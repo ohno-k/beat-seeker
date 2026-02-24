@@ -1,0 +1,8 @@
+--- Aggressive Update Script Start ---
+Official ranks count: 20
+Official songs count: 1103
+Total Unranked Lv12: 52
+Total Unranked Lv11: 55
+Saving updated difficulty_table.json...
+Successfully updated difficulty_table.json
+--- Aggressive Update Script End ---

@@ -1,0 +1,26 @@
+[
+  {
+    "title": "ピアノ協奏曲第１番”蠍火”",
+    "wr": 2772,
+    "avg": 2334,
+    "difficulty": "4",
+    "notes": 1414,
+    "bpm": "165-188",
+    "textage": "11/_psasori.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.1
+  },
+  {
+    "title": "ピアノ協奏曲第1番”蠍火” (BlackY Remix)",
+    "difficulty": "4",
+    "wr": 3813,
+    "avg": 3271,
+    "notes": 1926,
+    "bpm": "160",
+    "textage": "27/_psaso_r.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.2
+  }
+]

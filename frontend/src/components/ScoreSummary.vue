@@ -7,7 +7,14 @@
       </div>
       <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
         <div class="flex items-center gap-4 w-full md:w-auto">
-
+          <!-- Informal Toggle -->
+          <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
+            <div class="relative inline-flex items-center">
+              <input type="checkbox" v-model="priorityInformal" class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </div>
+            <span class="text-xs sm:text-sm font-bold text-slate-600 group-hover:text-slate-800 transition-colors">非公式優先</span>
+          </label>
 
           <div class="flex items-center gap-2">
             <!-- Level Filter -->
@@ -378,6 +385,7 @@ const searchQuery = ref('');
 const filterDifficulty = ref<string[]>([]);
 const filterLevel = ref<string[]>([]);
 const filterDjLevel = ref<string[]>([]);
+const priorityInformal = ref(true);
 
 const openDropdown = ref<string | null>(null);
 
@@ -474,7 +482,7 @@ onUnmounted(() => {
 });
 
 // Reset page when search or filters change
-watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, sortKey, sortOrder], () => {
+watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, sortKey, sortOrder, priorityInformal], () => {
   currentPage.value = 1;
 }, { deep: true });
 
@@ -525,18 +533,27 @@ const filteredScores = computed(() => {
   // Sorting
   if (sortKey.value === 'informalRank') {
     result.sort((a, b) => {
-      // Sort by informal rank primarily (treating undefined/0 as lowest)
-      const valA = parseFloat(a.informalRank || '0');
-      const valB = parseFloat(b.informalRank || '0');
-      if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
-      
-      // Secondary: typical level (1-12)
-      const levelA = a.difficultyLevel || 0;
-      const levelB = b.difficultyLevel || 0;
-      if (levelA !== levelB) return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
-
-      // Tertiary: title
-      return a.title.localeCompare(b.title);
+      if (priorityInformal.value) {
+        // Sort by informal rank primarily
+        const valA = parseFloat(a.informalRank || '0');
+        const valB = parseFloat(b.informalRank || '0');
+        if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+        
+        // Secondary: difficultyLevel
+        const levelA = a.difficultyLevel || 0;
+        const levelB = b.difficultyLevel || 0;
+        return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
+      } else {
+        // Typical difficulty level sort
+        const levelA = a.difficultyLevel || 0;
+        const levelB = b.difficultyLevel || 0;
+        if (levelA !== levelB) return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
+        
+        // Secondary: informalRank
+        const valA = parseFloat(a.informalRank || '0');
+        const valB = parseFloat(b.informalRank || '0');
+        return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+      }
     });
   } else if (sortKey.value === 'title') {
     result.sort((a, b) => {
@@ -569,7 +586,17 @@ const filteredScores = computed(() => {
       }
       return 0;
     });
-
+  } else if (sortKey.value === 'informalRank') {
+    result.sort((a, b) => {
+      const valA = a.informalRank ? parseFloat(a.informalRank) : -1;
+      const valB = b.informalRank ? parseFloat(b.informalRank) : -1;
+      const diff = valA - valB;
+      if (diff !== 0) {
+          return sortOrder.value === 'asc' ? diff : -diff;
+      }
+      // Inner sort by title if rank is same
+      return a.title.localeCompare(b.title);
+    });
   } else if (sortKey.value === 'djLevel') {
     result.sort((a, b) => {
       const levelMap: Record<string, number> = { 'AAA': 8, 'AA': 7, 'A': 6, 'B': 5, 'C': 4, 'D': 3, 'E': 2, 'F': 1, '---': 0 };

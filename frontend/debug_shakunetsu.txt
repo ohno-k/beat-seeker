@@ -1,0 +1,62 @@
+[
+  {
+    "title": "灼熱Beach Side Bunny",
+    "wr": 3381,
+    "avg": 2449,
+    "difficulty": "4",
+    "notes": 1719,
+    "bpm": "153",
+    "textage": "18/_shakunt.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.05
+  },
+  {
+    "title": "灼熱Beach Side Bunny (かめりあ's \"Summertime D'n'B\" Remix)",
+    "difficulty": "4",
+    "wr": 3278,
+    "avg": 2618,
+    "notes": 1647,
+    "bpm": "174",
+    "textage": "31/_shaku_c.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.11
+  },
+  {
+    "title": "灼熱 Pt.2 Long Train Running",
+    "wr": 3555,
+    "avg": 2586,
+    "difficulty": "4",
+    "notes": 1804,
+    "bpm": "165",
+    "textage": "23/_syaku_2.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.1
+  },
+  {
+    "title": "灼熱 Lost Summer Dayz",
+    "difficulty": "4",
+    "wr": 2888,
+    "avg": 2455,
+    "notes": 1453,
+    "bpm": "168",
+    "textage": "32/_shakuls.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.1
+  },
+  {
+    "title": "灼熱Beach Side Bunny (かめりあ's \"Summertime D'n'B\" Remix)",
+    "difficulty": "4",
+    "wr": 3278,
+    "avg": 2618,
+    "notes": 1647,
+    "bpm": "174",
+    "textage": "31/_shaku_c.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.11
+  }
+]
