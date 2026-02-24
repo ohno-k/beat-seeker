@@ -1,0 +1,1 @@
+{"root":["./src/main.ts","./src/vite-env.d.ts","./src/types/scoredata.ts","./src/utils/beattier.ts","./src/utils/csvparser.ts","./src/app.vue","./src/components/csvdropzone.vue","./src/components/scoredashboard.vue","./src/components/scoresummary.vue"],"version":"5.6.3"}

@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: beat-seeker-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/beatseeker
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: email, profile
+
+server:
+  port: 8080
+
+# CORS: allow frontend dev server
+logging:
+  level:
+    org.springframework.security: DEBUG
