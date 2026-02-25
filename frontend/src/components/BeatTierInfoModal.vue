@@ -56,8 +56,8 @@
               <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Calculation Formula</h4>
               <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                 <div class="flex-1 text-center md:text-left">
-                  <p class="text-4xl font-black mb-2 tracking-tight text-blue-400">Beat-PT = (Rate%)² × Weight</p>
-                  <p class="text-xs font-bold text-slate-400 leading-relaxed">スコアレートの2乗（比率）に、譜面ごとの重み（Weight）を掛け合わせて算出します。</p>
+                  <p class="text-4xl font-black mb-2 tracking-tight text-blue-400">Beat-PT = Rate% × Weight</p>
+                  <p class="text-xs font-bold text-slate-400 leading-relaxed">スコアレートに、譜面ごとの重み（Weight）を掛け合わせて算出します。</p>
                 </div>
                 <div class="h-px md:h-20 w-full md:w-px bg-slate-700"></div>
                 <div class="flex-1 text-sm font-bold text-slate-300 leading-relaxed">
