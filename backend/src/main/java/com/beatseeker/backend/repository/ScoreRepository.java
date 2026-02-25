@@ -6,10 +6,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Score> findByUserOrderByUploadedAtDesc(User user);
 
+    List<Score> findByUserOrderByUploadedAtAsc(User user);
+
+    Optional<Score> findFirstByUserOrderByUploadedAtDesc(User user);
+
+    List<Score> findByUserAndSnapshotId(User user, String snapshotId);
+
     void deleteByUser(User user);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByUserAndSnapshotId(User user, String snapshotId);
 }

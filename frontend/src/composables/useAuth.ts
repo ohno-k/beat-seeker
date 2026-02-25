@@ -5,6 +5,9 @@ export interface AuthUser {
     displayName: string;
     email: string;
     avatarUrl: string;
+    iidxId: string | null;
+    danRank: string | null;
+    arenaRank: string | null;
 }
 
 const user = ref<AuthUser | null>(null);
@@ -41,17 +44,26 @@ export function useAuth() {
     };
 
     const logout = async () => {
-        await fetch(`${API_BASE}/api/auth/logout`, {
-            method: 'POST',
-            credentials: 'include',
-        });
-        user.value = null;
+        try {
+            await fetch(`${API_BASE}/api/auth/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (e) {
+            console.error('Logout failed:', e);
+        } finally {
+            user.value = null;
+            // Force a reload to clear any residual state/cache
+            window.location.href = '/';
+        }
     };
+
+    const isLoggedIn = computed(() => !!user.value);
 
     return {
         user,
         isLoading,
-        isLoggedIn: () => !!user.value,
+        isLoggedIn,
         login,
         logout,
         refresh: fetchCurrentUser,

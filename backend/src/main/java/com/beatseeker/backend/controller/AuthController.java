@@ -39,6 +39,39 @@ public class AuthController {
                 "id", user.getId(),
                 "displayName", user.getDisplayName() != null ? user.getDisplayName() : "",
                 "email", user.getEmail(),
-                "avatarUrl", user.getAvatarUrl() != null ? user.getAvatarUrl() : ""));
+                "avatarUrl", user.getAvatarUrl() != null ? user.getAvatarUrl() : "",
+                "iidxId", user.getIidxId() != null ? user.getIidxId() : "",
+                "danRank", user.getDanRank() != null ? user.getDanRank() : "",
+                "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : ""));
+    }
+
+    /**
+     * Updates current user's profile information.
+     */
+    @PutMapping("/me/profile")
+    public ResponseEntity<Map<String, Object>> updateProfile(
+            @AuthenticationPrincipal OAuth2User principal,
+            @RequestBody ProfileUpdateRequest request) {
+
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String googleId = principal.getAttribute("sub");
+        User user = userRepository.findByGoogleId(googleId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.displayName() != null)
+            user.setDisplayName(request.displayName());
+        if (request.iidxId() != null)
+            user.setIidxId(request.iidxId());
+        if (request.danRank() != null)
+            user.setDanRank(request.danRank());
+        if (request.arenaRank() != null)
+            user.setArenaRank(request.arenaRank());
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
     }
 }

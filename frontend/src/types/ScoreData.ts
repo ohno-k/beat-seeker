@@ -6,6 +6,8 @@ export interface DifficultyStats {
     missCount: number | null;
     clearType: string;
     djLevel: string;
+    id?: number;
+    memo?: string;
 }
 
 export interface ScoreData {

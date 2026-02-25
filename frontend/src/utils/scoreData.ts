@@ -4,6 +4,7 @@ import diffTableRaw from '../data/difficulty_table.json';
 import { calculatePoints, getWeight } from './beatTier';
 
 export interface ScoreRecord {
+    id?: number;
     title: string;
     artist: string;
     genre: string;
@@ -23,6 +24,7 @@ export interface ScoreRecord {
     lastPlayTime: string;
     beatTierPoints: number;
     maxBeatTierPoints: number;
+    memo?: string;
 }
 
 const difficulties = ['beginner', 'normal', 'hyper', 'another', 'leggendaria'] as const;
@@ -111,6 +113,7 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                 const beatTierPoints = isHyperNonTarget ? 0 : calculatePoints(scoreRate, informalRank);
 
                 records.push({
+                    id: stats.id,
                     title: song.title,
                     artist: song.artist,
                     genre: song.genre,
@@ -129,7 +132,8 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                     playCount: song.playCount,
                     lastPlayTime: song.lastPlayTime,
                     beatTierPoints: beatTierPoints,
-                    maxBeatTierPoints: getWeight(informalRank)
+                    maxBeatTierPoints: getWeight(informalRank),
+                    memo: stats.memo
                 });
             }
         });

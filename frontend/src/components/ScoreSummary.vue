@@ -352,6 +352,34 @@
               </div>
             </div>
           </div>
+
+          <!-- Memo Section -->
+          <div v-if="selectedRecord.id" class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white mt-6">
+            <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <p class="text-sm font-bold text-slate-600 uppercase tracking-widest">メモ</p>
+              <button @click="isEditingMemo = true" v-if="!isEditingMemo" class="text-blue-600 hover:text-blue-700 text-sm font-bold flex items-center gap-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                </svg>
+                編集
+              </button>
+            </div>
+            <div class="p-6">
+              <template v-if="isEditingMemo">
+                <textarea v-model="editMemoText" rows="4" class="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 resize-y" placeholder="オプション（RANDOMなど）や攻略のメモを残せます..."></textarea>
+                <div class="flex justify-end gap-3 mt-4">
+                  <button @click="isEditingMemo = false" class="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">キャンセル</button>
+                  <button @click="saveMemo" :disabled="isSavingMemo" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50">
+                    {{ isSavingMemo ? '保存中...' : '保存' }}
+                  </button>
+                </div>
+              </template>
+              <template v-else>
+                <div v-if="selectedRecord.memo" class="text-slate-700 whitespace-pre-wrap leading-relaxed">{{ selectedRecord.memo }}</div>
+                <div v-else class="text-slate-400 italic text-sm">メモはありません。</div>
+              </template>
+            </div>
+          </div>
           
         </div>
       </div>
@@ -374,6 +402,9 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
+import { useScores } from '../composables/useScores';
+
+const { updateMemo } = useScores();
 
 const props = defineProps<{
   scores: ScoreData[];
@@ -456,9 +487,29 @@ const top100Keys = computed(() => {
 // Modal state
 const selectedRecord = ref<ScoreRecord | null>(null);
 
+const isEditingMemo = ref(false);
+const editMemoText = ref('');
+const isSavingMemo = ref(false);
+
 const openDetailModal = (record: ScoreRecord) => {
   selectedRecord.value = record;
+  isEditingMemo.value = false;
+  editMemoText.value = record.memo || '';
   document.body.style.overflow = 'hidden'; 
+};
+
+const saveMemo = async () => {
+    if (!selectedRecord.value?.id) return;
+    isSavingMemo.value = true;
+    try {
+        await updateMemo(selectedRecord.value.id, editMemoText.value);
+        selectedRecord.value.memo = editMemoText.value;
+        isEditingMemo.value = false;
+    } catch (e) {
+        alert('メモの保存に失敗しました');
+    } finally {
+        isSavingMemo.value = false;
+    }
 };
 
 const closeDetailModal = () => {

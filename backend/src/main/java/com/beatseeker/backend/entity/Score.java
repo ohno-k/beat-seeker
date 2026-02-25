@@ -33,6 +33,11 @@ public class Score {
     private Integer missCount;
     private Integer playCount;
 
+    @Column(columnDefinition = "TEXT")
+    private String memo;
+
+    private String snapshotId;
+
     @Column(nullable = false)
     private LocalDateTime uploadedAt = LocalDateTime.now();
 }

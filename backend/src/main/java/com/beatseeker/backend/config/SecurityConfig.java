@@ -41,7 +41,9 @@ public class SecurityConfig {
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/auth/me", "/api/scores/**").authenticated()
+                                                .requestMatchers("/api/auth/me", "/api/auth/me/profile",
+                                                                "/api/scores/**")
+                                                .authenticated()
                                                 .anyRequest().permitAll())
                                 .exceptionHandling(ex -> ex
                                                 // Return 401 instead of redirect for API calls

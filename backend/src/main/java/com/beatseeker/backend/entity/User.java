@@ -27,6 +27,15 @@ public class User {
     private String displayName;
     private String avatarUrl;
 
+    @Column(length = 9)
+    private String iidxId; // e.g. "1234-5678"
+
+    @Column(length = 20)
+    private String danRank; // e.g. "皆伝"
+
+    @Column(length = 10)
+    private String arenaRank; // e.g. "A1"
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
