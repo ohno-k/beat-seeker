@@ -30,6 +30,13 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                // Ensure URLs are valid even if env var is empty
+                String successUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl + "?login=success"
+                                : "/?login=success";
+                String errorUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl + "?login=error"
+                                : "/?login=error";
+                String logoutUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl : "/";
+
                 http
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .csrf(csrf -> csrf.disable())
@@ -44,11 +51,11 @@ public class SecurityConfig {
                                                 .userInfoEndpoint(userInfo -> userInfo
                                                                 .userService(customOAuth2UserService))
                                                 // After login, redirect back to frontend
-                                                .defaultSuccessUrl(frontendUrl + "?login=success", true)
-                                                .failureUrl(frontendUrl + "?login=error"))
+                                                .defaultSuccessUrl(successUrl, true)
+                                                .failureUrl(errorUrl))
                                 .logout(logout -> logout
                                                 .logoutUrl("/api/auth/logout")
-                                                .logoutSuccessUrl(frontendUrl)
+                                                .logoutSuccessUrl(logoutUrl)
                                                 .deleteCookies("JSESSIONID")
                                                 .invalidateHttpSession(true));
 
