@@ -47,19 +47,6 @@ const validateAndEmit = (file: File) => {
     alert('CSVファイルをアップロードしてください。'); // Simple alert for now
   }
 };
-
-const loadSampleData = async () => {
-  try {
-    const response = await fetch('/sample_scores.csv');
-    if (!response.ok) throw new Error('Network response was not ok');
-    const blob = await response.blob();
-    const file = new File([blob], 'sample_scores.csv', { type: 'text/csv' });
-    emit('file-dropped', file);
-  } catch (err) {
-    console.error('Failed to load sample data:', err);
-    alert('サンプルデータの読み込みに失敗しました。');
-  }
-};
 </script>
 
 <template>
@@ -100,12 +87,5 @@ const loadSampleData = async () => {
       class="hidden" 
       @change="handleFileSelect"
     />
-    
-    <button 
-      class="mt-6 text-sm text-slate-400 hover:text-blue-500 underline underline-offset-4 transition-colors"
-      @click.stop="loadSampleData"
-    >
-      サンプルデータで試す
-    </button>
   </div>
 </template>

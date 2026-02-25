@@ -36,7 +36,7 @@
           </div>
         </div>
 
-        <div class="p-8">
+        <div class="p-4 sm:p-8">
           <!-- About Tab -->
           <div v-if="activeTab === 'about'" class="space-y-8 animate-fade-in">
             <section>
@@ -51,40 +51,88 @@
               </p>
             </section>
 
-            <section class="bg-blue-600 rounded-2xl p-6 text-white shadow-lg shadow-blue-200">
-              <h4 class="text-xs font-black uppercase tracking-widest mb-4 opacity-80">計算式</h4>
-              <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <section class="bg-slate-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden border border-slate-700">
+              <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+              <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400">Calculation Formula</h4>
+              <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                 <div class="flex-1 text-center md:text-left">
-                  <p class="text-3xl font-black mb-1">Beat-PT = (Rate%)² × Weight</p>
-                  <p class="text-xs font-bold opacity-70">スコアレートの2乗に、譜面ごとの重み（Weight）を掛け合わせて算出します。</p>
+                  <p class="text-4xl font-black mb-2 tracking-tight text-blue-400">Beat-PT = (Rate%)² × Weight</p>
+                  <p class="text-xs font-bold text-slate-400 leading-relaxed">スコアレートの2乗（比率）に、譜面ごとの重み（Weight）を掛け合わせて算出します。</p>
                 </div>
-                <div class="h-px md:h-20 w-full md:w-px bg-white/20"></div>
-                <div class="flex-1 text-sm font-bold leading-relaxed">
-                  <p>• 重みは非公式難易度に基づき、11.0(150pt)〜12.9(188pt)の範囲で設定されます。</p>
+                <div class="h-px md:h-20 w-full md:w-px bg-slate-700"></div>
+                <div class="flex-1 text-sm font-bold text-slate-300 leading-relaxed">
+                  <p>• 重みは非公式難易度に基づき、11.0 (150pt) 〜 12.9 (188pt) の範囲で設定されます。</p>
+                  <p class="text-blue-400/80 mt-1">※ 全上位100曲の合計があなたの最終的なポイントになります。</p>
                 </div>
               </div>
             </section>
 
-            <section>
-              <h4 class="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-                <span class="w-1.5 h-6 bg-purple-600 rounded-full"></span>
-                ランク別ボーダーライン
-              </h4>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div 
-                  v-for="(rank, idx) in displayRanks" 
-                  :key="idx"
-                  class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between transition-hover hover:border-blue-200"
-                >
-                  <div class="flex flex-col">
-                    <span :class="['text-sm font-black', rank.color]">
-                      {{ rank.name }} {{ rank.tier || '' }}
-                    </span>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">必要ポイント</span>
+            <!-- Rank Board -->
+            <section class="space-y-8">
+              <div class="flex items-center justify-between">
+                <h4 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                  <span class="w-1.5 h-6 bg-purple-600 rounded-full"></span>
+                  ランクボード (Rank Board)
+                </h4>
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">Hierarchy</div>
+              </div>
+
+              <!-- Premium Dark Grid for Ranks -->
+              <div class="bg-slate-950 rounded-[2rem] p-4 sm:p-10 border border-slate-800 shadow-2xl overflow-x-auto custom-scrollbar">
+                <div class="min-w-[1000px] space-y-12">
+                  
+                  <!-- Legend & Special Ranks -->
+                  <div class="flex items-center justify-center gap-12 border-b border-slate-800/50 pb-16">
+                    <div v-if="groupedRanks['Legend']" class="flex flex-col items-center group">
+                      <RankIcon :rank-name="'Legend'" size="lg" />
+                      <div class="mt-6 text-center">
+                        <p class="text-base font-black text-amber-500 uppercase tracking-widest mb-1">Legend</p>
+                        <p class="text-sm font-bold text-slate-300 bg-slate-800/50 px-3 py-1 rounded-full border border-slate-700">{{ groupedRanks['Legend'][0].minPoints.toLocaleString() }} pt</p>
+                      </div>
+                    </div>
                   </div>
-                  <div class="text-right">
-                    <span class="text-sm font-black text-slate-700">{{ rank.minPoints.toLocaleString() }} pt</span>
+
+                  <!-- Main Grid (Novice to Mythic) -->
+                  <div class="grid grid-cols-9 gap-8">
+                    <div v-for="name in rankNames" :key="name" class="flex flex-col items-center space-y-6">
+                      <div class="w-px h-12 bg-gradient-to-b from-transparent to-slate-800"></div>
+                      <p class="text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-4 text-center h-4">{{ name }}</p>
+                      
+                      <!-- Tiers 5 to 1 (Descending) -->
+                      <div v-for="tier in 5" :key="tier" class="relative group w-full">
+                        <div v-if="getRankForTier(name, 6 - tier)" class="flex flex-col items-center">
+                           <!-- Small connecting lines -->
+                          <div v-if="tier > 1" class="w-px h-6 bg-slate-800/50 mb-2"></div>
+                          
+                          <div class="relative transition-all duration-300 transform group-hover:scale-110 group-hover:-translate-y-2">
+                            <RankIcon :rank-name="name" :tier="6 - tier" size="md" />
+                            <!-- Hover Tooltip -->
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-xs whitespace-nowrap z-30 pointer-events-none transition-all shadow-2xl">
+                              <div class="flex flex-col items-center gap-1">
+                                <span class="font-black text-blue-400 text-sm">{{ name }} {{ 6 - tier }}</span>
+                                <span class="font-bold text-slate-300">{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
+                              </div>
+                              <!-- Tooltip Arrow -->
+                              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-slate-900 border-r border-b border-slate-700 rotate-45"></div>
+                            </div>
+                          </div>
+                          <div class="mt-3 flex flex-col items-center gap-1">
+                            <p class="text-xs font-black text-slate-300">{{ 6 - tier }}</p>
+                            <p class="text-[9px] font-bold text-slate-500 tracking-tight">{{ (getRankForTier(name, 6 - tier)?.minPoints || 0) / 1000 }}k</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
+                  <!-- Beginner (Base) -->
+                  <div class="flex items-center justify-center pt-16 border-t border-slate-800/50">
+                    <div class="flex flex-col items-center opacity-40 hover:opacity-100 transition-all duration-300">
+                      <RankIcon :rank-name="'Beginner'" size="sm" />
+                      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mt-3">Beginner (0 pt)</p>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </section>
@@ -150,18 +198,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { RANKS, WEIGHTS } from '../utils/beatTier';
+import { WEIGHTS, getGroupedRanks } from '../utils/beatTier';
 import diffTableRaw from '../data/difficulty_table.json';
+import RankIcon from './RankIcon.vue';
 
 defineEmits(['close']);
 
 const activeTab = ref<'about' | 'songs'>('about');
 const songSearch = ref('');
 
-const displayRanks = computed(() => {
-  // Only show the major rank boundaries or filter appropriately to avoid overwhelming UI
-  return [...RANKS].reverse();
-});
+const groupedRanks = computed(() => getGroupedRanks());
+const rankNames = ['Novice', 'Intermediate', 'Advanced', 'Expert', 'Veteran', 'Elite', 'Master', 'Ancient', 'Mythic'];
+
+const getRankForTier = (name: string, tier: number) => {
+  return groupedRanks.value[name]?.find(r => r.tier === tier);
+};
 
 const songGroups = computed(() => {
   return diffTableRaw.ranks.map(r => ({

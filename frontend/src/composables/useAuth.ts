@@ -10,7 +10,7 @@ export interface AuthUser {
 const user = ref<AuthUser | null>(null);
 const isLoading = ref(true);
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
 
 async function fetchCurrentUser(): Promise<void> {
     try {

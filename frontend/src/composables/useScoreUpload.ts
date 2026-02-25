@@ -1,6 +1,6 @@
 import type { ScoreData } from '../types/ScoreData';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
 
 // Flatten ScoreData (one per song) into individual chart records for API
 function flattenToUploadRecords(scores: ScoreData[]) {

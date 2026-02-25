@@ -17,6 +17,7 @@
         </div>
         <p class="text-sm font-medium text-slate-500 mb-1 z-10 font-bold uppercase tracking-widest">Beat-Tier</p>
         <div class="flex flex-col items-center z-10 text-center">
+          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" />
           <h3 class="text-2xl sm:text-3xl font-black mb-1 line-clamp-1" :class="rankInfo.color">
             {{ rankInfo.name }} {{ rankInfo.tier || '' }}
           </h3>
@@ -158,6 +159,7 @@ import { Doughnut, Bar } from 'vue-chartjs';
 import { ref } from 'vue';
 import { getRankInfo, getNextRankInfo } from '../utils/beatTier';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
+import RankIcon from './RankIcon.vue';
 
 import { flattenScores } from '../utils/scoreData';
 

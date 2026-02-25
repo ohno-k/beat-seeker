@@ -125,3 +125,19 @@ export function getNextRankInfo(totalPoints: number): { nextRank?: RankInfo; pro
         progress: Math.min(100, Math.max(0, (currentProgress / range) * 100))
     };
 }
+
+/**
+ * Group ranks by name for UI board
+ */
+export function getGroupedRanks() {
+    const groups: Record<string, RankInfo[]> = {};
+    RANKS.forEach(r => {
+        if (!groups[r.name]) groups[r.name] = [];
+        groups[r.name].push(r);
+    });
+    // Ensure tiers are sorted within groups (usually they are already)
+    Object.keys(groups).forEach(name => {
+        groups[name].sort((a, b) => (a.tier || 0) - (b.tier || 0));
+    });
+    return groups;
+}
