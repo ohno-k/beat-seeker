@@ -28,7 +28,12 @@ for (let i = 0; i <= 19; i++) {
  */
 export function getWeight(informalRank: string | undefined): number {
     if (!informalRank) return 0;
-    return WEIGHTS[informalRank] || 0;
+
+    // Attempt to extract numeric part (e.g., "12.0 (IIDX 32)" -> "12.0")
+    const match = informalRank.match(/(\d+\.\d+)/);
+    const key = match ? match[1] : informalRank;
+
+    return WEIGHTS[key] || 0;
 }
 
 /**

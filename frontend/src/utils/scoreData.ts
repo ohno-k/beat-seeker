@@ -1,23 +1,7 @@
 import type { ScoreData } from '../types/ScoreData';
 import songDataRaw from '../data/song_data.json';
 import diffTableRaw from '../data/difficulty_table.json';
-import sp11Raw from '../data/sp11.json';
-import sp12Raw from '../data/sp12.json';
 import { calculatePoints, getWeight } from './beatTier';
-
-/**
- * Normalize song titles for consistent matching across different data sources.
- * Handles full-width/half-width variations and case sensitivity.
- */
-function normalizeTitle(title: string): string {
-    if (!title) return '';
-    return title
-        .normalize('NFKC')
-        .replace(/[“”〝〞]/g, '"') // Normalize various double quotes
-        .replace(/[‘’'｀´]/g, "'")   // Normalize various single quotes
-        .toLowerCase()
-        .trim();
-}
 
 export interface ScoreRecord {
     title: string;
@@ -73,31 +57,22 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
     const songDict = new Map<string, any>();
     if (songDataRaw && Array.isArray(songDataRaw.body)) {
         songDataRaw.body.forEach(s => {
-            const normalizedTitle = normalizeTitle(s.title);
-            songDict.set(`${normalizedTitle}_${s.difficulty}`, s);
+            songDict.set(`${s.title}_${s.difficulty}`, s);
         });
     }
 
-    // Index newer SP11/SP12 data for more accurate notes counts
-    const notesDict = new Map<string, number>();
-    const processRawData = (data: any) => {
-        if (Array.isArray(data)) {
-            data.forEach(s => {
-                if (s.title && s.notes) {
-                    notesDict.set(normalizeTitle(s.title), s.notes);
-                }
-            });
-        }
-    };
-    processRawData(sp11Raw);
-    processRawData(sp12Raw);
-
     // Index informal difficulty table
     const informalDict = new Map<string, string>();
-    if (diffTableRaw && Array.isArray((diffTableRaw as any).ranks)) {
-        (diffTableRaw as any).ranks.forEach((r: any) => {
-            r.songs.forEach((songTitle: string) => {
-                informalDict.set(normalizeTitle(songTitle), r.rank);
+    if (diffTableRaw && Array.isArray(diffTableRaw.ranks)) {
+        diffTableRaw.ranks.forEach(r => {
+            r.songs.forEach(songTitle => {
+                // Handle [L] suffix for LEGGENDARIA
+                if (songTitle.endsWith('[L]')) {
+                    const baseTitle = songTitle.slice(0, -3);
+                    informalDict.set(`${baseTitle}_LEGGENDARIA`, r.rank);
+                } else {
+                    informalDict.set(`${songTitle}_ANOTHER`, r.rank);
+                }
             });
         });
     }
@@ -110,17 +85,12 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                 let scoreRate = -1;
                 let maxScore = 0;
 
-                const normalizedTitle = normalizeTitle(song.title);
-
                 // Exact match via title and internal difficulty code
-                const defKey = `${normalizedTitle}_${spIidxDiffMap[diff]}`;
+                const defKey = `${song.title}_${spIidxDiffMap[diff]}`;
                 const definition = songDict.get(defKey);
 
-                // Prioritize sp11/sp12 data for notes count if available
-                const notes = notesDict.get(normalizedTitle) || (definition ? definition.notes : 0);
-
-                if (notes > 0) {
-                    maxScore = notes * 2;
+                if (definition && definition.notes) {
+                    maxScore = definition.notes * 2;
                     if (maxScore > 0) {
                         scoreRate = (stats.score / maxScore) * 100;
                     }
@@ -130,7 +100,13 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                 const isHyperNonTarget = diffLabel === 'HYPER' && stats.difficulty >= 11;
 
                 // Get informal rank
-                const informalRank = informalDict.get(normalizedTitle) || undefined;
+                const informalKey = `${song.title}_${diffLabel}`;
+                let informalRank = informalDict.get(informalKey) || undefined;
+
+                // Fallback for non-LEGGENDARIA songs in the table (sometimes ☆12s are just title)
+                if (!informalRank && diffLabel === 'ANOTHER') {
+                    informalRank = informalDict.get(`${song.title}_ANOTHER`) || undefined;
+                }
 
                 const beatTierPoints = isHyperNonTarget ? 0 : calculatePoints(scoreRate, informalRank);
 

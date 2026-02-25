@@ -1,0 +1,26 @@
+[
+  {
+    "title": "INSOMNIA",
+    "wr": 3305,
+    "avg": 2724,
+    "difficulty": "4",
+    "notes": 1661,
+    "bpm": "195",
+    "textage": "21/insomnia.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.11
+  },
+  {
+    "title": "Somnidiscotheque",
+    "difficulty": "4",
+    "wr": 3431,
+    "avg": 2591,
+    "notes": 1776,
+    "bpm": "115",
+    "textage": "30/somnidis.html?1AC00",
+    "difficultyLevel": "12",
+    "dpLevel": "0",
+    "coef": 1.14
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "title": "ABSOLUTE",
+    "wr": 2807,
+    "avg": 2440,
+    "difficulty": "10",
+    "notes": 1412,
+    "bpm": "60-144",
+    "textage": "4/absolutl.html?1AB00",
+    "difficultyLevel": "11",
+    "dpLevel": "0",
+    "coef": -1
+  },
+  {
+    "title": "ABSOLUTE (kors k Remix)",
+    "wr": 2657,
+    "avg": 2327,
+    "difficulty": "4",
+    "notes": 1336,
+    "bpm": "160",
+    "textage": "28/abso_k.html?1AB00",
+    "difficultyLevel": "11",
+    "dpLevel": "0",
+    "coef": -1
+  }
+]
