@@ -173,7 +173,7 @@ const handleTextSubmit = async () => {
                 CSVデータを貼り付け
             </h3>
             <p class="text-slate-500 text-sm mb-4">
-                公式の「スコアデータCSVダウンロード」画面のテキストをコピーして貼り付けてください。
+                <a href="https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">公式サイト</a>の「スコアデータCSVダウンロード」画面のテキストをコピーして貼り付けてください。
             </p>
             
             <textarea
