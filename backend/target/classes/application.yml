@@ -3,10 +3,10 @@ spring:
     name: beat-seeker-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/beatseeker
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/beatseeker}
     driver-class-name: org.postgresql.Driver
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
 
   jpa:
     hibernate:
