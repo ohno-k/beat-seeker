@@ -532,17 +532,26 @@ const filteredScores = computed(() => {
 
   // Sorting
   if (sortKey.value === 'informalRank') {
+    const getNumericRank = (rank: string | undefined): number => {
+      if (!rank) return -1;
+      const match = rank.match(/(\d+\.\d+)/);
+      return match ? parseFloat(match[1]) : -1;
+    };
+
     result.sort((a, b) => {
       if (priorityInformal.value) {
         // Sort by informal rank primarily
-        const valA = parseFloat(a.informalRank || '0');
-        const valB = parseFloat(b.informalRank || '0');
+        const valA = getNumericRank(a.informalRank);
+        const valB = getNumericRank(b.informalRank);
+        
         if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
         
-        // Secondary: difficultyLevel
+        // If numeric rank is same, fallback to secondary sort: difficultyLevel
         const levelA = a.difficultyLevel || 0;
         const levelB = b.difficultyLevel || 0;
-        return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
+        if (levelA !== levelB) return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
+
+        return a.title.localeCompare(b.title);
       } else {
         // Typical difficulty level sort
         const levelA = a.difficultyLevel || 0;
@@ -550,9 +559,11 @@ const filteredScores = computed(() => {
         if (levelA !== levelB) return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
         
         // Secondary: informalRank
-        const valA = parseFloat(a.informalRank || '0');
-        const valB = parseFloat(b.informalRank || '0');
-        return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+        const valA = getNumericRank(a.informalRank);
+        const valB = getNumericRank(b.informalRank);
+        if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+
+        return a.title.localeCompare(b.title);
       }
     });
   } else if (sortKey.value === 'title') {
@@ -585,17 +596,6 @@ const filteredScores = computed(() => {
           return sortOrder.value === 'asc' ? diff : -diff;
       }
       return 0;
-    });
-  } else if (sortKey.value === 'informalRank') {
-    result.sort((a, b) => {
-      const valA = a.informalRank ? parseFloat(a.informalRank) : -1;
-      const valB = b.informalRank ? parseFloat(b.informalRank) : -1;
-      const diff = valA - valB;
-      if (diff !== 0) {
-          return sortOrder.value === 'asc' ? diff : -diff;
-      }
-      // Inner sort by title if rank is same
-      return a.title.localeCompare(b.title);
     });
   } else if (sortKey.value === 'djLevel') {
     result.sort((a, b) => {
