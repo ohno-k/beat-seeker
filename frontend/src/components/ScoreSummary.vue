@@ -278,112 +278,112 @@
       <div v-if="selectedRecord" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200" @click.self="closeDetailModal">
       
       <!-- Sticky Header -->
-      <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 w-full transition-colors duration-200">
+      <div class="px-4 py-3 sm:px-6 sm:py-5 border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 w-full transition-colors duration-200">
         <div class="flex flex-col pr-4 max-w-full overflow-hidden">
-          <h3 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 leading-tight mb-1 truncate" :title="selectedRecord.title">{{ selectedRecord.title }}</h3>
-          <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400 truncate" :title="`${selectedRecord.artist} • ${selectedRecord.genre}`">{{ selectedRecord.artist }} • {{ selectedRecord.genre }}</p>
+          <h3 class="text-xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 leading-tight mb-0.5 sm:mb-1 truncate" :title="selectedRecord.title">{{ selectedRecord.title }}</h3>
+          <p class="text-xs sm:text-base font-medium text-slate-500 dark:text-slate-400 truncate" :title="`${selectedRecord.artist} • ${selectedRecord.genre}`">{{ selectedRecord.artist }} • {{ selectedRecord.genre }}</p>
         </div>
-        <button @click="closeDetailModal" class="flex-shrink-0 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors p-3 shadow-sm border border-slate-200 dark:border-slate-700">
-          <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button @click="closeDetailModal" class="flex-shrink-0 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors p-2 sm:p-3 shadow-sm border border-slate-200 dark:border-slate-700">
+          <svg class="w-5 h-5 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
       
       <!-- Scrollable Body -->
-      <div class="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 pb-32">
-        <div class="max-w-4xl mx-auto space-y-8">
+      <div class="flex-1 overflow-y-auto p-3 sm:p-8 lg:p-12 pb-24">
+        <div class="max-w-4xl mx-auto space-y-4 sm:space-y-8">
           
-          <div class="flex flex-col items-center sm:items-start gap-4">
+          <div class="flex flex-col items-center sm:items-start gap-2 sm:gap-4">
             <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
-              <span :class="['px-4 py-1.5 rounded-full text-sm font-black tracking-wide shadow-sm', selectedRecord.difficultyColor]">
+              <span :class="['px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide shadow-sm', selectedRecord.difficultyColor]">
                 {{ selectedRecord.difficultyName }} {{ selectedRecord.difficultyLevel ? `☆${selectedRecord.difficultyLevel}` : '' }}
               </span>
-              <span v-if="selectedRecord.informalRank" class="px-4 py-1.5 rounded-full text-sm font-black tracking-wide shadow-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <span v-if="selectedRecord.informalRank" class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide shadow-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                 非公式難易度: {{ selectedRecord.informalRank }}
               </span>
             </div>
-            <h3 class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-100 tracking-tight text-center sm:text-left leading-tight">
+            <h3 class="text-2xl sm:text-5xl font-black text-slate-800 dark:text-slate-100 tracking-tight text-center sm:text-left leading-tight mt-1 sm:mt-0">
               {{ selectedRecord.title }}
             </h3>
           </div>
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <span class="text-sm font-bold text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-600 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm transition-colors">
+            <span class="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm transition-colors">
               最終プレイ: <span class="text-slate-700 dark:text-slate-200 font-black">{{ selectedRecord.lastPlayTime || '不明' }}</span>
             </span>
           </div>
 
-          <div class="grid grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
-              <div class="absolute top-0 left-0 w-full h-2" :class="getClearTypeBgColor(selectedRecord.clearType)"></div>
-              <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 mt-2">クリアタイプ</p>
-              <p class="text-2xl sm:text-4xl font-black text-center" :class="getClearTypeColor(selectedRecord.clearType)">
+          <div class="grid grid-cols-2 gap-3 sm:gap-6">
+            <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
+              <div class="absolute top-0 left-0 w-full h-1 sm:h-2" :class="getClearTypeBgColor(selectedRecord.clearType)"></div>
+              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 mt-1 sm:mb-2 sm:mt-2">クリアタイプ</p>
+              <p class="text-lg sm:text-4xl font-black text-center" :class="getClearTypeColor(selectedRecord.clearType)">
                 {{ selectedRecord.clearType }}
               </p>
             </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
-              <div class="absolute top-0 left-0 w-full h-2" :class="getDjLevelBgColor(selectedRecord.djLevel)"></div>
-              <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 mt-2">DJレベル</p>
+            <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
+              <div class="absolute top-0 left-0 w-full h-1 sm:h-2" :class="getDjLevelBgColor(selectedRecord.djLevel)"></div>
+              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 mt-1 sm:mb-2 sm:mt-2">DJレベル</p>
               <div class="flex flex-col items-center">
-                <p class="text-5xl sm:text-6xl font-black text-center" :class="getDjLevelColor(selectedRecord.djLevel)">
+                <p class="text-4xl sm:text-6xl font-black text-center" :class="getDjLevelColor(selectedRecord.djLevel)">
                   {{ selectedRecord.djLevel }}
                 </p>
               </div>
             </div>
             
-            <div class="bg-indigo-900/10 dark:bg-indigo-900/20 p-8 rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200 border border-indigo-100 dark:border-indigo-800/50">
-              <p class="text-sm font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-2">単独BEAT-PT</p>
-              <div class="flex items-baseline gap-2">
-                <p class="text-6xl font-black text-indigo-700 dark:text-indigo-300 tracking-tight">
+            <div class="bg-indigo-900/10 dark:bg-indigo-900/20 p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200 border border-indigo-100 dark:border-indigo-800/50">
+              <p class="text-xs sm:text-sm font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1 sm:mb-2">単独BEAT-PT</p>
+              <div class="flex items-baseline gap-1 sm:gap-2">
+                <p class="text-4xl sm:text-6xl font-black text-indigo-700 dark:text-indigo-300 tracking-tight">
                   {{ selectedRecord.beatTierPoints.toFixed(1) }}
                 </p>
-                <p v-if="selectedRecord.maxBeatTierPoints > 0" class="text-xl font-bold text-indigo-400 dark:text-indigo-500">/ {{ selectedRecord.maxBeatTierPoints.toFixed(0) }}</p>
+                <p v-if="selectedRecord.maxBeatTierPoints > 0" class="text-sm sm:text-xl font-bold text-indigo-400 dark:text-indigo-500">/ {{ selectedRecord.maxBeatTierPoints.toFixed(0) }}</p>
               </div>
             </div>
             
-            <div class="bg-slate-800 dark:bg-slate-700 p-8 rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200">
-              <p class="text-sm font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-2">EXスコア</p>
-              <div class="flex items-baseline gap-2">
-                <p class="text-6xl font-black text-white tracking-tight">
+            <div class="bg-slate-800 dark:bg-slate-700 p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200">
+              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1 sm:mb-2">EXスコア</p>
+              <div class="flex items-baseline gap-1 sm:gap-2">
+                <p class="text-4xl sm:text-6xl font-black text-white tracking-tight">
                   {{ selectedRecord.score }}
                 </p>
-                <p v-if="selectedRecord.maxScore > 0" class="text-xl font-bold text-slate-500 dark:text-slate-400">/ {{ selectedRecord.maxScore }}</p>
+                <p v-if="selectedRecord.maxScore > 0" class="text-sm sm:text-xl font-bold text-slate-500 dark:text-slate-400">/ {{ selectedRecord.maxScore }}</p>
               </div>
             </div>
             <div 
-               class="p-8 rounded-2xl flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors relative duration-200"
+               class="p-4 sm:p-8 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors relative duration-200"
                :class="selectedRecord.scoreRate >= 0 ? 'bg-blue-50 dark:bg-slate-800 border-4 border-blue-200 dark:border-slate-700' : 'bg-slate-100 dark:bg-slate-800/50 border-dashed border-4 border-slate-300 dark:border-slate-600 group cursor-help'"
                :title="selectedRecord.scoreRate >= 0 ? '' : '正確なノーツ数定義データがないため計算できません'"
             >
-              <p class="text-sm font-bold uppercase tracking-widest mb-2" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'">単独スコアレート</p>
-              <p class="text-6xl font-black tracking-tight flex items-baseline" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-600 dark:text-blue-300' : 'text-slate-300 dark:text-slate-600 transition-colors group-hover:text-slate-400 dark:group-hover:text-slate-500'">
+              <p class="text-xs sm:text-sm font-bold uppercase tracking-widest mb-1 sm:mb-2" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'">単独スコアレート</p>
+              <p class="text-4xl sm:text-6xl font-black tracking-tight flex items-baseline" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-600 dark:text-blue-300' : 'text-slate-300 dark:text-slate-600 transition-colors group-hover:text-slate-400 dark:group-hover:text-slate-500'">
                  <template v-if="selectedRecord.scoreRate >= 0">
                     {{ selectedRecord.scoreRate.toFixed(2) }}
                  </template>
                  <template v-else>
                     ---
                  </template>
-                <span class="text-3xl font-bold ml-2">%</span>
+                <span class="text-xl sm:text-3xl font-bold ml-1 sm:ml-2">%</span>
               </p>
             </div>
           </div>
 
-          <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 transition-colors duration-200">
-            <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
-              <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">判定詳細</p>
+          <div class="border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 transition-colors duration-200">
+            <div class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-2 sm:py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
+              <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">判定詳細</p>
             </div>
             <div class="grid grid-cols-3 divide-x divide-slate-200 dark:divide-slate-700">
-              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-amber-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
-                <span class="text-sm text-amber-500 dark:text-amber-400 font-bold tracking-widest mb-2">PGREAT</span>
-                <span class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.pgreat }}</span>
+              <div class="p-3 sm:p-6 lg:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-amber-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
+                <span class="text-[10px] sm:text-sm text-amber-500 dark:text-amber-400 font-bold tracking-widest mb-1 sm:mb-2">PGREAT</span>
+                <span class="text-2xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.pgreat }}</span>
               </div>
-              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-yellow-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
-                <span class="text-sm text-yellow-500 dark:text-yellow-400 font-bold tracking-widest mb-2">GREAT</span>
-                <span class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.great }}</span>
+              <div class="p-3 sm:p-6 lg:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-yellow-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
+                <span class="text-[10px] sm:text-sm text-yellow-500 dark:text-yellow-400 font-bold tracking-widest mb-1 sm:mb-2">GREAT</span>
+                <span class="text-2xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.great }}</span>
               </div>
-              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-red-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
-                <span class="text-sm text-red-400 dark:text-red-500 font-bold tracking-widest mb-2">MISS</span>
-                <span class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.missCount !== null ? selectedRecord.missCount : '-' }}</span>
+              <div class="p-3 sm:p-6 lg:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-red-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
+                <span class="text-[10px] sm:text-sm text-red-400 dark:text-red-500 font-bold tracking-widest mb-1 sm:mb-2">MISS</span>
+                <span class="text-2xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.missCount !== null ? selectedRecord.missCount : '-' }}</span>
               </div>
             </div>
           </div>
