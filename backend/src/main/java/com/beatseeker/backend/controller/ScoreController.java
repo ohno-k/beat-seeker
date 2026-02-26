@@ -107,15 +107,18 @@ public class ScoreController {
         String latestSnapshotId = latestScoreOpt.get().getSnapshotId();
         List<Score> scores = scoreRepository.findByUserAndSnapshotId(user, latestSnapshotId);
 
-        List<Map<String, Object>> result = scores.stream().map(s -> Map.<String, Object>of(
-                "id", s.getId(),
-                "title", s.getTitle() != null ? s.getTitle() : "",
-                "difficultyName", s.getDifficultyName() != null ? s.getDifficultyName() : "",
-                "difficultyLevel", s.getDifficultyLevel() != null ? s.getDifficultyLevel() : 0,
-                "score", s.getScore() != null ? s.getScore() : 0,
-                "clearType", s.getClearType() != null ? s.getClearType() : "",
-                "djLevel", s.getDjLevel() != null ? s.getDjLevel() : "",
-                "memo", s.getMemo() != null ? s.getMemo() : "")).toList();
+        List<Map<String, Object>> result = scores.stream().map(s -> Map.<String, Object>ofEntries(
+                Map.entry("id", s.getId()),
+                Map.entry("title", s.getTitle() != null ? s.getTitle() : ""),
+                Map.entry("difficultyName", s.getDifficultyName() != null ? s.getDifficultyName() : ""),
+                Map.entry("difficultyLevel", s.getDifficultyLevel() != null ? s.getDifficultyLevel() : 0),
+                Map.entry("score", s.getScore() != null ? s.getScore() : 0),
+                Map.entry("clearType", s.getClearType() != null ? s.getClearType() : ""),
+                Map.entry("djLevel", s.getDjLevel() != null ? s.getDjLevel() : ""),
+                Map.entry("pgreat", s.getPgreat() != null ? s.getPgreat() : 0),
+                Map.entry("great", s.getGreat() != null ? s.getGreat() : 0),
+                Map.entry("missCount", s.getMissCount()), // Allow null so it can display as "-" in frontend
+                Map.entry("memo", s.getMemo() != null ? s.getMemo() : ""))).toList();
 
         return ResponseEntity.ok(result);
     }
