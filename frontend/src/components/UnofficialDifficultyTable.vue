@@ -104,53 +104,56 @@ const tableData = computed(() => {
     </div>
     
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse whitespace-nowrap">
+      <table class="w-full text-left border-collapse">
         <thead>
-          <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
-            <th class="py-3 px-4 font-bold w-24">難易度</th>
-            <th class="py-3 px-4 font-bold text-center w-32">平均スコアレート</th>
-            <th class="py-3 px-4 font-bold text-right w-48">合計 BEAT-PT</th>
-            <th class="py-3 px-4 font-bold text-center w-24">プレイ済</th>
-            <th class="py-3 px-4 w-12 text-center"></th>
+          <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[10px] sm:text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">難易度</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">平均RATE</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">合計 PT</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">プレイ済</th>
+            <th class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"></th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-xs sm:text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
           <template v-for="data in tableData" :key="data.rank">
             <tr 
               @click="toggleRank(data.rank)"
               class="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group"
               :class="{ 'bg-slate-50 dark:bg-slate-800/80': expandedRanks.has(data.rank) }"
             >
-              <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-100">
-                <span class="inline-block w-2 h-2 rounded-full mr-2" :class="parseFloat(data.rank) >= 12.5 ? 'bg-purple-500 dark:bg-purple-400' : 'bg-blue-500 dark:bg-blue-400'"></span>
+              <td class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">
+                <span class="inline-block w-2 h-2 rounded-full mr-1 sm:mr-2" :class="parseFloat(data.rank) >= 12.5 ? 'bg-purple-500 dark:bg-purple-400' : 'bg-blue-500 dark:bg-blue-400'"></span>
                 {{ data.rank }}
               </td>
-              <td class="py-3 px-4 text-center cursor-pointer">
+              <td class="py-2 px-2 sm:py-3 sm:px-4 text-center cursor-pointer">
                 <div class="flex flex-col items-center">
-                  <span class="font-black text-base" :class="data.averageRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : data.averageRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'">
+                  <span class="font-black text-sm sm:text-base whitespace-nowrap" :class="data.averageRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : data.averageRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'">
                     {{ data.averageRate > 0 ? data.averageRate.toFixed(2) + '%' : '-' }}
                   </span>
-                  <div v-if="data.averageRate > 0" class="w-20 h-1 mt-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div v-if="data.averageRate > 0" class="hidden sm:block w-full max-w-[5rem] h-1 mt-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mx-auto">
                     <div class="h-full bg-indigo-500 dark:bg-indigo-400" :style="{ width: `${data.averageRate}%` }"></div>
                   </div>
                 </div>
               </td>
-              <td class="py-3 px-4 text-right cursor-pointer" @click.stop="toggleRank(data.rank)">
-                <div class="flex items-center justify-end gap-2">
+              <td class="py-2 px-2 sm:py-3 sm:px-4 text-right cursor-pointer" @click.stop="toggleRank(data.rank)">
+                <div class="flex items-center justify-end gap-1 sm:gap-2">
                   <div class="flex flex-col text-right">
-                    <span class="font-black text-sm" :class="data.rankInfo.color">
-                      {{ data.totalBeatPoints.toFixed(1) }} <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">pt</span>
+                    <span class="font-black text-xs sm:text-sm whitespace-nowrap" :class="data.rankInfo.color">
+                      {{ data.totalBeatPoints.toFixed(1) }} <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">pt</span>
                     </span>
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold">MAX: {{ data.maxBeatPoints.toFixed(1) }}</span>
+                    <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold whitespace-nowrap">MAX: {{ data.maxBeatPoints.toFixed(1) }}</span>
                   </div>
-                  <RankIcon :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
+                  <RankIcon class="hidden sm:block" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
                 </div>
               </td>
-              <td class="py-3 px-4 text-center font-bold text-slate-600 dark:text-slate-300">
-                {{ data.playCount }} <span class="text-xs text-slate-400 dark:text-slate-500 font-normal">/ {{ data.totalCount }}</span>
+              <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-slate-600 dark:text-slate-300">
+                <div class="flex flex-col sm:block whitespace-nowrap">
+                  <span>{{ data.playCount }}</span>
+                  <span class="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 font-normal sm:ml-1">/ {{ data.totalCount }}</span>
+                </div>
               </td>
-              <td class="py-3 px-4 text-center text-slate-400 dark:text-slate-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200 group-hover:text-indigo-500 dark:group-hover:text-indigo-400" :class="{ 'rotate-180 text-indigo-500 dark:text-indigo-400': expandedRanks.has(data.rank) }" viewBox="0 0 20 20" fill="currentColor">
+              <td class="py-2 px-1 sm:py-3 sm:px-4 text-center text-slate-400 dark:text-slate-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 transform transition-transform duration-200 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 mx-auto" :class="{ 'rotate-180 text-indigo-500 dark:text-indigo-400': expandedRanks.has(data.rank) }" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </td>
