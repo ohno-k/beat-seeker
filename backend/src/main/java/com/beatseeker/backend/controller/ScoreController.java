@@ -220,21 +220,6 @@ public class ScoreController {
         return ResponseEntity.ok(Map.of("message", "メモを保存しました"));
     }
 
-    /**
-     * Delete a specific upload session (snapshot) for the current user.
-     */
-    @DeleteMapping("/snapshot/{snapshotId}")
-    @Transactional
-    public ResponseEntity<Map<String, Object>> deleteSnapshot(
-            @AuthenticationPrincipal OAuth2User principal,
-            @PathVariable String snapshotId) {
-
-        User user = getUser(principal);
-        scoreRepository.deleteByUserAndSnapshotId(user, snapshotId);
-
-        return ResponseEntity.ok(Map.of("message", "アップロード履歴を削除しました"));
-    }
-
     private User getUser(OAuth2User principal) {
         String googleId = principal.getAttribute("sub");
         return userRepository.findByGoogleId(googleId)

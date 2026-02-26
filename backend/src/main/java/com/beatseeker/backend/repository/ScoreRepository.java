@@ -19,8 +19,4 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Score> findByUserAndSnapshotId(User user, String snapshotId);
 
     void deleteByUser(User user);
-
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.transaction.annotation.Transactional
-    void deleteByUserAndSnapshotId(User user, String snapshotId);
 }

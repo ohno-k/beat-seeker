@@ -436,10 +436,10 @@
           </div>
 
           <!-- Memo Section -->
-          <div v-if="selectedRecord.id" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
+          <div v-if="selectedRecord.id || !isLoggedIn" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
               <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">メモ</p>
-              <button @click="isEditingMemo = true" v-if="!isEditingMemo" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-bold flex items-center gap-1 transition-colors">
+              <button @click="isEditingMemo = true" v-if="!isEditingMemo && isLoggedIn" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-bold flex items-center gap-1 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                 </svg>
@@ -447,7 +447,12 @@
               </button>
             </div>
             <div class="p-6">
-              <template v-if="isEditingMemo">
+              <template v-if="!isLoggedIn">
+                <div class="text-slate-500 dark:text-slate-400 italic text-sm text-center py-2">
+                  ※ログインすると、各楽曲にメモを残せるようになります。
+                </div>
+              </template>
+              <template v-else-if="isEditingMemo">
                 <textarea v-model="editMemoText" rows="4" class="w-full border border-slate-300 dark:border-slate-600 rounded-xl p-3 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-500 text-slate-700 dark:text-slate-200 resize-y transition-colors duration-200" placeholder="オプション（RANDOMなど）や攻略のメモを残せます..."></textarea>
                 <div class="flex justify-end gap-3 mt-4">
                   <button @click="isEditingMemo = false" class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">キャンセル</button>
@@ -486,9 +491,11 @@ import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
+import { useAuth } from '../composables/useAuth';
 
 const { updateMemo } = useScores();
 const { isDarkMode } = useDarkMode();
+const { isLoggedIn } = useAuth();
 
 const props = defineProps<{
   scores: ScoreData[];

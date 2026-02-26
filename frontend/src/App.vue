@@ -6,6 +6,7 @@ import ScoreDashboard from './components/ScoreDashboard.vue';
 import ProfileDashboard from './components/ProfileDashboard.vue';
 import ProfileSetupModal from './components/ProfileSetupModal.vue';
 import UploadHistory from './components/UploadHistory.vue';
+import Changelog from './components/Changelog.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { useAuth } from './composables/useAuth';
@@ -17,7 +18,7 @@ import { watch } from 'vue';
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history'>('dashboard');
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'changelog'>('dashboard');
 const totalBeatTierPoints = ref(0);
 
 const { user, isLoggedIn, login, logout, isLoading: authLoading } = useAuth();
@@ -54,6 +55,7 @@ const handleFileDropped = async (file: File) => {
     
     if (isLoggedIn.value && data.length > 0) {
       const res = await upload(data);
+      await loadSavedScores();
       alert(`保存完了: ${res.saved} 件のスコアが自動で保存されました`);
     } else if (!isLoggedIn.value) {
       alert("※ログインしていないため、データは表示のみとなります");
@@ -226,6 +228,12 @@ const resetData = () => {
             v-if="activeTab === 'profile'"
             class="w-full max-w-6xl"
           />
+
+          <!-- Changelog Tab -->
+          <Changelog 
+            v-if="activeTab === 'changelog'"
+            class="w-full max-w-4xl"
+          />
         </template>
         
       </div>
@@ -234,10 +242,17 @@ const resetData = () => {
 
     <!-- Footer -->
     <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 transition-colors duration-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p class="text-sm text-slate-500 dark:text-slate-400">
           © 2026 beat-seeker.
         </p>
+        <button 
+          @click="activeTab = 'changelog'"
+          class="text-sm font-medium transition-colors"
+          :class="activeTab === 'changelog' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+        >
+          更新履歴
+        </button>
       </div>
     </footer>
   </div>

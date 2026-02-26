@@ -46,26 +46,7 @@ const fetchHistory = async () => {
   }
 };
 
-const deleteSnapshot = async (snapshotId: string) => {
-  if (!confirm('このアップロード履歴を削除してもよろしいですか？\n※復元することはできません。')) {
-    return;
-  }
-  
-  try {
-    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-    const res = await fetch(`${API_BASE}/api/scores/snapshot/${snapshotId}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
-    
-    if (!res.ok) throw new Error('削除に失敗しました');
-    
-    // Refresh the list after successful deletion
-    await fetchHistory();
-  } catch (err: any) {
-    alert(err.message);
-  }
-};
+
 
 const formatDate = (dateStr: string) => {
   // Add 'Z' to treat as UTC if the server returns no timezone info,
@@ -121,7 +102,6 @@ onMounted(() => {
             <th class="p-4 font-semibold text-center">FULLCOMBO</th>
             <th class="p-4 font-semibold text-center">EX HARD</th>
             <th class="p-4 font-semibold text-center">AAA/AA/A</th>
-            <th class="p-4 font-semibold text-right">操作</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
@@ -162,12 +142,6 @@ onMounted(() => {
                   {{ item.diffs.aCount >= 0 ? '+' : '' }}{{ item.diffs.aCount }}
                 </span>
               </div>
-            </td>
-            <td class="p-4 text-right">
-              <button @click="deleteSnapshot(item.snapshotId)" 
-                class="px-3 py-1.5 bg-red-50 dark:bg-red-900/20 hover:bg-red-500 dark:hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white dark:hover:text-white rounded-lg text-xs font-semibold transition-colors duration-200 border border-red-100 dark:border-red-900/50 hover:border-red-500 dark:hover:border-red-600 outline-none focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900">
-                削除
-              </button>
             </td>
           </tr>
         </tbody>
