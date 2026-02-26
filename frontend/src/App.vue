@@ -7,8 +7,12 @@ import ProfileDashboard from './components/ProfileDashboard.vue';
 import ProfileSetupModal from './components/ProfileSetupModal.vue';
 import UploadHistory from './components/UploadHistory.vue';
 import Changelog from './components/Changelog.vue';
+import UploadResultModal from './components/UploadResultModal.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
+import { flattenScores } from './utils/scoreData';
+import type { UploadDiffResult, UpdatedSong } from './types/UploadDiff';
+import { getOverallRankInfo, calculateTotalPoints } from './utils/beatTier';
 import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useScores } from './composables/useScores';
@@ -20,6 +24,9 @@ const isParsing = ref(false);
 const errorMsg = ref('');
 const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'changelog'>('dashboard');
 const totalBeatTierPoints = ref(0);
+
+const diffResult = ref<UploadDiffResult | null>(null);
+const isDiffModalOpen = ref(false);
 
 const { user, isLoggedIn, login, logout, isLoading: authLoading } = useAuth();
 const { upload } = useScoreUpload();
@@ -43,22 +50,114 @@ watch(isLoggedIn, (newVal) => {
   }
 });
 
+const clearTypeRankings: Record<string, number> = {
+  'FULLCOMBO CLEAR': 7,
+  'EX HARD CLEAR': 6,
+  'HARD CLEAR': 5,
+  'CLEAR': 4,
+  'EASY CLEAR': 3,
+  'ASSIST CLEAR': 2,
+  'FAILED': 1,
+  'NO PLAY': 0,
+  '---': 0
+};
+
 const handleFileDropped = async (file: File) => {
   errorMsg.value = '';
   isParsing.value = true;
-  totalBeatTierPoints.value = 0;
   
   try {
-    const data = await parseScoreCsv(file);
-    scoreData.value = data;
-    console.log(`Successfully parsed ${data.length} songs.`);
+    const newData = await parseScoreCsv(file);
+    console.log(`Successfully parsed ${newData.length} songs.`);
     
-    if (isLoggedIn.value && data.length > 0) {
-      const res = await upload(data);
-      await loadSavedScores();
-      alert(`保存完了: ${res.saved} 件のスコアが自動で保存されました`);
+    // Calculate Diff
+    const oldFlat = flattenScores(scoreData.value);
+    const newFlat = flattenScores(newData);
+    
+    const oldScoreMap = new Map();
+    oldFlat.forEach(r => oldScoreMap.set(`${r.title}_${r.difficultyName}`, r));
+    
+    const updatedSongs: UpdatedSong[] = [];
+    
+    newFlat.forEach(newR => {
+        // We only care about level 11 and 12 for the diff highlight to avoid clutter
+        if (newR.difficultyLevel !== 11 && newR.difficultyLevel !== 12) return;
+        
+        const oldR = oldScoreMap.get(`${newR.title}_${newR.difficultyName}`);
+        
+        const oldScore = oldR ? oldR.score : 0;
+        const oldClearType = oldR ? oldR.clearType : 'NO PLAY';
+        const oldBeatPt = oldR ? oldR.beatTierPoints : 0;
+        
+        const newScore = newR.score;
+        const newClearType = newR.clearType;
+        const newBeatPt = newR.beatTierPoints;
+        
+        const oldClearRank = clearTypeRankings[oldClearType] || 0;
+        const newClearRank = clearTypeRankings[newClearType] || 0;
+        const clearTypeImproved = newClearRank > oldClearRank;
+        
+        const scoreIncrease = newScore > oldScore ? newScore - oldScore : 0;
+        const beatPtIncrease = newBeatPt > oldBeatPt ? newBeatPt - oldBeatPt : 0;
+        
+        if (scoreIncrease > 0 || clearTypeImproved) {
+            updatedSongs.push({
+                title: newR.title,
+                difficulty: newR.difficultyName,
+                oldScore,
+                newScore,
+                scoreIncrease,
+                oldClearType,
+                newClearType,
+                clearTypeImproved,
+                oldBeatPt,
+                newBeatPt,
+                beatPtIncrease
+            });
+        }
+    });
+
+    // Sort updated songs by beatPtIncrease descending, then scoreIncrease
+    updatedSongs.sort((a, b) => {
+        if (b.beatPtIncrease !== a.beatPtIncrease) return b.beatPtIncrease - a.beatPtIncrease;
+        return b.scoreIncrease - a.scoreIncrease;
+    });
+
+    const oldTotalBeatPt = calculateTotalPoints(oldFlat);
+    const newTotalBeatPt = calculateTotalPoints(newFlat);
+    const totalBeatPtIncrease = newTotalBeatPt > oldTotalBeatPt ? newTotalBeatPt - oldTotalBeatPt : 0;
+    
+    const oldTier = getOverallRankInfo(oldTotalBeatPt);
+    const newTier = getOverallRankInfo(newTotalBeatPt);
+    
+    diffResult.value = {
+        oldTotalBeatPt,
+        newTotalBeatPt,
+        totalBeatPtIncrease,
+        oldTier,
+        newTier,
+        updatedSongs
+    };
+    
+    // Open Diff Modal if there are updates or new session
+    if (oldFlat.length > 0 && updatedSongs.length > 0) {
+        isDiffModalOpen.value = true;
+    } else if (oldFlat.length === 0) {
+        // First upload in this session
+        isDiffModalOpen.value = true;
+    }
+
+    // Apply new data
+    scoreData.value = newData;
+    totalBeatTierPoints.value = newTotalBeatPt;
+    
+    if (isLoggedIn.value && newData.length > 0) {
+      // Async upload in background
+      upload(newData).then(() => {
+          loadSavedScores(); // Refresh strictly to sync server IDs for memos
+      }).catch(err => console.error("Auto upload failed", err));
     } else if (!isLoggedIn.value) {
-      alert("※ログインしていないため、データは表示のみとなります");
+      // Just a warning, diff modal will still show
     }
   } catch (err: any) {
     console.error('Failed to parse or save CSV:', err);
@@ -79,6 +178,13 @@ const resetData = () => {
   <div class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-col">
     <!-- Profile Setup Modal for new users -->
     <ProfileSetupModal v-if="isLoggedIn && !user?.iidxId && !authLoading" />
+
+    <!-- Upload Diff Result Modal -->
+    <UploadResultModal 
+      :is-open="isDiffModalOpen" 
+      :diff-data="diffResult" 
+      @close="isDiffModalOpen = false" 
+    />
 
     <!-- Header -->
     <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm transition-colors duration-200">

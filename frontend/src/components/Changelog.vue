@@ -17,8 +17,32 @@
       </p>
     </div>
 
-    <!-- Update Entry: v1.0.1 (Current Update) -->
+    <!-- Update Entry: v1.0.2 (CSV Diff Feature) -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.0.2</span>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">プレイ成果レポート（差分検知）</h3>
+        </div>
+        <span class="text-sm font-bold text-slate-500 dark:text-slate-400">2026年2月</span>
+      </div>
+      
+      <div class="p-8 space-y-6">
+        <div>
+          <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+            新機能 (New Features)
+          </h4>
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">プレイ成果の差分レポート:</span> ログインした状態で新しいCSVをアップロードした際、過去のスコアと比較して「どの楽曲のスコアやクリアランプが伸びたか」「どれだけBEAT-PTが増えたか」を自動計算してお知らせするポップアップ画面を追加しました。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">BEAT-TIER 昇格演出:</span> BEAT-TIERのランク（称号）が上がった際に、リザルト画面で昇格をお祝いする表示を追加しました。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Entry: v1.0.1 (Current Update) -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200 opacity-90">
       <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.0.1</span>

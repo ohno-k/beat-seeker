@@ -16,6 +16,13 @@ export interface RankInfo {
     color: string;
 }
 
+export interface FolderRankInfo {
+    name: string;
+    tier: number;
+    color: string;
+    description: string;
+}
+
 // Weights configuration (can be easily adjusted)
 export const WEIGHTS: Record<string, number> = {};
 for (let i = 0; i <= 19; i++) {
@@ -68,6 +75,43 @@ export const RANKS: RankInfo[] = [
 
     { name: 'Beginner', minPoints: 0, color: 'text-slate-400' },
 ];
+
+export const getFolderColorClass = (rankName: string): string => {
+    switch (rankName.toLowerCase()) {
+        case 'legend': return 'bg-gradient-to-r from-amber-200 to-yellow-400 border-amber-400 text-amber-900 font-bold';
+        case 'mythic': return 'bg-purple-100 border-purple-300 text-purple-800 font-bold';
+        case 'ancient': return 'bg-indigo-100 border-indigo-300 text-indigo-800 font-bold';
+        case 'master': return 'bg-red-50 border-red-200 text-red-700';
+        case 'elite': return 'bg-orange-50 border-orange-200 text-orange-700';
+        case 'veteran': return 'bg-emerald-50 border-emerald-200 text-emerald-700';
+        case 'expert': return 'bg-teal-50 border-teal-200 text-teal-700';
+        case 'advanced': return 'bg-cyan-50 border-cyan-200 text-cyan-700';
+        case 'intermediate': return 'bg-blue-50 border-blue-200 text-blue-700';
+        case 'novice': return 'bg-slate-100 border-slate-300 text-slate-700';
+        default: return 'bg-slate-50 border-slate-200 text-slate-800';
+    }
+};
+
+/**
+ * Calculates total BEAT-TIER points for a given set of flat scores
+ */
+export const calculateTotalPoints = (scores: { beatTierPoints: number }[]): number => {
+    return scores.reduce((sum, score) => sum + (score.beatTierPoints || 0), 0);
+};
+
+export const getOverallRankInfo = (totalPoints: number): FolderRankInfo => {
+    if (totalPoints >= 100000) return { name: 'Legend', tier: 5, color: 'text-amber-500', description: '神話の領域' };
+    if (totalPoints >= 80000) return { name: 'Mythic', tier: 4, color: 'text-purple-500', description: '伝説のプレイヤー' };
+    if (totalPoints >= 60000) return { name: 'Ancient', tier: 4, color: 'text-indigo-500', description: '古都の猛者' };
+    if (totalPoints >= 45000) return { name: 'Master', tier: 3, color: 'text-red-500', description: '達人' };
+    if (totalPoints >= 30000) return { name: 'Elite', tier: 3, color: 'text-orange-500', description: '熟練者' };
+    if (totalPoints >= 20000) return { name: 'Veteran', tier: 2, color: 'text-emerald-500', description: '歴戦の勇者' };
+    if (totalPoints >= 10000) return { name: 'Expert', tier: 2, color: 'text-teal-500', description: '上級者' };
+    if (totalPoints >= 5000) return { name: 'Advanced', tier: 1, color: 'text-cyan-500', description: '中級者' };
+    if (totalPoints >= 2000) return { name: 'Intermediate', tier: 1, color: 'text-blue-500', description: '初級者' };
+    if (totalPoints >= 500) return { name: 'Novice', tier: 0, color: 'text-slate-600', description: '見習い' };
+    return { name: 'Beginner', tier: 0, color: 'text-slate-500', description: '駆け出し' };
+};
 
 function generateTieredRanks(name: string, start: number, end: number, color: string): RankInfo[] {
     const tiers: RankInfo[] = [];
