@@ -1,5 +1,5 @@
 <template>
-  <div class="relative flex items-center justify-center select-none" :class="sizeClass">
+  <div class="relative flex items-center justify-center select-none shrink-0" :class="sizeClass">
     <!-- SVG Icon -->
     <svg 
       viewBox="0 0 100 100" 
