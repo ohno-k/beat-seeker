@@ -45,18 +45,39 @@
               </div>
             </div>
 
-            <!-- Total Points Change -->
-            <div class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
-              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">総合BEAT-PT 増加量</p>
-              <div class="flex items-baseline gap-2 text-indigo-600 dark:text-indigo-400">
-                <span class="text-5xl font-black tracking-tight" :class="diffData.totalBeatPtIncrease > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'">
+            <!-- Total Points Change Details -->
+            <div class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+              <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
+              
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">総合 BEAT-TIER の変化</p>
+              
+              <!-- Tier Context -->
+              <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
+                <div class="flex flex-col items-center flex-1">
+                  <span class="text-xs font-bold text-slate-400 mb-1">前回 ({{ diffData.oldTotalBeatPt.toFixed(1) }})</span>
+                  <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldTier?.name || '---' }}</span>
+                </div>
+                
+                <div class="shrink-0 flex flex-col items-center justify-center pt-4">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400 dark:text-indigo-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </div>
+
+                <div class="flex flex-col items-center flex-1">
+                  <span class="text-xs font-bold text-indigo-400 mb-1">今回 ({{ diffData.newTotalBeatPt.toFixed(1) }})</span>
+                  <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newTier?.color || 'text-slate-600'">{{ diffData.newTier?.name || '---' }}</span>
+                </div>
+              </div>
+              
+              <!-- PT Increase -->
+              <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-xl border border-slate-100 dark:border-slate-800 relative z-10">
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">増加量:</span>
+                <span class="text-4xl font-black tracking-tight" :class="diffData.totalBeatPtIncrease > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'">
                   {{ diffData.totalBeatPtIncrease > 0 ? '+' : '' }}{{ diffData.totalBeatPtIncrease.toFixed(1) }}
                 </span>
-                <span class="text-xl font-bold">pt</span>
+                <span class="text-lg font-bold text-indigo-500">pt</span>
               </div>
-              <p class="text-sm font-medium text-slate-400 dark:text-slate-500 mt-2">
-                {{ diffData.oldTotalBeatPt.toFixed(1) }} → <span class="text-slate-800 dark:text-slate-200 font-black">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
-              </p>
             </div>
 
             <!-- Updated Songs List -->

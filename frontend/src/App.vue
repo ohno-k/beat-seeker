@@ -140,16 +140,19 @@ const handleFileDropped = async (file: File) => {
     };
     
     // Open Diff Modal if there are updates or new session
-    if (oldFlat.length > 0 && updatedSongs.length > 0) {
+    if (updatedSongs.length > 0) {
+        // Only show if there are actual updates
         isDiffModalOpen.value = true;
-    } else if (oldFlat.length === 0) {
-        // First upload in this session
+    } else if (oldFlat.length === 0 && newFlat.length > 0) {
+        // First upload in this session (e.g. not logged in, or fresh DB)
         isDiffModalOpen.value = true;
     }
 
     // Apply new data
-    scoreData.value = newData;
-    totalBeatTierPoints.value = newTotalBeatPt;
+    if (oldFlat.length === 0 || updatedSongs.length > 0 || newData.length > oldFlat.length) {
+        scoreData.value = newData;
+        totalBeatTierPoints.value = newTotalBeatPt;
+    }
     
     if (isLoggedIn.value && newData.length > 0) {
       // Async upload in background
