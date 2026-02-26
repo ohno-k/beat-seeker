@@ -1,59 +1,59 @@
 <template>
   <div class="w-full space-y-6 animate-fade-in">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <h2 class="text-2xl font-bold text-slate-800 mb-2">プロフィール・成長軌跡</h2>
-      <p class="text-slate-500 mb-6">過去のアップロード記録から、あなたの成長の軌跡を可視化します。</p>
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">プロフィール・成長軌跡</h2>
+      <p class="text-slate-500 dark:text-slate-400 mb-6">過去のアップロード記録から、あなたの成長の軌跡を可視化します。</p>
 
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-12">
-        <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-        <p class="text-slate-500 font-medium">履歴データを読み込み中...</p>
+        <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-slate-500 dark:text-slate-400 font-medium">履歴データを読み込み中...</p>
       </div>
       
-      <div v-else-if="historyData.length === 0" class="py-12 text-center border-2 border-dashed border-slate-200 rounded-xl">
-        <p class="text-slate-500 font-medium">履歴データがありません。<br/>スコアを複数回アップロードすると、ここに成長グラフが表示されます。</p>
+      <div v-else-if="historyData.length === 0" class="py-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+        <p class="text-slate-500 dark:text-slate-400 font-medium">履歴データがありません。<br/>スコアを複数回アップロードすると、ここに成長グラフが表示されます。</p>
       </div>
 
       <div v-else class="space-y-8">
         <!-- Stats Summary -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col items-center">
-            <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1">スナップショット数</span>
-            <span class="text-2xl font-black text-slate-700">{{ historyData.length }}</span>
+          <div class="bg-blue-50/50 dark:bg-slate-700/50 border-blue-100 dark:border-slate-600 p-4 rounded-xl border flex flex-col items-center transition-colors duration-200">
+            <span class="text-[10px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-1">スナップショット数</span>
+            <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ historyData.length }}</span>
           </div>
-          <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-100 flex flex-col items-center">
-            <span class="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-1">最新の累計EXスコア</span>
-            <span class="text-2xl font-black text-slate-700">{{ latestTotalScore.toLocaleString() }}</span>
+          <div class="bg-amber-50/50 dark:bg-slate-700/50 border-amber-100 dark:border-slate-600 p-4 rounded-xl border flex flex-col items-center transition-colors duration-200">
+            <span class="text-[10px] font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-1">最新の累計EXスコア</span>
+            <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ latestTotalScore.toLocaleString() }}</span>
           </div>
-          <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 flex flex-col items-center">
-            <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">最新のAAA取得数</span>
-            <span class="text-2xl font-black text-slate-700">{{ latestAaaCount }}</span>
+          <div class="bg-emerald-50/50 dark:bg-slate-700/50 border-emerald-100 dark:border-slate-600 p-4 rounded-xl border flex flex-col items-center transition-colors duration-200">
+            <span class="text-[10px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest mb-1">最新のAAA取得数</span>
+            <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ latestAaaCount }}</span>
           </div>
-          <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 flex flex-col items-center">
-            <span class="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-1">最新のFC数</span>
-            <span class="text-2xl font-black text-slate-700">{{ latestFcCount }}</span>
+          <div class="bg-purple-50/50 dark:bg-slate-700/50 border-purple-100 dark:border-slate-600 p-4 rounded-xl border flex flex-col items-center transition-colors duration-200">
+            <span class="text-[10px] font-bold text-purple-500 dark:text-purple-400 uppercase tracking-widest mb-1">最新のFC数</span>
+            <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ latestFcCount }}</span>
           </div>
         </div>
 
         <!-- Charts -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-4">累計EXスコアの推移</h3>
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-200">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-4">累計EXスコアの推移</h3>
             <div class="h-64">
-              <LineChart v-if="scoreChartData" :data="scoreChartData" :options="lineOptions" />
+              <LineChart v-if="scoreChartData" :data="scoreChartData" :options="lineOptionsObj" />
             </div>
           </div>
           
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-4">DJレベル取得数の推移</h3>
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-200">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-4">DJレベル取得数の推移</h3>
             <div class="h-64">
-              <LineChart v-if="djLevelChartData" :data="djLevelChartData" :options="lineOptions" />
+              <LineChart v-if="djLevelChartData" :data="djLevelChartData" :options="lineOptionsObj" />
             </div>
           </div>
 
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
-            <h3 class="font-bold text-slate-800 mb-4">上位クリアタイプの推移</h3>
+          <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-2 transition-colors duration-200">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-4">上位クリアタイプの推移</h3>
             <div class="h-64">
-              <LineChart v-if="clearChartData" :data="clearChartData" :options="lineOptions" />
+              <LineChart v-if="clearChartData" :data="clearChartData" :options="lineOptionsObj" />
             </div>
           </div>
         </div>
@@ -63,9 +63,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line as LineChart } from 'vue-chartjs';
+import { useDarkMode } from '../composables/useDarkMode';
+
+const { isDarkMode } = useDarkMode();
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -200,28 +203,46 @@ const clearChartData = computed(() => {
     };
 });
 
-const lineOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-      labels: {
-          usePointStyle: true,
-          font: { family: "'Inter', sans-serif" }
+const lineOptionsObj = computed(() => {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+            usePointStyle: true,
+            font: { family: "'Inter', sans-serif" },
+            color: isDarkMode.value ? '#cbd5e1' : '#475569'
+        }
+      },
+      tooltip: {
+          mode: 'index' as const,
+          intersect: false,
+          backgroundColor: isDarkMode.value ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+          titleColor: isDarkMode.value ? '#f8fafc' : '#0f172a',
+          bodyColor: isDarkMode.value ? '#cbd5e1' : '#334155',
+          borderColor: isDarkMode.value ? '#334155' : '#e2e8f0',
+          borderWidth: 1
       }
     },
-    tooltip: {
-        mode: 'index' as const,
-        intersect: false,
+    interaction: {
+        mode: 'nearest' as const,
+        axis: 'x' as const,
+        intersect: false
+    },
+    scales: {
+      x: {
+        ticks: { color: isDarkMode.value ? '#94a3b8' : '#64748b' },
+        grid: { color: isDarkMode.value ? '#334155' : '#f1f5f9' }
+      },
+      y: {
+        ticks: { color: isDarkMode.value ? '#94a3b8' : '#64748b' },
+        grid: { color: isDarkMode.value ? '#334155' : '#f1f5f9' }
+      }
     }
-  },
-  interaction: {
-      mode: 'nearest' as const,
-      axis: 'x' as const,
-      intersect: false
-  }
-};
+  };
+});
 </script>
 
 <style scoped>

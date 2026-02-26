@@ -11,6 +11,7 @@ import type { ScoreData } from './types/ScoreData';
 import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useScores } from './composables/useScores';
+import { useDarkMode } from './composables/useDarkMode';
 import { watch } from 'vue';
 
 const scoreData = ref<ScoreData[]>([]);
@@ -22,6 +23,7 @@ const totalBeatTierPoints = ref(0);
 const { user, isLoggedIn, login, logout, isLoading: authLoading } = useAuth();
 const { upload } = useScoreUpload();
 const { fetchMyScores, isFetching } = useScores();
+const { isDarkMode, toggleDarkMode } = useDarkMode();
 
 const loadSavedScores = async () => {
   try {
@@ -72,12 +74,12 @@ const resetData = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 flex flex-col">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-col">
     <!-- Profile Setup Modal for new users -->
     <ProfileSetupModal v-if="isLoggedIn && !user?.iidxId && !authLoading" />
 
     <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2 cursor-pointer group" @click="activeTab = 'dashboard'">
           <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-blue-700 transition-colors">
@@ -89,14 +91,26 @@ const resetData = () => {
         </div>
         
         <div class="flex items-center gap-4">
+          <!-- Dark Mode Toggle -->
+          <button @click="toggleDarkMode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none">
+            <svg v-if="isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <!-- Moon Icon -->
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <!-- Sun Icon -->
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 4.22a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-4.22 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-4.22a1 1 0 010-1.415l-.707-.707a1 1 0 01-1.414 1.414l.707.707a1 1 0 011.414 0zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm4.22-4.22a1 1 0 011.415 0l.707-.707a1 1 0 01-1.414-1.414l-.707.707a1 1 0 010 1.414zM10 6a4 4 0 100 8 4 4 0 000-8z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          
           <template v-if="!isLoggedIn">
-            <button class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors" @click="login">ログイン</button>
+            <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="login">ログイン</button>
           </template>
           <template v-else>
             <div class="flex items-center gap-2">
               <img :src="user?.avatarUrl" alt="avatar" class="w-6 h-6 rounded-full" />
-              <span class="text-sm text-slate-600">{{ user?.displayName }}</span>
-              <button class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors" @click="logout">ログアウト</button>
+              <span class="text-sm text-slate-600 dark:text-slate-300">{{ user?.displayName }}</span>
+              <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="logout">ログアウト</button>
             </div>
           </template>
         </div>
@@ -108,19 +122,19 @@ const resetData = () => {
       
       <!-- Hero Section (Visible only when no data) -->
       <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl animate-fade-in">
-        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl mb-4">
-          スコアデータを<span class="text-blue-600">可視化</span>しよう
+        <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
+          スコアデータを<span class="text-blue-600 dark:text-blue-400">可視化</span>しよう
         </h1>
-        <p class="text-lg text-slate-600 leading-relaxed">
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
           最新のCSVデータをドロップするだけで、あなたの実力値を自動でグラフ化・分析します。
         </p>
       </div>
 
       <!-- Dropzone or Parsing State -->
       <div v-if="!scoreData.length" class="w-full max-w-3xl animate-fade-in">
-        <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white rounded-2xl shadow-sm border border-slate-200">
-          <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-          <p class="text-slate-600 font-medium tracking-wide">データを読み込み中...</p>
+        <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+          <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
+          <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
         </div>
         
         <CsvDropzone v-else @file-dropped="handleFileDropped" />
@@ -128,7 +142,7 @@ const resetData = () => {
         <!-- Error Message -->
         <div 
           v-if="errorMsg" 
-          class="mt-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl flex items-center gap-3 animate-fade-in"
+          class="mt-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 animate-fade-in"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
@@ -143,18 +157,18 @@ const resetData = () => {
         <!-- Header & Tabs -->
         <div class="w-full max-w-6xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <!-- Tabs -->
-          <div class="flex items-center gap-4 bg-slate-200/50 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
+          <div class="flex items-center gap-4 bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
             <button 
               @click="activeTab = 'dashboard'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'dashboard' ? 'bg-white text-blue-700' : 'text-slate-600 hover:text-slate-900 transparent'"
+              :class="activeTab === 'dashboard' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
             >
               ダッシュボード
             </button>
             <button 
               @click="activeTab = 'table'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'table' ? 'bg-white text-blue-700' : 'text-slate-600 hover:text-slate-900 transparent'"
+              :class="activeTab === 'table' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
             >
               スコア一覧
             </button>
@@ -162,7 +176,7 @@ const resetData = () => {
               v-if="isLoggedIn"
               @click="activeTab = 'profile'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'profile' ? 'bg-white text-blue-700' : 'text-slate-600 hover:text-slate-900 transparent'"
+              :class="activeTab === 'profile' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
             >
               プロフィール・成長
             </button>
@@ -170,14 +184,14 @@ const resetData = () => {
               v-if="isLoggedIn"
               @click="activeTab = 'history'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'history' ? 'bg-white text-blue-700' : 'text-slate-600 hover:text-slate-900 transparent'"
+              :class="activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
             >
               アップロード履歴
             </button>
           </div>
             <button 
               @click="resetData"
-              class="px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-xl transition-all border border-slate-200 hover:border-slate-300 shadow-sm whitespace-nowrap"
+              class="px-5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl transition-all border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 shadow-sm whitespace-nowrap"
             >
               CSVをアップロード
             </button>
@@ -219,9 +233,9 @@ const resetData = () => {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-8">
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p class="text-sm text-slate-500">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
           © 2026 beat-seeker.
         </p>
       </div>

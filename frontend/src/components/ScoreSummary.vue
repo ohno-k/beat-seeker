@@ -1,66 +1,68 @@
 <template>
   <div class="w-full mx-auto space-y-6 animate-fade-in relative">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-colors duration-200">
       <div>
-        <h2 class="text-2xl font-bold text-slate-800">楽曲スコア詳細</h2>
-        <p class="text-slate-500 mt-1">取得データ: <span class="font-semibold text-slate-700">{{ filteredScores.length }}</span> 件</p>
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">楽曲スコア詳細</h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">取得データ: <span class="font-semibold text-slate-700 dark:text-slate-200">{{ filteredScores.length }}</span> 件</p>
       </div>
-      <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
-        <div class="flex items-center gap-4 w-full md:w-auto">
-          <!-- Informal Toggle -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-end gap-3 w-full xl:w-auto">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
+          <!-- Hide Zero Score Toggle -->
           <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
             <div class="relative inline-flex items-center">
-              <input type="checkbox" v-model="priorityInformal" class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <input type="checkbox" v-model="hideZeroScore" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
             </div>
-            <span class="text-xs sm:text-sm font-bold text-slate-600 group-hover:text-slate-800 transition-colors">非公式優先</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">スコア0を非表示</span>
           </label>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 w-full sm:w-auto">
             <!-- Level Filter -->
-          <div class="relative w-full md:w-28">
+          <div class="relative w-full md:w-36">
             <button 
               @click.stop="toggleDropdown('level')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs sm:text-sm font-medium text-slate-700 transition-colors hover:bg-white shadow-sm"
+              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
+              :title="filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : 'レベル'"
             >
-              <span class="truncate">レベル{{ filterLevel.length > 0 ? ` (${filterLevel.length})` : '' }}</span>
-              <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <span class="truncate">{{ filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : 'レベル' }}</span>
+              <svg class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div v-if="openDropdown === 'level'" class="absolute z-20 mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="l in 12" :key="l" class="flex items-center px-4 py-2 hover:bg-slate-50 cursor-pointer group">
+            <div v-if="openDropdown === 'level'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
+              <label v-for="l in [11, 12]" :key="l" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
                 <input 
                   type="checkbox" 
                   :checked="isSelected(filterLevel, l.toString())"
                   @change="toggleFilterValue(filterLevel, l.toString())"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 transition-all cursor-pointer"
+                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
                 >
-                <span class="ml-3 text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">☆{{ l }}</span>
+                <span class="ml-3 text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">☆{{ l }}</span>
               </label>
             </div>
           </div>
 
           <!-- Difficulty Filter -->
-          <div class="relative w-full md:w-44">
+          <div class="relative w-full md:w-36">
             <button 
               @click.stop="toggleDropdown('difficulty')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs sm:text-sm font-medium text-slate-700 transition-colors hover:bg-white shadow-sm"
+              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
+              :title="filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : '難易度'"
             >
-              <span class="truncate">難易度{{ filterDifficulty.length > 0 ? ` (${filterDifficulty.length})` : '' }}</span>
-              <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <span class="truncate">{{ filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : '難易度' }}</span>
+              <svg class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div v-if="openDropdown === 'difficulty'" class="absolute z-20 mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="d in ['BEGINNER', 'NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA']" :key="d" class="flex items-center px-4 py-2 hover:bg-slate-50 cursor-pointer group">
+            <div v-if="openDropdown === 'difficulty'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
+              <label v-for="d in ['ANOTHER', 'LEGGENDARIA']" :key="d" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
                 <input 
                   type="checkbox" 
                   :checked="isSelected(filterDifficulty, d)"
                   @change="toggleFilterValue(filterDifficulty, d)"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 transition-all cursor-pointer"
+                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
                 >
-                <span class="ml-3 text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">{{ d }}</span>
+                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ d }}</span>
               </label>
             </div>
           </div>
@@ -69,22 +71,22 @@
           <div class="relative w-full md:w-32">
             <button 
               @click.stop="toggleDropdown('djLevel')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 rounded-xl bg-slate-50 text-xs sm:text-sm font-medium text-slate-700 transition-colors hover:bg-white shadow-sm"
+              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
             >
               <span class="truncate">ランク{{ filterDjLevel.length > 0 ? ` (${filterDjLevel.length})` : '' }}</span>
               <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div v-if="openDropdown === 'djLevel'" class="absolute z-20 mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="lvl in ['AAA', 'AA', 'A', 'B', 'C', 'D', 'E', 'F']" :key="lvl" class="flex items-center px-4 py-2 hover:bg-slate-50 cursor-pointer group">
+            <div v-if="openDropdown === 'djLevel'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
+              <label v-for="lvl in ['AAA', 'AA', 'A', 'B', 'C', 'D', 'E', 'F']" :key="lvl" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
                 <input 
                   type="checkbox" 
                   :checked="isSelected(filterDjLevel, lvl)"
                   @change="toggleFilterValue(filterDjLevel, lvl)"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 transition-all cursor-pointer"
+                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
                 >
-                <span class="ml-3 text-sm font-black text-slate-600 group-hover:text-slate-900 transition-colors">{{ lvl }}</span>
+                <span class="ml-3 text-sm font-black text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ lvl }}</span>
               </label>
             </div>
           </div>
@@ -100,7 +102,7 @@
           <input 
             v-model="searchQuery"
             type="text" 
-            class="block w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" 
+            class="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl leading-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" 
             placeholder="曲名、アーティストなど..."
           >
         </div>
@@ -108,74 +110,86 @@
     </div>
 
     <!-- Data Table -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-600">
-          <thead class="bg-slate-50/80 border-b border-slate-200 text-slate-700 font-semibold h-12">
+        <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+          <thead class="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold h-12">
             <tr>
-              <th class="px-2 sm:px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 transition-colors w-4/12 sm:w-4/12" @click="toggleSort('title')">
+              <th class="px-2 sm:px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-4/12 sm:w-4/12" @click="toggleSort('title')">
                 <div class="flex items-center gap-1">
                   曲名 <span class="hidden md:inline">(Title)</span>
-                  <span class="text-slate-400 group-hover:text-blue-500" v-if="sortKey === 'title'">
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'title'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
-                  <span v-else class="text-slate-300">↕</span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
-              <th class="px-2 sm:px-6 py-4 text-left text-xs font-black text-slate-700 uppercase tracking-wider w-2/12 sm:w-2/12 group cursor-pointer hover:bg-slate-100 transition-colors" @click="toggleSort('informalRank')">
+              <th class="px-2 sm:px-4 py-4 text-left text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider w-1/12 sm:w-1/12 group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" @click="toggleSort('difficultyLevel')">
                 <div class="flex items-center gap-1">
-                  難易度 <span class="hidden lg:inline">(Diff)</span>
-                  <span class="text-slate-400 group-hover:text-blue-500" v-if="sortKey === 'informalRank'">
+                  公式 <span class="hidden lg:inline">(Official)</span>
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'difficultyLevel'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
-              <th class="px-2 sm:px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 transition-colors w-2/12 sm:w-2/12" @click="toggleSort('scoreRate')">
+              <th class="px-2 sm:px-4 py-4 text-left text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider w-1/12 sm:w-1/12 group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" @click="toggleSort('informalRank')">
+                <div class="flex items-center gap-1">
+                  非公式 <span class="hidden lg:inline">(Informal)</span>
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'informalRank'">
+                    {{ sortOrder === 'asc' ? '▲' : '▼' }}
+                  </span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
+                </div>
+              </th>
+              <th class="px-2 sm:px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-2/12 sm:w-2/12" @click="toggleSort('scoreRate')">
                 <div class="flex items-center gap-1">
                   スコア <span class="hidden md:inline">(Score)</span>
-                  <span class="text-slate-400 group-hover:text-blue-500" v-if="sortKey === 'scoreRate'">
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'scoreRate'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
-                  <span v-else class="text-slate-300">↕</span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
-              <th class="px-2 sm:px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 transition-colors w-3/12 sm:w-2/12" @click="toggleSort('beatTierPoints')">
+              <th class="px-2 sm:px-6 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-3/12 sm:w-2/12" @click="toggleSort('beatTierPoints')">
                 <div class="flex items-center gap-1">
                   Beat-PT
-                  <span class="text-slate-400 group-hover:text-blue-500" v-if="sortKey === 'beatTierPoints'">
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'beatTierPoints'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
                 </div>
               </th>
-              <th class="px-2 sm:px-4 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 transition-colors w-1/12 sm:w-2/12" @click="toggleSort('djLevel')">
+              <th class="px-2 sm:px-4 py-4 text-left text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-1/12 sm:w-2/12" @click="toggleSort('djLevel')">
                 <div class="flex items-center gap-1">
                   ランク <span class="hidden xl:inline">(Rank)</span>
-                  <span class="text-slate-400 group-hover:text-blue-500" v-if="sortKey === 'djLevel'">
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'djLevel'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
                 </div>
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
             <tr 
               v-for="(record, index) in displayScores" 
               :key="index" 
               @click="openDetailModal(record)"
-              class="hover:bg-blue-50/70 cursor-pointer transition-colors h-14 w-full"
+              class="hover:bg-blue-50/70 dark:hover:bg-slate-700/50 cursor-pointer transition-colors h-14 w-full"
             >
-              <td class="px-2 sm:px-6 py-2 font-medium text-slate-800 max-w-[100px] sm:max-w-[200px] lg:max-w-md xl:max-w-lg truncate" :title="record.title">
+              <td class="px-2 sm:px-6 py-2 font-medium text-slate-800 dark:text-slate-200 max-w-[100px] sm:max-w-[200px] lg:max-w-md xl:max-w-lg truncate" :title="record.title">
                 {{ record.title }}
               </td>
-              <td class="px-2 sm:px-6 py-2 whitespace-nowrap">
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">
                 <div class="flex flex-col gap-0.5 sm:gap-1">
                   <span :class="['px-1 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] font-bold whitespace-nowrap inline-block w-fit', record.difficultyColor]">
                     {{ record.difficultyName.charAt(0) }}<span class="hidden sm:inline">{{ record.difficultyName.slice(1) }}</span> {{ record.difficultyLevel || '' }}
                   </span>
-                  <span v-if="record.informalRank" class="text-[8px] sm:text-[10px] font-bold text-slate-400">
+                </div>
+              </td>
+              <td class="px-2 sm:px-4 py-2 whitespace-nowrap">
+                  <span v-if="record.informalRank" class="text-[8px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">
                     {{ record.informalRank }}
                   </span>
-                </div>
               </td>
               <td class="px-2 sm:px-6 py-2">
                 <div class="flex flex-col gap-0.5">
@@ -183,29 +197,29 @@
                     {{ record.clearType === 'FULLCOMBO CLEAR' ? 'FC' : record.clearType === 'EX HARD CLEAR' ? 'EXH' : record.clearType === 'HARD CLEAR' ? 'H' : record.clearType === 'CLEAR' ? 'C' : record.clearType === 'EASY CLEAR' ? 'E' : record.clearType === 'ASSIST CLEAR' ? 'AC' : 'F' }}<span class="hidden sm:inline">{{ record.clearType.includes('CLE') ? record.clearType.replace(' CLEAR', '') : '' }}</span>
                   </span>
                   <div class="flex items-center gap-1">
-                     <span class="font-black text-slate-800 text-[10px] sm:text-xs">{{ record.score }}</span>
-                     <span class="text-[8px] sm:text-[10px] font-bold text-slate-500 hidden sm:inline" v-if="record.scoreRate >= 0">{{ record.scoreRate.toFixed(1) }}%</span>
+                     <span class="font-black text-slate-800 dark:text-slate-200 text-[10px] sm:text-xs">{{ record.score }}</span>
+                     <span class="text-[8px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 hidden sm:inline" v-if="record.scoreRate >= 0">{{ record.scoreRate.toFixed(1) }}%</span>
                   </div>
                 </div>
               </td>
               
               <td class="px-2 sm:px-6 py-2 whitespace-nowrap transition-colors" :class="[
-                top100Keys.has(record.title + '|' + record.difficultyName) ? 'bg-blue-50/80' : '',
+                top100Keys.has(record.title + '|' + record.difficultyName) ? 'bg-blue-50/80 dark:bg-blue-900/20' : '',
                 ((!record.informalRank && record.difficultyLevel && record.difficultyLevel <= 10) || (record.difficultyName === 'HYPER' && record.difficultyLevel && record.difficultyLevel >= 11)) ? 'bg-slate-900' : ''
               ]">
                 <div class="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2" v-if="(record.informalRank || (record.difficultyLevel && record.difficultyLevel > 10)) && !(record.difficultyName === 'HYPER' && record.difficultyLevel && record.difficultyLevel >= 11)">
                   <div class="flex items-center gap-1">
-                    <span class="font-black" :class="top100Keys.has(record.title + '|' + record.difficultyName) ? 'text-blue-700 text-xs sm:text-base' : 'text-slate-800 text-[10px] sm:text-sm'">
+                    <span class="font-black" :class="top100Keys.has(record.title + '|' + record.difficultyName) ? 'text-blue-700 dark:text-blue-400 text-xs sm:text-base' : 'text-slate-800 dark:text-slate-200 text-[10px] sm:text-sm'">
                       {{ record.beatTierPoints.toFixed(1) }}
                     </span>
-                    <span v-if="top100Keys.has(record.title + '|' + record.difficultyName)" class="px-1 py-0.5 rounded bg-blue-100 text-blue-600 text-[6px] sm:text-[8px] font-black uppercase border border-blue-200 shadow-sm">
+                    <span v-if="top100Keys.has(record.title + '|' + record.difficultyName)" class="px-1 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-[6px] sm:text-[8px] font-black uppercase border border-blue-200 dark:border-blue-800 shadow-sm">
                       TOP
                     </span>
                   </div>
-                  <span class="text-[7px] sm:text-[10px] font-bold text-slate-400">/{{ record.maxBeatTierPoints.toFixed(0) }}</span>
+                  <span class="text-[7px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">/{{ record.maxBeatTierPoints.toFixed(0) }}</span>
                 </div>
                 <div v-else class="flex items-center justify-center">
-                  <span class="text-[10px] font-black text-slate-700 italic">N/A</span>
+                  <span class="text-[10px] font-black text-slate-700 dark:text-slate-500 italic">N/A</span>
                 </div>
               </td>
               <td class="px-2 sm:px-4 py-2 whitespace-nowrap">
@@ -215,7 +229,7 @@
               </td>
             </tr>
             <tr v-if="displayScores.length === 0">
-              <td colspan="5" class="px-6 py-12 text-center text-slate-500 w-full">
+              <td colspan="6" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
                 条件に一致するスコアがありません。
               </td>
             </tr>
@@ -224,23 +238,34 @@
       </div>
       
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="text-sm text-slate-500">
-          <span class="font-medium text-slate-800">{{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredScores.length) }}</span> / <span class="font-medium text-slate-800">{{ filteredScores.length }}</span> 件表示中
+      <div v-if="filteredScores.length > 0" class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors duration-200">
+        <div class="flex flex-col sm:flex-row items-center gap-4">
+          <div class="text-sm text-slate-500 dark:text-slate-400">
+            <span class="font-medium text-slate-800 dark:text-slate-200">{{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredScores.length) }}</span> / <span class="font-medium text-slate-800 dark:text-slate-200">{{ filteredScores.length }}</span> 件表示中
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-slate-500 dark:text-slate-400">表示件数:</span>
+            <select v-model="itemsPerPage" class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors shadow-sm cursor-pointer">
+              <option :value="10">10件</option>
+              <option :value="25">25件</option>
+              <option :value="50">50件</option>
+              <option :value="100">100件</option>
+            </select>
+          </div>
         </div>
         <div class="flex items-center gap-2">
           <button 
             @click="prevPage" 
             :disabled="currentPage === 1"
-            class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors bg-white text-slate-700 shadow-sm"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm"
           >
             前へ
           </button>
-          <span class="text-sm font-medium text-slate-600 px-2 min-w-[3rem] text-center">{{ currentPage }} / {{ totalPages }}</span>
+          <span class="text-sm font-medium text-slate-600 dark:text-slate-400 px-2 min-w-[3rem] text-center">{{ currentPage }} / {{ totalPages }}</span>
           <button 
             @click="nextPage" 
             :disabled="currentPage === totalPages"
-            class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors bg-white text-slate-700 shadow-sm"
+            class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm"
           >
             次へ
           </button>
@@ -250,15 +275,15 @@
 
     <!-- Fullscreen Detail Modal -->
     <Teleport to="body">
-      <div v-if="selectedRecord" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col animate-fade-in" @click.self="closeDetailModal">
+      <div v-if="selectedRecord" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200" @click.self="closeDetailModal">
       
       <!-- Sticky Header -->
-      <div class="px-6 py-5 border-b border-slate-200 shadow-sm flex justify-between items-center bg-white sticky top-0 z-10 w-full">
+      <div class="px-6 py-5 border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 w-full transition-colors duration-200">
         <div class="flex flex-col pr-4 max-w-full overflow-hidden">
-          <h3 class="text-2xl sm:text-3xl font-black text-slate-800 leading-tight mb-1 truncate" :title="selectedRecord.title">{{ selectedRecord.title }}</h3>
-          <p class="text-sm sm:text-base font-medium text-slate-500 truncate" :title="`${selectedRecord.artist} • ${selectedRecord.genre}`">{{ selectedRecord.artist }} • {{ selectedRecord.genre }}</p>
+          <h3 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 leading-tight mb-1 truncate" :title="selectedRecord.title">{{ selectedRecord.title }}</h3>
+          <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400 truncate" :title="`${selectedRecord.artist} • ${selectedRecord.genre}`">{{ selectedRecord.artist }} • {{ selectedRecord.genre }}</p>
         </div>
-        <button @click="closeDetailModal" class="flex-shrink-0 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-200 rounded-full transition-colors p-3 shadow-sm border border-slate-200">
+        <button @click="closeDetailModal" class="flex-shrink-0 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors p-3 shadow-sm border border-slate-200 dark:border-slate-700">
           <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -274,31 +299,31 @@
               <span :class="['px-4 py-1.5 rounded-full text-sm font-black tracking-wide shadow-sm', selectedRecord.difficultyColor]">
                 {{ selectedRecord.difficultyName }} {{ selectedRecord.difficultyLevel ? `☆${selectedRecord.difficultyLevel}` : '' }}
               </span>
-              <span v-if="selectedRecord.informalRank" class="px-4 py-1.5 rounded-full text-sm font-black tracking-wide shadow-sm bg-slate-100 text-slate-700 border border-slate-200">
+              <span v-if="selectedRecord.informalRank" class="px-4 py-1.5 rounded-full text-sm font-black tracking-wide shadow-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                 非公式難易度: {{ selectedRecord.informalRank }}
               </span>
             </div>
-            <h3 class="text-4xl sm:text-5xl font-black text-slate-800 tracking-tight text-center sm:text-left leading-tight">
+            <h3 class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-100 tracking-tight text-center sm:text-left leading-tight">
               {{ selectedRecord.title }}
             </h3>
           </div>
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <span class="text-sm font-bold text-slate-500 border border-slate-300 px-4 py-2 rounded-lg bg-white shadow-sm">
-              最終プレイ: <span class="text-slate-700 font-black">{{ selectedRecord.lastPlayTime || '不明' }}</span>
+            <span class="text-sm font-bold text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-600 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm transition-colors">
+              最終プレイ: <span class="text-slate-700 dark:text-slate-200 font-black">{{ selectedRecord.lastPlayTime || '不明' }}</span>
             </span>
           </div>
 
           <div class="grid grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center relative overflow-hidden">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
               <div class="absolute top-0 left-0 w-full h-2" :class="getClearTypeBgColor(selectedRecord.clearType)"></div>
-              <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2 mt-2">クリアタイプ</p>
+              <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 mt-2">クリアタイプ</p>
               <p class="text-2xl sm:text-4xl font-black text-center" :class="getClearTypeColor(selectedRecord.clearType)">
                 {{ selectedRecord.clearType }}
               </p>
             </div>
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center relative overflow-hidden">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
               <div class="absolute top-0 left-0 w-full h-2" :class="getDjLevelBgColor(selectedRecord.djLevel)"></div>
-              <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2 mt-2">DJレベル</p>
+              <p class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 mt-2">DJレベル</p>
               <div class="flex flex-col items-center">
                 <p class="text-5xl sm:text-6xl font-black text-center" :class="getDjLevelColor(selectedRecord.djLevel)">
                   {{ selectedRecord.djLevel }}
@@ -306,22 +331,32 @@
               </div>
             </div>
             
-            <div class="bg-slate-800 p-8 rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1">
-              <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">EXスコア</p>
+            <div class="bg-indigo-900/10 dark:bg-indigo-900/20 p-8 rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200 border border-indigo-100 dark:border-indigo-800/50">
+              <p class="text-sm font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-2">単独BEAT-PT</p>
+              <div class="flex items-baseline gap-2">
+                <p class="text-6xl font-black text-indigo-700 dark:text-indigo-300 tracking-tight">
+                  {{ selectedRecord.beatTierPoints.toFixed(1) }}
+                </p>
+                <p v-if="selectedRecord.maxBeatTierPoints > 0" class="text-xl font-bold text-indigo-400 dark:text-indigo-500">/ {{ selectedRecord.maxBeatTierPoints.toFixed(0) }}</p>
+              </div>
+            </div>
+            
+            <div class="bg-slate-800 dark:bg-slate-700 p-8 rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200">
+              <p class="text-sm font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-2">EXスコア</p>
               <div class="flex items-baseline gap-2">
                 <p class="text-6xl font-black text-white tracking-tight">
                   {{ selectedRecord.score }}
                 </p>
-                <p v-if="selectedRecord.maxScore > 0" class="text-xl font-bold text-slate-500">/ {{ selectedRecord.maxScore }}</p>
+                <p v-if="selectedRecord.maxScore > 0" class="text-xl font-bold text-slate-500 dark:text-slate-400">/ {{ selectedRecord.maxScore }}</p>
               </div>
             </div>
             <div 
-               class="p-8 rounded-2xl flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors relative"
-               :class="selectedRecord.scoreRate >= 0 ? 'bg-blue-50 border-4 border-blue-200' : 'bg-slate-100 border-dashed border-4 border-slate-300 group cursor-help'"
+               class="p-8 rounded-2xl flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors relative duration-200"
+               :class="selectedRecord.scoreRate >= 0 ? 'bg-blue-50 dark:bg-slate-800 border-4 border-blue-200 dark:border-slate-700' : 'bg-slate-100 dark:bg-slate-800/50 border-dashed border-4 border-slate-300 dark:border-slate-600 group cursor-help'"
                :title="selectedRecord.scoreRate >= 0 ? '' : '正確なノーツ数定義データがないため計算できません'"
             >
-              <p class="text-sm font-bold uppercase tracking-widest mb-2" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-500' : 'text-slate-500'">単独スコアレート</p>
-              <p class="text-6xl font-black tracking-tight flex items-baseline" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-600' : 'text-slate-300 transition-colors group-hover:text-slate-400'">
+              <p class="text-sm font-bold uppercase tracking-widest mb-2" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'">単独スコアレート</p>
+              <p class="text-6xl font-black tracking-tight flex items-baseline" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-600 dark:text-blue-300' : 'text-slate-300 dark:text-slate-600 transition-colors group-hover:text-slate-400 dark:group-hover:text-slate-500'">
                  <template v-if="selectedRecord.scoreRate >= 0">
                     {{ selectedRecord.scoreRate.toFixed(2) }}
                  </template>
@@ -333,31 +368,78 @@
             </div>
           </div>
 
-          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white">
-            <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <p class="text-sm font-bold text-slate-600 uppercase tracking-widest">判定詳細</p>
+          <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 transition-colors duration-200">
+            <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
+              <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">判定詳細</p>
             </div>
-            <div class="grid grid-cols-3 divide-x divide-slate-200">
-              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-amber-50/50 to-white">
-                <span class="text-sm text-amber-500 font-bold tracking-widest mb-2">PGREAT</span>
-                <span class="text-4xl sm:text-5xl font-black text-slate-800">{{ selectedRecord.pgreat }}</span>
+            <div class="grid grid-cols-3 divide-x divide-slate-200 dark:divide-slate-700">
+              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-amber-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
+                <span class="text-sm text-amber-500 dark:text-amber-400 font-bold tracking-widest mb-2">PGREAT</span>
+                <span class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.pgreat }}</span>
               </div>
-              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-yellow-50/50 to-white">
-                <span class="text-sm text-yellow-500 font-bold tracking-widest mb-2">GREAT</span>
-                <span class="text-4xl sm:text-5xl font-black text-slate-800">{{ selectedRecord.great }}</span>
+              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-yellow-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
+                <span class="text-sm text-yellow-500 dark:text-yellow-400 font-bold tracking-widest mb-2">GREAT</span>
+                <span class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.great }}</span>
               </div>
-              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-red-50/50 to-white">
-                <span class="text-sm text-red-400 font-bold tracking-widest mb-2">MISS</span>
-                <span class="text-4xl sm:text-5xl font-black text-slate-800">{{ selectedRecord.missCount !== null ? selectedRecord.missCount : '-' }}</span>
+              <div class="p-6 sm:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-red-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
+                <span class="text-sm text-red-400 dark:text-red-500 font-bold tracking-widest mb-2">MISS</span>
+                <span class="text-4xl sm:text-5xl font-black text-slate-800 dark:text-slate-200">{{ selectedRecord.missCount !== null ? selectedRecord.missCount : '-' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BEAT-PT Target Calculator -->
+          <div v-if="selectedRecord.maxScore > 0 && selectedRecord.maxBeatTierPoints > 0 && selectedRecord.beatTierPoints < selectedRecord.maxBeatTierPoints" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
+            <div class="bg-indigo-50 dark:bg-indigo-900/30 px-6 py-4 border-b border-indigo-100 dark:border-indigo-800/50 flex items-center justify-between transition-colors duration-200">
+              <p class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                目標BEAT-PTシミュレーター
+              </p>
+            </div>
+            <div class="p-6">
+              <div class="flex flex-col gap-4">
+                <div class="flex justify-between items-end">
+                  <span class="text-sm font-bold text-slate-600 dark:text-slate-400">あと何pt稼ぐ？</span>
+                  <div class="flex flex-col items-end">
+                    <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400">+{{ targetBeatPtSlider.toFixed(1) }} <span class="text-sm">pt</span></span>
+                    <span v-if="targetBeatPtSlider > 0" class="text-xs font-bold text-indigo-500 dark:text-indigo-500/80">
+                      (合計: {{ (selectedRecord.beatTierPoints + targetBeatPtSlider).toFixed(1) }} pt)
+                    </span>
+                  </div>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  :max="selectedRecord.maxBeatTierPoints - selectedRecord.beatTierPoints" 
+                  step="0.1" 
+                  v-model.number="targetBeatPtSlider"
+                  class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-indigo-600"
+                >
+                <div class="flex justify-between text-xs font-medium text-slate-400 dark:text-slate-500">
+                  <span>0</span>
+                  <span>最大: +{{ (selectedRecord.maxBeatTierPoints - selectedRecord.beatTierPoints).toFixed(1) }}</span>
+                </div>
+                
+                <div v-if="targetBeatPtSlider > 0" class="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/50 flex flex-col items-center justify-center text-center">
+                  <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-2">目標達成に必要なスコアの伸び</p>
+                  <p class="text-4xl font-black text-indigo-700 dark:text-indigo-400 flex items-baseline gap-1">
+                    +{{ targetScoreNeeded }} <span class="text-lg font-bold">点</span>
+                  </p>
+                  <p class="text-xs font-medium text-indigo-500 dark:text-indigo-400 mt-2">
+                    目標スコア: {{ selectedRecord.score + targetScoreNeeded }} / {{ selectedRecord.maxScore }} ({{ (((selectedRecord.score + targetScoreNeeded) / selectedRecord.maxScore) * 100).toFixed(2) }}%)
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Memo Section -->
-          <div v-if="selectedRecord.id" class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white mt-6">
-            <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-              <p class="text-sm font-bold text-slate-600 uppercase tracking-widest">メモ</p>
-              <button @click="isEditingMemo = true" v-if="!isEditingMemo" class="text-blue-600 hover:text-blue-700 text-sm font-bold flex items-center gap-1 transition-colors">
+          <div v-if="selectedRecord.id" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
+            <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
+              <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">メモ</p>
+              <button @click="isEditingMemo = true" v-if="!isEditingMemo" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-bold flex items-center gap-1 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                 </svg>
@@ -366,17 +448,17 @@
             </div>
             <div class="p-6">
               <template v-if="isEditingMemo">
-                <textarea v-model="editMemoText" rows="4" class="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 resize-y" placeholder="オプション（RANDOMなど）や攻略のメモを残せます..."></textarea>
+                <textarea v-model="editMemoText" rows="4" class="w-full border border-slate-300 dark:border-slate-600 rounded-xl p-3 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-500 text-slate-700 dark:text-slate-200 resize-y transition-colors duration-200" placeholder="オプション（RANDOMなど）や攻略のメモを残せます..."></textarea>
                 <div class="flex justify-end gap-3 mt-4">
-                  <button @click="isEditingMemo = false" class="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">キャンセル</button>
-                  <button @click="saveMemo" :disabled="isSavingMemo" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50">
+                  <button @click="isEditingMemo = false" class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">キャンセル</button>
+                  <button @click="saveMemo" :disabled="isSavingMemo" class="px-6 py-2 bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50">
                     {{ isSavingMemo ? '保存中...' : '保存' }}
                   </button>
                 </div>
               </template>
               <template v-else>
-                <div v-if="selectedRecord.memo" class="text-slate-700 whitespace-pre-wrap leading-relaxed">{{ selectedRecord.memo }}</div>
-                <div v-else class="text-slate-400 italic text-sm">メモはありません。</div>
+                <div v-if="selectedRecord.memo" class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{{ selectedRecord.memo }}</div>
+                <div v-else class="text-slate-400 dark:text-slate-500 italic text-sm">メモはありません。</div>
               </template>
             </div>
           </div>
@@ -385,7 +467,7 @@
       </div>
       
       <!-- Sticky Footer -->
-      <div class="sticky bottom-0 bg-white border-t border-slate-200 p-4 sm:p-6 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] w-full flex justify-center z-10">
+      <div class="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.2)] w-full flex justify-center z-10 transition-colors duration-200">
          <button @click="closeDetailModal" class="w-full max-w-md px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-2xl shadow-lg transition-colors flex items-center justify-center gap-2">
            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -403,8 +485,10 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import { useScores } from '../composables/useScores';
+import { useDarkMode } from '../composables/useDarkMode';
 
 const { updateMemo } = useScores();
+const { isDarkMode } = useDarkMode();
 
 const props = defineProps<{
   scores: ScoreData[];
@@ -416,7 +500,7 @@ const searchQuery = ref('');
 const filterDifficulty = ref<string[]>([]);
 const filterLevel = ref<string[]>([]);
 const filterDjLevel = ref<string[]>([]);
-const priorityInformal = ref(true);
+const hideZeroScore = ref(false);
 
 const openDropdown = ref<string | null>(null);
 
@@ -438,9 +522,9 @@ const isSelected = (arr: string[], value: string) => {
 };
 
 const currentPage = ref(1);
-const itemsPerPage = 50;
+const itemsPerPage = ref(50);
 
-type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'djLevel' | 'beatTierPoints' | null;
+type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | null;
 type SortOrder = 'asc' | 'desc';
 
 const sortKey = ref<SortKey>('informalRank');
@@ -459,7 +543,11 @@ const clearTypeRankings: Record<string, number> = {
 };
 
 const allRecords = computed<ScoreRecord[]>(() => {
-  return flattenScores(props.scores);
+  return flattenScores(props.scores).filter(r => 
+    r.difficultyLevel &&
+    r.difficultyLevel >= 11 &&
+    ['ANOTHER', 'LEGGENDARIA'].includes(r.difficultyName)
+  );
 });
 
 const emit = defineEmits<{
@@ -490,6 +578,32 @@ const selectedRecord = ref<ScoreRecord | null>(null);
 const isEditingMemo = ref(false);
 const editMemoText = ref('');
 const isSavingMemo = ref(false);
+
+const targetBeatPtSlider = ref(0);
+
+// Reset target slider when a new record is selected
+watch(() => selectedRecord.value?.title, () => {
+  targetBeatPtSlider.value = 0;
+});
+
+const targetScoreNeeded = computed(() => {
+  if (!selectedRecord.value || selectedRecord.value.maxScore <= 0 || selectedRecord.value.maxBeatTierPoints <= 0) return 0;
+  
+  const currentPt = selectedRecord.value.beatTierPoints;
+  const weight = selectedRecord.value.maxBeatTierPoints;
+  const targetPt = currentPt + targetBeatPtSlider.value;
+  
+  if (targetPt <= currentPt) return 0;
+  if (targetPt > weight) return selectedRecord.value.maxScore - selectedRecord.value.score;
+
+  let targetScoreRate = 100 * Math.sqrt(targetPt / weight);
+  if (targetScoreRate < 66.667 && targetPt > 0) {
+      targetScoreRate = 66.667;
+  }
+  const targetScore = Math.ceil((targetScoreRate / 100) * selectedRecord.value.maxScore);
+  
+  return Math.max(0, targetScore - selectedRecord.value.score);
+});
 
 const openDetailModal = (record: ScoreRecord) => {
   selectedRecord.value = record;
@@ -533,7 +647,7 @@ onUnmounted(() => {
 });
 
 // Reset page when search or filters change
-watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, sortKey, sortOrder, priorityInformal], () => {
+watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, sortKey, sortOrder, hideZeroScore, itemsPerPage], () => {
   currentPage.value = 1;
 }, { deep: true });
 
@@ -558,6 +672,10 @@ const toggleSort = (key: SortKey) => {
 
 const filteredScores = computed(() => {
   let result = [...allRecords.value];
+
+  if (hideZeroScore.value) {
+    result = result.filter(r => r.score > 0);
+  }
 
   if (filterDifficulty.value.length > 0) {
     result = result.filter(r => filterDifficulty.value.includes(r.difficultyName));
@@ -590,20 +708,6 @@ const filteredScores = computed(() => {
     };
 
     result.sort((a, b) => {
-      if (priorityInformal.value) {
-        // Sort by informal rank primarily
-        const valA = getNumericRank(a.informalRank);
-        const valB = getNumericRank(b.informalRank);
-        
-        if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
-        
-        // If numeric rank is same, fallback to secondary sort: difficultyLevel
-        const levelA = a.difficultyLevel || 0;
-        const levelB = b.difficultyLevel || 0;
-        if (levelA !== levelB) return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
-
-        return a.title.localeCompare(b.title);
-      } else {
         // Typical difficulty level sort
         const levelA = a.difficultyLevel || 0;
         const levelB = b.difficultyLevel || 0;
@@ -615,7 +719,13 @@ const filteredScores = computed(() => {
         if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
 
         return a.title.localeCompare(b.title);
-      }
+    });
+  } else if (sortKey.value === 'difficultyLevel') {
+    result.sort((a, b) => {
+        const levelA = a.difficultyLevel || 0;
+        const levelB = b.difficultyLevel || 0;
+        if (levelA !== levelB) return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
+        return a.title.localeCompare(b.title);
     });
   } else if (sortKey.value === 'title') {
     result.sort((a, b) => {
@@ -660,11 +770,11 @@ const filteredScores = computed(() => {
   return result;
 });
 
-const totalPages = computed(() => Math.ceil(filteredScores.value.length / itemsPerPage) || 1);
+const totalPages = computed(() => Math.ceil(filteredScores.value.length / itemsPerPage.value) || 1);
 
 const displayScores = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
   return filteredScores.value.slice(start, end);
 });
 
@@ -677,42 +787,46 @@ const nextPage = () => {
 };
 
 // Utility for colors
-const getClearTypeColor = (ct: string) => {
-  if (ct === 'FULLCOMBO CLEAR') return 'text-emerald-500';
-  if (ct === 'EX HARD CLEAR') return 'text-amber-500';
-  if (ct === 'HARD CLEAR') return 'text-red-500';
-  if (ct === 'CLEAR') return 'text-blue-500';
-  if (ct === 'EASY CLEAR') return 'text-emerald-400';
-  if (ct === 'ASSIST CLEAR') return 'text-purple-500';
-  if (ct === 'FAILED') return 'text-slate-400';
-  return 'text-slate-600';
+const getClearTypeColor = (clearType: string) => {
+  switch (clearType) {
+    case 'FULLCOMBO CLEAR': return isDarkMode.value ? 'text-cyan-400' : 'text-cyan-600';
+    case 'EX HARD CLEAR': return isDarkMode.value ? 'text-yellow-400' : 'text-yellow-600';
+    case 'HARD CLEAR': return isDarkMode.value ? 'text-red-400' : 'text-red-500';
+    case 'CLEAR': return isDarkMode.value ? 'text-blue-400' : 'text-blue-500';
+    case 'EASY CLEAR': return isDarkMode.value ? 'text-green-400' : 'text-green-500';
+    case 'ASSIST CLEAR': return isDarkMode.value ? 'text-purple-400' : 'text-purple-500';
+    default: return isDarkMode.value ? 'text-slate-500' : 'text-slate-400';
+  }
 };
 
-const getClearTypeBgColor = (ct: string) => {
-  if (ct === 'FULLCOMBO CLEAR') return 'bg-emerald-500';
-  if (ct === 'EX HARD CLEAR') return 'bg-amber-500';
-  if (ct === 'HARD CLEAR') return 'bg-red-500';
-  if (ct === 'CLEAR') return 'bg-blue-500';
-  if (ct === 'EASY CLEAR') return 'bg-emerald-400';
-  if (ct === 'ASSIST CLEAR') return 'bg-purple-500';
-  if (ct === 'FAILED') return 'bg-slate-400';
-  return 'bg-slate-200';
+const getClearTypeBgColor = (clearType: string) => {
+  switch (clearType) {
+    case 'FULLCOMBO CLEAR': return 'bg-cyan-500';
+    case 'EX HARD CLEAR': return 'bg-yellow-500';
+    case 'HARD CLEAR': return 'bg-red-500';
+    case 'CLEAR': return 'bg-blue-500';
+    case 'EASY CLEAR': return 'bg-green-500';
+    case 'ASSIST CLEAR': return 'bg-purple-500';
+    default: return isDarkMode.value ? 'bg-slate-700' : 'bg-slate-200';
+  }
 };
 
-const getDjLevelColor = (lvl: string) => {
-  if (lvl === 'AAA') return 'text-amber-400';
-  if (lvl === 'AA') return 'text-slate-400';
-  if (lvl === 'A') return 'text-emerald-500';
-  if (['B','C','D','E','F'].includes(lvl)) return 'text-blue-500';
-  return 'text-slate-500';
+const getDjLevelColor = (djLevel: string) => {
+  switch (djLevel) {
+    case 'AAA': return isDarkMode.value ? 'text-amber-400' : 'text-amber-500';
+    case 'AA': return isDarkMode.value ? 'text-yellow-400' : 'text-yellow-500';
+    case 'A': return isDarkMode.value ? 'text-emerald-400' : 'text-emerald-500';
+    default: return isDarkMode.value ? 'text-slate-500' : 'text-slate-400';
+  }
 };
 
-const getDjLevelBgColor = (lvl: string) => {
-  if (lvl === 'AAA') return 'bg-amber-400';
-  if (lvl === 'AA') return 'bg-slate-400';
-  if (lvl === 'A') return 'bg-emerald-500';
-  if (['B','C','D','E','F'].includes(lvl)) return 'bg-blue-500';
-  return 'bg-slate-200';
+const getDjLevelBgColor = (djLevel: string) => {
+  switch (djLevel) {
+    case 'AAA': return 'bg-amber-500';
+    case 'AA': return 'bg-yellow-500';
+    case 'A': return 'bg-emerald-500';
+    default: return isDarkMode.value ? 'bg-slate-700' : 'bg-slate-200';
+  }
 };
 </script>
 

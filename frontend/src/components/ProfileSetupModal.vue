@@ -87,13 +87,13 @@ const submitProfile = async () => {
 
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
       
-      <div class="px-6 py-5 border-b border-slate-100 bg-slate-50">
-        <h3 class="text-xl font-bold text-slate-800">
+      <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 transition-colors duration-200">
+        <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">
           プロフィール設定 ✨
         </h3>
-        <p class="text-sm text-slate-500 mt-1">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Beat-Seekerへようこそ！初めにプレイヤー情報を設定してください。
         </p>
       </div>
@@ -101,7 +101,7 @@ const submitProfile = async () => {
       <div class="p-6 overflow-y-auto">
         <form @submit.prevent="submitProfile" class="space-y-5">
           
-          <div v-if="errorMsg" class="p-3 bg-red-50 text-red-700 text-sm rounded-xl flex items-center gap-2">
+          <div v-if="errorMsg" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-xl flex items-center gap-2 transition-colors duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
@@ -109,31 +109,31 @@ const submitProfile = async () => {
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">ユーザー名</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">ユーザー名</label>
             <input type="text" v-model="displayName" required
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100"
               placeholder="表示名" />
           </div>
           
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">IIDX ID</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">IIDX ID</label>
             <input type="text" :value="iidxId" @input="formatIidxId" required placeholder="1234-5678" pattern="\d{4}-\d{4}" maxlength="9"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800" />
-            <p class="text-xs text-slate-500 mt-1.5 ml-1">自動的にハイフンが挿入されます</p>
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100" />
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1 transition-colors duration-200">自動的にハイフンが挿入されます</p>
           </div>
           
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1.5">段位</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">段位</label>
               <select v-model="danRank" 
-                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 cursor-pointer appearance-none">
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
                 <option v-for="rank in danRanks" :key="rank" :value="rank">{{ rank }}</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1.5">アリーナランク</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">アリーナランク</label>
               <select v-model="arenaRank" 
-                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 cursor-pointer appearance-none">
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
                 <option v-for="rank in arenaRanks" :key="rank" :value="rank">{{ rank }}</option>
               </select>
             </div>
@@ -141,7 +141,7 @@ const submitProfile = async () => {
           
           <div class="pt-2">
             <button type="submit" :disabled="isSubmitting"
-              class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2">
+              class="w-full py-3 px-4 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-700 text-white font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2">
               <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               設定を完了する
             </button>

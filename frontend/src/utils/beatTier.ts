@@ -43,8 +43,8 @@ export function calculatePoints(scoreRate: number, informalRank: string | undefi
     const weight = getWeight(informalRank);
     if (weight === 0 || scoreRate <= 66.666) return 0;
 
-    // Linear curve: (ScoreRate/100) * Weight
-    return (scoreRate / 100) * weight;
+    // Quadratic curve: (ScoreRate/100)^2 * Weight
+    return Math.pow(scoreRate / 100, 2) * weight;
 }
 
 /**
@@ -54,14 +54,14 @@ export function calculatePoints(scoreRate: number, informalRank: string | undefi
  * Ranges narrow as you ascend.
  */
 export const RANKS: RankInfo[] = [
-    { name: 'Legend', minPoints: 18000, color: 'text-amber-500 font-black' },
+    { name: 'Legend', minPoints: 17500, color: 'text-amber-500 font-black' },
 
-    ...generateTieredRanks('Mythic', 17500, 18000, 'text-purple-600'),  // 500
-    ...generateTieredRanks('Ancient', 17000, 17500, 'text-indigo-600'),  // 500
-    ...generateTieredRanks('Master', 16500, 17000, 'text-red-600'),     // 500
-    ...generateTieredRanks('Elite', 16000, 16500, 'text-orange-600'),  // 500
-    ...generateTieredRanks('Veteran', 15500, 16000, 'text-emerald-600'), // 500
-    ...generateTieredRanks('Expert', 14500, 15500, 'text-teal-600'),    // 1000
+    ...generateTieredRanks('Mythic', 17000, 17500, 'text-purple-600'),  // 500
+    ...generateTieredRanks('Ancient', 16500, 17000, 'text-indigo-600'),  // 500
+    ...generateTieredRanks('Master', 16000, 16500, 'text-red-600'),     // 500
+    ...generateTieredRanks('Elite', 15500, 16000, 'text-orange-600'),  // 500
+    ...generateTieredRanks('Veteran', 15000, 15500, 'text-emerald-600'), // 500
+    ...generateTieredRanks('Expert', 14500, 15000, 'text-teal-600'),    // 1000
     ...generateTieredRanks('Advanced', 13500, 14500, 'text-cyan-600'),    // 1000
     ...generateTieredRanks('Intermediate', 12000, 13500, 'text-blue-600'),    // 1500
     ...generateTieredRanks('Novice', 10000, 12000, 'text-slate-600'),   // 2000
@@ -140,4 +140,132 @@ export function getGroupedRanks() {
         groups[name].sort((a, b) => (a.tier || 0) - (b.tier || 0));
     });
     return groups;
+}
+
+/**
+ * Definition of Folder Rank Tiers by ratio of max points.
+ */
+export const FOLDER_TIER_RATIOS = [
+    { ratio: 0.995, name: 'Legend', color: 'text-amber-500 font-black' },
+
+    { ratio: 0.98, name: 'Mythic', tier: 5, color: 'text-purple-600' },
+    { ratio: 0.97, name: 'Mythic', tier: 4, color: 'text-purple-600' },
+    { ratio: 0.96, name: 'Mythic', tier: 3, color: 'text-purple-600' },
+    { ratio: 0.95, name: 'Mythic', tier: 2, color: 'text-purple-600' },
+    { ratio: 0.94, name: 'Mythic', tier: 1, color: 'text-purple-600' },
+
+    { ratio: 0.93, name: 'Ancient', tier: 5, color: 'text-indigo-600' },
+    { ratio: 0.92, name: 'Ancient', tier: 4, color: 'text-indigo-600' },
+    { ratio: 0.91, name: 'Ancient', tier: 3, color: 'text-indigo-600' },
+    { ratio: 0.90, name: 'Ancient', tier: 2, color: 'text-indigo-600' },
+    { ratio: 0.89, name: 'Ancient', tier: 1, color: 'text-indigo-600' },
+
+    { ratio: 0.88, name: 'Master', tier: 5, color: 'text-red-600' },
+    { ratio: 0.87, name: 'Master', tier: 4, color: 'text-red-600' },
+    { ratio: 0.86, name: 'Master', tier: 3, color: 'text-red-600' },
+    { ratio: 0.85, name: 'Master', tier: 2, color: 'text-red-600' },
+    { ratio: 0.84, name: 'Master', tier: 1, color: 'text-red-600' },
+
+    { ratio: 0.83, name: 'Elite', tier: 5, color: 'text-orange-600' },
+    { ratio: 0.82, name: 'Elite', tier: 4, color: 'text-orange-600' },
+    { ratio: 0.81, name: 'Elite', tier: 3, color: 'text-orange-600' },
+    { ratio: 0.80, name: 'Elite', tier: 2, color: 'text-orange-600' },
+    { ratio: 0.79, name: 'Elite', tier: 1, color: 'text-orange-600' },
+
+    { ratio: 0.77, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
+    { ratio: 0.75, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
+    { ratio: 0.73, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
+    { ratio: 0.71, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
+    { ratio: 0.69, name: 'Veteran', tier: 1, color: 'text-emerald-600' },
+
+    { ratio: 0.67, name: 'Expert', tier: 5, color: 'text-teal-600' },
+    { ratio: 0.65, name: 'Expert', tier: 4, color: 'text-teal-600' },
+    { ratio: 0.63, name: 'Expert', tier: 3, color: 'text-teal-600' },
+    { ratio: 0.61, name: 'Expert', tier: 2, color: 'text-teal-600' },
+    { ratio: 0.59, name: 'Expert', tier: 1, color: 'text-teal-600' },
+
+    { ratio: 0.55, name: 'Advanced', tier: 5, color: 'text-cyan-600' },
+    { ratio: 0.53, name: 'Advanced', tier: 4, color: 'text-cyan-600' },
+    { ratio: 0.51, name: 'Advanced', tier: 3, color: 'text-cyan-600' },
+    { ratio: 0.49, name: 'Advanced', tier: 2, color: 'text-cyan-600' },
+    { ratio: 0.47, name: 'Advanced', tier: 1, color: 'text-cyan-600' },
+
+    { ratio: 0.43, name: 'Intermediate', tier: 5, color: 'text-blue-600' },
+    { ratio: 0.39, name: 'Intermediate', tier: 4, color: 'text-blue-600' },
+    { ratio: 0.35, name: 'Intermediate', tier: 3, color: 'text-blue-600' },
+    { ratio: 0.31, name: 'Intermediate', tier: 2, color: 'text-blue-600' },
+    { ratio: 0.27, name: 'Intermediate', tier: 1, color: 'text-blue-600' },
+
+    { ratio: 0.22, name: 'Novice', tier: 5, color: 'text-slate-600' },
+    { ratio: 0.18, name: 'Novice', tier: 4, color: 'text-slate-600' },
+    { ratio: 0.14, name: 'Novice', tier: 3, color: 'text-slate-600' },
+    { ratio: 0.10, name: 'Novice', tier: 2, color: 'text-slate-600' },
+    { ratio: 0.06, name: 'Novice', tier: 1, color: 'text-slate-600' },
+];
+
+/**
+ * Calculate folder rank info dynamically based on max possible points for that folder.
+ * Legend is 99.5% of max possible points.
+ * Other tiers are distributed below that.
+ */
+export function getFolderRankInfo(totalPoints: number, maxPoints: number): RankInfo {
+    if (maxPoints <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+
+    const ratio = totalPoints / maxPoints;
+
+    for (const tier of FOLDER_TIER_RATIOS) {
+        if (ratio >= tier.ratio) {
+            return {
+                name: tier.name,
+                tier: tier.tier,
+                minPoints: maxPoints * tier.ratio,
+                color: tier.color
+            };
+        }
+    }
+
+    return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+}
+
+/**
+ * Get progress to next rank for a folder
+ */
+export function getNextFolderRankInfo(totalPoints: number, maxPoints: number): { nextRank?: RankInfo; progress: number } {
+    if (maxPoints <= 0) return { progress: 100 };
+
+    const ratio = totalPoints / maxPoints;
+
+    // FOLDER_TIER_RATIOS is in descending order (highest to lowest)
+    const currentRankIndex = FOLDER_TIER_RATIOS.findIndex(t => ratio >= t.ratio);
+
+    if (currentRankIndex === 0) {
+        // Legend has no next rank
+        return { progress: 100 };
+    }
+
+    let currentRankMinRatio = 0;
+    if (currentRankIndex !== -1) {
+        currentRankMinRatio = FOLDER_TIER_RATIOS[currentRankIndex].ratio;
+    }
+
+    // The next rank is the one immediately before it in the descending list
+    const nextTierObj = FOLDER_TIER_RATIOS[currentRankIndex !== -1 ? currentRankIndex - 1 : FOLDER_TIER_RATIOS.length - 1];
+
+    const nextRank: RankInfo = {
+        name: nextTierObj.name,
+        tier: nextTierObj.tier,
+        minPoints: maxPoints * nextTierObj.ratio,
+        color: nextTierObj.color
+    };
+
+    const currentRankMinPoints = maxPoints * currentRankMinRatio;
+    const nextRankMinPoints = maxPoints * nextTierObj.ratio;
+
+    const range = nextRankMinPoints - currentRankMinPoints;
+    const currentProgress = totalPoints - currentRankMinPoints;
+
+    return {
+        nextRank,
+        progress: Math.min(100, Math.max(0, (currentProgress / range) * 100))
+    };
 }
