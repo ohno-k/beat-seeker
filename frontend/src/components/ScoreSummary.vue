@@ -715,16 +715,20 @@ const filteredScores = computed(() => {
     };
 
     result.sort((a, b) => {
-        // Typical difficulty level sort
-        const levelA = a.difficultyLevel || 0;
-        const levelB = b.difficultyLevel || 0;
-        if (levelA !== levelB) return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
-        
-        // Secondary: informalRank
         const valA = getNumericRank(a.informalRank);
         const valB = getNumericRank(b.informalRank);
-        if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+        
+        if (valA !== valB) {
+            return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+        }
 
+        // Secondary: difficultyLevel
+        const levelA = a.difficultyLevel || 0;
+        const levelB = b.difficultyLevel || 0;
+        if (levelA !== levelB) {
+            return sortOrder.value === 'asc' ? levelA - levelB : levelB - levelA;
+        }
+        
         return a.title.localeCompare(b.title);
     });
   } else if (sortKey.value === 'difficultyLevel') {
