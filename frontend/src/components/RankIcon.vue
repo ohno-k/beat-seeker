@@ -90,13 +90,14 @@ import { computed } from 'vue';
 const props = defineProps<{
   rankName: string;
   tier?: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 }>();
 
 const uid = Math.random().toString(36).substring(2, 11);
 
 const sizeClass = computed(() => {
   switch (props.size) {
+    case 'xs': return 'w-6 h-6 sm:w-8 sm:h-8';
     case 'sm': return 'w-8 h-8';
     case 'lg': return 'w-24 h-24 sm:w-32 sm:h-32';
     default: return 'w-16 h-16 sm:w-20 sm:h-20';

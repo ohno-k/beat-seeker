@@ -143,7 +143,8 @@ const tableData = computed(() => {
                     </span>
                     <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold whitespace-nowrap">MAX: {{ data.maxBeatPoints.toFixed(1) }}</span>
                   </div>
-                  <RankIcon class="hidden sm:block" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
+                  <RankIcon class="block sm:hidden shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
+                  <RankIcon class="hidden sm:block shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
                 </div>
               </td>
               <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-slate-600 dark:text-slate-300">
