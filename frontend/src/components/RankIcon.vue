@@ -9,19 +9,19 @@
     >
       <defs>
         <!-- Complex Gradients -->
-        <linearGradient :id="`grad-${rankName}-${tier}`" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient :id="`grad-${uid}`" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" :stop-color="colors.primary" />
           <stop offset="50%" :stop-color="colors.highlight" />
           <stop offset="100%" :stop-color="colors.secondary" />
         </linearGradient>
         
-        <linearGradient :id="`glow-grad-${rankName}`" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient :id="`glow-grad-${uid}`" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" :stop-color="colors.primary" stop-opacity="1" />
           <stop offset="100%" :stop-color="colors.primary" stop-opacity="0.2" />
         </linearGradient>
 
         <!-- Dynamic Filters -->
-        <filter :id="`inner-glow-${rankName}`">
+        <filter :id="`inner-glow-${uid}`">
           <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="out" result="glow" />
           <feFlood :flood-color="colors.stroke" flood-opacity="0.8" result="color" />
@@ -29,7 +29,7 @@
           <feComposite in2="SourceGraphic" operator="over" />
         </filter>
 
-        <filter :id="`outer-glow-${rankName}`" x="-20%" y="-20%" width="140%" height="140%">
+        <filter :id="`outer-glow-${uid}`" x="-20%" y="-20%" width="140%" height="140%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
           <feFlood :flood-color="colors.primary" flood-opacity="0.5" result="color" />
           <feComposite in="color" in2="blur" operator="in" result="shadow" />
@@ -47,17 +47,17 @@
         :d="shapePath" 
         :fill="colors.primary" 
         fill-opacity="0.1" 
-        :filter="`url(#outer-glow-${rankName})`"
+        :filter="`url(#outer-glow-${uid})`"
       />
 
       <!-- Base Shape -->
       <path 
         :d="shapePath" 
-        :fill="`url(#grad-${rankName}-${tier})`"
+        :fill="`url(#grad-${uid})`"
         :stroke="strokeColor"
         stroke-width="2.5"
         stroke-linejoin="round"
-        :filter="`url(#inner-glow-${rankName})`"
+        :filter="`url(#inner-glow-${uid})`"
       />
       
       <!-- Tier Segments (More visible "Energy Bars") -->
@@ -92,6 +92,8 @@ const props = defineProps<{
   tier?: number;
   size?: 'sm' | 'md' | 'lg';
 }>();
+
+const uid = Math.random().toString(36).substring(2, 11);
 
 const sizeClass = computed(() => {
   switch (props.size) {
