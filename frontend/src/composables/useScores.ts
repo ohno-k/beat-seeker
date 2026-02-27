@@ -1,7 +1,9 @@
 import { ref } from 'vue';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+// VITE_API_BASE should be explicitly set to 'http://localhost:8080' in local dev.
+// In production, leaves it empty so it targets '/' (triggering the Render Rewrite).
+const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
 export function useScores() {
     const isFetching = ref(false);

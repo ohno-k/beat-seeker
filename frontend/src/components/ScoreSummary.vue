@@ -603,7 +603,8 @@ const targetScoreNeeded = computed(() => {
   if (targetPt <= currentPt) return 0;
   if (targetPt > weight) return selectedRecord.value.maxScore - selectedRecord.value.score;
 
-  let targetScoreRate = 100 * Math.sqrt(targetPt / weight);
+  // Inverse of Rate^1.5 is Rate^(1/1.5) = Rate^(2/3)
+  let targetScoreRate = 100 * Math.pow(targetPt / weight, 2 / 3);
   if (targetScoreRate < 66.667 && targetPt > 0) {
       targetScoreRate = 66.667;
   }
