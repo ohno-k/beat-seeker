@@ -57,9 +57,8 @@ const submitProfile = async () => {
   isSubmitting.value = true;
   
   try {
-    // VITE_API_BASE should be explicitly set to 'http://localhost:8080' in local dev.
-// In production, leaves it empty so it targets '/' (triggering the Render Rewrite).
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+    // VITE_API_BASE should be explicitly configured in Render environment variables
+    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
     const res = await fetch(`${API_BASE}/api/auth/me/profile`, {
       method: 'PUT',
       headers: {

@@ -30,7 +30,7 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                // Ensure URLs are valid even if env var is empty
+                // Determine absolute redirect URLs based on environment
                 String successUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl + "?login=success"
                                 : "/?login=success";
                 String errorUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl + "?login=error"
@@ -52,7 +52,7 @@ public class SecurityConfig {
                                 .oauth2Login(oauth2 -> oauth2
                                                 .userInfoEndpoint(userInfo -> userInfo
                                                                 .userService(customOAuth2UserService))
-                                                // After login, redirect back to frontend
+                                                // After login, explicitly redirect cross-origin to frontend
                                                 .defaultSuccessUrl(successUrl, true)
                                                 .failureUrl(errorUrl))
                                 .logout(logout -> logout

@@ -13,9 +13,8 @@ export interface AuthUser {
 const user = ref<AuthUser | null>(null);
 const isLoading = ref(true);
 
-// VITE_API_BASE should be explicitly set to 'http://localhost:8080' in local dev.
-// In production, leaves it empty so it targets '/' (triggering the Render Rewrite).
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+// VITE_API_BASE should be explicitly configured in Render environment variables
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 async function fetchCurrentUser(): Promise<void> {
     try {

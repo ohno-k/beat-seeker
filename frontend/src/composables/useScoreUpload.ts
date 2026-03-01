@@ -1,8 +1,7 @@
 import type { ScoreData } from '../types/ScoreData';
 
-// VITE_API_BASE should be explicitly set to 'http://localhost:8080' in local dev.
-// In production, leaves it empty so it targets '/' (triggering the Render Rewrite).
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+// VITE_API_BASE should be explicitly configured in Render environment variables
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 // Flatten ScoreData (one per song) into individual chart records for API
 function flattenToUploadRecords(scores: ScoreData[]) {
@@ -45,7 +44,6 @@ function flattenToUploadRecords(scores: ScoreData[]) {
 export function useScoreUpload() {
     const upload = async (scores: ScoreData[]): Promise<{ saved: number; message: string }> => {
         const records = flattenToUploadRecords(scores);
-
         const res = await fetch(`${API_BASE}/api/scores/upload`, {
             method: 'POST',
             credentials: 'include',

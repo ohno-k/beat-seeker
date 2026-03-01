@@ -47,6 +47,15 @@ const loadSavedScores = async () => {
 watch(isLoggedIn, (newVal) => {
   if (newVal) {
     loadSavedScores();
+    
+    // Check if we just logged in via Google OAuth redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'success') {
+      activeTab.value = 'dashboard';
+      
+      // Clean up the URL without reloading the page
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 });
 
@@ -139,13 +148,15 @@ const handleFileDropped = async (file: File) => {
         updatedSongs
     };
     
-    // Open Diff Modal if there are updates or new session
-    if (updatedSongs.length > 0) {
-        // Only show if there are actual updates
-        isDiffModalOpen.value = true;
-    } else if (oldFlat.length === 0 && newFlat.length > 0) {
-        // First upload in this session (e.g. not logged in, or fresh DB)
-        isDiffModalOpen.value = true;
+    // Open Diff Modal if there are updates or new session (only for logged-in users)
+    if (isLoggedIn.value) {
+      if (updatedSongs.length > 0) {
+          // Only show if there are actual updates
+          isDiffModalOpen.value = true;
+      } else if (oldFlat.length === 0 && newFlat.length > 0) {
+          // First upload in this session
+          isDiffModalOpen.value = true;
+      }
     }
 
     // Apply new data
@@ -214,10 +225,10 @@ const resetData = () => {
             </svg>
           </button>
           
-          <template v-if="!isLoggedIn">
+          <template v-if="false">
             <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="login">ログイン</button>
           </template>
-          <template v-else>
+          <template v-else-if="false">
             <div class="flex items-center gap-2">
               <img :src="user?.avatarUrl" alt="avatar" class="w-6 h-6 rounded-full" />
               <span class="text-sm text-slate-600 dark:text-slate-300">{{ user?.displayName }}</span>
@@ -231,8 +242,8 @@ const resetData = () => {
     <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center">
       
-      <!-- Hero Section (Visible only when no data) -->
-      <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl animate-fade-in">
+      <!-- Hero Section (Visible only when no data and not logged in or explicitly on dropzone) -->
+      <div v-if="!scoreData.length && !isLoggedIn" class="text-center mb-12 max-w-2xl animate-fade-in">
         <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
           スコアデータを<span class="text-blue-600 dark:text-blue-400">可視化</span>しよう
         </h1>
@@ -241,8 +252,8 @@ const resetData = () => {
         </p>
       </div>
 
-      <!-- Dropzone or Parsing State -->
-      <div v-if="!scoreData.length" class="w-full max-w-3xl animate-fade-in">
+      <!-- Dropzone or Parsing State when completely empty -->
+      <div v-if="!scoreData.length && !isLoggedIn" class="w-full max-w-3xl animate-fade-in">
         <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
           <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
           <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
@@ -284,7 +295,7 @@ const resetData = () => {
               スコア一覧
             </button>
             <button 
-              v-if="isLoggedIn"
+              v-if="false"
               @click="activeTab = 'profile'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
               :class="activeTab === 'profile' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
@@ -292,7 +303,7 @@ const resetData = () => {
               プロフィール・成長
             </button>
             <button 
-              v-if="isLoggedIn"
+              v-if="false"
               @click="activeTab = 'history'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
               :class="activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
@@ -316,12 +327,24 @@ const resetData = () => {
 
         <template v-else>
           <!-- Dashboard Tab -->
-          <ScoreDashboard 
-            v-show="activeTab === 'dashboard'"
-            :scores="scoreData" 
-            :totalPoints="totalBeatTierPoints"
-            class="w-full max-w-6xl"
-          />
+          <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
+            
+            <div v-if="scoreData.length === 0" class="w-full max-w-3xl animate-fade-in mt-8">
+              <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
+              </div>
+              
+              <CsvDropzone v-else @file-dropped="handleFileDropped" />
+            </div>
+
+            <ScoreDashboard 
+              v-else
+              :scores="scoreData" 
+              :totalPoints="totalBeatTierPoints"
+              class="w-full"
+            />
+          </div>
 
           <!-- Table Tab -->
           <ScoreSummary 

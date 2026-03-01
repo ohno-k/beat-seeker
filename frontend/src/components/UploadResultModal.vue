@@ -7,10 +7,12 @@
         <div class="relative bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-8 text-center overflow-hidden shrink-0">
           <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
           
-          <button @click="close" class="absolute top-4 right-4 text-white/70 hover:text-white bg-black/10 hover:bg-black/20 rounded-full p-2 transition-colors">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button @click="close" class="absolute top-2 right-2 p-4 -m-2 group z-50">
+            <div class="text-white/70 group-hover:text-white bg-black/10 group-hover:bg-black/20 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
           </button>
           
           <div class="relative z-10 flex flex-col items-center">
