@@ -240,8 +240,8 @@ const resetData = () => {
     <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center">
       
-      <!-- Hero Section (Visible only when no data) -->
-      <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl animate-fade-in">
+      <!-- Hero Section (Visible only when no data and not logged in or explicitly on dropzone) -->
+      <div v-if="!scoreData.length && !isLoggedIn" class="text-center mb-12 max-w-2xl animate-fade-in">
         <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
           スコアデータを<span class="text-blue-600 dark:text-blue-400">可視化</span>しよう
         </h1>
@@ -250,8 +250,8 @@ const resetData = () => {
         </p>
       </div>
 
-      <!-- Dropzone or Parsing State -->
-      <div v-if="!scoreData.length" class="w-full max-w-3xl animate-fade-in">
+      <!-- Dropzone or Parsing State when completely empty -->
+      <div v-if="!scoreData.length && !isLoggedIn" class="w-full max-w-3xl animate-fade-in">
         <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
           <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
           <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
@@ -325,12 +325,24 @@ const resetData = () => {
 
         <template v-else>
           <!-- Dashboard Tab -->
-          <ScoreDashboard 
-            v-show="activeTab === 'dashboard'"
-            :scores="scoreData" 
-            :totalPoints="totalBeatTierPoints"
-            class="w-full max-w-6xl"
-          />
+          <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
+            
+            <div v-if="scoreData.length === 0" class="w-full max-w-3xl animate-fade-in mt-8">
+              <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+                <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
+              </div>
+              
+              <CsvDropzone v-else @file-dropped="handleFileDropped" />
+            </div>
+
+            <ScoreDashboard 
+              v-else
+              :scores="scoreData" 
+              :totalPoints="totalBeatTierPoints"
+              class="w-full"
+            />
+          </div>
 
           <!-- Table Tab -->
           <ScoreSummary 
