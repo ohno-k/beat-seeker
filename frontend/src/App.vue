@@ -148,13 +148,15 @@ const handleFileDropped = async (file: File) => {
         updatedSongs
     };
     
-    // Open Diff Modal if there are updates or new session
-    if (updatedSongs.length > 0) {
-        // Only show if there are actual updates
-        isDiffModalOpen.value = true;
-    } else if (oldFlat.length === 0 && newFlat.length > 0) {
-        // First upload in this session (e.g. not logged in, or fresh DB)
-        isDiffModalOpen.value = true;
+    // Open Diff Modal if there are updates or new session (only for logged-in users)
+    if (isLoggedIn.value) {
+      if (updatedSongs.length > 0) {
+          // Only show if there are actual updates
+          isDiffModalOpen.value = true;
+      } else if (oldFlat.length === 0 && newFlat.length > 0) {
+          // First upload in this session
+          isDiffModalOpen.value = true;
+      }
     }
 
     // Apply new data
@@ -223,10 +225,10 @@ const resetData = () => {
             </svg>
           </button>
           
-          <template v-if="!isLoggedIn">
+          <template v-if="false">
             <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="login">ログイン</button>
           </template>
-          <template v-else>
+          <template v-else-if="false">
             <div class="flex items-center gap-2">
               <img :src="user?.avatarUrl" alt="avatar" class="w-6 h-6 rounded-full" />
               <span class="text-sm text-slate-600 dark:text-slate-300">{{ user?.displayName }}</span>
@@ -293,7 +295,7 @@ const resetData = () => {
               スコア一覧
             </button>
             <button 
-              v-if="isLoggedIn"
+              v-if="false"
               @click="activeTab = 'profile'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
               :class="activeTab === 'profile' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
@@ -301,7 +303,7 @@ const resetData = () => {
               プロフィール・成長
             </button>
             <button 
-              v-if="isLoggedIn"
+              v-if="false"
               @click="activeTab = 'history'"
               class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
               :class="activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
