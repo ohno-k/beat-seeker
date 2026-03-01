@@ -13,13 +13,11 @@ export interface AuthUser {
 const user = ref<AuthUser | null>(null);
 const isLoading = ref(true);
 
-// VITE_API_BASE should be explicitly set to 'http://localhost:8080' in local dev.
-// In production, leaves it empty so it targets '/' (triggering the Render Rewrite).
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+// VITE_API_BASE is no longer used. We rely on Vite Proxy (local) or relative paths (production).
 
 async function fetchCurrentUser(): Promise<void> {
     try {
-        const res = await fetch(`${API_BASE}/api/auth/me`, {
+        const res = await fetch(`/api/auth/me`, {
             credentials: 'include', // Send session cookie
         });
         if (res.ok) {
@@ -42,12 +40,12 @@ export function useAuth() {
     });
 
     const login = () => {
-        window.location.href = `${API_BASE}/oauth2/authorization/google`;
+        window.location.href = `/oauth2/authorization/google`;
     };
 
     const logout = async () => {
         try {
-            await fetch(`${API_BASE}/api/auth/logout`, {
+            await fetch(`/api/auth/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });

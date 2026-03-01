@@ -30,12 +30,10 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-                // Ensure URLs are valid even if env var is empty
-                String successUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl + "?login=success"
-                                : "/?login=success";
-                String errorUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl + "?login=error"
-                                : "/?login=error";
-                String logoutUrl = (frontendUrl != null && !frontendUrl.isEmpty()) ? frontendUrl : "/";
+                // Now using simple relative paths since frontend proxies or shares origin
+                String successUrl = "/?login=success";
+                String errorUrl = "/?login=error";
+                String logoutUrl = "/";
 
                 http
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
