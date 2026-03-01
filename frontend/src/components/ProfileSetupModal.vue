@@ -57,7 +57,9 @@ const submitProfile = async () => {
   isSubmitting.value = true;
   
   try {
-    const res = await fetch(`/api/auth/me/profile`, {
+    // VITE_API_BASE should be explicitly configured in Render environment variables
+    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+    const res = await fetch(`${API_BASE}/api/auth/me/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'

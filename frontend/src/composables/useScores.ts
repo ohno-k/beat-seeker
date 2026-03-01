@@ -1,7 +1,8 @@
 import { ref } from 'vue';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 
-// VITE_API_BASE is no longer used. We rely on Vite Proxy (local) or relative paths (production).
+// VITE_API_BASE should be explicitly configured in Render environment variables
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 export function useScores() {
     const isFetching = ref(false);
@@ -9,7 +10,7 @@ export function useScores() {
     const fetchMyScores = async (): Promise<ScoreData[]> => {
         isFetching.value = true;
         try {
-            const res = await fetch(`/api/scores/me`, {
+            const res = await fetch(`${API_BASE}/api/scores/me`, {
                 credentials: 'include'
             });
 
@@ -80,7 +81,7 @@ export function useScores() {
     };
 
     const updateMemo = async (id: number, memo: string) => {
-        const res = await fetch(`/api/scores/${id}/memo`, {
+        const res = await fetch(`${API_BASE}/api/scores/${id}/memo`, {
             method: 'PUT',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
