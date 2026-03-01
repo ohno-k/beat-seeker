@@ -15,7 +15,7 @@ Render.io を使って、このアプリケーションを「最も簡単に」�
 ## 3. バックエンドのデプロイ
 1. **New > Web Service** を選択。
 2. リポジトリを選択し、以下を設定：
-   - **Name**: `beat-seeker-api`
+   - **Name**: `beat-seeker`
    - **Root Directory**: `backend`
    - **Environment**: `Docker`
 3. **Environment Variables** (Advanced) を追加：

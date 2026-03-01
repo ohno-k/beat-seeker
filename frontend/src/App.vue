@@ -47,6 +47,15 @@ const loadSavedScores = async () => {
 watch(isLoggedIn, (newVal) => {
   if (newVal) {
     loadSavedScores();
+    
+    // Check if we just logged in via Google OAuth redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'success') {
+      activeTab.value = 'dashboard';
+      
+      // Clean up the URL without reloading the page
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 });
 
