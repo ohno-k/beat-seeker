@@ -1,0 +1,1955 @@
+TITLE	NOTE(SP)					NOTE(DP)				TIME	MOVIE	LAYER
+	B	N	H	A	L	N	H	A	L			
+beatmania IIDX ▼ △												
+Dr.LOVE	-	204	261	290	-	259	321	-	-	1:40	専用:VJ GYO	
+GAMBOL	-	137	137	-	-	137	137	-	-	※	専用:VJ GYO	
+GRADIUSIC CYBER	-	442	508	609	-	409	556	631	-	1:40	専用:VJ GYO	
+R3	-	330	368	454	-	384	392	475	-	1:22	専用:VJ GYO	
+22DUNK	-	265	323	329	-	333	334	329	-	1:17	2nd TECHNO汎用	
+5.1.1.	-	99	511	786	-	99	511	796	-	※	専用:VJ GYO	
+beatmania IIDX substream ▲ ▼ △												
+deep in you	-	250	255	333	-	283	293	364	-	1:20	3rd DANCE汎用	
+GENOM SCREAMS	-	211	417	536	-	211	417	538	-	1:19	3rd CYBER汎用	
+gentle stress	-	172	342	728	-	199	327	772	-	1:43	専用:VJ GYO	
+KEEP ON MOVIN'	-	98	122	-	-	119	122	-	-	1:09	専用:VJ GYO	
+Macho Gang	-	191	548	837	-	262	836	846	-	1:37	専用:VJ GYO	
+PARANOIA MAX～DIRTY MIX～	-	280	376	562	-	280	406	581	-	1:36	専用:VJ GYO	
+RUGGED ASH	-	185	201	556	1058	186	201	624	1203	1:17	5th DISCO汎用	
+THE EARTH LIGHT	-	398	530	581	-	456	718	581	-	1:32	専用:VJ GYO	
+beatmania IIDX 2nd style ▲ ▼ △												
+Digital MinD(A/T Libra mix)	-	374	542	573	-	374	597	-	-	1:40	専用:VJ GYO	
+Electro Tuned(the SubS mix)	-	390	483	537	-	469	569	-	-	1:40	2nd TECHNO汎用+ミスレイヤー	BEMANI Designers "GOLI"
+I Was The One	-	272	326	348	-	205	270	-	-	1:38	2nd HOUSE汎用	
+Indigo Vision(full flavour hide around mix)	-	442	569	617	-	455	617	-	-	1:38	専用:VJ GYO,GOLI(イラスト)	
+PUT YOUR FAITH IN ME(for beatmania II)	-	291	434	-	-	288	434	-	-	1:56	2nd HOUSE汎用	
+SP-TRIP MACHINE(for beatmania II)	-	254	313	324	-	254	311	-	-	1:31	2nd TECHNO汎用	
+0.59	-	360	514	584	-	444	514	585	-	1:46	2nd HOUSE汎用	
+beatmania IIDX 3rd style ▲ ▼ △												
+CAN'T STOP FALLIN'IN LOVE	-	310	632	-	-	313	620	-	-	1:37	6th EURO汎用	
+Don't Stop!	-	389	428	453	-	391	450	-	-	1:51	3rd DISCO汎用	
+era (nostalmix)	-	437	555	786	-	437	952	1226	-	※	専用:VJ GYO	
+Holic	-	395	624	880	-	680	875	1136	-	1:27	3rd CYBER汎用	
+LEADING CYBER	-	434	611	645	-	478	611	645	-	1:42	専用:VJ YUZ,GOLI(イラスト)	
+Presto	-	273	498	508	-	274	508	-	-	1:40	専用:VJ YUZ	
+R5	-	387	588	889	-	430	599	870	-	※	2nd TECHNO汎用	
+REINCARNATION	-	424	525	643	-	398	525	643	-	1:56	専用:VJ GYO	
+Schlagwerk	-	414	663	848	-	412	1043	1090	-	1:40	専用:VJ GYO	
+Skyscraper	-	372	610	629	-	413	628	-	-	1:37	2nd HOUSE汎用	
+Tangerine Stream	-	141	198	-	-	151	199	-	-	1:35	2nd HOUSE汎用	
+THE SAFARI	183	618	900	-	-	624	900	-	-	1:26	4th HOUSE汎用+ミスレイヤー	BEMANI Designers "GOLI"
+beatmania IIDX 4th style ▲ ▼ △												
+ABSOLUTE	-	682	935	1218	1412	728	934	1338	1488	2:09	専用:GOLI	
+B4U	-	538	801	1014	-	629	815	-	-	1:37	専用:VJ GYO	
+Broken My Heart	-	474	751	914	-	405	742	914	-	1:43	6th EURO汎用	
+Burnin' The Floor	-	293	478	721	-	460	482	724	-	1:34	専用:NEW-3,GOLI(イラスト)	
+CHECKING YOU OUT	-	339	481	700	-	339	482	703	-	1:42	専用:VJ GYO	
+Clione	-	264	479	811	1102	264	477	1010	1203	2:01	専用:NEW-3	
+DXY!	-	651	968	1158	-	781	1332	1529	-	1:45	専用:NEW-3	
+empathy	-	416	703	743	-	411	961	-	-	1:51	専用:VJ GYO	
+era (step mix)	-	565	733	875	-	503	728	1226	-	1:51	専用:VJ GYO	
+FLOWERS for ALBION	-	122	222	-	-	190	222	-	-	1:38	4th HOUSE汎用	
+HIGHER	-	270	468	641	-	362	578	611	-	1:42	3rd DANCE汎用	
+Hitch Hiker2	-	420	609	665	976	518	880	864	975	1:45	専用:VJ GYO	
+Jam&Marmalade	-	388	456	512	-	327	451	-	-	1:14	4th TECHNO汎用	
+KAMIKAZE	-	515	745	1157	-	512	745	1156	-	1:45	4th TECHNO汎用+ミスレイヤー	GOLI
+LOVE WILL・・・	-	279	379	732	-	330	529	726	-	1:31	4th HOUSE汎用	
+minimalian	-	271	555	706	-	263	626	1015	-	1:29	4th TECHNO汎用	
+Mr.T.(take me higher)	-	428	510	889	-	428	510	885	-	1:40	5th DANCE汎用	
+starmine	224	456	719	800	-	566	796	1098	-	1:48	専用:VJ GYO	
+SWEET LAB	-	280	496	692	-	445	674	719	-	1:35	専用:shiro	
+Voltage (feat. Hidemaru)	-	480	630	670	-	480	964	-	-	1:32	4th TECHNO汎用	
+250bpm	-	353	528	726	-	351	523	672	-	1:24	専用:shiro	
+beatmania IIDX 5th style ▲ ▼ △												
+Abyss	-	639	817	945	-	771	889	964	-	1:58	専用:VJ YUZ	
+in my eyes	-	484	739	798	-	484	842	1051	-	1:52	5th TRANCE汎用	
+LOVE AGAIN TONIGHT～for Mellisa mix～	-	385	501	561	-	466	555	-	-	1:37	6th EURO汎用	
+outer wall	-	474	687	892	-	474	736	902	-	2:02	専用:HES	
+QQQ	-	621	961	1091	-	1016	1346	-	-	1:52	4th TECHNO汎用	
+Radical Faith	-	602	768	660	-	749	1255	1101	-	※	専用:VJ GYO	
+Real	-	580	866	920	-	796	949	1139	-	2:01	4th TECHNO汎用	
+Regulus	-	551	788	881	-	545	805	1065	-	1:54	5th DANCE汎用	
+RIDE ON THE LIGHT (HI GREAT MIX)	-	452	548	862	931	469	616	904	1010	1:48	専用:VJ YUZ,NEW-3	
+RISLIM	-	463	625	-	-	463	625	-	-	1:53	4th HOUSE汎用	
+sometime	-	393	539	672	-	393	676	693	-	2:03	専用:VJ GYO	
+Spin the disc	-	409	659	674	-	618	900	-	-	1:33	専用:shiro	
+STILL IN MY HEART	-	517	705	971	-	516	705	1286	-	1:39	6th EURO汎用	
+still my words	-	464	619	-	-	437	726	-	-	2:01	専用:shiro	
+sync	-	549	982	1204	-	796	1030	1208	-	2:02	専用:shiro	
+THE CUBE	-	374	644	682	-	374	645	1113	-	1:53	専用:VJ GYO	
+THE SHINING POLARIS	-	485	667	799	-	485	665	-	-	1:55	専用:Yasi	
+V	173	646	1272	1519	-	757	1385	1504	-	2:08	専用:VJ GYO	
+beatmania IIDX 6th style ▲ ▼ △												
+BALLAD FOR YOU～想いの雨～	-	297	387	537	-	375	546	-	-	1:45	6th HOUSE汎用	
+Blueberry Stream	-	429	770	846	-	598	817	868	-	1:41	専用:VJ GYO	
+Buffalo	-	511	744	932	1287	479	744	932	1260	1:47	専用:VJ YUZ	
+Colors (radio edit)	-	751	1011	1258	-	714	1099	1255	-	2:00	専用:VJ YUZ	
+DIVE ～INTO YOUR HEART～	-	656	945	1066	-	623	998	1083	-	2:03	専用:VJ GYO	
+fly through the night	-	452	688	863	-	452	688	981	-	1:58	専用:shiro	
+Free Style	-	473	571	664	-	473	579	-	-	1:40	6th DANCE汎用	
+Frozen Ray (original mix)	-	669	897	909	-	428	839	937	-	1:56	専用:VJ YUZ	
+G2	-	752	942	1188	-	665	830	1377	-	2:03	専用:VJ GYO	
+L'amour et la liberté	-	501	811	1025	-	501	784	1113	-	1:47	専用:shiro	
+Linus	-	489	789	1105	-	585	1007	1210	-	1:48	専用:shiro	
+NEMESIS	-	524	839	973	-	667	977	1367	-	2:03	専用:VJ YUZ,GOLI(イラスト)	
+rottel-da-sun	-	417	692	936	-	418	693	-	-	1:31	専用:GOLI	
+route 80s	-	457	614	766	-	562	765	900	-	1:32	専用:HES	
+SOMETHING WONDERFUL	-	471	688	1003	-	458	690	1003	-	2:02	専用:Yasi	
+Summer Vacation(CU mix)	-	667	949	-	-	984	1328	-	-	1:44	専用:VJ YUZ	
+Take It Easy	-	760	1229	1282	-	745	1356	-	-	2:06	6th DANCE汎用	
+VJ ARMY	-	660	904	1149	-	654	872	1182	-	1:54	専用:shiro / HES / GOLI / VJ GYO	
+19,November	-	560	733	910	-	589	733	1045	-	2:03	専用:good-cool	
+こっちを向いてよ	-	438	667	703	-	625	767	1127	-	1:51	6th DANCE汎用	
+beatmania IIDX 7th style ▲ ▼ △												
+A	-	666	1111	1260	-	613	1119	1343	-	2:09	7th TRANCE汎用	
+AVE DE RAPINA	-	713	882	934	-	948	1113	-	-	1:59	7th HOUSE汎用	
+Bad Routine	-	522	716	964	-	566	716	1042	-	1:57	5th DISCO汎用	
+Burning Heat! (Full Option Mix)	-	361	494	755	-	359	496	789	-	1:55	専用:shiro/HES/VJ GYO	
+Cheer Train	-	470	623	880	-	468	623	1307	-	1:51	専用:shiro	
+D2R	-	494	671	823	-	525	665	-	-	1:36	7th DANCE汎用	
+DESTINY	-	546	700	925	-	575	700	-	-	1:42	6th CYBER汎用	
+foreplay	-	357	631	684	-	361	630	979	-	1:27	7th HOUSE汎用	
+Glorious Days	-	262	411	463	-	395	461	-	-	2:02	専用:shiro	
+Happy Wedding	-	620	872	940	-	610	899	1061	-	2:08	6th DANCE汎用	
+Last Message	-	513	682	819	-	675	748	1111	-	1:37	専用:good-cool	
+Let the Snow Paint Me	-	431	537	624	-	485	559	-	-	2:06	専用:VJ GYO	
+Love Me Do	-	571	857	1058	-	577	899	-	-	1:55	7th DANCE汎用+レイヤー	GOLI
+MAX 300	-	570	982	1429	-	566	982	1496	-	1:32	7th TECHNO汎用	
+Somebody Like You	-	376	606	933	-	375	603	937	-	1:54	5th DISCO汎用	
+Spica	-	328	772	1167	-	327	782	1203	-	1:46	6th HOUSE汎用	
+stoic	-	874	1250	1302	-	874	1126	1497	-	1:56	専用:VJ GYO	
+Tomorrow Perfume	-	685	1000	1085	-	729	1212	1311	-	2:07	専用:VJ GYO	
+traces	-	778	982	1083	-	762	901	1071	-	2:13	7th TRANCE汎用	
+ZERO-ONE	-	556	874	1132	1448	556	874	1169	1458	1:36	7th TECHNO汎用+レイヤー	GOLI
+革命	-	392	1004	1183	-	702	1209	1401	-	1:50	7th TRANCE汎用	
+beatmania IIDX 8th style ▲ ▼ △												
+abstract	-	659	831	960	-	662	950	-	-	1:47	専用:VJ GYO	
+airflow	-	295	402	721	-	293	402	721	-	1:55	専用:VJ GYO	
+ALL RIGHT	-	446	658	815	-	501	720	860	-	2:01	8th TECHNO汎用	
+Attitude	-	527	721	881	-	578	707	881	-	2:06	専用:ミコシバ	
+bit mania	-	458	643	934	-	536	643	-	-	1:50	8th CYBER汎用	
+Blame	-	611	796	980	-	614	745	1105	-	1:46	専用:VJ GYO	
+CELEBRATE NITE	-	471	591	714	-	471	632	731	-	1:23	専用:HES	
+Colors -Y&Co. Eurobeat Remix-	-	585	1029	1100	-	663	1068	1100	-	2:08	8th POPS汎用	
+dual control	-	403	763	961	-	403	756	854	-	1:44	8th HOUSE汎用	
+Giudecca	-	470	1016	1381	-	600	1129	1392	-	1:55	専用:VJ YUZ	
+Halfway of promise	-	481	781	940	-	638	779	1157	-	1:58	8th POPS汎用	
+HYPER BOUNDARY GATE	-	646	976	1115	-	636	955	1115	-	2:02	専用:Yasi	
+LAB	-	534	1029	1075	1380	547	1014	1255	1594	1:52	専用:Yasi	
+LOVE IS ORANGE	-	399	519	903	1059	456	570	1034	1243	1:44	専用:HES	
+Luv 2 Feel Your Body	-	437	542	839	-	552	703	945	-	1:47	専用:KAKKI	
+memories	-	578	1056	1157	-	578	1122	1274	-	2:00	専用:VJ GYO	
+Monkey Dance	-	413	690	997	-	554	689	955	-	1:53	8th POPS汎用	
+murmur twins	-	567	854	1207	-	589	924	1188	-	2:03	専用:kaeru	
+MUSIC TO YOUR HEAD	-	415	743	849	-	628	769	849	-	2:01	専用:HES	
+PLEASE DON'T GO	-	505	715	1251	-	527	798	1188	-	2:02	専用:HES	
+rainbow flyer	-	422	859	1081	-	424	931	1167	-	2:04	専用:KAKKI	
+symbolic	-	734	952	1138	-	936	1152	-	-	1:59	8th TECHNO汎用	
+thunder	-	609	817	959	-	608	944	1126	-	2:10	8th HOUSE汎用	
+WAR GAME	-	488	789	1077	-	496	820	1044	-	2:04	8th TECHNO汎用	
+World Wide Love	-	353	526	559	-	454	560	-	-	1:53	8th HOUSE汎用	
+xenon	-	570	867	1379	-	563	865	1379	-	1:47	8th CYBER汎用	
+蒼い衝動	-	468	694	803	-	524	685	795	-	1:50	8th POPS汎用	
+桜	-	541	819	1123	-	605	819	1047	-	1:40	専用:DDR EXTREME2	
+beatmania IIDX 9th style ▲ ▼ △												
+Abyss -The Heavens Remix-	288	766	938	1188	-	803	1036	1102	-	1:42	専用:VJ YUZ	
+ACT	-	532	864	935	-	637	890	1005	-	2:00	専用:VJ GYO	
+ADVANCE	-	240	429	818	-	240	453	800	-	1:52	8th CYBER汎用	
+ATOMIC AGE	-	184	341	679	-	184	346	681	-	1:42	8th HOUSE汎用	
+BAD BOY BASS!! (dj Remo-con MIX)	-	468	714	908	-	468	708	-	-	1:58	専用:F-FLY	
+bag	-	468	621	963	-	636	912	1023	-	1:34	7th HOUSE汎用	
+BRIGHTNESS DARKNESS	-	363	750	889	-	381	825	984	-	1:54	専用:F-FLY	
+Cradle	-	466	751	803	-	617	784	-	-	1:51	6th HOUSE汎用+レイヤー	F-FLY
+Distress	-	691	937	-	-	993	1254	-	-	2:02	8th TECHNO汎用+レイヤー	F-FLY
+e-motion 2003 -romantic extra-	-	671	824	1001	-	715	978	-	-	2:14	専用:VJ GYO	
+fun	-	311	586	950	-	295	574	950	-	1:41	5th DISCO汎用	
+Golden Horn	-	359	646	763	-	359	646	853	-	1:54	専用:VJ YUZ	
+HYPER EUROBEAT (2DX style)	-	557	843	990	-	604	832	-	-	1:58	9th HOUSE汎用	
+I Was The One (80's EUROBEAT STYLE)	-	397	685	727	-	439	518	725	-	1:43	8th HOUSE汎用	
+Karma	-	668	839	925	-	797	1085	1267	-	※	9th TECHNO汎用	
+lights	-	357	753	910	-	635	927	995	-	2:14	専用:F-FLY	
+Logic Board	-	529	907	1173	-	529	906	1697	-	1:55	8th CYBER汎用	
+LOVE♡SHINE	270	433	921	1046	-	427	673	960	-	1:39	専用:GOLI	
+lower world	-	706	979	1144	-	705	981	1254	-	2:23	専用:ミコシバ	
+Make A Difference	-	445	846	1155	-	441	866	1202	-	1:59	専用:DDR EXTREME2	
+MARIA (I believe... )	-	375	804	983	-	375	861	983	-	1:57	9th HOUSE汎用	
+moon_child	-	533	1026	1300	-	510	1049	1661	-	2:08	専用:F-FLY/kaeru	
+one or eight	-	695	985	1177	-	632	790	1110	1426	1:38	4th TECHNO汎用+ミスレイヤー	GOLI
+PARANOIA survivor MAX	-	497	677	1092	-	485	671	1091	-	1:37	専用:RICE.C	
+quasar	-	591	901	1161	-	710	1056	1562	-	2:12	専用:F-FLY	
+Quickening	-	478	875	1062	-	440	620	1044	-	1:45	専用:VJ YUZ	
+Really Love	-	333	506	898	-	333	861	-	-	2:01	5th DISCO汎用	
+RISLIM -Remix-	-	405	508	959	-	521	817	1151	-	1:47	4th HOUSE汎用	
+rottel-the-Mercury	-	503	963	1137	-	634	924	1132	-	1:51	専用:VJ YUZ	
+Silvia Drive	-	429	790	1049	-	687	946	1364	-	1:53	専用:VJ GYO	
+SNOW	-	534	704	1038	-	598	762	1037	-	1:47	7th TECHNO汎用	
+STAR FIELD	-	351	806	947	-	351	793	-	-	2:00	専用:VJ YUZ	
+Sweet Sweet♡Magic	-	509	784	1032	-	519	786	1055	-	1:32	専用:DDR EXTREME2	
+SWEETEST SAVAGE	-	335	704	930	-	551	702	965	-	1:50	専用:F-FLY	
+真夏の花・真夏の夢	-	420	603	749	-	580	771	961	-	2:08	4th HOUSE汎用	
+ライオン好き	-	329	600	755	-	329	614	-	-	1:58	専用:VJ GYO	
+beatmania IIDX 10th style ▲ ▼ △												
+ALIEN TEMPLE	-	505	839	1021	-	649	954	1084	-	2:06	専用:VJ GYO	
+ASTRAL VOYAGE	-	510	727	971	-	523	731	1087	-	2:08	10th POPS汎用	
+BABY LOVE	-	598	865	1089	-	596	779	1159	-	2:08	6th DANCE汎用	
+Back Into The Light	-	602	835	1086	-	621	828	1160	-	2:19	8th POPS汎用	
+Boundary	-	440	930	1031	-	521	967	967	-	1:54	専用:F-FLY	
+CARRY ON NIGHT (English version)	-	510	702	1037	-	522	738	1088	-	1:56	6th EURO汎用	
+Daisuke	236	613	850	1205	-	660	858	1208	-	2:07	専用:VJ GYO	
+Debtty Daddy	-	533	1008	1371	-	533	1008	1607	-	2:15	7th DANCE汎用	
+desolation	-	245	331	386	-	245	386	-	-	2:01	4th HOUSE汎用	
+DoLL	175	478	626	810	-	478	645	923	-	1:57	専用:GOLI	
+EXE	-	448	829	1131	-	450	854	-	-	1:53	10th TECHNO汎用+レイヤー	GOLI
+Feedback	-	548	836	1010	-	550	838	984	-	2:00	9th TECHNO汎用	
+FEEL IT	-	474	888	1013	-	573	1002	1119	-	1:49	10th TECHNO汎用	
+Freezing atmosphere	-	416	585	775	-	418	586	776	-	1:57	専用:F-FLY	
+GHOST REVIVAL	-	466	1049	1311	-	466	1049	1409	-	2:05	4th CYBER汎用	
+GRADIUS -FULL SPEED-	-	385	643	1074	-	385	643	1074	-	1:58	専用:HES	
+HIGH	-	470	975	1088	1443	692	945	1233	1501	1:51	8th HOUSE汎用+レイヤー	VJ GYO
+Innocent Walls	-	847	1281	1446	-	855	1140	1553	-	2:01	専用:F-FLY	
+Love Is Eternity	-	622	1016	1215	-	604	1038	1417	-	2:11	専用:F-FLY	
+Lucy	-	485	903	1167	-	484	908	-	-	2:02	専用:VJ GYO	
+Narcissus At Oasis	-	392	807	838	-	384	771	830	-	2:05	専用:ミコシバ	
+No.13	-	855	1376	1607	-	778	1185	1639	-	2:01	専用:TOM	
+One More Lovely	-	439	832	1452	-	444	862	1557	-	1:55	6th RAVE汎用+レイヤー	GOLI
+pandora	-	455	852	931	-	509	805	1040	-	2:09	専用:VJ GYO	
+rainbow rainbow	-	799	1156	1377	-	815	1087	1400	-	1:57	8th TECHNO汎用	
+Rise'n Beauty	-	652	841	1094	-	683	882	1159	-	2:05	10th TRANCE汎用	
+SCORE	-	595	812	1055	-	597	806	1105	-	1:57	8th TECHNO汎用	
+SHOOTING STAR	-	651	855	1146	-	624	858	1178	-	2:01	10th POPS汎用	
+SPACE FIGHT	-	328	768	1134	-	519	765	1190	-	1:48	専用:F-FLY	
+1st Samurai	-	546	1016	1383	-	729	1016	1455	-	1:55	8th TECHNO汎用	
+システムロマンス	-	458	901	1023	-	457	886	-	-	2:12	8th POPS汎用+ミスレイヤー	GOLI
+雪月花	-	636	979	1287	-	867	1153	1411	-	1:55	9th HOUSE汎用+ミスレイヤー	GOLI
+beatmania IIDX 11 IIDX RED ▲ ▼ △												
+AA	-	642	1386	1834	-	659	997	1739	-	1:58	専用:Ta-k	
+AGEHA	305	537	888	948	1232	464	689	903	1460	2:00	専用:MAYA	
+ANDROMEDA	-	517	973	1446	-	512	1109	1568	-	2:14	専用:HES	
+awakening	-	553	750	866	-	546	746	873	-	2:01	10th AMBIENT汎用	
+Be quiet	-	559	894	1114	1463	558	861	1055	1614	1:57	専用:izm＠tksd /東京食堂	
+BLOCKS	-	417	675	1000	-	417	746	1001	-	1:39	8th CYBER汎用	
+BREATH	-	469	663	875	-	455	700	930	-	1:46	9th TECHNO汎用	
+Click Again	-	462	737	1097	-	462	735	1039	-	1:54	専用:F-FLY*1	
+Close my Eyes for Me	-	529	755	948	-	521	751	1058	-	2:01	専用:F-FLY	
+D.A.N.C.E.!	-	299	431	826	-	298	425	653	-	1:47	専用:TETSU-LOW	
+Don't be afraid myself	-	566	960	1155	-	621	935	1094	-	2:03	専用:yagi-denko	
+earth scape	-	230	530	644	-	230	507	-	-	2:06	専用:HES	
+FAKE TIME	-	534	916	1231	-	534	879	1178	-	1:45	8th HOUSE汎用+ミスレイヤー*2	GOLI
+Fly Away To India	-	344	562	712	-	344	562	-	-	1:50	10th POPS汎用+ミスレイヤー	GOLI
+GENOCIDE	-	587	1103	1222	-	588	1211	1456	-	1:38	9th TECHNO汎用+ミスレイヤー	MAYA
+gigadelic	355	771	1116	1301	-	754	1110	1344	-	2:08	10th TECHNO汎用+ミスレイヤー	GOLI
+HORIZON	-	546	786	990	-	547	818	1027	-	2:07	専用:MAYA	
+KEY	-	573	950	1436	-	573	989	1400	-	2:07	専用:VJ GYO	
+NEBULA GRASPER	-	691	1029	1241	-	724	1029	1155	-	2:02	専用:Ta-k	
+Raspberry♡Heart(English version)	-	531	797	932	-	524	772	901	-	1:47	専用:いとういつお	
+RED ZONE	89	567	975	1184	1566	611	941	1232	1502	1:47	6th EURO汎用	
+RESONATE 1794	-	469	745	951	-	469	744	-	-	2:08	専用:HES	
+Secret of Love	-	553	747	1019	-	496	767	-	-	2:02	専用:MAYA	
+SPEEDY CAT	-	569	861	1028	-	566	884	978	-	1:57	専用:VJ GYO	
+Sphere	-	541	996	1111	-	522	897	1139	-	1:52	10th TECHNO汎用	
+spiral galaxy	-	545	1061	1310	1910	564	1038	1139	2070	2:11	専用:HES	
+The Hope of Tomorrow	-	536	874	992	-	535	855	989	-	2:21	専用:pam	
+ＵＬＴｉＭΛＴＥ	-	480	744	1006	-	451	736	-	-	2:00	10th TRANCE汎用	
+Wonder Bullfighter	-	489	747	1062	-	451	729	1086	-	2:03	専用:matsu＠tksd / 東京食堂	
+大桟橋	-	247	574	937	-	247	574	-	-	1:57	専用:F-FLY	
+太陽～T・A・I・Y・O～	-	419	725	880	-	419	725	-	-	1:51	専用:VJ GYO	
+ピアノ協奏曲第１番”蠍火”	-	422	1111	1414	-	473	1031	1730	-	2:07	専用:VJ GYO/F-FLY	
+beatmania IIDX 12 HAPPY SKY ▲ ▼ △												
+Agnus Dei	-	466	850	1051	-	465	791	1051	-	1:52	専用:nono	
+alla turca con passione	-	409	829	1103	-	396	831	1057	-	2:00	専用:F-FLY	
+Aurora	-	714	1100	1280	-	675	1043	1218	-	1:57	専用:ТОЧКА	
+CaptivAte～浄化～	-	541	946	1243	1738	540	936	1235	1691	2:13	9th TECHNO汎用(色違い)+ミスレイヤー	GOLI
+Catch Me	-	405	678	925	1106	403	685	922	1189	1:51	10th HOUSE汎用+ミスレイヤー	GOLI
+Don't let it go	-	360	647	852	-	360	640	852	-	1:42	専用:F-FLY	
+double thrash	-	527	1066	1206	-	527	1048	-	-	2:05	専用:GOLI	
+EDEN	-	660	969	1363	1637	640	733	1377	1647	2:07	専用:GOLI	
+EMPTY OF THE SKY	-	334	526	843	-	334	526	842	-	2:05	専用:GOLI	
+First Resolution	-	421	808	1077	-	421	819	1077	-	1:53	専用:F-FLY	
+garden	-	440	773	1100	1583	461	774	1396	1756	2:26	10th AMBIENT汎用+ミスレイヤー	GOLI
+Get'em up to R.A.V.E	-	599	892	1158	-	595	890	-	-	2:27	専用:mito	
+GREEN EYES	-	507	827	1123	-	494	828	1123	-	2:00	専用:chihico	
+HAPPY☆ANGEL	332	555	782	1052	-	555	776	1073	-	1:54	7th DANCE汎用+ミスレイヤー	GOLI
+I am	-	555	883	1096	-	611	883	-	-	2:03	専用:yagi-denko	
+in motion	-	432	545	661	-	432	545	661	-	1:43	専用:Voijiy	
+INAZUMA	-	561	930	1368	2042	584	917	1554	1902	1:56	専用:tats	
+LESSON 5	-	654	949	1261	-	542	939	1471	-	2:04	専用:東京食堂(kjk)	
+Little Little Princess	-	558	1118	1420	1946	560	1171	1610	2035	※	専用:MAYA	
+Love Magic	-	515	895	991	-	515	895	-	-	2:02	10th POPS汎用+ミスレイヤー	MAYA
+mind the gap	-	395	550	840	-	378	564	856	-	1:53	専用:たかたん	
+MOON RACE	-	434	598	957	-	433	598	-	-	1:56	専用:MARS	
+Pink Rose	-	297	486	708	1012	297	486	770	1074	1:53	専用+ミスレイヤー:HES	HES
+PLASMA	-	479	848	1145	-	479	848	-	-	2:10	8th CYBER汎用+ミスレイヤー	GOLI
+Pollinosis	-	405	590	1278	-	464	644	829	-	2:01	専用:F-FLY	
+POODLE	-	492	956	1156	1707	493	880	1438	1796	1:59	専用:F-FLY	
+rage against usual	-	697	1060	1527	-	697	1081	1215	1664	2:06	10th TECHNO汎用+ミスレイヤー	GOLI
+SCREAM SQUAD	-	609	869	1073	-	579	863	1072	-	1:49	専用:F-FLY	
+Scripted Connection⇒ A mix	-	865	1155	1575	1749	1079	1269	1382	1816	2:00	8th TECHNO汎用+ミスレイヤー	GOLI
+Scripted Connection⇒ H mix	-	875	1059	1275	1466	879	1005	1366	1526	1:49	8th TECHNO汎用+ミスレイヤー	GOLI
+Scripted Connection⇒ N mix	-	674	858	1073	1247	661	909	1179	1349	1:48	8th TECHNO汎用+ミスレイヤー	GOLI
+SigSig	338	548	864	1309	-	552	884	1259	-	2:05	専用:MAYA+ミスレイヤー	MAYA
+Tizona d'El Cid	-	495	1000	1178	-	491	1000	-	-	2:06	専用:F-FLY+レイヤー	F-FLY
+Twelfth Style	-	630	778	1033	1684	707	976	1070	1748	2:07	専用:MAYA	
+Under the Sky	-	458	710	875	-	390	670	830	-	2:02	専用:F-FLY	
+vault of heaven	-	401	728	1010	-	401	728	1020	-	1:52	専用:XTC+ミスレイヤー	XTC
+Votum stellarum	-	413	857	1017	-	413	965	-	-	1:59	専用:shio	
+We are Disっ娘よっつ打ち命	-	336	490	837	-	336	490	873	-	2:02	専用:VJ GYO	
+Xepher	205	571	1135	1520	-	559	1089	1498	-	2:03	専用:MAYA	
+100% minimoo-G	-	474	871	903	-	474	871	1414	-	1:56	9th TECHNO汎用+レイヤー	eimy
+オレはビートマニア！お前は何マニア？	-	414	763	873	-	414	752	789	-	1:58	専用:東京食堂(izm)	
+合体せよ！ストロングイェーガー！！ (Ryu☆ remix)	-	564	807	972	-	556	784	935	-	1:58	専用:Yasi	
+月光	-	455	900	1246	-	440	922	1175	-	2:15	専用:東京食堂(matsushita)	
+ヒマワリ	-	285	947	1042	-	396	856	943	-	1:56	専用:amamon.	
+冥	302	555	1111	2000	-	555	1104	2000	-	1:57	専用:Ta-K	
+ラクエン	-	369	498	1034	-	368	723	1033	-	2:30	専用:HES	
+beatmania IIDX 13 DistorteD ▲ ▼ △												
+ALFARSHEAR 双神威に廻る夢	222	548	838	1049	-	548	838	1043	-	1:51	専用:GOLI	
+Apocalypse ～dirge of swans～	121	510	921	1214	-	480	981	1270	-	2:09	専用:Michael=Kerorich (kaeru)	
+BALLAD THE FEATHERS	-	367	554	764	-	357	560	-	-	1:41	専用:松田慎一郎	
+Bloody Tears(IIDX EDITION)	-	574	1012	1094	-	574	1009	1280	-	1:53	専用:MAYA	
+BOOM BOOM DISCO NIGHT	-	520	938	1151	-	520	927	1148	-	2:01	専用:tyke	
+Broadbanded	-	454	726	1019	-	436	727	899	-	2:02	8th CYBER汎用+ミスレイヤー	VJ GYO
+Concertino in Blue	198	460	915	1311	-	486	972	1425	-	1:39	専用:tqy	
+CONTRACT	-	648	863	1056	1418	607	856	1050	1545	1:47	CARDINAL GATE汎用+ミスレイヤー	あけのすずめ(VJ GYO)
+D.C.fish	-	513	998	1178	-	505	888	1228	-	2:00	専用:XTC+ミスレイヤー	XTC
+DEEP ROAR	-	503	726	1387	-	500	720	1378	-	1:57	6th EURO汎用	
+Double♡♡Loving Heart	-	292	671	909	-	393	730	1127	-	2:08	専用:ウサギ王 feat.せり★のりか	
+DUE TOMORROW	-	470	791	1073	-	470	791	1543	-	1:39	専用:東京食堂(kjk)	
+EURO-ROMANCE	-	497	933	1056	-	494	893	1363	-	2:08	10th TRANCE汎用+ミスレイヤー	MAYA
+Ganymede	-	571	884	1199	1356	612	951	1363	1391	2:06	CARDINAL GATE汎用+ミスレイヤー	HES
+Harmony and Lovely	-	457	902	1127	-	457	896	1122	-	2:00	専用:Ryu☆	
+Heavenly Sun (IIDX VERSION)	-	421	806	1060	-	421	805	1060	-	2:00	専用:stm	
+INFERNO	-	601	828	1008	-	600	856	1175	-	2:06	専用:東京食堂(matsushita)	
+Leaving...	-	396	714	1116	-	386	714	1024	-	1:45	専用:MAYA+ミスレイヤー	MAYA
+MINT	-	524	917	1158	-	517	906	1163	-	1:34	7th HOUSE汎用+ミスレイヤー	F-FLY
+MOON	-	436	1067	1118	-	436	1048	-	-	1:59	専用:SEKIYAMA with DJ	
+Power of Love	-	513	848	1077	-	512	861	1065	-	2:04	10th POPS汎用+ミスレイヤー	F-FLY
+So Fabulous !!	-	556	784	1191	-	548	853	1214	-	2:01	専用:HHH/MAYA	
+Sun Field	-	287	777	1234	-	449	856	1158	-	1:56	専用:VJ GYO	
+The Dirty of Loudness	-	740	1154	1327	-	723	1122	1189	-	1:44	専用:MAYA+ミスレイヤー	MAYA
+This is Love	-	473	910	1249	-	489	906	-	-	1:58	専用:chihiro	
+tripping contact(teranoid&MC Natsack Remix)	-	646	1020	1258	-	653	968	1367	-	1:59	10th TECHNO汎用+ミスレイヤー	XTC
+TYPE MARS(G-Style Mix)	-	571	974	1237	-	576	990	-	-	1:57	6th CYBER汎用+ミスレイヤー	GOLI
+waxing and wanding	-	658	997	1457	2000	647	966	1399	2000	2:05	CARDINAL GATE汎用+ミスレイヤー	GOLI
+Why did you go away	322	559	904	1166	-	552	901	1165	-	1:57	9th HOUSE汎用+ミスレイヤー	GOLI
+WISH(EUROBEAT MIX)	-	532	824	990	-	532	793	988	-	1:48	専用:yagi-denko	
+with you…	-	398	580	891	-	398	580	1324	-	1:56	専用:東京食堂(kjk)	
+Zenius -I- vanisher	-	493	790	1209	-	492	776	1207	-	2:09	専用:MAYA	
+カゴノトリ～弐式～	-	581	944	1325	-	581	978	1586	-	1:57	専用:nono	
+華蝶風雪	-	638	1064	1500	2014	626	1041	1481	2135	2:00	CARDINAL GATE汎用+ミスレイヤー	MAYA
+タシカナモノ	-	472	726	1026	-	470	797	1191	-	2:04	専用:村上右子	
+嘆きの樹	-	902	1281	2000	-	875	1281	2000	-	2:06	CARDINAL GATE汎用+ミスレイヤー	GOLI
+虹色	-	488	792	934	-	488	793	934	-	1:48	専用:Otas	
+罠	-	283	777	1231	-	374	730	-	-	1:53	10th HOUSE汎用+ミスレイヤー	F-FLY
+beatmania IIDX 14 GOLD ▲ ▼ △												
+Air Bell	-	499	687	868	-	455	642	794	-	1:53	GOLD HOUSE汎用+ミスレイヤー	MAYA
+ANDROMEDA II	-	501	982	1255	-	534	1084	-	-	1:55	8th CYBER汎用+ミスレイヤー	HES
+Blind Justice ～Torn souls, Hurt Faiths ～	-	679	1001	1245	-	618	950	1134	-	2:09	専用:MAYA	
+Candy Galy	-	800	1308	1798	-	642	863	1348	1872	2:12	専用:kototoi	
+CaptivAte～誓い～	-	677	1017	1127	-	710	1078	1319	-	2:05	6th CYBER汎用+ミスレイヤー	mari
+CaptivAte～裁き～	214	435	663	897	-	422	822	1110	-	1:48	専用:HES+F-FLY	
+CROSSROAD ～Left Story～	-	574	883	1097	-	575	857	1047	-	1:51	GOLD TRANCE汎用+ミスレイヤー	GOLI
+Cyber Force	-	637	980	1200	-	610	929	1081	-	2:02	専用:VJ GYO	
+Fascination MAXX	-	508	876	1313	-	475	825	1167	-	1:42	GOLD TECHNO汎用	
+FIRE FIRE	287	616	927	1405	-	616	962	1162	-	2:07	GOLD TRANCE汎用+ミスレイヤー	GOLI
+four-leaf	-	386	642	867	-	386	642	-	-	1:46	専用:tQy	
+GOLD RUSH	282	608	764	1199	-	601	851	1186	-	1:41	専用:kototoi	
+GRID KNIGHT	-	423	1012	1328	1744	813	1056	1396	1855	2:09	専用:12d	
+heaven above	-	418	711	928	-	419	706	921	-	2:06	専用:izm@東京食堂	
+High School Love	204	438	788	1106	-	439	771	1123	-	1:56	10th POPS汎用	
+INORI	-	701	1330	1614	-	699	1241	1730	-	2:24	専用:ТОЧКА	
+KAMAITACHI	-	647	1039	1368	2000	1005	1335	1662	2000	1:57	専用:MAYA	
+LASER CRUSTER	-	732	1250	1644	-	696	1254	1721	-	1:57	専用:F-FLY	
+Love Again...	-	293	400	538	-	396	533	-	-	1:56	専用:MAYA	
+Make Me Your Own	-	451	836	1086	-	451	836	1115	-	1:59	専用:Hozo Arisawa	
+METALLIC MIND	-	451	735	832	-	451	736	-	-	1:48	10th TRANCE汎用+ミスレイヤー	GOLI
+never...	-	414	691	915	-	413	690	-	-	2:09	GOLD HOUSE汎用	
+op.31 叙情	-	319	699	836	-	334	714	858	-	1:55	専用:kaeru	
+PHOTONGENIC	-	701	1002	1162	-	747	1086	1409	-	2:01	専用:Ta-k	
+Roulette	-	458	741	1073	-	459	753	1075	-	1:57	GOLD TRANCE汎用(色違い)+レイヤー	VJ GYO
+Second Heaven	112	500	787	1069	-	500	704	1069	-	2:00	専用:栗雄	
+Sense 2007	-	788	1179	1517	-	792	1179	1474	-	1:59	専用:matsu@東京食堂	
+smile	-	744	1107	1464	-	766	1145	1628	-	2:15	専用:ackermann	
+snow storm	118	403	1173	1409	1709	407	1173	1750	-	2:15	専用:Sachi Yamada	
+the shadow	-	618	1084	1480	-	616	1090	1394	-	2:12	専用:Yoshiaki Sano	
+The Smile of You	-	472	658	815	-	523	697	904	-	2:17	専用:kototoi	
+TRANOID	-	414	929	1141	1546	449	947	1141	1563	2:12	専用:VJ GYO	
+VANESSA	-	591	938	1228	1771	588	938	1297	1633	1:40	専用:MAYA	
+Watch out!!	-	377	544	837	-	377	544	-	-	1:56	8th HOUSE汎用	
+With your Smile	-	366	597	788	-	362	616	786	-	1:43	専用:MatsuTK	
+2hot2eat	-	307	612	854	-	311	635	904	-	1:52	専用:Keisuke Sekii	
+クルクル☆ラブ～Opioid Peptide MIX～	216	500	766	1144	-	538	816	1182	-	2:04	専用:ミコシバ	
+零 - ZERO -	110	596	912	1162	-	601	909	1154	-	2:02	専用:GOLI	
+電人、暁に斃れる。	335	785	1255	1725	-	775	1207	1732	-	2:07	専用:kototoi	
+花吹雪 ～ IIDX LIMITED ～	-	367	573	719	-	493	615	838	-	1:35	専用:MAYA	
+星をこの手に	-	614	933	1099	-	609	962	1267	-	1:56	専用	
+ヨシダさん	-	470	728	987	-	523	739	1003	-	2:10	専用:F-FLY	
+リグレット	-	666	887	1223	-	661	888	-	-	2:12	専用:ヤング	
+beatmania IIDX 15 DJ TROOPERS ▲ ▼ △												
+Anisakis -somatic mutation type"Forza"-	-	631	1089	1443	1971	637	1291	1603	1956	2:17	7th TRANCE汎用+ミスレイヤー	XTC
+avant-guerre	-	390	694	982	-	390	694	982	-	1:57	"専用:Daisuke Tanabe
+Risa Fujii(りったん)
+Hideaki Takahashi(ぺりー)"	
+Be OK	-	479	902	1215	1679	492	1063	1717	-	1:59	6th RAVE汎用	
+beatonic nation	-	640	955	1093	-	664	999	1259	-	2:09	専用:XTC	
+Blue Rain	174	514	812	1149	1702	587	803	1037	1662	1:52	GOLD TRANCE汎用+レイヤー	?
+Darling my LUV	-	354	512	695	-	345	576	-	-	1:48	専用:高橋秀和&宮川雄一	
+Dazzlin' Darlin	172	455	704	1115	-	433	696	1052	-	1:59	専用:Halka	
+Digitank System	-	480	815	1096	-	482	813	1175	-	2:03	7th TECHNO汎用+ミスレイヤー	XTC
+Do it!! Do it!!	-	538	816	987	1317	435	736	982	1312	1:53	MILITARY SPLASH汎用+ミスレイヤー	HES
+end of world	-	523	924	1268	-	523	924	1357	-	2:06	6th CYBER汎用	
+evergreen	-	507	720	997	-	519	740	1037	-	2:10	専用:rice.c	
+four pieces of heaven	-	481	988	1225	1518	481	965	1264	1560	1:58	MILITARY SPLASH汎用+ミスレイヤー	XTC
+Freeway Shuffle	173	411	650	949	-	416	669	916	-	1:43	専用:DanceDanceRevolution SuperNOVA2	
+ICARUS	-	694	1097	1301	2000	687	1038	1336	2000	2:01	MILITARY SPLASH汎用+ミスレイヤー	MAYA
+in the Sky	-	697	1079	1279	-	681	1040	1241	-	2:01	専用:Daisuke Tanabe	
+Kick Out 仮面	-	596	800	1022	-	599	842	1356	-	※	専用:VJ GYO+ミスレイヤー	VJ GYO
+LOVELY STORM	-	679	1105	1429	-	733	1249	1418	-	2:05	10th TRANCE汎用+レイヤー	ackermann & kototoi
+madrugada	-	363	631	945	-	319	623	942	-	1:57	専用:Yumi Yoshimura, Hide Takahashi	
+MAX LOVE	-	730	1100	1348	-	752	1130	1572	-	2:17	8th POPS汎用+6th DANCE汎用	
+MENDES	-	573	1353	1831	-	569	1231	1922	-	1:59	MILITARY SPLASH汎用+ミスレイヤー	G-WEAPON (GOLI)
+MENTAL MELTDOWN	-	609	1176	1443	-	607	1024	1335	-	1:58	専用:Manabu Komatsu,Kenta Ozaki	
+NEW GENERATION -もう、お前しか見えない-	-	541	1011	1342	1895	556	969	1278	1834	2:03	8th POPS汎用	
+oratio	-	747	1056	1493	-	706	1061	1406	-	2:06	専用:kaeru	
+PARANOiA ～HADES～	-	558	954	1395	-	600	989	1532	-	1:40	専用:DDR SuperNOVA2	
+PROMISE FOR LIFE	-	305	753	875	-	286	570	746	-	2:09	GOLD TRANCE汎用	
+REMINISCENCE	-	643	939	1183	-	643	946	1183	-	2:05	10th TRANCE汎用+ミスレイヤー	G-FantasyBell(GOLI)
+Rising in the Sun(original mix)	-	477	864	1202	-	477	839	1187	-	2:01	専用:Masahiko Yagi,Ryota Saito	
+Ristaccia	-	609	1032	1386	-	400	936	1174	1265	2:17	専用:MAYA	
+satellite020712 from "CODED ARMS"	-	680	983	1293	-	831	1199	1656	-	1:50	専用:kototoi	
+satfinal	-	548	722	963	-	545	805	1016	-	1:51	8th HOUSE汎用+レイヤー	VJ GYO
+scar in the earth	-	335	565	766	-	383	592	831	-	2:07	専用:MAYA	
+SOUND OF GIALLARHORN	257	708	1405	1668	-	704	1227	1599	-	2:15	専用:alo	
+State Of The Art	-	552	790	1570	-	541	806	1756	-	2:03	専用:KAISEI＆TETSU-LOW	
+STEEL NEEDLE	-	560	1121	1269	1701	575	1103	1367	1676	2:00	MILITARY SPLASH汎用+ミスレイヤー	VJ GYO
+switch	-	407	790	1069	-	407	790	1069	-	1:42	9th HOUSE汎用	
+THE DEEP STRIKER	274	556	1150	1528	1778	622	1133	1451	1728	2:00	GOLD TECHNO汎用+ミスレイヤー	G-MIRAGE(GOLI)
+the trigger of innocence	-	451	592	924	1558	597	1019	1527	2032	2:00	専用:Keizo,Swanico(イラスト)	
+Time to Air	-	640	1064	1458	1888	634	985	1325	1864	2:01	GOLD TRANCE汎用	
+TRIP MACHINE PhoeniX	-	353	842	935	-	333	762	929	-	1:33	専用:DDR SuperNOVA2	
+TROOPERS	-	625	1216	1496	-	625	1197	1616	-	2:02	専用:XTC+ミスレイヤー	XTC
+Übertreffen	-	555	1019	1280	1655	536	953	1171	1583	1:42	"GOLD TECHNO汎用
+[L]SPADA HARDCORE汎用+ミスレイヤー"	[L]BEMANI Designers "GOLI"
+Wanna Party?	-	386	599	762	1300	329	616	910	1326	1:43	専用:MASAHIKO SUZUKI & YUTA UJIIE	
+2 tribe 4 K	-	452	684	1402	-	419	666	1233	-	2:02	専用:TQY	
+エコ爺	174	424	678	923	-	424	678	922	-	2:04	専用:swift3＆TETSU-LOW	
+高高度降下低高度開傘	-	466	777	1005	-	475	842	1204	-	1:59	専用:Taiyo Yamamoto	
+少年A	-	642	1144	1449	-	681	1150	1356	-	2:19	7th TRANCE汎用+ミスレイヤー	G-RENAISSANCE(GOLI)
+走馬灯 -The Last Song-	-	258	464	673	-	258	465	-	-	2:09	専用:F-FLY	
+華爛漫 -Flowers-	169	510	804	1029	1597	592	801	1011	1719	1:47	10th POPS汎用	
+マチ子の唄	-	418	662	901	-	428	636	879	-	1:58	専用:Tomokazu Ohishi,Chiho Kobayashi	
+ミラージュ・レジデンス	-	575	1097	1345	1676	575	1073	1537	-	2:05	専用:stm	
+beatmania IIDX 16 EMPRESS ▲ ▼ △												
+ALL I NEED YOUR LOVE	-	559	873	1081	-	559	873	1081	-	2:00	専用:Shingo	
+ALL MY TURN -このターンに、オレの全てを賭ける-	-	533	971	1314	-	606	944	1224	-	2:01	6th RAVE汎用	
+Arabian Rave Night	-	655	1166	1504	1888	655	1161	1605	1991	2:02	専用:Tomokazu Ohishi	
+B4U(BEMANI FOR YOU MIX)	-	615	1205	1810	2360	764	1189	1519	1986	2:08	専用:VJ GYO	
+Bahram Attack-猫叉Master Remix-	-	535	997	1314	1640	618	1051	1443	1709	2:14	専用:Hide Takahashi	
+BITTER CHOCOLATE STRIKER	-	564	1142	1990	-	564	1141	1574	2038	2:14	専用:Taiyo Yamamoto	
+BRIDAL FESTIVAL !!!	-	502	764	1077	-	590	820	970	-	2:01	専用:Fukutomi WAVE	
+CaptivAte2～覚醒～	123	564	894	1221	-	493	805	1235	-	1:52	7th TRANCE汎用	
+Colorful Cookie	338	570	1143	1773	-	716	1220	1811	-	1:56	専用:Taiyo Yamamoto	
+Cyber Force -DJ Yoshitaka Remix-	-	553	944	1278	-	694	1079	1292	-	2:13	専用:NAGI	
+Flash Back 90's	-	467	964	1179	1470	526	815	1001	1318	2:07	専用:miuraちゃん	
+Fly Above	-	482	815	1016	-	412	894	1061	-	2:11	専用:Taiyo Yamamoto	
+Go Beyond!!	276	547	899	1166	-	528	822	1087	-	1:58	専用:Hideaki Tsutsumi	
+HYPERION	-	572	1072	1385	-	572	1047	1391	-	2:05	専用:alo	
+I'm Screaming LOVE	-	308	666	851	-	456	605	913	-	1:55	専用:hamon&Swaniko	
+Jack	-	465	714	1086	-	466	852	1252	-	1:43	4th TECHNO汎用	
+Just a Little Smile	-	415	683	1272	-	496	878	1276	-	2:02	専用:12d(Younosuke Yasuda)	
+Kung-fu Empire	-	760	1327	1657	1999	607	1301	1659	1999	2:12	専用:Manabu Komatsu	
+Marie Antoinette	-	558	1018	1312	1618	478	901	1385	1500	2:07	専用:Miki Fuyama	
+Mind Mapping	261	443	627	923	1135	353	667	937	1295	2:02	専用:Manabu Komatsu	
+Monkey Dance '09	-	437	895	1142	-	437	870	1257	-	2:00	8th POPS汎用	
+NΦ CRIME	147	414	736	951	1211	526	846	1012	1285	1:51	専用:「クロスファイア」テーマムービー	
+naughty girl@Queen's Palace	-	433	869	1088	1380	433	698	853	1276	1:54	7th TECHNO汎用+ミスレイヤー	XTC
+neogenesis	-	504	682	864	1180	476	675	1034	1390	1:58	専用:alo	
+Programmed World	-	476	910	1161	-	476	941	1181	-	2:08	4th CYBER汎用	
+Punch Love♡仮面	-	565	888	1269	1636	692	1028	1355	1771	2:02	専用:VJ GYO	
+Queen's Tragedy	-	428	872	1135	-	431	812	1012	-	2:07	専用:Tomokazu Ohishi	
+Secrets	-	638	1253	1592	2116	637	1195	1797	1951	2:00	専用:KAIRIKI	
+smooooch・∀・	199	418	830	1089	1436	448	813	1166	1475	1:55	専用:MAYA	
+SOLITON BEAM	-	741	1071	1187	-	710	1138	1366	-	2:08	専用:Ta-k	
+THANK YOU FOR PLAYING	-	412	858	1090	1534	437	863	1107	1182	1:45	専用:XTC	
+THE SHINING POLARIS(kors k mix)	-	664	1061	1645	-	656	1006	1631	-	2:09	専用:rice.c	
+thunder HOUSE NATION Remix	-	544	838	1242	1954	577	840	1296	1873	2:00	8th HOUSE汎用	
+Turii ～Panta rhei～	186	449	1051	1347	-	440	1006	1280	-	2:09	専用:MAYA	
+V2	400	751	1620	1810	-	746	1408	1686	-	2:13	専用:VJ GYO	
+Y&Co. is dead or alive	-	569	921	1478	-	549	936	1414	-	2:05	専用:Steins	
+You'll say "Now!"	-	629	962	1276	-	537	940	1299	-	2:07	3rd CYBER汎用	
+3y3s	280	772	1306	1871	-	804	1461	1882	-	2:07	10th TRANCE汎用+ミスレイヤー	XTC
+翼	-	454	765	988	1258	503	838	1086	1447	2:07	専用:Yoshinori Asami	
+天空脳番長危機十六連打	-	525	1115	1323	-	525	1087	1309	-	1:57	8th TECHNO汎用	
+鉄甲乙女-under the steel-	-	474	826	1098	-	534	850	1220	-	2:00	10th AMBIENT汎用+ミスレイヤー	XTC
+ハリツヤランデヴー	-	482	1078	1251	-	482	939	1248	-	1:52	専用:tateha	
+卑弥呼	-	643	1442	2119	-	640	1396	2194	-	2:12	GOLD TECHNO汎用+ミスレイヤー	GOLI
+不沈艦CANDY	306	601	1014	1682	-	601	1018	1486	-	2:03	専用:Taiyo Yamamoto	
+まほろば	-	398	737	1033	-	445	708	1127	-	1:56	専用:Hideaki Tsutsumi	
+ミッドナイト堕天使	-	500	827	1398	-	548	895	1552	-	1:59	10th TRANCE汎用	
+山岡晃の「クイズ！家事都合！」	-	339	700	1035	-	452	772	1012	-	1:44	専用:上野コオイチ	
+凛として咲く花の如く	198	672	1087	1398	1595	659	1094	1443	1766	2:06	専用:shio	
+beatmania IIDX 17 SIRIUS ▲ ▼ △												
+AIR RAID FROM THA UNDAGROUND	276	592	952	1189	1523	587	944	1225	1503	2:04	専用:Tomokazu Ohishi	
+Almagest	-	519	1146	1629	-	506	1117	1764	-	1:41	PARALLEL ROTATION汎用(紺)+ミスレイヤー	林林
+Bad Maniacs	-	667	989	1656	-	573	1074	1606	-	1:57	9th TECHNO汎用+ミスレイヤー	MAYA
+bass 2 bass	141	366	638	970	-	472	888	1085	-	1:39	10th POPS汎用	
+beatchic☆仮面～好き、でいさせて～	-	507	836	1017	-	524	987	1190	-	2:02	専用:VJ GYO+ミスレイヤー	
+BEAUTIFUL ANGEL	-	321	921	1254	-	433	954	1444	-	2:02	専用:suzuki masahiko&kensuke saito	
+being torn the sky	-	331	613	998	-	278	555	864	-	1:57	10th AMBIENT汎用+ミスレイヤー	MAYA
+bloomin' feeling	198	643	980	1313	-	646	1109	1384	-	1:35	専用:Steins	
+CaptivAte～裁き～(SUBLIME TECHNO MIX)	-	523	837	1231	-	530	847	1151	-	2:14	PARALLEL ROTATION汎用(白)	
+D	-	770	1004	1313	-	598	1021	1257	-	2:02	PARALLEL ROTATION汎用(緑)+ミスレイヤー	MAYA
+DAWN -THE NEXT ENDEAVOUR-	-	831	1369	1577	-	871	1393	1615	-	2:28	専用:ta-k	
+Dazzlin' Darlin-秋葉工房mix-	-	403	767	1053	-	474	818	1140	-	1:51	PARALLEL ROTATION汎用(緑)	
+DESIRE	-	477	1004	1446	-	531	872	1327	-	1:59	専用:alo	
+Do Back Burn	-	364	728	1078	-	456	788	1096	-	1:42	専用:Manabu Komatsu (WelzAnimationStudios Co.,ltd.)	
+DOMINION	-	635	1194	1636	-	601	1180	1631	-	2:04	SIRIUS CYBER汎用+ミスレイヤー	XTC
+DROP	-	435	1115	1337	-	390	977	1268	-	2:05	専用:小美野昌史	
+Elisha	217	462	754	1152	-	481	822	1390	-	2:06	専用:Shinichiro Matsuda	
+Empire State Glory	-	563	928	1329	-	596	1041	1351	-	1:57	8th CYBER汎用	
+eRAseRmOToRpHAntOM	-	787	1340	1686	-	788	1281	1798	-	2:25	専用:pam	
+Evans	304	628	1121	1440	-	679	1046	1438	-	1:45	10th TRANCE汎用	
+EXUSIA	-	628	1417	1964	-	887	1392	1980	-	2:08	PARALLEL ROTATION汎用(青)+ミスレイヤー	XTC
+G59	-	906	1210	2000	-	652	1210	2000	-	2:10	PARALLEL ROTATION汎用(白)+ミスレイヤー	林林
+GALGALIM	-	733	1036	1208	-	708	979	1197	-	1:48	4th CYBER汎用	
+GOLDEN CROSS	-	559	1072	1765	-	619	970	1529	-	2:01	専用:ackermann	
+Hydrogen Blueback	-	520	862	1170	1241	573	877	1165	1241	1:54	専用:Hideaki Tsutsumi	
+IN THE NAME OF LOVE	273	381	718	975	-	371	722	976	-	1:44	9th HOUSE汎用	
+Keep it-秋葉工房mix-	-	521	867	942	-	380	775	1204	-	1:50	専用:VJ GYO	
+Last Burning	-	443	840	1197	-	434	840	1059	-	1:57	専用:Shingo	
+Light Shine	-	415	582	988	-	559	898	1361	-	1:45	GOLD HOUSE汎用	
+MIRACLE MEETS	-	488	807	1128	-	471	857	1051	-	2:00	専用:alo & Minako Endo	
+mosaic	-	754	1035	1509	-	728	845	1348	-	1:47	PARALLEL ROTATION汎用(黄)+ミスレイヤー	HES
+NEW SENSATION -もう、あなたしか見えない-	-	641	1045	1357	-	650	1022	1574	-	2:04	専用:VJ GYO	
+NoN-Fiction Story!	-	360	703	1112	-	471	713	1007	-	1:47	専用:Swaniko、Hironobu Hatta、miura	
+Programmed Sun	-	563	960	1309	-	371	885	1135	-	2:03	専用:kei_viva	
+quell～the seventh slave～	-	490	926	1646	-	638	944	1752	-	※	専用:ackermann	
+Raison d'être～交差する宿命～	-	614	1184	1389	-	564	1028	1836	-	2:10	専用:MAYA	
+Red. by Full Metal Jacket	-	517	1062	1643	-	517	1015	1564	-	1:59	SIRIUS CYBER汎用+ミスレイヤー	GOLI
+Roots of my way!	-	447	683	1025	-	500	683	1025	-	2:10	GOLD TRANCE汎用	
+Session 1 -Genesis-	-	472	841	1240	-	638	871	1170	-	1:54	7th TRANCE汎用	
+She is my wife	217	358	801	1002	-	356	795	1020	-	1:56	専用:なかのりょうすけ	
+SOLID STATE SQUAD	-	539	1188	1819	1868	539	1188	1913	2033	2:13	専用:12d(Yonosuke Yasuda)	
+Sorrows	-	410	848	1241	-	466	880	1274	-	1:58	SIRIUS HOUSE汎用	
+Special One	-	435	618	895	-	415	625	900	-	1:37	SIRIUS HOUSE汎用	
+THE LAST STRIKER	-	721	995	1327	-	707	1016	1342	-	2:12	専用:ackermann改めリン・ハヤシ	
+The Story Begins	-	428	925	1232	-	729	1117	1480	-	2:22	専用:Nobuaki Ebihara(peace Co., Ltd.)	
+かずあそび	-	265	600	852	-	352	689	910	-	2:01	GOLD TECHNO汎用+ミスレイヤー	GOLI
+コスモス	-	458	762	1049	-	471	778	1012	-	1:48	専用:イシザワ	
+サヨナラ・ヘヴン	190	476	709	855	1117	644	815	957	1095	2:05	専用:ackermann a.k.a. akaman	
+水上の提督(Short mix from "幻想水滸伝V")	-	357	868	1073	-	357	940	1147	-	2:03	専用:kototoi	
+たからもの	-	646	943	1123	1786	636	908	1521	1846	2:12	5th DANCE汎用	
+バビロニア	-	422	705	940	-	412	590	951	-	2:09	専用:Fukutomi WAVE	
+未来のプリズム	-	351	701	893	-	341	698	967	-	1:55	専用:ES...(Molojun)	
+ワルツ第17番 ト短調”大犬のワルツ”	-	669	1214	1684	-	640	1259	2290	-	※	PARALLEL ROTATION汎用(赤)+レイヤー	NAGI
+beatmania IIDX 18 Resort Anthem ▲ ▼ △												
+Aegis	-	459	717	1202	-	444	728	1109	-	1:48	専用:かーる	
+ALBIDA	267	560	1013	1530	-	568	958	1393	-	1:55	GOLD TRANCE汎用	
+Answer	-	393	748	1224	-	463	738	1142	-	2:07	専用:小美野昌史	
+ANTHEM LANDING	-	489	987	1484	-	555	1164	1258	-	※	"専用:Akira Nightray
+(WelzAnimationStudios Co.,ltd.)"	
+Believe In Me	-	533	962	1213	-	502	916	1200	-	2:00	4th HOUSE汎用	
+BLUST OF WIND	-	427	810	1080	1335	394	784	1113	1451	2:00	"専用:Yuki Yoshida
+(WelzAnimationStudios Co.,ltd.)"	
+Bounce Bounce Bounce	-	560	909	1293	-	507	874	1230	-	2:10	7th DANCE汎用	
+Breaking the ground	-	598	899	1274	-	556	866	1265	-	2:08	WORLD TOUR汎用+レイヤー	NAGI
+Broken	-	543	1039	1598	-	551	1096	1420	-	2:17	GOLD TRANCE汎用	
+BROKEN EDEN	-	542	917	1182	-	560	992	1235	-	1:53	GOLD TRANCE汎用	
+Dances with Snow Fairies	-	743	1165	1623	2135	739	1183	1848	2156	2:07	JAPAN TOUR汎用+レイヤー	NAGI
+DAYDREAMER	-	598	885	1265	-	585	822	1304	-	2:09	専用:なかのりょうすけ	
+Destiny Sword	-	455	923	1213	-	453	829	1254	-	1:48	"専用:Mitsuhiro Saida,Masayuki Fujimoto
+(WelzAnimationStudios Co.,Ltd.)"	
+DM STAR～関西 energy style～	-	562	979	1206	-	637	1109	1474	-	2:04	JAPAN TOUR汎用+レイヤー	VJ GYO
+Energy Drive	-	448	763	1122	-	452	835	1230	-	2:05	6th CYBER汎用	
+Eternal Tears	-	222	551	691	-	266	485	691	-	2:00	6th HOUSE汎用	
+Everlasting Resort	-	448	669	959	-	472	750	1058	-	1:53	8th HOUSE汎用	
+Fantasia	122	201	781	1123	-	309	783	1216	-	1:46	7th TRANCE汎用	
+Golden Palms	-	377	758	1036	1240	503	853	1185	1264	2:01	専用:Vincent Bui,Jean Ledieu	
+I FIGHT ME	-	315	718	1068	-	366	781	1172	-	2:04	専用:Vincent Bui	
+Kailua	-	268	708	1125	-	429	740	1120	-	1:55	WORLD TOUR汎用+レイヤー	Fukutomi WAVE
+Let The Track Flow	-	571	943	1367	-	534	903	1380	-	1:57	WORLD TOUR汎用+レイヤー	VJ GYO
+Medicine of love	-	331	558	866	-	328	502	857	-	1:40	5th DANCE汎用	
+Mermaid girl	295	500	856	1113	-	629	1003	1310	-	2:06	10th POPS汎用+ミスレイヤー	Fukutomi_WAVE
+Never Fade Away	-	398	907	1535	-	529	1104	1598	-	2:05	10th TRANCE汎用+レイヤー	VJ GYO
+New Castle Legions	-	510	1042	1418	-	478	990	1587	-	1:59	10th TECHNO汎用	
+PARADISE LOST	-	726	1217	1718	-	689	1106	1820	-	2:13	WORLD TOUR汎用+レイヤー	HES
+passionate fate	-	589	832	1075	-	573	840	1295	-	1:58	6th RAVE汎用	
+perditus†paradisus	-	658	1345	2065	-	665	1341	2109	-	2:10	WORLD TOUR汎用+レイヤー	VJ GYO
+Programmed Life	-	557	921	1206	-	551	931	1291	-	1:50	"専用:Manabu Komatsu
+(WelzAnimationStudios Co.,ltd.)"	
+reunion	281	708	1239	1677	-	822	1243	1893	-	2:03	SIRIUS CYBER汎用+ミスレイヤー	MAYA
+Rock Da House	-	456	836	1128	-	453	794	1150	-	1:49	専用:yama_ko	
+SABER WING	-	282	952	1438	-	372	928	1549	-	1:47	専用:DDR X	
+Sakura Reflection	-	242	815	1190	-	511	879	1395	-	1:45	Resort Anthem DANCE汎用	
+sakura storm	-	529	675	1225	-	550	913	1498	-	1:33	専用:DDR II	
+Session 9 -Chronicles-	-	393	1238	1852	-	512	1184	1731	-	2:03	専用:alo	
+Space Time	-	317	867	1114	-	478	896	1359	-	2:12	"専用:Yumi Yoshimura
+(WelzAnimationStudios Co.,ltd.)"	
+SPECIAL SUMMER CAMPAIGN!	-	358	833	1509	-	601	1097	1526	-	1:46	6th RAVE汎用	
+Stay my side	-	325	541	678	-	301	498	689	-	1:42	5th DISCO汎用	
+STELLAR WIND	194	322	963	1370	-	523	930	1373	-	2:02	10th TRANCE汎用	
+THE BLACK KNIGHT	-	470	1067	1488	-	518	1086	1490	-	2:02	WORLD TOUR汎用+レイヤー	NAGI
+THE DOOR INTO RAINBOW	-	409	873	1123	-	425	923	1289	-	2:06	専用:pam,Ta-k(DisBound Dimension,ltd.)	
+THE FALLEN	-	468	780	1377	-	529	925	1235	-	1:51	8th CYBER汎用	
+Tropical April	-	827	1174	1395	-	636	1071	1388	-	2:03	Resort Anthem DANCE汎用+レイヤー	VJ GYO
+Vermillion	-	272	598	1045	-	276	743	1091	-	1:31	専用:HES	
+Watch Out Pt.2	-	599	1029	1506	-	616	961	1322	-	1:50	専用:三嶽大輔	
+WISE UP!	174	249	596	803	1320	284	487	792	1316	1:45	10th HOUSE汎用	
+Wuv U	-	208	672	861	-	623	804	1089	-	1:37	10th POPS汎用	
+XANADU OF TWO	-	505	882	1382	1729	551	879	1329	1817	2:11	8th POPS汎用	
+ZETA～素数の世界と超越者～	167	307	1097	1583	-	557	1307	1847	-	2:14	専用:VJ GYO+ミスレイヤー	MAYA
+おおきなこえで	-	230	502	754	1095	235	459	611	1067	2:04	6th HOUSE汎用+レイヤー	MAYA
+かげぬい ～ Ver.BENIBOTAN ～	266	450	718	980	-	458	729	1076	-	2:02	10th AMBIENT汎用+ミスレイヤー	GOLI
+黒髪乱れし修羅となりて	-	410	1077	1745	-	557	1234	1750	-	2:05	GOLD TRANCE汎用	
+灼熱Beach Side Bunny	296	564	1025	1719	-	542	933	1692	-	2:02	専用:Minako Endo	
+旅人リラン	-	579	998	1345	-	617	1054	1475	-	2:03	GOLD TECHNO汎用	
+中華急行	-	164	770	1167	-	433	811	1233	-	1:42	7th DANCE汎用	
+夕焼け ～Fading Day～	-	504	1067	1420	-	488	983	1314	-	1:57	9th TECHNO汎用	
+beatmania IIDX 19 Lincle ▲ ▼ △												
+A MINSTREL ～ ver. short-scape ～	-	341	732	1187	1954	346	771	1231	1965	2:04	10th AMBIENT汎用	
+Almace	-	432	660	1012	-	431	746	1153	-	1:46	専用:tef*tef	
+ANAGRAMS I to Y	-	456	849	1245	-	437	863	1233	-	2:13	Lincle POPS汎用+ミスレイヤー	HES
+BLACK.by X-Cross Fade	-	518	1111	1738	-	547	1201	1761	-	1:58	専用:yama_ko	
+CALL	-	185	441	735	1371	271	721	864	1426	1:59	"専用:せきやすこ&野口路加&DJ Codomo
+(onnacodomo)"	
+Castle on the Moon	121	328	837	1231	-	329	818	1305	-	1:38	8th POPS汎用	
+Change the World	-	412	714	931	-	549	913	1271	-	2:00	Lincle POPS汎用	
+DIAVOLO	-	657	974	1745	-	657	1209	1832	-	1:58	Lincle POPS汎用+レイヤー	チャーム･シスターズ
+Drive Me Crazy	-	361	704	1157	-	360	687	1254	-	1:58	Lincle POPS汎用+レイヤー	かーる
+Express Emotion	-	385	521	1271	-	395	654	1248	-	2:02	Lincle POPS汎用+ミスレイヤー	GOLI
+F	-	532	1099	1813	-	532	1258	1760	-	1:55	専用:Minako Endo	
+Far east nightbird	180	264	682	1025	-	373	738	1126	-	1:58	Lincle CYBER汎用	
+ƒƒƒƒƒ	-	431	1109	1624	-	611	1297	1703	-	1:42	GOLD HOUSE汎用	
+Flip Flap	140	294	706	1137	-	293	662	1004	-	1:54	Lincle POPS汎用	
+Follow Tomorrow	-	457	754	1142	-	490	819	1193	-	1:53	専用:bobnob	
+GIGANT	-	297	601	890	1484	316	678	1068	1481	1:44	Taiyo Yamamoto	
+HAERETICUS	-	440	1000	1589	-	458	1004	1535	-	1:48	Lincle CYBER汎用	
+I'm so Happy	159	211	709	1187	-	381	768	1205	-	1:40	Lincle POPS汎用	
+In the Blackest Den	-	449	831	1372	-	452	873	1457	-	1:57	Lincle Kingdom Phase 1汎用+戦闘レイヤー	かーる
+Infinite cave	-	529	786	1044	-	724	1137	1525	-	2:00	専用:kototoi	
+KYAMISAMA ONEGAI!	-	344	580	1076	1583	394	628	1098	1845	1:58	Lincle POPS汎用	
+LAX5 feat.Ryota Yoshinari	-	540	1082	1427	-	612	1181	1544	-	2:00	Lincle CYBER汎用	MatsuTK
+LETHEBOLG ～双神威に斬り咲けり～	-	518	826	1111	-	512	866	1115	-	2:07	専用:GOLI	
+Liquid Crystal Girl feat. echo	-	209	562	1014	-	229	617	1202	-	2:05	Lincle POPS汎用	
+LOVE B.B.B	-	394	772	1019	-	438	816	1181	-	1:57	Lincle POPS汎用	Stain
+Lucky Days	-	333	777	1111	-	333	777	1111	-	2:02	専用:MatsuTK	
+Mermaid girl-秋葉工房 MIX-	-	415	678	1030	-	427	704	1029	-	2:11	Lincle POPS汎用	
+Miami Sunset Drive	-	324	548	842	-	331	669	995	-	2:08	Lincle POPS汎用	
+NNRT	-	632	1290	1780	-	654	1389	1957	-	2:13	Lincle Kingdom Phase 2汎用+戦闘レイヤー	HES
+Phoenix	-	454	617	1258	2027	527	793	1329	2010	1:55	専用:MatsuTK	
+prompt	-	482	802	1420	-	530	1024	1502	-	2:06	Lincle POPS汎用	
+QUANTUM TELEPORTATION	-	729	1216	1490	1845	729	1216	1999	1825	2:10	専用:Naoya Miyadai (D.B.D)	
+quaver♪	145	357	1075	1745	-	340	1021	1874	-	1:49	7th DANCE汎用	
+Quick Silver	-	404	941	1353	-	447	878	1438	-	1:54	専用:yama_ko	
+Release The Music	-	430	740	1081	-	420	771	1035	-	2:03	Lincle POPS汎用	
+RESISTANCE	-	320	679	1198	-	353	707	1345	-	1:59	GOLD TECHNO汎用	
+Round and Round	-	403	622	1088	-	435	700	1230	-	2:00	Lincle POPS汎用+ミスレイヤー	GOLI
+SA.YO.NA.RA. SUPER STAR	-	248	656	868	-	402	754	1192	-	1:55	専用:なかのりょうすけ	
+Scharfrichter	-	449	822	1472	-	522	974	1552	-	2:05	Lincle Kingdom Phase 1汎用+戦闘レイヤー	VJ GYO
+Several Words	-	321	729	1098	-	336	724	1108	-	1:52	SIRIUS CYBER汎用+ミスレイヤー	square_head
+SHADE	-	551	1048	1464	-	609	1100	1372	-	※	Lincle CYBER汎用+ミスレイヤー	square_head
+Snake Stick	-	535	1067	1447	-	560	1108	1418	-	1:56	専用:Steins	
+Snow Goose	151	188	691	1238	-	239	1017	1394	-	1:41	Lincle POPS汎用	
+Star Trail	-	325	612	942	1325	376	726	1177	1291	2:00	専用:alo	
+The Limbo	-	603	1042	1701	2190	626	1192	1618	2146	2:04	Lincle Kingdom Phase 2汎用+戦闘レイヤー	GOLI
+The Sampling Paradise	-	438	940	1545	-	451	1191	1646	-	1:58	Lincle Kingdom Phase 1汎用+戦闘レイヤー	Fukutomi WAVE
+Thunderbolt	-	527	975	1911	-	534	1034	1677	-	2:05	Lincle CYBER汎用+ミスレイヤー	GOLI
+TITANS RETURN	164	318	802	1275	1377	319	798	1265	1384	1:47	Lincle CYBER汎用	
+Todestrieb	-	565	979	1733	-	541	1079	1960	-	2:09	Lincle Kingdom Phase 2汎用+戦闘レイヤー	NAGI
+Voxane	-	312	628	881	-	315	642	1013	-	1:53	Lincle POPS汎用	
+WONDER WALKER	-	496	990	1921	-	498	1020	1916	-	2:07	Lincle POPS汎用	
+YAKSHA	-	634	1215	2000	-	647	1391	2033	-	2:13	Lincle Kingdom Phase 2汎用+戦闘レイヤー	GOLI
+yellow head joe	-	401	778	1152	1596	424	893	1438	-	1:37	Lincle POPS汎用	
+Yellow Sunrise	-	383	726	1145	-	437	878	1493	-	1:57	専用:Minako Endo	
+24th Century BOY	-	430	996	1456	-	507	1049	1398	-	2:01	専用:pam & Ta-k & Haruki Kato	
+532nm	-	288	640	1349	-	352	686	1310	-	1:39	Lincle POPS汎用	
+蛇神	212	368	773	1438	1904	419	922	1473	1838	2:05	専用:MAYA	
+陽炎	-	317	606	1010	-	315	602	1079	-	1:45	Lincle POPS汎用+ミスレイヤー	square_head
+君のハートにロックオン	-	359	904	1363	1828	367	902	1837	-	2:04	専用:Ohashi Takashi	
+恋する☆宇宙戦争っ！！	257	455	883	1835	2355	455	840	1858	2276	2:08	Lincle POPS汎用+ミスレイヤー	GOLI
+子供の落書き帳	-	471	1018	1395	-	561	941	1254	-	1:36	専用:亥	
+衰色小町メランコリア	-	401	711	1192	-	395	744	1163	-	1:55	GOLD TECHNO汎用+レイヤー	VJ GYO
+聖人の塔	-	489	1076	1567	2290	530	1139	1997	2267	2:01	Lincle Kingdom Phase 1汎用+戦闘レイヤー	HES
+天空の夜明け	-	686	1125	2072	-	703	1444	2261	-	2:12	Lincle Kingdom Cuvelia汎用+戦闘レイヤー	GOLI
+突撃!ガラスのニーソ姫!	-	329	592	1066	-	363	696	1144	-	1:53	Lincle POPS汎用+レイヤー	GOLI
+ビューティフルレシート	171	259	621	978	-	311	814	1151	-	1:48	Lincle POPS汎用	
+ユミル	-	333	691	1434	-	505	854	1404	-	2:04	7th TRANCE汎用	
+beatmania IIDX 20 tricoro ▲ ▼ △												
+Ascalon	-	569	913	1171	-	649	1031	1448	-	1:57	Lincle POPS汎用+ミスレイヤー	tef*tef
+Beastie Starter	-	272	661	1121	-	272	667	1100	-	1:53	7th TECHNO汎用	
+BLUE STRAGGLER	-	440	761	1328	-	442	843	1311	-	1:51	専用:Fukutomi WAVE+ミスレイヤー	Fukutomi WAVE
+BRAVE GLOW	-	419	875	1261	-	392	772	1188	-	1:59	Lincle CYBER汎用+レイヤー	VJ GYO
+CONCEPTUAL	-	417	689	1391	-	437	708	1412	-	1:55	LEGEND CROSS汎用+戦闘レイヤー	AUK-YAM
+Confiserie	-	484	1097	1833	-	509	1097	1938	-	1:46	Lincle POPS汎用	
+connective	-	203	564	805	-	206	569	787	-	1:57	4th HOUSE汎用	
+Cookie Bouquets	-	446	1076	1714	-	655	1119	1814	-	2:09	"専用:Vincent Bui & Naoya Miyadai
+& Ryousuke Takeuchi(D.B.D)"	
+DAY DREAM	-	295	685	1075	-	318	644	1018	-	1:30	専用:K-GO	
+Devilz Staircase	-	332	1134	1685	-	361	1017	1614	-	1:51	専用:GOLI+ミスレイヤー	GOLI
+Elemental Creation	133	767	1248	2130	-	828	1268	2222	-	2:06	GOLD TRANCE汎用	
+examination leave	-	585	972	1712	-	704	1148	1613	-	1:51	tricoro CYBER汎用	
+FLOWER	182	575	915	1460	-	605	977	1493	-	2:05	専用:Motion Combat	
+Fly you to the star	-	393	818	1144	-	410	744	1161	-	1:55	専用:Motion Combat	
+GAIA	-	527	1149	1676	-	610	1074	1854	-	2:02	Lincle CYBER汎用	
+GRADIUS 2012	-	465	869	1380	-	532	817	1459	-	2:03	専用:HES	
+Hollywood Galaxy	-	567	1039	1392	-	579	1022	1378	-	1:54	GOLD TRANCE汎用	
+Howling	-	280	695	1066	1350	321	710	1060	1427	1:50	SIRIUS HOUSE汎用+レイヤー	VJ GYO
+I know You know	-	304	602	950	-	345	628	976	-	1:59	専用:bobnob	
+ILIAS	-	406	669	1105	-	412	846	1286	-	1:50	Lincle POPS汎用	
+Illegal Function Call	-	511	942	1398	2023	533	1173	1602	2076	2:01	専用:Ta-k & pam(drawiz.Inc)	
+In Heaven	-	386	745	1072	-	495	754	1107	-	1:58	専用:alo	
+JOMANDA	134	595	1300	1918	-	598	1317	1810	-	2:10	専用:T田	
+Liberation	-	760	1203	1905	-	738	1290	1744	-	1:59	専用:alo	
+Light and Cyber･･･	-	532	1039	1579	-	565	1073	1502	-	2:04	専用:Koji Aramaki	
+Little Star	-	495	896	1635	-	498	954	1676	-	1:56	tricoro CYBER汎用+レイヤー	GOLI
+LUV CAN SAVE U	-	295	720	1069	1409	300	699	1416	1644	2:01	Resort Anthem DANCE汎用+ミスレイヤー	NAGI
+mnemoniq	-	269	488	658	-	396	635	799	-	1:44	2nd HOUSE汎用	
+Neonlights	-	333	815	1127	-	346	967	1121	-	1:53	専用:MiRA	
+neu	99	504	1099	1999	-	521	999	1999	-	※	tricoro TECHNO汎用	
+New Decade IIDX Edition	136	503	1001	1539	-	533	948	1461	-	1:56	専用:もとこ*3	
+New Lights	-	531	929	1250	-	686	945	1306	-	2:06	Lincle POPS汎用+レイヤー	HES
+Plan 8	-	600	1147	1690	-	627	1077	1577	-	2:04	LEGEND CROSS UNKNOWN汎用+戦闘レイヤー	GOLI
+planarian	-	360	854	1279	-	398	862	1439	-	1:50	tricoro CYBER汎用+レイヤー	Fukutomi Wave
+POINT ZERO	-	370	663	1068	-	352	722	1014	-	1:51	5th DISCO汎用	
+Präludium	-	355	732	1164	-	381	758	1216	-	2:00	専用:Taiyo Yamamoto	
+Proof of the existence	-	603	1104	1675	-	595	1104	1524	-	2:06	Ω-ATTACK汎用+戦闘レイヤー	GOLI
+Rainbow after snow	-	370	744	1090	-	494	794	1208	-	2:04	10th AMBIENT汎用	
+Reflection Into the EDEN	-	404	740	1100	-	539	806	1283	-	2:24	専用:kototoi	
+Re:GENERATION	122	481	810	1145	-	481	949	1410	-	1:57	7th TRANCE汎用+ミスレイヤー	Nakamura Yuji
+rumrum triplets	-	491	1029	1541	-	484	1256	1613	-	2:07	LEGEND CROSS汎用+戦闘レイヤー	NAGI
+S!ck	-	463	808	1373	-	465	961	1416	-	2:02	LEGEND CROSS汎用+戦闘レイヤー	XTC
+Saturn	-	693	1040	1332	1783	711	1091	1470	1814	1:55	7th TRANCE汎用	
+Shining World	-	632	811	976	-	568	726	1296	-	1:58	4th HOUSE汎用+レイヤー	VJ GYO
+SHION	-	338	656	1359	-	393	810	1482	-	2:04	7th TRANCE汎用	
+Sol Cosine Job 2	-	542	904	1625	-	550	1294	1596	-	2:00	SIRIUS CYBER汎用+ミスレイヤー	XTC
+STULTI	-	415	867	1416	-	494	936	1496	-	1:50	8th CYBER汎用	
+SYNC-ANTHEM	-	481	1279	1865	-	563	1254	1732	-	2:07	LEGEND CROSS汎用+戦闘レイヤー	7
+Synergy For Angels	-	466	860	1400	-	469	850	1496	-	1:56	Lincle CYBER汎用	
+Take My Life	-	490	817	1487	-	522	910	1491	-	1:58	6th EURO汎用	
+Thor's Hammer	-	491	945	1641	-	516	1015	1670	-	1:46	LEGEND CROSS UNKNOWN汎用+戦闘レイヤー	チャーム・あねじゃ
+Time to Empress	-	467	983	1324	1600	726	1138	1497	1644	2:01	6th RAVE汎用	
+Timepiece phase II	-	546	1161	1665	-	522	1180	1571	-	1:47	専用:770	
+Timepiece phase II (CN Ver.)	-	501	1008	1546	-	502	970	1325	-	1:47		
+True Blue	-	551	1291	1898	-	579	1244	1775	-	2:08	tricoro CYBER汎用	
+Valanga	-	674	1126	1647	-	644	1142	1807	-	1:42	GOLD TECHNO汎用	
+VALLIS-NERIA	136	623	1076	1507	-	667	1169	1619	-	2:13	専用:T田	
+VEGA	-	581	1061	1584	-	583	1046	1670	-	1:59	専用:Fukutomi wave	
+ZED	-	474	876	1405	-	534	818	1479	-	2:02	専用:ogaooooo	
+Zirkfied	-	524	1055	1968	-	518	1044	1897	-	2:05	GOLD TECHNO汎用	
+405nm (Ryu☆mix)	-	467	898	1301	-	469	910	1361	-	1:49	7th DANCE汎用+レイヤー	かーる
+8bit Princess	-	327	690	1319	-	343	621	1355	-	2:01	10th POPS汎用+レイヤー	かーる
+アストライアの双皿	-	345	1110	1632	-	505	1105	1514	-	2:07	7th TRANCE汎用	
+梅雪夜	-	445	759	1081	-	425	771	1108	-	1:49	GOLD TECHNO汎用	
+ΕΛΠΙΣ	-	584	1075	1600	1852	551	1096	1577	1815	2:04	LEGEND CROSS UNKNOWN汎用+戦闘レイヤー	蒼弐
+"お米の美味しい炊き方、
+そしてお米を食べることによるその効果。"	-	459	812	1122	1907	517	805	1085	1866	1:58	GOLD TECHNO汎用	
+朧	104	395	758	1060	1280	413	759	1082	1257	2:01	専用:ゆうき	
+音楽	-	453	1038	1487	-	500	949	1369	-	※	tricoro TECHNO汎用	
+下弦の月	-	477	755	1000	-	471	729	984	-	1:58	tricoro TECHNO汎用+ミスレイヤー	VJ GYO
+カジノファイヤーことみちゃん	-	331	737	1271	1777	343	701	1477	-	1:53	Resort Anthem DANCE汎用+レイヤー	GOLI
+仮想空間の旅人たち	-	587	1121	1450	1943	570	1032	1549	1817	※	tricoro CYBER汎用+レイヤー	VJ GYO
+キャトられ♥恋はモ～モク	-	751	1359	1988	-	795	1388	2120	-	2:12	専用+戦闘レイヤー	GOLI
+狂イ咲ケ焔ノ華	-	621	1269	1860	-	656	1316	1894	-	2:10	専用:堕天王の眷属G+レイヤー	堕天王の眷属G
+シュレーディンガーの猫	-	580	1231	1717	-	614	1198	1685	-	1:53	10th TECHNO汎用	
+創世ノート	-	430	988	1512	-	464	952	1265	-	2:01	7th TRANCE汎用	
+即席！脳直★ミュージックシステム	-	529	1032	1838	-	543	1056	1735	-	2:02	Lincle POPS汎用+レイヤー	VJ GYO
+たまゆら	-	600	960	1407	-	602	1159	1441	-	1:49	専用:K-GO	
+トリカゴノ鳳凰	-	586	1057	1932	-	579	1138	1709	-	2:11	Ω-ATTACK汎用+戦闘レイヤー	GOLI
+†渚の小悪魔ラヴリィ～レイディオ†(IIDX EDIT)	123	279	858	1835	-	278	973	2084	-	1:50	専用:NATSU & たかたん	
+メイメツ、フラグメンツ	-	329	661	984	-	357	588	1059	-	1:40	専用:VJ GYO+ミスレイヤー	GOLI
+ラキラキ	-	332	749	1001	-	343	758	1016	-	1:43	Lincle POPS汎用	
+龍と少女とデコヒーレンス	-	427	863	1515	1713	440	893	1387	1722	2:06	専用:いそにん	
+beatmania IIDX 21 SPADA ▲ ▼ △												
+Adularia	100	540	972	1449	-	524	946	1382	-	1:57	専用:alo	
+ALBA -黎明-	-	330	787	1631	1990	398	820	1600	1996	1:55	専用:GOLI	
+Ancient Scapes	-	602	1073	1780	2198	637	1254	1931	2285	2:07	tricoro CYBER汎用	
+BLUE DRAGON(雷龍RemixIIDX)	-	769	1159	1727	-	675	1033	1373	1774	1:59	Lincle POPS汎用	
+BRAINSTORM	-	386	1032	1449	-	633	1204	1495	-	2:07	専用:OTAS	
+BRAVE OUT	-	528	773	1091	1413	520	912	1264	1809	2:00	Lincle POPS汎用	
+Claiomh Solais	-	173	723	1052	-	265	843	1175	-	1:59	専用:TSUMURING	
+Cleopatrysm	-	416	753	1326	-	381	732	1199	-	1:55	GOLD TRANCE汎用	
+Close the World feat.a☆ru	-	578	1075	1739	1983	433	912	1610	1851	1:59	SPADA HARDCORE汎用	
+Critical Crystal	112	565	946	1495	-	574	975	1429	-	1:54	専用:Taiyo Yamamoto	
+DARK LEGACY	-	675	1077	1828	-	894	1127	1853	-	2:03	専用:GOLI	
+Devilz Sacrifice -贖罪の羊-	-	489	927	1265	-	497	922	1224	-	1:48	7th TRANCE汎用	
+diagram	-	318	660	1461	-	400	636	1419	-	2:07	Resort Anthem DANCE汎用	
+Elektrick U-Phoria	-	593	1004	1566	2050	654	1048	1763	2164	2:02	専用:板垣 聖一	
+Element of SPADA	-	355	686	1047	1560	355	686	1217	1571	2:10	SPADA HARDCORE汎用	
+Engraved Mark	-	413	700	1222	-	430	713	1209	-	1:52	tricoro CYBER汎用	
+EXTREME MACH COLLIDER	-	527	763	1305	-	485	852	1007	-	2:02	専用:alo	
+Feel The Beat	-	689	1129	1830	2225	578	1049	1628	1879	2:04	tricoro CYBER汎用	
+Funny shuffle	-	309	590	1199	-	308	639	1312	-	1:46	GOLD HOUSE汎用	
+HYENA	-	608	1026	1434	1894	531	943	1433	1934	2:00	8th CYBER汎用	
+Hypersonik	-	521	878	1272	-	544	897	1252	-	2:06	Lincle CYBER汎用+レイヤー	VJ GYO
+I will be back -オレは帰ってきた-	-	516	1012	1492	-	544	1086	1512	-	1:50	専用:HES	
+Idola	-	621	1181	1826	-	655	1237	1873	-	2:10	専用:yunve	
+Insane Techniques	-	378	672	1263	-	385	812	1251	-	2:09	専用:murAta Yuzi	
+INSOMNIA	-	407	938	1661	-	443	991	1722	-	2:01	専用:小美野昌史	
+into the battlefield	-	374	734	1193	-	420	760	1184	-	1:56	専用	
+invoker	-	569	1009	1624	1851	579	1242	1659	1773	2:07	Lincle CYBER汎用	
+KAISER PHOENIX	-	679	1194	1693	2026	687	1224	1473	2058	1:46	専用	
+KHAMEN BREAK	-	298	723	1281	-	304	692	1154	-	2:12	tricoro TECHNO汎用	
+Last Dance	-	616	1040	1650	-	614	1137	1678	-	1:58	Lincle Kingdom Cuvelia汎用+戦闘レイヤー	GOLI
+Lighting Shower	-	418	694	1220	-	383	686	1288	-	1:39	専用:Koji Aramaki	
+M.D.Injection	-	301	626	1231	-	412	691	1259	-	1:57	tricoro TECHNO汎用+レイヤー	
+m1dy Deluxe	-	598	951	1342	-	627	931	1332	-	1:59	専用:Ta-k, pam (drawiz.Inc)	
+MAD ATTACK	-	348	683	991	1396	383	719	1136	1193	1:47	専用:Minako Endo	
+MAGIC & LOVE	-	517	942	1481	-	470	765	1628	-	1:54	8th POPS汎用+ミスレイヤー	VJ GYO
+Miracle 5ympho X	-	390	674	1325	1551	446	978	1489	1526	2:02	8th TECHNO汎用+レイヤー	VJ GYO
+NPC World	-	522	826	1155	-	496	970	1174	-	1:55	Lincle POPS汎用	
+Odin	-	408	721	1039	-	438	709	1140	-	2:10	SPADA HARDCORE汎用	
+Overload Frontier	-	404	954	1336	-	522	1006	1249	-	2:01	専用:yama_ko	
+Pharaoh	-	331	727	1242	-	338	634	794	-	1:47	GOLD TRANCE汎用+ミスレイヤー	Fukutomi WAVE
+PUNISHER	-	583	1081	1812	-	594	1107	1830	-	1:59	10th TRANCE汎用	
+ra'am	-	653	1003	1461	-	722	1067	1500	-	1:46	SPADA HARDCORE汎用+戦闘レイヤー	Fukutomi WAVE
+rainbow guitar weeps	-	492	951	1406	-	610	998	1683	-	2:03	専用:Minako Endo	
+Recollection	-	597	883	1118	-	598	880	1104	-	2:12	専用:Jimpei Okatome	
+refractive index	-	374	731	1360	-	405	761	1415	-	1:56	6th CYBER汎用+レイヤー	square_head
+RISE	-	480	701	951	-	496	732	1038	-	2:01	専用:Seventhgraphics	
+RIZING YOU UP	-	537	1080	1295	-	780	1313	1680	-	1:59	9th TECHNO汎用	
+SCHWARZSCHILD FIELD	-	472	840	1232	-	653	806	1143	-	1:48	6th RAVE汎用	
+Sigmund	-	806	1228	2029	2267	778	1341	2073	2255	2:03	7th TRANCE汎用	
+Squeeze	-	432	745	1257	-	478	864	1250	-	1:45	tricoro CYBER汎用	
+THE DETONATOR	-	836	1284	1636	-	985	1156	1570	-	2:22	専用:alo	
+Unicorn tail	-	438	1046	1605	-	438	1050	1833	-	2:21	7th TRANCE汎用	
+Valgus	-	330	685	1206	-	348	734	1212	-	2:03	10th TRANCE汎用	
+Verflucht	-	647	1081	1805	2401	643	1094	1949	2093	1:50	10th TRANCE汎用	
+VOX UP	-	754	1473	1870	-	726	1437	1855	-	2:02	専用:OTAS	
+Wonder Girl feat. Kanae Asaba	-	365	647	1414	-	432	673	1457	-	1:59	tricoro CYBER汎用	
+アルストロメリア	109	495	804	1254	-	482	852	1296	-	2:05	Lincle POPS汎用	
+ÆTHER	-	514	833	1440	1640	542	839	1385	1621	2:01	tricoro CYBER汎用	
+お願いアインシュタイン	-	457	753	1066	-	437	736	1041	-	1:42	Lincle POPS汎用+レイヤー	VJ GYO
+疾風迅雷	-	592	1078	1493	1824	556	1154	1670	1764	1:54	GOLD TECHNO汎用	
+旋律のドグマ～Misérables～	-	629	1271	2002	-	691	1362	1974	-	2:17	専用:いそにん	
+超!!遠距離らぶ♡メ～ル	-	292	790	1352	-	363	879	1450	-	2:07	Lincle POPS汎用	
+罪と罰	-	555	711	1096	-	672	896	1216	-	2:02	専用:Kiyoshi Tanada(Motion Combat)	
+デッドボヲルdeホームラン	-	318	846	1417	-	388	989	1447	-	1:51	GOLD HOUSE汎用	
+轟け！恋のビーンボール！！	-	541	1012	1834	-	596	1116	1774	-	1:51	8th CYBER汎用	
+IX	-	658	1247	2007	-	694	1382	2097	-	2:00	SPADA HARDCORE汎用	
+廿	-	485	890	1215	1731	485	938	1190	1782	2:03	SIRIUS CYBER汎用	
+バンブーソード・ガール	135	512	960	1261	-	502	994	1662	-	1:53	専用:cosMo	
+牧神笛吹きて	-	377	721	1044	-	379	748	1026	-	2:00	10th TECHNO汎用	
+煉獄のエルフェリア	-	698	1222	2000	-	725	1265	1945	-	2:05	Qprogue DX汎用+戦闘レイヤー	GOLI
+海神	-	585	1084	1629	1830	607	1145	1557	1860	2:09	7th TRANCE汎用	
+beatmania IIDX 22 PENDUAL ▲ ▼ △												
+AFRO KNUCKLE	-	496	917	1226	-	446	920	1320	-	2:03	専用:Koji Aramaki	
+Beat Radiance	-	505	826	1335	1809	420	716	1354	1887	1:49	tricoro TECHNO汎用+ミスレイヤー	GOLI
+Beyond The Earth	-	668	1102	1646	-	748	1214	1494	-	2:13	専用:SYO-jy	
+Blaze it UP!	-	493	964	1501	-	564	1069	1613	-	2:06	専用:connectrick	
+BLUE MIRAGE	-	596	1091	1606	-	596	1092	1509	-	1:58	専用:ackermann a.k.a. akaman	
+Broken Sword	-	658	1054	1887	-	513	1123	1911	-	2:02	Chrono Seeker BOSS汎用+戦闘レイヤー	NAGI
+Chain of pain	-	396	789	1130	-	610	939	1301	-	2:03	専用:kototoi	
+chrono diver -fragment-	-	347	590	900	1134	322	633	896	1114	2:04	PENDUAL MUSIC SELECT汎用(PRESENT)+ミスレイヤー	GOLI
+CHRONO DIVER -NORNIR-	-	592	1124	1568	2233	625	1128	1582	2477	2:06	PENDUAL MUSIC SELECT汎用(FUTURE)+ミスレイヤー	GOLI
+Chrono Diver -PENDULUMs-	281	722	1422	2222	-	722	1422	2222	-	2:02	PENDUAL PRESENT汎用+ミスレイヤー	NAGI
+Chronos	-	443	717	1205	1538	462	914	1356	1453	1:53	専用:alo	
+cinder	-	432	1037	1601	-	573	1139	1764	-	2:01	PENDUAL PRESENT汎用+ミスレイヤー	square_head
+COLOSSEUM	-	295	627	1159	-	353	684	1184	-	1:42	Chrono Seeker汎用+レイヤー	Fukutomi WAVE
+Cosmic Cat	-	476	892	1166	1651	544	815	1147	1747	2:06	Ω-ATTACK汎用+戦闘レイヤー	かーる
+Despair of ELFERIA	-	642	1248	2096	-	723	1328	2155	-	2:07	Qprogue DX汎用+戦闘レイヤー	GOLI
+Discloze	-	498	872	1365	-	497	966	1437	-	2:01	Lincle CYBER汎用	
+EBONY & IVORY	-	557	890	1520	1887	594	900	1575	1878	1:42	専用:タカハシサンとにゃん	
+entelecheia	-	528	1106	1657	-	589	1094	1778	-	1:48	Lincle Kingdom Phase 1汎用+戦闘レイヤー	NAGI
+Erosion Mark	-	407	788	1096	-	433	798	1186	-	1:54	PENDUAL FUTURE汎用	
+fallen leaves -IIDX edition-	-	603	1085	1745	-	629	967	1832	-	1:52	10th TECHNO汎用	
+FANTASTIC THREE	-	698	1166	1649	-	682	1125	1794	-	2:00	専用:小美野昌史	
+Flashes	-	489	931	1691	2090	596	1009	2090	1827	1:56	Lincle Kingdom Phase 1汎用+戦闘レイヤー	HES
+Gravigazer	-	495	966	1533	-	511	912	1524	-	2:00	PENDUAL FUTURE汎用+レイヤー	HES
+GUILTY	-	509	798	966	1525	521	837	1087	1424	1:29	6th CYBER汎用	
+HELL SCAPER -Last Escape Remix-	-	494	911	1458	-	741	1177	1459	-	2:26	6th CYBER汎用	
+Hello Happiness	-	461	871	1198	-	421	715	1134	-	1:45	10th POPS汎用+レイヤー	ぺぬ
+illuminate	-	316	817	1172	-	297	832	1250	-	2:04	専用:Taiyo Yamamoto	
+IMPLANTATION	-	335	885	1163	-	502	807	1153	1578	1:33	7th TRANCE汎用	
+In The Breeze	-	336	601	896	-	416	630	996	-	1:46	専用:Ray	
+Invitation from Mr.C	-	594	810	1405	-	637	833	1399	-	1:50	SIRIUS CYBER汎用	
+IXION	-	569	913	1086	-	621	911	1187	-	2:05	専用:Ta-k (synesthesia)	
+Line 4 Ruin	-	363	913	1402	-	612	827	1286	-	1:54	専用:alo	
+Monopole.	-	403	867	1729	-	433	982	1362	-	1:58	tricoro TECHNO汎用	
+NEO GENERATOR SEVEN	-	469	974	1690	-	630	1129	1524	-	2:05	Chrono Seeker BOSS汎用+戦闘レイヤー	HES
+Night sky	-	599	972	1491	-	600	968	1672	-	2:03	専用:alo	
+No Tears	-	609	1082	1286	-	639	1028	1216	-	2:02	7th TRANCE汎用	
+PENDUAL TALISMAN	-	524	820	1314	-	446	992	1340	-	2:03	専用:GOLI	
+Rave*it!! Rave*it!!	-	517	863	1656	-	497	824	1433	-	1:51	Qprogue DX汎用+戦闘レイヤー	Fukutomi WAVE
+Realize Maze	-	642	1054	1503	-	677	1152	1539	-	2:07	Lincle CYBER汎用	
+Reflux	-	402	822	1574	-	467	912	1693	-	1:59	PENDUAL FUTURE汎用+レイヤー	NAGI
+Sakura Mirage	-	520	710	1190	-	520	731	1156	-	1:45	GOLD TRANCE汎用	
+SAMSARA	-	432	731	1031	-	408	786	1087	-	2:06	tricoro CYBER汎用	
+Say YEEEAHH	-	610	952	1677	-	645	1219	1723	-	2:00	PENDUAL PRESENT汎用+レイヤー	NAGI
+Scarlet Moon	-	542	998	1389	-	555	989	1438	-	1:51	専用:GOLI	
+Scars of FAUNA	-	435	871	1475	-	436	816	1424	-	2:00	tricoro TECHNO汎用	
+Shooting Fireball	-	486	1181	1983	-	508	1148	1842	-	2:07	LEGEND CROSS UNKNOWN汎用+戦闘レイヤー	蒼弐
+Sounds Of Summer	-	640	1080	1513	-	617	1006	1599	-	1:53	Lincle POPS汎用+レイヤー	蒼弐・NAGI・かーる・Fukutomi wave
+SpaceLand☆TOYBOX	-	552	900	1501	-	585	951	1528	-	1:45	10th POPS汎用+ミスレイヤー	kaeru
+Sweet Radar	-	338	689	1020	-	345	586	1000	-	2:10	Lincle POPS汎用	
+Symmetry	-	586	1082	1659	-	535	1118	1681	-	2:00	Chrono Seeker BOSS汎用+戦闘レイヤー	NAGI
+TA・DA☆YO・SHI	-	579	849	1180	-	544	858	1145	-	2:02	専用:Fukutomi wave	
+The Least 100sec	-	414	762	1505	-	496	774	1369	-	1:42	専用:770	
+TIEFSEE	-	653	1096	1752	-	630	1099	1767	-	2:07	Lincle CYBER汎用	
+TOXIC VIBRATION	-	831	1248	1933	-	872	1376	2134	-	2:07	専用:いそにん	
+Vulkan	-	527	1030	1518	-	582	1120	1618	-	1:55	SIRIUS CYBER汎用+ミスレイヤー	square_head_dopestyle
+We're so Happy (P*Light Remix) IIDX ver.	-	600	1187	1896	-	598	1197	1716	-	1:59	Lincle POPS汎用	
+ZZ	102	667	1042	1541	-	665	1019	1647	-	1:52	PENDUAL PRESENT汎用	
+妖隠し -あやかしかくし-	-	489	803	1103	-	535	822	1380	-	2:06	専用:NAGI	
+十六夜セツナ	-	521	823	1132	-	662	917	1235	-	2:02	専用:Kiyoshi Tanada(Motion Combat)	
+鬼天	-	519	889	1265	-	576	960	1467	-	1:51	GOLD TECHNO汎用	
+共鳴遊戯の華	-	669	1296	2000	-	654	1395	2054	-	2:06	専用+戦闘レイヤー	GOLI
+恋は白帯、サンシロー	-	377	664	1021	1395	409	635	955	1494	2:02	専用:小美野昌史	
+#The_Relentless	-	611	1028	1479	2273	592	929	1626	2265	2:09	専用:murAta Yuzi	
+少年は空を辿る	-	644	1081	1729	-	644	1092	1908	-	2:05	PENDUAL PRESENT汎用	
+白露の風	-	240	639	1018	-	223	555	951	-	2:00	10th AMBIENT汎用	
+時空トラベローグ	-	571	983	1395	-	546	975	1313	-	1:58	Chrono Seeker汎用+レイヤー	Fukutomi WAVE
+千年ノ理	-	602	1008	1608	2183	680	931	1774	2190	2:05	専用:菌類 (・∀・) 冬虫夏草	
+それは花火のような恋	354	649	1321	1976	-	664	1261	1930	-	2:05	専用:もとこ	
+打打打打打打打打打打	100	419	701	1342	-	479	770	1301	-	1:44	専用:菌類	
+超青少年ノ為ノ超多幸ナ超古典的超舞曲	-	531	1028	1350	2110	529	973	1651	2257	2:00	専用:OTAS	
+Ｘ↑Ｘ↓	-	477	907	1485	-	559	1035	1658	-	2:04	SIRIUS CYBER汎用	
+取り残された美術(Arranged:HiZuMi)	126	495	882	1111	-	393	745	1158	-	1:44	専用:もとこ	
+とろぴかる倶楽部	-	432	755	1154	-	559	890	1149	-	1:47	Chrono Seeker汎用+レイヤー	NAGI
+ドッキン☆サマーあばんちゅーる	-	531	907	1447	-	517	975	1452	-	2:05	専用:もとこ(イラスト:NAGI)*4	
+夏色DIARY - L.E.D.-G STYLE MIX -	-	505	1031	1590	-	495	1135	1377	-	1:56	専用:NASU + BeatStream Designers	
+パ→ピ→プ→Yeah!	190	527	814	1280	-	503	923	1348	-	1:44	専用:も→と→こ→菌類！	
+表裏一体！？怪盗いいんちょの悩み♥	-	580	1127	1815	2334	716	1322	2122	2390	2:05	Lincle POPS汎用+レイヤー	いそにん
+ぷろぐれっしぶ時空少女！うらしまたろ子ちゃん！	-	453	756	1285	-	386	728	1243	-	1:59	Lincle POPS汎用+レイヤー	菌類
+ベィスドロップ・フリークス	-	323	651	1143	1275	424	626	1220	1252	1:55	Lincle POPS汎用+レイヤー	あおにゃん♡
+紅牡丹	249	544	929	1445	-	599	930	1291	-	1:44	8th POPS汎用	
+もっと！モット！ときめき feat. 松下	-	707	1061	1424	-	573	945	1266	-	2:08	Lincle POPS汎用+レイヤー	NAGI
+リリーゼと炎龍レーヴァテイン	-	504	1186	1771	-	567	1264	1848	-	1:49	専用:いそにん	
+beatmania IIDX 23 copula ▲ ▼ △												
+Acid Pumper	-	348	812	1267	-	392	850	1221	-	1:58	Resort Anthem DANCE汎用+レイヤー	かーる
+Angelic Jelly	-	579	1058	1419	-	592	1019	1447	-	1:58	tricoro CYBER汎用	
+AO-1	-	643	999	1443	-	671	1087	1456	-	1:47	Resort Anthem DANCE汎用+レイヤー	NAGI
+Arcana	-	613	893	1150	-	605	913	1172	-	1:54	Lincle CYBER汎用+レイヤー	NAGI
+Aublia	-	495	785	1299	-	513	836	1262	-	2:02	専用:Ta-k, pam, nakasima(DRAWIZ,Inc.)	
+Battle Train -IIDX Edition-	-	454	1302	1687	-	714	1218	1949	-	2:05	専用:L.E.D.による「ネオコントラ」のプレイ動画	
+Blue Spring Express	-	664	1087	1728	-	585	1013	1602	-	1:51	専用:NAGI	
+Central Station	-	527	803	1223	-	467	806	1285	-	1:59	tricoro CYBER汎用+レイヤー	Fukutomi WAVE
+chaos eater -IIDX edition-	-	604	887	1328	-	683	905	1442	-	1:52	tricoro TECHNO汎用+レイヤー	かーる
+CODE:1 [revision1.0.1]	-	497	887	1590	-	476	877	1685	-	1:55	6th CYBER汎用	
+Daily Lunch Special	-	549	1098	1494	-	554	1102	1622	-	2:11	4th HOUSE汎用	
+Damage Per Second	-	447	718	1026	1153	415	705	1056	1238	1:53	専用:HES	
+Derelict Star feat. Ryu*	-	709	977	1336	-	622	1014	1378	-	2:00	PENDUAL FUTURE汎用	
+Devil's Gear	-	548	1152	1793	-	573	1163	1782	-	2:08	SIRIUS CYBER汎用+レイヤー	NAGI
+DIAMOND CROSSING	-	509	917	1585	-	688	979	1681	-	1:46	copula TRANSPORT汎用+レイヤー	NAGI
+do the thing feat. Kanae Asaba	-	321	777	1171	-	323	741	1251	-	1:59	専用:Seventhgraphics	
+Donkey Donk	-	611	892	1150	-	560	976	1154	-	2:02	Resort Anthem DANCE汎用	
+Dynamite	276	611	1246	1953	-	775	1194	2084	-	2:07	SPADA HARDCORE汎用+ミスレイヤー	GOLI
+Everlasting Last	-	427	836	1124	-	555	809	1237	-	2:01	専用:Kiyoshi Tanada(Motion Combat)	
+Exchange Place	-	388	646	903	-	408	629	907	-	2:06	7th HOUSE汎用	
+GENERATE feat.綾倉盟	-	573	892	1182	-	566	941	1234	-	2:05	copula JAPANESQUE汎用+レイヤー	かーる
+Go Faraway	-	520	766	1259	-	571	931	1363	-	2:06	PENDUAL PRESENT汎用	
+GOBBLE	-	252	369	866	-	369	917	917	-	1:32	専用:Yasi	
+Godspeed	-	545	1002	1631	-	705	1112	1707	-	1:41	専用:NAGI xxx かーる xxx へす子	
+Grand Chariot	-	588	989	1775	-	620	1035	1866	-	2:02	Resort Anthem DANCE汎用	
+Highcharge Divolt	-	456	889	1421	-	527	863	1431	-	1:55	8th TECHNO汎用+レイヤー	NAGI
+Inner Spirit	-	446	985	1458	-	476	989	1550	-	2:02	専用:T田	
+Journey	-	351	639	950	1585	353	728	1010	1556	1:56	10th AMBIENT汎用	
+Konzert V	-	653	1181	1710	-	669	1132	1559	-	2:02	PENDUAL PRESENT汎用+レイヤー	VJ GYO
+La dolce primavera	-	360	707	1098	-	367	753	1291	-	1:48	10th POPS汎用+レイヤー	NAGI
+M4K3 1T B0UNC3	-	713	1082	1546	-	675	1062	1521	-	1:59	専用:ni-is	
+Musik LoverZ	-	539	722	1268	-	538	709	1155	-	1:59	専用:murAta Yuzi	
+NANAIRO	-	536	935	1308	-	485	1000	1271	-	1:54	Lincle POPS汎用	
+Nightmare before oversleep	-	605	988	1500	-	665	975	1580	-	2:00	tricoro TECHNO汎用+レイヤー	かーる
+NINJA IS DEAD IIDX ver.	-	627	989	1520	-	622	954	1500	-	1:54	6th CYBER汎用	
+NO LIMIT -オレ達に限界は無い-	-	420	631	1148	-	393	623	1017	-	2:00	専用:Fukutomi WAVE、VJ GYO	
+Nowhere	-	441	759	1100	-	488	818	1182	-	1:58	専用:Taiyo Yamamoto	
+NZM	-	547	831	1783	-	550	1065	1782	-	2:03	9th TECHNO汎用+レイヤー	NAGI xxx かーる xxx へす子
+On the FM	-	573	821	1419	-	627	814	1249	-	1:43	7th TECHNO汎用+レイヤー	NAGI
+Outbreak	-	675	933	1523	-	658	914	1548	-	1:59	SPADA HARDCORE汎用+ミスレイヤー	GOLI
+POSSESSION	272	701	1105	1521	-	708	1167	1711	-	1:51	専用:DDR X2	
+quick master (reform version)	-	80	178	264	-	128	225	312	-	1:29	8th POPS汎用	
+refrain	-	622	1208	1857	-	633	1094	1856	-	1:55	PENDUAL PRESENT汎用+レイヤー	ヒゲタカ
+Rock It	-	590	859	1500	-	569	931	1556	-	1:59	SIRIUS CYBER汎用+レイヤー	HES
+Routing	-	482	860	1323	-	575	918	1285	-	1:57	専用:nasu*5	
+Sephirot	-	485	848	1193	-	483	842	1161	-	2:01	PENDUAL PRESENT汎用	
+Set U Free feat. Kanae Asaba	-	478	812	1290	-	476	802	1433	-	1:59	Lincle CYBER汎用	
+SHELTER OF THE MIND	-	722	1020	1538	-	645	1037	1484	-	2:13	PENDUAL FUTURE汎用+ミスレイヤー	GOLI
+STARLiGHT	-	482	944	1413	-	535	954	1481	-	2:05	7th TRANCE汎用	
+STARLIGHT DANCEHALL	-	648	939	1342	1712	705	1007	1435	1814	1:54	専用:TOHRU MiTSUHASHi	
+StrayedCatz	-	557	1052	1490	-	515	831	1376	-	2:02	GOLD TRANCE汎用	
+Super Duper Racers	-	480	821	1199	1857	499	830	1200	1850	1:59	PENDUAL FUTURE汎用	
+SURVIVOR	-	363	658	1014	-	494	703	1135	-	2:03	専用:NATSU	
+Tori-no-kimochi	-	133	662	1030	-	310	730	1030	-	2:13	GOLD TRANCE汎用	
+Triple Counter	-	716	1145	2016	-	711	1193	1997	-	2:02	専用:KINRUI	
+Uh-Oh	-	568	891	1228	-	580	808	1182	-	2:04	copula TRANSPORT汎用	
+Violet Pulse	-	216	883	1252	2115	212	923	1327	2139	2:02	PENDUAL FUTURE汎用	
+Violet Rose	-	642	1038	1333	-	654	1071	1384	-	1:52	専用:Aono.Y	
+Welcome	-	440	919	1357	1701	727	967	1326	1762	2:03	専用:ackermann	
+X	-	811	1277	1952	-	802	1377	2086	-	2:03	専用+ミスレイヤー	GOLI
+ZEPHYRANTHES	-	514	943	1499	1982	510	983	1599	1985	2:02	Resort Anthem DANCE汎用	
+199024club -Re:BounceKiller-	-	360	873	1260	-	370	853	1210	-	2:04	8th TECHNO汎用+レイヤー	NAGI
+朝焼けから始まるボクらの小さな旅	-	490	882	1298	-	478	858	1369	-	2:00	Lincle POPS汎用	
+紫陽花 -AZISAI-	212	655	1094	1490	1815	675	1118	1496	1813	2:04	専用:HES	
+麗 ～うらら～	132	577	903	1329	-	603	1006	1363	-	2:01	copula JAPANESQUE汎用+ミスレイヤー	Fukutomi_WAVE
+駅猫のワルツ	-	601	1174	1558	-	515	1147	1635	-	1:48	"専用
+撮影:VJ GYO&NAGI、編集:かーる、
+度胸オーバーレイ:チャーム・シスターズ(あねじゃ))"	
+オルタネイトβ	-	424	725	1137	-	388	701	1331	-	2:04	専用:Kiyoshi Tanada(Motion Combat)	
+か・し・ま・し☆PUMP UP！	-	607	966	1453	-	607	941	1501	-	2:00	専用:GOLI	
+ギョギョっと人魚♨爆婚ブライダル	-	418	743	1209	-	428	805	1164	-	1:58	専用:NAGI	
+灼熱 Pt.2 Long Train Running	316	675	1093	1804	-	664	1031	1732	-	2:01	専用:Minako Endo	
+シュッパツシンコウ・シサカンコ	-	568	904	1234	-	558	878	1365	-	2:02	専用:小美野昌史	
+少女アリスと箱庭幻想コンチェルト	-	390	761	1095	-	440	819	1259	-	2:00	専用:NAGI	
+真 地獄超特急 -HELL or HELL-	-	737	1123	1727	-	769	1175	1773	-	2:06	Resort Anthem DANCE汎用+ミスレイヤー	GOLI
+セロトニン	-	677	947	1194	-	676	948	1231	-	2:00	専用:Hiromitsu Kawasaki	
+追想快晴テーマパーク	-	615	1077	1589	-	638	1110	1573	-	2:01	copula TRANSPORT汎用	
+星屑ディスタンシア	-	353	619	1073	-	347	624	1000	-	1:59	専用:ISA(+ヒゲタカ)	
+明鏡止水	-	438	976	1443	-	416	862	1346	-	2:06	専用:大阪土壽頭テリヤキ, はぐ	
+めいさいアイドル☆あいむちゃん♪	-	777	1202	1717	-	696	1248	1837	-	2:04	8th TECHNO汎用+ミスレイヤー	VJ GYO
+量子の海のリントヴルム	-	468	919	1508	-	469	940	1407	-	1:53	専用:いそにん	
+beatmania IIDX 24 SINOBUZ ▲ ▼ △												
+Amazing Mirage	189	458	894	1343	1684	459	931	1413	1671	1:59	専用:T田	
+AO-∞	-	601	952	1375	-	534	872	1351	-	2:04	tricoro CYBER汎用	
+Apocalypse	-	580	1096	1814	-	580	1081	1953	-	2:15	GOLD TECHNO汎用	
+Around The Galaxy	-	570	1080	1714	-	759	1398	1940	-	2:24	専用:OTAS	
+AsiaN distractive	-	606	911	1337	-	617	922	1385	-	2:02	専用:Hiromitsu Kawasaki,Ryuto Takano	
+BabeL ～Grand Story～	-	662	1097	1432	-	652	1079	1517	-	2:05	tricoro TECHNO汎用	
+Be A Star	-	487	925	1413	-	518	897	1334	-	2:00	tricoro CYBER汎用	
+Beat Juggling Mix	-	531	837	1138	-	533	859	1171	-	1:56	6th DANCE汎用+レイヤー	いそにん
+Believe in you	-	604	955	1226	-	582	924	1251	-	2:04	copula TRANSPORT汎用+レイヤー	NASU
+Beyond The Seven	-	373	671	1375	-	472	733	1387	-	2:01	専用:pam,Ta-k	
+BREAK OVER	-	462	785	1210	-	427	712	1193	-	2:10	専用:murAta Yuzi	
+Breakin' Chain	-	362	669	1169	-	461	811	1241	-	1:58	10th HOUSE汎用+レイヤー	KINRUI
+BroGamer	-	699	1099	1568	2383	667	1098	1575	2342	2:09	専用:nasu	
+Caterpillar	-	617	1129	1561	-	626	1064	1681	-	2:02	PENDUAL FUTURE汎用+レイヤー	NAGI
+crew	-	317	885	1480	-	339	946	1574	-	※	専用	
+Cyber True Color	-	504	863	1207	-	481	831	1216	-	2:02	tricoro CYBER汎用	
+DORNWALD ～Junge～	-	655	1163	1903	-	684	1230	1871	-	2:09	専用:NAGI	
+ECHIDNA	-	665	1111	1775	-	642	1084	1822	-	1:58	tricoro TECHNO汎用+レイヤー	GYO
+Egret and Willow	-	527	848	1383	-	533	847	1286	-	2:10	copula JAPANESQUE汎用+レイヤー	かーる
+elemental bender feat. Kanae Asaba	-	326	606	826	-	319	609	846	-	2:00	7th TRANCE汎用	
+FUZIN RIZIN	-	609	1008	1929	-	650	944	1931	-	2:03	SINOBUZ JAPANESQUE汎用+ミスレイヤー	GOLI
+Go Ahead!!	-	521	810	1413	-	498	792	1403	-	2:03	Lincle CYBER汎用+ミスレイヤー	NAGI
+GuNGNiR	-	684	1397	2081	2443	681	1420	2175	2428	2:09	SPADA HARDCORE汎用+レイヤー	かーる
+HADES	197	500	950	1601	-	475	964	1564	-	2:01	専用:Kaito	
+HAPPY★RUSH	-	400	982	1490	-	463	978	1468	-	2:02	Lincle POPS汎用	
+Honey Trap	-	422	822	1284	-	435	822	1286	-	2:03	専用:KINRUI	
+INVISIBLE STRIX	-	601	1074	1331	-	600	1081	1383	-	2:07	専用:pam,Ta-k	
+Lost wing at.0	-	475	752	1261	-	418	709	1297	-	2:04	専用:アキ	
+Macuilxochitl	267	752	1147	1677	-	768	1042	1546	-	1:53	GOLD TRANCE汎用	
+Magical	-	410	601	1011	-	410	635	1028	-	2:07	専用:NAGI	
+Mare Nectaris	-	746	1116	2094	-	746	1081	1862	-	2:06	copula JAPANESQUE汎用+レイヤー	GOLI
+Modular Technology	-	638	1006	1372	-	631	973	1365	-	1:50	専用:Lynx	
+Music is The Answer	-	403	726	977	-	402	766	1062	-	1:55	専用:cap	
+nostos	-	471	722	1359	-	486	814	1324	-	2:14	専用	
+OOO	-	349	737	1034	1336	373	714	1044	1530	1:56	10th POPS汎用+ミスレイヤー	shio忍
+OTENAMI Hurricane	-	670	1135	1643	-	654	1133	1743	-	2:02	SINOBUZ JAPANESQUE汎用+レイヤー	よしまさ
+PAPAYAPA BASS	-	397	788	1428	-	485	802	1362	-	2:02	10th POPS汎用+ミスレイヤー	KAERU
+Piano Samurai	-	546	909	1265	-	501	903	1251	-	2:04	専用(公式MV):ひやけ(ILLUSTRATION), Parmy(EDIT)	
+Quakes	-	577	1080	1654	-	559	1066	1613	-	1:56	GOLD TECHNO汎用+レイヤー	ちっひ
+RAIN	-	588	928	1657	-	603	1038	1755	-	1:54	10th TECHNO汎用	
+Rave Cannon	-	538	946	1700	-	546	975	1597	-	2:04	SINOBUZ POPS汎用+ミスレイヤー	GOLI
+Remedy feat. Kanae Asaba	-	468	835	1116	-	457	809	1163	-	2:02	6th EURO汎用	
+ROTTERDAM SHOGUN	274	574	930	1299	-	562	919	1411	-	1:56	専用:エビマヨ推しのくノ一忍者なす	
+SAMURAI-Scramble	-	511	865	1232	1576	559	957	1299	1572	2:09	10th TECHNO汎用+ミスレイヤー	NAGI
+Sarutobi Champion is 拙者	-	503	809	1153	-	525	817	1425	-	1:48	SINOBUZ JAPANESQUE汎用	
+SAY BAY	-	429	771	1455	-	480	796	1420	-	1:57	専用:Taiyo Yamamoto	
+Seaside Labyrinth	-	332	667	953	-	330	620	972	-	2:02	専用:いそにん	
+Selfish Sweet	-	327	493	877	1395	323	496	905	1307	1:55	6th HOUSE汎用	
+SEQUENCE CAT	-	551	1128	1446	-	640	1333	1985	-	2:04	専用:Ryousuke Takeuchi (D.B.D) + Naoya Miyadai (D.B.D)	
+shuriken	-	396	573	1298	-	387	660	1321	-	1:58	SINOBUZ JAPANESQUE汎用+ミスレイヤー	shio忍,NAGI忍
+SINOBUZ Fantasy	-	522	867	1228	-	523	904	1206	-	2:04	SINOBUZ POPS汎用	
+Sky High	222	603	1205	1943	-	589	1192	1918	-	2:03	専用:GOLI	
+Snakey Kung-fu	-	563	1110	1751	-	539	1122	1799	-	2:09	専用:忍々撮影隊	
+Steel Edge	-	466	759	1604	-	487	938	1392	-	2:03	SINOBUZ JAPANESQUE汎用+レイヤー	HES
+Summerlights(IIDX Edition)	-	581	949	1580	-	583	960	1654	-	2:02	10th HOUSE汎用	
+Super Rush	-	523	953	1791	-	574	1007	1719	-	2:07	専用:alo	
+Surf on the Light	-	399	760	1154	-	412	880	1198	-	2:00	PENDUAL PRESENT汎用	
+The Commanders	-	486	764	1227	-	485	803	1282	-	2:06	PENDUAL FUTURE汎用	
+(This Is Not) The Angels	-	309	739	1364	-	372	776	1304	-	1:56	専用:Minako Endo	
+TOGAKUSHI	-	526	987	1343	-	493	920	1333	-	1:58	専用:Seventhgraphics	
+Umbral	-	311	720	966	1566	314	675	1032	1512	2:00	専用:lied	
+Venom	-	656	1110	1624	-	641	1106	1451	-	2:06	PENDUAL FUTURE汎用	
+Vermilion	-	460	704	1043	-	459	678	1055	-	1:40	10th HOUSE汎用	
+Warrior	-	517	914	1257	-	512	880	1251	-	2:04	SINOBUZ JAPANESQUE汎用+レイヤー	square_head
+XINOBIKILL	-	506	910	1475	-	558	1074	1566	-	2:04	PENDUAL FUTURE汎用	
+yamabiko (SINOBUZ Edition)	-	499	823	1345	-	480	836	1299	-	2:04	copula JAPANESQUE汎用	
+Yellow Sketch(RX-Ver.S.P.L.)	-	389	943	1479	-	387	1010	1545	-	2:02	10th TRANCE汎用+レイヤー	かーる
+イザナミノナゲキ	-	605	1007	1661	-	637	962	1769	-	1:59	copula JAPANESQUE汎用+レイヤー	かーる
+焔極OVERKILL	-	598	1118	1901	-	672	1252	1984	-	2:01	GOLD TECHNO汎用+ミスレイヤー	NAGI
+禍根	-	411	704	1336	-	427	753	1219	-	1:55	PENDUAL PRESENT汎用+レイヤー	かーる
+鴉	-	763	1136	1356	-	741	1130	1346	-	1:58	専用:GOLI+ミスレイヤー	GOLI
+九尾狐夜行	-	438	912	1521	-	456	948	1530	-	1:54	専用:アキ	
+恋はどう？モロ◎波動OK☆方程式!!	-	518	805	1247	-	513	775	1028	-	1:53	専用:Ray	
+獅子霞麗ノ舞	-	252	550	873	-	250	526	938	-	1:59	専用:Aono.Y	
+忍恋花	-	515	867	1141	-	508	856	1330	-	1:44	専用:菌類	
+〆	-	657	1198	1877	-	665	1198	1933	-	2:05	SINOBUZ JAPANESQUE汎用+ミスレイヤー	XTC
+次葉 -turn the page-	-	427	716	1003	-	427	693	1073	-	1:47	SINOBUZ JAPANESQUE汎用+ミスレイヤー	GOLI
+ちらちら・はらはら	-	207	475	715	-	203	483	742	-	2:03	専用:公式MV	
+津軽雪	-	784	1137	1953	-	844	1165	2101	-	2:10	tricoro TECHNO汎用+レイヤー	NAGI
+月雪に舞う華のように	-	437	683	1083	-	446	722	1053	-	2:16	copula JAPANESQUE汎用	
+ディッシュウォッシャー◎彡おいわちゃん	-	366	736	1280	-	386	761	1292	-	1:53	SINOBUZ POPS汎用+ミスレイヤー	GOLI
+童話回廊	-	484	905	1592	-	483	912	1478	-	1:52	専用:Ko-Ku	
+刃図羅	-	626	1082	1746	-	590	1089	1790	-	2:09	専用:NAGI	
+焱影	-	366	723	1437	-	440	780	1431	-	2:00	SINOBUZ JAPANESQUE汎用+レイヤー	壱
+¡Viva!	-	492	825	1014	-	444	838	1206	-	1:50	専用:KINRUI	
+冬椿 ft. Kanae Asaba	131	482	633	1146	1535	474	621	1114	1509	2:01	専用:Kaito	
+#MAGiCVLGiRL_TRVP_B3VTZ	-	588	991	1753	-	592	956	1500	-	1:59	Lincel POPS汎用	
+beatmania IIDX 25 CANNON BALLERS ▲ ▼ △												
+AA -rebuild-	-	646	1253	1820	-	712	1192	1752	-	2:01	専用:Seventhgraphics	
+Abraxas	-	403	844	1241	-	414	921	1254	-	2:03	専用:pam、Ta-k	
+ACCELERATE	-	597	895	1261	-	561	869	1328	-	2:07	SINOBUZ POPS汎用+レイヤー	BEMANI Designers "かーる"
+Alpheratz	-	218	519	1049	-	281	574	1023	-	2:04	PENDUAL PRESENT汎用	
+Amor De Verão	-	404	728	1193	-	452	729	1206	-	1:59	SINOBUZ POPS汎用+レイヤー	BEMANI Designers "NAGI"
+ANAGMA	-	522	925	1339	-	520	952	1327	-	2:04	SIRIUS CYBER汎用	
+ANCHOR	-	680	1288	1835	-	678	1265	1830	-	2:04	専用:BEMANI Designers "NAGI"	
+Antigravity	-	535	1043	1591	-	558	1001	1467	-	1:55	専用:#Minako_Endo	
+Arca	-	468	961	1602	-	485	975	1606	-	2:07	SPADA HARDCORE汎用	
+Around the Future	-	561	892	1329	-	570	942	1385	-	2:08	8th CYBER汎用+ミスレイヤー	BEMANI Designers "NAGI"
+Back Spin Sweeper	-	438	717	1156	-	442	778	1205	-	2:04	専用:cap	
+Battleground	-	595	968	1361	-	587	900	1304	-	2:04	専用:Hiromitsu Kawasaki	
+Be a Hero!	-	394	1006	1592	-	494	921	1627	-	2:06	SINOBUZ POPS汎用	
+Best of Me	-	413	810	1127	-	409	761	1121	-	2:03	専用:Taiyo Yamamoto	
+Boomy and The Boost	211	538	1042	1826	-	576	1088	1798	-	2:08	Lincle POPS汎用+ミスレイヤー	BEMANI Designers "VJ GYO"
+Break Stasis	-	673	980	1274	-	670	990	1282	-	2:00	専用:Aono.Y	
+ChaserXX	-	560	988	1453	2000	571	953	1410	1957	2:04	専用:BEMANI Designers "T田"	
+Chemical Cookie	-	419	739	1081	-	389	724	1061	-	1:40	SINOBUZ POPS汎用+レイヤー	BEMANI Designers "?:球Q、?:蒼弐"
+City Never Sleeps (IIDX EDITION)	-	668	977	1344	-	666	979	1377	-	2:06	GOLD TRANCE汎用	
+COSMIC☆WONDER☆REVOLUTION	-	389	722	1049	-	438	694	1026	-	1:48	SINOBUZ POPS汎用+レイヤー	BEMANI Designers "Fukutomi WAVE"
+DEADHEAT	-	606	1066	1721	-	611	1074	1757	-	1:57	7th TECHNO汎用+ミスレイヤー	BEMANI Designers "XTC"
+DEATH†ZIGOQ ～怒りの高速爆走野郎～	-	710	1272	2075	2459	732	1262	1999	2459	1:55	Lincle CYBER汎用+レイヤー	BEMANI Designers "HES"
+DropZ-Line-	-	696	1101	1648	-	677	1040	1771	-	2:00	SIRIUS CYBER汎用	
+Eine Haube ～聖地の果てにあるもの～	-	493	728	1321	-	503	765	1346	-	1:52	Lincle POPS汎用	
+EMERALDAS	265	704	1258	1833	-	691	1293	1763	-	1:54	専用:BEMANI Designers "minoru"	
+encounter	-	494	907	1679	-	505	886	1709	-	2:04	PENDUAL FUTURE汎用	
+Exhaust Hype	-	523	994	1426	-	503	963	1393	-	2:02	専用:Lynx	
+Expanded !!	-	341	788	1324	-	341	759	1377	-	2:11	専用:CIMBAL CINTA	
+Fervidex	-	432	915	1361	-	427	912	1397	-	2:08	専用:BEMANI Designers "かーる"	
+FREEDOM	-	511	880	1481	-	507	852	1482	-	2:05	専用:murAta Yuzi	
+From Time To Time	-	404	983	1293	-	404	983	1293	-	2:07	10th TRANCE汎用	
+FUTURE is Dead	-	467	767	1151	-	443	740	1095	-	1:57	専用:Hiromitsu Kawasaki	
+Get Up! feat. Kanae Asaba	-	296	645	966	-	341	686	1000	-	1:58	6th HOUSE汎用	
+HAT TRICK	-	438	732	1118	-	465	777	1215	-	1:54	専用:murAta Yuzi	
+Hella Deep	-	325	538	959	-	328	554	959	-	2:03	専用:alo	
+HYPE THE CORE	-	565	1044	1539	-	564	1046	1871	-	1:51	専用:VJ IM	
+I Love You	-	540	970	1381	-	536	971	1379	-	2:04	Resort Anthem DANCE汎用	
+Illusionary Waterlily	-	667	1164	1803	-	687	1225	1740	-	2:03	専用:BEMANI Designers	
+Initiation	330	762	1277	2018	-	817	1338	2018	-	2:06	専用:BEMANI Designers "Kaito"	
+Life Is A Game ft.DD"ナカタ"Metal	-	642	999	1775	-	698	1169	1667	-	2:05	SPADA HARDCORE汎用+ミスレイヤー	BEMANI Designers "XTC"
+LUV DRIVE	-	419	683	1075	-	480	670	1103	-	2:00	4th HOUSE汎用	
+MAXIVCORD	-	413	752	1256	-	418	771	1175	-	1:38	専用:ケイ壱(QMA MAXIVCORD デモムービー)	
+Midnight Lady	-	323	596	979	-	325	572	1035	-	2:05	専用:Minako Endo	
+n'pa pa BBQ	-	469	892	1408	-	531	909	1423	-	1:58	SINOBUZ POPS汎用+ミスレイヤー	BEMANI Designers
+NITROUS CANNON	-	713	1055	1875	-	696	1054	1852	-	2:08	Lincle CYBER汎用	
+No Limit 2 dAnce feat. 大山愛未	-	495	793	1182	-	479	770	1145	-	2:01	5th DANCE汎用	
+Nothing but Theory	-	556	811	1438	1890	601	910	1397	-	2:04	専用:alo	
+O/D*20	-	581	854	1071	1984	659	1013	1246	2049	1:56	tricoro TECHNO汎用	
+Only for now	-	459	797	1138	-	503	807	1128	-	2:02	CANNON BALLERS RACING汎用+レイヤー	BEMANI Designers "とっきー"
+Papilio ulysses	-	614	1080	1498	-	619	1069	1452	-	2:02	専用:BEMANI Designers	
+Persephone	-	690	1007	1539	-	669	1142	1573	-	2:02	SPADA HARDCORE汎用+レイヤー	BEMANI Designers "かーる"
+Rampage	-	653	1257	1831	-	648	1253	1983	-	2:16	SPADA HARDCORE汎用+ミスレイヤー	BEMANI Designers "GOLI"
+Raspberry Railgun	-	719	1155	1606	-	673	1067	1694	-	2:06	10th POPS汎用+レイヤー	BEMANI Designers
+REVOLVER	-	471	844	1405	1731	456	833	1374	1715	1:45	PENDUAL PRESENT汎用	
+Sleepless days	-	255	456	788	-	260	455	789	-	1:30	専用:ケイ壱(QMA THE WORLD EVOLVE デモムービー)	
+Slipstream	-	546	1054	1822	-	566	1001	1717	-	2:11	専用:pam、nakasima、Ta-k	
+SPEED DEMON	-	379	736	1198	-	422	731	1266	-	1:58	CANNON BALLERS RACING汎用+レイヤー	BEMANI Designers "ちっひ"
+STARLIGHT JUNCTION	-	454	816	1150	1462	415	791	1211	1492	2:01	CANNON BALLERS RACING汎用+レイヤー	BEMANI Designers "VJ GYO"
+Static State	-	540	912	1218	-	521	882	1196	-	2:02	専用:Seventhgraphics	
+Temple of Anubis	-	517	781	1345	-	549	909	1332	-	2:12	CANNON BALLERS RACING汎用	
+THE CANNONBALLER	244	770	1236	1748	-	753	1299	1807	-	2:13	CANNON BALLERS RACING汎用+レイヤー	BEMANI Designers "VJ GYO"
+The Chase	-	359	710	1148	-	372	737	1142	-	1:58	CANNON BALLERS RACING汎用	
+UMMU	220	626	1083	1587	-	673	1127	1614	-	2:02	tricoro CYBER汎用	
+Usual Days-remix	-	558	764	1364	-	725	1147	1474	-	1:53	専用:かーる / tam / アオニサイ	
+Xperanza	276	701	1238	1637	-	690	1141	1698	-	2:05	専用:Nakasima	
+1001 -ESCAPE-	-	524	866	1327	-	538	851	1333	-	2:05	PENDUAL FUTURE汎用	
+255	-	469	823	1676	-	564	953	1590	-	1:50	6th RAVE汎用	
+命の標本	-	372	864	1358	-	372	846	1275	-	2:02	専用:BEMANI Designers "かーる"	
+うさ☆かめ 大戦争！	-	487	836	1276	-	479	809	1257	-	1:57	専用:BEMANI Designers "菌類"	
+エディブルフラワーの独白	-	411	795	1110	-	414	779	1174	-	2:01	10th POPS汎用+ミスレイヤー	BEMANI Designers "mayo"
+共犯ヘヴンズコード	-	258	704	1149	-	267	697	1141	-	1:55	専用:ダンエボスタッフ	
+シムルグの目醒め	-	717	1211	1822	-	766	1293	1815	-	2:05	6th HOUSE汎用+レイヤー	BEMANI Designers "かーる"
+神謳 -RESONANCE-	-	702	1285	2047	-	725	1356	2052	-	2:11	Lincle CYBER汎用	
+純真可憐デザイア	127	422	824	1172	1498	450	817	1124	1508	2:05	専用:BEMANI Designers "NAGI"	
+草原の王女-軌跡を辿って-	-	352	629	1172	-	433	722	1127	-	1:51	専用:BEMANI Designers "とっきー"	
+東京神話	235	528	914	1505	-	500	906	1533	-	1:56	専用+ミスレイヤー:BEMANI Designers "NAGI"	
+ナイトシティー・アヴァンチュール	-	521	774	1047	-	511	774	1139	-	2:06	7th HOUSE汎用+ミスレイヤー	BEMANI Designers "kaeru"
+ハイ*ビスカス ft. Kanae Asaba	-	438	784	1233	-	531	772	1303	-	2:07	専用:BEMANI Designers "かーる"	
+バスルーム ロマンス	-	492	744	1228	-	494	752	1204	-	1:59	SINOBUZ POPS汎用+ミスレイヤー	BEMANI Designers
+バ→ビ→ブ→Bomb!	-	422	923	1294	-	431	939	1297	-	1:59	CANNON BALLERS RACING汎用	
+パラドキシカル・タイムリープトライアル(Short Ver.)	-	529	997	1416	-	522	1013	1515	-	2:02	SINOBUZ POPS汎用	
+ラストセンチュリーメランコリック	-	430	822	1108	-	434	863	1105	-	2:09	専用:Taiyo Yamamoto	
+beatmania IIDX 26 Rootage ▲ ▼ △												
+Afterimage d'automne	-	519	879	1480	-	525	913	1554	-	2:01	GOLD TRANCE汎用	
+BLACK JACKAL	-	428	812	1183	-	428	813	1138	-	1:58	Rootage TECHNO汎用	
+BLO§OM	-	550	843	1290	-	546	815	1316	-	2:04	10th HOUSE汎用	
+Carmina	266	683	1292	2000	-	701	1273	2000	-	2:07	Rootage CYBER汎用+レイヤー	BEMANI Designers "NAGI"
+Carry Me Away	268	575	933	1613	-	595	957	1568	-	2:00	tricoro CYBER汎用	
+Catch Our Fire!	-	699	1186	1885	-	691	1198	1888	-	2:03	専用:BEMANI Designers "いそにん"	
+CODE:Ø	-	726	1120	1454	1829	738	1086	1382	1906	2:03	専用:BEMANI Designers "KINRUI"	
+CoMAAAAAAA	-	643	1068	1208	1957	640	1151	1304	1972	2:04	専用:VJ Routes	
+COSMIC CYBER	-	524	862	1469	-	531	835	1325	-	1:50	専用:magarikado	
+Cranberry City ft. Luschel	-	433	816	1234	-	447	792	1272	-	2:08	7th HOUSE汎用	
+dAuntl3ss	-	542	1018	1775	-	584	1157	1770	-	2:06	専用:Seventhgraphics	
+Dr. Chemical & Killing Machine	-	567	964	1700	-	586	978	1919	-	2:00	Rootage TECHNO汎用	
+Drastic Dramatic	-	800	1231	1765	-	782	1253	1736	-	1:59	10th POPS汎用+レイヤー	BEMANI Designers "kyunkyun"
+DRUNK MONKY	-	524	833	1177	-	593	862	1104	-	1:21	6th RAVE汎用	
+Ember Lights	-	491	842	1369	1582	530	863	1296	1600	2:01	専用:Hanamori Hiro	
+EVANESCENT	-	661	1241	1845	-	660	1174	1820	-	2:02	10th HOUSE汎用	
+Garuda	-	541	842	1323	-	541	876	1319	-	1:44	SIRIUS CYBER汎用	
+Geirskögul	-	545	808	1128	-	555	745	1122	-	2:07	専用:murAta Yuzi	
+GENE	-	664	1009	2183	-	659	990	1986	-	※	専用:BEMANI Designers "NAGI"*6	
+GIGA THRASH	-	643	970	1400	-	662	1002	1503	-	2:04	専用:Lynx	
+Glory	-	390	855	1185	-	376	838	1168	-	2:05	専用:BEMANI Designers "minoru"	
+GO OVER WITH GLARE -ROOTAGE 26-	-	548	1160	2000	-	558	1129	1769	-	2:02	専用:IIDX Designers "GOLI、VJ GYO、HES、NAGI"	
+HARD BRAIN	-	701	1044	1914	-	706	1095	1903	-	2:08	SIRIUS CYBER汎用	
+HEISEI	190	590	992	1291	-	581	1033	1323	-	2:05	専用:Taiyo Yamamoto	
+Hurry Hurry	-	380	527	1045	-	379	527	1032	-	1:59	専用:Minako Endo	
+IDC feat.REVERBEE (Mo'Cuts Ver)	-	557	818	1145	-	553	779	1017	-	2:01	専用:cap	
+IDOL syndrome.	-	382	738	1109	1533	397	720	1183	1567	2:07	PENDUAL FUTURE汎用+ミスレイヤー	BEMANI Designers "NAGI"
+KILL EACH OTHER	-	711	1270	1945	-	713	1248	1889	-	2:15	Rootage TECHNO汎用+レイヤー	BEMANI Designers "NAGI"
+L.F.O	-	444	898	1687	-	448	847	1697	-	2:08	専用:pam, Ta-k	
+LADYBIRD	-	572	865	1258	-	601	894	1253	-	1:48	10th POPS汎用+レイヤー	BEMANI Designers "ちっひ"
+Let me be your cure	-	573	718	1344	-	631	879	1354	-	2:16	GOLD TRANCE汎用	
+Lethal Weapon	-	598	961	1646	-	597	1053	1684	-	2:01	専用:BEMANI Designers "HES"+レイヤー	BEMANI Designers "NAGI"
+Level One	-	647	1182	1857	-	750	1149	1872	-	2:11	専用:murAta Yuzi	
+Lift Us High	-	494	808	1247	-	490	777	1252	-	2:08	専用:BEMANI Designers "NANTOMO"	
+LOST TECHNOLOGIE	-	590	984	1822	-	644	1009	1849	-	2:04	Rootage TECHNO汎用+ミスレイヤー	BEMANI Designers "mayo"
+Mächö Mönky	-	754	1123	1588	-	643	1100	1522	-	2:00	5th DANCE汎用+レイヤー	BEMANI Designers "NAGI"
+Necroxis Girl	-	601	1027	1441	-	558	962	1505	-	1:59	Lincle CYBER汎用	
+Next Tales 2 Oath (IIDX 20th Anniv "Ring" Theme)	-	457	847	1387	-	519	820	1415	-	2:00	専用:Ringスタッフ	
+Night! Night! Night!	-	609	931	1540	-	590	917	1486	-	2:02	PENDUAL FUTURE汎用+ミスレイヤー	BEMANI Designers "VJ GYO"
+ONIGOROSHI	-	597	1107	1541	-	584	1107	1503	-	2:00	専用:BEMANI Designers "いそにん"	
+OVER TIME	-	293	492	779	1013	262	556	841	1032	1:54	専用:BEMANI Designers "minoru"	
+Painful Fate	-	642	1178	1702	-	683	1112	1677	-	2:09	tricoro TECHNO汎用+レイヤー	BEMANI Designers "T田"
+Playing With Fire	-	512	866	1200	-	516	814	1113	-	1:45	PENDUAL FUTURE汎用	
+Psycho Sheep Riddim	-	324	512	841	1150	330	509	842	1091	2:02	専用:Hanamori Hiro	
+Red. by Jack Trance	-	770	1122	1862	-	735	1129	1612	-	2:03	Rootage TECHNO汎用	
+REPLAY	-	478	840	1141	-	820	973	1505	-	2:12	専用:Noriaki Furuya	
+ROCK女 feat. 大山愛未, Ken	-	548	954	1436	-	561	997	1435	-	2:04	5th DANCE汎用	
+R∞tAge	273	565	850	1503	-	569	1058	1459	-	2:12	Rootage CYBER汎用+レイヤー	BEMANI Designers "GOLI"
+ruin of opals	-	533	1016	1646	-	537	1012	1604	-	2:00	tricoro TECHNO汎用	
+SPEED ROCKER	-	464	879	1175	-	491	874	1214	-	2:00	専用:Hiromitsu Kawasaki	
+Technicolour Dreams	-	474	722	1202	-	454	708	1209	-	1:48	tricoro CYBER汎用	
+The Best of Both Worlds	-	301	726	1128	-	303	732	1211	-	2:06	専用:yama_ko	
+THE DAY OF JUBILATIONS	-	794	1234	1757	-	771	1223	1883	-	1:58	Lincle POPS汎用+レイヤー	BEMANI Designers "NAGI"
+The Rebellion of Sequencer	-	646	1054	1634	-	640	1041	1628	-	1:56	Rootage TECHNO汎用+ミスレイヤー	BEMANI Designers "XTC"
+toy boxer	-	390	725	1122	-	401	743	1149	-	1:48	copula TRANSPORT汎用	
+ToyCube Pf.(RX-Ver.S.P.L.)	-	379	789	1153	-	575	1038	1395	-	2:06	10th AMBIENT汎用	
+Trill auf G	-	586	1098	1670	-	577	1059	1610	-	2:01	Lincle POPS汎用+レイヤー	BEMANI Designers "VJ GYO"
+Twilight Warp	-	483	741	1083	-	483	740	1110	-	2:07	6th HOUSE汎用	
+Unbelief	-	570	1113	1675	-	661	1092	1716	-	2:03	SIRIUS CYBER汎用+ミスレイヤー	BEMANI Designers "Am"
+UNDERWORLD HOLOGRAPHY	-	580	1081	1648	-	578	1138	1644	-	2:09	専用:BEMANI Designers "いそにん"	
+Urban Constellations	-	362	771	1167	-	372	761	1261	-	2:01	専用:karekitsune	
+Visterhv	-	642	1152	1869	-	637	1159	1782	-	2:03	専用:BEMANI Designers "NAGI"	
+voltississimo	-	613	1135	1888	-	613	1146	1824	-	1:56	PENDUAL FUTURE汎用	
+Wing of Hearts	-	567	916	1473	-	565	918	1477	-	2:15	Rootage CYBER汎用+レイヤー	BEMANI Desingers "Ortie"
+Wolf 1061	-	516	872	1584	-	572	936	1514	-	2:06	専用:BEMANI Designers "ni-si"	
+Wonderland	-	542	957	1393	-	533	901	1392	-	2:05	専用:Seventhgraphics	
+XENON II ～TOMOYUKIの野望～	-	601	915	1523	-	609	911	1482	-	1:54	専用:BEMANI Designers "T田"	
+Xlø	-	776	1304	1988	-	708	1304	1936	-	2:02	専用:karekitsune	
+Yum Yum Jelly	-	398	799	1204	-	436	820	1236	-	1:57	専用:BEMANI Designers "まゆずみ"	
+ZENDEGI DANCE	-	602	935	1393	-	587	922	1378	-	2:01	tricoro TECHNO汎用+レイヤー	BEMANI Designers "T田"
+50th Memorial Songs -Beginning Story-	162	417	846	1378	-	433	867	1468	-	2:09	専用	
+50th Memorial Songs -Flagship medley-	192	496	786	1157	-	481	785	1148	-	1:54	専用	
+50th Memorial Songs -二人の時 ～under the cherry blossoms～-	283	621	834	1311	-	623	829	1317	-	2:06	専用	
+50th Memorial Songs -The BEMANI History-	274	545	851	1348	-	628	889	1290	-	2:00	専用	
+& Intelligence	-	594	1112	1623	-	603	1129	1600	-	2:03	専用:Taiyo Yamamoto	
+おーまい！らぶりー！すうぃーてぃ！だーりん！	-	560	1009	1480	-	599	991	1480	-	2:03	SINOBUZ POPS汎用	
+お菓子の王国	-	718	1191	2109	-	705	1225	2135	-	2:09	10th POPS汎用+レイヤー	BEMANI Designers "てふてふ"
+X-DEN	-	861	1418	2220	-	896	1495	2220	-	※	専用+ミスレイヤー	BEMANI Designers "VJ GYO"
+グラナダの風	-	414	637	954	-	426	642	985	-	1:52	専用:BEMANI Designers "Fukutomi_WAVE"	
+金野火織の金色提言	-	643	1171	1630	-	640	1189	1676	-	2:02	専用:BEMANI Designers "NAGI"	
+最小三倍完全数	-	469	921	1314	-	464	908	1414	-	1:48	SIRIUS CYBER汎用	
+深愛のリグレット	-	399	605	1206	-	400	605	1129	-	2:08	10th AMBIENT汎用	
+セカンドピアス	-	302	555	1015	-	300	504	1002	-	2:08	10th POPS汎用	
+泰東ノ翠霞	-	252	384	914	-	276	470	1291	-	2:08	専用:諏訪間千晃, Ta‑k (synesthesia)	
+抱きしめてモナムール	-	664	1189	2110	-	675	1212	2129	-	2:14	10th HOUSE汎用+レイヤー	BEMANI Designers "ちっひ"
+夏の匂い。キミの残像。 ft. Kanae Asaba	-	347	777	1281	-	355	817	1348	-	2:12	専用:BEMANI Designers "なす"	
+ハードベース・フェスタ	-	582	928	1447	-	562	966	1441	-	2:04	6th RAVE汎用+ミスレイヤー	BEMANI Designers "NAGI"
+花冠 feat.Aikapin	-	513	869	1365	-	502	886	1366	-	2:06	6th HOUSE汎用+レイヤー	BEMANI Designers "壱&なす"
+爆ゼニ☆がってんワーカー	-	639	993	1391	-	634	1009	1332	-	2:02	SINOBUZ POPS汎用+ミスレイヤー	BEMANI Designers "T田"
+ミストレス・アンに花束を	-	293	518	718	-	279	465	709	-	1:51	専用:BEMANI Designers "kyunkyun"	
+ミッドナイト☆WAR	-	414	800	1261	-	417	832	1311	-	1:53	専用:チームいちか	
+龍王の霊廟(Mausoleum Of The Primal Dragon)	-	576	1190	1614	2023	577	1070	1599	2046	2:11	専用:BEMANI Desiners "いそにん"	
+beatmania IIDX 27 HEROIC VERSE ▲ ▼ △												
+Advent Infamous	-	508	843	1454	-	503	854	1430	-	2:01	専用:yama_ko	
+AKASHIC BREAK	-	633	1243	1823	-	652	1177	1767	-	1:59	専用:alo	
+And-RoiD	-	373	672	1008	-	384	682	985	-	1:48	Lincle CYBER汎用+レイヤー	BEMANI Designers "とっきー"
+Artist	-	660	1243	1870	-	665	1252	1923	-	1:59	PENDUAL PRESENT汎用+レイヤー	BEMANI Designers "Ray"
+Backyard Stars	-	540	844	1155	-	543	838	1222	-	1:56	Lincle POPS汎用+レイヤー	BEMANI Designers "蒼弐*アオニサイ"
+BEAT PRISONER	-	629	1083	1844	-	628	1075	1752	-	1:54	専用:BEMANI Designers "KING"	
+beatAffection	-	524	792	1341	-	522	730	1232	-	2:15	9th TECHNO汎用+レイヤー	BEMANI Designers "Kaito"
+Beautiful Harmony (IIDX MIX)	-	452	870	1246	-	483	870	1269	-	2:11	6th HOUSE汎用	
+Bow shock!!	-	408	986	1566	2176	417	974	1583	2170	2:07	Lincle POPS汎用+レイヤー	BEMANI Designers "oku"
+Calvados Queen	-	502	777	1245	-	500	760	1244	-	2:06	Lincle CYBER汎用+レイヤー	BEMANI Designers "蒼弐"
+Change Yourself	-	493	890	1288	-	462	833	1260	-	1:59	専用:BEMANI Designers "菌類"	
+Crank It	-	393	731	1228	-	401	737	1164	-	2:00	Rootage TECHNO汎用+レイヤー	BEMANI Designers "Ray"
+Dans la nuit de l'éternité	-	718	1153	1830	-	714	1128	1850	-	2:07	SPADA HARDCORE汎用+レイヤー	BEMANI Designers "チャーム・シスターズ（あねじゃ）"
+Do What You Want	-	352	644	1027	-	351	688	1085	-	1:43	PENDUAL PRESENT汎用	
+Double Dribble	-	654	1009	1683	-	600	1057	1874	-	2:04	専用:mori-flo	
+EROICA	-	703	1193	2040	-	702	1213	2363	-	2:02	専用:BEMANI Designers "GOLI"	
+Everlasting Message	-	638	1197	1970	-	619	1149	1781	-	1:57	GOLD HOUSE汎用	
+fairy cocktail	-	230	559	828	-	230	567	861	-	1:59	専用:yama_ko	
+Fly Above (Vicissitude Remix)	-	444	778	1200	-	453	826	1244	-	1:59	6th HOUSE汎用	
+Forgetting Machine	-	366	634	868	-	358	620	826	-	1:42	SINOBUZ POPS汎用	
+Friction[!]Function	-	560	911	1634	-	553	1008	1546	-	2:02	専用:Minako Endo	
+GHOST	-	425	767	1403	-	418	749	1354	-	1:58	専用:BEMANI Designers "KING"	
+GIGA VIOLATE	-	565	833	1392	-	547	827	1445	-	1:56	専用:magarikado	
+Hold My Hand	-	472	855	1247	-	424	809	1264	-	2:03	Lincle POPS汎用	
+Hyper Drive feat. ぷにぷに電機	-	335	775	1000	-	339	761	1000	-	2:00	専用:BEMANI Designers "まゆずみ"	
+If	-	398	689	959	-	394	690	969	-	1:50	Lincle POPS汎用	
+Inferno of Fomalhaut	-	523	980	1701	-	531	967	1723	-	2:03	tricoro TECHNO汎用+ミスレイヤー	BEMANI Designers "Fukutomi Wave"
+Infinity Mirror	-	436	709	1164	-	422	729	1303	-	2:08	専用:Hiromitsu Kawasaki	
+Into The Madness	-	508	821	1286	-	539	806	1276	-	1:57	Rootage TECHNO汎用	
+LASER CRUSTER (IGNITE REMIX)	-	399	908	1824	-	380	848	1700	-	2:06	Lincle CYBER汎用	
+Level 2	-	484	886	1488	-	500	933	1556	-	2:01	専用:Yoshiaki Nakaichi	
+LIGHTNING STRIKES	237	471	854	1639	2123	473	950	1763	2084	1:54	HEROIC VERSE POPS汎用+レイヤー	BEMANI Designers "KINRUI"
+Like+it!	-	541	885	1197	-	505	871	1071	-	1:38	PENDUAL FUTURE汎用	
+Lords Of The Roundtable	-	541	950	1586	-	567	838	1477	-	2:04	Rootage TECHNO汎用+レイヤー	BEMANI Designers "KING、Pendragon"
+Lost Souls	-	358	857	1236	2000	349	820	1280	1938	1:47	専用+ミスレイヤー	BEMANI Designers "9-sphere、NAGI"
+Matt Silver	-	598	1096	1707	-	545	1053	1705	-	2:01	専用:BEMANI Designers "まゆずみ"	
+Megalara Garuda	-	764	1012	1543	-	764	1031	1503	-	1:53	PENDUAL FUTURE汎用	
+Mel	-	396	767	1088	1373	405	713	1026	1353	2:03	10th POPS汎用+レイヤー	BEMANI Designers "てふてふ"
+Moving on	-	525	979	1501	-	542	933	1480	-	2:00	専用:BEMANI Designers "KING、KINRUI"	
+Nasty Techniques	-	496	854	1338	-	499	841	1290	-	2:08	専用:murAta Yuzi	
+NEWALONE	-	303	662	1012	-	352	643	980	-	1:58	専用:Hanamori Hiro	
+ORCA	-	681	1241	1795	-	673	1235	1789	-	2:00	PENDUAL FUTURE汎用	
+OUTER PLANETS	-	340	716	1100	-	343	732	1104	-	2:02	専用:BEMANI Designers "Ray"	
+Override	-	480	821	1471	2204	492	815	1445	2145	2:00	専用:Seventhgraphics	
+PHASE SHIFT MANEUVER	-	638	886	1447	-	646	913	1429	-	2:04	PENDUAL FUTURE汎用+ミスレイヤー	BEMANI Designers "T田"
+Primitive Vibes	298	587	1004	1564	-	589	1019	1534	-	2:01	専用:Routes	
+Queen Kaguya	-	493	952	1330	-	506	892	1327	-	2:02	専用:Seventhgraphics	
+Rainstorm	-	501	784	1146	-	485	775	1140	-	2:03	6th HOUSE汎用	
+Rave Patroller	-	696	1189	1705	-	747	1289	1667	-	2:07	専用:Taiyo Yamamoto	
+rough percussionythm	-	515	853	1295	-	523	866	1293	-	2:08	専用:BEMANI Designers "Kaito"	
+S!ck (Nhato Remix)	-	506	830	1279	-	556	922	1313	-	1:58	Lincle CYBER汎用	
+SCREW // owo // SCREW	-	567	1111	1567	-	568	1104	1542	-	2:00	専用:Hiromitsu Kawasaki	
+Shiva	-	370	753	1085	-	347	726	1040	-	1:49	SIRIUS CYBER汎用	
+Silly Love	131	406	716	1061	-	401	712	1051	-	2:00	専用:BEMANI Designers "いそにん"	
+Ska-sh All Neurons!!	-	497	739	1176	-	502	692	1139	-	2:04	Lincle POPS汎用+レイヤー	BEMANI Designers "ぺぬ"
+Smashing Wedge	-	492	1141	1957	-	555	1270	1969	-	2:01	専用+レイヤー	BEMANI Designers "ぺぬ"
+Sparkle Smilin'	-	462	756	1243	-	456	746	1191	-	1:50	専用:チームいちか	
+STOIC HYPOTHESIS	-	565	917	1442	-	560	919	1405	-	2:03	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "KINRUI"
+Sugar Drippin'	-	391	701	1069	-	396	687	1129	-	1:58	Lincle POPS汎用	
+T-REX vs Velociraptor (In the Far east euphoria)	-	712	943	1636	-	712	923	1607	-	1:57	専用:Taiyo Yamamoto	
+take me higher	-	414	647	1015	-	419	648	959	-	1:53	10th HOUSE汎用	
+TECHNO Style Essentials	-	516	833	1453	-	517	822	1506	-	1:54	10th HOUSE汎用	
+THE BRAVE MUST DIE	-	721	1283	2075	-	778	1238	2086	-	2:09	Rootage TECHNO汎用+ミスレイヤー	BEMANI Designers "XTC"
+THE F∀UST	-	691	1183	1851	-	701	1143	1838	-	2:07	PENDUAL FUTURE汎用+レイヤー	BEMANI Desingers "9-sphere"
+The Sky of Sadness	-	444	767	1215	-	451	776	1296	-	1:52	GOLD TRANCE汎用	
+Theory	-	412	745	1342	-	418	731	1309	-	2:03	SIRIUS CYBER汎用	
+TRIUMPH	-	475	1019	1724	-	477	959	1691	-	1:58	専用:alo	
+UNITE THE HEART	-	753	1319	1676	-	696	1259	1633	-	2:12	HEROIC VERSE POPS汎用	
+VALKYRIAS -英雄誕生-	235	524	881	1386	-	531	919	1466	-	2:07	専用:BEMANI Designers "NAGI"	
+VIBRΛ	-	472	666	941	-	475	670	1032	-	2:02	6th HOUSE汎用	
+Vinculum stellarum	-	473	1229	1873	-	472	1190	1903	-	2:20	PENDUAL PRESENT汎用	
+Virus Funk	-	397	785	1119	-	443	703	1009	-	2:01	専用:BEMANI Designers "アキ"	
+Volcanic Dragon	-	548	914	1495	-	620	861	1412	-	2:06	PENDUAL FUTURE汎用	
+Voo Doo Bamboleo	-	459	786	1262	-	472	809	1361	-	2:08	PENDUAL FUTURE汎用	
+Ypsilon	-	567	913	1466	1801	579	896	1402	1796	2:02	Lincle CYBER汎用+レイヤー	
+27th style	-	593	908	1299	-	623	907	1257	-	2:04	専用:BEMANI Designers "VJ GYO、KINRUI"	
+華麗なる大犬円舞曲	-	710	1105	1849	-	712	1114	1835	-	2:07	HEROIC VERSE GOTHIC汎用+レイヤー	BEMANI Designers "NAGI"
+がっつり陰キャ!? 怪盗いいんちょの億劫^^;	-	789	1399	2192	-	774	1390	2161	-	1:59	Lincle POPS汎用	
+狂水一華	-	489	888	1370	-	493	896	1336	-	1:59	専用:チームいちか	
+灼熱Beach Side Bunny (Masayoshi Iimori Remix)	-	336	583	933	-	335	594	941	-	1:55	8th POPS汎用	
+シャムシールの舞	-	435	790	1294	-	435	798	1300	-	1:55	HEROIC VERSE GOTHIC汎用	
+深淵に捧ぐレクイエム	-	431	843	1537	-	442	846	1456	-	1:58	HEROIC VERSE GOTHIC汎用	
+セピアの軌跡 ft. 天宮みや(少女フラクタル)	191	404	739	1205	-	427	753	1223	-	2:05	専用:BEMANI Designers "KINRUI"	
+眠りの国のステラ	-	594	946	1393	-	575	937	1405	-	2:03	HEROIC VERSE GOTHIC汎用	
+バッドエンド・シンドローム	-	535	892	1497	-	491	940	1552	-	2:11	HEROIC VERSE GOTHIC汎用	
+開きたまえ！Next stAge！	-	576	861	1463	-	556	1040	1473	-	2:01	Rootage CYBER汎用+レイヤー	BEMANI Designers "GOLI"
+ピアノ協奏曲第1番”蠍火” (BlackY Remix)	-	521	1072	1926	-	610	1130	1937	-	2:13	PENDUAL PRESENT汎用	
+曼荼羅恋々	-	561	894	1392	-	558	861	1344	-	2:03	専用:BEMANI Designers "T田"	
+魅惑のYUMMYスイーツ	-	469	906	1586	-	472	861	1728	-	2:01	専用:BEMANI Designers "tef * tef"	
+ラブキラ☆スプラッシュ	-	564	838	1267	-	517	758	1100	-	2:03	専用:チームいちか	
+ランカーキラーガール	-	583	955	1479	-	604	903	1419	-	2:03	CANNON BALLERS RACING汎用	
+錬成人間トリコロイダー	-	531	913	1613	-	531	902	1516	-	2:01	HEROIC VERSE POPS汎用+レイヤー	BEMANI Designers "VJ GYO"
+beatmania IIDX 28 BISTROVER ▲ ▼ △												
+ABSOLUTE (kors k Remix)	-	476	792	1336	-	475	819	1313	-	2:09	tricoro CYBER汎用	
+Ah Hah Yeah	-	367	729	1108	-	363	728	1098	-	1:47	専用:BEMANI Designers "Kaito"	
+AMRITA -不滅ノ花-	-	455	815	1398	-	455	806	1327	-	1:59	PENDUAL FUTURE汎用	
+apo:llioth	-	615	1053	1498	-	616	1065	1511	-	2:10	PENDUAL FUTURE汎用	
+As You Want	-	430	753	1246	-	437	750	1063	-	2:00	専用:はなけん	
+"ASIAN VIRTUAL REALITIES
+(MELTING TOGETHER IN DAZZLING DARKNESS)"	-	545	964	1752	-	568	949	1687	-	1:57	専用:BEMANI Designers "猫味蕎麦"	
+BEMANI PRO LEAGUE Theme	-	393	712	996	-	495	717	1024	-	2:01	専用:BEMANI Design Team	
+BIGソムタム	284	639	964	1688	-	720	1036	1714	-	2:01	CANNON BALLERS RACING汎用	
+BLACK or WHITE?	317	655	1287	2013	-	715	1252	1960	-	2:01	SPADA HARDCORE汎用	
+Burning Flame	-	609	935	1470	1938	586	925	1429	1944	1:58	Resort Anthem DANCE汎用+レイヤー	BEMANI Designers "HES"
+Chewingood!!!	153	435	761	1317	-	446	780	1304	-	1:58	専用:BEMANI Designers "NAGI"	
+COSMIC RAY	-	667	1130	1509	-	691	1122	1471	-	1:45	専用:magarikado	
+Crazy Jackpot	-	506	848	1447	-	531	858	1429	-	1:57	SINOBUZ POPS汎用	
+Danza Aestas	-	504	888	1519	-	520	883	1558	-	2:04	BISTROVER TRANSPORT汎用	
+Dawn Saga	-	486	839	1378	-	485	838	1406	-	2:02	専用:shun yamaguchi	
+DENIM	-	304	670	883	-	415	801	1043	-	1:17	9th TECHNO汎用	
+Don't Stop The Music feat. Kanae Asaba	-	349	674	944	-	358	668	909	-	1:59	10th HOUSE汎用	
+DUAL STRIKER	-	602	1277	1960	-	631	1270	1951	-	2:04	PENDUAL FUTURE汎用	
+Empire of Fury	-	700	1110	1700	-	680	1088	1619	-	1:58	専用:alo	
+Euphoric Lagoon	-	448	815	1312	-	449	790	1309	-	2:07	専用:BEMANI Designers "KINRUI"	
+Explorer feat. ぷにぷに電機	-	382	661	1082	1461	471	713	1001	1438	2:00	専用:BEMANI Designers "NAGI"	
+Farewell to Marrakech	-	466	786	1162	-	506	853	1279	-	2:05	専用:nokir	
+Fire Beat	-	567	935	1392	-	492	961	1488	-	2:02	Resort Anthem DANCE汎用	
+Frisk And Squeak	-	407	801	1228	-	428	811	1230	-	2:00	専用:alo	
+GIGA RAID	-	493	951	1222	-	501	924	1356	-	2:02	Rootage TECHNO汎用	
+Globe Glitter	-	538	849	1369	-	547	860	1351	-	1:59	CANNON BALLERS RACING汎用	
+Here We Are	202	549	872	1249	-	544	839	1226	-	2:06	専用:Routes	
+HIGH VOLTAGE	-	421	730	1148	-	420	724	1191	-	2:03	Rootage CYBER汎用+レイヤー	BEMANI Designers "9-sphere"
+Ignis†Iræ	-	558	1243	1970	-	571	1219	1968	-	2:09	専用:BEMANI Designers "over the mountain"	
+IIDX RED Ending (Ryu☆Remix)	-	327	607	938	-	384	697	1019	-	1:54	専用:BEMANI Designers "HES"	
+innocent revolver	-	570	1197	1990	-	574	1232	1964	-	2:06	copula TRANSPORT汎用+ミスレイヤー	BEMANI Designers "猫味蕎麦"
+Jungle Eater	-	513	935	1517	-	529	930	1547	-	2:00	専用:BEMANI Designers "猫味蕎麦"	
+LAST DAY	-	578	887	1551	-	631	878	1545	-	2:00	Lincle CYBER汎用	
+Level 3	-	592	1174	1844	-	607	1170	1845	-	2:01	BISTROVER METAL汎用	
+LOCUS OF THE TRAVEL	-	561	1297	1920	-	563	1286	1936	-	2:03	専用:BEMANI Designers "GOLI"	
+Lovely Howdy Cowboy!!	-	550	946	1405	-	539	947	1373	-	1:58	SINOBUZ POPS汎用+レイヤー	BEMANI Designers "球Q"
+MA・TSU・RI	-	555	948	1302	-	538	963	1224	-	1:53	copula JAPANESQUE汎用	
+MEGAERA	-	746	1112	1790	-	741	1065	1810	-	2:02	専用+レイヤー	BEMANI Designers "NAGI"
+Midnight Drive	-	308	675	1016	-	319	653	968	-	1:59	10th HOUSE汎用	
+MOVE! (We Keep It Movin')	-	387	694	1111	-	371	666	1111	-	2:06	CANNON BALLERS RACING汎用	
+Neo Heritage	-	481	851	1454	-	472	851	1428	-	2:00	BISTROVER METAL汎用	
+Ocean Blue feat. Luschel	-	432	736	1244	-	434	754	1241	-	2:04	BISTROVER TRANSPORT汎用	
+of the first magnitude	-	523	976	1503	-	522	998	1541	-	2:08	専用:Seventhgraphics	
+OTOKOZAKA	-	542	970	1485	-	530	979	1653	-	2:07	10th TRANCE汎用	
+Overslept	-	583	904	1300	-	593	915	1309	-	1:58	8th HOUSE汎用	
+Para siempre	-	487	785	1461	-	500	844	1392	-	2:07	専用:BEMANI Designers "とっきー"	
+Pārvatī	-	523	940	1467	-	529	948	1430	-	1:59	専用:BEMANI Designers "maysea"	
+POLꞰAMAИIA	219	503	961	1507	1960	572	899	1473	1798	1:58	GOLD HOUSE汎用+レイヤー	BEMANI Designers "いそにん"
+Rejection Girl	-	514	844	1352	-	522	830	1390	-	2:02	専用+レイヤー	BEMANI Designers "NAGI"
+Ritual of Anubis	-	599	945	1422	-	580	932	1427	-	1:55	専用:Hanamori Hiro	
+Romanticが止まらない	196	479	848	1367	-	484	879	1388	-	1:50	10th HOUSE汎用	
+rommmo	-	615	946	1762	-	612	965	1297	-	1:59	専用:Routes	
+Rosa azuL	-	456	926	1417	-	477	933	1437	-	1:54	専用:Taiyo Yamamoto	
+Rowdy	-	531	795	1256	-	530	804	1311	-	1:58	専用:pam(DRAWIZ,Inc.)	
+Rubrum Piano	-	492	877	1253	-	491	837	1244	-	1:44	専用:BEMANI Designers "neko鯵soba"	
+S-Bahn	-	491	800	1092	-	525	799	1093	-	1:52	専用:BEMANI Designers "OQ"	
+Sinus Iridum	-	651	1101	1803	-	651	1229	1814	-	2:06	専用+レイヤー	BEMANI Designers "NAGI"
+smooooch・∀・ (Snail's House Remix)	-	442	807	1193	-	436	793	1180	-	2:07	Lincle POPS汎用	
+SOLID STATE SQUAD -RISEN RELIC REMIX-	-	670	1177	1670	-	667	1167	1688	-	2:08	BISTROVER METAL汎用	
+Sugarplum	-	445	938	1265	-	452	946	1297	-	1:59	専用:BEMANI Designers "maysea"	
+Swarm Of Scarabs	-	532	784	1212	-	532	785	1212	-	1:48	Rootage TECHNO汎用	
+Tell me what you wish feat.らっぷびと	-	571	818	1436	-	576	860	1514	-	2:14	PENDUAL FUTURE汎用	
+That Feeling	-	364	629	973	-	365	634	965	-	1:59	専用:Hiromitsu Kawasaki	
+THE PEERLESS UNDER HEAVEN	-	595	1066	1818	-	592	1032	1801	-	2:00	BISTROVER METAL汎用+レイヤー	BEMANI Designers "maysea"
+The Wind of China Express(The 4th Mashup)	-	506	857	1283	-	507	841	1248	-	1:59	BISTROVER METAL汎用	
+Tiempo Loco	-	545	1035	1884	-	550	1062	1740	-	2:04	専用:猫クロス	
+Viridian	-	556	1022	1700	-	549	1058	1832	-	1:57	専用:alo	
+Vitrum	-	554	905	1848	-	580	910	1703	-	2:01	BISTROVER METAL汎用+レイヤー	Hanamori Hiro
+WAKE UP NOW	-	485	739	1008	1249	542	713	1127	1415	2:01	専用:BEMANI Designers "maysea"	
+When I Met U	-	452	666	1033	-	458	659	1032	-	1:50	Lincle POPS汎用	
+Winner's Proof ft. KANASA from bless4	138	385	696	1118	-	386	678	1089	-	1:56	専用:BEMANI Designers "maysea"	
+X-ray binary	-	500	983	1417	-	503	991	1424	-	2:00	HEROIC VERSE GOTHIC汎用	
+Zenith	-	428	752	1128	-	424	767	1227	-	2:11	copula TRANSPORT汎用	
+犬に雨傘	-	471	740	1069	-	478	745	1086	-	2:08	10th AMBIENT汎用+レイヤー	BEMANI Designers "ネコみソバ"
+閠槞彁の願い	-	533	1109	1613	-	530	1061	1683	-	2:03	専用:Taiyo Yamamoto	
+ここからよろしく大作戦143	134	485	896	1264	1598	520	941	1292	1637	2:10	専用	
+新宝島	264	397	700	1186	1790	404	707	1200	1821	1:56	tricoro CYBER汎用	
+水鏡の異界	-	452	889	1661	-	452	913	1668	-	2:00	copula JAPANESQUE汎用	
+スーパー戦湯ババンバーン	-	645	1080	1755	-	658	1026	1702	-	2:07	SINOBUZ JAPANESQUE汎用	
+世界の果てに約束の凱歌を -ReUnion-	-	602	973	1983	-	610	995	1918	-	2:04	tricoro CYBER汎用	
+∀	303	667	1136	1802	-	661	1116	1879	-	1:58	専用:magarikado	
+ディスコルディア	-	701	1229	2073	-	724	1258	2089	-	2:04	PENDUAL PRESENT汎用	
+涙のテ・エストラーニョ・ムーチョ	-	700	1045	1422	-	683	1010	1582	-	2:01	専用:BEMANI Designers "菌類"	
+儚き恋の華	-	538	943	1515	-	557	972	1531	-	2:02	専用:BEMANI Designers "狗待草"	
+伐折羅-vajra-	-	585	1085	1877	-	610	1075	1829	-	1:59	SINOBUZ JAPANESQUE汎用	
+バッド・スイーツ、バッド・ドリーム	-	563	943	1862	-	559	936	1543	-	2:04	tricoro CYBER汎用+レイヤー	BEMANI Designers "アオニサイ&蒼弐"
+二人ノ廃城幽踊宴	-	637	1216	1927	-	658	1231	1935	-	2:03	専用:ヒロサキ	
+-65℃	-	714	1157	1912	-	716	1102	1827	-	2:02	専用:BEMANI Designers "maysea"	
+魔法のかくれんぼ	-	449	854	1454	-	445	865	1530	-	1:59	専用:BEMANI Designers "いそにん"	
+水無月の雫 ft. 小林まな	-	633	908	1313	-	625	1006	1471	-	2:03	専用:BEMANI Designers "ロNO"	
+無意識のフィロソフィア	-	571	1136	1682	-	574	1136	1658	-	2:08	PENDUAL FUTURE汎用	
+霧幻メモリア	-	482	726	1026	-	487	779	1154	-	1:55	HEROIC VERSE GOTHIC汎用	
+乱膳の舞姫	-	537	927	1382	-	574	919	1392	-	1:57	専用:BEMANI Designers "T田"	
+beatmania IIDX 29 CastHour ▲ ▼ △												
+ABSOLUTE EVIL	127	602	1136	1778	-	603	1193	1818	-	2:05	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "まゆずみ"*7
+Aftermath	-	619	1220	1828	-	595	1257	1777	-	2:13	BISTROVER METAL汎用	
+ALTERNATOR	-	684	1289	1907	-	715	1296	1941	-	1:59	専用:BEMANI Designers "maysea"	
+AMICABLE	-	519	809	1259	-	533	811	1242	-	1:56	専用:BEMANI Designers "maysea"	
+ANEMONE	111	390	806	1069	-	403	839	1175	-	1:57	HEROIC VERSE POPS汎用+レイヤー	BEMANI Designers "アオニサイ"
+Angel's Ladder	-	546	1170	1800	-	617	1257	1800	-	2:06	専用:はなけん	
+Ariah	-	361	753	1090	-	384	733	1060	-	2:02	専用:BEMANI Designers "T田"	
+Arkadia	-	591	1071	1873	-	584	1071	1872	-	1:59	PENDUAL MUSIC SELECT汎用(PRESENT)+レイヤー	BEMANI Designers "GOLI"
+Banger Banger Banger Banger	-	496	907	1497	-	580	919	1573	-	1:59	専用:BEMANI Designers "網焼蕎麦"*8	
+Binary Black Hole	-	681	1174	2000	-	684	1220	2000	-	2:05	専用:BEMANI Designers "HES"	
+Blue Bird feat. Kanae Asaba	-	331	563	900	-	301	622	889	-	2:02	6th HOUSE汎用	
+Brave Spirits	-	362	722	1250	-	362	718	1249	-	2:00	HEROIC VERSE POPS汎用	
+DISPARATE	-	524	927	1243	-	544	954	1318	-	1:50	専用:murAta Yuzi	
+Divine Heaven	-	476	1006	1503	-	472	983	1567	-	2:06	専用	
+Don't believe the hype	-	588	1133	1666	-	579	1118	1572	-	2:07	BISTROVER METAL汎用	
+DREAM OF SPACE UFO ABDUCTION	-	548	922	1371	-	568	903	1393	-	2:03	専用:ヒロサキ	
+Emera	-	450	831	1179	-	482	861	1266	-	1:44	HEROIC VERSE POPS汎用	
+EMOTiON TRiPPER	-	477	749	1098	-	504	769	1103	-	1:57	copula TRANSPORT汎用	
+Ergosphere	-	506	950	1391	-	517	972	1345	-	1:46	PENDUAL FUTURE汎用	
+Fantastic Merry-Go-Round	-	543	757	1061	-	533	752	1088	-	2:05	SINOBUZ POPS汎用	
+Fegrix	-	640	1172	1687	-	649	1175	1803	-	2:03	PENDUAL FUTURE汎用	
+FINALLY BLAZE	-	469	905	1424	-	481	878	1278	-	2:08	専用:猫クロス,mq	
+Flying Castle	-	548	1162	1877	-	547	1132	1889	-	2:05	専用:BEMANI Designers "コスモnoodle"	
+Game Changers	-	390	740	1395	-	386	759	1353	-	2:05	Rootage TECHNO汎用	
+Get set, Go! feat.Kanae Asaba	-	425	740	1069	-	432	766	1115	-	2:01	専用:BEMANI Designers "アキ"	
+GiGaGaHell	-	698	1077	1687	-	697	1048	1594	-	2:00	専用:BEMANI Designers "猫GiGa蕎麦"	
+GRAVITON	-	597	1040	1762	-	610	1073	1813	-	1:59	専用:alo	
+hard-wired	-	821	1208	1901	-	813	1185	1949	-	2:02	CastHour CYBER汎用+RESIDENT MUSIC SELECT汎用+レイヤー	BEMANI Designers
+Harmonia	-	376	629	1013	-	379	641	1007	-	1:35	専用:ちっひ	
+Hat Surprise	-	349	825	1234	-	350	820	1246	-	1:51	CANNON BALLERS RACING汎用	
+HEARTACHE	-	251	603	930	-	371	689	1045	-	1:59	SIRIUS HOUSE汎用+レイヤー	BEMANI Designers "アオニサイ"
+kors k's How to make OTOGE CORE	-	418	793	1180	-	424	804	1216	-	2:07	専用:BEMANI Designers "How味蕎麦"ほか*9	
+Lawes's Parotia	-	454	884	1294	-	467	885	1304	-	1:56	CANNON BALLERS RACING汎用	
+LIVE DRIVING!! feat. 花たん	-	817	1275	1947	-	830	1334	1988	-	2:06	copula TRANSPORT汎用+レイヤー	BEMANI Designers "いそにん"
+N.O.	-	423	768	1272	-	476	742	1117	-	2:04	専用:Hanamori Hiro	
+n/a	-	632	1028	1867	-	622	1018	1929	-	1:59	専用:Seventhgraphics	
+No Day But Today!	222	376	680	1000	-	376	697	1098	-	1:42	SINOBUZ POPS汎用+レイヤー	BEMANI Designers "かーる"?
+Nocturnal 2097	-	480	990	1479	-	504	966	1488	-	2:01	PENDUAL FUTURE汎用+レイヤー	BEMANI Desiners "maysea"
+Non Stop Rock	-	403	672	952	-	433	680	933	-	1:56	Rootage TECHNO汎用	
+One for All	-	516	910	1632	-	524	946	1554	-	2:03	PENDUAL PRESENT汎用	
+Onyx	-	466	767	1214	-	471	794	1272	-	1:51	BISTROVER METAL汎用	
+P.O.W.E.R.	-	536	897	1186	-	487	848	1216	-	1:59	専用:Hanamori Hiro	
+PIRATES BLADE	-	464	764	1088	-	481	767	1053	-	1:59	専用:ヒロサキ	
+PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.	218	746	1356	2271	-	725	1308	2235	-	2:04	CastHour CYBER汎用+レイヤー	BEMANI Designers "VJ GYO"
+Pout	-	542	892	1317	-	548	961	1323	-	1:58	専用:BEMANI Designers "tef * tef"	
+Prohibited Props	-	527	801	1142	-	516	822	1179	-	1:55	専用+ミスレイヤー	BEMANI Designers "ちっひ"
+Purple Perplex	-	585	976	1578	-	611	971	1501	-	1:57	専用:Routes	
+Push on Beats!～音ゲの国のeX-ストリーマー～	-	629	1018	1748	-	626	1015	1766	-	1:58	CastHour CYBER汎用	
+RAGE feat.H14 of LEONAIR	222	559	1149	1886	-	585	1146	1841	-	2:01	専用+レイヤー	BEMANI Designers "GOLI"
+Silver Bullet	-	612	1044	1662	-	614	1061	1788	-	2:00	HEROIC VERSE GOTHIC汎用+レイヤー	BEMANI Designers "かーる"
+Smalt #28598F	-	552	1192	1725	-	577	1190	1705	-	2:01	専用:BEMANI Designers "maysea"	
+SOLID WYVERN	-	615	1010	1333	1999	598	995	1280	1999	1:49	Rootage TECHNO汎用	
+Souhait bleu	-	457	977	1407	-	467	1007	1457	-	1:57	copula TRANSPORT汎用	
+SPARK IN THE NIGHT	-	440	734	1149	-	437	705	1118	-	2:05	SPADA HARDCORE汎用	
+Stepper	-	356	780	1105	-	364	783	1112	-	1:48	CastHour CYBER汎用	
+Tail Lights	-	556	990	1589	-	594	977	1613	-	2:11	専用:cap	
+TOMAHAWK	-	697	1215	1830	-	713	1318	1841	-	2:05	SPADA HARDCORE汎用	
+Triple Cross	297	568	1172	1667	-	598	1184	1693	-	2:00	CastHour CYBER汎用	
+Ventriloquist	-	396	774	1232	-	399	764	1173	-	1:57	専用:BEMANI Designers "猫味蕎麦"	
+Victory Of Ravers	-	517	894	1301	-	535	864	1168	-	1:53	CastHour CYBER汎用	
+WHA	-	627	1206	1946	-	687	1127	1928	-	2:00	専用:BEMANI Designers "4O8Q"	
+Wonderful Escape	-	488	744	1052	-	494	726	1035	-	2:01	専用:BEMANI Designers "tef * tef"	
+Xyndrome	-	488	840	1495	-	529	901	1480	-	2:00	専用:Routes	
+10000 MILES AWAY	-	525	842	1494	-	535	874	1504	-	2:02	専用:BEMANI Designers "蒼弐"	
+2 Beasts Unchained	-	759	1145	1780	-	766	1170	1736	-	1:57	BISTROVER METAL汎用	
+808monkey	-	385	606	914	-	393	655	969	-	1:55	SIRIUS CYBER汎用	
+青の洞窟	-	455	1033	1600	-	472	1027	1560	-	2:12	専用:BEMANI Designers "maysea"	
+アクマフカ	-	382	780	1168	-	382	774	1229	-	1:58	専用:BEMANI Designers "NAGI"	
+天邪鬼	209	500	870	1693	-	514	906	1758	-	1:59	専用:BEMANI Designers "KING"	
+愛しくてラヴィンユー ft. マナ	-	407	757	1209	-	395	749	1287	-	2:05	Lincle POPS汎用	
+ウツシミウツシ	-	640	1049	1595	-	634	1129	1590	-	2:03	tricoro CYBER汎用	
+オールトの雲	-	617	1015	1335	-	612	973	1313	-	2:04	専用:BEMANI Designers "猫味蕎麦"	
+オドループ	258	558	792	1175	1500	531	783	1277	1537	1:59	公式PV	
+怪物	174	376	602	1205	1648	383	610	1241	1584	2:00	HEROIC VERSE POPS汎用	
+黒紅掬い	-	336	613	916	-	334	617	1046	-	1:58	copula JAPANESQUE汎用	
+口カラ凸ゲキ	-	469	779	1217	-	478	792	1262	-	2:00	専用:ar(DRAWIZ,Inc.),pam(DRAWIZ,Inc.)	
+グッバイ宣言	293	554	905	1557	1849	558	931	1571	1829	2:00	CastHour CYBER汎用	
+《GRANDMASTER》	-	499	939	1504	-	496	934	1508	-	1:58	tricoro TECHNO汎用	
+逆月	-	760	1194	1920	-	768	1177	1848	-	2:02	copula JAPANESQUE汎用	
+シル・ヴ・プレジデント	152	328	611	901	1299	331	613	928	1255	1:33	公式PV	
+雪上断火	-	511	940	1544	-	530	956	1439	-	2:13	SINOBUZ JAPANESQUE汎用	
+月とミルク	-	500	800	1400	-	519	772	1351	-	2:01	専用:BEMANI Designers "まゆずみ"	
+ナイトフィクション	-	367	790	1087	-	380	767	1094	-	1:52	専用:BEMANI Designers "NAGI"	
+ハイテックトキオ	-	560	980	1367	1657	536	969	1385	1670	2:00	CastHour CYBER汎用+レイヤー	BEMANI Designers "NAGI"
+ピアノ独奏無言歌 "灰燼"	-	608	1256	1977	-	618	1300	2174	-	※	HEROIC VERSE GOTHIC汎用	
+烽火連天の刃	-	576	1195	1771	2279	572	1216	1778	-	2:04	専用:BEMANI Designers "NAGI"	
+禊	-	545	1169	1631	-	560	1153	1587	-	2:00	専用:BEMANI Designers "GOLI"	
+ミュージック・アワー	275	610	1084	1516	2094	603	1066	1520	2065	2:00	copula TRANSPORT汎用	
+めでてえ	-	562	875	1336	-	559	873	1303	-	2:04	専用+レイヤー	BEMANI Designers "NAGI"
+beatmania IIDX 30 RESIDENT ▲ ▼ △												
+Always We Trust In You	-	607	951	1625	-	630	925	1692	-	1:58	Lincle POPS汎用+レイヤー	BEMANI Desngers "NAGI"
+Ambush Ace	-	542	1075	1492	-	528	959	1477	-	1:54	HEROIC VERSE POPS汎用	
+AWA AWA	-	398	671	1169	-	405	705	1237	-	2:09	専用:BEMANI Designers "NAGI"	
+B.O.D.Y.	-	558	1103	1734	-	608	1067	1661	-	1:53	専用:BEMANI Designers "Kaito"	
+Bad Encryption	-	678	1015	1633	-	692	998	1614	-	1:53	専用:Routes	
+Beyond Evolution	-	753	1332	2216	-	777	1364	2137	-	2:06	専用:IIDX Designers	
+BIGWAVERS	-	587	963	1796	-	599	1042	1777	-	2:07	専用:BEMANI Designers "maysea"	
+C-C-C-N-N-N	-	504	898	1434	-	525	902	1490	-	1:59	専用:BEMANI Designers "アキ"	
+Caldwell 99	-	530	975	1293	1743	541	961	1338	1766	2:03	CastHour CYBER汎用	
+Chaotoxin	-	599	888	1705	-	615	869	1746	-	2:03	専用:BEMANI Designers "maysea"	
+CODE -CRiMSON-	-	668	971	1516	-	699	933	1563	-	2:01	Rootage TECHNO汎用	
+CUE CUE RESCUE	267	580	853	1278	1549	555	838	1244	1565	1:46	専用:BEMANI Designers "アキ"	
+dica dica	-	591	1233	1638	-	600	1230	1640	-	2:01	SIRIUS CYBER汎用	
+Dreaming Dream	-	423	719	1143	-	426	705	1118	-	2:02	専用:BEMANI Designers "猫dreamそば"	
+Driver	-	450	651	906	-	455	647	930	-	1:58	PENDUAL FUTURE汎用	
+EXODUS SIGN	-	626	921	1366	-	633	946	1275	-	2:00	専用:alo	
+Fading Stars	-	553	831	1367	-	581	874	1292	-	2:01	専用:ヒロサキ	
+FLARE -炎舞- ft.Nana Takahashi	-	573	961	1455	-	575	970	1337	-	2:14	専用:BEMANI Designers "いそにん"	
+Get On Your Feet	-	573	914	1384	-	587	944	1347	-	2:01	Rootage CYBER汎用	
+GET UP AGAIN	-	564	856	1226	-	588	821	1227	-	1:55	RESIDENT CYBER汎用+レイヤー	BEMANI Designers "GOLI"
+glacia	-	606	1093	1492	-	608	1080	1497	-	1:58	Rootage CYBER汎用	
+Hat Surprise (Season 2)	-	514	928	1729	-	524	947	1703	-	1:57	CANNON BALLERS RACING汎用	
+I	-	632	1191	1901	-	617	1151	1890	-	2:00	CastHour CYBER汎用	
+kors k's How to make OTOGE CORE 「LONG」	-	607	1216	1863	-	610	1219	1859	-	2:09	専用:BEMANI Designers "猫long蕎麦"	
+KING	226	475	997	1553	1983	460	987	1581	2024	2:11	Rootage CYBER汎用	
+LADS	-	474	834	1155	-	519	720	1349	-	1:56	6th HOUSE汎用+レイヤー	BEMANI Designers "いそにん"
+Level 4	-	619	1066	1883	-	600	1032	1883	-	2:02	専用:Taiyo Yamamoto、Rei Kurashima	
+LOUDER ROLLING THUNDER	-	555	1029	1767	-	635	1026	1650	-	1:55	専用:BEMANI Designers "maysea"	
+MAX 360	-	616	1192	1610	-	615	1190	1610	-	2:04	SPADA HARDCORE汎用	
+Meissa	-	465	826	1435	-	463	825	1415	-	1:52	RESIDENT CYBER汎用	
+Next Level	-	477	817	1100	-	473	816	1135	-	1:57	PENDUAL FUTURE汎用	
+No Border	-	589	1013	1895	-	592	1075	1953	-	2:03	専用:Minako Endo	
+ONE AND ONLY	-	600	919	1639	-	620	1018	1646	-	2:06	専用:BEMANI Designers "maysea"	
+OVER VOLTAGE	-	560	935	1332	-	583	954	1371	-	2:08	RESIDENT CYBER汎用	
+Peaktime Booster	-	588	959	1663	-	588	909	1572	-	2:00	10th HOUSE汎用+レイヤー	BEMANI Designers "NAGI"
+Perfect Plan	-	595	912	1328	-	597	913	1305	-	2:11	BISTROVER TRANSPORT汎用	
+Programmed Genom	-	570	826	1214	-	559	829	1155	-	2:05	専用:BEMANI Designers "Ray"	
+Red Soul	-	543	915	1494	-	532	931	1463	-	2:02	tricoro CYBER汎用	
+Rewind Time	-	361	658	1107	-	360	655	1215	-	1:59	RESIDENT CYBER汎用	
+RINИE	-	604	1186	1788	-	604	1172	1767	-	2:00	Lincle CYBER汎用	
+Ruler or Loser	-	494	845	1339	-	493	855	1351	-	1:57	専用:BEMANI Designers "NAGI"	
+Seraph	-	500	922	1227	-	503	859	1234	-	1:58	専用:BEMANI Designers "ロNO"	
+Shadow World	-	498	836	1369	-	510	885	1365	-	2:03	専用:BEMANI Designers "maysea"	
+Shamshir	-	557	751	1132	-	552	749	1129	-	1:58	SIRIUS CYBER汎用	
+Somnidiscotheque	-	680	1053	1776	-	682	1038	1788	-	2:00	専用:BEMANI Designers "猫夢麦"	
+STAR BEAT	-	427	880	1230	-	446	882	1271	-	1:56	CastHour CYBER汎用	
+STRAIGHT TO THE STARS	-	530	879	1506	-	486	857	1456	-	2:01	tricoro CYBER汎用+レイヤー	BEMANI Designers "アオニサイ/蒼弐"
+Stylus	-	627	993	1440	-	648	1019	1741	-	1:52	CastHour CYBER汎用	
+Summerblue	186	551	886	1232	-	552	885	1271	-	2:05	専用:BEMANI Designers "4O8Q"	
+Sunny Day Vibes	-	482	829	1150	-	562	930	1211	-	1:53	専用:BEMANI Designers "いそにん"	
+Super Freak	-	565	963	1754	-	606	974	1789	-	2:04	専用:murAta Yuzi	
+suspicions	-	609	1174	1908	-	666	1224	1914	-	1:57	HEROIC VERSE GOTHIC汎用	
+Swing My Wonderland	-	662	1178	1570	-	662	1147	1500	-	1:56	Rootage CYBER汎用	
+TECHNOPHOBIA	-	404	852	1544	-	437	839	1538	-	1:46	専用:BEMANI Designers "KING"	
+The Clown of 24stairs	-	579	1146	1788	-	572	1117	1786	-	1:48	HEROIC VERSE POPS汎用	
+THE TIME MACHINE	-	552	900	1350	-	574	856	1328	-	1:59	専用:Taiyo Yamamoto	
+VØID	-	684	1028	1712	-	685	991	1709	-	1:56	専用:IIDX Designers	
+VOLAQUAS	-	670	1119	1982	-	667	1141	2003	-	2:08	HEROIC VERSE POPS汎用	
+VOLCANIC BIGBEAT	-	552	932	1444	-	568	922	1402	-	1:59	10th HOUSE汎用	
+wanna be a "BAD GIRL" feat. Nana Takahashi	-	401	665	1029	-	395	661	1002	-	2:01	Lincle POPS汎用+レイヤー	BEMANI Designers "はるお"
+With You	-	420	801	1296	-	404	754	1234	-	2:02	専用:pam	
+Xerulean	-	690	1049	1802	-	709	1043	1804	-	1:54	copula TRANSPORT汎用(色違い)+レイヤー	BEMANI Designers "9-sphere"
+ZEИITH	-	580	1020	1531	-	597	1008	1502	-	1:55	Rootage CYBER汎用	
+24h Endurance Race	-	504	1096	1743	-	634	1160	1915	-	2:05	専用:BEMANI Designers "NAGI"?	
+3V0	-	530	929	1530	-	530	930	1530	-	1:59	専用:alo	
+7 Colors	-	318	607	970	-	318	597	997	-	1:39	BISTROVER TRANSPORT汎用	
+[ ]DENTITY	-	590	1070	2000	-	616	1048	2000	-	2:08	tricoro CYBER汎用	
+雨のちパノラマセカイ	-	413	721	1112	-	491	798	1115	-	2:02	tricoro CYBER汎用	
+あるビー！ feat.ころねぽち	-	500	900	1457	-	502	885	1474	-	2:02	専用:BEMANI Designers "GOLI"	
+異心前進♪ぴょんぴょんぴょん	-	560	847	1260	-	555	833	1269	-	2:01	Lincle POPS汎用	
+栄冠のカンパネラ	-	687	1101	2000	-	700	1179	2000	-	1:59	専用:BEMANI Designers "猫味蕎麦"	
+《ORDERBREAKER》	-	511	815	1257	-	521	750	1298	-	1:59	BISTROVER METAL汎用	
+Ōu Legends	-	581	1068	1687	-	600	1063	1701	-	2:02	tricoro TECHNO汎用	
+おとせサンダー	107	334	602	1088	-	350	608	1158	-	1:42	公式MV	
+神っぽいな	186	392	734	1078	1574	411	740	1079	1550	1:47	PENDUAL FUTURE汎用	
+神のシナリオ	-	593	882	1652	-	589	904	1630	-	2:03	専用:BEMANI Designers "maysea"	
+#CMFLG	-	601	1186	1748	-	625	1152	1562	-	2:02	RESIDENT CYBER汎用	
+きゅんです。	-	367	724	1177	-	384	718	1202	-	1:46	専用:BEMANI Designers "NAGI"	
+響花水月	-	608	974	1487	-	586	1039	1545	-	2:01	PENDUAL PRESENT汎用	
+昏き甲鉄のヴェルガ	-	458	813	1177	-	431	766	1229	-	2:05	RESIDENT CYBER汎用	
+■□模様	-	495	782	1337	-	527	809	1380	-	2:03	SINOBUZ POPS汎用+ミスレイヤー	BEMANI Designers "ネコ味模様"
+サヨナラ・ヘヴン-Celtic Chip Dance Mix-	-	461	775	1319	-	443	736	1280	-	1:58	CastHour CYBER汎用	
+≡+≡	301	698	1069	1520	2333	696	1031	1573	2233	1:58	RESIDENT CYBER汎用	
+罪過の聖堂	-	449	708	1080	-	449	731	1081	-	2:02	専用:ヒロサキ	
+湘南ロンリーMIDNIGHT RAIN	-	493	918	1438	-	518	891	1305	-	2:05	4th HOUSE汎用+ミスレイヤー	BEMANI Designers "猫ロンリーSOBA"
+少年リップルズ	-	451	903	1242	-	482	970	1284	-	1:52	専用:ヒロサキ	
+ぞうしょく！？マイデンティティ	-	645	1177	1851	-	645	1165	1787	-	1:57	CastHour CYBER汎用+レイヤー	BEMANI Designers "ねこあじ！？ヌードル"
+チェイスチェイスジョーカーズのうた (オニスタイルリミックス)	-	498	876	1427	-	502	923	1386	-	2:03	専用	
+ちょえちょえまぎか	-	619	1159	1529	-	619	1136	1512	-	1:58	専用:BEMANI Designers "NAGI"	
+月と夢の跡 ft. マナ	-	484	780	1269	-	488	808	1233	-	2:03	copula JAPANESQUE汎用	
+儚キ戀ノ幻想譚	298	797	1169	1808	-	806	1139	1800	-	1:56	専用:BEMANI Designers "アオニサイ(蒼弐)"	
+パーフェクトイーター	-	591	1057	1531	-	599	1060	1541	-	2:05	HEROIC VERSE POPS汎用	
+真夜中のバベル	-	360	607	877	-	357	597	891	-	1:53	専用:BEMANI Designers "tef*tef"	
+楽園追放	-	476	796	1228	-	496	776	1223	-	1:54	専用:BEMANI Designers "T田"	
+輪廻の鴉	-	520	910	1398	-	584	910	1398	-	2:01	Rootage CYBER汎用	
+恋愛＝精度×認識力	-	825	1220	1756	-	805	1174	1716	-	2:06	SINOBUZ POPS汎用	
+惑星☆ロリポップ	-	397	806	1425	-	413	790	1459	-	1:46	専用:月見堂 & S子 x yama_ko	
+beatmania IIDX 31 EPOLIS ▲ ▼ △												
+ACTØ	-	639	1124	1534	-	620	1043	1606	-	2:02	RESIDENT CYBER汎用+レイヤー	BEMANI Designers "maysea"
+Aeterna	-	498	797	1285	-	507	789	1258	-	2:00	tricoro TECHNO汎用+レイヤー	BEMANI Designers "泉水-Izumi-"、BEMANI Designers "S.Yasutake"
+Akatsuki	-	509	789	1135	-	479	759	1041	-	1:59	公式MV	
+Ambivalent Vermilia	-	783	1248	2132	-	780	1251	2105	-	2:07	専用:BEMANI Designers "GOLI"?	
+Amethyst	-	667	933	1322	-	643	953	1248	-	2:06	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "maysea"
+Bitter & Lucky	-	443	704	1287	-	456	873	1369	-	2:00	6th HOUSE汎用	
+BLAZING_LAZER	-	630	1084	1752	-	644	1100	1724	-	1:59	Rootage CYBER汎用	
+CADENZA	-	775	1277	2357	-	769	1302	2354	-	2:12	RESIDENT CYBER汎用+レイヤー	BEMANI Designers "NAGI"
+Chemical Colours	-	526	1035	1416	-	547	1021	1426	-	1:59	copula TRANSPORT汎用	
+CODE:2	-	546	905	1491	-	551	903	1730	-	2:02	CastHour CYBER汎用	
+COUNTING SHEEP ft. Kanae Asaba	-	339	659	1114	-	343	689	1077	-	1:43	HEROIC VERSE GOTHIC汎用+ミスレイヤー	BEMANI Designers "tam"
+Cult Invitation	-	621	984	1804	-	617	994	1779	-	2:08	Lincle POPS汎用+レイヤー	BEMANI Designers "maysea"
+Dahlia	-	665	1095	1617	-	694	1030	1600	-	2:05	専用:BEMANI Designers "5to3"	
+DAZZLE ATTACK	277	494	847	1435	-	500	858	1419	-	2:02	tricoro CYBER汎用	
+Deep Sea Mystery	-	567	749	997	-	566	815	1057	-	2:05	専用:Routes	
+Demon March	-	749	1209	1875	-	789	1294	1984	-	2:00	専用:alo	
+Echoes of Sunfall	-	522	838	1518	-	537	817	1410	-	1:59	専用:BEMANI Designers "猫味蕎麦"	
+frequent	-	665	1178	1900	-	655	1260	1821	-	2:02	CANNON BALLERS RACING汎用	
+GAME ON	-	696	1141	1386	-	656	1070	1592	-	2:08	公式MV	
+Get Higher	-	496	889	1171	-	509	909	1259	-	2:03	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "猫味車"
+Get Wicked	-	454	744	1251	-	464	744	1132	-	2:04	PENDUAL FUTURE汎用	
+Ghost Pulse	-	537	852	1409	-	517	877	1420	-	1:48	専用:alo	
+Glitch N Ride	-	461	834	1389	-	513	846	1349	-	2:06	専用:BEMANI Designers "HES"	
+GloriosA	-	622	1015	1437	-	601	920	1322	-	1:58	専用:サム	
+GLORIOUS HAMMER	-	560	993	1587	-	611	1040	1520	-	2:01	専用:ar	
+Hard Breaker	-	391	793	1286	-	416	797	1234	-	2:02	SIRIUS CYBER汎用	
+Hat Surprise (Season 3)	-	632	1107	1384	-	623	1062	1345	-	1:57	CANNON BALLERS RACING汎用	
+i-ii	-	559	911	1499	-	555	899	1444	-	2:02	EPOLIS TRANSPORT汎用	
+INHERITANCE	-	553	913	1432	1827	552	896	1376	1869	1:58	CastHour CYBER汎用+ミスレイヤー	BEMANI Designers "maysea"
+Iris	208	421	775	1109	-	488	809	1163	-	1:53	EPOLIS TRANSPORT汎用+ミスレイヤー	BEMANI Designers "tam"
+Jumper	-	458	763	1214	-	466	733	1129	-	1:55	専用:murAta Yuzi	
+Just Gimme	-	486	869	1393	-	470	908	1412	-	2:02	専用:cap	
+JUSTICE/GUILTY feat. Nana Takahashi & 709sec.	-	882	1271	1959	-	879	1275	1909	-	2:11	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "GOLI"
+Level 5	-	679	1256	1937	-	689	1250	1858	-	2:06	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "NAGI"
+MAXIMUM CHEAT GIRL	-	628	1133	1842	-	653	1166	1787	-	2:07	copula TRANSPORT汎用(色違い)+レイヤー	BEMANI Designers "アオニサイ"
+Million Dollar	-	599	1028	1762	-	663	1035	1759	-	2:05	EPOLIS TRANSPORT汎用+レイヤー	BEMANI Designers "9-sphere"
+Monkey Business	-	369	809	1324	-	393	787	1290	-	1:59	BISTROVER METAL汎用	
+Mukade	-	572	967	1645	-	593	966	1546	-	2:03	専用:Taiyo Yamamoto	
+My Sweet Bird?	-	427	769	1107	-	432	784	1065	-	1:59	7th HOUSE汎用	
+NEEDLESS MY LOVE FOR YOU	-	509	830	1224	-	512	835	1301	-	2:02	PENDUAL PRESENT汎用	
+Out of Control	-	592	1178	1598	-	598	1200	1649	-	2:04	EPOLIS TRANSPORT汎用+ミスレイヤー	BEMANI Designers "maysea"
+out of disk space	-	565	998	1305	-	546	948	1289	-	1:53	CastHour CYBER汎用+レイヤー	BEMANI Designers "NAGI"
+PILGRIM	-	494	870	1381	-	470	772	1359	-	2:02	RESIDENT CYBER汎用	
+Psychedelic Intelligence	-	636	960	1448	-	641	975	1450	-	2:04	EPOLIS TRANSPORT汎用	
+Red Determination	-	534	815	1355	-	531	820	1373	-	1:59	BISTROVER METAL汎用	
+Resonant	-	542	1206	1864	-	580	1173	1824	-	2:08	EPOLIS TRANSPORT汎用(色違い)+レイヤー	BEMANI Designers "GOLI"
+Riff//rain	106	369	639	907	-	395	676	964	-	1:43	公式MV	
+See You Again	-	601	960	1584	-	607	944	1519	-	2:09	CANNON BALLERS RACING汎用	
+Seven Times Four	-	597	1023	1763	-	614	1043	1690	-	1:59	CANNON BALLERS RACING汎用	
+Shapeshifter	-	566	874	1283	-	574	863	1335	-	1:51	専用:Seventhgrapics	
+Sirius	-	514	850	1637	-	513	850	1533	-	2:02	HEROIC VERSE POPS汎用	
+So What	-	315	590	929	-	320	618	897	-	1:48	公式MV	
+SOLAR ECLIPSE	-	762	1265	1893	-	761	1276	1901	-	2:01	BISTROVER METAL汎用+レイヤー	BEMANI Designers "はるお"
+Speculation	-	512	915	1530	-	520	953	1618	-	1:56	専用:Minako Endo	
+squall	-	618	923	1369	-	596	943	1397	-	2:00	専用:Taiyo Yamamoto	
+Stereo Beasts	-	679	1310	1881	-	676	1307	1834	-	2:08	BISTROVER METAL汎用	
+Submerge Serenade	-	548	923	1486	2104	543	940	1565	2126	2:04	専用:BEMANI Designers "KING"	
+Sword of Vengeance	-	726	1115	1650	-	747	1181	1615	-	2:04	EPOLIS TRANSPORT汎用	
+T.R.O.L.L.	-	524	900	1329	-	513	901	1323	-	2:03	BISTROVER METAL汎用	
+The Last Apocalypse	-	717	1276	1903	-	728	1205	1861	-	2:08	Rootage TECHNO汎用+レイヤー	BEMANI Designers "maysea"
+The Onlyonez	-	519	873	1587	-	515	834	1531	-	2:04	EPOLIS TRANSPORT汎用	
+This Is Club Musik feat. 大久保紅葉	-	556	901	1343	-	557	889	1330	-	2:00	8th HOUSE汎用	
+Time Distortion pt.2(IIDX Edit)	-	667	995	1492	-	700	1009	1498	-	1:59	SIRIUS CYBER汎用	
+TITANIUM RIDERS	-	450	762	1071	-	448	797	1095	-	1:57	CANNON BALLERS RACING汎用	
+Too Late Snow	-	404	720	1014	-	441	725	992	-	2:03	PENDUAL PRESENT汎用	
+TRIP THE DEEP	-	512	832	1289	-	500	785	1408	-	2:05	CastHour CYBER汎用+レイヤー	BEMANI Designers "NAGI"
+Tripping Jumping	-	424	805	1166	-	436	830	1195	-	1:58	10th HOUSE汎用	
+Vermilion Carol	-	694	1139	1837	-	700	1210	1773	-	2:00	tricoro TECHNO汎用+ミスレイヤー	BEMANI Designers "NAGI"
+Vulnerability	-	673	1017	1885	-	673	1002	1901	-	1:57	copula TRANSPORT汎用+レイヤー	BEMANI Designers "tef * tef"
+WaterCube Pf.(RX-Ver.S.P.L.)	-	295	700	1120	-	351	735	1143	-	2:00	専用:kototoi	
+winkle 2 winkle	-	535	954	1408	-	529	920	1381	-	1:59	Lincle POPS汎用+レイヤー	BEMANI Designers "9-sphere"
+Xb10r	-	612	1208	1833	-	612	1254	1801	-	2:01	CastHour CYBER汎用	
+ZEROIN ON THE LIGHT	-	567	887	1345	-	574	884	1350	-	2:06	BISTROVER METAL汎用+レイヤー	BEMANI Designers "GOLI"
+20XX	-	611	919	1370	-	604	902	1344	-	1:55	HEROIC VERSE POPS汎用+レイヤー	BEMANI Designers "ポトロッポ"
+アイドル	141	445	761	1310	1600	443	777	1307	1675	2:06	Lincle POPS汎用	
+愛包ダンスホール	177	472	700	1296	-	463	748	1270	-	2:20	公式MV	
+アタシ完全絶対正義ちゃん！	-	498	813	1082	-	512	814	1096	-	2:00	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "NAGI"
+神様、つれない。	-	352	721	1083	-	361	726	1183	-	2:04	Lincle POPS汎用+レイヤー	BEMANI Designers "球Ｑ"
+可愛くてごめん	143	314	703	1133	1407	325	717	1103	1356	2:07	10th POPS汎用	
+今宵、ロマンス横丁。	-	576	1195	1714	-	592	1198	1649	-	2:00	copula JAPANESEQUE汎用+EPOLIS TRANSPORT汎用+レイヤー	BEMANI Designers "maysea"
+残像ニ繋ガレタ追憶ノHIDEAWAY	-	601	1162	1789	-	621	1151	1723	-	2:03	公式MV	
+雫	-	514	1039	1361	-	495	1019	1328	-	2:07	HEROIC VERSE GOTHIC汎用	
+灼熱Beach Side Bunny (かめりあ's "Summertime D'n'B" Remix)	-	543	1001	1647	-	561	1017	1634	-	2:08	BISTROVER TRANSPORT汎用	
+終焔のClaudia	-	719	1014	1406	-	698	1015	1394	-	1:52	SPADA HARDCORE汎用	
+唱	96	232	514	892	-	251	515	895	-	1:42	公式MV	
+シンデレラ	271	438	780	1119	-	457	791	1165	-	2:05	専用:BEMANI Designers "Ray"	
+センチメンタル・サマー	-	337	652	1004	-	356	669	1028	-	1:59	copula TRANSPORT汎用	
+ちゅ、多様性。	110	264	576	963	1140	292	583	951	1247	1:49	公式MV	
+デビルじゃないもん	174	421	695	1054	-	424	694	1005	-	1:42	Lincle POPS汎用	
+電光	-	545	976	1560	-	593	1014	1616	-	2:03	Resort Anthem DANCE汎用	
+電子になりたい	-	425	729	1017	-	446	715	1001	-	1:46	RESIDENT CYBER汎用+ミスレイヤー	BEMANI Designers "球Ｑ"
+電腦都市	-	717	1181	1738	-	718	1208	1745	-	1:55	EPOLIS TRANSPORT汎用+レイヤー	BEMANI Designers "NAGI"
+ないないルーティン	-	298	691	1053	-	356	676	931	-	1:56	10th POPS汎用	
+夏風邪デスコ	159	412	892	1339	-	406	898	1283	-	1:57	7th HOUSE汎用	
+寝起きヤシの木	238	549	921	1411	-	520	901	1376	-	1:55	BISTROVER TRANSPORT汎用	
+果たせぬ約束 ft. 小林マナ	-	592	988	1515	-	564	1019	1514	-	2:07	copula JAPANESQUE汎用	
+フォニイ	316	614	1011	1454	1975	620	992	1556	1975	2:03	EPOLIS TRANSPORT汎用	
+《PL|RAYER》	-	469	886	1420	-	463	852	1421	-	1:59	tricoro CYBER汎用	
+閉塞的フレーション	-	515	825	1221	-	543	836	1255	-	2:04	公式MV	
+ポラリスノウタ	150	437	833	1141	-	445	773	1086	-	1:58	tricoro CYBER汎用	
+マーシャル・マキシマイザー	214	411	731	1082	-	408	758	1082	-	1:32	tricoro CYBER汎用	
+摩天楼	-	348	762	1309	-	379	805	1316	-	2:08	EPOLIS TRANSPORT汎用	
+未完成ノ蒸氣驅動乙女	-	550	1079	1538	-	571	1090	1495	-	1:55	Rootage TECHNO汎用	
+めうめうぺったんたん！！ (ZAQUVA Remix)	-	530	974	1419	-	556	978	1460	-	2:01	SINOBUZ POPS汎用	
+勇者	189	407	724	1245	-	425	733	1324	-	1:46	tricoro TECHNO汎用	
+夢縁	-	605	1073	1515	-	573	1095	1506	-	2:02	専用:BEMANI Designers "アキ"	
+酔いどれ知らず	138	417	652	1118	-	413	665	1161	-	2:09	PENDUAL FUTURE汎用	
+ラビットホール	344	714	1061	1471	-	691	1065	1422	-	2:06	公式MV	
+リメンバーリメンバー	-	258	492	854	-	254	487	825	-	2:00	PENDUAL PRESENT汎用	
+流桜ノ門	-	510	804	1075	-	515	829	1099	-	1:58	専用:はなけん	
+れとりば！	-	431	671	1032	-	425	657	996	-	1:55	専用:ヒロサキ	
+惑星鉄道	-	589	1119	1633	-	609	1156	1643	-	2:04	専用:murAta Yuzi、ひかがみひなみ	
+beatmania IIDX 32 Pinky Crush ▲ △												
+ADAMANT	-	580	995	1539	-	580	995	1525	-	2:10	Lincle CYBER汎用	
+Aqvion	-	598	998	1773	-	600	1046	1774	-	1:58	専用:BEMANI Designers "ロン毛だいすき"	
+Arcanos	-	335	602	1003	-	360	619	1064	-	1:49	HEROIC VERSE GOTHIC汎用	
+Bang-Boo Bumble	-	573	993	1479	-	573	989	1476	-	2:06	専用:BEMANI Designers "maysea"	
+Bling-Bang-Bang-Born	174	332	589	994	1105	385	583	1003	1169	1:32	PENDUAL FUTURE汎用	
+Bring The Fire	-	598	991	1734	-	615	1057	1639	-	2:06	6th RAVE汎用	
+Butterfly Twist	-	524	801	1373	-	528	830	1308	-	2:06	EPOLIS TRANSPORT汎用	
+CHAOTIC SUNBIRD	-	623	885	1662	-	627	882	1512	-	2:02	BISTROVER TRANSPORT汎用+レイヤー	BEMANI Designers "GOLI"
+Chasing After YOU ～夢の欠片～ ft. 小林マナ	-	496	725	1032	-	507	748	1051	-	1:59	EPOLIS TRANSPORT汎用	
+Constellation	-	487	928	1435	-	527	888	1310	-	2:02	専用:サム	
+Cross Fire	-	551	1134	1746	-	582	1149	1731	-	2:00	Rootage CYBER汎用	
+destination	-	523	1140	1698	-	523	1155	1770	-	2:06	Pinky Crush STYLISH汎用	
+Digital Radiance	-	578	723	1018	-	584	779	1021	-	2:01	CastHour CYBER汎用	
+DIVINE JUDGEMENT	-	520	1025	1416	-	537	1065	1455	-	1:48	tricoro TECHNO汎用+ミスレイヤー	BEMANI Designers "NAGI"
+Dreamship	-	469	685	978	-	463	678	1030	-	2:01	Lincle POPS汎用+レイヤー	BEMANI Designers "とっきー"
+Drop Syndicate	-	600	1001	1861	-	607	959	1851	-	2:01	専用:BEMANI Designers "Ray"	
+Eleanor	-	404	707	1219	-	407	698	1209	-	2:00	専用:BEMANI Designers "M.Torii"	
+ELYSIUM	-	466	790	1377	-	509	821	1384	-	1:52	tricoro TECHNO汎用+レイヤー	BEMANI Designers "maysea"
+everlastingeuphoria:	-	562	855	1243	-	516	852	1220	-	1:55	専用:Minako Endo	
+EX-MASSIVE FIGHTER	-	619	1091	1725	-	614	1099	1703	-	2:03	BISTROVER METAL汎用	
+EYE OF THE HEAVEN	-	512	1216	1824	-	529	1228	1804	-	2:01	HEROIC VERSE POPS汎用	
+FERMI♡PARADOX	-	584	839	1274	-	596	835	1326	-	2:05	RESIDENT CYBER汎用+レイヤー	BEMANI Designers "アオニサイ"
+Fiery Stallion	-	449	849	1220	-	470	870	1176	-	2:03	専用:murAta Yuzi	
+Flämingo	-	545	1208	1800	-	544	1200	1810	-	2:03	BISTROVER METAL汎用+レイヤー	BEMANI Designers "NAGI"
+FlyAway	-	633	1050	1648	-	635	1019	1683	-	2:00	Lincle POPS汎用+レイヤー	BEMANI Designers "はるお"
+Galaxy Collapse	-	419	642	962	-	425	665	985	-	1:57	Lincle CYBER汎用+レイヤー	BEMANI Designers "NAGI"
+get set mind	-	516	797	1230	-	501	806	1236	-	1:57	専用:BEMANI Designers "アキ"	
+God Mind	-	780	1349	2155	-	803	1220	2157	-	2:07	BISTROVER METAL汎用+クプロレイヤー	BEMANI Designers "NAGI"
+Good Looking	-	375	660	1046	-	375	634	1025	-	1:37	tricoro CYBER汎用	
+Here We Go Now	-	581	1127	1690	-	578	1031	1498	-	2:07	専用:Routes	
+hora de verdad	-	574	1055	1564	-	555	1019	1574	-	1:51	HEROIC VERSE GOTHIC汎用	
+IN BETWEEN	-	461	765	1201	-	462	767	1163	-	1:52	BISTROVER METAL汎用	
+KOTONOHA ft. Kotoha	-	421	665	994	-	457	684	1007	-	1:53	専用:BEMANI Designers "GOLI"	
+lowercase lifetime	-	544	1066	1407	-	550	1012	1430	-	2:03	専用:alo	
+Lycoris	-	392	698	1026	-	433	738	1058	-	1:50	copula JAPANESQUE汎用	
+MARLIN	-	609	1170	1798	-	629	1166	1795	-	1:59	専用:Taiyo Yamamoto	
+Mid-Corner (Magic Maker)	-	619	1055	1611	-	606	1065	1540	-	2:00	PENDUAL FUTURE汎用+レイヤー	BEMANI Designers "maysea"
+Mighty Cutie	-	579	1013	1394	-	570	1017	1401	-	2:09	専用:Routes	
+MVP	-	465	772	1318	-	466	733	1264	-	1:57	専用:PRIDASK	
+NOIXIA	-	714	1173	2027	-	716	1212	2009	-	1:59	Pinky Crush STYLISH汎用	
+PERFECT HUMAN	267	448	734	1118	-	465	761	1071	-	1:58	Rootage CYBER汎用	
+Pinky Happy Crazy	-	674	1287	1833	-	696	1294	1909	-	2:06	専用:BEMANI Designers "9-sphere"	
+PIT A PAT	-	518	922	1299	-	482	912	1333	-	2:03	Pinky Crush STYLISH汎用+レイヤー	BEMANI Designers "tam"、BEMANI Designers "cov"、BEMANI Designers "maysea"
+Plazma	133	348	637	1020	1432	346	637	1000	1397	1:31	公式MV	
+Plea Per Phase	-	520	892	1395	-	519	939	1379	-	2:06	CastHour CYBER汎用	
+PopなEDEN	-	490	827	1235	-	490	823	1217	-	1:59	専用:BEMANI Designers "アオニサイ"	
+Raspberry Potion (feat.あれたん♡ & ぎゃるのしん☆)	-	456	910	1267	-	472	890	1242	-	2:07	専用:ヒロサキ	
+RAVE SYNDROME	-	515	876	1402	-	516	857	1377	-	2:03	専用:Taiyo Yamamoto	
+Roar of Chronos	-	626	1120	1991	-	628	1115	1974	-	2:06	PENDUAL PRESENT汎用+レイヤー	BEMANI Designers "GOLI"
+Satellite Burst	-	627	1119	2000	-	609	1217	1900	-	2:02	専用:サム	
+Secret Rouge	-	428	835	1165	-	443	828	1189	-	1:55	専用:BEMANI Designers "猫味蕎麦"	
+Shirdal	-	441	780	1269	-	477	799	1136	-	2:05	tricoro TECHNO汎用+レイヤー	BEMANI Designers "NAGI"
+Show Me All Your Love	-	568	1018	1482	-	581	1032	1426	-	2:07	専用:Seventhgrapics	
+SISYPHUS	-	525	915	1399	-	520	914	1409	-	1:55	tricoro TECHNO汎用	
+Skratch Education Lv-1	-	558	952	1572	-	630	962	1566	-	1:51	専用:BEMANI Designers "maysea"	
+Slumber☆Party	-	422	904	1166	-	500	778	1218	-	1:54	専用:alo	
+Space In Time	-	434	805	1047	-	443	813	1035	-	1:59	PENDUAL FUTURE汎用	
+Stargazing Trip ～星 探す旅～ ft. 小林マナ	-	545	903	1344	-	545	900	1281	-	2:01	専用:BEMANI Designers "NAGI"	
+SμG@R RU$#	-	728	1275	2037	-	732	1291	2139	-	2:06	専用:さるきむ	
+SUPER HEROINE!!	-	472	829	1187	-	475	844	1199	-	1:47	公式MV	
+TECHNO RUMBLE	-	593	937	1481	-	568	913	1553	-	2:05	CastHour CYBER汎用+レイヤー	BEMANI Designers "はるお"
+u gotta beat	-	686	1189	1806	-	709	1182	1777	-	2:02	専用:Minako Endo	
+Uaigh Gealaí	-	668	1157	1972	-	695	1141	1994	-	2:04	BISTROVER METAL汎用+レイヤー	BEMANI Designers "maysea"
+Vibing! Shake it!	-	490	845	1263	-	518	827	1211	-	2:00	専用:BEMANI Designers "5to3"	
+Without Heaven	-	672	1127	1912	-	645	1011	1794	-	2:02	専用:ar	
+XHRONOXAPSULΞ	-	600	1231	2077	-	724	1263	1807	-	2:02	CastHour CYBER汎用	
+1116	-	570	1041	1581	-	595	1095	1515	-	1:50	専用:BEMANI Designers "maysea"	
+朱と碧のランページ	-	518	862	1266	-	512	850	1314	-	2:06	PENDUAL PRESENT汎用	
+飴玉	-	300	460	699	-	302	489	654	-	1:25	公式MV	
+アラビアン ハイパー ナイト	-	607	967	1690	-	553	1211	1690	-	1:50	tricoro TECHNO汎用+レイヤー	BEMANI Designers "maysea"
+uən	-	735	1105	1547	-	752	1088	1550	-	1:59	HEROIC VERSE GOTHIC汎用	
+イガク	160	444	766	1025	-	445	757	1017	-	2:00	公式MV	
+エクスプロウル	-	478	818	1211	-	485	824	1243	-	2:03	公式MV	
+えだまめカレークッキング	219	413	660	1119	-	435	678	1150	-	1:48	公式MV	
+オッド♡ラヴィ	198	534	900	1274	-	533	929	1258	-	2:09	公式MV	
+オブソミート	120	438	756	1204	-	449	746	1229	-	1:59	公式MV	
+覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～	-	539	978	1468	-	547	978	1567	-	2:05	公式MV	
+キスキツネ	99	446	747	1192	-	455	798	1350	-	2:01	公式MV	
+きみのせかい	-	518	845	1446	-	533	800	1600	-	2:03	専用:BEMANI Designers "IIDX もふもふ撮影隊 - スタッフＱ"	
+きゅうくらりん	229	446	866	1203	-	444	803	1217	-	1:58	公式MV	
+ギャ・ギャ・ギャ・ギャラクシー！	-	459	830	1201	-	465	802	1215	-	2:08	公式MV	
+ゲシュタルト	201	480	796	1239	1677	475	783	1268	1645	2:08	公式MV	
+最強頂戴girl♡	-	433	746	1106	-	452	725	1070	-	1:51	Pinky Crush STYLISH汎用+レイヤー	BEMANI Designers "はるお"
+灼熱 Lost Summer Dayz	-	528	979	1453	-	529	995	1481	-	2:06	専用:BEMANI Designers "GLD"	
+消極的セツナイズム	-	490	807	1152	-	559	869	1213	-	1:54	専用:BEMANI Designers "Freeze工房"	
+進捗ダメダメです	145	404	811	1124	-	399	820	1131	-	1:56	公式MV	
+スキッテイエェエエェ!!!!	-	798	1328	2193	-	787	1284	2136	-	1:59	専用:BEMANI Designers "はるお"	
+スパークリング☆彡ハイパーチューン！！	-	743	1105	1843	-	747	1114	1913	-	2:10	専用+レイヤー	BEMANI Designers "GOLI"
+断罪の一花	-	448	785	1296	-	446	753	1254	-	2:02	専用:Routes	
+弾幕信仰	-	541	842	1266	-	596	836	1274	-	1:59	公式MV	
+天使のカンタータ -Cantata of Angels-	-	637	1142	2205	-	626	1143	2222	-	2:09	Lincle Kindom Cuvelia汎用+レイヤー	BEMANI Designers "GOLI"
+ドリムチウ	-	436	799	1312	-	442	796	1326	-	2:02	Lincle CYBER汎用+レイヤー	BEMANI Designers "9sphere"
+ドーナツホール 2024	175	499	822	1191	-	506	886	1265	-	2:02	公式MV	
+ハオ	153	440	883	1459	-	440	865	1425	-	2:09	公式MV	
+爆ぜりゃんせ	-	568	977	1521	-	593	1003	1593	-	2:02	copula JAPANESQUE汎用+レイヤー	BEMANI Designers "はるお"
+ハルイロメロディー	-	442	706	1110	-	447	731	1069	-	1:59	専用:BEMANI Designers "maysea"	
+ＰＡＳＴＥＬＩＳＭ	-	526	781	1070	-	535	799	1095	-	2:00	専用:BEMANI Designers "はるお"	
+ビビデバ	134	396	672	1036	-	426	665	1173	-	2:03	公式MV	
+無双	-	594	993	1677	-	589	991	1644	-	2:12	SINOBUZ JAPANESQUE汎用	
+メズマライザー	291	588	929	1375	-	493	916	1486	-	2:05	公式MV	
+ロマンシングエスケープ	-	221	572	925	-	226	591	932	-	1:54	EPOLIS TRANSPORT汎用	
+我ら完全無敵のアイドル!!	123	525	830	1283	-	528	825	1302	-	2:14	SINOBUZ POPS汎用	
+LIGHTNING MODEL 先行楽曲												
+COSMIC V3LOCITY	-	637	1188	1716	-	623	1174	1730	-	1:59	専用:Munehito Gunji	
+Lightspeed	-	648	1073	1606	-	636	1034	1618	-	1:48	Rootage CYBER汎用	
+ファイナルレター	-	500	967	1371	-	509	956	1351	-	2:01	tricoro CYBER汎用	
+												TITLE	NOTE(SP)					NOTE(DP)				TIME	MOVIE	LAYER
+	B	N	H	A	L	N	H	A	L			
+デフォルト曲												
+稼働時												
+A Certified Rave Moment	-	509	900	1404	-	544	920	1447	-	2:04	専用:Routes?	
+AGETEKE ONDO	-	513	821	1297	-	512	793	1271	-	2:01	SINOBUZ JAPANESQUE汎用	
+Bang Bang Dance	-	421	884	1415	-	428	842	1398	-	2:02	専用:BEMANI Desingers "はるお"?	
+Caramel Pain	118	325	525	832	-	370	612	999	-	2:01	公式MV	
+Catch ya Getcha!	-	531	1028	1481	-	501	1016	1452	-	1:55	BISTROVER TRANSPORT汎用	
+Countdown to Heaven or Hell	-	636	1026	1569	-	649	1003	1586	-	1:57	専用:BEMANI Designers "NAGI"?	
+Disco Killer Music Lover	-	553	926	1557	-	561	940	1565	-	1:54	専用:BEMANI Designers "9-sphere"?	
+Fashion Fruit	-	540	986	1534	-	519	985	1583	-	2:11	Sparkle Shower POPS汎用	
+From Human Blood	-	616	1064	1850	-	639	1087	1754	-	2:01	専用:Seventhgrapics	
+JUST SYNC ft.Kanae Asaba	-	378	648	1014	-	421	681	1048	-	2:01	copula TRANSPORT汎用	
+LEMON MELON COOKIE	185	409	778	1128	-	426	724	1067	-	2:08	公式MV	
+Makin' It	-	533	847	1471	-	510	773	1481	-	2:00	専用:Minako Endo?	
+Memoria Obscura	-	508	1112	2085	-	554	1116	2026	-	1:59	tricoro TECHNO汎用	
+MOCHIMOCHI DREAMIN!!	-	571	939	1530	-	561	945	1564	-	2:00	SINOBUZ POPS汎用	
+Nyan Nyan University	-	471	811	1294	-	472	778	1298	-	1:57	専用:BEMANI Designers "球Ｑ"?	
+PALETTE	184	442	732	1031	-	440	689	990	-	2:10	公式MV	
+RALLY '25	-	613	1100	1674	-	643	1114	1698	-	2:01	専用:murAta Yuzi?	
+Regina vespaE	-	629	1147	1840	-	623	1166	1736	-	2:07	Lincle CYBER汎用	
+SHINING☆DANCE	-	437	789	1243	-	445	793	1279	-	2:02	6th RAVE汎用+レイヤー	BEMANI Designers "猫味蕎麦"?
+SnapSkipSpark	-	544	967	1466	-	558	966	1408	-	2:03	Sparkle Shower POPS汎用	
+Space Battleship S4TØ	-	681	1138	1900	-	688	1110	1861	-	2:01	HEROIC VERSE POPS汎用	
+SPLASH!!!!!!!!!	-	460	763	1153	-	533	827	1181	-	1:59	専用:ar?	
+Substance	-	609	890	1578	-	596	813	1477	-	2:07	専用:BEMANI Designers "KING"?	
+Vitamin	-	588	923	1346	-	611	967	1369	-	2:06	専用:Routes?	
+2 Be Continued	-	528	1004	1872	-	551	967	1852	-	2:01	専用:ヒロサキ	
+ιgniЯRuina	-	702	1104	1851	-	633	1160	1819	-	2:05	SPADA HARDCORE汎用	
+かわいいだけじゃだめですか？	110	469	804	1070	-	466	780	1165	-	1:52	Lincle POPS汎用	
+鏡像都市	-	420	700	985	-	442	700	995	-	1:54	BISTROVER METAL汎用	
+月下繚乱	-	454	894	1422	-	452	912	1485	-	1:58	copula JAPANESQUE汎用+レイヤー	BEMANI Designers "猫味蕎麦"?
+閃と雷管とロープ	-	456	713	1294	-	462	739	1373	-	1:59	tricoro TECHNO汎用+レイヤー	BEMANI Designers "NAGI"?
+それが、ボクの使命～レスキュー隊長 メンキュー～	-	374	798	1093	-	363	736	1034	-	1:51	専用:BEMANI Designers "アキ"?	
+デラむぅのでらっくす☆どり～むぅ	-	415	670	997	-	422	681	1012	-	1:59	専用:BEMANI Designers "アキ"?	
+でんぱ どりる わんにゃー☆三	145	598	1142	1679	-	592	1130	1712	-	2:03	公式MV	
+夏色のセレナーデ	-	443	683	1128	-	480	768	1092	-	1:44	専用:ヒロサキ	
+バブリン	137	584	872	1221	-	567	873	1215	-	2:24	公式MV	
+ビビッド ☆＋＊。キラキライム	272	602	1062	1896	-	609	1027	1878	-	2:12	Sparkle Shower POPS汎用+レイヤー	BEMANI Designers "アオニサイ"?
+百恋ラブラスター	-	372	812	1324	-	391	738	1284	-	1:57	Lincle POPS汎用+レイヤー	BEMANI Designers "スティンガー"?
+ベラ・ベ・カラベラ	-	529	873	1436	-	525	920	1419	-	2:02	専用:BEMANI Designers "Ray"?	
+もんめためたもん	110	429	714	1127	-	423	732	1119	-	1:57	公式MV	
+煉獄コンフィチュール	-	516	957	1353	-	511	942	1284	-	1:58	PENDUAL FUTURE汎用	
+2025/09/29配信												
+Shooting Star	119	420	759	1228	-	425	738	1256	-	2:06	公式MV	
+2025/11/19配信												
+Lisa-RICCIA	261	622	1129	1692	2394	662	1255	1846	2393	2:13	専用:BEMANI Designers "T田"?	
+2026/02/19配信												
+華麗なる！音戯探偵ひなビタ♫	-	359	702	1204	-	425	708	1187	-	1:50	EPOLIS TRANSPORT汎用	
+レシピのリドル	-	327	729	1181	-	398	768	1182	-	2:11	Sparkle Shower POPS汎用	
+2026/02/26配信												
+Signs and Wonders	-	338	524	806	-	332	581	829	-	1:28	公式MV	
+WORLD TOURISM												
+EDP LiveAct TOURISM 1・2												
+GOLD RUSH 2025	-	446	825	1420	-	434	876	1343	-	2:00	Rootage CYBER汎用	
+chaplet -IIDX re:build-	-	514	1002	1481	-	525	1044	1494	-	1:56	HEROIC VERSE GOTHIC汎用	
+BPL S5 TOURISM 1												
+COLOR BURST	103	396	701	1101	-	402	693	1109	-	2:00	公式MV	
+Sparkle Fruit Lab.												
+レモンルーム												
+好吃来世deエレクトリック	-	412	700	958	-	414	726	1010	-	1:46	EPOLIS TRANSPORT汎用+レイヤー	球Ｑ
+kors k's Let's make an Image Song!	-	495	941	1392	-	496	943	1351	-	2:05	専用:maysea	
+BattleRoyal	-	562	899	1330	-	558	944	1318	-	2:01	RESIDENT CYBER汎用+レイヤー	はるお
+Begin	-	517	1029	1638	-	540	1040	1628	-	1:56	専用:4O8Q	
+⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason	-	644	1103	1988	-	640	1108	1914	-	2:00	専用:はるお	
+グレープルーム												
+Watermelon Explosion	-	385	702	1021	-	386	699	1026	-	1:45	専用:はるお	
+REcorrection	-	298	556	823	-	293	543	852	-	2:04	10th POPS汎用	
+Hallucination	-	538	964	1391	-	535	973	1363	-	2:02	専用:NAGI	
+voice of echo.	-	558	917	1392	-	559	959	1383	-	1:55	専用:NAGI	
+クレッシェンド	-	616	965	1742	-	652	985	1657	-	1:45	専用:9-sphere	
+FiZZλ_PØT!0И	-	723	1065	1800	-	749	1286	1672	-	1:56	専用:maysea	
+いちごルーム												
+Show Time	-	429	725	1035	-	442	720	1023	-	1:58	専用:NAGI?	
+タンポポ	-	635	973	1346	-	632	951	1436	-	1:44	GOLD HOUSE汎用	
+Nemophila	-	527	920	1404	-	531	935	1470	-	2:02	専用:Seventhgraphics?	
+UNDO THE NIGHT	-	526	1079	1787	-	542	1030	1769	-	2:03	専用:ヒロサキ	
+PERFECT GREAT!!	-	649	1237	1990	-	659	1240	1997	-	2:00	専用:maysea?	
+Amor∞Fati	-	634	1310	2171	-			2160	-	2:05	専用:GOLI?	
+みんなで応援！BPLプロ選手サポーターズ -SEASON 5-												
+Astra Blaze	-	599	1159	1730	-	599	1183	1767	-	2:01	CastHour CYBER汎用	
+GO!	-	447	933	1618	-	556	956	1559	-	2:07	tricoro CYBER汎用	
+HORIZON BEATZ	-	390	846	1289	-	389	904	1305	-	2:04	HEROIC VERSE POPS汎用	
+King of Tribe	-	562	1044	1590	-	581	1057	1552	-	1:58	Rootage TECHNO汎用	
+Meteor☆Shower	-	486	1054	1493	-	535	1067	1505	-	2:06	Sparkle Shower POPS汎用	
+RIZING-GAMERS.	-	526	1168	1759	-	538	1176	1751	-	2:03	EPOLIS TRANSPORT汎用	
+SILKY BRAVE	-	467	812	1203	-	464	770	1154	-	1:54	CANNON BALLERS RACING汎用	
+BEMANI PRO LEAGUE -SEASON 5- Triple Tribe												
+Last Card	-	539	956	1560	-	591	992	1511	-	2:01	CANNON BALLERS RACING汎用	
+TOKAKU=ALMiRAJ	-	469	1007	1477	-	506	935	1502	-	1:59	CastHour CYBER汎用	
+色を喪った街	-	659	1254	2026	-	637	1244	1876	-	2:02	BISTROVER METAL汎用	
+HyperTwist	-	659	1141	1692	-	632	1197	1709	-	1:57	RESIDENT CYBER汎用	
+fixer	-	433	949	1861	-	475	1037	1948	-	2:03	HEROIC VERSE POPS汎用	
+バトルモード												
+ARENAバトル 第1回												
+evergreen	-	507	720	997	-	519	740	1037	-	2:10	専用:rice.c	
+ARENAバトル 第2回												
+KYAMISAMA ONEGAI!	-	344	580	1076	1583	394	628	1098	1845	1:58	Lincle POPS汎用	

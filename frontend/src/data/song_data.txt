@@ -1,0 +1,6794 @@
+SP					DP				BPM	GENRE	TITLE	ARTIST	
+B	N	H	A	L	N	H	A	L					
+beatmania IIDX ▼ △													
+-	2	3	4	-	3	4	-	-	123	DANCE POP	Dr.LOVE	baby weapon feat.Asuka.M	
+-	2	2	-	-	2	2	-	-	102	BIG BEAT	GAMBOL	SLAKE	
+-	5	6	7	-	4	9	9	-	※	DIGI-ROCK	GRADIUSIC CYBER	TAKA	
+-	4	5	6	-	4	6	8	-	157	RAVE	R3	tiger YAMATO	
+-	3	4	5	-	5	5	5	-	135	TECHNO	22DUNK	SLAKE	
+-	2	6	10	-	1	7	10	-	101	PIANO AMBIENT	5.1.1.	dj nagureo	
+beatmania IIDX substream ▲ ▼ △													
+-	4	4	5	-	3	4	7	-	126	DANCE POP	deep in you	dj nagureo	
+-	3	6	9	-	3	6	9	-	150	TRANCE	GENOM SCREAMS	L.E.D.LIGHT	
+-	2	4	9	-	3	5	9	-	175	DRUM'N'BASS	gentle stress	DJ Swan	
+-	2	3	-	-	2	3	-	-	132	DANCE POP	KEEP ON MOVIN'	N.M.R.	
+-	2	7	10	-	3	11	11	-	125	TRIBAL HOUSE	Macho Gang	ANAL SPYDER	
+-	5	6	8	-	3	6	9	-	190	JUNGLE	PARANOIA MAX～DIRTY MIX～	190	
+-	3	3	9	11	3	4	9	12	168	FUTURE JAZZ	RUGGED ASH	SYMPHONIC DEFOGGERS	
+-	4	7	8	-	5	10	7	-	145	TRANCE	THE EARTH LIGHT	L.E.D.LIGHT	
+beatmania IIDX 2nd style ▲ ▼ △													
+-	4	5	6	-	4	8	-	-	155	MINIMAL	Digital MinD(A/T Libra mix)	TaQ	
+-	4	5	6	-	6	9	-	-	125	BIG BEAT	Electro Tuned(the SubS mix)	TaQ	
+-	3	3	4	-	2	2	-	-	125	ITALO HOUSE	I Was The One	good-cool	
+-	3	5	8	-	5	8	-	-	155	GOA TRANCE	Indigo Vision(full flavour hide around mix)	TaQ	
+-	3	6	-	-	4	7	-	-	127	JAZZ FUNK	PUT YOUR FAITH IN ME(for beatmania II)	dj TAKA feat. UZI-LAY	
+-	3	4	4	-	3	5	-	-	168	JUNGLE	SP-TRIP MACHINE(for beatmania II)	dj TAKA feat. DE-SIRE	
+-	4	6	7	-	4	6	7	-	123-135	CHILL OUT	0.59	dj TAKA	
+beatmania IIDX 3rd style ▲ ▼ △													
+-	4	8	-	-	4	7	-	-	155	HYPER EUROBEAT	CAN'T STOP FALLIN'IN LOVE	NAOKI	
+-	4	4	4	-	4	4	-	-	130	HAPPY HANDBAG	Don't Stop!	dj TAKA feat. JP Miles	
+-	5	8	9	-	5	12	12	-	90-180	DRUM'N'BASS	era (nostalmix)	TaQ	
+-	5	7	11	-	7	10	12	-	155	HARD TECHNO	Holic	TaQ	
+-	4	6	7	-	4	6	6	-	150	DIGI-ROCK	LEADING CYBER	dj TAKA	
+-	3	8	8	-	3	8	-	-	136	PIANO AMBIENT	Presto	Osamu Kubota	
+-	5	8	11	-	5	8	11	-	180	RAVE	R5	tigerYAMATO with ultrabeatbox	
+-	4	5	7	-	4	5	7	-	145	TRANCE	REINCARNATION	dj TAKA	
+-	4	6	8	-	4	11	11	-	125	BIG BEAT	Schlagwerk	TaQ	
+-	4	6	7	-	4	7	-	-	135	EPIC HOUSE	Skyscraper	good-cool	
+-	2	3	-	-	2	3	-	-	84	AMBIENT	Tangerine Stream	dj TAKA	
+2	7	10	-	-	8	10	-	-	150	WORLD HOUSE	THE SAFARI	Lion Musashi	
+beatmania IIDX 4th style ▲ ▼ △													
+-	6	8	10	"[HCN]
+11"	6	8	11	"[HCN]
+11"	60-144	EPIC TRANCE	ABSOLUTE	dj TAKA	
+-	5	9	10	-	6	8	-	-	155	SPEED RAVE	B4U	NAOKI	
+-	5	7	9	-	4	7	10	-	160	HYPER EUROBEAT	Broken My Heart	NAOKI feat.PAULA TERRY	
+-	4	4	7	-	4	4	8	-	155	EURO GROOVE	Burnin' The Floor	NAOKI	
+-	7	9	11	-	7	11	11	-	108-216	HIP HOP	CHECKING YOU OUT	good-cool feat. JP Miles	
+-	4	5	9	"[HCN]
+11"	3	4	9	"[HCN]
+11"	148	DUTCH TRANCE	Clione	kors k	
+-	6	9	10	-	6	12	12	-	148	TECHNO	DXY!	TaQ	
+-	5	7	8	-	4	11	-	-	※	DRUM'N'BASS	empathy	TaQ	
+-	5	8	9	-	4	8	12	-	90-180	DRUM'N'BASS	era (step mix)	TaQ	
+-	2	5	-	-	5	7	-	-	70-93	AMBIENT	FLOWERS for ALBION	dj TAKA	
+-	3	4	6	-	4	6	7	-	132	DANCE POP	HIGHER	NM feat. Sunny	
+-	4	6	7	9	5	9	9	10	137	WARP HOUSE	Hitch Hiker2	good-cool	
+-	6	7	8	-	4	6	-	-	145	WARP HOUSE	Jam&Marmalade	FinalOffset	
+-	5	6	10	-	5	7	10	-	130	TECHNO	KAMIKAZE	dj nagureo	
+-	4	4	7	-	4	6	8	-	144	TRANCE	LOVE WILL・・・	riewo	
+-	3	8	9	-	3	9	12	-	141	MINIMAL	minimalian	DETROIAN	
+-	4	5	10	-	4	5	10	-	128	DANCE POP	Mr.T.(take me higher)	Risky Men feat.Asuka-M	
+2	5	8	9	-	5	8	12	-	182	HAPPY HARDCORE	starmine	Ryu☆	
+-	3	6	10	-	6	10	12	-	120	LOUNGE HOUSE	SWEET LAB	DJ SIMON	
+-	5	7	8	-	5	11	-	-	30-125	BIG BEAT	Voltage (feat. Hidemaru)	TaQ	
+-	5	8	10	-	4	7	9	-	250	GABBA	250bpm	AKIRA YAMAOKA	
+beatmania IIDX 5th style ▲ ▼ △													
+-	5	7	8	-	7	8	9	-	142	INTELLIGENCE	Abyss	dj TAKA	
+-	5	6	7	-	5	8	10	-	142	TRANCE	in my eyes	ric	
+-	4	5	6	-	4	5	-	-	150	HYPER EUROBEAT	LOVE AGAIN TONIGHT～for Mellisa mix～	NAOKI feat.PAULA TERRY	
+-	5	6	8	-	5	7	10	-	149	TECHNO	outer wall	sampling masters MEGA	
+-	5	8	10	-	10	12	-	-	155	TECHNO	QQQ	TaQ	
+-	5	6	7	-	6	11	10	-	114	BIG BEAT	Radical Faith	TaQ	
+-	5	8	9	-	7	9	11	-	200	DRUM'N'BASS	Real	Aya	
+-	6	9	10	-	6	10	11	-	120-128	INSTRUMENTAL	Regulus	DJ.W	
+-	4	5	8	"[HCN]
+10"	5	8	9	"[HCN]
+10"	180	POWER FUSION	RIDE ON THE LIGHT (HI GREAT MIX)	Mr.T	
+-	4	7	-	-	4	6	-	-	130	NEW ROMANTIC	RISLIM	ric	
+-	4	6	8	-	5	8	"[CN]
+8"	-	150	SOUND TRACK	sometime	Aya	
+-	5	7	8	-	7	10	-	-	130	HOUSE	Spin the disc	good-cool	
+-	5	7	9	-	4	6	11	-	150	HYPER EUROBEAT	STILL IN MY HEART	NAOKI	
+-	4	6	-	-	5	7	-	-	136	AMBIENT	still my words	TaQ feat. Meg	
+-	6	8	10	-	7	9	11	-	167	TRANCE	sync	OutPhase (TaQ/dj TAKA)	
+-	4	6	7	-	4	6	11	-	178	DRUM'N'BASS	THE CUBE	DJ SUWAMI	
+-	5	7	8	-	6	8	-	-	147	EPIC TRANCE	THE SHINING POLARIS	L.E.D. feat. Sana	
+2	5	10	12	-	6	10	11	-	150	PROGRESSIVE	V	TAKA	
+beatmania IIDX 6th style ▲ ▼ △													
+-	4	5	7	-	5	8	-	-	65	BALLAD	BALLAD FOR YOU～想いの雨～	NM feat.Thomas Howard	
+-	5	7	8	-	7	9	10	-	138	HOUSE	Blueberry Stream	dj TAKA	
+-	5	7	10	11	4	8	10	11	108	ROCK	Buffalo	good-cool feat. Hideo Suwa	
+-	6	9	12	-	6	10	12	-	150	TRANCE	Colors (radio edit)	dj TAKA	
+-	5	8	10	-	5	8	10	-	155	HYPER TRANCE EURO BEAT	DIVE ～INTO YOUR HEART～	NAOKI feat.PAULA TERRY	
+-	4	7	8	-	4	8	10	-	140	TRANCE	fly through the night	Mr.T	
+-	5	6	7	-	6	6	-	-	132	DANCE POP	Free Style	Shapes	
+-	6	9	9	-	5	9	9	-	156	TRANCE	Frozen Ray (original mix)	dj TAKA	
+-	8	9	11	-	6	7	12	-	170	DRUM'N'BASS	G2	Aya	
+-	5	8	10	-	5	8	10	-	140-145	TRANCE	L'amour et la liberté	NAOKI underground	
+-	5	9	11	-	5	9	11	-	160-176	LOUNGE POP	Linus	LEGO STUDIO	
+-	5	9	11	-	7	10	12	-	164	TECHNO	NEMESIS	D.J.SETUP	
+-	5	8	10	-	5	8	-	-	200	ROTTERDAM TECHNO	rottel-da-sun	sampling masters MEGA	
+-	6	8	9	-	7	11	12	-	122	NOISY	route 80s	sampling masters MEGA	
+-	6	8	"[CN]
+10"	-	4	8	"[CN]
+11"	-	150	EPIC TRANCE	SOMETHING WONDERFUL	L.E.D.	
+-	6	9	-	-	9	12	-	-	135	TRIP HOP	Summer Vacation(CU mix)	OutPhase	
+-	7	10	11	-	6	11	-	-	205	INSTRUMENTAL	Take It Easy	Aya	
+-	6	9	10	-	6	8	10	-	135-160	ALL MIX	VJ ARMY	good-cool	
+-	5	6	8	-	5	7	10	-	125	HOUSE	19,November	good-cool	
+-	5	6	7	-	6	9	11	-	128	SOUL	こっちを向いてよ	vivi	
+beatmania IIDX 7th style ▲ ▼ △													
+-	6	10	12	-	8	11	12	-	93-191	RENAISSANCE	A	D.J.Amuro	
+-	6	8	9	-	8	10	-	-	125	ALTERNATIVE HOUSE	AVE DE RAPINA	Shawn The Horny Master	
+-	5	7	9	-	6	7	9	-	130	FILTER HOUSE	Bad Routine	D.J. Spugna	
+-	4	5	7	-	4	5	9	-	166	12 BEAT	Burning Heat! (Full Option Mix)	Mr.T with Motoaki.F	
+-	5	6	9	-	4	6	12	-	120	BIG BEAT	Cheer Train	Fuzita Blender	
+-	5	6	8	-	5	6	-	-	160	HYPER ROCK BEAT	D2R	NAOKI	
+-	5	6	8	-	4	6	-	-	155	HYPER EUROBEAT	DESTINY	NAOKI feat.Paula Terry	
+-	4	8	8	-	5	9	11	-	140	PROGRESSIVE JAZZ	foreplay	Osamu Kubota	
+-	3	5	6	-	6	7	-	-	40-83	HIP HOP&SOUL	Glorious Days	Noria	
+-	6	7	8	-	6	8	10	-	126	HOUSE	Happy Wedding	ASKA	
+-	5	8	9	-	6	10	11	-	155	EUROBEAT	Last Message	good-cool feat. Meg	
+-	4	6	7	-	6	7	-	-	130	AMBIENT POP	Let the Snow Paint Me	Sana	
+-	5	7	9	-	5	7	-	-	167	NEW WAVE	Love Me Do	AKIRA YAMAOKA	
+-	7	10	12	-	7	10	12	-	12-300	HARDCORE TECHNO	MAX 300	Ω	
+-	4	7	9	-	4	7	9	-	125	POPS	Somebody Like You	good-cool	
+-	4	9	11	-	3	9	12	-	128	HOUSE	Spica	D.JW	
+-	8	10	11	-	8	10	12	-	155	TECHNO	stoic	TaQ	
+-	6	9	9	-	6	10	11	-	144	TRANCE	Tomorrow Perfume	dj TAKA	
+-	6	9	10	-	7	9	10	-	152	TRANCE	traces	TaQ	
+-	5	9	10	11	5	8	10	11	160	ELECTROSHOCK	ZERO-ONE	Mr.T	
+-	6	10	10	-	7	12	12	-	83-148	ORCHESTRAL	革命	dj TAKA with NAOKI	
+beatmania IIDX 8th style ▲ ▼ △													
+-	6	9	9	-	7	9	-	-	125	BIG BEAT	abstract	TaQ	
+-	3	5	7	-	3	6	7	-	40-148	INSTRUMENTAL	airflow	Mr.T	
+-	4	8	9	-	7	8	10	-	180	DRUM'N'BASS	ALL RIGHT	RAM	
+-	5	8	9	-	5	7	9	-	145	TRANCE	Attitude	Y&Co.	
+-	4	5	8	-	5	6	-	-	148	テクノ歌謡	bit mania	AKIRA YAMAOKA	
+-	6	7	11	-	6	7	10	-	155	EUROBEAT	Blame	good-cool feat. Jeff Coote	
+-	5	6	8	-	5	7	8	-	144	EURO GROOVE	CELEBRATE NITE	N.M.R	
+-	5	9	10	-	6	10	10	-	155	EUROBEAT	Colors -Y&Co. Eurobeat Remix-	dj TAKA (remixed by 横田商会)	
+-	5	7	9	-	4	8	9	-	131-140	GARAGE HOUSE	dual control	Mr.T	
+-	4	9	11	-	5	10	11	-	155	PSYCHEDELIC TECHNO	Giudecca	D.J.SETUP	
+-	4	8	11	-	5	8	10	-	140	GIRL ROCK	Halfway of promise	Yu Takami feat. Shihori Nakane	
+-	6	8	9	-	6	8	10	-	152	GOA TRANCE	HYPER BOUNDARY GATE	L.E.D.LIGHT	
+-	5	9	10	11	5	10	11	12	180	RAVE	LAB	RAM	
+-	4	6	8	10	4	5	9	11	180	HARD CHANSON	LOVE IS ORANGE	Orange Lounge	
+-	4	6	9	-	6	9	10	-	134	2 STEP	Luv 2 Feel Your Body	Shoichiro Hirata	
+-	5	9	9	-	5	10	11	-	188	BEAT ROCK	memories	TAKA	
+-	4	7	9	-	5	6	9	-	155	EUROBEAT	Monkey Dance	Y&Co.	
+-	5	9	11	-	5	10	12	-	174	CUDDLECORE	murmur twins	yu_tokiwa.djw	
+-	4	7	9	-	8	8	9	-	144	TECHNO	MUSIC TO YOUR HEAD	SLAKE	
+-	5	7	12	-	4	9	10	-	135	DISCO	PLEASE DON'T GO	ASLETICS	
+-	5	9	11	-	4	10	11	-	148	TRANCE	rainbow flyer	dj TAKA	
+-	6	9	10	-	8	10	-	-	155	TECHNO	symbolic	TaQ	
+-	6	8	9	-	5	9	11	-	135	HOUSE	thunder	Lion MUSASHI	
+-	4	8	10	-	4	7	10	-	93	HIP HOP	WAR GAME	ASLETICS	
+-	3	5	5	-	4	5	-	-	122	POPS	World Wide Love	MTO	
+-	5	9	11	-	5	8	11	-	158	ELECTROSHOCK	xenon	Mr.T	
+-	5	7	8	-	5	6	9	-	145	J-TRANCE	蒼い衝動	NAOKI feat.YUKI	
+-	7	10	12	-	8	10	12	-	13-320	SPIRITUAL	桜	Reven-G	
+beatmania IIDX 9th style ▲ ▼ △													
+3	7	10	10	-	6	9	10	-	171	TRANCE CORE	Abyss -The Heavens Remix-	dj TAKA Remixed by Ryu☆	
+-	6	9	9	-	6	9	10	-	180	RAVE	ACT	RAM	
+-	4	6	10	-	4	6	10	-	100	ELECTRONICA	ADVANCE	SLAKE	
+-	2	5	"[HCN]
+9"	-	2	6	"[HCN]
+9"	-	130	ENSEMBLE	ATOMIC AGE	SHUNZZY	
+-	5	7	8	-	4	7	-	-	148	NRG	BAD BOY BASS!! (dj Remo-con MIX)	Y&Co.	
+-	5	6	10	-	6	9	10	-	130	SPIRITUAL	bag	Reven-G	
+-	4	8	9	-	3	8	10	-	150	ROCOCO TEK	BRIGHTNESS DARKNESS	SPARKER	
+-	5	8	10	-	6	10	-	-	160-188	HEALIN' HARDCORE	Cradle	positive MA feat.akino	
+-	7	10	-	-	9	11	-	-	125	MIXTURE	Distress	dj TAKA Remixed by TaQ	
+-	6	8	10	-	8	10	-	-	145	TRANCE	e-motion 2003 -romantic extra-	e.o.s. Remixed by dj TAKA	
+-	4	7	10	-	4	7	10	-	100-200	FUNK SHUFFLE	fun	Mr.T	
+-	4	8	9	-	3	8	11	-	160	TURKISH PIANO'N'BASS	Golden Horn	Osamu Kubota	
+-	5	8	10	-	6	8	-	-	152	EUROBEAT	HYPER EUROBEAT (2DX style)	NAOKI feat.PAULA TERRY	
+-	4	6	7	-	4	6	8	-	142	EUROBEAT	I Was The One (80's EUROBEAT STYLE)	good-cool Remixed by NAOKI	
+-	6	9	10	-	8	11	12	-	※	DRUM'N'BASS	Karma	TaQ	
+-	3	6	8	-	7	9	10	-	142	SOUL	lights	flare	
+-	5	8	11	-	6	8	12	-	130	TECHNO	Logic Board	dj nagureo	
+3	5	9	10	-	4	7	9	-	177	J-HAPPY HARDCORE	LOVE♡SHINE	小坂りゆ	
+-	6	9	10	-	7	10	12	-	155	TECHNO	lower world	D.J.SETUP	
+-	5	9	10	-	5	9	10	-	130	GOSPEL	Make A Difference	Lala Moore with CoCoRo*Co	
+-	4	8	9	-	4	8	9	-	158	EUROBEAT	MARIA (I believe... )	NAOKI feat.PAULA TERRY	
+-	5	10	12	-	4	11	12	-	130-160	POST ROCK	moon_child	少年ラジオ	
+-	7	10	12	-	7	8	10	12	155	HARDCORE RAVE	one or eight	sampling masters AYA	
+-	5	8	10	-	5	8	10	-	73-290	JUNGLE MIXTURE	PARANOIA survivor MAX	290	
+-	6	9	11	-	7	11	12	-	155	TRANCE	quasar	OutPhase	
+-	5	9	10	-	5	7	10	-	150	PSYCHEDELIC	Quickening	dj TAKA	
+-	4	6	10	-	4	10	-	-	100	R&B	Really Love	大部真由美	
+-	4	6	11	-	6	9	12	-	132	ELECTRO 2 STEP	RISLIM -Remix-	ric Remixed by Hisashi Nawata	
+-	6	9	10	-	6	9	11	-	200	GABBA	rottel-the-Mercury	sampling masters MEGA	
+-	4	8	9	-	7	10	11	-	129	HAPPY HANDBAG	Silvia Drive	dj TAKA feat.Noria	
+-	5	7	10	-	5	8	10	-	180	DRUM'N'BASS	SNOW	RAM	
+-	4	8	9	-	5	8	-	-	140	TRANCE	STAR FIELD	SADA	
+-	5	8	10	-	5	9	11	-	180	HAPPY HARDCORE	Sweet Sweet♡Magic	jun	
+-	4	7	11	-	6	7	11	-	114	HIPHOP	SWEETEST SAVAGE	ASLETICS	
+-	4	6	"[CN]
+9"	-	5	8	"[CN]
+10"	-	130	HOUSE	真夏の花・真夏の夢	Sana	
+-	4	5	7	-	3	6	-	-	146	ボデー	ライオン好き	AKIRA YAMAOKA	
+beatmania IIDX 10th style ▲ ▼ △													
+-	5	7	8	-	5	8	10	-	145	PSYCHEDELIC TRANCE	ALIEN TEMPLE	PINK PONG	
+-	5	6	9	-	5	9	10	-	136	DREAM TECHNO	ASTRAL VOYAGE	EeL	
+-	6	7	10	-	6	7	11	-	160	ITALO POP	BABY LOVE	Noria	
+-	6	7	10	-	6	9	10	-	144	2STEP POP TRANCE	Back Into The Light	Sota Fujimori	
+-	4	9	9	-	5	9	9	-	160	ROCOCO TEK	Boundary	SPARKER	
+-	5	7	9	-	5	8	10	-	158	EUROBEAT	CARRY ON NIGHT (English version)	platoniX (EURO style)	
+2	6	8	10	-	5	8	11	-	157	EUROBEAT	Daisuke	Y&Co.	
+-	5	9	11	-	5	8	11	-	155	ETHNO HARDCORE	Debtty Daddy	sampling masters AYA	
+-	2	4	5	-	3	4	-	-	72	PIANO BALLADE	desolation	Mr.T	
+2	5	6	7	-	6	7	9	-	170	HYPER J-POP FOUR	DoLL	TЁЯRA	
+-	4	8	10	-	4	8	-	-	158	ELECTROSHOCK	EXE	Mr.T	
+-	5	8	10	-	5	10	10	-	140	BREAK BEATS	Feedback	Audio Highs	
+-	5	9	10	-	5	9	10	-	180	DRUM'N'BASS	FEEL IT	RAM	
+-	4	6	9	-	4	8	10	-	135	NATURAL SOUND	Freezing atmosphere	Twin AmadeuS	
+-	5	9	10	-	4	9	12	-	148	GOA TRANCE	GHOST REVIVAL	L.E.D.	
+-	4	8	10	-	3	7	11	-	160-220	GAME MUSIC	GRADIUS -FULL SPEED-	Mr.T	
+-	5	9	9	11	6	9	10	11	180	RAVE	HIGH	RAM	
+-	8	12	12	-	8	10	12	-	155	TECHNO	Innocent Walls	TaQ	
+-	6	9	11	-	6	10	12	-	140	TRANCE	Love Is Eternity	kors k	
+-	4	9	11	-	4	10	-	-	156	DANCE POP	Lucy	ELE BLOCK	
+-	4	10	10	-	4	10	11	-	170	ARTCORE	Narcissus At Oasis	Ryu☆	
+-	8	10	11	-	6	10	12	-	172	PROGRESSIVE BAROQUE	No.13	TAKA respect for J.S.B.	
+-	5	9	12	-	4	10	12	-	200	HAPPY	One More Lovely	Risk Junk	
+-	5	8	9	-	7	9	11	-	148	TRANCE	pandora	dj TAKA feat.Tomomi	
+-	7	10	11	-	7	9	11	-	177	HAPPY HARDCORE	rainbow rainbow	Ryu☆	
+-	6	9	10	-	6	10	11	-	144	TRANCE	Rise'n Beauty	Sota feat. Cyborg Akemi	
+-	5	8	10	-	5	8	10	-	140	TECH HOUSE	SCORE	DJ Remo-con	
+-	7	8	9	-	6	9	11	-	140	J-POP	SHOOTING STAR	小坂りゆ	
+-	3	8	11	-	6	8	11	-	139	戦艦テクノ	SPACE FIGHT	AKIRA YAMAOKA	
+-	5	10	11	-	7	10	12	-	175-200	お江戸テクノ	1st Samurai	sampling masters MEGA	
+-	4	7	8	-	4	7	-	-	148	ムートラ(ムードトランス)	システムロマンス	ヒロシ＆チー子	
+-	6	10	12	-	8	10	12	-	151	HARD HOUSE	雪月花	Ryu☆	
+beatmania IIDX 11 IIDX RED ▲ ▼ △													
+-	5	10	12	-	5	9	12	-	154	RENAISSANCE	AA	D.J.Amuro	
+3	5	8	9	"[CN]
+11"	5	7	8	"[CN]
+11"	180	HAPPY HARDCORE	AGEHA	Ryu☆	
+-	5	8	11	-	4	9	11	-	150	PSYCHEDELIC GOA TRANCE	ANDROMEDA	Sota Fujimori	
+-	5	7	10	-	5	7	9	-	143	TRANCE	awakening	AKIRA YAMAOKA	
+-	5	9	11	"[BSS]
+12"	6	8	11	"[BSS]
+12"	150	HARD DANCE	Be quiet	Ryu☆	
+-	5	7	11	-	4	7	12	-	141	TRANCE	BLOCKS	SPARKER	
+-	6	7	10	-	5	8	10	-	160	ROCOCO TEK	BREATH	SPARKER	
+-	5	6	11	-	4	6	10	-	137	CLICK HOUSE	Click Again	dj REMO-CON	
+-	5	8	9	-	5	8	11	-	132-145	AMERICA	Close my Eyes for Me	D-crew feat.DENNIS GUNN(DJ Yoshitaka SCRATCHING)	
+-	3	5	10	-	3	5	8	-	116	J-POP	D.A.N.C.E.!	DJ Yoshitaka feat.星野奏子	
+-	5	9	10	-	6	9	10	-	165	J-POP	Don't be afraid myself	platoniX with ray.D	
+-	2	5	7	-	2	6	-	-	45-94	PIANO BALLAD	earth scape	dj TAKA	
+-	5	11	12	-	7	12	12	-	200	HARD ROCK	FAKE TIME	dj REMO-CON	
+-	3	6	7	-	4	6	-	-	133	DANCE POP	Fly Away To India	Baby Weapon feat.KAJIL	
+-	6	10	11	-	6	12	12	-	175	DRUM'N'BASS	GENOCIDE	dj Killer	
+3	9	12	12	-	10	12	12	-	173	NUSTYLE GABBA	gigadelic	teranoid feat.MC Natsack	
+-	5	7	8	-	5	7	9	-	171	HAPPY HARDCORE	HORIZON	LIA	
+-	6	8	11	-	5	8	11	-	212	BEAT ROCK	KEY	colors	
+-	6	9	10	-	7	9	11	-	152-153	PSYCHEDELIC TRANCE	NEBULA GRASPER	L.E.D.	
+-	5	8	9	-	6	8	10	-	160	COLORFUL HARDCORE	Raspberry♡Heart(English version)	jun feat. PAULA TERRY	
+1	5	9	11	"[BSS]
+12"	5	9	11	"[BSS]
+12"	165	SPEED RAVE	RED ZONE	Tatsh&NAOKI	
+-	5	10	11	-	4	11	-	-	160	HARD SONATA	RESONATE 1794	KOHTA	
+-	5	7	11	-	5	9	-	-	162	DRUM'N'BASS	Secret of Love	D.J.SWAN	
+-	5	8	9	-	5	9	10	-	155	EUROBEAT	SPEEDY CAT	Y&Co.	
+-	5	9	10	-	5	8	12	-	160	MEDIEVAL CHOIR	Sphere	Tatsh feat. K.Nayuki	
+-	5	9	11	12	5	9	10	12	154	PSYCHEDELIC TECHNO	spiral galaxy	D.J.SETUP	
+-	5	8	10	-	6	9	10	-	144	CYBORG TRANCE	The Hope of Tomorrow	Sota Fujimori	
+-	5	7	9	-	4	7	-	-	180	HYPER J-POP FIVE	ＵＬＴｉＭΛＴＥ	TЁЯRA	
+-	5	7	11	-	5	8	10	-	126	NATURAL SOUND	Wonder Bullfighter	Twin AmadeuS	
+-	3	6	9	-	3	6	-	-	84-168	JAPAN	大桟橋	ウッチーズ	
+-	4	8	9	-	4	8	-	-	155	CYBER J-EURO	太陽～T・A・I・Y・O～	NAOKI feat.星野奏子	
+-	5	11	12	-	5	10	12	-	165-188	DIRGE	ピアノ協奏曲第１番”蠍火”	virkato	
+beatmania IIDX 12 HAPPY SKY ▲ ▼ △													
+-	5	9	10	-	5	8	11	-	70-168	GOTHIC METAL	Agnus Dei	あさき	
+-	5	8	10	-	4	8	10	-	140	NATURAL SOUND	alla turca con passione	Twin AmadeuS	
+-	7	10	11	-	7	10	11	-	181	TRANCE CORE	Aurora	Ryu☆	
+-	5	9	11	12	5	9	11	12	160	NOSTALISH REQUIEM	CaptivAte～浄化～	A/I	
+-	5	8	10	11	4	9	10	11	115	ACID JAZZ	Catch Me	DJ Yoshitaka feat. ERi	
+-	4	8	9	-	4	7	10	-	160	J-POP REMIX	Don't let it go	ウッチーズ	
+-	6	10	10	-	5	10	-	-	166	BATTLE2005	double thrash	414	
+-	6	9	10	11	7	8	10	11	200	HYPER J-POP SIX	EDEN	TЁЯRA	
+-	3	5	8	-	3	5	8	-	182	E-ROCK	EMPTY OF THE SKY	AKIRA YAMAOKA	
+-	5	7	9	-	5	8	10	-	150	TECHNO RAVE	First Resolution	good-cool	
+-	4	7	10	12	4	7	12	12	220	SWING WALTZ	garden	青野りえ	
+-	5	8	10	-	5	8	-	-	145	RAVE	Get'em up to R.A.V.E	Disconation	
+-	6	8	10	-	6	9	11	-	170	BROKEN TEK	GREEN EYES	SLAKE	
+3	5	7	10	-	6	7	10	-	180	HAPPY HARDCORE	HAPPY☆ANGEL	jun with TAHIRIH	
+-	5	8	10	-	5	8	-	-	190	CYBER J-ROCK	I am	有沢みはる from BeForU	
+-	5	6	7	-	5	6	8	-	138	CLICK HOUSE	in motion	Ryu☆	
+-	5	9	11	12	6	9	12	12	148	TRANCE	INAZUMA	dj TAKA	
+-	5	8	9	-	5	7	11	-	152	HAPPY EXTREME	LESSON 5	Risk Junk feat.Erika Mochizuki	
+-	5	10	11	12	5	10	11	12	※	PUNK OPERA	Little Little Princess	SHRINE 418	
+-	5	8	10	-	4	8	-	-	170	DRUM'N'BASS	Love Magic	D.J.SWAN	
+-	5	7	9	-	6	8	9	-	98-147	UK PROGRESSIVE	mind the gap	Osamu Kubota	
+-	5	7	9	-	5	10	-	-	147	FUTURE HOUSE	MOON RACE	ELEKTEL	
+-	3	5	"[CN]
+8"	"[CN]
+10"	3	5	"[CN]
+8"	"[CN]
+10"	116-146	HEART	Pink Rose	Kiyommy＋Seiya	
+-	4	8	9	-	5	8	-	-	148	SYNTHESIZED TECHNO	PLASMA	Sota Fujimori	
+-	4	6	11	-	4	8	9	-	145	HARD DANCE	Pollinosis	dj REMO-CON	
+-	5	8	10	"[CN]
+11"	5	8	11	"[CN]
+12"	160	EUROBEAT	POODLE	Y&Co.	
+-	7	10	12	-	6	10	11	12	152	DIGI-ROCK	rage against usual	dj TAKA feat.Gt.Shintaro	
+-	7	10	12	-	6	10	12	-	220	BREAKCORE	SCREAM SQUAD	CALF	
+-	7	10	12	12	8	10	11	12	151	TECHNO	Scripted Connection⇒ A mix	DJ MURASAME	
+-	7	10	11	12	8	10	11	12	151	TECHNO	Scripted Connection⇒ H mix	DJ MURASAME	
+-	6	8	10	11	6	9	10	11	151	TECHNO	Scripted Connection⇒ N mix	DJ MURASAME	
+3	5	7	10	-	5	7	11	-	179	MAKINA	SigSig	kors k	
+-	5	9	10	-	5	10	-	-	265	MPB	Tizona d'El Cid	TOMOSUKE	
+-	6	7	10	12	6	9	9	12	160	HAPPY EURO PARADISE	Twelfth Style	Tatsh&DAYBREAKERS NEXT	
+-	5	7	9	-	4	7	9	-	170	J-EUROTRANCE	Under the Sky	南さやか(BeForU) with platoniX	
+-	4	8	10	-	4	7	9	-	160	ELECTROSHOCK	vault of heaven	Mr.T	
+-	4	9	10	-	4	11	-	-	136-147	ANTHEM TRANCE	Votum stellarum	iconoclasm	
+-	3	5	9	-	3	5	9	-	129	DISCO	We are Disっ娘よっつ打ち命	DANCE☆MAN feat. Disっ娘	
+3	5	10	11	-	5	10	11	-	170	MEDIEVAL CHOIR	Xepher	Tatsh	
+-	5	10	11	-	4	10	11	-	252	SYNTHETIC PROGRESSIVE ROCK	100% minimoo-G	Sota Fujimori	
+-	7	8	10	-	5	7	9	-	123	FUNK	オレはビートマニア！お前は何マニア？	DANCE☆MAN	
+-	5	8	11	-	5	9	11	-	155	HARD DANCE	合体せよ！ストロングイェーガー！！ (Ryu☆ remix)	L.E.D./Remixed by Ryu☆	
+-	5	8	10	-	4	9	10	-	155	J-EUROBEAT	月光	Tatsh feat. 星野奏子	
+-	3	9	10	-	4	8	9	-	185	J-HAPPY HARDCORE	ヒマワリ	小坂りゆ	
+3	5	10	12	-	5	11	12	-	66-200	HUMAN SEQUENCER	冥	Amuro vs Killer	
+-	4	6	11	-	4	9	11	-	99-198	REGGAE	ラクエン	Chonan Chiharu	
+beatmania IIDX 13 DistorteD ▲ ▼ △													
+2	5	7	10	-	6	9	10	-	170	HYPER J-POP SEVEN	ALFARSHEAR 双神威に廻る夢	TЁЯRA	
+1	5	9	10	-	5	8	11	-	170	ORATORIO	Apocalypse ～dirge of swans～	Zektbach	
+-	4	6	8	-	5	8	-	-	132	CELTIC REEL	BALLAD THE FEATHERS	S.S.D.FANTASICA feat.Naomi Koizumi	
+-	5	9	10	-	5	10	11	-	170	HARD RENAISSANCE	Bloody Tears(IIDX EDITION)	DJ YOSHITAKA	
+-	5	8	10	-	5	9	10	-	155	EUROBEAT	BOOM BOOM DISCO NIGHT	Y&Co.	
+-	5	8	11	-	4	10	11	-	140	TRANCE	Broadbanded	SADA	
+2	5	10	12	-	5	10	12	-	103-155	PROGRESSIVE	Concertino in Blue	佐々木博史	
+-	9	10	11	12	7	10	12	12	180	SUBLIME TECHNO	CONTRACT	朱雀	
+-	5	9	11	-	5	8	11	-	155	TECHNO	D.C.fish	DJ MURASAME	
+-	5	7	11	-	5	7	11	-	165	SUPER RAVE BEAT	DEEP ROAR	NAOKI&Tatsh	
+-	3	6	9	-	4	7	10	-	138	J-POP	Double♡♡Loving Heart	Tatsh feat. Junko Hirata ＆ Sayaka Minami	
+-	6	9	12	-	6	10	12	-	100-400	TECHNO	DUE TOMORROW	Mr.T	
+-	5	8	10	-	5	8	11	-	161	80's TECHNO	EURO-ROMANCE	K-MASERA	
+-	6	10	11	12	8	11	12	12	72-82	ESOTERIC SLOWCORE	Ganymede	玄武	
+-	4	8	11	-	5	9	11	-	135	PROGRESSIVE HOUSE	Harmony and Lovely	Ryu☆	
+-	4	7	10	-	4	8	10	-	130	TRANCE	Heavenly Sun (IIDX VERSION)	AKIRA YAMAOKA	
+-	5	7	9	-	5	7	10	-	135	BRAZILIAN HOUSE	INFERNO	Caldeira feat.星野奏子	
+-	4	8	10	-	4	7	10	-	145	SYMPHONIC EURO	Leaving...	SEIYA MURAI meets “eimy”	
+-	6	10	11	-	5	10	12	-	150	ELECTRONICA	MINT	SLAKE	
+-	5	9	10	-	5	10	-	-	156	哀愁ユーロ	MOON	dj TAKA feat.Erika Mochizuki	
+-	5	7	10	-	4	8	10	-	135	2 STEP	Power of Love	kors k feat.PSY	
+-	5	8	10	-	5	9	11	-	149	BUCHIAGE TRANCE	So Fabulous !!	HHH (Ryu☆ & Dai)	
+-	3	8	11	-	5	9	11	-	152	HAPPY POP	Sun Field	mh sequence	
+-	7	10	11	-	7	10	10	-	165	SADISTIC HARDCORE	The Dirty of Loudness	Tatsh Assault X	
+-	4	8	10	-	5	8	-	-	175	CORE POP	This is Love	D-crew feat.MAKOTO	
+-	6	10	11	-	7	10	12	-	187	GABBA	tripping contact(teranoid&MC Natsack Remix)	kors k vs teranoid	
+-	5	9	11	-	6	10	-	-	159	PSYCHEDELIC TRANCE	TYPE MARS(G-Style Mix)	L.E.D.	
+-	7	10	11	12	7	10	11	12	191	DANCE SPEED	waxing and wanding	青龍	
+3	5	8	10	-	5	9	11	-	160	LOVERS EUROBEAT	Why did you go away	jun with TAHIRIH	
+-	5	8	9	-	5	8	9	-	155	EUROBEAT	WISH(EUROBEAT MIX)	DJ YOSHITAKA feat.杉村ことみ	
+-	4	6	9	-	4	7	11	-	135	FUNK'N JAZZ HOUSE	with you…	Sota Fujimori	
+-	5	7	10	-	5	8	11	-	160	CYBER OPUS	Zenius -I- vanisher	Tatsh	
+-	6	9	12	-	6	9	12	-	140	和式電子音楽	カゴノトリ～弐式～	橙色特別室	
+-	6	10	11	12	7	10	12	12	199	ASIAN MIXTURE	華蝶風雪	白虎	
+-	5	7	9	-	5	7	10	-	180	POPROCK	タシカナモノ	星野奏子 with the BAND	
+-	8	11	12	-	7	11	12	-	160	CONTEMPORARY	嘆きの樹	金獅子	
+-	5	8	9	-	5	7	8	-	160	LOVELY TRANS POP	虹色	DJ YOSHITAKA feat. G.S.C license	
+-	3	8	10	-	4	7	-	-	180	DRUM'N'ROCK	罠	good-cool	
+beatmania IIDX 14 GOLD ▲ ▼ △													
+-	5	6	8	-	5	7	8	-	171	FLOW POP	Air Bell	D-crew	
+-	5	9	10	-	5	10	-	-	152	PSYCHEDELIC SYNTH TRANCE	ANDROMEDA II	Sota Fujimori	
+-	6	8	11	-	7	8	10	-	137-165	EPIC POETRY	Blind Justice ～Torn souls, Hurt Faiths ～	Zektbach	
+-	7	10	12	-	6	8	12	12	184	HAPPY	Candy Galy	Risk Junk-G	
+-	6	9	10	-	6	9	11	-	160	NOSTALISH REQUIEM	CaptivAte～誓い～	A/I	
+3	6	8	9	-	5	9	11	-	180	NOSTALISH REQUIEM	CaptivAte～裁き～	DJ YOSHITAKA feat.A/I	
+-	5	8	10	-	6	8	10	-	170	DRAMATIC EURO TRANCE	CROSSROAD ～Left Story～	jun with TAHIRIH	
+-	5	9	10	-	6	8	8	-	146	CYBORG TRANCE	Cyber Force	Sota Fujimori feat.cyborg AKEMI	
+-	9	11	12	-	9	10	12	-	100-400	SuperNOVA BEAT	Fascination MAXX	100-200-400	
+3	7	10	12	-	7	9	11	-	150	BUCHIAGE TRANCE	FIRE FIRE	StripE	
+-	4	6	8	-	4	8	-	-	157	ROCK	four-leaf	Sis Bond Chit	
+3	7	9	11	-	6	8	10	-	162	RECKLESS RAVE	GOLD RUSH	DJ YOSHITAKA-G feat.Michael a la mode	
+-	6	8	10	12	7	8	10	12	160	ELECTRONICA	GRID KNIGHT	SAW WAVE SQUAD	
+-	5	7	9	-	5	7	9	-	132	FILTER HOUSE	heaven above	kors k	
+2	4	6	9	-	5	7	9	-	180	HIGH SPEED LOVE SONG	High School Love	DJ YOSHITAKA feat.DWP	
+-	6	10	11	-	6	9	12	-	146	MILLENNIUM TRANCE	INORI	dj TAKA feat.HAL	
+-	6	9	11	12	8	10	12	12	165	FREEFORM HARDCORE	KAMAITACHI	DJ TECHNORCH fw. GUHROOVY	
+-	7	11	12	-	7	11	12	-	152	NU-SKOOL BREAKS	LASER CRUSTER	L.E.D.	
+-	3	4	5	-	4	5	-	-	110	POPS	Love Again...	Tatsh feat. Junko Hirata	
+-	5	9	10	-	4	9	11	-	130	HOUSE	Make Me Your Own	good-cool ft. Raj Ramayya	
+-	4	8	9	-	5	7	-	-	150	OLDSKOOL HARDCORE RAVE	METALLIC MIND	DJ TECHNORCH fw. GUHROOVY	
+-	4	7	8	-	4	6	-	-	130	DANCE POP	never…	Kanako Hoshino with dj TAKA	
+-	4	9	10	-	6	11	12	-	100-350	PIANO CONCERTO	op.31 叙情	akiko	
+-	7	10	10	-	7	9	11	-	176	DRUM & BASS	PHOTONGENIC	L.E.D. fw.堀澤麻衣子	
+-	5	8	10	-	5	8	10	-	160	EUROBEAT	Roulette	Y&Co.	
+1	5	8	11	-	6	8	11	-	149	HANDZ UP	Second Heaven	Ryu☆	
+-	9	11	12	-	9	12	12	-	140	RAVE	Sense 2007	good-cool	
+-	7	9	11	-	7	9	12	-	189	ELE POP	smile	miru_maki.gjw	
+1	4	9	10	12	4	10	12	-	145	TRANCE	snow storm	dj TAKA	
+-	6	9	11	-	5	9	11	-	156	SCHRANZ	the shadow	kors k	
+-	4	7	8	-	4	6	7	-	136	POP	The Smile of You	猫叉Master feat.JESSY	
+-	5	10	11	"[CN]
+12"	6	10	12	"[CN]
+12"	130-190	PSG WORKS	TRANOID	T&S seq. factory	
+-	8	11	12	12	7	11	12	12	185	DECEPTIVE GABBA	VANESSA	朱雀	
+-	4	6	9	-	4	6	-	-	121	HIP HOP	Watch out!!	MAD Sequence*	
+-	4	6	8	-	4	7	8	-	135	J-HOUSE	With your Smile	Shoichiro Hirata plus Junko Hirata	
+-	4	7	9	-	4	9	10	-	140-155	HINDU SALSA	2hot2eat	Osamu Kubota	
+2	5	8	10	-	5	8	10	-	185	FUTURE POP	クルクル☆ラブ～Opioid Peptide MIX～	イオンチャンネル	
+1	6	8	9	-	6	8	10	-	180	HYPER J-POP ZERO	零 - ZERO -	TЁЯRA	
+3	7	10	12	-	7	10	12	-	165	NU-NRG	電人、暁に斃れる。	L.E.D.-G	
+-	4	6	8	-	5	7	8	-	150	JAPANESE ALTERATION	花吹雪 ～ IIDX LIMITED ～	S.S.D.FANTASICA feat.ユッコ	
+-	7	9	10	-	6	9	10	-	165	J-POP	星をこの手に	DJ YOSHITAKA feat.星野奏子	
+-	5	7	9	-	5	6	8	-	150	TECHNO	ヨシダさん	AKIRA YAMAOKA	
+-	6	8	10	-	6	8	-	-	155	EURO TRANCE	リグレット	星野奏子	
+beatmania IIDX 15 DJ TROOPERS ▲ ▼ △													
+-	6	10	11	12	6	10	12	12	185	HARD RENAISSANCE	Anisakis -somatic mutation type"Forza"-	朱雀	
+-	4	7	10	-	5	9	10	-	130-146	CLASSICAL PIANO SOLO	avant-guerre	Osamu Kubota	
+-	5	8	10	11	6	9	12	-	160	EUROBEAT	Be OK	good-cool ft. Florence	
+-	5	8	9	-	5	7	10	-	165	TECH-TRONIKA	beatonic nation	Sota Fujimori	
+2	6	8	11	12	6	7	10	12	144	TRANCE	Blue Rain	dj TAKA VS Ryu☆	
+-	4	6	8	-	5	7	-	-	100	J-R&B	Darling my LUV	DJ Yoshitaka feat.B-Agents	
+2	4	7	10	-	5	7	11	-	149	HANDZ UP	Dazzlin' Darlin	HHH	
+-	6	9	11	-	5	8	10	-	128	TECH-BREAKBEATS	Digitank System	DJ Mass MAD Izm*	
+-	8	10	11	12	5	10	12	12	300	N-BEATS	Do it!! Do it!!	Kraken	
+-	6	9	10	-	5	10	11	-	162	FRENZY HOUSE	end of world	猫叉Master+	
+-	5	7	10	-	5	8	11	-	133	PROG	evergreen	kors k	
+-	5	10	11	12	6	10	12	12	125-195	JUNGLE	four pieces of heaven	Lion	
+2	4	7	10	-	5	8	9	-	145	TRANCE	Freeway Shuffle	dj TAKA	
+-	7	10	12	12	7	10	12	12	126-251	NU-SKOOL BREAKBEATS HARDCORE	ICARUS	Eagle	
+-	7	9	11	-	7	10	11	-	180	HAPPY HARDCORE	in the Sky	Ryu☆	
+-	5	7	9	-	5	7	10	-	160	E-DANCE POP	Kick Out 仮面	上野圭市(aka. Babyweapon,DJ SWAMI)feat.星野奏子	
+-	6	9	10	-	7	10	11	-	178	HAPPY HARDCORE	LOVELY STORM	L.E.D.-G	
+-	4	7	10	-	3	7	10	-	125	PROGRESSIVE HOUSE	madrugada	PINK PONG	
+-	5	8	10	-	7	9	10	-	180	LOVELY BUCHIAGE POP	MAX LOVE	DJ YOSHITAKA feat.星野奏子	
+-	6	11	12	-	6	10	12	-	168	IRREGULAR HI-BREAK	MENDES	Humanoid	
+-	6	10	11	-	6	9	11	-	145	HARD HOP	MENTAL MELTDOWN	GUHROOVY fw.TECHNORCH	
+-	5	9	10	12	6	9	11	12	165	ONLY ONE EURO BEAT	NEW GENERATION -もう、お前しか見えない-	SUPER STAR 満-MITSURU-	
+-	7	10	12	-	7	9	12	-	162	HYMNUS	oratio	蓑舞衆	
+-	7	11	12	-	8	11	12	-	75-300	SUPERNOVA2 BEAT #1	PARANOiA ～HADES～	αTYPE-300	
+-	3	7	8	-	4	6	8	-	70	BALLAD	PROMISE FOR LIFE	TЁЯRA WORKS	
+-	6	9	10	-	6	9	11	-	171	TRI EURO FANTASIA	REMINISCENCE	jun with Alison	
+-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	172	UK HARDCORE	Rising in the Sun(original mix)	kors k feat.Rie	
+-	6	9	12	-	5	8	10	11	160	OUVERTÜRE	Ristaccia	Zektbach	
+-	6	9	11	-	8	10	12	-	154	HARD HOUSE	satellite020712 from "CODED ARMS"	猫叉Master	
+-	5	7	9	-	6	8	10	-	180	RAVE	satfinal	RAM	
+-	4	5	8	-	4	7	9	-	141	WORLD/ELECTRONICA	scar in the earth	猫叉Master	
+2	6	10	11	-	6	9	10	-	184	FREEFORM HARDCORE	SOUND OF GIALLARHORN	L.E.D.-G	
+-	5	8	11	-	6	8	12	-	155	TECHNOTRONICA	State Of The Art	Sota Fujimori feat. cyborg AKEMI	
+-	6	10	11	12	6	10	11	12	205	BREAK CORE	STEEL NEEDLE	Scorpion	
+-	5	9	11	-	5	9	11	-	152	ULTIMATE J-POP	switch	DAISUKE ASAKURA ex.TЁЯRA	
+2	6	10	11	12	5	10	11	12	173	NU STYLE GABBA	THE DEEP STRIKER	L.E.D.-G	
+-	5	7	9	11	6	9	10	12	150	ETHNOTRONICA	the trigger of innocence	Seiya Murai	
+-	6	10	11	12	7	9	11	12	191	DANCE SPEED	Time to Air	青龍	
+-	6	9	10	-	6	9	11	-	80-160	SUPERNOVA2 BEAT #2	TRIP MACHINE PhoeniX	DE-SIRE 改	
+-	6	10	12	-	6	10	12	-	177	ULTIMATE CORE	TROOPERS	Des-TRACT	
+-	6	10	11	12	7	10	11	12	174	PROGRESSIVE BAROQUE	Übertreffen	TAKA respect for J.S.B.	
+-	4	7	8	11	3	6	9	12	128	PIANO HOUSE	Wanna Party?	RAM	
+-	5	7	11	-	5	7	10	-	140	TRIBAL	2 tribe 4 K	Remo-con	
+2	4	6	9	-	4	6	9	-	125	80's EURO	エコ爺	Y&Co.	
+-	5	8	9	-	5	9	10	-	150	SYMPHONIC TECHNO	高高度降下低高度開傘	Dr.Honda	
+-	6	10	12	-	6	10	12	-	90-192	POST RENAISSANCE	少年A	Remixed by 少年ラジオ	
+-	3	4	7	-	3	5	-	-	68-85	SOLDIER'S BALLAD	走馬灯 -The Last Song-	TAKA	
+2	6	8	10	12	7	9	10	12	160	HYPER JAPANESQUE 2	華爛漫 -Flowers-	TЁЯRA	
+-	4	6	8	-	4	7	9	-	152	EDUCATION	マチ子の唄	AKIRA YAMAOKA	
+-	5	9	10	"[CN]
+12"	6	10	12	-	144	FUSION	ミラージュ・レジデンス	Jimmy Weckl	
+beatmania IIDX 16 EMPRESS ▲ ▼ △													
+-	5	7	9	-	6	7	9	-	145	HARD CORE	ALL I NEED YOUR LOVE	GUHROOVY fw. M-Project	
+-	6	9	11	-	6	9	11	-	170	ONLY ONE EURO BEAT	ALL MY TURN -このターンに、オレの全てを賭ける-	SUPER STAR 満-MITSURU-	
+-	6	10	11	12	6	10	11	12	180	ARABIC HARDCORE	Arabian Rave Night	dj MAX STEROID	
+-	6	9	11	12	7	9	11	12	170	RECKLESS RAVE	B4U(BEMANI FOR YOU MIX)	Remixed by DJ YOSHITAKA with Michael a la mode	
+-	4	9	10	11	5	9	11	11	155	HOUSE	Bahram Attack-猫叉Master Remix-	猫叉Master feat.JUNE	
+-	5	10	12	-	5	10	11	12	165	JUMPSTYLE	BITTER CHOCOLATE STRIKER	L.E.D.-G	
+-	4	7	9	-	5	8	9	-	138	HAPPY ☆ JIG	BRIDAL FESTIVAL !!!	S.S.D. with ななっち	
+1	6	9	11	-	5	9	11	-	175	NOSTALISH REQUIEM	CaptivAte2～覚醒～	e-lma	
+3	5	10	12	-	7	10	12	-	180	HAPPY HARDCORE	Colorful Cookie	Lucky Vacuum	
+-	5	9	10	-	6	9	10	-	146	BUCHIAGE TRANCE	Cyber Force -DJ Yoshitaka Remix-	Remixed by DJ YOSHITAKA	
+-	4	8	10	11	5	8	9	10	155	MEGA MIX	Flash Back 90's	kors k as disconation	
+-	5	6	8	-	5	8	9	-	150	DREAM TRANCE	Fly Above	Sota Fujimori	
+3	6	10	12	-	6	10	12	-	200	TRANCE CORE	Go Beyond!!	Ryu☆ Vs. Sota	
+-	6	9	11	-	6	9	11	-	150	MORNING FULL ON	HYPERION	L.E.D.	
+-	4	6	7	-	5	7	9	-	147	TECHNO POP	I'm Screaming LOVE	Creative Life	
+-	5	7	10	-	5	8	11	-	116	MIXTURE	Jack	DesQ	
+-	4	8	11	-	5	8	11	-	136	NU SKOOL BREAKS	Just a Little Smile	Sota Fujimori	
+-	6	10	11	12	6	10	11	12	177	ASIAN JANGLE	Kung-fu Empire	飛燕流舞	
+-	6	9	11	12	6	9	11	11	205-248	宮廷円舞曲	Marie Antoinette	Marguerite du Pré	
+3	4	7	9	10	4	7	8	11	128	ELECTRO-TECH	Mind Mapping	Ryu☆	
+-	4	8	10	-	4	8	11	-	155	EUROBEAT	Monkey Dance '09	Y&Co. Feat. DOMINO	
+2	4	7	9	10	5	8	9	11	160	DANCE MUSIC OF SORROW	NΦ CRIME	C×F	
+-	5	9	11	11	5	8	10	11	145	TECH-BREAKBEATS	naughty girl@Queen's Palace	DJ Mass MAD Izm*	
+-	4	6	9	11	5	7	9	11	151	ENERGETIC TRANCE	neogenesis	DM Ashura	
+-	5	9	11	-	5	10	11	-	153	PSY TRANCE(FULL ON)	Programmed World	kors k as StripE	
+-	5	8	10	11	6	9	10	12	172	E-DANCE POP	Punch Love♡仮面	上野圭市(aka. Babyweapon,DJ SWAMI)feat.星野奏子	
+-	4	8	10	-	4	8	9	-	152	BIGBEAT	Queen's Tragedy	猫叉Master+	
+-	6	9	11	12	5	10	11	12	150	TECH-PARA	Secrets	good-cool ft. CHiCO	
+2	4	8	10	11	5	8	10	"[CN]
+11"	177	CANDY RAVE	smooooch・∀・	kors k	
+-	6	9	10	-	7	10	11	-	152	TECHNO	SOLITON BEAM	L.E.D.	
+-	5	9	10	12	5	8	10	11	45-170	ONLY ONE EPILOGUE	THANK YOU FOR PLAYING	SUPER STAR 満-MITSURU-	
+-	6	9	11	-	6	9	11	-	172	UK HARD CORE	THE SHINING POLARIS(kors k mix)	Remixed by kors k	
+-	5	7	9	12	5	8	10	12	128	HOUSE	thunder HOUSE NATION Remix	Remix by Sunset In Ibiza (SII)	
+2	4	9	10	-	4	8	10	-	148	ELEMENTAL CHANT	Turii ～Panta rhei～	Zektbach	
+3	6	10	11	-	5	10	11	-	150	PROGRESSIVE	V2	TAKA	
+-	5	9	12	-	5	10	12	-	145-876	90's RAVE	Y&Co. is dead or alive	Y&Co.	
+-	6	10	11	-	7	10	11	-	155	ONLY ONE TECHNO	You'll say "Now!"	BLACK STAR 幸広-YUKIHIRO-	
+3	7	10	12	-	8	10	12	-	191	DANCE SPEED	3y3s	青龍	
+-	4	7	9	10	5	8	9	11	148	J-TRANCE	翼	小林ゆう	
+-	5	10	11	-	5	10	11	-	150	RAGE AGAINST EMPRESS	天空脳番長危機十六連打	D.J.SETUP	
+-	4	7	10	-	5	9	10	-	160	IRON CONCERTO	鉄甲乙女-under the steel-	Seiya Murai	
+-	5	8	10	-	5	8	10	-	143	HOU-ROCK	ハリツヤランデヴー	Des-MASTERS	
+-	6	11	12	-	7	11	12	-	83-185	ESOTERIC SPEEDCORE	卑弥呼	朱雀 VS 玄武	
+3	6	9	12	-	6	9	11	-	188	HARDCORE	不沈艦CANDY	Risk Junk	
+-	5	7	9	-	5	8	11	-	149	J-DANCE POP	まほろば	HHH+H	
+-	5	7	11	-	5	8	12	-	150	TRENDY TECHNO	ミッドナイト堕天使	Dr.Honda	
+-	4	7	10	-	5	8	10	-	148	ポップス	山岡晃の「クイズ！家事都合！」	AKIRA YAMAOKA feat.喜屋武ちあき	
+2	6	9	10	11	6	9	10	12	163	撫子ロック	凛として咲く花の如く	紅色リトマス	
+beatmania IIDX 17 SIRIUS ▲ ▼ △													
+3	7	9	11	12	6	9	11	12	180	SPEEDCORE	AIR RAID FROM THA UNDAGROUND	GUHROOVY	
+-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	-	178	AKASHIC RECORDS	Almagest	Galdeira	
+-	7	10	12	-	7	10	12	-	195	INDUSTRIAL	Bad Maniacs	kors k as teranoid	
+1	4	7	10	-	5	7	10	-	140	BUBBLEGUM DANCE	bass 2 bass	Ryu☆	
+-	5	8	9	-	5	8	10	-	175	E-DANCE POP	beatchic☆仮面～好き、でいさせて～	上野圭市(transforming into Masao♥Lovely)feat.星野奏子	
+-	4	8	10	-	5	8	10	-	172	DRUM'N'BASS	BEAUTIFUL ANGEL	"DJ SWAN
+[A] DJ SWAN (Toshiaki Komiya & Keiichi Ueno)"	
+-	4	7	10	-	3	7	9	-	102	ELECTRO POP	being torn the sky	猫叉Master+ feat.JUNE	
+2	"[CN]
+7"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	-	181	HAPPY HARDCORE	bloomin' feeling	Ryu☆	
+-	6	8	10	-	5	8	10	-	180	SUBLIME TECHNO	CaptivAte～裁き～(SUBLIME TECHNO MIX)	Remixed by DJ YOSHITAKA	
+-	"[CN]
+8"	"[CN]
+10"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	-	30-240	NEXT SKOOL BREAKBEATS HARDCORE	D	Eagle	
+-	7	9	11	-	8	9	10	-	183	DRUM & BASS	DAWN -THE NEXT ENDEAVOUR-	L.E.D. fw.堀澤麻衣子	
+-	4	8	10	-	5	8	11	-	160	EUROBEAT	Dazzlin' Darlin-秋葉工房mix-	Remixed by DJ Command	
+-	5	9	11	-	5	8	10	-	175	UK HARDCORE	DESIRE	M-Project fw. GUHROOVY	
+-	"[MSS]
+4"	"[MSS]
+7"	"[MSS]
+10"	-	"[MSS]
+5"	"[MSS]
+9"	"[CN]
+[MSS]
+10"	-	136	ELECTRO	Do Back Burn	PRASTIK DANCEFLOOR	
+-	7	10	12	-	5	10	12	-	196	HARDCORE	DOMINION	L.E.D.-G	
+-	4	9	11	-	4	8	11	-	152	WHITE SEQUENCE	DROP	dj TAKA feat.Kanako Hoshino	
+2	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	185	TRANCE CORE	Elisha	DJ YOSHITAKA	
+-	6	9	11	-	6	10	11	-	173	CYBERPUNK	Empire State Glory	Dirty Androids	
+-	7	10	12	-	8	10	12	-	135-270	HARDCORE	eRAseRmOToRpHAntOM	L.E.D.-G VS GUHROOVY	
+3	6	11	12	-	7	10	12	-	185	HARD RENAISSANCE	"Evans
+[B][N][H] Evans -prototype-
+[A]Evans"	DJ YOSHITAKA	
+-	6	10	12	-	8	10	12	-	188	HARDCORE	EXUSIA	L.E.D.-G	
+-	7	10	12	-	6	11	12	-	170	EXPERIMENTAL MUSIC	G59	怒れる金の獅子	
+-	6	10	11	-	7	10	12	-	165	HARDCORE TECHNO	GALGALIM	L.E.D.	
+-	5	9	12	-	6	8	12	-	150	TECHNO	GOLDEN CROSS	dj REMO-CON VS dj TAKA	
+-	5	8	10	11	5	8	10	11	143	TECH DANCE	Hydrogen Blueback	MAD CHILD	
+3	4	7	9	-	4	8	10	-	155	EUROBEAT	IN THE NAME OF LOVE	Y&Co.feat.Erica	
+-	5	9	10	-	5	9	11	-	166	EUROBEAT	Keep it-秋葉工房mix-	DJ Command feat. NAGISA	
+-	5	7	10	-	4	7	9	-	130	ELECTRO	Last Burning	Dirty Androids	
+-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	140	BUBBLEGUM DANCE	Light Shine	Ryu☆	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+10"	-	160	BUCHIAGE TRANCE	MIRACLE MEETS	Lucky Vacuum	
+-	7	10	12	-	7	8	11	-	188	TECHNO POP SPEED	mosaic	Auridy	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	200	ONLY ONE IDOL SONG	NEW SENSATION -もう、あなたしか見えない-	SUPER HEROINE 彩香-AYAKA-	
+-	4	7	10	-	4	7	9	-	160	TECHNO POP	NoN-Fiction Story!	Creative Life	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+4"	"[CN]
+9"	"[CN]
+10"	-	144	PSY TRANCE(MORNING)	Programmed Sun	kors k	
+-	4	9	12	-	7	9	12	-	※	TRANCE	quell～the seventh slave～	dj TAKA Vs. DJ YOSHITAKA	
+-	5	10	11	-	6	10	12	-	155-175	ASTRAL CHOIR	Raison d'être～交差する宿命～	Zektbach	
+-	6	10	12	-	6	9	12	-	158	TECH-BREAKBEATS	Red. by Full Metal Jacket	DJ Mass MAD Izm*	
+-	4	7	9	-	5	7	9	-	158	ACTRESS	Roots of my way!	ナイア	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+8"	"[CN]
+9"	"[CN]
+11"	-	79-178	ELECTRIC FUSION	Session 1 -Genesis-	PRASTIK DANCEFLOOR	
+3	5	9	10	-	5	9	10	-	85-170	ONLY ONE BALLAD	She is my wife	SUPER STAR 満-MITSURU-	
+-	5	10	12	"[HCN]
+12"	5	11	12	"[HCN]
+12"	155	HARDSTYLE	SOLID STATE SQUAD	kors k Vs. L.E.D.	
+-	5	8	10	-	5	8	11	-	185	EMO	Sorrows	Asako Yoshihiro	
+-	5	7	9	-	5	8	9	-	128	J-HOUSE	Special One	kors k feat. Suzuyo Miyamoto	
+-	6	8	11	-	6	8	10	-	185	DRUM & BASS	THE LAST STRIKER	L.E.D.	
+-	4	8	10	-	6	9	11	-	150	EPIC TRANCE	The Story Begins	SADA & Sota	
+-	3	"[CN]
+6"	"[CN]
+8"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	170	INSANIO	かずあそび	CULTVOICE by S.S.D.PRODUCTS	
+-	5	8	9	-	5	8	9	-	148	J-POP	コスモス	TSU-NA	
+2	4	6	8	10	6	7	8	10	111	WORLD/ELECTRONICA	サヨナラ・ヘヴン	猫叉Master	
+-	4	8	10	-	3	9	10	-	140	WORLD/ELECTRONICA	水上の提督(Short mix from "幻想水滸伝V")	猫叉Master	
+-	6	8	9	11	5	7	10	11	182	POPS	たからもの	セリカ＆エリカ	
+-	4	7	8	-	4	6	8	-	164	DISTORTED NEW AGE	バビロニア	劇団レコード	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	132	STARPOP	未来のプリズム	星野奏子	
+-	6	10	12	-	6	10	12	-	※	VALSE	ワルツ第17番 ト短調”大犬のワルツ”	virkato	
+beatmania IIDX 18 Resort Anthem ▲ ▼ △													
+-	"[CN]
+6"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	162	TECHNO	Aegis	IT medalion	
+3	6	10	12	-	6	9	11	-	185	HARD RENAISSANCE	ALBIDA	DJ YOSHITAKA	
+-	4	7	10	-	5	7	9	-	156	STARPOP	Answer	星野奏子	
+-	5	9	11	-	6	10	11	-	151	LATIN TEK	ANTHEM LANDING	DJムラサメ	
+-	5	9	11	-	5	9	11	-	170	HARDCORE	Believe In Me	Uraken feat. Calyn Tsukishima	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	"[CN]
+11"	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	"[CN]
+11"	145	CROSSOVER HOUSE	BLUST OF WIND	Anemo=Aspel by MLREC.	
+-	5	9	11	-	5	9	11	-	116	DANCEHALL	Bounce Bounce Bounce	kors k feat.Kanata Okajima＆楽天斎	
+-	5	8	10	-	5	8	10	-	166	HARDCORE	Breaking the ground	Art of Fighters	
+-	5	9	12	-	5	9	12	-	148	TRANCE	Broken	dj TAKA feat.AiMEE	
+-	6	9	11	-	6	10	11	-	162	SYMPHONIC-TEK	BROKEN EDEN	MYTHOLOGIA by MLREC.	
+-	7	10	12	"[CN]
+12"	7	10	12	"[CN]
+12"	154	トレンディートランス	Dances with Snow Fairies	Dr.Honda	
+-	6	8	10	-	6	8	10	-	195	GIRLY ROCK	DAYDREAMER	ピンクターボ	
+-	5	9	11	-	5	9	11	-	155	ELECTRIC STEP	Destiny Sword	CAPACITY GATE	
+-	6	9	10	-	6	9	11	-	155	SPEED RAVE	DM STAR～関西 energy style～	NAOKI	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	170	HARDCORE	Energy Drive	kevin energy	
+-	2	5	7	-	2	5	7	-	84	WINTER BALLADE	Eternal Tears	ツガル	
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	148	ONLY ONE ANTHEM	Everlasting Resort	SUPER STAR 満-MITSURU-	
+1	3	8	10	-	4	8	10	-	165	HYPER FANTASIA	Fantasia	TЁЯRA	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	"[HCN]
+[HBSS]
+11"	"[CN]
+5"	"[CN]
+9"	"[CN]
+10"	"[HCN]
+[HBSS]
+11"	130	NU DISCO	Golden Palms	Dirty Androids	
+-	3	7	9	-	4	7	10	-	175	DRUM & BASS	I FIGHT ME	kobo feat. Marsha	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+4"	"[CN]
+9"	"[CN]
+12"	-	146	ENERGETIC HAWAIIAN TRANCE	Kailua	kors k	
+-	6	9	11	-	5	8	11	-	175	UK HARDCORE	Let The Track Flow	Brisk & Ham	
+-	4	6	9	-	4	6	9	-	173	MAGICAL POP	Medicine of love	イロハ＆リリナ	
+3	5	8	10	-	6	8	10	-	140	BUBBLEGUM DANCE	Mermaid girl	Cream puff	
+-	4	8	11	-	5	9	11	-	170	IIDX HANDZ UP!!	Never Fade Away	Sota Fujimori feat. dj MAX STEROID	
+-	6	"[CN]
+10"	"[CN]
+12"	-	6	10	12	-	120-180	DYSTOPIA	New Castle Legions	Dirty Androids	
+-	"[CN]
+7"	"[CN]
+11"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	200	TRANCE CORE	PARADISE LOST	Ryu☆ Vs. L.E.D.-G	
+-	6	8	10	-	6	9	11	-	149	HANDZ UP	passionate fate	Ryu☆	
+-	"[CN]
+7"	"[CN]
+11"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+11"	"[CN]
+12"	-	172	ANTHEM CORE	perditus†paradisus	iconoclasm	
+-	6	9	10	-	6	9	11	-	145	PSY TRANCE(FULL ON)	Programmed Life	kors k	
+3	8	11	12	-	8	11	12	-	184	CYBER WALTZ	reunion	Tatsh	
+-	5	9	11	-	5	8	10	-	175	UK HARDCORE	Rock Da House	M-Project fw. GUHROOVY	
+-	5	9	11	-	5	9	12	-	37-444	SHOOTING WALTZ	SABER WING	TAG	
+-	3	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	181	HAPPY HARDCORE	Sakura Reflection	Ryu☆	
+-	5	"[CN]
+8"	"[CN]
+12"	-	6	"[CN]
+10"	"[CN]
+12"	-	184	HAPPY HARDCORE	sakura storm	Ryu☆	
+-	5	10	12	-	5	10	12	-	182-189	ROCKIN' DRUM'N'BASS	Session 9 -Chronicles-	PRASTIK DANCEFLOOR	
+-	4	8	10	-	4	8	11	-	143	ENERGETIC TRANCE	Space Time	NISH	
+-	4	8	12	-	6	10	12	-	168	BUCHIAGE TRANCE	SPECIAL SUMMER CAMPAIGN!	Lucky Vacuum	
+-	"[CN]
+4"	"[CN]
+6"	"[CN]
+8"	-	"[CN]
+4"	"[CN]
+6"	"[CN]
+7"	-	100	R&B	Stay my side	DJ Yoshitaka feat.RINA	
+2	4	9	11	-	5	9	11	-	162	HARD DANCE	STELLAR WIND	L.E.D.	
+-	"[CN]
+5"	"[CN]
+10"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	154	GOA TRANCE	THE BLACK KNIGHT	L.E.D.	
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	155	TRANCE	THE DOOR INTO RAINBOW	L.E.D.	
+-	5	8	11	-	5	9	11	-	167	GOTH NU-STYLE GABBA	THE FALLEN	L.E.D.-G	
+-	8	10	11	-	6	9	11	-	182	VACATION DANCE	Tropical April	Risk Junk	
+-	"[CN]
+5"	"[CN]
+7"	10	-	"[CN]
+5"	"[CN]
+8"	10	-	152	PSYCHE FUSION	Vermillion	Mystic Moon	
+-	6	9	12	-	6	9	11	-	148	TECH-BREAKBEATS	Watch Out Pt.2	DJ Mass MAD Izm* VS.DJ Yoshitaka	
+2	3	7	9	11	3	6	9	11	127	RESORT HOUSE	WISE UP!	木之下慶行 feat.星野奏子	
+-	3	8	10	-	7	9	11	-	173	CANDY RAVE	Wuv U	kors k	
+-	5	8	10	11	5	8	10	11	160	DANCE POP	XANADU OF TWO	T.Kakuta With Starving Trancer + 森永真由美	
+2	4	9	11	-	6	10	12	-	90-180	IDM	ZETA～素数の世界と超越者～	Zektbach	
+-	3	5	7	"[CN]
+10"	3	5	7	"[CN]
+10"	100	WORLD/POPS	おおきなこえで	猫叉Master feat.Sana	
+"[CN]
+3"	"[CN]
+5"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	186	NATSU MATSURI	かげぬい ～ Ver.BENIBOTAN ～	CULTVOICE by S.S.D.PRODUCTS	
+-	4	9	12	-	5	10	12	-	150	撫子メタル	黒髪乱れし修羅となりて	村正クオリア	
+3	7	10	12	-	6	10	12	-	153	BROKEN SAMBA BREAK	灼熱Beach Side Bunny	DJ Mass MAD Izm*	
+-	6	9	11	-	6	10	12	-	155	ELECLORE	旅人リラン	XOGO BRYKK	
+-	2	8	10	-	5	8	10	-	171	HAPPY HARDCORE	中華急行	Ryu☆	
+-	5	9	11	-	5	9	11	-	174	AURAL ADRENALINE	夕焼け ～Fading Day～	JAKAZiD	
+beatmania IIDX 19 Lincle ▲ ▼ △													
+-	"[CN]
+3"	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	"[CN]
+3"	"[CN]
+8"	"[CN]
+9"	"[CN]
+12"	114	LA FABELO	A MINSTREL ～ ver. short-scape ～	KANTASIA by S.S.D. PRODUCTS	
+-	"[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	4	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	172	TECHNO	Almace	Qrispy Joybox	
+-	4	7	9	-	4	8	9	-	165	DANCE POP	ANAGRAMS I to Y	Mayumi Morinaga	
+-	6	10	12	-	6	10	12	-	163	TECH-BREAKBEATS	BLACK.by X-Cross Fade	DJ Mass MAD Izm*	
+-	2	5	8	"[CN]
+11"	2	8	8	"[CN]
+11"	158	WORLD/ELECTRONICA	CALL	猫叉Master	
+1	4	9	11	-	4	9	11	-	191	DANCE SPEED	Castle on the Moon	青龍	
+-	5	7	9	-	6	9	11	-	286	SPEED POP	Change the World	Tatsh feat.小田ユウ	
+-	6	9	12	-	7	10	12	-	160	TRANSCENDENTAL ETUDES	DIAVOLO	度胸兄弟	
+-	4	7	10	-	4	7	10	-	180	AKIBA RAVE	Drive Me Crazy	kors k feat.古川未鈴	
+-	4	6	10	-	4	6	9	-	182	J-CORE	Express Emotion	REDALiCE feat. Shihori	
+-	5	10	12	-	5	"[CN]
+10"	12	-	154	RENAISSANCE	F	D.J.Amuro	
+2	3	7	9	-	4	8	10	-	180	DRUM'N'BASS	Far east nightbird	猫叉Master	
+-	4	10	12	-	5	10	12	-	138	HARD Pf	ƒƒƒƒƒ	Five Hammer	
+1	3	7	10	-	"[BSS]
+3"	"[BSS]
+7"	"[BSS]
+10"	-	175	CANDY HANDZ UP	Flip Flap	kors k	
+-	4	8	10	-	4	8	10	-	140	J-DANCE POP	Follow Tomorrow	HHH×MM×ST	
+-	"[CN]
+3"	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	"[CN]
+3"	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	140	MARCHING ROCK	GIGANT	seiya-murai	
+-	5	10	12	-	5	10	12	-	208	ECCENTRIC	HAERETICUS	D.J.Amuro Vs MAX MAXIMIZER	
+2	3	8	11	-	5	9	11	-	181	HAPPY HARDCORE	I'm so Happy	Ryu☆	
+-	5	8	11	-	5	8	11	-	177	PROGRESSIVE ROCK	In the Blackest Den	Bulluvegola	
+-	6	9	10	-	8	10	12	-	190	DRUM'N'BASS	Infinite cave	猫叉Master+	
+-	3	6	9	"[CN]
+11"	4	6	9	"[BSS]
+12"	140	トレンディーポップス	KYAMISAMA ONEGAI!	Dr.Honda feat. Moe	
+-	6	9	10	-	6	9	10	-	190	LOUD TECH	LAX5 feat.Ryota Yoshinari	Katana Sounds	
+-	5	8	10	-	5	8	10	-	165	PLATINUM J-POP ONE	LETHEBOLG ～双神威に斬り咲けり～	TЁЯRA	
+-	2	6	9	-	2	6	9	-	134	ELECTRO	Liquid Crystal Girl feat. echo	kmp	
+-	4	8	10	-	4	8	10	-	173	DRUM'N'BASS	LOVE B.B.B	SWAN K feat. Asuka M	
+-	4	8	10	-	4	8	10	-	160	DREAM TRANCE	Lucky Days	Sota Fujimori feat. Kanako Hoshino	
+-	4	6	9	-	4	7	9	-	150	EUROBEAT	Mermaid girl-秋葉工房 MIX-	Remixed by DJ Command	
+-	"[CN]
+4"	"[CN]
+6"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	131	80's ELECTRO HOUSE	Miami Sunset Drive	Dirty Androids	
+-	6	10	12	-	6	10	12	-	101-202	ELECTRO GOTHIC	NNRT	Levaslater	
+-	5	7	10	"[BSS]
+12"	5	8	11	"[BSS]
+12"	176	HARD NRG	Phoenix	Hommarju	
+-	5	8	11	-	5	8	11	-	198	NU PROGRESSIVE	prompt	wｘs ft.*spiLa*	
+-	7	10	11	12	7	10	12	12	152	TECHNO	QUANTUM TELEPORTATION	L.E.D.	
+1	4	9	12	-	4	9	12	-	182-186	HAPPY	quaver♪	Risk Junk	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	172	RAVE FUSION	Quick Silver	Mystic Moon	
+-	4	7	10	-	4	7	10	-	146	TECH DANCE	Release The Music	kors k	
+-	3	7	10	-	3	7	10	-	184	MYSTERIOUS ROCK	RESISTANCE	セリカ	
+-	4	6	9	-	3	6	10	-	145	HYPER ELECTRO	Round and Round	Masayoshi Minoshima feat. 綾倉盟	
+-	"[BSS]
+4"	"[BSS]
+8"	"[BSS]
+10"	-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+11"	-	85-170	ONLY ONE FINALE	SA.YO.NA.RA. SUPER STAR	SUPER STAR 満-MITSURU-	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	217	HARD ROCK	Scharfrichter	Ashemu	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	180	VALIANT BEAT	Several Words	CAPACITY GATE	
+-	5	9	11	-	5	10	11	-	151	TECHNO	SHADE	DJ MURASAME vs dj Killer	
+-	6	10	12	-	6	10	12	-	145	TECH-BREAKBEATS	Snake Stick	DJ Yoshitaka VS. DJ Mass MAD Izm*	
+2	3	8	11	-	4	9	11	-	200	ELECTRIC POMP	Snow Goose	Mutsuhiko Izumi	
+-	4	7	10	"[CN]
+[BSS]
+11"	4	7	10	"[CN]
+11"	148	TRANCE	Star Trail	Nhato	
+-	6	10	12	12	6	10	12	12	200	CYBER PUNK	The Limbo	STN	
+-	"[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	150	HARD TRANCE	The Sampling Paradise	Mamonis	
+-	5	9	12	-	5	9	11	-	188	RAVERS DANCE SPEED	Thunderbolt	雷龍	
+2	4	8	11	"[HCN]
+[HBSS]
+12"	4	8	11	"[HCN]
+[HBSS]
+12"	※	DRUMSTEP	TITANS RETURN	L.E.D.	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	185	SACRED TRANCE	Todestrieb	Rche	
+-	3	7	9	-	3	7	9	-	140	TECH DANCE	Voxane	Remo-con	
+-	5	9	12	-	5	9	12	-	165	HARD TRANCE	WONDER WALKER	L.E.D.	
+-	6	10	12	-	6	11	12	-	190	TERROR CORE	YAKSHA	Neulakyussra	
+-	4	8	10	"[CN]
+12"	4	9	12	-	187	TEK-TRANCE	yellow head joe	S-C-U	
+-	4	7	10	-	4	8	11	-	174	DRUM'N'BASS	Yellow Sunrise	xac	
+-	5	9	11	-	5	9	11	-	168	EURO RAVE	24th Century BOY	Tatsh	
+-	3	7	11	-	4	7	11	-	177	HARDCORE	532nm	Ryu☆	
+2	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	"[HCN]
+12"	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	"[HCN]
+12"	170	ORIENTAL MYTHOLOGY	蛇神	Zektbach	
+-	3	6	9	-	3	6	10	-	140	POP	陽炎	星野奏子	
+-	4	9	11	12	4	8	12	-	260	トレンディーフュージョン	君のハートにロックオン	Dr.Honda	
+2	5	8	12	"[CN]
+12"	4	8	12	"[CN]
+12"	200	Hi-BLEEP	恋する☆宇宙戦争っ！！	Prim	
+-	6	10	12	-	7	10	12	-	280	PROGRESSIVE	子供の落書き帳	佐々木博史	
+-	4	7	10	-	4	7	10	-	139	NEO CLASSICAL DANCE	衰色小町メランコリア	iNO	
+-	6	10	12	"[CN]
+12"	6	10	12	"[CN]
+12"	97-194	BATTLE TRACK	聖人の塔	Beridzebeth	
+-	7	10	12	-	7	11	12	-	150	ANTHEM	天空の夜明け	Cuvelia	
+-	4	7	"[CN]
+[BSS]
+10"	-	4	8	"[CN]
+[BSS]
+10"	-	185	電波	突撃!ガラスのニーソ姫!	山本椛 (monotone)	
+1	3	8	10	-	4	9	11	-	196	HAPPY HARDCORE	ビューティフルレシート	Lucky Vacuum	
+-	3	7	11	-	5	8	11	-	164	SYMPHONIC-TEK	ユミル	MYTHOLOGIA by MLREC.	
+beatmania IIDX 20 tricoro ▲ ▼ △													
+-	5	8	10	-	6	9	11	-	185	ELECTRO POP	Ascalon	Qrispy Joybox	
+-	3	7	11	-	3	7	11	-	190	SPEEDCORE	Beastie Starter	GUHROOVY	
+-	4	7	10	-	4	8	10	-	160	HARD DANCE	BLUE STRAGGLER	L.E.D.	
+-	4	8	10	-	4	8	10	-	160	SPACY TRANCE	BRAVE GLOW	SOUND HOLIC feat. Nana Takahashi	
+-	5	7	11	-	5	8	11	-	198	HARD REVOLUTION	CONCEPTUAL	Sota Fujimori 2nd Season	
+-	5	10	12	-	5	10	12	-	185	HARD ELECTRIC POP	Confiserie	L.E.D. vs S-C-U	
+-	2	6	8	-	2	6	8	-	128	LOUNGE POP	connective	猫叉Master feat.*spiLa*	
+-	5	9	11	-	7	10	11	-	205	BREAK CORE	Cookie Bouquets	L.E.D. vs TOMOSUKE fw.crimm	
+-	5	10	12	-	6	10	12	-	80-300	DARK PROGRESSIVE	DAY DREAM	Mutsuhiko Izumi	
+-	3	"[CN]
+10"	"[CN]
+12"	-	4	"[CN]
+10"	"[CN]
+12"	-	185	SYMPHONIC BREAK BEATS	Devilz Staircase	OSTER project	
+1	7	10	12	-	8	10	"[CN]
+12"	-	212	HARD RENAISSANCE	Elemental Creation	dj TAKA meets DJ YOSHITAKA	
+-	6	9	11	-	6	10	11	-	180	VACATION DANCE	examination leave	dj razzle dazzle	
+"[CN]
+2"	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	173	TRANCE CORE	FLOWER	DJ YOSHITAKA	
+-	4	8	10	-	4	8	11	-	141	HANDZ UP	Fly you to the star	Another Infinity feat. Mayumi Morinaga	
+-	5	10	12	-	5	10	12	-	180	SPEED DANCE	GAIA	猫叉L.E.D.Master+	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	180	KONAMI REMIX	GRADIUS 2012	Sota Fujimori	
+-	5	"[CN]
+10"	"[CN]
+12"	-	6	"[CN]
+9"	"[CN]
+12"	-	186	DRUM'N'BASS	Hollywood Galaxy	dj TAKA	
+-	4	7	9	10	4	7	10	11	155	NU RAVE	Howling	PON	
+-	3	6	9	-	3	6	9	-	136	NEW 80's	I know You know	Suke+Suke feat.Ribbon	
+-	4	7	10	-	4	8	10	-	142	HYPER ELECTRO	ILIAS	Masayoshi Minoshima feat. 坂上なち	
+-	5	9	11	12	5	10	11	12	260	ORBITALIC CORE	Illegal Function Call	U1-ASAMi	
+-	4	7	9	-	5	7	9	-	149	HEAVENLY TRANCE	In Heaven	Sota Fujimori	
+1	"[BSS]
+6"	"[BSS]
+10"	12	-	"[BSS]
+6"	"[BSS]
+10"	12	-	90-300	HARD RENAISSANCE	JOMANDA	DJ YOSHITAKA	
+-	6	9	12	-	6	10	12	-	150	TRANCE	Liberation	dj TAKA	
+-	5	9	11	-	5	9	11	-	181	HAPPY HARDCORE	Light and Cyber･･･	Tatsh	
+-	5	8	12	-	5	8	12	-	183	J-CORE	Little Star	REDALiCE feat. Ayumi Nomiya	
+-	3	7	9	"[CN]
+10"	3	6	10	11	140	NEO 80's EURO ELECTRO	LUV CAN SAVE U	HIDEKI NAGANUMA	
+-	4	5	8	-	5	8	9	-	111	JAZZ HOUSE	mnemoniq	youhei shimizu	
+-	4	8	10	-	4	10	11	-	145	TECH DANCE	Neonlights	DJ Noriken	
+1	6	10	12	-	6	10	12	-	※	NIENTE	neu	少年ラジオ	
+1	5	9	11	-	5	9	11	-	200	SPEED DANCE CORE	New Decade IIDX Edition	Sota F.	
+-	6	9	10	-	6	9	10	-	175	HARDCORE	New Lights	kors k	
+-	6	10	12	-	6	10	12	-	212	HAPPY GABBA	Plan 8	Ryu☆	
+-	4	8	10	-	4	8	11	-	164	ELECTRIC POP	planarian	S-C-U	
+-	4	7	10	-	4	7	10	-	188	DRUM'N'BASS	POINT ZERO	猫叉Master+	
+-	4	8	10	-	4	8	11	-	152	CLASSICAL PIANO	Präludium	Yuko Takahashi	
+-	6	10	12	-	6	10	12	-	170	HARD ELECTRONICA	Proof of the existence	猫叉Master+	
+-	4	7	10	-	5	8	10	-	179	DRUM'N'BASS	Rainbow after snow	猫叉Master feat.林ももこ	
+-	4	7	10	-	5	7	10	-	110	BOSSA ELECTRONICA	Reflection Into the EDEN	猫叉Master	
+1	5	8	10	-	5	8	11	-	176	EMOTIONAL SENTENCE	Re:GENERATION	TAG feat. ERi	
+-	5	10	11	-	5	10	12	-	192	LOUNGECORE	rumrum triplets	yu_tokiwa.djw	
+-	5	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	5	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	177	DRUMSTEP	S!ck	Eagle	
+-	7	10	11	12	6	10	11	12	155	PROGRESSIVE TRIBAL	Saturn	Mr.Saturn	
+-	6	8	9	-	4	7	9	-	150	ELECTRO POP	Shining World	DJ Genki feat. Yukacco	
+-	4	7	10	-	4	7	11	-	179	HI-SPEED FANTASY TUNE	SHION	DJ YOSHITAKA	
+-	"[BSS]
+6"	"[BSS]
+9"	"[BSS]
+12"	-	"[BSS]
+6"	"[BSS]
+11"	"[BSS]
+12"	-	190-200	FREEFORM HARDCORE	Sol Cosine Job 2	DJ TECHNORCH	
+-	5	10	12	-	5	10	12	-	90-182	GRAVIOL	STULTI	MAX MAXIMIZER VS DJ TOTTO	
+-	5	10	12	-	6	10	12	-	160-166	LATIN EURO	SYNC-ANTHEM	Tatsh feat. 星野奏子	
+-	"[CN]
+4"	8	11	-	"[CN]
+4"	"[CN]
+8"	11	-	160	ORBITALIC REVOLUTION	Synergy For Angels	TAG×U1-ASAMi	
+-	5	8	11	-	5	9	11	-	175	EUROBEAT	Take My Life	Y&Co.	
+-	5	10	12	-	5	10	12	-	150	TRANSCENDENTAL ETUDES	Thor's Hammer	ユニバーサル度胸兄弟	
+-	4	9	10	"[CN]
+11"	7	9	11	"[CN]
+12"	148	TRANCE	Time to Empress	dj TAKA feat.wac & secret K	
+-	5	10	12	-	6	11	12	-	287	PROGRESSIVE ROCK	Timepiece phase II	佐々木博史	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	-	287	PROGRESSIVE ROCK	Timepiece phase II (CN Ver.)	佐々木博史	
+-	5	10	12	-	5	10	12	-	164	ESSENTIALLY	True Blue	dj TAKA feat.AiMEE	
+-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	186	ART CORE	Valanga	DJ TOTTO	
+1	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+11"	-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+11"	-	185	TRANCE CORE	VALLIS-NERIA	DJ YOSHITAKA	
+-	5	"[BSS]
+9"	"[BSS]
+11"	-	5	"[BSS]
+9"	"[BSS]
+11"	-	191	UNIVERSAL J-CORE	VEGA	REDALiCE	
+-	5	8	11	-	5	8	11	-	190	DUB STEP	ZED	USAO	
+-	5	10	12	-	5	10	12	-	210	SPACE REQUIEM	Zirkfied	iconoclasm	
+-	5	9	11	-	5	9	11	-	177	HARDCORE	405nm (Ryu☆mix)	Another Infinity	
+-	3	6	10	-	3	6	10	-	150	CHIPTUNE	8bit Princess	seiya-murai feat. ALT	
+-	"[CN]
+4"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	173	ZODIAC ORACLE 7	アストライアの双皿	ZODIACSYNDICATE	
+-	5	7	10	-	5	8	10	-	167	想歌 梅	梅雪夜	Qrispy Joybox feat.mao	
+-	6	10	12	"[CN]
+12"	6	10	12	"[CN]
+12"	175	ROMANTIC SCHOOL VARIATIONS	ΕΛΠΙΣ	dj TAKA	
+-	5	8	10	12	5	9	10	12	190	お米タル	お米の美味しい炊き方、そしてお米を食べることによるその効果。	大日本鉄倶楽部【あさき＆96】	
+1	4	7	10	11	4	7	10	11	149	FASCINATION	朧	HHH×MM×ST	
+-	5	10	12	-	5	10	12	-	210-360	SILENT	音楽	弁士カンタビレオ	
+-	5	7	9	-	5	7	9	-	166	NEO CLASSICAL DANCE	下弦の月	iNO	
+-	4	8	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	4	8	"[CN]
+[BSS]
+12"	-	230	電波	カジノファイヤーことみちゃん	ARM feat. 山本椛 + Brasscapsule	
+-	5	9	11	12	5	8	11	12	151	TECHNO	仮想空間の旅人たち	DJ MURASAME	
+-	6	10	12	-	6	10	12	-	196	Hi-ν BLEEP	キャトられ♥恋はモ～モク	ギュ～っとしたい♥Prim	
+-	6	10	12	-	6	10	12	-	206	Hi-GOTH	狂イ咲ケ焔ノ華	覚醒ノPrim	
+-	6	10	12	-	7	10	12	-	187	TOY CONTEMPORARY	シュレーディンガーの猫	Cait Sith	
+-	4	9	11	-	4	9	11	-	200	CREATOR	創世ノート	PON+wac	
+-	6	10	12	-	6	9	12	-	197	AKIBA-POP	即席！脳直★ミュージックシステム	MOSAIC.WAV	
+-	7	10	12	-	6	10	12	-	180	PROGRESSIVE	たまゆら	佐々木博史	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	12	-	185	歌謡 DRUM & BASS	トリカゴノ鳳凰	L.E.D. Vs. 幽閉サテライト	
+1	3	9	12	-	3	9	12	-	190	Hi-CORE	†渚の小悪魔ラヴリィ～レイディオ†(IIDX EDIT)	夏色ビキニのPrim	
+-	4	8	10	-	4	7	11	-	157	CYBER SYMPHONIC POP	メイメツ、フラグメンツ	中山真斗(Elements Garden)feat.桜川めぐ	
+-	4	8	10	-	4	8	10	-	165	LUCKY TECHNO	ラキラキ	Mutsuhiko Izumi & S-C-U	
+-	5	8	11	"[CN]
+12"	5	9	11	"[CN]
+12"	165	EPIC TECHNO	龍と少女とデコヒーレンス	黒猫ダンジョン	
+beatmania IIDX 21 SPADA ▲ ▼ △													
+1	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	180	ARTCORE	Adularia	DJ TOTTO	
+-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	"[CN]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+11"	"[CN]
+12"	165	HYPER GOTHIC BEAT	ALBA -黎明-	SOUND HOLIC feat. Nana Takahashi	
+-	6	10	12	12	6	10	12	12	178	DYNASTIC FREEFORM	Ancient Scapes	Durandal	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+11"	"[CN]
+12"	188	RAVERS DANCE SPEED	BLUE DRAGON(雷龍RemixIIDX)	青龍	
+-	4	10	11	-	6	10	12	-	180	TRANCECORE MEETS GABBA	BRAINSTORM	Hardcore United Tokyo(teranoid & DJ TECHNORCH)	
+-	5	8	10	11	5	9	11	12	150	ELECTRANCE	BRAVE OUT	nomico / DOWNFORCE	
+-	2	6	9	-	2	8	10	-	165	ILUZIO	Claiomh Solais	DJ Yoshitaka VS S.S.D.	
+-	4	8	11	-	4	9	11	-	190	PHARAO BEAM STEP	Cleopatrysm	ピラミッ℃	
+-	5	10	12	12	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	"[CN]
+12"	188	J-CORE	Close the World feat.a☆ru	天叢雲剣	
+1	"[CN]
+6"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	191	DANCE SPEED	Critical Crystal	青龍	
+-	6	9	12	-	7	9	12	-	196	DARK ELEMENT	DARK LEGACY	BaSTeT	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	175	SYMPHONIC BREAK BEATS	Devilz Sacrifice -贖罪の羊-	OSTER project	
+-	3	7	11	-	4	7	11	-	112	GLITCH HOP	diagram	Expander	
+-	6	9	11	"[HCN]
+12"	5	8	12	"[HCN]
+12"	180	UK HARDCORE	Elektrick U-Phoria	DJ Noriken	
+-	3	7	9	"[CN]
+11"	3	6	9	11	170	HEALING POP	Element of SPADA	猫叉Master feat.霜月はるか	
+-	4	8	11	-	4	8	11	-	188	HAPPY SAD CORE	Engraved Mark	Ryu☆ ∞ Des-ROW	
+-	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+11"	-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+10"	-	148	TECHNO	EXTREME MACH COLLIDER	L.E.D.	
+-	7	10	12	12	6	9	11	12	175	HARDCORE RAVE	Feel The Beat	Falsion	
+-	3	6	11	-	4	7	11	-	115	JAG GLITCH	Funny shuffle	猫叉Master+	
+-	6	9	11	"[CN]
+[MSS]
+12"	5	8	11	"[CN]
+[MSS]
+12"	178	BIG BEAT	HYENA	Hommarju	
+-	5	8	10	-	5	8	11	-	175	DRUM&BASS	Hypersonik	Eagle	
+-	"[BSS]
+6"	"[BSS]
+9"	"[BSS]
+11"	-	"[BSS]
+6"	"[BSS]
+10"	"[CN]
+[BSS]
+12"	-	172	ONLY ONE MOMENT	I will be back -オレは帰ってきた-	SUPER STAR 満-MITSURU-	
+-	6	10	12	-	6	10	12	-	201	REPLICANT CORE	Idola	iconoclasm feat.GUMI	
+-	4	7	11	-	4	8	10	-	146	Hi-TECH FULL ON	Insane Techniques	kors k	
+-	4	8	12	-	4	8	12	-	195	FUNKOT	INSOMNIA	ジャカルタファンクブラザーズ	
+-	4	8	10	-	5	7	10	-	180	SYMPHONIC BREAKS	into the battlefield	the wandering bard	
+-	5	9	12	12	6	10	12	12	195	TRIBE CORE	invoker	Caladborg	
+-	7	10	12	12	6	10	11	12	170	HEAVY METAL	KAISER PHOENIX	96	
+-	"[BSS]
+3"	"[BSS]
+7"	"[BSS]
+11"	-	"[BSS]
+3"	"[BSS]
+8"	"[BSS]
+10"	-	180	PROGRESSIVE GOSPEL	KHAMEN BREAK	くふおー	
+-	"[CN]
+[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[BSS]
+10"	"[CN]
+[BSS]
+12"	-	150	HARD STACC	Last Dance	dj TAKA	
+-	4	7	11	-	4	7	11	-	162	TRANCE POP	Lighting Shower	TAG	
+-	3	6	10	-	5	8	11	-	202	PIECED DOWNBEAT	M.D.Injection	Project B-	
+-	6	9	11	-	6	9	11	-	205	TOKYO STYLE SPEEDCORE	m1dy Deluxe	m1dy	
+-	3	6	9	"[MSS]
+12"	3	6	10	"[MSS]
+11"	140	UPBEAT	MAD ATTACK	HALFBY	
+-	5	9	11	-	4	8	11	-	185	HAPPY CORE	MAGIC & LOVE	DJ Genki feat. Yukacco	
+-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	"[MSS]
+12"	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	"[MSS]
+12"	210	FRENCHCORE	Miracle 5ympho X	USAO	
+-	5	8	10	-	5	9	10	-	165	ELECTRO POP	NPC World	PON	
+-	4	7	10	-	5	7	10	-	160-180	GABBER	Odin	Noizenecio	
+-	5	8	11	-	6	9	11	-	175	HARDCORE RAVE	Overload Frontier	DJ Shimamura	
+-	3	8	11	-	3	8	9	-	180	ANCIENT CIVILIZATION	Pharaoh	劇団レコード	
+-	5	9	12	-	5	9	12	-	180	VARIANT RAVE	PUNISHER	TAG×PON	
+-	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	111-222	RAVERS DANCE SPEED	ra'am	雷龍	
+-	5	9	11	-	6	9	12	-	156	BRIGHTNESS	rainbow guitar weeps	dj TAKA	
+-	5	7	9	-	6	7	8	-	182	POPS	Recollection	Noria	
+-	3	7	11	-	4	7	11	-	154	PSYCHEDELIC TRANCE	refractive index	Sota Fujimori	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	182	DRUMSTEP	RISE	Dirty Androids	
+-	6	9	10	-	8	10	12	-	177	HAPPY HARDCORE	RIZING YOU UP	Ryu☆	
+-	6	9	11	-	7	9	11	-	150	FULL ON	SCHWARZSCHILD FIELD	L.E.D.	
+-	7	"[CN]
+10"	"[CN]
+12"	"[CN]
+12"	7	"[CN]
+10"	"[CN]
+12"	"[CN]
+12"	200	REQUIEM PSY	Sigmund	Gram	
+-	5	8	11	-	5	8	11	-	173	WITHOUT YOU TONIGHT -VI-	Squeeze	VENUS feat. Mutsuhiko Izumi	
+-	7	10	11	-	8	9	10	-	173	NU STYLE GABBA	THE DETONATOR	teranoid VS L.E.D.-G	
+-	5	9	11	-	5	9	12	-	170	BREAKBEATS TRANCE	Unicorn tail	DJ YOSHITAKA	
+-	4	7	11	-	4	7	11	-	175	MAINSTREAM HARDCORE	Valgus	DJ Myosuke feat.yukacco	
+-	6	10	12	"[CN]
+[BSS]
+12"	7	10	12	12	180	HARD NRG	Verflucht	Tyrfing	
+-	8	11	12	-	7	11	12	-	202	ROTTERDAM TECHNO	VOX UP	sampling masters MEGA vs 青龍	
+-	4	6	11	-	5	7	10	-	160	EUROBEAT	Wonder Girl feat. Kanae Asaba	Y&Co.	
+1	5	8	10	-	5	8	10	-	144	BLOOM FUSION	アルストロメリア	TAG	
+-	5	8	11	12	5	8	11	12	※	ASTRAL HARDCORE	ÆTHER	TAG underground	
+-	5	8	10	-	5	8	10	-	143	CYBER SYMPHONIC POP	お願いアインシュタイン	中山真斗 feat.桜川めぐ	
+-	6	10	12	"[CN]
+12"	6	10	12	"[CN]
+12"	180	ORIENTAL CORE	疾風迅雷	KUMOKIRI	
+-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	192	JUVENILE DRUM & BASS	旋律のドグマ～Misérables～	楓璃夢＝ジークフリード＝ファイエルローゼン	
+-	3	7	10	-	4	7	11	-	130	乙女EDM	超!!遠距離らぶ♡メ～ル	ななひら	
+-	5	7	10	-	6	8	10	-	144	HYPER J-POP	罪と罰	Xceon feat. Mayumi Morinaga	
+-	3	9	11	-	4	9	11	-	145	ELECTRIC MANOUSH SWING	デッドボヲルdeホームラン	猫叉Masterβ2	
+-	6	10	12	-	6	10	12	-	180	ベースボールヒロイン	轟け！恋のビーンボール！！	ダイナミック野球兄弟 v.s. クロスファイヤーPrim	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	-	198	BLOOD METAL	IX	dj TAKA VS DJ TOTTO feat.藍	
+-	5	8	10	12	5	8	10	12	120-160	新世紀進歩的羽扇子音楽	廿	DJ TECHNORCH	
+1	5	9	11	-	5	10	12	-	208	J-SPEEDMETAL	バンブーソード・ガール	cosMo@暴走P	
+-	4	8	11	-	4	8	11	-	157	ZODIAC ORACLE X	牧神笛吹きて	楽士ゾディアック	
+-	7	10	12	-	7	10	12	-	183	HARD SYMPHONIC	煉獄のエルフェリア	猫叉Master+	
+-	"[CN]
+[BSS]
+7"	"[CN]
+10"	"[CN]
+12"	"[CN]
+[BSS]
+12"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+12"	"[CN]
+12"	159	HYDRO CORE	海神	兎々	
+beatmania IIDX 22 PENDUAL ▲ ▼ △													
+-	5	8	11	-	5	9	11	-	145	AFRO-SAMBA	AFRO KNUCKLE	猫叉Master+	
+-	5	8	10	12	5	8	10	12	192	NEO CLASSICAL DANCE	Beat Radiance	iNO	
+-	5	10	11	-	6	9	"[CN]
+11"	-	140	WORLD/ELECTRONICA	Beyond The Earth	猫叉Master	
+-	5	8	"[CN]
+11"	-	5	8	"[CN]
+11"	-	175	HARDCORE RAVE	Blaze it UP!	DJ Shimamura	
+-	5	10	12	-	5	9	11	-	170	NU STYLE GABBA	BLUE MIRAGE	DJ CHUCKY	
+-	7	10	12	-	6	9	12	-	160	DUAL ANTIQUE	Broken Sword	金獅子 VS 麒麟	
+-	4	8	10	-	7	9	11	-	153	FULL ON	Chain of pain	kors k VS 猫叉Master+	
+-	3	6	9	10	3	6	9	10	185	HEALING DRUM'N'BASS	chrono diver -fragment-	猫叉Master feat.三澤 秋	
+-	5	9	11	"[BSS]
+12"	5	9	11	"[BSS]
+12"	185	CYBER DRUM & BASS	CHRONO DIVER -NORNIR-	L.E.D.	
+3	7	11	12	-	7	11	12	-	196	CHRONO BREAKS	Chrono Diver -PENDULUMs-	猫叉L.E.D.Master＋	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	"[CN]
+11"	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	"[CN]
+11"	128	PROGRESSIVE	Chronos	TAG	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	216	MAELSTROM	cinder	PHQUASE	
+-	4	7	11	-	4	8	10	-	140	LOST GROUND	COLOSSEUM	劇団レコード	
+-	6	9	11	"[CN]
+12"	6	8	10	"[CN]
+12"	160	FUTURE BASS	Cosmic Cat	8bit Moonside	
+-	7	10	12	-	7	10	12	-	205	HARD IRISH SYMPHONIC	Despair of ELFERIA	猫叉Master	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	9	11	-	128-145	Hi-TECH PSYTRANCE	Discloze	lapix	
+-	6	9	12	"[CN]
+12"	6	9	12	"[CN]
+12"	※	RAGTIME CHIPTUNE	EBONY & IVORY	OSTER project	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	185	SACRED TRANCE	entelecheia	Rche	
+-	4	8	11	-	4	8	11	-	192	FALLIN APART CORE	Erosion Mark	kors k REASM Des-ROW	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	165	WORLD/ELECTRONICA	fallen leaves -IIDX edition-	猫叉Master	
+-	7	10	12	-	7	"[CN]
+10"	12	-	185	DUB COMEDY	FANTASTIC THREE	ジャカルタファンクブラザーズ	
+-	6	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	12	6	9	12	"[CN]
+[BSS]
+12"	180	DRUM'N'BASS	Flashes	Dollscythe	
+-	5	10	"[BSS]
+12"	-	5	9	12	-	160	PROGRESSIVE SCHRANZ	Gravigazer	DJ TOTTO	
+-	5	8	10	"[CN]
+12"	5	9	11	"[CN]
+12"	148	TECHNO	GUILTY	D.J.SETUP	
+-	5	8	11	-	6	9	11	-	180	GABBAH	HELL SCAPER -Last Escape Remix-	Remixed by DJ TECHNORCH fw.GUHROOVY	
+-	5	9	11	-	5	8	11	-	182	HAPPY HARDCORE	Hello Happiness	P*Light feat. mow*2	
+-	"[BSS]
+3"	"[BSS]
+8"	"[BSS]
+10"	-	"[BSS]
+3"	"[BSS]
+9"	"[BSS]
+11"	-	146	SYNTHETIC EDM	illuminate	Sota Fujimori	
+-	5	10	12	-	5	9	11	12	145	GOA TRANCE	IMPLANTATION	TOMOSUKE	
+-	4	7	9	-	5	8	10	-	123-142	HYBRID	In The Breeze	96 & Sota ft. Mayumi Morinaga	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	230	HOLIC	Invitation from Mr.C	C-Show	
+-	5	8	9	-	5	8	11	-	150	PSYCHEDELIC TRANCE	IXION	L.E.D.	
+-	4	9	11	-	6	9	11	-	141	ELECTRO TECH	Line 4 Ruin	Ryu☆	
+-	"[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	201	ARTCORE ROCK	Monopole.	cosMo＠暴走P	
+-	5	9	12	-	6	10	11	-	182	MAINSTREAM HARDCORE	NEO GENERATOR SEVEN	L.E.D.-G	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	192	PUMPCORE	Night sky	USAO	
+-	6	9	11	-	6	9	10	-	170	HARD EDM	No Tears	RoughSketch feat.Aikapin	
+-	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+11"	-	4	"[BSS]
+8"	"[BSS]
+10"	-	150-160	SYSTEM BGM	PENDUAL TALISMAN	猫叉L.E.D.Master	
+-	6	9	"[CN]
+12"	-	6	"[CN]
+9"	"[CN]
+12"	-	282	EDM SPEED	Rave*it!! Rave*it!!	機龍	
+-	6	9	11	-	6	9	11	-	149	SOLITUDE	Realize Maze	movies (moimoi×Xceon×Dai.)	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	150	TRANCESTEP	Reflux	Eagle	
+-	6	8	"[CN]
+[BSS]
+11"	-	6	8	"[CN]
+[BSS]
+10"	-	187	CHIPCORE	Sakura Mirage	Ryu☆	
+-	4	7	10	-	4	7	10	-	164	DIMENSION WAVE	SAMSARA	SOUND HOLIC feat. Nana Takahashi	
+-	6	9	12	-	6	10	12	-	135	EDM	Say YEEEAHH	kors k	
+-	6	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	180	J-CORE	Scarlet Moon	REDALiCE feat. Ayumi Nomiya	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	165	WORLD/ELECTRONICA	Scars of FAUNA	猫叉Master	
+-	6	10	12	-	6	10	12	-	160	MUSIC GAME TRADITIONAL	Shooting Fireball	dj TAKA	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	175	UK HARDCORE	Sounds Of Summer	Hommarju	
+-	6	9	12	-	6	9	12	-	172	RAGTIME FUTURE POP	SpaceLand☆TOYBOX	OSTER project	
+-	4	7	10	-	4	6	10	-	150	ELECTRO POP	Sweet Radar	DJ Genki feat. Yukacco	
+-	6	10	12	-	6	9	11	-	163	EPIC ELECTRONICA	Symmetry	猫叉Master	
+-	5	8	"[CN]
+[BSS]
+10"	-	5	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	160	EUROBEAT	TA・DA☆YO・SHI	Y&Co.	
+-	5	9	12	-	6	9	12	-	200-264	PROGRESSIVE	The Least 100sec	Sasaki Hirofumi	
+-	6	9	12	-	6	9	12	-	165	DEEP SPECTRUM	TIEFSEE	SOUND HOLIC Vs. dj TAKA feat. YURiCa	
+-	7	10	12	-	7	10	12	-	197	MELODIC SPEED METAL	TOXIC VIBRATION	SOUND HOLIC Vs. T.Kakuta feat. YURiCa	
+-	5	9	11	-	5	9	11	-	205	GYPSYCORE	Vulkan	Hommarju	
+-	6	10	12	-	6	10	12	-	185	HAPPY HARDCORE	We're so Happy (P*Light Remix) IIDX ver.	Remixed by P*Light	
+1	6	10	"[CN]
+12"	-	6	"[CN]
+10"	12	-	154	INTELLIGENCE	ZZ	D.J.Amuro	
+-	5	9	10	-	6	8	11	-	85	DRUM'N'WALTZ	妖隠し -あやかしかくし-	DJ TOTTO feat.3L	
+-	5	7	"[CN]
+10"	-	"[CN]
+6"	"[CN]
+8"	"[CN]
+10"	-	160	HYPER J-POP	十六夜セツナ	Xceon feat.Mayumi Morinaga	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	161	ASURA TEK CORE	鬼天	兎々	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	190	ASTRAL DRUM & BASS	共鳴遊戯の華	アイテール魔導士隊	
+-	3	6	9	"[BSS]
+11"	4	6	9	"[BSS]
+11"	175	KANA-POP	恋は白帯、サンシロー	星野奏子	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	"[CN]
+12"	"[CN]
+5"	"[CN]
+9"	11	"[CN]
+12"	170	DUBCORE	#The_Relentless	DJ Noriken	
+-	6	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	7	"[CN]
+10"	"[CN]
+12"	-	140	ムラクモ	少年は空を辿る	Power Of Nature	
+-	2	6	9	-	2	6	9	-	166	想歌 風	白露の風	Qrispy Joybox feat. 常盤ゆう	
+-	6	9	11	-	6	9	11	-	234	TIME TRIP JAZZ	時空トラベローグ	SWING HOLIC feat. A～YA	
+-	6	9	12	"[CN]
+12"	6	9	12	"[CN]
+12"	153	WORLD/ELECTRONICA	千年ノ理	猫叉Master	
+3	6	10	12	-	7	10	12	-	182	Hi-歌謡コア	それは花火のような恋	夏色バーニングラブ☆Prim	
+1	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+11"	-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+11"	-	156	JAPANESE TRADITIONAL	打打打打打打打打打打	ヒゲドライバー join. SELEN	
+-	6	9	11	12	6	8	12	12	150	PIECED EUPHORIA	超青少年ノ為ノ超多幸ナ超古典的超舞曲	Project B-	
+-	5	8	11	-	5	9	12	-	172	新世紀進歩的羽扇子音楽	Ｘ↑Ｘ↓	DJ TECHNORCH	
+1	5	8	10	-	5	8	10	-	160	HYPER J-POP	取り残された美術(Arranged:HiZuMi)	幽閉サテライト feat. senya	
+-	5	8	11	-	6	9	11	-	120	TROPICAL	とろぴかる倶楽部	HALFBY	
+-	5	8	11	-	6	9	11	-	180	ドタバタ☆夏休み	ドッキン☆サマーあばんちゅーる	L.E.D.-G + Qrispy Joybox + ARM feat. ななひら	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	190	HAPPY SUMMER CORE	夏色DIARY - L.E.D.-G STYLE MIX -	猫叉王子 feat.L.E.D.-G	
+"[CN]
+2"	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	160	電波ソング	パ→ピ→プ→Yeah!	ヒゲドライバー join. shully & Nimo	
+-	"[BSS]
+6"	10	12	12	"[CN]
+[BSS]
+6"	10	12	12	165	Hi-FUNK BREAKS	表裏一体！？怪盗いいんちょの悩み♥	◇◆噂の怪盗少女 ぷらずま★彡Prim◇◆	
+-	5	7	11	-	4	7	10	-	175	ぷろぐれっしぶ電波	ぷろぐれっしぶ時空少女！うらしまたろ子ちゃん！	ARM(IOSYS) feat. 山本椛	
+-	"[BSS]
+4"	"[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[MSS]
+11"	"[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+11"	"[CN]
+[MSS]
+11"	179	A-STYLE DRUMSTEP	ベィスドロップ・フリークス	かめりあ feat. ななひら	
+3	6	9	12	-	6	9	11	-	181	J-CORE	紅牡丹	DJ NAGAI feat. a☆ru	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	9	11	-	185	きらめきコア	もっと！モット！ときめき feat. 松下	シャイニング度胸兄弟	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	200	OLDSTYLE GAMEMUSIC	リリーゼと炎龍レーヴァテイン	黒猫ダンジョン	
+beatmania IIDX 23 copula ▲ ▼ △													
+-	"[HCN]
+4"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+11"	-	"[HCN]
+[HBSS]
+5"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+11"	-	150	HARD DANCE	Acid Pumper	ni-21	
+-	6	9	11	-	6	9	11	-	200	HAPPY で HARDCORE	Angelic Jelly	t+pazolite	
+-	7	"[CN]
+10"	"[CN]
+12"	-	7	"[CN]
+10"	"[CN]
+12"	-	195	DANCE EXPRESS	AO-1	電龍	
+-	6	8	"[HCN]
+10"	-	6	8	"[HCN]
+10"	-	143	UPLIFTING TRANCE	Arcana	Maozon	
+-	5	"[CN]
+8"	"[CN]
+11"	-	5	"[CN]
+8"	"[CN]
+11"	-	156	POST J-TRADITIONAL	Aublia	onoken feat. ALIAKE	
+-	4	10	11	-	6	9	12	-	160	HARD DANCE	Battle Train -IIDX Edition-	Sota Fujimori	
+-	7	10	12	-	6	10	12	-	172	DREAM CORE	Blue Spring Express	DJ Scratch & Bend	
+-	5	8	10	-	4	8	10	-	158	FUTURE BASS	Central Station	Recycle	
+-	5	9	11	-	7	9	12	-	210	HARD STEP	chaos eater -IIDX edition-	猫叉Master+	
+-	5	9	12	-	5	9	12	-	145	TECHNO	CODE:1 [revision1.0.1]	HEXA	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	205	ラッキーハードコア	Daily Lunch Special	Lucky Vacuum	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	"[CN]
+10"	4	7	"[CN]
+10"	"[CN]
+11"	177	CYBER DRUMSTEP	Damage Per Second	Maozon	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	-	150	HARD DANCE	Derelict Star feat. Ryu*	Remo-con	
+-	6	10	12	-	6	10	12	-	180	MAINSTREAM HARDCORE	Devil's Gear	DJ Myosuke	
+-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	180	HARD ELECTRIC POP	DIAMOND CROSSING	S-C-U vs L.E.D.	
+-	3	8	10	-	3	8	10	-	135	EDM	do the thing feat. Kanae Asaba	MK	
+-	"[HCN]
+6"	"[HCN]
+9"	"[HCN]
+10"	-	"[HCN]
+6"	"[HCN]
+9"	"[HCN]
+11"	-	155	DONK	Donkey Donk	Ryu☆	
+3	"[CN]
+7"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	100	HYBRID TWERK	Dynamite	USAO	
+-	4	8	10	-	5	8	10	-	140	J-DANCE POP	Everlasting Last	HHH×MM×ST	
+-	4	7	9	-	4	7	9	-	142	FUTURE JERSEY	Exchange Place	Dirty Androids	
+-	5	8	10	-	5	8	10	-	145	ELECTRONIC DANCE	GENERATE feat.綾倉盟	Masayoshi Minoshima	
+-	5	7	10	-	5	9	11	-	150	TRAPSTYLE	Go Faraway	DJ Noriken feat. Yukacco	
+-	4	7	11	-	7	12	11	-	160	CANTERBURY&BEAT	GOBBLE	Kimitaka Matsumae	
+-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	165	JOINT WORK	Godspeed	dj TAKA xxx 猫叉Master xxx L.E.D.	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	191	HARD ART CORE	Grand Chariot	xi	
+-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	200	BEMANIZED DIGITAL ROCK	Highcharge Divolt	HuΣeR	
+-	5	9	11	-	5	8	11	-	146	HiTECH FULLON	Inner Spirit	lapix	
+-	3	6	9	11	4	7	9	11	112	WORLD/ELECTRONICA	Journey	猫叉Master	
+-	6	10	12	-	7	10	11	-	160	JUNGLE CLASSIC	Konzert V	Remo-con vs. dj TAKA	
+-	4	8	"[CN]
+10"	-	5	8	"[CN]
+11"	-	220	PRIMAVERA JAZZ WALTZ	La dolce primavera	OSTER project	
+-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	150	HDM	M4K3 1T B0UNC3	kors k	
+-	5	7	10	-	5	7	10	-	150	HARDSTYLE	Musik LoverZ	RoughSketch	
+-	5	9	10	-	5	9	10	-	192	METAL POPS	NANAIRO	LIQU@。	
+-	7	10	12	-	7	10	12	-	190	SORROW STEP	Nightmare before oversleep	猫叉Master	
+-	6	9	12	-	6	9	12	-	111-222	SHINOBI SPEED	NINJA IS DEAD IIDX ver.	P*Light	
+-	4	6	10	-	4	6	10	-	150	ONLY ONE DANCE MUSIC	NO LIMIT -オレ達に限界は無い-	SUPER STAR 満-MITSURU- vs. 伝説のダンサー マイク	
+-	4	8	10	-	5	9	11	-	140	ELECTRO TRANCE	Nowhere	Nhato	
+-	"[HCN]
+6"	"[HCN]
+9"	"[HCN]
+12"	-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	190	END ROLL	NZM	The 4th	
+-	"[CN]
+6"	"[BSS]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[BSS]
+8"	"[CN]
+11"	-	200	RADIO SHOWCASE	On the FM	C-Show	
+-	6	9	11	-	6	9	11	-	195	FRENCHCORE	Outbreak	USAO	
+3	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	23-185	PSYCHIC FLASH	POSSESSION	TAG underground	
+-	1	3	5	-	1	5	6	-	145	J-TEKNO	quick master (reform version)	youhei shimizu	
+-	6	10	12	-	6	10	12	-	158	TRANCE	refrain	dj TAKA feat.AiMEE	
+-	5	8	11	-	5	9	11	-	170	HARDCORE	Rock It	Hommarju	
+-	6	9	11	-	7	9	11	-	144	JAZZY-ELECTRO	Routing	かめりあ	
+-	5	8	10	-	5	8	10	-	154	TRANCE	Sephirot	SHIKI	
+-	4	8	10	-	4	8	11	-	140	HARD TRANCE	Set U Free feat. Kanae Asaba	Y&Co.	
+-	6	9	11	-	6	9	11	-	185	ROCKIN' DRUM&BASS	SHELTER OF THE MIND	YURiCa/花たん	
+-	5	9	11	-	5	9	11	-	199	DANCE SPEED GOLD	STARLiGHT	星龍	
+-	6	9	11	12	7	9	11	12	177	HAPPY EMOTION	STARLIGHT DANCEHALL	P*Light	
+-	6	10	12	-	6	9	12	-	303	FANTASY	StrayedCatz	削除	
+-	4	8	10	12	5	8	10	12	170	HARDCORE	Super Duper Racers	kors k & Numb'n'dub	
+-	4	7	9	-	5	7	10	-	150	GRAVITY POP	SURVIVOR	SOUND HOLIC Vs. ZYTOKINE feat. Nana Takahashi	
+-	1	6	10	-	3	7	11	-	132	WORLD/ELECTRONICA	Tori-no-kimochi	猫叉Master+	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	216	RISK + VACUUM	Triple Counter	DJ YOSHITAKA meets dj TAKA	
+-	5	8	11	-	5	8	10	-	175	CANDY RAVE	Uh-Oh	kors k	
+-	2	8	10	12	2	8	10	12	134	GLITCH ELECTRO	Violet Pulse	G.K	
+-	7	9	11	-	7	10	11	-	152	LATIN JAZZ TRIO	Violet Rose	OSTER project	
+-	4	10	11	"[HCN]
+[HBSS]
+12"	7	9	11	"[HCN]
+[HBSS]
+12"	170	HARDCORE	Welcome	Uraken	
+-	7	10	12	-	7	10	12	-	180	RENAISSANCE	X	D.J.Amuro	
+-	5	9	11	"[CN]
+12"	5	9	11	"[CN]
+12"	180	BLOOM CORE	ZEPHYRANTHES	TAG	
+-	5	10	12	-	5	10	12	-	143	TECH BREAKBEATS	199024club -Re:BounceKiller-	DJ Mass MAD Izm*	
+-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+11"	-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+11"	-	100-218	ARTCORE ROCK	朝焼けから始まるボクらの小さな旅	cosMo＠暴走P	
+2	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	"[CN]
+[MSS]
+12"	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	"[CN]
+[MSS]
+12"	155	ORIENTAL TECHDANCE	紫陽花 -AZISAI-	Camellia Vs. Expander	
+1	5	9	11	-	6	10	11	-	155	WINTER GLOW	麗 ～うらら～	SOUND HOLIC feat. Nana Takahashi	
+-	6	10	12	-	6	10	12	-	282	にゃんコア	駅猫のワルツ	ミニョンヌ鉄道兄弟	
+-	4	7	10	-	4	7	10	-	162	HYPER J-POP	オルタネイトβ	Xceon feat. Mayumi Morinaga	
+-	6	9	11	-	6	9	11	-	175	SUMMER WORKOUT	か・し・ま・し☆PUMP UP！	miko	
+-	"[CN]
+4"	"[CN]
+8"	10	-	"[CN]
+4"	"[CN]
+8"	10	-	169	Hi-RESORT電波	ギョギョっと人魚♨爆婚ブライダル	海の底からマーメイド♨Prim by ARM×狐夢想	
+"[BSS]
+3"	"[BSS]
+7"	"[BSS]
+11"	"[BSS]
+12"	-	"[BSS]
+7"	"[BSS]
+11"	"[BSS]
+12"	-	165	BROKEN SAMBA BREAK	灼熱 Pt.2 Long Train Running	DJ Mass MAD Izm*	
+-	5	8	10	-	5	8	10	-	182	KANA-POP	シュッパツシンコウ・シサカンコ	星野奏子	
+-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+10"	-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	134	空想ファンタジーシリーズ	少女アリスと箱庭幻想コンチェルト	DJ TOTTO	
+-	"[HCN]
+[HBSS]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+7"	"[HCN]
+[HBSS]
+11"	"[HCN]
+[HBSS]
+12"	-	165	新世紀進歩的羽扇子音楽	真 地獄超特急 -HELL or HELL-	DJ TECHNORCH Vs. L.E.D.Light-G	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	150	ORBITALICTRO	セロトニン	U1 overground	
+-	6	10	11	-	6	10	11	-	170	FUTURE E-POP	追想快晴テーマパーク	PHQUASE	
+-	4	6	10	-	4	6	10	-	110	GLITCH JAZZ	星屑ディスタンシア	ARM feat. 普透明度 + Brasscapsule	
+-	5	9	11	-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	208-290	禅ジャズ	明鏡止水	TOMOSUKE feat. あさき	
+-	7	10	12	-	7	10	12	-	160	電波デステクノ	めいさいアイドル☆あいむちゃん♪	DJ SHARPNEL feat. みらい	
+-	6	"[CN]
+9"	"[CN]
+11"	-	6	"[CN]
+10"	"[CN]
+11"	-	280	エピックプログレ	量子の海のリントヴルム	黒猫ダンジョン	
+beatmania IIDX 24 SINOBUZ ▲ ▼ △													
+2	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	"[CN]
+[BSS]
+12"	153	HiTECH FULLON	Amazing Mirage	lapix	
+-	6	9	10	-	6	9	10	-	191	DANCE SPEED	AO-∞	青龍	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	165	EPIC D'N'B	Apocalypse	Morrigan feat. リリィ	
+-	5	9	11	-	7	10	11	-	145	UPLIFTING TRANCE	Around The Galaxy	NISH	
+-	5	8	11	-	6	9	11	-	132-157	WORLD	AsiaN distractive	猫叉劇団	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	163	SPIRAL STAIRS	BabeL ～Grand Story～	Ako Atak	
+-	4	9	11	-	5	8	11	-	174	ALTERNATIVE TECHNO POP	Be A Star	PHQUASE feat.ぁゅ	
+-	6	9	11	-	6	9	11	-	66-198	DJ BATTLE	Beat Juggling Mix	Hommarju	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+6"	"[CN]
+8"	"[CN]
+10"	-	175	HARDCORE RAVE	Believe in you	DJ Shimamura feat. Renna	
+-	4	7	11	-	4	8	11	-	142	TRANCE	Beyond The Seven	Nhato	
+-	5	9	11	-	5	8	11	-	106-150	FESTIVAL SOUND	BREAK OVER	MASAYOSHI IIMORI	
+-	"[CN]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	206	MOOMBAHCORE	Breakin' Chain	REDALiCE feat. MONICO	
+-	7	9	11	12	7	9	11	12	207	SUPER ULTIMATE HYPER CORE	BroGamer	USAO	
+-	6	10	12	-	6	10	12	-	170	HARD TRAP	Caterpillar	Eagle	
+-	3	8	11	-	4	9	11	-	※	"[N]ANTHEM
+[SPH]WITHOUT YOU TONIGHT
+[SPA]EURODANCE
+[DPH]J-CORE
+[DPA]Hi ANTHEM"	"crew
+[N]crew -original mix-
+[SPH]crew -VENUS mix-
+[SPA]crew -Ryu☆ mix-
+[DPH]crew -kors k mix-
+[DPA]crew -Prim version-"	"beatnation Records
+[N][DPH]beatnation Records feat.星野奏子
+[SPH]beatnation Records feat.VENUS
+[SPA]beatnation Records feat.NU-KO
+[DPA]beatnation Records feat.Prim"	
+-	5	9	11	-	5	9	11	-	150	DREAM COLLABORATION	Cyber True Color	kors k vs Sota Fujimori	
+-	6	10	12	-	7	10	12	-	169	ARCHAIC TALE EP1	DORNWALD ～Junge～	DJ TOTTO	
+-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	146	HYBRID BUCHIAGE TRANCE	ECHIDNA	HuΣeR	
+-	6	8	11	-	6	8	11	-	196	FUTURE BEATS	Egret and Willow	Dirty Androids	
+-	3	6	8	-	3	6	8	-	135	EDM	elemental bender feat. Kanae Asaba	MK	
+-	5	9	12	-	6	9	12	-	190	HYPER DIGIMETAL	FUZIN RIZIN	SOUND HOLIC feat. Nana Takahashi & 709sec.	
+-	7	"[CN]
+10"	"[CN]
+12"	-	7	"[CN]
+10"	"[CN]
+12"	-	200	TRANCE CORE	Go Ahead!!	Ryu☆ Vs. Sota	
+-	"[CN]
+7"	"[CN]
+11"	"[CN]
+[BSS]
+12"	"[CN]
+[BSS]
+12"	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	"[CN]
+12"	222	REQUIEM PSY	GuNGNiR	Gram	
+2	5	9	12	-	5	9	12	-	155	HARDSTYLE	HADES	Massive New Krew	
+-	"[BSS]
+4"	9	11	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[BSS]
+11"	-	185	HAPPY	HAPPY★RUSH	P*Light	
+-	5	8	11	-	5	8	11	-	160	HYPER TRAP	Honey Trap	Expander	
+-	6	10	11	-	7	10	11	-	184	NEUROFUNK	INVISIBLE STRIX	L.E.D.	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	185	DRUM'N'BASS	Lost wing at.0	猫叉Master+	
+3	7	10	11	-	7	10	11	-	148	PIANO CONTEMPORARY	Macuilxochitl	TOMOSUKE	
+-	4	6	10	-	4	6	10	-	174	KAWAII FUTURE BASS	Magical	Snail's House	
+-	"[BSS]
+7"	"[BSS]
+11"	"[BSS]
+12"	-	"[BSS]
+7"	"[BSS]
+10"	"[BSS]
+12"	-	256	EXPERIMENTAL	Mare Nectaris	神楽	
+-	6	10	11	-	6	10	11	-	170	TECHNO	Modular Technology	Sota Fujimori	
+-	4	8	10	-	4	8	10	-	128	TURBOFUNK	Music is The Answer	C-Show	
+-	5	8	11	-	5	9	11	-	86-144	NOSTALGIA	nostos	Setaria Virtuoso	
+-	3	7	10	11	3	7	10	11	140	BUBBLEGUM DANCE	OOO	Ryu☆ feat.moimoi	
+-	6	10	"[CN]
+12"	-	6	10	12	-	215	POP BREAKCORE	OTENAMI Hurricane	t+pazolite	
+-	5	8	11	-	5	8	11	-	147	MONDO-GROOVE BASSHOUSE	PAPAYAPA BASS	かめりあ feat. ななひら	
+-	5	9	10	-	5	9	10	-	170	BEAT PIANO MUSIC	Piano Samurai	maras k(marasy＋kors k)	
+-	"[CN]
+6"	"[CN]
+10"	"[HCN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[HCN]
+12"	-	190	HARD BREAK BEATS	Quakes	dj Hellix	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	159	TRANCE	RAIN	dj TAKA	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	160	SPEED RAVE	Rave Cannon	kors k	
+-	5	8	10	-	5	8	10	-	165	哀愁EUROBEAT	Remedy feat. Kanae Asaba	Y&Co.	
+3	"[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	199	RDM	ROTTERDAM SHOGUN	ABDI from ジャカルタファンクブラザーズ	
+-	5	9	11	12	6	9	11	12	150	TECH BREAKBEATS	SAMURAI-Scramble	DJ Mass MAD Izm*	
+-	6	9	11	-	6	9	11	-	130-195	PIECED MAKIBISHI	Sarutobi Champion is 拙者	Project B-	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	165	SHINOBI RAVE	SAY BAY	P*Light	
+-	4	7	9	-	4	6	9	-	136	80's SYNTH FUNK	Seaside Labyrinth	Dirty Androids	
+-	3	5	9	11	3	6	9	11	135	R&B	Selfish Sweet	OSTER project feat. かなたん	
+-	5	10	11	-	6	10	12	-	145	TECHNO	SEQUENCE CAT	SLEDLAKE (SLAKE & L.E.D.)	
+-	"[CN]
+4"	"[CN]
+6"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	160	CHIPTUNE	shuriken	ヒゲドライバー	
+-	6	9	10	-	6	9	10	-	190	CANDY ROCK	SINOBUZ Fantasy	Noria	
+3	6	10	12	-	6	10	12	-	153	ANTHEM	Sky High	Cuvelia	
+-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	156	ASIAN CONTEMPORARY	Snakey Kung-fu	金獅子 vs 麒麟 feat. 獏	
+-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	177	DRUM&BASS	Steel Edge	Maozon	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	175	HARDCORE RAVE	Summerlights(IIDX Edition)	DJ Noriken	
+-	6	9	"[CN]
+12"	-	6	9	"[CN]
+12"	-	190	HARDTEK	Super Rush	kors k	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	60-160	ELECTRO FUSION	Surf on the Light	Tomoyuki Uchida	
+-	5	8	10	-	5	8	11	-	150	HARDSTYLE	The Commanders	USAO	
+-	4	8	11	-	5	8	11	-	33-130	BIG BEAT/BREAKBEATS	(This Is Not) The Angels	Hommarju	
+-	"[HCN]
+5"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+5"	"[HCN]
+10"	"[HCN]
+12"	-	152	HARD TRANCE	TOGAKUSHI	SETUP	
+-	3	7	10	"[HCN]
+12"	3	7	10	"[HCN]
+12"	138	UPLIFTING TRANCE	Umbral	Maozon	
+-	6	10	12	-	7	10	11	-	190	JUMP UP/HARDCORE	Venom	kors k vs L.E.D.-G	
+-	5	8	10	-	5	8	10	-	143	HARD HOUSE	Vermilion	Remo-con	
+-	5	8	"[CN]
+10"	-	5	9	"[CN]
+10"	-	175	MAINSTREAM HARDCORE	Warrior	DJ CHUCKY feat. Jonjo	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	164	CYBER JAZZSTEP	XINOBIKILL	SOUND HOLIC feat. Nana Takahashi	
+-	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+11"	-	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+11"	-	154	夏の夕暮れと、DUBSTEP。	yamabiko (SINOBUZ Edition)	かめりあ	
+-	4	"[CN]
+9"	"[CN]
+11"	-	4	"[CN]
+9"	"[CN]
+11"	-	176	ALTERNATIVE ELECTRO	Yellow Sketch(RX-Ver.S.P.L.)	高田雅史	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	195	WORLD/ELECTRONICA	イザナミノナゲキ	猫叉Master	
+-	6	10	12	-	7	10	12	-	192	HARDCORE	焔極OVERKILL	RoughSketch Vs. L.E.D.-G	
+-	5	9	11	-	5	9	11	-	170	ORBITALIC FUTURE BASS	禍根	U1 overground	
+-	7	10	11	-	7	10	11	-	190	CROSSBREED	鴉	L.E.D.-G	
+-	5	9	12	-	5	9	12	-	145	ORIENTAL FUSION	九尾狐夜行	天狐	
+-	5	8	10	-	5	8	10	-	128	理系ポップ	恋はどう？モロ◎波動OK☆方程式!!	あべにゅうぷろじぇくと feat. 佐倉紗織 produced by ave;new	
+-	"[HCN]
+4"	"[HCN]
+6"	"[HCN]
+9"	-	"[HCN]
+3"	"[HCN]
+6"	"[HCN]
+9"	-	100	DRAMATIC WALTZ	獅子霞麗ノ舞	HuΣeR	
+-	5	9	11	-	5	9	11	-	189	忍歌	忍恋花	黒脛	
+-	"[BSS]
+6"	"[BSS]
+9"	"[BSS]
+12"	-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	160	HiTECH	〆	lapix	
+-	4	"[CN]
+8"	"[CN]
+10"	-	4	"[CN]
+8"	"[CN]
+10"	-	180	POP ROCK	次葉 -turn the page-	小寺可南子	
+-	3	5	7	-	2	5	7	-	180	ACEDIA	ちらちら・はらはら	NU-KO	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	160	MICHINOKU	津軽雪	罠師 VS 安室	
+-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	70-125	FOREST SNOW	月雪に舞う華のように	猫叉Master	
+-	3	7	11	-	4	7	11	-	210	ネオスカ電波	ディッシュウォッシャー◎彡おいわちゃん	ARM×狐夢想 feat. 山本椛	
+-	5	9	12	-	5	9	12	-	262	空想ファンタジーシリーズ	童話回廊	DJ TOTTO	
+-	6	10	12	-	6	10	12	-	165	LAST ARTS	刃図羅	猫叉Master vs HuΣeR	
+-	5	9	12	-	6	9	12	-	136	HIP HOP	焱影	RoughSkreamZ feat.楽天斎	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	4	9	"[CN]
+11"	-	135	TRIBAL HOUSE	¡Viva!	Ryu*	
+1	5	7	10	11	5	7	10	11	155	HYPER ENKA POP	冬椿 ft. Kanae Asaba	Xceon	
+-	6	9	"[CN]
+12"	-	6	9	11	-	100	NEON/TWERKCORE	#MAGiCVLGiRL_TRVP_B3VTZ	DJ Noriken	
+beatmania IIDX 25 CANNON BALLERS ▲ ▼ △													
+-	7	10	12	-	7	10	12	-	174	RENAISSANCE	AA -rebuild-	D.J.Amuro	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	165	DUBSTEP	Abraxas	SYUNN	
+-	6	8	10	-	5	8	10	-	153	SYNTH-TECH	ACCELERATE	Sota Fujimori	
+-	2	5	9	-	3	5	"[CN]
+9"	-	154	PIANO TRANCE	Alpheratz	Xceon	
+-	4	8	11	-	5	8	11	-	138	熱帯 THE BASS	Amor De Verão	かめりあ feat. ななひら	
+-	5	8	10	-	5	8	10	-	150	PSY TECH DANCE	ANAGMA	C-Show	
+-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	180	STYLISH CROSSOVER	ANCHOR	BEMANI Sound Team "HuΣeR Vs. SYUNN"	
+-	"[HCN]
+[HBSS]
+6"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+[HBSS]
+6"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+12"	-	222	HARDCORE DANCE SPEED	Antigravity	t+pazolite	
+-	5	9	12	-	5	9	12	-	185	GENESIS	Arca	BEMANI Sound Team "Akhuta Works"	
+-	6	9	11	-	6	9	11	-	162	CYBERCORE	Around the Future	Maozon vs. C-Show	
+-	"[HBSS]
+6"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+11"	-	"[HBSS]
+6"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+11"	-	155	WAGON WHEEL TRANCE	Back Spin Sweeper	DJ TOTTO	
+-	6	9	11	-	6	9	11	-	165	SCHRANZ	Battleground	kors k	
+-	4	9	11	-	5	9	11	-	190	DIGITAL THRASH PUNK	Be a Hero!	中島由貴	
+-	4	8	10	-	4	8	"[CN]
+10"	-	177	CYBER LIQUID FUNK	Best of Me	Maozon	
+2	6	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	6	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	174	NEO JUNGLE	Boomy and The Boost	Eagle	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+10"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+10"	-	184	DRUMSTEP/HARDCORE	Break Stasis	Hommarju & Akira Complex	
+-	6	9	11	"[CN]
+[BSS]
+12"	6	9	11	"[CN]
+[BSS]
+12"	140	CYBERNETICS PIANO HOUSE	ChaserXX	HuΣeR	
+-	5	8	10	-	5	8	11	-	180	FUTURE BASS	Chemical Cookie	YUC'e	
+-	"[CN]
+7"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+7"	"[CN]
+9"	"[CN]
+11"	-	178	DRUM&BASS	City Never Sleeps (IIDX EDITION)	Dirty Androids	
+-	4	7	9	-	5	7	9	-	152	COSMIC POP	COSMIC☆WONDER☆REVOLUTION	猫叉Master+	
+-	6	10	12	-	7	10	12	-	200	HARDCORE	DEADHEAT	DJ Myosuke	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	"[HCN]
+12"	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	"[HCN]
+12"	200	世紀末コア	DEATH†ZIGOQ ～怒りの高速爆走野郎～	L.E.D.ALiCE(DJ NAGAI Vs. BEMANI Sound Team "L.E.D.-G")	
+-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	50-400	PUMPCORE	DropZ-Line-	Getty vs. DJ DiA	
+-	5	8	11	-	5	9	12	-	170	VELLUM	Eine Haube ～聖地の果てにあるもの～	AIKO OI	
+"[HCN]
+3"	"[HCN]
+[HBSS]
+7"	"[HCN]
+[HBSS]
+11"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+[HBSS]
+7"	"[HCN]
+[HBSS]
+11"	"[HCN]
+[HBSS]
+12"	-	88-176	IRREGULAR DJENT STEP	EMERALDAS	BEMANI Sound Team "HuΣeR vs dj Hellix"	
+-	5	9	12	-	5	9	12	-	190	DRUM'N'BASS	encounter	猫叉Master+	
+-	5	9	11	-	5	9	11	-	147	HARD BASS HOUSE	Exhaust Hype	DJ Noriken	
+-	4	8	10	-	4	8	10	-	200	MIDDLE EASTERN TWERK	Expanded !!	BEMANI Sound Team "Expander"	
+-	5	9	11	-	5	9	11	-	191	ARTCORE	Fervidex	Feryquitous	
+-	5	8	11	-	5	8	11	-	150	HYPER DUBSTEP	FREEDOM	USAO	
+-	4	9	10	-	4	10	11	-	140	TECH HOUSE	From Time To Time	sanodg	
+-	5	8	11	-	5	8	11	-	※	HOLIC	FUTURE is Dead	C-Show	
+-	3	"[CN]
+7"	"[CN]
+9"	-	4	"[CN]
+7"	"[CN]
+9"	-	130	TROPICAL HOUSE	Get Up! feat. Kanae Asaba	MK	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	150	HANDZ STYLE	HAT TRICK	P*Light	
+-	"[BSS]
+4"	"[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[BSS]
+4"	"[BSS]
+8"	"[BSS]
+10"	-	132-150	FREE STYLE	Hella Deep	MASAYOSHI IIMORI	
+-	6	10	11	-	7	10	12	-	190	GABBA	HYPE THE CORE	DJ CHUCKY	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	170	EURO TRANCE	I Love You	O/iviA	
+-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	180	EMOTIONAL RAVE EUPHORIA	Illusionary Waterlily	DJ Noriken	
+"[HCN]
+3"	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	160	00's TECHNO	Initiation	BEMANI Sound Team "謎の勢力"	
+-	6	10	12	-	7	10	12	-	195	UPTEMPO HARDCORE	Life Is A Game ft.DD"ナカタ"Metal	RoughSketch	
+-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	188	POPCORE	LUV DRIVE	RoughSketch feat.Aikapin	
+-	5	9	"[CN]
+11"	-	5	9	"[CN]
+11"	-	154	ADMIRABLE	MAXIVCORD	BEMANI Sound Team "dj TAKA"	
+-	"[CN]
+4"	"[CN]
+6"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+6"	"[CN]
+9"	-	128	NU 80's DISCO FUNK	Midnight Lady	Dirty Androids	
+-	4	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	5	"[BSS]
+8"	"[CN]
+[BSS]
+11"	-	300	FUTURE TERROR	n'pa pa BBQ	YUC'e	
+-	"[CN]
+7"	"[CN]
+10"	12	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	169	MACHINEGUN PSYSTYLE	NITROUS CANNON	かめりあ	
+-	5	8	11	-	5	8	11	-	155	HYPER TECHNO	No Limit 2 dAnce feat. 大山愛未	Y&Co.	
+-	5	8	11	"[BSS]
+12"	6	9	11	-	160	ULTRA JAZZFUNKTION	Nothing but Theory	lapix	
+-	6	"[CN]
+8"	"[CN]
+10"	"[CN]
+12"	6	"[CN]
+10"	"[CN]
+11"	"[CN]
+12"	155	TECHNO	O/D*20	Ryu*	
+-	4	8	10	-	5	8	10	-	150	PSYCHDELIC TRANCE	Only for now	RINA SOUND PRODUCE:KAZUYA TAKASE	
+-	7	"[CN]
+10"	"[CN]
+12"	-	7	10	"[CN]
+12"	-	180	DRUMSTEP	Papilio ulysses	BEMANI Sound Team "SYUNN"	
+-	6	9	12	-	6	10	12	-	155	HARDSTYLE	Persephone	Massive New Krew	
+-	6	"[BSS]
+10"	"[CN]
+[BSS]
+12"	-	7	"[BSS]
+10"	"[BSS]
+12"	-	195	HARDCORE	Rampage	USAO	
+-	7	10	12	-	7	10	12	-	142	PANIC FUSION	Raspberry Railgun	OSTER project	
+-	5	8	11	"[CN]
+[BSS]
+12"	5	8	11	"[CN]
+[BSS]
+12"	160	Hi-TECHDANCE	REVOLVER	sky_delta	
+-	4	6	9	-	4	6	9	-	188	THE WORLD EVOLVE	Sleepless days	猫叉Master feat.Mayumi Morinaga	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	175	FUTURE CORE	Slipstream	lapix	
+-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	190	HARDTEK	SPEED DEMON	GUHROOVY feat. NO+CHIN	
+-	4	8	10	11	4	8	10	11	160	HEAV'NLY TRANCE	STARLIGHT JUNCTION	SOUND HOLIC feat. Nana Takahashi	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+10"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+10"	-	138	ELECTRO TRANCE	Static State	Nhato	
+-	"[CN]
+[BSS]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	155	PSYSTYLE	Temple of Anubis	Massive New Krew	
+2	6	10	11	-	6	10	11	-	170	EUROBEAT	THE CANNONBALLER	L.E.D. feat. YURiCa/花たん	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	142	TECH BREAKS	The Chase	DJ Mass MAD Izm*	
+2	6	"[CN]
+10"	"[CN]
+[BSS]
+11"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+[BSS]
+11"	-	180	OSHARave	UMMU	t+pazolite	
+-	5	9	11	-	7	10	12	-	139	DANCE POP	Usual Days-remix	ota2	
+"[CN]
+3"	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	200	HYBRID HARDCORE	Xperanza	aran	
+-	5	8	10	-	5	8	10	-	147	JAZZ ROCK	1001 -ESCAPE-	SOUND HOLIC feat. Nana Takahashi	
+-	6	9	12	-	6	9	12	-	255	HYPER SPEED RAVE	255	255	
+-	4	8	11	-	4	8	11	-	183	STRANGE WORLD MUSIC	命の標本	志方あきこ	
+-	6	8	11	-	6	8	11	-	210	プログレッシブ徒競走	うさ☆かめ 大戦争！	ARM×狐夢想 feat. I've:柚子乃 & RINA	
+-	4	8	10	-	4	8	10	-	180	HARD FRENCH	エディブルフラワーの独白	OSTER project feat. 常盤ゆう	
+-	3	7	10	-	3	7	10	-	219	ELEGANT SWING	共犯ヘヴンズコード	D-Evoke(与那嶺雅人/小日向翔)	
+-	7	10	12	-	7	10	12	-	190	NATURE	シムルグの目醒め	BEMANI Sound Team "DJ TOTTO" feat.rionos	
+-	7	10	12	-	7	10	12	-	180	Hi-MYTH	神謳 -RESONANCE-	SOUND HOLIC feat. Nana Takahashi Vs.GOD PHOENIX Prim	
+1	4	8	10	"[CN]
+11"	4	8	10	"[CN]
+11"	182	EMOTIONAL ROCK	純真可憐デザイア	BEMANI Sound Team "HuΣeR" feat.Fernweh	
+-	3	7	10	-	4	8	10	-	142	JOURNEY SCENE	草原の王女-軌跡を辿って-	劇団レコード	
+2	6	9	12	-	6	9	12	-	196	ORBITALIC GABBER STEP	東京神話	DJ TECHNORCH feat.宇宙★海月 vs BEMANI Sound Team "U1-ASAMi"	
+-	5	7	9	-	5	7	9	-	170	歌謡ニューウェーブ	ナイトシティー・アヴァンチュール	森永真由美	
+-	4	7	10	-	5	8	10	-	157	YANKEE CAR J TRANCE	ハイ*ビスカス ft. Kanae Asaba	Xceon	
+-	5	8	10	-	5	8	10	-	155	CLASSIC MOTIF	バスルーム ロマンス	BEMANI Sound Team "Saori Watanabe"	
+-	"[CN]
+[BSS]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	175	電波ソング	バ→ビ→ブ→Bomb!	ヒゲドライバー join. 新菜まこ & 松平なな	
+-	5	9	11	-	5	9	11	-	188	AKIBA-POP	パラドキシカル・タイムリープトライアル(Short Ver.)	MOSAIC.WAV	
+-	"[CN]
+5"	"[HCN]
+8"	"[HCN]
+10"	-	"[CN]
+5"	"[HCN]
+8"	"[HCN]
+11"	-	170	FUTURE J-POP	ラストセンチュリーメランコリック	DJ Taku aka ☆Taku Takahashi (m-flo)	
+beatmania IIDX 26 Rootage ▲ ▼ △													
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	232	ASYMMETRY ART	Afterimage d'automne	BEMANI Sound Team "猫叉劇団"	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	150	DANCE MUSIC	BLACK JACKAL	Akira Complex	
+-	5	8	"[CN]
+10"	-	5	8	"[CN]
+10"	-	158	BLOOM TRANCE	BLO§OM	BEMANI Sound Team "TAG"	
+3	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+12"	-	195	SYMPHONIC TRANCECORE	Carmina	CANVAS feat. Quimär	
+3	"[CN]
+7"	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[BSS]
+12"	-	175	FUTURE CORE	Carry Me Away	lapix	
+-	6	10	12	-	6	10	12	-	190	MARVELOUS CHEER	Catch Our Fire!	中島由貴	
+-	5	9	11	12	6	10	11	12	125	BIG BEAT	CODE:Ø	BEMANI Sound Team "HEXA"	
+-	6	9	10	12	6	10	10	12	150	UPLIFTING ETHNIC	CoMAAAAAAA	Ryu☆	
+-	5	9	11	-	6	9	11	-	170	BIGCORE	COSMIC CYBER	BEMANI Sound Team "Captain Sonic"	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	138	GARAGE	Cranberry City ft. Luschel	lapix	
+-	6	10	12	-	6	10	12	-	166	HARDER DANCE MUSIC	dAuntl3ss	DJ Noriken	
+-	5	9	12	-	5	9	12	-	165	INDUSTRIAL TECHNO	Dr. Chemical & Killing Machine	Hommarju	
+-	7	10	12	-	7	10	12	-	166	8BARS	Drastic Dramatic	KING & Princess	
+-	7	10	12	-	7	9	11	-	145	MINIMAL	DRUNK MONKY	DJ ODDBALL	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	"[HCN]
+12"	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	"[HCN]
+[HBSS]
+12"	148	FUSION TRANCE	Ember Lights	Nhato	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	127-165	PROGRESSIVE ROCK	EVANESCENT	SOUND HOLIC feat. Nana Takahashi	
+-	5	"[CN]
+9"	"[CN]
+11"	-	6	"[CN]
+9"	"[CN]
+11"	-	160	JUKE/FOOTWORK	Garuda	kors k	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+10"	-	177	CYBER DRUMSTEP	Geirskögul	Maozon	
+-	7	"[CN]
+10"	12	-	7	"[CN]
+9"	12	-	163	TECHNO GRAFFITI	GENE	VINCENT GANATCH	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+7"	"[CN]
+9"	"[CN]
+12"	-	150	DUBSTEP	GIGA THRASH	Blacklolita	
+-	4	7	9	-	4	7	10	-	134	EDM	Glory	kradness	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	170	HARDSTYLE	GO OVER WITH GLARE -ROOTAGE 26-	BEMANI Sound Team "L.E.D.-G"	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	155	HARD TECHNO	HARD BRAIN	AJURIKA	
+2	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	-	152	ELETRONIC RHAPSODY	HEISEI	BEMANI Sound Team "dj TAKA"	
+-	4	6	9	-	4	6	9	-	160	RAVE SXXX	Hurry Hurry	Masayoshi Iimori	
+-	"[BSS]
+7"	"[BSS]
+9"	"[BSS]
+11"	-	"[BSS]
+7"	"[BSS]
+10"	"[BSS]
+11"	-	140	TECH-BREAKS	IDC feat.REVERBEE (Mo'Cuts Ver)	DJ Mass MAD Izm*	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	"[CN]
+11"	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	"[CN]
+11"	145	PSYCHEDELIC ROCK	IDOL syndrome.	RINA	
+-	7	10	12	-	7	10	12	-	162	PSYSTYLE	KILL EACH OTHER	BEMANI Sound Team "L.E.D. VS. L.E.D.-G"	
+-	5	"[BSS]
+9"	"[BSS]
+12"	-	5	"[BSS]
+9"	"[BSS]
+12"	-	180	UK HARDCORE	L.F.O	aran	
+-	7	9	"[BSS]
+11"	-	7	"[BSS]
+9"	"[CN]
+[BSS]
+11"	-	230	GLITCH HOP	LADYBIRD	YUC'e	
+-	5	7	10	-	5	8	10	-	192	ELECTRIC DANCE ROCK	Let me be your cure	Pizuya's Cell	
+-	6	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	6	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	90-180	RECKLESS HARDCORE	Lethal Weapon	BEMANI Sound Team "HuΣeR"	
+-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	173	Drumstep / DnB	Level One	Yamato	
+-	5	8	10	-	5	8	10	-	150	MELODIC TRANCE	Lift Us High	BEMANI Sound Team "Sota Fujimori"	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	157	TECHNO	LOST TECHNOLOGIE	かめりあ	
+-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	150	JUNGLE TERROR	Mächö Mönky	kors k	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	150	GLITCH DUBSTEP	Necroxis Girl	BEMANI Sound Team "HuΣeR"	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	180	THEME SONG	Next Tales 2 Oath (IIDX 20th Anniv "Ring" Theme)	Hommarju	
+-	6	9	11	-	6	9	12	-	165	EURO DYNAMITE	Night! Night! Night!	MM	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[HCN]
+[HBSS]
+12"	-	400	TOKYO STYLE SPEEDCORE	ONIGOROSHI	m1dy	
+-	3	5	8	10	3	6	9	10	134	ELECTRO POP	OVER TIME	空中分解feat.アンテナガール	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	192	DRUM'N'BASS	Painful Fate	BEMANI Sound Team "猫叉Master"	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	160	SPEED RAVE	Playing With Fire	kors k	
+-	3	"[CN]
+7"	"[CN]
+[BSS]
+9"	"[CN]
+[MSS]
+11"	3	"[CN]
+7"	"[CN]
+[BSS]
+9"	"[CN]
+[MSS]
+11"	150	RIDDIM DUBSTEP	Psycho Sheep Riddim	BEMANI Sound Team "SYUNN"	
+-	"[BSS]
+7"	"[BSS]
+10"	"[BSS]
+12"	-	"[BSS]
+7"	"[BSS]
+10"	"[BSS]
+12"	-	160	TECH-BREAKS	Red. by Jack Trance	DJ Mass MAD Izm*	
+-	4	8	10	-	6	9	11	-	140	TECHNO	REPLAY	SLAKE	
+-	"[CN]
+7"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+7"	"[CN]
+9"	"[CN]
+11"	-	150	TRANCE	ROCK女 feat. 大山愛未, Ken	Y&Co.	
+"[CN]
+3"	"[CN]
+5"	"[CN]
+8"	11	-	"[CN]
+5"	8	11	-	150	NEO J-TEKNO	R∞tAge	BEMANI Sound Team "HuΣeR+"	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	220-390	IRIDESCENCE JAZZ ETUDE	ruin of opals	上ノ瀬つかさ	
+-	"[CN]
+4"	"[CN]
+9"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+9"	"[CN]
+10"	-	145	PSYCHEDELIC TRANCE	SPEED ROCKER	AJURIKA	
+-	5	"[CN]
+8"	"[CN]
+10"	-	5	"[CN]
+8"	10	-	170	HDM	Technicolour Dreams	DUNE & M-Project & GUHROOVY	
+-	3	"[CN]
+8"	"[CN]
+10"	-	3	"[CN]
+8"	"[CN]
+10"	-	160	EUROTRAPBEAT	The Best of Both Worlds	☆Taku Takahashi (m-flo, block.fm)	
+-	7	10	"[CN]
+12"	-	7	"[CN]
+10"	"[CN]
+12"	-	181	HARD ELECTRIC POP	THE DAY OF JUBILATIONS	BEMANI Sound Team "S-C-U vs L.E.D."	
+-	"[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	300	DJENTCORE	The Rebellion of Sequencer	DJ Myosuke	
+-	4	8	10	-	4	8	10	-	190	BOXINGCORE	toy boxer	BEMANI Sound Team "S-C-U & SYUNN"	
+-	4	7	9	-	7	9	11	-	137-180	NEW AGE	ToyCube Pf.(RX-Ver.S.P.L.)	高田雅史	
+-	6	10	12	-	6	10	12	-	188	MUSIC GAMES HARDCORE	Trill auf G	BEMANI Sound Team "dj TAKA"	
+-	4	7	9	-	4	7	9	-	145	CYBER DANCE MUSIC	Twilight Warp	Maozon feat. Kyte	
+-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	135	METAL	Unbelief	BEMANI Sound Team "Anonymous"	
+-	5	9	11	-	5	9	11	-	187	DRUM & BASS	UNDERWORLD HOLOGRAPHY	BEMANI Sound Team "L.E.D." feat. KOTOKO	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	167	JAZZY FOOTWORK JUNGLE	Urban Constellations	Dirty Androids	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	191	REBIRTH OUT	Visterhv	Feryquitous	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	225	VVV	voltississimo	BEMANI Sound Team "PHQUASE"	
+-	5	"[CN]
+8"	"[CN]
+10"	-	5	"[CN]
+8"	"[CN]
+11"	-	187	HYPER HANDS UP	Wing of Hearts	USAO & DJ Nanashi	
+-	"[CN]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	173	PIANO TRANCE	Wolf 1061	Xceon	
+-	5	9	11	-	5	9	11	-	180	CANDY RAVE GABBER	Wonderland	kors k	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	160	ELECTRO SHOCK	XENON II ～TOMOYUKIの野望～	Mr.T	
+-	7	"[CN]
+10"	12	-	7	10	12	-	165	NEUTRONIKA	Xlø	sasakure.UK	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	180	FUTURE BASS	Yum Yum Jelly	YUC'e	
+-	6	9	11	-	6	9	11	-	160	ORBITALIC ORIENTAL ELECTRO	ZENDEGI DANCE	ARM×BEMANI Sound Team "U1 overground"	
+"[CN]
+2"	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	135	ANNIVERSARY	50th Memorial Songs -Beginning Story-	BEMANI Sound Team	
+2	5	8	10	-	5	8	10	-	135-175	ANNIVERSARY	50th Memorial Songs -Flagship medley-	BEMANI Sound Team	
+3	5	8	10	-	5	8	10	-	160	ANNIVERSARY	50th Memorial Songs -二人の時 ～under the cherry blossoms～-	BEMANI Sound Team	
+3	5	"[CN]
+9"	"[CN]
+11"	-	6	"[CN]
+9"	"[CN]
+11"	-	136	ANNIVERSARY	50th Memorial Songs -The BEMANI History-	BEMANI Sound Team	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	160	MEGA MIX	& Intelligence	lapix	
+-	5	9	11	-	6	9	11	-	170	LOVELY YOUTH	おーまい！らぶりー！すうぃーてぃ！だーりん！	BEMANI Sound Team "PON" feat.NU-KO	
+-	7	10	12	-	7	10	12	-	190	SPEED CANDY	お菓子の王国	Snail's House	
+-	"[CN]
+8"	"[CN]
+11"	"[CN]
+12"	-	"[CN]
+8"	"[CN]
+11"	"[CN]
+12"	-	200	ULTIΣATE COLLARBORATION	X-DEN	T.Σ.Generation	
+-	5	8	10	-	5	7	10	-	130	SPANISH GUITAR	グラナダの風	BEMANI Sound Team "劇団レコード"	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	225	音ゲー賛美歌	金野火織の金色提言	DJ TECHNORCH feat. 宇宙★海月	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	220	ピタゴラス的不完全性破壊衝動音律(ハンマーによる)	最小三倍完全数	DJ TECHNORCH	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	145	PIANO J TRANCE POP	深愛のリグレット	Xceon feat.Mayumi Morinaga	
+-	3	6	9	-	3	6	9	-	138	GIRLS ROCK	セカンドピアス	OSTER project feat. echo	
+-	3	6	11	-	3	6	12	-	180	JAPANESE POPS	泰東ノ翠霞	bermei.inazawa/feat.霜月はるか	
+-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	190	Hi-歌謡コア	抱きしめてモナムール	冬色AMOUR☆Prim	
+-	4	8	10	-	4	8	10	-	161	Re 90's J-DANCE POP	夏の匂い。キミの残像。 ft. Kanae Asaba	Xceon	
+-	6	9	11	-	6	9	11	-	158	A-STYLE RUSSIAN HARDBASS	ハードベース・フェスタ	かめりあ feat. ななひら	
+-	6	9	11	-	6	9	11	-	83-180	SOCA	花冠 feat.Aikapin	RoughSkreamZ	
+-	6	9	11	-	6	9	11	-	195	勤労☆電波	爆ゼニ☆がってんワーカー	ARM×狐夢想 feat. ななひら	
+-	3	6	8	-	3	6	8	-	135	ELECTRONICA	ミストレス・アンに花束を	soejima takuma feat. BEMANI Sound Team "猫叉Master"	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	156	BEMANIZED ROCKCORE	ミッドナイト☆WAR	いちか	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+11"	"[CN]
+12"	"[CN]
+5"	"[CN]
+10"	"[CN]
+11"	"[CN]
+12"	144	RETROSPECTIVE EPIC MUSIC	龍王の霊廟(Mausoleum Of The Primal Dragon)	BEMANI Sound Team "黒猫ダンジョン"	
+beatmania IIDX 27 HEROIC VERSE ▲ ▼ △													
+-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+[HBSS]
+11"	-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+[HBSS]
+11"	-	150	NEO DIGITAL FUTURE	Advent Infamous	Blacklolita	
+-	6	10	12	-	7	10	12	-	205	LAPLACE CORE	AKASHIC BREAK	BEMANI Sound Team "TAG"	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	173	J-POP	And-RoiD	Fujishiro feat.KNA	
+-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	165	MYSTICAL HARD DANCE	Artist	CANVAS feat. Quimär	
+-	6	9	10	-	6	9	11	-	175	FUTURE BASS	Backyard Stars	TAKU INOUE	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+7"	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	155	PRIME BIG BEAT	BEAT PRISONER	AJURIKA	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	190	BEAT MUSIC	beatAffection	ビートまりお	
+-	5	8	10	-	5	8	11	-	135	PROGRESSIVE TRANCE	Beautiful Harmony (IIDX MIX)	Ryu☆	
+-	4	9	11	"[CN]
+12"	4	9	11	"[CN]
+12"	165	JAZZ PIANO TRANCE	Bow shock!!	Xceon	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	220	JAZZ ROCK	Calvados Queen	OSTER project feat. かなたん	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	155	TRANCE	Change Yourself	ARM × kradness	
+-	4	7	9	-	4	7	9	-	160	BASS HOUSE	Crank It	Crayvxn	
+-	7	10	12	-	7	10	12	-	244	POLONAISE	Dans la nuit de l'éternité	BEMANI Sound Team "レ・度胸兄弟"	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+[BSS]
+10"	-	160	FUTURE BASS	Do What You Want	BEMANI Sound Team "SYUNN"	
+-	6	10	12	-	"[CN]
+6"	"[CN]
+10"	12	-	210	FUNKY GABBER	Double Dribble	lapix	
+-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+7"	"[HCN]
+10"	"[HCN]
+12"	-	200	VERSE	EROICA	BEMANI Sound Team "HERO"	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+11"	"[CN]
+[BSS]
+12"	-	230	EPIC ORCHESTRA	Everlasting Message	ぺのれり	
+-	"[CN]
+3"	"[CN]
+6"	"[CN]
+8"	-	"[CN]
+3"	"[CN]
+6"	"[CN]
+8"	-	134	エレクトロニック/エレクトロニカ/ポップ	fairy cocktail	Tomggg	
+-	4	7	10	-	4	8	10	-	180	DREAM DRUM'N'BASS	Fly Above (Vicissitude Remix)	Remixed by BEMANI Sound Team "PHQUASE"	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	174	DRUM'N'BASS	Forgetting Machine	TAKU INOUE	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	150	PROGRES BEAT	Friction[!]Function	Feryquitous	
+-	5	8	11	-	5	8	11	-	150-180	FREEFORM HARDCORE	GHOST	Hommarju	
+-	"[CN]
+6"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+8"	"[CN]
+11"	-	150	EDM-DUBSTYLE	GIGA VIOLATE	Blacklolita	
+-	5	8	10	-	5	8	10	-	154	MELODIC DANCE MUSIC	Hold My Hand	BEMANI Sound Team "Sota Fujimori"	
+-	3	7	9	-	3	7	9	-	130	DANCE POP	Hyper Drive feat. ぷにぷに電機	パソコン音楽クラブ	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	170	FUTURE BASS	If	Pa's Lam System	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	150	DJENT STEP	Inferno of Fomalhaut	fallen shepherd ft. ricono	
+-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+10"	-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+10"	-	148	NEO 90's CINEMATIC TECHNO	Infinity Mirror	Dirty Androids	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	155	SPOOKY	Into The Madness	Yuta Imai	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+[BSS]
+12"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+12"	-	174	DRUM & BASS / HYBRID TRAP	LASER CRUSTER (IGNITE REMIX)	Remixed by BEMANI Sound Team "HuΣeR"	
+-	"[BSS]
+6"	"[BSS]
+9"	"[BSS]
+12"	-	"[BSS]
+5"	"[BSS]
+10"	"[BSS]
+12"	-	150	BIGBEAT / DUBSTEP	Level 2	Yamato	
+2	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+12"	"[CN]
+[BSS]
+12"	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+12"	"[CN]
+[BSS]
+12"	174	Hi-GAIN ENERGY	LIGHTNING STRIKES	BEMANI Sound Team "HuΣeR"	
+-	6	9	11	-	6	9	11	-	165	EUROBEAT	Like+it!	Ryu☆	
+-	6	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	6	"[HCN]
+10"	"[HCN]
+[HBSS]
+12"	-	174	PIANO BEAT MUSIC	Lords Of The Roundtable	DJ Mass MAD Izm* feat.REO	
+-	4	9	11	12	4	9	11	12	185	DARKSTEP	Lost Souls	BEMANI Sound Team "SYUNN"	
+-	6	9	12	-	6	9	12	-	146	TECHSTYLE	Matt Silver	Remo-con	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	180	DRUMSTEP	Megalara Garuda	SYUNN	
+-	"[BSS]
+4"	"[BSS]
+7"	"[BSS]
+9"	"[CN]
+10"	"[BSS]
+4"	"[BSS]
+7"	"[BSS]
+9"	"[CN]
+10"	178	DRUM'N'BASS	Mel	Applekid	
+-	5	8	11	-	5	8	11	-	153	PSYCHEDELIC TRANCE	Moving on	AJURIKA feat.矢吹真央	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	150	Hi-TECH FULL ON	Nasty Techniques	kors k	
+-	"[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+9"	-	"[CN]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+9"	-	110	INDUSTRIAL BASS	NEWALONE	Masayoshi Iimori	
+-	7	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	7	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	155	CETACEA HDM	ORCA	かめりあ	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	140	EPIC STORY	OUTER PLANETS	BEMANI Sound Team "劇団レコード"	
+-	5	8	11	12	5	8	11	12	175	EUPHORIC HARDCORE	Override	Nhato	
+-	6	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	6	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	163	PSYSTYLE	PHASE SHIFT MANEUVER	BEMANI Sound Team "L.E.D."	
+3	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	150	TRIBAL FRONTIER	Primitive Vibes	lapix	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	200	ORBITALIC MOON MIXTURE	Queen Kaguya	BEMANI Sound Team "U1 overground"	
+-	5	8	10	-	5	8	10	-	140	UPLIFTING TRANCE	Rainstorm	Maozon feat. Chica	
+-	7	10	12	-	7	10	12	-	175	FUTURE SKOOL BREAKBEATS HARDCORE	Rave Patroller	Eagle	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	175	HARD D&B	rough percussionythm	BEMANI Sound Team "setup VS 謎の勢力"	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	174	HARDCORE	S!ck (Nhato Remix)	Remixed by Nhato	
+-	6	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	6	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	114	TWERKCORE // uwu // BEATJUGGLE	SCREW // owo // SCREW	かめりあ	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	150	HARD PSY	Shiva	Relect	
+1	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	124-153	ELECTRO NU DISCO	Silly Love	DÉ DÉ MOUSE	
+-	4	"[CN]
+7"	"[CN]
+10"	-	4	"[CN]
+7"	"[CN]
+10"	-	183	A-STYLE NEURO+"スカ"+FUNK DRUMSTEP	Ska-sh All Neurons!!	かめりあ feat. ななひら	
+-	5	10	"[BSS]
+12"	-	5	"[BSS]
+10"	"[BSS]
+12"	-	215	HARDCORE	Smashing Wedge	nora2r	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	180	TWINKLE POP	Sparkle Smilin'	BEMANI Sound Team "Qrispy Joybox" feat.いちか	
+-	6	9	11	-	6	9	11	-	170	RIDDIM CORE	STOIC HYPOTHESIS	BEMANI Sound Team "Expander"	
+-	"[CN]
+4"	7	9	-	"[CN]
+4"	7	10	-	135	GARAGE	Sugar Drippin'	kors k	
+-	"[CN]
+7"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+9"	"[CN]
+12"	-	200	RAVECORE	T-REX vs Velociraptor (In the Far east euphoria)	RoughSketch & TARACHINE	
+-	4	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	4	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	140	FUTURE JERSEY	take me higher	KOTONOHOUSE	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	154	TECHNO	TECHNO Style Essentials	BEMANI Sound Team "SETUP from Berlin"	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	215	HARDCORE	THE BRAVE MUST DIE	BEMANI Sound Team "L.E.D.-G"	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	170	PIERROT CORE	THE F∀UST	Masqed Pierrot	
+-	4	8	10	-	5	8	11	-	138	WORLD/CONTEMPORARY	The Sky of Sadness	猫叉Master	
+-	5	8	11	-	5	8	11	-	102-146	TRAP	Theory	YUTO	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	183	UK HARDCORE	TRIUMPH	AJURIKA	
+-	7	10	11	-	7	10	11	-	185	DANCE POP DUET	UNITE THE HEART	BEMANI Sound Team "T.Kakuta" feat. 709sec. / 花たん	
+2	6	9	11	-	6	9	"[CN]
+11"	-	184	HEROIC VALHALLA ROCK	VALKYRIAS -英雄誕生-	BEMANI Sound Team "HuΣeR" feat.Fernweh	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	176	EMO STEP	VIBRΛ	Nhato Vs. MK	
+-	5	10	"[CN]
+12"	-	5	10	"[CN]
+12"	-	160	ANTHEM TRANCE	Vinculum stellarum	iconoclasm	
+-	"[HCN]
+4"	"[HCN]
+7"	"[HCN]
+10"	-	"[HCN]
+5"	"[HCN]
+7"	"[HCN]
+[HBSS]
+10"	-	132	PROGRESSIVE DISCO	Virus Funk	Nhato	
+-	6	8	"[CN]
+[BSS]
+11"	-	6	8	"[CN]
+[BSS]
+11"	-	175	HARDCORE RAVE	Volcanic Dragon	DJ Shimamura	
+-	5	8	10	-	5	7	10	-	137	TRIBAL DANCE	Voo Doo Bamboleo	SOUND HOLIC Vs. ZYTOKINE feat. CALEN	
+-	6	9	11	12	6	9	11	12	160	HARD STACC	Ypsilon	BEMANI Sound Team "setup"	
+-	5	9	11	-	5	8	11	-	150	HIP HOP	27th style	三代目 "dj TAKA & DAYBREAKERS"	
+-	7	10	12	-	7	10	12	-	60-147	CINEMATIC VALSE	華麗なる大犬円舞曲	Wiktoria	
+-	7	10	12	-	7	10	12	-	185	Hi-メランコリックコア	がっつり陰キャ!? 怪盗いいんちょの億劫^^;	噂の怪盗少女ぷらずま★彡Prim@休業中～( _ _ ).。	
+-	5	9	"[CN]
+11"	-	5	9	11	-	160	STYLISH CROSSOVER	狂水一華	BEMANI Sound Team "HuΣeR Vs. SYUNN" feat.いちか	
+-	4	7	"[BSS]
+10"	-	4	7	"[BSS]
+10"	-	150	NRG	灼熱Beach Side Bunny (Masayoshi Iimori Remix)	Remixed by Masayoshi Iimori	
+-	4	8	11	-	4	8	11	-	100-155	バトルダンス	シャムシールの舞	Zektbach	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	175	CYBER REQUIEM	深淵に捧ぐレクイエム	OSTER project	
+2	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	158	MS J TRANCE POP	セピアの軌跡 ft. 天宮みや(少女フラクタル)	Xceon	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	193	空想ファンタジーシリーズ	眠りの国のステラ	BEMANI Sound Team "DJ TOTTO"	
+-	5	8	11	-	5	9	11	-	126	PIANO CHRONICLE	バッドエンド・シンドローム	アリスシャッハと魔法の楽団	
+-	5	9	11	-	5	10	11	-	200	CHARACTER SONG	開きたまえ！Next stAge！	librarians of Rootage (Ripnte, Stampa and Cleep)	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	160	PDM	ピアノ協奏曲第1番”蠍火” (BlackY Remix)	Remixed by BlackY	
+-	6	9	11	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	198	GOTHIC CORE	曼荼羅恋々	BEMANI Sound Team "Akhuta Works" feat. Nana Takahashi	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	208	TWINKLE POP	魅惑のYUMMYスイーツ	BEMANI Sound Team "TATSUYA"	
+-	5	8	10	-	5	8	10	-	152	HYPER POP	ラブキラ☆スプラッシュ	BEMANI Sound Team "Sota F." feat.いちか	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	200	KILLER PUNK	ランカーキラーガール	中島由貴×いちか	
+-	5	8	11	-	5	8	11	-	190	特撮ハードコア	錬成人間トリコロイダー	DJ SHARPNEL feat. ￥Cuスタ平	
+beatmania IIDX 28 BISTROVER ▲ ▼ △													
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	160	IIDX ANTHEM REVIVAL	ABSOLUTE (kors k Remix)	Remixed by kors k	
+-	4	8	11	-	4	8	11	-	115-230	UPTEMPO RAW	Ah Hah Yeah	Masayoshi Iimori	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	152	ORIENTAL TRANCE	AMRITA -不滅ノ花-	SOUND HOLIC feat. Nana Takahashi	
+-	5	9	11	-	5	9	11	-	200	HARDCORE	apo:llioth	Juggernaut.	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	177	CYBER LIQUID FUNK	As You Want	Maozon	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	150	BIG BEAT	"ASIAN VIRTUAL REALITIES
+(MELTING TOGETHER IN DAZZLING DARKNESS)"	かめりあ	
+-	4	7	9	-	5	7	9	-	134	BPL EDM	BEMANI PRO LEAGUE Theme	BEMANI Sound Team "Sota F."	
+3	"[CN]
+7"	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	187	DRUMSTEP	BIGソムタム	AJURIKA	
+"[CN]
+3"	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	185	SYMPHONIC SPEED SCRANZ	BLACK or WHITE?	BlackYooh vs. siromaru	
+-	6	9	11	12	6	9	11	12	165	HYPER TECHNO	Burning Flame	AJURIKA feat.SAK.	
+1	4	7	10	-	4	7	10	-	190	CHIP RAVE	Chewingood!!!	TORIENA	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	195	BIGCORE	COSMIC RAY	BEMANI Sound Team "Captain Sonic"	
+-	5	9	11	-	5	9	11	-	170	UK HARDCORE	Crazy Jackpot	Hommarju	
+-	5	8	11	-	5	8	11	-	150	CONTEMPORARY SALSA	Danza Aestas	Feryquitous	
+-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+12"	-	185	CELTIC TRANCE STEP	Dawn Saga	Nhato	
+-	4	9	10	-	4	10	11	-	150	TECHNO	"DENIM
+[N][H]DENIM
+[A]DENIM (ELECTRO MIX)"	"SLAKE
+[N][H]SLAKE
+[A]SLAKE (another mixed by DEPROGRAM MAN)"	
+-	3	6	9	-	3	6	9	-	132	ELECTRO FUNK	Don't Stop The Music feat. Kanae Asaba	Nhato	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	185	IIDX SOUNDS	DUAL STRIKER	"Mayumi Morinaga,Fernweh
+by BEMANI Sound Team ""L.E.D. & HuΣeR"""	
+-	7	10	12	-	7	10	12	-	204	JUNGLE TERROR	Empire of Fury	kors k	
+-	5	8	10	-	5	8	10	-	149	J-DANCE FUSION	Euphoric Lagoon	BEMANI Sound Team "TAG"	
+-	4	7	10	11	5	7	10	11	131	DANCE POP	Explorer feat. ぷにぷに電機	パソコン音楽クラブ	
+-	5	8	11	-	5	8	11	-	144	MOROCCAN CROSSOVER	Farewell to Marrakech	Dirty Androids	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	157-300	EXPERIMENTAL EUROBEAT	Fire Beat	kors k	
+-	4	8	10	-	4	8	10	-	185	MAKINA	Frisk And Squeak	nora2r	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	150	NEO RUSSIAN FUTURE	GIGA RAID	Blacklolita	
+-	5	8	11	-	5	8	11	-	190	RAVE STEP	Globe Glitter	Sana,ATSUMI UEDA by BEMANI Sound Team "PON"	
+2	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	175	J-CORE	Here We Are	The 4th feat.ここなつ	
+-	"[HCN]
+4"	"[HCN]
+7"	"[HCN]
+[HBSS]
+10"	-	"[HCN]
+4"	"[HCN]
+7"	"[HCN]
+[HBSS]
+10"	-	155	HARDSTYLE	HIGH VOLTAGE	Yuta Imai	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	188-191	X	Ignis†Iræ	BEMANI Sound Team "神"	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	155	CAPTIVATE	IIDX RED Ending (Ryu☆Remix)	Remixed by Ryu☆	
+-	6	10	12	-	6	10	12	-	310	BIGBAND JAZZ	innocent revolver	OSTER project	
+-	5	9	11	-	5	9	11	-	184	DRUMSTEP / RAGGATEK	Jungle Eater	Hommarju	
+-	6	9	11	-	6	9	11	-	157	PSYCHEDELIC TRANCE	LAST DAY	AJURIKA	
+-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	175	DRUMSTEP / DnB	Level 3	Yamato	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	182	HAPPY BISTRO CORE	LOCUS OF THE TRAVEL	CANVAS feat. Quimär & BEMANI Sound Team "L.E.D.-G"	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	180	HAPPY COUNTRY CORE	Lovely Howdy Cowboy!!	まろん feat. キャサリン	
+-	5	"[BSS]
+9"	"[BSS]
+11"	-	5	"[BSS]
+9"	"[BSS]
+11"	-	160	JAPANESQUE	MA・TSU・RI	かなたん,アマギセーラ,ぁゅ by BEMANI Sound Team "藤森崇多"	
+-	7	10	"[CN]
+12"	-	7	10	"[CN]
+12"	-	206	BULGARIAN CORE	MEGAERA	fallen shepherd × cotowari ft. nayuta	
+-	"[CN]
+3"	"[CN]
+8"	10	-	"[CN]
+3"	"[CN]
+8"	10	-	90-110	HIP HOP	Midnight Drive	らっぷびと Prod. by uno	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	142	ORBITALIC ELECTRIC MUSIC	MOVE! (We Keep It Movin')	"Jonny Dynamite!,Lisa - paint with stars -,Rio Hiiragi
+by BEMANI Sound Team ""U1-ASAMi"""	
+-	5	9	11	-	5	9	11	-	150	HDM	Neo Heritage	kors k vs MAD CHILD	
+-	4	7	10	-	4	7	10	-	145	HiTECH FUSION	Ocean Blue feat. Luschel	lapix	
+-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	157	TRANCE	of the first magnitude	BEMANI Sound Team "Trance Liquid"	
+-	5	9	11	-	5	9	12	-	160	OLD FASHIONED	OTOKOZAKA	BEMANI Sound Team "Trance Liquid"	
+-	6	9	11	-	6	9	11	-	170	DRUM'N'BASS	Overslept	PARKGOLF	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	180	MEXICAN DRUMSTEP	Para siempre	削除 feat. 削除	
+-	5	9	12	-	5	9	12	-	205	ORBITALIC WORLD MUSIC	Pārvatī	BEMANI Sound Team "U1 overground"	
+2	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	"[CN]
+12"	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	"[CN]
+12"	160	ポルカ2020	POLꞰAMAИIA	かめりあ feat. ななひら	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+11"	-	174	STYLISH FUTURE	Rejection Girl	BEMANI Sound Team "HuΣeR"	
+-	6	9	11	-	6	9	11	-	190	ARABIC HARD RITUAL	Ritual of Anubis	KO3 & Relect	
+2	5	8	11	-	5	8	11	-	162	IIDX EDITION	Romanticが止まらない	Remixed by BEMANI Sound Team "L.E.D."& IOSYS	
+-	6	9	12	-	6	9	11	-	208	BREAKCORE	rommmo	callasoiled	
+-	5	9	11	-	5	9	11	-	155	HARD LATIN	Rosa azuL	lapix	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	100	DUBSTEP	Rowdy	Dazsta	
+-	5	9	11	-	5	9	12	-	160	ACID LATIN JAZZ	Rubrum Piano	Xceon	
+-	4	7	9	-	5	7	9	-	142	DARK TECHNO	S-Bahn	BEMANI Sound Team "DARK TRAIN"	
+-	"[CN]
+7"	"[CN]
+11"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+11"	"[CN]
+12"	-	128-256	KAMIKURA	Sinus Iridum	神楽改	
+-	5	"[CN]
+8"	"[CN]
+10"	-	5	"[CN]
+8"	"[CN]
+10"	-	177	CANDY RAVE BASS	smooooch・∀・ (Snail's House Remix)	Remixed by Snail's House	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	186	LIFE STREAM	SOLID STATE SQUAD -RISEN RELIC REMIX-	Remixed by xi	
+-	5	8	10	-	5	8	10	-	170	MOE CORE	Sugarplum	KOTONOHOUSE	
+-	"[CN]
+6"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	110	HOLIC	Swarm Of Scarabs	C-Show	
+-	5	8	11	-	5	8	11	-	203	ROCK	Tell me what you wish feat.らっぷびと	Pizuya's Cell	
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	150	SPEED HOUSE	That Feeling	Crayvxn	
+-	6	10	"[CN]
+12"	-	6	10	12	-	170	HARD MIXTURE	THE PEERLESS UNDER HEAVEN	Yuta Imai Vs. BEMANI Sound Team "L.E.D.-G"	
+-	5	8	10	-	5	8	10	-	170	THE 4TH	The Wind of China Express(The 4th Mashup)	The 4th	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	180	Hi-TECH / PSY CORE	Tiempo Loco	kors k feat.Hboy	
+-	"[BSS]
+5"	"[CN]
+[BSS]
+10"	12	-	"[BSS]
+5"	"[CN]
+[BSS]
+10"	12	-	161	NU-NRG	Viridian	REMO-CON	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	146	PROGRESSIVE METAL	Vitrum	BEMANI Sound Team "Yvya"	
+-	"[CN]
+5"	"[CN]
+7"	9	"[CN]
+10"	"[CN]
+5"	"[CN]
+7"	10	"[CN]
+11"	150	TROPICAL ELECTRO HOUSE	WAKE UP NOW	Maozon feat. Chica	
+-	4	7	10	-	4	7	10	-	145	HYBRID BASSLINE	When I Met U	LADY'S ONLY	
+1	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	100	THEME SONG	Winner's Proof ft. KANASA from bless4	BEMANI Sound Team "HuΣeR" & kors k	
+-	5	9	11	-	5	9	11	-	150	TRANCE	X-ray binary	BEMANI Sound Team "Trance Liquid"	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	164	PLUS ONE	Zenith	Snail's House	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	240	FRENCH POP	犬に雨傘	OSTER project feat. そらこ	
+-	"[HCN]
+[HBSS]
+6"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+[HBSS]
+6"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	180	DARKSTEP	閠槞彁の願い	DJ TECHNORCH & RoughSketch	
+1	4	8	10	"[CN]
+11"	4	8	10	"[CN]
+11"	184	ROCK	ここからよろしく大作戦143	BEMANI Sound Team "あさき隊"	
+"[CN]
+3"	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	165	IIDX EDITION	新宝島	Remixed by BEMANI Sound Team "TAG feat. PON"	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	168	JAPANESE TECH BREAKS	水鏡の異界	BEMANI Sound Team "Coyaan"	
+-	6	10	12	-	6	10	12	-	187	オンセン♨ヒーロー	スーパー戦湯ババンバーン	"すわひでお,秋成,かぼちゃ,藍月なくる,NU-KO
+by BEMANI Sound Team ""八戸亀生羅"""	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	200	BRAVE ANTHEM	世界の果てに約束の凱歌を -ReUnion-	OSTER project feat. かなたん	
+3	7	"[CN]
+10"	"[CN]
+12"	-	7	"[CN]
+10"	"[CN]
+12"	-	180	RENAISSANCE	∀	BEMANI Sound Team "HuΣeR" respect for D.J.Amuro	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	180-280	CROSSOVER	ディスコルディア	ぺのれり vs. BEMANI Sound Team "HuΣeR"	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	187	Hi-歌謡タンゴ	涙のテ・エストラーニョ・ムーチョ	LA BAILARINA☆Prim	
+-	5	9	11	-	5	9	11	-	162	BLOOM ROCK	儚き恋の華	BEMANI Sound Team "TAG" feat. 猫体質	
+-	6	10	12	-	6	10	12	-	173	KUDOS CORE	伐折羅-vajra-	DJ TOTTO VS 兎々	
+-	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[HCN]
+[HBSS]
+12"	-	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[HCN]
+[HBSS]
+12"	-	220	.+:☆ BAD FUTURE ☆:+.	バッド・スイーツ、バッド・ドリーム	かめりあ feat. ななひら	
+-	7	10	12	-	7	10	12	-	280-316	SPUKWALZER	二人ノ廃城幽踊宴	上ノ瀬つかさ	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	186	WHITE OUT	-65℃	BEMANI Sound Team "D.J.Amuro"	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+12"	-	178-208	FANTASY TOYPOP	魔法のかくれんぼ	Snail's House	
+-	6	8	10	-	6	9	11	-	167	-和- EURO TRANCE	水無月の雫 ft. 小林まな	Xceon	
+-	5	9	11	-	5	9	11	-	160	HARD TRANCE	無意識のフィロソフィア	BEMANI Sound Team "TAG"	
+-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	150	LAST FRONTIER	霧幻メモリア	BEMANI Sound Team "劇団レコード" feat.Risa Yuzuki	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	171	BALKANIC ROCK	乱膳の舞姫	BEMANI Sound Team "Akhuta Works" feat. mami	
+beatmania IIDX 29 CastHour ▲ ▼ △													
+1	"[HCN]
+6"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+6"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	200	EUPHORIC FRENCHCORE	ABSOLUTE EVIL	Yuta Imai	
+-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	200	ROCK	Aftermath	BEMANI Sound Team "猫叉Master & あさき & Yvya"	
+-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[MSS]
+12"	-	185	IRREGULAR OMNIBUS HARDCORE	ALTERNATOR	BEMANI Sound Team "dj Hellix"	
+-	5	8	10	-	5	8	10	-	158	FUTURE POP	AMICABLE	BEMANI Sound Team "Sota F."	
+1	4	7	"[CN]
+10"	-	4	7	"[CN]
+10"	-	174	EMOTIONAL J-POP	ANEMONE	BEMANI Sound Team "HuΣeR × Yvya" feat.紫村 花澄	
+-	6	10	12	-	6	10	12	-	155	PIANO TECH	Angel's Ladder	xi	
+-	4	7	10	-	4	7	10	-	198	UNSUNG REQUIEM	Ariah	satella feat.藍月なくる	
+-	5	9	12	-	5	9	12	-	180	FREEFORM HARDCORE	Arkadia	Hommarju ft.Mayumi Morinaga	
+-	5	9	11	-	6	9	11	-	190	EARLY RAVE	Banger Banger Banger Banger	nora2r	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	190	BLACK OUT	Binary Black Hole	BEMANI Sound Team "D.J.Amuro"	
+-	4	6	8	-	4	6	8	-	134	LATIN FUSION POP	Blue Bird feat. Kanae Asaba	Nhato	
+-	"[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	152	MELODIC RIDDIM	Brave Spirits	MK	
+-	5	8	11	-	5	9	11	-	200	CYBERPUNK	DISPARATE	BEMANI Sound Team "Captain Sonic"	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	150	BIG ANTHEM	Divine Heaven	Absolute The 4th	
+-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	"[HCN]
+6"	"[HCN]
+10"	"[HCN]
+12"	-	210	MIXTURE	Don't believe the hype	DJ Mass MAD Izm* feat.H14(LEONAIR)	
+-	5	8	11	-	5	8	11	-	140	ABDUCTION BEAT	DREAM OF SPACE UFO ABDUCTION	BEMANI Sound Team "謎の宇宙人スペースX"	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	161	EDM STYLE	Emera	PON	
+-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	170	ELECTRIC POP	EMOTiON TRiPPER	sky_delta	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	170	亜空間ジャズ	Ergosphere	TOMOSUKE	
+-	4	"[CN]
+7"	"[CN]
+9"	-	4	"[CN]
+7"	"[CN]
+9"	-	168	DIGITAL POP	Fantastic Merry-Go-Round	SOUND HOLIC feat. Nana Takahashi	
+-	6	10	12	-	6	10	12	-	175	EURO BEAT	Fegrix	Xceon vs DJ Command (Eurobeat Union)	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	185	ENERGETIC HARDCORE	FINALLY BLAZE	BlackY	
+-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	174	COLOUR CORE	Flying Castle	lapix	
+-	4	8	11	-	4	8	11	-	105-210	HARD MIXTURE	Game Changers	Yuta Imai	
+-	4	7	10	-	4	7	10	-	135	FUTURE BOUNCE	Get set, Go! feat.Kanae Asaba	MK	
+-	7	10	12	-	7	10	12	-	250	EXTRATONE	GiGaGaHell	m1dy, RoughSketch	
+-	6	10	12	-	6	10	12	-	185	NEUROFUNK	GRAVITON	BEMANI Sound Team "L.E.D."	
+-	7	10	"[HCN]
+12"	-	7	10	"[HCN]
+12"	-	208	HIDEOUT	hard-wired	Yuta Imai ≡ Blacklolita	
+-	4	7	10	-	4	7	10	-	177	NU PRELUDE	Harmonia	ATSUMI UEDA	
+-	4	8	11	-	4	8	11	-	180	UK HARDCORE	Hat Surprise	Hommarju	
+-	"[MSS]
+3"	"[MSS]
+7"	"[MSS]
+10"	-	"[MSS]
+3"	"[MSS]
+7"	"[MSS]
+10"	-	90	HEALING FUTURE	HEARTACHE	BEMANI Sound Team "HuΣeR" feat.ゆきまめ	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	124-190	CHANNEL K	kors k's How to make OTOGE CORE	kors k	
+-	4	8	11	-	4	8	11	-	140	PROGRESSIVE METAL	Lawes's Parotia	BEMANI Sound Team "Yvya"	
+-	7	10	12	-	7	10	12	-	190	HARD ELECTRIC POP	LIVE DRIVING!! feat. 花たん	BEMANI Sound Team "S-C-U vs L.E.D."	
+-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	150	ASTRONOMICAL TECHNO	N.O.	かめりあ	
+-	"[CN]
+[MSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	85-255	SYMPHONIC DUBSTEP	n/a	Blacklolita	
+2	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	150	J-POP	No Day But Today!	NU-KO & yunocy	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	157	DARKSYNTH	Nocturnal 2097	Dirty Androids	
+-	"[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	172	DRUM'N'BASS	Non Stop Rock	Masayoshi Iimori	
+-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+12"	-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+12"	-	195	EUPHORIC FRENCHCORE	One for All	RoughSketch	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	44-174	STYLISH COLOUR	Onyx	BEMANI Sound Team "HuΣeR"	
+-	5	8	10	-	5	8	10	-	160	RAWSTYLE	P.O.W.E.R.	Yuta Imai	
+-	5	8	10	-	5	8	10	-	160	STORMY SEA	PIRATES BLADE	BEMANI Sound Team "劇団レコード"	
+2	6	10	12	-	6	10	12	-	178	LIGHTNING EUROBEAT	PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.	BEMANI Sound Team "L.E.D."	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	170	FUTURE BASS	Pout	BEMANI Sound Team "SYUNN"	
+-	5	8	10	-	5	8	10	-	164	VARIABLE FUTURE BASS	Prohibited Props	BEMANI Sound Team "ZAQUVA"	
+-	"[CN]
+[MSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	150	MELODIC RIDDIM	Purple Perplex	Eagle	
+-	6	9	12	-	6	9	12	-	164-172	AKIBA-POP	Push on Beats!～音ゲの国のeX-ストリーマー～	MOSAIC.WAV	
+3	"[MSS]
+6"	"[MSS]
+10"	"[MSS]
+12"	-	"[MSS]
+6"	"[MSS]
+10"	"[MSS]
+12"	-	166	MIXTURE	RAGE feat.H14 of LEONAIR	DJ Mass MAD Izm*	
+-	6	10	12	-	6	10	12	-	152-172	PIANO CONCERTINO + JAZZ FUSION	Silver Bullet	xi	
+-	6	10	12	-	6	10	12	-	151	TECH DANCE	Smalt #28598F	REMO-CON	
+-	6	9	11	"[BSS]
+12"	6	9	11	12	165	HARDPSY	SOLID WYVERN	BEMANI Sound Team "L.E.D."	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	225	ALCHEMY POP	Souhait bleu	しーけー	
+-	4	8	10	-	4	8	10	-	160	EUPHORIC HARDSTYLE	SPARK IN THE NIGHT	BEMANI Sound Team "L.E.D.-G"	
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	128	DANCE MUSIC	Stepper	PSYQUI	
+-	5	9	11	-	5	9	11	-	156	TRANCE	Tail Lights	BEMANI Sound Team "dj TAKA" feat.nana hatori	
+-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[MSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	215	SUPER HARDCORE NOVA	TOMAHAWK	かめりあ	
+3	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	196	MUSIC GAME TRADITIONAL	Triple Cross	BEMANI Sound Team "dj TAKA & DJ YOSHITAKA & SYUNN"	
+-	4	8	11	-	4	8	11	-	170	JAZZY STEP	Ventriloquist	Avans	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+10"	-	178	HARDCORE RAVE	Victory Of Ravers	DJ Shimamura	
+-	7	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	7	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	108	CROSSO-WHA-R	WHA	かめりあ involving ななひら	
+-	5	7	10	-	5	8	10	-	165	NU DRUM & BASS	Wonderful Escape	DÉ DÉ MOUSE	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	195	FRENCHCORE	Xyndrome	nora2r	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	178	DRUMSTEP	10000 MILES AWAY	AJURIKA	
+-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	175	HARDCORE	2 Beasts Unchained	kors k vs Yooh	
+-	4	7	9	-	4	7	9	-	168	JUNGLE TERROR	808monkey	AJURIKA	
+-	4	9	11	-	4	9	11	-	175	AQUARIUM QUARTERSTEP	青の洞窟	Ujico*	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	135	ROCK	アクマフカ	Pizuya's Cell	
+2	5	"[BSS]
+9"	"[BSS]
+12"	-	5	"[BSS]
+9"	"[BSS]
+12"	-	155	HARD DANCE	天邪鬼	Qlarabelle	
+-	4	7	10	-	4	7	10	-	152	EURO BEAT	愛しくてラヴィンユー ft. マナ	Xceon	
+-	6	9	11	-	6	9	11	-	154	ALTERNATIVE DANCE CORE	ウツシミウツシ	BEMANI Sound Team "PHQUASE" feat.ぁゅ	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	215	GALAXY QUEST	オールトの雲	OSTER Project	
+3	5	7	10	11	5	7	10	11	172	J-POP	オドループ	フレデリック	
+1	4	6	10	"[CN]
+[BSS]
+11"	4	6	10	"[CN]
+[BSS]
+11"	170	IIDX EDITION	怪物	Remixed by Nhato feat. ricono	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	150	HUMAN BEATBOX ELECTRO	口カラ凸ゲキ	SARUKANI × Blacklolita	
+-	4	7	9	-	4	7	9	-	104	SHOWA RETRO	黒紅掬い	猫叉Master feat.霜月はるか	
+3	5	8	11	"[CN]
+12"	5	8	11	"[CN]
+[MSS]
+12"	170	IIDX EDITION	グッバイ宣言	Remixed by uno(IOSYS) & Liqo feat. Chiyoko	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	160	TRIUMPH	《GRANDMASTER》	Blacklolita	
+-	"[HCN]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	280	JAPANESQUE	逆月	BEMANI Sound Team "HuΣeR" feat.Fernweh	
+2	4	7	10	11	4	7	10	11	176	J-POP	シル・ヴ・プレジデント	P丸様。	
+-	6	10	12	-	6	10	12	-	105-180	HIP ROCK3	雪上断火	Des-ROW・組	
+-	5	8	11	-	5	8	11	-	190	CHIPBREAK POP	月とミルク	TORIENA	
+-	4	8	10	-	4	8	10	-	163	ALTERNATIVE	ナイトフィクション	中山真斗 feat. CHAN	
+-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+9"	"[CN]
+[MSS]
+11"	"[CN]
+[MSS]
+12"	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+9"	"[CN]
+[MSS]
+11"	"[CN]
+[MSS]
+12"	165	ハイテックトキオ	ハイテックトキオ	lapix ∞ BEMANI Sound Team "Sota Fujimori"	
+-	6	10	12	-	6	10	12	-	※	THRENODY	ピアノ独奏無言歌 "灰燼"	BEMANI Sound Team "Virkato Wakhmaninov"	
+-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	"[CN]
+[BSS]
+12"	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	190	CYBER TAIGA	烽火連天の刃	OSTER project	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	160	HARD PSY TRANCE	禊	Nhato	
+3	"[BSS]
+6"	"[BSS]
+9"	"[BSS]
+11"	"[CN]
+[BSS]
+12"	"[BSS]
+6"	"[BSS]
+9"	"[BSS]
+11"	"[CN]
+[BSS]
+12"	165	IIDX EDITION	ミュージック・アワー	Remixed by BEMANI Sound Team "PON"	
+-	5	8	10	-	5	8	10	-	240	ハッピースピードコア	めでてえ	TORIENA	
+beatmania IIDX 30 RESIDENT ▲ ▼ △													
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	190	EMOTIONAL HAPPY EUPHORIA	Always We Trust In You	nora2r	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	158	ELECTRO FUSION	Ambush Ace	Xceon	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	95-165	BOSSA NA NOKA	AWA AWA	Snail's House	
+-	6	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	6	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	157	HARD BODY MUSIC	B.O.D.Y.	BEMANI Sound Team "L.E.D. Sota F."& Starbitz	
+-	"[CN]
+[BSS]
+7"	"[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	200	NEO INDUSTRIAL	Bad Encryption	BEMANI Sound Team "ZAQUVA" respect for teranoid	
+-	"[HCN]
+7"	"[HCN]
+11"	"[HCN]
+12"	-	"[HCN]
+7"	"[HCN]
+11"	"[HCN]
+12"	-	185	CULMINATION	Beyond Evolution	Hekatoncheir	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	177	EMOTIONAL HARDCORE SUMMERS	BIGWAVERS	BlackY	
+-	5	9	11	-	5	9	11	-	162-180	ELECTRONICORE	C-C-C-N-N-N	RoughSkreamZ feat. Aikapin	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+11"	"[CN]
+12"	142	STARRY BASS HOUSE	Caldwell 99	BlackY	
+-	5	9	12	-	5	9	12	-	180	HELETIC BREAK D'n'B	Chaotoxin	Feryquitous	
+-	6	"[CN]
+9"	"[MSS]
+11"	-	6	9	"[MSS]
+11"	-	167	NRG SCHRANZ	CODE -CRiMSON-	Shiron	
+3	5	8	10	12	5	8	10	12	160	EMERGENCY CORE	CUE CUE RESCUE	TORIENA	
+-	5	10	12	-	5	10	12	-	175	ACID RAVE	dica dica	REMO-CON	
+-	4	7	10	-	4	7	10	-	140	DANCE POP	Dreaming Dream	MK feat. 紫咲ほたる	
+-	5	7	9	-	5	7	9	-	174	BIGROOM D&B	Driver	Masayoshi Iimori	
+-	"[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[MSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	150	TEAROUT BREAKS	EXODUS SIGN	Blacklolita	
+-	5	8	10	-	5	8	10	-	148	TRANCE	Fading Stars	Nhato	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	140	BPL S3 THEME	FLARE -炎舞- ft.Nana Takahashi	BEMANI Sound Team "dj TAKA" Vs SOUND HOLIC	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	155	HYBRID TRANCE	Get On Your Feet	Nhato	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	180	COMPETITIVE ROCKSTEP	GET UP AGAIN	Zekk feat. くらべ	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	186	ARTCORE	glacia	DJ TOTTO	
+-	5	9	12	-	5	9	12	-	180	UK HARDCORE	Hat Surprise (Season 2)	Hommarju	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	225	CHIP ELECTRO	I	黒魔	
+-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	190	CHANNEL K	kors k's How to make OTOGE CORE 「LONG」	kors k	
+2	4	9	11	12	4	9	11	12	166	IIDX EDITION	KING	Remixed by SOUND HOLIC feat. はるの	
+-	5	7	10	-	5	7	10	-	152	HYBRID FOLK	LADS	BEMANI Sound Team "PON"	
+-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	180	DnB	Level 4	Yamato	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[HCN]
+[HBSS]
+12"	-	180	MASSIVE MIXTURE	LOUDER ROLLING THUNDER	BEMANI Sound Team "Dustup Vs. L.E.D.-G"	
+-	6	10	"[CN]
+12"	-	6	10	"[CN]
+12"	-	15-360	HARDCORE TECHNO	MAX 360	BEMANI Sound Team "[𝑥]"	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	124-174	PROGRESSIVE DRUM'N'BASS	Meissa	BEMANI Sound Team "Yvya"	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+10"	-	174	DRUM & BASS	Next Level	Maozon	
+-	6	10	12	-	6	10	12	-	150	TRANCE	No Border	BEMANI Sound Team "dj TAKA" feat.Sana	
+-	6	9	12	-	6	10	12	-	174	RAVE IN THE GAME	ONE AND ONLY	Yuta Imai	
+-	6	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+11"	-	6	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+11"	-	160	HARDSTYLE	OVER VOLTAGE	Yuta Imai	
+-	7	10	12	-	6	10	12	-	180	RAPCORE	Peaktime Booster	らっぷびと Prod. by RoughSketch & NUE	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	150	CRIME JAZZ BROKEN BEATS	Perfect Plan	Dirty Androids	
+-	5	8	11	-	5	8	11	-	150	PSYCHEDELIC TRANCE	Programmed Genom	kors k	
+-	6	9	11	-	6	9	11	-	180	HARDCORE	Red Soul	RoughSketch	
+-	4	7	10	-	4	7	10	-	115	GLITCH HOP	Rewind Time	Dazsta	
+-	5	10	12	-	5	10	12	-	198	SYMPHONIC SAVIOR	RINИE	GeMiNioИ	
+-	5	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	5	"[CN]
+8"	"[CN]
+11"	-	174	DRUM & BASS	Ruler or Loser	Maozon feat. Nadia	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	216	UNSUNG SHADOWS	Seraph	satella feat.棗いつき	
+-	4	8	11	-	4	8	11	-	180	STYLISH CONTEMPORARY	Shadow World	BEMANI Sound Team "HuΣeR × 猫叉Master" feat.Emi Evans	
+-	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+10"	-	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+10"	-	135	G-HOUSE	Shamshir	Blacklolita	
+-	"[CN]
+6"	"[CN]
+11"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	115	SUBCONSCIOUS FRAGMENT	Somnidiscotheque	夢路 歩	
+-	"[CN]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+10"	-	158	COLOUR BASS	STAR BEAT	MK	
+-	5	8	11	-	5	8	11	-	158	COLOUR BASS BREAKS	STRAIGHT TO THE STARS	BEMANI Sound Team "Expander" feat. Starbitz	
+-	6	9	11	-	6	10	12	-	165	STYLISH TECHNO	Stylus	BEMANI Sound Team "HuΣeR"	
+2	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	145	GAME MUSIC	Summerblue	Toby Fox & Camellia	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	185	FUTURE CORE	Sunny Day Vibes	Mameyudoufu	
+-	5	9	12	-	5	9	12	-	200	HARDCORE	Super Freak	Hommarju	
+-	6	10	12	-	6	10	12	-	153	JAZZ CORE	suspicions	BEMANI Sound Team "猫叉Master VS dj TAKA"	
+-	5	9	11	-	5	9	11	-	170	ULTRA JAZZFUNKTION	Swing My Wonderland	lapix	
+-	5	8	12	-	5	8	12	-	152	TECH/ELECTRO	TECHNOPHOBIA	BEMANI Sound Team "HuΣeR"	
+-	6	10	12	-	6	10	12	-	204	DISSOCIATIVE IDENTITY DISORDER	The Clown of 24stairs	Yu_Asahina	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	155	HARDWAVE/STYLE	THE TIME MACHINE	Yuta Imai	
+-	"[CN]
+[MSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[MSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	80-170	EXTREME EXPERIMENTAL	VØID	BEMANI Sound Team "Darker Vs. JUSTICE"	
+-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	212	EMPYREAL HYDRO ARTCORE	VOLAQUAS	BEMANI Sound Team "DJ TOTTO VS 兎々"	
+-	6	9	11	-	6	9	11	-	148	TECH-BIGBEAT	VOLCANIC BIGBEAT	DJ Mass MAD Izm*	
+-	3	6	9	-	3	6	9	-	142	FUNK POP	wanna be a "BAD GIRL" feat. Nana Takahashi	Nhato	
+-	4	8	11	-	4	8	11	-	150	DANCE	With You	BANVOX	
+-	"[HBSS]
+7"	"[HBSS]
+10"	"[HBSS]
+12"	-	"[HCN]
+[HBSS]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	182	HAPPY HARDCORE	Xerulean	BEMANI Sound Team "ZAQUVA"	
+-	6	9	11	-	6	9	11	-	190	ARCADE CORE	ZEИITH	Ashrount vs polysha	
+-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	184	HARDCORE	24h Endurance Race	BEMANI Sound Team "Risk Junk"	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	191	NEO DANCE SPEED	3V0	BlackY	
+-	4	7	10	-	4	7	10	-	156	PRISM EURO	7 Colors	kors k feat.吉河順央	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	200	FORTUNE OVERTURE	[ ]DENTITY	BEMANI Sound Team "HuΣeR"	
+-	4	7	9	-	4	7	10	-	178	SUNNY SKY	雨のちパノラマセカイ	BEMANI Sound Team "劇団レコード" feat.NU-KO	
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	236	ピコピコ電波ソング	あるビー！ feat.ころねぽち	ヒゲドライバー	
+-	5	"[CN]
+8"	"[CN]
+10"	-	5	"[CN]
+8"	"[CN]
+10"	-	170	EUROBEAT	異心前進♪ぴょんぴょんぴょん	天土	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	185	TRIUMPHAL MARCH	栄冠のカンパネラ	OSTER project	
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	166	GODSPEED	《ORDERBREAKER》	Blacklolita	
+-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	191	TOHOKU NEURO DENSETSU	Ōu Legends	かめりあ	
+1	4	7	10	-	4	7	10	-	177	J-ROCK	おとせサンダー	ぼっちぼろまる	
+2	4	8	10	12	5	8	10	12	142	IIDX EDITION	神っぽいな	Remixed by uno(IOSYS) & NUE feat. Chiyoko	
+-	"[HCN]
+[HBSS]
+6"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+[HBSS]
+6"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+12"	-	140	MELODIC DUBSTEP	神のシナリオ	AJURIKA	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	155	HARD TRIBAL	#CMFLG	Qlarabelle	
+-	4	7	10	-	4	7	10	-	162	ROCK	きゅんです。	Pizuya's Cell	
+-	6	9	11	-	6	9	11	-	180	HEROIC DRUM & BASS	響花水月	xi feat. Risa Yuzuki	
+-	4	7	10	-	4	7	10	-	174	FANTASIA	昏き甲鉄のヴェルガ	arcane feat.rionos	
+-	5	"[CN]
+8"	"[CN]
+10"	-	5	"[CN]
+8"	"[CN]
+10"	-	189	ALTERNATIVE SHIBUYA E-POP	■□模様	BEMANI Sound Team "PHQUASE" feat.紫崎 雪	
+-	4	8	"[CN]
+10"	-	4	7	"[CN]
+10"	-	137	BEMANI 8BIT COLLECTION	サヨナラ・ヘヴン-Celtic Chip Dance Mix-	しのりゅー	
+3	7	10	11	"[HCN]
+[HBSS]
+12"	7	10	11	"[HCN]
+[HBSS]
+12"	182	NIGHTCORE	≡+≡	Ryu☆	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+9"	"[CN]
+11"	-	40-165	PIANO CONCERTO	罪過の聖堂	OSTER project	
+-	5	8	"[HCN]
+10"	-	5	8	10	-	165	歌謡ニューウェーブ	湘南ロンリーMIDNIGHT RAIN	Nana Takahashi & BEMANI Sound Team "T.Kakuta"	
+-	4	9	"[CN]
+11"	-	4	9	"[CN]
+11"	-	210	EMOCTRO	少年リップルズ	常盤ゆう	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	200	バーチャルマルチコア	ぞうしょく！？マイデンティティ	DJ SHARPNEL feat.みらい	
+-	5	9	11	-	5	9	11	-	200	ウラシュダイカ	チェイスチェイスジョーカーズのうた (オニスタイルリミックス)	ちよこ & 一ノ瀬 月琉 Prod. by RoughSketch & NUE	
+-	6	10	11	-	6	10	11	-	180	ROCK	ちょえちょえまぎか	Pizuya's Cell	
+-	5	8	10	-	5	8	10	-	160	J METAL×DANCE POP	月と夢の跡 ft. マナ	Xceon	
+"[BSS]
+3"	"[BSS]
+8"	"[BSS]
+10"	"[BSS]
+12"	-	"[BSS]
+7"	"[BSS]
+10"	"[BSS]
+12"	-	175	和風歌謡硬核音楽	儚キ戀ノ幻想譚	まろん feat. あやぽんず＊ (森羅万象)	
+-	"[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+11"	-	"[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	175	ROCK	パーフェクトイーター	BEMANI Sound Team "PON" feat.かなたん	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	140	HOUSE	真夜中のバベル	Len	
+-	5	8	10	-	5	8	10	-	239	ALTERNATIVE	楽園追放	中山真斗 feat. CHAN	
+-	5	9	11	-	6	9	11	-	198	SPIRITUAL CORE	輪廻の鴉	BEMANI Sound Team "dj TAKA"	
+-	"[CN]
+[MSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[MSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	3-333	HARDCORE×ソフラン×変拍子×萌え	恋愛＝精度×認識力	立秋 vs. BEMANI Sound Team "L.E.D.-G" feat.ちょこ＆ななひら	
+-	4	8	11	-	4	7	11	-	180	ANIMTRIBE POP	惑星☆ロリポップ	SOUND HOLIC feat. Nana Takahashi	
+beatmania IIDX 31 EPOLIS ▲ ▼ △													
+-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	185	NEOTRANCE CORE	ACTØ	モリモリあつし	
+-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+11"	-	182	UNSUNG FANTASIA	Aeterna	satella feat. Risa Yuzuki	
+-	5	7	10	-	5	7	10	-	180	LOUD TRAP	Akatsuki	PRIDASK	
+-	7	10	12	-	7	10	12	-	185	HARD RENAISSANCE	Ambivalent Vermilia	BEMANI Sound Team "二代目朱雀 feat.朱雀"	
+-	6	9	11	-	6	9	11	-	155	TRANCE	Amethyst	BlackY	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+8"	"[CN]
+10"	-	135-180	NU SYNTH BASS	Bitter & Lucky	DÉ DÉ MOUSE	
+-	6	10	"[BSS]
+12"	-	6	9	12	-	191	BURNING RAVE	BLAZING_LAZER	brz1128	
+-	7	10	12	-	7	10	12	-	160	PSYCHEDELIC TRANCE	CADENZA	lapix ∞ BEMANI Sound Team "L.E.D."	
+-	"[CN]
+[MSS]
+5"	"[CN]
+[MSS]
+9"	"[CN]
+[MSS]
+11"	-	"[CN]
+[MSS]
+5"	"[CN]
+[MSS]
+9"	"[CN]
+[MSS]
+11"	-	175	COLOUR TECHCORE	Chemical Colours	Blacklolita x BEMANI Sound Team "Expander"	
+-	5	9	11	-	5	9	12	-	155	HARD TECHNO	CODE:2	HEXA	
+-	4	7	10	-	4	7	10	-	152	SYMPHONIC DRUM'N'BASS	COUNTING SHEEP ft. Kanae Asaba	Xceon	
+-	6	10	12	-	6	10	12	-	164	00's TECHNO	Cult Invitation	BEMANI Sound Team "謎の勢力"	
+-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	6	"[BSS]
+10"	"[BSS]
+12"	-	185	HARD RENAISSANCE	Dahlia	BlackY	
+3	5	8	11	-	5	8	11	-	175	HAPPY HARDCORE TAKEOVER	DAZZLE ATTACK	Yuta Imai	
+-	"[CN]
+6"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	172	NEO 90's AMBIENT JUNGLE	Deep Sea Mystery	Dirty Androids	
+-	"[HCN]
+6"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+6"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	174	CINEMATIC BREAKCORE	Demon March	Nhato	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	"[BSS]
+5"	"[BSS]
+8"	"[BSS]
+11"	-	160	ETHNIC HARDSOUND	Echoes of Sunfall	nora2r	
+-	5	10	12	-	5	10	12	-	176	MUSIC GAME TRADITIONAL	frequent	BEMANI Sound Team "dj TAKA"	
+-	7	10	"[CN]
+[BSS]
+12"	-	7	10	"[CN]
+12"	-	105	MIXTURE	GAME ON	DJ Mass MAD Izm* feat.H14 of LEONAIR	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	170	ADVENTURE TRIP	Get Higher	BEMANI Sound Team "劇団レコード"	
+-	5	8	10	-	5	8	10	-	135	BIG BEAT	Get Wicked	Maozon	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	165	NEOTRANCE	Ghost Pulse	crayvxn	
+-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	30-300	COLOUR BASS	Glitch N Ride	Eagle	
+-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+9"	"[CN]
+[MSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	175	XYMPHONIC TECHCORE	GloriosA	KARUT	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	155-160	DUBSTEP	GLORIOUS HAMMER	AJURIKA	
+-	4	8	10	-	4	8	10	-	155	HARD TRANCE	Hard Breaker	Nhato	
+-	6	10	11	-	6	10	11	-	180	UK HARDCORE	Hat Surprise (Season 3)	Hommarju	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	155	HITECH NHI FULLON	i-ii	かめりあ	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	"[CN]
+12"	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+11"	"[CN]
+[BSS]
+12"	180	TRANCE CORE	INHERITANCE	Zekk	
+2	4	7	10	-	4	7	10	-	177	EMOTIONAL J-POP	Iris	BEMANI Sound Team "HuΣeR" feat.紫村 花澄	
+-	"[CN]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+4"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	174	DRUM'N'BASS	Jumper	Masayoshi Iimori	
+-	5	8	11	-	5	8	11	-	178	CYBER DRUMSTEP	Just Gimme	Maozon	
+-	7	10	12	-	7	10	12	-	183	ROCKIN' DRUM & BASS	JUSTICE/GUILTY feat. Nana Takahashi & 709sec.	BEMANI Sound Team "L.E.D."	
+-	"[BSS]
+6"	"[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[BSS]
+6"	"[MSS]
+10"	"[CN]
+[MSS]
+12"	-	185	Drumstep / Bass House / Dnb	Level 5	Yamato	
+-	6	10	12	-	6	10	12	-	210	MAXIMUM GAME-BREAKING HARDCORE	MAXIMUM CHEAT GIRL	かめりあ feat. ななひら	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	180	PARTICULAR NIGHTSCAPE	Million Dollar	Dirty Androids	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	80-160	HARD DANCE	Monkey Business	kors k	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	160	SCHRANZ	Mukade	kors k	
+-	4	7	9	-	4	7	9	-	180	J-POP	My Sweet Bird?	アオワイファイ feat.秋山雫	
+-	5	8	10	-	5	8	10	-	182	ROCK	NEEDLESS MY LOVE FOR YOU	Pizuya's Cell	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	185	FREEFORM ARTCORE	Out of Control	CANVAS feat. Quimär	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	165-190	CHARGE CORE	out of disk space	TORIENA	
+-	5	9	"[BSS]
+11"	-	5	8	11	-	150	TRAP	PILGRIM	crayvxn	
+-	6	9	11	-	6	9	11	-	150	PSYCHEDELIC	Psychedelic Intelligence	BEMANI Sound Team "Sota Fujimori"	
+-	5	"[CN]
+8"	"[CN]
+[MSS]
+11"	-	5	"[CN]
+8"	"[CN]
+[MSS]
+11"	-	180	HARDCORE	Red Determination	RoughSketch	
+-	"[CN]
+5"	"[CN]
+[BSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[HCN]
+[HBSS]
+12"	-	182	DRUM'N'BASS	Resonant	BEMANI Sound Team "猫叉Master" & かめりあ	
+1	4	7	9	-	4	7	9	-	180	THEME SONG	Riff//rain	Rainy。	
+-	5	9	11	-	5	9	11	-	175	HARDCORE	See You Again	kors k & Numb'n'dub	
+-	5	9	12	-	5	9	12	-	170	UK HARDCORE	Seven Times Four	Hommarju	
+-	6	9	10	-	6	9	11	-	134	TECHNICAL ELECTRO	Shapeshifter	Avans	
+-	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+12"	-	165	COLOUR BASS	Sirius	MK	
+-	"[CN]
+[BSS]
+3"	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	-	"[CN]
+[BSS]
+3"	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	-	128	BASS HOUSE	So What	PRIDASK	
+-	"[HCN]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	195	CROSSOVER	SOLAR ECLIPSE	Yuta Imai Vs. BEMANI Sound Team "Yvya"	
+-	"[CN]
+5"	"[CN]
+[MSS]
+9"	"[CN]
+[MSS]
+11"	-	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	190	HARDCORE TECHNO	Speculation	BEMANI Sound Team "ZAQUVA"	
+-	6	9	11	-	6	9	11	-	190	DRUM'N'BASS	squall	猫叉Master+	
+-	6	10	12	-	6	10	12	-	160	HARD TECHNO/DOWNTEMPO	Stereo Beasts	MK & RoughSketch	
+-	"[CN]
+5"	"[CN]
+9"	11	"[CN]
+[BSS]
+12"	"[CN]
+5"	"[CN]
+9"	11	"[CN]
+[BSS]
+12"	157	HARDTECHNO	Submerge Serenade	lapix	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	208	HI-SPEED TECHCORE	Sword of Vengeance	sky_delta	
+-	6	9	11	-	6	9	12	-	100-160	RAWSTYLE	T.R.O.L.L.	Yuta Imai	
+-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	190	NEO-CLASSICAL CORE	The Last Apocalypse	BEMANI Sound Team "Sota F. feat. Yvya"	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	220	FRENCHCORE	The Onlyonez	RoughSketch	
+-	6	9	11	-	6	9	11	-	165	HARD HOUSE	This Is Club Musik feat. 大久保紅葉	REMO-CON	
+-	6	9	11	-	6	9	11	-	150	PSYCHEDELIC TECHNO	Time Distortion pt.2(IIDX Edit)	kors k vs BEMANI Sound Team "setup"	
+-	5	8	10	-	5	8	10	-	172	HARDCORE RAVE	TITANIUM RIDERS	DJ Shimamura	
+-	4	7	9	-	4	7	"[CN]
+9"	-	138	J-DANCE POP	Too Late Snow	movies (moimoi × Xceon × Dai.)	
+-	5	8	11	-	5	8	11	-	135	MELODIC TECHNO	TRIP THE DEEP	Qlarabelle	
+-	4	8	"[CN]
+[BSS]
+10"	-	4	8	"[CN]
+[BSS]
+10"	-	156	FUNKY BREAKS	Tripping Jumping	Aikapin Prod. by uno & NiActivity	
+-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[CN]
+12"	-	175	GOTHIC PIANO TRANCE	Vermilion Carol	OSTER project	
+-	"[CN]
+7"	"[CN]
+10"	"[HCN]
+[HBSS]
+12"	-	"[CN]
+7"	"[CN]
+10"	"[HCN]
+[HBSS]
+12"	-	168	VARIABLE CORE	Vulnerability	BEMANI Sound Team "ZAQUVA"	
+-	3	7	10	-	3	7	10	-	133-150	ETHNO POP	WaterCube Pf.(RX-Ver.S.P.L.)	高田雅史	
+-	6	9	11	-	6	9	11	-	171	EURODANCE SPEED	winkle 2 winkle	Ryu☆ ft.NU-KO	
+-	"[CN]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	200	VOLTENIZED CORE	Xb10r	隣の庭は青い(庭師+Aoi)	
+-	5	8	10	-	5	8	10	-	162	COLD BEAT	ZEROIN ON THE LIGHT	SOUND HOLIC Vs. ZYTOKINE feat. Nana Takahashi	
+-	6	9	11	-	6	9	11	-	180	CYBER BREAKCORE	20XX	COR!S	
+1	4	7	10	11	4	7	10	11	166	IIDX EDITION	アイドル	Covered by BEMANI Sound Team "HuΣeR × wac" feat. 佐伯伊織	
+1	4	7	10	-	4	7	10	-	141	J-POP	愛包ダンスホール	HIMEHINA	
+-	5	8	10	-	5	8	10	-	201	ROCK	アタシ完全絶対正義ちゃん！	Pizuya's Cell	
+-	4	7	10	-	4	7	10	-	140	ALTERNATIVE	神様、つれない。	中山真斗 feat. CHAN	
+1	3	7	9	"[CN]
+10"	3	7	9	"[CN]
+10"	160	IIDX EDITION	可愛くてごめん	Remixed by MK feat. 紫咲ほたる	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	168	和風歌謡硬核音楽	今宵、ロマンス横丁。	まろん feat. Rikotan	
+-	5	10	12	-	6	10	12	-	160	HYPER DIG!ROCK	残像ニ繋ガレタ追憶ノHIDEAWAY	SOUND HOLIC Vs. BEMANI Sound Team "KE!JU" feat. Nana Takahashi	
+-	5	9	11	-	5	9	11	-	95-210	LAMENTO	雫	あさき	
+-	5	9	12	-	6	10	12	-	174	BROKEN SAMBA DRUM'N'BASS	灼熱Beach Side Bunny (かめりあ's "Summertime D'n'B" Remix)	Remixed by かめりあ	
+-	8	10	12	-	7	10	12	-	90-185	HARD RENAISSANCE	終焔のClaudia	二代目朱雀	
+1	3	7	9	-	3	7	9	-	132	J-POP	唱	Ado	
+3	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	178	DRUM & BASS	シンデレラ	Maozon feat. Nadia	
+-	"[CN]
+3"	"[CN]
+6"	"[CN]
+9"	-	3	"[CN]
+6"	"[CN]
+9"	-	135	CITY DANCE POP	センチメンタル・サマー	Nhato feat. Kanae Asaba & はるまき (from ボタニカルな暮らし。)	
+1	3	6	9	10	3	6	9	10	153	J-POP	ちゅ、多様性。	ano	
+2	5	8	10	-	5	8	10	-	154	IIDX EDITION	デビルじゃないもん	Remixed by BlackY feat. Risa Yuzuki	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	165	BUCHIAGE TRANCE	電光	Yuta Imai	
+-	5	8	"[CN]
+[BSS]
+10"	-	5	8	"[CN]
+[BSS]
+10"	-	158	HYBRID DANCE MUSIC	電子になりたい	BEMANI Sound Team "HuΣeR"	
+-	7	10	12	-	7	10	"[CN]
+12"	-	240	BREAKCORE	電腦都市	Blacklolita	
+-	"[CN]
+3"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+3"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	148	SPEED HOUSE	ないないルーティン	Len	
+1	4	8	10	-	4	8	10	-	165	SUMMER POP	夏風邪デスコ	TORIENA	
+2	5	9	11	-	5	9	11	-	160	IIDX EDITION	寝起きヤシの木	Remixed by uno(IOSYS) feat. Chiyoko	
+-	6	9	11	-	5	9	11	-	164	CHINA SQUARE DANCEPOP	果たせぬ約束 ft. 小林マナ	Xceon	
+3	6	9	11	12	6	9	11	"[CN]
+12"	170	IIDX EDITION	フォニイ	Remixed by Pizuya's Cell	
+-	"[CN]
+[BSS]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+9"	"[CN]
+12"	-	180	ASCENDING TOGETHER	《PL|RAYER》	BlackLolita	
+-	5	8	10	-	5	8	10	-	176	ROCK	閉塞的フレーション	Pizuya's Cell VS BEMANI Sound Team "dj TAKA"	
+1	4	8	10	-	4	8	10	-	170	FUTUREBASS	ポラリスノウタ	ここなつ2.0	
+3	5	9	11	-	5	9	11	-	190	IIDX EDITION	マーシャル・マキシマイザー	Remixed by uno(IOSYS) feat. Chiyoko	
+-	"[HCN]
+[HBSS]
+4"	"[HCN]
+[HBSS]
+8"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+[HBSS]
+4"	"[HCN]
+[HBSS]
+9"	"[HCN]
+[HBSS]
+12"	-	172	VALHALLASTEP	摩天楼	Julianne	
+-	5	10	12	-	5	10	12	-	170	ORBITAL STEAMPUNK	未完成ノ蒸氣驅動乙女	U1 overground	
+-	4	9	11	-	4	9	11	-	200	HYPERACTIVE HELLCORE	めうめうぺったんたん！！ (ZAQUVA Remix)	Remixed by BEMANI Sound Team "ZAQUVA"	
+2	5	8	11	-	5	8	11	-	210	IIDX EDITION	勇者	Remixed by OSTER Project feat. そらこ	
+-	6	10	11	-	6	10	11	-	162	JUVENILE PIANO ROCK	夢縁	xi feat. Risa Yuzuki	
+1	4	7	10	-	4	7	10	-	115	IIDX EDITION	酔いどれ知らず	Remixed by SOUND HOLIC feat. Nana Takahashi	
+3	6	9	11	-	6	9	11	-	173	J-POP	ラビットホール	DECO*27	
+-	3	6	9	-	3	6	9	-	182	RAINY WALTZ	リメンバーリメンバー	rino & m@sumi from plastic penguin	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	170	SCI-FI CHRONICLE	流桜ノ門	tokiwa	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	180	KAWAII DOGGO POPS	れとりば！	OSTER project feat. 月ノ輪乃愛	
+-	"[CN]
+7"	"[CN]
+11"	"[CN]
+[BSS]
+12"	-	"[CN]
+7"	"[CN]
+11"	"[CN]
+[BSS]
+12"	-	10-166	PROLOGUE	惑星鉄道	Snail's House	
+beatmania IIDX 32 Pinky Crush ▲ △													
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	200	HARDCORE	ADAMANT	BEMANI Sound Team "L.E.D.-G"	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	175	AQUATIC TECHCORE	Aqvion	lapix	
+-	"[HCN]
+4"	"[HCN]
+7"	"[HCN]
+10"	-	"[HCN]
+4"	"[HCN]
+7"	"[HCN]
+10"	-	96	NOSTALGIC ARTCORE	Arcanos	DJ Totoriott	
+-	5	"[CN]
+9"	"[CN]
+11"	-	5	"[CN]
+9"	"[CN]
+11"	-	165	BANGIN' TECHNO	Bang-Boo Bumble	二代目白虎	
+2	4	7	10	11	4	7	10	11	157	IIDX EDITION	Bling-Bang-Bang-Born	Covered by uno(IOSYS) feat. Fra	
+-	6	9	"[CN]
+12"	-	6	9	"[CN]
+12"	-	160	SPEED RAVE	Bring The Fire	kors k	
+-	5	8	"[CN]
+[BSS]
+11"	-	5	8	"[CN]
+[MSS]
+11"	-	160	SPEED HOUSE	Butterfly Twist	Yooh	
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	163	ULTRA SAM-BASS	CHAOTIC SUNBIRD	Tanchiky	
+-	5	7	10	-	5	7	10	-	150	Y2K 2000 J-POP DANCE	Chasing After YOU ～夢の欠片～ ft. 小林マナ	Xceon	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	140	UPLIFTING TRANCE	Constellation	Maozon	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	180	CROSSOVER	Cross Fire	Hommarju vs RoughSketch	
+-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	175	TRANCECORE	destination	One Round Rabbits	
+-	"[CN]
+5"	"[CN]
+7"	"[CN]
+[BSS]
+9"	-	"[CN]
+5"	"[CN]
+7"	"[CN]
+[BSS]
+9"	-	166	COLOUR TECH	Digital Radiance	BEMANI Sound Team "Sota Fujimori" feat. S.B.Z.	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	190	SYMPHONIC BREAK BEATS	DIVINE JUDGEMENT	OSTER project	
+-	4	7	9	-	4	7	9	-	140	ELECTRO POP	Dreamship	Nhato feat. Kanae Asaba	
+-	"[CN]
+[BSS]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+9"	"[CN]
+[BSS]
+12"	-	180	MOOMBAHCORE / DRUM'N BASS	Drop Syndicate	Seventhrun × nora2r	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	208	UNNAMED FIESTA	Eleanor	satella feat. nayuta	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	183	RANDOM ACCESS MEMORIES	ELYSIUM	Snail's House	
+-	5	9	11	-	5	9	11	-	165	HYPERTRANCE	everlastingeuphoria:	crayvxn	
+-	6	10	12	-	6	10	12	-	165	HYBRID HARDSTYLE	EX-MASSIVE FIGHTER	BEMANI Sound Team "L.E.D.-G"	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	308	ORBITALIC ELECTRONIC METAL	EYE OF THE HEAVEN	BEMANI Sound Team "U1-ASAMi"	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+10"	-	179	COSMIC HAPPY TUNE	FERMI♡PARADOX	BlackY feat. Risa Yuzuki	
+-	"[HCN]
+4"	"[HCN]
+9"	"[HCN]
+[HBSS]
+11"	-	"[HCN]
+4"	"[HCN]
+9"	"[HCN]
+[HBSS]
+11"	-	168	80'S SYNTHWAVE ROCK	Fiery Stallion	Dirty Androids	
+-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+10"	"[CN]
+12"	-	189	PASSIONATE RAVE	Flämingo	CANVAS feat. Quimär	
+-	"[CN]
+[MSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	160	HARD DANCE	FlyAway	Blacklolita	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	156	MULTIGENRE	Galaxy Collapse	BEMANI Sound Team "めめめ"	
+-	5	8	10	-	5	8	10	-	180	TORIENA LAND	get set mind	TORIENA	
+-	"[HCN]
+[HBSS]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	"[HCN]
+[HBSS]
+7"	"[HCN]
+[HBSS]
+10"	"[HCN]
+[HBSS]
+12"	-	185	NEO HARD RENAISSANCE	God Mind	Tatsunoshin	
+-	4	8	10	-	4	8	10	-	170	RAVE BREAKS	Good Looking	JAKAZiD	
+-	"[CN]
+6"	"[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[BSS]
+10"	"[CN]
+[BSS]
+12"	-	170	HARD PSY	Here We Go Now	Whac-A-Me	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	140-280	CYBER FLAMENCO	hora de verdad	Vandalusia改	
+-	5	9	"[CN]
+11"	-	5	9	"[CN]
+11"	-	160	HARDSTYLE	IN BETWEEN	BEMANI Sound Team "L.E.D.-G" feat. Mayumi Morinaga	
+-	5	8	10	-	5	8	10	-	160	EMOISM FUTURE POP	KOTONOHA ft. Kotoha	EmoCosine × BEMANI Sound Team "HuΣeR"	
+-	"[CN]
+5"	9	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	9	"[CN]
+11"	-	205	HYPERFLIP	lowercase lifetime	BEMANI Sound Team "ZAQUVA"	
+-	4	7	10	-	4	7	10	-	174	HYPER JAPANESQUE	Lycoris	BEMANI Sound Team "HuΣeR" feat.Fernweh	
+-	6	10	12	-	6	10	12	-	184	DRUM'N'BASS	MARLIN	Zekk	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	165	HARD DANCE	Mid-Corner (Magic Maker)	REMO-CON	
+-	5	8	10	-	5	8	10	-	172	HAPPY HARDCORE	Mighty Cutie	KARUT	
+-	5	8	"[BSS]
+11"	-	5	8	"[BSS]
+11"	-	100	HARD TRAP	MVP	PRIDASK	
+-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+[MSS]
+12"	-	165	STYLISH ELECTRO	NOIXIA	BEMANI Sound Team "HuΣeR"	
+"[CN]
+3"	"[CN]
+5"	"[CN]
+7"	10	-	"[CN]
+5"	"[CN]
+7"	10	-	150	IIDX EDITION	PERFECT HUMAN	Remixed by Ryu☆ feat. BEMANI Sound Team "PON"	
+-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+12"	-	190	HAPPY	Pinky Happy Crazy	BEMANI Sound Team "Risk Junk"	
+-	5	8	10	-	5	8	10	-	170	NEO CANDY RAVE	PIT A PAT	Zekk	
+2	5	8	10	12	5	8	10	12	173	J-POP	Plazma	米津玄師	
+-	5	9	11	-	5	9	11	-	150	MELODIC CONTEMPORARIDDIM	Plea Per Phase	Feryquitous	
+-	5	9	11	-	5	9	11	-	305	J-POP	PopなEDEN	YASUHIRO(康寛) feat.橘田ほのか	
+-	5	9	"[BSS]
+11"	-	5	9	"[CN]
+11"	-	177	LOVE♡CORE	Raspberry Potion (feat.あれたん♡ & ぎゃるのしん☆)	Tatsunoshin & 藍良あれれ	
+-	"[CN]
+6"	"[CN]
+9"	"[BSS]
+11"	-	"[CN]
+6"	"[CN]
+8"	"[BSS]
+11"	-	165	REVERSE BASS	RAVE SYNDROME	Yuta Imai	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	175	DIAMOND CORE	Roar of Chronos	BEMANI Sound Team "KE!JU"	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	177	HARD SYMPHONIC	Satellite Burst	xi	
+-	5	8	10	-	5	8	10	-	139	DIGITAL J-POP	Secret Rouge	ハレトキドキ	
+-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	190	CHAOTIC METAL BREAKCORE	Shirdal	Dirty Androids	
+-	5	9	11	-	5	9	11	-	165	NEORAVE	Show Me All Your Love	Hommarju	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	90-190	ABSURD STYLE	SISYPHUS	BEMANI Sound Team "Paoon"	
+-	7	10	12	-	7	10	12	-	100-200	DJ BATTLE	Skratch Education Lv-1	DJ Mass MAD Izm*	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	180	MULTIGENRE	Slumber☆Party	BEMANI Sound Team "めめめ"	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	165-174	FUTURE'N'BASS	Space In Time	Masayoshi Iimori	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	185	ANIME-STYLE DRUM AND BASS	Stargazing Trip ～星 探す旅～ ft. 小林マナ	Xceon	
+-	"[BSS]
+7"	"[BSS]
+10"	"[MSS]
+12"	-	"[BSS]
+7"	"[BSS]
+10"	"[MSS]
+12"	-	180	H4P9Y H@RI>CORE	SμG@R RU$#	Yuta Imai	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	186	GENSOU FULLON	SUPER HEROINE!!	Amateras Records vs BEMANI Sound Team "TATSUYA" feat. miko	
+-	"[CN]
+6"	"[CN]
+9"	"[BSS]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[BSS]
+11"	-	170	SPED UP SCHRANZ	TECHNO RUMBLE	Qlarabelle	
+-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	"[BSS]
+6"	"[BSS]
+10"	"[BSS]
+12"	-	180	TECHCORE	u gotta beat	KARUT	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	183	NEURO FUNK / CEILTEACH DORCHA	Uaigh Gealaí	かめりあ	
+-	5	8	10	-	5	8	10	-	160	SOCA/HARD DANCE	Vibing! Shake it!	らっぷびと Prod. by RoughSketch & NUE	
+-	"[CN]
+[BSS]
+7"	"[CN]
+10"	"[CN]
+12"	-	7	10	"[CN]
+12"	-	162	VARIABLE ORIENTAL CORE	Without Heaven	BEMANI Sound Team "ZAQUVA"	
+-	"[CN]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	"[CN]
+12"	-	277	CHRONO-SYMPHONIC SPEEDCORE	XHRONOXAPSULΞ	Silentroom	
+-	6	10	12	-	6	10	12	-	190	BREAKBEATS	1116	BEMANI Sound Team "Dustup"	
+-	5	8	10	-	5	8	10	-	178	ANIMA SONG	朱と碧のランページ	NU-KO	
+-	4	7	9	-	4	7	9	-	120	J-POP	飴玉	CYNHN	
+-	6	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	6	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	182	ARABIC TRAP CORE	アラビアン ハイパー ナイト	BEMANI Sound Team "マックス ステロイ度!"	
+-	7	10	12	-	7	10	12	-	200	RINASCITA	uən	少年ラジオ	
+1	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	170	ボーカロイド・J-POP・ダンス	イガク	原口沙輔 feat.重音テト	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	164	VOCALOID	エクスプロウル	晴いちばん	
+2	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+11"	-	150	ZUNTSUMU TEETEE	えだまめカレークッキング	OSTER project feat. ずんだもん & 春日部つむぎ	
+2	5	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	5	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	172	LOVELY TECHCORE	オッド♡ラヴィ	lapix feat. PANXI	
+1	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	158	ボカロ	オブソミート	サツキ feat.初音ミク、重音テト	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	141-176	ビックリポップ	覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～	マキシウキョウ	
+1	4	7	10	-	4	7	10	-	148	J-POP	キスキツネ	HIMEHINA	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+11"	-	184	8-BIT MIXTURE	きみのせかい	Nhato	
+2	5	8	10	-	5	8	10	-	220	VOCALOID	きゅうくらりん	いよわ	
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[BSS]
+10"	-	140	VOCALOID	ギャ・ギャ・ギャ・ギャラクシー！	つきみぐー、	
+2	5	7	10	"[CN]
+[BSS]
+11"	5	7	10	11	150	J-POP	ゲシュタルト	花譜	
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	206	TWINKLE POP	最強頂戴girl♡	BEMANI Sound Team "TATSUYA" feat. ななひら	
+-	6	"[CN]
+10"	"[CN]
+12"	-	6	"[CN]
+10"	"[CN]
+12"	-	168	DRUM'N'BASS	灼熱 Lost Summer Dayz	DJ Mass MAD Izm* feat.すみはね	
+-	5	8	10	-	5	8	10	-	145	ROCK	消極的セツナイズム	Pizuya's Cell	
+1	4	8	10	-	4	8	10	-	156	J-POP	進捗ダメダメです	GYARI feat.宮舞モカ、弦巻マキ	
+-	8	10	12	-	7	10	12	-	200	Hi-ラブコメPOP	スキッテイエェエエェ!!!!	cosMo@暴走P & BEMANI Sound Team "L.E.D.-G"	
+-	6	9	12	-	7	10	12	-	177	EUROBEAT	スパークリング☆彡ハイパーチューン！！	Machico	
+-	"[CN]
+[BSS]
+4"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+4"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	185	J-POP	断罪の一花	Len feat.mochari	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	170	HARD ORIENTAL	弾幕信仰	豚乙女×BEMANI Sound Team "PON"	
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	158	ANTHEM	天使のカンタータ -Cantata of Angels-	BEMANI Sound Team "Cuvelia"	
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	170	HARDCORE TECHNO	ドリムチウ	TORIENA	
+2	5	8	10	-	5	8	10	-	252	J-POP	ドーナツホール 2024	ハチ	
+1	4	8	11	-	4	8	11	-	130-176	J-POP・VOCALOID	ハオ	DECO*27	
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	172	繚乱呂句	爆ぜりゃんせ	敦姫	
+-	4	7	10	-	4	7	10	-	166	AOHARU MELODY	ハルイロメロディー	月乃 ＆ BEMANI Sound Team "劇団レコード"	
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	165	KAWAII FUTURE BASS	ＰＡＳＴＥＬＩＳＭ	Snail's House	
+1	4	"[CN]
+[BSS]
+7"	"[CN]
+[BSS]
+10"	-	4	7	10	-	120	J-POP	ビビデバ	星街すいせい	
+-	5	8	11	-	5	8	11	-	180	SENGOKU LEGENDS	無双	SOUND HOLIC Vs. VENUS feat. Nana Takahashi	
+"[CN]
+3"	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	5	"[CN]
+9"	"[CN]
+11"	-	185	HAPPY HARDCORE	メズマライザー	サツキ feat.初音ミク・重音テトSV	
+-	"[CN]
+3"	"[CN]
+[BSS]
+7"	"[CN]
+9"	-	"[CN]
+3"	"[CN]
+[BSS]
+7"	"[CN]
+9"	-	132	SYNTHWAVE POP	ロマンシングエスケープ	ここなつ2.0	
+1	5	8	10	-	5	8	10	-	176	J-POP	我ら完全無敵のアイドル!!	B小町	
+LIGHTNING MODEL 専用楽曲													
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	200	UCHIAGE CORE	COSMIC V3LOCITY	BEMANI Sound Team "Coyaan & KE!JU & ZAQUVA"	
+-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	200	FRENCHCORE	Lightspeed	Tanukichi	
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	205	MELODIOUS WATER PIANO	ファイナルレター	かねこちはる	
+SP					DP				BPM	GENRE	TITLE	ARTIST													
+B	N	H	A	L	N	H	A	L																	
+デフォルト曲																									
+稼働時(2025/09/17配信)																									
+-	"[MSS]
+5"	"[MSS]
+9"	"[MSS]
+11"	-	"[BSS]
+5"	"[BSS]
+9"	"[BSS]
+11"	-	165	MULTIGENRE	A Certified Rave Moment	BEMANI Sound Team "めめめ"													
+-	5	7	10	-	5	7	10	-	164	JAPANESE OMATSURI ROCK	AGETEKE ONDO	暁Records													
+-	5	"[BSS]
+9"	"[CN]
+[BSS]
+11"	-	5	"[BSS]
+9"	"[BSS]
+11"	-	156	HARD DANCE	Bang Bang Dance	Nhato													
+1	"[CN]
+3"	"[CN]
+6"	"[CN]
+8"	-	"[CN]
+3"	"[CN]
+6"	"[CN]
+9"	-	130	J-POP	Caramel Pain	星街すいせい													
+-	"[CN]
+5"	9	11	-	"[CN]
+5"	"[CN]
+9"	11	-	156	PSY-KECAK STYLE	Catch ya Getcha!	Tanchiky													
+-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+11"	-	155	TECH TRANCE	Countdown to Heaven or Hell	BEMANI Sound Team "dj TAKA"													
+-	6	9	12	-	6	9	12	-	175	HARDCORE RAVE	Disco Killer Music Lover	Zekk													
+-	5	9	11	-	5	9	11	-	165	STAR☆FRUIT	Fashion Fruit	Tatsunoshin x Aira Arere													
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	170	ORBITALIC METAL STEP	From Human Blood	BEMANI Sound Team "U1-ASAMi"													
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+9"	-	153	80s SYNTH POWER POP	JUST SYNC ft.Kanae Asaba	Xceon													
+2	4	7	"[CN]
+[BSS]
+9"	-	4	7	"[CN]
+[BSS]
+9"	-	180	ボカロ	LEMON MELON COOKIE	TAK feat.初音ミク													
+-	6	10	12	-	6	10	12	-	168	JUNGLE， DRUM N BASS	Makin' It	DJ RENA													
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	180	UNNAMED PROGRESSIVE	Memoria Obscura	satella													
+-	5	"[CN]
+8"	"[CN]
+11"	-	5	"[CN]
+8"	"[CN]
+11"	-	170	オモチコア	MOCHIMOCHI DREAMIN!!	nora2r × まろん feat. 和鳴るせ													
+-	5	8	10	-	5	8	10	-	160	MAJOR IN MEWOLOGY	Nyan Nyan University	Aice room													
+2	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	184	BLUE CORE	PALETTE	lapix feat. 奈良ひより													
+-	6	"[BSS]
+10"	"[BSS]
+12"	-	6	"[BSS]
+10"	"[BSS]
+12"	-	160	RALLY HARD TECHNO	RALLY '25	Masayoshi Iimori													
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	189	CYBER RENAISSANCE	Regina vespaE	KARUT													
+-	4	7	10	-	4	7	10	-	161	J-RAVE	SHINING☆DANCE	ハレトキドキ													
+-	5	9	11	-	5	9	11	-	185	HAPPY BREAKCORE	SnapSkipSpark	Feryquitous													
+-	7	"[BSS]
+10"	"[BSS]
+12"	-	7	"[BSS]
+10"	"[BSS]
+12"	-	174	BIGCORE	Space Battleship S4TØ	BEMANI Sound Team "Captain Sonic"													
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	175	DRUM'N'BASS / HAPPY HARDCORE	SPLASH!!!!!!!!!	Yuta Imai													
+-	5	8	11	-	5	8	11	-	130-174	PSYTECH FULL ON	Substance	BEMANI Sound Team "めめめ"													
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	160	SPEED HOUSE	Vitamin	BlackY													
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+12"	-	189	DRAMATIC CHIPTUNE	2 Be Continued	打打だいず													
+-	6	10	12	-	6	10	12	-	183	PSALMS OF ASHES	ιgniЯRuina	xi feat. Risa Yuzuki													
+1	5	8	10	-	5	8	10	-	175	IIDX EDITION	かわいいだけじゃだめですか？	Remixed by BEMANI Sound Team "L.E.D.-G" feat. 佐伯伊織													
+-	"[CN]
+4"	7	"[CN]
+9"	-	"[CN]
+4"	7	"[CN]
+9"	-	160	CYBER METROPOLIS	鏡像都市	BEMANI Sound Team "劇団レコード" feat.T4K													
+-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	"[HCN]
+5"	"[HCN]
+9"	"[HCN]
+11"	-	170	CYBER YAMATO	月下繚乱	Julianne													
+-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+11"	-	"[HCN]
+5"	"[HCN]
+8"	"[HCN]
+11"	-	165	PIANO ROCK	閃と雷管とロープ	めと(Metomate)													
+-	"[CN]
+[BSS]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	"[CN]
+4"	"[CN]
+[BSS]
+8"	"[CN]
+[BSS]
+10"	-	180	EMERGENCY CORE	それが、ボクの使命～レスキュー隊長 メンキュー～	TORIENA													
+-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	140	だんすむぅ～じっく	デラむぅのでらっくす☆どり～むぅ	デラむぅとBEMANI Sound Team "TATSUYA"お兄さん													
+1	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	5	"[CN]
+9"	"[CN]
+11"	-	182	HEISEI POP	でんぱ どりる わんにゃー☆三	キノシタ feat. 重音テト													
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+10"	-	175	OMOIDE CORE	夏色のセレナーデ	BEMANI Sound Team "KE!JU"													
+1	4	7	10	-	4	7	10	-	198	J-POP	バブリン	HIMEHINA													
+3	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+9"	"[CN]
+12"	-	191	ハピコア	ビビッド ☆＋＊。キラキライム	Machico													
+-	4	8	10	-	4	8	10	-	160	KAWAII POP	百恋ラブラスター	irucaice feat. ななひら													
+-	"[BSS]
+6"	"[BSS]
+9"	"[MSS]
+11"	-	"[BSS]
+6"	"[BSS]
+9"	"[BSS]
+11"	-	150	TERRORCORE/RAP	ベラ・ベ・カラベラ	Fra Prod. by RoughSketch													
+1	4	8	10	-	4	8	10	-	165	ALIEN IDOL CORE	もんめためたもん	OSTER project feat. ずんだもん ＆ 四国めたん													
+-	5	9	11	-	5	9	11	-	236	ROCK	煉獄コンフィチュール	Pizuya's Cell													
+2025/09/29配信																									
+1	4	7	10	-	4	7	10	-	170	DANCE POP	Shooting Star	ReGLOSS													
+2025/11/19配信																									
+2	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	"[CN]
+[BSS]
+12"	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	"[CN]
+[BSS]
+12"	205	HARD RENAISSANCE	Lisa-RICCIA	DJ YOSHITAKA													
+2026/02/19配信																									
+-	4	8	11	-	5	8	11	-	72-127	オトギタンテイ	華麗なる！音戯探偵ひなビタ♫	音戯探偵ひなビタ♫													
+-	3	7	10	-	4	7	10	-	245	ガールズティーパーティー	レシピのリドル	音戯探偵ひなビタ♫													
+2026/02/26配信																									
+-	4	7	9	-	4	7	9	-	196	PROJECT ZIRCON	Signs and Wonders	ネオン(CV:藤川茜)、芽兎めう(CV:五十嵐裕美)													
+WORLD TOURISM																									
+EDP LiveAct TOURISM 1・2(2025/10/14配信)																									
+-	5	9	"[CN]
+11"	-	5	"[CN]
+9"	"[CN]
+11"	-	130-200	RECKLESS RAVE	GOLD RUSH 2025	Remixed by BEMANI Sound Team "めめめ" feat. beatnation Records													
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	200	FUTURISTIC 12 BEAT	chaplet -IIDX re:build-	BEMANI Sound Team "DJ TOTTO"													
+BPL S5 TOURISM 1(2025/11/27配信)																									
+1	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+4"	"[CN]
+7"	"[CN]
+10"	-	170	COLOR DANCE POP	COLOR BURST	Rainy。													
+Sparkle Fruit Lab.																									
+レモンルーム(2025/11/13配信)																									
+-	4	7	10	-	4	7	10	-	144	ALTERNATIVE	好吃来世deエレクトリック	中山真斗 feat. CHAN													
+-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+8"	"[CN]
+[BSS]
+11"	-	176	CHANNEL K	kors k's Let's make an Image Song!	kors k													
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	150	DUBSTEP	BattleRoyal	Blacklolita													
+-	6	10	12	-	6	10	12	-	170	PSY-TRANCE	Begin	Whac-A-Me													
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	174	ROMANTIC SCHOOL VARIATIONS	⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason	Ice vs BEMANI Sound Team "dj TAKA"													
+グレープルーム(2026/01/15配信)																									
+-	"[CN]
+4"	"[BSS]
+8"	"[BSS]
+10"	-	"[CN]
+[BSS]
+4"	"[BSS]
+8"	"[CN]
+[BSS]
+10"	-	180	EXPLO POP	Watermelon Explosion	YUC'e													
+-	3	6	"[CN]
+9"	-	3	6	"[CN]
+9"	-	116	フルフィーポップ	REcorrection	猫叉Master feat.常盤ゆう													
+-	5	9	11	-	5	9	11	-	120-160	PSYCHEDELIC TRANCE	Hallucination	KO3 & Relect													
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	175	HYPERTRANCE	voice of echo.	crayvxn													
+-	"[CN]
+7"	"[CN]
+9"	"[CN]
+12"	-	"[CN]
+7"	"[CN]
+9"	"[CN]
+12"	-	180	CLASSICAL	クレッシェンド	Virtuoso													
+-	"[CN]
+[BSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[BSS]
+7"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	187	超炭酸すぱしゃわコア	FiZZλ_PØT!0И	めめめ													
+いちごルーム(2026/02/26配信)																									
+-	"[CN]
+5"	"[CN]
+7"	"[CN]
+10"	-	"[CN]
+5"	"[CN?]
+7"	"[CN]
+10"	-	145	HYBRID JERSEY CLUB	Show Time	MK&Kanae Asaba													
+-	6	9	11	-	6	9	11	-	206	ROCK	タンポポ	豚乙女													
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+9"	"[CN]
+[BSS]
+11"	-	170	EMOTIONAL FUTURE RIDDIM	Nemophila	TAN1CHU													
+-	5	9	12	-	5	9	12	-	162	EUROBEAT	UNDO THE NIGHT	葛城ユイ feat. Command (Eurobeat Union)													
+-	6	10	12	-	6	10	12	-	190	SUPER ULTRA MIRACLE HAPPY HARDCORE	PERFECT GREAT!!	Zekk													
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+12"	-	"[CN?]
+6"	"[CN?]
+10"	"[CN]
+12"	-	173	PIANO DANCE APPASSIONATO	Amor∞Fati	BlackY													
+みんなで応援！BPLプロ選手サポーターズ -SEASON 5-																									
+2025/12/11配信																									
+-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+6"	"[CN]
+10"	"[CN]
+[BSS]
+12"	-	168	DRUMSTEP	Astra Blaze	MK													
+-	"[CN]
+6"	"[CN]
+[BSS]
+9"	"[BSS]
+11"	-	"[CN]
+5"	"[CN]
+[BSS]
+9"	"[BSS]
+11"	-	128	GLHF	GO!	Juggernaut.													
+-	4	8	10	-	5	8	10	-	152	FUTURE VIBES	HORIZON BEATZ	SOUND HOLIC feat. Nana Takahashi													
+-	6	10	12	-	6	10	12	-	200	ブレイクコア	King of Tribe	Numb'n'dub													
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+11"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+11"	-	177	STAR☆CORE	Meteor☆Shower	Tatsunoshin													
+-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	"[CN]
+[BSS]
+5"	"[CN]
+[BSS]
+10"	"[CN]
+[BSS]
+12"	-	165	GOLDEN FORCE	RIZING-GAMERS.	BlackY													
+-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+10"	-	"[CN]
+5"	"[CN]
+9"	"[CN]
+[BSS]
+10"	-	178	HARDCORE RAVE	SILKY BRAVE	DJ Shimamura													
+BEMANI PRO LEAGUE -SEASON 5- Triple Tribe																									
+2026/01/29配信																									
+-	"[HCN]
+6"	"[HCN]
+9"	"[HCN]
+11"	-	"[HCN]
+6"	"[HCN]
+9"	"[HCN]
+11"	-	170	BEBOP CORE	Last Card	kors k													
+-	5	9	11	-	5	9	11	-	170	ORIENTAL MIRAGE	TOKAKU=ALMiRAJ	MYUKKE.													
+-	5	10	12	-	6	10	12	-	166	GREY DISTRICT	色を喪った街	かめりあ feat. かめりあ													
+-	7	10	12	-	7	10	12	-	190	YALDICORE	HyperTwist	TANUKI													
+-	"[CN]
+[BSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	"[CN]
+[BSS]
+6"	"[CN]
+[MSS]
+10"	"[CN]
+[MSS]
+12"	-	75-215	DOUBLE DRIVE	fixer	PHQUASE vs. dj TAKA													
+バトルモード																									
+ARENAバトル 第1回																									
+-	5	7	10	-	5	8	11	-	133	PROG	evergreen	kors k													
+ARENAバトル 第2回																									
+-	3	6	9	"[CN]
+11"	4	6	9	"[BSS]
+12"	140	トレンディーポップス	KYAMISAMA ONEGAI!	Dr.Honda feat. Moe													

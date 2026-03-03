@@ -42,7 +42,7 @@ function flattenToUploadRecords(scores: ScoreData[]) {
 }
 
 export function useScoreUpload() {
-    const upload = async (scores: ScoreData[]): Promise<{ saved: number; message: string }> => {
+    const upload = async (scores: ScoreData[]): Promise<{ updatedCount: number; updatedSongs: any[]; message: string }> => {
         const records = flattenToUploadRecords(scores);
         const res = await fetch(`${API_BASE}/api/scores/upload`, {
             method: 'POST',

@@ -2,11 +2,12 @@ com\beatseeker\backend\entity\Score.class
 com\beatseeker\backend\controller\ScoreController$MemoUpdateRequest.class
 com\beatseeker\backend\repository\ScoreRepository.class
 com\beatseeker\backend\controller\AuthController.class
-com\beatseeker\backend\service\CustomOAuth2UserService.class
+com\beatseeker\backend\controller\LoginRequest.class
 com\beatseeker\backend\BackendApplication.class
 com\beatseeker\backend\config\SecurityConfig.class
 com\beatseeker\backend\entity\User.class
 com\beatseeker\backend\controller\ScoreController$ScoreUploadRequest.class
+com\beatseeker\backend\controller\RegisterRequest.class
 com\beatseeker\backend\repository\UserRepository.class
 com\beatseeker\backend\controller\ScoreController.class
 com\beatseeker\backend\controller\ProfileUpdateRequest.class

@@ -4,7 +4,7 @@ import CsvDropzone from './components/CsvDropzone.vue';
 import ScoreSummary from './components/ScoreSummary.vue';
 import ScoreDashboard from './components/ScoreDashboard.vue';
 import ProfileDashboard from './components/ProfileDashboard.vue';
-import ProfileSetupModal from './components/ProfileSetupModal.vue';
+import LoginModal from './components/LoginModal.vue';
 import UploadHistory from './components/UploadHistory.vue';
 import Changelog from './components/Changelog.vue';
 import UploadResultModal from './components/UploadResultModal.vue';
@@ -12,7 +12,7 @@ import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
 import type { UploadDiffResult, UpdatedSong } from './types/UploadDiff';
-import { getOverallRankInfo, calculateTotalPoints } from './utils/beatTier';
+import { getOverallRankInfo, calculateTotalPoints, calculatePoints } from './utils/beatTier';
 import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useScores } from './composables/useScores';
@@ -27,8 +27,9 @@ const totalBeatTierPoints = ref(0);
 
 const diffResult = ref<UploadDiffResult | null>(null);
 const isDiffModalOpen = ref(false);
+const isLoginModalOpen = ref(false);
 
-const { user, isLoggedIn, login, logout, isLoading: authLoading } = useAuth();
+const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
 const { upload } = useScoreUpload();
 const { fetchMyScores, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -79,7 +80,7 @@ const handleFileDropped = async (file: File) => {
     const newData = await parseScoreCsv(file);
     console.log(`Successfully parsed ${newData.length} songs.`);
     
-    // Calculate Diff
+    // Calculate Diff (compare with current scoreData)
     const oldFlat = flattenScores(scoreData.value);
     const newFlat = flattenScores(newData);
     
@@ -89,9 +90,7 @@ const handleFileDropped = async (file: File) => {
     const updatedSongs: UpdatedSong[] = [];
     
     newFlat.forEach(newR => {
-        // We only care about level 11 and 12 for the diff highlight to avoid clutter
-        if (newR.difficultyLevel !== 11 && newR.difficultyLevel !== 12) return;
-        
+        // Report on level 11 and 12 improvements primarily, but you can see all in table
         const oldR = oldScoreMap.get(`${newR.title}_${newR.difficultyName}`);
         
         const oldScore = oldR ? oldR.score : 0;
@@ -105,11 +104,13 @@ const handleFileDropped = async (file: File) => {
         const oldClearRank = clearTypeRankings[oldClearType] || 0;
         const newClearRank = clearTypeRankings[newClearType] || 0;
         const clearTypeImproved = newClearRank > oldClearRank;
+        const scoreImproved = newScore > oldScore;
         
-        const scoreIncrease = newScore > oldScore ? newScore - oldScore : 0;
+        const scoreIncrease = scoreImproved ? newScore - oldScore : 0;
         const beatPtIncrease = newBeatPt > oldBeatPt ? newBeatPt - oldBeatPt : 0;
         
-        if (scoreIncrease > 0 || clearTypeImproved) {
+        // Only report if there is an actual improvement in score or lamp
+        if (scoreImproved || clearTypeImproved) {
             updatedSongs.push({
                 title: newR.title,
                 difficulty: newR.difficultyName,
@@ -134,48 +135,88 @@ const handleFileDropped = async (file: File) => {
 
     const oldTotalBeatPt = calculateTotalPoints(oldFlat);
     const newTotalBeatPt = calculateTotalPoints(newFlat);
-    const totalBeatPtIncrease = newTotalBeatPt > oldTotalBeatPt ? newTotalBeatPt - oldTotalBeatPt : 0;
-    
     const oldTier = getOverallRankInfo(oldTotalBeatPt);
     const newTier = getOverallRankInfo(newTotalBeatPt);
-    
-    diffResult.value = {
-        oldTotalBeatPt,
-        newTotalBeatPt,
-        totalBeatPtIncrease,
-        oldTier,
-        newTier,
-        updatedSongs
-    };
-    
-    // Open Diff Modal if there are updates or new session (only for logged-in users)
-    if (isLoggedIn.value) {
-      if (updatedSongs.length > 0) {
-          // Only show if there are actual updates
-          isDiffModalOpen.value = true;
-      } else if (oldFlat.length === 0 && newFlat.length > 0) {
-          // First upload in this session
-          isDiffModalOpen.value = true;
-      }
-    }
 
-    // Apply new data
-    if (oldFlat.length === 0 || updatedSongs.length > 0 || newData.length > oldFlat.length) {
+    if (isLoggedIn.value && newData.length > 0) {
+      // PRO-UPGRADE: Use backend-provided diff for accuracy against DB
+      isParsing.value = true; // Keep loading state
+      try {
+        const result = await upload(newData);
+        console.log("Scores persisted to database.");
+        
+        // Map the backend diff to our UploadDiffResult format, adding beat points
+        const backendUpdates = result.updatedSongs.map(s => {
+          // We need original chart data to calculate Beat Points (maxScore, informalRank)
+          const chartData = newFlat.find(nf => nf.title === s.title && nf.difficultyName === s.difficulty);
+          const informalRank = chartData?.informalRank || (chartData?.difficultyLevel ? chartData.difficultyLevel.toFixed(1) : '12.0');
+          const maxScore = chartData?.maxScore || (s.newScore > 0 ? s.newScore : 3000); // Fallback
+
+          // Helper to get points
+          const getPoints = (score: number) => {
+             const scoreRate = (score / maxScore) * 100;
+             return calculatePoints(scoreRate, informalRank);
+          };
+
+          const oldBeatPt = getPoints(s.oldScore);
+          const newBeatPt = getPoints(s.newScore);
+
+          return {
+            ...s,
+            oldBeatPt,
+            newBeatPt,
+            beatPtIncrease: Math.max(0, newBeatPt - oldBeatPt)
+          };
+        });
+
+        // Filter and sort for the report
+        const reportSongs = backendUpdates
+          .filter(s => s.scoreIncrease > 0 || s.clearTypeImproved)
+          .sort((a, b) => b.beatPtIncrease - a.beatPtIncrease || b.scoreIncrease - a.scoreIncrease);
+
+        const currentTotalBeatPt = calculateTotalPoints(newFlat);
+        diffResult.value = {
+            oldTotalBeatPt,
+            newTotalBeatPt: currentTotalBeatPt,
+            totalBeatPtIncrease: Math.max(0, currentTotalBeatPt - oldTotalBeatPt),
+            oldTier,
+            newTier: getOverallRankInfo(currentTotalBeatPt),
+            updatedSongs: reportSongs
+        };
+
+        if (reportSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
+            isDiffModalOpen.value = true;
+        }
+
+        // Apply new data locally and refresh strictly to sync server IDs for memos
+        scoreData.value = newData;
+        totalBeatTierPoints.value = currentTotalBeatPt;
+        await loadSavedScores(); 
+      } catch (err) {
+        console.error("Auto upload failed", err);
+        errorMsg.value = '自動保存または差分の取得に失敗しました。';
+      }
+    } else {
+        // Guest mode - stay with frontend calculation
+        diffResult.value = {
+            oldTotalBeatPt,
+            newTotalBeatPt,
+            totalBeatPtIncrease: Math.max(0, newTotalBeatPt - oldTotalBeatPt),
+            oldTier,
+            newTier,
+            updatedSongs
+        };
+        
+        if (updatedSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
+            isDiffModalOpen.value = true;
+        }
+        
         scoreData.value = newData;
         totalBeatTierPoints.value = newTotalBeatPt;
     }
-    
-    if (isLoggedIn.value && newData.length > 0) {
-      // Async upload in background
-      upload(newData).then(() => {
-          loadSavedScores(); // Refresh strictly to sync server IDs for memos
-      }).catch(err => console.error("Auto upload failed", err));
-    } else if (!isLoggedIn.value) {
-      // Just a warning, diff modal will still show
-    }
   } catch (err: any) {
     console.error('Failed to parse or save CSV:', err);
-    errorMsg.value = err.message || 'エラーが発生しました。';
+    errorMsg.value = err.message || 'CSVの解析に失敗しました。';
   } finally {
     isParsing.value = false;
   }
@@ -190,8 +231,8 @@ const resetData = () => {
 
 <template>
   <div class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-col">
-    <!-- Profile Setup Modal for new users -->
-    <ProfileSetupModal v-if="isLoggedIn && !user?.iidxId && !authLoading" />
+    <!-- Login / Registration Modal -->
+    <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" />
 
     <!-- Upload Diff Result Modal -->
     <UploadResultModal 
@@ -225,14 +266,13 @@ const resetData = () => {
             </svg>
           </button>
           
-          <template v-if="false">
-            <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="login">ログイン</button>
+          <template v-if="!isLoggedIn && !authLoading">
+            <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="isLoginModalOpen = true">ログイン</button>
           </template>
-          <template v-else-if="false">
-            <div class="flex items-center gap-2">
-              <img :src="user?.avatarUrl" alt="avatar" class="w-6 h-6 rounded-full" />
-              <span class="text-sm text-slate-600 dark:text-slate-300">{{ user?.displayName }}</span>
-              <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="logout">ログアウト</button>
+          <template v-else-if="isLoggedIn">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ user?.displayName || user?.iidxId }}</span>
+              <button class="text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors" @click="logout">ログアウト</button>
             </div>
           </template>
         </div>

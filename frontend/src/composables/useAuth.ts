@@ -1,13 +1,11 @@
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, readonly } from 'vue';
 
 export interface AuthUser {
     id: number;
     displayName: string;
-    email: string;
-    avatarUrl: string;
-    iidxId: string | null;
-    danRank: string | null;
-    arenaRank: string | null;
+    iidxId: string;
+    danRank: string;
+    arenaRank: string;
 }
 
 const user = ref<AuthUser | null>(null);
@@ -17,6 +15,7 @@ const isLoading = ref(true);
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 async function fetchCurrentUser(): Promise<void> {
+    isLoading.value = true;
     try {
         const res = await fetch(`${API_BASE}/api/auth/me`, {
             credentials: 'include', // Send session cookie
@@ -34,14 +33,40 @@ async function fetchCurrentUser(): Promise<void> {
 }
 
 export function useAuth() {
-    onMounted(() => {
-        if (isLoading.value) {
-            fetchCurrentUser();
-        }
-    });
+    // Note: To avoid multiple fetches on mount across components, we could do this once in App.vue, 
+    // but doing it here with a simple check is ok for now.
+    if (isLoading.value && user.value === null) {
+        fetchCurrentUser();
+    }
 
-    const login = () => {
-        window.location.href = `${API_BASE}/oauth2/authorization/google`;
+    const login = async (iidxId: string, password: string): Promise<void> => {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ iidxId, password })
+        });
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.message || 'ログインに失敗しました。');
+        }
+        await fetchCurrentUser();
+    };
+
+    const registerUser = async (payload: any): Promise<void> => {
+        const res = await fetch(`${API_BASE}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.message || '登録に失敗しました。');
+        }
+        await fetchCurrentUser();
     };
 
     const logout = async () => {
@@ -62,10 +87,11 @@ export function useAuth() {
     const isLoggedIn = computed(() => !!user.value);
 
     return {
-        user,
-        isLoading,
+        user: readonly(user),
+        isLoading: readonly(isLoading),
         isLoggedIn,
         login,
+        registerUser,
         logout,
         refresh: fetchCurrentUser,
     };

@@ -1,0 +1,4 @@
+﻿CONTAINER ID   IMAGE                 COMMAND                   CREATED      STATUS          PORTS                                         NAMES
+194d70ea3616   44e5c7b2dad7          "/docker-entrypoint.窶ｦ"   5 days ago   Up 15 minutes   0.0.0.0:80->80/tcp, [::]:80->80/tcp           beat-seeker-frontend-1
+4aeb1966b0c7   beat-seeker-backend   "java -jar app.jar"       5 days ago   Up 15 minutes   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   beat-seeker-backend-1
+f456ebad7bde   postgres:15-alpine    "docker-entrypoint.s窶ｦ"   5 days ago   Up 15 minutes   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   beat-seeker-db-1

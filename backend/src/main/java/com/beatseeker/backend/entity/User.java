@@ -18,17 +18,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String googleId;
+    @Column(unique = true, length = 9)
+    private String iidxId; // e.g. "1234-5678"
 
-    @Column(nullable = false)
-    private String email;
+    private String passwordHash;
 
     private String displayName;
-    private String avatarUrl;
-
-    @Column(length = 9)
-    private String iidxId; // e.g. "1234-5678"
 
     @Column(length = 20)
     private String danRank; // e.g. "皆伝"

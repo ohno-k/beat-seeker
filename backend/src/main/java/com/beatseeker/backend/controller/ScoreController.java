@@ -5,8 +5,7 @@ import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,8 +13,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/scores")
@@ -30,64 +27,108 @@ public class ScoreController {
     }
 
     /**
-     * Upload (replace) all scores for the current user.
-     * Accepts a JSON array of score objects.
+     * Upload (upsert) scores for the current user.
+     * Keeps only the best scores and returns the diff.
      */
     @PostMapping("/upload")
     @Transactional
     public ResponseEntity<Map<String, Object>> uploadScores(
-            @AuthenticationPrincipal OAuth2User principal,
+            Authentication auth,
             @RequestBody List<ScoreUploadRequest> requests) {
 
-        User user = getUser(principal);
+        User user = getUser(auth);
 
-        // Find previous latest snapshot to carry over memos
-        Optional<Score> latestScoreOpt = scoreRepository.findFirstByUserOrderByUploadedAtDesc(user);
-        Map<String, String> previousMemos = new HashMap<>();
-        if (latestScoreOpt.isPresent() && latestScoreOpt.get().getSnapshotId() != null) {
-            String prevSnapshotId = latestScoreOpt.get().getSnapshotId();
-            List<Score> prevScores = scoreRepository.findByUserAndSnapshotId(user, prevSnapshotId);
-            for (Score s : prevScores) {
-                if (s.getMemo() != null && !s.getMemo().trim().isEmpty()) {
-                    String key = s.getTitle() + "_" + s.getDifficultyName() + "_" + s.getDifficultyLevel();
-                    previousMemos.put(key, s.getMemo());
+        // Load existing scores for the user for lookup
+        List<Score> existingScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+        Map<String, Score> scoreMap = new HashMap<>();
+        for (Score s : existingScores) {
+            String key = s.getTitle() + "_" + s.getDifficultyName() + "_" + s.getDifficultyLevel();
+            scoreMap.put(key, s);
+        }
+
+        List<Map<String, Object>> updatedSongs = new java.util.ArrayList<>();
+
+        for (ScoreUploadRequest req : requests) {
+            String key = req.title() + "_" + req.difficultyName() + "_" + req.difficultyLevel();
+            Score existing = scoreMap.get(key);
+
+            boolean isImproved = false;
+            int oldScore = 0;
+            String oldClearType = "NO PLAY";
+
+            if (existing == null) {
+                // New score
+                isImproved = true;
+                Score newScore = new Score();
+                newScore.setUser(user);
+                updateScoreFields(newScore, req);
+                scoreRepository.save(newScore);
+            } else {
+                oldScore = existing.getScore() != null ? existing.getScore() : 0;
+                oldClearType = existing.getClearType() != null ? existing.getClearType() : "NO PLAY";
+
+                int oldRank = getClearTypeRank(oldClearType);
+                int newRank = getClearTypeRank(req.clearType());
+
+                boolean scoreBetter = req.score() > oldScore;
+                boolean rankBetter = newRank > oldRank;
+
+                if (scoreBetter || rankBetter) {
+                    isImproved = true;
+                    updateScoreFields(existing, req);
+                    scoreRepository.save(existing);
                 }
+            }
+
+            if (isImproved) {
+                Map<String, Object> diff = new HashMap<>();
+                diff.put("title", req.title());
+                diff.put("difficulty", req.difficultyName());
+                diff.put("oldScore", oldScore);
+                diff.put("newScore", req.score());
+                diff.put("scoreIncrease", Math.max(0, req.score() - oldScore));
+                diff.put("oldClearType", oldClearType);
+                diff.put("newClearType", req.clearType());
+                diff.put("clearTypeImproved", getClearTypeRank(req.clearType()) > getClearTypeRank(oldClearType));
+                updatedSongs.add(diff);
             }
         }
 
-        String newSnapshotId = UUID.randomUUID().toString();
-
-        List<Score> scores = requests.stream().map(req -> {
-            Score score = new Score();
-            score.setUser(user);
-            score.setSnapshotId(newSnapshotId);
-            score.setTitle(req.title());
-            score.setArtist(req.artist());
-            score.setGenre(req.genre());
-            score.setDifficultyName(req.difficultyName());
-            score.setDifficultyLevel(req.difficultyLevel());
-            score.setScore(req.score());
-            score.setClearType(req.clearType());
-            score.setDjLevel(req.djLevel());
-            score.setPgreat(req.pgreat());
-            score.setGreat(req.great());
-            score.setMissCount(req.missCount());
-            score.setPlayCount(req.playCount());
-
-            // Carry over memo
-            String key = req.title() + "_" + req.difficultyName() + "_" + req.difficultyLevel();
-            if (previousMemos.containsKey(key)) {
-                score.setMemo(previousMemos.get(key));
-            }
-
-            return score;
-        }).toList();
-
-        scoreRepository.saveAll(scores);
-
         return ResponseEntity.ok(Map.of(
-                "saved", scores.size(),
-                "message", "スコアを保存しました"));
+                "updatedCount", updatedSongs.size(),
+                "updatedSongs", updatedSongs,
+                "message", "スコアを更新しました"));
+    }
+
+    private void updateScoreFields(Score score, ScoreUploadRequest req) {
+        score.setTitle(req.title());
+        score.setArtist(req.artist());
+        score.setGenre(req.genre());
+        score.setDifficultyName(req.difficultyName());
+        score.setDifficultyLevel(req.difficultyLevel());
+        score.setScore(req.score());
+        score.setClearType(req.clearType());
+        score.setDjLevel(req.djLevel());
+        score.setPgreat(req.pgreat());
+        score.setGreat(req.great());
+        score.setMissCount(req.missCount());
+        score.setPlayCount(req.playCount());
+        score.setUploadedAt(java.time.LocalDateTime.now());
+    }
+
+    private int getClearTypeRank(String clearType) {
+        if (clearType == null)
+            return 0;
+        return switch (clearType) {
+            case "FULLCOMBO CLEAR" -> 7;
+            case "EX HARD CLEAR" -> 6;
+            case "HARD CLEAR" -> 5;
+            case "CLEAR" -> 4;
+            case "EASY CLEAR" -> 3;
+            case "ASSIST CLEAR" -> 2;
+            case "FAILED" -> 1;
+            default -> 0;
+        };
     }
 
     /**
@@ -95,30 +136,27 @@ public class ScoreController {
      */
     @GetMapping("/me")
     public ResponseEntity<List<Map<String, Object>>> getMyScores(
-            @AuthenticationPrincipal OAuth2User principal) {
+            Authentication auth) {
 
-        User user = getUser(principal);
+        User user = getUser(auth);
 
-        Optional<Score> latestScoreOpt = scoreRepository.findFirstByUserOrderByUploadedAtDesc(user);
-        if (latestScoreOpt.isEmpty() || latestScoreOpt.get().getSnapshotId() == null) {
-            return ResponseEntity.ok(List.of());
-        }
+        List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
 
-        String latestSnapshotId = latestScoreOpt.get().getSnapshotId();
-        List<Score> scores = scoreRepository.findByUserAndSnapshotId(user, latestSnapshotId);
-
-        List<Map<String, Object>> result = scores.stream().map(s -> Map.<String, Object>ofEntries(
-                Map.entry("id", s.getId()),
-                Map.entry("title", s.getTitle() != null ? s.getTitle() : ""),
-                Map.entry("difficultyName", s.getDifficultyName() != null ? s.getDifficultyName() : ""),
-                Map.entry("difficultyLevel", s.getDifficultyLevel() != null ? s.getDifficultyLevel() : 0),
-                Map.entry("score", s.getScore() != null ? s.getScore() : 0),
-                Map.entry("clearType", s.getClearType() != null ? s.getClearType() : ""),
-                Map.entry("djLevel", s.getDjLevel() != null ? s.getDjLevel() : ""),
-                Map.entry("pgreat", s.getPgreat() != null ? s.getPgreat() : 0),
-                Map.entry("great", s.getGreat() != null ? s.getGreat() : 0),
-                Map.entry("missCount", s.getMissCount()), // Allow null so it can display as "-" in frontend
-                Map.entry("memo", s.getMemo() != null ? s.getMemo() : ""))).toList();
+        List<Map<String, Object>> result = scores.stream().map(s -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", s.getId());
+            map.put("title", s.getTitle() != null ? s.getTitle() : "");
+            map.put("difficultyName", s.getDifficultyName() != null ? s.getDifficultyName() : "");
+            map.put("difficultyLevel", s.getDifficultyLevel() != null ? s.getDifficultyLevel() : 0);
+            map.put("score", s.getScore() != null ? s.getScore() : 0);
+            map.put("clearType", s.getClearType() != null ? s.getClearType() : "");
+            map.put("djLevel", s.getDjLevel() != null ? s.getDjLevel() : "");
+            map.put("pgreat", s.getPgreat() != null ? s.getPgreat() : 0);
+            map.put("great", s.getGreat() != null ? s.getGreat() : 0);
+            map.put("missCount", s.getMissCount());
+            map.put("memo", s.getMemo() != null ? s.getMemo() : "");
+            return map;
+        }).toList();
 
         return ResponseEntity.ok(result);
     }
@@ -128,9 +166,9 @@ public class ScoreController {
      */
     @GetMapping("/history")
     public ResponseEntity<List<Map<String, Object>>> getHistory(
-            @AuthenticationPrincipal OAuth2User principal) {
+            Authentication auth) {
 
-        User user = getUser(principal);
+        User user = getUser(auth);
         List<Score> allScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
 
         // Group by snapshotId (or uploadedAt if missing)
@@ -205,11 +243,11 @@ public class ScoreController {
     @PutMapping("/{id}/memo")
     @Transactional
     public ResponseEntity<Map<String, Object>> updateMemo(
-            @AuthenticationPrincipal OAuth2User principal,
+            Authentication auth,
             @PathVariable Long id,
             @RequestBody MemoUpdateRequest request) {
 
-        User user = getUser(principal);
+        User user = getUser(auth);
         Score score = scoreRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Score not found"));
 
@@ -223,9 +261,12 @@ public class ScoreController {
         return ResponseEntity.ok(Map.of("message", "メモを保存しました"));
     }
 
-    private User getUser(OAuth2User principal) {
-        String googleId = principal.getAttribute("sub");
-        return userRepository.findByGoogleId(googleId)
+    private User getUser(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Not authenticated");
+        }
+        String iidxId = (String) auth.getPrincipal();
+        return userRepository.findByIidxId(iidxId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
