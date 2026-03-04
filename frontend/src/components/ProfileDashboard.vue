@@ -63,12 +63,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line as LineChart } from 'vue-chartjs';
 import { useDarkMode } from '../composables/useDarkMode';
+import { useAuth } from '../composables/useAuth';
 
 const { isDarkMode } = useDarkMode();
+const { authHeaders } = useAuth();
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -86,9 +88,7 @@ interface HistoryRecord {
   aCount: number;
 }
 
-// VITE_API_BASE should be explicitly set to 'http://localhost:8080' in local dev.
-// In production, leaves it empty so it targets '/' (triggering the Render Rewrite).
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const isLoading = ref(true);
 const historyData = ref<HistoryRecord[]>([]);
@@ -96,7 +96,7 @@ const historyData = ref<HistoryRecord[]>([]);
 onMounted(async () => {
     try {
         const res = await fetch(`${API_BASE}/api/scores/history`, {
-            credentials: 'include'
+            headers: authHeaders()
         });
         if (res.ok) {
             historyData.value = await res.json();

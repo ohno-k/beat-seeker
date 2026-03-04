@@ -1,7 +1,0 @@
-## Production profile — activated on Render via SPRING_PROFILES_ACTIVE=prod
-server:
-  servlet:
-    session:
-      cookie:
-        same-site: none
-        secure: true

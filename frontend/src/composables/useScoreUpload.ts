@@ -1,6 +1,6 @@
 import type { ScoreData } from '../types/ScoreData';
+import { useAuth } from './useAuth';
 
-// VITE_API_BASE should be explicitly configured in Render environment variables
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 // Flatten ScoreData (one per song) into individual chart records for API
@@ -42,12 +42,13 @@ function flattenToUploadRecords(scores: ScoreData[]) {
 }
 
 export function useScoreUpload() {
+    const { authHeaders } = useAuth();
+
     const upload = async (scores: ScoreData[]): Promise<{ updatedCount: number; updatedSongs: any[]; message: string }> => {
         const records = flattenToUploadRecords(scores);
         const res = await fetch(`${API_BASE}/api/scores/upload`, {
             method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(records),
         });
 

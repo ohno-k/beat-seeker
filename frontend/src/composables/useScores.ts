@@ -1,17 +1,18 @@
 import { ref } from 'vue';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
+import { useAuth } from './useAuth';
 
-// VITE_API_BASE should be explicitly configured in Render environment variables
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 export function useScores() {
     const isFetching = ref(false);
+    const { authHeaders } = useAuth();
 
     const fetchMyScores = async (): Promise<ScoreData[]> => {
         isFetching.value = true;
         try {
             const res = await fetch(`${API_BASE}/api/scores/me`, {
-                credentials: 'include'
+                headers: authHeaders()
             });
 
             if (!res.ok) {
@@ -44,7 +45,7 @@ export function useScores() {
                     grouped.set(title, {
                         version: '0',
                         title: title,
-                        genre: s.genre || '', // genre might not be returned in /me directly, but let's map what we have
+                        genre: s.genre || '',
                         artist: s.artist || '',
                         playCount: s.playCount || 0,
                         lastPlayTime: '',
@@ -83,8 +84,7 @@ export function useScores() {
     const updateMemo = async (id: number, memo: string) => {
         const res = await fetch(`${API_BASE}/api/scores/${id}/memo`, {
             method: 'PUT',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ memo })
         });
         if (!res.ok) throw new Error('Failed to update memo');

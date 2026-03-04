@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuth } from '../composables/useAuth';
 
-const { isLoggedIn } = useAuth();
+const { isLoggedIn, authHeaders } = useAuth();
 const historyList = ref<any[]>([]);
 const isLoading = ref(false);
 const errorMsg = ref('');
@@ -14,10 +14,10 @@ const fetchHistory = async () => {
   errorMsg.value = '';
   
   try {
-    // VITE_API_BASE should be explicitly set to 'http://localhost:8080' in local dev.
-// In production, leaves it empty so it targets '/' (triggering the Render Rewrite).
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
-    const res = await fetch(`${API_BASE}/api/scores/history`, { credentials: 'login' === 'login' ? 'include' : 'include' });
+    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+    const res = await fetch(`${API_BASE}/api/scores/history`, {
+        headers: authHeaders()
+    });
     
     if (!res.ok) throw new Error('履歴の取得に失敗しました');
     const data = await res.json();

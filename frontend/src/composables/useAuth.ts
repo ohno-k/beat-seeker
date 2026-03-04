@@ -11,19 +11,50 @@ export interface AuthUser {
 const user = ref<AuthUser | null>(null);
 const isLoading = ref(true);
 
+const TOKEN_KEY = 'beat-seeker-token';
+
 // VITE_API_BASE should be explicitly configured in Render environment variables
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+function getToken(): string | null {
+    return localStorage.getItem(TOKEN_KEY);
+}
+
+function setToken(token: string) {
+    localStorage.setItem(TOKEN_KEY, token);
+}
+
+function removeToken() {
+    localStorage.removeItem(TOKEN_KEY);
+}
+
+/** Build standard headers. Include Authorization if a JWT is stored. */
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = { ...extra };
+    const token = getToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
 async function fetchCurrentUser(): Promise<void> {
     isLoading.value = true;
+    const token = getToken();
+    if (!token) {
+        user.value = null;
+        isLoading.value = false;
+        return;
+    }
     try {
         const res = await fetch(`${API_BASE}/api/auth/me`, {
-            credentials: 'include', // Send session cookie
+            headers: authHeaders(),
         });
         if (res.ok) {
             user.value = await res.json();
         } else {
             user.value = null;
+            removeToken(); // Token is invalid / expired
         }
     } catch {
         user.value = null;
@@ -33,8 +64,6 @@ async function fetchCurrentUser(): Promise<void> {
 }
 
 export function useAuth() {
-    // Note: To avoid multiple fetches on mount across components, we could do this once in App.vue, 
-    // but doing it here with a simple check is ok for now.
     if (isLoading.value && user.value === null) {
         fetchCurrentUser();
     }
@@ -43,7 +72,6 @@ export function useAuth() {
         const res = await fetch(`${API_BASE}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({ iidxId, password })
         });
 
@@ -51,6 +79,8 @@ export function useAuth() {
             const data = await res.json().catch(() => ({}));
             throw new Error(data.message || 'ログインに失敗しました。');
         }
+        const data = await res.json();
+        setToken(data.token);
         await fetchCurrentUser();
     };
 
@@ -58,7 +88,6 @@ export function useAuth() {
         const res = await fetch(`${API_BASE}/api/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify(payload)
         });
 
@@ -66,22 +95,15 @@ export function useAuth() {
             const data = await res.json().catch(() => ({}));
             throw new Error(data.message || '登録に失敗しました。');
         }
+        const data = await res.json();
+        setToken(data.token);
         await fetchCurrentUser();
     };
 
     const logout = async () => {
-        try {
-            await fetch(`${API_BASE}/api/auth/logout`, {
-                method: 'POST',
-                credentials: 'include',
-            });
-        } catch (e) {
-            console.error('Logout failed:', e);
-        } finally {
-            user.value = null;
-            // Force a reload to clear any residual state/cache
-            window.location.href = '/';
-        }
+        removeToken();
+        user.value = null;
+        window.location.href = '/';
     };
 
     const isLoggedIn = computed(() => !!user.value);
@@ -94,5 +116,6 @@ export function useAuth() {
         registerUser,
         logout,
         refresh: fetchCurrentUser,
+        authHeaders, // Expose for use in other API calls (e.g., score uploads)
     };
 }

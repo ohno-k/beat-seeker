@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +25,12 @@ public class SecurityConfig {
         @Value("${FRONTEND_URL:http://localhost:5173}")
         private String frontendUrl;
 
+        private final JwtAuthFilter jwtAuthFilter;
+
+        public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+                this.jwtAuthFilter = jwtAuthFilter;
+        }
+
         @Bean
         public PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
@@ -36,7 +43,7 @@ public class SecurityConfig {
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .csrf(csrf -> csrf.disable())
                                 .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile",
                                                                 "/api/scores/**")
@@ -45,13 +52,7 @@ public class SecurityConfig {
                                 .exceptionHandling(ex -> ex
                                                 .authenticationEntryPoint(
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                                .logout(logout -> logout
-                                                .logoutUrl("/api/auth/logout")
-                                                .logoutSuccessHandler((request, response, authentication) -> {
-                                                        response.setStatus(HttpStatus.OK.value());
-                                                })
-                                                .deleteCookies("JSESSIONID")
-                                                .invalidateHttpSession(true));
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }
@@ -62,7 +63,7 @@ public class SecurityConfig {
                 config.setAllowedOrigins(List.of(frontendUrl));
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
-                config.setAllowCredentials(true); // Required for session cookies
+                config.setAllowCredentials(true);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                 source.registerCorsConfiguration("/**", config);

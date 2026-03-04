@@ -1,21 +1,15 @@
 package com.beatseeker.backend.controller;
 
+import com.beatseeker.backend.config.JwtUtil;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,15 +19,16 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request,
-            HttpServletRequest httpRequest) {
+    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
         if (userRepository.findByIidxId(request.iidxId()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "IIDX ID is already registered"));
         }
@@ -46,14 +41,12 @@ public class AuthController {
         user.setArenaRank(request.arenaRank());
         userRepository.save(user);
 
-        // Auto login
-        authenticateUser(user, httpRequest);
-        return ResponseEntity.ok(Map.of("message", "Registration successful"));
+        String token = jwtUtil.generateToken(user.getIidxId());
+        return ResponseEntity.ok(Map.of("message", "Registration successful", "token", token));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request,
-            HttpServletRequest httpRequest) {
+    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {
         Optional<User> optionalUser = userRepository.findByIidxId(request.iidxId());
 
         if (optionalUser.isEmpty()
@@ -62,16 +55,8 @@ public class AuthController {
                     .body(Map.of("message", "Invalid IIDX ID or Password"));
         }
 
-        authenticateUser(optionalUser.get(), httpRequest);
-        return ResponseEntity.ok(Map.of("message", "Login successful"));
-    }
-
-    private void authenticateUser(User user, HttpServletRequest request) {
-        Authentication auth = new UsernamePasswordAuthenticationToken(user.getIidxId(), null, Collections.emptyList());
-        SecurityContext sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(auth);
-        HttpSession session = request.getSession(true);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, sc);
+        String token = jwtUtil.generateToken(optionalUser.get().getIidxId());
+        return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
     }
 
     @GetMapping("/me")
@@ -80,7 +65,7 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
 
-        String iidxId = (String) auth.getPrincipal(); // Authenticated principal is iidxId
+        String iidxId = (String) auth.getPrincipal();
         User user = userRepository.findByIidxId(iidxId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -106,8 +91,7 @@ public class AuthController {
         if (request.displayName() != null)
             user.setDisplayName(request.displayName());
         if (request.iidxId() != null)
-            user.setIidxId(request.iidxId()); // Note: changing iidxId might log them out if not handled, but keeping it
-                                              // simple
+            user.setIidxId(request.iidxId());
         if (request.danRank() != null)
             user.setDanRank(request.danRank());
         if (request.arenaRank() != null)
