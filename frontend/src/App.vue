@@ -259,10 +259,23 @@ const handleFileDropped = async (file: File) => {
   }
 };
 
+const showUploadArea = ref(false);
+
 const resetData = () => {
-  scoreData.value = [];
+  if (isLoggedIn.value) {
+    // If logged in, we shouldn't clear the data, just show the upload area
+    showUploadArea.value = true;
+  } else {
+    // If guest, clear it to start over
+    scoreData.value = [];
+    totalBeatTierPoints.value = 0;
+  }
   errorMsg.value = '';
-  totalBeatTierPoints.value = 0;
+};
+
+const cancelUpload = () => {
+  showUploadArea.value = false;
+  errorMsg.value = '';
 };
 </script>
 
@@ -316,9 +329,9 @@ const resetData = () => {
           <template v-else-if="isLoggedIn">
             <div class="flex items-center gap-3">
               <button 
-                v-if="user?.id === 18 && !viewingUserId"
+                v-if="(user?.id == 18 || user?.iidxId === '5737-1145') && !viewingUserId"
                 @click="isAdminModalOpen = true" 
-                class="hidden sm:inline-flex items-center justify-center text-sm font-bold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 transition-colors shadow-sm gap-1.5 group"
+                class="inline-flex items-center justify-center text-sm font-bold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 transition-colors shadow-sm gap-1.5 group"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -361,75 +374,76 @@ const resetData = () => {
         </button>
       </div>
       
-      <!-- Hero Section (Visible only when no data and not logged in or explicitly on dropzone) -->
-      <div v-if="!scoreData.length && !isLoggedIn" class="text-center mb-12 max-w-2xl animate-fade-in">
-        <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
-          スコアデータを<span class="text-blue-600 dark:text-blue-400">可視化</span>しよう
-        </h1>
-        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-          最新のCSVデータをドロップするだけで、あなたの実力値を自動でグラフ化・分析します。
-        </p>
-      </div>
-
-      <!-- Dropzone or Parsing State when completely empty -->
-      <div v-if="!scoreData.length && !isLoggedIn" class="w-full max-w-3xl animate-fade-in">
-        <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
-          <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
-          <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
+      <!-- Main Views -->
+      <template v-if="activeTab === 'changelog'">
+        <Changelog class="w-full max-w-4xl animate-fade-in" />
+      </template>
+      
+      <template v-else-if="activeTab === 'history'">
+        <UploadHistory class="w-full animate-fade-in" />
+      </template>
+      
+      <template v-else>
+        <!-- Hero Section (Visible only when no data and not logged in) -->
+        <div v-if="!scoreData.length && !isLoggedIn" class="text-center mb-12 max-w-2xl animate-fade-in">
+          <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
+            スコアデータを<span class="text-blue-600 dark:text-blue-400">可視化</span>しよう
+          </h1>
+          <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+            最新のCSVデータをドロップするだけで、あなたの実力値を自動でグラフ化・分析します。
+          </p>
         </div>
-        
-        <CsvDropzone v-else @file-dropped="handleFileDropped" />
-        
-        <!-- Error Message -->
-        <div 
-          v-if="errorMsg" 
-          class="mt-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 animate-fade-in"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-          </svg>
-          <span class="font-medium text-sm sm:text-base">{{ errorMsg }}</span>
-        </div>
-      </div>
 
-      <!-- Score Results View -->
-      <div v-else class="w-full flex flex-col items-center animate-fade-in">
-        
-        <!-- Header & Tabs -->
-        <div class="w-full max-w-6xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <!-- Tabs -->
-          <div class="flex items-center gap-4 bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
-            <button 
-              @click="activeTab = 'dashboard'"
-              class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'dashboard' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
-            >
-              ダッシュボード
-            </button>
-            <button 
-              @click="activeTab = 'table'"
-              class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'table' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
-            >
-              スコア一覧
-            </button>
-            <button 
-              v-if="false"
-              @click="activeTab = 'profile'"
-              class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'profile' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
-            >
-              プロフィール・成長
-            </button>
-            <button 
-              v-if="false"
-              @click="activeTab = 'history'"
-              class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
-              :class="activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
-            >
-              アップロード履歴
-            </button>
+        <!-- Empty State or Explicit Upload State -->
+        <div v-if="(!scoreData.length && !isLoggedIn) || showUploadArea" class="w-full max-w-3xl animate-fade-in flex flex-col items-center">
+          <div v-if="isParsing || isFetching || authLoading" class="w-full flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
           </div>
+          
+          <template v-else>
+            <div class="w-full flex justify-between items-center mb-4" v-if="showUploadArea && scoreData.length > 0">
+              <h2 class="text-lg font-bold text-slate-800 dark:text-white">CSVアップロード</h2>
+              <button @click="cancelUpload" class="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">キャンセル</button>
+            </div>
+            <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
+          </template>
+          
+          <!-- Error Message -->
+          <div 
+            v-if="errorMsg" 
+            class="w-full mt-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 animate-fade-in"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <span class="font-medium text-sm sm:text-base">{{ errorMsg }}</span>
+          </div>
+        </div>
+
+        <!-- Score Results View (Visible when we have data and not explicitly uploading) -->
+        <div v-if="scoreData.length > 0 && !showUploadArea" class="w-full flex flex-col items-center animate-fade-in">
+          
+          <!-- Header & Tabs -->
+          <div class="w-full max-w-6xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <!-- Tabs -->
+            <div class="flex items-center gap-4 bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-xl overflow-x-auto whitespace-nowrap">
+              <button 
+                @click="activeTab = 'dashboard'"
+                class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
+                :class="activeTab === 'dashboard' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
+              >
+                ダッシュボード
+              </button>
+              <button 
+                @click="activeTab = 'table'"
+                class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
+                :class="activeTab === 'table' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
+              >
+                スコア一覧
+              </button>
+            </div>
+            
             <button 
               v-if="!viewingUserId"
               @click="resetData"
@@ -439,27 +453,9 @@ const resetData = () => {
             </button>
           </div>
 
-        <!-- History Tab -->
-        <UploadHistory 
-          v-if="activeTab === 'history'"
-          class="w-full"
-        />
-
-        <template v-else>
           <!-- Dashboard Tab -->
           <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
-            
-            <div v-if="scoreData.length === 0" class="w-full max-w-3xl animate-fade-in mt-8">
-              <div v-if="isParsing || isFetching || authLoading" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
-                <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
-                <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
-              </div>
-              
-              <CsvDropzone v-else @file-dropped="handleFileDropped" />
-            </div>
-
             <ScoreDashboard 
-              v-else
               :scores="scoreData" 
               :totalPoints="totalBeatTierPoints"
               class="w-full"
@@ -480,15 +476,8 @@ const resetData = () => {
             v-if="activeTab === 'profile'"
             class="w-full max-w-6xl"
           />
-
-          <!-- Changelog Tab -->
-          <Changelog 
-            v-if="activeTab === 'changelog'"
-            class="w-full max-w-4xl"
-          />
-        </template>
-        
-      </div>
+        </div>
+      </template>
       
     </main>
 
