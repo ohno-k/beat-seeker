@@ -329,7 +329,7 @@ const cancelUpload = () => {
           <template v-else-if="isLoggedIn">
             <div class="flex items-center gap-3">
               <button 
-                v-if="(user?.id == 18 || user?.iidxId === '5737-1145') && !viewingUserId"
+                v-if="(user?.id == 18 || user?.iidxId === '5787-1145') && !viewingUserId"
                 @click="isAdminModalOpen = true" 
                 class="inline-flex items-center justify-center text-sm font-bold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 transition-colors shadow-sm gap-1.5 group"
               >
