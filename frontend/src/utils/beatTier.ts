@@ -99,7 +99,11 @@ export const getFolderColorClass = (rankName: string): string => {
  * Calculates total BEAT-TIER points for a given set of flat scores
  */
 export const calculateTotalPoints = (scores: { beatTierPoints: number }[]): number => {
-    return scores.reduce((sum, score) => sum + (score.beatTierPoints || 0), 0);
+    const validScores = scores.filter(s => s.beatTierPoints && s.beatTierPoints > 0);
+    validScores.sort((a, b) => b.beatTierPoints - a.beatTierPoints);
+    const top100 = validScores.slice(0, 100);
+    const sum = top100.reduce((acc, score) => acc + score.beatTierPoints, 0);
+    return Math.round(sum * 10) / 10;
 };
 
 export const getOverallRankInfo = (totalPoints: number): FolderRankInfo => {

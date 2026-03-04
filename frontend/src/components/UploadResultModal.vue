@@ -35,15 +35,15 @@
           <div v-if="diffData" class="space-y-8 max-w-2xl mx-auto">
             
             <!-- Tier Up Notification -->
-            <div v-if="diffData.oldTier && diffData.newTier && diffData.oldTier.tier < diffData.newTier.tier" class="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-yellow-900/40 dark:to-amber-800/40 border border-amber-300 dark:border-amber-700/50 p-6 rounded-2xl shadow-sm text-center transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
+            <div v-if="diffData.oldTier && diffData.newTier && diffData.oldTier.minPoints < diffData.newTier.minPoints" class="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-yellow-900/40 dark:to-amber-800/40 border border-amber-300 dark:border-amber-700/50 p-6 rounded-2xl shadow-sm text-center transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
               <div class="absolute inset-0 bg-yellow-200/50 dark:bg-yellow-500/10 mix-blend-overlay animate-pulse"></div>
               <p class="text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest text-sm mb-2 relative z-10">BEAT-TIER 昇格！</p>
               <div class="flex items-center justify-center gap-4 relative z-10">
-                <span class="text-2xl font-black text-slate-500 dark:text-slate-400 line-through decoration-amber-400/50">{{ diffData.oldTier.name }}</span>
+                <span class="text-2xl font-black text-slate-500 dark:text-slate-400 line-through decoration-amber-400/50">{{ diffData.oldTier.name }}{{ diffData.oldTier.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                 </svg>
-                <span class="text-3xl font-black text-amber-600 dark:text-amber-300">{{ diffData.newTier.name }}</span>
+                <span class="text-3xl font-black text-amber-600 dark:text-amber-300">{{ diffData.newTier.name }}{{ diffData.newTier.tier ? ' ' + diffData.newTier.tier : '' }}</span>
               </div>
             </div>
 
@@ -57,7 +57,7 @@
               <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
                 <div class="flex flex-col items-center flex-1">
                   <span class="text-xs font-bold text-slate-400 mb-1">前回 ({{ diffData.oldTotalBeatPt.toFixed(1) }})</span>
-                  <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldTier?.name || '---' }}</span>
+                  <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldTier?.name || '---' }}{{ diffData.oldTier?.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
                 </div>
                 
                 <div class="shrink-0 flex flex-col items-center justify-center pt-4">
@@ -68,7 +68,7 @@
 
                 <div class="flex flex-col items-center flex-1">
                   <span class="text-xs font-bold text-indigo-400 mb-1">今回 ({{ diffData.newTotalBeatPt.toFixed(1) }})</span>
-                  <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newTier?.color || 'text-slate-600'">{{ diffData.newTier?.name || '---' }}</span>
+                  <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newTier?.color || 'text-slate-600'">{{ diffData.newTier?.name || '---' }}{{ diffData.newTier?.tier ? ' ' + diffData.newTier.tier : '' }}</span>
                 </div>
               </div>
               

@@ -12,7 +12,7 @@ import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
 import type { UploadDiffResult, UpdatedSong } from './types/UploadDiff';
-import { getOverallRankInfo, calculateTotalPoints, calculatePoints } from './utils/beatTier';
+import { getRankInfo, calculateTotalPoints, calculatePoints } from './utils/beatTier';
 import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useScores } from './composables/useScores';
@@ -135,8 +135,8 @@ const handleFileDropped = async (file: File) => {
 
     const oldTotalBeatPt = calculateTotalPoints(oldFlat);
     const newTotalBeatPt = calculateTotalPoints(newFlat);
-    const oldTier = getOverallRankInfo(oldTotalBeatPt);
-    const newTier = getOverallRankInfo(newTotalBeatPt);
+    const oldTier = getRankInfo(oldTotalBeatPt);
+    const newTier = getRankInfo(newTotalBeatPt);
 
     if (isLoggedIn.value && newData.length > 0) {
       // PRO-UPGRADE: Use backend-provided diff for accuracy against DB
@@ -180,7 +180,7 @@ const handleFileDropped = async (file: File) => {
             newTotalBeatPt: currentTotalBeatPt,
             totalBeatPtIncrease: Math.max(0, currentTotalBeatPt - oldTotalBeatPt),
             oldTier,
-            newTier: getOverallRankInfo(currentTotalBeatPt),
+            newTier: getRankInfo(currentTotalBeatPt),
             updatedSongs: reportSongs
         };
 

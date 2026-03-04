@@ -1,4 +1,4 @@
-import type { FolderRankInfo } from '../utils/beatTier';
+import type { RankInfo } from '../utils/beatTier';
 
 export interface UpdatedSong {
     title: string;
@@ -18,7 +18,7 @@ export interface UploadDiffResult {
     oldTotalBeatPt: number;
     newTotalBeatPt: number;
     totalBeatPtIncrease: number;
-    oldTier: FolderRankInfo | null;
-    newTier: FolderRankInfo | null;
+    oldTier: RankInfo | null;
+    newTier: RankInfo | null;
     updatedSongs: UpdatedSong[];
 }
