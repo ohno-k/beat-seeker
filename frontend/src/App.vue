@@ -8,6 +8,7 @@ import LoginModal from './components/LoginModal.vue';
 import UploadHistory from './components/UploadHistory.vue';
 import Changelog from './components/Changelog.vue';
 import UploadResultModal from './components/UploadResultModal.vue';
+import AdminUserListModal from './components/AdminUserListModal.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
@@ -28,25 +29,56 @@ const totalBeatTierPoints = ref(0);
 const diffResult = ref<UploadDiffResult | null>(null);
 const isDiffModalOpen = ref(false);
 const isLoginModalOpen = ref(false);
+const isAdminModalOpen = ref(false);
+
+const viewingUserId = ref<number | null>(null);
+const viewingUserName = ref<string>('');
 
 const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
 const { upload } = useScoreUpload();
-const { fetchMyScores, isFetching } = useScores();
+const { fetchMyScores, fetchUserScores, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 
 const loadSavedScores = async () => {
   try {
-    const data = await fetchMyScores();
+    let data;
+    if (viewingUserId.value !== null) {
+      data = await fetchUserScores(viewingUserId.value);
+    } else {
+      data = await fetchMyScores();
+    }
+    
+    // Always clear old data first
+    scoreData.value = [];
+    totalBeatTierPoints.value = 0;
+    
     if (data && data.length > 0) {
       scoreData.value = data;
+      // Calculate total points for the loaded data
+      totalBeatTierPoints.value = calculateTotalPoints(flattenScores(data));
     }
   } catch (e) {
     console.error("Failed to load saved scores", e);
   }
 };
 
+const handleSelectUser = async (selectedUser: any) => {
+  isAdminModalOpen.value = false;
+  viewingUserId.value = selectedUser.id;
+  viewingUserName.value = selectedUser.displayName || selectedUser.iidxId;
+  await loadSavedScores();
+};
+
+const returnToMyData = async () => {
+  viewingUserId.value = null;
+  viewingUserName.value = '';
+  await loadSavedScores();
+};
+
 watch(isLoggedIn, (newVal) => {
   if (newVal) {
+    viewingUserId.value = null;
+    viewingUserName.value = '';
     loadSavedScores();
     
     // Check if we just logged in via Google OAuth redirect
@@ -57,6 +89,11 @@ watch(isLoggedIn, (newVal) => {
       // Clean up the URL without reloading the page
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+  } else {
+    viewingUserId.value = null;
+    viewingUserName.value = '';
+    scoreData.value = [];
+    totalBeatTierPoints.value = 0;
   }
 });
 
@@ -241,6 +278,13 @@ const resetData = () => {
       @close="isDiffModalOpen = false" 
     />
 
+    <!-- Admin User List Modal -->
+    <AdminUserListModal
+      :is-open="isAdminModalOpen"
+      @close="isAdminModalOpen = false"
+      @select="handleSelectUser"
+    />
+
     <!-- Header -->
     <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -271,6 +315,17 @@ const resetData = () => {
           </template>
           <template v-else-if="isLoggedIn">
             <div class="flex items-center gap-3">
+              <button 
+                v-if="user?.id === 18 && !viewingUserId"
+                @click="isAdminModalOpen = true" 
+                class="hidden sm:inline-flex items-center justify-center text-sm font-bold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 transition-colors shadow-sm gap-1.5 group"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                ほかのプレイヤーを見る
+              </button>
               <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ user?.displayName || user?.iidxId }}</span>
               <button class="text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors" @click="logout">ログアウト</button>
             </div>
@@ -281,6 +336,30 @@ const resetData = () => {
 
     <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center">
+
+      <!-- Admin Viewing Banner -->
+      <div v-if="viewingUserId" class="w-full max-w-6xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden">
+        <div class="absolute right-0 top-0 bottom-0 w-32 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 to-transparent pointer-events-none"></div>
+        <div class="flex items-center gap-3 relative z-10 w-full justify-center sm:justify-start">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">管理者モード</span>
+            <span class="text-base sm:text-lg font-bold">現在 <span class="text-white bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm shadow-sm">{{ viewingUserName }}</span> さんのデータを閲覧中</span>
+          </div>
+        </div>
+        <button 
+          @click="returnToMyData" 
+          class="shrink-0 relative z-10 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-lg border border-white/30 transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          自分のデータに戻る
+        </button>
+      </div>
       
       <!-- Hero Section (Visible only when no data and not logged in or explicitly on dropzone) -->
       <div v-if="!scoreData.length && !isLoggedIn" class="text-center mb-12 max-w-2xl animate-fade-in">
@@ -352,6 +431,7 @@ const resetData = () => {
             </button>
           </div>
             <button 
+              v-if="!viewingUserId"
               @click="resetData"
               class="px-5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-xl transition-all border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 shadow-sm whitespace-nowrap"
             >
