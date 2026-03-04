@@ -2,7 +2,7 @@
  * Beat-Tier System Logic
  * 
  * 1. Single Song Points = (ScoreRate / 100)^1.5 * Weight
- *    Weight: 11.0 -> 150, 11.1 -> 152, ..., 12.9 -> 188, 13.0 -> 190
+ *    Weight: 11.0 -> 150, 11.1 -> 152, ..., 12.4 -> 178, 12.5 -> 182, ..., 13.0 -> 202
  * 2. Total Points = Sum of top 100 songs
  * 3. Rank = Based on Total Points (52 tiers + Beginner)
  *    Novice 1 (= entry point) starts at 10,000pt
@@ -25,9 +25,12 @@ export interface FolderRankInfo {
 
 // Weights configuration (can be easily adjusted)
 export const WEIGHTS: Record<string, number> = {};
+let weight = 150;
 for (let i = 0; i <= 20; i++) {
-    const rank = (11.0 + i * 0.1).toFixed(1);
-    WEIGHTS[rank] = 150 + i * 2;
+    const rankValue = 11.0 + i * 0.1;
+    const rank = rankValue.toFixed(1);
+    WEIGHTS[rank] = weight;
+    weight += (rankValue >= 12.39) ? 4 : 2; // Step becomes 4 starting from the jump to 12.5
 }
 
 /**
