@@ -23,8 +23,6 @@ public class User {
 
     private String passwordHash;
 
-    private String email; // legacy column from Google OAuth — kept for DB compatibility
-
     private String displayName;
 
     @Column(length = 20)
