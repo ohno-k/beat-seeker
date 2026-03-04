@@ -31,7 +31,7 @@ public class User {
     @Column(length = 10)
     private String arenaRank; // e.g. "A1"
 
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -29,34 +29,45 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
-        if (userRepository.findByIidxId(request.iidxId()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "IIDX ID is already registered"));
+        try {
+            if (userRepository.findByIidxId(request.iidxId()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("message", "IIDX ID is already registered"));
+            }
+
+            User user = new User();
+            user.setIidxId(request.iidxId());
+            user.setPasswordHash(passwordEncoder.encode(request.password()));
+            user.setDisplayName(request.displayName() != null ? request.displayName() : "No Name");
+            user.setDanRank(request.danRank());
+            user.setArenaRank(request.arenaRank());
+            userRepository.save(user);
+
+            String token = jwtUtil.generateToken(user.getIidxId());
+            return ResponseEntity.ok(Map.of("message", "Registration successful", "token", token));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Registration failed: " + e.getMessage()));
         }
-
-        User user = new User();
-        user.setIidxId(request.iidxId());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setDisplayName(request.displayName() != null ? request.displayName() : "No Name");
-        user.setDanRank(request.danRank());
-        user.setArenaRank(request.arenaRank());
-        userRepository.save(user);
-
-        String token = jwtUtil.generateToken(user.getIidxId());
-        return ResponseEntity.ok(Map.of("message", "Registration successful", "token", token));
     }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {
-        Optional<User> optionalUser = userRepository.findByIidxId(request.iidxId());
+        try {
+            Optional<User> optionalUser = userRepository.findByIidxId(request.iidxId());
 
-        if (optionalUser.isEmpty()
-                || !passwordEncoder.matches(request.password(), optionalUser.get().getPasswordHash())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Invalid IIDX ID or Password"));
+            if (optionalUser.isEmpty()
+                    || !passwordEncoder.matches(request.password(), optionalUser.get().getPasswordHash())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "Invalid IIDX ID or Password"));
+            }
+
+            String token = jwtUtil.generateToken(optionalUser.get().getIidxId());
+            return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Login failed: " + e.getMessage()));
         }
-
-        String token = jwtUtil.generateToken(optionalUser.get().getIidxId());
-        return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
     }
 
     @GetMapping("/me")
