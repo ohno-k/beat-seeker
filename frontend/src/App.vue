@@ -9,6 +9,7 @@ import UploadHistory from './components/UploadHistory.vue';
 import Changelog from './components/Changelog.vue';
 import UploadResultModal from './components/UploadResultModal.vue';
 import AdminUserListModal from './components/AdminUserListModal.vue';
+import Terms from './components/Terms.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
@@ -23,7 +24,7 @@ import { watch } from 'vue';
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'changelog'>('dashboard');
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'changelog' | 'terms'>('dashboard');
 const totalBeatTierPoints = ref(0);
 
 const diffResult = ref<UploadDiffResult | null>(null);
@@ -302,8 +303,14 @@ const cancelUpload = () => {
     <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2 cursor-pointer group" @click="activeTab = 'dashboard'">
-          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-blue-700 transition-colors">
+          <div class="relative w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-blue-700 transition-colors overflow-hidden">
             B
+            <div 
+              class="absolute bg-red-500 text-white text-[9px] font-black py-[2px] w-[46px] text-center transform -rotate-45 shadow-sm leading-none tracking-wider"
+              style="bottom: 3px; right: -14px;"
+            >
+              BETA
+            </div>
           </div>
           <span class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500 tracking-tight group-hover:from-blue-600 group-hover:to-blue-400 transition-all">
             beat-seeker
@@ -313,13 +320,13 @@ const cancelUpload = () => {
         <div class="flex items-center gap-4">
           <!-- Dark Mode Toggle -->
           <button @click="toggleDarkMode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none">
-            <svg v-if="isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg v-if="isDarkMode" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
               <!-- Moon Icon -->
-              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+              <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
               <!-- Sun Icon -->
-              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 4.22a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-4.22 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-4.22a1 1 0 010-1.415l-.707-.707a1 1 0 01-1.414 1.414l.707.707a1 1 0 011.414 0zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm4.22-4.22a1 1 0 011.415 0l.707-.707a1 1 0 01-1.414-1.414l-.707.707a1 1 0 010 1.414zM10 6a4 4 0 100 8 4 4 0 000-8z" clip-rule="evenodd" />
+              <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
             </svg>
           </button>
           
@@ -337,7 +344,6 @@ const cancelUpload = () => {
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                ほかのプレイヤーを見る
               </button>
               <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ user?.displayName || user?.iidxId }}</span>
               <button class="text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors" @click="logout">ログアウト</button>
@@ -377,6 +383,10 @@ const cancelUpload = () => {
       <!-- Main Views -->
       <template v-if="activeTab === 'changelog'">
         <Changelog class="w-full max-w-4xl animate-fade-in" />
+      </template>
+      
+      <template v-else-if="activeTab === 'terms'">
+        <Terms class="w-full max-w-4xl animate-fade-in" />
       </template>
       
       <template v-else-if="activeTab === 'history'">
@@ -487,13 +497,22 @@ const cancelUpload = () => {
         <p class="text-sm text-slate-500 dark:text-slate-400">
           © 2026 beat-seeker.
         </p>
-        <button 
-          @click="activeTab = 'changelog'"
-          class="text-sm font-medium transition-colors"
-          :class="activeTab === 'changelog' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
-        >
-          更新履歴
-        </button>
+        <div class="flex items-center gap-4">
+          <button 
+            @click="activeTab = 'terms'"
+            class="text-sm font-medium transition-colors"
+            :class="activeTab === 'terms' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+          >
+            利用規約・プライバシーポリシー
+          </button>
+          <button 
+            @click="activeTab = 'changelog'"
+            class="text-sm font-medium transition-colors"
+            :class="activeTab === 'changelog' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+          >
+            更新履歴
+          </button>
+        </div>
       </div>
     </footer>
   </div>

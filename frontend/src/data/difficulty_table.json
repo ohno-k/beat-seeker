@@ -24,7 +24,9 @@
                 "SAMURAI-Scramble[L]",
                 "X-DEN",
                 "Skratch Education Lv-1",
-                "Dans la nuit de l'eternite"
+                "Dans la nuit de l'eternite",
+                "灼熱Beach Side Bunny",
+                "灼熱 Pt.2 Long Train Running"
             ]
         },
         {
@@ -35,7 +37,6 @@
                 "天使のカンタータ -Cantata of Angels-",
                 "二人ノ廃城幽踊宴",
                 "GiGaGaHell",
-                "Flamingo",
                 "ChaserXX[L]",
                 "Y&Co. is dead or alive",
                 "perditus†paradisus",
@@ -45,7 +46,6 @@
                 "ピアノ独奏無言歌 \"灰燼\"",
                 "音楽",
                 "Sigmund[L]",
-                "灼熱Beach Side Bunny",
                 "Inferno of Fomalhaut",
                 "hard-wired",
                 "THE PEERLESS UNDER HEAVEN",
@@ -63,9 +63,7 @@
                 "fixer",
                 "Level 5",
                 "冥",
-                "君のハートにロックオン[L]",
-                "In the Blackest Den",
-                "灼熱 Pt.2 Long Train Running"
+                "君のハートにロックオン[L]"
             ]
         },
         {
@@ -103,7 +101,6 @@
                 "Everlasting Message",
                 "DUE TOMORROW",
                 "LOUDER ROLLING THUNDER",
-                "Routing",
                 "Vulnerability",
                 "LOST TECHNOLOGIE",
                 "CADENZA",
@@ -114,7 +111,13 @@
                 "3y3s",
                 "Bad Encryption",
                 "CODE:0[L]",
-                "LOCUS OF THE TRAVEL",
+                "LOCUS OF THE TRAVEL"
+            ]
+        },
+        {
+            "rank": "12.6",
+            "songs": [
+                "Routing",
                 "Do it!! Do it!![L]",
                 "POLKAMANIA[L]",
                 "⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason",
@@ -123,12 +126,7 @@
                 "ワルツ第17番 ト短調”大犬のワルツ”",
                 "MAD ATTACK[L]",
                 "VANESSA[L]",
-                "1116"
-            ]
-        },
-        {
-            "rank": "12.6",
-            "songs": [
+                "1116",
                 "RUGGED ASH[L]",
                 "DEATH†ZIGOQ ～怒りの高速爆走野郎～[L]",
                 "焔極OVERKILL",
@@ -179,7 +177,8 @@
                 "FiZZλ_POT!0N",
                 "Watch Out Pt.2",
                 "Confiserie",
-                "Zenith"
+                "Zenith",
+                "In the Blackest Den"
             ]
         },
         {
@@ -400,7 +399,8 @@
                 "HyperTwist",
                 "INHERITANCE[L]",
                 "KYAMISAMA ONEGAI![L]",
-                "Plazma[L]"
+                "Plazma[L]",
+                "Flamingo"
             ]
         },
         {
@@ -476,21 +476,7 @@
                 "Monopole.",
                 "CaptivAte～浄化～[L]",
                 "garden[L]",
-                "INAZUMA[L]"
-            ]
-        },
-        {
-            "rank": "12.1",
-            "songs": [
-                "Scripted Connection⇒ H mix[L]",
-                "グッバイ宣言[L]",
-                "CoMAAAAAAA[L]",
-                "Countdown to Heaven or Hell",
-                "GOLD RUSH 2025",
-                "Submerge Serenade[L]",
-                "Super Duper Racers[L]",
-                "RALLY '25",
-                "O/D*20[L]",
+                "INAZUMA[L]",
                 "Ancient Scapes",
                 "めいさいアイドル☆あいむちゃん♪",
                 "Evans",
@@ -506,6 +492,21 @@
                 "ZEPHYRANTHES[L]",
                 "Hydrogen Blueback[L]",
                 "#CMFLG",
+                "Verflucht"
+            ]
+        },
+        {
+            "rank": "12.1",
+            "songs": [
+                "Scripted Connection⇒ H mix[L]",
+                "グッバイ宣言[L]",
+                "CoMAAAAAAA[L]",
+                "Countdown to Heaven or Hell",
+                "GOLD RUSH 2025",
+                "Submerge Serenade[L]",
+                "Super Duper Racers[L]",
+                "RALLY '25",
+                "O/D*20[L]",
                 "EX-MASSIVE FIGHTER",
                 "追想快晴テーマパーク",
                 "ZEИITH",
@@ -535,12 +536,7 @@
                 "Begin",
                 "King of Tribe",
                 "TOKAKU=ALMiRAJ",
-                "華麗なる！音戯探偵ひなビタ♫"
-            ]
-        },
-        {
-            "rank": "12.0",
-            "songs": [
+                "華麗なる！音戯探偵ひなビタ♫",
                 "Monkey Business",
                 "刃図羅",
                 "Modular Technology",
@@ -572,7 +568,12 @@
                 "cinder",
                 "電光",
                 "TOGAKUSHI",
-                "ミラージュ・レジデンス[L]",
+                "ミラージュ・レジデンス[L]"
+            ]
+        },
+        {
+            "rank": "12.0",
+            "songs": [
                 "Please Welcome Mr.C",
                 "Sense 2007",
                 "M4K3 1T B0UNC3",
@@ -608,17 +609,11 @@
                 "CONCEPTUAL",
                 "Do it!! Do it!!",
                 "Perfect Plan",
-                "Verflucht",
                 "Overload Frontier",
                 "THE DAY OF JUBILATIONS",
                 "抱きしめてモナムール",
                 "Cyber True Color",
-                "《ORDERBREAKER》"
-            ]
-        },
-        {
-            "rank": "11.9",
-            "songs": [
+                "《ORDERBREAKER》",
                 "フォニイ[L]",
                 "Disco Killer Music Lover",
                 "Space Battleship S4TO",
@@ -642,7 +637,12 @@
                 "〆",
                 "TECHNO Style Essentials",
                 "3V0",
-                "ABSOLUTE[L]",
+                "ABSOLUTE[L]"
+            ]
+        },
+        {
+            "rank": "11.9",
+            "songs": [
                 "DARK LEGACY",
                 "Friction[!]Function",
                 "PLEASE DON'T GO",
@@ -710,12 +710,7 @@
                 "& Intelligence",
                 "AKASHIC BREAK",
                 "TRIP THE DEEP",
-                "RISLIM -Remix-"
-            ]
-        },
-        {
-            "rank": "11.8",
-            "songs": [
+                "RISLIM -Remix-",
                 "Amazing Mirage",
                 "Innocent Walls",
                 "たまゆら",
@@ -734,7 +729,12 @@
                 "Critical Crystal",
                 "神のシナリオ",
                 "不沈艦CANDY",
-                "BITTER CHOCOLATE STRIKER",
+                "BITTER CHOCOLATE STRIKER"
+            ]
+        },
+        {
+            "rank": "11.8",
+            "songs": [
                 "旋律のドグマ～Miserables～",
                 "XENON II ～TOMOYUKIの野望～",
                 "Tail Lights",
@@ -783,12 +783,7 @@
                 "VALLIS-NERIA",
                 "Nightmare before oversleep",
                 "STARLiGHT",
-                "FUZIN RIZIN"
-            ]
-        },
-        {
-            "rank": "11.7",
-            "songs": [
+                "FUZIN RIZIN",
                 "Mukade",
                 "frequent",
                 "Arca",
@@ -827,7 +822,12 @@
                 "THE DEEP STRIKER[L]",
                 "Valanga",
                 "V2",
-                "WONDER WALKER",
+                "WONDER WALKER"
+            ]
+        },
+        {
+            "rank": "11.7",
+            "songs": [
                 "シュレーディンガーの猫",
                 "Playing With Fire",
                 "Kung-fu Empire",
@@ -859,12 +859,7 @@
                 "BLUST OF WIND[L]",
                 "Aublia",
                 "Apocalypse",
-                "創世ノート"
-            ]
-        },
-        {
-            "rank": "11.6",
-            "songs": [
+                "創世ノート",
                 "Pollinosis",
                 "Kailua",
                 "HYENA",
@@ -918,7 +913,12 @@
                 "SWEETEST SAVAGE",
                 "Ypsilon",
                 "Burning Flame",
-                "Snow Goose",
+                "Snow Goose"
+            ]
+        },
+        {
+            "rank": "11.6",
+            "songs": [
                 "Crazy Jackpot",
                 "乱膳の舞姫",
                 "きみのせかい",
@@ -955,12 +955,7 @@
                 "Drastic Dramatic",
                 "Be OK[L]",
                 "rumrum triplets",
-                "AIR RAID FROM THA UNDAGROUND"
-            ]
-        },
-        {
-            "rank": "11.5",
-            "songs": [
+                "AIR RAID FROM THA UNDAGROUND",
                 "天空脳番長危機十六連打",
                 "RED ZONE[L]",
                 "Ghost Pulse",
@@ -1020,7 +1015,12 @@
                 "SPECIAL SUMMER CAMPAIGN!",
                 "Scripted Connection⇒ A mix",
                 "LAST DAY",
-                "WISE UP![L]",
+                "WISE UP![L]"
+            ]
+        },
+        {
+            "rank": "11.5",
+            "songs": [
                 "ZZ",
                 "ZERO-ONE[L]",
                 "SEQUENCE CAT",
@@ -1043,12 +1043,7 @@
                 "ハードベース・フェスタ",
                 "THE TIME MACHINE",
                 "Night! Night! Night!",
-                "SOLID WYVERN"
-            ]
-        },
-        {
-            "rank": "11.4",
-            "songs": [
+                "SOLID WYVERN",
                 "Ubertreffen",
                 "パーフェクトイーター",
                 "紅牡丹",
@@ -1113,7 +1108,12 @@
                 "Flash Back 90's[L]",
                 "冬椿 ft. Kanae Asaba[L]",
                 "めうめうぺったんたん！！ (ZAQUVA Remix)",
-                "仮想空間の旅人たち[L]",
+                "仮想空間の旅人たち[L]"
+            ]
+        },
+        {
+            "rank": "11.4",
+            "songs": [
                 "ランカーキラーガール",
                 "DREAM OF SPACE UFO ABDUCTION",
                 "Get Higher",
@@ -1146,12 +1146,7 @@
                 "曼荼羅恋々",
                 "smile",
                 "Destiny Sword",
-                "雫"
-            ]
-        },
-        {
-            "rank": "11.3",
-            "songs": [
+                "雫",
                 "STARLIGHT DANCEHALL",
                 "Energy Drive",
                 "UNITE THE HEART",
@@ -1194,7 +1189,12 @@
                 "Outbreak",
                 "牧神笛吹きて",
                 "Blue Rain",
-                "Lost Souls",
+                "Lost Souls"
+            ]
+        },
+        {
+            "rank": "11.3",
+            "songs": [
                 "ユミル",
                 "GIGA RAID",
                 "Bang-Boo Bumble",
@@ -1222,12 +1222,7 @@
                 "n'pa pa BBQ",
                 "Stylus",
                 "Vulkan",
-                "Journey[L]"
-            ]
-        },
-        {
-            "rank": "11.2",
-            "songs": [
+                "Journey[L]",
                 "無双",
                 "CONNECT-",
                 "Catch ya Getcha!",
@@ -1260,7 +1255,12 @@
                 "Beat Radiance[L]",
                 "GloriosA",
                 "Pout",
-                "examination leave",
+                "examination leave"
+            ]
+        },
+        {
+            "rank": "11.2",
+            "songs": [
                 "winkle 2 winkle",
                 "Psychedelic Intelligence",
                 "X-ray binary",
@@ -1284,12 +1284,7 @@
                 "ROTTERDAM SHOGUN",
                 "No Limit 2 dAnce feat. 大山愛未",
                 "MIRACLE MEETS",
-                "Empire State Glory"
-            ]
-        },
-        {
-            "rank": "11.1",
-            "songs": [
+                "Empire State Glory",
                 "朧[L]",
                 "果たせぬ約束 ft. 小林マナ",
                 "Ruler or Loser",
@@ -1315,7 +1310,12 @@
                 "Cookie Bouquets",
                 "メズマライザー",
                 "ちょえちょえまぎか",
-                "PENDUAL TALISMAN",
+                "PENDUAL TALISMAN"
+            ]
+        },
+        {
+            "rank": "11.1",
+            "songs": [
                 "Erosion Mark",
                 "Line 4 Ruin",
                 "VALKYRIAS -英雄誕生-",
@@ -1342,18 +1342,18 @@
                 "DEEP ROAR",
                 "勇者",
                 "怪物[L]",
-                "ラビットホール"
-            ]
-        },
-        {
-            "rank": "11.0",
-            "songs": [
+                "ラビットホール",
                 "Legendary Treasures",
                 "グッバイ宣言",
                 "鴉",
                 "Be A Star",
                 "少年リップルズ",
-                "in the Sky",
+                "in the Sky"
+            ]
+        },
+        {
+            "rank": "11.0",
+            "songs": [
                 "DAWN -THE NEXT ENDEAVOUR-",
                 "凛として咲く花の如く[L]",
                 "恋は白帯、サンシロー[L]",

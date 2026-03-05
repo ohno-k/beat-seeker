@@ -77,48 +77,57 @@
                 <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full transition-colors duration-200">Hierarchy</div>
               </div>
 
-              <!-- Premium Dark Grid for Ranks -->
-              <div class="bg-slate-950 rounded-[2rem] p-4 sm:p-10 border border-slate-800 shadow-2xl overflow-x-auto custom-scrollbar">
-                <div class="min-w-[1000px] space-y-12">
+              <!-- Premium Dark/Light Grid for Ranks -->
+              <div class="bg-white dark:bg-slate-950 rounded-[2rem] p-4 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl">
+                <div class="w-full space-y-12">
                   
                   <!-- Legend & Special Ranks -->
-                  <div class="flex items-center justify-center gap-12 border-b border-slate-800/50 pb-16">
+                  <div class="flex items-center justify-center gap-12 border-b border-slate-200 dark:border-slate-800/50 pb-12">
                     <div v-if="groupedRanks['Legend']" class="flex flex-col items-center group">
                       <RankIcon :rank-name="'Legend'" size="lg" />
                       <div class="mt-6 text-center">
                         <p class="text-base font-black text-amber-500 uppercase tracking-widest mb-1">Legend</p>
-                        <p class="text-sm font-bold text-slate-300 bg-slate-800/50 px-3 py-1 rounded-full border border-slate-700">{{ groupedRanks['Legend'][0].minPoints.toLocaleString() }} pt</p>
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/50 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700">{{ groupedRanks['Legend'][0].minPoints.toLocaleString() }} pt</p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Main Grid (Novice to Mythic) -->
-                  <div class="grid grid-cols-9 gap-8">
-                    <div v-for="name in rankNames" :key="name" class="flex flex-col items-center space-y-6">
-                      <div class="w-px h-12 bg-gradient-to-b from-transparent to-slate-800"></div>
-                      <p class="text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-4 text-center h-4">{{ name }}</p>
+                  <!-- On Mobile: Vertical List. On xl (1280px+): Horizontal Row -->
+                  <div class="flex flex-col xl:flex-row justify-between gap-8 xl:gap-4 overflow-x-auto custom-scrollbar xl:overflow-visible pb-4 xl:pb-0">
+                    <div v-for="name in rankNames" :key="name" class="flex flex-col xl:items-center bg-slate-50 dark:bg-slate-900/50 xl:bg-transparent rounded-2xl p-4 xl:p-0">
                       
-                      <!-- Tiers 5 to 1 (Descending) -->
-                      <div v-for="tier in 5" :key="tier" class="relative group w-full">
-                        <div v-if="getRankForTier(name, 6 - tier)" class="flex flex-col items-center">
-                           <!-- Small connecting lines -->
-                          <div v-if="tier > 1" class="w-px h-6 bg-slate-800/50 mb-2"></div>
-                          
-                          <div class="relative transition-all duration-300 transform group-hover:scale-110 group-hover:-translate-y-2">
-                            <RankIcon :rank-name="name" :tier="6 - tier" size="md" />
-                            <!-- Hover Tooltip -->
-                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-xs whitespace-nowrap z-30 pointer-events-none transition-all shadow-2xl">
-                              <div class="flex flex-col items-center gap-1">
-                                <span class="font-black text-blue-400 text-sm">{{ name }} {{ 6 - tier }}</span>
-                                <span class="font-bold text-slate-300">{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
+                      <!-- Header Row for this Rank on Mobile, Top Header on Desktop -->
+                      <div class="flex items-center xl:flex-col xl:space-y-6 mb-4 xl:mb-0">
+                        <div class="hidden xl:block w-px h-12 bg-gradient-to-b from-transparent to-slate-200 dark:to-slate-800 xl:mb-6"></div>
+                        <p class="text-base xl:text-xs font-black text-slate-700 dark:text-slate-300 xl:text-slate-500 xl:dark:text-slate-400 uppercase tracking-widest flex-1 xl:flex-none xl:h-4 xl:mb-4">{{ name }}</p>
+                      </div>
+                      
+                      <!-- Tiers Flow: Horizontal on mobile, vertical on desktop -->
+                      <div class="flex flex-row xl:flex-col items-center gap-4 xl:gap-0 xl:space-y-0 w-full overflow-x-auto xl:overflow-visible py-2 xl:py-0 custom-scrollbar">
+                        <!-- Tiers 5 to 1 (Descending) -->
+                        <div v-for="tier in 5" :key="tier" class="relative group shrink-0 xl:w-full">
+                          <div v-if="getRankForTier(name, 6 - tier)" class="flex flex-row xl:flex-col items-center">
+                             <!-- Small connecting lines -->
+                            <div v-if="tier > 1" class="hidden xl:block w-px h-6 bg-slate-200 dark:bg-slate-800/50 mb-2"></div>
+                            <div v-if="tier > 1" class="xl:hidden w-4 h-px bg-slate-200 dark:bg-slate-800/50 mr-4"></div>
+                            
+                            <div class="relative transition-all duration-300 transform group-hover:scale-110 group-hover:-translate-y-2">
+                              <RankIcon :rank-name="name" :tier="6 - tier" size="md" />
+                              <!-- Hover Tooltip -->
+                              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white p-3 rounded-xl text-xs whitespace-nowrap z-30 pointer-events-none transition-all shadow-xl dark:shadow-2xl">
+                                <div class="flex flex-col items-center gap-1">
+                                  <span class="font-black text-blue-600 dark:text-blue-400 text-sm">{{ name }} {{ 6 - tier }}</span>
+                                  <span class="font-bold text-slate-600 dark:text-slate-300">{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
+                                </div>
+                                <!-- Tooltip Arrow -->
+                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-white dark:bg-slate-900 border-r border-b border-slate-200 dark:border-slate-700 rotate-45"></div>
                               </div>
-                              <!-- Tooltip Arrow -->
-                              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-slate-900 border-r border-b border-slate-700 rotate-45"></div>
                             </div>
-                          </div>
-                          <div class="mt-3 flex flex-col items-center gap-1">
-                            <p class="text-xs font-black text-slate-300">{{ 6 - tier }}</p>
-                            <p class="text-[9px] font-bold text-slate-500 tracking-tight">{{ (getRankForTier(name, 6 - tier)?.minPoints || 0) / 1000 }}k</p>
+                            <div class="mt-3 xl:mt-3 ml-0 xl:ml-0 flex flex-col items-center gap-1 min-w-[3rem]">
+                              <p class="text-xs font-black text-slate-700 dark:text-slate-300">{{ 6 - tier }}</p>
+                              <p class="text-[10px] font-bold text-slate-500 tracking-tight">{{ (getRankForTier(name, 6 - tier)?.minPoints || 0) / 1000 }}k</p>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -126,10 +135,10 @@
                   </div>
 
                   <!-- Beginner (Base) -->
-                  <div class="flex items-center justify-center pt-16 border-t border-slate-800/50">
-                    <div class="flex flex-col items-center opacity-40 hover:opacity-100 transition-all duration-300">
+                  <div class="flex items-center justify-center pt-8 border-t border-slate-200 dark:border-slate-800/50">
+                    <div class="flex flex-col items-center opacity-70 hover:opacity-100 transition-all duration-300">
                       <RankIcon :rank-name="'Beginner'" size="sm" />
-                      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mt-3">Beginner (0 pt)</p>
+                      <p class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-3">Beginner (0 pt)</p>
                     </div>
                   </div>
 
@@ -166,14 +175,14 @@
                     <span class="text-sm font-black text-blue-600 dark:text-blue-400">{{ group.weight }} pt</span>
                   </div>
                 </div>
-                <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
+                <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 lg:gap-y-4">
                   <div 
                     v-for="song in group.songs" 
                     :key="song"
-                    class="text-[13px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 truncate py-0.5"
+                    class="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 truncate py-1"
                     :title="song"
                   >
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                    <div class="w-1.5 h-1.5 shrink-0 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                     {{ song }}
                   </div>
                 </div>
@@ -208,7 +217,7 @@ const activeTab = ref<'about' | 'songs'>('about');
 const songSearch = ref('');
 
 const groupedRanks = computed(() => getGroupedRanks());
-const rankNames = ['Novice', 'Intermediate', 'Advanced', 'Expert', 'Veteran', 'Elite', 'Master', 'Ancient', 'Mythic'];
+const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
 
 const getRankForTier = (name: string, tier: number) => {
   return groupedRanks.value[name]?.find(r => r.tier === tier);

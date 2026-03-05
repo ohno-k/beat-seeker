@@ -25,12 +25,12 @@ export interface FolderRankInfo {
 
 // Weights configuration (can be easily adjusted)
 export const WEIGHTS: Record<string, number> = {};
-let weight = 150;
+let weight = 152;
 for (let i = 0; i <= 20; i++) {
     const rankValue = 11.0 + i * 0.1;
     const rank = rankValue.toFixed(1);
     WEIGHTS[rank] = weight;
-    weight += (rankValue >= 12.39) ? 4 : 2; // Step becomes 4 starting from the jump to 12.5
+    weight += (rankValue >= 12.49) ? 3 : 2; // Step becomes 4 starting from the jump to 12.5
 }
 
 /**
@@ -70,10 +70,10 @@ export const RANKS: RankInfo[] = [
     ...generateTieredRanks('Ancient', 17000, 17500, 'text-indigo-600'),  // 500
     ...generateTieredRanks('Master', 16500, 17000, 'text-red-600'),     // 500
     ...generateTieredRanks('Elite', 16000, 16500, 'text-orange-600'),  // 500
-    ...generateTieredRanks('Veteran', 15500, 16000, 'text-emerald-600'), // 500
-    ...generateTieredRanks('Expert', 14500, 15500, 'text-teal-600'),    // 1000
-    ...generateTieredRanks('Advanced', 13500, 14500, 'text-cyan-600'),    // 1000
-    ...generateTieredRanks('Intermediate', 12000, 13500, 'text-blue-600'),    // 1500
+    ...generateTieredRanks('Veteran', 15000, 16000, 'text-emerald-600'), // 500
+    ...generateTieredRanks('Expert', 14000, 15000, 'text-teal-600'),    // 1000
+    ...generateTieredRanks('Advanced', 13000, 14000, 'text-cyan-600'),    // 1000
+    ...generateTieredRanks('Intermediate', 12000, 13000, 'text-blue-600'),    // 1500
     ...generateTieredRanks('Novice', 10000, 12000, 'text-slate-600'),   // 2000
 
     { name: 'Beginner', minPoints: 0, color: 'text-slate-400' },
