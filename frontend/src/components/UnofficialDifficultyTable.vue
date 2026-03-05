@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import type { ScoreRecord } from '../utils/scoreData';
 import { getFolderRankInfo, getNextFolderRankInfo } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
+import difficultyData from '../data/difficulty_table.json';
 
 const props = defineProps<{
   scores: ScoreRecord[];
@@ -38,6 +39,15 @@ const groupedByRank = computed(() => {
   });
 
   return groups;
+});
+
+// Calculate total songs per rank from the difficulty table
+const rankSongCounts = computed(() => {
+  const counts: Record<string, number> = {};
+  difficultyData.ranks.forEach(r => {
+    counts[r.rank] = r.songs.length;
+  });
+  return counts;
 });
 
 // Calculate statistics for each rank and sort them descending (e.g., 12.9 down to 11.6)
@@ -84,7 +94,7 @@ const tableData = computed(() => {
       maxBeatPoints,
       averageRate,
       playCount,
-      totalCount: songs.length,
+      totalCount: rankSongCounts.value[rank] || songs.length,
       rankInfo,
       nextRankInfo
     };

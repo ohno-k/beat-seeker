@@ -1,8 +1,10 @@
 package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.Score;
+import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.ScoreRepository;
+import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,10 +22,13 @@ public class ScoreController {
 
     private final ScoreRepository scoreRepository;
     private final UserRepository userRepository;
+    private final ScoreHistoryLogRepository scoreHistoryLogRepository;
 
-    public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository) {
+    public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository,
+            ScoreHistoryLogRepository scoreHistoryLogRepository) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
+        this.scoreHistoryLogRepository = scoreHistoryLogRepository;
     }
 
     /**
@@ -94,10 +99,68 @@ public class ScoreController {
             }
         }
 
+        // If any scores were updated/added, save a new snapshot
+        if (!updatedSongs.isEmpty()) {
+            saveScoreHistorySnapshot(user);
+        }
+
         return ResponseEntity.ok(Map.of(
                 "updatedCount", updatedSongs.size(),
                 "updatedSongs", updatedSongs,
                 "message", "スコアを更新しました"));
+    }
+
+    private void saveScoreHistorySnapshot(User user) {
+        List<Score> allScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+        if (allScores.isEmpty())
+            return;
+
+        ScoreHistoryLog log = new ScoreHistoryLog();
+        log.setUser(user);
+        log.setUploadedAt(java.time.LocalDateTime.now());
+
+        long totalScore = 0;
+        int fcCount = 0;
+        int exhCount = 0;
+        int hCount = 0;
+        int clearCount = 0;
+        int easyCount = 0;
+        int aaaCount = 0;
+        int aaCount = 0;
+        int aCount = 0;
+
+        for (Score s : allScores) {
+            if (s.getScore() != null)
+                totalScore += s.getScore();
+            if ("FULLCOMBO CLEAR".equals(s.getClearType()))
+                fcCount++;
+            if ("EX HARD CLEAR".equals(s.getClearType()))
+                exhCount++;
+            if ("HARD CLEAR".equals(s.getClearType()))
+                hCount++;
+            if ("CLEAR".equals(s.getClearType()))
+                clearCount++;
+            if ("EASY CLEAR".equals(s.getClearType()))
+                easyCount++;
+            if ("AAA".equals(s.getDjLevel()))
+                aaaCount++;
+            if ("AA".equals(s.getDjLevel()))
+                aaCount++;
+            if ("A".equals(s.getDjLevel()))
+                aCount++;
+        }
+
+        log.setTotalScore(totalScore);
+        log.setFcCount(fcCount);
+        log.setExhCount(exhCount);
+        log.setHCount(hCount);
+        log.setClearCount(clearCount);
+        log.setEasyCount(easyCount);
+        log.setAaaCount(aaaCount);
+        log.setAaCount(aaCount);
+        log.setACount(aCount);
+
+        scoreHistoryLogRepository.save(log);
     }
 
     private void updateScoreFields(Score score, ScoreUploadRequest req) {
@@ -162,74 +225,30 @@ public class ScoreController {
     }
 
     /**
-     * Get history aggregates for the current user.
+     * Get history aggregates for the current user from score_history_logs.
      */
     @GetMapping("/history")
     public ResponseEntity<List<Map<String, Object>>> getHistory(
             Authentication auth) {
 
         User user = getUser(auth);
-        List<Score> allScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
-
-        // Group by snapshotId (or uploadedAt if missing)
-        Map<String, List<Score>> grouped = new LinkedHashMap<>();
-        for (Score s : allScores) {
-            String key = s.getSnapshotId() != null ? s.getSnapshotId() : s.getUploadedAt().toString();
-            grouped.computeIfAbsent(key, k -> new java.util.ArrayList<>()).add(s);
-        }
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
 
         List<Map<String, Object>> history = new java.util.ArrayList<>();
 
-        for (Map.Entry<String, List<Score>> entry : grouped.entrySet()) {
-            List<Score> snapshotScores = entry.getValue();
-            if (snapshotScores.isEmpty())
-                continue;
-
-            String dateStr = snapshotScores.get(0).getUploadedAt().toString();
-
-            long totalScore = 0;
-            int fcCount = 0;
-            int exhCount = 0;
-            int hCount = 0;
-            int clearCount = 0;
-            int easyCount = 0;
-            int aaaCount = 0;
-            int aaCount = 0;
-            int aCount = 0;
-
-            for (Score s : snapshotScores) {
-                if (s.getScore() != null)
-                    totalScore += s.getScore();
-                if ("FULLCOMBO CLEAR".equals(s.getClearType()))
-                    fcCount++;
-                if ("EX HARD CLEAR".equals(s.getClearType()))
-                    exhCount++;
-                if ("HARD CLEAR".equals(s.getClearType()))
-                    hCount++;
-                if ("CLEAR".equals(s.getClearType()))
-                    clearCount++;
-                if ("EASY CLEAR".equals(s.getClearType()))
-                    easyCount++;
-                if ("AAA".equals(s.getDjLevel()))
-                    aaaCount++;
-                if ("AA".equals(s.getDjLevel()))
-                    aaCount++;
-                if ("A".equals(s.getDjLevel()))
-                    aCount++;
-            }
-
+        for (ScoreHistoryLog log : logs) {
             Map<String, Object> snapshotData = new HashMap<>();
-            snapshotData.put("snapshotId", entry.getKey());
-            snapshotData.put("date", dateStr);
-            snapshotData.put("totalScore", totalScore);
-            snapshotData.put("fcCount", fcCount);
-            snapshotData.put("exhCount", exhCount);
-            snapshotData.put("hCount", hCount);
-            snapshotData.put("clearCount", clearCount);
-            snapshotData.put("easyCount", easyCount);
-            snapshotData.put("aaaCount", aaaCount);
-            snapshotData.put("aaCount", aaCount);
-            snapshotData.put("aCount", aCount);
+            snapshotData.put("snapshotId", log.getId().toString()); // Use ID as pseudo-snapshot ID
+            snapshotData.put("date", log.getUploadedAt().toString());
+            snapshotData.put("totalScore", log.getTotalScore());
+            snapshotData.put("fcCount", log.getFcCount());
+            snapshotData.put("exhCount", log.getExhCount());
+            snapshotData.put("hCount", log.getHCount());
+            snapshotData.put("clearCount", log.getClearCount());
+            snapshotData.put("easyCount", log.getEasyCount());
+            snapshotData.put("aaaCount", log.getAaaCount());
+            snapshotData.put("aaCount", log.getAaCount());
+            snapshotData.put("aCount", log.getACount());
 
             history.add(snapshotData);
         }
