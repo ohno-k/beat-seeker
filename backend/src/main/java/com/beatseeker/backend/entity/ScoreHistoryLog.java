@@ -32,4 +32,11 @@ public class ScoreHistoryLog {
     private Integer aaaCount = 0;
     private Integer aaCount = 0;
     private Integer aCount = 0;
+
+    private Double totalBeatPt = 0.0;
+    private Double beatPtIncrease = 0.0;
+    private Integer updatedCount = 0;
+
+    @Column(columnDefinition = "TEXT")
+    private String diffJson;
 }

@@ -37,7 +37,7 @@ const viewingUserId = ref<number | null>(null);
 const viewingUserName = ref<string>('');
 
 const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
-const { upload } = useScoreUpload();
+const { upload, saveHistoryLog } = useScoreUpload();
 const { fetchMyScores, fetchUserScores, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 
@@ -230,6 +230,22 @@ const handleFileDropped = async (file: File) => {
         // Apply new data locally and refresh strictly to sync server IDs for memos
         scoreData.value = newData;
         totalBeatTierPoints.value = currentTotalBeatPt;
+
+        // Save the history log to backend
+        if (reportSongs.length > 0) {
+            try {
+                await saveHistoryLog(
+                    currentTotalBeatPt,
+                    Math.max(0, currentTotalBeatPt - oldTotalBeatPt),
+                    reportSongs.length,
+                    JSON.stringify(reportSongs)
+                );
+                console.log("History log saved successfully.");
+            } catch (err) {
+                 console.error("Failed to save history log", err);
+            }
+        }
+
         await loadSavedScores(); 
       } catch (err) {
         console.error("Auto upload failed", err);
@@ -394,10 +410,6 @@ const cancelUpload = () => {
         <About class="w-full max-w-4xl animate-fade-in" />
       </template>
       
-      <template v-else-if="activeTab === 'history'">
-        <UploadHistory class="w-full animate-fade-in" />
-      </template>
-      
       <template v-else>
         <!-- Hero Section (Visible only when no data) -->
         <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl animate-fade-in">
@@ -458,6 +470,7 @@ const cancelUpload = () => {
                 スコア一覧
               </button>
               <button 
+                v-if="!viewingUserId"
                 @click="activeTab = 'history'"
                 class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
                 :class="activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
@@ -497,6 +510,12 @@ const cancelUpload = () => {
           <ProfileDashboard 
             v-if="activeTab === 'profile'"
             class="w-full max-w-6xl"
+          />
+
+          <!-- History Tab -->
+          <UploadHistory 
+            v-if="activeTab === 'history'"
+            class="w-full max-w-6xl animate-fade-in" 
           />
         </div>
       </template>

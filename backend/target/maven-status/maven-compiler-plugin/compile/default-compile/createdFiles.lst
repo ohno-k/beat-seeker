@@ -13,6 +13,7 @@ com\beatseeker\backend\BackendApplication.class
 com\beatseeker\backend\config\SecurityConfig.class
 com\beatseeker\backend\entity\User.class
 com\beatseeker\backend\config\JwtUtil.class
+com\beatseeker\backend\controller\SaveHistoryLogRequest.class
 com\beatseeker\backend\controller\ScoreController$ScoreUploadRequest.class
 com\beatseeker\backend\controller\RegisterRequest.class
 com\beatseeker\backend\repository\UserRepository.class

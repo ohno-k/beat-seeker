@@ -51,7 +51,6 @@
             <div class="flex items-center gap-2">
               <label class="font-bold text-slate-500 dark:text-slate-400 text-xs">対象レベル</label>
               <select v-model="selectedLevel" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-lg px-2 py-1 outline-none focus:ring-2 ring-blue-500 transition-all cursor-pointer">
-                <option value="ALL">すべて</option>
                 <option value="12">☆12</option>
                 <option value="11">☆11</option>
               </select>
@@ -176,7 +175,7 @@ const props = defineProps<{
 const showInfoModal = ref(false);
 
 // Dashboard Settings State
-const selectedLevel = ref('ALL');
+const selectedLevel = ref('12');
 const excludeZeroScore = ref(false);
 const displayMode = ref<'rate' | 'count'>('rate');
 

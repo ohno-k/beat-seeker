@@ -59,5 +59,17 @@ export function useScoreUpload() {
         return res.json();
     };
 
-    return { upload };
+    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string): Promise<void> => {
+        const res = await fetch(`${API_BASE}/api/scores/save-history-log`, {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson }),
+        });
+
+        if (!res.ok) {
+            throw new Error(`Failed to save history log: ${res.status}`);
+        }
+    };
+
+    return { upload, saveHistoryLog };
 }

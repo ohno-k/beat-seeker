@@ -99,25 +99,34 @@ public class ScoreController {
             }
         }
 
-        // If any scores were updated/added, save a new snapshot
-        if (!updatedSongs.isEmpty()) {
-            saveScoreHistorySnapshot(user);
-        }
-
         return ResponseEntity.ok(Map.of(
                 "updatedCount", updatedSongs.size(),
                 "updatedSongs", updatedSongs,
                 "message", "スコアを更新しました"));
     }
 
-    private void saveScoreHistorySnapshot(User user) {
+    /**
+     * Save history log (snapshot) with diff data from frontend
+     */
+    @PostMapping("/save-history-log")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> saveHistoryLog(
+            Authentication auth,
+            @RequestBody SaveHistoryLogRequest req) {
+
+        User user = getUser(auth);
         List<Score> allScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
-        if (allScores.isEmpty())
-            return;
+        if (allScores.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "No scores found to snapshot"));
+        }
 
         ScoreHistoryLog log = new ScoreHistoryLog();
         log.setUser(user);
         log.setUploadedAt(java.time.LocalDateTime.now());
+        log.setTotalBeatPt(req.totalBeatPt());
+        log.setBeatPtIncrease(req.beatPtIncrease());
+        log.setUpdatedCount(req.updatedCount());
+        log.setDiffJson(req.diffJson());
 
         long totalScore = 0;
         int fcCount = 0;
@@ -161,6 +170,8 @@ public class ScoreController {
         log.setACount(aCount);
 
         scoreHistoryLogRepository.save(log);
+
+        return ResponseEntity.ok(Map.of("message", "History log saved"));
     }
 
     private void updateScoreFields(Score score, ScoreUploadRequest req) {
@@ -249,6 +260,12 @@ public class ScoreController {
             snapshotData.put("aaaCount", log.getAaaCount());
             snapshotData.put("aaCount", log.getAaCount());
             snapshotData.put("aCount", log.getACount());
+
+            // New fields
+            snapshotData.put("totalBeatPt", log.getTotalBeatPt());
+            snapshotData.put("beatPtIncrease", log.getBeatPtIncrease());
+            snapshotData.put("updatedCount", log.getUpdatedCount());
+            snapshotData.put("diffJson", log.getDiffJson());
 
             history.add(snapshotData);
         }

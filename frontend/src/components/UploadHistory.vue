@@ -1,11 +1,39 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import { getRankInfo } from '../utils/beatTier';
+import UploadResultModal from './UploadResultModal.vue';
+import RankIcon from './RankIcon.vue';
+import type { UploadDiffResult } from '../types/UploadDiff';
 
 const { isLoggedIn, authHeaders } = useAuth();
 const historyList = ref<any[]>([]);
 const isLoading = ref(false);
 const errorMsg = ref('');
+
+const selectedDiff = ref<UploadDiffResult | null>(null);
+const isModalOpen = ref(false);
+
+const openDiffModal = (item: any) => {
+  if (!item.diffJson || item.diffJson === '[]') return;
+  
+  try {
+    const updatedSongs = JSON.parse(item.diffJson);
+    const oldTotal = Math.max(0, item.totalBeatPt - item.beatPtIncrease);
+    
+    selectedDiff.value = {
+      oldTotalBeatPt: oldTotal,
+      newTotalBeatPt: item.totalBeatPt,
+      totalBeatPtIncrease: item.beatPtIncrease,
+      oldTier: getRankInfo(oldTotal),
+      newTier: getRankInfo(item.totalBeatPt),
+      updatedSongs: updatedSongs
+    };
+    isModalOpen.value = true;
+  } catch (err) {
+    console.error('Failed to parse diffJson', err);
+  }
+};
 
 const fetchHistory = async () => {
   if (!isLoggedIn.value) return;
@@ -25,22 +53,18 @@ const fetchHistory = async () => {
     // Sort descending by date
     const sortedData = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
-    // Calculate differences from the previous upload
-    for (let i = 0; i < sortedData.length; i++) {
-      const current = sortedData[i];
-      const previous = i < sortedData.length - 1 ? sortedData[i + 1] : null;
-
-      current.diffs = {
-        totalScore: previous ? current.totalScore - previous.totalScore : 0,
-        fcCount: previous ? current.fcCount - previous.fcCount : 0,
-        exhCount: previous ? current.exhCount - previous.exhCount : 0,
-        aaaCount: previous ? current.aaaCount - previous.aaaCount : 0,
-        aaCount: previous ? current.aaCount - previous.aaCount : 0,
-        aCount: previous ? current.aCount - previous.aCount : 0,
+    historyList.value = sortedData.map((item: any) => {
+      // Provide fallbacks for totalBeatPt if missing
+      const beatPt = item.totalBeatPt || 0;
+      const beatPtInc = item.beatPtIncrease || 0;
+      const tierInfo = getRankInfo(beatPt);
+      return {
+        ...item,
+        totalBeatPt: beatPt,
+        beatPtIncrease: beatPtInc,
+        tierInfo: tierInfo
       };
-    }
-    
-    historyList.value = sortedData;
+    });
   } catch (err: any) {
     errorMsg.value = err.message;
   } finally {
@@ -48,11 +72,7 @@ const fetchHistory = async () => {
   }
 };
 
-
-
 const formatDate = (dateStr: string) => {
-  // Add 'Z' to treat as UTC if the server returns no timezone info,
-  // then format it into JST
   const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
   const d = new Date(zDateStr);
   return d.toLocaleString('ja-JP', { 
@@ -99,55 +119,66 @@ onMounted(() => {
       <table class="w-full text-left border-collapse whitespace-nowrap">
         <thead>
           <tr class="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm transition-colors duration-200">
-            <th class="p-4 font-semibold">アップロード日時</th>
-            <th class="p-4 font-semibold text-right">EX SCORE 合計</th>
-            <th class="p-4 font-semibold text-center">FULLCOMBO</th>
-            <th class="p-4 font-semibold text-center">EX HARD</th>
-            <th class="p-4 font-semibold text-center">AAA/AA/A</th>
+            <th class="p-4 font-semibold text-center w-16">BEAT-TIER</th>
+            <th class="p-4 font-semibold text-center">アップロード日時</th>
+            <th class="p-4 font-semibold text-center">更新・新規</th>
+            <th class="p-4 font-semibold text-center">BEAT-PT</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
-          <tr v-for="(item, index) in historyList" :key="item.snapshotId" class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors group">
-            <td class="p-4 font-medium text-slate-800 dark:text-slate-100">{{ formatDate(item.date) }}</td>
-            <td class="p-4 text-right font-mono">
-              <div>{{ item.totalScore.toLocaleString() }}</div>
-              <div v-if="index < historyList.length - 1" :class="item.diffs.totalScore >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'" class="text-xs font-bold transition-colors">
-                {{ item.diffs.totalScore >= 0 ? '+' : '' }}{{ item.diffs.totalScore.toLocaleString() }}
+          <tr 
+            v-for="item in historyList" 
+            :key="item.snapshotId" 
+            class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors group"
+            :class="item.diffJson && item.diffJson !== '[]' ? 'cursor-pointer' : ''"
+            @click="openDiffModal(item)"
+          >
+            <!-- Beat-Tier Icon -->
+            <td class="p-4 text-center align-middle">
+              <div class="flex justify-center translate-x-2">
+                <RankIcon 
+                  :rankName="item.tierInfo?.name || 'Unranked'" 
+                  :tier="item.tierInfo?.tier"
+                  size="md" 
+                  class="shrink-0 drop-shadow-sm" 
+                />
               </div>
             </td>
-            <td class="p-4 text-center">
-              <span class="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-xs transition-colors">{{ item.fcCount }}</span>
-              <div v-if="index < historyList.length - 1" :class="item.diffs.fcCount >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'" class="text-xs font-bold mt-1 transition-colors">
-                {{ item.diffs.fcCount >= 0 ? '+' : '' }}{{ item.diffs.fcCount }}
-              </div>
+
+            <!-- Upload Date -->
+            <td class="p-4 font-medium text-slate-800 dark:text-slate-100 text-center align-middle">
+              {{ formatDate(item.date) }}
             </td>
-            <td class="p-4 text-center">
-              <span class="px-2 py-0.5 text-yellow-500 dark:text-yellow-400 font-bold border border-yellow-200 dark:border-yellow-700/50 bg-yellow-50 dark:bg-yellow-900/30 rounded-md text-xs transition-colors">{{ item.exhCount }}</span>
-              <div v-if="index < historyList.length - 1" :class="item.diffs.exhCount >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'" class="text-xs font-bold mt-1 transition-colors">
-                {{ item.diffs.exhCount >= 0 ? '+' : '' }}{{ item.diffs.exhCount }}
-              </div>
+            
+            <!-- Updated Count -->
+            <td class="p-4 text-center align-middle font-black">
+              <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-base">
+                {{ item.updatedCount }} 個
+              </span>
+              <span v-else class="text-slate-400 dark:text-slate-500 font-normal">
+                -
+              </span>
             </td>
-            <td class="p-4 text-center text-xs">
-              <div class="mb-1">
-                <span class="text-slate-500 dark:text-slate-400 font-bold">AAA:</span> {{ item.aaaCount }} / 
-                <span class="text-slate-400 dark:text-slate-500 font-bold">AA:</span> {{ item.aaCount }} / 
-                <span class="text-slate-400 dark:text-slate-500 font-bold">A:</span> {{ item.aCount }}
+
+            <!-- Beat-PT -->
+            <td class="p-4 text-center align-middle">
+              <div class="font-black text-slate-700 dark:text-slate-200 text-lg">
+                {{ item.totalBeatPt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
               </div>
-              <div v-if="index < historyList.length - 1" class="space-x-2">
-                <span :class="item.diffs.aaaCount >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'" class="font-bold transition-colors">
-                  {{ item.diffs.aaaCount >= 0 ? '+' : '' }}{{ item.diffs.aaaCount }}
-                </span>
-                <span :class="item.diffs.aaCount >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'" class="font-bold transition-colors">
-                  {{ item.diffs.aaCount >= 0 ? '+' : '' }}{{ item.diffs.aaCount }}
-                </span>
-                <span :class="item.diffs.aCount >= 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'" class="font-bold transition-colors">
-                  {{ item.diffs.aCount >= 0 ? '+' : '' }}{{ item.diffs.aCount }}
-                </span>
+              <div v-if="item.beatPtIncrease > 0" class="text-sm font-bold text-indigo-500 dark:text-indigo-400 mt-0.5">
+                +{{ item.beatPtIncrease.toFixed(1) }} pt
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Upload Result Diff Modal -->
+    <UploadResultModal 
+      :is-open="isModalOpen" 
+      :diff-data="selectedDiff" 
+      @close="isModalOpen = false" 
+    />
   </div>
 </template>
