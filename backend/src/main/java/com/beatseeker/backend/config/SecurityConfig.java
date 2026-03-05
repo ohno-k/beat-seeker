@@ -48,6 +48,11 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile",
                                                                 "/api/scores/**")
                                                 .authenticated()
+                                                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/votes")
+                                                .authenticated()
+                                                .requestMatchers(org.springframework.http.HttpMethod.DELETE,
+                                                                "/api/votes")
+                                                .authenticated()
                                                 .anyRequest().permitAll())
                                 .exceptionHandling(ex -> ex
                                                 .authenticationEntryPoint(

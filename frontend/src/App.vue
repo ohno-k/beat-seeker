@@ -10,6 +10,7 @@ import Changelog from './components/Changelog.vue';
 import UploadResultModal from './components/UploadResultModal.vue';
 import AdminUserListModal from './components/AdminUserListModal.vue';
 import Terms from './components/Terms.vue';
+import About from './components/About.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
@@ -24,7 +25,7 @@ import { watch } from 'vue';
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'changelog' | 'terms'>('dashboard');
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'changelog' | 'terms' | 'about'>('dashboard');
 const totalBeatTierPoints = ref(0);
 
 const diffResult = ref<UploadDiffResult | null>(null);
@@ -389,6 +390,10 @@ const cancelUpload = () => {
         <Terms class="w-full max-w-4xl animate-fade-in" />
       </template>
       
+      <template v-else-if="activeTab === 'about'">
+        <About class="w-full max-w-4xl animate-fade-in" />
+      </template>
+      
       <template v-else-if="activeTab === 'history'">
         <UploadHistory class="w-full animate-fade-in" />
       </template>
@@ -497,7 +502,14 @@ const cancelUpload = () => {
         <p class="text-sm text-slate-500 dark:text-slate-400">
           © 2026 beat-seeker.
         </p>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 flex-wrap">
+          <button 
+            @click="activeTab = 'about'"
+            class="text-sm font-medium transition-colors"
+            :class="activeTab === 'about' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+          >
+            beat-seekerとは？
+          </button>
           <button 
             @click="activeTab = 'terms'"
             class="text-sm font-medium transition-colors"

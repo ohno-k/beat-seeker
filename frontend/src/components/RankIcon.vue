@@ -115,6 +115,7 @@ const colors = computed(() => {
   if (name === 'advanced') return { primary: '#155e75', highlight: '#22d3ee', secondary: '#083344', stroke: '#a5f3fc' };
   if (name === 'expert') return { primary: '#115e59', highlight: '#2dd4bf', secondary: '#042f2e', stroke: '#99f6e4' };
   if (name === 'veteran') return { primary: '#064e3b', highlight: '#34d399', secondary: '#022c22', stroke: '#a7f3d0' };
+  if (name === 'commander') return { primary: '#854d0e', highlight: '#eab308', secondary: '#422006', stroke: '#fef08a' };
   if (name === 'elite') return { primary: '#9a3412', highlight: '#fb923c', secondary: '#431407', stroke: '#ffedd5' };
   if (name === 'master') return { primary: '#991b1b', highlight: '#f87171', secondary: '#450a0a', stroke: '#fee2e2' };
   if (name === 'ancient') return { primary: '#3730a3', highlight: '#818cf8', secondary: '#1e1b4b', stroke: '#e0e7ff' };
@@ -134,6 +135,7 @@ const shapePath = computed(() => {
   if (name === 'advanced') return "M50 15 L85 50 L50 85 L15 50 Z"; // diamond
   if (name === 'expert') return "M50 15 L85 40 L70 85 L30 85 L15 40 Z"; // pentagon
   if (name === 'veteran') return "M50 15 L80 30 L80 70 L50 85 L20 70 L20 30 Z"; // hexagon
+  if (name === 'commander') return "M50 10 L78 25 L88 55 L68 82 L32 82 L12 55 L22 25 Z"; // heptagon
   if (name === 'elite') return "M50 10 L78 22 L90 50 L78 78 L50 90 L22 78 L10 50 L22 22 Z"; // octagon
   if (name === 'master') return "M50 10 L65 35 L90 50 L65 65 L50 90 L35 65 L10 50 L35 35 Z"; // cross-star
   if (name === 'ancient') return "M50 10 L60 40 L90 40 L65 60 L75 90 L50 75 L25 90 L35 60 L10 40 L40 40 Z"; // star

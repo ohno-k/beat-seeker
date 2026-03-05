@@ -6,6 +6,7 @@ export interface AuthUser {
     iidxId: string;
     danRank: string;
     arenaRank: string;
+    playSide: string;
 }
 
 const user = ref<AuthUser | null>(null);

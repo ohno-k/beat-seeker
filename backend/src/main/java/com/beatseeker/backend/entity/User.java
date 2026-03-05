@@ -31,6 +31,9 @@ public class User {
     @Column(length = 10)
     private String arenaRank; // e.g. "A1"
 
+    @Column(length = 2)
+    private String playSide = "1P"; // "1P" or "2P"
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

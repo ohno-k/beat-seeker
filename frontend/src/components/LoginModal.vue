@@ -22,6 +22,7 @@ const password = ref('');
 const displayName = ref('');
 const danRank = ref('初段');
 const arenaRank = ref('C5');
+const playSide = ref('1P');
 
 const danRanks = [
   '七級', '六級', '五級', '四級', '三級', '二級', '一級',
@@ -74,7 +75,8 @@ const handleSubmit = async () => {
         password: password.value,
         displayName: displayName.value,
         danRank: danRank.value,
-        arenaRank: arenaRank.value
+        arenaRank: arenaRank.value,
+        playSide: playSide.value
       });
     }
     emit('close');
@@ -160,6 +162,23 @@ const switchMode = (newMode: 'login' | 'register') => {
                   <option v-for="rank in arenaRanks" :key="rank" :value="rank">{{ rank }}</option>
                 </select>
               </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">プレイサイド</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer group">
+                  <input type="radio" v-model="playSide" value="1P"
+                    class="h-4 w-4 text-blue-600 border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer" />
+                  <span class="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">1P</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                  <input type="radio" v-model="playSide" value="2P"
+                    class="h-4 w-4 text-blue-600 border-slate-300 dark:border-slate-600 focus:ring-blue-500 cursor-pointer" />
+                  <span class="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">2P</span>
+                </label>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">おすすめオプション投票の正規/ミラー変換に使用されます</p>
             </div>
           </template>
           

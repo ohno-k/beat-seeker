@@ -41,6 +41,7 @@ public class AuthController {
             user.setDisplayName(request.displayName() != null ? request.displayName() : "No Name");
             user.setDanRank(request.danRank());
             user.setArenaRank(request.arenaRank());
+            user.setPlaySide(request.playSide() != null ? request.playSide() : "1P");
             userRepository.save(user);
 
             String token = jwtUtil.generateToken(user.getIidxId());
@@ -85,7 +86,8 @@ public class AuthController {
                 "displayName", user.getDisplayName() != null ? user.getDisplayName() : "",
                 "iidxId", user.getIidxId(),
                 "danRank", user.getDanRank() != null ? user.getDanRank() : "",
-                "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : ""));
+                "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "",
+                "playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P"));
     }
 
     @PutMapping("/me/profile")
@@ -107,6 +109,8 @@ public class AuthController {
             user.setDanRank(request.danRank());
         if (request.arenaRank() != null)
             user.setArenaRank(request.arenaRank());
+        if (request.playSide() != null)
+            user.setPlaySide(request.playSide());
 
         userRepository.save(user);
 

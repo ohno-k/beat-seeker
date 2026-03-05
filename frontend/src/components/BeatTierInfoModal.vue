@@ -217,7 +217,7 @@ const activeTab = ref<'about' | 'songs'>('about');
 const songSearch = ref('');
 
 const groupedRanks = computed(() => getGroupedRanks());
-const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
+const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Commander', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
 
 const getRankForTier = (name: string, tier: number) => {
   return groupedRanks.value[name]?.find(r => r.tier === tier);

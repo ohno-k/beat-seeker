@@ -69,8 +69,9 @@ export const RANKS: RankInfo[] = [
     ...generateTieredRanks('Mythic', 17500, 18000, 'text-purple-600'),  // 500
     ...generateTieredRanks('Ancient', 17000, 17500, 'text-indigo-600'),  // 500
     ...generateTieredRanks('Master', 16500, 17000, 'text-red-600'),     // 500
-    ...generateTieredRanks('Elite', 16000, 16500, 'text-orange-600'),  // 500
-    ...generateTieredRanks('Veteran', 15000, 16000, 'text-emerald-600'), // 500
+    ...generateTieredRanks('Elite', 16000, 16500, 'text-orange-600'),    // 500
+    ...generateTieredRanks('Commander', 15500, 16000, 'text-yellow-700'), // 500
+    ...generateTieredRanks('Veteran', 15000, 15500, 'text-emerald-600'), // 500
     ...generateTieredRanks('Expert', 14000, 15000, 'text-teal-600'),    // 1000
     ...generateTieredRanks('Advanced', 13000, 14000, 'text-cyan-600'),    // 1000
     ...generateTieredRanks('Intermediate', 12000, 13000, 'text-blue-600'),    // 1500
@@ -86,6 +87,7 @@ export const getFolderColorClass = (rankName: string): string => {
         case 'ancient': return 'bg-indigo-100 border-indigo-300 text-indigo-800 font-bold';
         case 'master': return 'bg-red-50 border-red-200 text-red-700';
         case 'elite': return 'bg-orange-50 border-orange-200 text-orange-700';
+        case 'commander': return 'bg-yellow-50 border-yellow-200 text-yellow-700';
         case 'veteran': return 'bg-emerald-50 border-emerald-200 text-emerald-700';
         case 'expert': return 'bg-teal-50 border-teal-200 text-teal-700';
         case 'advanced': return 'bg-cyan-50 border-cyan-200 text-cyan-700';
@@ -112,6 +114,7 @@ export const getOverallRankInfo = (totalPoints: number): FolderRankInfo => {
     if (totalPoints >= 60000) return { name: 'Ancient', tier: 4, color: 'text-indigo-500', description: '古都の猛者' };
     if (totalPoints >= 45000) return { name: 'Master', tier: 3, color: 'text-red-500', description: '達人' };
     if (totalPoints >= 30000) return { name: 'Elite', tier: 3, color: 'text-orange-500', description: '熟練者' };
+    if (totalPoints >= 25000) return { name: 'Commander', tier: 2, color: 'text-yellow-600', description: '指揮官' };
     if (totalPoints >= 20000) return { name: 'Veteran', tier: 2, color: 'text-emerald-500', description: '歴戦の勇者' };
     if (totalPoints >= 10000) return { name: 'Expert', tier: 2, color: 'text-teal-500', description: '上級者' };
     if (totalPoints >= 5000) return { name: 'Advanced', tier: 1, color: 'text-cyan-500', description: '中級者' };
@@ -223,10 +226,16 @@ export const FOLDER_TIER_RATIOS = [
     { ratio: 0.80, name: 'Elite', tier: 2, color: 'text-orange-600' },
     { ratio: 0.79, name: 'Elite', tier: 1, color: 'text-orange-600' },
 
-    { ratio: 0.77, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
-    { ratio: 0.75, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
-    { ratio: 0.73, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
-    { ratio: 0.71, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
+    { ratio: 0.78, name: 'Commander', tier: 5, color: 'text-yellow-700' },
+    { ratio: 0.77, name: 'Commander', tier: 4, color: 'text-yellow-700' },
+    { ratio: 0.76, name: 'Commander', tier: 3, color: 'text-yellow-700' },
+    { ratio: 0.75, name: 'Commander', tier: 2, color: 'text-yellow-700' },
+    { ratio: 0.74, name: 'Commander', tier: 1, color: 'text-yellow-700' },
+
+    { ratio: 0.73, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
+    { ratio: 0.72, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
+    { ratio: 0.71, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
+    { ratio: 0.70, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
     { ratio: 0.69, name: 'Veteran', tier: 1, color: 'text-emerald-600' },
 
     { ratio: 0.67, name: 'Expert', tier: 5, color: 'text-teal-600' },

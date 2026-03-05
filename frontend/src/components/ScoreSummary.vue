@@ -142,9 +142,18 @@
                   <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
-              <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12" @click="toggleSort('scoreRate')">
+              <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12" @click="toggleSort('clearType')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  スコア <span class="hidden md:inline">(Score)</span>
+                  スコア <span class="hidden md:inline">/ ランク</span>
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'clearType'">
+                    {{ sortOrder === 'asc' ? '▲' : '▼' }}
+                  </span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
+                </div>
+              </th>
+              <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-1/12" @click="toggleSort('scoreRate')">
+                <div class="flex items-center gap-0.5 sm:gap-1">
+                  <span class="hidden sm:inline">スコア</span>レート
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'scoreRate'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
@@ -157,14 +166,7 @@
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'beatTierPoints'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
-                </div>
-              </th>
-              <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12" @click="toggleSort('djLevel')">
-                <div class="flex items-center gap-0.5 sm:gap-1">
-                  ランク <span class="hidden xl:inline">(Rank)</span>
-                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'djLevel'">
-                    {{ sortOrder === 'asc' ? '▲' : '▼' }}
-                  </span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
             </tr>
@@ -193,14 +195,20 @@
               </td>
               <td class="px-1 sm:px-6 py-1.5 sm:py-2">
                 <div class="flex flex-col gap-0.5">
-                  <span class="font-black text-[8px] sm:text-[10px] truncate max-w-[36px] sm:max-w-none" :class="getClearTypeColor(record.clearType)">
-                    {{ record.clearType === 'FULLCOMBO CLEAR' ? 'FC' : record.clearType === 'EX HARD CLEAR' ? 'EXH' : record.clearType === 'HARD CLEAR' ? 'H' : record.clearType === 'CLEAR' ? 'C' : record.clearType === 'EASY CLEAR' ? 'E' : record.clearType === 'ASSIST CLEAR' ? 'AC' : 'F' }}<span class="hidden sm:inline">{{ record.clearType.includes('CLE') ? record.clearType.replace(' CLEAR', '') : '' }}</span>
-                  </span>
+                  <div class="flex items-center gap-1 sm:gap-2">
+                    <span class="font-black text-[8px] sm:text-[10px] truncate max-w-[36px] sm:max-w-none" :class="getClearTypeColor(record.clearType)">
+                      {{ record.clearType === 'FULLCOMBO CLEAR' ? 'FC' : record.clearType === 'EX HARD CLEAR' ? 'EXH' : record.clearType === 'HARD CLEAR' ? 'H' : record.clearType === 'CLEAR' ? 'C' : record.clearType === 'EASY CLEAR' ? 'E' : record.clearType === 'ASSIST CLEAR' ? 'AC' : 'F' }}
+                    </span>
+                    <span class="font-black text-[10px] sm:text-sm" :class="getDjLevelColor(record.djLevel)">{{ record.djLevel !== '---' ? record.djLevel : '' }}</span>
+                  </div>
                   <div class="flex items-center gap-0.5 sm:gap-1">
                      <span class="font-black text-slate-800 dark:text-slate-200 text-[9px] sm:text-xs">{{ record.score }}</span>
-                     <span class="text-[8px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 hidden sm:inline" v-if="record.scoreRate >= 0">{{ record.scoreRate.toFixed(1) }}%</span>
                   </div>
                 </div>
+              </td>
+              <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
+                <span v-if="record.scoreRate >= 0" class="font-bold text-[9px] sm:text-xs" :class="record.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : record.scoreRate >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'">{{ record.scoreRate.toFixed(2) }}%</span>
+                <span v-else class="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">---</span>
               </td>
               
               <td class="px-1 sm:px-6 py-1.5 sm:py-2 whitespace-nowrap transition-colors" :class="[
@@ -220,11 +228,6 @@
                 </div>
                 <div v-else class="flex items-center justify-center">
                   <span class="text-[9px] sm:text-[10px] font-black text-slate-700 dark:text-slate-500 italic">N/A</span>
-                </div>
-              </td>
-              <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
-                <div class="flex flex-col items-center">
-                  <span class="font-black text-[10px] sm:text-sm" :class="getDjLevelColor(record.djLevel)">{{ record.djLevel !== '---' ? record.djLevel : '' }}</span>
                 </div>
               </td>
             </tr>
@@ -388,6 +391,62 @@
             </div>
           </div>
 
+          <!-- Option Vote Section -->
+          <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
+            <div class="bg-emerald-50 dark:bg-emerald-900/30 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-100 dark:border-emerald-800/50 flex items-center justify-between transition-colors duration-200">
+              <p class="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                おすすめオプション投票
+              </p>
+              <span v-if="voteData.totalVotes > 0" class="text-[10px] sm:text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">{{ voteData.totalVotes }}票</span>
+            </div>
+            <div class="p-4 sm:p-6">
+              <!-- Vote Buttons -->
+              <div v-if="isLoggedIn" class="flex flex-wrap gap-2 mb-4">
+                <button
+                  v-for="opt in optionTypes"
+                  :key="opt.value"
+                  @click="castVote(opt.value)"
+                  :disabled="isVoting"
+                  class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  :class="voteData.myVote === opt.value 
+                    ? `${opt.activeBg} ${opt.activeText} ${opt.activeBorder} shadow-sm` 
+                    : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                >
+                  <span>{{ opt.icon }}</span>
+                  {{ opt.label }}
+                  <span v-if="voteData.myVote === opt.value" class="text-[10px]">✔</span>
+                </button>
+              </div>
+              <div v-else class="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-sm text-slate-500 dark:text-slate-400 italic text-center">
+                ※ログインすると投票できます。
+              </div>
+              
+              <!-- Vote Results Bar Chart -->
+              <div v-if="voteData.totalVotes > 0" class="space-y-2">
+                <div v-for="opt in optionTypes" :key="opt.value" class="flex items-center gap-2">
+                  <span class="text-[10px] sm:text-xs font-bold w-20 sm:w-24 text-right shrink-0" :class="opt.labelColor">{{ opt.label }}</span>
+                  <div class="flex-1 h-6 sm:h-7 bg-slate-100 dark:bg-slate-700 rounded-lg overflow-hidden relative">
+                    <div
+                      class="h-full rounded-lg transition-all duration-500 flex items-center justify-end pr-2"
+                      :class="opt.barColor"
+                      :style="{ width: `${getVotePercent(opt.value)}%`, minWidth: (voteData.counts[opt.value] || 0) > 0 ? '24px' : '0px' }"
+                    >
+                      <span v-if="(voteData.counts[opt.value] || 0) > 0" class="text-[10px] sm:text-xs font-black text-white drop-shadow-sm">{{ voteData.counts[opt.value] }}</span>
+                    </div>
+                    <span v-if="(voteData.counts[opt.value] || 0) === 0" class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 dark:text-slate-500">0</span>
+                  </div>
+                  <span class="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 w-10 text-right">{{ getVotePercent(opt.value).toFixed(0) }}%</span>
+                </div>
+              </div>
+              <div v-else class="text-center py-4 text-sm text-slate-400 dark:text-slate-500">
+                まだ投票がありません。最初の投票者になりましょう！
+              </div>
+            </div>
+          </div>
+
           <!-- BEAT-PT Target Calculator -->
           <div v-if="selectedRecord.maxScore > 0 && selectedRecord.maxBeatTierPoints > 0 && selectedRecord.beatTierPoints < selectedRecord.maxBeatTierPoints" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-indigo-50 dark:bg-indigo-900/30 px-6 py-4 border-b border-indigo-100 dark:border-indigo-800/50 flex items-center justify-between transition-colors duration-200">
@@ -495,7 +554,9 @@ import { useAuth } from '../composables/useAuth';
 
 const { updateMemo } = useScores();
 const { isDarkMode } = useDarkMode();
-const { isLoggedIn } = useAuth();
+const { isLoggedIn, authHeaders } = useAuth();
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const props = defineProps<{
   scores: ScoreData[];
@@ -591,7 +652,87 @@ const targetBeatPtSlider = ref(0);
 // Reset target slider when a new record is selected
 watch(() => selectedRecord.value?.title, () => {
   targetBeatPtSlider.value = 0;
+  // Fetch votes for the new record
+  if (selectedRecord.value) {
+    fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);
+  }
 });
+
+// Option Vote System
+interface VoteDataType {
+  counts: Record<string, number>;
+  totalVotes: number;
+  myVote: string | null;
+}
+
+const voteData = ref<VoteDataType>({
+  counts: { REGULAR: 0, MIRROR: 0, RANDOM: 0, 'R-RANDOM': 0, 'S-RANDOM': 0 },
+  totalVotes: 0,
+  myVote: null
+});
+const isVoting = ref(false);
+
+const optionTypes = [
+  { value: 'REGULAR', label: '正規', icon: '▶', activeBg: 'bg-blue-50 dark:bg-blue-900/30', activeText: 'text-blue-700 dark:text-blue-400', activeBorder: 'border-blue-300 dark:border-blue-700', barColor: 'bg-blue-500', labelColor: 'text-blue-600 dark:text-blue-400' },
+  { value: 'MIRROR', label: 'MIRROR', icon: '◀', activeBg: 'bg-purple-50 dark:bg-purple-900/30', activeText: 'text-purple-700 dark:text-purple-400', activeBorder: 'border-purple-300 dark:border-purple-700', barColor: 'bg-purple-500', labelColor: 'text-purple-600 dark:text-purple-400' },
+  { value: 'RANDOM', label: 'RANDOM', icon: '🎲', activeBg: 'bg-emerald-50 dark:bg-emerald-900/30', activeText: 'text-emerald-700 dark:text-emerald-400', activeBorder: 'border-emerald-300 dark:border-emerald-700', barColor: 'bg-emerald-500', labelColor: 'text-emerald-600 dark:text-emerald-400' },
+  { value: 'R-RANDOM', label: 'R-RAN', icon: '🔀', activeBg: 'bg-amber-50 dark:bg-amber-900/30', activeText: 'text-amber-700 dark:text-amber-400', activeBorder: 'border-amber-300 dark:border-amber-700', barColor: 'bg-amber-500', labelColor: 'text-amber-600 dark:text-amber-400' },
+  { value: 'S-RANDOM', label: 'S-RAN', icon: '🎰', activeBg: 'bg-rose-50 dark:bg-rose-900/30', activeText: 'text-rose-700 dark:text-rose-400', activeBorder: 'border-rose-300 dark:border-rose-700', barColor: 'bg-rose-500', labelColor: 'text-rose-600 dark:text-rose-400' },
+];
+
+const getVotePercent = (optionValue: string): number => {
+  if (voteData.value.totalVotes === 0) return 0;
+  return ((voteData.value.counts[optionValue] || 0) / voteData.value.totalVotes) * 100;
+};
+
+const fetchVotes = async (title: string, difficultyName: string) => {
+  try {
+    const params = new URLSearchParams({ title, difficultyName });
+    const res = await fetch(`${API_BASE}/api/votes?${params}`, {
+      headers: authHeaders(),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      voteData.value = data;
+    }
+  } catch {
+    // Silently fail
+  }
+};
+
+const castVote = async (optionType: string) => {
+  if (!selectedRecord.value) return;
+  isVoting.value = true;
+  try {
+    // If already voted for this option, delete the vote
+    if (voteData.value.myVote === optionType) {
+      const params = new URLSearchParams({
+        title: selectedRecord.value.title,
+        difficultyName: selectedRecord.value.difficultyName
+      });
+      await fetch(`${API_BASE}/api/votes?${params}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+    } else {
+      await fetch(`${API_BASE}/api/votes`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: selectedRecord.value.title,
+          difficultyName: selectedRecord.value.difficultyName,
+          optionType
+        })
+      });
+    }
+    // Refresh vote data
+    await fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);
+  } catch {
+    // Silently fail
+  } finally {
+    isVoting.value = false;
+  }
+};
 
 const targetScoreNeeded = computed(() => {
   if (!selectedRecord.value || selectedRecord.value.maxScore <= 0 || selectedRecord.value.maxBeatTierPoints <= 0) return 0;
@@ -661,16 +802,12 @@ watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, sortKey, sortO
 
 const toggleSort = (key: SortKey) => {
   if (sortKey.value === key) {
-    if (sortOrder.value === 'desc') {
-        sortKey.value = null; // Clear sort on third click
-        sortOrder.value = 'asc';
-    } else {
-        sortOrder.value = 'desc';
-    }
+    // Toggle between asc and desc
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
   } else {
     sortKey.value = key;
     // Set default order for specific keys
-    if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints') {
+    if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints' || key === 'clearType' || key === 'djLevel') {
         sortOrder.value = 'desc';
     } else {
         sortOrder.value = 'asc';

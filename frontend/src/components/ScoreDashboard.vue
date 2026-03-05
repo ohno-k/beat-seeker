@@ -256,6 +256,7 @@ const clearTypeData = computed(() => {
 
 // DJ Level Chart
 const djLevelColors: Record<string, string> = {
+  'MAX-': '#a855f7', // purple-500
   'AAA': '#fbbf24', // amber-400
   'AA': '#94a3b8',  // slate-400
   'A': '#22c55e',   // green-500
@@ -267,15 +268,20 @@ const djLevelColors: Record<string, string> = {
 };
 
 const djLevelData = computed(() => {
-  const levels = ['AAA', 'AA', 'A', 'B', 'C', 'D', 'E', 'F'];
+  const levels = ['MAX-', 'AAA', 'AA', 'A', 'B', 'C', 'D', 'E', 'F'];
   const counts: Record<string, number> = levels.reduce((acc, lvl) => ({ ...acc, [lvl]: 0 }), {});
   
   filteredScores.value.forEach(s => {
     // Only count actual plays or fails
     if (s.clearType !== 'NO PLAY' && s.clearType !== '---') {
-        const lvl = s.djLevel;
-        if (counts[lvl] !== undefined) {
-          counts[lvl]++;
+        // Count MAX- (scoreRate >= 94.45%) separately; exclude from AAA
+        if (s.scoreRate >= 94.45) {
+          counts['MAX-']++;
+        } else {
+          const lvl = s.djLevel;
+          if (counts[lvl] !== undefined) {
+            counts[lvl]++;
+          }
         }
     }
   });
