@@ -269,6 +269,11 @@ const handleFileDropped = async (file: File) => {
         scoreData.value = newData;
         totalBeatTierPoints.value = newTotalBeatPt;
     }
+    
+    // Always hide upload area and return to dashboard view after successful parse
+    showUploadArea.value = false;
+    activeTab.value = 'dashboard';
+
   } catch (err: any) {
     console.error('Failed to parse or save CSV:', err);
     errorMsg.value = err.message || 'CSVの解析に失敗しました。';
