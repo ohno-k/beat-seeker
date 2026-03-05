@@ -457,6 +457,13 @@ const cancelUpload = () => {
               >
                 スコア一覧
               </button>
+              <button 
+                @click="activeTab = 'history'"
+                class="px-5 py-2 rounded-lg font-medium text-sm transition-all shadow-sm"
+                :class="activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transparent'"
+              >
+                成長記録
+              </button>
             </div>
             
             <button 
