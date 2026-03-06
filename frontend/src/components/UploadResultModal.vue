@@ -1,13 +1,13 @@
 <template>
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in" @click.self="close">
-      <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] animate-slide-up border border-slate-200 dark:border-slate-800">
+      <div id="report-container" ref="reportContent" class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] animate-slide-up border border-slate-200 dark:border-slate-800">
         
         <!-- Header: Hero Section -->
         <div class="relative bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-8 text-center overflow-hidden shrink-0">
           <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
           
-          <button @click="close" class="absolute top-2 right-2 p-4 -m-2 group z-50">
+          <button id="modal-close-btn" @click="close" class="absolute top-2 right-2 p-4 -m-2 group z-50">
             <div class="text-white/70 group-hover:text-white bg-black/10 group-hover:bg-black/20 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -31,7 +31,7 @@
         </div>
 
         <!-- Scrollable Body -->
-        <div class="flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-50 dark:bg-slate-900">
+        <div id="report-body" class="flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-50 dark:bg-slate-900">
           <div v-if="diffData" class="space-y-8 max-w-2xl mx-auto">
             
             <!-- Tier Up Notification -->
@@ -139,8 +139,23 @@
         </div>
         
         <!-- Footer -->
-        <div class="p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
-          <button @click="close" class="w-full py-4 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
+        <div id="modal-footer" class="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex flex-col sm:flex-row gap-3">
+          <button @click="shareOnX" :disabled="isSharing" class="flex-1 py-3.5 sm:py-4 bg-black hover:bg-slate-800 text-white font-bold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50 text-sm sm:text-base">
+            <template v-if="!isSharing">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
+              </svg>
+              画像付きでXにポスト
+            </template>
+            <template v-else>
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              画像生成中...
+            </template>
+          </button>
+          <button @click="close" class="flex-1 py-3.5 sm:py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base">
             ダッシュボードへ戻る
           </button>
         </div>
@@ -151,7 +166,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
+import html2canvas from 'html2canvas';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -164,6 +181,92 @@ const emit = defineEmits<{
 
 const close = () => {
   emit('close');
+};
+
+const reportContent = ref<HTMLElement | null>(null);
+const isSharing = ref(false);
+
+const shareOnX = async () => {
+  if (!reportContent.value || isSharing.value) return;
+  isSharing.value = true;
+  
+  try {
+    const canvas = await html2canvas(reportContent.value, {
+      scale: 2,
+      backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff', // slate-900 or white
+      onclone: (clonedDoc) => {
+        const container = clonedDoc.getElementById('report-container');
+        const body = clonedDoc.getElementById('report-body');
+        const closeBtn = clonedDoc.getElementById('modal-close-btn');
+        const footer = clonedDoc.getElementById('modal-footer');
+        if (container) {
+          container.style.maxHeight = 'none';
+        }
+        if (body) {
+          body.style.overflow = 'visible';
+          body.style.maxHeight = 'none';
+        }
+        if (closeBtn) closeBtn.style.display = 'none';
+        if (footer) footer.style.display = 'none';
+      }
+    });
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) throw new Error('Blob is null');
+      
+      const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
+      const textParam = encodeURIComponent("Beat-Seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker");
+      
+      // Try Web Share API first (supported Safari/Mobile/Newer Windows Chrome)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: 'Beat-Seeker Report',
+            text: "Beat-Seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker",
+            files: [file]
+          });
+          isSharing.value = false;
+          return; // Success via native share!
+        } catch (e) {
+          console.log('Share canceled or failed', e);
+          // Fallback to clipboard if it fails without user cancellation
+          if ((e as Error).name !== 'AbortError') {
+              // Proceed to fallback
+          } else {
+              isSharing.value = false;
+              return;
+          }
+        }
+      }
+      
+      // Fallback: Clipboard Web API + Window Open
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        alert("画像をクリップボードにコピーしました！\nX（Twitter）の投稿画面が開くので、そのまま画像を「貼り付け（Ctrl+V / Cmd+V）」してください。");
+        window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
+      } catch (e) {
+        console.error('Clipboard copy failed:', e);
+        // Deep fallback, create a download link so user can manually attach
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'beat-seeker-report.png';
+        a.click();
+        URL.revokeObjectURL(downloadUrl);
+        alert("画像のコピーに失敗したため、画像をダウンロードしました。\nX（Twitter）の投稿画面が開きますので、ダウンロードした画像を添付してください。");
+        window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
+      }
+      
+      isSharing.value = false;
+    }, 'image/png');
+    
+  } catch (error) {
+    console.error('Share failed:', error);
+    alert("画像の生成に失敗しました。");
+    isSharing.value = false;
+  }
 };
 
 const getDifficultyColorClass = (difficulty: string) => {
