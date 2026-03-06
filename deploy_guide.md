@@ -1,4 +1,4 @@
-# Render.io デプロイガイド (Beat-Seeker)
+# Render.io デプロイガイド (beat-seeker)
 
 Render.io を使って、このアプリケーションを「最も簡単に」インターネット公開する手順です。
 

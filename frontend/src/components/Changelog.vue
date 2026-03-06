@@ -85,7 +85,7 @@
       <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="bg-slate-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.0.0</span>
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">Beat-Seeker 初期リリース</h3>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">beat-seeker 初期リリース</h3>
         </div>
         <span class="text-sm font-bold text-slate-500 dark:text-slate-400">2026年2月以前</span>
       </div>

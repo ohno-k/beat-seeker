@@ -173,7 +173,7 @@
           プレイ成果レポート
         </h2>
         <p class="text-indigo-100 font-medium text-2xl">
-          Beat-Seeker で新記録を達成しました！
+          beat-seeker で新記録を達成しました！
         </p>
       </div>
       
@@ -254,7 +254,7 @@
       </div>
       
       <div class="bg-indigo-600 p-6 text-center text-white/90 font-black text-xl tracking-widest shrink-0">
-        Beat-Seeker - IIDX Score Tracker
+        beat-seeker - IIDX Score Tracker
       </div>
     </div>
   </Teleport>
@@ -305,14 +305,14 @@ const shareOnX = async () => {
       if (!blob) throw new Error('Blob is null');
       
       const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
-      const textParam = encodeURIComponent("Beat-Seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker");
+      const textParam = encodeURIComponent("beat-seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker");
       
       // Try Web Share API first (supported Safari/Mobile/Newer Windows Chrome)
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
-            title: 'Beat-Seeker Report',
-            text: "Beat-Seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker",
+            title: 'beat-seeker Report',
+            text: "beat-seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker",
             files: [file]
           });
           isSharing.value = false;

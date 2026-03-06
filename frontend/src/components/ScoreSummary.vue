@@ -403,6 +403,13 @@
               <span v-if="voteData.totalVotes > 0" class="text-[10px] sm:text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">{{ voteData.totalVotes }}票</span>
             </div>
             <div class="p-4 sm:p-6">
+              <div class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50">
+                <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                  💡 2P側でプレイされている方の投票は、自動的に1P側の配置に反転（ミラーリング）されて集計されます。
+                  そのため、<span class="font-bold text-emerald-600 dark:text-emerald-500">ご自身のプレイサイドで当たりだったオプションをそのまま投票</span>してください。
+                </p>
+              </div>
+              
               <!-- Vote Buttons -->
               <div v-if="isLoggedIn" class="flex flex-wrap gap-2 mb-4">
                 <button
