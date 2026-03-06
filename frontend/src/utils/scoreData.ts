@@ -1,7 +1,7 @@
 import type { ScoreData } from '../types/ScoreData';
 import songDataRaw from '../data/song_data.json';
 import diffTableRaw from '../data/difficulty_table.json';
-import { calculatePoints, getWeight } from './beatTier';
+import { calculatePoints, getMaxPoints } from './beatTier';
 
 export interface ScoreRecord {
     id?: number;
@@ -132,7 +132,7 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                     playCount: song.playCount,
                     lastPlayTime: song.lastPlayTime,
                     beatTierPoints: beatTierPoints,
-                    maxBeatTierPoints: getWeight(informalRank),
+                    maxBeatTierPoints: getMaxPoints(informalRank),
                     memo: stats.memo
                 });
             }

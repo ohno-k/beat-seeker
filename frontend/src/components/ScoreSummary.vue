@@ -224,7 +224,7 @@
                       TOP
                     </span>
                   </div>
-                  <span class="text-[7px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">/{{ record.maxBeatTierPoints.toFixed(0) }}</span>
+                  <span class="text-[7px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">/{{ record.maxBeatTierPoints.toFixed(1) }}</span>
                 </div>
                 <div v-else class="flex items-center justify-center">
                   <span class="text-[9px] sm:text-[10px] font-black text-slate-700 dark:text-slate-500 italic">N/A</span>
@@ -340,7 +340,7 @@
                 <p class="text-4xl sm:text-6xl font-black text-indigo-700 dark:text-indigo-300 tracking-tight">
                   {{ selectedRecord.beatTierPoints.toFixed(1) }}
                 </p>
-                <p v-if="selectedRecord.maxBeatTierPoints > 0" class="text-sm sm:text-xl font-bold text-indigo-400 dark:text-indigo-500">/ {{ selectedRecord.maxBeatTierPoints.toFixed(0) }}</p>
+                <p v-if="selectedRecord.maxBeatTierPoints > 0" class="text-sm sm:text-xl font-bold text-indigo-400 dark:text-indigo-500">/ {{ selectedRecord.maxBeatTierPoints.toFixed(1) }}</p>
               </div>
             </div>
             
@@ -548,9 +548,12 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
+import diffTableRaw from '../data/difficulty_table.json';
+import { calculatePoints, getMaxPoints } from '../utils/beatTier';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
+import songDataRaw from '../data/song_data.json';
 
 const { updateMemo } = useScores();
 const { isDarkMode } = useDarkMode();
@@ -611,11 +614,79 @@ const clearTypeRankings: Record<string, number> = {
 };
 
 const allRecords = computed<ScoreRecord[]>(() => {
-  return flattenScores(props.scores).filter(r => 
+  // First, get the user's played scores
+  const playedRecords = flattenScores(props.scores).filter(r => 
     r.difficultyLevel &&
     r.difficultyLevel >= 11 &&
     ['ANOTHER', 'LEGGENDARIA'].includes(r.difficultyName)
   );
+
+  // Build a map for fast lookup
+  const playedMap = new Map<string, ScoreRecord>();
+  playedRecords.forEach(r => playedMap.set(`${r.title}|${r.difficultyName}`, r));
+
+  // Index informal difficulty table for unplayed songs
+  const informalDict = new Map<string, string>();
+  if (diffTableRaw && Array.isArray(diffTableRaw.ranks)) {
+      diffTableRaw.ranks.forEach(r => {
+          r.songs.forEach(songTitle => {
+              if (songTitle.endsWith('[L]')) {
+                  const baseTitle = songTitle.slice(0, -3);
+                  informalDict.set(`${baseTitle}_LEGGENDARIA`, r.rank);
+              } else {
+                  informalDict.set(`${songTitle}_ANOTHER`, r.rank);
+              }
+          });
+      });
+  }
+
+  // Create empty records for songs in song_data.json that the user hasn't played
+  const difMap: Record<string, string> = { "4": "ANOTHER", "10": "LEGGENDARIA" };
+  const baseRecords: ScoreRecord[] = (songDataRaw.body as any[])
+    .filter(s => s.level >= 11 && (s.difficulty === "4" || s.difficulty === "10"))
+    .map(s => {
+      const diffName = difMap[s.difficulty];
+      const key = `${s.title}|${diffName}`;
+      
+      if (playedMap.has(key)) {
+        return playedMap.get(key)!;
+      }
+
+      // Look up informal rank
+      const informalKey = `${s.title}_${diffName}`;
+      let informalRank = informalDict.get(informalKey);
+      if (!informalRank && diffName === 'ANOTHER') {
+          informalRank = informalDict.get(`${s.title}_ANOTHER`);
+      }
+
+      // Generate a default empty record
+      return {
+        id: undefined,
+        playStyle: 'SP',
+        title: s.title,
+        genre: s.genre,
+        artist: s.artist,
+        playCount: 0,
+        difficultyName: diffName,
+        difficultyLevel: s.level,
+        score: 0,
+        pgreat: 0,
+        great: 0,
+        missCount: 0,
+        clearType: 'NO PLAY',
+        djLevel: '---',
+        maxScore: s.notes ? s.notes * 2 : 0,
+        scoreRate: 0,
+        informalRank: informalRank,
+        beatTierPoints: 0,
+        maxBeatTierPoints: getMaxPoints(informalRank),
+        memo: undefined,
+        difficultyColor: diffName === 'LEGGENDARIA' ? 'text-purple-700 bg-purple-100 border border-purple-300' : 'text-red-700 bg-red-100 border border-red-300',
+        lastPlayTime: ''
+      } as ScoreRecord;
+    });
+
+  return baseRecords;
 });
 
 const emit = defineEmits<{
@@ -738,20 +809,30 @@ const targetScoreNeeded = computed(() => {
   if (!selectedRecord.value || selectedRecord.value.maxScore <= 0 || selectedRecord.value.maxBeatTierPoints <= 0) return 0;
   
   const currentPt = selectedRecord.value.beatTierPoints;
-  const weight = selectedRecord.value.maxBeatTierPoints;
   const targetPt = currentPt + targetBeatPtSlider.value;
   
   if (targetPt <= currentPt) return 0;
-  if (targetPt > weight) return selectedRecord.value.maxScore - selectedRecord.value.score;
 
-  // Inverse of Rate^1.5 is Rate^(1/1.5) = Rate^(2/3)
-  let targetScoreRate = 100 * Math.pow(targetPt / weight, 2 / 3);
-  if (targetScoreRate < 66.667 && targetPt > 0) {
-      targetScoreRate = 66.667;
-  }
-  const targetScore = Math.ceil((targetScoreRate / 100) * selectedRecord.value.maxScore);
+  let low = selectedRecord.value.score;
+  let high = selectedRecord.value.maxScore;
+  let bestScore = selectedRecord.value.maxScore;
   
-  return Math.max(0, targetScore - selectedRecord.value.score);
+  const informalRank = selectedRecord.value.informalRank || (selectedRecord.value.difficultyLevel?.toFixed(1) ?? '12.0');
+
+  while (low <= high) {
+    let mid = Math.floor((low + high) / 2);
+    let midRate = (mid / selectedRecord.value.maxScore) * 100;
+    let midPt = calculatePoints(midRate, informalRank);
+    
+    if (midPt >= targetPt) {
+      bestScore = mid;
+      high = mid - 1; 
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return Math.max(0, bestScore - selectedRecord.value.score);
 });
 
 const openDetailModal = (record: ScoreRecord) => {

@@ -25,12 +25,12 @@ export interface FolderRankInfo {
 
 // Weights configuration (can be easily adjusted)
 export const WEIGHTS: Record<string, number> = {};
-let weight = 152;
+let weight = 145;
 for (let i = 0; i <= 20; i++) {
     const rankValue = 11.0 + i * 0.1;
     const rank = rankValue.toFixed(1);
     WEIGHTS[rank] = weight;
-    weight += (rankValue >= 12.49) ? 3 : 2; // Step becomes 4 starting from the jump to 12.5
+    weight += (rankValue >= 12.49) ? 3 : 2; // Step becomes 3 starting from the jump to 12.5
 }
 
 /**
@@ -47,14 +47,28 @@ export function getWeight(informalRank: string | undefined): number {
 }
 
 /**
+ * Get maximum possible points for a given informal rank (includes AA/AAA/MAX- bonuses)
+ */
+export function getMaxPoints(informalRank: string | undefined): number {
+    const weight = getWeight(informalRank);
+    return weight * 1.03; // Max is basic weight + 3% (AA, AAA, MAX- bonuses)
+}
+
+/**
  * Calculate points for a single song
  */
 export function calculatePoints(scoreRate: number, informalRank: string | undefined): number {
     const weight = getWeight(informalRank);
     if (weight === 0 || scoreRate <= 66.666) return 0;
 
-    // Power curve: (ScoreRate/100)^1.5 * Weight
-    return Math.pow(scoreRate / 100, 1.5) * weight;
+    let basePoints = Math.pow(scoreRate / 100, 1.3) * weight;
+
+    let bonus = 0;
+    if (scoreRate > 77.77) bonus += weight * 0.01; // AA bonus
+    if (scoreRate > 88.88) bonus += weight * 0.01; // AAA bonus
+    if (scoreRate > 94.44) bonus += weight * 0.01; // MAX- bonus
+
+    return basePoints + bonus;
 }
 
 /**
