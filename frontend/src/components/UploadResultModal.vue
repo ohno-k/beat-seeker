@@ -163,77 +163,97 @@
       </div>
     </div>
 
-    <!-- Offscreen container for X image sharing (800px fixed width) -->
+    <!-- Offscreen container for X image sharing (1080x1920px fixed size 9:16) -->
     <div 
       ref="shareContainer"
-      class="fixed top-[-9999px] left-[0] bg-white dark:bg-slate-900 w-[800px] flex flex-col z-[-1] border-none"
+      class="fixed top-[-9999px] left-[0] bg-slate-50 dark:bg-slate-900 w-[1080px] h-[1920px] flex flex-col z-[-1] border-none overflow-hidden"
     >
-      <div class="bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-8 text-center shrink-0">
-        <h2 class="text-4xl font-black text-white tracking-tight mb-2 drop-shadow-md">
+      <div class="bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-12 text-center shrink-0">
+        <h2 class="text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md">
           プレイ成果レポート
         </h2>
-        <p class="text-indigo-100 font-medium text-lg">
+        <p class="text-indigo-100 font-medium text-2xl">
           Beat-Seeker で新記録を達成しました！
         </p>
       </div>
       
-      <div class="p-8 bg-white dark:bg-slate-900" v-if="diffData">
-        <!-- Total Points -->
-        <div class="flex items-center justify-between border-2 border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-8 mb-8 bg-indigo-50/30 dark:bg-indigo-900/10">
-          <div>
-            <p class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">総BEAT-PT</p>
-            <div class="flex items-baseline gap-2">
-              <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
-              <span class="text-xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
+      <div class="p-12 flex-1 flex flex-col bg-slate-50 dark:bg-slate-900" v-if="diffData">
+        <!-- Total Points and Progress-->
+        <div class="border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl p-10 mb-10 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden shrink-0">
+          <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
+          
+          <div class="flex items-center justify-between relative z-10 mb-8">
+            <div>
+              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">総BEAT-PT</p>
+              <div class="flex items-baseline gap-3">
+                <span class="text-7xl font-black text-slate-800 dark:text-slate-100">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
+                <span class="text-3xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">BEAT-TIER</p>
+              <p class="text-6xl font-black" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
             </div>
           </div>
-          <div class="text-right">
-            <p class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">BEAT-TIER</p>
-            <p class="text-4xl font-black" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
+          
+          <!-- Progress Bar -->
+          <div v-if="nextRankData && nextRankData.nextRank" class="relative z-10">
+            <div class="flex justify-between items-end mb-3">
+              <span class="text-lg font-bold text-slate-500 dark:text-slate-400">NEXT TIER</span>
+              <div class="flex items-baseline gap-2">
+                <span class="text-3xl font-black" :class="nextRankData.nextRank.color">{{ nextRankData.nextRank.name }} {{ nextRankData.nextRank.tier || '' }}</span>
+                <span class="text-lg font-bold text-slate-400">まであと <span class="text-indigo-500">{{ (nextRankData.nextRank.minPoints - diffData.newTotalBeatPt).toFixed(1) }}</span> pt</span>
+              </div>
+            </div>
+            <div class="w-full h-6 bg-slate-100 dark:bg-slate-700/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
+              <div class="h-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all" :style="{ width: `${nextRankData.progress}%` }"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Top Updated Songs (max 5) -->
-        <div v-if="diffData.updatedSongs.length > 0">
-           <h3 class="text-xl font-black text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-              <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
-              更新楽曲 (Top 5)
+        <!-- Top Updated Songs (max 10) -->
+        <div v-if="diffData.updatedSongs.length > 0" class="flex-1 flex flex-col">
+           <h3 class="text-3xl font-black text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 shrink-0">
+              <span class="w-2.5 h-8 bg-emerald-500 rounded-full"></span>
+              更新楽曲 (Top 10)
            </h3>
-           <div class="space-y-3">
-             <div v-for="song in diffData.updatedSongs.slice(0, 5)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+           <div class="space-y-4 flex-1">
+             <div v-for="song in diffData.updatedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                <div>
-                 <div class="flex items-center gap-2 mb-1">
-                    <span class="px-2 py-0.5 rounded text-xs font-black border" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
-                    <span v-if="song.clearTypeImproved" class="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
+                 <div class="flex items-center gap-2 mb-2">
+                    <span class="px-3 py-1 rounded text-sm font-black border" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
+                    <span v-if="song.clearTypeImproved" class="text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
                  </div>
-                 <p class="font-black text-xl text-slate-800 dark:text-slate-100">{{ song.title }}</p>
-                 <div v-if="song.clearTypeImproved" class="flex items-center gap-2 mt-1">
-                   <span class="text-xs font-bold text-slate-500 dark:text-slate-400 line-through">{{ song.oldClearType }}</span>
-                   <span class="text-xs font-black" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
+                 <p class="font-black text-2xl text-slate-800 dark:text-slate-100">{{ song.title }}</p>
+                 <div v-if="song.clearTypeImproved" class="flex items-center gap-3 mt-1.5">
+                   <span class="text-sm font-bold text-slate-500 dark:text-slate-400 line-through">{{ song.oldClearType }}</span>
+                   <span class="text-sm font-black" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
                  </div>
                </div>
-               <div class="text-right flex justify-end gap-6 w-1/2">
+               <div class="text-right flex justify-end gap-10 w-1/2">
                  <div v-if="song.scoreIncrease > 0" class="text-right">
-                   <p class="text-xs font-bold text-slate-500 mb-0.5">EX SCORE</p>
-                   <p class="font-black text-xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-sm font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
+                   <p class="text-sm font-bold text-slate-500 mb-1">EX SCORE</p>
+                   <p class="font-black text-3xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-lg font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
                  </div>
                  <div v-if="song.beatPtIncrease > 0" class="text-right">
-                   <p class="text-xs font-bold text-slate-500 mb-0.5">BEAT-PT</p>
-                   <p class="font-black text-xl text-indigo-600 dark:text-indigo-400">+{{ song.beatPtIncrease.toFixed(1) }}</p>
+                   <p class="text-sm font-bold text-slate-500 mb-1">BEAT-PT</p>
+                   <p class="font-black text-3xl text-indigo-600 dark:text-indigo-400">+{{ song.beatPtIncrease.toFixed(1) }}</p>
                  </div>
                </div>
              </div>
            </div>
-           <p v-if="diffData.updatedSongs.length > 5" class="text-center text-sm font-bold text-slate-500 mt-4">
-             ...他 {{ diffData.updatedSongs.length - 5 }} 件の更新
-           </p>
+           <div v-if="diffData.updatedSongs.length > 10" class="text-center mt-6 shrink-0">
+             <span class="inline-block px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-full text-base font-bold text-slate-500 dark:text-slate-300">
+               ...他 {{ diffData.updatedSongs.length - 10 }} 件の更新
+             </span>
+           </div>
         </div>
-        <div v-else class="text-center py-8 text-slate-500 font-bold border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+        <div v-else class="text-center py-12 text-slate-500 font-bold border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-xl shrink-0">
           自己ベストの更新はありませんでした。
         </div>
       </div>
       
-      <div class="bg-slate-100 dark:bg-slate-800 p-4 text-center text-slate-500 dark:text-slate-400 font-bold text-sm tracking-widest border-t border-slate-200 dark:border-slate-700">
+      <div class="bg-indigo-600 p-6 text-center text-white/90 font-black text-xl tracking-widest shrink-0">
         Beat-Seeker - IIDX Score Tracker
       </div>
     </div>
@@ -241,14 +261,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
+import { getNextRankInfo } from '../utils/beatTier';
 import html2canvas from 'html2canvas';
 
 const props = defineProps<{
   isOpen: boolean;
   diffData: UploadDiffResult | null;
 }>();
+
+const nextRankData = computed(() => {
+  if (!props.diffData) return null;
+  return getNextRankInfo(props.diffData.newTotalBeatPt);
+});
 
 const emit = defineEmits<{
   (e: 'close'): void;
