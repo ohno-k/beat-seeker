@@ -162,6 +162,81 @@
         
       </div>
     </div>
+
+    <!-- Offscreen container for X image sharing (800px fixed width) -->
+    <div 
+      ref="shareContainer"
+      class="fixed top-[-9999px] left-[0] bg-white dark:bg-slate-900 w-[800px] flex flex-col z-[-1] border-none"
+    >
+      <div class="bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-8 text-center shrink-0">
+        <h2 class="text-4xl font-black text-white tracking-tight mb-2 drop-shadow-md">
+          プレイ成果レポート
+        </h2>
+        <p class="text-indigo-100 font-medium text-lg">
+          Beat-Seeker で新記録を達成しました！
+        </p>
+      </div>
+      
+      <div class="p-8 bg-white dark:bg-slate-900" v-if="diffData">
+        <!-- Total Points -->
+        <div class="flex items-center justify-between border-2 border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-8 mb-8 bg-indigo-50/30 dark:bg-indigo-900/10">
+          <div>
+            <p class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">総BEAT-PT</p>
+            <div class="flex items-baseline gap-2">
+              <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
+              <span class="text-xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-2">BEAT-TIER</p>
+            <p class="text-4xl font-black" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
+          </div>
+        </div>
+
+        <!-- Top Updated Songs (max 5) -->
+        <div v-if="diffData.updatedSongs.length > 0">
+           <h3 class="text-xl font-black text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+              <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+              更新楽曲 (Top 5)
+           </h3>
+           <div class="space-y-3">
+             <div v-for="song in diffData.updatedSongs.slice(0, 5)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+               <div>
+                 <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded text-xs font-black border" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
+                    <span v-if="song.clearTypeImproved" class="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
+                 </div>
+                 <p class="font-black text-xl text-slate-800 dark:text-slate-100">{{ song.title }}</p>
+                 <div v-if="song.clearTypeImproved" class="flex items-center gap-2 mt-1">
+                   <span class="text-xs font-bold text-slate-500 dark:text-slate-400 line-through">{{ song.oldClearType }}</span>
+                   <span class="text-xs font-black" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
+                 </div>
+               </div>
+               <div class="text-right flex justify-end gap-6 w-1/2">
+                 <div v-if="song.scoreIncrease > 0" class="text-right">
+                   <p class="text-xs font-bold text-slate-500 mb-0.5">EX SCORE</p>
+                   <p class="font-black text-xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-sm font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
+                 </div>
+                 <div v-if="song.beatPtIncrease > 0" class="text-right">
+                   <p class="text-xs font-bold text-slate-500 mb-0.5">BEAT-PT</p>
+                   <p class="font-black text-xl text-indigo-600 dark:text-indigo-400">+{{ song.beatPtIncrease.toFixed(1) }}</p>
+                 </div>
+               </div>
+             </div>
+           </div>
+           <p v-if="diffData.updatedSongs.length > 5" class="text-center text-sm font-bold text-slate-500 mt-4">
+             ...他 {{ diffData.updatedSongs.length - 5 }} 件の更新
+           </p>
+        </div>
+        <div v-else class="text-center py-8 text-slate-500 font-bold border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+          自己ベストの更新はありませんでした。
+        </div>
+      </div>
+      
+      <div class="bg-slate-100 dark:bg-slate-800 p-4 text-center text-slate-500 dark:text-slate-400 font-bold text-sm tracking-widest border-t border-slate-200 dark:border-slate-700">
+        Beat-Seeker - IIDX Score Tracker
+      </div>
+    </div>
   </Teleport>
 </template>
 
@@ -183,32 +258,21 @@ const close = () => {
   emit('close');
 };
 
-const reportContent = ref<HTMLElement | null>(null);
+const shareContainer = ref<HTMLElement | null>(null);
 const isSharing = ref(false);
 
 const shareOnX = async () => {
-  if (!reportContent.value || isSharing.value) return;
+  if (!shareContainer.value || isSharing.value) return;
   isSharing.value = true;
   
+  // Wait for Vue to render the loading state
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
   try {
-    const canvas = await html2canvas(reportContent.value, {
+    const canvas = await html2canvas(shareContainer.value, {
       scale: 2,
       backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff', // slate-900 or white
-      onclone: (clonedDoc) => {
-        const container = clonedDoc.getElementById('report-container');
-        const body = clonedDoc.getElementById('report-body');
-        const closeBtn = clonedDoc.getElementById('modal-close-btn');
-        const footer = clonedDoc.getElementById('modal-footer');
-        if (container) {
-          container.style.maxHeight = 'none';
-        }
-        if (body) {
-          body.style.overflow = 'visible';
-          body.style.maxHeight = 'none';
-        }
-        if (closeBtn) closeBtn.style.display = 'none';
-        if (footer) footer.style.display = 'none';
-      }
+      logging: false
     });
 
     canvas.toBlob(async (blob) => {
