@@ -46,7 +46,15 @@ public class AuthController {
 
             String token = jwtUtil.generateToken(user.getIidxId());
             return ResponseEntity.ok(Map.of("message", "Registration successful", "token", token));
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException
+                | org.hibernate.NonUniqueResultException e) {
+            System.err.println("Duplicate user found for IIDX ID: " + request.iidxId());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message",
+                            "Database integrity error: Multiple users found with same IIDX ID. Please contact admin."));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Registration failed: " + e.getMessage()));
         }
@@ -65,7 +73,15 @@ public class AuthController {
 
             String token = jwtUtil.generateToken(optionalUser.get().getIidxId());
             return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException
+                | org.hibernate.NonUniqueResultException e) {
+            System.err.println("Duplicate user found for login attempt: " + request.iidxId());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message",
+                            "Database integrity error: Multiple users found with same IIDX ID. Please contact admin."));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Login failed: " + e.getMessage()));
         }
@@ -73,21 +89,34 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getCurrentUser(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
+        try {
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(401).build();
+            }
+
+            String iidxId = (String) auth.getPrincipal();
+            User user = userRepository.findByIidxId(iidxId)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + iidxId));
+
+            return ResponseEntity.ok(Map.of(
+                    "id", user.getId(),
+                    "displayName", user.getDisplayName() != null ? user.getDisplayName() : "",
+                    "iidxId", user.getIidxId(),
+                    "danRank", user.getDanRank() != null ? user.getDanRank() : "",
+                    "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "",
+                    "playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P"));
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException
+                | org.hibernate.NonUniqueResultException e) {
+            System.err.println("Duplicate user found in getCurrentUser for IIDX ID: "
+                    + (auth != null ? auth.getPrincipal() : "unknown"));
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Database integrity error: Multiple users found. Please contact admin."));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error fetching user: " + e.getMessage()));
         }
-
-        String iidxId = (String) auth.getPrincipal();
-        User user = userRepository.findByIidxId(iidxId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return ResponseEntity.ok(Map.of(
-                "id", user.getId(),
-                "displayName", user.getDisplayName() != null ? user.getDisplayName() : "",
-                "iidxId", user.getIidxId(),
-                "danRank", user.getDanRank() != null ? user.getDanRank() : "",
-                "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "",
-                "playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P"));
     }
 
     @PutMapping("/me/profile")

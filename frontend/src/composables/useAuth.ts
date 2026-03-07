@@ -77,8 +77,8 @@ export function useAuth() {
         });
 
         if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data.message || 'ログインに失敗しました。');
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'ログインに失敗しました。');
         }
         const data = await res.json();
         setToken(data.token);
@@ -93,8 +93,8 @@ export function useAuth() {
         });
 
         if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data.message || '登録に失敗しました。');
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'ユーザー登録に失敗しました。');
         }
         const data = await res.json();
         setToken(data.token);
