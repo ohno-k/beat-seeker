@@ -171,7 +171,7 @@ const handleUpdate = async () => {
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1">
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">プレイサイド</label>
                 <div class="flex gap-4 py-2.5">
