@@ -7,6 +7,7 @@ export interface AuthUser {
     danRank: string;
     arenaRank: string;
     playSide: string;
+    isPublic: boolean;
 }
 
 const user = ref<AuthUser | null>(null);
@@ -101,6 +102,20 @@ export function useAuth() {
         await fetchCurrentUser();
     };
 
+    const updateProfile = async (payload: any): Promise<void> => {
+        const res = await fetch(`${API_BASE}/api/auth/me/profile`, {
+            method: 'PUT',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || 'プロフィールの更新に失敗しました。');
+        }
+        await fetchCurrentUser();
+    };
+
     const logout = async () => {
         removeToken();
         user.value = null;
@@ -111,12 +126,13 @@ export function useAuth() {
 
     return {
         user: readonly(user),
-        isLoading: readonly(isLoading),
         isLoggedIn,
+        isLoading: readonly(isLoading),
         login,
-        registerUser,
         logout,
-        refresh: fetchCurrentUser,
-        authHeaders, // Expose for use in other API calls (e.g., score uploads)
+        registerUser,
+        updateProfile,
+        fetchCurrentUser,
+        authHeaders // Expose for use in other API calls (e.g., score uploads)
     };
 }

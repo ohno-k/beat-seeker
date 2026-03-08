@@ -104,7 +104,8 @@ public class AuthController {
                     "iidxId", user.getIidxId(),
                     "danRank", user.getDanRank() != null ? user.getDanRank() : "",
                     "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "",
-                    "playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P"));
+                    "playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P",
+                    "isPublic", user.isPublic()));
         } catch (org.springframework.dao.IncorrectResultSizeDataAccessException
                 | org.hibernate.NonUniqueResultException e) {
             System.err.println("Duplicate user found in getCurrentUser for IIDX ID: "
@@ -130,16 +131,25 @@ public class AuthController {
         User user = userRepository.findByIidxId(iidxId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Password change logic
+        if (request.currentPassword() != null && request.newPassword() != null) {
+            if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "現在のパスワードが正しくありません。"));
+            }
+            user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        }
+
         if (request.displayName() != null)
             user.setDisplayName(request.displayName());
-        if (request.iidxId() != null)
-            user.setIidxId(request.iidxId());
         if (request.danRank() != null)
             user.setDanRank(request.danRank());
         if (request.arenaRank() != null)
             user.setArenaRank(request.arenaRank());
         if (request.playSide() != null)
             user.setPlaySide(request.playSide());
+        if (request.isPublic() != null)
+            user.setPublic(request.isPublic());
 
         userRepository.save(user);
 

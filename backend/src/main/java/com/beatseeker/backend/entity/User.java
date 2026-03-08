@@ -34,6 +34,8 @@ public class User {
     @Column(length = 2)
     private String playSide = "1P"; // "1P" or "2P"
 
+    private boolean isPublic = true;
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

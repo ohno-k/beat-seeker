@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -271,6 +270,64 @@ public class ScoreController {
         }
 
         return ResponseEntity.ok(history);
+    }
+
+    /**
+     * Get global BEAT-PT ranking.
+     */
+    @GetMapping("/debug-ranking")
+    public ResponseEntity<Map<String, Object>> debugRanking() {
+        Map<String, Object> result = new HashMap<>();
+
+        List<Map<String, Object>> userSummary = userRepository.findAll().stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", u.getId());
+            map.put("displayName", u.getDisplayName());
+            map.put("isPublic", u.isPublic());
+            List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(u);
+            map.put("historyCount", logs.size());
+            if (!logs.isEmpty()) {
+                ScoreHistoryLog latest = logs.get(logs.size() - 1);
+                map.put("latestPt", latest.getTotalBeatPt());
+                map.put("latestAt", latest.getUploadedAt().toString());
+            }
+            return map;
+        }).toList();
+
+        result.put("users", userSummary);
+        result.put("top10", scoreHistoryLogRepository.getGlobalRanking().stream().limit(10).toList());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/debug-user-scores/{userId}")
+    public ResponseEntity<List<Map<String, Object>>> debugUserScores(@PathVariable Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+
+        List<Map<String, Object>> result = scores.stream().map(s -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", s.getId());
+            map.put("title", s.getTitle());
+            map.put("difficultyName", s.getDifficultyName());
+            map.put("difficultyLevel", s.getDifficultyLevel());
+            map.put("score", s.getScore());
+            map.put("clearType", s.getClearType());
+            map.put("uploadedAt", s.getUploadedAt().toString());
+            return map;
+        }).toList();
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<Map<String, Object>>> getGlobalRanking() {
+        List<Map<String, Object>> ranking = scoreHistoryLogRepository.getGlobalRanking();
+        System.out.println("DEBUG: Ranking result top 10:");
+        ranking.stream().limit(10).forEach(r -> {
+            System.out.println("DEBUG: User: " + r.get("displayName") + ", Points: " + r.get("totalBeatPt"));
+        });
+        return ResponseEntity.ok(ranking);
     }
 
     /**

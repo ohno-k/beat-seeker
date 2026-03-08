@@ -1,0 +1,218 @@
+バージョン,タイトル,ジャンル,アーティスト,プレー回数,BEGINNER 難易度,BEGINNER スコア,BEGINNER PGreat,BEGINNER Great,BEGINNER ミスカウント,BEGINNER クリアタイプ,BEGINNER DJ LEVEL,NORMAL 難易度,NORMAL スコア,NORMAL PGreat,NORMAL Great,NORMAL ミスカウント,NORMAL クリアタイプ,NORMAL DJ LEVEL,HYPER 難易度,HYPER スコア,HYPER PGreat,HYPER Great,HYPER ミスカウント,HYPER クリアタイプ,HYPER DJ LEVEL,ANOTHER 難易度,ANOTHER スコア,ANOTHER PGreat,ANOTHER Great,ANOTHER ミスカウント,ANOTHER クリアタイプ,ANOTHER DJ LEVEL,LEGGENDARIA 難易度,LEGGENDARIA スコア,LEGGENDARIA PGreat,LEGGENDARIA Great,LEGGENDARIA ミスカウント,LEGGENDARIA クリアタイプ,LEGGENDARIA DJ LEVEL,最終プレー日時
+1st&substream,22DUNK,TECHNO,SLAKE,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,5,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+1st&substream,5.1.1.,PIANO AMBIENT,dj nagureo,0,0,0,0,0,---,NO PLAY,---,1,0,0,0,---,FULLCOMBO CLEAR,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+1st&substream,Dr.LOVE,DANCE POP,baby weapon  feat.Asuka.M,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+1st&substream,GAMBOL,BIG BEAT,SLAKE,0,0,0,0,0,---,NO PLAY,---,2,0,0,0,---,NO PLAY,---,2,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+1st&substream,R3,RAVE,tiger YAMATO,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+2nd style,.59,CHILL OUT,dj TAKA,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+2nd style,I Was The One,ITALO HOUSE,good-cool,0,0,0,0,0,---,NO PLAY,---,2,0,0,0,---,NO PLAY,---,2,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+4th style,B4U,SPEED RAVE,NAOKI,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+4th style,DXY!,TECHNO,TaQ,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+4th style,FLOWERS for ALBION,AMBIENT,dj TAKA,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+4th style,KAMIKAZE,TECHNO,dj nagureo,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+4th style,Voltage (feat. Hidemaru),BIG BEAT,TaQ,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+5th style,Abyss,INTELLIGENCE,dj TAKA,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+6th style,19，November,HOUSE,good-cool,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+6th style,Blueberry Stream,HOUSE,dj TAKA,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+6th style,Frozen Ray (original mix),TRANCE,dj TAKA,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+7th style,Cheer Train,BIG BEAT,Fuzita Blender,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+7th style,Happy Wedding,HOUSE,ASKA,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+8th style,airflow,INSTRUMENTAL,Mr.T,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+8th style,CELEBRATE NITE,EURO GROOVE,N.M.R,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,8,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+9th style,BRIGHTNESS DARKNESS,ROCOCO TEK,SPARKER,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+9th style,LOVE SHINE,J-HAPPY HARDCORE,小坂りゆ,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+9th style,rottel-the-Mercury,GABBA,sampling masters MEGA,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,FAILED,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+9th style,ライオン好き,ボデー,AKIRA YAMAOKA,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,HARD CLEAR,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+10th style,システムロマンス,ムートラ(ムードトランス),ヒロシ＆チー子,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+10th style,雪月花,HARD HOUSE,Ryu☆,0,0,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+IIDX RED,AGEHA,HAPPY HARDCORE,Ryu☆,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,8,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+IIDX RED,Be quiet,HARD DANCE,Ryu☆,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+IIDX RED,BLOCKS,TRANCE,SPARKER,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,EX HARD CLEAR,---,7,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+IIDX RED,D.A.N.C.E.!,J-POP,DJ Yoshitaka feat.星野奏子,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HAPPY SKY,HAPPY☆ANGEL,HAPPY HARDCORE,jun with TAHIRIH,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HAPPY SKY,Twelfth Style,HAPPY EURO PARADISE,Tatsh&DAYBREAKERS NEXT,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HAPPY SKY,Under the Sky,J-EUROTRANCE,南さやか(BeForU) with platoniX,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,EURO-ROMANCE,80's TECHNO,K-MASERA,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,The Dirty of Loudness,SADISTIC HARDCORE,Tatsh Assault X,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,This is Love,CORE POP,D-crew feat.MAKOTO,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,WISH(EUROBEAT MIX),EUROBEAT,DJ YOSHITAKA feat.杉村ことみ,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,カゴノトリ～弐式～,和式電子音楽,橙色特別室,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,嘆きの樹,CONTEMPORARY,金獅子,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,罠,DRUM'N'ROCK,good-cool,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DistorteD,虹色,LOVELY TRANS POP,DJ YOSHITAKA feat. G.S.C license,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,CLEAR,---,8,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,FIRE FIRE,BUCHIAGE TRANCE,StripE,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,GOLD RUSH,RECKLESS RAVE,DJ YOSHITAKA-G feat.Michael a la mode,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,High School Love,HIGH SPEED LOVE SONG,DJ YOSHITAKA feat.DWP,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,Roulette,EUROBEAT,Y&Co.,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,CLEAR,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,The Smile of You,POP,猫叉Master feat.JESSY,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,7,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,With your Smile,J-HOUSE,Shoichiro Hirata plus Junko Hirata,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,ヨシダさん,TECHNO,AKIRA YAMAOKA,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+GOLD,花吹雪 ～ IIDX LIMITED ～,JAPANESE ALTERATION,S.S.D.FANTASICA feat.ユッコ,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,2 tribe 4 K,TRIBAL,Remo-con,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,Blue Rain,TRANCE,dj TAKA VS Ryu☆,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,Dazzlin' Darlin,HANDZ UP,HHH,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,Kick Out 仮面,E-DANCE POP,上野圭市(aka. Babyweapon，DJ SWAMI)feat.星野奏子,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,MAX LOVE,LOVELY BUCHIAGE POP,DJ YOSHITAKA feat.星野奏子,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,NEW GENERATION -もう、お前しか見えない-,ONLY ONE EURO BEAT,SUPER STAR 満-MITSURU-,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,Ristaccia,OUVERTURE,Zektbach,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,satellite020712 from "CODED ARMS",HARD HOUSE,猫叉Master,0,0,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,scar in the earth,WORLD/ELECTRONICA,猫叉Master,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,the trigger of innocence,ETHNOTRONICA,Seiya Murai,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,HARD CLEAR,---,9,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,TROOPERS,ULTIMATE CORE,Des-TRACT,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,HARD CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,Wanna Party?,PIANO HOUSE,RAM,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,FAILED,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,エコ爺,80's EURO,Y&Co.,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,マチ子の唄,EDUCATION,AKIRA YAMAOKA,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,華爛漫 -Flowers-,HYPER JAPANESQUE 2,ＴЁЯＲＡ,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,9,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+DJ TROOPERS,走馬灯 -The Last Song-,SOLDIER'S BALLAD,TAKA,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EMPRESS,BRIDAL FESTIVAL !!!,HAPPY ☆ JIG,S.S.D. with ななっち,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EMPRESS,Colorful Cookie,HAPPY HARDCORE,Lucky Vacuum,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EMPRESS,Fly Above,DREAM TRANCE,Sota Fujimori,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EMPRESS,I'm Screaming LOVE,TECHNO POP,Creative Life,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EMPRESS,Mind Mapping,ELECTRO-TECH,Ryu☆,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,8,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EMPRESS,ハリツヤランデヴー,HOU-ROCK,Des-MASTERS,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EMPRESS,鉄甲乙女-under the steel-,IRON CONCERTO,Seiya Murai,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,Bad Maniacs,INDUSTRIAL,kors k as teranoid,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,BEAUTIFUL ANGEL,DRUM'N'BASS,DJ SWAN,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,DAWN -THE NEXT ENDEAVOUR-,DRUM & BASS,L.E.D. fw.堀澤麻衣子,0,0,0,0,0,---,NO PLAY,---,8,0,0,0,---,EASY CLEAR,---,9,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,mosaic,TECHNO POP SPEED,Auridy,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,Red. by Full Metal Jacket,TECH-BREAKBEATS,DJ Mass MAD Izm*,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,HARD CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,Roots of my way!,ACTRESS,ナイア,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,HARD CLEAR,---,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,かずあそび,INSANIO,CULTVOICE by S.S.D.PRODUCTS,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,たからもの,POPS,セリカ＆エリカ,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,FAILED,---,10,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,コスモス,J-POP,TSU-NA,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,サヨナラ・ヘヴン,WORLD/ELECTRONICA,猫叉Master,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SIRIUS,水上の提督(Short mix from "幻想水滸伝V"),WORLD/ELECTRONICA,猫叉Master,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,Breaking the ground,HARDCORE,Art of Fighters,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,DM STAR～関西 energy style～,SPEED RAVE,NAOKI,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,HARD CLEAR,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,Everlasting Resort,ONLY ONE ANTHEM,SUPER STAR 満-MITSURU-,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,Medicine of love,MAGICAL POP,イロハ＆リリナ,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,passionate fate,HANDZ UP,Ryu☆,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,perditus†paradisus,ANTHEM CORE,iconoclasm,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,CLEAR,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,THE FALLEN,GOTH NU-STYLE GABBA,L.E.D.-G,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,Wuv U,CANDY RAVE,kors k,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,かげぬい ～ Ver.BENIBOTAN ～,NATSU MATSURI,CULTVOICE by S.S.D.PRODUCTS,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,旅人リラン,ELECLORE,XOGO BRYKK,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Resort Anthem,灼熱Beach Side Bunny,BROKEN SAMBA BREAK,DJ Mass MAD Izm*,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,BLACK.by X-Cross Fade,TECH-BREAKBEATS,DJ Mass MAD Izm*,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,CALL,WORLD/ELECTRONICA,猫叉Master,0,0,0,0,0,---,NO PLAY,---,2,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,Express Emotion,J-CORE,REDALiCE feat. Shihori,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,Flip Flap,CANDY HANDZ UP,kors k,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,EASY CLEAR,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,I'm so Happy,HAPPY HARDCORE,Ryu☆,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,LOVE B.B.B,DRUM'N'BASS,SWAN K feat. Asuka M,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,FAILED,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,Mermaid girl-秋葉工房 MIX-,EURO BEAT,Remixed by DJ Command,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,Quick Silver,RAVE FUSION,Mystic Moon,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,Round and Round,HYPER ELECTRO,Masayoshi Minoshima feat. 綾倉盟,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Lincle,Snake Stick,TECH-BREAKBEATS,DJ Yoshitaka VS. DJ Mass MAD Izm*,1,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,10,1053,382,289,---,FAILED,C,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-12-27 07:19
+Lincle,突撃!ガラスのニーソ姫!,電波,山本椛 (monotone),0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,8bit Princess,CHIPTUNE,seiya-murai feat. ALT,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,Ascalon,ELECTRO POP,Qrispy Joybox,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,examination leave,VACATION DANCE,dj razzle dazzle,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,10,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,GRADIUS 2012,KONAMI REMIX,Sota Fujimori,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,Howling,NU RAVE,PON,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,EASY CLEAR,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,LUV CAN SAVE U,NEO 80's EURO ELECTRO,HIDEKI NAGANUMA,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,Shining World,ELECTRO POP,DJ Genki feat. Yukacco,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,Take My Life,EUROBEAT,Y&Co.,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,Time To Empress,TRANCE,dj TAKA feat.wac & secret K,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,FAILED,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,ZED,DUB STEP,USAO,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,†渚の小悪魔ラヴリィ～レイディオ†(IIDX EDIT),Hi-CORE,夏色ビキニのPrim,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,メイメツ、フラグメンツ,CYBER SYMPHONIC POP,中山真斗(Elements Garden)feat.桜川めぐ,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,ラキラキ,LUCKY TECHNO,Mutsuhiko Izumi & S-C-U,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,下弦の月,NEO CLASSICAL DANCE,iNO,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+tricoro,朧,FASCINATION,HHH×MM×ST,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,Claiomh Solais,ILUZIO,DJ Yoshitaka VS S.S.D.,0,0,0,0,0,---,NO PLAY,---,2,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,DARK LEGACY,DARK ELEMENT,BaSTeT,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,Element of SPADA,HEALING POP,猫叉Master feat.霜月はるか,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,into the battlefield,SYMPHONIC BREAKS,the wandering bard,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,MAD ATTACK,UPBEAT,HALFBY,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,10,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,SCHWARZSCHILD FIELD,FULL ON,L.E.D.,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,Valgus,MAINSTREAM HARDCORE,DJ Myosuke feat.Yukacco,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,Wonder Girl feat. Kanae Asaba,EUROBEAT,Y&Co.,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,廿,新世紀進歩的羽扇子音楽,DJ TECHNORCH,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,FAILED,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SPADA,罪と罰,HYPER J-POP,Xceon feat. Mayumi Morinaga,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,#The_Relentless,DUBCORE,DJ Noriken,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,chrono diver -fragment-,HEALING DRUM'N'BASS,猫叉Master feat.三澤 秋,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,Chrono Diver -PENDULUMs-,CHRONO BREAKS,猫叉L.E.D.Master+,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,Hello Happiness,HAPPY HARDCORE,P*Light feat. mow*2,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,Line 4 Ruin,ELECTRO TECH,Ryu☆,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,Rave*it!! Rave*it!!,EDM SPEED,機龍,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,SAMSARA,DIMENSION WAVE,SOUND HOLIC feat. Nana Takahashi,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,TA・DA ☆ YO・SHI,EUROBEAT,Y&Co.,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,ぷろぐれっしぶ時空少女！うらしまたろ子ちゃん！,ぷろぐれっしぶ電波,ARM(IOSYS) feat. 山本椛,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,パ→ピ→プ→Yeah!,電波ソング,ヒゲドライバー join. shully & Nimo,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,十六夜セツナ,HYPER J-POP,Xceon feat.Mayumi Morinaga,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,HARD CLEAR,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,恋は白帯、サンシロー,KANA-POP,星野奏子,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,打打打打打打打打打打,JAPANESE TRADITIONAL,ヒゲドライバー join. SELEN,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,EASY CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+PENDUAL,超青少年ノ為ノ超多幸ナ超古典的超舞曲,PIECED EUPHORIA,Project B-,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,GENERATE feat.綾倉盟,ELECTRONIC DANCE,Masayoshi Minoshima,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,Konzert V,JUNGLE CLASSIC,Remo-con vs. dj TAKA,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,NINJA IS DEAD IIDX ver.,SHINOBI SPEED,P*Light,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,On the FM,RADIO SHOWCASE,C-Show,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,SHELTER OF THE MIND,ROCKIN' DRUM&BASS,YURiCa/花たん,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,STARLIGHT DANCEHALL,HAPPY EMOTION,P*Light,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,Super Duper Racers,HARDCORE,kors k & Numb'n'dub,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,Violet Pulse,GLITCH ELECTRO,G.K,0,0,0,0,0,---,NO PLAY,---,2,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,オルタネイトβ,HYPER J-POP,Xceon feat. Mayumi Morinaga,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,HARD CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,シュッパツシンコウ・シサカンコ,KANA-POP,星野奏子,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,真 地獄超特急 -HELL or HELL-,新世紀進歩的羽扇子音楽,DJ TECHNORCH Vs. L.E.D.Light-G,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+copula,麗 ～うらら～,WINTER GLOW,SOUND HOLIC feat. Nana Takahashi,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,Egret and Willow,FUTURE BEATS,Dirty Androids,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,OOO,BUBBLEGUM DANCE,Ryu☆ feat.moimoi,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,ROTTERDAM SHOGUN,RDM,ABDI from ジャカルタファンクブラザーズ,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,SINOBUZ Fantasy,CANDY ROCK,Noria,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,XINOBIKILL,CYBER JAZZSTEP,SOUND HOLIC feat. Nana Takahashi,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,冬椿 ft. Kanae Asaba,HYPER ENKA POP,Xceon,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,火影,HIP HOP,RoughSkreamZ feat.楽天斎,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+SINOBUZ,獅子霞麗ノ舞,DRAMATIC WALTZ,HuΣeR,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,DEATH†ZIGOQ ～怒りの高速爆走野郎～,世紀末コア,L.E.D.ALiCE(DJ NAGAI Vs. BEMANI Sound Team "L.E.D.-G"),0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,HAT TRICK,HANDZ STYLE,P*Light,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,Initiation,00's TECHNO,BEMANI Sound Team "謎の勢力",0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,Life Is A Game ft.DD"ナカタ"Metal,UPTEMPO HARDCORE,RoughSketch,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,LUV DRIVE,POPCORE,RoughSketch feat.Aikapin,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,HARD CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,Nothing but Theory,ULTRA JAZZFUNKTION,lapix,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,神謳 -RESONANCE-,Hi-MYTH,SOUND HOLIC feat. Nana Takahashi Vs.GOD PHOENIX Prim,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CANNON BALLERS,純真可憐デザイア,EMOTIONAL ROCK,BEMANI Sound Team "HuΣeR" feat.Fernweh,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,8,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,50th Memorial Songs -二人の時 ～under the cherry blossoms～-,ANNIVERSARY,BEMANI Sound Team,1,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,1262,544,174,51,ASSIST CLEAR,A,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-12-27 07:12
+Rootage,CoMAAAAAAA,UPLIFTING ETHNIC,Ryu☆,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,CLEAR,---,10,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,Cranberry City ft. Luschel,GARAGE,lapix,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,Dr. Chemical & Killing Machine,INDUSTRIAL TECHNO,Hommarju,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,Ember Lights,FUSION TRANCE,Nhato,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,HARD BRAIN,HARD TECHNO,AJURIKA,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,Hurry Hurry,RAVE SXXX,Masayoshi Iimori,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,KILL EACH OTHER,PSYSTYLE,BEMANI Sound Team "L.E.D. VS. L.E.D.-G",0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,Let me be your cure,ELECTRIC DANCE ROCK,Pizuya's Cell,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,Lift Us High,MELODIC TRANCE,BEMANI Sound Team "Sota Fujimori",0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,EASY CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,OVER TIME,ELECTRO POP,空中分解feat.アンテナガール,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,ROCK女 feat. 大山愛未， Ken,TRANCE,Y&Co.,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,R∞tAge,NEO J-TEKNO,BEMANI Sound Team "HuΣeR+",0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,Twilight Warp,CYBER DANCE MUSIC,Maozon feat. Kyte,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,EASY CLEAR,---,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,セカンドピアス,GIRLS ROCK,OSTER project feat. echo,0,0,0,0,0,---,NO PLAY,---,3,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,ハードベース・フェスタ,A-STYLE RUSSIAN HARDBASS,かめりあ feat. ななひら,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,夏の匂い。キミの残像。 ft. Kanae Asaba,Re 90's J-DANCE POP,Xceon,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+Rootage,深愛のリグレット,PIANO J TRANCE POP,Xceon feat.Mayumi Morinaga,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,AKASHIC BREAK,LAPLACE CORE,BEMANI Sound Team "TAG",0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,FAILED,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,beatAffection,BEAT MUSIC,ビートまりお,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,Bow shock!!,JAZZ PIANO TRANCE,Xceon,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,LIGHTNING STRIKES,Hi-GAIN ENERGY,BEMANI Sound Team "HuΣeR",0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,Matt Silver,TECHSTYLE,Remo-con,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,FAILED,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,Override,EUPHORIC HARDCORE,Nhato,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,T-REX vs Velociraptor (In the Far east euphoria),RAVECORE,RoughSketch & TARACHINE,0,0,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,VALKYRIAS -英雄誕生-,HEROIC VALHALLA ROCK,BEMANI Sound Team "HuΣeR" feat.Fernweh,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,シャムシールの舞,バトルダンス,Zektbach,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,ラブキラ☆スプラッシュ,HYPER POP,BEMANI Sound Team "Sota F." feat.いちか,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,NO PLAY,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,狂水一華,STYLISH CROSSOVER,BEMANI Sound Team "HuΣeR Vs. SYUNN" feat.いちか,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,EX HARD CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+HEROIC VERSE,魅惑のYUMMYスイーツ,TWINKLE POP,BEMANI Sound Team "TATSUYA",0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,HARD CLEAR,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+BISTROVER,Crazy Jackpot,UK HARDCORE,Hommarju,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,ASSIST CLEAR,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+BISTROVER,Level 3,DRUMSTEP / DnB,Yamato,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,HARD CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+BISTROVER,Romanticが止まらない,IIDX EDITION,Remixed by BEMANI Sound Team "L.E.D." & IOSYS,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+BISTROVER,rommmo,BREAKCORE,callasoiled,0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,NO PLAY,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+BISTROVER,S-Bahn,DARK TECHNO,BEMANI Sound Team "DARK TRAIN",1,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,1026,407,212,63,CLEAR,B,9,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-12-27 07:09
+BISTROVER,WAKE UP NOW,TROPICAL ELECTRO HOUSE,Maozon feat. Chica,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+BISTROVER,新宝島,IIDX EDITION,Remixed by BEMANI Sound Team "TAG feat. PON",0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,7,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+BISTROVER,水鏡の異界,JAPANESE TECH BREAKS,BEMANI Sound Team "Coyaan",0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,12,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CastHour,ミュージック・アワー,IIDX EDITION,Remixed by BEMANI Sound Team "PON",0,0,0,0,0,---,NO PLAY,---,6,0,0,0,---,NO PLAY,---,9,0,0,0,---,ASSIST CLEAR,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+CastHour,愛しくてラヴィンユー ft. マナ,EURO BEAT,Xceon,0,0,0,0,0,---,NO PLAY,---,4,0,0,0,---,NO PLAY,---,7,0,0,0,---,NO PLAY,---,10,0,0,0,---,FAILED,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+RESIDENT,C-C-C-N-N-N,ELECTRONICORE,RoughSkreamZ feat. Aikapin,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,9,0,0,0,---,FAILED,---,11,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+RESIDENT,異心前進♪ぴょんぴょんぴょん,EUROBEAT,天土,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+RESIDENT,神っぽいな,IIDX EDITION,Remixed by uno(IOSYS) & NUE feat. Chiyoko,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,FAILED,---,10,0,0,0,---,NO PLAY,---,12,0,0,0,---,NO PLAY,---,2025-09-17 08:27
+EPOLIS,ZEROIN ON THE LIGHT,COLD BEAT,SOUND HOLIC Vs. ZYTOKINE feat. Nana Takahashi,1,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,1270,518,234,46,ASSIST CLEAR,A,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-12-27 07:16
+Pinky Crush,我ら完全無敵のアイドル!!,J-POP,B小町,0,0,0,0,0,---,NO PLAY,---,5,0,0,0,---,NO PLAY,---,8,0,0,0,---,ASSIST CLEAR,---,10,0,0,0,---,NO PLAY,---,0,0,0,0,---,NO PLAY,---,2025-09-17 08:27

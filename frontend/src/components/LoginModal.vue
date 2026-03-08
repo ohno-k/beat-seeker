@@ -19,6 +19,7 @@ const errorMsg = ref('');
 // Form fields
 const inputIidxId = ref('');
 const password = ref('');
+const passwordConfirm = ref('');
 const displayName = ref('');
 const danRank = ref('初段');
 const arenaRank = ref('C5');
@@ -136,6 +137,12 @@ const switchMode = (newMode: 'login' | 'register') => {
           <div>
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">パスワード</label>
             <input type="password" v-model="password" required placeholder="••••••••" minlength="4"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+          </div>
+
+          <div v-if="mode === 'register'">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">パスワード（確認）</label>
+            <input type="password" v-model="passwordConfirm" required placeholder="••••••••" minlength="4"
               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
           </div>
           

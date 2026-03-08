@@ -38,6 +38,16 @@ export const parseScoreCsv = (file: File): Promise<ScoreData[]> => {
                             leggendaria: parseDifficulty(row, 'LEGGENDARIA'),
                             lastPlayTime: row['最終プレー日時'] || '',
                         }));
+
+                    // DP Check: 22DUNK's NORMAL, HYPER, ANOTHER levels are all 5 in DP (3,4,5 in SP)
+                    const dunk22 = parsedData.find(d => d.title === '22DUNK');
+                    if (dunk22 &&
+                        dunk22.normal.difficulty === 5 &&
+                        dunk22.hyper.difficulty === 5 &&
+                        dunk22.another.difficulty === 5) {
+                        throw new Error('DPのCSVは読み込めません。SPのCSVを使用してください。');
+                    }
+
                     resolve(parsedData);
                 } catch (err) {
                     reject(err);
