@@ -92,16 +92,6 @@ public class FriendController {
         }
 
         List<User> users = userRepository.searchUsers(trimmedQuery, variant).stream()
-                .filter(u -> {
-                    // Always show if exact IIDX ID matches
-                    if (u.getIidxId() != null && u.getIidxId().equals(trimmedQuery)) {
-                        return true;
-                    }
-                    // For name searches, respect privacy level
-                    // Default to public (0) if null
-                    Integer pl = u.getPrivacyLevel();
-                    return pl == null || pl != 2;
-                })
                 .limit(20)
                 .collect(Collectors.toList());
 
