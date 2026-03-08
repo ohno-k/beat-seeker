@@ -343,7 +343,7 @@ const cancelUpload = () => {
             <!-- Hamburger Button -->
             <button 
               @click="isSidebarOpen = true" 
-              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none lg:hidden"
+              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none xl:hidden"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -362,24 +362,24 @@ const cancelUpload = () => {
               </div>
             </div>
             
-            <div class="flex items-center gap-1 sm:gap-4 overflow-x-auto no-scrollbar ml-2 sm:ml-4 h-full flex-1">
+            <div class="hidden lg:flex items-center gap-4 overflow-x-auto no-scrollbar ml-4 h-full flex-1">
               <button 
                 @click="activeTab = 'dashboard'"
-                class="flex items-center h-full px-2 sm:px-3 border-b-2 transition-all font-bold text-xs sm:text-sm tracking-wide shrink-0 whitespace-nowrap"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
                 ダッシュボード
               </button>
               <button 
                 @click="activeTab = 'table'"
-                class="flex items-center h-full px-2 sm:px-3 border-b-2 transition-all font-bold text-xs sm:text-sm tracking-wide shrink-0 whitespace-nowrap"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
                 スコア一覧
               </button>
               <button 
                 @click="activeTab = 'ranking'"
-                class="flex items-center h-full px-2 sm:px-3 border-b-2 transition-all font-bold text-xs sm:text-sm tracking-wide shrink-0 whitespace-nowrap"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
                 ランキング
@@ -387,7 +387,7 @@ const cancelUpload = () => {
               <button 
                 v-if="isLoggedIn && !viewingUserId"
                 @click="activeTab = 'history'"
-                class="flex items-center h-full px-2 sm:px-3 border-b-2 transition-all font-bold text-xs sm:text-sm tracking-wide shrink-0 whitespace-nowrap"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
                 成長記録
@@ -395,7 +395,7 @@ const cancelUpload = () => {
               <button 
                 v-if="isLoggedIn && !viewingUserId"
                 @click="activeTab = 'profile'"
-                class="flex items-center h-full px-2 sm:px-3 border-b-2 transition-all font-bold text-xs sm:text-sm tracking-wide shrink-0 whitespace-nowrap"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
                 プロフィール
@@ -423,7 +423,7 @@ const cancelUpload = () => {
               <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="isLoginModalOpen = true">ログイン</button>
             </template>
             <template v-if="isLoggedIn">
-              <div @click="isSidebarOpen = true" class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm cursor-pointer hover:shadow-md transition-all md:hidden">
+              <div @click="isSidebarOpen = true" class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm cursor-pointer hover:shadow-md transition-all xl:hidden">
                 {{ user?.displayName?.charAt(0) || user?.iidxId?.charAt(0) || 'U' }}
               </div>
             </template>
@@ -432,7 +432,47 @@ const cancelUpload = () => {
       </header>
 
       <!-- Main Content -->
-      <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <!-- Mobile Navigation Tabs (Body Portion) -->
+        <nav class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
+          <button 
+            @click="activeTab = 'dashboard'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+          >
+            ダッシュボード
+          </button>
+          <button 
+            @click="activeTab = 'table'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+          >
+            スコア一覧
+          </button>
+          <button 
+            @click="activeTab = 'ranking'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+          >
+            ランキング
+          </button>
+          <button 
+            v-if="isLoggedIn && !viewingUserId"
+            @click="activeTab = 'history'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+          >
+            成長記録
+          </button>
+          <button 
+            v-if="isLoggedIn && !viewingUserId"
+            @click="activeTab = 'profile'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+          >
+            プロフィール
+          </button>
+        </nav>
         <!-- Admin Viewing Banner -->
         <div v-if="viewingUserId" class="w-full max-w-6xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden shrink-0">
           <div class="absolute right-0 top-0 bottom-0 w-32 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 to-transparent pointer-events-none"></div>

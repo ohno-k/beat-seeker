@@ -80,14 +80,14 @@ const filteredNavItems = computed(() => {
       <div 
         v-if="isOpen" 
         @click="closeSidebar"
-        class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-40 transition-opacity lg:hidden"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-40 transition-opacity xl:hidden"
       ></div>
     </Transition>
 
     <!-- Sidebar Panel -->
     <aside 
-      class="fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0 lg:shadow-none"
-      :class="isOpen ? 'translate-x-0' : '-translate-x-full'"
+      class="fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out xl:translate-x-0 xl:static xl:z-0 xl:shadow-none"
+      :class="isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'"
     >
       <div class="h-full flex flex-col">
         <!-- Sidebar Header (Logo) -->
@@ -106,7 +106,7 @@ const filteredNavItems = computed(() => {
               beat-seeker
             </span>
           </div>
-          <button @click="closeSidebar" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+          <button @click="closeSidebar" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors xl:hidden">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
