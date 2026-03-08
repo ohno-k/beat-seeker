@@ -46,7 +46,7 @@ watch(() => props.isOpen, (newVal) => {
     danRank.value = user.value.danRank;
     arenaRank.value = user.value.arenaRank;
     playSide.value = user.value.playSide;
-    isPublic.value = user.value.isPublic ?? true;
+    isPublic.value = true;
     
     currentPassword.value = '';
     newPassword.value = '';
@@ -171,7 +171,7 @@ const handleUpdate = async () => {
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1">
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">プレイサイド</label>
                 <div class="flex gap-4 py-2.5">
@@ -184,14 +184,6 @@ const handleUpdate = async () => {
                     <span class="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 transition-colors">2P</span>
                   </label>
                 </div>
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">スコアの公開設定</label>
-                <select v-model="isPublic" 
-                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option :value="true">公開する</option>
-                  <option :value="false">非公開にする</option>
-                </select>
               </div>
             </div>
           </div>
