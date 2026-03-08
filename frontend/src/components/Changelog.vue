@@ -17,6 +17,31 @@
       </p>
     </div>
 
+    <!-- Update Entry: v1.0.4 (Rival (Friend) Feature) -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.0.4</span>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">ライバル（フレンド）機能の追加</h3>
+        </div>
+        <span class="text-sm font-bold text-slate-500 dark:text-slate-400">2026年3月</span>
+      </div>
+      
+      <div class="p-8 space-y-6">
+        <div>
+          <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+            新機能 (New Features)
+          </h4>
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">ライバル（フレンド）機能:</span> 他のユーザーとフレンドになることができ、相互にスコア状況を確認・比較できる機能を追加しました。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">詳細スコア比較:</span> フレンドとのスコアを非公式難易度ごとに比較し、どの楽曲で勝っているか・負けているかを一目で確認できる詳細モードを搭載しました。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">プライバシー設定:</span> プロフィール設定から、自分のスコアを「公開」「フレンドのみ公開」「非公開」に切り替えられるようになりました。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- Update Entry: v1.0.3 (Ranking & UI Overhaul) -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
