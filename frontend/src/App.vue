@@ -335,22 +335,22 @@ const cancelUpload = () => {
       @select="handleSelectUser"
     />
 
-    <div class="flex-1 flex flex-col h-screen overflow-y-auto relative custom-scrollbar">
+    <div class="flex-1 flex flex-col h-screen overflow-x-hidden overflow-y-auto relative custom-scrollbar lg:ml-72">
       <!-- Header -->
       <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm transition-colors duration-200 h-16 shrink-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+        <div class="max-w-7xl lg:max-w-none mx-auto lg:mx-0 px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div class="flex items-center gap-4">
             <!-- Hamburger Button -->
             <button 
               @click="isSidebarOpen = true" 
-              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none xl:hidden"
+              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none lg:hidden"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
 
-            <div class="flex items-center gap-2 cursor-pointer group" @click="activeTab = 'dashboard'">
+            <div class="flex lg:hidden items-center gap-2 cursor-pointer group" @click="activeTab = 'dashboard'">
               <div class="relative w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-blue-700 transition-colors overflow-hidden">
                 B
                 <div 
@@ -423,7 +423,7 @@ const cancelUpload = () => {
               <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="isLoginModalOpen = true">ログイン</button>
             </template>
             <template v-if="isLoggedIn">
-              <div @click="isSidebarOpen = true" class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm cursor-pointer hover:shadow-md transition-all xl:hidden">
+              <div @click="isSidebarOpen = true" class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm cursor-pointer hover:shadow-md transition-all lg:hidden">
                 {{ user?.displayName?.charAt(0) || user?.iidxId?.charAt(0) || 'U' }}
               </div>
             </template>
@@ -432,7 +432,7 @@ const cancelUpload = () => {
       </header>
 
       <!-- Main Content -->
-      <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main class="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <!-- Mobile Navigation Tabs (Body Portion) -->
         <nav class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
           <button 

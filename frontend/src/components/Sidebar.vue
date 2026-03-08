@@ -34,7 +34,7 @@ const selectTab = (tab: string) => {
 
 const handleUploadClick = () => {
   emit('upload');
-  if (window.innerWidth < 768) {
+  if (window.innerWidth < 1024) { // lg breakpoint
     closeSidebar();
   }
 };
@@ -86,8 +86,10 @@ const filteredNavItems = computed(() => {
 
     <!-- Sidebar Panel -->
     <aside 
-      class="fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out xl:translate-x-0 xl:static xl:z-0 xl:shadow-none"
-      :class="isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'"
+      class="fixed inset-y-0 left-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shadow-xl transition-all duration-300 ease-in-out flex flex-col z-50 w-72 lg:translate-x-0 lg:shadow-none lg:h-screen lg:z-40"
+      :class="[
+        isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      ]"
     >
       <div class="h-full flex flex-col">
         <!-- Sidebar Header (Logo) -->
@@ -106,7 +108,7 @@ const filteredNavItems = computed(() => {
               beat-seeker
             </span>
           </div>
-          <button @click="closeSidebar" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors xl:hidden">
+          <button @click="closeSidebar" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors lg:hidden">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -243,7 +245,7 @@ const filteredNavItems = computed(() => {
         <!-- Sidebar Footer (Version/Socials maybe?) -->
         <div class="p-6 text-center">
           <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-            v0.9.5-beta | beat-seeker
+            v1.0.3 | beat-seeker
           </p>
         </div>
       </div>
