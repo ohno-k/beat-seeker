@@ -21,7 +21,7 @@ const displayName = ref('');
 const danRank = ref('');
 const arenaRank = ref('');
 const playSide = ref('');
-const isPublic = ref(true);
+const privacyLevel = ref(0);
 
 const currentPassword = ref('');
 const newPassword = ref('');
@@ -46,7 +46,7 @@ watch(() => props.isOpen, (newVal) => {
     danRank.value = user.value.danRank;
     arenaRank.value = user.value.arenaRank;
     playSide.value = user.value.playSide;
-    isPublic.value = user.value.isPublic ?? true;
+    privacyLevel.value = user.value.privacyLevel ?? 0;
     
     currentPassword.value = '';
     newPassword.value = '';
@@ -89,7 +89,7 @@ const handleUpdate = async () => {
       danRank: danRank.value,
       arenaRank: arenaRank.value,
       playSide: playSide.value,
-      isPublic: isPublic.value
+      privacyLevel: privacyLevel.value
     };
 
     if (newPassword.value) {
@@ -187,10 +187,11 @@ const handleUpdate = async () => {
               </div>
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">スコアの公開設定</label>
-                <select v-model="isPublic" 
+                <select v-model="privacyLevel" 
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option :value="true">公開する</option>
-                  <option :value="false">非公開にする</option>
+                  <option :value="0">全公開</option>
+                  <option :value="1">フレンドのみ公開</option>
+                  <option :value="2">非公開</option>
                 </select>
               </div>
             </div>

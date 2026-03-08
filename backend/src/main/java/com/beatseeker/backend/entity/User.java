@@ -34,7 +34,13 @@ public class User {
     @Column(length = 2)
     private String playSide = "1P"; // "1P" or "2P"
 
-    private boolean isPublic = true;
+    @Column(columnDefinition = "integer default 0")
+    private Integer privacyLevel = 0; // 0: Public, 1: Friends Only, 2: Private
+
+    private LocalDateTime lastUploadedAt;
+
+    @Column(columnDefinition = "TEXT")
+    private String pushSubscription; // Web Push subscription JSON
 
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

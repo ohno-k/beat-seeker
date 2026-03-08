@@ -98,10 +98,19 @@ public class ScoreController {
             }
         }
 
+        if (!updatedSongs.isEmpty()) {
+            updateLastUploadTime(user);
+        }
+
         return ResponseEntity.ok(Map.of(
                 "updatedCount", updatedSongs.size(),
                 "updatedSongs", updatedSongs,
                 "message", "スコアを更新しました"));
+    }
+
+    private void updateLastUploadTime(User user) {
+        user.setLastUploadedAt(java.time.LocalDateTime.now());
+        userRepository.save(user);
     }
 
     /**
@@ -281,9 +290,8 @@ public class ScoreController {
 
         List<Map<String, Object>> userSummary = userRepository.findAll().stream().map(u -> {
             Map<String, Object> map = new HashMap<>();
-            map.put("id", u.getId());
             map.put("displayName", u.getDisplayName());
-            map.put("isPublic", u.isPublic());
+            map.put("privacyLevel", u.getPrivacyLevel());
             List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(u);
             map.put("historyCount", logs.size());
             if (!logs.isEmpty()) {

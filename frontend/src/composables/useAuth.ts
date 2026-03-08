@@ -7,7 +7,8 @@ export interface AuthUser {
     danRank: string;
     arenaRank: string;
     playSide: string;
-    isPublic: boolean;
+    privacyLevel: number;
+    lastUploadedAt: string | null;
 }
 
 const user = ref<AuthUser | null>(null);

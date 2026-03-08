@@ -105,7 +105,8 @@ public class AuthController {
                     "danRank", user.getDanRank() != null ? user.getDanRank() : "",
                     "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "",
                     "playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P",
-                    "isPublic", user.isPublic()));
+                    "privacyLevel", user.getPrivacyLevel(),
+                    "lastUploadedAt", user.getLastUploadedAt()));
         } catch (org.springframework.dao.IncorrectResultSizeDataAccessException
                 | org.hibernate.NonUniqueResultException e) {
             System.err.println("Duplicate user found in getCurrentUser for IIDX ID: "
@@ -148,8 +149,8 @@ public class AuthController {
             user.setArenaRank(request.arenaRank());
         if (request.playSide() != null)
             user.setPlaySide(request.playSide());
-        if (request.isPublic() != null)
-            user.setPublic(request.isPublic());
+        if (request.privacyLevel() != null)
+            user.setPrivacyLevel(request.privacyLevel());
 
         userRepository.save(user);
 

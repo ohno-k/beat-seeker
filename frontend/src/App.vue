@@ -14,6 +14,8 @@ import AdminUserListModal from './components/AdminUserListModal.vue';
 import Sidebar from './components/Sidebar.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
+import Friends from './components/Friends.vue';
+import NotificationBox from './components/NotificationBox.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
@@ -23,12 +25,13 @@ import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useScores } from './composables/useScores';
 import { useDarkMode } from './composables/useDarkMode';
-import { watch } from 'vue';
+import { useFriends } from './composables/useFriends';
+import { watch, onMounted } from 'vue';
 
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about'>('dashboard');
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends'>('dashboard');
 const totalBeatTierPoints = ref(0);
 
 const diffResult = ref<UploadDiffResult | null>(null);
@@ -45,6 +48,47 @@ const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
 const { upload, saveHistoryLog } = useScoreUpload();
 const { fetchMyScores, fetchUserScores, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
+const { pendingRequests, fetchPendingRequests, updatePushSubscription } = useFriends();
+
+const isNotificationOpen = ref(false);
+const deferredPrompt = ref<any>(null);
+const showInstallBanner = ref(false);
+
+onMounted(() => {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt.value = e;
+    showInstallBanner.value = true;
+  });
+
+  // Request notification permission if logged in
+  if (isLoggedIn.value) {
+    requestNotificationPermission();
+  }
+});
+
+const requestNotificationPermission = async () => {
+  if (!('Notification' in window)) return;
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted' && 'serviceWorker' in navigator) {
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: 'BCp04c...' // Placeholder VAPID key
+    });
+    await updatePushSubscription(JSON.stringify(subscription));
+  }
+};
+
+const installApp = async () => {
+  if (!deferredPrompt.value) return;
+  deferredPrompt.value.prompt();
+  const { outcome } = await deferredPrompt.value.userChoice;
+  if (outcome === 'accepted') {
+    deferredPrompt.value = null;
+    showInstallBanner.value = false;
+  }
+};
 
 const loadSavedScores = async () => {
   try {
@@ -87,6 +131,7 @@ watch(isLoggedIn, (newVal) => {
     viewingUserId.value = null;
     viewingUserName.value = '';
     loadSavedScores();
+    fetchPendingRequests(); // Check for friends
     
     // Check if we just logged in via Google OAuth redirect
     const urlParams = new URLSearchParams(window.location.search);
@@ -419,6 +464,22 @@ const cancelUpload = () => {
               </svg>
             </button>
             
+            <!-- Notification Bell -->
+            <div v-if="isLoggedIn" class="relative">
+              <button 
+                @click="isNotificationOpen = !isNotificationOpen"
+                class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none relative"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span v-if="pendingRequests.length > 0" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
+                  {{ pendingRequests.length }}
+                </span>
+              </button>
+              <NotificationBox :is-open="isNotificationOpen" @close="isNotificationOpen = false" />
+            </div>
+            
             <template v-if="!isLoggedIn && !authLoading">
               <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="isLoginModalOpen = true">ログイン</button>
             </template>
@@ -483,6 +544,23 @@ const cancelUpload = () => {
             <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
               最新のCSVデータをドロップするだけで、あなたの実力値を自動でグラフ化・分析します。
             </p>
+            
+            <!-- PWA Install Banner -->
+            <div v-if="showInstallBanner" class="mt-8 p-6 bg-blue-600 rounded-2xl shadow-xl text-white flex flex-col sm:flex-row items-center gap-4 animate-in zoom-in duration-300">
+              <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div class="text-center sm:text-left flex-1">
+                <h3 class="font-bold text-lg">アプリとして追加</h3>
+                <p class="text-blue-100 text-sm">ホーム画面に追加して、もっと快適にスコア管理しましょう。</p>
+              </div>
+              <div class="flex gap-2">
+                <button @click="showInstallBanner = false" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-all">後で</button>
+                <button @click="installApp" class="px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-bold transition-all shadow-md">インストール</button>
+              </div>
+            </div>
           </div>
 
           <!-- Empty State or Explicit Upload State -->
@@ -542,6 +620,12 @@ const cancelUpload = () => {
             <UploadHistory 
               v-if="activeTab === 'history'"
               class="w-full max-w-6xl animate-fade-in" 
+            />
+
+            <!-- Friends Tab -->
+            <Friends 
+              v-if="activeTab === 'friends'"
+              class="w-full max-w-6xl animate-fade-in"
             />
           </div>
         </template>
