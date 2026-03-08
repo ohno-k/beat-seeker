@@ -27,6 +27,9 @@ public class FriendRequest {
     @Column(length = 20)
     private String status = "PENDING"; // PENDING, ACCEPTED, REJECTED
 
+    @Column(length = 255)
+    private String message;
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

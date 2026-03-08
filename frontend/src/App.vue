@@ -31,7 +31,8 @@ import { watch, onMounted } from 'vue';
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends'>('dashboard');
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends'>('dashboard')
+const viewingMode = ref<'admin' | 'friend' | null>(null);
 const totalBeatTierPoints = ref(0);
 
 const diffResult = ref<UploadDiffResult | null>(null);
@@ -117,12 +118,22 @@ const handleSelectUser = async (selectedUser: any) => {
   isAdminModalOpen.value = false;
   viewingUserId.value = selectedUser.id;
   viewingUserName.value = selectedUser.displayName || selectedUser.iidxId;
+  viewingMode.value = 'admin';
+  await loadSavedScores();
+};
+
+const handleViewFriend = async (friend: { id: number; displayName: string }) => {
+  viewingUserId.value = friend.id;
+  viewingUserName.value = friend.displayName;
+  viewingMode.value = 'friend';
+  activeTab.value = 'dashboard';
   await loadSavedScores();
 };
 
 const returnToMyData = async () => {
   viewingUserId.value = null;
   viewingUserName.value = '';
+  viewingMode.value = null;
   await loadSavedScores();
 };
 
@@ -422,7 +433,8 @@ const cancelUpload = () => {
               >
                 スコア一覧
               </button>
-              <button 
+              <button
+                v-if="!viewingUserId"
                 @click="activeTab = 'ranking'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
@@ -510,7 +522,8 @@ const cancelUpload = () => {
           >
             スコア一覧
           </button>
-          <button 
+          <button
+            v-if="!viewingUserId"
             @click="activeTab = 'ranking'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
@@ -543,7 +556,7 @@ const cancelUpload = () => {
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             <div class="flex flex-col">
-              <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">管理者モード</span>
+              <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">{{ viewingMode === 'admin' ? '管理者モード' : 'フレンドのデータを閲覧中' }}</span>
               <span class="text-base sm:text-lg font-bold">現在 <span class="text-white bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm shadow-sm">{{ viewingUserName }}</span> さんのデータを閲覧中</span>
             </div>
           </div>
@@ -663,9 +676,10 @@ const cancelUpload = () => {
             />
 
             <!-- Friends Tab -->
-            <Friends 
+            <Friends
               v-if="activeTab === 'friends'"
               class="w-full max-w-6xl animate-fade-in"
+              @view-user="handleViewFriend"
             />
           </div>
         </template>
@@ -680,7 +694,7 @@ const cancelUpload = () => {
           <div class="flex items-center gap-4 flex-wrap justify-center">
             <button @click="activeTab = 'about'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">beat-seekerとは？</button>
             <button @click="activeTab = 'terms'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">利用規約</button>
-            <button @click="activeTab = 'ranking'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">ランキング</button>
+            <button v-if="!viewingUserId" @click="activeTab = 'ranking'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">ランキング</button>
           </div>
         </div>
       </footer>

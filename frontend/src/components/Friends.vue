@@ -1,11 +1,36 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useFriends } from '../composables/useFriends';
+import type { Friend } from '../composables/useFriends';
 import FriendSearchModal from './FriendSearchModal.vue';
+import FriendComparisonModal from './FriendComparisonModal.vue';
+import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 
-const { friends, isLoading, fetchFriends } = useFriends();
+const emit = defineEmits<{
+  'view-user': [user: { id: number; displayName: string }]
+}>();
+
+const { friends, isLoading, fetchFriends, removeFriend } = useFriends();
 const isSearchModalOpen = ref(false);
+const isComparisonModalOpen = ref(false);
+const selectedFriend = ref<Friend | null>(null);
+const removingId = ref<number | null>(null);
+
+const openComparison = (friend: Friend) => {
+  selectedFriend.value = friend;
+  isComparisonModalOpen.value = true;
+};
+
+const handleRemoveFriend = async (friend: Friend) => {
+  if (!confirm(`${friend.displayName} さんをフレンドから削除しますか？`)) return;
+  removingId.value = friend.id;
+  try {
+    await removeFriend(friend.id);
+  } finally {
+    removingId.value = null;
+  }
+};
 
 onMounted(() => {
   fetchFriends();
@@ -18,6 +43,13 @@ const formatDate = (dateStr: string | null) => {
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit'
   });
+};
+
+const canViewDashboard = (friend: Friend) => (friend.privacyLevel ?? 0) !== 2;
+
+const handleNameClick = (friend: Friend) => {
+  if (!canViewDashboard(friend)) return;
+  emit('view-user', { id: friend.id, displayName: friend.displayName });
 };
 </script>
 
@@ -55,36 +87,74 @@ const formatDate = (dateStr: string | null) => {
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div v-for="friend in friends" :key="friend.id" 
+      <div v-for="friend in friends" :key="friend.id"
         class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all group"
       >
         <div class="flex items-center gap-4 mb-4">
-          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md">
+          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md shrink-0">
             {{ friend.displayName?.charAt(0) || 'U' }}
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-slate-900 dark:text-white truncate group-hover:text-blue-600 transition-colors">{{ friend.displayName }}</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ friend.iidxId }}</p>
+            <h3
+              class="font-bold text-slate-900 dark:text-white truncate transition-colors"
+              :class="canViewDashboard(friend) ? 'cursor-pointer hover:text-blue-600' : 'cursor-default'"
+              @click="handleNameClick(friend)"
+            >
+              {{ friend.displayName }}
+              <span v-if="!canViewDashboard(friend)" class="ml-1 text-xs text-slate-400 font-normal">🔒</span>
+            </h3>
           </div>
+          <button
+            @click="handleRemoveFriend(friend)"
+            :disabled="removingId === friend.id"
+            class="shrink-0 p-1.5 text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+            title="フレンドを削除"
+          >
+            <svg v-if="removingId === friend.id" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+            </svg>
+          </button>
         </div>
-        
+
         <div class="space-y-3">
           <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
-             <div class="flex flex-col">
-               <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">BEAT-PT</span>
-               <span class="text-lg font-black text-blue-600 dark:text-blue-400">{{ friend.totalBeatPt.toLocaleString() }} <span class="text-xs font-normal">pt</span></span>
-             </div>
-             <div class="flex flex-col items-end">
-               <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">TIER</span>
-               <div :class="[getRankInfo(friend.totalBeatPt).color, 'font-black text-sm']">
-                 {{ getRankInfo(friend.totalBeatPt).name }} {{ getRankInfo(friend.totalBeatPt).tier }}
-               </div>
-             </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">BEAT-PT</span>
+              <span class="text-lg font-black text-blue-600 dark:text-blue-400">{{ friend.totalBeatPt.toLocaleString() }} <span class="text-xs font-normal">pt</span></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <RankIcon
+                :rank-name="getRankInfo(friend.totalBeatPt).name"
+                :tier="getRankInfo(friend.totalBeatPt).tier"
+                size="sm"
+              />
+              <div class="flex flex-col items-end">
+                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">TIER</span>
+                <div :class="[getRankInfo(friend.totalBeatPt).color, 'font-black text-sm']">
+                  {{ getRankInfo(friend.totalBeatPt).name }} {{ getRankInfo(friend.totalBeatPt).tier }}
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
-            <span>最終更新</span>
-            <span>{{ formatDate(friend.lastUploadedAt) }}</span>
+
+          <div class="flex gap-2">
+            <button
+              v-if="canViewDashboard(friend)"
+              @click="openComparison(friend)"
+              class="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              比較する
+            </button>
+            <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-1 flex-1">
+              <span>最終更新: {{ formatDate(friend.lastUploadedAt) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -94,6 +164,13 @@ const formatDate = (dateStr: string | null) => {
       :is-open="isSearchModalOpen"
       @close="isSearchModalOpen = false"
       @request-sent="fetchFriends"
+    />
+
+    <FriendComparisonModal
+      v-if="isComparisonModalOpen && selectedFriend"
+      :is-open="isComparisonModalOpen"
+      :friend="selectedFriend"
+      @close="isComparisonModalOpen = false"
     />
   </div>
 </template>

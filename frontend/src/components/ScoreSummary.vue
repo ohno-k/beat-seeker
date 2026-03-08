@@ -281,21 +281,132 @@
       <div v-if="selectedRecord" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200" @click.self="closeDetailModal">
       
       <!-- Sticky Header -->
-      <div class="px-4 py-3 sm:px-6 sm:py-5 border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center bg-white dark:bg-slate-900 sticky top-0 z-10 w-full transition-colors duration-200">
-        <div class="flex flex-col pr-4 max-w-full overflow-hidden">
-          <h3 class="text-xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 leading-tight mb-0.5 sm:mb-1 truncate" :title="selectedRecord.title">{{ selectedRecord.title }}</h3>
-          <p class="text-xs sm:text-base font-medium text-slate-500 dark:text-slate-400 truncate" :title="`${selectedRecord.artist} • ${selectedRecord.genre}`">{{ selectedRecord.artist }} • {{ selectedRecord.genre }}</p>
+      <div class="bg-white dark:bg-slate-900 sticky top-0 z-10 w-full shadow-sm border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <div class="px-4 py-3 sm:px-6 sm:py-5 flex justify-between items-center">
+          <div class="flex flex-col pr-4 max-w-full overflow-hidden">
+            <h3 class="text-xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 leading-tight mb-0.5 sm:mb-1 truncate" :title="selectedRecord.title">{{ selectedRecord.title }}</h3>
+            <p class="text-xs sm:text-base font-medium text-slate-500 dark:text-slate-400 truncate" :title="`${selectedRecord.artist} • ${selectedRecord.genre}`">{{ selectedRecord.artist }} • {{ selectedRecord.genre }}</p>
+          </div>
+          <button @click="closeDetailModal" class="flex-shrink-0 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors p-2 sm:p-3 shadow-sm border border-slate-200 dark:border-slate-700">
+            <svg class="w-5 h-5 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <button @click="closeDetailModal" class="flex-shrink-0 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors p-2 sm:p-3 shadow-sm border border-slate-200 dark:border-slate-700">
-          <svg class="w-5 h-5 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <!-- Modal Tabs -->
+        <div class="flex border-t border-slate-100 dark:border-slate-800">
+          <button
+            @click="modalTab = 'detail'"
+            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
+            :class="modalTab === 'detail' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+          >詳細</button>
+          <button
+            v-if="isLoggedIn"
+            @click="handleRivalTabClick"
+            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
+            :class="modalTab === 'rivals' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+          >
+            ライバル
+            <span v-if="rivalList.length > 0" class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full px-1.5">{{ rivalList.length }}</span>
+          </button>
+        </div>
       </div>
       
       <!-- Scrollable Body -->
       <div class="flex-1 overflow-y-auto p-3 sm:p-8 lg:p-12 pb-24">
-        <div class="max-w-4xl mx-auto space-y-4 sm:space-y-8">
+
+        <!-- Rivals Tab -->
+        <div v-if="modalTab === 'rivals'" class="w-full">
+          <div v-if="isLoadingRivals" class="flex flex-col items-center justify-center py-20">
+            <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
+          </div>
+          <div v-else-if="rivalList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <p class="font-bold">スコアを登録しているライバルがいません</p>
+          </div>
+          <div v-else class="space-y-2">
+            <div
+              v-for="(rival, index) in rivalList"
+              :key="rival.id"
+              class="rounded-xl border px-4 py-3 flex items-center gap-4"
+              :class="rival.isSelf
+                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
+            >
+              <!-- Rank number -->
+              <div class="w-10 text-center shrink-0">
+                <span v-if="rival.score != null" class="text-base font-black text-slate-500 dark:text-slate-400">#{{ index + 1 }}</span>
+                <span v-else class="text-sm font-bold text-slate-400 dark:text-slate-500">-</span>
+              </div>
+
+              <!-- Avatar + Name -->
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0"
+                  :class="rival.isSelf ? 'bg-blue-500' : 'bg-gradient-to-br from-slate-400 to-slate-600'"
+                >
+                  {{ rival.displayName?.charAt(0) || 'U' }}
+                </div>
+                <p class="text-sm font-bold truncate" :class="rival.isSelf ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">{{ rival.displayName }}</p>
+              </div>
+
+              <!-- Private: lock icon -->
+              <div v-if="!rival.isSelf && rival.privacyLevel === 2" class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span class="text-sm font-bold">非公開</span>
+              </div>
+
+              <template v-else-if="rival.score != null">
+                <!-- Clear Lamp -->
+                <div class="text-center shrink-0 w-14">
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">CLEAR</p>
+                  <p class="text-sm font-black" :class="getClearTypeColor(rival.clearType)">
+                    {{ rival.clearType === 'FULLCOMBO CLEAR' ? 'FC' : rival.clearType === 'EX HARD CLEAR' ? 'EXH' : rival.clearType === 'HARD CLEAR' ? 'H' : rival.clearType === 'CLEAR' ? 'C' : rival.clearType === 'EASY CLEAR' ? 'E' : rival.clearType === 'ASSIST CLEAR' ? 'AC' : 'F' }}
+                  </p>
+                </div>
+
+                <!-- DJ Level -->
+                <div class="text-center shrink-0 w-14">
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">DJ LV</p>
+                  <p class="text-base font-black" :class="getDjLevelColor(rival.djLevel)">{{ rival.djLevel !== '---' ? rival.djLevel : '-' }}</p>
+                </div>
+
+                <!-- Score -->
+                <div class="text-center shrink-0 w-24">
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">SCORE</p>
+                  <p class="text-base font-black text-slate-800 dark:text-slate-100">{{ rival.score.toLocaleString() }}</p>
+                </div>
+
+                <!-- Score Rate -->
+                <div class="text-center shrink-0 w-20">
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">RATE</p>
+                  <p class="text-sm font-bold" :class="selectedRecord && selectedRecord.maxScore > 0 && (rival.score / selectedRecord.maxScore * 100) >= 94.45 ? 'text-purple-600 dark:text-purple-400' : selectedRecord && selectedRecord.maxScore > 0 && (rival.score / selectedRecord.maxScore * 100) >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-300'">
+                    {{ selectedRecord && selectedRecord.maxScore > 0 ? (rival.score / selectedRecord.maxScore * 100).toFixed(2) + '%' : '---' }}
+                  </p>
+                </div>
+
+                <!-- BEAT-PT -->
+                <div class="text-center shrink-0 w-20">
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">BEAT-PT</p>
+                  <p class="text-base font-black text-indigo-600 dark:text-indigo-400">
+                    {{ selectedRecord && selectedRecord.maxScore > 0 && selectedRecord.informalRank
+                      ? calculatePoints(rival.score / selectedRecord.maxScore * 100, selectedRecord.informalRank).toFixed(1)
+                      : '---' }}
+                  </p>
+                </div>
+              </template>
+
+              <div v-else-if="rival.isSelf || rival.privacyLevel !== 2" class="text-sm text-slate-400 dark:text-slate-500 font-bold shrink-0">未プレイ</div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="max-w-4xl mx-auto space-y-4 sm:space-y-8">
           
           <div class="flex flex-col items-center sm:items-start gap-2 sm:gap-4">
             <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
@@ -720,6 +831,7 @@ const top100Keys = computed(() => {
 
 // Modal state
 const selectedRecord = ref<ScoreRecord | null>(null);
+const modalTab = ref<'detail' | 'rivals'>('detail');
 
 const isEditingMemo = ref(false);
 const editMemoText = ref('');
@@ -727,9 +839,84 @@ const isSavingMemo = ref(false);
 
 const targetBeatPtSlider = ref(0);
 
+// Rival scores state
+interface RivalScore {
+  id: number;
+  displayName: string;
+  iidxId: string;
+  score: number | null;
+  clearType: string;
+  djLevel: string;
+  pgreat: number;
+  great: number;
+  missCount: number | null;
+  isSelf?: boolean;
+  privacyLevel?: number;
+}
+const rivalScores = ref<RivalScore[]>([]);
+
+const rivalList = computed(() => {
+  if (!selectedRecord.value) return [];
+  const rec = selectedRecord.value;
+
+  // Build self entry
+  const selfEntry: RivalScore = {
+    id: -1,
+    displayName: 'あなた',
+    iidxId: '',
+    score: rec.score > 0 ? rec.score : null,
+    clearType: rec.clearType,
+    djLevel: rec.djLevel,
+    pgreat: rec.pgreat,
+    great: rec.great,
+    missCount: rec.missCount,
+    isSelf: true
+  };
+
+  const all: RivalScore[] = [selfEntry, ...rivalScores.value];
+
+  // Sort: scored first (desc), unplayed last
+  return all.sort((a, b) => {
+    if (a.score == null && b.score == null) return 0;
+    if (a.score == null) return 1;
+    if (b.score == null) return -1;
+    return b.score - a.score;
+  });
+});
+const isLoadingRivals = ref(false);
+
+const fetchRivalScores = async () => {
+  if (!selectedRecord.value) return;
+  isLoadingRivals.value = true;
+  try {
+    const params = new URLSearchParams({
+      title: selectedRecord.value.title,
+      difficultyName: selectedRecord.value.difficultyName
+    });
+    const res = await fetch(`${API_BASE}/api/friends/scores?${params}`, {
+      headers: authHeaders()
+    });
+    if (res.ok) {
+      rivalScores.value = await res.json();
+    }
+  } catch {
+    // Silently fail
+  } finally {
+    isLoadingRivals.value = false;
+  }
+};
+
+const handleRivalTabClick = () => {
+  modalTab.value = 'rivals';
+  if (rivalScores.value.length === 0 && !isLoadingRivals.value) {
+    fetchRivalScores();
+  }
+};
+
 // Reset target slider when a new record is selected
 watch(() => selectedRecord.value?.title, () => {
   targetBeatPtSlider.value = 0;
+  rivalScores.value = [];
   // Fetch votes for the new record
   if (selectedRecord.value) {
     fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);
@@ -844,9 +1031,10 @@ const targetScoreNeeded = computed(() => {
 
 const openDetailModal = (record: ScoreRecord) => {
   selectedRecord.value = record;
+  modalTab.value = 'detail';
   isEditingMemo.value = false;
   editMemoText.value = record.memo || '';
-  document.body.style.overflow = 'hidden'; 
+  document.body.style.overflow = 'hidden';
 };
 
 const saveMemo = async () => {

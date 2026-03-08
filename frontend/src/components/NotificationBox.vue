@@ -69,9 +69,13 @@ const handleReject = async (id: number) => {
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-xs text-slate-600 dark:text-slate-300 leading-normal">
-                  <span class="font-bold text-slate-900 dark:text-white">{{ req.senderName }}</span> さんからフレンド申請が届いています。
+                  <span class="font-bold text-slate-900 dark:text-white">{{ req.senderName || 'ユーザー' }}</span> さんからフレンド申請が届いています。
                 </p>
-                <p class="text-[10px] text-slate-400 mt-1">{{ req.senderIidxId }}</p>
+                <!-- Message Bubble -->
+                <div v-if="req.message" class="mt-2 p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800 relative">
+                  <div class="absolute -top-1 left-3 w-2 h-2 bg-blue-50 dark:bg-blue-900/30 border-t border-l border-blue-100 dark:border-blue-800 rotate-45"></div>
+                  <p class="text-[10px] text-blue-800 dark:text-blue-300 italic">"{{ req.message }}"</p>
+                </div>
               </div>
             </div>
             

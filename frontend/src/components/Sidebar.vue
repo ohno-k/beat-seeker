@@ -26,17 +26,17 @@ const closeSidebar = () => {
 
 const selectTab = (tab: string) => {
   emit('update:activeTab', tab);
-  // On mobile, close sidebar after selection
-  if (window.innerWidth < 768) {
-    closeSidebar();
-  }
+  closeSidebar();
 };
 
 const handleUploadClick = () => {
   emit('upload');
-  if (window.innerWidth < 1024) { // lg breakpoint
-    closeSidebar();
-  }
+  closeSidebar();
+};
+
+const handleAction = (event: 'login' | 'logout' | 'editProfile' | 'openAdmin') => {
+  (emit as any)(event);
+  closeSidebar();
 };
 
 const navigationItems = [
@@ -129,18 +129,15 @@ const filteredNavItems = computed(() => {
             <template v-else-if="isLoggedIn">
               <div class="flex flex-col gap-4">
                 <div 
-                  @click="emit('editProfile')"
+                  @click="handleAction('editProfile')"
                   class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all group border border-transparent hover:border-slate-100 dark:hover:border-slate-600"
                 >
                   <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                    {{ user?.displayName?.charAt(0) || user?.iidxId?.charAt(0) || 'U' }}
+                    {{ (user?.displayName || user?.iidxId || 'U').charAt(0) }}
                   </div>
                   <div class="flex-1 min-w-0">
                     <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
                       {{ user?.displayName || user?.iidxId }}
-                    </p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                      {{ user?.iidxId }}
                     </p>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -151,7 +148,7 @@ const filteredNavItems = computed(() => {
                 <div class="flex flex-col gap-1">
                   <button 
                     v-if="isAdmin && !viewingUserId"
-                    @click="emit('openAdmin')"
+                    @click="handleAction('openAdmin')"
                     class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all border border-indigo-100 dark:border-indigo-800"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -161,7 +158,7 @@ const filteredNavItems = computed(() => {
                     管理者パネル
                   </button>
                   <button 
-                    @click="emit('logout')"
+                    @click="handleAction('logout')"
                     class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -175,7 +172,7 @@ const filteredNavItems = computed(() => {
             
             <template v-else>
               <button 
-                @click="emit('login')"
+                @click="handleAction('login')"
                 class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

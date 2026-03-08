@@ -2,10 +2,12 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.FriendRequest;
 import com.beatseeker.backend.entity.Friendship;
+import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.repository.FriendRequestRepository;
 import com.beatseeker.backend.repository.FriendshipRepository;
+import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import org.springframework.http.ResponseEntity;
@@ -26,15 +28,23 @@ public class FriendController {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendshipRepository friendshipRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
+    private final ScoreRepository scoreRepository;
 
     public FriendController(UserRepository userRepository,
             FriendRequestRepository friendRequestRepository,
             FriendshipRepository friendshipRepository,
-            ScoreHistoryLogRepository scoreHistoryLogRepository) {
+            ScoreHistoryLogRepository scoreHistoryLogRepository,
+            ScoreRepository scoreRepository) {
         this.userRepository = userRepository;
         this.friendRequestRepository = friendRequestRepository;
         this.friendshipRepository = friendshipRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
+        this.scoreRepository = scoreRepository;
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "FriendController is active";
     }
 
     @GetMapping
@@ -49,6 +59,7 @@ public class FriendController {
             map.put("displayName", friend.getDisplayName());
             map.put("iidxId", friend.getIidxId());
             map.put("lastUploadedAt", friend.getLastUploadedAt());
+            map.put("privacyLevel", friend.getPrivacyLevel() != null ? friend.getPrivacyLevel() : 0);
 
             // Get latest BEAT-PT from history
             List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(friend);
@@ -67,11 +78,30 @@ public class FriendController {
     @GetMapping("/search")
     public ResponseEntity<List<Map<String, Object>>> searchUsers(Authentication auth, @RequestParam String query) {
         User currentUser = getUser(auth);
-        // Search by exact IIDXID or contains Display Name
-        List<User> users = userRepository.findAll().stream()
-                .filter(u -> !u.getId().equals(currentUser.getId()))
-                .filter(u -> (u.getIidxId() != null && u.getIidxId().equals(query)) ||
-                        (u.getDisplayName() != null && u.getDisplayName().toLowerCase().contains(query.toLowerCase())))
+        String trimmedQuery = query.trim();
+
+        if (trimmedQuery.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+
+        String variant = trimmedQuery;
+        if (trimmedQuery.matches("\\d{8}")) {
+            variant = trimmedQuery.substring(0, 4) + "-" + trimmedQuery.substring(4);
+        } else if (trimmedQuery.matches("\\d{4}-\\d{4}")) {
+            variant = trimmedQuery.replace("-", "");
+        }
+
+        List<User> users = userRepository.searchUsers(trimmedQuery, variant).stream()
+                .filter(u -> {
+                    // Always show if exact IIDX ID matches
+                    if (u.getIidxId() != null && u.getIidxId().equals(trimmedQuery)) {
+                        return true;
+                    }
+                    // For name searches, respect privacy level
+                    // Default to public (0) if null
+                    Integer pl = u.getPrivacyLevel();
+                    return pl == null || pl != 2;
+                })
                 .limit(20)
                 .collect(Collectors.toList());
 
@@ -107,9 +137,10 @@ public class FriendController {
     @PostMapping("/request")
     @Transactional
     public ResponseEntity<Map<String, Object>> sendRequest(Authentication auth,
-            @RequestBody Map<String, Long> payload) {
+            @RequestBody Map<String, Object> payload) {
         User sender = getUser(auth);
-        Long receiverId = payload.get("receiverId");
+        Long receiverId = payload.get("receiverId") != null ? Long.valueOf(payload.get("receiverId").toString()) : null;
+        String message = payload.get("message") != null ? payload.get("message").toString() : null;
         User receiver = userRepository.findById(receiverId).orElseThrow();
 
         if (sender.getId().equals(receiver.getId())) {
@@ -127,6 +158,7 @@ public class FriendController {
         FriendRequest request = new FriendRequest();
         request.setSender(sender);
         request.setReceiver(receiver);
+        request.setMessage(message);
         friendRequestRepository.save(request);
 
         return ResponseEntity.ok(Map.of("message", "フレンド申請を送信しました。"));
@@ -143,6 +175,7 @@ public class FriendController {
             map.put("senderId", r.getSender().getId());
             map.put("senderName", r.getSender().getDisplayName());
             map.put("senderIidxId", r.getSender().getIidxId());
+            map.put("message", r.getMessage());
             map.put("createdAt", r.getCreatedAt());
             return map;
         }).collect(Collectors.toList());
@@ -197,6 +230,98 @@ public class FriendController {
         friendRequestRepository.save(request);
 
         return ResponseEntity.ok(Map.of("message", "フレンド申請を拒否しました。"));
+    }
+
+    @GetMapping("/scores")
+    public ResponseEntity<List<Map<String, Object>>> getFriendScores(
+            Authentication auth,
+            @RequestParam String title,
+            @RequestParam String difficultyName) {
+        User user = getUser(auth);
+        List<Friendship> friendships = friendshipRepository.findByUser(user);
+
+        List<Map<String, Object>> result = friendships.stream()
+                .map(f -> {
+                    User friend = f.getFriend();
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", friend.getId());
+                    map.put("displayName", friend.getDisplayName());
+                    map.put("iidxId", friend.getIidxId());
+                    Integer privacyLevel = friend.getPrivacyLevel() != null ? friend.getPrivacyLevel() : 0;
+                    map.put("privacyLevel", privacyLevel);
+
+                    if (privacyLevel != 2) {
+                        scoreRepository.findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(
+                                friend, title, difficultyName)
+                                .ifPresent(score -> {
+                                    map.put("score", score.getScore());
+                                    map.put("clearType", score.getClearType());
+                                    map.put("djLevel", score.getDjLevel());
+                                    map.put("pgreat", score.getPgreat());
+                                    map.put("great", score.getGreat());
+                                    map.put("missCount", score.getMissCount());
+                                    map.put("difficultyLevel", score.getDifficultyLevel());
+                                });
+                    }
+
+                    return map;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{friendId}/scores")
+    public ResponseEntity<List<Map<String, Object>>> getFriendAllScores(
+            Authentication auth,
+            @PathVariable Long friendId) {
+        User user = getUser(auth);
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if there's a friendship
+        if (friendshipRepository.findByUserAndFriend(user, friend).isEmpty()) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Integer privacyLevel = friend.getPrivacyLevel() != null ? friend.getPrivacyLevel() : 0;
+        if (privacyLevel == 2) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(friend);
+
+        List<Map<String, Object>> result = scores.stream().map(s -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", s.getId());
+            map.put("title", s.getTitle());
+            map.put("difficultyName", s.getDifficultyName());
+            map.put("difficultyLevel", s.getDifficultyLevel());
+            map.put("score", s.getScore());
+            map.put("clearType", s.getClearType());
+            map.put("djLevel", s.getDjLevel());
+            map.put("pgreat", s.getPgreat());
+            map.put("great", s.getGreat());
+            map.put("missCount", s.getMissCount());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{friendId}")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> removeFriend(Authentication auth, @PathVariable Long friendId) {
+        User user = getUser(auth);
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        friendshipRepository.findByUserAndFriend(user, friend)
+                .ifPresent(friendshipRepository::delete);
+        friendshipRepository.findByUserAndFriend(friend, user)
+                .ifPresent(friendshipRepository::delete);
+
+        return ResponseEntity.ok(Map.of("message", "フレンドを削除しました。"));
     }
 
     @PostMapping("/push-subscription")

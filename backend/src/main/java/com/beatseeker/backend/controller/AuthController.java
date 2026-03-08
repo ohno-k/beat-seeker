@@ -98,15 +98,16 @@ public class AuthController {
             User user = userRepository.findByIidxId(iidxId)
                     .orElseThrow(() -> new RuntimeException("User not found: " + iidxId));
 
-            return ResponseEntity.ok(Map.of(
-                    "id", user.getId(),
-                    "displayName", user.getDisplayName() != null ? user.getDisplayName() : "",
-                    "iidxId", user.getIidxId(),
-                    "danRank", user.getDanRank() != null ? user.getDanRank() : "",
-                    "arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "",
-                    "playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P",
-                    "privacyLevel", user.getPrivacyLevel(),
-                    "lastUploadedAt", user.getLastUploadedAt()));
+            java.util.Map<String, Object> responseBody = new java.util.HashMap<>();
+            responseBody.put("id", user.getId());
+            responseBody.put("displayName", user.getDisplayName() != null ? user.getDisplayName() : "");
+            responseBody.put("iidxId", user.getIidxId());
+            responseBody.put("danRank", user.getDanRank() != null ? user.getDanRank() : "");
+            responseBody.put("arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "");
+            responseBody.put("playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P");
+            responseBody.put("privacyLevel", user.getPrivacyLevel());
+            responseBody.put("lastUploadedAt", user.getLastUploadedAt());
+            return ResponseEntity.ok(responseBody);
         } catch (org.springframework.dao.IncorrectResultSizeDataAccessException
                 | org.hibernate.NonUniqueResultException e) {
             System.err.println("Duplicate user found in getCurrentUser for IIDX ID: "

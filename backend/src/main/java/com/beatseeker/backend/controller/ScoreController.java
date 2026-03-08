@@ -331,10 +331,6 @@ public class ScoreController {
     @GetMapping("/ranking")
     public ResponseEntity<List<Map<String, Object>>> getGlobalRanking() {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getGlobalRanking();
-        System.out.println("DEBUG: Ranking result top 10:");
-        ranking.stream().limit(10).forEach(r -> {
-            System.out.println("DEBUG: User: " + r.get("displayName") + ", Points: " + r.get("totalBeatPt"));
-        });
         return ResponseEntity.ok(ranking);
     }
 

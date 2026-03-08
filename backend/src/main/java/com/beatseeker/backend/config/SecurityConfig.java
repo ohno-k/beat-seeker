@@ -46,7 +46,8 @@ public class SecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/debug-ranking",
-                                                                "/api/scores/debug-user-scores/**")
+                                                                "/api/scores/debug-user-scores/**", "/api/friends/test",
+                                                                "/api/test-root")
                                                 .permitAll()
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile").authenticated()
                                                 .requestMatchers("/api/scores/upload", "/api/scores/save-history-log",
@@ -59,6 +60,7 @@ public class SecurityConfig {
                                                 .requestMatchers(org.springframework.http.HttpMethod.DELETE,
                                                                 "/api/votes")
                                                 .authenticated()
+                                                .requestMatchers("/api/friends/**").authenticated()
                                                 .anyRequest().permitAll())
                                 .exceptionHandling(ex -> ex
                                                 .authenticationEntryPoint(

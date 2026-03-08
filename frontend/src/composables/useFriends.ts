@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { useAuth, API_BASE } from './useAuth';
 
 export interface Friend {
     id: number;
@@ -6,6 +7,7 @@ export interface Friend {
     iidxId: string;
     lastUploadedAt: string | null;
     totalBeatPt: number;
+    privacyLevel?: number;
     isFriend?: boolean;
     hasSentRequest?: boolean;
 }
@@ -15,10 +17,12 @@ export interface PendingRequest {
     senderId: number;
     senderName: string;
     senderIidxId: string;
+    message: string | null;
     createdAt: string;
 }
 
 export function useFriends() {
+    const { authHeaders } = useAuth();
     const friends = ref<Friend[]>([]);
     const pendingRequests = ref<PendingRequest[]>([]);
     const isLoading = ref(false);
@@ -27,12 +31,11 @@ export function useFriends() {
     const fetchFriends = async () => {
         isLoading.value = true;
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/friends', {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(`${API_BASE}/api/friends`, {
+                headers: authHeaders()
             });
             if (!res.ok) throw new Error('Failed to fetch friends');
-            friends.value = await res.ok ? await res.json() : [];
+            friends.value = await res.json();
         } catch (e: any) {
             error.value = e.message;
         } finally {
@@ -43,9 +46,8 @@ export function useFriends() {
     const searchUsers = async (query: string): Promise<Friend[]> => {
         isLoading.value = true;
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`/api/friends/search?query=${encodeURIComponent(query)}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(`${API_BASE}/api/friends/search?query=${encodeURIComponent(query)}`, {
+                headers: authHeaders()
             });
             if (!res.ok) throw new Error('Search failed');
             return await res.json();
@@ -57,16 +59,12 @@ export function useFriends() {
         }
     };
 
-    const sendFriendRequest = async (receiverId: number) => {
+    const sendFriendRequest = async (receiverId: number, message?: string) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/friends/request', {
+            const res = await fetch(`${API_BASE}/api/friends/request`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ receiverId })
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ receiverId, message })
             });
             if (!res.ok) {
                 const data = await res.json();
@@ -80,9 +78,8 @@ export function useFriends() {
 
     const fetchPendingRequests = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/friends/requests/pending', {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(`${API_BASE}/api/friends/requests/pending`, {
+                headers: authHeaders()
             });
             if (!res.ok) throw new Error('Failed to fetch requests');
             pendingRequests.value = await res.json();
@@ -93,10 +90,9 @@ export function useFriends() {
 
     const acceptRequest = async (requestId: number) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`/api/friends/requests/${requestId}/accept`, {
+            const res = await fetch(`${API_BASE}/api/friends/requests/${requestId}/accept`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: authHeaders()
             });
             if (!res.ok) throw new Error('Failed to accept');
             await fetchPendingRequests();
@@ -109,10 +105,9 @@ export function useFriends() {
 
     const rejectRequest = async (requestId: number) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`/api/friends/requests/${requestId}/reject`, {
+            const res = await fetch(`${API_BASE}/api/friends/requests/${requestId}/reject`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: authHeaders()
             });
             if (!res.ok) throw new Error('Failed to reject');
             await fetchPendingRequests();
@@ -122,15 +117,41 @@ export function useFriends() {
         }
     };
 
+    const removeFriend = async (friendId: number) => {
+        try {
+            const res = await fetch(`${API_BASE}/api/friends/${friendId}`, {
+                method: 'DELETE',
+                headers: authHeaders()
+            });
+            if (!res.ok) throw new Error('Failed to remove friend');
+            await fetchFriends();
+        } catch (e: any) {
+            error.value = e.message;
+            throw e;
+        }
+    };
+
+    const fetchFriendScores = async (friendId: number) => {
+        isLoading.value = true;
+        try {
+            const res = await fetch(`${API_BASE}/api/friends/${friendId}/scores`, {
+                headers: authHeaders()
+            });
+            if (!res.ok) throw new Error('Failed to fetch friend scores');
+            return await res.json();
+        } catch (e: any) {
+            error.value = e.message;
+            throw e;
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     const updatePushSubscription = async (subscription: string) => {
         try {
-            const token = localStorage.getItem('token');
-            await fetch('/api/friends/push-subscription', {
+            await fetch(`${API_BASE}/api/friends/push-subscription`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ subscription })
             });
         } catch (e: any) {
@@ -149,6 +170,8 @@ export function useFriends() {
         fetchPendingRequests,
         acceptRequest,
         rejectRequest,
-        updatePushSubscription
+        removeFriend,
+        updatePushSubscription,
+        fetchFriendScores
     };
 }

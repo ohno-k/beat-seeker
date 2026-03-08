@@ -19,4 +19,6 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Score> findByUserAndSnapshotId(User user, String snapshotId);
 
     void deleteByUser(User user);
+
+    java.util.Optional<Score> findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(User user, String title, String difficultyName);
 }
