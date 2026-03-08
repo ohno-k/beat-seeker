@@ -17,7 +17,6 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    ORDER BY user_id, uploaded_at DESC " +
             ") AS latest_scores " +
             "JOIN users u ON latest_scores.user_id = u.id " +
-            "WHERE u.is_public = true " +
             "ORDER BY latest_scores.total_beat_pt DESC", nativeQuery = true)
     List<Map<String, Object>> getGlobalRanking();
 }
