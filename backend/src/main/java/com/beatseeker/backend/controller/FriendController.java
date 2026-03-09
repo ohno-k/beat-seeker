@@ -10,6 +10,7 @@ import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
+import com.beatseeker.backend.service.PushNotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,17 +30,20 @@ public class FriendController {
     private final FriendshipRepository friendshipRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     private final ScoreRepository scoreRepository;
+    private final PushNotificationService pushNotificationService;
 
     public FriendController(UserRepository userRepository,
             FriendRequestRepository friendRequestRepository,
             FriendshipRepository friendshipRepository,
             ScoreHistoryLogRepository scoreHistoryLogRepository,
-            ScoreRepository scoreRepository) {
+            ScoreRepository scoreRepository,
+            PushNotificationService pushNotificationService) {
         this.userRepository = userRepository;
         this.friendRequestRepository = friendRequestRepository;
         this.friendshipRepository = friendshipRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.scoreRepository = scoreRepository;
+        this.pushNotificationService = pushNotificationService;
     }
 
     @GetMapping("/test")
@@ -149,7 +153,17 @@ public class FriendController {
         request.setSender(sender);
         request.setReceiver(receiver);
         request.setMessage(message);
+        request.setStatus("PENDING");
         friendRequestRepository.save(request);
+
+        // Send push notification to receiver
+        if (receiver.getPushSubscription() != null) {
+            pushNotificationService.sendNotification(
+                    receiver.getPushSubscription(),
+                    "ライバル申請が届きました",
+                    sender.getDisplayName() + "さんからライバル申請が届きました。",
+                    "/friends");
+        }
 
         return ResponseEntity.ok(Map.of("message", "フレンド申請を送信しました。"));
     }
@@ -316,12 +330,13 @@ public class FriendController {
 
     @PostMapping("/push-subscription")
     @Transactional
-    public ResponseEntity<Map<String, Object>> updatePushSubscription(Authentication auth,
+    public ResponseEntity<Map<String, String>> updatePushSubscription(Authentication auth,
             @RequestBody Map<String, String> payload) {
         User user = getUser(auth);
-        user.setPushSubscription(payload.get("subscription"));
+        String subscription = payload.get("subscription");
+        user.setPushSubscription(subscription);
         userRepository.save(user);
-        return ResponseEntity.ok(Map.of("message", "Push通知の設定を保存しました。"));
+        return ResponseEntity.ok(Map.of("status", "success"));
     }
 
     private User getUser(Authentication auth) {
