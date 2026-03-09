@@ -75,7 +75,7 @@ const requestNotificationPermission = async () => {
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: 'BCp04c...' // Placeholder VAPID key
+      applicationServerKey: 'BDGlranXpFZQs_QO3pNXvrNudlAgliWJFOILQZxXd8_kjGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE'
     });
     await updatePushSubscription(JSON.stringify(subscription));
   }

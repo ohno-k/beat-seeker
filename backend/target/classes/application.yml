@@ -25,3 +25,10 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
+
+vapid:
+  public:
+    key: BDGlranXpFZQs_QO3pNXvrNudlAgliWJFOILQZxXd8_kjGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE
+  private:
+    key: jGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE
+  subject: mailto:admin@example.com
