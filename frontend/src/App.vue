@@ -16,6 +16,7 @@ import Terms from './components/Terms.vue';
 import About from './components/About.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
+import OnboardingModal from './components/OnboardingModal.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
@@ -40,6 +41,7 @@ const isDiffModalOpen = ref(false);
 const isLoginModalOpen = ref(false);
 const isProfileModalOpen = ref(false);
 const isAdminModalOpen = ref(false);
+const isOnboardingOpen = ref(false);
 
 const viewingUserId = ref<number | null>(null);
 const viewingUserName = ref<string>('');
@@ -49,7 +51,7 @@ const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
 const { upload, saveHistoryLog } = useScoreUpload();
 const { fetchMyScores, fetchUserScores, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
-const { pendingRequests, fetchPendingRequests, updatePushSubscription } = useFriends();
+const { pendingRequests, fetchPendingRequests, requestNotificationPermission } = useFriends();
 
 const isNotificationOpen = ref(false);
 const deferredPrompt = ref<any>(null);
@@ -68,18 +70,7 @@ onMounted(() => {
   }
 });
 
-const requestNotificationPermission = async () => {
-  if (!('Notification' in window)) return;
-  const permission = await Notification.requestPermission();
-  if (permission === 'granted' && 'serviceWorker' in navigator) {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: 'BDGlranXpFZQs_QO3pNXvrNudlAgliWJFOILQZxXd8_kjGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE'
-    });
-    await updatePushSubscription(JSON.stringify(subscription));
-  }
-};
+// Notification permission is handled by useFriends
 
 const installApp = async () => {
   if (!deferredPrompt.value) return;
@@ -143,6 +134,7 @@ watch(isLoggedIn, (newVal) => {
     viewingUserName.value = '';
     loadSavedScores();
     fetchPendingRequests(); // Check for friends
+    requestNotificationPermission();
     
     // Check if we just logged in via Google OAuth redirect
     const urlParams = new URLSearchParams(window.location.search);
@@ -378,7 +370,8 @@ const cancelUpload = () => {
     />
 
     <!-- Modals -->
-    <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" />
+    <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" @registered="isOnboardingOpen = true" />
+    <OnboardingModal :is-open="isOnboardingOpen" :deferred-prompt="deferredPrompt" @close="isOnboardingOpen = false" />
     <ProfileEditModal :is-open="isProfileModalOpen" @close="isProfileModalOpen = false" />
     <UploadResultModal 
       :is-open="isDiffModalOpen" 

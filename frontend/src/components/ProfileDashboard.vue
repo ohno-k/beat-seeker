@@ -57,6 +57,42 @@
             </div>
           </div>
         </div>
+
+        <!-- Notification Settings -->
+        <div class="mt-8 p-6 bg-slate-50 dark:bg-slate-700/30 rounded-2xl border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+            </svg>
+            プッシュ通知設定
+          </h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            ライバル申請が届いた時にリアルタイムで通知を受け取れます。
+            <br/>※iOS/iPadOSの場合は「ホーム画面に追加」してから設定してください。
+          </p>
+          
+          <div class="flex items-center gap-4">
+            <button 
+              @click="handleEnableNotifications"
+              :disabled="isSubscribing || notificationStatus === 'granted'"
+              class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-sm"
+              :class="notificationStatus === 'granted' 
+                ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95 disabled:opacity-50'"
+            >
+              <span v-if="isSubscribing" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <span v-else-if="notificationStatus === 'granted'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </span>
+              {{ notificationStatus === 'granted' ? '通知は有効です' : '通知を有効にする' }}
+            </button>
+            <span class="text-xs text-slate-400 dark:text-slate-500">
+              現在の状態: {{ notificationStatus === 'granted' ? '許可済み' : notificationStatus === 'denied' ? 'ブロック中' : '未設定' }}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -68,9 +104,32 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { Line as LineChart } from 'vue-chartjs';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
+import { useFriends } from '../composables/useFriends';
 
 const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
+const { requestNotificationPermission } = useFriends();
+
+const notificationStatus = ref(Notification?.permission || 'default');
+const isSubscribing = ref(false);
+
+const handleEnableNotifications = async () => {
+    isSubscribing.value = true;
+    try {
+        const success = await requestNotificationPermission();
+        if (success) {
+            notificationStatus.value = 'granted';
+            alert('通知が有効になりました。');
+        } else {
+            alert('通知の許可が得られなかったか、エラーが発生しました。');
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        isSubscribing.value = false;
+        notificationStatus.value = Notification?.permission || 'default';
+    }
+};
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 

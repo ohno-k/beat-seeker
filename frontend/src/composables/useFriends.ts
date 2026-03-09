@@ -159,6 +159,47 @@ export function useFriends() {
         }
     };
 
+    const urlBase64ToUint8Array = (base64String: string) => {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    };
+
+    const requestNotificationPermission = async () => {
+        if (!('Notification' in window)) {
+            console.error('Notifications not supported');
+            return;
+        }
+
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted' && 'serviceWorker' in navigator) {
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const vapidPublicKey = 'BDGlranXpFZQs_QO3pNXvrNudlAgliWJFOILQZxXd8_kjGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE';
+                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: convertedVapidKey
+                });
+                console.log('Push Subscription successful');
+                await updatePushSubscription(JSON.stringify(subscription));
+                return true;
+            } catch (e) {
+                console.error('Failed to subscribe to push notifications', e);
+                return false;
+            }
+        }
+        return permission === 'granted';
+    };
+
     return {
         friends,
         pendingRequests,
@@ -172,6 +213,7 @@ export function useFriends() {
         rejectRequest,
         removeFriend,
         updatePushSubscription,
-        fetchFriendScores
+        fetchFriendScores,
+        requestNotificationPermission
     };
 }

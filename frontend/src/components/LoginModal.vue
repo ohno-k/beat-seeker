@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void;
+  (e: 'registered'): void;
 }>();
 
 const { login, registerUser } = useAuth();
@@ -71,16 +72,17 @@ const handleSubmit = async () => {
       if (!displayName.value.trim()) {
         throw new Error('ユーザー名を入力してください。');
       }
-      await registerUser({
-        iidxId: inputIidxId.value,
-        password: password.value,
-        displayName: displayName.value,
-        danRank: danRank.value,
-        arenaRank: arenaRank.value,
-        playSide: playSide.value
-      });
-    }
-    emit('close');
+        await registerUser({
+          iidxId: inputIidxId.value,
+          password: password.value,
+          displayName: displayName.value,
+          danRank: danRank.value,
+          arenaRank: arenaRank.value,
+          playSide: playSide.value
+        });
+        emit('registered');
+      }
+      emit('close');
   } catch (err: any) {
     errorMsg.value = err.message || 'エラーが発生しました。';
   } finally {
