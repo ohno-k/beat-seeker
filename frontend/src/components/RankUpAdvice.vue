@@ -26,15 +26,18 @@
     </p>
 
     <div v-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
-      スコア+50点以内で伸ばせる曲がありません
+      伸ばせる曲がありません
     </div>
     <div v-else class="space-y-2">
       <div
         v-for="(sug, i) in suggestions"
         :key="i"
-        class="flex items-center gap-2 p-2 sm:p-3 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/50"
+        class="flex items-center gap-2 p-2 sm:p-3 rounded-xl border transition-colors"
+        :class="sug.crossesBorder
+          ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50'
+          : 'bg-slate-50/50 dark:bg-slate-700/20 border-slate-100 dark:border-slate-700/50'"
       >
-        <span class="text-[10px] font-black text-blue-400 dark:text-blue-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
+        <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
         <div class="flex-1 min-w-0">
           <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.song.title }}</p>
           <p class="text-[10px] text-slate-500 dark:text-slate-400">
@@ -42,8 +45,8 @@
           </p>
         </div>
         <div class="text-right shrink-0">
-          <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400">{{ sug.targetLabel }}</p>
-          <p class="text-xs font-black text-blue-600 dark:text-blue-400">
+          <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">{{ sug.targetLabel }}</p>
+          <p class="text-xs font-black text-slate-700 dark:text-slate-200">
             スコア +{{ sug.scoreIncrease.toLocaleString() }}点
           </p>
           <p class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">+{{ sug.ptGain.toFixed(1) }} pt</p>
@@ -123,8 +126,9 @@ const IMPROVEMENT_THRESHOLDS = [
 
 interface Suggestion {
   song: ScoreRecord;
-  targetLabel: string;
-  scoreIncrease: number; // raw score points needed (≤ 50)
+  targetLabel: string;   // highest border crossed, or ''
+  crossesBorder: boolean;
+  scoreIncrease: number; // raw score points added (≤ 50)
   ptGain: number;        // net Beat-PT gain
 }
 
@@ -134,33 +138,40 @@ function buildCandidates(): Suggestion[] {
 
   for (const song of props.flatScores) {
     if (song.maxScore <= 0 || !song.informalRank || song.scoreRate < 0) continue;
+    if (song.score >= song.maxScore) continue;
 
-    for (const thr of IMPROVEMENT_THRESHOLDS) {
-      if (song.scoreRate >= thr.rate - 0.01) continue; // already past this threshold
+    const newScore = Math.min(song.score + 50, song.maxScore);
+    const scoreIncrease = newScore - song.score;
+    if (scoreIncrease <= 0) continue;
 
-      const targetScore = Math.ceil(song.maxScore * thr.rate / 100);
-      const scoreIncrease = targetScore - song.score;
-      if (scoreIncrease <= 0 || scoreIncrease > 50) continue; // ≤50点 制限
+    const newScoreRate = (newScore / song.maxScore) * 100;
+    const newBeatPT = calculatePoints(newScoreRate, song.informalRank);
+    const rawGain = newBeatPT - song.beatTierPoints;
+    if (rawGain <= 0) continue;
 
-      const newBeatPT = calculatePoints(thr.rate, song.informalRank);
-      const rawGain = newBeatPT - song.beatTierPoints;
-      if (rawGain <= 0) continue;
-
-      const inTop100 = top100Set.value.has(`${song.title}|${song.difficultyName}`);
-      let netGain: number;
-      if (inTop100) {
-        netGain = rawGain;
-      } else if (th > 0) {
-        netGain = newBeatPT - th;
-      } else {
-        netGain = rawGain;
-      }
-
-      if (netGain <= 0) continue;
-
-      candidates.push({ song, targetLabel: thr.label, scoreIncrease, ptGain: netGain });
-      break; // use the first (lowest) reachable threshold per song
+    const inTop100 = top100Set.value.has(`${song.title}|${song.difficultyName}`);
+    let netGain: number;
+    if (inTop100) {
+      netGain = rawGain;
+    } else if (th > 0) {
+      netGain = newBeatPT - th;
+    } else {
+      netGain = rawGain;
     }
+
+    if (netGain <= 0) continue;
+
+    // Determine the highest border crossed by this improvement
+    let targetLabel = '';
+    let crossesBorder = false;
+    for (const thr of IMPROVEMENT_THRESHOLDS) {
+      if (song.scoreRate < thr.rate - 0.01 && newScoreRate >= thr.rate - 0.01) {
+        targetLabel = thr.label;
+        crossesBorder = true;
+      }
+    }
+
+    candidates.push({ song, targetLabel, crossesBorder, scoreIncrease, ptGain: netGain });
   }
 
   return candidates;
