@@ -21,10 +21,12 @@ export interface PendingRequest {
     createdAt: string;
 }
 
+// Module-level shared state so App.vue and NotificationBox.vue see the same ref
+const pendingRequests = ref<PendingRequest[]>([]);
+
 export function useFriends() {
     const { authHeaders } = useAuth();
     const friends = ref<Friend[]>([]);
-    const pendingRequests = ref<PendingRequest[]>([]);
     const isLoading = ref(false);
     const error = ref<string | null>(null);
 

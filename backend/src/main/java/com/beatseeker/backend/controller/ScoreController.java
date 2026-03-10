@@ -335,6 +335,16 @@ public class ScoreController {
     }
 
     /**
+     * Returns all users' ANOTHER and LEGGENDARIA scores for song ranking aggregation.
+     * The frontend uses this to determine which songs appear in each user's top-100.
+     */
+    @GetMapping("/all-user-scores")
+    public ResponseEntity<List<Map<String, Object>>> getAllUserScores() {
+        List<Map<String, Object>> scores = scoreRepository.findAllUserAnotherAndLeggendariaScores();
+        return ResponseEntity.ok(scores);
+    }
+
+    /**
      * Update the memo for a specific score.
      */
     @PutMapping("/{id}/memo")
