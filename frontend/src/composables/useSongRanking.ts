@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import songDataRaw from '../data/song_data.json';
 import diffTableRaw from '../data/difficulty_table.json';
 import { calculatePoints } from '../utils/beatTier';
+import { useAuth } from './useAuth';
 
 export interface SongRankingEntry {
     title: string;
@@ -23,6 +24,7 @@ interface RawUserScore {
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 export function useSongRanking() {
+    const { authHeaders } = useAuth();
     const ranking = ref<SongRankingEntry[]>([]);
     const isLoading = ref(false);
     const error = ref('');
@@ -32,7 +34,9 @@ export function useSongRanking() {
         isLoading.value = true;
         error.value = '';
         try {
-            const res = await fetch(`${API_BASE}/api/scores/all-user-scores`);
+            const res = await fetch(`${API_BASE}/api/scores/all-user-scores`, {
+                headers: authHeaders()
+            });
             if (!res.ok) throw new Error('Failed to fetch');
             const allScores: RawUserScore[] = await res.json();
 

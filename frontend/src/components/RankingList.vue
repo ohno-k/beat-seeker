@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import RankIcon from './RankIcon.vue';
 import SongRankingList from './SongRankingList.vue';
 import { getRankInfo } from '../utils/beatTier';
+import { useAuth } from '../composables/useAuth';
 
 interface RankingEntry {
   displayName: string;
@@ -10,6 +11,7 @@ interface RankingEntry {
   totalBeatPt: number;
 }
 
+const { isLoggedIn } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const ranking = ref<RankingEntry[]>([]);
 const isLoading = ref(true);
@@ -60,6 +62,7 @@ onMounted(async () => {
           プレイヤーランキング
         </button>
         <button
+          v-if="isLoggedIn"
           @click="activeTab = 'song'"
           class="flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all"
           :class="activeTab === 'song'
