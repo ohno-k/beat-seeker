@@ -122,6 +122,34 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/link-token")
+    public ResponseEntity<Map<String, Object>> getLinkToken(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        String iidxId = (String) auth.getPrincipal();
+        User user = userRepository.findByIidxId(iidxId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getLinkToken() == null) {
+            user.setLinkToken(java.util.UUID.randomUUID().toString());
+            userRepository.save(user);
+        }
+        return ResponseEntity.ok(Map.of("linkToken", user.getLinkToken()));
+    }
+
+    @PostMapping("/link-token/regenerate")
+    public ResponseEntity<Map<String, Object>> regenerateLinkToken(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        String iidxId = (String) auth.getPrincipal();
+        User user = userRepository.findByIidxId(iidxId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setLinkToken(java.util.UUID.randomUUID().toString());
+        userRepository.save(user);
+        return ResponseEntity.ok(Map.of("linkToken", user.getLinkToken()));
+    }
+
     @PutMapping("/me/profile")
     public ResponseEntity<Map<String, Object>> updateProfile(Authentication auth,
             @RequestBody ProfileUpdateRequest request) {

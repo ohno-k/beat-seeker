@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.iidxId = :query OR u.iidxId = :variant OR u.displayName = :query")
     List<User> searchUsers(@org.springframework.data.repository.query.Param("query") String query,
             @org.springframework.data.repository.query.Param("variant") String variant);
+
+    Optional<User> findByLinkToken(String linkToken);
 }

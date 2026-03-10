@@ -6,11 +6,16 @@ import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -368,6 +373,154 @@ public class ScoreController {
         return ResponseEntity.ok(Map.of("message", "メモを保存しました"));
     }
 
+    /**
+     * Import scores from raw CSV text using a link token (for bookmarklet use).
+     * No JWT required – authenticated via the user's link token.
+     */
+    @CrossOrigin(origins = "*")
+    @PostMapping("/import-csv")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> importCsv(@RequestBody ImportCsvRequest req) {
+        if (req.token() == null || req.token().isBlank()) {
+            return ResponseEntity.status(401).body(Map.of("message", "トークンが必要です"));
+        }
+
+        User user = userRepository.findByLinkToken(req.token()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "無効なトークンです。beat-seekerで新しいトークンを発行してください。"));
+        }
+
+        List<ScoreUploadRequest> requests;
+        try {
+            requests = parseCsvText(req.csvText());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "CSV解析エラー: " + e.getMessage()));
+        }
+
+        if (requests.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "有効なスコアデータが見つかりませんでした"));
+        }
+
+        // Upsert using same logic as /upload
+        List<Score> existingScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+        Map<String, Score> scoreMap = new HashMap<>();
+        for (Score s : existingScores) {
+            String key = s.getTitle() + "_" + s.getDifficultyName() + "_" + s.getDifficultyLevel();
+            scoreMap.put(key, s);
+        }
+
+        List<Map<String, Object>> updatedSongs = new ArrayList<>();
+        for (ScoreUploadRequest r : requests) {
+            String key = r.title() + "_" + r.difficultyName() + "_" + r.difficultyLevel();
+            Score existing = scoreMap.get(key);
+            boolean improved = false;
+            int oldScore = 0;
+            String oldClearType = "NO PLAY";
+
+            if (existing == null) {
+                improved = true;
+                Score s = new Score();
+                s.setUser(user);
+                updateScoreFields(s, r);
+                scoreRepository.save(s);
+            } else {
+                oldScore = existing.getScore() != null ? existing.getScore() : 0;
+                oldClearType = existing.getClearType() != null ? existing.getClearType() : "NO PLAY";
+                if (r.score() > oldScore || getClearTypeRank(r.clearType()) > getClearTypeRank(oldClearType)) {
+                    improved = true;
+                    updateScoreFields(existing, r);
+                    scoreRepository.save(existing);
+                }
+            }
+
+            if (improved) {
+                Map<String, Object> diff = new HashMap<>();
+                diff.put("title", r.title());
+                diff.put("difficulty", r.difficultyName());
+                diff.put("oldScore", oldScore);
+                diff.put("newScore", r.score());
+                diff.put("scoreIncrease", Math.max(0, r.score() - oldScore));
+                diff.put("oldClearType", oldClearType);
+                diff.put("newClearType", r.clearType());
+                diff.put("clearTypeImproved", getClearTypeRank(r.clearType()) > getClearTypeRank(oldClearType));
+                updatedSongs.add(diff);
+            }
+        }
+
+        if (!updatedSongs.isEmpty()) {
+            updateLastUploadTime(user);
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "updatedCount", updatedSongs.size(),
+                "updatedSongs", updatedSongs,
+                "message", "インポート完了！" + updatedSongs.size() + "曲のスコアを更新しました"));
+    }
+
+    private List<ScoreUploadRequest> parseCsvText(String csvText) throws Exception {
+        // Strip BOM if present
+        if (csvText.startsWith("\uFEFF")) {
+            csvText = csvText.substring(1);
+        }
+
+        List<ScoreUploadRequest> result = new ArrayList<>();
+        String[] difficulties = {"BEGINNER", "NORMAL", "HYPER", "ANOTHER", "LEGGENDARIA"};
+
+        try (CSVParser parser = CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .setIgnoreEmptyLines(true)
+                .build()
+                .parse(new StringReader(csvText))) {
+
+            for (CSVRecord row : parser) {
+                String title = getCol(row, "タイトル");
+                if (title == null || title.isBlank()) continue;
+
+                String artist = getCol(row, "アーティスト");
+                String genre = getCol(row, "ジャンル");
+                int playCount = parseIntSafe(getCol(row, "プレー回数"));
+
+                for (String diff : difficulties) {
+                    String clearType = getCol(row, diff + " クリアタイプ");
+                    if (clearType == null || clearType.equals("NO PLAY") || clearType.equals("---")) continue;
+
+                    int score = parseIntSafe(getCol(row, diff + " スコア"));
+                    int diffLevel = parseIntSafe(getCol(row, diff + " 難易度"));
+                    int pgreat = parseIntSafe(getCol(row, diff + " PGreat"));
+                    int great = parseIntSafe(getCol(row, diff + " Great"));
+                    String missStr = getCol(row, diff + " ミスカウント");
+                    Integer missCount = (missStr == null || missStr.equals("---") || missStr.isBlank())
+                            ? null : parseIntSafe(missStr);
+                    String djLevel = getCol(row, diff + " DJ LEVEL");
+                    if (djLevel == null) djLevel = "---";
+
+                    result.add(new ScoreUploadRequest(
+                            title, artist, genre, diff, diffLevel,
+                            score, clearType, djLevel, pgreat, great, missCount, playCount));
+                }
+            }
+        }
+        return result;
+    }
+
+    private String getCol(CSVRecord row, String col) {
+        try {
+            return row.get(col);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private int parseIntSafe(String val) {
+        if (val == null || val.isBlank() || val.equals("---")) return 0;
+        try {
+            return Integer.parseInt(val.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     private User getUser(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
             throw new RuntimeException("Not authenticated");
@@ -394,5 +547,8 @@ public class ScoreController {
     }
 
     public record MemoUpdateRequest(String memo) {
+    }
+
+    public record ImportCsvRequest(String token, String csvText) {
     }
 }

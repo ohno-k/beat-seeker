@@ -17,6 +17,7 @@ import About from './components/About.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
+import EagateImportModal from './components/EagateImportModal.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
@@ -42,6 +43,7 @@ const isLoginModalOpen = ref(false);
 const isProfileModalOpen = ref(false);
 const isAdminModalOpen = ref(false);
 const isOnboardingOpen = ref(false);
+const isEagateImportOpen = ref(false);
 
 const viewingUserId = ref<number | null>(null);
 const viewingUserName = ref<string>('');
@@ -367,12 +369,14 @@ const cancelUpload = () => {
       @edit-profile="isProfileModalOpen = true"
       @open-admin="isAdminModalOpen = true"
       @upload="resetData"
+      @eagate-import="isEagateImportOpen = true"
     />
 
     <!-- Modals -->
     <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" @registered="isOnboardingOpen = true" />
     <OnboardingModal :is-open="isOnboardingOpen" :deferred-prompt="deferredPrompt" @close="isOnboardingOpen = false" />
     <ProfileEditModal :is-open="isProfileModalOpen" @close="isProfileModalOpen = false" />
+    <EagateImportModal :is-open="isEagateImportOpen" @close="isEagateImportOpen = false" />
     <UploadResultModal 
       :is-open="isDiffModalOpen" 
       :diff-data="diffResult" 
@@ -609,24 +613,20 @@ const cancelUpload = () => {
             </div>
           </div>
 
-          <!-- Empty State or Explicit Upload State -->
-          <div v-if="!scoreData.length || showUploadArea" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
-            <div v-if="isParsing || isFetching || authLoading" class="w-full flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+          <!-- Loading State -->
+          <div v-if="isParsing || isFetching || authLoading" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
+            <div class="w-full flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
               <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
               <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
             </div>
-            
-            <template v-else>
-              <div class="w-full flex justify-between items-center mb-4" v-if="showUploadArea && scoreData.length > 0">
-                <h2 class="text-lg font-bold text-slate-800 dark:text-white">CSVアップロード</h2>
-                <button @click="cancelUpload" class="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">キャンセル</button>
-              </div>
-              <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
-            </template>
-            
+          </div>
+
+          <!-- Empty State (no data yet) -->
+          <div v-else-if="!scoreData.length" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
+            <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
             <!-- Error Message -->
-            <div 
-              v-if="errorMsg" 
+            <div
+              v-if="errorMsg"
               class="w-full mt-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 animate-fade-in"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -636,8 +636,32 @@ const cancelUpload = () => {
             </div>
           </div>
 
-          <!-- Score Results View (Visible when we have data and not explicitly uploading) -->
-          <div v-if="scoreData.length > 0 && !showUploadArea" class="w-full flex flex-col items-center animate-fade-in">
+          <!-- CSV Upload Modal (shown over existing data) -->
+          <div v-if="showUploadArea && scoreData.length > 0" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="cancelUpload">
+            <div class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
+              <div class="flex justify-between items-center mb-5">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white">CSVアップロード</h2>
+                <button @click="cancelUpload" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
+              <div
+                v-if="errorMsg"
+                class="w-full mt-4 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                <span class="font-medium text-sm sm:text-base">{{ errorMsg }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Score Results View -->
+          <div v-if="scoreData.length > 0" class="w-full flex flex-col items-center animate-fade-in">
             <!-- Dashboard Tab -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
               <ScoreDashboard 

@@ -123,6 +123,25 @@ export function useAuth() {
         window.location.href = '/';
     };
 
+    const getLinkToken = async (): Promise<string> => {
+        const res = await fetch(`${API_BASE}/api/auth/link-token`, {
+            headers: authHeaders(),
+        });
+        if (!res.ok) throw new Error('トークンの取得に失敗しました');
+        const data = await res.json();
+        return data.linkToken;
+    };
+
+    const regenerateLinkToken = async (): Promise<string> => {
+        const res = await fetch(`${API_BASE}/api/auth/link-token/regenerate`, {
+            method: 'POST',
+            headers: authHeaders(),
+        });
+        if (!res.ok) throw new Error('トークンの再発行に失敗しました');
+        const data = await res.json();
+        return data.linkToken;
+    };
+
     const isLoggedIn = computed(() => !!user.value);
 
     return {
@@ -134,6 +153,8 @@ export function useAuth() {
         registerUser,
         updateProfile,
         fetchCurrentUser,
-        authHeaders // Expose for use in other API calls (e.g., score uploads)
+        authHeaders,
+        getLinkToken,
+        regenerateLinkToken,
     };
 }

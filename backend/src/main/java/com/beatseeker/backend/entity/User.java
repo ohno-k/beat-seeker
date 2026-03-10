@@ -42,6 +42,9 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String pushSubscription; // Web Push subscription JSON
 
+    @Column(unique = true)
+    private String linkToken; // For bookmarklet CSV import
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
