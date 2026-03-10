@@ -49,6 +49,7 @@
           <p class="text-xs font-black text-slate-700 dark:text-slate-200">
             スコア +{{ sug.scoreIncrease.toLocaleString() }}点
           </p>
+          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">→ {{ sug.newScoreRate.toFixed(2) }}%</p>
           <p class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">+{{ sug.ptGain.toFixed(1) }} pt</p>
         </div>
       </div>
@@ -129,7 +130,21 @@ interface Suggestion {
   targetLabel: string;   // highest border crossed, or ''
   crossesBorder: boolean;
   scoreIncrease: number; // raw score points added (≤ 50)
+  newScoreRate: number;  // score rate after improvement
   ptGain: number;        // net Beat-PT gain
+}
+
+// Score cap decreases for songs that are already high in your personal ranking,
+// since those songs are harder to push further.
+function getScoreCap(song: ScoreRecord): number {
+  const idx = sortedScored.value.findIndex(
+    s => s.title === song.title && s.difficultyName === song.difficultyName
+  );
+  if (idx < 0 || idx >= 100) return 50; // outside top-100
+  if (idx < 10) return 10;              // #1-10: very hard to improve
+  if (idx < 25) return 20;             // #11-25
+  if (idx < 50) return 35;             // #26-50
+  return 50;                            // #51-100
 }
 
 function buildCandidates(): Suggestion[] {
@@ -140,9 +155,27 @@ function buildCandidates(): Suggestion[] {
     if (song.maxScore <= 0 || !song.informalRank || song.scoreRate < 0) continue;
     if (song.score >= song.maxScore) continue;
 
-    const newScore = Math.min(song.score + 50, song.maxScore);
-    const scoreIncrease = newScore - song.score;
-    if (scoreIncrease <= 0) continue;
+    const cap = getScoreCap(song);
+
+    // Find the nearest border reachable within cap pts; fall back to +cap if none
+    let scoreIncrease = cap;
+    let targetLabel = '';
+    let crossesBorder = false;
+
+    for (const thr of IMPROVEMENT_THRESHOLDS) {
+      if (song.scoreRate >= thr.rate - 0.01) continue;
+      const needed = Math.ceil(song.maxScore * thr.rate / 100) - song.score;
+      if (needed > 0 && needed <= cap) {
+        scoreIncrease = needed;
+        targetLabel = thr.label;
+        crossesBorder = true;
+        break;
+      }
+    }
+
+    const newScore = Math.min(song.score + scoreIncrease, song.maxScore);
+    const actualIncrease = newScore - song.score;
+    if (actualIncrease <= 0) continue;
 
     const newScoreRate = (newScore / song.maxScore) * 100;
     const newBeatPT = calculatePoints(newScoreRate, song.informalRank);
@@ -159,19 +192,9 @@ function buildCandidates(): Suggestion[] {
       netGain = rawGain;
     }
 
-    if (netGain <= 0) continue;
+    if (netGain < 0.05) continue; // skip if gain would display as 0.0 pt
 
-    // Determine the highest border crossed by this improvement
-    let targetLabel = '';
-    let crossesBorder = false;
-    for (const thr of IMPROVEMENT_THRESHOLDS) {
-      if (song.scoreRate < thr.rate - 0.01 && newScoreRate >= thr.rate - 0.01) {
-        targetLabel = thr.label;
-        crossesBorder = true;
-      }
-    }
-
-    candidates.push({ song, targetLabel, crossesBorder, scoreIncrease, ptGain: netGain });
+    candidates.push({ song, targetLabel, crossesBorder, scoreIncrease: actualIncrease, newScoreRate, ptGain: netGain });
   }
 
   return candidates;
@@ -184,18 +207,41 @@ function pickRandomSuggestions(): Suggestion[] {
   const candidates = buildCandidates();
   if (candidates.length === 0) return [];
 
-  // Shuffle
+  // Shuffle for variety
   const shuffled = [...candidates].sort(() => Math.random() - 0.5);
 
-  // Pick greedily until gap is covered or 20 songs reached
+  // Fill with songs whose individual gain doesn't yet cover the gap,
+  // leaving room for one final "tipping" song to land just over the target.
   const result: Suggestion[] = [];
   let accumulated = 0;
+
   for (const c of shuffled) {
-    if (result.length >= 20) break;
-    result.push(c);
-    accumulated += c.ptGain;
-    if (accumulated >= gap) break;
+    if (result.length >= 19) break;
+    if (accumulated + c.ptGain < gap) {
+      result.push(c);
+      accumulated += c.ptGain;
+    }
   }
+
+  // Add the smallest single candidate that tips us just over the remaining gap
+  if (accumulated < gap) {
+    const usedKeys = new Set(result.map(s => `${s.song.title}|${s.song.difficultyName}`));
+    const remaining = gap - accumulated;
+    const covering = shuffled
+      .filter(c => !usedKeys.has(`${c.song.title}|${c.song.difficultyName}`) && c.ptGain >= remaining)
+      .sort((a, b) => a.ptGain - b.ptGain);
+
+    if (covering.length > 0) {
+      result.push(covering[0]);
+    } else {
+      // No single candidate covers remaining — add the best available
+      const best = shuffled
+        .filter(c => !usedKeys.has(`${c.song.title}|${c.song.difficultyName}`))
+        .sort((a, b) => b.ptGain - a.ptGain);
+      if (best.length > 0) result.push(best[0]);
+    }
+  }
+
   return result;
 }
 
