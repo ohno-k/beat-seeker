@@ -142,6 +142,9 @@
       </div>
     </div>
 
+    <!-- Rank Up Advice -->
+    <RankUpAdvice :flat-scores="allFlattenedScores" :total-points="props.totalPoints" />
+
     <!-- Unofficial Difficulty Table -->
     <UnofficialDifficultyTable :scores="allFlattenedScores" />
 
@@ -159,6 +162,7 @@ import { getRankInfo, getNextRankInfo } from '../utils/beatTier';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
 import RankIcon from './RankIcon.vue';
 import UnofficialDifficultyTable from './UnofficialDifficultyTable.vue';
+import RankUpAdvice from './RankUpAdvice.vue';
 import { useDarkMode } from '../composables/useDarkMode';
 
 import { flattenScores } from '../utils/scoreData';

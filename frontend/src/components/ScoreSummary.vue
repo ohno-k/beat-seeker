@@ -69,7 +69,7 @@
 
           <!-- DJ Level Filter -->
           <div class="relative w-full md:w-32">
-            <button 
+            <button
               @click.stop="toggleDropdown('djLevel')"
               class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
             >
@@ -80,13 +80,37 @@
             </button>
             <div v-if="openDropdown === 'djLevel'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
               <label v-for="lvl in ['AAA', 'AA', 'A', 'B', 'C', 'D', 'E', 'F']" :key="lvl" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   :checked="isSelected(filterDjLevel, lvl)"
                   @change="toggleFilterValue(filterDjLevel, lvl)"
                   class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
                 >
                 <span class="ml-3 text-sm font-black text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ lvl }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Clear Type Filter -->
+          <div class="relative w-full md:w-36">
+            <button
+              @click.stop="toggleDropdown('clearType')"
+              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
+            >
+              <span class="truncate">ランプ{{ filterClearType.length > 0 ? ` (${filterClearType.length})` : '' }}</span>
+              <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div v-if="openDropdown === 'clearType'" class="absolute z-20 mt-1 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
+              <label v-for="ct in ['FULLCOMBO CLEAR', 'EX HARD CLEAR', 'HARD CLEAR', 'CLEAR', 'EASY CLEAR', 'ASSIST CLEAR', 'FAILED', 'NO PLAY']" :key="ct" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  :checked="isSelected(filterClearType, ct)"
+                  @change="toggleFilterValue(filterClearType, ct)"
+                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+                >
+                <span class="ml-3 text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ ct }}</span>
               </label>
             </div>
           </div>
@@ -169,6 +193,9 @@
                   <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
+              <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-orange-500 dark:text-orange-400 uppercase tracking-wider w-auto sm:w-2/12">
+                TOP100
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
@@ -178,7 +205,7 @@
               @click="openDetailModal(record)"
               class="hover:bg-blue-50/70 dark:hover:bg-slate-700/50 cursor-pointer transition-colors h-12 sm:h-14 w-full"
             >
-              <td class="px-1 sm:px-6 py-1.5 sm:py-2 font-medium text-slate-800 dark:text-slate-200 max-w-[80px] sm:max-w-[200px] lg:max-w-md xl:max-w-lg truncate" :title="record.title">
+              <td class="px-1 sm:px-6 py-1.5 sm:py-2 font-medium text-slate-800 dark:text-slate-200 max-w-[80px] sm:max-w-[160px] lg:max-w-[240px] xl:max-w-xs truncate" :title="record.title">
                 {{ record.title }}
               </td>
               <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
@@ -230,9 +257,19 @@
                   <span class="text-[9px] sm:text-[10px] font-black text-slate-700 dark:text-slate-500 italic">N/A</span>
                 </div>
               </td>
+              <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
+                <div
+                  v-if="top100ScoreNeededMap.has(record.title + '|' + record.difficultyName)"
+                  class="flex flex-col gap-0.5"
+                >
+                  <span class="text-[9px] sm:text-[11px] font-black text-orange-500 dark:text-orange-400">あと</span>
+                  <span class="text-xs sm:text-sm font-black text-orange-600 dark:text-orange-300 tabular-nums">{{ top100ScoreNeededMap.get(record.title + '|' + record.difficultyName)!.toLocaleString() }}点</span>
+                  <span class="text-[8px] sm:text-[10px] font-bold text-orange-400 dark:text-orange-500">でIN</span>
+                </div>
+              </td>
             </tr>
             <tr v-if="displayScores.length === 0">
-              <td colspan="6" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
+              <td colspan="7" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
                 条件に一致するスコアがありません。
               </td>
             </tr>
@@ -689,6 +726,7 @@ const searchQuery = ref('');
 const filterDifficulty = ref<string[]>([]);
 const filterLevel = ref<string[]>([]);
 const filterDjLevel = ref<string[]>([]);
+const filterClearType = ref<string[]>([]);
 const hideZeroScore = ref(false);
 
 const openDropdown = ref<string | null>(null);
@@ -827,6 +865,50 @@ watch(totalBeatTierPoints, (newVal) => {
 const top100Keys = computed(() => {
     const sorted = [...allRecords.value].sort((a, b) => b.beatTierPoints - a.beatTierPoints);
     return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
+});
+
+// 100th song's Beat-PT (= threshold to enter top 100)
+const top100Threshold = computed(() => {
+    const sorted = [...allRecords.value]
+        .filter(r => r.beatTierPoints > 0)
+        .sort((a, b) => b.beatTierPoints - a.beatTierPoints);
+    return sorted.length >= 100 ? sorted[99].beatTierPoints : 0;
+});
+
+// Map of (title|diff) -> score points needed to exceed top-100 threshold
+const top100ScoreNeededMap = computed(() => {
+    const map = new Map<string, number>();
+    if (top100Threshold.value === 0) return map;
+
+    for (const record of allRecords.value) {
+        const key = `${record.title}|${record.difficultyName}`;
+        if (top100Keys.value.has(key)) continue;
+        if (!record.informalRank || record.maxScore <= 0) continue;
+
+        const targetPt = top100Threshold.value;
+        // Can't reach threshold even with perfect score
+        if (calculatePoints(100, record.informalRank) <= targetPt) continue;
+
+        // Binary search: find minimum score that gives Beat-PT > threshold
+        let low = record.score;
+        let high = record.maxScore;
+        let bestScore = record.maxScore;
+
+        while (low <= high) {
+            const mid = Math.floor((low + high) / 2);
+            const midPt = calculatePoints((mid / record.maxScore) * 100, record.informalRank);
+            if (midPt > targetPt) {
+                bestScore = mid;
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        const needed = bestScore - record.score;
+        if (needed > 0) map.set(key, needed);
+    }
+    return map;
 });
 
 // Modal state
@@ -1072,7 +1154,7 @@ onUnmounted(() => {
 });
 
 // Reset page when search or filters change
-watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, sortKey, sortOrder, hideZeroScore, itemsPerPage], () => {
+watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, sortKey, sortOrder, hideZeroScore, itemsPerPage], () => {
   currentPage.value = 1;
 }, { deep: true });
 
@@ -1108,6 +1190,10 @@ const filteredScores = computed(() => {
 
   if (filterDjLevel.value.length > 0) {
     result = result.filter(r => filterDjLevel.value.includes(r.djLevel));
+  }
+
+  if (filterClearType.value.length > 0) {
+    result = result.filter(r => filterClearType.value.includes(r.clearType));
   }
 
   const query = searchQuery.value.toLowerCase().trim();

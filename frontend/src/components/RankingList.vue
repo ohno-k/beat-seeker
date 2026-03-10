@@ -1,22 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import RankIcon from './RankIcon.vue';
-import SongRankingList from './SongRankingList.vue';
 import { getRankInfo } from '../utils/beatTier';
-import { useAuth } from '../composables/useAuth';
 
 interface RankingEntry {
   displayName: string;
   iidxId: string;
   totalBeatPt: number;
 }
-
-const { isLoggedIn } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const ranking = ref<RankingEntry[]>([]);
 const isLoading = ref(true);
 const error = ref('');
-const activeTab = ref<'player' | 'song'>('player');
 
 onMounted(async () => {
     try {
@@ -50,31 +45,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Tab Switcher -->
-      <div class="flex gap-1 bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl mb-6">
-        <button
-          @click="activeTab = 'player'"
-          class="flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all"
-          :class="activeTab === 'player'
-            ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
-            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >
-          プレイヤーランキング
-        </button>
-        <button
-          v-if="isLoggedIn"
-          @click="activeTab = 'song'"
-          class="flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all"
-          :class="activeTab === 'song'
-            ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
-            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >
-          楽曲ランキング
-        </button>
-      </div>
-
       <!-- Player Ranking -->
-      <template v-if="activeTab === 'player'">
         <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
           <div class="w-12 h-12 border-4 border-blue-100 dark:border-slate-700 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
           <p class="text-slate-500 dark:text-slate-400 font-bold">ランキングを集計中...</p>
@@ -138,12 +109,6 @@ onMounted(async () => {
             </tbody>
           </table>
         </div>
-      </template>
-
-      <!-- Song Ranking -->
-      <template v-else>
-        <SongRankingList />
-      </template>
     </div>
   </div>
 </template>
