@@ -124,10 +124,15 @@
                     </div>
                     
                     <div v-if="song.beatPtIncrease > 0" class="flex flex-col items-end">
-                      <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">BEAT-PT</span>
+                      <div class="flex items-center gap-1 mb-0.5">
+                        <span class="text-[10px] font-bold uppercase" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'">BEAT-PT</span>
+                        <span v-if="song.isInTop100 !== undefined" class="text-[9px] font-black px-1 rounded" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400'">
+                          {{ song.isInTop100 ? 'TOP100' : '圏外' }}
+                        </span>
+                      </div>
                       <div class="flex items-baseline gap-1">
-                        <span class="font-black text-indigo-600 dark:text-indigo-400 text-lg">+{{ song.beatPtIncrease.toFixed(1) }}</span>
-                        <span class="text-xs font-bold text-indigo-400 dark:text-indigo-500">pt</span>
+                        <span class="font-black text-lg" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.beatPtIncrease.toFixed(1) }}</span>
+                        <span class="text-xs font-bold" :class="song.isInTop100 ? 'text-amber-400 dark:text-amber-500' : 'text-indigo-400 dark:text-indigo-500'">pt</span>
                       </div>
                     </div>
                   </div>
@@ -236,8 +241,11 @@
                    <p class="font-black text-3xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-lg font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
                  </div>
                  <div v-if="song.beatPtIncrease > 0" class="text-right">
-                   <p class="text-sm font-bold text-slate-500 mb-1">BEAT-PT</p>
-                   <p class="font-black text-3xl text-indigo-600 dark:text-indigo-400">+{{ song.beatPtIncrease.toFixed(1) }}</p>
+                   <div class="flex items-center justify-end gap-2 mb-1">
+                     <p class="text-sm font-bold" :class="song.isInTop100 ? 'text-amber-500' : 'text-slate-500'">BEAT-PT</p>
+                     <span v-if="song.isInTop100 !== undefined" class="text-xs font-black px-1.5 py-0.5 rounded" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'">{{ song.isInTop100 ? 'TOP100' : '圏外' }}</span>
+                   </div>
+                   <p class="font-black text-3xl" :class="song.isInTop100 ? 'text-amber-500' : 'text-indigo-400'">+{{ song.beatPtIncrease.toFixed(1) }}</p>
                  </div>
                </div>
              </div>

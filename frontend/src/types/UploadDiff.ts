@@ -12,6 +12,7 @@ export interface UpdatedSong {
     oldBeatPt: number;
     newBeatPt: number;
     beatPtIncrease: number;
+    isInTop100?: boolean;
 }
 
 export interface UploadDiffResult {

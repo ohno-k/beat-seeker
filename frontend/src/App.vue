@@ -180,7 +180,10 @@ const handleFileDropped = async (file: File) => {
     oldFlat.forEach(r => oldScoreMap.set(`${r.title}_${r.difficultyName}`, r));
     
     const updatedSongs: UpdatedSong[] = [];
-    
+
+    const sortedNewFlatDesc = newFlat.filter(s => s.beatTierPoints > 0).sort((a, b) => b.beatTierPoints - a.beatTierPoints);
+    const top100SetGuest = new Set(sortedNewFlatDesc.slice(0, 100).map(s => `${s.title}_${s.difficultyName}`));
+
     newFlat.forEach(newR => {
         // Report on level 11 and 12 improvements primarily, but you can see all in table
         const oldR = oldScoreMap.get(`${newR.title}_${newR.difficultyName}`);
@@ -214,7 +217,8 @@ const handleFileDropped = async (file: File) => {
                 clearTypeImproved,
                 oldBeatPt,
                 newBeatPt,
-                beatPtIncrease
+                beatPtIncrease,
+                isInTop100: top100SetGuest.has(`${newR.title}_${newR.difficultyName}`)
             });
         }
     });
@@ -261,14 +265,22 @@ const handleFileDropped = async (file: File) => {
           };
         });
 
+        // Update local state by fetching ALL scores from the server to get an accurate total
+        await loadSavedScores();
+        const accurateTotalBeatPt = totalBeatTierPoints.value;
+
+        // Determine top-100 set for isInTop100 flag
+        const allFlatAfterUpload = flattenScores(scoreData.value);
+        const sortedByPtDesc = allFlatAfterUpload
+          .filter(s => s.beatTierPoints > 0)
+          .sort((a, b) => b.beatTierPoints - a.beatTierPoints);
+        const top100Set = new Set(sortedByPtDesc.slice(0, 100).map(s => `${s.title}_${s.difficultyName}`));
+
         // Filter and sort for the report
         const reportSongs = backendUpdates
           .filter(s => s.scoreIncrease > 0 || s.clearTypeImproved)
+          .map(s => ({ ...s, isInTop100: top100Set.has(`${s.title}_${s.difficulty}`) }))
           .sort((a, b) => b.beatPtIncrease - a.beatPtIncrease || b.scoreIncrease - a.scoreIncrease);
-
-        // Update local state by fetching ALL scores from the server to get an accurate total
-        await loadSavedScores(); 
-        const accurateTotalBeatPt = totalBeatTierPoints.value;
 
         diffResult.value = {
             oldTotalBeatPt,
