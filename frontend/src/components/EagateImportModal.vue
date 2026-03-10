@@ -15,7 +15,7 @@ const isCopiedShortcuts = ref(false);
 const isRegenerating = ref(false);
 const activeTab = ref<'bookmarklet' | 'shortcuts'>('bookmarklet');
 
-const EAGATE_CSV_URL = 'https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html';
+const EAGATE_CSV_URL = 'https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html?style=SP';
 
 watch(() => props.isOpen, async (open) => {
   if (open && !linkToken.value) {
