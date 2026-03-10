@@ -48,7 +48,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/all-user-scores",
                                                                 "/api/scores/debug-ranking",
                                                                 "/api/scores/debug-user-scores/**", "/api/friends/test",
-                                                                "/api/test-root", "/api/scores/import-csv")
+                                                                "/api/test-root")
                                                 .permitAll()
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile").authenticated()
                                                 .requestMatchers("/api/scores/upload", "/api/scores/save-history-log",
@@ -74,14 +74,6 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-                // import-csv: allow all origins (bookmarklet from eagate)
-                CorsConfiguration importConfig = new CorsConfiguration();
-                importConfig.setAllowedOriginPatterns(List.of("*"));
-                importConfig.setAllowedMethods(List.of("POST", "OPTIONS"));
-                importConfig.setAllowedHeaders(List.of("*"));
-                importConfig.setAllowCredentials(false);
-                source.registerCorsConfiguration("/api/scores/import-csv", importConfig);
 
                 // default: allow frontend only
                 CorsConfiguration config = new CorsConfiguration();

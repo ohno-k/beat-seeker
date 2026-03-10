@@ -15,5 +15,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> searchUsers(@org.springframework.data.repository.query.Param("query") String query,
             @org.springframework.data.repository.query.Param("variant") String variant);
 
-    Optional<User> findByLinkToken(String linkToken);
+
 }

@@ -17,7 +17,6 @@ import About from './components/About.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
-import EagateImportModal from './components/EagateImportModal.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores } from './utils/scoreData';
@@ -43,7 +42,6 @@ const isLoginModalOpen = ref(false);
 const isProfileModalOpen = ref(false);
 const isAdminModalOpen = ref(false);
 const isOnboardingOpen = ref(false);
-const isEagateImportOpen = ref(false);
 
 const viewingUserId = ref<number | null>(null);
 const viewingUserName = ref<string>('');
@@ -369,14 +367,12 @@ const cancelUpload = () => {
       @edit-profile="isProfileModalOpen = true"
       @open-admin="isAdminModalOpen = true"
       @upload="resetData"
-      @eagate-import="isEagateImportOpen = true"
     />
 
     <!-- Modals -->
     <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" @registered="isOnboardingOpen = true" />
     <OnboardingModal :is-open="isOnboardingOpen" :deferred-prompt="deferredPrompt" @close="isOnboardingOpen = false" />
     <ProfileEditModal :is-open="isProfileModalOpen" @close="isProfileModalOpen = false" />
-    <EagateImportModal :is-open="isEagateImportOpen" @close="isEagateImportOpen = false" />
     <UploadResultModal 
       :is-open="isDiffModalOpen" 
       :diff-data="diffResult" 
