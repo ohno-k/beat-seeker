@@ -205,8 +205,16 @@
               @click="openDetailModal(record)"
               class="hover:bg-blue-50/70 dark:hover:bg-slate-700/50 cursor-pointer transition-colors h-12 sm:h-14 w-full"
             >
-              <td class="px-1 sm:px-6 py-1.5 sm:py-2 font-medium text-slate-800 dark:text-slate-200 max-w-[80px] sm:max-w-[160px] lg:max-w-[240px] xl:max-w-xs truncate" :title="record.title">
-                {{ record.title }}
+              <td class="px-1 sm:px-6 py-1.5 sm:py-2 font-medium text-slate-800 dark:text-slate-200 max-w-[80px] sm:max-w-[160px] lg:max-w-[240px] xl:max-w-xs" :title="record.title">
+                <div class="flex flex-col gap-0.5">
+                  <span class="truncate block">{{ record.title }}</span>
+                  <template v-for="label of [getScoreGradeLabel(record)]" :key="0">
+                    <div v-if="label" class="flex gap-1 text-[8px] sm:text-[10px] font-bold leading-none">
+                      <span :class="record.scoreRate >= 94.45 ? 'text-purple-500 dark:text-purple-400' : record.scoreRate >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'">{{ label.primary }}</span>
+                      <span class="text-slate-400 dark:text-slate-500">{{ label.secondary }}</span>
+                    </div>
+                  </template>
+                </div>
               </td>
               <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
                 <div class="flex flex-col gap-0.5 sm:gap-1">
@@ -1319,6 +1327,22 @@ const getClearTypeBgColor = (clearType: string) => {
     case 'EASY CLEAR': return 'bg-green-500';
     case 'ASSIST CLEAR': return 'bg-purple-500';
     default: return isDarkMode.value ? 'bg-slate-700' : 'bg-slate-200';
+  }
+};
+
+const getScoreGradeLabel = (record: ScoreRecord) => {
+  if (record.maxScore <= 0 || record.scoreRate < 0 || record.score <= 0) return null;
+  const maxScore = record.maxScore;
+  const score = record.score;
+  const aaaThreshold = Math.ceil(maxScore * 8 / 9);
+  const aaThreshold = Math.ceil(maxScore * 7 / 9);
+  if (record.scoreRate >= 94.45) {
+    return { primary: `MAX-${maxScore - score}`, secondary: `AAA+${score - aaaThreshold}` };
+  } else if (record.scoreRate >= 88.89) {
+    return { primary: `AAA+${score - aaaThreshold}`, secondary: `MAX-${maxScore - score}` };
+  } else {
+    const aaDiff = score - aaThreshold;
+    return { primary: `AAA-${aaaThreshold - score}`, secondary: aaDiff >= 0 ? `AA+${aaDiff}` : `AA-${-aaDiff}` };
   }
 };
 

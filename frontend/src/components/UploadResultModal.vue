@@ -4,29 +4,27 @@
       <div id="report-container" ref="reportContent" class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] animate-slide-up border border-slate-200 dark:border-slate-800">
         
         <!-- Header: Hero Section -->
-        <div class="relative bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-8 text-center overflow-hidden shrink-0">
-          <div class="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-          
-          <button id="modal-close-btn" @click="close" class="absolute top-2 right-2 p-4 -m-2 group z-50">
-            <div class="text-white/70 group-hover:text-white bg-black/10 group-hover:bg-black/20 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="relative bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 overflow-hidden shrink-0">
+          <div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+
+          <button id="modal-close-btn" @click="close" class="absolute top-2 right-2 p-2 group z-50">
+            <div class="text-white/60 group-hover:text-white bg-white/10 group-hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
           </button>
-          
-          <div class="relative z-10 flex flex-col items-center">
-            <div class="bg-white/20 p-3 rounded-full mb-4 backdrop-blur-md">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+
+          <div class="relative z-10 flex items-center gap-3">
+            <div class="bg-white/20 p-2 rounded-lg backdrop-blur-md shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2 drop-shadow-md">
-              プレイ成果レポート
-            </h2>
-            <p class="text-indigo-100 font-medium text-sm sm:text-base">
-              CSVのアップロードが完了し、あなたの成長が記録されました！
-            </p>
+            <div>
+              <h2 class="text-lg font-black text-white tracking-tight leading-tight">プレイ成果レポート</h2>
+              <p class="text-indigo-200 font-medium text-xs">CSVのアップロードが完了し、あなたの成長が記録されました！</p>
+            </div>
           </div>
         </div>
 
@@ -131,8 +129,9 @@
                         </span>
                       </div>
                       <div class="flex items-baseline gap-1">
-                        <span class="font-black text-lg" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.beatPtIncrease.toFixed(1) }}</span>
+                        <span class="font-black text-lg" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.newBeatPt.toFixed(1) }}</span>
                         <span class="text-xs font-bold" :class="song.isInTop100 ? 'text-amber-400 dark:text-amber-500' : 'text-indigo-400 dark:text-indigo-500'">pt</span>
+                        <span class="text-xs font-bold text-slate-400 dark:text-slate-500">(+{{ song.beatPtIncrease.toFixed(1) }})</span>
                       </div>
                     </div>
                   </div>
@@ -245,7 +244,7 @@
                      <p class="text-sm font-bold" :class="song.isInTop100 ? 'text-amber-500' : 'text-slate-500'">BEAT-PT</p>
                      <span v-if="song.isInTop100 !== undefined" class="text-xs font-black px-1.5 py-0.5 rounded" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'">{{ song.isInTop100 ? 'TOP100' : '圏外' }}</span>
                    </div>
-                   <p class="font-black text-3xl" :class="song.isInTop100 ? 'text-amber-500' : 'text-indigo-400'">+{{ song.beatPtIncrease.toFixed(1) }}</p>
+                   <p class="font-black text-3xl" :class="song.isInTop100 ? 'text-amber-500' : 'text-indigo-400'">+{{ song.newBeatPt.toFixed(1) }} <span class="text-lg font-bold text-slate-400">(+{{ song.beatPtIncrease.toFixed(1) }})</span></p>
                  </div>
                </div>
              </div>
