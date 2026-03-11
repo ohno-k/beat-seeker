@@ -144,6 +144,7 @@ const comparisonStats = computed(() => {
     const friendPlay = friendScore && friendScore.score > 0;
 
     if (!myPlay && !friendPlay) return; // Both 0 -> Skip
+    if (showBothPlayedOnly.value && !(myPlay && friendPlay)) return; // Filter: both played only
 
     const lvKey = s.difficultyLevel === 11 ? 'lv11' : 'lv12';
     const rank = s.informalRank && !s.informalRank.includes('Uncategorized') ? s.informalRank : null;
@@ -220,6 +221,8 @@ const toggleRank = (rank: string) => {
     expandedRanks.value.add(rank);
   }
 };
+
+const showBothPlayedOnly = ref(false);
 </script>
 
 <template>
@@ -258,18 +261,33 @@ const toggleRank = (rank: string) => {
           </div>
 
           <div v-else class="space-y-8">
+            <!-- Filter Toggle -->
+            <div class="flex items-center justify-end gap-3">
+              <span class="text-sm font-bold text-slate-600 dark:text-slate-300">両者プレイ済みのみ表示</span>
+              <button
+                @click="showBothPlayedOnly = !showBothPlayedOnly"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
+                :class="showBothPlayedOnly ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                  :class="showBothPlayedOnly ? 'translate-x-6' : 'translate-x-1'"
+                ></span>
+              </button>
+            </div>
+
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div v-for="(stats, key) in comparisonStats.summary" :key="key" class="bg-slate-100/50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all hover:shadow-md">
                 <h3 class="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                   {{ key === 'overall' ? '全体 (11 & 12)' : key === 'lv11' ? 'レベル 11' : 'レベル 12' }}
                 </h3>
-                <div class="grid grid-cols-5 gap-1 font-black text-center">
+                <div class="font-black text-center" :class="showBothPlayedOnly ? 'grid grid-cols-3 gap-1' : 'grid grid-cols-5 gap-1'">
                   <div class="flex flex-col">
                     <span class="text-2xl text-blue-600 dark:text-blue-400">{{ stats.win }}</span>
                     <span class="text-[8px] text-slate-400 dark:text-slate-500">WIN</span>
                   </div>
-                  <div class="flex flex-col bg-blue-50 dark:bg-blue-900/20 rounded-lg py-1">
+                  <div v-if="!showBothPlayedOnly" class="flex flex-col bg-blue-50 dark:bg-blue-900/20 rounded-lg py-1">
                     <span class="text-lg text-blue-500/80">{{ stats.myOnly }}</span>
                     <span class="text-[8px] text-blue-400 dark:text-blue-500">YOU</span>
                   </div>
@@ -277,7 +295,7 @@ const toggleRank = (rank: string) => {
                     <span class="text-2xl text-slate-400 dark:text-slate-500">{{ stats.draw }}</span>
                     <span class="text-[8px] text-slate-400 dark:text-slate-500">DRAW</span>
                   </div>
-                  <div class="flex flex-col bg-red-50 dark:bg-red-900/20 rounded-lg py-1">
+                  <div v-if="!showBothPlayedOnly" class="flex flex-col bg-red-50 dark:bg-red-900/20 rounded-lg py-1">
                     <span class="text-lg text-red-400/80">{{ stats.friendOnly }}</span>
                     <span class="text-[8px] text-red-400 dark:text-red-500">FRIEND</span>
                   </div>
@@ -289,9 +307,9 @@ const toggleRank = (rank: string) => {
                 <!-- Progress Bar -->
                 <div class="mt-4 h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex">
                   <div class="h-full bg-blue-500" :style="{ width: `${(stats.win/stats.total)*100}%` }"></div>
-                  <div class="h-full bg-blue-300" :style="{ width: `${(stats.myOnly/stats.total)*100}%` }"></div>
+                  <div v-if="!showBothPlayedOnly" class="h-full bg-blue-300" :style="{ width: `${(stats.myOnly/stats.total)*100}%` }"></div>
                   <div class="h-full bg-slate-400" :style="{ width: `${(stats.draw/stats.total)*100}%` }"></div>
-                  <div class="h-full bg-red-300" :style="{ width: `${(stats.friendOnly/stats.total)*100}%` }"></div>
+                  <div v-if="!showBothPlayedOnly" class="h-full bg-red-300" :style="{ width: `${(stats.friendOnly/stats.total)*100}%` }"></div>
                   <div class="h-full bg-red-400" :style="{ width: `${(stats.loss/stats.total)*100}%` }"></div>
                 </div>
                 <p class="mt-2 text-[10px] text-right text-slate-400 font-bold">{{ stats.total }} 曲対象</p>
@@ -310,9 +328,9 @@ const toggleRank = (rank: string) => {
                     <tr>
                       <th class="p-4 w-24">ランク</th>
                       <th class="p-4 text-center">WIN</th>
-                      <th class="p-4 text-center bg-blue-50/50 dark:bg-blue-900/10">YOU</th>
+                      <th v-if="!showBothPlayedOnly" class="p-4 text-center bg-blue-50/50 dark:bg-blue-900/10">YOU</th>
                       <th class="p-4 text-center">DRAW</th>
-                      <th class="p-4 text-center bg-red-50/50 dark:bg-red-900/10">FRIEND</th>
+                      <th v-if="!showBothPlayedOnly" class="p-4 text-center bg-red-50/50 dark:bg-red-900/10">FRIEND</th>
                       <th class="p-4 text-center">LOSS</th>
                     </tr>
                   </thead>
@@ -329,14 +347,14 @@ const toggleRank = (rank: string) => {
                           <span class="text-slate-800 dark:text-slate-200">{{ rank }}</span>
                         </td>
                         <td class="p-4 text-center font-black text-blue-600 dark:text-blue-400">{{ stats.win }}</td>
-                        <td class="p-4 text-center font-black text-blue-500/80 bg-blue-50/30 dark:bg-blue-900/5">{{ stats.myOnly }}</td>
+                        <td v-if="!showBothPlayedOnly" class="p-4 text-center font-black text-blue-500/80 bg-blue-50/30 dark:bg-blue-900/5">{{ stats.myOnly }}</td>
                         <td class="p-4 text-center font-black text-slate-400">{{ stats.draw }}</td>
-                        <td class="p-4 text-center font-black text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ stats.friendOnly }}</td>
+                        <td v-if="!showBothPlayedOnly" class="p-4 text-center font-black text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ stats.friendOnly }}</td>
                         <td class="p-4 text-center font-black text-red-500 dark:text-red-400">{{ stats.loss }}</td>
                       </tr>
                       <!-- Expanded Breakdown -->
                       <tr v-if="expandedRanks.has(rank)">
-                        <td colspan="6" class="p-0 bg-slate-50/50 dark:bg-slate-900/20">
+                        <td :colspan="showBothPlayedOnly ? 4 : 6" class="p-0 bg-slate-50/50 dark:bg-slate-900/20">
                           <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <!-- WIN Section -->
                             <div v-if="stats.winSongs.length > 0" class="space-y-2">
