@@ -34,8 +34,8 @@ public class User {
     @Column(length = 2)
     private String playSide = "1P"; // "1P" or "2P"
 
-    @Column(columnDefinition = "integer default 2")
-    private Integer privacyLevel = 2; // 0: Public, 1: Friends Only, 2: Private
+    @Column(columnDefinition = "integer default 1")
+    private Integer privacyLevel = 1; // 0: Public, 1: Friends Only, 2: Private
 
     private LocalDateTime lastUploadedAt;
 
