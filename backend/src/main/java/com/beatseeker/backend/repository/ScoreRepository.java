@@ -47,7 +47,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "WITH best_scores AS (" +
         "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score" +
         "  FROM scores" +
-        "  WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA')" +
+        "  WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0" +
         "  GROUP BY title, difficulty_name, difficulty_level, user_id" +
         "), " +
         "all_ranks AS (" +
