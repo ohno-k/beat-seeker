@@ -344,6 +344,24 @@ public class ScoreController {
         return ResponseEntity.ok(scores);
     }
 
+    private static final String ADMIN_IIDX_ID = "5787-1145";
+
+    /**
+     * Get per-song ranking for a specific song (admin only).
+     */
+    @GetMapping("/song-ranking")
+    public ResponseEntity<List<Map<String, Object>>> getSongRanking(
+            Authentication auth,
+            @RequestParam String title,
+            @RequestParam String difficultyName) {
+        if (auth == null || !auth.isAuthenticated()
+                || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<Map<String, Object>> ranking = scoreRepository.findSongRanking(title, difficultyName);
+        return ResponseEntity.ok(ranking);
+    }
+
     /**
      * Update the memo for a specific score.
      */

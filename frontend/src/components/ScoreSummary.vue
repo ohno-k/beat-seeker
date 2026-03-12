@@ -354,14 +354,111 @@
             ライバル
             <span v-if="rivalList.length > 0" class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full px-1.5">{{ rivalList.length }}</span>
           </button>
+          <button
+            v-if="isAdmin"
+            @click="handleRankingTabClick"
+            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
+            :class="modalTab === 'ranking' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+          >
+            ランキング
+            <span v-if="songRankingList.length > 0" class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-full px-1.5">{{ songRankingList.length }}</span>
+          </button>
         </div>
       </div>
       
       <!-- Scrollable Body -->
       <div class="flex-1 overflow-y-auto p-3 sm:p-8 lg:p-12 pb-24">
 
+        <!-- Ranking Tab -->
+        <div v-if="modalTab === 'ranking' && isAdmin" class="w-full">
+          <div v-if="isLoadingSongRanking" class="flex flex-col items-center justify-center py-20">
+            <div class="w-10 h-10 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-500 dark:text-slate-400">ランキング読み込み中...</p>
+          </div>
+          <div v-else-if="songRankingList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <p class="font-bold">このスコアのランキングデータがありません</p>
+            <p class="text-sm mt-1">公開設定のユーザーのみ表示されます</p>
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-3 pl-3 text-xs font-black text-slate-400 uppercase tracking-widest w-12">順位</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest w-14 text-center">TIER</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-24">スコア</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">レート</th>
+                  <th class="pb-3 pr-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">BEAT-PT</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr
+                  v-for="(entry, index) in songRankingList"
+                  :key="index"
+                  class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                >
+                  <!-- 順位 -->
+                  <td class="py-3 pl-3">
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                      :class="[
+                        index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                        index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                        index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                        'text-slate-400 border border-slate-100 dark:border-slate-700'
+                      ]">
+                      {{ index + 1 }}
+                    </div>
+                  </td>
+                  <!-- プレイヤー名 -->
+                  <td class="py-3">
+                    <span class="font-bold text-slate-800 dark:text-slate-100 text-sm">{{ entry.displayName }}</span>
+                  </td>
+                  <!-- BEAT-TIERアイコン -->
+                  <td class="py-3 px-2 text-center">
+                    <div class="flex justify-center">
+                      <RankIcon
+                        :rank-name="getRankInfo(entry.totalBeatPt).name"
+                        :tier="getRankInfo(entry.totalBeatPt).tier"
+                        size="sm"
+                      />
+                    </div>
+                  </td>
+                  <!-- スコア -->
+                  <td class="py-3 text-right">
+                    <span class="font-black text-slate-800 dark:text-slate-100 text-sm tabular-nums">{{ entry.score.toLocaleString() }}</span>
+                  </td>
+                  <!-- スコアレート -->
+                  <td class="py-3 text-right">
+                    <span
+                      v-if="selectedRecord && selectedRecord.maxScore > 0"
+                      class="font-bold text-sm tabular-nums"
+                      :class="(entry.score / selectedRecord.maxScore * 100) >= 94.45 ? 'text-purple-600 dark:text-purple-400' : (entry.score / selectedRecord.maxScore * 100) >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-300'"
+                    >
+                      {{ (entry.score / selectedRecord.maxScore * 100).toFixed(2) }}%
+                    </span>
+                    <span v-else class="text-slate-400 text-sm">---</span>
+                  </td>
+                  <!-- BEAT-PT -->
+                  <td class="py-3 pr-3 text-right">
+                    <span
+                      v-if="selectedRecord && selectedRecord.maxScore > 0 && selectedRecord.informalRank"
+                      class="font-black text-indigo-600 dark:text-indigo-400 text-sm tabular-nums"
+                    >
+                      {{ calculatePoints(entry.score / selectedRecord.maxScore * 100, selectedRecord.informalRank).toFixed(1) }}
+                    </span>
+                    <span v-else class="text-slate-400 text-sm">---</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Rivals Tab -->
-        <div v-if="modalTab === 'rivals'" class="w-full">
+        <div v-else-if="modalTab === 'rivals'" class="w-full">
           <div v-if="isLoadingRivals" class="flex flex-col items-center justify-center py-20">
             <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
             <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
@@ -712,15 +809,17 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import diffTableRaw from '../data/difficulty_table.json';
-import { calculatePoints, getMaxPoints } from '../utils/beatTier';
+import { calculatePoints, getMaxPoints, getRankInfo } from '../utils/beatTier';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import songDataRaw from '../data/song_data.json';
+import RankIcon from './RankIcon.vue';
 
 const { updateMemo } = useScores();
 const { isDarkMode } = useDarkMode();
-const { isLoggedIn, authHeaders } = useAuth();
+const { isLoggedIn, authHeaders, user } = useAuth();
+const isAdmin = computed(() => user.value?.iidxId === '5787-1145');
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
@@ -921,7 +1020,7 @@ const top100ScoreNeededMap = computed(() => {
 
 // Modal state
 const selectedRecord = ref<ScoreRecord | null>(null);
-const modalTab = ref<'detail' | 'rivals'>('detail');
+const modalTab = ref<'detail' | 'rivals' | 'ranking'>('detail');
 
 const isEditingMemo = ref(false);
 const editMemoText = ref('');
@@ -944,6 +1043,41 @@ interface RivalScore {
   privacyLevel?: number;
 }
 const rivalScores = ref<RivalScore[]>([]);
+
+// Song ranking state
+interface SongRankingEntry {
+  displayName: string;
+  score: number;
+  totalBeatPt: number;
+}
+const songRankingList = ref<SongRankingEntry[]>([]);
+const isLoadingSongRanking = ref(false);
+
+const fetchSongRanking = async () => {
+  if (!selectedRecord.value) return;
+  isLoadingSongRanking.value = true;
+  try {
+    const params = new URLSearchParams({
+      title: selectedRecord.value.title,
+      difficultyName: selectedRecord.value.difficultyName
+    });
+    const res = await fetch(`${API_BASE}/api/scores/song-ranking?${params}`, { headers: authHeaders() });
+    if (res.ok) {
+      songRankingList.value = await res.json();
+    }
+  } catch {
+    // Silently fail
+  } finally {
+    isLoadingSongRanking.value = false;
+  }
+};
+
+const handleRankingTabClick = () => {
+  modalTab.value = 'ranking';
+  if (songRankingList.value.length === 0 && !isLoadingSongRanking.value) {
+    fetchSongRanking();
+  }
+};
 
 const rivalList = computed(() => {
   if (!selectedRecord.value) return [];
@@ -1007,6 +1141,7 @@ const handleRivalTabClick = () => {
 watch(() => selectedRecord.value?.title, () => {
   targetBeatPtSlider.value = 0;
   rivalScores.value = [];
+  songRankingList.value = [];
   // Fetch votes for the new record
   if (selectedRecord.value) {
     fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);
