@@ -11,6 +11,7 @@ import Changelog from './components/Changelog.vue';
 import UploadResultModal from './components/UploadResultModal.vue';
 import RankingList from './components/RankingList.vue';
 import AdminUserListModal from './components/AdminUserListModal.vue';
+import AdminSongRanksView from './components/AdminSongRanksView.vue';
 import Sidebar from './components/Sidebar.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
@@ -32,7 +33,7 @@ import { watch, onMounted } from 'vue';
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks'>('dashboard')
 const viewingMode = ref<'admin' | 'friend' | null>(null);
 const totalBeatTierPoints = ref(0);
 
@@ -583,6 +584,10 @@ const cancelUpload = () => {
 
         <template v-else-if="activeTab === 'ranking'">
           <RankingList class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <template v-else-if="activeTab === 'admin-song-ranks'">
+          <AdminSongRanksView class="w-full max-w-5xl mx-auto" />
         </template>
         
         <template v-else-if="activeTab === 'terms'">

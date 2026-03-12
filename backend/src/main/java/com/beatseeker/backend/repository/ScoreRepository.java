@@ -42,4 +42,25 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY s.score DESC",
         nativeQuery = true)
     List<Map<String, Object>> findSongRanking(@Param("title") String title, @Param("difficultyName") String difficultyName);
+
+    @Query(value =
+        "WITH best_scores AS (" +
+        "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score" +
+        "  FROM scores" +
+        "  WHERE difficulty_level IN (11, 12)" +
+        "  GROUP BY title, difficulty_name, difficulty_level, user_id" +
+        "), " +
+        "all_ranks AS (" +
+        "  SELECT title, difficulty_name, difficulty_level, user_id, score," +
+        "    RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC) AS rank," +
+        "    COUNT(*) OVER (PARTITION BY title, difficulty_name) AS total" +
+        "  FROM best_scores" +
+        ") " +
+        "SELECT title as \"title\", difficulty_name as \"difficultyName\", difficulty_level as \"difficultyLevel\"," +
+        "  rank as \"rank\", total as \"total\" " +
+        "FROM all_ranks " +
+        "WHERE user_id = :adminUserId " +
+        "ORDER BY rank ASC, title ASC",
+        nativeQuery = true)
+    List<Map<String, Object>> findAdminSongRanks(@Param("adminUserId") Long adminUserId);
 }

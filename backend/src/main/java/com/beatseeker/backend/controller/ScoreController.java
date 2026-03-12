@@ -363,6 +363,18 @@ public class ScoreController {
     }
 
     /**
+     * Get admin's rank for every song (admin only).
+     */
+    @GetMapping("/admin-song-ranks")
+    public ResponseEntity<List<Map<String, Object>>> getAdminSongRanks(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()
+                || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
+            return ResponseEntity.ok(List.of());
+        }
+        return ResponseEntity.ok(scoreRepository.findAdminSongRanks(18L));
+    }
+
+    /**
      * Update the memo for a specific score.
      */
     @PutMapping("/{id}/memo")
