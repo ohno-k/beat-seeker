@@ -36,7 +36,7 @@
 
     <!-- Filters -->
     <div v-if="rows.length > 0" class="flex flex-wrap gap-3 mb-4">
-      <label v-for="lv in [8, 9, 10, 11, 12]" :key="lv" class="flex items-center gap-2 cursor-pointer select-none">
+      <label v-for="lv in availableLevels" :key="lv" class="flex items-center gap-2 cursor-pointer select-none">
         <input type="checkbox" v-model="showLevels[lv]" class="w-4 h-4 rounded accent-amber-500" />
         <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Lv.{{ lv }}</span>
       </label>
@@ -137,12 +137,19 @@ const showLevels = ref<Record<number, boolean>>({ 8: true, 9: true, 10: true, 11
 const showAnother = ref(true);
 const showLeggendaria = ref(true);
 
+const availableLevels = computed(() => {
+  const lvs = new Set(rows.value.map(r => r.difficultyLevel));
+  return [8, 9, 10, 11, 12].filter(lv => lvs.has(lv));
+});
+
 const filteredRows = computed(() =>
-  rows.value.filter(r =>
-    (showLevels.value[r.difficultyLevel] ?? true) &&
-    (r.difficultyName === 'ANOTHER' ? showAnother.value : true) &&
-    (r.difficultyName === 'LEGGENDARIA' ? showLeggendaria.value : true)
-  )
+  rows.value.filter(r => {
+    const lvInRange = [8, 9, 10, 11, 12].includes(r.difficultyLevel);
+    if (lvInRange && !showLevels.value[r.difficultyLevel]) return false;
+    if (r.difficultyName === 'ANOTHER' && !showAnother.value) return false;
+    if (r.difficultyName === 'LEGGENDARIA' && !showLeggendaria.value) return false;
+    return true;
+  })
 );
 
 const firstPlaceCount = computed(() => filteredRows.value.filter(r => r.rank === 1).length);
