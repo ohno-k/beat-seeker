@@ -36,13 +36,9 @@
 
     <!-- Filters -->
     <div v-if="rows.length > 0" class="flex flex-wrap gap-3 mb-4">
-      <label class="flex items-center gap-2 cursor-pointer select-none">
-        <input type="checkbox" v-model="showLv11" class="w-4 h-4 rounded accent-amber-500" />
-        <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Lv.11</span>
-      </label>
-      <label class="flex items-center gap-2 cursor-pointer select-none">
-        <input type="checkbox" v-model="showLv12" class="w-4 h-4 rounded accent-amber-500" />
-        <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Lv.12</span>
+      <label v-for="lv in [8, 9, 10, 11, 12]" :key="lv" class="flex items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" v-model="showLevels[lv]" class="w-4 h-4 rounded accent-amber-500" />
+        <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Lv.{{ lv }}</span>
       </label>
       <div class="w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
       <label class="flex items-center gap-2 cursor-pointer select-none">
@@ -137,15 +133,13 @@ const rows = ref<SongRankRow[]>([]);
 const isLoading = ref(false);
 const loaded = ref(false);
 
-const showLv11 = ref(true);
-const showLv12 = ref(true);
+const showLevels = ref<Record<number, boolean>>({ 8: true, 9: true, 10: true, 11: true, 12: true });
 const showAnother = ref(true);
 const showLeggendaria = ref(true);
 
 const filteredRows = computed(() =>
   rows.value.filter(r =>
-    (r.difficultyLevel === 11 ? showLv11.value : true) &&
-    (r.difficultyLevel === 12 ? showLv12.value : true) &&
+    (showLevels.value[r.difficultyLevel] ?? true) &&
     (r.difficultyName === 'ANOTHER' ? showAnother.value : true) &&
     (r.difficultyName === 'LEGGENDARIA' ? showLeggendaria.value : true)
   )
