@@ -94,7 +94,7 @@
               </div>
               
               <div v-else class="space-y-3">
-                <div v-for="song in diffData.updatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
+                <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
                   
                   <div class="flex flex-col gap-1 overflow-hidden">
                     <div class="flex items-center gap-2 flex-wrap">
@@ -222,7 +222,7 @@
               更新楽曲 (Top 10)
            </h3>
            <div class="space-y-4 flex-1">
-             <div v-for="song in diffData.updatedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+             <div v-for="song in sortedUpdatedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                <div>
                  <div class="flex items-center gap-2 mb-2">
                     <span class="px-3 py-1 rounded text-sm font-black border" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
@@ -281,6 +281,11 @@ const props = defineProps<{
 const nextRankData = computed(() => {
   if (!props.diffData) return null;
   return getNextRankInfo(props.diffData.newTotalBeatPt);
+});
+
+const sortedUpdatedSongs = computed(() => {
+  if (!props.diffData) return [];
+  return [...props.diffData.updatedSongs].sort((a, b) => b.newBeatPt - a.newBeatPt);
 });
 
 const emit = defineEmits<{
