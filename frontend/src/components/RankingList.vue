@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
+import { useAuth } from '../composables/useAuth';
 
 interface RankingEntry {
   displayName: string;
@@ -9,6 +10,7 @@ interface RankingEntry {
   totalBeatPt: number;
   rankChange: number | null;
 }
+const { user } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const ranking = ref<RankingEntry[]>([]);
 const isLoading = ref(true);
@@ -72,7 +74,10 @@ onMounted(async () => {
             </thead>
             <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
               <tr v-for="(entry, index) in ranking" :key="entry.iidxId"
-                class="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                class="group transition-colors"
+                :class="user && entry.iidxId === user.iidxId
+                  ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
+                  : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'">
                 <td class="py-3 pl-4">
                   <div class="flex items-center gap-2">
                     <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
@@ -80,6 +85,7 @@ onMounted(async () => {
                         index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                         index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
                         index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                        user && entry.iidxId === user.iidxId ? 'bg-blue-500 text-white' :
                         'text-slate-400 border border-slate-100 dark:border-slate-700'
                       ]">
                       {{ index + 1 }}
@@ -91,9 +97,16 @@ onMounted(async () => {
                   </div>
                 </td>
                 <td class="py-3">
-                  <span class="font-bold text-slate-800 dark:text-slate-100 text-base group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {{ entry.displayName || 'Unnamed Player' }}
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-base transition-colors"
+                      :class="user && entry.iidxId === user.iidxId
+                        ? 'text-blue-700 dark:text-blue-300'
+                        : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400'">
+                      {{ entry.displayName || 'Unnamed Player' }}
+                    </span>
+                    <span v-if="user && entry.iidxId === user.iidxId"
+                      class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">YOU</span>
+                  </div>
                 </td>
                 <td class="py-3 px-2 text-center">
                   <div class="flex justify-center">
@@ -106,7 +119,10 @@ onMounted(async () => {
                 </td>
                 <td class="py-3 text-right pr-4">
                   <div class="flex items-baseline justify-end gap-1">
-                    <span class="text-xl font-black text-slate-800 dark:text-slate-100 tabular-nums">
+                    <span class="text-xl font-black tabular-nums"
+                      :class="user && entry.iidxId === user.iidxId
+                        ? 'text-blue-700 dark:text-blue-300'
+                        : 'text-slate-800 dark:text-slate-100'">
                       {{ entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                     </span>
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
