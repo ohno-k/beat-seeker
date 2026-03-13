@@ -7,6 +7,7 @@ interface RankingEntry {
   displayName: string;
   iidxId: string;
   totalBeatPt: number;
+  rankChange: number | null;
 }
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const ranking = ref<RankingEntry[]>([]);
@@ -63,7 +64,7 @@ onMounted(async () => {
           <table class="w-full">
             <thead>
               <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-16">順位</th>
+                <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">順位</th>
                 <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
                 <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">ランク</th>
                 <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">総 BEAT-PT</th>
@@ -73,14 +74,20 @@ onMounted(async () => {
               <tr v-for="(entry, index) in ranking" :key="entry.iidxId"
                 class="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                 <td class="py-3 pl-4">
-                  <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
-                    :class="[
-                      index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                      index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                      index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
-                      'text-slate-400 border border-slate-100 dark:border-slate-700'
-                    ]">
-                    {{ index + 1 }}
+                  <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                      :class="[
+                        index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                        index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                        index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                        'text-slate-400 border border-slate-100 dark:border-slate-700'
+                      ]">
+                      {{ index + 1 }}
+                    </div>
+                    <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
+                    <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
+                    <span v-else-if="entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(entry.rankChange) }}</span>
+                    <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
                   </div>
                 </td>
                 <td class="py-3">

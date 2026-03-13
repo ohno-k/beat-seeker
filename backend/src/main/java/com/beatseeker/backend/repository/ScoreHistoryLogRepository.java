@@ -10,13 +10,33 @@ import java.util.Map;
 public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog, Long> {
     List<ScoreHistoryLog> findByUserOrderByUploadedAtAsc(User user);
 
-    @Query(value = "SELECT u.display_name as \"displayName\", u.iidx_id as \"iidxId\", latest_scores.total_beat_pt as \"totalBeatPt\" "
-            + " FROM ( " +
-            "    SELECT DISTINCT ON (user_id) user_id, total_beat_pt, uploaded_at " +
-            "    FROM score_history_logs " +
-            "    ORDER BY user_id, uploaded_at DESC " +
-            ") AS latest_scores " +
-            "JOIN users u ON latest_scores.user_id = u.id " +
-            "ORDER BY latest_scores.total_beat_pt DESC", nativeQuery = true)
+    @Query(value =
+            "WITH current_ranks AS ( " +
+            "    SELECT user_id, total_beat_pt, " +
+            "           RANK() OVER (ORDER BY total_beat_pt DESC) AS rank_pos " +
+            "    FROM ( " +
+            "        SELECT DISTINCT ON (user_id) user_id, total_beat_pt, uploaded_at " +
+            "        FROM score_history_logs " +
+            "        ORDER BY user_id, uploaded_at DESC " +
+            "    ) AS latest " +
+            "), " +
+            "previous_ranks AS ( " +
+            "    SELECT user_id, " +
+            "           RANK() OVER (ORDER BY total_beat_pt DESC) AS rank_pos " +
+            "    FROM ( " +
+            "        SELECT DISTINCT ON (user_id) user_id, total_beat_pt, uploaded_at " +
+            "        FROM score_history_logs " +
+            "        WHERE uploaded_at < CURRENT_DATE " +
+            "        ORDER BY user_id, uploaded_at DESC " +
+            "    ) AS prev_latest " +
+            ") " +
+            "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
+            "       cr.total_beat_pt AS \"totalBeatPt\", " +
+            "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
+            "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
+            "FROM current_ranks cr " +
+            "JOIN users u ON cr.user_id = u.id " +
+            "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
+            "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getGlobalRanking();
 }
