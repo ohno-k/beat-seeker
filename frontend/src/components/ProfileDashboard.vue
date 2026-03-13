@@ -219,58 +219,6 @@
       </div>
     </div>
 
-    <!-- 他プレイヤーとの比較 -->
-    <div v-if="comparisonData" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
-      <div class="mb-5">
-        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">他プレイヤーとの比較</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">総合BEAT-PT ±200pt 以内の {{ comparisonData.nearbyCount }} 名との {{ comparisonData.totalCompared }} 曲の比較（Lv11/12、0点除く）</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <div class="section-header">
-            <div class="w-1 h-5 bg-emerald-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">あなたが得意な曲 TOP5</h3>
-          </div>
-          <div class="space-y-2">
-            <div v-for="c in comparisonData.good" :key="`g_${c.title}_${c.diff}`"
-              class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30">
-              <div class="flex justify-between items-start gap-2">
-                <div class="min-w-0">
-                  <div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">{{ c.title }}</div>
-                  <div class="text-xs text-slate-400">{{ c.diff }} ☆{{ c.difficultyLevel }}<span v-if="c.informalRank"> · {{ c.informalRank }}</span></div>
-                </div>
-                <div class="text-right shrink-0">
-                  <div class="text-emerald-600 dark:text-emerald-400 font-black text-sm">+{{ c.delta.toFixed(1) }}%</div>
-                  <div class="text-xs text-slate-400">自 {{ c.myRate.toFixed(1) }}% / 平均 {{ c.avgRate.toFixed(1) }}%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="section-header">
-            <div class="w-1 h-5 bg-red-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">あなたが苦手な曲 TOP5</h3>
-          </div>
-          <div class="space-y-2">
-            <div v-for="c in comparisonData.bad" :key="`b_${c.title}_${c.diff}`"
-              class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30">
-              <div class="flex justify-between items-start gap-2">
-                <div class="min-w-0">
-                  <div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">{{ c.title }}</div>
-                  <div class="text-xs text-slate-400">{{ c.diff }} ☆{{ c.difficultyLevel }}<span v-if="c.informalRank"> · {{ c.informalRank }}</span></div>
-                </div>
-                <div class="text-right shrink-0">
-                  <div class="text-red-600 dark:text-red-400 font-black text-sm">{{ c.delta.toFixed(1) }}%</div>
-                  <div class="text-xs text-slate-400">自 {{ c.myRate.toFixed(1) }}% / 平均 {{ c.avgRate.toFixed(1) }}%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Score Rate Band Modal -->
     <Teleport to="body">
       <div v-if="histModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="histModalOpen = false">
@@ -381,7 +329,7 @@ import songDataRaw from '../data/song_data.json';
 import diffTableRaw from '../data/difficulty_table.json';
 
 const { isDarkMode } = useDarkMode();
-const { authHeaders, user } = useAuth();
+const { authHeaders } = useAuth();
 const { requestNotificationPermission } = useFriends();
 
 const notificationStatus = ref(Notification?.permission || 'default');
@@ -435,7 +383,6 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const isLoading = ref(true);
 const historyData = ref<HistoryRecord[]>([]);
 const myScores = ref<any[]>([]);
-const allUserScores = ref<any[]>([]);
 
 // Build lookup maps from static data files
 const songDict = new Map<string, number>();
@@ -460,10 +407,9 @@ if ((diffTableRaw as any)?.ranks) {
 
 onMounted(async () => {
   try {
-    const [histRes, scoresRes, allScoresRes] = await Promise.allSettled([
+    const [histRes, scoresRes] = await Promise.allSettled([
       fetch(`${API_BASE}/api/scores/history`, { headers: authHeaders() }),
       fetch(`${API_BASE}/api/scores/me`, { headers: authHeaders() }),
-      fetch(`${API_BASE}/api/scores/all-user-scores`, { headers: authHeaders() }),
     ]);
 
     if (histRes.status === 'fulfilled' && histRes.value.ok) {
@@ -472,9 +418,6 @@ onMounted(async () => {
     }
     if (scoresRes.status === 'fulfilled' && scoresRes.value.ok) {
       myScores.value = await scoresRes.value.json();
-    }
-    if (allScoresRes.status === 'fulfilled' && allScoresRes.value.ok) {
-      allUserScores.value = await allScoresRes.value.json();
     }
   } catch (e) {
     console.error('Failed to load data', e);
@@ -715,91 +658,6 @@ const avgPgreatRate = computed(() => {
   if (!scored.length) return null;
   const sum = scored.reduce((acc, s) => acc + (s.pgreat / (s.pgreat + s.great)) * 100, 0);
   return Math.round(sum / scored.length * 10) / 10;
-});
-
-// ── Abstract comparison (±100pt peers, Lv11/12, score > 0) ───────────────────
-
-const comparisonData = computed(() => {
-  if (!allUserScores.value.length || !user.value) return null;
-  const myUserId = user.value.id;
-  const myBeatPt = latestBeatPt.value;
-  if (myBeatPt === 0) return null;
-
-  // Group other users' scores
-  const userScoresByUser = new Map<number, any[]>();
-  allUserScores.value.forEach((s: any) => {
-    if (s.userId === myUserId) return;
-    if (!userScoresByUser.has(s.userId)) userScoresByUser.set(s.userId, []);
-    userScoresByUser.get(s.userId)!.push(s);
-  });
-
-  // Compute each other user's totalBeatPt (top-100 approach)
-  const userBeatPtMap = new Map<number, number>();
-  for (const [uid, scores] of userScoresByUser.entries()) {
-    const pts = scores
-      .map((s: any) => {
-        const diffCode = s.difficultyName === 'ANOTHER' ? '4' : '10';
-        const maxScore = songDict.get(`${s.title}_${diffCode}`) ?? 0;
-        const scoreRate = maxScore > 0 ? (s.score / maxScore) * 100 : -1;
-        const informalRank = informalDict.get(`${s.title}_${s.difficultyName}`);
-        return calculatePoints(scoreRate, informalRank);
-      })
-      .filter((pt: number) => pt > 0)
-      .sort((a: number, b: number) => b - a)
-      .slice(0, 100);
-    userBeatPtMap.set(uid, pts.reduce((a: number, b: number) => a + b, 0));
-  }
-
-  // Filter to users within ±200pt
-  const nearbyUserIds = new Set(
-    [...userBeatPtMap.entries()]
-      .filter(([, pt]) => Math.abs(pt - myBeatPt) <= 200)
-      .map(([uid]) => uid)
-  );
-
-  if (nearbyUserIds.size === 0) return null;
-
-  // Build avg score rate per song from nearby users (Lv11/12, score > 0)
-  const songStats = new Map<string, { sum: number; count: number }>();
-  allUserScores.value.forEach((s: any) => {
-    if (!nearbyUserIds.has(s.userId)) return;
-    if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return;
-    if (s.score === 0) return;
-    const diffCode = s.difficultyName === 'ANOTHER' ? '4' : '10';
-    const max = songDict.get(`${s.title}_${diffCode}`) ?? 0;
-    if (max === 0) return;
-    const rate = (s.score / max) * 100;
-    const key = `${s.title}_${s.difficultyName}`;
-    if (!songStats.has(key)) songStats.set(key, { sum: 0, count: 0 });
-    const st = songStats.get(key)!;
-    st.sum += rate;
-    st.count++;
-  });
-
-  // Compare with my active scores
-  const comparisons: Array<{ title: string; diff: string; myRate: number; avgRate: number; delta: number; informalRank: string; difficultyLevel: number }> = [];
-  myScoresActive.value.forEach(s => {
-    const key = `${s.title}_${s.difficultyName}`;
-    const stat = songStats.get(key);
-    if (!stat || stat.count < 2) return;
-    const avgRate = stat.sum / stat.count;
-    comparisons.push({
-      title: s.title, diff: s.difficultyName,
-      myRate: s.scoreRate, avgRate,
-      delta: s.scoreRate - avgRate,
-      informalRank: s.informalRank,
-      difficultyLevel: s.difficultyLevel
-    });
-  });
-
-  if (!comparisons.length) return null;
-  const sorted = [...comparisons].sort((a, b) => b.delta - a.delta);
-  return {
-    good: sorted.slice(0, 5),
-    bad: [...comparisons].sort((a, b) => a.delta - b.delta).slice(0, 5),
-    totalCompared: comparisons.length,
-    nearbyCount: nearbyUserIds.size,
-  };
 });
 
 // ── Score rate histogram modal ────────────────────────────────────────────────
