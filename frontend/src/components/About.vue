@@ -92,7 +92,7 @@
             </div>
             <h3 class="font-black text-slate-800 dark:text-white text-center mb-2">成長を記録</h3>
             <p class="text-sm text-slate-600 dark:text-slate-400 text-center leading-relaxed">
-              Googleアカウントでログインすると、スコアがクラウドに保存され、過去との比較や成長の確認ができます。
+              アカウント登録してログインすると、スコアがクラウドに保存され、過去との比較や成長の確認ができます。
             </p>
           </div>
         </div>
@@ -206,7 +206,7 @@
               <h3 class="font-black text-slate-800 dark:text-white">クラウド保存 & ログイン</h3>
             </div>
             <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Googleアカウントでログインすると、スコアデータがクラウドに自動保存されます。
+              アカウント登録してログインすると、スコアデータがクラウドに自動保存されます。
               ログインなしでもCSVの読み込みと分析は利用可能ですが、データの保存や履歴機能を使うにはログインが必要です。
             </p>
           </div>
@@ -252,7 +252,7 @@
             <h4 class="font-black text-slate-800 dark:text-white mb-2">Q. ログインしないと使えませんか？</h4>
             <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               いいえ、ログインなしでもCSVの読み込みとダッシュボード・スコア一覧の表示は可能です。
-              ただし、データのクラウド保存やアップロード履歴の確認にはGoogleアカウントでのログインが必要です。
+              ただし、データのクラウド保存やアップロード履歴の確認にはアカウント登録後のログインが必要です。
             </p>
           </div>
           <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-200 dark:border-slate-700">

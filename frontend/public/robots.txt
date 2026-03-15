@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /terms
+Allow: /ranking
+
+Sitemap: https://beat-seeker-1.onrender.com/sitemap.xml

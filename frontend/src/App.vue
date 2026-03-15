@@ -69,6 +69,18 @@ onMounted(() => {
   if (isLoggedIn.value) {
     requestNotificationPermission();
   }
+
+  // URLパスに応じてタブを設定（直接アクセス・クローラー対応）
+  const pathToTab: Record<string, typeof activeTab.value> = {
+    '/about': 'about',
+    '/terms': 'terms',
+    '/ranking': 'ranking',
+    '/changelog': 'changelog',
+  };
+  const currentPath = window.location.pathname;
+  if (pathToTab[currentPath]) {
+    activeTab.value = pathToTab[currentPath];
+  }
 });
 
 // Notification permission is handled by useFriends
