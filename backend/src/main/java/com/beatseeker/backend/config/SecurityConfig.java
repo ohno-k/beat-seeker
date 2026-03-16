@@ -62,6 +62,7 @@ public class SecurityConfig {
                                                                 "/api/votes")
                                                 .authenticated()
                                                 .requestMatchers("/api/friends/**").authenticated()
+                                                .requestMatchers("/api/arena/**").authenticated()
                                                 .anyRequest().permitAll())
                                 .exceptionHandling(ex -> ex
                                                 .authenticationEntryPoint(

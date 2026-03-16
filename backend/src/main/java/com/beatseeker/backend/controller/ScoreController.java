@@ -135,6 +135,7 @@ public class ScoreController {
         log.setBeatPtIncrease(req.beatPtIncrease());
         log.setUpdatedCount(req.updatedCount());
         log.setDiffJson(req.diffJson());
+        log.setTotalPrecisionPt(req.totalPrecisionPt() != null ? req.totalPrecisionPt() : 0.0);
 
         long totalScore = 0;
         int fcCount = 0;
@@ -331,6 +332,12 @@ public class ScoreController {
     @GetMapping("/ranking")
     public ResponseEntity<List<Map<String, Object>>> getGlobalRanking() {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getGlobalRanking();
+        return ResponseEntity.ok(ranking);
+    }
+
+    @GetMapping("/precision-ranking")
+    public ResponseEntity<List<Map<String, Object>>> getPrecisionRanking() {
+        List<Map<String, Object>> ranking = scoreHistoryLogRepository.getPrecisionRanking();
         return ResponseEntity.ok(ranking);
     }
 

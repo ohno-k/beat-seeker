@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import CsvDropzone from './components/CsvDropzone.vue';
+import UnifiedImport from './components/UnifiedImport.vue';
+import { BOOKMARKLET_CODE } from './utils/bookmarklet';
 import ScoreSummary from './components/ScoreSummary.vue';
 import ScoreDashboard from './components/ScoreDashboard.vue';
 import ProfileDashboard from './components/ProfileDashboard.vue';
@@ -15,6 +17,7 @@ import AdminSongRanksView from './components/AdminSongRanksView.vue';
 import Sidebar from './components/Sidebar.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
+import ArenaView from './views/ArenaView.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
@@ -25,15 +28,19 @@ import type { UploadDiffResult, UpdatedSong } from './types/UploadDiff';
 import { getRankInfo, calculateTotalPoints, calculatePoints } from './utils/beatTier';
 import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
+import { useAppUpdate } from './composables/useAppUpdate';
 import { useScores } from './composables/useScores';
 import { useDarkMode } from './composables/useDarkMode';
 import { useFriends } from './composables/useFriends';
 import { watch, onMounted } from 'vue';
 
+const { hasUpdate } = useAppUpdate();
+const reloadPage = () => window.location.reload();
+
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena'>('dashboard')
 const viewingMode = ref<'admin' | 'friend' | null>(null);
 const totalBeatTierPoints = ref(0);
 
@@ -110,8 +117,8 @@ const loadSavedScores = async () => {
     
     if (data && data.length > 0) {
       scoreData.value = data;
-      // Calculate total points for the loaded data
-      totalBeatTierPoints.value = calculateTotalPoints(flattenScores(data));
+      const flat = flattenScores(data);
+      totalBeatTierPoints.value = calculateTotalPoints(flat);
     }
   } catch (e) {
     console.error("Failed to load saved scores", e);
@@ -359,6 +366,8 @@ const handleFileDropped = async (file: File) => {
 
 const showUploadArea = ref(false);
 
+const pendingScoreFile = ref<File | null>(null);
+
 const resetData = () => {
   if (isLoggedIn.value) {
     // If logged in, we shouldn't clear the data, just show the upload area
@@ -371,9 +380,16 @@ const resetData = () => {
   errorMsg.value = '';
 };
 
-const cancelUpload = () => {
+const handleUnifiedClose = async () => {
   showUploadArea.value = false;
   errorMsg.value = '';
+  const fileToProcess = pendingScoreFile.value;
+  pendingScoreFile.value = null;
+  if (fileToProcess) {
+    await handleFileDropped(fileToProcess);
+  } else {
+    await loadSavedScores();
+  }
 };
 </script>
 
@@ -476,6 +492,15 @@ const cancelUpload = () => {
                 プロフィール
               </button>
               
+              <button
+                v-if="isLoggedIn && !viewingUserId"
+                @click="activeTab = 'arena'"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
+                :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+              >
+                ARENAモード
+              </button>
+
               <!-- Special Titles for non-tab pages -->
               <span v-if="['changelog', 'terms', 'about'].includes(activeTab)" class="ml-4 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0 capitalize">
                 {{ activeTab }}
@@ -556,13 +581,21 @@ const cancelUpload = () => {
           >
             成長記録
           </button>
-          <button 
+          <button
             v-if="isLoggedIn && !viewingUserId"
             @click="activeTab = 'profile'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
             プロフィール
+          </button>
+          <button
+            v-if="isLoggedIn && !viewingUserId"
+            @click="activeTab = 'arena'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+          >
+            ARENA
           </button>
         </nav>
         <!-- Admin Viewing Banner -->
@@ -589,7 +622,22 @@ const cancelUpload = () => {
           </button>
         </div>
         
-        <!-- Main Views -->
+        <!-- Import Modal -->
+      <div v-if="showUploadArea && scoreData.length > 0" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="handleUnifiedClose">
+        <div class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-slate-800 dark:text-white">データを取り込む</h2>
+            <button @click="handleUnifiedClose" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @score-file="pendingScoreFile = $event" @close="handleUnifiedClose" />
+        </div>
+      </div>
+
+      <!-- Main Views -->
         <template v-if="activeTab === 'changelog'">
           <Changelog class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
@@ -608,6 +656,10 @@ const cancelUpload = () => {
         
         <template v-else-if="activeTab === 'about'">
           <About class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <template v-else-if="activeTab === 'arena'">
+          <ArenaView class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
         
         <template v-else>
@@ -661,36 +713,12 @@ const cancelUpload = () => {
             </div>
           </div>
 
-          <!-- CSV Upload Modal (shown over existing data) -->
-          <div v-if="showUploadArea && scoreData.length > 0" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="cancelUpload">
-            <div class="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
-              <div class="flex justify-between items-center mb-5">
-                <h2 class="text-lg font-bold text-slate-800 dark:text-white">CSVアップロード</h2>
-                <button @click="cancelUpload" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
-              <div
-                v-if="errorMsg"
-                class="w-full mt-4 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-                <span class="font-medium text-sm sm:text-base">{{ errorMsg }}</span>
-              </div>
-            </div>
-          </div>
-
           <!-- Score Results View -->
           <div v-if="scoreData.length > 0" class="w-full flex flex-col items-center animate-fade-in">
             <!-- Dashboard Tab -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
-              <ScoreDashboard 
-                :scores="scoreData" 
+              <ScoreDashboard
+                :scores="scoreData"
                 :totalPoints="totalBeatTierPoints"
                 class="w-full"
               />
@@ -741,6 +769,26 @@ const cancelUpload = () => {
         </div>
       </footer>
     </div>
+  <!-- Update banner -->
+  <Teleport to="body">
+    <div
+      v-if="hasUpdate"
+      class="fixed bottom-0 inset-x-0 z-[100] flex items-center justify-between gap-4 px-4 py-3 bg-slate-800 dark:bg-slate-900 text-white shadow-2xl border-t border-slate-700"
+    >
+      <div class="flex items-center gap-2.5 text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>新しいバージョンが利用可能です。</span>
+      </div>
+      <button
+        @click="reloadPage"
+        class="shrink-0 px-4 py-1.5 bg-blue-500 hover:bg-blue-400 text-white text-sm font-bold rounded-lg transition-colors"
+      >
+        今すぐ更新
+      </button>
+    </div>
+  </Teleport>
   </div>
 </template>
 

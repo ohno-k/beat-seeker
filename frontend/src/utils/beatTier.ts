@@ -1,6 +1,6 @@
 /**
  * Beat-Tier System Logic
- * 
+ *
  * 1. Single Song Points = (ScoreRate / 100)^1.5 * Weight
  *    Weight: 11.0 -> 150, 11.1 -> 152, ..., 12.4 -> 178, 12.5 -> 182, ..., 13.0 -> 202
  * 2. Total Points = Sum of top 100 songs
@@ -300,6 +300,7 @@ export function getFolderRankInfo(totalPoints: number, maxPoints: number): RankI
 
     return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 }
+
 
 /**
  * Get progress to next rank for a folder
