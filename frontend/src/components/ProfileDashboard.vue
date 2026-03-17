@@ -182,6 +182,18 @@
           </div>
         </div>
 
+        <!-- BEAT-PT上位100曲の難易度分布 -->
+        <div>
+          <div class="section-header">
+            <div class="w-1 h-5 bg-indigo-500 rounded-full"></div>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200">BEAT-PT 上位100曲の難易度分布</h3>
+          </div>
+          <div class="chart-card">
+            <h4 class="chart-title">非公式難易度別 曲数（上位100曲中）</h4>
+            <div class="h-44"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="barOpts" /></div>
+          </div>
+        </div>
+
         <!-- BEAT-PT上位10曲 -->
         <div>
           <div class="section-header">
@@ -324,7 +336,7 @@ import { Line as LineChart, Bar as BarChart, Doughnut as DoughnutChart } from 'v
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import { useFriends } from '../composables/useFriends';
-import { calculatePoints } from '../utils/beatTier';
+import { calculatePoints, WEIGHTS } from '../utils/beatTier';
 import songDataRaw from '../data/song_data.json';
 import diffTableRaw from '../data/difficulty_table.json';
 
@@ -552,6 +564,35 @@ const beatPtTop10 = computed(() =>
     .sort((a, b) => b.beatPt - a.beatPt)
     .slice(0, 10)
 );
+
+const beatPtTop100 = computed(() =>
+  [...myScoresActive.value]
+    .filter(s => s.beatPt > 0)
+    .sort((a, b) => b.beatPt - a.beatPt)
+    .slice(0, 100)
+);
+
+const top100DiffHistData = computed(() => {
+  if (!beatPtTop100.value.length) return null;
+  const keys = Object.keys(WEIGHTS).sort((a, b) => parseFloat(a) - parseFloat(b));
+  const counts: Record<string, number> = Object.fromEntries(keys.map(k => [k, 0]));
+  beatPtTop100.value.forEach(s => {
+    const match = s.informalRank?.match(/(\d+\.\d+)/);
+    const key = match ? match[1] : null;
+    if (key && key in counts) counts[key]++;
+  });
+  const colors = keys.map(k => {
+    const v = parseFloat(k);
+    if (v >= 12.5) return 'rgba(168,85,247,0.75)';
+    if (v >= 12.0) return 'rgba(99,102,241,0.75)';
+    if (v >= 11.5) return 'rgba(59,130,246,0.75)';
+    return 'rgba(148,163,184,0.6)';
+  });
+  return {
+    labels: keys.map(k => `☆${k}`),
+    datasets: [{ label: '曲数', data: keys.map(k => counts[k]), backgroundColor: colors, borderRadius: 4 }]
+  };
+});
 
 // Clear type doughnut (excludes NO PLAY / ---)
 const clearTypeDoughnut = computed(() => {
