@@ -12,7 +12,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
 
     @Query(value =
             "WITH current_ranks AS ( " +
-            "    SELECT user_id, total_beat_pt, " +
+            "    SELECT user_id, total_beat_pt, uploaded_at, " +
             "           RANK() OVER (ORDER BY total_beat_pt DESC) AS rank_pos " +
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_beat_pt, uploaded_at " +
@@ -32,6 +32,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             ") " +
             "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       cr.total_beat_pt AS \"totalBeatPt\", " +
+            "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +

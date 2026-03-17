@@ -9,6 +9,19 @@ interface RankingEntry {
   iidxId: string;
   totalBeatPt: number;
   rankChange: number | null;
+  lastUpdatedAt: string | null;
+}
+
+function formatLastUpdated(dateStr: string | null): string {
+  if (!dateStr) return '-';
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return '今日';
+  if (diffDays === 1) return '昨日';
+  if (diffDays === 2) return '一昨日';
+  if (diffDays <= 6) return `${diffDays}日前`;
+  return '一週間以上前';
 }
 
 const { user } = useAuth();
@@ -68,7 +81,8 @@ onMounted(async () => {
               <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">順位</th>
               <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
               <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">ランク</th>
-              <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">総 BEAT-PT</th>
+              <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">総 BEAT-PT</th>
+              <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">最終更新</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -116,7 +130,7 @@ onMounted(async () => {
                   />
                 </div>
               </td>
-              <td class="py-3 text-right pr-4">
+              <td class="py-3 text-right">
                 <div class="flex items-baseline justify-end gap-1">
                   <span class="text-xl font-black tabular-nums"
                     :class="user && entry.iidxId === user.iidxId
@@ -126,6 +140,14 @@ onMounted(async () => {
                   </span>
                   <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
                 </div>
+              </td>
+              <td class="py-3 text-right pr-4">
+                <span class="text-xs font-medium tabular-nums"
+                  :class="formatLastUpdated(entry.lastUpdatedAt) === '今日'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-400 dark:text-slate-500'">
+                  {{ formatLastUpdated(entry.lastUpdatedAt) }}
+                </span>
               </td>
             </tr>
           </tbody>
