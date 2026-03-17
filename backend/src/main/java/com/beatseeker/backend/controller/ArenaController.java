@@ -114,17 +114,44 @@ public class ArenaController {
             map.put("battleType", m.getBattleType());
             map.put("matchDate", m.getMatchDate());
             map.put("myDjName", m.getMyDjName());
-            map.put("myArenaClass", m.getMyArenaClass());
-            map.put("myRank", m.getMyRank());
-            map.put("myTotalPt", m.getMyTotalPt());
+
+            List<Map<String, Object>> players = List.of();
+            try {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> parsed = objectMapper.readValue(m.getPlayersJson(), List.class);
+                players = parsed;
+            } catch (Exception ignored) {}
+            map.put("players", players);
 
             try {
                 map.put("songs", objectMapper.readValue(m.getSongsJson(), List.class));
-                map.put("players", objectMapper.readValue(m.getPlayersJson(), List.class));
-            } catch (Exception e) {
+            } catch (Exception ignored) {
                 map.put("songs", List.of());
-                map.put("players", List.of());
             }
+
+            // Recalculate my stats from playersJson when stored values are missing
+            int myRank = m.getMyRank() != null ? m.getMyRank() : 0;
+            int myTotalPt = m.getMyTotalPt() != null ? m.getMyTotalPt() : 0;
+            String myArenaClass = m.getMyArenaClass() != null ? m.getMyArenaClass() : "";
+            String myDjName = m.getMyDjName();
+
+            if (myRank == 0 && myDjName != null && !myDjName.isEmpty()) {
+                for (Map<String, Object> p : players) {
+                    if (myDjName.equals(p.get("djName"))) {
+                        Object rankObj = p.get("rank");
+                        Object ptObj = p.get("totalPt");
+                        Object clsObj = p.get("arenaClass");
+                        if (rankObj instanceof Number) myRank = ((Number) rankObj).intValue();
+                        if (ptObj instanceof Number) myTotalPt = ((Number) ptObj).intValue();
+                        if (clsObj instanceof String) myArenaClass = (String) clsObj;
+                        break;
+                    }
+                }
+            }
+
+            map.put("myArenaClass", myArenaClass);
+            map.put("myRank", myRank);
+            map.put("myTotalPt", myTotalPt);
 
             result.add(map);
         }
