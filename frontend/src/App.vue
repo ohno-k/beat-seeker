@@ -64,6 +64,7 @@ const { pendingRequests, fetchPendingRequests, requestNotificationPermission } =
 const isNotificationOpen = ref(false);
 const deferredPrompt = ref<any>(null);
 const showInstallBanner = ref(false);
+const pendingImportOpen = ref(false);
 
 onMounted(() => {
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -87,6 +88,17 @@ onMounted(() => {
   const currentPath = window.location.pathname;
   if (pathToTab[currentPath]) {
     activeTab.value = pathToTab[currentPath];
+  }
+
+  // ブックマークレットからのリダイレクト時にインポートモーダルを自動表示
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('import') === 'open') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    if (isLoggedIn.value) {
+      showUploadArea.value = true;
+    } else {
+      pendingImportOpen.value = true;
+    }
   }
 });
 
@@ -155,12 +167,17 @@ watch(isLoggedIn, (newVal) => {
     loadSavedScores();
     fetchPendingRequests(); // Check for friends
     requestNotificationPermission();
-    
+
+    if (pendingImportOpen.value) {
+      pendingImportOpen.value = false;
+      showUploadArea.value = true;
+    }
+
     // Check if we just logged in via Google OAuth redirect
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('login') === 'success') {
       activeTab.value = 'dashboard';
-      
+
       // Clean up the URL without reloading the page
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -623,7 +640,7 @@ const handleUnifiedClose = async () => {
         </div>
         
         <!-- Import Modal -->
-      <div v-if="showUploadArea && scoreData.length > 0" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="handleUnifiedClose">
+      <div v-if="showUploadArea && isLoggedIn" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="handleUnifiedClose">
         <div class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-bold text-slate-800 dark:text-white">データを取り込む</h2>
