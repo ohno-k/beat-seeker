@@ -39,7 +39,7 @@ const getSongMaxScore = (titleRaw: string, diffText: string): number => {
 
 const { isLoggedIn } = useAuth();
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 // --- Matches state ---
 const matches = ref<any[]>([]);
