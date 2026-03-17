@@ -27,7 +27,7 @@ const isImporting = ref(false);
 const resultMsg = ref('');
 const resultError = ref('');
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const makeCsvFile = (csvText: string): File => {
   const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
