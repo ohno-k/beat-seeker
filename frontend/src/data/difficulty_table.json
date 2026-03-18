@@ -1015,7 +1015,8 @@
                 "Sakura Mirage",
                 "SPECIAL SUMMER CAMPAIGN!",
                 "LAST DAY",
-                "WISE UP![L]"
+                "WISE UP![L]",
+                "SUPER HEROINE!!"
             ]
         },
         {
@@ -1108,7 +1109,9 @@
                 "Flash Back 90's[L]",
                 "冬椿 ft. Kanae Asaba[L]",
                 "めうめうぺったんたん！！ (ZAQUVA Remix)",
-                "仮想空間の旅人たち[L]"
+                "仮想空間の旅人たち[L]",
+                "i-ii",
+                "BRAVE OUT[L]"
             ]
         },
         {
@@ -1312,7 +1315,8 @@
                 "ちょえちょえまぎか",
                 "PENDUAL TALISMAN",
                 "A MINSTREL ～ ver. short-scape ～[L]",
-                "月とミルク"
+                "月とミルク",
+                "Plea Per Phase"
             ]
         },
         {
@@ -1376,11 +1380,7 @@
         },
         {
             "rank": "Uncategorized(IIDX 32)",
-            "songs": [
-                "Plea Per Phase",
-                "BRAVE OUT[L]",
-                "SUPER HEROINE!!"
-            ]
+            "songs": []
         },
         {
             "rank": "Uncategorized(IIDX 33)",
@@ -1389,7 +1389,6 @@
                 "Time To Empress[L]",
                 "華麗なる！音戯探偵ひなビタ",
                 "Nemophila",
-                "Time to Empress[L]",
                 "タンポポ",
                 "Amor∞Fati",
                 "PERFECT GREAT!!",
@@ -1400,9 +1399,7 @@
         },
         {
             "rank": "Uncategorized(other)",
-            "songs": [
-                "i-ii"
-            ]
+            "songs": []
         }
     ]
 }
