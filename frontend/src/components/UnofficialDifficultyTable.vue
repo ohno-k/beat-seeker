@@ -23,7 +23,14 @@ const rateTableRows = computed(() => {
     const label = def.tier ? `${def.name} ${def.tier}` : def.name;
     const rates = allFolders.map(f => {
       const rate = getFolderLegendRate(f) - def.offset;
-      return rate > 66.666 ? rate.toFixed(2) + '%' : '-';
+      if (rate <= 66.666) return { text: '-', color: 'text-slate-400 dark:text-slate-500' };
+      
+      let rateColor = 'text-slate-600 dark:text-slate-300';
+      if (rate >= 94.45) rateColor = 'text-purple-600 dark:text-purple-400 font-bold';
+      else if (rate >= 88.88) rateColor = 'text-amber-500 dark:text-amber-400 font-bold';
+      else if (rate >= 77.77) rateColor = 'text-emerald-600 dark:text-emerald-400 font-bold';
+      
+      return { text: rate.toFixed(2) + '%', color: rateColor };
     });
     return { label, color: def.color, rates };
   });
@@ -145,7 +152,7 @@ const tableData = computed(() => {
           >?</button>
           <div
             v-if="showInfo"
-            class="absolute z-20 left-0 top-7 w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
+            class="absolute z-20 top-7 -left-16 sm:left-0 w-[280px] sm:w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
           >
             <div class="flex items-center justify-between mb-2">
               <span class="font-bold text-sm text-slate-800 dark:text-slate-100">フォルダランクについて</span>
@@ -196,7 +203,7 @@ const tableData = computed(() => {
               <tbody>
                 <tr v-for="(row, idx) in rateTableRows" :key="row.label" :class="idx % 5 === 0 ? 'border-t border-slate-200 dark:border-slate-700' : ''">
                   <td class="py-1 px-2 font-bold whitespace-nowrap sticky left-0 z-10 bg-white dark:bg-slate-800" :class="row.color">{{ row.label }}</td>
-                  <td v-for="(rate, i) in row.rates" :key="i" class="py-1 px-1 sm:px-2 text-center font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ rate }}</td>
+                  <td v-for="(rate, i) in row.rates" :key="i" class="py-1 px-1 sm:px-2 text-center font-mono whitespace-nowrap" :class="rate.color">{{ rate.text }}</td>
                 </tr>
               </tbody>
             </table>
