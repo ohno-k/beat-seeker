@@ -22,16 +22,9 @@
         変更
       </button>
     </div>
-    <p class="text-xs text-slate-400 dark:text-slate-500 mb-1">
+    <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">
       次のランクまで あと <span class="font-black text-blue-600 dark:text-blue-400">{{ nextRankGap.toFixed(1) }} pt</span> 必要
     </p>
-    <p v-if="nearbyPlayerCount > 0" class="text-[10px] text-slate-400 dark:text-slate-500 mb-4">
-      近接プレイヤー (±200pt) <span class="font-bold text-slate-500 dark:text-slate-400">{{ nearbyPlayerCount }}人</span> のTOP100スコアを参照
-    </p>
-    <p v-else-if="!isLoading" class="text-[10px] text-slate-400 dark:text-slate-500 mb-4">
-      近接プレイヤーデータなし
-    </p>
-    <div v-else class="mb-4" />
 
     <div v-if="isLoading" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
       読み込み中...
