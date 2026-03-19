@@ -50785,6 +50785,42 @@
       "level": 10
     },
     {
+      "title": "オーバーライド",
+      "artist": "Remixed by Pizuya's Cell",
+      "genre": "IIDX EDITION",
+      "notes": 0,
+      "bpm": "204",
+      "difficulty": "1",
+      "level": 2
+    },
+    {
+      "title": "オーバーライド",
+      "artist": "Remixed by Pizuya's Cell",
+      "genre": "IIDX EDITION",
+      "notes": 0,
+      "bpm": "204",
+      "difficulty": "2",
+      "level": 5
+    },
+    {
+      "title": "オーバーライド",
+      "artist": "Remixed by Pizuya's Cell",
+      "genre": "IIDX EDITION",
+      "notes": 909,
+      "bpm": "204",
+      "difficulty": "2",
+      "level": 9
+    },
+    {
+      "title": "オーバーライド",
+      "artist": "Remixed by Pizuya's Cell",
+      "genre": "IIDX EDITION",
+      "notes": 1603,
+      "bpm": "204",
+      "difficulty": "4",
+      "level": 11
+    },
+    {
       "title": "オールトの雲",
       "artist": "OSTER Project",
       "genre": "GALAXY QUEST",
@@ -53107,6 +53143,33 @@
       "level": 11
     },
     {
+      "title": "ベンガル vs. アムール Battle",
+      "artist": "OSTER Project",
+      "genre": "BOLLYWOOD CORE",
+      "notes": 671,
+      "bpm": "165",
+      "difficulty": "2",
+      "level": 6
+    },
+    {
+      "title": "ベンガル vs. アムール Battle",
+      "artist": "OSTER Project",
+      "genre": "BOLLYWOOD CORE",
+      "notes": 1059,
+      "bpm": "165",
+      "difficulty": "3",
+      "level": 10
+    },
+    {
+      "title": "ベンガル vs. アムール Battle",
+      "artist": "OSTER Project",
+      "genre": "BOLLYWOOD CORE",
+      "notes": 1867,
+      "bpm": "165",
+      "difficulty": "4",
+      "level": 12
+    },
+    {
       "title": "ポラリスノウタ",
       "artist": "ここなつ2.0",
       "genre": "FUTUREBASS",
@@ -53696,6 +53759,33 @@
       "bpm": "152",
       "difficulty": "4",
       "level": 10
+    },
+    {
+      "title": "ラブコメトキドキシリアス",
+      "artist": "cosMo@暴走P & L.E.D.-G",
+      "genre": "Hi-ROM COM",
+      "notes": 636,
+      "bpm": "173",
+      "difficulty": "2",
+      "level": 7
+    },
+    {
+      "title": "ラブコメトキドキシリアス",
+      "artist": "cosMo@暴走P & L.E.D.-G",
+      "genre": "Hi-ROM COM",
+      "notes": 1035,
+      "bpm": "173",
+      "difficulty": "3",
+      "level": 10
+    },
+    {
+      "title": "ラブコメトキドキシリアス",
+      "artist": "cosMo@暴走P & L.E.D.-G",
+      "genre": "Hi-ROM COM",
+      "notes": 1902,
+      "bpm": "173",
+      "difficulty": "4",
+      "level": 12
     },
     {
       "title": "ランカーキラーガール",
@@ -61124,6 +61214,42 @@
       "coef": -1,
       "difficultyLevel": "11",
       "dpLevel": "0"
+    },
+    {
+      "title": "不死身ごっこ",
+      "artist": "ピノキオピー",
+      "genre": "ボカロ",
+      "notes": 0,
+      "bpm": "147",
+      "difficulty": "1",
+      "level": 1
+    },
+    {
+      "title": "不死身ごっこ",
+      "artist": "ピノキオピー",
+      "genre": "ボカロ",
+      "notes": 0,
+      "bpm": "147",
+      "difficulty": "2",
+      "level": 5
+    },
+    {
+      "title": "不死身ごっこ",
+      "artist": "ピノキオピー",
+      "genre": "ボカロ",
+      "notes": 0,
+      "bpm": "147",
+      "difficulty": "3",
+      "level": 7
+    },
+    {
+      "title": "不死身ごっこ",
+      "artist": "ピノキオピー",
+      "genre": "ボカロ",
+      "notes": 1292,
+      "bpm": "147",
+      "difficulty": "4",
+      "level": 10
     }
   ]
 }
