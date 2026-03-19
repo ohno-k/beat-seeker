@@ -55,6 +55,33 @@ export function getMaxPoints(informalRank: string | undefined): number {
 }
 
 /**
+ * Get the Legend score rate threshold for a folder.
+ * Power curve (t^1.7): ☆11.0 = 99.6%, ☆13.0 = 94.44%
+ * t^1.7 keeps the rate flat near ☆11.0 and drops toward ☆13.0.
+ */
+export function getFolderLegendRate(informalRank: string | undefined): number {
+    if (!informalRank) return 0;
+    const match = informalRank.match(/(\d+\.\d+)/);
+    const rankValue = match ? parseFloat(match[1]) : 0;
+    if (rankValue < 11.0 || rankValue > 13.0) return 0;
+
+    const LEGEND_RATE_LOW = 99.6;   // ☆11.0: almost all MAX- single digits
+    const LEGEND_RATE_HIGH = 94.44; // ☆13.0: MAX- notation threshold
+    const t = (rankValue - 11.0) / (13.0 - 11.0);
+    return LEGEND_RATE_LOW - Math.pow(t, 1.7) * (LEGEND_RATE_LOW - LEGEND_RATE_HIGH);
+}
+
+/**
+ * Get the per-song Legend point threshold for a folder.
+ * Converts the Legend score rate to BEAT-PT using calculatePoints.
+ */
+export function getLegendPtPerSong(informalRank: string | undefined): number {
+    const legendRate = getFolderLegendRate(informalRank);
+    if (legendRate <= 0) return 0;
+    return calculatePoints(legendRate, informalRank);
+}
+
+/**
  * Calculate points for a single song
  */
 export function calculatePoints(scoreRate: number, informalRank: string | undefined): number {
@@ -211,89 +238,94 @@ export function getGroupedRanks() {
 }
 
 /**
- * Definition of Folder Rank Tiers by ratio of max points.
+ * Folder Rank definitions: each rank is 0.5% score rate below Legend.
+ * Legend rate varies per folder (linear interpolation).
  */
-export const FOLDER_TIER_RATIOS = [
-    { ratio: 0.995, name: 'Legend', color: 'text-amber-500 font-black' },
+export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; color: string }[] = [
+    { offset: 0, name: 'Legend', color: 'text-amber-500 font-black' },
 
-    { ratio: 0.98, name: 'Mythic', tier: 5, color: 'text-purple-600' },
-    { ratio: 0.97, name: 'Mythic', tier: 4, color: 'text-purple-600' },
-    { ratio: 0.96, name: 'Mythic', tier: 3, color: 'text-purple-600' },
-    { ratio: 0.95, name: 'Mythic', tier: 2, color: 'text-purple-600' },
-    { ratio: 0.94, name: 'Mythic', tier: 1, color: 'text-purple-600' },
+    { offset: 0.5, name: 'Mythic', tier: 5, color: 'text-purple-600' },
+    { offset: 1.0, name: 'Mythic', tier: 4, color: 'text-purple-600' },
+    { offset: 1.5, name: 'Mythic', tier: 3, color: 'text-purple-600' },
+    { offset: 2.0, name: 'Mythic', tier: 2, color: 'text-purple-600' },
+    { offset: 2.5, name: 'Mythic', tier: 1, color: 'text-purple-600' },
 
-    { ratio: 0.93, name: 'Ancient', tier: 5, color: 'text-indigo-600' },
-    { ratio: 0.92, name: 'Ancient', tier: 4, color: 'text-indigo-600' },
-    { ratio: 0.91, name: 'Ancient', tier: 3, color: 'text-indigo-600' },
-    { ratio: 0.90, name: 'Ancient', tier: 2, color: 'text-indigo-600' },
-    { ratio: 0.89, name: 'Ancient', tier: 1, color: 'text-indigo-600' },
+    { offset: 3.0, name: 'Ancient', tier: 5, color: 'text-indigo-600' },
+    { offset: 3.5, name: 'Ancient', tier: 4, color: 'text-indigo-600' },
+    { offset: 4.0, name: 'Ancient', tier: 3, color: 'text-indigo-600' },
+    { offset: 4.5, name: 'Ancient', tier: 2, color: 'text-indigo-600' },
+    { offset: 5.0, name: 'Ancient', tier: 1, color: 'text-indigo-600' },
 
-    { ratio: 0.88, name: 'Master', tier: 5, color: 'text-red-600' },
-    { ratio: 0.87, name: 'Master', tier: 4, color: 'text-red-600' },
-    { ratio: 0.86, name: 'Master', tier: 3, color: 'text-red-600' },
-    { ratio: 0.85, name: 'Master', tier: 2, color: 'text-red-600' },
-    { ratio: 0.84, name: 'Master', tier: 1, color: 'text-red-600' },
+    { offset: 5.5, name: 'Master', tier: 5, color: 'text-red-600' },
+    { offset: 6.0, name: 'Master', tier: 4, color: 'text-red-600' },
+    { offset: 6.5, name: 'Master', tier: 3, color: 'text-red-600' },
+    { offset: 7.0, name: 'Master', tier: 2, color: 'text-red-600' },
+    { offset: 7.5, name: 'Master', tier: 1, color: 'text-red-600' },
 
-    { ratio: 0.83, name: 'Elite', tier: 5, color: 'text-orange-600' },
-    { ratio: 0.82, name: 'Elite', tier: 4, color: 'text-orange-600' },
-    { ratio: 0.81, name: 'Elite', tier: 3, color: 'text-orange-600' },
-    { ratio: 0.80, name: 'Elite', tier: 2, color: 'text-orange-600' },
-    { ratio: 0.79, name: 'Elite', tier: 1, color: 'text-orange-600' },
+    { offset: 8.0, name: 'Elite', tier: 5, color: 'text-orange-600' },
+    { offset: 8.5, name: 'Elite', tier: 4, color: 'text-orange-600' },
+    { offset: 9.0, name: 'Elite', tier: 3, color: 'text-orange-600' },
+    { offset: 9.5, name: 'Elite', tier: 2, color: 'text-orange-600' },
+    { offset: 10.0, name: 'Elite', tier: 1, color: 'text-orange-600' },
 
-    { ratio: 0.78, name: 'Commander', tier: 5, color: 'text-yellow-700' },
-    { ratio: 0.77, name: 'Commander', tier: 4, color: 'text-yellow-700' },
-    { ratio: 0.76, name: 'Commander', tier: 3, color: 'text-yellow-700' },
-    { ratio: 0.75, name: 'Commander', tier: 2, color: 'text-yellow-700' },
-    { ratio: 0.74, name: 'Commander', tier: 1, color: 'text-yellow-700' },
+    { offset: 10.5, name: 'Commander', tier: 5, color: 'text-yellow-700' },
+    { offset: 11.0, name: 'Commander', tier: 4, color: 'text-yellow-700' },
+    { offset: 11.5, name: 'Commander', tier: 3, color: 'text-yellow-700' },
+    { offset: 12.0, name: 'Commander', tier: 2, color: 'text-yellow-700' },
+    { offset: 12.5, name: 'Commander', tier: 1, color: 'text-yellow-700' },
 
-    { ratio: 0.73, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
-    { ratio: 0.72, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
-    { ratio: 0.71, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
-    { ratio: 0.70, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
-    { ratio: 0.69, name: 'Veteran', tier: 1, color: 'text-emerald-600' },
+    { offset: 13.0, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
+    { offset: 13.5, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
+    { offset: 14.0, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
+    { offset: 14.5, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
+    { offset: 15.0, name: 'Veteran', tier: 1, color: 'text-emerald-600' },
 
-    { ratio: 0.67, name: 'Expert', tier: 5, color: 'text-teal-600' },
-    { ratio: 0.65, name: 'Expert', tier: 4, color: 'text-teal-600' },
-    { ratio: 0.63, name: 'Expert', tier: 3, color: 'text-teal-600' },
-    { ratio: 0.61, name: 'Expert', tier: 2, color: 'text-teal-600' },
-    { ratio: 0.59, name: 'Expert', tier: 1, color: 'text-teal-600' },
+    { offset: 15.5, name: 'Expert', tier: 5, color: 'text-teal-600' },
+    { offset: 16.0, name: 'Expert', tier: 4, color: 'text-teal-600' },
+    { offset: 16.5, name: 'Expert', tier: 3, color: 'text-teal-600' },
+    { offset: 17.0, name: 'Expert', tier: 2, color: 'text-teal-600' },
+    { offset: 17.5, name: 'Expert', tier: 1, color: 'text-teal-600' },
 
-    { ratio: 0.55, name: 'Advanced', tier: 5, color: 'text-cyan-600' },
-    { ratio: 0.53, name: 'Advanced', tier: 4, color: 'text-cyan-600' },
-    { ratio: 0.51, name: 'Advanced', tier: 3, color: 'text-cyan-600' },
-    { ratio: 0.49, name: 'Advanced', tier: 2, color: 'text-cyan-600' },
-    { ratio: 0.47, name: 'Advanced', tier: 1, color: 'text-cyan-600' },
+    { offset: 18.0, name: 'Advanced', tier: 5, color: 'text-cyan-600' },
+    { offset: 18.5, name: 'Advanced', tier: 4, color: 'text-cyan-600' },
+    { offset: 19.0, name: 'Advanced', tier: 3, color: 'text-cyan-600' },
+    { offset: 19.5, name: 'Advanced', tier: 2, color: 'text-cyan-600' },
+    { offset: 20.0, name: 'Advanced', tier: 1, color: 'text-cyan-600' },
 
-    { ratio: 0.43, name: 'Intermediate', tier: 5, color: 'text-blue-600' },
-    { ratio: 0.39, name: 'Intermediate', tier: 4, color: 'text-blue-600' },
-    { ratio: 0.35, name: 'Intermediate', tier: 3, color: 'text-blue-600' },
-    { ratio: 0.31, name: 'Intermediate', tier: 2, color: 'text-blue-600' },
-    { ratio: 0.27, name: 'Intermediate', tier: 1, color: 'text-blue-600' },
+    { offset: 20.5, name: 'Intermediate', tier: 5, color: 'text-blue-600' },
+    { offset: 21.0, name: 'Intermediate', tier: 4, color: 'text-blue-600' },
+    { offset: 21.5, name: 'Intermediate', tier: 3, color: 'text-blue-600' },
+    { offset: 22.0, name: 'Intermediate', tier: 2, color: 'text-blue-600' },
+    { offset: 22.5, name: 'Intermediate', tier: 1, color: 'text-blue-600' },
 
-    { ratio: 0.22, name: 'Novice', tier: 5, color: 'text-slate-600' },
-    { ratio: 0.18, name: 'Novice', tier: 4, color: 'text-slate-600' },
-    { ratio: 0.14, name: 'Novice', tier: 3, color: 'text-slate-600' },
-    { ratio: 0.10, name: 'Novice', tier: 2, color: 'text-slate-600' },
-    { ratio: 0.06, name: 'Novice', tier: 1, color: 'text-slate-600' },
+    { offset: 23.0, name: 'Novice', tier: 5, color: 'text-slate-600' },
+    { offset: 23.5, name: 'Novice', tier: 4, color: 'text-slate-600' },
+    { offset: 24.0, name: 'Novice', tier: 3, color: 'text-slate-600' },
+    { offset: 24.5, name: 'Novice', tier: 2, color: 'text-slate-600' },
+    { offset: 25.0, name: 'Novice', tier: 1, color: 'text-slate-600' },
 ];
 
 /**
- * Calculate folder rank info dynamically based on max possible points for that folder.
- * Legend is 99.5% of max possible points.
- * Other tiers are distributed below that.
+ * Calculate folder rank info based on score rate thresholds.
+ * Legend rate = getFolderLegendRate(informalRank), each rank 0.5% below.
+ * Threshold points = calculatePoints(thresholdRate, informalRank) × songCount.
  */
-export function getFolderRankInfo(totalPoints: number, maxPoints: number): RankInfo {
-    if (maxPoints <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+export function getFolderRankInfo(totalPoints: number, informalRank: string | undefined, songCount: number): RankInfo {
+    if (!informalRank || songCount <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 
-    const ratio = totalPoints / maxPoints;
+    const legendRate = getFolderLegendRate(informalRank);
+    if (legendRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 
-    for (const tier of FOLDER_TIER_RATIOS) {
-        if (ratio >= tier.ratio) {
+    for (const def of FOLDER_RANK_DEFS) {
+        const thresholdRate = legendRate - def.offset;
+        if (thresholdRate <= 66.666) break;
+        const thresholdPoints = calculatePoints(thresholdRate, informalRank) * songCount;
+        if (totalPoints >= thresholdPoints) {
             return {
-                name: tier.name,
-                tier: tier.tier,
-                minPoints: maxPoints * tier.ratio,
-                color: tier.color
+                name: def.name,
+                tier: def.tier,
+                minPoints: thresholdPoints,
+                color: def.color
             };
         }
     }
@@ -301,46 +333,55 @@ export function getFolderRankInfo(totalPoints: number, maxPoints: number): RankI
     return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 }
 
-
 /**
- * Get progress to next rank for a folder
+ * Get progress to next folder rank.
+ * Uses score-rate-based thresholds (Legend rate - 0.5% per rank).
  */
-export function getNextFolderRankInfo(totalPoints: number, maxPoints: number): { nextRank?: RankInfo; progress: number } {
-    if (maxPoints <= 0) return { progress: 100 };
+export function getNextFolderRankInfo(totalPoints: number, informalRank: string | undefined, songCount: number): { nextRank?: RankInfo; progress: number } {
+    if (!informalRank || songCount <= 0) return { progress: 0 };
 
-    const ratio = totalPoints / maxPoints;
+    const legendRate = getFolderLegendRate(informalRank);
+    if (legendRate <= 0) return { progress: 0 };
 
-    // FOLDER_TIER_RATIOS is in descending order (highest to lowest)
-    const currentRankIndex = FOLDER_TIER_RATIOS.findIndex(t => ratio >= t.ratio);
-
-    if (currentRankIndex === 0) {
-        // Legend has no next rank
-        return { progress: 100 };
+    // Build thresholds array
+    const thresholds: { def: typeof FOLDER_RANK_DEFS[0]; points: number }[] = [];
+    for (const def of FOLDER_RANK_DEFS) {
+        const thresholdRate = legendRate - def.offset;
+        if (thresholdRate <= 66.666) break;
+        thresholds.push({ def, points: calculatePoints(thresholdRate, informalRank) * songCount });
     }
 
-    let currentRankMinRatio = 0;
-    if (currentRankIndex !== -1) {
-        currentRankMinRatio = FOLDER_TIER_RATIOS[currentRankIndex].ratio;
+    if (thresholds.length === 0) return { progress: 0 };
+
+    // Find current rank
+    let currentIdx = -1;
+    for (let i = 0; i < thresholds.length; i++) {
+        if (totalPoints >= thresholds[i].points) {
+            currentIdx = i;
+            break;
+        }
     }
 
-    // The next rank is the one immediately before it in the descending list
-    const nextTierObj = FOLDER_TIER_RATIOS[currentRankIndex !== -1 ? currentRankIndex - 1 : FOLDER_TIER_RATIOS.length - 1];
+    // Already at Legend
+    if (currentIdx === 0) return { progress: 100 };
+
+    // Determine next rank and current threshold
+    const nextIdx = currentIdx === -1 ? thresholds.length - 1 : currentIdx - 1;
+    const currentThreshold = currentIdx === -1 ? 0 : thresholds[currentIdx].points;
+    const nextThreshold = thresholds[nextIdx].points;
+    const nextDef = thresholds[nextIdx].def;
 
     const nextRank: RankInfo = {
-        name: nextTierObj.name,
-        tier: nextTierObj.tier,
-        minPoints: maxPoints * nextTierObj.ratio,
-        color: nextTierObj.color
+        name: nextDef.name,
+        tier: nextDef.tier,
+        minPoints: nextThreshold,
+        color: nextDef.color
     };
 
-    const currentRankMinPoints = maxPoints * currentRankMinRatio;
-    const nextRankMinPoints = maxPoints * nextTierObj.ratio;
+    const range = nextThreshold - currentThreshold;
+    const progress = range > 0
+        ? Math.min(100, Math.max(0, (totalPoints - currentThreshold) / range * 100))
+        : 0;
 
-    const range = nextRankMinPoints - currentRankMinPoints;
-    const currentProgress = totalPoints - currentRankMinPoints;
-
-    return {
-        nextRank,
-        progress: Math.min(100, Math.max(0, (currentProgress / range) * 100))
-    };
+    return { nextRank, progress };
 }

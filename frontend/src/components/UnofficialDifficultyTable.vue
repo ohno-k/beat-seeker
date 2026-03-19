@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { ScoreRecord } from '../utils/scoreData';
-import { getFolderRankInfo, getNextFolderRankInfo } from '../utils/beatTier';
+import { getFolderRankInfo, getNextFolderRankInfo, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
 import difficultyData from '../data/difficulty_table.json';
 
@@ -10,6 +10,24 @@ const props = defineProps<{
 }>();
 
 const expandedRanks = ref<Set<string>>(new Set());
+const showInfo = ref(false);
+const showRateTable = ref(false);
+
+// All folders ☆11.0 ~ ☆13.0
+const allFolders: string[] = [];
+for (let i = 0; i <= 20; i++) allFolders.push((11.0 + i * 0.1).toFixed(1));
+
+// Rate table: all ranks × all folders
+const rateTableRows = computed(() => {
+  return FOLDER_RANK_DEFS.map(def => {
+    const label = def.tier ? `${def.name} ${def.tier}` : def.name;
+    const rates = allFolders.map(f => {
+      const rate = getFolderLegendRate(f) - def.offset;
+      return rate > 66.666 ? rate.toFixed(2) + '%' : '-';
+    });
+    return { label, color: def.color, rates };
+  });
+});
 
 const toggleRank = (rank: string) => {
   if (expandedRanks.value.has(rank)) {
@@ -70,7 +88,6 @@ const tableData = computed(() => {
     songs.forEach(s => {
       // Points accumulation
       totalBeatPoints += s.beatTierPoints;
-      maxBeatPoints += s.maxBeatTierPoints;
 
       // Only include songs with a max score (i.e. we have note data for them)
       if (s.maxScore > 0 && s.score > 0) {
@@ -81,9 +98,18 @@ const tableData = computed(() => {
 
     const averageRate = totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
     const playCount = songs.filter(s => s.score > 0).length;
-    
-    const rankInfo = getFolderRankInfo(totalBeatPoints, maxBeatPoints);
-    const nextRankInfo = getNextFolderRankInfo(totalBeatPoints, maxBeatPoints);
+
+    const totalCount = rankSongCounts.value[rank] || songs.length;
+
+    // Legend threshold for display (MAX reference)
+    const legendPtPerSong = getLegendPtPerSong(rank);
+    maxBeatPoints = legendPtPerSong > 0 ? legendPtPerSong * totalCount : 0;
+
+    const rankInfo = getFolderRankInfo(totalBeatPoints, rank, totalCount);
+    const nextRankInfo = getNextFolderRankInfo(totalBeatPoints, rank, totalCount);
+
+    // Played-only rank: same points but evaluated against played song count only
+    const playedRankInfo = getFolderRankInfo(totalBeatPoints, rank, playCount);
 
     return {
       rank,
@@ -94,9 +120,10 @@ const tableData = computed(() => {
       maxBeatPoints,
       averageRate,
       playCount,
-      totalCount: rankSongCounts.value[rank] || songs.length,
+      totalCount,
       rankInfo,
-      nextRankInfo
+      nextRankInfo,
+      playedRankInfo
     };
   });
 });
@@ -110,8 +137,73 @@ const tableData = computed(() => {
           <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
         </svg>
         非公式難易度表サマリー
+        <div class="relative">
+          <button
+            @click.stop="showInfo = !showInfo"
+            class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 hover:bg-indigo-200 dark:hover:bg-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[10px] font-black flex items-center justify-center transition-colors"
+            title="このサマリーについて"
+          >?</button>
+          <div
+            v-if="showInfo"
+            class="absolute z-20 left-0 top-7 w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-slate-800 dark:text-slate-100">フォルダランクについて</span>
+              <button @click="showInfo = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-base leading-none">×</button>
+            </div>
+            <p class="mb-2 text-slate-600 dark:text-slate-400">各フォルダの全楽曲の合計BEAT-PTをもとに、フォルダランクを算出します。</p>
+            <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-2 space-y-1">
+              <p class="font-bold text-slate-700 dark:text-slate-200">■ LEGENDラインの基準</p>
+              <p>LEGENDに必要な平均スコアレートは難易度ごとに異なります。☆11.0では約99.6%、☆13.0では約94.44%（MAX-越え）が基準で、その間は曲線で補間されます。</p>
+              <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">■ 各ランクの基準</p>
+              <p>LEGENDラインから0.5%ずつ必要スコアレートが下がるごとに、ランクが1段階下がります。</p>
+              <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">■ 薄いランクアイコン</p>
+              <p>プレイ済みの曲のみで算出したランクです。全曲プレイ済みの場合は表示されません。</p>
+            </div>
+            <button
+              @click.stop="showRateTable = true; showInfo = false"
+              class="mt-3 w-full py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition-colors"
+            >📊 必要スコアレート表を見る</button>
+          </div>
+        </div>
       </h3>
     </div>
+    <!-- Click-outside backdrop for info tooltip -->
+    <div v-if="showInfo" class="fixed inset-0 z-10" @click="showInfo = false"></div>
+
+    <!-- Rate Table Modal -->
+    <Teleport to="body">
+      <div v-if="showRateTable" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showRateTable = false"></div>
+        <div class="relative z-10 bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[95vw] max-h-[90vh] flex flex-col">
+          <!-- Header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">📊 必要スコアレート表</h3>
+              <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">LEGENDから0.5%刻みでランクが下降</p>
+            </div>
+            <button @click="showRateTable = false" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors shrink-0 ml-2">×</button>
+          </div>
+          <!-- Scrollable table -->
+          <div class="overflow-auto flex-1">
+            <table class="text-[10px] sm:text-xs border-collapse">
+              <thead class="sticky top-0 z-20">
+                <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
+                  <th class="py-1.5 px-2 text-left font-bold sticky left-0 z-30 bg-slate-100 dark:bg-slate-900 min-w-[80px] sm:min-w-[110px]">ランク</th>
+                  <th v-for="f in allFolders" :key="f" class="py-1.5 px-1 sm:px-2 text-center font-bold whitespace-nowrap">☆{{ f }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in rateTableRows" :key="row.label" :class="idx % 5 === 0 ? 'border-t border-slate-200 dark:border-slate-700' : ''">
+                  <td class="py-1 px-2 font-bold whitespace-nowrap sticky left-0 z-10 bg-white dark:bg-slate-800" :class="row.color">{{ row.label }}</td>
+                  <td v-for="(rate, i) in row.rates" :key="i" class="py-1 px-1 sm:px-2 text-center font-mono text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ rate }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </Teleport>
     
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
@@ -119,7 +211,7 @@ const tableData = computed(() => {
           <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[10px] sm:text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
             <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">難易度</th>
             <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">平均RATE</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">合計 PT</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">合計PT（予測ランク）</th>
             <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">プレイ済</th>
             <th class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"></th>
           </tr>
@@ -153,8 +245,16 @@ const tableData = computed(() => {
                     </span>
                     <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold whitespace-nowrap">MAX: {{ data.maxBeatPoints.toFixed(1) }}</span>
                   </div>
-                  <RankIcon class="block sm:hidden shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
-                  <RankIcon class="hidden sm:block shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
+                  <div class="flex items-center gap-0.5">
+                    <template v-if="data.playCount < data.totalCount">
+                      <RankIcon class="block sm:hidden shrink-0 opacity-30" :rank-name="data.playedRankInfo.name" :tier="data.playedRankInfo.tier" size="xs" />
+                      <RankIcon class="hidden sm:block shrink-0 opacity-30" :rank-name="data.playedRankInfo.name" :tier="data.playedRankInfo.tier" size="sm" />
+                    </template>
+                    <template v-else>
+                      <RankIcon class="block sm:hidden shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
+                      <RankIcon class="hidden sm:block shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
+                    </template>
+                  </div>
                 </div>
               </td>
               <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-slate-600 dark:text-slate-300">
@@ -178,6 +278,7 @@ const tableData = computed(() => {
                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">フォルダ内 BEAT-TIER</span>
                     <div class="flex items-center gap-3">
                       <RankIcon :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="lg" />
+                      <RankIcon v-if="data.playCount < data.totalCount" :rank-name="data.playedRankInfo.name" :tier="data.playedRankInfo.tier" size="lg" class="opacity-30" />
                       <div class="flex flex-col">
                         <span class="text-2xl font-black tracking-tight" :class="data.rankInfo.color">
                           {{ data.totalBeatPoints.toFixed(1) }} <span class="text-sm text-slate-400 dark:text-slate-500 font-bold uppercase">pt</span>

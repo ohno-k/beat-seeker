@@ -17,6 +17,32 @@
       </p>
     </div>
 
+    <!-- Update Entry: v1.1.1 (Folder Rank System Redesign) -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.1.1</span>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">フォルダランクシステムの刷新</h3>
+        </div>
+        <span class="text-sm font-bold text-slate-500 dark:text-slate-400">2026年3月</span>
+      </div>
+
+      <div class="p-8 space-y-6">
+        <div>
+          <h4 class="text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+            改善・変更 (Improvements &amp; Changes)
+          </h4>
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">フォルダランク算出ロジックの全面刷新:</span> 各フォルダのLEGENDに必要な平均スコアレートが難易度ごとに変化するようになりました。☆11.0では約99.6%、☆13.0では約94.44%（MAX-越え）を基準に、曲線補間で各フォルダのLEGENDラインが決まります。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">ランク間隔の統一:</span> LEGENDから0.5%刻みで必要スコアレートが下がるごとにランクが1段階下がる方式に変更し、全フォルダで直感的なランク体系になりました。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">必要スコアレート表の追加:</span> 非公式難易度表サマリーのヘルプボタンから、全フォルダ×全ランクの必要スコアレート一覧表をモーダルで確認できるようになりました。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">ヘルプテキストの更新:</span> フォルダランクの説明文を新しいスコアレートベースの仕組みに合わせて更新しました。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- Update Entry: v1.1.0 (Arena Feature) -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
