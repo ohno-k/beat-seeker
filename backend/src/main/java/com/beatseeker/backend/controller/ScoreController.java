@@ -351,60 +351,6 @@ public class ScoreController {
         return ResponseEntity.ok(scores);
     }
 
-    /**
-     * Returns ANOTHER/LEGGENDARIA scores of players whose total BEAT-PT is within
-     * ±range of the given pt, grouped by player. Used by "ランクアップへの道" to
-     * calculate 伸びしろ against nearby players' TOP-100 scores.
-     */
-    @GetMapping("/nearby-players-scores")
-    public ResponseEntity<List<Map<String, Object>>> getNearbyPlayersScores(
-            @RequestParam double pt,
-            @RequestParam(defaultValue = "200") double range) {
-
-        List<Map<String, Object>> nearbyUsers = scoreHistoryLogRepository.findNearbyUsers(pt, range);
-        if (nearbyUsers.isEmpty()) {
-            return ResponseEntity.ok(List.of());
-        }
-
-        List<Long> userIds = nearbyUsers.stream()
-                .map(u -> ((Number) u.get("userId")).longValue())
-                .toList();
-
-        List<Map<String, Object>> rawScores = scoreRepository.findScoresByUserIds(userIds);
-
-        // Index nearbyUsers by userId for quick lookup
-        Map<Long, Map<String, Object>> userMap = new HashMap<>();
-        for (Map<String, Object> u : nearbyUsers) {
-            userMap.put(((Number) u.get("userId")).longValue(), u);
-        }
-
-        // Group scores by userId
-        Map<Long, List<Map<String, Object>>> scoresByUser = new java.util.LinkedHashMap<>();
-        for (Map<String, Object> s : rawScores) {
-            Long uid = ((Number) s.get("userId")).longValue();
-            scoresByUser.computeIfAbsent(uid, k -> new java.util.ArrayList<>()).add(Map.of(
-                    "title", s.get("title"),
-                    "difficultyName", s.get("difficultyName"),
-                    "difficultyLevel", s.get("difficultyLevel") != null ? s.get("difficultyLevel") : 0,
-                    "score", s.get("score") != null ? s.get("score") : 0
-            ));
-        }
-
-        List<Map<String, Object>> result = userIds.stream()
-                .filter(uid -> scoresByUser.containsKey(uid))
-                .map(uid -> {
-                    Map<String, Object> u = userMap.get(uid);
-                    Map<String, Object> entry = new HashMap<>();
-                    entry.put("displayName", u.get("displayName"));
-                    entry.put("totalBeatPt", u.get("totalBeatPt"));
-                    entry.put("scores", scoresByUser.getOrDefault(uid, List.of()));
-                    return entry;
-                })
-                .toList();
-
-        return ResponseEntity.ok(result);
-    }
-
     private static final String ADMIN_IIDX_ID = "5787-1145";
 
     /**

@@ -4,7 +4,6 @@ import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Map;
 
@@ -72,15 +71,4 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
             "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getPrecisionRanking();
-
-    @Query(value =
-            "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", lp.total_beat_pt AS \"totalBeatPt\" " +
-            "FROM ( " +
-            "    SELECT DISTINCT ON (user_id) user_id, total_beat_pt " +
-            "    FROM score_history_logs " +
-            "    ORDER BY user_id, uploaded_at DESC " +
-            ") lp " +
-            "JOIN users u ON lp.user_id = u.id " +
-            "WHERE ABS(lp.total_beat_pt - :pt) <= :range", nativeQuery = true)
-    List<Map<String, Object>> findNearbyUsers(@Param("pt") double pt, @Param("range") double range);
 }
