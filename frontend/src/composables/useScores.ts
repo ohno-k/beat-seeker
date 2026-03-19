@@ -193,10 +193,14 @@ export function useScores() {
     };
 
     const fetchNearbyPlayersScores = async (pt: number, range = 200): Promise<NearbyPlayer[]> => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
         try {
             const res = await fetch(`${API_BASE}/api/scores/nearby-players-scores?pt=${pt}&range=${range}`, {
-                headers: authHeaders()
+                headers: authHeaders(),
+                signal: controller.signal
             });
+            clearTimeout(timer);
             if (!res.ok) return [];
             return await res.json();
         } catch {
