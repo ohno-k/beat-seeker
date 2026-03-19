@@ -28,6 +28,9 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     @Query(value = "SELECT s.user_id as \"userId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.difficulty_level as \"difficultyLevel\", s.score as \"score\" FROM scores s WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')", nativeQuery = true)
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScores();
 
+    @Query(value = "SELECT s.user_id as \"userId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.difficulty_level as \"difficultyLevel\", s.score as \"score\" FROM scores s WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.user_id IN :userIds", nativeQuery = true)
+    List<Map<String, Object>> findScoresByUserIds(@Param("userIds") List<Long> userIds);
+
     @Query(value =
         "SELECT u.display_name as \"displayName\", s.score as \"score\", " +
         "COALESCE(latest.total_beat_pt, 0) as \"totalBeatPt\" " +

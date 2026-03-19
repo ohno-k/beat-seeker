@@ -2,6 +2,19 @@ import { ref } from 'vue';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 import { useAuth } from './useAuth';
 
+export interface NearbyPlayerScore {
+    title: string;
+    difficultyName: string;
+    difficultyLevel: number;
+    score: number;
+}
+
+export interface NearbyPlayer {
+    displayName: string;
+    totalBeatPt: number;
+    scores: NearbyPlayerScore[];
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 export function useScores() {
@@ -179,5 +192,15 @@ export function useScores() {
         return res.json();
     };
 
-    return { fetchMyScores, fetchUserScores, fetchAllUsers, updateMemo, isFetching };
+    const fetchNearbyPlayersScores = async (pt: number, range = 200): Promise<NearbyPlayer[]> => {
+        try {
+            const res = await fetch(`${API_BASE}/api/scores/nearby-players-scores?pt=${pt}&range=${range}`);
+            if (!res.ok) return [];
+            return await res.json();
+        } catch {
+            return [];
+        }
+    };
+
+    return { fetchMyScores, fetchUserScores, fetchAllUsers, updateMemo, fetchNearbyPlayersScores, isFetching };
 }

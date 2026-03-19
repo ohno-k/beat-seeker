@@ -13,19 +13,30 @@
       </h3>
       <button
         @click="regenerate"
-        class="flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg border border-blue-200 dark:border-blue-800 transition-colors"
+        :disabled="isLoading"
+        class="flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg border border-blue-200 dark:border-blue-800 transition-colors disabled:opacity-50"
       >
-        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-3 h-3" :class="isLoading ? 'animate-spin' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
         変更
       </button>
     </div>
-    <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">
+    <p class="text-xs text-slate-400 dark:text-slate-500 mb-1">
       次のランクまで あと <span class="font-black text-blue-600 dark:text-blue-400">{{ nextRankGap.toFixed(1) }} pt</span> 必要
     </p>
+    <p v-if="nearbyPlayerCount > 0" class="text-[10px] text-slate-400 dark:text-slate-500 mb-4">
+      近接プレイヤー (±200pt) <span class="font-bold text-slate-500 dark:text-slate-400">{{ nearbyPlayerCount }}人</span> のTOP100スコアを参照
+    </p>
+    <p v-else-if="!isLoading" class="text-[10px] text-slate-400 dark:text-slate-500 mb-4">
+      近接プレイヤーデータなし
+    </p>
+    <div v-else class="mb-4" />
 
-    <div v-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+    <div v-if="isLoading" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+      読み込み中...
+    </div>
+    <div v-else-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
       伸ばせる曲がありません
     </div>
     <div v-else class="space-y-2">
@@ -85,11 +96,15 @@
 import { computed, ref, watch, onMounted } from 'vue';
 import type { ScoreRecord } from '../utils/scoreData';
 import { calculatePoints, getNextRankInfo } from '../utils/beatTier';
+import { useScores } from '../composables/useScores';
+import type { NearbyPlayer } from '../composables/useScores';
 
 const props = defineProps<{
   flatScores: ScoreRecord[];
   totalPoints: number;
 }>();
+
+const { fetchNearbyPlayersScores } = useScores();
 
 // ── Top-100 state ────────────────────────────────────────────────────────
 
@@ -98,11 +113,6 @@ const sortedScored = computed(() =>
     .filter(s => s.beatTierPoints > 0)
     .sort((a, b) => b.beatTierPoints - a.beatTierPoints)
 );
-
-const threshold = computed(() => {
-  const s = sortedScored.value;
-  return s.length >= 100 ? s[99].beatTierPoints : 0;
-});
 
 const top100Set = computed(() =>
   new Set(sortedScored.value.slice(0, 100).map(s => `${s.title}|${s.difficultyName}`))
@@ -116,8 +126,7 @@ const nextRankGap = computed(() => {
   return Math.max(0, nextRank.minPoints - props.totalPoints);
 });
 
-// ── Improvement thresholds (AA / AAA / MAX- give bonus points) ───────────
-// Each threshold slightly above the bonus trigger point so the bonus is included.
+// ── Improvement thresholds ───────────────────────────────────────────────
 const IMPROVEMENT_THRESHOLDS = [
   { rate: 66.67, label: 'Beat-PT獲得ライン突破' },
   { rate: 77.78, label: 'AA達成' },
@@ -125,93 +134,112 @@ const IMPROVEMENT_THRESHOLDS = [
   { rate: 94.45, label: 'MAX-達成' },
 ];
 
-interface Suggestion {
-  song: ScoreRecord;
-  targetLabel: string;   // highest border crossed, or ''
-  crossesBorder: boolean;
-  scoreIncrease: number; // raw score points added (≤ 50)
-  newScoreRate: number;  // score rate after improvement
-  ptGain: number;        // net Beat-PT gain
+// ── Nearby players data ──────────────────────────────────────────────────
+
+const nearbyPlayers = ref<NearbyPlayer[]>([]);
+const isLoading = ref(false);
+
+const nearbyPlayerCount = computed(() => nearbyPlayers.value.length);
+
+// Build a map: "title|difficultyName" → { refScore, refPlayerName, refPlayerPt }
+// refScore = the highest score among nearby players on that song
+const nearbyRefMap = computed(() => {
+  const map = new Map<string, { refScore: number; refPlayerName: string; refPlayerPt: number }>();
+  for (const player of nearbyPlayers.value) {
+    for (const s of player.scores) {
+      const key = `${s.title}|${s.difficultyName}`;
+      const existing = map.get(key);
+      if (!existing || s.score > existing.refScore) {
+        map.set(key, { refScore: s.score, refPlayerName: player.displayName, refPlayerPt: player.totalBeatPt });
+      }
+    }
+  }
+  return map;
+});
+
+async function loadNearbyPlayers() {
+  if (props.totalPoints <= 0) return;
+  isLoading.value = true;
+  try {
+    nearbyPlayers.value = await fetchNearbyPlayersScores(props.totalPoints);
+  } finally {
+    isLoading.value = false;
+    suggestions.value = pickSuggestions();
+  }
 }
 
-// Score cap decreases for songs that are already high in your personal ranking,
-// since those songs are harder to push further.
-function getScoreCap(song: ScoreRecord): number {
-  const idx = sortedScored.value.findIndex(
-    s => s.title === song.title && s.difficultyName === song.difficultyName
-  );
-  if (idx < 0 || idx >= 100) return 50; // outside top-100
-  if (idx < 10) return 10;              // #1-10: very hard to improve
-  if (idx < 25) return 20;             // #11-25
-  if (idx < 50) return 35;             // #26-50
-  return 50;                            // #51-100
+// ── Suggestions ──────────────────────────────────────────────────────────
+
+interface Suggestion {
+  song: ScoreRecord;
+  targetLabel: string;
+  crossesBorder: boolean;
+  scoreIncrease: number;
+  newScoreRate: number;
+  ptGain: number;
+  refPlayerName: string;
+  refPlayerPt: number;
 }
 
 function buildCandidates(): Suggestion[] {
   const candidates: Suggestion[] = [];
-  const th = threshold.value;
+  const refMap = nearbyRefMap.value;
 
   for (const song of props.flatScores) {
     if (song.maxScore <= 0 || !song.informalRank || song.scoreRate < 0) continue;
     if (song.score >= song.maxScore) continue;
 
-    const cap = getScoreCap(song);
+    // TOP100に入っている曲のみ対象
+    if (!top100Set.value.has(`${song.title}|${song.difficultyName}`)) continue;
 
-    // Find the nearest border reachable within cap pts; fall back to +cap if none
-    let scoreIncrease = cap;
+    // 近接プレイヤーの参照スコアを取得
+    const ref = refMap.get(`${song.title}|${song.difficultyName}`);
+    if (!ref || ref.refScore <= song.score) continue; // 自分以下なら伸びしろなし
+
+    const targetScore = Math.min(ref.refScore, song.maxScore);
+    const scoreIncrease = targetScore - song.score;
+    if (scoreIncrease <= 0) continue;
+
+    const newScoreRate = (targetScore / song.maxScore) * 100;
+    const newBeatPT = calculatePoints(newScoreRate, song.informalRank);
+    const ptGain = newBeatPT - song.beatTierPoints;
+    if (ptGain < 0.05) continue;
+
+    // 到達するマイルストーンを判定
     let targetLabel = '';
     let crossesBorder = false;
-
     for (const thr of IMPROVEMENT_THRESHOLDS) {
-      if (song.scoreRate >= thr.rate - 0.01) continue;
-      const needed = Math.ceil(song.maxScore * thr.rate / 100) - song.score;
-      if (needed > 0 && needed <= cap) {
-        scoreIncrease = needed;
+      if (song.scoreRate < thr.rate - 0.01 && newScoreRate >= thr.rate - 0.01) {
         targetLabel = thr.label;
         crossesBorder = true;
         break;
       }
     }
 
-    const newScore = Math.min(song.score + scoreIncrease, song.maxScore);
-    const actualIncrease = newScore - song.score;
-    if (actualIncrease <= 0) continue;
-
-    const newScoreRate = (newScore / song.maxScore) * 100;
-    const newBeatPT = calculatePoints(newScoreRate, song.informalRank);
-    const rawGain = newBeatPT - song.beatTierPoints;
-    if (rawGain <= 0) continue;
-
-    const inTop100 = top100Set.value.has(`${song.title}|${song.difficultyName}`);
-    let netGain: number;
-    if (inTop100) {
-      netGain = rawGain;
-    } else if (th > 0) {
-      netGain = newBeatPT - th;
-    } else {
-      netGain = rawGain;
-    }
-
-    if (netGain < 0.05) continue; // skip if gain would display as 0.0 pt
-
-    candidates.push({ song, targetLabel, crossesBorder, scoreIncrease: actualIncrease, newScoreRate, ptGain: netGain });
+    candidates.push({
+      song,
+      targetLabel,
+      crossesBorder,
+      scoreIncrease,
+      newScoreRate,
+      ptGain,
+      refPlayerName: ref.refPlayerName,
+      refPlayerPt: ref.refPlayerPt,
+    });
   }
 
   return candidates;
 }
 
-function pickRandomSuggestions(): Suggestion[] {
+function pickSuggestions(): Suggestion[] {
   const gap = nextRankGap.value;
   if (gap <= 0) return [];
 
   const candidates = buildCandidates();
   if (candidates.length === 0) return [];
 
-  // Shuffle for variety
   const shuffled = [...candidates].sort(() => Math.random() - 0.5);
 
-  // Fill with songs whose individual gain doesn't yet cover the gap,
-  // leaving room for one final "tipping" song to land just over the target.
   const result: Suggestion[] = [];
   let accumulated = 0;
 
@@ -223,7 +251,6 @@ function pickRandomSuggestions(): Suggestion[] {
     }
   }
 
-  // Add the smallest single candidate that tips us just over the remaining gap
   if (accumulated < gap) {
     const usedKeys = new Set(result.map(s => `${s.song.title}|${s.song.difficultyName}`));
     const remaining = gap - accumulated;
@@ -234,7 +261,6 @@ function pickRandomSuggestions(): Suggestion[] {
     if (covering.length > 0) {
       result.push(covering[0]);
     } else {
-      // No single candidate covers remaining — add the best available
       const best = shuffled
         .filter(c => !usedKeys.has(`${c.song.title}|${c.song.difficultyName}`))
         .sort((a, b) => b.ptGain - a.ptGain);
@@ -247,13 +273,15 @@ function pickRandomSuggestions(): Suggestion[] {
 
 const suggestions = ref<Suggestion[]>([]);
 
-onMounted(() => { suggestions.value = pickRandomSuggestions(); });
-watch(() => [props.flatScores, props.totalPoints], () => {
-  suggestions.value = pickRandomSuggestions();
-}, { deep: false });
+onMounted(() => { loadNearbyPlayers(); });
+watch(() => props.totalPoints, () => { loadNearbyPlayers(); });
 
 function regenerate() {
-  suggestions.value = pickRandomSuggestions();
+  if (nearbyPlayers.value.length > 0) {
+    suggestions.value = pickSuggestions();
+  } else {
+    loadNearbyPlayers();
+  }
 }
 
 const totalSuggestionGain = computed(() =>
