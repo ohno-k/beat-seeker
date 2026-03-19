@@ -132,19 +132,14 @@ const IMPROVEMENT_THRESHOLDS = [
 const nearbyPlayers = ref<NearbyPlayer[]>([]);
 const isLoading = ref(false);
 
-const nearbyPlayerCount = computed(() => nearbyPlayers.value.length);
-
-// Build a map: "title|difficultyName" → { refScore, refPlayerName, refPlayerPt }
-// refScore = the highest score among nearby players on that song
+// Build a map: "title|difficultyName" → bestScore (highest among nearby players)
 const nearbyRefMap = computed(() => {
-  const map = new Map<string, { refScore: number; refPlayerName: string; refPlayerPt: number }>();
+  const map = new Map<string, number>();
   for (const player of nearbyPlayers.value) {
     for (const s of player.scores) {
       const key = `${s.title}|${s.difficultyName}`;
-      const existing = map.get(key);
-      if (!existing || s.score > existing.refScore) {
-        map.set(key, { refScore: s.score, refPlayerName: player.displayName, refPlayerPt: player.totalBeatPt });
-      }
+      const existing = map.get(key) ?? 0;
+      if (s.score > existing) map.set(key, s.score);
     }
   }
   return map;
@@ -170,8 +165,6 @@ interface Suggestion {
   scoreIncrease: number;
   newScoreRate: number;
   ptGain: number;
-  refPlayerName: string;
-  refPlayerPt: number;
 }
 
 function buildCandidates(): Suggestion[] {
@@ -185,11 +178,11 @@ function buildCandidates(): Suggestion[] {
     // TOP100に入っている曲のみ対象
     if (!top100Set.value.has(`${song.title}|${song.difficultyName}`)) continue;
 
-    // 近接プレイヤーの参照スコアを取得
-    const ref = refMap.get(`${song.title}|${song.difficultyName}`);
-    if (!ref || ref.refScore <= song.score) continue; // 自分以下なら伸びしろなし
+    // 近接プレイヤーの最高スコアを取得
+    const refScore = refMap.get(`${song.title}|${song.difficultyName}`);
+    if (refScore === undefined || refScore <= song.score) continue;
 
-    const targetScore = Math.min(ref.refScore, song.maxScore);
+    const targetScore = Math.min(refScore, song.maxScore);
     const scoreIncrease = targetScore - song.score;
     if (scoreIncrease <= 0) continue;
 
@@ -209,16 +202,7 @@ function buildCandidates(): Suggestion[] {
       }
     }
 
-    candidates.push({
-      song,
-      targetLabel,
-      crossesBorder,
-      scoreIncrease,
-      newScoreRate,
-      ptGain,
-      refPlayerName: ref.refPlayerName,
-      refPlayerPt: ref.refPlayerPt,
-    });
+    candidates.push({ song, targetLabel, crossesBorder, scoreIncrease, newScoreRate, ptGain });
   }
 
   return candidates;
