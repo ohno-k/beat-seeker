@@ -35,7 +35,7 @@
           </h4>
           <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
             <li><span class="font-bold text-slate-900 dark:text-slate-100">フォルダランク算出ロジックの全面刷新:</span> 各フォルダのLEGENDに必要な平均スコアレートが難易度ごとに変化するようになりました。☆11.0では約99.6%、☆13.0では約94.44%（MAX-越え）を基準に、曲線補間で各フォルダのLEGENDラインが決まります。</li>
-            <li><span class="font-bold text-slate-900 dark:text-slate-100">ランク間隔の統一:</span> LEGENDから0.5%刻みで必要スコアレートが下がるごとにランクが1段階下がる方式に変更し、全フォルダで直感的なランク体系になりました。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">ランク間隔の統一:</span> LEGENDから0.25%刻みで必要スコアレートが下がるごとにランクが1段階下がる方式に変更し、全フォルダで直感的なランク体系になりました。</li>
             <li><span class="font-bold text-slate-900 dark:text-slate-100">必要スコアレート表の追加:</span> 非公式難易度表サマリーのヘルプボタンから、全フォルダ×全ランクの必要スコアレート一覧表をモーダルで確認できるようになりました。</li>
             <li><span class="font-bold text-slate-900 dark:text-slate-100">ヘルプテキストの更新:</span> フォルダランクの説明文を新しいスコアレートベースの仕組みに合わせて更新しました。</li>
           </ul>

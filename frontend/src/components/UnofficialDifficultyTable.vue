@@ -163,7 +163,7 @@ const tableData = computed(() => {
               <p class="font-bold text-slate-700 dark:text-slate-200">■ LEGENDラインの基準</p>
               <p>LEGENDに必要な平均スコアレートは難易度ごとに異なります。☆11.0では約99.6%、☆13.0では約94.44%（MAX-越え）が基準で、その間は曲線で補間されます。</p>
               <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">■ 各ランクの基準</p>
-              <p>LEGENDラインから0.5%ずつ必要スコアレートが下がるごとに、ランクが1段階下がります。</p>
+              <p>LEGENDラインから0.25%ずつ必要スコアレートが下がるごとに、ランクが1段階下がります。</p>
               <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">■ 薄いランクアイコン</p>
               <p>プレイ済みの曲のみで算出したランクです。全曲プレイ済みの場合は表示されません。</p>
             </div>
@@ -187,7 +187,6 @@ const tableData = computed(() => {
           <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <div>
               <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">📊 必要スコアレート表</h3>
-              <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">LEGENDから0.5%刻みでランクが下降</p>
             </div>
             <button @click="showRateTable = false" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors shrink-0 ml-2">×</button>
           </div>

@@ -65,10 +65,10 @@ export function getFolderLegendRate(informalRank: string | undefined): number {
     const rankValue = match ? parseFloat(match[1]) : 0;
     if (rankValue < 11.0 || rankValue > 13.0) return 0;
 
-    const LEGEND_RATE_LOW = 99.6;   // ☆11.0: almost all MAX- single digits
+    const LEGEND_RATE_LOW = 99.75;   // ☆11.0: almost all MAX- single digits
     const LEGEND_RATE_HIGH = 94.44; // ☆13.0: MAX- notation threshold
     const t = (rankValue - 11.0) / (13.0 - 11.0);
-    return LEGEND_RATE_LOW - Math.pow(t, 1.7) * (LEGEND_RATE_LOW - LEGEND_RATE_HIGH);
+    return LEGEND_RATE_LOW - Math.pow(t, 4) * (LEGEND_RATE_LOW - LEGEND_RATE_HIGH);
 }
 
 /**
@@ -238,71 +238,71 @@ export function getGroupedRanks() {
 }
 
 /**
- * Folder Rank definitions: each rank is 0.5% score rate below Legend.
+ * Folder Rank definitions: each rank is 0.25% score rate below Legend.
  * Legend rate varies per folder (linear interpolation).
  */
 export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; color: string }[] = [
     { offset: 0, name: 'Legend', color: 'text-amber-500 font-black' },
 
-    { offset: 0.5, name: 'Mythic', tier: 5, color: 'text-purple-600' },
-    { offset: 1.0, name: 'Mythic', tier: 4, color: 'text-purple-600' },
-    { offset: 1.5, name: 'Mythic', tier: 3, color: 'text-purple-600' },
-    { offset: 2.0, name: 'Mythic', tier: 2, color: 'text-purple-600' },
-    { offset: 2.5, name: 'Mythic', tier: 1, color: 'text-purple-600' },
+    { offset: 0.25, name: 'Mythic', tier: 5, color: 'text-purple-600' },
+    { offset: 0.50, name: 'Mythic', tier: 4, color: 'text-purple-600' },
+    { offset: 0.75, name: 'Mythic', tier: 3, color: 'text-purple-600' },
+    { offset: 1.00, name: 'Mythic', tier: 2, color: 'text-purple-600' },
+    { offset: 1.25, name: 'Mythic', tier: 1, color: 'text-purple-600' },
 
-    { offset: 3.0, name: 'Ancient', tier: 5, color: 'text-indigo-600' },
-    { offset: 3.5, name: 'Ancient', tier: 4, color: 'text-indigo-600' },
-    { offset: 4.0, name: 'Ancient', tier: 3, color: 'text-indigo-600' },
-    { offset: 4.5, name: 'Ancient', tier: 2, color: 'text-indigo-600' },
-    { offset: 5.0, name: 'Ancient', tier: 1, color: 'text-indigo-600' },
+    { offset: 1.50, name: 'Ancient', tier: 5, color: 'text-indigo-600' },
+    { offset: 1.75, name: 'Ancient', tier: 4, color: 'text-indigo-600' },
+    { offset: 2.00, name: 'Ancient', tier: 3, color: 'text-indigo-600' },
+    { offset: 2.25, name: 'Ancient', tier: 2, color: 'text-indigo-600' },
+    { offset: 2.50, name: 'Ancient', tier: 1, color: 'text-indigo-600' },
 
-    { offset: 5.5, name: 'Master', tier: 5, color: 'text-red-600' },
-    { offset: 6.0, name: 'Master', tier: 4, color: 'text-red-600' },
-    { offset: 6.5, name: 'Master', tier: 3, color: 'text-red-600' },
-    { offset: 7.0, name: 'Master', tier: 2, color: 'text-red-600' },
-    { offset: 7.5, name: 'Master', tier: 1, color: 'text-red-600' },
+    { offset: 2.75, name: 'Master', tier: 5, color: 'text-red-600' },
+    { offset: 3.00, name: 'Master', tier: 4, color: 'text-red-600' },
+    { offset: 3.25, name: 'Master', tier: 3, color: 'text-red-600' },
+    { offset: 3.50, name: 'Master', tier: 2, color: 'text-red-600' },
+    { offset: 3.75, name: 'Master', tier: 1, color: 'text-red-600' },
 
-    { offset: 8.0, name: 'Elite', tier: 5, color: 'text-orange-600' },
-    { offset: 8.5, name: 'Elite', tier: 4, color: 'text-orange-600' },
-    { offset: 9.0, name: 'Elite', tier: 3, color: 'text-orange-600' },
-    { offset: 9.5, name: 'Elite', tier: 2, color: 'text-orange-600' },
-    { offset: 10.0, name: 'Elite', tier: 1, color: 'text-orange-600' },
+    { offset: 4.00, name: 'Elite', tier: 5, color: 'text-orange-600' },
+    { offset: 4.25, name: 'Elite', tier: 4, color: 'text-orange-600' },
+    { offset: 4.50, name: 'Elite', tier: 3, color: 'text-orange-600' },
+    { offset: 4.75, name: 'Elite', tier: 2, color: 'text-orange-600' },
+    { offset: 5.00, name: 'Elite', tier: 1, color: 'text-orange-600' },
 
-    { offset: 10.5, name: 'Commander', tier: 5, color: 'text-yellow-700' },
-    { offset: 11.0, name: 'Commander', tier: 4, color: 'text-yellow-700' },
-    { offset: 11.5, name: 'Commander', tier: 3, color: 'text-yellow-700' },
-    { offset: 12.0, name: 'Commander', tier: 2, color: 'text-yellow-700' },
-    { offset: 12.5, name: 'Commander', tier: 1, color: 'text-yellow-700' },
+    { offset: 5.25, name: 'Commander', tier: 5, color: 'text-yellow-700' },
+    { offset: 5.50, name: 'Commander', tier: 4, color: 'text-yellow-700' },
+    { offset: 5.75, name: 'Commander', tier: 3, color: 'text-yellow-700' },
+    { offset: 6.00, name: 'Commander', tier: 2, color: 'text-yellow-700' },
+    { offset: 6.25, name: 'Commander', tier: 1, color: 'text-yellow-700' },
 
-    { offset: 13.0, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
-    { offset: 13.5, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
-    { offset: 14.0, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
-    { offset: 14.5, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
-    { offset: 15.0, name: 'Veteran', tier: 1, color: 'text-emerald-600' },
+    { offset: 6.50, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
+    { offset: 6.75, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
+    { offset: 7.00, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
+    { offset: 7.25, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
+    { offset: 7.50, name: 'Veteran', tier: 1, color: 'text-emerald-600' },
 
-    { offset: 15.5, name: 'Expert', tier: 5, color: 'text-teal-600' },
-    { offset: 16.0, name: 'Expert', tier: 4, color: 'text-teal-600' },
-    { offset: 16.5, name: 'Expert', tier: 3, color: 'text-teal-600' },
-    { offset: 17.0, name: 'Expert', tier: 2, color: 'text-teal-600' },
-    { offset: 17.5, name: 'Expert', tier: 1, color: 'text-teal-600' },
+    { offset: 7.75, name: 'Expert', tier: 5, color: 'text-teal-600' },
+    { offset: 8.00, name: 'Expert', tier: 4, color: 'text-teal-600' },
+    { offset: 8.25, name: 'Expert', tier: 3, color: 'text-teal-600' },
+    { offset: 8.50, name: 'Expert', tier: 2, color: 'text-teal-600' },
+    { offset: 8.75, name: 'Expert', tier: 1, color: 'text-teal-600' },
 
-    { offset: 18.0, name: 'Advanced', tier: 5, color: 'text-cyan-600' },
-    { offset: 18.5, name: 'Advanced', tier: 4, color: 'text-cyan-600' },
-    { offset: 19.0, name: 'Advanced', tier: 3, color: 'text-cyan-600' },
-    { offset: 19.5, name: 'Advanced', tier: 2, color: 'text-cyan-600' },
-    { offset: 20.0, name: 'Advanced', tier: 1, color: 'text-cyan-600' },
+    { offset: 9.00, name: 'Advanced', tier: 5, color: 'text-cyan-600' },
+    { offset: 9.25, name: 'Advanced', tier: 4, color: 'text-cyan-600' },
+    { offset: 9.50, name: 'Advanced', tier: 3, color: 'text-cyan-600' },
+    { offset: 9.75, name: 'Advanced', tier: 2, color: 'text-cyan-600' },
+    { offset: 10.00, name: 'Advanced', tier: 1, color: 'text-cyan-600' },
 
-    { offset: 20.5, name: 'Intermediate', tier: 5, color: 'text-blue-600' },
-    { offset: 21.0, name: 'Intermediate', tier: 4, color: 'text-blue-600' },
-    { offset: 21.5, name: 'Intermediate', tier: 3, color: 'text-blue-600' },
-    { offset: 22.0, name: 'Intermediate', tier: 2, color: 'text-blue-600' },
-    { offset: 22.5, name: 'Intermediate', tier: 1, color: 'text-blue-600' },
+    { offset: 10.25, name: 'Intermediate', tier: 5, color: 'text-blue-600' },
+    { offset: 10.50, name: 'Intermediate', tier: 4, color: 'text-blue-600' },
+    { offset: 10.75, name: 'Intermediate', tier: 3, color: 'text-blue-600' },
+    { offset: 11.00, name: 'Intermediate', tier: 2, color: 'text-blue-600' },
+    { offset: 11.25, name: 'Intermediate', tier: 1, color: 'text-blue-600' },
 
-    { offset: 23.0, name: 'Novice', tier: 5, color: 'text-slate-600' },
-    { offset: 23.5, name: 'Novice', tier: 4, color: 'text-slate-600' },
-    { offset: 24.0, name: 'Novice', tier: 3, color: 'text-slate-600' },
-    { offset: 24.5, name: 'Novice', tier: 2, color: 'text-slate-600' },
-    { offset: 25.0, name: 'Novice', tier: 1, color: 'text-slate-600' },
+    { offset: 11.50, name: 'Novice', tier: 5, color: 'text-slate-600' },
+    { offset: 11.75, name: 'Novice', tier: 4, color: 'text-slate-600' },
+    { offset: 12.00, name: 'Novice', tier: 3, color: 'text-slate-600' },
+    { offset: 12.25, name: 'Novice', tier: 2, color: 'text-slate-600' },
+    { offset: 12.50, name: 'Novice', tier: 1, color: 'text-slate-600' },
 ];
 
 /**
