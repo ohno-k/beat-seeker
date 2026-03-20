@@ -199,10 +199,12 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
-            <tr 
-              v-for="(record, index) in displayScores" 
-              :key="index" 
-              @click="openDetailModal(record)"
+            <tr
+              v-for="(record, index) in displayScores"
+              :key="index"
+              @touchstart="handleTouchStart"
+              @touchmove="handleTouchMove"
+              @click="handleRowClick(record)"
               class="hover:bg-blue-50/70 dark:hover:bg-slate-700/50 cursor-pointer transition-colors h-12 sm:h-14 w-full"
             >
               <td class="px-1 sm:px-6 py-1.5 sm:py-2 font-medium text-slate-800 dark:text-slate-200 max-w-[80px] sm:max-w-[160px] lg:max-w-[240px] xl:max-w-xs" :title="record.title">
@@ -1017,6 +1019,30 @@ const top100ScoreNeededMap = computed(() => {
     }
     return map;
 });
+
+// タッチスクロール判定
+let touchStartY = 0;
+let touchStartX = 0;
+let isTouchScrolling = false;
+
+const handleTouchStart = (e: TouchEvent) => {
+  touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+  isTouchScrolling = false;
+};
+
+const handleTouchMove = (e: TouchEvent) => {
+  const dy = Math.abs(e.touches[0].clientY - touchStartY);
+  const dx = Math.abs(e.touches[0].clientX - touchStartX);
+  if (dy > 8 || dx > 8) {
+    isTouchScrolling = true;
+  }
+};
+
+const handleRowClick = (record: ScoreRecord) => {
+  if (isTouchScrolling) return;
+  openDetailModal(record);
+};
 
 // Modal state
 const selectedRecord = ref<ScoreRecord | null>(null);
