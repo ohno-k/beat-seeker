@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { ScoreRecord } from '../utils/scoreData';
-import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS } from '../utils/beatTier';
+import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
+import songDataRaw from '../data/song_data.json';
 import RankIcon from './RankIcon.vue';
 import difficultyData from '../data/difficulty_table.json';
 
@@ -44,23 +45,71 @@ const toggleRank = (rank: string) => {
   }
 };
 
-// Group scores by informalRank, filter out those without one or the ones we want to hide
+// Build song definition lookup by "title_difficultyCode"
+const songDict = new Map<string, any>();
+if (songDataRaw && Array.isArray(songDataRaw.body)) {
+  songDataRaw.body.forEach(s => {
+    songDict.set(`${s.title}_${s.difficulty}`, s);
+  });
+}
+
+// Group all songs by informalRank, including unplayed ones from the difficulty table
 const groupedByRank = computed(() => {
   const groups: Record<string, ScoreRecord[]> = {};
-  
+
+  // Build lookup from played scores by title + difficultyName
+  const scoreMap = new Map<string, ScoreRecord>();
   props.scores.forEach(s => {
-    // We only care about levels 11 and 12
-    if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) {
-      return;
-    }
-    
-    // We only care about scores that have an informal rank assigned and exclude 'Uncategorized(other)'
     if (s.informalRank && !s.informalRank.includes('Uncategorized')) {
-      if (!groups[s.informalRank]) {
-        groups[s.informalRank] = [];
-      }
-      groups[s.informalRank].push(s);
+      scoreMap.set(`${s.title}_${s.difficultyName}`, s);
     }
+  });
+
+  // Iterate all songs defined in the difficulty table
+  difficultyData.ranks.forEach(r => {
+    const rank = r.rank;
+    if (!groups[rank]) groups[rank] = [];
+
+    r.songs.forEach(songTitle => {
+      const isLeggendaria = songTitle.endsWith('[L]');
+      const baseTitle = isLeggendaria ? songTitle.slice(0, -3) : songTitle;
+      const diffName = isLeggendaria ? 'LEGGENDARIA' : 'ANOTHER';
+      const diffCode = isLeggendaria ? '10' : '4';
+
+      const scoreKey = `${baseTitle}_${diffName}`;
+      if (scoreMap.has(scoreKey)) {
+        // Played song – use existing score record
+        groups[rank].push(scoreMap.get(scoreKey)!);
+      } else {
+        // Unplayed song – create placeholder using song definition data
+        const def = songDict.get(`${baseTitle}_${diffCode}`);
+        const maxScore = def ? def.notes * 2 : 0;
+        groups[rank].push({
+          title: baseTitle,
+          artist: def?.artist ?? '',
+          genre: def?.genre ?? '',
+          difficultyName: diffName,
+          difficultyColor: isLeggendaria
+            ? 'text-purple-700 bg-purple-100 border border-purple-300'
+            : 'text-red-700 bg-red-100 border border-red-300',
+          difficultyLevel: def?.level ?? null,
+          clearType: 'NO PLAY',
+          score: 0,
+          scoreRate: -1,
+          maxScore,
+          informalRank: rank,
+          djLevel: '-',
+          pgreat: 0,
+          great: 0,
+          missCount: null,
+          playCount: 0,
+          lastPlayTime: '',
+          beatTierPoints: 0,
+          maxBeatTierPoints: getMaxPoints(rank),
+          memo: undefined,
+        });
+      }
+    });
   });
 
   return groups;
