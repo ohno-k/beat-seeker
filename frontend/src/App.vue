@@ -742,33 +742,33 @@ const handleUnifiedClose = async () => {
             </div>
 
             <!-- Table Tab -->
-            <ScoreSummary 
+            <ScoreSummary
               v-show="activeTab === 'table'"
-              :scores="scoreData" 
-              @reset="resetData" 
+              :scores="scoreData"
+              @reset="resetData"
               @update:totalPoints="points => totalBeatTierPoints = points"
               class="w-full"
             />
-            
-            <!-- Profile Tab -->
-            <ProfileDashboard 
-              v-if="activeTab === 'profile'"
-              class="w-full max-w-6xl"
-            />
-
-            <!-- History Tab -->
-            <UploadHistory 
-              v-if="activeTab === 'history'"
-              class="w-full max-w-6xl animate-fade-in" 
-            />
-
-            <!-- Friends Tab -->
-            <Friends
-              v-if="activeTab === 'friends'"
-              class="w-full max-w-6xl animate-fade-in"
-              @view-user="handleViewFriend"
-            />
           </div>
+
+          <!-- Profile Tab (scoreDataに依存しないため外に配置) -->
+          <ProfileDashboard
+            v-if="activeTab === 'profile'"
+            class="w-full max-w-6xl"
+          />
+
+          <!-- History Tab (scoreDataに依存しないため外に配置) -->
+          <UploadHistory
+            v-if="activeTab === 'history'"
+            class="w-full max-w-6xl animate-fade-in"
+          />
+
+          <!-- Friends Tab (scoreDataに依存しないため外に配置) -->
+          <Friends
+            v-if="activeTab === 'friends'"
+            class="w-full max-w-6xl animate-fade-in"
+            @view-user="handleViewFriend"
+          />
         </template>
       </main>
 
