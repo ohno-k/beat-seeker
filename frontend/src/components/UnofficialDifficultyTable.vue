@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { ScoreRecord } from '../utils/scoreData';
-import { getFolderRankInfo, getNextFolderRankInfo, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS } from '../utils/beatTier';
+import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
 import difficultyData from '../data/difficulty_table.json';
 
@@ -112,11 +112,11 @@ const tableData = computed(() => {
     const legendPtPerSong = getLegendPtPerSong(rank);
     maxBeatPoints = legendPtPerSong > 0 ? legendPtPerSong * totalCount : 0;
 
-    const rankInfo = getFolderRankInfo(totalBeatPoints, rank, totalCount);
-    const nextRankInfo = getNextFolderRankInfo(totalBeatPoints, rank, totalCount);
+    const rankInfo = getFolderRankInfoByRate(averageRate, rank);
+    const nextRankInfo = getNextFolderRankInfoByRate(averageRate, rank);
 
-    // Played-only rank: same points but evaluated against played song count only
-    const playedRankInfo = getFolderRankInfo(totalBeatPoints, rank, playCount);
+    // レートベースのランクは既にプレイ済み曲の平均レートで算出されるため playedRankInfo は同値
+    const playedRankInfo = rankInfo;
 
     return {
       rank,
@@ -306,7 +306,7 @@ const tableData = computed(() => {
                             {{ data.nextRankInfo.nextRank.name }} {{ data.nextRankInfo.nextRank.tier || '' }}
                           </span>
                           <span class="text-xs font-bold text-slate-400 dark:text-slate-500">
-                            (あと{{ (data.nextRankInfo.nextRank.minPoints - data.totalBeatPoints).toFixed(1) }} pt)
+                            (あと{{ (data.nextRankInfo.nextRank.minRate - data.averageRate).toFixed(2) }}%)
                           </span>
                         </div>
                       </div>

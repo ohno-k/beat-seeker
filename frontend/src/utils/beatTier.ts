@@ -385,3 +385,73 @@ export function getNextFolderRankInfo(totalPoints: number, informalRank: string 
 
     return { nextRank, progress };
 }
+
+/**
+ * Determine folder rank based on average score rate alone.
+ */
+export function getFolderRankInfoByRate(averageRate: number, informalRank: string | undefined): RankInfo {
+    if (!informalRank || averageRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+
+    const legendRate = getFolderLegendRate(informalRank);
+    if (legendRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+
+    for (const def of FOLDER_RANK_DEFS) {
+        const thresholdRate = legendRate - def.offset;
+        if (thresholdRate <= 66.666) break;
+        if (averageRate >= thresholdRate) {
+            return { name: def.name, tier: def.tier, minPoints: thresholdRate, color: def.color };
+        }
+    }
+
+    return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+}
+
+/**
+ * Get progress to next folder rank based on average score rate.
+ * minRate on the returned nextRank is the score rate threshold for that rank.
+ */
+export function getNextFolderRankInfoByRate(averageRate: number, informalRank: string | undefined): { nextRank?: RankInfo & { minRate: number }; progress: number } {
+    if (!informalRank || averageRate <= 0) return { progress: 0 };
+
+    const legendRate = getFolderLegendRate(informalRank);
+    if (legendRate <= 0) return { progress: 0 };
+
+    const thresholds: { def: typeof FOLDER_RANK_DEFS[0]; rate: number }[] = [];
+    for (const def of FOLDER_RANK_DEFS) {
+        const thresholdRate = legendRate - def.offset;
+        if (thresholdRate <= 66.666) break;
+        thresholds.push({ def, rate: thresholdRate });
+    }
+
+    if (thresholds.length === 0) return { progress: 0 };
+
+    let currentIdx = -1;
+    for (let i = 0; i < thresholds.length; i++) {
+        if (averageRate >= thresholds[i].rate) {
+            currentIdx = i;
+            break;
+        }
+    }
+
+    if (currentIdx === 0) return { progress: 100 };
+
+    const nextIdx = currentIdx === -1 ? thresholds.length - 1 : currentIdx - 1;
+    const currentRate = currentIdx === -1 ? 66.666 : thresholds[currentIdx].rate;
+    const nextRate = thresholds[nextIdx].rate;
+    const nextDef = thresholds[nextIdx].def;
+
+    const nextRank = {
+        name: nextDef.name,
+        tier: nextDef.tier,
+        minPoints: nextRate,
+        minRate: nextRate,
+        color: nextDef.color,
+    };
+
+    const range = nextRate - currentRate;
+    const progress = range > 0
+        ? Math.min(100, Math.max(0, (averageRate - currentRate) / range * 100))
+        : 0;
+
+    return { nextRank, progress };
+}
