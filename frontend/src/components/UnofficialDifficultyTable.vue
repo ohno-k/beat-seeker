@@ -253,13 +253,13 @@ const tableData = computed(() => {
                     <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold whitespace-nowrap">MAX: {{ data.maxBeatPoints.toFixed(1) }}</span>
                   </div>
                   <div class="flex items-center gap-0.5">
-                    <template v-if="data.playCount < data.totalCount">
-                      <RankIcon class="block sm:hidden shrink-0 opacity-30" :rank-name="data.playedRankInfo.name" :tier="data.playedRankInfo.tier" size="xs" />
-                      <RankIcon class="hidden sm:block shrink-0 opacity-30" :rank-name="data.playedRankInfo.name" :tier="data.playedRankInfo.tier" size="sm" />
-                    </template>
-                    <template v-else>
+                    <template v-if="data.playCount >= data.totalCount">
                       <RankIcon class="block sm:hidden shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
                       <RankIcon class="hidden sm:block shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
+                    </template>
+                    <template v-else>
+                      <RankIcon class="block sm:hidden shrink-0 opacity-30" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
+                      <RankIcon class="hidden sm:block shrink-0 opacity-30" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
                     </template>
                   </div>
                 </div>
@@ -284,8 +284,7 @@ const tableData = computed(() => {
                   <div class="flex flex-col">
                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">フォルダ内 BEAT-TIER</span>
                     <div class="flex items-center gap-3">
-                      <RankIcon :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="lg" />
-                      <RankIcon v-if="data.playCount < data.totalCount" :rank-name="data.playedRankInfo.name" :tier="data.playedRankInfo.tier" size="lg" class="opacity-30" />
+                      <RankIcon :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="lg" :class="data.playCount < data.totalCount ? 'opacity-30' : ''" />
                       <div class="flex flex-col">
                         <span class="text-2xl font-black tracking-tight" :class="data.rankInfo.color">
                           {{ data.totalBeatPoints.toFixed(1) }} <span class="text-sm text-slate-400 dark:text-slate-500 font-bold uppercase">pt</span>
