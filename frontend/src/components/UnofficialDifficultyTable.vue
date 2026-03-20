@@ -68,6 +68,7 @@ const groupedByRank = computed(() => {
   // Iterate all songs defined in the difficulty table
   difficultyData.ranks.forEach(r => {
     const rank = r.rank;
+    if (rank.includes('Uncategorized')) return;
     if (!groups[rank]) groups[rank] = [];
 
     r.songs.forEach(songTitle => {
