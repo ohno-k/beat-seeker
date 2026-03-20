@@ -83,7 +83,8 @@ const groupedByRank = computed(() => {
       } else {
         // Unplayed song – create placeholder using song definition data
         const def = songDict.get(`${baseTitle}_${diffCode}`);
-        const maxScore = def ? def.notes * 2 : 0;
+        if (!def) return; // skip if no song definition found (uncategorized)
+        const maxScore = def.notes * 2;
         groups[rank].push({
           title: baseTitle,
           artist: def?.artist ?? '',
