@@ -14,7 +14,8 @@
     "iconv-lite": "^0.7.2",
     "papaparse": "^5.5.3",
     "vue": "^3.5.12",
-    "vue-chartjs": "^5.3.3"
+    "vue-chartjs": "^5.3.3",
+    "vue-router": "^5.0.4"
   },
   "devDependencies": {
     "@types/papaparse": "^5.5.2",
