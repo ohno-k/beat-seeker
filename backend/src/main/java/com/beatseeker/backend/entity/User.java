@@ -42,6 +42,13 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String pushSubscription; // Web Push subscription JSON
 
+    @Column(unique = true)
+    private String email;
+
+    private String passwordResetToken;
+
+    private LocalDateTime passwordResetExpiredAt;
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

@@ -93,49 +93,47 @@
                 <p class="text-slate-500 dark:text-slate-400 font-medium">自己ベストの更新はありませんでした。</p>
               </div>
               
-              <div v-else class="space-y-3">
-                <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
-                  
-                  <div class="flex flex-col gap-1 overflow-hidden">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span class="px-2 py-0.5 rounded text-[10px] font-black tracking-wider border" :class="getDifficultyColorClass(song.difficulty)">
-                        {{ song.difficulty }}
-                      </span>
-                      <span v-if="song.clearTypeImproved" class="px-2 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px] font-black tracking-wider rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
-                    </div>
-                    <h4 class="font-black text-slate-800 dark:text-slate-100 text-lg truncate" :title="song.title">{{ song.title }}</h4>
-                    
-                    <div v-if="song.clearTypeImproved" class="flex items-center gap-2 mt-1">
-                      <span class="text-xs font-bold text-slate-500 dark:text-slate-400 line-through">{{ song.oldClearType }}</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                      <span class="text-xs font-black" :class="getClearTypeColor(song.newClearType)">{{ song.newClearType }}</span>
+              <div v-else class="space-y-2">
+                <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+
+                  <!-- Row 1: Difficulty badge + LAMP UP -->
+                  <div class="flex items-center gap-1.5 mb-1">
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
+                      {{ song.difficulty }}
+                    </span>
+                    <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-black rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
+                  </div>
+
+                  <!-- Row 2: Title + scores -->
+                  <div class="flex items-baseline justify-between gap-2">
+                    <h4 class="font-black text-slate-800 dark:text-slate-100 text-base leading-tight" :title="song.title">{{ song.title }}</h4>
+                    <div class="flex items-baseline gap-2 shrink-0 text-right">
+                      <span v-if="song.scoreIncrease > 0" class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ song.newScore }}<span class="text-blue-500 dark:text-blue-400">(+{{ song.scoreIncrease }})</span></span>
+                      <span v-if="song.beatPtIncrease > 0" class="text-xs font-black whitespace-nowrap" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.newBeatPt.toFixed(1) }}pt</span>
                     </div>
                   </div>
-                  
-                  <div class="flex items-end sm:items-center justify-between sm:justify-end gap-6 shrink-0 bg-slate-50 dark:bg-slate-900/50 p-3 sm:p-0 sm:bg-transparent sm:dark:bg-transparent border border-slate-100 dark:border-slate-800 sm:border-0 rounded-xl">
-                    <div v-if="song.scoreIncrease > 0" class="flex flex-col items-start sm:items-end">
-                      <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">EX SCORE</span>
-                      <div class="flex items-baseline gap-1">
-                        <span class="font-black text-slate-700 dark:text-slate-200 text-lg">{{ song.newScore }}</span>
-                        <span class="text-xs font-bold text-blue-500 dark:text-blue-400">(+{{ song.scoreIncrease }})</span>
-                      </div>
-                    </div>
-                    
-                    <div v-if="song.beatPtIncrease > 0" class="flex flex-col items-end">
-                      <div class="flex items-center gap-1 mb-0.5">
-                        <span class="text-[10px] font-bold uppercase" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'">BEAT-PT</span>
-                        <span v-if="song.isInTop100 !== undefined" class="text-[9px] font-black px-1 rounded" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400'">
-                          {{ song.isInTop100 ? 'TOP100' : '圏外' }}
-                        </span>
-                      </div>
-                      <div class="flex items-baseline gap-1">
-                        <span class="font-black text-lg" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.newBeatPt.toFixed(1) }}</span>
-                        <span class="text-xs font-bold" :class="song.isInTop100 ? 'text-amber-400 dark:text-amber-500' : 'text-indigo-400 dark:text-indigo-500'">pt</span>
-                        <span class="text-xs font-bold text-slate-400 dark:text-slate-500">(+{{ song.beatPtIncrease.toFixed(1) }})</span>
-                      </div>
-                    </div>
+
+                  <!-- Row 3: LAMP change (if any) -->
+                  <div v-if="song.clearTypeImproved" class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-[10px] font-bold text-slate-400 line-through">{{ song.oldClearType }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                    <span class="text-[10px] font-black" :class="getClearTypeColor(song.newClearType)">{{ song.newClearType }}</span>
                   </div>
-                  
+
+                  <!-- Row 4: Vote buttons -->
+                  <div class="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                    <button
+                      v-for="opt in optionTypes"
+                      :key="opt.value"
+                      @click="castVote(song.title, song.difficulty, opt.value)"
+                      :disabled="votingKey === (song.title + song.difficulty)"
+                      class="px-2 py-1 rounded-md text-[10px] font-bold border transition-all disabled:opacity-50 flex items-center gap-0.5"
+                      :class="getVoteClass(song.title, song.difficulty, opt.value, opt)"
+                    >
+                      {{ opt.icon }} {{ opt.label }}<span v-if="songVotes[song.title + song.difficulty]?.myVote === opt.value"> ✔</span>
+                    </button>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -271,12 +269,15 @@
 import { ref, computed } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
 import { getNextRankInfo } from '../utils/beatTier';
+import { useAuth, API_BASE } from '../composables/useAuth';
 import html2canvas from 'html2canvas';
 
 const props = defineProps<{
   isOpen: boolean;
   diffData: UploadDiffResult | null;
 }>();
+
+const { authHeaders } = useAuth();
 
 const nextRankData = computed(() => {
   if (!props.diffData) return null;
@@ -290,10 +291,55 @@ const sortedUpdatedSongs = computed(() => {
 
 const emit = defineEmits<{
   (e: 'close'): void;
+  (e: 'navigate', tab: string): void;
 }>();
 
 const close = () => {
   emit('close');
+};
+
+// Option vote state
+interface SongVoteState { myVote: string | null; }
+const songVotes = ref<Record<string, SongVoteState>>({});
+const votingKey = ref<string | null>(null);
+
+const optionTypes = [
+  { value: 'REGULAR', label: '正規', icon: '▶', activeBg: 'bg-blue-50 dark:bg-blue-900/30', activeText: 'text-blue-700 dark:text-blue-400', activeBorder: 'border-blue-300 dark:border-blue-700' },
+  { value: 'MIRROR', label: 'MIRROR', icon: '◀', activeBg: 'bg-purple-50 dark:bg-purple-900/30', activeText: 'text-purple-700 dark:text-purple-400', activeBorder: 'border-purple-300 dark:border-purple-700' },
+  { value: 'RANDOM', label: 'RANDOM', icon: '🎲', activeBg: 'bg-emerald-50 dark:bg-emerald-900/30', activeText: 'text-emerald-700 dark:text-emerald-400', activeBorder: 'border-emerald-300 dark:border-emerald-700' },
+  { value: 'R-RANDOM', label: 'R-RAN', icon: '🔀', activeBg: 'bg-amber-50 dark:bg-amber-900/30', activeText: 'text-amber-700 dark:text-amber-400', activeBorder: 'border-amber-300 dark:border-amber-700' },
+  { value: 'S-RANDOM', label: 'S-RAN', icon: '🎰', activeBg: 'bg-rose-50 dark:bg-rose-900/30', activeText: 'text-rose-700 dark:text-rose-400', activeBorder: 'border-rose-300 dark:border-rose-700' },
+];
+
+const getVoteClass = (title: string, difficulty: string, optValue: string, opt: typeof optionTypes[0]) => {
+  const key = title + difficulty;
+  const isVoted = songVotes.value[key]?.myVote === optValue;
+  if (isVoted) return `${opt.activeBg} ${opt.activeText} ${opt.activeBorder}`;
+  return 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800';
+};
+
+const castVote = async (title: string, difficultyName: string, optionType: string) => {
+  const key = title + difficultyName;
+  votingKey.value = key;
+  try {
+    const currentVote = songVotes.value[key]?.myVote;
+    if (currentVote === optionType) {
+      const params = new URLSearchParams({ title, difficultyName });
+      await fetch(`${API_BASE}/api/votes?${params}`, { method: 'DELETE', headers: authHeaders() });
+      songVotes.value[key] = { myVote: null };
+    } else {
+      await fetch(`${API_BASE}/api/votes`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, difficultyName, optionType })
+      });
+      songVotes.value[key] = { myVote: optionType };
+    }
+  } catch {
+    // silent
+  } finally {
+    votingKey.value = null;
+  }
 };
 
 const shareContainer = ref<HTMLElement | null>(null);

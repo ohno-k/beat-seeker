@@ -10,8 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -42,6 +44,9 @@ public class AuthController {
             user.setDanRank(request.danRank());
             user.setArenaRank(request.arenaRank());
             user.setPlaySide(request.playSide() != null ? request.playSide() : "1P");
+            if (request.email() != null && !request.email().isBlank()) {
+                user.setEmail(request.email().trim().toLowerCase());
+            }
             userRepository.save(user);
 
             String token = jwtUtil.generateToken(user.getIidxId());
@@ -107,6 +112,7 @@ public class AuthController {
             responseBody.put("playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P");
             responseBody.put("privacyLevel", user.getPrivacyLevel());
             responseBody.put("lastUploadedAt", user.getLastUploadedAt());
+            responseBody.put("email", user.getEmail() != null ? user.getEmail() : "");
             return ResponseEntity.ok(responseBody);
         } catch (org.springframework.dao.IncorrectResultSizeDataAccessException
                 | org.hibernate.NonUniqueResultException e) {
@@ -152,9 +158,73 @@ public class AuthController {
             user.setPlaySide(request.playSide());
         if (request.privacyLevel() != null)
             user.setPrivacyLevel(request.privacyLevel());
+        if (request.email() != null && !request.email().isBlank()) {
+            String newEmail = request.email().trim().toLowerCase();
+            Optional<User> existing = userRepository.findByEmail(newEmail);
+            if (existing.isPresent() && !existing.get().getId().equals(user.getId())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("message", "そのメールアドレスは既に使用されています。"));
+            }
+            user.setEmail(newEmail);
+        }
 
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(@RequestBody Map<String, String> payload) {
+        String iidxId = payload.get("iidxId");
+        String email = payload.get("email");
+
+        if (iidxId == null || email == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "IIDX IDとメールアドレスを入力してください。"));
+        }
+
+        Optional<User> optUser = userRepository.findByIidxId(iidxId.trim());
+        if (optUser.isEmpty() || !email.trim().equalsIgnoreCase(optUser.get().getEmail())) {
+            // Return generic message to prevent user enumeration
+            return ResponseEntity.ok(Map.of("message", "該当するアカウントが見つかった場合、パスワードリセット手順を送信します。"));
+        }
+
+        User user = optUser.get();
+        String token = UUID.randomUUID().toString();
+        user.setPasswordResetToken(token);
+        user.setPasswordResetExpiredAt(LocalDateTime.now().plusHours(1));
+        userRepository.save(user);
+
+        // TODO: send email with reset token
+        // In development, log the token
+        System.out.println("[DEV] Password reset token for " + iidxId + ": " + token);
+
+        return ResponseEntity.ok(Map.of("message", "パスワードリセットの手順をメールで送信しました。"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Map<String, String> payload) {
+        String token = payload.get("token");
+        String newPassword = payload.get("newPassword");
+
+        if (token == null || newPassword == null || newPassword.length() < 4) {
+            return ResponseEntity.badRequest().body(Map.of("message", "無効なリクエストです。"));
+        }
+
+        Optional<User> optUser = userRepository.findByPasswordResetToken(token);
+        if (optUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "無効または期限切れのトークンです。"));
+        }
+
+        User user = optUser.get();
+        if (user.getPasswordResetExpiredAt() == null || LocalDateTime.now().isAfter(user.getPasswordResetExpiredAt())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "トークンの有効期限が切れています。再度リセットを申請してください。"));
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setPasswordResetToken(null);
+        user.setPasswordResetExpiredAt(null);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "パスワードをリセットしました。新しいパスワードでログインしてください。"));
     }
 }

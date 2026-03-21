@@ -23,6 +23,7 @@ const arenaRank = ref('');
 const playSide = ref('');
 const privacyLevel = ref(0);
 
+const email = ref('');
 const currentPassword = ref('');
 const newPassword = ref('');
 const newPasswordConfirm = ref('');
@@ -47,7 +48,8 @@ watch(() => props.isOpen, (newVal) => {
     arenaRank.value = user.value.arenaRank;
     playSide.value = user.value.playSide;
     privacyLevel.value = user.value.privacyLevel ?? 0;
-    
+    email.value = user.value.email ?? '';
+
     currentPassword.value = '';
     newPassword.value = '';
     newPasswordConfirm.value = '';
@@ -89,7 +91,8 @@ const handleUpdate = async () => {
       danRank: danRank.value,
       arenaRank: arenaRank.value,
       playSide: playSide.value,
-      privacyLevel: privacyLevel.value
+      privacyLevel: privacyLevel.value,
+      email: email.value.trim() || undefined
     };
 
     if (newPassword.value) {
@@ -194,6 +197,19 @@ const handleUpdate = async () => {
                   <option :value="2">非公開</option>
                 </select>
               </div>
+            </div>
+          </div>
+
+          <!-- Email section -->
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
+            <div class="flex items-center gap-2">
+              <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">メールアドレス</h4>
+              <span v-if="!user?.email" class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-800/50">未登録</span>
+            </div>
+            <div>
+              <input type="email" v-model="email" placeholder="example@email.com"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1">パスワードを忘れた場合のリセットに使用されます</p>
             </div>
           </div>
 

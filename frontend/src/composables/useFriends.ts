@@ -21,8 +21,18 @@ export interface PendingRequest {
     createdAt: string;
 }
 
+export interface AppNotificationItem {
+    id: number;
+    type: string;
+    message: string;
+    read: boolean;
+    createdAt: string;
+}
+
 // Module-level shared state so App.vue and NotificationBox.vue see the same ref
 const pendingRequests = ref<PendingRequest[]>([]);
+const appNotifications = ref<AppNotificationItem[]>([]);
+const appUnreadCount = ref(0);
 
 export function useFriends() {
     const { authHeaders } = useAuth();
@@ -202,9 +212,36 @@ export function useFriends() {
         return permission === 'granted';
     };
 
+    const fetchAppNotifications = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/notifications`, { headers: authHeaders() });
+            if (!res.ok) return;
+            const data = await res.json();
+            appNotifications.value = data.notifications ?? [];
+            appUnreadCount.value = data.unreadCount ?? 0;
+        } catch {
+            // silent
+        }
+    };
+
+    const markAllNotificationsRead = async () => {
+        try {
+            await fetch(`${API_BASE}/api/notifications/read-all`, {
+                method: 'POST',
+                headers: authHeaders()
+            });
+            appNotifications.value = appNotifications.value.map(n => ({ ...n, read: true }));
+            appUnreadCount.value = 0;
+        } catch {
+            // silent
+        }
+    };
+
     return {
         friends,
         pendingRequests,
+        appNotifications,
+        appUnreadCount,
         isLoading,
         error,
         fetchFriends,
@@ -216,6 +253,8 @@ export function useFriends() {
         removeFriend,
         updatePushSubscription,
         fetchFriendScores,
-        requestNotificationPermission
+        requestNotificationPermission,
+        fetchAppNotifications,
+        markAllNotificationsRead,
     };
 }

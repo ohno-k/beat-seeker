@@ -59,11 +59,11 @@ export function useScoreUpload() {
         return res.json();
     };
 
-    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string): Promise<void> => {
+    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string): Promise<void> => {
         const res = await fetch(`${API_BASE}/api/scores/save-history-log`, {
             method: 'POST',
             headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson }),
+            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson, tierName, prevTierName }),
         });
 
         if (!res.ok) {

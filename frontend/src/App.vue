@@ -59,7 +59,7 @@ const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
 const { upload, saveHistoryLog } = useScoreUpload();
 const { fetchMyScores, fetchUserScores, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
-const { pendingRequests, fetchPendingRequests, requestNotificationPermission } = useFriends();
+const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission } = useFriends();
 
 const isNotificationOpen = ref(false);
 const deferredPrompt = ref<any>(null);
@@ -231,7 +231,8 @@ watch(isLoggedIn, (newVal) => {
     viewingUserId.value = null;
     viewingUserName.value = '';
     loadSavedScores();
-    fetchPendingRequests(); // Check for friends
+    fetchPendingRequests();
+    fetchAppNotifications();
     requestNotificationPermission();
 
     if (pendingImportOpen.value) {
@@ -408,11 +409,16 @@ const handleFileDropped = async (file: File) => {
         // Save the history log to backend using the ACCURATE total from the full profile
         if (reportSongs.length > 0) {
             try {
+                const newTierInfo = getRankInfo(accurateTotalBeatPt);
+                const newTierLabel = newTierInfo.name + (newTierInfo.tier ? ' ' + newTierInfo.tier : '');
+                const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
                 await saveHistoryLog(
                     accurateTotalBeatPt,
                     Math.max(0, accurateTotalBeatPt - oldTotalBeatPt),
                     reportSongs.length,
-                    JSON.stringify(reportSongs)
+                    JSON.stringify(reportSongs),
+                    newTierLabel,
+                    oldTierLabel
                 );
                 console.log("History log saved successfully.");
             } catch (err) {
@@ -504,10 +510,11 @@ const handleUnifiedClose = async () => {
     <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" @registered="isOnboardingOpen = true" />
     <OnboardingModal :is-open="isOnboardingOpen" :deferred-prompt="deferredPrompt" @close="isOnboardingOpen = false" />
     <ProfileEditModal :is-open="isProfileModalOpen" @close="isProfileModalOpen = false" />
-    <UploadResultModal 
-      :is-open="isDiffModalOpen" 
-      :diff-data="diffResult" 
-      @close="isDiffModalOpen = false" 
+    <UploadResultModal
+      :is-open="isDiffModalOpen"
+      :diff-data="diffResult"
+      @close="isDiffModalOpen = false"
+      @navigate="(tab) => { isDiffModalOpen = false; activeTab = tab as any; }"
     />
     <AdminUserListModal
       :is-open="isAdminModalOpen"
@@ -618,8 +625,8 @@ const handleUnifiedClose = async () => {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <span v-if="pendingRequests.length > 0" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
-                  {{ pendingRequests.length }}
+                <span v-if="pendingRequests.length + appUnreadCount > 0" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
+                  {{ pendingRequests.length + appUnreadCount }}
                 </span>
               </button>
               <NotificationBox :is-open="isNotificationOpen" @close="isNotificationOpen = false" />
@@ -811,6 +818,7 @@ const handleUnifiedClose = async () => {
                 :scores="scoreData"
                 :totalPoints="totalBeatTierPoints"
                 class="w-full"
+                @open-profile-edit="isProfileModalOpen = true"
               />
             </div>
 

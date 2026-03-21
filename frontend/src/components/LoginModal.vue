@@ -11,11 +11,12 @@ const emit = defineEmits<{
   (e: 'registered'): void;
 }>();
 
-const { login, registerUser } = useAuth();
+const { login, registerUser, forgotPassword } = useAuth();
 
-const mode = ref<'login' | 'register'>('login');
+const mode = ref<'login' | 'register' | 'forgot'>('login');
 const isSubmitting = ref(false);
 const errorMsg = ref('');
+const successMsg = ref('');
 
 // Form fields
 const inputIidxId = ref('');
@@ -50,21 +51,45 @@ const formatIidxId = (e: Event) => {
   target.value = val;
 };
 
+const forgotEmail = ref('');
+
 const handleSubmit = async () => {
   errorMsg.value = '';
-  
+  successMsg.value = '';
+
+  if (mode.value === 'forgot') {
+    if (!inputIidxId.value.match(/^\d{4}-\d{4}$/)) {
+      errorMsg.value = 'IIDX IDは「数字4桁 - 数字4桁」の形式で入力してください。';
+      return;
+    }
+    if (!forgotEmail.value.trim()) {
+      errorMsg.value = 'メールアドレスを入力してください。';
+      return;
+    }
+    isSubmitting.value = true;
+    try {
+      const msg = await forgotPassword(inputIidxId.value, forgotEmail.value.trim());
+      successMsg.value = msg;
+    } catch (err: any) {
+      errorMsg.value = err.message || 'エラーが発生しました。';
+    } finally {
+      isSubmitting.value = false;
+    }
+    return;
+  }
+
   if (!inputIidxId.value.match(/^\d{4}-\d{4}$/)) {
     errorMsg.value = 'IIDX IDは「数字4桁 - 数字4桁」の形式で入力してください。';
     return;
   }
-  
+
   if (!password.value) {
     errorMsg.value = 'パスワードを入力してください。';
     return;
   }
 
   isSubmitting.value = true;
-  
+
   try {
     if (mode.value === 'login') {
       await login(inputIidxId.value, password.value);
@@ -90,10 +115,10 @@ const handleSubmit = async () => {
   }
 };
 
-const switchMode = (newMode: 'login' | 'register') => {
+const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
   mode.value = newMode;
   errorMsg.value = '';
-  // Keep iidxId and password when switching, clear others
+  successMsg.value = '';
 };
 </script>
 
@@ -103,19 +128,26 @@ const switchMode = (newMode: 'login' | 'register') => {
       
       <!-- Tabs -->
       <div class="flex border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
-        <button 
+        <button
           @click="switchMode('login')"
-          :class="['flex-1 py-4 text-sm font-bold transition-colors duration-200', 
+          :class="['flex-1 py-4 text-sm font-bold transition-colors duration-200',
                    mode === 'login' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-white dark:bg-slate-800' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
         >
           ログイン
         </button>
-        <button 
+        <button
           @click="switchMode('register')"
-          :class="['flex-1 py-4 text-sm font-bold transition-colors duration-200', 
+          :class="['flex-1 py-4 text-sm font-bold transition-colors duration-200',
                    mode === 'register' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-white dark:bg-slate-800' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
         >
           新規登録
+        </button>
+        <button
+          @click="switchMode('forgot')"
+          :class="['flex-1 py-4 text-xs font-bold transition-colors duration-200',
+                   mode === 'forgot' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-white dark:bg-slate-800' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
+        >
+          パスワードを忘れた
         </button>
       </div>
       
@@ -128,15 +160,43 @@ const switchMode = (newMode: 'login' | 'register') => {
             </svg>
             {{ errorMsg }}
           </div>
+          <div v-if="successMsg" class="p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm rounded-xl flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            {{ successMsg }}
+          </div>
 
-          <div>
+          <!-- Forgot Password Form -->
+          <template v-if="mode === 'forgot'">
+            <p class="text-sm text-slate-600 dark:text-slate-400">登録済みのIIDX IDとメールアドレスを入力してください。パスワードリセット手順をお送りします。</p>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">IIDX ID</label>
+              <input type="text" :value="inputIidxId" @input="formatIidxId" placeholder="1234-5678" pattern="\d{4}-\d{4}" maxlength="9"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">登録メールアドレス</label>
+              <input type="email" v-model="forgotEmail" placeholder="example@email.com"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+            </div>
+            <div class="pt-2 flex gap-3">
+              <button type="button" @click="emit('close')" class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">キャンセル</button>
+              <button type="submit" :disabled="isSubmitting" class="flex-[2] py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+                <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                リセット手順を送信
+              </button>
+            </div>
+          </template>
+
+          <div v-if="mode !== 'forgot'">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">IIDX ID</label>
             <input type="text" :value="inputIidxId" @input="formatIidxId" required placeholder="1234-5678" pattern="\d{4}-\d{4}" maxlength="9"
               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
             <p v-if="mode === 'register'" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1 transition-colors duration-200">自動的にハイフンが挿入されます</p>
           </div>
 
-          <div>
+          <div v-if="mode !== 'forgot'">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">パスワード</label>
             <input type="password" v-model="password" required placeholder="••••••••" minlength="4"
               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
@@ -191,7 +251,7 @@ const switchMode = (newMode: 'login' | 'register') => {
             </div>
           </template>
           
-          <div class="pt-2 flex gap-3">
+          <div v-if="mode !== 'forgot'" class="pt-2 flex gap-3">
             <button type="button" @click="emit('close')"
               class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">
               キャンセル

@@ -11,6 +11,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByIidxId(String iidxId);
 
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findByPasswordResetToken(String token);
+
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.iidxId = :query OR u.iidxId = :variant OR u.displayName = :query")
     List<User> searchUsers(@org.springframework.data.repository.query.Param("query") String query,
             @org.springframework.data.repository.query.Param("variant") String variant);

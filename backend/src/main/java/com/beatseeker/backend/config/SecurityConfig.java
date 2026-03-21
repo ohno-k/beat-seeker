@@ -50,7 +50,10 @@ public class SecurityConfig {
                                                                 "/api/scores/debug-user-scores/**", "/api/friends/test",
                                                                 "/api/test-root")
                                                 .permitAll()
+                                                .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                                                .requestMatchers("/api/activity/feed").permitAll()
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile").authenticated()
+                                                .requestMatchers("/api/notifications/**").authenticated()
                                                 .requestMatchers("/api/scores/upload", "/api/scores/save-history-log",
                                                                 "/api/scores/me", "/api/scores/history",
                                                                 "/api/scores/*/memo")

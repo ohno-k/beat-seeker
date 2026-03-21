@@ -5,5 +5,7 @@ public record SaveHistoryLogRequest(
         Double beatPtIncrease,
         Integer updatedCount,
         String diffJson,
-        Double totalPrecisionPt) {
+        Double totalPrecisionPt,
+        String tierName,
+        String prevTierName) {
 }

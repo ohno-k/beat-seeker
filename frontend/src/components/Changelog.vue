@@ -17,6 +17,41 @@
       </p>
     </div>
 
+    <!-- Update Entry: v1.2.0 (Notification Tabs & Vote UI) -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.2.0</span>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">通知タブの分離とインライン投票 UI</h3>
+        </div>
+        <span class="text-sm font-bold text-slate-500 dark:text-slate-400">2026年3月</span>
+      </div>
+
+      <div class="p-8 space-y-6">
+        <div>
+          <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+            新機能 (New Features)
+          </h4>
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">通知ボックスのタブ分離:</span> 通知ボックスが「フレンド申請」と「アクティビティ」の2タブに分かれました。未読のアクティビティ通知は赤バッジで件数を表示し、「全て既読」ボタンでまとめて既読にできます。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">おすすめオプションのインライン投票:</span> スコアアップロード後のリザルト画面で、各楽曲カードに正規・MIRROR・RANDOM・R-RAN・S-RANのボタンが直接表示されるようになりました。クリック一つで推奨オプションに投票でき、もう一度押すと取り消せます。</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+            不具合対応 (Bug Fixes)
+          </h4>
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">リザルト画面の楽曲名が切れる問題を修正:</span> 難易度バッジ・LAMP UP・スコア値と同じ行に表示していたため、タイトルが途中で切れていた問題を解消しました。各情報を行ごとに分けることで、長い楽曲名も正しく表示されます。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">スマホで通知ボックスが画面外にはみ出す問題を修正:</span> 通知ボックスの位置指定を絶対座標から画面固定（fixed）に変更し、モバイル端末でも常に正しく表示されるよう修正しました。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <!-- Update Entry: v1.1.1 (Folder Rank System Redesign) -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">

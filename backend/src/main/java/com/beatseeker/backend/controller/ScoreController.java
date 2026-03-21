@@ -1,11 +1,17 @@
 package com.beatseeker.backend.controller;
 
+import com.beatseeker.backend.entity.ActivityLog;
+import com.beatseeker.backend.entity.AppNotification;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.repository.ActivityLogRepository;
+import com.beatseeker.backend.repository.AppNotificationRepository;
+import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.service.PushNotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +28,24 @@ public class ScoreController {
     private final ScoreRepository scoreRepository;
     private final UserRepository userRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
+    private final FriendshipRepository friendshipRepository;
+    private final AppNotificationRepository appNotificationRepository;
+    private final ActivityLogRepository activityLogRepository;
+    private final PushNotificationService pushNotificationService;
 
     public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository,
-            ScoreHistoryLogRepository scoreHistoryLogRepository) {
+            ScoreHistoryLogRepository scoreHistoryLogRepository,
+            FriendshipRepository friendshipRepository,
+            AppNotificationRepository appNotificationRepository,
+            ActivityLogRepository activityLogRepository,
+            PushNotificationService pushNotificationService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
+        this.friendshipRepository = friendshipRepository;
+        this.appNotificationRepository = appNotificationRepository;
+        this.activityLogRepository = activityLogRepository;
+        this.pushNotificationService = pushNotificationService;
     }
 
     /**
@@ -100,6 +118,7 @@ public class ScoreController {
 
         if (!updatedSongs.isEmpty()) {
             updateLastUploadTime(user);
+            notifyFriendsOfScoreBeat(user, updatedSongs);
         }
 
         return ResponseEntity.ok(Map.of(
@@ -179,6 +198,18 @@ public class ScoreController {
         log.setACount(aCount);
 
         scoreHistoryLogRepository.save(log);
+
+        // ランクアップ通知とActivityLog
+        if (req.tierName() != null && req.prevTierName() != null
+                && !req.tierName().equals(req.prevTierName())) {
+            notifyFriendsOfRankUp(user, req.prevTierName(), req.tierName());
+            ActivityLog activity = new ActivityLog();
+            activity.setUser(user);
+            activity.setType("RANK_UP");
+            activity.setOldValue(req.prevTierName());
+            activity.setNewValue(req.tierName());
+            activityLogRepository.save(activity);
+        }
 
         return ResponseEntity.ok(Map.of("message", "History log saved"));
     }
@@ -403,6 +434,69 @@ public class ScoreController {
         scoreRepository.save(score);
 
         return ResponseEntity.ok(Map.of("message", "メモを保存しました"));
+    }
+
+    /**
+     * フレンドのスコアを自分のスコアが上回った場合、そのフレンドに通知する
+     */
+    private void notifyFriendsOfScoreBeat(User uploader, List<Map<String, Object>> updatedSongs) {
+        List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(uploader);
+        for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
+            User friend = friendship.getFriend();
+            if (friend.getPrivacyLevel() != null && friend.getPrivacyLevel() == 2) continue;
+
+            for (Map<String, Object> song : updatedSongs) {
+                String title = (String) song.get("title");
+                String difficulty = (String) song.get("difficulty");
+                int newScore = (int) song.get("newScore");
+
+                scoreRepository.findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(
+                        friend, title, difficulty).ifPresent(friendScore -> {
+                    int friendScoreVal = friendScore.getScore() != null ? friendScore.getScore() : 0;
+                    if (newScore > friendScoreVal && friendScoreVal > 0) {
+                        AppNotification notification = new AppNotification();
+                        notification.setRecipient(friend);
+                        notification.setType("SCORE_BEAT");
+                        notification.setMessage(
+                                uploader.getDisplayName() + "さんが「" + title + "」(" + difficulty + ") で " +
+                                newScore + " を記録し、あなたのスコア " + friendScoreVal + " を上回りました！");
+                        appNotificationRepository.save(notification);
+
+                        if (friend.getPushSubscription() != null) {
+                            pushNotificationService.sendNotification(
+                                    friend.getPushSubscription(),
+                                    "スコアを抜かれました！",
+                                    uploader.getDisplayName() + "さんに「" + title + "」で抜かれました",
+                                    "/");
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * ランクアップした際にフレンド全員に通知する
+     */
+    private void notifyFriendsOfRankUp(User user, String oldTier, String newTier) {
+        List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(user);
+        for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
+            User friend = friendship.getFriend();
+            AppNotification notification = new AppNotification();
+            notification.setRecipient(friend);
+            notification.setType("FRIEND_RANK_UP");
+            notification.setMessage(
+                    user.getDisplayName() + "さんが Beat-Tier「" + oldTier + "」から「" + newTier + "」にランクアップしました！");
+            appNotificationRepository.save(notification);
+
+            if (friend.getPushSubscription() != null) {
+                pushNotificationService.sendNotification(
+                        friend.getPushSubscription(),
+                        "フレンドがランクアップ！",
+                        user.getDisplayName() + "さんが " + newTier + " にランクアップしました！",
+                        "/");
+            }
+        }
     }
 
     private User getUser(Authentication auth) {

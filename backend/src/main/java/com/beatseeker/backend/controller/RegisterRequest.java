@@ -11,5 +11,6 @@ public record RegisterRequest(
                 String displayName,
                 String danRank,
                 String arenaRank,
-                String playSide) {
+                String playSide,
+                String email) {
 }

@@ -8,5 +8,6 @@ public record ProfileUpdateRequest(
                 String playSide,
                 String currentPassword,
                 String newPassword,
-                Integer privacyLevel) {
+                Integer privacyLevel,
+                String email) {
 }

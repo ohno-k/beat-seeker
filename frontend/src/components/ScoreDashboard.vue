@@ -1,5 +1,23 @@
 <template>
   <div class="w-full space-y-6 animate-fade-in">
+    <!-- Email Registration Prompt (未登録の場合のみ表示) -->
+    <div v-if="user && !user.email" class="w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div class="flex items-center gap-3 flex-1">
+        <div class="w-9 h-9 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-amber-800 dark:text-amber-300">メールアドレスが未登録です</p>
+          <p class="text-xs text-amber-600 dark:text-amber-400">登録するとパスワードを忘れた際のリセットができます。</p>
+        </div>
+      </div>
+      <button @click="$emit('open-profile-edit')" class="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">
+        今すぐ登録
+      </button>
+    </div>
+
     <!-- Dashboard Stats Header -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
@@ -104,6 +122,9 @@
     <!-- Rank Up Advice -->
     <RankUpAdvice :flat-scores="allFlattenedScores" :total-points="props.totalPoints" />
 
+    <!-- Activity Feed (全体ニュース) -->
+    <ActivityFeed />
+
     <!-- Info Modal -->
     <BeatTierInfoModal v-if="showInfoModal" @close="showInfoModal = false" />
   </div>
@@ -117,11 +138,14 @@ import BeatTierInfoModal from './BeatTierInfoModal.vue';
 import RankIcon from './RankIcon.vue';
 import UnofficialDifficultyTable from './UnofficialDifficultyTable.vue';
 import RankUpAdvice from './RankUpAdvice.vue';
+import ActivityFeed from './ActivityFeed.vue';
 import { useAuth } from '../composables/useAuth';
 import { flattenScores } from '../utils/scoreData';
 
 const { user } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+
+const emit = defineEmits<{ (e: 'open-profile-edit'): void }>();
 
 const props = defineProps<{
   scores: ScoreData[];

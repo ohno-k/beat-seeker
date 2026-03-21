@@ -9,6 +9,7 @@ export interface AuthUser {
     playSide: string;
     privacyLevel: number;
     lastUploadedAt: string | null;
+    email: string;
 }
 
 const user = ref<AuthUser | null>(null);
@@ -123,6 +124,28 @@ export function useAuth() {
         window.location.href = '/';
     };
 
+    const forgotPassword = async (iidxId: string, email: string): Promise<string> => {
+        const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ iidxId, email })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.message || 'リクエストに失敗しました。');
+        return data.message as string;
+    };
+
+    const resetPassword = async (token: string, newPassword: string): Promise<string> => {
+        const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, newPassword })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.message || 'リセットに失敗しました。');
+        return data.message as string;
+    };
+
     const isLoggedIn = computed(() => !!user.value);
 
     return {
@@ -135,5 +158,7 @@ export function useAuth() {
         updateProfile,
         fetchCurrentUser,
         authHeaders,
+        forgotPassword,
+        resetPassword,
     };
 }
