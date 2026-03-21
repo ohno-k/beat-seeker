@@ -65,6 +65,58 @@ const isNotificationOpen = ref(false);
 const deferredPrompt = ref<any>(null);
 const showInstallBanner = ref(false);
 const pendingImportOpen = ref(false);
+const pendingFragmentData = ref<string | null>(null);
+
+/** Decode bookmarklet data from URL fragment */
+const decodeFragmentData = (): string | null => {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#data=')) return null;
+  try {
+    const b64 = hash.slice(6); // strip '#data='
+    return decodeURIComponent(escape(atob(b64)));
+  } catch (e) {
+    console.warn('Failed to decode fragment data:', e);
+    return null;
+  }
+};
+
+/** Process bookmarklet JSON data: handle ARENA import + score CSV */
+const processBookmarkletData = async (jsonText: string) => {
+  try {
+    const parsed = JSON.parse(jsonText);
+    if (!parsed || parsed.type !== 'beat-seeker-combined') return;
+
+    // Handle ARENA battles
+    if (parsed.battles && Array.isArray(parsed.battles) && parsed.battles.length > 0) {
+      const token = localStorage.getItem('beat-seeker-token');
+      try {
+        const res = await fetch(`${API_BASE}/api/arena/import`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(parsed),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          console.log('ARENA import:', data.message);
+        }
+      } catch (e) {
+        console.warn('ARENA import failed:', e);
+      }
+    }
+
+    // Handle score CSV
+    if (parsed.scoresCsv) {
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const blob = new Blob([bom, parsed.scoresCsv], { type: 'text/csv;charset=utf-8;' });
+      const file = new File([blob], 'scores.csv', { type: 'text/csv' });
+      await handleFileDropped(file);
+    }
+  } catch (e) {
+    console.warn('Failed to process bookmarklet data:', e);
+  }
+};
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 onMounted(() => {
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -90,17 +142,31 @@ onMounted(() => {
     activeTab.value = pathToTab[currentPath];
   }
 
-  // ブックマークレットからのリダイレクト時にインポートモーダルを自動表示
+  // ブックマークレットからのリダイレクト時：URLフラグメントからデータを自動取り込み
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('import') === 'open') {
+    const fragmentData = decodeFragmentData();
     window.history.replaceState({}, document.title, window.location.pathname);
-    if (isLoggedIn.value) {
-      showUploadArea.value = true;
+
+    if (fragmentData) {
+      // URLフラグメントにデータあり → 自動取り込み
+      if (isLoggedIn.value) {
+        processBookmarkletData(fragmentData);
+      } else {
+        pendingFragmentData.value = fragmentData;
+        pendingImportOpen.value = true;
+      }
     } else {
-      pendingImportOpen.value = true;
+      // フラグメントなし（従来のクリップボード方式フォールバック）
+      if (isLoggedIn.value) {
+        showUploadArea.value = true;
+      } else {
+        pendingImportOpen.value = true;
+      }
     }
   }
 });
+
 
 // Notification permission is handled by useFriends
 
@@ -170,7 +236,14 @@ watch(isLoggedIn, (newVal) => {
 
     if (pendingImportOpen.value) {
       pendingImportOpen.value = false;
-      showUploadArea.value = true;
+      if (pendingFragmentData.value) {
+        // URLフラグメントデータがある場合は自動取り込み
+        const data = pendingFragmentData.value;
+        pendingFragmentData.value = null;
+        processBookmarkletData(data);
+      } else {
+        showUploadArea.value = true;
+      }
     }
 
     // Check if we just logged in via Google OAuth redirect
