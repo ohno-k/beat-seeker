@@ -11,15 +11,6 @@
         </svg>
         ランクアップへの道
       </h3>
-      <button
-        @click="regenerate"
-        class="flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-lg border border-blue-200 dark:border-blue-800 transition-colors"
-      >
-        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        変更
-      </button>
     </div>
     <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">
       次のランクまで あと <span class="font-black text-blue-600 dark:text-blue-400">{{ nextRankGap.toFixed(1) }} pt</span> 必要
@@ -200,46 +191,32 @@ function buildCandidates(): Suggestion[] {
   return candidates;
 }
 
-function pickRandomSuggestions(): Suggestion[] {
+function pickBestSuggestions(): Suggestion[] {
   const gap = nextRankGap.value;
   if (gap <= 0) return [];
 
   const candidates = buildCandidates();
   if (candidates.length === 0) return [];
 
-  // Shuffle for variety
-  const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+  // Sort by efficiency: ptGain per scoreIncrease (descending).
+  // Border-crossing songs (AA/AAA/MAX-) get priority among ties.
+  const sorted = [...candidates].sort((a, b) => {
+    const effA = a.ptGain / a.scoreIncrease;
+    const effB = b.ptGain / b.scoreIncrease;
+    if (Math.abs(effA - effB) > 0.001) return effB - effA;
+    if (a.crossesBorder !== b.crossesBorder) return a.crossesBorder ? -1 : 1;
+    return b.ptGain - a.ptGain;
+  });
 
-  // Fill with songs whose individual gain doesn't yet cover the gap,
-  // leaving room for one final "tipping" song to land just over the target.
+  // Pick most efficient songs until the gap is covered (up to 19 songs).
   const result: Suggestion[] = [];
   let accumulated = 0;
 
-  for (const c of shuffled) {
+  for (const c of sorted) {
     if (result.length >= 19) break;
-    if (accumulated + c.ptGain < gap) {
-      result.push(c);
-      accumulated += c.ptGain;
-    }
-  }
-
-  // Add the smallest single candidate that tips us just over the remaining gap
-  if (accumulated < gap) {
-    const usedKeys = new Set(result.map(s => `${s.song.title}|${s.song.difficultyName}`));
-    const remaining = gap - accumulated;
-    const covering = shuffled
-      .filter(c => !usedKeys.has(`${c.song.title}|${c.song.difficultyName}`) && c.ptGain >= remaining)
-      .sort((a, b) => a.ptGain - b.ptGain);
-
-    if (covering.length > 0) {
-      result.push(covering[0]);
-    } else {
-      // No single candidate covers remaining — add the best available
-      const best = shuffled
-        .filter(c => !usedKeys.has(`${c.song.title}|${c.song.difficultyName}`))
-        .sort((a, b) => b.ptGain - a.ptGain);
-      if (best.length > 0) result.push(best[0]);
-    }
+    if (accumulated >= gap) break;
+    result.push(c);
+    accumulated += c.ptGain;
   }
 
   return result;
@@ -247,14 +224,10 @@ function pickRandomSuggestions(): Suggestion[] {
 
 const suggestions = ref<Suggestion[]>([]);
 
-onMounted(() => { suggestions.value = pickRandomSuggestions(); });
+onMounted(() => { suggestions.value = pickBestSuggestions(); });
 watch(() => [props.flatScores, props.totalPoints], () => {
-  suggestions.value = pickRandomSuggestions();
+  suggestions.value = pickBestSuggestions();
 }, { deep: false });
-
-function regenerate() {
-  suggestions.value = pickRandomSuggestions();
-}
 
 const totalSuggestionGain = computed(() =>
   suggestions.value.reduce((acc, s) => acc + s.ptGain, 0)
