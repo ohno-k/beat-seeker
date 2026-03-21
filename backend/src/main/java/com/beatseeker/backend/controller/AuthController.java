@@ -3,6 +3,7 @@ package com.beatseeker.backend.controller;
 import com.beatseeker.backend.config.JwtUtil;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +23,13 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
     }
 
     @PostMapping("/register")
@@ -194,9 +197,13 @@ public class AuthController {
         user.setPasswordResetExpiredAt(LocalDateTime.now().plusHours(1));
         userRepository.save(user);
 
-        // TODO: send email with reset token
-        // In development, log the token
-        System.out.println("[DEV] Password reset token for " + iidxId + ": " + token);
+        try {
+            emailService.sendPasswordResetEmail(user.getEmail(), iidxId.trim(), token);
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to send password reset email: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "メールの送信に失敗しました。しばらく経ってから再試行してください。"));
+        }
 
         return ResponseEntity.ok(Map.of("message", "パスワードリセットの手順をメールで送信しました。"));
     }

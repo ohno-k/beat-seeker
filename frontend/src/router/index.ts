@@ -8,11 +8,13 @@ import FriendsView from '../views/FriendsView.vue'
 import ChangelogView from '../views/ChangelogView.vue'
 import TermsView from '../views/TermsView.vue'
 import AboutView from '../views/AboutView.vue'
+import ResetPasswordView from '../views/ResetPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', redirect: '/dashboard' },
+    { path: '/reset-password', name: 'reset-password', component: ResetPasswordView },
     { path: '/dashboard', name: 'dashboard', component: DashboardView },
     { path: '/scores', name: 'scores', component: ScoresView },
     { path: '/ranking', name: 'ranking', component: RankingView },

@@ -2,6 +2,18 @@ spring:
   application:
     name: beat-seeker-backend
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/beatseeker}
     driver-class-name: org.postgresql.Driver
@@ -25,6 +37,9 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
 
 vapid:
   public:
