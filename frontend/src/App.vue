@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import ResetPasswordView from './views/ResetPasswordView.vue';
 import CsvDropzone from './components/CsvDropzone.vue';
 import UnifiedImport from './components/UnifiedImport.vue';
 import { BOOKMARKLET_CODE } from './utils/bookmarklet';
@@ -33,6 +34,8 @@ import { useScores } from './composables/useScores';
 import { useDarkMode } from './composables/useDarkMode';
 import { useFriends } from './composables/useFriends';
 import { watch, onMounted } from 'vue';
+
+const isResetPasswordPage = ref(window.location.pathname === '/reset-password');
 
 const { hasUpdate } = useAppUpdate();
 const reloadPage = () => window.location.reload();
@@ -490,7 +493,8 @@ const handleUnifiedClose = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden">
+  <ResetPasswordView v-if="isResetPasswordPage" />
+  <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden">
     <!-- Sidebar Component -->
     <Sidebar 
       v-model:is-open="isSidebarOpen"
