@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { useAuth } from '../composables/useAuth';
 
-const route = useRoute();
-const router = useRouter();
 const { resetPassword } = useAuth();
 
 const token = ref('');
@@ -15,7 +12,8 @@ const errorMsg = ref('');
 const successMsg = ref('');
 
 onMounted(() => {
-  token.value = (route.query.token as string) ?? '';
+  const params = new URLSearchParams(window.location.search);
+  token.value = params.get('token') ?? '';
   if (!token.value) {
     errorMsg.value = '無効なリセットリンクです。';
   }
@@ -50,7 +48,7 @@ const handleSubmit = async () => {
 
       <div v-if="successMsg" class="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl">
         <p class="text-sm font-bold text-emerald-700 dark:text-emerald-400">{{ successMsg }}</p>
-        <button @click="router.push('/')" class="mt-3 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
+        <button @click="window.location.href = '/'" class="mt-3 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
           トップページへ戻る
         </button>
       </div>
