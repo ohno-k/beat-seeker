@@ -19,6 +19,8 @@ onMounted(() => {
   }
 });
 
+const goToTop = () => { window.location.href = '/'; };
+
 const handleSubmit = async () => {
   errorMsg.value = '';
   if (newPassword.value.length < 4) {
@@ -48,7 +50,7 @@ const handleSubmit = async () => {
 
       <div v-if="successMsg" class="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl">
         <p class="text-sm font-bold text-emerald-700 dark:text-emerald-400">{{ successMsg }}</p>
-        <button @click="window.location.href = '/'" class="mt-3 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
+        <button @click="goToTop" class="mt-3 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
           トップページへ戻る
         </button>
       </div>
