@@ -255,7 +255,7 @@ const filteredNavItems = computed(() => {
         <!-- Sidebar Footer (Version/Socials maybe?) -->
         <div class="p-6 text-center">
           <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-            v1.2.0 | beat-seeker
+            v1.3.0 | beat-seeker
           </p>
         </div>
       </div>
