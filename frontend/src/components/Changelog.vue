@@ -56,8 +56,7 @@ const activeTab = ref<'changelog' | 'difficulty'>('changelog');
           </h4>
           <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
             <li><span class="font-bold text-slate-900 dark:text-slate-100">RATE-TIER システムの実装:</span> スコアレート（最大スコアに対する達成率）をもとにプレイヤーの精度を評価する新指標「RATE-PT / RATE-TIER」を追加しました。ANOTHER・LEGGENDARIA 全曲が対象で、上位100曲のポイント合計によってランクが決まります。ランクボード・スコアレート換算表はヘルプモーダルで確認できます。</li>
-            <li><span class="font-bold text-slate-900 dark:text-slate-100">RATE-PT 楽曲ランキングの追加:</span> 全ユーザーのRATE-PT算出に使われているTop100楽曲を「多い順／少ない順」で確認できる楽曲ランキング画面を追加しました。</li>
-            <li><span class="font-bold text-slate-900 dark:text-slate-100">楽曲難易度表 第2版の適用:</span> 新規追加・既存変更を含む難易度改訂（第2版）を実施しました。詳細は「楽曲難易度制定履歴」タブをご覧ください。</li>
+<li><span class="font-bold text-slate-900 dark:text-slate-100">楽曲難易度表 第2版の適用:</span> 新規追加・既存変更を含む難易度改訂（第2版）を実施しました。詳細は「楽曲難易度制定履歴」タブをご覧ください。</li>
             <li><span class="font-bold text-slate-900 dark:text-slate-100">難易度改訂のアップロード履歴への自動記録:</span> 難易度改訂が行われた際、全ユーザーのアップロード履歴に「難易度改訂」ラベルの記録が自動的に追加されるようになりました。改訂前後のBEAT-PTの変動を履歴で確認できます。</li>
           </ul>
         </div>

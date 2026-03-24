@@ -5,7 +5,6 @@ import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import SongRankingList from './SongRankingList.vue';
-import RateSongRankingList from './RateSongRankingList.vue';
 
 interface BeatRankingEntry {
   displayName: string;
@@ -41,10 +40,8 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const pageMode = ref<'player' | 'song'>('player');
 const viewMode = ref<'beat' | 'rate'>('beat');
-const songRankMode = ref<'beat' | 'rate'>('beat');
 watch(showRateTier, (val) => {
     if (!val && viewMode.value === 'rate') viewMode.value = 'beat';
-    if (!val && songRankMode.value === 'rate') songRankMode.value = 'beat';
 });
 const beatRanking = ref<BeatRankingEntry[]>([]);
 const rateRanking = ref<RateRankingEntry[]>([]);
@@ -313,27 +310,7 @@ watch(viewMode, async (mode) => {
       </template>
       </template>
       <template v-else-if="pageMode === 'song'">
-        <!-- Song Ranking Tier Tabs -->
-        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit">
-          <button
-            @click="songRankMode = 'beat'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
-            :class="songRankMode === 'beat'
-              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-          >Beat-Tier</button>
-          <button
-            v-if="showRateTier"
-            @click="songRankMode = 'rate'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
-            :class="songRankMode === 'rate'
-              ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-          >Rate-Tier</button>
-        </div>
-
-        <SongRankingList v-if="songRankMode === 'beat'" />
-        <RateSongRankingList v-else-if="songRankMode === 'rate' && showRateTier" />
+        <SongRankingList />
       </template>
 
     </div>

@@ -47,7 +47,6 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/rate-ranking",
                                                                 "/api/scores/all-user-scores",
-                                                                "/api/scores/rate-song-ranking",
                                                                 "/api/scores/debug-ranking",
                                                                 "/api/scores/debug-user-scores/**", "/api/friends/test",
                                                                 "/api/test-root")
