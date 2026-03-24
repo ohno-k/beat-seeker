@@ -494,7 +494,43 @@ const handleFileDropped = async (file: File) => {
         }
       } catch (err) {
         console.error("Auto upload failed", err);
-        errorMsg.value = '自動保存または差分の取得に失敗しました。';
+        errorMsg.value = 'スコアの保存に失敗しました。表示は取り込み前との比較です。';
+        // フォールバック: クライアント側差分でモーダルを表示
+        // (サーバー側でスコアが保存されていた場合に備えて history log も試みる)
+        const guestNewTotalRatePt = calcFlatRatePt(newFlat);
+        diffResult.value = {
+            oldTotalBeatPt,
+            newTotalBeatPt,
+            totalBeatPtIncrease: Math.max(0, newTotalBeatPt - oldTotalBeatPt),
+            oldTier,
+            newTier,
+            updatedSongs,
+            oldTotalRatePt,
+            newTotalRatePt: guestNewTotalRatePt,
+            oldRateTier: getRateTierRankInfo(oldTotalRatePt),
+            newRateTier: getRateTierRankInfo(guestNewTotalRatePt),
+        };
+        if (updatedSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
+            isDiffModalOpen.value = true;
+            if (updatedSongs.length > 0) {
+                try {
+                    const newTierLabel = newTier.name + (newTier.tier ? ' ' + newTier.tier : '');
+                    const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
+                    await saveHistoryLog(
+                        newTotalBeatPt,
+                        Math.max(0, newTotalBeatPt - oldTotalBeatPt),
+                        updatedSongs.length,
+                        JSON.stringify(updatedSongs),
+                        newTierLabel,
+                        oldTierLabel,
+                        guestNewTotalRatePt
+                    );
+                    console.log("History log saved (fallback).");
+                } catch (histErr) {
+                    console.error("History log fallback save failed:", histErr);
+                }
+            }
+        }
       }
     } else {
         // Guest mode - stay with frontend calculation
