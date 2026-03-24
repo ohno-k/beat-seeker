@@ -86,16 +86,19 @@ public class ScoreController {
                 updateScoreFields(newScore, req);
                 scoreRepository.save(newScore);
             } else {
-                oldScore = existing.getScore() != null ? existing.getScore() : 0;
-                oldClearType = existing.getClearType() != null ? existing.getClearType() : "NO PLAY";
+                int oldMiss = existing.getMissCount() != null ? existing.getMissCount() : Integer.MAX_VALUE;
+                int newMiss = req.missCount() != null ? req.missCount() : Integer.MAX_VALUE;
 
                 int oldRank = getClearTypeRank(oldClearType);
                 int newRank = getClearTypeRank(req.clearType());
 
                 boolean scoreBetter = req.score() > oldScore;
                 boolean rankBetter = newRank > oldRank;
+                boolean missBetter = newMiss < oldMiss;
 
-                if (scoreBetter || rankBetter) {
+                // Typical IIDX tracking: Best Score, Best Clear, Best BP are tracked.
+                // Since this app has a single Score entity per song, any improvement triggers an update.
+                if (scoreBetter || rankBetter || missBetter) {
                     isImproved = true;
                     updateScoreFields(existing, req);
                     scoreRepository.save(existing);

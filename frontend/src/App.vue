@@ -470,27 +470,29 @@ const handleFileDropped = async (file: File) => {
 
         if (reportSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
             isDiffModalOpen.value = true;
+        } else {
+            errorMsg.value = 'スコアの更新はありませんでした（すでに最新のスコアが保存されています）';
         }
 
-        // Save the history log to backend using the ACCURATE total from the full profile
-        if (reportSongs.length > 0) {
-            try {
-                const newTierInfo = getRankInfo(accurateTotalBeatPt);
-                const newTierLabel = newTierInfo.name + (newTierInfo.tier ? ' ' + newTierInfo.tier : '');
-                const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
-                await saveHistoryLog(
-                    accurateTotalBeatPt,
-                    Math.max(0, accurateTotalBeatPt - oldTotalBeatPt),
-                    reportSongs.length,
-                    JSON.stringify(reportSongs),
-                    newTierLabel,
-                    oldTierLabel,
-                    accurateTotalRatePt
-                );
-                console.log("History log saved successfully.");
-            } catch (err) {
-                 console.error("Failed to save history log", err);
-            }
+        // Save the history log to backend using the ACCURATE total from the full profile.
+        // Even if reportSongs.length === 0, we want to save a snapshot of the current stats for their growth record.
+        try {
+            const newTierInfo = getRankInfo(accurateTotalBeatPt);
+            const newTierLabel = newTierInfo.name + (newTierInfo.tier ? ' ' + newTierInfo.tier : '');
+            const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
+            await saveHistoryLog(
+                accurateTotalBeatPt,
+                Math.max(0, accurateTotalBeatPt - oldTotalBeatPt),
+                reportSongs.length,
+                JSON.stringify(reportSongs),
+                newTierLabel,
+                oldTierLabel,
+                accurateTotalRatePt
+            );
+            console.log("History log saved successfully.");
+        } catch (err) {
+            console.error("Failed to save history log", err);
+            errorMsg.value = '成長記録の保存に失敗しました。ページを再読み込みして再度お試しください。';
         }
       } catch (err) {
         console.error("Auto upload failed", err);
@@ -512,7 +514,7 @@ const handleFileDropped = async (file: File) => {
         };
         if (updatedSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
             isDiffModalOpen.value = true;
-            if (updatedSongs.length > 0) {
+            if (updatedSongs.length > 0 || newTotalBeatPt > 0) {
                 try {
                     const newTierLabel = newTier.name + (newTier.tier ? ' ' + newTier.tier : '');
                     const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
