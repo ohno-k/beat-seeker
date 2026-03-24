@@ -4,7 +4,6 @@ import RankIcon from './RankIcon.vue';
 import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
-import SongRankingList from './SongRankingList.vue';
 
 interface BeatRankingEntry {
   displayName: string;
@@ -38,7 +37,6 @@ const { user } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-const pageMode = ref<'player' | 'song'>('player');
 const viewMode = ref<'beat' | 'rate'>('beat');
 watch(showRateTier, (val) => {
     if (!val && viewMode.value === 'rate') viewMode.value = 'beat';
@@ -92,36 +90,17 @@ watch(viewMode, async (mode) => {
     <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
       <!-- Header -->
       <div class="flex items-center gap-4 mb-6">
-        <div class="p-3 rounded-2xl transition-colors" :class="pageMode === 'player' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-indigo-100 dark:bg-indigo-900/30'">
-          <svg v-if="pageMode === 'player'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/30 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
           </svg>
         </div>
         <div>
-          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ pageMode === 'player' ? 'ランキング' : '楽曲採用ランキング' }}</h2>
-          <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">{{ pageMode === 'player' ? '全プレイヤーの集計結果' : 'Top100に採用されている楽曲の集計' }}</p>
+          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">ランキング</h2>
+          <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">全プレイヤーの集計結果</p>
         </div>
       </div>
 
-      <!-- Page Tabs -->
-      <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit border border-slate-200 dark:border-slate-700">
-        <button
-          @click="pageMode = 'player'"
-          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-          :class="pageMode === 'player' ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >プレイヤー</button>
-        <button
-          @click="pageMode = 'song'"
-          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-          :class="pageMode === 'song' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >楽曲採用</button>
-      </div>
-
-      <!-- Player Ranking Content -->
-      <template v-if="pageMode === 'player'">
 
       <!-- Mode Toggle -->
       <div v-if="showRateTier" class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit">
@@ -307,10 +286,6 @@ watch(viewMode, async (mode) => {
             </table>
           </div>
         </div>
-      </template>
-      </template>
-      <template v-else-if="pageMode === 'song'">
-        <SongRankingList />
       </template>
 
     </div>
