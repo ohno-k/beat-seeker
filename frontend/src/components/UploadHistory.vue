@@ -5,8 +5,10 @@ import { getRankInfo } from '../utils/beatTier';
 import UploadResultModal from './UploadResultModal.vue';
 import RankIcon from './RankIcon.vue';
 import type { UploadDiffResult } from '../types/UploadDiff';
+import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
 const { isLoggedIn, authHeaders } = useAuth();
+const { showRateTier } = useRateTierVisibility();
 const props = defineProps<{
   viewingUserId?: number | null;
 }>();
@@ -159,7 +161,7 @@ onMounted(() => {
             <th class="p-4 font-semibold text-center">アップロード日時</th>
             <th class="p-4 font-semibold text-center">更新種別</th>
             <th class="p-4 font-semibold text-center w-36">BEAT-PT</th>
-            <th class="p-4 font-semibold text-center w-36">RATE-PT</th>
+            <th v-if="showRateTier" class="p-4 font-semibold text-center w-36">RATE-PT</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
@@ -211,7 +213,7 @@ onMounted(() => {
             </td>
 
             <!-- Rate-PT -->
-            <td class="p-4 text-center align-middle w-36">
+            <td v-if="showRateTier" class="p-4 text-center align-middle w-36">
               <div class="font-black text-slate-700 dark:text-slate-200 text-lg">
                 {{ item.totalRatePt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
               </div>
