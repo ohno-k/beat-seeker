@@ -1,13 +1,20 @@
 package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.Score;
+import com.beatseeker.backend.entity.ArenaMatch;
+import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.repository.ArenaMatchRepository;
+import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.beatseeker.backend.service.ScoreRecalculationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +25,23 @@ public class AdminController {
 
     private final UserRepository userRepository;
     private final ScoreRepository scoreRepository;
+    private final ScoreHistoryLogRepository scoreHistoryLogRepository;
+    private final ArenaMatchRepository arenaMatchRepository;
+    private final ScoreRecalculationService scoreRecalculationService;
+    private final ObjectMapper objectMapper;
 
-    public AdminController(UserRepository userRepository, ScoreRepository scoreRepository) {
+    public AdminController(UserRepository userRepository, 
+                           ScoreRepository scoreRepository, 
+                           ScoreHistoryLogRepository scoreHistoryLogRepository,
+                           ArenaMatchRepository arenaMatchRepository,
+                           ScoreRecalculationService scoreRecalculationService,
+                           ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
+        this.scoreHistoryLogRepository = scoreHistoryLogRepository;
+        this.arenaMatchRepository = arenaMatchRepository;
+        this.scoreRecalculationService = scoreRecalculationService;
+        this.objectMapper = objectMapper;
     }
 
     private void checkAdminAccess(Authentication auth) {
@@ -84,5 +104,124 @@ public class AdminController {
         }).toList();
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/users/{userId}/history")
+    public ResponseEntity<List<Map<String, Object>>> getUserHistory(
+            Authentication auth,
+            @PathVariable Long userId) {
+
+        checkAdminAccess(auth);
+
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(targetUser);
+
+        List<Map<String, Object>> history = new ArrayList<>();
+
+        for (ScoreHistoryLog log : logs) {
+            Map<String, Object> snapshotData = new HashMap<>();
+            snapshotData.put("snapshotId", log.getId().toString()); // Use ID as pseudo-snapshot ID
+            snapshotData.put("date", log.getUploadedAt().toString());
+            snapshotData.put("totalScore", log.getTotalScore());
+            snapshotData.put("fcCount", log.getFcCount());
+            snapshotData.put("exhCount", log.getExhCount());
+            snapshotData.put("hCount", log.getHCount());
+            snapshotData.put("clearCount", log.getClearCount());
+            snapshotData.put("easyCount", log.getEasyCount());
+            snapshotData.put("aaaCount", log.getAaaCount());
+            snapshotData.put("aaCount", log.getAaCount());
+            snapshotData.put("aCount", log.getACount());
+
+            snapshotData.put("totalBeatPt", log.getTotalBeatPt());
+            snapshotData.put("beatPtIncrease", log.getBeatPtIncrease());
+            snapshotData.put("updatedCount", log.getUpdatedCount());
+            snapshotData.put("diffJson", log.getDiffJson());
+            snapshotData.put("totalRatePt", log.getTotalRatePt());
+
+            history.add(snapshotData);
+        }
+
+        return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/users/{userId}/arena/matches")
+    public ResponseEntity<List<Map<String, Object>>> getUserArenaMatches(
+            Authentication auth,
+            @PathVariable Long userId) {
+
+        checkAdminAccess(auth);
+
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        List<ArenaMatch> matches = arenaMatchRepository.findByUserOrderByMatchDateDesc(targetUser);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ArenaMatch m : matches) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", m.getId());
+            map.put("battleType", m.getBattleType());
+            map.put("matchDate", m.getMatchDate());
+            map.put("myDjName", m.getMyDjName());
+
+            List<Map<String, Object>> players = List.of();
+            try {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> parsed = objectMapper.readValue(m.getPlayersJson(), List.class);
+                players = parsed;
+            } catch (Exception ignored) {}
+            map.put("players", players);
+
+            try {
+                map.put("songs", objectMapper.readValue(m.getSongsJson(), List.class));
+            } catch (Exception ignored) {
+                map.put("songs", List.of());
+            }
+
+            int myRank = m.getMyRank() != null ? m.getMyRank() : 0;
+            int myTotalPt = m.getMyTotalPt() != null ? m.getMyTotalPt() : 0;
+            String myArenaClass = m.getMyArenaClass() != null ? m.getMyArenaClass() : "";
+            String myDjName = m.getMyDjName();
+
+            if (myRank == 0 && myDjName != null && !myDjName.isEmpty()) {
+                for (Map<String, Object> p : players) {
+                    if (myDjName.equals(p.get("djName"))) {
+                        Object rankObj = p.get("rank");
+                        Object ptObj = p.get("totalPt");
+                        Object clsObj = p.get("arenaClass");
+                        if (rankObj instanceof Number) myRank = ((Number) rankObj).intValue();
+                        if (ptObj instanceof Number) myTotalPt = ((Number) ptObj).intValue();
+                        if (clsObj instanceof String) myArenaClass = (String) clsObj;
+                        break;
+                    }
+                }
+            }
+
+            map.put("myArenaClass", myArenaClass);
+            map.put("myRank", myRank);
+            map.put("myTotalPt", myTotalPt);
+
+            result.add(map);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/recalculate-points")
+    public ResponseEntity<Map<String, Object>> recalculatePoints(
+            Authentication auth,
+            @RequestBody RecalculatePointsRequest req) {
+
+        checkAdminAccess(auth);
+
+        try {
+            scoreRecalculationService.recalculateAllUsersAsync(req.songDataJson(), req.difficultyTableJson());
+            return ResponseEntity.accepted().body(Map.of("message", "Recalculation started in background"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Error starting recalculation: " + e.getMessage()));
+        }
     }
 }

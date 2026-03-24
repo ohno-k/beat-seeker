@@ -52,6 +52,23 @@ const diffColors: Record<string, string> = {
     leggendaria: 'text-purple-700 bg-purple-100 border border-purple-300'
 };
 
+// Map from uppercase difficulty label to song_data.json difficulty code
+const diffLabelToCode: Record<string, string> = {
+    BEGINNER: '1', NORMAL: '2', HYPER: '3', ANOTHER: '4', LEGGENDARIA: '10'
+};
+
+/**
+ * Look up maxScore (= notes * 2) directly from song_data.json given a title and
+ * the uppercase difficulty label (e.g. "ANOTHER", "LEGGENDARIA").
+ * Returns 0 when the song/chart is not found.
+ */
+export function getSongMaxScore(title: string, difficultyName: string): number {
+    const code = diffLabelToCode[difficultyName];
+    if (!code) return 0;
+    const definition = songDict.get(`${title}_${code}`);
+    return definition?.notes ? definition.notes * 2 : 0;
+}
+
 export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
     const records: ScoreRecord[] = [];
 

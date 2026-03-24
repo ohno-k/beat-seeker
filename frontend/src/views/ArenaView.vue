@@ -39,6 +39,10 @@ const getSongMaxScore = (titleRaw: string, diffText: string): number => {
 
 const { isLoggedIn } = useAuth();
 
+const props = defineProps<{
+  viewingUserId?: number | null;
+}>();
+
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 // --- Matches state ---
@@ -122,7 +126,10 @@ const fetchMatches = async () => {
   isFetching.value = true;
   try {
     const token = localStorage.getItem('beat-seeker-token');
-    const res = await fetch(`${API_BASE}/api/arena/matches`, {
+    const endpoint = props.viewingUserId 
+      ? `${API_BASE}/api/admin/users/${props.viewingUserId}/arena/matches`
+      : `${API_BASE}/api/arena/matches`;
+    const res = await fetch(endpoint, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
@@ -138,6 +145,7 @@ const fetchMatches = async () => {
 onMounted(fetchMatches);
 
 const handleDelete = async (id: number) => {
+  if (props.viewingUserId) return;
   if (!confirm('この対戦記録を削除しますか？')) return;
   const token = localStorage.getItem('beat-seeker-token');
   await fetch(`${API_BASE}/api/arena/matches/${id}`, {
@@ -245,7 +253,7 @@ const classColor = (cls: string) => {
       </div>
 
       <!-- Import Panel (collapsible) -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div v-if="!props.viewingUserId" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <!-- Toggle row -->
         <button
           @click="showImportPanel = !showImportPanel"
@@ -437,6 +445,7 @@ const classColor = (cls: string) => {
             </div>
             <div class="flex items-center gap-2">
               <button
+                v-if="!props.viewingUserId"
                 @click.stop="handleDelete(match.id)"
                 class="p-1.5 text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
               >
@@ -502,10 +511,10 @@ const classColor = (cls: string) => {
                     >-{{ (songTopTwo(match.players, si)[0] - ss.score).toLocaleString() }}</span>
                     <!-- Grade badge based on song_data.json actual MAX -->
                     <span
-                      v-if="match.songs[si] && scoreGrade(ss.score, getSongMaxScore(match.songs[si].title, match.songs[si].difficulty))"
+                      v-if="match.songs[si] && scoreGrade(Number(ss.score), getSongMaxScore(match.songs[si].title, String(match.songs[si].difficulty)))"
                       class="block text-[10px] font-bold"
-                      :class="gradeColor(scoreGrade(ss.score, getSongMaxScore(match.songs[si].title, match.songs[si].difficulty)))"
-                    >{{ scoreGrade(ss.score, getSongMaxScore(match.songs[si].title, match.songs[si].difficulty)) }}{{ scoreGradeDelta(ss.score, getSongMaxScore(match.songs[si].title, match.songs[si].difficulty)) }}</span>
+                      :class="gradeColor(scoreGrade(Number(ss.score), getSongMaxScore(match.songs[si].title, String(match.songs[si].difficulty))))"
+                    >{{ scoreGrade(Number(ss.score), getSongMaxScore(match.songs[si].title, String(match.songs[si].difficulty))) }}{{ scoreGradeDelta(Number(ss.score), getSongMaxScore(match.songs[si].title, String(match.songs[si].difficulty))) }}</span>
                   </td>
                 </tr>
               </tbody>

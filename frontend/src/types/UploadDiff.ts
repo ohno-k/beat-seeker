@@ -13,6 +13,12 @@ export interface UpdatedSong {
     newBeatPt: number;
     beatPtIncrease: number;
     isInTop100?: boolean;
+    // Rate-Tier fields
+    scoreRate: number;
+    maxScore: number;
+    newRatePt: number;
+    ratePtIncrease: number;
+    isInRateTop100?: boolean;
 }
 
 export interface UploadDiffResult {
@@ -22,4 +28,9 @@ export interface UploadDiffResult {
     oldTier: RankInfo | null;
     newTier: RankInfo | null;
     updatedSongs: UpdatedSong[];
+    // Rate-Tier totals
+    oldTotalRatePt: number;
+    newTotalRatePt: number;
+    oldRateTier: RankInfo | null;
+    newRateTier: RankInfo | null;
 }

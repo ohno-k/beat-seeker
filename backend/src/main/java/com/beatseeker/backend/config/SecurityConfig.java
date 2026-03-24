@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/scores/ranking", "/api/scores/all-user-scores",
+                                                .requestMatchers("/api/scores/ranking", "/api/scores/rate-ranking",
+                                                                "/api/scores/all-user-scores",
                                                                 "/api/scores/debug-ranking",
                                                                 "/api/scores/debug-user-scores/**", "/api/friends/test",
                                                                 "/api/test-root")

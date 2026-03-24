@@ -1,13 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import RankIcon from './RankIcon.vue';
-import { getRankInfo } from '../utils/beatTier';
+import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
+import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import SongRankingList from './SongRankingList.vue';
+import RateSongRankingList from './RateSongRankingList.vue';
 
-interface RankingEntry {
+interface BeatRankingEntry {
   displayName: string;
   iidxId: string;
   totalBeatPt: number;
+  rankChange: number | null;
+  lastUpdatedAt: string | null;
+}
+
+interface RateRankingEntry {
+  displayName: string;
+  iidxId: string;
+  totalRatePt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
 }
@@ -25,22 +36,56 @@ function formatLastUpdated(dateStr: string | null): string {
 }
 
 const { user } = useAuth();
+const { showRateTier } = useRateTierVisibility();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-const ranking = ref<RankingEntry[]>([]);
+const pageMode = ref<'player' | 'song'>('player');
+const viewMode = ref<'beat' | 'rate'>('beat');
+const songRankMode = ref<'beat' | 'rate'>('beat');
+watch(showRateTier, (val) => {
+    if (!val && viewMode.value === 'rate') viewMode.value = 'beat';
+    if (!val && songRankMode.value === 'rate') songRankMode.value = 'beat';
+});
+const beatRanking = ref<BeatRankingEntry[]>([]);
+const rateRanking = ref<RateRankingEntry[]>([]);
 const isLoading = ref(true);
 const error = ref('');
 
+async function fetchBeatRanking() {
+    const res = await fetch(`${API_BASE}/api/scores/ranking`);
+    if (res.ok) beatRanking.value = await res.json();
+    else throw new Error('beat');
+}
+
+async function fetchRateRanking() {
+    const res = await fetch(`${API_BASE}/api/scores/rate-ranking`);
+    if (res.ok) rateRanking.value = await res.json();
+    else throw new Error('rate');
+}
+
 onMounted(async () => {
     try {
-        const res = await fetch(`${API_BASE}/api/scores/ranking`);
-        if (res.ok) ranking.value = await res.json();
-        else error.value = 'ランキングの取得に失敗しました。';
+        await fetchBeatRanking();
     } catch (e) {
         console.error(e);
-        error.value = '通信エラーが発生しました。';
+        error.value = 'ランキングの取得に失敗しました。';
     } finally {
         isLoading.value = false;
+    }
+});
+
+watch(viewMode, async (mode) => {
+    if (mode === 'rate' && rateRanking.value.length === 0) {
+        isLoading.value = true;
+        error.value = '';
+        try {
+            await fetchRateRanking();
+        } catch (e) {
+            console.error(e);
+            error.value = 'ランキングの取得に失敗しました。';
+        } finally {
+            isLoading.value = false;
+        }
     }
 });
 </script>
@@ -48,16 +93,55 @@ onMounted(async () => {
 <template>
   <div class="w-full max-w-4xl space-y-6 animate-fade-in">
     <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+      <!-- Header -->
       <div class="flex items-center gap-4 mb-6">
-        <div class="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-2xl">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="p-3 rounded-2xl transition-colors" :class="pageMode === 'player' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-indigo-100 dark:bg-indigo-900/30'">
+          <svg v-if="pageMode === 'player'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
           </svg>
         </div>
         <div>
-          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">ランキング</h2>
-          <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">全プレイヤーの集計結果</p>
+          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ pageMode === 'player' ? 'ランキング' : '楽曲採用ランキング' }}</h2>
+          <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">{{ pageMode === 'player' ? '全プレイヤーの集計結果' : 'Top100に採用されている楽曲の集計' }}</p>
         </div>
+      </div>
+
+      <!-- Page Tabs -->
+      <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit border border-slate-200 dark:border-slate-700">
+        <button
+          @click="pageMode = 'player'"
+          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+          :class="pageMode === 'player' ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        >プレイヤー</button>
+        <button
+          @click="pageMode = 'song'"
+          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+          :class="pageMode === 'song' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        >楽曲採用</button>
+      </div>
+
+      <!-- Player Ranking Content -->
+      <template v-if="pageMode === 'player'">
+
+      <!-- Mode Toggle -->
+      <div v-if="showRateTier" class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit">
+        <button
+          @click="viewMode = 'beat'"
+          class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+          :class="viewMode === 'beat'
+            ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+        >Beat-Tier</button>
+        <button
+          @click="viewMode = 'rate'"
+          class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+          :class="viewMode === 'rate'
+            ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm'
+            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+        >Rate-Tier</button>
       </div>
 
       <!-- Loading / Error / Empty -->
@@ -70,89 +154,187 @@ onMounted(async () => {
         {{ error }}
       </div>
 
-      <div v-else-if="ranking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
-        <p class="text-slate-500 dark:text-slate-400 font-bold">表示できるデータがありません。</p>
-      </div>
+      <template v-else>
+        <!-- Beat-Tier ranking -->
+        <div v-if="viewMode === 'beat'">
+          <div v-if="beatRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+            <p class="text-slate-500 dark:text-slate-400 font-bold">表示できるデータがありません。</p>
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">順位</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">ランク</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">総 BEAT-PT</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">最終更新</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr v-for="(entry, index) in beatRanking" :key="entry.iidxId"
+                  class="group transition-colors"
+                  :class="user && entry.iidxId === user.iidxId
+                    ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'">
+                  <td class="py-3 pl-4">
+                    <div class="flex items-center gap-2">
+                      <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                        :class="[
+                          index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                          index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                          index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                          user && entry.iidxId === user.iidxId ? 'bg-blue-500 text-white' :
+                          'text-slate-400 border border-slate-100 dark:border-slate-700'
+                        ]">
+                        {{ index + 1 }}
+                      </div>
+                      <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
+                      <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
+                      <span v-else-if="entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(entry.rankChange) }}</span>
+                      <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-base transition-colors"
+                        :class="user && entry.iidxId === user.iidxId
+                          ? 'text-blue-700 dark:text-blue-300'
+                          : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400'">
+                        {{ entry.displayName || 'Unnamed Player' }}
+                      </span>
+                      <span v-if="user && entry.iidxId === user.iidxId"
+                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">YOU</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-2 text-center">
+                    <div class="flex justify-center">
+                      <RankIcon :rank-name="getRankInfo(entry.totalBeatPt).name" :tier="getRankInfo(entry.totalBeatPt).tier" size="md" />
+                    </div>
+                  </td>
+                  <td class="py-3 text-right">
+                    <div class="flex items-baseline justify-end gap-1">
+                      <span class="text-xl font-black tabular-nums"
+                        :class="user && entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
+                        {{ entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                      </span>
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
+                    </div>
+                  </td>
+                  <td class="py-3 text-right pr-4">
+                    <span class="text-xs font-medium tabular-nums"
+                      :class="formatLastUpdated(entry.lastUpdatedAt) === '今日' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+                      {{ formatLastUpdated(entry.lastUpdatedAt) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-      <div v-else class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-              <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">順位</th>
-              <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
-              <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">ランク</th>
-              <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">総 BEAT-PT</th>
-              <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">最終更新</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-            <tr v-for="(entry, index) in ranking" :key="entry.iidxId"
-              class="group transition-colors"
-              :class="user && entry.iidxId === user.iidxId
-                ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
-                : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'">
-              <td class="py-3 pl-4">
-                <div class="flex items-center gap-2">
-                  <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
-                    :class="[
-                      index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                      index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                      index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
-                      user && entry.iidxId === user.iidxId ? 'bg-blue-500 text-white' :
-                      'text-slate-400 border border-slate-100 dark:border-slate-700'
-                    ]">
-                    {{ index + 1 }}
-                  </div>
-                  <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
-                  <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
-                  <span v-else-if="entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(entry.rankChange) }}</span>
-                  <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
-                </div>
-              </td>
-              <td class="py-3">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-base transition-colors"
-                    :class="user && entry.iidxId === user.iidxId
-                      ? 'text-blue-700 dark:text-blue-300'
-                      : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400'">
-                    {{ entry.displayName || 'Unnamed Player' }}
-                  </span>
-                  <span v-if="user && entry.iidxId === user.iidxId"
-                    class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">YOU</span>
-                </div>
-              </td>
-              <td class="py-3 px-2 text-center">
-                <div class="flex justify-center">
-                  <RankIcon
-                    :rank-name="getRankInfo(entry.totalBeatPt).name"
-                    :tier="getRankInfo(entry.totalBeatPt).tier"
-                    size="md"
-                  />
-                </div>
-              </td>
-              <td class="py-3 text-right">
-                <div class="flex items-baseline justify-end gap-1">
-                  <span class="text-xl font-black tabular-nums"
-                    :class="user && entry.iidxId === user.iidxId
-                      ? 'text-blue-700 dark:text-blue-300'
-                      : 'text-slate-800 dark:text-slate-100'">
-                    {{ entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
-                  </span>
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
-                </div>
-              </td>
-              <td class="py-3 text-right pr-4">
-                <span class="text-xs font-medium tabular-nums"
-                  :class="formatLastUpdated(entry.lastUpdatedAt) === '今日'
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-slate-400 dark:text-slate-500'">
-                  {{ formatLastUpdated(entry.lastUpdatedAt) }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <!-- Rate-Tier ranking -->
+        <div v-else>
+          <div v-if="rateRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+            <p class="text-slate-500 dark:text-slate-400 font-bold">表示できるデータがありません。<br/><span class="text-xs font-normal">スコアをアップロードするとRATE-TIERが集計されます。</span></p>
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">順位</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">ランク</th>
+                  <th class="pb-4 text-xs font-black text-emerald-500 uppercase tracking-widest text-right">総 RATE-PT</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">最終更新</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr v-for="(entry, index) in rateRanking" :key="entry.iidxId"
+                  class="group transition-colors"
+                  :class="user && entry.iidxId === user.iidxId
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-l-emerald-500'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'">
+                  <td class="py-3 pl-4">
+                    <div class="flex items-center gap-2">
+                      <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                        :class="[
+                          index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                          index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                          index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                          user && entry.iidxId === user.iidxId ? 'bg-emerald-500 text-white' :
+                          'text-slate-400 border border-slate-100 dark:border-slate-700'
+                        ]">
+                        {{ index + 1 }}
+                      </div>
+                      <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
+                      <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
+                      <span v-else-if="entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(entry.rankChange) }}</span>
+                      <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-base transition-colors"
+                        :class="user && entry.iidxId === user.iidxId
+                          ? 'text-emerald-700 dark:text-emerald-300'
+                          : 'text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'">
+                        {{ entry.displayName || 'Unnamed Player' }}
+                      </span>
+                      <span v-if="user && entry.iidxId === user.iidxId"
+                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500 text-white">YOU</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-2 text-center">
+                    <div class="flex justify-center">
+                      <RankIcon :rank-name="getRateTierRankInfo(entry.totalRatePt).name" :tier="getRateTierRankInfo(entry.totalRatePt).tier" size="md" />
+                    </div>
+                  </td>
+                  <td class="py-3 text-right">
+                    <div class="flex items-baseline justify-end gap-1">
+                      <span class="text-xl font-black tabular-nums"
+                        :class="user && entry.iidxId === user.iidxId ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'">
+                        {{ entry.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                      </span>
+                      <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">RATE-PT</span>
+                    </div>
+                  </td>
+                  <td class="py-3 text-right pr-4">
+                    <span class="text-xs font-medium tabular-nums"
+                      :class="formatLastUpdated(entry.lastUpdatedAt) === '今日' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+                      {{ formatLastUpdated(entry.lastUpdatedAt) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+      </template>
+      <template v-else-if="pageMode === 'song'">
+        <!-- Song Ranking Tier Tabs -->
+        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit">
+          <button
+            @click="songRankMode = 'beat'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="songRankMode === 'beat'
+              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >Beat-Tier</button>
+          <button
+            v-if="showRateTier"
+            @click="songRankMode = 'rate'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="songRankMode === 'rate'
+              ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >Rate-Tier</button>
+        </div>
+
+        <SongRankingList v-if="songRankMode === 'beat'" />
+        <RateSongRankingList v-else-if="songRankMode === 'rate' && showRateTier" />
+      </template>
 
     </div>
   </div>

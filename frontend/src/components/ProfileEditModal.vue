@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -11,6 +12,7 @@ const emit = defineEmits<{
 }>();
 
 const { user, updateProfile } = useAuth();
+const { showRateTier, setRateTier } = useRateTierVisibility();
 
 const isSubmitting = ref(false);
 const errorMsg = ref('');
@@ -234,6 +236,21 @@ const handleUpdate = async () => {
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
               </div>
             </div>
+          </div>
+
+          <!-- Display Settings -->
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
+            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">表示設定</h4>
+            <label class="flex items-center justify-between cursor-pointer group">
+              <div>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">RATE-TIER を表示する</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">オフにするとRATE-TIERに関するすべての表示が非表示になります</p>
+              </div>
+              <div class="relative inline-flex items-center ml-4 shrink-0">
+                <input type="checkbox" :checked="showRateTier" @change="setRateTier(($event.target as HTMLInputElement).checked)" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </div>
+            </label>
           </div>
 
           <div class="pt-4 flex gap-3">

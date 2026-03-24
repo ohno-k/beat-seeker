@@ -238,6 +238,92 @@ export function getGroupedRanks() {
 }
 
 /**
+ * Rate-Tier overall rank definitions.
+ * Thresholds double each step: 25 → 50 → 100 → ... → 25600 (theoretical max).
+ */
+export const RATE_TIER_RANKS: RankInfo[] = [
+    { name: 'Legend', minPoints: 25600, color: 'text-amber-500 font-black' },
+
+    ...generateTieredRanks('Mythic', 12800, 25600, 'text-purple-600'),
+    ...generateTieredRanks('Ancient', 6400, 12800, 'text-indigo-600'),
+    ...generateTieredRanks('Master', 3200, 6400, 'text-red-600'),
+    ...generateTieredRanks('Elite', 1600, 3200, 'text-orange-600'),
+    ...generateTieredRanks('Commander', 800, 1600, 'text-yellow-700'),
+    ...generateTieredRanks('Veteran', 400, 800, 'text-emerald-600'),
+    ...generateTieredRanks('Expert', 200, 400, 'text-teal-600'),
+    ...generateTieredRanks('Advanced', 100, 200, 'text-cyan-600'),
+    ...generateTieredRanks('Intermediate', 50, 100, 'text-blue-600'),
+    ...generateTieredRanks('Novice', 25, 50, 'text-slate-600'),
+
+    { name: 'Beginner', minPoints: 0, color: 'text-slate-400' },
+];
+
+export function getGroupedRateTierRanks() {
+    const groups: Record<string, RankInfo[]> = {};
+    RATE_TIER_RANKS.forEach(r => {
+        if (!groups[r.name]) groups[r.name] = [];
+        groups[r.name].push(r);
+    });
+    Object.keys(groups).forEach(name => {
+        groups[name].sort((a, b) => (a.tier || 0) - (b.tier || 0));
+    });
+    return groups;
+}
+
+export function getRateTierRankInfo(totalPoints: number): RankInfo {
+    const sorted = [...RATE_TIER_RANKS].sort((a, b) => b.minPoints - a.minPoints);
+    return sorted.find(r => totalPoints >= r.minPoints) ?? RATE_TIER_RANKS[RATE_TIER_RANKS.length - 1];
+}
+
+export function getNextRateTierRankInfo(totalPoints: number): { nextRank?: RankInfo; progress: number } {
+    const sortedAsc = [...RATE_TIER_RANKS].sort((a, b) => a.minPoints - b.minPoints);
+    const reversed = [...sortedAsc].reverse();
+    const currentIdx = reversed.findIndex(r => totalPoints >= r.minPoints);
+    if (currentIdx === -1 || currentIdx === 0) return { progress: 100 };
+    const currentRank = reversed[currentIdx];
+    const nextRank = reversed[currentIdx - 1];
+    const range = nextRank.minPoints - currentRank.minPoints;
+    const progress = Math.min(100, Math.max(0, (totalPoints - currentRank.minPoints) / range * 100));
+    return { nextRank, progress };
+}
+
+/**
+ * Score Rate Tier: point thresholds per song (all ANOTHER/LEGGENDARIA, all levels).
+ * Between thresholds, linearly interpolate. Below minimum: 0pt.
+ */
+export const SCORE_RATE_THRESHOLDS: { rate: number; points: number }[] = [
+    { rate: 77.77, points: 1 },
+    { rate: 88.89, points: 2 },
+    { rate: 94.44, points: 4 },
+    { rate: 97.22, points: 8 },
+    { rate: 98.61, points: 16 },
+    { rate: 99.31, points: 32 },
+    { rate: 99.65, points: 64 },
+    { rate: 99.83, points: 128 },
+    { rate: 99.91, points: 256 },
+    { rate: 100, points: 512 },
+];
+
+/**
+ * Calculate Score Rate Tier points for a single song.
+ * Linearly interpolates between the defined thresholds.
+ */
+export function calculateScoreRateTierPoints(scoreRate: number): number {
+    if (scoreRate <= 0 || scoreRate < SCORE_RATE_THRESHOLDS[0].rate) return 0;
+    const last = SCORE_RATE_THRESHOLDS[SCORE_RATE_THRESHOLDS.length - 1];
+    if (scoreRate >= last.rate) return last.points;
+    for (let i = 0; i < SCORE_RATE_THRESHOLDS.length - 1; i++) {
+        const lo = SCORE_RATE_THRESHOLDS[i];
+        const hi = SCORE_RATE_THRESHOLDS[i + 1];
+        if (scoreRate < hi.rate) {
+            const t = (scoreRate - lo.rate) / (hi.rate - lo.rate);
+            return lo.points + t * (hi.points - lo.points);
+        }
+    }
+    return 0;
+}
+
+/**
  * Folder Rank definitions: each rank is 0.25% score rate below Legend.
  * Legend rate varies per folder (linear interpolation).
  */

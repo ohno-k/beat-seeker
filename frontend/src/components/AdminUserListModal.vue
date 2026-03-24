@@ -10,11 +10,21 @@
             </svg>
             プレイヤー一覧 (管理者用)
           </h2>
-          <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
+          <div class="flex items-center gap-2">
+            <button 
+              @click="handleRecalculateAll" 
+              :disabled="isRecalculating"
+              class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+            >
+              <svg v-if="isRecalculating" class="animate-spin -ml-1 mr-1 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
+            </button>
+            <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900/50">
@@ -22,10 +32,18 @@
             <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
             <p class="text-slate-500 font-medium tracking-wide">ユーザー一覧を取得中...</p>
           </div>
-          <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200">
+          <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 mb-4">
             {{ error }}
           </div>
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          <div v-if="recalculateError" class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 mb-4">
+            {{ recalculateError }}
+          </div>
+          <div v-if="recalculateSuccess" class="bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 mb-4">
+            {{ recalculateSuccess }}
+          </div>
+
+          <div v-if="!loading && !error" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div 
               v-for="u in users" 
               :key="u.id" 
@@ -57,6 +75,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useScores } from '../composables/useScores';
+import { useAuth } from '../composables/useAuth';
+import songDataRaw from '../data/song_data.json';
+import diffTableRaw from '../data/difficulty_table.json';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -92,6 +113,39 @@ watch(() => props.isOpen, (newVal) => {
 
 const selectUser = (u: any) => {
   emit('select', u);
+};
+
+const isRecalculating = ref(false);
+const recalculateError = ref('');
+const recalculateSuccess = ref('');
+
+const handleRecalculateAll = async () => {
+  if (!confirm('全ユーザーのポイント再計算を実行しますか？この操作は取り消せません。')) return;
+  
+  isRecalculating.value = true;
+  recalculateError.value = '';
+  recalculateSuccess.value = '';
+  
+  try {
+    const { authHeaders } = useAuth();
+    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+    
+    const res = await fetch(`${API_BASE}/api/admin/recalculate-points`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        songDataJson: JSON.stringify(songDataRaw),
+        difficultyTableJson: JSON.stringify(diffTableRaw)
+      })
+    });
+    
+    if (!res.ok && res.status !== 202) throw new Error(`API error: ${res.status}`);
+    recalculateSuccess.value = 'バックグラウンドで再集計を開始しました。数分後に履歴を確認してください。';
+  } catch(e: any) {
+    recalculateError.value = '再計算に失敗しました: ' + e.message;
+  } finally {
+    isRecalculating.value = false;
+  }
 };
 </script>
 

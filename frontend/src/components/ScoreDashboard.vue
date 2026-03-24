@@ -18,12 +18,13 @@
       </button>
     </div>
 
-    <!-- Dashboard Stats Header -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Tier Cards Row -->
+    <div class="grid grid-cols-1 gap-6" :class="{ 'sm:grid-cols-2': showRateTier }">
+      <!-- Beat-Tier (Lv11/12) -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
         <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 dark:from-blue-900/20 to-transparent pointer-events-none"></div>
         <div class="absolute top-4 right-4 z-20">
-          <button 
+          <button
             @click="showInfoModal = true"
             class="group flex items-center gap-1.5 text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all font-bold"
           >
@@ -43,7 +44,7 @@
         </div>
         <!-- Progress Bar -->
         <div class="w-full mt-4 bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden z-10">
-          <div 
+          <div
             class="h-full bg-blue-500 dark:bg-blue-400 rounded-full transition-all duration-1000"
             :style="{ width: `${nextRankInfo.progress}%` }"
           ></div>
@@ -53,7 +54,45 @@
           残り ({{ nextRankInfo.nextRank.minPoints - totalPoints > 0 ? (nextRankInfo.nextRank.minPoints - totalPoints).toFixed(1) : 0 }} pt)
         </p>
       </div>
-      <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col justify-between col-span-1 md:col-span-1 lg:col-span-3 transition-colors duration-200">
+
+      <!-- Rate-Tier (全難度 ANOTHER/LEGGENDARIA) -->
+      <div v-if="showRateTier" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/50 dark:from-emerald-900/20 to-transparent pointer-events-none"></div>
+        <div class="absolute top-4 right-4 z-20">
+          <button
+            @click="showRateInfoModal = true"
+            class="group flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all font-bold"
+          >
+            <span class="text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">Rate-Tierとは？</span>
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold uppercase tracking-widest">Rate-Tier</p>
+        <div class="flex flex-col items-center z-10 text-center">
+          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" />
+          <h3 class="text-2xl sm:text-3xl font-black mb-1 line-clamp-1" :class="rateTierRankInfo.color">
+            {{ rateTierRankInfo.name }} {{ rateTierRankInfo.tier || '' }}
+          </h3>
+          <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500">{{ rateTierPoints.toFixed(1) }} pt</p>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full mt-4 bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden z-10">
+          <div
+            class="h-full bg-emerald-500 dark:bg-emerald-400 rounded-full transition-all duration-1000"
+            :style="{ width: `${rateTierNextRankInfo.progress}%` }"
+          ></div>
+        </div>
+        <p v-if="rateTierNextRankInfo.nextRank" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-2 z-10 uppercase tracking-widest text-center">
+          Next: {{ rateTierNextRankInfo.nextRank.name }} {{ rateTierNextRankInfo.nextRank.tier || '' }}<br/>
+          残り ({{ rateTierNextRankInfo.nextRank.minPoints - rateTierPoints > 0 ? (rateTierNextRankInfo.nextRank.minPoints - rateTierPoints).toFixed(1) : 0 }} pt)
+        </p>
+      </div>
+    </div>
+
+    <!-- Ranking + Lv12 Stats Row -->
+    <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
         <!-- Ranking Position -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
           <div>
@@ -113,7 +152,6 @@
             </h3>
           </div>
         </div>
-      </div>
     </div>
 
     <!-- Unofficial Difficulty Table -->
@@ -127,20 +165,25 @@
 
     <!-- Info Modal -->
     <BeatTierInfoModal v-if="showInfoModal" @close="showInfoModal = false" />
+    <RateTierInfoModal v-if="showRateInfoModal" @close="showRateInfoModal = false" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import type { ScoreData } from '../types/ScoreData';
-import { getRankInfo, getNextRankInfo } from '../utils/beatTier';
+import { getRankInfo, getNextRankInfo, getRateTierRankInfo, getNextRateTierRankInfo, calculateScoreRateTierPoints } from '../utils/beatTier';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
+import RateTierInfoModal from './RateTierInfoModal.vue';
 import RankIcon from './RankIcon.vue';
 import UnofficialDifficultyTable from './UnofficialDifficultyTable.vue';
 import RankUpAdvice from './RankUpAdvice.vue';
 import ActivityFeed from './ActivityFeed.vue';
 import { useAuth } from '../composables/useAuth';
 import { flattenScores } from '../utils/scoreData';
+import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+
+const { showRateTier } = useRateTierVisibility();
 
 const { user } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
@@ -153,6 +196,7 @@ const props = defineProps<{
 }>();
 
 const showInfoModal = ref(false);
+const showRateInfoModal = ref(false);
 
 // Beat-Tier Calculations
 const rankInfo = computed(() => getRankInfo(props.totalPoints));
@@ -160,6 +204,20 @@ const nextRankInfo = computed(() => getNextRankInfo(props.totalPoints));
 
 // Flat Scores processing
 const allFlattenedScores = computed(() => flattenScores(props.scores));
+
+// Rate-Tier: top 100 ANOTHER/LEGGENDARIA songs across all levels
+const rateTierPoints = computed(() => {
+  const top100 = allFlattenedScores.value
+    .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
+    .map(s => calculateScoreRateTierPoints(s.scoreRate))
+    .filter(pt => pt > 0)
+    .sort((a, b) => b - a)
+    .slice(0, 100);
+  const sum = top100.reduce((acc, pt) => acc + pt, 0);
+  return Math.round(sum * 10) / 10;
+});
+const rateTierRankInfo = computed(() => getRateTierRankInfo(rateTierPoints.value));
+const rateTierNextRankInfo = computed(() => getNextRateTierRankInfo(rateTierPoints.value));
 
 // Lv12 quick stats (no settings needed)
 const lv12All = computed(() => allFlattenedScores.value.filter(s => s.difficultyLevel === 12));

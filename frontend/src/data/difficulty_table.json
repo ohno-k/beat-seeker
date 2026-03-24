@@ -62,7 +62,8 @@
                 "fixer",
                 "Level 5",
                 "冥",
-                "君のハートにロックオン[L]"
+                "君のハートにロックオン[L]",
+                "HEROES"
             ]
         },
         {
@@ -109,7 +110,8 @@
                 "Bad Encryption",
                 "CODE:0[L]",
                 "LOCUS OF THE TRAVEL",
-                "DAY DREAM"
+                "DAY DREAM",
+                "Amor∞Fati"
             ]
         },
         {
@@ -166,7 +168,6 @@
                 "Timepiece phase II (CN Ver.)",
                 "時空トラベローグ",
                 "voltississimo",
-                "BRAINSTORM",
                 "EMERALDAS",
                 "T.R.O.L.L.",
                 "Lisa-RICCIA[L]",
@@ -177,7 +178,8 @@
                 "Zenith",
                 "In the Blackest Den",
                 "キャトられ恋はモ～モク",
-                "LOST TECHNOLOGIE"
+                "LOST TECHNOLOGIE",
+                "PERFECT GREAT!!"
             ]
         },
         {
@@ -241,7 +243,9 @@
                 "NITROUS CANNON",
                 "Dances with Snow Fairies",
                 "Time to Air[L]",
-                "Watch Out Pt.2"
+                "Watch Out Pt.2",
+                "UNDO THE NIGHT",
+                "ラブコメトキドキシリアス"
             ]
         },
         {
@@ -318,7 +322,8 @@
                 "Scripted Connection⇒ A mix[L]",
                 "The Least 100sec",
                 "SCREAM SQUAD",
-                "Flashes[L]"
+                "Flashes[L]",
+                "BRAINSTORM"
             ]
         },
         {
@@ -576,7 +581,8 @@
                 "電光",
                 "TOGAKUSHI",
                 "ミラージュ・レジデンス[L]",
-                "T-REX vs Velociraptor (In the Far east euphoria)"
+                "T-REX vs Velociraptor (In the Far east euphoria)",
+                "華麗なる！音戯探偵ひなビタ"
             ]
         },
         {
@@ -649,7 +655,9 @@
                 "MAX 300",
                 "garden[L]",
                 "Scripted Connection⇒ A mix",
-                "Scripted Connection⇒ H mix[L]"
+                "Scripted Connection⇒ H mix[L]",
+                "Nemophila",
+                "ベンガル vs. アムール Battle"
             ]
         },
         {
@@ -915,7 +923,8 @@
                 "SWEETEST SAVAGE",
                 "Ypsilon",
                 "Burning Flame",
-                "Snow Goose"
+                "Snow Goose",
+                "ちょえちょえまぎか[L]"
             ]
         },
         {
@@ -1016,7 +1025,8 @@
                 "SPECIAL SUMMER CAMPAIGN!",
                 "LAST DAY",
                 "WISE UP![L]",
-                "SUPER HEROINE!!"
+                "SUPER HEROINE!!",
+                "Time to Empress[L]"
             ]
         },
         {
@@ -1316,7 +1326,8 @@
                 "PENDUAL TALISMAN",
                 "A MINSTREL ～ ver. short-scape ～[L]",
                 "月とミルク",
-                "Plea Per Phase"
+                "Plea Per Phase",
+                "Butterfly Twist"
             ]
         },
         {
@@ -1353,7 +1364,8 @@
                 "Be A Star",
                 "少年リップルズ",
                 "in the Sky",
-                "DAWN -THE NEXT ENDEAVOUR-"
+                "DAWN -THE NEXT ENDEAVOUR-",
+                "タンポポ"
             ]
         },
         {
@@ -1375,7 +1387,8 @@
                 "マーシャル・マキシマイザー",
                 "Sakura Reflection",
                 "オドループ[L]",
-                "Stargazing Trip ～星 探す旅～ ft. 小林マナ"
+                "Stargazing Trip ～星 探す旅～ ft. 小林マナ",
+                "オーバーライド"
             ]
         },
         {
@@ -1384,21 +1397,7 @@
         },
         {
             "rank": "Uncategorized(IIDX 33)",
-            "songs": [
-                "Butterfly Twist",
-                "Time to Empress[L]",
-                "華麗なる！音戯探偵ひなビタ",
-                "Nemophila",
-                "タンポポ",
-                "Amor∞Fati",
-                "PERFECT GREAT!!",
-                "UNDO THE NIGHT",
-                "HEROES",
-                "ちょえちょえまぎか[L]",
-                "オーバーライド",
-                "ラブコメトキドキシリアス",
-                "ベンガル vs. アムール Battle"
-            ]
+            "songs": []
         },
         {
             "rank": "Uncategorized(other)",

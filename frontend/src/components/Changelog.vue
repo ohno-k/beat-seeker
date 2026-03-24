@@ -1,5 +1,7 @@
 <script setup lang="ts">
-// Changelog Info Component
+import { ref } from 'vue';
+
+const activeTab = ref<'changelog' | 'difficulty'>('changelog');
 </script>
 
 <template>
@@ -15,9 +17,54 @@
       <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium tracking-wide">
         最近のアップデートや新機能の追加をお知らせします。
       </p>
+
+      <!-- Tabs -->
+      <div class="flex flex-wrap mt-6 gap-2 border-t border-slate-100 dark:border-slate-700 pt-6">
+        <button
+          @click="activeTab = 'changelog'"
+          class="px-5 py-2.5 text-sm font-bold rounded-lg transition-all"
+          :class="activeTab === 'changelog' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
+        >
+          システムアップデート
+        </button>
+        <button
+          @click="activeTab = 'difficulty'"
+          class="px-5 py-2.5 text-sm font-bold rounded-lg transition-all"
+          :class="activeTab === 'difficulty' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
+        >
+          楽曲難易度制定履歴
+        </button>
+      </div>
     </div>
 
-    <!-- Update Entry: v1.2.0 (Notification Tabs & Vote UI) -->
+    <div v-if="activeTab === 'changelog'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
+      <!-- Update Entry: v1.3.0 (Difficulty Revision) -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.3.0</span>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">難易度改訂と履歴への自動記録</h3>
+        </div>
+        <span class="text-sm font-bold text-slate-500 dark:text-slate-400">2026年3月</span>
+      </div>
+
+      <div class="p-8 space-y-6">
+        <div>
+          <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+            新機能 (New Features)
+          </h4>
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">RATE-TIER システムの実装:</span> スコアレート（最大スコアに対する達成率）をもとにプレイヤーの精度を評価する新指標「RATE-PT / RATE-TIER」を追加しました。ANOTHER・LEGGENDARIA 全曲が対象で、上位100曲のポイント合計によってランクが決まります。ランクボード・スコアレート換算表はヘルプモーダルで確認できます。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">RATE-PT 楽曲ランキングの追加:</span> 全ユーザーのRATE-PT算出に使われているTop100楽曲を「多い順／少ない順」で確認できる楽曲ランキング画面を追加しました。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">楽曲難易度表 第2版の適用:</span> 新規追加・既存変更を含む難易度改訂（第2版）を実施しました。詳細は「楽曲難易度制定履歴」タブをご覧ください。</li>
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">難易度改訂のアップロード履歴への自動記録:</span> 難易度改訂が行われた際、全ユーザーのアップロード履歴に「難易度改訂」ラベルの記録が自動的に追加されるようになりました。改訂前後のBEAT-PTの変動を履歴で確認できます。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+      <!-- Update Entry: v1.2.0 (Notification Tabs & Vote UI) -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -250,6 +297,85 @@
           CSVをクライアント側（ブラウザ）で解析し、ダッシュボードでの可視化、スコア一覧の表示、BEAT-PT（独自の腕前指標）の表示を行う最初のバージョンを公開しました。
         </p>
       </div>
+    </div>
+    </div>
+
+    <!-- Difficulty History Tab -->
+    <div v-else-if="activeTab === 'difficulty'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
+      
+      <!-- Difficulty Entry: v2 -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+        <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">第2版</span>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">難易度改訂 (Ver 1.3.0)</h3>
+          </div>
+          <span class="text-sm font-bold text-slate-500 dark:text-slate-400">2026年3月</span>
+        </div>
+        
+        <div class="p-8 space-y-6">
+          <div>
+            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+              新規追加
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-700 dark:text-slate-300 ml-2 font-medium">
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>Butterfly Twist</span><span class="font-bold text-blue-600 dark:text-blue-400">11.2</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>Time to Empress[L]</span><span class="font-bold text-blue-600 dark:text-blue-400">11.6</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>華麗なる！音戯探偵ひなビタ</span><span class="font-bold text-blue-600 dark:text-blue-400">12.1</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>Nemophira</span><span class="font-bold text-blue-600 dark:text-blue-400">12.0</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>タンポポ</span><span class="font-bold text-blue-600 dark:text-blue-400">11.1</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>Amor∞Fati</span><span class="font-bold text-blue-600 dark:text-blue-400">12.7</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>PERFECT GREAT!!</span><span class="font-bold text-blue-600 dark:text-blue-400">12.6</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>UNDO THE NIGHT</span><span class="font-bold text-blue-600 dark:text-blue-400">12.5</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>HEROES</span><span class="font-bold text-blue-600 dark:text-blue-400">12.8</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>ちょえちょえまぎか[L]</span><span class="font-bold text-blue-600 dark:text-blue-400">11.7</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>オーバーライド</span><span class="font-bold text-blue-600 dark:text-blue-400">11.0</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>ラブコメトキドキシリアス</span><span class="font-bold text-blue-600 dark:text-blue-400">12.5</span></div>
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>ベンガル vs. アムール Battle</span><span class="font-bold text-blue-600 dark:text-blue-400">12.0</span></div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+              既存変更
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-700 dark:text-slate-300 ml-2 font-medium">
+              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
+                <span>BRAINSTORM</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-400 line-through">12.6</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                  <span class="font-bold text-amber-600 dark:text-amber-500">12.4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Difficulty Entry: v1 -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200 opacity-90">
+        <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="bg-slate-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">初版</span>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">現行（初期制定）</h3>
+          </div>
+          <span class="text-sm font-bold text-slate-500 dark:text-slate-400">初期</span>
+        </div>
+        
+        <div class="p-8">
+          <h4 class="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+            制定内容
+          </h4>
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+            <li><span class="font-bold text-slate-900 dark:text-slate-100">初版の制定:</span>beat-seekerリリース時の基準となる難易度表です。</li>
+          </ul>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>

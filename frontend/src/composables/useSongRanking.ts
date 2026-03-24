@@ -26,6 +26,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 export function useSongRanking() {
     const { authHeaders } = useAuth();
     const ranking = ref<SongRankingEntry[]>([]);
+    const leastRanking = ref<SongRankingEntry[]>([]);
     const isLoading = ref(false);
     const error = ref('');
     const totalUsers = ref(0);
@@ -101,17 +102,17 @@ export function useSongRanking() {
                 }
             }
 
-            // Sort by userCount desc, then avgBeatPt desc
-            ranking.value = Array.from(songCountMap.values())
-                .map(e => ({
-                    title: e.title,
-                    difficultyName: e.difficultyName,
-                    informalRank: e.informalRank,
-                    userCount: e.count,
-                    avgBeatPt: e.count > 0 ? e.totalBeatPt / e.count : 0,
-                    maxBeatPt: e.maxBeatPt,
-                }))
-                .sort((a, b) => b.userCount - a.userCount || b.avgBeatPt - a.avgBeatPt);
+            const entries: SongRankingEntry[] = Array.from(songCountMap.values()).map(e => ({
+                title: e.title,
+                difficultyName: e.difficultyName,
+                informalRank: e.informalRank,
+                userCount: e.count,
+                avgBeatPt: e.count > 0 ? e.totalBeatPt / e.count : 0,
+                maxBeatPt: e.maxBeatPt,
+            }));
+
+            ranking.value = [...entries].sort((a, b) => b.userCount - a.userCount || b.avgBeatPt - a.avgBeatPt);
+            leastRanking.value = [...entries].sort((a, b) => a.userCount - b.userCount || a.avgBeatPt - b.avgBeatPt);
         } catch (e) {
             error.value = '楽曲ランキングの取得に失敗しました。';
             console.error(e);
@@ -120,5 +121,5 @@ export function useSongRanking() {
         }
     };
 
-    return { ranking, isLoading, error, totalUsers, fetchSongRanking };
+    return { ranking, leastRanking, isLoading, error, totalUsers, fetchSongRanking };
 }

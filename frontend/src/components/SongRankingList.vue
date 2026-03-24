@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useSongRanking } from '../composables/useSongRanking';
 
-const { ranking, isLoading, error, totalUsers, fetchSongRanking } = useSongRanking();
+const { ranking, leastRanking, isLoading, error, totalUsers, fetchSongRanking } = useSongRanking();
+const sortMode = ref<'most' | 'least'>('most');
 
 onMounted(() => {
     fetchSongRanking();
@@ -11,13 +12,31 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">
         全ユーザーの総合BEAT-PT算出に使われているTop100楽曲を集計したランキングです。
       </p>
-      <span v-if="!isLoading && totalUsers > 0" class="text-xs text-slate-400 dark:text-slate-500 shrink-0 ml-4">
-        {{ totalUsers }}人のデータを集計
-      </span>
+      <div class="flex items-center gap-3 shrink-0">
+        <span v-if="!isLoading && totalUsers > 0" class="text-xs text-slate-400 dark:text-slate-500">
+          {{ totalUsers }}人のデータを集計
+        </span>
+        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl">
+          <button
+            @click="sortMode = 'most'"
+            class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="sortMode === 'most'
+              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >多い順</button>
+          <button
+            @click="sortMode = 'least'"
+            class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="sortMode === 'least'
+              ? 'bg-white dark:bg-slate-600 text-orange-500 dark:text-orange-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >少ない順</button>
+        </div>
+      </div>
     </div>
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
@@ -29,7 +48,7 @@ onMounted(() => {
       {{ error }}
     </div>
 
-    <div v-else-if="ranking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+    <div v-else-if="ranking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl" >
       <p class="text-slate-500 dark:text-slate-400 font-bold">表示できるデータがありません。</p>
     </div>
 
@@ -42,24 +61,24 @@ onMounted(() => {
             <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-24 text-center hidden sm:table-cell">難易度</th>
             <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center hidden md:table-cell">ランク</th>
             <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right hidden lg:table-cell">平均BEAT-PT</th>
-            <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">採用人数</th>
+            <th class="pb-4 text-xs font-black" :class="sortMode === 'most' ? 'text-blue-500' : 'text-orange-500'" style="text-align:right; padding-right:1rem;">採用人数</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
           <tr
-            v-for="(entry, index) in ranking"
+            v-for="(entry, index) in (sortMode === 'most' ? ranking : leastRanking)"
             :key="`${entry.title}_${entry.difficultyName}`"
             class="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
           >
             <td class="py-3 pl-4">
               <div
                 class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
-                :class="[
+                :class="sortMode === 'most' ? [
                   index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                   index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
                   index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
                   'text-slate-400 border border-slate-100 dark:border-slate-700'
-                ]"
+                ] : 'text-slate-400 border border-slate-100 dark:border-slate-700'"
               >
                 {{ index + 1 }}
               </div>
@@ -104,7 +123,8 @@ onMounted(() => {
             </td>
             <td class="py-3 text-right pr-4">
               <div class="flex items-baseline justify-end gap-1">
-                <span class="text-lg font-black text-slate-800 dark:text-slate-100 tabular-nums">
+                <span class="text-lg font-black tabular-nums"
+                  :class="sortMode === 'most' ? 'text-slate-800 dark:text-slate-100' : 'text-orange-600 dark:text-orange-400'">
                   {{ entry.userCount }}
                 </span>
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">人</span>

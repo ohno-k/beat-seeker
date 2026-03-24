@@ -1,15 +1,18 @@
-﻿Total Songs in Table: 1102
-Theoretical Max (Top 100): 18464.00 pt
---- Top 10 Songs ---
-1. 諠第弌驩・％ (12.9) -> 188pt
-2. Mare Nectaris (12.9) -> 188pt
-3. Thor's Hammer (12.9) -> 188pt
-4. DIAVOLO (12.9) -> 188pt
-5. 鬧・賢縺ｮ繝ｯ繝ｫ繝・(12.9) -> 188pt
-6. Illegal Function Call[L] (12.9) -> 188pt
-7. SAMURAI-Scramble[L] (12.9) -> 188pt
-8. Sinus Iridum (12.9) -> 188pt
-9. Somnidiscotheque (12.9) -> 188pt
-10. ICARUS[L] (12.9) -> 188pt
---- 100th Song ---
-100. 逵・蝨ｰ迯・ｶ・音諤･ -HELL or HELL- (12.6) -> 182pt
+﻿Total mapped informalRanks: 1285
+Sample of 13.0: [
+  [ '諠第弌驩・％_ANOTHER', '13.0' ],
+  [ 'SﾎｼG@R RU$#_ANOTHER', '13.0' ],
+  [ "Thor's Hammer_ANOTHER", '13.0' ],
+  [ 'Mare Nectaris_ANOTHER', '13.0' ],
+  [ 'DIAVOLO_ANOTHER', '13.0' ]
+]
+Total mapped songMaxScores: 6051
+Sample of scores: [
+  [ '#CMFLG_2', 1202 ],
+  [ '#CMFLG_3', 2372 ],
+  [ '#CMFLG_4', 3496 ],
+  [ '#MAGiCVLGiRL_TRVP_B3VTZ_2', 1176 ],
+  [ '#MAGiCVLGiRL_TRVP_B3VTZ_3', 1982 ]
+]
+Looking up: 諠第弌驩・％_ANOTHER Found: 13.0
+Looking up: B4U(BEMANI FOR YOU MIX)_LEGGENDARIA Found: 12.5

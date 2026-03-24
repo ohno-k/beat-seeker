@@ -48,7 +48,7 @@
             <!-- Total Points Change Details -->
             <div class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
               <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
-              
+
               <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">総合 BEAT-TIER の変化</p>
               
               <!-- Tier Context -->
@@ -80,6 +80,37 @@
               </div>
             </div>
 
+            <!-- Rate-Tier Change -->
+            <div v-if="showRateTier && (diffData.newTotalRatePt > 0 || diffData.oldTotalRatePt > 0)" class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+              <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
+
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">総合 RATE-TIER の変化</p>
+
+              <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
+                <div class="flex flex-col items-center flex-1">
+                  <span class="text-xs font-bold text-slate-400 mb-1">前回 ({{ diffData.oldTotalRatePt.toFixed(1) }})</span>
+                  <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldRateTier?.name || '---' }}{{ diffData.oldRateTier?.tier ? ' ' + diffData.oldRateTier.tier : '' }}</span>
+                </div>
+                <div class="shrink-0 flex flex-col items-center justify-center pt-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-400 dark:text-emerald-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                  <span class="text-xs font-bold text-emerald-400 mb-1">今回 ({{ diffData.newTotalRatePt.toFixed(1) }})</span>
+                  <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newRateTier?.color || 'text-slate-600'">{{ diffData.newRateTier?.name || '---' }}{{ diffData.newRateTier?.tier ? ' ' + diffData.newRateTier.tier : '' }}</span>
+                </div>
+              </div>
+
+              <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-xl border border-slate-100 dark:border-slate-800 relative z-10">
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">増加量:</span>
+                <span class="text-4xl font-black tracking-tight" :class="diffData.newTotalRatePt - diffData.oldTotalRatePt > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+                  {{ diffData.newTotalRatePt - diffData.oldTotalRatePt > 0 ? '+' : '' }}{{ (diffData.newTotalRatePt - diffData.oldTotalRatePt).toFixed(1) }}
+                </span>
+                <span class="text-lg font-bold text-emerald-500">pt</span>
+              </div>
+            </div>
+
             <!-- Updated Songs List -->
             <div>
               <h3 class="flex items-center gap-2 text-lg font-black text-slate-800 dark:text-slate-200 mb-4 px-2">
@@ -96,12 +127,21 @@
               <div v-else class="space-y-2">
                 <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
 
-                  <!-- Row 1: Difficulty badge + LAMP UP -->
-                  <div class="flex items-center gap-1.5 mb-1">
+                  <!-- Row 1: Difficulty badge + LAMP UP + grade labels -->
+                  <div class="flex items-center gap-1.5 mb-1 flex-wrap">
                     <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
                       {{ song.difficulty }}
                     </span>
                     <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-black rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
+                    <template v-if="song.maxScore > 0">
+                      <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                        {{ getScoreGradeInfo(song.newScore, song.maxScore).fromMax }}
+                      </span>
+                      <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="getScoreGradeInfo(song.newScore, song.maxScore).gradeColor">
+                        {{ getScoreGradeInfo(song.newScore, song.maxScore).grade }}
+                      </span>
+                    </template>
+                    <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">RATE TOP100</span>
                   </div>
 
                   <!-- Row 2: Title + scores -->
@@ -180,35 +220,54 @@
       </div>
       
       <div class="p-12 flex-1 flex flex-col bg-slate-50 dark:bg-slate-900" v-if="diffData">
-        <!-- Total Points and Progress-->
-        <div class="border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl p-10 mb-10 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden shrink-0">
-          <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
-          
-          <div class="flex items-center justify-between relative z-10 mb-8">
-            <div>
+        <!-- Beat-Tier + Rate-Tier summary row -->
+        <div class="grid gap-8 mb-10 shrink-0" :class="showRateTier ? 'grid-cols-2' : 'grid-cols-1 max-w-sm mx-auto w-full'">
+          <!-- BEAT-TIER -->
+          <div class="border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
+            <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">総BEAT-PT</p>
               <div class="flex items-baseline gap-3">
-                <span class="text-7xl font-black text-slate-800 dark:text-slate-100">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
-                <span class="text-3xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
+                <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
+                <span class="text-2xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
               </div>
             </div>
-            <div class="text-right">
-              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">BEAT-TIER</p>
-              <p class="text-6xl font-black" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
+            <div class="relative z-10 mb-6">
+              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-1">BEAT-TIER</p>
+              <p class="text-4xl font-black" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
+            </div>
+            <div v-if="nextRankData && nextRankData.nextRank" class="relative z-10">
+              <div class="flex justify-between items-end mb-2">
+                <span class="text-base font-bold text-slate-500">NEXT</span>
+                <span class="text-xl font-black" :class="nextRankData.nextRank.color">{{ nextRankData.nextRank.name }} {{ nextRankData.nextRank.tier || '' }}</span>
+              </div>
+              <div class="w-full h-4 bg-slate-100 dark:bg-slate-700/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
+                <div class="h-full bg-gradient-to-r from-indigo-500 to-blue-500" :style="{ width: `${nextRankData.progress}%` }"></div>
+              </div>
             </div>
           </div>
-          
-          <!-- Progress Bar -->
-          <div v-if="nextRankData && nextRankData.nextRank" class="relative z-10">
-            <div class="flex justify-between items-end mb-3">
-              <span class="text-lg font-bold text-slate-500 dark:text-slate-400">NEXT TIER</span>
-              <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-black" :class="nextRankData.nextRank.color">{{ nextRankData.nextRank.name }} {{ nextRankData.nextRank.tier || '' }}</span>
-                <span class="text-lg font-bold text-slate-400">まであと <span class="text-indigo-500">{{ (nextRankData.nextRank.minPoints - diffData.newTotalBeatPt).toFixed(1) }}</span> pt</span>
+          <!-- RATE-TIER -->
+          <div v-if="showRateTier" class="border-2 border-emerald-100 dark:border-emerald-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
+            <div class="relative z-10 mb-6">
+              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">総RATE-PT</p>
+              <div class="flex items-baseline gap-3">
+                <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ (diffData.newTotalRatePt ?? 0).toFixed(1) }}</span>
+                <span class="text-2xl font-bold text-emerald-500">{{ (diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0) > 0 ? '+' : '' }}{{ ((diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0)).toFixed(1) }}</span>
               </div>
             </div>
-            <div class="w-full h-6 bg-slate-100 dark:bg-slate-700/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
-              <div class="h-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all" :style="{ width: `${nextRankData.progress}%` }"></div>
+            <div class="relative z-10 mb-6">
+              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-1">RATE-TIER</p>
+              <p class="text-4xl font-black" :class="diffData.newRateTier?.color">{{ diffData.newRateTier?.name }} {{ diffData.newRateTier?.tier || '' }}</p>
+            </div>
+            <div v-if="nextRateTierData && nextRateTierData.nextRank" class="relative z-10">
+              <div class="flex justify-between items-end mb-2">
+                <span class="text-base font-bold text-slate-500">NEXT</span>
+                <span class="text-xl font-black" :class="nextRateTierData.nextRank.color">{{ nextRateTierData.nextRank.name }} {{ nextRateTierData.nextRank.tier || '' }}</span>
+              </div>
+              <div class="w-full h-4 bg-slate-100 dark:bg-slate-700/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500" :style="{ width: `${nextRateTierData.progress}%` }"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -221,18 +280,23 @@
            </h3>
            <div class="space-y-4 flex-1">
              <div v-for="song in sortedUpdatedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-               <div>
-                 <div class="flex items-center gap-2 mb-2">
-                    <span class="px-3 py-1 rounded text-sm font-black border" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
+               <div class="flex-1 min-w-0 pr-4">
+                 <div class="flex items-center gap-2 mb-2 flex-wrap">
+                    <span class="px-3 py-1 rounded text-sm font-black border shrink-0" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
                     <span v-if="song.clearTypeImproved" class="text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
+                    <template v-if="song.maxScore > 0">
+                      <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ getScoreGradeInfo(song.newScore, song.maxScore).fromMax }}</span>
+                      <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="getScoreGradeInfo(song.newScore, song.maxScore).gradeColor">{{ getScoreGradeInfo(song.newScore, song.maxScore).grade }}</span>
+                    </template>
+                    <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-sm font-black px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">RATE TOP100</span>
                  </div>
-                 <p class="font-black text-2xl text-slate-800 dark:text-slate-100">{{ song.title }}</p>
+                 <p class="font-black text-2xl text-slate-800 dark:text-slate-100 truncate">{{ song.title }}</p>
                  <div v-if="song.clearTypeImproved" class="flex items-center gap-3 mt-1.5">
                    <span class="text-sm font-bold text-slate-500 dark:text-slate-400 line-through">{{ song.oldClearType }}</span>
                    <span class="text-sm font-black" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
                  </div>
                </div>
-               <div class="text-right flex justify-end gap-10 w-1/2">
+               <div class="text-right flex justify-end gap-6 shrink-0">
                  <div v-if="song.scoreIncrease > 0" class="text-right">
                    <p class="text-sm font-bold text-slate-500 mb-1">EX SCORE</p>
                    <p class="font-black text-3xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-lg font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
@@ -268,8 +332,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
-import { getNextRankInfo } from '../utils/beatTier';
+import { getNextRankInfo, getNextRateTierRankInfo } from '../utils/beatTier';
 import { useAuth, API_BASE } from '../composables/useAuth';
+import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import html2canvas from 'html2canvas';
 
 const props = defineProps<{
@@ -278,16 +343,48 @@ const props = defineProps<{
 }>();
 
 const { authHeaders } = useAuth();
+const { showRateTier } = useRateTierVisibility();
 
 const nextRankData = computed(() => {
   if (!props.diffData) return null;
   return getNextRankInfo(props.diffData.newTotalBeatPt);
 });
 
+const nextRateTierData = computed(() => {
+  if (!props.diffData) return null;
+  return getNextRateTierRankInfo(props.diffData.newTotalRatePt ?? 0);
+});
+
 const sortedUpdatedSongs = computed(() => {
   if (!props.diffData) return [];
   return [...props.diffData.updatedSongs].sort((a, b) => b.newBeatPt - a.newBeatPt);
 });
+
+// Score grade label: "MAX", "MAX-n", "AAA+n", "AAA", "AA+n", etc.
+function getScoreGradeInfo(newScore: number, maxScore: number): { fromMax: string; grade: string; gradeColor: string } {
+  if (!maxScore || maxScore <= 0) return { fromMax: '', grade: '', gradeColor: '' };
+  const fromMaxN = maxScore - newScore;
+  const fromMax = fromMaxN === 0 ? 'MAX' : `MAX-${fromMaxN}`;
+
+  const grades = [
+    { name: 'AAA', threshold: maxScore * 8 / 9, color: 'text-yellow-500' },
+    { name: 'AA',  threshold: maxScore * 7 / 9, color: 'text-blue-400' },
+    { name: 'A',   threshold: maxScore * 6 / 9, color: 'text-green-500' },
+    { name: 'B',   threshold: maxScore * 5 / 9, color: 'text-slate-400' },
+    { name: 'C',   threshold: maxScore * 4 / 9, color: 'text-slate-400' },
+    { name: 'D',   threshold: maxScore * 3 / 9, color: 'text-slate-400' },
+    { name: 'E',   threshold: maxScore * 2 / 9, color: 'text-slate-400' },
+  ];
+
+  for (const g of grades) {
+    const thresh = Math.ceil(g.threshold);
+    if (newScore >= thresh) {
+      const above = newScore - thresh;
+      return { fromMax, grade: above === 0 ? g.name : `${g.name}+${above}`, gradeColor: g.color };
+    }
+  }
+  return { fromMax, grade: 'F', gradeColor: 'text-slate-400' };
+}
 
 const emit = defineEmits<{
   (e: 'close'): void;

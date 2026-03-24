@@ -71,4 +71,36 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
             "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getPrecisionRanking();
+
+    @Query(value =
+            "WITH current_ranks AS ( " +
+            "    SELECT user_id, total_rate_pt, uploaded_at, " +
+            "           RANK() OVER (ORDER BY total_rate_pt DESC) AS rank_pos " +
+            "    FROM ( " +
+            "        SELECT DISTINCT ON (user_id) user_id, total_rate_pt, uploaded_at " +
+            "        FROM score_history_logs " +
+            "        WHERE total_rate_pt > 0 " +
+            "        ORDER BY user_id, uploaded_at DESC " +
+            "    ) AS latest " +
+            "), " +
+            "previous_ranks AS ( " +
+            "    SELECT user_id, " +
+            "           RANK() OVER (ORDER BY total_rate_pt DESC) AS rank_pos " +
+            "    FROM ( " +
+            "        SELECT DISTINCT ON (user_id) user_id, total_rate_pt, uploaded_at " +
+            "        FROM score_history_logs " +
+            "        WHERE total_rate_pt > 0 AND uploaded_at < CURRENT_DATE " +
+            "        ORDER BY user_id, uploaded_at DESC " +
+            "    ) AS prev_latest " +
+            ") " +
+            "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
+            "       cr.total_rate_pt AS \"totalRatePt\", " +
+            "       cr.uploaded_at AS \"lastUpdatedAt\", " +
+            "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
+            "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
+            "FROM current_ranks cr " +
+            "JOIN users u ON cr.user_id = u.id " +
+            "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
+            "ORDER BY cr.rank_pos", nativeQuery = true)
+    List<Map<String, Object>> getRateTierRanking();
 }

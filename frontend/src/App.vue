@@ -24,9 +24,9 @@ import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
-import { flattenScores } from './utils/scoreData';
+import { flattenScores, getSongMaxScore } from './utils/scoreData';
 import type { UploadDiffResult, UpdatedSong } from './types/UploadDiff';
-import { getRankInfo, calculateTotalPoints, calculatePoints } from './utils/beatTier';
+import { getRankInfo, getRateTierRankInfo, calculateTotalPoints, calculatePoints, calculateScoreRateTierPoints } from './utils/beatTier';
 import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useAppUpdate } from './composables/useAppUpdate';
@@ -298,26 +298,39 @@ const handleFileDropped = async (file: File) => {
     const sortedNewFlatDesc = newFlat.filter(s => s.beatTierPoints > 0).sort((a, b) => b.beatTierPoints - a.beatTierPoints);
     const top100SetGuest = new Set(sortedNewFlatDesc.slice(0, 100).map(s => `${s.title}_${s.difficultyName}`));
 
+    const sortedByRatePtDescGuest = newFlat
+      .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
+      .map(s => ({ key: `${s.title}_${s.difficultyName}`, pt: calculateScoreRateTierPoints(s.scoreRate) }))
+      .filter(s => s.pt > 0)
+      .sort((a, b) => b.pt - a.pt);
+    const rateTop100SetGuest = new Set(sortedByRatePtDescGuest.slice(0, 100).map(s => s.key));
+
     newFlat.forEach(newR => {
         // Report on level 11 and 12 improvements primarily, but you can see all in table
         const oldR = oldScoreMap.get(`${newR.title}_${newR.difficultyName}`);
-        
+
         const oldScore = oldR ? oldR.score : 0;
         const oldClearType = oldR ? oldR.clearType : 'NO PLAY';
         const oldBeatPt = oldR ? oldR.beatTierPoints : 0;
-        
+
         const newScore = newR.score;
         const newClearType = newR.clearType;
         const newBeatPt = newR.beatTierPoints;
-        
+
         const oldClearRank = clearTypeRankings[oldClearType] || 0;
         const newClearRank = clearTypeRankings[newClearType] || 0;
         const clearTypeImproved = newClearRank > oldClearRank;
         const scoreImproved = newScore > oldScore;
-        
+
         const scoreIncrease = scoreImproved ? newScore - oldScore : 0;
         const beatPtIncrease = newBeatPt > oldBeatPt ? newBeatPt - oldBeatPt : 0;
-        
+
+        const isRateEligible = ['ANOTHER', 'LEGGENDARIA'].includes(newR.difficultyName);
+        const newRatePt = (isRateEligible && newR.scoreRate > 0) ? calculateScoreRateTierPoints(newR.scoreRate) : 0;
+        const oldRateScore = oldR ? oldR.scoreRate : 0;
+        const oldRatePt = (isRateEligible && oldRateScore > 0) ? calculateScoreRateTierPoints(oldRateScore) : 0;
+        const ratePtIncrease = Math.max(0, newRatePt - oldRatePt);
+
         // Only report if there is an actual improvement in score or lamp
         if (scoreImproved || clearTypeImproved) {
             updatedSongs.push({
@@ -332,7 +345,12 @@ const handleFileDropped = async (file: File) => {
                 oldBeatPt,
                 newBeatPt,
                 beatPtIncrease,
-                isInTop100: top100SetGuest.has(`${newR.title}_${newR.difficultyName}`)
+                isInTop100: top100SetGuest.has(`${newR.title}_${newR.difficultyName}`),
+                scoreRate: newR.scoreRate,
+                maxScore: newR.maxScore,
+                newRatePt,
+                ratePtIncrease,
+                isInRateTop100: rateTop100SetGuest.has(`${newR.title}_${newR.difficultyName}`)
             });
         }
     });
@@ -347,6 +365,18 @@ const handleFileDropped = async (file: File) => {
     const newTotalBeatPt = calculateTotalPoints(newFlat);
     const oldTier = getRankInfo(oldTotalBeatPt);
     const newTier = getRankInfo(newTotalBeatPt);
+
+    // Rate-Tier totals helper
+    const calcFlatRatePt = (flat: ReturnType<typeof flattenScores>) => {
+      const top100 = flat
+        .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
+        .map(s => calculateScoreRateTierPoints(s.scoreRate))
+        .filter(pt => pt > 0)
+        .sort((a, b) => b - a)
+        .slice(0, 100);
+      return Math.round(top100.reduce((acc, pt) => acc + pt, 0) * 10) / 10;
+    };
+    const oldTotalRatePt = calcFlatRatePt(oldFlat);
 
     if (isLoggedIn.value && newData.length > 0) {
       // PRO-UPGRADE: Use backend-provided diff for accuracy against DB
@@ -383,17 +413,46 @@ const handleFileDropped = async (file: File) => {
         await loadSavedScores();
         const accurateTotalBeatPt = totalBeatTierPoints.value;
 
-        // Determine top-100 set for isInTop100 flag
+        // Determine top-100 set for isInTop100 and isInRateTop100 flags
         const allFlatAfterUpload = flattenScores(scoreData.value);
         const sortedByPtDesc = allFlatAfterUpload
           .filter(s => s.beatTierPoints > 0)
           .sort((a, b) => b.beatTierPoints - a.beatTierPoints);
         const top100Set = new Set(sortedByPtDesc.slice(0, 100).map(s => `${s.title}_${s.difficultyName}`));
 
+        const sortedByRatePtDesc = allFlatAfterUpload
+          .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
+          .map(s => ({ key: `${s.title}_${s.difficultyName}`, pt: calculateScoreRateTierPoints(s.scoreRate) }))
+          .filter(s => s.pt > 0)
+          .sort((a, b) => b.pt - a.pt);
+        const rateTop100Set = new Set(sortedByRatePtDesc.slice(0, 100).map(s => s.key));
+        const accurateTotalRatePt = calcFlatRatePt(allFlatAfterUpload);
+
+        // Enrich backendUpdates with rate-tier and scoreRate fields
+        const enrichedUpdates = backendUpdates.map(s => {
+          const maxScore = getSongMaxScore(s.title, s.difficulty);
+          const scoreRate = maxScore > 0 ? (s.newScore / maxScore) * 100 : 0;
+          const isRateEligible = ['ANOTHER', 'LEGGENDARIA'].includes(s.difficulty);
+          const newRatePt = (isRateEligible && scoreRate > 0) ? calculateScoreRateTierPoints(scoreRate) : 0;
+          const oldRateScore = maxScore > 0 ? (s.oldScore / maxScore) * 100 : 0;
+          const oldRatePt = (isRateEligible && oldRateScore > 0) ? calculateScoreRateTierPoints(oldRateScore) : 0;
+          return {
+            ...s,
+            scoreRate,
+            maxScore,
+            newRatePt,
+            ratePtIncrease: Math.max(0, newRatePt - oldRatePt),
+          };
+        });
+
         // Filter and sort for the report
-        const reportSongs = backendUpdates
+        const reportSongs = enrichedUpdates
           .filter(s => s.scoreIncrease > 0 || s.clearTypeImproved)
-          .map(s => ({ ...s, isInTop100: top100Set.has(`${s.title}_${s.difficulty}`) }))
+          .map(s => ({
+            ...s,
+            isInTop100: top100Set.has(`${s.title}_${s.difficulty}`),
+            isInRateTop100: rateTop100Set.has(`${s.title}_${s.difficulty}`),
+          }))
           .sort((a, b) => b.beatPtIncrease - a.beatPtIncrease || b.scoreIncrease - a.scoreIncrease);
 
         diffResult.value = {
@@ -402,7 +461,11 @@ const handleFileDropped = async (file: File) => {
             totalBeatPtIncrease: Math.max(0, accurateTotalBeatPt - oldTotalBeatPt),
             oldTier,
             newTier: getRankInfo(accurateTotalBeatPt),
-            updatedSongs: reportSongs
+            updatedSongs: reportSongs,
+            oldTotalRatePt,
+            newTotalRatePt: accurateTotalRatePt,
+            oldRateTier: getRateTierRankInfo(oldTotalRatePt),
+            newRateTier: getRateTierRankInfo(accurateTotalRatePt),
         };
 
         if (reportSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
@@ -421,7 +484,8 @@ const handleFileDropped = async (file: File) => {
                     reportSongs.length,
                     JSON.stringify(reportSongs),
                     newTierLabel,
-                    oldTierLabel
+                    oldTierLabel,
+                    accurateTotalRatePt
                 );
                 console.log("History log saved successfully.");
             } catch (err) {
@@ -434,13 +498,18 @@ const handleFileDropped = async (file: File) => {
       }
     } else {
         // Guest mode - stay with frontend calculation
+        const guestNewTotalRatePt = calcFlatRatePt(newFlat);
         diffResult.value = {
             oldTotalBeatPt,
             newTotalBeatPt,
             totalBeatPtIncrease: Math.max(0, newTotalBeatPt - oldTotalBeatPt),
             oldTier,
             newTier,
-            updatedSongs
+            updatedSongs,
+            oldTotalRatePt,
+            newTotalRatePt: guestNewTotalRatePt,
+            oldRateTier: getRateTierRankInfo(oldTotalRatePt),
+            newRateTier: getRateTierRankInfo(guestNewTotalRatePt),
         };
         
         if (updatedSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
@@ -577,7 +646,7 @@ const handleUnifiedClose = async () => {
                 ランキング
               </button>
               <button 
-                v-if="isLoggedIn && !viewingUserId"
+                v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
                 @click="activeTab = 'history'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
@@ -585,7 +654,7 @@ const handleUnifiedClose = async () => {
                 成長記録
               </button>
               <button 
-                v-if="isLoggedIn && !viewingUserId"
+                v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
                 @click="activeTab = 'profile'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
@@ -594,7 +663,7 @@ const handleUnifiedClose = async () => {
               </button>
               
               <button
-                v-if="isLoggedIn && !viewingUserId"
+                v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
                 @click="activeTab = 'arena'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
@@ -675,7 +744,7 @@ const handleUnifiedClose = async () => {
             ランキング
           </button>
           <button 
-            v-if="isLoggedIn && !viewingUserId"
+            v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
             @click="activeTab = 'history'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
@@ -683,7 +752,7 @@ const handleUnifiedClose = async () => {
             成長記録
           </button>
           <button
-            v-if="isLoggedIn && !viewingUserId"
+            v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
             @click="activeTab = 'profile'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
@@ -691,7 +760,7 @@ const handleUnifiedClose = async () => {
             プロフィール
           </button>
           <button
-            v-if="isLoggedIn && !viewingUserId"
+            v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
             @click="activeTab = 'arena'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
@@ -760,7 +829,7 @@ const handleUnifiedClose = async () => {
         </template>
 
         <template v-else-if="activeTab === 'arena'">
-          <ArenaView class="w-full max-w-5xl mx-auto animate-fade-in" />
+          <ArenaView class="w-full max-w-5xl mx-auto animate-fade-in" :viewing-user-id="viewingUserId" />
         </template>
         
         <template v-else>
@@ -840,12 +909,14 @@ const handleUnifiedClose = async () => {
           <ProfileDashboard
             v-if="activeTab === 'profile'"
             class="w-full max-w-6xl"
+            :viewing-user-id="viewingUserId"
           />
 
           <!-- History Tab (scoreDataに依存しないため外に配置) -->
           <UploadHistory
             v-if="activeTab === 'history'"
             class="w-full max-w-6xl animate-fade-in"
+            :viewing-user-id="viewingUserId"
           />
 
           <!-- Friends Tab (scoreDataに依存しないため外に配置) -->

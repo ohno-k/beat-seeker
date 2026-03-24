@@ -287,7 +287,7 @@
     </Teleport>
 
     <!-- 通知設定 -->
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="!props.viewingUserId" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -340,8 +340,13 @@ import { calculatePoints, WEIGHTS } from '../utils/beatTier';
 import songDataRaw from '../data/song_data.json';
 import diffTableRaw from '../data/difficulty_table.json';
 
+const props = defineProps<{
+  viewingUserId?: number | null;
+}>();
+
 const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
+// For push notifications, we only show/allow if it's the current user (no viewingUserId)
 const { requestNotificationPermission } = useFriends();
 
 const notificationStatus = ref(Notification?.permission || 'default');
@@ -419,9 +424,16 @@ if ((diffTableRaw as any)?.ranks) {
 
 onMounted(async () => {
   try {
+    const histEndpoint = props.viewingUserId 
+        ? `${API_BASE}/api/admin/users/${props.viewingUserId}/history`
+        : `${API_BASE}/api/scores/history`;
+    const scoresEndpoint = props.viewingUserId 
+        ? `${API_BASE}/api/admin/users/${props.viewingUserId}/scores`
+        : `${API_BASE}/api/scores/me`;
+
     const [histRes, scoresRes] = await Promise.allSettled([
-      fetch(`${API_BASE}/api/scores/history`, { headers: authHeaders() }),
-      fetch(`${API_BASE}/api/scores/me`, { headers: authHeaders() }),
+      fetch(histEndpoint, { headers: authHeaders() }),
+      fetch(scoresEndpoint, { headers: authHeaders() }),
     ]);
 
     if (histRes.status === 'fulfilled' && histRes.value.ok) {

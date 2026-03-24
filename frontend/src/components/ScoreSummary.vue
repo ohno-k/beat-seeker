@@ -30,7 +30,7 @@
               </svg>
             </button>
             <div v-if="openDropdown === 'level'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="l in [11, 12]" :key="l" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
+              <label v-for="l in (viewMode === 'rate' ? [1,2,3,4,5,6,7,8,9,10,11,12] : [11,12])" :key="l" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
                 <input 
                   type="checkbox" 
                   :checked="isSelected(filterLevel, l.toString())"
@@ -133,6 +133,20 @@
       </div>
     </div>
 
+    <!-- Mode Tabs -->
+    <div v-if="showRateTier" class="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl w-fit border border-slate-200 dark:border-slate-700">
+      <button
+        @click="viewMode = 'beat'"
+        class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+        :class="viewMode === 'beat' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+      >BEAT-TIER</button>
+      <button
+        @click="viewMode = 'rate'"
+        class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+        :class="viewMode === 'rate' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+      >RATE-TIER</button>
+    </div>
+
     <!-- Data Table -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="overflow-x-auto">
@@ -184,16 +198,19 @@
                   <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
-              <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12" @click="toggleSort('beatTierPoints')">
+              <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12"
+                :class="viewMode === 'rate' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'"
+                @click="toggleSort('beatTierPoints')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  Beat-PT
+                  {{ viewMode === 'rate' ? '獲得PT' : 'Beat-PT' }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'beatTierPoints'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
                   <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
-              <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-orange-500 dark:text-orange-400 uppercase tracking-wider w-auto sm:w-2/12">
+              <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black uppercase tracking-wider w-auto sm:w-2/12"
+                :class="viewMode === 'rate' ? 'text-emerald-500 dark:text-emerald-400' : 'text-orange-500 dark:text-orange-400'">
                 TOP100
               </th>
             </tr>
@@ -248,7 +265,8 @@
                 <span v-else class="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">---</span>
               </td>
               
-              <td class="px-1 sm:px-6 py-1.5 sm:py-2 whitespace-nowrap transition-colors" :class="[
+              <!-- BEAT-TIER mode: BEAT-PT cell -->
+              <td v-if="viewMode === 'beat'" class="px-1 sm:px-6 py-1.5 sm:py-2 whitespace-nowrap transition-colors" :class="[
                 top100Keys.has(record.title + '|' + record.difficultyName) ? 'bg-blue-50/80 dark:bg-blue-900/20' : '',
                 ((!record.informalRank && record.difficultyLevel && record.difficultyLevel <= 10) || (record.difficultyName === 'HYPER' && record.difficultyLevel && record.difficultyLevel >= 11)) ? 'bg-slate-900' : ''
               ]">
@@ -267,9 +285,24 @@
                   <span class="text-[9px] sm:text-[10px] font-black text-slate-700 dark:text-slate-500 italic">N/A</span>
                 </div>
               </td>
+              <!-- RATE-TIER mode: 獲得PT cell -->
+              <td v-else class="px-1 sm:px-6 py-1.5 sm:py-2 whitespace-nowrap transition-colors"
+                :class="rateTop100Keys.has(record.title + '|' + record.difficultyName) ? 'bg-emerald-50/80 dark:bg-emerald-900/20' : ''"
+              >
+                <div v-if="record.scoreRate > 0" class="flex items-center gap-0.5 sm:gap-1">
+                  <span class="font-black" :class="rateTop100Keys.has(record.title + '|' + record.difficultyName) ? 'text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-base' : 'text-slate-800 dark:text-slate-200 text-[9px] sm:text-sm'">
+                    {{ calculateScoreRateTierPoints(record.scoreRate).toFixed(2) }}
+                  </span>
+                  <span v-if="rateTop100Keys.has(record.title + '|' + record.difficultyName)" class="hidden sm:inline-block px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 text-[6px] sm:text-[8px] font-black uppercase border border-emerald-200 dark:border-emerald-800 shadow-sm">
+                    TOP
+                  </span>
+                </div>
+                <span v-else class="text-[9px] sm:text-[10px] font-black text-slate-700 dark:text-slate-500 italic">---</span>
+              </td>
+              <!-- TOP100 column -->
               <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
                 <div
-                  v-if="top100ScoreNeededMap.has(record.title + '|' + record.difficultyName)"
+                  v-if="viewMode === 'beat' && top100ScoreNeededMap.has(record.title + '|' + record.difficultyName)"
                   class="flex flex-col gap-0.5"
                 >
                   <span class="text-[9px] sm:text-[11px] font-black text-orange-500 dark:text-orange-400">あと</span>
@@ -347,6 +380,12 @@
             class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
             :class="modalTab === 'detail' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >詳細</button>
+          <button
+            v-if="['ANOTHER', 'LEGGENDARIA'].includes(selectedRecord?.difficultyName ?? '')"
+            @click="modalTab = 'rate-tier'"
+            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
+            :class="modalTab === 'rate-tier' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+          >Rate-Tier</button>
           <button
             v-if="isLoggedIn"
             @click="handleRivalTabClick"
@@ -452,6 +491,65 @@
                       {{ calculatePoints(entry.score / selectedRecord.maxScore * 100, selectedRecord.informalRank).toFixed(1) }}
                     </span>
                     <span v-else class="text-slate-400 text-sm">---</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Rate-Tier Tab -->
+        <div v-else-if="modalTab === 'rate-tier'" class="w-full max-w-4xl mx-auto space-y-6">
+          <!-- 獲得PT display -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-emerald-900/10 dark:bg-emerald-900/20 p-6 sm:p-8 rounded-2xl shadow-md flex flex-col items-center justify-center border border-emerald-100 dark:border-emerald-800/50">
+              <p class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">獲得PT</p>
+              <p class="text-4xl sm:text-6xl font-black text-emerald-700 dark:text-emerald-300 tracking-tight">
+                {{ calculateScoreRateTierPoints(selectedRecord!.scoreRate).toFixed(2) }}
+              </p>
+              <p class="text-xs font-bold text-emerald-500 dark:text-emerald-500 mt-1">/ 256 pt (MAX)</p>
+            </div>
+            <div class="bg-blue-50 dark:bg-slate-800 p-6 sm:p-8 rounded-2xl border-4 border-blue-200 dark:border-slate-700 flex flex-col items-center justify-center">
+              <p class="text-xs sm:text-sm font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-2">スコアレート</p>
+              <p class="text-4xl sm:text-6xl font-black text-blue-600 dark:text-blue-300 tracking-tight flex items-baseline">
+                <template v-if="selectedRecord!.scoreRate >= 0">{{ selectedRecord!.scoreRate.toFixed(2) }}</template>
+                <template v-else>---</template>
+                <span class="text-xl sm:text-3xl font-bold ml-1">%</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Threshold Table -->
+          <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
+            <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-3 border-b border-slate-200 dark:border-slate-700">
+              <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">獲得PT 閾値一覧</p>
+            </div>
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-slate-100 dark:border-slate-700">
+                  <th class="px-6 py-3 text-left text-xs font-black text-slate-400 uppercase tracking-widest">スコアレート</th>
+                  <th class="px-6 py-3 text-right text-xs font-black text-slate-400 uppercase tracking-widest">獲得PT</th>
+                  <th class="px-6 py-3 text-center text-xs font-black text-slate-400 uppercase tracking-widest">達成</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr
+                  v-for="(th, i) in SCORE_RATE_THRESHOLDS"
+                  :key="i"
+                  class="transition-colors"
+                  :class="selectedRecord!.scoreRate >= th.rate ? 'bg-emerald-50/60 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700/20'"
+                >
+                  <td class="px-6 py-3 font-bold tabular-nums" :class="selectedRecord!.scoreRate >= th.rate ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-400'">
+                    {{ th.rate.toFixed(2) }}%
+                  </td>
+                  <td class="px-6 py-3 text-right font-black tabular-nums" :class="selectedRecord!.scoreRate >= th.rate ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'">
+                    {{ th.points }}
+                  </td>
+                  <td class="px-6 py-3 text-center">
+                    <span v-if="selectedRecord!.scoreRate >= th.rate" class="text-emerald-500 font-black text-base">✓</span>
+                    <span v-else class="text-slate-300 dark:text-slate-600 font-black text-sm">
+                      +{{ (th.rate - selectedRecord!.scoreRate).toFixed(2) }}%
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -811,10 +909,11 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import diffTableRaw from '../data/difficulty_table.json';
-import { calculatePoints, getMaxPoints, getRankInfo } from '../utils/beatTier';
+import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS } from '../utils/beatTier';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
+import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import songDataRaw from '../data/song_data.json';
 import RankIcon from './RankIcon.vue';
 
@@ -830,6 +929,10 @@ const props = defineProps<{
 }>();
 
 // Emits are handled below after totalBeatTierPoints definition
+
+const { showRateTier } = useRateTierVisibility();
+const viewMode = ref<'beat' | 'rate'>('beat');
+watch(showRateTier, (val) => { if (!val && viewMode.value === 'rate') viewMode.value = 'beat'; });
 
 const searchQuery = ref('');
 const filterDifficulty = ref<string[]>([]);
@@ -970,9 +1073,24 @@ watch(totalBeatTierPoints, (newVal) => {
     emit('update:totalPoints', newVal);
 }, { immediate: true });
 
-// Top 100 status for highlighting
+// Top 100 status for highlighting (BEAT-TIER)
 const top100Keys = computed(() => {
     const sorted = [...allRecords.value].sort((a, b) => b.beatTierPoints - a.beatTierPoints);
+    return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
+});
+
+// RATE-TIER: all played ANOTHER/LEGGENDARIA songs across all levels (unlimited)
+const rateAllRecords = computed<ScoreRecord[]>(() =>
+    flattenScores(props.scores).filter(r =>
+        ['ANOTHER', 'LEGGENDARIA'].includes(r.difficultyName)
+    )
+);
+
+// RATE-TIER: top 100 keys by score rate tier points (for highlighting)
+const rateTop100Keys = computed(() => {
+    const sorted = [...rateAllRecords.value]
+        .filter(r => r.scoreRate > 0)
+        .sort((a, b) => calculateScoreRateTierPoints(b.scoreRate) - calculateScoreRateTierPoints(a.scoreRate));
     return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
 });
 
@@ -1046,7 +1164,7 @@ const handleRowClick = (record: ScoreRecord) => {
 
 // Modal state
 const selectedRecord = ref<ScoreRecord | null>(null);
-const modalTab = ref<'detail' | 'rivals' | 'ranking'>('detail');
+const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking'>('detail');
 
 const isEditingMemo = ref(false);
 const editMemoText = ref('');
@@ -1343,7 +1461,7 @@ const toggleSort = (key: SortKey) => {
 };
 
 const filteredScores = computed(() => {
-  let result = [...allRecords.value];
+  let result = viewMode.value === 'rate' ? [...rateAllRecords.value] : [...allRecords.value];
 
   if (hideZeroScore.value) {
     result = result.filter(r => r.score > 0);
@@ -1413,11 +1531,19 @@ const filteredScores = computed(() => {
       return sortOrder.value === 'asc' ? cmp : -cmp;
     });
   } else if (sortKey.value === 'beatTierPoints') {
-    result.sort((a, b) => {
-      const valA = a.beatTierPoints || 0;
-      const valB = b.beatTierPoints || 0;
-      return sortOrder.value === 'asc' ? valA - valB : valB - valA;
-    });
+    if (viewMode.value === 'rate') {
+      result.sort((a, b) => {
+        const valA = calculateScoreRateTierPoints(a.scoreRate);
+        const valB = calculateScoreRateTierPoints(b.scoreRate);
+        return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+      });
+    } else {
+      result.sort((a, b) => {
+        const valA = a.beatTierPoints || 0;
+        const valB = b.beatTierPoints || 0;
+        return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+      });
+    }
   } else if (sortKey.value === 'clearType') {
     result.sort((a, b) => {
       const rankA = clearTypeRankings[a.clearType] || 0;
@@ -1448,6 +1574,14 @@ const filteredScores = computed(() => {
   }
 
   return result;
+});
+
+// Reset page and set default sort when switching modes
+watch(viewMode, (mode) => {
+  currentPage.value = 1;
+  filterLevel.value = [];
+  sortKey.value = 'beatTierPoints';
+  sortOrder.value = 'desc';
 });
 
 const totalPages = computed(() => Math.ceil(filteredScores.value.length / itemsPerPage.value) || 1);
