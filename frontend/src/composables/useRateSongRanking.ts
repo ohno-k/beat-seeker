@@ -3,6 +3,7 @@ import songDataRaw from '../data/song_data.json';
 import diffTableRaw from '../data/difficulty_table.json';
 import { calculateScoreRateTierPoints } from '../utils/beatTier';
 import { useAuth } from './useAuth';
+import { useRateTierVisibility } from './useRateTierVisibility';
 
 export interface RateSongRankingEntry {
     title: string;
@@ -31,6 +32,8 @@ export function useRateSongRanking() {
     const totalUsers = ref(0);
 
     const fetchRateSongRanking = async () => {
+        const { showRateTier } = useRateTierVisibility();
+        if (!showRateTier.value) return;
         if (mostRanking.value.length > 0) return;
         isLoading.value = true;
         error.value = '';
