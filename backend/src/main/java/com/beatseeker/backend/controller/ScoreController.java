@@ -86,6 +86,9 @@ public class ScoreController {
                 updateScoreFields(newScore, req);
                 scoreRepository.save(newScore);
             } else {
+                oldScore = existing.getScore() != null ? existing.getScore() : 0;
+                oldClearType = existing.getClearType() != null ? existing.getClearType() : "NO PLAY";
+
                 int oldMiss = existing.getMissCount() != null ? existing.getMissCount() : Integer.MAX_VALUE;
                 int newMiss = req.missCount() != null ? req.missCount() : Integer.MAX_VALUE;
 

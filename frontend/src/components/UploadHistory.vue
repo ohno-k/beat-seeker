@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { getRankInfo } from '../utils/beatTier';
 import UploadResultModal from './UploadResultModal.vue';
@@ -16,15 +16,71 @@ const props = defineProps<{
 const historyList = ref<any[]>([]);
 const isLoading = ref(false);
 const errorMsg = ref('');
+const groupByDay = ref(false);
 
 const selectedDiff = ref<UploadDiffResult | null>(null);
 const isModalOpen = ref(false);
 
+const getDateKey = (dateStr: string) => {
+  const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
+  const d = new Date(zDateStr);
+  return d.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' });
+};
+
+/** 同日エントリをまとめたリストを返す */
+const groupedList = computed(() => {
+  if (!groupByDay.value) return historyList.value;
+
+  const dayMap = new Map<string, any[]>();
+  for (const item of historyList.value) {
+    const key = getDateKey(item.date);
+    if (!dayMap.has(key)) dayMap.set(key, []);
+    dayMap.get(key)!.push(item);
+  }
+
+  return Array.from(dayMap.entries()).map(([dateKey, items]) => {
+    // items は降順ソート済み (fetchHistory で sortedData)
+    const latest = items[0];
+    // 当日の最初アップロード前の totalBeatPt = 最後の item の (totalBeatPt - beatPtIncrease)
+    // 複数ある場合: 前日最終エントリの totalBeatPt が基準
+    const dayBeforeLast = historyList.value[historyList.value.indexOf(items[items.length - 1]) + 1];
+    const prevBeatPt = dayBeforeLast ? (dayBeforeLast.totalBeatPt || 0) : 0;
+    const prevRatePt = dayBeforeLast ? (dayBeforeLast.totalRatePt || 0) : 0;
+
+    // 当日の更新曲を全てまとめる (diffJson をマージ、title+difficulty で重複排除)
+    const songMap = new Map<string, any>();
+    for (const item of [...items].reverse()) {
+      if (!item.diffJson || item.diffJson === '[]') continue;
+      try {
+        const songs = JSON.parse(item.diffJson);
+        for (const s of songs) {
+          const key = `${s.title}_${s.difficulty || s.difficultyName}`;
+          // 後から上書き → より新しいスコアが残る
+          songMap.set(key, s);
+        }
+      } catch (_) { /* ignore */ }
+    }
+    const mergedSongs = Array.from(songMap.values());
+
+    return {
+      ...latest,
+      _isGrouped: true,
+      _dateKey: dateKey,
+      _itemCount: items.length,
+      updatedCount: items.reduce((sum: number, i: any) => sum + (i.updatedCount || 0), 0),
+      beatPtIncrease: latest.totalBeatPt - prevBeatPt,
+      ratePtIncrease: latest.totalRatePt - prevRatePt,
+      _mergedDiffJson: JSON.stringify(mergedSongs),
+    };
+  });
+});
+
 const openDiffModal = (item: any) => {
-  if (!item.diffJson || item.diffJson === '[]') return;
+  const diffJson = item._isGrouped ? item._mergedDiffJson : item.diffJson;
+  if (!diffJson || diffJson === '[]') return;
 
   try {
-    const updatedSongs = JSON.parse(item.diffJson);
+    const updatedSongs = JSON.parse(diffJson);
     const oldTotal = Math.max(0, item.totalBeatPt - item.beatPtIncrease);
 
     selectedDiff.value = {
@@ -134,11 +190,19 @@ onMounted(() => {
         </svg>
         アップロード履歴
       </h2>
-      <button @click="fetchHistory" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg transition-colors focus:outline-none" title="更新">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-        </svg>
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          @click="groupByDay = !groupByDay"
+          :class="groupByDay ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-600' : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'"
+          class="px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors focus:outline-none"
+          title="同日の更新をまとめる"
+        >同日まとめ</button>
+        <button @click="fetchHistory" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg transition-colors focus:outline-none" title="更新">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="py-12 flex justify-center">
@@ -166,10 +230,10 @@ onMounted(() => {
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
           <tr
-            v-for="item in historyList"
-            :key="item.snapshotId"
+            v-for="item in groupedList"
+            :key="item._isGrouped ? item._dateKey : item.snapshotId"
             class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors group"
-            :class="item.diffJson && item.diffJson !== '[]' ? 'cursor-pointer' : ''"
+            :class="(item._isGrouped ? item._mergedDiffJson !== '[]' : (item.diffJson && item.diffJson !== '[]')) ? 'cursor-pointer' : ''"
             @click="openDiffModal(item)"
           >
             <!-- Beat-Tier Icon -->
@@ -186,7 +250,13 @@ onMounted(() => {
 
             <!-- Upload Date -->
             <td class="p-4 font-medium text-slate-800 dark:text-slate-100 text-center align-middle">
-              {{ formatDate(item.date) }}
+              <template v-if="item._isGrouped">
+                {{ item._dateKey }}
+                <span class="ml-1 text-xs text-slate-400 dark:text-slate-500">({{ item._itemCount }}回)</span>
+              </template>
+              <template v-else>
+                {{ formatDate(item.date) }}
+              </template>
             </td>
 
             <!-- Updated Count -->

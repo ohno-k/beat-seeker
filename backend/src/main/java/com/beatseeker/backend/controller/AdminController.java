@@ -231,4 +231,36 @@ public class AdminController {
         userRepository.clearAllPushSubscriptions();
         return ResponseEntity.ok(Map.of("message", "全てのユーザーのプッシュ通知設定を初期化しました。"));
     }
+
+    /**
+     * total_rate_pt = 0 の履歴ログを現在のスコアから再計算して補正する。
+     * recalculate-points と同じリクエストボディ（songDataJson のみ使用）。
+     */
+    @PostMapping("/patch-rate-pt")
+    public ResponseEntity<Map<String, Object>> patchRatePt(
+            Authentication auth,
+            @RequestBody RecalculatePointsRequest req) {
+
+        checkAdminAccess(auth);
+
+        try {
+            com.fasterxml.jackson.databind.JsonNode songDataRoot = objectMapper.readTree(req.songDataJson());
+            java.util.Map<String, Integer> songMaxScores = new java.util.HashMap<>();
+            if (songDataRoot.has("body") && songDataRoot.get("body").isArray()) {
+                for (com.fasterxml.jackson.databind.JsonNode s : songDataRoot.get("body")) {
+                    String title = s.path("title").asText().trim();
+                    String diffCode = s.path("difficulty").asText();
+                    int notes = s.path("notes").asInt(0);
+                    if (notes > 0) {
+                        songMaxScores.put(title + "_" + diffCode, notes * 2);
+                    }
+                }
+            }
+            int patched = scoreRecalculationService.patchZeroRatePtLogs(songMaxScores);
+            return ResponseEntity.ok(Map.of("message", patched + " 件の履歴ログを補正しました"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Error: " + e.getMessage()));
+        }
+    }
 }

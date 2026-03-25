@@ -199,6 +199,52 @@ public class ScoreRecalculationService {
         scoreHistoryLogRepository.save(newLog);
     }
 
+    /**
+     * total_rate_pt が 0 のhistory logエントリを現在のスコアから再計算して補正する。
+     * songMaxScores: title_difficultyCode -> maxScore のマップ
+     */
+    @Transactional
+    public int patchZeroRatePtLogs(Map<String, Integer> songMaxScores) {
+        List<User> users = userRepository.findAll();
+        int patchedCount = 0;
+        for (User user : users) {
+            List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
+            boolean hasZero = logs.stream().anyMatch(l -> l.getTotalRatePt() == null || l.getTotalRatePt() == 0.0);
+            if (!hasZero) continue;
+
+            // Calculate current rate-pt from user's scores
+            List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+            List<Double> ratePts = new ArrayList<>();
+            for (Score score : scores) {
+                String diffName = normalizeDiffName(score.getDifficultyName());
+                boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
+                if (!isRateEligible) continue;
+                String code = getDifficultyCode(diffName);
+                if (code == null) continue;
+                Integer maxScore = songMaxScores.get(score.getTitle() + "_" + code);
+                if (maxScore == null || maxScore == 0) continue;
+                double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
+                if (scoreRate <= 0) continue;
+                double rPt = calculateScoreRateTierPoints(scoreRate);
+                if (rPt > 0) ratePts.add(rPt);
+            }
+            ratePts.sort(Collections.reverseOrder());
+            double totalRatePtAcc = 0;
+            for (int i = 0; i < Math.min(100, ratePts.size()); i++) totalRatePtAcc += ratePts.get(i);
+            double calculatedRatePt = Math.round(totalRatePtAcc * 10.0) / 10.0;
+            if (calculatedRatePt <= 0) continue;
+
+            for (ScoreHistoryLog log : logs) {
+                if (log.getTotalRatePt() == null || log.getTotalRatePt() == 0.0) {
+                    log.setTotalRatePt(calculatedRatePt);
+                    scoreHistoryLogRepository.save(log);
+                    patchedCount++;
+                }
+            }
+        }
+        return patchedCount;
+    }
+
     private String normalizeDiffName(String diff) {
         if (diff == null) return "UNKNOWN";
         return diff.toUpperCase();
