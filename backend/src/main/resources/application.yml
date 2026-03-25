@@ -43,7 +43,7 @@ app:
 
 vapid:
   public:
-    key: BDGlranXpFZQs_QO3pNXvrNudlAgliWJFOILQZxXd8_kjGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE
+    key: BK8nOI89kHqMXjG1Pz5MiOLMc7lX8zjgd-gd3KhfRfr3mD_pt_VgRBFPzPRvmPoDhz06o82fBbBmVLATrotGB0k
   private:
-    key: jGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE
+    key: w9dtbWdRCwDU0C3k2MCRkjUzr-mozK2qtFchFU56SYk
   subject: mailto:admin@example.com

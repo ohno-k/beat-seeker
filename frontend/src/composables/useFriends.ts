@@ -171,6 +171,25 @@ export function useFriends() {
         }
     };
 
+    const sendTestNotification = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/friends/push-test`, {
+                method: 'POST',
+                headers: authHeaders()
+            });
+            if (!res.ok) {
+                let msg = 'テスト送信に失敗しました (' + res.status + ')';
+                try {
+                    const data = await res.json();
+                    msg = data.error || data.message || msg;
+                } catch (e) {}
+                throw new Error(msg);
+            }
+        } catch (e: any) {
+            throw e;
+        }
+    };
+
     const urlBase64ToUint8Array = (base64String: string) => {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding)
@@ -194,7 +213,7 @@ export function useFriends() {
         if (permission === 'granted' && 'serviceWorker' in navigator) {
             try {
                 const registration = await navigator.serviceWorker.ready;
-                const vapidPublicKey = 'BDGlranXpFZQs_QO3pNXvrNudlAgliWJFOILQZxXd8_kjGZyRqEJQtJWN6Jymd5PnlFe3ITpTBgRt8v6dLcXIvE';
+                const vapidPublicKey = 'BK8nOI89kHqMXjG1Pz5MiOLMc7lX8zjgd-gd3KhfRfr3mD_pt_VgRBFPzPRvmPoDhz06o82fBbBmVLATrotGB0k';
                 const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
 
                 const subscription = await registration.pushManager.subscribe({
@@ -252,6 +271,7 @@ export function useFriends() {
         rejectRequest,
         removeFriend,
         updatePushSubscription,
+        sendTestNotification,
         fetchFriendScores,
         requestNotificationPermission,
         fetchAppNotifications,

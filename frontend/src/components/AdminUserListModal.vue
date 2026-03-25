@@ -19,6 +19,14 @@
               <svg v-if="isRecalculating" class="animate-spin -ml-1 mr-1 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
               {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
             </button>
+            <button 
+              @click="handleClearPushAll" 
+              :disabled="isClearingPush"
+              class="px-3 py-1.5 bg-rose-100 hover:bg-rose- Rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800/80 dark:text-rose-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+            >
+              <svg v-if="isClearingPush" class="animate-spin -ml-1 mr-1 h-4 w-4 text-rose-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              {{ isClearingPush ? '処理中...' : 'Push通知リセット' }}
+            </button>
             <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -145,6 +153,32 @@ const handleRecalculateAll = async () => {
     recalculateError.value = '再計算に失敗しました: ' + e.message;
   } finally {
     isRecalculating.value = false;
+  }
+};
+
+const isClearingPush = ref(false);
+const handleClearPushAll = async () => {
+  if (!confirm('全ユーザーのプッシュ通知設定を初期化しますか？古いVAPID鍵での登録データが全て削除され、ユーザーは再設定が必要になります。')) return;
+  
+  isClearingPush.value = true;
+  recalculateError.value = '';
+  recalculateSuccess.value = '';
+  
+  try {
+    const { authHeaders } = useAuth();
+    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+    
+    const res = await fetch(`${API_BASE}/api/admin/push/clear-all`, {
+      method: 'POST',
+      headers: authHeaders()
+    });
+    
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    recalculateSuccess.value = '全てのユーザーのプッシュ通知設定を初期化しました。';
+  } catch(e: any) {
+    recalculateError.value = '初期化に失敗しました: ' + e.message;
+  } finally {
+    isClearingPush.value = false;
   }
 };
 </script>

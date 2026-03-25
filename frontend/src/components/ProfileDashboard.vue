@@ -315,6 +315,14 @@
           </span>
           {{ notificationStatus === 'granted' ? '通知は有効です' : '通知を有効にする' }}
         </button>
+        <button v-if="notificationStatus === 'granted'"
+          @click="handleTestNotification"
+          :disabled="isTesting"
+          class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
+        >
+          <span v-if="isTesting">送信中...</span>
+          <span v-else>テスト送信</span>
+        </button>
         <span class="text-xs text-slate-400 dark:text-slate-500">
           現在の状態: {{ notificationStatus === 'granted' ? '許可済み' : notificationStatus === 'denied' ? 'ブロック中' : '未設定' }}
         </span>
@@ -347,10 +355,11 @@ const props = defineProps<{
 const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
 // For push notifications, we only show/allow if it's the current user (no viewingUserId)
-const { requestNotificationPermission } = useFriends();
+const { requestNotificationPermission, sendTestNotification } = useFriends();
 
 const notificationStatus = ref(Notification?.permission || 'default');
 const isSubscribing = ref(false);
+const isTesting = ref(false);
 
 const handleEnableNotifications = async () => {
   isSubscribing.value = true;
@@ -367,6 +376,18 @@ const handleEnableNotifications = async () => {
   } finally {
     isSubscribing.value = false;
     notificationStatus.value = Notification?.permission || 'default';
+  }
+};
+
+const handleTestNotification = async () => {
+  isTesting.value = true;
+  try {
+    await sendTestNotification();
+    alert('通知のテスト送信をリクエストしました。数秒以内に通知が届くか確認してください。');
+  } catch (e: any) {
+    alert(e.message || 'テスト送信に失敗しました');
+  } finally {
+    isTesting.value = false;
   }
 };
 

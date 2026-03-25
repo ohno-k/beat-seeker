@@ -339,6 +339,25 @@ public class FriendController {
         return ResponseEntity.ok(Map.of("status", "success"));
     }
 
+    @PostMapping("/push-test")
+    public ResponseEntity<Map<String, String>> testPushNotification(Authentication auth) {
+        try {
+            User user = getUser(auth);
+            if (user.getPushSubscription() != null && !user.getPushSubscription().isEmpty()) {
+                pushNotificationService.sendNotificationWithEx(
+                        user.getPushSubscription(),
+                        "テスト通知",
+                        "Push通知が正常に設定されています！",
+                        "/");
+                return ResponseEntity.ok(Map.of("status", "success", "message", "テスト通知を送信しました。"));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("error", "サーバー側に通知の購読情報が登録されていません。再度「通知を有効にする」をやり直すか、端末の設定を確認してください。"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "サーバー側でエラーが発生しました: " + e.getMessage()));
+        }
+    }
+
     private User getUser(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
             throw new RuntimeException("Not authenticated");

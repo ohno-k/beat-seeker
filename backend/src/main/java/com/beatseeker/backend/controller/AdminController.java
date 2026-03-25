@@ -224,4 +224,11 @@ public class AdminController {
             return ResponseEntity.status(500).body(Map.of("message", "Error starting recalculation: " + e.getMessage()));
         }
     }
+
+    @PostMapping("/push/clear-all")
+    public ResponseEntity<Map<String, Object>> clearAllPushSubscriptions(Authentication auth) {
+        checkAdminAccess(auth);
+        userRepository.clearAllPushSubscriptions();
+        return ResponseEntity.ok(Map.of("message", "全てのユーザーのプッシュ通知設定を初期化しました。"));
+    }
 }
