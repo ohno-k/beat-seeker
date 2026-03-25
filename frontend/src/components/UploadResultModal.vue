@@ -22,8 +22,8 @@
               </svg>
             </div>
             <div>
-              <h2 class="text-lg font-black text-white tracking-tight leading-tight">プレイ成果レポート</h2>
-              <p class="text-indigo-200 font-medium text-xs">CSVのアップロードが完了し、あなたの成長が記録されました！</p>
+              <h2 class="text-lg font-black text-white tracking-tight leading-tight">{{ t('report.title') }}</h2>
+              <p class="text-indigo-200 font-medium text-xs">{{ t('report.subtitle') }}</p>
             </div>
           </div>
         </div>
@@ -35,7 +35,7 @@
             <!-- Tier Up Notification -->
             <div v-if="diffData.oldTier && diffData.newTier && diffData.oldTier.minPoints < diffData.newTier.minPoints" class="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-yellow-900/40 dark:to-amber-800/40 border border-amber-300 dark:border-amber-700/50 p-6 rounded-2xl shadow-sm text-center transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
               <div class="absolute inset-0 bg-yellow-200/50 dark:bg-yellow-500/10 mix-blend-overlay animate-pulse"></div>
-              <p class="text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest text-sm mb-2 relative z-10">BEAT-TIER 昇格！</p>
+              <p class="text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest text-sm mb-2 relative z-10">{{ t('report.tierUp') }}</p>
               <div class="flex items-center justify-center gap-4 relative z-10">
                 <span class="text-2xl font-black text-slate-500 dark:text-slate-400 line-through decoration-amber-400/50">{{ diffData.oldTier.name }}{{ diffData.oldTier.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -49,12 +49,12 @@
             <div class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
               <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
 
-              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">総合 BEAT-TIER の変化</p>
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">{{ t('report.beatTierChange') }}</p>
               
               <!-- Tier Context -->
               <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
                 <div class="flex flex-col items-center flex-1">
-                  <span class="text-xs font-bold text-slate-400 mb-1">前回 ({{ diffData.oldTotalBeatPt.toFixed(1) }})</span>
+                  <span class="text-xs font-bold text-slate-400 mb-1">{{ t('report.previous') }} ({{ diffData.oldTotalBeatPt.toFixed(1) }})</span>
                   <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldTier?.name || '---' }}{{ diffData.oldTier?.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
                 </div>
                 
@@ -65,30 +65,30 @@
                 </div>
 
                 <div class="flex flex-col items-center flex-1">
-                  <span class="text-xs font-bold text-indigo-400 mb-1">今回 ({{ diffData.newTotalBeatPt.toFixed(1) }})</span>
+                  <span class="text-xs font-bold text-indigo-400 mb-1">{{ t('report.current') }} ({{ diffData.newTotalBeatPt.toFixed(1) }})</span>
                   <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newTier?.color || 'text-slate-600'">{{ diffData.newTier?.name || '---' }}{{ diffData.newTier?.tier ? ' ' + diffData.newTier.tier : '' }}</span>
                 </div>
               </div>
               
               <!-- PT Increase -->
               <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-xl border border-slate-100 dark:border-slate-800 relative z-10">
-                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">増加量:</span>
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">{{ t('report.increase') }}:</span>
                 <span class="text-4xl font-black tracking-tight" :class="diffData.totalBeatPtIncrease > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'">
                   {{ diffData.totalBeatPtIncrease > 0 ? '+' : '' }}{{ diffData.totalBeatPtIncrease.toFixed(1) }}
                 </span>
-                <span class="text-lg font-bold text-indigo-500">pt</span>
+                <span class="text-lg font-bold text-indigo-500">{{ t('common.pt') }}</span>
               </div>
             </div>
 
             <!-- Rate-Tier Change -->
-            <div v-if="showRateTier && (diffData.newTotalRatePt > 0 || diffData.oldTotalRatePt > 0)" class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+            <div v-if="showRateTier && diffData.newTotalRatePt > 0 && (diffData.newTotalRatePt - diffData.oldTotalRatePt) >= 0.1" class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
               <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
 
-              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">総合 RATE-TIER の変化</p>
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">{{ t('report.rateTierChange') }}</p>
 
               <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
                 <div class="flex flex-col items-center flex-1">
-                  <span class="text-xs font-bold text-slate-400 mb-1">前回 ({{ diffData.oldTotalRatePt.toFixed(1) }})</span>
+                  <span class="text-xs font-bold text-slate-400 mb-1">{{ t('report.previous') }} ({{ diffData.oldTotalRatePt.toFixed(1) }})</span>
                   <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldRateTier?.name || '---' }}{{ diffData.oldRateTier?.tier ? ' ' + diffData.oldRateTier.tier : '' }}</span>
                 </div>
                 <div class="shrink-0 flex flex-col items-center justify-center pt-4">
@@ -97,17 +97,17 @@
                   </svg>
                 </div>
                 <div class="flex flex-col items-center flex-1">
-                  <span class="text-xs font-bold text-emerald-400 mb-1">今回 ({{ diffData.newTotalRatePt.toFixed(1) }})</span>
+                  <span class="text-xs font-bold text-emerald-400 mb-1">{{ t('report.current') }} ({{ diffData.newTotalRatePt.toFixed(1) }})</span>
                   <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newRateTier?.color || 'text-slate-600'">{{ diffData.newRateTier?.name || '---' }}{{ diffData.newRateTier?.tier ? ' ' + diffData.newRateTier.tier : '' }}</span>
                 </div>
               </div>
 
               <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-xl border border-slate-100 dark:border-slate-800 relative z-10">
-                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">増加量:</span>
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">{{ t('report.increase') }}:</span>
                 <span class="text-4xl font-black tracking-tight" :class="diffData.newTotalRatePt - diffData.oldTotalRatePt > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
                   {{ diffData.newTotalRatePt - diffData.oldTotalRatePt > 0 ? '+' : '' }}{{ (diffData.newTotalRatePt - diffData.oldTotalRatePt).toFixed(1) }}
                 </span>
-                <span class="text-lg font-bold text-emerald-500">pt</span>
+                <span class="text-lg font-bold text-emerald-500">{{ t('common.pt') }}</span>
               </div>
             </div>
 
@@ -117,11 +117,11 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
-                更新された楽曲 <span class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2 py-0.5 rounded-full ml-1">{{ diffData.updatedSongs.length }}件</span>
+                {{ t('report.updatedSongs') }} <span class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2 py-0.5 rounded-full ml-1">{{ t('report.otherUpdates', { n: diffData.updatedSongs.length }) }}</span>
               </h3>
               
               <div v-if="diffData.updatedSongs.length === 0" class="text-center p-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 border-dashed">
-                <p class="text-slate-500 dark:text-slate-400 font-medium">自己ベストの更新はありませんでした。</p>
+                <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('report.noUpdates') }}</p>
               </div>
               
               <div v-else class="space-y-2">
@@ -132,7 +132,7 @@
                     <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
                       {{ song.difficulty }}
                     </span>
-                    <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-black rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
+                    <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-black rounded border border-emerald-200 dark:border-emerald-800/50">{{ t('report.lampUp') }}</span>
                     <template v-if="song.maxScore > 0">
                       <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                         {{ getScoreGradeInfo(song.newScore, song.maxScore).fromMax }}
@@ -187,18 +187,18 @@
               <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
               </svg>
-              画像付きでXにポスト
+              {{ t('report.shareX') }}
             </template>
             <template v-else>
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
               </svg>
-              画像生成中...
+              {{ t('report.generatingImage') }}
             </template>
           </button>
           <button @click="close" class="flex-1 py-3.5 sm:py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base">
-            ダッシュボードへ戻る
+            {{ t('report.backToDashboard') }}
           </button>
         </div>
         
@@ -212,10 +212,10 @@
     >
       <div class="bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-12 text-center shrink-0">
         <h2 class="text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md">
-          プレイ成果レポート
+          {{ t('report.title') }}
         </h2>
         <p class="text-indigo-100 font-medium text-2xl">
-          beat-seeker で新記録を達成しました！
+          {{ t('report.newRecord') }}
         </p>
       </div>
       
@@ -226,7 +226,7 @@
           <div class="border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
             <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
             <div class="relative z-10 mb-6">
-              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">総BEAT-PT</p>
+              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('common.beatPt') }}</p>
               <div class="flex items-baseline gap-3">
                 <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
                 <span class="text-2xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
@@ -250,7 +250,7 @@
           <div v-if="showRateTier" class="border-2 border-emerald-100 dark:border-emerald-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
             <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
             <div class="relative z-10 mb-6">
-              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">総RATE-PT</p>
+              <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('common.ratePt') }}</p>
               <div class="flex items-baseline gap-3">
                 <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ (diffData.newTotalRatePt ?? 0).toFixed(1) }}</span>
                 <span class="text-2xl font-bold text-emerald-500">{{ (diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0) > 0 ? '+' : '' }}{{ ((diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0)).toFixed(1) }}</span>
@@ -276,7 +276,7 @@
         <div v-if="diffData.updatedSongs.length > 0" class="flex-1 flex flex-col">
            <h3 class="text-3xl font-black text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 shrink-0">
               <span class="w-2.5 h-8 bg-emerald-500 rounded-full"></span>
-              更新楽曲 (Top 10)
+              {{ t('report.top10') }}
            </h3>
            <div class="space-y-4 flex-1">
              <div v-for="song in sortedUpdatedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -313,12 +313,12 @@
            </div>
            <div v-if="diffData.updatedSongs.length > 10" class="text-center mt-6 shrink-0">
              <span class="inline-block px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-full text-base font-bold text-slate-500 dark:text-slate-300">
-               ...他 {{ diffData.updatedSongs.length - 10 }} 件の更新
+               {{ t('report.otherUpdates', { n: diffData.updatedSongs.length - 10 }) }}
              </span>
            </div>
         </div>
         <div v-else class="text-center py-12 text-slate-500 font-bold border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-xl shrink-0">
-          自己ベストの更新はありませんでした。
+          {{ t('report.noUpdates') }}
         </div>
       </div>
       
@@ -335,7 +335,10 @@ import type { UploadDiffResult } from './../types/UploadDiff';
 import { getNextRankInfo, getNextRateTierRankInfo } from '../utils/beatTier';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useI18n } from '../composables/useI18n';
 import html2canvas from 'html2canvas';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   isOpen: boolean;
@@ -460,14 +463,14 @@ const shareOnX = async () => {
       if (!blob) throw new Error('Blob is null');
       
       const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
-      const textParam = encodeURIComponent("beat-seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker");
+      const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`);
       
       // Try Web Share API first (supported Safari/Mobile/Newer Windows Chrome)
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             title: 'beat-seeker Report',
-            text: "beat-seekerでスコアを更新しました！\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker",
+            text: `${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`,
             files: [file]
           });
           isSharing.value = false;
@@ -489,7 +492,7 @@ const shareOnX = async () => {
         await navigator.clipboard.write([
           new ClipboardItem({ 'image/png': blob })
         ]);
-        alert("画像をクリップボードにコピーしました！\nX（Twitter）の投稿画面が開くので、そのまま画像を「貼り付け（Ctrl+V / Cmd+V）」してください。");
+        alert(t('report.copySuccess'));
         window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
       } catch (e) {
         console.error('Clipboard copy failed:', e);
@@ -500,7 +503,7 @@ const shareOnX = async () => {
         a.download = 'beat-seeker-report.png';
         a.click();
         URL.revokeObjectURL(downloadUrl);
-        alert("画像のコピーに失敗したため、画像をダウンロードしました。\nX（Twitter）の投稿画面が開きますので、ダウンロードした画像を添付してください。");
+        alert(t('report.copyError'));
         window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
       }
       
@@ -509,7 +512,7 @@ const shareOnX = async () => {
     
   } catch (error) {
     console.error('Share failed:', error);
-    alert("画像の生成に失敗しました。");
+    alert(t('report.generateError'));
     isSharing.value = false;
   }
 };

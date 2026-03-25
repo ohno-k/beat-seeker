@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   isOpen: boolean;
@@ -27,9 +30,26 @@ const danRank = ref('初段');
 const arenaRank = ref('C5');
 const playSide = ref('1P');
 
-const danRanks = [
-  '七級', '六級', '五級', '四級', '三級', '二級', '一級',
-  '初段', '二段', '三段', '四段', '五段', '六段', '七段', '八段', '九段', '十段', '中伝', '皆伝'
+const danRankOptions = [
+  { value: '七級', labelKey: 'dan.7kyu' },
+  { value: '六級', labelKey: 'dan.6kyu' },
+  { value: '五級', labelKey: 'dan.5kyu' },
+  { value: '四級', labelKey: 'dan.4kyu' },
+  { value: '三級', labelKey: 'dan.3kyu' },
+  { value: '二級', labelKey: 'dan.2kyu' },
+  { value: '一級', labelKey: 'dan.1kyu' },
+  { value: '初段', labelKey: 'dan.shodan' },
+  { value: '二段', labelKey: 'dan.2dan' },
+  { value: '三段', labelKey: 'dan.3dan' },
+  { value: '四段', labelKey: 'dan.4dan' },
+  { value: '五段', labelKey: 'dan.5dan' },
+  { value: '六段', labelKey: 'dan.6dan' },
+  { value: '七段', labelKey: 'dan.7dan' },
+  { value: '八段', labelKey: 'dan.8dan' },
+  { value: '九段', labelKey: 'dan.9dan' },
+  { value: '十段', labelKey: 'dan.10dan' },
+  { value: '中伝', labelKey: 'dan.chuden' },
+  { value: '皆伝', labelKey: 'dan.kaiden' }
 ];
 
 const arenaRanks = [
@@ -59,11 +79,11 @@ const handleSubmit = async () => {
 
   if (mode.value === 'forgot') {
     if (!inputIidxId.value.match(/^\d{4}-\d{4}$/)) {
-      errorMsg.value = 'IIDX IDは「数字4桁 - 数字4桁」の形式で入力してください。';
+      errorMsg.value = t('auth.iidxIdError');
       return;
     }
     if (!forgotEmail.value.trim()) {
-      errorMsg.value = 'メールアドレスを入力してください。';
+      errorMsg.value = t('auth.emailRequired');
       return;
     }
     isSubmitting.value = true;
@@ -71,7 +91,7 @@ const handleSubmit = async () => {
       const msg = await forgotPassword(inputIidxId.value, forgotEmail.value.trim());
       successMsg.value = msg;
     } catch (err: any) {
-      errorMsg.value = err.message || 'エラーが発生しました。';
+      errorMsg.value = err.message || t('auth.error');
     } finally {
       isSubmitting.value = false;
     }
@@ -79,12 +99,12 @@ const handleSubmit = async () => {
   }
 
   if (!inputIidxId.value.match(/^\d{4}-\d{4}$/)) {
-    errorMsg.value = 'IIDX IDは「数字4桁 - 数字4桁」の形式で入力してください。';
+    errorMsg.value = t('auth.iidxIdError');
     return;
   }
 
   if (!password.value) {
-    errorMsg.value = 'パスワードを入力してください。';
+    errorMsg.value = t('auth.passwordRequired');
     return;
   }
 
@@ -95,7 +115,7 @@ const handleSubmit = async () => {
       await login(inputIidxId.value, password.value);
     } else {
       if (!displayName.value.trim()) {
-        throw new Error('ユーザー名を入力してください。');
+        throw new Error(t('auth.usernameRequired'));
       }
         await registerUser({
           iidxId: inputIidxId.value,
@@ -109,7 +129,7 @@ const handleSubmit = async () => {
       }
       emit('close');
   } catch (err: any) {
-    errorMsg.value = err.message || 'エラーが発生しました。';
+    errorMsg.value = err.message || t('auth.error');
   } finally {
     isSubmitting.value = false;
   }
@@ -133,21 +153,21 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
           :class="['flex-1 py-4 text-sm font-bold transition-colors duration-200',
                    mode === 'login' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-white dark:bg-slate-800' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
         >
-          ログイン
+          {{ t('auth.login') }}
         </button>
         <button
           @click="switchMode('register')"
           :class="['flex-1 py-4 text-sm font-bold transition-colors duration-200',
                    mode === 'register' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-white dark:bg-slate-800' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
         >
-          新規登録
+          {{ t('auth.register') }}
         </button>
         <button
           @click="switchMode('forgot')"
           :class="['flex-1 py-4 text-xs font-bold transition-colors duration-200',
                    mode === 'forgot' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-white dark:bg-slate-800' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
         >
-          パスワードを忘れた
+          {{ t('auth.forgotPassword') }}
         </button>
       </div>
       
@@ -169,63 +189,63 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
 
           <!-- Forgot Password Form -->
           <template v-if="mode === 'forgot'">
-            <p class="text-sm text-slate-600 dark:text-slate-400">登録済みのIIDX IDとメールアドレスを入力してください。パスワードリセット手順をお送りします。</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400">{{ t('auth.forgotHint') }}</p>
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">IIDX ID</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('auth.iidxId') }}</label>
               <input type="text" :value="inputIidxId" @input="formatIidxId" placeholder="1234-5678" pattern="\d{4}-\d{4}" maxlength="9"
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">登録メールアドレス</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('auth.registeredEmail') }}</label>
               <input type="email" v-model="forgotEmail" placeholder="example@email.com"
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
             </div>
             <div class="pt-2 flex gap-3">
-              <button type="button" @click="emit('close')" class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">キャンセル</button>
+              <button type="button" @click="emit('close')" class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">{{ t('auth.cancel') }}</button>
               <button type="submit" :disabled="isSubmitting" class="flex-[2] py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
                 <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                リセット手順を送信
+                {{ t('auth.resetSend') }}
               </button>
             </div>
           </template>
 
           <div v-if="mode !== 'forgot'">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">IIDX ID</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.iidxId') }}</label>
             <input type="text" :value="inputIidxId" @input="formatIidxId" required placeholder="1234-5678" pattern="\d{4}-\d{4}" maxlength="9"
               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
-            <p v-if="mode === 'register'" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1 transition-colors duration-200">自動的にハイフンが挿入されます</p>
+            <p v-if="mode === 'register'" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1 transition-colors duration-200">{{ t('auth.iidxIdHint') }}</p>
           </div>
 
           <div v-if="mode !== 'forgot'">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">パスワード</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.password') }}</label>
             <input type="password" v-model="password" required placeholder="••••••••" minlength="4"
               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
           </div>
 
           <div v-if="mode === 'register'">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">パスワード（確認）</label>
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.passwordConfirm') }}</label>
             <input type="password" v-model="passwordConfirm" required placeholder="••••••••" minlength="4"
               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
           </div>
           
           <template v-if="mode === 'register'">
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">ユーザー名</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.username') }}</label>
               <input type="text" v-model="displayName" required
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100"
-                placeholder="表示名" />
+                :placeholder="t('auth.displayName')" />
             </div>
             
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">段位</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.danRank') }}</label>
                 <select v-model="danRank" 
-                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option v-for="rank in danRanks" :key="rank" :value="rank">{{ rank }}</option>
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
+                  <option v-for="rank in danRankOptions" :key="rank.value" :value="rank.value">{{ t(rank.labelKey) }}</option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">アリーナランク</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.arenaRank') }}</label>
                 <select v-model="arenaRank" 
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
                   <option v-for="rank in arenaRanks" :key="rank" :value="rank">{{ rank }}</option>
@@ -234,7 +254,7 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">プレイサイド</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.playSide') }}</label>
               <div class="flex gap-4">
                 <label class="flex items-center gap-2 cursor-pointer group">
                   <input type="radio" v-model="playSide" value="1P"
@@ -247,19 +267,19 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
                   <span class="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">2P</span>
                 </label>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">おすすめオプション投票の正規/ミラー変換に使用されます</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ t('auth.playSideHint') }}</p>
             </div>
           </template>
           
           <div v-if="mode !== 'forgot'" class="pt-2 flex gap-3">
             <button type="button" @click="emit('close')"
               class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">
-              キャンセル
+              {{ t('auth.cancel') }}
             </button>
             <button type="submit" :disabled="isSubmitting"
               class="flex-[2] py-3 px-4 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-700 text-white font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2">
               <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              {{ mode === 'login' ? 'ログイン' : '登録してログイン' }}
+              {{ mode === 'login' ? t('auth.loginBtn') : t('auth.registerBtn') }}
             </button>
           </div>
           

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import { useI18n } from '../composables/useI18n';
 import UnifiedImport from '../components/UnifiedImport.vue';
 import { BOOKMARKLET_CODE } from '../utils/bookmarklet';
 import songDataRaw from '../data/song_data.json';
@@ -38,6 +39,7 @@ const getSongMaxScore = (titleRaw: string, diffText: string): number => {
 };
 
 const { isLoggedIn } = useAuth();
+const { t } = useI18n();
 
 const props = defineProps<{
   viewingUserId?: number | null;
@@ -146,7 +148,7 @@ onMounted(fetchMatches);
 
 const handleDelete = async (id: number) => {
   if (props.viewingUserId) return;
-  if (!confirm('この対戦記録を削除しますか？')) return;
+  if (!confirm(t('arena.deleteConfirm'))) return;
   const token = localStorage.getItem('beat-seeker-token');
   await fetch(`${API_BASE}/api/arena/matches/${id}`, {
     method: 'DELETE',
@@ -155,7 +157,7 @@ const handleDelete = async (id: number) => {
   matches.value = matches.value.filter(m => m.id !== id);
 };
 
-const rankLabel = (rank: number) => ['1位', '2位', '3位', '4位'][rank - 1] ?? '-';
+const rankLabel = (rank: number) => (rank >= 1 && rank <= 4) ? t(`arena.rank${rank}`) : '-';
 const rankColor = (rank: number) => {
   return [
     'text-yellow-600 dark:text-yellow-400 font-black',
@@ -230,13 +232,13 @@ const classColor = (cls: string) => {
   <div class="w-full max-w-5xl mx-auto space-y-8 animate-fade-in">
     <!-- Header -->
     <div>
-      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">ARENAモード戦績</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">ブックマークレットで取得した対戦データを管理します。</p>
+      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ t('arena.title') }}</h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ t('arena.subtitle') }}</p>
     </div>
 
     <!-- Not logged in -->
     <div v-if="!isLoggedIn" class="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-      <p class="text-slate-500 dark:text-slate-400">ログインすると対戦記録を保存できます。</p>
+      <p class="text-slate-500 dark:text-slate-400">{{ t('arena.loginPrompt') }}</p>
     </div>
 
     <template v-else>
@@ -244,7 +246,7 @@ const classColor = (cls: string) => {
       <div v-if="matches.length > 0" class="grid grid-cols-5 gap-3">
         <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 text-center">
           <p class="text-2xl font-black text-slate-800 dark:text-white">{{ stats.total }}</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">総対戦数</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ t('arena.totalMatches') }}</p>
         </div>
         <div v-for="(cnt, i) in stats.ranks" :key="i" class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 text-center">
           <p class="text-2xl font-black" :class="rankColor(i + 1)">{{ cnt }}</p>
@@ -263,7 +265,7 @@ const classColor = (cls: string) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
-            データを取り込む
+            {{ t('arena.importData') }}
           </span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 transition-transform" :class="showImportPanel ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -282,7 +284,7 @@ const classColor = (cls: string) => {
           <!-- Main view toggle -->
           <div class="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
             <button
-              v-for="v in [{ id: 'history', label: '対戦履歴' }, { id: 'opponents', label: '対戦相手' }]"
+              v-for="v in [{ id: 'history', label: t('arena.matchHistory') }, { id: 'opponents', label: t('arena.opponents') }]"
               :key="v.id"
               @click="mainView = v.id as 'history' | 'opponents'"
               class="px-3 py-1 text-xs font-bold rounded-lg transition-colors"
@@ -294,7 +296,7 @@ const classColor = (cls: string) => {
           <!-- History sub-tabs (only in history view) -->
           <div v-if="mainView === 'history'" class="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 border border-slate-200 dark:border-slate-700">
             <button
-              v-for="tab in [{ id: 'all', label: 'すべて' }, { id: 'online', label: 'オンライン' }, { id: 'local', label: 'ローカル' }]"
+              v-for="tab in [{ id: 'all', label: t('arena.all') }, { id: 'online', label: t('arena.online') }, { id: 'local', label: t('arena.local') }]"
               :key="tab.id"
               @click="activeTab = tab.id as 'all' | 'online' | 'local'; expandedMatchId = null"
               class="px-3 py-1 text-xs font-bold rounded-lg transition-colors"
@@ -310,23 +312,23 @@ const classColor = (cls: string) => {
         </div>
 
         <div v-else-if="matches.length === 0" class="text-center py-10 text-slate-400 dark:text-slate-500">
-          対戦記録がありません。ブックマークレットでデータを取得してください。
+          {{ t('arena.noRecords') }}
         </div>
 
         <!-- Opponent Summary View -->
         <template v-else-if="mainView === 'opponents'">
           <div v-if="opponentStats.length === 0" class="text-center py-10 text-slate-400 dark:text-slate-500">
-            対戦相手のデータがありません。
+            {{ t('arena.noOpponents') }}
           </div>
           <div v-else class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
             <table class="w-full text-sm">
               <thead>
                 <tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
-                  <th class="px-4 py-3 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">DJ NAME</th>
-                  <th class="px-3 py-3 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">対戦</th>
-                  <th class="px-3 py-3 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">曲勝</th>
-                  <th class="px-3 py-3 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">曲負</th>
-                  <th class="px-4 py-3 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">曲勝率</th>
+                  <th class="px-4 py-3 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.djName') }}</th>
+                  <th class="px-3 py-3 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.matches') }}</th>
+                  <th class="px-3 py-3 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.songWins') }}</th>
+                  <th class="px-3 py-3 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.songLosses') }}</th>
+                  <th class="px-4 py-3 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.winRate') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -370,10 +372,10 @@ const classColor = (cls: string) => {
                           <div class="flex items-center gap-2 mb-2 flex-wrap">
                             <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full">{{ m.battleType }}</span>
                             <span class="text-xs font-mono text-slate-500 dark:text-slate-400">{{ m.matchDate }}</span>
-                            <span class="text-xs font-bold" :class="rankColor(m.myRank)">自: {{ rankLabel(m.myRank) }}</span>
-                            <span class="text-[10px] text-slate-400">vs</span>
+                            <span class="text-xs font-bold" :class="rankColor(m.myRank)">{{ t('arena.self') }}: {{ rankLabel(m.myRank) }}</span>
+                            <span class="text-[10px] text-slate-400">{{ t('arena.vs') }}</span>
                             <span class="text-xs font-bold" :class="rankColor((m.players as any[]).find((p: any) => p.djName === opp.djName)?.rank)">
-                              相: {{ rankLabel((m.players as any[]).find((p: any) => p.djName === opp.djName)?.rank) }}
+                              {{ t('arena.opponent') }}: {{ rankLabel((m.players as any[]).find((p: any) => p.djName === opp.djName)?.rank) }}
                             </span>
                           </div>
                           <!-- Song table -->
@@ -391,7 +393,7 @@ const classColor = (cls: string) => {
                                   <td class="py-1.5 px-2 text-right font-mono w-20"
                                     :class="(((m.players as any[]).find((p: any) => p.djName === m.myDjName)?.songScores?.[si]?.score ?? 0) > ((m.players as any[]).find((p: any) => p.djName === opp.djName)?.songScores?.[si]?.score ?? 0)) ? 'text-blue-600 dark:text-blue-400 font-bold' : (((m.players as any[]).find((p: any) => p.djName === m.myDjName)?.songScores?.[si]?.score ?? 0) < ((m.players as any[]).find((p: any) => p.djName === opp.djName)?.songScores?.[si]?.score ?? 0)) ? 'text-rose-500 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'"
                                   >{{ ((m.players as any[]).find((p: any) => p.djName === m.myDjName)?.songScores?.[si]?.score ?? 0).toLocaleString() }}</td>
-                                  <td class="py-1.5 px-1 text-center text-slate-400 dark:text-slate-500 w-4">vs</td>
+                                  <td class="py-1.5 px-1 text-center text-slate-400 dark:text-slate-500 w-4">{{ t('arena.vs') }}</td>
                                   <td class="py-1.5 px-2 font-mono w-20"
                                     :class="(((m.players as any[]).find((p: any) => p.djName === opp.djName)?.songScores?.[si]?.score ?? 0) > ((m.players as any[]).find((p: any) => p.djName === m.myDjName)?.songScores?.[si]?.score ?? 0)) ? 'text-blue-600 dark:text-blue-400 font-bold' : (((m.players as any[]).find((p: any) => p.djName === opp.djName)?.songScores?.[si]?.score ?? 0) < ((m.players as any[]).find((p: any) => p.djName === m.myDjName)?.songScores?.[si]?.score ?? 0)) ? 'text-rose-500 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'"
                                   >{{ ((m.players as any[]).find((p: any) => p.djName === opp.djName)?.songScores?.[si]?.score ?? 0).toLocaleString() }}</td>
@@ -417,7 +419,7 @@ const classColor = (cls: string) => {
         <!-- Match History View -->
         <template v-else>
         <div v-if="filteredMatches.length === 0" class="text-center py-10 text-slate-400 dark:text-slate-500">
-          該当する対戦記録がありません。
+          {{ t('arena.noFilteredRecords') }}
         </div>
 
         <div
@@ -464,10 +466,10 @@ const classColor = (cls: string) => {
             <table class="w-full text-sm min-w-max">
               <thead>
                 <tr class="bg-slate-50 dark:bg-slate-900/50">
-                  <th class="px-4 py-2 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">DJ NAME</th>
+                  <th class="px-4 py-2 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.djName') }}</th>
                   <th class="px-3 py-2 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">CLS</th>
-                  <th class="px-3 py-2 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">合計</th>
-                  <th class="px-3 py-2 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">順位</th>
+                  <th class="px-3 py-2 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('common.total') }}</th>
+                  <th class="px-3 py-2 text-center font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('ranking.colRank') }}</th>
                   <th
                     v-for="(song, si) in match.songs"
                     :key="si"
@@ -487,7 +489,7 @@ const classColor = (cls: string) => {
                 >
                   <td class="px-4 py-2 font-bold text-slate-800 dark:text-white text-xs">
                     {{ player.djName }}
-                    <span v-if="player.djName === match.myDjName" class="ml-1 text-[10px] font-black text-blue-600 dark:text-blue-400">YOU</span>
+                    <span v-if="player.djName === match.myDjName" class="ml-1 text-[10px] font-black text-blue-600 dark:text-blue-400">{{ t('arena.you') }}</span>
                   </td>
                   <td class="px-3 py-2 text-center">
                     <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" :class="classColor(player.arenaClass)">{{ player.arenaClass }}</span>

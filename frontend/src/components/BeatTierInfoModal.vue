@@ -4,8 +4,8 @@
       <!-- Header -->
       <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
         <div>
-          <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">Beat-Tier 統計システム</h3>
-          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5 uppercase tracking-widest">システム解説 と 対象楽曲リスト</p>
+          <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('beatTierInfo.title') }}</h3>
+          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5 uppercase tracking-widest">{{ t('beatTierInfo.subtitle') }}</p>
         </div>
         <button @click="$emit('close')" class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,14 +23,14 @@
               @click="activeTab = 'about'" 
               :class="['pb-4 text-sm font-black transition-all relative', activeTab === 'about' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300']"
             >
-              仕組み・ランク
+              {{ t('beatTierInfo.tabAbout') }}
               <div v-if="activeTab === 'about'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 dark:bg-blue-500 rounded-full"></div>
             </button>
             <button 
               @click="activeTab = 'songs'" 
               :class="['pb-4 text-sm font-black transition-all relative', activeTab === 'songs' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300']"
             >
-              対象曲リスト
+              {{ t('beatTierInfo.tabSongs') }}
               <div v-if="activeTab === 'songs'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 dark:bg-blue-500 rounded-full"></div>
             </button>
           </div>
@@ -42,13 +42,9 @@
             <section>
               <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
                 <span class="w-1.5 h-6 bg-blue-600 dark:bg-blue-500 rounded-full"></span>
-                Beat-Tier システムとは？
+                {{ t('beatTierInfo.whatIsTitle') }}
               </h4>
-              <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-medium">
-                Beat-Tierは、プレイヤーの真の地力を可視化するためのランキングシステムです。<br/>
-                非公式難易度表（☆12 / ☆11）に掲載されている楽曲を対象とし、高スコアを出すほど多くのポイントを獲得できます。<br/>
-                合計ポイントは、全対象曲のうち**獲得ポイントが高い上位100曲**の合算によって決定されます。
-              </p>
+              <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-medium" v-html="t('beatTierInfo.whatIsDesc')"></p>
             </section>
 
             <section class="bg-slate-900 dark:bg-slate-950 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden border border-slate-700 dark:border-slate-800 transition-colors duration-200">
@@ -57,12 +53,12 @@
               <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                 <div class="flex-1 text-center md:text-left">
                   <p class="text-4xl font-black mb-2 tracking-tight text-blue-400 dark:text-blue-300">Beat-PT = Rate%^1.3 × Weight + Bonus</p>
-                  <p class="text-xs font-bold text-slate-400 dark:text-slate-500 leading-relaxed">スコアレートの1.3乗と譜面ごとの重み（Weight）による基本ポイントに対し、<br/>一定のランク（AA, AAA, MAX-）を達成するとさらにボーナス（各+1%）が加算されます。</p>
+                  <p class="text-xs font-bold text-slate-400 dark:text-slate-500 leading-relaxed" v-html="t('beatTierInfo.formulaDesc')"></p>
                 </div>
                 <div class="h-px md:h-20 w-full md:w-px bg-slate-700 dark:bg-slate-800"></div>
                 <div class="flex-1 text-sm font-bold text-slate-300 dark:text-slate-400 leading-relaxed">
-                  <p>• 重みは非公式難易度に基づき、11.0 (150pt) 〜 13.0 (190pt) の範囲で設定されます。</p>
-                  <p class="text-blue-400/80 dark:text-blue-300/80 mt-1">※ 全上位100曲の合計があなたの最終的なポイントになります。</p>
+                  <p>• {{ t('beatTierInfo.weightDesc') }}</p>
+                  <p class="text-blue-400/80 dark:text-blue-300/80 mt-1">{{ t('beatTierInfo.finalPointsDesc') }}</p>
                 </div>
               </div>
             </section>
@@ -72,7 +68,7 @@
               <div class="flex items-center justify-between">
                 <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <span class="w-1.5 h-6 bg-purple-600 dark:bg-purple-500 rounded-full"></span>
-                  ランクボード (Rank Board)
+                  {{ t('beatTierInfo.rankBoardTitle') }}
                 </h4>
                 <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full transition-colors duration-200">Hierarchy</div>
               </div>
@@ -154,7 +150,7 @@
                 <input 
                   v-model="songSearch" 
                   type="text" 
-                  placeholder="楽曲名で検索..." 
+                  :placeholder="t('beatTierInfo.songSearchPlaceholder')"
                   class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none transition-all shadow-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 />
                 <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -167,11 +163,11 @@
               <div v-for="group in filteredSongGroups" :key="group.rank" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm transition-colors duration-200">
                 <div class="px-5 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">非公式難易度</span>
+                    <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{{ t('beatTierInfo.unofficialDifficulty') }}</span>
                     <span class="text-lg font-black text-slate-800 dark:text-slate-100">{{ group.rank }}</span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500">重み</span>
+                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500">{{ t('beatTierInfo.weight') }}</span>
                     <span class="text-sm font-black text-blue-600 dark:text-blue-400">{{ group.weight }} pt</span>
                   </div>
                 </div>
@@ -188,7 +184,7 @@
                 </div>
               </div>
               <div v-if="filteredSongGroups.length === 0" class="py-20 text-center text-slate-400 dark:text-slate-500 font-bold">
-                一致する形式が見つかりませんでした。
+                {{ t('beatTierInfo.noSongsFound') }}
               </div>
             </div>
           </div>
@@ -198,7 +194,7 @@
       <!-- Footer -->
       <div class="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 text-center transition-colors duration-200">
         <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-          データは現在の非公式難易度表の定義に基づいています • {{ new Date().toLocaleDateString() }}
+          {{ t('beatTierInfo.footerDesc') }} • {{ new Date().toLocaleDateString() }}
         </p>
       </div>
     </div>
@@ -207,10 +203,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import { WEIGHTS, getGroupedRanks } from '../utils/beatTier';
 import diffTableRaw from '../data/difficulty_table.json';
 import RankIcon from './RankIcon.vue';
 
+const { t } = useI18n();
 defineEmits(['close']);
 
 const activeTab = ref<'about' | 'songs'>('about');

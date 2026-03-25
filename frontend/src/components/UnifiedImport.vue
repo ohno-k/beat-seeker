@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{ bookmarkletCode: string }>();
 const emit = defineEmits<{
@@ -75,19 +78,19 @@ const processText = async (text: string) => {
         if (res.ok) {
           arenaResultMsg = data.message;
         } else {
-          resultError.value = data.message || 'ARENAデータの取り込みに失敗しました。';
+          resultError.value = data.message || t('import.arenaFail');
           return;
         }
       }
     }
 
     const parts = [];
-    if (scoresReady) parts.push('スコアデータを取り込みます');
+    if (scoresReady) parts.push(t('import.scoresProcessing'));
     if (arenaResultMsg) parts.push(arenaResultMsg);
-    resultMsg.value = parts.length > 0 ? parts.join('。') + '。' : '取り込むデータがありませんでした。';
+    resultMsg.value = parts.length > 0 ? parts.join('. ') + '.' : t('import.noData');
     setTimeout(() => emit('close'), 1500);
   } catch (e: any) {
-    resultError.value = e.message || '取り込みに失敗しました。';
+    resultError.value = e.message || t('import.fail');
   } finally {
     isImporting.value = false;
   }
@@ -99,7 +102,7 @@ const handleSubmit = async () => {
     resultMsg.value = '';
     resultError.value = '';
     emit('score-file', selectedFile.value);
-    resultMsg.value = 'スコアデータを取り込みます。';
+    resultMsg.value = t('import.scoresProcessing');
     setTimeout(() => emit('close'), 1500);
     return;
   }
@@ -112,19 +115,19 @@ const handleSubmit = async () => {
     try {
       const text = (await navigator.clipboard.readText()).trim();
       if (!text) {
-        resultError.value = 'クリップボードが空です。ブックマークレットを実行してからもう一度お試しください。';
+        resultError.value = t('import.errorEmpty');
         return;
       }
       await processText(text);
     } catch {
-      resultError.value = 'クリップボードへのアクセスが許可されていません。テキストエリアに直接貼り付けてください。';
+      resultError.value = t('import.errorAccess');
     }
   }
 };
 
 const stageFile = (file: File) => {
   if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv' && file.type !== 'application/vnd.ms-excel') {
-    resultError.value = 'CSVファイルをアップロードしてください。';
+    resultError.value = t('import.errorCsv');
     return;
   }
   resultError.value = '';
@@ -163,8 +166,10 @@ const copyBookmarkletCode = async () => {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-        ブックマークレットを使用すると、ARENAモードでの戦績も記録できます。
-        <button @click="showHelpModal = true" class="font-bold underline underline-offset-2 hover:text-amber-600 dark:hover:text-amber-200 transition-colors">ブックマークレットの使い方</button>
+        {{ t('import.arenaHint') }}
+        <button @click="showHelpModal = true" class="font-bold underline underline-offset-2 hover:text-amber-600 dark:hover:text-amber-200 transition-colors">
+          {{ t('import.bookmarkletHelp') }}
+        </button>
       </p>
     </div>
 
@@ -174,23 +179,23 @@ const copyBookmarkletCode = async () => {
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
         :class="importTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="importTab = 'text'"
-      >テキスト貼り付け</button>
+      >{{ t('import.tabText') }}</button>
       <button
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
         :class="importTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="importTab = 'file'"
-      >ファイルアップロード</button>
+      >{{ t('import.tabFile') }}</button>
     </div>
 
     <!-- Text paste tab -->
     <div v-if="importTab === 'text'" class="space-y-2">
       <p class="text-xs text-slate-500 dark:text-slate-400">
-        <a href="https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html?style=SP" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">公式サイト</a>の「スコアデータCSVダウンロード」画面のテキスト、またはブックマークレットで取得したデータを貼り付けてください。
+        {{ t('import.textHint') }}
       </p>
       <textarea
         v-model="pastedText"
         class="w-full h-24 p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-100 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
-        placeholder="CSVデータまたはブックマークレットのJSONデータを貼り付け..."
+        :placeholder="t('import.textareaPlaceholder')"
       ></textarea>
     </div>
 
@@ -216,10 +221,10 @@ const copyBookmarkletCode = async () => {
         </svg>
         <div class="text-center">
           <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
-            {{ selectedFile ? selectedFile.name : 'CSVファイルをドロップ' }}
+            {{ selectedFile ? selectedFile.name : t('import.dropPlaceholder') }}
           </p>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {{ selectedFile ? 'クリックしてファイルを変更' : 'またはクリックしてファイルを選択' }}
+            {{ selectedFile ? t('import.clickToChange') : t('import.clickToSelect') }}
           </p>
         </div>
         <input type="file" ref="fileInput" accept=".csv,text/csv" class="hidden" @change="e => { const f = (e.target as HTMLInputElement).files?.[0]; if (f) stageFile(f); }" />
@@ -242,9 +247,9 @@ const copyBookmarkletCode = async () => {
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
       </svg>
-      <template v-if="isImporting">取り込み中...</template>
-      <template v-else-if="importTab === 'text' && !pastedText.trim()">クリップボードから取り込む</template>
-      <template v-else>読み込む</template>
+      <template v-if="isImporting">{{ t('import.importing') }}</template>
+      <template v-else-if="importTab === 'text' && !pastedText.trim()">{{ t('import.loadFromClipboard') }}</template>
+      <template v-else>{{ t('import.load') }}</template>
     </button>
 
   </div>
@@ -254,7 +259,7 @@ const copyBookmarkletCode = async () => {
     <div v-if="showHelpModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showHelpModal = false">
       <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-base font-bold text-slate-800 dark:text-white">ブックマークレットの使い方</h3>
+          <h3 class="text-base font-bold text-slate-800 dark:text-white">{{ t('import.helpTitle') }}</h3>
           <button @click="showHelpModal = false" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -262,7 +267,7 @@ const copyBookmarkletCode = async () => {
           </button>
         </div>
 
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">IIDXの公式サイトでブックマークレットを実行すると、スコアCSVとARENAデータを一括取得できます。</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ t('import.helpDesc') }}</p>
 
         <!-- PC / SP tab switcher -->
         <div class="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 w-fit mb-4">
@@ -270,30 +275,30 @@ const copyBookmarkletCode = async () => {
             class="px-4 py-1.5 text-xs font-bold rounded-md transition-all"
             :class="deviceTab === 'sp' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400'"
             @click="deviceTab = 'sp'"
-          >スマートフォン</button>
+          >{{ t('import.deviceSp') }}</button>
           <button
             class="px-4 py-1.5 text-xs font-bold rounded-md transition-all"
             :class="deviceTab === 'pc' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400'"
             @click="deviceTab = 'pc'"
-          >PC</button>
+          >{{ t('import.devicePc') }}</button>
         </div>
 
         <!-- Smartphone instructions -->
         <div v-if="deviceTab === 'sp'" class="space-y-3">
           <ol class="text-xs text-slate-700 dark:text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
             <li>
-              <span class="font-bold">ブックマークレットを登録する（初回のみ）</span>
+              <span class="font-bold">{{ t('import.spStep1Title') }}</span>
               <ol class="mt-1.5 ml-4 space-y-1 list-[lower-alpha] list-inside text-slate-600 dark:text-slate-400">
-                <li>下の「コードをコピー」ボタンを押す</li>
-                <li>ブラウザで何かのページをブックマーク登録する</li>
-                <li>ブックマーク一覧を開き、登録したブックマークを<span class="font-bold">編集</span>する</li>
-                <li>名前を「データ一括取得」などに変更し、URLの欄をすべて削除してコピーしたコードを貼り付ける</li>
-                <li>保存する</li>
+                <li>{{ t('import.spStep1a') }}</li>
+                <li>{{ t('import.spStep1b') }}</li>
+                <li>{{ t('import.spStep1c') }}</li>
+                <li>{{ t('import.spStep1d') }}</li>
+                <li>{{ t('import.spStep1e') }}</li>
               </ol>
             </li>
-            <li>IIDXの公式サイト（どのページでも可）を開く</li>
-            <li>アドレスバーにブックマーク名を入力して候補から実行するか、ブックマーク一覧から「データ一括取得」を選ぶ</li>
-            <li>「コピーしました」と表示されたら、このページに戻って「クリップボードから取り込む」を押す</li>
+            <li>{{ t('import.spStep2') }}</li>
+            <li>{{ t('import.spStep3') }}</li>
+            <li>{{ t('import.spStep4') }}</li>
           </ol>
           <button
             @click="copyBookmarkletCode"
@@ -306,16 +311,16 @@ const copyBookmarkletCode = async () => {
             <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            {{ codeCopied ? 'コピーしました！' : 'コードをコピー' }}
+            {{ codeCopied ? t('import.copied') : t('import.copyCode') }}
           </button>
         </div>
 
         <!-- PC instructions -->
         <div v-else class="space-y-3">
           <ol class="text-xs text-slate-700 dark:text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
-            <li>下のボタンをブラウザのブックマークバーにドラッグして登録（初回のみ）</li>
-            <li>IIDXの公式サイト（どのページでも可）でブックマークバーの「データ一括取得」をクリック</li>
-            <li>データがクリップボードにコピーされたら、「クリップボードから取り込む」を押す</li>
+            <li>{{ t('import.pcStep1') }}</li>
+            <li>{{ t('import.pcStep2') }}</li>
+            <li>{{ t('import.pcStep3') }}</li>
           </ol>
           <div class="flex items-center gap-3 flex-wrap">
             <a
@@ -327,9 +332,9 @@ const copyBookmarkletCode = async () => {
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
-              データ一括取得
+              {{ t('import.bookmarkletName') }}
             </a>
-            <span class="text-xs text-slate-500 dark:text-slate-400">← ドラッグして登録</span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.dragToRegister') }}</span>
           </div>
         </div>
       </div>

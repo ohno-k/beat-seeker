@@ -4,6 +4,7 @@ import RankIcon from './RankIcon.vue';
 import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useI18n } from '../composables/useI18n';
 
 interface BeatRankingEntry {
   displayName: string;
@@ -26,12 +27,14 @@ function formatLastUpdated(dateStr: string | null): string {
   const now = new Date();
   const date = new Date(dateStr);
   const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return '今日';
-  if (diffDays === 1) return '昨日';
-  if (diffDays === 2) return '一昨日';
-  if (diffDays <= 6) return `${diffDays}日前`;
-  return '一週間以上前';
+  if (diffDays === 0) return t('common.today');
+  if (diffDays === 1) return t('common.yesterday');
+  if (diffDays === 2) return t('common.dayBeforeYesterday');
+  if (diffDays <= 6) return t('common.daysAgo', { days: diffDays });
+  return t('common.moreThanAWeekAgo');
 }
+
+const { t } = useI18n();
 
 const { user } = useAuth();
 const { showRateTier } = useRateTierVisibility();
@@ -63,7 +66,7 @@ onMounted(async () => {
         await fetchBeatRanking();
     } catch (e) {
         console.error(e);
-        error.value = 'ランキングの取得に失敗しました。';
+        error.value = t('ranking.error');
     } finally {
         isLoading.value = false;
     }
@@ -77,7 +80,7 @@ watch(viewMode, async (mode) => {
             await fetchRateRanking();
         } catch (e) {
             console.error(e);
-            error.value = 'ランキングの取得に失敗しました。';
+            error.value = t('ranking.error');
         } finally {
             isLoading.value = false;
         }
@@ -96,8 +99,8 @@ watch(viewMode, async (mode) => {
           </svg>
         </div>
         <div>
-          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">ランキング</h2>
-          <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">全プレイヤーの集計結果</p>
+          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('ranking.title') }}</h2>
+          <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">{{ t('ranking.subtitle') }}</p>
         </div>
       </div>
 
@@ -123,28 +126,28 @@ watch(viewMode, async (mode) => {
       <!-- Loading / Error / Empty -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
         <div class="w-12 h-12 border-4 border-blue-100 dark:border-slate-700 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
-        <p class="text-slate-500 dark:text-slate-400 font-bold">ランキングを集計中...</p>
+        <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.loading') }}</p>
       </div>
 
       <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl text-center font-bold">
-        {{ error }}
+        {{ t('ranking.error') }}
       </div>
 
       <template v-else>
         <!-- Beat-Tier ranking -->
         <div v-if="viewMode === 'beat'">
           <div v-if="beatRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
-            <p class="text-slate-500 dark:text-slate-400 font-bold">表示できるデータがありません。</p>
+            <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">順位</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">ランク</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">総 BEAT-PT</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">最終更新</th>
+                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'BEAT' }) }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">{{ t('ranking.colUpdatedAt') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -180,7 +183,7 @@ watch(viewMode, async (mode) => {
                         {{ entry.displayName || 'Unnamed Player' }}
                       </span>
                       <span v-if="user && entry.iidxId === user.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">YOU</span>
+                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
                     </div>
                   </td>
                   <td class="py-3 px-2 text-center">
@@ -212,17 +215,17 @@ watch(viewMode, async (mode) => {
         <!-- Rate-Tier ranking -->
         <div v-else>
           <div v-if="rateRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
-            <p class="text-slate-500 dark:text-slate-400 font-bold">表示できるデータがありません。<br/><span class="text-xs font-normal">スコアをアップロードするとRATE-TIERが集計されます。</span></p>
+            <p class="text-slate-500 dark:text-slate-400 font-bold" v-html="t('ranking.emptyRate')"></p>
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">順位</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">ランク</th>
-                  <th class="pb-4 text-xs font-black text-emerald-500 uppercase tracking-widest text-right">総 RATE-PT</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">最終更新</th>
+                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 text-xs font-black text-emerald-500 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'RATE' }) }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">{{ t('ranking.colUpdatedAt') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -258,7 +261,7 @@ watch(viewMode, async (mode) => {
                         {{ entry.displayName || 'Unnamed Player' }}
                       </span>
                       <span v-if="user && entry.iidxId === user.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500 text-white">YOU</span>
+                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500 text-white">{{ t('ranking.you') }}</span>
                     </div>
                   </td>
                   <td class="py-3 px-2 text-center">

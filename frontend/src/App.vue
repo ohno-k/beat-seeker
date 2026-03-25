@@ -33,7 +33,10 @@ import { useAppUpdate } from './composables/useAppUpdate';
 import { useScores } from './composables/useScores';
 import { useDarkMode } from './composables/useDarkMode';
 import { useFriends } from './composables/useFriends';
+import { useI18n } from './composables/useI18n';
 import { watch, onMounted } from 'vue';
+
+const { t } = useI18n();
 
 const isResetPasswordPage = ref(window.location.pathname === '/reset-password');
 
@@ -471,7 +474,7 @@ const handleFileDropped = async (file: File) => {
         if (reportSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
             isDiffModalOpen.value = true;
         } else {
-            errorMsg.value = 'スコアの更新はありませんでした（すでに最新のスコアが保存されています）';
+            errorMsg.value = t('app.error.noUpdate');
         }
 
         // Save the history log to backend using the ACCURATE total from the full profile.
@@ -492,11 +495,11 @@ const handleFileDropped = async (file: File) => {
             console.log("History log saved successfully.");
         } catch (err) {
             console.error("Failed to save history log", err);
-            errorMsg.value = '成長記録の保存に失敗しました。ページを再読み込みして再度お試しください。';
+            errorMsg.value = t('app.error.historySaveFailed');
         }
       } catch (err) {
         console.error("Auto upload failed", err);
-        errorMsg.value = 'スコアの保存に失敗しました。表示は取り込み前との比較です。';
+        errorMsg.value = t('app.error.uploadFailed');
         // フォールバック: クライアント側差分でモーダルを表示
         // (サーバー側でスコアが保存されていた場合に備えて history log も試みる)
         const guestNewTotalRatePt = calcFlatRatePt(newFlat);
@@ -564,7 +567,7 @@ const handleFileDropped = async (file: File) => {
 
   } catch (err: any) {
     console.error('Failed to parse or save CSV:', err);
-    errorMsg.value = err.message || 'CSVの解析に失敗しました。';
+    errorMsg.value = err.message || t('app.error.parseFailed');
   } finally {
     isParsing.value = false;
   }
@@ -666,14 +669,14 @@ const handleUnifiedClose = async () => {
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
-                ダッシュボード
+                {{ t('nav.dashboard') }}
               </button>
               <button 
                 @click="activeTab = 'table'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
-                スコア一覧
+                {{ t('nav.scoreList') }}
               </button>
               <button
                 v-if="!viewingUserId"
@@ -681,7 +684,7 @@ const handleUnifiedClose = async () => {
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
-                ランキング
+                {{ t('nav.ranking') }}
               </button>
               <button 
                 v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
@@ -689,7 +692,7 @@ const handleUnifiedClose = async () => {
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
-                成長記録
+                {{ t('nav.history') }}
               </button>
               <button 
                 v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
@@ -697,21 +700,21 @@ const handleUnifiedClose = async () => {
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
-                プロフィール
+                {{ t('nav.profile') }}
               </button>
               
-              <button
+              <button 
                 v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
                 @click="activeTab = 'arena'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
-                ARENAモード
+                {{ t('nav.arena') }}
               </button>
 
               <!-- Special Titles for non-tab pages -->
               <span v-if="['changelog', 'terms', 'about'].includes(activeTab)" class="ml-4 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0 capitalize">
-                {{ activeTab }}
+                {{ t(`nav.${activeTab}`) }}
               </span>
             </div>
           </div>
@@ -744,7 +747,9 @@ const handleUnifiedClose = async () => {
             </div>
             
             <template v-if="!isLoggedIn && !authLoading">
-              <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="isLoginModalOpen = true">ログイン</button>
+              <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="isLoginModalOpen = true">
+                {{ t('nav.loginRegister') }}
+              </button>
             </template>
             <template v-if="isLoggedIn">
               <div @click="isSidebarOpen = true" class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm cursor-pointer hover:shadow-md transition-all lg:hidden">
@@ -764,14 +769,14 @@ const handleUnifiedClose = async () => {
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
-            ダッシュボード
+            {{ t('nav.dashboard') }}
           </button>
           <button 
             @click="activeTab = 'table'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
-            スコア一覧
+            {{ t('nav.scoreList') }}
           </button>
           <button
             v-if="!viewingUserId"
@@ -779,7 +784,7 @@ const handleUnifiedClose = async () => {
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
-            ランキング
+            {{ t('nav.ranking') }}
           </button>
           <button 
             v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
@@ -787,7 +792,7 @@ const handleUnifiedClose = async () => {
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
-            成長記録
+            {{ t('nav.history') }}
           </button>
           <button
             v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
@@ -795,7 +800,7 @@ const handleUnifiedClose = async () => {
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
-            プロフィール
+            {{ t('nav.profile') }}
           </button>
           <button
             v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
@@ -803,7 +808,7 @@ const handleUnifiedClose = async () => {
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
-            ARENA
+            {{ t('nav.arena') }}
           </button>
         </nav>
         <!-- Admin Viewing Banner -->
@@ -815,8 +820,8 @@ const handleUnifiedClose = async () => {
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             <div class="flex flex-col">
-              <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">{{ viewingMode === 'admin' ? '管理者モード' : 'フレンドのデータを閲覧中' }}</span>
-              <span class="text-base sm:text-lg font-bold">現在 <span class="text-white bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm shadow-sm">{{ viewingUserName }}</span> さんのデータを閲覧中</span>
+              <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">{{ viewingMode === 'admin' ? t('app.banner.adminMode') : t('app.banner.friendMode') }}</span>
+              <span class="text-base sm:text-lg font-bold">{{ t('app.banner.viewingUser', { name: viewingUserName }) }}</span>
             </div>
           </div>
           <button 
@@ -826,7 +831,7 @@ const handleUnifiedClose = async () => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            自分のデータに戻る
+            {{ t('app.banner.returnButton') }}
           </button>
         </div>
         
@@ -834,7 +839,7 @@ const handleUnifiedClose = async () => {
       <div v-if="showUploadArea && isLoggedIn" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="handleUnifiedClose">
         <div class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-bold text-slate-800 dark:text-white">データを取り込む</h2>
+            <h2 class="text-lg font-bold text-slate-800 dark:text-white">{{ t('app.import.title') }}</h2>
             <button @click="handleUnifiedClose" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -874,10 +879,10 @@ const handleUnifiedClose = async () => {
           <!-- Hero Section (Visible only when no data) -->
           <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
             <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
-              スコアデータを<span class="text-blue-600 dark:text-blue-400">可視化</span>しよう
+              {{ t('app.hero.title') }}
             </h1>
             <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-              最新のCSVデータをドロップするだけで、あなたの実力値を自動でグラフ化・分析します。
+              {{ t('app.hero.subtitle') }}
             </p>
             
             <!-- PWA Install Banner -->
@@ -888,12 +893,12 @@ const handleUnifiedClose = async () => {
                 </svg>
               </div>
               <div class="text-center sm:text-left flex-1">
-                <h3 class="font-bold text-lg">アプリとして追加</h3>
-                <p class="text-blue-100 text-sm">ホーム画面に追加して、もっと快適にスコア管理しましょう。</p>
+                <h3 class="font-bold text-lg">{{ t('app.pwa.title') }}</h3>
+                <p class="text-blue-100 text-sm">{{ t('app.pwa.desc') }}</p>
               </div>
               <div class="flex gap-2">
-                <button @click="showInstallBanner = false" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-all">後で</button>
-                <button @click="installApp" class="px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-bold transition-all shadow-md">インストール</button>
+                <button @click="showInstallBanner = false" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-bold transition-all">{{ t('app.pwa.later') }}</button>
+                <button @click="installApp" class="px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg text-sm font-bold transition-all shadow-md">{{ t('app.pwa.install') }}</button>
               </div>
             </div>
           </div>
@@ -902,7 +907,7 @@ const handleUnifiedClose = async () => {
           <div v-if="isParsing || isFetching || authLoading" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
             <div class="w-full flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
               <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
-              <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">データを読み込み中...</p>
+              <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">{{ t('app.loading.data') }}</p>
             </div>
           </div>
 
@@ -973,9 +978,9 @@ const handleUnifiedClose = async () => {
             © 2026 beat-seeker.
           </p>
           <div class="flex items-center gap-4 flex-wrap justify-center">
-            <button @click="activeTab = 'about'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">beat-seekerとは？</button>
-            <button @click="activeTab = 'terms'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">利用規約</button>
-            <button v-if="!viewingUserId" @click="activeTab = 'ranking'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">ランキング</button>
+            <button @click="activeTab = 'about'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('app.footer.desc') }}</button>
+            <button @click="activeTab = 'terms'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.terms') }}</button>
+            <button v-if="!viewingUserId" @click="activeTab = 'ranking'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.ranking') }}</button>
           </div>
         </div>
       </footer>
@@ -990,13 +995,13 @@ const handleUnifiedClose = async () => {
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
-        <span>新しいバージョンが利用可能です。</span>
+        <span>{{ t('app.update.available') }}</span>
       </div>
       <button
         @click="reloadPage"
         class="shrink-0 px-4 py-1.5 bg-blue-500 hover:bg-blue-400 text-white text-sm font-bold rounded-lg transition-colors"
       >
-        今すぐ更新
+        {{ t('app.update.reload') }}
       </button>
     </div>
   </Teleport>

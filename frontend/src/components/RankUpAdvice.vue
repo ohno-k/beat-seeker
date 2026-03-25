@@ -9,15 +9,15 @@
         <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
         </svg>
-        ランクアップへの道
+        {{ t('advice.title') }}
       </h3>
     </div>
     <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">
-      次のランクまで あと <span class="font-black text-blue-600 dark:text-blue-400">{{ nextRankGap.toFixed(1) }} pt</span> 必要
+      {{ t('advice.remaining', { n: nextRankGap.toFixed(1) }) }}
     </p>
 
     <div v-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
-      伸ばせる曲がありません
+      {{ t('advice.noSuggestions') }}
     </div>
     <div v-else class="space-y-2">
       <div
@@ -32,13 +32,13 @@
         <div class="flex-1 min-w-0">
           <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.song.title }}</p>
           <p class="text-[10px] text-slate-500 dark:text-slate-400">
-            {{ sug.song.difficultyName }} / 現在 {{ sug.song.beatTierPoints.toFixed(1) }} pt
+            {{ sug.song.difficultyName }} / {{ t('common.current') }} {{ sug.song.beatTierPoints.toFixed(1) }} pt
           </p>
         </div>
         <div class="text-right shrink-0">
           <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">{{ sug.targetLabel }}</p>
           <p class="text-xs font-black text-slate-700 dark:text-slate-200">
-            スコア +{{ sug.scoreIncrease.toLocaleString() }}点
+            {{ t('advice.scoreIncrease', { n: sug.scoreIncrease.toLocaleString() }) }}
           </p>
           <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">→ {{ sug.newScoreRate.toFixed(2) }}%</p>
           <p class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">+{{ sug.ptGain.toFixed(1) }} pt</p>
@@ -57,15 +57,15 @@
       <div>
         <p class="text-[10px] font-bold uppercase tracking-wider"
           :class="totalSuggestionGain >= nextRankGap ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'">
-          {{ totalSuggestionGain >= nextRankGap ? '達成可能！' : '不足' }}
+          {{ totalSuggestionGain >= nextRankGap ? t('common.achievable') : t('common.shortfall') }}
         </p>
         <p class="text-lg font-black"
           :class="totalSuggestionGain >= nextRankGap ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'">
-          合計 +{{ totalSuggestionGain.toFixed(1) }} pt
+          {{ t('common.total') }} +{{ totalSuggestionGain.toFixed(1) }} pt
         </p>
       </div>
       <div class="text-right text-xs font-bold text-slate-500 dark:text-slate-400">
-        <p>目標</p>
+        <p>{{ t('advice.goal') }}</p>
         <p class="text-sm font-black text-slate-700 dark:text-slate-200">+{{ nextRankGap.toFixed(1) }} pt</p>
       </div>
     </div>
@@ -74,8 +74,11 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
 import { calculatePoints, getNextRankInfo } from '../utils/beatTier';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   flatScores: ScoreRecord[];
@@ -110,10 +113,10 @@ const nextRankGap = computed(() => {
 // ── Improvement thresholds (AA / AAA / MAX- give bonus points) ───────────
 // Each threshold slightly above the bonus trigger point so the bonus is included.
 const IMPROVEMENT_THRESHOLDS = [
-  { rate: 66.67, label: 'Beat-PT獲得ライン突破' },
-  { rate: 77.78, label: 'AA達成' },
-  { rate: 88.89, label: 'AAA達成' },
-  { rate: 94.45, label: 'MAX-達成' },
+  { rate: 66.67, label: t('advice.thresholdBorder') },
+  { rate: 77.78, label: t('advice.thresholdAa') },
+  { rate: 88.89, label: t('advice.thresholdAaa') },
+  { rate: 94.45, label: t('advice.thresholdMax') },
 ];
 
 interface Suggestion {

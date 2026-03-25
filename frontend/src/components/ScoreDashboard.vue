@@ -9,12 +9,12 @@
           </svg>
         </div>
         <div>
-          <p class="text-sm font-bold text-amber-800 dark:text-amber-300">メールアドレスが未登録です</p>
-          <p class="text-xs text-amber-600 dark:text-amber-400">登録するとパスワードを忘れた際のリセットができます。</p>
+          <p class="text-sm font-bold text-amber-800 dark:text-amber-300">{{ t('dashboard.emailNotRegistered') }}</p>
+          <p class="text-xs text-amber-600 dark:text-amber-400">{{ t('dashboard.emailHint') }}</p>
         </div>
       </div>
       <button @click="$emit('open-profile-edit')" class="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">
-        今すぐ登録
+        {{ t('dashboard.registerNow') }}
       </button>
     </div>
 
@@ -28,7 +28,7 @@
             @click="showInfoModal = true"
             class="group flex items-center gap-1.5 text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all font-bold"
           >
-            <span class="text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">Beat-Tierとは？</span>
+            <span class="text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">{{ t('dashboard.whatIsBeatTier') }}</span>
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -51,7 +51,7 @@
         </div>
         <p v-if="nextRankInfo.nextRank" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-2 z-10 uppercase tracking-widest text-center">
           Next: {{ nextRankInfo.nextRank.name }} {{ nextRankInfo.nextRank.tier || '' }}<br/>
-          残り ({{ nextRankInfo.nextRank.minPoints - totalPoints > 0 ? (nextRankInfo.nextRank.minPoints - totalPoints).toFixed(1) : 0 }} pt)
+          {{ t('dashboard.remaining') }} ({{ nextRankInfo.nextRank.minPoints - totalPoints > 0 ? (nextRankInfo.nextRank.minPoints - totalPoints).toFixed(1) : 0 }} pt)
         </p>
       </div>
 
@@ -63,7 +63,7 @@
             @click="showRateInfoModal = true"
             class="group flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all font-bold"
           >
-            <span class="text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">Rate-Tierとは？</span>
+            <span class="text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">{{ t('dashboard.whatIsRateTier') }}</span>
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -86,7 +86,7 @@
         </div>
         <p v-if="rateTierNextRankInfo.nextRank" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-2 z-10 uppercase tracking-widest text-center">
           Next: {{ rateTierNextRankInfo.nextRank.name }} {{ rateTierNextRankInfo.nextRank.tier || '' }}<br/>
-          残り ({{ rateTierNextRankInfo.nextRank.minPoints - rateTierPoints > 0 ? (rateTierNextRankInfo.nextRank.minPoints - rateTierPoints).toFixed(1) : 0 }} pt)
+          {{ t('dashboard.remaining') }} ({{ rateTierNextRankInfo.nextRank.minPoints - rateTierPoints > 0 ? (rateTierNextRankInfo.nextRank.minPoints - rateTierPoints).toFixed(1) : 0 }} pt)
         </p>
       </div>
     </div>
@@ -96,28 +96,28 @@
         <!-- Ranking Position -->
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
           <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">現在のランキング順位</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ t('dashboard.currentRank') }}</p>
             <div class="flex items-end gap-3">
               <span v-if="myRankingPosition" class="text-5xl font-black text-slate-800 dark:text-slate-100 tabular-nums leading-none"># {{ myRankingPosition.position }}</span>
               <span v-else class="text-3xl font-black text-slate-300 dark:text-slate-600 leading-none">-</span>
               <div v-if="myRankingPosition" class="flex flex-col pb-1 gap-0.5">
-                <span class="text-sm font-bold text-slate-400">/ {{ myRankingPosition.total }} 人中</span>
-                <span v-if="myRankingPosition.rankChange === null" class="text-[11px] font-bold text-blue-500">NEW ENTRY</span>
-                <span v-else-if="myRankingPosition.rankChange > 0" class="text-[11px] font-bold text-emerald-500">▲ {{ myRankingPosition.rankChange }} 位上昇</span>
-                <span v-else-if="myRankingPosition.rankChange < 0" class="text-[11px] font-bold text-red-500">▼ {{ Math.abs(myRankingPosition.rankChange) }} 位下降</span>
-                <span v-else class="text-[11px] font-bold text-slate-400 dark:text-slate-500">順位変動なし</span>
+                <span class="text-sm font-bold text-slate-400">/ {{ myRankingPosition.total }} {{ t('dashboard.outOf') }}</span>
+                <span v-if="myRankingPosition.rankChange === null" class="text-[11px] font-bold text-blue-500 uppercase">{{ t('dashboard.newEntry') }}</span>
+                <span v-else-if="myRankingPosition.rankChange > 0" class="text-[11px] font-bold text-emerald-500">{{ t('dashboard.rankUp', { n: myRankingPosition.rankChange }) }}</span>
+                <span v-else-if="myRankingPosition.rankChange < 0" class="text-[11px] font-bold text-red-500">{{ t('dashboard.rankDown', { n: Math.abs(myRankingPosition.rankChange) }) }}</span>
+                <span v-else class="text-[11px] font-bold text-slate-400 dark:text-slate-500">{{ t('dashboard.rankNoChange') }}</span>
               </div>
             </div>
           </div>
           <div v-if="myRankingPosition" class="flex items-center gap-2 self-end sm:self-auto">
             <div class="text-right">
-              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">前後のプレイヤー</p>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{{ t('dashboard.neighbors') }}</p>
               <div class="space-y-0.5">
                 <p v-if="rankingNeighbors.above" class="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                   ▲ {{ rankingNeighbors.above.displayName }} ({{ rankingNeighbors.above.totalBeatPt.toFixed(1) }} pt)
                 </p>
                 <p class="text-xs font-bold text-blue-600 dark:text-blue-400 tabular-nums">
-                  ▶ あなた ({{ totalPoints.toFixed(1) }} pt)
+                  ▶ {{ t('dashboard.you') }} ({{ totalPoints.toFixed(1) }} pt)
                 </p>
                 <p v-if="rankingNeighbors.below" class="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                   ▼ {{ rankingNeighbors.below.displayName }} ({{ rankingNeighbors.below.totalBeatPt.toFixed(1) }} pt)
@@ -130,23 +130,23 @@
         <!-- Lv12 Quick Stats (fixed, no settings needed) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-auto">
           <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50/50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700">
-            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">☆12 総数</p>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ t('dashboard.lv12Total') }}</p>
             <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-700 dark:text-slate-200">{{ lv12Total }}</h3>
           </div>
           <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50/30 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/50 border-t-2 border-t-blue-400 dark:border-t-blue-500">
-            <p class="text-[9px] font-bold text-blue-400 dark:text-blue-500 uppercase tracking-widest mb-1">☆12 クリア率</p>
+            <p class="text-[9px] font-bold text-blue-400 dark:text-blue-500 uppercase tracking-widest mb-1">{{ t('dashboard.lv12ClearRate') }}</p>
             <h3 class="text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400 flex items-baseline gap-0.5">
               {{ lv12ClearRate }}<span class="text-sm font-bold opacity-70">%</span>
             </h3>
           </div>
           <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-amber-50/30 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-800/50 border-t-2 border-t-amber-400 dark:border-t-amber-500">
-            <p class="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-1">☆12 AAA率</p>
+            <p class="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-1">{{ t('dashboard.lv12AaaRate') }}</p>
             <h3 class="text-2xl sm:text-3xl font-extrabold text-amber-500 flex items-baseline gap-0.5">
               {{ lv12AaaRate }}<span class="text-sm font-bold opacity-70">%</span>
             </h3>
           </div>
           <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-purple-50/30 dark:bg-purple-900/10 border border-purple-100/50 dark:border-purple-800/50 border-t-2 border-t-purple-400 dark:border-t-purple-500">
-            <p class="text-[9px] font-bold text-purple-400 dark:text-purple-500 uppercase tracking-widest mb-1" title="スコアレート 94.45% 以上">☆12 MAX-率</p>
+            <p class="text-[9px] font-bold text-purple-400 dark:text-purple-500 uppercase tracking-widest mb-1" :title="t('dashboard.maxMinusHint')">{{ t('dashboard.lv12MaxMinusRate') }}</p>
             <h3 class="text-2xl sm:text-3xl font-extrabold text-purple-600 dark:text-purple-400 flex items-baseline gap-0.5">
               {{ lv12MaxMinusRate }}<span class="text-sm font-bold opacity-70">%</span>
             </h3>
@@ -171,6 +171,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
 import { getRankInfo, getNextRankInfo, getRateTierRankInfo, getNextRateTierRankInfo, calculateScoreRateTierPoints } from '../utils/beatTier';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
@@ -184,7 +185,7 @@ import { flattenScores } from '../utils/scoreData';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
 const { showRateTier } = useRateTierVisibility();
-
+const { t } = useI18n();
 const { user } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
@@ -222,7 +223,6 @@ const rateTierNextRankInfo = computed(() => getNextRateTierRankInfo(rateTierPoin
 // Lv12 quick stats (no settings needed)
 const lv12All = computed(() => allFlattenedScores.value.filter(s => s.difficultyLevel === 12));
 const lv12Total = computed(() => lv12All.value.length);
-const lv12Played = computed(() => lv12All.value.filter(s => s.score > 0));
 const lv12ClearRate = computed(() => {
   if (!lv12Total.value) return 0;
   const cleared = lv12All.value.filter(s => !['FAILED', 'NO PLAY', '---'].includes(s.clearType)).length;

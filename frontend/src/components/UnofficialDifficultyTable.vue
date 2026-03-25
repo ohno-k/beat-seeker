@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
 import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
 import songDataRaw from '../data/song_data.json';
@@ -10,6 +11,7 @@ const props = defineProps<{
   scores: ScoreRecord[];
 }>();
 
+const { t } = useI18n();
 const expandedRanks = ref<Set<string>>(new Set());
 const showInfo = ref(false);
 const showRateTable = ref(false);
@@ -194,34 +196,34 @@ const tableData = computed(() => {
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 dark:text-indigo-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
           <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
         </svg>
-        非公式難易度表サマリー
+        {{ t('table.unofficialSummary') }}
         <div class="relative">
           <button
             @click.stop="showInfo = !showInfo"
             class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 hover:bg-indigo-200 dark:hover:bg-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[10px] font-black flex items-center justify-center transition-colors"
-            title="このサマリーについて"
+            :title="t('table.aboutSummary')"
           >?</button>
           <div
             v-if="showInfo"
             class="absolute z-20 top-7 -left-16 sm:left-0 w-[280px] sm:w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
           >
             <div class="flex items-center justify-between mb-2">
-              <span class="font-bold text-sm text-slate-800 dark:text-slate-100">フォルダランクについて</span>
+               <span class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ t('table.aboutFolderRank') }}</span>
               <button @click="showInfo = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-base leading-none">×</button>
             </div>
-            <p class="mb-2 text-slate-600 dark:text-slate-400">各フォルダの全楽曲の合計BEAT-PTをもとに、フォルダランクを算出します。</p>
+            <p class="mb-2 text-slate-600 dark:text-slate-400">{{ t('table.folderRankExplanation') }}</p>
             <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-2 space-y-1">
-              <p class="font-bold text-slate-700 dark:text-slate-200">■ LEGENDラインの基準</p>
-              <p>LEGENDに必要な平均スコアレートは難易度ごとに異なります。☆11.0では約99.6%、☆13.0では約94.44%（MAX-越え）が基準で、その間は曲線で補間されます。</p>
-              <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">■ 各ランクの基準</p>
-              <p>LEGENDラインから0.25%ずつ必要スコアレートが下がるごとに、ランクが1段階下がります。</p>
-              <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">■ 薄いランクアイコン</p>
-              <p>プレイ済みの曲のみで算出したランクです。全曲プレイ済みの場合は表示されません。</p>
+              <p class="font-bold text-slate-700 dark:text-slate-200">{{ t('table.legendCriteria') }}</p>
+              <p>{{ t('table.legendExplanation') }}</p>
+              <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">{{ t('table.rankCriteria') }}</p>
+              <p>{{ t('table.rankExplanation') }}</p>
+              <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">{{ t('table.paleIconCriteria') }}</p>
+              <p>{{ t('table.paleIconExplanation') }}</p>
             </div>
             <button
               @click.stop="showRateTable = true; showInfo = false"
               class="mt-3 w-full py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition-colors"
-            >📊 必要スコアレート表を見る</button>
+            >{{ t('table.viewRateTable') }}</button>
           </div>
         </div>
       </h3>
@@ -237,7 +239,7 @@ const tableData = computed(() => {
           <!-- Header -->
           <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <div>
-              <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">📊 必要スコアレート表</h3>
+              <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">{{ t('table.rateTableTitle') }}</h3>
             </div>
             <button @click="showRateTable = false" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors shrink-0 ml-2">×</button>
           </div>
@@ -246,7 +248,7 @@ const tableData = computed(() => {
             <table class="text-[10px] sm:text-xs border-collapse">
               <thead class="sticky top-0 z-20">
                 <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
-                  <th class="py-1.5 px-2 text-left font-bold sticky left-0 z-30 bg-slate-100 dark:bg-slate-900 min-w-[80px] sm:min-w-[110px]">ランク</th>
+                  <th class="py-1.5 px-2 text-left font-bold sticky left-0 z-30 bg-slate-100 dark:bg-slate-900 min-w-[80px] sm:min-w-[110px]">{{ t('table.colRank') }}</th>
                   <th v-for="f in allFolders" :key="f" class="py-1.5 px-1 sm:px-2 text-center font-bold whitespace-nowrap">☆{{ f }}</th>
                 </tr>
               </thead>
@@ -266,10 +268,10 @@ const tableData = computed(() => {
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[10px] sm:text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">難易度</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">平均RATE</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">合計PT（予測ランク）</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">プレイ済</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">{{ t('table.colDifficulty') }}</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">{{ t('table.colAvgRate') }}</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">{{ t('table.colTotalPt') }}</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">{{ t('table.colPlayed') }}</th>
             <th class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"></th>
           </tr>
         </thead>
@@ -332,7 +334,7 @@ const tableData = computed(() => {
                 <!-- Summary Board -->
                 <div class="mb-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-200">
                   <div class="flex flex-col">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">フォルダ内 BEAT-TIER</span>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ t('table.folderBeatTier') }}</span>
                     <div class="flex items-center gap-3">
                       <RankIcon :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="lg" :class="data.playCount < data.totalCount ? 'opacity-30' : ''" />
                       <div class="flex flex-col">
@@ -398,7 +400,7 @@ const tableData = computed(() => {
           
           <tr v-if="tableData.length === 0">
             <td colspan="5" class="py-12 text-center text-slate-500 dark:text-slate-400">
-              非公式難易度データが見つかりません。対象レベル（☆11、☆12）が含まれているか確認してください。
+              {{ t('table.noUnofficialData') }}
             </td>
           </tr>
         </tbody>

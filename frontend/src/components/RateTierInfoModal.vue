@@ -4,8 +4,8 @@
       <!-- Header -->
       <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
         <div>
-          <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">Rate-Tier 統計システム</h3>
-          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5 uppercase tracking-widest">システム解説 と スコアレート換算表</p>
+          <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('rateTierInfo.title') }}</h3>
+          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5 uppercase tracking-widest">{{ t('rateTierInfo.subtitle') }}</p>
         </div>
         <button @click="$emit('close')" class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,14 +23,14 @@
               @click="activeTab = 'about'"
               :class="['pb-4 text-sm font-black transition-all relative', activeTab === 'about' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300']"
             >
-              仕組み・ランク
+              {{ t('beatTierInfo.tabAbout') }}
               <div v-if="activeTab === 'about'" class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-600 dark:bg-emerald-500 rounded-full"></div>
             </button>
             <button
               @click="activeTab = 'table'"
               :class="['pb-4 text-sm font-black transition-all relative', activeTab === 'table' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300']"
             >
-              スコアレート換算表
+              {{ t('rateTierInfo.tabTable') }}
               <div v-if="activeTab === 'table'" class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-600 dark:bg-emerald-500 rounded-full"></div>
             </button>
           </div>
@@ -42,13 +42,9 @@
             <section>
               <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
                 <span class="w-1.5 h-6 bg-emerald-600 dark:bg-emerald-500 rounded-full"></span>
-                Rate-Tier システムとは？
+                {{ t('rateTierInfo.whatIsTitle') }}
               </h4>
-              <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-medium">
-                Rate-Tierは、スコアレート（最大スコアに対する達成率）をもとにプレイヤーの精度を評価するシステムです。<br/>
-                ANOTHER・LEGGENDARIA 全曲が対象で、スコアレートが高いほど多くのポイントを獲得できます。<br/>
-                合計ポイントは、全対象曲のうち<strong>獲得ポイントが高い上位100曲</strong>の合算によって決定されます。
-              </p>
+              <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-medium" v-html="t('rateTierInfo.whatIsDesc')"></p>
             </section>
 
             <section class="bg-slate-900 dark:bg-slate-950 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden border border-slate-700 dark:border-slate-800 transition-colors duration-200">
@@ -56,13 +52,13 @@
               <h4 class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-slate-400 dark:text-slate-500">Calculation Formula</h4>
               <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                 <div class="flex-1 text-center md:text-left">
-                  <p class="text-4xl font-black mb-2 tracking-tight text-emerald-400 dark:text-emerald-300">Score Rate = スコア ÷ 最大スコア × 100%</p>
-                  <p class="text-xs font-bold text-slate-400 dark:text-slate-500 leading-relaxed">各曲のスコアを最大スコア（ノーツ数×2）で割りパーセントを算出。<br/>スコアレートに応じてポイントを線形補間し、上位100曲を合算します。</p>
+                  <p class="text-4xl font-black mb-2 tracking-tight text-emerald-400 dark:text-emerald-300">{{ t('rateTierInfo.formulaTitle') }}</p>
+                  <p class="text-xs font-bold text-slate-400 dark:text-slate-500 leading-relaxed" v-html="t('rateTierInfo.formulaDesc')"></p>
                 </div>
                 <div class="h-px md:h-20 w-full md:w-px bg-slate-700 dark:bg-slate-800"></div>
                 <div class="flex-1 text-sm font-bold text-slate-300 dark:text-slate-400 leading-relaxed">
-                  <p>• 難易度・レベルに関わらず ANOTHER / LEGGENDARIA 全曲が対象です。</p>
-                  <p class="text-emerald-400/80 dark:text-emerald-300/80 mt-1">※ 全上位100曲の合計があなたの最終的なポイントになります。</p>
+                  <p>• {{ t('rateTierInfo.weightDesc') }}</p>
+                  <p class="text-emerald-400/80 dark:text-emerald-300/80 mt-1">{{ t('rateTierInfo.finalPointsDesc') }}</p>
                 </div>
               </div>
             </section>
@@ -72,7 +68,7 @@
               <div class="flex items-center justify-between">
                 <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <span class="w-1.5 h-6 bg-purple-600 dark:bg-purple-500 rounded-full"></span>
-                  ランクボード (Rank Board)
+                  {{ t('beatTierInfo.rankBoardTitle') }}
                 </h4>
                 <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full transition-colors duration-200">Hierarchy</div>
               </div>
@@ -146,18 +142,18 @@
             <section>
               <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
                 <span class="w-1.5 h-6 bg-emerald-600 dark:bg-emerald-500 rounded-full"></span>
-                スコアレート別ポイント換算表
+                {{ t('rateTierInfo.tableTitle') }}
               </h4>
               <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-6">
-                各スコアレートの境界値でのポイントです。境界値の間は線形補間されます。
+                {{ t('rateTierInfo.tableDesc') }}
               </p>
             </section>
 
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
               <div class="px-5 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4">
-                <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">スコアレート</span>
-                <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right">獲得ポイント</span>
-                <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right">スコア例（☆12 1500ノーツ）</span>
+                <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{{ t('table.colRate') }}</span>
+                <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right">{{ t('table.colPoints') }}</span>
+                <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right">{{ t('rateTierInfo.scoreExampleTitle') }}</span>
               </div>
               <div class="divide-y divide-slate-100 dark:divide-slate-700">
                 <div
@@ -181,7 +177,7 @@
             </div>
 
             <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 text-center">
-              ※ 1500ノーツの場合、最大スコアは3000点です。
+              {{ t('rateTierInfo.notes1500') }}
             </p>
           </div>
         </div>
@@ -190,7 +186,7 @@
       <!-- Footer -->
       <div class="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 text-center transition-colors duration-200">
         <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-          ANOTHER / LEGGENDARIA 全曲対象 • 上位100曲合算 • {{ new Date().toLocaleDateString() }}
+          {{ t('rateTierInfo.footerDesc') }} • {{ new Date().toLocaleDateString() }}
         </p>
       </div>
     </div>
@@ -199,9 +195,11 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import { RATE_TIER_RANKS, SCORE_RATE_THRESHOLDS, getGroupedRateTierRanks } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
 
+const { t } = useI18n();
 defineEmits(['close']);
 
 const activeTab = ref<'about' | 'table'>('about');

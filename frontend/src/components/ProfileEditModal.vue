@@ -2,6 +2,9 @@
 import { ref, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   isOpen: boolean;
@@ -65,22 +68,22 @@ const handleUpdate = async () => {
   successMsg.value = '';
   
   if (!displayName.value.trim()) {
-    errorMsg.value = '表示名を入力してください。';
+    errorMsg.value = t('profile.displayNameRequired');
     return;
   }
 
   // Password change validation
   if (newPassword.value || currentPassword.value || newPasswordConfirm.value) {
     if (!currentPassword.value) {
-      errorMsg.value = 'パスワードを変更するには、現在のパスワードを入力してください。';
+      errorMsg.value = t('profile.currentPasswordRequired');
       return;
     }
     if (newPassword.value !== newPasswordConfirm.value) {
-      errorMsg.value = '新しいパスワードが一致しません。';
+      errorMsg.value = t('profile.passwordMismatch');
       return;
     }
     if (newPassword.value.length < 4) {
-      errorMsg.value = '新しいパスワードは4文字以上で入力してください。';
+      errorMsg.value = t('profile.passwordTooShort');
       return;
     }
   }
@@ -103,7 +106,7 @@ const handleUpdate = async () => {
     }
 
     await updateProfile(payload);
-    successMsg.value = 'プロフィールを更新しました！';
+    successMsg.value = t('profile.updateSuccess');
     
     // Clear password fields
     currentPassword.value = '';
@@ -115,7 +118,7 @@ const handleUpdate = async () => {
     }, 1500);
 
   } catch (err: any) {
-    errorMsg.value = err.message || '更新に失敗しました。';
+    errorMsg.value = err.message || t('profile.updateFailed');
   } finally {
     isSubmitting.value = false;
   }
@@ -127,7 +130,7 @@ const handleUpdate = async () => {
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
       
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">プロフィールの編集</h3>
+        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('profile.editTitle') }}</h3>
         <button @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -154,21 +157,21 @@ const handleUpdate = async () => {
 
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">ユーザー名 (表示名)</label>
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.displayName') }}</label>
               <input type="text" v-model="displayName" required
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">段位</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.danRank') }}</label>
                 <select v-model="danRank" 
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
                   <option v-for="rank in danRanks" :key="rank" :value="rank">{{ rank }}</option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">アリーナランク</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.arenaRank') }}</label>
                 <select v-model="arenaRank" 
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
                   <option v-for="rank in arenaRanks" :key="rank" :value="rank">{{ rank }}</option>
@@ -178,7 +181,7 @@ const handleUpdate = async () => {
 
             <div class="grid grid-cols-1">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">プレイサイド</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.playSide') }}</label>
                 <div class="flex gap-4 py-2.5">
                   <label class="flex items-center gap-2 cursor-pointer group">
                     <input type="radio" v-model="playSide" value="1P" class="h-4 w-4 text-blue-600 border-slate-300" />
@@ -191,12 +194,12 @@ const handleUpdate = async () => {
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">スコアの公開設定</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.privacySetting') }}</label>
                 <select v-model="privacyLevel" 
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option :value="0">全公開</option>
-                  <option :value="1">フレンドのみ公開</option>
-                  <option :value="2">非公開</option>
+                  <option :value="0">{{ t('profile.privacyPublic') }}</option>
+                  <option :value="1">{{ t('profile.privacyFriendsOnly') }}</option>
+                  <option :value="2">{{ t('profile.privacyPrivate') }}</option>
                 </select>
               </div>
             </div>
@@ -205,34 +208,34 @@ const handleUpdate = async () => {
           <!-- Email section -->
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <div class="flex items-center gap-2">
-              <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">メールアドレス</h4>
-              <span v-if="!user?.email" class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-800/50">未登録</span>
+              <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ t('profile.emailSection') }}</h4>
+              <span v-if="!user?.email" class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-800/50">{{ t('profile.emailNotRegistered') }}</span>
             </div>
             <div>
-              <input type="email" v-model="email" placeholder="example@email.com"
+              <input type="email" v-model="email" :placeholder="t('profile.emailNotRegistered')"
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1">パスワードを忘れた場合のリセットに使用されます</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1">{{ t('profile.emailHint') }}</p>
             </div>
           </div>
 
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
-            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">パスワードの変更 (任意)</h4>
+            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ t('profile.passwordChange') }}</h4>
             
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">現在のパスワード</label>
-              <input type="password" v-model="currentPassword" placeholder="変更する場合のみ入力"
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.currentPassword') }}</label>
+              <input type="password" v-model="currentPassword" :placeholder="t('profile.currentPasswordPlaceholder')"
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">新しいパスワード</label>
-                <input type="password" v-model="newPassword" placeholder="4文字以上"
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.newPassword') }}</label>
+                <input type="password" v-model="newPassword" :placeholder="t('profile.newPasswordPlaceholder')"
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
               </div>
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">確認のため再入力</label>
-                <input type="password" v-model="newPasswordConfirm" placeholder="4文字以上"
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.confirmNewPassword') }}</label>
+                <input type="password" v-model="newPasswordConfirm" :placeholder="t('profile.newPasswordPlaceholder')"
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
               </div>
             </div>
@@ -240,11 +243,11 @@ const handleUpdate = async () => {
 
           <!-- Display Settings -->
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
-            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">表示設定</h4>
+            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ t('profile.displaySettings') }}</h4>
             <label class="flex items-center justify-between cursor-pointer group">
               <div>
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">RATE-TIER を表示する</p>
-                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">オフにするとRATE-TIERに関するすべての表示が非表示になります</p>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('profile.showRateTier') }}</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ t('profile.showRateTierHint') }}</p>
               </div>
               <div class="relative inline-flex items-center ml-4 shrink-0">
                 <input type="checkbox" :checked="showRateTier" @change="setRateTier(($event.target as HTMLInputElement).checked)" class="sr-only peer">
@@ -256,12 +259,12 @@ const handleUpdate = async () => {
           <div class="pt-4 flex gap-3">
             <button type="button" @click="emit('close')"
               class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">
-              キャンセル
+              {{ t('common.cancel') }}
             </button>
             <button type="submit" :disabled="isSubmitting"
               class="flex-[2] py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2">
               <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              {{ isSubmitting ? '保存中...' : '変更を保存する' }}
+              {{ isSubmitting ? t('profile.saving') : t('profile.saveChanges') }}
             </button>
           </div>
           

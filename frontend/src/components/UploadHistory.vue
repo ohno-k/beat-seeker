@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
-import { getRankInfo } from '../utils/beatTier';
+import { useI18n } from '../composables/useI18n';
+import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
+
+const { t, currentLang } = useI18n();
 import UploadResultModal from './UploadResultModal.vue';
 import RankIcon from './RankIcon.vue';
 import type { UploadDiffResult } from '../types/UploadDiff';
@@ -24,7 +27,8 @@ const isModalOpen = ref(false);
 const getDateKey = (dateStr: string) => {
   const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
   const d = new Date(zDateStr);
-  return d.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' });
+  const locale = currentLang.value === 'ko' ? 'ko-KR' : (currentLang.value === 'en' ? 'en-US' : 'ja-JP');
+  return d.toLocaleDateString(locale, { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' });
 };
 
 /** 同日エントリをまとめたリストを返す */
@@ -90,10 +94,10 @@ const openDiffModal = (item: any) => {
       oldTier: getRankInfo(oldTotal),
       newTier: getRankInfo(item.totalBeatPt),
       updatedSongs: updatedSongs,
-      oldTotalRatePt: 0,
-      newTotalRatePt: 0,
-      oldRateTier: null,
-      newRateTier: null
+      oldTotalRatePt: Math.max(0, item.totalRatePt - item.ratePtIncrease),
+      newTotalRatePt: item.totalRatePt,
+      oldRateTier: getRateTierRankInfo(Math.max(0, item.totalRatePt - item.ratePtIncrease)),
+      newRateTier: getRateTierRankInfo(item.totalRatePt)
     };
     isModalOpen.value = true;
   } catch (err) {
@@ -117,7 +121,7 @@ const fetchHistory = async () => {
         headers: authHeaders()
     });
 
-    if (!res.ok) throw new Error('履歴の取得に失敗しました');
+    if (!res.ok) throw new Error(t('history.error'));
     const data = await res.json();
 
     // Sort descending by date
@@ -150,13 +154,15 @@ const fetchHistory = async () => {
       }
 
       const tierInfo = getRankInfo(beatPt);
+      const rateTierInfo = getRateTierRankInfo(ratePt);
       return {
         ...item,
         totalBeatPt: beatPt,
         totalRatePt: ratePt,
         beatPtIncrease: calcBeatPtIncrease,
         ratePtIncrease: calcRatePtIncrease,
-        tierInfo: tierInfo
+        tierInfo: tierInfo,
+        rateTierInfo: rateTierInfo
       };
     });
   } catch (err: any) {
@@ -169,7 +175,8 @@ const fetchHistory = async () => {
 const formatDate = (dateStr: string) => {
   const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
   const d = new Date(zDateStr);
-  return d.toLocaleString('ja-JP', {
+  const locale = currentLang.value === 'ko' ? 'ko-KR' : (currentLang.value === 'en' ? 'en-US' : 'ja-JP');
+  return d.toLocaleString(locale, {
     timeZone: 'Asia/Tokyo',
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit'
@@ -188,16 +195,16 @@ onMounted(() => {
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        アップロード履歴
+        {{ t('history.title') }}
       </h2>
       <div class="flex items-center gap-2">
         <button
           @click="groupByDay = !groupByDay"
           :class="groupByDay ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-600' : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'"
           class="px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors focus:outline-none"
-          title="同日の更新をまとめる"
-        >同日まとめ</button>
-        <button @click="fetchHistory" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg transition-colors focus:outline-none" title="更新">
+          :title="t('history.groupByDayHint')"
+        >{{ t('history.groupByDay') }}</button>
+        <button @click="fetchHistory" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg transition-colors focus:outline-none" :title="t('history.refresh')">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
           </svg>
@@ -214,18 +221,18 @@ onMounted(() => {
     </div>
 
     <div v-else-if="historyList.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400">
-      履歴データがありません
+      {{ t('history.empty') }}
     </div>
 
     <div v-else class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <table class="w-full text-left border-collapse whitespace-nowrap">
         <thead>
           <tr class="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm transition-colors duration-200">
-            <th class="p-4 font-semibold text-center w-16">BEAT-TIER</th>
-            <th class="p-4 font-semibold text-center">アップロード日時</th>
-            <th class="p-4 font-semibold text-center">更新種別</th>
-            <th class="p-4 font-semibold text-center w-36">BEAT-PT</th>
-            <th v-if="showRateTier" class="p-4 font-semibold text-center w-36">RATE-PT</th>
+            <th class="p-4 font-semibold text-center w-16">{{ t('history.colTier') }}</th>
+            <th class="p-4 font-semibold text-center">{{ t('history.colDate') }}</th>
+            <th class="p-4 font-semibold text-center">{{ t('history.colType') }}</th>
+            <th class="p-4 font-semibold text-center w-36">{{ t('history.colBeatPt') }}</th>
+            <th v-if="showRateTier" class="p-4 font-semibold text-center w-36">{{ t('history.colRatePt') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
@@ -236,12 +243,19 @@ onMounted(() => {
             :class="(item._isGrouped ? item._mergedDiffJson !== '[]' : (item.diffJson && item.diffJson !== '[]')) ? 'cursor-pointer' : ''"
             @click="openDiffModal(item)"
           >
-            <!-- Beat-Tier Icon -->
+            <!-- Beat-Tier Icon (+ Rate-Tier Icon) -->
             <td class="p-4 text-center align-middle">
-              <div class="flex justify-center translate-x-2">
+              <div class="flex justify-center items-center gap-1">
                 <RankIcon
                   :rankName="item.tierInfo?.name || 'Unranked'"
                   :tier="item.tierInfo?.tier"
+                  size="md"
+                  class="shrink-0 drop-shadow-sm"
+                />
+                <RankIcon
+                  v-if="showRateTier"
+                  :rankName="item.rateTierInfo?.name || 'Unranked'"
+                  :tier="item.rateTierInfo?.tier"
                   size="md"
                   class="shrink-0 drop-shadow-sm"
                 />
@@ -252,7 +266,7 @@ onMounted(() => {
             <td class="p-4 font-medium text-slate-800 dark:text-slate-100 text-center align-middle">
               <template v-if="item._isGrouped">
                 {{ item._dateKey }}
-                <span class="ml-1 text-xs text-slate-400 dark:text-slate-500">({{ item._itemCount }}回)</span>
+                <span class="ml-1 text-xs text-slate-400 dark:text-slate-500">{{ t('history.times', { n: item._itemCount }) }}</span>
               </template>
               <template v-else>
                 {{ formatDate(item.date) }}
@@ -262,10 +276,10 @@ onMounted(() => {
             <!-- Updated Count -->
             <td class="p-4 text-center align-middle font-black">
               <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-base">
-                {{ item.updatedCount }} 曲
+                {{ item.updatedCount }} {{ t('history.unitSongs') }}
               </span>
               <span v-else class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-sm">
-                難易度改訂
+                {{ t('history.revision') }}
               </span>
             </td>
 

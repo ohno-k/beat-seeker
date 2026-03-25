@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 const isDragging = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -47,7 +50,7 @@ const validateAndEmit = (file: File) => {
   if (file.name.toLowerCase().endsWith('.csv') || file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
     emit('file-dropped', file);
   } else {
-    alert('CSVファイルをアップロードしてください。'); // Simple alert for now
+    alert(t('upload.errorCsv'));
   }
 };
 
@@ -63,13 +66,13 @@ const handleTextSubmit = async () => {
         textToProcess = clipboardText.trim();
         pastedCsvText.value = textToProcess; // Optional: fill the textarea to show what was read
       } else {
-        alert('クリップボードにテキストがありません。');
+        alert(t('import.errorEmpty'));
         isLoadingFromClipboard.value = false;
         return;
       }
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
-      alert('クリップボードの読み取りに失敗しました。お使いのブラウザか設定で許可されていない可能性があります。手動でペーストしてください。');
+      alert(t('import.errorAccess'));
       isLoadingFromClipboard.value = false;
       return;
     }
@@ -77,7 +80,7 @@ const handleTextSubmit = async () => {
 
   // Basic validation to see if it looks somewhat like a CSV
   if (!textToProcess.includes(',') && !textToProcess.includes('\t') && textToProcess.split('\n').length < 2) {
-    alert('有効なCSVデータではないようです。データを確認してください。');
+    alert(t('upload.errorInvalid'));
     isLoadingFromClipboard.value = false;
     return;
   }
@@ -107,14 +110,14 @@ const handleTextSubmit = async () => {
         :class="activeTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="activeTab = 'text'"
       >
-        テキストから読み込む
+        {{ t('upload.textTab') }}
       </button>
       <button 
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
         :class="activeTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="activeTab = 'file'"
       >
-        ファイルアップロード
+        {{ t('upload.fileTab') }}
       </button>
     </div>
 
@@ -140,18 +143,18 @@ const handleTextSubmit = async () => {
                 </svg>
             </div>
             <h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-2">
-                CSVファイルをドロップ
+                {{ t('upload.drop') }}
             </h3>
             <p class="text-slate-500 dark:text-slate-400 text-center text-sm mb-6">
-                またはクリックしてファイルを選択してください。<br/>
-                beatmania IIDX公式のスコアデータCSVに対応しています。
+                {{ t('upload.dropOrClick') }}<br/>
+                {{ t('upload.csvSupport') }}
             </p>
             
             <button 
                 class="px-6 py-2.5 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium rounded-lg transition-colors shadow-sm"
                 @click.stop="triggerFileInput"
             >
-                ファイルを選択
+                {{ t('upload.select') }}
             </button>
             <input 
                 type="file" 
@@ -170,16 +173,16 @@ const handleTextSubmit = async () => {
             class="absolute inset-0 w-full h-full p-6 border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex flex-col transition-colors duration-200"
             >
             <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">
-                CSVデータを貼り付け
+                {{ t('upload.pasteTitle') }}
             </h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">
-                <a href="https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html?style=SP" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">公式サイト</a>の「スコアデータCSVダウンロード」画面のテキストをコピーして貼り付けてください。
+                <a href="https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html?style=SP" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ t('about.faqQ1').split('?')[0] }}</a>{{ t('upload.officialSiteManualHint') || 'の「スコアデータCSVダウンロード」画面のテキストをコピーして貼り付けてください。' }}
             </p>
             
             <textarea
                 v-model="pastedCsvText"
                 class="flex-1 w-full p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 resize-none font-mono text-sm mb-4 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-200"
-                placeholder="バージョン,タイトル,ジャンル,アーティスト..."
+                :placeholder="t('upload.textareaPlaceholder')"
             ></textarea>
             
             <button 
@@ -195,10 +198,10 @@ const handleTextSubmit = async () => {
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {{ pastedCsvText.trim() ? '読み込む' : 'クリップボードから読み込む' }}
+                {{ pastedCsvText.trim() ? t('upload.load') : t('upload.loadFromClipboard') }}
             </button>
             <p v-if="!pastedCsvText.trim()" class="text-xs text-slate-400 dark:text-slate-500 text-center mt-3">
-                ボタンを押すと、自動的にクリップボードの内容が読み込まれます。
+                {{ t('upload.clipboardAutoLoad') }}
             </p>
             </div>
         </transition>

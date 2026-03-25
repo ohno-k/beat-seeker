@@ -2,8 +2,8 @@
   <div class="w-full mx-auto space-y-6 animate-fade-in relative">
     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-colors duration-200">
       <div>
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">楽曲スコア詳細</h2>
-        <p class="text-slate-500 dark:text-slate-400 mt-1">取得データ: <span class="font-semibold text-slate-700 dark:text-slate-200">{{ filteredScores.length }}</span> 件</p>
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('table.title') }}</h2>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">{{ t('table.dataCount', { n: filteredScores.length }) }}</p>
       </div>
       <div class="flex flex-col md:flex-row items-start md:items-center justify-end gap-3 w-full xl:w-auto">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
@@ -13,7 +13,7 @@
               <input type="checkbox" v-model="hideZeroScore" class="sr-only peer">
               <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
             </div>
-            <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">スコア0を非表示</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">{{ t('table.hideZero') }}</span>
           </label>
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -22,9 +22,9 @@
             <button 
               @click.stop="toggleDropdown('level')"
               class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
-              :title="filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : 'レベル'"
+              :title="filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : t('table.level')"
             >
-              <span class="truncate">{{ filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : 'レベル' }}</span>
+              <span class="truncate">{{ filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : t('table.level') }}</span>
               <svg class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -47,9 +47,9 @@
             <button 
               @click.stop="toggleDropdown('difficulty')"
               class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
-              :title="filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : '難易度'"
+              :title="filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : t('table.difficulty')"
             >
-              <span class="truncate">{{ filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : '難易度' }}</span>
+              <span class="truncate">{{ filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : t('table.difficulty') }}</span>
               <svg class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -73,7 +73,7 @@
               @click.stop="toggleDropdown('djLevel')"
               class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
             >
-              <span class="truncate">ランク{{ filterDjLevel.length > 0 ? ` (${filterDjLevel.length})` : '' }}</span>
+              <span class="truncate">{{ t('table.rank') }}{{ filterDjLevel.length > 0 ? ` (${filterDjLevel.length})` : '' }}</span>
               <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -97,7 +97,7 @@
               @click.stop="toggleDropdown('clearType')"
               class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
             >
-              <span class="truncate">ランプ{{ filterClearType.length > 0 ? ` (${filterClearType.length})` : '' }}</span>
+              <span class="truncate">{{ t('table.lamp') }}{{ filterClearType.length > 0 ? ` (${filterClearType.length})` : '' }}</span>
               <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
@@ -127,7 +127,7 @@
             v-model="searchQuery"
             type="text" 
             class="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl leading-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" 
-            placeholder="曲名、アーティストなど..."
+            :placeholder="t('table.searchPlaceholder')"
           >
         </div>
       </div>
@@ -155,7 +155,7 @@
             <tr>
               <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-4/12" @click="toggleSort('title')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  曲名 <span class="hidden md:inline">(Title)</span>
+                  {{ t('table.colTitle') }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'title'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
@@ -164,7 +164,7 @@
               </th>
               <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider w-auto sm:w-1/12 group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" @click="toggleSort('difficultyLevel')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  公式 <span class="hidden lg:inline">(Official)</span>
+                  {{ t('table.colOfficial') }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'difficultyLevel'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
@@ -173,7 +173,7 @@
               </th>
               <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider w-auto sm:w-1/12 group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" @click="toggleSort('informalRank')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  非公式 <span class="hidden lg:inline">(Informal)</span>
+                  {{ t('table.colInformal') }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'informalRank'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
@@ -182,7 +182,7 @@
               </th>
               <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12" @click="toggleSort('clearType')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  スコア <span class="hidden md:inline">/ ランク</span>
+                  {{ t('table.colScore') }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'clearType'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
@@ -191,7 +191,7 @@
               </th>
               <th class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-1/12" @click="toggleSort('scoreRate')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  <span class="hidden sm:inline">スコア</span>レート
+                  {{ t('table.colRate') }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'scoreRate'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
@@ -202,7 +202,7 @@
                 :class="viewMode === 'rate' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'"
                 @click="toggleSort('beatTierPoints')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
-                  {{ viewMode === 'rate' ? '獲得PT' : 'Beat-PT' }}
+                  {{ viewMode === 'rate' ? t('table.colPoints') : t('table.colBeatPt') }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'beatTierPoints'">
                     {{ sortOrder === 'asc' ? '▲' : '▼' }}
                   </span>
@@ -305,15 +305,15 @@
                   v-if="viewMode === 'beat' && top100ScoreNeededMap.has(record.title + '|' + record.difficultyName)"
                   class="flex flex-col gap-0.5"
                 >
-                  <span class="text-[9px] sm:text-[11px] font-black text-orange-500 dark:text-orange-400">あと</span>
-                  <span class="text-xs sm:text-sm font-black text-orange-600 dark:text-orange-300 tabular-nums">{{ top100ScoreNeededMap.get(record.title + '|' + record.difficultyName)!.toLocaleString() }}点</span>
-                  <span class="text-[8px] sm:text-[10px] font-bold text-orange-400 dark:text-orange-500">でIN</span>
+                  <span class="text-[9px] sm:text-[11px] font-black text-orange-500 dark:text-orange-400">{{ t('table.top100GapStart') }}</span>
+                  <span class="text-xs sm:text-sm font-black text-orange-600 dark:text-orange-300 tabular-nums">{{ top100ScoreNeededMap.get(record.title + '|' + record.difficultyName)!.toLocaleString() }}{{ t('common.points') }}</span>
+                  <span class="text-[8px] sm:text-[10px] font-bold text-orange-400 dark:text-orange-500">{{ t('table.top100GapEnd') }}</span>
                 </div>
               </td>
             </tr>
             <tr v-if="displayScores.length === 0">
               <td colspan="7" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
-                条件に一致するスコアがありません。
+                {{ t('table.noMatchingScores') }}
               </td>
             </tr>
           </tbody>
@@ -324,15 +324,15 @@
       <div v-if="filteredScores.length > 0" class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors duration-200">
         <div class="flex flex-col sm:flex-row items-center gap-4">
           <div class="text-sm text-slate-500 dark:text-slate-400">
-            <span class="font-medium text-slate-800 dark:text-slate-200">{{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredScores.length) }}</span> / <span class="font-medium text-slate-800 dark:text-slate-200">{{ filteredScores.length }}</span> 件表示中
+            {{ t('table.displayCount', { start: (currentPage - 1) * itemsPerPage + 1, end: Math.min(currentPage * itemsPerPage, filteredScores.length), total: filteredScores.length }) }}
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-slate-500 dark:text-slate-400">表示件数:</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400">{{ t('table.itemsPerPage') }}:</span>
             <select v-model="itemsPerPage" class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors shadow-sm cursor-pointer">
-              <option :value="10">10件</option>
-              <option :value="25">25件</option>
-              <option :value="50">50件</option>
-              <option :value="100">100件</option>
+              <option :value="10">10{{ t('history.timesUnit') }}</option>
+              <option :value="25">25{{ t('history.timesUnit') }}</option>
+              <option :value="50">50{{ t('history.timesUnit') }}</option>
+              <option :value="100">100{{ t('history.timesUnit') }}</option>
             </select>
           </div>
         </div>
@@ -342,7 +342,7 @@
             :disabled="currentPage === 1"
             class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm"
           >
-            前へ
+            {{ t('table.prev') }}
           </button>
           <span class="text-sm font-medium text-slate-600 dark:text-slate-400 px-2 min-w-[3rem] text-center">{{ currentPage }} / {{ totalPages }}</span>
           <button 
@@ -350,7 +350,7 @@
             :disabled="currentPage === totalPages"
             class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm"
           >
-            次へ
+            {{ t('table.next') }}
           </button>
         </div>
       </div>
@@ -379,7 +379,7 @@
             @click="modalTab = 'detail'"
             class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
             :class="modalTab === 'detail' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-          >詳細</button>
+          >{{ t('table.detail') }}</button>
           <button
             v-if="['ANOTHER', 'LEGGENDARIA'].includes(selectedRecord?.difficultyName ?? '')"
             @click="modalTab = 'rate-tier'"
@@ -392,7 +392,7 @@
             class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
             :class="modalTab === 'rivals' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >
-            ライバル
+            {{ t('table.rivals') }}
             <span v-if="rivalList.length > 0" class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full px-1.5">{{ rivalList.length }}</span>
           </button>
           <button
@@ -401,7 +401,7 @@
             class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
             :class="modalTab === 'ranking' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >
-            ランキング
+            {{ t('table.ranking') }}
             <span v-if="songRankingList.length > 0" class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-full px-1.5">{{ songRankingList.length }}</span>
           </button>
         </div>
@@ -414,25 +414,25 @@
         <div v-if="modalTab === 'ranking' && isAdmin" class="w-full">
           <div v-if="isLoadingSongRanking" class="flex flex-col items-center justify-center py-20">
             <div class="w-10 h-10 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-slate-500 dark:text-slate-400">ランキング読み込み中...</p>
+            <p class="text-slate-500 dark:text-slate-400">{{ t('table.loadingRanking') }}</p>
           </div>
           <div v-else-if="songRankingList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <p class="font-bold">このスコアのランキングデータがありません</p>
-            <p class="text-sm mt-1">公開設定のユーザーのみ表示されます</p>
+            <p class="font-bold">{{ t('table.noRankingData') }}</p>
+            <p class="text-sm mt-1">{{ t('table.rankingPrivacyHint') }}</p>
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-3 pl-3 text-xs font-black text-slate-400 uppercase tracking-widest w-12">順位</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest w-14 text-center">TIER</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-24">スコア</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">レート</th>
-                  <th class="pb-3 pr-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">BEAT-PT</th>
+                  <th class="pb-3 pl-3 text-xs font-black text-slate-400 uppercase tracking-widest w-12">{{ t('table.colRankNum') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('table.colPlayer') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest w-14 text-center">{{ t('table.colTier') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-24">{{ t('table.colScore') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">{{ t('table.colRate') }}</th>
+                  <th class="pb-3 pr-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">{{ t('table.colBeatPt') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -503,14 +503,14 @@
           <!-- 獲得PT display -->
           <div class="grid grid-cols-2 gap-4">
             <div class="bg-emerald-900/10 dark:bg-emerald-900/20 p-6 sm:p-8 rounded-2xl shadow-md flex flex-col items-center justify-center border border-emerald-100 dark:border-emerald-800/50">
-              <p class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">獲得PT</p>
+              <p class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">{{ t('table.colPoints') }}</p>
               <p class="text-4xl sm:text-6xl font-black text-emerald-700 dark:text-emerald-300 tracking-tight">
                 {{ calculateScoreRateTierPoints(selectedRecord!.scoreRate).toFixed(2) }}
               </p>
               <p class="text-xs font-bold text-emerald-500 dark:text-emerald-500 mt-1">/ 256 pt (MAX)</p>
             </div>
             <div class="bg-blue-50 dark:bg-slate-800 p-6 sm:p-8 rounded-2xl border-4 border-blue-200 dark:border-slate-700 flex flex-col items-center justify-center">
-              <p class="text-xs sm:text-sm font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-2">スコアレート</p>
+              <p class="text-xs sm:text-sm font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-2">{{ t('table.colRate') }}</p>
               <p class="text-4xl sm:text-6xl font-black text-blue-600 dark:text-blue-300 tracking-tight flex items-baseline">
                 <template v-if="selectedRecord!.scoreRate >= 0">{{ selectedRecord!.scoreRate.toFixed(2) }}</template>
                 <template v-else>---</template>
@@ -522,14 +522,14 @@
           <!-- Threshold Table -->
           <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-3 border-b border-slate-200 dark:border-slate-700">
-              <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">獲得PT 閾値一覧</p>
+              <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('table.rateTierThresholds') }}</p>
             </div>
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700">
-                  <th class="px-6 py-3 text-left text-xs font-black text-slate-400 uppercase tracking-widest">スコアレート</th>
-                  <th class="px-6 py-3 text-right text-xs font-black text-slate-400 uppercase tracking-widest">獲得PT</th>
-                  <th class="px-6 py-3 text-center text-xs font-black text-slate-400 uppercase tracking-widest">達成</th>
+                  <th class="px-6 py-3 text-left text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('table.colRate') }}</th>
+                  <th class="px-6 py-3 text-right text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('table.colPoints') }}</th>
+                  <th class="px-6 py-3 text-center text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('table.achieved') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -561,13 +561,13 @@
         <div v-else-if="modalTab === 'rivals'" class="w-full">
           <div v-if="isLoadingRivals" class="flex flex-col items-center justify-center py-20">
             <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-            <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
+            <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
           </div>
           <div v-else-if="rivalList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <p class="font-bold">スコアを登録しているライバルがいません</p>
+            <p class="font-bold">{{ t('table.rivalNotPlayed') }}</p>
           </div>
           <div v-else class="space-y-2">
             <div
@@ -600,7 +600,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span class="text-sm font-bold">非公開</span>
+                <span class="text-sm font-bold">{{ t('table.privateShort') }}</span>
               </div>
 
               <template v-else-if="rival.score != null">
@@ -643,7 +643,7 @@
                 </div>
               </template>
 
-              <div v-else-if="rival.isSelf || rival.privacyLevel !== 2" class="text-sm text-slate-400 dark:text-slate-500 font-bold shrink-0">未プレイ</div>
+              <div v-else-if="rival.isSelf || rival.privacyLevel !== 2" class="text-sm text-slate-400 dark:text-slate-500 font-bold shrink-0">{{ t('table.notPlayedShort') }}</div>
             </div>
           </div>
         </div>
@@ -656,7 +656,7 @@
                 {{ selectedRecord.difficultyName }} {{ selectedRecord.difficultyLevel ? `☆${selectedRecord.difficultyLevel}` : '' }}
               </span>
               <span v-if="selectedRecord.informalRank" class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide shadow-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                非公式難易度: {{ selectedRecord.informalRank }}
+                {{ t('table.colInformal') }}: {{ selectedRecord.informalRank }}
               </span>
             </div>
             <h3 class="text-2xl sm:text-5xl font-black text-slate-800 dark:text-slate-100 tracking-tight text-center sm:text-left leading-tight mt-1 sm:mt-0">
@@ -665,21 +665,21 @@
           </div>
           <div class="flex flex-wrap items-center justify-between gap-3">
             <span class="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm transition-colors">
-              最終プレイ: <span class="text-slate-700 dark:text-slate-200 font-black">{{ selectedRecord.lastPlayTime || '不明' }}</span>
+              {{ t('table.lastPlayTime') }}: <span class="text-slate-700 dark:text-slate-200 font-black">{{ selectedRecord.lastPlayTime || t('table.unknown') }}</span>
             </span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 sm:gap-6">
             <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
               <div class="absolute top-0 left-0 w-full h-1 sm:h-2" :class="getClearTypeBgColor(selectedRecord.clearType)"></div>
-              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 mt-1 sm:mb-2 sm:mt-2">クリアタイプ</p>
+              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 mt-1 sm:mb-2 sm:mt-2">{{ t('table.lamp') }}</p>
               <p class="text-lg sm:text-4xl font-black text-center" :class="getClearTypeColor(selectedRecord.clearType)">
                 {{ selectedRecord.clearType }}
               </p>
             </div>
             <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
               <div class="absolute top-0 left-0 w-full h-1 sm:h-2" :class="getDjLevelBgColor(selectedRecord.djLevel)"></div>
-              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 mt-1 sm:mb-2 sm:mt-2">DJレベル</p>
+              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 mt-1 sm:mb-2 sm:mt-2">{{ t('table.colRank') }}</p>
               <div class="flex flex-col items-center">
                 <p class="text-4xl sm:text-6xl font-black text-center" :class="getDjLevelColor(selectedRecord.djLevel)">
                   {{ selectedRecord.djLevel }}
@@ -688,7 +688,7 @@
             </div>
             
             <div class="bg-indigo-900/10 dark:bg-indigo-900/20 p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200 border border-indigo-100 dark:border-indigo-800/50">
-              <p class="text-xs sm:text-sm font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1 sm:mb-2">単独BEAT-PT</p>
+              <p class="text-xs sm:text-sm font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1 sm:mb-2">BEAT-PT</p>
               <div class="flex items-baseline gap-1 sm:gap-2">
                 <p class="text-4xl sm:text-6xl font-black text-indigo-700 dark:text-indigo-300 tracking-tight">
                   {{ selectedRecord.beatTierPoints.toFixed(1) }}
@@ -698,7 +698,7 @@
             </div>
             
             <div class="bg-slate-800 dark:bg-slate-700 p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200">
-              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1 sm:mb-2">EXスコア</p>
+              <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1 sm:mb-2">{{ t('table.exScore') }}</p>
               <div class="flex items-baseline gap-1 sm:gap-2">
                 <p class="text-4xl sm:text-6xl font-black text-white tracking-tight">
                   {{ selectedRecord.score }}
@@ -709,10 +709,10 @@
             <div 
                class="p-4 sm:p-8 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors relative duration-200"
                :class="selectedRecord.scoreRate >= 0 ? 'bg-blue-50 dark:bg-slate-800 border-4 border-blue-200 dark:border-slate-700' : 'bg-slate-100 dark:bg-slate-800/50 border-dashed border-4 border-slate-300 dark:border-slate-600 group cursor-help'"
-               :title="selectedRecord.scoreRate >= 0 ? '' : '正確なノーツ数定義データがないため計算できません'"
+               :title="selectedRecord.scoreRate >= 0 ? '' : t('table.rateCalculabilityHint')"
             >
-              <p class="text-xs sm:text-sm font-bold uppercase tracking-widest mb-1 sm:mb-2" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'">単独スコアレート</p>
-              <p class="text-4xl sm:text-6xl font-black tracking-tight flex items-baseline" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-600 dark:text-blue-300' : 'text-slate-300 dark:text-slate-600 transition-colors group-hover:text-slate-400 dark:group-hover:text-slate-500'">
+               <p class="text-xs sm:text-sm font-bold uppercase tracking-widest mb-1 sm:mb-2" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'">{{ t('table.individualRate') }}</p>
+               <p class="text-4xl sm:text-6xl font-black tracking-tight flex items-baseline" :class="selectedRecord.scoreRate >= 0 ? 'text-blue-600 dark:text-blue-300' : 'text-slate-300 dark:text-slate-600 transition-colors group-hover:text-slate-400 dark:group-hover:text-slate-500'">
                  <template v-if="selectedRecord.scoreRate >= 0">
                     {{ selectedRecord.scoreRate.toFixed(2) }}
                  </template>
@@ -726,7 +726,7 @@
 
           <div class="border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-2 sm:py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
-              <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">判定詳細</p>
+              <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('table.judgmentDetail') }}</p>
             </div>
             <div class="grid grid-cols-3 divide-x divide-slate-200 dark:divide-slate-700">
               <div class="p-3 sm:p-6 lg:p-8 flex flex-col items-center justify-center bg-gradient-to-b from-amber-50/50 dark:from-slate-800/50 to-white dark:to-slate-800 transition-colors duration-200">
@@ -751,15 +751,14 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                おすすめオプション投票
+                {{ t('table.optionVote') }}
               </p>
-              <span v-if="voteData.totalVotes > 0" class="text-[10px] sm:text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">{{ voteData.totalVotes }}票</span>
+              <span v-if="voteData.totalVotes > 0" class="text-[10px] sm:text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">{{ t('table.voteCount', { n: voteData.totalVotes }) }}</span>
             </div>
             <div class="p-4 sm:p-6">
               <div class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/50">
                 <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                  💡 2P側でプレイされている方の投票は、自動的に1P側の配置に反転（ミラーリング）されて集計されます。
-                  そのため、<span class="font-bold text-emerald-600 dark:text-emerald-500">ご自身のプレイサイドで当たりだったオプションをそのまま投票</span>してください。
+                  {{ t('table.voteHint') }}
                 </p>
               </div>
               
@@ -781,7 +780,7 @@
                 </button>
               </div>
               <div v-else class="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-sm text-slate-500 dark:text-slate-400 italic text-center">
-                ※ログインすると投票できます。
+                {{ t('table.loginToVote') }}
               </div>
               
               <!-- Vote Results Bar Chart -->
@@ -802,7 +801,7 @@
                 </div>
               </div>
               <div v-else class="text-center py-4 text-sm text-slate-400 dark:text-slate-500">
-                まだ投票がありません。最初の投票者になりましょう！
+                {{ t('table.noVotesYet') }}
               </div>
             </div>
           </div>
@@ -814,17 +813,17 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
-                目標BEAT-PTシミュレーター
+                {{ t('scores.targetSimulator') }}
               </p>
             </div>
             <div class="p-6">
               <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-end">
-                  <span class="text-sm font-bold text-slate-600 dark:text-slate-400">あと何pt稼ぐ？</span>
+                  <span class="text-sm font-bold text-slate-600 dark:text-slate-400">{{ t('scores.targetHowManyPt') }}</span>
                   <div class="flex flex-col items-end">
                     <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400">+{{ targetBeatPtSlider.toFixed(1) }} <span class="text-sm">pt</span></span>
                     <span v-if="targetBeatPtSlider > 0" class="text-xs font-bold text-indigo-500 dark:text-indigo-500/80">
-                      (合計: {{ (selectedRecord.beatTierPoints + targetBeatPtSlider).toFixed(1) }} pt)
+                      {{ t('scores.targetTotalPt', { n: (selectedRecord.beatTierPoints + targetBeatPtSlider).toFixed(1) }) }}
                     </span>
                   </div>
                 </div>
@@ -838,16 +837,16 @@
                 >
                 <div class="flex justify-between text-xs font-medium text-slate-400 dark:text-slate-500">
                   <span>0</span>
-                  <span>最大: +{{ (selectedRecord.maxBeatTierPoints - selectedRecord.beatTierPoints).toFixed(1) }}</span>
+                  <span>{{ t('scores.targetMaxIncrease', { n: (selectedRecord.maxBeatTierPoints - selectedRecord.beatTierPoints).toFixed(1) }) }}</span>
                 </div>
                 
                 <div v-if="targetBeatPtSlider > 0" class="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/50 flex flex-col items-center justify-center text-center">
-                  <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-2">目標達成に必要なスコアの伸び</p>
+                  <p class="text-sm font-bold text-slate-600 dark:text-slate-300 mb-2">{{ t('scores.targetScoreNeededLabel') }}</p>
                   <p class="text-4xl font-black text-indigo-700 dark:text-indigo-400 flex items-baseline gap-1">
-                    +{{ targetScoreNeeded }} <span class="text-lg font-bold">点</span>
+                    {{ t('scores.targetScoreNeededValue', { n: targetScoreNeeded }) }}
                   </p>
                   <p class="text-xs font-medium text-indigo-500 dark:text-indigo-400 mt-2">
-                    目標スコア: {{ selectedRecord.score + targetScoreNeeded }} / {{ selectedRecord.maxScore }} ({{ (((selectedRecord.score + targetScoreNeeded) / selectedRecord.maxScore) * 100).toFixed(2) }}%)
+                    {{ t('scores.targetFinalScore', { score: selectedRecord.score + targetScoreNeeded, max: selectedRecord.maxScore, rate: (((selectedRecord.score + targetScoreNeeded) / selectedRecord.maxScore) * 100).toFixed(2) }) }}
                   </p>
                 </div>
               </div>
@@ -857,32 +856,32 @@
           <!-- Memo Section -->
           <div v-if="selectedRecord.id || !isLoggedIn" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
-              <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">メモ</p>
+              <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('scores.memo') }}</p>
               <button @click="isEditingMemo = true" v-if="!isEditingMemo && isLoggedIn" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-bold flex items-center gap-1 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                 </svg>
-                編集
+                {{ t('common.edit') }}
               </button>
             </div>
             <div class="p-6">
               <template v-if="!isLoggedIn">
                 <div class="text-slate-500 dark:text-slate-400 italic text-sm text-center py-2">
-                  ※ログインすると、各楽曲にメモを残せるようになります。
+                  {{ t('scores.memoLoginHint') }}
                 </div>
               </template>
               <template v-else-if="isEditingMemo">
-                <textarea v-model="editMemoText" rows="4" class="w-full border border-slate-300 dark:border-slate-600 rounded-xl p-3 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-500 text-slate-700 dark:text-slate-200 resize-y transition-colors duration-200" placeholder="オプション（RANDOMなど）や攻略のメモを残せます..."></textarea>
+                <textarea v-model="editMemoText" rows="4" class="w-full border border-slate-300 dark:border-slate-600 rounded-xl p-3 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-500 text-slate-700 dark:text-slate-200 resize-y transition-colors duration-200" :placeholder="t('scores.memoPlaceholder')"></textarea>
                 <div class="flex justify-end gap-3 mt-4">
-                  <button @click="isEditingMemo = false" class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">キャンセル</button>
+                  <button @click="isEditingMemo = false" class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">{{ t('common.cancel') }}</button>
                   <button @click="saveMemo" :disabled="isSavingMemo" class="px-6 py-2 bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50">
-                    {{ isSavingMemo ? '保存中...' : '保存' }}
+                    {{ isSavingMemo ? t('common.saving') : t('common.save') }}
                   </button>
                 </div>
               </template>
               <template v-else>
                 <div v-if="selectedRecord.memo" class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{{ selectedRecord.memo }}</div>
-                <div v-else class="text-slate-400 dark:text-slate-500 italic text-sm">メモはありません。</div>
+                <div v-else class="text-slate-400 dark:text-slate-500 italic text-sm">{{ t('scores.noMemo') }}</div>
               </template>
             </div>
           </div>
@@ -896,7 +895,7 @@
            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
            </svg>
-           一覧に戻る
+           {{ t('common.backToList') }}
          </button>
       </div>
     </div>
@@ -906,6 +905,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import diffTableRaw from '../data/difficulty_table.json';
@@ -931,6 +931,7 @@ const props = defineProps<{
 // Emits are handled below after totalBeatTierPoints definition
 
 const { showRateTier } = useRateTierVisibility();
+const { t } = useI18n();
 const viewMode = ref<'beat' | 'rate'>('beat');
 watch(showRateTier, (val) => { if (!val && viewMode.value === 'rate') viewMode.value = 'beat'; });
 
@@ -1425,6 +1426,15 @@ const closeDetailModal = () => {
   document.body.style.overflow = '';
 };
 
+// Watch for filter changes to reset pagination
+watch(
+  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
+  () => {
+    currentPage.value = 1;
+  },
+  { deep: true }
+);
+
 const handleClickOutside = (event: MouseEvent) => {
   if (openDropdown.value && !(event.target as Element).closest('.relative')) {
     openDropdown.value = null;
@@ -1439,11 +1449,6 @@ onUnmounted(() => {
   window.removeEventListener('click', handleClickOutside);
   document.body.style.overflow = '';
 });
-
-// Reset page when search or filters change
-watch([searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, sortKey, sortOrder, hideZeroScore, itemsPerPage], () => {
-  currentPage.value = 1;
-}, { deep: true });
 
 const toggleSort = (key: SortKey) => {
   if (sortKey.value === key) {
@@ -1577,7 +1582,7 @@ const filteredScores = computed(() => {
 });
 
 // Reset page and set default sort when switching modes
-watch(viewMode, (mode) => {
+watch(viewMode, () => {
   currentPage.value = 1;
   filterLevel.value = [];
   sortKey.value = 'beatTierPoints';

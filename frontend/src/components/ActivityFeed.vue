@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import { API_BASE } from '../composables/useAuth';
 
 interface ActivityItem {
@@ -11,6 +12,7 @@ interface ActivityItem {
   createdAt: string;
 }
 
+const { t, currentLang } = useI18n();
 const activities = ref<ActivityItem[]>([]);
 const isLoading = ref(false);
 
@@ -33,13 +35,13 @@ const formatDate = (isoStr: string) => {
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return 'たった今';
-  if (diffMin < 60) return `${diffMin}分前`;
+  if (diffMin < 1) return t('activity.justNow');
+  if (diffMin < 60) return t('activity.minutesAgo', { n: diffMin });
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}時間前`;
+  if (diffH < 24) return t('activity.hoursAgo', { n: diffH });
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 7) return `${diffD}日前`;
-  return d.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+  if (diffD < 7) return t('activity.daysAgo', { n: diffD });
+  return d.toLocaleDateString(currentLang.value === 'ko' ? 'ko-KR' : currentLang.value === 'en' ? 'en-US' : 'ja-JP', { month: 'short', day: 'numeric' });
 };
 
 onMounted(fetchFeed);
@@ -52,7 +54,7 @@ onMounted(fetchFeed);
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
-        <h3 class="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">全体ニュース</h3>
+        <h3 class="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">{{ t('activity.title') }}</h3>
       </div>
       <button @click="fetchFeed" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isLoading }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -67,7 +69,7 @@ onMounted(fetchFeed);
       </div>
 
       <div v-else-if="activities.length === 0" class="px-5 py-8 text-center">
-        <p class="text-xs text-slate-400 dark:text-slate-500 font-bold">まだニュースはありません</p>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-bold">{{ t('activity.noNews') }}</p>
       </div>
 
       <div v-else v-for="item in activities" :key="item.id" class="px-5 py-3.5 flex items-start gap-3 hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
@@ -82,14 +84,12 @@ onMounted(fetchFeed);
         <!-- Content -->
         <div class="flex-1 min-w-0">
           <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-            <span class="font-bold text-slate-900 dark:text-white">{{ item.displayName }}</span>
-            さんが
-            <span v-if="item.type === 'RANK_UP'">
-              Beat-Tier <span class="font-bold text-slate-500 dark:text-slate-400 line-through">{{ item.oldValue }}</span>
-              から
-              <span class="font-bold text-amber-600 dark:text-amber-400">{{ item.newValue }}</span>
-              へランクアップしました！
-            </span>
+            <template v-if="item.type === 'RANK_UP'">
+              {{ t('activity.rankUpMsg', { user: item.displayName, old: item.oldValue, new: item.newValue }) }}
+            </template>
+            <template v-else>
+               <span class="font-bold text-slate-900 dark:text-white">{{ item.displayName }}</span>: {{ item.newValue }}
+            </template>
           </p>
           <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">{{ formatDate(item.createdAt) }}</p>
         </div>

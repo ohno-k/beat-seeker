@@ -3,16 +3,16 @@
 
     <!-- 成長軌跡 -->
     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">プロフィール・成長軌跡</h2>
-      <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">アップロード履歴からあなたの成長を多角的に分析します。</p>
+      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{{ t('dashboard.title') }}</h2>
+      <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">{{ t('dashboard.subtitle') }}</p>
 
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-12">
         <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
-        <p class="text-slate-500 dark:text-slate-400 font-medium">データを読み込み中...</p>
+        <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('dashboard.loading') }}</p>
       </div>
 
       <div v-else-if="historyData.length === 0" class="py-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
-        <p class="text-slate-500 dark:text-slate-400 font-medium">履歴データがありません。<br/>スコアを複数回アップロードすると、ここに成長グラフが表示されます。</p>
+        <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('dashboard.noData') }}<br/>{{ t('dashboard.noDataHint') }}</p>
       </div>
 
       <div v-else class="space-y-10">
@@ -20,35 +20,35 @@
         <div>
           <div class="section-header">
             <div class="w-1 h-5 bg-violet-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">成長サマリー</h3>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.summary') }}</h3>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             <div class="stat-card border-blue-100 dark:border-slate-600 bg-blue-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-1">スナップショット</span>
+              <span class="text-[9px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-1">{{ t('dashboard.snapshot') }}</span>
               <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ historyData.length }}</span>
             </div>
             <div class="stat-card border-violet-100 dark:border-slate-600 bg-violet-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-violet-500 dark:text-violet-400 uppercase tracking-widest mb-1">最新 BEAT-PT</span>
+              <span class="text-[9px] font-bold text-violet-500 dark:text-violet-400 uppercase tracking-widest mb-1">{{ t('dashboard.latestBeatPt') }}</span>
               <span class="text-xl font-black text-slate-700 dark:text-slate-200">{{ latestBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
             <div class="stat-card border-amber-100 dark:border-slate-600 bg-amber-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-1">累計 EXスコア</span>
+              <span class="text-[9px] font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-1">{{ t('dashboard.totalExScore') }}</span>
               <span class="text-lg font-black text-slate-700 dark:text-slate-200">{{ latestTotalScore.toLocaleString() }}</span>
             </div>
             <div class="stat-card border-yellow-100 dark:border-slate-600 bg-yellow-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest mb-1">最新 AAA数</span>
+              <span class="text-[9px] font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest mb-1">{{ t('dashboard.latestAaa') }}</span>
               <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ latestAaaCount }}</span>
             </div>
             <div class="stat-card border-emerald-100 dark:border-slate-600 bg-emerald-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest mb-1">最新 FC数</span>
+              <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest mb-1">{{ t('dashboard.latestFc') }}</span>
               <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ latestFcCount }}</span>
             </div>
             <div class="stat-card border-purple-100 dark:border-slate-600 bg-purple-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-purple-500 dark:text-purple-400 uppercase tracking-widest mb-1">平均増加/回</span>
+              <span class="text-[9px] font-bold text-purple-500 dark:text-purple-400 uppercase tracking-widest mb-1">{{ t('dashboard.avgIncrease') }}</span>
               <span class="text-xl font-black text-slate-700 dark:text-slate-200">{{ avgBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
             <div class="stat-card border-indigo-100 dark:border-slate-600 bg-indigo-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1">最大増加</span>
+              <span class="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1">{{ t('dashboard.maxIncrease') }}</span>
               <span class="text-xl font-black text-slate-700 dark:text-slate-200">{{ maxBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
           </div>
@@ -58,27 +58,27 @@
         <div>
           <div class="section-header">
             <div class="w-1 h-5 bg-blue-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">時系列推移</h3>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.trends') }}</h3>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div class="chart-card lg:col-span-2">
-              <h4 class="chart-title">総 BEAT-PT の推移</h4>
+              <h4 class="chart-title">{{ t('dashboard.beatPtTrend') }}</h4>
               <div class="h-56"><LineChart v-if="beatPtChartData" :data="beatPtChartData" :options="lineOpts" /></div>
             </div>
             <div class="chart-card lg:col-span-2">
-              <h4 class="chart-title">アップロード別 BEAT-PT 増加量</h4>
+              <h4 class="chart-title">{{ t('dashboard.increaseTrend') }}</h4>
               <div class="h-44"><BarChart v-if="uploadIncreaseChartData" :data="uploadIncreaseChartData" :options="barOpts" /></div>
             </div>
             <div class="chart-card">
-              <h4 class="chart-title">累計 EXスコアの推移</h4>
+              <h4 class="chart-title">{{ t('dashboard.scoreTrend') }}</h4>
               <div class="h-44"><LineChart v-if="scoreChartData" :data="scoreChartData" :options="lineOpts" /></div>
             </div>
             <div class="chart-card">
-              <h4 class="chart-title">DJレベル取得数の推移</h4>
+              <h4 class="chart-title">{{ t('dashboard.djLevelTrend') }}</h4>
               <div class="h-44"><LineChart v-if="djLevelTrendData" :data="djLevelTrendData" :options="lineOpts" /></div>
             </div>
             <div class="chart-card lg:col-span-2">
-              <h4 class="chart-title">上位クリアタイプの推移</h4>
+              <h4 class="chart-title">{{ t('dashboard.clearTypeTrend') }}</h4>
               <div class="h-44"><LineChart v-if="clearChartData" :data="clearChartData" :options="lineOpts" /></div>
             </div>
           </div>
@@ -90,18 +90,18 @@
     <div v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">スコア分析</h2>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Lv11/12 の ANOTHER / LEGGENDARIA {{ myScoresActive.length }} 曲を分析（0点除く）</p>
+          <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">{{ t('dashboard.analysis') }}</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('dashboard.analysisHint', { n: myScoresActive.length }) }}</p>
         </div>
         <div v-if="avgPgreatRate !== null" class="text-right">
-          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">平均 P-GREAT 率</span>
+          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">{{ t('dashboard.avgPgreatRate') }}</span>
           <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ avgPgreatRate }}%</span>
         </div>
       </div>
 
       <!-- Level filter -->
       <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
-        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">対象レベル</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{{ t('dashboard.targetLevel') }}</span>
         <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
           <button
             v-for="lvl in ['ALL', '11', '12']" :key="lvl"
@@ -110,7 +110,7 @@
             :class="selectedAnalysisLevel === lvl
               ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
-          >{{ lvl === 'ALL' ? 'すべて' : `☆${lvl}` }}</button>
+          >{{ lvl === 'ALL' ? t('common.all') : `☆${lvl}` }}</button>
         </div>
       </div>
 
@@ -119,19 +119,19 @@
         <div>
           <div class="section-header">
             <div class="w-1 h-5 bg-emerald-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">クリア状況（Lv11/12）</h3>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.clearStatus') }}</h3>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div class="chart-card">
-              <h4 class="chart-title">クリアタイプ分布</h4>
+              <h4 class="chart-title">{{ t('dashboard.clearTypeDist') }}</h4>
               <div class="h-52"><DoughnutChart v-if="clearTypeDoughnut" :data="clearTypeDoughnut" :options="doughnutOpts" /></div>
             </div>
             <div class="chart-card">
-              <h4 class="chart-title">DJレベル分布</h4>
+              <h4 class="chart-title">{{ t('dashboard.djLevelDist') }}</h4>
               <div class="h-52"><BarChart v-if="djLevelCurrentData" :data="djLevelCurrentData" :options="barOpts" /></div>
             </div>
             <div class="chart-card lg:col-span-2">
-              <h4 class="chart-title">スコアレート分布（0点除く）<span class="text-[10px] font-normal text-slate-400 ml-2">棒をクリックで曲一覧</span></h4>
+              <h4 class="chart-title">{{ t('dashboard.scoreRateDist') }} <span class="text-[10px] font-normal text-slate-400 ml-2">{{ t('dashboard.clickForList') }}</span></h4>
               <div class="h-44"><BarChart v-if="scoreRateHistData" :data="scoreRateHistData" :options="scoreRateHistOpts" /></div>
             </div>
           </div>
@@ -141,21 +141,21 @@
         <div>
           <div class="section-header">
             <div class="w-1 h-5 bg-amber-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">非公式難易度別クリア状況</h3>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.informalClearStatus') }}</h3>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-black uppercase tracking-wide">
-                  <th class="pb-3 pl-2 text-left text-slate-400">難度</th>
+                  <th class="pb-3 pl-2 text-left text-slate-400">{{ t('dashboard.rank') }}</th>
                   <th class="pb-3 text-center text-emerald-500">FC</th>
                   <th class="pb-3 text-center text-amber-500">EXH</th>
                   <th class="pb-3 text-center text-red-500">HARD</th>
                   <th class="pb-3 text-center text-blue-500">CLEAR</th>
                   <th class="pb-3 text-center text-green-500">EASY</th>
-                  <th class="pb-3 text-center text-slate-400">他</th>
-                  <th class="pb-3 text-center text-slate-400">計</th>
-                  <th class="pb-3 pr-2 text-right text-slate-400">クリア率</th>
+                  <th class="pb-3 text-center text-slate-400">{{ t('common.other') }}</th>
+                  <th class="pb-3 text-center text-slate-400">{{ t('common.total') }}</th>
+                  <th class="pb-3 pr-2 text-right text-slate-400">{{ t('dashboard.clearRate') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -186,10 +186,10 @@
         <div>
           <div class="section-header">
             <div class="w-1 h-5 bg-indigo-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">BEAT-PT 上位100曲の難易度分布</h3>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top100Dist') }}</h3>
           </div>
           <div class="chart-card">
-            <h4 class="chart-title">非公式難易度別 曲数（上位100曲中）</h4>
+            <h4 class="chart-title">{{ t('dashboard.top100CountByType') }}</h4>
             <div class="h-44"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="barOpts" /></div>
           </div>
         </div>
@@ -198,17 +198,17 @@
         <div>
           <div class="section-header">
             <div class="w-1 h-5 bg-violet-500 rounded-full"></div>
-            <h3 class="font-bold text-slate-700 dark:text-slate-200">BEAT-PT 上位10曲</h3>
+            <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top10') }}</h3>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-black uppercase text-slate-400">
                   <th class="pb-3 pl-2 text-left w-6">#</th>
-                  <th class="pb-3 text-left">楽曲</th>
-                  <th class="pb-3 text-center w-16">難度</th>
+                  <th class="pb-3 text-left">{{ t('table.colTitle') }}</th>
+                  <th class="pb-3 text-center w-16">{{ t('dashboard.rank') }}</th>
                   <th class="pb-3 text-center w-10">☆</th>
-                  <th class="pb-3 text-right w-20">スコア率</th>
+                  <th class="pb-3 text-right w-20">{{ t('table.colRate') }}</th>
                   <th class="pb-3 pr-2 text-right w-24 text-violet-500">BEAT-PT</th>
                 </tr>
               </thead>
@@ -249,11 +249,11 @@
             <table class="w-full text-sm">
               <thead class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                 <tr class="text-xs font-black uppercase text-slate-400 tracking-wide">
-                  <th class="pb-3 pt-3 pl-6 text-left">曲名</th>
+                  <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
                   <th class="pb-3 pt-3 text-center w-14">☆</th>
-                  <th class="pb-3 pt-3 text-center w-14">難度</th>
-                  <th class="pb-3 pt-3 text-right w-24">スコア</th>
-                  <th class="pb-3 pt-3 text-right pr-6 w-32">次の区分まで</th>
+                  <th class="pb-3 pt-3 text-center w-14">{{ t('table.colInformal') }}</th>
+                  <th class="pb-3 pt-3 text-right w-24">{{ t('table.exScore') }}</th>
+                  <th class="pb-3 pt-3 text-right pr-6 w-32">{{ t('table.nextBand') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -272,10 +272,10 @@
                   <td class="py-2 pr-6 text-right text-xs tabular-nums">
                     <template v-if="s.nextBandPts !== null && s.nextBandPts > 0">
                       <div class="font-bold text-blue-600 dark:text-blue-400">{{ s.nextBandLabel }}</div>
-                      <div class="text-slate-400 text-[10px]">あと {{ s.nextBandPts.toLocaleString() }} 点</div>
+                      <div class="text-slate-400 text-[10px]">{{ t('dashboard.remainingPoints', { n: s.nextBandPts.toLocaleString() }) }}</div>
                     </template>
                     <template v-else>
-                      <span class="text-purple-500 font-bold text-[10px]">MAX-達成済</span>
+                      <span class="text-purple-500 font-bold text-[10px]">{{ t('table.achieved') }}</span>
                     </template>
                   </td>
                 </tr>
@@ -292,11 +292,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
         </svg>
-        プッシュ通知設定
+        {{ t('dashboard.notifications') }}
       </h3>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        ライバル申請が届いた時にリアルタイムで通知を受け取れます。
-        <br/>※iOS/iPadOSの場合は「ホーム画面に追加」してから設定してください。
+        {{ t('dashboard.notificationsHint') }}
+        <br/>{{ t('dashboard.iosPwaHint') }}
       </p>
       <div class="flex items-center gap-4">
         <button
@@ -313,18 +313,18 @@
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
           </span>
-          {{ notificationStatus === 'granted' ? '通知は有効です' : '通知を有効にする' }}
+          {{ notificationStatus === 'granted' ? t('dashboard.notificationsEnabled') : t('dashboard.enableNotifications') }}
         </button>
         <button v-if="notificationStatus === 'granted'"
           @click="handleTestNotification"
           :disabled="isTesting"
           class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
         >
-          <span v-if="isTesting">送信中...</span>
-          <span v-else>テスト送信</span>
+          <span v-if="isTesting">{{ t('dashboard.sending') }}</span>
+          <span v-else>{{ t('dashboard.testNotification') }}</span>
         </button>
         <span class="text-xs text-slate-400 dark:text-slate-500">
-          現在の状態: {{ notificationStatus === 'granted' ? '許可済み' : notificationStatus === 'denied' ? 'ブロック中' : '未設定' }}
+          {{ t('dashboard.currentStatus') }}: {{ notificationStatus === 'granted' ? t('dashboard.statusGranted') : notificationStatus === 'denied' ? t('dashboard.statusDenied') : t('dashboard.statusDefault') }}
         </span>
       </div>
     </div>
@@ -343,6 +343,7 @@ import {
 import { Line as LineChart, Bar as BarChart, Doughnut as DoughnutChart } from 'vue-chartjs';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
+import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
 import { calculatePoints, WEIGHTS } from '../utils/beatTier';
 import songDataRaw from '../data/song_data.json';
@@ -354,6 +355,7 @@ const props = defineProps<{
 
 const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
+const { t } = useI18n();
 // For push notifications, we only show/allow if it's the current user (no viewingUserId)
 const { requestNotificationPermission, sendTestNotification } = useFriends();
 
@@ -367,9 +369,9 @@ const handleEnableNotifications = async () => {
     const success = await requestNotificationPermission();
     if (success) {
       notificationStatus.value = 'granted';
-      alert('通知が有効になりました。');
+      alert(t('profile.notificationSuccess'));
     } else {
-      alert('通知の許可が得られなかったか、エラーが発生しました。');
+      alert(t('profile.notificationError'));
     }
   } catch (e) {
     console.error(e);
@@ -383,9 +385,9 @@ const handleTestNotification = async () => {
   isTesting.value = true;
   try {
     await sendTestNotification();
-    alert('通知のテスト送信をリクエストしました。数秒以内に通知が届くか確認してください。');
+    alert(t('profile.testNotificationSuccess'));
   } catch (e: any) {
-    alert(e.message || 'テスト送信に失敗しました');
+    alert(e.message || t('profile.testNotificationError'));
   } finally {
     isTesting.value = false;
   }
@@ -501,7 +503,7 @@ const beatPtChartData = computed(() => {
   return {
     labels: labels.value,
     datasets: [{
-      label: '総 BEAT-PT',
+      label: t('dashboard.beatPtTrend'),
       data: historyData.value.map(r => r.totalBeatPt),
       borderColor: '#a855f7',
       backgroundColor: 'rgba(168,85,247,0.1)',
@@ -515,7 +517,7 @@ const uploadIncreaseChartData = computed(() => {
   return {
     labels: labels.value,
     datasets: [{
-      label: 'BEAT-PT 増加',
+      label: t('dashboard.increaseTrend'),
       data: historyData.value.map(r => r.beatPtIncrease ?? 0),
       backgroundColor: historyData.value.map(r => (r.beatPtIncrease ?? 0) > 0 ? 'rgba(168,85,247,0.65)' : 'rgba(148,163,184,0.35)'),
       borderColor: historyData.value.map(r => (r.beatPtIncrease ?? 0) > 0 ? '#a855f7' : '#94a3b8'),
@@ -529,7 +531,7 @@ const scoreChartData = computed(() => {
   return {
     labels: labels.value,
     datasets: [{
-      label: '累計EXスコア',
+      label: t('dashboard.scoreTrend'),
       data: historyData.value.map(r => r.totalScore),
       borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)',
       fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#3b82f6'
@@ -623,7 +625,7 @@ const top100DiffHistData = computed(() => {
   });
   return {
     labels: keys.map(k => `☆${k}`),
-    datasets: [{ label: '曲数', data: keys.map(k => counts[k]), backgroundColor: colors, borderRadius: 4 }]
+    datasets: [{ label: t('common.songCount'), data: keys.map(k => counts[k]), backgroundColor: colors, borderRadius: 4 }]
   };
 });
 
@@ -665,7 +667,7 @@ const djLevelCurrentData = computed(() => {
   return {
     labels: levels,
     datasets: [{
-      label: '楽曲数',
+      label: t('common.songCount'),
       backgroundColor: djColors,
       data: levels.map(l => counts[l]),
       borderRadius: 4,
@@ -698,7 +700,7 @@ const scoreRateHistData = computed(() => {
   return {
     labels: bands.map(b => b.label),
     datasets: [{
-      label: '楽曲数',
+      label: t('common.songCount'),
       data: bands.map(b => b.count),
       backgroundColor: ['#94a3b8', '#60a5fa', '#38bdf8', '#fbbf24', '#f59e0b', '#10b981', '#a855f7'],
       borderRadius: 6,
