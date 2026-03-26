@@ -338,7 +338,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
 import { getNextRankInfo, getNextRateTierRankInfo } from '../utils/beatTier';
 import { useAuth, API_BASE } from '../composables/useAuth';
@@ -456,98 +456,66 @@ const castVote = async (title: string, difficultyName: string, optionType: strin
 
 const shareContainer = ref<HTMLElement | null>(null);
 const isSharing = ref(false);
-const cachedShareBlob = ref<Blob | null>(null);
 
-// Pre-generate share image when modal opens so navigator.share() can be called
-// directly from user gesture without breaking the gesture chain on iOS Safari.
-const generateShareImage = async () => {
-  if (!shareContainer.value) return;
+const shareOnX = async () => {
+  if (!shareContainer.value || isSharing.value) return;
+  isSharing.value = true;
+
+  const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`);
+
   try {
     const canvas = await html2canvas(shareContainer.value, {
       scale: 2,
       backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
       logging: false
     });
-    canvas.toBlob((blob) => {
-      if (blob) cachedShareBlob.value = blob;
-    }, 'image/png');
-  } catch {
-    // ignore; shareOnX will regenerate on demand
-  }
-};
 
-watch(() => props.isOpen, async (open) => {
-  if (open) {
-    cachedShareBlob.value = null;
-    await nextTick();
-    setTimeout(generateShareImage, 300);
-  }
-});
+    // Use await+Promise instead of callback to preserve the user gesture chain on iOS Safari
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) throw new Error('Blob is null');
 
-const shareOnX = async () => {
-  if (isSharing.value) return;
-  isSharing.value = true;
+    const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
 
-  const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`);
-
-  // Use cached blob if available; otherwise generate now (non-iOS fallback)
-  let blob = cachedShareBlob.value;
-  if (!blob) {
-    if (!shareContainer.value) { isSharing.value = false; return; }
-    try {
-      const canvas = await html2canvas(shareContainer.value, {
-        scale: 2,
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
-        logging: false
-      });
-      blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
-      if (!blob) throw new Error('Blob is null');
-    } catch (error) {
-      console.error('Share failed:', error);
-      alert(t('report.generateError'));
-      isSharing.value = false;
-      return;
-    }
-  }
-
-  const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
-
-  // Try Web Share API first (iOS Safari / Android / newer desktop Chrome)
-  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({
-        title: 'beat-seeker Report',
-        text: `${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`,
-        files: [file]
-      });
-      isSharing.value = false;
-      return;
-    } catch (e) {
-      if ((e as Error).name === 'AbortError') {
+    // Try Web Share API first (iOS Safari / Android / newer desktop Chrome)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: 'beat-seeker Report',
+          text: `${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`,
+          files: [file]
+        });
         isSharing.value = false;
         return;
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') {
+          isSharing.value = false;
+          return;
+        }
+        // Non-abort error → fall through to clipboard
       }
-      // Non-abort error → fall through to clipboard
     }
-  }
 
-  // Fallback: Clipboard Web API + Window Open
-  try {
-    await navigator.clipboard.write([
-      new ClipboardItem({ 'image/png': blob })
-    ]);
-    alert(t('report.copySuccess'));
-    window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
-  } catch (e) {
-    console.error('Clipboard copy failed:', e);
-    const downloadUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = 'beat-seeker-report.png';
-    a.click();
-    URL.revokeObjectURL(downloadUrl);
-    alert(t('report.copyError'));
-    window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
+    // Fallback: Clipboard Web API + Window Open
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      alert(t('report.copySuccess'));
+      window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
+    } catch (e) {
+      console.error('Clipboard copy failed:', e);
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = 'beat-seeker-report.png';
+      a.click();
+      URL.revokeObjectURL(downloadUrl);
+      alert(t('report.copyError'));
+      window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
+    }
+  } catch (error) {
+    console.error('Share failed:', error);
+    alert(t('report.generateError'));
   }
 
   isSharing.value = false;
