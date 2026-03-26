@@ -37,7 +37,7 @@ public class User {
     @Column(columnDefinition = "integer default 1")
     private Integer privacyLevel = 1; // 0: Public, 1: Friends Only, 2: Private
 
-    @Column(length = 5)
+    @Column(columnDefinition = "varchar(5) default 'ja'")
     private String language = "ja"; // "ja", "en", "ko"
 
     private LocalDateTime lastUploadedAt;
