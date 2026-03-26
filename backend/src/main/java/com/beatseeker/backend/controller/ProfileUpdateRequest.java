@@ -10,5 +10,6 @@ public record ProfileUpdateRequest(
                 String newPassword,
                 Integer privacyLevel,
                 String email,
-                String language) {
+                String language,
+                Boolean showRateTier) {
 }

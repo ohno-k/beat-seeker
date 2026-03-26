@@ -40,6 +40,9 @@ public class User {
     @Column(columnDefinition = "varchar(5) default 'ja'")
     private String language = "ja"; // "ja", "en", "ko"
 
+    @Column(columnDefinition = "boolean default true")
+    private Boolean showRateTier = true;
+
     private LocalDateTime lastUploadedAt;
 
     @Column(columnDefinition = "TEXT")

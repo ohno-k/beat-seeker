@@ -20,5 +20,7 @@ public class DataInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         entityManager.createQuery("UPDATE User u SET u.language = 'ja' WHERE u.language IS NULL")
                 .executeUpdate();
+        entityManager.createQuery("UPDATE User u SET u.showRateTier = true WHERE u.showRateTier IS NULL")
+                .executeUpdate();
     }
 }

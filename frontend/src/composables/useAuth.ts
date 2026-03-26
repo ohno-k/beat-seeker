@@ -1,5 +1,6 @@
 import { ref, computed, readonly } from 'vue';
 import { currentLang } from './useI18n';
+import { showRateTierRef } from './useRateTierVisibility';
 import { TOKEN_KEY, API_BASE } from './constants';
 
 export { API_BASE };
@@ -13,6 +14,7 @@ export interface AuthUser {
     playSide: string;
     privacyLevel: number;
     language: string;
+    showRateTier: boolean;
     lastUploadedAt: string | null;
     email: string;
 }
@@ -61,6 +63,10 @@ async function fetchCurrentUser(): Promise<void> {
                 currentLang.value = data.language;
                 localStorage.setItem('beat-seeker-lang', data.language);
                 document.documentElement.lang = data.language;
+            }
+            if (data.showRateTier !== undefined) {
+                showRateTierRef.value = data.showRateTier;
+                localStorage.setItem('showRateTier', String(data.showRateTier));
             }
         } else {
             user.value = null;

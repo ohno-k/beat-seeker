@@ -1,17 +1,31 @@
 import { ref } from 'vue';
+import { API_BASE, TOKEN_KEY } from './constants';
 
-const showRateTier = ref(localStorage.getItem('showRateTier') === 'true');
+export const showRateTierRef = ref(localStorage.getItem('showRateTier') !== 'false');
+
+function saveToDb(value: boolean) {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    fetch(`${API_BASE}/api/auth/me/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ showRateTier: value })
+    }).catch(() => {});
+  }
+}
 
 export function useRateTierVisibility() {
   const toggleRateTier = () => {
-    showRateTier.value = !showRateTier.value;
-    localStorage.setItem('showRateTier', String(showRateTier.value));
+    showRateTierRef.value = !showRateTierRef.value;
+    localStorage.setItem('showRateTier', String(showRateTierRef.value));
+    saveToDb(showRateTierRef.value);
   };
 
   const setRateTier = (value: boolean) => {
-    showRateTier.value = value;
+    showRateTierRef.value = value;
     localStorage.setItem('showRateTier', String(value));
+    saveToDb(value);
   };
 
-  return { showRateTier, toggleRateTier, setRateTier };
+  return { showRateTier: showRateTierRef, toggleRateTier, setRateTier };
 }
