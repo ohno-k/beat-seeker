@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import { translations } from '../locales';
-
-const currentLang = ref<string>(localStorage.getItem('beat-seeker-lang') || 'ja');
+import { API_BASE, TOKEN_KEY } from './constants';
+export const currentLang = ref<string>(localStorage.getItem('beat-seeker-lang') || 'ja');
 
 export function useI18n() {
   const t = (key: string, params?: Record<string, any>) => {
@@ -23,6 +23,15 @@ export function useI18n() {
       currentLang.value = lang;
       localStorage.setItem('beat-seeker-lang', lang);
       document.documentElement.lang = lang;
+
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) {
+        fetch(`${API_BASE}/api/auth/me/profile`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ language: lang })
+        }).catch(() => {});
+      }
     }
   };
 

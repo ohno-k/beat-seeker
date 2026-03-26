@@ -114,6 +114,7 @@ public class AuthController {
             responseBody.put("arenaRank", user.getArenaRank() != null ? user.getArenaRank() : "");
             responseBody.put("playSide", user.getPlaySide() != null ? user.getPlaySide() : "1P");
             responseBody.put("privacyLevel", user.getPrivacyLevel());
+            responseBody.put("language", user.getLanguage() != null ? user.getLanguage() : "ja");
             responseBody.put("lastUploadedAt", user.getLastUploadedAt());
             responseBody.put("email", user.getEmail() != null ? user.getEmail() : "");
             return ResponseEntity.ok(responseBody);
@@ -161,6 +162,8 @@ public class AuthController {
             user.setPlaySide(request.playSide());
         if (request.privacyLevel() != null)
             user.setPrivacyLevel(request.privacyLevel());
+        if (request.language() != null)
+            user.setLanguage(request.language());
         if (request.email() != null && !request.email().isBlank()) {
             String newEmail = request.email().trim().toLowerCase();
             Optional<User> existing = userRepository.findByEmail(newEmail);

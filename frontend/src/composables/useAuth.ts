@@ -1,4 +1,8 @@
 import { ref, computed, readonly } from 'vue';
+import { currentLang } from './useI18n';
+import { TOKEN_KEY, API_BASE } from './constants';
+
+export { API_BASE };
 
 export interface AuthUser {
     id: number;
@@ -8,17 +12,13 @@ export interface AuthUser {
     arenaRank: string;
     playSide: string;
     privacyLevel: number;
+    language: string;
     lastUploadedAt: string | null;
     email: string;
 }
 
 const user = ref<AuthUser | null>(null);
 const isLoading = ref(true);
-
-const TOKEN_KEY = 'beat-seeker-token';
-
-// VITE_API_BASE should be explicitly configured in Render environment variables
-export const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 function getToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
@@ -55,7 +55,13 @@ async function fetchCurrentUser(): Promise<void> {
             headers: authHeaders(),
         });
         if (res.ok) {
-            user.value = await res.json();
+            const data = await res.json();
+            user.value = data;
+            if (data.language) {
+                currentLang.value = data.language;
+                localStorage.setItem('beat-seeker-lang', data.language);
+                document.documentElement.lang = data.language;
+            }
         } else {
             user.value = null;
             removeToken(); // Token is invalid / expired

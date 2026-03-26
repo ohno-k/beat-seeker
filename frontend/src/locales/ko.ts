@@ -309,6 +309,8 @@ export const ko = {
   'common.exscore': 'EX SCORE',
   'common.beatPt': 'BEAT-PT',
   'common.ratePt': 'RATE-PT',
+  'common.all': 'ALL',
+  'common.songCount': '곡 수',
 
   // Ranking
   'ranking.loading': '불러오는 중...',
@@ -501,6 +503,7 @@ export const ko = {
   'upload.loadFromClipboard': '클립보드에서 읽기',
   'upload.load': '읽기',
   'upload.clipboardAutoLoad': '버튼을 누르면 클립보드 내용이 자동으로 읽힙니다.',
+  'upload.officialSiteLinkText': '공식 사이트',
   'upload.officialSiteManualHint': " 의 '스코어 데이터 CSV 다운로드' 화면의 텍스트를 복사하여 붙อย넣으세요.",
   'upload.errorInvalid': '유효한 CSV 데이터가 아닌 것 같습니다. 데이터를 확인해 주세요.',
   'upload.textareaPlaceholder': '버전, 타이틀, 장르, 아티스트...',
@@ -674,7 +677,8 @@ export const ko = {
   'import.bookmarkletHelp': '북마클릿 사용법',
   'import.tabText': '텍스트 붙여넣기',
   'import.tabFile': '파일 업로드',
-  'import.textHint': '공식 사이트의 텍스트 또는 북마클릿으로 취득한 데이터를 붙여넣어 주세요.',
+  'import.textHint': '{link}의 텍스트 또는 북마클릿으로 취득한 데이터를 붙여넣어 주세요.',
+  'import.textHintLinkText': '공식 사이트',
   'import.textareaPlaceholder': 'CSV 데이터 또는 북마클릿 JSON 데이터를 붙여넣기...',
   'import.dropPlaceholder': 'CSV 파일을 드롭',
   'import.clickToSelect': '또는 클릭하여 파일 선택',

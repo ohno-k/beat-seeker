@@ -309,6 +309,8 @@ export const en = {
   'common.exscore': 'EX SCORE',
   'common.beatPt': 'BEAT-PT',
   'common.ratePt': 'RATE-PT',
+  'common.all': 'ALL',
+  'common.songCount': 'Songs',
 
   // Ranking
   'ranking.loading': 'Loading...',
@@ -501,6 +503,7 @@ export const en = {
   'upload.loadFromClipboard': 'Load from Clipboard',
   'upload.load': 'Load',
   'upload.clipboardAutoLoad': 'Clicking the button will automatically load clipboard contents.',
+  'upload.officialSiteLinkText': 'Official Site',
   'upload.officialSiteManualHint': "'s 'Score Data CSV Download' screen and paste it here.",
   'upload.errorInvalid': 'It does not look like valid CSV data. Please check your data.',
   'upload.textareaPlaceholder': 'Version,Title,Genre,Artist...',
@@ -673,7 +676,8 @@ export const en = {
   'import.bookmarkletHelp': 'How to use the bookmarklet',
   'import.tabText': 'Paste Text',
   'import.tabFile': 'File Upload',
-  'import.textHint': 'Paste text from the official site or data from the bookmarklet.',
+  'import.textHint': 'Paste text from the {link} or data from the bookmarklet.',
+  'import.textHintLinkText': 'official site',
   'import.textareaPlaceholder': 'Paste CSV data or bookmarklet JSON data...',
   'import.dropPlaceholder': 'Drop CSV file',
   'import.clickToSelect': 'Or click to select a file',

@@ -454,6 +454,7 @@ public class ScoreController {
      * フレンドのスコアを自分のスコアが上回った場合、そのフレンドに通知する
      */
     private void notifyFriendsOfScoreBeat(User uploader, List<Map<String, Object>> updatedSongs) {
+        if (uploader.getPrivacyLevel() != null && uploader.getPrivacyLevel() == 2) return;
         List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(uploader);
         for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
             User friend = friendship.getFriend();
@@ -493,6 +494,7 @@ public class ScoreController {
      * ランクアップした際にフレンド全員に通知する
      */
     private void notifyFriendsOfRankUp(User user, String oldTier, String newTier) {
+        if (user.getPrivacyLevel() != null && user.getPrivacyLevel() == 2) return;
         List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(user);
         for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
             User friend = friendship.getFriend();

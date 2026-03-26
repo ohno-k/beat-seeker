@@ -189,9 +189,7 @@ const copyBookmarkletCode = async () => {
 
     <!-- Text paste tab -->
     <div v-if="importTab === 'text'" class="space-y-2">
-      <p class="text-xs text-slate-500 dark:text-slate-400">
-        {{ t('import.textHint') }}
-      </p>
+      <p class="text-xs text-slate-500 dark:text-slate-400" v-html="t('import.textHint', { link: `<a href='https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html?style=SP' target='_blank' rel='noopener noreferrer' class='text-blue-600 dark:text-blue-400 hover:underline font-medium'>${t('import.textHintLinkText')}</a>` })"></p>
       <textarea
         v-model="pastedText"
         class="w-full h-24 p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-100 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"

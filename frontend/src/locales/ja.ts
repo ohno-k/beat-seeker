@@ -309,6 +309,8 @@ export const ja = {
   'common.exscore': 'EX SCORE',
   'common.beatPt': 'BEAT-PT',
   'common.ratePt': 'RATE-PT',
+  'common.all': 'ALL',
+  'common.songCount': '曲数',
 
   // Ranking
   'ranking.loading': '読み込み中...',
@@ -503,6 +505,7 @@ export const ja = {
   'upload.loadFromClipboard': 'クリップボードから読み込む',
   'upload.load': '読み込む',
   'upload.clipboardAutoLoad': 'ボタンを押すと、自動的にクリップボードの内容が読み込まれます。',
+  'upload.officialSiteLinkText': '公式サイト',
   'upload.officialSiteManualHint': 'の「スコアデータCSVダウンロード」画面のテキストをコピーして貼り付けてください。',
   'upload.errorInvalid': '有効なCSVデータではないようです。データを確認してください。',
   'upload.textareaPlaceholder': 'バージョン,タイトル,ジャンル,アーティスト...',
@@ -676,7 +679,8 @@ export const ja = {
   'import.bookmarkletHelp': 'ブックマークレットの使い方',
   'import.tabText': 'テキスト貼り付け',
   'import.tabFile': 'ファイルアップロード',
-  'import.textHint': '公式サイトのテキスト、またはブックマークレットで取得したデータを貼り付けてください。',
+  'import.textHint': '{link}のテキスト、またはブックマークレットで取得したデータを貼り付けてください。',
+  'import.textHintLinkText': '公式サイト',
   'import.textareaPlaceholder': 'CSVデータまたはブックマークレットのJSONデータを貼り付け...',
   'import.dropPlaceholder': 'CSVファイルをドロップ',
   'import.clickToSelect': 'またはクリックしてファイルを選択',

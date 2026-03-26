@@ -9,5 +9,6 @@ public record ProfileUpdateRequest(
                 String currentPassword,
                 String newPassword,
                 Integer privacyLevel,
-                String email) {
+                String email,
+                String language) {
 }

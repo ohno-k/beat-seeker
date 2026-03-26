@@ -28449,6 +28449,33 @@
       "level": 10
     },
     {
+      "title": "pique",
+      "artist": "星野音楽工房",
+      "genre": "MELODIOUS TECH",
+      "notes": 582,
+      "bpm": "162",
+      "difficulty": "2",
+      "level": 5
+    },
+    {
+      "title": "pique",
+      "artist": "MELODIOUS TECH",
+      "genre": "HEART",
+      "notes": 0,
+      "bpm": "162",
+      "difficulty": "3",
+      "level": 9
+    },
+    {
+      "title": "pique",
+      "artist": "MELODIOUS TECH",
+      "genre": "HEART",
+      "notes": 1542,
+      "bpm": "162",
+      "difficulty": "4",
+      "level": 11
+    },
+    {
       "title": "Pink Rose",
       "artist": "Kiyommy＋Seiya",
       "genre": "HEART",
@@ -30268,6 +30295,33 @@
       "bpm": "168",
       "difficulty": "4",
       "level": 9
+    },
+    {
+      "title": "RUINA",
+      "artist": "Dustup VS MAX MAXIMIZER",
+      "genre": "HARD PSY/SPEEDCORE",
+      "notes": 476,
+      "bpm": "160",
+      "difficulty": "2",
+      "level": 6
+    },
+    {
+      "title": "RUINA",
+      "artist": "Dustup VS MAX MAXIMIZER",
+      "genre": "HARD PSY/SPEEDCORE",
+      "notes": 947,
+      "bpm": "160",
+      "difficulty": "3",
+      "level": 10
+    },
+    {
+      "title": "RUINA",
+      "artist": "Dustup VS MAX MAXIMIZER",
+      "genre": "HARD PSY/SPEEDCORE",
+      "notes": 1533,
+      "bpm": "160",
+      "difficulty": "4",
+      "level": 12
     },
     {
       "title": "Radical Faith",
@@ -43055,6 +43109,15 @@
       "dpLevel": "0"
     },
     {
+      "title": "ZED",
+      "artist": "USAO",
+      "genre": "DUB STEP",
+      "notes": 1778,
+      "bpm": "190",
+      "difficulty": "10",
+      "level": 12
+    },
+    {
       "title": "ZENDEGI DANCE",
       "artist": "ARM×BEMANI Sound Team \"U1 overground\"",
       "genre": "ORBITALIC ORIENTAL ELECTRO",
@@ -47263,6 +47326,33 @@
       "level": 10
     },
     {
+      "title": "Skywalking",
+      "artist": "Nhato",
+      "genre": "TRANCECORE",
+      "notes": 458,
+      "bpm": "180",
+      "difficulty": "2",
+      "level": 5
+    },
+    {
+      "title": "Skywalking",
+      "artist": "Nhato",
+      "genre": "TRANCECORE",
+      "notes": 0,
+      "bpm": "180",
+      "difficulty": "3",
+      "level": 8
+    },
+    {
+      "title": "Skywalking",
+      "artist": "Nhato",
+      "genre": "TRANCECORE",
+      "notes": 1173,
+      "bpm": "180",
+      "difficulty": "4",
+      "level": 10
+    },
+    {
       "title": "smile",
       "artist": "miru_maki.gjw",
       "genre": "ELE POP",
@@ -50788,7 +50878,7 @@
       "title": "オーバーライド",
       "artist": "Remixed by Pizuya's Cell",
       "genre": "IIDX EDITION",
-      "notes": 0,
+      "notes": 240,
       "bpm": "204",
       "difficulty": "1",
       "level": 2
@@ -50797,7 +50887,7 @@
       "title": "オーバーライド",
       "artist": "Remixed by Pizuya's Cell",
       "genre": "IIDX EDITION",
-      "notes": 0,
+      "notes": 609,
       "bpm": "204",
       "difficulty": "2",
       "level": 5
@@ -61219,7 +61309,7 @@
       "title": "不死身ごっこ",
       "artist": "ピノキオピー",
       "genre": "ボカロ",
-      "notes": 0,
+      "notes": 134,
       "bpm": "147",
       "difficulty": "1",
       "level": 1
@@ -61228,7 +61318,7 @@
       "title": "不死身ごっこ",
       "artist": "ピノキオピー",
       "genre": "ボカロ",
-      "notes": 0,
+      "notes": 482,
       "bpm": "147",
       "difficulty": "2",
       "level": 5
@@ -61237,7 +61327,7 @@
       "title": "不死身ごっこ",
       "artist": "ピノキオピー",
       "genre": "ボカロ",
-      "notes": 0,
+      "notes": 752,
       "bpm": "147",
       "difficulty": "3",
       "level": 7
