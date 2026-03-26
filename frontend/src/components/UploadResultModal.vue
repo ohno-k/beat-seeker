@@ -338,7 +338,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
 import { getNextRankInfo, getNextRateTierRankInfo } from '../utils/beatTier';
 import { useAuth, API_BASE } from '../composables/useAuth';
@@ -456,77 +456,101 @@ const castVote = async (title: string, difficultyName: string, optionType: strin
 
 const shareContainer = ref<HTMLElement | null>(null);
 const isSharing = ref(false);
+const cachedShareBlob = ref<Blob | null>(null);
 
-const shareOnX = async () => {
-  if (!shareContainer.value || isSharing.value) return;
-  isSharing.value = true;
-  
-  // Wait for Vue to render the loading state
-  await new Promise(resolve => setTimeout(resolve, 50));
-  
+// Pre-generate share image when modal opens so navigator.share() can be called
+// directly from user gesture without breaking the gesture chain on iOS Safari.
+const generateShareImage = async () => {
+  if (!shareContainer.value) return;
   try {
     const canvas = await html2canvas(shareContainer.value, {
       scale: 2,
-      backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff', // slate-900 or white
+      backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
       logging: false
     });
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) throw new Error('Blob is null');
-      
-      const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
-      const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`);
-      
-      // Try Web Share API first (supported Safari/Mobile/Newer Windows Chrome)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: 'beat-seeker Report',
-            text: `${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`,
-            files: [file]
-          });
-          isSharing.value = false;
-          return; // Success via native share!
-        } catch (e) {
-          console.log('Share canceled or failed', e);
-          // Fallback to clipboard if it fails without user cancellation
-          if ((e as Error).name !== 'AbortError') {
-              // Proceed to fallback
-          } else {
-              isSharing.value = false;
-              return;
-          }
-        }
-      }
-      
-      // Fallback: Clipboard Web API + Window Open
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
-        alert(t('report.copySuccess'));
-        window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
-      } catch (e) {
-        console.error('Clipboard copy failed:', e);
-        // Deep fallback, create a download link so user can manually attach
-        const downloadUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = 'beat-seeker-report.png';
-        a.click();
-        URL.revokeObjectURL(downloadUrl);
-        alert(t('report.copyError'));
-        window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
-      }
-      
-      isSharing.value = false;
+    canvas.toBlob((blob) => {
+      if (blob) cachedShareBlob.value = blob;
     }, 'image/png');
-    
-  } catch (error) {
-    console.error('Share failed:', error);
-    alert(t('report.generateError'));
-    isSharing.value = false;
+  } catch {
+    // ignore; shareOnX will regenerate on demand
   }
+};
+
+watch(() => props.isOpen, async (open) => {
+  if (open) {
+    cachedShareBlob.value = null;
+    await nextTick();
+    setTimeout(generateShareImage, 300);
+  }
+});
+
+const shareOnX = async () => {
+  if (isSharing.value) return;
+  isSharing.value = true;
+
+  const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`);
+
+  // Use cached blob if available; otherwise generate now (non-iOS fallback)
+  let blob = cachedShareBlob.value;
+  if (!blob) {
+    if (!shareContainer.value) { isSharing.value = false; return; }
+    try {
+      const canvas = await html2canvas(shareContainer.value, {
+        scale: 2,
+        backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+        logging: false
+      });
+      blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Blob is null');
+    } catch (error) {
+      console.error('Share failed:', error);
+      alert(t('report.generateError'));
+      isSharing.value = false;
+      return;
+    }
+  }
+
+  const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
+
+  // Try Web Share API first (iOS Safari / Android / newer desktop Chrome)
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        title: 'beat-seeker Report',
+        text: `${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`,
+        files: [file]
+      });
+      isSharing.value = false;
+      return;
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') {
+        isSharing.value = false;
+        return;
+      }
+      // Non-abort error → fall through to clipboard
+    }
+  }
+
+  // Fallback: Clipboard Web API + Window Open
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': blob })
+    ]);
+    alert(t('report.copySuccess'));
+    window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
+  } catch (e) {
+    console.error('Clipboard copy failed:', e);
+    const downloadUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = 'beat-seeker-report.png';
+    a.click();
+    URL.revokeObjectURL(downloadUrl);
+    alert(t('report.copyError'));
+    window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
+  }
+
+  isSharing.value = false;
 };
 
 const getDifficultyColorClass = (difficulty: string) => {
