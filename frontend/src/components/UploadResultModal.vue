@@ -467,7 +467,9 @@ const shareOnX = async () => {
     const canvas = await html2canvas(shareContainer.value, {
       scale: 2,
       backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
-      logging: false
+      logging: false,
+      windowWidth: 1080,
+      windowHeight: 1920,
     });
 
     // Use await+Promise instead of callback to preserve the user gesture chain on iOS Safari
