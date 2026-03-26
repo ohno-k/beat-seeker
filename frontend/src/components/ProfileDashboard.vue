@@ -481,14 +481,19 @@ const latestTotalScore = computed(() => latestRecord.value?.totalScore ?? 0);
 const latestAaaCount = computed(() => latestRecord.value?.aaaCount ?? 0);
 const latestFcCount = computed(() => latestRecord.value?.fcCount ?? 0);
 
+// 初回インポートを除いたデータ（BEAT-PT増加量グラフ・統計用）
+const historyWithoutFirst = computed(() =>
+  historyData.value.length > 1 ? historyData.value.slice(1) : historyData.value
+);
+
 const avgBeatPtIncrease = computed(() => {
-  const vals = historyData.value.map(r => r.beatPtIncrease ?? 0).filter(v => v > 0);
+  const vals = historyWithoutFirst.value.map(r => r.beatPtIncrease ?? 0).filter(v => v > 0);
   if (!vals.length) return 0;
   return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10;
 });
 
 const maxBeatPtIncrease = computed(() =>
-  Math.round(Math.max(0, ...historyData.value.map(r => r.beatPtIncrease ?? 0)) * 10) / 10
+  Math.round(Math.max(0, ...historyWithoutFirst.value.map(r => r.beatPtIncrease ?? 0)) * 10) / 10
 );
 
 const labels = computed(() =>
@@ -512,15 +517,22 @@ const beatPtChartData = computed(() => {
   };
 });
 
+const uploadIncreaseLabels = computed(() =>
+  historyWithoutFirst.value.map(r => {
+    const d = new Date(r.date);
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  })
+);
+
 const uploadIncreaseChartData = computed(() => {
-  if (!historyData.value.length) return null;
+  if (!historyWithoutFirst.value.length) return null;
   return {
-    labels: labels.value,
+    labels: uploadIncreaseLabels.value,
     datasets: [{
       label: t('dashboard.increaseTrend'),
-      data: historyData.value.map(r => r.beatPtIncrease ?? 0),
-      backgroundColor: historyData.value.map(r => (r.beatPtIncrease ?? 0) > 0 ? 'rgba(168,85,247,0.65)' : 'rgba(148,163,184,0.35)'),
-      borderColor: historyData.value.map(r => (r.beatPtIncrease ?? 0) > 0 ? '#a855f7' : '#94a3b8'),
+      data: historyWithoutFirst.value.map(r => r.beatPtIncrease ?? 0),
+      backgroundColor: historyWithoutFirst.value.map(r => (r.beatPtIncrease ?? 0) > 0 ? 'rgba(168,85,247,0.65)' : 'rgba(148,163,184,0.35)'),
+      borderColor: historyWithoutFirst.value.map(r => (r.beatPtIncrease ?? 0) > 0 ? '#a855f7' : '#94a3b8'),
       borderWidth: 1, borderRadius: 4,
     }]
   };
