@@ -134,12 +134,17 @@
                     </span>
                     <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-black rounded border border-emerald-200 dark:border-emerald-800/50">{{ t('report.lampUp') }}</span>
                     <template v-if="song.maxScore > 0">
-                      <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                        {{ getScoreGradeInfo(song.newScore, song.maxScore).fromMax }}
-                      </span>
-                      <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="getScoreGradeInfo(song.newScore, song.maxScore).gradeColor">
-                        {{ getScoreGradeInfo(song.newScore, song.maxScore).grade }}
-                      </span>
+                      <template v-for="info in [getScoreGradeInfo(song.newScore, song.maxScore)]" :key="'grade'">
+                        <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                          {{ info.fromMax }}
+                        </span>
+                        <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="info.gradeColor">
+                          {{ info.grade }}
+                        </span>
+                        <span v-if="info.nextGrade" class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600">
+                          {{ info.nextGrade.name }}{{ info.nextGrade.gap }}
+                        </span>
+                      </template>
                     </template>
                     <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">RATE TOP100</span>
                   </div>
@@ -285,8 +290,11 @@
                     <span class="px-3 py-1 rounded text-sm font-black border shrink-0" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
                     <span v-if="song.clearTypeImproved" class="text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
                     <template v-if="song.maxScore > 0">
-                      <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ getScoreGradeInfo(song.newScore, song.maxScore).fromMax }}</span>
-                      <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="getScoreGradeInfo(song.newScore, song.maxScore).gradeColor">{{ getScoreGradeInfo(song.newScore, song.maxScore).grade }}</span>
+                      <template v-for="info2 in [getScoreGradeInfo(song.newScore, song.maxScore)]" :key="'grade2'">
+                        <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ info2.fromMax }}</span>
+                        <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="info2.gradeColor">{{ info2.grade }}</span>
+                        <span v-if="info2.nextGrade" class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600">{{ info2.nextGrade.name }}{{ info2.nextGrade.gap }}</span>
+                      </template>
                     </template>
                     <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-sm font-black px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">RATE TOP100</span>
                  </div>
@@ -364,8 +372,8 @@ const sortedUpdatedSongs = computed(() => {
 });
 
 // Score grade label: "MAX", "MAX-n", "AAA+n", "AAA", "AA+n", etc.
-function getScoreGradeInfo(newScore: number, maxScore: number): { fromMax: string; grade: string; gradeColor: string } {
-  if (!maxScore || maxScore <= 0) return { fromMax: '', grade: '', gradeColor: '' };
+function getScoreGradeInfo(newScore: number, maxScore: number): { fromMax: string; grade: string; gradeColor: string; nextGrade: { name: string; gap: number } | null } {
+  if (!maxScore || maxScore <= 0) return { fromMax: '', grade: '', gradeColor: '', nextGrade: null };
   const fromMaxN = maxScore - newScore;
   const fromMax = fromMaxN === 0 ? 'MAX' : `MAX-${fromMaxN}`;
 
@@ -379,14 +387,18 @@ function getScoreGradeInfo(newScore: number, maxScore: number): { fromMax: strin
     { name: 'E',   threshold: maxScore * 2 / 9, color: 'text-slate-400' },
   ];
 
-  for (const g of grades) {
+  for (let i = 0; i < grades.length; i++) {
+    const g = grades[i];
     const thresh = Math.ceil(g.threshold);
     if (newScore >= thresh) {
       const above = newScore - thresh;
-      return { fromMax, grade: above === 0 ? g.name : `${g.name}+${above}`, gradeColor: g.color };
+      const nextGrade = i > 0 ? { name: grades[i - 1].name + '-', gap: Math.ceil(grades[i - 1].threshold) - newScore } : null;
+      return { fromMax, grade: above === 0 ? g.name : `${g.name}+${above}`, gradeColor: g.color, nextGrade };
     }
   }
-  return { fromMax, grade: 'F', gradeColor: 'text-slate-400' };
+  // Below E: next grade is E
+  const eThresh = Math.ceil(maxScore * 2 / 9);
+  return { fromMax, grade: 'F', gradeColor: 'text-slate-400', nextGrade: { name: 'E-', gap: eThresh - newScore } };
 }
 
 const emit = defineEmits<{
