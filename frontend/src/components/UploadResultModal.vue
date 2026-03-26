@@ -216,7 +216,7 @@
       class="fixed -top-[2000px] -left-[2000px] bg-slate-50 dark:bg-slate-900 w-[1080px] h-[1920px] flex flex-col z-[-1] border-none overflow-hidden pointer-events-none"
     >
       <div class="bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-12 text-center shrink-0">
-        <h2 class="text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md">
+        <h2 class="text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md leading-tight">
           {{ t('report.title') }}
         </h2>
         <p class="text-indigo-100 font-medium text-2xl">
@@ -233,13 +233,13 @@
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('common.beatPt') }}</p>
               <div class="flex items-baseline gap-3">
-                <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
+                <span class="text-5xl font-black text-slate-800 dark:text-slate-100 leading-tight">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
                 <span class="text-2xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
               </div>
             </div>
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-1">BEAT-TIER</p>
-              <p class="text-4xl font-black" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
+              <p class="text-4xl font-black leading-tight" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
             </div>
             <div v-if="nextRankData && nextRankData.nextRank" class="relative z-10">
               <div class="flex justify-between items-end mb-2">
@@ -257,13 +257,13 @@
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('common.ratePt') }}</p>
               <div class="flex items-baseline gap-3">
-                <span class="text-5xl font-black text-slate-800 dark:text-slate-100">{{ (diffData.newTotalRatePt ?? 0).toFixed(1) }}</span>
+                <span class="text-5xl font-black text-slate-800 dark:text-slate-100 leading-tight">{{ (diffData.newTotalRatePt ?? 0).toFixed(1) }}</span>
                 <span class="text-2xl font-bold text-emerald-500">{{ (diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0) > 0 ? '+' : '' }}{{ ((diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0)).toFixed(1) }}</span>
               </div>
             </div>
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-1">RATE-TIER</p>
-              <p class="text-4xl font-black" :class="diffData.newRateTier?.color">{{ diffData.newRateTier?.name }} {{ diffData.newRateTier?.tier || '' }}</p>
+              <p class="text-4xl font-black leading-tight" :class="diffData.newRateTier?.color">{{ diffData.newRateTier?.name }} {{ diffData.newRateTier?.tier || '' }}</p>
             </div>
             <div v-if="nextRateTierData && nextRateTierData.nextRank" class="relative z-10">
               <div class="flex justify-between items-end mb-2">
@@ -279,7 +279,7 @@
 
         <!-- Top Updated Songs (max 10) -->
         <div v-if="diffData.updatedSongs.length > 0" class="flex-1 flex flex-col">
-           <h3 class="text-3xl font-black text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 shrink-0">
+           <h3 class="text-3xl font-black text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 shrink-0 leading-tight">
               <span class="w-2.5 h-8 bg-emerald-500 rounded-full"></span>
               {{ t('report.top10') }}
            </h3>
@@ -298,7 +298,7 @@
                     </template>
                     <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-sm font-black px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">RATE TOP100</span>
                  </div>
-                 <p class="font-black text-2xl text-slate-800 dark:text-slate-100 truncate">{{ song.title }}</p>
+                 <p class="font-black text-2xl text-slate-800 dark:text-slate-100 truncate leading-snug pb-1">{{ song.title }}</p>
                  <div v-if="song.clearTypeImproved" class="flex items-center gap-3 mt-1.5">
                    <span class="text-sm font-bold text-slate-500 dark:text-slate-400 line-through">{{ song.oldClearType }}</span>
                    <span class="text-sm font-black" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
