@@ -213,7 +213,7 @@
     <!-- Offscreen container for X image sharing (1080x1920px fixed size 9:16) -->
     <div 
       ref="shareContainer"
-      class="fixed top-0 left-0 bg-slate-50 dark:bg-slate-900 w-[1080px] h-[1920px] flex flex-col z-[-1] border-none overflow-hidden invisible pointer-events-none"
+      class="fixed -top-[2000px] -left-[2000px] bg-slate-50 dark:bg-slate-900 w-[1080px] h-[1920px] flex flex-col z-[-1] border-none overflow-hidden pointer-events-none"
     >
       <div class="bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-12 text-center shrink-0">
         <h2 class="text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md">
