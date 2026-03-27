@@ -1,6 +1,5 @@
 import { ref } from 'vue';
-import songDataRaw from '../data/song_data.json';
-import diffTableRaw from '../data/difficulty_table.json';
+import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { useRateTierVisibility } from './useRateTierVisibility';
 
 export interface RateSongRankingEntry {
@@ -29,16 +28,16 @@ export function useRateSongRanking() {
         try {
             // Build song max-score map to send to backend (title_diffCode -> maxScore)
             const songMaxScores: Record<string, number> = {};
-            if (songDataRaw && Array.isArray(songDataRaw.body)) {
-                songDataRaw.body.forEach((s: any) => {
+            if (songDataBodyRef.value && Array.isArray(songDataBodyRef.value)) {
+                songDataBodyRef.value.forEach((s: any) => {
                     if (s.notes) songMaxScores[`${s.title}_${s.difficulty}`] = s.notes * 2;
                 });
             }
 
             // Build informal rank lookup (client-side only, for display)
             const informalDict = new Map<string, string>();
-            if (diffTableRaw && Array.isArray(diffTableRaw.ranks)) {
-                diffTableRaw.ranks.forEach((r: any) => {
+            if (diffTableRanksRef.value && Array.isArray(diffTableRanksRef.value)) {
+                diffTableRanksRef.value.forEach((r: any) => {
                     r.songs.forEach((songTitle: string) => {
                         if (songTitle.endsWith('[L]')) {
                             informalDict.set(`${songTitle.slice(0, -3)}_LEGGENDARIA`, r.rank);

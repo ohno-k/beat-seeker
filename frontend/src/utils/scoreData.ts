@@ -1,6 +1,5 @@
 import type { ScoreData } from '../types/ScoreData';
-import songDataRaw from '../data/song_data.json';
-import diffTableRaw from '../data/difficulty_table.json';
+import { songData as songDataBody, diffTable as diffTableRanks } from '../composables/useGameData';
 import { calculatePoints, getMaxPoints } from './beatTier';
 
 export interface ScoreRecord {
@@ -52,19 +51,51 @@ const diffColors: Record<string, string> = {
     leggendaria: 'text-purple-700 bg-purple-100 border border-purple-300'
 };
 
-// Map from uppercase difficulty label to song_data.json difficulty code
+// Map from uppercase difficulty label to difficulty code
 const diffLabelToCode: Record<string, string> = {
     BEGINNER: '1', NORMAL: '2', HYPER: '3', ANOTHER: '4', LEGGENDARIA: '10'
 };
 
+/** Helper to build a song dictionary from current reactive data */
+function buildSongDict(): Map<string, any> {
+    const dict = new Map<string, any>();
+    const body = songDataBody.value;
+    if (body && Array.isArray(body)) {
+        body.forEach((s: any) => {
+            dict.set(`${s.title}_${s.difficulty}`, s);
+        });
+    }
+    return dict;
+}
+
+/** Helper to build an informal rank dictionary from current reactive data */
+function buildInformalDict(): Map<string, string> {
+    const dict = new Map<string, string>();
+    const ranks = diffTableRanks.value;
+    if (ranks && Array.isArray(ranks)) {
+        ranks.forEach((r: any) => {
+            r.songs.forEach((songTitle: string) => {
+                if (songTitle.endsWith('[L]')) {
+                    const baseTitle = songTitle.slice(0, -3);
+                    dict.set(`${baseTitle}_LEGGENDARIA`, r.rank);
+                } else {
+                    dict.set(`${songTitle}_ANOTHER`, r.rank);
+                }
+            });
+        });
+    }
+    return dict;
+}
+
 /**
- * Look up maxScore (= notes * 2) directly from song_data.json given a title and
+ * Look up maxScore (= notes * 2) from song data given a title and
  * the uppercase difficulty label (e.g. "ANOTHER", "LEGGENDARIA").
  * Returns 0 when the song/chart is not found.
  */
 export function getSongMaxScore(title: string, difficultyName: string): number {
     const code = diffLabelToCode[difficultyName];
     if (!code) return 0;
+    const songDict = buildSongDict();
     const definition = songDict.get(`${title}_${code}`);
     return definition?.notes ? definition.notes * 2 : 0;
 }
@@ -72,29 +103,8 @@ export function getSongMaxScore(title: string, difficultyName: string): number {
 export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
     const records: ScoreRecord[] = [];
 
-    // Index song definitions for faster lookup
-    const songDict = new Map<string, any>();
-    if (songDataRaw && Array.isArray(songDataRaw.body)) {
-        songDataRaw.body.forEach(s => {
-            songDict.set(`${s.title}_${s.difficulty}`, s);
-        });
-    }
-
-    // Index informal difficulty table
-    const informalDict = new Map<string, string>();
-    if (diffTableRaw && Array.isArray(diffTableRaw.ranks)) {
-        diffTableRaw.ranks.forEach(r => {
-            r.songs.forEach(songTitle => {
-                // Handle [L] suffix for LEGGENDARIA
-                if (songTitle.endsWith('[L]')) {
-                    const baseTitle = songTitle.slice(0, -3);
-                    informalDict.set(`${baseTitle}_LEGGENDARIA`, r.rank);
-                } else {
-                    informalDict.set(`${songTitle}_ANOTHER`, r.rank);
-                }
-            });
-        });
-    }
+    const songDict = buildSongDict();
+    const informalDict = buildInformalDict();
 
     scores.forEach(song => {
         difficulties.forEach(diff => {
@@ -122,7 +132,7 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                 const informalKey = `${song.title}_${diffLabel}`;
                 let informalRank = informalDict.get(informalKey) || undefined;
 
-                // Fallback for non-LEGGENDARIA songs in the table (sometimes ☆12s are just title)
+                // Fallback for non-LEGGENDARIA songs in the table
                 if (!informalRank && diffLabel === 'ANOTHER') {
                     informalRank = informalDict.get(`${song.title}_ANOTHER`) || undefined;
                 }

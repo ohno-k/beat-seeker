@@ -19,6 +19,8 @@ export interface UpdatedSong {
     newRatePt: number;
     ratePtIncrease: number;
     isInRateTop100?: boolean;
+    songRank?: number;
+    songRankTotal?: number;
 }
 
 export interface UploadDiffResult {

@@ -12,6 +12,12 @@
           </h2>
           <div class="flex items-center gap-2">
             <button 
+              @click="showGameDataModal = true" 
+              class="px-3 py-1.5 bg-teal-100 hover:bg-teal-200 text-teal-700 dark:bg-teal-900/50 dark:hover:bg-teal-800/80 dark:text-teal-300 rounded text-sm font-bold flex items-center gap-1 transition-colors"
+            >
+              データ管理
+            </button>
+            <button 
               @click="handleRecalculateAll" 
               :disabled="isRecalculating"
               class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
@@ -78,14 +84,19 @@
       </div>
     </div>
   </Teleport>
+  <AdminGameDataModal :isOpen="showGameDataModal" @close="showGameDataModal = false" />
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useScores } from '../composables/useScores';
 import { useAuth } from '../composables/useAuth';
-import songDataRaw from '../data/song_data.json';
-import diffTableRaw from '../data/difficulty_table.json';
+import { useGameData } from '../composables/useGameData';
+import AdminGameDataModal from './AdminGameDataModal.vue';
+
+const { songDataBody: songDataRef, diffTableRanks: diffTableRef } = useGameData();
+const songDataRaw = { body: songDataRef.value };
+const diffTableRaw = { ranks: diffTableRef.value };
 
 const props = defineProps<{
   isOpen: boolean;
@@ -126,6 +137,7 @@ const selectUser = (u: any) => {
 const isRecalculating = ref(false);
 const recalculateError = ref('');
 const recalculateSuccess = ref('');
+const showGameDataModal = ref(false);
 
 const handleRecalculateAll = async () => {
   if (!confirm('全ユーザーのポイント再計算を実行しますか？この操作は取り消せません。')) return;

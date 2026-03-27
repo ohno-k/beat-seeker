@@ -180,7 +180,7 @@
                   <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
-              <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12" @click="toggleSort('clearType')">
+              <th class="max-sm:hidden px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12" @click="toggleSort('clearType')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
                   {{ t('table.colScore') }}
                   <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'clearType'">
@@ -228,9 +228,13 @@
                 <div class="flex flex-col gap-0.5">
                   <span class="truncate block">{{ record.title }}</span>
                   <template v-for="label of [getScoreGradeLabel(record)]" :key="0">
-                    <div v-if="label" class="flex gap-1 text-[8px] sm:text-[10px] font-bold leading-none">
+                    <div v-if="label" class="flex items-center gap-1 text-[8px] sm:text-[10px] font-bold leading-none">
                       <span :class="record.scoreRate >= 94.45 ? 'text-purple-500 dark:text-purple-400' : record.scoreRate >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'">{{ label.primary }}</span>
                       <span class="text-slate-400 dark:text-slate-500">{{ label.secondary }}</span>
+                      <template v-if="isLoggedIn && songRankMap.get(record.title + '|' + record.difficultyName)">
+                        <span class="text-slate-300 dark:text-slate-600">·</span>
+                        <span :class="songRankMap.get(record.title + '|' + record.difficultyName)!.rank === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'">#{{ songRankMap.get(record.title + '|' + record.difficultyName)!.rank }}<span class="font-normal text-slate-400 dark:text-slate-600">/{{ songRankMap.get(record.title + '|' + record.difficultyName)!.total }}</span></span>
+                      </template>
                     </div>
                   </template>
                 </div>
@@ -247,7 +251,7 @@
                     {{ record.informalRank }}
                   </span>
               </td>
-              <td class="px-1 sm:px-6 py-1.5 sm:py-2">
+              <td class="max-sm:hidden px-1 sm:px-6 py-1.5 sm:py-2">
                 <div class="flex flex-col gap-0.5">
                   <div class="flex items-center gap-1 sm:gap-2">
                     <span class="font-black text-[8px] sm:text-[10px] truncate max-w-[36px] sm:max-w-none" :class="getClearTypeColor(record.clearType)">
@@ -908,13 +912,12 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
-import diffTableRaw from '../data/difficulty_table.json';
+import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS } from '../utils/beatTier';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
-import songDataRaw from '../data/song_data.json';
 import RankIcon from './RankIcon.vue';
 
 const { updateMemo } = useScores();
@@ -933,6 +936,22 @@ const props = defineProps<{
 const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
 const viewMode = ref<'beat' | 'rate'>('beat');
+
+// Song rank data: map of "title|difficultyName" -> { rank, total }
+const songRankMap = ref<Map<string, { rank: number; total: number }>>(new Map());
+
+const fetchSongRanks = async () => {
+  if (!isLoggedIn.value) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/scores/my-song-ranks`, { headers: authHeaders() });
+    if (res.ok) {
+      const data: Array<{ title: string; difficultyName: string; rank: number; total: number }> = await res.json();
+      const map = new Map<string, { rank: number; total: number }>();
+      data.forEach(r => map.set(`${r.title}|${r.difficultyName}`, { rank: r.rank, total: r.total }));
+      songRankMap.value = map;
+    }
+  } catch { /* silent */ }
+};
 watch(showRateTier, (val) => { if (!val && viewMode.value === 'rate') viewMode.value = 'beat'; });
 
 const searchQuery = ref('');
@@ -964,7 +983,7 @@ const isSelected = (arr: string[], value: string) => {
 const currentPage = ref(1);
 const itemsPerPage = ref(50);
 
-type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | null;
+type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | 'songRank' | null;
 type SortOrder = 'asc' | 'desc';
 
 const sortKey = ref<SortKey>('informalRank');
@@ -996,9 +1015,9 @@ const allRecords = computed<ScoreRecord[]>(() => {
 
   // Index informal difficulty table for unplayed songs
   const informalDict = new Map<string, string>();
-  if (diffTableRaw && Array.isArray(diffTableRaw.ranks)) {
-      diffTableRaw.ranks.forEach(r => {
-          r.songs.forEach(songTitle => {
+  if (diffTableRanksRef.value && Array.isArray(diffTableRanksRef.value)) {
+      diffTableRanksRef.value.forEach((r: any) => {
+          r.songs.forEach((songTitle: string) => {
               if (songTitle.endsWith('[L]')) {
                   const baseTitle = songTitle.slice(0, -3);
                   informalDict.set(`${baseTitle}_LEGGENDARIA`, r.rank);
@@ -1011,9 +1030,9 @@ const allRecords = computed<ScoreRecord[]>(() => {
 
   // Create empty records for songs in song_data.json that the user hasn't played
   const difMap: Record<string, string> = { "4": "ANOTHER", "10": "LEGGENDARIA" };
-  const baseRecords: ScoreRecord[] = (songDataRaw.body as any[])
-    .filter(s => s.level >= 11 && (s.difficulty === "4" || s.difficulty === "10"))
-    .map(s => {
+  const baseRecords: ScoreRecord[] = (songDataBodyRef.value as any[])
+    .filter((s: any) => s.level >= 11 && (s.difficulty === "4" || s.difficulty === "10"))
+    .map((s: any) => {
       const diffName = difMap[s.difficulty];
       const key = `${s.title}|${diffName}`;
       
@@ -1426,6 +1445,12 @@ const closeDetailModal = () => {
   document.body.style.overflow = '';
 };
 
+// Refetch song ranks when scores prop changes (after upload)
+watch(() => props.scores, () => { fetchSongRanks(); }, { deep: false });
+
+// Fetch song ranks when auth completes (isLoggedIn may be false on mount)
+watch(isLoggedIn, (val) => { if (val) fetchSongRanks(); });
+
 // Watch for filter changes to reset pagination
 watch(
   [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
@@ -1443,6 +1468,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   window.addEventListener('click', handleClickOutside);
+  fetchSongRanks();
 });
 
 onUnmounted(() => {
@@ -1459,6 +1485,8 @@ const toggleSort = (key: SortKey) => {
     // Set default order for specific keys
     if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints' || key === 'clearType' || key === 'djLevel') {
         sortOrder.value = 'desc';
+    } else if (key === 'songRank') {
+        sortOrder.value = 'asc';
     } else {
         sortOrder.value = 'asc';
     }
@@ -1575,6 +1603,12 @@ const filteredScores = computed(() => {
       const valA = levelMap[a.djLevel] || 0;
       const valB = levelMap[b.djLevel] || 0;
       return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+    });
+  } else if (sortKey.value === 'songRank') {
+    result.sort((a, b) => {
+      const rankA = songRankMap.value.get(`${a.title}|${a.difficultyName}`)?.rank ?? 999999;
+      const rankB = songRankMap.value.get(`${b.title}|${b.difficultyName}`)?.rank ?? 999999;
+      return sortOrder.value === 'asc' ? rankA - rankB : rankB - rankA;
     });
   }
 

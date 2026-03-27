@@ -415,6 +415,15 @@ public class ScoreController {
     }
 
     /**
+     * Get current user's rank for every ANOTHER/LEGGENDARIA song they have played.
+     */
+    @GetMapping("/my-song-ranks")
+    public ResponseEntity<List<Map<String, Object>>> getMySongRanks(Authentication auth) {
+        User user = getUser(auth);
+        return ResponseEntity.ok(scoreRepository.findUserSongRanks(user.getId()));
+    }
+
+    /**
      * Get admin's rank for every song (admin only).
      */
     @GetMapping("/admin-song-ranks")

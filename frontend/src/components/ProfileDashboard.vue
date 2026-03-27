@@ -346,8 +346,7 @@ import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
 import { calculatePoints, WEIGHTS } from '../utils/beatTier';
-import songDataRaw from '../data/song_data.json';
-import diffTableRaw from '../data/difficulty_table.json';
+import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
 
 const props = defineProps<{
   viewingUserId?: number | null;
@@ -424,17 +423,17 @@ const isLoading = ref(true);
 const historyData = ref<HistoryRecord[]>([]);
 const myScores = ref<any[]>([]);
 
-// Build lookup maps from static data files
+// Build lookup maps from reactive game data
 const songDict = new Map<string, number>();
-if ((songDataRaw as any)?.body) {
-  (songDataRaw as any).body.forEach((s: any) => {
+if (songDataBodyRef.value && Array.isArray(songDataBodyRef.value)) {
+  songDataBodyRef.value.forEach((s: any) => {
     if (s.notes) songDict.set(`${s.title}_${s.difficulty}`, s.notes * 2);
   });
 }
 
 const informalDict = new Map<string, string>();
-if ((diffTableRaw as any)?.ranks) {
-  (diffTableRaw as any).ranks.forEach((r: any) => {
+if (diffTableRanksRef.value && Array.isArray(diffTableRanksRef.value)) {
+  diffTableRanksRef.value.forEach((r: any) => {
     r.songs.forEach((songTitle: string) => {
       if (songTitle.endsWith('[L]')) {
         informalDict.set(`${songTitle.slice(0, -3)}_LEGGENDARIA`, r.rank);

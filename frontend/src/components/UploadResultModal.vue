@@ -132,6 +132,9 @@
                     <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
                       {{ song.difficulty }}
                     </span>
+                    <span v-if="song.songRank" class="px-1.5 py-0.5 rounded text-[9px] font-black border shrink-0"
+                      :class="song.songRank === 1 ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700' : 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'"
+                    >#{{ song.songRank }}<span class="font-medium">/{{ song.songRankTotal }}</span></span>
                     <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-black rounded border border-emerald-200 dark:border-emerald-800/50">{{ t('report.lampUp') }}</span>
                     <template v-if="song.maxScore > 0">
                       <template v-for="info in [getScoreGradeInfo(song.newScore, song.maxScore)]" :key="'grade'">
@@ -187,7 +190,7 @@
         
         <!-- Footer -->
         <div id="modal-footer" class="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex flex-col sm:flex-row gap-3">
-          <button @click="shareOnX" :disabled="isSharing" class="flex-1 py-3.5 sm:py-4 bg-black hover:bg-slate-800 text-white font-bold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50 text-sm sm:text-base">
+          <button @click="openShareOptions" :disabled="isSharing" class="flex-1 py-3.5 sm:py-4 bg-black hover:bg-slate-800 text-white font-bold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50 text-sm sm:text-base">
             <template v-if="!isSharing">
               <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
@@ -205,6 +208,55 @@
           <button @click="close" class="flex-1 py-3.5 sm:py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base">
             {{ t('report.backToDashboard') }}
           </button>
+        </div>
+
+        <!-- Image Output Options Modal -->
+        <div v-if="isShareOptionsOpen" class="absolute inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 rounded-3xl" @click.self="isShareOptionsOpen = false">
+          <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+              <h3 class="font-black text-slate-800 dark:text-slate-100 text-base">{{ t('report.outputOptions') }}</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('report.outputOptionsSub') }}</p>
+            </div>
+            <div class="p-4 space-y-2">
+              <button
+                @click="shareSortMode = 'beat'"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left"
+                :class="shareSortMode === 'beat' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
+              >
+                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareSortMode === 'beat' ? 'border-indigo-500' : 'border-slate-300 dark:border-slate-600'">
+                  <div v-if="shareSortMode === 'beat'" class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                </div>
+                <div>
+                  <p class="font-black text-sm" :class="shareSortMode === 'beat' ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByBeatPt') }}</p>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ t('report.sortByBeatPtDesc') }}</p>
+                </div>
+              </button>
+              <button
+                @click="shareSortMode = 'rate'"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left"
+                :class="shareSortMode === 'rate' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
+              >
+                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareSortMode === 'rate' ? 'border-emerald-500' : 'border-slate-300 dark:border-slate-600'">
+                  <div v-if="shareSortMode === 'rate'" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                </div>
+                <div>
+                  <p class="font-black text-sm" :class="shareSortMode === 'rate' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByRatePt') }}</p>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ t('report.sortByRatePtDesc') }}</p>
+                </div>
+              </button>
+            </div>
+            <div class="px-4 pb-4 flex gap-2">
+              <button @click="isShareOptionsOpen = false" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm transition-colors">
+                {{ t('common.cancel') }}
+              </button>
+              <button @click="confirmShare" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
+                </svg>
+                {{ t('report.generateAndShare') }}
+              </button>
+            </div>
+          </div>
         </div>
         
       </div>
@@ -284,10 +336,13 @@
               {{ t('report.top10') }}
            </h3>
            <div class="space-y-4 flex-1">
-             <div v-for="song in sortedUpdatedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+             <div v-for="song in imageSortedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                <div class="flex-1 min-w-0 pr-4">
                  <div class="flex items-center gap-2 mb-2 flex-wrap">
                     <span class="px-3 py-1 rounded text-sm font-black border shrink-0" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
+                    <span v-if="song.songRank" class="px-2 py-0.5 rounded text-sm font-black border shrink-0"
+                      :class="song.songRank === 1 ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-300'"
+                    >#{{ song.songRank }}/{{ song.songRankTotal }}</span>
                     <span v-if="song.clearTypeImproved" class="text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
                     <template v-if="song.maxScore > 0">
                       <template v-for="info2 in [getScoreGradeInfo(song.newScore, song.maxScore)]" :key="'grade2'">
@@ -368,6 +423,14 @@ const nextRateTierData = computed(() => {
 
 const sortedUpdatedSongs = computed(() => {
   if (!props.diffData) return [];
+  return [...props.diffData.updatedSongs].sort((a, b) => b.newBeatPt - a.newBeatPt);
+});
+
+const imageSortedSongs = computed(() => {
+  if (!props.diffData) return [];
+  if (shareSortMode.value === 'rate') {
+    return [...props.diffData.updatedSongs].sort((a, b) => b.newRatePt - a.newRatePt);
+  }
   return [...props.diffData.updatedSongs].sort((a, b) => b.newBeatPt - a.newBeatPt);
 });
 
@@ -456,6 +519,17 @@ const castVote = async (title: string, difficultyName: string, optionType: strin
 
 const shareContainer = ref<HTMLElement | null>(null);
 const isSharing = ref(false);
+const isShareOptionsOpen = ref(false);
+const shareSortMode = ref<'beat' | 'rate'>('beat');
+
+const openShareOptions = () => {
+  isShareOptionsOpen.value = true;
+};
+
+const confirmShare = () => {
+  isShareOptionsOpen.value = false;
+  shareOnX();
+};
 
 const shareOnX = async () => {
   if (!shareContainer.value || isSharing.value) return;

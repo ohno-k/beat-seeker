@@ -245,6 +245,7 @@ export const ja = {
   'table.miss': 'MISS',
   'table.voteLoginHintShort': '※ログインすると投票できます。',
   'table.rivalRequestRealtime': 'ライバル申請が届いた時にリアルタイムで通知を受け取れます。',
+  'table.colSongRank': '単曲順位',
 
 
 
@@ -272,6 +273,13 @@ export const ja = {
   'report.lampUp': 'LAMP UP!',
   'report.inTop100': 'TOP100',
   'report.outOfRange': '圏外',
+  'report.outputOptions': '画像出力オプション',
+  'report.outputOptionsSub': '更新楽曲の並び順を選択してください',
+  'report.sortByBeatPt': 'BEAT-PT 優先',
+  'report.sortByBeatPtDesc': 'BEAT-PT の増加量が大きい曲を上位表示',
+  'report.sortByRatePt': 'RATE-PT 優先',
+  'report.sortByRatePtDesc': 'RATE-PT の高い曲を上位表示',
+  'report.generateAndShare': '画像を生成してポスト',
 
   // Common
   'common.loading': '読み込み中...',
@@ -340,8 +348,12 @@ export const ja = {
   'ranking.sortLeast': '少ない順',
   'ranking.songRankingAggregating': '楽曲ランキングを集計中...',
   'ranking.colSongName': '楽曲名',
+  'ranking.colDifficulty': '難易度',
+  'ranking.colInformalRank': '非公式難易度',
   'ranking.colUserCount': '採用人数',
+  'ranking.unitPersons': '人',
   'ranking.colAvgBeatPt': '平均BEAT-PT',
+  'ranking.tabSong': '楽曲',
   'ranking.colAvgRatePt': '平均RATE-PT',
   'ranking.rank': '順位',
   'ranking.player': 'プレイヤー',

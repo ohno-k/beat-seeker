@@ -245,6 +245,7 @@ export const ko = {
   'table.miss': 'MISS',
   'table.voteLoginHintShort': '* 로그인하면 투표할 수 있습니다.',
   'table.rivalRequestRealtime': '라이벌 신청이 도착했을 때 실시간으로 알림을 받을 수 있습니다.',
+  'table.colSongRank': '단곡 순위',
 
 
 
@@ -272,6 +273,13 @@ export const ko = {
   'report.lampUp': 'LAMP UP!',
   'report.inTop100': 'TOP100',
   'report.outOfRange': '권외',
+  'report.outputOptions': '이미지 출력 옵션',
+  'report.outputOptionsSub': '업데이트 곡의 정렬 순서를 선택하세요',
+  'report.sortByBeatPt': 'BEAT-PT 우선',
+  'report.sortByBeatPtDesc': 'BEAT-PT 증가량이 큰 곡을 상위 표시',
+  'report.sortByRatePt': 'RATE-PT 우선',
+  'report.sortByRatePtDesc': 'RATE-PT가 높은 곡을 상위 표시',
+  'report.generateAndShare': '이미지 생성 후 포스트',
 
   // Common
   'common.loading': '불러오는 중...',
@@ -339,8 +347,12 @@ export const ko = {
   'ranking.sortLeast': '적은 순',
   'ranking.songRankingAggregating': '곡 랭킹 집계 중...',
   'ranking.colSongName': '곡명',
+  'ranking.colDifficulty': '난이도',
+  'ranking.colInformalRank': '비공식 난이도',
   'ranking.colUserCount': '사용 인원',
+  'ranking.unitPersons': '명',
   'ranking.colAvgBeatPt': '평균 BEAT-PT',
+  'ranking.tabSong': '곡별',
   'ranking.colAvgRatePt': '평균 RATE-PT',
   'ranking.rank': '순위',
   'ranking.player': '플레이어',

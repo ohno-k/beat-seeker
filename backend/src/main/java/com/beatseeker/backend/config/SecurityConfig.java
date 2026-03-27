@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/game-data/**").permitAll()
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/rate-ranking",
                                                                 "/api/scores/all-user-scores",
                                                                 "/api/scores/debug-ranking",
@@ -55,6 +56,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/activity/feed").permitAll()
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile").authenticated()
                                                 .requestMatchers("/api/notifications/**").authenticated()
+                                                .requestMatchers("/api/admin/game-data/**").authenticated()
                                                 .requestMatchers("/api/scores/upload", "/api/scores/save-history-log",
                                                                 "/api/scores/me", "/api/scores/history",
                                                                 "/api/scores/*/memo")

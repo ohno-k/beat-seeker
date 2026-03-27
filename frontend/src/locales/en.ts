@@ -245,6 +245,7 @@ export const en = {
   'table.miss': 'MISS',
   'table.voteLoginHintShort': '* Login to vote.',
   'table.rivalRequestRealtime': 'Receive real-time notifications for rival requests.',
+  'table.colSongRank': 'Rank',
 
 
 
@@ -272,6 +273,13 @@ export const en = {
   'report.lampUp': 'LAMP UP!',
   'report.inTop100': 'TOP100',
   'report.outOfRange': 'Out of Range',
+  'report.outputOptions': 'Image Output Options',
+  'report.outputOptionsSub': 'Select the sort order for updated songs',
+  'report.sortByBeatPt': 'BEAT-PT Priority',
+  'report.sortByBeatPtDesc': 'Show songs with larger BEAT-PT increase first',
+  'report.sortByRatePt': 'RATE-PT Priority',
+  'report.sortByRatePtDesc': 'Show songs with higher RATE-PT first',
+  'report.generateAndShare': 'Generate & Post',
 
   // Common
   'common.loading': 'Loading...',
@@ -340,8 +348,12 @@ export const en = {
   'ranking.sortLeast': 'Least',
   'ranking.songRankingAggregating': 'Aggregating song ranking...',
   'ranking.colSongName': 'Song Name',
+  'ranking.colDifficulty': 'Difficulty',
+  'ranking.colInformalRank': 'Informal Rank',
   'ranking.colUserCount': 'Users',
+  'ranking.unitPersons': 'persons',
   'ranking.colAvgBeatPt': 'Avg. BEAT-PT',
+  'ranking.tabSong': 'Song',
   'ranking.colAvgRatePt': 'Avg. RATE-PT',
   'ranking.rank': 'Rank',
   'ranking.player': 'Player',

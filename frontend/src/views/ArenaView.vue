@@ -4,7 +4,7 @@ import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import UnifiedImport from '../components/UnifiedImport.vue';
 import { BOOKMARKLET_CODE } from '../utils/bookmarklet';
-import songDataRaw from '../data/song_data.json';
+import { songData as songDataBodyRef } from '../composables/useGameData';
 
 // Difficulty text (from bookmarklet) → song_data.json difficulty code
 const DIFF_TEXT_TO_CODE: Record<string, string> = {
@@ -17,7 +17,7 @@ const DIFF_TEXT_TO_CODE: Record<string, string> = {
 
 // Build lookup: "title|diffCode" → notes
 const songNotesMap = new Map<string, number>();
-for (const entry of (songDataRaw as any).body) {
+for (const entry of (songDataBodyRef.value as any[])) {
   songNotesMap.set(`${entry.title}|${entry.difficulty}`, entry.notes);
 }
 

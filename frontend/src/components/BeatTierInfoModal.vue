@@ -205,7 +205,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { WEIGHTS, getGroupedRanks } from '../utils/beatTier';
-import diffTableRaw from '../data/difficulty_table.json';
+import { diffTable as diffTableRanksRef } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 
 const { t } = useI18n();
@@ -222,18 +222,18 @@ const getRankForTier = (name: string, tier: number) => {
 };
 
 const songGroups = computed(() => {
-  return diffTableRaw.ranks.map(r => ({
+  return (diffTableRanksRef.value || []).map((r: any) => ({
     rank: r.rank,
     weight: WEIGHTS[r.rank] || 0,
     songs: r.songs
-  })).filter(g => g.weight > 0);
+  })).filter((g: any) => g.weight > 0);
 });
 
 const filteredSongGroups = computed(() => {
   if (!songSearch.value) return songGroups.value;
   
   return songGroups.value.map(group => {
-    const matchedSongs = group.songs.filter(s => 
+    const matchedSongs = group.songs.filter((s: string) => 
       s.toLowerCase().includes(songSearch.value.toLowerCase())
     );
     return { ...group, songs: matchedSongs };

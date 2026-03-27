@@ -34,9 +34,14 @@ import { useScores } from './composables/useScores';
 import { useDarkMode } from './composables/useDarkMode';
 import { useFriends } from './composables/useFriends';
 import { useI18n } from './composables/useI18n';
+import { useGameData } from './composables/useGameData';
 import { watch, onMounted } from 'vue';
 
 const { t } = useI18n();
+
+// Fetch game data from API on initialization
+const { fetchGameData } = useGameData();
+fetchGameData();
 
 const isResetPasswordPage = ref(window.location.pathname === '/reset-password');
 
@@ -448,14 +453,32 @@ const handleFileDropped = async (file: File) => {
           };
         });
 
+        // Fetch user's song ranks for the report
+        const songRankMap = new Map<string, { rank: number; total: number }>();
+        try {
+          const token = localStorage.getItem('beat-seeker-token');
+          const rankRes = await fetch(`${API_BASE}/api/scores/my-song-ranks`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (rankRes.ok) {
+            const rankData: Array<{ title: string; difficultyName: string; rank: number; total: number }> = await rankRes.json();
+            rankData.forEach(r => songRankMap.set(`${r.title}_${r.difficultyName}`, { rank: r.rank, total: r.total }));
+          }
+        } catch { /* silent */ }
+
         // Filter and sort for the report
         const reportSongs = enrichedUpdates
           .filter(s => s.scoreIncrease > 0 || s.clearTypeImproved)
-          .map(s => ({
-            ...s,
-            isInTop100: top100Set.has(`${s.title}_${s.difficulty}`),
-            isInRateTop100: rateTop100Set.has(`${s.title}_${s.difficulty}`),
-          }))
+          .map(s => {
+            const rankEntry = songRankMap.get(`${s.title}_${s.difficulty}`);
+            return {
+              ...s,
+              isInTop100: top100Set.has(`${s.title}_${s.difficulty}`),
+              isInRateTop100: rateTop100Set.has(`${s.title}_${s.difficulty}`),
+              songRank: rankEntry?.rank,
+              songRankTotal: rankEntry?.total,
+            };
+          })
           .sort((a, b) => b.beatPtIncrease - a.beatPtIncrease || b.scoreIncrease - a.scoreIncrease);
 
         diffResult.value = {

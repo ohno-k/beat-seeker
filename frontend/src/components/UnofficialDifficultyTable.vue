@@ -3,9 +3,8 @@ import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
 import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
-import songDataRaw from '../data/song_data.json';
+import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
-import difficultyData from '../data/difficulty_table.json';
 
 const props = defineProps<{
   scores: ScoreRecord[];
@@ -49,8 +48,8 @@ const toggleRank = (rank: string) => {
 
 // Build song definition lookup by "title_difficultyCode"
 const songDict = new Map<string, any>();
-if (songDataRaw && Array.isArray(songDataRaw.body)) {
-  songDataRaw.body.forEach(s => {
+if (songDataBodyRef.value && Array.isArray(songDataBodyRef.value)) {
+  songDataBodyRef.value.forEach((s: any) => {
     songDict.set(`${s.title}_${s.difficulty}`, s);
   });
 }
@@ -68,12 +67,12 @@ const groupedByRank = computed(() => {
   });
 
   // Iterate all songs defined in the difficulty table
-  difficultyData.ranks.forEach(r => {
+  (diffTableRanksRef.value || []).forEach((r: any) => {
     const rank = r.rank;
     if (rank.includes('Uncategorized')) return;
     if (!groups[rank]) groups[rank] = [];
 
-    r.songs.forEach(songTitle => {
+    r.songs.forEach((songTitle: string) => {
       const isLeggendaria = songTitle.endsWith('[L]');
       const baseTitle = isLeggendaria ? songTitle.slice(0, -3) : songTitle;
       const diffName = isLeggendaria ? 'LEGGENDARIA' : 'ANOTHER';
@@ -122,7 +121,7 @@ const groupedByRank = computed(() => {
 // Calculate total songs per rank from the difficulty table
 const rankSongCounts = computed(() => {
   const counts: Record<string, number> = {};
-  difficultyData.ranks.forEach(r => {
+  (diffTableRanksRef.value || []).forEach((r: any) => {
     counts[r.rank] = r.songs.length;
   });
   return counts;
