@@ -15,7 +15,7 @@
             <!-- Apply button -->
             <button 
               @click="handleApplyDraft" 
-              :disabled="isApplying || (!hasDraftSongs && !hasDraftDiffTable)"
+              :disabled="isApplying || (draftSongs.length === 0 && savedDiffChanges.length === 0)"
               class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <svg v-if="isApplying" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -467,12 +467,6 @@ const loadData = async () => {
       draftSongs.value = await songsRes.json();
     }
 
-    // Fetch active difficulty table (for diff comparison)
-    const activeRes = await fetch(`${API_BASE}/api/game-data/difficulty-table`);
-    if (activeRes.ok) {
-      activeDiffTable.value = await activeRes.json();
-    }
-
     // Fetch difficulty table draft
     const diffRes = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, { headers: authHeaders() });
     if (diffRes.ok) {
@@ -481,6 +475,16 @@ const loadData = async () => {
     }
   } catch (e: any) {
     console.error('Failed to load admin game data:', e);
+  }
+
+  // Fetch active difficulty table independently (for diff comparison)
+  try {
+    const activeRes = await fetch(`${API_BASE}/api/game-data/difficulty-table`);
+    if (activeRes.ok) {
+      activeDiffTable.value = await activeRes.json();
+    }
+  } catch (e) {
+    console.warn('Failed to fetch active difficulty table for diff:', e);
   }
 };
 
