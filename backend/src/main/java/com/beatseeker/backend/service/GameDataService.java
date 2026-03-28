@@ -129,8 +129,9 @@ public class GameDataService {
     /** Save draft difficulty table from JSON string */
     @Transactional
     public void saveDraftDifficultyTable(String json) throws Exception {
-        // Delete existing draft ranks
-        diffRankRepo.deleteByRevision("draft");
+        // Delete existing draft ranks (use deleteAll to trigger cascade on child songs)
+        List<DifficultyRank> existingDraft = diffRankRepo.findByRevisionOrderBySortOrderAsc("draft");
+        diffRankRepo.deleteAll(existingDraft);
         diffRankRepo.flush();
 
         // Parse and create new draft records
@@ -179,7 +180,8 @@ public class GameDataService {
         // 2. If draft difficulty table exists, replace active with draft
         List<DifficultyRank> draftRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("draft");
         if (!draftRanks.isEmpty()) {
-            diffRankRepo.deleteByRevision("active");
+            List<DifficultyRank> activeRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("active");
+            diffRankRepo.deleteAll(activeRanks);
             diffRankRepo.flush();
             for (DifficultyRank dr : draftRanks) {
                 dr.setRevision("active");
