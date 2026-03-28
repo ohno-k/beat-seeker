@@ -118,7 +118,10 @@ const loadUsers = async () => {
   loading.value = true;
   error.value = '';
   try {
-    users.value = await fetchAllUsers();
+    const all = await fetchAllUsers();
+    users.value = all.sort((a: any, b: any) =>
+      (a.displayName ?? '').localeCompare(b.displayName ?? '', undefined, { sensitivity: 'base' })
+    );
   } catch (err: any) {
     error.value = err.message || '一覧の取得に失敗しました。';
   } finally {

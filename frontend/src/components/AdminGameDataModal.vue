@@ -203,6 +203,22 @@
               </div>
             </div>
 
+            <!-- Saved draft changes (applied to draft, not yet published) -->
+            <div v-if="savedDiffChanges.length > 0" class="mb-3">
+              <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">ドラフト済みの変更 ({{ savedDiffChanges.length }}件)</h4>
+              <div class="space-y-1">
+                <div v-for="change in savedDiffChanges" :key="change.title" class="flex items-center bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 min-w-0">
+                  <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
+                  <div class="flex items-center gap-2 text-sm shrink-0">
+                    <span class="line-through text-slate-400">{{ change.oldRank }}</span>
+                    <span class="text-slate-400">→</span>
+                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ change.newRank }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pending in-memory changes (not yet saved to draft) -->
             <div v-if="pendingDiffChanges.length > 0">
                <h4 class="text-xs font-bold text-slate-500 mb-2">保存前の変更一覧</h4>
                <div class="space-y-1">
@@ -221,7 +237,7 @@
                   </div>
                </div>
             </div>
-            <div v-else class="text-center text-sm py-8 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl">
+            <div v-if="savedDiffChanges.length === 0 && pendingDiffChanges.length === 0" class="text-center text-sm py-8 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl">
               変更はありません。<br>上のフォームから楽曲を選んでランクを移動してください。
             </div>
           </div>
@@ -318,10 +334,29 @@ const isSubmitting = ref(false);
 const isApplying = ref(false);
 const isSavingDiff = ref(false);
 
+const activeDiffTable = ref<{ranks: {rank: string, songs: string[]}[]}>({ranks: []});
 const originalDiffTable = ref<{ranks: {rank: string, songs: string[]}[]}>({ranks: []});
 const pendingDiffChanges = ref<{title: string, oldRank: string, newRank: string}[]>([]);
 const diffEditSongTitle = ref('');
 const diffEditNewRank = ref('');
+
+const savedDiffChanges = computed(() => {
+  if (!activeDiffTable.value?.ranks?.length || !originalDiffTable.value?.ranks?.length) return [];
+  const activeMap = new Map<string, string>();
+  for (const r of activeDiffTable.value.ranks) {
+    for (const s of r.songs) activeMap.set(s, r.rank);
+  }
+  const changes: {title: string, oldRank: string, newRank: string}[] = [];
+  for (const r of originalDiffTable.value.ranks) {
+    for (const s of r.songs) {
+      const activeRank = activeMap.get(s);
+      if (activeRank !== undefined && activeRank !== r.rank) {
+        changes.push({ title: s, oldRank: activeRank, newRank: r.rank });
+      }
+    }
+  }
+  return changes;
+});
 
 const effectiveSongsList = computed(() => {
   if (!originalDiffTable.value?.ranks) return [];
@@ -393,7 +428,13 @@ const loadData = async () => {
       draftSongs.value = await songsRes.json();
     }
 
-    // Fetch difficulty table (draft or active)
+    // Fetch active difficulty table (for diff comparison)
+    const activeRes = await fetch(`${API_BASE}/api/game-data/difficulty-table`);
+    if (activeRes.ok) {
+      activeDiffTable.value = await activeRes.json();
+    }
+
+    // Fetch difficulty table draft
     const diffRes = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, { headers: authHeaders() });
     if (diffRes.ok) {
       originalDiffTable.value = await diffRes.json();
