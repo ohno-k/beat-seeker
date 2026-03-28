@@ -5,13 +5,16 @@ import com.beatseeker.backend.entity.AppNotification;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.entity.UserSongRank;
 import com.beatseeker.backend.repository.ActivityLogRepository;
 import com.beatseeker.backend.repository.AppNotificationRepository;
 import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.repository.UserSongRankRepository;
 import com.beatseeker.backend.service.PushNotificationService;
+import com.beatseeker.backend.service.SongRankBatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,13 +35,17 @@ public class ScoreController {
     private final AppNotificationRepository appNotificationRepository;
     private final ActivityLogRepository activityLogRepository;
     private final PushNotificationService pushNotificationService;
+    private final UserSongRankRepository userSongRankRepository;
+    private final SongRankBatchService songRankBatchService;
 
     public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository,
             ScoreHistoryLogRepository scoreHistoryLogRepository,
             FriendshipRepository friendshipRepository,
             AppNotificationRepository appNotificationRepository,
             ActivityLogRepository activityLogRepository,
-            PushNotificationService pushNotificationService) {
+            PushNotificationService pushNotificationService,
+            UserSongRankRepository userSongRankRepository,
+            SongRankBatchService songRankBatchService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -46,6 +53,8 @@ public class ScoreController {
         this.appNotificationRepository = appNotificationRepository;
         this.activityLogRepository = activityLogRepository;
         this.pushNotificationService = pushNotificationService;
+        this.userSongRankRepository = userSongRankRepository;
+        this.songRankBatchService = songRankBatchService;
     }
 
     /**
@@ -416,15 +425,27 @@ public class ScoreController {
 
     /**
      * Get current user's rank for every ANOTHER/LEGGENDARIA song they have played.
+     * Reads from the pre-calculated cache table (refreshed daily by SongRankBatchService).
      */
     @GetMapping("/my-song-ranks")
     public ResponseEntity<List<Map<String, Object>>> getMySongRanks(Authentication auth) {
         User user = getUser(auth);
-        return ResponseEntity.ok(scoreRepository.findUserSongRanks(user.getId()));
+        List<UserSongRank> ranks = userSongRankRepository.findByUserId(user.getId());
+        List<Map<String, Object>> result = ranks.stream().map(r -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("title", r.getTitle());
+            map.put("difficultyName", r.getDifficultyName());
+            map.put("difficultyLevel", r.getDifficultyLevel());
+            map.put("rank", r.getRank());
+            map.put("total", r.getTotal());
+            return map;
+        }).toList();
+        return ResponseEntity.ok(result);
     }
 
     /**
      * Get admin's rank for every song (admin only).
+     * Reads from the pre-calculated cache table.
      */
     @GetMapping("/admin-song-ranks")
     public ResponseEntity<List<Map<String, Object>>> getAdminSongRanks(Authentication auth) {
@@ -432,7 +453,31 @@ public class ScoreController {
                 || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
             return ResponseEntity.ok(List.of());
         }
-        return ResponseEntity.ok(scoreRepository.findAdminSongRanks(18L));
+        List<UserSongRank> ranks = userSongRankRepository.findByUserId(18L);
+        List<Map<String, Object>> result = ranks.stream().map(r -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("title", r.getTitle());
+            map.put("difficultyName", r.getDifficultyName());
+            map.put("difficultyLevel", r.getDifficultyLevel());
+            map.put("rank", r.getRank());
+            map.put("total", r.getTotal());
+            return map;
+        }).toList();
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Manually trigger song rank recalculation (admin only).
+     * Use after deploying or when ranks seem stale.
+     */
+    @PostMapping("/recalculate-song-ranks")
+    public ResponseEntity<Map<String, Object>> recalculateSongRanks(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()
+                || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        songRankBatchService.recalculateAll();
+        return ResponseEntity.ok(Map.of("message", "Song ranks recalculated"));
     }
 
     /**

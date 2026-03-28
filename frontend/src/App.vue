@@ -504,29 +504,27 @@ const handleFileDropped = async (file: File) => {
 
         if (reportSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
             isDiffModalOpen.value = true;
+            // Save the history log only when there are actual score improvements
+            try {
+                const newTierInfo = getRankInfo(accurateTotalBeatPt);
+                const newTierLabel = newTierInfo.name + (newTierInfo.tier ? ' ' + newTierInfo.tier : '');
+                const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
+                await saveHistoryLog(
+                    accurateTotalBeatPt,
+                    Math.max(0, accurateTotalBeatPt - oldTotalBeatPt),
+                    reportSongs.length,
+                    JSON.stringify(reportSongs),
+                    newTierLabel,
+                    oldTierLabel,
+                    accurateTotalRatePt
+                );
+                console.log("History log saved successfully.");
+            } catch (err) {
+                console.error("Failed to save history log", err);
+                errorMsg.value = t('app.error.historySaveFailed');
+            }
         } else {
             errorMsg.value = t('app.error.noUpdate');
-        }
-
-        // Save the history log to backend using the ACCURATE total from the full profile.
-        // Even if reportSongs.length === 0, we want to save a snapshot of the current stats for their growth record.
-        try {
-            const newTierInfo = getRankInfo(accurateTotalBeatPt);
-            const newTierLabel = newTierInfo.name + (newTierInfo.tier ? ' ' + newTierInfo.tier : '');
-            const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
-            await saveHistoryLog(
-                accurateTotalBeatPt,
-                Math.max(0, accurateTotalBeatPt - oldTotalBeatPt),
-                reportSongs.length,
-                JSON.stringify(reportSongs),
-                newTierLabel,
-                oldTierLabel,
-                accurateTotalRatePt
-            );
-            console.log("History log saved successfully.");
-        } catch (err) {
-            console.error("Failed to save history log", err);
-            errorMsg.value = t('app.error.historySaveFailed');
         }
       } catch (err) {
         console.error("Auto upload failed", err);
