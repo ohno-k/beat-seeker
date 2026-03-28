@@ -207,13 +207,18 @@
             <div v-if="savedDiffChanges.length > 0" class="mb-3">
               <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">ドラフト済みの変更 ({{ savedDiffChanges.length }}件)</h4>
               <div class="space-y-1">
-                <div v-for="change in savedDiffChanges" :key="change.title" class="flex items-center bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 min-w-0">
+                <div v-for="change in savedDiffChanges" :key="change.title" class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 min-w-0">
                   <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
                   <div class="flex items-center gap-2 text-sm shrink-0">
                     <span class="line-through text-slate-400">{{ change.oldRank }}</span>
                     <span class="text-slate-400">→</span>
                     <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ change.newRank }}</span>
                   </div>
+                  <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -409,6 +414,40 @@ const handleAddDiffChange = () => {
 
 const handleRemoveDiffChange = (title: string) => {
     pendingDiffChanges.value = pendingDiffChanges.value.filter(p => p.title !== title);
+};
+
+const handleRevertSavedChange = async (change: {title: string, oldRank: string, newRank: string}) => {
+    if (!confirm(`「${change.title}」のドラフト変更を取り消しますか？`)) return;
+
+    const newTable = JSON.parse(JSON.stringify(originalDiffTable.value));
+    for (const r of newTable.ranks) {
+        r.songs = r.songs.filter((s: string) => s !== change.title);
+    }
+    const targetRank = newTable.ranks.find((r: any) => r.rank === change.oldRank);
+    if (targetRank) targetRank.songs.push(change.title);
+
+    isSavingDiff.value = true;
+    errorMsg.value = '';
+    try {
+        const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, {
+            method: 'PUT',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(newTable),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Error');
+        originalDiffTable.value = newTable;
+        successMsg.value = 'ドラフト変更を取り消しました';
+        const statusRes = await fetch(`${API_BASE}/api/admin/game-data/status`, { headers: authHeaders() });
+        if (statusRes.ok) {
+            const status = await statusRes.json();
+            hasDraftDiffTable.value = status.hasDraftDifficultyTable;
+        }
+    } catch (e: any) {
+        errorMsg.value = '取り消しエラー: ' + e.message;
+    } finally {
+        isSavingDiff.value = false;
+    }
 };
 
 // ── Load data ───────────────────────────────────────────
