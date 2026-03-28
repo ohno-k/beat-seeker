@@ -464,37 +464,48 @@ public class ScoreController {
      */
     private void notifyFriendsOfScoreBeat(User uploader, List<Map<String, Object>> updatedSongs) {
         if (uploader.getPrivacyLevel() != null && uploader.getPrivacyLevel() == 2) return;
+        if (updatedSongs.isEmpty()) return;
         List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(uploader);
+
+        List<String> titles = updatedSongs.stream().map(s -> (String) s.get("title")).toList();
+        List<String> difficulties = updatedSongs.stream().map(s -> (String) s.get("difficulty")).distinct().toList();
+
         for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
             User friend = friendship.getFriend();
             if (friend.getPrivacyLevel() != null && friend.getPrivacyLevel() == 2) continue;
+
+            // Batch-fetch all relevant friend scores in one query (instead of N×M individual queries)
+            List<com.beatseeker.backend.entity.Score> friendScores =
+                    scoreRepository.findByUserAndTitlesAndDifficulties(friend, titles, difficulties);
+            Map<String, Integer> friendScoreMap = new HashMap<>();
+            for (com.beatseeker.backend.entity.Score fs : friendScores) {
+                String key = fs.getTitle() + "_" + fs.getDifficultyName();
+                friendScoreMap.put(key, fs.getScore() != null ? fs.getScore() : 0);
+            }
 
             for (Map<String, Object> song : updatedSongs) {
                 String title = (String) song.get("title");
                 String difficulty = (String) song.get("difficulty");
                 int newScore = (int) song.get("newScore");
+                int friendScoreVal = friendScoreMap.getOrDefault(title + "_" + difficulty, 0);
 
-                scoreRepository.findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(
-                        friend, title, difficulty).ifPresent(friendScore -> {
-                    int friendScoreVal = friendScore.getScore() != null ? friendScore.getScore() : 0;
-                    if (newScore > friendScoreVal && friendScoreVal > 0) {
-                        AppNotification notification = new AppNotification();
-                        notification.setRecipient(friend);
-                        notification.setType("SCORE_BEAT");
-                        notification.setMessage(
-                                uploader.getDisplayName() + "さんが「" + title + "」(" + difficulty + ") で " +
-                                newScore + " を記録し、あなたのスコア " + friendScoreVal + " を上回りました！");
-                        appNotificationRepository.save(notification);
+                if (newScore > friendScoreVal && friendScoreVal > 0) {
+                    AppNotification notification = new AppNotification();
+                    notification.setRecipient(friend);
+                    notification.setType("SCORE_BEAT");
+                    notification.setMessage(
+                            uploader.getDisplayName() + "さんが「" + title + "」(" + difficulty + ") で " +
+                            newScore + " を記録し、あなたのスコア " + friendScoreVal + " を上回りました！");
+                    appNotificationRepository.save(notification);
 
-                        if (friend.getPushSubscription() != null) {
-                            pushNotificationService.sendNotification(
-                                    friend.getPushSubscription(),
-                                    "スコアを抜かれました！",
-                                    uploader.getDisplayName() + "さんに「" + title + "」で抜かれました",
-                                    "/");
-                        }
+                    if (friend.getPushSubscription() != null) {
+                        pushNotificationService.sendNotification(
+                                friend.getPushSubscription(),
+                                "スコアを抜かれました！",
+                                uploader.getDisplayName() + "さんに「" + title + "」で抜かれました",
+                                "/");
                     }
-                });
+                }
             }
         }
     }

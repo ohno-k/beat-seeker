@@ -46,17 +46,24 @@ export function useScoreUpload() {
 
     const upload = async (scores: ScoreData[]): Promise<{ updatedCount: number; updatedSongs: any[]; message: string }> => {
         const records = flattenToUploadRecords(scores);
-        const res = await fetch(`${API_BASE}/api/scores/upload`, {
-            method: 'POST',
-            headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify(records),
-        });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        try {
+            const res = await fetch(`${API_BASE}/api/scores/upload`, {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify(records),
+                signal: controller.signal,
+            });
 
-        if (!res.ok) {
-            throw new Error(`Upload failed: ${res.status}`);
+            if (!res.ok) {
+                throw new Error(`Upload failed: ${res.status}`);
+            }
+
+            return res.json();
+        } finally {
+            clearTimeout(timeoutId);
         }
-
-        return res.json();
     };
 
     const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number): Promise<void> => {

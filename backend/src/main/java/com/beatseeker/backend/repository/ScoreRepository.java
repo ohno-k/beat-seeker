@@ -25,6 +25,9 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
 
     java.util.Optional<Score> findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(User user, String title, String difficultyName);
 
+    @Query("SELECT s FROM Score s WHERE s.user = :user AND s.title IN :titles AND s.difficultyName IN :difficulties")
+    List<Score> findByUserAndTitlesAndDifficulties(@Param("user") User user, @Param("titles") List<String> titles, @Param("difficulties") List<String> difficulties);
+
     @Query(value = "SELECT s.user_id as \"userId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.difficulty_level as \"difficultyLevel\", s.score as \"score\" FROM scores s WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')", nativeQuery = true)
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScores();
 

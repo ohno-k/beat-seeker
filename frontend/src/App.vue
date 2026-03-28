@@ -453,18 +453,26 @@ const handleFileDropped = async (file: File) => {
           };
         });
 
-        // Fetch user's song ranks for the report
+        // Fetch user's song ranks for the report (with timeout to avoid blocking upload flow)
         const songRankMap = new Map<string, { rank: number; total: number }>();
         try {
           const token = localStorage.getItem('beat-seeker-token');
-          const rankRes = await fetch(`${API_BASE}/api/scores/my-song-ranks`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (rankRes.ok) {
-            const rankData: Array<{ title: string; difficultyName: string; rank: number; total: number }> = await rankRes.json();
-            rankData.forEach(r => songRankMap.set(`${r.title}_${r.difficultyName}`, { rank: r.rank, total: r.total }));
+          const rankController = new AbortController();
+          const rankTimeout = setTimeout(() => rankController.abort(), 15000);
+          try {
+            const rankRes = await fetch(`${API_BASE}/api/scores/my-song-ranks`, {
+              headers: { Authorization: `Bearer ${token}` },
+              signal: rankController.signal
+            });
+            clearTimeout(rankTimeout);
+            if (rankRes.ok) {
+              const rankData: Array<{ title: string; difficultyName: string; rank: number; total: number }> = await rankRes.json();
+              rankData.forEach(r => songRankMap.set(`${r.title}_${r.difficultyName}`, { rank: r.rank, total: r.total }));
+            }
+          } finally {
+            clearTimeout(rankTimeout);
           }
-        } catch { /* silent */ }
+        } catch { /* silent - timeout or network error, proceed without ranks */ }
 
         // Filter and sort for the report
         const reportSongs = enrichedUpdates
