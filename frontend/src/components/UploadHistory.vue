@@ -164,6 +164,10 @@ const fetchHistory = async () => {
         tierInfo: tierInfo,
         rateTierInfo: rateTierInfo
       };
+    }).filter((item: any) => {
+      if ((item.updatedCount || 0) > 0) return true;
+      // updatedCount=0 でも BEAT-PT か RATE-PT が変動していれば難易度改訂として表示
+      return Math.abs(item.beatPtIncrease) >= 0.1 || Math.abs(item.ratePtIncrease) >= 0.1;
     });
   } catch (err: any) {
     errorMsg.value = err.message;
