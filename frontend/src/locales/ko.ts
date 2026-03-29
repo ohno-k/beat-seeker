@@ -12,6 +12,7 @@ export const ko = {
   'nav.terms': '이용 약관',
   'nav.adminPanel': '관리자 패널',
   'nav.songRankings': '곡별 순위',
+  'nav.tierVoting': '투표소',
   'nav.logout': '로그아웃',
   'nav.loginRegister': '로그인 / 회원가입',
   'nav.uploadCsv': 'CSV 업로드',
@@ -795,6 +796,23 @@ export const ko = {
   'changelog.v130f1': 'RATE-TIER 시스템 구현: 점수 레이트를 기반으로 플레이어의 정확도를 평가하는 새로운 지표를 추가했습니다.',
   'changelog.v130f2': '곡 난이도표 제2판 적용: 신규 추가 및 기존 변경을 포함한 난이도 개정을 실시했습니다.',
   'changelog.v130f3': '난이도 개정 이력 자동 기록: 난이도 개정 시 업로드 이력에 자동으로 라벨이 추가되도록 개선했습니다.',
+
+  // Tier Voting
+  'tierVoting.subtitle': '모든 악보의 난이도표 승격·유지·강등을 함께 투표해 봅시다.',
+  'tierVoting.criteriaTitle': '투표 기준',
+  'tierVoting.criteria1': 'MAX-（스코어 레이트 94.4444...%）달성 난이도를 기준으로 투표해 주세요.',
+  'tierVoting.criteria2': '클리어 램프는 고려하지 않습니다. RANDOM 등으로 유리한 배치를 뽑아 MAX-를 달성한 경우도 유효합니다.',
+  'tierVoting.loginHint': '투표하려면 로그인이 필요합니다. 집계 결과는 누구나 확인할 수 있습니다.',
+  'tierVoting.searchPlaceholder': '곡명으로 검색...',
+  'tierVoting.songs': '곡',
+  'tierVoting.promote': '승격',
+  'tierVoting.stay': '유지',
+  'tierVoting.demote': '강등',
+  'tierVoting.votedCount': '{n}곡에 투표 완료',
+  'tierVoting.noResults': '해당하는 곡이 없습니다.',
+  'tierVoting.selectTierHint': '티어 배치 투표',
+  'tierVoting.noVote': '미투표',
+  'tierVoting.topVoted': '최다',
 
   // App / Global
   'app.error.noUpdate': '업데이트된 점수가 없습니다 (이미 최신 점수가 저장되어 있습니다).',

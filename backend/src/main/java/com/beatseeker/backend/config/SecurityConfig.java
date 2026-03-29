@@ -67,6 +67,12 @@ public class SecurityConfig {
                                                 .requestMatchers(org.springframework.http.HttpMethod.DELETE,
                                                                 "/api/votes")
                                                 .authenticated()
+                                                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/tier-votes")
+                                                .authenticated()
+                                                .requestMatchers(org.springframework.http.HttpMethod.DELETE,
+                                                                "/api/tier-votes")
+                                                .authenticated()
+                                                .requestMatchers("/api/tier-votes/mine").authenticated()
                                                 .requestMatchers("/api/friends/**").authenticated()
                                                 .requestMatchers("/api/arena/**").authenticated()
                                                 .anyRequest().permitAll())

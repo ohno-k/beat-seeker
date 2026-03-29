@@ -14,6 +14,7 @@ import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
 import com.beatseeker.backend.service.PushNotificationService;
+import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.SongRankBatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,6 +38,7 @@ public class ScoreController {
     private final PushNotificationService pushNotificationService;
     private final UserSongRankRepository userSongRankRepository;
     private final SongRankBatchService songRankBatchService;
+    private final ScoreRecalculationService scoreRecalculationService;
 
     public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository,
             ScoreHistoryLogRepository scoreHistoryLogRepository,
@@ -45,7 +47,8 @@ public class ScoreController {
             ActivityLogRepository activityLogRepository,
             PushNotificationService pushNotificationService,
             UserSongRankRepository userSongRankRepository,
-            SongRankBatchService songRankBatchService) {
+            SongRankBatchService songRankBatchService,
+            ScoreRecalculationService scoreRecalculationService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -55,6 +58,7 @@ public class ScoreController {
         this.pushNotificationService = pushNotificationService;
         this.userSongRankRepository = userSongRankRepository;
         this.songRankBatchService = songRankBatchService;
+        this.scoreRecalculationService = scoreRecalculationService;
     }
 
     /**
@@ -170,7 +174,11 @@ public class ScoreController {
         log.setUpdatedCount(req.updatedCount());
         log.setDiffJson(req.diffJson());
         log.setTotalPrecisionPt(req.totalPrecisionPt() != null ? req.totalPrecisionPt() : 0.0);
-        log.setTotalRatePt(req.totalRatePt() != null ? req.totalRatePt() : 0.0);
+        double totalRatePt = req.totalRatePt() != null ? req.totalRatePt() : 0.0;
+        if (totalRatePt <= 0) {
+            totalRatePt = scoreRecalculationService.calculateRatePtFromActiveData(allScores);
+        }
+        log.setTotalRatePt(totalRatePt);
 
         long totalScore = 0;
         int fcCount = 0;

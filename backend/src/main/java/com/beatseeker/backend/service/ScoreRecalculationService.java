@@ -2,9 +2,11 @@ package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
+import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
+import com.beatseeker.backend.repository.SongDefinitionRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +26,7 @@ public class ScoreRecalculationService {
     private final UserRepository userRepository;
     private final ScoreRepository scoreRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
+    private final SongDefinitionRepository songDefinitionRepository;
     private final ObjectMapper objectMapper;
 
     // Weights configuration mapped from beatTier.ts
@@ -52,11 +55,45 @@ public class ScoreRecalculationService {
             {100.0, 512.0}
     };
 
-    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, ObjectMapper objectMapper) {
+    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
+        this.songDefinitionRepository = songDefinitionRepository;
         this.objectMapper = objectMapper;
+    }
+
+    /**
+     * Calculates total RATE-PT for the given scores using the active song definitions from DB.
+     * Used as a server-side fallback when the frontend-provided value is 0 or missing.
+     */
+    public double calculateRatePtFromActiveData(List<Score> scores) {
+        List<SongDefinition> activeSongs = songDefinitionRepository.findByRevision("active");
+        Map<String, Integer> songMaxScores = new HashMap<>();
+        for (SongDefinition s : activeSongs) {
+            if (s.getNotes() != null && s.getNotes() > 0) {
+                songMaxScores.put(s.getTitle() + "_" + s.getDifficulty(), s.getNotes() * 2);
+            }
+        }
+
+        List<Double> ratePts = new ArrayList<>();
+        for (Score score : scores) {
+            String diffName = normalizeDiffName(score.getDifficultyName());
+            boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
+            if (!isRateEligible) continue;
+            String code = getDifficultyCode(diffName);
+            if (code == null) continue;
+            Integer maxScore = songMaxScores.get(score.getTitle() + "_" + code);
+            if (maxScore == null || maxScore == 0) continue;
+            double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
+            if (scoreRate <= 0) continue;
+            double rPt = calculateScoreRateTierPoints(scoreRate);
+            if (rPt > 0) ratePts.add(rPt);
+        }
+        ratePts.sort(Collections.reverseOrder());
+        double totalRatePtAcc = 0;
+        for (int i = 0; i < Math.min(100, ratePts.size()); i++) totalRatePtAcc += ratePts.get(i);
+        return Math.round(totalRatePtAcc * 10.0) / 10.0;
     }
 
     @Async

@@ -12,6 +12,7 @@ export const ja = {
   'nav.terms': '利用規約',
   'nav.adminPanel': '管理者パネル',
   'nav.songRankings': '曲別順位',
+  'nav.tierVoting': '投票所',
   'nav.logout': 'ログアウト',
   'nav.loginRegister': 'ログイン / 新規登録',
   'nav.uploadCsv': 'CSVをアップロード',
@@ -797,6 +798,23 @@ export const ja = {
   'changelog.v130f1': 'RATE-TIER システムの実装: スコアレートをもとにプレイヤーの精度を評価する新指標を追加しました。',
   'changelog.v130f2': '楽曲難易度表 第2版の適用: 新規追加・既存変更を含む難易度改訂を実施しました。',
   'changelog.v130f3': '難易度改訂の履歴への自動記録: 難易度改訂時にアップロード履歴へ自動的にラベルが追加されるようになりました。',
+
+  // Tier Voting
+  'tierVoting.subtitle': '全譜面の難易度表における昇格・降格・現状維持をみんなで投票しましょう。',
+  'tierVoting.criteriaTitle': '投票基準',
+  'tierVoting.criteria1': 'MAX-（スコアレート 94.4444...%）の達成難易度を基準に投票してください。',
+  'tierVoting.criteria2': 'クリアランプは考慮しません。RANDOM等で有利な配置を引いてMAX-を達成した場合もOKです。',
+  'tierVoting.loginHint': 'ログインすると投票できます。集計結果は誰でも確認できます。',
+  'tierVoting.searchPlaceholder': '曲名で検索...',
+  'tierVoting.songs': '曲',
+  'tierVoting.promote': '昇格',
+  'tierVoting.stay': '現状維持',
+  'tierVoting.demote': '降格',
+  'tierVoting.votedCount': '{n}曲に投票済み',
+  'tierVoting.noResults': '該当する曲が見つかりません。',
+  'tierVoting.selectTierHint': 'ティア配置投票',
+  'tierVoting.noVote': '未投票',
+  'tierVoting.topVoted': '最多',
 
   // App / Global
   'app.error.noUpdate': 'スコアの更新はありませんでした（すでに最新のスコアが保存されています）',

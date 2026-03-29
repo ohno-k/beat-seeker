@@ -19,6 +19,7 @@ import Sidebar from './components/Sidebar.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
 import ArenaView from './views/ArenaView.vue';
+import TierVotingView from './views/TierVotingView.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
@@ -51,7 +52,7 @@ const reloadPage = () => window.location.reload();
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting'>('dashboard')
 const viewingMode = ref<'admin' | 'friend' | null>(null);
 const totalBeatTierPoints = ref(0);
 
@@ -741,6 +742,15 @@ const handleUnifiedClose = async () => {
                 {{ t('nav.arena') }}
               </button>
 
+              <button
+                v-if="!viewingUserId"
+                @click="activeTab = 'tier-voting'"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
+                :class="activeTab === 'tier-voting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+              >
+                {{ t('nav.tierVoting') }}
+              </button>
+
               <!-- Special Titles for non-tab pages -->
               <span v-if="['changelog', 'terms', 'about'].includes(activeTab)" class="ml-4 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0 capitalize">
                 {{ t(`nav.${activeTab}`) }}
@@ -839,6 +849,14 @@ const handleUnifiedClose = async () => {
           >
             {{ t('nav.arena') }}
           </button>
+          <button
+            v-if="!viewingUserId"
+            @click="activeTab = 'tier-voting'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'tier-voting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+          >
+            {{ t('nav.tierVoting') }}
+          </button>
         </nav>
         <!-- Admin Viewing Banner -->
         <div v-if="viewingUserId" class="w-full max-w-6xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden shrink-0">
@@ -902,6 +920,10 @@ const handleUnifiedClose = async () => {
 
         <template v-else-if="activeTab === 'arena'">
           <ArenaView class="w-full max-w-5xl mx-auto animate-fade-in" :viewing-user-id="viewingUserId" />
+        </template>
+
+        <template v-else-if="activeTab === 'tier-voting'">
+          <TierVotingView class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
         
         <template v-else>

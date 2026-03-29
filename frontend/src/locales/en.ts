@@ -12,6 +12,7 @@ export const en = {
   'nav.terms': 'Terms of Service',
   'nav.adminPanel': 'Admin Panel',
   'nav.songRankings': 'Song Rankings',
+  'nav.tierVoting': 'Voting Station',
   'nav.logout': 'Logout',
   'nav.loginRegister': 'Login / Register',
   'nav.uploadCsv': 'Upload CSV',
@@ -794,6 +795,23 @@ export const en = {
   'changelog.v130f1': 'RATE-TIER System Implementation: Added new metrics to evaluate player accuracy based on score rates.',
   'changelog.v130f2': '2nd Edition Difficulty Table: Applied difficulty revisions including new songs and existing changes.',
   'changelog.v130f3': 'Auto-logging of Revisions: Upload history now automatically records "Difficulty Revision" labels.',
+
+  // Tier Voting
+  'tierVoting.subtitle': 'Vote on whether each chart should be promoted, stay, or demoted in the difficulty table.',
+  'tierVoting.criteriaTitle': 'Voting Criteria',
+  'tierVoting.criteria1': 'Base your vote on the difficulty of achieving MAX- (score rate 94.4444...%).',
+  'tierVoting.criteria2': 'Clear lamps are not considered. Achieving MAX- with a favorable RANDOM arrangement is perfectly valid.',
+  'tierVoting.loginHint': 'Log in to cast votes. Vote totals are visible to everyone.',
+  'tierVoting.searchPlaceholder': 'Search by title...',
+  'tierVoting.songs': ' songs',
+  'tierVoting.promote': 'Promote',
+  'tierVoting.stay': 'Stay',
+  'tierVoting.demote': 'Demote',
+  'tierVoting.votedCount': 'Voted on {n} charts',
+  'tierVoting.noResults': 'No charts found.',
+  'tierVoting.selectTierHint': 'Tier Placement Vote',
+  'tierVoting.noVote': 'Not voted',
+  'tierVoting.topVoted': 'Top',
 
   // App / Global
   'app.error.noUpdate': 'No score updates found (latest scores already saved).',
