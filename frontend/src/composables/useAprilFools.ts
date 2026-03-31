@@ -13,8 +13,12 @@ const _isAprilFools = ref(DEBUG_FORCE_APRIL_FOOLS);
 let _timer: ReturnType<typeof setInterval> | null = null;
 let _refCount = 0;
 
+// 機能全体を無効化するマスタースイッチ
+const ENABLE_APRIL_FOOLS = false;
+
 function checkAprilFools(): boolean {
   if (DEBUG_FORCE_APRIL_FOOLS) return true;
+  if (!ENABLE_APRIL_FOOLS) return false;
   
   // Check against JST (Asia/Tokyo)
   const formatter = new Intl.DateTimeFormat('en-US', {
