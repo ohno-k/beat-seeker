@@ -36,9 +36,21 @@ import { useDarkMode } from './composables/useDarkMode';
 import { useFriends } from './composables/useFriends';
 import { useI18n } from './composables/useI18n';
 import { useGameData } from './composables/useGameData';
-import { watch, onMounted } from 'vue';
+import { useAprilFools } from './composables/useAprilFools';
+import AprilFoolsOverlay from './components/AprilFoolsOverlay.vue';
+import { watch, watchEffect, onMounted } from 'vue';
 
 const { t } = useI18n();
+const { isAprilFools } = useAprilFools();
+
+// Toggle af-mode class on <html> element for global CSS overrides
+watchEffect(() => {
+  if (isAprilFools.value) {
+    document.documentElement.classList.add('af-mode');
+  } else {
+    document.documentElement.classList.remove('af-mode');
+  }
+});
 
 // Fetch game data from API on initialization
 const { fetchGameData } = useGameData();
@@ -634,7 +646,9 @@ const handleUnifiedClose = async () => {
 
 <template>
   <ResetPasswordView v-if="isResetPasswordPage" />
-  <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden">
+  <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
+    <!-- April Fools Overlay -->
+    <AprilFoolsOverlay />
     <!-- Sidebar Component -->
     <Sidebar 
       v-model:is-open="isSidebarOpen"

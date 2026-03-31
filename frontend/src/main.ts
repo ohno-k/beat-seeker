@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import './style.css'
 import './output.css'
+import './aprilFools.css'
 import App from './App.vue'
 import router from './router'
 
