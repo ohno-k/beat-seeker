@@ -232,6 +232,12 @@ public class ScoreController {
 
         scoreHistoryLogRepository.save(log);
 
+        // ユーザーのtotalBeatPtをキャッシュ（ティア別平均クエリの高速化）
+        if (req.totalBeatPt() != null) {
+            user.setTotalBeatPt(req.totalBeatPt());
+            userRepository.save(user);
+        }
+
         // ランクアップ通知とActivityLog
         if (req.tierName() != null && req.prevTierName() != null
                 && !req.tierName().equals(req.prevTierName())) {

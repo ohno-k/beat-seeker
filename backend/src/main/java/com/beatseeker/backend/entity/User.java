@@ -45,6 +45,9 @@ public class User {
 
     private LocalDateTime lastUploadedAt;
 
+    @Column(columnDefinition = "float8 default 0")
+    private Double totalBeatPt = 0.0;
+
     @Column(columnDefinition = "TEXT")
     private String pushSubscription; // Web Push subscription JSON
 

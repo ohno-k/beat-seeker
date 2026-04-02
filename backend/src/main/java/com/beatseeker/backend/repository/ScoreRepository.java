@@ -112,14 +112,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findAllUserSongRanks();
 
     @Query(value =
-        "WITH user_latest_pt AS (" +
-        "  SELECT DISTINCT ON (user_id) user_id, total_beat_pt" +
-        "  FROM score_history_logs" +
-        "  WHERE total_beat_pt > 0" +
-        "  ORDER BY user_id, uploaded_at DESC" +
-        "), " +
-        "user_tier AS (" +
-        "  SELECT user_id," +
+        "WITH user_tier AS (" +
+        "  SELECT id AS user_id," +
         "    CASE" +
         "      WHEN total_beat_pt >= 18000 THEN 'Legend'" +
         "      WHEN total_beat_pt >= 17500 THEN 'Mythic'" +
@@ -134,7 +128,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "      WHEN total_beat_pt >= 10000 THEN 'Novice'" +
         "      ELSE 'Beginner'" +
         "    END AS beat_tier" +
-        "  FROM user_latest_pt" +
+        "  FROM users" +
+        "  WHERE total_beat_pt > 0" +
         "), " +
         "best_scores AS (" +
         "  SELECT s.user_id, s.title, s.difficulty_name, s.difficulty_level, MAX(s.score) AS score" +

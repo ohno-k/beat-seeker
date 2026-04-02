@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog, Long> {
     List<ScoreHistoryLog> findByUserOrderByUploadedAtAsc(User user);
+    Optional<ScoreHistoryLog> findFirstByUserOrderByUploadedAtDesc(User user);
 
     @Query(value =
             "WITH current_ranks AS ( " +

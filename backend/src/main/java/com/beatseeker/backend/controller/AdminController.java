@@ -231,6 +231,27 @@ public class AdminController {
         }
     }
 
+    /**
+     * score_history_logs の最新レコードから users.total_beat_pt を一括移行する。
+     * 新カラム追加後に一度だけ実行する。
+     */
+    @PostMapping("/migrate-user-beat-pt")
+    public ResponseEntity<Map<String, Object>> migrateUserBeatPt(Authentication auth) {
+        checkAdminAccess(auth);
+        List<User> users = userRepository.findAll();
+        int updated = 0;
+        for (User u : users) {
+            scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(u).ifPresent(log -> {
+                if (log.getTotalBeatPt() != null && log.getTotalBeatPt() > 0) {
+                    u.setTotalBeatPt(log.getTotalBeatPt());
+                    userRepository.save(u);
+                }
+            });
+            updated++;
+        }
+        return ResponseEntity.ok(Map.of("message", updated + " 件のユーザーのtotalBeatPtを更新しました"));
+    }
+
     @PostMapping("/push/clear-all")
     public ResponseEntity<Map<String, Object>> clearAllPushSubscriptions(Authentication auth) {
         checkAdminAccess(auth);
