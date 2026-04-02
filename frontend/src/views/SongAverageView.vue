@@ -33,7 +33,7 @@ interface SongRow {
 // ── State ──────────────────────────────────────────────────
 const rawData = ref<{
   title: string; difficultyName: string; difficultyLevel: number;
-  beatTier: string; score: number;
+  beatTier: string; avgScore: number; userCount: number;
 }[]>([]);
 // key: "title_ANOTHER" or "title_LEGGENDARIA" → my best score
 const myScoresMap = ref<Map<string, number>>(new Map());
@@ -83,12 +83,12 @@ function getMaxScore(title: string, difficultyName: string): number {
 
 // ── Build rows ─────────────────────────────────────────────
 const rows = computed<SongRow[]>(() => {
-  // First pass: build song map and collect scores per song+tier
   const songMap = new Map<string, SongRow>();
-  // nested map: songKey → tier → scores[]
-  const tierScores = new Map<string, Map<BeatTierName, number[]>>();
 
   for (const entry of rawData.value) {
+    const tier = entry.beatTier as BeatTierName;
+    if (!TIER_ORDER.includes(tier)) continue;
+
     const songKey = `${entry.title}_${entry.difficultyName}`;
     if (!songMap.has(songKey)) {
       const maxScore = getMaxScore(entry.title, entry.difficultyName);
@@ -100,31 +100,14 @@ const rows = computed<SongRow[]>(() => {
         averages: {},
         maxScore,
       });
-      tierScores.set(songKey, new Map());
     }
     const row = songMap.get(songKey)!;
-    const tier = entry.beatTier as BeatTierName;
-    if (!TIER_ORDER.includes(tier)) continue;
-
-    // A未満（66.66%未満）はノーカウント
-    if ((entry.score / row.maxScore) * 100 < 66.66) continue;
-
-    const byTier = tierScores.get(songKey)!;
-    if (!byTier.has(tier)) byTier.set(tier, []);
-    byTier.get(tier)!.push(entry.score);
-  }
-
-  // Second pass: aggregate
-  for (const [songKey, byTier] of tierScores) {
-    const row = songMap.get(songKey)!;
-    for (const [tier, scores] of byTier) {
-      const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-      row.averages[tier] = {
-        avgScore,
-        avgRate: (avgScore / row.maxScore) * 100,
-        userCount: scores.length,
-      };
-    }
+    const avgScore = Math.round(Number(entry.avgScore));
+    row.averages[tier] = {
+      avgScore,
+      avgRate: (avgScore / row.maxScore) * 100,
+      userCount: Number(entry.userCount),
+    };
   }
 
   return Array.from(songMap.values());

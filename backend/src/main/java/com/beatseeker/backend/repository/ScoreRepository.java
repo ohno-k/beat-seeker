@@ -139,9 +139,12 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  GROUP BY s.user_id, s.title, s.difficulty_name, s.difficulty_level" +
         ") " +
         "SELECT b.title as \"title\", b.difficulty_name as \"difficultyName\", b.difficulty_level as \"difficultyLevel\"," +
-        "  t.beat_tier as \"beatTier\", b.score as \"score\" " +
+        "  t.beat_tier as \"beatTier\"," +
+        "  ROUND(AVG(b.score)) as \"avgScore\"," +
+        "  COUNT(*) as \"userCount\" " +
         "FROM best_scores b " +
         "JOIN user_tier t ON b.user_id = t.user_id " +
+        "GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier " +
         "ORDER BY b.title, b.difficulty_name",
         nativeQuery = true)
     List<Map<String, Object>> findRawSongScoresWithBeatTier();
