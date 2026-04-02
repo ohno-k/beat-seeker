@@ -4,6 +4,7 @@ import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { API_BASE } from '../composables/useAuth';
+import TierCommentModal from '../components/TierCommentModal.vue';
 
 const { t } = useI18n();
 const { diffTableRanks } = useGameData();
@@ -22,6 +23,33 @@ const myVotes = ref<Map<string, string>>(new Map());
 
 const isLoadingVotes = ref(false);
 const searchQuery = ref('');
+
+const commentStats = ref<Map<string, { count: number; latest: string }>>(new Map());
+const showCommentModal = ref(false);
+const activeCommentTitle = ref('');
+const activeCommentDiff = ref('');
+
+const fetchCommentStats = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/tier-comments/stats`);
+    if (res.ok) {
+      const data: Array<{ title: string; difficultyName: string; commentCount: number; latestCommentAt: string }> = await res.json();
+      const map = new Map();
+      for (const item of data) {
+        map.set(`${item.title}|${item.difficultyName}`, { count: item.commentCount, latest: item.latestCommentAt });
+      }
+      commentStats.value = map;
+    }
+  } catch {
+    // ignore
+  }
+};
+
+const openCommentModal = (title: string, difficultyName: string) => {
+  activeCommentTitle.value = title;
+  activeCommentDiff.value = difficultyName;
+  showCommentModal.value = true;
+};
 
 const fetchAllVotes = async () => {
   isLoadingVotes.value = true;
@@ -66,6 +94,7 @@ const fetchMyVotes = async () => {
 
 onMounted(async () => {
   await fetchAllVotes();
+  await fetchCommentStats();
   await fetchMyVotes();
 });
 
@@ -175,13 +204,35 @@ const castTierVote = async (title: string, difficultyName: string, tier: string)
 };
 
 const filteredRanks = computed(() => {
-  if (!searchQuery.value.trim()) return diffTableRanks.value;
-  const q = searchQuery.value.trim().toLowerCase();
+  const query = searchQuery.value.trim().toLowerCase();
   return diffTableRanks.value
-    .map(rank => ({
-      ...rank,
-      songs: rank.songs.filter(s => s.toLowerCase().includes(q)),
-    }))
+    .map(rank => {
+      let filteredSongs = rank.songs;
+      if (query) {
+        filteredSongs = filteredSongs.filter(s => s.toLowerCase().includes(query));
+      }
+
+      // Sort by recent comment descending
+      filteredSongs = [...filteredSongs].sort((a, b) => {
+        const aParsed = parseSong(a);
+        const bParsed = parseSong(b);
+        const aStats = commentStats.value.get(`${aParsed.title}|${aParsed.difficultyName}`);
+        const bStats = commentStats.value.get(`${bParsed.title}|${bParsed.difficultyName}`);
+
+        const aTime = aStats ? new Date(aStats.latest).getTime() : 0;
+        const bTime = bStats ? new Date(bStats.latest).getTime() : 0;
+
+        if (aTime !== bTime) {
+          return bTime - aTime;
+        }
+        return 0; // retain original diffTableRanks ordering if no comments or same time
+      });
+
+      return {
+        ...rank,
+        songs: filteredSongs,
+      };
+    })
     .filter(rank => rank.songs.length > 0);
 });
 
@@ -274,10 +325,11 @@ const totalVotedCount = computed(() => myVotes.value.size);
           <div
             v-for="songEntry in rank.songs"
             :key="songEntry"
-            class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
+            class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 transition-colors group hover:bg-slate-50 dark:hover:bg-slate-700/30 cursor-pointer"
+            @click="openCommentModal(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
           >
             <!-- Song Info -->
-            <div class="flex items-center gap-2 flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-1 min-w-0 pr-4">
               <span
                 class="shrink-0 text-[10px] px-1.5 py-0.5 rounded font-bold"
                 :class="parseSong(songEntry).difficultyName === 'LEGGENDARIA'
@@ -286,23 +338,40 @@ const totalVotedCount = computed(() => myVotes.value.size);
               >
                 {{ parseSong(songEntry).difficultyName === 'LEGGENDARIA' ? 'LEG' : 'ANO' }}
               </span>
-              <span class="font-semibold text-slate-900 dark:text-white text-sm truncate">
+              <span class="font-semibold text-slate-900 dark:text-white text-sm truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {{ parseSong(songEntry).title }}
               </span>
+
+              <!-- Comment Button / Badge -->
+              <button 
+                @click.stop="openCommentModal(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
+                class="inline-flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg text-[10px] font-bold transition-all ml-1"
+                :class="commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`)
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/60'
+                  : 'bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600'"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <template v-if="commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`)">
+                  {{ commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`)!.count }} 件のスレッド
+                </template>
+                <template v-else>
+                  スレッドを開く
+                </template>
+              </button>
             </div>
 
             <!-- Uncategorized: Tier Select -->
             <template v-if="isUncategorized(rank.rank)">
-              <div class="flex items-center gap-3 shrink-0">
+              <div class="flex items-center gap-3 shrink-0" @click.stop>
                 <select
                   :value="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) ?? ''"
                   :disabled="!isLoggedIn"
                   @change="castTierVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, ($event.target as HTMLSelectElement).value)"
                   class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  :class="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName)
+                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName)
                     ? 'bg-blue-500 text-white border-blue-500'
                     : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'"
+                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <option value="">{{ t('tierVoting.noVote') }}</option>
                   <option v-for="tier in TIER_OPTIONS" :key="tier" :value="tier">{{ tier }}</option>
@@ -317,45 +386,45 @@ const totalVotedCount = computed(() => myVotes.value.size);
 
             <!-- Ranked: PROMOTE / STAY / DEMOTE buttons -->
             <template v-else>
-              <div class="flex items-center gap-1.5 shrink-0">
+              <div class="flex items-center gap-1.5 shrink-0" @click.stop>
                 <!-- PROMOTE -->
                 <button
-                  @click="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'PROMOTE')"
+                  @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'PROMOTE')"
                   :disabled="!isLoggedIn"
                   :title="t('tierVoting.promote')"
                   class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border"
-                  :class="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'PROMOTE'
+                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'PROMOTE'
                     ? 'bg-green-500 text-white border-green-500 shadow-sm'
                     : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-green-400 hover:text-green-600',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'"
+                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>↑</span>
                   <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
                 </button>
                 <!-- STAY -->
                 <button
-                  @click="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'STAY')"
+                  @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'STAY')"
                   :disabled="!isLoggedIn"
                   :title="t('tierVoting.stay')"
                   class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border"
-                  :class="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'STAY'
+                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'STAY'
                     ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
                     : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-blue-400 hover:text-blue-600',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'"
+                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>→</span>
                   <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
                 </button>
                 <!-- DEMOTE -->
                 <button
-                  @click="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'DEMOTE')"
+                  @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'DEMOTE')"
                   :disabled="!isLoggedIn"
                   :title="t('tierVoting.demote')"
                   class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border"
-                  :class="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'DEMOTE'
+                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'DEMOTE'
                     ? 'bg-red-500 text-white border-red-500 shadow-sm'
                     : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-red-400 hover:text-red-600',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'"
+                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>↓</span>
                   <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['DEMOTE'] ?? 0 }}</span>
@@ -366,10 +435,18 @@ const totalVotedCount = computed(() => myVotes.value.size);
         </div>
       </div>
 
-      <!-- Empty search result -->
       <div v-if="filteredRanks.length === 0" class="text-center py-16 text-slate-400 dark:text-slate-500 text-sm">
         {{ t('tierVoting.noResults') }}
       </div>
     </div>
+
+    <!-- Comment Modal -->
+    <TierCommentModal
+      :show="showCommentModal"
+      :title="activeCommentTitle"
+      :difficultyName="activeCommentDiff"
+      @close="showCommentModal = false"
+      @update="fetchCommentStats"
+    />
   </div>
 </template>
