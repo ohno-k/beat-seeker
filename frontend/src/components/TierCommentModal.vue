@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
+import RankIcon from './RankIcon.vue';
+import { getRankInfo } from '../utils/beatTier';
 
 const props = defineProps<{
   show: boolean;
@@ -15,7 +17,7 @@ const emit = defineEmits<{
 
 const { isLoggedIn, authHeaders } = useAuth();
 
-const comments = ref<Array<{ id: number; userId: number; displayName: string; content: string; createdAt: string }>>([]);
+const comments = ref<Array<{ id: number; userId: number; totalBeatPt: number; content: string; createdAt: string }>>([]);
 const isLoading = ref(false);
 const newComment = ref('');
 const isSubmitting = ref(false);
@@ -126,9 +128,9 @@ const formatDate = (dateString: string) => {
         </div>
 
         <template v-else>
-          <div v-for="comment in comments" :key="comment.id" class="flex flex-col gap-1">
-            <div class="flex items-center gap-2 text-xs">
-              <span class="font-bold text-slate-700 dark:text-slate-300">{{ comment.displayName }}</span>
+          <div v-for="comment in comments" :key="comment.id" class="flex flex-col gap-1 mt-3 first:mt-0">
+            <div class="flex items-center gap-2 text-xs mb-0.5">
+              <RankIcon v-if="comment.totalBeatPt !== undefined" :rank-name="getRankInfo(comment.totalBeatPt).name" :tier="getRankInfo(comment.totalBeatPt).tier" size="sm" disable-party />
               <span class="text-slate-400 dark:text-slate-500">{{ formatDate(comment.createdAt) }}</span>
             </div>
             <div class="bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 px-4 py-3 rounded-2xl rounded-tl-sm w-fit max-w-[90%] whitespace-pre-wrap text-sm leading-relaxed">

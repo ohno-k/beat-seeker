@@ -53,7 +53,7 @@ public class TierCommentController {
             map.put("id", c.getId());
             map.put("userId", c.getUserId());
             User u = userMap.get(c.getUserId());
-            map.put("displayName", u != null ? u.getDisplayName() : "Unknown");
+            map.put("totalBeatPt", u != null ? u.getTotalBeatPt() : 0.0);
             map.put("title", c.getTitle());
             map.put("difficultyName", c.getDifficultyName());
             map.put("content", c.getContent());
