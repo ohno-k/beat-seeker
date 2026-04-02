@@ -45,7 +45,7 @@ public class ScoreController {
     private final EmailService emailService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final long ADMIN_USER_ID = 18L;
+    private static final Long ADMIN_USER_ID = 18L;
 
     public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository,
             ScoreHistoryLogRepository scoreHistoryLogRepository,
