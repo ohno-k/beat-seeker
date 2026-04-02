@@ -258,6 +258,11 @@
                       {{ record.clearType === 'FULLCOMBO CLEAR' ? 'FC' : record.clearType === 'EX HARD CLEAR' ? 'EXH' : record.clearType === 'HARD CLEAR' ? 'H' : record.clearType === 'CLEAR' ? 'C' : record.clearType === 'EASY CLEAR' ? 'E' : record.clearType === 'ASSIST CLEAR' ? 'AC' : 'F' }}
                     </span>
                     <span class="font-black text-[10px] sm:text-sm" :class="getDjLevelColor(record.djLevel)">{{ record.djLevel !== '---' ? record.djLevel : '' }}</span>
+                    <template v-if="isLoggedIn && songRankMap.get(record.title + '|' + record.difficultyName)">
+                      <span class="font-bold text-[9px] sm:text-[11px]" :class="songRankMap.get(record.title + '|' + record.difficultyName)!.rank === 1 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'">
+                        #{{ songRankMap.get(record.title + '|' + record.difficultyName)!.rank }}<span class="font-normal text-slate-400 dark:text-slate-600">/{{ songRankMap.get(record.title + '|' + record.difficultyName)!.total }}</span>
+                      </span>
+                    </template>
                   </div>
                   <div class="flex items-center gap-0.5 sm:gap-1">
                      <span class="font-black text-slate-800 dark:text-slate-200 text-[9px] sm:text-xs">{{ record.score }}</span>
@@ -408,6 +413,12 @@
             {{ t('table.ranking') }}
             <span v-if="songRankingList.length > 0" class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-full px-1.5">{{ songRankingList.length }}</span>
           </button>
+          <button
+            v-if="isLoggedIn && ['ANOTHER', 'LEGGENDARIA'].includes(selectedRecord?.difficultyName ?? '')"
+            @click="handleHistoryTabClick"
+            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
+            :class="modalTab === 'history' ? 'border-violet-500 text-violet-600 dark:text-violet-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+          >{{ t('table.history') }}</button>
         </div>
       </div>
       
@@ -652,8 +663,50 @@
           </div>
         </div>
 
+        <!-- History Tab -->
+        <div v-else-if="modalTab === 'history'" class="w-full">
+          <div v-if="isLoadingHistory" class="flex flex-col items-center justify-center py-20">
+            <div class="w-10 h-10 border-4 border-violet-100 border-t-violet-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
+          </div>
+          <div v-else-if="songHistory.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="font-bold">{{ t('table.noHistoryData') }}</p>
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-3 pl-3 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('table.colDate') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-28">{{ t('table.exScore') }}</th>
+                  <th class="pb-3 pr-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-24">BEAT-PT</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr
+                  v-for="(entry, index) in songHistory"
+                  :key="index"
+                  class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                >
+                  <td class="py-3 pl-3 text-sm text-slate-600 dark:text-slate-300 tabular-nums">
+                    {{ formatHistoryDate(entry.uploadedAt) }}
+                  </td>
+                  <td class="py-3 text-right font-black text-slate-800 dark:text-slate-100 text-sm tabular-nums">
+                    {{ entry.score != null ? entry.score.toLocaleString() : '---' }}
+                  </td>
+                  <td class="py-3 pr-3 text-right font-black text-indigo-600 dark:text-indigo-400 text-sm tabular-nums">
+                    {{ entry.beatPt != null ? entry.beatPt.toFixed(1) : '---' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div v-else class="max-w-4xl mx-auto space-y-4 sm:space-y-8">
-          
+
           <div class="flex flex-col items-center sm:items-start gap-2 sm:gap-4">
             <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
               <span :class="['px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide shadow-sm', selectedRecord.difficultyColor]">
@@ -1184,7 +1237,7 @@ const handleRowClick = (record: ScoreRecord) => {
 
 // Modal state
 const selectedRecord = ref<ScoreRecord | null>(null);
-const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking'>('detail');
+const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking' | 'history'>('detail');
 
 const isEditingMemo = ref(false);
 const editMemoText = ref('');
@@ -1301,11 +1354,53 @@ const handleRivalTabClick = () => {
   }
 };
 
+// Song history state
+interface SongHistoryEntry {
+  uploadedAt: string;
+  score: number | null;
+  beatPt: number | null;
+}
+const songHistory = ref<SongHistoryEntry[]>([]);
+const isLoadingHistory = ref(false);
+
+const fetchSongHistory = async () => {
+  if (!selectedRecord.value) return;
+  isLoadingHistory.value = true;
+  try {
+    const params = new URLSearchParams({
+      title: selectedRecord.value.title,
+      difficultyName: selectedRecord.value.difficultyName
+    });
+    const res = await fetch(`${API_BASE}/api/scores/song-history?${params}`, { headers: authHeaders() });
+    if (res.ok) {
+      songHistory.value = await res.json();
+    }
+  } catch {
+    // Silently fail
+  } finally {
+    isLoadingHistory.value = false;
+  }
+};
+
+const handleHistoryTabClick = () => {
+  modalTab.value = 'history';
+  if (songHistory.value.length === 0 && !isLoadingHistory.value) {
+    fetchSongHistory();
+  }
+};
+
+const formatHistoryDate = (dateStr: string) => {
+  // Backend returns LocalDateTime without timezone — treat as JST (UTC+9)
+  const jstStr = /[Z+\-]\d{2}:?\d{2}$/.test(dateStr) ? dateStr : dateStr + '+09:00';
+  return new Date(jstStr).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+};
+
 // Reset target slider when a new record is selected
 watch(() => selectedRecord.value?.title, () => {
   targetBeatPtSlider.value = 0;
   rivalScores.value = [];
   songRankingList.value = [];
+  songHistory.value = [];
   // Fetch votes for the new record
   if (selectedRecord.value) {
     fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);

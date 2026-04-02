@@ -480,9 +480,28 @@ const latestTotalScore = computed(() => latestRecord.value?.totalScore ?? 0);
 const latestAaaCount = computed(() => latestRecord.value?.aaaCount ?? 0);
 const latestFcCount = computed(() => latestRecord.value?.fcCount ?? 0);
 
+// 日単位に集約したデータ（同じ日の複数スナップショットをまとめる）
+const dailyHistory = computed<HistoryRecord[]>(() => {
+  if (!historyData.value.length) return [];
+  const byDate = new Map<string, HistoryRecord[]>();
+  for (const r of historyData.value) {
+    const day = r.date.slice(0, 10); // YYYY-MM-DD
+    if (!byDate.has(day)) byDate.set(day, []);
+    byDate.get(day)!.push(r);
+  }
+  // Sort days and aggregate
+  return Array.from(byDate.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, records]) => {
+      const last = records[records.length - 1]; // 最後のスナップショットの累計値を使用
+      const totalIncrease = records.reduce((sum, r) => sum + (r.beatPtIncrease ?? 0), 0);
+      return { ...last, beatPtIncrease: totalIncrease };
+    });
+});
+
 // 初回インポートを除いたデータ（BEAT-PT増加量グラフ・統計用）
 const historyWithoutFirst = computed(() =>
-  historyData.value.length > 1 ? historyData.value.slice(1) : historyData.value
+  dailyHistory.value.length > 1 ? dailyHistory.value.slice(1) : dailyHistory.value
 );
 
 const avgBeatPtIncrease = computed(() => {
@@ -496,19 +515,19 @@ const maxBeatPtIncrease = computed(() =>
 );
 
 const labels = computed(() =>
-  historyData.value.map(r => {
+  dailyHistory.value.map(r => {
     const d = new Date(r.date);
     return `${d.getMonth() + 1}/${d.getDate()}`;
   })
 );
 
 const beatPtChartData = computed(() => {
-  if (!historyData.value.length) return null;
+  if (!dailyHistory.value.length) return null;
   return {
     labels: labels.value,
     datasets: [{
       label: t('dashboard.beatPtTrend'),
-      data: historyData.value.map(r => r.totalBeatPt),
+      data: dailyHistory.value.map(r => r.totalBeatPt),
       borderColor: '#a855f7',
       backgroundColor: 'rgba(168,85,247,0.1)',
       fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#a855f7'
@@ -538,12 +557,12 @@ const uploadIncreaseChartData = computed(() => {
 });
 
 const scoreChartData = computed(() => {
-  if (!historyData.value.length) return null;
+  if (!dailyHistory.value.length) return null;
   return {
     labels: labels.value,
     datasets: [{
       label: t('dashboard.scoreTrend'),
-      data: historyData.value.map(r => r.totalScore),
+      data: dailyHistory.value.map(r => r.totalScore),
       borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)',
       fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#3b82f6'
     }]
@@ -551,25 +570,25 @@ const scoreChartData = computed(() => {
 });
 
 const djLevelTrendData = computed(() => {
-  if (!historyData.value.length) return null;
+  if (!dailyHistory.value.length) return null;
   return {
     labels: labels.value,
     datasets: [
-      { label: 'AAA', data: historyData.value.map(r => r.aaaCount), borderColor: '#fbbf24', backgroundColor: '#fbbf24', tension: 0.3, pointRadius: 3 },
-      { label: 'AA', data: historyData.value.map(r => r.aaCount), borderColor: '#94a3b8', backgroundColor: '#94a3b8', tension: 0.3, pointRadius: 3 },
-      { label: 'A', data: historyData.value.map(r => r.aCount), borderColor: '#22c55e', backgroundColor: '#22c55e', tension: 0.3, pointRadius: 3 }
+      { label: 'AAA', data: dailyHistory.value.map(r => r.aaaCount), borderColor: '#fbbf24', backgroundColor: '#fbbf24', tension: 0.3, pointRadius: 3 },
+      { label: 'AA', data: dailyHistory.value.map(r => r.aaCount), borderColor: '#94a3b8', backgroundColor: '#94a3b8', tension: 0.3, pointRadius: 3 },
+      { label: 'A', data: dailyHistory.value.map(r => r.aCount), borderColor: '#22c55e', backgroundColor: '#22c55e', tension: 0.3, pointRadius: 3 }
     ]
   };
 });
 
 const clearChartData = computed(() => {
-  if (!historyData.value.length) return null;
+  if (!dailyHistory.value.length) return null;
   return {
     labels: labels.value,
     datasets: [
-      { label: 'FC', data: historyData.value.map(r => r.fcCount), borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 3 },
-      { label: 'EX HARD', data: historyData.value.map(r => r.exhCount), borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 3 },
-      { label: 'HARD', data: historyData.value.map(r => r.hCount), borderColor: '#ef4444', backgroundColor: '#ef4444', tension: 0.3, pointRadius: 3 }
+      { label: 'FC', data: dailyHistory.value.map(r => r.fcCount), borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 3 },
+      { label: 'EX HARD', data: dailyHistory.value.map(r => r.exhCount), borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 3 },
+      { label: 'HARD', data: dailyHistory.value.map(r => r.hCount), borderColor: '#ef4444', backgroundColor: '#ef4444', tension: 0.3, pointRadius: 3 }
     ]
   };
 });

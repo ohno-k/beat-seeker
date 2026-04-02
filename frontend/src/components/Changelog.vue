@@ -40,6 +40,30 @@ const activeTab = ref<'changelog' | 'difficulty'>('changelog');
     </div>
 
     <div v-if="activeTab === 'changelog'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
+      <!-- Update Entry: v1.4.0 -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+        <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.4.0</span>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v140Title') }}</h3>
+          </div>
+          <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
+        </div>
+
+        <div class="p-8 space-y-6">
+          <div>
+            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+              {{ t('changelog.newFeatures') }}
+            </h4>
+            <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-2 ml-2 leading-relaxed font-medium">
+              <li>{{ t('changelog.v140f1') }}</li>
+              <li>{{ t('changelog.v140f2') }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- Update Entry: v1.3.1 (Localization Support) -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">

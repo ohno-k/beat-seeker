@@ -3,6 +3,7 @@ package com.beatseeker.backend.service;
 import com.beatseeker.backend.entity.UserSongRank;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,12 @@ public class SongRankBatchService {
      * Recalculates song ranks for all users and refreshes the cache table.
      * Runs daily at 03:00.
      */
+    /** Called from the admin API — runs in a separate thread so the HTTP response returns immediately. */
+    @Async
+    public void recalculateAllAsync() {
+        recalculateAll();
+    }
+
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void recalculateAll() {

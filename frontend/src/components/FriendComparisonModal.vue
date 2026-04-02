@@ -121,6 +121,8 @@ const comparisonStats = computed(() => {
 
   myProcessedScores.value.forEach(s => {
     if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return;
+    if (s.difficultyLevel === 11 && !showLv11.value) return;
+    if (s.difficultyLevel === 12 && !showLv12.value) return;
     const key = `${s.title}_${s.difficultyName}`;
     allKeys.add(key);
     myMap.set(key, s);
@@ -128,6 +130,8 @@ const comparisonStats = computed(() => {
 
   friendProcessedScores.value.forEach(s => {
     if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return;
+    if (s.difficultyLevel === 11 && !showLv11.value) return;
+    if (s.difficultyLevel === 12 && !showLv12.value) return;
     const key = `${s.title}_${s.difficultyName}`;
     allKeys.add(key);
     friendMap.set(key, s);
@@ -223,6 +227,8 @@ const toggleRank = (rank: string) => {
 };
 
 const showBothPlayedOnly = ref(false);
+const showLv11 = ref(true);
+const showLv12 = ref(true);
 </script>
 
 <template>
@@ -262,23 +268,50 @@ const showBothPlayedOnly = ref(false);
 
           <div v-else class="space-y-8">
             <!-- Filter Toggle -->
-            <div class="flex items-center justify-end gap-3">
-              <span class="text-sm font-bold text-slate-600 dark:text-slate-300">両者プレイ済みのみ表示</span>
-              <button
-                @click="showBothPlayedOnly = !showBothPlayedOnly"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
-                :class="showBothPlayedOnly ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'"
-              >
-                <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
-                  :class="showBothPlayedOnly ? 'translate-x-6' : 'translate-x-1'"
-                ></span>
-              </button>
+            <div class="flex flex-wrap items-center justify-end gap-4">
+              <!-- Level Checkboxes -->
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    v-model="showLv11"
+                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
+                  />
+                  <span class="text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.11</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    v-model="showLv12"
+                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
+                  />
+                  <span class="text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.12</span>
+                </label>
+              </div>
+              <!-- Divider -->
+              <span class="w-px h-5 bg-slate-200 dark:bg-slate-600"></span>
+              <!-- Both Played Toggle -->
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-slate-600 dark:text-slate-300">両者プレイ済みのみ表示</span>
+                <button
+                  @click="showBothPlayedOnly = !showBothPlayedOnly"
+                  class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
+                  :class="showBothPlayedOnly ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'"
+                >
+                  <span
+                    class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                    :class="showBothPlayedOnly ? 'translate-x-6' : 'translate-x-1'"
+                  ></span>
+                </button>
+              </div>
             </div>
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div v-for="(stats, key) in comparisonStats.summary" :key="key" class="bg-slate-100/50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all hover:shadow-md">
+              <div v-for="(stats, key) in comparisonStats.summary" :key="key"
+                v-show="key === 'overall' || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
+                class="bg-slate-100/50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all hover:shadow-md">
                 <h3 class="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                   {{ key === 'overall' ? '全体 (11 & 12)' : key === 'lv11' ? 'レベル 11' : 'レベル 12' }}
                 </h3>

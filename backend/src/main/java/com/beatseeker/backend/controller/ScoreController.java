@@ -13,9 +13,12 @@ import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
+import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.SongRankBatchService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +42,10 @@ public class ScoreController {
     private final UserSongRankRepository userSongRankRepository;
     private final SongRankBatchService songRankBatchService;
     private final ScoreRecalculationService scoreRecalculationService;
+    private final EmailService emailService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final long ADMIN_USER_ID = 18L;
 
     public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository,
             ScoreHistoryLogRepository scoreHistoryLogRepository,
@@ -48,7 +55,8 @@ public class ScoreController {
             PushNotificationService pushNotificationService,
             UserSongRankRepository userSongRankRepository,
             SongRankBatchService songRankBatchService,
-            ScoreRecalculationService scoreRecalculationService) {
+            ScoreRecalculationService scoreRecalculationService,
+            EmailService emailService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -59,6 +67,7 @@ public class ScoreController {
         this.userSongRankRepository = userSongRankRepository;
         this.songRankBatchService = songRankBatchService;
         this.scoreRecalculationService = scoreRecalculationService;
+        this.emailService = emailService;
     }
 
     /**
@@ -233,6 +242,29 @@ public class ScoreController {
             activity.setOldValue(req.prevTierName());
             activity.setNewValue(req.tierName());
             activityLogRepository.save(activity);
+        }
+
+        // 管理者以外のユーザーが更新した場合、管理者(ID=18)にメール通知
+        if (!ADMIN_USER_ID.equals(user.getId()) && req.diffJson() != null && !req.diffJson().isBlank()) {
+            userRepository.findById(ADMIN_USER_ID).ifPresent(admin -> {
+                if (admin.getEmail() != null) {
+                    try {
+                        List<Map<String, Object>> diffs = objectMapper.readValue(
+                                req.diffJson(), new TypeReference<>() {});
+                        emailService.sendScoreUpdateNotification(
+                                admin.getEmail(),
+                                user.getDisplayName() != null ? user.getDisplayName() : user.getIidxId(),
+                                user.getIidxId() != null ? user.getIidxId() : "",
+                                diffs,
+                                req.totalBeatPt() != null ? req.totalBeatPt() : 0.0,
+                                req.beatPtIncrease() != null ? req.beatPtIncrease() : 0.0,
+                                req.tierName(),
+                                req.prevTierName());
+                    } catch (Exception e) {
+                        System.err.println("Failed to parse diffJson for email: " + e.getMessage());
+                    }
+                }
+            });
         }
 
         return ResponseEntity.ok(Map.of("message", "History log saved"));
@@ -416,6 +448,15 @@ public class ScoreController {
     private static final String ADMIN_IIDX_ID = "5787-1145";
 
     /**
+     * Get raw best scores per user per song with BEAT-TIER label.
+     * Only Lv11 and Lv12 ANOTHER/LEGGENDARIA. Aggregation (A-rank filter) done client-side.
+     */
+    @GetMapping("/song-arena-averages")
+    public ResponseEntity<List<Map<String, Object>>> getSongBeatTierAverages() {
+        return ResponseEntity.ok(scoreRepository.findRawSongScoresWithBeatTier());
+    }
+
+    /**
      * Get per-song ranking for a specific song (admin only).
      */
     @GetMapping("/song-ranking")
@@ -484,8 +525,48 @@ public class ScoreController {
                 || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
             return ResponseEntity.status(403).build();
         }
-        songRankBatchService.recalculateAll();
-        return ResponseEntity.ok(Map.of("message", "Song ranks recalculated"));
+        songRankBatchService.recalculateAllAsync();
+        return ResponseEntity.accepted().body(Map.of("message", "Song rank recalculation started"));
+    }
+
+    /**
+     * Get score update history for a specific song by parsing diffJson in score_history_logs.
+     */
+    @GetMapping("/song-history")
+    public ResponseEntity<List<Map<String, Object>>> getSongHistory(
+            Authentication auth,
+            @RequestParam String title,
+            @RequestParam String difficultyName) {
+        User user = getUser(auth);
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
+
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+
+        for (ScoreHistoryLog log : logs) {
+            String diffJson = log.getDiffJson();
+            if (diffJson == null || diffJson.isEmpty() || "[]".equals(diffJson)) continue;
+            try {
+                List<Map<String, Object>> diffs = mapper.readValue(diffJson,
+                        new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
+                for (Map<String, Object> diff : diffs) {
+                    Object t = diff.get("title");
+                    Object d = diff.get("difficulty");
+                    if (title.equals(t) && difficultyName.equals(d)) {
+                        Map<String, Object> entry = new HashMap<>();
+                        entry.put("uploadedAt", log.getUploadedAt().toString());
+                        entry.put("score", diff.get("newScore"));
+                        entry.put("beatPt", diff.get("newBeatPt"));
+                        result.add(entry);
+                    }
+                }
+            } catch (Exception e) {
+                // skip malformed diffJson
+            }
+        }
+
+        result.sort((a, b) -> ((String) b.get("uploadedAt")).compareTo((String) a.get("uploadedAt")));
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -540,9 +621,11 @@ public class ScoreController {
                 String title = (String) song.get("title");
                 String difficulty = (String) song.get("difficulty");
                 int newScore = (int) song.get("newScore");
+                int oldScore = (int) song.get("oldScore");
                 int friendScoreVal = friendScoreMap.getOrDefault(title + "_" + difficulty, 0);
 
-                if (newScore > friendScoreVal && friendScoreVal > 0) {
+                // 更新前はフレンドに負けていて、更新後に抜かした場合のみ通知する
+                if (newScore > friendScoreVal && friendScoreVal > 0 && oldScore <= friendScoreVal) {
                     AppNotification notification = new AppNotification();
                     notification.setRecipient(friend);
                     notification.setType("SCORE_BEAT");

@@ -48,6 +48,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/game-data/**").permitAll()
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/rate-ranking",
                                                                 "/api/scores/all-user-scores",
+                                                                "/api/scores/song-arena-averages",
                                                                 "/api/scores/debug-ranking",
                                                                 "/api/scores/debug-user-scores/**", "/api/friends/test",
                                                                 "/api/test-root")

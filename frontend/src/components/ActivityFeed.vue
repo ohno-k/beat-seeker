@@ -31,7 +31,9 @@ const fetchFeed = async () => {
 };
 
 const formatDate = (isoStr: string) => {
-  const d = new Date(isoStr);
+  // Backend returns LocalDateTime without timezone — treat as JST (UTC+9)
+  const jstStr = /[Z+\-]\d{2}:?\d{2}$/.test(isoStr) ? isoStr : isoStr + '+09:00';
+  const d = new Date(jstStr);
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);

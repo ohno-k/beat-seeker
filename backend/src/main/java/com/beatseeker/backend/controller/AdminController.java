@@ -106,6 +106,12 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/scores/all-user-scores-with-info")
+    public ResponseEntity<List<Map<String, Object>>> getAllUserScoresWithInfo(Authentication auth) {
+        checkAdminAccess(auth);
+        return ResponseEntity.ok(scoreRepository.findAllUserAnotherAndLeggendariaScoresWithUserInfo());
+    }
+
     @GetMapping("/users/{userId}/history")
     public ResponseEntity<List<Map<String, Object>>> getUserHistory(
             Authentication auth,

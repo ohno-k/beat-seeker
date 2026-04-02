@@ -31,6 +31,9 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     @Query(value = "SELECT s.user_id as \"userId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.difficulty_level as \"difficultyLevel\", s.score as \"score\" FROM scores s WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')", nativeQuery = true)
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScores();
 
+    @Query(value = "SELECT s.user_id as \"userId\", u.display_name as \"displayName\", u.iidx_id as \"iidxId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.score as \"score\" FROM scores s JOIN users u ON s.user_id = u.id WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')", nativeQuery = true)
+    List<Map<String, Object>> findAllUserAnotherAndLeggendariaScoresWithUserInfo();
+
     @Query(value =
         "SELECT u.display_name as \"displayName\", s.score as \"score\", " +
         "COALESCE(latest.total_beat_pt, 0) as \"totalBeatPt\" " +
@@ -107,4 +110,44 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY user_id, rank ASC, title ASC",
         nativeQuery = true)
     List<Map<String, Object>> findAllUserSongRanks();
+
+    @Query(value =
+        "WITH user_latest_pt AS (" +
+        "  SELECT DISTINCT ON (user_id) user_id, total_beat_pt" +
+        "  FROM score_history_logs" +
+        "  WHERE total_beat_pt > 0" +
+        "  ORDER BY user_id, uploaded_at DESC" +
+        "), " +
+        "user_tier AS (" +
+        "  SELECT user_id," +
+        "    CASE" +
+        "      WHEN total_beat_pt >= 18000 THEN 'Legend'" +
+        "      WHEN total_beat_pt >= 17500 THEN 'Mythic'" +
+        "      WHEN total_beat_pt >= 17000 THEN 'Ancient'" +
+        "      WHEN total_beat_pt >= 16500 THEN 'Master'" +
+        "      WHEN total_beat_pt >= 16000 THEN 'Elite'" +
+        "      WHEN total_beat_pt >= 15500 THEN 'Commander'" +
+        "      WHEN total_beat_pt >= 15000 THEN 'Veteran'" +
+        "      WHEN total_beat_pt >= 14000 THEN 'Expert'" +
+        "      WHEN total_beat_pt >= 13000 THEN 'Advanced'" +
+        "      WHEN total_beat_pt >= 12000 THEN 'Intermediate'" +
+        "      WHEN total_beat_pt >= 10000 THEN 'Novice'" +
+        "      ELSE 'Beginner'" +
+        "    END AS beat_tier" +
+        "  FROM user_latest_pt" +
+        "), " +
+        "best_scores AS (" +
+        "  SELECT s.user_id, s.title, s.difficulty_name, s.difficulty_level, MAX(s.score) AS score" +
+        "  FROM scores s" +
+        "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0" +
+        "    AND s.difficulty_level IN (11, 12)" +
+        "  GROUP BY s.user_id, s.title, s.difficulty_name, s.difficulty_level" +
+        ") " +
+        "SELECT b.title as \"title\", b.difficulty_name as \"difficultyName\", b.difficulty_level as \"difficultyLevel\"," +
+        "  t.beat_tier as \"beatTier\", b.score as \"score\" " +
+        "FROM best_scores b " +
+        "JOIN user_tier t ON b.user_id = t.user_id " +
+        "ORDER BY b.title, b.difficulty_name",
+        nativeQuery = true)
+    List<Map<String, Object>> findRawSongScoresWithBeatTier();
 }

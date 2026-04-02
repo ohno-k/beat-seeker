@@ -20,6 +20,8 @@ import Terms from './components/Terms.vue';
 import About from './components/About.vue';
 import ArenaView from './views/ArenaView.vue';
 import TierVotingView from './views/TierVotingView.vue';
+import ArcadeAssistView from './views/ArcadeView.vue';
+import SongAverageView from './views/SongAverageView.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
@@ -64,7 +66,7 @@ const reloadPage = () => window.location.reload();
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg'>('dashboard')
 const viewingMode = ref<'admin' | 'friend' | null>(null);
 const totalBeatTierPoints = ref(0);
 
@@ -757,12 +759,30 @@ const handleUnifiedClose = async () => {
               </button>
 
               <button
+                v-if="isLoggedIn && !viewingUserId"
+                @click="activeTab = 'arcade-assist'"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
+                :class="activeTab === 'arcade-assist' ? 'border-violet-600 text-violet-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+              >
+                {{ t('nav.arcadeAssist') }}
+              </button>
+
+              <button
                 v-if="!viewingUserId"
                 @click="activeTab = 'tier-voting'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'tier-voting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
               >
                 {{ t('nav.tierVoting') }}
+              </button>
+
+              <button
+                v-if="!viewingUserId"
+                @click="activeTab = 'song-avg'"
+                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
+                :class="activeTab === 'song-avg' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+              >
+                {{ t('nav.songAvg') }}
               </button>
 
               <!-- Special Titles for non-tab pages -->
@@ -864,12 +884,28 @@ const handleUnifiedClose = async () => {
             {{ t('nav.arena') }}
           </button>
           <button
+            v-if="isLoggedIn && !viewingUserId"
+            @click="activeTab = 'arcade-assist'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'arcade-assist' ? 'border-violet-600 text-violet-600' : 'border-transparent text-slate-500'"
+          >
+            {{ t('nav.arcadeAssist') }}
+          </button>
+          <button
             v-if="!viewingUserId"
             @click="activeTab = 'tier-voting'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'tier-voting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
           >
             {{ t('nav.tierVoting') }}
+          </button>
+          <button
+            v-if="!viewingUserId"
+            @click="activeTab = 'song-avg'"
+            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
+            :class="activeTab === 'song-avg' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500'"
+          >
+            {{ t('nav.songAvg') }}
           </button>
         </nav>
         <!-- Admin Viewing Banner -->
@@ -939,7 +975,15 @@ const handleUnifiedClose = async () => {
         <template v-else-if="activeTab === 'tier-voting'">
           <TierVotingView class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
-        
+
+        <template v-else-if="activeTab === 'arcade-assist'">
+          <ArcadeAssistView class="w-full max-w-lg mx-auto animate-fade-in" />
+        </template>
+
+        <template v-else-if="activeTab === 'song-avg'">
+          <SongAverageView class="w-full max-w-7xl mx-auto animate-fade-in" />
+        </template>
+
         <template v-else>
           <!-- Hero Section (Visible only when no data) -->
           <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">

@@ -2,20 +2,42 @@
   <div class="w-full max-w-5xl mx-auto px-4 py-6 animate-fade-in">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-xl font-black text-slate-800 dark:text-white">曲別順位</h1>
-      <button
-        @click="load"
-        :disabled="isLoading"
-        class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-colors disabled:opacity-50"
-      >
-        <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        更新
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          @click="recalculate"
+          :disabled="isRecalculating"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-colors disabled:opacity-50"
+          title="全プレイヤーの順位を再計算（数分かかる場合があります）"
+        >
+          <svg v-if="isRecalculating" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          {{ isRecalculating ? '計算中...' : '全員再計算' }}
+        </button>
+        <button
+          @click="load"
+          :disabled="isLoading"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-colors disabled:opacity-50"
+        >
+          <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          更新
+        </button>
+      </div>
+    </div>
+
+    <!-- Recalculate message -->
+    <div v-if="recalculateMsg" class="mb-4 px-4 py-3 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-bold">
+      {{ recalculateMsg }}
     </div>
 
     <!-- Stats summary -->
@@ -131,6 +153,7 @@ const { authHeaders } = useAuth();
 
 const rows = ref<SongRankRow[]>([]);
 const isLoading = ref(false);
+const isRecalculating = ref(false);
 const loaded = ref(false);
 
 const showLevels = ref<Record<number, boolean>>({ 8: true, 9: true, 10: true, 11: true, 12: true });
@@ -189,6 +212,27 @@ const diffClass = (name: string) => {
   if (name === 'LEGGENDARIA') return 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300';
   if (name === 'ANOTHER') return 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300';
   return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
+};
+
+const recalculateMsg = ref('');
+
+const recalculate = async () => {
+  if (isRecalculating.value) return;
+  isRecalculating.value = true;
+  recalculateMsg.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/api/scores/recalculate-song-ranks`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    if (res.status === 202) {
+      recalculateMsg.value = 'バックグラウンドで計算を開始しました。数分後に「更新」ボタンで結果を確認してください。';
+    }
+  } catch {
+    recalculateMsg.value = 'エラーが発生しました。';
+  } finally {
+    isRecalculating.value = false;
+  }
 };
 
 onMounted(load);
