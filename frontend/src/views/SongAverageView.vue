@@ -337,11 +337,11 @@ onMounted(loadData);
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-700/50">
               <th
-                class="pb-3 pl-2 pr-1 text-left text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-600 sticky left-0 bg-white dark:bg-slate-800 z-10 whitespace-nowrap"
+                class="pb-3 pl-2 pr-1 text-left text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-600 whitespace-nowrap"
                 @click="toggleSort('level')"
               >☆ <span v-if="sortKey === 'level'">{{ sortDir === 'desc' ? '▼' : '▲' }}</span></th>
               <th
-                class="pb-3 pr-6 text-left text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-600 sticky left-10 bg-white dark:bg-slate-800 z-10"
+                class="pb-3 pr-6 text-left text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-600"
                 @click="toggleSort('title')"
               >{{ t('songAvg.colSong') }} <span v-if="sortKey === 'title'">{{ sortDir === 'desc' ? '▼' : '▲' }}</span></th>
               <th
@@ -365,7 +365,7 @@ onMounted(loadData);
               class="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
             >
               <!-- Level + diff badge -->
-              <td class="py-2 pl-2 pr-1 whitespace-nowrap sticky left-0 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 z-10">
+              <td class="py-2 pl-2 pr-1 whitespace-nowrap">
                 <div class="flex flex-col items-start gap-0.5">
                   <span class="text-xs font-black text-slate-500 dark:text-slate-400">☆{{ row.difficultyLevel }}</span>
                   <span
@@ -377,7 +377,7 @@ onMounted(loadData);
                 </div>
               </td>
               <!-- Song title -->
-              <td class="py-2 pr-6 sticky left-10 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 z-10 max-w-[200px]">
+              <td class="py-2 pr-6 max-w-[200px]">
                 <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-tight line-clamp-1 block" :title="row.title">
                   {{ row.title }}
                 </span>
