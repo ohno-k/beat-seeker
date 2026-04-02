@@ -338,10 +338,10 @@
           <div class="flex items-center gap-2">
             <span class="text-sm text-slate-500 dark:text-slate-400">{{ t('table.itemsPerPage') }}:</span>
             <select v-model="itemsPerPage" class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors shadow-sm cursor-pointer">
-              <option :value="10">10{{ t('history.timesUnit') }}</option>
-              <option :value="25">25{{ t('history.timesUnit') }}</option>
-              <option :value="50">50{{ t('history.timesUnit') }}</option>
-              <option :value="100">100{{ t('history.timesUnit') }}</option>
+              <option :value="10">10{{ t('scores.count') }}</option>
+              <option :value="25">25{{ t('scores.count') }}</option>
+              <option :value="50">50{{ t('scores.count') }}</option>
+              <option :value="100">100{{ t('scores.count') }}</option>
             </select>
           </div>
         </div>
