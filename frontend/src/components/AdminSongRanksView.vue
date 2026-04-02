@@ -4,6 +4,14 @@
       <h1 class="text-xl font-black text-slate-800 dark:text-white">曲別順位</h1>
       <div class="flex items-center gap-2">
         <button
+          @click="migrateBeatPt"
+          :disabled="isMigrating"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors disabled:opacity-50"
+          title="既存ユーザーのtotalBeatPtをscore_history_logsから移行（初回のみ）"
+        >
+          {{ isMigrating ? '移行中...' : 'BeatPt移行' }}
+        </button>
+        <button
           @click="recalculate"
           :disabled="isRecalculating"
           class="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl transition-colors disabled:opacity-50"
@@ -215,6 +223,25 @@ const diffClass = (name: string) => {
 };
 
 const recalculateMsg = ref('');
+const isMigrating = ref(false);
+
+const migrateBeatPt = async () => {
+  if (isMigrating.value) return;
+  if (!confirm('既存ユーザーのtotalBeatPtを移行します。初回デプロイ後に一度だけ実行してください。続けますか？')) return;
+  isMigrating.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/migrate-user-beat-pt`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    recalculateMsg.value = data.message ?? '移行完了';
+  } catch {
+    recalculateMsg.value = '移行中にエラーが発生しました。';
+  } finally {
+    isMigrating.value = false;
+  }
+};
 
 const recalculate = async () => {
   if (isRecalculating.value) return;
