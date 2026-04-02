@@ -86,7 +86,8 @@ const submitComment = async () => {
 };
 
 const formatDate = (dateString: string) => {
-  const d = new Date(dateString);
+  const ds = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+  const d = new Date(ds);
   return d.toLocaleString();
 };
 
