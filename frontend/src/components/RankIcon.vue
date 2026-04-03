@@ -253,7 +253,7 @@ const colors = computed(() => {
   const name = props.rankName.toLowerCase();
   // Premium metallic/jewel palettes
   if (name === 'beginner') return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
-  if (name === 'novice') return { primary: '#4f46e5', highlight: '#e0e7ff', secondary: '#312e81', stroke: '#a5b4fc' };
+  if (name === 'novice') return { primary: '#5c7c99', highlight: '#e2e8f0', secondary: '#2e455e', stroke: '#94a3b8' };
   if (name === 'intermediate') return { primary: '#0284c7', highlight: '#e0f2fe', secondary: '#082f49', stroke: '#7dd3fc' };
   if (name === 'advanced') return { primary: '#0d9488', highlight: '#ccfbf1', secondary: '#134e4a', stroke: '#5eead4' };
   if (name === 'expert') return { primary: '#059669', highlight: '#d1fae5', secondary: '#064e3b', stroke: '#6ee7b7' };
