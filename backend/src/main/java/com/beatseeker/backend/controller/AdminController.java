@@ -112,6 +112,12 @@ public class AdminController {
         return ResponseEntity.ok(scoreRepository.findAllUserAnotherAndLeggendariaScoresWithUserInfo());
     }
 
+    @GetMapping("/scores/simulation-aggregate")
+    public ResponseEntity<List<Map<String, Object>>> getSimulationAggregate(Authentication auth) {
+        checkAdminAccess(auth);
+        return ResponseEntity.ok(scoreRepository.calculateDifficultySimulation());
+    }
+
     @GetMapping("/users/{userId}/history")
     public ResponseEntity<List<Map<String, Object>>> getUserHistory(
             Authentication auth,

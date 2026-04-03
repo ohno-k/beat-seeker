@@ -451,6 +451,11 @@ public class ScoreController {
         return ResponseEntity.ok(scores);
     }
 
+    @GetMapping("/song-ranking-aggregate")
+    public ResponseEntity<List<Map<String, Object>>> getSongRankingAggregate() {
+        return ResponseEntity.ok(scoreRepository.findAllSongRankingAggregates());
+    }
+
     private static final String ADMIN_IIDX_ID = "5787-1145";
 
     /**

@@ -3,6 +3,7 @@ package com.beatseeker.backend.repository;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -153,4 +154,131 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY b.title, b.difficulty_name",
         nativeQuery = true)
     List<Map<String, Object>> findRawSongScoresWithBeatTier();
+    @Query(value =
+        "WITH weight_map(rv, wt) AS ( " +
+        "  VALUES ('11.0', 145), ('11.1', 147), ('11.2', 149), ('11.3', 151), ('11.4', 153), " +
+        "  ('11.5', 155), ('11.6', 157), ('11.7', 159), ('11.8', 161), ('11.9', 163), " +
+        "  ('12.0', 165), ('12.1', 167), ('12.2', 169), ('12.3', 171), ('12.4', 173), " +
+        "  ('12.5', 175), ('12.6', 178), ('12.7', 181), ('12.8', 184), ('12.9', 187), ('13.0', 190) " +
+        "), " +
+        "song_ranks AS ( " +
+        "  SELECT drs.song_title AS mapped_title, dr.rank_value, wm.wt AS weight " +
+        "  FROM difficulty_ranks dr " +
+        "  JOIN difficulty_rank_songs drs ON dr.id = drs.difficulty_rank_id " +
+        "  LEFT JOIN weight_map wm ON wm.rv = SUBSTRING(dr.rank_value FROM '^\\d+\\.\\d+') " +
+        "  WHERE dr.revision = 'active' " +
+        "), " +
+        "scored_data AS ( " +
+        "  SELECT " +
+        "    s.user_id, s.title, s.difficulty_name, " +
+        "    sr.rank_value AS informal_rank, sr.weight, " +
+        "    (s.score * 100.0 / NULLIF(sd.notes * 2.0, 0)) AS score_rate " +
+        "  FROM scores s " +
+        "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
+        "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        "  JOIN song_ranks sr ON sr.mapped_title = (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || ' [L]' ELSE s.title END) " +
+        "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0 " +
+        "), " +
+        "valid_scores AS ( " +
+        "  SELECT " +
+        "    user_id, title, difficulty_name, informal_rank, " +
+        "    (POWER(score_rate / 100.0, 1.3) * weight) + " +
+        "    (weight * CASE " +
+        "      WHEN score_rate > 94.44 THEN 0.03 " +
+        "      WHEN score_rate > 88.88 THEN 0.02 " +
+        "      WHEN score_rate > 77.77 THEN 0.01 " +
+        "      ELSE 0.0 END) AS beat_pt " +
+        "  FROM scored_data " +
+        "  WHERE score_rate > 66.666 AND weight IS NOT NULL " +
+        "), " +
+        "ranked_scores AS ( " +
+        "  SELECT *, ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY beat_pt DESC) AS rn " +
+        "  FROM valid_scores " +
+        ") " +
+        "SELECT " +
+        "  title AS \"title\", difficulty_name AS \"difficultyName\", informal_rank AS \"informalRank\", " +
+        "  COUNT(*) AS \"userCount\", ROUND(AVG(beat_pt)::numeric, 1) AS \"avgBeatPt\", ROUND(MAX(beat_pt)::numeric, 1) AS \"maxBeatPt\" " +
+        "FROM ranked_scores " +
+        "WHERE rn <= 100 " +
+        "GROUP BY title, difficulty_name, informal_rank " +
+        "ORDER BY \"userCount\" DESC, \"avgBeatPt\" DESC", nativeQuery = true)
+    List<Map<String, Object>> findAllSongRankingAggregates();
+
+    @Query(value =
+        "WITH weight_map(rv, wt) AS ( " +
+        "  VALUES ('11.0', 145), ('11.1', 147), ('11.2', 149), ('11.3', 151), ('11.4', 153), " +
+        "  ('11.5', 155), ('11.6', 157), ('11.7', 159), ('11.8', 161), ('11.9', 163), " +
+        "  ('12.0', 165), ('12.1', 167), ('12.2', 169), ('12.3', 171), ('12.4', 173), " +
+        "  ('12.5', 175), ('12.6', 178), ('12.7', 181), ('12.8', 184), ('12.9', 187), ('13.0', 190) " +
+        "), " +
+        "ranks AS ( " +
+        "  SELECT drs.song_title AS mapped_title, wm.wt AS weight, dr.revision " +
+        "  FROM difficulty_ranks dr " +
+        "  JOIN difficulty_rank_songs drs ON dr.id = drs.difficulty_rank_id " +
+        "  LEFT JOIN weight_map wm ON wm.rv = SUBSTRING(dr.rank_value FROM '^\\d+\\.\\d+') " +
+        "  WHERE dr.revision IN ('active', 'draft') " +
+        "), " +
+        "base_scores AS ( " +
+        "  SELECT " +
+        "    s.user_id, u.display_name, u.iidx_id, " +
+        "    (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || ' [L]' ELSE s.title END) AS mapped_title, " +
+        "    (s.score * 100.0 / NULLIF(sd.notes * 2.0, 0)) AS score_rate " +
+        "  FROM scores s " +
+        "  JOIN users u on s.user_id = u.id " +
+        "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
+        "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0 " +
+        "), " +
+        "calc_points AS ( " +
+        "  SELECT b.user_id, b.display_name, b.iidx_id, r.revision, " +
+        "         (POWER(b.score_rate / 100.0, 1.3) * r.weight) + " +
+        "         (r.weight * CASE WHEN b.score_rate > 94.44 THEN 0.03 WHEN b.score_rate > 88.88 THEN 0.02 WHEN b.score_rate > 77.77 THEN 0.01 ELSE 0.0 END) AS bg_pt " +
+        "  FROM base_scores b " +
+        "  JOIN ranks r ON b.mapped_title = r.mapped_title " +
+        "  WHERE b.score_rate > 66.666 AND r.weight IS NOT NULL " +
+        "), " +
+        "rn_points AS ( " +
+        "  SELECT user_id, display_name, iidx_id, revision, bg_pt, " +
+        "         ROW_NUMBER() OVER(PARTITION BY user_id, revision ORDER BY bg_pt DESC) AS rn " +
+        "  FROM calc_points " +
+        "), " +
+        "sum_active AS ( " +
+        "  SELECT user_id, display_name, iidx_id, SUM(bg_pt) as total_active " +
+        "  FROM rn_points WHERE rn <= 100 AND revision = 'active' GROUP BY user_id, display_name, iidx_id " +
+        "), " +
+        "sum_draft AS ( " +
+        "  SELECT user_id, SUM(bg_pt) as total_draft " +
+        "  FROM rn_points WHERE rn <= 100 AND revision = 'draft' GROUP BY user_id " +
+        ") " +
+        "SELECT a.display_name as \"displayName\", a.iidx_id as \"iidxId\", " +
+        "       ROUND(a.total_active::numeric, 1) as \"currentBeatPt\", " +
+        "       ROUND(COALESCE(d.total_draft, a.total_active)::numeric, 1) as \"simulatedBeatPt\", " +
+        "       ROUND((COALESCE(d.total_draft, a.total_active) - a.total_active)::numeric, 1) as \"ptDelta\" " +
+        "FROM sum_active a " +
+        "LEFT JOIN sum_draft d ON a.user_id = d.user_id " +
+        "ORDER BY \"simulatedBeatPt\" DESC", nativeQuery = true)
+    List<Map<String, Object>> calculateDifficultySimulation();
+
+    @Modifying
+    @Query(value =
+        "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank, total, calculated_at) " +
+        "WITH best_scores AS ( " +
+        "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score " +
+        "  FROM scores " +
+        "  WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        "  GROUP BY title, difficulty_name, difficulty_level, user_id " +
+        "), " +
+        "all_ranks AS ( " +
+        "  SELECT title, difficulty_name, difficulty_level, user_id, score, " +
+        "    RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC) AS rank, " +
+        "    COUNT(*) OVER (PARTITION BY title, difficulty_name) AS total " +
+        "  FROM best_scores " +
+        ") " +
+        "SELECT user_id, title, difficulty_name, difficulty_level, rank, total, NOW() " +
+        "FROM all_ranks", nativeQuery = true)
+    void insertAllUserSongRanks();
+
+    @Modifying
+    @Query(value = "TRUNCATE TABLE user_song_ranks", nativeQuery = true)
+    void truncateUserSongRanks();
 }

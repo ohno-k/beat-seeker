@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import RankIcon from './RankIcon.vue';
-import { getRankInfo, getRateTierRankInfo, calculatePoints } from '../utils/beatTier';
+import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
-import { songData as songDataBody, diffTable as diffTableRanks } from '../composables/useGameData';
+import { diffTable as diffTableRanks } from '../composables/useGameData';
 
 interface BeatRankingEntry {
   displayName: string;
@@ -81,66 +81,26 @@ async function fetchRateRanking() {
     else throw new Error('rate');
 }
 
-function buildSongDict(): Map<string, number> {
-    const dict = new Map<string, number>();
-    if (songDataBody.value && Array.isArray(songDataBody.value)) {
-        songDataBody.value.forEach((s: any) => {
-            if (s.notes) dict.set(`${s.title}_${s.difficulty}`, s.notes * 2);
-        });
-    }
-    return dict;
-}
 
-function buildInformalDict(ranks: { rank: string; songs: string[] }[]): Map<string, string> {
-    const dict = new Map<string, string>();
-    ranks.forEach(r => {
-        r.songs.forEach(songTitle => {
-            if (songTitle.endsWith('[L]')) {
-                dict.set(`${songTitle.slice(0, -3)}_LEGGENDARIA`, r.rank);
-            } else {
-                dict.set(`${songTitle}_ANOTHER`, r.rank);
-            }
-        });
-    });
-    return dict;
-}
-
-function calcUserBeatPt(
-    userScores: { title: string; difficultyName: string; score: number }[],
-    songDict: Map<string, number>,
-    informalDict: Map<string, string>
-): number {
-    const pts = userScores.map(s => {
-        const diffCode = s.difficultyName === 'ANOTHER' ? '4' : '10';
-        const maxScore = songDict.get(`${s.title}_${diffCode}`) ?? 0;
-        const scoreRate = maxScore > 0 ? (s.score / maxScore) * 100 : -1;
-        const informalRank = informalDict.get(`${s.title}_${s.difficultyName}`);
-        return calculatePoints(scoreRate, informalRank);
-    }).filter(p => p > 0);
-    pts.sort((a, b) => b - a);
-    const top100 = pts.slice(0, 100);
-    const sum = top100.reduce((acc, p) => acc + p, 0);
-    return Math.round(sum * 10) / 10;
-}
 
 async function fetchSimulationData() {
     isSimulationLoading.value = true;
     simulationError.value = '';
     try {
-        // Ensure the regular ranking is loaded (needed as the authoritative user list)
+        // Ensure the regular ranking is loaded to set current ranks
         if (beatRanking.value.length === 0) {
             await fetchBeatRanking();
         }
 
-        const [scoresRes, draftRes, activeDiffRes] = await Promise.all([
-            fetch(`${API_BASE}/api/admin/scores/all-user-scores-with-info`, { headers: authHeaders() }),
+        const [simRes, draftRes, activeDiffRes] = await Promise.all([
+            fetch(`${API_BASE}/api/admin/scores/simulation-aggregate`, { headers: authHeaders() }),
             fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, { headers: authHeaders() }),
             fetch(`${API_BASE}/api/game-data/difficulty-table`),
         ]);
-        if (!scoresRes.ok) throw new Error('スコアデータの取得に失敗しました');
+        if (!simRes.ok) throw new Error('シミュレーションの取得に失敗しました');
         if (!draftRes.ok) throw new Error('ドラフト難易度表の取得に失敗しました');
 
-        const allScores: { userId: number; displayName: string; iidxId: string; title: string; difficultyName: string; score: number }[] = await scoresRes.json();
+        const simEntries: Omit<SimulationEntry, 'currentRank' | 'simulatedRank' | 'rankDelta'>[] = await simRes.json();
         const draftTable: { ranks: { rank: string; songs: string[] }[] } = await draftRes.json();
         const activeDiff: { ranks: { rank: string; songs: string[] }[] } = activeDiffRes.ok
             ? await activeDiffRes.json()
@@ -160,45 +120,8 @@ async function fetchSimulationData() {
         });
         draftDiffChanges.value = changes;
 
-        const songDict = buildSongDict();
-        const currentInformalDict = buildInformalDict(activeDiff.ranks);
-        const draftInformalDict = buildInformalDict(draftTable.ranks);
-
-        // Group scores by iidxId
-        const userScoresMap = new Map<string, { title: string; difficultyName: string; score: number }[]>();
-        for (const s of allScores) {
-            if (!userScoresMap.has(s.iidxId)) userScoresMap.set(s.iidxId, []);
-            userScoresMap.get(s.iidxId)!.push({ title: s.title, difficultyName: s.difficultyName, score: s.score });
-        }
-
-        // Use regular ranking as the authoritative user list (same as what's displayed)
-        // For users with scores: calculate from raw data for accurate delta
-        // For users without scores: show ranking BEAT-PT with 0 delta
-        const entries: Omit<SimulationEntry, 'currentRank' | 'simulatedRank' | 'rankDelta'>[] = beatRanking.value.map(rankEntry => {
-            const userScores = userScoresMap.get(rankEntry.iidxId);
-            if (userScores && userScores.length > 0) {
-                const currentBeatPt = calcUserBeatPt(userScores, songDict, currentInformalDict);
-                const simulatedBeatPt = calcUserBeatPt(userScores, songDict, draftInformalDict);
-                return {
-                    displayName: rankEntry.displayName,
-                    iidxId: rankEntry.iidxId,
-                    currentBeatPt,
-                    simulatedBeatPt,
-                    ptDelta: Math.round((simulatedBeatPt - currentBeatPt) * 10) / 10,
-                };
-            }
-            // No ANOTHER/LEGGENDARIA scores found: use ranking BEAT-PT, no change
-            return {
-                displayName: rankEntry.displayName,
-                iidxId: rankEntry.iidxId,
-                currentBeatPt: rankEntry.totalBeatPt,
-                simulatedBeatPt: rankEntry.totalBeatPt,
-                ptDelta: 0,
-            };
-        });
-
         // Sort by simulated BEAT-PT descending
-        const sortedBySim = [...entries].sort((a, b) => b.simulatedBeatPt - a.simulatedBeatPt);
+        const sortedBySim = [...simEntries].sort((a, b) => b.simulatedBeatPt - a.simulatedBeatPt);
 
         // Current rank = position in the regular ranking
         const currentRankMap = new Map<string, number>();
