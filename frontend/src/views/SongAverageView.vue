@@ -39,7 +39,7 @@ interface SongRow {
 
 const rawData = ref<{
   title: string; difficultyName: string; difficultyLevel: number;
-  beatTier: string; tierLevel: number; avgScore: number; userCount: number;
+  tierData: string;
 }[]>([]);
 // key: "title_ANOTHER" or "title_LEGGENDARIA" → my best score
 const myScoresMap = ref<Map<string, number>>(new Map());
@@ -94,9 +94,6 @@ const rows = computed<SongRow[]>(() => {
   const songMap = new Map<string, SongRow>();
 
   for (const entry of rawData.value) {
-    const tier = entry.beatTier as BeatTierName;
-    if (!TIER_ORDER.includes(tier)) continue;
-
     const songKey = `${entry.title}_${entry.difficultyName}`;
     if (!songMap.has(songKey)) {
       const maxScore = getMaxScore(entry.title, entry.difficultyName);
@@ -110,18 +107,28 @@ const rows = computed<SongRow[]>(() => {
       });
     }
     const row = songMap.get(songKey)!;
-    if (!row.averages[tier]) {
-      row.averages[tier] = { avgScore: 0, avgRate: 0, userCount: 0, subTiers: {} };
-    }
     
-    // Some entries might come as 0 (e.g. Legend/Beginner)
-    const level = Number(entry.tierLevel || 0);
-    const avgScore = Math.round(Number(entry.avgScore));
-    row.averages[tier].subTiers[level] = {
-      avgScore,
-      avgRate: (avgScore / row.maxScore) * 100,
-      userCount: Math.round(Number(entry.userCount)),
-    };
+    let tiersArr: any[] = [];
+    try {
+      if (entry.tierData) tiersArr = JSON.parse(entry.tierData);
+    } catch { /* IGNORE */ }
+    
+    for (const tData of tiersArr) {
+      const tier = tData.beatTier as BeatTierName;
+      if (!TIER_ORDER.includes(tier)) continue;
+      
+      if (!row.averages[tier]) {
+        row.averages[tier] = { avgScore: 0, avgRate: 0, userCount: 0, subTiers: {} };
+      }
+      
+      const level = Number(tData.tierLevel || 0);
+      const avgScore = Math.round(Number(tData.avgScore));
+      row.averages[tier].subTiers[level] = {
+        avgScore,
+        avgRate: (avgScore / row.maxScore) * 100,
+        userCount: Math.round(Number(tData.userCount)),
+      };
+    }
   }
 
   // Calculate weighted average for broad tiers

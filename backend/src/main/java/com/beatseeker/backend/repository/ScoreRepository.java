@@ -152,21 +152,34 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0" +
         "    AND s.difficulty_level IN (11, 12)" +
         "  GROUP BY s.user_id, s.title, s.difficulty_name, s.difficulty_level" +
+        "), " +
+        "agg_scores AS (" +
+        "  SELECT b.title, b.difficulty_name, b.difficulty_level," +
+        "    t.beat_tier," +
+        "    t.tier_level," +
+        "    ROUND(AVG(b.score)) as avg_score," +
+        "    COUNT(*) as user_count" +
+        "  FROM best_scores b " +
+        "  JOIN user_tier t ON b.user_id = t.user_id " +
+        "  JOIN song_definitions sd " +
+        "    ON b.title = sd.title " +
+        "    AND sd.revision = 'active' " +
+        "    AND ((b.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (b.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        "  WHERE (b.score * 3) >= (sd.notes * 4) " +
+        "  GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier, t.tier_level" +
         ") " +
-        "SELECT b.title as \"title\", b.difficulty_name as \"difficultyName\", b.difficulty_level as \"difficultyLevel\"," +
-        "  t.beat_tier as \"beatTier\"," +
-        "  t.tier_level as \"tierLevel\"," +
-        "  ROUND(AVG(b.score)) as \"avgScore\"," +
-        "  COUNT(*) as \"userCount\" " +
-        "FROM best_scores b " +
-        "JOIN user_tier t ON b.user_id = t.user_id " +
-        "JOIN song_definitions sd " +
-        "  ON b.title = sd.title " +
-        "  AND sd.revision = 'active' " +
-        "  AND ((b.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (b.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
-        "WHERE (b.score * 3) >= (sd.notes * 4) " +
-        "GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier, t.tier_level " +
-        "ORDER BY b.title, b.difficulty_name",
+        "SELECT title as \"title\", difficulty_name as \"difficultyName\", difficulty_level as \"difficultyLevel\"," +
+        "  json_agg(" +
+        "    json_build_object(" +
+        "      'beatTier', beat_tier," +
+        "      'tierLevel', tier_level," +
+        "      'avgScore', avg_score," +
+        "      'userCount', user_count" +
+        "    )" +
+        "  )\\:\\:text as \"tierData\" " +
+        "FROM agg_scores " +
+        "GROUP BY title, difficulty_name, difficulty_level " +
+        "ORDER BY title, difficulty_name",
         nativeQuery = true)
     List<Map<String, Object>> findRawSongScoresWithBeatTier();
     @Query(value =
