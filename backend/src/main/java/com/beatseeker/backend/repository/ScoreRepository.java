@@ -144,6 +144,11 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  COUNT(*) as \"userCount\" " +
         "FROM best_scores b " +
         "JOIN user_tier t ON b.user_id = t.user_id " +
+        "JOIN song_definitions sd " +
+        "  ON b.title = sd.title " +
+        "  AND sd.revision = 'active' " +
+        "  AND ((b.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (b.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        "WHERE (b.score * 3) >= (sd.notes * 4) " +
         "GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier " +
         "ORDER BY b.title, b.difficulty_name",
         nativeQuery = true)
