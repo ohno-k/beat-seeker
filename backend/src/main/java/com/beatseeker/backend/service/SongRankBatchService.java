@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Batch service that pre-calculates per-song rankings for all users daily.

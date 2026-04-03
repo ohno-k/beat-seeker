@@ -47,30 +47,45 @@
       :class="{ 'af-bounce': isAprilFoolsActive }"
     >
       <defs>
-        <!-- Complex Gradients -->
-        <linearGradient :id="`grad-${uid}`" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" :stop-color="isAprilFoolsActive ? aprilColors.primary : colors.primary" />
-          <stop offset="50%" :stop-color="isAprilFoolsActive ? aprilColors.highlight : colors.highlight" />
+        <!-- Shape Clip for internal shading -->
+        <clipPath :id="`shape-clip-${uid}`">
+          <path :d="shapePath" />
+        </clipPath>
+
+        <!-- Rich Metallic/Jewel Gradient -->
+        <linearGradient :id="`grad-${uid}`" x1="15%" y1="5%" x2="85%" y2="95%">
+          <stop offset="0%" :stop-color="isAprilFoolsActive ? aprilColors.highlight : colors.highlight" />
+          <stop offset="35%" :stop-color="isAprilFoolsActive ? aprilColors.primary : colors.primary" />
+          <stop offset="70%" :stop-color="isAprilFoolsActive ? aprilColors.primary : colors.primary" />
           <stop offset="100%" :stop-color="isAprilFoolsActive ? aprilColors.secondary : colors.secondary" />
         </linearGradient>
         
-        <linearGradient :id="`glow-grad-${uid}`" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" :stop-color="colors.primary" stop-opacity="1" />
-          <stop offset="100%" :stop-color="colors.primary" stop-opacity="0.2" />
+        <!-- Glass Reflection Layer -->
+        <linearGradient :id="`glass-grad-${uid}`" x1="0%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="white" stop-opacity="0.6" />
+          <stop offset="45%" stop-color="white" stop-opacity="0.1" />
+          <stop offset="50%" stop-color="white" stop-opacity="0.0" />
+          <stop offset="100%" stop-color="white" stop-opacity="0.0" />
+        </linearGradient>
+
+        <!-- Bottom Inner Glow -->
+        <linearGradient :id="`bottom-glow-${uid}`" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" :stop-color="isAprilFoolsActive ? aprilColors.highlight : colors.highlight" stop-opacity="0.8" />
+          <stop offset="50%" :stop-color="isAprilFoolsActive ? aprilColors.highlight : colors.highlight" stop-opacity="0.0" />
         </linearGradient>
 
         <!-- Dynamic Filters -->
         <filter :id="`inner-glow-${uid}`">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="out" result="glow" />
-          <feFlood :flood-color="colors.stroke" flood-opacity="0.8" result="color" />
+          <feFlood :flood-color="colors.secondary" flood-opacity="0.9" result="color" />
           <feComposite in="color" in2="glow" operator="in" />
           <feComposite in2="SourceGraphic" operator="over" />
         </filter>
 
         <filter :id="`outer-glow-${uid}`" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
-          <feFlood :flood-color="colors.primary" flood-opacity="0.5" result="color" />
+          <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+          <feFlood :flood-color="colors.primary" flood-opacity="0.6" result="color" />
           <feComposite in="color" in2="blur" operator="in" result="shadow" />
           <feOffset in="shadow" dx="0" dy="0" result="offsetShadow" />
           <feMerge>
@@ -78,36 +93,95 @@
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+
+        <!-- Gorgeous Aura for Legend -->
+        <filter :id="`legend-aura-${uid}`" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+        </filter>
+
+        <!-- Drop shadow for tier segments -->
+        <filter :id="`segment-shadow-${uid}`" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="black" flood-opacity="0.5" />
+        </filter>
       </defs>
 
       <!-- Glow Underlay for high ranks -->
       <path 
-        v-if="tier && tier > 0"
+        v-if="tier && tier > 1 || isLegend"
         :d="shapePath" 
         :fill="colors.primary" 
         fill-opacity="0.1" 
         :filter="`url(#outer-glow-${uid})`"
       />
 
+      <!-- Extra Radiant Aura for Legend -->
+      <path 
+        v-if="isLegend"
+        :d="shapePath" 
+        :fill="colors.highlight"
+        fill-opacity="0.4"
+        :filter="`url(#legend-aura-${uid})`"
+        class="animate-pulse"
+      />
+
       <!-- Base Shape -->
       <path 
         :d="shapePath" 
         :fill="`url(#grad-${uid})`"
-        :stroke="strokeColor"
+        :stroke="colors.stroke"
         stroke-width="2.5"
         stroke-linejoin="round"
         :filter="`url(#inner-glow-${uid})`"
       />
+
+      <!-- Internal Premium Effects (clipped to shape) -->
+      <g :clip-path="`url(#shape-clip-${uid})`">
+        <!-- Inner Border Ring -->
+        <path 
+          :d="shapePath" 
+          fill="none"
+          :stroke="colors.highlight"
+          stroke-width="1.5"
+          stroke-opacity="0.9"
+          transform="scale(0.88)"
+          style="transform-origin: 50% 50%"
+        />
+
+        <!-- Glass Reflection Overlay -->
+        <path 
+          :d="shapePath" 
+          :fill="`url(#glass-grad-${uid})`"
+        />
+
+        <!-- Bottom Bounce Light -->
+        <path 
+          :d="shapePath" 
+          :fill="`url(#bottom-glow-${uid})`"
+        />
+      </g>
       
-      <!-- Tier Segments (More visible "Energy Bars") -->
-      <g v-if="tier && tier > 0" class="tier-segments">
+      <!-- Max Tier (5) Diamond Emblem -->
+      <g v-if="tier === 5" class="tier-segments" :filter="`url(#segment-shadow-${uid})`">
+        <!-- Top Left Facet (Lightest) -->
+        <path d="M50 35 L38 50 L50 50 Z" fill="#ffffff" />
+        <!-- Top Right Facet -->
+        <path d="M50 35 L62 50 L50 50 Z" fill="#f1f5f9" />
+        <!-- Bottom Left Facet -->
+        <path d="M50 50 L38 50 L50 65 Z" fill="#e2e8f0" />
+        <!-- Bottom Right Facet (Darkest) -->
+        <path d="M50 50 L62 50 L50 65 Z" fill="#cbd5e1" />
+        <!-- Thin Unified Border -->
+        <path d="M50 35 L62 50 L50 65 L38 50 Z" fill="none" stroke="#ffffff" stroke-width="0.75" stroke-linejoin="round" />
+      </g>
+
+      <!-- Tier Segments (More visible "Energy Bars") for tiers 1-4 -->
+      <g v-else-if="tier && tier > 0" class="tier-segments">
         <path 
           v-for="n in tier" 
           :key="n" 
           :d="getSegmentPath(n)" 
           fill="white" 
-          fill-opacity="0.9"
-          class="drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]"
+          :filter="`url(#segment-shadow-${uid})`"
         />
       </g>
 
@@ -177,20 +251,20 @@ const isLegend = computed(() => props.rankName === 'Legend');
 
 const colors = computed(() => {
   const name = props.rankName.toLowerCase();
-  // Multi-stop color sets for richness
-  if (name === 'beginner') return { primary: '#475569', highlight: '#94a3b8', secondary: '#1e293b', stroke: '#cbd5e1' };
-  if (name === 'novice') return { primary: '#334155', highlight: '#64748b', secondary: '#0f172a', stroke: '#94a3b8' };
-  if (name === 'intermediate') return { primary: '#1e40af', highlight: '#60a5fa', secondary: '#1e3a8a', stroke: '#bfdbfe' };
-  if (name === 'advanced') return { primary: '#155e75', highlight: '#22d3ee', secondary: '#083344', stroke: '#a5f3fc' };
-  if (name === 'expert') return { primary: '#115e59', highlight: '#2dd4bf', secondary: '#042f2e', stroke: '#99f6e4' };
-  if (name === 'veteran') return { primary: '#064e3b', highlight: '#34d399', secondary: '#022c22', stroke: '#a7f3d0' };
-  if (name === 'commander') return { primary: '#854d0e', highlight: '#eab308', secondary: '#422006', stroke: '#fef08a' };
-  if (name === 'elite') return { primary: '#9a3412', highlight: '#fb923c', secondary: '#431407', stroke: '#ffedd5' };
-  if (name === 'master') return { primary: '#991b1b', highlight: '#f87171', secondary: '#450a0a', stroke: '#fee2e2' };
-  if (name === 'ancient') return { primary: '#3730a3', highlight: '#818cf8', secondary: '#1e1b4b', stroke: '#e0e7ff' };
-  if (name === 'mythic') return { primary: '#6b21a8', highlight: '#c084fc', secondary: '#2e1065', stroke: '#f3e8ff' };
-  if (name === 'legend') return { primary: '#854d0e', highlight: '#fbbf24', secondary: '#422006', stroke: '#fef3c7' };
-  return { primary: '#475569', highlight: '#94a3b8', secondary: '#1e293b', stroke: '#cbd5e1' };
+  // Premium metallic/jewel palettes
+  if (name === 'beginner') return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
+  if (name === 'novice') return { primary: '#4f46e5', highlight: '#e0e7ff', secondary: '#312e81', stroke: '#a5b4fc' };
+  if (name === 'intermediate') return { primary: '#0284c7', highlight: '#e0f2fe', secondary: '#082f49', stroke: '#7dd3fc' };
+  if (name === 'advanced') return { primary: '#0d9488', highlight: '#ccfbf1', secondary: '#134e4a', stroke: '#5eead4' };
+  if (name === 'expert') return { primary: '#059669', highlight: '#d1fae5', secondary: '#064e3b', stroke: '#6ee7b7' };
+  if (name === 'veteran') return { primary: '#65a30d', highlight: '#ecfccb', secondary: '#365314', stroke: '#bef264' };
+  if (name === 'commander') return { primary: '#eab308', highlight: '#fefce8', secondary: '#713f12', stroke: '#fef08a' };
+  if (name === 'elite') return { primary: '#f97316', highlight: '#fff7ed', secondary: '#9a3412', stroke: '#fed7aa' };
+  if (name === 'master') return { primary: '#be123c', highlight: '#fff1f2', secondary: '#4c0519', stroke: '#fecdd3' };
+  if (name === 'ancient') return { primary: '#4338ca', highlight: '#e0e7ff', secondary: '#1e1b4b', stroke: '#a5b4fc' };
+  if (name === 'mythic') return { primary: '#9333ea', highlight: '#fae8ff', secondary: '#3b0764', stroke: '#d8b4fe' };
+  if (name === 'legend') return { primary: '#fbbf24', highlight: '#ffffff', secondary: '#92400e', stroke: '#fef08a' }; // Radiant Gold
+  return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
 });
 
 // April Fools pastel rainbow colors
@@ -210,8 +284,6 @@ const aprilColors = computed(() => {
   if (name === 'legend') return { primary: '#fbbf24', highlight: '#fde68a', secondary: '#f59e0b' };
   return { primary: '#f9a8d4', highlight: '#fbcfe8', secondary: '#f472b6' };
 });
-
-const strokeColor = computed(() => colors.value.stroke);
 
 const limbColor = computed(() => {
   return colors.value.stroke;
