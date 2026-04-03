@@ -1,4 +1,7 @@
 export const en = {
+  // Common
+  'common.back': 'Back',
+
   // Navigation
   'nav.dashboard': 'Dashboard',
   'nav.scoreList': 'Score List',

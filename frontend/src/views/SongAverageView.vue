@@ -16,10 +16,17 @@ const TIER_ORDER = [
 ] as const;
 type BeatTierName = typeof TIER_ORDER[number];
 
+interface SubTierEntry {
+  avgScore: number;
+  avgRate: number;
+  userCount: number;
+}
+
 interface AverageEntry {
   avgScore: number;
   avgRate: number;
   userCount: number;
+  subTiers: Record<number, SubTierEntry>;
 }
 
 interface SongRow {
@@ -30,15 +37,16 @@ interface SongRow {
   maxScore: number;
 }
 
-// ── State ──────────────────────────────────────────────────
 const rawData = ref<{
   title: string; difficultyName: string; difficultyLevel: number;
-  beatTier: string; avgScore: number; userCount: number;
+  beatTier: string; tierLevel: number; avgScore: number; userCount: number;
 }[]>([]);
 // key: "title_ANOTHER" or "title_LEGGENDARIA" → my best score
 const myScoresMap = ref<Map<string, number>>(new Map());
 const isLoading = ref(true);
 const error = ref('');
+
+const detailTier = ref<BeatTierName | null>(null);
 
 const searchQuery = ref('');
 const showLv11 = ref(true);
@@ -60,7 +68,7 @@ function applyFilter() {
   currentPage.value = 1;
 }
 
-const sortKey = ref<'level' | 'title' | BeatTierName>('level');
+const sortKey = ref<'level' | 'title' | BeatTierName | string>('level');
 const sortDir = ref<'asc' | 'desc'>('desc');
 const currentPage = ref(1);
 const PAGE_SIZE = 50;
@@ -102,12 +110,36 @@ const rows = computed<SongRow[]>(() => {
       });
     }
     const row = songMap.get(songKey)!;
+    if (!row.averages[tier]) {
+      row.averages[tier] = { avgScore: 0, avgRate: 0, userCount: 0, subTiers: {} };
+    }
+    
+    // Some entries might come as 0 (e.g. Legend/Beginner)
+    const level = Number(entry.tierLevel || 0);
     const avgScore = Math.round(Number(entry.avgScore));
-    row.averages[tier] = {
+    row.averages[tier].subTiers[level] = {
       avgScore,
       avgRate: (avgScore / row.maxScore) * 100,
-      userCount: Number(entry.userCount),
+      userCount: Math.round(Number(entry.userCount)),
     };
+  }
+
+  // Calculate weighted average for broad tiers
+  for (const row of songMap.values()) {
+    for (const tier of Object.keys(row.averages) as BeatTierName[]) {
+      const avg = row.averages[tier]!;
+      let sumScore = 0;
+      let totalCount = 0;
+      for (const sub of Object.values(avg.subTiers)) {
+        sumScore += sub.avgScore * sub.userCount;
+        totalCount += sub.userCount;
+      }
+      if (totalCount > 0) {
+        avg.avgScore = Math.round(sumScore / totalCount);
+        avg.userCount = totalCount;
+        avg.avgRate = (avg.avgScore / row.maxScore) * 100;
+      }
+    }
   }
 
   return Array.from(songMap.values());
@@ -121,6 +153,15 @@ const activeTiers = computed<BeatTierName[]>(() => {
     }
   }
   return TIER_ORDER.filter(t => present.has(t));
+});
+
+type ColumnDef = { type: 'broad', tier: BeatTierName } | { type: 'sub', tier: BeatTierName, level: number };
+
+const activeColumns = computed<ColumnDef[]>(() => {
+  if (detailTier.value) {
+    return [5, 4, 3, 2, 1].map(l => ({ type: 'sub', tier: detailTier.value!, level: l }));
+  }
+  return activeTiers.value.map(t => ({ type: 'broad', tier: t }));
 });
 
 const filteredRows = computed<SongRow[]>(() => {
@@ -156,6 +197,13 @@ const filteredRows = computed<SongRow[]>(() => {
     if (sortKey.value === 'level') {
       va = a.difficultyLevel;
       vb = b.difficultyLevel;
+    } else if (typeof sortKey.value === 'string' && sortKey.value.includes('-')) {
+      // e.g. "Master-5"
+      const [tName, tLevel] = sortKey.value.split('-');
+      const ak = a.averages[tName as BeatTierName]?.subTiers[Number(tLevel)];
+      const bk = b.averages[tName as BeatTierName]?.subTiers[Number(tLevel)];
+      va = (ak && ak.userCount >= 3) ? ak.avgRate : -1;
+      vb = (bk && bk.userCount >= 3) ? bk.avgRate : -1;
     } else {
       const ak = a.averages[sortKey.value as BeatTierName];
       const bk = b.averages[sortKey.value as BeatTierName];
@@ -209,7 +257,7 @@ function tierColor(tier: BeatTierName): string {
   return getRankInfo(map[tier]).color.replace(' font-black', '').replace(' font-bold', '');
 }
 
-watch([searchQuery, showLv11, showLv12], () => { currentPage.value = 1; });
+watch([searchQuery, showLv11, showLv12, detailTier], () => { currentPage.value = 1; });
 
 // ── Fetch ──────────────────────────────────────────────────
 async function loadData() {
@@ -333,6 +381,18 @@ onMounted(loadData);
           {{ filteredRows.length }} {{ t('songAvg.songs') }}
           &nbsp;({{ (currentPage - 1) * PAGE_SIZE + 1 }}–{{ Math.min(currentPage * PAGE_SIZE, filteredRows.length) }})
         </p>
+        <div v-if="detailTier" class="mb-4 flex items-center justify-between pb-2 border-b border-indigo-100 dark:border-indigo-900/50">
+          <div class="flex items-center gap-3">
+            <button @click="detailTier = null" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-bold transition-colors text-xs sm:text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+              {{ t('common.back') || '戻る' }}
+            </button>
+            <span class="font-black text-slate-700 dark:text-slate-200" :class="tierColor(detailTier!)">
+              {{ detailTier }}の詳細
+            </span>
+          </div>
+        </div>
+
         <table class="text-sm border-collapse" style="min-width: max-content">
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-700/50">
@@ -344,16 +404,33 @@ onMounted(loadData);
                 class="pb-3 pr-6 text-left text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-600"
                 @click="toggleSort('title')"
               >{{ t('songAvg.colSong') }} <span v-if="sortKey === 'title'">{{ sortDir === 'desc' ? '▼' : '▲' }}</span></th>
+              
               <th
-                v-for="tier in activeTiers" :key="tier"
-                class="pb-3 px-2 text-center text-xs font-black uppercase tracking-widest cursor-pointer whitespace-nowrap"
-                :class="[tierColor(tier), 'hover:opacity-80']"
-                @click="toggleSort(tier)"
+                v-for="col in activeColumns" :key="col.type === 'broad' ? col.tier : col.tier + '-' + col.level"
+                class="pb-3 px-2 text-center text-xs font-black uppercase tracking-widest whitespace-nowrap align-top"
+                :class="[tierColor(col.tier)]"
               >
-                <div class="flex flex-col items-center gap-0.5">
-                  <RankIcon :rank-name="tier" :tier="undefined" size="sm" disable-party />
-                  <span>{{ tier }}</span>
-                  <span v-if="sortKey === tier" class="text-[10px]">{{ sortDir === 'desc' ? '▼' : '▲' }}</span>
+                <!-- 大分類カラム -->
+                <div v-if="col.type === 'broad'" class="relative flex flex-col items-center gap-0.5 group/header rounded-xl p-1 transition-colors" :class="{'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50': true}" @click="toggleSort(col.tier)">
+                  <RankIcon :rank-name="col.tier" size="sm" disable-party />
+                  <span class="mt-1">{{ col.tier }}</span>
+                  <span v-if="sortKey === col.tier" class="text-[10px]">{{ sortDir === 'desc' ? '▼' : '▲' }}</span>
+                  
+                  <button 
+                    v-if="col.tier !== 'Legend' && col.tier !== 'Beginner'"
+                    @click.stop="detailTier = col.tier"
+                    class="absolute top-0 right-0 p-1 rounded-full bg-white dark:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-600 opacity-0 group-hover/header:opacity-100 transition-opacity hover:scale-110 hover:text-indigo-500"
+                    title="1〜5ごとの平均スコアを見る"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                  </button>
+                </div>
+
+                <!-- 小分類（ドリルダウン）カラム -->
+                <div v-else class="flex flex-col items-center gap-0.5 cursor-pointer hover:opacity-80 p-1" @click="toggleSort(`${col.tier}-${col.level}`)">
+                  <RankIcon :rank-name="col.tier" :tier="col.level" size="sm" disable-party />
+                  <span class="mt-1">{{ col.tier }} {{ col.level }}</span>
+                  <span v-if="sortKey === `${col.tier}-${col.level}`" class="text-[10px]">{{ sortDir === 'desc' ? '▼' : '▲' }}</span>
                 </div>
               </th>
             </tr>
@@ -383,16 +460,32 @@ onMounted(loadData);
                 </span>
               </td>
               <!-- BEAT-TIER averages -->
-              <td v-for="tier in activeTiers" :key="tier" class="py-2 px-2 text-center">
-                <template v-if="row.averages[tier] && row.averages[tier]!.userCount >= 3">
-                  <div class="font-bold tabular-nums" :class="rateColorClass(row.averages[tier]!.avgRate)">
-                    {{ row.averages[tier]!.avgScore.toLocaleString() }}
-                  </div>
-                  <div class="text-[10px] tabular-nums" :class="comparisonClass(row.averages[tier]!.avgScore, row.title, row.difficultyName)">
-                    {{ row.averages[tier]!.avgRate.toFixed(1) }}%
-                  </div>
+              <td v-for="col in activeColumns" :key="col.type === 'broad' ? col.tier : col.tier + '-' + col.level" class="py-2 px-2 text-center">
+                
+                <template v-if="col.type === 'broad'">
+                  <template v-if="row.averages[col.tier] && row.averages[col.tier]!.userCount >= 3">
+                    <div class="font-bold tabular-nums" :class="rateColorClass(row.averages[col.tier]!.avgRate)">
+                      {{ row.averages[col.tier]!.avgScore.toLocaleString() }}
+                    </div>
+                    <div class="text-[10px] tabular-nums" :class="comparisonClass(row.averages[col.tier]!.avgScore, row.title, row.difficultyName)">
+                      {{ row.averages[col.tier]!.avgRate.toFixed(1) }}%
+                    </div>
+                  </template>
+                  <span v-else class="text-slate-200 dark:text-slate-700 text-xs">—</span>
                 </template>
-                <span v-else class="text-slate-200 dark:text-slate-700 text-xs">—</span>
+
+                <template v-else>
+                  <template v-if="row.averages[col.tier] && row.averages[col.tier]!.subTiers[col.level] && row.averages[col.tier]!.subTiers[col.level].userCount >= 3">
+                    <div class="font-bold tabular-nums" :class="rateColorClass(row.averages[col.tier]!.subTiers[col.level]!.avgRate)">
+                      {{ row.averages[col.tier]!.subTiers[col.level]!.avgScore.toLocaleString() }}
+                    </div>
+                    <div class="text-[10px] tabular-nums" :class="comparisonClass(row.averages[col.tier]!.subTiers[col.level]!.avgScore, row.title, row.difficultyName)">
+                      {{ row.averages[col.tier]!.subTiers[col.level]!.avgRate.toFixed(1) }}%
+                    </div>
+                  </template>
+                  <span v-else class="text-slate-200 dark:text-slate-700 text-xs">—</span>
+                </template>
+
               </td>
             </tr>
           </tbody>

@@ -128,7 +128,21 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "      WHEN total_beat_pt >= 12000 THEN 'Intermediate'" +
         "      WHEN total_beat_pt >= 10000 THEN 'Novice'" +
         "      ELSE 'Beginner'" +
-        "    END AS beat_tier" +
+        "    END AS beat_tier," +
+        "    CASE" +
+        "      WHEN total_beat_pt >= 18000 THEN 0" +
+        "      WHEN total_beat_pt >= 17500 THEN FLOOR((total_beat_pt - 17500)/100) + 1" +
+        "      WHEN total_beat_pt >= 17000 THEN FLOOR((total_beat_pt - 17000)/100) + 1" +
+        "      WHEN total_beat_pt >= 16500 THEN FLOOR((total_beat_pt - 16500)/100) + 1" +
+        "      WHEN total_beat_pt >= 16000 THEN FLOOR((total_beat_pt - 16000)/100) + 1" +
+        "      WHEN total_beat_pt >= 15500 THEN FLOOR((total_beat_pt - 15500)/100) + 1" +
+        "      WHEN total_beat_pt >= 15000 THEN FLOOR((total_beat_pt - 15000)/100) + 1" +
+        "      WHEN total_beat_pt >= 14000 THEN FLOOR((total_beat_pt - 14000)/200) + 1" +
+        "      WHEN total_beat_pt >= 13000 THEN FLOOR((total_beat_pt - 13000)/200) + 1" +
+        "      WHEN total_beat_pt >= 12000 THEN FLOOR((total_beat_pt - 12000)/200) + 1" +
+        "      WHEN total_beat_pt >= 10000 THEN FLOOR((total_beat_pt - 10000)/400) + 1" +
+        "      ELSE 0" +
+        "    END AS tier_level" +
         "  FROM users" +
         "  WHERE total_beat_pt > 0" +
         "), " +
@@ -141,6 +155,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         ") " +
         "SELECT b.title as \"title\", b.difficulty_name as \"difficultyName\", b.difficulty_level as \"difficultyLevel\"," +
         "  t.beat_tier as \"beatTier\"," +
+        "  t.tier_level as \"tierLevel\"," +
         "  ROUND(AVG(b.score)) as \"avgScore\"," +
         "  COUNT(*) as \"userCount\" " +
         "FROM best_scores b " +
@@ -150,7 +165,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  AND sd.revision = 'active' " +
         "  AND ((b.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (b.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
         "WHERE (b.score * 3) >= (sd.notes * 4) " +
-        "GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier " +
+        "GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier, t.tier_level " +
         "ORDER BY b.title, b.difficulty_name",
         nativeQuery = true)
     List<Map<String, Object>> findRawSongScoresWithBeatTier();

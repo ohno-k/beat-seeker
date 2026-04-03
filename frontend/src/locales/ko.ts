@@ -1,4 +1,7 @@
 export const ko = {
+  // Common
+  'common.back': '뒤로',
+
   // Navigation
   'nav.dashboard': '대시보드',
   'nav.scoreList': '점수 목록',

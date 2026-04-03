@@ -1,4 +1,7 @@
 export const ja = {
+  // Common
+  'common.back': '戻る',
+
   // Navigation
   'nav.dashboard': 'ダッシュボード',
   'nav.scoreList': 'スコア一覧',
