@@ -18,6 +18,7 @@ export const ko = {
   'nav.tierVoting': '투표소',
   'nav.arcadeAssist': '선곡 어시스트',
   'nav.songAvg': '티어별 평균',
+  'nav.diffTable': '난이도표',
   'nav.logout': '로그아웃',
   'nav.loginRegister': '로그인 / 회원가입',
   'nav.uploadCsv': 'CSV 업로드',
@@ -910,6 +911,17 @@ export const ko = {
   'songAvg.loading': '데이터 로딩 중...',
   'songAvg.songs': '곡',
   'songAvg.colSong': '곡명',
+
+  // Difficulty Table View
+  'diffTable.title': '비공식 난이도표',
+  'diffTable.subtitle': '총 {total}곡 / {ranks}단계',
+  'diffTable.searchPlaceholder': '곡명으로 검색...',
+  'diffTable.expandAll': '모두 열기',
+  'diffTable.collapseAll': '모두 닫기',
+  'diffTable.songs': '곡',
+  'diffTable.noResults': '해당하는 곡이 없습니다',
+  'diffTable.ctaTitle': '스코어를 기록하고 랭크를 확인하세요',
+  'diffTable.ctaDesc': '로그인 또는 회원가입하면 스코어와 난이도표를 비교하여 BEAT-PT를 계산할 수 있습니다.',
 
   // Dan Ranks
   'dan.7kyu': '7급', 'dan.6kyu': '6급', 'dan.5kyu': '5급', 'dan.4kyu': '4급', 'dan.3kyu': '3급', 'dan.2kyu': '2급', 'dan.1kyu': '1급',

@@ -18,6 +18,7 @@ export const ja = {
   'nav.tierVoting': '投票所',
   'nav.arcadeAssist': '選曲アシスト',
   'nav.songAvg': 'ティア別平均',
+  'nav.diffTable': '難易度表',
   'nav.logout': 'ログアウト',
   'nav.loginRegister': 'ログイン / 新規登録',
   'nav.uploadCsv': 'CSVをアップロード',
@@ -912,6 +913,18 @@ export const ja = {
   'songAvg.loading': 'データ読み込み中...',
   'songAvg.songs': '曲',
   'songAvg.colSong': '曲名',
+
+  // Dan Ranks
+  // Difficulty Table View
+  'diffTable.title': '非公式難易度表',
+  'diffTable.subtitle': '全{total}曲 / {ranks}段階',
+  'diffTable.searchPlaceholder': '曲名で検索...',
+  'diffTable.expandAll': 'すべて開く',
+  'diffTable.collapseAll': 'すべて閉じる',
+  'diffTable.songs': '曲',
+  'diffTable.noResults': '該当する楽曲が見つかりません',
+  'diffTable.ctaTitle': 'スコアを記録してランクを確認しよう',
+  'diffTable.ctaDesc': 'ログインまたは登録すると、自分のスコアとこの難易度表を照らし合わせてBEAT-PTを計算できます。',
 
   // Dan Ranks
   'dan.7kyu': '七級', 'dan.6kyu': '六級', 'dan.5kyu': '五級', 'dan.4kyu': '四級', 'dan.3kyu': '三級', 'dan.2kyu': '二級', 'dan.1kyu': '一級',

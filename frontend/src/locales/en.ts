@@ -18,6 +18,7 @@ export const en = {
   'nav.tierVoting': 'Voting Station',
   'nav.arcadeAssist': 'Song Assist',
   'nav.songAvg': 'Tier Averages',
+  'nav.diffTable': 'Difficulty Table',
   'nav.logout': 'Logout',
   'nav.loginRegister': 'Login / Register',
   'nav.uploadCsv': 'Upload CSV',
@@ -909,6 +910,17 @@ export const en = {
   'songAvg.loading': 'Loading data...',
   'songAvg.songs': 'songs',
   'songAvg.colSong': 'Song',
+
+  // Difficulty Table View
+  'diffTable.title': 'Unofficial Difficulty Table',
+  'diffTable.subtitle': '{total} songs / {ranks} tiers',
+  'diffTable.searchPlaceholder': 'Search songs...',
+  'diffTable.expandAll': 'Expand All',
+  'diffTable.collapseAll': 'Collapse All',
+  'diffTable.songs': ' songs',
+  'diffTable.noResults': 'No songs found',
+  'diffTable.ctaTitle': 'Track your scores and check your rank',
+  'diffTable.ctaDesc': 'Log in or register to compare your scores against this difficulty table and calculate your BEAT-PT.',
 
   // Dan Ranks
   'dan.7kyu': '7th Kyu', 'dan.6kyu': '6th Kyu', 'dan.5kyu': '5th Kyu', 'dan.4kyu': '4th Kyu', 'dan.3kyu': '3rd Kyu', 'dan.2kyu': '2nd Kyu', 'dan.1kyu': '1st Kyu',

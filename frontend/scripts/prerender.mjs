@@ -12,6 +12,62 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, '../dist');
 const indexHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
 
+// 難易度表の静的JSONを読み込み
+const diffTableJson = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '../src/data/difficulty_table.json'), 'utf-8')
+);
+
+function buildDiffTableHtml(ranks) {
+  const numericRanks = ranks
+    .filter(r => !isNaN(parseFloat(r.rank)))
+    .slice()
+    .reverse();
+
+  const rankColors = (rank) => {
+    const v = parseFloat(rank);
+    if (v >= 13.0) return '#dc2626';
+    if (v >= 12.5) return '#f97316';
+    if (v >= 12.0) return '#f59e0b';
+    if (v >= 11.5) return '#10b981';
+    return '#3b82f6';
+  };
+
+  const rankSections = numericRanks.map(r => {
+    const songItems = r.songs.map(s => {
+      const isL = s.endsWith('[L]');
+      const name = isL ? s.slice(0, -3) : s;
+      const badge = isL ? `<span style="font-size:0.7rem;font-weight:bold;color:#9333ea;background:#f3e8ff;padding:1px 5px;border-radius:4px;margin-right:4px;">L</span>` : '';
+      return `<li style="padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:0.9rem;">${badge}${name}</li>`;
+    }).join('');
+
+    return `
+<section style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+  <div style="padding:14px 20px;background:#f8fafc;display:flex;align-items:center;gap:12px;">
+    <span style="font-size:1.5rem;font-weight:900;color:${rankColors(r.rank)};">☆${r.rank}</span>
+    <span style="font-size:0.85rem;color:#64748b;">${r.songs.length}曲</span>
+  </div>
+  <ul style="padding:8px 20px 12px;list-style:none;margin:0;column-count:2;column-gap:24px;">
+    ${songItems}
+  </ul>
+</section>`;
+  }).join('');
+
+  const totalSongs = ranks.reduce((acc, r) => acc + r.songs.length, 0);
+
+  return `
+<article style="max-width:900px;margin:0 auto;padding:24px 16px;font-family:sans-serif;color:#1e293b;">
+  <h1 style="font-size:2rem;font-weight:900;margin-bottom:8px;">beatmania IIDX 非公式難易度表</h1>
+  <p style="color:#64748b;margin-bottom:8px;">全${totalSongs}曲 / ${numericRanks.length}段階（☆11.0〜☆13.0）</p>
+  <p style="color:#475569;margin-bottom:32px;">
+    beatmania IIDXの高難度譜面（☆11〜☆13）を独自の難易度評価で細かく分類した非公式難易度表です。
+    各ランクの楽曲リストは投票や管理者判断をもとに随時更新されます。
+    スコアと組み合わせてBEAT-PTを算出し、プレイヤーの地力をBeginner〜Legendのランクで可視化します。
+  </p>
+  ${rankSections}
+  <p style="margin-top:32px;"><a href="/" style="color:#2563eb;">← アプリトップへ</a></p>
+</article>`;
+}
+
 // ページ定義: URL → { title, description, bodyHtml }
 const pages = {
   about: {
@@ -117,6 +173,13 @@ const pages = {
   <p style="margin-top:32px;"><a href="/" style="color:#2563eb;">← アプリに戻る</a></p>
 </article>`,
   },
+};
+
+// 難易度表ページを pages に追加
+pages['difficulty-table'] = {
+  title: 'beatmania IIDX 非公式難易度表 | beat-seeker',
+  description: `beatmania IIDXの高難度譜面（☆11〜☆13）を独自評価で細分した非公式難易度表。全${diffTableJson.ranks.reduce((a, r) => a + r.songs.length, 0)}曲を${diffTableJson.ranks.filter(r => !isNaN(parseFloat(r.rank))).length}段階に分類。スコアと組み合わせてBEAT-PTを計算できます。`,
+  bodyHtml: buildDiffTableHtml(diffTableJson.ranks),
 };
 
 // 各ページのHTMLを生成して dist/<page>/index.html に書き出す
