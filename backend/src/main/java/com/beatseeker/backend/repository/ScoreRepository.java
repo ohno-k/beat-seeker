@@ -249,7 +249,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "base_scores AS ( " +
         "  SELECT " +
         "    s.user_id, u.display_name, u.iidx_id, " +
-        "    (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || ' [L]' ELSE s.title END) AS mapped_title, " +
+        "    (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || '[L]' ELSE s.title END) AS mapped_title, " +
         "    (s.score * 100.0 / NULLIF(sd.notes * 2.0, 0)) AS score_rate " +
         "  FROM scores s " +
         "  JOIN users u on s.user_id = u.id " +

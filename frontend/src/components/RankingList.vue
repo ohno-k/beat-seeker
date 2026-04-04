@@ -68,6 +68,8 @@ const simulationData = ref<SimulationEntry[]>([]);
 const isSimulationLoading = ref(false);
 const simulationError = ref('');
 const draftDiffChanges = ref<{ title: string; oldRank: string; newRank: string }[]>([]);
+const promotionChanges = computed(() => draftDiffChanges.value.filter(c => parseFloat(c.newRank) > parseFloat(c.oldRank)));
+const demotionChanges = computed(() => draftDiffChanges.value.filter(c => parseFloat(c.newRank) < parseFloat(c.oldRank)));
 
 async function fetchBeatRanking() {
     const res = await fetch(`${API_BASE}/api/scores/ranking`);
@@ -386,14 +388,26 @@ watch(viewMode, async (mode) => {
         <!-- Simulation tab (admin only) -->
         <div v-if="viewMode === 'simulation' && isAdmin">
           <!-- Draft changes summary -->
-          <div v-if="draftDiffChanges.length > 0" class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl">
-            <p class="text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">ドラフト難易度変更 ({{ draftDiffChanges.length }}件)</p>
-            <div class="flex flex-wrap gap-1.5">
-              <span v-for="c in draftDiffChanges" :key="c.title"
-                class="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-700 rounded-full text-slate-700 dark:text-slate-300">
-                {{ c.title.length > 20 ? c.title.slice(0, 18) + '…' : c.title }}
-                <span class="line-through text-slate-400">{{ c.oldRank }}</span>→<span class="font-bold text-amber-600 dark:text-amber-400">{{ c.newRank }}</span>
-              </span>
+          <div v-if="draftDiffChanges.length > 0" class="mb-4 space-y-2">
+            <div v-if="promotionChanges.length > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl">
+              <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2">▲ 昇格 ({{ promotionChanges.length }}件)</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="c in promotionChanges" :key="c.title"
+                  class="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-700 rounded-full text-slate-700 dark:text-slate-300">
+                  {{ c.title.length > 20 ? c.title.slice(0, 18) + '…' : c.title }}
+                  <span class="line-through text-slate-400">{{ c.oldRank }}</span>→<span class="font-bold text-emerald-600 dark:text-emerald-400">{{ c.newRank }}</span>
+                </span>
+              </div>
+            </div>
+            <div v-if="demotionChanges.length > 0" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl">
+              <p class="text-xs font-bold text-red-700 dark:text-red-400 mb-2">▼ 降格 ({{ demotionChanges.length }}件)</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="c in demotionChanges" :key="c.title"
+                  class="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-700 rounded-full text-slate-700 dark:text-slate-300">
+                  {{ c.title.length > 20 ? c.title.slice(0, 18) + '…' : c.title }}
+                  <span class="line-through text-slate-400">{{ c.oldRank }}</span>→<span class="font-bold text-red-600 dark:text-red-400">{{ c.newRank }}</span>
+                </span>
+              </div>
             </div>
           </div>
           <div v-else-if="!isSimulationLoading && !simulationError" class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 dark:text-slate-400">

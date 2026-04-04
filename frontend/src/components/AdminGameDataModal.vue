@@ -204,21 +204,41 @@
             </div>
 
             <!-- Saved draft changes (applied to draft, not yet published) -->
-            <div v-if="savedDiffChanges.length > 0" class="mb-3">
-              <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">ドラフト済みの変更 ({{ savedDiffChanges.length }}件)</h4>
-              <div class="space-y-1">
-                <div v-for="change in savedDiffChanges" :key="change.title" class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 min-w-0">
-                  <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
-                  <div class="flex items-center gap-2 text-sm shrink-0">
-                    <span class="line-through text-slate-400">{{ change.oldRank }}</span>
-                    <span class="text-slate-400">→</span>
-                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ change.newRank }}</span>
+            <div v-if="savedDiffChanges.length > 0" class="mb-3 space-y-2">
+              <div v-if="savedPromotions.length > 0">
+                <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">▲ 昇格 ({{ savedPromotions.length }}件)</h4>
+                <div class="space-y-1">
+                  <div v-for="change in savedPromotions" :key="change.title" class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 min-w-0">
+                    <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
+                    <div class="flex items-center gap-2 text-sm shrink-0">
+                      <span class="line-through text-slate-400">{{ change.oldRank }}</span>
+                      <span class="text-slate-400">→</span>
+                      <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ change.newRank }}</span>
+                    </div>
+                    <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
                   </div>
-                  <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                  </button>
+                </div>
+              </div>
+              <div v-if="savedDemotions.length > 0">
+                <h4 class="text-xs font-bold text-red-600 dark:text-red-400 mb-1">▼ 降格 ({{ savedDemotions.length }}件)</h4>
+                <div class="space-y-1">
+                  <div v-for="change in savedDemotions" :key="change.title" class="flex items-center justify-between bg-red-50 dark:bg-red-900/20 p-2.5 rounded-lg border border-red-200 dark:border-red-800/50 min-w-0">
+                    <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
+                    <div class="flex items-center gap-2 text-sm shrink-0">
+                      <span class="line-through text-slate-400">{{ change.oldRank }}</span>
+                      <span class="text-slate-400">→</span>
+                      <span class="text-red-600 dark:text-red-400 font-bold">{{ change.newRank }}</span>
+                    </div>
+                    <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -362,6 +382,9 @@ const savedDiffChanges = computed(() => {
   }
   return changes;
 });
+
+const savedPromotions = computed(() => savedDiffChanges.value.filter(c => parseFloat(c.newRank) > parseFloat(c.oldRank)));
+const savedDemotions = computed(() => savedDiffChanges.value.filter(c => parseFloat(c.newRank) < parseFloat(c.oldRank)));
 
 const effectiveSongsList = computed(() => {
   if (!originalDiffTable.value?.ranks) return [];
