@@ -1062,6 +1062,27 @@ const handleUnifiedClose = async () => {
           />
         </template>
 
+        <template v-else-if="activeTab === 'profile'">
+          <ProfileDashboard
+            class="w-full max-w-6xl"
+            :viewing-user-id="viewingUserId"
+          />
+        </template>
+
+        <template v-else-if="activeTab === 'history'">
+          <UploadHistory
+            class="w-full max-w-6xl animate-fade-in"
+            :viewing-user-id="viewingUserId"
+          />
+        </template>
+
+        <template v-else-if="activeTab === 'friends'">
+          <Friends
+            class="w-full max-w-6xl animate-fade-in"
+            @view-user="handleViewFriend"
+          />
+        </template>
+
         <template v-else>
           <!-- Hero Section (Visible only when no data) -->
           <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
@@ -1071,7 +1092,7 @@ const handleUnifiedClose = async () => {
             <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
               {{ t('app.hero.subtitle') }}
             </p>
-            
+
             <!-- PWA Install Banner -->
             <div v-if="showInstallBanner" class="mt-8 p-6 bg-blue-600 rounded-2xl shadow-xl text-white flex flex-col sm:flex-row items-center gap-4 animate-in zoom-in duration-300">
               <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
@@ -1134,27 +1155,6 @@ const handleUnifiedClose = async () => {
               class="w-full"
             />
           </div>
-
-          <!-- Profile Tab (scoreDataに依存しないため外に配置) -->
-          <ProfileDashboard
-            v-if="activeTab === 'profile'"
-            class="w-full max-w-6xl"
-            :viewing-user-id="viewingUserId"
-          />
-
-          <!-- History Tab (scoreDataに依存しないため外に配置) -->
-          <UploadHistory
-            v-if="activeTab === 'history'"
-            class="w-full max-w-6xl animate-fade-in"
-            :viewing-user-id="viewingUserId"
-          />
-
-          <!-- Friends Tab (scoreDataに依存しないため外に配置) -->
-          <Friends
-            v-if="activeTab === 'friends'"
-            class="w-full max-w-6xl animate-fade-in"
-            @view-user="handleViewFriend"
-          />
         </template>
       </main>
 

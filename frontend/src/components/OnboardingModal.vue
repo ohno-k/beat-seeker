@@ -14,7 +14,7 @@ const emit = defineEmits<{
 const { requestNotificationPermission } = useFriends();
 
 const isSubscribing = ref(false);
-const notificationStatus = ref(Notification?.permission || 'default');
+const notificationStatus = ref(typeof Notification !== 'undefined' ? (Notification.permission || 'default') : 'default');
 
 const isIOS = computed(() => {
   return [

@@ -358,7 +358,7 @@ const { t } = useI18n();
 // For push notifications, we only show/allow if it's the current user (no viewingUserId)
 const { requestNotificationPermission, sendTestNotification } = useFriends();
 
-const notificationStatus = ref(Notification?.permission || 'default');
+const notificationStatus = ref(typeof Notification !== 'undefined' ? (Notification.permission || 'default') : 'default');
 const isSubscribing = ref(false);
 const isTesting = ref(false);
 
@@ -376,7 +376,7 @@ const handleEnableNotifications = async () => {
     console.error(e);
   } finally {
     isSubscribing.value = false;
-    notificationStatus.value = Notification?.permission || 'default';
+    notificationStatus.value = typeof Notification !== 'undefined' ? (Notification.permission || 'default') : 'default';
   }
 };
 
