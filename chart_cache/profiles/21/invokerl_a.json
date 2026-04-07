@@ -1,0 +1,213 @@
+{
+  "textage": "21/invokerl.html?1AC00",
+  "analyzed_at": "2026-04-06T06:41:58.687345+00:00",
+  "title": "invoker",
+  "artist": "Caladborg",
+  "bpm_raw": "195",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1836,
+  "events": 1097,
+  "bpm_main": 195,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 195.0,
+  "weighted_eff16": 160.5,
+  "scratch_pct": 11.66,
+  "chord_pct": 46.86,
+  "single_pct": 53.14,
+  "ranuchi": 148,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 586,
+      "pct": 53.5,
+      "eff16": 195.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 443,
+      "pct": 40.4,
+      "eff16": 97.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 0.9,
+      "eff16": 48.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 390.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 292.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 585.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 130.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 780.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 32.5
+    },
+    "42": {
+      "name": "(42)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 111.4
+    }
+  },
+  "chord_dist": {
+    "1": 583,
+    "2": 325,
+    "3": 155,
+    "4": 32,
+    "5": 2
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 581,
+      "pct": 35.8,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 543,
+      "pct": 33.5,
+      "eff16": 195.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 472,
+      "pct": 29.1,
+      "eff16": 97.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 0.7,
+      "eff16": 48.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 32.5
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 24.4
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 780.0
+    },
+    "5": {
+      "name": "~64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 936.0
+    },
+    "13": {
+      "name": "~32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 360.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 21.6,
+      "eff16": 48.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 41,
+      "pct": 19.2,
+      "eff16": 195.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 31,
+      "pct": 14.6,
+      "eff16": 97.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 5.6,
+      "eff16": 32.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 5.2,
+      "eff16": 65.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 3.8,
+      "eff16": 24.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 2.3,
+      "eff16": 16.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 1.9,
+      "eff16": 12.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 1.9,
+      "eff16": 10.8
+    },
+    "168": {
+      "name": "(168)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 27.9
+    }
+  }
+}

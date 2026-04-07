@@ -1,0 +1,197 @@
+{
+  "textage": "26/_omylove.html?1AB00",
+  "analyzed_at": "2026-04-06T11:00:05.729602+00:00",
+  "title": "おーまい！らぶりー！すうぃーてぃ！だーりん！",
+  "artist": "BEMANI Sound Team \"PON\" feat.NU-KO",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1480,
+  "events": 981,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 143.8,
+  "scratch_pct": 6.15,
+  "chord_pct": 41.18,
+  "single_pct": 58.82,
+  "ranuchi": 77,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 611,
+      "pct": 62.3,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 309,
+      "pct": 31.5,
+      "eff16": 85.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 39,
+      "pct": 4.0,
+      "eff16": 255.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 1.5,
+      "eff16": 42.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 56.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.2
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 24.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.0
+    }
+  },
+  "chord_dist": {
+    "1": 577,
+    "2": 320,
+    "3": 73,
+    "4": 11
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 611,
+      "pct": 44.0,
+      "eff16": 170.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 408,
+      "pct": 29.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 309,
+      "pct": 22.3,
+      "eff16": 85.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 39,
+      "pct": 2.8,
+      "eff16": 255.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 42.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 56.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.2
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 24.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 18.9,
+      "eff16": 42.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 14.4,
+      "eff16": 10.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 12.2,
+      "eff16": 85.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 10.0,
+      "eff16": 21.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 8,
+      "pct": 8.9,
+      "eff16": 5.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 6,
+      "pct": 6.7,
+      "eff16": 14.2
+    },
+    "216": {
+      "name": "(216)",
+      "count": 5,
+      "pct": 5.6,
+      "eff16": 18.9
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 3.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 28.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 34.0
+    }
+  }
+}

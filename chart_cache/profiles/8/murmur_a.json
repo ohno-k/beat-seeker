@@ -1,0 +1,218 @@
+{
+  "textage": "8/murmur.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:17.599809+00:00",
+  "title": "murmur twins",
+  "artist": "yu_tokiwa.djw",
+  "bpm_raw": "174",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1165,
+  "events": 851,
+  "bpm_main": 174,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 174.0,
+  "weighted_eff16": 140.1,
+  "scratch_pct": 5.06,
+  "chord_pct": 26.67,
+  "single_pct": 73.33,
+  "ranuchi": 78,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 501,
+      "pct": 58.9,
+      "eff16": 174.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 291,
+      "pct": 34.2,
+      "eff16": 87.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 2.6,
+      "eff16": 43.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 261.0
+    },
+    "54": {
+      "name": "(54)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 77.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 58.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 29.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 17.4
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.8
+    }
+  },
+  "chord_dist": {
+    "1": 624,
+    "2": 160,
+    "3": 54,
+    "4": 8,
+    "5": 3,
+    "6": 2
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 501,
+      "pct": 45.3,
+      "eff16": 174.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 289,
+      "pct": 26.2,
+      "eff16": 87.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 257,
+      "pct": 23.3,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 1.8,
+      "eff16": 43.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 18,
+      "pct": 1.6,
+      "eff16": 261.0
+    },
+    "54": {
+      "name": "(54)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 77.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 58.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 29.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 17.4
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 14,
+      "pct": 24.1,
+      "eff16": 87.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 12,
+      "pct": 20.7,
+      "eff16": 5.8
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 8.6,
+      "eff16": 21.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 8.6,
+      "eff16": 29.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 4,
+      "pct": 6.9,
+      "eff16": 5.1
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 6.9,
+      "eff16": 17.4
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 5.2,
+      "eff16": 12.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 3.4,
+      "eff16": 10.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.4,
+      "eff16": 5.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 43.5
+    }
+  }
+}

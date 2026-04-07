@@ -1,0 +1,218 @@
+{
+  "textage": "23/dvlsgear.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:53.410078+00:00",
+  "title": "Devil's Gear",
+  "artist": "DJ Myosuke",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1753,
+  "events": 1014,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 164.3,
+  "scratch_pct": 9.87,
+  "chord_pct": 47.63,
+  "single_pct": 52.37,
+  "ranuchi": 90,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 686,
+      "pct": 67.7,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 219,
+      "pct": 21.6,
+      "eff16": 90.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 54,
+      "pct": 5.3,
+      "eff16": 360.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 2.8,
+      "eff16": 45.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.4,
+      "eff16": 60.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 540.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 18.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 22.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    }
+  },
+  "chord_dist": {
+    "1": 531,
+    "2": 273,
+    "3": 165,
+    "4": 44,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 669,
+      "pct": 42.4,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 585,
+      "pct": 37.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 218,
+      "pct": 13.8,
+      "eff16": 90.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 54,
+      "pct": 3.4,
+      "eff16": 360.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 1.5,
+      "eff16": 45.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 0.9,
+      "eff16": 60.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 36.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 540.0
+    },
+    "312": {
+      "name": "(312)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 23.3,
+      "eff16": 45.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 27,
+      "pct": 15.7,
+      "eff16": 90.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 27,
+      "pct": 15.7,
+      "eff16": 60.0
+    },
+    "192": {
+      "name": "half",
+      "count": 23,
+      "pct": 13.4,
+      "eff16": 22.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 18,
+      "pct": 10.5,
+      "eff16": 11.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 10,
+      "pct": 5.8,
+      "eff16": 180.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 2.9,
+      "eff16": 15.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 6.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 30.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 5.6
+    }
+  }
+}

@@ -1,0 +1,230 @@
+{
+  "textage": "22/discloze.html?1AB00",
+  "analyzed_at": "2026-04-06T10:50:56.229629+00:00",
+  "title": "Discloze",
+  "artist": "lapix",
+  "bpm_raw": "128-145",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1325,
+  "events": 792,
+  "bpm_main": 145,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 145.0,
+  "weighted_eff16": 135.7,
+  "scratch_pct": 6.57,
+  "chord_pct": 46.46,
+  "single_pct": 53.54,
+  "ranuchi": 87,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 499,
+      "pct": 63.1,
+      "eff16": 145.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 173,
+      "pct": 21.9,
+      "eff16": 72.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 48,
+      "pct": 6.1,
+      "eff16": 290.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 2.7,
+      "eff16": 36.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.8,
+      "eff16": 48.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 1.5,
+      "eff16": 108.8
+    },
+    "36": {
+      "name": "(36)",
+      "count": 7,
+      "pct": 0.9,
+      "eff16": 96.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 217.5
+    },
+    "4": {
+      "name": "(4)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 870.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 29.0
+    }
+  },
+  "chord_dist": {
+    "1": 424,
+    "2": 241,
+    "3": 92,
+    "4": 32,
+    "5": 3
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 495,
+      "pct": 40.0,
+      "eff16": 145.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 457,
+      "pct": 36.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 166,
+      "pct": 13.4,
+      "eff16": 72.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 47,
+      "pct": 3.8,
+      "eff16": 290.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 1.7,
+      "eff16": 36.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.2,
+      "eff16": 48.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 108.8
+    },
+    "36": {
+      "name": "(36)",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 96.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 217.5
+    },
+    "4": {
+      "name": "(4)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 870.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 21,
+      "pct": 24.4,
+      "eff16": 72.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 16.3,
+      "eff16": 36.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 10.5,
+      "eff16": 48.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 7,
+      "pct": 8.1,
+      "eff16": 14.5
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 7.0,
+      "eff16": 18.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 4.7,
+      "eff16": 9.1
+    },
+    "264": {
+      "name": "(264)",
+      "count": 3,
+      "pct": 3.5,
+      "eff16": 13.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 24.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 145.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 2.3
+    }
+  },
+  "cn_notes": 2,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.16,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 100.0,
+      "eff16": 18.1
+    }
+  }
+}

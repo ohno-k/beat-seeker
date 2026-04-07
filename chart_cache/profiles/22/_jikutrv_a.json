@@ -1,0 +1,218 @@
+{
+  "textage": "22/_jikutrv.html?1AB00",
+  "analyzed_at": "2026-04-06T11:01:40.427925+00:00",
+  "title": "時空トラベローグ",
+  "artist": "SWING HOLIC feat. A～YA",
+  "bpm_raw": "234",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1395,
+  "events": 999,
+  "bpm_main": 234,
+  "is_soflan": false,
+  "dominant_interval": 32,
+  "dominant_eff16": 175.5,
+  "weighted_eff16": 216.3,
+  "scratch_pct": 3.94,
+  "chord_pct": 29.13,
+  "single_pct": 70.87,
+  "ranuchi": 46,
+  "interval_dist": {
+    "32": {
+      "name": "12th(triplet)",
+      "count": 286,
+      "pct": 28.7,
+      "eff16": 175.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 126,
+      "pct": 12.6,
+      "eff16": 87.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 100,
+      "pct": 10.0,
+      "eff16": 58.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 94,
+      "pct": 9.4,
+      "eff16": 702.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 86,
+      "pct": 8.6,
+      "eff16": 351.0
+    },
+    "56": {
+      "name": "(56)",
+      "count": 46,
+      "pct": 4.6,
+      "eff16": 100.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 45,
+      "pct": 4.5,
+      "eff16": 117.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 41,
+      "pct": 4.1,
+      "eff16": 234.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 25,
+      "pct": 2.5,
+      "eff16": 156.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 21,
+      "pct": 2.1,
+      "eff16": 468.0
+    }
+  },
+  "chord_dist": {
+    "1": 708,
+    "2": 207,
+    "3": 63,
+    "4": 21
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 347,
+      "pct": 25.9,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 289,
+      "pct": 21.6,
+      "eff16": 175.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 126,
+      "pct": 9.4,
+      "eff16": 87.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 100,
+      "pct": 7.5,
+      "eff16": 58.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 90,
+      "pct": 6.7,
+      "eff16": 702.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 84,
+      "pct": 6.3,
+      "eff16": 351.0
+    },
+    "56": {
+      "name": "(56)",
+      "count": 46,
+      "pct": 3.4,
+      "eff16": 100.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 45,
+      "pct": 3.4,
+      "eff16": 117.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 39,
+      "pct": 2.9,
+      "eff16": 234.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 25,
+      "pct": 1.9,
+      "eff16": 156.0
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 13.0,
+      "eff16": 29.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 9.3,
+      "eff16": 7.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 7.4,
+      "eff16": 58.5
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 4,
+      "pct": 7.4,
+      "eff16": 2.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 7.4,
+      "eff16": 14.6
+    },
+    "224": {
+      "name": "(224)",
+      "count": 4,
+      "pct": 7.4,
+      "eff16": 25.1
+    },
+    "416": {
+      "name": "(416)",
+      "count": 3,
+      "pct": 5.6,
+      "eff16": 13.5
+    },
+    "1120": {
+      "name": "(1120)",
+      "count": 3,
+      "pct": 5.6,
+      "eff16": 5.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 5.6,
+      "eff16": 4.9
+    },
+    "1408": {
+      "name": "(1408)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 4.0
+    }
+  }
+}

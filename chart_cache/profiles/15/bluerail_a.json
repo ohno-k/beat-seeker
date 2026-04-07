@@ -1,0 +1,195 @@
+{
+  "textage": "15/bluerail.html?1AC00",
+  "analyzed_at": "2026-04-06T06:32:47.708085+00:00",
+  "title": "Blue Rain",
+  "artist": "dj TAKA VS Ryu☆",
+  "bpm_raw": "144",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1701,
+  "events": 860,
+  "bpm_main": 144,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 144.0,
+  "weighted_eff16": 140.6,
+  "scratch_pct": 2.0,
+  "chord_pct": 71.86,
+  "single_pct": 28.14,
+  "ranuchi": 106,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 736,
+      "pct": 85.7,
+      "eff16": 144.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 67,
+      "pct": 7.8,
+      "eff16": 72.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 32,
+      "pct": 3.7,
+      "eff16": 288.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.5,
+      "eff16": 36.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 18.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 48.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 24.0
+    }
+  },
+  "chord_dist": {
+    "1": 242,
+    "2": 453,
+    "3": 112,
+    "4": 48,
+    "5": 5
+  },
+  "tags": [
+    "scratch_low",
+    "chord_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 809,
+      "pct": 48.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 735,
+      "pct": 44.1,
+      "eff16": 144.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 67,
+      "pct": 4.0,
+      "eff16": 72.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 32,
+      "pct": 1.9,
+      "eff16": 288.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 0.8,
+      "eff16": 36.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 18.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 9.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 48.0
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 18.2,
+      "eff16": 9.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 18.2,
+      "eff16": 36.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 15.2,
+      "eff16": 18.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 9.1,
+      "eff16": 24.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 1.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 2.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 14.4
+    },
+    "0": {
+      "name": "(0)",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 0
+    },
+    "6288": {
+      "name": "(6288)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 0.5
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 2.3
+    }
+  }
+}

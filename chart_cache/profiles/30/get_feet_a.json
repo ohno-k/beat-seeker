@@ -1,0 +1,282 @@
+{
+  "textage": "30/get_feet.html?1AB00",
+  "analyzed_at": "2026-04-06T10:52:30.476047+00:00",
+  "title": "Get On Your Feet",
+  "artist": "Nhato",
+  "bpm_raw": "155",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1320,
+  "events": 847,
+  "bpm_main": 155,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 155.0,
+  "weighted_eff16": 137.1,
+  "scratch_pct": 5.15,
+  "chord_pct": 45.57,
+  "single_pct": 54.43,
+  "ranuchi": 37,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 654,
+      "pct": 77.3,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 100,
+      "pct": 11.8,
+      "eff16": 77.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 50,
+      "pct": 5.9,
+      "eff16": 38.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 51.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 310.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 25.8
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 22.1
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 17.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.9
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.4
+    }
+  },
+  "chord_dist": {
+    "1": 461,
+    "2": 322,
+    "3": 43,
+    "4": 19,
+    "5": 2
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 633,
+      "pct": 50.6,
+      "eff16": 155.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 424,
+      "pct": 33.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 104,
+      "pct": 8.3,
+      "eff16": 77.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 49,
+      "pct": 3.9,
+      "eff16": 38.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 1.5,
+      "eff16": 51.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 310.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 25.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.1
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 17.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.9
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 23.9,
+      "eff16": 38.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 9.0,
+      "eff16": 51.7
+    },
+    "24": {
+      "name": "16th",
+      "count": 6,
+      "pct": 9.0,
+      "eff16": 155.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 7.5,
+      "eff16": 2.4
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 7.5,
+      "eff16": 19.4
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 7.5,
+      "eff16": 77.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 11.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 8.6
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 12.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 25.8
+    }
+  },
+  "cn_notes": 25,
+  "cn_scratch_pct": 14.29,
+  "cn_kbd_overlap_pct": 7.03,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 20.8,
+      "eff16": 38.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 16.7,
+      "eff16": 9.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 12.5,
+      "eff16": 12.9
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 77.5
+    },
+    "6624": {
+      "name": "(6624)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 0.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 25.8
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 4.6
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 5.5
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 1.9
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 19.4
+    }
+  }
+}

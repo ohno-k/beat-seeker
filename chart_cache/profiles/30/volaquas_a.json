@@ -1,0 +1,253 @@
+{
+  "textage": "30/volaquas.html?1AC00",
+  "analyzed_at": "2026-04-06T10:58:07.649048+00:00",
+  "title": "VOLAQUAS",
+  "artist": "BEMANI Sound Team \"DJ TOTTO VS 兎々\"",
+  "bpm_raw": "212",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1964,
+  "events": 1061,
+  "bpm_main": 212,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 212.0,
+  "weighted_eff16": 163.0,
+  "scratch_pct": 4.63,
+  "chord_pct": 59.19,
+  "single_pct": 40.81,
+  "ranuchi": 57,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 486,
+      "pct": 45.8,
+      "eff16": 212.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 402,
+      "pct": 37.9,
+      "eff16": 106.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 98,
+      "pct": 9.2,
+      "eff16": 159.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 34,
+      "pct": 3.2,
+      "eff16": 53.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 1.6,
+      "eff16": 318.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 636.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 26.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 21.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 35.3
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.3
+    }
+  },
+  "chord_dist": {
+    "1": 433,
+    "2": 439,
+    "3": 129,
+    "4": 34,
+    "5": 26
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 822,
+      "pct": 43.9,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 482,
+      "pct": 25.7,
+      "eff16": 212.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 389,
+      "pct": 20.8,
+      "eff16": 106.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 98,
+      "pct": 5.2,
+      "eff16": 159.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 2.1,
+      "eff16": 53.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 0.9,
+      "eff16": 318.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.3,
+      "eff16": 636.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 26.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 21.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 35.3
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 16.7,
+      "eff16": 26.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 16.7,
+      "eff16": 35.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 11,
+      "pct": 12.2,
+      "eff16": 6.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 10.0,
+      "eff16": 53.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 7.8,
+      "eff16": 13.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 5.6,
+      "eff16": 3.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 11.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 10.6
+    },
+    "24": {
+      "name": "16th",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 212.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 7.6
+    }
+  },
+  "cn_notes": 6,
+  "cn_scratch_pct": 71.43,
+  "cn_kbd_overlap_pct": 0.48,
+  "cn_interval_dist": {
+    "3264": {
+      "name": "(3264)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 1.6
+    },
+    "14016": {
+      "name": "(14016)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 0.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 3.3
+    },
+    "5568": {
+      "name": "(5568)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 0.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 13.2
+    }
+  }
+}

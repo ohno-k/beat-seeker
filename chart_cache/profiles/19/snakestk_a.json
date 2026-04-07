@@ -1,0 +1,201 @@
+{
+  "textage": "19/snakestk.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:47.651737+00:00",
+  "title": "Snake Stick",
+  "artist": "DJ Yoshitaka VS. DJ Mass MAD Izm*",
+  "bpm_raw": "145",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1406,
+  "events": 914,
+  "bpm_main": 145,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 145.0,
+  "weighted_eff16": 143.0,
+  "scratch_pct": 26.81,
+  "chord_pct": 40.37,
+  "single_pct": 59.63,
+  "ranuchi": 110,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 655,
+      "pct": 71.7,
+      "eff16": 145.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 146,
+      "pct": 16.0,
+      "eff16": 72.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 58,
+      "pct": 6.4,
+      "eff16": 217.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 40,
+      "pct": 4.4,
+      "eff16": 290.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 36.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 108.8
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.1
+    }
+  },
+  "chord_dist": {
+    "1": 545,
+    "2": 269,
+    "3": 80,
+    "4": 17,
+    "5": 3
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 515,
+      "pct": 50.1,
+      "eff16": 145.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 288,
+      "pct": 28.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 99,
+      "pct": 9.6,
+      "eff16": 72.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 4.5,
+      "eff16": 36.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 40,
+      "pct": 3.9,
+      "eff16": 290.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.4,
+      "eff16": 48.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 1.2,
+      "eff16": 24.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.2,
+      "eff16": 217.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.1
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.1
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 156,
+      "pct": 41.5,
+      "eff16": 72.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 130,
+      "pct": 34.6,
+      "eff16": 145.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 42,
+      "pct": 11.2,
+      "eff16": 217.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 12,
+      "pct": 3.2,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 2.9,
+      "eff16": 36.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.8,
+      "eff16": 8.1
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.8,
+      "eff16": 18.1
+    },
+    "80": {
+      "name": "(80)",
+      "count": 3,
+      "pct": 0.8,
+      "eff16": 43.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.8,
+      "eff16": 54.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 48.3
+    }
+  }
+}

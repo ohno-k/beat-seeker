@@ -1,0 +1,217 @@
+{
+  "textage": "25/hypecr25.html?1AB00",
+  "analyzed_at": "2026-04-06T10:52:47.329524+00:00",
+  "title": "HYPE THE CORE",
+  "artist": "DJ CHUCKY",
+  "bpm_raw": "190",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1048,
+  "events": 548,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 95.0,
+  "weighted_eff16": 132.1,
+  "scratch_pct": 7.82,
+  "chord_pct": 60.22,
+  "single_pct": 39.78,
+  "ranuchi": 42,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 323,
+      "pct": 59.0,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 172,
+      "pct": 31.4,
+      "eff16": 190.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 3.3,
+      "eff16": 47.5
+    },
+    "6": {
+      "name": "64th",
+      "count": 9,
+      "pct": 1.6,
+      "eff16": 760.0
+    },
+    "42": {
+      "name": "(42)",
+      "count": 9,
+      "pct": 1.6,
+      "eff16": 108.6
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 11.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 10.6
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 23.8
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 5.8
+    },
+    "1584": {
+      "name": "(1584)",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 2.9
+    }
+  },
+  "chord_dist": {
+    "1": 218,
+    "2": 203,
+    "3": 90,
+    "4": 31,
+    "5": 6
+  },
+  "tags": [
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 422,
+      "pct": 43.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 316,
+      "pct": 32.7,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 172,
+      "pct": 17.8,
+      "eff16": 190.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 2.1,
+      "eff16": 47.5
+    },
+    "6": {
+      "name": "64th",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 760.0
+    },
+    "42": {
+      "name": "(42)",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 108.6
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 11.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 10.6
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 23.8
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 38,
+      "pct": 46.9,
+      "eff16": 47.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 15,
+      "pct": 18.5,
+      "eff16": 95.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 23.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 5.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 11.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 9.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 7.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 6.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 13.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 19.0
+    }
+  }
+}

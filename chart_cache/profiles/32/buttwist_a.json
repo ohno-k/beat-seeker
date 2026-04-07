@@ -1,0 +1,265 @@
+{
+  "textage": "32/buttwist.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:47.772358+00:00",
+  "title": "Butterfly Twist",
+  "artist": "Yooh",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1311,
+  "events": 802,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 132.1,
+  "scratch_pct": 7.78,
+  "chord_pct": 44.14,
+  "single_pct": 55.86,
+  "ranuchi": 23,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 419,
+      "pct": 52.3,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 308,
+      "pct": 38.5,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 3.0,
+      "eff16": 40.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 24,
+      "pct": 3.0,
+      "eff16": 480.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.7,
+      "eff16": 53.3
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 20.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 240.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.0
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.7
+    }
+  },
+  "chord_dist": {
+    "1": 448,
+    "2": 243,
+    "3": 76,
+    "4": 27,
+    "5": 7,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 427,
+      "pct": 35.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 409,
+      "pct": 33.9,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 296,
+      "pct": 24.5,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 2.3,
+      "eff16": 40.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 24,
+      "pct": 2.0,
+      "eff16": 480.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 53.3
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 20.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 240.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 26.7
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 25,
+      "pct": 24.8,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 19.8,
+      "eff16": 40.0
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 13.9,
+      "eff16": 20.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 8,
+      "pct": 7.9,
+      "eff16": 160.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 5.0,
+      "eff16": 5.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 5,
+      "pct": 5.0,
+      "eff16": 22.9
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 3.0,
+      "eff16": 11.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 2.5
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 2.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 8.0
+    }
+  },
+  "cn_notes": 16,
+  "cn_scratch_pct": 21.74,
+  "cn_kbd_overlap_pct": 0.25,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 53.3,
+      "eff16": 80.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 20.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 26.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 10.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 16.0
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 3.0
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 2.9
+    }
+  }
+}

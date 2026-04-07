@@ -23,6 +23,7 @@ import TierVotingView from './views/TierVotingView.vue';
 import ArcadeAssistView from './views/ArcadeView.vue';
 import SongAverageView from './views/SongAverageView.vue';
 import DifficultyTableView from './views/DifficultyTableView.vue';
+import ScorePredictionView from './views/ScorePredictionView.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
@@ -67,7 +68,7 @@ const reloadPage = () => window.location.reload();
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction'>('dashboard')
 const viewingMode = ref<'admin' | 'friend' | null>(null);
 const totalBeatTierPoints = ref(0);
 
@@ -90,6 +91,30 @@ const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotificat
 
 const isNotificationOpen = ref(false);
 const deferredPrompt = ref<any>(null);
+
+// Ko-fi support modal
+const showKofiModal = ref(false);
+const kofiCopied = ref(false);
+
+const handleKofiClick = () => {
+  if (user.value?.supporterToken) {
+    showKofiModal.value = true;
+  } else {
+    window.open('https://ko-fi.com/beat_seeker', '_blank');
+  }
+};
+
+const confirmKofiOpen = () => {
+  const token = user.value?.supporterToken;
+  if (token) {
+    navigator.clipboard.writeText(token).then(() => {
+      kofiCopied.value = true;
+      setTimeout(() => { kofiCopied.value = false; }, 5000);
+    }).catch(() => {});
+  }
+  showKofiModal.value = false;
+  window.open('https://ko-fi.com/beat_seeker', '_blank');
+};
 const showInstallBanner = ref(false);
 const pendingImportOpen = ref(false);
 const pendingFragmentData = ref<string | null>(null);
@@ -660,6 +685,7 @@ const handleUnifiedClose = async () => {
       :is-logged-in="isLoggedIn"
       :user="user"
       :viewing-user-id="viewingUserId"
+      :viewing-mode="viewingMode"
       :auth-loading="authLoading"
       @login="isLoginModalOpen = true"
       @logout="logout"
@@ -1007,6 +1033,35 @@ const handleUnifiedClose = async () => {
           <DifficultyTableView class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
+        <template v-else-if="activeTab === 'score-prediction'">
+          <div v-if="!user?.isSupporter" class="w-full max-w-2xl mx-auto animate-fade-in">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center shadow-sm">
+              <div class="w-20 h-20 mx-auto mb-6 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-3">{{ t('supporter.lockedTitle') }}</h2>
+              <p class="text-slate-500 dark:text-slate-400 font-medium mb-6 leading-relaxed">{{ t('supporter.lockedDesc') }}</p>
+              <button
+                @click="handleKofiClick"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {{ t('supporter.kofiButton') }}
+              </button>
+            </div>
+          </div>
+          <ScorePredictionView
+            v-else
+            class="w-full max-w-6xl mx-auto animate-fade-in"
+            :viewing-user-id="viewingUserId"
+            :viewing-mode="viewingMode"
+          />
+        </template>
+
         <template v-else>
           <!-- Hero Section (Visible only when no data) -->
           <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
@@ -1136,6 +1191,46 @@ const handleUnifiedClose = async () => {
         {{ t('app.update.reload') }}
       </button>
     </div>
+  </Teleport>
+  <!-- Ko-fi Confirmation Modal -->
+  <Teleport to="body">
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-150"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showKofiModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showKofiModal = false"></div>
+        <div class="relative bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-sm w-full p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('supporter.modalTitle') }}</h3>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{{ t('supporter.modalDesc') }}</p>
+          <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 text-center">
+            <p class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">{{ t('supporter.modalTokenLabel') }}</p>
+            <p class="text-lg font-mono font-black text-amber-700 dark:text-amber-300 select-all">{{ user?.supporterToken }}</p>
+          </div>
+          <div class="flex gap-2">
+            <button @click="showKofiModal = false"
+              class="flex-1 px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+              {{ t('supporter.modalCancel') }}
+            </button>
+            <button @click="confirmKofiOpen"
+              class="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl hover:shadow-lg hover:shadow-amber-500/20 transition-all">
+              {{ t('supporter.modalConfirm') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </Teleport>
   </div>
 </template>

@@ -1,0 +1,201 @@
+{
+  "textage": "26/_hbfesta.html?1AB00",
+  "analyzed_at": "2026-04-06T11:00:41.298286+00:00",
+  "title": "ハードベース・フェスタ",
+  "artist": "かめりあ feat. ななひら",
+  "bpm_raw": "158",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1447,
+  "events": 866,
+  "bpm_main": 158,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 158.0,
+  "weighted_eff16": 127.9,
+  "scratch_pct": 9.68,
+  "chord_pct": 46.3,
+  "single_pct": 53.7,
+  "ranuchi": 81,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 490,
+      "pct": 56.6,
+      "eff16": 158.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 317,
+      "pct": 36.6,
+      "eff16": 79.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 39.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.8,
+      "eff16": 316.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 52.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 118.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 237.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.3
+    }
+  },
+  "chord_dist": {
+    "1": 465,
+    "2": 279,
+    "3": 72,
+    "4": 42,
+    "5": 8
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 473,
+      "pct": 36.2,
+      "eff16": 158.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 452,
+      "pct": 34.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 320,
+      "pct": 24.5,
+      "eff16": 79.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.4,
+      "eff16": 39.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 316.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 52.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 118.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 237.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 22.3,
+      "eff16": 39.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 25,
+      "pct": 18.0,
+      "eff16": 79.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 23,
+      "pct": 16.5,
+      "eff16": 26.3
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 10.1,
+      "eff16": 19.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 9,
+      "pct": 6.5,
+      "eff16": 15.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 6,
+      "pct": 4.3,
+      "eff16": 158.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 3.6,
+      "eff16": 9.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 4.9
+    },
+    "624": {
+      "name": "(624)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 6.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 52.7
+    }
+  }
+}

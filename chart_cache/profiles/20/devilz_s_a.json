@@ -1,0 +1,237 @@
+{
+  "textage": "20/devilz_s.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:54.913666+00:00",
+  "title": "Devilz Staircase",
+  "artist": "OSTER project",
+  "bpm_raw": "185",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1595,
+  "events": 883,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 185.0,
+  "weighted_eff16": 159.1,
+  "scratch_pct": 3.95,
+  "chord_pct": 51.3,
+  "single_pct": 48.7,
+  "ranuchi": 67,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 425,
+      "pct": 48.2,
+      "eff16": 185.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 256,
+      "pct": 29.0,
+      "eff16": 138.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 112,
+      "pct": 12.7,
+      "eff16": 92.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 36,
+      "pct": 4.1,
+      "eff16": 277.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.9,
+      "eff16": 46.2
+    },
+    "21": {
+      "name": "(21)",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 211.4
+    },
+    "36": {
+      "name": "(36)",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 123.3
+    },
+    "22": {
+      "name": "(22)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 201.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 69.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 15.4
+    }
+  },
+  "chord_dist": {
+    "1": 430,
+    "2": 302,
+    "3": 80,
+    "4": 40,
+    "5": 26,
+    "6": 4,
+    "7": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 649,
+      "pct": 42.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 425,
+      "pct": 27.8,
+      "eff16": 185.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 256,
+      "pct": 16.7,
+      "eff16": 138.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 112,
+      "pct": 7.3,
+      "eff16": 92.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 36,
+      "pct": 2.4,
+      "eff16": 277.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.1,
+      "eff16": 46.2
+    },
+    "21": {
+      "name": "(21)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 211.4
+    },
+    "36": {
+      "name": "(36)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 123.3
+    },
+    "22": {
+      "name": "(22)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 201.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 69.4
+    }
+  },
+  "scr_interval_dist": {
+    "21": {
+      "name": "(21)",
+      "count": 8,
+      "pct": 12.9,
+      "eff16": 211.4
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 12.9,
+      "eff16": 138.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 30.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 15.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 46.2
+    },
+    "22": {
+      "name": "(22)",
+      "count": 4,
+      "pct": 6.5,
+      "eff16": 201.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 6.5,
+      "eff16": 69.4
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 6.5,
+      "eff16": 23.1
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 92.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 11.6
+    }
+  },
+  "cn_notes": 4,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 66.7,
+      "eff16": 11.6
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 33.3,
+      "eff16": 15.4
+    }
+  }
+}

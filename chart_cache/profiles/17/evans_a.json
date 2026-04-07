@@ -1,0 +1,205 @@
+{
+  "textage": "17/evans.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:24.454850+00:00",
+  "title": "Evans",
+  "artist": "DJ YOSHITAKA",
+  "bpm_raw": "185",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1306,
+  "events": 781,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 185.0,
+  "weighted_eff16": 146.6,
+  "scratch_pct": 10.41,
+  "chord_pct": 44.81,
+  "single_pct": 55.19,
+  "ranuchi": 69,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 468,
+      "pct": 60.0,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 294,
+      "pct": 37.7,
+      "eff16": 92.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.9,
+      "eff16": 46.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 10.9
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 10.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 61.7
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.4
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.4
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.5
+    }
+  },
+  "chord_dist": {
+    "1": 431,
+    "2": 219,
+    "3": 91,
+    "4": 36,
+    "5": 4
+  },
+  "tags": [
+    "scratch_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 444,
+      "pct": 38.0,
+      "eff16": 185.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 405,
+      "pct": 34.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 304,
+      "pct": 26.0,
+      "eff16": 92.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 46.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 10.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 10.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 20.7,
+      "eff16": 46.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 27,
+      "pct": 20.0,
+      "eff16": 92.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 22,
+      "pct": 16.3,
+      "eff16": 61.7
+    },
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 12.6,
+      "eff16": 23.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 7,
+      "pct": 5.2,
+      "eff16": 15.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 3.7,
+      "eff16": 30.8
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 4.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 11.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 18.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 5.8
+    }
+  }
+}

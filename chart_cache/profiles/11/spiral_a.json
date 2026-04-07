@@ -1,0 +1,204 @@
+{
+  "textage": "11/spiral.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:40.962094+00:00",
+  "title": "spiral galaxy",
+  "artist": "D.J.SETUP",
+  "bpm_raw": "154",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1253,
+  "events": 978,
+  "bpm_main": 154,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 154.0,
+  "weighted_eff16": 138.7,
+  "scratch_pct": 3.43,
+  "chord_pct": 22.09,
+  "single_pct": 77.91,
+  "ranuchi": 63,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 793,
+      "pct": 81.2,
+      "eff16": 154.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 165,
+      "pct": 16.9,
+      "eff16": 77.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 38.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 51.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.6
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.6
+    }
+  },
+  "chord_dist": {
+    "1": 762,
+    "2": 162,
+    "3": 49,
+    "4": 5
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 791,
+      "pct": 65.4,
+      "eff16": 154.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 234,
+      "pct": 19.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 165,
+      "pct": 13.6,
+      "eff16": 77.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 38.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 51.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.6
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.8
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.6
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 14.3,
+      "eff16": 9.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 14.3,
+      "eff16": 77.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 14.3,
+      "eff16": 2.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 11.9,
+      "eff16": 4.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 9.5,
+      "eff16": 38.5
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 1.6
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 19.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 6.4
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 11.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 25.7
+    }
+  }
+}

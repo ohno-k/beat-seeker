@@ -1,0 +1,217 @@
+{
+  "textage": "22/_benibtn.html?1AC00",
+  "analyzed_at": "2026-04-06T11:02:11.213376+00:00",
+  "title": "紅牡丹",
+  "artist": "DJ NAGAI feat. a☆ru",
+  "bpm_raw": "181",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1413,
+  "events": 749,
+  "bpm_main": 181,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 181.0,
+  "weighted_eff16": 136.5,
+  "scratch_pct": 9.13,
+  "chord_pct": 54.47,
+  "single_pct": 45.53,
+  "ranuchi": 71,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 404,
+      "pct": 54.0,
+      "eff16": 181.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 298,
+      "pct": 39.8,
+      "eff16": 90.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 2.9,
+      "eff16": 45.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 1.6,
+      "eff16": 60.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 30.2
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 22.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.1
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.1
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 36.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    }
+  },
+  "chord_dist": {
+    "1": 341,
+    "2": 213,
+    "3": 138,
+    "4": 53,
+    "5": 4
+  },
+  "tags": [
+    "scratch_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 539,
+      "pct": 42.0,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 403,
+      "pct": 31.4,
+      "eff16": 181.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 295,
+      "pct": 23.0,
+      "eff16": 90.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.5,
+      "eff16": 45.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 60.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 30.2
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 22.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.1
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.1
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 36.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 66,
+      "pct": 51.6,
+      "eff16": 45.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 15,
+      "pct": 11.7,
+      "eff16": 90.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 6.2,
+      "eff16": 30.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 8,
+      "pct": 6.2,
+      "eff16": 15.1
+    },
+    "960": {
+      "name": "(960)",
+      "count": 5,
+      "pct": 3.9,
+      "eff16": 4.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 3.9,
+      "eff16": 12.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 60.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 5.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 1.6,
+      "eff16": 18.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 1.6,
+      "eff16": 10.1
+    }
+  }
+}

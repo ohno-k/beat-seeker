@@ -1,0 +1,278 @@
+{
+  "textage": "25/dthzigoq.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:35.330382+00:00",
+  "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～",
+  "artist": "L.E.D.ALiCE(DJ NAGAI Vs. BEMANI Sound Team \"L.E.D.-G\")",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1920,
+  "events": 1029,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 200.0,
+  "weighted_eff16": 172.1,
+  "scratch_pct": 7.08,
+  "chord_pct": 52.58,
+  "single_pct": 47.42,
+  "ranuchi": 98,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 736,
+      "pct": 71.6,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 236,
+      "pct": 23.0,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 2.3,
+      "eff16": 50.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 400.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 66.7
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 171.4
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 11.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.1
+    }
+  },
+  "chord_dist": {
+    "1": 488,
+    "2": 295,
+    "3": 173,
+    "4": 50,
+    "5": 15,
+    "6": 8
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 771,
+      "pct": 43.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 732,
+      "pct": 41.1,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 231,
+      "pct": 13.0,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 0.8,
+      "eff16": 50.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 66.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.3,
+      "eff16": 400.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 171.4
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 11.1
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 11.8
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 57,
+      "pct": 42.2,
+      "eff16": 100.0
+    },
+    "192": {
+      "name": "half",
+      "count": 26,
+      "pct": 19.3,
+      "eff16": 25.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 17.0,
+      "eff16": 50.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 3.0,
+      "eff16": 3.1
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 6.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 33.3
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 3.6
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 4.2
+    },
+    "0": {
+      "name": "(0)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 66.7
+    }
+  },
+  "cn_notes": 11,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 2.3,
+  "cn_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 20.0,
+      "eff16": 6.2
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 25.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 8.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 33.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 50.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 16.7
+    },
+    "6048": {
+      "name": "(6048)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 0.8
+    },
+    "7824": {
+      "name": "(7824)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 0.6
+    }
+  }
+}

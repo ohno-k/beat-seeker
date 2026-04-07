@@ -1,0 +1,219 @@
+{
+  "textage": "27/_badends.html?1AB00",
+  "analyzed_at": "2026-04-06T11:00:42.639027+00:00",
+  "title": "バッドエンド・シンドローム",
+  "artist": "アリスシャッハと魔法の楽団",
+  "bpm_raw": "126",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1497,
+  "events": 799,
+  "bpm_main": 126,
+  "is_soflan": false,
+  "dominant_interval": 32,
+  "dominant_eff16": 94.5,
+  "weighted_eff16": 120.9,
+  "scratch_pct": 2.0,
+  "chord_pct": 58.45,
+  "single_pct": 41.55,
+  "ranuchi": 33,
+  "interval_dist": {
+    "32": {
+      "name": "12th(triplet)",
+      "count": 534,
+      "pct": 66.9,
+      "eff16": 94.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 170,
+      "pct": 21.3,
+      "eff16": 189.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 3.9,
+      "eff16": 31.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 23,
+      "pct": 2.9,
+      "eff16": 47.2
+    },
+    "6": {
+      "name": "64th",
+      "count": 10,
+      "pct": 1.3,
+      "eff16": 504.0
+    },
+    "26": {
+      "name": "(26)",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 116.3
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 108.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 756.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 252.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 151.2
+    }
+  },
+  "chord_dist": {
+    "1": 332,
+    "2": 292,
+    "3": 126,
+    "4": 42,
+    "5": 7
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 669,
+      "pct": 45.6,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 534,
+      "pct": 36.4,
+      "eff16": 94.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 170,
+      "pct": 11.6,
+      "eff16": 189.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 2.1,
+      "eff16": 31.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 23,
+      "pct": 1.6,
+      "eff16": 47.2
+    },
+    "6": {
+      "name": "64th",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 504.0
+    },
+    "26": {
+      "name": "(26)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 116.3
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 108.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 756.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 252.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 24.1,
+      "eff16": 31.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 20.7,
+      "eff16": 7.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 17.2,
+      "eff16": 3.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 10.5
+    },
+    "864": {
+      "name": "(864)",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 3.5
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 4.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 2.0
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 1.3
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 2.6
+    },
+    "360": {
+      "name": "(360)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 8.4
+    }
+  }
+}

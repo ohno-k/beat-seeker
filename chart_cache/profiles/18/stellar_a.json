@@ -1,0 +1,211 @@
+{
+  "textage": "18/stellar.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:16.253531+00:00",
+  "title": "STELLAR WIND",
+  "artist": "L.E.D.",
+  "bpm_raw": "162",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1289,
+  "events": 861,
+  "bpm_main": 162,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 162.0,
+  "weighted_eff16": 149.3,
+  "scratch_pct": 5.59,
+  "chord_pct": 39.02,
+  "single_pct": 60.98,
+  "ranuchi": 54,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 558,
+      "pct": 64.9,
+      "eff16": 162.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 179,
+      "pct": 20.8,
+      "eff16": 81.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 45,
+      "pct": 5.2,
+      "eff16": 54.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 40,
+      "pct": 4.7,
+      "eff16": 243.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 32,
+      "pct": 3.7,
+      "eff16": 324.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 486.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.5
+    },
+    "784": {
+      "name": "(784)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    }
+  },
+  "chord_dist": {
+    "1": 525,
+    "2": 258,
+    "3": 64,
+    "4": 14
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 559,
+      "pct": 46.0,
+      "eff16": 162.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 357,
+      "pct": 29.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 179,
+      "pct": 14.7,
+      "eff16": 81.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 45,
+      "pct": 3.7,
+      "eff16": 54.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 40,
+      "pct": 3.3,
+      "eff16": 243.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 30,
+      "pct": 2.5,
+      "eff16": 324.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 486.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.5
+    },
+    "784": {
+      "name": "(784)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 19.7,
+      "eff16": 54.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 16.9,
+      "eff16": 40.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 15.5,
+      "eff16": 81.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 9.9,
+      "eff16": 20.2
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 5,
+      "pct": 7.0,
+      "eff16": 2.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 5.6,
+      "eff16": 10.1
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 4.2,
+      "eff16": 3.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 5.1
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 11.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 27.0
+    }
+  }
+}

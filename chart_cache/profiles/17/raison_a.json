@@ -1,0 +1,218 @@
+{
+  "textage": "17/raison.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:38.677662+00:00",
+  "title": "Raison d'etre～交差する宿命～",
+  "artist": "Zektbach",
+  "bpm_raw": "155-175",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1122,
+  "events": 886,
+  "bpm_main": 175,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 175.0,
+  "weighted_eff16": 152.0,
+  "scratch_pct": 7.93,
+  "chord_pct": 19.19,
+  "single_pct": 80.81,
+  "ranuchi": 30,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 682,
+      "pct": 77.1,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 151,
+      "pct": 17.1,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 2.9,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 58.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 10.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 29.2
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.9
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.7
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.5
+    }
+  },
+  "chord_dist": {
+    "1": 716,
+    "2": 112,
+    "3": 52,
+    "4": 4,
+    "5": 2
+  },
+  "tags": [
+    "single_heavy",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 679,
+      "pct": 65.8,
+      "eff16": 175.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 163,
+      "pct": 15.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 145,
+      "pct": 14.1,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.3,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 1.2,
+      "eff16": 58.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 29.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 10.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.9
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.9
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 45.5,
+      "eff16": 43.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 13.6,
+      "eff16": 10.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 8,
+      "pct": 9.1,
+      "eff16": 5.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 5.7,
+      "eff16": 87.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 4.5,
+      "eff16": 12.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 4.5,
+      "eff16": 14.6
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 3.4,
+      "eff16": 21.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 2.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 29.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 1.1,
+      "eff16": 7.3
+    }
+  }
+}

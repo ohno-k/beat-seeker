@@ -1,0 +1,272 @@
+{
+  "textage": "21/alba.html?1AB00",
+  "analyzed_at": "2026-04-06T10:48:33.914123+00:00",
+  "title": "ALBA -黎明-",
+  "artist": "SOUND HOLIC feat. Nana Takahashi",
+  "bpm_raw": "165",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1548,
+  "events": 864,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 130.9,
+  "scratch_pct": 5.43,
+  "chord_pct": 47.92,
+  "single_pct": 52.08,
+  "ranuchi": 79,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 478,
+      "pct": 55.4,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 322,
+      "pct": 37.3,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 41.2
+    },
+    "55": {
+      "name": "(55)",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 72.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 247.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 330.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 123.8
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 20.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 55.0
+    },
+    "54": {
+      "name": "(54)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 73.3
+    }
+  },
+  "chord_dist": {
+    "1": 450,
+    "2": 246,
+    "3": 90,
+    "4": 55,
+    "5": 22,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 600,
+      "pct": 41.0,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 478,
+      "pct": 32.7,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 322,
+      "pct": 22.0,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 41.2
+    },
+    "55": {
+      "name": "(55)",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 72.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 247.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 330.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 123.8
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 20.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 55.0
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 25,
+      "pct": 30.1,
+      "eff16": 20.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 26.5,
+      "eff16": 41.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 8.4,
+      "eff16": 10.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 3.6,
+      "eff16": 82.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 2.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 27.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 11.8
+    },
+    "110": {
+      "name": "(110)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 36.0
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 2.4
+    }
+  },
+  "cn_notes": 17,
+  "cn_scratch_pct": 5.56,
+  "cn_kbd_overlap_pct": 7.92,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 31.2,
+      "eff16": 10.3
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 25.0,
+      "eff16": 20.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 12.5,
+      "eff16": 41.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 3.4
+    },
+    "18048": {
+      "name": "(18048)",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 0.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 6.9
+    },
+    "8040": {
+      "name": "(8040)",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 0.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 165.0
+    }
+  }
+}

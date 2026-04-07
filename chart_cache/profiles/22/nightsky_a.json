@@ -1,0 +1,265 @@
+{
+  "textage": "22/nightsky.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:38.374799+00:00",
+  "title": "Night sky",
+  "artist": "USAO",
+  "bpm_raw": "192",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1390,
+  "events": 943,
+  "bpm_main": 192,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 192.0,
+  "weighted_eff16": 144.7,
+  "scratch_pct": 6.55,
+  "chord_pct": 34.99,
+  "single_pct": 65.01,
+  "ranuchi": 27,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 486,
+      "pct": 51.6,
+      "eff16": 192.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 411,
+      "pct": 43.6,
+      "eff16": 96.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 2.8,
+      "eff16": 48.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 144.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 24.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 32.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 288.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.0
+    }
+  },
+  "chord_dist": {
+    "1": 613,
+    "2": 232,
+    "3": 80,
+    "4": 17,
+    "5": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 479,
+      "pct": 36.9,
+      "eff16": 192.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 386,
+      "pct": 29.7,
+      "eff16": 96.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 378,
+      "pct": 29.1,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 2.3,
+      "eff16": 48.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 144.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 38.4
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 24.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 64.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 27.4
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 28.9,
+      "eff16": 48.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 26,
+      "pct": 28.9,
+      "eff16": 96.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 8.9,
+      "eff16": 24.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 6.7,
+      "eff16": 32.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 5.6,
+      "eff16": 3.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 12.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 6.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 16.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 13.7
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 3.2
+    }
+  },
+  "cn_notes": 28,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 7.31,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 33.3,
+      "eff16": 24.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 29.6,
+      "eff16": 12.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 11.1,
+      "eff16": 48.0
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 11.1,
+      "eff16": 3.2
+    },
+    "6912": {
+      "name": "(6912)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 0.7
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 27.4
+    },
+    "24": {
+      "name": "16th",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 192.0
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 1.2
+    }
+  }
+}

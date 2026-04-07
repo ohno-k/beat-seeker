@@ -1,0 +1,198 @@
+{
+  "textage": "10/lucy.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:02.677954+00:00",
+  "title": "Lucy",
+  "artist": "ELE BLOCK",
+  "bpm_raw": "156",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1045,
+  "events": 636,
+  "bpm_main": 156,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 78.0,
+  "weighted_eff16": 105.8,
+  "scratch_pct": 4.5,
+  "chord_pct": 48.43,
+  "single_pct": 51.57,
+  "ranuchi": 56,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 380,
+      "pct": 59.8,
+      "eff16": 78.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 232,
+      "pct": 36.5,
+      "eff16": 156.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 2.4,
+      "eff16": 39.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 234.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 8.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 15.6
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 4.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 52.0
+    }
+  },
+  "chord_dist": {
+    "1": 328,
+    "2": 223,
+    "3": 72,
+    "4": 10,
+    "5": 3
+  },
+  "tags": [
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 380,
+      "pct": 38.1,
+      "eff16": 78.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 362,
+      "pct": 36.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 232,
+      "pct": 23.3,
+      "eff16": 156.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 1.5,
+      "eff16": 39.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 234.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.6
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 52.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 15.2,
+      "eff16": 39.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 15.2,
+      "eff16": 78.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 10.9,
+      "eff16": 4.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 8.7,
+      "eff16": 13.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 8.7,
+      "eff16": 26.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 6.5,
+      "eff16": 9.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 6.5,
+      "eff16": 11.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 2.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 52.0
+    },
+    "1872": {
+      "name": "(1872)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 2.0
+    }
+  }
+}

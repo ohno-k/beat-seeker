@@ -47,3 +47,7 @@ vapid:
   private:
     key: w9dtbWdRCwDU0C3k2MCRkjUzr-mozK2qtFchFU56SYk
   subject: mailto:admin@example.com
+
+kofi:
+  verification:
+    token: ${KOFI_VERIFICATION_TOKEN:}

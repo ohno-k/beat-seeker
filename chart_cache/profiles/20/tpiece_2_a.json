@@ -1,0 +1,200 @@
+{
+  "textage": "20/tpiece_2.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:49.527860+00:00",
+  "title": "Timepiece phase II",
+  "artist": "佐々木博史",
+  "bpm_raw": "287",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1621,
+  "events": 821,
+  "bpm_main": 287,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 143.5,
+  "weighted_eff16": 144.3,
+  "scratch_pct": 4.57,
+  "chord_pct": 67.24,
+  "single_pct": 32.76,
+  "ranuchi": 84,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 709,
+      "pct": 86.5,
+      "eff16": 143.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 50,
+      "pct": 6.1,
+      "eff16": 71.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 32,
+      "pct": 3.9,
+      "eff16": 215.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 1.6,
+      "eff16": 430.5
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 35.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 9.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 107.6
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.0
+    }
+  },
+  "chord_dist": {
+    "1": 269,
+    "2": 370,
+    "3": 130,
+    "4": 38,
+    "5": 14
+  },
+  "tags": [
+    "chord_heavy",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 726,
+      "pct": 47.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 709,
+      "pct": 45.9,
+      "eff16": 143.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 50,
+      "pct": 3.2,
+      "eff16": 71.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 32,
+      "pct": 2.1,
+      "eff16": 215.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 0.8,
+      "eff16": 430.5
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 0.6,
+      "eff16": 35.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 9.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 107.6
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.0
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 28,
+      "pct": 38.4,
+      "eff16": 17.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 16.4,
+      "eff16": 71.8
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 13.7,
+      "eff16": 35.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 9,
+      "pct": 12.3,
+      "eff16": 9.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 8,
+      "pct": 11.0,
+      "eff16": 12.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 4.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 2.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 6.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 14.3
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 4.8
+    }
+  }
+}

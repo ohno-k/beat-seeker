@@ -1,0 +1,252 @@
+{
+  "textage": "29/_kaibutu.html?1XB00",
+  "analyzed_at": "2026-04-06T11:01:30.351004+00:00",
+  "title": "怪物",
+  "artist": "Remixed by Nhato feat. ricono",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1604,
+  "events": 716,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 85.0,
+  "weighted_eff16": 100.8,
+  "scratch_pct": 4.3,
+  "chord_pct": 74.58,
+  "single_pct": 25.42,
+  "ranuchi": 37,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 546,
+      "pct": 76.4,
+      "eff16": 85.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 140,
+      "pct": 19.6,
+      "eff16": 170.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 2.5,
+      "eff16": 42.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 56.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 28.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 255.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.2
+    }
+  },
+  "chord_dist": {
+    "1": 182,
+    "2": 266,
+    "3": 184,
+    "4": 82,
+    "5": 2
+  },
+  "tags": [
+    "chord_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 825,
+      "pct": 53.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 539,
+      "pct": 35.1,
+      "eff16": 85.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 136,
+      "pct": 8.9,
+      "eff16": 170.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.2,
+      "eff16": 42.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 56.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 28.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 255.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.2
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 34,
+      "pct": 50.0,
+      "eff16": 21.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 11.8,
+      "eff16": 10.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 10.3,
+      "eff16": 85.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 10.3,
+      "eff16": 28.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 2.9,
+      "eff16": 42.5
+    },
+    "3552": {
+      "name": "(3552)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 1.1
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 5.7
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 5.0
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 3.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 14.2
+    }
+  },
+  "cn_notes": 21,
+  "cn_scratch_pct": 19.05,
+  "cn_kbd_overlap_pct": 2.48,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 20.0,
+      "eff16": 42.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 10.0,
+      "eff16": 5.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 10.0,
+      "eff16": 56.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 10.0,
+      "eff16": 34.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 10.0,
+      "eff16": 21.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 2.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 7.1
+    },
+    "960": {
+      "name": "(960)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 4.2
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 2.8
+    },
+    "11616": {
+      "name": "(11616)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 0.4
+    }
+  }
+}

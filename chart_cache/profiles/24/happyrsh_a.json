@@ -1,0 +1,221 @@
+{
+  "textage": "24/happyrsh.html?1AB00",
+  "analyzed_at": "2026-04-06T10:52:42.664698+00:00",
+  "title": "HAPPY★RUSH",
+  "artist": "P*Light",
+  "bpm_raw": "185",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1436,
+  "events": 873,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 185.0,
+  "weighted_eff16": 144.6,
+  "scratch_pct": 6.55,
+  "chord_pct": 47.65,
+  "single_pct": 52.35,
+  "ranuchi": 32,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 514,
+      "pct": 58.9,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 251,
+      "pct": 28.8,
+      "eff16": 92.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 52,
+      "pct": 6.0,
+      "eff16": 46.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 1.7,
+      "eff16": 30.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 14,
+      "pct": 1.6,
+      "eff16": 138.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 61.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 277.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 23.1
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 18.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.8
+    }
+  },
+  "chord_dist": {
+    "1": 457,
+    "2": 288,
+    "3": 111,
+    "4": 15,
+    "5": 2
+  },
+  "tags": [
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 508,
+      "pct": 37.9,
+      "eff16": 185.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 478,
+      "pct": 35.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 242,
+      "pct": 18.0,
+      "eff16": 92.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 51,
+      "pct": 3.8,
+      "eff16": 46.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 30.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 138.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 61.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 277.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 23.1
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 37.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 45,
+      "pct": 48.4,
+      "eff16": 46.2
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 9.7,
+      "eff16": 23.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 8.6,
+      "eff16": 11.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 5.4,
+      "eff16": 92.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 5.8
+    },
+    "864": {
+      "name": "(864)",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 5.1
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 9.2
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 1.7
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 3.6
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 15.4
+    }
+  },
+  "cn_notes": 1,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {}
+}

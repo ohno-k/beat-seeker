@@ -1,0 +1,278 @@
+{
+  "textage": "29/_oortcld.html?1AB00",
+  "analyzed_at": "2026-04-06T11:00:23.174664+00:00",
+  "title": "オールトの雲",
+  "artist": "OSTER Project",
+  "bpm_raw": "215",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1285,
+  "events": 816,
+  "bpm_main": 215,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 107.5,
+  "weighted_eff16": 128.4,
+  "scratch_pct": 3.42,
+  "chord_pct": 37.62,
+  "single_pct": 62.38,
+  "ranuchi": 48,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 520,
+      "pct": 63.8,
+      "eff16": 107.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 191,
+      "pct": 23.4,
+      "eff16": 215.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 71,
+      "pct": 8.7,
+      "eff16": 53.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 17,
+      "pct": 2.1,
+      "eff16": 161.2
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 26.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 35.8
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 143.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 71.7
+    },
+    "780": {
+      "name": "(780)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.6
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 430.0
+    }
+  },
+  "chord_dist": {
+    "1": 509,
+    "2": 184,
+    "3": 92,
+    "4": 23,
+    "5": 8
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 520,
+      "pct": 41.9,
+      "eff16": 107.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 427,
+      "pct": 34.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 191,
+      "pct": 15.4,
+      "eff16": 215.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 71,
+      "pct": 5.7,
+      "eff16": 53.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 17,
+      "pct": 1.4,
+      "eff16": 161.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 35.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 26.9
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 143.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 71.7
+    },
+    "780": {
+      "name": "(780)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.6
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 30.2,
+      "eff16": 53.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 25.6,
+      "eff16": 107.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 4.7,
+      "eff16": 1.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 4.7,
+      "eff16": 26.9
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 4.7,
+      "eff16": 2.2
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 4.7,
+      "eff16": 1.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 4.7,
+      "eff16": 3.4
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 4.7,
+      "eff16": 4.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 2.3,
+      "eff16": 13.4
+    },
+    "9792": {
+      "name": "(9792)",
+      "count": 1,
+      "pct": 2.3,
+      "eff16": 0.5
+    }
+  },
+  "cn_notes": 16,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 4.11,
+  "cn_interval_dist": {
+    "15": {
+      "name": "~24th",
+      "count": 4,
+      "pct": 26.7,
+      "eff16": 344.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 3,
+      "pct": 20.0,
+      "eff16": 286.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 21.5
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 9.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 6.7
+    },
+    "5904": {
+      "name": "(5904)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 0.9
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 15.4
+    },
+    "174": {
+      "name": "(174)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 29.7
+    },
+    "6288": {
+      "name": "(6288)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 0.8
+    }
+  }
+}

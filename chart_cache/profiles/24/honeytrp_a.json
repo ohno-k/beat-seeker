@@ -1,0 +1,219 @@
+{
+  "textage": "24/honeytrp.html?1AB00",
+  "analyzed_at": "2026-04-06T10:52:56.675313+00:00",
+  "title": "Honey Trap",
+  "artist": "Expander",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1264,
+  "events": 798,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 129.2,
+  "scratch_pct": 10.13,
+  "chord_pct": 44.36,
+  "single_pct": 55.64,
+  "ranuchi": 47,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 410,
+      "pct": 51.4,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 247,
+      "pct": 31.0,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 54,
+      "pct": 6.8,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 2.6,
+      "eff16": 40.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 15,
+      "pct": 1.9,
+      "eff16": 120.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.5,
+      "eff16": 320.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 240.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 32.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 480.0
+    },
+    "52": {
+      "name": "(52)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 73.8
+    }
+  },
+  "chord_dist": {
+    "1": 444,
+    "2": 262,
+    "3": 74,
+    "4": 16,
+    "5": 2
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 382,
+      "pct": 33.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 378,
+      "pct": 33.3,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 234,
+      "pct": 20.6,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 64,
+      "pct": 5.6,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 2.2,
+      "eff16": 40.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 120.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 11,
+      "pct": 1.0,
+      "eff16": 320.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 32.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 240.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 480.0
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 24,
+      "pct": 18.9,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 16.5,
+      "eff16": 40.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 19,
+      "pct": 15.0,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 5.5,
+      "eff16": 53.3
+    },
+    "0": {
+      "name": "(0)",
+      "count": 6,
+      "pct": 4.7,
+      "eff16": 0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 13.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 5.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 160.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 2.4,
+      "eff16": 8.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 3,
+      "pct": 2.4,
+      "eff16": 22.9
+    }
+  }
+}

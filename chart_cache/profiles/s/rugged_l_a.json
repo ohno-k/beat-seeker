@@ -1,0 +1,183 @@
+{
+  "textage": "s/rugged_l.html?1AB00",
+  "analyzed_at": "2026-04-06T06:38:21.943433+00:00",
+  "title": "RUGGED ASH",
+  "artist": "SYMPHONIC DEFOGGERS",
+  "bpm_raw": "168",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 587,
+  "events": 432,
+  "bpm_main": 168,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 84.0,
+  "weighted_eff16": 147.9,
+  "scratch_pct": 2.04,
+  "chord_pct": 23.61,
+  "single_pct": 76.39,
+  "ranuchi": 11,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 184,
+      "pct": 42.7,
+      "eff16": 84.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 5.8,
+      "eff16": 42.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 22,
+      "pct": 5.1,
+      "eff16": 252.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 21,
+      "pct": 4.9,
+      "eff16": 126.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 20,
+      "pct": 4.6,
+      "eff16": 504.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 20,
+      "pct": 4.6,
+      "eff16": 168.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 16,
+      "pct": 3.7,
+      "eff16": 112.0
+    },
+    "44": {
+      "name": "(44)",
+      "count": 16,
+      "pct": 3.7,
+      "eff16": 91.6
+    },
+    "40": {
+      "name": "(40)",
+      "count": 15,
+      "pct": 3.5,
+      "eff16": 100.8
+    },
+    "80": {
+      "name": "(80)",
+      "count": 13,
+      "pct": 3.0,
+      "eff16": 50.4
+    }
+  },
+  "chord_dist": {
+    "1": 330,
+    "2": 60,
+    "3": 31,
+    "4": 11
+  },
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 173,
+      "pct": 30.1,
+      "eff16": 84.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 155,
+      "pct": 27.0,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 4.2,
+      "eff16": 42.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 22,
+      "pct": 3.8,
+      "eff16": 252.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 21,
+      "pct": 3.7,
+      "eff16": 126.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 20,
+      "pct": 3.5,
+      "eff16": 504.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 20,
+      "pct": 3.5,
+      "eff16": 168.0
+    },
+    "44": {
+      "name": "(44)",
+      "count": 16,
+      "pct": 2.8,
+      "eff16": 91.6
+    },
+    "36": {
+      "name": "(36)",
+      "count": 15,
+      "pct": 2.6,
+      "eff16": 112.0
+    },
+    "80": {
+      "name": "(80)",
+      "count": 13,
+      "pct": 2.3,
+      "eff16": 50.4
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 54.5,
+      "eff16": 84.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 18.2,
+      "eff16": 5.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 18.2,
+      "eff16": 16.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 8.4
+    }
+  }
+}

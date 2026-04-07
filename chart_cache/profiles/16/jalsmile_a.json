@@ -1,0 +1,217 @@
+{
+  "textage": "16/jalsmile.html?1AB00",
+  "analyzed_at": "2026-04-06T10:53:23.183424+00:00",
+  "title": "Just a Little Smile",
+  "artist": "Sota Fujimori",
+  "bpm_raw": "136",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1265,
+  "events": 794,
+  "bpm_main": 136,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 136.0,
+  "weighted_eff16": 121.5,
+  "scratch_pct": 20.24,
+  "chord_pct": 45.97,
+  "single_pct": 54.03,
+  "ranuchi": 68,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 588,
+      "pct": 74.1,
+      "eff16": 136.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 161,
+      "pct": 20.3,
+      "eff16": 68.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 1.6,
+      "eff16": 45.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 1.3,
+      "eff16": 272.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 34.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 204.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 408.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 9.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 22.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.6
+    }
+  },
+  "chord_dist": {
+    "1": 429,
+    "2": 266,
+    "3": 92,
+    "4": 7
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 424,
+      "pct": 42.1,
+      "eff16": 136.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 319,
+      "pct": 31.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 187,
+      "pct": 18.6,
+      "eff16": 68.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 38,
+      "pct": 3.8,
+      "eff16": 45.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.8,
+      "eff16": 34.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 272.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 204.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 408.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 22.7
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 119,
+      "pct": 46.7,
+      "eff16": 136.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 78,
+      "pct": 30.6,
+      "eff16": 68.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 28,
+      "pct": 11.0,
+      "eff16": 45.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 6.7,
+      "eff16": 34.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 1.6,
+      "eff16": 13.6
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 0.8,
+      "eff16": 1.2
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 2.3
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 1.1
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 9.7
+    },
+    "1776": {
+      "name": "(1776)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 1.8
+    }
+  }
+}

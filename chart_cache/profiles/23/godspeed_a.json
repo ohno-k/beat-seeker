@@ -1,0 +1,271 @@
+{
+  "textage": "23/godspeed.html?1AC00",
+  "analyzed_at": "2026-04-06T10:52:37.330636+00:00",
+  "title": "Godspeed",
+  "artist": "dj TAKA xxx 猫叉Master xxx L.E.D.",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1551,
+  "events": 879,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 158.4,
+  "scratch_pct": 3.16,
+  "chord_pct": 53.01,
+  "single_pct": 46.99,
+  "ranuchi": 72,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 446,
+      "pct": 50.8,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 267,
+      "pct": 30.4,
+      "eff16": 82.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 102,
+      "pct": 11.6,
+      "eff16": 247.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 26,
+      "pct": 3.0,
+      "eff16": 330.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 495.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 41.2
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 20.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 55.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 27.5
+    }
+  },
+  "chord_dist": {
+    "1": 413,
+    "2": 318,
+    "3": 109,
+    "4": 21,
+    "5": 17,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 625,
+      "pct": 41.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 446,
+      "pct": 29.7,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 266,
+      "pct": 17.7,
+      "eff16": 82.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 102,
+      "pct": 6.8,
+      "eff16": 247.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 26,
+      "pct": 1.7,
+      "eff16": 330.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 18,
+      "pct": 1.2,
+      "eff16": 495.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 20.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 55.0
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 14.6,
+      "eff16": 2.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 14.6,
+      "eff16": 41.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 4,
+      "pct": 8.3,
+      "eff16": 3.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 8.3,
+      "eff16": 10.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 8.3,
+      "eff16": 16.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 8.3,
+      "eff16": 55.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 82.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 5.2
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 20.6
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 8.2
+    }
+  },
+  "cn_notes": 47,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 13.65,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 15.2,
+      "eff16": 41.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 7,
+      "pct": 15.2,
+      "eff16": 16.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 13.0,
+      "eff16": 82.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 10.9,
+      "eff16": 10.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 10.9,
+      "eff16": 27.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 8.7,
+      "eff16": 5.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 6.5,
+      "eff16": 11.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 6.9
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 20.6
+    },
+    "1008": {
+      "name": "(1008)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 3.9
+    }
+  }
+}

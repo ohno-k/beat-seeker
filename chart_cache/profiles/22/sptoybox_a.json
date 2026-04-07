@@ -1,0 +1,218 @@
+{
+  "textage": "22/sptoybox.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:54.375130+00:00",
+  "title": "SpaceLand☆TOYBOX",
+  "artist": "OSTER project",
+  "bpm_raw": "172",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1470,
+  "events": 873,
+  "bpm_main": 172,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 172.0,
+  "weighted_eff16": 149.5,
+  "scratch_pct": 3.2,
+  "chord_pct": 49.14,
+  "single_pct": 50.86,
+  "ranuchi": 109,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 544,
+      "pct": 62.4,
+      "eff16": 172.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 245,
+      "pct": 28.1,
+      "eff16": 86.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 40,
+      "pct": 4.6,
+      "eff16": 129.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 27,
+      "pct": 3.1,
+      "eff16": 258.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 43.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 516.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 344.0
+    },
+    "10": {
+      "name": "(10)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 412.8
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 24.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 57.3
+    }
+  },
+  "chord_dist": {
+    "1": 444,
+    "2": 289,
+    "3": 115,
+    "4": 22,
+    "5": 3
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 553,
+      "pct": 38.9,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 540,
+      "pct": 38.0,
+      "eff16": 172.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 245,
+      "pct": 17.2,
+      "eff16": 86.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 40,
+      "pct": 2.8,
+      "eff16": 129.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 27,
+      "pct": 1.9,
+      "eff16": 258.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 43.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 516.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 344.0
+    },
+    "10": {
+      "name": "(10)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 412.8
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 24.6
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 15.2,
+      "eff16": 43.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 10.9,
+      "eff16": 21.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 10.9,
+      "eff16": 5.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 10.9,
+      "eff16": 14.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 8.7,
+      "eff16": 17.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 6.5,
+      "eff16": 12.3
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 6.5,
+      "eff16": 6.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 6.5,
+      "eff16": 2.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 10.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 8.6
+    }
+  }
+}

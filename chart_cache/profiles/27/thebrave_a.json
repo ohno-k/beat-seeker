@@ -1,0 +1,241 @@
+{
+  "textage": "27/thebrave.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:16.689899+00:00",
+  "title": "THE BRAVE MUST DIE",
+  "artist": "BEMANI Sound Team \"L.E.D.-G\"",
+  "bpm_raw": "215",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 2055,
+  "events": 1052,
+  "bpm_main": 215,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 107.5,
+  "weighted_eff16": 149.5,
+  "scratch_pct": 4.09,
+  "chord_pct": 64.73,
+  "single_pct": 35.27,
+  "ranuchi": 96,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 517,
+      "pct": 49.2,
+      "eff16": 107.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 337,
+      "pct": 32.1,
+      "eff16": 215.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 154,
+      "pct": 14.7,
+      "eff16": 161.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.8,
+      "eff16": 53.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 80.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 71.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 322.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 645.0
+    },
+    "128": {
+      "name": "(128)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 40.3
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.7
+    }
+  },
+  "chord_dist": {
+    "1": 371,
+    "2": 415,
+    "3": 211,
+    "4": 54,
+    "5": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 922,
+      "pct": 46.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 516,
+      "pct": 26.2,
+      "eff16": 107.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 334,
+      "pct": 17.0,
+      "eff16": 215.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 154,
+      "pct": 7.8,
+      "eff16": 161.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 0.9,
+      "eff16": 53.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 12,
+      "pct": 0.6,
+      "eff16": 80.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 71.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 35.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 322.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 645.0
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 16,
+      "pct": 19.3,
+      "eff16": 13.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 11,
+      "pct": 13.3,
+      "eff16": 6.7
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 13.3,
+      "eff16": 26.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 12.0,
+      "eff16": 53.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 10,
+      "pct": 12.0,
+      "eff16": 107.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 3.6,
+      "eff16": 4.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 1.7
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 3.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 3.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 35.8
+    }
+  },
+  "cn_notes": 13,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 5.94,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 83.3,
+      "eff16": 13.4
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 26.9
+    },
+    "27840": {
+      "name": "(27840)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 0.2
+    }
+  }
+}

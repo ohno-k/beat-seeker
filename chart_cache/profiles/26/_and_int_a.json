@@ -1,0 +1,253 @@
+{
+  "textage": "26/_and_int.html?1AB00",
+  "analyzed_at": "2026-04-06T10:48:09.014314+00:00",
+  "title": "& Intelligence",
+  "artist": "lapix",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1565,
+  "events": 1035,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 150.5,
+  "scratch_pct": 9.9,
+  "chord_pct": 44.25,
+  "single_pct": 55.75,
+  "ranuchi": 128,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 866,
+      "pct": 83.8,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 133,
+      "pct": 12.9,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 18,
+      "pct": 1.7,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 40.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 480.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 26.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 120.0
+    },
+    "648": {
+      "name": "(648)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.9
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.4
+    }
+  },
+  "chord_dist": {
+    "1": 577,
+    "2": 389,
+    "3": 66,
+    "4": 3
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 801,
+      "pct": 56.8,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 420,
+      "pct": 29.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 151,
+      "pct": 10.7,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 0.9,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 53.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 26.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 120.0
+    },
+    "648": {
+      "name": "(648)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.9
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.4
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 39,
+      "pct": 25.3,
+      "eff16": 160.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 36,
+      "pct": 23.4,
+      "eff16": 40.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 19,
+      "pct": 12.3,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 6.5,
+      "eff16": 53.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 5.2,
+      "eff16": 10.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 3.9,
+      "eff16": 240.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 5,
+      "pct": 3.2,
+      "eff16": 17.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 2.6,
+      "eff16": 32.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 4,
+      "pct": 2.6,
+      "eff16": 22.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 1.9,
+      "eff16": 26.7
+    }
+  },
+  "cn_notes": 17,
+  "cn_scratch_pct": 5.0,
+  "cn_kbd_overlap_pct": 2.27,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 50.0,
+      "eff16": 40.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 18.8,
+      "eff16": 20.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 12.5,
+      "eff16": 13.3
+    },
+    "95.04000000000087": {
+      "name": "~quarter",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 40.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 10.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 6.2,
+      "eff16": 6.7
+    }
+  }
+}

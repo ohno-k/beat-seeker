@@ -1,0 +1,168 @@
+{
+  "textage": "31/_zanzoni.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:48.421189+00:00",
+  "title": "残像ニ繋ガレタ追憶ノHIDEAWAY",
+  "artist": "SOUND HOLIC Vs. BEMANI Sound Team \"KE!JU\" feat. Nana Takahashi",
+  "bpm_raw": "160",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1789,
+  "events": 948,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 135.5,
+  "scratch_pct": 4.25,
+  "chord_pct": 63.82,
+  "single_pct": 36.18,
+  "ranuchi": 128,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 650,
+      "pct": 68.6,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 262,
+      "pct": 27.7,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 40.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 240.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.3
+    }
+  },
+  "chord_dist": {
+    "1": 343,
+    "2": 415,
+    "3": 149,
+    "4": 36,
+    "5": 5
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 766,
+      "pct": 44.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 650,
+      "pct": 38.0,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 262,
+      "pct": 15.3,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 0.9,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.5,
+      "eff16": 40.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.5,
+      "eff16": 240.0
+    }
+  },
+  "scr_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 16,
+      "pct": 21.3,
+      "eff16": 5.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 10,
+      "pct": 13.3,
+      "eff16": 80.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 12.0,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 9.3,
+      "eff16": 40.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 9.3,
+      "eff16": 10.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 6.7,
+      "eff16": 53.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 5.3,
+      "eff16": 13.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 4.0,
+      "eff16": 26.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 11.4
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 5.3
+    }
+  }
+}

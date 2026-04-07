@@ -1,0 +1,220 @@
+{
+  "textage": "27/screwowo.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:02.814531+00:00",
+  "title": "SCREW // owo // SCREW",
+  "artist": "かめりあ",
+  "bpm_raw": "114",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1557,
+  "events": 898,
+  "bpm_main": 114,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 114.0,
+  "weighted_eff16": 148.8,
+  "scratch_pct": 18.11,
+  "chord_pct": 41.76,
+  "single_pct": 58.24,
+  "ranuchi": 55,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 509,
+      "pct": 56.7,
+      "eff16": 114.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 207,
+      "pct": 23.1,
+      "eff16": 228.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 84,
+      "pct": 9.4,
+      "eff16": 57.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 29,
+      "pct": 3.2,
+      "eff16": 171.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 14,
+      "pct": 1.6,
+      "eff16": 684.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 136.8
+    },
+    "36": {
+      "name": "(36)",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 76.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 38.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 456.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 342.0
+    }
+  },
+  "chord_dist": {
+    "1": 523,
+    "2": 230,
+    "3": 62,
+    "4": 37,
+    "5": 36,
+    "6": 10
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 493,
+      "pct": 38.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 457,
+      "pct": 35.9,
+      "eff16": 114.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 112,
+      "pct": 8.8,
+      "eff16": 228.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 95,
+      "pct": 7.5,
+      "eff16": 57.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 27,
+      "pct": 2.1,
+      "eff16": 171.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 24,
+      "pct": 1.9,
+      "eff16": 76.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 38.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 136.8
+    },
+    "4": {
+      "name": "(4)",
+      "count": 10,
+      "pct": 0.8,
+      "eff16": 684.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 456.0
+    }
+  },
+  "scr_interval_dist": {
+    "12": {
+      "name": "32nd",
+      "count": 82,
+      "pct": 29.2,
+      "eff16": 228.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 77,
+      "pct": 27.4,
+      "eff16": 114.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 30,
+      "pct": 10.7,
+      "eff16": 57.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 22,
+      "pct": 7.8,
+      "eff16": 38.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 4.6,
+      "eff16": 28.5
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 4.3,
+      "eff16": 14.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 3.2,
+      "eff16": 19.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 2.1,
+      "eff16": 7.1
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 1.8,
+      "eff16": 22.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 1.4,
+      "eff16": 11.4
+    }
+  }
+}

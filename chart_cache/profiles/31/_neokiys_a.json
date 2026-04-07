@@ -1,0 +1,183 @@
+{
+  "textage": "31/_neokiys.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:26.380033+00:00",
+  "title": "寝起きヤシの木",
+  "artist": "Remixed by uno(IOSYS) feat. Chiyoko",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1411,
+  "events": 726,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 118.1,
+  "scratch_pct": 11.27,
+  "chord_pct": 59.5,
+  "single_pct": 40.5,
+  "ranuchi": 46,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 333,
+      "pct": 45.9,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 331,
+      "pct": 45.7,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 43,
+      "pct": 5.9,
+      "eff16": 40.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.7,
+      "eff16": 320.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.7,
+      "eff16": 53.3
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.0
+    }
+  },
+  "chord_dist": {
+    "1": 294,
+    "2": 246,
+    "3": 126,
+    "4": 54,
+    "5": 5,
+    "6": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 542,
+      "pct": 43.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 322,
+      "pct": 25.7,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 316,
+      "pct": 25.3,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 47,
+      "pct": 3.8,
+      "eff16": 40.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 320.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 53.3
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 20.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 32.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 59,
+      "pct": 37.3,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 34.2,
+      "eff16": 40.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 11,
+      "pct": 7.0,
+      "eff16": 8.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 5,
+      "pct": 3.2,
+      "eff16": 5.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 10.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 5.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 8.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 53.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 1.9,
+      "eff16": 13.3
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 1.9,
+      "eff16": 20.0
+    }
+  }
+}

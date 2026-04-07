@@ -1,0 +1,271 @@
+{
+  "textage": "33/meteorsw.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:20.872093+00:00",
+  "title": "Meteor☆Shower",
+  "artist": "Tatsunoshin",
+  "bpm_raw": "177",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1427,
+  "events": 828,
+  "bpm_main": 177,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 88.5,
+  "weighted_eff16": 126.1,
+  "scratch_pct": 9.81,
+  "chord_pct": 49.4,
+  "single_pct": 50.6,
+  "ranuchi": 144,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 434,
+      "pct": 52.5,
+      "eff16": 88.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 333,
+      "pct": 40.3,
+      "eff16": 177.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 32,
+      "pct": 3.9,
+      "eff16": 44.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 14,
+      "pct": 1.7,
+      "eff16": 354.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 29.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 59.0
+    },
+    "108": {
+      "name": "(108)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 39.3
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.7
+    }
+  },
+  "chord_dist": {
+    "1": 419,
+    "2": 280,
+    "3": 78,
+    "4": 41,
+    "5": 10
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 469,
+      "pct": 36.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 431,
+      "pct": 33.5,
+      "eff16": 88.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 324,
+      "pct": 25.2,
+      "eff16": 177.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 35,
+      "pct": 2.7,
+      "eff16": 44.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 14,
+      "pct": 1.1,
+      "eff16": 354.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 29.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 59.0
+    },
+    "108": {
+      "name": "(108)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 39.3
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 60,
+      "pct": 43.2,
+      "eff16": 44.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 18,
+      "pct": 12.9,
+      "eff16": 88.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 8.6,
+      "eff16": 29.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 6.5,
+      "eff16": 59.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 9,
+      "pct": 6.5,
+      "eff16": 177.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 5.8,
+      "eff16": 22.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 7,
+      "pct": 5.0,
+      "eff16": 14.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 5.5
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 3.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 17.7
+    }
+  },
+  "cn_notes": 41,
+  "cn_scratch_pct": 2.27,
+  "cn_kbd_overlap_pct": 4.66,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 22.5,
+      "eff16": 29.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 17.5,
+      "eff16": 88.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 15.0,
+      "eff16": 44.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 10.0,
+      "eff16": 7.4
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 5.0,
+      "eff16": 8.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 6.3
+    },
+    "4032": {
+      "name": "(4032)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 1.1
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 22.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 9.8
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 6.8
+    }
+  }
+}

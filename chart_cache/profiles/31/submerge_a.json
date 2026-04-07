@@ -1,0 +1,180 @@
+{
+  "textage": "31/submerge.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:03.179485+00:00",
+  "title": "Submerge Serenade",
+  "artist": "lapix",
+  "bpm_raw": "157",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 2092,
+  "events": 1158,
+  "bpm_main": 157,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 157.0,
+  "weighted_eff16": 149.2,
+  "scratch_pct": 6.55,
+  "chord_pct": 61.05,
+  "single_pct": 38.95,
+  "ranuchi": 91,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 1043,
+      "pct": 90.1,
+      "eff16": 157.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 111,
+      "pct": 9.6,
+      "eff16": 78.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 39.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 52.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.2
+    }
+  },
+  "chord_dist": {
+    "1": 451,
+    "2": 510,
+    "3": 168,
+    "4": 28,
+    "5": 1
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 1029,
+      "pct": 52.7,
+      "eff16": 157.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 822,
+      "pct": 42.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 90,
+      "pct": 4.6,
+      "eff16": 78.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 39.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 52.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 15.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 26.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 31.4
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 22.4
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 38,
+      "pct": 27.9,
+      "eff16": 78.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 17.6,
+      "eff16": 39.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 18,
+      "pct": 13.2,
+      "eff16": 157.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 11.8,
+      "eff16": 52.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 7.4,
+      "eff16": 9.8
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 19.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 15.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 2.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 8.7
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 2.8
+    }
+  }
+}

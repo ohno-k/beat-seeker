@@ -1,0 +1,217 @@
+{
+  "textage": "28/lastday.html?1AB00",
+  "analyzed_at": "2026-04-06T10:53:37.465573+00:00",
+  "title": "LAST DAY",
+  "artist": "AJURIKA",
+  "bpm_raw": "157",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1551,
+  "events": 991,
+  "bpm_main": 157,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 157.0,
+  "weighted_eff16": 144.8,
+  "scratch_pct": 5.35,
+  "chord_pct": 48.23,
+  "single_pct": 51.77,
+  "ranuchi": 74,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 678,
+      "pct": 68.5,
+      "eff16": 157.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 163,
+      "pct": 16.5,
+      "eff16": 117.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 68,
+      "pct": 6.9,
+      "eff16": 78.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 28,
+      "pct": 2.8,
+      "eff16": 235.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 25,
+      "pct": 2.5,
+      "eff16": 52.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 314.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 58.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 39.2
+    },
+    "20": {
+      "name": "(20)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 188.4
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.2
+    }
+  },
+  "chord_dist": {
+    "1": 513,
+    "2": 399,
+    "3": 76,
+    "4": 3
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 670,
+      "pct": 45.7,
+      "eff16": 157.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 484,
+      "pct": 33.0,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 163,
+      "pct": 11.1,
+      "eff16": 117.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 67,
+      "pct": 4.6,
+      "eff16": 78.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 28,
+      "pct": 1.9,
+      "eff16": 235.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 26,
+      "pct": 1.8,
+      "eff16": 52.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 314.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 58.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 39.2
+    },
+    "20": {
+      "name": "(20)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 188.4
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 21,
+      "pct": 25.6,
+      "eff16": 52.3
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 11.0,
+      "eff16": 19.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 9.8,
+      "eff16": 78.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 7.3,
+      "eff16": 9.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 2.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 39.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 117.8
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 5.2
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 58.9
+    },
+    "24": {
+      "name": "16th",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 157.0
+    }
+  }
+}

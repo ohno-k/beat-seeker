@@ -1,0 +1,227 @@
+{
+  "textage": "32/_gestalt.html?1AC00",
+  "analyzed_at": "2026-04-06T11:00:28.643385+00:00",
+  "title": "ゲシュタルト",
+  "artist": "花譜",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1671,
+  "events": 756,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 110.7,
+  "scratch_pct": 4.49,
+  "chord_pct": 64.81,
+  "single_pct": 35.19,
+  "ranuchi": 75,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 382,
+      "pct": 50.6,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 324,
+      "pct": 42.9,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 4.0,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.9,
+      "eff16": 50.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 21.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 30.0
+    },
+    "44": {
+      "name": "(44)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 81.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.0
+    },
+    "52": {
+      "name": "(52)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 69.2
+    },
+    "80": {
+      "name": "(80)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 45.0
+    }
+  },
+  "chord_dist": {
+    "1": 266,
+    "2": 208,
+    "3": 169,
+    "4": 83,
+    "5": 30
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 845,
+      "pct": 53.0,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 381,
+      "pct": 23.9,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 321,
+      "pct": 20.1,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 29,
+      "pct": 1.8,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 50.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 21.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.8
+    },
+    "52": {
+      "name": "(52)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 69.2
+    },
+    "44": {
+      "name": "(44)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 81.8
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 32,
+      "pct": 43.2,
+      "eff16": 50.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 9.5,
+      "eff16": 9.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 9.5,
+      "eff16": 37.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 6.8,
+      "eff16": 4.7
+    },
+    "864": {
+      "name": "(864)",
+      "count": 4,
+      "pct": 5.4,
+      "eff16": 4.2
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 18.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 15.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 75.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 5.4
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 8.3
+    }
+  },
+  "cn_notes": 2,
+  "cn_scratch_pct": 50.0,
+  "cn_kbd_overlap_pct": 0.06,
+  "cn_interval_dist": {
+    "7104": {
+      "name": "(7104)",
+      "count": 1,
+      "pct": 100.0,
+      "eff16": 0.5
+    }
+  }
+}

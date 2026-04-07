@@ -1,0 +1,282 @@
+{
+  "textage": "25/backspin.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:18.225884+00:00",
+  "title": "Back Spin Sweeper",
+  "artist": "DJ TOTTO",
+  "bpm_raw": "155",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1085,
+  "events": 750,
+  "bpm_main": 155,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 155.0,
+  "weighted_eff16": 132.4,
+  "scratch_pct": 5.62,
+  "chord_pct": 36.0,
+  "single_pct": 64.0,
+  "ranuchi": 80,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 544,
+      "pct": 72.6,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 143,
+      "pct": 19.1,
+      "eff16": 77.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 2.1,
+      "eff16": 38.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 1.6,
+      "eff16": 25.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 8,
+      "pct": 1.1,
+      "eff16": 31.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 7,
+      "pct": 0.9,
+      "eff16": 232.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 51.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 0.7,
+      "eff16": 15.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 9.7
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 17.2
+    }
+  },
+  "chord_dist": {
+    "1": 480,
+    "2": 209,
+    "3": 57,
+    "4": 4
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 533,
+      "pct": 52.1,
+      "eff16": 155.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 291,
+      "pct": 28.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 132,
+      "pct": 12.9,
+      "eff16": 77.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.8,
+      "eff16": 38.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 11,
+      "pct": 1.1,
+      "eff16": 31.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 1.1,
+      "eff16": 25.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 232.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 51.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 9.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 15.5
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 28.3,
+      "eff16": 77.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 11.7,
+      "eff16": 9.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 10.0,
+      "eff16": 2.4
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 5.0,
+      "eff16": 19.4
+    },
+    "24": {
+      "name": "16th",
+      "count": 3,
+      "pct": 5.0,
+      "eff16": 155.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 12.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 25.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 51.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 4.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 38.8
+    }
+  },
+  "cn_notes": 31,
+  "cn_scratch_pct": 87.1,
+  "cn_kbd_overlap_pct": 0.78,
+  "cn_interval_dist": {
+    "288": {
+      "name": "(288)",
+      "count": 6,
+      "pct": 20.0,
+      "eff16": 12.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 20.0,
+      "eff16": 9.7
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 16.7,
+      "eff16": 19.4
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 10.0,
+      "eff16": 7.8
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 3.2
+    },
+    "6336": {
+      "name": "(6336)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 0.6
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 4.6
+    },
+    "912": {
+      "name": "(912)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 4.1
+    },
+    "3456": {
+      "name": "(3456)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 1.1
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 1.0
+    }
+  }
+}

@@ -1,0 +1,255 @@
+{
+  "textage": "23/posesion.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:03.884147+00:00",
+  "title": "POSSESSION",
+  "artist": "TAG underground",
+  "bpm_raw": "23-185",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1509,
+  "events": 757,
+  "bpm_main": 185,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 92.5,
+  "weighted_eff16": 158.5,
+  "scratch_pct": 2.05,
+  "chord_pct": 55.22,
+  "single_pct": 44.78,
+  "ranuchi": 74,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 250,
+      "pct": 33.1,
+      "eff16": 92.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 237,
+      "pct": 31.3,
+      "eff16": 185.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 94,
+      "pct": 12.4,
+      "eff16": 138.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 91,
+      "pct": 12.0,
+      "eff16": 69.4
+    },
+    "12": {
+      "name": "32nd",
+      "count": 76,
+      "pct": 10.1,
+      "eff16": 370.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 740.0
+    },
+    "3": {
+      "name": "(3)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 1480.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.7
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 246.7
+    },
+    "9": {
+      "name": "~48th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 493.3
+    }
+  },
+  "chord_dist": {
+    "1": 339,
+    "2": 204,
+    "3": 108,
+    "4": 92,
+    "5": 14
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 724,
+      "pct": 49.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 250,
+      "pct": 16.9,
+      "eff16": 92.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 237,
+      "pct": 16.0,
+      "eff16": 185.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 93,
+      "pct": 6.3,
+      "eff16": 69.4
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 90,
+      "pct": 6.1,
+      "eff16": 138.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 76,
+      "pct": 5.1,
+      "eff16": 370.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 740.0
+    },
+    "3": {
+      "name": "(3)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 1480.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 246.7
+    },
+    "9": {
+      "name": "~48th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 493.3
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 23.3,
+      "eff16": 61.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 13.3,
+      "eff16": 15.4
+    },
+    "2784": {
+      "name": "(2784)",
+      "count": 3,
+      "pct": 10.0,
+      "eff16": 1.6
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 1.4
+    },
+    "24": {
+      "name": "16th",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 92.5
+    },
+    "2736": {
+      "name": "(2736)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 1.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 46.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 18.5
+    },
+    "360": {
+      "name": "(360)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 12.3
+    }
+  },
+  "cn_notes": 11,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 1.83,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 40.0,
+      "eff16": 92.5
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 3,
+      "pct": 30.0,
+      "eff16": 3.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 5.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 61.7
+    },
+    "21240": {
+      "name": "(21240)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 0.2
+    }
+  }
+}

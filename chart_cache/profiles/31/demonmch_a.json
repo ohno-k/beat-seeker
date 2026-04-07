@@ -1,0 +1,218 @@
+{
+  "textage": "31/demonmch.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:50.772094+00:00",
+  "title": "Demon March",
+  "artist": "Nhato",
+  "bpm_raw": "174",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1833,
+  "events": 1052,
+  "bpm_main": 174,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 174.0,
+  "weighted_eff16": 167.2,
+  "scratch_pct": 3.98,
+  "chord_pct": 44.01,
+  "single_pct": 55.99,
+  "ranuchi": 86,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 736,
+      "pct": 70.0,
+      "eff16": 174.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 187,
+      "pct": 17.8,
+      "eff16": 87.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 84,
+      "pct": 8.0,
+      "eff16": 348.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 3.5,
+      "eff16": 43.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 130.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 29.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.8
+    }
+  },
+  "chord_dist": {
+    "1": 589,
+    "2": 252,
+    "3": 139,
+    "4": 46,
+    "5": 17,
+    "6": 9
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 734,
+      "pct": 41.7,
+      "eff16": 174.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 709,
+      "pct": 40.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 188,
+      "pct": 10.7,
+      "eff16": 87.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 84,
+      "pct": 4.8,
+      "eff16": 348.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 2.1,
+      "eff16": 43.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 130.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 29.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.8
+    }
+  },
+  "scr_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 29,
+      "pct": 40.3,
+      "eff16": 29.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 9,
+      "pct": 12.5,
+      "eff16": 5.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 8.3,
+      "eff16": 10.9
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 6.9,
+      "eff16": 21.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 4,
+      "pct": 5.6,
+      "eff16": 174.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 5.6,
+      "eff16": 2.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 4.2,
+      "eff16": 43.5
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 5.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 87.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 8.7
+    }
+  },
+  "cn_notes": 19,
+  "cn_scratch_pct": 5.26,
+  "cn_kbd_overlap_pct": 5.8,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 77.8,
+      "eff16": 21.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 11.1,
+      "eff16": 10.9
+    },
+    "10176": {
+      "name": "(10176)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 0.4
+    },
+    "2112": {
+      "name": "(2112)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 2.0
+    }
+  }
+}

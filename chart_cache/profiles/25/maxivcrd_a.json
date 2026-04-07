@@ -1,0 +1,194 @@
+{
+  "textage": "25/maxivcrd.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:08.713420+00:00",
+  "title": "MAXIVCORD",
+  "artist": "BEMANI Sound Team \"dj TAKA\"",
+  "bpm_raw": "154",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1214,
+  "events": 680,
+  "bpm_main": 154,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 154.0,
+  "weighted_eff16": 142.9,
+  "scratch_pct": 2.39,
+  "chord_pct": 55.88,
+  "single_pct": 44.12,
+  "ranuchi": 53,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 472,
+      "pct": 69.5,
+      "eff16": 154.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 141,
+      "pct": 20.8,
+      "eff16": 77.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 34,
+      "pct": 5.0,
+      "eff16": 231.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 2.1,
+      "eff16": 51.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 10,
+      "pct": 1.5,
+      "eff16": 462.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 1.2,
+      "eff16": 38.5
+    }
+  },
+  "chord_dist": {
+    "1": 300,
+    "2": 265,
+    "3": 79,
+    "4": 34,
+    "5": 1,
+    "6": 1
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 505,
+      "pct": 42.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 472,
+      "pct": 39.9,
+      "eff16": 154.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 141,
+      "pct": 11.9,
+      "eff16": 77.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 34,
+      "pct": 2.9,
+      "eff16": 231.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.2,
+      "eff16": 51.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 10,
+      "pct": 0.8,
+      "eff16": 462.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 38.5
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 25.0,
+      "eff16": 2.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 21.4,
+      "eff16": 9.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 21.4,
+      "eff16": 51.3
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 14.3,
+      "eff16": 19.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 77.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 12.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 38.5
+    },
+    "4224": {
+      "name": "(4224)",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 0.9
+    }
+  },
+  "cn_notes": 30,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 16.37,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 55.2,
+      "eff16": 38.5
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 31.0,
+      "eff16": 19.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 9.6
+    },
+    "7776": {
+      "name": "(7776)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 0.5
+    }
+  }
+}

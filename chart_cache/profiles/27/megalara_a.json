@@ -1,0 +1,283 @@
+{
+  "textage": "27/megalara.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:18.837502+00:00",
+  "title": "Megalara Garuda",
+  "artist": "SYUNN",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1417,
+  "events": 809,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 90.0,
+  "weighted_eff16": 131.5,
+  "scratch_pct": 2.82,
+  "chord_pct": 53.15,
+  "single_pct": 46.85,
+  "ranuchi": 70,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 355,
+      "pct": 43.9,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 340,
+      "pct": 42.1,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 38,
+      "pct": 4.7,
+      "eff16": 45.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 35,
+      "pct": 4.3,
+      "eff16": 135.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 30.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.9,
+      "eff16": 60.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 67.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 540.0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 108.0
+    }
+  },
+  "chord_dist": {
+    "1": 379,
+    "2": 292,
+    "3": 98,
+    "4": 40
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 571,
+      "pct": 41.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 356,
+      "pct": 25.9,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 338,
+      "pct": 24.6,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 38,
+      "pct": 2.8,
+      "eff16": 45.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 35,
+      "pct": 2.5,
+      "eff16": 135.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 30.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 60.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 67.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 540.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 270.0
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 15.4,
+      "eff16": 22.5
+    },
+    "864": {
+      "name": "(864)",
+      "count": 5,
+      "pct": 12.8,
+      "eff16": 5.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 12.8,
+      "eff16": 90.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 7.7,
+      "eff16": 11.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 7.7,
+      "eff16": 18.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 5.1,
+      "eff16": 3.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 5.1,
+      "eff16": 15.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 5.1,
+      "eff16": 9.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 5.1,
+      "eff16": 1.4
+    },
+    "112": {
+      "name": "(112)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 38.6
+    }
+  },
+  "cn_notes": 55,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 5.16,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 24.5,
+      "eff16": 22.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 13.2,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 9.4,
+      "eff16": 45.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 7.5,
+      "eff16": 7.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 5.7,
+      "eff16": 10.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 30.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 6.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 15.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 5.6
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 8.2
+    }
+  }
+}

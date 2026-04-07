@@ -1,0 +1,218 @@
+{
+  "textage": "21/brainstm.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:14.901275+00:00",
+  "title": "BRAINSTORM",
+  "artist": "Hardcore United Tokyo(teranoid & DJ TECHNORCH)",
+  "bpm_raw": "180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1364,
+  "events": 833,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 90.0,
+  "weighted_eff16": 138.6,
+  "scratch_pct": 14.96,
+  "chord_pct": 49.22,
+  "single_pct": 50.78,
+  "ranuchi": 99,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 360,
+      "pct": 43.3,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 358,
+      "pct": 43.0,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 36,
+      "pct": 4.3,
+      "eff16": 45.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 540.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 30.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 360.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 135.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 270.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 240.0
+    },
+    "30": {
+      "name": "(30)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 144.0
+    }
+  },
+  "chord_dist": {
+    "1": 423,
+    "2": 307,
+    "3": 85,
+    "4": 18
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 410,
+      "pct": 35.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 333,
+      "pct": 28.7,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 330,
+      "pct": 28.5,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 4.7,
+      "eff16": 45.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 14,
+      "pct": 1.2,
+      "eff16": 30.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 0.9,
+      "eff16": 60.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 22.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 15.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 56,
+      "pct": 27.6,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 34,
+      "pct": 16.7,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 12.3,
+      "eff16": 45.0
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 5.4,
+      "eff16": 22.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 4.9,
+      "eff16": 135.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 7,
+      "pct": 3.4,
+      "eff16": 120.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 5,
+      "pct": 2.5,
+      "eff16": 240.0
+    },
+    "30": {
+      "name": "(30)",
+      "count": 4,
+      "pct": 2.0,
+      "eff16": 144.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 4,
+      "pct": 2.0,
+      "eff16": 0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 4,
+      "pct": 2.0,
+      "eff16": 108.0
+    }
+  }
+}

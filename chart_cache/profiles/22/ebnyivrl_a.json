@@ -1,0 +1,250 @@
+{
+  "textage": "22/ebnyivrl.html?1AC00",
+  "analyzed_at": "2026-04-06T06:34:14.951259+00:00",
+  "title": "EBONY & IVORY",
+  "artist": "OSTER project",
+  "bpm_raw": "※",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1785,
+  "events": 935,
+  "bpm_main": 0,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 0.0,
+  "weighted_eff16": 0.0,
+  "scratch_pct": 2.75,
+  "chord_pct": 55.51,
+  "single_pct": 44.49,
+  "ranuchi": 84,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 652,
+      "pct": 69.8,
+      "eff16": 0.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 154,
+      "pct": 16.5,
+      "eff16": 0.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 56,
+      "pct": 6.0,
+      "eff16": 0.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 14,
+      "pct": 1.5,
+      "eff16": 0.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 11,
+      "pct": 1.2,
+      "eff16": 0.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 0.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 0.0
+    },
+    "10": {
+      "name": "(10)",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 0.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 0.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 0.0
+    }
+  },
+  "chord_dist": {
+    "1": 416,
+    "2": 293,
+    "3": 157,
+    "4": 42,
+    "5": 22,
+    "6": 2,
+    "7": 2,
+    "8": 1
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 805,
+      "pct": 46.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 646,
+      "pct": 37.2,
+      "eff16": 0.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 156,
+      "pct": 9.0,
+      "eff16": 0.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 56,
+      "pct": 3.2,
+      "eff16": 0.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 14,
+      "pct": 0.8,
+      "eff16": 0.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 11,
+      "pct": 0.6,
+      "eff16": 0.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 10,
+      "pct": 0.6,
+      "eff16": 0.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 9,
+      "pct": 0.5,
+      "eff16": 0.0
+    },
+    "10": {
+      "name": "(10)",
+      "count": 9,
+      "pct": 0.5,
+      "eff16": 0.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 0.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 29.2,
+      "eff16": 0.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 18.8,
+      "eff16": 0.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 10.4,
+      "eff16": 0.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 8.3,
+      "eff16": 0.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 0.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 0.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 2.1,
+      "eff16": 0.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 2.1,
+      "eff16": 0.0
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 2.1,
+      "eff16": 0.0
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 2.1,
+      "eff16": 0.0
+    }
+  },
+  "cn_notes": 13,
+  "cn_scratch_pct": 0.0,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 66.7,
+      "eff16": 0.0
+    },
+    "2496": {
+      "name": "(2496)",
+      "count": 2,
+      "pct": 16.7,
+      "eff16": 0.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 0.0
+    },
+    "8640": {
+      "name": "(8640)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 0.0
+    }
+  }
+}

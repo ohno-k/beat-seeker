@@ -1,0 +1,219 @@
+{
+  "textage": "26/_hanakan.html?1AB00",
+  "analyzed_at": "2026-04-06T11:02:16.640750+00:00",
+  "title": "花冠 feat.Aikapin",
+  "artist": "RoughSkreamZ",
+  "bpm_raw": "83-180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1365,
+  "events": 845,
+  "bpm_main": 180,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 153.2,
+  "scratch_pct": 25.71,
+  "chord_pct": 48.52,
+  "single_pct": 51.48,
+  "ranuchi": 53,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 393,
+      "pct": 46.6,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 308,
+      "pct": 36.5,
+      "eff16": 90.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 45,
+      "pct": 5.3,
+      "eff16": 135.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 32,
+      "pct": 3.8,
+      "eff16": 60.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 14,
+      "pct": 1.7,
+      "eff16": 270.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.5,
+      "eff16": 45.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 216.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 154.3
+    },
+    "18": {
+      "name": "(18)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 240.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 540.0
+    }
+  },
+  "chord_dist": {
+    "1": 435,
+    "2": 310,
+    "3": 90,
+    "4": 10
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 365,
+      "pct": 36.0,
+      "eff16": 90.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 300,
+      "pct": 29.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 231,
+      "pct": 22.8,
+      "eff16": 180.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 39,
+      "pct": 3.8,
+      "eff16": 60.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 38,
+      "pct": 3.8,
+      "eff16": 135.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 2.6,
+      "eff16": 45.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 216.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 154.3
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 22.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 270.0
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 167,
+      "pct": 47.7,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 73,
+      "pct": 20.9,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 6.0,
+      "eff16": 45.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 3.4,
+      "eff16": 135.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 1.7,
+      "eff16": 270.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 6,
+      "pct": 1.7,
+      "eff16": 6.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 1.4,
+      "eff16": 11.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 1.1,
+      "eff16": 12.9
+    },
+    "20": {
+      "name": "(20)",
+      "count": 4,
+      "pct": 1.1,
+      "eff16": 216.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 4,
+      "pct": 1.1,
+      "eff16": 240.0
+    }
+  }
+}

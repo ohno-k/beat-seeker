@@ -1,0 +1,283 @@
+{
+  "textage": "25/anchor.html?1AC00",
+  "analyzed_at": "2026-04-06T10:48:37.322075+00:00",
+  "title": "ANCHOR",
+  "artist": "BEMANI Sound Team \"HuΣeR Vs. SYUNN\"",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1771,
+  "events": 1031,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 159.1,
+  "scratch_pct": 5.31,
+  "chord_pct": 53.15,
+  "single_pct": 46.85,
+  "ranuchi": 128,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 660,
+      "pct": 64.1,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 250,
+      "pct": 24.3,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 29,
+      "pct": 2.8,
+      "eff16": 270.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 2.7,
+      "eff16": 45.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 24,
+      "pct": 2.3,
+      "eff16": 360.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 24,
+      "pct": 2.3,
+      "eff16": 135.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 36.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 60.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.0
+    }
+  },
+  "chord_dist": {
+    "1": 483,
+    "2": 402,
+    "3": 106,
+    "4": 34,
+    "5": 6
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 660,
+      "pct": 39.4,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 657,
+      "pct": 39.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 239,
+      "pct": 14.3,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 29,
+      "pct": 1.7,
+      "eff16": 270.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 1.4,
+      "eff16": 45.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 24,
+      "pct": 1.4,
+      "eff16": 360.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 24,
+      "pct": 1.4,
+      "eff16": 135.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 22.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 36.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 60.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 19.4,
+      "eff16": 45.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 18.3,
+      "eff16": 90.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 16,
+      "pct": 17.2,
+      "eff16": 30.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 6,
+      "pct": 6.5,
+      "eff16": 6.4
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 5.4,
+      "eff16": 18.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 5.4,
+      "eff16": 22.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 9.0
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 8.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 5.6
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 3.5
+    }
+  },
+  "cn_notes": 29,
+  "cn_scratch_pct": 8.33,
+  "cn_kbd_overlap_pct": 3.22,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 14.3,
+      "eff16": 11.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 9.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 18.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 7.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 5.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 30.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 2.8
+    },
+    "8208": {
+      "name": "(8208)",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 0.5
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 3.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 15.0
+    }
+  }
+}

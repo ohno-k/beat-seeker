@@ -1,0 +1,257 @@
+{
+  "textage": "27/s_smilin.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:55.047685+00:00",
+  "title": "Sparkle Smilin'",
+  "artist": "BEMANI Sound Team \"Qrispy Joybox\" feat.いちか",
+  "bpm_raw": "180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1211,
+  "events": 736,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 90.0,
+  "weighted_eff16": 117.3,
+  "scratch_pct": 4.71,
+  "chord_pct": 47.83,
+  "single_pct": 52.17,
+  "ranuchi": 69,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 474,
+      "pct": 64.5,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 204,
+      "pct": 27.8,
+      "eff16": 180.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 33,
+      "pct": 4.5,
+      "eff16": 135.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.8,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 270.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 60.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    }
+  },
+  "chord_dist": {
+    "1": 384,
+    "2": 251,
+    "3": 79,
+    "4": 22
+  },
+  "tags": [
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 474,
+      "pct": 41.1,
+      "eff16": 90.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 422,
+      "pct": 36.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 203,
+      "pct": 17.6,
+      "eff16": 180.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 36,
+      "pct": 3.1,
+      "eff16": 135.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.1,
+      "eff16": 45.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 60.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    }
+  },
+  "scr_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 17,
+      "pct": 30.4,
+      "eff16": 30.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 17.9,
+      "eff16": 45.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 10.7,
+      "eff16": 22.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 7.1,
+      "eff16": 9.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 7.1,
+      "eff16": 2.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 5.4,
+      "eff16": 10.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 5.4,
+      "eff16": 5.6
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 2.6
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 12.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 11.2
+    }
+  },
+  "cn_notes": 19,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 5.37,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 27.8,
+      "eff16": 90.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 16.7,
+      "eff16": 6.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 11.1,
+      "eff16": 30.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 2.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 5.6
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 3.8
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 6.9
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 22.5
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 2.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 12.9
+    }
+  }
+}

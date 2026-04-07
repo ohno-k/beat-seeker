@@ -1,0 +1,251 @@
+{
+  "textage": "19/a_minstr.html?1XC00",
+  "analyzed_at": "2026-04-06T10:48:24.422694+00:00",
+  "title": "A MINSTREL ～ ver. short-scape ～",
+  "artist": "KANTASIA by S.S.D. PRODUCTS",
+  "bpm_raw": "114",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1928,
+  "events": 712,
+  "bpm_main": 114,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 114.0,
+  "weighted_eff16": 108.0,
+  "scratch_pct": 2.02,
+  "chord_pct": 72.05,
+  "single_pct": 27.95,
+  "ranuchi": 51,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 448,
+      "pct": 63.0,
+      "eff16": 114.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 175,
+      "pct": 24.6,
+      "eff16": 57.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 64,
+      "pct": 9.0,
+      "eff16": 228.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 1.5,
+      "eff16": 38.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 7,
+      "pct": 1.0,
+      "eff16": 76.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 28.5
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 16.3
+    },
+    "60": {
+      "name": "(60)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 45.6
+    }
+  },
+  "chord_dist": {
+    "1": 199,
+    "2": 147,
+    "3": 150,
+    "4": 123,
+    "5": 70,
+    "6": 19,
+    "7": 3,
+    "8": 1
+  },
+  "tags": [
+    "scratch_low",
+    "chord_heavy",
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 1178,
+      "pct": 62.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 448,
+      "pct": 23.7,
+      "eff16": 114.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 174,
+      "pct": 9.2,
+      "eff16": 57.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 64,
+      "pct": 3.4,
+      "eff16": 228.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 0.6,
+      "eff16": 38.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 76.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 28.5
+    },
+    "60": {
+      "name": "(60)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 45.6
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.7
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.3
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 28.9,
+      "eff16": 57.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 10,
+      "pct": 26.3,
+      "eff16": 22.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 7.9,
+      "eff16": 9.5
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 3,
+      "pct": 7.9,
+      "eff16": 1.2
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 5.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 38.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 8.1
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 2.4
+    },
+    "4608": {
+      "name": "(4608)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 0.6
+    },
+    "2016": {
+      "name": "(2016)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 1.4
+    }
+  },
+  "cn_notes": 9,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 2.65,
+  "cn_interval_dist": {
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 28.6,
+      "eff16": 11.4
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 2.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 19.0
+    },
+    "12144": {
+      "name": "(12144)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 0.2
+    },
+    "3216": {
+      "name": "(3216)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 0.9
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 1.2
+    }
+  }
+}

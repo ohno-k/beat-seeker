@@ -1,0 +1,244 @@
+{
+  "textage": "31/chemiclr.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:13.331614+00:00",
+  "title": "Chemical Colours",
+  "artist": "Blacklolita x BEMANI Sound Team \"Expander\"",
+  "bpm_raw": "175",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1356,
+  "events": 832,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 175.0,
+  "weighted_eff16": 129.7,
+  "scratch_pct": 7.08,
+  "chord_pct": 47.12,
+  "single_pct": 52.88,
+  "ranuchi": 44,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 420,
+      "pct": 50.5,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 372,
+      "pct": 44.8,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 29,
+      "pct": 3.5,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 58.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.9
+    }
+  },
+  "chord_dist": {
+    "1": 440,
+    "2": 273,
+    "3": 106,
+    "4": 13
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 471,
+      "pct": 37.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 371,
+      "pct": 29.5,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 365,
+      "pct": 29.0,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 3.2,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 58.3
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 21.9
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 35.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 29.2
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 47,
+      "pct": 49.5,
+      "eff16": 175.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 10.5,
+      "eff16": 43.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 5.3,
+      "eff16": 10.9
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 5.3,
+      "eff16": 21.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 2.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 14.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 87.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 3.2,
+      "eff16": 3.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.1,
+      "eff16": 5.5
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 2,
+      "pct": 2.1,
+      "eff16": 4.0
+    }
+  },
+  "cn_notes": 32,
+  "cn_scratch_pct": 40.62,
+  "cn_kbd_overlap_pct": 3.1,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 32.3,
+      "eff16": 29.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 19.4,
+      "eff16": 43.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 9.7,
+      "eff16": 7.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 9.7,
+      "eff16": 8.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 6.5,
+      "eff16": 87.5
+    },
+    "5376": {
+      "name": "(5376)",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 0.8
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 4.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 10.9
+    },
+    "960": {
+      "name": "(960)",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 4.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 2.7
+    }
+  }
+}

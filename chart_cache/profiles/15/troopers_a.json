@@ -1,0 +1,220 @@
+{
+  "textage": "15/troopers.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:32.077822+00:00",
+  "title": "TROOPERS",
+  "artist": "Des-TRACT",
+  "bpm_raw": "177",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1286,
+  "events": 631,
+  "bpm_main": 177,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 88.5,
+  "weighted_eff16": 113.1,
+  "scratch_pct": 16.56,
+  "chord_pct": 66.09,
+  "single_pct": 33.91,
+  "ranuchi": 34,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 395,
+      "pct": 62.7,
+      "eff16": 88.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 180,
+      "pct": 28.6,
+      "eff16": 177.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 4.9,
+      "eff16": 44.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 1.0,
+      "eff16": 132.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 5,
+      "pct": 0.8,
+      "eff16": 9.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 265.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 66.4
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 8.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 59.0
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 3.4
+    }
+  },
+  "chord_dist": {
+    "1": 214,
+    "2": 241,
+    "3": 121,
+    "4": 48,
+    "5": 7
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "chord_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 496,
+      "pct": 46.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 319,
+      "pct": 29.8,
+      "eff16": 88.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 167,
+      "pct": 15.6,
+      "eff16": 177.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 62,
+      "pct": 5.8,
+      "eff16": 44.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 132.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 9.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 29.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 35.4
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 66.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 59.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 121,
+      "pct": 57.1,
+      "eff16": 88.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 50,
+      "pct": 23.6,
+      "eff16": 44.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 7.1,
+      "eff16": 29.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 3.3,
+      "eff16": 59.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 2.4,
+      "eff16": 22.1
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 6.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 5.5
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 3.2
+    },
+    "5856": {
+      "name": "(5856)",
+      "count": 1,
+      "pct": 0.5,
+      "eff16": 0.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.5,
+      "eff16": 35.4
+    }
+  }
+}

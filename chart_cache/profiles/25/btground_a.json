@@ -1,0 +1,218 @@
+{
+  "textage": "25/btground.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:24.254569+00:00",
+  "title": "Battleground",
+  "artist": "kors k",
+  "bpm_raw": "165",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1316,
+  "events": 889,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 137.6,
+  "scratch_pct": 7.07,
+  "chord_pct": 36.9,
+  "single_pct": 63.1,
+  "ranuchi": 71,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 580,
+      "pct": 65.3,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 249,
+      "pct": 28.0,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 2.6,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 2.0,
+      "eff16": 55.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 330.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 27.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.8
+    }
+  },
+  "chord_dist": {
+    "1": 561,
+    "2": 253,
+    "3": 52,
+    "4": 22,
+    "5": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 576,
+      "pct": 47.1,
+      "eff16": 165.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 348,
+      "pct": 28.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 237,
+      "pct": 19.4,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 1.8,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 1.6,
+      "eff16": 55.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 330.0
+    },
+    "456": {
+      "name": "(456)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.7
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 28.3,
+      "eff16": 41.2
+    },
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 16.3,
+      "eff16": 20.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 14,
+      "pct": 15.2,
+      "eff16": 82.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 8,
+      "pct": 8.7,
+      "eff16": 11.8
+    },
+    "720": {
+      "name": "(720)",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 5.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 10.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 5.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 2.6
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 9.2
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 2.7
+    }
+  }
+}

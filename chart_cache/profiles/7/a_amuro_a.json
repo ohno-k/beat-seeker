@@ -1,0 +1,214 @@
+{
+  "textage": "7/a_amuro.html?1AC00",
+  "analyzed_at": "2026-04-06T10:48:23.089725+00:00",
+  "title": "A",
+  "artist": "D.J.Amuro",
+  "bpm_raw": "93-191",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1183,
+  "events": 741,
+  "bpm_main": 191,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 191.0,
+  "weighted_eff16": 153.7,
+  "scratch_pct": 3.8,
+  "chord_pct": 37.25,
+  "single_pct": 62.75,
+  "ranuchi": 48,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 451,
+      "pct": 60.9,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 251,
+      "pct": 33.9,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 3.1,
+      "eff16": 47.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 382.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 31.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 19.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 63.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.9
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.2
+    }
+  },
+  "chord_dist": {
+    "1": 465,
+    "2": 173,
+    "3": 51,
+    "4": 42,
+    "5": 9,
+    "6": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 451,
+      "pct": 39.7,
+      "eff16": 191.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 397,
+      "pct": 34.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 251,
+      "pct": 22.1,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 2.0,
+      "eff16": 47.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 382.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 31.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 19.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 63.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.9
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 25.0,
+      "eff16": 47.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 13.6,
+      "eff16": 63.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 9.1,
+      "eff16": 8.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 6.8,
+      "eff16": 23.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 6.8,
+      "eff16": 15.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 4.5,
+      "eff16": 6.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 4.5,
+      "eff16": 6.0
+    },
+    "312": {
+      "name": "(312)",
+      "count": 2,
+      "pct": 4.5,
+      "eff16": 14.7
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 2.3,
+      "eff16": 5.3
+    },
+    "1464": {
+      "name": "(1464)",
+      "count": 1,
+      "pct": 2.3,
+      "eff16": 3.1
+    }
+  }
+}

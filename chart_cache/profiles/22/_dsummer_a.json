@@ -1,0 +1,218 @@
+{
+  "textage": "22/_dsummer.html?1AB00",
+  "analyzed_at": "2026-04-06T11:00:38.631745+00:00",
+  "title": "ドッキン☆サマーあばんちゅーる",
+  "artist": "L.E.D.-G + Qrispy Joybox + ARM feat. ななひら",
+  "bpm_raw": "180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1435,
+  "events": 736,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 90.0,
+  "weighted_eff16": 114.4,
+  "scratch_pct": 10.1,
+  "chord_pct": 62.23,
+  "single_pct": 37.77,
+  "ranuchi": 38,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 347,
+      "pct": 47.2,
+      "eff16": 90.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 172,
+      "pct": 23.4,
+      "eff16": 135.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 106,
+      "pct": 14.4,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 63,
+      "pct": 8.6,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 3.3,
+      "eff16": 270.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 13,
+      "pct": 1.8,
+      "eff16": 67.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 60.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 30.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.6
+    }
+  },
+  "chord_dist": {
+    "1": 278,
+    "2": 272,
+    "3": 139,
+    "4": 39,
+    "5": 8
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 565,
+      "pct": 43.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 344,
+      "pct": 26.7,
+      "eff16": 90.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 172,
+      "pct": 13.3,
+      "eff16": 135.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 104,
+      "pct": 8.1,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 55,
+      "pct": 4.3,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 23,
+      "pct": 1.8,
+      "eff16": 270.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 67.5
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 22.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 60.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 52,
+      "pct": 36.1,
+      "eff16": 45.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 21,
+      "pct": 14.6,
+      "eff16": 90.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 6.9,
+      "eff16": 30.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 10,
+      "pct": 6.9,
+      "eff16": 0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 6.2,
+      "eff16": 22.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 6,
+      "pct": 4.2,
+      "eff16": 18.0
+    },
+    "624": {
+      "name": "(624)",
+      "count": 5,
+      "pct": 3.5,
+      "eff16": 6.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 3.5,
+      "eff16": 2.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 60.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 67.5
+    }
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "textage": "33/tokakual.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:27.389100+00:00",
+  "title": "TOKAKU=ALMiRAJ",
+  "artist": "MYUKKE.",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1477,
+  "events": 1013,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 164.6,
+  "scratch_pct": 15.44,
+  "chord_pct": 36.92,
+  "single_pct": 63.08,
+  "ranuchi": 55,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 608,
+      "pct": 60.1,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 263,
+      "pct": 26.0,
+      "eff16": 85.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 115,
+      "pct": 11.4,
+      "eff16": 340.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.7,
+      "eff16": 42.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 56.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 255.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    },
+    "60": {
+      "name": "(60)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 68.0
+    }
+  },
+  "chord_dist": {
+    "1": 639,
+    "2": 300,
+    "3": 59,
+    "4": 14,
+    "5": 1
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 575,
+      "pct": 46.1,
+      "eff16": 170.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 277,
+      "pct": 22.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 247,
+      "pct": 19.8,
+      "eff16": 85.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 111,
+      "pct": 8.9,
+      "eff16": 340.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 1.6,
+      "eff16": 42.5
+    },
+    "108": {
+      "name": "(108)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 37.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 56.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 255.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 28.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 34.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 84,
+      "pct": 37.0,
+      "eff16": 85.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 57,
+      "pct": 25.1,
+      "eff16": 170.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 48,
+      "pct": 21.1,
+      "eff16": 42.5
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 4.0,
+      "eff16": 21.2
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 6,
+      "pct": 2.6,
+      "eff16": 2.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 2.2,
+      "eff16": 10.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 1.8,
+      "eff16": 28.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 12.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 9.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 56.7
+    }
+  }
+}

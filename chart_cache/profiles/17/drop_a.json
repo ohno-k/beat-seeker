@@ -1,0 +1,170 @@
+{
+  "textage": "17/drop.html?1AB00",
+  "analyzed_at": "2026-04-06T10:50:42.748495+00:00",
+  "title": "DROP",
+  "artist": "dj TAKA feat.Kanako Hoshino",
+  "bpm_raw": "152",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1289,
+  "events": 880,
+  "bpm_main": 152,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 152.0,
+  "weighted_eff16": 137.1,
+  "scratch_pct": 4.34,
+  "chord_pct": 34.55,
+  "single_pct": 65.45,
+  "ranuchi": 60,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 634,
+      "pct": 72.1,
+      "eff16": 152.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 175,
+      "pct": 19.9,
+      "eff16": 76.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 39,
+      "pct": 4.4,
+      "eff16": 228.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 22,
+      "pct": 2.5,
+      "eff16": 50.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 38.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 304.0
+    }
+  },
+  "chord_dist": {
+    "1": 576,
+    "2": 211,
+    "3": 82,
+    "4": 10,
+    "5": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 618,
+      "pct": 50.2,
+      "eff16": 152.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 364,
+      "pct": 29.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 179,
+      "pct": 14.5,
+      "eff16": 76.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 39,
+      "pct": 3.2,
+      "eff16": 228.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 25,
+      "pct": 2.0,
+      "eff16": 50.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 38.0
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 16,
+      "pct": 29.1,
+      "eff16": 9.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 7,
+      "pct": 12.7,
+      "eff16": 15.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 12.7,
+      "eff16": 25.3
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 7.3,
+      "eff16": 2.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 7.3,
+      "eff16": 4.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 7.3,
+      "eff16": 12.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 5.5,
+      "eff16": 38.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 76.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 7.6
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 1.9
+    }
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "textage": "23/derelict.html?1AB00",
+  "analyzed_at": "2026-04-06T10:50:51.442220+00:00",
+  "title": "Derelict Star feat. Ryu*",
+  "artist": "Remo-con",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1240,
+  "events": 641,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 75.0,
+  "weighted_eff16": 109.6,
+  "scratch_pct": 7.74,
+  "chord_pct": 65.37,
+  "single_pct": 34.63,
+  "ranuchi": 100,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 341,
+      "pct": 53.3,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 283,
+      "pct": 44.2,
+      "eff16": 150.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 1.4,
+      "eff16": 225.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 3.1
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 37.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 8.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 12.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 9.4
+    }
+  },
+  "chord_dist": {
+    "1": 222,
+    "2": 260,
+    "3": 138,
+    "4": 21
+  },
+  "tags": [
+    "chord_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 509,
+      "pct": 44.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 335,
+      "pct": 29.3,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 283,
+      "pct": 24.8,
+      "eff16": 150.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 225.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.3
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 37.5
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 39,
+      "pct": 41.1,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 28.4,
+      "eff16": 37.5
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 6.3,
+      "eff16": 18.8
+    },
+    "672": {
+      "name": "(672)",
+      "count": 5,
+      "pct": 5.3,
+      "eff16": 5.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 9.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.2,
+      "eff16": 4.7
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 3.2,
+      "eff16": 3.1
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 2.1,
+      "eff16": 2.5
+    },
+    "1728": {
+      "name": "(1728)",
+      "count": 1,
+      "pct": 1.1,
+      "eff16": 2.1
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 1.1,
+      "eff16": 5.0
+    }
+  },
+  "cn_notes": 16,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 8.65,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 15,
+      "pct": 100.0,
+      "eff16": 9.4
+    }
+  }
+}

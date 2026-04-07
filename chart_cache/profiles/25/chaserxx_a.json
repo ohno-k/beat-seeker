@@ -1,0 +1,218 @@
+{
+  "textage": "25/chaserxx.html?1AB00",
+  "analyzed_at": "2026-04-06T10:50:12.662911+00:00",
+  "title": "ChaserXX",
+  "artist": "HuΣeR",
+  "bpm_raw": "140",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1437,
+  "events": 961,
+  "bpm_main": 140,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 140.0,
+  "weighted_eff16": 154.6,
+  "scratch_pct": 5.5,
+  "chord_pct": 37.25,
+  "single_pct": 62.75,
+  "ranuchi": 52,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 633,
+      "pct": 65.9,
+      "eff16": 140.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 89,
+      "pct": 9.3,
+      "eff16": 70.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 42,
+      "pct": 4.4,
+      "eff16": 210.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 31,
+      "pct": 3.2,
+      "eff16": 186.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 18,
+      "pct": 1.9,
+      "eff16": 420.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 105.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.6,
+      "eff16": 46.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 15,
+      "pct": 1.6,
+      "eff16": 280.0
+    },
+    "14": {
+      "name": "(14)",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 240.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 840.0
+    }
+  },
+  "chord_dist": {
+    "1": 603,
+    "2": 257,
+    "3": 84,
+    "4": 17
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 627,
+      "pct": 46.2,
+      "eff16": 140.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 414,
+      "pct": 30.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 81,
+      "pct": 6.0,
+      "eff16": 70.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 43,
+      "pct": 3.2,
+      "eff16": 210.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 31,
+      "pct": 2.3,
+      "eff16": 186.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 420.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 105.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 280.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 46.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 28.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 28.2,
+      "eff16": 35.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 14,
+      "pct": 17.9,
+      "eff16": 70.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 7.7,
+      "eff16": 105.0
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 5,
+      "pct": 6.4,
+      "eff16": 2.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 5.1,
+      "eff16": 5.8
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 5.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 17.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 2.6,
+      "eff16": 23.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 2.6,
+      "eff16": 8.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 1.3,
+      "eff16": 11.7
+    }
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "textage": "30/rulerorl.html?1AB00",
+  "analyzed_at": "2026-04-06T10:55:56.173625+00:00",
+  "title": "Ruler or Loser",
+  "artist": "Maozon feat. Nadia",
+  "bpm_raw": "174",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1309,
+  "events": 839,
+  "bpm_main": 174,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 174.0,
+  "weighted_eff16": 130.3,
+  "scratch_pct": 3.97,
+  "chord_pct": 37.54,
+  "single_pct": 62.46,
+  "ranuchi": 54,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 446,
+      "pct": 53.2,
+      "eff16": 174.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 331,
+      "pct": 39.5,
+      "eff16": 87.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 49,
+      "pct": 5.8,
+      "eff16": 43.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 58.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 34.8
+    }
+  },
+  "chord_dist": {
+    "1": 524,
+    "2": 203,
+    "3": 79,
+    "4": 23,
+    "5": 10
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 443,
+      "pct": 35.3,
+      "eff16": 174.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 423,
+      "pct": 33.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 327,
+      "pct": 26.0,
+      "eff16": 87.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 48,
+      "pct": 3.8,
+      "eff16": 43.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 0.8,
+      "eff16": 58.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 34.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 21.6,
+      "eff16": 43.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 13.7,
+      "eff16": 29.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 11.8,
+      "eff16": 87.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 5,
+      "pct": 9.8,
+      "eff16": 7.2
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 9.8,
+      "eff16": 21.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 7.8,
+      "eff16": 10.9
+    },
+    "2976": {
+      "name": "(2976)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 1.4
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 6.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 17.4
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 5.8
+    }
+  },
+  "cn_notes": 10,
+  "cn_scratch_pct": 9.09,
+  "cn_kbd_overlap_pct": 1.67,
+  "cn_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 22.2,
+      "eff16": 5.4
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 22.2,
+      "eff16": 21.8
+    },
+    "9120": {
+      "name": "(9120)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 0.5
+    },
+    "7680": {
+      "name": "(7680)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 0.5
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 3.1
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 3.3
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 2.6
+    }
+  }
+}

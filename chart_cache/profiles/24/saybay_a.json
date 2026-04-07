@@ -1,0 +1,271 @@
+{
+  "textage": "24/saybay.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:00.831564+00:00",
+  "title": "SAY BAY",
+  "artist": "P*Light",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1375,
+  "events": 767,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 134.2,
+  "scratch_pct": 13.02,
+  "chord_pct": 57.37,
+  "single_pct": 42.63,
+  "ranuchi": 51,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 443,
+      "pct": 57.8,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 257,
+      "pct": 33.6,
+      "eff16": 82.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 20,
+      "pct": 2.6,
+      "eff16": 330.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 2.5,
+      "eff16": 55.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 2.2,
+      "eff16": 41.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 11.8
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.9
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.3
+    }
+  },
+  "chord_dist": {
+    "1": 327,
+    "2": 310,
+    "3": 96,
+    "4": 30,
+    "5": 4
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 461,
+      "pct": 38.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 423,
+      "pct": 35.4,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 241,
+      "pct": 20.2,
+      "eff16": 82.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 1.7,
+      "eff16": 55.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 20,
+      "pct": 1.7,
+      "eff16": 330.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 41.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 27.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 33.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.3
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 57,
+      "pct": 32.0,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 39,
+      "pct": 21.9,
+      "eff16": 41.2
+    },
+    "0": {
+      "name": "(0)",
+      "count": 12,
+      "pct": 6.7,
+      "eff16": 0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 11,
+      "pct": 6.2,
+      "eff16": 10.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 5.6,
+      "eff16": 27.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 9,
+      "pct": 5.1,
+      "eff16": 165.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 9,
+      "pct": 5.1,
+      "eff16": 13.8
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 4.5,
+      "eff16": 20.6
+    },
+    "312": {
+      "name": "(312)",
+      "count": 6,
+      "pct": 3.4,
+      "eff16": 12.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 3.4,
+      "eff16": 55.0
+    }
+  },
+  "cn_notes": 21,
+  "cn_scratch_pct": 23.81,
+  "cn_kbd_overlap_pct": 6.69,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 50.0,
+      "eff16": 10.3
+    },
+    "1728": {
+      "name": "(1728)",
+      "count": 2,
+      "pct": 10.0,
+      "eff16": 2.3
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 10.0,
+      "eff16": 23.6
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 10.0,
+      "eff16": 18.3
+    },
+    "8640": {
+      "name": "(8640)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 0.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 1.3
+    },
+    "6240": {
+      "name": "(6240)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 0.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 41.2
+    }
+  }
+}

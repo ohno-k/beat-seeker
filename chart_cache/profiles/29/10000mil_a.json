@@ -1,0 +1,264 @@
+{
+  "textage": "29/10000mil.html?1AB00",
+  "analyzed_at": "2026-04-06T10:48:11.677635+00:00",
+  "title": "10000 MILES AWAY",
+  "artist": "AJURIKA",
+  "bpm_raw": "178",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1306,
+  "events": 742,
+  "bpm_main": 178,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 89.0,
+  "weighted_eff16": 119.2,
+  "scratch_pct": 9.95,
+  "chord_pct": 54.58,
+  "single_pct": 45.42,
+  "ranuchi": 56,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 438,
+      "pct": 59.1,
+      "eff16": 89.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 191,
+      "pct": 25.8,
+      "eff16": 178.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 48,
+      "pct": 6.5,
+      "eff16": 267.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 43,
+      "pct": 5.8,
+      "eff16": 44.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 2.0,
+      "eff16": 29.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 17.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 59.3
+    }
+  },
+  "chord_dist": {
+    "1": 337,
+    "2": 259,
+    "3": 136,
+    "4": 7,
+    "5": 3
+  },
+  "tags": [
+    "scratch_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 446,
+      "pct": 38.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 438,
+      "pct": 37.3,
+      "eff16": 89.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 191,
+      "pct": 16.3,
+      "eff16": 178.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 48,
+      "pct": 4.1,
+      "eff16": 267.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 39,
+      "pct": 3.3,
+      "eff16": 44.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 29.7
+    },
+    "624": {
+      "name": "(624)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 6.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 59.3
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 53,
+      "pct": 41.1,
+      "eff16": 89.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 12.4,
+      "eff16": 44.5
+    },
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 11.6,
+      "eff16": 22.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 11.6,
+      "eff16": 29.7
+    },
+    "624": {
+      "name": "(624)",
+      "count": 9,
+      "pct": 7.0,
+      "eff16": 6.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 14.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 8.9
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 3.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 1.6,
+      "eff16": 11.1
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 1.6,
+      "eff16": 3.7
+    }
+  },
+  "cn_notes": 63,
+  "cn_scratch_pct": 8.65,
+  "cn_kbd_overlap_pct": 7.82,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 21.3,
+      "eff16": 44.5
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 18.0,
+      "eff16": 22.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 9,
+      "pct": 14.8,
+      "eff16": 89.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 8.2,
+      "eff16": 12.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 6.6,
+      "eff16": 29.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 4.9,
+      "eff16": 11.1
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 5.6
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 7.4
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 5.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 14.8
+    }
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "textage": "21/closewdl.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:18.701776+00:00",
+  "title": "Close the World feat.a☆ru",
+  "artist": "天叢雲剣",
+  "bpm_raw": "188",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1860,
+  "events": 973,
+  "bpm_main": 188,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 188.0,
+  "weighted_eff16": 168.1,
+  "scratch_pct": 5.91,
+  "chord_pct": 52.52,
+  "single_pct": 47.48,
+  "ranuchi": 123,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 724,
+      "pct": 74.5,
+      "eff16": 188.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 161,
+      "pct": 16.6,
+      "eff16": 94.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 39,
+      "pct": 4.0,
+      "eff16": 47.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 26,
+      "pct": 2.7,
+      "eff16": 376.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 31.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 18.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 13.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 62.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.5
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.2
+    }
+  },
+  "chord_dist": {
+    "1": 462,
+    "2": 238,
+    "3": 184,
+    "4": 75,
+    "5": 14
+  },
+  "tags": [
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 793,
+      "pct": 45.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 700,
+      "pct": 40.0,
+      "eff16": 188.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 169,
+      "pct": 9.7,
+      "eff16": 94.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 2.1,
+      "eff16": 47.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 26,
+      "pct": 1.5,
+      "eff16": 376.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 0.7,
+      "eff16": 31.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 18.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 13.4
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 62.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 21.1,
+      "eff16": 47.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 20,
+      "pct": 18.3,
+      "eff16": 94.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 15,
+      "pct": 13.8,
+      "eff16": 188.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 7.3,
+      "eff16": 23.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 6,
+      "pct": 5.5,
+      "eff16": 13.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 4.6,
+      "eff16": 31.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 5,
+      "pct": 4.6,
+      "eff16": 10.4
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 4,
+      "pct": 3.7,
+      "eff16": 3.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 3.7,
+      "eff16": 11.8
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 2.8,
+      "eff16": 6.3
+    }
+  }
+}

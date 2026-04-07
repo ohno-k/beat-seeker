@@ -1,0 +1,212 @@
+{
+  "textage": "28/_vajra.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:08.296511+00:00",
+  "title": "伐折羅-vajra-",
+  "artist": "DJ TOTTO VS 兎々",
+  "bpm_raw": "173",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1877,
+  "events": 1111,
+  "bpm_main": 173,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 173.0,
+  "weighted_eff16": 167.1,
+  "scratch_pct": 5.27,
+  "chord_pct": 48.33,
+  "single_pct": 51.67,
+  "ranuchi": 117,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 749,
+      "pct": 67.5,
+      "eff16": 173.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 161,
+      "pct": 14.5,
+      "eff16": 129.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 79,
+      "pct": 7.1,
+      "eff16": 86.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 68,
+      "pct": 6.1,
+      "eff16": 259.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 2.0,
+      "eff16": 43.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 519.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 57.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 346.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.6
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.8
+    }
+  },
+  "chord_dist": {
+    "1": 574,
+    "2": 369,
+    "3": 118,
+    "4": 39,
+    "5": 11
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 731,
+      "pct": 41.1,
+      "eff16": 173.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 684,
+      "pct": 38.5,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 161,
+      "pct": 9.1,
+      "eff16": 129.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 78,
+      "pct": 4.4,
+      "eff16": 86.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 68,
+      "pct": 3.8,
+      "eff16": 259.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.1,
+      "eff16": 43.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 12,
+      "pct": 0.7,
+      "eff16": 519.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 0.6,
+      "eff16": 57.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 346.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 19.2
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 26,
+      "pct": 26.5,
+      "eff16": 86.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 20.4,
+      "eff16": 43.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 15,
+      "pct": 15.3,
+      "eff16": 5.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 15,
+      "pct": 15.3,
+      "eff16": 10.8
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 9.2,
+      "eff16": 21.6
+    },
+    "576": {
+      "name": "(576)",
+      "count": 5,
+      "pct": 5.1,
+      "eff16": 7.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 4.1,
+      "eff16": 57.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 2.7
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 1.0,
+      "eff16": 3.6
+    }
+  }
+}

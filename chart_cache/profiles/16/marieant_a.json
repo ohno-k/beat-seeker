@@ -1,0 +1,218 @@
+{
+  "textage": "16/marieant.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:17.494288+00:00",
+  "title": "Marie Antoinette",
+  "artist": "Marguerite du Pré",
+  "bpm_raw": "205-248",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1278,
+  "events": 801,
+  "bpm_main": 248,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 124.0,
+  "weighted_eff16": 141.1,
+  "scratch_pct": 5.09,
+  "chord_pct": 44.44,
+  "single_pct": 55.56,
+  "ranuchi": 75,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 492,
+      "pct": 61.5,
+      "eff16": 124.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 124,
+      "pct": 15.5,
+      "eff16": 186.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 90,
+      "pct": 11.2,
+      "eff16": 62.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 56,
+      "pct": 7.0,
+      "eff16": 248.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 3.0,
+      "eff16": 372.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 20.7
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 31.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 93.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.8
+    }
+  },
+  "chord_dist": {
+    "1": 445,
+    "2": 256,
+    "3": 81,
+    "4": 17,
+    "5": 2
+  },
+  "tags": [
+    "has_triplet",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 486,
+      "pct": 40.1,
+      "eff16": 124.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 416,
+      "pct": 34.3,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 124,
+      "pct": 10.2,
+      "eff16": 186.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 92,
+      "pct": 7.6,
+      "eff16": 62.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 56,
+      "pct": 4.6,
+      "eff16": 248.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 2.0,
+      "eff16": 372.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 20.7
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 31.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 93.0
+    }
+  },
+  "scr_interval_dist": {
+    "288": {
+      "name": "(288)",
+      "count": 27,
+      "pct": 42.2,
+      "eff16": 20.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 25.0,
+      "eff16": 62.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 12.5,
+      "eff16": 31.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 5,
+      "pct": 7.8,
+      "eff16": 10.3
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 2.6
+    },
+    "960": {
+      "name": "(960)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 6.2
+    },
+    "5088": {
+      "name": "(5088)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 1.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 12.4
+    },
+    "5760": {
+      "name": "(5760)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 1.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 6.9
+    }
+  }
+}

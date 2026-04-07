@@ -1,0 +1,217 @@
+{
+  "textage": "28/rommmo.html?1AC00",
+  "analyzed_at": "2026-04-06T10:59:34.220074+00:00",
+  "title": "rommmo",
+  "artist": "callasoiled",
+  "bpm_raw": "208",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1762,
+  "events": 854,
+  "bpm_main": 208,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 104.0,
+  "weighted_eff16": 138.7,
+  "scratch_pct": 6.24,
+  "chord_pct": 67.92,
+  "single_pct": 32.08,
+  "ranuchi": 77,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 488,
+      "pct": 57.2,
+      "eff16": 104.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 315,
+      "pct": 36.9,
+      "eff16": 208.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 3.2,
+      "eff16": 52.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 34.7
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 26.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 14.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 69.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 17.3
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.7
+    }
+  },
+  "chord_dist": {
+    "1": 274,
+    "2": 324,
+    "3": 192,
+    "4": 56,
+    "5": 8
+  },
+  "tags": [
+    "chord_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 806,
+      "pct": 48.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 484,
+      "pct": 29.3,
+      "eff16": 104.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 314,
+      "pct": 19.0,
+      "eff16": 208.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 1.6,
+      "eff16": 52.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 0.6,
+      "eff16": 34.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 14.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 13.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 69.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 17.3
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 30,
+      "pct": 27.5,
+      "eff16": 26.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 25.7,
+      "eff16": 52.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 9.2,
+      "eff16": 13.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 7.3,
+      "eff16": 104.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 7.3,
+      "eff16": 34.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 8,
+      "pct": 7.3,
+      "eff16": 17.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 3.7,
+      "eff16": 20.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.8,
+      "eff16": 3.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 1.8,
+      "eff16": 8.7
+    },
+    "6000": {
+      "name": "(6000)",
+      "count": 1,
+      "pct": 0.9,
+      "eff16": 0.8
+    }
+  }
+}

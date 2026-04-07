@@ -161,6 +161,39 @@ public class EmailService {
         }
     }
 
+    @Async
+    public void sendSupporterActivatedNotification(String toEmail, String userName, String iidxId) {
+        String html = """
+                <!DOCTYPE html>
+                <html lang="ja">
+                <body style="font-family:sans-serif;background:#f8fafc;padding:32px;">
+                  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
+                    <h2 style="color:#1e293b;margin-top:0;">新しいサポーターが登録されました</h2>
+                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:20px;margin:16px 0;text-align:center;">
+                      <div style="font-size:11px;color:#92400e;margin-bottom:8px;font-weight:bold;">SUPPORTER</div>
+                      <div style="font-size:24px;font-weight:900;color:#d97706;">%s</div>
+                      <div style="font-size:13px;color:#92400e;margin-top:4px;">IIDX ID: %s</div>
+                    </div>
+                    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+                    <p style="color:#94a3b8;font-size:11px;">beat-seeker</p>
+                  </div>
+                </body>
+                </html>
+                """.formatted(escapeHtml(userName), escapeHtml(iidxId));
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject("[beat-seeker] " + userName + "さんがサポーターになりました");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            System.err.println("Failed to send supporter notification: " + e.getMessage());
+        }
+    }
+
     private String escapeHtml(String s) {
         if (s == null) return "";
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");

@@ -1,0 +1,286 @@
+{
+  "textage": "29/pperplex.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:22.028608+00:00",
+  "title": "Purple Perplex",
+  "artist": "Eagle",
+  "bpm_raw": "150",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1482,
+  "events": 861,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 147.6,
+  "scratch_pct": 14.17,
+  "chord_pct": 48.78,
+  "single_pct": 51.22,
+  "ranuchi": 58,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 515,
+      "pct": 59.9,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 141,
+      "pct": 16.4,
+      "eff16": 75.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 46,
+      "pct": 5.3,
+      "eff16": 225.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 43,
+      "pct": 5.0,
+      "eff16": 300.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 39,
+      "pct": 4.5,
+      "eff16": 112.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 3.5,
+      "eff16": 37.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 450.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 56.2
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 18.8
+    },
+    "4": {
+      "name": "(4)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 900.0
+    }
+  },
+  "chord_dist": {
+    "1": 441,
+    "2": 287,
+    "3": 86,
+    "4": 32,
+    "5": 10,
+    "6": 4,
+    "7": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 531,
+      "pct": 41.8,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 369,
+      "pct": 29.0,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 169,
+      "pct": 13.3,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 52,
+      "pct": 4.1,
+      "eff16": 37.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 48,
+      "pct": 3.8,
+      "eff16": 225.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 40,
+      "pct": 3.1,
+      "eff16": 112.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 35,
+      "pct": 2.8,
+      "eff16": 300.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 18.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 56.2
+    },
+    "4": {
+      "name": "(4)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 900.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 77,
+      "pct": 36.8,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 73,
+      "pct": 34.9,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 5.7,
+      "eff16": 37.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 2.4,
+      "eff16": 9.4
+    },
+    "216": {
+      "name": "(216)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 16.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 50.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 30.0
+    },
+    "56": {
+      "name": "(56)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 64.3
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 18.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 112.5
+    }
+  },
+  "cn_notes": 28,
+  "cn_scratch_pct": 30.77,
+  "cn_kbd_overlap_pct": 6.05,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 29.6,
+      "eff16": 9.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 14.8,
+      "eff16": 4.7
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 7.4,
+      "eff16": 5.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 7.4,
+      "eff16": 75.0
+    },
+    "2208": {
+      "name": "(2208)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 1.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 25.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 7.5
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 3.4
+    },
+    "7632": {
+      "name": "(7632)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 0.5
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 4.4
+    }
+  }
+}

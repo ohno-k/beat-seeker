@@ -1,0 +1,283 @@
+{
+  "textage": "33/korskimg.html?1AC00",
+  "analyzed_at": "2026-04-06T10:59:14.245510+00:00",
+  "title": "kors k's Let's make an Image Song!",
+  "artist": "kors k",
+  "bpm_raw": "176",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1302,
+  "events": 784,
+  "bpm_main": 176,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 88.0,
+  "weighted_eff16": 121.8,
+  "scratch_pct": 11.44,
+  "chord_pct": 46.81,
+  "single_pct": 53.19,
+  "ranuchi": 57,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 421,
+      "pct": 53.8,
+      "eff16": 88.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 289,
+      "pct": 36.9,
+      "eff16": 176.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 5.9,
+      "eff16": 44.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 211.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 29.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 58.7
+    },
+    "4": {
+      "name": "(4)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 1056.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 150.9
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 117.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 352.0
+    }
+  },
+  "chord_dist": {
+    "1": 417,
+    "2": 250,
+    "3": 84,
+    "4": 32,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 409,
+      "pct": 35.5,
+      "eff16": 88.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 391,
+      "pct": 33.9,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 284,
+      "pct": 24.7,
+      "eff16": 176.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 55,
+      "pct": 4.8,
+      "eff16": 44.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 211.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 29.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 58.7
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 264.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 35.2
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 63,
+      "pct": 42.6,
+      "eff16": 88.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 15.5,
+      "eff16": 44.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 8.1,
+      "eff16": 11.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 5.4,
+      "eff16": 29.3
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 4.7,
+      "eff16": 22.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 6,
+      "pct": 4.1,
+      "eff16": 17.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 3.4,
+      "eff16": 5.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 2.7,
+      "eff16": 7.3
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 6.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 8.8
+    }
+  },
+  "cn_notes": 30,
+  "cn_scratch_pct": 7.14,
+  "cn_kbd_overlap_pct": 4.34,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 20.7,
+      "eff16": 22.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 3.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 44.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 88.0
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 3.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 29.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 11.0
+    },
+    "1104": {
+      "name": "(1104)",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 3.8
+    },
+    "4224": {
+      "name": "(4224)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 1.0
+    },
+    "2928": {
+      "name": "(2928)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 1.4
+    }
+  }
+}

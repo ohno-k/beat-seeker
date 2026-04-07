@@ -1,0 +1,163 @@
+{
+  "textage": "13/mint.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:12.074697+00:00",
+  "title": "MINT",
+  "artist": "SLAKE",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1108,
+  "events": 651,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 131.8,
+  "scratch_pct": 1.71,
+  "chord_pct": 51.15,
+  "single_pct": 48.85,
+  "ranuchi": 53,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 510,
+      "pct": 78.5,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 95,
+      "pct": 14.6,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 29,
+      "pct": 4.5,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 2.3,
+      "eff16": 37.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 8.8
+    }
+  },
+  "chord_dist": {
+    "1": 318,
+    "2": 230,
+    "3": 86,
+    "4": 13,
+    "5": 4
+  },
+  "tags": [
+    "scratch_low",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 507,
+      "pct": 46.6,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 442,
+      "pct": 40.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 91,
+      "pct": 8.4,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 31,
+      "pct": 2.8,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.5,
+      "eff16": 37.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.8
+    }
+  },
+  "scr_interval_dist": {
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 22.2,
+      "eff16": 15.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 16.7,
+      "eff16": 4.7
+    },
+    "960": {
+      "name": "(960)",
+      "count": 2,
+      "pct": 11.1,
+      "eff16": 3.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 11.1,
+      "eff16": 10.7
+    },
+    "5280": {
+      "name": "(5280)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 0.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 6.2
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 2.8
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 6.8
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 0.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 2.3
+    }
+  }
+}

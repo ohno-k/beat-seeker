@@ -1,0 +1,150 @@
+{
+  "textage": "8/xenon.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:51.607714+00:00",
+  "title": "xenon",
+  "artist": "Mr.T",
+  "bpm_raw": "158",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1241,
+  "events": 902,
+  "bpm_main": 158,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 158.0,
+  "weighted_eff16": 149.7,
+  "scratch_pct": 3.63,
+  "chord_pct": 32.93,
+  "single_pct": 67.07,
+  "ranuchi": 40,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 813,
+      "pct": 90.2,
+      "eff16": 158.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 77,
+      "pct": 8.5,
+      "eff16": 79.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 52.7
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 9.3
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.8
+    }
+  },
+  "chord_dist": {
+    "1": 605,
+    "2": 256,
+    "3": 40,
+    "4": 1
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 796,
+      "pct": 66.6,
+      "eff16": 158.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 304,
+      "pct": 25.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 82,
+      "pct": 6.9,
+      "eff16": 79.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 52.7
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 9.3
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.8
+    }
+  },
+  "scr_interval_dist": {
+    "288": {
+      "name": "(288)",
+      "count": 13,
+      "pct": 29.5,
+      "eff16": 13.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 22.7,
+      "eff16": 39.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 7,
+      "pct": 15.9,
+      "eff16": 3.3
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 6,
+      "pct": 13.6,
+      "eff16": 3.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 11.4,
+      "eff16": 19.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 6.8,
+      "eff16": 2.5
+    }
+  }
+}

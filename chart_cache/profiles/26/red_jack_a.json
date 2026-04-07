@@ -1,0 +1,224 @@
+{
+  "textage": "26/red_jack.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:46.051347+00:00",
+  "title": "Red. by Jack Trance",
+  "artist": "DJ Mass MAD Izm*",
+  "bpm_raw": "160",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1854,
+  "events": 871,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 133.6,
+  "scratch_pct": 27.45,
+  "chord_pct": 63.72,
+  "single_pct": 36.28,
+  "ranuchi": 92,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 477,
+      "pct": 54.8,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 318,
+      "pct": 36.6,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 34,
+      "pct": 3.9,
+      "eff16": 240.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.8,
+      "eff16": 320.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.6,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 40.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 26.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 32.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.4
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 120.0
+    }
+  },
+  "chord_dist": {
+    "1": 316,
+    "2": 269,
+    "3": 180,
+    "4": 77,
+    "5": 22,
+    "6": 7
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 631,
+      "pct": 46.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 443,
+      "pct": 33.0,
+      "eff16": 80.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 215,
+      "pct": 16.0,
+      "eff16": 160.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 22,
+      "pct": 1.6,
+      "eff16": 53.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 320.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 26.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 32.0
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 259,
+      "pct": 51.0,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 141,
+      "pct": 27.8,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 26,
+      "pct": 5.1,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 3.5,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 17,
+      "pct": 3.3,
+      "eff16": 53.3
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 1.8,
+      "eff16": 20.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 1.4,
+      "eff16": 26.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 1.2,
+      "eff16": 10.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 1.0,
+      "eff16": 32.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 4,
+      "pct": 0.8,
+      "eff16": 17.8
+    }
+  },
+  "cn_notes": 1,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {}
+}

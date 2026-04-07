@@ -1,0 +1,234 @@
+{
+  "textage": "28/_turn_a.html?1AC00",
+  "analyzed_at": "2026-04-06T10:59:59.593156+00:00",
+  "title": "∀",
+  "artist": "BEMANI Sound Team \"HuΣeR\" respect for D.J.Amuro",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1770,
+  "events": 938,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 156.6,
+  "scratch_pct": 5.65,
+  "chord_pct": 56.18,
+  "single_pct": 43.82,
+  "ranuchi": 132,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 671,
+      "pct": 71.6,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 186,
+      "pct": 19.9,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 58,
+      "pct": 6.2,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 540.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 22.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 36.0
+    }
+  },
+  "chord_dist": {
+    "1": 411,
+    "2": 303,
+    "3": 153,
+    "4": 61,
+    "5": 10
+  },
+  "tags": [
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 747,
+      "pct": 44.8,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 664,
+      "pct": 39.8,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 175,
+      "pct": 10.5,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 62,
+      "pct": 3.7,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 540.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 22.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 36.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 20,
+      "pct": 20.2,
+      "eff16": 90.0
+    },
+    "192": {
+      "name": "half",
+      "count": 18,
+      "pct": 18.2,
+      "eff16": 22.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 15.2,
+      "eff16": 45.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 12.1,
+      "eff16": 11.2
+    },
+    "720": {
+      "name": "(720)",
+      "count": 5,
+      "pct": 5.1,
+      "eff16": 6.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 4.0,
+      "eff16": 15.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 4,
+      "pct": 4.0,
+      "eff16": 180.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.0,
+      "eff16": 5.6
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 3.0,
+      "eff16": 12.9
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 3.2
+    }
+  },
+  "cn_notes": 14,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 9,
+      "pct": 69.2,
+      "eff16": 90.0
+    },
+    "624": {
+      "name": "(624)",
+      "count": 2,
+      "pct": 15.4,
+      "eff16": 6.9
+    },
+    "2976": {
+      "name": "(2976)",
+      "count": 1,
+      "pct": 7.7,
+      "eff16": 1.5
+    },
+    "7536": {
+      "name": "(7536)",
+      "count": 1,
+      "pct": 7.7,
+      "eff16": 0.6
+    }
+  }
+}

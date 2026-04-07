@@ -1,0 +1,217 @@
+{
+  "textage": "17/sssquadl.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:06.779286+00:00",
+  "title": "SOLID STATE SQUAD",
+  "artist": "kors k Vs. L.E.D.",
+  "bpm_raw": "155",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1720,
+  "events": 929,
+  "bpm_main": 155,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 155.0,
+  "weighted_eff16": 137.9,
+  "scratch_pct": 7.33,
+  "chord_pct": 51.78,
+  "single_pct": 48.22,
+  "ranuchi": 136,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 702,
+      "pct": 75.6,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 191,
+      "pct": 20.6,
+      "eff16": 77.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 310.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 38.8
+    },
+    "84": {
+      "name": "(84)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 44.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 8.6
+    },
+    "300": {
+      "name": "(300)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 12.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 51.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 232.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 465.0
+    }
+  },
+  "chord_dist": {
+    "1": 448,
+    "2": 253,
+    "3": 149,
+    "4": 76,
+    "5": 3
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 700,
+      "pct": 43.9,
+      "eff16": 155.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 680,
+      "pct": 42.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 186,
+      "pct": 11.7,
+      "eff16": 77.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 8.6
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 310.0
+    },
+    "60": {
+      "name": "(60)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 62.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 51.7
+    },
+    "84": {
+      "name": "(84)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 44.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 11.1
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 232.5
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 29.6,
+      "eff16": 38.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 25,
+      "pct": 20.0,
+      "eff16": 77.5
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 8.8,
+      "eff16": 19.4
+    },
+    "24": {
+      "name": "16th",
+      "count": 9,
+      "pct": 7.2,
+      "eff16": 155.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 4.0,
+      "eff16": 15.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 4.0,
+      "eff16": 9.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 3.2,
+      "eff16": 6.5
+    },
+    "84": {
+      "name": "(84)",
+      "count": 3,
+      "pct": 2.4,
+      "eff16": 44.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.4,
+      "eff16": 25.8
+    },
+    "300": {
+      "name": "(300)",
+      "count": 2,
+      "pct": 1.6,
+      "eff16": 12.4
+    }
+  }
+}

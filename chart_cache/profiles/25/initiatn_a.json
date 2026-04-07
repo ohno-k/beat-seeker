@@ -1,0 +1,267 @@
+{
+  "textage": "25/initiatn.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:15.788937+00:00",
+  "title": "Initiation",
+  "artist": "BEMANI Sound Team \"謎の勢力\"",
+  "bpm_raw": "160",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1727,
+  "events": 817,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 148.4,
+  "scratch_pct": 1.74,
+  "chord_pct": 74.17,
+  "single_pct": 25.83,
+  "ranuchi": 24,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 706,
+      "pct": 86.5,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 69,
+      "pct": 8.5,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 2.5,
+      "eff16": 53.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 120.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 40.0
+    },
+    "56": {
+      "name": "(56)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 68.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 16.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.4
+    },
+    "6168": {
+      "name": "(6168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 0.6
+    }
+  },
+  "chord_dist": {
+    "1": 211,
+    "2": 361,
+    "3": 204,
+    "4": 30,
+    "5": 4,
+    "6": 7
+  },
+  "tags": [
+    "scratch_low",
+    "chord_heavy",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 886,
+      "pct": 52.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 705,
+      "pct": 41.6,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 63,
+      "pct": 3.7,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 1.2,
+      "eff16": 53.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 0.6,
+      "eff16": 120.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "56": {
+      "name": "(56)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 68.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 16.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 26.7
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 9.4
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 8,
+      "pct": 27.6,
+      "eff16": 2.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 20.7,
+      "eff16": 80.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 13.8,
+      "eff16": 10.0
+    },
+    "1104": {
+      "name": "(1104)",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 3.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 11.4
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 6.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 26.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 5.0
+    },
+    "9120": {
+      "name": "(9120)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 0.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 40.0
+    }
+  },
+  "cn_notes": 48,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 3.3,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 35.7,
+      "eff16": 20.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 23.8,
+      "eff16": 10.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 23.8,
+      "eff16": 40.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 3.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 11.4
+    },
+    "2400": {
+      "name": "(2400)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 1.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 16.0
+    },
+    "4224": {
+      "name": "(4224)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 0.9
+    }
+  }
+}

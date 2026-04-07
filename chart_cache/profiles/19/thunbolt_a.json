@@ -1,0 +1,217 @@
+{
+  "textage": "19/thunbolt.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:45.509614+00:00",
+  "title": "Thunderbolt",
+  "artist": "雷龍",
+  "bpm_raw": "188",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1373,
+  "events": 676,
+  "bpm_main": 188,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 188.0,
+  "weighted_eff16": 134.6,
+  "scratch_pct": 7.5,
+  "chord_pct": 68.49,
+  "single_pct": 31.51,
+  "ranuchi": 25,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 320,
+      "pct": 47.4,
+      "eff16": 188.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 306,
+      "pct": 45.3,
+      "eff16": 94.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 3.0,
+      "eff16": 62.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 1.6,
+      "eff16": 47.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 10,
+      "pct": 1.5,
+      "eff16": 10.4
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 11.1
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.5
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.4
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.6
+    }
+  },
+  "chord_dist": {
+    "1": 213,
+    "2": 280,
+    "3": 134,
+    "4": 47,
+    "5": 2
+  },
+  "tags": [
+    "chord_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 605,
+      "pct": 47.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 317,
+      "pct": 25.0,
+      "eff16": 188.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 289,
+      "pct": 22.8,
+      "eff16": 94.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 21,
+      "pct": 1.7,
+      "eff16": 62.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.5,
+      "eff16": 47.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 10.4
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 11.1
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.4
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.5
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.8
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 23,
+      "pct": 22.5,
+      "eff16": 94.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 21,
+      "pct": 20.6,
+      "eff16": 11.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 20.6,
+      "eff16": 47.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 8,
+      "pct": 7.8,
+      "eff16": 5.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 3.9,
+      "eff16": 15.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 3.9,
+      "eff16": 31.3
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 3.9
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 23.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 188.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 10.4
+    }
+  }
+}

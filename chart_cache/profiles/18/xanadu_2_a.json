@@ -1,0 +1,198 @@
+{
+  "textage": "18/xanadu_2.html?1AC00",
+  "analyzed_at": "2026-04-06T06:41:21.437239+00:00",
+  "title": "XANADU OF TWO",
+  "artist": "T.Kakuta With Starving Trancer + 森永真由美",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1270,
+  "events": 796,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 117.7,
+  "scratch_pct": 3.54,
+  "chord_pct": 48.12,
+  "single_pct": 51.88,
+  "ranuchi": 31,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 386,
+      "pct": 48.6,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 384,
+      "pct": 48.3,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 2.0,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 40.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.9
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.3
+    }
+  },
+  "chord_dist": {
+    "1": 413,
+    "2": 304,
+    "3": 68,
+    "4": 10,
+    "5": 1
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 431,
+      "pct": 35.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 384,
+      "pct": 31.4,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 382,
+      "pct": 31.2,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 1.5,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 40.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.9
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.3
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 20.5,
+      "eff16": 10.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 15.9,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 9.1,
+      "eff16": 40.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 9.1,
+      "eff16": 5.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 9.1,
+      "eff16": 53.3
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 3,
+      "pct": 6.8,
+      "eff16": 1.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 6.8,
+      "eff16": 2.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 2,
+      "pct": 4.5,
+      "eff16": 0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 4.5,
+      "eff16": 1.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 4.5,
+      "eff16": 26.7
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "textage": "19/_seijin.html?1XC00",
+  "analyzed_at": "2026-04-06T11:02:14.601425+00:00",
+  "title": "聖人の塔",
+  "artist": "Beridzebeth",
+  "bpm_raw": "97-194",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 2152,
+  "events": 1174,
+  "bpm_main": 194,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 194.0,
+  "weighted_eff16": 210.8,
+  "scratch_pct": 1.16,
+  "chord_pct": 59.97,
+  "single_pct": 40.03,
+  "ranuchi": 304,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 840,
+      "pct": 71.6,
+      "eff16": 194.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 180,
+      "pct": 15.3,
+      "eff16": 388.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 146,
+      "pct": 12.4,
+      "eff16": 97.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 48.5
+    }
+  },
+  "chord_dist": {
+    "1": 470,
+    "2": 471,
+    "3": 194,
+    "4": 37,
+    "5": 2
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 953,
+      "pct": 44.8,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 840,
+      "pct": 39.5,
+      "eff16": 194.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 180,
+      "pct": 8.5,
+      "eff16": 388.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 146,
+      "pct": 6.9,
+      "eff16": 97.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.3,
+      "eff16": 48.5
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 10,
+      "pct": 41.7,
+      "eff16": 3.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 1.5
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 24.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 10.8
+    },
+    "1008": {
+      "name": "(1008)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 4.6
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 8.8
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 3.9
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 13.9
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 1.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 16.2
+    }
+  },
+  "cn_notes": 62,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 11.42,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 29,
+      "pct": 47.5,
+      "eff16": 32.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 19.7,
+      "eff16": 48.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 6.6,
+      "eff16": 64.7
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 4.9,
+      "eff16": 97.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 24.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 4.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 10.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 12.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 16.2
+    },
+    "3744": {
+      "name": "(3744)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 1.2
+    }
+  }
+}

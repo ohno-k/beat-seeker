@@ -1,0 +1,168 @@
+{
+  "textage": "28/explorer.html?1AC00",
+  "analyzed_at": "2026-04-06T06:34:37.312308+00:00",
+  "title": "Explorer feat. ぷにぷに電機",
+  "artist": "パソコン音楽クラブ",
+  "bpm_raw": "131",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1461,
+  "events": 915,
+  "bpm_main": 131,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 131.0,
+  "weighted_eff16": 127.1,
+  "scratch_pct": 3.76,
+  "chord_pct": 48.85,
+  "single_pct": 51.15,
+  "ranuchi": 72,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 718,
+      "pct": 78.6,
+      "eff16": 131.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 118,
+      "pct": 12.9,
+      "eff16": 65.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 72,
+      "pct": 7.9,
+      "eff16": 196.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 32.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 43.7
+    }
+  },
+  "chord_dist": {
+    "1": 468,
+    "2": 361,
+    "3": 75,
+    "4": 9,
+    "5": 2
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 694,
+      "pct": 49.4,
+      "eff16": 131.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 511,
+      "pct": 36.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 118,
+      "pct": 8.4,
+      "eff16": 65.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 72,
+      "pct": 5.1,
+      "eff16": 196.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 43.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 26.2
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.4
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 16,
+      "pct": 29.6,
+      "eff16": 131.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 12,
+      "pct": 22.2,
+      "eff16": 65.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 9,
+      "pct": 16.7,
+      "eff16": 2.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 7.4,
+      "eff16": 21.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 7.4,
+      "eff16": 32.8
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 2,
+      "pct": 3.7,
+      "eff16": 2.3
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 4.4
+    },
+    "696": {
+      "name": "(696)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 4.5
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 2.4
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 2.5
+    }
+  }
+}

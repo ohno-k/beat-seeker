@@ -1,0 +1,198 @@
+{
+  "textage": "20/saturn.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:24.237752+00:00",
+  "title": "Saturn",
+  "artist": "Mr.Saturn",
+  "bpm_raw": "155",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1283,
+  "events": 783,
+  "bpm_main": 155,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 155.0,
+  "weighted_eff16": 132.8,
+  "scratch_pct": 2.34,
+  "chord_pct": 51.21,
+  "single_pct": 48.79,
+  "ranuchi": 80,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 569,
+      "pct": 72.8,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 193,
+      "pct": 24.7,
+      "eff16": 77.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 51.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 38.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 9.1
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 19.4
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 8.6
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.8
+    }
+  },
+  "chord_dist": {
+    "1": 382,
+    "2": 308,
+    "3": 87,
+    "4": 6
+  },
+  "tags": [
+    "scratch_low",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 569,
+      "pct": 45.4,
+      "eff16": 155.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 473,
+      "pct": 37.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 191,
+      "pct": 15.3,
+      "eff16": 77.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 51.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 38.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.6
+    },
+    "600": {
+      "name": "(600)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.8
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 9,
+      "pct": 31.0,
+      "eff16": 77.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 20.7,
+      "eff16": 4.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 6.9,
+      "eff16": 12.9
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 4.3
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 1.0
+    },
+    "6096": {
+      "name": "(6096)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 0.6
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 4.6
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 3.2
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 7.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 15.5
+    }
+  }
+}

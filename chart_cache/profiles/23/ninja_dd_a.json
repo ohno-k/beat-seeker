@@ -1,0 +1,212 @@
+{
+  "textage": "23/ninja_dd.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:29.581750+00:00",
+  "title": "NINJA IS DEAD IIDX ver.",
+  "artist": "P*Light",
+  "bpm_raw": "111-222",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1527,
+  "events": 856,
+  "bpm_main": 222,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 111.0,
+  "weighted_eff16": 140.8,
+  "scratch_pct": 4.06,
+  "chord_pct": 51.99,
+  "single_pct": 48.01,
+  "ranuchi": 46,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 549,
+      "pct": 64.2,
+      "eff16": 111.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 250,
+      "pct": 29.2,
+      "eff16": 222.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 4.3,
+      "eff16": 55.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 166.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 74.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 27.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 18.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 37.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.9
+    }
+  },
+  "chord_dist": {
+    "1": 411,
+    "2": 261,
+    "3": 144,
+    "4": 38,
+    "5": 2
+  },
+  "tags": [
+    "has_triplet",
+    "soflan",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 622,
+      "pct": 42.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 541,
+      "pct": 37.0,
+      "eff16": 111.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 248,
+      "pct": 16.9,
+      "eff16": 222.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 2.1,
+      "eff16": 55.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 166.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 37.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 74.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 13.9
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 44.4
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.3
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 21,
+      "pct": 34.4,
+      "eff16": 27.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 11.5,
+      "eff16": 13.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 9.8,
+      "eff16": 6.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 6.6,
+      "eff16": 55.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 4.9,
+      "eff16": 18.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 111.0
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 3.3
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 4.3
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 4.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 3.5
+    }
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "textage": "30/volca_bb.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:08.305786+00:00",
+  "title": "VOLCANIC BIGBEAT",
+  "artist": "DJ Mass MAD Izm*",
+  "bpm_raw": "148",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1444,
+  "events": 859,
+  "bpm_main": 148,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 148.0,
+  "weighted_eff16": 128.6,
+  "scratch_pct": 19.74,
+  "chord_pct": 51.22,
+  "single_pct": 48.78,
+  "ranuchi": 84,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 538,
+      "pct": 62.7,
+      "eff16": 148.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 227,
+      "pct": 26.5,
+      "eff16": 74.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 54,
+      "pct": 6.3,
+      "eff16": 222.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 3.3,
+      "eff16": 37.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 111.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 49.3
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.5
+    }
+  },
+  "chord_dist": {
+    "1": 419,
+    "2": 306,
+    "3": 123,
+    "4": 11
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 433,
+      "pct": 37.4,
+      "eff16": 148.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 407,
+      "pct": 35.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 224,
+      "pct": 19.3,
+      "eff16": 74.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 57,
+      "pct": 4.9,
+      "eff16": 37.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 28,
+      "pct": 2.4,
+      "eff16": 222.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 49.3
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 18.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 55.5
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.1
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 100,
+      "pct": 35.2,
+      "eff16": 74.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 92,
+      "pct": 32.4,
+      "eff16": 148.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 7.4,
+      "eff16": 37.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 21,
+      "pct": 7.4,
+      "eff16": 222.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 10,
+      "pct": 3.5,
+      "eff16": 12.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 2.5,
+      "eff16": 111.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 2.1,
+      "eff16": 49.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 1.8,
+      "eff16": 9.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 1.4,
+      "eff16": 24.7
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 1.1,
+      "eff16": 5.3
+    }
+  }
+}

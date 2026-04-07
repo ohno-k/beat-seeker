@@ -11,5 +11,6 @@ public record ProfileUpdateRequest(
                 Integer privacyLevel,
                 String email,
                 String language,
-                Boolean showRateTier) {
+                Boolean showRateTier,
+                Boolean showSupporterBorder) {
 }

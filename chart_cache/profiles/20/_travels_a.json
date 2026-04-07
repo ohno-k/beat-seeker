@@ -1,0 +1,209 @@
+{
+  "textage": "20/_travels.html?1AB00",
+  "analyzed_at": "2026-04-06T11:01:07.633087+00:00",
+  "title": "仮想空間の旅人たち",
+  "artist": "DJ MURASAME",
+  "bpm_raw": "151",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1904,
+  "events": 1007,
+  "bpm_main": 151,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 151.0,
+  "weighted_eff16": 143.0,
+  "scratch_pct": 1.47,
+  "chord_pct": 53.13,
+  "single_pct": 46.87,
+  "ranuchi": 216,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 824,
+      "pct": 81.9,
+      "eff16": 151.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 163,
+      "pct": 16.2,
+      "eff16": 75.5
+    },
+    "20": {
+      "name": "(20)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 181.2
+    },
+    "4": {
+      "name": "(4)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 906.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 50.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 302.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 37.8
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 604.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 201.3
+    }
+  },
+  "chord_dist": {
+    "1": 472,
+    "2": 283,
+    "3": 183,
+    "4": 47,
+    "5": 10,
+    "6": 7,
+    "7": 3,
+    "8": 2
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 870,
+      "pct": 46.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 824,
+      "pct": 43.9,
+      "eff16": 151.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 163,
+      "pct": 8.7,
+      "eff16": 75.5
+    },
+    "20": {
+      "name": "(20)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 181.2
+    },
+    "4": {
+      "name": "(4)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 906.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 50.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 302.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 604.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 201.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 22.2,
+      "eff16": 37.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 18.5,
+      "eff16": 2.4
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 3,
+      "pct": 11.1,
+      "eff16": 1.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 11.1,
+      "eff16": 75.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 11.1,
+      "eff16": 25.2
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 7.4,
+      "eff16": 2.5
+    },
+    "2976": {
+      "name": "(2976)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 1.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 4.7
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 4.2
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 1.9
+    }
+  }
+}

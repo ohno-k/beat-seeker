@@ -1,0 +1,284 @@
+{
+  "textage": "28/locustrv.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:40.235995+00:00",
+  "title": "LOCUS OF THE TRAVEL",
+  "artist": "CANVAS feat. Quimär & BEMANI Sound Team \"L.E.D.-G\"",
+  "bpm_raw": "182",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1732,
+  "events": 1049,
+  "bpm_main": 182,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 182.0,
+  "weighted_eff16": 162.6,
+  "scratch_pct": 16.63,
+  "chord_pct": 45.47,
+  "single_pct": 54.53,
+  "ranuchi": 80,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 624,
+      "pct": 59.5,
+      "eff16": 182.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 296,
+      "pct": 28.2,
+      "eff16": 91.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 77,
+      "pct": 7.3,
+      "eff16": 273.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 2.5,
+      "eff16": 45.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 364.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 22.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 546.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 1092.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 60.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 136.5
+    }
+  },
+  "chord_dist": {
+    "1": 572,
+    "2": 305,
+    "3": 140,
+    "4": 30,
+    "5": 2
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 531,
+      "pct": 36.8,
+      "eff16": 182.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 467,
+      "pct": 32.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 312,
+      "pct": 21.6,
+      "eff16": 91.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 68,
+      "pct": 4.7,
+      "eff16": 273.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 35,
+      "pct": 2.4,
+      "eff16": 45.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 0.8,
+      "eff16": 60.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 364.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 22.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 136.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 546.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 113,
+      "pct": 39.4,
+      "eff16": 91.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 98,
+      "pct": 34.1,
+      "eff16": 182.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 5.9,
+      "eff16": 45.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 15,
+      "pct": 5.2,
+      "eff16": 11.4
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 3.5,
+      "eff16": 22.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 3.1,
+      "eff16": 273.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 1.4,
+      "eff16": 5.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 1.4,
+      "eff16": 60.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 1.0,
+      "eff16": 2.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 15.2
+    }
+  },
+  "cn_notes": 68,
+  "cn_scratch_pct": 2.5,
+  "cn_kbd_overlap_pct": 15.51,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 19.4,
+      "eff16": 11.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 13,
+      "pct": 19.4,
+      "eff16": 30.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 17.9,
+      "eff16": 45.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 6,
+      "pct": 9.0,
+      "eff16": 18.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 7.5,
+      "eff16": 91.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 7.5,
+      "eff16": 22.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 5.7
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 2.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 15.2
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 8.3
+    }
+  }
+}

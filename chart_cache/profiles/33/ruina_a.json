@@ -1,0 +1,283 @@
+{
+  "textage": "33/ruina.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:38.028286+00:00",
+  "title": "RUINA",
+  "artist": "Dustup VS MAX MAXIMIZER",
+  "bpm_raw": "160",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1477,
+  "events": 1003,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 210.0,
+  "scratch_pct": 5.08,
+  "chord_pct": 34.9,
+  "single_pct": 65.1,
+  "ranuchi": 80,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 474,
+      "pct": 47.3,
+      "eff16": 160.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 313,
+      "pct": 31.2,
+      "eff16": 320.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 73,
+      "pct": 7.3,
+      "eff16": 240.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 71,
+      "pct": 7.1,
+      "eff16": 80.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 20,
+      "pct": 2.0,
+      "eff16": 120.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 15,
+      "pct": 1.5,
+      "eff16": 480.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.4,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 53.3
+    },
+    "36": {
+      "name": "(36)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 106.7
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 20.0
+    }
+  },
+  "chord_dist": {
+    "1": 653,
+    "2": 248,
+    "3": 80,
+    "4": 22
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 472,
+      "pct": 33.7,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 427,
+      "pct": 30.5,
+      "eff16": 0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 312,
+      "pct": 22.3,
+      "eff16": 320.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 61,
+      "pct": 4.4,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 60,
+      "pct": 4.3,
+      "eff16": 240.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 20,
+      "pct": 1.4,
+      "eff16": 120.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 480.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 53.3
+    },
+    "36": {
+      "name": "(36)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 106.7
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 24,
+      "pct": 32.4,
+      "eff16": 20.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 17.6,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 14.9,
+      "eff16": 40.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 8.1,
+      "eff16": 10.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 8.1,
+      "eff16": 80.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 2.5
+    },
+    "624": {
+      "name": "(624)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 6.2
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 2.7
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 1.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 6.7
+    }
+  },
+  "cn_notes": 25,
+  "cn_scratch_pct": 29.63,
+  "cn_kbd_overlap_pct": 10.84,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 20.8,
+      "eff16": 10.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 12.5,
+      "eff16": 20.0
+    },
+    "2496": {
+      "name": "(2496)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 1.5
+    },
+    "1728": {
+      "name": "(1728)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 2.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 40.0
+    },
+    "2016": {
+      "name": "(2016)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 1.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 13.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 8.0
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 3.1
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 4.7
+    }
+  }
+}

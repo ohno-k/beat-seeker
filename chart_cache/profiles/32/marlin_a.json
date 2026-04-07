@@ -1,0 +1,218 @@
+{
+  "textage": "32/marlin.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:06.036241+00:00",
+  "title": "MARLIN",
+  "artist": "Zekk",
+  "bpm_raw": "184",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1798,
+  "events": 992,
+  "bpm_main": 184,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 184.0,
+  "weighted_eff16": 160.0,
+  "scratch_pct": 8.62,
+  "chord_pct": 56.35,
+  "single_pct": 43.65,
+  "ranuchi": 90,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 637,
+      "pct": 64.3,
+      "eff16": 184.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 255,
+      "pct": 25.7,
+      "eff16": 92.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 3.7,
+      "eff16": 46.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 26,
+      "pct": 2.6,
+      "eff16": 276.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 18,
+      "pct": 1.8,
+      "eff16": 368.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 138.0
+    },
+    "60": {
+      "name": "(60)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 73.6
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 552.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 36.8
+    }
+  },
+  "chord_dist": {
+    "1": 433,
+    "2": 361,
+    "3": 149,
+    "4": 49
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 675,
+      "pct": 41.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 633,
+      "pct": 38.6,
+      "eff16": 184.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 225,
+      "pct": 13.7,
+      "eff16": 92.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 47,
+      "pct": 2.9,
+      "eff16": 46.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 26,
+      "pct": 1.6,
+      "eff16": 276.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 18,
+      "pct": 1.1,
+      "eff16": 368.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 138.0
+    },
+    "60": {
+      "name": "(60)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 73.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 30.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 552.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 54,
+      "pct": 35.1,
+      "eff16": 92.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 13.0,
+      "eff16": 46.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 13,
+      "pct": 8.4,
+      "eff16": 13.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 7.1,
+      "eff16": 30.7
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 5.2,
+      "eff16": 23.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 8,
+      "pct": 5.2,
+      "eff16": 184.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 5,
+      "pct": 3.2,
+      "eff16": 10.2
+    },
+    "720": {
+      "name": "(720)",
+      "count": 5,
+      "pct": 3.2,
+      "eff16": 6.1
+    },
+    "672": {
+      "name": "(672)",
+      "count": 5,
+      "pct": 3.2,
+      "eff16": 6.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.6,
+      "eff16": 5.8
+    }
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "textage": "14/t_shadow.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:44.268537+00:00",
+  "title": "the shadow",
+  "artist": "kors k",
+  "bpm_raw": "156",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1278,
+  "events": 894,
+  "bpm_main": 156,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 156.0,
+  "weighted_eff16": 144.8,
+  "scratch_pct": 5.01,
+  "chord_pct": 36.47,
+  "single_pct": 63.53,
+  "ranuchi": 52,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 628,
+      "pct": 70.3,
+      "eff16": 156.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 157,
+      "pct": 17.6,
+      "eff16": 78.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 34,
+      "pct": 3.8,
+      "eff16": 234.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 31,
+      "pct": 3.5,
+      "eff16": 52.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 19,
+      "pct": 2.1,
+      "eff16": 312.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 468.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 39.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 117.0
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 4.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 31.2
+    }
+  },
+  "chord_dist": {
+    "1": 568,
+    "2": 280,
+    "3": 35,
+    "4": 10,
+    "5": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 617,
+      "pct": 50.9,
+      "eff16": 156.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 330,
+      "pct": 27.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 154,
+      "pct": 12.7,
+      "eff16": 78.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 36,
+      "pct": 3.0,
+      "eff16": 52.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 33,
+      "pct": 2.7,
+      "eff16": 234.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 19,
+      "pct": 1.6,
+      "eff16": 312.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 39.0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 93.6
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 468.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 117.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 16,
+      "pct": 25.4,
+      "eff16": 78.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 20.6,
+      "eff16": 39.0
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 19.0,
+      "eff16": 19.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 11.1,
+      "eff16": 2.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 4.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 3.2,
+      "eff16": 9.8
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 1.6
+    },
+    "1104": {
+      "name": "(1104)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 3.4
+    },
+    "1872": {
+      "name": "(1872)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 2.0
+    },
+    "2784": {
+      "name": "(2784)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 1.3
+    }
+  }
+}

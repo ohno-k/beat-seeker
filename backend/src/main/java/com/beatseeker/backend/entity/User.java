@@ -43,6 +43,15 @@ public class User {
     @Column(columnDefinition = "boolean default true")
     private Boolean showRateTier = true;
 
+    @Column(columnDefinition = "boolean default false")
+    private Boolean isSupporter = false;
+
+    @Column(columnDefinition = "boolean default true")
+    private Boolean showSupporterBorder = true;
+
+    @Column(unique = true, length = 12)
+    private String supporterToken;
+
     private LocalDateTime lastUploadedAt;
 
     @Column(columnDefinition = "float8 default 0")

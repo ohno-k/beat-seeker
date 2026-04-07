@@ -1,0 +1,219 @@
+{
+  "textage": "20/lt_cyber.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:50.554735+00:00",
+  "title": "Light and Cyber…",
+  "artist": "Tatsh",
+  "bpm_raw": "181",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1566,
+  "events": 1046,
+  "bpm_main": 181,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 181.0,
+  "weighted_eff16": 160.2,
+  "scratch_pct": 3.07,
+  "chord_pct": 42.45,
+  "single_pct": 57.55,
+  "ranuchi": 95,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 808,
+      "pct": 77.3,
+      "eff16": 181.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 220,
+      "pct": 21.1,
+      "eff16": 90.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 45.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 11.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 362.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 120.7
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 241.3
+    },
+    "30": {
+      "name": "(30)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 144.8
+    }
+  },
+  "chord_dist": {
+    "1": 602,
+    "2": 385,
+    "3": 51,
+    "4": 1,
+    "5": 5,
+    "6": 2
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 808,
+      "pct": 53.3,
+      "eff16": 181.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 472,
+      "pct": 31.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 220,
+      "pct": 14.5,
+      "eff16": 90.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 45.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 11.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 30.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 5.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 362.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 120.7
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 241.3
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 13,
+      "pct": 27.7,
+      "eff16": 90.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 19.1,
+      "eff16": 45.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 6.4,
+      "eff16": 30.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 6.4,
+      "eff16": 2.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 6.4,
+      "eff16": 5.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 6.4,
+      "eff16": 7.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 6.4,
+      "eff16": 11.3
+    },
+    "2208": {
+      "name": "(2208)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 2.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 1.4
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 1.9
+    }
+  }
+}

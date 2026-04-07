@@ -1,0 +1,217 @@
+{
+  "textage": "21/unicorn.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:00.888950+00:00",
+  "title": "Unicorn tail",
+  "artist": "DJ YOSHITAKA",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1589,
+  "events": 961,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 85.0,
+  "weighted_eff16": 139.5,
+  "scratch_pct": 3.84,
+  "chord_pct": 50.68,
+  "single_pct": 49.32,
+  "ranuchi": 84,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 480,
+      "pct": 50.0,
+      "eff16": 85.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 356,
+      "pct": 37.1,
+      "eff16": 170.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 68,
+      "pct": 7.1,
+      "eff16": 340.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 22,
+      "pct": 2.3,
+      "eff16": 127.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 22,
+      "pct": 2.3,
+      "eff16": 255.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 42.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 680.0
+    },
+    "90": {
+      "name": "(90)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 45.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 28.3
+    }
+  },
+  "chord_dist": {
+    "1": 474,
+    "2": 356,
+    "3": 121,
+    "4": 10
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 588,
+      "pct": 38.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 480,
+      "pct": 31.4,
+      "eff16": 85.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 342,
+      "pct": 22.4,
+      "eff16": 170.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 58,
+      "pct": 3.8,
+      "eff16": 340.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 22,
+      "pct": 1.4,
+      "eff16": 127.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 22,
+      "pct": 1.4,
+      "eff16": 255.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 42.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 28.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 680.0
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 16,
+      "pct": 26.7,
+      "eff16": 170.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 16.7,
+      "eff16": 42.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 9,
+      "pct": 15.0,
+      "eff16": 85.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 8.3,
+      "eff16": 10.6
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 8.3,
+      "eff16": 21.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 17.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 28.3
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 1.8
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 2.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 9.4
+    }
+  }
+}

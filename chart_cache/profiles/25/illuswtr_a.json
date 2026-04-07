@@ -1,0 +1,245 @@
+{
+  "textage": "25/illuswtr.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:13.755686+00:00",
+  "title": "Illusionary Waterlily",
+  "artist": "DJ Noriken",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1719,
+  "events": 1041,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 160.0,
+  "scratch_pct": 6.57,
+  "chord_pct": 43.8,
+  "single_pct": 56.2,
+  "ranuchi": 104,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 770,
+      "pct": 74.0,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 203,
+      "pct": 19.5,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 30,
+      "pct": 2.9,
+      "eff16": 270.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 2.0,
+      "eff16": 45.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 22.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 36.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.0
+    }
+  },
+  "chord_dist": {
+    "1": 585,
+    "2": 293,
+    "3": 117,
+    "4": 33,
+    "5": 13
+  },
+  "tags": [
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 756,
+      "pct": 47.1,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 581,
+      "pct": 36.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 203,
+      "pct": 12.6,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 30,
+      "pct": 1.9,
+      "eff16": 270.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 0.9,
+      "eff16": 45.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 0.7,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 22.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 22.3,
+      "eff16": 45.0
+    },
+    "192": {
+      "name": "half",
+      "count": 23,
+      "pct": 20.5,
+      "eff16": 22.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 17,
+      "pct": 15.2,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 9.8,
+      "eff16": 90.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 9,
+      "pct": 8.0,
+      "eff16": 5.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 5.4,
+      "eff16": 60.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 3.6,
+      "eff16": 11.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 2.7,
+      "eff16": 7.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.7,
+      "eff16": 2.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 1.8,
+      "eff16": 15.0
+    }
+  },
+  "cn_notes": 13,
+  "cn_scratch_pct": 7.69,
+  "cn_kbd_overlap_pct": 3.24,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 50.0,
+      "eff16": 45.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 4,
+      "pct": 33.3,
+      "eff16": 6.4
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 3.0
+    },
+    "7200": {
+      "name": "(7200)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 0.6
+    }
+  }
+}

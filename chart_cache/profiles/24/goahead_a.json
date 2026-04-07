@@ -1,0 +1,236 @@
+{
+  "textage": "24/goahead.html?1AC00",
+  "analyzed_at": "2026-04-06T10:52:35.194925+00:00",
+  "title": "Go Ahead!!",
+  "artist": "Ryu☆ Vs. Sota",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1339,
+  "events": 778,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 200.0,
+  "weighted_eff16": 146.7,
+  "scratch_pct": 6.2,
+  "chord_pct": 50.13,
+  "single_pct": 49.87,
+  "ranuchi": 44,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 363,
+      "pct": 46.7,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 331,
+      "pct": 42.6,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 4.0,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 26,
+      "pct": 3.3,
+      "eff16": 25.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 300.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 600.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 12.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 150.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 6.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 66.7
+    }
+  },
+  "chord_dist": {
+    "1": 388,
+    "2": 263,
+    "3": 89,
+    "4": 33,
+    "5": 4,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 483,
+      "pct": 38.5,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 363,
+      "pct": 28.9,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 328,
+      "pct": 26.1,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 2.4,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 26,
+      "pct": 2.1,
+      "eff16": 25.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 300.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 600.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 12.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 150.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 66.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 24.4,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 17.1,
+      "eff16": 25.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 11.0,
+      "eff16": 12.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 6.1,
+      "eff16": 6.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 6.1,
+      "eff16": 33.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 6.1,
+      "eff16": 100.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 6.1,
+      "eff16": 16.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 14.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 20.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 0
+    }
+  },
+  "cn_notes": 14,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 4.06,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 84.6,
+      "eff16": 25.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 15.4,
+      "eff16": 12.5
+    }
+  }
+}

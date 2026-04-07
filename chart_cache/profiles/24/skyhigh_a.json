@@ -1,0 +1,202 @@
+{
+  "textage": "24/skyhigh.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:44.980560+00:00",
+  "title": "Sky High",
+  "artist": "Cuvelia",
+  "bpm_raw": "153",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1943,
+  "events": 1005,
+  "bpm_main": 153,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 153.0,
+  "weighted_eff16": 157.4,
+  "scratch_pct": 2.62,
+  "chord_pct": 64.78,
+  "single_pct": 35.22,
+  "ranuchi": 110,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 865,
+      "pct": 86.2,
+      "eff16": 153.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 68,
+      "pct": 6.8,
+      "eff16": 76.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 43,
+      "pct": 4.3,
+      "eff16": 229.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 20,
+      "pct": 2.0,
+      "eff16": 459.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.6
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 114.8
+    },
+    "20": {
+      "name": "(20)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 183.6
+    },
+    "4": {
+      "name": "(4)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 918.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.5
+    }
+  },
+  "chord_dist": {
+    "1": 354,
+    "2": 440,
+    "3": 149,
+    "4": 49,
+    "5": 12,
+    "6": 1
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 889,
+      "pct": 47.0,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 865,
+      "pct": 45.7,
+      "eff16": 153.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 68,
+      "pct": 3.6,
+      "eff16": 76.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 43,
+      "pct": 2.3,
+      "eff16": 229.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 20,
+      "pct": 1.1,
+      "eff16": 459.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 114.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 9.6
+    },
+    "20": {
+      "name": "(20)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 183.6
+    },
+    "4": {
+      "name": "(4)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 918.0
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 17,
+      "pct": 34.0,
+      "eff16": 9.6
+    },
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 34.0,
+      "eff16": 19.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 9,
+      "pct": 18.0,
+      "eff16": 2.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 12.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 38.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 3.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 8.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 25.5
+    }
+  }
+}

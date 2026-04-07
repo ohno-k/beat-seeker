@@ -1,0 +1,168 @@
+{
+  "textage": "22/implant.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:04.322318+00:00",
+  "title": "IMPLANTATION",
+  "artist": "TOMOSUKE",
+  "bpm_raw": "145",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 953,
+  "events": 610,
+  "bpm_main": 145,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 145.0,
+  "weighted_eff16": 135.8,
+  "scratch_pct": 1.68,
+  "chord_pct": 44.92,
+  "single_pct": 55.08,
+  "ranuchi": 60,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 535,
+      "pct": 87.8,
+      "eff16": 145.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 61,
+      "pct": 10.0,
+      "eff16": 72.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 8.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 8.1
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 217.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 4.5
+    }
+  },
+  "chord_dist": {
+    "1": 336,
+    "2": 225,
+    "3": 29,
+    "4": 20
+  },
+  "tags": [
+    "scratch_low",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 535,
+      "pct": 57.2,
+      "eff16": 145.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 329,
+      "pct": 35.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 61,
+      "pct": 6.5,
+      "eff16": 72.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 8.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 8.1
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 217.5
+    }
+  },
+  "scr_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 20.0,
+      "eff16": 4.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 1.1
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 72.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 36.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 2.3
+    },
+    "4560": {
+      "name": "(4560)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 0.8
+    },
+    "1584": {
+      "name": "(1584)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 2.2
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 4.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 10.4
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 18.1
+    }
+  }
+}

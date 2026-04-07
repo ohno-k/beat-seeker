@@ -1,0 +1,1080 @@
+
+=== Significant Mismatches (> 1%) ===
+[garden (10)] Notes: 493 (Profile) vs 1583 (SongData) | Diff: 1090 (68.86%) | File: chart_cache\profiles\12\gardenhs_a.json
+[Selfish Sweet (10)] Notes: 457 (Profile) vs 1395 (SongData) | Diff: 938 (67.24%) | File: chart_cache\profiles\24\selfishs_a.json
+[Super Duper Racers (10)] Notes: 671 (Profile) vs 1857 (SongData) | Diff: 1186 (63.87%) | File: chart_cache\profiles\23\superdup_a.json
+[Lost Souls (4)] Notes: 2000 (Profile) vs 1236 (SongData) | Diff: 764 (61.81%) | File: chart_cache\profiles\27\lostsoul_a.json
+[BRAVE OUT (10)] Notes: 592 (Profile) vs 1413 (SongData) | Diff: 821 (58.10%) | File: chart_cache\profiles\21\braveout_a.json
+[LAB (10)] Notes: 609 (Profile) vs 1380 (SongData) | Diff: 771 (55.87%) | File: chart_cache\profiles\8\lab_a.json
+[超青少年ノ為ノ超多幸ナ超古典的超舞曲 (4)] Notes: 2090 (Profile) vs 1350 (SongData) | Diff: 740 (54.81%) | File: chart_cache\profiles\22\_verycls_a.json
+[OOO (10)] Notes: 604 (Profile) vs 1336 (SongData) | Diff: 732 (54.79%) | File: chart_cache\profiles\24\ooo_a.json
+[Punch Love 仮面 (10)] Notes: 747 (Profile) vs 1636 (SongData) | Diff: 889 (54.34%) | File: chart_cache\profiles\16\punch_lv_a.json
+[RED ZONE (10)] Notes: 722 (Profile) vs 1566 (SongData) | Diff: 844 (53.90%) | File: chart_cache\profiles\11\redzonel_l.json
+[ゲシュタルト (10)] Notes: 802 (Profile) vs 1677 (SongData) | Diff: 875 (52.18%) | File: chart_cache\profiles\32\_gestalt_a.json
+[廿 (10)] Notes: 831 (Profile) vs 1731 (SongData) | Diff: 900 (51.99%) | File: chart_cache\profiles\21\_twentyl_a.json
+[神っぽいな (10)] Notes: 771 (Profile) vs 1574 (SongData) | Diff: 803 (51.02%) | File: chart_cache\profiles\30\_kamipoi_a.json
+[シル・ヴ・プレジデント (10)] Notes: 645 (Profile) vs 1299 (SongData) | Diff: 654 (50.35%) | File: chart_cache\profiles\29\_silvous_a.json
+[Little Little Princess (10)] Notes: 973 (Profile) vs 1946 (SongData) | Diff: 973 (50.00%) | File: chart_cache\profiles\12\littlepl_a.json
+[KAISER PHOENIX (10)] Notes: 1015 (Profile) vs 2026 (SongData) | Diff: 1011 (49.90%) | File: chart_cache\profiles\21\kaiserpl_a.json
+[Override (4)] Notes: 2204 (Profile) vs 1471 (SongData) | Diff: 733 (49.83%) | File: chart_cache\profiles\27\override_a.json
+[SOLID WYVERN (4)] Notes: 1995 (Profile) vs 1333 (SongData) | Diff: 662 (49.66%) | File: chart_cache\profiles\29\slwyvern_a.json
+[Ancient Scapes (10)] Notes: 1112 (Profile) vs 2198 (SongData) | Diff: 1086 (49.41%) | File: chart_cache\profiles\21\ancientl_a.json
+[spiral galaxy (10)] Notes: 979 (Profile) vs 1910 (SongData) | Diff: 931 (48.74%) | File: chart_cache\profiles\11\spiral_l_a.json
+[CoMAAAAAAA (10)] Notes: 1008 (Profile) vs 1957 (SongData) | Diff: 949 (48.49%) | File: chart_cache\profiles\26\comaaaaa_a.json
+[Blue Rain (10)] Notes: 883 (Profile) vs 1702 (SongData) | Diff: 819 (48.12%) | File: chart_cache\profiles\15\bluerail_l.json
+[Welcome (10)] Notes: 885 (Profile) vs 1701 (SongData) | Diff: 816 (47.97%) | File: chart_cache\profiles\23\welcomel_l.json
+[Bling-Bang-Bang-Born (10)] Notes: 575 (Profile) vs 1105 (SongData) | Diff: 530 (47.96%) | File: chart_cache\profiles\32\blingbbb_a.json
+[Beat Radiance (10)] Notes: 944 (Profile) vs 1809 (SongData) | Diff: 865 (47.82%) | File: chart_cache\profiles\22\beatradl_a.json
+[超青少年ノ為ノ超多幸ナ超古典的超舞曲 (10)] Notes: 1105 (Profile) vs 2110 (SongData) | Diff: 1005 (47.63%) | File: chart_cache\profiles\22\_verycsl_a.json
+[≡+≡ (4)] Notes: 2241 (Profile) vs 1520 (SongData) | Diff: 721 (47.43%) | File: chart_cache\profiles\30\_3plus3_a.json
+[STARLIGHT DANCEHALL (10)] Notes: 913 (Profile) vs 1712 (SongData) | Diff: 799 (46.67%) | File: chart_cache\profiles\23\starltdl_a.json
+[CONTRACT (10)] Notes: 768 (Profile) vs 1418 (SongData) | Diff: 650 (45.84%) | File: chart_cache\profiles\13\contracl_a.json
+[CONTRACT (10)] Notes: 769 (Profile) vs 1418 (SongData) | Diff: 649 (45.77%) | File: chart_cache\profiles\13\contracl_l.json
+[凛として咲く花の如く (10)] Notes: 865 (Profile) vs 1595 (SongData) | Diff: 730 (45.77%) | File: chart_cache\profiles\16\_rintosl_a.json
+[GRID KNIGHT (10)] Notes: 950 (Profile) vs 1744 (SongData) | Diff: 794 (45.53%) | File: chart_cache\profiles\14\gknightl_a.json
+[GRID KNIGHT (10)] Notes: 960 (Profile) vs 1744 (SongData) | Diff: 784 (44.95%) | File: chart_cache\profiles\14\gknightl_l.json
+[RUGGED ASH (10)] Notes: 587 (Profile) vs 1058 (SongData) | Diff: 471 (44.52%) | File: chart_cache\profiles\s\rugged_l_a.json
+[Submerge Serenade (4)] Notes: 2092 (Profile) vs 1486 (SongData) | Diff: 606 (40.78%) | File: chart_cache\profiles\31\submerge_a.json
+[Cosmic Cat (4)] Notes: 1612 (Profile) vs 1166 (SongData) | Diff: 446 (38.25%) | File: chart_cache\profiles\22\cosmicat_a.json
+[蛇神 (4)] Notes: 897 (Profile) vs 1438 (SongData) | Diff: 541 (37.62%) | File: chart_cache\profiles\19\_kagachi_a.json
+[Like+it! (4)] Notes: 1647 (Profile) vs 1197 (SongData) | Diff: 450 (37.59%) | File: chart_cache\profiles\27\like_it_a.json
+[ちょえちょえまぎか (4)] Notes: 2098 (Profile) vs 1529 (SongData) | Diff: 569 (37.21%) | File: chart_cache\profiles\30\_choe_a.json
+[waxing and wanding (4)] Notes: 1996 (Profile) vs 1457 (SongData) | Diff: 539 (36.99%) | File: chart_cache\profiles\13\waxing_a.json
+[Bow shock!! (4)] Notes: 2142 (Profile) vs 1566 (SongData) | Diff: 576 (36.78%) | File: chart_cache\profiles\27\bowshock_a.json
+[フォニイ (4)] Notes: 1975 (Profile) vs 1454 (SongData) | Diff: 521 (35.83%) | File: chart_cache\profiles\31\_phony_a.json
+[27th style (4)] Notes: 1763 (Profile) vs 1299 (SongData) | Diff: 464 (35.72%) | File: chart_cache\profiles\27\27thstyl_a.json
+[ミュージック・アワー (4)] Notes: 2040 (Profile) vs 1516 (SongData) | Diff: 524 (34.56%) | File: chart_cache\profiles\29\_mschour_a.json
+[CONTRACT (4)] Notes: 1418 (Profile) vs 1056 (SongData) | Diff: 362 (34.28%) | File: chart_cache\profiles\13\contract_a.json
+[CHRONO DIVER -NORNIR- (4)] Notes: 2104 (Profile) vs 1568 (SongData) | Diff: 536 (34.18%) | File: chart_cache\profiles\22\chrono_n_a.json
+[Digitank System (4)] Notes: 723 (Profile) vs 1096 (SongData) | Diff: 373 (34.03%) | File: chart_cache\profiles\15\digitank_a.json
+[MIRACLE MEETS (4)] Notes: 751 (Profile) vs 1128 (SongData) | Diff: 377 (33.42%) | File: chart_cache\profiles\17\miraclem_a.json
+[KYAMISAMA ONEGAI! (10)] Notes: 1064 (Profile) vs 1583 (SongData) | Diff: 519 (32.79%) | File: chart_cache\profiles\19\kyamsama_a.json
+[RED ZONE (4)] Notes: 1564 (Profile) vs 1184 (SongData) | Diff: 380 (32.09%) | File: chart_cache\profiles\11\redzone_a.json
+[HYPE THE CORE (4)] Notes: 1048 (Profile) vs 1539 (SongData) | Diff: 491 (31.90%) | File: chart_cache\profiles\25\hypecr25_a.json
+[Burning Flame (4)] Notes: 1938 (Profile) vs 1470 (SongData) | Diff: 468 (31.84%) | File: chart_cache\profiles\28\brnflame_a.json
+[仮想空間の旅人たち (4)] Notes: 1904 (Profile) vs 1450 (SongData) | Diff: 454 (31.31%) | File: chart_cache\profiles\20\_travels_a.json
+[Caldwell 99 (4)] Notes: 1693 (Profile) vs 1293 (SongData) | Diff: 400 (30.94%) | File: chart_cache\profiles\30\caldwl99_a.json
+[Little Little Princess (4)] Notes: 1855 (Profile) vs 1420 (SongData) | Diff: 435 (30.63%) | File: chart_cache\profiles\12\littlepr_a.json
+[Beat Juggling Mix (4)] Notes: 791 (Profile) vs 1138 (SongData) | Diff: 347 (30.49%) | File: chart_cache\profiles\24\beatjugg_a.json
+[Scripted Connection⇒ H mix (10)] Notes: 1020 (Profile) vs 1466 (SongData) | Diff: 446 (30.42%) | File: chart_cache\profiles\12\script_h_l.json
+[Lisa-RICCIA (4)] Notes: 2200 (Profile) vs 1692 (SongData) | Diff: 508 (30.02%) | File: chart_cache\profiles\33\lisa_ric_a.json
+[Verflucht (4)] Notes: 2344 (Profile) vs 1805 (SongData) | Diff: 539 (29.86%) | File: chart_cache\profiles\21\verflcht_a.json
+[SABER WING (4)] Notes: 1020 (Profile) vs 1438 (SongData) | Diff: 418 (29.07%) | File: chart_cache\profiles\18\saberwng_a.json
+[Rock It (4)] Notes: 1071 (Profile) vs 1500 (SongData) | Diff: 429 (28.60%) | File: chart_cache\profiles\23\rock_it_a.json
+[Thunderbolt (4)] Notes: 1373 (Profile) vs 1911 (SongData) | Diff: 538 (28.15%) | File: chart_cache\profiles\19\thunbolt_a.json
+[Golden Palms (10)] Notes: 891 (Profile) vs 1240 (SongData) | Diff: 349 (28.15%) | File: chart_cache\profiles\18\gldplm_l_l.json
+[AIR RAID FROM THA UNDAGROUND (4)] Notes: 1523 (Profile) vs 1189 (SongData) | Diff: 334 (28.09%) | File: chart_cache\profiles\17\airraid_a.json
+[Kailua (4)] Notes: 810 (Profile) vs 1125 (SongData) | Diff: 315 (28.00%) | File: chart_cache\profiles\18\kailua_a.json
+[KING (4)] Notes: 1983 (Profile) vs 1553 (SongData) | Diff: 430 (27.69%) | File: chart_cache\profiles\30\king_a.json
+[LIGHTNING STRIKES (4)] Notes: 2087 (Profile) vs 1639 (SongData) | Diff: 448 (27.33%) | File: chart_cache\profiles\27\lightstr_a.json
+[Chronos (4)] Notes: 1530 (Profile) vs 1205 (SongData) | Diff: 325 (26.97%) | File: chart_cache\profiles\22\chronos_a.json
+[XANADU OF TWO (10)] Notes: 1270 (Profile) vs 1729 (SongData) | Diff: 459 (26.55%) | File: chart_cache\profiles\18\xanadu_2_a.json
+[FLOWER (4)] Notes: 1075 (Profile) vs 1460 (SongData) | Diff: 385 (26.37%) | File: chart_cache\profiles\20\flower_a.json
+[sakura storm (4)] Notes: 903 (Profile) vs 1225 (SongData) | Diff: 322 (26.29%) | File: chart_cache\profiles\18\sakurast_a.json
+[CODE:0 (4)] Notes: 1829 (Profile) vs 1454 (SongData) | Diff: 375 (25.79%) | File: chart_cache\profiles\26\code_0_a.json
+[INHERITANCE (4)] Notes: 1795 (Profile) vs 1432 (SongData) | Diff: 363 (25.35%) | File: chart_cache\profiles\31\inherita_a.json
+[Golden Palms (10)] Notes: 934 (Profile) vs 1240 (SongData) | Diff: 306 (24.68%) | File: chart_cache\profiles\18\gldplm_l_a.json
+[Scripted Connection⇒ H mix (4)] Notes: 962 (Profile) vs 1275 (SongData) | Diff: 313 (24.55%) | File: chart_cache\profiles\12\script_h_a.json
+[DRUNK MONKY (4)] Notes: 898 (Profile) vs 1177 (SongData) | Diff: 279 (23.70%) | File: chart_cache\profiles\26\drkmonky_a.json
+[Flashes (10)] Notes: 2090 (Profile) vs 1691 (SongData) | Diff: 399 (23.60%) | File: chart_cache\profiles\22\flashes_l.json
+[Acid Pumper (4)] Notes: 973 (Profile) vs 1267 (SongData) | Diff: 294 (23.20%) | File: chart_cache\profiles\23\acidpump_a.json
+[BLUST OF WIND (10)] Notes: 1029 (Profile) vs 1335 (SongData) | Diff: 306 (22.92%) | File: chart_cache\profiles\18\blstwind_a.json
+[Ypsilon (4)] Notes: 1801 (Profile) vs 1466 (SongData) | Diff: 335 (22.85%) | File: chart_cache\profiles\27\ypsilon_a.json
+[PLEASE DON'T GO (4)] Notes: 968 (Profile) vs 1251 (SongData) | Diff: 283 (22.62%) | File: chart_cache\profiles\8\please_a.json
+[EROICA (4)] Notes: 1580 (Profile) vs 2040 (SongData) | Diff: 460 (22.55%) | File: chart_cache\profiles\27\eroica_a.json
+[You'll say "Now!" (4)] Notes: 994 (Profile) vs 1276 (SongData) | Diff: 282 (22.10%) | File: chart_cache\profiles\16\youllnow_a.json
+[Sakura Reflection (4)] Notes: 930 (Profile) vs 1190 (SongData) | Diff: 260 (21.85%) | File: chart_cache\profiles\18\sakurarf_a.json
+[G2 (4)] Notes: 929 (Profile) vs 1188 (SongData) | Diff: 259 (21.80%) | File: chart_cache\profiles\6\g2_a.json
+[純真可憐デザイア (10)] Notes: 1172 (Profile) vs 1498 (SongData) | Diff: 326 (21.76%) | File: chart_cache\profiles\25\_jdesire_a.json
+[NOIXIA (4)] Notes: 1587 (Profile) vs 2027 (SongData) | Diff: 440 (21.71%) | File: chart_cache\profiles\32\noixia_a.json
+[Elisha (4)] Notes: 902 (Profile) vs 1152 (SongData) | Diff: 250 (21.70%) | File: chart_cache\profiles\17\elisha_a.json
+[stoic (4)] Notes: 1022 (Profile) vs 1302 (SongData) | Diff: 280 (21.51%) | File: chart_cache\profiles\7\stoic_a.json
+[Amazing Mirage (4)] Notes: 1630 (Profile) vs 1343 (SongData) | Diff: 287 (21.37%) | File: chart_cache\profiles\24\amazingm_a.json
+[Feel The Beat (4)] Notes: 2221 (Profile) vs 1830 (SongData) | Diff: 391 (21.37%) | File: chart_cache\profiles\21\feelbeat_a.json
+[STARLIGHT DANCEHALL (4)] Notes: 1624 (Profile) vs 1342 (SongData) | Diff: 282 (21.01%) | File: chart_cache\profiles\23\starltdh_a.json
+[Y&Co. is dead or alive (4)] Notes: 1168 (Profile) vs 1478 (SongData) | Diff: 310 (20.97%) | File: chart_cache\profiles\16\ycodoa25_a.json
+[naughty girl@Queen's Palace (4)] Notes: 860 (Profile) vs 1088 (SongData) | Diff: 228 (20.96%) | File: chart_cache\profiles\16\naughty_a.json
+[Tropical April (4)] Notes: 1105 (Profile) vs 1395 (SongData) | Diff: 290 (20.79%) | File: chart_cache\profiles\18\tropical_a.json
+[mosaic (4)] Notes: 1198 (Profile) vs 1509 (SongData) | Diff: 311 (20.61%) | File: chart_cache\profiles\17\mosaic_a.json
+[PARADISE LOST (4)] Notes: 1365 (Profile) vs 1718 (SongData) | Diff: 353 (20.55%) | File: chart_cache\profiles\18\paralost_a.json
+[真 地獄超特急 -HELL or HELL- (4)] Notes: 1375 (Profile) vs 1727 (SongData) | Diff: 352 (20.38%) | File: chart_cache\profiles\23\_sjigoku_a.json
+[Ancient Scapes (4)] Notes: 2134 (Profile) vs 1780 (SongData) | Diff: 354 (19.89%) | File: chart_cache\profiles\21\ancients_a.json
+[Around The Galaxy (4)] Notes: 1374 (Profile) vs 1714 (SongData) | Diff: 340 (19.84%) | File: chart_cache\profiles\24\a_glxy24_a.json
+[神のシナリオ (4)] Notes: 1328 (Profile) vs 1652 (SongData) | Diff: 324 (19.61%) | File: chart_cache\profiles\30\_kmscena_a.json
+[龍王の霊廟(Mausoleum Of The Primal Dragon) (4)] Notes: 1929 (Profile) vs 1614 (SongData) | Diff: 315 (19.52%) | File: chart_cache\profiles\26\_mausole_a.json
+[Catch Me (10)] Notes: 892 (Profile) vs 1106 (SongData) | Diff: 214 (19.35%) | File: chart_cache\profiles\12\catchme_a.json
+[Raison d'etre～交差する宿命～ (4)] Notes: 1122 (Profile) vs 1389 (SongData) | Diff: 267 (19.22%) | File: chart_cache\profiles\17\raison_a.json
+[naughty girl@Queen's Palace (10)] Notes: 1119 (Profile) vs 1380 (SongData) | Diff: 261 (18.91%) | File: chart_cache\profiles\16\naughtyl_l.json
+[新宝島 (10)] Notes: 1454 (Profile) vs 1790 (SongData) | Diff: 336 (18.77%) | File: chart_cache\profiles\28\_stakara_a.json
+[新宝島 (10)] Notes: 1454 (Profile) vs 1790 (SongData) | Diff: 336 (18.77%) | File: chart_cache\profiles\28\_stakara_l.json
+[疾風迅雷 (4)] Notes: 1770 (Profile) vs 1493 (SongData) | Diff: 277 (18.55%) | File: chart_cache\profiles\21\_ltspeed_a.json
+[EBONY & IVORY (4)] Notes: 1795 (Profile) vs 1520 (SongData) | Diff: 275 (18.09%) | File: chart_cache\profiles\22\ebnyivry_a.json
+[IMPLANTATION (4)] Notes: 953 (Profile) vs 1163 (SongData) | Diff: 210 (18.06%) | File: chart_cache\profiles\22\implant_a.json
+[naughty girl@Queen's Palace (10)] Notes: 1134 (Profile) vs 1380 (SongData) | Diff: 246 (17.83%) | File: chart_cache\profiles\16\naughtyl_a.json
+[Time to Empress (10)] Notes: 1315 (Profile) vs 1600 (SongData) | Diff: 285 (17.81%) | File: chart_cache\profiles\20\time2emp_a.json
+[Cookie Bouquets (4)] Notes: 1410 (Profile) vs 1714 (SongData) | Diff: 304 (17.74%) | File: chart_cache\profiles\20\cookie_b_a.json
+[DUE TOMORROW (4)] Notes: 884 (Profile) vs 1073 (SongData) | Diff: 189 (17.61%) | File: chart_cache\profiles\13\due_tmrw_a.json
+[BLUE MIRAGE (4)] Notes: 1324 (Profile) vs 1606 (SongData) | Diff: 282 (17.56%) | File: chart_cache\profiles\22\b_mirage_a.json
+[Destiny Sword (4)] Notes: 1001 (Profile) vs 1213 (SongData) | Diff: 212 (17.48%) | File: chart_cache\profiles\18\dstsword_a.json
+[rainbow rainbow (4)] Notes: 1137 (Profile) vs 1377 (SongData) | Diff: 240 (17.43%) | File: chart_cache\profiles\10\rbwrbw_a.json
+[Critical Crystal (4)] Notes: 1235 (Profile) vs 1495 (SongData) | Diff: 260 (17.39%) | File: chart_cache\profiles\21\ccrystal_a.json
+[TRANOID (4)] Notes: 943 (Profile) vs 1141 (SongData) | Diff: 198 (17.35%) | File: chart_cache\profiles\14\tranoid_a.json
+[INVISIBLE STRIX (4)] Notes: 1101 (Profile) vs 1331 (SongData) | Diff: 230 (17.28%) | File: chart_cache\profiles\24\invstrix_a.json
+[BEAT PRISONER (4)] Notes: 1528 (Profile) vs 1844 (SongData) | Diff: 316 (17.14%) | File: chart_cache\profiles\27\btprison_a.json
+[Papilio ulysses (4)] Notes: 1242 (Profile) vs 1498 (SongData) | Diff: 256 (17.09%) | File: chart_cache\profiles\25\papilio_a.json
+[NZM (4)] Notes: 1484 (Profile) vs 1783 (SongData) | Diff: 299 (16.77%) | File: chart_cache\profiles\23\nzm_a.json
+[Welcome (4)] Notes: 1583 (Profile) vs 1357 (SongData) | Diff: 226 (16.65%) | File: chart_cache\profiles\23\welcome_a.json
+[TOGAKUSHI (4)] Notes: 1121 (Profile) vs 1343 (SongData) | Diff: 222 (16.53%) | File: chart_cache\profiles\24\togakusi_a.json
+[ZERO-ONE (10)] Notes: 1209 (Profile) vs 1448 (SongData) | Diff: 239 (16.51%) | File: chart_cache\profiles\7\zeroone_l.json
+[Innocent Walls (4)] Notes: 1209 (Profile) vs 1446 (SongData) | Diff: 237 (16.39%) | File: chart_cache\profiles\10\innocent_a.json
+[The Chase (4)] Notes: 960 (Profile) vs 1148 (SongData) | Diff: 188 (16.38%) | File: chart_cache\profiles\25\thechase_a.json
+[Rock Da House (4)] Notes: 944 (Profile) vs 1128 (SongData) | Diff: 184 (16.31%) | File: chart_cache\profiles\18\rokhouse_a.json
+[GOLDEN CROSS (4)] Notes: 1491 (Profile) vs 1765 (SongData) | Diff: 274 (15.52%) | File: chart_cache\profiles\17\goldcros_a.json
+[199024club -Re:BounceKiller- (4)] Notes: 1065 (Profile) vs 1260 (SongData) | Diff: 195 (15.48%) | File: chart_cache\profiles\23\199024cl_a.json
+[Around the Future (4)] Notes: 1124 (Profile) vs 1329 (SongData) | Diff: 205 (15.43%) | File: chart_cache\profiles\25\a_future_a.json
+[smile (4)] Notes: 1241 (Profile) vs 1464 (SongData) | Diff: 223 (15.23%) | File: chart_cache\profiles\14\smile_a.json
+[MENDES (4)] Notes: 1554 (Profile) vs 1831 (SongData) | Diff: 277 (15.13%) | File: chart_cache\profiles\15\mendes_a.json
+[one or eight (4)] Notes: 1001 (Profile) vs 1177 (SongData) | Diff: 176 (14.95%) | File: chart_cache\profiles\9\oneeight_a.json
+[Be OK (10)] Notes: 1428 (Profile) vs 1679 (SongData) | Diff: 251 (14.95%) | File: chart_cache\profiles\15\be_ok_l.json
+[Clione (10)] Notes: 938 (Profile) vs 1102 (SongData) | Diff: 164 (14.88%) | File: chart_cache\profiles\4\clione_l_l.json
+[Sense 2007 (4)] Notes: 1292 (Profile) vs 1517 (SongData) | Diff: 225 (14.83%) | File: chart_cache\profiles\14\sens2007_a.json
+[Zenith (4)] Notes: 962 (Profile) vs 1128 (SongData) | Diff: 166 (14.72%) | File: chart_cache\profiles\28\zenith_a.json
+[Rejection Girl (4)] Notes: 1154 (Profile) vs 1352 (SongData) | Diff: 198 (14.64%) | File: chart_cache\profiles\28\rejegirl_a.json
+[SPACE FIGHT (4)] Notes: 968 (Profile) vs 1134 (SongData) | Diff: 166 (14.64%) | File: chart_cache\profiles\10\spfight_a.json
+[SAMURAI-Scramble (4)] Notes: 1052 (Profile) vs 1232 (SongData) | Diff: 180 (14.61%) | File: chart_cache\profiles\24\samurais_a.json
+[3y3s (4)] Notes: 1599 (Profile) vs 1871 (SongData) | Diff: 272 (14.54%) | File: chart_cache\profiles\16\3y3s_a.json
+[Session 9 -Chronicles- (4)] Notes: 1583 (Profile) vs 1852 (SongData) | Diff: 269 (14.52%) | File: chart_cache\profiles\18\session9_a.json
+[R5 (4)] Notes: 760 (Profile) vs 889 (SongData) | Diff: 129 (14.51%) | File: chart_cache\profiles\3\r5_a.json
+[栄冠のカンパネラ (4)] Notes: 1710 (Profile) vs 2000 (SongData) | Diff: 290 (14.50%) | File: chart_cache\profiles\30\_eikan_c_a.json
+[REVOLVER (10)] Notes: 1481 (Profile) vs 1731 (SongData) | Diff: 250 (14.44%) | File: chart_cache\profiles\25\revolver_l.json
+[CALL (10)] Notes: 1173 (Profile) vs 1371 (SongData) | Diff: 198 (14.44%) | File: chart_cache\profiles\19\call_l.json
+[Reflux (4)] Notes: 1347 (Profile) vs 1574 (SongData) | Diff: 227 (14.42%) | File: chart_cache\profiles\22\reflux_a.json
+[Initiation (4)] Notes: 1727 (Profile) vs 2018 (SongData) | Diff: 291 (14.42%) | File: chart_cache\profiles\25\initiatn_a.json
+[HELL SCAPER -Last Escape Remix- (4)] Notes: 1249 (Profile) vs 1458 (SongData) | Diff: 209 (14.33%) | File: chart_cache\profiles\22\helsca_t_a.json
+[深淵に捧ぐレクイエム (4)] Notes: 1317 (Profile) vs 1537 (SongData) | Diff: 220 (14.31%) | File: chart_cache\profiles\27\_shinen_a.json
+[アストライアの双皿 (4)] Notes: 1399 (Profile) vs 1632 (SongData) | Diff: 233 (14.28%) | File: chart_cache\profiles\20\_astraia_a.json
+[烽火連天の刃 (4)] Notes: 2023 (Profile) vs 1771 (SongData) | Diff: 252 (14.23%) | File: chart_cache\profiles\29\_hrenten_a.json
+[烽火連天の刃 (10)] Notes: 2023 (Profile) vs 1771 (SongData) | Diff: 252 (14.23%) | File: chart_cache\profiles\29\_hrenten_l.json
+[ハイテックトキオ (4)] Notes: 1561 (Profile) vs 1367 (SongData) | Diff: 194 (14.19%) | File: chart_cache\profiles\29\_hitokio_a.json
+[GOLD RUSH (4)] Notes: 1029 (Profile) vs 1199 (SongData) | Diff: 170 (14.18%) | File: chart_cache\profiles\14\goldrush_a.json
+[Usual Days-remix (4)] Notes: 1171 (Profile) vs 1364 (SongData) | Diff: 193 (14.15%) | File: chart_cache\profiles\25\usualday_a.json
+[TROOPERS (4)] Notes: 1286 (Profile) vs 1496 (SongData) | Diff: 210 (14.04%) | File: chart_cache\profiles\15\troopers_a.json
+[Evans (4)] Notes: 1306 (Profile) vs 1519 (SongData) | Diff: 213 (14.02%) | File: chart_cache\profiles\17\evans_a.json
+[G59 (4)] Notes: 1720 (Profile) vs 2000 (SongData) | Diff: 280 (14.00%) | File: chart_cache\profiles\17\g59_a.json
+[FiZZλ_POT!0N (4)] Notes: 1548 (Profile) vs 1800 (SongData) | Diff: 252 (14.00%) | File: chart_cache\profiles\33\fizzyptn_a.json
+[the shadow (4)] Notes: 1278 (Profile) vs 1480 (SongData) | Diff: 202 (13.65%) | File: chart_cache\profiles\14\t_shadow_a.json
+[GIGANT (10)] Notes: 1284 (Profile) vs 1484 (SongData) | Diff: 200 (13.48%) | File: chart_cache\profiles\19\gigant_l.json
+[グッバイ宣言 (4)] Notes: 1765 (Profile) vs 1557 (SongData) | Diff: 208 (13.36%) | File: chart_cache\profiles\29\_goodbys_a.json
+[Snow Goose (4)] Notes: 1073 (Profile) vs 1238 (SongData) | Diff: 165 (13.33%) | File: chart_cache\profiles\19\snwgoose_a.json
+[お菓子の王国 (4)] Notes: 2390 (Profile) vs 2109 (SongData) | Diff: 281 (13.32%) | File: chart_cache\profiles\26\_candykd_a.json
+[Fiery Stallion (4)] Notes: 1058 (Profile) vs 1220 (SongData) | Diff: 162 (13.28%) | File: chart_cache\profiles\32\fierystl_a.json
+[Hollywood Galaxy (4)] Notes: 1210 (Profile) vs 1392 (SongData) | Diff: 182 (13.07%) | File: chart_cache\profiles\20\holywood_a.json
+[Clione (10)] Notes: 958 (Profile) vs 1102 (SongData) | Diff: 144 (13.07%) | File: chart_cache\profiles\4\clione_l_a.json
+[invoker (4)] Notes: 1836 (Profile) vs 1624 (SongData) | Diff: 212 (13.05%) | File: chart_cache\profiles\21\invoker_a.json
+[《ORDERBREAKER》 (4)] Notes: 1093 (Profile) vs 1257 (SongData) | Diff: 164 (13.05%) | File: chart_cache\profiles\30\_orderbr_a.json
+[蛇神 (10)] Notes: 1656 (Profile) vs 1904 (SongData) | Diff: 248 (13.03%) | File: chart_cache\profiles\19\_kagachi_l.json
+[ミラージュ・レジデンス (10)] Notes: 1458 (Profile) vs 1676 (SongData) | Diff: 218 (13.01%) | File: chart_cache\profiles\15\_m_resid_l.json
+[Be a Hero! (4)] Notes: 1388 (Profile) vs 1592 (SongData) | Diff: 204 (12.81%) | File: chart_cache\profiles\25\b_a_hero_a.json
+[Secrets (10)] Notes: 1845 (Profile) vs 2116 (SongData) | Diff: 271 (12.81%) | File: chart_cache\profiles\16\secrets_l.json
+[QUANTUM TELEPORTATION (4)] Notes: 1680 (Profile) vs 1490 (SongData) | Diff: 190 (12.75%) | File: chart_cache\profiles\19\quantum_a.json
+[ROTTERDAM SHOGUN (4)] Notes: 1134 (Profile) vs 1299 (SongData) | Diff: 165 (12.70%) | File: chart_cache\profiles\24\rtshogun_a.json
+[10000 MILES AWAY (4)] Notes: 1306 (Profile) vs 1494 (SongData) | Diff: 188 (12.58%) | File: chart_cache\profiles\29\10000mil_a.json
+[Ristaccia (4)] Notes: 1212 (Profile) vs 1386 (SongData) | Diff: 174 (12.55%) | File: chart_cache\profiles\15\ristacia_a.json
+[In the Blackest Den (4)] Notes: 1201 (Profile) vs 1372 (SongData) | Diff: 171 (12.46%) | File: chart_cache\profiles\19\in_black_a.json
+[Scars of FAUNA (4)] Notes: 1293 (Profile) vs 1475 (SongData) | Diff: 182 (12.34%) | File: chart_cache\profiles\22\scrfauna_a.json
+[Caterpillar (4)] Notes: 1369 (Profile) vs 1561 (SongData) | Diff: 192 (12.30%) | File: chart_cache\profiles\24\caterpil_a.json
+[Quick Silver (4)] Notes: 1187 (Profile) vs 1353 (SongData) | Diff: 166 (12.27%) | File: chart_cache\profiles\19\q_silver_a.json
+[DIAMOND CROSSING (4)] Notes: 1391 (Profile) vs 1585 (SongData) | Diff: 194 (12.24%) | File: chart_cache\profiles\23\diacross_a.json
+[Invitation from Mr.C (4)] Notes: 1234 (Profile) vs 1405 (SongData) | Diff: 171 (12.17%) | File: chart_cache\profiles\22\invi_mrc_a.json
+[(This Is Not) The Angels (4)] Notes: 1198 (Profile) vs 1364 (SongData) | Diff: 166 (12.17%) | File: chart_cache\profiles\24\theangel_a.json
+[ディスコルディア (4)] Notes: 1823 (Profile) vs 2073 (SongData) | Diff: 250 (12.06%) | File: chart_cache\profiles\28\_dscrdia_a.json
+[LASER CRUSTER (4)] Notes: 1446 (Profile) vs 1644 (SongData) | Diff: 198 (12.04%) | File: chart_cache\profiles\14\lcruster_a.json
+[Click Again (4)] Notes: 966 (Profile) vs 1097 (SongData) | Diff: 131 (11.94%) | File: chart_cache\profiles\11\click_a.json
+[鬼天 (4)] Notes: 1114 (Profile) vs 1265 (SongData) | Diff: 151 (11.94%) | File: chart_cache\profiles\22\_onigami_a.json
+[Scripted Connection⇒ A mix (4)] Notes: 1389 (Profile) vs 1575 (SongData) | Diff: 186 (11.81%) | File: chart_cache\profiles\12\script_a_a.json
+[もっと！モット！ときめき feat. 松下 (4)] Notes: 1256 (Profile) vs 1424 (SongData) | Diff: 168 (11.80%) | File: chart_cache\profiles\22\_mottoki_a.json
+[DIAVOLO (4)] Notes: 1540 (Profile) vs 1745 (SongData) | Diff: 205 (11.75%) | File: chart_cache\profiles\19\diavolo_a.json
+[果たせぬ約束 ft. 小林マナ (4)] Notes: 1692 (Profile) vs 1515 (SongData) | Diff: 177 (11.68%) | File: chart_cache\profiles\27\_sepiano_a.json
+[MAGIC & LOVE (4)] Notes: 1308 (Profile) vs 1481 (SongData) | Diff: 173 (11.68%) | File: chart_cache\profiles\21\magic_lv_a.json
+[1st Samurai (4)] Notes: 1222 (Profile) vs 1383 (SongData) | Diff: 161 (11.64%) | File: chart_cache\profiles\10\1samurai_a.json
+[of the first magnitude (4)] Notes: 1329 (Profile) vs 1503 (SongData) | Diff: 174 (11.58%) | File: chart_cache\profiles\28\of_magni_a.json
+[Glitch N Ride (4)] Notes: 1229 (Profile) vs 1389 (SongData) | Diff: 160 (11.52%) | File: chart_cache\profiles\31\glitch_n_a.json
+[Thor's Hammer (4)] Notes: 1452 (Profile) vs 1641 (SongData) | Diff: 189 (11.52%) | File: chart_cache\profiles\20\thors_hm_a.json
+[Take My Life (4)] Notes: 1316 (Profile) vs 1487 (SongData) | Diff: 171 (11.50%) | File: chart_cache\profiles\20\takelife_a.json
+[恋する☆宇宙戦争っ！！ (4)] Notes: 1625 (Profile) vs 1835 (SongData) | Diff: 210 (11.44%) | File: chart_cache\profiles\19\_koisuru_a.json
+[夕焼け ～Fading Day～ (4)] Notes: 1258 (Profile) vs 1420 (SongData) | Diff: 162 (11.41%) | File: chart_cache\profiles\18\_yuuyake_a.json
+[chaplet -IIDX re:build- (4)] Notes: 1315 (Profile) vs 1481 (SongData) | Diff: 166 (11.21%) | File: chart_cache\profiles\33\chaplet_a.json
+[Snakey Kung-fu (4)] Notes: 1555 (Profile) vs 1751 (SongData) | Diff: 196 (11.19%) | File: chart_cache\profiles\24\snkungfu_a.json
+[Debtty Daddy (4)] Notes: 1218 (Profile) vs 1371 (SongData) | Diff: 153 (11.16%) | File: chart_cache\profiles\10\debtty_a.json
+[Little Star (4)] Notes: 1454 (Profile) vs 1635 (SongData) | Diff: 181 (11.07%) | File: chart_cache\profiles\20\ltl_star_a.json
+[Space In Time (4)] Notes: 933 (Profile) vs 1047 (SongData) | Diff: 114 (10.89%) | File: chart_cache\profiles\32\spaceint_a.json
+[Unbelief (4)] Notes: 1493 (Profile) vs 1675 (SongData) | Diff: 182 (10.87%) | File: chart_cache\profiles\26\unbelief_a.json
+[Do it!! Do it!! (10)] Notes: 1175 (Profile) vs 1317 (SongData) | Diff: 142 (10.78%) | File: chart_cache\profiles\15\doit_emp_l.json
+[PARANOiA ～HADES～ (4)] Notes: 1245 (Profile) vs 1395 (SongData) | Diff: 150 (10.75%) | File: chart_cache\profiles\15\pr_hades_a.json
+[Star Trail (10)] Notes: 1183 (Profile) vs 1325 (SongData) | Diff: 142 (10.72%) | File: chart_cache\profiles\19\strtrail_l.json
+[Energy Drive (4)] Notes: 1002 (Profile) vs 1122 (SongData) | Diff: 120 (10.70%) | File: chart_cache\profiles\18\engdrive_a.json
+[QUANTUM TELEPORTATION (10)] Notes: 1648 (Profile) vs 1845 (SongData) | Diff: 197 (10.68%) | File: chart_cache\profiles\19\quantuml_a.json
+[Ignis†Irae (4)] Notes: 1760 (Profile) vs 1970 (SongData) | Diff: 210 (10.66%) | File: chart_cache\profiles\28\ignisira_a.json
+[Scripted Connection⇒ N mix (10)] Notes: 1115 (Profile) vs 1247 (SongData) | Diff: 132 (10.59%) | File: chart_cache\profiles\12\script_n_l.json
+[crew (4)] Notes: 1360 (Profile) vs 1519 (SongData) | Diff: 159 (10.47%) | File: chart_cache\profiles\24\crew_a.json
+[FIRE FIRE (4)] Notes: 1258 (Profile) vs 1405 (SongData) | Diff: 147 (10.46%) | File: chart_cache\profiles\14\firefire_a.json
+[Lucy (4)] Notes: 1045 (Profile) vs 1167 (SongData) | Diff: 122 (10.45%) | File: chart_cache\profiles\10\lucy_a.json
+[TRIUMPH (4)] Notes: 1544 (Profile) vs 1724 (SongData) | Diff: 180 (10.44%) | File: chart_cache\profiles\27\triumph_a.json
+[Scarlet Moon (4)] Notes: 1244 (Profile) vs 1389 (SongData) | Diff: 145 (10.44%) | File: chart_cache\profiles\22\scarmoon_a.json
+[えだまめカレークッキング (4)] Notes: 1003 (Profile) vs 1119 (SongData) | Diff: 116 (10.37%) | File: chart_cache\profiles\32\_edamame_a.json
+[oratio (4)] Notes: 1339 (Profile) vs 1493 (SongData) | Diff: 154 (10.31%) | File: chart_cache\profiles\15\oratio_a.json
+[BIGソムタム (4)] Notes: 1514 (Profile) vs 1688 (SongData) | Diff: 174 (10.31%) | File: chart_cache\profiles\28\big_smtm_a.json
+[Quakes (4)] Notes: 1484 (Profile) vs 1654 (SongData) | Diff: 170 (10.28%) | File: chart_cache\profiles\24\quakes_a.json
+[天空脳番長危機十六連打 (4)] Notes: 1188 (Profile) vs 1323 (SongData) | Diff: 135 (10.20%) | File: chart_cache\profiles\16\_rage16_a.json
+[NEW SENSATION -もう、あなたしか見えない- (4)] Notes: 1219 (Profile) vs 1357 (SongData) | Diff: 138 (10.17%) | File: chart_cache\profiles\17\new_sens_a.json
+[Daily Lunch Special (4)] Notes: 1344 (Profile) vs 1494 (SongData) | Diff: 150 (10.04%) | File: chart_cache\profiles\23\daylunch_a.json
+[ECHIDNA (4)] Notes: 1597 (Profile) vs 1775 (SongData) | Diff: 178 (10.03%) | File: chart_cache\profiles\24\echidna_a.json
+[xenon (4)] Notes: 1241 (Profile) vs 1379 (SongData) | Diff: 138 (10.01%) | File: chart_cache\profiles\8\xenon_a.json
+[Slipstream (4)] Notes: 1640 (Profile) vs 1822 (SongData) | Diff: 182 (9.99%) | File: chart_cache\profiles\25\slipstrm_a.json
+[Dynamite (4)] Notes: 1758 (Profile) vs 1953 (SongData) | Diff: 195 (9.98%) | File: chart_cache\profiles\23\dynausao_a.json
+[HYPERION (4)] Notes: 1247 (Profile) vs 1385 (SongData) | Diff: 138 (9.96%) | File: chart_cache\profiles\16\hyperion_a.json
+[gigadelic (4)] Notes: 1172 (Profile) vs 1301 (SongData) | Diff: 129 (9.92%) | File: chart_cache\profiles\11\gigadel_a.json
+[Adularia (4)] Notes: 1306 (Profile) vs 1449 (SongData) | Diff: 143 (9.87%) | File: chart_cache\profiles\21\adularia_a.json
+[D (4)] Notes: 1184 (Profile) vs 1313 (SongData) | Diff: 129 (9.82%) | File: chart_cache\profiles\17\d_eagle_a.json
+[Souhait bleu (4)] Notes: 1269 (Profile) vs 1407 (SongData) | Diff: 138 (9.81%) | File: chart_cache\profiles\29\souhaitb_a.json
+[LOCUS OF THE TRAVEL (4)] Notes: 1732 (Profile) vs 1920 (SongData) | Diff: 188 (9.79%) | File: chart_cache\profiles\28\locustrv_a.json
+[STEEL NEEDLE (4)] Notes: 1145 (Profile) vs 1269 (SongData) | Diff: 124 (9.77%) | File: chart_cache\profiles\15\stneedle_a.json
+[Second Heaven (4)] Notes: 965 (Profile) vs 1069 (SongData) | Diff: 104 (9.73%) | File: chart_cache\profiles\14\secondhv_a.json
+[rainbow flyer (4)] Notes: 976 (Profile) vs 1081 (SongData) | Diff: 105 (9.71%) | File: chart_cache\profiles\8\rbwflyer_a.json
+[か・し・ま・し☆PUMP UP！ (4)] Notes: 1312 (Profile) vs 1453 (SongData) | Diff: 141 (9.70%) | File: chart_cache\profiles\23\_kasimas_a.json
+[Session 1 -Genesis- (4)] Notes: 1121 (Profile) vs 1240 (SongData) | Diff: 119 (9.60%) | File: chart_cache\profiles\17\session1_a.json
+[satellite020712 from "CODED ARMS" (4)] Notes: 1169 (Profile) vs 1293 (SongData) | Diff: 124 (9.59%) | File: chart_cache\profiles\15\sa2712ac_a.json
+[Let The Track Flow (4)] Notes: 1236 (Profile) vs 1367 (SongData) | Diff: 131 (9.58%) | File: chart_cache\profiles\18\lettrack_a.json
+[Sakura Mirage (4)] Notes: 1076 (Profile) vs 1190 (SongData) | Diff: 114 (9.58%) | File: chart_cache\profiles\22\sakuramr_a.json
+[Pollinosis (4)] Notes: 1156 (Profile) vs 1278 (SongData) | Diff: 122 (9.55%) | File: chart_cache\profiles\12\pollino_a.json
+[ワルツ第17番 ト短調”大犬のワルツ” (4)] Notes: 1524 (Profile) vs 1684 (SongData) | Diff: 160 (9.50%) | File: chart_cache\profiles\17\_valse17_a.json
+[摩天楼 (4)] Notes: 1185 (Profile) vs 1309 (SongData) | Diff: 124 (9.47%) | File: chart_cache\profiles\31\_matenro_a.json
+[EXUSIA (4)] Notes: 1778 (Profile) vs 1964 (SongData) | Diff: 186 (9.47%) | File: chart_cache\profiles\17\exusia_a.json
+[Sinus Iridum (4)] Notes: 1633 (Profile) vs 1803 (SongData) | Diff: 170 (9.43%) | File: chart_cache\profiles\28\sinusiri_a.json
+[KAISER PHOENIX (4)] Notes: 1852 (Profile) vs 1693 (SongData) | Diff: 159 (9.39%) | File: chart_cache\profiles\21\kaiserph_a.json
+[Queen Kaguya (4)] Notes: 1206 (Profile) vs 1330 (SongData) | Diff: 124 (9.32%) | File: chart_cache\profiles\27\q_kaguya_a.json
+[FAKE TIME (4)] Notes: 1117 (Profile) vs 1231 (SongData) | Diff: 114 (9.26%) | File: chart_cache\profiles\11\faketime_a.json
+[GENOCIDE (4)] Notes: 1109 (Profile) vs 1222 (SongData) | Diff: 113 (9.25%) | File: chart_cache\profiles\11\genocide_a.json
+[Scharfrichter (4)] Notes: 1336 (Profile) vs 1472 (SongData) | Diff: 136 (9.24%) | File: chart_cache\profiles\19\scharfri_a.json
+[Onyx (4)] Notes: 1102 (Profile) vs 1214 (SongData) | Diff: 112 (9.23%) | File: chart_cache\profiles\29\onyx_a.json
+[BROKEN EDEN (4)] Notes: 1073 (Profile) vs 1182 (SongData) | Diff: 109 (9.22%) | File: chart_cache\profiles\18\brkneden_a.json
+[Abraxas (4)] Notes: 1127 (Profile) vs 1241 (SongData) | Diff: 114 (9.19%) | File: chart_cache\profiles\25\abraxas_a.json
+[QUANTUM TELEPORTATION (10)] Notes: 1677 (Profile) vs 1845 (SongData) | Diff: 168 (9.11%) | File: chart_cache\profiles\19\quantuml_l.json
+[Steel Edge (4)] Notes: 1458 (Profile) vs 1604 (SongData) | Diff: 146 (9.10%) | File: chart_cache\profiles\24\steledge_a.json
+[Plan 8 (4)] Notes: 1537 (Profile) vs 1690 (SongData) | Diff: 153 (9.05%) | File: chart_cache\profiles\20\plan8_a.json
+[Psycho Sheep Riddim (10)] Notes: 1046 (Profile) vs 1150 (SongData) | Diff: 104 (9.04%) | File: chart_cache\profiles\26\psysheep_l.json
+[Temple of Anubis (4)] Notes: 1224 (Profile) vs 1345 (SongData) | Diff: 121 (9.00%) | File: chart_cache\profiles\25\t_anubis_a.json
+[ABSOLUTE (10)] Notes: 1285 (Profile) vs 1412 (SongData) | Diff: 127 (8.99%) | File: chart_cache\profiles\4\absolutl_l.json
+[ALL MY TURN -このターンに、オレの全てを賭ける- (4)] Notes: 1196 (Profile) vs 1314 (SongData) | Diff: 118 (8.98%) | File: chart_cache\profiles\16\almyturn_a.json
+[うさ☆かめ 大戦争！ (4)] Notes: 1162 (Profile) vs 1276 (SongData) | Diff: 114 (8.93%) | File: chart_cache\profiles\25\_usakame_a.json
+[Visterhv (4)] Notes: 1703 (Profile) vs 1869 (SongData) | Diff: 166 (8.88%) | File: chart_cache\profiles\26\visterhv_a.json
+[Scripted Connection⇒ A mix (10)] Notes: 1594 (Profile) vs 1749 (SongData) | Diff: 155 (8.86%) | File: chart_cache\profiles\12\script_a_l.json
+[Ember Lights (4)] Notes: 1490 (Profile) vs 1369 (SongData) | Diff: 121 (8.84%) | File: chart_cache\profiles\26\emberlts_a.json
+[ABSOLUTE (kors k Remix) (4)] Notes: 1218 (Profile) vs 1336 (SongData) | Diff: 118 (8.83%) | File: chart_cache\profiles\28\abso_k_a.json
+[Ｘ↑Ｘ↓ (4)] Notes: 1354 (Profile) vs 1485 (SongData) | Diff: 131 (8.82%) | File: chart_cache\profiles\22\_x7xl_a.json
+[INORI (4)] Notes: 1472 (Profile) vs 1614 (SongData) | Diff: 142 (8.80%) | File: chart_cache\profiles\14\inori_a.json
+[ABSOLUTE (10)] Notes: 1288 (Profile) vs 1412 (SongData) | Diff: 124 (8.78%) | File: chart_cache\profiles\4\absolutl_a.json
+[Linus (4)] Notes: 1009 (Profile) vs 1105 (SongData) | Diff: 96 (8.69%) | File: chart_cache\profiles\6\linus_a.json
+[B4U(BEMANI FOR YOU MIX) (10)] Notes: 2155 (Profile) vs 2360 (SongData) | Diff: 205 (8.69%) | File: chart_cache\profiles\16\bemani4u_l.json
+[Ou Legends (4)] Notes: 1541 (Profile) vs 1687 (SongData) | Diff: 146 (8.65%) | File: chart_cache\profiles\30\_oulgnds_a.json
+[perditus†paradisus (4)] Notes: 1887 (Profile) vs 2065 (SongData) | Diff: 178 (8.62%) | File: chart_cache\profiles\18\perditus_a.json
+[KAISER PHOENIX (10)] Notes: 1852 (Profile) vs 2026 (SongData) | Diff: 174 (8.59%) | File: chart_cache\profiles\21\kaiserpl_l.json
+[Painful Fate (4)] Notes: 1556 (Profile) vs 1702 (SongData) | Diff: 146 (8.58%) | File: chart_cache\profiles\26\painfate_a.json
+[乱膳の舞姫 (4)] Notes: 1264 (Profile) vs 1382 (SongData) | Diff: 118 (8.54%) | File: chart_cache\profiles\28\_feastof_a.json
+[quasar (4)] Notes: 1062 (Profile) vs 1161 (SongData) | Diff: 99 (8.53%) | File: chart_cache\profiles\9\quasar_a.json
+[凛として咲く花の如く (10)] Notes: 1459 (Profile) vs 1595 (SongData) | Diff: 136 (8.53%) | File: chart_cache\profiles\16\_rintosl_l.json
+[neogenesis (10)] Notes: 1080 (Profile) vs 1180 (SongData) | Diff: 100 (8.47%) | File: chart_cache\profiles\16\neogenes_l.json
+[GALGALIM (4)] Notes: 1106 (Profile) vs 1208 (SongData) | Diff: 102 (8.44%) | File: chart_cache\profiles\17\galgalim_a.json
+[Everlasting Message (4)] Notes: 1804 (Profile) vs 1970 (SongData) | Diff: 166 (8.43%) | File: chart_cache\profiles\27\evermesg_a.json
+[量子の海のリントヴルム (4)] Notes: 1381 (Profile) vs 1508 (SongData) | Diff: 127 (8.42%) | File: chart_cache\profiles\23\_maudand_a.json
+[Close the World feat.a☆ru (4)] Notes: 1885 (Profile) vs 1739 (SongData) | Diff: 146 (8.40%) | File: chart_cache\profiles\21\closewld_a.json
+[#MAGiCVLGiRL_TRVP_B3VTZ (4)] Notes: 1606 (Profile) vs 1753 (SongData) | Diff: 147 (8.39%) | File: chart_cache\profiles\24\_magicvl_a.json
+[Gravigazer (4)] Notes: 1405 (Profile) vs 1533 (SongData) | Diff: 128 (8.35%) | File: chart_cache\profiles\22\gravigzr_a.json
+[Summerlights(IIDX Edition) (4)] Notes: 1449 (Profile) vs 1580 (SongData) | Diff: 131 (8.29%) | File: chart_cache\profiles\24\summerlt_a.json
+[Perfect Plan (4)] Notes: 1218 (Profile) vs 1328 (SongData) | Diff: 110 (8.28%) | File: chart_cache\profiles\30\perfplan_a.json
+[パ→ピ→プ→Yeah! (4)] Notes: 1174 (Profile) vs 1280 (SongData) | Diff: 106 (8.28%) | File: chart_cache\profiles\22\_papipu_a.json
+[Dawn Saga (4)] Notes: 1264 (Profile) vs 1378 (SongData) | Diff: 114 (8.27%) | File: chart_cache\profiles\28\dawnsaga_a.json
+[Megalara Garuda (4)] Notes: 1417 (Profile) vs 1543 (SongData) | Diff: 126 (8.17%) | File: chart_cache\profiles\27\megalara_a.json
+[Triple Cross (4)] Notes: 1531 (Profile) vs 1667 (SongData) | Diff: 136 (8.16%) | File: chart_cache\profiles\29\tricross_a.json
+[Timepiece phase II (CN Ver.) (4)] Notes: 1420 (Profile) vs 1546 (SongData) | Diff: 126 (8.15%) | File: chart_cache\profiles\20\tpiececn_a.json
+[SOLID STATE SQUAD -RISEN RELIC REMIX- (4)] Notes: 1534 (Profile) vs 1670 (SongData) | Diff: 136 (8.14%) | File: chart_cache\profiles\28\sss_rrr_a.json
+[Lisa-RICCIA (10)] Notes: 2200 (Profile) vs 2394 (SongData) | Diff: 194 (8.10%) | File: chart_cache\profiles\33\lisa_ric_l.json
+[Ergosphere (4)] Notes: 1279 (Profile) vs 1391 (SongData) | Diff: 112 (8.05%) | File: chart_cache\profiles\29\ergosphr_a.json
+[Secrets (4)] Notes: 1464 (Profile) vs 1592 (SongData) | Diff: 128 (8.04%) | File: chart_cache\profiles\16\secrets_a.json
+[Blaze it UP! (4)] Notes: 1381 (Profile) vs 1501 (SongData) | Diff: 120 (7.99%) | File: chart_cache\profiles\22\blazitup_a.json
+[The Dirty of Loudness (4)] Notes: 1221 (Profile) vs 1327 (SongData) | Diff: 106 (7.99%) | File: chart_cache\profiles\13\thedirty_a.json
+[嘆きの樹 (4)] Notes: 1841 (Profile) vs 2000 (SongData) | Diff: 159 (7.95%) | File: chart_cache\profiles\13\_nageki_a.json
+[INSOMNIA (4)] Notes: 1529 (Profile) vs 1661 (SongData) | Diff: 132 (7.95%) | File: chart_cache\profiles\21\insomnia_a.json
+[少年A (4)] Notes: 1334 (Profile) vs 1449 (SongData) | Diff: 115 (7.94%) | File: chart_cache\profiles\15\_kid_a_a.json
+[SOLID STATE SQUAD (10)] Notes: 1720 (Profile) vs 1868 (SongData) | Diff: 148 (7.92%) | File: chart_cache\profiles\17\sssquadl_l.json
+[ディッシュウォッシャー◎彡おいわちゃん (4)] Notes: 1179 (Profile) vs 1280 (SongData) | Diff: 101 (7.89%) | File: chart_cache\profiles\24\_dw_oiwa_a.json
+[CHRONO DIVER -NORNIR- (10)] Notes: 2057 (Profile) vs 2233 (SongData) | Diff: 176 (7.88%) | File: chart_cache\profiles\22\chrononl_a.json
+[Drop Syndicate (4)] Notes: 1715 (Profile) vs 1861 (SongData) | Diff: 146 (7.85%) | File: chart_cache\profiles\32\dropsynd_a.json
+[Sigmund (4)] Notes: 2187 (Profile) vs 2029 (SongData) | Diff: 158 (7.79%) | File: chart_cache\profiles\21\sigmund_a.json
+[MENTAL MELTDOWN (4)] Notes: 1331 (Profile) vs 1443 (SongData) | Diff: 112 (7.76%) | File: chart_cache\profiles\15\meltdown_a.json
+[海神 (10)] Notes: 1688 (Profile) vs 1830 (SongData) | Diff: 142 (7.76%) | File: chart_cache\profiles\21\_wadatmi_l.json
+[EDEN (10)] Notes: 1510 (Profile) vs 1637 (SongData) | Diff: 127 (7.76%) | File: chart_cache\profiles\12\eden_l.json
+[CHECKING YOU OUT (4)] Notes: 646 (Profile) vs 700 (SongData) | Diff: 54 (7.71%) | File: chart_cache\profiles\4\checking_a.json
+[雪月花 (4)] Notes: 1188 (Profile) vs 1287 (SongData) | Diff: 99 (7.69%) | File: chart_cache\profiles\10\_stgekka_a.json
+[Hello Happiness (4)] Notes: 1106 (Profile) vs 1198 (SongData) | Diff: 92 (7.68%) | File: chart_cache\profiles\22\hellohap_a.json
+[禊 (4)] Notes: 1507 (Profile) vs 1631 (SongData) | Diff: 124 (7.60%) | File: chart_cache\profiles\29\_misogi_a.json
+[Flashes (4)] Notes: 1564 (Profile) vs 1691 (SongData) | Diff: 127 (7.51%) | File: chart_cache\profiles\22\flashes_a.json
+[entelecheia (4)] Notes: 1533 (Profile) vs 1657 (SongData) | Diff: 124 (7.48%) | File: chart_cache\profiles\22\entelech_a.json
+[DEATH†ZIGOQ ～怒りの高速爆走野郎～ (4)] Notes: 1920 (Profile) vs 2075 (SongData) | Diff: 155 (7.47%) | File: chart_cache\profiles\25\dthzigoq_a.json
+[ADAMANT (4)] Notes: 1425 (Profile) vs 1539 (SongData) | Diff: 114 (7.41%) | File: chart_cache\profiles\32\adamant_a.json
+[SEQUENCE CAT (4)] Notes: 1339 (Profile) vs 1446 (SongData) | Diff: 107 (7.40%) | File: chart_cache\profiles\24\sequence_a.json
+[DIVINE JUDGEMENT (4)] Notes: 1312 (Profile) vs 1416 (SongData) | Diff: 104 (7.34%) | File: chart_cache\profiles\32\divjudge_a.json
+[VALLIS-NERIA (4)] Notes: 1397 (Profile) vs 1507 (SongData) | Diff: 110 (7.30%) | File: chart_cache\profiles\20\vallis_a.json
+[STEEL NEEDLE (10)] Notes: 1577 (Profile) vs 1701 (SongData) | Diff: 124 (7.29%) | File: chart_cache\profiles\15\stneedle_l.json
+[リリーゼと炎龍レーヴァテイン (4)] Notes: 1642 (Profile) vs 1771 (SongData) | Diff: 129 (7.28%) | File: chart_cache\profiles\22\_lilieze_a.json
+[忍恋花 (4)] Notes: 1058 (Profile) vs 1141 (SongData) | Diff: 83 (7.27%) | File: chart_cache\profiles\24\_snbrnka_a.json
+[Concertino in Blue (4)] Notes: 1216 (Profile) vs 1311 (SongData) | Diff: 95 (7.25%) | File: chart_cache\profiles\13\concert_a.json
+[カゴノトリ～弐式～ (4)] Notes: 1229 (Profile) vs 1325 (SongData) | Diff: 96 (7.25%) | File: chart_cache\profiles\13\_kagono_a.json
+[龍と少女とデコヒーレンス (10)] Notes: 1589 (Profile) vs 1713 (SongData) | Diff: 124 (7.24%) | File: chart_cache\profiles\20\_decohel_l.json
+[SPECIAL SUMMER CAMPAIGN! (4)] Notes: 1400 (Profile) vs 1509 (SongData) | Diff: 109 (7.22%) | File: chart_cache\profiles\18\ssc_a.json
+[ZETA～素数の世界と超越者～ (4)] Notes: 1469 (Profile) vs 1583 (SongData) | Diff: 114 (7.20%) | File: chart_cache\profiles\18\zeta_a.json
+[Lords Of The Roundtable (4)] Notes: 1472 (Profile) vs 1586 (SongData) | Diff: 114 (7.19%) | File: chart_cache\profiles\27\lords_rt_a.json
+[Derelict Star feat. Ryu* (4)] Notes: 1240 (Profile) vs 1336 (SongData) | Diff: 96 (7.19%) | File: chart_cache\profiles\23\derelict_a.json
+[LAB (10)] Notes: 1281 (Profile) vs 1380 (SongData) | Diff: 99 (7.17%) | File: chart_cache\profiles\8\lab_l.json
+[CaptivAte～浄化～ (4)] Notes: 1154 (Profile) vs 1243 (SongData) | Diff: 89 (7.16%) | File: chart_cache\profiles\12\captive_a.json
+[100％ minimoo-G (4)] Notes: 839 (Profile) vs 903 (SongData) | Diff: 64 (7.09%) | File: chart_cache\profiles\12\100mnm_g_a.json
+[BLUE DRAGON(雷龍RemixIIDX) (4)] Notes: 1605 (Profile) vs 1727 (SongData) | Diff: 122 (7.06%) | File: chart_cache\profiles\21\bldragon_a.json
+[SCHWARZSCHILD FIELD (4)] Notes: 1145 (Profile) vs 1232 (SongData) | Diff: 87 (7.06%) | File: chart_cache\profiles\21\schwarzs_a.json
+[DESIRE (4)] Notes: 1345 (Profile) vs 1446 (SongData) | Diff: 101 (6.98%) | File: chart_cache\profiles\17\desire_a.json
+[Arabian Rave Night (4)] Notes: 1399 (Profile) vs 1504 (SongData) | Diff: 105 (6.98%) | File: chart_cache\profiles\16\arabian_a.json
+[Red Determination (4)] Notes: 1261 (Profile) vs 1355 (SongData) | Diff: 94 (6.94%) | File: chart_cache\profiles\31\redeterm_a.json
+[Welcome (10)] Notes: 1583 (Profile) vs 1701 (SongData) | Diff: 118 (6.94%) | File: chart_cache\profiles\23\welcomel_a.json
+[BLACK.by X-Cross Fade (4)] Notes: 1619 (Profile) vs 1738 (SongData) | Diff: 119 (6.85%) | File: chart_cache\profiles\19\blackbyx_a.json
+[Beyond The Seven (4)] Notes: 1281 (Profile) vs 1375 (SongData) | Diff: 94 (6.84%) | File: chart_cache\profiles\24\beyond_7_a.json
+[Pout (4)] Notes: 1227 (Profile) vs 1317 (SongData) | Diff: 90 (6.83%) | File: chart_cache\profiles\29\pout_a.json
+[Red. by Full Metal Jacket (4)] Notes: 1531 (Profile) vs 1643 (SongData) | Diff: 112 (6.82%) | File: chart_cache\profiles\17\red_fmj_a.json
+[Night sky (4)] Notes: 1390 (Profile) vs 1491 (SongData) | Diff: 101 (6.77%) | File: chart_cache\profiles\22\nightsky_a.json
+[ZED (10)] Notes: 1658 (Profile) vs 1778 (SongData) | Diff: 120 (6.75%) | File: chart_cache\profiles\20\zed_l.json
+[XHRONOXAPSULΞ (4)] Notes: 1937 (Profile) vs 2077 (SongData) | Diff: 140 (6.74%) | File: chart_cache\profiles\32\xhronoxp_a.json
+[廿 (10)] Notes: 1615 (Profile) vs 1731 (SongData) | Diff: 116 (6.70%) | File: chart_cache\profiles\21\_twentyl_l.json
+[Nemophila (4)] Notes: 1310 (Profile) vs 1404 (SongData) | Diff: 94 (6.70%) | File: chart_cache\profiles\33\nemophla_a.json
+[電人、暁に斃れる。 (4)] Notes: 1611 (Profile) vs 1725 (SongData) | Diff: 114 (6.61%) | File: chart_cache\profiles\14\_fattack_a.json
+[魔法のかくれんぼ (4)] Notes: 1358 (Profile) vs 1454 (SongData) | Diff: 96 (6.60%) | File: chart_cache\profiles\28\_mkakure_a.json
+[子供の落書き帳 (4)] Notes: 1303 (Profile) vs 1395 (SongData) | Diff: 92 (6.59%) | File: chart_cache\profiles\19\_kodomo_a.json
+[bloomin' feeling (4)] Notes: 1227 (Profile) vs 1313 (SongData) | Diff: 86 (6.55%) | File: chart_cache\profiles\17\bloominf_a.json
+[RAIN (4)] Notes: 1549 (Profile) vs 1657 (SongData) | Diff: 108 (6.52%) | File: chart_cache\profiles\24\rain_a.json
+[ミッドナイト☆WAR (4)] Notes: 1179 (Profile) vs 1261 (SongData) | Diff: 82 (6.50%) | File: chart_cache\profiles\26\_mid_war_a.json
+[kors k's Let's make an Image Song! (4)] Notes: 1302 (Profile) vs 1392 (SongData) | Diff: 90 (6.47%) | File: chart_cache\profiles\33\korskimg_a.json
+[卑弥呼 (4)] Notes: 1982 (Profile) vs 2119 (SongData) | Diff: 137 (6.47%) | File: chart_cache\profiles\16\_himiko_a.json
+[SHADE (4)] Notes: 1370 (Profile) vs 1464 (SongData) | Diff: 94 (6.42%) | File: chart_cache\profiles\19\shade_a.json
+[Erosion Mark (4)] Notes: 1026 (Profile) vs 1096 (SongData) | Diff: 70 (6.39%) | File: chart_cache\profiles\22\erosion_a.json
+[EMERALDAS (4)] Notes: 1716 (Profile) vs 1833 (SongData) | Diff: 117 (6.38%) | File: chart_cache\profiles\25\emeralds_a.json
+[cinder (4)] Notes: 1499 (Profile) vs 1601 (SongData) | Diff: 102 (6.37%) | File: chart_cache\profiles\22\cinder_a.json
+[UMMU (4)] Notes: 1486 (Profile) vs 1587 (SongData) | Diff: 101 (6.36%) | File: chart_cache\profiles\25\ummu_a.json
+[ZZ (4)] Notes: 1443 (Profile) vs 1541 (SongData) | Diff: 98 (6.36%) | File: chart_cache\profiles\22\zz_amuro_a.json
+[POODLE (10)] Notes: 1599 (Profile) vs 1707 (SongData) | Diff: 108 (6.33%) | File: chart_cache\profiles\12\poodle_l.json
+[Beyond Evolution (4)] Notes: 2076 (Profile) vs 2216 (SongData) | Diff: 140 (6.32%) | File: chart_cache\profiles\30\beyondev_a.json
+[FANTASTIC THREE (4)] Notes: 1545 (Profile) vs 1649 (SongData) | Diff: 104 (6.31%) | File: chart_cache\profiles\22\fanthree_a.json
+[B4U(BEMANI FOR YOU MIX) (4)] Notes: 1696 (Profile) vs 1810 (SongData) | Diff: 114 (6.30%) | File: chart_cache\profiles\16\bemani4u_a.json
+[津軽雪 (4)] Notes: 1830 (Profile) vs 1953 (SongData) | Diff: 123 (6.30%) | File: chart_cache\profiles\24\_tgryuki_a.json
+[覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～ (4)] Notes: 1376 (Profile) vs 1468 (SongData) | Diff: 92 (6.27%) | File: chart_cache\profiles\32\_kakugos_a.json
+[n'pa pa BBQ (4)] Notes: 1320 (Profile) vs 1408 (SongData) | Diff: 88 (6.25%) | File: chart_cache\profiles\25\npapabbq_a.json
+[Aftermath (4)] Notes: 1714 (Profile) vs 1828 (SongData) | Diff: 114 (6.24%) | File: chart_cache\profiles\29\aftrmath_a.json
+[AA (4)] Notes: 1720 (Profile) vs 1834 (SongData) | Diff: 114 (6.22%) | File: chart_cache\profiles\11\aa_amuro_a.json
+[Close the World feat.a☆ru (10)] Notes: 1860 (Profile) vs 1983 (SongData) | Diff: 123 (6.20%) | File: chart_cache\profiles\21\closewdl_l.json
+[Boomy and The Boost (4)] Notes: 1713 (Profile) vs 1826 (SongData) | Diff: 113 (6.19%) | File: chart_cache\profiles\25\booboost_a.json
+[Secret of Love (4)] Notes: 956 (Profile) vs 1019 (SongData) | Diff: 63 (6.18%) | File: chart_cache\profiles\11\seclove_a.json
+[Persephone (4)] Notes: 1444 (Profile) vs 1539 (SongData) | Diff: 95 (6.17%) | File: chart_cache\profiles\25\prsphone_a.json
+[MAD ATTACK (10)] Notes: 1310 (Profile) vs 1396 (SongData) | Diff: 86 (6.16%) | File: chart_cache\profiles\21\madatack_l.json
+[Back Spin Sweeper (4)] Notes: 1085 (Profile) vs 1156 (SongData) | Diff: 71 (6.14%) | File: chart_cache\profiles\25\backspin_a.json
+[A (4)] Notes: 1183 (Profile) vs 1260 (SongData) | Diff: 77 (6.11%) | File: chart_cache\profiles\7\a_amuro_a.json
+[fffff (4)] Notes: 1525 (Profile) vs 1624 (SongData) | Diff: 99 (6.10%) | File: chart_cache\profiles\19\fffff_a.json
+[きみのせかい (4)] Notes: 1358 (Profile) vs 1446 (SongData) | Diff: 88 (6.09%) | File: chart_cache\profiles\32\_kiminos_a.json
+[Purple Perplex (4)] Notes: 1482 (Profile) vs 1578 (SongData) | Diff: 96 (6.08%) | File: chart_cache\profiles\29\pperplex_a.json
+[聖人の塔 (10)] Notes: 2152 (Profile) vs 2290 (SongData) | Diff: 138 (6.03%) | File: chart_cache\profiles\19\_seijin_l.json
+[Giudecca (4)] Notes: 1298 (Profile) vs 1381 (SongData) | Diff: 83 (6.01%) | File: chart_cache\profiles\8\giudecca_a.json
+[Highcharge Divolt (4)] Notes: 1336 (Profile) vs 1421 (SongData) | Diff: 85 (5.98%) | File: chart_cache\profiles\23\hicharge_a.json
+[THE BLACK KNIGHT (4)] Notes: 1399 (Profile) vs 1488 (SongData) | Diff: 89 (5.98%) | File: chart_cache\profiles\18\tbknight_a.json
+[Lightspeed (4)] Notes: 1510 (Profile) vs 1606 (SongData) | Diff: 96 (5.98%) | File: chart_cache\profiles\32\lightspd_a.json
+[TITANS RETURN (10)] Notes: 1295 (Profile) vs 1377 (SongData) | Diff: 82 (5.95%) | File: chart_cache\profiles\19\titans_l.json
+[閠槞彁の願い (4)] Notes: 1517 (Profile) vs 1613 (SongData) | Diff: 96 (5.95%) | File: chart_cache\profiles\28\_grk_a.json
+[バンブーソード・ガール (4)] Notes: 1186 (Profile) vs 1261 (SongData) | Diff: 75 (5.95%) | File: chart_cache\profiles\21\_bamboos_a.json
+[SOUND OF GIALLARHORN (4)] Notes: 1569 (Profile) vs 1668 (SongData) | Diff: 99 (5.94%) | File: chart_cache\profiles\15\sgiallar_a.json
+[Punch Love 仮面 (10)] Notes: 1539 (Profile) vs 1636 (SongData) | Diff: 97 (5.93%) | File: chart_cache\profiles\16\punch_lv_l.json
+[Rave*it!! Rave*it!! (4)] Notes: 1558 (Profile) vs 1656 (SongData) | Diff: 98 (5.92%) | File: chart_cache\profiles\22\rave_it_a.json
+[STELLAR WIND (4)] Notes: 1289 (Profile) vs 1370 (SongData) | Diff: 81 (5.91%) | File: chart_cache\profiles\18\stellar_a.json
+[水鏡の異界 (4)] Notes: 1563 (Profile) vs 1661 (SongData) | Diff: 98 (5.90%) | File: chart_cache\profiles\28\_suikyo_a.json
+[眠りの国のステラ (4)] Notes: 1311 (Profile) vs 1393 (SongData) | Diff: 82 (5.89%) | File: chart_cache\profiles\27\_stellad_a.json
+[Sounds Of Summer (4)] Notes: 1424 (Profile) vs 1513 (SongData) | Diff: 89 (5.88%) | File: chart_cache\profiles\22\sosummer_a.json
+[Nightmare before oversleep (4)] Notes: 1412 (Profile) vs 1500 (SongData) | Diff: 88 (5.87%) | File: chart_cache\profiles\23\nightbfr_a.json
+[BRAINSTORM (4)] Notes: 1364 (Profile) vs 1449 (SongData) | Diff: 85 (5.87%) | File: chart_cache\profiles\21\brainstm_a.json
+[Aublia (4)] Notes: 1223 (Profile) vs 1299 (SongData) | Diff: 76 (5.85%) | File: chart_cache\profiles\23\aublia_a.json
+[2 Beasts Unchained (4)] Notes: 1676 (Profile) vs 1780 (SongData) | Diff: 104 (5.84%) | File: chart_cache\profiles\29\2beasts_a.json
+[XINOBIKILL (4)] Notes: 1389 (Profile) vs 1475 (SongData) | Diff: 86 (5.83%) | File: chart_cache\profiles\24\xinobikl_a.json
+[Ember Lights (10)] Notes: 1490 (Profile) vs 1582 (SongData) | Diff: 92 (5.82%) | File: chart_cache\profiles\26\emberlts_l.json
+[Nocturnal 2097 (4)] Notes: 1393 (Profile) vs 1479 (SongData) | Diff: 86 (5.81%) | File: chart_cache\profiles\29\noct2097_a.json
+[m1dy Deluxe (4)] Notes: 1264 (Profile) vs 1342 (SongData) | Diff: 78 (5.81%) | File: chart_cache\profiles\21\m1dy_dx_a.json
+[ハイテックトキオ (10)] Notes: 1561 (Profile) vs 1657 (SongData) | Diff: 96 (5.79%) | File: chart_cache\profiles\29\_hitokio_l.json
+[ANTHEM LANDING (4)] Notes: 1399 (Profile) vs 1484 (SongData) | Diff: 85 (5.73%) | File: chart_cache\profiles\18\anthemld_a.json
+[龍と少女とデコヒーレンス (10)] Notes: 1615 (Profile) vs 1713 (SongData) | Diff: 98 (5.72%) | File: chart_cache\profiles\20\_decohel_a.json
+[Beastie Starter (4)] Notes: 1057 (Profile) vs 1121 (SongData) | Diff: 64 (5.71%) | File: chart_cache\profiles\20\beastie_a.json
+[セロトニン (4)] Notes: 1126 (Profile) vs 1194 (SongData) | Diff: 68 (5.70%) | File: chart_cache\profiles\23\_seroton_a.json
+[Million Dollar (4)] Notes: 1662 (Profile) vs 1762 (SongData) | Diff: 100 (5.68%) | File: chart_cache\profiles\31\mldollar_a.json
+[合体せよ！ストロングイェーガー！！ (Ryu☆ remix) (4)] Notes: 917 (Profile) vs 972 (SongData) | Diff: 55 (5.66%) | File: chart_cache\profiles\12\_tsj_ryu_a.json
+[-65℃ (4)] Notes: 1804 (Profile) vs 1912 (SongData) | Diff: 108 (5.65%) | File: chart_cache\profiles\28\_65c_a.json
+[バ→ビ→ブ→Bomb! (4)] Notes: 1221 (Profile) vs 1294 (SongData) | Diff: 73 (5.64%) | File: chart_cache\profiles\25\_babibu_a.json
+[four pieces of heaven (4)] Notes: 1156 (Profile) vs 1225 (SongData) | Diff: 69 (5.63%) | File: chart_cache\profiles\15\fourpces_a.json
+[Umbral (10)] Notes: 1478 (Profile) vs 1566 (SongData) | Diff: 88 (5.62%) | File: chart_cache\profiles\24\umbral_l.json
+[Carmina (4)] Notes: 1888 (Profile) vs 2000 (SongData) | Diff: 112 (5.60%) | File: chart_cache\profiles\26\carmina_a.json
+[DAY DREAM (4)] Notes: 1135 (Profile) vs 1075 (SongData) | Diff: 60 (5.58%) | File: chart_cache\profiles\20\daydream_a.json
+[HYENA (4)] Notes: 1354 (Profile) vs 1434 (SongData) | Diff: 80 (5.58%) | File: chart_cache\profiles\21\hyena_a.json
+[旅人リラン (4)] Notes: 1270 (Profile) vs 1345 (SongData) | Diff: 75 (5.58%) | File: chart_cache\profiles\18\_t_rerun_a.json
+[Last Dance (4)] Notes: 1558 (Profile) vs 1650 (SongData) | Diff: 92 (5.58%) | File: chart_cache\profiles\21\lstdance_a.json
+[BLACK or WHITE? (4)] Notes: 1901 (Profile) vs 2013 (SongData) | Diff: 112 (5.56%) | File: chart_cache\profiles\28\blkwhite_a.json
+[Marie Antoinette (10)] Notes: 1528 (Profile) vs 1618 (SongData) | Diff: 90 (5.56%) | File: chart_cache\profiles\16\marieant_l.json
+[rough percussionythm (4)] Notes: 1223 (Profile) vs 1295 (SongData) | Diff: 72 (5.56%) | File: chart_cache\profiles\27\roughper_a.json
+[ALTERNATOR (4)] Notes: 1801 (Profile) vs 1907 (SongData) | Diff: 106 (5.56%) | File: chart_cache\profiles\29\altnator_a.json
+[AGEHA (10)] Notes: 1164 (Profile) vs 1232 (SongData) | Diff: 68 (5.52%) | File: chart_cache\profiles\11\ageha_l.json
+[Playing With Fire (4)] Notes: 1134 (Profile) vs 1200 (SongData) | Diff: 66 (5.50%) | File: chart_cache\profiles\26\playfire_a.json
+[SAY BAY (4)] Notes: 1375 (Profile) vs 1455 (SongData) | Diff: 80 (5.50%) | File: chart_cache\profiles\24\saybay_a.json
+[HYENA (10)] Notes: 1790 (Profile) vs 1894 (SongData) | Diff: 104 (5.49%) | File: chart_cache\profiles\21\hyena_l.json
+[Aegis (4)] Notes: 1136 (Profile) vs 1202 (SongData) | Diff: 66 (5.49%) | File: chart_cache\profiles\18\aegis_a.json
+[Para siempre (4)] Notes: 1381 (Profile) vs 1461 (SongData) | Diff: 80 (5.48%) | File: chart_cache\profiles\28\psiempre_a.json
+[夏色DIARY - L.E.D.-G STYLE MIX - (4)] Notes: 1503 (Profile) vs 1590 (SongData) | Diff: 87 (5.47%) | File: chart_cache\profiles\22\_ntdiary_a.json
+[海神 (4)] Notes: 1540 (Profile) vs 1629 (SongData) | Diff: 89 (5.46%) | File: chart_cache\profiles\21\_wadatmi_a.json
+[KEY (4)] Notes: 1358 (Profile) vs 1436 (SongData) | Diff: 78 (5.43%) | File: chart_cache\profiles\11\key_a.json
+[GAIA (4)] Notes: 1585 (Profile) vs 1676 (SongData) | Diff: 91 (5.43%) | File: chart_cache\profiles\20\gaia_a.json
+[JOMANDA (4)] Notes: 1814 (Profile) vs 1918 (SongData) | Diff: 104 (5.42%) | File: chart_cache\profiles\20\jomanda_a.json
+[EBONY & IVORY (10)] Notes: 1785 (Profile) vs 1887 (SongData) | Diff: 102 (5.41%) | File: chart_cache\profiles\22\ebnyivrl_a.json
+[GIGA RAID (4)] Notes: 1156 (Profile) vs 1222 (SongData) | Diff: 66 (5.40%) | File: chart_cache\profiles\28\gigaraid_a.json
+[Devilz Staircase (4)] Notes: 1595 (Profile) vs 1685 (SongData) | Diff: 90 (5.34%) | File: chart_cache\profiles\20\devilz_s_a.json
+[CHRONO DIVER -NORNIR- (10)] Notes: 2114 (Profile) vs 2233 (SongData) | Diff: 119 (5.33%) | File: chart_cache\profiles\22\chrononl_l.json
+[逆月 (4)] Notes: 1818 (Profile) vs 1920 (SongData) | Diff: 102 (5.31%) | File: chart_cache\profiles\29\_sakazki_a.json
+[THE F∀UST (4)] Notes: 1753 (Profile) vs 1851 (SongData) | Diff: 98 (5.29%) | File: chart_cache\profiles\27\thefaust_a.json
+[ROCK女 feat. 大山愛未， Ken (4)] Notes: 1360 (Profile) vs 1436 (SongData) | Diff: 76 (5.29%) | File: chart_cache\profiles\26\rockonna_a.json
+[Routing (4)] Notes: 1253 (Profile) vs 1323 (SongData) | Diff: 70 (5.29%) | File: chart_cache\profiles\23\routing_a.json
+[ra'am (4)] Notes: 1384 (Profile) vs 1461 (SongData) | Diff: 77 (5.27%) | File: chart_cache\profiles\21\raam_a.json
+[Go Ahead!! (4)] Notes: 1339 (Profile) vs 1413 (SongData) | Diff: 74 (5.24%) | File: chart_cache\profiles\24\goahead_a.json
+[Insane Techniques (4)] Notes: 1197 (Profile) vs 1263 (SongData) | Diff: 66 (5.23%) | File: chart_cache\profiles\21\insanetc_a.json
+[Battle Train -IIDX Edition- (4)] Notes: 1599 (Profile) vs 1687 (SongData) | Diff: 88 (5.22%) | File: chart_cache\profiles\23\btltrain_a.json
+[On the FM (4)] Notes: 1345 (Profile) vs 1419 (SongData) | Diff: 74 (5.21%) | File: chart_cache\profiles\23\onthefm_a.json
+[Binary Black Hole (4)] Notes: 1896 (Profile) vs 2000 (SongData) | Diff: 104 (5.20%) | File: chart_cache\profiles\29\binarybh_a.json
+[GOBBLE (4)] Notes: 821 (Profile) vs 866 (SongData) | Diff: 45 (5.20%) | File: chart_cache\profiles\23\gobblecp_a.json
+[Todestrieb (4)] Notes: 1643 (Profile) vs 1733 (SongData) | Diff: 90 (5.19%) | File: chart_cache\profiles\19\todestri_a.json
+[Super Rush (4)] Notes: 1698 (Profile) vs 1791 (SongData) | Diff: 93 (5.19%) | File: chart_cache\profiles\24\superush_a.json
+[TYPE MARS(G-Style Mix) (4)] Notes: 1173 (Profile) vs 1237 (SongData) | Diff: 64 (5.17%) | File: chart_cache\profiles\13\typemars_a.json
+[voice of echo. (4)] Notes: 1320 (Profile) vs 1392 (SongData) | Diff: 72 (5.17%) | File: chart_cache\profiles\33\voicecho_a.json
+[No Limit 2 dAnce feat. 大山愛未 (4)] Notes: 1121 (Profile) vs 1182 (SongData) | Diff: 61 (5.16%) | File: chart_cache\profiles\25\no2dance_a.json
+[バッド・スイーツ、バッド・ドリーム (4)] Notes: 1766 (Profile) vs 1862 (SongData) | Diff: 96 (5.16%) | File: chart_cache\profiles\28\_badswts_a.json
+[STARLIGHT DANCEHALL (10)] Notes: 1624 (Profile) vs 1712 (SongData) | Diff: 88 (5.14%) | File: chart_cache\profiles\23\starltdl_l.json
+[532nm (4)] Notes: 1280 (Profile) vs 1349 (SongData) | Diff: 69 (5.11%) | File: chart_cache\profiles\19\532nm_a.json
+[焔極OVERKILL (4)] Notes: 1804 (Profile) vs 1901 (SongData) | Diff: 97 (5.10%) | File: chart_cache\profiles\24\_enkyoku_a.json
+[禍根 (4)] Notes: 1268 (Profile) vs 1336 (SongData) | Diff: 68 (5.09%) | File: chart_cache\profiles\24\_srcof_c_a.json
+[ALBA -黎明- (4)] Notes: 1548 (Profile) vs 1631 (SongData) | Diff: 83 (5.09%) | File: chart_cache\profiles\21\alba_a.json
+[Bahram Attack-猫叉Master Remix- (10)] Notes: 1557 (Profile) vs 1640 (SongData) | Diff: 83 (5.06%) | File: chart_cache\profiles\16\bahram_l.json
+[Triple Counter (4)] Notes: 1914 (Profile) vs 2016 (SongData) | Diff: 102 (5.06%) | File: chart_cache\profiles\23\tripleco_a.json
+[Wolf 1061 (4)] Notes: 1504 (Profile) vs 1584 (SongData) | Diff: 80 (5.05%) | File: chart_cache\profiles\26\wolf1061_a.json
+[VANESSA (4)] Notes: 1166 (Profile) vs 1228 (SongData) | Diff: 62 (5.05%) | File: chart_cache\profiles\14\vanessa_a.json
+[龍と少女とデコヒーレンス (4)] Notes: 1591 (Profile) vs 1515 (SongData) | Diff: 76 (5.02%) | File: chart_cache\profiles\20\_decoher_a.json
+[Synergy For Angels (4)] Notes: 1330 (Profile) vs 1400 (SongData) | Diff: 70 (5.00%) | File: chart_cache\profiles\20\synergy_a.json
+[HADES (4)] Notes: 1521 (Profile) vs 1601 (SongData) | Diff: 80 (5.00%) | File: chart_cache\profiles\24\hadesmnk_a.json
+[Close the World feat.a☆ru (10)] Notes: 1884 (Profile) vs 1983 (SongData) | Diff: 99 (4.99%) | File: chart_cache\profiles\21\closewdl_a.json
+[AFRO KNUCKLE (4)] Notes: 1165 (Profile) vs 1226 (SongData) | Diff: 61 (4.98%) | File: chart_cache\profiles\22\afroknuc_a.json
+[Urban Constellations (4)] Notes: 1109 (Profile) vs 1167 (SongData) | Diff: 58 (4.97%) | File: chart_cache\profiles\26\urbancon_a.json
+[HEISEI (4)] Notes: 1227 (Profile) vs 1291 (SongData) | Diff: 64 (4.96%) | File: chart_cache\profiles\26\heisei_a.json
+[パラドキシカル・タイムリープトライアル(Short Ver.) (4)] Notes: 1346 (Profile) vs 1416 (SongData) | Diff: 70 (4.94%) | File: chart_cache\profiles\25\_paradox_a.json
+[駅猫のワルツ (4)] Notes: 1481 (Profile) vs 1558 (SongData) | Diff: 77 (4.94%) | File: chart_cache\profiles\23\_ekineko_a.json
+[Inferno of Fomalhaut (4)] Notes: 1617 (Profile) vs 1701 (SongData) | Diff: 84 (4.94%) | File: chart_cache\profiles\27\inffomal_a.json
+[ANDROMEDA (4)] Notes: 1375 (Profile) vs 1446 (SongData) | Diff: 71 (4.91%) | File: chart_cache\profiles\11\andromed_a.json
+[VOID (4)] Notes: 1628 (Profile) vs 1712 (SongData) | Diff: 84 (4.91%) | File: chart_cache\profiles\30\vo_id_a.json
+[Godspeed (4)] Notes: 1551 (Profile) vs 1631 (SongData) | Diff: 80 (4.90%) | File: chart_cache\profiles\23\godspeed_a.json
+[Wonder Bullfighter (4)] Notes: 1010 (Profile) vs 1062 (SongData) | Diff: 52 (4.90%) | File: chart_cache\profiles\11\wonbull_a.json
+[Programmed Sun (4)] Notes: 1245 (Profile) vs 1309 (SongData) | Diff: 64 (4.89%) | File: chart_cache\profiles\17\prog_sun_a.json
+[EBONY & IVORY (10)] Notes: 1795 (Profile) vs 1887 (SongData) | Diff: 92 (4.88%) | File: chart_cache\profiles\22\ebnyivrl_l.json
+[Time to Air (10)] Notes: 1796 (Profile) vs 1888 (SongData) | Diff: 92 (4.87%) | File: chart_cache\profiles\15\time2air_l.json
+[Engraved Mark (4)] Notes: 1163 (Profile) vs 1222 (SongData) | Diff: 59 (4.83%) | File: chart_cache\profiles\21\engraved_a.json
+[Ghost Pulse (4)] Notes: 1341 (Profile) vs 1409 (SongData) | Diff: 68 (4.83%) | File: chart_cache\profiles\31\ghostpls_a.json
+[SOLID STATE SQUAD (10)] Notes: 1778 (Profile) vs 1868 (SongData) | Diff: 90 (4.82%) | File: chart_cache\profiles\17\sssquadl_a.json
+[#The_Relentless (4)] Notes: 1408 (Profile) vs 1479 (SongData) | Diff: 71 (4.80%) | File: chart_cache\profiles\22\_therele_a.json
+[Vermilion Carol (4)] Notes: 1749 (Profile) vs 1837 (SongData) | Diff: 88 (4.79%) | File: chart_cache\profiles\31\vercarol_a.json
+[牧神笛吹きて (4)] Notes: 994 (Profile) vs 1044 (SongData) | Diff: 50 (4.79%) | File: chart_cache\profiles\21\_aigipan_a.json
+[rage against usual (4)] Notes: 1454 (Profile) vs 1527 (SongData) | Diff: 73 (4.78%) | File: chart_cache\profiles\12\rageagst_a.json
+[千年ノ理 (10)] Notes: 2079 (Profile) vs 2183 (SongData) | Diff: 104 (4.76%) | File: chart_cache\profiles\22\_sennen_l.json
+[Valanga (4)] Notes: 1569 (Profile) vs 1647 (SongData) | Diff: 78 (4.74%) | File: chart_cache\profiles\20\valanga_a.json
+[S!ck (Nhato Remix) (4)] Notes: 1219 (Profile) vs 1279 (SongData) | Diff: 60 (4.69%) | File: chart_cache\profiles\27\sick_r_a.json
+[ASIAN VIRTUAL REALITIES (MELTING TOGETHER IN DAZZLING DARKNESS) (4)] Notes: 1670 (Profile) vs 1752 (SongData) | Diff: 82 (4.68%) | File: chart_cache\profiles\28\asian_vr_a.json
+[SOLID STATE SQUAD (4)] Notes: 1734 (Profile) vs 1819 (SongData) | Diff: 85 (4.67%) | File: chart_cache\profiles\17\sssquad_a.json
+[Illusionary Waterlily (4)] Notes: 1719 (Profile) vs 1803 (SongData) | Diff: 84 (4.66%) | File: chart_cache\profiles\25\illuswtr_a.json
+[灼熱Beach Side Bunny (4)] Notes: 1639 (Profile) vs 1719 (SongData) | Diff: 80 (4.65%) | File: chart_cache\profiles\18\_shakunt_a.json
+[龍王の霊廟(Mausoleum Of The Primal Dragon) (10)] Notes: 1929 (Profile) vs 2023 (SongData) | Diff: 94 (4.65%) | File: chart_cache\profiles\26\_mausole_l.json
+[Get On Your Feet (4)] Notes: 1320 (Profile) vs 1384 (SongData) | Diff: 64 (4.62%) | File: chart_cache\profiles\30\get_feet_a.json
+[kors k's How to make OTOGE CORE 「LONG」 (4)] Notes: 1777 (Profile) vs 1863 (SongData) | Diff: 86 (4.62%) | File: chart_cache\profiles\30\korsklng_a.json
+[City Never Sleeps (IIDX Edition) (4)] Notes: 1282 (Profile) vs 1344 (SongData) | Diff: 62 (4.61%) | File: chart_cache\profiles\25\citynvrs_a.json
+[Afterimage d'automne (4)] Notes: 1412 (Profile) vs 1480 (SongData) | Diff: 68 (4.59%) | File: chart_cache\profiles\26\afterimg_a.json
+[24h Endurance Race (4)] Notes: 1663 (Profile) vs 1743 (SongData) | Diff: 80 (4.59%) | File: chart_cache\profiles\30\24h_race_a.json
+[Anisakis -somatic mutation type"Forza"- (4)] Notes: 1377 (Profile) vs 1443 (SongData) | Diff: 66 (4.57%) | File: chart_cache\profiles\15\anisakis_a.json
+[AO-1 (4)] Notes: 1377 (Profile) vs 1443 (SongData) | Diff: 66 (4.57%) | File: chart_cache\profiles\23\ao_1_a.json
+[グッバイ宣言 (10)] Notes: 1765 (Profile) vs 1849 (SongData) | Diff: 84 (4.54%) | File: chart_cache\profiles\29\_goodbys_l.json
+[Butterfly Twist (4)] Notes: 1311 (Profile) vs 1373 (SongData) | Diff: 62 (4.52%) | File: chart_cache\profiles\32\buttwist_a.json
+[snow storm (10)] Notes: 1632 (Profile) vs 1709 (SongData) | Diff: 77 (4.51%) | File: chart_cache\profiles\14\snwstorm_l.json
+[KAMAITACHI (10)] Notes: 1910 (Profile) vs 2000 (SongData) | Diff: 90 (4.50%) | File: chart_cache\profiles\14\kmitachl_l.json
+[華蝶風雪 (4)] Notes: 1433 (Profile) vs 1500 (SongData) | Diff: 67 (4.47%) | File: chart_cache\profiles\13\_kachofu_a.json
+[M4K3 1T B0UNC3 (4)] Notes: 1477 (Profile) vs 1546 (SongData) | Diff: 69 (4.46%) | File: chart_cache\profiles\23\m4k3_1t_a.json
+[Monopole. (4)] Notes: 1652 (Profile) vs 1729 (SongData) | Diff: 77 (4.45%) | File: chart_cache\profiles\22\monopole_a.json
+[THE LAST STRIKER (4)] Notes: 1268 (Profile) vs 1327 (SongData) | Diff: 59 (4.45%) | File: chart_cache\profiles\17\tlaststr_a.json
+[THE FALLEN (4)] Notes: 1316 (Profile) vs 1377 (SongData) | Diff: 61 (4.43%) | File: chart_cache\profiles\18\t_fallen_a.json
+[Meteor☆Shower (4)] Notes: 1427 (Profile) vs 1493 (SongData) | Diff: 66 (4.42%) | File: chart_cache\profiles\33\meteorsw_a.json
+[I (4)] Notes: 1817 (Profile) vs 1901 (SongData) | Diff: 84 (4.42%) | File: chart_cache\profiles\30\i_chroma_a.json
+[ONIGOROSHI (4)] Notes: 1473 (Profile) vs 1541 (SongData) | Diff: 68 (4.41%) | File: chart_cache\profiles\26\onigoros_a.json
+[fallen leaves -IIDX edition- (4)] Notes: 1668 (Profile) vs 1745 (SongData) | Diff: 77 (4.41%) | File: chart_cache\profiles\22\faleaves_a.json
+[でんぱ どりる わんにゃー☆三 (4)] Notes: 1605 (Profile) vs 1679 (SongData) | Diff: 74 (4.41%) | File: chart_cache\profiles\33\_dpdrill_a.json
+[Blame (4)] Notes: 937 (Profile) vs 980 (SongData) | Diff: 43 (4.39%) | File: chart_cache\profiles\8\blame_a.json
+[Watch Out Pt.2 (4)] Notes: 1440 (Profile) vs 1506 (SongData) | Diff: 66 (4.38%) | File: chart_cache\profiles\18\watchpt2_a.json
+[V2 (4)] Notes: 1731 (Profile) vs 1810 (SongData) | Diff: 79 (4.36%) | File: chart_cache\profiles\16\v2_taka_a.json
+[BattleRoyal (4)] Notes: 1272 (Profile) vs 1330 (SongData) | Diff: 58 (4.36%) | File: chart_cache\profiles\33\btlroyal_a.json
+[涙のテ・エストラーニョ・ムーチョ (4)] Notes: 1360 (Profile) vs 1422 (SongData) | Diff: 62 (4.36%) | File: chart_cache\profiles\28\_namidam_a.json
+[spiral galaxy (4)] Notes: 1253 (Profile) vs 1310 (SongData) | Diff: 57 (4.35%) | File: chart_cache\profiles\11\spiral_a.json
+[Vitrum (4)] Notes: 1768 (Profile) vs 1848 (SongData) | Diff: 80 (4.33%) | File: chart_cache\profiles\28\vitrum_a.json
+[BITTER CHOCOLATE STRIKER (4)] Notes: 1904 (Profile) vs 1990 (SongData) | Diff: 86 (4.32%) | File: chart_cache\profiles\16\bitchoco_a.json
+[Yum Yum Jelly (4)] Notes: 1152 (Profile) vs 1204 (SongData) | Diff: 52 (4.32%) | File: chart_cache\profiles\26\yumjelly_a.json
+[MINT (4)] Notes: 1108 (Profile) vs 1158 (SongData) | Diff: 50 (4.32%) | File: chart_cache\profiles\13\mint_a.json
+[Angelic Jelly (4)] Notes: 1358 (Profile) vs 1419 (SongData) | Diff: 61 (4.30%) | File: chart_cache\profiles\23\angjelly_a.json
+[即席！脳直★ミュージックシステム (4)] Notes: 1759 (Profile) vs 1838 (SongData) | Diff: 79 (4.30%) | File: chart_cache\profiles\20\_sokseki_a.json
+[Somnidiscotheque (4)] Notes: 1700 (Profile) vs 1776 (SongData) | Diff: 76 (4.28%) | File: chart_cache\profiles\30\somnidis_a.json
+[OTENAMI Hurricane (4)] Notes: 1573 (Profile) vs 1643 (SongData) | Diff: 70 (4.26%) | File: chart_cache\profiles\24\otenamih_a.json
+[Chemical Colours (4)] Notes: 1356 (Profile) vs 1416 (SongData) | Diff: 60 (4.24%) | File: chart_cache\profiles\31\chemiclr_a.json
+[Last Card (4)] Notes: 1494 (Profile) vs 1560 (SongData) | Diff: 66 (4.23%) | File: chart_cache\profiles\33\lastcard_a.json
+[NNRT (4)] Notes: 1706 (Profile) vs 1780 (SongData) | Diff: 74 (4.16%) | File: chart_cache\profiles\19\nnrt_a.json
+[聖人の塔 (4)] Notes: 1502 (Profile) vs 1567 (SongData) | Diff: 65 (4.15%) | File: chart_cache\profiles\19\_seijin_a.json
+[Candy Galy (4)] Notes: 1724 (Profile) vs 1798 (SongData) | Diff: 74 (4.12%) | File: chart_cache\profiles\14\candygal_a.json
+[電光 (4)] Notes: 1496 (Profile) vs 1560 (SongData) | Diff: 64 (4.10%) | File: chart_cache\profiles\31\_denkou_a.json
+[Xperanza (4)] Notes: 1570 (Profile) vs 1637 (SongData) | Diff: 67 (4.09%) | File: chart_cache\profiles\25\xperanza_a.json
+[Aqvion (4)] Notes: 1701 (Profile) vs 1773 (SongData) | Diff: 72 (4.06%) | File: chart_cache\profiles\32\aqvion_a.json
+[2 Be Continued (4)] Notes: 1796 (Profile) vs 1872 (SongData) | Diff: 76 (4.06%) | File: chart_cache\profiles\33\2beconti_a.json
+[OVER VOLTAGE (4)] Notes: 1278 (Profile) vs 1332 (SongData) | Diff: 54 (4.05%) | File: chart_cache\profiles\30\overvolt_a.json
+[Nasty Techniques (4)] Notes: 1284 (Profile) vs 1338 (SongData) | Diff: 54 (4.04%) | File: chart_cache\profiles\27\nastytec_a.json
+[voltississimo (4)] Notes: 1812 (Profile) vs 1888 (SongData) | Diff: 76 (4.03%) | File: chart_cache\profiles\26\voltissi_a.json
+[GIGA VIOLATE (4)] Notes: 1336 (Profile) vs 1392 (SongData) | Diff: 56 (4.02%) | File: chart_cache\profiles\27\gigaviol_a.json
+[I will be back -オレは帰ってきた- (4)] Notes: 1432 (Profile) vs 1492 (SongData) | Diff: 60 (4.02%) | File: chart_cache\profiles\21\iwilback_a.json
+[カジノファイヤーことみちゃん (4)] Notes: 1220 (Profile) vs 1271 (SongData) | Diff: 51 (4.01%) | File: chart_cache\profiles\20\_casino_a.json
+[ZEPHYRANTHES (4)] Notes: 1439 (Profile) vs 1499 (SongData) | Diff: 60 (4.00%) | File: chart_cache\profiles\23\zephyran_a.json
+[Swarm Of Scarabs (4)] Notes: 1164 (Profile) vs 1212 (SongData) | Diff: 48 (3.96%) | File: chart_cache\profiles\28\swarmofs_a.json
+[B.O.D.Y. (4)] Notes: 1666 (Profile) vs 1734 (SongData) | Diff: 68 (3.92%) | File: chart_cache\profiles\30\b_o_d_y__a.json
+[SOLAR ECLIPSE (4)] Notes: 1819 (Profile) vs 1893 (SongData) | Diff: 74 (3.91%) | File: chart_cache\profiles\31\solarecl_a.json
+[CODE:1 [revision1.0.1] (4)] Notes: 1528 (Profile) vs 1590 (SongData) | Diff: 62 (3.90%) | File: chart_cache\profiles\23\code_1_a.json
+[Castle on the Moon (4)] Notes: 1183 (Profile) vs 1231 (SongData) | Diff: 48 (3.90%) | File: chart_cache\profiles\19\csl_moon_a.json
+[紫陽花 -AZISAI- (4)] Notes: 1432 (Profile) vs 1490 (SongData) | Diff: 58 (3.89%) | File: chart_cache\profiles\23\_azisai_a.json
+[Necroxis Girl (4)] Notes: 1385 (Profile) vs 1441 (SongData) | Diff: 56 (3.89%) | File: chart_cache\profiles\26\necroxis_a.json
+[Dances with Snow Fairies (4)] Notes: 1560 (Profile) vs 1623 (SongData) | Diff: 63 (3.88%) | File: chart_cache\profiles\18\dancwith_a.json
+[Verflucht (10)] Notes: 2308 (Profile) vs 2401 (SongData) | Diff: 93 (3.87%) | File: chart_cache\profiles\21\verflchl_l.json
+[Don't believe the hype (4)] Notes: 1602 (Profile) vs 1666 (SongData) | Diff: 64 (3.84%) | File: chart_cache\profiles\29\donthype_a.json
+[Time to Air (4)] Notes: 1402 (Profile) vs 1458 (SongData) | Diff: 56 (3.84%) | File: chart_cache\profiles\15\time2air_a.json
+[Sigmund (10)] Notes: 2180 (Profile) vs 2267 (SongData) | Diff: 87 (3.84%) | File: chart_cache\profiles\21\sigmundl_l.json
+[鴉 (4)] Notes: 1304 (Profile) vs 1356 (SongData) | Diff: 52 (3.83%) | File: chart_cache\profiles\24\_karasu_a.json
+[neu (4)] Notes: 1923 (Profile) vs 1999 (SongData) | Diff: 76 (3.80%) | File: chart_cache\profiles\20\neu_a.json
+[INAZUMA (4)] Notes: 1316 (Profile) vs 1368 (SongData) | Diff: 52 (3.80%) | File: chart_cache\profiles\12\inazuma_a.json
+[RISLIM -Remix- (4)] Notes: 923 (Profile) vs 959 (SongData) | Diff: 36 (3.75%) | File: chart_cache\profiles\9\rislimr_a.json
+[紫陽花 -AZISAI- (10)] Notes: 1747 (Profile) vs 1815 (SongData) | Diff: 68 (3.75%) | File: chart_cache\profiles\23\_azisai_l.json
+[オールトの雲 (4)] Notes: 1285 (Profile) vs 1335 (SongData) | Diff: 50 (3.75%) | File: chart_cache\profiles\29\_oortcld_a.json
+[spiral galaxy (10)] Notes: 1839 (Profile) vs 1910 (SongData) | Diff: 71 (3.72%) | File: chart_cache\profiles\11\spiral_l_l.json
+[ABSOLUTE EVIL (4)] Notes: 1712 (Profile) vs 1778 (SongData) | Diff: 66 (3.71%) | File: chart_cache\profiles\29\absoevil_a.json
+[Little Little Princess (10)] Notes: 1874 (Profile) vs 1946 (SongData) | Diff: 72 (3.70%) | File: chart_cache\profiles\12\littlepl_l.json
+[four pieces of heaven (10)] Notes: 1462 (Profile) vs 1518 (SongData) | Diff: 56 (3.69%) | File: chart_cache\profiles\15\fourpces_l.json
+[Vulkan (4)] Notes: 1462 (Profile) vs 1518 (SongData) | Diff: 56 (3.69%) | File: chart_cache\profiles\22\vulkan_a.json
+[Saturn (4)] Notes: 1283 (Profile) vs 1332 (SongData) | Diff: 49 (3.68%) | File: chart_cache\profiles\20\saturn_a.json
+[out of disk space (4)] Notes: 1257 (Profile) vs 1305 (SongData) | Diff: 48 (3.68%) | File: chart_cache\profiles\31\out_disk_a.json
+[Rising in the Sun(original mix) (4)] Notes: 1158 (Profile) vs 1202 (SongData) | Diff: 44 (3.66%) | File: chart_cache\profiles\15\risins27_a.json
+[魅惑のYUMMYスイーツ (4)] Notes: 1528 (Profile) vs 1586 (SongData) | Diff: 58 (3.66%) | File: chart_cache\profiles\27\_enyummy_a.json
+[RUINA (4)] Notes: 1477 (Profile) vs 1533 (SongData) | Diff: 56 (3.65%) | File: chart_cache\profiles\33\ruina_a.json
+[Resonant (4)] Notes: 1796 (Profile) vs 1864 (SongData) | Diff: 68 (3.65%) | File: chart_cache\profiles\31\resonant_a.json
+[ファイナルレター (4)] Notes: 1321 (Profile) vs 1371 (SongData) | Diff: 50 (3.65%) | File: chart_cache\profiles\32\_fletter_a.json
+[メズマライザー (4)] Notes: 1325 (Profile) vs 1375 (SongData) | Diff: 50 (3.64%) | File: chart_cache\profiles\32\_mesmerz_a.json
+[HAPPY★RUSH (4)] Notes: 1436 (Profile) vs 1490 (SongData) | Diff: 54 (3.62%) | File: chart_cache\profiles\24\happyrsh_a.json
+[Vulnerability (4)] Notes: 1817 (Profile) vs 1885 (SongData) | Diff: 68 (3.61%) | File: chart_cache\profiles\31\vulnerab_a.json
+[GO OVER WITH GLARE -ROOTAGE 26- (4)] Notes: 1928 (Profile) vs 2000 (SongData) | Diff: 72 (3.60%) | File: chart_cache\profiles\26\go_glare_a.json
+[DROP (4)] Notes: 1289 (Profile) vs 1337 (SongData) | Diff: 48 (3.59%) | File: chart_cache\profiles\17\drop_a.json
+[ラクエン (4)] Notes: 997 (Profile) vs 1034 (SongData) | Diff: 37 (3.58%) | File: chart_cache\profiles\12\_rakuen_a.json
+[& Intelligence (4)] Notes: 1565 (Profile) vs 1623 (SongData) | Diff: 58 (3.57%) | File: chart_cache\profiles\26\_and_int_a.json
+[VANESSA (10)] Notes: 1708 (Profile) vs 1771 (SongData) | Diff: 63 (3.56%) | File: chart_cache\profiles\14\vanessal_l.json
+[fixer (4)] Notes: 1795 (Profile) vs 1861 (SongData) | Diff: 66 (3.55%) | File: chart_cache\profiles\33\fixer_a.json
+[SUPER HEROINE!! (4)] Notes: 1145 (Profile) vs 1187 (SongData) | Diff: 42 (3.54%) | File: chart_cache\profiles\32\sheroine_a.json
+[F (4)] Notes: 1749 (Profile) vs 1813 (SongData) | Diff: 64 (3.53%) | File: chart_cache\profiles\19\f_amuro_a.json
+[Sigmund (10)] Notes: 2187 (Profile) vs 2267 (SongData) | Diff: 80 (3.53%) | File: chart_cache\profiles\21\sigmundl_a.json
+[RIZING-GAMERS. (4)] Notes: 1697 (Profile) vs 1759 (SongData) | Diff: 62 (3.52%) | File: chart_cache\profiles\33\rizingms_a.json
+[IDOL syndrome. (10)] Notes: 1479 (Profile) vs 1533 (SongData) | Diff: 54 (3.52%) | File: chart_cache\profiles\26\idolsynd_a.json
+[IDOL syndrome. (10)] Notes: 1479 (Profile) vs 1533 (SongData) | Diff: 54 (3.52%) | File: chart_cache\profiles\26\idolsynd_l.json
+[LOST TECHNOLOGIE (4)] Notes: 1758 (Profile) vs 1822 (SongData) | Diff: 64 (3.51%) | File: chart_cache\profiles\26\losttech_a.json
+[PENDUAL TALISMAN (4)] Notes: 1268 (Profile) vs 1314 (SongData) | Diff: 46 (3.50%) | File: chart_cache\profiles\22\pendualt_a.json
+[冥 (4)] Notes: 1930 (Profile) vs 2000 (SongData) | Diff: 70 (3.50%) | File: chart_cache\profiles\12\_mei_a.json
+[ANCHOR (4)] Notes: 1771 (Profile) vs 1835 (SongData) | Diff: 64 (3.49%) | File: chart_cache\profiles\25\anchor_a.json
+[murmur twins (4)] Notes: 1165 (Profile) vs 1207 (SongData) | Diff: 42 (3.48%) | File: chart_cache\profiles\8\murmur_a.json
+[少年は空を辿る (4)] Notes: 1669 (Profile) vs 1729 (SongData) | Diff: 60 (3.47%) | File: chart_cache\profiles\22\_soratad_a.json
+[Say YEEEAHH (4)] Notes: 1619 (Profile) vs 1677 (SongData) | Diff: 58 (3.46%) | File: chart_cache\profiles\22\say_yeah_a.json
+[Anisakis -somatic mutation type"Forza"- (10)] Notes: 1903 (Profile) vs 1971 (SongData) | Diff: 68 (3.45%) | File: chart_cache\profiles\15\anisakis_l.json
+[Level One (4)] Notes: 1793 (Profile) vs 1857 (SongData) | Diff: 64 (3.45%) | File: chart_cache\profiles\26\levelone_a.json
+[共鳴遊戯の華 (4)] Notes: 1932 (Profile) vs 2000 (SongData) | Diff: 68 (3.40%) | File: chart_cache\profiles\22\_kyoumei_a.json
+[WHA (4)] Notes: 1880 (Profile) vs 1946 (SongData) | Diff: 66 (3.39%) | File: chart_cache\profiles\29\wha_a.json
+[FUZIN RIZIN (4)] Notes: 1864 (Profile) vs 1929 (SongData) | Diff: 65 (3.37%) | File: chart_cache\profiles\24\fuznrizn_a.json
+[Ancient Scapes (10)] Notes: 2124 (Profile) vs 2198 (SongData) | Diff: 74 (3.37%) | File: chart_cache\profiles\21\ancientl_l.json
+[BabeL ～Grand Story～ (4)] Notes: 1384 (Profile) vs 1432 (SongData) | Diff: 48 (3.35%) | File: chart_cache\profiles\24\babel_gs_a.json
+[Without Heaven (4)] Notes: 1848 (Profile) vs 1912 (SongData) | Diff: 64 (3.35%) | File: chart_cache\profiles\32\withouth_a.json
+[MAXIVCORD (4)] Notes: 1214 (Profile) vs 1256 (SongData) | Diff: 42 (3.34%) | File: chart_cache\profiles\25\maxivcrd_a.json
+[Uh-Oh (4)] Notes: 1187 (Profile) vs 1228 (SongData) | Diff: 41 (3.34%) | File: chart_cache\profiles\23\uh_oh_a.json
+[灼熱 Pt.2 Long Train Running (4)] Notes: 1744 (Profile) vs 1804 (SongData) | Diff: 60 (3.33%) | File: chart_cache\profiles\23\_syaku_2_a.json
+[Be quiet (4)] Notes: 1077 (Profile) vs 1114 (SongData) | Diff: 37 (3.32%) | File: chart_cache\profiles\11\bequiet_a.json
+[Battleground (4)] Notes: 1316 (Profile) vs 1361 (SongData) | Diff: 45 (3.31%) | File: chart_cache\profiles\25\btground_a.json
+[Tiempo Loco (4)] Notes: 1822 (Profile) vs 1884 (SongData) | Diff: 62 (3.29%) | File: chart_cache\profiles\28\tiempolc_a.json
+[I'm so Happy (4)] Notes: 1148 (Profile) vs 1187 (SongData) | Diff: 39 (3.29%) | File: chart_cache\profiles\19\im_happy_a.json
+[Outbreak (4)] Notes: 1473 (Profile) vs 1523 (SongData) | Diff: 50 (3.28%) | File: chart_cache\profiles\23\outbreak_a.json
+[GLORIOUS HAMMER (4)] Notes: 1535 (Profile) vs 1587 (SongData) | Diff: 52 (3.28%) | File: chart_cache\profiles\31\glhammer_a.json
+[今宵、ロマンス横丁。 (4)] Notes: 1658 (Profile) vs 1714 (SongData) | Diff: 56 (3.27%) | File: chart_cache\profiles\31\_koyoiry_a.json
+[TRANOID (10)] Notes: 1496 (Profile) vs 1546 (SongData) | Diff: 50 (3.23%) | File: chart_cache\profiles\14\tranoid_l.json
+[Ambush Ace (4)] Notes: 1444 (Profile) vs 1492 (SongData) | Diff: 48 (3.22%) | File: chart_cache\profiles\30\ambush_a_a.json
+[glacia (4)] Notes: 1444 (Profile) vs 1492 (SongData) | Diff: 48 (3.22%) | File: chart_cache\profiles\30\glacia_a.json
+[n/a (4)] Notes: 1807 (Profile) vs 1867 (SongData) | Diff: 60 (3.21%) | File: chart_cache\profiles\29\n_a_a.json
+[Amazing Mirage (10)] Notes: 1630 (Profile) vs 1684 (SongData) | Diff: 54 (3.21%) | File: chart_cache\profiles\24\amazingl_l.json
+[Meissa (4)] Notes: 1389 (Profile) vs 1435 (SongData) | Diff: 46 (3.21%) | File: chart_cache\profiles\30\meissa_a.json
+[Element of SPADA (10)] Notes: 1510 (Profile) vs 1560 (SongData) | Diff: 50 (3.21%) | File: chart_cache\profiles\21\elespada_l.json
+[金野火織の金色提言 (4)] Notes: 1578 (Profile) vs 1630 (SongData) | Diff: 52 (3.19%) | File: chart_cache\profiles\26\_k_hiori_a.json
+[ΕΛΠΙΣ (4)] Notes: 1549 (Profile) vs 1600 (SongData) | Diff: 51 (3.19%) | File: chart_cache\profiles\20\_elpis_a.json
+[nostos (4)] Notes: 1316 (Profile) vs 1359 (SongData) | Diff: 43 (3.16%) | File: chart_cache\profiles\24\nostos_a.json
+[True Blue (4)] Notes: 1838 (Profile) vs 1898 (SongData) | Diff: 60 (3.16%) | File: chart_cache\profiles\20\trueblue_a.json
+[quell～the seventh slave～ (4)] Notes: 1594 (Profile) vs 1646 (SongData) | Diff: 52 (3.16%) | File: chart_cache\profiles\17\quell_a.json
+[YAKSHA (4)] Notes: 1937 (Profile) vs 2000 (SongData) | Diff: 63 (3.15%) | File: chart_cache\profiles\19\yaksha_a.json
+[ベィスドロップ・フリークス (10)] Notes: 1235 (Profile) vs 1275 (SongData) | Diff: 40 (3.14%) | File: chart_cache\profiles\22\_basdrop_l.json
+[MOCHIMOCHI DREAMIN!! (4)] Notes: 1482 (Profile) vs 1530 (SongData) | Diff: 48 (3.14%) | File: chart_cache\profiles\33\mochidrm_a.json
+[SWEETEST SAVAGE (4)] Notes: 901 (Profile) vs 930 (SongData) | Diff: 29 (3.12%) | File: chart_cache\profiles\9\savagecp_a.json
+[Lighting Shower (4)] Notes: 1182 (Profile) vs 1220 (SongData) | Diff: 38 (3.11%) | File: chart_cache\profiles\21\ltshower_a.json
+[New Castle Legions (4)] Notes: 1374 (Profile) vs 1418 (SongData) | Diff: 44 (3.10%) | File: chart_cache\profiles\18\nwcasl26_a.json
+[月下繚乱 (4)] Notes: 1378 (Profile) vs 1422 (SongData) | Diff: 44 (3.09%) | File: chart_cache\profiles\33\_gryoran_a.json
+[不沈艦CANDY (4)] Notes: 1630 (Profile) vs 1682 (SongData) | Diff: 52 (3.09%) | File: chart_cache\profiles\16\_fuchin_a.json
+[Level 2 (4)] Notes: 1442 (Profile) vs 1488 (SongData) | Diff: 46 (3.09%) | File: chart_cache\profiles\27\level2_a.json
+[Almagest (4)] Notes: 1579 (Profile) vs 1629 (SongData) | Diff: 50 (3.07%) | File: chart_cache\profiles\17\almag_ra_a.json
+[Believe In Me (4)] Notes: 1176 (Profile) vs 1213 (SongData) | Diff: 37 (3.05%) | File: chart_cache\profiles\18\believme_a.json
+[24th Century BOY (4)] Notes: 1412 (Profile) vs 1456 (SongData) | Diff: 44 (3.02%) | File: chart_cache\profiles\19\24th_boy_a.json
+[Speculation (4)] Notes: 1484 (Profile) vs 1530 (SongData) | Diff: 46 (3.01%) | File: chart_cache\profiles\31\speculat_a.json
+[トリカゴノ鳳凰 (4)] Notes: 1874 (Profile) vs 1932 (SongData) | Diff: 58 (3.00%) | File: chart_cache\profiles\20\_trikago_a.json
+[Spica (4)] Notes: 1132 (Profile) vs 1167 (SongData) | Diff: 35 (3.00%) | File: chart_cache\profiles\7\spica_a.json
+[switch (4)] Notes: 1037 (Profile) vs 1069 (SongData) | Diff: 32 (2.99%) | File: chart_cache\profiles\15\switch15_a.json
+[Be A Star (4)] Notes: 1371 (Profile) vs 1413 (SongData) | Diff: 42 (2.97%) | File: chart_cache\profiles\24\b_a_star_a.json
+[God Mind (4)] Notes: 2091 (Profile) vs 2155 (SongData) | Diff: 64 (2.97%) | File: chart_cache\profiles\32\godmind_a.json
+[疾風迅雷 (10)] Notes: 1770 (Profile) vs 1824 (SongData) | Diff: 54 (2.96%) | File: chart_cache\profiles\21\_ltspedl_a.json
+[EYE OF THE HEAVEN (4)] Notes: 1770 (Profile) vs 1824 (SongData) | Diff: 54 (2.96%) | File: chart_cache\profiles\32\eyeheavn_a.json
+[ビビッド ☆+*。キラキライム (4)] Notes: 1840 (Profile) vs 1896 (SongData) | Diff: 56 (2.95%) | File: chart_cache\profiles\33\_vividkr_a.json
+[Xb10r (4)] Notes: 1779 (Profile) vs 1833 (SongData) | Diff: 54 (2.95%) | File: chart_cache\profiles\31\xb10r_a.json
+[Xyndrome (4)] Notes: 1451 (Profile) vs 1495 (SongData) | Diff: 44 (2.94%) | File: chart_cache\profiles\29\xyndrome_a.json
+[君のハートにロックオン (4)] Notes: 1323 (Profile) vs 1363 (SongData) | Diff: 40 (2.93%) | File: chart_cache\profiles\19\_klockon_a.json
+[Discloze (4)] Notes: 1325 (Profile) vs 1365 (SongData) | Diff: 40 (2.93%) | File: chart_cache\profiles\22\discloze_a.json
+[Line 4 Ruin (4)] Notes: 1361 (Profile) vs 1402 (SongData) | Diff: 41 (2.92%) | File: chart_cache\profiles\22\lineruin_a.json
+[ruin of opals (4)] Notes: 1598 (Profile) vs 1646 (SongData) | Diff: 48 (2.92%) | File: chart_cache\profiles\26\ruinopal_a.json
+[Get Higher (4)] Notes: 1137 (Profile) vs 1171 (SongData) | Diff: 34 (2.90%) | File: chart_cache\profiles\31\gethighr_a.json
+[PHASE SHIFT MANEUVER (4)] Notes: 1405 (Profile) vs 1447 (SongData) | Diff: 42 (2.90%) | File: chart_cache\profiles\27\phasesft_a.json
+[STARLiGHT (4)] Notes: 1372 (Profile) vs 1413 (SongData) | Diff: 41 (2.90%) | File: chart_cache\profiles\23\strlight_a.json
+[XENON II ～TOMOYUKIの野望～ (4)] Notes: 1479 (Profile) vs 1523 (SongData) | Diff: 44 (2.89%) | File: chart_cache\profiles\26\xenon2_a.json
+[Monkey Business (4)] Notes: 1286 (Profile) vs 1324 (SongData) | Diff: 38 (2.87%) | File: chart_cache\profiles\31\monkeybs_a.json
+[Caldwell 99 (10)] Notes: 1693 (Profile) vs 1743 (SongData) | Diff: 50 (2.87%) | File: chart_cache\profiles\30\caldwl99_l.json
+[We're so Happy (P*Light Remix) IIDX ver. (4)] Notes: 1842 (Profile) vs 1896 (SongData) | Diff: 54 (2.85%) | File: chart_cache\profiles\22\wesoh_pl_a.json
+[Bang-Boo Bumble (4)] Notes: 1437 (Profile) vs 1479 (SongData) | Diff: 42 (2.84%) | File: chart_cache\profiles\32\bang_boo_a.json
+[Snake Stick (4)] Notes: 1406 (Profile) vs 1447 (SongData) | Diff: 41 (2.83%) | File: chart_cache\profiles\19\snakestk_a.json
+[ピアノ協奏曲第１番”蠍火” (4)] Notes: 1374 (Profile) vs 1414 (SongData) | Diff: 40 (2.83%) | File: chart_cache\profiles\11\_psasori_a.json
+[ALBA -黎明- (10)] Notes: 1934 (Profile) vs 1990 (SongData) | Diff: 56 (2.81%) | File: chart_cache\profiles\21\alba_l.json
+[ALBIDA (4)] Notes: 1487 (Profile) vs 1530 (SongData) | Diff: 43 (2.81%) | File: chart_cache\profiles\18\albida_a.json
+[ピアノ協奏曲第1番”蠍火” (BlackY Remix) (4)] Notes: 1872 (Profile) vs 1926 (SongData) | Diff: 54 (2.80%) | File: chart_cache\profiles\27\_psaso_r_a.json
+[COSMIC V3LOCITY (4)] Notes: 1668 (Profile) vs 1716 (SongData) | Diff: 48 (2.80%) | File: chart_cache\profiles\32\cosmcv3l_a.json
+[狂イ咲ケ焔ノ華 (4)] Notes: 1808 (Profile) vs 1860 (SongData) | Diff: 52 (2.80%) | File: chart_cache\profiles\20\_kuruizk_a.json
+[FlyAway (4)] Notes: 1602 (Profile) vs 1648 (SongData) | Diff: 46 (2.79%) | File: chart_cache\profiles\32\flyawayb_a.json
+[IX (4)] Notes: 1951 (Profile) vs 2007 (SongData) | Diff: 56 (2.79%) | File: chart_cache\profiles\21\_nine_ix_a.json
+[eRAseRmOToRpHAntOM (4)] Notes: 1639 (Profile) vs 1686 (SongData) | Diff: 47 (2.79%) | File: chart_cache\profiles\17\ephantom_a.json
+[BIGWAVERS (4)] Notes: 1746 (Profile) vs 1796 (SongData) | Diff: 50 (2.78%) | File: chart_cache\profiles\30\bigwaver_a.json
+[NITROUS CANNON (4)] Notes: 1823 (Profile) vs 1875 (SongData) | Diff: 52 (2.77%) | File: chart_cache\profiles\25\nitrous_a.json
+[Cross Fire (4)] Notes: 1698 (Profile) vs 1746 (SongData) | Diff: 48 (2.75%) | File: chart_cache\profiles\32\crosfire_a.json
+[疾風迅雷 (10)] Notes: 1774 (Profile) vs 1824 (SongData) | Diff: 50 (2.74%) | File: chart_cache\profiles\21\_ltspedl_l.json
+[恋愛＝精度×認識力 (4)] Notes: 1708 (Profile) vs 1756 (SongData) | Diff: 48 (2.73%) | File: chart_cache\profiles\30\_r_s_x_n_a.json
+[Regina vespaE (4)] Notes: 1790 (Profile) vs 1840 (SongData) | Diff: 50 (2.72%) | File: chart_cache\profiles\33\regina_v_a.json
+[WONDER WALKER (4)] Notes: 1869 (Profile) vs 1921 (SongData) | Diff: 52 (2.71%) | File: chart_cache\profiles\19\w_walker_a.json
+[HAERETICUS (4)] Notes: 1546 (Profile) vs 1589 (SongData) | Diff: 43 (2.71%) | File: chart_cache\profiles\19\haeretic_a.json
+[Violet Rose (4)] Notes: 1297 (Profile) vs 1333 (SongData) | Diff: 36 (2.70%) | File: chart_cache\profiles\23\violrose_a.json
+[Lost wing at.0 (4)] Notes: 1227 (Profile) vs 1261 (SongData) | Diff: 34 (2.70%) | File: chart_cache\profiles\24\lostwing_a.json
+[Memoria Obscura (4)] Notes: 2029 (Profile) vs 2085 (SongData) | Diff: 56 (2.69%) | File: chart_cache\profiles\33\memoriao_a.json
+[怪物 (10)] Notes: 1604 (Profile) vs 1648 (SongData) | Diff: 44 (2.67%) | File: chart_cache\profiles\29\_kaibutu_l.json
+[Divine Heaven (4)] Notes: 1463 (Profile) vs 1503 (SongData) | Diff: 40 (2.66%) | File: chart_cache\profiles\29\divinehv_a.json
+[Aurora (4)] Notes: 1246 (Profile) vs 1280 (SongData) | Diff: 34 (2.66%) | File: chart_cache\profiles\12\aurora_a.json
+[Timepiece phase II (4)] Notes: 1621 (Profile) vs 1665 (SongData) | Diff: 44 (2.64%) | File: chart_cache\profiles\20\tpiece_2_a.json
+[Pinky Happy Crazy (4)] Notes: 1785 (Profile) vs 1833 (SongData) | Diff: 48 (2.62%) | File: chart_cache\profiles\32\pinkycrz_a.json
+[HARD BRAIN (4)] Notes: 1864 (Profile) vs 1914 (SongData) | Diff: 50 (2.61%) | File: chart_cache\profiles\26\hrdbrain_a.json
+[ChaserXX (10)] Notes: 1948 (Profile) vs 2000 (SongData) | Diff: 52 (2.60%) | File: chart_cache\profiles\25\chaserxx_l.json
+[Marie Antoinette (4)] Notes: 1278 (Profile) vs 1312 (SongData) | Diff: 34 (2.59%) | File: chart_cache\profiles\16\marieant_a.json
+[ミュージック・アワー (10)] Notes: 2040 (Profile) vs 2094 (SongData) | Diff: 54 (2.58%) | File: chart_cache\profiles\29\_mschour_l.json
+[少年リップルズ (4)] Notes: 1210 (Profile) vs 1242 (SongData) | Diff: 32 (2.58%) | File: chart_cache\profiles\30\_sripple_a.json
+[KHAMEN BREAK (4)] Notes: 1248 (Profile) vs 1281 (SongData) | Diff: 33 (2.58%) | File: chart_cache\profiles\21\khamenbr_a.json
+[AMRITA -不滅ノ花- (4)] Notes: 1362 (Profile) vs 1398 (SongData) | Diff: 36 (2.58%) | File: chart_cache\profiles\28\amrita_a.json
+[Sparkle Smilin' (4)] Notes: 1211 (Profile) vs 1243 (SongData) | Diff: 32 (2.57%) | File: chart_cache\profiles\27\s_smilin_a.json
+[Broadbanded (4)] Notes: 993 (Profile) vs 1019 (SongData) | Diff: 26 (2.55%) | File: chart_cache\profiles\13\brdband_a.json
+[FINALLY BLAZE (4)] Notes: 1388 (Profile) vs 1424 (SongData) | Diff: 36 (2.53%) | File: chart_cache\profiles\29\fnlblaze_a.json
+[hard-wired (4)] Notes: 1853 (Profile) vs 1901 (SongData) | Diff: 48 (2.52%) | File: chart_cache\profiles\29\hd_wired_a.json
+[†渚の小悪魔ラヴリィ～レイディオ†(IIDX EDIT) (4)] Notes: 1789 (Profile) vs 1835 (SongData) | Diff: 46 (2.51%) | File: chart_cache\profiles\20\_nagisa_a.json
+[Out of Control (4)] Notes: 1558 (Profile) vs 1598 (SongData) | Diff: 40 (2.50%) | File: chart_cache\profiles\31\outcntrl_a.json
+[rainbow guitar weeps (4)] Notes: 1371 (Profile) vs 1406 (SongData) | Diff: 35 (2.49%) | File: chart_cache\profiles\21\rbguitar_a.json
+[DUAL STRIKER (4)] Notes: 1912 (Profile) vs 1960 (SongData) | Diff: 48 (2.45%) | File: chart_cache\profiles\28\dualstr_a.json
+[Friction[!]Function (4)] Notes: 1594 (Profile) vs 1634 (SongData) | Diff: 40 (2.45%) | File: chart_cache\profiles\27\friction_a.json
+[Elektrick U-Phoria (4)] Notes: 1528 (Profile) vs 1566 (SongData) | Diff: 38 (2.43%) | File: chart_cache\profiles\21\euphoria_a.json
+[BroGamer (4)] Notes: 1530 (Profile) vs 1568 (SongData) | Diff: 38 (2.42%) | File: chart_cache\profiles\24\brogamer_a.json
+[SYNC-ANTHEM (4)] Notes: 1820 (Profile) vs 1865 (SongData) | Diff: 45 (2.41%) | File: chart_cache\profiles\20\sync_ant_a.json
+[CHAOTIC SUNBIRD (4)] Notes: 1622 (Profile) vs 1662 (SongData) | Diff: 40 (2.41%) | File: chart_cache\profiles\32\chaosunb_a.json
+[The Onlyonez (4)] Notes: 1549 (Profile) vs 1587 (SongData) | Diff: 38 (2.39%) | File: chart_cache\profiles\31\theonly1_a.json
+[創世ノート (4)] Notes: 1476 (Profile) vs 1512 (SongData) | Diff: 36 (2.38%) | File: chart_cache\profiles\20\_gennote_a.json
+[Time to Empress (10)] Notes: 1562 (Profile) vs 1600 (SongData) | Diff: 38 (2.38%) | File: chart_cache\profiles\20\time2emp_l.json
+[Xepher (4)] Notes: 1484 (Profile) vs 1520 (SongData) | Diff: 36 (2.37%) | File: chart_cache\profiles\12\xepher_a.json
+[アラビアン ハイパー ナイト (4)] Notes: 1650 (Profile) vs 1690 (SongData) | Diff: 40 (2.37%) | File: chart_cache\profiles\32\_arabhyp_a.json
+[FREEDOM (4)] Notes: 1446 (Profile) vs 1481 (SongData) | Diff: 35 (2.36%) | File: chart_cache\profiles\25\freedom_a.json
+[Cosmic Cat (10)] Notes: 1612 (Profile) vs 1651 (SongData) | Diff: 39 (2.36%) | File: chart_cache\profiles\22\cosmical_l.json
+[DAWN -THE NEXT ENDEAVOUR- (4)] Notes: 1540 (Profile) vs 1577 (SongData) | Diff: 37 (2.35%) | File: chart_cache\profiles\17\dawn_end_a.json
+[Elektrick U-Phoria (10)] Notes: 2002 (Profile) vs 2050 (SongData) | Diff: 48 (2.34%) | File: chart_cache\profiles\21\euphoria_l.json
+[Advent Infamous (4)] Notes: 1420 (Profile) vs 1454 (SongData) | Diff: 34 (2.34%) | File: chart_cache\profiles\27\adventin_a.json
+[狂水一華 (4)] Notes: 1338 (Profile) vs 1370 (SongData) | Diff: 32 (2.34%) | File: chart_cache\profiles\27\_kichika_a.json
+[ELYSIUM (4)] Notes: 1345 (Profile) vs 1377 (SongData) | Diff: 32 (2.32%) | File: chart_cache\profiles\32\elysium_a.json
+[GAME ON (4)] Notes: 1354 (Profile) vs 1386 (SongData) | Diff: 32 (2.31%) | File: chart_cache\profiles\31\game_on_a.json
+[TOMAHAWK (4)] Notes: 1788 (Profile) vs 1830 (SongData) | Diff: 42 (2.30%) | File: chart_cache\profiles\29\tomahawk_a.json
+[仮想空間の旅人たち (10)] Notes: 1899 (Profile) vs 1943 (SongData) | Diff: 44 (2.26%) | File: chart_cache\profiles\20\_travell_l.json
+[KAMAITACHI (10)] Notes: 1955 (Profile) vs 2000 (SongData) | Diff: 45 (2.25%) | File: chart_cache\profiles\14\kmitachl_a.json
+[Ruler or Loser (4)] Notes: 1309 (Profile) vs 1339 (SongData) | Diff: 30 (2.24%) | File: chart_cache\profiles\30\rulerorl_a.json
+[Demon March (4)] Notes: 1833 (Profile) vs 1875 (SongData) | Diff: 42 (2.24%) | File: chart_cache\profiles\31\demonmch_a.json
+[Devil's Gear (4)] Notes: 1753 (Profile) vs 1793 (SongData) | Diff: 40 (2.23%) | File: chart_cache\profiles\23\dvlsgear_a.json
+[紅牡丹 (4)] Notes: 1413 (Profile) vs 1445 (SongData) | Diff: 32 (2.21%) | File: chart_cache\profiles\22\_benibtn_a.json
+[AA -rebuild- (4)] Notes: 1780 (Profile) vs 1820 (SongData) | Diff: 40 (2.20%) | File: chart_cache\profiles\25\aa_rebld_a.json
+[あるビー！ feat.ころねぽち (4)] Notes: 1425 (Profile) vs 1457 (SongData) | Diff: 32 (2.20%) | File: chart_cache\profiles\30\_aru_b_a.json
+[Change Yourself (4)] Notes: 1260 (Profile) vs 1288 (SongData) | Diff: 28 (2.17%) | File: chart_cache\profiles\27\changeys_a.json
+[EVANESCENT (4)] Notes: 1805 (Profile) vs 1845 (SongData) | Diff: 40 (2.17%) | File: chart_cache\profiles\26\evanscnt_a.json
+[THE DAY OF JUBILATIONS (4)] Notes: 1719 (Profile) vs 1757 (SongData) | Diff: 38 (2.16%) | File: chart_cache\profiles\26\t_jubila_a.json
+[GuNGNiR (4)] Notes: 2036 (Profile) vs 2081 (SongData) | Diff: 45 (2.16%) | File: chart_cache\profiles\24\gungnir_a.json
+[打打打打打打打打打打 (4)] Notes: 1313 (Profile) vs 1342 (SongData) | Diff: 29 (2.16%) | File: chart_cache\profiles\22\_dadada_a.json
+[断罪の一花 (4)] Notes: 1268 (Profile) vs 1296 (SongData) | Diff: 28 (2.16%) | File: chart_cache\profiles\32\_danzai1_a.json
+[LOUDER ROLLING THUNDER (4)] Notes: 1729 (Profile) vs 1767 (SongData) | Diff: 38 (2.15%) | File: chart_cache\profiles\30\louderrt_a.json
+[tripping contact(teranoid&MC Natsack Remix) (4)] Notes: 1231 (Profile) vs 1258 (SongData) | Diff: 27 (2.15%) | File: chart_cache\profiles\13\trip_mc_a.json
+[Love Is Eternity (4)] Notes: 1189 (Profile) vs 1215 (SongData) | Diff: 26 (2.14%) | File: chart_cache\profiles\10\loveter_a.json
+[Antigravity (4)] Notes: 1557 (Profile) vs 1591 (SongData) | Diff: 34 (2.14%) | File: chart_cache\profiles\25\antigrav_a.json
+[Vinculum stellarum (4)] Notes: 1833 (Profile) vs 1873 (SongData) | Diff: 40 (2.14%) | File: chart_cache\profiles\27\vinculum_a.json
+[《GRANDMASTER》 (4)] Notes: 1472 (Profile) vs 1504 (SongData) | Diff: 32 (2.13%) | File: chart_cache\profiles\29\_gmaster_a.json
+[Wonder Girl feat. Kanae Asaba (4)] Notes: 1384 (Profile) vs 1414 (SongData) | Diff: 30 (2.12%) | File: chart_cache\profiles\21\wndrgirl_a.json
+[I Love You (4)] Notes: 1352 (Profile) vs 1381 (SongData) | Diff: 29 (2.10%) | File: chart_cache\profiles\25\iloveyou_a.json
+[moon_child (4)] Notes: 1273 (Profile) vs 1300 (SongData) | Diff: 27 (2.08%) | File: chart_cache\profiles\9\m_child_a.json
+[SpaceLand☆TOYBOX (4)] Notes: 1470 (Profile) vs 1501 (SongData) | Diff: 31 (2.07%) | File: chart_cache\profiles\22\sptoybox_a.json
+[Miracle 5ympho X (10)] Notes: 1519 (Profile) vs 1551 (SongData) | Diff: 32 (2.06%) | File: chart_cache\profiles\21\miracle5_l.json
+[Go Beyond!! (4)] Notes: 1190 (Profile) vs 1166 (SongData) | Diff: 24 (2.06%) | File: chart_cache\profiles\16\gobeyond_a.json
+[KAMAITACHI (4)] Notes: 1340 (Profile) vs 1368 (SongData) | Diff: 28 (2.05%) | File: chart_cache\profiles\14\kmitachi_a.json
+[Do it!! Do it!! (4)] Notes: 967 (Profile) vs 987 (SongData) | Diff: 20 (2.03%) | File: chart_cache\profiles\15\doit_emp_a.json
+[Victory Of Ravers (4)] Notes: 1275 (Profile) vs 1301 (SongData) | Diff: 26 (2.00%) | File: chart_cache\profiles\29\vcravers_a.json
+[RESONATE 1794 (4)] Notes: 932 (Profile) vs 951 (SongData) | Diff: 19 (2.00%) | File: chart_cache\profiles\11\reso1794_a.json
+[Lovely Howdy Cowboy!! (4)] Notes: 1377 (Profile) vs 1405 (SongData) | Diff: 28 (1.99%) | File: chart_cache\profiles\28\lhcowboy_a.json
+[RUGGED ASH (10)] Notes: 1037 (Profile) vs 1058 (SongData) | Diff: 21 (1.98%) | File: chart_cache\profiles\s\rugged_l_l.json
+[Always We Trust In You (4)] Notes: 1593 (Profile) vs 1625 (SongData) | Diff: 32 (1.97%) | File: chart_cache\profiles\30\alwayswe_a.json
+[惑星鉄道 (4)] Notes: 1601 (Profile) vs 1633 (SongData) | Diff: 32 (1.96%) | File: chart_cache\profiles\31\_waktetu_a.json
+[朧 (10)] Notes: 1255 (Profile) vs 1280 (SongData) | Diff: 25 (1.95%) | File: chart_cache\profiles\20\_oborol_l.json
+[クレッシェンド (4)] Notes: 1708 (Profile) vs 1742 (SongData) | Diff: 34 (1.95%) | File: chart_cache\profiles\33\_crescnd_a.json
+[GloriosA (4)] Notes: 1409 (Profile) vs 1437 (SongData) | Diff: 28 (1.95%) | File: chart_cache\profiles\31\gloriosa_a.json
+[BLUST OF WIND (10)] Notes: 1309 (Profile) vs 1335 (SongData) | Diff: 26 (1.95%) | File: chart_cache\profiles\18\blstwind_l.json
+[Overload Frontier (4)] Notes: 1310 (Profile) vs 1336 (SongData) | Diff: 26 (1.95%) | File: chart_cache\profiles\21\overload_a.json
+[ぷろぐれっしぶ時空少女！うらしまたろ子ちゃん！ (4)] Notes: 1260 (Profile) vs 1285 (SongData) | Diff: 25 (1.95%) | File: chart_cache\profiles\22\_progura_a.json
+[灼熱 Lost Summer Dayz (4)] Notes: 1425 (Profile) vs 1453 (SongData) | Diff: 28 (1.93%) | File: chart_cache\profiles\32\_shakuls_a.json
+[イザナミノナゲキ (4)] Notes: 1629 (Profile) vs 1661 (SongData) | Diff: 32 (1.93%) | File: chart_cache\profiles\24\_izanami_a.json
+[Despair of ELFERIA (4)] Notes: 2056 (Profile) vs 2096 (SongData) | Diff: 40 (1.91%) | File: chart_cache\profiles\22\delferia_a.json
+[天使のカンタータ -Cantata of Angels- (4)] Notes: 2163 (Profile) vs 2205 (SongData) | Diff: 42 (1.90%) | File: chart_cache\profiles\32\_cantata_a.json
+[EXODUS SIGN (4)] Notes: 1340 (Profile) vs 1366 (SongData) | Diff: 26 (1.90%) | File: chart_cache\profiles\30\exodusgn_a.json
+[Devilz Sacrifice -贖罪の羊- (4)] Notes: 1241 (Profile) vs 1265 (SongData) | Diff: 24 (1.90%) | File: chart_cache\profiles\21\dvl_sacr_a.json
+[NEO GENERATOR SEVEN (4)] Notes: 1658 (Profile) vs 1690 (SongData) | Diff: 32 (1.89%) | File: chart_cache\profiles\22\neogene7_a.json
+[Ubertreffen (4)] Notes: 1304 (Profile) vs 1280 (SongData) | Diff: 24 (1.88%) | File: chart_cache\profiles\15\ubertref_a.json
+[Emera (4)] Notes: 1157 (Profile) vs 1179 (SongData) | Diff: 22 (1.87%) | File: chart_cache\profiles\29\emera_a.json
+[LASER CRUSTER (IGNITE REMIX) (4)] Notes: 1790 (Profile) vs 1824 (SongData) | Diff: 34 (1.86%) | File: chart_cache\profiles\27\lcrust_h_a.json
+[GIGA THRASH (4)] Notes: 1374 (Profile) vs 1400 (SongData) | Diff: 26 (1.86%) | File: chart_cache\profiles\26\gigathra_a.json
+[閃と雷管とロープ (4)] Notes: 1270 (Profile) vs 1294 (SongData) | Diff: 24 (1.85%) | File: chart_cache\profiles\33\_sraikan_a.json
+[Bring The Fire (4)] Notes: 1702 (Profile) vs 1734 (SongData) | Diff: 32 (1.85%) | File: chart_cache\profiles\32\brngfire_a.json
+[405nm (Ryu☆mix) (4)] Notes: 1277 (Profile) vs 1301 (SongData) | Diff: 24 (1.84%) | File: chart_cache\profiles\20\405nm_a.json
+[thunder HOUSE NATION Remix (10)] Notes: 1918 (Profile) vs 1954 (SongData) | Diff: 36 (1.84%) | File: chart_cache\profiles\16\thund28r_l.json
+[S!ck (4)] Notes: 1348 (Profile) vs 1373 (SongData) | Diff: 25 (1.82%) | File: chart_cache\profiles\20\sick_a.json
+[Flying Castle (4)] Notes: 1843 (Profile) vs 1877 (SongData) | Diff: 34 (1.81%) | File: chart_cache\profiles\29\flcastle_a.json
+[No.13 (4)] Notes: 1578 (Profile) vs 1607 (SongData) | Diff: 29 (1.80%) | File: chart_cache\profiles\10\no13_a.json
+[Rampage (4)] Notes: 1798 (Profile) vs 1831 (SongData) | Diff: 33 (1.80%) | File: chart_cache\profiles\25\rampage_a.json
+[カジノファイヤーことみちゃん (10)] Notes: 1745 (Profile) vs 1777 (SongData) | Diff: 32 (1.80%) | File: chart_cache\profiles\20\_casino_l.json
+[One More Lovely (4)] Notes: 1426 (Profile) vs 1452 (SongData) | Diff: 26 (1.79%) | File: chart_cache\profiles\10\onemore_a.json
+[Bounce Bounce Bounce (4)] Notes: 1270 (Profile) vs 1293 (SongData) | Diff: 23 (1.78%) | File: chart_cache\profiles\18\bouncex3_a.json
+[Flamingo (4)] Notes: 1768 (Profile) vs 1800 (SongData) | Diff: 32 (1.78%) | File: chart_cache\profiles\32\flamingo_a.json
+[∀ (4)] Notes: 1770 (Profile) vs 1802 (SongData) | Diff: 32 (1.78%) | File: chart_cache\profiles\28\_turn_a_a.json
+[THE CANNONBALLER (4)] Notes: 1717 (Profile) vs 1748 (SongData) | Diff: 31 (1.77%) | File: chart_cache\profiles\25\tcannonb_a.json
+[Shooting Fireball (4)] Notes: 1948 (Profile) vs 1983 (SongData) | Diff: 35 (1.77%) | File: chart_cache\profiles\22\shootfir_a.json
+[EXTREME MACH COLLIDER (4)] Notes: 1282 (Profile) vs 1305 (SongData) | Diff: 23 (1.76%) | File: chart_cache\profiles\21\extrmach_a.json
+[Yellow Sketch(RX-Ver.S.P.L.) (4)] Notes: 1453 (Profile) vs 1479 (SongData) | Diff: 26 (1.76%) | File: chart_cache\profiles\24\ylsketch_a.json
+[INHERITANCE (10)] Notes: 1795 (Profile) vs 1827 (SongData) | Diff: 32 (1.75%) | File: chart_cache\profiles\31\inherita_l.json
+[泰東ノ翠霞 (4)] Notes: 898 (Profile) vs 914 (SongData) | Diff: 16 (1.75%) | File: chart_cache\profiles\26\_taito26_a.json
+[Symmetry (4)] Notes: 1630 (Profile) vs 1659 (SongData) | Diff: 29 (1.75%) | File: chart_cache\profiles\22\symmetry_a.json
+[BREAK OVER (4)] Notes: 1189 (Profile) vs 1210 (SongData) | Diff: 21 (1.74%) | File: chart_cache\profiles\24\breakovr_a.json
+[i-ii (4)] Notes: 1473 (Profile) vs 1499 (SongData) | Diff: 26 (1.73%) | File: chart_cache\profiles\31\i_ii_a.json
+[COLOSSEUM (4)] Notes: 1139 (Profile) vs 1159 (SongData) | Diff: 20 (1.73%) | File: chart_cache\profiles\22\coloseum_a.json
+[ベンガル vs. アムール Battle (4)] Notes: 1835 (Profile) vs 1867 (SongData) | Diff: 32 (1.71%) | File: chart_cache\profiles\33\_bengal_a.json
+[RAGE feat.H14 of LEONAIR (4)] Notes: 1854 (Profile) vs 1886 (SongData) | Diff: 32 (1.70%) | File: chart_cache\profiles\29\rage_h14_a.json
+[LIGHTNING STRIKES (10)] Notes: 2087 (Profile) vs 2123 (SongData) | Diff: 36 (1.70%) | File: chart_cache\profiles\27\lightstr_l.json
+[SμG@R RU$# (4)] Notes: 2003 (Profile) vs 2037 (SongData) | Diff: 34 (1.67%) | File: chart_cache\profiles\32\sugarush_a.json
+[Ganymede (4)] Notes: 1219 (Profile) vs 1199 (SongData) | Diff: 20 (1.67%) | File: chart_cache\profiles\13\ganymede_a.json
+[Amazing Mirage (10)] Notes: 1656 (Profile) vs 1684 (SongData) | Diff: 28 (1.66%) | File: chart_cache\profiles\24\amazingl_a.json
+[Countdown to Heaven or Hell (4)] Notes: 1543 (Profile) vs 1569 (SongData) | Diff: 26 (1.66%) | File: chart_cache\profiles\33\countdhh_a.json
+[Here We Go Now (4)] Notes: 1662 (Profile) vs 1690 (SongData) | Diff: 28 (1.66%) | File: chart_cache\profiles\32\here_now_a.json
+[Empire State Glory (4)] Notes: 1307 (Profile) vs 1329 (SongData) | Diff: 22 (1.66%) | File: chart_cache\profiles\17\empstate_a.json
+[Modular Technology (4)] Notes: 1350 (Profile) vs 1372 (SongData) | Diff: 22 (1.60%) | File: chart_cache\profiles\24\modulart_a.json
+[Blue Rain (4)] Notes: 1131 (Profile) vs 1149 (SongData) | Diff: 18 (1.57%) | File: chart_cache\profiles\15\bluerain_a.json
+[Bow shock!! (10)] Notes: 2142 (Profile) vs 2176 (SongData) | Diff: 34 (1.56%) | File: chart_cache\profiles\27\bowshock_l.json
+[Honey Trap (4)] Notes: 1264 (Profile) vs 1284 (SongData) | Diff: 20 (1.56%) | File: chart_cache\profiles\24\honeytrp_a.json
+[hora de verdad (4)] Notes: 1540 (Profile) vs 1564 (SongData) | Diff: 24 (1.53%) | File: chart_cache\profiles\32\horadeve_a.json
+[THE DETONATOR (4)] Notes: 1661 (Profile) vs 1636 (SongData) | Diff: 25 (1.53%) | File: chart_cache\profiles\21\the_deto_a.json
+[TECHNO Style Essentials (4)] Notes: 1431 (Profile) vs 1453 (SongData) | Diff: 22 (1.51%) | File: chart_cache\profiles\27\tecstyle_a.json
+[Artist (4)] Notes: 1842 (Profile) vs 1870 (SongData) | Diff: 28 (1.50%) | File: chart_cache\profiles\27\artist_a.json
+[PUNISHER (4)] Notes: 1785 (Profile) vs 1812 (SongData) | Diff: 27 (1.49%) | File: chart_cache\profiles\21\punisher_a.json
+[Shiva (4)] Notes: 1069 (Profile) vs 1085 (SongData) | Diff: 16 (1.47%) | File: chart_cache\profiles\27\shiva_a.json
+[Volcanic Dragon (4)] Notes: 1473 (Profile) vs 1495 (SongData) | Diff: 22 (1.47%) | File: chart_cache\profiles\27\vldragon_a.json
+[Sirius (4)] Notes: 1613 (Profile) vs 1637 (SongData) | Diff: 24 (1.47%) | File: chart_cache\profiles\31\sirius_a.json
+[The Least 100sec (4)] Notes: 1483 (Profile) vs 1505 (SongData) | Diff: 22 (1.46%) | File: chart_cache\profiles\22\t_100sec_a.json
+[めいさいアイドル☆あいむちゃん♪ (4)] Notes: 1742 (Profile) vs 1717 (SongData) | Diff: 25 (1.46%) | File: chart_cache\profiles\23\_meisai_a.json
+[千年ノ理 (4)] Notes: 1585 (Profile) vs 1608 (SongData) | Diff: 23 (1.43%) | File: chart_cache\profiles\22\_sennen_a.json
+[SISYPHUS (4)] Notes: 1379 (Profile) vs 1399 (SongData) | Diff: 20 (1.43%) | File: chart_cache\profiles\32\sisyphus_a.json
+[シムルグの目醒め (4)] Notes: 1796 (Profile) vs 1822 (SongData) | Diff: 26 (1.43%) | File: chart_cache\profiles\25\_simurgh_a.json
+[Uaigh Gealai (4)] Notes: 1944 (Profile) vs 1972 (SongData) | Diff: 28 (1.42%) | File: chart_cache\profiles\32\uaigh_a.json
+[#The_Relentless (10)] Notes: 2241 (Profile) vs 2273 (SongData) | Diff: 32 (1.41%) | File: chart_cache\profiles\22\_therele_l.json
+[Blue Spring Express (4)] Notes: 1752 (Profile) vs 1728 (SongData) | Diff: 24 (1.39%) | File: chart_cache\profiles\23\blspring_a.json
+[〆 (4)] Notes: 1851 (Profile) vs 1877 (SongData) | Diff: 26 (1.39%) | File: chart_cache\profiles\24\_shime_a.json
+[Amor∞Fati (4)] Notes: 2141 (Profile) vs 2171 (SongData) | Diff: 30 (1.38%) | File: chart_cache\profiles\33\amorfati_a.json
+[Broken Sword (4)] Notes: 1861 (Profile) vs 1887 (SongData) | Diff: 26 (1.38%) | File: chart_cache\profiles\22\brokensw_a.json
+[The Limbo (4)] Notes: 1678 (Profile) vs 1701 (SongData) | Diff: 23 (1.35%) | File: chart_cache\profiles\19\thelimbo_a.json
+[Vitamin (4)] Notes: 1328 (Profile) vs 1346 (SongData) | Diff: 18 (1.34%) | File: chart_cache\profiles\33\vitamin_a.json
+[A MINSTREL ～ ver. short-scape ～ (10)] Notes: 1928 (Profile) vs 1954 (SongData) | Diff: 26 (1.33%) | File: chart_cache\profiles\19\a_minstr_l.json
+[朝焼けから始まるボクらの小さな旅 (4)] Notes: 1281 (Profile) vs 1298 (SongData) | Diff: 17 (1.31%) | File: chart_cache\profiles\23\_asayake_a.json
+[Kung-fu Empire (10)] Notes: 1973 (Profile) vs 1999 (SongData) | Diff: 26 (1.30%) | File: chart_cache\profiles\16\kungfu_l_a.json
+[From Human Blood (4)] Notes: 1826 (Profile) vs 1850 (SongData) | Diff: 24 (1.30%) | File: chart_cache\profiles\33\frmhuman_a.json
+[Programmed World (4)] Notes: 1146 (Profile) vs 1161 (SongData) | Diff: 15 (1.29%) | File: chart_cache\profiles\16\prgworld_a.json
+[lowercase lifetime (4)] Notes: 1389 (Profile) vs 1407 (SongData) | Diff: 18 (1.28%) | File: chart_cache\profiles\32\lowercas_a.json
+[Astra Blaze (4)] Notes: 1708 (Profile) vs 1730 (SongData) | Diff: 22 (1.27%) | File: chart_cache\profiles\33\astrablz_a.json
+[表裏一体！？怪盗いいんちょの悩み (4)] Notes: 1792 (Profile) vs 1815 (SongData) | Diff: 23 (1.27%) | File: chart_cache\profiles\22\_hyouri_a.json
+[Constellation (4)] Notes: 1417 (Profile) vs 1435 (SongData) | Diff: 18 (1.25%) | File: chart_cache\profiles\32\constell_a.json
+[Nothing but Theory (4)] Notes: 1420 (Profile) vs 1438 (SongData) | Diff: 18 (1.25%) | File: chart_cache\profiles\25\nbtheory_a.json
+[Mid-Corner (Magic Maker) (4)] Notes: 1591 (Profile) vs 1611 (SongData) | Diff: 20 (1.24%) | File: chart_cache\profiles\32\mid_crnr_a.json
+[Level 5 (4)] Notes: 1913 (Profile) vs 1937 (SongData) | Diff: 24 (1.24%) | File: chart_cache\profiles\31\level5_a.json
+[ICARUS (4)] Notes: 1285 (Profile) vs 1301 (SongData) | Diff: 16 (1.23%) | File: chart_cache\profiles\15\icarus_a.json
+[The Rebellion of Sequencer (4)] Notes: 1614 (Profile) vs 1634 (SongData) | Diff: 20 (1.22%) | File: chart_cache\profiles\26\t_rebeli_a.json
+[Cosmic Cat (10)] Notes: 1631 (Profile) vs 1651 (SongData) | Diff: 20 (1.21%) | File: chart_cache\profiles\22\cosmical_a.json
+[純真可憐デザイア (10)] Notes: 1480 (Profile) vs 1498 (SongData) | Diff: 18 (1.20%) | File: chart_cache\profiles\25\_jdesire_l.json
+[Stargazing Trip ～星 探す旅～ ft. 小林マナ (4)] Notes: 1328 (Profile) vs 1344 (SongData) | Diff: 16 (1.19%) | File: chart_cache\profiles\32\stgztrip_a.json
+[ΕΛΠΙΣ (10)] Notes: 1830 (Profile) vs 1852 (SongData) | Diff: 22 (1.19%) | File: chart_cache\profiles\20\_elpis_l.json
+[命の標本 (4)] Notes: 1342 (Profile) vs 1358 (SongData) | Diff: 16 (1.18%) | File: chart_cache\profiles\25\_inochi_a.json
+[DOMINION (4)] Notes: 1617 (Profile) vs 1636 (SongData) | Diff: 19 (1.16%) | File: chart_cache\profiles\17\dominion_a.json
+[天空の夜明け (4)] Notes: 2048 (Profile) vs 2072 (SongData) | Diff: 24 (1.16%) | File: chart_cache\profiles\19\_tkyoake_a.json
+[NEMESIS (4)] Notes: 962 (Profile) vs 973 (SongData) | Diff: 11 (1.13%) | File: chart_cache\profiles\6\nemesis_a.json
+[THE DEEP STRIKER (10)] Notes: 1758 (Profile) vs 1778 (SongData) | Diff: 20 (1.12%) | File: chart_cache\profiles\15\tdeepstl_l.json
+[Dances with Snow Fairies (10)] Notes: 2111 (Profile) vs 2135 (SongData) | Diff: 24 (1.12%) | File: chart_cache\profiles\18\dancwith_l.json
+[Logic Board (4)] Notes: 1160 (Profile) vs 1173 (SongData) | Diff: 13 (1.11%) | File: chart_cache\profiles\9\logic_a.json
+[Apocalypse (4)] Notes: 1794 (Profile) vs 1814 (SongData) | Diff: 20 (1.10%) | File: chart_cache\profiles\24\apocalrf_a.json
+[ChaserXX (4)] Notes: 1437 (Profile) vs 1453 (SongData) | Diff: 16 (1.10%) | File: chart_cache\profiles\25\chaserxx_a.json
+[BLOCKS (4)] Notes: 1011 (Profile) vs 1000 (SongData) | Diff: 11 (1.10%) | File: chart_cache\profiles\11\blocks_a.json
+[encounter (4)] Notes: 1661 (Profile) vs 1679 (SongData) | Diff: 18 (1.07%) | File: chart_cache\profiles\25\encountr_a.json
+[東京神話 (4)] Notes: 1521 (Profile) vs 1505 (SongData) | Diff: 16 (1.06%) | File: chart_cache\profiles\25\_tksinwa_a.json
+[COSMIC RAY (4)] Notes: 1493 (Profile) vs 1509 (SongData) | Diff: 16 (1.06%) | File: chart_cache\profiles\28\cosmcray_a.json
+[CODE -CRiMSON- (4)] Notes: 1500 (Profile) vs 1516 (SongData) | Diff: 16 (1.06%) | File: chart_cache\profiles\30\ccrimson_a.json
+[The Sampling Paradise (4)] Notes: 1529 (Profile) vs 1545 (SongData) | Diff: 16 (1.04%) | File: chart_cache\profiles\19\t_sample_a.json
+[garden (10)] Notes: 1599 (Profile) vs 1583 (SongData) | Diff: 16 (1.01%) | File: chart_cache\profiles\12\gardenhs_l.json
+[追想快晴テーマパーク (4)] Notes: 1573 (Profile) vs 1589 (SongData) | Diff: 16 (1.01%) | File: chart_cache\profiles\23\_sunpark_a.json
+[MEGAERA (4)] Notes: 1772 (Profile) vs 1790 (SongData) | Diff: 18 (1.01%) | File: chart_cache\profiles\28\megaera_a.json
+[Kung-fu Empire (10)] Notes: 1979 (Profile) vs 1999 (SongData) | Diff: 20 (1.00%) | File: chart_cache\profiles\16\kungfu_l_l.json
+
+=== Minor Mismatches (<= 1%) ===
+[Unicorn tail (4)] Notes: 1589 (Profile) vs 1605 (SongData) | Diff: 16 (1.00%) | File: chart_cache\profiles\21\unicorn_a.json
+[Bad Encryption (4)] Notes: 1617 (Profile) vs 1633 (SongData) | Diff: 16 (0.98%) | File: chart_cache\profiles\30\badencry_a.json
+[桜 (4)] Notes: 1134 (Profile) vs 1123 (SongData) | Diff: 11 (0.98%) | File: chart_cache\profiles\8\_sakura_a.json
+[THE BRAVE MUST DIE (4)] Notes: 2055 (Profile) vs 2075 (SongData) | Diff: 20 (0.96%) | File: chart_cache\profiles\27\thebrave_a.json
+[Halfway of promise (4)] Notes: 949 (Profile) vs 940 (SongData) | Diff: 9 (0.96%) | File: chart_cache\profiles\8\halfway_a.json
+[超青少年ノ為ノ超多幸ナ超古典的超舞曲 (10)] Notes: 2090 (Profile) vs 2110 (SongData) | Diff: 20 (0.95%) | File: chart_cache\profiles\22\_verycsl_l.json
+[Rave Cannon (4)] Notes: 1684 (Profile) vs 1700 (SongData) | Diff: 16 (0.94%) | File: chart_cache\profiles\24\rvcannon_a.json
+[Konzert V (4)] Notes: 1694 (Profile) vs 1710 (SongData) | Diff: 16 (0.94%) | File: chart_cache\profiles\23\konzertv_a.json
+[恋する☆宇宙戦争っ！！ (10)] Notes: 2333 (Profile) vs 2355 (SongData) | Diff: 22 (0.93%) | File: chart_cache\profiles\19\_koisuru_l.json
+[SCREAM SQUAD (4)] Notes: 1083 (Profile) vs 1073 (SongData) | Diff: 10 (0.93%) | File: chart_cache\profiles\12\sc_squad_a.json
+[2 tribe 4 K (4)] Notes: 1389 (Profile) vs 1402 (SongData) | Diff: 13 (0.93%) | File: chart_cache\profiles\15\2tribelc_a.json
+[Eine Haube ～聖地の果てにあるもの～ (4)] Notes: 1333 (Profile) vs 1321 (SongData) | Diff: 12 (0.91%) | File: chart_cache\profiles\25\einehaub_a.json
+[VOLAQUAS (4)] Notes: 1964 (Profile) vs 1982 (SongData) | Diff: 18 (0.91%) | File: chart_cache\profiles\30\volaquas_a.json
+[世界の果てに約束の凱歌を -ReUnion- (4)] Notes: 1965 (Profile) vs 1983 (SongData) | Diff: 18 (0.91%) | File: chart_cache\profiles\28\_sekaiop_a.json
+[Garuda (4)] Notes: 1311 (Profile) vs 1323 (SongData) | Diff: 12 (0.91%) | File: chart_cache\profiles\26\garuda_a.json
+[⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason (4)] Notes: 1970 (Profile) vs 1988 (SongData) | Diff: 18 (0.91%) | File: chart_cache\profiles\33\_beyondr_a.json
+[X-DEN (4)] Notes: 2200 (Profile) vs 2220 (SongData) | Diff: 20 (0.90%) | File: chart_cache\profiles\26\_kai_den_a.json
+[Liberation (4)] Notes: 1888 (Profile) vs 1905 (SongData) | Diff: 17 (0.89%) | File: chart_cache\profiles\20\liberatn_a.json
+[Blind Justice ～Torn souls， Hurt Faiths ～ (4)] Notes: 1234 (Profile) vs 1245 (SongData) | Diff: 11 (0.88%) | File: chart_cache\profiles\14\blindjus_a.json
+[とろぴかる倶楽部 (4)] Notes: 1144 (Profile) vs 1154 (SongData) | Diff: 10 (0.87%) | File: chart_cache\profiles\22\_trpclub_a.json
+[refrain (4)] Notes: 1841 (Profile) vs 1857 (SongData) | Diff: 16 (0.86%) | File: chart_cache\profiles\23\refrain_a.json
+[TIEFSEE (4)] Notes: 1737 (Profile) vs 1752 (SongData) | Diff: 15 (0.86%) | File: chart_cache\profiles\22\tiefsee_a.json
+[Mukade (4)] Notes: 1631 (Profile) vs 1645 (SongData) | Diff: 14 (0.85%) | File: chart_cache\profiles\31\mukade_a.json
+[Level 4 (4)] Notes: 1867 (Profile) vs 1883 (SongData) | Diff: 16 (0.85%) | File: chart_cache\profiles\30\level4_a.json
+[DropZ-Line- (4)] Notes: 1634 (Profile) vs 1648 (SongData) | Diff: 14 (0.85%) | File: chart_cache\profiles\25\dropz_ln_a.json
+[kors k's How to make OTOGE CORE (4)] Notes: 1170 (Profile) vs 1180 (SongData) | Diff: 10 (0.85%) | File: chart_cache\profiles\29\korskhow_a.json
+[SHELTER OF THE MIND (4)] Notes: 1525 (Profile) vs 1538 (SongData) | Diff: 13 (0.85%) | File: chart_cache\profiles\23\shelter_a.json
+[Exhaust Hype (4)] Notes: 1414 (Profile) vs 1426 (SongData) | Diff: 12 (0.84%) | File: chart_cache\profiles\25\exh_hype_a.json
+[Verflucht (10)] Notes: 2381 (Profile) vs 2401 (SongData) | Diff: 20 (0.83%) | File: chart_cache\profiles\21\verflchl_a.json
+[ドッキン☆サマーあばんちゅーる (4)] Notes: 1435 (Profile) vs 1447 (SongData) | Diff: 12 (0.83%) | File: chart_cache\profiles\22\_dsummer_a.json
+[Light and Cyber… (4)] Notes: 1566 (Profile) vs 1579 (SongData) | Diff: 13 (0.82%) | File: chart_cache\profiles\20\lt_cyber_a.json
+[diagram (4)] Notes: 1449 (Profile) vs 1461 (SongData) | Diff: 12 (0.82%) | File: chart_cache\profiles\21\diagram_a.json
+[Seraph (4)] Notes: 1217 (Profile) vs 1227 (SongData) | Diff: 10 (0.81%) | File: chart_cache\profiles\30\seraph_a.json
+[DEATH†ZIGOQ ～怒りの高速爆走野郎～ (10)] Notes: 2439 (Profile) vs 2459 (SongData) | Diff: 20 (0.81%) | File: chart_cache\profiles\25\dthzigoq_l.json
+[invoker (10)] Notes: 1836 (Profile) vs 1851 (SongData) | Diff: 15 (0.81%) | File: chart_cache\profiles\21\invokerl_a.json
+[invoker (10)] Notes: 1836 (Profile) vs 1851 (SongData) | Diff: 15 (0.81%) | File: chart_cache\profiles\21\invokerl_l.json
+[Satellite Burst (4)] Notes: 1984 (Profile) vs 2000 (SongData) | Diff: 16 (0.80%) | File: chart_cache\profiles\32\satburst_a.json
+[V (4)] Notes: 1507 (Profile) vs 1519 (SongData) | Diff: 12 (0.79%) | File: chart_cache\profiles\5\v_taka_a.json
+[Raspberry Potion (feat.あれたん & ぎゃるのしん☆) (4)] Notes: 1257 (Profile) vs 1267 (SongData) | Diff: 10 (0.79%) | File: chart_cache\profiles\32\rspotion_a.json
+[POSSESSION (4)] Notes: 1509 (Profile) vs 1521 (SongData) | Diff: 12 (0.79%) | File: chart_cache\profiles\23\posesion_a.json
+[Illegal Function Call (4)] Notes: 1387 (Profile) vs 1398 (SongData) | Diff: 11 (0.79%) | File: chart_cache\profiles\20\illegal_a.json
+[Into The Madness (4)] Notes: 1276 (Profile) vs 1286 (SongData) | Diff: 10 (0.78%) | File: chart_cache\profiles\27\into_mad_a.json
+[Feel The Beat (10)] Notes: 2242 (Profile) vs 2225 (SongData) | Diff: 17 (0.76%) | File: chart_cache\profiles\21\feelbetl_l.json
+[それは花火のような恋 (4)] Notes: 1961 (Profile) vs 1976 (SongData) | Diff: 15 (0.76%) | File: chart_cache\profiles\22\_shanabi_a.json
+[抱きしめてモナムール (4)] Notes: 2094 (Profile) vs 2110 (SongData) | Diff: 16 (0.76%) | File: chart_cache\profiles\26\_dakismt_a.json
+[Cleopatrysm (4)] Notes: 1316 (Profile) vs 1326 (SongData) | Diff: 10 (0.75%) | File: chart_cache\profiles\21\cleopatr_a.json
+[Carry Me Away (4)] Notes: 1601 (Profile) vs 1613 (SongData) | Diff: 12 (0.74%) | File: chart_cache\profiles\26\carryme_a.json
+[50th Memorial Songs -The BEMANI History- (4)] Notes: 1338 (Profile) vs 1348 (SongData) | Diff: 10 (0.74%) | File: chart_cache\profiles\26\50th_bmn_a.json
+[GO! (4)] Notes: 1606 (Profile) vs 1618 (SongData) | Diff: 12 (0.74%) | File: chart_cache\profiles\33\go_juger_a.json
+[Life Is A Game ft.DD"ナカタ"Metal (4)] Notes: 1762 (Profile) vs 1775 (SongData) | Diff: 13 (0.73%) | File: chart_cache\profiles\25\lifegame_a.json
+[ミッドナイト堕天使 (4)] Notes: 1388 (Profile) vs 1398 (SongData) | Diff: 10 (0.72%) | File: chart_cache\profiles\16\_mdatn24_a.json
+[A Certified Rave Moment (4)] Notes: 1394 (Profile) vs 1404 (SongData) | Diff: 10 (0.71%) | File: chart_cache\profiles\33\a_certif_a.json
+[ZED (4)] Notes: 1415 (Profile) vs 1405 (SongData) | Diff: 10 (0.71%) | File: chart_cache\profiles\20\zed_a.json
+[華爛漫 -Flowers- (10)] Notes: 1608 (Profile) vs 1597 (SongData) | Diff: 11 (0.69%) | File: chart_cache\profiles\15\_hranman_l.json
+[黒髪乱れし修羅となりて (4)] Notes: 1733 (Profile) vs 1745 (SongData) | Diff: 12 (0.69%) | File: chart_cache\profiles\18\_krokami_a.json
+[ランカーキラーガール (4)] Notes: 1469 (Profile) vs 1479 (SongData) | Diff: 10 (0.68%) | File: chart_cache\profiles\27\_rankerk_a.json
+[IN BETWEEN (4)] Notes: 1193 (Profile) vs 1201 (SongData) | Diff: 8 (0.67%) | File: chart_cache\profiles\32\inbetwen_a.json
+[Echoes of Sunfall (4)] Notes: 1508 (Profile) vs 1518 (SongData) | Diff: 10 (0.66%) | File: chart_cache\profiles\31\esunfall_a.json
+[爆ぜりゃんせ (4)] Notes: 1511 (Profile) vs 1521 (SongData) | Diff: 10 (0.66%) | File: chart_cache\profiles\32\_hazerya_a.json
+[Idola (4)] Notes: 1814 (Profile) vs 1826 (SongData) | Diff: 12 (0.66%) | File: chart_cache\profiles\21\idola_a.json
+[THE DEEP STRIKER (4)] Notes: 1518 (Profile) vs 1528 (SongData) | Diff: 10 (0.65%) | File: chart_cache\profiles\15\tdeepstr_a.json
+[Egret and Willow (4)] Notes: 1374 (Profile) vs 1383 (SongData) | Diff: 9 (0.65%) | File: chart_cache\profiles\24\egretwil_a.json
+[SCREW // owo // SCREW (4)] Notes: 1557 (Profile) vs 1567 (SongData) | Diff: 10 (0.64%) | File: chart_cache\profiles\27\screwowo_a.json
+[LADYBIRD (4)] Notes: 1250 (Profile) vs 1258 (SongData) | Diff: 8 (0.64%) | File: chart_cache\profiles\26\ladybird_a.json
+[Arabian Rave Night (10)] Notes: 1876 (Profile) vs 1888 (SongData) | Diff: 12 (0.64%) | File: chart_cache\profiles\16\arabian_l.json
+[quaver♪ (4)] Notes: 1734 (Profile) vs 1745 (SongData) | Diff: 11 (0.63%) | File: chart_cache\profiles\19\quaver_a.json
+[MAX 360 (4)] Notes: 1600 (Profile) vs 1610 (SongData) | Diff: 10 (0.62%) | File: chart_cache\profiles\30\max_360_a.json
+[MA・TSU・RI (4)] Notes: 1294 (Profile) vs 1302 (SongData) | Diff: 8 (0.61%) | File: chart_cache\profiles\28\matsuri_a.json
+[Beyond The Earth (4)] Notes: 1636 (Profile) vs 1646 (SongData) | Diff: 10 (0.61%) | File: chart_cache\profiles\22\beyond_p_a.json
+[MVP (4)] Notes: 1310 (Profile) vs 1318 (SongData) | Diff: 8 (0.61%) | File: chart_cache\profiles\32\mvp_a.json
+[O/D*20 (10)] Notes: 1972 (Profile) vs 1984 (SongData) | Diff: 12 (0.60%) | File: chart_cache\profiles\25\o_d_20_l.json
+[Kung-fu Empire (4)] Notes: 1647 (Profile) vs 1657 (SongData) | Diff: 10 (0.60%) | File: chart_cache\profiles\16\kung_fu_a.json
+[旋律のドグマ～Miserables～ (4)] Notes: 1990 (Profile) vs 2002 (SongData) | Diff: 12 (0.60%) | File: chart_cache\profiles\21\_s_dogma_a.json
+[Realize Maze (4)] Notes: 1494 (Profile) vs 1503 (SongData) | Diff: 9 (0.60%) | File: chart_cache\profiles\22\realmaze_a.json
+[RALLY '25 (4)] Notes: 1664 (Profile) vs 1674 (SongData) | Diff: 10 (0.60%) | File: chart_cache\profiles\33\rally_25_a.json
+[天邪鬼 (4)] Notes: 1683 (Profile) vs 1693 (SongData) | Diff: 10 (0.59%) | File: chart_cache\profiles\29\_amanojk_a.json
+[destination (4)] Notes: 1688 (Profile) vs 1698 (SongData) | Diff: 10 (0.59%) | File: chart_cache\profiles\32\dstntion_a.json
+[NEW GENERATION -もう、お前しか見えない- (10)] Notes: 1906 (Profile) vs 1895 (SongData) | Diff: 11 (0.58%) | File: chart_cache\profiles\15\new_gene_l.json
+[#CMFLG (4)] Notes: 1738 (Profile) vs 1748 (SongData) | Diff: 10 (0.57%) | File: chart_cache\profiles\30\_cmflg_a.json
+[Submerge Serenade (10)] Notes: 2092 (Profile) vs 2104 (SongData) | Diff: 12 (0.57%) | File: chart_cache\profiles\31\submerge_l.json
+[Holic (4)] Notes: 875 (Profile) vs 880 (SongData) | Diff: 5 (0.57%) | File: chart_cache\profiles\3\holic_a.json
+[《PL|RAYER》 (4)] Notes: 1412 (Profile) vs 1420 (SongData) | Diff: 8 (0.56%) | File: chart_cache\profiles\31\_plrayer_a.json
+[ベラ・ベ・カラベラ (4)] Notes: 1428 (Profile) vs 1436 (SongData) | Diff: 8 (0.56%) | File: chart_cache\profiles\33\_bl_clvr_a.json
+[Xerulean (4)] Notes: 1792 (Profile) vs 1802 (SongData) | Diff: 10 (0.55%) | File: chart_cache\profiles\30\xerulean_a.json
+[Just a Little Smile (4)] Notes: 1265 (Profile) vs 1272 (SongData) | Diff: 7 (0.55%) | File: chart_cache\profiles\16\jalsmile_a.json
+[朧 (10)] Notes: 1273 (Profile) vs 1280 (SongData) | Diff: 7 (0.55%) | File: chart_cache\profiles\20\_oborol_a.json
+[ぞうしょく！？マイデンティティ (4)] Notes: 1841 (Profile) vs 1851 (SongData) | Diff: 10 (0.54%) | File: chart_cache\profiles\30\_zoshoku_a.json
+[reunion (4)] Notes: 1686 (Profile) vs 1677 (SongData) | Diff: 9 (0.54%) | File: chart_cache\profiles\18\reunion_a.json
+[Fascination MAXX (4)] Notes: 1306 (Profile) vs 1313 (SongData) | Diff: 7 (0.53%) | File: chart_cache\profiles\14\fas_maxx_a.json
+[パーフェクトイーター (4)] Notes: 1523 (Profile) vs 1531 (SongData) | Diff: 8 (0.52%) | File: chart_cache\profiles\30\_pfeater_a.json
+[Chronos (10)] Notes: 1530 (Profile) vs 1538 (SongData) | Diff: 8 (0.52%) | File: chart_cache\profiles\22\chronos_l.json
+[Elemental Creation (4)] Notes: 2141 (Profile) vs 2130 (SongData) | Diff: 11 (0.52%) | File: chart_cache\profiles\20\elecreat_a.json
+[ここからよろしく大作戦143 (10)] Notes: 1590 (Profile) vs 1598 (SongData) | Diff: 8 (0.50%) | File: chart_cache\profiles\28\_ope_143_l.json
+[T-REX vs Velociraptor (In the Far east euphoria) (4)] Notes: 1628 (Profile) vs 1636 (SongData) | Diff: 8 (0.49%) | File: chart_cache\profiles\27\t_rex_vs_a.json
+[Ubertreffen (10)] Notes: 1663 (Profile) vs 1655 (SongData) | Diff: 8 (0.48%) | File: chart_cache\profiles\15\ubertref_l.json
+[255 (4)] Notes: 1668 (Profile) vs 1676 (SongData) | Diff: 8 (0.48%) | File: chart_cache\profiles\25\255_255_a.json
+[in the Sky (4)] Notes: 1273 (Profile) vs 1279 (SongData) | Diff: 6 (0.47%) | File: chart_cache\profiles\15\inthesky_a.json
+[NINJA IS DEAD IIDX ver. (4)] Notes: 1527 (Profile) vs 1520 (SongData) | Diff: 7 (0.46%) | File: chart_cache\profiles\23\ninja_dd_a.json
+[Chrono Diver -PENDULUMs- (4)] Notes: 2232 (Profile) vs 2222 (SongData) | Diff: 10 (0.45%) | File: chart_cache\profiles\22\chrono_p_a.json
+[THE TIME MACHINE (4)] Notes: 1344 (Profile) vs 1350 (SongData) | Diff: 6 (0.44%) | File: chart_cache\profiles\30\timemchn_a.json
+[Harmony and Lovely (4)] Notes: 1122 (Profile) vs 1127 (SongData) | Diff: 5 (0.44%) | File: chart_cache\profiles\13\harmlove_a.json
+[Level 3 (4)] Notes: 1836 (Profile) vs 1844 (SongData) | Diff: 8 (0.43%) | File: chart_cache\profiles\28\level3_a.json
+[Red. by Jack Trance (4)] Notes: 1854 (Profile) vs 1862 (SongData) | Diff: 8 (0.43%) | File: chart_cache\profiles\26\red_jack_a.json
+[D.C.fish (4)] Notes: 1183 (Profile) vs 1178 (SongData) | Diff: 5 (0.42%) | File: chart_cache\profiles\13\dcfish_a.json
+[Bang Bang Dance (4)] Notes: 1409 (Profile) vs 1415 (SongData) | Diff: 6 (0.42%) | File: chart_cache\profiles\33\bangdanc_a.json
+[明鏡止水 (4)] Notes: 1437 (Profile) vs 1443 (SongData) | Diff: 6 (0.42%) | File: chart_cache\profiles\23\_meikyou_a.json
+[GuNGNiR (10)] Notes: 2433 (Profile) vs 2443 (SongData) | Diff: 10 (0.41%) | File: chart_cache\profiles\24\gungnir_l.json
+[StrayedCatz (4)] Notes: 1496 (Profile) vs 1490 (SongData) | Diff: 6 (0.40%) | File: chart_cache\profiles\23\strycatz_a.json
+[Roar of Chronos (4)] Notes: 1983 (Profile) vs 1991 (SongData) | Diff: 8 (0.40%) | File: chart_cache\profiles\32\roarchro_a.json
+[Colorful Cookie (4)] Notes: 1766 (Profile) vs 1773 (SongData) | Diff: 7 (0.39%) | File: chart_cache\profiles\16\cocookie_a.json
+[Primitive Vibes (4)] Notes: 1558 (Profile) vs 1564 (SongData) | Diff: 6 (0.38%) | File: chart_cache\profiles\27\prmvibes_a.json
+[Confiserie (4)] Notes: 1826 (Profile) vs 1833 (SongData) | Diff: 7 (0.38%) | File: chart_cache\profiles\20\confiser_a.json
+[chaos eater -IIDX edition- (4)] Notes: 1323 (Profile) vs 1328 (SongData) | Diff: 5 (0.38%) | File: chart_cache\profiles\23\chaoseat_a.json
+[yellow head joe (10)] Notes: 1590 (Profile) vs 1596 (SongData) | Diff: 6 (0.38%) | File: chart_cache\profiles\19\yheadjoe_l.json
+[VOX UP (4)] Notes: 1863 (Profile) vs 1870 (SongData) | Diff: 7 (0.37%) | File: chart_cache\profiles\21\voxup_sp_a.json
+[One for All (4)] Notes: 1626 (Profile) vs 1632 (SongData) | Diff: 6 (0.37%) | File: chart_cache\profiles\29\oneforal_a.json
+[Lethal Weapon (4)] Notes: 1640 (Profile) vs 1646 (SongData) | Diff: 6 (0.36%) | File: chart_cache\profiles\26\lethalwp_a.json
+[Sword of Vengeance (4)] Notes: 1644 (Profile) vs 1650 (SongData) | Diff: 6 (0.36%) | File: chart_cache\profiles\31\swordven_a.json
+[Proof of the existence (4)] Notes: 1669 (Profile) vs 1675 (SongData) | Diff: 6 (0.36%) | File: chart_cache\profiles\20\proof_of_a.json
+[ゲシュタルト (10)] Notes: 1671 (Profile) vs 1677 (SongData) | Diff: 6 (0.36%) | File: chart_cache\profiles\32\_gestalt_l.json
+[IDC feat.REVERBEE (Mo'Cuts Ver) (4)] Notes: 1141 (Profile) vs 1145 (SongData) | Diff: 4 (0.35%) | File: chart_cache\profiles\26\idc_a.json
+[ORCA (4)] Notes: 1789 (Profile) vs 1795 (SongData) | Diff: 6 (0.33%) | File: chart_cache\profiles\27\orca_a.json
+[u gotta beat (4)] Notes: 1800 (Profile) vs 1806 (SongData) | Diff: 6 (0.33%) | File: chart_cache\profiles\32\ugottabt_a.json
+[Space Battleship S4TO (4)] Notes: 1894 (Profile) vs 1900 (SongData) | Diff: 6 (0.32%) | File: chart_cache\profiles\33\spc_s4to_a.json
+[No Tears (4)] Notes: 1282 (Profile) vs 1286 (SongData) | Diff: 4 (0.31%) | File: chart_cache\profiles\22\notears_a.json
+[最小三倍完全数 (4)] Notes: 1310 (Profile) vs 1314 (SongData) | Diff: 4 (0.30%) | File: chart_cache\profiles\26\_saisho3_a.json
+[ZEPHYRANTHES (10)] Notes: 1976 (Profile) vs 1982 (SongData) | Diff: 6 (0.30%) | File: chart_cache\profiles\23\zephyran_l.json
+[ICARUS (10)] Notes: 2006 (Profile) vs 2000 (SongData) | Diff: 6 (0.30%) | File: chart_cache\profiles\15\icarus_l.json
+[yamabiko (SINOBUZ Edition) (4)] Notes: 1341 (Profile) vs 1345 (SongData) | Diff: 4 (0.30%) | File: chart_cache\profiles\24\yamabiko_a.json
+[Fire Beat (4)] Notes: 1388 (Profile) vs 1392 (SongData) | Diff: 4 (0.29%) | File: chart_cache\profiles\28\firebeat_a.json
+[GOLD RUSH 2025 (4)] Notes: 1416 (Profile) vs 1420 (SongData) | Diff: 4 (0.28%) | File: chart_cache\profiles\33\gold2025_a.json
+[3V0 (4)] Notes: 1526 (Profile) vs 1530 (SongData) | Diff: 4 (0.26%) | File: chart_cache\profiles\30\3v0_a.json
+[pique (4)] Notes: 1538 (Profile) vs 1542 (SongData) | Diff: 4 (0.26%) | File: chart_cache\profiles\33\pique_a.json
+[Macho Monky (4)] Notes: 1584 (Profile) vs 1588 (SongData) | Diff: 4 (0.25%) | File: chart_cache\profiles\26\machomnk_a.json
+[L.F.O (4)] Notes: 1683 (Profile) vs 1687 (SongData) | Diff: 4 (0.24%) | File: chart_cache\profiles\26\lfo_a.json
+[Take It Easy (4)] Notes: 1285 (Profile) vs 1282 (SongData) | Diff: 3 (0.23%) | File: chart_cache\profiles\6\take_ez_a.json
+[BLAZING_LAZER (4)] Notes: 1748 (Profile) vs 1752 (SongData) | Diff: 4 (0.23%) | File: chart_cache\profiles\31\bl_lazer_a.json
+[麗 ～うらら～ (4)] Notes: 1332 (Profile) vs 1329 (SongData) | Diff: 3 (0.23%) | File: chart_cache\profiles\23\_urara_a.json
+[AsiaN distractive (4)] Notes: 1340 (Profile) vs 1337 (SongData) | Diff: 3 (0.22%) | File: chart_cache\profiles\24\asiandst_a.json
+[儚キ戀ノ幻想譚 (4)] Notes: 1804 (Profile) vs 1808 (SongData) | Diff: 4 (0.22%) | File: chart_cache\profiles\30\_hgensou_a.json
+[REVOLVER (4)] Notes: 1402 (Profile) vs 1405 (SongData) | Diff: 3 (0.21%) | File: chart_cache\profiles\25\revolver_a.json
+[たまゆら (4)] Notes: 1404 (Profile) vs 1407 (SongData) | Diff: 3 (0.21%) | File: chart_cache\profiles\20\_tamayra_a.json
+[Inner Spirit (4)] Notes: 1455 (Profile) vs 1458 (SongData) | Diff: 3 (0.21%) | File: chart_cache\profiles\23\inspirit_a.json
+[SOLID WYVERN (10)] Notes: 1995 (Profile) vs 1999 (SongData) | Diff: 4 (0.20%) | File: chart_cache\profiles\29\slwyvern_l.json
+[waxing and wanding (10)] Notes: 1996 (Profile) vs 2000 (SongData) | Diff: 4 (0.20%) | File: chart_cache\profiles\13\waxing_l_a.json
+[waxing and wanding (10)] Notes: 1996 (Profile) vs 2000 (SongData) | Diff: 4 (0.20%) | File: chart_cache\profiles\13\waxing_l_l.json
+[[ ]DENTITY (4)] Notes: 1996 (Profile) vs 2000 (SongData) | Diff: 4 (0.20%) | File: chart_cache\profiles\30\_dentity_a.json
+[State Of The Art (4)] Notes: 1567 (Profile) vs 1570 (SongData) | Diff: 3 (0.19%) | File: chart_cache\profiles\15\sotart24_a.json
+[Feel The Beat (10)] Notes: 2221 (Profile) vs 2225 (SongData) | Diff: 4 (0.18%) | File: chart_cache\profiles\21\feelbetl_a.json
+[FUTURE is Dead (4)] Notes: 1149 (Profile) vs 1151 (SongData) | Diff: 2 (0.17%) | File: chart_cache\profiles\25\futuredd_a.json
+[CaptivAte2～覚醒～ (4)] Notes: 1219 (Profile) vs 1221 (SongData) | Diff: 2 (0.16%) | File: chart_cache\profiles\16\ckakusei_a.json
+[Colors (radio edit) (4)] Notes: 1260 (Profile) vs 1258 (SongData) | Diff: 2 (0.16%) | File: chart_cache\profiles\6\colors_a.json
+[DORNWALD ～Junge～ (4)] Notes: 1906 (Profile) vs 1903 (SongData) | Diff: 3 (0.16%) | File: chart_cache\profiles\24\dornwald_a.json
+[Fervidex (4)] Notes: 1363 (Profile) vs 1361 (SongData) | Diff: 2 (0.15%) | File: chart_cache\profiles\25\fervidex_a.json
+[PILGRIM (4)] Notes: 1379 (Profile) vs 1381 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\31\pilgrim_a.json
+[Next Tales 2 Oath (IIDX 20th Anniv "Ring" Theme) (4)] Notes: 1385 (Profile) vs 1387 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\26\nexttale_a.json
+[CONCEPTUAL (4)] Notes: 1389 (Profile) vs 1391 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\20\concept_a.json
+[恋は白帯、サンシロー (10)] Notes: 1393 (Profile) vs 1395 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\22\_koisirl_a.json
+[恋は白帯、サンシロー (10)] Notes: 1393 (Profile) vs 1395 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\22\_koisirl_l.json
+[RAVE SYNDROME (4)] Notes: 1400 (Profile) vs 1402 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\32\ravesynd_a.json
+[prompt (4)] Notes: 1418 (Profile) vs 1420 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\19\prompt_a.json
+[smooooch・∀・ (10)] Notes: 1438 (Profile) vs 1436 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\16\smooooch_l.json
+[Be quiet (10)] Notes: 1461 (Profile) vs 1463 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\11\bequiet_l.json
+[TECHNO RUMBLE (4)] Notes: 1479 (Profile) vs 1481 (SongData) | Diff: 2 (0.14%) | File: chart_cache\profiles\32\tcrumble_a.json
+[GUILTY (10)] Notes: 1523 (Profile) vs 1525 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\22\guilty_l.json
+[ACT0 (4)] Notes: 1532 (Profile) vs 1534 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\31\act0_a.json
+[冬椿 ft. Kanae Asaba (10)] Notes: 1533 (Profile) vs 1535 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\24\_fuyutbl_a.json
+[冬椿 ft. Kanae Asaba (10)] Notes: 1533 (Profile) vs 1535 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\24\_fuyutbl_l.json
+[New Decade IIDX Edition (4)] Notes: 1541 (Profile) vs 1539 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\20\nwdecade_a.json
+[rumrum triplets (4)] Notes: 1543 (Profile) vs 1541 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\20\rumrum_a.json
+[RED ZONE (10)] Notes: 1564 (Profile) vs 1566 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\11\redzonel_a.json
+[KYAMISAMA ONEGAI! (10)] Notes: 1581 (Profile) vs 1583 (SongData) | Diff: 2 (0.13%) | File: chart_cache\profiles\19\kyamsama_l.json
+[Dahlia (4)] Notes: 1615 (Profile) vs 1617 (SongData) | Diff: 2 (0.12%) | File: chart_cache\profiles\31\dahlia_a.json
+[THE PEERLESS UNDER HEAVEN (4)] Notes: 1816 (Profile) vs 1818 (SongData) | Diff: 2 (0.11%) | File: chart_cache\profiles\28\tpeerles_a.json
+[Nothing but Theory (10)] Notes: 1888 (Profile) vs 1890 (SongData) | Diff: 2 (0.11%) | File: chart_cache\profiles\25\nbtheory_l.json
+[The Last Apocalypse (4)] Notes: 1901 (Profile) vs 1903 (SongData) | Diff: 2 (0.11%) | File: chart_cache\profiles\31\tlastapo_a.json
+[Smashing Wedge (4)] Notes: 1955 (Profile) vs 1957 (SongData) | Diff: 2 (0.10%) | File: chart_cache\profiles\27\smawedge_a.json
+[Phoenix (10)] Notes: 2025 (Profile) vs 2027 (SongData) | Diff: 2 (0.10%) | File: chart_cache\profiles\19\phoenix_l.json
+[Sarutobi Champion is 拙者 (4)] Notes: 1152 (Profile) vs 1153 (SongData) | Diff: 1 (0.09%) | File: chart_cache\profiles\24\sarutobi_a.json
+[Valgus (4)] Notes: 1205 (Profile) vs 1206 (SongData) | Diff: 1 (0.08%) | File: chart_cache\profiles\21\valgus_a.json
+[Squeeze (4)] Notes: 1256 (Profile) vs 1257 (SongData) | Diff: 1 (0.08%) | File: chart_cache\profiles\21\squeeze_a.json
+[THANK YOU FOR PLAYING (10)] Notes: 1533 (Profile) vs 1534 (SongData) | Diff: 1 (0.07%) | File: chart_cache\profiles\16\thank_ul_l.json
+[VEGA (4)] Notes: 1585 (Profile) vs 1584 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\20\vega_a.json
+[Broken (4)] Notes: 1597 (Profile) vs 1598 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\18\brokenrb_a.json
+[Sol Cosine Job 2 (4)] Notes: 1624 (Profile) vs 1625 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\20\soljob2_a.json
+[Bad Maniacs (4)] Notes: 1657 (Profile) vs 1656 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\17\bmaniacs_a.json
+[Blue Rain (10)] Notes: 1701 (Profile) vs 1702 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\15\bluerail_a.json
+[DEADHEAT (4)] Notes: 1720 (Profile) vs 1721 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\25\deadheat_a.json
+[Grand Chariot (4)] Notes: 1776 (Profile) vs 1775 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\23\gchariot_a.json
+[Beat Radiance (10)] Notes: 1808 (Profile) vs 1809 (SongData) | Diff: 1 (0.06%) | File: chart_cache\profiles\22\beatradl_l.json
+[X (4)] Notes: 1951 (Profile) vs 1952 (SongData) | Diff: 1 (0.05%) | File: chart_cache\profiles\23\x_amuro_a.json
+[キャトられ恋はモ～モク (4)] Notes: 1989 (Profile) vs 1988 (SongData) | Diff: 1 (0.05%) | File: chart_cache\profiles\20\_kyatora_a.json
+[Mare Nectaris (4)] Notes: 2093 (Profile) vs 2094 (SongData) | Diff: 1 (0.05%) | File: chart_cache\profiles\24\marenect_a.json
+
+=== Not Found in song_data.json ===
+
+=== Summary ===
+Total profiles checked: 1334
+Mismatches (> 1%): 875
+Mismatches (<= 1%): 193
+Not found in SongData: 0

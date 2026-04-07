@@ -1,0 +1,236 @@
+{
+  "textage": "24/otenamih.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:48.453616+00:00",
+  "title": "OTENAMI Hurricane",
+  "artist": "t+pazolite",
+  "bpm_raw": "215",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1573,
+  "events": 938,
+  "bpm_main": 215,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 107.5,
+  "weighted_eff16": 157.4,
+  "scratch_pct": 10.49,
+  "chord_pct": 48.93,
+  "single_pct": 51.07,
+  "ranuchi": 88,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 455,
+      "pct": 48.6,
+      "eff16": 107.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 334,
+      "pct": 35.6,
+      "eff16": 215.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 57,
+      "pct": 6.1,
+      "eff16": 53.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 55,
+      "pct": 5.9,
+      "eff16": 322.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 161.2
+    },
+    "20": {
+      "name": "(20)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 258.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 184.3
+    },
+    "50": {
+      "name": "(50)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 103.2
+    },
+    "52": {
+      "name": "(52)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 99.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 645.0
+    }
+  },
+  "chord_dist": {
+    "1": 479,
+    "2": 320,
+    "3": 104,
+    "4": 33,
+    "5": 2
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 494,
+      "pct": 35.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 435,
+      "pct": 30.9,
+      "eff16": 107.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 327,
+      "pct": 23.2,
+      "eff16": 215.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 55,
+      "pct": 3.9,
+      "eff16": 53.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 54,
+      "pct": 3.8,
+      "eff16": 322.5
+    },
+    "20": {
+      "name": "(20)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 258.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 184.3
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 26.9
+    },
+    "50": {
+      "name": "(50)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 103.2
+    },
+    "52": {
+      "name": "(52)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 99.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 32.9,
+      "eff16": 53.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 39,
+      "pct": 23.8,
+      "eff16": 107.5
+    },
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 10.4,
+      "eff16": 26.9
+    },
+    "576": {
+      "name": "(576)",
+      "count": 6,
+      "pct": 3.7,
+      "eff16": 9.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 6,
+      "pct": 3.7,
+      "eff16": 215.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 3.0,
+      "eff16": 35.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 3.0,
+      "eff16": 21.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 17.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 10.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 6.7
+    }
+  },
+  "cn_notes": 5,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.92,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 1,
+      "pct": 50.0,
+      "eff16": 107.5
+    },
+    "18432": {
+      "name": "(18432)",
+      "count": 1,
+      "pct": 50.0,
+      "eff16": 0.3
+    }
+  }
+}

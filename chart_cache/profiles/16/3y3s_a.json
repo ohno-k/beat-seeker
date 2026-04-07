@@ -1,0 +1,218 @@
+{
+  "textage": "16/3y3s.html?1AC00",
+  "analyzed_at": "2026-04-06T10:48:20.433554+00:00",
+  "title": "3y3s",
+  "artist": "青龍",
+  "bpm_raw": "191",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1599,
+  "events": 782,
+  "bpm_main": 191,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 191.0,
+  "weighted_eff16": 152.7,
+  "scratch_pct": 10.94,
+  "chord_pct": 66.11,
+  "single_pct": 33.89,
+  "ranuchi": 125,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 498,
+      "pct": 63.8,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 233,
+      "pct": 29.8,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 4.7,
+      "eff16": 47.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 11.2
+    },
+    "792": {
+      "name": "(792)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 5.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 10.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 19.1
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.9
+    },
+    "1608": {
+      "name": "(1608)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.6
+    }
+  },
+  "chord_dist": {
+    "1": 265,
+    "2": 273,
+    "3": 199,
+    "4": 34,
+    "5": 11
+  },
+  "tags": [
+    "scratch_heavy",
+    "chord_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 659,
+      "pct": 46.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 494,
+      "pct": 34.7,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 219,
+      "pct": 15.4,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 35,
+      "pct": 2.5,
+      "eff16": 47.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 11.2
+    },
+    "792": {
+      "name": "(792)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 5.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 19.1
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 9.6
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.9
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 124,
+      "pct": 71.3,
+      "eff16": 47.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 33,
+      "pct": 19.0,
+      "eff16": 95.5
+    },
+    "864": {
+      "name": "(864)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 5.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 10.6
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 9.6
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 3.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 11.9
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 4.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 6.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 8.0
+    }
+  }
+}

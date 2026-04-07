@@ -1,0 +1,210 @@
+{
+  "textage": "30/3v0.html?1AB00",
+  "analyzed_at": "2026-04-06T10:48:19.773139+00:00",
+  "title": "3V0",
+  "artist": "BlackY",
+  "bpm_raw": "191",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1526,
+  "events": 880,
+  "bpm_main": 191,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 191.0,
+  "weighted_eff16": 143.4,
+  "scratch_pct": 11.47,
+  "chord_pct": 53.07,
+  "single_pct": 46.93,
+  "ranuchi": 86,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 461,
+      "pct": 52.4,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 376,
+      "pct": 42.8,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 3.4,
+      "eff16": 47.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 63.7
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.8
+    }
+  },
+  "chord_dist": {
+    "1": 413,
+    "2": 313,
+    "3": 130,
+    "4": 23,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 501,
+      "pct": 37.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 446,
+      "pct": 33.0,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 339,
+      "pct": 25.1,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 49,
+      "pct": 3.6,
+      "eff16": 47.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 63.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 31.8
+    },
+    "696": {
+      "name": "(696)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.6
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.8
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 72,
+      "pct": 41.4,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 39,
+      "pct": 22.4,
+      "eff16": 47.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 24,
+      "pct": 13.8,
+      "eff16": 191.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 6.3,
+      "eff16": 63.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 2.3,
+      "eff16": 3.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 10.6
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 23.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 11.9
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 27.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 13.6
+    }
+  },
+  "cn_notes": 7,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 2.37,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 33.3,
+      "eff16": 11.9
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 33.3,
+      "eff16": 23.9
+    },
+    "10368": {
+      "name": "(10368)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 0.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 6.0
+    }
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "textage": "25/revolver.html?1AB00",
+  "analyzed_at": "2026-04-06T10:55:33.347616+00:00",
+  "title": "REVOLVER",
+  "artist": "sky_delta",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1402,
+  "events": 858,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 154.7,
+  "scratch_pct": 8.63,
+  "chord_pct": 46.97,
+  "single_pct": 53.03,
+  "ranuchi": 73,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 571,
+      "pct": 66.6,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 119,
+      "pct": 13.9,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 107,
+      "pct": 12.5,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 2.3,
+      "eff16": 40.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 120.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 26.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 53.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 480.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 60.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 20.0
+    }
+  },
+  "chord_dist": {
+    "1": 455,
+    "2": 291,
+    "3": 84,
+    "4": 27,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 571,
+      "pct": 44.6,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 423,
+      "pct": 33.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 119,
+      "pct": 9.3,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 107,
+      "pct": 8.4,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 1.6,
+      "eff16": 40.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 120.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 26.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 53.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 480.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 60.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 30.8,
+      "eff16": 40.0
+    },
+    "192": {
+      "name": "half",
+      "count": 19,
+      "pct": 15.8,
+      "eff16": 20.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 12.5,
+      "eff16": 53.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 6.7,
+      "eff16": 26.7
+    },
+    "0": {
+      "name": "(0)",
+      "count": 7,
+      "pct": 5.8,
+      "eff16": 0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 7,
+      "pct": 5.8,
+      "eff16": 13.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 5.0,
+      "eff16": 10.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 4.2,
+      "eff16": 80.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 16.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 22.9
+    }
+  }
+}

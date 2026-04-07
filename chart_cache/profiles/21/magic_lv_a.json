@@ -1,0 +1,218 @@
+{
+  "textage": "21/magic_lv.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:05.326431+00:00",
+  "title": "MAGIC & LOVE",
+  "artist": "DJ Genki feat. Yukacco",
+  "bpm_raw": "185",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1308,
+  "events": 731,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 92.5,
+  "weighted_eff16": 135.3,
+  "scratch_pct": 8.87,
+  "chord_pct": 52.94,
+  "single_pct": 47.06,
+  "ranuchi": 71,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 363,
+      "pct": 49.7,
+      "eff16": 92.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 301,
+      "pct": 41.2,
+      "eff16": 185.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 34,
+      "pct": 4.7,
+      "eff16": 46.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.6,
+      "eff16": 277.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.6,
+      "eff16": 370.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 30.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 10.3
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 3.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.7
+    },
+    "840": {
+      "name": "(840)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.3
+    }
+  },
+  "chord_dist": {
+    "1": 344,
+    "2": 249,
+    "3": 87,
+    "4": 50,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 471,
+      "pct": 39.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 362,
+      "pct": 30.4,
+      "eff16": 92.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 298,
+      "pct": 25.0,
+      "eff16": 185.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 2.1,
+      "eff16": 46.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 277.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 370.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.3
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 3.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.5
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 51,
+      "pct": 44.3,
+      "eff16": 46.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 16,
+      "pct": 13.9,
+      "eff16": 92.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 13,
+      "pct": 11.3,
+      "eff16": 30.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 9,
+      "pct": 7.8,
+      "eff16": 18.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 5.2,
+      "eff16": 11.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 5.2,
+      "eff16": 5.8
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 3.9
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 3.3
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 23.1
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 5.4
+    }
+  }
+}

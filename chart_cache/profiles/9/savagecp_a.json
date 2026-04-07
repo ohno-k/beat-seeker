@@ -1,0 +1,218 @@
+{
+  "textage": "9/savagecp.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:19.569447+00:00",
+  "title": "SWEETEST SAVAGE",
+  "artist": "ASLETICS",
+  "bpm_raw": "114",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 901,
+  "events": 584,
+  "bpm_main": 114,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 114.0,
+  "weighted_eff16": 104.7,
+  "scratch_pct": 19.42,
+  "chord_pct": 43.66,
+  "single_pct": 56.34,
+  "ranuchi": 40,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 400,
+      "pct": 68.6,
+      "eff16": 114.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 127,
+      "pct": 21.8,
+      "eff16": 57.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 14,
+      "pct": 2.4,
+      "eff16": 228.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 2.1,
+      "eff16": 38.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 1.5,
+      "eff16": 171.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 7,
+      "pct": 1.2,
+      "eff16": 76.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 1.0,
+      "eff16": 342.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 85.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 28.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 5.7
+    }
+  },
+  "chord_dist": {
+    "1": 329,
+    "2": 199,
+    "3": 50,
+    "4": 6
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 308,
+      "pct": 42.5,
+      "eff16": 114.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 210,
+      "pct": 29.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 137,
+      "pct": 18.9,
+      "eff16": 57.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 2.8,
+      "eff16": 38.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 1.4,
+      "eff16": 228.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 9,
+      "pct": 1.2,
+      "eff16": 76.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 1.1,
+      "eff16": 171.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 85.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 28.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 342.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 56,
+      "pct": 32.2,
+      "eff16": 57.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 50,
+      "pct": 28.7,
+      "eff16": 114.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 30,
+      "pct": 17.2,
+      "eff16": 38.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 6,
+      "pct": 3.4,
+      "eff16": 11.4
+    },
+    "264": {
+      "name": "(264)",
+      "count": 5,
+      "pct": 2.9,
+      "eff16": 10.4
+    },
+    "312": {
+      "name": "(312)",
+      "count": 5,
+      "pct": 2.9,
+      "eff16": 8.8
+    },
+    "216": {
+      "name": "(216)",
+      "count": 4,
+      "pct": 2.3,
+      "eff16": 12.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 28.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 9.5
+    },
+    "360": {
+      "name": "(360)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 7.6
+    }
+  }
+}

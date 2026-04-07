@@ -1,0 +1,199 @@
+{
+  "textage": "11/andromed.html?1AB00",
+  "analyzed_at": "2026-04-06T10:48:37.986631+00:00",
+  "title": "ANDROMEDA",
+  "artist": "Sota Fujimori",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1375,
+  "events": 978,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 136.2,
+  "scratch_pct": 1.96,
+  "chord_pct": 31.19,
+  "single_pct": 68.81,
+  "ranuchi": 24,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 823,
+      "pct": 84.2,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 94,
+      "pct": 9.6,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 35,
+      "pct": 3.6,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 2.1,
+      "eff16": 37.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.0
+    }
+  },
+  "chord_dist": {
+    "1": 673,
+    "2": 214,
+    "3": 90,
+    "4": 1
+  },
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 820,
+      "pct": 60.9,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 373,
+      "pct": 27.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 94,
+      "pct": 7.0,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 36,
+      "pct": 2.7,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 1.5,
+      "eff16": 37.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 26.9,
+      "eff16": 37.5
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 4,
+      "pct": 15.4,
+      "eff16": 1.3
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 11.5,
+      "eff16": 18.8
+    },
+    "264": {
+      "name": "(264)",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 13.6
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 2.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 4.7
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 7.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 12.5
+    },
+    "2976": {
+      "name": "(2976)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 1.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 9.4
+    }
+  }
+}

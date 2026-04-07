@@ -1,0 +1,187 @@
+{
+  "textage": "33/snapskip.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:49.017084+00:00",
+  "title": "SnapSkipSpark",
+  "artist": "Feryquitous",
+  "bpm_raw": "185",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1466,
+  "events": 826,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 92.5,
+  "weighted_eff16": 127.2,
+  "scratch_pct": 2.93,
+  "chord_pct": 49.27,
+  "single_pct": 50.73,
+  "ranuchi": 37,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 420,
+      "pct": 50.9,
+      "eff16": 92.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 343,
+      "pct": 41.6,
+      "eff16": 185.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 5.6,
+      "eff16": 46.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 1.3,
+      "eff16": 30.8
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 23.1
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.7
+    }
+  },
+  "chord_dist": {
+    "1": 419,
+    "2": 251,
+    "3": 92,
+    "4": 51,
+    "5": 13
+  },
+  "tags": [
+    "scratch_low",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 603,
+      "pct": 42.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 418,
+      "pct": 29.4,
+      "eff16": 92.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 337,
+      "pct": 23.7,
+      "eff16": 185.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 47,
+      "pct": 3.3,
+      "eff16": 46.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 30.8
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 23.1
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.7
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 21.4,
+      "eff16": 23.1
+    },
+    "576": {
+      "name": "(576)",
+      "count": 7,
+      "pct": 16.7,
+      "eff16": 7.7
+    },
+    "24": {
+      "name": "16th",
+      "count": 5,
+      "pct": 11.9,
+      "eff16": 185.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 9.5,
+      "eff16": 61.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 7.1,
+      "eff16": 15.4
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 13.2
+    },
+    "6144": {
+      "name": "(6144)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 0.7
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 3.3
+    },
+    "3408": {
+      "name": "(3408)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 1.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 46.2
+    }
+  }
+}

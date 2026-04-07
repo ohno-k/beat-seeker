@@ -1,0 +1,264 @@
+{
+  "textage": "32/flyawayb.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:42.264359+00:00",
+  "title": "FlyAway",
+  "artist": "Blacklolita",
+  "bpm_raw": "160",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1602,
+  "events": 904,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 144.8,
+  "scratch_pct": 12.42,
+  "chord_pct": 60.73,
+  "single_pct": 39.27,
+  "ranuchi": 144,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 729,
+      "pct": 80.7,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 125,
+      "pct": 13.8,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 2.1,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 1.2,
+      "eff16": 53.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 320.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 16.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 240.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 32.0
+    }
+  },
+  "chord_dist": {
+    "1": 355,
+    "2": 415,
+    "3": 119,
+    "4": 15
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 665,
+      "pct": 47.4,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 548,
+      "pct": 39.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 131,
+      "pct": 9.3,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 1.4,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 53.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 320.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 16.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 8.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 240.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 20.0
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 79,
+      "pct": 39.9,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 72,
+      "pct": 36.4,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 4.5,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 3.5,
+      "eff16": 40.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 3.0,
+      "eff16": 20.0
+    },
+    "624": {
+      "name": "(624)",
+      "count": 5,
+      "pct": 2.5,
+      "eff16": 6.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 2.0,
+      "eff16": 2.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 2.0,
+      "eff16": 10.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 1.0,
+      "eff16": 5.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 1.0,
+      "eff16": 6.7
+    }
+  },
+  "cn_notes": 11,
+  "cn_scratch_pct": 5.88,
+  "cn_kbd_overlap_pct": 1.85,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 30.0,
+      "eff16": 80.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 20.0,
+      "eff16": 6.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 20.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 5.3
+    },
+    "18048": {
+      "name": "(18048)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 0.2
+    },
+    "8400": {
+      "name": "(8400)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 0.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 10.0
+    }
+  }
+}

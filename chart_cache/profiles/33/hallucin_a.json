@@ -1,0 +1,219 @@
+{
+  "textage": "33/hallucin.html?1AC00",
+  "analyzed_at": "2026-04-06T10:52:49.327895+00:00",
+  "title": "Hallucination",
+  "artist": "KO3 & Relect",
+  "bpm_raw": "120-160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1391,
+  "events": 1039,
+  "bpm_main": 160,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 143.1,
+  "scratch_pct": 4.96,
+  "chord_pct": 28.1,
+  "single_pct": 71.9,
+  "ranuchi": 44,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 679,
+      "pct": 65.4,
+      "eff16": 160.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 156,
+      "pct": 15.0,
+      "eff16": 120.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 145,
+      "pct": 14.0,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 15,
+      "pct": 1.4,
+      "eff16": 240.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.2,
+      "eff16": 320.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 40.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 60.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 106.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 480.0
+    }
+  },
+  "chord_dist": {
+    "1": 747,
+    "2": 235,
+    "3": 54,
+    "4": 3
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 677,
+      "pct": 51.2,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 293,
+      "pct": 22.2,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 157,
+      "pct": 11.9,
+      "eff16": 120.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 142,
+      "pct": 10.7,
+      "eff16": 80.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 240.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 320.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 40.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 60.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 106.7
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 10,
+      "pct": 14.7,
+      "eff16": 80.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 14.7,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 11.8,
+      "eff16": 40.0
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 4,
+      "pct": 5.9,
+      "eff16": 2.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 5.9,
+      "eff16": 53.3
+    },
+    "864": {
+      "name": "(864)",
+      "count": 4,
+      "pct": 5.9,
+      "eff16": 4.4
+    },
+    "528": {
+      "name": "(528)",
+      "count": 3,
+      "pct": 4.4,
+      "eff16": 7.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 4.4,
+      "eff16": 26.7
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 2.9,
+      "eff16": 3.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.9,
+      "eff16": 13.3
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "textage": "17/dominion.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:40.758930+00:00",
+  "title": "DOMINION",
+  "artist": "L.E.D.-G",
+  "bpm_raw": "196",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1617,
+  "events": 814,
+  "bpm_main": 196,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 98.0,
+  "weighted_eff16": 123.9,
+  "scratch_pct": 7.42,
+  "chord_pct": 73.34,
+  "single_pct": 26.66,
+  "ranuchi": 100,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 582,
+      "pct": 71.6,
+      "eff16": 98.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 219,
+      "pct": 26.9,
+      "eff16": 196.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 39.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 49.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 392.0
+    },
+    "708": {
+      "name": "(708)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.6
+    },
+    "1008": {
+      "name": "(1008)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.7
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 65.3
+    }
+  },
+  "chord_dist": {
+    "1": 217,
+    "2": 443,
+    "3": 103,
+    "4": 50,
+    "5": 1
+  },
+  "tags": [
+    "chord_heavy",
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 684,
+      "pct": 45.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 581,
+      "pct": 38.8,
+      "eff16": 98.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 219,
+      "pct": 14.6,
+      "eff16": 196.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 39.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 49.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 392.0
+    },
+    "708": {
+      "name": "(708)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.6
+    },
+    "1008": {
+      "name": "(1008)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.7
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 56,
+      "pct": 47.1,
+      "eff16": 49.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 12.6,
+      "eff16": 32.7
+    },
+    "48": {
+      "name": "8th",
+      "count": 12,
+      "pct": 10.1,
+      "eff16": 98.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 11,
+      "pct": 9.2,
+      "eff16": 6.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 6.7,
+      "eff16": 12.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 3.1
+    },
+    "0": {
+      "name": "(0)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 4.1
+    },
+    "624": {
+      "name": "(624)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 7.5
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 3.3
+    }
+  }
+}

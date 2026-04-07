@@ -1,0 +1,217 @@
+{
+  "textage": "16/fback90s.html?1XB00",
+  "analyzed_at": "2026-04-06T10:51:40.200096+00:00",
+  "title": "Flash Back 90's",
+  "artist": "kors k as disconation",
+  "bpm_raw": "155",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1470,
+  "events": 905,
+  "bpm_main": 155,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 155.0,
+  "weighted_eff16": 130.1,
+  "scratch_pct": 7.41,
+  "chord_pct": 47.07,
+  "single_pct": 52.93,
+  "ranuchi": 64,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 534,
+      "pct": 59.1,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 284,
+      "pct": 31.4,
+      "eff16": 77.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 3.0,
+      "eff16": 38.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 2.7,
+      "eff16": 232.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 21,
+      "pct": 2.3,
+      "eff16": 116.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 310.0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 93.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 465.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 51.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.7
+    }
+  },
+  "chord_dist": {
+    "1": 479,
+    "2": 303,
+    "3": 107,
+    "4": 16
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 520,
+      "pct": 38.2,
+      "eff16": 155.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 476,
+      "pct": 35.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 280,
+      "pct": 20.6,
+      "eff16": 77.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 1.8,
+      "eff16": 232.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 21,
+      "pct": 1.5,
+      "eff16": 116.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 1.5,
+      "eff16": 38.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 310.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 17.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 9.7
+    },
+    "40": {
+      "name": "(40)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 93.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 29,
+      "pct": 26.9,
+      "eff16": 38.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 15,
+      "pct": 13.9,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 14,
+      "pct": 13.0,
+      "eff16": 77.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 11,
+      "pct": 10.2,
+      "eff16": 9.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 6.5,
+      "eff16": 25.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 7,
+      "pct": 6.5,
+      "eff16": 12.9
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 6.5,
+      "eff16": 19.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 3.7,
+      "eff16": 2.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 2.8,
+      "eff16": 4.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 2.8,
+      "eff16": 51.7
+    }
+  }
+}

@@ -1,0 +1,212 @@
+{
+  "textage": "33/heroes.html?1AC00",
+  "analyzed_at": "2026-04-06T10:52:54.010252+00:00",
+  "title": "HEROES",
+  "artist": "ビートまりお Prod. by Yuta Imai & L.E.D.-G",
+  "bpm_raw": "185",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1831,
+  "events": 1172,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 185.0,
+  "weighted_eff16": 171.2,
+  "scratch_pct": 18.19,
+  "chord_pct": 47.53,
+  "single_pct": 52.47,
+  "ranuchi": 141,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 717,
+      "pct": 61.2,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 327,
+      "pct": 27.9,
+      "eff16": 92.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 70,
+      "pct": 6.0,
+      "eff16": 370.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 39,
+      "pct": 3.3,
+      "eff16": 277.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 46.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 61.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.6
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.1
+    }
+  },
+  "chord_dist": {
+    "1": 615,
+    "2": 467,
+    "3": 79,
+    "4": 10,
+    "5": 1
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 592,
+      "pct": 39.5,
+      "eff16": 185.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 419,
+      "pct": 28.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 353,
+      "pct": 23.6,
+      "eff16": 92.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 70,
+      "pct": 4.7,
+      "eff16": 370.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 30,
+      "pct": 2.0,
+      "eff16": 277.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 61.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 0.7,
+      "eff16": 46.2
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 23.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 30.8
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.4
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 138,
+      "pct": 41.6,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 70,
+      "pct": 21.1,
+      "eff16": 92.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 55,
+      "pct": 16.6,
+      "eff16": 46.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 5.7,
+      "eff16": 61.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 3.9,
+      "eff16": 11.6
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 3.6,
+      "eff16": 23.1
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 2.7,
+      "eff16": 277.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 1.5,
+      "eff16": 5.8
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 1.4
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 10.9
+    }
+  }
+}

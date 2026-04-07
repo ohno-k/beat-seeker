@@ -1,0 +1,199 @@
+{
+  "textage": "33/discokil.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:56.900080+00:00",
+  "title": "Disco Killer Music Lover",
+  "artist": "Zekk",
+  "bpm_raw": "175",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1557,
+  "events": 992,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 175.0,
+  "weighted_eff16": 158.3,
+  "scratch_pct": 7.19,
+  "chord_pct": 42.04,
+  "single_pct": 57.96,
+  "ranuchi": 106,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 680,
+      "pct": 68.6,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 224,
+      "pct": 22.6,
+      "eff16": 87.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 30,
+      "pct": 3.0,
+      "eff16": 262.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 26,
+      "pct": 2.6,
+      "eff16": 350.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 2.4,
+      "eff16": 43.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 58.3
+    }
+  },
+  "chord_dist": {
+    "1": 575,
+    "2": 299,
+    "3": 92,
+    "4": 22,
+    "5": 4
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 639,
+      "pct": 44.3,
+      "eff16": 175.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 493,
+      "pct": 34.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 211,
+      "pct": 14.6,
+      "eff16": 87.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 30,
+      "pct": 2.1,
+      "eff16": 262.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 26,
+      "pct": 1.8,
+      "eff16": 350.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 1.5,
+      "eff16": 43.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 13,
+      "pct": 0.9,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 58.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 29.2
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.4
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 31,
+      "pct": 27.9,
+      "eff16": 175.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 18.9,
+      "eff16": 43.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 10,
+      "pct": 9.0,
+      "eff16": 87.5
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 6.3,
+      "eff16": 21.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 5.4,
+      "eff16": 10.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 4.5,
+      "eff16": 29.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 3.6,
+      "eff16": 14.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 3.6,
+      "eff16": 58.3
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 2.7,
+      "eff16": 2.9
+    },
+    "624": {
+      "name": "(624)",
+      "count": 2,
+      "pct": 1.8,
+      "eff16": 6.7
+    }
+  }
+}

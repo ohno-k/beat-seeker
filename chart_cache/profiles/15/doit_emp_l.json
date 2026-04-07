@@ -1,0 +1,218 @@
+{
+  "textage": "15/doit_emp.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:58.221146+00:00",
+  "title": "Do it!! Do it!!",
+  "artist": "Kraken",
+  "bpm_raw": "300",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1175,
+  "events": 518,
+  "bpm_main": 300,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 128.6,
+  "scratch_pct": 14.47,
+  "chord_pct": 70.08,
+  "single_pct": 29.92,
+  "ranuchi": 68,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 377,
+      "pct": 72.9,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 73,
+      "pct": 14.1,
+      "eff16": 75.0
+    },
+    "192": {
+      "name": "half",
+      "count": 42,
+      "pct": 8.1,
+      "eff16": 37.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 9,
+      "pct": 1.7,
+      "eff16": 300.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 0.8,
+      "eff16": 9.4
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 16.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 4.7
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 3.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 50.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 15.0
+    }
+  },
+  "chord_dist": {
+    "1": 155,
+    "2": 133,
+    "3": 171,
+    "4": 54,
+    "5": 5
+  },
+  "tags": [
+    "scratch_heavy",
+    "chord_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 517,
+      "pct": 51.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 367,
+      "pct": 36.6,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 72,
+      "pct": 7.2,
+      "eff16": 75.0
+    },
+    "192": {
+      "name": "half",
+      "count": 21,
+      "pct": 2.1,
+      "eff16": 37.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 300.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 18.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 16.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    },
+    "2352": {
+      "name": "(2352)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 50.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 60,
+      "pct": 35.5,
+      "eff16": 150.0
+    },
+    "192": {
+      "name": "half",
+      "count": 38,
+      "pct": 22.5,
+      "eff16": 37.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 33,
+      "pct": 19.5,
+      "eff16": 75.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 4.1,
+      "eff16": 18.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 5,
+      "pct": 3.0,
+      "eff16": 12.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 9.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 4.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 50.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 2.3
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 13.6
+    }
+  }
+}

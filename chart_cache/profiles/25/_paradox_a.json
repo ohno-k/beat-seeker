@@ -1,0 +1,218 @@
+{
+  "textage": "25/_paradox.html?1AB00",
+  "analyzed_at": "2026-04-06T11:00:45.260305+00:00",
+  "title": "パラドキシカル・タイムリープトライアル(Short Ver.)",
+  "artist": "MOSAIC.WAV",
+  "bpm_raw": "188",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1346,
+  "events": 866,
+  "bpm_main": 188,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 188.0,
+  "weighted_eff16": 146.3,
+  "scratch_pct": 6.32,
+  "chord_pct": 36.84,
+  "single_pct": 63.16,
+  "ranuchi": 57,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 461,
+      "pct": 53.3,
+      "eff16": 188.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 277,
+      "pct": 32.0,
+      "eff16": 94.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 5.3,
+      "eff16": 47.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 32,
+      "pct": 3.7,
+      "eff16": 62.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 31,
+      "pct": 3.6,
+      "eff16": 282.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 141.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 10.4
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 70.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 31.3
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 23.5
+    }
+  },
+  "chord_dist": {
+    "1": 547,
+    "2": 204,
+    "3": 73,
+    "4": 38,
+    "5": 4
+  },
+  "tags": [
+    "single_heavy",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 451,
+      "pct": 35.8,
+      "eff16": 188.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 405,
+      "pct": 32.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 275,
+      "pct": 21.8,
+      "eff16": 94.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 43,
+      "pct": 3.4,
+      "eff16": 47.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 34,
+      "pct": 2.7,
+      "eff16": 62.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 31,
+      "pct": 2.5,
+      "eff16": 282.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 31.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 141.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 10.4
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 70.5
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 20.2,
+      "eff16": 23.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 20.2,
+      "eff16": 94.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 11.9,
+      "eff16": 47.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 7.1,
+      "eff16": 11.8
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 4,
+      "pct": 4.8,
+      "eff16": 3.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.6,
+      "eff16": 5.9
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 3.6,
+      "eff16": 7.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 3.6,
+      "eff16": 13.4
+    },
+    "864": {
+      "name": "(864)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 5.2
+    },
+    "312": {
+      "name": "(312)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 14.5
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "textage": "23/shelter.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:04.782902+00:00",
+  "title": "SHELTER OF THE MIND",
+  "artist": "YURiCa/花たん",
+  "bpm_raw": "185",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1525,
+  "events": 965,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 92.5,
+  "weighted_eff16": 129.2,
+  "scratch_pct": 5.44,
+  "chord_pct": 46.22,
+  "single_pct": 53.78,
+  "ranuchi": 32,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 552,
+      "pct": 57.3,
+      "eff16": 92.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 393,
+      "pct": 40.8,
+      "eff16": 185.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 46.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.7
+    }
+  },
+  "chord_dist": {
+    "1": 519,
+    "2": 354,
+    "3": 70,
+    "4": 22
+  },
+  "tags": [
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 550,
+      "pct": 38.2,
+      "eff16": 92.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 478,
+      "pct": 33.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 393,
+      "pct": 27.3,
+      "eff16": 185.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.2,
+      "eff16": 46.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 10.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.7
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 22,
+      "pct": 26.8,
+      "eff16": 23.1
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 18.3,
+      "eff16": 46.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 11.0,
+      "eff16": 11.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 7,
+      "pct": 8.5,
+      "eff16": 5.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 8.5,
+      "eff16": 92.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 6.1,
+      "eff16": 2.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 30.8
+    },
+    "672": {
+      "name": "(672)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 6.6
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 3.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 15.4
+    }
+  }
+}

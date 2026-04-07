@@ -1,0 +1,219 @@
+{
+  "textage": "8/_sakura.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:47.755624+00:00",
+  "title": "桜",
+  "artist": "Reven-G",
+  "bpm_raw": "13-320",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1134,
+  "events": 594,
+  "bpm_main": 320,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 132.2,
+  "scratch_pct": 7.32,
+  "chord_pct": 57.58,
+  "single_pct": 42.42,
+  "ranuchi": 88,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 307,
+      "pct": 51.8,
+      "eff16": 160.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 223,
+      "pct": 37.6,
+      "eff16": 80.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 25,
+      "pct": 4.2,
+      "eff16": 120.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 25,
+      "pct": 4.2,
+      "eff16": 240.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 53.3
+    },
+    "24": {
+      "name": "16th",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 320.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 20.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 640.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 213.3
+    }
+  },
+  "chord_dist": {
+    "1": 252,
+    "2": 182,
+    "3": 126,
+    "4": 30,
+    "5": 4
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 457,
+      "pct": 43.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 307,
+      "pct": 29.2,
+      "eff16": 160.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 223,
+      "pct": 21.2,
+      "eff16": 80.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 25,
+      "pct": 2.4,
+      "eff16": 120.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 25,
+      "pct": 2.4,
+      "eff16": 240.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 53.3
+    },
+    "24": {
+      "name": "16th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 320.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 20.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 40.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 640.0
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 18.3,
+      "eff16": 40.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 15.9,
+      "eff16": 80.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 12.2,
+      "eff16": 20.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 11.0,
+      "eff16": 53.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 8.5,
+      "eff16": 160.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 7,
+      "pct": 8.5,
+      "eff16": 10.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 6,
+      "pct": 7.3,
+      "eff16": 13.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 26.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 5.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 1.2,
+      "eff16": 2.5
+    }
+  }
+}

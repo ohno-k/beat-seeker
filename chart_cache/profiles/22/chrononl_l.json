@@ -1,0 +1,200 @@
+{
+  "textage": "22/chrononl.html?1AC00",
+  "analyzed_at": "2026-04-06T10:49:51.784331+00:00",
+  "title": "CHRONO DIVER -NORNIR-",
+  "artist": "L.E.D.",
+  "bpm_raw": "185",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 2114,
+  "events": 962,
+  "bpm_main": 185,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 185.0,
+  "weighted_eff16": 152.2,
+  "scratch_pct": 3.22,
+  "chord_pct": 70.37,
+  "single_pct": 29.63,
+  "ranuchi": 111,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 545,
+      "pct": 56.7,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 364,
+      "pct": 37.9,
+      "eff16": 92.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 23,
+      "pct": 2.4,
+      "eff16": 277.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 46.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 555.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 69.4
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.9
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.6
+    }
+  },
+  "chord_dist": {
+    "1": 285,
+    "2": 278,
+    "3": 326,
+    "4": 70,
+    "5": 3
+  },
+  "tags": [
+    "chord_heavy",
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 1089,
+      "pct": 53.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 545,
+      "pct": 26.7,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 356,
+      "pct": 17.4,
+      "eff16": 92.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 23,
+      "pct": 1.1,
+      "eff16": 277.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 0.9,
+      "eff16": 46.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.4,
+      "eff16": 555.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.1,
+      "eff16": 69.4
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 10.9
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 5.6
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 19,
+      "pct": 28.4,
+      "eff16": 92.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 17.9,
+      "eff16": 11.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 17.9,
+      "eff16": 46.2
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 4,
+      "pct": 6.0,
+      "eff16": 3.1
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 1.7
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 3.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 5.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 23.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 15.4
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 69.4
+    }
+  }
+}

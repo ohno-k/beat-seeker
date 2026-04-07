@@ -1,0 +1,218 @@
+{
+  "textage": "19/fffff.html?1AC00",
+  "analyzed_at": "2026-04-06T10:59:55.584741+00:00",
+  "title": "fffff",
+  "artist": "Five Hammer",
+  "bpm_raw": "138",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1525,
+  "events": 841,
+  "bpm_main": 138,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 138.0,
+  "weighted_eff16": 156.5,
+  "scratch_pct": 3.8,
+  "chord_pct": 58.38,
+  "single_pct": 41.62,
+  "ranuchi": 79,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 594,
+      "pct": 70.7,
+      "eff16": 138.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 117,
+      "pct": 13.9,
+      "eff16": 207.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 74,
+      "pct": 8.8,
+      "eff16": 69.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 42,
+      "pct": 5.0,
+      "eff16": 414.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 552.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 46.0
+    },
+    "42": {
+      "name": "(42)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 78.9
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.1
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 276.0
+    }
+  },
+  "chord_dist": {
+    "1": 350,
+    "2": 329,
+    "3": 138,
+    "4": 18,
+    "5": 5,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 626,
+      "pct": 42.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 594,
+      "pct": 40.5,
+      "eff16": 138.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 117,
+      "pct": 8.0,
+      "eff16": 207.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 74,
+      "pct": 5.0,
+      "eff16": 69.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 42,
+      "pct": 2.9,
+      "eff16": 414.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 552.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 46.0
+    },
+    "42": {
+      "name": "(42)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 78.9
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.1
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 38.6,
+      "eff16": 34.5
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 12.3,
+      "eff16": 17.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 8.8,
+      "eff16": 23.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 8.8,
+      "eff16": 69.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 5.3,
+      "eff16": 8.6
+    },
+    "624": {
+      "name": "(624)",
+      "count": 2,
+      "pct": 3.5,
+      "eff16": 5.3
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 3.5,
+      "eff16": 2.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 3.5,
+      "eff16": 46.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 3.5,
+      "eff16": 6.9
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 3.5,
+      "eff16": 1.2
+    }
+  }
+}

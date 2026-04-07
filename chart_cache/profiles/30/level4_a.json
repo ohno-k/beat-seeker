@@ -1,0 +1,261 @@
+{
+  "textage": "30/level4.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:47.039147+00:00",
+  "title": "Level 4",
+  "artist": "Yamato",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1867,
+  "events": 1085,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 169.3,
+  "scratch_pct": 31.07,
+  "chord_pct": 49.95,
+  "single_pct": 50.05,
+  "ranuchi": 140,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 637,
+      "pct": 58.8,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 243,
+      "pct": 22.4,
+      "eff16": 90.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 74,
+      "pct": 6.8,
+      "eff16": 135.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 64,
+      "pct": 5.9,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 34,
+      "pct": 3.1,
+      "eff16": 540.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 2.2,
+      "eff16": 45.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 22.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 67.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.0
+    }
+  },
+  "chord_dist": {
+    "1": 543,
+    "2": 365,
+    "3": 129,
+    "4": 35,
+    "5": 12,
+    "7": 1
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 447,
+      "pct": 34.8,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 414,
+      "pct": 32.2,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 341,
+      "pct": 26.5,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 58,
+      "pct": 4.5,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 270.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 135.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 67.5
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.0
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 264,
+      "pct": 45.6,
+      "eff16": 180.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 114,
+      "pct": 19.7,
+      "eff16": 135.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 106,
+      "pct": 18.3,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 58,
+      "pct": 10.0,
+      "eff16": 45.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 10,
+      "pct": 1.7,
+      "eff16": 67.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.9,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 22.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 60.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 18.0
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 3.2
+    }
+  },
+  "cn_notes": 7,
+  "cn_scratch_pct": 42.86,
+  "cn_kbd_overlap_pct": 1.94,
+  "cn_interval_dist": {
+    "1728": {
+      "name": "(1728)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 2.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 11.2
+    },
+    "5280": {
+      "name": "(5280)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 0.8
+    },
+    "18048": {
+      "name": "(18048)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 0.2
+    },
+    "3168": {
+      "name": "(3168)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 1.4
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 1.1
+    }
+  }
+}

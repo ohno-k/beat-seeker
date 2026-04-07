@@ -1,0 +1,188 @@
+{
+  "textage": "32/blingbbb.html?1AC00",
+  "analyzed_at": "2026-04-06T10:49:36.261657+00:00",
+  "title": "Bling-Bang-Bang-Born",
+  "artist": "Covered by uno(IOSYS) feat. Fra",
+  "bpm_raw": "157",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1105,
+  "events": 630,
+  "bpm_main": 157,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 157.0,
+  "weighted_eff16": 123.7,
+  "scratch_pct": 34.03,
+  "chord_pct": 51.11,
+  "single_pct": 48.89,
+  "ranuchi": 61,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 355,
+      "pct": 56.4,
+      "eff16": 157.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 244,
+      "pct": 38.8,
+      "eff16": 78.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 2.7,
+      "eff16": 39.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 1.0,
+      "eff16": 235.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 52.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 314.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 19.6
+    }
+  },
+  "chord_dist": {
+    "1": 308,
+    "2": 209,
+    "3": 78,
+    "4": 30,
+    "5": 5
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 271,
+      "pct": 37.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 210,
+      "pct": 28.8,
+      "eff16": 78.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 167,
+      "pct": 22.9,
+      "eff16": 157.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 37,
+      "pct": 5.1,
+      "eff16": 52.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 33,
+      "pct": 4.5,
+      "eff16": 39.2
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.7,
+      "eff16": 19.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 26.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.8
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 188,
+      "pct": 50.1,
+      "eff16": 157.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 134,
+      "pct": 35.7,
+      "eff16": 78.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 5.3,
+      "eff16": 39.2
+    },
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 3.5,
+      "eff16": 19.6
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 1.6,
+      "eff16": 235.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.8,
+      "eff16": 52.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 26.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 314.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 15.7
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 1,
+      "pct": 0.3,
+      "eff16": 2.5
+    }
+  }
+}

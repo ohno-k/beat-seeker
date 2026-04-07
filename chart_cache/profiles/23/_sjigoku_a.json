@@ -1,0 +1,283 @@
+{
+  "textage": "23/_sjigoku.html?1AC00",
+  "analyzed_at": "2026-04-06T11:02:05.842382+00:00",
+  "title": "真 地獄超特急 -HELL or HELL-",
+  "artist": "DJ TECHNORCH Vs. L.E.D.Light-G",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1375,
+  "events": 737,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 125.2,
+  "scratch_pct": 15.56,
+  "chord_pct": 55.9,
+  "single_pct": 44.1,
+  "ranuchi": 65,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 370,
+      "pct": 50.3,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 293,
+      "pct": 39.8,
+      "eff16": 82.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 18,
+      "pct": 2.4,
+      "eff16": 27.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 2.2,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 2.0,
+      "eff16": 55.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.6,
+      "eff16": 247.5
+    },
+    "168": {
+      "name": "(168)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 23.6
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 11.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 330.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.3
+    }
+  },
+  "chord_dist": {
+    "1": 325,
+    "2": 239,
+    "3": 129,
+    "4": 35,
+    "5": 9
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 489,
+      "pct": 42.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 300,
+      "pct": 25.9,
+      "eff16": 82.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 286,
+      "pct": 24.7,
+      "eff16": 165.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 21,
+      "pct": 1.8,
+      "eff16": 55.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.6,
+      "eff16": 41.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 18,
+      "pct": 1.6,
+      "eff16": 27.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 247.5
+    },
+    "168": {
+      "name": "(168)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 23.6
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 330.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 49.3,
+      "eff16": 82.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 39,
+      "pct": 18.3,
+      "eff16": 165.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 8.9,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 5.2,
+      "eff16": 55.0
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 5.2,
+      "eff16": 20.6
+    },
+    "0": {
+      "name": "(0)",
+      "count": 7,
+      "pct": 3.3,
+      "eff16": 0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 3.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 10.3
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 2.6
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 6.9
+    }
+  },
+  "cn_notes": 73,
+  "cn_scratch_pct": 1.09,
+  "cn_kbd_overlap_pct": 19.29,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 18,
+      "pct": 25.0,
+      "eff16": 20.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 18,
+      "pct": 25.0,
+      "eff16": 27.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 14,
+      "pct": 19.4,
+      "eff16": 10.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 6.9,
+      "eff16": 41.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 6.9,
+      "eff16": 16.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 6.9
+    },
+    "7920": {
+      "name": "(7920)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 0.5
+    },
+    "912": {
+      "name": "(912)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 4.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 8.2
+    },
+    "1104": {
+      "name": "(1104)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 3.6
+    }
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "textage": "15/pr_hades.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:58.508683+00:00",
+  "title": "PARANOiA ～HADES～",
+  "artist": "αTYPE-300",
+  "bpm_raw": "75-300",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1245,
+  "events": 708,
+  "bpm_main": 300,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 189.8,
+  "scratch_pct": 2.17,
+  "chord_pct": 56.64,
+  "single_pct": 43.36,
+  "ranuchi": 79,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 464,
+      "pct": 65.6,
+      "eff16": 150.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 101,
+      "pct": 14.3,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 51,
+      "pct": 7.2,
+      "eff16": 75.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 35,
+      "pct": 5.0,
+      "eff16": 600.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 35,
+      "pct": 5.0,
+      "eff16": 225.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 37.5
+    },
+    "36": {
+      "name": "(36)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 200.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 18.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 50.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.4
+    }
+  },
+  "chord_dist": {
+    "1": 307,
+    "2": 295,
+    "3": 80,
+    "4": 22,
+    "5": 4
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 511,
+      "pct": 42.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 462,
+      "pct": 38.0,
+      "eff16": 150.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 101,
+      "pct": 8.3,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 52,
+      "pct": 4.3,
+      "eff16": 75.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 35,
+      "pct": 2.9,
+      "eff16": 600.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 35,
+      "pct": 2.9,
+      "eff16": 225.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 37.5
+    },
+    "36": {
+      "name": "(36)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 200.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 18.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 50.0
+    }
+  },
+  "scr_interval_dist": {
+    "3072": {
+      "name": "(3072)",
+      "count": 6,
+      "pct": 23.1,
+      "eff16": 2.3
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 23.1,
+      "eff16": 37.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 11.5,
+      "eff16": 18.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 4.7
+    },
+    "2880": {
+      "name": "(2880)",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 2.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 30.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 10.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 12.5
+    },
+    "5952": {
+      "name": "(5952)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 1.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 9.4
+    }
+  }
+}

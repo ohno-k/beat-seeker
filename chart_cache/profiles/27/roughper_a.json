@@ -1,0 +1,276 @@
+{
+  "textage": "27/roughper.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:34.886417+00:00",
+  "title": "rough percussionythm",
+  "artist": "BEMANI Sound Team \"setup VS 謎の勢力\"",
+  "bpm_raw": "175",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1223,
+  "events": 845,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 175.0,
+  "weighted_eff16": 130.4,
+  "scratch_pct": 23.55,
+  "chord_pct": 35.98,
+  "single_pct": 64.02,
+  "ranuchi": 76,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 418,
+      "pct": 49.5,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 323,
+      "pct": 38.3,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 57,
+      "pct": 6.8,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 23,
+      "pct": 2.7,
+      "eff16": 58.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 262.5
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 21.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 29.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 35.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.6
+    }
+  },
+  "chord_dist": {
+    "1": 541,
+    "2": 247,
+    "3": 40,
+    "4": 17
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 281,
+      "pct": 30.1,
+      "eff16": 87.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 265,
+      "pct": 28.4,
+      "eff16": 175.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 256,
+      "pct": 27.4,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 85,
+      "pct": 9.1,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 17,
+      "pct": 1.8,
+      "eff16": 58.3
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 1.3,
+      "eff16": 21.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 29.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 262.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.6
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.7
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 133,
+      "pct": 46.3,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 66,
+      "pct": 23.0,
+      "eff16": 87.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 30,
+      "pct": 10.5,
+      "eff16": 58.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 4.2,
+      "eff16": 262.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 3.8,
+      "eff16": 29.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 3.5,
+      "eff16": 43.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 1.0,
+      "eff16": 12.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 2.7
+    },
+    "2256": {
+      "name": "(2256)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 1.9
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 10.3
+    }
+  },
+  "cn_notes": 33,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 7.91,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 18.8,
+      "eff16": 87.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 5,
+      "pct": 15.6,
+      "eff16": 9.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 12.5,
+      "eff16": 12.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 12.5,
+      "eff16": 10.9
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 9.4,
+      "eff16": 5.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 6.2,
+      "eff16": 14.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 6.2,
+      "eff16": 29.2
+    },
+    "1872": {
+      "name": "(1872)",
+      "count": 1,
+      "pct": 3.1,
+      "eff16": 2.2
+    },
+    "7296": {
+      "name": "(7296)",
+      "count": 1,
+      "pct": 3.1,
+      "eff16": 0.6
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 3.1,
+      "eff16": 3.6
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "textage": "20/exaleave.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:02.026731+00:00",
+  "title": "examination leave",
+  "artist": "dj razzle dazzle",
+  "bpm_raw": "180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1712,
+  "events": 753,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 90.0,
+  "weighted_eff16": 129.5,
+  "scratch_pct": 2.69,
+  "chord_pct": 70.39,
+  "single_pct": 29.61,
+  "ranuchi": 73,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 371,
+      "pct": 49.3,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 344,
+      "pct": 45.7,
+      "eff16": 180.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 17,
+      "pct": 2.3,
+      "eff16": 30.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.7,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 270.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 60.0
+    },
+    "400": {
+      "name": "(400)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.8
+    },
+    "416": {
+      "name": "(416)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.4
+    }
+  },
+  "chord_dist": {
+    "1": 223,
+    "2": 261,
+    "3": 132,
+    "4": 114,
+    "5": 23
+  },
+  "tags": [
+    "scratch_low",
+    "chord_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 916,
+      "pct": 55.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 373,
+      "pct": 22.4,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 340,
+      "pct": 20.4,
+      "eff16": 180.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 17,
+      "pct": 1.0,
+      "eff16": 30.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 0.8,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 270.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 60.0
+    },
+    "400": {
+      "name": "(400)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.8
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 28.9,
+      "eff16": 11.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 8,
+      "pct": 17.8,
+      "eff16": 9.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 4,
+      "pct": 8.9,
+      "eff16": 6.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 8.9,
+      "eff16": 15.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 8.9,
+      "eff16": 30.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 4.4,
+      "eff16": 1.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 4.4,
+      "eff16": 45.0
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 3.5
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 2.6
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 4.1
+    }
+  }
+}

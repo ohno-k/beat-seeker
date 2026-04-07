@@ -1,0 +1,219 @@
+{
+  "textage": "19/_kodomo.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:25.723504+00:00",
+  "title": "子供の落書き帳",
+  "artist": "佐々木博史",
+  "bpm_raw": "280",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1303,
+  "events": 801,
+  "bpm_main": 280,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 140.0,
+  "weighted_eff16": 219.1,
+  "scratch_pct": 4.14,
+  "chord_pct": 39.58,
+  "single_pct": 60.42,
+  "ranuchi": 57,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 290,
+      "pct": 36.2,
+      "eff16": 140.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 93,
+      "pct": 11.6,
+      "eff16": 70.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 93,
+      "pct": 11.6,
+      "eff16": 210.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 37,
+      "pct": 4.6,
+      "eff16": 420.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 26,
+      "pct": 3.2,
+      "eff16": 105.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 25,
+      "pct": 3.1,
+      "eff16": 186.7
+    },
+    "24": {
+      "name": "16th",
+      "count": 22,
+      "pct": 2.8,
+      "eff16": 280.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 18,
+      "pct": 2.2,
+      "eff16": 840.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.9,
+      "eff16": 93.3
+    },
+    "6": {
+      "name": "64th",
+      "count": 13,
+      "pct": 1.6,
+      "eff16": 1120.0
+    }
+  },
+  "chord_dist": {
+    "1": 484,
+    "2": 171,
+    "3": 114,
+    "4": 25,
+    "5": 7
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 448,
+      "pct": 35.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 290,
+      "pct": 23.2,
+      "eff16": 140.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 93,
+      "pct": 7.5,
+      "eff16": 70.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 93,
+      "pct": 7.5,
+      "eff16": 210.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 37,
+      "pct": 3.0,
+      "eff16": 420.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 26,
+      "pct": 2.1,
+      "eff16": 105.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 25,
+      "pct": 2.0,
+      "eff16": 186.7
+    },
+    "24": {
+      "name": "16th",
+      "count": 22,
+      "pct": 1.8,
+      "eff16": 280.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 18,
+      "pct": 1.4,
+      "eff16": 840.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.2,
+      "eff16": 93.3
+    }
+  },
+  "scr_interval_dist": {
+    "288": {
+      "name": "(288)",
+      "count": 20,
+      "pct": 37.7,
+      "eff16": 23.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 17.0,
+      "eff16": 46.7
+    },
+    "128": {
+      "name": "(128)",
+      "count": 5,
+      "pct": 9.4,
+      "eff16": 52.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 7.5,
+      "eff16": 11.7
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 5.7,
+      "eff16": 5.8
+    },
+    "864": {
+      "name": "(864)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 7.8
+    },
+    "320": {
+      "name": "(320)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 21.0
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 2.9
+    },
+    "3744": {
+      "name": "(3744)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 1.8
+    },
+    "2016": {
+      "name": "(2016)",
+      "count": 1,
+      "pct": 1.9,
+      "eff16": 3.3
+    }
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "textage": "25/usualday.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:02.271245+00:00",
+  "title": "Usual Days-remix",
+  "artist": "ota2",
+  "bpm_raw": "139",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1171,
+  "events": 768,
+  "bpm_main": 139,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 139.0,
+  "weighted_eff16": 129.9,
+  "scratch_pct": 5.47,
+  "chord_pct": 39.19,
+  "single_pct": 60.81,
+  "ranuchi": 70,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 587,
+      "pct": 76.5,
+      "eff16": 139.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 129,
+      "pct": 16.8,
+      "eff16": 69.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 23,
+      "pct": 3.0,
+      "eff16": 208.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 17,
+      "pct": 2.2,
+      "eff16": 104.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 417.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 4.1
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.7
+    }
+  },
+  "chord_dist": {
+    "1": 467,
+    "2": 209,
+    "3": 83,
+    "4": 8,
+    "5": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 586,
+      "pct": 53.0,
+      "eff16": 139.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 342,
+      "pct": 30.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 125,
+      "pct": 11.3,
+      "eff16": 69.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 23,
+      "pct": 2.1,
+      "eff16": 208.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 16,
+      "pct": 1.4,
+      "eff16": 104.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 417.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 4.1
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 34.8
+    },
+    "56": {
+      "name": "(56)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 59.6
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 22.2,
+      "eff16": 34.8
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 14.3,
+      "eff16": 17.4
+    },
+    "336": {
+      "name": "(336)",
+      "count": 8,
+      "pct": 12.7,
+      "eff16": 9.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 11.1,
+      "eff16": 8.7
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 11.1,
+      "eff16": 69.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 6.3,
+      "eff16": 23.2
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 5.0
+    },
+    "3600": {
+      "name": "(3600)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 0.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 2.2
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 1.4
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "textage": "20/plan8.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:11.898950+00:00",
+  "title": "Plan 8",
+  "artist": "Ryu☆",
+  "bpm_raw": "212",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1537,
+  "events": 818,
+  "bpm_main": 212,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 106.0,
+  "weighted_eff16": 137.9,
+  "scratch_pct": 20.04,
+  "chord_pct": 61.0,
+  "single_pct": 39.0,
+  "ranuchi": 68,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 465,
+      "pct": 56.9,
+      "eff16": 106.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 284,
+      "pct": 34.8,
+      "eff16": 212.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 4.5,
+      "eff16": 53.0
+    },
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 1.6,
+      "eff16": 26.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 13.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 70.7
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 79.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 159.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.9
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.8
+    }
+  },
+  "chord_dist": {
+    "1": 319,
+    "2": 344,
+    "3": 105,
+    "4": 35,
+    "5": 15
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 507,
+      "pct": 41.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 469,
+      "pct": 38.2,
+      "eff16": 106.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 165,
+      "pct": 13.4,
+      "eff16": 212.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 55,
+      "pct": 4.5,
+      "eff16": 53.0
+    },
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 1.1,
+      "eff16": 26.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 13.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 70.7
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    },
+    "504": {
+      "name": "(504)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.1
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 147,
+      "pct": 47.9,
+      "eff16": 106.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 70,
+      "pct": 22.8,
+      "eff16": 212.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 17.6,
+      "eff16": 53.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 2.3,
+      "eff16": 26.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 2.0,
+      "eff16": 70.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 1.0,
+      "eff16": 6.6
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 1.0,
+      "eff16": 7.6
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 79.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 159.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 21.2
+    }
+  }
+}

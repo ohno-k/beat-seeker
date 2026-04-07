@@ -1,0 +1,199 @@
+{
+  "textage": "21/ancientl.html?1AC00",
+  "analyzed_at": "2026-04-06T10:48:52.066433+00:00",
+  "title": "Ancient Scapes",
+  "artist": "Durandal",
+  "bpm_raw": "178",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 2124,
+  "events": 1219,
+  "bpm_main": 178,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 178.0,
+  "weighted_eff16": 175.9,
+  "scratch_pct": 4.61,
+  "chord_pct": 50.21,
+  "single_pct": 49.79,
+  "ranuchi": 217,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 952,
+      "pct": 78.2,
+      "eff16": 178.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 174,
+      "pct": 14.3,
+      "eff16": 89.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 43,
+      "pct": 3.5,
+      "eff16": 267.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 28,
+      "pct": 2.3,
+      "eff16": 534.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 44.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 356.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 59.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.5
+    }
+  },
+  "chord_dist": {
+    "1": 607,
+    "2": 372,
+    "3": 190,
+    "4": 47,
+    "5": 3
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 937,
+      "pct": 46.3,
+      "eff16": 178.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 829,
+      "pct": 40.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 167,
+      "pct": 8.2,
+      "eff16": 89.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 43,
+      "pct": 2.1,
+      "eff16": 267.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 28,
+      "pct": 1.4,
+      "eff16": 534.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 0.6,
+      "eff16": 44.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.3,
+      "eff16": 356.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 11.1
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 10.5
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 16,
+      "pct": 16.5,
+      "eff16": 89.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 16,
+      "pct": 16.5,
+      "eff16": 178.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 15.5,
+      "eff16": 44.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 10.3,
+      "eff16": 11.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 8.2,
+      "eff16": 59.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 7,
+      "pct": 7.2,
+      "eff16": 5.6
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 7.2,
+      "eff16": 22.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 5.2,
+      "eff16": 2.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 4.1,
+      "eff16": 12.7
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 2.1,
+      "eff16": 3.7
+    }
+  }
+}

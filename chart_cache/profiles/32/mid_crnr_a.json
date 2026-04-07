@@ -1,0 +1,266 @@
+{
+  "textage": "32/mid_crnr.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:21.545531+00:00",
+  "title": "Mid-Corner (Magic Maker)",
+  "artist": "REMO-CON",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1591,
+  "events": 964,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 149.2,
+  "scratch_pct": 8.36,
+  "chord_pct": 48.65,
+  "single_pct": 51.35,
+  "ranuchi": 114,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 663,
+      "pct": 68.8,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 185,
+      "pct": 19.2,
+      "eff16": 82.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 31,
+      "pct": 3.2,
+      "eff16": 247.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 18,
+      "pct": 1.9,
+      "eff16": 330.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 123.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 55.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 110.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 141.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 41.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 27.5
+    }
+  },
+  "chord_dist": {
+    "1": 495,
+    "2": 359,
+    "3": 70,
+    "4": 32,
+    "5": 8
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 640,
+      "pct": 43.9,
+      "eff16": 165.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 573,
+      "pct": 39.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 165,
+      "pct": 11.3,
+      "eff16": 82.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 21,
+      "pct": 1.4,
+      "eff16": 247.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.1,
+      "eff16": 330.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.0,
+      "eff16": 55.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 123.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 41.2
+    },
+    "216": {
+      "name": "(216)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 18.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 33.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 22,
+      "pct": 16.7,
+      "eff16": 82.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 13,
+      "pct": 9.8,
+      "eff16": 165.0
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 9.1,
+      "eff16": 20.6
+    },
+    "16": {
+      "name": "24th",
+      "count": 10,
+      "pct": 7.6,
+      "eff16": 247.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 6.8,
+      "eff16": 27.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 5.3,
+      "eff16": 41.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 5.3,
+      "eff16": 123.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 3.8,
+      "eff16": 16.5
+    },
+    "36": {
+      "name": "(36)",
+      "count": 5,
+      "pct": 3.8,
+      "eff16": 110.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 5,
+      "pct": 3.8,
+      "eff16": 141.4
+    }
+  },
+  "cn_notes": 11,
+  "cn_scratch_pct": 63.64,
+  "cn_kbd_overlap_pct": 2.19,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 30.0,
+      "eff16": 10.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 20.0,
+      "eff16": 5.2
+    },
+    "16464": {
+      "name": "(16464)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 0.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 82.5
+    },
+    "4320": {
+      "name": "(4320)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 0.9
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 2.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 10.0,
+      "eff16": 41.2
+    }
+  }
+}

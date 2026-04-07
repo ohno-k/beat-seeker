@@ -1,0 +1,177 @@
+{
+  "textage": "30/_choe.html?1AC00",
+  "analyzed_at": "2026-04-06T11:00:13.782954+00:00",
+  "title": "ちょえちょえまぎか",
+  "artist": "Pizuya's Cell",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 2098,
+  "events": 971,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 143.6,
+  "scratch_pct": 2.57,
+  "chord_pct": 71.16,
+  "single_pct": 28.84,
+  "ranuchi": 96,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 556,
+      "pct": 57.3,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 394,
+      "pct": 40.6,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 270.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 135.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 45.0
+    }
+  },
+  "chord_dist": {
+    "1": 280,
+    "2": 312,
+    "3": 323,
+    "4": 55,
+    "5": 1
+  },
+  "tags": [
+    "scratch_low",
+    "chord_heavy",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 1073,
+      "pct": 52.5,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 556,
+      "pct": 27.2,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 394,
+      "pct": 19.3,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.4,
+      "eff16": 270.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.4,
+      "eff16": 135.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 30.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 45.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 17.0,
+      "eff16": 45.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 13.2,
+      "eff16": 11.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 7,
+      "pct": 13.2,
+      "eff16": 3.8
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 11.3,
+      "eff16": 22.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 9.4,
+      "eff16": 5.6
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 3,
+      "pct": 5.7,
+      "eff16": 4.1
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 2.9
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 18.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 12.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 3.8,
+      "eff16": 9.0
+    }
+  }
+}

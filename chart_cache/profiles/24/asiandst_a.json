@@ -1,0 +1,219 @@
+{
+  "textage": "24/asiandst.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:02.787930+00:00",
+  "title": "AsiaN distractive",
+  "artist": "猫叉劇団",
+  "bpm_raw": "132-157",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1340,
+  "events": 720,
+  "bpm_main": 157,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 78.5,
+  "weighted_eff16": 129.2,
+  "scratch_pct": 3.51,
+  "chord_pct": 56.39,
+  "single_pct": 43.61,
+  "ranuchi": 36,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 334,
+      "pct": 46.5,
+      "eff16": 78.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 233,
+      "pct": 32.4,
+      "eff16": 157.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 76,
+      "pct": 10.6,
+      "eff16": 235.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 16,
+      "pct": 2.2,
+      "eff16": 117.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 2.2,
+      "eff16": 314.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 1.5,
+      "eff16": 39.2
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 10,
+      "pct": 1.4,
+      "eff16": 58.9
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 1.1,
+      "eff16": 471.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 26.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 52.3
+    }
+  },
+  "chord_dist": {
+    "1": 314,
+    "2": 237,
+    "3": 129,
+    "4": 35,
+    "5": 5
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 573,
+      "pct": 44.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 334,
+      "pct": 25.9,
+      "eff16": 78.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 233,
+      "pct": 18.0,
+      "eff16": 157.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 76,
+      "pct": 5.9,
+      "eff16": 235.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 117.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 314.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 0.9,
+      "eff16": 39.2
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 10,
+      "pct": 0.8,
+      "eff16": 58.9
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 471.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 26.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 34.8,
+      "eff16": 39.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 13.0,
+      "eff16": 2.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 10.9,
+      "eff16": 9.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 8.7,
+      "eff16": 6.5
+    },
+    "672": {
+      "name": "(672)",
+      "count": 4,
+      "pct": 8.7,
+      "eff16": 5.6
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 2.9
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 2.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 78.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 13.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 26.2
+    }
+  }
+}

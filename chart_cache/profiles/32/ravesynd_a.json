@@ -1,0 +1,204 @@
+{
+  "textage": "32/ravesynd.html?1AB00",
+  "analyzed_at": "2026-04-06T10:55:30.025271+00:00",
+  "title": "RAVE SYNDROME",
+  "artist": "Yuta Imai",
+  "bpm_raw": "165",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1400,
+  "events": 847,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 125.0,
+  "scratch_pct": 10.36,
+  "chord_pct": 46.16,
+  "single_pct": 53.84,
+  "ranuchi": 57,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 450,
+      "pct": 53.2,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 340,
+      "pct": 40.2,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 3.5,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 55.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 123.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 27.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.3
+    }
+  },
+  "chord_dist": {
+    "1": 456,
+    "2": 262,
+    "3": 103,
+    "4": 19,
+    "5": 7
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 460,
+      "pct": 36.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 405,
+      "pct": 32.3,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 325,
+      "pct": 25.9,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 1.8,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 17,
+      "pct": 1.4,
+      "eff16": 55.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 123.8
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 20.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 27.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 33.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.5
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 51,
+      "pct": 35.4,
+      "eff16": 41.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 26,
+      "pct": 18.1,
+      "eff16": 165.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 15,
+      "pct": 10.4,
+      "eff16": 10.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 13,
+      "pct": 9.0,
+      "eff16": 82.5
+    },
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 9.0,
+      "eff16": 20.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 4.9,
+      "eff16": 55.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 3.5,
+      "eff16": 5.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 16.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 2.6
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 0.7,
+      "eff16": 6.3
+    }
+  },
+  "cn_notes": 1,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {}
+}

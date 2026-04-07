@@ -1,0 +1,211 @@
+{
+  "textage": "25/b_a_hero.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:26.262507+00:00",
+  "title": "Be a Hero!",
+  "artist": "中島由貴",
+  "bpm_raw": "190",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1388,
+  "events": 992,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 190.0,
+  "weighted_eff16": 158.7,
+  "scratch_pct": 10.09,
+  "chord_pct": 27.92,
+  "single_pct": 72.08,
+  "ranuchi": 37,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 699,
+      "pct": 70.5,
+      "eff16": 190.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 226,
+      "pct": 22.8,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 35,
+      "pct": 3.5,
+      "eff16": 47.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 1.9,
+      "eff16": 63.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 11.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 10.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 31.7
+    },
+    "456": {
+      "name": "(456)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.3
+    }
+  },
+  "chord_dist": {
+    "1": 715,
+    "2": 175,
+    "3": 85,
+    "4": 17
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 695,
+      "pct": 55.7,
+      "eff16": 190.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 260,
+      "pct": 20.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 224,
+      "pct": 18.0,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 3.0,
+      "eff16": 47.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 1.5,
+      "eff16": 63.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 11.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 10.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 31.7
+    },
+    "456": {
+      "name": "(456)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 26.6,
+      "eff16": 47.5
+    },
+    "192": {
+      "name": "half",
+      "count": 18,
+      "pct": 12.9,
+      "eff16": 23.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 12.2,
+      "eff16": 95.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 11.5,
+      "eff16": 63.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 7.2,
+      "eff16": 31.7
+    },
+    "0": {
+      "name": "(0)",
+      "count": 8,
+      "pct": 5.8,
+      "eff16": 0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 3.6,
+      "eff16": 19.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 15.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 3.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 6.8
+    }
+  }
+}

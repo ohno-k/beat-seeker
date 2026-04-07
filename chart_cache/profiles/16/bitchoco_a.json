@@ -1,0 +1,206 @@
+{
+  "textage": "16/bitchoco.html?1AC00",
+  "analyzed_at": "2026-04-06T10:49:09.521159+00:00",
+  "title": "BITTER CHOCOLATE STRIKER",
+  "artist": "L.E.D.-G",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1904,
+  "events": 870,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 32,
+  "dominant_eff16": 123.8,
+  "weighted_eff16": 123.4,
+  "scratch_pct": 6.14,
+  "chord_pct": 65.06,
+  "single_pct": 34.94,
+  "ranuchi": 10,
+  "interval_dist": {
+    "32": {
+      "name": "12th(triplet)",
+      "count": 751,
+      "pct": 86.4,
+      "eff16": 123.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 63,
+      "pct": 7.2,
+      "eff16": 61.9
+    },
+    "16": {
+      "name": "24th",
+      "count": 40,
+      "pct": 4.6,
+      "eff16": 247.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 41.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 10.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 165.0
+    }
+  },
+  "chord_dist": {
+    "1": 304,
+    "2": 176,
+    "3": 315,
+    "4": 72,
+    "5": 3
+  },
+  "tags": [
+    "chord_heavy",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 919,
+      "pct": 51.5,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 748,
+      "pct": 41.9,
+      "eff16": 123.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 64,
+      "pct": 3.6,
+      "eff16": 61.9
+    },
+    "16": {
+      "name": "24th",
+      "count": 40,
+      "pct": 2.2,
+      "eff16": 247.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.3,
+      "eff16": 41.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 10.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 8.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.2
+    },
+    "128": {
+      "name": "(128)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.9
+    },
+    "24": {
+      "name": "16th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 165.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 57,
+      "pct": 49.1,
+      "eff16": 41.2
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 12.1,
+      "eff16": 20.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 8.6,
+      "eff16": 10.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 8,
+      "pct": 6.9,
+      "eff16": 61.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 4.3,
+      "eff16": 5.2
+    },
+    "160": {
+      "name": "(160)",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 24.8
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 2.8
+    },
+    "128": {
+      "name": "(128)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 30.9
+    },
+    "512": {
+      "name": "(512)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 7.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 123.8
+    }
+  }
+}

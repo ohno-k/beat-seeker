@@ -1,0 +1,198 @@
+{
+  "textage": "21/euphoria.html?1AB00",
+  "analyzed_at": "2026-04-06T10:51:15.718719+00:00",
+  "title": "Elektrick U-Phoria",
+  "artist": "DJ Noriken",
+  "bpm_raw": "180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1528,
+  "events": 905,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 134.6,
+  "scratch_pct": 6.94,
+  "chord_pct": 50.83,
+  "single_pct": 49.17,
+  "ranuchi": 57,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 442,
+      "pct": 48.9,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 425,
+      "pct": 47.0,
+      "eff16": 90.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.5,
+      "eff16": 60.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 1.3,
+      "eff16": 45.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 270.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    }
+  },
+  "chord_dist": {
+    "1": 445,
+    "2": 333,
+    "3": 92,
+    "4": 34,
+    "5": 1
+  },
+  "tags": [
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 528,
+      "pct": 37.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 438,
+      "pct": 30.8,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 412,
+      "pct": 29.0,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.1,
+      "eff16": 45.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 60.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 270.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 28.6,
+      "eff16": 45.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 22,
+      "pct": 21.0,
+      "eff16": 90.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 11.4,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 9.5,
+      "eff16": 22.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 5.7,
+      "eff16": 2.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 4.8,
+      "eff16": 11.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 3.8,
+      "eff16": 12.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 3.8,
+      "eff16": 15.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 10.0
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 3.6
+    }
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "textage": "21/iwilback.html?1AB00",
+  "analyzed_at": "2026-04-06T10:53:00.039262+00:00",
+  "title": "I will be back -オレは帰ってきた-",
+  "artist": "SUPER STAR 満-MITSURU-",
+  "bpm_raw": "172",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1432,
+  "events": 868,
+  "bpm_main": 172,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 172.0,
+  "weighted_eff16": 151.4,
+  "scratch_pct": 2.51,
+  "chord_pct": 42.63,
+  "single_pct": 57.37,
+  "ranuchi": 118,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 650,
+      "pct": 75.0,
+      "eff16": 172.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 134,
+      "pct": 15.5,
+      "eff16": 86.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 36,
+      "pct": 4.2,
+      "eff16": 129.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 43.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 64.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 258.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 57.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 28.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 21.5
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.1
+    }
+  },
+  "chord_dist": {
+    "1": 498,
+    "2": 221,
+    "3": 116,
+    "4": 25,
+    "5": 4,
+    "6": 4
+  },
+  "tags": [
+    "scratch_low",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 649,
+      "pct": 46.5,
+      "eff16": 172.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 531,
+      "pct": 38.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 134,
+      "pct": 9.6,
+      "eff16": 86.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 36,
+      "pct": 2.6,
+      "eff16": 129.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.1,
+      "eff16": 43.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 64.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 258.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 57.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 28.7
+    },
+    "312": {
+      "name": "(312)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 28.6,
+      "eff16": 43.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 14.3,
+      "eff16": 86.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 14.3,
+      "eff16": 21.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 4,
+      "pct": 11.4,
+      "eff16": 1.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 8.6,
+      "eff16": 64.5
+    },
+    "2496": {
+      "name": "(2496)",
+      "count": 1,
+      "pct": 2.9,
+      "eff16": 1.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 2.9,
+      "eff16": 5.4
+    },
+    "2592": {
+      "name": "(2592)",
+      "count": 1,
+      "pct": 2.9,
+      "eff16": 1.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 2.9,
+      "eff16": 10.8
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 2.9,
+      "eff16": 3.1
+    }
+  },
+  "cn_notes": 3,
+  "cn_scratch_pct": 50.0,
+  "cn_kbd_overlap_pct": 0.57,
+  "cn_interval_dist": {
+    "6912": {
+      "name": "(6912)",
+      "count": 1,
+      "pct": 50.0,
+      "eff16": 0.6
+    },
+    "6144": {
+      "name": "(6144)",
+      "count": 1,
+      "pct": 50.0,
+      "eff16": 0.7
+    }
+  }
+}

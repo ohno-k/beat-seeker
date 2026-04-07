@@ -1,0 +1,281 @@
+{
+  "textage": "20/flower.html?1AB00",
+  "analyzed_at": "2026-04-06T10:51:30.671007+00:00",
+  "title": "FLOWER",
+  "artist": "DJ YOSHITAKA",
+  "bpm_raw": "173",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1075,
+  "events": 648,
+  "bpm_main": 173,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 173.0,
+  "weighted_eff16": 133.0,
+  "scratch_pct": 6.33,
+  "chord_pct": 48.46,
+  "single_pct": 51.54,
+  "ranuchi": 51,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 357,
+      "pct": 55.2,
+      "eff16": 173.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 228,
+      "pct": 35.2,
+      "eff16": 86.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 26,
+      "pct": 4.0,
+      "eff16": 57.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 3.1,
+      "eff16": 43.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.9,
+      "eff16": 346.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 34.6
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 14.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 28.8
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 3.5
+    },
+    "3864": {
+      "name": "(3864)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 1.1
+    }
+  },
+  "chord_dist": {
+    "1": 334,
+    "2": 233,
+    "3": 49,
+    "4": 32
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 364,
+      "pct": 36.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 353,
+      "pct": 35.1,
+      "eff16": 173.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 228,
+      "pct": 22.7,
+      "eff16": 86.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 27,
+      "pct": 2.7,
+      "eff16": 57.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.7,
+      "eff16": 43.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 346.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 34.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 28.8
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.5
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 30,
+      "pct": 44.8,
+      "eff16": 57.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 14.9,
+      "eff16": 10.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 9.0,
+      "eff16": 86.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 6.0,
+      "eff16": 21.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 5.4
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 9.6
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 24.7
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 5.1
+    },
+    "10080": {
+      "name": "(10080)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 0.4
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 3.9
+    }
+  },
+  "cn_notes": 28,
+  "cn_scratch_pct": 21.43,
+  "cn_kbd_overlap_pct": 13.11,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 25.9,
+      "eff16": 10.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 18.5,
+      "eff16": 86.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 14.8,
+      "eff16": 43.2
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 11.1,
+      "eff16": 21.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 7.4,
+      "eff16": 2.7
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 3.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 28.8
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 3.2
+    },
+    "10176": {
+      "name": "(10176)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 0.4
+    },
+    "960": {
+      "name": "(960)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 4.3
+    }
+  }
+}

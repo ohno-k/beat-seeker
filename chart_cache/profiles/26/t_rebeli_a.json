@@ -1,0 +1,271 @@
+{
+  "textage": "26/t_rebeli.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:42.171023+00:00",
+  "title": "The Rebellion of Sequencer",
+  "artist": "DJ Myosuke",
+  "bpm_raw": "300",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1614,
+  "events": 903,
+  "bpm_main": 300,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 169.6,
+  "scratch_pct": 8.98,
+  "chord_pct": 54.93,
+  "single_pct": 45.07,
+  "ranuchi": 73,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 663,
+      "pct": 73.5,
+      "eff16": 150.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 81,
+      "pct": 9.0,
+      "eff16": 225.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 65,
+      "pct": 7.2,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 45,
+      "pct": 5.0,
+      "eff16": 300.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 20,
+      "pct": 2.2,
+      "eff16": 450.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 900.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 37.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 50.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.4
+    }
+  },
+  "chord_dist": {
+    "1": 407,
+    "2": 314,
+    "3": 149,
+    "4": 33
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 658,
+      "pct": 44.8,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 577,
+      "pct": 39.3,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 81,
+      "pct": 5.5,
+      "eff16": 225.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 3.7,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 45,
+      "pct": 3.1,
+      "eff16": 300.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 20,
+      "pct": 1.4,
+      "eff16": 450.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 37.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 50.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 900.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 21.4
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 19.4,
+      "eff16": 75.0
+    },
+    "192": {
+      "name": "half",
+      "count": 25,
+      "pct": 17.4,
+      "eff16": 37.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 23,
+      "pct": 16.0,
+      "eff16": 50.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 20,
+      "pct": 13.9,
+      "eff16": 18.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 12,
+      "pct": 8.3,
+      "eff16": 25.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 12,
+      "pct": 8.3,
+      "eff16": 9.4
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 4.2,
+      "eff16": 150.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 10.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 4.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 12.5
+    }
+  },
+  "cn_notes": 13,
+  "cn_scratch_pct": 7.69,
+  "cn_kbd_overlap_pct": 3.54,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 41.7,
+      "eff16": 18.8
+    },
+    "3264": {
+      "name": "(3264)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 2.2
+    },
+    "8832": {
+      "name": "(8832)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 0.8
+    },
+    "3648": {
+      "name": "(3648)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 2.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 75.0
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 1.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 4.7
+    },
+    "17760": {
+      "name": "(17760)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 0.4
+    }
+  }
+}

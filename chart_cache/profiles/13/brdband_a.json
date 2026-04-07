@@ -1,0 +1,156 @@
+{
+  "textage": "13/brdband.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:43.631656+00:00",
+  "title": "Broadbanded",
+  "artist": "SADA",
+  "bpm_raw": "140",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 993,
+  "events": 772,
+  "bpm_main": 140,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 140.0,
+  "weighted_eff16": 128.1,
+  "scratch_pct": 3.73,
+  "chord_pct": 24.22,
+  "single_pct": 75.78,
+  "ranuchi": 24,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 669,
+      "pct": 86.8,
+      "eff16": 140.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 51,
+      "pct": 6.6,
+      "eff16": 70.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 4.8,
+      "eff16": 35.0
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 1.4,
+      "eff16": 17.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 8.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.2
+    }
+  },
+  "chord_dist": {
+    "1": 585,
+    "2": 154,
+    "3": 32,
+    "4": 1
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 669,
+      "pct": 70.1,
+      "eff16": 140.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 184,
+      "pct": 19.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 51,
+      "pct": 5.3,
+      "eff16": 70.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 3.9,
+      "eff16": 35.0
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 1.2,
+      "eff16": 17.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.2
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 22.2,
+      "eff16": 70.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 16.7,
+      "eff16": 8.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 16.7,
+      "eff16": 35.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 13.9,
+      "eff16": 17.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 4,
+      "pct": 11.1,
+      "eff16": 1.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 11.1,
+      "eff16": 2.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 8.3,
+      "eff16": 4.4
+    }
+  }
+}

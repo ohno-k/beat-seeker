@@ -1,0 +1,204 @@
+{
+  "textage": "6/linus.html?1AB00",
+  "analyzed_at": "2026-04-06T10:53:53.894270+00:00",
+  "title": "Linus",
+  "artist": "LEGO STUDIO",
+  "bpm_raw": "160-176",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1009,
+  "events": 580,
+  "bpm_main": 176,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 88.0,
+  "weighted_eff16": 106.8,
+  "scratch_pct": 3.17,
+  "chord_pct": 58.79,
+  "single_pct": 41.21,
+  "ranuchi": 54,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 361,
+      "pct": 62.3,
+      "eff16": 88.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 156,
+      "pct": 26.9,
+      "eff16": 176.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 53,
+      "pct": 9.2,
+      "eff16": 44.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 58.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 22.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 29.3
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 4.9
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 9.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 10.4
+    }
+  },
+  "chord_dist": {
+    "1": 239,
+    "2": 267,
+    "3": 60,
+    "4": 14
+  },
+  "tags": [
+    "soflan",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 398,
+      "pct": 40.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 361,
+      "pct": 37.0,
+      "eff16": 88.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 156,
+      "pct": 16.0,
+      "eff16": 176.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 53,
+      "pct": 5.4,
+      "eff16": 44.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 58.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 22.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.9
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.4
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 41.9,
+      "eff16": 11.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 9.7,
+      "eff16": 12.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 9.7,
+      "eff16": 2.8
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 3,
+      "pct": 9.7,
+      "eff16": 1.4
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 2,
+      "pct": 6.5,
+      "eff16": 3.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 6.5,
+      "eff16": 29.3
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 3.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 44.0
+    },
+    "1776": {
+      "name": "(1776)",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 2.4
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 3.2,
+      "eff16": 8.0
+    }
+  }
+}

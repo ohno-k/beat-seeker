@@ -1,0 +1,284 @@
+{
+  "textage": "28/_dscrdia.html?1AC00",
+  "analyzed_at": "2026-04-06T11:00:36.014281+00:00",
+  "title": "ディスコルディア",
+  "artist": "ぺのれり vs. BEMANI Sound Team \"HuΣeR\"",
+  "bpm_raw": "180-280",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1823,
+  "events": 1017,
+  "bpm_main": 280,
+  "is_soflan": true,
+  "dominant_interval": 32,
+  "dominant_eff16": 210.0,
+  "weighted_eff16": 219.3,
+  "scratch_pct": 4.39,
+  "chord_pct": 50.25,
+  "single_pct": 49.75,
+  "ranuchi": 43,
+  "interval_dist": {
+    "32": {
+      "name": "12th(triplet)",
+      "count": 384,
+      "pct": 37.8,
+      "eff16": 210.0
+    },
+    "38": {
+      "name": "(38)",
+      "count": 136,
+      "pct": 13.4,
+      "eff16": 176.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 87,
+      "pct": 8.6,
+      "eff16": 105.0
+    },
+    "39": {
+      "name": "(39)",
+      "count": 84,
+      "pct": 8.3,
+      "eff16": 172.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 65,
+      "pct": 6.4,
+      "eff16": 140.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 59,
+      "pct": 5.8,
+      "eff16": 420.0
+    },
+    "21": {
+      "name": "(21)",
+      "count": 45,
+      "pct": 4.4,
+      "eff16": 320.0
+    },
+    "13": {
+      "name": "~32nd",
+      "count": 32,
+      "pct": 3.1,
+      "eff16": 516.9
+    },
+    "22": {
+      "name": "(22)",
+      "count": 23,
+      "pct": 2.3,
+      "eff16": 305.5
+    },
+    "19": {
+      "name": "(19)",
+      "count": 21,
+      "pct": 2.1,
+      "eff16": 353.7
+    }
+  },
+  "chord_dist": {
+    "1": 506,
+    "2": 302,
+    "3": 133,
+    "4": 66,
+    "5": 10
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 728,
+      "pct": 41.8,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 382,
+      "pct": 21.9,
+      "eff16": 210.0
+    },
+    "38": {
+      "name": "(38)",
+      "count": 136,
+      "pct": 7.8,
+      "eff16": 176.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 87,
+      "pct": 5.0,
+      "eff16": 105.0
+    },
+    "39": {
+      "name": "(39)",
+      "count": 84,
+      "pct": 4.8,
+      "eff16": 172.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 65,
+      "pct": 3.7,
+      "eff16": 140.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 59,
+      "pct": 3.4,
+      "eff16": 420.0
+    },
+    "21": {
+      "name": "(21)",
+      "count": 45,
+      "pct": 2.6,
+      "eff16": 320.0
+    },
+    "13": {
+      "name": "~32nd",
+      "count": 32,
+      "pct": 1.8,
+      "eff16": 516.9
+    },
+    "22": {
+      "name": "(22)",
+      "count": 23,
+      "pct": 1.3,
+      "eff16": 305.5
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 17.7,
+      "eff16": 35.0
+    },
+    "77": {
+      "name": "(77)",
+      "count": 12,
+      "pct": 15.2,
+      "eff16": 87.3
+    },
+    "230": {
+      "name": "(230)",
+      "count": 7,
+      "pct": 8.9,
+      "eff16": 29.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 8.9,
+      "eff16": 210.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 6.3,
+      "eff16": 4.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 6.3,
+      "eff16": 8.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 5.1,
+      "eff16": 105.0
+    },
+    "160": {
+      "name": "(160)",
+      "count": 4,
+      "pct": 5.1,
+      "eff16": 42.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 17.5
+    },
+    "256": {
+      "name": "(256)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 26.2
+    }
+  },
+  "cn_notes": 64,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 18.53,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 22,
+      "pct": 37.3,
+      "eff16": 17.5
+    },
+    "192": {
+      "name": "half",
+      "count": 21,
+      "pct": 35.6,
+      "eff16": 35.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 6.8,
+      "eff16": 70.0
+    },
+    "3456": {
+      "name": "(3456)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 1.9
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 3.5
+    },
+    "9600": {
+      "name": "(9600)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 0.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 23.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 140.0
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 10.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 46.7
+    }
+  }
+}

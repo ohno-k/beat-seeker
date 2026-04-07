@@ -1,0 +1,246 @@
+{
+  "textage": "21/adularia.html?1AC00",
+  "analyzed_at": "2026-04-06T10:48:42.061279+00:00",
+  "title": "Adularia",
+  "artist": "DJ TOTTO",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1306,
+  "events": 962,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 153.8,
+  "scratch_pct": 1.23,
+  "chord_pct": 28.48,
+  "single_pct": 71.52,
+  "ranuchi": 61,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 692,
+      "pct": 72.0,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 246,
+      "pct": 25.6,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 45.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 67.5
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 20.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    }
+  },
+  "chord_dist": {
+    "1": 688,
+    "2": 209,
+    "3": 60,
+    "4": 5
+  },
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 692,
+      "pct": 53.7,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 328,
+      "pct": 25.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 246,
+      "pct": 19.1,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 45.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 67.5
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 20.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 20.0,
+      "eff16": 2.8
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 1.4
+    },
+    "3024": {
+      "name": "(3024)",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 1.4
+    },
+    "1584": {
+      "name": "(1584)",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 2.7
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 2.9
+    },
+    "4656": {
+      "name": "(4656)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 0.9
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 3.1
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 22.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 15.0
+    }
+  },
+  "cn_notes": 66,
+  "cn_scratch_pct": 9.09,
+  "cn_kbd_overlap_pct": 24.26,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 18,
+      "pct": 27.7,
+      "eff16": 11.2
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 21.5,
+      "eff16": 22.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 9.2,
+      "eff16": 90.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 7.7,
+      "eff16": 30.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 6.2,
+      "eff16": 18.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 6.2,
+      "eff16": 45.0
+    },
+    "3264": {
+      "name": "(3264)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 1.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 5.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 60.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 36.0
+    }
+  }
+}

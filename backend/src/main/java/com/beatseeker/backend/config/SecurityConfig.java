@@ -55,6 +55,7 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                                                 .requestMatchers("/api/activity/feed").permitAll()
+                                                .requestMatchers("/api/kofi/webhook").permitAll()
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile").authenticated()
                                                 .requestMatchers("/api/notifications/**").authenticated()
                                                 .requestMatchers("/api/admin/game-data/**").authenticated()

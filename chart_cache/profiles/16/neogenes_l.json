@@ -1,0 +1,218 @@
+{
+  "textage": "16/neogenes.html?1XB00",
+  "analyzed_at": "2026-04-06T10:59:20.961423+00:00",
+  "title": "neogenesis",
+  "artist": "DM Ashura",
+  "bpm_raw": "151",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1080,
+  "events": 694,
+  "bpm_main": 151,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 151.0,
+  "weighted_eff16": 127.1,
+  "scratch_pct": 2.22,
+  "chord_pct": 41.5,
+  "single_pct": 58.5,
+  "ranuchi": 67,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 471,
+      "pct": 68.0,
+      "eff16": 151.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 150,
+      "pct": 21.6,
+      "eff16": 75.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 45,
+      "pct": 6.5,
+      "eff16": 50.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 1.4,
+      "eff16": 302.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.7,
+      "eff16": 25.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 30.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 37.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 18.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.4
+    }
+  },
+  "chord_dist": {
+    "1": 406,
+    "2": 207,
+    "3": 66,
+    "4": 13,
+    "5": 2
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 468,
+      "pct": 44.4,
+      "eff16": 151.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 364,
+      "pct": 34.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 151,
+      "pct": 14.3,
+      "eff16": 75.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 45,
+      "pct": 4.3,
+      "eff16": 50.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 10,
+      "pct": 0.9,
+      "eff16": 302.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 25.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 30.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 37.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 18.9
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.9
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 21.7,
+      "eff16": 9.4
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 17.4,
+      "eff16": 18.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 17.4,
+      "eff16": 37.8
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 8.7,
+      "eff16": 1.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 8.7,
+      "eff16": 2.4
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 1.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 4.7
+    },
+    "6144": {
+      "name": "(6144)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 0.6
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 5.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 4.4
+    }
+  }
+}

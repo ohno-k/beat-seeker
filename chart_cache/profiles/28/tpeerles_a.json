@@ -1,0 +1,223 @@
+{
+  "textage": "28/tpeerles.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:22.714109+00:00",
+  "title": "THE PEERLESS UNDER HEAVEN",
+  "artist": "Yuta Imai Vs. BEMANI Sound Team \"L.E.D.-G\"",
+  "bpm_raw": "170",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1816,
+  "events": 1091,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 165.5,
+  "scratch_pct": 20.65,
+  "chord_pct": 49.13,
+  "single_pct": 50.87,
+  "ranuchi": 102,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 852,
+      "pct": 78.2,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 143,
+      "pct": 13.1,
+      "eff16": 85.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 46,
+      "pct": 4.2,
+      "eff16": 340.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 1.4,
+      "eff16": 42.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 255.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 21.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 510.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 127.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.6
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.0
+    }
+  },
+  "chord_dist": {
+    "1": 555,
+    "2": 377,
+    "3": 135,
+    "4": 18,
+    "5": 6
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 665,
+      "pct": 46.2,
+      "eff16": 170.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 483,
+      "pct": 33.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 163,
+      "pct": 11.3,
+      "eff16": 85.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 46,
+      "pct": 3.2,
+      "eff16": 340.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 34,
+      "pct": 2.4,
+      "eff16": 42.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.0,
+      "eff16": 56.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 255.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 510.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 127.5
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 21.2
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 207,
+      "pct": 55.3,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 83,
+      "pct": 22.2,
+      "eff16": 85.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 8.0,
+      "eff16": 42.5
+    },
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 4.5,
+      "eff16": 21.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 2.4,
+      "eff16": 10.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 2.4,
+      "eff16": 56.7
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 0.8,
+      "eff16": 3.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.8,
+      "eff16": 28.3
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 2.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 34.0
+    }
+  },
+  "cn_notes": 1,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.28,
+  "cn_interval_dist": {}
+}

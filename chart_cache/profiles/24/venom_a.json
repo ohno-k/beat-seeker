@@ -1,0 +1,217 @@
+{
+  "textage": "24/venom.html?1AC00",
+  "analyzed_at": "2026-04-06T10:58:10.988268+00:00",
+  "title": "Venom",
+  "artist": "kors k vs L.E.D.-G",
+  "bpm_raw": "190",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1624,
+  "events": 911,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 95.0,
+  "weighted_eff16": 132.0,
+  "scratch_pct": 7.51,
+  "chord_pct": 53.79,
+  "single_pct": 46.21,
+  "ranuchi": 100,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 545,
+      "pct": 59.9,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 317,
+      "pct": 34.8,
+      "eff16": 190.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.5,
+      "eff16": 47.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 380.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 63.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 285.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 31.7
+    },
+    "20": {
+      "name": "(20)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 228.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 23.8
+    },
+    "28": {
+      "name": "(28)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 162.9
+    }
+  },
+  "chord_dist": {
+    "1": 421,
+    "2": 307,
+    "3": 144,
+    "4": 38,
+    "5": 1
+  },
+  "tags": [
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 605,
+      "pct": 40.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 535,
+      "pct": 35.6,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 307,
+      "pct": 20.5,
+      "eff16": 190.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 0.9,
+      "eff16": 63.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 13,
+      "pct": 0.9,
+      "eff16": 380.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 47.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 31.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 285.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 23.8
+    },
+    "20": {
+      "name": "(20)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 228.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 44.6,
+      "eff16": 47.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 9.1,
+      "eff16": 95.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 5.8,
+      "eff16": 23.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 5.8,
+      "eff16": 11.9
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 5,
+      "pct": 4.1,
+      "eff16": 3.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 4.1,
+      "eff16": 31.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 63.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 38.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 5.9
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 7.9
+    }
+  }
+}

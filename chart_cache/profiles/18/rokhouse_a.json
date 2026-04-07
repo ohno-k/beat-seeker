@@ -1,0 +1,211 @@
+{
+  "textage": "18/rokhouse.html?1AB00",
+  "analyzed_at": "2026-04-06T10:55:52.173437+00:00",
+  "title": "Rock Da House",
+  "artist": "M-Project fw. GUHROOVY",
+  "bpm_raw": "175",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 944,
+  "events": 616,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 87.5,
+  "weighted_eff16": 126.0,
+  "scratch_pct": 7.31,
+  "chord_pct": 39.29,
+  "single_pct": 60.71,
+  "ranuchi": 34,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 317,
+      "pct": 51.5,
+      "eff16": 87.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 253,
+      "pct": 41.1,
+      "eff16": 175.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 2.6,
+      "eff16": 43.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 2.0,
+      "eff16": 350.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 1.5,
+      "eff16": 58.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 9.7
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 5.1
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 12.5
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 3.5
+    }
+  },
+  "chord_dist": {
+    "1": 374,
+    "2": 167,
+    "3": 64,
+    "4": 11
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 308,
+      "pct": 35.2,
+      "eff16": 87.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 272,
+      "pct": 31.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 243,
+      "pct": 27.8,
+      "eff16": 175.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.9,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 1.5,
+      "eff16": 58.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 350.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 9.7
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.9
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 35.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 36.8,
+      "eff16": 43.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 14,
+      "pct": 20.6,
+      "eff16": 87.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 7.4,
+      "eff16": 14.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 4.4,
+      "eff16": 10.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 4.4,
+      "eff16": 58.3
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 2.9,
+      "eff16": 5.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.9,
+      "eff16": 2.7
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 2.9,
+      "eff16": 1.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 2.9,
+      "eff16": 17.5
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 3.4
+    }
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "textage": "23/journeko.html?1XB00",
+  "analyzed_at": "2026-04-06T10:53:21.172299+00:00",
+  "title": "Journey",
+  "artist": "猫叉Master",
+  "bpm_raw": "112",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1585,
+  "events": 753,
+  "bpm_main": 112,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 112.0,
+  "weighted_eff16": 118.6,
+  "scratch_pct": 1.26,
+  "chord_pct": 76.63,
+  "single_pct": 23.37,
+  "ranuchi": 50,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 466,
+      "pct": 62.0,
+      "eff16": 112.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 148,
+      "pct": 19.7,
+      "eff16": 56.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 113,
+      "pct": 15.0,
+      "eff16": 224.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 1.1,
+      "eff16": 84.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 1.1,
+      "eff16": 168.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 74.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 37.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 336.0
+    }
+  },
+  "chord_dist": {
+    "1": 176,
+    "2": 356,
+    "3": 191,
+    "4": 26,
+    "5": 4
+  },
+  "tags": [
+    "scratch_low",
+    "chord_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 812,
+      "pct": 51.9,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 466,
+      "pct": 29.8,
+      "eff16": 112.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 148,
+      "pct": 9.5,
+      "eff16": 56.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 113,
+      "pct": 7.2,
+      "eff16": 224.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 84.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 168.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 74.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 37.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 336.0
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 31.6,
+      "eff16": 1.8
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 4,
+      "pct": 21.1,
+      "eff16": 1.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 56.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 28.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 3.5
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 1.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 5.6
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 9.3
+    }
+  }
+}

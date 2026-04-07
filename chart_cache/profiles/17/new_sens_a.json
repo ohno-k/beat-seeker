@@ -1,0 +1,279 @@
+{
+  "textage": "17/new_sens.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:28.921259+00:00",
+  "title": "NEW SENSATION -もう、あなたしか見えない-",
+  "artist": "SUPER HEROINE 彩香-AYAKA-",
+  "bpm_raw": "200",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1219,
+  "events": 784,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 100.0,
+  "weighted_eff16": 127.9,
+  "scratch_pct": 4.02,
+  "chord_pct": 45.92,
+  "single_pct": 54.08,
+  "ranuchi": 34,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 440,
+      "pct": 56.2,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 222,
+      "pct": 28.4,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 81,
+      "pct": 10.3,
+      "eff16": 50.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 23,
+      "pct": 2.9,
+      "eff16": 300.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 66.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 11.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 33.3
+    },
+    "400": {
+      "name": "(400)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.0
+    }
+  },
+  "chord_dist": {
+    "1": 424,
+    "2": 285,
+    "3": 75
+  },
+  "tags": [
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 434,
+      "pct": 37.1,
+      "eff16": 100.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 391,
+      "pct": 33.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 222,
+      "pct": 19.0,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 79,
+      "pct": 6.8,
+      "eff16": 50.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 23,
+      "pct": 2.0,
+      "eff16": 300.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 66.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 33.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.1
+    },
+    "400": {
+      "name": "(400)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 22.9,
+      "eff16": 50.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 9,
+      "pct": 18.8,
+      "eff16": 3.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 12.5,
+      "eff16": 12.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 8.3,
+      "eff16": 66.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 6.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 33.3
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 1.6
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 25.0
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 3.3
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 2.1,
+      "eff16": 3.8
+    }
+  },
+  "cn_notes": 58,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 5.38,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 11,
+      "pct": 19.3,
+      "eff16": 12.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 9,
+      "pct": 15.8,
+      "eff16": 8.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 8,
+      "pct": 14.0,
+      "eff16": 14.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 12.3,
+      "eff16": 100.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 8.8,
+      "eff16": 33.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 7.0,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 5.3,
+      "eff16": 50.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 5.3,
+      "eff16": 10.0
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 3.5,
+      "eff16": 1.8
+    },
+    "8928": {
+      "name": "(8928)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 0.5
+    }
+  }
+}

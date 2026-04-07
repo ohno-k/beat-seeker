@@ -1,0 +1,220 @@
+{
+  "textage": "11/wonbull.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:29.743227+00:00",
+  "title": "Wonder Bullfighter",
+  "artist": "Twin AmadeuS",
+  "bpm_raw": "126",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1010,
+  "events": 714,
+  "bpm_main": 126,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 126.0,
+  "weighted_eff16": 114.6,
+  "scratch_pct": 20.99,
+  "chord_pct": 30.39,
+  "single_pct": 69.61,
+  "ranuchi": 42,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 457,
+      "pct": 64.1,
+      "eff16": 126.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 135,
+      "pct": 18.9,
+      "eff16": 63.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 37,
+      "pct": 5.2,
+      "eff16": 42.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 15,
+      "pct": 2.1,
+      "eff16": 378.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 15,
+      "pct": 2.1,
+      "eff16": 94.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 1.7,
+      "eff16": 31.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 1.4,
+      "eff16": 21.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 10,
+      "pct": 1.4,
+      "eff16": 189.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 504.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 15.8
+    }
+  },
+  "chord_dist": {
+    "1": 497,
+    "2": 158,
+    "3": 41,
+    "4": 16,
+    "5": 2
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 339,
+      "pct": 42.5,
+      "eff16": 126.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 195,
+      "pct": 24.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 145,
+      "pct": 18.2,
+      "eff16": 63.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 54,
+      "pct": 6.8,
+      "eff16": 42.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 2.6,
+      "eff16": 31.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 1.5,
+      "eff16": 21.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 504.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 94.5
+    },
+    "66": {
+      "name": "(66)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 45.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 15.8
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 127,
+      "pct": 60.2,
+      "eff16": 126.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 28,
+      "pct": 13.3,
+      "eff16": 94.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 23,
+      "pct": 10.9,
+      "eff16": 63.0
+    },
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 6.2,
+      "eff16": 15.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 5,
+      "pct": 2.4,
+      "eff16": 7.4
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 2.2
+    },
+    "600": {
+      "name": "(600)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 5.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.5,
+      "eff16": 5.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 0.5,
+      "eff16": 2.6
+    },
+    "984": {
+      "name": "(984)",
+      "count": 1,
+      "pct": 0.5,
+      "eff16": 3.1
+    }
+  }
+}

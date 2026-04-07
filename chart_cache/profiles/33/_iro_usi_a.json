@@ -1,0 +1,218 @@
+{
+  "textage": "33/_iro_usi.html?1AC00",
+  "analyzed_at": "2026-04-06T11:02:15.958181+00:00",
+  "title": "色を喪った街",
+  "artist": "かめりあ feat. かめりあ",
+  "bpm_raw": "166",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 2026,
+  "events": 1211,
+  "bpm_main": 166,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 166.0,
+  "weighted_eff16": 190.0,
+  "scratch_pct": 6.96,
+  "chord_pct": 44.34,
+  "single_pct": 55.66,
+  "ranuchi": 93,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 659,
+      "pct": 54.5,
+      "eff16": 166.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 264,
+      "pct": 21.8,
+      "eff16": 249.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 120,
+      "pct": 9.9,
+      "eff16": 83.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 120,
+      "pct": 9.9,
+      "eff16": 332.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.2,
+      "eff16": 55.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 41.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 124.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 498.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 27.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.9
+    }
+  },
+  "chord_dist": {
+    "1": 674,
+    "2": 351,
+    "3": 107,
+    "4": 66,
+    "5": 13
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 684,
+      "pct": 36.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 652,
+      "pct": 34.6,
+      "eff16": 166.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 264,
+      "pct": 14.0,
+      "eff16": 249.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 119,
+      "pct": 6.3,
+      "eff16": 332.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 114,
+      "pct": 6.1,
+      "eff16": 83.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 0.7,
+      "eff16": 55.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 0.6,
+      "eff16": 41.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 124.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 498.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 27.7
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 28,
+      "pct": 20.0,
+      "eff16": 55.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 21,
+      "pct": 15.0,
+      "eff16": 83.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 10.0,
+      "eff16": 41.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 9.3,
+      "eff16": 10.4
+    },
+    "24": {
+      "name": "16th",
+      "count": 11,
+      "pct": 7.9,
+      "eff16": 166.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 6.4,
+      "eff16": 20.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 8,
+      "pct": 5.7,
+      "eff16": 16.6
+    },
+    "288": {
+      "name": "(288)",
+      "count": 8,
+      "pct": 5.7,
+      "eff16": 13.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 7,
+      "pct": 5.0,
+      "eff16": 11.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.9,
+      "eff16": 5.2
+    }
+  }
+}

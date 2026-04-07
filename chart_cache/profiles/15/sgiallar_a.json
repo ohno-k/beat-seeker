@@ -1,0 +1,217 @@
+{
+  "textage": "15/sgiallar.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:10.194440+00:00",
+  "title": "SOUND OF GIALLARHORN",
+  "artist": "L.E.D.-G",
+  "bpm_raw": "184",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1569,
+  "events": 902,
+  "bpm_main": 184,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 92.0,
+  "weighted_eff16": 128.3,
+  "scratch_pct": 3.76,
+  "chord_pct": 54.88,
+  "single_pct": 45.12,
+  "ranuchi": 98,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 535,
+      "pct": 59.4,
+      "eff16": 92.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 346,
+      "pct": 38.4,
+      "eff16": 184.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 368.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 122.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 61.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.7
+    },
+    "84": {
+      "name": "(84)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 52.6
+    },
+    "60": {
+      "name": "(60)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 73.6
+    }
+  },
+  "chord_dist": {
+    "1": 407,
+    "2": 346,
+    "3": 129,
+    "4": 17,
+    "5": 3
+  },
+  "tags": [
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 613,
+      "pct": 40.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 539,
+      "pct": 35.7,
+      "eff16": 92.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 344,
+      "pct": 22.8,
+      "eff16": 184.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 61.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 10.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 10.8
+    },
+    "36": {
+      "name": "(36)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 122.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 368.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.7
+    },
+    "84": {
+      "name": "(84)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 52.6
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 13.8,
+      "eff16": 23.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 13.8,
+      "eff16": 46.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 12.1,
+      "eff16": 11.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 6.9,
+      "eff16": 30.7
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 6.9,
+      "eff16": 92.0
+    },
+    "2880": {
+      "name": "(2880)",
+      "count": 3,
+      "pct": 5.2,
+      "eff16": 1.5
+    },
+    "36": {
+      "name": "(36)",
+      "count": 3,
+      "pct": 5.2,
+      "eff16": 122.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 5.2,
+      "eff16": 2.9
+    },
+    "348": {
+      "name": "(348)",
+      "count": 2,
+      "pct": 3.4,
+      "eff16": 12.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 3.4,
+      "eff16": 13.1
+    }
+  }
+}

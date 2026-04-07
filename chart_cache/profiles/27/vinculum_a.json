@@ -1,0 +1,224 @@
+{
+  "textage": "27/vinculum.html?1AC00",
+  "analyzed_at": "2026-04-06T10:58:14.998084+00:00",
+  "title": "Vinculum stellarum",
+  "artist": "iconoclasm",
+  "bpm_raw": "160",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1833,
+  "events": 1088,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 166.1,
+  "scratch_pct": 2.02,
+  "chord_pct": 47.98,
+  "single_pct": 52.02,
+  "ranuchi": 98,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 690,
+      "pct": 63.5,
+      "eff16": 160.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 153,
+      "pct": 14.1,
+      "eff16": 120.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 116,
+      "pct": 10.7,
+      "eff16": 240.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 60,
+      "pct": 5.5,
+      "eff16": 80.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 35,
+      "pct": 3.2,
+      "eff16": 480.0
+    },
+    "192": {
+      "name": "half",
+      "count": 16,
+      "pct": 1.5,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 40.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 60.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 960.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 192.0
+    }
+  },
+  "chord_dist": {
+    "1": 566,
+    "2": 344,
+    "3": 134,
+    "4": 43,
+    "5": 1
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 708,
+      "pct": 39.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 690,
+      "pct": 38.4,
+      "eff16": 160.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 153,
+      "pct": 8.5,
+      "eff16": 120.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 116,
+      "pct": 6.5,
+      "eff16": 240.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 60,
+      "pct": 3.3,
+      "eff16": 80.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 35,
+      "pct": 1.9,
+      "eff16": 480.0
+    },
+    "192": {
+      "name": "half",
+      "count": 16,
+      "pct": 0.9,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.4,
+      "eff16": 40.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 60.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 960.0
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 38.9,
+      "eff16": 20.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 19.4,
+      "eff16": 2.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 19.4,
+      "eff16": 10.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 1.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 6.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 40.0
+    },
+    "3648": {
+      "name": "(3648)",
+      "count": 1,
+      "pct": 2.8,
+      "eff16": 1.1
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 2.8,
+      "eff16": 3.3
+    }
+  },
+  "cn_notes": 13,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.61,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 72.7,
+      "eff16": 20.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 27.3,
+      "eff16": 10.0
+    }
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "textage": "25/_jdesire.html?1AC00",
+  "analyzed_at": "2026-04-06T11:02:11.880379+00:00",
+  "title": "純真可憐デザイア",
+  "artist": "BEMANI Sound Team \"HuΣeR\" feat.Fernweh",
+  "bpm_raw": "182",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1480,
+  "events": 815,
+  "bpm_main": 182,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 91.0,
+  "weighted_eff16": 127.2,
+  "scratch_pct": 6.55,
+  "chord_pct": 58.9,
+  "single_pct": 41.1,
+  "ranuchi": 103,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 476,
+      "pct": 58.5,
+      "eff16": 91.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 246,
+      "pct": 30.2,
+      "eff16": 182.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 41,
+      "pct": 5.0,
+      "eff16": 45.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 15,
+      "pct": 1.8,
+      "eff16": 136.5
+    },
+    "6": {
+      "name": "64th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 728.0
+    },
+    "42": {
+      "name": "(42)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 104.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 364.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 546.0
+    },
+    "10": {
+      "name": "(10)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 436.8
+    },
+    "38": {
+      "name": "(38)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 114.9
+    }
+  },
+  "chord_dist": {
+    "1": 335,
+    "2": 344,
+    "3": 94,
+    "4": 36,
+    "5": 5,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 582,
+      "pct": 42.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 483,
+      "pct": 34.9,
+      "eff16": 91.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 245,
+      "pct": 17.7,
+      "eff16": 182.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 36,
+      "pct": 2.6,
+      "eff16": 45.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 136.5
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 22.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 546.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 273.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 60.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 364.0
+    }
+  },
+  "scr_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 20,
+      "pct": 20.8,
+      "eff16": 30.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 17.7,
+      "eff16": 45.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 12.5,
+      "eff16": 11.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 7,
+      "pct": 7.3,
+      "eff16": 5.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 18.2
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 4.1
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 6.5
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 22.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 10.1
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 13.0
+    }
+  },
+  "cn_notes": 10,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.14,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 44.4,
+      "eff16": 91.0
+    },
+    "5712": {
+      "name": "(5712)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 0.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 13.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 6.1
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 3.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 11.1,
+      "eff16": 9.1
+    }
+  }
+}

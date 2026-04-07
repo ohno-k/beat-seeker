@@ -1,0 +1,283 @@
+{
+  "textage": "24/echidna.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:05.591613+00:00",
+  "title": "ECHIDNA",
+  "artist": "HuΣeR",
+  "bpm_raw": "146",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1597,
+  "events": 941,
+  "bpm_main": 146,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 146.0,
+  "weighted_eff16": 154.8,
+  "scratch_pct": 5.76,
+  "chord_pct": 50.37,
+  "single_pct": 49.63,
+  "ranuchi": 95,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 616,
+      "pct": 65.5,
+      "eff16": 146.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 134,
+      "pct": 14.3,
+      "eff16": 219.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 96,
+      "pct": 10.2,
+      "eff16": 109.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 52,
+      "pct": 5.5,
+      "eff16": 73.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 26,
+      "pct": 2.8,
+      "eff16": 438.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 48.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 36.5
+    },
+    "552": {
+      "name": "(552)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 6.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.1
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.7
+    }
+  },
+  "chord_dist": {
+    "1": 467,
+    "2": 337,
+    "3": 98,
+    "4": 33,
+    "5": 6
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 614,
+      "pct": 40.8,
+      "eff16": 146.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 572,
+      "pct": 38.0,
+      "eff16": 0
+    },
+    "16": {
+      "name": "24th",
+      "count": 133,
+      "pct": 8.8,
+      "eff16": 219.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 96,
+      "pct": 6.4,
+      "eff16": 109.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 50,
+      "pct": 3.3,
+      "eff16": 73.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 26,
+      "pct": 1.7,
+      "eff16": 438.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 48.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 36.5
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 18.2
+    },
+    "552": {
+      "name": "(552)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 6.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 29,
+      "pct": 31.9,
+      "eff16": 36.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 18.7,
+      "eff16": 73.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 5,
+      "pct": 5.5,
+      "eff16": 146.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 9.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 12.2
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 18.2
+    },
+    "0": {
+      "name": "(0)",
+      "count": 4,
+      "pct": 4.4,
+      "eff16": 0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 14.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 2.3
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 3.0
+    }
+  },
+  "cn_notes": 40,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 16.74,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 31.6,
+      "eff16": 9.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 26.3,
+      "eff16": 48.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 10.5,
+      "eff16": 24.3
+    },
+    "3456": {
+      "name": "(3456)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 1.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 14.6
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 3.0
+    },
+    "4008": {
+      "name": "(4008)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 0.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 12.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 36.5
+    },
+    "912": {
+      "name": "(912)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 3.8
+    }
+  }
+}

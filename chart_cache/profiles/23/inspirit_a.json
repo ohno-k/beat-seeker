@@ -1,0 +1,207 @@
+{
+  "textage": "23/inspirit.html?1AB00",
+  "analyzed_at": "2026-04-06T10:53:16.452299+00:00",
+  "title": "Inner Spirit",
+  "artist": "lapix",
+  "bpm_raw": "146",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1455,
+  "events": 990,
+  "bpm_main": 146,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 146.0,
+  "weighted_eff16": 148.5,
+  "scratch_pct": 8.18,
+  "chord_pct": 35.15,
+  "single_pct": 64.85,
+  "ranuchi": 73,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 638,
+      "pct": 64.5,
+      "eff16": 146.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 120,
+      "pct": 12.1,
+      "eff16": 73.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 102,
+      "pct": 10.3,
+      "eff16": 292.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 93,
+      "pct": 9.4,
+      "eff16": 109.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.7,
+      "eff16": 36.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 48.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 438.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 29.2
+    }
+  },
+  "chord_dist": {
+    "1": 642,
+    "2": 253,
+    "3": 73,
+    "4": 22
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 609,
+      "pct": 45.6,
+      "eff16": 146.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 386,
+      "pct": 28.9,
+      "eff16": 0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 101,
+      "pct": 7.6,
+      "eff16": 292.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 93,
+      "pct": 7.0,
+      "eff16": 73.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 91,
+      "pct": 6.8,
+      "eff16": 109.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 2.0,
+      "eff16": 36.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 0.8,
+      "eff16": 48.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 438.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 29.2
+    },
+    "156": {
+      "name": "(156)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 22.5
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 29,
+      "pct": 24.6,
+      "eff16": 73.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 25,
+      "pct": 21.2,
+      "eff16": 146.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 13.6,
+      "eff16": 36.5
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 5.9,
+      "eff16": 18.2
+    },
+    "672": {
+      "name": "(672)",
+      "count": 6,
+      "pct": 5.1,
+      "eff16": 5.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 14.6
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 29.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 48.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 12.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 24.3
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "textage": "31/tlastapo.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:38.828227+00:00",
+  "title": "The Last Apocalypse",
+  "artist": "BEMANI Sound Team \"Sota F. feat. Yvya\"",
+  "bpm_raw": "190",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1901,
+  "events": 1173,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 190.0,
+  "weighted_eff16": 169.3,
+  "scratch_pct": 8.15,
+  "chord_pct": 45.69,
+  "single_pct": 54.31,
+  "ranuchi": 120,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 707,
+      "pct": 60.3,
+      "eff16": 190.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 338,
+      "pct": 28.8,
+      "eff16": 95.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 70,
+      "pct": 6.0,
+      "eff16": 285.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 2.3,
+      "eff16": 47.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.4,
+      "eff16": 380.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 570.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 63.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 142.5
+    }
+  },
+  "chord_dist": {
+    "1": 637,
+    "2": 383,
+    "3": 116,
+    "4": 35,
+    "5": 2
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 672,
+      "pct": 38.5,
+      "eff16": 190.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 605,
+      "pct": 34.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 336,
+      "pct": 19.3,
+      "eff16": 95.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 70,
+      "pct": 4.0,
+      "eff16": 285.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 1.3,
+      "eff16": 47.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 0.9,
+      "eff16": 380.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 63.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 570.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 142.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 38.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 45,
+      "pct": 29.2,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 16.9,
+      "eff16": 47.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 26,
+      "pct": 16.9,
+      "eff16": 190.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 7.1,
+      "eff16": 31.7
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 7.1,
+      "eff16": 23.8
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 5,
+      "pct": 3.2,
+      "eff16": 3.2
+    },
+    "264": {
+      "name": "(264)",
+      "count": 3,
+      "pct": 1.9,
+      "eff16": 17.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 1.9,
+      "eff16": 38.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 1.9,
+      "eff16": 5.9
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 1.3,
+      "eff16": 19.0
+    }
+  },
+  "cn_notes": 2,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "14304": {
+      "name": "(14304)",
+      "count": 1,
+      "pct": 100.0,
+      "eff16": 0.3
+    }
+  }
+}

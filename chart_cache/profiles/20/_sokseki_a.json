@@ -1,0 +1,218 @@
+{
+  "textage": "20/_sokseki.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:17.108642+00:00",
+  "title": "即席！脳直★ミュージックシステム",
+  "artist": "MOSAIC.WAV",
+  "bpm_raw": "197",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1759,
+  "events": 1083,
+  "bpm_main": 197,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 197.0,
+  "weighted_eff16": 160.0,
+  "scratch_pct": 7.96,
+  "chord_pct": 42.84,
+  "single_pct": 57.16,
+  "ranuchi": 57,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 636,
+      "pct": 58.8,
+      "eff16": 197.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 290,
+      "pct": 26.8,
+      "eff16": 98.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 52,
+      "pct": 4.8,
+      "eff16": 147.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 1.9,
+      "eff16": 49.2
+    },
+    "55": {
+      "name": "(55)",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 86.0
+    },
+    "38": {
+      "name": "(38)",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 124.4
+    },
+    "20": {
+      "name": "(20)",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 236.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 65.7
+    },
+    "39": {
+      "name": "(39)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 121.2
+    },
+    "128": {
+      "name": "(128)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 36.9
+    }
+  },
+  "chord_dist": {
+    "1": 619,
+    "2": 305,
+    "3": 111,
+    "4": 43,
+    "5": 5
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 622,
+      "pct": 38.4,
+      "eff16": 197.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 545,
+      "pct": 33.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 296,
+      "pct": 18.3,
+      "eff16": 98.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 52,
+      "pct": 3.2,
+      "eff16": 147.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 1.2,
+      "eff16": 49.2
+    },
+    "55": {
+      "name": "(55)",
+      "count": 12,
+      "pct": 0.7,
+      "eff16": 86.0
+    },
+    "38": {
+      "name": "(38)",
+      "count": 12,
+      "pct": 0.7,
+      "eff16": 124.4
+    },
+    "20": {
+      "name": "(20)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 236.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 65.7
+    },
+    "39": {
+      "name": "(39)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 121.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 41,
+      "pct": 29.5,
+      "eff16": 49.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 21,
+      "pct": 15.1,
+      "eff16": 98.5
+    },
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 12.2,
+      "eff16": 24.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 14,
+      "pct": 10.1,
+      "eff16": 32.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 6,
+      "pct": 4.3,
+      "eff16": 16.4
+    },
+    "128": {
+      "name": "(128)",
+      "count": 6,
+      "pct": 4.3,
+      "eff16": 36.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 3.6,
+      "eff16": 6.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 3.6,
+      "eff16": 19.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 12.3
+    },
+    "219": {
+      "name": "(219)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 21.6
+    }
+  }
+}

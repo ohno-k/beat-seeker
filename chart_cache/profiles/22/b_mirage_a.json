@@ -1,0 +1,220 @@
+{
+  "textage": "22/b_mirage.html?1AC00",
+  "analyzed_at": "2026-04-06T10:49:13.572466+00:00",
+  "title": "BLUE MIRAGE",
+  "artist": "DJ CHUCKY",
+  "bpm_raw": "170",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1324,
+  "events": 881,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 164.2,
+  "scratch_pct": 10.95,
+  "chord_pct": 35.98,
+  "single_pct": 64.02,
+  "ranuchi": 32,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 672,
+      "pct": 76.4,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 65,
+      "pct": 7.4,
+      "eff16": 85.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 49,
+      "pct": 5.6,
+      "eff16": 127.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 39,
+      "pct": 4.4,
+      "eff16": 63.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 21,
+      "pct": 2.4,
+      "eff16": 510.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 19,
+      "pct": 2.2,
+      "eff16": 255.0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 102.0
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 42.5
+    },
+    "416": {
+      "name": "(416)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.8
+    }
+  },
+  "chord_dist": {
+    "1": 564,
+    "2": 212,
+    "3": 89,
+    "4": 11,
+    "5": 5
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 680,
+      "pct": 57.7,
+      "eff16": 170.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 315,
+      "pct": 26.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 65,
+      "pct": 5.5,
+      "eff16": 85.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 46,
+      "pct": 3.9,
+      "eff16": 63.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 34,
+      "pct": 2.9,
+      "eff16": 127.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 13,
+      "pct": 1.1,
+      "eff16": 510.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 11,
+      "pct": 0.9,
+      "eff16": 255.0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 102.0
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.6
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 38,
+      "pct": 26.4,
+      "eff16": 42.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 24,
+      "pct": 16.7,
+      "eff16": 85.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 20,
+      "pct": 13.9,
+      "eff16": 127.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 17,
+      "pct": 11.8,
+      "eff16": 63.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 12,
+      "pct": 8.3,
+      "eff16": 170.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 6.9,
+      "eff16": 21.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 2.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 5.3
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 1.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 10.6
+    }
+  }
+}

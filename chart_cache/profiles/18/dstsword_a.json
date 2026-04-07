@@ -1,0 +1,217 @@
+{
+  "textage": "18/dstsword.html?1AB00",
+  "analyzed_at": "2026-04-06T10:50:52.756176+00:00",
+  "title": "Destiny Sword",
+  "artist": "CAPACITY GATE",
+  "bpm_raw": "155",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1001,
+  "events": 666,
+  "bpm_main": 155,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 155.0,
+  "weighted_eff16": 137.4,
+  "scratch_pct": 7.69,
+  "chord_pct": 38.44,
+  "single_pct": 61.56,
+  "ranuchi": 33,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 437,
+      "pct": 65.7,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 161,
+      "pct": 24.2,
+      "eff16": 77.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 34,
+      "pct": 5.1,
+      "eff16": 232.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 2.4,
+      "eff16": 51.7
+    },
+    "400": {
+      "name": "(400)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 9.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 310.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 38.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 9.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 8.6
+    },
+    "36": {
+      "name": "(36)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 103.3
+    }
+  },
+  "chord_dist": {
+    "1": 410,
+    "2": 188,
+    "3": 57,
+    "4": 11
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 434,
+      "pct": 47.0,
+      "eff16": 155.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 268,
+      "pct": 29.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 155,
+      "pct": 16.8,
+      "eff16": 77.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 35,
+      "pct": 3.8,
+      "eff16": 232.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 51.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 38.8
+    },
+    "400": {
+      "name": "(400)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 9.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.6
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.7
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 21.1,
+      "eff16": 51.7
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 15.8,
+      "eff16": 19.4
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 9.2,
+      "eff16": 77.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 9.2,
+      "eff16": 25.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 7.9,
+      "eff16": 38.8
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 4,
+      "pct": 5.3,
+      "eff16": 3.5
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 3,
+      "pct": 3.9,
+      "eff16": 2.7
+    },
+    "60": {
+      "name": "(60)",
+      "count": 3,
+      "pct": 3.9,
+      "eff16": 62.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 2.6,
+      "eff16": 3.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.6,
+      "eff16": 12.9
+    }
+  }
+}

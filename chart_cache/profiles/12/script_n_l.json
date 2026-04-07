@@ -1,0 +1,218 @@
+{
+  "textage": "12/script_n.html?1XB00",
+  "analyzed_at": "2026-04-06T10:56:30.261200+00:00",
+  "title": "Scripted Connection⇒ N mix",
+  "artist": "DJ MURASAME",
+  "bpm_raw": "151",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1115,
+  "events": 713,
+  "bpm_main": 151,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 151.0,
+  "weighted_eff16": 133.2,
+  "scratch_pct": 7.17,
+  "chord_pct": 42.5,
+  "single_pct": 57.5,
+  "ranuchi": 29,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 519,
+      "pct": 72.9,
+      "eff16": 151.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 128,
+      "pct": 18.0,
+      "eff16": 75.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 3.5,
+      "eff16": 37.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 1.8,
+      "eff16": 226.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 1.4,
+      "eff16": 113.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 1.0,
+      "eff16": 50.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 8.9
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 453.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 25.2
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.8
+    }
+  },
+  "chord_dist": {
+    "1": 410,
+    "2": 232,
+    "3": 45,
+    "4": 24,
+    "5": 2
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 511,
+      "pct": 49.4,
+      "eff16": 151.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 334,
+      "pct": 32.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 126,
+      "pct": 12.2,
+      "eff16": 75.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.8,
+      "eff16": 37.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 11,
+      "pct": 1.1,
+      "eff16": 226.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 113.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 50.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 30.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 8.9
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 453.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 34.2,
+      "eff16": 37.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 10.1,
+      "eff16": 75.5
+    },
+    "672": {
+      "name": "(672)",
+      "count": 6,
+      "pct": 7.6,
+      "eff16": 5.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 6.3,
+      "eff16": 12.6
+    },
+    "528": {
+      "name": "(528)",
+      "count": 5,
+      "pct": 6.3,
+      "eff16": 6.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 5.1,
+      "eff16": 4.7
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 5.1,
+      "eff16": 18.9
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 6.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 7.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 151.0
+    }
+  }
+}

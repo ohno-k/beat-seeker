@@ -36,7 +36,7 @@
         </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold uppercase tracking-widest">Beat-Tier</p>
         <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" />
+          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
           <h3 class="text-2xl sm:text-3xl font-black mb-1 line-clamp-1" :class="rankInfo.color">
             {{ rankInfo.name }} {{ rankInfo.tier || '' }}
           </h3>
@@ -71,7 +71,7 @@
         </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold uppercase tracking-widest">Rate-Tier</p>
         <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" />
+          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
           <h3 class="text-2xl sm:text-3xl font-black mb-1 line-clamp-1" :class="rateTierRankInfo.color">
             {{ rateTierRankInfo.name }} {{ rateTierRankInfo.tier || '' }}
           </h3>

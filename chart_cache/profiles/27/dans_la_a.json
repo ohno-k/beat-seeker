@@ -1,0 +1,214 @@
+{
+  "textage": "27/dans_la.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:48.068725+00:00",
+  "title": "Dans la nuit de l'eternite",
+  "artist": "BEMANI Sound Team \"レ・度胸兄弟\"",
+  "bpm_raw": "244",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1830,
+  "events": 953,
+  "bpm_main": 244,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 122.0,
+  "weighted_eff16": 182.9,
+  "scratch_pct": 7.16,
+  "chord_pct": 61.07,
+  "single_pct": 38.93,
+  "ranuchi": 91,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 430,
+      "pct": 45.2,
+      "eff16": 122.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 165,
+      "pct": 17.3,
+      "eff16": 366.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 97,
+      "pct": 10.2,
+      "eff16": 61.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 71,
+      "pct": 7.5,
+      "eff16": 244.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 56,
+      "pct": 5.9,
+      "eff16": 183.0
+    },
+    "192": {
+      "name": "half",
+      "count": 23,
+      "pct": 2.4,
+      "eff16": 30.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 732.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 81.3
+    },
+    "21": {
+      "name": "(21)",
+      "count": 12,
+      "pct": 1.3,
+      "eff16": 278.9
+    },
+    "80": {
+      "name": "(80)",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 73.2
+    }
+  },
+  "chord_dist": {
+    "1": 371,
+    "2": 366,
+    "3": 152,
+    "4": 52,
+    "5": 10,
+    "6": 1,
+    "7": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 747,
+      "pct": 44.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 429,
+      "pct": 25.3,
+      "eff16": 122.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 165,
+      "pct": 9.7,
+      "eff16": 366.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 96,
+      "pct": 5.7,
+      "eff16": 61.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 71,
+      "pct": 4.2,
+      "eff16": 244.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 56,
+      "pct": 3.3,
+      "eff16": 183.0
+    },
+    "192": {
+      "name": "half",
+      "count": 23,
+      "pct": 1.4,
+      "eff16": 30.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 13,
+      "pct": 0.8,
+      "eff16": 732.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 0.8,
+      "eff16": 81.3
+    },
+    "21": {
+      "name": "(21)",
+      "count": 12,
+      "pct": 0.7,
+      "eff16": 278.9
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 70,
+      "pct": 53.8,
+      "eff16": 30.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 10.8,
+      "eff16": 61.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 12,
+      "pct": 9.2,
+      "eff16": 10.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 10,
+      "pct": 7.7,
+      "eff16": 5.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 10,
+      "pct": 7.7,
+      "eff16": 20.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 8,
+      "pct": 6.2,
+      "eff16": 7.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 15.2
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 8.7
+    },
+    "2592": {
+      "name": "(2592)",
+      "count": 1,
+      "pct": 0.8,
+      "eff16": 2.3
+    }
+  }
+}

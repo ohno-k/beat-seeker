@@ -1,0 +1,235 @@
+{
+  "textage": "32/lowercas.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:14.910493+00:00",
+  "title": "lowercase lifetime",
+  "artist": "BEMANI Sound Team \"ZAQUVA\"",
+  "bpm_raw": "205",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1389,
+  "events": 821,
+  "bpm_main": 205,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 102.5,
+  "weighted_eff16": 128.8,
+  "scratch_pct": 5.33,
+  "chord_pct": 47.62,
+  "single_pct": 52.38,
+  "ranuchi": 72,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 515,
+      "pct": 62.8,
+      "eff16": 102.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 186,
+      "pct": 22.7,
+      "eff16": 205.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 81,
+      "pct": 9.9,
+      "eff16": 51.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 68.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 153.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 410.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 1230.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 175.7
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 136.7
+    },
+    "160": {
+      "name": "(160)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.8
+    }
+  },
+  "chord_dist": {
+    "1": 430,
+    "2": 268,
+    "3": 77,
+    "4": 38,
+    "5": 8
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 506,
+      "pct": 38.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 506,
+      "pct": 38.5,
+      "eff16": 102.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 184,
+      "pct": 14.0,
+      "eff16": 205.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 77,
+      "pct": 5.9,
+      "eff16": 51.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 0.8,
+      "eff16": 68.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 153.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 410.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 1230.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 175.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 34.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 23.3,
+      "eff16": 51.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 23.3,
+      "eff16": 102.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 9.6,
+      "eff16": 12.8
+    },
+    "672": {
+      "name": "(672)",
+      "count": 5,
+      "pct": 6.8,
+      "eff16": 7.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 6.8,
+      "eff16": 14.6
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 5.5,
+      "eff16": 11.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 5.5,
+      "eff16": 3.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 4.1,
+      "eff16": 6.4
+    },
+    "2640": {
+      "name": "(2640)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 1.9
+    },
+    "24": {
+      "name": "16th",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 205.0
+    }
+  },
+  "cn_notes": 8,
+  "cn_scratch_pct": 12.5,
+  "cn_kbd_overlap_pct": 3.57,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 85.7,
+      "eff16": 12.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 6.4
+    }
+  }
+}

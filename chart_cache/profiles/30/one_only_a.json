@@ -1,0 +1,219 @@
+{
+  "textage": "30/one_only.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:45.760268+00:00",
+  "title": "ONE AND ONLY",
+  "artist": "Yuta Imai",
+  "bpm_raw": "174",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1639,
+  "events": 1049,
+  "bpm_main": 174,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 174.0,
+  "weighted_eff16": 159.1,
+  "scratch_pct": 11.65,
+  "chord_pct": 42.23,
+  "single_pct": 57.77,
+  "ranuchi": 76,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 666,
+      "pct": 63.5,
+      "eff16": 174.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 133,
+      "pct": 12.7,
+      "eff16": 87.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 89,
+      "pct": 8.5,
+      "eff16": 261.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 56,
+      "pct": 5.3,
+      "eff16": 58.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 48,
+      "pct": 4.6,
+      "eff16": 43.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 33,
+      "pct": 3.1,
+      "eff16": 130.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 18,
+      "pct": 1.7,
+      "eff16": 348.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 21.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 65.2
+    }
+  },
+  "chord_dist": {
+    "1": 606,
+    "2": 328,
+    "3": 86,
+    "4": 26,
+    "5": 3
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 628,
+      "pct": 43.4,
+      "eff16": 174.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 458,
+      "pct": 31.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 102,
+      "pct": 7.0,
+      "eff16": 87.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 89,
+      "pct": 6.2,
+      "eff16": 261.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 59,
+      "pct": 4.1,
+      "eff16": 58.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 3.2,
+      "eff16": 43.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 33,
+      "pct": 2.3,
+      "eff16": 130.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 18,
+      "pct": 1.2,
+      "eff16": 348.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 21.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 34.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 41,
+      "pct": 21.6,
+      "eff16": 43.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 38,
+      "pct": 20.0,
+      "eff16": 87.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 24,
+      "pct": 12.6,
+      "eff16": 174.0
+    },
+    "192": {
+      "name": "half",
+      "count": 20,
+      "pct": 10.5,
+      "eff16": 21.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 10.0,
+      "eff16": 58.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 6.8,
+      "eff16": 10.9
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 3.7,
+      "eff16": 130.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 2.6,
+      "eff16": 29.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 1.6,
+      "eff16": 5.4
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 12.4
+    }
+  }
+}

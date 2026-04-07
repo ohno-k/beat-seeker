@@ -1,0 +1,287 @@
+{
+  "textage": "33/amorfati.html?1AC00",
+  "analyzed_at": "2026-04-06T10:48:51.417464+00:00",
+  "title": "Amor∞Fati",
+  "artist": "BlackY",
+  "bpm_raw": "173",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 2141,
+  "events": 1406,
+  "bpm_main": 173,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 173.0,
+  "weighted_eff16": 207.0,
+  "scratch_pct": 2.76,
+  "chord_pct": 38.48,
+  "single_pct": 61.52,
+  "ranuchi": 75,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 849,
+      "pct": 60.4,
+      "eff16": 173.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 325,
+      "pct": 23.1,
+      "eff16": 259.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 76,
+      "pct": 5.4,
+      "eff16": 346.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 49,
+      "pct": 3.5,
+      "eff16": 519.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 47,
+      "pct": 3.3,
+      "eff16": 86.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 36,
+      "pct": 2.6,
+      "eff16": 57.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 129.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 43.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 17.3
+    }
+  },
+  "chord_dist": {
+    "1": 865,
+    "2": 412,
+    "3": 82,
+    "4": 39,
+    "5": 2,
+    "6": 4,
+    "8": 2
+  },
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 841,
+      "pct": 40.4,
+      "eff16": 173.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 683,
+      "pct": 32.8,
+      "eff16": 0
+    },
+    "16": {
+      "name": "24th",
+      "count": 324,
+      "pct": 15.6,
+      "eff16": 259.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 75,
+      "pct": 3.6,
+      "eff16": 346.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 49,
+      "pct": 2.4,
+      "eff16": 519.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 49,
+      "pct": 2.4,
+      "eff16": 86.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 37,
+      "pct": 1.8,
+      "eff16": 57.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 0.5,
+      "eff16": 129.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.4,
+      "eff16": 43.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 17.3
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 34.5,
+      "eff16": 57.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 8.6,
+      "eff16": 43.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 6.9,
+      "eff16": 86.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 3,
+      "pct": 5.2,
+      "eff16": 173.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 3.4,
+      "eff16": 5.1
+    },
+    "312": {
+      "name": "(312)",
+      "count": 2,
+      "pct": 3.4,
+      "eff16": 13.3
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 1.8
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 6.2
+    },
+    "912": {
+      "name": "(912)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 4.6
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 3.9
+    }
+  },
+  "cn_notes": 18,
+  "cn_scratch_pct": 5.26,
+  "cn_kbd_overlap_pct": 11.1,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 23.5,
+      "eff16": 10.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 11.8,
+      "eff16": 86.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 11.8,
+      "eff16": 43.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 5.9,
+      "eff16": 17.3
+    },
+    "912": {
+      "name": "(912)",
+      "count": 1,
+      "pct": 5.9,
+      "eff16": 4.6
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 5.9,
+      "eff16": 6.7
+    },
+    "11856": {
+      "name": "(11856)",
+      "count": 1,
+      "pct": 5.9,
+      "eff16": 0.4
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 5.9,
+      "eff16": 12.4
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 5.9,
+      "eff16": 3.3
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 5.9,
+      "eff16": 4.8
+    }
+  }
+}

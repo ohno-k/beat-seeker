@@ -1,0 +1,219 @@
+{
+  "textage": "24/samurais.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:00.181635+00:00",
+  "title": "SAMURAI-Scramble",
+  "artist": "DJ Mass MAD Izm*",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1052,
+  "events": 603,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 75.0,
+  "weighted_eff16": 104.3,
+  "scratch_pct": 29.56,
+  "chord_pct": 50.08,
+  "single_pct": 49.92,
+  "ranuchi": 58,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 313,
+      "pct": 52.0,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 137,
+      "pct": 22.8,
+      "eff16": 150.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 66,
+      "pct": 11.0,
+      "eff16": 225.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 61,
+      "pct": 10.1,
+      "eff16": 37.5
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.8,
+      "eff16": 18.8
+    },
+    "176": {
+      "name": "(176)",
+      "count": 5,
+      "pct": 0.8,
+      "eff16": 20.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 300.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 112.5
+    },
+    "180": {
+      "name": "(180)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 20.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 25.0
+    }
+  },
+  "chord_dist": {
+    "1": 301,
+    "2": 180,
+    "3": 99,
+    "4": 21,
+    "5": 2
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 246,
+      "pct": 33.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 193,
+      "pct": 26.1,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 108,
+      "pct": 14.6,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 92,
+      "pct": 12.4,
+      "eff16": 37.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 55,
+      "pct": 7.4,
+      "eff16": 225.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 14,
+      "pct": 1.9,
+      "eff16": 25.0
+    },
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 1.8,
+      "eff16": 18.8
+    },
+    "176": {
+      "name": "(176)",
+      "count": 5,
+      "pct": 0.7,
+      "eff16": 20.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 300.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 112.5
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 166,
+      "pct": 53.5,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 73,
+      "pct": 23.5,
+      "eff16": 37.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 23,
+      "pct": 7.4,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 13,
+      "pct": 4.2,
+      "eff16": 0
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 3.9,
+      "eff16": 18.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 7,
+      "pct": 2.3,
+      "eff16": 225.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 1.0,
+      "eff16": 25.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 10.7
+    },
+    "80": {
+      "name": "(80)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 45.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 15.0
+    }
+  }
+}

@@ -284,7 +284,7 @@ watch(viewMode, async (mode) => {
                   </td>
                   <td class="py-3 px-2 text-center">
                     <div class="flex justify-center">
-                      <RankIcon :rank-name="getRankInfo(entry.totalBeatPt).name" :tier="getRankInfo(entry.totalBeatPt).tier" size="md" disable-party />
+                      <RankIcon :rank-name="getRankInfo(entry.totalBeatPt).name" :tier="getRankInfo(entry.totalBeatPt).tier" size="md" disable-party :is-supporter="entry.isSupporter" />
                     </div>
                   </td>
                   <td class="py-3 text-right">
@@ -362,7 +362,7 @@ watch(viewMode, async (mode) => {
                   </td>
                   <td class="py-3 px-2 text-center">
                     <div class="flex justify-center">
-                      <RankIcon :rank-name="getRateTierRankInfo(entry.totalRatePt).name" :tier="getRateTierRankInfo(entry.totalRatePt).tier" size="md" disable-party />
+                      <RankIcon :rank-name="getRateTierRankInfo(entry.totalRatePt).name" :tier="getRateTierRankInfo(entry.totalRatePt).tier" size="md" disable-party :is-supporter="entry.isSupporter" />
                     </div>
                   </td>
                   <td class="py-3 text-right">

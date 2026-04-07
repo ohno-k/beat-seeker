@@ -1,0 +1,228 @@
+{
+  "textage": "31/swordven.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:09.178125+00:00",
+  "title": "Sword of Vengeance",
+  "artist": "sky_delta",
+  "bpm_raw": "208",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1644,
+  "events": 939,
+  "bpm_main": 208,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 104.0,
+  "weighted_eff16": 138.5,
+  "scratch_pct": 5.41,
+  "chord_pct": 56.98,
+  "single_pct": 43.02,
+  "ranuchi": 118,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 551,
+      "pct": 58.7,
+      "eff16": 104.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 331,
+      "pct": 35.3,
+      "eff16": 208.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 3.9,
+      "eff16": 52.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 34.7
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 26.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.1
+    },
+    "4": {
+      "name": "(4)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 1248.0
+    },
+    "44": {
+      "name": "(44)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 113.5
+    }
+  },
+  "chord_dist": {
+    "1": 404,
+    "2": 397,
+    "3": 111,
+    "4": 22,
+    "5": 5
+  },
+  "tags": [
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 619,
+      "pct": 39.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 550,
+      "pct": 35.4,
+      "eff16": 104.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 329,
+      "pct": 21.2,
+      "eff16": 208.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 35,
+      "pct": 2.3,
+      "eff16": 52.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 34.7
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 26.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 41.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 69.3
+    },
+    "312": {
+      "name": "(312)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 1248.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 24,
+      "pct": 27.3,
+      "eff16": 104.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 19.3,
+      "eff16": 52.0
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 13.6,
+      "eff16": 26.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 8.0,
+      "eff16": 34.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 8.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 3.2
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 9.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 6.5
+    },
+    "1584": {
+      "name": "(1584)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 3.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 17.3
+    }
+  },
+  "cn_notes": 4,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.32,
+  "cn_interval_dist": {
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 33.3,
+      "eff16": 23.1
+    },
+    "24": {
+      "name": "16th",
+      "count": 1,
+      "pct": 33.3,
+      "eff16": 208.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 33.3,
+      "eff16": 34.7
+    }
+  }
+}

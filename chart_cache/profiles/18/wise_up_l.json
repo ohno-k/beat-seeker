@@ -1,0 +1,220 @@
+{
+  "textage": "18/wise_up.html?1XB00",
+  "analyzed_at": "2026-04-06T10:58:23.065167+00:00",
+  "title": "WISE UP!",
+  "artist": "木之下慶行 feat.星野奏子",
+  "bpm_raw": "127",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1320,
+  "events": 653,
+  "bpm_main": 127,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 127.0,
+  "weighted_eff16": 122.3,
+  "scratch_pct": 1.89,
+  "chord_pct": 58.81,
+  "single_pct": 41.19,
+  "ranuchi": 70,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 467,
+      "pct": 71.6,
+      "eff16": 127.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 130,
+      "pct": 19.9,
+      "eff16": 63.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 1.7,
+      "eff16": 42.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 1.4,
+      "eff16": 190.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 1.2,
+      "eff16": 381.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.9,
+      "eff16": 254.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 95.2
+    },
+    "4": {
+      "name": "(4)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 762.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 152.4
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 84.7
+    }
+  },
+  "chord_dist": {
+    "1": 269,
+    "2": 194,
+    "3": 123,
+    "4": 47,
+    "5": 14,
+    "6": 6
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 643,
+      "pct": 49.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 467,
+      "pct": 36.1,
+      "eff16": 127.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 129,
+      "pct": 10.0,
+      "eff16": 63.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 0.9,
+      "eff16": 42.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 190.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 381.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 254.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 95.2
+    },
+    "4": {
+      "name": "(4)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 762.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 152.4
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 20.8,
+      "eff16": 2.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 16.7,
+      "eff16": 42.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 12.5,
+      "eff16": 31.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 12.5,
+      "eff16": 7.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 12.5,
+      "eff16": 4.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 4.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 2.6
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 3.5
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 1.9
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 2.1
+    }
+  }
+}

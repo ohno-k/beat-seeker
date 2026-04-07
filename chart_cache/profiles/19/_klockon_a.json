@@ -1,0 +1,219 @@
+{
+  "textage": "19/_klockon.html?1AB00",
+  "analyzed_at": "2026-04-06T11:01:19.080169+00:00",
+  "title": "君のハートにロックオン",
+  "artist": "Dr.Honda",
+  "bpm_raw": "260",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1323,
+  "events": 1020,
+  "bpm_main": 260,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 130.0,
+  "weighted_eff16": 154.6,
+  "scratch_pct": 4.76,
+  "chord_pct": 24.9,
+  "single_pct": 75.1,
+  "ranuchi": 66,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 463,
+      "pct": 45.4,
+      "eff16": 130.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 428,
+      "pct": 42.0,
+      "eff16": 195.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 64,
+      "pct": 6.3,
+      "eff16": 65.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 22,
+      "pct": 2.2,
+      "eff16": 43.3
+    },
+    "24": {
+      "name": "16th",
+      "count": 18,
+      "pct": 1.8,
+      "eff16": 260.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 390.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 97.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 32.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 14.4
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 26.0
+    }
+  },
+  "chord_dist": {
+    "1": 766,
+    "2": 216,
+    "3": 28,
+    "4": 9,
+    "5": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 459,
+      "pct": 36.5,
+      "eff16": 130.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 428,
+      "pct": 34.0,
+      "eff16": 195.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 245,
+      "pct": 19.5,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 59,
+      "pct": 4.7,
+      "eff16": 65.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 24,
+      "pct": 1.9,
+      "eff16": 43.3
+    },
+    "24": {
+      "name": "16th",
+      "count": 18,
+      "pct": 1.4,
+      "eff16": 260.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 390.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 32.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 97.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 14.4
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 14.5,
+      "eff16": 32.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 14.5,
+      "eff16": 65.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 6,
+      "pct": 9.7,
+      "eff16": 21.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 9.7,
+      "eff16": 4.1
+    },
+    "864": {
+      "name": "(864)",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 7.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 16.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 6.5,
+      "eff16": 8.1
+    },
+    "672": {
+      "name": "(672)",
+      "count": 4,
+      "pct": 6.5,
+      "eff16": 9.3
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 2.0
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 3.2,
+      "eff16": 4.6
+    }
+  }
+}

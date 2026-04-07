@@ -1,0 +1,218 @@
+{
+  "textage": "25/lifegame.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:49.884140+00:00",
+  "title": "Life Is A Game ft.DD\"ナカタ\"Metal",
+  "artist": "RoughSketch",
+  "bpm_raw": "195",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1762,
+  "events": 902,
+  "bpm_main": 195,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 195.0,
+  "weighted_eff16": 155.1,
+  "scratch_pct": 4.65,
+  "chord_pct": 51.11,
+  "single_pct": 48.89,
+  "ranuchi": 74,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 378,
+      "pct": 42.0,
+      "eff16": 195.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 307,
+      "pct": 34.1,
+      "eff16": 97.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 102,
+      "pct": 11.3,
+      "eff16": 48.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 58,
+      "pct": 6.4,
+      "eff16": 292.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 29,
+      "pct": 3.2,
+      "eff16": 390.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 65.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 32.5
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 130.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 24.4
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 585.0
+    }
+  },
+  "chord_dist": {
+    "1": 441,
+    "2": 206,
+    "3": 134,
+    "4": 99,
+    "5": 21,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 797,
+      "pct": 47.5,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 369,
+      "pct": 22.0,
+      "eff16": 195.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 297,
+      "pct": 17.7,
+      "eff16": 97.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 108,
+      "pct": 6.4,
+      "eff16": 48.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 58,
+      "pct": 3.5,
+      "eff16": 292.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 27,
+      "pct": 1.6,
+      "eff16": 390.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 0.6,
+      "eff16": 65.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 24.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 32.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 585.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 18.5,
+      "eff16": 48.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 13.6,
+      "eff16": 97.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 9.9,
+      "eff16": 12.2
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 8.6,
+      "eff16": 24.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 7.4,
+      "eff16": 3.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 32.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 6.1
+    },
+    "24": {
+      "name": "16th",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 195.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 6.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 16.2
+    }
+  }
+}

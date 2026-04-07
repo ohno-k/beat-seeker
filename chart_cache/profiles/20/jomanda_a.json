@@ -1,0 +1,219 @@
+{
+  "textage": "20/jomanda.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:19.801103+00:00",
+  "title": "JOMANDA",
+  "artist": "DJ YOSHITAKA",
+  "bpm_raw": "90-300",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1814,
+  "events": 1025,
+  "bpm_main": 300,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 300.0,
+  "weighted_eff16": 237.0,
+  "scratch_pct": 6.34,
+  "chord_pct": 50.24,
+  "single_pct": 49.76,
+  "ranuchi": 112,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 587,
+      "pct": 57.3,
+      "eff16": 300.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 387,
+      "pct": 37.8,
+      "eff16": 150.0
+    },
+    "44": {
+      "name": "(44)",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 163.6
+    },
+    "36": {
+      "name": "(36)",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 200.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 100.0
+    },
+    "68": {
+      "name": "(68)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 105.9
+    },
+    "40": {
+      "name": "(40)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 75.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 257.1
+    }
+  },
+  "chord_dist": {
+    "1": 510,
+    "2": 290,
+    "3": 179,
+    "4": 43,
+    "5": 3
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 676,
+      "pct": 39.8,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 587,
+      "pct": 34.6,
+      "eff16": 300.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 386,
+      "pct": 22.7,
+      "eff16": 150.0
+    },
+    "44": {
+      "name": "(44)",
+      "count": 10,
+      "pct": 0.6,
+      "eff16": 163.6
+    },
+    "36": {
+      "name": "(36)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 200.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 100.0
+    },
+    "68": {
+      "name": "(68)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 105.9
+    },
+    "40": {
+      "name": "(40)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 75.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 38,
+      "pct": 33.3,
+      "eff16": 75.0
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 12.3,
+      "eff16": 37.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 13,
+      "pct": 11.4,
+      "eff16": 50.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 10.5,
+      "eff16": 100.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 6,
+      "pct": 5.3,
+      "eff16": 21.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 4.4,
+      "eff16": 18.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 4.4,
+      "eff16": 150.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 30.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 4.7
+    },
+    "1104": {
+      "name": "(1104)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 6.5
+    }
+  }
+}

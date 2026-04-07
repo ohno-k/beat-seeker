@@ -1,0 +1,221 @@
+{
+  "textage": "18/saberwng.html?1AB00",
+  "analyzed_at": "2026-04-06T10:55:58.838587+00:00",
+  "title": "SABER WING",
+  "artist": "TAG",
+  "bpm_raw": "37-444",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1020,
+  "events": 546,
+  "bpm_main": 444,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 222.0,
+  "weighted_eff16": 297.6,
+  "scratch_pct": 2.75,
+  "chord_pct": 53.48,
+  "single_pct": 46.52,
+  "ranuchi": 55,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 365,
+      "pct": 67.0,
+      "eff16": 222.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 64,
+      "pct": 11.7,
+      "eff16": 666.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 48,
+      "pct": 8.8,
+      "eff16": 444.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 5.7,
+      "eff16": 111.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 11,
+      "pct": 2.0,
+      "eff16": 333.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 6,
+      "pct": 1.1,
+      "eff16": 31.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.7,
+      "eff16": 1332.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 27.8
+    },
+    "7": {
+      "name": "~48th",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 1522.3
+    },
+    "25": {
+      "name": "~16th",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 426.2
+    }
+  },
+  "chord_dist": {
+    "1": 254,
+    "2": 145,
+    "3": 121,
+    "4": 20,
+    "5": 3,
+    "6": 3
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 447,
+      "pct": 45.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 365,
+      "pct": 36.8,
+      "eff16": 222.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 64,
+      "pct": 6.5,
+      "eff16": 666.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 48,
+      "pct": 4.8,
+      "eff16": 444.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 3.1,
+      "eff16": 111.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 11,
+      "pct": 1.1,
+      "eff16": 333.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 31.7
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 1332.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 27.8
+    },
+    "7": {
+      "name": "~48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 1522.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 29.6,
+      "eff16": 111.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 5,
+      "pct": 18.5,
+      "eff16": 18.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 14.8,
+      "eff16": 37.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 11.1,
+      "eff16": 9.2
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 7.4,
+      "eff16": 4.6
+    },
+    "4320": {
+      "name": "(4320)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 2.5
+    },
+    "2952": {
+      "name": "(2952)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 3.6
+    },
+    "4158": {
+      "name": "(4158)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 2.6
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 2.8
+    },
+    "1824": {
+      "name": "(1824)",
+      "count": 1,
+      "pct": 3.7,
+      "eff16": 5.8
+    }
+  }
+}

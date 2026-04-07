@@ -1,0 +1,253 @@
+{
+  "textage": "23/onthefm.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:50.456777+00:00",
+  "title": "On the FM",
+  "artist": "C-Show",
+  "bpm_raw": "200",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1345,
+  "events": 661,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 100.0,
+  "weighted_eff16": 129.6,
+  "scratch_pct": 12.64,
+  "chord_pct": 60.36,
+  "single_pct": 39.64,
+  "ranuchi": 68,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 238,
+      "pct": 36.1,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 180,
+      "pct": 27.3,
+      "eff16": 200.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 132,
+      "pct": 20.0,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 62,
+      "pct": 9.4,
+      "eff16": 50.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 28,
+      "pct": 4.2,
+      "eff16": 75.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 1.7,
+      "eff16": 33.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 66.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 14.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 6.2
+    },
+    "800": {
+      "name": "(800)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 6.0
+    }
+  },
+  "chord_dist": {
+    "1": 262,
+    "2": 209,
+    "3": 123,
+    "4": 39,
+    "5": 28
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 547,
+      "pct": 46.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 202,
+      "pct": 17.2,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 179,
+      "pct": 15.2,
+      "eff16": 200.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 132,
+      "pct": 11.2,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 44,
+      "pct": 3.7,
+      "eff16": 50.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 30,
+      "pct": 2.6,
+      "eff16": 33.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 28,
+      "pct": 2.4,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 66.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 40.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 56,
+      "pct": 33.1,
+      "eff16": 50.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 46,
+      "pct": 27.2,
+      "eff16": 100.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 37,
+      "pct": 21.9,
+      "eff16": 33.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 3.0,
+      "eff16": 12.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 5,
+      "pct": 3.0,
+      "eff16": 10.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 14.3
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 9.1
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 6.2
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 25.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 7.1
+    }
+  },
+  "cn_notes": 6,
+  "cn_scratch_pct": 33.33,
+  "cn_kbd_overlap_pct": 2.21,
+  "cn_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 3.1
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 1.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 12.5
+    },
+    "24864": {
+      "name": "(24864)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 0.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 6.2
+    }
+  }
+}

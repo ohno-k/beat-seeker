@@ -1,0 +1,211 @@
+{
+  "textage": "18/believme.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:30.895321+00:00",
+  "title": "Believe In Me",
+  "artist": "Uraken feat. Calyn Tsukishima",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1176,
+  "events": 808,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 134.0,
+  "scratch_pct": 4.25,
+  "chord_pct": 33.91,
+  "single_pct": 66.09,
+  "ranuchi": 23,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 391,
+      "pct": 48.5,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 346,
+      "pct": 42.9,
+      "eff16": 85.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 28,
+      "pct": 3.5,
+      "eff16": 56.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 28,
+      "pct": 3.5,
+      "eff16": 340.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 42.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.3
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.1
+    },
+    "8": {
+      "name": "48th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 510.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 255.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.0
+    }
+  },
+  "chord_dist": {
+    "1": 534,
+    "2": 190,
+    "3": 74,
+    "4": 10
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 376,
+      "pct": 33.4,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 354,
+      "pct": 31.5,
+      "eff16": 85.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 329,
+      "pct": 29.2,
+      "eff16": 0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 28,
+      "pct": 2.5,
+      "eff16": 56.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 27,
+      "pct": 2.4,
+      "eff16": 340.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 42.5
+    },
+    "1548": {
+      "name": "(1548)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.6
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.1
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 18.4,
+      "eff16": 42.5
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 14.3,
+      "eff16": 21.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 10.2,
+      "eff16": 56.7
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 6.1,
+      "eff16": 85.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 6.1,
+      "eff16": 10.6
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 6.1,
+      "eff16": 34.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 5.3
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 1.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 28.3
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 3.5
+    }
+  }
+}

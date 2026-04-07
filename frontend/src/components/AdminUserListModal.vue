@@ -11,28 +11,56 @@
             プレイヤー一覧 (管理者用)
           </h2>
           <div class="flex items-center gap-2">
-            <button 
-              @click="showGameDataModal = true" 
-              class="px-3 py-1.5 bg-teal-100 hover:bg-teal-200 text-teal-700 dark:bg-teal-900/50 dark:hover:bg-teal-800/80 dark:text-teal-300 rounded text-sm font-bold flex items-center gap-1 transition-colors"
-            >
-              データ管理
-            </button>
-            <button 
-              @click="handleRecalculateAll" 
-              :disabled="isRecalculating"
-              class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
-            >
-              <svg v-if="isRecalculating" class="animate-spin -ml-1 mr-1 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
-            </button>
-            <button 
-              @click="handleClearPushAll" 
-              :disabled="isClearingPush"
-              class="px-3 py-1.5 bg-rose-100 hover:bg-rose- Rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800/80 dark:text-rose-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
-            >
-              <svg v-if="isClearingPush" class="animate-spin -ml-1 mr-1 h-4 w-4 text-rose-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              {{ isClearingPush ? '処理中...' : 'Push通知リセット' }}
-            </button>
+            <!-- データ管理 -->
+            <div class="relative group">
+              <button
+                @click="showGameDataModal = true"
+                class="px-3 py-1.5 bg-teal-100 hover:bg-teal-200 text-teal-700 dark:bg-teal-900/50 dark:hover:bg-teal-800/80 dark:text-teal-300 rounded text-sm font-bold flex items-center gap-1 transition-colors"
+              >
+                データ管理
+              </button>
+              <div class="admin-tooltip">楽曲・難易度表のドラフト追加や公開を行います</div>
+            </div>
+
+            <!-- 全ユーザー再集計 -->
+            <div class="relative group">
+              <button
+                @click="handleRecalculateAll"
+                :disabled="isRecalculating"
+                class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+              >
+                <svg v-if="isRecalculating" class="animate-spin -ml-1 mr-1 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
+              </button>
+              <div class="admin-tooltip">全ユーザーのBEAT-PTとRate-PTを現在の難易度表で再計算します。難易度表更新後に実行してください</div>
+            </div>
+
+            <!-- 譜面プロファイルDB投入 -->
+            <div class="relative group">
+              <button
+                @click="handleImportChartProfiles"
+                :disabled="isImportingProfiles"
+                class="px-3 py-1.5 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 dark:bg-cyan-900/50 dark:hover:bg-cyan-800/80 dark:text-cyan-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+              >
+                <svg v-if="isImportingProfiles" class="animate-spin -ml-1 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                {{ isImportingProfiles ? 'インポート中...' : '譜面プロファイルDB投入' }}
+              </button>
+              <div class="admin-tooltip">chart_cache/profiles/ の譜面傾向JSONをDBに登録します。スコア予測機能に必要です。新規追加・再分析後に実行してください</div>
+            </div>
+
+            <!-- Push通知リセット -->
+            <div class="relative group">
+              <button
+                @click="handleClearPushAll"
+                :disabled="isClearingPush"
+                class="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800/80 dark:text-rose-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+              >
+                <svg v-if="isClearingPush" class="animate-spin -ml-1 mr-1 h-4 w-4 text-rose-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                {{ isClearingPush ? '処理中...' : 'Push通知リセット' }}
+              </button>
+              <div class="admin-tooltip">全ユーザーのプッシュ通知設定を削除します。VAPIDキーを変更した際に実行してください</div>
+            </div>
+
             <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -171,6 +199,34 @@ const handleRecalculateAll = async () => {
   }
 };
 
+const isImportingProfiles = ref(false);
+const handleImportChartProfiles = async () => {
+  if (!confirm('chart_cache/profiles/ の譜面プロファイルをDBに投入します。\n既存データは上書きされます。続行しますか？')) return;
+
+  isImportingProfiles.value = true;
+  recalculateError.value = '';
+  recalculateSuccess.value = '';
+
+  try {
+    const { authHeaders } = useAuth();
+    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+
+    const res = await fetch(`${API_BASE}/api/admin/chart-tendencies/import`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ profilesDir: '../chart_cache/profiles' }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? `API error: ${res.status}`);
+    recalculateSuccess.value = `譜面プロファイルを投入しました: 新規 ${data.inserted} 件、更新 ${data.updated} 件、スキップ ${data.skipped} 件`;
+  } catch (e: any) {
+    recalculateError.value = '投入に失敗しました: ' + e.message;
+  } finally {
+    isImportingProfiles.value = false;
+  }
+};
+
 const isClearingPush = ref(false);
 const handleClearPushAll = async () => {
   if (!confirm('全ユーザーのプッシュ通知設定を初期化しますか？古いVAPID鍵での登録データが全て削除され、ユーザーは再設定が必要になります。')) return;
@@ -206,5 +262,41 @@ const handleClearPushAll = async () => {
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* ツールチップ */
+.admin-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 6px 10px;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.5;
+  border-radius: 8px;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 200;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.admin-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+}
+
+.group:hover .admin-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>

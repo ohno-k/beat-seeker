@@ -1,0 +1,213 @@
+{
+  "textage": "24/modulart.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:23.566232+00:00",
+  "title": "Modular Technology",
+  "artist": "Sota Fujimori",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1350,
+  "events": 950,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 159.1,
+  "scratch_pct": 7.48,
+  "chord_pct": 34.84,
+  "single_pct": 65.16,
+  "ranuchi": 67,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 744,
+      "pct": 78.4,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 123,
+      "pct": 13.0,
+      "eff16": 85.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 34,
+      "pct": 3.6,
+      "eff16": 340.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 2.6,
+      "eff16": 42.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 17,
+      "pct": 1.8,
+      "eff16": 56.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 127.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 28.3
+    }
+  },
+  "chord_dist": {
+    "1": 619,
+    "2": 270,
+    "3": 55,
+    "4": 5,
+    "6": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 725,
+      "pct": 58.1,
+      "eff16": 170.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 331,
+      "pct": 26.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 102,
+      "pct": 8.2,
+      "eff16": 85.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 33,
+      "pct": 2.6,
+      "eff16": 340.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 23,
+      "pct": 1.8,
+      "eff16": 56.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 1.6,
+      "eff16": 42.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 28.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 127.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 34.0
+    },
+    "108": {
+      "name": "(108)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 37.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 28.0,
+      "eff16": 42.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 22,
+      "pct": 22.0,
+      "eff16": 85.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 10,
+      "pct": 10.0,
+      "eff16": 170.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 6,
+      "pct": 6.0,
+      "eff16": 14.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 5.0,
+      "eff16": 56.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 5.0,
+      "eff16": 10.6
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 4.0,
+      "eff16": 21.2
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 3.0,
+      "eff16": 6.1
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 3.3
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 7.1
+    }
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "textage": "32/adamant.html?1AB00",
+  "analyzed_at": "2026-04-06T10:48:29.122359+00:00",
+  "title": "ADAMANT",
+  "artist": "BEMANI Sound Team \"L.E.D.-G\"",
+  "bpm_raw": "200",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1425,
+  "events": 867,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 100.0,
+  "weighted_eff16": 121.8,
+  "scratch_pct": 7.3,
+  "chord_pct": 48.9,
+  "single_pct": 51.1,
+  "ranuchi": 50,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 441,
+      "pct": 50.9,
+      "eff16": 100.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 173,
+      "pct": 20.0,
+      "eff16": 150.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 140,
+      "pct": 16.2,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 91,
+      "pct": 10.5,
+      "eff16": 50.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 14,
+      "pct": 1.6,
+      "eff16": 75.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 300.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 33.3
+    }
+  },
+  "chord_dist": {
+    "1": 443,
+    "2": 307,
+    "3": 100,
+    "4": 17
+  },
+  "tags": [
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 457,
+      "pct": 34.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 437,
+      "pct": 33.1,
+      "eff16": 100.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 173,
+      "pct": 13.1,
+      "eff16": 150.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 140,
+      "pct": 10.6,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 90,
+      "pct": 6.8,
+      "eff16": 50.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 14,
+      "pct": 1.1,
+      "eff16": 75.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 300.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 33.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 26.2,
+      "eff16": 50.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 9.7,
+      "eff16": 12.5
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 9.7,
+      "eff16": 25.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 9.7,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 9,
+      "pct": 8.7,
+      "eff16": 100.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 9,
+      "pct": 8.7,
+      "eff16": 6.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 5.8,
+      "eff16": 3.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 5.8,
+      "eff16": 33.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 5.8,
+      "eff16": 75.0
+    },
+    "6144": {
+      "name": "(6144)",
+      "count": 1,
+      "pct": 1.0,
+      "eff16": 0.8
+    }
+  },
+  "cn_notes": 57,
+  "cn_scratch_pct": 1.49,
+  "cn_kbd_overlap_pct": 13.93,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 16,
+      "pct": 28.6,
+      "eff16": 33.3
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 25.0,
+      "eff16": 25.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 12.5,
+      "eff16": 12.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 8.9,
+      "eff16": 50.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 7.1,
+      "eff16": 6.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 5.4,
+      "eff16": 8.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 10.0
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 3.6
+    },
+    "20352": {
+      "name": "(20352)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 0.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 16.7
+    }
+  }
+}

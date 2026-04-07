@@ -1,0 +1,269 @@
+{
+  "textage": "22/gravigzr.html?1AC00",
+  "analyzed_at": "2026-04-06T10:52:39.312501+00:00",
+  "title": "Gravigazer",
+  "artist": "DJ TOTTO",
+  "bpm_raw": "160",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1405,
+  "events": 917,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 148.2,
+  "scratch_pct": 5.27,
+  "chord_pct": 42.97,
+  "single_pct": 57.03,
+  "ranuchi": 62,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 787,
+      "pct": 85.9,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 106,
+      "pct": 11.6,
+      "eff16": 80.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 40.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 240.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 53.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 32.0
+    }
+  },
+  "chord_dist": {
+    "1": 523,
+    "2": 307,
+    "3": 81,
+    "4": 5,
+    "5": 1
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 770,
+      "pct": 57.9,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 430,
+      "pct": 32.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 7.9,
+      "eff16": 80.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 20.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 40.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 240.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 53.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 32.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.3
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 17,
+      "pct": 23.3,
+      "eff16": 160.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 23.3,
+      "eff16": 40.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 12.3,
+      "eff16": 20.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 5.5,
+      "eff16": 80.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 4.1,
+      "eff16": 2.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 4.1,
+      "eff16": 16.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 4.1,
+      "eff16": 32.0
+    },
+    "912": {
+      "name": "(912)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 4.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 6.7
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 2.9
+    }
+  },
+  "cn_notes": 20,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 26.3,
+      "eff16": 2.5
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 15.8,
+      "eff16": 20.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 10.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 1.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 3.3
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 3.1
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 5.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 5.0
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 2.4
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 6.7
+    }
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "textage": "26/comaaaaa.html?1AC00",
+  "analyzed_at": "2026-04-06T06:33:29.935251+00:00",
+  "title": "CoMAAAAAAA",
+  "artist": "Ryu☆",
+  "bpm_raw": "150",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1008,
+  "events": 647,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 75.0,
+  "weighted_eff16": 106.9,
+  "scratch_pct": 3.08,
+  "chord_pct": 45.13,
+  "single_pct": 54.87,
+  "ranuchi": 35,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 299,
+      "pct": 46.3,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 243,
+      "pct": 37.6,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 43,
+      "pct": 6.7,
+      "eff16": 37.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 32,
+      "pct": 5.0,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 2.8,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.8,
+      "eff16": 18.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 112.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 15.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 56.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 30.0
+    }
+  },
+  "chord_dist": {
+    "1": 355,
+    "2": 229,
+    "3": 57,
+    "4": 6
+  },
+  "tags": [
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 361,
+      "pct": 37.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 266,
+      "pct": 27.3,
+      "eff16": 75.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 242,
+      "pct": 24.8,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 33,
+      "pct": 3.4,
+      "eff16": 37.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 32,
+      "pct": 3.3,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 1.9,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 18.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 25.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 12.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 15.0
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 16.7,
+      "eff16": 9.4
+    },
+    "624": {
+      "name": "(624)",
+      "count": 4,
+      "pct": 13.3,
+      "eff16": 5.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 10.0,
+      "eff16": 4.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 6.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 7.5
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 4.4
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 75.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 12.5
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 2.5
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 2.2
+    }
+  }
+}

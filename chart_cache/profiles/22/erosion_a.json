@@ -1,0 +1,217 @@
+{
+  "textage": "22/erosion.html?1AB00",
+  "analyzed_at": "2026-04-06T10:51:23.782401+00:00",
+  "title": "Erosion Mark",
+  "artist": "kors k REASM Des-ROW",
+  "bpm_raw": "192",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1026,
+  "events": 687,
+  "bpm_main": 192,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 96.0,
+  "weighted_eff16": 116.3,
+  "scratch_pct": 7.41,
+  "chord_pct": 42.79,
+  "single_pct": 57.21,
+  "ranuchi": 73,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 483,
+      "pct": 70.4,
+      "eff16": 96.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 159,
+      "pct": 23.2,
+      "eff16": 192.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 4.1,
+      "eff16": 48.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 64.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 24.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 10.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 32.0
+    },
+    "42": {
+      "name": "(42)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 109.7
+    },
+    "54": {
+      "name": "(54)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 85.3
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 768.0
+    }
+  },
+  "chord_dist": {
+    "1": 393,
+    "2": 253,
+    "3": 37,
+    "4": 4
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 479,
+      "pct": 50.5,
+      "eff16": 96.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 273,
+      "pct": 28.8,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 158,
+      "pct": 16.6,
+      "eff16": 192.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 2.0,
+      "eff16": 48.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 24.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 64.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 32.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 13.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 22.7,
+      "eff16": 48.0
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 16.0,
+      "eff16": 24.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 16.0,
+      "eff16": 12.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 8.0,
+      "eff16": 6.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 6.7,
+      "eff16": 13.7
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 4.0,
+      "eff16": 6.9
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 8.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 9.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 96.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 0
+    }
+  }
+}

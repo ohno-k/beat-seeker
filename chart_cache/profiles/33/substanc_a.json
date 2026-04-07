@@ -1,0 +1,189 @@
+{
+  "textage": "33/substanc.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:03.847861+00:00",
+  "title": "Substance",
+  "artist": "BEMANI Sound Team \"めめめ\"",
+  "bpm_raw": "130-174",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1578,
+  "events": 1140,
+  "bpm_main": 174,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 174.0,
+  "weighted_eff16": 166.9,
+  "scratch_pct": 8.3,
+  "chord_pct": 31.23,
+  "single_pct": 68.77,
+  "ranuchi": 89,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 1034,
+      "pct": 90.8,
+      "eff16": 174.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 71,
+      "pct": 6.2,
+      "eff16": 87.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.7,
+      "eff16": 43.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 348.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 58.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 34.8
+    }
+  },
+  "chord_dist": {
+    "1": 784,
+    "2": 285,
+    "3": 60,
+    "4": 11
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "has_32nd",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 1012,
+      "pct": 70.0,
+      "eff16": 174.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 334,
+      "pct": 23.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 59,
+      "pct": 4.1,
+      "eff16": 87.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 11,
+      "pct": 0.8,
+      "eff16": 34.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 0.8,
+      "eff16": 43.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 58.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 348.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 29.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 17.4
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 34,
+      "pct": 26.2,
+      "eff16": 174.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 19.2,
+      "eff16": 43.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 13.1,
+      "eff16": 87.0
+    },
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 11.5,
+      "eff16": 21.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 14,
+      "pct": 10.8,
+      "eff16": 10.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 14.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 58.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 5.4
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 6.2
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 3.1
+    }
+  }
+}

@@ -1,0 +1,253 @@
+{
+  "textage": "27/shiva.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:39.020861+00:00",
+  "title": "Shiva",
+  "artist": "Relect",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1069,
+  "events": 784,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 140.0,
+  "scratch_pct": 8.04,
+  "chord_pct": 30.48,
+  "single_pct": 69.52,
+  "ranuchi": 63,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 527,
+      "pct": 67.3,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 178,
+      "pct": 22.7,
+      "eff16": 75.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 36,
+      "pct": 4.6,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 2.7,
+      "eff16": 37.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 450.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 225.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 18.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 50.0
+    }
+  },
+  "chord_dist": {
+    "1": 545,
+    "2": 198,
+    "3": 36,
+    "4": 5
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 518,
+      "pct": 52.7,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 213,
+      "pct": 21.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 175,
+      "pct": 17.8,
+      "eff16": 75.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 36,
+      "pct": 3.7,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 1.5,
+      "eff16": 37.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 450.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 225.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 18.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 50.0
+    },
+    "312": {
+      "name": "(312)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.5
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 30.6,
+      "eff16": 37.5
+    },
+    "192": {
+      "name": "half",
+      "count": 19,
+      "pct": 22.4,
+      "eff16": 18.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 10,
+      "pct": 11.8,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 8.2,
+      "eff16": 75.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 5.9,
+      "eff16": 12.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 3.5,
+      "eff16": 25.0
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 2.5
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 2.9
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 15.0
+    },
+    "528": {
+      "name": "(528)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 6.8
+    }
+  },
+  "cn_notes": 13,
+  "cn_scratch_pct": 61.54,
+  "cn_kbd_overlap_pct": 5.39,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 33.3,
+      "eff16": 9.4
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 33.3,
+      "eff16": 18.8
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 3.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 2.3
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 7.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 8.3,
+      "eff16": 12.5
+    }
+  }
+}

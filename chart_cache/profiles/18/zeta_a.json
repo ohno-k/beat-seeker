@@ -1,0 +1,220 @@
+{
+  "textage": "18/zeta.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:49.233467+00:00",
+  "title": "ZETA～素数の世界と超越者～",
+  "artist": "Zektbach",
+  "bpm_raw": "90-180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1469,
+  "events": 1049,
+  "bpm_main": 180,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 142.8,
+  "scratch_pct": 2.31,
+  "chord_pct": 28.98,
+  "single_pct": 71.02,
+  "ranuchi": 30,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 530,
+      "pct": 50.6,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 337,
+      "pct": 32.2,
+      "eff16": 90.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 89,
+      "pct": 8.5,
+      "eff16": 135.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 2.5,
+      "eff16": 45.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 20,
+      "pct": 1.9,
+      "eff16": 360.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 11,
+      "pct": 1.0,
+      "eff16": 36.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 25.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 60.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 270.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 120.0
+    }
+  },
+  "chord_dist": {
+    "1": 745,
+    "2": 196,
+    "3": 100,
+    "4": 8
+  },
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 527,
+      "pct": 36.8,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 388,
+      "pct": 27.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 337,
+      "pct": 23.5,
+      "eff16": 90.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 89,
+      "pct": 6.2,
+      "eff16": 135.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 1.8,
+      "eff16": 45.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 20,
+      "pct": 1.4,
+      "eff16": 360.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 11,
+      "pct": 0.8,
+      "eff16": 36.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 60.0
+    },
+    "168": {
+      "name": "(168)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 25.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 270.0
+    }
+  },
+  "scr_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 9,
+      "pct": 27.3,
+      "eff16": 5.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 21.2,
+      "eff16": 45.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 9.1,
+      "eff16": 6.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 30.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 11.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 2.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 22.5
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 2.2
+    },
+    "6144": {
+      "name": "(6144)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 0.7
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 1.4
+    }
+  }
+}

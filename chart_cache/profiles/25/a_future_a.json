@@ -1,0 +1,217 @@
+{
+  "textage": "25/a_future.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:01.434911+00:00",
+  "title": "Around the Future",
+  "artist": "Maozon vs. C-Show",
+  "bpm_raw": "162",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1124,
+  "events": 820,
+  "bpm_main": 162,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 162.0,
+  "weighted_eff16": 132.9,
+  "scratch_pct": 7.74,
+  "chord_pct": 29.88,
+  "single_pct": 70.12,
+  "ranuchi": 30,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 540,
+      "pct": 65.9,
+      "eff16": 162.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 225,
+      "pct": 27.5,
+      "eff16": 81.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 2.3,
+      "eff16": 54.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 2.1,
+      "eff16": 40.5
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 20.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 243.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 27.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 4.5
+    },
+    "38": {
+      "name": "(38)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 102.3
+    }
+  },
+  "chord_dist": {
+    "1": 575,
+    "2": 195,
+    "3": 41,
+    "4": 9
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 527,
+      "pct": 50.9,
+      "eff16": 162.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 254,
+      "pct": 24.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 201,
+      "pct": 19.4,
+      "eff16": 81.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 1.8,
+      "eff16": 54.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 1.1,
+      "eff16": 40.5
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 1.1,
+      "eff16": 20.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 27.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.0
+    },
+    "960": {
+      "name": "(960)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 4.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 32.4
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 20,
+      "pct": 23.3,
+      "eff16": 81.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 11.6,
+      "eff16": 20.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 10,
+      "pct": 11.6,
+      "eff16": 162.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 10.5,
+      "eff16": 40.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 8.1,
+      "eff16": 27.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 5.8,
+      "eff16": 5.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 5.8,
+      "eff16": 10.1
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 3.5,
+      "eff16": 2.7
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 3.5,
+      "eff16": 243.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 5.8
+    }
+  }
+}

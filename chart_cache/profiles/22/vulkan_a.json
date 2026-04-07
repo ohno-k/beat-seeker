@@ -1,0 +1,181 @@
+{
+  "textage": "22/vulkan.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:20.400051+00:00",
+  "title": "Vulkan",
+  "artist": "Hommarju",
+  "bpm_raw": "205",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1462,
+  "events": 872,
+  "bpm_main": 205,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 102.5,
+  "weighted_eff16": 139.3,
+  "scratch_pct": 2.94,
+  "chord_pct": 51.95,
+  "single_pct": 48.05,
+  "ranuchi": 63,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 515,
+      "pct": 59.1,
+      "eff16": 102.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 327,
+      "pct": 37.5,
+      "eff16": 205.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 51.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 68.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.4
+    }
+  },
+  "chord_dist": {
+    "1": 419,
+    "2": 336,
+    "3": 99,
+    "4": 16,
+    "5": 2
+  },
+  "tags": [
+    "scratch_low",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 553,
+      "pct": 39.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 519,
+      "pct": 36.6,
+      "eff16": 102.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 317,
+      "pct": 22.4,
+      "eff16": 205.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 1.2,
+      "eff16": 51.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 68.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 11.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 41.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.4
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 38.1,
+      "eff16": 51.2
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 14.3,
+      "eff16": 25.6
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 7.1,
+      "eff16": 3.4
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 7.1,
+      "eff16": 8.5
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 3.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 3.2
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 1.6
+    },
+    "1680": {
+      "name": "(1680)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 2.9
+    },
+    "48": {
+      "name": "8th",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 102.5
+    },
+    "3168": {
+      "name": "(3168)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 1.6
+    }
+  }
+}

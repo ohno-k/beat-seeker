@@ -1,0 +1,202 @@
+{
+  "textage": "27/_shamshr.html?1AB00",
+  "analyzed_at": "2026-04-06T11:00:29.962355+00:00",
+  "title": "シャムシールの舞",
+  "artist": "Zektbach",
+  "bpm_raw": "100-155",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1294,
+  "events": 620,
+  "bpm_main": 155,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 77.5,
+  "weighted_eff16": 117.8,
+  "scratch_pct": 3.17,
+  "chord_pct": 64.68,
+  "single_pct": 35.32,
+  "ranuchi": 8,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 266,
+      "pct": 43.0,
+      "eff16": 77.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 215,
+      "pct": 34.7,
+      "eff16": 155.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 51,
+      "pct": 8.2,
+      "eff16": 232.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 7.4,
+      "eff16": 38.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 33,
+      "pct": 5.3,
+      "eff16": 116.2
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 19.4
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 465.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 25.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 9.7
+    }
+  },
+  "chord_dist": {
+    "1": 219,
+    "2": 189,
+    "3": 166,
+    "4": 35,
+    "5": 7,
+    "6": 4
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 633,
+      "pct": 50.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 266,
+      "pct": 21.2,
+      "eff16": 77.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 215,
+      "pct": 17.2,
+      "eff16": 155.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 51,
+      "pct": 4.1,
+      "eff16": 232.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 3.7,
+      "eff16": 38.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 33,
+      "pct": 2.6,
+      "eff16": 116.2
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 19.4
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 465.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 37.5,
+      "eff16": 38.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 11,
+      "pct": 27.5,
+      "eff16": 4.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 20.0,
+      "eff16": 9.7
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 5.0,
+      "eff16": 1.2
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 5.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 3.2
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 3.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 7.8
+    }
+  }
+}

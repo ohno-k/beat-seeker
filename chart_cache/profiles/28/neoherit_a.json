@@ -1,0 +1,189 @@
+{
+  "textage": "28/neoherit.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:34.998953+00:00",
+  "title": "Neo Heritage",
+  "artist": "kors k vs MAD CHILD",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1454,
+  "events": 900,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 136.1,
+  "scratch_pct": 9.9,
+  "chord_pct": 42.78,
+  "single_pct": 57.22,
+  "ranuchi": 83,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 660,
+      "pct": 73.4,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 177,
+      "pct": 19.7,
+      "eff16": 75.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 24,
+      "pct": 2.7,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 2.0,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 1.8,
+      "eff16": 50.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 450.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    }
+  },
+  "chord_dist": {
+    "1": 515,
+    "2": 262,
+    "3": 92,
+    "4": 18,
+    "5": 11,
+    "6": 2
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 614,
+      "pct": 46.9,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 456,
+      "pct": 34.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 170,
+      "pct": 13.0,
+      "eff16": 75.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 24,
+      "pct": 1.8,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 1.7,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 18.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 450.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 43,
+      "pct": 30.1,
+      "eff16": 37.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 33,
+      "pct": 23.1,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 28,
+      "pct": 19.6,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 8.4,
+      "eff16": 50.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 7,
+      "pct": 4.9,
+      "eff16": 30.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 4.2,
+      "eff16": 2.3
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 18.8
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 2.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 6.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.7,
+      "eff16": 9.4
+    }
+  }
+}

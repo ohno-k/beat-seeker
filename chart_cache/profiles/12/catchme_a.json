@@ -1,0 +1,213 @@
+{
+  "textage": "12/catchme.html?1AC00",
+  "analyzed_at": "2026-04-06T06:33:17.834269+00:00",
+  "title": "Catch Me",
+  "artist": "DJ Yoshitaka feat. ERi",
+  "bpm_raw": "115",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 892,
+  "events": 539,
+  "bpm_main": 115,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 115.0,
+  "weighted_eff16": 110.1,
+  "scratch_pct": 13.68,
+  "chord_pct": 45.83,
+  "single_pct": 54.17,
+  "ranuchi": 31,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 288,
+      "pct": 53.5,
+      "eff16": 115.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 128,
+      "pct": 23.8,
+      "eff16": 57.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 49,
+      "pct": 9.1,
+      "eff16": 38.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 36,
+      "pct": 6.7,
+      "eff16": 230.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 3.2,
+      "eff16": 172.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 16,
+      "pct": 3.0,
+      "eff16": 345.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 28.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 86.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 6.8
+    }
+  },
+  "chord_dist": {
+    "1": 292,
+    "2": 162,
+    "3": 65,
+    "4": 19,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 261,
+      "pct": 33.9,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 240,
+      "pct": 31.2,
+      "eff16": 115.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 137,
+      "pct": 17.8,
+      "eff16": 57.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 57,
+      "pct": 7.4,
+      "eff16": 38.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 36,
+      "pct": 4.7,
+      "eff16": 230.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 2.2,
+      "eff16": 172.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 16,
+      "pct": 2.1,
+      "eff16": 345.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 28.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 86.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 30.6,
+      "eff16": 28.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 30,
+      "pct": 24.8,
+      "eff16": 115.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 6.6,
+      "eff16": 7.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 8,
+      "pct": 6.6,
+      "eff16": 8.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 6.6,
+      "eff16": 38.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 5.8,
+      "eff16": 57.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 3.3,
+      "eff16": 14.4
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 3.3,
+      "eff16": 11.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 19.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 4.8
+    }
+  }
+}

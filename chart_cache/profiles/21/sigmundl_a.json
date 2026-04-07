@@ -1,0 +1,233 @@
+{
+  "textage": "21/sigmundl.html?1AC00",
+  "analyzed_at": "2026-04-06T06:39:28.315010+00:00",
+  "title": "Sigmund",
+  "artist": "Gram",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 2187,
+  "events": 1269,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 200.0,
+  "weighted_eff16": 198.4,
+  "scratch_pct": 6.04,
+  "chord_pct": 53.9,
+  "single_pct": 46.1,
+  "ranuchi": 140,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 632,
+      "pct": 49.8,
+      "eff16": 200.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 348,
+      "pct": 27.4,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 150,
+      "pct": 11.8,
+      "eff16": 100.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 78,
+      "pct": 6.2,
+      "eff16": 600.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 33,
+      "pct": 2.6,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 1.9,
+      "eff16": 50.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 33.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    }
+  },
+  "chord_dist": {
+    "1": 585,
+    "2": 470,
+    "3": 194,
+    "4": 20
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 787,
+      "pct": 38.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 632,
+      "pct": 30.8,
+      "eff16": 200.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 348,
+      "pct": 16.9,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 150,
+      "pct": 7.3,
+      "eff16": 100.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 78,
+      "pct": 3.8,
+      "eff16": 600.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 33,
+      "pct": 1.6,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 1.2,
+      "eff16": 50.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 33.3
+    }
+  },
+  "scr_interval_dist": {
+    "32": {
+      "name": "12th(triplet)",
+      "count": 58,
+      "pct": 44.3,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 13,
+      "pct": 9.9,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 12,
+      "pct": 9.2,
+      "eff16": 200.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 6.1,
+      "eff16": 12.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 8,
+      "pct": 6.1,
+      "eff16": 6.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 4.6,
+      "eff16": 3.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 4.6,
+      "eff16": 66.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 4.6,
+      "eff16": 50.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 75.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 4.2
+    }
+  },
+  "cn_notes": 19,
+  "cn_scratch_pct": 0.0,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 33.3,
+      "eff16": 25.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 22.2,
+      "eff16": 12.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 22.2,
+      "eff16": 33.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 11.1,
+      "eff16": 20.0
+    },
+    "11904": {
+      "name": "(11904)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 0.4
+    },
+    "2544": {
+      "name": "(2544)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 1.9
+    }
+  }
+}

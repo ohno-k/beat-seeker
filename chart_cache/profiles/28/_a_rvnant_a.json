@@ -1,0 +1,220 @@
+{
+  "textage": "28/_a_rvnant.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:05.630103+00:00",
+  "title": "二人ノ廃城幽踊宴",
+  "artist": "上ノ瀬つかさ",
+  "bpm_raw": "280-316",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1927,
+  "events": 1222,
+  "bpm_main": 316,
+  "is_soflan": true,
+  "dominant_interval": 64,
+  "dominant_eff16": 118.5,
+  "weighted_eff16": 181.1,
+  "scratch_pct": 4.57,
+  "chord_pct": 37.81,
+  "single_pct": 62.19,
+  "ranuchi": 82,
+  "interval_dist": {
+    "64": {
+      "name": "quarter-triplet",
+      "count": 328,
+      "pct": 26.9,
+      "eff16": 118.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 302,
+      "pct": 24.7,
+      "eff16": 237.0
+    },
+    "43": {
+      "name": "(43)",
+      "count": 168,
+      "pct": 13.8,
+      "eff16": 176.4
+    },
+    "42": {
+      "name": "(42)",
+      "count": 83,
+      "pct": 6.8,
+      "eff16": 180.6
+    },
+    "128": {
+      "name": "(128)",
+      "count": 65,
+      "pct": 5.3,
+      "eff16": 59.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 62,
+      "pct": 5.1,
+      "eff16": 316.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 44,
+      "pct": 3.6,
+      "eff16": 79.0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 22,
+      "pct": 1.8,
+      "eff16": 189.6
+    },
+    "56": {
+      "name": "(56)",
+      "count": 20,
+      "pct": 1.6,
+      "eff16": 135.4
+    },
+    "48": {
+      "name": "8th",
+      "count": 18,
+      "pct": 1.5,
+      "eff16": 158.0
+    }
+  },
+  "chord_dist": {
+    "1": 760,
+    "2": 289,
+    "3": 117,
+    "4": 42,
+    "5": 14
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 620,
+      "pct": 33.7,
+      "eff16": 0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 328,
+      "pct": 17.8,
+      "eff16": 118.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 302,
+      "pct": 16.4,
+      "eff16": 237.0
+    },
+    "43": {
+      "name": "(43)",
+      "count": 168,
+      "pct": 9.1,
+      "eff16": 176.4
+    },
+    "42": {
+      "name": "(42)",
+      "count": 83,
+      "pct": 4.5,
+      "eff16": 180.6
+    },
+    "128": {
+      "name": "(128)",
+      "count": 64,
+      "pct": 3.5,
+      "eff16": 59.2
+    },
+    "24": {
+      "name": "16th",
+      "count": 62,
+      "pct": 3.4,
+      "eff16": 316.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 44,
+      "pct": 2.4,
+      "eff16": 79.0
+    },
+    "40": {
+      "name": "(40)",
+      "count": 22,
+      "pct": 1.2,
+      "eff16": 189.6
+    },
+    "56": {
+      "name": "(56)",
+      "count": 19,
+      "pct": 1.0,
+      "eff16": 135.4
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 16,
+      "pct": 18.4,
+      "eff16": 19.8
+    },
+    "128": {
+      "name": "(128)",
+      "count": 16,
+      "pct": 18.4,
+      "eff16": 59.2
+    },
+    "160": {
+      "name": "(160)",
+      "count": 7,
+      "pct": 8.0,
+      "eff16": 47.4
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 5.7,
+      "eff16": 39.5
+    },
+    "512": {
+      "name": "(512)",
+      "count": 4,
+      "pct": 4.6,
+      "eff16": 14.8
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 4,
+      "pct": 4.6,
+      "eff16": 6.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 3.4,
+      "eff16": 4.9
+    },
+    "256": {
+      "name": "(256)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 29.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 9.9
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 1.1,
+      "eff16": 2.5
+    }
+  }
+}

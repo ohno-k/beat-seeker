@@ -1,0 +1,234 @@
+{
+  "textage": "29/vcravers.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:14.294984+00:00",
+  "title": "Victory Of Ravers",
+  "artist": "DJ Shimamura",
+  "bpm_raw": "178",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1275,
+  "events": 671,
+  "bpm_main": 178,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 89.0,
+  "weighted_eff16": 109.7,
+  "scratch_pct": 13.96,
+  "chord_pct": 58.72,
+  "single_pct": 41.28,
+  "ranuchi": 36,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 406,
+      "pct": 60.6,
+      "eff16": 89.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 192,
+      "pct": 28.7,
+      "eff16": 178.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 66,
+      "pct": 9.9,
+      "eff16": 44.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 29.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 59.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.1
+    }
+  },
+  "chord_dist": {
+    "1": 277,
+    "2": 251,
+    "3": 92,
+    "4": 35,
+    "5": 16
+  },
+  "tags": [
+    "scratch_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 474,
+      "pct": 43.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 368,
+      "pct": 33.6,
+      "eff16": 89.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 170,
+      "pct": 15.5,
+      "eff16": 178.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 72,
+      "pct": 6.6,
+      "eff16": 44.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 29.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 59.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 17.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.1
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.6
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.8
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 81,
+      "pct": 45.8,
+      "eff16": 89.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 20.9,
+      "eff16": 44.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 16,
+      "pct": 9.0,
+      "eff16": 178.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 6.2,
+      "eff16": 29.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 2.8,
+      "eff16": 17.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 2.8,
+      "eff16": 12.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 2.3,
+      "eff16": 14.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 11.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 2.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 9.9
+    }
+  },
+  "cn_notes": 19,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.91,
+  "cn_interval_dist": {
+    "336": {
+      "name": "(336)",
+      "count": 6,
+      "pct": 33.3,
+      "eff16": 12.7
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 33.3,
+      "eff16": 89.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 16.7,
+      "eff16": 11.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 29.7
+    },
+    "14064": {
+      "name": "(14064)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 0.3
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 5.6,
+      "eff16": 8.1
+    }
+  }
+}

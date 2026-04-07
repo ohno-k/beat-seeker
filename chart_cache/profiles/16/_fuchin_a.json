@@ -1,0 +1,212 @@
+{
+  "textage": "16/_fuchin.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:02.903085+00:00",
+  "title": "不沈艦CANDY",
+  "artist": "Risk Junk",
+  "bpm_raw": "188",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1630,
+  "events": 864,
+  "bpm_main": 188,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 188.0,
+  "weighted_eff16": 143.1,
+  "scratch_pct": 2.82,
+  "chord_pct": 63.08,
+  "single_pct": 36.92,
+  "ranuchi": 87,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 439,
+      "pct": 50.9,
+      "eff16": 188.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 336,
+      "pct": 38.9,
+      "eff16": 94.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 60,
+      "pct": 7.0,
+      "eff16": 47.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.9,
+      "eff16": 376.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 62.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.8
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.5
+    }
+  },
+  "chord_dist": {
+    "1": 319,
+    "2": 366,
+    "3": 142,
+    "4": 32,
+    "5": 5
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 722,
+      "pct": 45.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 437,
+      "pct": 27.6,
+      "eff16": 188.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 336,
+      "pct": 21.2,
+      "eff16": 94.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 58,
+      "pct": 3.7,
+      "eff16": 47.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.0,
+      "eff16": 376.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 62.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 37.6
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 10.4
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.8
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 11,
+      "pct": 24.4,
+      "eff16": 2.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 17.8,
+      "eff16": 47.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 13.3,
+      "eff16": 11.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 8.9,
+      "eff16": 15.7
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 8.9,
+      "eff16": 23.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 6.7,
+      "eff16": 5.9
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 4.4,
+      "eff16": 3.9
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 4.4,
+      "eff16": 94.0
+    },
+    "1200": {
+      "name": "(1200)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 3.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 18.8
+    }
+  }
+}

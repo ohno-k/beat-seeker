@@ -1,0 +1,223 @@
+{
+  "textage": "27/smawedge.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:46.983640+00:00",
+  "title": "Smashing Wedge",
+  "artist": "nora2r",
+  "bpm_raw": "215",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1955,
+  "events": 991,
+  "bpm_main": 215,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 107.5,
+  "weighted_eff16": 152.4,
+  "scratch_pct": 8.49,
+  "chord_pct": 64.48,
+  "single_pct": 35.52,
+  "ranuchi": 73,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 449,
+      "pct": 45.4,
+      "eff16": 107.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 446,
+      "pct": 45.1,
+      "eff16": 215.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 47,
+      "pct": 4.7,
+      "eff16": 80.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 2.3,
+      "eff16": 53.8
+    },
+    "128": {
+      "name": "(128)",
+      "count": 17,
+      "pct": 1.7,
+      "eff16": 40.3
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 26.9
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 161.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 322.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.5
+    }
+  },
+  "chord_dist": {
+    "1": 352,
+    "2": 395,
+    "3": 172,
+    "4": 63,
+    "5": 9
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 822,
+      "pct": 46.0,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 440,
+      "pct": 24.6,
+      "eff16": 215.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 432,
+      "pct": 24.2,
+      "eff16": 107.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 47,
+      "pct": 2.6,
+      "eff16": 80.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 1.1,
+      "eff16": 53.8
+    },
+    "128": {
+      "name": "(128)",
+      "count": 17,
+      "pct": 1.0,
+      "eff16": 40.3
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 26.9
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 161.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 322.5
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.7
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 53,
+      "pct": 32.1,
+      "eff16": 107.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 47,
+      "pct": 28.5,
+      "eff16": 53.8
+    },
+    "192": {
+      "name": "half",
+      "count": 29,
+      "pct": 17.6,
+      "eff16": 26.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 5.5,
+      "eff16": 13.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 35.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 3.4
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 161.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 10.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 6.7
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 1.7
+    }
+  },
+  "cn_notes": 3,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 100.0,
+      "eff16": 13.4
+    }
+  }
+}

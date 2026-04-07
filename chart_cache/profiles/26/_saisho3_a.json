@@ -1,0 +1,218 @@
+{
+  "textage": "26/_saisho3.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:41.763316+00:00",
+  "title": "最小三倍完全数",
+  "artist": "DJ TECHNORCH",
+  "bpm_raw": "220",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1310,
+  "events": 741,
+  "bpm_main": 220,
+  "is_soflan": false,
+  "dominant_interval": 38,
+  "dominant_eff16": 138.9,
+  "weighted_eff16": 192.6,
+  "scratch_pct": 7.48,
+  "chord_pct": 54.25,
+  "single_pct": 45.75,
+  "ranuchi": 73,
+  "interval_dist": {
+    "38": {
+      "name": "(38)",
+      "count": 166,
+      "pct": 22.4,
+      "eff16": 138.9
+    },
+    "19": {
+      "name": "(19)",
+      "count": 143,
+      "pct": 19.3,
+      "eff16": 277.9
+    },
+    "39": {
+      "name": "(39)",
+      "count": 132,
+      "pct": 17.8,
+      "eff16": 135.4
+    },
+    "16": {
+      "name": "24th",
+      "count": 56,
+      "pct": 7.6,
+      "eff16": 330.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 50,
+      "pct": 6.8,
+      "eff16": 165.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 29,
+      "pct": 3.9,
+      "eff16": 264.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 3.4,
+      "eff16": 55.0
+    },
+    "13": {
+      "name": "~32nd",
+      "count": 24,
+      "pct": 3.2,
+      "eff16": 406.2
+    },
+    "77": {
+      "name": "(77)",
+      "count": 23,
+      "pct": 3.1,
+      "eff16": 68.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 19,
+      "pct": 2.6,
+      "eff16": 110.0
+    }
+  },
+  "chord_dist": {
+    "1": 339,
+    "2": 254,
+    "3": 131,
+    "4": 15,
+    "5": 2
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 503,
+      "pct": 41.5,
+      "eff16": 0
+    },
+    "38": {
+      "name": "(38)",
+      "count": 143,
+      "pct": 11.8,
+      "eff16": 138.9
+    },
+    "19": {
+      "name": "(19)",
+      "count": 137,
+      "pct": 11.3,
+      "eff16": 277.9
+    },
+    "39": {
+      "name": "(39)",
+      "count": 113,
+      "pct": 9.3,
+      "eff16": 135.4
+    },
+    "16": {
+      "name": "24th",
+      "count": 56,
+      "pct": 4.6,
+      "eff16": 330.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 50,
+      "pct": 4.1,
+      "eff16": 165.0
+    },
+    "77": {
+      "name": "(77)",
+      "count": 44,
+      "pct": 3.6,
+      "eff16": 68.6
+    },
+    "20": {
+      "name": "(20)",
+      "count": 27,
+      "pct": 2.2,
+      "eff16": 264.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 2.1,
+      "eff16": 55.0
+    },
+    "13": {
+      "name": "~32nd",
+      "count": 24,
+      "pct": 2.0,
+      "eff16": 406.2
+    }
+  },
+  "scr_interval_dist": {
+    "39": {
+      "name": "(39)",
+      "count": 15,
+      "pct": 15.5,
+      "eff16": 135.4
+    },
+    "38": {
+      "name": "(38)",
+      "count": 14,
+      "pct": 14.4,
+      "eff16": 138.9
+    },
+    "76": {
+      "name": "(76)",
+      "count": 10,
+      "pct": 10.3,
+      "eff16": 69.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 9.3,
+      "eff16": 13.8
+    },
+    "77": {
+      "name": "(77)",
+      "count": 9,
+      "pct": 9.3,
+      "eff16": 68.6
+    },
+    "19": {
+      "name": "(19)",
+      "count": 6,
+      "pct": 6.2,
+      "eff16": 277.9
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 4.1,
+      "eff16": 27.5
+    },
+    "57": {
+      "name": "(57)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 92.6
+    },
+    "58": {
+      "name": "(58)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 91.0
+    },
+    "116": {
+      "name": "(116)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 45.5
+    }
+  }
+}

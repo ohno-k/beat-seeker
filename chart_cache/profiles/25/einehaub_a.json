@@ -1,0 +1,218 @@
+{
+  "textage": "25/einehaub.html?1AB00",
+  "analyzed_at": "2026-04-06T10:51:14.344552+00:00",
+  "title": "Eine Haube ～聖地の果てにあるもの～",
+  "artist": "AIKO OI",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1333,
+  "events": 820,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 157.5,
+  "scratch_pct": 3.08,
+  "chord_pct": 41.34,
+  "single_pct": 58.66,
+  "ranuchi": 59,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 364,
+      "pct": 44.4,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 148,
+      "pct": 18.1,
+      "eff16": 85.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 123,
+      "pct": 15.0,
+      "eff16": 127.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 74,
+      "pct": 9.0,
+      "eff16": 255.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 4.9,
+      "eff16": 42.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 27,
+      "pct": 3.3,
+      "eff16": 510.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 16,
+      "pct": 2.0,
+      "eff16": 63.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 56.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 340.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 21.2
+    }
+  },
+  "chord_dist": {
+    "1": 481,
+    "2": 217,
+    "3": 80,
+    "4": 32,
+    "5": 10
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 472,
+      "pct": 36.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 364,
+      "pct": 28.2,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 148,
+      "pct": 11.5,
+      "eff16": 85.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 123,
+      "pct": 9.5,
+      "eff16": 127.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 74,
+      "pct": 5.7,
+      "eff16": 255.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 3.1,
+      "eff16": 42.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 27,
+      "pct": 2.1,
+      "eff16": 510.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 16,
+      "pct": 1.2,
+      "eff16": 63.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 56.7
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 340.0
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 20.0,
+      "eff16": 10.6
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 17.5,
+      "eff16": 21.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 10.0,
+      "eff16": 56.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 10.0,
+      "eff16": 42.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 7.5,
+      "eff16": 2.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 5.0,
+      "eff16": 7.1
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 5.0,
+      "eff16": 5.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 5.0,
+      "eff16": 85.0
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 6.5
+    },
+    "912": {
+      "name": "(912)",
+      "count": 1,
+      "pct": 2.5,
+      "eff16": 4.5
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "textage": "18/xanadu_2.html?1AC00",
+  "analyzed_at": "2026-04-06T10:58:33.785282+00:00",
+  "title": "XANADU OF TWO",
+  "artist": "T.Kakuta With Starving Trancer + 森永真由美",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1729,
+  "events": 892,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 123.3,
+  "scratch_pct": 3.24,
+  "chord_pct": 61.21,
+  "single_pct": 38.79,
+  "ranuchi": 33,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 487,
+      "pct": 54.7,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 392,
+      "pct": 44.0,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.7
+    }
+  },
+  "chord_dist": {
+    "1": 346,
+    "2": 308,
+    "3": 187,
+    "4": 49,
+    "5": 2
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 781,
+      "pct": 46.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 487,
+      "pct": 29.1,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 392,
+      "pct": 23.4,
+      "eff16": 80.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.5,
+      "eff16": 53.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 40.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.7
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 21.8,
+      "eff16": 20.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 14.5,
+      "eff16": 10.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 14.5,
+      "eff16": 80.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 10.9,
+      "eff16": 2.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 10.9,
+      "eff16": 53.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 7.3,
+      "eff16": 5.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 32.0
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 1.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 26.7
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 1.2
+    }
+  }
+}

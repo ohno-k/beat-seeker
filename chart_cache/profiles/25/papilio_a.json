@@ -1,0 +1,257 @@
+{
+  "textage": "25/papilio.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:05.886030+00:00",
+  "title": "Papilio ulysses",
+  "artist": "BEMANI Sound Team \"SYUNN\"",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1242,
+  "events": 971,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 173.2,
+  "scratch_pct": 7.49,
+  "chord_pct": 24.51,
+  "single_pct": 75.49,
+  "ranuchi": 79,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 777,
+      "pct": 80.1,
+      "eff16": 180.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 75,
+      "pct": 7.7,
+      "eff16": 270.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 74,
+      "pct": 7.6,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 19,
+      "pct": 2.0,
+      "eff16": 45.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 11.2
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 22.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 9.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.0
+    }
+  },
+  "chord_dist": {
+    "1": 733,
+    "2": 207,
+    "3": 29,
+    "4": 2
+  },
+  "tags": [
+    "single_heavy",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 776,
+      "pct": 67.6,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 204,
+      "pct": 17.8,
+      "eff16": 0
+    },
+    "16": {
+      "name": "24th",
+      "count": 75,
+      "pct": 6.5,
+      "eff16": 270.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 35,
+      "pct": 3.0,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 2.4,
+      "eff16": 45.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 11.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 22.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 18.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 9.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 38,
+      "pct": 41.3,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 26.1,
+      "eff16": 45.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 7.6,
+      "eff16": 22.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 9.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 2.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 180.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 10.0
+    },
+    "864": {
+      "name": "(864)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 5.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.2,
+      "eff16": 5.6
+    }
+  },
+  "cn_notes": 30,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 15.23,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 51.7,
+      "eff16": 22.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 20.7,
+      "eff16": 2.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 7.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 11.2
+    },
+    "4512": {
+      "name": "(4512)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 1.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 9.0
+    }
+  }
+}

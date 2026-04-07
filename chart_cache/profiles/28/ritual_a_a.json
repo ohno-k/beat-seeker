@@ -1,0 +1,182 @@
+{
+  "textage": "28/ritual_a.html?1AB00",
+  "analyzed_at": "2026-04-06T10:55:50.849426+00:00",
+  "title": "Ritual of Anubis",
+  "artist": "KO3 & Relect",
+  "bpm_raw": "190",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1422,
+  "events": 781,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 95.0,
+  "weighted_eff16": 127.8,
+  "scratch_pct": 12.66,
+  "chord_pct": 59.67,
+  "single_pct": 40.33,
+  "ranuchi": 72,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 424,
+      "pct": 54.4,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 294,
+      "pct": 37.7,
+      "eff16": 190.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 49,
+      "pct": 6.3,
+      "eff16": 47.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 142.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 63.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 31.7
+    }
+  },
+  "chord_dist": {
+    "1": 315,
+    "2": 323,
+    "3": 114,
+    "4": 26,
+    "5": 3
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 483,
+      "pct": 38.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 396,
+      "pct": 31.9,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 290,
+      "pct": 23.4,
+      "eff16": 190.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 47,
+      "pct": 3.8,
+      "eff16": 47.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 63.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 31.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 142.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 23.8
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 75,
+      "pct": 41.9,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 60,
+      "pct": 33.5,
+      "eff16": 47.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 8,
+      "pct": 4.5,
+      "eff16": 15.8
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 3.4,
+      "eff16": 23.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 2.8,
+      "eff16": 11.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 5.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 6.8
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 4.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 9.5
+    },
+    "624": {
+      "name": "(624)",
+      "count": 2,
+      "pct": 1.1,
+      "eff16": 7.3
+    }
+  }
+}

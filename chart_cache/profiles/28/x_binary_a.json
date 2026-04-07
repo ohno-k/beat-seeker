@@ -1,0 +1,186 @@
+{
+  "textage": "28/x_binary.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:33.100911+00:00",
+  "title": "X-ray binary",
+  "artist": "BEMANI Sound Team \"Trance Liquid\"",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1417,
+  "events": 918,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 134.2,
+  "scratch_pct": 2.47,
+  "chord_pct": 42.92,
+  "single_pct": 57.08,
+  "ranuchi": 117,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 721,
+      "pct": 78.6,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 172,
+      "pct": 18.8,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 37.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 18.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.0
+    }
+  },
+  "chord_dist": {
+    "1": 524,
+    "2": 300,
+    "3": 83,
+    "4": 11
+  },
+  "tags": [
+    "scratch_low",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 721,
+      "pct": 52.2,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 464,
+      "pct": 33.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 172,
+      "pct": 12.5,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 37.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 18.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 20.6,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 11.8,
+      "eff16": 37.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 4,
+      "pct": 11.8,
+      "eff16": 1.2
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 8.8,
+      "eff16": 18.8
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 8.8,
+      "eff16": 5.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 8.8,
+      "eff16": 2.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 8.8,
+      "eff16": 12.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 8.8,
+      "eff16": 9.4
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 2.9,
+      "eff16": 1.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 2.9,
+      "eff16": 5.4
+    }
+  }
+}

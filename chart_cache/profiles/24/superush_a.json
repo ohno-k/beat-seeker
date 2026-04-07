@@ -1,0 +1,266 @@
+{
+  "textage": "24/superush.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:07.175779+00:00",
+  "title": "Super Rush",
+  "artist": "kors k",
+  "bpm_raw": "190",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1698,
+  "events": 799,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 95.0,
+  "weighted_eff16": 124.3,
+  "scratch_pct": 8.78,
+  "chord_pct": 69.96,
+  "single_pct": 30.04,
+  "ranuchi": 71,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 536,
+      "pct": 67.2,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 212,
+      "pct": 26.6,
+      "eff16": 190.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 4.6,
+      "eff16": 47.5
+    },
+    "6": {
+      "name": "64th",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 760.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 31.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 63.3
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.0
+    }
+  },
+  "chord_dist": {
+    "1": 240,
+    "2": 298,
+    "3": 186,
+    "4": 71,
+    "5": 4
+  },
+  "tags": [
+    "scratch_heavy",
+    "chord_heavy",
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 756,
+      "pct": 48.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 530,
+      "pct": 34.2,
+      "eff16": 95.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 209,
+      "pct": 13.5,
+      "eff16": 190.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 2.4,
+      "eff16": 47.5
+    },
+    "6": {
+      "name": "64th",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 760.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 31.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 63.3
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 42,
+      "pct": 28.4,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 27.0,
+      "eff16": 47.5
+    },
+    "192": {
+      "name": "half",
+      "count": 20,
+      "pct": 13.5,
+      "eff16": 23.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 11,
+      "pct": 7.4,
+      "eff16": 11.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 4.1,
+      "eff16": 31.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.7,
+      "eff16": 5.9
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 3.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 19.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 6.8
+    },
+    "864": {
+      "name": "(864)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 5.3
+    }
+  },
+  "cn_notes": 27,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 3.36,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 23.1,
+      "eff16": 47.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 19.2,
+      "eff16": 95.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 15.4,
+      "eff16": 3.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 11.5,
+      "eff16": 5.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 11.5,
+      "eff16": 6.8
+    },
+    "2784": {
+      "name": "(2784)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 1.6
+    },
+    "2112": {
+      "name": "(2112)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 2.2
+    },
+    "2160": {
+      "name": "(2160)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 2.1
+    },
+    "9312": {
+      "name": "(9312)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 0.5
+    },
+    "4416": {
+      "name": "(4416)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 1.0
+    }
+  }
+}

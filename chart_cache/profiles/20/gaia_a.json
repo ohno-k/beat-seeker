@@ -1,0 +1,217 @@
+{
+  "textage": "20/gaia.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:47.588070+00:00",
+  "title": "GAIA",
+  "artist": "猫叉L.E.D.Master+",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1585,
+  "events": 1038,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 166.9,
+  "scratch_pct": 3.97,
+  "chord_pct": 40.08,
+  "single_pct": 59.92,
+  "ranuchi": 98,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 802,
+      "pct": 77.3,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 136,
+      "pct": 13.1,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 52,
+      "pct": 5.0,
+      "eff16": 270.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.5,
+      "eff16": 45.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 1.1,
+      "eff16": 30.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 135.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 18.0
+    },
+    "592": {
+      "name": "(592)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 7.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.6
+    }
+  },
+  "chord_dist": {
+    "1": 622,
+    "2": 310,
+    "3": 86,
+    "4": 15,
+    "5": 5
+  },
+  "tags": [
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 790,
+      "pct": 51.9,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 501,
+      "pct": 32.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 132,
+      "pct": 8.7,
+      "eff16": 90.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 52,
+      "pct": 3.4,
+      "eff16": 270.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 1.0,
+      "eff16": 45.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 0.7,
+      "eff16": 30.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 18.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 36.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 135.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 60.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 16.1,
+      "eff16": 45.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 22.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 90.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 8.1,
+      "eff16": 30.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 6.5,
+      "eff16": 12.9
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 4,
+      "pct": 6.5,
+      "eff16": 135.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 5.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 18.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 6.4
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 3,
+      "pct": 4.8,
+      "eff16": 2.6
+    }
+  }
+}

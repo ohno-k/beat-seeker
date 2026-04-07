@@ -1,0 +1,220 @@
+{
+  "textage": "23/_ekineko.html?1AC00",
+  "analyzed_at": "2026-04-06T11:02:38.141118+00:00",
+  "title": "駅猫のワルツ",
+  "artist": "ミニョンヌ鉄道兄弟",
+  "bpm_raw": "282",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1481,
+  "events": 1073,
+  "bpm_main": 282,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 141.0,
+  "weighted_eff16": 225.6,
+  "scratch_pct": 8.17,
+  "chord_pct": 25.44,
+  "single_pct": 74.56,
+  "ranuchi": 90,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 366,
+      "pct": 34.1,
+      "eff16": 141.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 288,
+      "pct": 26.9,
+      "eff16": 282.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 143,
+      "pct": 13.3,
+      "eff16": 423.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 98,
+      "pct": 9.1,
+      "eff16": 70.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 93,
+      "pct": 8.7,
+      "eff16": 211.5
+    },
+    "80": {
+      "name": "(80)",
+      "count": 21,
+      "pct": 2.0,
+      "eff16": 84.6
+    },
+    "6": {
+      "name": "64th",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 1128.0
+    },
+    "58": {
+      "name": "(58)",
+      "count": 12,
+      "pct": 1.1,
+      "eff16": 116.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 94.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 105.8
+    }
+  },
+  "chord_dist": {
+    "1": 800,
+    "2": 163,
+    "3": 93,
+    "4": 9,
+    "5": 8
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 366,
+      "pct": 26.9,
+      "eff16": 141.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 288,
+      "pct": 21.2,
+      "eff16": 282.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 287,
+      "pct": 21.1,
+      "eff16": 0
+    },
+    "16": {
+      "name": "24th",
+      "count": 143,
+      "pct": 10.5,
+      "eff16": 423.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 98,
+      "pct": 7.2,
+      "eff16": 70.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 93,
+      "pct": 6.8,
+      "eff16": 211.5
+    },
+    "80": {
+      "name": "(80)",
+      "count": 21,
+      "pct": 1.5,
+      "eff16": 84.6
+    },
+    "6": {
+      "name": "64th",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 1128.0
+    },
+    "58": {
+      "name": "(58)",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 116.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 94.0
+    }
+  },
+  "scr_interval_dist": {
+    "288": {
+      "name": "(288)",
+      "count": 42,
+      "pct": 35.0,
+      "eff16": 23.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 30.8,
+      "eff16": 70.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 14,
+      "pct": 11.7,
+      "eff16": 11.8
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 6.7,
+      "eff16": 35.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 3.3,
+      "eff16": 141.0
+    },
+    "1728": {
+      "name": "(1728)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 3.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 10.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 17.6
+    },
+    "2400": {
+      "name": "(2400)",
+      "count": 1,
+      "pct": 0.8,
+      "eff16": 2.8
+    },
+    "2016": {
+      "name": "(2016)",
+      "count": 1,
+      "pct": 0.8,
+      "eff16": 3.4
+    }
+  }
+}

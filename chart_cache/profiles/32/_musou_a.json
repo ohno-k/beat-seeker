@@ -1,0 +1,218 @@
+{
+  "textage": "32/_musou.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:58.564960+00:00",
+  "title": "無双",
+  "artist": "SOUND HOLIC Vs. VENUS feat. Nana Takahashi",
+  "bpm_raw": "180",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1677,
+  "events": 942,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 90.0,
+  "weighted_eff16": 132.7,
+  "scratch_pct": 4.95,
+  "chord_pct": 53.72,
+  "single_pct": 46.28,
+  "ranuchi": 60,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 513,
+      "pct": 54.5,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 325,
+      "pct": 34.5,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 43,
+      "pct": 4.6,
+      "eff16": 45.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 28,
+      "pct": 3.0,
+      "eff16": 360.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 540.0
+    },
+    "30": {
+      "name": "(30)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 144.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 240.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 154.3
+    },
+    "22": {
+      "name": "(22)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 196.4
+    },
+    "26": {
+      "name": "(26)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 166.2
+    }
+  },
+  "chord_dist": {
+    "1": 436,
+    "2": 327,
+    "3": 131,
+    "4": 46,
+    "5": 2
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 653,
+      "pct": 41.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 511,
+      "pct": 32.1,
+      "eff16": 90.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 325,
+      "pct": 20.4,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 44,
+      "pct": 2.8,
+      "eff16": 45.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 28,
+      "pct": 1.8,
+      "eff16": 360.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 540.0
+    },
+    "30": {
+      "name": "(30)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 144.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 240.0
+    },
+    "28": {
+      "name": "(28)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 154.3
+    },
+    "22": {
+      "name": "(22)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 196.4
+    }
+  },
+  "scr_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 20,
+      "pct": 24.4,
+      "eff16": 30.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 13.4,
+      "eff16": 45.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 9,
+      "pct": 11.0,
+      "eff16": 90.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 11.0,
+      "eff16": 22.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 8.5,
+      "eff16": 2.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 7.3,
+      "eff16": 5.6
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 15.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 12.9
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 3.8
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 2.4,
+      "eff16": 5.3
+    }
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "textage": "18/anthemld.html?1AB00",
+  "analyzed_at": "2026-04-06T10:48:38.659061+00:00",
+  "title": "ANTHEM LANDING",
+  "artist": "DJムラサメ",
+  "bpm_raw": "151",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1399,
+  "events": 871,
+  "bpm_main": 151,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 151.0,
+  "weighted_eff16": 132.2,
+  "scratch_pct": 1.93,
+  "chord_pct": 43.4,
+  "single_pct": 56.6,
+  "ranuchi": 75,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 663,
+      "pct": 76.2,
+      "eff16": 151.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 183,
+      "pct": 21.0,
+      "eff16": 75.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 2.3,
+      "eff16": 50.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 37.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.9
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.9
+    }
+  },
+  "chord_dist": {
+    "1": 493,
+    "2": 248,
+    "3": 111,
+    "4": 18,
+    "5": 1
+  },
+  "tags": [
+    "scratch_low",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 663,
+      "pct": 48.4,
+      "eff16": 151.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 501,
+      "pct": 36.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 183,
+      "pct": 13.3,
+      "eff16": 75.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 20,
+      "pct": 1.5,
+      "eff16": 50.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 37.8
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.9
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.9
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 26.9,
+      "eff16": 2.4
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 19.2,
+      "eff16": 75.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 9.4
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 18.9
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 1.9
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 2.4
+    },
+    "1176": {
+      "name": "(1176)",
+      "count": 2,
+      "pct": 7.7,
+      "eff16": 3.1
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 7.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 37.8
+    },
+    "3168": {
+      "name": "(3168)",
+      "count": 1,
+      "pct": 3.8,
+      "eff16": 1.1
+    }
+  }
+}

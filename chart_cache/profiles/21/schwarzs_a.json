@@ -1,0 +1,220 @@
+{
+  "textage": "21/schwarzs.html?1AB00",
+  "analyzed_at": "2026-04-06T10:56:01.491622+00:00",
+  "title": "SCHWARZSCHILD FIELD",
+  "artist": "L.E.D.",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1145,
+  "events": 770,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 145.5,
+  "scratch_pct": 11.27,
+  "chord_pct": 33.25,
+  "single_pct": 66.75,
+  "ranuchi": 45,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 569,
+      "pct": 74.0,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 114,
+      "pct": 14.8,
+      "eff16": 75.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 42,
+      "pct": 5.5,
+      "eff16": 225.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 16,
+      "pct": 2.1,
+      "eff16": 450.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.7,
+      "eff16": 37.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 112.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 8.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.0
+    }
+  },
+  "chord_dist": {
+    "1": 514,
+    "2": 170,
+    "3": 58,
+    "4": 23,
+    "5": 5
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 559,
+      "pct": 55.1,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 265,
+      "pct": 26.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 111,
+      "pct": 10.9,
+      "eff16": 75.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 44,
+      "pct": 4.3,
+      "eff16": 225.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 12,
+      "pct": 1.2,
+      "eff16": 450.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 50.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 8.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 16.7
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 34,
+      "pct": 26.6,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 33,
+      "pct": 25.8,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 10.2,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 7.0,
+      "eff16": 37.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 5.5,
+      "eff16": 9.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 12.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 25.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 18.8
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 2,
+      "pct": 1.6,
+      "eff16": 3.4
+    }
+  }
+}

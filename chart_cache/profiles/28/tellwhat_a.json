@@ -1,0 +1,220 @@
+{
+  "textage": "28/tellwhat.html?1AB00",
+  "analyzed_at": "2026-04-06T10:57:35.418654+00:00",
+  "title": "Tell me what you wish feat.らっぷびと",
+  "artist": "Pizuya's Cell",
+  "bpm_raw": "203",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1436,
+  "events": 991,
+  "bpm_main": 203,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 101.5,
+  "weighted_eff16": 143.8,
+  "scratch_pct": 2.09,
+  "chord_pct": 36.53,
+  "single_pct": 63.47,
+  "ranuchi": 44,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 472,
+      "pct": 47.7,
+      "eff16": 101.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 422,
+      "pct": 42.6,
+      "eff16": 203.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 70,
+      "pct": 7.1,
+      "eff16": 50.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 304.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 33.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 152.2
+    },
+    "42": {
+      "name": "(42)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 116.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 812.0
+    },
+    "54": {
+      "name": "(54)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 90.2
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 76.1
+    }
+  },
+  "chord_dist": {
+    "1": 629,
+    "2": 297,
+    "3": 48,
+    "4": 16,
+    "5": 1
+  },
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 472,
+      "pct": 33.6,
+      "eff16": 101.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 422,
+      "pct": 30.0,
+      "eff16": 203.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 415,
+      "pct": 29.5,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 70,
+      "pct": 5.0,
+      "eff16": 50.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 304.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 33.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 152.2
+    },
+    "42": {
+      "name": "(42)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 116.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 812.0
+    },
+    "54": {
+      "name": "(54)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 90.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 27.6,
+      "eff16": 50.8
+    },
+    "2352": {
+      "name": "(2352)",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 2.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 33.8
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 3,
+      "pct": 10.3,
+      "eff16": 1.6
+    },
+    "2544": {
+      "name": "(2544)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 1.9
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 12.7
+    },
+    "5712": {
+      "name": "(5712)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 0.9
+    },
+    "6192": {
+      "name": "(6192)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 0.8
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 2.1
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 3.4,
+      "eff16": 16.9
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "textage": "16/_rage16.html?1AB00",
+  "analyzed_at": "2026-04-06T11:01:24.372376+00:00",
+  "title": "天空脳番長危機十六連打",
+  "artist": "D.J.SETUP",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1188,
+  "events": 851,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 169.9,
+  "scratch_pct": 5.47,
+  "chord_pct": 33.84,
+  "single_pct": 66.16,
+  "ranuchi": 28,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 633,
+      "pct": 74.5,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 71,
+      "pct": 8.4,
+      "eff16": 75.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 32,
+      "pct": 3.8,
+      "eff16": 900.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 31,
+      "pct": 3.6,
+      "eff16": 180.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 112.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.9,
+      "eff16": 37.5
+    },
+    "28": {
+      "name": "(28)",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 128.6
+    },
+    "44": {
+      "name": "(44)",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 81.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 56.2
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 18.8
+    }
+  },
+  "chord_dist": {
+    "1": 563,
+    "2": 240,
+    "3": 47,
+    "4": 1
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 628,
+      "pct": 56.0,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 287,
+      "pct": 25.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 66,
+      "pct": 5.9,
+      "eff16": 75.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 29,
+      "pct": 2.6,
+      "eff16": 900.0
+    },
+    "20": {
+      "name": "(20)",
+      "count": 28,
+      "pct": 2.5,
+      "eff16": 180.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.6,
+      "eff16": 37.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 17,
+      "pct": 1.5,
+      "eff16": 112.5
+    },
+    "28": {
+      "name": "(28)",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 128.6
+    },
+    "44": {
+      "name": "(44)",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 81.8
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 56.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 21.9,
+      "eff16": 37.5
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 15.6,
+      "eff16": 18.8
+    },
+    "168": {
+      "name": "(168)",
+      "count": 7,
+      "pct": 10.9,
+      "eff16": 21.4
+    },
+    "216": {
+      "name": "(216)",
+      "count": 7,
+      "pct": 10.9,
+      "eff16": 16.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 9.4,
+      "eff16": 9.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 6.2,
+      "eff16": 25.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 30.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 3.1
+    },
+    "212": {
+      "name": "(212)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 17.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 1.2
+    }
+  }
+}

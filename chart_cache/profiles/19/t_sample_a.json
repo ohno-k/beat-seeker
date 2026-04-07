@@ -1,0 +1,241 @@
+{
+  "textage": "19/t_sample.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:42.845782+00:00",
+  "title": "The Sampling Paradise",
+  "artist": "Mamonis",
+  "bpm_raw": "150",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1529,
+  "events": 944,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 144.2,
+  "scratch_pct": 10.92,
+  "chord_pct": 45.13,
+  "single_pct": 54.87,
+  "ranuchi": 68,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 777,
+      "pct": 82.4,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 111,
+      "pct": 11.8,
+      "eff16": 75.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 28,
+      "pct": 3.0,
+      "eff16": 225.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 37.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 450.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 50.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.4
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 112.5
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    }
+  },
+  "chord_dist": {
+    "1": 518,
+    "2": 294,
+    "3": 105,
+    "4": 27
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 720,
+      "pct": 52.9,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 464,
+      "pct": 34.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 112,
+      "pct": 8.2,
+      "eff16": 75.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 28,
+      "pct": 2.1,
+      "eff16": 225.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 37.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 450.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 50.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 9.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 18.8
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 49,
+      "pct": 29.5,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 37,
+      "pct": 22.3,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 13.3,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 6.6,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 4.8,
+      "eff16": 18.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 4.2,
+      "eff16": 25.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 3.0,
+      "eff16": 9.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 4.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 30.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 10.7
+    }
+  },
+  "cn_notes": 4,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "10560": {
+      "name": "(10560)",
+      "count": 1,
+      "pct": 33.3,
+      "eff16": 0.3
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 33.3,
+      "eff16": 1.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 33.3,
+      "eff16": 4.7
+    }
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "textage": "25/freedom.html?1AB00",
+  "analyzed_at": "2026-04-06T10:51:31.376815+00:00",
+  "title": "FREEDOM",
+  "artist": "USAO",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1446,
+  "events": 771,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 116.7,
+  "scratch_pct": 10.65,
+  "chord_pct": 53.7,
+  "single_pct": 46.3,
+  "ranuchi": 90,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 381,
+      "pct": 49.5,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 338,
+      "pct": 43.9,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 2.3,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.2,
+      "eff16": 37.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 9,
+      "pct": 1.2,
+      "eff16": 300.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 100.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 600.0
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 200.0
+    },
+    "42": {
+      "name": "(42)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 85.7
+    }
+  },
+  "chord_dist": {
+    "1": 357,
+    "2": 221,
+    "3": 138,
+    "4": 44,
+    "5": 9,
+    "6": 2
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 536,
+      "pct": 41.5,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 380,
+      "pct": 29.4,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 334,
+      "pct": 25.9,
+      "eff16": 75.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 1.4,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 0.8,
+      "eff16": 37.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 300.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.4
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 200.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 600.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 48,
+      "pct": 31.4,
+      "eff16": 37.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 38,
+      "pct": 24.8,
+      "eff16": 75.0
+    },
+    "192": {
+      "name": "half",
+      "count": 22,
+      "pct": 14.4,
+      "eff16": 18.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 4.6,
+      "eff16": 50.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 2.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 9.4
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 5.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 25.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 1.3,
+      "eff16": 15.0
+    },
+    "84": {
+      "name": "(84)",
+      "count": 2,
+      "pct": 1.3,
+      "eff16": 42.9
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "textage": "21/overload.html?1AB00",
+  "analyzed_at": "2026-04-06T10:54:54.451059+00:00",
+  "title": "Overload Frontier",
+  "artist": "DJ Shimamura",
+  "bpm_raw": "175",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1310,
+  "events": 862,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 175.0,
+  "weighted_eff16": 135.2,
+  "scratch_pct": 16.87,
+  "chord_pct": 39.21,
+  "single_pct": 60.79,
+  "ranuchi": 97,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 485,
+      "pct": 56.3,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 317,
+      "pct": 36.8,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 2.9,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 58.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 350.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 21.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 29.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 17.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.9
+    }
+  },
+  "chord_dist": {
+    "1": 524,
+    "2": 241,
+    "3": 84,
+    "4": 13
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "single_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 426,
+      "pct": 39.2,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 318,
+      "pct": 29.2,
+      "eff16": 87.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 275,
+      "pct": 25.3,
+      "eff16": 0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 24,
+      "pct": 2.2,
+      "eff16": 58.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 2.0,
+      "eff16": 43.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 29.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 17.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 35.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 21.9
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 350.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 84,
+      "pct": 38.2,
+      "eff16": 43.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 49,
+      "pct": 22.3,
+      "eff16": 87.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 33,
+      "pct": 15.0,
+      "eff16": 58.3
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 4.5,
+      "eff16": 21.9
+    },
+    "24": {
+      "name": "16th",
+      "count": 10,
+      "pct": 4.5,
+      "eff16": 175.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 4.1,
+      "eff16": 29.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 6,
+      "pct": 2.7,
+      "eff16": 17.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 1.8,
+      "eff16": 10.9
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 7.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 14.6
+    }
+  }
+}

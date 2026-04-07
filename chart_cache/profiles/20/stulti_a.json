@@ -1,0 +1,220 @@
+{
+  "textage": "20/stulti.html?1AC00",
+  "analyzed_at": "2026-04-06T10:56:18.243017+00:00",
+  "title": "STULTI",
+  "artist": "MAX MAXIMIZER VS DJ TOTTO",
+  "bpm_raw": "90-182",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1416,
+  "events": 795,
+  "bpm_main": 182,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 182.0,
+  "weighted_eff16": 156.9,
+  "scratch_pct": 6.99,
+  "chord_pct": 45.03,
+  "single_pct": 54.97,
+  "ranuchi": 57,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 523,
+      "pct": 65.9,
+      "eff16": 182.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 121,
+      "pct": 15.2,
+      "eff16": 91.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 78,
+      "pct": 9.8,
+      "eff16": 136.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 29,
+      "pct": 3.7,
+      "eff16": 45.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 21,
+      "pct": 2.6,
+      "eff16": 273.0
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 1.5,
+      "eff16": 22.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 60.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 36.4
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.3
+    }
+  },
+  "chord_dist": {
+    "1": 437,
+    "2": 193,
+    "3": 120,
+    "4": 15,
+    "5": 9,
+    "6": 19,
+    "7": 2
+  },
+  "tags": [
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 541,
+      "pct": 41.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 513,
+      "pct": 39.0,
+      "eff16": 182.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 117,
+      "pct": 8.9,
+      "eff16": 91.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 82,
+      "pct": 6.2,
+      "eff16": 136.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 31,
+      "pct": 2.4,
+      "eff16": 45.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 273.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 22.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 36.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 60.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 25.5,
+      "eff16": 45.5
+    },
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 17.3,
+      "eff16": 22.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 12.2,
+      "eff16": 30.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 8.2,
+      "eff16": 11.4
+    },
+    "24": {
+      "name": "16th",
+      "count": 7,
+      "pct": 7.1,
+      "eff16": 182.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 7.1,
+      "eff16": 91.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 18.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 13.0
+    },
+    "960": {
+      "name": "(960)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 4.5
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 3.2
+    }
+  }
+}

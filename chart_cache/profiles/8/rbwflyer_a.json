@@ -1,0 +1,162 @@
+{
+  "textage": "8/rbwflyer.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:30.272960+00:00",
+  "title": "rainbow flyer",
+  "artist": "dj TAKA",
+  "bpm_raw": "148",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 976,
+  "events": 678,
+  "bpm_main": 148,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 148.0,
+  "weighted_eff16": 130.6,
+  "scratch_pct": 3.18,
+  "chord_pct": 35.25,
+  "single_pct": 64.75,
+  "ranuchi": 81,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 542,
+      "pct": 80.1,
+      "eff16": 148.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 15.5,
+      "eff16": 74.0
+    },
+    "192": {
+      "name": "half",
+      "count": 20,
+      "pct": 3.0,
+      "eff16": 18.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 1.2,
+      "eff16": 9.2
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.3
+    }
+  },
+  "chord_dist": {
+    "1": 439,
+    "2": 189,
+    "3": 41,
+    "4": 9
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 542,
+      "pct": 57.4,
+      "eff16": 148.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 267,
+      "pct": 28.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 11.1,
+      "eff16": 74.0
+    },
+    "192": {
+      "name": "half",
+      "count": 20,
+      "pct": 2.1,
+      "eff16": 18.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 9.2
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 4.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.3
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 13,
+      "pct": 43.3,
+      "eff16": 18.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 20.0,
+      "eff16": 9.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 13.3,
+      "eff16": 2.3
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 1.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 6.7,
+      "eff16": 6.2
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 2.6
+    },
+    "4608": {
+      "name": "(4608)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 0.8
+    },
+    "984": {
+      "name": "(984)",
+      "count": 1,
+      "pct": 3.3,
+      "eff16": 3.6
+    }
+  }
+}

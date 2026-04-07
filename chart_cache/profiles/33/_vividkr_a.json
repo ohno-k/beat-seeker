@@ -1,0 +1,216 @@
+{
+  "textage": "33/_vividkr.html?1AC00",
+  "analyzed_at": "2026-04-06T11:00:46.613239+00:00",
+  "title": "ビビッド ☆+*。キラキライム",
+  "artist": "Machico",
+  "bpm_raw": "191",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1840,
+  "events": 1188,
+  "bpm_main": 191,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 191.0,
+  "weighted_eff16": 162.8,
+  "scratch_pct": 3.37,
+  "chord_pct": 46.63,
+  "single_pct": 53.37,
+  "ranuchi": 126,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 785,
+      "pct": 66.1,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 372,
+      "pct": 31.3,
+      "eff16": 95.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 21,
+      "pct": 1.8,
+      "eff16": 286.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 382.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 47.8
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.1
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 63.7
+    }
+  },
+  "chord_dist": {
+    "1": 634,
+    "2": 471,
+    "3": 74,
+    "4": 3,
+    "5": 6
+  },
+  "tags": [
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 785,
+      "pct": 44.2,
+      "eff16": 191.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 591,
+      "pct": 33.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 372,
+      "pct": 20.9,
+      "eff16": 95.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 21,
+      "pct": 1.2,
+      "eff16": 286.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 382.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 47.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 63.7
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 19,
+      "pct": 31.1,
+      "eff16": 11.9
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 23.0,
+      "eff16": 23.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 13.1,
+      "eff16": 47.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 11.5,
+      "eff16": 3.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 5,
+      "pct": 8.2,
+      "eff16": 1.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 8.2,
+      "eff16": 95.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 6.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 19.1
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 1.6,
+      "eff16": 5.6
+    }
+  },
+  "cn_notes": 29,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 2.25,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 14,
+      "pct": 50.0,
+      "eff16": 31.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 25.0,
+      "eff16": 47.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 10.7,
+      "eff16": 11.9
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 7.1,
+      "eff16": 95.5
+    },
+    "25344": {
+      "name": "(25344)",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 0.2
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 3.6,
+      "eff16": 23.9
+    }
+  }
+}

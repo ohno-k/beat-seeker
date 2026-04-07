@@ -1,0 +1,217 @@
+{
+  "textage": "19/nnrt.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:30.915530+00:00",
+  "title": "NNRT",
+  "artist": "Levaslater",
+  "bpm_raw": "101-202",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1706,
+  "events": 949,
+  "bpm_main": 202,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 101.0,
+  "weighted_eff16": 151.9,
+  "scratch_pct": 5.69,
+  "chord_pct": 54.16,
+  "single_pct": 45.84,
+  "ranuchi": 138,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 463,
+      "pct": 48.8,
+      "eff16": 101.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 416,
+      "pct": 43.9,
+      "eff16": 202.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 31,
+      "pct": 3.3,
+      "eff16": 303.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 2.6,
+      "eff16": 50.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 606.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 6.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.9
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.2
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.2
+    }
+  },
+  "chord_dist": {
+    "1": 435,
+    "2": 296,
+    "3": 193,
+    "4": 25
+  },
+  "tags": [
+    "has_32nd",
+    "soflan",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 667,
+      "pct": 41.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 457,
+      "pct": 28.4,
+      "eff16": 101.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 415,
+      "pct": 25.8,
+      "eff16": 202.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 31,
+      "pct": 1.9,
+      "eff16": 303.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 1.4,
+      "eff16": 50.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 25.2
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 606.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 11.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 38.5,
+      "eff16": 50.5
+    },
+    "192": {
+      "name": "half",
+      "count": 24,
+      "pct": 25.0,
+      "eff16": 25.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 12.5,
+      "eff16": 12.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 5.2,
+      "eff16": 101.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 3.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 4,
+      "pct": 4.2,
+      "eff16": 4.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 6.3
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 1.0,
+      "eff16": 3.6
+    },
+    "2400": {
+      "name": "(2400)",
+      "count": 1,
+      "pct": 1.0,
+      "eff16": 2.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 1.0,
+      "eff16": 10.1
+    }
+  }
+}

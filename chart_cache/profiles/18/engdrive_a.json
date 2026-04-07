@@ -1,0 +1,282 @@
+{
+  "textage": "18/engdrive.html?1AB00",
+  "analyzed_at": "2026-04-06T10:51:21.788936+00:00",
+  "title": "Energy Drive",
+  "artist": "kevin energy",
+  "bpm_raw": "170",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1002,
+  "events": 708,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 129.5,
+  "scratch_pct": 3.39,
+  "chord_pct": 32.34,
+  "single_pct": 67.66,
+  "ranuchi": 65,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 392,
+      "pct": 55.4,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 263,
+      "pct": 37.2,
+      "eff16": 85.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 3.4,
+      "eff16": 42.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 8,
+      "pct": 1.1,
+      "eff16": 63.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 10.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 56.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 9.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 34.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 113.3
+    },
+    "28": {
+      "name": "(28)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 145.7
+    }
+  },
+  "chord_dist": {
+    "1": 479,
+    "2": 169,
+    "3": 56,
+    "4": 3,
+    "5": 1
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 392,
+      "pct": 40.5,
+      "eff16": 170.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 268,
+      "pct": 27.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 262,
+      "pct": 27.1,
+      "eff16": 85.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 1.7,
+      "eff16": 42.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 63.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 10.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 56.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 9.4
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 34.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 113.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 33.3,
+      "eff16": 42.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 15.2,
+      "eff16": 10.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 15.2,
+      "eff16": 5.3
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 9.1,
+      "eff16": 3.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 9.1,
+      "eff16": 2.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 6.1,
+      "eff16": 21.2
+    },
+    "864": {
+      "name": "(864)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 4.7
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 1.5
+    },
+    "4608": {
+      "name": "(4608)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 0.9
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 3.0,
+      "eff16": 1.8
+    }
+  },
+  "cn_notes": 39,
+  "cn_scratch_pct": 17.95,
+  "cn_kbd_overlap_pct": 12.19,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 31.6,
+      "eff16": 10.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 23.7,
+      "eff16": 28.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 18.4,
+      "eff16": 42.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 8.5
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 21.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 14.2
+    },
+    "648": {
+      "name": "(648)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 6.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 34.0
+    },
+    "12576": {
+      "name": "(12576)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 0.3
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 7.1
+    }
+  }
+}

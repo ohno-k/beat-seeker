@@ -1,0 +1,223 @@
+{
+  "textage": "32/roarchro.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:51.518661+00:00",
+  "title": "Roar of Chronos",
+  "artist": "BEMANI Sound Team \"KE!JU\"",
+  "bpm_raw": "175",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1983,
+  "events": 1101,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 175.0,
+  "weighted_eff16": 154.3,
+  "scratch_pct": 6.66,
+  "chord_pct": 56.95,
+  "single_pct": 43.05,
+  "ranuchi": 106,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 855,
+      "pct": 77.7,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 213,
+      "pct": 19.4,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.6,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 1.0,
+      "eff16": 58.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 29.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.9
+    }
+  },
+  "chord_dist": {
+    "1": 474,
+    "2": 453,
+    "3": 117,
+    "4": 38,
+    "5": 15,
+    "6": 3,
+    "7": 1
+  },
+  "tags": [
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 841,
+      "pct": 45.5,
+      "eff16": 175.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 772,
+      "pct": 41.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 195,
+      "pct": 10.5,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 1.4,
+      "eff16": 43.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 0.7,
+      "eff16": 58.3
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 21.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 29.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.9
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 31,
+      "pct": 23.7,
+      "eff16": 87.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 21.4,
+      "eff16": 43.8
+    },
+    "192": {
+      "name": "half",
+      "count": 16,
+      "pct": 12.2,
+      "eff16": 21.9
+    },
+    "24": {
+      "name": "16th",
+      "count": 14,
+      "pct": 10.7,
+      "eff16": 175.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 7.6,
+      "eff16": 58.3
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 2.7
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 3.1,
+      "eff16": 10.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 2.3,
+      "eff16": 14.6
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 3.0
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 3.1
+    }
+  },
+  "cn_notes": 6,
+  "cn_scratch_pct": 33.33,
+  "cn_kbd_overlap_pct": 1.08,
+  "cn_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 87.5
+    },
+    "7872": {
+      "name": "(7872)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 0.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 21.9
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 3.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 2.7
+    }
+  }
+}

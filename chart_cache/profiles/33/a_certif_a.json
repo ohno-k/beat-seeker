@@ -1,0 +1,227 @@
+{
+  "textage": "33/a_certif.html?1AC00",
+  "analyzed_at": "2026-04-06T10:48:23.744476+00:00",
+  "title": "A Certified Rave Moment",
+  "artist": "BEMANI Sound Team \"めめめ\"",
+  "bpm_raw": "165",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1394,
+  "events": 862,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 133.6,
+  "scratch_pct": 19.51,
+  "chord_pct": 46.17,
+  "single_pct": 53.83,
+  "ranuchi": 82,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 562,
+      "pct": 65.3,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 244,
+      "pct": 28.3,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 36,
+      "pct": 4.2,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 55.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 20.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 13.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 27.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.5
+    }
+  },
+  "chord_dist": {
+    "1": 464,
+    "2": 302,
+    "3": 58,
+    "4": 38
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 396,
+      "pct": 35.3,
+      "eff16": 165.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 387,
+      "pct": 34.5,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 255,
+      "pct": 22.7,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 4.8,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 1.0,
+      "eff16": 55.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 27.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 20.6
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 33.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 16.5
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 163,
+      "pct": 60.1,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 34,
+      "pct": 12.5,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 10.0,
+      "eff16": 41.2
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 3.7,
+      "eff16": 20.6
+    },
+    "528": {
+      "name": "(528)",
+      "count": 4,
+      "pct": 1.5,
+      "eff16": 7.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 1.5,
+      "eff16": 55.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 1.1,
+      "eff16": 6.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 1.1,
+      "eff16": 13.8
+    },
+    "552": {
+      "name": "(552)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 7.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.7,
+      "eff16": 11.8
+    }
+  },
+  "cn_notes": 3,
+  "cn_scratch_pct": 100.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 50.0,
+      "eff16": 20.6
+    },
+    "16896": {
+      "name": "(16896)",
+      "count": 1,
+      "pct": 50.0,
+      "eff16": 0.2
+    }
+  }
+}

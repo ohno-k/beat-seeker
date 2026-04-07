@@ -1,0 +1,200 @@
+{
+  "textage": "28/apolioth.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:52.621196+00:00",
+  "title": "apo:llioth",
+  "artist": "Juggernaut.",
+  "bpm_raw": "200",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1498,
+  "events": 902,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 100.0,
+  "weighted_eff16": 132.2,
+  "scratch_pct": 11.01,
+  "chord_pct": 53.77,
+  "single_pct": 46.23,
+  "ranuchi": 65,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 462,
+      "pct": 51.3,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 302,
+      "pct": 33.5,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 95,
+      "pct": 10.5,
+      "eff16": 50.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 21,
+      "pct": 2.3,
+      "eff16": 150.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 15,
+      "pct": 1.7,
+      "eff16": 300.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 16.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 33.3
+    }
+  },
+  "chord_dist": {
+    "1": 417,
+    "2": 387,
+    "3": 86,
+    "4": 11,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 496,
+      "pct": 37.2,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 429,
+      "pct": 32.2,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 238,
+      "pct": 17.9,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 126,
+      "pct": 9.5,
+      "eff16": 50.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 21,
+      "pct": 1.6,
+      "eff16": 150.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 300.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 33.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 16.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 62,
+      "pct": 37.8,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 34,
+      "pct": 20.7,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 12.8,
+      "eff16": 50.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 7,
+      "pct": 4.3,
+      "eff16": 3.1
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 3.7,
+      "eff16": 150.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 25.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 6.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 33.3
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 2.4,
+      "eff16": 20.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 4.2
+    }
+  }
+}

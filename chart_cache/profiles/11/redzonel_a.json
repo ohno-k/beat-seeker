@@ -1,0 +1,196 @@
+{
+  "textage": "11/redzonel.html?1AC00",
+  "analyzed_at": "2026-04-06T06:38:15.277420+00:00",
+  "title": "RED ZONE",
+  "artist": "Tatsh&NAOKI",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1564,
+  "events": 836,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 141.3,
+  "scratch_pct": 5.12,
+  "chord_pct": 59.81,
+  "single_pct": 40.19,
+  "ranuchi": 92,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 600,
+      "pct": 71.9,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 220,
+      "pct": 26.3,
+      "eff16": 82.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 55.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 123.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 41.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.3
+    },
+    "332": {
+      "name": "(332)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.9
+    },
+    "436": {
+      "name": "(436)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.1
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.2
+    }
+  },
+  "chord_dist": {
+    "1": 336,
+    "2": 334,
+    "3": 119,
+    "4": 32,
+    "5": 15
+  },
+  "tags": [
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 658,
+      "pct": 44.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 589,
+      "pct": 39.7,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 222,
+      "pct": 15.0,
+      "eff16": 82.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 55.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 123.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 41.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.2
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 25,
+      "pct": 31.6,
+      "eff16": 82.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 13,
+      "pct": 16.5,
+      "eff16": 165.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 7.6,
+      "eff16": 41.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 6.3,
+      "eff16": 55.0
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 5.9
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 123.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 2.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 10.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 13.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 5.2
+    }
+  },
+  "cn_notes": 1,
+  "cn_scratch_pct": 100.0,
+  "cn_interval_dist": {}
+}

@@ -1,0 +1,219 @@
+{
+  "textage": "16/bemani4u.html?1XC00",
+  "analyzed_at": "2026-04-06T10:49:06.137707+00:00",
+  "title": "B4U(BEMANI FOR YOU MIX)",
+  "artist": "Remixed by DJ YOSHITAKA with Michael a la mode",
+  "bpm_raw": "170",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 2155,
+  "events": 1055,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 165.0,
+  "scratch_pct": 6.64,
+  "chord_pct": 60.28,
+  "single_pct": 39.72,
+  "ranuchi": 166,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 866,
+      "pct": 82.2,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 113,
+      "pct": 10.7,
+      "eff16": 85.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 21,
+      "pct": 2.0,
+      "eff16": 255.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 20,
+      "pct": 1.9,
+      "eff16": 510.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 1.7,
+      "eff16": 56.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 42.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 10.0
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 127.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.2
+    }
+  },
+  "chord_dist": {
+    "1": 419,
+    "2": 324,
+    "3": 191,
+    "4": 92,
+    "5": 27,
+    "6": 2
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 964,
+      "pct": 47.9,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 863,
+      "pct": 42.9,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 112,
+      "pct": 5.6,
+      "eff16": 85.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 21,
+      "pct": 1.0,
+      "eff16": 255.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 20,
+      "pct": 1.0,
+      "eff16": 510.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 0.9,
+      "eff16": 56.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 42.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 10.0
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 5.2
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 127.5
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 33,
+      "pct": 23.2,
+      "eff16": 42.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 29,
+      "pct": 20.4,
+      "eff16": 85.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 28,
+      "pct": 19.7,
+      "eff16": 56.7
+    },
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 10.6,
+      "eff16": 21.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 4.9,
+      "eff16": 10.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 6,
+      "pct": 4.2,
+      "eff16": 17.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 14.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 12.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 28.3
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 1.4,
+      "eff16": 2.8
+    }
+  }
+}

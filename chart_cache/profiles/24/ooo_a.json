@@ -1,0 +1,158 @@
+{
+  "textage": "24/ooo.html?1AC00",
+  "analyzed_at": "2026-04-06T06:37:31.780267+00:00",
+  "title": "OOO",
+  "artist": "Ryu☆ feat.moimoi",
+  "bpm_raw": "140",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 604,
+  "events": 474,
+  "bpm_main": 140,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 70.0,
+  "weighted_eff16": 85.2,
+  "scratch_pct": 1.32,
+  "chord_pct": 20.89,
+  "single_pct": 79.11,
+  "ranuchi": 5,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 207,
+      "pct": 43.8,
+      "eff16": 70.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 154,
+      "pct": 32.6,
+      "eff16": 140.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 59,
+      "pct": 12.5,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 37,
+      "pct": 7.8,
+      "eff16": 46.7
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 2.3,
+      "eff16": 17.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 23.3
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 93.3
+    }
+  },
+  "chord_dist": {
+    "1": 375,
+    "2": 75,
+    "3": 18,
+    "4": 5,
+    "5": 1
+  },
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 204,
+      "pct": 34.3,
+      "eff16": 70.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 153,
+      "pct": 25.7,
+      "eff16": 140.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 125,
+      "pct": 21.0,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 58,
+      "pct": 9.7,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 38,
+      "pct": 6.4,
+      "eff16": 46.7
+    },
+    "192": {
+      "name": "half",
+      "count": 12,
+      "pct": 2.0,
+      "eff16": 17.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 23.3
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 93.3
+    }
+  },
+  "scr_interval_dist": {
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 42.9,
+      "eff16": 11.7
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 1.1
+    },
+    "8928": {
+      "name": "(8928)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 0.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 35.0
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 1,
+      "pct": 14.3,
+      "eff16": 1.2
+    }
+  }
+}

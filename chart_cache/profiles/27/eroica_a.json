@@ -1,0 +1,264 @@
+{
+  "textage": "27/eroica.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:08.341046+00:00",
+  "title": "EROICA",
+  "artist": "BEMANI Sound Team \"HERO\"",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1580,
+  "events": 966,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 100.0,
+  "weighted_eff16": 164.3,
+  "scratch_pct": 3.61,
+  "chord_pct": 49.69,
+  "single_pct": 50.31,
+  "ranuchi": 83,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 505,
+      "pct": 52.3,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 241,
+      "pct": 25.0,
+      "eff16": 200.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 192,
+      "pct": 19.9,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.9,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.0
+    },
+    "304": {
+      "name": "(304)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 15.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 600.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.8
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 16.7
+    }
+  },
+  "chord_dist": {
+    "1": 486,
+    "2": 390,
+    "3": 55,
+    "4": 26,
+    "5": 9
+  },
+  "tags": [
+    "has_32nd",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 560,
+      "pct": 36.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 504,
+      "pct": 33.1,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 240,
+      "pct": 15.8,
+      "eff16": 200.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 192,
+      "pct": 12.6,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.2,
+      "eff16": 50.0
+    },
+    "304": {
+      "name": "(304)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 15.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 600.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.3
+    },
+    "600": {
+      "name": "(600)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 8.0
+    }
+  },
+  "scr_interval_dist": {
+    "288": {
+      "name": "(288)",
+      "count": 19,
+      "pct": 33.9,
+      "eff16": 16.7
+    },
+    "576": {
+      "name": "(576)",
+      "count": 12,
+      "pct": 21.4,
+      "eff16": 8.3
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 11,
+      "pct": 19.6,
+      "eff16": 4.2
+    },
+    "864": {
+      "name": "(864)",
+      "count": 9,
+      "pct": 16.1,
+      "eff16": 5.6
+    },
+    "960": {
+      "name": "(960)",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 5.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 3.6,
+      "eff16": 25.0
+    },
+    "1728": {
+      "name": "(1728)",
+      "count": 1,
+      "pct": 1.8,
+      "eff16": 2.8
+    }
+  },
+  "cn_notes": 229,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 1.18,
+  "cn_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 90,
+      "pct": 39.5,
+      "eff16": 200.0
+    },
+    "15": {
+      "name": "~24th",
+      "count": 83,
+      "pct": 36.4,
+      "eff16": 320.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 34,
+      "pct": 14.9,
+      "eff16": 266.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 6,
+      "pct": 2.6,
+      "eff16": 40.0
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 4,
+      "pct": 1.8,
+      "eff16": 4.5
+    },
+    "114": {
+      "name": "(114)",
+      "count": 2,
+      "pct": 0.9,
+      "eff16": 42.1
+    },
+    "5985": {
+      "name": "(5985)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 0.8
+    },
+    "6048": {
+      "name": "(6048)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 0.8
+    },
+    "5586": {
+      "name": "(5586)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 0.9
+    },
+    "5490": {
+      "name": "(5490)",
+      "count": 1,
+      "pct": 0.4,
+      "eff16": 0.9
+    }
+  }
+}

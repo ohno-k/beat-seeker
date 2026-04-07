@@ -1,0 +1,219 @@
+{
+  "textage": "16/punch_lv.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:21.343099+00:00",
+  "title": "Punch Love 仮面",
+  "artist": "上野圭市(aka. Babyweapon,DJ SWAMI)feat.星野奏子",
+  "bpm_raw": "172",
+  "level": 11,
+  "difficulty": "10",
+  "notes": 1539,
+  "events": 737,
+  "bpm_main": 172,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 172.0,
+  "weighted_eff16": 123.9,
+  "scratch_pct": 3.18,
+  "chord_pct": 67.84,
+  "single_pct": 32.16,
+  "ranuchi": 54,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 337,
+      "pct": 45.8,
+      "eff16": 172.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 329,
+      "pct": 44.7,
+      "eff16": 86.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 38,
+      "pct": 5.2,
+      "eff16": 43.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 1.2,
+      "eff16": 129.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 258.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 10.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 57.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 64.5
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 5.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 28.7
+    }
+  },
+  "chord_dist": {
+    "1": 237,
+    "2": 276,
+    "3": 161,
+    "4": 48,
+    "5": 15
+  },
+  "tags": [
+    "chord_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 754,
+      "pct": 50.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 337,
+      "pct": 22.6,
+      "eff16": 172.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 329,
+      "pct": 22.1,
+      "eff16": 86.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 38,
+      "pct": 2.6,
+      "eff16": 43.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 129.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 258.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 57.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 64.5
+    },
+    "792": {
+      "name": "(792)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 5.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 28.7
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 14.6,
+      "eff16": 21.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 12.5,
+      "eff16": 10.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 10.4,
+      "eff16": 12.3
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 5.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 43.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 3,
+      "pct": 6.2,
+      "eff16": 5.1
+    },
+    "1248": {
+      "name": "(1248)",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 3.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 86.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 7.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 4.2,
+      "eff16": 28.7
+    }
+  }
+}

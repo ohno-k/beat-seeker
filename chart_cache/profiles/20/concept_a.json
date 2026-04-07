@@ -1,0 +1,218 @@
+{
+  "textage": "20/concept.html?1AB00",
+  "analyzed_at": "2026-04-06T10:49:57.110406+00:00",
+  "title": "CONCEPTUAL",
+  "artist": "Sota Fujimori 2nd Season",
+  "bpm_raw": "198",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1389,
+  "events": 875,
+  "bpm_main": 198,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 198.0,
+  "weighted_eff16": 155.8,
+  "scratch_pct": 4.82,
+  "chord_pct": 44.0,
+  "single_pct": 56.0,
+  "ranuchi": 64,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 426,
+      "pct": 48.7,
+      "eff16": 198.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 303,
+      "pct": 34.7,
+      "eff16": 99.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 54,
+      "pct": 6.2,
+      "eff16": 49.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 27,
+      "pct": 3.1,
+      "eff16": 148.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 20,
+      "pct": 2.3,
+      "eff16": 297.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 17,
+      "pct": 1.9,
+      "eff16": 396.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 1.5,
+      "eff16": 66.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 33.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 594.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 24.8
+    }
+  },
+  "chord_dist": {
+    "1": 490,
+    "2": 268,
+    "3": 106,
+    "4": 10,
+    "5": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 459,
+      "pct": 34.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 423,
+      "pct": 32.0,
+      "eff16": 198.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 289,
+      "pct": 21.9,
+      "eff16": 99.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 57,
+      "pct": 4.3,
+      "eff16": 49.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 27,
+      "pct": 2.0,
+      "eff16": 148.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 19,
+      "pct": 1.4,
+      "eff16": 297.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 396.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.1,
+      "eff16": 66.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 33.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 39.6
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 15.2,
+      "eff16": 49.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 8,
+      "pct": 12.1,
+      "eff16": 19.8
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 9.1,
+      "eff16": 24.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 9.1,
+      "eff16": 33.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 6.1,
+      "eff16": 11.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 6.1,
+      "eff16": 6.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 99.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 12.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 16.5
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 3.1
+    }
+  }
+}

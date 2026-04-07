@@ -1,0 +1,218 @@
+{
+  "textage": "17/bmaniacs.html?1AC00",
+  "analyzed_at": "2026-04-06T10:49:19.548204+00:00",
+  "title": "Bad Maniacs",
+  "artist": "kors k as teranoid",
+  "bpm_raw": "195",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1657,
+  "events": 845,
+  "bpm_main": 195,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 195.0,
+  "weighted_eff16": 153.4,
+  "scratch_pct": 6.1,
+  "chord_pct": 51.01,
+  "single_pct": 48.99,
+  "ranuchi": 89,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 493,
+      "pct": 58.4,
+      "eff16": 195.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 222,
+      "pct": 26.3,
+      "eff16": 97.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 3.2,
+      "eff16": 48.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 21,
+      "pct": 2.5,
+      "eff16": 65.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 292.5
+    },
+    "60": {
+      "name": "(60)",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 78.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 146.2
+    },
+    "84": {
+      "name": "(84)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 55.7
+    },
+    "80": {
+      "name": "(80)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 58.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 32.5
+    }
+  },
+  "chord_dist": {
+    "1": 414,
+    "2": 204,
+    "3": 103,
+    "4": 94,
+    "5": 30
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 723,
+      "pct": 46.5,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 490,
+      "pct": 31.5,
+      "eff16": 195.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 220,
+      "pct": 14.1,
+      "eff16": 97.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 24,
+      "pct": 1.5,
+      "eff16": 48.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 23,
+      "pct": 1.5,
+      "eff16": 65.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 292.5
+    },
+    "60": {
+      "name": "(60)",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 78.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 146.2
+    },
+    "84": {
+      "name": "(84)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 55.7
+    },
+    "80": {
+      "name": "(80)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 58.5
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 32,
+      "pct": 32.0,
+      "eff16": 24.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 16.0,
+      "eff16": 48.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 16.0,
+      "eff16": 65.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 9,
+      "pct": 9.0,
+      "eff16": 9.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 7.0,
+      "eff16": 12.2
+    },
+    "864": {
+      "name": "(864)",
+      "count": 4,
+      "pct": 4.0,
+      "eff16": 5.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.0,
+      "eff16": 6.1
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 8.1
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 1.5
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 3.5
+    }
+  }
+}

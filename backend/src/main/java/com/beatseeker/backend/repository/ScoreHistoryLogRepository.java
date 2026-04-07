@@ -35,6 +35,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       cr.total_beat_pt AS \"totalBeatPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
+            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -66,6 +67,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             ") " +
             "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       cr.total_precision_pt AS \"totalPrecisionPt\", " +
+            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -98,6 +100,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       cr.total_rate_pt AS \"totalRatePt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
+            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +

@@ -1,0 +1,211 @@
+{
+  "textage": "28/_unphilo.html?1AB00",
+  "analyzed_at": "2026-04-06T11:01:59.244812+00:00",
+  "title": "無意識のフィロソフィア",
+  "artist": "BEMANI Sound Team \"TAG\"",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1682,
+  "events": 1095,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 144.7,
+  "scratch_pct": 2.97,
+  "chord_pct": 45.39,
+  "single_pct": 54.61,
+  "ranuchi": 81,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 844,
+      "pct": 77.1,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 222,
+      "pct": 20.3,
+      "eff16": 80.0
+    },
+    "14": {
+      "name": "(14)",
+      "count": 8,
+      "pct": 0.7,
+      "eff16": 274.3
+    },
+    "20": {
+      "name": "(20)",
+      "count": 7,
+      "pct": 0.6,
+      "eff16": 192.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 53.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 240.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 320.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.7
+    }
+  },
+  "chord_dist": {
+    "1": 598,
+    "2": 409,
+    "3": 86,
+    "4": 2
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 844,
+      "pct": 51.7,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 540,
+      "pct": 33.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 218,
+      "pct": 13.4,
+      "eff16": 80.0
+    },
+    "14": {
+      "name": "(14)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 274.3
+    },
+    "20": {
+      "name": "(20)",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 192.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 53.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 240.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 320.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 40.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 26.7
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 26.5,
+      "eff16": 40.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 9,
+      "pct": 18.4,
+      "eff16": 80.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 5,
+      "pct": 10.2,
+      "eff16": 1.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 8.2,
+      "eff16": 11.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 8.2,
+      "eff16": 26.7
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 8.2,
+      "eff16": 20.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 6.1,
+      "eff16": 10.0
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 2.8
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 2.7
+    },
+    "2976": {
+      "name": "(2976)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 1.3
+    }
+  }
+}

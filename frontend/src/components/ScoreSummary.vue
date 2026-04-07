@@ -123,10 +123,10 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <input 
+          <input
             v-model="searchQuery"
-            type="text" 
-            class="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl leading-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" 
+            type="text"
+            class="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl leading-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
             :placeholder="t('table.searchPlaceholder')"
           >
         </div>
@@ -479,6 +479,7 @@
                         :rank-name="getRankInfo(entry.totalBeatPt).name"
                         :tier="getRankInfo(entry.totalBeatPt).tier"
                         size="sm"
+                        :is-supporter="user?.isSupporter && user?.showSupporterBorder"
                       />
                     </div>
                   </td>
@@ -1006,6 +1007,7 @@ const fetchSongRanks = async () => {
   } catch { /* silent */ }
 };
 watch(showRateTier, (val) => { if (!val && viewMode.value === 'rate') viewMode.value = 'beat'; });
+
 
 const searchQuery = ref('');
 const filterDifficulty = ref<string[]>([]);

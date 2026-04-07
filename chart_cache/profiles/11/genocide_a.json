@@ -1,0 +1,218 @@
+{
+  "textage": "11/genocide.html?1AB00",
+  "analyzed_at": "2026-04-06T10:51:50.277620+00:00",
+  "title": "GENOCIDE",
+  "artist": "dj Killer",
+  "bpm_raw": "175",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1109,
+  "events": 776,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 175.0,
+  "weighted_eff16": 150.0,
+  "scratch_pct": 4.6,
+  "chord_pct": 36.98,
+  "single_pct": 63.02,
+  "ranuchi": 27,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 542,
+      "pct": 69.9,
+      "eff16": 175.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 195,
+      "pct": 25.2,
+      "eff16": 87.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.8,
+      "eff16": 58.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 1.2,
+      "eff16": 131.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 262.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 43.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 350.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.6
+    },
+    "40": {
+      "name": "(40)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 105.0
+    }
+  },
+  "chord_dist": {
+    "1": 489,
+    "2": 245,
+    "3": 38,
+    "4": 4
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 531,
+      "pct": 50.2,
+      "eff16": 175.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 294,
+      "pct": 27.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 190,
+      "pct": 18.0,
+      "eff16": 87.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 1.4,
+      "eff16": 58.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 131.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 43.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 262.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 350.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.6
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 10,
+      "pct": 20.0,
+      "eff16": 175.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 12.0,
+      "eff16": 43.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 12.0,
+      "eff16": 87.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 6.0,
+      "eff16": 14.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 6.0,
+      "eff16": 29.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 12.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 8.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 5.5
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 21.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 2.0,
+      "eff16": 6.2
+    }
+  }
+}

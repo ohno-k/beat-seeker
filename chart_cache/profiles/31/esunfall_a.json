@@ -1,0 +1,242 @@
+{
+  "textage": "31/esunfall.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:13.003807+00:00",
+  "title": "Echoes of Sunfall",
+  "artist": "nora2r",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1508,
+  "events": 903,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 145.1,
+  "scratch_pct": 6.17,
+  "chord_pct": 46.07,
+  "single_pct": 53.93,
+  "ranuchi": 134,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 553,
+      "pct": 61.3,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 198,
+      "pct": 22.0,
+      "eff16": 80.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 44,
+      "pct": 4.9,
+      "eff16": 120.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 34,
+      "pct": 3.8,
+      "eff16": 320.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 31,
+      "pct": 3.4,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 2.0,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 1.2,
+      "eff16": 53.3
+    },
+    "36": {
+      "name": "(36)",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 106.7
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 20.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.0
+    }
+  },
+  "chord_dist": {
+    "1": 487,
+    "2": 265,
+    "3": 116,
+    "4": 33,
+    "5": 1,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 544,
+      "pct": 38.5,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 535,
+      "pct": 37.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 182,
+      "pct": 12.9,
+      "eff16": 80.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 44,
+      "pct": 3.1,
+      "eff16": 120.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 33,
+      "pct": 2.3,
+      "eff16": 320.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 31,
+      "pct": 2.2,
+      "eff16": 240.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 1.3,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 0.8,
+      "eff16": 53.3
+    },
+    "36": {
+      "name": "(36)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 106.7
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 20.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 18.5,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 16.3,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 13.0,
+      "eff16": 53.3
+    },
+    "24": {
+      "name": "16th",
+      "count": 7,
+      "pct": 7.6,
+      "eff16": 160.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 6,
+      "pct": 6.5,
+      "eff16": 13.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 6.5,
+      "eff16": 5.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 5.4,
+      "eff16": 20.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 5.4,
+      "eff16": 26.7
+    },
+    "672": {
+      "name": "(672)",
+      "count": 4,
+      "pct": 4.3,
+      "eff16": 5.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 3.3,
+      "eff16": 10.0
+    }
+  },
+  "cn_notes": 5,
+  "cn_scratch_pct": 60.0,
+  "cn_kbd_overlap_pct": 1.13,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 50.0,
+      "eff16": 10.0
+    },
+    "8064": {
+      "name": "(8064)",
+      "count": 1,
+      "pct": 25.0,
+      "eff16": 0.5
+    },
+    "4608": {
+      "name": "(4608)",
+      "count": 1,
+      "pct": 25.0,
+      "eff16": 0.8
+    }
+  }
+}

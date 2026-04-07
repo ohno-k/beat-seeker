@@ -1,0 +1,285 @@
+{
+  "textage": "30/_oulgnds.html?1AC00",
+  "analyzed_at": "2026-04-06T10:59:54.931882+00:00",
+  "title": "Ou Legends",
+  "artist": "かめりあ",
+  "bpm_raw": "191",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1541,
+  "events": 971,
+  "bpm_main": 191,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 191.0,
+  "weighted_eff16": 170.5,
+  "scratch_pct": 4.87,
+  "chord_pct": 37.38,
+  "single_pct": 62.62,
+  "ranuchi": 59,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 470,
+      "pct": 48.5,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 263,
+      "pct": 27.1,
+      "eff16": 95.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 101,
+      "pct": 10.4,
+      "eff16": 286.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 45,
+      "pct": 4.6,
+      "eff16": 47.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 35,
+      "pct": 3.6,
+      "eff16": 382.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 22,
+      "pct": 2.3,
+      "eff16": 63.7
+    },
+    "19": {
+      "name": "(19)",
+      "count": 12,
+      "pct": 1.2,
+      "eff16": 241.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 31.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 143.2
+    },
+    "20": {
+      "name": "(20)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 229.2
+    }
+  },
+  "chord_dist": {
+    "1": 608,
+    "2": 243,
+    "3": 58,
+    "4": 40,
+    "5": 19,
+    "6": 3
+  },
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 502,
+      "pct": 34.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 463,
+      "pct": 31.6,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 258,
+      "pct": 17.6,
+      "eff16": 95.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 101,
+      "pct": 6.9,
+      "eff16": 286.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 43,
+      "pct": 2.9,
+      "eff16": 47.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 35,
+      "pct": 2.4,
+      "eff16": 382.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 27,
+      "pct": 1.8,
+      "eff16": 63.7
+    },
+    "19": {
+      "name": "(19)",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 241.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 31.8
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 38.2
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 16,
+      "pct": 21.6,
+      "eff16": 95.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 17.6,
+      "eff16": 63.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 16.2,
+      "eff16": 31.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 9.5,
+      "eff16": 47.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 13.6
+    },
+    "1104": {
+      "name": "(1104)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 4.2
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 6.8
+    },
+    "912": {
+      "name": "(912)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 5.0
+    },
+    "1776": {
+      "name": "(1776)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 2.6
+    },
+    "2736": {
+      "name": "(2736)",
+      "count": 1,
+      "pct": 1.4,
+      "eff16": 1.7
+    }
+  },
+  "cn_notes": 49,
+  "cn_scratch_pct": 2.53,
+  "cn_kbd_overlap_pct": 8.87,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 28.9,
+      "eff16": 47.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 15.6,
+      "eff16": 95.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 6,
+      "pct": 13.3,
+      "eff16": 13.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 6.7,
+      "eff16": 11.9
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 4.4,
+      "eff16": 4.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 4.4,
+      "eff16": 23.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 4.4,
+      "eff16": 6.0
+    },
+    "1668": {
+      "name": "(1668)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 2.7
+    },
+    "252": {
+      "name": "(252)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 18.2
+    },
+    "6528": {
+      "name": "(6528)",
+      "count": 1,
+      "pct": 2.2,
+      "eff16": 0.7
+    }
+  }
+}

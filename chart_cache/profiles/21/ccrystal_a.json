@@ -1,0 +1,222 @@
+{
+  "textage": "21/ccrystal.html?1AB00",
+  "analyzed_at": "2026-04-06T10:50:27.325721+00:00",
+  "title": "Critical Crystal",
+  "artist": "青龍",
+  "bpm_raw": "191",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1235,
+  "events": 726,
+  "bpm_main": 191,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 95.5,
+  "weighted_eff16": 131.0,
+  "scratch_pct": 8.58,
+  "chord_pct": 54.27,
+  "single_pct": 45.73,
+  "ranuchi": 40,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 356,
+      "pct": 49.1,
+      "eff16": 95.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 304,
+      "pct": 41.9,
+      "eff16": 191.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 56,
+      "pct": 7.7,
+      "eff16": 47.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 63.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 10.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 31.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.1
+    },
+    "2352": {
+      "name": "(2352)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 1.9
+    }
+  },
+  "chord_dist": {
+    "1": 332,
+    "2": 302,
+    "3": 70,
+    "4": 21,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 469,
+      "pct": 41.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 314,
+      "pct": 27.8,
+      "eff16": 95.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 267,
+      "pct": 23.7,
+      "eff16": 191.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 52,
+      "pct": 4.6,
+      "eff16": 47.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 1.0,
+      "eff16": 31.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 63.7
+    },
+    "216": {
+      "name": "(216)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 21.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.1
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.9
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 38,
+      "pct": 36.2,
+      "eff16": 191.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 31,
+      "pct": 29.5,
+      "eff16": 95.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 4.8,
+      "eff16": 47.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 3.8,
+      "eff16": 31.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 11.9
+    },
+    "720": {
+      "name": "(720)",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 6.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 15.9
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 38.2
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 19.1
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 9.6
+    }
+  },
+  "cn_notes": 3,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 100.0,
+      "eff16": 11.9
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "textage": "22/_hyouri.html?1AC00",
+  "analyzed_at": "2026-04-06T11:02:22.667768+00:00",
+  "title": "表裏一体！？怪盗いいんちょの悩み",
+  "artist": "◇◆噂の怪盗少女 ぷらずま★彡Prim◇◆",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1792,
+  "events": 956,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 141.4,
+  "scratch_pct": 6.03,
+  "chord_pct": 64.64,
+  "single_pct": 35.36,
+  "ranuchi": 82,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 679,
+      "pct": 71.1,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 199,
+      "pct": 20.8,
+      "eff16": 82.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 41,
+      "pct": 4.3,
+      "eff16": 55.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 2.4,
+      "eff16": 41.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 330.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 247.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.6
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 23.6
+    }
+  },
+  "chord_dist": {
+    "1": 338,
+    "2": 444,
+    "3": 132,
+    "4": 40,
+    "5": 2
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 735,
+      "pct": 43.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 672,
+      "pct": 39.9,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 196,
+      "pct": 11.6,
+      "eff16": 82.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 43,
+      "pct": 2.6,
+      "eff16": 55.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 1.4,
+      "eff16": 41.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 330.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 247.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.6
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 33.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 61.9
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 29,
+      "pct": 27.1,
+      "eff16": 82.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 21.5,
+      "eff16": 41.2
+    },
+    "192": {
+      "name": "half",
+      "count": 16,
+      "pct": 15.0,
+      "eff16": 20.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 6.5,
+      "eff16": 55.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 4.7,
+      "eff16": 27.5
+    },
+    "528": {
+      "name": "(528)",
+      "count": 3,
+      "pct": 2.8,
+      "eff16": 7.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 10.3
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 0.9,
+      "eff16": 2.1
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.9,
+      "eff16": 4.9
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.9,
+      "eff16": 8.2
+    }
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "textage": "20/daydream.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:32.616217+00:00",
+  "title": "DAY DREAM",
+  "artist": "Mutsuhiko Izumi",
+  "bpm_raw": "80-300",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1135,
+  "events": 700,
+  "bpm_main": 300,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 300.0,
+  "weighted_eff16": 954.9,
+  "scratch_pct": 3.79,
+  "chord_pct": 45.57,
+  "single_pct": 54.43,
+  "ranuchi": 18,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 235,
+      "pct": 33.6,
+      "eff16": 300.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 87,
+      "pct": 12.4,
+      "eff16": 150.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 49,
+      "pct": 7.0,
+      "eff16": 600.0
+    },
+    "2": {
+      "name": "(2)",
+      "count": 47,
+      "pct": 6.7,
+      "eff16": 3600.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 31,
+      "pct": 4.4,
+      "eff16": 1200.0
+    },
+    "3": {
+      "name": "(3)",
+      "count": 31,
+      "pct": 4.4,
+      "eff16": 2400.0
+    },
+    "1": {
+      "name": "(1)",
+      "count": 23,
+      "pct": 3.3,
+      "eff16": 7200.0
+    },
+    "25": {
+      "name": "~16th",
+      "count": 22,
+      "pct": 3.1,
+      "eff16": 288.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 22,
+      "pct": 3.1,
+      "eff16": 1800.0
+    },
+    "7": {
+      "name": "~48th",
+      "count": 12,
+      "pct": 1.7,
+      "eff16": 1028.6
+    }
+  },
+  "chord_dist": {
+    "1": 381,
+    "2": 229,
+    "3": 66,
+    "4": 22,
+    "5": 2
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 396,
+      "pct": 36.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 235,
+      "pct": 21.5,
+      "eff16": 300.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 87,
+      "pct": 8.0,
+      "eff16": 150.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 49,
+      "pct": 4.5,
+      "eff16": 600.0
+    },
+    "2": {
+      "name": "(2)",
+      "count": 45,
+      "pct": 4.1,
+      "eff16": 3600.0
+    },
+    "6": {
+      "name": "64th",
+      "count": 31,
+      "pct": 2.8,
+      "eff16": 1200.0
+    },
+    "3": {
+      "name": "(3)",
+      "count": 29,
+      "pct": 2.7,
+      "eff16": 2400.0
+    },
+    "25": {
+      "name": "~16th",
+      "count": 22,
+      "pct": 2.0,
+      "eff16": 288.0
+    },
+    "1": {
+      "name": "(1)",
+      "count": 22,
+      "pct": 2.0,
+      "eff16": 7200.0
+    },
+    "4": {
+      "name": "(4)",
+      "count": 21,
+      "pct": 1.9,
+      "eff16": 1800.0
+    }
+  },
+  "scr_interval_dist": {
+    "408": {
+      "name": "(408)",
+      "count": 13,
+      "pct": 31.0,
+      "eff16": 17.6
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 11.9,
+      "eff16": 100.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 9.5,
+      "eff16": 18.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 9.4
+    },
+    "30": {
+      "name": "(30)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 240.0
+    },
+    "2352": {
+      "name": "(2352)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 3.1
+    },
+    "1632": {
+      "name": "(1632)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 4.4
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 9.1
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 42.9
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 8.8
+    }
+  }
+}

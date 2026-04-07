@@ -1,0 +1,220 @@
+{
+  "textage": "29/pushonbt.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:22.686143+00:00",
+  "title": "Push on Beats!～音ゲの国のeX-ストリーマー～",
+  "artist": "MOSAIC.WAV",
+  "bpm_raw": "164-172",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1748,
+  "events": 1011,
+  "bpm_main": 172,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 172.0,
+  "weighted_eff16": 165.7,
+  "scratch_pct": 9.38,
+  "chord_pct": 47.38,
+  "single_pct": 52.62,
+  "ranuchi": 65,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 617,
+      "pct": 61.1,
+      "eff16": 172.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 206,
+      "pct": 20.4,
+      "eff16": 86.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 111,
+      "pct": 11.0,
+      "eff16": 258.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 27,
+      "pct": 2.7,
+      "eff16": 57.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 19,
+      "pct": 1.9,
+      "eff16": 516.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 43.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 129.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 344.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 28.7
+    },
+    "40": {
+      "name": "(40)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 103.2
+    }
+  },
+  "chord_dist": {
+    "1": 532,
+    "2": 288,
+    "3": 137,
+    "4": 41,
+    "5": 13
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 608,
+      "pct": 38.4,
+      "eff16": 172.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 597,
+      "pct": 37.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 201,
+      "pct": 12.7,
+      "eff16": 86.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 103,
+      "pct": 6.5,
+      "eff16": 258.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 25,
+      "pct": 1.6,
+      "eff16": 57.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 16,
+      "pct": 1.0,
+      "eff16": 516.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 43.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 64.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 129.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 344.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 43,
+      "pct": 26.4,
+      "eff16": 86.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 28,
+      "pct": 17.2,
+      "eff16": 57.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 15.3,
+      "eff16": 43.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 13,
+      "pct": 8.0,
+      "eff16": 172.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 6.1,
+      "eff16": 10.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 8,
+      "pct": 4.9,
+      "eff16": 17.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 28.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 12.3
+    },
+    "624": {
+      "name": "(624)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 6.6
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 21.5
+    }
+  }
+}

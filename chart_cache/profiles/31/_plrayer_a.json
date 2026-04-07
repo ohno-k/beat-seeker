@@ -1,0 +1,221 @@
+{
+  "textage": "31/_plrayer.html?1AC00",
+  "analyzed_at": "2026-04-06T11:00:03.048659+00:00",
+  "title": "《PL|RAYER》",
+  "artist": "BlackLolita",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1412,
+  "events": 791,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 139.0,
+  "scratch_pct": 4.6,
+  "chord_pct": 51.2,
+  "single_pct": 48.8,
+  "ranuchi": 80,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 436,
+      "pct": 55.2,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 255,
+      "pct": 32.3,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 39,
+      "pct": 4.9,
+      "eff16": 45.0
+    },
+    "128": {
+      "name": "(128)",
+      "count": 17,
+      "pct": 2.2,
+      "eff16": 33.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.5,
+      "eff16": 360.0
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 1.4,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 30.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 67.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 270.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 11.2
+    }
+  },
+  "chord_dist": {
+    "1": 386,
+    "2": 258,
+    "3": 93,
+    "4": 39,
+    "5": 15
+  },
+  "tags": [
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 559,
+      "pct": 41.5,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 436,
+      "pct": 32.4,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 254,
+      "pct": 18.9,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 2.7,
+      "eff16": 45.0
+    },
+    "128": {
+      "name": "(128)",
+      "count": 17,
+      "pct": 1.3,
+      "eff16": 33.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 360.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 22.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 30.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 67.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 270.0
+    }
+  },
+  "scr_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 11,
+      "pct": 17.2,
+      "eff16": 5.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 17.2,
+      "eff16": 90.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 14.1,
+      "eff16": 22.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 12.5,
+      "eff16": 11.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 9.4,
+      "eff16": 2.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 6.2,
+      "eff16": 45.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 4.7,
+      "eff16": 12.9
+    },
+    "1104": {
+      "name": "(1104)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 3.9
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 10.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 3.1,
+      "eff16": 18.0
+    }
+  },
+  "cn_notes": 1,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.0,
+  "cn_interval_dist": {}
+}

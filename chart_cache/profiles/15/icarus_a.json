@@ -1,0 +1,212 @@
+{
+  "textage": "15/icarus.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:02.300639+00:00",
+  "title": "ICARUS",
+  "artist": "Eagle",
+  "bpm_raw": "126-251",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1285,
+  "events": 845,
+  "bpm_main": 251,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 251.0,
+  "weighted_eff16": 204.3,
+  "scratch_pct": 7.7,
+  "chord_pct": 39.64,
+  "single_pct": 60.36,
+  "ranuchi": 54,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 562,
+      "pct": 66.6,
+      "eff16": 251.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 221,
+      "pct": 26.2,
+      "eff16": 125.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 3.3,
+      "eff16": 62.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 83.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 15.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 41.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.1
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.8
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 31.4
+    }
+  },
+  "chord_dist": {
+    "1": 510,
+    "2": 261,
+    "3": 51,
+    "4": 15,
+    "5": 8
+  },
+  "tags": [
+    "single_heavy",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 556,
+      "pct": 46.9,
+      "eff16": 251.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 356,
+      "pct": 30.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 214,
+      "pct": 18.1,
+      "eff16": 125.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 2.2,
+      "eff16": 62.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 22,
+      "pct": 1.9,
+      "eff16": 83.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 41.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 25.1
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 50.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 15.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 31.4
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 25.5,
+      "eff16": 62.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 22,
+      "pct": 22.4,
+      "eff16": 125.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 13.3,
+      "eff16": 15.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 10.2,
+      "eff16": 83.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 7,
+      "pct": 7.1,
+      "eff16": 41.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 6.1,
+      "eff16": 7.8
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 6.1,
+      "eff16": 31.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 3.1,
+      "eff16": 3.9
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 2.6
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 1.0,
+      "eff16": 2.0
+    }
+  }
+}

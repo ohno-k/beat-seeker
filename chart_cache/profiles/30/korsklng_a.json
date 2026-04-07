@@ -1,0 +1,284 @@
+{
+  "textage": "30/korsklng.html?1AC00",
+  "analyzed_at": "2026-04-06T10:59:13.557237+00:00",
+  "title": "kors k's How to make OTOGE CORE 「LONG」",
+  "artist": "kors k",
+  "bpm_raw": "190",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1777,
+  "events": 993,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 190.0,
+  "weighted_eff16": 152.7,
+  "scratch_pct": 9.23,
+  "chord_pct": 51.06,
+  "single_pct": 48.94,
+  "ranuchi": 102,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 477,
+      "pct": 48.1,
+      "eff16": 190.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 414,
+      "pct": 41.7,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 32,
+      "pct": 3.2,
+      "eff16": 47.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 30,
+      "pct": 3.0,
+      "eff16": 285.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 23,
+      "pct": 2.3,
+      "eff16": 380.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 142.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 570.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 71.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 63.3
+    },
+    "1532": {
+      "name": "(1532)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 3.0
+    }
+  },
+  "chord_dist": {
+    "1": 486,
+    "2": 273,
+    "3": 192,
+    "4": 41,
+    "5": 1
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 653,
+      "pct": 40.5,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 455,
+      "pct": 28.2,
+      "eff16": 190.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 413,
+      "pct": 25.6,
+      "eff16": 95.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 30,
+      "pct": 1.9,
+      "eff16": 285.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 1.7,
+      "eff16": 47.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 23,
+      "pct": 1.4,
+      "eff16": 380.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 63.3
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 23.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 142.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 570.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 74,
+      "pct": 45.4,
+      "eff16": 47.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 20,
+      "pct": 12.3,
+      "eff16": 95.0
+    },
+    "192": {
+      "name": "half",
+      "count": 19,
+      "pct": 11.7,
+      "eff16": 23.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 12,
+      "pct": 7.4,
+      "eff16": 190.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 6.1,
+      "eff16": 11.9
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 4.9,
+      "eff16": 142.5
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 3.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 1.8,
+      "eff16": 5.9
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 10.6
+    },
+    "1392": {
+      "name": "(1392)",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 3.3
+    }
+  },
+  "cn_notes": 38,
+  "cn_scratch_pct": 21.05,
+  "cn_kbd_overlap_pct": 2.05,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 73.0,
+      "eff16": 47.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 15.8
+    },
+    "15888": {
+      "name": "(15888)",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 0.3
+    },
+    "3888": {
+      "name": "(3888)",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 1.2
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 9.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 23.8
+    },
+    "5088": {
+      "name": "(5088)",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 0.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 6.8
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 4.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 2.7,
+      "eff16": 11.9
+    }
+  }
+}

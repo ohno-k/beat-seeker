@@ -1,0 +1,180 @@
+{
+  "textage": "28/firebeat.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:39.520151+00:00",
+  "title": "Fire Beat",
+  "artist": "kors k",
+  "bpm_raw": "157-300",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1388,
+  "events": 946,
+  "bpm_main": 300,
+  "is_soflan": true,
+  "dominant_interval": 48,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 209.8,
+  "scratch_pct": 5.19,
+  "chord_pct": 41.12,
+  "single_pct": 58.88,
+  "ranuchi": 87,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 462,
+      "pct": 48.9,
+      "eff16": 150.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 394,
+      "pct": 41.7,
+      "eff16": 300.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 77,
+      "pct": 8.1,
+      "eff16": 75.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 600.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 37.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    }
+  },
+  "chord_dist": {
+    "1": 557,
+    "2": 336,
+    "3": 53
+  },
+  "tags": [
+    "has_32nd",
+    "soflan",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 461,
+      "pct": 35.1,
+      "eff16": 150.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 394,
+      "pct": 30.0,
+      "eff16": 300.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 378,
+      "pct": 28.7,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 63,
+      "pct": 4.8,
+      "eff16": 75.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 0.7,
+      "eff16": 37.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 600.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 50.0
+    }
+  },
+  "scr_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 23.9,
+      "eff16": 37.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 15.5,
+      "eff16": 75.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 9.9,
+      "eff16": 150.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 8.5,
+      "eff16": 9.4
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 6,
+      "pct": 8.5,
+      "eff16": 5.0
+    },
+    "720": {
+      "name": "(720)",
+      "count": 4,
+      "pct": 5.6,
+      "eff16": 10.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 5.6,
+      "eff16": 4.7
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 10.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 18.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 21.4
+    }
+  }
+}

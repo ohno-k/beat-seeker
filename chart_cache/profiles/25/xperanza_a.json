@@ -1,0 +1,241 @@
+{
+  "textage": "25/xperanza.html?1AC00",
+  "analyzed_at": "2026-04-06T10:58:39.177049+00:00",
+  "title": "Xperanza",
+  "artist": "aran",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1570,
+  "events": 895,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 100.0,
+  "weighted_eff16": 136.7,
+  "scratch_pct": 14.01,
+  "chord_pct": 50.61,
+  "single_pct": 49.39,
+  "ranuchi": 87,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 479,
+      "pct": 53.6,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 335,
+      "pct": 37.5,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 4.1,
+      "eff16": 50.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 15,
+      "pct": 1.7,
+      "eff16": 150.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 1.2,
+      "eff16": 33.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 300.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 66.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.0
+    }
+  },
+  "chord_dist": {
+    "1": 442,
+    "2": 269,
+    "3": 151,
+    "4": 28,
+    "5": 5
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 484,
+      "pct": 35.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 472,
+      "pct": 35.0,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 312,
+      "pct": 23.1,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 33,
+      "pct": 2.4,
+      "eff16": 50.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 33.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 150.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 300.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 66.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 40.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 63,
+      "pct": 28.8,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 58,
+      "pct": 26.5,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 30,
+      "pct": 13.7,
+      "eff16": 25.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 16,
+      "pct": 7.3,
+      "eff16": 33.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 4.1,
+      "eff16": 12.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 7,
+      "pct": 3.2,
+      "eff16": 20.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 6,
+      "pct": 2.7,
+      "eff16": 200.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 2.7,
+      "eff16": 66.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 5,
+      "pct": 2.3,
+      "eff16": 16.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 3,
+      "pct": 1.4,
+      "eff16": 11.1
+    }
+  },
+  "cn_notes": 6,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 0.81,
+  "cn_interval_dist": {
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 40.0,
+      "eff16": 25.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 40.0,
+      "eff16": 16.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 12.5
+    }
+  }
+}

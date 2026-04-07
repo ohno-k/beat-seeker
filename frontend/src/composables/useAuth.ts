@@ -15,6 +15,9 @@ export interface AuthUser {
     privacyLevel: number;
     language: string;
     showRateTier: boolean;
+    isSupporter: boolean;
+    showSupporterBorder: boolean;
+    supporterToken: string;
     lastUploadedAt: string | null;
     email: string;
 }

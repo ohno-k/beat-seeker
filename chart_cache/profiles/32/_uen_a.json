@@ -1,0 +1,218 @@
+{
+  "textage": "32/_uen.html?1AC00",
+  "analyzed_at": "2026-04-06T10:59:47.611060+00:00",
+  "title": "uen",
+  "artist": "少年ラジオ",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1547,
+  "events": 925,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 200.0,
+  "weighted_eff16": 174.2,
+  "scratch_pct": 0.78,
+  "chord_pct": 48.0,
+  "single_pct": 52.0,
+  "ranuchi": 73,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 323,
+      "pct": 35.0,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 278,
+      "pct": 30.1,
+      "eff16": 100.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 109,
+      "pct": 11.8,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 77,
+      "pct": 8.3,
+      "eff16": 50.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 74,
+      "pct": 8.0,
+      "eff16": 300.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 33,
+      "pct": 3.6,
+      "eff16": 600.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 400.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 0.8,
+      "eff16": 25.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 133.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 66.7
+    }
+  },
+  "chord_dist": {
+    "1": 481,
+    "2": 288,
+    "3": 134,
+    "4": 22
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 619,
+      "pct": 40.4,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 321,
+      "pct": 20.9,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 278,
+      "pct": 18.1,
+      "eff16": 100.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 108,
+      "pct": 7.0,
+      "eff16": 150.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 78,
+      "pct": 5.1,
+      "eff16": 50.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 74,
+      "pct": 4.8,
+      "eff16": 300.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 33,
+      "pct": 2.2,
+      "eff16": 600.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 400.0
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 25.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 133.3
+    }
+  },
+  "scr_interval_dist": {
+    "504": {
+      "name": "(504)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 9.5
+    },
+    "12432": {
+      "name": "(12432)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 0.4
+    },
+    "2360": {
+      "name": "(2360)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 2.0
+    },
+    "7030": {
+      "name": "(7030)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 0.7
+    },
+    "90": {
+      "name": "(90)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 53.3
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 1.6
+    },
+    "3120": {
+      "name": "(3120)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 1.5
+    },
+    "6912": {
+      "name": "(6912)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 0.7
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 6.1
+    },
+    "300": {
+      "name": "(300)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 16.0
+    }
+  }
+}

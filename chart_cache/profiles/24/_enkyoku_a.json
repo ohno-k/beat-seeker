@@ -1,0 +1,217 @@
+{
+  "textage": "24/_enkyoku.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:57.888321+00:00",
+  "title": "焔極OVERKILL",
+  "artist": "RoughSketch Vs. L.E.D.-G",
+  "bpm_raw": "192",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1804,
+  "events": 1050,
+  "bpm_main": 192,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 192.0,
+  "weighted_eff16": 163.9,
+  "scratch_pct": 8.26,
+  "chord_pct": 50.86,
+  "single_pct": 49.14,
+  "ranuchi": 91,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 539,
+      "pct": 51.4,
+      "eff16": 192.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 379,
+      "pct": 36.1,
+      "eff16": 96.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 79,
+      "pct": 7.5,
+      "eff16": 288.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 2.1,
+      "eff16": 48.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 576.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 64.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 384.0
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 24.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 128.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.0
+    }
+  },
+  "chord_dist": {
+    "1": 516,
+    "2": 338,
+    "3": 172,
+    "4": 24
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 632,
+      "pct": 38.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 512,
+      "pct": 31.0,
+      "eff16": 192.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 373,
+      "pct": 22.6,
+      "eff16": 96.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 79,
+      "pct": 4.8,
+      "eff16": 288.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 1.5,
+      "eff16": 48.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 1.0,
+      "eff16": 64.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 10,
+      "pct": 0.6,
+      "eff16": 576.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 32.0
+    },
+    "624": {
+      "name": "(624)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.4
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 24.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 31.1,
+      "eff16": 48.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 36,
+      "pct": 24.3,
+      "eff16": 96.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 6.1,
+      "eff16": 12.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 5.4,
+      "eff16": 24.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 5,
+      "pct": 3.4,
+      "eff16": 0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 2.7,
+      "eff16": 10.7
+    },
+    "24": {
+      "name": "16th",
+      "count": 4,
+      "pct": 2.7,
+      "eff16": 192.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 4,
+      "pct": 2.7,
+      "eff16": 9.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 3.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 2.0,
+      "eff16": 6.0
+    }
+  }
+}

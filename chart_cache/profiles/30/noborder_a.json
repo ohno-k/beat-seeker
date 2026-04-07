@@ -1,0 +1,219 @@
+{
+  "textage": "30/noborder.html?1AC00",
+  "analyzed_at": "2026-04-06T10:54:40.416247+00:00",
+  "title": "No Border",
+  "artist": "BEMANI Sound Team \"dj TAKA\" feat.Sana",
+  "bpm_raw": "150",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1895,
+  "events": 1077,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 159.4,
+  "scratch_pct": 1.95,
+  "chord_pct": 49.77,
+  "single_pct": 50.23,
+  "ranuchi": 28,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 729,
+      "pct": 67.8,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 115,
+      "pct": 10.7,
+      "eff16": 75.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 92,
+      "pct": 8.6,
+      "eff16": 112.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 58,
+      "pct": 5.4,
+      "eff16": 450.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 56,
+      "pct": 5.2,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 37.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 300.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 56.2
+    },
+    "4": {
+      "name": "(4)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 900.0
+    }
+  },
+  "chord_dist": {
+    "1": 541,
+    "2": 338,
+    "3": 131,
+    "4": 50,
+    "5": 17
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 784,
+      "pct": 42.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 725,
+      "pct": 39.0,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 115,
+      "pct": 6.2,
+      "eff16": 75.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 92,
+      "pct": 5.0,
+      "eff16": 112.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 58,
+      "pct": 3.1,
+      "eff16": 450.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 56,
+      "pct": 3.0,
+      "eff16": 225.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.4,
+      "eff16": 50.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.3,
+      "eff16": 37.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.3,
+      "eff16": 300.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 56.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 27.8,
+      "eff16": 37.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 4,
+      "pct": 11.1,
+      "eff16": 1.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 11.1,
+      "eff16": 2.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 8.3,
+      "eff16": 4.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 18.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 9.4
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 75.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 25.0
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 2.8,
+      "eff16": 3.1
+    },
+    "552": {
+      "name": "(552)",
+      "count": 1,
+      "pct": 2.8,
+      "eff16": 6.5
+    }
+  }
+}

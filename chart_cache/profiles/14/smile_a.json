@@ -1,0 +1,217 @@
+{
+  "textage": "14/smile.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:38.236359+00:00",
+  "title": "smile",
+  "artist": "miru_maki.gjw",
+  "bpm_raw": "189",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1241,
+  "events": 762,
+  "bpm_main": 189,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 94.5,
+  "weighted_eff16": 130.3,
+  "scratch_pct": 8.3,
+  "chord_pct": 44.36,
+  "single_pct": 55.64,
+  "ranuchi": 93,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 382,
+      "pct": 50.2,
+      "eff16": 94.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 316,
+      "pct": 41.5,
+      "eff16": 189.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 46,
+      "pct": 6.0,
+      "eff16": 47.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 10.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 63.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 283.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 18.9
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 5.6
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.1
+    },
+    "456": {
+      "name": "(456)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.9
+    }
+  },
+  "chord_dist": {
+    "1": 424,
+    "2": 235,
+    "3": 71,
+    "4": 26,
+    "5": 6
+  },
+  "tags": [
+    "scratch_heavy",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 380,
+      "pct": 33.4,
+      "eff16": 94.5
+    },
+    "0": {
+      "name": "(0)",
+      "count": 378,
+      "pct": 33.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 315,
+      "pct": 27.7,
+      "eff16": 189.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 45,
+      "pct": 4.0,
+      "eff16": 47.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 63.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 10.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 283.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 18.9
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 5.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 31.5
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 37,
+      "pct": 36.3,
+      "eff16": 94.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 21.6,
+      "eff16": 47.2
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 8.8,
+      "eff16": 23.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 9,
+      "pct": 8.8,
+      "eff16": 11.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 5,
+      "pct": 4.9,
+      "eff16": 10.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 5.9
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 18.9
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 13.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 7.9
+    },
+    "6192": {
+      "name": "(6192)",
+      "count": 2,
+      "pct": 2.0,
+      "eff16": 0.7
+    }
+  }
+}

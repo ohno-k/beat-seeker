@@ -1,0 +1,272 @@
+{
+  "textage": "32/flamingo.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:43.593750+00:00",
+  "title": "Flamingo",
+  "artist": "CANVAS feat. Quimär",
+  "bpm_raw": "189",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1768,
+  "events": 1179,
+  "bpm_main": 189,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 189.0,
+  "weighted_eff16": 180.9,
+  "scratch_pct": 10.01,
+  "chord_pct": 37.49,
+  "single_pct": 62.51,
+  "ranuchi": 51,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 715,
+      "pct": 60.7,
+      "eff16": 189.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 240,
+      "pct": 20.4,
+      "eff16": 94.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 122,
+      "pct": 10.4,
+      "eff16": 283.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 43,
+      "pct": 3.7,
+      "eff16": 141.8
+    },
+    "12": {
+      "name": "32nd",
+      "count": 14,
+      "pct": 1.2,
+      "eff16": 378.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 14,
+      "pct": 1.2,
+      "eff16": 567.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 0.9,
+      "eff16": 47.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 63.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 31.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 70.9
+    }
+  },
+  "chord_dist": {
+    "1": 737,
+    "2": 313,
+    "3": 111,
+    "4": 18
+  },
+  "tags": [
+    "scratch_heavy",
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 674,
+      "pct": 42.4,
+      "eff16": 189.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 450,
+      "pct": 28.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 232,
+      "pct": 14.6,
+      "eff16": 94.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 122,
+      "pct": 7.7,
+      "eff16": 283.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 43,
+      "pct": 2.7,
+      "eff16": 141.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 0.9,
+      "eff16": 47.2
+    },
+    "12": {
+      "name": "32nd",
+      "count": 14,
+      "pct": 0.9,
+      "eff16": 378.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 14,
+      "pct": 0.9,
+      "eff16": 567.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 11,
+      "pct": 0.7,
+      "eff16": 63.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 31.5
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 45,
+      "pct": 25.6,
+      "eff16": 94.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 33,
+      "pct": 18.8,
+      "eff16": 189.0
+    },
+    "192": {
+      "name": "half",
+      "count": 23,
+      "pct": 13.1,
+      "eff16": 23.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 11.4,
+      "eff16": 47.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 13,
+      "pct": 7.4,
+      "eff16": 11.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 6.8,
+      "eff16": 31.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 4.0,
+      "eff16": 63.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 2.8,
+      "eff16": 13.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 2.3,
+      "eff16": 5.9
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 1.7,
+      "eff16": 6.8
+    }
+  },
+  "cn_notes": 21,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 6.73,
+  "cn_interval_dist": {
+    "63": {
+      "name": "~quarter-triplet",
+      "count": 7,
+      "pct": 35.0,
+      "eff16": 72.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 25.0,
+      "eff16": 11.8
+    },
+    "66": {
+      "name": "(66)",
+      "count": 3,
+      "pct": 15.0,
+      "eff16": 68.7
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 5.9
+    },
+    "8064": {
+      "name": "(8064)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 0.6
+    },
+    "273": {
+      "name": "(273)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 16.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 18.9
+    },
+    "18048": {
+      "name": "(18048)",
+      "count": 1,
+      "pct": 5.0,
+      "eff16": 0.3
+    }
+  }
+}

@@ -1,0 +1,284 @@
+{
+  "textage": "28/ignisira.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:11.737663+00:00",
+  "title": "Ignis†Irae",
+  "artist": "BEMANI Sound Team \"神\"",
+  "bpm_raw": "188-191",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1760,
+  "events": 1092,
+  "bpm_main": 191,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 191.0,
+  "weighted_eff16": 160.1,
+  "scratch_pct": 9.2,
+  "chord_pct": 48.26,
+  "single_pct": 51.74,
+  "ranuchi": 32,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 553,
+      "pct": 50.7,
+      "eff16": 191.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 237,
+      "pct": 21.7,
+      "eff16": 143.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 214,
+      "pct": 19.6,
+      "eff16": 95.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 28,
+      "pct": 2.6,
+      "eff16": 71.6
+    },
+    "16": {
+      "name": "24th",
+      "count": 27,
+      "pct": 2.5,
+      "eff16": 286.5
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 23.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 47.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 6,
+      "pct": 0.5,
+      "eff16": 573.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 63.7
+    },
+    "20": {
+      "name": "(20)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 229.2
+    }
+  },
+  "chord_dist": {
+    "1": 565,
+    "2": 413,
+    "3": 87,
+    "4": 27
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 529,
+      "pct": 33.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 527,
+      "pct": 33.0,
+      "eff16": 191.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 248,
+      "pct": 15.5,
+      "eff16": 143.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 222,
+      "pct": 13.9,
+      "eff16": 95.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 28,
+      "pct": 1.8,
+      "eff16": 71.6
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 1.1,
+      "eff16": 286.5
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 23.9
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 47.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 63.7
+    },
+    "20": {
+      "name": "(20)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 229.2
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 90,
+      "pct": 55.9,
+      "eff16": 191.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 8.1,
+      "eff16": 47.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 13,
+      "pct": 8.1,
+      "eff16": 95.5
+    },
+    "672": {
+      "name": "(672)",
+      "count": 8,
+      "pct": 5.0,
+      "eff16": 6.8
+    },
+    "192": {
+      "name": "half",
+      "count": 7,
+      "pct": 4.3,
+      "eff16": 23.9
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 6,
+      "pct": 3.7,
+      "eff16": 3.2
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 3.1,
+      "eff16": 11.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 15.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 2.5,
+      "eff16": 31.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 1.9,
+      "eff16": 8.0
+    }
+  },
+  "cn_notes": 61,
+  "cn_scratch_pct": 2.5,
+  "cn_kbd_overlap_pct": 8.95,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 30.0,
+      "eff16": 47.8
+    },
+    "63": {
+      "name": "~quarter-triplet",
+      "count": 10,
+      "pct": 16.7,
+      "eff16": 72.8
+    },
+    "129": {
+      "name": "(129)",
+      "count": 7,
+      "pct": 11.7,
+      "eff16": 35.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 6.7,
+      "eff16": 11.9
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 6.7,
+      "eff16": 23.9
+    },
+    "126": {
+      "name": "(126)",
+      "count": 4,
+      "pct": 6.7,
+      "eff16": 36.4
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 8.0
+    },
+    "258": {
+      "name": "(258)",
+      "count": 2,
+      "pct": 3.3,
+      "eff16": 17.8
+    },
+    "6720": {
+      "name": "(6720)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 0.7
+    },
+    "3456": {
+      "name": "(3456)",
+      "count": 1,
+      "pct": 1.7,
+      "eff16": 1.3
+    }
+  }
+}

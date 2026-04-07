@@ -1,0 +1,218 @@
+{
+  "textage": "21/punisher.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:04.531081+00:00",
+  "title": "PUNISHER",
+  "artist": "TAG×PON",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1785,
+  "events": 975,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 158.6,
+  "scratch_pct": 6.44,
+  "chord_pct": 49.33,
+  "single_pct": 50.67,
+  "ranuchi": 112,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 650,
+      "pct": 66.7,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 187,
+      "pct": 19.2,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 39,
+      "pct": 4.0,
+      "eff16": 45.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 35,
+      "pct": 3.6,
+      "eff16": 60.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 24,
+      "pct": 2.5,
+      "eff16": 360.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 20,
+      "pct": 2.1,
+      "eff16": 135.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 14,
+      "pct": 1.4,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 540.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 36.0
+    }
+  },
+  "chord_dist": {
+    "1": 494,
+    "2": 260,
+    "3": 140,
+    "4": 54,
+    "5": 27
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 703,
+      "pct": 42.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 640,
+      "pct": 38.3,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 183,
+      "pct": 11.0,
+      "eff16": 90.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 41,
+      "pct": 2.5,
+      "eff16": 60.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 39,
+      "pct": 2.3,
+      "eff16": 45.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 24,
+      "pct": 1.4,
+      "eff16": 360.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 20,
+      "pct": 1.2,
+      "eff16": 135.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 14,
+      "pct": 0.8,
+      "eff16": 270.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 540.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 26.3,
+      "eff16": 45.0
+    },
+    "192": {
+      "name": "half",
+      "count": 21,
+      "pct": 18.4,
+      "eff16": 22.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 13,
+      "pct": 11.4,
+      "eff16": 90.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 8.8,
+      "eff16": 11.2
+    },
+    "0": {
+      "name": "(0)",
+      "count": 8,
+      "pct": 7.0,
+      "eff16": 0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 7,
+      "pct": 6.1,
+      "eff16": 15.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 5.3,
+      "eff16": 5.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 3.5,
+      "eff16": 2.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 18.0
+    },
+    "1056": {
+      "name": "(1056)",
+      "count": 2,
+      "pct": 1.8,
+      "eff16": 4.1
+    }
+  }
+}

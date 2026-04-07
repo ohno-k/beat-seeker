@@ -1,0 +1,186 @@
+{
+  "textage": "14/candygal.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:03.224977+00:00",
+  "title": "Candy Galy",
+  "artist": "Risk Junk-G",
+  "bpm_raw": "184",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1724,
+  "events": 945,
+  "bpm_main": 184,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 184.0,
+  "weighted_eff16": 148.5,
+  "scratch_pct": 4.47,
+  "chord_pct": 52.91,
+  "single_pct": 47.09,
+  "ranuchi": 73,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 606,
+      "pct": 64.2,
+      "eff16": 184.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 292,
+      "pct": 30.9,
+      "eff16": 92.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 3.9,
+      "eff16": 46.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 10.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.2
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 23.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.7
+    }
+  },
+  "chord_dist": {
+    "1": 445,
+    "2": 277,
+    "3": 172,
+    "4": 46,
+    "5": 5
+  },
+  "tags": [
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 702,
+      "pct": 42.6,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 606,
+      "pct": 36.8,
+      "eff16": 184.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 292,
+      "pct": 17.7,
+      "eff16": 92.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 2.2,
+      "eff16": 46.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 10.8
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 10.2
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 23.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.7
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 21,
+      "pct": 27.6,
+      "eff16": 92.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 26.3,
+      "eff16": 46.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 9,
+      "pct": 11.8,
+      "eff16": 2.9
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 11.8,
+      "eff16": 23.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 9.2,
+      "eff16": 11.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 2.6,
+      "eff16": 1.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 2.6,
+      "eff16": 5.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 2.6,
+      "eff16": 30.7
+    },
+    "720": {
+      "name": "(720)",
+      "count": 1,
+      "pct": 1.3,
+      "eff16": 6.1
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 1.3,
+      "eff16": 5.4
+    }
+  }
+}

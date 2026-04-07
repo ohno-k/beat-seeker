@@ -1,0 +1,265 @@
+{
+  "textage": "33/frmhuman.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:44.928355+00:00",
+  "title": "From Human Blood",
+  "artist": "BEMANI Sound Team \"U1-ASAMi\"",
+  "bpm_raw": "170",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1826,
+  "events": 1111,
+  "bpm_main": 170,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 170.0,
+  "weighted_eff16": 167.5,
+  "scratch_pct": 6.74,
+  "chord_pct": 45.99,
+  "single_pct": 54.01,
+  "ranuchi": 75,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 848,
+      "pct": 76.4,
+      "eff16": 170.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 137,
+      "pct": 12.3,
+      "eff16": 85.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 54,
+      "pct": 4.9,
+      "eff16": 255.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 25,
+      "pct": 2.3,
+      "eff16": 510.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 19,
+      "pct": 1.7,
+      "eff16": 127.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 56.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 42.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 63.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 28.3
+    },
+    "84": {
+      "name": "(84)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 48.6
+    }
+  },
+  "chord_dist": {
+    "1": 600,
+    "2": 342,
+    "3": 139,
+    "4": 25,
+    "5": 5
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 869,
+      "pct": 51.1,
+      "eff16": 170.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 631,
+      "pct": 37.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 144,
+      "pct": 8.5,
+      "eff16": 85.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 1.4,
+      "eff16": 255.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 0.7,
+      "eff16": 127.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 56.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 42.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 63.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 28.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 9.4
+    }
+  },
+  "scr_interval_dist": {
+    "64": {
+      "name": "quarter-triplet",
+      "count": 26,
+      "pct": 21.3,
+      "eff16": 63.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 18,
+      "pct": 14.8,
+      "eff16": 127.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 13.1,
+      "eff16": 42.5
+    },
+    "768": {
+      "name": "(768)",
+      "count": 15,
+      "pct": 12.3,
+      "eff16": 5.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 12,
+      "pct": 9.8,
+      "eff16": 85.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 6,
+      "pct": 4.9,
+      "eff16": 170.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 4.1,
+      "eff16": 28.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 10.6
+    },
+    "160": {
+      "name": "(160)",
+      "count": 3,
+      "pct": 2.5,
+      "eff16": 25.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 2,
+      "pct": 1.6,
+      "eff16": 10.0
+    }
+  },
+  "cn_notes": 12,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 4.87,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 45.5,
+      "eff16": 42.5
+    },
+    "8160": {
+      "name": "(8160)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 0.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 14.2
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 2.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 2.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 21.2
+    },
+    "168": {
+      "name": "(168)",
+      "count": 1,
+      "pct": 9.1,
+      "eff16": 24.3
+    }
+  }
+}

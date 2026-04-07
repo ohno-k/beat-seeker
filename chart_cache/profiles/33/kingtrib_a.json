@@ -1,0 +1,205 @@
+{
+  "textage": "33/kingtrib.html?1AC00",
+  "analyzed_at": "2026-04-06T10:53:31.277087+00:00",
+  "title": "King of Tribe",
+  "artist": "Numb'n'dub",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1590,
+  "events": 877,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 100.0,
+  "weighted_eff16": 138.5,
+  "scratch_pct": 7.42,
+  "chord_pct": 52.34,
+  "single_pct": 47.66,
+  "ranuchi": 85,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 439,
+      "pct": 50.1,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 352,
+      "pct": 40.2,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 53,
+      "pct": 6.1,
+      "eff16": 50.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 15,
+      "pct": 1.7,
+      "eff16": 150.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 25.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 300.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 66.7
+    }
+  },
+  "chord_dist": {
+    "1": 418,
+    "2": 256,
+    "3": 157,
+    "4": 41,
+    "5": 5
+  },
+  "tags": [
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 623,
+      "pct": 42.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 432,
+      "pct": 29.4,
+      "eff16": 100.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 349,
+      "pct": 23.7,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 53,
+      "pct": 3.6,
+      "eff16": 50.0
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 25.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 40.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 33.3
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 11.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 49,
+      "pct": 41.9,
+      "eff16": 50.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 18,
+      "pct": 15.4,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 17,
+      "pct": 14.5,
+      "eff16": 100.0
+    },
+    "192": {
+      "name": "half",
+      "count": 9,
+      "pct": 7.7,
+      "eff16": 25.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 5.1,
+      "eff16": 12.5
+    },
+    "864": {
+      "name": "(864)",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 5.6
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 6.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 14.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 33.3
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 16.7
+    }
+  }
+}

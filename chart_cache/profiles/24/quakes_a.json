@@ -1,0 +1,257 @@
+{
+  "textage": "24/quakes.html?1AC00",
+  "analyzed_at": "2026-04-06T10:55:25.395678+00:00",
+  "title": "Quakes",
+  "artist": "dj Hellix",
+  "bpm_raw": "190",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1484,
+  "events": 930,
+  "bpm_main": 190,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 190.0,
+  "weighted_eff16": 168.6,
+  "scratch_pct": 7.14,
+  "chord_pct": 42.15,
+  "single_pct": 57.85,
+  "ranuchi": 129,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 701,
+      "pct": 75.5,
+      "eff16": 190.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 182,
+      "pct": 19.6,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.4,
+      "eff16": 47.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 285.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 0.9,
+      "eff16": 11.9
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 23.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 570.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 11.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 63.3
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.8
+    }
+  },
+  "chord_dist": {
+    "1": 538,
+    "2": 257,
+    "3": 108,
+    "4": 27
+  },
+  "tags": [
+    "has_32nd",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 696,
+      "pct": 50.5,
+      "eff16": 190.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 463,
+      "pct": 33.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 179,
+      "pct": 13.0,
+      "eff16": 95.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 0.8,
+      "eff16": 47.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 285.0
+    },
+    "408": {
+      "name": "(408)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 11.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 63.3
+    },
+    "8": {
+      "name": "48th",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 570.0
+    },
+    "696": {
+      "name": "(696)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.6
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 48,
+      "pct": 45.7,
+      "eff16": 47.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 11,
+      "pct": 10.5,
+      "eff16": 15.8
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 9.5,
+      "eff16": 23.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 9.5,
+      "eff16": 11.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 4.8,
+      "eff16": 5.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.9,
+      "eff16": 31.7
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 6.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 3.0
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 9.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 1.9,
+      "eff16": 95.0
+    }
+  },
+  "cn_notes": 15,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 8.42,
+  "cn_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 35.7,
+      "eff16": 5.9
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 28.6,
+      "eff16": 23.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 14.3,
+      "eff16": 7.9
+    },
+    "13056": {
+      "name": "(13056)",
+      "count": 1,
+      "pct": 7.1,
+      "eff16": 0.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 7.1,
+      "eff16": 11.9
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 7.1,
+      "eff16": 1.2
+    }
+  }
+}

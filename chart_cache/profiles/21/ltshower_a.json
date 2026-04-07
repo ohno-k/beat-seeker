@@ -1,0 +1,174 @@
+{
+  "textage": "21/ltshower.html?1AB00",
+  "analyzed_at": "2026-04-06T10:53:51.221903+00:00",
+  "title": "Lighting Shower",
+  "artist": "TAG",
+  "bpm_raw": "162",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1182,
+  "events": 819,
+  "bpm_main": 162,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 162.0,
+  "weighted_eff16": 144.3,
+  "scratch_pct": 5.67,
+  "chord_pct": 30.65,
+  "single_pct": 69.35,
+  "ranuchi": 48,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 651,
+      "pct": 79.6,
+      "eff16": 162.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 139,
+      "pct": 17.0,
+      "eff16": 81.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 17,
+      "pct": 2.1,
+      "eff16": 54.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 40.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.2
+    }
+  },
+  "chord_dist": {
+    "1": 568,
+    "2": 150,
+    "3": 90,
+    "4": 11
+  },
+  "tags": [
+    "single_heavy",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 649,
+      "pct": 58.3,
+      "eff16": 162.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 298,
+      "pct": 26.8,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 137,
+      "pct": 12.3,
+      "eff16": 81.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 19,
+      "pct": 1.7,
+      "eff16": 54.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 40.5
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 9.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.2
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 30.3,
+      "eff16": 40.5
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 16.7,
+      "eff16": 20.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 10,
+      "pct": 15.2,
+      "eff16": 54.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 10.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 2.5
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 2.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 13.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 3.4
+    },
+    "0": {
+      "name": "(0)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 81.0
+    }
+  }
+}

@@ -1,8 +1,32 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
+
+const kofiCopied = ref(false);
+const showKofiModal = ref(false);
+
+const handleKofiClick = () => {
+  const token = props.user?.supporterToken;
+  if (token) {
+    showKofiModal.value = true;
+  } else {
+    window.open('https://ko-fi.com/beat_seeker', '_blank');
+  }
+};
+
+const confirmKofiOpen = () => {
+  const token = props.user?.supporterToken;
+  if (token) {
+    navigator.clipboard.writeText(token).then(() => {
+      kofiCopied.value = true;
+      setTimeout(() => { kofiCopied.value = false; }, 5000);
+    }).catch(() => {});
+  }
+  showKofiModal.value = false;
+  window.open('https://ko-fi.com/beat_seeker', '_blank');
+};
 
 const props = defineProps<{
   isOpen: boolean;
@@ -10,6 +34,7 @@ const props = defineProps<{
   isLoggedIn: boolean;
   user: any;
   viewingUserId: number | null;
+  viewingMode: 'admin' | 'friend' | null;
   authLoading: boolean;
 }>();
 
@@ -54,6 +79,7 @@ const navigationItems = computed(() => [
   { id: 'tier-voting', label: t('nav.tierVoting'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 7l2 2 4-4' },
   { id: 'song-avg', label: t('nav.songAvg'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
   { id: 'diff-table', label: t('nav.diffTable'), icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
+  { id: 'score-prediction', label: t('nav.scorePrediction'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
 ]);
 
 const secondaryItems = computed(() => [
@@ -69,7 +95,11 @@ const isAdmin = computed(() => {
 const filteredNavItems = computed(() => {
   return navigationItems.value.filter(item => {
     if (item.requiresAuth && !props.isLoggedIn) return false;
-    if (item.hideOnViewing && props.viewingUserId) return false;
+    // adminモードの場合はscore-predictionを許可（他のhideOnViewingはそのまま非表示）
+    if (item.hideOnViewing && props.viewingUserId) {
+      if (item.id === 'score-prediction' && props.viewingMode === 'admin') return true;
+      return false;
+    }
     return true;
   });
 });
@@ -220,14 +250,17 @@ const filteredNavItems = computed(() => {
               <button
                 @click="selectTab(item.id)"
                 class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all group"
-                :class="activeTab === item.id 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' 
+                :class="activeTab === item.id
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                 </svg>
                 {{ item.label }}
+                <span v-if="item.supporterOnly" class="ml-auto text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+                  Supporter
+                </span>
               </button>
             </template>
           </nav>
@@ -281,14 +314,100 @@ const filteredNavItems = computed(() => {
           </div>
         </div>
 
-        <!-- Sidebar Footer (Version/Socials maybe?) -->
-        <div class="p-6 text-center">
+        <!-- Ko-fi Support -->
+        <div class="px-4 pb-3 space-y-2">
+          <button
+            @click="handleKofiClick"
+            class="group flex items-center gap-3 w-full px-4 py-3 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl hover:shadow-md hover:shadow-amber-500/10 hover:-translate-y-0.5 transition-all text-left"
+          >
+            <div class="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.5 3H6C4.9 3 4 3.9 4 5v11c0 1.1.9 2 2 2h1v3l3-3h8.5c1.38 0 2.5-1.12 2.5-2.5v-10C21 4.12 19.88 3 18.5 3zm-3 10.5c-1.93 0-3.5-1.57-3.5-3.5 0-.44.09-.86.23-1.25L11 8h-1V6h2.5l2.11 1.77c.32-.12.66-.27 1.39-.27 1.93 0 3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5z"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-bold text-amber-700 dark:text-amber-400">{{ t('supporter.kofiButton') }}</p>
+              <p class="text-[10px] text-amber-500 dark:text-amber-500/70 font-medium">{{ t('supporter.kofiSidebarHint') }}</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </button>
+          <!-- Token hint for logged-in users -->
+          <div v-if="isLoggedIn && user?.supporterToken" class="px-1">
+            <p v-if="kofiCopied" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 text-center">
+              {{ t('supporter.tokenCopied') }}
+            </p>
+            <p v-else class="text-[10px] text-slate-400 dark:text-slate-500 text-center leading-relaxed">
+              {{ t('supporter.tokenHint') }}
+              <span class="font-mono font-bold text-amber-600 dark:text-amber-400 select-all">{{ user.supporterToken }}</span>
+            </p>
+          </div>
+        </div>
+
+
+        <!-- Sidebar Footer -->
+        <div class="p-6 pt-0 text-center">
           <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
             v1.4.0 | beat-seeker
           </p>
         </div>
       </div>
     </aside>
+
+    <!-- Ko-fi Confirmation Modal -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition-opacity duration-200"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-150"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="showKofiModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showKofiModal = false"></div>
+          <div class="relative bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-sm w-full p-6 space-y-4">
+            <!-- Header -->
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('supporter.modalTitle') }}</h3>
+            </div>
+
+            <!-- Body -->
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              {{ t('supporter.modalDesc') }}
+            </p>
+
+            <!-- Token display -->
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 text-center">
+              <p class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">{{ t('supporter.modalTokenLabel') }}</p>
+              <p class="text-lg font-mono font-black text-amber-700 dark:text-amber-300 select-all">{{ user?.supporterToken }}</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-2">
+              <button
+                @click="showKofiModal = false"
+                class="flex-1 px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                {{ t('supporter.modalCancel') }}
+              </button>
+              <button
+                @click="confirmKofiOpen"
+                class="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl hover:shadow-lg hover:shadow-amber-500/20 transition-all"
+              >
+                {{ t('supporter.modalConfirm') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 

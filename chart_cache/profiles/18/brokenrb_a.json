@@ -1,0 +1,200 @@
+{
+  "textage": "18/brokenrb.html?1AC00",
+  "analyzed_at": "2026-04-06T10:49:44.314324+00:00",
+  "title": "Broken",
+  "artist": "dj TAKA feat.AiMEE",
+  "bpm_raw": "148",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1597,
+  "events": 903,
+  "bpm_main": 148,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 148.0,
+  "weighted_eff16": 136.0,
+  "scratch_pct": 2.44,
+  "chord_pct": 60.35,
+  "single_pct": 39.65,
+  "ranuchi": 94,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 748,
+      "pct": 82.9,
+      "eff16": 148.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 11.6,
+      "eff16": 74.0
+    },
+    "192": {
+      "name": "half",
+      "count": 16,
+      "pct": 1.8,
+      "eff16": 18.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 11,
+      "pct": 1.2,
+      "eff16": 222.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 24.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.0,
+      "eff16": 37.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 444.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 14.8
+    }
+  },
+  "chord_dist": {
+    "1": 358,
+    "2": 428,
+    "3": 90,
+    "4": 22,
+    "5": 5
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 748,
+      "pct": 48.0,
+      "eff16": 148.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 656,
+      "pct": 42.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 6.7,
+      "eff16": 74.0
+    },
+    "192": {
+      "name": "half",
+      "count": 16,
+      "pct": 1.0,
+      "eff16": 18.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 11,
+      "pct": 0.7,
+      "eff16": 222.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 0.6,
+      "eff16": 24.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.5,
+      "eff16": 37.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 14.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 444.0
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 10,
+      "pct": 26.3,
+      "eff16": 2.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 18.4,
+      "eff16": 37.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 10.5,
+      "eff16": 74.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 10.5,
+      "eff16": 9.2
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 10.5,
+      "eff16": 18.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 3,
+      "pct": 7.9,
+      "eff16": 3.1
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 14.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 5.3,
+      "eff16": 24.7
+    },
+    "2928": {
+      "name": "(2928)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 1.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 2.6,
+      "eff16": 8.2
+    }
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "textage": "21/rbguitar.html?1AB00",
+  "analyzed_at": "2026-04-06T10:59:30.923823+00:00",
+  "title": "rainbow guitar weeps",
+  "artist": "dj TAKA",
+  "bpm_raw": "156",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1371,
+  "events": 867,
+  "bpm_main": 156,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 156.0,
+  "weighted_eff16": 139.1,
+  "scratch_pct": 1.9,
+  "chord_pct": 43.14,
+  "single_pct": 56.86,
+  "ranuchi": 65,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 511,
+      "pct": 59.0,
+      "eff16": 156.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 210,
+      "pct": 24.2,
+      "eff16": 78.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 45,
+      "pct": 5.2,
+      "eff16": 117.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 44,
+      "pct": 5.1,
+      "eff16": 234.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 2.1,
+      "eff16": 52.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 15,
+      "pct": 1.7,
+      "eff16": 468.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.6,
+      "eff16": 39.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 58.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 8.7
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 19.5
+    }
+  },
+  "chord_dist": {
+    "1": 493,
+    "2": 261,
+    "3": 97,
+    "4": 15,
+    "5": 1
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 511,
+      "pct": 38.0,
+      "eff16": 156.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 479,
+      "pct": 35.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 210,
+      "pct": 15.6,
+      "eff16": 78.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 45,
+      "pct": 3.3,
+      "eff16": 117.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 44,
+      "pct": 3.3,
+      "eff16": 234.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 18,
+      "pct": 1.3,
+      "eff16": 52.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 15,
+      "pct": 1.1,
+      "eff16": 468.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 39.0
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 58.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 8.7
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 10,
+      "pct": 40.0,
+      "eff16": 9.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 9,
+      "pct": 36.0,
+      "eff16": 2.4
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 4.0,
+      "eff16": 3.2
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 4.0,
+      "eff16": 19.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 4.0,
+      "eff16": 6.5
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 1,
+      "pct": 4.0,
+      "eff16": 1.4
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 1,
+      "pct": 4.0,
+      "eff16": 2.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 4.0,
+      "eff16": 39.0
+    }
+  }
+}

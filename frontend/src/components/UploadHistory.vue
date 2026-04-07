@@ -10,7 +10,7 @@ import RankIcon from './RankIcon.vue';
 import type { UploadDiffResult } from '../types/UploadDiff';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
-const { isLoggedIn, authHeaders } = useAuth();
+const { user, isLoggedIn, authHeaders } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 const props = defineProps<{
   viewingUserId?: number | null;
@@ -255,6 +255,7 @@ onMounted(() => {
                   :tier="item.tierInfo?.tier"
                   size="md"
                   class="shrink-0 drop-shadow-sm"
+                  :is-supporter="user?.isSupporter && user?.showSupporterBorder"
                 />
                 <RankIcon
                   v-if="showRateTier"
@@ -262,6 +263,7 @@ onMounted(() => {
                   :tier="item.rateTierInfo?.tier"
                   size="md"
                   class="shrink-0 drop-shadow-sm"
+                  :is-supporter="user?.isSupporter && user?.showSupporterBorder"
                 />
               </div>
             </td>

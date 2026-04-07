@@ -1,0 +1,242 @@
+{
+  "textage": "31/game_on.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:48.937420+00:00",
+  "title": "GAME ON",
+  "artist": "DJ Mass MAD Izm* feat.H14 of LEONAIR",
+  "bpm_raw": "105",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1354,
+  "events": 724,
+  "bpm_main": 105,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 105.0,
+  "weighted_eff16": 118.1,
+  "scratch_pct": 24.67,
+  "chord_pct": 55.25,
+  "single_pct": 44.75,
+  "ranuchi": 50,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 397,
+      "pct": 54.9,
+      "eff16": 105.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 164,
+      "pct": 22.7,
+      "eff16": 210.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 123,
+      "pct": 17.0,
+      "eff16": 52.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 1.8,
+      "eff16": 26.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 11,
+      "pct": 1.5,
+      "eff16": 157.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 17.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 35.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 21.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 78.8
+    },
+    "84": {
+      "name": "(84)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 30.0
+    }
+  },
+  "chord_dist": {
+    "1": 324,
+    "2": 227,
+    "3": 123,
+    "4": 43,
+    "5": 7
+  },
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 455,
+      "pct": 44.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 336,
+      "pct": 33.0,
+      "eff16": 105.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 131,
+      "pct": 12.9,
+      "eff16": 52.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 54,
+      "pct": 5.3,
+      "eff16": 210.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 12,
+      "pct": 1.2,
+      "eff16": 17.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 26.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 0.9,
+      "eff16": 35.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 7,
+      "pct": 0.7,
+      "eff16": 21.0
+    },
+    "216": {
+      "name": "(216)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 11.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 10.5
+    }
+  },
+  "scr_interval_dist": {
+    "12": {
+      "name": "32nd",
+      "count": 104,
+      "pct": 31.2,
+      "eff16": 210.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 100,
+      "pct": 30.0,
+      "eff16": 52.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 71,
+      "pct": 21.3,
+      "eff16": 105.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 20,
+      "pct": 6.0,
+      "eff16": 26.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 11,
+      "pct": 3.3,
+      "eff16": 157.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 78.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 7.5
+    },
+    "252": {
+      "name": "(252)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 10.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 35.0
+    },
+    "744": {
+      "name": "(744)",
+      "count": 2,
+      "pct": 0.6,
+      "eff16": 3.4
+    }
+  },
+  "cn_notes": 9,
+  "cn_scratch_pct": 11.11,
+  "cn_kbd_overlap_pct": 3.33,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 50.0,
+      "eff16": 17.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 37.5,
+      "eff16": 10.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 1,
+      "pct": 12.5,
+      "eff16": 0.8
+    }
+  }
+}

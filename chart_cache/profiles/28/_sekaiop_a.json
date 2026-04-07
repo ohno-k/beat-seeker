@@ -1,0 +1,266 @@
+{
+  "textage": "28/_sekaiop.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:03.570324+00:00",
+  "title": "世界の果てに約束の凱歌を -ReUnion-",
+  "artist": "OSTER project feat. かなたん",
+  "bpm_raw": "200",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1965,
+  "events": 1011,
+  "bpm_main": 200,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 200.0,
+  "weighted_eff16": 156.6,
+  "scratch_pct": 4.53,
+  "chord_pct": 52.42,
+  "single_pct": 47.58,
+  "ranuchi": 91,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 521,
+      "pct": 51.6,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 405,
+      "pct": 40.1,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 3.7,
+      "eff16": 50.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 300.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 150.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.8,
+      "eff16": 600.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 66.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.5,
+      "eff16": 33.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 400.0
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 133.3
+    }
+  },
+  "chord_dist": {
+    "1": 481,
+    "2": 276,
+    "3": 127,
+    "4": 90,
+    "5": 31,
+    "6": 6
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 865,
+      "pct": 46.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 521,
+      "pct": 27.8,
+      "eff16": 200.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 405,
+      "pct": 21.6,
+      "eff16": 100.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 37,
+      "pct": 2.0,
+      "eff16": 50.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 10,
+      "pct": 0.5,
+      "eff16": 300.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 8,
+      "pct": 0.4,
+      "eff16": 150.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.4,
+      "eff16": 600.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.3,
+      "eff16": 66.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 33.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 400.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 26,
+      "pct": 29.5,
+      "eff16": 50.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 19,
+      "pct": 21.6,
+      "eff16": 100.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 11.4,
+      "eff16": 25.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 3.4,
+      "eff16": 8.3
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 3,
+      "pct": 3.4,
+      "eff16": 1.6
+    },
+    "336": {
+      "name": "(336)",
+      "count": 3,
+      "pct": 3.4,
+      "eff16": 14.3
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 6.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 12.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 16.7
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 2.3,
+      "eff16": 3.3
+    }
+  },
+  "cn_notes": 20,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 4.16,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 7,
+      "pct": 46.7,
+      "eff16": 12.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 16.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 13.3,
+      "eff16": 50.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 6.2
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 1.8
+    },
+    "30336": {
+      "name": "(30336)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 0.2
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 6.7,
+      "eff16": 4.2
+    }
+  }
+}

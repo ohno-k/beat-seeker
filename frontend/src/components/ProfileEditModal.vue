@@ -32,6 +32,7 @@ const email = ref('');
 const currentPassword = ref('');
 const newPassword = ref('');
 const newPasswordConfirm = ref('');
+const showSupporterBorder = ref(true);
 
 const danRanks = [
   '七級', '六級', '五級', '四級', '三級', '二級', '一級',
@@ -54,6 +55,7 @@ watch(() => props.isOpen, (newVal) => {
     playSide.value = user.value.playSide;
     privacyLevel.value = user.value.privacyLevel ?? 0;
     email.value = user.value.email ?? '';
+    showSupporterBorder.value = user.value.showSupporterBorder ?? true;
 
     currentPassword.value = '';
     newPassword.value = '';
@@ -97,7 +99,8 @@ const handleUpdate = async () => {
       arenaRank: arenaRank.value,
       playSide: playSide.value,
       privacyLevel: privacyLevel.value,
-      email: email.value.trim() || undefined
+      email: email.value.trim() || undefined,
+      showSupporterBorder: showSupporterBorder.value
     };
 
     if (newPassword.value) {
@@ -252,6 +255,16 @@ const handleUpdate = async () => {
               <div class="relative inline-flex items-center ml-4 shrink-0">
                 <input type="checkbox" :checked="showRateTier" @change="setRateTier(($event.target as HTMLInputElement).checked)" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </div>
+            </label>
+            <label v-if="user?.isSupporter" class="flex items-center justify-between cursor-pointer group">
+              <div>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('profile.showSupporterBorder') }}</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ t('profile.showSupporterBorderHint') }}</p>
+              </div>
+              <div class="relative inline-flex items-center ml-4 shrink-0">
+                <input type="checkbox" v-model="showSupporterBorder" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
               </div>
             </label>
           </div>

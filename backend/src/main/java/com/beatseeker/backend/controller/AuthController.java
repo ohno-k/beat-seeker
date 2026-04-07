@@ -116,6 +116,15 @@ public class AuthController {
             responseBody.put("privacyLevel", user.getPrivacyLevel());
             responseBody.put("language", user.getLanguage() != null ? user.getLanguage() : "ja");
             responseBody.put("showRateTier", user.getShowRateTier() != null ? user.getShowRateTier() : true);
+            responseBody.put("isSupporter", user.getIsSupporter() != null ? user.getIsSupporter() : false);
+            responseBody.put("showSupporterBorder", user.getShowSupporterBorder() != null ? user.getShowSupporterBorder() : true);
+            // Auto-generate supporter token if not exists
+            if (user.getSupporterToken() == null || user.getSupporterToken().isEmpty()) {
+                String token = "BS-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                user.setSupporterToken(token);
+                userRepository.save(user);
+            }
+            responseBody.put("supporterToken", user.getSupporterToken());
             responseBody.put("lastUploadedAt", user.getLastUploadedAt());
             responseBody.put("email", user.getEmail() != null ? user.getEmail() : "");
             return ResponseEntity.ok(responseBody);
@@ -167,6 +176,8 @@ public class AuthController {
             user.setLanguage(request.language());
         if (request.showRateTier() != null)
             user.setShowRateTier(request.showRateTier());
+        if (request.showSupporterBorder() != null)
+            user.setShowSupporterBorder(request.showSupporterBorder());
         if (request.email() != null && !request.email().isBlank()) {
             String newEmail = request.email().trim().toLowerCase();
             Optional<User> existing = userRepository.findByEmail(newEmail);

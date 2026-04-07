@@ -1,0 +1,218 @@
+{
+  "textage": "29/lparotia.html?1AB00",
+  "analyzed_at": "2026-04-06T10:53:43.682842+00:00",
+  "title": "Lawes's Parotia",
+  "artist": "BEMANI Sound Team \"Yvya\"",
+  "bpm_raw": "140",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1294,
+  "events": 776,
+  "bpm_main": 140,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 140.0,
+  "weighted_eff16": 126.1,
+  "scratch_pct": 5.72,
+  "chord_pct": 48.2,
+  "single_pct": 51.8,
+  "ranuchi": 23,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 467,
+      "pct": 60.3,
+      "eff16": 140.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 115,
+      "pct": 14.8,
+      "eff16": 70.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 79,
+      "pct": 10.2,
+      "eff16": 105.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 62,
+      "pct": 8.0,
+      "eff16": 210.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 23,
+      "pct": 3.0,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.8,
+      "eff16": 46.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 28.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 23.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 52.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 280.0
+    }
+  },
+  "chord_dist": {
+    "1": 402,
+    "2": 264,
+    "3": 85,
+    "4": 16,
+    "5": 9
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 463,
+      "pct": 38.0,
+      "eff16": 140.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 447,
+      "pct": 36.7,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 117,
+      "pct": 9.6,
+      "eff16": 70.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 78,
+      "pct": 6.4,
+      "eff16": 105.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 62,
+      "pct": 5.1,
+      "eff16": 210.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 22,
+      "pct": 1.8,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 1.1,
+      "eff16": 46.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 28.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 23.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 52.5
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 16,
+      "pct": 21.9,
+      "eff16": 46.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 15,
+      "pct": 20.5,
+      "eff16": 35.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 15.1,
+      "eff16": 70.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 8.2,
+      "eff16": 8.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 6,
+      "pct": 8.2,
+      "eff16": 4.4
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 5.5,
+      "eff16": 17.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 4.1,
+      "eff16": 11.7
+    },
+    "168": {
+      "name": "(168)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 20.0
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 5.8
+    },
+    "672": {
+      "name": "(672)",
+      "count": 2,
+      "pct": 2.7,
+      "eff16": 5.0
+    }
+  }
+}

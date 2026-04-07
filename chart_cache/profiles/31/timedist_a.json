@@ -1,0 +1,187 @@
+{
+  "textage": "31/timedist.html?1AC00",
+  "analyzed_at": "2026-04-06T10:57:46.846489+00:00",
+  "title": "Time Distortion pt.2(IIDX Edit)",
+  "artist": "kors k vs BEMANI Sound Team \"setup\"",
+  "bpm_raw": "150",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1492,
+  "events": 862,
+  "bpm_main": 150,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 150.0,
+  "weighted_eff16": 130.4,
+  "scratch_pct": 4.49,
+  "chord_pct": 54.87,
+  "single_pct": 45.13,
+  "ranuchi": 112,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 610,
+      "pct": 70.8,
+      "eff16": 150.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 201,
+      "pct": 23.3,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 2.4,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 50.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.4,
+      "eff16": 300.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 225.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 30.0
+    }
+  },
+  "chord_dist": {
+    "1": 389,
+    "2": 341,
+    "3": 108,
+    "4": 23,
+    "5": 1
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 607,
+      "pct": 42.6,
+      "eff16": 150.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 568,
+      "pct": 39.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 196,
+      "pct": 13.8,
+      "eff16": 75.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 21,
+      "pct": 1.5,
+      "eff16": 37.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 13,
+      "pct": 0.9,
+      "eff16": 50.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 0.8,
+      "eff16": 300.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 30.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 225.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 21.2,
+      "eff16": 37.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 18.2,
+      "eff16": 9.4
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 12.1,
+      "eff16": 18.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 7,
+      "pct": 10.6,
+      "eff16": 75.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 6.1,
+      "eff16": 2.3
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 4.5,
+      "eff16": 5.4
+    },
+    "480": {
+      "name": "(480)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 7.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 12.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 15.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 4.7
+    }
+  }
+}

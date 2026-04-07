@@ -1,0 +1,219 @@
+{
+  "textage": "24/_buzra.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:13.050032+00:00",
+  "title": "刃図羅",
+  "artist": "猫叉Master vs HuΣeR",
+  "bpm_raw": "165",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1746,
+  "events": 1036,
+  "bpm_main": 165,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 152.9,
+  "scratch_pct": 4.58,
+  "chord_pct": 51.83,
+  "single_pct": 48.17,
+  "ranuchi": 125,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 447,
+      "pct": 43.2,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 329,
+      "pct": 31.8,
+      "eff16": 82.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 153,
+      "pct": 14.8,
+      "eff16": 247.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 69,
+      "pct": 6.7,
+      "eff16": 123.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 19,
+      "pct": 1.8,
+      "eff16": 495.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 41.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 33.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 330.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 27.5
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 20.6
+    }
+  },
+  "chord_dist": {
+    "1": 499,
+    "2": 401,
+    "3": 105,
+    "4": 26,
+    "5": 4,
+    "6": 1
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 636,
+      "pct": 38.2,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 445,
+      "pct": 26.7,
+      "eff16": 165.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 328,
+      "pct": 19.7,
+      "eff16": 82.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 153,
+      "pct": 9.2,
+      "eff16": 247.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 69,
+      "pct": 4.1,
+      "eff16": 123.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 17,
+      "pct": 1.0,
+      "eff16": 495.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 41.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 33.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 330.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 27.5
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 18,
+      "pct": 22.8,
+      "eff16": 41.2
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 12.7,
+      "eff16": 20.6
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 10.1,
+      "eff16": 10.3
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 7.6,
+      "eff16": 55.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 6.3,
+      "eff16": 82.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 5.1,
+      "eff16": 33.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 2.6
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 3.8,
+      "eff16": 5.2
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 2.9
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 2.8
+    }
+  }
+}

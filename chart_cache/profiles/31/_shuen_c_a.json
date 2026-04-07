@@ -1,0 +1,214 @@
+{
+  "textage": "31/_shuen_c.html?1AC00",
+  "analyzed_at": "2026-04-06T11:02:13.930207+00:00",
+  "title": "終焔のClaudia",
+  "artist": "二代目朱雀",
+  "bpm_raw": "90-185",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1406,
+  "events": 795,
+  "bpm_main": 185,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 185.0,
+  "weighted_eff16": 143.1,
+  "scratch_pct": 4.77,
+  "chord_pct": 53.84,
+  "single_pct": 46.16,
+  "ranuchi": 65,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 275,
+      "pct": 34.6,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 260,
+      "pct": 32.7,
+      "eff16": 92.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 155,
+      "pct": 19.5,
+      "eff16": 138.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 50,
+      "pct": 6.3,
+      "eff16": 277.5
+    },
+    "128": {
+      "name": "(128)",
+      "count": 14,
+      "pct": 1.8,
+      "eff16": 34.7
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 13,
+      "pct": 1.6,
+      "eff16": 69.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 1.0,
+      "eff16": 46.2
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 0.8,
+      "eff16": 23.1
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 30.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 18.5
+    }
+  },
+  "chord_dist": {
+    "1": 367,
+    "2": 303,
+    "3": 79,
+    "4": 36,
+    "5": 8,
+    "6": 2
+  },
+  "tags": [
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 545,
+      "pct": 40.7,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 275,
+      "pct": 20.6,
+      "eff16": 185.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 260,
+      "pct": 19.4,
+      "eff16": 92.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 155,
+      "pct": 11.6,
+      "eff16": 138.8
+    },
+    "16": {
+      "name": "24th",
+      "count": 50,
+      "pct": 3.7,
+      "eff16": 277.5
+    },
+    "128": {
+      "name": "(128)",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 34.7
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 13,
+      "pct": 1.0,
+      "eff16": 69.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 46.2
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.4,
+      "eff16": 30.8
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 23.1
+    }
+  },
+  "scr_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 20,
+      "pct": 30.3,
+      "eff16": 30.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 18.2,
+      "eff16": 46.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 8,
+      "pct": 12.1,
+      "eff16": 5.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 12.1,
+      "eff16": 11.6
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 9.1,
+      "eff16": 23.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 7.6,
+      "eff16": 2.9
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 6.1,
+      "eff16": 92.5
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 2,
+      "pct": 3.0,
+      "eff16": 1.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 1.5,
+      "eff16": 15.4
+    }
+  }
+}

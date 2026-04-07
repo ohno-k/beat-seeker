@@ -1,0 +1,218 @@
+{
+  "textage": "21/the_deto.html?1AB00",
+  "analyzed_at": "2026-04-06T10:57:20.035265+00:00",
+  "title": "THE DETONATOR",
+  "artist": "teranoid VS L.E.D.-G",
+  "bpm_raw": "173",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1661,
+  "events": 898,
+  "bpm_main": 173,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 86.5,
+  "weighted_eff16": 123.7,
+  "scratch_pct": 8.13,
+  "chord_pct": 54.12,
+  "single_pct": 45.88,
+  "ranuchi": 110,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 537,
+      "pct": 59.9,
+      "eff16": 86.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 255,
+      "pct": 28.4,
+      "eff16": 173.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 35,
+      "pct": 3.9,
+      "eff16": 43.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 33,
+      "pct": 3.7,
+      "eff16": 259.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 11,
+      "pct": 1.2,
+      "eff16": 129.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 10,
+      "pct": 1.1,
+      "eff16": 519.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 6,
+      "pct": 0.7,
+      "eff16": 346.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.4,
+      "eff16": 28.8
+    },
+    "36": {
+      "name": "(36)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 115.3
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.6
+    }
+  },
+  "chord_dist": {
+    "1": 412,
+    "2": 245,
+    "3": 205,
+    "4": 36
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 639,
+      "pct": 41.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 525,
+      "pct": 34.4,
+      "eff16": 86.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 255,
+      "pct": 16.7,
+      "eff16": 173.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 40,
+      "pct": 2.6,
+      "eff16": 43.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 33,
+      "pct": 2.2,
+      "eff16": 259.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 11,
+      "pct": 0.7,
+      "eff16": 129.8
+    },
+    "8": {
+      "name": "48th",
+      "count": 10,
+      "pct": 0.7,
+      "eff16": 519.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 346.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 28.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 12.4
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 47,
+      "pct": 35.1,
+      "eff16": 43.2
+    },
+    "192": {
+      "name": "half",
+      "count": 24,
+      "pct": 17.9,
+      "eff16": 21.6
+    },
+    "240": {
+      "name": "(240)",
+      "count": 10,
+      "pct": 7.5,
+      "eff16": 17.3
+    },
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 6.7,
+      "eff16": 28.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 6.0,
+      "eff16": 10.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 6.0,
+      "eff16": 86.5
+    },
+    "672": {
+      "name": "(672)",
+      "count": 6,
+      "pct": 4.5,
+      "eff16": 6.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 3.0,
+      "eff16": 2.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 3.0,
+      "eff16": 14.4
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 5.4
+    }
+  }
+}

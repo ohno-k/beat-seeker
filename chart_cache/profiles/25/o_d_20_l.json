@@ -1,0 +1,201 @@
+{
+  "textage": "25/o_d_20.html?1XC00",
+  "analyzed_at": "2026-04-06T10:54:45.098787+00:00",
+  "title": "O/D*20",
+  "artist": "Ryu*",
+  "bpm_raw": "155",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 1972,
+  "events": 1022,
+  "bpm_main": 155,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 155.0,
+  "weighted_eff16": 148.1,
+  "scratch_pct": 8.22,
+  "chord_pct": 59.78,
+  "single_pct": 40.22,
+  "ranuchi": 104,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 888,
+      "pct": 87.0,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 10.3,
+      "eff16": 77.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 1.6,
+      "eff16": 310.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 1.0,
+      "eff16": 38.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 51.7
+    }
+  },
+  "chord_dist": {
+    "1": 411,
+    "2": 376,
+    "3": 160,
+    "4": 53,
+    "5": 18,
+    "6": 1,
+    "7": 3
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 877,
+      "pct": 48.5,
+      "eff16": 155.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 798,
+      "pct": 44.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 106,
+      "pct": 5.9,
+      "eff16": 77.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 16,
+      "pct": 0.9,
+      "eff16": 310.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 0.4,
+      "eff16": 38.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 51.7
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 19.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 25.8
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 52,
+      "pct": 32.3,
+      "eff16": 155.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 45,
+      "pct": 28.0,
+      "eff16": 77.5
+    },
+    "192": {
+      "name": "half",
+      "count": 21,
+      "pct": 13.0,
+      "eff16": 19.4
+    },
+    "96": {
+      "name": "quarter",
+      "count": 13,
+      "pct": 8.1,
+      "eff16": 38.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 11,
+      "pct": 6.8,
+      "eff16": 25.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 4.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 15.5
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 1.2,
+      "eff16": 3.2
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 8.6
+    },
+    "312": {
+      "name": "(312)",
+      "count": 1,
+      "pct": 0.6,
+      "eff16": 11.9
+    }
+  },
+  "cn_notes": 7,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 1.44,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 50.0,
+      "eff16": 25.8
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 33.3,
+      "eff16": 38.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 77.5
+    }
+  }
+}

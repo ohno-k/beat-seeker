@@ -1,0 +1,221 @@
+{
+  "textage": "30/_sripple.html?1AC00",
+  "analyzed_at": "2026-04-06T11:01:28.350191+00:00",
+  "title": "少年リップルズ",
+  "artist": "常盤ゆう",
+  "bpm_raw": "210",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1210,
+  "events": 711,
+  "bpm_main": 210,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 105.0,
+  "weighted_eff16": 113.5,
+  "scratch_pct": 4.3,
+  "chord_pct": 53.87,
+  "single_pct": 46.13,
+  "ranuchi": 35,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 494,
+      "pct": 69.6,
+      "eff16": 105.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 91,
+      "pct": 12.8,
+      "eff16": 52.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 62,
+      "pct": 8.7,
+      "eff16": 210.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 53,
+      "pct": 7.5,
+      "eff16": 157.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 8,
+      "pct": 1.1,
+      "eff16": 315.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 35.0
+    }
+  },
+  "chord_dist": {
+    "1": 328,
+    "2": 275,
+    "3": 100,
+    "4": 8
+  },
+  "tags": [
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 487,
+      "pct": 42.1,
+      "eff16": 105.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 455,
+      "pct": 39.3,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 94,
+      "pct": 8.1,
+      "eff16": 52.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 62,
+      "pct": 5.4,
+      "eff16": 210.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 57,
+      "pct": 4.9,
+      "eff16": 157.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 35.0
+    }
+  },
+  "scr_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 17,
+      "pct": 33.3,
+      "eff16": 35.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 9.8,
+      "eff16": 52.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 7.8,
+      "eff16": 15.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 4,
+      "pct": 7.8,
+      "eff16": 1.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 7.8,
+      "eff16": 105.0
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 5.9,
+      "eff16": 21.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 3.9,
+      "eff16": 17.5
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 3.9,
+      "eff16": 7.0
+    },
+    "816": {
+      "name": "(816)",
+      "count": 2,
+      "pct": 3.9,
+      "eff16": 6.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 3.9,
+      "eff16": 3.3
+    }
+  },
+  "cn_notes": 20,
+  "cn_scratch_pct": 0.0,
+  "cn_kbd_overlap_pct": 8.03,
+  "cn_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 6,
+      "pct": 31.6,
+      "eff16": 52.5
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 15.8,
+      "eff16": 8.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 13.1
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 6.6
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 7.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 2,
+      "pct": 10.5,
+      "eff16": 105.0
+    },
+    "11136": {
+      "name": "(11136)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 0.5
+    },
+    "9216": {
+      "name": "(9216)",
+      "count": 1,
+      "pct": 5.3,
+      "eff16": 0.5
+    }
+  }
+}

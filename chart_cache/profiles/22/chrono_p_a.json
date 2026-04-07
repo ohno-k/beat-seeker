@@ -1,0 +1,220 @@
+{
+  "textage": "22/chrono_p.html?1AC00",
+  "analyzed_at": "2026-04-06T10:50:14.008107+00:00",
+  "title": "Chrono Diver -PENDULUMs-",
+  "artist": "猫叉L.E.D.Master＋",
+  "bpm_raw": "196",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 2232,
+  "events": 1175,
+  "bpm_main": 196,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 196.0,
+  "weighted_eff16": 169.6,
+  "scratch_pct": 2.15,
+  "chord_pct": 61.53,
+  "single_pct": 38.47,
+  "ranuchi": 184,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 704,
+      "pct": 60.0,
+      "eff16": 196.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 298,
+      "pct": 25.4,
+      "eff16": 98.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 108,
+      "pct": 9.2,
+      "eff16": 147.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 2.0,
+      "eff16": 294.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 49.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 588.0
+    },
+    "54": {
+      "name": "(54)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 87.1
+    },
+    "42": {
+      "name": "(42)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 112.0
+    },
+    "52": {
+      "name": "(52)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 90.5
+    },
+    "56": {
+      "name": "(56)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 84.0
+    }
+  },
+  "chord_dist": {
+    "1": 452,
+    "2": 452,
+    "3": 214,
+    "4": 52,
+    "5": 4,
+    "6": 1
+  },
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 1010,
+      "pct": 46.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 704,
+      "pct": 32.2,
+      "eff16": 196.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 298,
+      "pct": 13.7,
+      "eff16": 98.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 108,
+      "pct": 4.9,
+      "eff16": 147.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 24,
+      "pct": 1.1,
+      "eff16": 294.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 12,
+      "pct": 0.5,
+      "eff16": 49.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 12,
+      "pct": 0.5,
+      "eff16": 588.0
+    },
+    "54": {
+      "name": "(54)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 87.1
+    },
+    "42": {
+      "name": "(42)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 112.0
+    },
+    "52": {
+      "name": "(52)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 90.5
+    }
+  },
+  "scr_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 12,
+      "pct": 25.5,
+      "eff16": 6.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 8,
+      "pct": 17.0,
+      "eff16": 3.1
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 10.6,
+      "eff16": 49.0
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 10.6,
+      "eff16": 24.5
+    },
+    "720": {
+      "name": "(720)",
+      "count": 4,
+      "pct": 8.5,
+      "eff16": 6.5
+    },
+    "816": {
+      "name": "(816)",
+      "count": 4,
+      "pct": 8.5,
+      "eff16": 5.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 3,
+      "pct": 6.4,
+      "eff16": 9.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 4.3,
+      "eff16": 12.2
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 2.1,
+      "eff16": 1.2
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 2.1,
+      "eff16": 16.3
+    }
+  }
+}

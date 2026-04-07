@@ -1,0 +1,229 @@
+{
+  "textage": "22/flashes.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:40.879209+00:00",
+  "title": "Flashes",
+  "artist": "Dollscythe",
+  "bpm_raw": "180",
+  "level": 12,
+  "difficulty": "10",
+  "notes": 2090,
+  "events": 1180,
+  "bpm_main": 180,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 180.0,
+  "weighted_eff16": 170.2,
+  "scratch_pct": 2.44,
+  "chord_pct": 50.68,
+  "single_pct": 49.32,
+  "ranuchi": 224,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 1060,
+      "pct": 89.9,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 100,
+      "pct": 8.5,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.2,
+      "eff16": 45.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 30.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 60.0
+    }
+  },
+  "chord_dist": {
+    "1": 582,
+    "2": 351,
+    "3": 189,
+    "4": 53,
+    "5": 3,
+    "6": 2
+  },
+  "tags": [
+    "scratch_low",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 1054,
+      "pct": 51.7,
+      "eff16": 180.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 862,
+      "pct": 42.3,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 103,
+      "pct": 5.1,
+      "eff16": 90.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 0.7,
+      "eff16": 45.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.2,
+      "eff16": 30.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 1,
+      "pct": 0.0,
+      "eff16": 60.0
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 16,
+      "pct": 32.0,
+      "eff16": 180.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 12,
+      "pct": 24.0,
+      "eff16": 90.0
+    },
+    "3072": {
+      "name": "(3072)",
+      "count": 4,
+      "pct": 8.0,
+      "eff16": 1.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 8.0,
+      "eff16": 60.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 11.2
+    },
+    "864": {
+      "name": "(864)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 5.0
+    },
+    "1296": {
+      "name": "(1296)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 3.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 10.0
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 1.6
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 4.0,
+      "eff16": 2.8
+    }
+  },
+  "cn_notes": 43,
+  "cn_scratch_pct": 2.33,
+  "cn_kbd_overlap_pct": 12.9,
+  "cn_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 35.7,
+      "eff16": 30.0
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 14.3,
+      "eff16": 22.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 14.3,
+      "eff16": 90.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 11.9,
+      "eff16": 11.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 11.9,
+      "eff16": 45.0
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 2.2
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 1.9
+    },
+    "3840": {
+      "name": "(3840)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 1.1
+    },
+    "5376": {
+      "name": "(5376)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 0.8
+    },
+    "1680": {
+      "name": "(1680)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 2.6
+    }
+  }
+}

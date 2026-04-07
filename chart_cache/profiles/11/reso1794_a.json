@@ -1,0 +1,211 @@
+{
+  "textage": "11/reso1794.html?1AB00",
+  "analyzed_at": "2026-04-06T10:55:32.003324+00:00",
+  "title": "RESONATE 1794",
+  "artist": "KOHTA",
+  "bpm_raw": "160",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 932,
+  "events": 660,
+  "bpm_main": 160,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 160.0,
+  "weighted_eff16": 115.7,
+  "scratch_pct": 7.73,
+  "chord_pct": 30.0,
+  "single_pct": 70.0,
+  "ranuchi": 28,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 352,
+      "pct": 53.4,
+      "eff16": 160.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 188,
+      "pct": 28.5,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 65,
+      "pct": 9.9,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 28,
+      "pct": 4.2,
+      "eff16": 53.3
+    },
+    "192": {
+      "name": "half",
+      "count": 14,
+      "pct": 2.1,
+      "eff16": 20.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.6,
+      "eff16": 26.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 13.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 120.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 10.0
+    }
+  },
+  "chord_dist": {
+    "1": 462,
+    "2": 136,
+    "3": 50,
+    "4": 12
+  },
+  "tags": [
+    "single_heavy",
+    "has_triplet",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 331,
+      "pct": 38.5,
+      "eff16": 160.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 220,
+      "pct": 25.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 181,
+      "pct": 21.1,
+      "eff16": 80.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 68,
+      "pct": 7.9,
+      "eff16": 40.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 31,
+      "pct": 3.6,
+      "eff16": 53.3
+    },
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 1.7,
+      "eff16": 20.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 0.6,
+      "eff16": 26.7
+    },
+    "288": {
+      "name": "(288)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 13.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 120.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 10.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 16,
+      "pct": 22.5,
+      "eff16": 40.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 15.5,
+      "eff16": 80.0
+    },
+    "192": {
+      "name": "half",
+      "count": 10,
+      "pct": 14.1,
+      "eff16": 20.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 7,
+      "pct": 9.9,
+      "eff16": 5.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 8.5,
+      "eff16": 10.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 4.2,
+      "eff16": 26.7
+    },
+    "2304": {
+      "name": "(2304)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 1.7
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 8.9
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 6.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 2.8,
+      "eff16": 53.3
+    }
+  }
+}

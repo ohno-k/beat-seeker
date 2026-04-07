@@ -1,0 +1,222 @@
+{
+  "textage": "25/dropz_ln.html?1AC00",
+  "analyzed_at": "2026-04-06T10:51:02.928617+00:00",
+  "title": "DropZ-Line-",
+  "artist": "Getty vs. DJ DiA",
+  "bpm_raw": "50-400",
+  "level": 12,
+  "difficulty": "4",
+  "notes": 1634,
+  "events": 1036,
+  "bpm_main": 400,
+  "is_soflan": true,
+  "dominant_interval": 24,
+  "dominant_eff16": 400.0,
+  "weighted_eff16": 335.8,
+  "scratch_pct": 8.87,
+  "chord_pct": 44.31,
+  "single_pct": 55.69,
+  "ranuchi": 90,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 723,
+      "pct": 69.9,
+      "eff16": 400.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 273,
+      "pct": 26.4,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 34,
+      "pct": 3.3,
+      "eff16": 100.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 133.3
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.2
+    },
+    "216": {
+      "name": "(216)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 44.4
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 33.3
+    }
+  },
+  "chord_dist": {
+    "1": 577,
+    "2": 339,
+    "3": 101,
+    "4": 19
+  },
+  "tags": [
+    "scratch_heavy",
+    "soflan",
+    "high_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 713,
+      "pct": 47.9,
+      "eff16": 400.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 493,
+      "pct": 33.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 231,
+      "pct": 15.5,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 35,
+      "pct": 2.4,
+      "eff16": 100.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 133.3
+    },
+    "120": {
+      "name": "(120)",
+      "count": 5,
+      "pct": 0.3,
+      "eff16": 80.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 50.0
+    },
+    "1776": {
+      "name": "(1776)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 66.7
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 58,
+      "pct": 40.3,
+      "eff16": 200.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 18.8,
+      "eff16": 100.0
+    },
+    "192": {
+      "name": "half",
+      "count": 8,
+      "pct": 5.6,
+      "eff16": 50.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 7,
+      "pct": 4.9,
+      "eff16": 33.3
+    },
+    "384": {
+      "name": "1measure",
+      "count": 6,
+      "pct": 4.2,
+      "eff16": 25.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 3.5,
+      "eff16": 12.5
+    },
+    "336": {
+      "name": "(336)",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 28.6
+    },
+    "576": {
+      "name": "(576)",
+      "count": 4,
+      "pct": 2.8,
+      "eff16": 16.7
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 6.2
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 2.1,
+      "eff16": 14.3
+    }
+  },
+  "cn_notes": 7,
+  "cn_scratch_pct": 57.14,
+  "cn_kbd_overlap_pct": 0.6,
+  "cn_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 50.0,
+      "eff16": 25.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 6.2
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 100.0
+    },
+    "10272": {
+      "name": "(10272)",
+      "count": 1,
+      "pct": 16.7,
+      "eff16": 0.9
+    }
+  }
+}

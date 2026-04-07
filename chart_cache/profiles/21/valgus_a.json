@@ -1,0 +1,219 @@
+{
+  "textage": "21/valgus.html?1AB00",
+  "analyzed_at": "2026-04-06T10:58:10.312277+00:00",
+  "title": "Valgus",
+  "artist": "DJ Myosuke feat.yukacco",
+  "bpm_raw": "175",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1205,
+  "events": 688,
+  "bpm_main": 175,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 87.5,
+  "weighted_eff16": 124.1,
+  "scratch_pct": 8.88,
+  "chord_pct": 45.35,
+  "single_pct": 54.65,
+  "ranuchi": 46,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 268,
+      "pct": 39.0,
+      "eff16": 87.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 242,
+      "pct": 35.2,
+      "eff16": 175.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 60,
+      "pct": 8.7,
+      "eff16": 43.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 36,
+      "pct": 5.2,
+      "eff16": 131.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 25,
+      "pct": 3.6,
+      "eff16": 58.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 20,
+      "pct": 2.9,
+      "eff16": 350.0
+    },
+    "192": {
+      "name": "half",
+      "count": 17,
+      "pct": 2.5,
+      "eff16": 21.9
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 1.7,
+      "eff16": 262.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 10.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 29.2
+    }
+  },
+  "chord_dist": {
+    "1": 376,
+    "2": 154,
+    "3": 115,
+    "4": 39,
+    "5": 4
+  },
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 416,
+      "pct": 37.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 264,
+      "pct": 24.1,
+      "eff16": 87.5
+    },
+    "24": {
+      "name": "16th",
+      "count": 239,
+      "pct": 21.8,
+      "eff16": 175.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 59,
+      "pct": 5.4,
+      "eff16": 43.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 36,
+      "pct": 3.3,
+      "eff16": 131.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 26,
+      "pct": 2.4,
+      "eff16": 58.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 20,
+      "pct": 1.8,
+      "eff16": 350.0
+    },
+    "192": {
+      "name": "half",
+      "count": 16,
+      "pct": 1.5,
+      "eff16": 21.9
+    },
+    "16": {
+      "name": "24th",
+      "count": 11,
+      "pct": 1.0,
+      "eff16": 262.5
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 35.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 23.6,
+      "eff16": 43.8
+    },
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 14.2,
+      "eff16": 21.9
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 13.2,
+      "eff16": 58.3
+    },
+    "48": {
+      "name": "8th",
+      "count": 12,
+      "pct": 11.3,
+      "eff16": 87.5
+    },
+    "480": {
+      "name": "(480)",
+      "count": 5,
+      "pct": 4.7,
+      "eff16": 8.8
+    },
+    "768": {
+      "name": "(768)",
+      "count": 5,
+      "pct": 4.7,
+      "eff16": 5.5
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 3.8,
+      "eff16": 10.9
+    },
+    "288": {
+      "name": "(288)",
+      "count": 4,
+      "pct": 3.8,
+      "eff16": 14.6
+    },
+    "576": {
+      "name": "(576)",
+      "count": 3,
+      "pct": 2.8,
+      "eff16": 7.3
+    },
+    "624": {
+      "name": "(624)",
+      "count": 3,
+      "pct": 2.8,
+      "eff16": 6.7
+    }
+  }
+}

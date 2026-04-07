@@ -1,0 +1,217 @@
+{
+  "textage": "18/_yuuyake.html?1AB00",
+  "analyzed_at": "2026-04-06T11:01:21.705588+00:00",
+  "title": "夕焼け ～Fading Day～",
+  "artist": "JAKAZiD",
+  "bpm_raw": "174",
+  "level": 11,
+  "difficulty": "4",
+  "notes": 1258,
+  "events": 828,
+  "bpm_main": 174,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 174.0,
+  "weighted_eff16": 151.7,
+  "scratch_pct": 6.52,
+  "chord_pct": 40.7,
+  "single_pct": 59.3,
+  "ranuchi": 77,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 592,
+      "pct": 71.6,
+      "eff16": 174.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 189,
+      "pct": 22.9,
+      "eff16": 87.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 15,
+      "pct": 1.8,
+      "eff16": 29.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.5,
+      "eff16": 348.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 10,
+      "pct": 1.2,
+      "eff16": 43.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 261.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 58.0
+    },
+    "1944": {
+      "name": "(1944)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.1
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.3
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.1
+    }
+  },
+  "chord_dist": {
+    "1": 491,
+    "2": 252,
+    "3": 78,
+    "4": 6,
+    "5": 1
+  },
+  "tags": [
+    "has_32nd",
+    "mid_effective_bpm"
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 591,
+      "pct": 50.3,
+      "eff16": 174.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 360,
+      "pct": 30.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 172,
+      "pct": 14.6,
+      "eff16": 87.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 21,
+      "pct": 1.8,
+      "eff16": 29.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 12,
+      "pct": 1.0,
+      "eff16": 348.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 0.8,
+      "eff16": 43.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 58.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 3,
+      "pct": 0.3,
+      "eff16": 261.0
+    },
+    "1944": {
+      "name": "(1944)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 2.1
+    },
+    "792": {
+      "name": "(792)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 17,
+      "pct": 21.0,
+      "eff16": 43.5
+    },
+    "192": {
+      "name": "half",
+      "count": 15,
+      "pct": 18.5,
+      "eff16": 21.8
+    },
+    "48": {
+      "name": "8th",
+      "count": 11,
+      "pct": 13.6,
+      "eff16": 87.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 11,
+      "pct": 13.6,
+      "eff16": 10.9
+    },
+    "144": {
+      "name": "(144)",
+      "count": 6,
+      "pct": 7.4,
+      "eff16": 29.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 5.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 4.9,
+      "eff16": 58.0
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 3,
+      "pct": 3.7,
+      "eff16": 2.7
+    },
+    "240": {
+      "name": "(240)",
+      "count": 2,
+      "pct": 2.5,
+      "eff16": 17.4
+    },
+    "2688": {
+      "name": "(2688)",
+      "count": 1,
+      "pct": 1.2,
+      "eff16": 1.6
+    }
+  }
+}
