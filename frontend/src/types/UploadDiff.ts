@@ -1,5 +1,13 @@
 import type { RankInfo } from '../utils/beatTier';
 
+export interface FolderAnnouncement {
+    folder: string; // e.g. "12.0"
+    type: 'rank_assigned' | 'rank_up' | 'remaining';
+    oldRankName?: string;
+    newRankName?: string;
+    remaining?: number; // songs remaining to complete the folder
+}
+
 export interface UpdatedSong {
     title: string;
     difficulty: string;
@@ -35,4 +43,5 @@ export interface UploadDiffResult {
     newTotalRatePt: number;
     oldRateTier: RankInfo | null;
     newRateTier: RankInfo | null;
+    folderAnnouncements?: FolderAnnouncement[];
 }

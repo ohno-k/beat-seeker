@@ -291,6 +291,10 @@ export const ja = {
   'report.sortByRatePt': 'RATE-PT 優先',
   'report.sortByRatePtDesc': 'RATE-PT の高い曲を上位表示',
   'report.generateAndShare': '画像を生成してポスト',
+  'report.folderNews': '難易度表トピック',
+  'report.folderRankAssigned': '全曲プレー完了！ランク：{rank}',
+  'report.folderRankUp': 'ランクアップ！ {oldRank} → {newRank}',
+  'report.folderRemaining': 'あと {n} 曲でランクがつきます',
 
   // Common
   'common.loading': '読み込み中...',

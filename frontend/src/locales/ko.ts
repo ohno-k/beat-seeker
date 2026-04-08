@@ -291,6 +291,10 @@ export const ko = {
   'report.sortByRatePt': 'RATE-PT 우선',
   'report.sortByRatePtDesc': 'RATE-PT가 높은 곡을 상위 표시',
   'report.generateAndShare': '이미지 생성 후 포스트',
+  'report.folderNews': '난이도표 토픽',
+  'report.folderRankAssigned': '전곡 플레이 완료! 랭크: {rank}',
+  'report.folderRankUp': '랭크 업! {oldRank} → {newRank}',
+  'report.folderRemaining': '랭크 부여까지 {n}곡 남았습니다',
 
   // Common
   'common.loading': '불러오는 중...',

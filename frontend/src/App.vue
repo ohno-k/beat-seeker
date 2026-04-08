@@ -30,8 +30,9 @@ import OnboardingModal from './components/OnboardingModal.vue';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores, getSongMaxScore } from './utils/scoreData';
-import type { UploadDiffResult, UpdatedSong } from './types/UploadDiff';
-import { getRankInfo, getRateTierRankInfo, calculateTotalPoints, calculatePoints, calculateScoreRateTierPoints } from './utils/beatTier';
+import type { UploadDiffResult, UpdatedSong, FolderAnnouncement } from './types/UploadDiff';
+import { getRankInfo, getRateTierRankInfo, calculateTotalPoints, calculatePoints, calculateScoreRateTierPoints, getFolderRankInfoByRate } from './utils/beatTier';
+import { diffTable as diffTableRanksRef } from './composables/useGameData';
 import { useAuth } from './composables/useAuth';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useAppUpdate } from './composables/useAppUpdate';
@@ -328,6 +329,122 @@ const clearTypeRankings: Record<string, number> = {
   '---': 0
 };
 
+/**
+ * Compare old vs new scores to generate folder-level announcements.
+ * - 'rank_assigned': all songs in a folder are now played and a rank was assigned
+ * - 'rank_up': folder rank improved
+ * - 'remaining': at every 5-song boundary, announce how many songs remain
+ */
+const computeFolderAnnouncements = (
+  oldFlat: ReturnType<typeof flattenScores>,
+  newFlat: ReturnType<typeof flattenScores>
+): FolderAnnouncement[] => {
+  const announcements: FolderAnnouncement[] = [];
+  const ranks = diffTableRanksRef.value;
+  if (!ranks || !Array.isArray(ranks)) return announcements;
+
+  // Build play-count maps per folder: count songs with score > 0
+  const buildPlayCounts = (flat: ReturnType<typeof flattenScores>) => {
+    const counts = new Map<string, number>();
+    flat.forEach(s => {
+      if (s.informalRank && s.score > 0) {
+        counts.set(s.informalRank, (counts.get(s.informalRank) || 0) + 1);
+      }
+    });
+    return counts;
+  };
+
+  // Build average score rate per folder (played songs only)
+  const buildAvgRates = (flat: ReturnType<typeof flattenScores>) => {
+    const sums = new Map<string, { totalScore: number; totalMax: number }>();
+    flat.forEach(s => {
+      if (s.informalRank && s.score > 0 && s.maxScore > 0) {
+        const entry = sums.get(s.informalRank) || { totalScore: 0, totalMax: 0 };
+        entry.totalScore += s.score;
+        entry.totalMax += s.maxScore;
+        sums.set(s.informalRank, entry);
+      }
+    });
+    const rates = new Map<string, number>();
+    sums.forEach((v, k) => {
+      if (v.totalMax > 0) rates.set(k, (v.totalScore / v.totalMax) * 100);
+    });
+    return rates;
+  };
+
+  const oldPlayCounts = buildPlayCounts(oldFlat);
+  const newPlayCounts = buildPlayCounts(newFlat);
+  const oldAvgRates = buildAvgRates(oldFlat);
+  const newAvgRates = buildAvgRates(newFlat);
+
+  // Total song count per folder from the difficulty table
+  const folderTotals = new Map<string, number>();
+  ranks.forEach((r: any) => {
+    if (!r.rank.includes('Uncategorized')) {
+      folderTotals.set(r.rank, r.songs.length);
+    }
+  });
+
+  folderTotals.forEach((totalCount, folder) => {
+    const oldPlayed = oldPlayCounts.get(folder) || 0;
+    const newPlayed = newPlayCounts.get(folder) || 0;
+    if (newPlayed <= oldPlayed) return; // no new plays in this folder
+
+    const remaining = totalCount - newPlayed;
+    const oldRemaining = totalCount - oldPlayed;
+
+    // Check: all songs now played (rank assigned for the first time)
+    if (remaining === 0 && oldRemaining > 0) {
+      const newRate = newAvgRates.get(folder) || 0;
+      const newRank = getFolderRankInfoByRate(newRate, folder);
+      announcements.push({
+        folder,
+        type: 'rank_assigned',
+        newRankName: newRank.name + (newRank.tier ? ' ' + newRank.tier : ''),
+      });
+      return; // rank_assigned takes priority
+    }
+
+    // Check: rank up (both old and new have all songs played)
+    if (remaining === 0 && oldRemaining === 0) {
+      const oldRate = oldAvgRates.get(folder) || 0;
+      const newRate = newAvgRates.get(folder) || 0;
+      const oldRank = getFolderRankInfoByRate(oldRate, folder);
+      const newRank = getFolderRankInfoByRate(newRate, folder);
+      if (newRank.minPoints > oldRank.minPoints) {
+        announcements.push({
+          folder,
+          type: 'rank_up',
+          oldRankName: oldRank.name + (oldRank.tier ? ' ' + oldRank.tier : ''),
+          newRankName: newRank.name + (newRank.tier ? ' ' + newRank.tier : ''),
+        });
+      }
+      return;
+    }
+
+    // Check: remaining songs milestone (every 5 songs)
+    if (remaining > 0) {
+      // Crossed a 5-song boundary? e.g. old=17 remaining, new=14 remaining → crossed 15
+      const oldBucket = Math.floor(oldRemaining / 5);
+      const newBucket = Math.floor(remaining / 5);
+      if (newBucket < oldBucket || remaining <= 5) {
+        // Only announce if remaining is a multiple of 5, or <= 5
+        if (remaining % 5 === 0 || remaining <= 5) {
+          announcements.push({
+            folder,
+            type: 'remaining',
+            remaining,
+          });
+        }
+      }
+    }
+  });
+
+  // Sort by folder descending
+  announcements.sort((a, b) => parseFloat(b.folder) - parseFloat(a.folder));
+  return announcements;
+};
+
 const handleFileDropped = async (file: File) => {
   errorMsg.value = '';
   isParsing.value = true;
@@ -542,6 +659,7 @@ const handleFileDropped = async (file: File) => {
             newTotalRatePt: accurateTotalRatePt,
             oldRateTier: getRateTierRankInfo(oldTotalRatePt),
             newRateTier: getRateTierRankInfo(accurateTotalRatePt),
+            folderAnnouncements: computeFolderAnnouncements(oldFlat, allFlatAfterUpload),
         };
 
         if (reportSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
@@ -585,6 +703,7 @@ const handleFileDropped = async (file: File) => {
             newTotalRatePt: guestNewTotalRatePt,
             oldRateTier: getRateTierRankInfo(oldTotalRatePt),
             newRateTier: getRateTierRankInfo(guestNewTotalRatePt),
+            folderAnnouncements: computeFolderAnnouncements(oldFlat, newFlat),
         };
         if (updatedSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
             isDiffModalOpen.value = true;
@@ -622,8 +741,9 @@ const handleFileDropped = async (file: File) => {
             newTotalRatePt: guestNewTotalRatePt,
             oldRateTier: getRateTierRankInfo(oldTotalRatePt),
             newRateTier: getRateTierRankInfo(guestNewTotalRatePt),
+            folderAnnouncements: computeFolderAnnouncements(oldFlat, newFlat),
         };
-        
+
         if (updatedSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
             isDiffModalOpen.value = true;
         }

@@ -291,6 +291,10 @@ export const en = {
   'report.sortByRatePt': 'RATE-PT Priority',
   'report.sortByRatePtDesc': 'Show songs with higher RATE-PT first',
   'report.generateAndShare': 'Generate & Post',
+  'report.folderNews': 'Difficulty Table Updates',
+  'report.folderRankAssigned': 'All songs played! Rank: {rank}',
+  'report.folderRankUp': 'Rank Up! {oldRank} → {newRank}',
+  'report.folderRemaining': '{n} more songs until rank is assigned',
 
   // Common
   'common.loading': 'Loading...',

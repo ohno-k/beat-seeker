@@ -99,7 +99,7 @@
           <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
         </filter>
 
-        <!-- Supporter Gold Border Gradient (animated rotation via CSS) -->
+        <!-- Supporter Gold Border Gradient -->
         <linearGradient :id="`supporter-grad-${uid}`" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
           <stop offset="0%" stop-color="#fde68a" />
           <stop offset="25%" stop-color="#fbbf24" />
@@ -108,10 +108,10 @@
           <stop offset="100%" stop-color="#fde68a" />
         </linearGradient>
 
-        <!-- Supporter Outer Glow -->
+        <!-- Supporter Static Outer Glow -->
         <filter :id="`supporter-glow-${uid}`" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
-          <feFlood flood-color="#fbbf24" flood-opacity="0.6" result="color" />
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3.5" result="blur" />
+          <feFlood flood-color="#f59e0b" flood-opacity="0.5" result="color" />
           <feComposite in="color" in2="blur" operator="in" result="shadow" />
           <feMerge>
             <feMergeNode in="shadow" />
@@ -146,29 +146,27 @@
 
       <!-- Supporter Gold Outer Border -->
       <g v-if="isSupporter">
-        <!-- Gold glow aura -->
+        <!-- Soft gold glow behind border -->
         <path
           :d="shapePath"
           fill="none"
           stroke="#fbbf24"
-          stroke-width="8"
+          stroke-width="10"
           stroke-linejoin="round"
-          stroke-opacity="0.3"
+          stroke-opacity="0.35"
           :filter="`url(#supporter-glow-${uid})`"
           transform="scale(1.08)"
           style="transform-origin: 50% 50%"
-          class="supporter-glow-pulse"
         />
         <!-- Gold border ring -->
         <path
           :d="shapePath"
           fill="none"
           :stroke="`url(#supporter-grad-${uid})`"
-          stroke-width="4"
+          stroke-width="5"
           stroke-linejoin="round"
-          transform="scale(1.06)"
+          transform="scale(1.07)"
           style="transform-origin: 50% 50%"
-          class="supporter-border-shimmer"
         />
       </g>
 
@@ -427,25 +425,6 @@ const getSegmentPath = (n: number) => {
   animation: shimmer 3s infinite linear;
 }
 
-/* Supporter Gold Border Animations */
-@keyframes supporter-glow {
-  0%, 100% { stroke-opacity: 0.2; stroke-width: 7; }
-  50% { stroke-opacity: 0.5; stroke-width: 9; }
-}
-
-@keyframes supporter-shimmer {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: -200; }
-}
-
-.supporter-glow-pulse {
-  animation: supporter-glow 2.5s ease-in-out infinite;
-}
-
-.supporter-border-shimmer {
-  stroke-dasharray: 8 4;
-  animation: supporter-shimmer 3s linear infinite;
-}
 
 /* ===== April Fools Dancing Animations ===== */
 

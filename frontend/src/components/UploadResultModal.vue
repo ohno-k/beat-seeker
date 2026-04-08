@@ -111,6 +111,43 @@
               </div>
             </div>
 
+            <!-- Folder Announcements -->
+            <div v-if="diffData.folderAnnouncements && diffData.folderAnnouncements.length > 0" class="space-y-2">
+              <h3 class="flex items-center gap-2 text-lg font-black text-slate-800 dark:text-slate-200 mb-3 px-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+                </svg>
+                {{ t('report.folderNews') }}
+              </h3>
+              <div v-for="ann in diffData.folderAnnouncements" :key="ann.folder + ann.type"
+                class="px-4 py-3 rounded-xl border transition-colors"
+                :class="ann.type === 'rank_assigned'
+                  ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50'
+                  : ann.type === 'rank_up'
+                    ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800/50'
+                    : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
+              >
+                <template v-if="ann.type === 'rank_assigned'">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">☆{{ ann.folder }}</span>
+                    <span class="text-sm font-bold text-amber-700 dark:text-amber-300">{{ t('report.folderRankAssigned', { rank: ann.newRankName }) }}</span>
+                  </div>
+                </template>
+                <template v-else-if="ann.type === 'rank_up'">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-violet-600 dark:text-violet-400 uppercase tracking-wider">☆{{ ann.folder }}</span>
+                    <span class="text-sm font-bold text-violet-700 dark:text-violet-300">{{ t('report.folderRankUp', { oldRank: ann.oldRankName, newRank: ann.newRankName }) }}</span>
+                  </div>
+                </template>
+                <template v-else-if="ann.type === 'remaining'">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">☆{{ ann.folder }}</span>
+                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t('report.folderRemaining', { n: ann.remaining }) }}</span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
             <!-- Updated Songs List -->
             <div>
               <h3 class="flex items-center gap-2 text-lg font-black text-slate-800 dark:text-slate-200 mb-4 px-2">
