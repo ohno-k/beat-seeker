@@ -1,0 +1,283 @@
+{
+  "textage": "15/pro4life.html?1AC00",
+  "analyzed_at": "2026-04-08T20:16:24.778702+00:00",
+  "title": "PROMISE FOR LIFE",
+  "artist": "TЁЯRA WORKS",
+  "bpm_raw": "70",
+  "level": 8,
+  "difficulty": "4",
+  "notes": 875,
+  "events": 488,
+  "bpm_main": 70,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 70.0,
+  "weighted_eff16": 65.7,
+  "scratch_pct": 2.69,
+  "chord_pct": 60.04,
+  "single_pct": 39.96,
+  "ranuchi": 31,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 422,
+      "pct": 86.7,
+      "eff16": 70.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 60,
+      "pct": 12.3,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 23.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 140.0
+    }
+  },
+  "chord_dist": {
+    "1": 195,
+    "2": 198,
+    "3": 81,
+    "4": 13,
+    "5": 1
+  },
+  "jack_count": 7,
+  "jack_notes": 21,
+  "jack_pct": 2.36,
+  "trill_count": 7,
+  "trill_notes": 48,
+  "trill_pct": 5.39,
+  "stairs_count": 1,
+  "stairs_notes": 4,
+  "stairs_pct": 0.45,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "low_effective_bpm",
+    "jack_heavy",
+    "trill_heavy"
+  ],
+  "measure_notes": [
+    0,
+    26,
+    25,
+    22,
+    35,
+    25,
+    26,
+    23,
+    26,
+    29,
+    29,
+    30,
+    33,
+    31,
+    30,
+    8,
+    24,
+    26,
+    29,
+    20,
+    24,
+    28,
+    21,
+    21,
+    21,
+    24,
+    21,
+    22,
+    24,
+    30,
+    27,
+    26,
+    23,
+    30,
+    22,
+    27,
+    3
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 421,
+      "pct": 48.6,
+      "eff16": 70.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 380,
+      "pct": 43.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 59,
+      "pct": 6.8,
+      "eff16": 35.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 23.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 140.0
+    }
+  },
+  "scr_interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 21.7,
+      "eff16": 35.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 21.7,
+      "eff16": 17.5
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 13.0,
+      "eff16": 8.8
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 8.7,
+      "eff16": 1.1
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 1.2
+    },
+    "2064": {
+      "name": "(2064)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 0.8
+    },
+    "1920": {
+      "name": "(1920)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 0.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 2.2
+    },
+    "552": {
+      "name": "(552)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 3.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 4.3,
+      "eff16": 14.0
+    }
+  },
+  "measure_notes_kbd": [
+    0,
+    25,
+    25,
+    22,
+    35,
+    24,
+    26,
+    23,
+    25,
+    28,
+    29,
+    30,
+    33,
+    31,
+    29,
+    8,
+    24,
+    26,
+    29,
+    19,
+    23,
+    28,
+    20,
+    19,
+    21,
+    20,
+    20,
+    22,
+    24,
+    29,
+    26,
+    26,
+    23,
+    30,
+    20,
+    23,
+    2
+  ],
+  "measure_notes_scr": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    1,
+    2,
+    0,
+    4,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    2,
+    4,
+    1
+  ]
+}

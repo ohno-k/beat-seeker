@@ -24,6 +24,8 @@ import ArcadeAssistView from './views/ArcadeView.vue';
 import SongAverageView from './views/SongAverageView.vue';
 import DifficultyTableView from './views/DifficultyTableView.vue';
 import ScorePredictionView from './views/ScorePredictionView.vue';
+import SkillTreeView from './views/SkillTreeView.vue';
+import ChartListView from './views/ChartListView.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
@@ -69,7 +71,7 @@ const reloadPage = () => window.location.reload();
 const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list'>('dashboard')
 const viewingMode = ref<'admin' | 'friend' | null>(null);
 const totalBeatTierPoints = ref(0);
 

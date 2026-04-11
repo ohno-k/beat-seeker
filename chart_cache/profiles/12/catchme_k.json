@@ -1,0 +1,384 @@
+{
+  "textage": "12/catchme.html?1HC00",
+  "analyzed_at": "2026-04-08T19:34:19.509304+00:00",
+  "title": "Catch Me",
+  "artist": "DJ Yoshitaka feat. ERi",
+  "bpm_raw": "115",
+  "level": 8,
+  "difficulty": "3",
+  "notes": 678,
+  "events": 391,
+  "bpm_main": 115,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 98.46,
+  "weighted_eff16": 95.63,
+  "scratch_pct": 13.35,
+  "chord_pct": 46.15,
+  "single_pct": 53.85,
+  "ranuchi": 31,
+  "cn_notes": 0,
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "low_effective_bpm",
+    "jack_heavy",
+    "trill_heavy"
+  ],
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 285,
+      "pct": 53.6,
+      "eff16": 115.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 121,
+      "pct": 22.7,
+      "eff16": 57.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 49,
+      "pct": 9.2,
+      "eff16": 38.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 40,
+      "pct": 7.5,
+      "eff16": 230.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 3.2,
+      "eff16": 172.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 16,
+      "pct": 3.0,
+      "eff16": 345.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 28.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 86.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 6.8
+    }
+  },
+  "chord_dist": {
+    "1": 287,
+    "2": 162,
+    "3": 64,
+    "4": 19,
+    "5": 1
+  },
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 261,
+      "pct": 34.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 241,
+      "pct": 31.5,
+      "eff16": 115.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 128,
+      "pct": 16.7,
+      "eff16": 57.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 57,
+      "pct": 7.5,
+      "eff16": 38.3
+    },
+    "12": {
+      "name": "32nd",
+      "count": 40,
+      "pct": 5.2,
+      "eff16": 230.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 2.2,
+      "eff16": 172.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 16,
+      "pct": 2.1,
+      "eff16": 345.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 28.8
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 86.2
+    },
+    "408": {
+      "name": "(408)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 33,
+      "pct": 28.2,
+      "eff16": 28.8
+    },
+    "24": {
+      "name": "16th",
+      "count": 29,
+      "pct": 24.8,
+      "eff16": 115.0
+    },
+    "384": {
+      "name": "1measure",
+      "count": 8,
+      "pct": 6.8,
+      "eff16": 7.2
+    },
+    "336": {
+      "name": "(336)",
+      "count": 8,
+      "pct": 6.8,
+      "eff16": 8.2
+    },
+    "48": {
+      "name": "8th",
+      "count": 8,
+      "pct": 6.8,
+      "eff16": 57.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 8,
+      "pct": 6.8,
+      "eff16": 38.3
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 14.4
+    },
+    "240": {
+      "name": "(240)",
+      "count": 4,
+      "pct": 3.4,
+      "eff16": 11.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 19.2
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 4.8
+    }
+  },
+  "jack_count": 10,
+  "jack_notes": 22,
+  "jack_pct": 3.39,
+  "trill_count": 8,
+  "trill_notes": 67,
+  "trill_pct": 10.29,
+  "stairs_count": 0,
+  "stairs_notes": 0,
+  "stairs_pct": 0.0,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "measure_notes": [
+    0,
+    0,
+    15,
+    10,
+    18,
+    16,
+    21,
+    12,
+    20,
+    15,
+    17,
+    14,
+    16,
+    15,
+    16,
+    13,
+    17,
+    12,
+    12,
+    12,
+    15,
+    12,
+    14,
+    12,
+    16,
+    12,
+    16,
+    11,
+    16,
+    12,
+    16,
+    13,
+    18,
+    13,
+    12,
+    12,
+    16,
+    14,
+    14,
+    15,
+    15,
+    15,
+    14,
+    0,
+    13,
+    12,
+    15,
+    1,
+    13,
+    1
+  ],
+  "measure_notes_kbd": [
+    1,
+    11,
+    8,
+    7,
+    10,
+    14,
+    11,
+    10,
+    16,
+    13,
+    13,
+    0,
+    16,
+    0,
+    0,
+    0,
+    17,
+    11,
+    13,
+    0,
+    12,
+    11,
+    12,
+    0,
+    18,
+    9,
+    13,
+    0,
+    18,
+    0,
+    0,
+    7,
+    21,
+    11,
+    10,
+    11,
+    16,
+    10,
+    10,
+    11,
+    10,
+    10,
+    0,
+    0,
+    9,
+    9,
+    7,
+    1,
+    15,
+    0
+  ],
+  "measure_notes_scr": [
+    2,
+    2,
+    1,
+    1,
+    4,
+    2,
+    1,
+    0,
+    1,
+    1,
+    3,
+    0,
+    1,
+    0,
+    0,
+    0,
+    2,
+    1,
+    0,
+    0,
+    5,
+    1,
+    2,
+    0,
+    0,
+    1,
+    2,
+    0,
+    0,
+    0,
+    0,
+    3,
+    1,
+    1,
+    2,
+    0,
+    2,
+    4,
+    4,
+    4,
+    7,
+    7,
+    0,
+    0,
+    7,
+    4,
+    7,
+    0,
+    1,
+    1
+  ]
+}

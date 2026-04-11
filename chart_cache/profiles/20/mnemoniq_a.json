@@ -1,0 +1,359 @@
+{
+  "textage": "20/mnemoniq.html?1AC00",
+  "analyzed_at": "2026-04-08T20:16:26.656721+00:00",
+  "title": "mnemoniq",
+  "artist": "youhei shimizu",
+  "bpm_raw": "111",
+  "level": 8,
+  "difficulty": "4",
+  "notes": 658,
+  "events": 405,
+  "bpm_main": 111,
+  "is_soflan": false,
+  "dominant_interval": 48,
+  "dominant_eff16": 55.5,
+  "weighted_eff16": 94.5,
+  "scratch_pct": 4.31,
+  "chord_pct": 35.56,
+  "single_pct": 64.44,
+  "ranuchi": 31,
+  "interval_dist": {
+    "48": {
+      "name": "8th",
+      "count": 135,
+      "pct": 33.4,
+      "eff16": 55.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 128,
+      "pct": 31.7,
+      "eff16": 166.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 95,
+      "pct": 23.5,
+      "eff16": 83.2
+    },
+    "80": {
+      "name": "(80)",
+      "count": 26,
+      "pct": 6.4,
+      "eff16": 33.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 10,
+      "pct": 2.5,
+      "eff16": 41.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 1.2,
+      "eff16": 27.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 18.5
+    },
+    "784": {
+      "name": "(784)",
+      "count": 2,
+      "pct": 0.5,
+      "eff16": 3.4
+    },
+    "272": {
+      "name": "(272)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 9.8
+    }
+  },
+  "chord_dist": {
+    "1": 261,
+    "2": 119,
+    "3": 19,
+    "4": 6
+  },
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 0,
+  "trill_notes": 0,
+  "trill_pct": 0.0,
+  "stairs_count": 6,
+  "stairs_notes": 24,
+  "stairs_pct": 4.14,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "tags": [
+    "single_heavy",
+    "has_triplet",
+    "low_effective_bpm",
+    "stairs_heavy"
+  ],
+  "measure_notes": [
+    0,
+    0,
+    4,
+    8,
+    12,
+    11,
+    15,
+    8,
+    15,
+    15,
+    15,
+    14,
+    17,
+    16,
+    20,
+    17,
+    15,
+    17,
+    13,
+    14,
+    16,
+    19,
+    13,
+    20,
+    16,
+    13,
+    11,
+    15,
+    15,
+    13,
+    11,
+    15,
+    15,
+    0,
+    0,
+    18,
+    15,
+    15,
+    15,
+    14,
+    17,
+    0,
+    0,
+    19,
+    10,
+    16,
+    3
+  ],
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 153,
+      "pct": 27.6,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 129,
+      "pct": 23.3,
+      "eff16": 55.5
+    },
+    "16": {
+      "name": "24th",
+      "count": 128,
+      "pct": 23.1,
+      "eff16": 166.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 95,
+      "pct": 17.1,
+      "eff16": 83.2
+    },
+    "80": {
+      "name": "(80)",
+      "count": 26,
+      "pct": 4.7,
+      "eff16": 33.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 10,
+      "pct": 1.8,
+      "eff16": 41.6
+    },
+    "96": {
+      "name": "quarter",
+      "count": 8,
+      "pct": 1.4,
+      "eff16": 27.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 18.5
+    },
+    "784": {
+      "name": "(784)",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 3.4
+    },
+    "272": {
+      "name": "(272)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 9.8
+    }
+  },
+  "scr_interval_dist": {
+    "1536": {
+      "name": "(1536)",
+      "count": 6,
+      "pct": 25.0,
+      "eff16": 1.7
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 20.8,
+      "eff16": 18.5
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 12.5,
+      "eff16": 11.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 3,
+      "pct": 12.5,
+      "eff16": 6.9
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 2.3
+    },
+    "432": {
+      "name": "(432)",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 6.2
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 8.3,
+      "eff16": 13.9
+    },
+    "768": {
+      "name": "(768)",
+      "count": 1,
+      "pct": 4.2,
+      "eff16": 3.5
+    }
+  },
+  "measure_notes_kbd": [
+    0,
+    0,
+    4,
+    8,
+    11,
+    11,
+    15,
+    8,
+    14,
+    15,
+    15,
+    14,
+    16,
+    16,
+    20,
+    15,
+    14,
+    17,
+    13,
+    14,
+    15,
+    19,
+    13,
+    20,
+    14,
+    11,
+    10,
+    14,
+    15,
+    11,
+    10,
+    14,
+    15,
+    0,
+    0,
+    17,
+    14,
+    15,
+    15,
+    14,
+    16,
+    0,
+    0,
+    17,
+    9,
+    15,
+    2
+  ],
+  "measure_notes_scr": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    2,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    2,
+    2,
+    1,
+    1,
+    0,
+    2,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    2,
+    1,
+    1,
+    1
+  ]
+}

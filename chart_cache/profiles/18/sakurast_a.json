@@ -1,269 +1,179 @@
 {
   "textage": "18/sakurast.html?1AC00",
-  "analyzed_at": "2026-04-06T10:59:36.899390+00:00",
+  "analyzed_at": "2026-04-08T19:34:19.509304+00:00",
   "title": "sakura storm",
   "artist": "Ryu☆",
   "bpm_raw": "184",
   "level": 12,
   "difficulty": "4",
-  "notes": 903,
-  "events": 482,
+  "notes": 1225,
+  "events": 0,
   "bpm_main": 184,
   "is_soflan": false,
-  "dominant_interval": 24,
-  "dominant_eff16": 184.0,
-  "weighted_eff16": 136.8,
-  "scratch_pct": 15.17,
-  "chord_pct": 50.21,
-  "single_pct": 49.79,
-  "ranuchi": 52,
-  "interval_dist": {
-    "24": {
-      "name": "16th",
-      "count": 274,
-      "pct": 57.0,
-      "eff16": 184.0
-    },
-    "48": {
-      "name": "8th",
-      "count": 137,
-      "pct": 28.5,
-      "eff16": 92.0
-    },
-    "96": {
-      "name": "quarter",
-      "count": 55,
-      "pct": 11.4,
-      "eff16": 46.0
-    },
-    "480": {
-      "name": "(480)",
-      "count": 4,
-      "pct": 0.8,
-      "eff16": 9.2
-    },
-    "504": {
-      "name": "(504)",
-      "count": 2,
-      "pct": 0.4,
-      "eff16": 8.8
-    },
-    "528": {
-      "name": "(528)",
-      "count": 2,
-      "pct": 0.4,
-      "eff16": 8.4
-    },
-    "432": {
-      "name": "(432)",
-      "count": 2,
-      "pct": 0.4,
-      "eff16": 10.2
-    },
-    "72": {
-      "name": "(72)",
-      "count": 2,
-      "pct": 0.4,
-      "eff16": 61.3
-    },
-    "864": {
-      "name": "(864)",
-      "count": 1,
-      "pct": 0.2,
-      "eff16": 5.1
-    },
-    "816": {
-      "name": "(816)",
-      "count": 1,
-      "pct": 0.2,
-      "eff16": 5.4
-    }
-  },
-  "chord_dist": {
-    "1": 240,
-    "2": 114,
-    "3": 77,
-    "4": 51
-  },
+  "dominant_interval": 0,
+  "dominant_eff16": 229.53,
+  "weighted_eff16": 0.0,
+  "scratch_pct": 6.11,
+  "chord_pct": 41.09,
+  "single_pct": 0.0,
+  "ranuchi": 0,
+  "cn_notes": 0,
   "tags": [
-    "scratch_very_heavy",
-    "high_effective_bpm"
+    "low_effective_bpm"
   ],
-  "kbd_interval_dist": {
-    "0": {
-      "name": "(0)",
-      "count": 308,
-      "pct": 40.3,
-      "eff16": 0
-    },
-    "24": {
-      "name": "16th",
-      "count": 274,
-      "pct": 35.8,
-      "eff16": 184.0
-    },
-    "48": {
-      "name": "8th",
-      "count": 111,
-      "pct": 14.5,
-      "eff16": 92.0
-    },
-    "96": {
-      "name": "quarter",
-      "count": 52,
-      "pct": 6.8,
-      "eff16": 46.0
-    },
-    "528": {
-      "name": "(528)",
-      "count": 5,
-      "pct": 0.7,
-      "eff16": 8.4
-    },
-    "288": {
-      "name": "(288)",
-      "count": 4,
-      "pct": 0.5,
-      "eff16": 15.3
-    },
-    "504": {
-      "name": "(504)",
-      "count": 2,
-      "pct": 0.3,
-      "eff16": 8.8
-    },
-    "480": {
-      "name": "(480)",
-      "count": 2,
-      "pct": 0.3,
-      "eff16": 9.2
-    },
-    "72": {
-      "name": "(72)",
-      "count": 2,
-      "pct": 0.3,
-      "eff16": 61.3
-    },
-    "864": {
-      "name": "(864)",
-      "count": 1,
-      "pct": 0.1,
-      "eff16": 5.1
-    }
-  },
-  "scr_interval_dist": {
-    "48": {
-      "name": "8th",
-      "count": 56,
-      "pct": 41.2,
-      "eff16": 92.0
-    },
-    "96": {
-      "name": "quarter",
-      "count": 43,
-      "pct": 31.6,
-      "eff16": 46.0
-    },
-    "432": {
-      "name": "(432)",
-      "count": 11,
-      "pct": 8.1,
-      "eff16": 10.2
-    },
-    "192": {
-      "name": "half",
-      "count": 5,
-      "pct": 3.7,
-      "eff16": 23.0
-    },
-    "768": {
-      "name": "(768)",
-      "count": 5,
-      "pct": 3.7,
-      "eff16": 5.8
-    },
-    "384": {
-      "name": "1measure",
-      "count": 5,
-      "pct": 3.7,
-      "eff16": 11.5
-    },
-    "240": {
-      "name": "(240)",
-      "count": 2,
-      "pct": 1.5,
-      "eff16": 18.4
-    },
-    "864": {
-      "name": "(864)",
-      "count": 2,
-      "pct": 1.5,
-      "eff16": 5.1
-    },
-    "816": {
-      "name": "(816)",
-      "count": 2,
-      "pct": 1.5,
-      "eff16": 5.4
-    },
-    "528": {
-      "name": "(528)",
-      "count": 2,
-      "pct": 1.5,
-      "eff16": 8.4
-    }
-  },
-  "cn_notes": 29,
-  "cn_scratch_pct": 0.0,
-  "cn_kbd_overlap_pct": 8.88,
-  "cn_interval_dist": {
-    "384": {
-      "name": "1measure",
-      "count": 8,
-      "pct": 28.6,
-      "eff16": 11.5
-    },
-    "768": {
-      "name": "(768)",
-      "count": 6,
-      "pct": 21.4,
-      "eff16": 5.8
-    },
-    "144": {
-      "name": "(144)",
-      "count": 5,
-      "pct": 17.9,
-      "eff16": 30.7
-    },
-    "192": {
-      "name": "half",
-      "count": 3,
-      "pct": 10.7,
-      "eff16": 23.0
-    },
-    "48": {
-      "name": "8th",
-      "count": 3,
-      "pct": 10.7,
-      "eff16": 92.0
-    },
-    "7680": {
-      "name": "(7680)",
-      "count": 1,
-      "pct": 3.6,
-      "eff16": 0.6
-    },
-    "1584": {
-      "name": "(1584)",
-      "count": 1,
-      "pct": 3.6,
-      "eff16": 2.8
-    },
-    "912": {
-      "name": "(912)",
-      "count": 1,
-      "pct": 3.6,
-      "eff16": 4.8
-    }
-  }
+  "interval_dist": {},
+  "chord_dist": {},
+  "kbd_interval_dist": {},
+  "scr_interval_dist": {},
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 0,
+  "trill_notes": 0,
+  "trill_pct": 0.0,
+  "stairs_count": 0,
+  "stairs_notes": 0,
+  "stairs_pct": 0.0,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "measure_notes": [],
+  "measure_notes_kbd": [
+    12,
+    9,
+    21,
+    20,
+    15,
+    9,
+    0,
+    20,
+    16,
+    12,
+    16,
+    16,
+    0,
+    12,
+    0,
+    14,
+    12,
+    17,
+    8,
+    7,
+    18,
+    19,
+    8,
+    9,
+    0,
+    19,
+    15,
+    9,
+    0,
+    0,
+    20,
+    9,
+    0,
+    20,
+    16,
+    12,
+    0,
+    16,
+    0,
+    12,
+    0,
+    0,
+    9,
+    13,
+    8,
+    9,
+    24,
+    10,
+    25,
+    24,
+    24,
+    11,
+    0,
+    23,
+    0,
+    15,
+    16,
+    19,
+    16,
+    15,
+    16,
+    18,
+    8,
+    12,
+    0,
+    12,
+    1
+  ],
+  "measure_notes_scr": [
+    6,
+    4,
+    1,
+    0,
+    2,
+    5,
+    0,
+    0,
+    1,
+    4,
+    6,
+    5,
+    0,
+    1,
+    0,
+    2,
+    1,
+    1,
+    6,
+    3,
+    1,
+    0,
+    6,
+    5,
+    0,
+    1,
+    2,
+    4,
+    0,
+    0,
+    1,
+    4,
+    0,
+    1,
+    1,
+    4,
+    0,
+    5,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    6,
+    4,
+    1,
+    3,
+    1,
+    0,
+    1,
+    5,
+    0,
+    1,
+    0,
+    4,
+    1,
+    0,
+    1,
+    4,
+    1,
+    1,
+    6,
+    6,
+    0,
+    4,
+    1
+  ]
 }

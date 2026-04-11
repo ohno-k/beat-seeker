@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
 """
-全Lv11/12 ANOTHER/LEGGENDARIA 譜面のバッチ分析スクリプト
+全SP譜面バッチ取得・分析スクリプト (SPB/SPN/SPH/SPA/SPL)
+
+textageの各曲ページHTMLを1回取得し、全難易度を一括パース・分析する。
+HTMLキャッシュにより再取得なしで再分析可能。
 
 出力先:
   chart_cache/
-    cache_index.json          # 全曲の取得状況���マリー
-    raw/{ver}/{key}.json      # sp[]生文字列 + ��タ情報
-    profiles/{ver}/{key}.json # 計算済み傾向プロファイル
+    cache_index.json          # 全曲の取得状況サマリー
+    html/{ver}/{key}.html     # textage生HTMLデータ（1ページ1ファイル）
+    raw/{ver}/{key}_{d}.json  # sp[]生文字列 + メタ情報
+    profiles/{ver}/{key}_{d}.json # 計算済み傾向プロファイル
 
 使い方:
-  python batch_analyze.py              # 全曲処理（未取得の���）
-  python batch_analyze.py --reanalyze  # raw再利用・profile再計算
-  python batch_analyze.py --limit 10   # テスト用：10曲のみ
+  python batch_analyze.py                # 全曲処理（未取得のみ）
+  python batch_analyze.py --reanalyze    # HTMLキャッシュから再パース・全難易度再分析
+  python batch_analyze.py --refetch      # HTML再取得
+  python batch_analyze.py --limit 10     # テスト用：10ページのみ
+  python batch_analyze.py --ver 22       # 指定バージョンのみ
 """
 
 import json
@@ -28,46 +34,86 @@ from pathlib import Path
 
 # analyze_chart.py から関数をインポート
 sys.path.insert(0, str(Path(__file__).parent))
-from analyze_chart import fetch_raw, profile_from_sp
+from analyze_chart import (
+    fetch_textage_html, parse_from_html, profile_from_sp, count_notes,
+)
 
 # ---------------------------------------------------------------------------
 # 定数
 # ---------------------------------------------------------------------------
 SONG_DATA  = Path('backend/src/main/resources/data/song_data.json')
 CACHE_DIR  = Path('chart_cache')
+HTML_DIR   = CACHE_DIR / 'html'
 RAW_DIR    = CACHE_DIR / 'raw'
 PROF_DIR   = CACHE_DIR / 'profiles'
 INDEX_FILE = CACHE_DIR / 'cache_index.json'
 
-REQUEST_INTERVAL = 0.6   # 秒（サ���バー負荷軽減）
+REQUEST_INTERVAL = 0.6   # 秒（サーバー負荷軽減）
 MAX_RETRY        = 3
 RETRY_WAIT       = 5.0
+
+# SP全難易度: (diff_letter, song_data difficulty code, 表示名)
+# diff_letter は textage HTML の if(?) ブロック識別子
+SP_DIFFICULTIES = [
+    ('b', '1',  'SPB'),   # BEGINNER
+    ('n', '2',  'SPN'),   # NORMAL
+    ('k', '3',  'SPH'),   # HYPER
+    ('a', '4',  'SPA'),   # ANOTHER
+    ('l', '10', 'SPL'),   # LEGGENDARIA
+]
+
+# textage URL クエリパラメータの難易度文字マッピング
+# 例: ?1AC00 → 2文字目 'A' = ANOTHER
+DIFF_URL_CHAR = {
+    'b': 'B',   # BEGINNER
+    'n': 'N',   # NORMAL
+    'k': 'H',   # HYPER
+    'a': 'A',   # ANOTHER
+    'l': 'X',   # LEGGENDARIA
+}
 
 
 # ---------------------------------------------------------------------------
 # ユーティリティ
 # ---------------------------------------------------------------------------
-# URLクエリの難易度文字 -> if(?)ブロック文字
-# ?1AC00 -> 'A' -> if(a){}  ANOTHER
-# ?1XC00 -> 'X' -> if(l){}  LEGGENDARIA（共有ページ）
-# ?1AB00 -> 'A' -> if(a){}  LEGGENDARIA（専用ページ）
-QUERY_DIFF_MAP = {'A': 'a', 'X': 'l', 'B': 'a', 'D': 'a'}
+def textage_base(textage_url: str):
+    """textage URLからベースページ情報 (ver, key) を抽出する。クエリは無視。"""
+    m = re.match(r'(\w+)/([^.]+)\.html', textage_url)
+    return (m.group(1), m.group(2)) if m else (None, None)
 
 
-def textage_to_parts(textage_url: str):
+def textage_url_for_diff(base_url: str, diff_letter: str) -> str:
+    """ベースtextage URLから指定難易度用のURLを生成する。
+    例: '22/foo.html?1AC00' + diff_letter='n' → '22/foo.html?1NC00'
     """
-    "22/chrono_p.html?1AC00" -> (ver="22", key="chrono_p", diff_letter="a")
-    URLクエリ文字列の2文字目から難易度を判定する。
-    """
-    m = re.match(r'(\w+)/([^.]+)\.html\?(.+)', textage_url)
-    if not m:
-        m2 = re.match(r'(\w+)/([^.]+)\.html', textage_url)
-        return (m2.group(1), m2.group(2), 'a') if m2 else (None, None, 'a')
-    ver, key, query = m.group(1), m.group(2), m.group(3)
-    # クエリ2文字目が難易度コード (例: "1AC00" -> 'A')
-    diff_char    = query[1].upper() if len(query) >= 2 else 'A'
-    diff_letter  = QUERY_DIFF_MAP.get(diff_char, 'a')
-    return ver, key, diff_letter
+    url_char = DIFF_URL_CHAR.get(diff_letter, 'A')
+    if '?' in base_url:
+        base, query = base_url.split('?', 1)
+        if len(query) >= 2:
+            new_query = query[0] + url_char + query[2:]
+            return f"{base}?{new_query}"
+    # クエリパラメータがない場合はデフォルトを追加
+    base = base_url.split('?')[0]
+    return f"{base}?1{url_char}C00"
+
+
+def has_diff_block(html, diff_letter):
+    """HTMLに指定難易度のデータが存在するか簡易チェック。"""
+    if diff_letter == 'l':
+        return bool(re.search(r'if\s*\(\s*kuro\s*\)\s*\{', html)) or \
+               bool(re.search(r'if\s*\(\s*l\s*\)\s*\{', html))
+    if diff_letter == 'a':
+        return True   # ANOTHERはグローバルデータの場合もあるため常に試行
+    if diff_letter == 'n':
+        # NORMAL: if(n)ブロックがあるか、グローバルsp[]がNORMAL（if(k)が存在する場合）
+        return bool(re.search(r'if\s*\(\s*n\s*\)\s*\{', html)) or \
+               bool(re.search(r'if\s*\(\s*k\s*\)\s*\{', html))
+    # b, k 等: 厳密にブロック開始パターンをチェック
+    return bool(re.search(r'(?:else\s+)?if\s*\(\s*' + re.escape(diff_letter) + r'\s*\)\s*\{', html))
+
+
+def html_path(ver, key):
+    return HTML_DIR / ver / f"{key}.html"
 
 
 def raw_path(ver, key, diff_letter):
@@ -82,7 +128,7 @@ def load_index():
     if INDEX_FILE.exists():
         with open(INDEX_FILE, encoding='utf-8') as f:
             return json.load(f)
-    return {'cached': {}}   # {textage_url: {"fetched_at": ...}}
+    return {'cached': {}}
 
 
 def save_index(index):
@@ -98,7 +144,22 @@ def now_iso():
 # ---------------------------------------------------------------------------
 # 取得・保存
 # ---------------------------------------------------------------------------
-def save_raw(ver, key, diff_letter, textage_url, sp: dict, cn_events=None,
+def save_html(ver, key, html: str):
+    p = html_path(ver, key)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(p, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+
+def load_html(ver, key):
+    p = html_path(ver, key)
+    if not p.exists():
+        return None
+    with open(p, encoding='utf-8') as f:
+        return f.read()
+
+
+def save_raw(ver, key, diff_letter, textage_url, sp, cn_events=None,
              lndef=384, ln_map=None):
     p = raw_path(ver, key, diff_letter)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -116,19 +177,7 @@ def save_raw(ver, key, diff_letter, textage_url, sp: dict, cn_events=None,
     return data
 
 
-def load_raw(ver, key, diff_letter):
-    p = raw_path(ver, key, diff_letter)
-    if not p.exists():
-        return None
-    with open(p, encoding='utf-8') as f:
-        d = json.load(f)
-    d['sp'] = {int(k): v for k, v in d['sp'].items()}
-    d.setdefault('lndef', 384)
-    d['ln_map'] = {int(k): v for k, v in d.get('ln_map', {}).items()}
-    return d
-
-
-def save_profile(ver, key, diff_letter, textage_url, song_meta: dict, prof: dict):
+def save_profile(ver, key, diff_letter, textage_url, song_meta, prof):
     p = prof_path(ver, key, diff_letter)
     p.parent.mkdir(parents=True, exist_ok=True)
     data = {
@@ -150,155 +199,226 @@ def save_profile(ver, key, diff_letter, textage_url, song_meta: dict, prof: dict
 # メイン処理
 # ---------------------------------------------------------------------------
 def main():
-    parser = argparse.ArgumentParser(description='Beat Seeker 譜面バッチ分析')
+    parser = argparse.ArgumentParser(description='Beat Seeker 全譜面バッチ分析')
     parser.add_argument('--reanalyze', action='store_true',
-                        help='rawキャッシュを再利用してprofileのみ再計算')
+                        help='HTMLキャッシュから全難易度を再パース・profile再計算')
     parser.add_argument('--refetch', action='store_true',
-                        help='キャッシュ��みも含めて全曲再取得')
+                        help='HTMLを再取得（textageにアクセス）')
     parser.add_argument('--limit', type=int, default=0,
-                        help='処理する���大曲数（0=全件）')
+                        help='処理する最大ページ数（0=全件）')
     parser.add_argument('--ver', type=str, default='',
                         help='指定バージョンフォルダのみ処理 (例: 22)')
     args = parser.parse_args()
 
-    # song_data.json 読み込み
+    # ── song_data.json 読み込み → ページ単位でグルーピング ──────
     with open(SONG_DATA, encoding='utf-8') as f:
         songs = json.load(f)['body']
 
-    # Lv11/12 ANOTHER/LEGGENDARIA で textage あり
-    targets_raw = [
-        s for s in songs
-        if s.get('level') in (11, 12)
-        and s.get('difficulty') in ('4', '10')
-        and s.get('textage')
-    ]
+    # textage URLを持つ全エントリ
+    all_songs = [s for s in songs if s.get('textage')]
 
-    # (textage_url, difficulty) の組み合わせで重複排除
-    # → ANOTHER と LEGGENDARIA は別々に処理する
-    seen = {}
-    for s in targets_raw:
-        k = (s["textage"], s.get("difficulty", "4"))
-        if k not in seen:
-            seen[k] = s
-    targets = list(seen.values())
+    # ページ単位 (ver, key) のメタデータを構築
+    # page_meta: 曲名・BPM等（ページ共通）
+    # diff_meta: 難易度別のレベル・ノーツ数（期待値チェック用）
+    page_meta = {}   # (ver, key) -> {title, artist, bpm, textage}
+    diff_meta = {}   # (ver, key, diff_code) -> {level, notes}
 
-    # バージョンフィルタ
+    # タイトル→(ver,key)の逆引き（textage無しエントリのdiff_meta補完用）
+    title_to_page = {}   # title -> (ver, key)
+
+    for s in all_songs:
+        ver, key = textage_base(s['textage'])
+        if not ver:
+            continue
+
+        pk = (ver, key)
+        if pk not in page_meta:
+            page_meta[pk] = {
+                'title':   s.get('title', key),
+                'artist':  s.get('artist', ''),
+                'bpm':     s.get('bpm', '0'),
+                'textage': s['textage'],
+            }
+            title_to_page[s.get('title', key)] = pk
+
+        diff_code = s.get('difficulty', '4')
+        dk = (ver, key, diff_code)
+        if dk not in diff_meta:
+            diff_meta[dk] = {
+                'level': s.get('level'),
+                'notes': s.get('notes', 0),
+                'textage': s['textage'],   # song_data の元URL（DB参照用）
+            }
+
+    # textage URLを持たないエントリからも diff_meta を補完
+    # （BEGINNER/NORMAL/HYPER等、textage無しでもlevel/notes情報を使用）
+    for s in songs:
+        if s.get('textage'):
+            continue  # textage付きは上で処理済み
+        title = s.get('title', '')
+        pk = title_to_page.get(title)
+        if not pk:
+            continue
+        ver, key = pk
+        diff_code = s.get('difficulty', '4')
+        dk = (ver, key, diff_code)
+        if dk not in diff_meta:
+            diff_meta[dk] = {
+                'level': s.get('level'),
+                'notes': s.get('notes', 0),
+                'textage': '',
+            }
+
+    # ── フィルタ・制限 ──────────────────────────────────────────
+    page_list = list(page_meta.items())
     if args.ver:
-        targets = [s for s in targets if s['textage'].startswith(args.ver + '/')]
+        page_list = [(k, v) for k, v in page_list if k[0] == args.ver]
 
-    total = len(targets)
-    print(f"��象曲数: {total}曲")
+    total = len(page_list)
+    print(f"対象ページ数: {total}")
     if args.limit:
-        targets = targets[:args.limit]
+        page_list = page_list[:args.limit]
         print(f"  --limit {args.limit} を適用")
 
     index = load_index()
+    cached_set = set(index.get('cached', {}).keys())
 
-    ok = skip = err = 0
+    ok_pages = 0
+    ok_diffs = 0
+    skip = 0
+    err = 0
     errors = []
 
-    for i, song in enumerate(targets, 1):
-        textage_url = song['textage']
-        ver, key, diff_letter_url = textage_to_parts(textage_url)
-        if not ver or not key:
-            print(f"[{i}/{len(targets)}] URLパース失敗: {textage_url}")
-            err += 1
-            continue
+    # ── メインループ（ページ単位） ──────────────────────────────
+    for i, ((ver, key), pm) in enumerate(page_list, 1):
+        title       = pm['title']
+        textage_url = pm['textage']
+        bpm         = pm['bpm']
 
-        # difficulty='10' (LEGGENDARIA) なのに URL が 'a' になる場合は 'l' を使う
-        # 共有ページ(?1XC00)は URL から正しく 'l' が取れるが、
-        # song_data の difficulty と URL が食い違う場合（同一URL で両難易度を持つ曲）を補正
-        if song.get('difficulty') == '10' and diff_letter_url == 'a':
-            diff_letter = 'l'
-        else:
-            diff_letter = diff_letter_url
+        # ---- HTML取得 / キャッシュ確認 ----
+        html = load_html(ver, key)
+        fetched_from_network = False
 
-        title = song.get('title', '')
-        bpm   = song.get('bpm', '0')
+        need_fetch = (html is None) or args.refetch
+        if need_fetch:
+            html = None
+            for attempt in range(1, MAX_RETRY + 1):
+                try:
+                    html = fetch_textage_html(textage_url)
+                    break
+                except Exception as e:
+                    if attempt < MAX_RETRY:
+                        print(f"  リトライ {attempt}/{MAX_RETRY}: {e}")
+                        time.sleep(RETRY_WAIT)
+                    else:
+                        print(f"[{i}/{len(page_list)}] エラー: {title} -- {e}")
+                        errors.append({'textage': textage_url, 'title': title, 'error': str(e)})
+                        err += 1
 
-        # ---------- rawキャッシュ確認 ----------
-        cache_key = f"{textage_url}#{diff_letter}"
-        already_cached = (not args.refetch) and (cache_key in index.get('cached', {}))
-
-        if args.reanalyze and already_cached:
-            raw_data = load_raw(ver, key, diff_letter)
-            if raw_data:
-                sp   = raw_data['sp']
-                cn_events = raw_data.get('cn_events', [])
-                # cn_events stored as list of [s, e, k] → convert to tuples
-                cn_events = [tuple(x) for x in cn_events]
-                raw_lndef = raw_data.get('lndef', 384)
-                raw_ln_map = raw_data.get('ln_map', {})
-                prof = profile_from_sp(sp, bpm, cn_events, raw_lndef, raw_ln_map)
-                save_profile(ver, key, diff_letter, textage_url, song, prof)
-                print(f"[{i}/{len(targets)}] 再分析: {title}  ({prof['notes']}notes)")
-                ok += 1
+            if html:
+                save_html(ver, key, html)
+                fetched_from_network = True
+            else:
+                if fetched_from_network:
+                    time.sleep(REQUEST_INTERVAL)
                 continue
 
-        if already_cached and not args.reanalyze:
-            skip += 1
-            print(f"[{i}/{len(targets)}] スキップ (キャッシュ済): {title}")
-            continue
+        # ---- 各難易度を処理 ----
+        diffs_processed = []
+        decoded_notes_map = {}   # diff_letter -> decoded_notes（フォールバック検出用）
 
-        # ---------- textage フェッチ ----------
-        fetch_result = None
-        for attempt in range(1, MAX_RETRY + 1):
+        for diff_letter, diff_code, diff_name in SP_DIFFICULTIES:
+            cache_key = f"{ver}/{key}#{diff_letter}"
+
+            # キャッシュ済みスキップ（reanalyze/refetch時は除く）
+            if not args.reanalyze and not args.refetch and cache_key in cached_set:
+                continue
+
+            # HTMLに該当難易度のブロックがあるか簡易チェック
+            if not has_diff_block(html, diff_letter):
+                continue
+
+            # パース
             try:
-                fetch_result = fetch_raw(textage_url, diff_letter)
-                break
-            except Exception as e:
-                if attempt < MAX_RETRY:
-                    print(f"  リトライ {attempt}/{MAX_RETRY}: {e}")
-                    time.sleep(RETRY_WAIT)
-                else:
-                    print(f"[{i}/{len(targets)}] エラー: {title} -- {e}")
-                    errors.append({'textage': textage_url, 'title': title, 'error': str(e)})
-                    err += 1
+                sp, cn_events, lndef, ln_map = parse_from_html(html, diff_letter)
+            except Exception:
+                continue
 
-        if fetch_result is None:
-            time.sleep(REQUEST_INTERVAL)
-            continue
+            decoded_notes = count_notes(sp, lndef, ln_map)
+            if decoded_notes == 0:
+                continue
 
-        sp, cn_events, lndef, ln_map = fetch_result
+            # フォールバック検出: SPL/SPBが他難易度と同じノーツ数ならスキップ
+            if diff_letter in ('l', 'b') and decoded_notes in decoded_notes_map.values():
+                continue
 
-        # ---------- 保存 ----------
-        save_raw(ver, key, diff_letter, textage_url, sp, cn_events, lndef, ln_map)
+            # 期待ノーツ数との照合（song_dataにエントリがある場合）
+            dm = diff_meta.get((ver, key, diff_code))
+            if dm and dm['notes'] and dm['notes'] > 0:
+                expected = dm['notes']
+                if abs(decoded_notes - expected) > expected * 0.2:
+                    continue   # 乖離が大きい → 誤った難易度データの可能性
 
-        prof = profile_from_sp(sp, bpm, cn_events, lndef, ln_map)
-        save_profile(ver, key, diff_letter, textage_url, song, prof)
+            decoded_notes_map[diff_letter] = decoded_notes
 
-        index.setdefault('cached', {})[cache_key] = {
-            'fetched_at': now_iso(),
-            'notes': prof['notes'],
-            'tags':  prof['tags'],
-        }
+            # 分析
+            prof = profile_from_sp(sp, bpm, cn_events, lndef, ln_map)
 
-        ok += 1
-        tag_str = ' '.join(prof['tags'])
-        print(f"[{i}/{len(targets)}] {title[:40]:<40}  "
-              f"{prof['notes']:4d}notes  eff16={prof['dominant_eff16']:5.0f}  {tag_str}")
+            # 公式ノーツ数でprofileのnotesを上書き（分析データは保持）
+            if dm and dm['notes'] and dm['notes'] > 0:
+                prof['notes'] = dm['notes']
 
-        # イ��デックスを定期保存（50件ごと）
-        if ok % 50 == 0:
+            # 保存（song_dataの元URLがあればそれを使用、なければ生成）
+            diff_textage_url = (dm.get('textage') if dm else None) \
+                               or textage_url_for_diff(textage_url, diff_letter)
+            save_raw(ver, key, diff_letter, diff_textage_url, sp, cn_events, lndef, ln_map)
+            song_meta = {
+                'title':      title,
+                'artist':     pm['artist'],
+                'bpm':        bpm,
+                'level':      dm['level'] if dm else None,
+                'difficulty':  diff_code,
+            }
+            save_profile(ver, key, diff_letter, diff_textage_url, song_meta, prof)
+
+            # インデックス更新
+            index.setdefault('cached', {})[cache_key] = {
+                'fetched_at': now_iso(),
+                'notes': prof['notes'],
+                'tags':  prof['tags'],
+            }
+            cached_set.add(cache_key)
+
+            diffs_processed.append(f"{diff_name}({prof['notes']})")
+            ok_diffs += 1
+
+        if diffs_processed:
+            ok_pages += 1
+            print(f"[{i}/{len(page_list)}] {title[:40]:<40}  {' '.join(diffs_processed)}")
+        else:
+            skip += 1
+
+        # インデックス定期保存
+        if ok_pages % 50 == 0 and ok_pages > 0:
             save_index(index)
 
-        time.sleep(REQUEST_INTERVAL)
+        if fetched_from_network:
+            time.sleep(REQUEST_INTERVAL)
 
-    # 最終保存
+    # ── 最終保存 ──────────────────────────────────────────────
     save_index(index)
 
-    # ---------- 結果サマリー ----------
+    # ── 結果サマリー ──────────────────────────────────────────
     print()
     print("=" * 60)
-    print(f"  完了: {ok}曲  スキップ: {skip}曲  エラー: {err}曲")
-    print(f"  キャッシュ総数: {len(index.get('cached', {}))}曲")
+    print(f"  処理ページ: {ok_pages}  処理譜面: {ok_diffs}  スキップ: {skip}  エラー: {err}")
+    print(f"  キャッシュ総数: {len(index.get('cached', {}))}件")
     if errors:
         print(f"\n  エラー一覧:")
         for e in errors:
             print(f"    {e['textage']}  {e['title']}  -- {e['error']}")
     print("=" * 60)
 
-    # エラーリ���ト���ファイルに書き出し
     if errors:
         err_file = CACHE_DIR / 'errors.json'
         with open(err_file, 'w', encoding='utf-8') as f:

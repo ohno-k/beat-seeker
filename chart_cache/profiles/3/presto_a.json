@@ -1,0 +1,337 @@
+{
+  "textage": "3/presto.html?1AC00",
+  "analyzed_at": "2026-04-08T20:16:31.781453+00:00",
+  "title": "Presto",
+  "artist": "Osamu Kubota",
+  "bpm_raw": "136",
+  "level": 8,
+  "difficulty": "4",
+  "notes": 508,
+  "events": 465,
+  "bpm_main": 136,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 136.0,
+  "weighted_eff16": 111.6,
+  "scratch_pct": 1.18,
+  "chord_pct": 9.46,
+  "single_pct": 90.54,
+  "ranuchi": 14,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 306,
+      "pct": 65.9,
+      "eff16": 136.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 63,
+      "pct": 13.6,
+      "eff16": 68.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 28,
+      "pct": 6.0,
+      "eff16": 34.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 27,
+      "pct": 5.8,
+      "eff16": 102.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 14,
+      "pct": 3.0,
+      "eff16": 45.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 9,
+      "pct": 1.9,
+      "eff16": 51.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.9,
+      "eff16": 27.2
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 0.9,
+      "eff16": 17.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.9,
+      "eff16": 204.0
+    },
+    "128": {
+      "name": "(128)",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 25.5
+    }
+  },
+  "chord_dist": {
+    "1": 421,
+    "2": 44
+  },
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 0,
+  "trill_notes": 0,
+  "trill_pct": 0.0,
+  "stairs_count": 4,
+  "stairs_notes": 21,
+  "stairs_pct": 4.13,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "tags": [
+    "scratch_low",
+    "single_heavy",
+    "has_triplet",
+    "mid_effective_bpm",
+    "has_stairs"
+  ],
+  "measure_notes": [
+    11,
+    7,
+    13,
+    7,
+    9,
+    10,
+    9,
+    6,
+    9,
+    5,
+    10,
+    10,
+    8,
+    8,
+    13,
+    9,
+    11,
+    16,
+    16,
+    16,
+    16,
+    9,
+    5,
+    2,
+    4,
+    2,
+    8,
+    5,
+    6,
+    9,
+    14,
+    16,
+    15,
+    13,
+    10,
+    10,
+    12,
+    16,
+    16,
+    16,
+    19,
+    16,
+    19,
+    17,
+    16,
+    15
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 303,
+      "pct": 60.4,
+      "eff16": 136.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 60,
+      "pct": 12.0,
+      "eff16": 68.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 43,
+      "pct": 8.6,
+      "eff16": 0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 29,
+      "pct": 5.8,
+      "eff16": 34.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 27,
+      "pct": 5.4,
+      "eff16": 102.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 15,
+      "pct": 3.0,
+      "eff16": 45.3
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 8,
+      "pct": 1.6,
+      "eff16": 51.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 4,
+      "pct": 0.8,
+      "eff16": 27.2
+    },
+    "16": {
+      "name": "24th",
+      "count": 4,
+      "pct": 0.8,
+      "eff16": 204.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 17.0
+    }
+  },
+  "scr_interval_dist": {
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 40.0,
+      "eff16": 4.2
+    },
+    "8256": {
+      "name": "(8256)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 0.4
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 17.0
+    },
+    "7632": {
+      "name": "(7632)",
+      "count": 1,
+      "pct": 20.0,
+      "eff16": 0.4
+    }
+  },
+  "measure_notes_kbd": [
+    10,
+    7,
+    13,
+    7,
+    9,
+    10,
+    9,
+    6,
+    9,
+    5,
+    10,
+    10,
+    8,
+    8,
+    13,
+    9,
+    11,
+    16,
+    16,
+    16,
+    16,
+    8,
+    4,
+    2,
+    4,
+    2,
+    8,
+    5,
+    6,
+    9,
+    14,
+    16,
+    15,
+    13,
+    10,
+    10,
+    12,
+    16,
+    16,
+    16,
+    19,
+    15,
+    19,
+    16,
+    16,
+    14
+  ],
+  "measure_notes_scr": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1
+  ]
+}

@@ -9,6 +9,7 @@ import ChangelogView from '../views/ChangelogView.vue'
 import TermsView from '../views/TermsView.vue'
 import AboutView from '../views/AboutView.vue'
 import ResetPasswordView from '../views/ResetPasswordView.vue'
+import ChartListView from '../views/ChartListView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -24,6 +25,7 @@ const router = createRouter({
     { path: '/changelog', name: 'changelog', component: ChangelogView },
     { path: '/terms', name: 'terms', component: TermsView },
     { path: '/about', name: 'about', component: AboutView },
+    { path: '/chart-list', name: 'chart-list', component: ChartListView },
     // 他ユーザーのスコアを共有リンクで閲覧するルート
     { path: '/user/:userId', name: 'user-dashboard', component: DashboardView },
     { path: '/user/:userId/scores', name: 'user-scores', component: ScoresView },

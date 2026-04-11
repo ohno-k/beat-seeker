@@ -21,6 +21,10 @@ public interface ChartTendencyProfileRepository extends JpaRepository<ChartTende
     @Query("SELECT p.textage FROM ChartTendencyProfile p")
     List<String> findAllIds();
 
+    /** ベースURL（クエリパラメータなし部分）で前方一致検索 — 同一曲の全難易度を返す */
+    @Query("SELECT p FROM ChartTendencyProfile p WHERE p.textage LIKE :base || '%' ORDER BY p.difficulty")
+    List<ChartTendencyProfile> findByTextageBase(@Param("base") String base);
+
     /** タグを含む曲を検索 */
     @Query("SELECT p FROM ChartTendencyProfile p WHERE p.tagsJson LIKE %:tag%")
     List<ChartTendencyProfile> findByTagContaining(@Param("tag") String tag);

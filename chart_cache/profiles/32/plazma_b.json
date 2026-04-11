@@ -1,0 +1,366 @@
+{
+  "textage": "32/plazma.html?1BC00",
+  "analyzed_at": "2026-04-08T19:34:19.509304+00:00",
+  "title": "Plazma",
+  "artist": "米津玄師",
+  "bpm_raw": "173",
+  "level": 2,
+  "difficulty": "1",
+  "notes": 133,
+  "events": 71,
+  "bpm_main": 173,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 52.72,
+  "weighted_eff16": 49.77,
+  "scratch_pct": 2.58,
+  "chord_pct": 58.72,
+  "single_pct": 41.28,
+  "ranuchi": 87,
+  "cn_notes": 0,
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm",
+    "stairs_heavy"
+  ],
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 467,
+      "pct": 60.9,
+      "eff16": 173.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 161,
+      "pct": 21.0,
+      "eff16": 86.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 65,
+      "pct": 8.5,
+      "eff16": 346.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 3.3,
+      "eff16": 43.2
+    },
+    "36": {
+      "name": "(36)",
+      "count": 20,
+      "pct": 2.6,
+      "eff16": 115.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 13,
+      "pct": 1.7,
+      "eff16": 259.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.9,
+      "eff16": 129.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 28.8
+    },
+    "84": {
+      "name": "(84)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 49.4
+    },
+    "192": {
+      "name": "half",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 21.6
+    }
+  },
+  "chord_dist": {
+    "1": 317,
+    "2": 273,
+    "3": 145,
+    "4": 32,
+    "6": 1
+  },
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 628,
+      "pct": 45.1,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 467,
+      "pct": 33.5,
+      "eff16": 173.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 161,
+      "pct": 11.5,
+      "eff16": 86.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 65,
+      "pct": 4.7,
+      "eff16": 346.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 25,
+      "pct": 1.8,
+      "eff16": 43.2
+    },
+    "36": {
+      "name": "(36)",
+      "count": 20,
+      "pct": 1.4,
+      "eff16": 115.3
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 0.9,
+      "eff16": 259.5
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 7,
+      "pct": 0.5,
+      "eff16": 129.8
+    },
+    "144": {
+      "name": "(144)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 28.8
+    },
+    "84": {
+      "name": "(84)",
+      "count": 3,
+      "pct": 0.2,
+      "eff16": 49.4
+    }
+  },
+  "scr_interval_dist": {
+    "144": {
+      "name": "(144)",
+      "count": 9,
+      "pct": 25.0,
+      "eff16": 28.8
+    },
+    "240": {
+      "name": "(240)",
+      "count": 5,
+      "pct": 13.9,
+      "eff16": 17.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 4,
+      "pct": 11.1,
+      "eff16": 43.2
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 4,
+      "pct": 11.1,
+      "eff16": 2.7
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 11.1,
+      "eff16": 86.5
+    },
+    "1488": {
+      "name": "(1488)",
+      "count": 3,
+      "pct": 8.3,
+      "eff16": 2.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 5.6,
+      "eff16": 21.6
+    },
+    "1152": {
+      "name": "(1152)",
+      "count": 1,
+      "pct": 2.8,
+      "eff16": 3.6
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 2.8,
+      "eff16": 8.7
+    },
+    "1584": {
+      "name": "(1584)",
+      "count": 1,
+      "pct": 2.8,
+      "eff16": 2.6
+    }
+  },
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 0,
+  "trill_notes": 0,
+  "trill_pct": 0.0,
+  "stairs_count": 7,
+  "stairs_notes": 3,
+  "stairs_pct": 2.23,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "measure_notes": [],
+  "measure_notes_kbd": [
+    1,
+    2,
+    2,
+    4,
+    1,
+    2,
+    1,
+    0,
+    4,
+    3,
+    3,
+    2,
+    2,
+    3,
+    3,
+    3,
+    2,
+    3,
+    1,
+    4,
+    4,
+    3,
+    4,
+    2,
+    4,
+    3,
+    4,
+    3,
+    3,
+    3,
+    2,
+    2,
+    0,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    4,
+    3,
+    4,
+    1,
+    3,
+    4,
+    1,
+    4,
+    2,
+    4,
+    4,
+    2,
+    3,
+    3,
+    2,
+    2,
+    2,
+    3,
+    3,
+    4
+  ],
+  "measure_notes_scr": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    3,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    0,
+    0,
+    0,
+    0
+  ]
+}

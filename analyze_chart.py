@@ -585,6 +585,197 @@ def iname(d):
 
 
 # -----------------------------------------------------------------------------
+# pattern detection (配置パターン検出)
+# -----------------------------------------------------------------------------
+def _detect_patterns(all_notes):
+    """
+    譜面の配置パターンを検出する。
+
+    検出対象:
+      - 縦連打 (jack): 同一鍵の高速連打 (3打以上、16分間隔以下)
+      - トリル (trill): 2鍵が交互に連打 (6ノーツ以上、16分間隔以下)
+      - 階段 (stairs): 隣接鍵が順番に降る (4ステップ以上、16分間隔以下)
+      - 二重階段 (dstairs): 2鍵同時押しが階段状に移動 (4ステップ以上)
+
+    戻り値: dict  パターンごとの出現回数・ノーツ数
+    """
+    MAX_INTERVAL = 24   # 16分音符 = 24 subdivisions
+
+    # --- 鍵盤ノーツのみ（key 1-7）のタイムライン構築 ---
+    key_positions = defaultdict(list)   # key -> sorted list of positions
+    for pos, key in all_notes:
+        if key >= 1:
+            key_positions[key].append(pos)
+
+    # position -> set of button keys (scratch excluded)
+    pos_btn_keys = defaultdict(set)
+    for pos, key in all_notes:
+        if key >= 1:
+            pos_btn_keys[pos].add(key)
+
+    # ===================================================================
+    # 縦連打 (Jack) 検出
+    # 同一鍵が MAX_INTERVAL 以下の間隔で 3打以上連続
+    # ===================================================================
+    jack_count = 0
+    jack_notes = 0
+
+    for key, positions in key_positions.items():
+        i = 0
+        while i < len(positions):
+            run = 1
+            while (i + run < len(positions) and
+                   positions[i + run] - positions[i + run - 1] <= MAX_INTERVAL):
+                run += 1
+            if run >= 3:
+                jack_count += 1
+                jack_notes += run
+            i += max(run, 1)
+
+    # ===================================================================
+    # トリル (Trill) 検出
+    # 2鍵が交互に MAX_INTERVAL 以下の間隔で 6ノーツ以上
+    # 隣接鍵 (差1) と非隣接鍵の両方を検出
+    # ===================================================================
+    trill_count = 0
+    trill_notes = 0
+
+    button_keys = sorted(key_positions.keys())
+    # 全2鍵ペアを調べるのはO(n^2)だが鍵盤は7鍵なので最大21ペア
+    trill_used = set()   # 既にトリルとして計上したノーツ (pos, key)
+
+    for idx_a in range(len(button_keys)):
+        for idx_b in range(idx_a + 1, len(button_keys)):
+            key_a, key_b = button_keys[idx_a], button_keys[idx_b]
+            # 2鍵のノーツを時系列に統合
+            merged = sorted(
+                [(p, key_a) for p in key_positions[key_a]] +
+                [(p, key_b) for p in key_positions[key_b]]
+            )
+            i = 0
+            while i < len(merged) - 1:
+                # 交互に出現するランを検出
+                run = 1
+                j = i + 1
+                while (j < len(merged) and
+                       merged[j][0] - merged[j-1][0] <= MAX_INTERVAL and
+                       merged[j][0] - merged[j-1][0] > 0 and
+                       merged[j][1] != merged[j-1][1]):
+                    run += 1
+                    j += 1
+                if run >= 6:
+                    # 他のトリルと重複しないか確認
+                    notes_in_run = {(merged[k][0], merged[k][1]) for k in range(i, i + run)}
+                    if len(notes_in_run - trill_used) >= run * 0.5:
+                        trill_count += 1
+                        trill_notes += run
+                        trill_used |= notes_in_run
+                    i = i + run
+                else:
+                    i += 1
+
+    # ===================================================================
+    # 階段 (Stairs) 検出
+    # 単ノーツが鍵番号 ±1 ずつ変化し、MAX_INTERVAL 以下の間隔で 4ステップ以上
+    # ===================================================================
+    stairs_count = 0
+    stairs_notes = 0
+
+    # 単ノーツのみ抽出 (その時刻に鍵盤が1つだけ鳴っている)
+    single_btn_events = sorted(
+        [(pos, list(keys)[0]) for pos, keys in pos_btn_keys.items() if len(keys) == 1]
+    )
+
+    i = 0
+    while i < len(single_btn_events) - 1:
+        best_run = 1
+        for direction in (1, -1):
+            run = 1
+            prev_pos, prev_key = single_btn_events[i]
+            j = i + 1
+            while j < len(single_btn_events):
+                cur_pos, cur_key = single_btn_events[j]
+                interval = cur_pos - prev_pos
+                if interval > MAX_INTERVAL:
+                    break
+                if interval == 0:
+                    j += 1
+                    continue
+                if cur_key == prev_key + direction:
+                    run += 1
+                    prev_pos, prev_key = cur_pos, cur_key
+                    j += 1
+                else:
+                    break
+            if run > best_run:
+                best_run = run
+                best_dir = direction
+        if best_run >= 4:
+            stairs_count += 1
+            stairs_notes += best_run
+            i += best_run
+        else:
+            i += 1
+
+    # ===================================================================
+    # 二重階段 (Double Stairs) 検出
+    # 2鍵同時押しが鍵番号 ±1 ずつ平行移動、MAX_INTERVAL 以下で 4ステップ以上
+    # 例: (1,5)→(2,6)→(3,7)  or  (1,3)→(2,4)→(3,5)
+    # ===================================================================
+    dstairs_count = 0
+    dstairs_notes = 0
+
+    chord2_events = sorted(
+        [(pos, sorted(keys)) for pos, keys in pos_btn_keys.items() if len(keys) == 2]
+    )
+
+    i = 0
+    while i < len(chord2_events) - 1:
+        best_run = 1
+        for direction in (1, -1):
+            run = 1
+            prev_pos = chord2_events[i][0]
+            prev_keys = chord2_events[i][1]
+            j = i + 1
+            while j < len(chord2_events):
+                cur_pos = chord2_events[j][0]
+                cur_keys = chord2_events[j][1]
+                interval = cur_pos - prev_pos
+                if interval > MAX_INTERVAL or interval == 0:
+                    if interval == 0:
+                        j += 1
+                        continue
+                    break
+                diff0 = cur_keys[0] - prev_keys[0]
+                diff1 = cur_keys[1] - prev_keys[1]
+                if diff0 == direction and diff1 == direction:
+                    run += 1
+                    prev_pos, prev_keys = cur_pos, cur_keys
+                    j += 1
+                else:
+                    break
+            if run > best_run:
+                best_run = run
+        if best_run >= 4:
+            dstairs_count += 1
+            dstairs_notes += best_run * 2
+            i += best_run
+        else:
+            i += 1
+
+    return {
+        'jack_count': jack_count,
+        'jack_notes': jack_notes,
+        'trill_count': trill_count,
+        'trill_notes': trill_notes,
+        'stairs_count': stairs_count,
+        'stairs_notes': stairs_notes,
+        'dstairs_count': dstairs_count,
+        'dstairs_notes': dstairs_notes,
+    }
+
+
+# -----------------------------------------------------------------------------
 # core analysis
 # -----------------------------------------------------------------------------
 def collect_events(textage_path):
@@ -720,21 +911,110 @@ def analyze_song(textage_path, bpm_raw, title="", expected_notes=0):
 # -----------------------------------------------------------------------------
 # fetch / analyze API  (for batch use)
 # -----------------------------------------------------------------------------
+def fetch_textage_html(textage_path):
+    """textageのページHTMLを取得する（パースなし）。"""
+    url = f"https://textage.cc/score/{textage_path}"
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.read().decode('shift_jis', errors='replace')
+
+
+def count_notes(sp, lndef=None, ln_map=None):
+    """sp辞書のデコード済みノーツ数を返す。"""
+    if lndef is None:
+        lndef = LNDEF
+    if ln_map is None:
+        ln_map = {}
+    total = 0
+    for mes in sp:
+        sdd = sp.get(mes)
+        if sdd:
+            total += len(decode_measure(sdd, get_ln(mes, lndef, ln_map)))
+    return total
+
+
 def fetch_raw(textage_path, diff_letter='a'):
     """
     textageのページを取得し、sp[]生文字列辞書と cn_events を返す。
     diff_letter: 'a'=ANOTHER, 'l'=LEGGENDARIA
-    戻り値: (sp_dict, cn_events, lndef, ln_map)
+    戻り値: (sp_dict, cn_events, lndef, ln_map, html)
       sp_dict   : {mes_number: sdd_string}
       cn_events : list of (abs_start, abs_end, key)
       lndef     : 基底subdivision数
       ln_map    : {mes_number: subdivision_count} 上書き分
+      html      : 取得したHTML生データ
     """
     url = f"https://textage.cc/score/{textage_path}"
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     with urllib.request.urlopen(req, timeout=30) as r:
         html = r.read().decode('shift_jis', errors='replace')
     sp = parse_sp_chart(html, diff_letter)
+    cn_events = parse_c1(html, diff_letter)
+    lndef, ln_map = parse_ln_map(html)
+    return sp, cn_events, lndef, ln_map, html
+
+
+def _parse_sp_normal(html):
+    """
+    NORMAL(SPN)の譜面データを返す。
+
+    textageの構造:
+      if(k){ ... HYPER sp[] ... if(a){ ANOTHER } if(l){ LEGG } }
+      else{ ... NORMAL sp[] ... dp[] ... if(a){ DP ANOTHER } }
+    NORMALデータは if(k){...} の直後の else{...} ブロック内にある。
+    if(n) ブロックがあればそちらを優先する。
+    """
+    # 1) if(n) ブロックがあればそちらを使用
+    blocks = _find_if_blocks(html, 'n')
+    if blocks:
+        sp_global = _find_global_sp(html)
+        for block_content, block_start, brace_start, end in blocks:
+            if 'dp[' in block_content or 'c2[' in block_content:
+                continue
+            sp = _sp_from_block(block_content, sp_global)
+            if sp:
+                if sp_global and len(sp) < len(sp_global) * 0.8:
+                    merged = dict(sp_global)
+                    merged.update(sp)
+                    sp = merged
+                return sp
+
+    # 2) if(k) の直後の else{...} ブロックからNORMALデータを取得
+    #    if(k) ブロック全体を _extract_block で取得し、その終了直後の else{} を探す
+    k_match = re.search(r'(?:^|[;\s])if\s*\(\s*k\s*\)\s*\{', html)
+    if k_match:
+        brace_pos = html.index('{', k_match.start())
+        _, k_end = _extract_block(html, brace_pos)
+
+        # k_end 直後の else{ を探す（空白のみ許容）
+        after_k = html[k_end:]
+        else_match = re.match(r'\s*else\s*\{', after_k)
+        if else_match:
+            else_brace = k_end + after_k.index('{', else_match.start())
+            else_content, _ = _extract_block(html, else_brace)
+            # else{} 内から SP のみ抽出（ネストされた if(a) 等を除去）
+            sp_content = _strip_nested_blocks(else_content)
+            sp = _sp_from_block(else_content, None)
+            if sp:
+                return sp
+
+    # 3) フォールバック: グローバルスコープのデータ
+    sp = _find_global_sp(html)
+    if sp:
+        return sp
+
+    return {}
+
+
+def parse_from_html(html, diff_letter='a'):
+    """
+    保存済みHTMLからsp[], cn_events, lndef, ln_mapをパースする。
+    textageへのリクエストを行わない。
+    """
+    if diff_letter == 'n':
+        sp = _parse_sp_normal(html)
+    else:
+        sp = parse_sp_chart(html, diff_letter)
     cn_events = parse_c1(html, diff_letter)
     lndef, ln_map = parse_ln_map(html)
     return sp, cn_events, lndef, ln_map
@@ -763,13 +1043,22 @@ def profile_from_sp(sp, bpm_raw, cn_events=None, lndef=None, ln_map=None):
         offset += get_ln(m, lndef, ln_map)
 
     all_notes = []
+    measure_notes = {}   # mes -> note count（小節ごとノーツ数）
+    measure_notes_kbd = {}  # mes -> keyboard note count
+    measure_notes_scr = {}  # mes -> scratch note count
     for mes in sorted_measures:
         sdd = sp.get(mes)
         if not sdd:
             continue
         ln_n = get_ln(mes, lndef, ln_map)
         base = cum_offset.get(mes, (mes + GAP) * lndef)
-        for (p, k) in decode_measure(sdd, ln_n):
+        decoded = decode_measure(sdd, ln_n)
+        measure_notes[mes] = len(decoded)
+        kbd_count = sum(1 for (_, k) in decoded if k != 0)
+        scr_count = sum(1 for (_, k) in decoded if k == 0)
+        measure_notes_kbd[mes] = kbd_count
+        measure_notes_scr[mes] = scr_count
+        for (p, k) in decoded:
             all_notes.append((base + p, k))
     all_notes.sort()
 
@@ -916,6 +1205,20 @@ def profile_from_sp(sp, bpm_raw, cn_events=None, lndef=None, ln_map=None):
             'cn_interval_dist': cn_interval_detail,
         }
 
+    # ---- 配置パターン検出 ----
+    patterns = _detect_patterns(all_notes)
+    total_notes = len(all_notes) or 1
+
+    # パターン別タグ付け
+    if patterns['jack_count'] >= 5:         tags.append('jack_heavy')
+    elif patterns['jack_count'] >= 2:       tags.append('has_jack')
+    if patterns['trill_count'] >= 3:        tags.append('trill_heavy')
+    elif patterns['trill_count'] >= 1:      tags.append('has_trill')
+    if patterns['stairs_count'] >= 5:       tags.append('stairs_heavy')
+    elif patterns['stairs_count'] >= 2:     tags.append('has_stairs')
+    if patterns['dstairs_count'] >= 3:      tags.append('dstairs_heavy')
+    elif patterns['dstairs_count'] >= 1:    tags.append('has_dstairs')
+
     return {
         'notes': len(all_notes),
         'events': total_ev,
@@ -930,7 +1233,28 @@ def profile_from_sp(sp, bpm_raw, cn_events=None, lndef=None, ln_map=None):
         'ranuchi': ranuchi,
         'interval_dist': interval_detail,
         'chord_dist': {k: v for k, v in sorted(chord_dist.items())},
+        'jack_count': patterns['jack_count'],
+        'jack_notes': patterns['jack_notes'],
+        'jack_pct': round(patterns['jack_notes'] / total_notes * 100, 2),
+        'trill_count': patterns['trill_count'],
+        'trill_notes': patterns['trill_notes'],
+        'trill_pct': round(patterns['trill_notes'] / total_notes * 100, 2),
+        'stairs_count': patterns['stairs_count'],
+        'stairs_notes': patterns['stairs_notes'],
+        'stairs_pct': round(patterns['stairs_notes'] / total_notes * 100, 2),
+        'dstairs_count': patterns['dstairs_count'],
+        'dstairs_notes': patterns['dstairs_notes'],
+        'dstairs_pct': round(patterns['dstairs_notes'] / total_notes * 100, 2),
         'tags': tags,
+        'measure_notes': [measure_notes.get(m, 0) for m in range(
+            min(sorted_measures) if sorted_measures else 0,
+            (max(sorted_measures) + 1) if sorted_measures else 0)],
+        'measure_notes_kbd': [measure_notes_kbd.get(m, 0) for m in range(
+            min(sorted_measures) if sorted_measures else 0,
+            (max(sorted_measures) + 1) if sorted_measures else 0)],
+        'measure_notes_scr': [measure_notes_scr.get(m, 0) for m in range(
+            min(sorted_measures) if sorted_measures else 0,
+            (max(sorted_measures) + 1) if sorted_measures else 0)],
         **kbd_profile,
         **scr_profile,
         **cn_profile,

@@ -1,0 +1,363 @@
+{
+  "textage": "30/_kamipoi.html?1HC00",
+  "analyzed_at": "2026-04-08T19:34:19.509304+00:00",
+  "title": "神っぽいな",
+  "artist": "Remixed by uno(IOSYS) & NUE feat. Chiyoko",
+  "bpm_raw": "142",
+  "level": 8,
+  "difficulty": "3",
+  "notes": 734,
+  "events": 384,
+  "bpm_main": 142,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 96.97,
+  "weighted_eff16": 98.61,
+  "scratch_pct": 8.7,
+  "chord_pct": 61.73,
+  "single_pct": 38.27,
+  "ranuchi": 66,
+  "cn_notes": 0,
+  "tags": [
+    "scratch_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm",
+    "trill_heavy",
+    "has_stairs"
+  ],
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 596,
+      "pct": 72.5,
+      "eff16": 142.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 120,
+      "pct": 14.6,
+      "eff16": 71.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 39,
+      "pct": 4.7,
+      "eff16": 213.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 28,
+      "pct": 3.4,
+      "eff16": 284.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 20,
+      "pct": 2.4,
+      "eff16": 426.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 9,
+      "pct": 1.1,
+      "eff16": 35.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.5,
+      "eff16": 47.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 106.5
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.5
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 7.9
+    }
+  },
+  "chord_dist": {
+    "1": 315,
+    "2": 304,
+    "3": 167,
+    "4": 35,
+    "5": 2
+  },
+  "kbd_interval_dist": {
+    "0": {
+      "name": "(0)",
+      "count": 650,
+      "pct": 45.3,
+      "eff16": 0
+    },
+    "24": {
+      "name": "16th",
+      "count": 570,
+      "pct": 39.7,
+      "eff16": 142.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 123,
+      "pct": 8.6,
+      "eff16": 71.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 33,
+      "pct": 2.3,
+      "eff16": 213.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 28,
+      "pct": 1.9,
+      "eff16": 284.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 14,
+      "pct": 1.0,
+      "eff16": 35.5
+    },
+    "8": {
+      "name": "48th",
+      "count": 8,
+      "pct": 0.6,
+      "eff16": 426.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 4,
+      "pct": 0.3,
+      "eff16": 47.3
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 106.5
+    },
+    "528": {
+      "name": "(528)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.5
+    }
+  },
+  "scr_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 75,
+      "pct": 55.1,
+      "eff16": 142.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 12,
+      "pct": 8.8,
+      "eff16": 213.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 4.4,
+      "eff16": 71.0
+    },
+    "336": {
+      "name": "(336)",
+      "count": 5,
+      "pct": 3.7,
+      "eff16": 10.1
+    },
+    "384": {
+      "name": "1measure",
+      "count": 5,
+      "pct": 3.7,
+      "eff16": 8.9
+    },
+    "120": {
+      "name": "(120)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 28.4
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 2.2,
+      "eff16": 47.3
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 4.4
+    },
+    "576": {
+      "name": "(576)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 5.9
+    },
+    "720": {
+      "name": "(720)",
+      "count": 2,
+      "pct": 1.5,
+      "eff16": 4.7
+    }
+  },
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 3,
+  "trill_notes": 9,
+  "trill_pct": 1.21,
+  "stairs_count": 2,
+  "stairs_notes": 3,
+  "stairs_pct": 0.51,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "measure_notes": [],
+  "measure_notes_kbd": [
+    1,
+    1,
+    0,
+    0,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    2,
+    8,
+    8,
+    8,
+    3,
+    8,
+    8,
+    8,
+    2,
+    6,
+    6,
+    6,
+    3,
+    6,
+    6,
+    6,
+    8,
+    1,
+    4,
+    7,
+    4,
+    7,
+    6,
+    7,
+    4,
+    7,
+    8,
+    6,
+    7,
+    7,
+    4,
+    6,
+    7,
+    7,
+    10,
+    8,
+    8,
+    8,
+    3,
+    8,
+    8,
+    8,
+    5,
+    7,
+    6,
+    7,
+    4,
+    8,
+    7,
+    8,
+    3
+  ],
+  "measure_notes_scr": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2,
+    0,
+    0,
+    0,
+    2,
+    0,
+    0,
+    0,
+    2,
+    0,
+    0,
+    0,
+    3,
+    0,
+    0,
+    0,
+    0,
+    4,
+    0,
+    1,
+    2,
+    0,
+    2,
+    1,
+    2,
+    0,
+    0,
+    1,
+    0,
+    0,
+    3,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    2,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    3,
+    0,
+    1,
+    0,
+    2
+  ]
+}

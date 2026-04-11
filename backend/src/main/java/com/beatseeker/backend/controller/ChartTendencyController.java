@@ -4,6 +4,7 @@ import com.beatseeker.backend.entity.ChartTendencyProfile;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.ChartTendencyService;
+import com.beatseeker.backend.service.SkillTreeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,14 @@ import java.util.Optional;
 public class ChartTendencyController {
 
     private final ChartTendencyService service;
+    private final SkillTreeService skillTreeService;
     private final UserRepository userRepository;
 
-    public ChartTendencyController(ChartTendencyService service, UserRepository userRepository) {
+    public ChartTendencyController(ChartTendencyService service,
+                                   SkillTreeService skillTreeService,
+                                   UserRepository userRepository) {
         this.service = service;
+        this.skillTreeService = skillTreeService;
         this.userRepository = userRepository;
     }
 
@@ -45,6 +50,27 @@ public class ChartTendencyController {
 
         try {
             Map<String, Object> result = service.importFromDirectory(dir);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/admin/chart-tendencies/import-json
+     * JSON 配列をリクエストボディから直接インポートする（本番環境用）。
+     *
+     * Body: [ { "textage": "...", "title": "...", ... }, ... ]
+     */
+    @PostMapping("/api/admin/chart-tendencies/import-json")
+    public ResponseEntity<Map<String, Object>> importJsonBody(
+            Authentication auth,
+            @RequestBody com.fasterxml.jackson.databind.JsonNode body) {
+
+        checkAdmin(auth);
+
+        try {
+            Map<String, Object> result = service.importFromJsonArray(body);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
@@ -84,6 +110,20 @@ public class ChartTendencyController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(profileToMap(opt.get()));
+    }
+
+    /**
+     * GET /api/analysis/tendency-profiles-by-song?textageBase=22/foo.html
+     * 曲のベースURL（クエリパラメータなし）で全難易度のプロファイルを返す。
+     */
+    @GetMapping("/api/analysis/tendency-profiles-by-song")
+    public ResponseEntity<List<Map<String, Object>>> getProfilesBySong(
+            @RequestParam String textageBase) {
+        List<ChartTendencyProfile> profiles = service.getByTextageBase(textageBase);
+        List<Map<String, Object>> result = profiles.stream()
+                .map(this::profileToMap)
+                .toList();
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -165,6 +205,23 @@ public class ChartTendencyController {
         return ResponseEntity.ok(service.computeSimilarityDebug(textageA, textageB));
     }
 
+    // ── スキルツリー ──────────────────────────────────────────────
+
+    /**
+     * GET /api/analysis/skill-tree
+     * スキルツリーを生成して返す。認証済みの場合はユーザー進捗を含む。
+     */
+    @GetMapping("/api/analysis/skill-tree")
+    public ResponseEntity<Map<String, Object>> getSkillTree(Authentication auth) {
+        User user = null;
+        if (auth != null && auth.isAuthenticated()) {
+            String iidxId = (String) auth.getPrincipal();
+            user = userRepository.findByIidxId(iidxId).orElse(null);
+        }
+        Map<String, Object> result = skillTreeService.generateSkillTree(user);
+        return ResponseEntity.ok(result);
+    }
+
     // ── ヘルパー ─────────────────────────────────────────────────
 
     private void checkAdmin(Authentication auth) {
@@ -206,6 +263,22 @@ public class ChartTendencyController {
         m.put("cnScratchPct", p.getCnScratchPct());
         m.put("cnKbdOverlapPct", p.getCnKbdOverlapPct());
         m.put("cnIntervalDistJson", p.getCnIntervalDistJson());
+        // 配置パターン属性
+        m.put("jackCount", p.getJackCount());
+        m.put("jackNotes", p.getJackNotes());
+        m.put("jackPct", p.getJackPct());
+        m.put("trillCount", p.getTrillCount());
+        m.put("trillNotes", p.getTrillNotes());
+        m.put("trillPct", p.getTrillPct());
+        m.put("stairsCount", p.getStairsCount());
+        m.put("stairsNotes", p.getStairsNotes());
+        m.put("stairsPct", p.getStairsPct());
+        m.put("dstairsCount", p.getDstairsCount());
+        m.put("dstairsNotes", p.getDstairsNotes());
+        m.put("dstairsPct", p.getDstairsPct());
+        m.put("measureNotesJson", p.getMeasureNotesJson());
+        m.put("measureNotesKbdJson", p.getMeasureNotesKbdJson());
+        m.put("measureNotesScrJson", p.getMeasureNotesScrJson());
         return m;
     }
 }

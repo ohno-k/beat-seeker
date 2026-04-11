@@ -37,6 +37,7 @@
 
             <!-- 譜面プロファイルDB投入 -->
             <div class="relative group">
+              <input ref="profileFileInput" type="file" accept=".json" class="hidden" @change="onProfileFileSelected" />
               <button
                 @click="handleImportChartProfiles"
                 :disabled="isImportingProfiles"
@@ -45,7 +46,7 @@
                 <svg v-if="isImportingProfiles" class="animate-spin -ml-1 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 {{ isImportingProfiles ? 'インポート中...' : '譜面プロファイルDB投入' }}
               </button>
-              <div class="admin-tooltip">chart_cache/profiles/ の譜面傾向JSONをDBに登録します。スコア予測機能に必要です。新規追加・再分析後に実行してください</div>
+              <div class="admin-tooltip">JSONファイルを選択して譜面プロファイルをDBに登録します。export_profiles.pyで生成したファイルを使用してください</div>
             </div>
 
             <!-- Push通知リセット -->
@@ -200,8 +201,19 @@ const handleRecalculateAll = async () => {
 };
 
 const isImportingProfiles = ref(false);
-const handleImportChartProfiles = async () => {
-  if (!confirm('chart_cache/profiles/ の譜面プロファイルをDBに投入します。\n既存データは上書きされます。続行しますか？')) return;
+const profileFileInput = ref<HTMLInputElement | null>(null);
+
+const handleImportChartProfiles = () => {
+  profileFileInput.value?.click();
+};
+
+const onProfileFileSelected = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  input.value = ''; // reset for re-upload
+
+  if (!confirm(`${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB) をDBに投入します。\n既存データは上書きされます。続行しますか？`)) return;
 
   isImportingProfiles.value = true;
   recalculateError.value = '';
@@ -211,15 +223,22 @@ const handleImportChartProfiles = async () => {
     const { authHeaders } = useAuth();
     const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-    const res = await fetch(`${API_BASE}/api/admin/chart-tendencies/import`, {
+    recalculateSuccess.value = 'ファイル読み込み中...';
+    const text = await file.text();
+    const profiles = JSON.parse(text);
+    if (!Array.isArray(profiles)) throw new Error('JSONファイルは配列形式で必要です');
+
+    recalculateSuccess.value = `${profiles.length} 件送信中...`;
+
+    const res = await fetch(`${API_BASE}/api/admin/chart-tendencies/import-json`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ profilesDir: '../chart_cache/profiles' }),
+      body: text, // 読み込み済みテキストをそのまま送信
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? `API error: ${res.status}`);
-    recalculateSuccess.value = `譜面プロファイルを投入しました: 新規 ${data.inserted} 件、更新 ${data.updated} 件、スキップ ${data.skipped} 件`;
+    recalculateSuccess.value = `譜面プロファイルを投入しました: ${data.inserted} 件登録、${data.skipped} 件スキップ`;
   } catch (e: any) {
     recalculateError.value = '投入に失敗しました: ' + e.message;
   } finally {

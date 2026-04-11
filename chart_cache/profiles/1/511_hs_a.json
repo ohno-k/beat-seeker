@@ -1,0 +1,261 @@
+{
+  "textage": "1/511_hs.html?1AC00",
+  "analyzed_at": "2026-04-08T20:16:26.835254+00:00",
+  "title": "5.1.1.",
+  "artist": "dj nagureo",
+  "bpm_raw": "101",
+  "level": 10,
+  "difficulty": "4",
+  "notes": 786,
+  "events": 449,
+  "bpm_main": 101,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 101.0,
+  "weighted_eff16": 91.0,
+  "scratch_pct": 19.7,
+  "chord_pct": 48.33,
+  "single_pct": 51.67,
+  "ranuchi": 50,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 362,
+      "pct": 80.8,
+      "eff16": 101.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 78,
+      "pct": 17.4,
+      "eff16": 50.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 7,
+      "pct": 1.6,
+      "eff16": 33.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 25.2
+    }
+  },
+  "chord_dist": {
+    "1": 232,
+    "2": 167,
+    "3": 39,
+    "4": 7,
+    "5": 4
+  },
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 4,
+  "trill_notes": 80,
+  "trill_pct": 10.94,
+  "stairs_count": 6,
+  "stairs_notes": 26,
+  "stairs_pct": 3.56,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "tags": [
+    "scratch_very_heavy",
+    "low_effective_bpm",
+    "trill_heavy",
+    "stairs_heavy"
+  ],
+  "measure_notes": [
+    21,
+    27,
+    14,
+    15,
+    14,
+    15,
+    14,
+    15,
+    27,
+    26,
+    15,
+    18,
+    15,
+    14,
+    14,
+    14,
+    28,
+    29,
+    13,
+    22,
+    27,
+    25,
+    24,
+    26,
+    25,
+    26,
+    22,
+    29,
+    23,
+    30,
+    22,
+    29,
+    23,
+    30
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 307,
+      "pct": 52.4,
+      "eff16": 101.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 175,
+      "pct": 29.9,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 89,
+      "pct": 15.2,
+      "eff16": 50.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 11,
+      "pct": 1.9,
+      "eff16": 25.2
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 33.7
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 20.2
+    }
+  },
+  "scr_interval_dist": {
+    "72": {
+      "name": "(72)",
+      "count": 96,
+      "pct": 67.1,
+      "eff16": 33.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 27,
+      "pct": 18.9,
+      "eff16": 25.2
+    },
+    "192": {
+      "name": "half",
+      "count": 11,
+      "pct": 7.7,
+      "eff16": 12.6
+    },
+    "48": {
+      "name": "8th",
+      "count": 6,
+      "pct": 4.2,
+      "eff16": 50.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.7,
+      "eff16": 16.8
+    },
+    "480": {
+      "name": "(480)",
+      "count": 1,
+      "pct": 0.7,
+      "eff16": 5.0
+    },
+    "432": {
+      "name": "(432)",
+      "count": 1,
+      "pct": 0.7,
+      "eff16": 5.6
+    }
+  },
+  "measure_notes_kbd": [
+    16,
+    22,
+    9,
+    10,
+    9,
+    10,
+    9,
+    10,
+    22,
+    21,
+    10,
+    13,
+    10,
+    9,
+    9,
+    9,
+    23,
+    24,
+    8,
+    17,
+    25,
+    23,
+    22,
+    24,
+    23,
+    24,
+    22,
+    24,
+    17,
+    25,
+    22,
+    24,
+    17,
+    25
+  ],
+  "measure_notes_scr": [
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    0,
+    5,
+    6,
+    5,
+    0,
+    5,
+    6,
+    5
+  ]
+}

@@ -345,7 +345,6 @@ const filteredNavItems = computed(() => {
           </div>
         </div>
 
-
         <!-- Sidebar Footer -->
         <div class="p-6 pt-0 text-center">
           <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">

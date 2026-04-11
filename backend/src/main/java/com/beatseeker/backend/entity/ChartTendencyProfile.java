@@ -3,6 +3,7 @@ package com.beatseeker.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Persistable;
 
 /**
  * 譜面傾向プロファイル。
@@ -12,7 +13,16 @@ import lombok.NoArgsConstructor;
 @Table(name = "chart_tendency_profiles")
 @Data
 @NoArgsConstructor
-public class ChartTendencyProfile {
+public class ChartTendencyProfile implements Persistable<String> {
+
+    @Transient
+    private boolean isNewEntity = true;
+
+    @Override
+    public String getId() { return textage; }
+
+    @Override
+    public boolean isNew() { return isNewEntity; }
 
     /** textage URLフラグメント (例: "22/chrono_p.html?1AC00") */
     @Id
@@ -78,4 +88,46 @@ public class ChartTendencyProfile {
     /** スクラッチ単体のインターバル分布 (JSON オブジェクト、スクラッチなし曲はnull) */
     @Column(columnDefinition = "TEXT")
     private String scrIntervalDistJson;
+
+    // ── 配置パターン属性 ─────────────────────────────────────────
+
+    /** 縦連打 (Jack) 出現回数 */
+    private Integer jackCount;
+    /** 縦連打に含まれるノーツ数 */
+    private Integer jackNotes;
+    /** 縦連打ノーツの全体に対する割合 (%) */
+    private Double jackPct;
+
+    /** トリル出現回数 */
+    private Integer trillCount;
+    /** トリルに含まれるノーツ数 */
+    private Integer trillNotes;
+    /** トリルノーツの全体に対する割合 (%) */
+    private Double trillPct;
+
+    /** 階段出現回数 */
+    private Integer stairsCount;
+    /** 階段に含まれるノーツ数 */
+    private Integer stairsNotes;
+    /** 階段ノーツの全体に対する割合 (%) */
+    private Double stairsPct;
+
+    /** 二重階段出現回数 */
+    private Integer dstairsCount;
+    /** 二重階段に含まれるノーツ数 */
+    private Integer dstairsNotes;
+    /** 二重階段ノーツの全体に対する割合 (%) */
+    private Double dstairsPct;
+
+    /** 小節ごとのノーツ数 (JSON配列) */
+    @Column(columnDefinition = "TEXT")
+    private String measureNotesJson;
+
+    /** 小節ごとの鍵盤ノーツ数 (JSON配列) */
+    @Column(columnDefinition = "TEXT")
+    private String measureNotesKbdJson;
+
+    /** 小節ごとの皿ノーツ数 (JSON配列) */
+    @Column(columnDefinition = "TEXT")
+    private String measureNotesScrJson;
 }

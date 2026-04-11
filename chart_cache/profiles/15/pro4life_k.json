@@ -1,0 +1,305 @@
+{
+  "textage": "15/pro4life.html?1HC00",
+  "analyzed_at": "2026-04-08T20:16:24.771572+00:00",
+  "title": "PROMISE FOR LIFE",
+  "artist": "TЁЯRA WORKS",
+  "bpm_raw": "70",
+  "level": 7,
+  "difficulty": "3",
+  "notes": 753,
+  "events": 466,
+  "bpm_main": 70,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 70.0,
+  "weighted_eff16": 64.0,
+  "scratch_pct": 3.14,
+  "chord_pct": 44.21,
+  "single_pct": 55.79,
+  "ranuchi": 25,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 384,
+      "pct": 82.6,
+      "eff16": 70.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 71,
+      "pct": 15.3,
+      "eff16": 35.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 8.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 23.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 17.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.4,
+      "eff16": 140.0
+    }
+  },
+  "chord_dist": {
+    "1": 260,
+    "2": 152,
+    "3": 47,
+    "4": 7
+  },
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 3,
+  "trill_notes": 19,
+  "trill_pct": 2.59,
+  "stairs_count": 3,
+  "stairs_notes": 12,
+  "stairs_pct": 1.64,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "tags": [
+    "has_32nd",
+    "low_effective_bpm",
+    "trill_heavy",
+    "has_stairs"
+  ],
+  "measure_notes": [
+    4,
+    21,
+    20,
+    19,
+    25,
+    22,
+    21,
+    20,
+    23,
+    18,
+    16,
+    17,
+    21,
+    29,
+    24,
+    8,
+    29,
+    4,
+    20,
+    20,
+    22,
+    24,
+    24,
+    19,
+    21,
+    22,
+    21,
+    22,
+    24,
+    22,
+    19,
+    20,
+    18,
+    25,
+    21,
+    25,
+    3
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 384,
+      "pct": 54.2,
+      "eff16": 70.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 244,
+      "pct": 34.4,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 71,
+      "pct": 10.0,
+      "eff16": 35.0
+    },
+    "192": {
+      "name": "half",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 8.8
+    },
+    "72": {
+      "name": "(72)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 23.3
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 17.5
+    },
+    "12": {
+      "name": "32nd",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 140.0
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 5,
+      "pct": 22.7,
+      "eff16": 17.5
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 18.2,
+      "eff16": 8.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 2,
+      "pct": 9.1,
+      "eff16": 4.4
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 2,
+      "pct": 9.1,
+      "eff16": 1.1
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 9.1,
+      "eff16": 2.2
+    },
+    "1344": {
+      "name": "(1344)",
+      "count": 1,
+      "pct": 4.5,
+      "eff16": 1.2
+    },
+    "2064": {
+      "name": "(2064)",
+      "count": 1,
+      "pct": 4.5,
+      "eff16": 0.8
+    },
+    "816": {
+      "name": "(816)",
+      "count": 1,
+      "pct": 4.5,
+      "eff16": 2.1
+    },
+    "552": {
+      "name": "(552)",
+      "count": 1,
+      "pct": 4.5,
+      "eff16": 3.0
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 4.5,
+      "eff16": 14.0
+    }
+  },
+  "measure_notes_kbd": [
+    3,
+    20,
+    20,
+    19,
+    25,
+    21,
+    21,
+    20,
+    22,
+    17,
+    16,
+    17,
+    21,
+    29,
+    23,
+    8,
+    29,
+    3,
+    19,
+    20,
+    21,
+    24,
+    23,
+    17,
+    21,
+    21,
+    20,
+    22,
+    24,
+    21,
+    18,
+    20,
+    18,
+    25,
+    19,
+    21,
+    2
+  ],
+  "measure_notes_scr": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    2,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    2,
+    4,
+    1
+  ]
+}

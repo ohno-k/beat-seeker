@@ -1,0 +1,317 @@
+{
+  "textage": "31/_hatasen.html?1HC00",
+  "analyzed_at": "2026-04-08T19:34:19.509304+00:00",
+  "title": "果たせぬ約束 ft. 小林マナ",
+  "artist": "Xceon",
+  "bpm_raw": "164",
+  "level": 9,
+  "difficulty": "3",
+  "notes": 988,
+  "events": 644,
+  "bpm_main": 164,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 132.44,
+  "weighted_eff16": 124.85,
+  "scratch_pct": 2.96,
+  "chord_pct": 46.1,
+  "single_pct": 53.9,
+  "ranuchi": 109,
+  "cn_notes": 3,
+  "tags": [
+    "scratch_low",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm",
+    "trill_heavy",
+    "has_dstairs"
+  ],
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 692,
+      "pct": 70.2,
+      "eff16": 164.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 178,
+      "pct": 18.1,
+      "eff16": 82.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 52,
+      "pct": 5.3,
+      "eff16": 328.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 34,
+      "pct": 3.4,
+      "eff16": 41.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 1.7,
+      "eff16": 246.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.6,
+      "eff16": 123.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 54.7
+    },
+    "14": {
+      "name": "(14)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 281.1
+    },
+    "20": {
+      "name": "(20)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 196.8
+    },
+    "576": {
+      "name": "(576)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    }
+  },
+  "chord_dist": {
+    "1": 532,
+    "2": 274,
+    "3": 135,
+    "4": 23,
+    "5": 23
+  },
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 689,
+      "pct": 42.0,
+      "eff16": 164.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 658,
+      "pct": 40.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 178,
+      "pct": 10.8,
+      "eff16": 82.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 52,
+      "pct": 3.2,
+      "eff16": 328.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 34,
+      "pct": 2.1,
+      "eff16": 41.0
+    },
+    "16": {
+      "name": "24th",
+      "count": 17,
+      "pct": 1.0,
+      "eff16": 246.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 6,
+      "pct": 0.4,
+      "eff16": 123.0
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 54.7
+    },
+    "14": {
+      "name": "(14)",
+      "count": 2,
+      "pct": 0.1,
+      "eff16": 281.1
+    },
+    "20": {
+      "name": "(20)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 196.8
+    }
+  },
+  "scr_interval_dist": {
+    "384": {
+      "name": "1measure",
+      "count": 12,
+      "pct": 24.5,
+      "eff16": 10.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 7,
+      "pct": 14.3,
+      "eff16": 5.1
+    },
+    "1536": {
+      "name": "(1536)",
+      "count": 5,
+      "pct": 10.2,
+      "eff16": 2.6
+    },
+    "192": {
+      "name": "half",
+      "count": 5,
+      "pct": 10.2,
+      "eff16": 20.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 4,
+      "pct": 8.2,
+      "eff16": 82.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 41.0
+    },
+    "288": {
+      "name": "(288)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 13.7
+    },
+    "1440": {
+      "name": "(1440)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 2.7
+    },
+    "72": {
+      "name": "(72)",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 54.7
+    },
+    "24": {
+      "name": "16th",
+      "count": 2,
+      "pct": 4.1,
+      "eff16": 164.0
+    }
+  },
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 3,
+  "trill_notes": 17,
+  "trill_pct": 1.54,
+  "stairs_count": 1,
+  "stairs_notes": 3,
+  "stairs_pct": 0.24,
+  "dstairs_count": 1,
+  "dstairs_notes": 5,
+  "dstairs_pct": 0.47,
+  "measure_notes": [
+    7,
+    6,
+    7,
+    7,
+    10,
+    13,
+    11,
+    18,
+    16,
+    15,
+    14,
+    20,
+    14,
+    12,
+    13,
+    15,
+    6,
+    5,
+    5,
+    16,
+    15,
+    20,
+    14,
+    14,
+    16,
+    18,
+    15,
+    14,
+    15,
+    15,
+    17,
+    17,
+    17,
+    20,
+    16,
+    16,
+    15,
+    16,
+    16,
+    16,
+    15,
+    18,
+    8,
+    10,
+    9,
+    10,
+    18,
+    18,
+    20,
+    21,
+    21,
+    20,
+    7,
+    4,
+    5,
+    5,
+    7,
+    7,
+    10,
+    12,
+    14,
+    3,
+    8,
+    15,
+    18,
+    18,
+    18,
+    18,
+    20,
+    16,
+    19,
+    15,
+    18,
+    14,
+    16,
+    20,
+    20,
+    17,
+    22,
+    1,
+    0
+  ]
+}

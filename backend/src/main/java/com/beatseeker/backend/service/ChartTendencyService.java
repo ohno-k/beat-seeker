@@ -30,6 +30,9 @@ public class ChartTendencyService {
     private final DifficultyRankRepository difficultyRankRepo;
     private final ObjectMapper objectMapper;
 
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
     public ChartTendencyService(ChartTendencyProfileRepository profileRepo,
                                 ScoreRepository scoreRepo,
                                 SongDefinitionRepository songDefRepo,
@@ -59,8 +62,8 @@ public class ChartTendencyService {
 
         int skipped = 0;
 
-        List<ChartTendencyProfile> toSave = new ArrayList<>();
-        Set<String> existingIds = new java.util.HashSet<>(profileRepo.findAllIds());
+        // textage をキーにして重複を排除（後勝ち）
+        Map<String, ChartTendencyProfile> profileMap = new LinkedHashMap<>();
 
         try (Stream<Path> paths = Files.walk(root)) {
             List<Path> jsonFiles = paths
@@ -75,21 +78,80 @@ public class ChartTendencyService {
                         skipped++;
                         continue;
                     }
-                    toSave.add(profile);
+                    profileMap.put(profile.getTextage(), profile);
                 } catch (Exception e) {
                     skipped++;
                 }
             }
         }
 
-        // 既存IDを先に判別してからバッチ保存（ネットワーク往復を最小化）
-        int inserted = (int) toSave.stream().filter(p -> !existingIds.contains(p.getTextage())).count();
-        int updated  = toSave.size() - inserted;
-        profileRepo.saveAll(toSave);
+        List<ChartTendencyProfile> toSave = new ArrayList<>(profileMap.values());
+
+        // 全削除→バルクINSERT（SELECT不要で高速）
+        int previousCount = (int) profileRepo.count();
+        profileRepo.deleteAllInBatch();
+        profileRepo.flush();
+
+        // チャンク分割してsaveAll（バッチINSERTが効く）
+        int batchSize = 500;
+        for (int i = 0; i < toSave.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, toSave.size());
+            profileRepo.saveAll(toSave.subList(i, end));
+            profileRepo.flush();
+            entityManager.clear();
+        }
 
         return Map.of(
-                "inserted", inserted,
-                "updated", updated,
+                "inserted", toSave.size(),
+                "replaced", previousCount,
+                "skipped", skipped,
+                "total", toSave.size()
+        );
+    }
+
+    /**
+     * JSON 配列をリクエストボディから直接インポートする。
+     * chart_cache ディレクトリが存在しない本番環境用。
+     */
+    @Transactional
+    public Map<String, Object> importFromJsonArray(JsonNode arrayNode) {
+        if (!arrayNode.isArray()) {
+            throw new IllegalArgumentException("Expected a JSON array");
+        }
+
+        int skipped = 0;
+        Map<String, ChartTendencyProfile> profileMap = new LinkedHashMap<>();
+
+        for (JsonNode node : arrayNode) {
+            try {
+                ChartTendencyProfile profile = jsonToProfile(node);
+                if (profile == null || profile.getNotes() == null || profile.getNotes() == 0) {
+                    skipped++;
+                    continue;
+                }
+                profileMap.put(profile.getTextage(), profile);
+            } catch (Exception e) {
+                skipped++;
+            }
+        }
+
+        List<ChartTendencyProfile> toSave = new ArrayList<>(profileMap.values());
+
+        int previousCount = (int) profileRepo.count();
+        profileRepo.deleteAllInBatch();
+        profileRepo.flush();
+
+        int batchSize = 500;
+        for (int i = 0; i < toSave.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, toSave.size());
+            profileRepo.saveAll(toSave.subList(i, end));
+            profileRepo.flush();
+            entityManager.clear();
+        }
+
+        return Map.of(
+                "inserted", toSave.size(),
+                "replaced", previousCount,
                 "skipped", skipped,
                 "total", toSave.size()
         );
@@ -150,6 +212,34 @@ public class ChartTendencyService {
             try { p.setScrIntervalDistJson(objectMapper.writeValueAsString(n.get("scr_interval_dist"))); }
             catch (Exception ignored) {}
         }
+
+        // 配置パターン属性
+        if (n.has("jack_count"))  p.setJackCount(n.path("jack_count").asInt());
+        if (n.has("jack_notes"))  p.setJackNotes(n.path("jack_notes").asInt());
+        if (n.has("jack_pct"))    p.setJackPct(n.path("jack_pct").asDouble());
+        if (n.has("trill_count")) p.setTrillCount(n.path("trill_count").asInt());
+        if (n.has("trill_notes")) p.setTrillNotes(n.path("trill_notes").asInt());
+        if (n.has("trill_pct"))   p.setTrillPct(n.path("trill_pct").asDouble());
+        if (n.has("stairs_count"))  p.setStairsCount(n.path("stairs_count").asInt());
+        if (n.has("stairs_notes"))  p.setStairsNotes(n.path("stairs_notes").asInt());
+        if (n.has("stairs_pct"))    p.setStairsPct(n.path("stairs_pct").asDouble());
+        if (n.has("dstairs_count")) p.setDstairsCount(n.path("dstairs_count").asInt());
+        if (n.has("dstairs_notes")) p.setDstairsNotes(n.path("dstairs_notes").asInt());
+        if (n.has("dstairs_pct"))   p.setDstairsPct(n.path("dstairs_pct").asDouble());
+
+        if (n.has("measure_notes")) {
+            try { p.setMeasureNotesJson(objectMapper.writeValueAsString(n.get("measure_notes"))); }
+            catch (Exception ignored) {}
+        }
+        if (n.has("measure_notes_kbd")) {
+            try { p.setMeasureNotesKbdJson(objectMapper.writeValueAsString(n.get("measure_notes_kbd"))); }
+            catch (Exception ignored) {}
+        }
+        if (n.has("measure_notes_scr")) {
+            try { p.setMeasureNotesScrJson(objectMapper.writeValueAsString(n.get("measure_notes_scr"))); }
+            catch (Exception ignored) {}
+        }
+
         return p;
     }
 
@@ -165,6 +255,10 @@ public class ChartTendencyService {
 
     public List<ChartTendencyProfile> getByLevelAndDifficulty(int level, String difficulty) {
         return profileRepo.findByLevelAndDifficulty(level, difficulty);
+    }
+
+    public List<ChartTendencyProfile> getByTextageBase(String textageBase) {
+        return profileRepo.findByTextageBase(textageBase);
     }
 
     // ── スコア予測 ───────────────────────────────────────────────

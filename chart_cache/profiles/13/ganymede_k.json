@@ -1,0 +1,361 @@
+{
+  "textage": "13/ganymede.html?1HC00",
+  "analyzed_at": "2026-04-08T16:46:11.283965+00:00",
+  "title": "Ganymede",
+  "artist": "玄武",
+  "bpm_raw": "72-82",
+  "level": 10,
+  "difficulty": "3",
+  "notes": 884,
+  "events": 672,
+  "bpm_main": 82,
+  "is_soflan": true,
+  "dominant_interval": 16,
+  "dominant_eff16": 123.0,
+  "weighted_eff16": 108.0,
+  "scratch_pct": 4.86,
+  "chord_pct": 24.26,
+  "single_pct": 75.74,
+  "ranuchi": 34,
+  "interval_dist": {
+    "16": {
+      "name": "24th",
+      "count": 256,
+      "pct": 38.2,
+      "eff16": 123.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 213,
+      "pct": 31.7,
+      "eff16": 82.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 102,
+      "pct": 15.2,
+      "eff16": 41.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 52,
+      "pct": 7.7,
+      "eff16": 246.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 38,
+      "pct": 5.7,
+      "eff16": 164.0
+    },
+    "96": {
+      "name": "quarter",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 20.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 13.7
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 61.5
+    },
+    "288": {
+      "name": "(288)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 6.8
+    }
+  },
+  "chord_dist": {
+    "1": 509,
+    "2": 129,
+    "3": 21,
+    "4": 11,
+    "5": 2
+  },
+  "jack_count": 25,
+  "jack_notes": 87,
+  "jack_pct": 9.84,
+  "trill_count": 3,
+  "trill_notes": 26,
+  "trill_pct": 2.94,
+  "stairs_count": 5,
+  "stairs_notes": 22,
+  "stairs_pct": 2.49,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "tags": [
+    "single_heavy",
+    "has_32nd",
+    "has_triplet",
+    "soflan",
+    "mid_effective_bpm",
+    "jack_heavy",
+    "trill_heavy",
+    "stairs_heavy"
+  ],
+  "measure_notes": [
+    12,
+    12,
+    11,
+    11,
+    17,
+    16,
+    17,
+    19,
+    17,
+    16,
+    16,
+    20,
+    28,
+    28,
+    20,
+    30,
+    22,
+    23,
+    20,
+    29,
+    8,
+    6,
+    14,
+    9,
+    11,
+    26,
+    26,
+    28,
+    37,
+    37,
+    35,
+    37,
+    39,
+    34,
+    34,
+    26,
+    33,
+    14,
+    12,
+    14,
+    11,
+    9
+  ],
+  "kbd_interval_dist": {
+    "16": {
+      "name": "24th",
+      "count": 256,
+      "pct": 30.5,
+      "eff16": 123.0
+    },
+    "24": {
+      "name": "16th",
+      "count": 203,
+      "pct": 24.2,
+      "eff16": 82.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 177,
+      "pct": 21.1,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 105,
+      "pct": 12.5,
+      "eff16": 41.0
+    },
+    "8": {
+      "name": "48th",
+      "count": 52,
+      "pct": 6.2,
+      "eff16": 246.0
+    },
+    "12": {
+      "name": "32nd",
+      "count": 38,
+      "pct": 4.5,
+      "eff16": 164.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 3,
+      "pct": 0.4,
+      "eff16": 61.5
+    },
+    "96": {
+      "name": "quarter",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 20.5
+    },
+    "144": {
+      "name": "(144)",
+      "count": 2,
+      "pct": 0.2,
+      "eff16": 13.7
+    },
+    "336": {
+      "name": "(336)",
+      "count": 1,
+      "pct": 0.1,
+      "eff16": 5.9
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 16.7,
+      "eff16": 20.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 5,
+      "pct": 11.9,
+      "eff16": 41.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 5,
+      "pct": 11.9,
+      "eff16": 13.7
+    },
+    "384": {
+      "name": "1measure",
+      "count": 4,
+      "pct": 9.5,
+      "eff16": 5.1
+    },
+    "192": {
+      "name": "half",
+      "count": 4,
+      "pct": 9.5,
+      "eff16": 10.2
+    },
+    "768": {
+      "name": "(768)",
+      "count": 3,
+      "pct": 7.1,
+      "eff16": 2.6
+    },
+    "672": {
+      "name": "(672)",
+      "count": 3,
+      "pct": 7.1,
+      "eff16": 2.9
+    },
+    "240": {
+      "name": "(240)",
+      "count": 3,
+      "pct": 7.1,
+      "eff16": 8.2
+    },
+    "312": {
+      "name": "(312)",
+      "count": 2,
+      "pct": 4.8,
+      "eff16": 6.3
+    },
+    "1128": {
+      "name": "(1128)",
+      "count": 1,
+      "pct": 2.4,
+      "eff16": 1.7
+    }
+  },
+  "measure_notes_kbd": [
+    11,
+    11,
+    10,
+    10,
+    16,
+    16,
+    16,
+    18,
+    16,
+    16,
+    15,
+    19,
+    25,
+    26,
+    17,
+    27,
+    21,
+    23,
+    20,
+    29,
+    8,
+    5,
+    14,
+    9,
+    8,
+    25,
+    26,
+    27,
+    36,
+    36,
+    35,
+    36,
+    38,
+    33,
+    33,
+    24,
+    31,
+    12,
+    11,
+    13,
+    10,
+    9
+  ],
+  "measure_notes_scr": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    3,
+    2,
+    3,
+    3,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    3,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    1,
+    1,
+    1,
+    0
+  ]
+}

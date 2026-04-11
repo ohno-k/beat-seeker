@@ -1,0 +1,377 @@
+{
+  "textage": "6/route80s.html?1AC00",
+  "analyzed_at": "2026-04-08T20:16:31.953614+00:00",
+  "title": "route 80s",
+  "artist": "sampling masters MEGA",
+  "bpm_raw": "122",
+  "level": 9,
+  "difficulty": "4",
+  "notes": 766,
+  "events": 481,
+  "bpm_main": 122,
+  "is_soflan": false,
+  "dominant_interval": 24,
+  "dominant_eff16": 122.0,
+  "weighted_eff16": 96.3,
+  "scratch_pct": 15.09,
+  "chord_pct": 41.37,
+  "single_pct": 58.63,
+  "ranuchi": 20,
+  "interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 273,
+      "pct": 56.9,
+      "eff16": 122.0
+    },
+    "48": {
+      "name": "8th",
+      "count": 171,
+      "pct": 35.6,
+      "eff16": 61.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 2.5,
+      "eff16": 91.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 1.9,
+      "eff16": 40.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 1.5,
+      "eff16": 30.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.6,
+      "eff16": 45.8
+    },
+    "384": {
+      "name": "1measure",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 7.6
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 20.3
+    },
+    "6": {
+      "name": "64th",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 488.0
+    },
+    "18": {
+      "name": "(18)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 162.7
+    }
+  },
+  "chord_dist": {
+    "1": 282,
+    "2": 128,
+    "3": 45,
+    "4": 21,
+    "5": 5
+  },
+  "jack_count": 13,
+  "jack_notes": 57,
+  "jack_pct": 7.29,
+  "trill_count": 3,
+  "trill_notes": 24,
+  "trill_pct": 3.07,
+  "stairs_count": 0,
+  "stairs_notes": 0,
+  "stairs_pct": 0.0,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "tags": [
+    "scratch_very_heavy",
+    "has_32nd",
+    "has_triplet",
+    "mid_effective_bpm",
+    "jack_heavy",
+    "trill_heavy"
+  ],
+  "measure_notes": [
+    1,
+    11,
+    21,
+    15,
+    20,
+    13,
+    22,
+    19,
+    9,
+    16,
+    17,
+    14,
+    20,
+    14,
+    24,
+    20,
+    24,
+    19,
+    26,
+    23,
+    15,
+    21,
+    17,
+    14,
+    14,
+    14,
+    22,
+    18,
+    20,
+    16,
+    19,
+    14,
+    19,
+    21,
+    19,
+    16,
+    19,
+    18,
+    19,
+    15,
+    0,
+    18,
+    17,
+    14,
+    21,
+    14
+  ],
+  "kbd_interval_dist": {
+    "24": {
+      "name": "16th",
+      "count": 272,
+      "pct": 41.0,
+      "eff16": 122.0
+    },
+    "0": {
+      "name": "(0)",
+      "count": 192,
+      "pct": 29.0,
+      "eff16": 0
+    },
+    "48": {
+      "name": "8th",
+      "count": 161,
+      "pct": 24.3,
+      "eff16": 61.0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 12,
+      "pct": 1.8,
+      "eff16": 91.5
+    },
+    "72": {
+      "name": "(72)",
+      "count": 9,
+      "pct": 1.4,
+      "eff16": 40.7
+    },
+    "96": {
+      "name": "quarter",
+      "count": 7,
+      "pct": 1.1,
+      "eff16": 30.5
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 3,
+      "pct": 0.5,
+      "eff16": 45.8
+    },
+    "192": {
+      "name": "half",
+      "count": 2,
+      "pct": 0.3,
+      "eff16": 15.2
+    },
+    "120": {
+      "name": "(120)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 24.4
+    },
+    "144": {
+      "name": "(144)",
+      "count": 1,
+      "pct": 0.2,
+      "eff16": 20.3
+    }
+  },
+  "scr_interval_dist": {
+    "96": {
+      "name": "quarter",
+      "count": 30,
+      "pct": 25.6,
+      "eff16": 30.5
+    },
+    "48": {
+      "name": "8th",
+      "count": 28,
+      "pct": 23.9,
+      "eff16": 61.0
+    },
+    "144": {
+      "name": "(144)",
+      "count": 13,
+      "pct": 11.1,
+      "eff16": 20.3
+    },
+    "0": {
+      "name": "(0)",
+      "count": 12,
+      "pct": 10.3,
+      "eff16": 0
+    },
+    "32": {
+      "name": "12th(triplet)",
+      "count": 10,
+      "pct": 8.5,
+      "eff16": 91.5
+    },
+    "192": {
+      "name": "half",
+      "count": 6,
+      "pct": 5.1,
+      "eff16": 15.2
+    },
+    "960": {
+      "name": "(960)",
+      "count": 3,
+      "pct": 2.6,
+      "eff16": 3.0
+    },
+    "768": {
+      "name": "(768)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 3.8
+    },
+    "336": {
+      "name": "(336)",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 8.7
+    },
+    "64": {
+      "name": "quarter-triplet",
+      "count": 2,
+      "pct": 1.7,
+      "eff16": 45.8
+    }
+  },
+  "measure_notes_kbd": [
+    0,
+    11,
+    15,
+    11,
+    14,
+    9,
+    16,
+    15,
+    4,
+    10,
+    16,
+    14,
+    14,
+    14,
+    24,
+    20,
+    23,
+    17,
+    23,
+    22,
+    11,
+    18,
+    16,
+    14,
+    11,
+    14,
+    19,
+    16,
+    19,
+    15,
+    18,
+    14,
+    18,
+    16,
+    15,
+    10,
+    18,
+    14,
+    15,
+    9,
+    0,
+    14,
+    16,
+    14,
+    14,
+    14
+  ],
+  "measure_notes_scr": [
+    1,
+    0,
+    6,
+    4,
+    6,
+    4,
+    6,
+    4,
+    5,
+    6,
+    1,
+    0,
+    6,
+    0,
+    0,
+    0,
+    1,
+    2,
+    3,
+    1,
+    4,
+    3,
+    1,
+    0,
+    3,
+    0,
+    3,
+    2,
+    1,
+    1,
+    1,
+    0,
+    1,
+    5,
+    4,
+    6,
+    1,
+    4,
+    4,
+    6,
+    0,
+    4,
+    1,
+    0,
+    7,
+    0
+  ]
+}

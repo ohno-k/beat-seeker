@@ -1,216 +1,192 @@
 {
-  "textage": "11/redzonel.html?1AC00",
-  "analyzed_at": "2026-04-06T10:55:30.681485+00:00",
+  "textage": "11/redzone.html?1XC00",
+  "analyzed_at": "2026-04-08T19:34:19.509304+00:00",
   "title": "RED ZONE",
   "artist": "Tatsh&NAOKI",
   "bpm_raw": "165",
   "level": 12,
   "difficulty": "10",
-  "notes": 722,
-  "events": 597,
+  "notes": 1566,
+  "events": 0,
   "bpm_main": 165,
   "is_soflan": false,
-  "dominant_interval": 48,
-  "dominant_eff16": 82.5,
-  "weighted_eff16": 109.5,
-  "scratch_pct": 5.26,
-  "chord_pct": 18.93,
-  "single_pct": 81.07,
-  "ranuchi": 19,
-  "interval_dist": {
-    "48": {
-      "name": "8th",
-      "count": 295,
-      "pct": 49.5,
-      "eff16": 82.5
-    },
-    "24": {
-      "name": "16th",
-      "count": 225,
-      "pct": 37.8,
-      "eff16": 165.0
-    },
-    "72": {
-      "name": "(72)",
-      "count": 43,
-      "pct": 7.2,
-      "eff16": 55.0
-    },
-    "96": {
-      "name": "quarter",
-      "count": 21,
-      "pct": 3.5,
-      "eff16": 41.2
-    },
-    "144": {
-      "name": "(144)",
-      "count": 5,
-      "pct": 0.8,
-      "eff16": 27.5
-    },
-    "32": {
-      "name": "12th(triplet)",
-      "count": 3,
-      "pct": 0.5,
-      "eff16": 123.8
-    },
-    "384": {
-      "name": "1measure",
-      "count": 1,
-      "pct": 0.2,
-      "eff16": 10.3
-    },
-    "792": {
-      "name": "(792)",
-      "count": 1,
-      "pct": 0.2,
-      "eff16": 5.0
-    },
-    "120": {
-      "name": "(120)",
-      "count": 1,
-      "pct": 0.2,
-      "eff16": 33.0
-    },
-    "480": {
-      "name": "(480)",
-      "count": 1,
-      "pct": 0.2,
-      "eff16": 8.2
-    }
-  },
-  "chord_dist": {
-    "1": 484,
-    "2": 101,
-    "3": 12
-  },
+  "dominant_interval": 0,
+  "dominant_eff16": 165.0,
+  "weighted_eff16": 0.0,
+  "scratch_pct": 5.12,
+  "chord_pct": 59.81,
+  "single_pct": 0.0,
+  "ranuchi": 0,
+  "cn_notes": 1,
   "tags": [
-    "single_heavy",
     "has_triplet",
-    "low_effective_bpm"
+    "mid_effective_bpm",
+    "trill_heavy",
+    "has_dstairs"
   ],
-  "kbd_interval_dist": {
-    "48": {
-      "name": "8th",
-      "count": 264,
-      "pct": 38.7,
-      "eff16": 82.5
-    },
-    "24": {
-      "name": "16th",
-      "count": 218,
-      "pct": 31.9,
-      "eff16": 165.0
-    },
-    "0": {
-      "name": "(0)",
-      "count": 125,
-      "pct": 18.3,
-      "eff16": 0
-    },
-    "72": {
-      "name": "(72)",
-      "count": 34,
-      "pct": 5.0,
-      "eff16": 55.0
-    },
-    "96": {
-      "name": "quarter",
-      "count": 19,
-      "pct": 2.8,
-      "eff16": 41.2
-    },
-    "144": {
-      "name": "(144)",
-      "count": 9,
-      "pct": 1.3,
-      "eff16": 27.5
-    },
-    "120": {
-      "name": "(120)",
-      "count": 4,
-      "pct": 0.6,
-      "eff16": 33.0
-    },
-    "192": {
-      "name": "half",
-      "count": 3,
-      "pct": 0.4,
-      "eff16": 20.6
-    },
-    "32": {
-      "name": "12th(triplet)",
-      "count": 3,
-      "pct": 0.4,
-      "eff16": 123.8
-    },
-    "336": {
-      "name": "(336)",
-      "count": 2,
-      "pct": 0.3,
-      "eff16": 11.8
-    }
-  },
-  "scr_interval_dist": {
-    "24": {
-      "name": "16th",
-      "count": 6,
-      "pct": 16.2,
-      "eff16": 165.0
-    },
-    "48": {
-      "name": "8th",
-      "count": 5,
-      "pct": 13.5,
-      "eff16": 82.5
-    },
-    "96": {
-      "name": "quarter",
-      "count": 3,
-      "pct": 8.1,
-      "eff16": 41.2
-    },
-    "288": {
-      "name": "(288)",
-      "count": 2,
-      "pct": 5.4,
-      "eff16": 13.8
-    },
-    "144": {
-      "name": "(144)",
-      "count": 2,
-      "pct": 5.4,
-      "eff16": 27.5
-    },
-    "72": {
-      "name": "(72)",
-      "count": 2,
-      "pct": 5.4,
-      "eff16": 55.0
-    },
-    "384": {
-      "name": "1measure",
-      "count": 1,
-      "pct": 2.7,
-      "eff16": 10.3
-    },
-    "1152": {
-      "name": "(1152)",
-      "count": 1,
-      "pct": 2.7,
-      "eff16": 3.4
-    },
-    "672": {
-      "name": "(672)",
-      "count": 1,
-      "pct": 2.7,
-      "eff16": 5.9
-    },
-    "648": {
-      "name": "(648)",
-      "count": 1,
-      "pct": 2.7,
-      "eff16": 6.1
-    }
-  }
+  "interval_dist": {},
+  "chord_dist": {},
+  "kbd_interval_dist": {},
+  "scr_interval_dist": {},
+  "jack_count": 0,
+  "jack_notes": 0,
+  "jack_pct": 0.0,
+  "trill_count": 0,
+  "trill_notes": 0,
+  "trill_pct": 0.0,
+  "stairs_count": 0,
+  "stairs_notes": 0,
+  "stairs_pct": 0.0,
+  "dstairs_count": 0,
+  "dstairs_notes": 0,
+  "dstairs_pct": 0.0,
+  "measure_notes": [],
+  "measure_notes_kbd": [
+    0,
+    0,
+    0,
+    24,
+    26,
+    24,
+    25,
+    16,
+    26,
+    22,
+    22,
+    24,
+    16,
+    17,
+    24,
+    24,
+    16,
+    18,
+    28,
+    17,
+    22,
+    22,
+    19,
+    21,
+    23,
+    22,
+    20,
+    17,
+    22,
+    18,
+    23,
+    26,
+    26,
+    22,
+    25,
+    23,
+    19,
+    19,
+    24,
+    24,
+    21,
+    19,
+    18,
+    24,
+    22,
+    22,
+    20,
+    21,
+    23,
+    22,
+    20,
+    17,
+    22,
+    17,
+    26,
+    22,
+    25,
+    22,
+    22,
+    22,
+    0,
+    23,
+    25,
+    23,
+    26,
+    23,
+    25,
+    23,
+    26,
+    27,
+    26,
+    4
+  ],
+  "measure_notes_scr": [
+    1,
+    2,
+    0,
+    0,
+    1,
+    3,
+    0,
+    5,
+    1,
+    0,
+    0,
+    2,
+    1,
+    0,
+    1,
+    1,
+    1,
+    3,
+    1,
+    4,
+    1,
+    0,
+    0,
+    3,
+    1,
+    0,
+    0,
+    0,
+    1,
+    2,
+    1,
+    3,
+    1,
+    0,
+    0,
+    3,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    5,
+    8,
+    1,
+    0,
+    0,
+    3,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    3,
+    1,
+    0,
+    0,
+    3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    3,
+    3,
+    1
+  ]
 }

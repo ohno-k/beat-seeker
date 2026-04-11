@@ -22,10 +22,10 @@ const isAdminViewing = computed(() =>
 const searchQuery = ref('');
 const selectedEntry = ref<SongDataEntry | null>(null);
 
-// ANOTHER(4) / LEGGENDARIA(10) で textage を持つ曲のみ
+// ANOTHER(4) / LEGGENDARIA(10) で Lv11-12、textage を持つ曲のみ
 const targetEntries = computed((): SongDataEntry[] => {
   return songDataBody.value.filter(
-    s => (s.difficulty === '4' || s.difficulty === '10') && !!s.textage
+    s => (s.difficulty === '4' || s.difficulty === '10') && (s.level === 11 || s.level === 12) && !!s.textage
   );
 });
 
@@ -192,7 +192,106 @@ interface TendencyProfile {
   ranuchi: number;
   tagsJson: string | null;
   intervalDistJson: string | null;
+  measureNotesJson: string | null;
+  measureNotesKbdJson: string | null;
+  measureNotesScrJson: string | null;
+  jackCount: number | null;
+  jackNotes: number | null;
+  jackPct: number | null;
+  trillCount: number | null;
+  trillNotes: number | null;
+  trillPct: number | null;
+  stairsCount: number | null;
+  stairsNotes: number | null;
+  stairsPct: number | null;
+  dstairsCount: number | null;
+  dstairsNotes: number | null;
+  dstairsPct: number | null;
 }
+
+// ── 配置パターンバッジ ─────────────────────────────────────
+interface PatternBadge {
+  key: string;
+  label: string;
+  count: number;
+  pct: number;
+  colorClass: string;
+}
+
+const PATTERN_DEFS: { key: string; label: string; countKey: keyof TendencyProfile; pctKey: keyof TendencyProfile; color: string; colorBg: string }[] = [
+  { key: 'trill',   label: 'トリル',   countKey: 'trillCount',   pctKey: 'trillPct',   color: 'text-sky-700 dark:text-sky-300',    colorBg: 'bg-sky-100 dark:bg-sky-900/40' },
+  { key: 'stairs',  label: '階段',     countKey: 'stairsCount',  pctKey: 'stairsPct',  color: 'text-emerald-700 dark:text-emerald-300', colorBg: 'bg-emerald-100 dark:bg-emerald-900/40' },
+  { key: 'dstairs', label: '二重階段', countKey: 'dstairsCount', pctKey: 'dstairsPct', color: 'text-violet-700 dark:text-violet-300', colorBg: 'bg-violet-100 dark:bg-violet-900/40' },
+  { key: 'jack',    label: '縦連打',   countKey: 'jackCount',    pctKey: 'jackPct',    color: 'text-rose-700 dark:text-rose-300',   colorBg: 'bg-rose-100 dark:bg-rose-900/40' },
+];
+
+const patternBadges = computed((): PatternBadge[] => {
+  const p = tendencyProfile.value;
+  if (!p) return [];
+  return PATTERN_DEFS
+    .filter(d => (p[d.countKey] as number | null) != null && (p[d.countKey] as number) > 0)
+    .map(d => ({
+      key: d.key,
+      label: d.label,
+      count: p[d.countKey] as number,
+      pct: p[d.pctKey] as number,
+      colorClass: `${d.colorBg} ${d.color}`,
+    }));
+});
+
+// ── タグバッジ ─────────────────────────────────────────────
+interface TagBadge { tag: string; label: string; colorClass: string; }
+
+const TAG_DISPLAY: Record<string, { label: string; colorClass: string }> = {
+  scratch_very_heavy: { label: '皿: 非常に多い', colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
+  scratch_heavy:      { label: '皿: 多い',       colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
+  scratch_low:        { label: '皿: 少ない',     colorClass: 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-slate-300' },
+  chord_heavy:        { label: '同時押し寄り',   colorClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+  single_heavy:       { label: '単鍵寄り',       colorClass: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300' },
+  has_32nd:           { label: '32分あり',        colorClass: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  has_triplet:        { label: '3連あり',         colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
+  soflan:             { label: 'ソフラン',        colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
+  high_effective_bpm: { label: '高速',            colorClass: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  mid_effective_bpm:  { label: '中速',            colorClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
+  low_effective_bpm:  { label: '低速',            colorClass: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300' },
+};
+
+const tagBadges = computed((): TagBadge[] => {
+  const p = tendencyProfile.value;
+  if (!p?.tagsJson) return [];
+  try {
+    const tags = JSON.parse(p.tagsJson) as string[];
+    return tags
+      .filter(t => TAG_DISPLAY[t] && !t.startsWith('has_jack') && !t.startsWith('jack_')
+                 && !t.startsWith('has_trill') && !t.startsWith('trill_')
+                 && !t.startsWith('has_stairs') && !t.startsWith('stairs_')
+                 && !t.startsWith('has_dstairs') && !t.startsWith('dstairs_'))
+      .map(t => ({ tag: t, ...TAG_DISPLAY[t] }));
+  } catch { return []; }
+});
+
+// ── 小節ごとノーツ数グラフ ──────────────────────────────────
+const measureNotes = computed((): number[] => {
+  if (!tendencyProfile.value?.measureNotesJson) return [];
+  try { return JSON.parse(tendencyProfile.value.measureNotesJson); }
+  catch { return []; }
+});
+
+const measureNotesKbd = computed((): number[] => {
+  if (!tendencyProfile.value?.measureNotesKbdJson) return [];
+  try { return JSON.parse(tendencyProfile.value.measureNotesKbdJson); }
+  catch { return []; }
+});
+
+const measureNotesScr = computed((): number[] => {
+  if (!tendencyProfile.value?.measureNotesScrJson) return [];
+  try { return JSON.parse(tendencyProfile.value.measureNotesScrJson); }
+  catch { return []; }
+});
+
+const hasSplitMeasure = computed(() => measureNotesKbd.value.length > 0);
+
+const measureMax = computed(() => Math.max(...measureNotes.value, 1));
 
 // tick値 → 日本語音符名のマッピング（96 ticks/quarter note基準）
 const TICK_TO_NOTE: { tick: number; label: string }[] = [
@@ -409,6 +508,61 @@ watch(selectedEntry, async (entry) => {
               <div class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-2">
                 <div class="text-xs text-blue-500 dark:text-blue-400">同時押し率</div>
                 <div class="text-base font-bold text-blue-600 dark:text-blue-300">{{ tendencyProfile.chordPct.toFixed(1) }}%</div>
+              </div>
+            </div>
+
+            <!-- 譜面属性タグ -->
+            <div v-if="tagBadges.length || patternBadges.length" class="mt-3">
+              <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mb-2">譜面属性</div>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="tb in tagBadges" :key="tb.tag"
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold"
+                  :class="tb.colorClass"
+                >{{ tb.label }}</span>
+                <span v-for="pb in patternBadges" :key="pb.key"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+                  :class="pb.colorClass"
+                  :title="`${pb.count}回 / ${pb.pct}%`"
+                >
+                  {{ pb.label }}
+                  <span class="opacity-70 font-normal">{{ pb.pct }}%</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 小節ごとノーツ密度グラフ（ブロック積み上げ） -->
+            <div v-if="measureNotes.length" class="mt-3">
+              <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mb-2">ノーツ密度（小節）</div>
+              <div class="flex items-end gap-px bg-slate-50 dark:bg-slate-700/30 rounded-lg p-1"
+                   :style="{ height: `${measureMax * 4 + 10}px` }">
+                <div v-for="(n, i) in measureNotes" :key="i"
+                  class="flex-1 min-w-0 flex flex-col-reverse gap-px"
+                  :title="`小節${i + 1}: ${n}ノーツ${hasSplitMeasure ? ` (鍵盤${measureNotesKbd[i] ?? 0} / 皿${measureNotesScr[i] ?? 0})` : ''}`"
+                >
+                  <!-- 皿ノーツ（赤）が上 -->
+                  <template v-if="hasSplitMeasure">
+                    <div v-for="b in (measureNotesScr[i] ?? 0)" :key="'s' + b"
+                      class="w-full rounded-[1px] bg-rose-500"
+                      style="height: 3px"
+                    />
+                    <div v-for="b in (measureNotesKbd[i] ?? 0)" :key="'k' + b"
+                      class="w-full rounded-[1px] bg-slate-200 dark:bg-slate-300"
+                      style="height: 3px"
+                    />
+                  </template>
+                  <!-- フォールバック: 分割データなし -->
+                  <template v-else>
+                    <div v-for="b in n" :key="b"
+                      class="w-full rounded-[1px]"
+                      :class="n > measureMax * 0.8 ? 'bg-rose-400 dark:bg-rose-500' : n > measureMax * 0.5 ? 'bg-amber-400 dark:bg-amber-500' : 'bg-blue-400 dark:bg-blue-500'"
+                      style="height: 3px"
+                    />
+                  </template>
+                </div>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-1 px-1">
+                <span>1</span>
+                <span>{{ measureNotes.length }}</span>
               </div>
             </div>
 
