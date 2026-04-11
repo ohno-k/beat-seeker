@@ -330,6 +330,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import { useGameData } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 
@@ -342,6 +343,7 @@ const emit = defineEmits<{
 }>();
 
 const { authHeaders } = useAuth();
+const { songDataBody } = useGameData();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const activeTab = ref<'songs' | 'difficulty'>('songs');
@@ -430,21 +432,25 @@ const pendingDiffChanges = ref<{title: string, oldRank: string, newRank: string}
 const diffEditSongTitle = ref('');
 const diffEditNewRank = ref('');
 
-// Level filter
+// Level filter (based on official level from song_data)
 const showLv12 = ref(true);
 const showLv11 = ref(true);
 
-const getSongLevel = (rank: string): 'lv12' | 'lv11' | 'uncat' => {
-  const num = parseFloat(rank);
-  if (isNaN(num)) return 'uncat';
-  return num >= 12.0 ? 'lv12' : 'lv11';
-};
+const officialLevelMap = computed(() => {
+  const map = new Map<string, number>();
+  for (const song of songDataBody.value) {
+    if (song.difficulty === '4') map.set(`${song.title}|ANOTHER`, song.level);
+    else if (song.difficulty === '10') map.set(`${song.title}|LEGGENDARIA`, song.level);
+  }
+  return map;
+});
 
-const matchesLevelFilter = (rank: string): boolean => {
-  const level = getSongLevel(rank);
-  if (level === 'lv12') return showLv12.value;
-  if (level === 'lv11') return showLv11.value;
-  return showLv12.value || showLv11.value;
+const matchesLevelFilter = (songEntry: string): boolean => {
+  const parsed = parseSongTitle(songEntry);
+  const level = officialLevelMap.value.get(`${parsed.title}|${parsed.difficultyName}`);
+  if (level === 12) return showLv12.value;
+  if (level === 11) return showLv11.value;
+  return showLv12.value || showLv11.value; // unknown → show if either checked
 };
 
 const savedDiffChanges = computed(() => {
@@ -466,14 +472,14 @@ const savedDiffChanges = computed(() => {
 });
 
 const savedPlacements = computed(() => savedDiffChanges.value.filter(c =>
-  (isNaN(parseFloat(c.oldRank)) || isNaN(parseFloat(c.newRank))) && matchesLevelFilter(c.newRank)));
+  (isNaN(parseFloat(c.oldRank)) || isNaN(parseFloat(c.newRank))) && matchesLevelFilter(c.title)));
 const savedPromotions = computed(() => savedDiffChanges.value.filter(c => {
   const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
-  return !isNaN(o) && !isNaN(n) && n > o && matchesLevelFilter(c.newRank);
+  return !isNaN(o) && !isNaN(n) && n > o && matchesLevelFilter(c.title);
 }));
 const savedDemotions = computed(() => savedDiffChanges.value.filter(c => {
   const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
-  return !isNaN(o) && !isNaN(n) && n < o && matchesLevelFilter(c.newRank);
+  return !isNaN(o) && !isNaN(n) && n < o && matchesLevelFilter(c.title);
 }));
 
 const effectiveSongsList = computed(() => {
@@ -483,7 +489,7 @@ const effectiveSongsList = computed(() => {
     for (const s of r.songs) {
        const pending = pendingDiffChanges.value.find(p => p.title === s);
        const effectiveRank = pending ? pending.newRank : r.rank;
-       if (!matchesLevelFilter(effectiveRank)) continue;
+       if (!matchesLevelFilter(s)) continue;
        list.push({ title: s, rank: effectiveRank });
     }
   }
@@ -491,7 +497,7 @@ const effectiveSongsList = computed(() => {
 });
 
 const filteredPendingChanges = computed(() =>
-  pendingDiffChanges.value.filter(c => matchesLevelFilter(c.newRank))
+  pendingDiffChanges.value.filter(c => matchesLevelFilter(c.title))
 );
 
 const availableRanks = computed(() => {
