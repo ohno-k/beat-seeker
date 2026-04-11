@@ -192,6 +192,18 @@
               </div>
             </div>
 
+            <!-- Level filter checkboxes -->
+            <div class="mb-3 flex items-center gap-4">
+              <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                <input v-model="showLv12" type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-500 focus:ring-indigo-500 cursor-pointer" />
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆12</span>
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                <input v-model="showLv11" type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-500 focus:ring-indigo-500 cursor-pointer" />
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆11</span>
+              </label>
+            </div>
+
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <h4 class="text-xs font-bold text-slate-500 mb-2">楽曲のランク移動</h4>
               <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
@@ -275,7 +287,7 @@
             <div v-if="pendingDiffChanges.length > 0">
                <h4 class="text-xs font-bold text-slate-500 mb-2">保存前の変更一覧</h4>
                <div class="space-y-1">
-                  <div v-for="change in pendingDiffChanges" :key="change.title" class="flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 min-w-0" @mouseenter="handleSongHover(change.title, $event)" @mouseleave="handleSongLeave()">
+                  <div v-for="change in filteredPendingChanges" :key="change.title" class="flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 min-w-0" @mouseenter="handleSongHover(change.title, $event)" @mouseleave="handleSongLeave()">
                      <div class="text-sm font-bold text-slate-800 dark:text-white truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
                      <div class="flex items-center gap-2 text-sm shrink-0">
                         <span class="line-through text-slate-400">{{ change.oldRank }}</span>
@@ -418,6 +430,23 @@ const pendingDiffChanges = ref<{title: string, oldRank: string, newRank: string}
 const diffEditSongTitle = ref('');
 const diffEditNewRank = ref('');
 
+// Level filter
+const showLv12 = ref(true);
+const showLv11 = ref(true);
+
+const getSongLevel = (rank: string): 'lv12' | 'lv11' | 'uncat' => {
+  const num = parseFloat(rank);
+  if (isNaN(num)) return 'uncat';
+  return num >= 12.0 ? 'lv12' : 'lv11';
+};
+
+const matchesLevelFilter = (rank: string): boolean => {
+  const level = getSongLevel(rank);
+  if (level === 'lv12') return showLv12.value;
+  if (level === 'lv11') return showLv11.value;
+  return showLv12.value || showLv11.value;
+};
+
 const savedDiffChanges = computed(() => {
   if (!activeDiffTable.value?.ranks?.length || !originalDiffTable.value?.ranks?.length) return [];
   const activeMap = new Map<string, string>();
@@ -436,9 +465,16 @@ const savedDiffChanges = computed(() => {
   return changes;
 });
 
-const savedPlacements = computed(() => savedDiffChanges.value.filter(c => isNaN(parseFloat(c.oldRank)) || isNaN(parseFloat(c.newRank))));
-const savedPromotions = computed(() => savedDiffChanges.value.filter(c => { const o = parseFloat(c.oldRank), n = parseFloat(c.newRank); return !isNaN(o) && !isNaN(n) && n > o; }));
-const savedDemotions = computed(() => savedDiffChanges.value.filter(c => { const o = parseFloat(c.oldRank), n = parseFloat(c.newRank); return !isNaN(o) && !isNaN(n) && n < o; }));
+const savedPlacements = computed(() => savedDiffChanges.value.filter(c =>
+  (isNaN(parseFloat(c.oldRank)) || isNaN(parseFloat(c.newRank))) && matchesLevelFilter(c.newRank)));
+const savedPromotions = computed(() => savedDiffChanges.value.filter(c => {
+  const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
+  return !isNaN(o) && !isNaN(n) && n > o && matchesLevelFilter(c.newRank);
+}));
+const savedDemotions = computed(() => savedDiffChanges.value.filter(c => {
+  const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
+  return !isNaN(o) && !isNaN(n) && n < o && matchesLevelFilter(c.newRank);
+}));
 
 const effectiveSongsList = computed(() => {
   if (!originalDiffTable.value?.ranks) return [];
@@ -446,11 +482,17 @@ const effectiveSongsList = computed(() => {
   for (const r of originalDiffTable.value.ranks) {
     for (const s of r.songs) {
        const pending = pendingDiffChanges.value.find(p => p.title === s);
-       list.push({ title: s, rank: pending ? pending.newRank : r.rank });
+       const effectiveRank = pending ? pending.newRank : r.rank;
+       if (!matchesLevelFilter(effectiveRank)) continue;
+       list.push({ title: s, rank: effectiveRank });
     }
   }
   return list.sort((a, b) => a.title.localeCompare(b.title));
 });
+
+const filteredPendingChanges = computed(() =>
+  pendingDiffChanges.value.filter(c => matchesLevelFilter(c.newRank))
+);
 
 const availableRanks = computed(() => {
   if (!originalDiffTable.value?.ranks) return [];
