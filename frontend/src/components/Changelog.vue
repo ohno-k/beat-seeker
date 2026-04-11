@@ -1,9 +1,37 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import difficultyRevisions from '../data/difficulty_revisions.json';
 
-const { t } = useI18n();
+const { t, currentLang } = useI18n();
 const activeTab = ref<'changelog' | 'difficulty'>('changelog');
+
+interface RevisionEntry {
+  version: number;
+  label: string;
+  appVersion: string;
+  date: string;
+  added: { title: string; rank: string }[];
+  changed: { title: string; from: string; to: string }[];
+}
+
+const revisions = difficultyRevisions as RevisionEntry[];
+
+function formatDate(dateStr: string): string {
+  const [year, month] = dateStr.split('-');
+  const m = parseInt(month, 10);
+  if (currentLang.value === 'ja') return `${year}年${m}月`;
+  if (currentLang.value === 'ko') return `${year}년 ${m}월`;
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${months[m - 1]} ${year}`;
+}
+
+function editionLabel(version: number): string {
+  if (currentLang.value === 'ja') return `第${version}版`;
+  if (currentLang.value === 'ko') return `제${version}판`;
+  const suffixes: Record<number, string> = { 1: 'st', 2: 'nd', 3: 'rd' };
+  return `${version}${suffixes[version] || 'th'} Edition`;
+}
 </script>
 
 <template>
@@ -177,43 +205,44 @@ const activeTab = ref<'changelog' | 'difficulty'>('changelog');
 
     <!-- Difficulty History Tab -->
     <div v-else-if="activeTab === 'difficulty'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
-      
-      <!-- Difficulty Entry: v2 -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+
+      <div v-for="rev in revisions" :key="rev.version" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{{ t('changelog.v2edition') }}</span>
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.difficultyRevision') }} (Ver 1.3.0)</h3>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{{ editionLabel(rev.version) }}</span>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.difficultyRevision') }} ({{ rev.appVersion }})</h3>
           </div>
-          <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
+          <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ formatDate(rev.date) }}</span>
         </div>
-        
+
         <div class="p-8 space-y-6">
-          <div>
+          <!-- Added Songs -->
+          <div v-if="rev.added.length > 0">
             <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.addedSongs') }}
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-700 dark:text-slate-300 ml-2 font-medium">
-              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>Butterfly Twist</span><span class="font-bold text-blue-600 dark:text-blue-400">11.2</span></div>
-              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>Time to Empress[L]</span><span class="font-bold text-blue-600 dark:text-blue-400">11.6</span></div>
-              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>華麗なる！音戯探偵ひなビタ</span><span class="font-bold text-blue-600 dark:text-blue-400">12.1</span></div>
-              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1"><span>Nemophira</span><span class="font-bold text-blue-600 dark:text-blue-400">12.0</span></div>
+              <div v-for="(song, i) in rev.added" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
+                <span>{{ song.title }}</span>
+                <span class="font-bold text-blue-600 dark:text-blue-400">{{ song.rank }}</span>
+              </div>
             </div>
           </div>
 
-          <div>
+          <!-- Changed Songs -->
+          <div v-if="rev.changed.length > 0">
             <h4 class="text-sm font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1-1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
               {{ t('changelog.changedSongs') }}
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-700 dark:text-slate-300 ml-2 font-medium">
-              <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
-                <span>BRAINSTORM</span>
+              <div v-for="(song, i) in rev.changed" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
+                <span>{{ song.title }}</span>
                 <div class="flex items-center gap-2">
-                  <span class="text-slate-400 line-through">12.6</span>
+                  <span class="text-slate-400 line-through">{{ song.from }}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                  <span class="font-bold text-amber-600 dark:text-amber-500">12.4</span>
+                  <span class="font-bold text-amber-600 dark:text-amber-500">{{ song.to }}</span>
                 </div>
               </div>
             </div>

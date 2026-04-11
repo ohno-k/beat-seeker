@@ -170,16 +170,26 @@
 
           <!-- Difficulty Table Tab -->
           <div v-if="activeTab === 'difficulty'">
-            <div class="mb-3 flex items-center justify-between">
-              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">難易度表 GUI 編集</h3>
-              <button 
-                @click="handleSaveDiffTable" 
-                :disabled="isSavingDiff || pendingDiffChanges.length === 0"
-                class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-40 flex items-center gap-1"
-              >
-                <svg v-if="isSavingDiff" class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                下書き保存 ({{ pendingDiffChanges.length }}件)
-              </button>
+            <div class="mb-3 flex items-center justify-between gap-2">
+              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 shrink-0">難易度表 GUI 編集</h3>
+              <div class="flex items-center gap-2">
+                <button
+                  @click="generateDraftFromVotes"
+                  :disabled="isGeneratingDraft"
+                  class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
+                >
+                  <svg v-if="isGeneratingDraft" class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  投票から生成
+                </button>
+                <button
+                  @click="handleSaveDiffTable"
+                  :disabled="isSavingDiff || pendingDiffChanges.length === 0"
+                  class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
+                >
+                  <svg v-if="isSavingDiff" class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  下書き保存 ({{ pendingDiffChanges.length }}件)
+                </button>
+              </div>
             </div>
 
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
@@ -208,7 +218,7 @@
               <div v-if="savedPromotions.length > 0">
                 <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">▲ 昇格 ({{ savedPromotions.length }}件)</h4>
                 <div class="space-y-1">
-                  <div v-for="change in savedPromotions" :key="change.title" class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 min-w-0">
+                  <div v-for="change in savedPromotions" :key="change.title" class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 min-w-0" @mouseenter="handleSongHover(change.title, $event)" @mouseleave="handleSongLeave()">
                     <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
                     <div class="flex items-center gap-2 text-sm shrink-0">
                       <span class="line-through text-slate-400">{{ change.oldRank }}</span>
@@ -226,12 +236,30 @@
               <div v-if="savedDemotions.length > 0">
                 <h4 class="text-xs font-bold text-red-600 dark:text-red-400 mb-1">▼ 降格 ({{ savedDemotions.length }}件)</h4>
                 <div class="space-y-1">
-                  <div v-for="change in savedDemotions" :key="change.title" class="flex items-center justify-between bg-red-50 dark:bg-red-900/20 p-2.5 rounded-lg border border-red-200 dark:border-red-800/50 min-w-0">
+                  <div v-for="change in savedDemotions" :key="change.title" class="flex items-center justify-between bg-red-50 dark:bg-red-900/20 p-2.5 rounded-lg border border-red-200 dark:border-red-800/50 min-w-0" @mouseenter="handleSongHover(change.title, $event)" @mouseleave="handleSongLeave()">
                     <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
                     <div class="flex items-center gap-2 text-sm shrink-0">
                       <span class="line-through text-slate-400">{{ change.oldRank }}</span>
                       <span class="text-slate-400">→</span>
                       <span class="text-red-600 dark:text-red-400 font-bold">{{ change.newRank }}</span>
+                    </div>
+                    <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-if="savedPlacements.length > 0">
+                <h4 class="text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">● 配置 ({{ savedPlacements.length }}件)</h4>
+                <div class="space-y-1">
+                  <div v-for="change in savedPlacements" :key="change.title" class="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/50 min-w-0" @mouseenter="handleSongHover(change.title, $event)" @mouseleave="handleSongLeave()">
+                    <div class="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
+                    <div class="flex items-center gap-2 text-sm shrink-0">
+                      <span class="text-slate-400 text-xs">{{ change.oldRank.length > 15 ? change.oldRank.substring(0, 12) + '...' : change.oldRank }}</span>
+                      <span class="text-slate-400">→</span>
+                      <span class="text-blue-600 dark:text-blue-400 font-bold">{{ change.newRank }}</span>
                     </div>
                     <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -247,7 +275,7 @@
             <div v-if="pendingDiffChanges.length > 0">
                <h4 class="text-xs font-bold text-slate-500 mb-2">保存前の変更一覧</h4>
                <div class="space-y-1">
-                  <div v-for="change in pendingDiffChanges" :key="change.title" class="flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 min-w-0">
+                  <div v-for="change in pendingDiffChanges" :key="change.title" class="flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 min-w-0" @mouseenter="handleSongHover(change.title, $event)" @mouseleave="handleSongLeave()">
                      <div class="text-sm font-bold text-slate-800 dark:text-white truncate flex-1 min-w-0 mr-2" :title="change.title">{{ change.title }}</div>
                      <div class="flex items-center gap-2 text-sm shrink-0">
                         <span class="line-through text-slate-400">{{ change.oldRank }}</span>
@@ -269,12 +297,29 @@
         </div>
       </div>
     </div>
+
+    <!-- Comment tooltip -->
+    <div
+      v-if="isOpen && tooltipSongKey && (tooltipComments.length > 0 || tooltipLoading)"
+      class="fixed z-[200] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-3 w-80 overflow-y-auto pointer-events-none"
+      :style="{ top: tooltipPosition.top + 'px', left: tooltipPosition.left + 'px', maxHeight: tooltipPosition.maxHeight + 'px' }"
+    >
+      <div v-if="tooltipLoading" class="text-xs text-slate-400 text-center py-2">読み込み中...</div>
+      <div v-else class="space-y-2.5">
+        <div v-for="(c, i) in tooltipComments" :key="i" class="flex items-start gap-2">
+          <RankIcon v-if="c.totalBeatPt !== undefined" :rank-name="getRankInfo(c.totalBeatPt).name" :tier="getRankInfo(c.totalBeatPt).tier" size="sm" disable-party class="shrink-0 mt-0.5" />
+          <div class="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap break-words leading-relaxed">{{ c.content }}</div>
+        </div>
+      </div>
+    </div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import RankIcon from './RankIcon.vue';
+import { getRankInfo } from '../utils/beatTier';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -358,6 +403,14 @@ const form = ref<SongForm>(defaultForm());
 const isSubmitting = ref(false);
 const isApplying = ref(false);
 const isSavingDiff = ref(false);
+const isGeneratingDraft = ref(false);
+
+// Comment tooltip
+const tooltipSongKey = ref('');
+const tooltipComments = ref<Array<{ totalBeatPt: number; content: string; createdAt: string }>>([]);
+const tooltipLoading = ref(false);
+const tooltipPosition = ref({ top: 0, left: 0, maxHeight: 240 });
+const commentCache = new Map<string, Array<any>>();
 
 const activeDiffTable = ref<{ranks: {rank: string, songs: string[]}[]}>({ranks: []});
 const originalDiffTable = ref<{ranks: {rank: string, songs: string[]}[]}>({ranks: []});
@@ -383,8 +436,9 @@ const savedDiffChanges = computed(() => {
   return changes;
 });
 
-const savedPromotions = computed(() => savedDiffChanges.value.filter(c => parseFloat(c.newRank) > parseFloat(c.oldRank)));
-const savedDemotions = computed(() => savedDiffChanges.value.filter(c => parseFloat(c.newRank) < parseFloat(c.oldRank)));
+const savedPlacements = computed(() => savedDiffChanges.value.filter(c => isNaN(parseFloat(c.oldRank)) || isNaN(parseFloat(c.newRank))));
+const savedPromotions = computed(() => savedDiffChanges.value.filter(c => { const o = parseFloat(c.oldRank), n = parseFloat(c.newRank); return !isNaN(o) && !isNaN(n) && n > o; }));
+const savedDemotions = computed(() => savedDiffChanges.value.filter(c => { const o = parseFloat(c.oldRank), n = parseFloat(c.newRank); return !isNaN(o) && !isNaN(n) && n < o; }));
 
 const effectiveSongsList = computed(() => {
   if (!originalDiffTable.value?.ranks) return [];
@@ -408,6 +462,48 @@ const originalRankOf = (title: string) => {
         if (r.songs.includes(title)) return r.rank;
     }
     return '';
+};
+
+const parseSongTitle = (songEntry: string): { title: string; difficultyName: 'ANOTHER' | 'LEGGENDARIA' } => {
+  if (songEntry.endsWith('[L]')) {
+    return { title: songEntry.slice(0, -3), difficultyName: 'LEGGENDARIA' };
+  }
+  return { title: songEntry, difficultyName: 'ANOTHER' };
+};
+
+const handleSongHover = async (songEntry: string, event: MouseEvent) => {
+  const parsed = parseSongTitle(songEntry);
+  const key = `${parsed.title}|${parsed.difficultyName}`;
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  const maxH = Math.min(240, Math.max(100, window.innerHeight - rect.bottom - 20));
+  tooltipPosition.value = {
+    top: rect.bottom + 4,
+    left: Math.min(rect.left, window.innerWidth - 340),
+    maxHeight: maxH,
+  };
+  tooltipSongKey.value = key;
+
+  if (commentCache.has(key)) {
+    tooltipComments.value = commentCache.get(key)!;
+    return;
+  }
+
+  tooltipLoading.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/tier-comments?title=${encodeURIComponent(parsed.title)}&difficultyName=${encodeURIComponent(parsed.difficultyName)}`);
+    if (res.ok) {
+      const data = await res.json();
+      commentCache.set(key, data);
+      if (tooltipSongKey.value === key) tooltipComments.value = data;
+    }
+  } catch { /* ignore */ } finally {
+    tooltipLoading.value = false;
+  }
+};
+
+const handleSongLeave = () => {
+  tooltipSongKey.value = '';
+  tooltipComments.value = [];
 };
 
 const handleAddDiffChange = () => {
@@ -515,6 +611,7 @@ watch(() => props.isOpen, (val) => {
   if (val) {
     errorMsg.value = '';
     successMsg.value = '';
+    commentCache.clear();
     loadData();
   }
 });
@@ -612,6 +709,119 @@ const handleDeleteDraftSong = async (ids: number[]) => {
     hasDraftSongs.value = draftSongs.value.length > 0;
   } catch (e: any) {
     errorMsg.value = '削除エラー: ' + e.message;
+  }
+};
+
+// ── Generate draft from votes ─────────────────────────
+const generateDraftFromVotes = async () => {
+  if (!confirm('現在のドラフトを全削除し、投票結果からドラフトを再生成しますか？')) return;
+
+  isGeneratingDraft.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+
+  try {
+    const [activeRes, votesRes] = await Promise.all([
+      fetch(`${API_BASE}/api/game-data/difficulty-table`),
+      fetch(`${API_BASE}/api/tier-votes/all`),
+    ]);
+    if (!activeRes.ok || !votesRes.ok) throw new Error('データ取得に失敗しました');
+
+    const activeTable: { ranks: Array<{ rank: string; songs: string[] }> } = await activeRes.json();
+    const votesData: Array<Record<string, any>> = await votesRes.json();
+
+    // Build vote map: "title|difficultyName" -> { PROMOTE: n, STAY: n, DEMOTE: n, "12.3": n, ... }
+    const voteMap = new Map<string, Record<string, number>>();
+    for (const item of votesData) {
+      const { title, difficultyName, ...rest } = item;
+      const counts: Record<string, number> = {};
+      for (const [k, v] of Object.entries(rest)) counts[k] = Number(v) || 0;
+      voteMap.set(`${title}|${difficultyName}`, counts);
+    }
+
+    const newTable = JSON.parse(JSON.stringify(activeTable));
+    const ranks: Array<{ rank: string; songs: string[] }> = newTable.ranks;
+
+    // Identify numeric (non-uncategorized) rank indices
+    const numericRankIndices: number[] = [];
+    for (let i = 0; i < ranks.length; i++) {
+      if (!ranks[i].rank.toLowerCase().includes('uncategorized')) numericRankIndices.push(i);
+    }
+
+    // Tier options for uncategorized (11.0-13.0 in 0.1 steps)
+    const TIER_OPTIONS: string[] = [];
+    for (let i = 110; i <= 130; i++) TIER_OPTIONS.push((i / 10).toFixed(1));
+
+    // Phase 1: Collect all moves (iterate originals, apply later to avoid double-moves)
+    const moves: Array<{ song: string; fromIdx: number; toIdx: number }> = [];
+
+    for (let ri = 0; ri < ranks.length; ri++) {
+      const rank = ranks[ri];
+      const isUncat = rank.rank.toLowerCase().includes('uncategorized');
+
+      for (const songEntry of rank.songs) {
+        const parsed = parseSongTitle(songEntry);
+        const key = `${parsed.title}|${parsed.difficultyName}`;
+        const votes = voteMap.get(key);
+        if (!votes) continue;
+
+        if (isUncat) {
+          // Uncategorized: place at top-voted tier
+          let bestTier: string | null = null;
+          let bestCount = 0;
+          for (const tier of TIER_OPTIONS) {
+            const count = votes[tier] ?? 0;
+            if (count > bestCount) { bestTier = tier; bestCount = count; }
+          }
+          if (bestTier && bestCount > 0) {
+            const targetIdx = ranks.findIndex(r => r.rank === bestTier);
+            if (targetIdx !== -1) moves.push({ song: songEntry, fromIdx: ri, toIdx: targetIdx });
+          }
+        } else {
+          // Ranked: majority vote (STAY wins if >= both, tie = no change)
+          const promote = votes['PROMOTE'] ?? 0;
+          const stay = votes['STAY'] ?? 0;
+          const demote = votes['DEMOTE'] ?? 0;
+          if (promote === 0 && stay === 0 && demote === 0) continue;
+          if (stay >= promote && stay >= demote) continue;
+          if (promote === demote) continue;
+
+          const curNumIdx = numericRankIndices.indexOf(ri);
+          if (curNumIdx === -1) continue;
+
+          if (promote > demote && curNumIdx > 0) {
+            moves.push({ song: songEntry, fromIdx: ri, toIdx: numericRankIndices[curNumIdx - 1] });
+          } else if (demote > promote && curNumIdx < numericRankIndices.length - 1) {
+            moves.push({ song: songEntry, fromIdx: ri, toIdx: numericRankIndices[curNumIdx + 1] });
+          }
+        }
+      }
+    }
+
+    // Phase 2: Apply all moves at once
+    for (const { song, fromIdx, toIdx } of moves) {
+      ranks[fromIdx].songs = ranks[fromIdx].songs.filter((s: string) => s !== song);
+      ranks[toIdx].songs.push(song);
+    }
+
+    // Save the new draft
+    const saveRes = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, {
+      method: 'PUT',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(newTable),
+    });
+    const saveData = await saveRes.json();
+    if (!saveRes.ok) throw new Error(saveData.message || 'Error');
+
+    originalDiffTable.value = newTable;
+    activeDiffTable.value = activeTable;
+    pendingDiffChanges.value = [];
+    hasDraftDiffTable.value = true;
+    successMsg.value = `投票結果から ${moves.length}件 の変更をドラフトに反映しました`;
+  } catch (e: any) {
+    errorMsg.value = 'ドラフト生成エラー: ' + e.message;
+  } finally {
+    isGeneratingDraft.value = false;
   }
 };
 

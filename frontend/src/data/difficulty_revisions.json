@@ -1,0 +1,69 @@
+[
+  {
+    "version": 1,
+    "label": "v1",
+    "appVersion": "Ver 1.4.0",
+    "date": "2026-04",
+    "added": [
+      {
+        "title": "Butterfly Twist",
+        "rank": "11.2"
+      },
+      {
+        "title": "Time to Empress[L]",
+        "rank": "11.6"
+      },
+      {
+        "title": "華麗なる！音戯探偵ひなビタ",
+        "rank": "12.1"
+      },
+      {
+        "title": "Nemophira",
+        "rank": "12.0"
+      },
+      {
+        "title": "タンポポ",
+        "rank": "11.1"
+      },
+      {
+        "title": "AmorocoFati",
+        "rank": "12.7"
+      },
+      {
+        "title": "PERFECT GREAT!!",
+        "rank": "12.6"
+      },
+      {
+        "title": "UNDO THE NIGHT",
+        "rank": "12.5"
+      },
+      {
+        "title": "HEROES",
+        "rank": "12.8"
+      },
+      {
+        "title": "ちょえちょえまぎか[L]",
+        "rank": "11.7"
+      },
+      {
+        "title": "オーバーライド",
+        "rank": "11.0"
+      },
+      {
+        "title": "ラブコメトキドキシリアス",
+        "rank": "12.5"
+      },
+      {
+        "title": "ベンガル vs. アムール Battle",
+        "rank": "12.0"
+      }
+    ],
+    "changed": [
+      {
+        "title": "BRAINSTORM",
+        "from": "12.6",
+        "to": "12.4"
+      }
+    ]
+  }
+]
