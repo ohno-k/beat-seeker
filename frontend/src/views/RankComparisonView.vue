@@ -192,7 +192,8 @@ function sortIcon(key: string): string {
               <tr
                 v-for="(row, idx) in sortedData"
                 :key="`${row.title}_${row.difficultyName}`"
-                class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                :class="sortKey === 'rank' && idx > 0 && getRank(sortedData[idx - 1]) !== getRank(row) ? 'border-t-2 border-t-red-500 border-b border-b-slate-100 dark:border-b-slate-700/50' : 'border-b border-slate-100 dark:border-slate-700/50'"
               >
                 <td class="px-3 py-2 text-slate-400 text-xs">{{ getFixedRank(row) }}</td>
                 <td class="px-3 py-2">
