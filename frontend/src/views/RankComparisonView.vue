@@ -177,7 +177,7 @@ function sortIcon(key: string): string {
                   @click="toggleSort('avgScoreRate')"
                 >平均レート {{ sortIcon('avgScoreRate') }}</th>
                 <th
-                  class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-20 cursor-pointer hover:text-blue-600 select-none"
+                  class="text-center px-3 py-2.5 font-black text-amber-600 dark:text-amber-400 w-20 cursor-pointer hover:text-amber-700 dark:hover:text-amber-300 select-none bg-amber-50/50 dark:bg-amber-900/20"
                   @click="toggleSort('maxMinusRate')"
                 >MAX- {{ sortIcon('maxMinusRate') }}</th>
                 <th
@@ -200,7 +200,9 @@ function sortIcon(key: string): string {
                 </td>
                 <td class="px-3 py-2 text-center font-mono text-slate-700 dark:text-slate-300">{{ getRank(row) }}</td>
                 <td class="px-3 py-2 text-center font-mono font-bold text-slate-700 dark:text-slate-300">{{ row.avgScoreRate.toFixed(2) }}%</td>
-                <td class="px-3 py-2 text-center font-mono text-slate-700 dark:text-slate-300">{{ row.maxMinusRate.toFixed(1) }}%</td>
+                <td class="px-3 py-2 text-center font-mono font-bold bg-amber-50/50 dark:bg-amber-900/20"
+                    :class="row.maxMinusRate >= 50 ? 'text-amber-600 dark:text-amber-400' : row.maxMinusRate >= 20 ? 'text-amber-500 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'"
+                >{{ row.maxMinusRate.toFixed(1) }}%</td>
                 <td class="px-3 py-2 text-center text-slate-500 dark:text-slate-400">{{ row.playerCount }}</td>
                 <td class="px-3 py-2 text-center text-xs">
                   <span v-if="getDraft(row)" class="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 font-bold">{{ getDraft(row) }}</span>

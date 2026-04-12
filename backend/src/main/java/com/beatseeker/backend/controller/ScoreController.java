@@ -493,23 +493,14 @@ public class ScoreController {
         // 2. Fetch per-song avg scores (lightweight, no JOIN, single-table GROUP BY)
         List<Map<String, Object>> songAvgs = scoreRepository.findSongAvgScores();
 
-        // 3. Fetch raw scores to compute MAX- ratio per song
-        List<Map<String, Object>> rawScores = scoreRepository.findSongRawScores();
-        Map<String, int[]> maxMinusStats = new HashMap<>(); // key -> [maxMinusCount, totalCount]
-        for (Map<String, Object> row : rawScores) {
-            String title = (String) row.get("title");
-            String diffName = (String) row.get("difficultyName");
-            int score = ((Number) row.get("score")).intValue();
-            String key = title + "|" + diffName;
-            Integer notes = notesMap.get(key);
-            if (notes == null || notes <= 0) continue;
-            double scoreRate = score * 100.0 / (notes * 2.0);
-            if (scoreRate < 66.667) continue;
-            int[] stats = maxMinusStats.computeIfAbsent(key, k -> new int[2]);
-            stats[1]++;
-            if (scoreRate >= 94.4444) {
-                stats[0]++;
-            }
+        // 3. Fetch MAX- counts per song (aggregated JOIN, returns ~1000 rows)
+        List<Map<String, Object>> maxMinusData = scoreRepository.findSongMaxMinusCounts();
+        Map<String, int[]> maxMinusStats = new HashMap<>();
+        for (Map<String, Object> row : maxMinusData) {
+            String key = row.get("title") + "|" + row.get("difficultyName");
+            int maxMinusCount = ((Number) row.get("maxMinusCount")).intValue();
+            int totalCount = ((Number) row.get("totalCount")).intValue();
+            maxMinusStats.put(key, new int[]{maxMinusCount, totalCount});
         }
 
         // 4. Convert avg scores to score rates using notes, filter >= 66.667%

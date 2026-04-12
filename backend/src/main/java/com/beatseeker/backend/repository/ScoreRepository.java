@@ -244,12 +244,19 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findSongAvgScores();
 
     @Query(value =
-        "SELECT title AS \"title\", difficulty_name AS \"difficultyName\", score AS \"score\" " +
-        "FROM scores " +
-        "WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
-        "  AND difficulty_level IN (11, 12) " +
-        "  AND score > 0", nativeQuery = true)
-    List<Map<String, Object>> findSongRawScores();
+        "SELECT s.title AS \"title\", s.difficulty_name AS \"difficultyName\", " +
+        "  COUNT(CASE WHEN s.score * 9 >= sd.notes * 17 THEN 1 END) AS \"maxMinusCount\", " +
+        "  COUNT(*) AS \"totalCount\" " +
+        "FROM scores s " +
+        "JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
+        "  AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') " +
+        "    OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND s.difficulty_level IN (11, 12) " +
+        "  AND s.score > 0 " +
+        "  AND sd.level >= 11 " +
+        "GROUP BY s.title, s.difficulty_name", nativeQuery = true)
+    List<Map<String, Object>> findSongMaxMinusCounts();
 
     @Query(value =
         "WITH weight_map(rv, wt) AS ( " +
