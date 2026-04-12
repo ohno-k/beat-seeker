@@ -146,39 +146,10 @@ const sortedData = computed(() => {
   return data;
 });
 
-// ドラフトランクごとのMAX-率境界を算出（手動変更に強い）
-const draftRankBoundaries = computed(() => {
-  const ratesByRank = new Map<string, number[]>();
-  for (const row of scoreRates.value) {
-    const entry = row.difficultyName === 'LEGGENDARIA' ? row.title + '[L]' : row.title;
-    const rank = draftRankMap.value.get(entry) || rankMap.value.get(entry);
-    if (!rank || rank === '-') continue;
-    if (isNaN(parseFloat(rank))) continue;
-    if (!ratesByRank.has(rank)) ratesByRank.set(rank, []);
-    ratesByRank.get(rank)!.push(row.maxMinusRate);
-  }
-  // 各ランクの最大MAX-率を境界とする（難しい順）
-  const ranks = [...ratesByRank.keys()].sort((a, b) => parseFloat(b) - parseFloat(a));
-  const boundaries: number[] = [];
-  for (let i = 0; i < ranks.length - 1; i++) {
-    const rates = ratesByRank.get(ranks[i])!;
-    boundaries.push(Math.max(...rates));
-  }
-  return boundaries;
-});
-
 function hasRedLine(idx: number): boolean {
   if (idx === 0) return false;
-  const prev = sortedData.value[idx - 1];
-  const curr = sortedData.value[idx];
   if (sortKey.value === 'rank') {
-    return getRank(prev) !== getRank(curr);
-  }
-  if (sortKey.value === 'maxMinusRate') {
-    const [lo, hi] = sortDir.value === 'asc'
-      ? [prev.maxMinusRate, curr.maxMinusRate]
-      : [curr.maxMinusRate, prev.maxMinusRate];
-    return draftRankBoundaries.value.some(b => lo <= b && b < hi);
+    return getRank(sortedData.value[idx - 1]) !== getRank(sortedData.value[idx]);
   }
   return false;
 }
