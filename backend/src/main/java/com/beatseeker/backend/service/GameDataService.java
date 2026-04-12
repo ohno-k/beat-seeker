@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,9 @@ public class GameDataService {
     private final DifficultyRankRepository diffRankRepo;
     private final ScoreRecalculationService recalcService;
     private final ObjectMapper objectMapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public GameDataService(SongDefinitionRepository songDefRepo,
                            DifficultyRankRepository diffRankRepo,
@@ -129,6 +134,7 @@ public class GameDataService {
     /** Save draft difficulty table from JSON string */
     @Transactional
     public void saveDraftDifficultyTable(String json) throws Exception {
+        entityManager.createNativeQuery("SET LOCAL statement_timeout = '120s'").executeUpdate();
         // Delete existing draft ranks (use deleteAll to trigger cascade on child songs)
         List<DifficultyRank> existingDraft = diffRankRepo.findByRevisionOrderBySortOrderAsc("draft");
         diffRankRepo.deleteAll(existingDraft);

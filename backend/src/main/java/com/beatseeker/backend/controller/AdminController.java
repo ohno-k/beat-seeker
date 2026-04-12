@@ -10,8 +10,11 @@ import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.beatseeker.backend.service.ScoreRecalculationService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -30,8 +33,11 @@ public class AdminController {
     private final ScoreRecalculationService scoreRecalculationService;
     private final ObjectMapper objectMapper;
 
-    public AdminController(UserRepository userRepository, 
-                           ScoreRepository scoreRepository, 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public AdminController(UserRepository userRepository,
+                           ScoreRepository scoreRepository,
                            ScoreHistoryLogRepository scoreHistoryLogRepository,
                            ArenaMatchRepository arenaMatchRepository,
                            ScoreRecalculationService scoreRecalculationService,
@@ -113,8 +119,10 @@ public class AdminController {
     }
 
     @GetMapping("/scores/simulation-aggregate")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<Map<String, Object>>> getSimulationAggregate(Authentication auth) {
         checkAdminAccess(auth);
+        entityManager.createNativeQuery("SET LOCAL statement_timeout = '120s'").executeUpdate();
         return ResponseEntity.ok(scoreRepository.calculateDifficultySimulation());
     }
 
