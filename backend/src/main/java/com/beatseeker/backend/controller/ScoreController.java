@@ -11,8 +11,10 @@ import com.beatseeker.backend.repository.AppNotificationRepository;
 import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
+import com.beatseeker.backend.repository.SongDefinitionRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
+import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
@@ -43,6 +45,7 @@ public class ScoreController {
     private final SongRankBatchService songRankBatchService;
     private final ScoreRecalculationService scoreRecalculationService;
     private final EmailService emailService;
+    private final SongDefinitionRepository songDefinitionRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Long ADMIN_USER_ID = 18L;
@@ -56,7 +59,8 @@ public class ScoreController {
             UserSongRankRepository userSongRankRepository,
             SongRankBatchService songRankBatchService,
             ScoreRecalculationService scoreRecalculationService,
-            EmailService emailService) {
+            EmailService emailService,
+            SongDefinitionRepository songDefinitionRepository) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -68,6 +72,7 @@ public class ScoreController {
         this.songRankBatchService = songRankBatchService;
         this.scoreRecalculationService = scoreRecalculationService;
         this.emailService = emailService;
+        this.songDefinitionRepository = songDefinitionRepository;
     }
 
     /**
@@ -465,6 +470,82 @@ public class ScoreController {
     @GetMapping("/song-arena-averages")
     public ResponseEntity<List<Map<String, Object>>> getSongBeatTierAverages() {
         return ResponseEntity.ok(scoreRepository.findRawSongScoresWithBeatTier());
+    }
+
+    /**
+     * Get average score rates per song (ANOTHER/LEGGENDARIA, score rate >= 66.67%).
+     * Uses lightweight single-table aggregation + Java-side notes resolution.
+     */
+    @GetMapping("/song-avg-score-rates")
+    public ResponseEntity<List<Map<String, Object>>> getSongAvgScoreRates() {
+        // 1. Build notes lookup: "title|difficultyName" -> notes (fast, single table)
+        List<SongDefinition> songDefs = songDefinitionRepository.findByRevision("active");
+        Map<String, Integer> notesMap = new HashMap<>();
+        for (SongDefinition sd : songDefs) {
+            if (sd.getLevel() == null || sd.getLevel() < 11) continue;
+            if ("4".equals(sd.getDifficulty())) {
+                notesMap.put(sd.getTitle() + "|ANOTHER", sd.getNotes());
+            } else if ("10".equals(sd.getDifficulty())) {
+                notesMap.put(sd.getTitle() + "|LEGGENDARIA", sd.getNotes());
+            }
+        }
+
+        // 2. Fetch per-song avg scores (lightweight, no JOIN, single-table GROUP BY)
+        List<Map<String, Object>> songAvgs = scoreRepository.findSongAvgScores();
+
+        // 3. Fetch raw scores to compute MAX- ratio per song
+        List<Map<String, Object>> rawScores = scoreRepository.findSongRawScores();
+        Map<String, int[]> maxMinusStats = new HashMap<>(); // key -> [maxMinusCount, totalCount]
+        for (Map<String, Object> row : rawScores) {
+            String title = (String) row.get("title");
+            String diffName = (String) row.get("difficultyName");
+            int score = ((Number) row.get("score")).intValue();
+            String key = title + "|" + diffName;
+            Integer notes = notesMap.get(key);
+            if (notes == null || notes <= 0) continue;
+            double scoreRate = score * 100.0 / (notes * 2.0);
+            if (scoreRate < 66.667) continue;
+            int[] stats = maxMinusStats.computeIfAbsent(key, k -> new int[2]);
+            stats[1]++;
+            if (scoreRate >= 94.4444) {
+                stats[0]++;
+            }
+        }
+
+        // 4. Convert avg scores to score rates using notes, filter >= 66.667%
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        for (Map<String, Object> row : songAvgs) {
+            String title = (String) row.get("title");
+            String diffName = (String) row.get("difficultyName");
+            double avgScore = ((Number) row.get("avgScore")).doubleValue();
+            int playerCount = ((Number) row.get("playerCount")).intValue();
+
+            String key = title + "|" + diffName;
+            Integer notes = notesMap.get(key);
+            if (notes == null || notes <= 0) continue;
+
+            double avgScoreRate = avgScore * 100.0 / (notes * 2.0);
+            if (avgScoreRate < 66.667) continue;
+
+            int[] stats = maxMinusStats.get(key);
+            double maxMinusRate = (stats != null && stats[1] > 0)
+                ? Math.round(stats[0] * 10000.0 / stats[1]) / 100.0
+                : 0.0;
+
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("title", title);
+            entry.put("difficultyName", diffName);
+            entry.put("avgScoreRate", Math.round(avgScoreRate * 100.0) / 100.0);
+            entry.put("playerCount", playerCount);
+            entry.put("maxMinusRate", maxMinusRate);
+            result.add(entry);
+        }
+
+        result.sort((a, b) -> Double.compare(
+            ((Number) a.get("avgScoreRate")).doubleValue(),
+            ((Number) b.get("avgScoreRate")).doubleValue()));
+
+        return ResponseEntity.ok(result);
     }
 
     /**

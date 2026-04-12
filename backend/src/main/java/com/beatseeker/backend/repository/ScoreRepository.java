@@ -233,6 +233,25 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findAllSongRankingAggregates();
 
     @Query(value =
+        "SELECT title AS \"title\", difficulty_name AS \"difficultyName\", " +
+        "  ROUND(AVG(score)::numeric, 1) AS \"avgScore\", COUNT(*) AS \"playerCount\" " +
+        "FROM scores " +
+        "WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND difficulty_level IN (11, 12) " +
+        "  AND score > 0 " +
+        "GROUP BY title, difficulty_name " +
+        "ORDER BY title, difficulty_name", nativeQuery = true)
+    List<Map<String, Object>> findSongAvgScores();
+
+    @Query(value =
+        "SELECT title AS \"title\", difficulty_name AS \"difficultyName\", score AS \"score\" " +
+        "FROM scores " +
+        "WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND difficulty_level IN (11, 12) " +
+        "  AND score > 0", nativeQuery = true)
+    List<Map<String, Object>> findSongRawScores();
+
+    @Query(value =
         "WITH weight_map(rv, wt) AS ( " +
         "  VALUES ('11.0', 145), ('11.1', 147), ('11.2', 149), ('11.3', 151), ('11.4', 153), " +
         "  ('11.5', 155), ('11.6', 157), ('11.7', 159), ('11.8', 161), ('11.9', 163), " +

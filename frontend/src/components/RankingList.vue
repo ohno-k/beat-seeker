@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
@@ -62,6 +62,50 @@ const beatRanking = ref<BeatRankingEntry[]>([]);
 const rateRanking = ref<RateRankingEntry[]>([]);
 const isLoading = ref(true);
 const error = ref('');
+
+// Pagination
+const PAGE_SIZE = 50;
+const beatPage = ref(1);
+const ratePage = ref(1);
+
+const beatTotalPages = computed(() => Math.max(1, Math.ceil(beatRanking.value.length / PAGE_SIZE)));
+const rateTotalPages = computed(() => Math.max(1, Math.ceil(rateRanking.value.length / PAGE_SIZE)));
+
+const paginatedBeatRanking = computed(() => {
+    const start = (beatPage.value - 1) * PAGE_SIZE;
+    return beatRanking.value.slice(start, start + PAGE_SIZE);
+});
+const paginatedRateRanking = computed(() => {
+    const start = (ratePage.value - 1) * PAGE_SIZE;
+    return rateRanking.value.slice(start, start + PAGE_SIZE);
+});
+
+const beatPageStartIndex = computed(() => (beatPage.value - 1) * PAGE_SIZE);
+const ratePageStartIndex = computed(() => (ratePage.value - 1) * PAGE_SIZE);
+
+function goToMyRank() {
+    if (!user.value) return;
+    const list = viewMode.value === 'rate' ? rateRanking.value : beatRanking.value;
+    const idx = list.findIndex(e => e.iidxId === user.value!.iidxId);
+    if (idx === -1) return;
+    const page = Math.floor(idx / PAGE_SIZE) + 1;
+    if (viewMode.value === 'rate') {
+        ratePage.value = page;
+    } else {
+        beatPage.value = page;
+    }
+    // Scroll to the row after DOM updates
+    nextTick(() => {
+        const row = document.getElementById(`ranking-row-${user.value!.iidxId}`);
+        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+}
+
+// Reset page when switching modes
+watch(viewMode, () => {
+    beatPage.value = 1;
+    ratePage.value = 1;
+});
 
 // Simulation state
 const simulationData = ref<SimulationEntry[]>([]);
@@ -192,6 +236,18 @@ watch(viewMode, async (mode) => {
       </div>
 
 
+      <!-- Find My Rank Button + Mode Toggle -->
+      <div class="flex items-center gap-3 mb-6 flex-wrap">
+        <button
+          v-if="user && (viewMode === 'beat' || viewMode === 'rate')"
+          @click="goToMyRank"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          {{ t('ranking.findMyRank') }}
+        </button>
+      </div>
+
       <!-- Mode Toggle -->
       <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit">
         <button
@@ -247,7 +303,8 @@ watch(viewMode, async (mode) => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr v-for="(entry, index) in beatRanking" :key="entry.iidxId"
+                <tr v-for="(entry, idx) in paginatedBeatRanking" :key="entry.iidxId"
+                  :id="`ranking-row-${entry.iidxId}`"
                   class="group transition-colors"
                   :class="user && entry.iidxId === user.iidxId
                     ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
@@ -256,13 +313,13 @@ watch(viewMode, async (mode) => {
                     <div class="flex items-center gap-2">
                       <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
                         :class="[
-                          index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                          index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                          index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                          beatPageStartIndex + idx === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                          beatPageStartIndex + idx === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                          beatPageStartIndex + idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
                           user && entry.iidxId === user.iidxId ? 'bg-blue-500 text-white' :
                           'text-slate-400 border border-slate-100 dark:border-slate-700'
                         ]">
-                        {{ index + 1 }}
+                        {{ beatPageStartIndex + idx + 1 }}
                       </div>
                       <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
                       <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
@@ -298,13 +355,35 @@ watch(viewMode, async (mode) => {
                   </td>
                   <td class="py-3 text-right pr-4">
                     <span class="text-xs font-medium tabular-nums"
-                      :class="formatLastUpdated(entry.lastUpdatedAt) === '今日' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+                      :class="formatLastUpdated(entry.lastUpdatedAt) === t('common.today') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
                       {{ formatLastUpdated(entry.lastUpdatedAt) }}
                     </span>
                   </td>
                 </tr>
               </tbody>
             </table>
+            <!-- Beat Pagination -->
+            <div v-if="beatTotalPages > 1" class="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+              <button @click="beatPage = 1" :disabled="beatPage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &laquo;
+              </button>
+              <button @click="beatPage--" :disabled="beatPage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &lsaquo;
+              </button>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">
+                {{ beatPage }} / {{ beatTotalPages }}
+              </span>
+              <button @click="beatPage++" :disabled="beatPage === beatTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &rsaquo;
+              </button>
+              <button @click="beatPage = beatTotalPages" :disabled="beatPage === beatTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &raquo;
+              </button>
+            </div>
           </div>
         </div>
 
@@ -325,7 +404,8 @@ watch(viewMode, async (mode) => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr v-for="(entry, index) in rateRanking" :key="entry.iidxId"
+                <tr v-for="(entry, idx) in paginatedRateRanking" :key="entry.iidxId"
+                  :id="`ranking-row-${entry.iidxId}`"
                   class="group transition-colors"
                   :class="user && entry.iidxId === user.iidxId
                     ? 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-l-emerald-500'
@@ -334,13 +414,13 @@ watch(viewMode, async (mode) => {
                     <div class="flex items-center gap-2">
                       <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
                         :class="[
-                          index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                          index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                          index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                          ratePageStartIndex + idx === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                          ratePageStartIndex + idx === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                          ratePageStartIndex + idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
                           user && entry.iidxId === user.iidxId ? 'bg-emerald-500 text-white' :
                           'text-slate-400 border border-slate-100 dark:border-slate-700'
                         ]">
-                        {{ index + 1 }}
+                        {{ ratePageStartIndex + idx + 1 }}
                       </div>
                       <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
                       <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
@@ -376,13 +456,35 @@ watch(viewMode, async (mode) => {
                   </td>
                   <td class="py-3 text-right pr-4">
                     <span class="text-xs font-medium tabular-nums"
-                      :class="formatLastUpdated(entry.lastUpdatedAt) === '今日' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+                      :class="formatLastUpdated(entry.lastUpdatedAt) === t('common.today') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
                       {{ formatLastUpdated(entry.lastUpdatedAt) }}
                     </span>
                   </td>
                 </tr>
               </tbody>
             </table>
+            <!-- Rate Pagination -->
+            <div v-if="rateTotalPages > 1" class="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+              <button @click="ratePage = 1" :disabled="ratePage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &laquo;
+              </button>
+              <button @click="ratePage--" :disabled="ratePage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &lsaquo;
+              </button>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">
+                {{ ratePage }} / {{ rateTotalPages }}
+              </span>
+              <button @click="ratePage++" :disabled="ratePage === rateTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &rsaquo;
+              </button>
+              <button @click="ratePage = rateTotalPages" :disabled="ratePage === rateTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
+                &raquo;
+              </button>
+            </div>
           </div>
         </div>
         <!-- Simulation tab (admin only) -->

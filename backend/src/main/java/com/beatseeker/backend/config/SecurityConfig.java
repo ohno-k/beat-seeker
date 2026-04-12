@@ -49,6 +49,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/rate-ranking",
                                                                 "/api/scores/all-user-scores",
                                                                 "/api/scores/song-arena-averages",
+                                                                "/api/scores/song-avg-score-rates",
                                                                 "/api/scores/debug-ranking",
                                                                 "/api/scores/debug-user-scores/**", "/api/friends/test",
                                                                 "/api/test-root")

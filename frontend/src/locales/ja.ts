@@ -22,6 +22,7 @@ export const ja = {
   'nav.diffTable': '難易度表',
   'nav.scorePrediction': '譜面分析',
   'nav.skillTree': 'スキルツリー',
+  'nav.rankComparison': '曲別平均スコアレート',
   'skillTree.subtitle': '譜面攻略ツリー — クリアの道筋を可視化',
   'chartList.title': '譜面一覧',
   'chartList.subtitle': '全譜面の情報を検索・フィルタリング',
@@ -400,6 +401,7 @@ export const ja = {
   'ranking.dayBeforeYesterday': '一昨日',
   'ranking.daysAgo': '{n}日前',
   'ranking.overWeekAgo': '一週間以上前',
+  'ranking.findMyRank': '自分の順位を確認',
 
   // Profile
   'profile.title': 'プロフィール',
@@ -976,6 +978,30 @@ export const ja = {
   'supporter.modalConfirm': 'コピーして開く',
   'supporter.discordButton': 'Discordに参加',
   'supporter.discordHint': 'サポーター限定サーバー',
+
+  // Rank Comparison
+  'rankComparison.title': 'スコアレート比較分析',
+  'rankComparison.description': '難易度表のランク付けと、全プレイヤーの平均スコアレートに基づく予測ランクを比較します。スコアレート66.67%以上のプレイデータを使用。',
+  'rankComparison.totalSongs': '対象曲数',
+  'rankComparison.match': '一致',
+  'rankComparison.overrated': '過大評価',
+  'rankComparison.underrated': '過小評価',
+  'rankComparison.avgDiff': '平均差異',
+  'rankComparison.showAll': 'すべて表示',
+  'rankComparison.diffOnly': '差異のみ',
+  'rankComparison.sortByRate': 'スコアレート順',
+  'rankComparison.sortByDiff': '差異順',
+  'rankComparison.showing': '{count}件表示中',
+  'rankComparison.song': '曲名',
+  'rankComparison.avgRate': '平均レート',
+  'rankComparison.players': '人数',
+  'rankComparison.actualRank': '実際のランク',
+  'rankComparison.predictedRank': '予測ランク',
+  'rankComparison.diff': '差異',
+  'rankComparison.unrated': 'スコアデータなし ({count}曲)',
+  'rankComparison.legendOverrated': '= 実際のランクがスコアレート予測より高い（過大評価の可能性）',
+  'rankComparison.legendUnderrated': '= 実際のランクがスコアレート予測より低い（過小評価の可能性）',
+  'rankComparison.legendNote': '※ スコアレート66.67%以上のプレイヤーの平均値を使用。曲数に応じてバケット分割。',
 
   // Dan Ranks
   'dan.7kyu': '七級', 'dan.6kyu': '六級', 'dan.5kyu': '五級', 'dan.4kyu': '四級', 'dan.3kyu': '三級', 'dan.2kyu': '二級', 'dan.1kyu': '一級',

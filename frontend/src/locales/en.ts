@@ -22,6 +22,7 @@ export const en = {
   'nav.diffTable': 'Difficulty Table',
   'nav.scorePrediction': 'Score Prediction',
   'nav.skillTree': 'Skill Tree',
+  'nav.rankComparison': 'Avg Score Rate',
   'skillTree.subtitle': 'Chart Progression Tree — Visualize your clear path',
   'chartList.title': 'Chart List',
   'chartList.subtitle': 'Search and filter all charts',
@@ -400,6 +401,7 @@ export const en = {
   'ranking.dayBeforeYesterday': '2 days ago',
   'ranking.daysAgo': '{n} days ago',
   'ranking.overWeekAgo': 'Over a week ago',
+  'ranking.findMyRank': 'Find My Rank',
 
   // Profile
   'profile.title': 'Profile',
@@ -972,6 +974,30 @@ export const en = {
   'supporter.modalConfirm': 'Copy & Open',
   'supporter.discordButton': 'Join Discord',
   'supporter.discordHint': 'Supporter-only server',
+
+  // Rank Comparison
+  'rankComparison.title': 'Score Rate Comparison Analysis',
+  'rankComparison.description': 'Compare difficulty table ranks with predicted ranks based on average player score rates. Uses play data with score rate >= 66.67%.',
+  'rankComparison.totalSongs': 'Total Songs',
+  'rankComparison.match': 'Match',
+  'rankComparison.overrated': 'Overrated',
+  'rankComparison.underrated': 'Underrated',
+  'rankComparison.avgDiff': 'Avg Diff',
+  'rankComparison.showAll': 'Show All',
+  'rankComparison.diffOnly': 'Diff Only',
+  'rankComparison.sortByRate': 'By Score Rate',
+  'rankComparison.sortByDiff': 'By Difference',
+  'rankComparison.showing': 'Showing {count}',
+  'rankComparison.song': 'Song',
+  'rankComparison.avgRate': 'Avg Rate',
+  'rankComparison.players': 'Players',
+  'rankComparison.actualRank': 'Actual',
+  'rankComparison.predictedRank': 'Predicted',
+  'rankComparison.diff': 'Diff',
+  'rankComparison.unrated': 'No score data ({count} songs)',
+  'rankComparison.legendOverrated': '= Actual rank is higher than predicted by score rate (possibly overrated)',
+  'rankComparison.legendUnderrated': '= Actual rank is lower than predicted by score rate (possibly underrated)',
+  'rankComparison.legendNote': '* Uses average score rates of players with >= 66.67%. Songs divided into buckets matching table sizes.',
 
   // Dan Ranks
   'dan.7kyu': '7th Kyu', 'dan.6kyu': '6th Kyu', 'dan.5kyu': '5th Kyu', 'dan.4kyu': '4th Kyu', 'dan.3kyu': '3rd Kyu', 'dan.2kyu': '2nd Kyu', 'dan.1kyu': '1st Kyu',

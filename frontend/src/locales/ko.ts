@@ -22,6 +22,7 @@ export const ko = {
   'nav.diffTable': '난이도표',
   'nav.scorePrediction': '스코어 예측',
   'nav.skillTree': '스킬 트리',
+  'nav.rankComparison': '곡별 평균 스코어 레이트',
   'skillTree.subtitle': '채보 공략 트리 — 클리어 경로를 시각화',
   'chartList.title': '채보 목록',
   'chartList.subtitle': '모든 채보를 검색하고 필터링',
@@ -400,6 +401,7 @@ export const ko = {
   'ranking.daysAgo': '{n}일 전',
   'ranking.overWeekAgo': '일주일 이상 전',
   'ranking.noRateDisplay': '표시할 데이터가 없습니다.\n점수를 업로드하면 RATE-TIER가 집계됩니다.',
+  'ranking.findMyRank': '내 순위 확인',
 
   // Profile
   'profile.title': '프로필',
@@ -973,6 +975,30 @@ export const ko = {
   'supporter.modalConfirm': '복사 후 열기',
   'supporter.discordButton': 'Discord 참여',
   'supporter.discordHint': '서포터 전용 서버',
+
+  // Rank Comparison
+  'rankComparison.title': '스코어 레이트 비교 분석',
+  'rankComparison.description': '난이도표 랭크와 전체 플레이어 평균 스코어 레이트 기반 예측 랭크를 비교합니다. 스코어 레이트 66.67% 이상 플레이 데이터를 사용.',
+  'rankComparison.totalSongs': '대상 곡수',
+  'rankComparison.match': '일치',
+  'rankComparison.overrated': '과대평가',
+  'rankComparison.underrated': '과소평가',
+  'rankComparison.avgDiff': '평균 차이',
+  'rankComparison.showAll': '전체 표시',
+  'rankComparison.diffOnly': '차이만',
+  'rankComparison.sortByRate': '스코어 레이트 순',
+  'rankComparison.sortByDiff': '차이 순',
+  'rankComparison.showing': '{count}건 표시 중',
+  'rankComparison.song': '곡명',
+  'rankComparison.avgRate': '평균 레이트',
+  'rankComparison.players': '인원',
+  'rankComparison.actualRank': '실제 랭크',
+  'rankComparison.predictedRank': '예측 랭크',
+  'rankComparison.diff': '차이',
+  'rankComparison.unrated': '스코어 데이터 없음 ({count}곡)',
+  'rankComparison.legendOverrated': '= 실제 랭크가 스코어 레이트 예측보다 높음 (과대평가 가능성)',
+  'rankComparison.legendUnderrated': '= 실제 랭크가 스코어 레이트 예측보다 낮음 (과소평가 가능성)',
+  'rankComparison.legendNote': '※ 스코어 레이트 66.67% 이상 플레이어의 평균값 사용. 곡수에 맞춰 버킷 분할.',
 
   // Dan Ranks
   'dan.7kyu': '7급', 'dan.6kyu': '6급', 'dan.5kyu': '5급', 'dan.4kyu': '4급', 'dan.3kyu': '3급', 'dan.2kyu': '2급', 'dan.1kyu': '1급',
