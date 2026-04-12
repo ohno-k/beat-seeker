@@ -528,6 +528,7 @@ public class ScoreController {
             entry.put("avgScoreRate", Math.round(avgScoreRate * 100.0) / 100.0);
             entry.put("playerCount", playerCount);
             entry.put("maxMinusRate", maxMinusRate);
+            entry.put("maxMinusCount", stats != null ? stats[0] : 0);
             result.add(entry);
         }
 
