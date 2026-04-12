@@ -6,7 +6,7 @@ import { useI18n } from '../composables/useI18n';
 
 const { t } = useI18n();
 const { diffTableRanks } = useGameData();
-const { authHeaders } = useAuth();
+const { authHeaders, isLoggedIn } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 interface ScoreRateEntry {
@@ -55,7 +55,9 @@ function getDraft(row: ScoreRateEntry): string {
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/scores/song-avg-score-rates`);
+    const res = await fetch(`${API_BASE}/api/scores/song-avg-score-rates`, {
+      headers: authHeaders(),
+    });
     if (res.ok) {
       scoreRates.value = await res.json();
     } else {
@@ -67,22 +69,24 @@ onMounted(async () => {
     isLoading.value = false;
   }
 
-  // ドラフト難易度表を取得（認証必要、失敗しても無視）
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, {
-      headers: authHeaders(),
-    });
-    if (res.ok) {
-      const data: { ranks: { rank: string; songs: string[] }[] } = await res.json();
-      const map = new Map<string, string>();
-      for (const r of data.ranks) {
-        for (const song of r.songs) {
-          map.set(song, r.rank);
+  // ドラフト難易度表を取得（ログイン時のみ、失敗しても無視）
+  if (isLoggedIn.value) {
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, {
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        const data: { ranks: { rank: string; songs: string[] }[] } = await res.json();
+        const map = new Map<string, string>();
+        for (const r of data.ranks) {
+          for (const song of r.songs) {
+            map.set(song, r.rank);
+          }
         }
+        draftRankMap.value = map;
       }
-      draftRankMap.value = map;
-    }
-  } catch {}
+    } catch {}
+  }
 });
 
 function toggleSort(key: typeof sortKey.value) {
@@ -147,7 +151,7 @@ function sortIcon(key: string): string {
     <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
       <h2 class="text-xl font-black text-slate-900 dark:text-white mb-2">曲別平均スコアレート</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
-        全プレイヤーの平均スコアレート（66.67%以上、ANOTHER+LEGGENDARIA、☆11+☆12）
+        全プレイヤーの平均スコアレート（ANOTHER+LEGGENDARIA、☆11+☆12）
       </p>
 
       <div v-if="isLoading" class="flex items-center justify-center py-12">

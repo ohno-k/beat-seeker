@@ -516,7 +516,6 @@ public class ScoreController {
             if (notes == null || notes <= 0) continue;
 
             double avgScoreRate = avgScore * 100.0 / (notes * 2.0);
-            if (avgScoreRate < 66.667) continue;
 
             int[] stats = maxMinusStats.get(key);
             double maxMinusRate = (stats != null && stats[1] > 0)
