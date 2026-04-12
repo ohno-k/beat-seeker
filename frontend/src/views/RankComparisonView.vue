@@ -111,27 +111,28 @@ function getFixedRank(row: ScoreRateEntry): number {
 const sortedData = computed(() => {
   const data = [...scoreRates.value];
   const dir = sortDir.value === 'asc' ? 1 : -1;
-  switch (sortKey.value) {
-    case 'avgScoreRate':
-      data.sort((a, b) => (a.avgScoreRate - b.avgScoreRate) * dir);
-      break;
-    case 'title':
-      data.sort((a, b) => a.title.localeCompare(b.title) * dir);
-      break;
-    case 'playerCount':
-      data.sort((a, b) => (a.playerCount - b.playerCount) * dir);
-      break;
-    case 'rank':
-      data.sort((a, b) => {
-        const ra = parseFloat(getRank(a)) || 0;
-        const rb = parseFloat(getRank(b)) || 0;
-        return (ra - rb) * dir;
-      });
-      break;
-    case 'maxMinusRate':
-      data.sort((a, b) => (a.maxMinusRate - b.maxMinusRate) * dir);
-      break;
-  }
+  data.sort((a, b) => {
+    let primary = 0;
+    switch (sortKey.value) {
+      case 'avgScoreRate':
+        primary = (a.avgScoreRate - b.avgScoreRate) * dir;
+        break;
+      case 'title':
+        primary = a.title.localeCompare(b.title) * dir;
+        break;
+      case 'playerCount':
+        primary = (a.playerCount - b.playerCount) * dir;
+        break;
+      case 'rank':
+        primary = ((parseFloat(getRank(a)) || 0) - (parseFloat(getRank(b)) || 0)) * dir;
+        break;
+      case 'maxMinusRate':
+        primary = (a.maxMinusRate - b.maxMinusRate) * dir;
+        break;
+    }
+    if (primary !== 0) return primary;
+    return a.maxMinusRate - b.maxMinusRate;
+  });
   return data;
 });
 
