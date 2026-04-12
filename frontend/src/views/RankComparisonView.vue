@@ -146,6 +146,43 @@ const sortedData = computed(() => {
   return data;
 });
 
+// ドラフトランクごとのMAX-率境界を算出（手動変更に強い）
+const draftRankBoundaries = computed(() => {
+  const ratesByRank = new Map<string, number[]>();
+  for (const row of scoreRates.value) {
+    const entry = row.difficultyName === 'LEGGENDARIA' ? row.title + '[L]' : row.title;
+    const rank = draftRankMap.value.get(entry) || rankMap.value.get(entry);
+    if (!rank || rank === '-') continue;
+    if (isNaN(parseFloat(rank))) continue;
+    if (!ratesByRank.has(rank)) ratesByRank.set(rank, []);
+    ratesByRank.get(rank)!.push(row.maxMinusRate);
+  }
+  // 各ランクの最大MAX-率を境界とする（難しい順）
+  const ranks = [...ratesByRank.keys()].sort((a, b) => parseFloat(b) - parseFloat(a));
+  const boundaries: number[] = [];
+  for (let i = 0; i < ranks.length - 1; i++) {
+    const rates = ratesByRank.get(ranks[i])!;
+    boundaries.push(Math.max(...rates));
+  }
+  return boundaries;
+});
+
+function hasRedLine(idx: number): boolean {
+  if (idx === 0) return false;
+  const prev = sortedData.value[idx - 1];
+  const curr = sortedData.value[idx];
+  if (sortKey.value === 'rank') {
+    return getRank(prev) !== getRank(curr);
+  }
+  if (sortKey.value === 'maxMinusRate') {
+    const [lo, hi] = sortDir.value === 'asc'
+      ? [prev.maxMinusRate, curr.maxMinusRate]
+      : [curr.maxMinusRate, prev.maxMinusRate];
+    return draftRankBoundaries.value.some(b => lo <= b && b < hi);
+  }
+  return false;
+}
+
 function sortIcon(key: string): string {
   if (sortKey.value !== key) return '↕';
   return sortDir.value === 'asc' ? '↑' : '↓';
@@ -203,7 +240,7 @@ function sortIcon(key: string): string {
                 v-for="(row, idx) in sortedData"
                 :key="`${row.title}_${row.difficultyName}`"
                 class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                :class="(sortKey === 'rank' && idx > 0 && getRank(sortedData[idx - 1]) !== getRank(row)) || (sortKey === 'maxMinusRate' && idx > 0 && getDraftRank(sortedData[idx - 1]) !== getDraftRank(row)) ? 'border-t-2 border-t-red-500 border-b border-b-slate-100 dark:border-b-slate-700/50' : 'border-b border-slate-100 dark:border-slate-700/50'"
+                :class="hasRedLine(idx) ? 'border-t-2 border-t-red-500 border-b border-b-slate-100 dark:border-b-slate-700/50' : 'border-b border-slate-100 dark:border-slate-700/50'"
               >
                 <td class="px-3 py-2 text-slate-400 text-xs">{{ getFixedRank(row) }}</td>
                 <td class="px-3 py-2">
