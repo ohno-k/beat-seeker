@@ -503,6 +503,16 @@ public class ScoreController {
             maxMinusStats.put(key, new int[]{maxMinusCount, totalCount});
         }
 
+        // 3b. Fetch AAA counts per song
+        List<Map<String, Object>> aaaData = scoreRepository.findSongAaaCounts();
+        Map<String, int[]> aaaStats = new HashMap<>();
+        for (Map<String, Object> row : aaaData) {
+            String key = row.get("title") + "|" + row.get("difficultyName");
+            int aaaCount = ((Number) row.get("aaaCount")).intValue();
+            int totalCount = ((Number) row.get("totalCount")).intValue();
+            aaaStats.put(key, new int[]{aaaCount, totalCount});
+        }
+
         // 4. Convert avg scores to score rates using notes, filter >= 66.667%
         List<Map<String, Object>> result = new java.util.ArrayList<>();
         for (Map<String, Object> row : songAvgs) {
@@ -529,6 +539,13 @@ public class ScoreController {
             entry.put("playerCount", playerCount);
             entry.put("maxMinusRate", maxMinusRate);
             entry.put("maxMinusCount", stats != null ? stats[0] : 0);
+
+            int[] aStats = aaaStats.get(key);
+            double aaaRate = (aStats != null && aStats[1] > 0)
+                ? Math.round(aStats[0] * 10000.0 / aStats[1]) / 100.0
+                : 0.0;
+            entry.put("aaaRate", aaaRate);
+            entry.put("aaaCount", aStats != null ? aStats[0] : 0);
             result.add(entry);
         }
 

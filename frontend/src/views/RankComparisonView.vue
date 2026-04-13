@@ -16,12 +16,14 @@ interface ScoreRateEntry {
   playerCount: number;
   maxMinusRate: number;
   maxMinusCount: number;
+  aaaRate: number;
+  aaaCount: number;
 }
 
 const isLoading = ref(true);
 const errorMsg = ref('');
 const scoreRates = ref<ScoreRateEntry[]>([]);
-const sortKey = ref<'avgScoreRate' | 'title' | 'playerCount' | 'rank' | 'maxMinusRate'>('maxMinusRate');
+const sortKey = ref<'avgScoreRate' | 'title' | 'playerCount' | 'rank' | 'maxMinusRate' | 'aaaRate'>('maxMinusRate');
 const sortDir = ref<'asc' | 'desc'>('asc');
 
 // 難易度表から曲→ランクのマップを構築
@@ -139,6 +141,9 @@ const sortedData = computed(() => {
       case 'maxMinusRate':
         primary = (a.maxMinusRate - b.maxMinusRate) * dir;
         break;
+      case 'aaaRate':
+        primary = (a.aaaRate - b.aaaRate) * dir;
+        break;
     }
     if (primary !== 0) return primary;
     return a.maxMinusRate - b.maxMinusRate;
@@ -200,6 +205,10 @@ function sortIcon(key: string): string {
                   @click="toggleSort('maxMinusRate')"
                 >MAX- {{ sortIcon('maxMinusRate') }}</th>
                 <th
+                  class="text-center px-3 py-2.5 font-bold text-emerald-600 dark:text-emerald-400 w-32 cursor-pointer hover:text-emerald-700 dark:hover:text-emerald-300 select-none bg-emerald-50/50 dark:bg-emerald-900/20"
+                  @click="toggleSort('aaaRate')"
+                >AAA {{ sortIcon('aaaRate') }}</th>
+                <th
                   class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-20 cursor-pointer hover:text-blue-600 select-none"
                   @click="toggleSort('playerCount')"
                 >人数 {{ sortIcon('playerCount') }}</th>
@@ -223,6 +232,9 @@ function sortIcon(key: string): string {
                 <td class="px-3 py-2 text-center font-mono font-bold bg-amber-50/50 dark:bg-amber-900/20 whitespace-nowrap"
                     :class="row.maxMinusRate >= 50 ? 'text-amber-600 dark:text-amber-400' : row.maxMinusRate >= 20 ? 'text-amber-500 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'"
                 >{{ row.maxMinusRate.toFixed(1) }}% <span class="text-slate-400 dark:text-slate-500 font-normal">({{ row.maxMinusCount }})</span></td>
+                <td class="px-3 py-2 text-center font-mono font-bold bg-emerald-50/50 dark:bg-emerald-900/20 whitespace-nowrap"
+                    :class="row.aaaRate >= 50 ? 'text-emerald-600 dark:text-emerald-400' : row.aaaRate >= 20 ? 'text-emerald-500 dark:text-emerald-500' : 'text-slate-500 dark:text-slate-400'"
+                >{{ row.aaaRate.toFixed(1) }}% <span class="text-slate-400 dark:text-slate-500 font-normal">({{ row.aaaCount }})</span></td>
                 <td class="px-3 py-2 text-center text-slate-500 dark:text-slate-400">{{ row.playerCount }}</td>
                 <td class="px-3 py-2 text-center text-xs">
                   <span v-if="getDraft(row)" class="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 font-bold">{{ getDraft(row) }}</span>
