@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
+import TierCommentModal from '../components/TierCommentModal.vue';
 
 const { t } = useI18n();
 const { diffTableRanks } = useGameData();
@@ -76,6 +77,8 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
+
+  fetchCommentStats();
 
   // ドラフト難易度表を取得（ログイン時のみ、失敗しても無視）
   if (isLoggedIn.value) {
@@ -163,6 +166,40 @@ function sortIcon(key: string): string {
   if (sortKey.value !== key) return '↕';
   return sortDir.value === 'asc' ? '↑' : '↓';
 }
+
+// コメント関連
+const commentStats = ref(new Map<string, number>());
+const commentModalShow = ref(false);
+const commentModalTitle = ref('');
+const commentModalDiff = ref('');
+
+function getCommentKey(title: string, difficultyName: string): string {
+  return `${title}|${difficultyName}`;
+}
+
+function getCommentCount(row: ScoreRateEntry): number {
+  return commentStats.value.get(getCommentKey(row.title, row.difficultyName)) || 0;
+}
+
+function openCommentModal(row: ScoreRateEntry) {
+  commentModalTitle.value = row.title;
+  commentModalDiff.value = row.difficultyName;
+  commentModalShow.value = true;
+}
+
+async function fetchCommentStats() {
+  try {
+    const res = await fetch(`${API_BASE}/api/tier-comments/stats`);
+    if (res.ok) {
+      const data: Array<{ title: string; difficultyName: string; commentCount: number }> = await res.json();
+      const map = new Map<string, number>();
+      for (const row of data) {
+        map.set(getCommentKey(row.title, row.difficultyName), row.commentCount);
+      }
+      commentStats.value = map;
+    }
+  } catch {}
+}
 </script>
 
 <template>
@@ -212,6 +249,7 @@ function sortIcon(key: string): string {
                   class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-20 cursor-pointer hover:text-blue-600 select-none"
                   @click="toggleSort('playerCount')"
                 >人数 {{ sortIcon('playerCount') }}</th>
+                <th class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-16">コメ</th>
                 <th class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-28">ドラフト</th>
               </tr>
             </thead>
@@ -236,6 +274,16 @@ function sortIcon(key: string): string {
                     :class="row.aaaRate >= 50 ? 'text-emerald-600 dark:text-emerald-400' : row.aaaRate >= 20 ? 'text-emerald-500 dark:text-emerald-500' : 'text-slate-500 dark:text-slate-400'"
                 >{{ row.aaaRate.toFixed(1) }}% <span class="text-slate-400 dark:text-slate-500 font-normal">({{ row.aaaCount }})</span></td>
                 <td class="px-3 py-2 text-center text-slate-500 dark:text-slate-400">{{ row.playerCount }}</td>
+                <td class="px-3 py-2 text-center">
+                  <button
+                    @click="openCommentModal(row)"
+                    class="inline-flex items-center gap-0.5 text-xs hover:bg-blue-50 dark:hover:bg-blue-900/30 px-1.5 py-0.5 rounded transition-colors"
+                    :class="getCommentCount(row) > 0 ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-slate-400 dark:text-slate-500'"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span v-if="getCommentCount(row) > 0">{{ getCommentCount(row) }}</span>
+                  </button>
+                </td>
                 <td class="px-3 py-2 text-center text-xs">
                   <span v-if="getDraft(row)" class="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 font-bold">{{ getDraft(row) }}</span>
                 </td>
@@ -246,4 +294,12 @@ function sortIcon(key: string): string {
       </template>
     </div>
   </div>
+
+  <TierCommentModal
+    :show="commentModalShow"
+    :title="commentModalTitle"
+    :difficulty-name="commentModalDiff"
+    @close="commentModalShow = false"
+    @update="fetchCommentStats()"
+  />
 </template>
