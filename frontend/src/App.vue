@@ -946,7 +946,7 @@ const handleUnifiedClose = async () => {
               </button>
 
               <button
-                v-if="!viewingUserId && user && [18, 23].includes(user.id)"
+                v-if="!viewingUserId && user && [18, 23, 24].includes(user.id)"
                 @click="activeTab = 'rank-comparison'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'rank-comparison' ? 'border-teal-600 text-teal-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
@@ -1085,7 +1085,7 @@ const handleUnifiedClose = async () => {
             {{ t('nav.diffTable') }}
           </button>
           <button
-            v-if="!viewingUserId && user && [18, 23].includes(user.id)"
+            v-if="!viewingUserId && user && [18, 23, 24].includes(user.id)"
             @click="activeTab = 'rank-comparison'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeTab === 'rank-comparison' ? 'border-teal-600 text-teal-600' : 'border-transparent text-slate-500'"
