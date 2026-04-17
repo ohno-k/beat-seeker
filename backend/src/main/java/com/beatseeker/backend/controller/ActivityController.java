@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +22,9 @@ public class ActivityController {
         this.activityLogRepository = activityLogRepository;
     }
 
+    private static final ZoneId JST = ZoneId.of("Asia/Tokyo");
+    private static final DateTimeFormatter ISO_JST = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
     /** 最新20件のアクティビティを返す（全体ニュースフィード用）*/
     @GetMapping("/feed")
     public ResponseEntity<List<Map<String, Object>>> getFeed() {
@@ -31,7 +36,7 @@ public class ActivityController {
                 "displayName", a.getUser().getDisplayName() != null ? a.getUser().getDisplayName() : "プレイヤー",
                 "oldValue", a.getOldValue() != null ? a.getOldValue() : "",
                 "newValue", a.getNewValue() != null ? a.getNewValue() : "",
-                "createdAt", a.getCreatedAt().toString()
+                "createdAt", a.getCreatedAt().atZone(ZoneId.systemDefault()).withZoneSameInstant(JST).format(ISO_JST)
         )).collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
