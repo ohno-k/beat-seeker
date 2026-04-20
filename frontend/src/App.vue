@@ -247,7 +247,9 @@ const loadSavedScores = async () => {
   try {
     let data;
     if (viewingUserId.value !== null) {
-      data = await fetchUserScores(viewingUserId.value);
+      // フレンド閲覧時は friend エンドポイントを使う（admin endpoint は管理者しか叩けないため）
+      const fetchMode = viewingMode.value === 'friend' ? 'friend' : 'admin';
+      data = await fetchUserScores(viewingUserId.value, fetchMode);
     } else {
       data = await fetchMyScores();
     }

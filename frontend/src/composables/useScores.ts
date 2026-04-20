@@ -98,10 +98,14 @@ export function useScores() {
         }
     };
 
-    const fetchUserScores = async (userId: number): Promise<ScoreData[]> => {
+    const fetchUserScores = async (userId: number, mode: 'admin' | 'friend' = 'admin'): Promise<ScoreData[]> => {
         isFetching.value = true;
         try {
-            const res = await fetch(`${API_BASE}/api/admin/users/${userId}/scores`, {
+            // 管理者は admin エンドポイント、フレンド閲覧時は friend エンドポイントを使う
+            const url = mode === 'friend'
+                ? `${API_BASE}/api/friends/${userId}/scores`
+                : `${API_BASE}/api/admin/users/${userId}/scores`;
+            const res = await fetch(url, {
                 headers: authHeaders()
             });
 
