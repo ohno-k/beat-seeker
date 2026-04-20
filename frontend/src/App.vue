@@ -85,6 +85,7 @@ const isOnboardingOpen = ref(false);
 
 const viewingUserId = ref<number | null>(null);
 const viewingUserName = ref<string>('');
+const viewingUserIidxId = ref<string>('');
 const isSidebarOpen = ref(false);
 
 const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
@@ -238,6 +239,11 @@ const installApp = async () => {
 };
 
 const loadSavedScores = async () => {
+  // フェッチ失敗時に古い（自分の）データが残ってフレンド画面に表示されてしまう問題を防ぐため
+  // フェッチ前に必ずクリアする
+  scoreData.value = [];
+  totalBeatTierPoints.value = 0;
+
   try {
     let data;
     if (viewingUserId.value !== null) {
@@ -245,11 +251,7 @@ const loadSavedScores = async () => {
     } else {
       data = await fetchMyScores();
     }
-    
-    // Always clear old data first
-    scoreData.value = [];
-    totalBeatTierPoints.value = 0;
-    
+
     if (data && data.length > 0) {
       scoreData.value = data;
       const flat = flattenScores(data);
@@ -264,13 +266,15 @@ const handleSelectUser = async (selectedUser: any) => {
   isAdminModalOpen.value = false;
   viewingUserId.value = selectedUser.id;
   viewingUserName.value = selectedUser.displayName || selectedUser.iidxId;
+  viewingUserIidxId.value = selectedUser.iidxId || '';
   viewingMode.value = 'admin';
   await loadSavedScores();
 };
 
-const handleViewFriend = async (friend: { id: number; displayName: string }) => {
+const handleViewFriend = async (friend: { id: number; displayName: string; iidxId?: string }) => {
   viewingUserId.value = friend.id;
   viewingUserName.value = friend.displayName;
+  viewingUserIidxId.value = friend.iidxId || '';
   viewingMode.value = 'friend';
   activeTab.value = 'dashboard';
   await loadSavedScores();
@@ -279,6 +283,7 @@ const handleViewFriend = async (friend: { id: number; displayName: string }) => 
 const returnToMyData = async () => {
   viewingUserId.value = null;
   viewingUserName.value = '';
+  viewingUserIidxId.value = '';
   viewingMode.value = null;
   await loadSavedScores();
 };
@@ -287,6 +292,7 @@ watch(isLoggedIn, (newVal) => {
   if (newVal) {
     viewingUserId.value = null;
     viewingUserName.value = '';
+    viewingUserIidxId.value = '';
     loadSavedScores();
     fetchPendingRequests();
     fetchAppNotifications();
@@ -315,6 +321,7 @@ watch(isLoggedIn, (newVal) => {
   } else {
     viewingUserId.value = null;
     viewingUserName.value = '';
+    viewingUserIidxId.value = '';
     scoreData.value = [];
     totalBeatTierPoints.value = 0;
   }
@@ -1094,7 +1101,7 @@ const handleUnifiedClose = async () => {
           </button>
         </nav>
         <!-- Admin Viewing Banner -->
-        <div v-if="viewingUserId" class="w-full max-w-6xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden shrink-0">
+        <div v-if="viewingUserId" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden shrink-0">
           <div class="absolute right-0 top-0 bottom-0 w-32 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 to-transparent pointer-events-none"></div>
           <div class="flex items-center gap-3 relative z-10 w-full justify-center sm:justify-start">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1285,6 +1292,8 @@ const handleUnifiedClose = async () => {
               <ScoreDashboard
                 :scores="scoreData"
                 :totalPoints="totalBeatTierPoints"
+                :viewing-iidx-id="viewingUserIidxId"
+                :viewing-display-name="viewingUserName"
                 class="w-full"
                 @open-profile-edit="isProfileModalOpen = true"
               />

@@ -8,7 +8,7 @@ import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 
 const emit = defineEmits<{
-  'view-user': [user: { id: number; displayName: string }]
+  'view-user': [user: { id: number; displayName: string; iidxId: string }]
 }>();
 
 const { friends, isLoading, fetchFriends, removeFriend } = useFriends();
@@ -49,7 +49,7 @@ const canViewDashboard = (friend: Friend) => (friend.privacyLevel ?? 0) !== 2;
 
 const handleNameClick = (friend: Friend) => {
   if (!canViewDashboard(friend)) return;
-  emit('view-user', { id: friend.id, displayName: friend.displayName });
+  emit('view-user', { id: friend.id, displayName: friend.displayName, iidxId: friend.iidxId });
 };
 </script>
 

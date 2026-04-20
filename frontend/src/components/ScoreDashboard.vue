@@ -117,7 +117,7 @@
                   ▲ {{ rankingNeighbors.above.displayName }} ({{ rankingNeighbors.above.totalBeatPt.toFixed(1) }} pt)
                 </p>
                 <p class="text-xs font-bold text-blue-600 dark:text-blue-400 tabular-nums">
-                  ▶ {{ t('dashboard.you') }} ({{ totalPoints.toFixed(1) }} pt)
+                  ▶ {{ isViewingOther ? (viewingDisplayName || t('dashboard.you')) : t('dashboard.you') }} ({{ totalPoints.toFixed(1) }} pt)
                 </p>
                 <p v-if="rankingNeighbors.below" class="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                   ▼ {{ rankingNeighbors.below.displayName }} ({{ rankingNeighbors.below.totalBeatPt.toFixed(1) }} pt)
@@ -194,7 +194,11 @@ const emit = defineEmits<{ (e: 'open-profile-edit'): void }>();
 const props = defineProps<{
   scores: ScoreData[];
   totalPoints: number;
+  viewingIidxId?: string;
+  viewingDisplayName?: string;
 }>();
+
+const isViewingOther = computed(() => !!props.viewingIidxId);
 
 const showInfoModal = ref(false);
 const showRateInfoModal = ref(false);
@@ -251,8 +255,11 @@ onMounted(async () => {
 });
 
 const myRankingPosition = computed(() => {
-  if (!user.value || !rankingData.value.length) return null;
-  const idx = rankingData.value.findIndex(r => r.iidxId === user.value!.iidxId);
+  if (!rankingData.value.length) return null;
+  // フレンド/管理者閲覧中は対象ユーザーのiidxIdを、それ以外は自分のiidxIdを使う
+  const targetIidxId = props.viewingIidxId || user.value?.iidxId;
+  if (!targetIidxId) return null;
+  const idx = rankingData.value.findIndex(r => r.iidxId === targetIidxId);
   if (idx === -1) return null;
   return { position: idx + 1, total: rankingData.value.length, rankChange: rankingData.value[idx].rankChange };
 });

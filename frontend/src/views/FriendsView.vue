@@ -4,8 +4,8 @@ import Friends from '../components/Friends.vue'
 
 const router = useRouter()
 
-const handleViewUser = (friend: { id: number; displayName: string }) => {
-  router.push({ name: 'user-dashboard', params: { userId: friend.id }, query: { name: friend.displayName } })
+const handleViewUser = (friend: { id: number; displayName: string; iidxId: string }) => {
+  router.push({ name: 'user-dashboard', params: { userId: friend.id }, query: { name: friend.displayName, mode: 'friend' } })
 }
 </script>
 
