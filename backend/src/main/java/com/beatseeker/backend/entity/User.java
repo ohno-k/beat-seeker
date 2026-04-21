@@ -3,6 +3,7 @@ package com.beatseeker.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,19 +35,20 @@ public class User {
     @Column(length = 2)
     private String playSide = "1P"; // "1P" or "2P"
 
-    @Column(columnDefinition = "integer default 1")
+    @ColumnDefault("1")
     private Integer privacyLevel = 1; // 0: Public, 1: Friends Only, 2: Private
 
-    @Column(columnDefinition = "varchar(5) default 'ja'")
+    @Column(length = 5)
+    @ColumnDefault("'ja'")
     private String language = "ja"; // "ja", "en", "ko"
 
-    @Column(columnDefinition = "boolean default true")
+    @ColumnDefault("true")
     private Boolean showRateTier = true;
 
-    @Column(columnDefinition = "boolean default false")
+    @ColumnDefault("false")
     private Boolean isSupporter = false;
 
-    @Column(columnDefinition = "boolean default true")
+    @ColumnDefault("true")
     private Boolean showSupporterBorder = true;
 
     @Column(unique = true, length = 12)
@@ -54,7 +56,7 @@ public class User {
 
     private LocalDateTime lastUploadedAt;
 
-    @Column(columnDefinition = "float8 default 0")
+    @ColumnDefault("0")
     private Double totalBeatPt = 0.0;
 
     @Column(columnDefinition = "TEXT")
