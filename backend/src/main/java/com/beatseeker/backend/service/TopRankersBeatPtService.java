@@ -7,6 +7,8 @@ import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +30,12 @@ import java.util.zip.GZIPInputStream;
 @Service
 public class TopRankersBeatPtService {
 
+    private static final Logger log = LoggerFactory.getLogger(TopRankersBeatPtService.class);
+
     private static final String MANIFEST_PATH = "top-rankers-data/manifest.json";
+
+    private static final int MAX_INIT_ATTEMPTS = 5;
+    private static final long INIT_RETRY_BASE_DELAY_MS = 15_000L;
 
     private static final Map<String, Integer> WEIGHTS = new HashMap<>();
 
@@ -70,6 +77,14 @@ public class TopRankersBeatPtService {
     // key: versionNum + "\0" + prefectureFileNum  →  full score list for that area
     private volatile Map<String, AreaProfile> cachedAreaProfiles = Collections.emptyMap();
 
+    public enum InitState { PENDING, RUNNING, SUCCESS, FAILED }
+
+    private volatile InitState initState = InitState.PENDING;
+    private volatile int initAttempts = 0;
+    private volatile String lastError = null;
+    private volatile long lastRecomputeDurationMs = -1L;
+    private volatile long lastRecomputeFinishedAt = -1L;
+
     public record SongScoreEntry(int versionNum, String versionName,
                                   int prefectureFileNum, String prefectureName,
                                   String djName, int score) {}
@@ -91,15 +106,62 @@ public class TopRankersBeatPtService {
 
     @PostConstruct
     public void init() {
-        Thread t = new Thread(() -> {
-            try {
-                recompute();
-            } catch (Exception e) {
-                System.err.println("TopRankersBeatPtService init failed: " + e.getMessage());
-            }
-        }, "top-rankers-init");
+        Thread t = new Thread(this::initWithRetry, "top-rankers-init");
         t.setDaemon(true);
         t.start();
+    }
+
+    private void initWithRetry() {
+        for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS; attempt++) {
+            initAttempts = attempt;
+            initState = InitState.RUNNING;
+            log.info("TopRankersBeatPtService init attempt {}/{} starting", attempt, MAX_INIT_ATTEMPTS);
+            try {
+                recompute();
+                if (!cached.isEmpty()) {
+                    initState = InitState.SUCCESS;
+                    lastError = null;
+                    log.info("TopRankersBeatPtService init succeeded on attempt {} (rows={})",
+                            attempt, cached.size());
+                    return;
+                }
+                lastError = "recompute produced empty result (manifest or CSVs unreadable)";
+                log.warn("TopRankersBeatPtService attempt {} completed but cache is empty; {}",
+                        attempt, lastError);
+            } catch (Exception e) {
+                lastError = e.getClass().getSimpleName() + ": " + e.getMessage();
+                log.error("TopRankersBeatPtService attempt {} failed", attempt, e);
+            }
+
+            if (attempt < MAX_INIT_ATTEMPTS) {
+                long delay = INIT_RETRY_BASE_DELAY_MS * attempt;
+                log.info("TopRankersBeatPtService retrying in {} ms", delay);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    initState = InitState.FAILED;
+                    log.warn("TopRankersBeatPtService init interrupted");
+                    return;
+                }
+            }
+        }
+        initState = InitState.FAILED;
+        log.error("TopRankersBeatPtService init giving up after {} attempts; lastError={}",
+                MAX_INIT_ATTEMPTS, lastError);
+    }
+
+    public Map<String, Object> getInitStatus() {
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("state", initState.name());
+        status.put("attempts", initAttempts);
+        status.put("lastError", lastError);
+        status.put("cachedRows", cached.size());
+        status.put("cachedSongKeys", cachedSongScores.size());
+        status.put("cachedAreas", cachedAreaProfiles.size());
+        status.put("lastRecomputeDurationMs", lastRecomputeDurationMs);
+        status.put("lastRecomputeFinishedAt", lastRecomputeFinishedAt);
+        return status;
     }
 
     public List<Map<String, Object>> getRanking() {
@@ -133,6 +195,8 @@ public class TopRankersBeatPtService {
             maxScoreMap.put(key, s.getNotes() * 2);
             if (s.getLevel() != null) levelMap.put(key, s.getLevel());
         }
+        log.info("TopRankersBeatPtService: loaded {} active song definitions (maxScoreMap={}, levelMap={})",
+                activeSongs.size(), maxScoreMap.size(), levelMap.size());
 
         // Build (title,diffName) -> informalRank from active difficulty ranks.
         Map<String, String> informalRankMap = new HashMap<>();
@@ -150,19 +214,25 @@ public class TopRankersBeatPtService {
                 }
             }
         }
+        log.info("TopRankersBeatPtService: loaded {} active difficulty ranks (informalRankMap={})",
+                ranks.size(), informalRankMap.size());
 
         List<Map<String, Object>> manifest;
         try (InputStream in = new ClassPathResource(MANIFEST_PATH).getInputStream()) {
             manifest = objectMapper.readValue(in, new com.fasterxml.jackson.core.type.TypeReference<>() {});
         } catch (Exception e) {
-            System.err.println("Failed to load manifest: " + e.getMessage());
-            return;
+            log.error("TopRankersBeatPtService: failed to load manifest {}", MANIFEST_PATH, e);
+            throw new RuntimeException("manifest load failed: " + MANIFEST_PATH, e);
         }
+        log.info("TopRankersBeatPtService: manifest loaded ({} entries)", manifest.size());
 
         List<Map<String, Object>> beatResults = new ArrayList<>(manifest.size());
         List<Map<String, Object>> rateResults = new ArrayList<>(manifest.size());
         Map<String, List<SongScoreEntry>> songScoresBuilder = new HashMap<>();
         Map<String, AreaProfile> areaProfilesBuilder = new HashMap<>();
+        int csvFailureCount = 0;
+        String firstCsvFailurePath = null;
+        Exception firstCsvFailureCause = null;
         for (Map<String, Object> entry : manifest) {
             Number versionNum = (Number) entry.get("versionNum");
             String versionName = (String) entry.get("versionName");
@@ -177,7 +247,13 @@ public class TopRankersBeatPtService {
                         versionNum.intValue(), versionName, prefFileNum.intValue(), prefectureName,
                         songScoresBuilder, areaRows);
             } catch (Exception e) {
-                System.err.println("Failed for " + resourcePath + ": " + e.getMessage());
+                csvFailureCount++;
+                if (firstCsvFailurePath == null) {
+                    firstCsvFailurePath = resourcePath;
+                    firstCsvFailureCause = e;
+                    log.error("TopRankersBeatPtService: failed to read CSV {} ({}: {})",
+                            resourcePath, e.getClass().getSimpleName(), e.getMessage(), e);
+                }
                 continue;
             }
             areaProfilesBuilder.put(versionNum.intValue() + "\0" + prefFileNum.intValue(),
@@ -222,8 +298,19 @@ public class TopRankersBeatPtService {
         cachedSongScores = Collections.unmodifiableMap(finalized);
         cachedAreaProfiles = Collections.unmodifiableMap(areaProfilesBuilder);
         long t1 = System.currentTimeMillis();
-        System.out.println("TopRankersBeatPtService: computed " + beatResults.size() + " rows, "
-                + finalized.size() + " song-diff keys, " + areaProfilesBuilder.size() + " areas in " + (t1 - t0) + "ms");
+        lastRecomputeDurationMs = t1 - t0;
+        lastRecomputeFinishedAt = t1;
+        log.info("TopRankersBeatPtService: computed {} rows, {} song-diff keys, {} areas in {} ms (csvFailures={}, firstFailurePath={})",
+                beatResults.size(), finalized.size(), areaProfilesBuilder.size(),
+                lastRecomputeDurationMs, csvFailureCount, firstCsvFailurePath);
+        if (csvFailureCount > 0) {
+            log.warn("TopRankersBeatPtService: {} CSV(s) failed to read (first: {}); cache may be partial",
+                    csvFailureCount, firstCsvFailurePath, firstCsvFailureCause);
+        }
+        if (beatResults.isEmpty() && !manifest.isEmpty()) {
+            throw new RuntimeException("All " + manifest.size() + " manifest entries failed; first failure: "
+                    + firstCsvFailurePath + " -> " + (firstCsvFailureCause == null ? "(none)" : firstCsvFailureCause.getMessage()));
+        }
     }
 
     /** Returns [beatPt, ratePt] for the CSV at resourcePath. Also appends per-song entries to songScoresBuilder and per-area score rows to areaRows. */

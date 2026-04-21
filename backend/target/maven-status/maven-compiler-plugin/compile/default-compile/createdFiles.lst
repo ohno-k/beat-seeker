@@ -37,6 +37,7 @@ com\beatseeker\backend\repository\VirtualRivalRepository.class
 com\beatseeker\backend\config\SecurityConfig.class
 com\beatseeker\backend\controller\RegisterRequest.class
 com\beatseeker\backend\entity\AppNotification.class
+com\beatseeker\backend\service\TopRankersBeatPtService$InitState.class
 com\beatseeker\backend\entity\FriendRequest.class
 com\beatseeker\backend\entity\UserSongRank.class
 com\beatseeker\backend\service\PushNotificationService.class
