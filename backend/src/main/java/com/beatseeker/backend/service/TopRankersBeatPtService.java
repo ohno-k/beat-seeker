@@ -91,11 +91,15 @@ public class TopRankersBeatPtService {
 
     @PostConstruct
     public void init() {
-        try {
-            recompute();
-        } catch (Exception e) {
-            System.err.println("TopRankersBeatPtService init failed: " + e.getMessage());
-        }
+        Thread t = new Thread(() -> {
+            try {
+                recompute();
+            } catch (Exception e) {
+                System.err.println("TopRankersBeatPtService init failed: " + e.getMessage());
+            }
+        }, "top-rankers-init");
+        t.setDaemon(true);
+        t.start();
     }
 
     public List<Map<String, Object>> getRanking() {
