@@ -377,6 +377,7 @@ const handleViewPublicUser = async (u: { id: number; displayName: string; iidxId
   viewingMode.value = 'public';
   viewingTopRanker.value = null;
   activeTab.value = 'dashboard';
+  fetchFriendStatus(u.id);
   await loadSavedScores();
 };
 
@@ -1279,7 +1280,7 @@ const handleUnifiedClose = async () => {
                 title="クリックで解除"
               >ライバル登録済み</button>
             </template>
-            <template v-if="viewingMode === 'private' && isLoggedIn">
+            <template v-if="(viewingMode === 'private' || viewingMode === 'public') && isLoggedIn">
               <button
                 v-if="friendStatus === 'none'"
                 @click="openFriendRequestModal"
