@@ -73,8 +73,10 @@ const scoreData = ref<ScoreData[]>([]);
 const isParsing = ref(false);
 const errorMsg = ref('');
 const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison'>('dashboard')
-const viewingMode = ref<'admin' | 'friend' | null>(null);
+const viewingMode = ref<'admin' | 'friend' | 'public' | 'topRanker' | 'private' | null>(null);
+const viewingTopRanker = ref<{ versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string } | null>(null);
 const totalBeatTierPoints = ref(0);
+const privateRateTierPoints = ref<number | null>(null);
 
 const diffResult = ref<UploadDiffResult | null>(null);
 const isDiffModalOpen = ref(false);
@@ -88,11 +90,85 @@ const viewingUserName = ref<string>('');
 const viewingUserIidxId = ref<string>('');
 const isSidebarOpen = ref(false);
 
-const { user, isLoggedIn, logout, isLoading: authLoading } = useAuth();
+const { user, isLoggedIn, logout, isLoading: authLoading, authHeaders } = useAuth();
 const { upload, saveHistoryLog } = useScoreUpload();
-const { fetchMyScores, fetchUserScores, isFetching } = useScores();
+const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
-const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission } = useFriends();
+const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission, sendFriendRequest, fetchVirtualRivalStatus, addVirtualRival, removeVirtualRival } = useFriends();
+
+const friendStatus = ref<'none' | 'friend' | 'requested' | 'incoming' | 'self' | null>(null);
+const isFriendRequestModalOpen = ref(false);
+const friendRequestMessage = ref('');
+const friendRequestSending = ref(false);
+const friendRequestError = ref('');
+
+const fetchFriendStatus = async (userId: number) => {
+  friendStatus.value = null;
+  if (!isLoggedIn.value) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/users/${userId}/friend-status`, { headers: authHeaders() });
+    if (res.ok) {
+      const data = await res.json();
+      friendStatus.value = data.status;
+    }
+  } catch {}
+};
+
+const openFriendRequestModal = () => {
+  friendRequestMessage.value = '';
+  friendRequestError.value = '';
+  isFriendRequestModalOpen.value = true;
+};
+
+const virtualRivalRegistered = ref<boolean | null>(null);
+const virtualRivalBusy = ref(false);
+
+const refreshVirtualRivalStatus = async () => {
+  virtualRivalRegistered.value = null;
+  if (!isLoggedIn.value) return;
+  const area = viewingTopRanker.value;
+  if (!area) return;
+  virtualRivalRegistered.value = await fetchVirtualRivalStatus(area.versionNum, area.prefectureFileNum);
+};
+
+const toggleVirtualRival = async () => {
+  const area = viewingTopRanker.value;
+  if (!area || !isLoggedIn.value) return;
+  virtualRivalBusy.value = true;
+  try {
+    if (virtualRivalRegistered.value) {
+      await removeVirtualRival(area.versionNum, area.prefectureFileNum);
+      virtualRivalRegistered.value = false;
+    } else {
+      await addVirtualRival({
+        versionNum: area.versionNum,
+        prefectureFileNum: area.prefectureFileNum,
+        versionName: area.versionName,
+        prefectureName: area.prefectureName,
+      });
+      virtualRivalRegistered.value = true;
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    virtualRivalBusy.value = false;
+  }
+};
+
+const submitFriendRequest = async () => {
+  if (viewingUserId.value == null) return;
+  friendRequestSending.value = true;
+  friendRequestError.value = '';
+  try {
+    await sendFriendRequest(viewingUserId.value, friendRequestMessage.value.trim() || undefined);
+    friendStatus.value = 'requested';
+    isFriendRequestModalOpen.value = false;
+  } catch (e: any) {
+    friendRequestError.value = e.message || '申請に失敗しました';
+  } finally {
+    friendRequestSending.value = false;
+  }
+};
 
 const isNotificationOpen = ref(false);
 const deferredPrompt = ref<any>(null);
@@ -246,9 +322,20 @@ const loadSavedScores = async () => {
 
   try {
     let data;
-    if (viewingUserId.value !== null) {
-      // フレンド閲覧時は friend エンドポイントを使う（admin endpoint は管理者しか叩けないため）
-      const fetchMode = viewingMode.value === 'friend' ? 'friend' : 'admin';
+    if (viewingMode.value === 'topRanker' && viewingTopRanker.value) {
+      const { profile, scores } = await fetchTopRankerProfile(
+        viewingTopRanker.value.versionNum,
+        viewingTopRanker.value.prefectureFileNum
+      );
+      if (profile) {
+        viewingTopRanker.value = profile;
+      }
+      data = scores;
+    } else if (viewingUserId.value !== null) {
+      const fetchMode =
+        viewingMode.value === 'friend' ? 'friend'
+        : viewingMode.value === 'public' ? 'public'
+        : 'admin';
       data = await fetchUserScores(viewingUserId.value, fetchMode);
     } else {
       data = await fetchMyScores();
@@ -278,8 +365,48 @@ const handleViewFriend = async (friend: { id: number; displayName: string; iidxI
   viewingUserName.value = friend.displayName;
   viewingUserIidxId.value = friend.iidxId || '';
   viewingMode.value = 'friend';
+  viewingTopRanker.value = null;
   activeTab.value = 'dashboard';
   await loadSavedScores();
+};
+
+const handleViewPublicUser = async (u: { id: number; displayName: string; iidxId?: string }) => {
+  viewingUserId.value = u.id;
+  viewingUserName.value = u.displayName;
+  viewingUserIidxId.value = u.iidxId || '';
+  viewingMode.value = 'public';
+  viewingTopRanker.value = null;
+  activeTab.value = 'dashboard';
+  await loadSavedScores();
+};
+
+const handleViewTopRanker = async (area: {
+  versionNum: number;
+  versionName: string;
+  prefectureFileNum: number;
+  prefectureName: string;
+}) => {
+  viewingUserId.value = null;
+  viewingUserName.value = `${area.versionName} ${area.prefectureName} TOP`;
+  viewingUserIidxId.value = '';
+  viewingMode.value = 'topRanker';
+  viewingTopRanker.value = { ...area };
+  activeTab.value = 'dashboard';
+  refreshVirtualRivalStatus();
+  await loadSavedScores();
+};
+
+const handleViewPrivateUser = (u: { id: number; displayName: string; iidxId: string; totalBeatPt: number; totalRatePt: number }) => {
+  viewingUserId.value = u.id;
+  viewingUserName.value = u.displayName;
+  viewingUserIidxId.value = u.iidxId || '';
+  viewingMode.value = 'private';
+  viewingTopRanker.value = null;
+  activeTab.value = 'dashboard';
+  scoreData.value = [];
+  totalBeatTierPoints.value = u.totalBeatPt;
+  privateRateTierPoints.value = u.totalRatePt;
+  fetchFriendStatus(u.id);
 };
 
 const returnToMyData = async () => {
@@ -287,6 +414,11 @@ const returnToMyData = async () => {
   viewingUserName.value = '';
   viewingUserIidxId.value = '';
   viewingMode.value = null;
+  viewingTopRanker.value = null;
+  privateRateTierPoints.value = null;
+  friendStatus.value = null;
+  isFriendRequestModalOpen.value = false;
+  virtualRivalRegistered.value = null;
   await loadSavedScores();
 };
 
@@ -295,6 +427,7 @@ watch(isLoggedIn, (newVal) => {
     viewingUserId.value = null;
     viewingUserName.value = '';
     viewingUserIidxId.value = '';
+    viewingTopRanker.value = null;
     loadSavedScores();
     fetchPendingRequests();
     fetchAppNotifications();
@@ -324,6 +457,7 @@ watch(isLoggedIn, (newVal) => {
     viewingUserId.value = null;
     viewingUserName.value = '';
     viewingUserIidxId.value = '';
+    viewingTopRanker.value = null;
     scoreData.value = [];
     totalBeatTierPoints.value = 0;
   }
@@ -1103,7 +1237,7 @@ const handleUnifiedClose = async () => {
           </button>
         </nav>
         <!-- Admin Viewing Banner -->
-        <div v-if="viewingUserId" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden shrink-0">
+        <div v-if="viewingUserId || viewingMode === 'topRanker'" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden shrink-0">
           <div class="absolute right-0 top-0 bottom-0 w-32 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 to-transparent pointer-events-none"></div>
           <div class="flex items-center gap-3 relative z-10 w-full justify-center sm:justify-start">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -1111,19 +1245,110 @@ const handleUnifiedClose = async () => {
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             <div class="flex flex-col">
-              <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">{{ viewingMode === 'admin' ? t('app.banner.adminMode') : t('app.banner.friendMode') }}</span>
-              <span class="text-base sm:text-lg font-bold">{{ t('app.banner.viewingUser', { name: viewingUserName }) }}</span>
+              <span class="text-xs font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">{{ viewingMode === 'admin' ? t('app.banner.adminMode') : viewingMode === 'public' ? t('app.banner.publicMode') : viewingMode === 'topRanker' ? t('app.banner.topRankerMode') : viewingMode === 'private' ? t('app.banner.privateMode') : t('app.banner.friendMode') }}</span>
+              <span class="text-base sm:text-lg font-bold">{{ viewingMode === 'topRanker' ? t('app.banner.viewingTopRanker', { name: viewingUserName }) : t('app.banner.viewingUser', { name: viewingUserName }) }}</span>
             </div>
           </div>
-          <button 
-            @click="returnToMyData" 
-            class="shrink-0 relative z-10 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-lg border border-white/30 transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            {{ t('app.banner.returnButton') }}
-          </button>
+          <div class="flex items-center gap-2 shrink-0 relative z-10">
+            <button
+              @click="returnToMyData"
+              class="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-lg border border-white/30 transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {{ t('app.banner.returnButton') }}
+            </button>
+            <template v-if="viewingMode === 'topRanker' && isLoggedIn">
+              <button
+                v-if="virtualRivalRegistered === false"
+                @click="toggleVirtualRival"
+                :disabled="virtualRivalBusy"
+                class="px-4 py-2 bg-emerald-500/90 hover:bg-emerald-500 disabled:bg-emerald-400 text-white font-bold rounded-lg border border-emerald-300/50 transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                フレンド申請
+              </button>
+              <button
+                v-else-if="virtualRivalRegistered === true"
+                @click="toggleVirtualRival"
+                :disabled="virtualRivalBusy"
+                class="px-4 py-2 bg-emerald-500/20 hover:bg-red-500/40 text-emerald-100 hover:text-white font-bold rounded-lg border border-emerald-300/40 transition-all whitespace-nowrap text-sm"
+                title="クリックで解除"
+              >ライバル登録済み</button>
+            </template>
+            <template v-if="viewingMode === 'private' && isLoggedIn">
+              <button
+                v-if="friendStatus === 'none'"
+                @click="openFriendRequestModal"
+                class="px-4 py-2 bg-emerald-500/90 hover:bg-emerald-500 text-white font-bold rounded-lg border border-emerald-300/50 transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                フレンド申請
+              </button>
+              <span
+                v-else-if="friendStatus === 'requested'"
+                class="px-4 py-2 bg-amber-500/20 text-amber-100 font-bold rounded-lg border border-amber-300/40 whitespace-nowrap text-sm"
+              >申請済み</span>
+              <span
+                v-else-if="friendStatus === 'friend'"
+                class="px-4 py-2 bg-emerald-500/20 text-emerald-100 font-bold rounded-lg border border-emerald-300/40 whitespace-nowrap text-sm"
+              >フレンド</span>
+              <span
+                v-else-if="friendStatus === 'incoming'"
+                class="px-4 py-2 bg-blue-500/20 text-blue-100 font-bold rounded-lg border border-blue-300/40 whitespace-nowrap text-sm"
+              >申請受信中</span>
+            </template>
+          </div>
+        </div>
+
+        <!-- Friend Request Modal -->
+        <div v-if="isFriendRequestModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in" @click.self="isFriendRequestModalOpen = false">
+          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+              <h3 class="text-lg font-black text-slate-800 dark:text-white tracking-tight">{{ viewingUserName }} さんにフレンド申請</h3>
+              <button @click="isFriendRequestModalOpen = false" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="p-6 space-y-4">
+              <label class="block">
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">申請メッセージ (任意)</span>
+                <textarea
+                  v-model="friendRequestMessage"
+                  maxlength="100"
+                  rows="3"
+                  placeholder="よろしくお願いします！"
+                  class="mt-2 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-slate-200 resize-none"
+                ></textarea>
+                <span class="text-xs text-slate-400 mt-1 block text-right">{{ friendRequestMessage.length }} / 100</span>
+              </label>
+              <div v-if="friendRequestError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm">
+                {{ friendRequestError }}
+              </div>
+              <div class="flex gap-2 justify-end">
+                <button
+                  @click="isFriendRequestModalOpen = false"
+                  :disabled="friendRequestSending"
+                  class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-lg transition-all"
+                >キャンセル</button>
+                <button
+                  @click="submitFriendRequest"
+                  :disabled="friendRequestSending"
+                  class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold rounded-lg transition-all flex items-center gap-2"
+                >
+                  <span v-if="friendRequestSending" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  申請を送る
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- Import Modal -->
@@ -1147,7 +1372,12 @@ const handleUnifiedClose = async () => {
         </template>
 
         <template v-else-if="activeTab === 'ranking'">
-          <RankingList class="w-full max-w-5xl mx-auto animate-fade-in" />
+          <RankingList
+            class="w-full max-w-5xl mx-auto animate-fade-in"
+            @view-user="handleViewPublicUser"
+            @view-private-user="handleViewPrivateUser"
+            @view-top-ranker="handleViewTopRanker"
+          />
         </template>
 
         <template v-else-if="activeTab === 'admin-song-ranks'">
@@ -1233,12 +1463,13 @@ const handleUnifiedClose = async () => {
           <Friends
             class="w-full max-w-6xl animate-fade-in"
             @view-user="handleViewFriend"
+            @view-top-ranker="handleViewTopRanker"
           />
         </template>
 
         <template v-else>
           <!-- Hero Section (Visible only when no data) -->
-          <div v-if="!scoreData.length" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
+          <div v-if="!scoreData.length && viewingMode !== 'private'" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
             <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
               {{ t('app.hero.title') }}
             </h1>
@@ -1273,7 +1504,7 @@ const handleUnifiedClose = async () => {
           </div>
 
           <!-- Empty State (no data yet) -->
-          <div v-else-if="!scoreData.length" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
+          <div v-else-if="!scoreData.length && viewingMode !== 'private'" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
             <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
             <!-- Error Message -->
             <div
@@ -1288,7 +1519,7 @@ const handleUnifiedClose = async () => {
           </div>
 
           <!-- Score Results View -->
-          <div v-if="scoreData.length > 0" class="w-full flex flex-col items-center animate-fade-in">
+          <div v-if="scoreData.length > 0 || viewingMode === 'private'" class="w-full flex flex-col items-center animate-fade-in">
             <!-- Dashboard Tab -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
               <ScoreDashboard
@@ -1296,6 +1527,8 @@ const handleUnifiedClose = async () => {
                 :totalPoints="totalBeatTierPoints"
                 :viewing-iidx-id="viewingUserIidxId"
                 :viewing-display-name="viewingUserName"
+                :viewing-mode="viewingMode"
+                :rate-tier-points-override="privateRateTierPoints"
                 class="w-full"
                 @open-profile-edit="isProfileModalOpen = true"
               />
@@ -1305,8 +1538,11 @@ const handleUnifiedClose = async () => {
             <ScoreSummary
               v-show="activeTab === 'table'"
               :scores="scoreData"
+              :viewing-mode="viewingMode"
               @reset="resetData"
-              @update:totalPoints="points => totalBeatTierPoints = points"
+              @update:totalPoints="points => { if (viewingMode !== 'private') totalBeatTierPoints = points; }"
+              @view-user="handleViewPublicUser"
+              @view-top-ranker="handleViewTopRanker"
               class="w-full"
             />
           </div>

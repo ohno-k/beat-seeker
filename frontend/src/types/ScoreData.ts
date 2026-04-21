@@ -8,6 +8,7 @@ export interface DifficultyStats {
     djLevel: string;
     id?: number;
     memo?: string;
+    djName?: string;
 }
 
 export interface ScoreData {

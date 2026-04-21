@@ -20,6 +20,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\ScoreController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\TierCommentController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\TierVoteController.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\UserController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\DataInitializer.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\ActivityLog.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\AppNotification.java
@@ -37,6 +38,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\TierVote.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\User.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\UserSongRank.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\VirtualRival.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ActivityLogRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\AppNotificationRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ArenaMatchRepository.java
@@ -52,6 +54,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\TierVoteRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\UserRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\UserSongRankRepository.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\VirtualRivalRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\ChartTendencyService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\EmailService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\GameDataService.java
@@ -59,4 +62,5 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\ScoreRecalculationService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\SkillTreeService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\SongRankBatchService.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\TopRankersBeatPtService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\TestController.java

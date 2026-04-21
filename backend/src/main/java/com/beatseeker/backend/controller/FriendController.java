@@ -5,12 +5,15 @@ import com.beatseeker.backend.entity.Friendship;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
+import com.beatseeker.backend.entity.VirtualRival;
 import com.beatseeker.backend.repository.FriendRequestRepository;
 import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
+import com.beatseeker.backend.repository.VirtualRivalRepository;
 import com.beatseeker.backend.service.PushNotificationService;
+import com.beatseeker.backend.service.TopRankersBeatPtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,20 +33,26 @@ public class FriendController {
     private final FriendshipRepository friendshipRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     private final ScoreRepository scoreRepository;
+    private final VirtualRivalRepository virtualRivalRepository;
     private final PushNotificationService pushNotificationService;
+    private final TopRankersBeatPtService topRankersBeatPtService;
 
     public FriendController(UserRepository userRepository,
             FriendRequestRepository friendRequestRepository,
             FriendshipRepository friendshipRepository,
             ScoreHistoryLogRepository scoreHistoryLogRepository,
             ScoreRepository scoreRepository,
-            PushNotificationService pushNotificationService) {
+            VirtualRivalRepository virtualRivalRepository,
+            PushNotificationService pushNotificationService,
+            TopRankersBeatPtService topRankersBeatPtService) {
         this.userRepository = userRepository;
         this.friendRequestRepository = friendRequestRepository;
         this.friendshipRepository = friendshipRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.scoreRepository = scoreRepository;
+        this.virtualRivalRepository = virtualRivalRepository;
         this.pushNotificationService = pushNotificationService;
+        this.topRankersBeatPtService = topRankersBeatPtService;
     }
 
     @GetMapping("/test")
@@ -326,6 +335,91 @@ public class FriendController {
                 .ifPresent(friendshipRepository::delete);
 
         return ResponseEntity.ok(Map.of("message", "フレンドを削除しました。"));
+    }
+
+    @GetMapping("/virtual-rivals")
+    public ResponseEntity<List<Map<String, Object>>> getVirtualRivals(Authentication auth) {
+        User user = getUser(auth);
+        List<VirtualRival> rivals = virtualRivalRepository.findByOwner(user);
+
+        Map<String, Number> beatPtLookup = new HashMap<>();
+        for (Map<String, Object> row : topRankersBeatPtService.getRanking()) {
+            beatPtLookup.put(row.get("versionNum") + "\0" + row.get("prefectureFileNum"),
+                    (Number) row.get("beatPt"));
+        }
+        Map<String, Number> ratePtLookup = new HashMap<>();
+        for (Map<String, Object> row : topRankersBeatPtService.getRateRanking()) {
+            ratePtLookup.put(row.get("versionNum") + "\0" + row.get("prefectureFileNum"),
+                    (Number) row.get("ratePt"));
+        }
+
+        List<Map<String, Object>> result = rivals.stream().map(r -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", r.getId());
+            map.put("versionNum", r.getVersionNum());
+            map.put("versionName", r.getVersionName());
+            map.put("prefectureFileNum", r.getPrefectureFileNum());
+            map.put("prefectureName", r.getPrefectureName());
+            map.put("createdAt", r.getCreatedAt());
+            String key = r.getVersionNum() + "\0" + r.getPrefectureFileNum();
+            Number beatPt = beatPtLookup.get(key);
+            Number ratePt = ratePtLookup.get(key);
+            map.put("totalBeatPt", beatPt != null ? beatPt.doubleValue() : 0.0);
+            map.put("totalRatePt", ratePt != null ? ratePt.doubleValue() : 0.0);
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/virtual-rivals/status")
+    public ResponseEntity<Map<String, Object>> getVirtualRivalStatus(Authentication auth,
+            @RequestParam Integer versionNum,
+            @RequestParam Integer prefectureFileNum) {
+        User user = getUser(auth);
+        boolean registered = virtualRivalRepository
+                .findByOwnerAndVersionNumAndPrefectureFileNum(user, versionNum, prefectureFileNum)
+                .isPresent();
+        return ResponseEntity.ok(Map.of("registered", registered));
+    }
+
+    @PostMapping("/virtual-rivals")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> addVirtualRival(Authentication auth,
+            @RequestBody Map<String, Object> payload) {
+        User user = getUser(auth);
+        if (payload.get("versionNum") == null || payload.get("prefectureFileNum") == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "versionNum と prefectureFileNum は必須です。"));
+        }
+        Integer versionNum = Integer.valueOf(payload.get("versionNum").toString());
+        Integer prefectureFileNum = Integer.valueOf(payload.get("prefectureFileNum").toString());
+        String versionName = payload.get("versionName") != null ? payload.get("versionName").toString() : null;
+        String prefectureName = payload.get("prefectureName") != null ? payload.get("prefectureName").toString() : null;
+
+        if (virtualRivalRepository
+                .findByOwnerAndVersionNumAndPrefectureFileNum(user, versionNum, prefectureFileNum)
+                .isPresent()) {
+            return ResponseEntity.ok(Map.of("message", "既に登録済みです。", "registered", true));
+        }
+
+        VirtualRival rival = new VirtualRival();
+        rival.setOwner(user);
+        rival.setVersionNum(versionNum);
+        rival.setPrefectureFileNum(prefectureFileNum);
+        rival.setVersionName(versionName);
+        rival.setPrefectureName(prefectureName);
+        virtualRivalRepository.save(rival);
+
+        return ResponseEntity.ok(Map.of("message", "ライバルに登録しました。", "registered", true));
+    }
+
+    @DeleteMapping("/virtual-rivals")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> removeVirtualRival(Authentication auth,
+            @RequestParam Integer versionNum,
+            @RequestParam Integer prefectureFileNum) {
+        User user = getUser(auth);
+        virtualRivalRepository.deleteByOwnerAndVersionNumAndPrefectureFileNum(user, versionNum, prefectureFileNum);
+        return ResponseEntity.ok(Map.of("message", "ライバルを解除しました。", "registered", false));
     }
 
     @PostMapping("/push-subscription")

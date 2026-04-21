@@ -98,12 +98,16 @@ export function useScores() {
         }
     };
 
-    const fetchUserScores = async (userId: number, mode: 'admin' | 'friend' = 'admin'): Promise<ScoreData[]> => {
+    const fetchUserScores = async (
+        userId: number,
+        mode: 'admin' | 'friend' | 'public' = 'admin'
+    ): Promise<ScoreData[]> => {
         isFetching.value = true;
         try {
-            // 管理者は admin エンドポイント、フレンド閲覧時は friend エンドポイントを使う
-            const url = mode === 'friend'
-                ? `${API_BASE}/api/friends/${userId}/scores`
+            // 管理者 → admin / フレンド閲覧 → friend / 全公開ユーザ → public
+            const url =
+                mode === 'friend' ? `${API_BASE}/api/friends/${userId}/scores`
+                : mode === 'public' ? `${API_BASE}/api/users/${userId}/scores`
                 : `${API_BASE}/api/admin/users/${userId}/scores`;
             const res = await fetch(url, {
                 headers: authHeaders()
@@ -173,6 +177,96 @@ export function useScores() {
         }
     };
 
+    const fetchTopRankerProfile = async (
+        versionNum: number,
+        prefectureFileNum: number
+    ): Promise<{ profile: any | null; scores: ScoreData[] }> => {
+        isFetching.value = true;
+        try {
+            const res = await fetch(
+                `${API_BASE}/api/scores/top-ranker-profile?versionNum=${versionNum}&prefectureFileNum=${prefectureFileNum}`
+            );
+            if (!res.ok) return { profile: null, scores: [] };
+            const data = await res.json();
+
+            const grouped = new Map<string, any>();
+            const emptyDiff = (): DifficultyStats => ({
+                difficulty: null,
+                score: 0,
+                pgreat: 0,
+                great: 0,
+                missCount: null,
+                clearType: 'NO PLAY',
+                djLevel: '---',
+                memo: undefined,
+                id: undefined
+            });
+
+            (data.scores ?? []).forEach((s: any) => {
+                const title = s.title;
+                if (!grouped.has(title)) {
+                    grouped.set(title, {
+                        version: '0',
+                        title,
+                        genre: '',
+                        artist: '',
+                        playCount: 0,
+                        lastPlayTime: '',
+                        djName: s.djName ?? '',
+                        beginner: emptyDiff(),
+                        normal: emptyDiff(),
+                        hyper: emptyDiff(),
+                        another: emptyDiff(),
+                        leggendaria: emptyDiff(),
+                    });
+                }
+                const entry = grouped.get(title);
+                const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
+                if (entry[diffKey]) {
+                    entry[diffKey] = {
+                        id: undefined,
+                        difficulty: s.difficultyLevel,
+                        score: s.score,
+                        pgreat: 0,
+                        great: 0,
+                        missCount: null,
+                        clearType: s.clearType ?? 'NO PLAY',
+                        djLevel: s.djLevel ?? '---',
+                        memo: undefined,
+                        djName: s.djName ?? undefined,
+                    } as any;
+                }
+            });
+
+            return {
+                profile: {
+                    versionNum: data.versionNum,
+                    versionName: data.versionName,
+                    prefectureFileNum: data.prefectureFileNum,
+                    prefectureName: data.prefectureName,
+                },
+                scores: Array.from(grouped.values()),
+            };
+        } finally {
+            isFetching.value = false;
+        }
+    };
+
+    const fetchPublicProfile = async (userId: number): Promise<any | null> => {
+        const res = await fetch(`${API_BASE}/api/users/${userId}/profile`);
+        if (!res.ok) return null;
+        return await res.json();
+    };
+
+    const fetchFriendStatus = async (userId: number): Promise<string> => {
+        const res = await fetch(`${API_BASE}/api/users/${userId}/friend-status`, {
+            headers: authHeaders(),
+        });
+        if (!res.ok) return 'none';
+        const data = await res.json();
+        return data.status ?? 'none';
+    };
+
     const updateMemo = async (id: number, memo: string) => {
         const res = await fetch(`${API_BASE}/api/scores/${id}/memo`, {
             method: 'PUT',
@@ -183,5 +277,14 @@ export function useScores() {
         return res.json();
     };
 
-    return { fetchMyScores, fetchUserScores, fetchAllUsers, updateMemo, isFetching };
+    return {
+        fetchMyScores,
+        fetchUserScores,
+        fetchAllUsers,
+        fetchTopRankerProfile,
+        fetchPublicProfile,
+        fetchFriendStatus,
+        updateMemo,
+        isFetching,
+    };
 }

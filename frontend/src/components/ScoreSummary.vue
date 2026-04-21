@@ -227,6 +227,9 @@
               <td class="px-1 sm:px-6 py-1.5 sm:py-2 font-medium text-slate-800 dark:text-slate-200 max-w-[80px] sm:max-w-[160px] lg:max-w-[240px] xl:max-w-xs" :title="record.title">
                 <div class="flex flex-col gap-0.5">
                   <span class="truncate block">{{ record.title }}</span>
+                  <span v-if="props.viewingMode === 'topRanker' && record.djName" class="text-[8px] sm:text-[10px] font-bold text-emerald-600 dark:text-emerald-400 truncate block">
+                    DJ: {{ record.djName }}
+                  </span>
                   <template v-for="label of [getScoreGradeLabel(record)]" :key="0">
                     <div v-if="label" class="flex items-center gap-1 text-[8px] sm:text-[10px] font-bold leading-none">
                       <span :class="record.scoreRate >= 94.45 ? 'text-purple-500 dark:text-purple-400' : record.scoreRate >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'">{{ label.primary }}</span>
@@ -296,7 +299,7 @@
               </td>
               <!-- RATE-TIER mode: 獲得PT cell -->
               <td v-else class="px-1 sm:px-6 py-1.5 sm:py-2 whitespace-nowrap transition-colors"
-                :class="rateTop100Keys.has(record.title + '|' + record.difficultyName) ? 'bg-emerald-50/80 dark:bg-emerald-900/20' : ''"
+                :class="hasPerfectRateOverflow && record.scoreRate >= 100 ? 'bg-amber-100/80 dark:bg-amber-900/30' : rateTop100Keys.has(record.title + '|' + record.difficultyName) ? 'bg-emerald-50/80 dark:bg-emerald-900/20' : ''"
               >
                 <div v-if="record.scoreRate > 0" class="flex items-center gap-0.5 sm:gap-1">
                   <span class="font-black" :class="rateTop100Keys.has(record.title + '|' + record.difficultyName) ? 'text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-base' : 'text-slate-800 dark:text-slate-200 text-[9px] sm:text-sm'">
@@ -401,17 +404,8 @@
             class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
             :class="modalTab === 'rivals' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >
-            {{ t('table.rivals') }}
-            <span v-if="rivalList.length > 0" class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full px-1.5">{{ rivalList.length }}</span>
-          </button>
-          <button
-            v-if="isAdmin"
-            @click="handleRankingTabClick"
-            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
-            :class="modalTab === 'ranking' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-          >
             {{ t('table.ranking') }}
-            <span v-if="songRankingList.length > 0" class="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 rounded-full px-1.5">{{ songRankingList.length }}</span>
+            <span v-if="rankingList.length > 0" class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full px-1.5">{{ rankingList.length }}</span>
           </button>
           <button
             v-if="isLoggedIn && ['ANOTHER', 'LEGGENDARIA'].includes(selectedRecord?.difficultyName ?? '')"
@@ -425,97 +419,8 @@
       <!-- Scrollable Body -->
       <div class="flex-1 overflow-y-auto p-3 sm:p-8 lg:p-12 pb-24">
 
-        <!-- Ranking Tab -->
-        <div v-if="modalTab === 'ranking' && isAdmin" class="w-full">
-          <div v-if="isLoadingSongRanking" class="flex flex-col items-center justify-center py-20">
-            <div class="w-10 h-10 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-slate-500 dark:text-slate-400">{{ t('table.loadingRanking') }}</p>
-          </div>
-          <div v-else-if="songRankingList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <p class="font-bold">{{ t('table.noRankingData') }}</p>
-            <p class="text-sm mt-1">{{ t('table.rankingPrivacyHint') }}</p>
-          </div>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-3 pl-3 text-xs font-black text-slate-400 uppercase tracking-widest w-12">{{ t('table.colRankNum') }}</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('table.colPlayer') }}</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest w-14 text-center">{{ t('table.colTier') }}</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-24">{{ t('table.colScore') }}</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">{{ t('table.colRate') }}</th>
-                  <th class="pb-3 pr-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">{{ t('table.colBeatPt') }}</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr
-                  v-for="(entry, index) in songRankingList"
-                  :key="index"
-                  class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                >
-                  <!-- 順位 -->
-                  <td class="py-3 pl-3">
-                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
-                      :class="[
-                        index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                        index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                        index === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
-                        'text-slate-400 border border-slate-100 dark:border-slate-700'
-                      ]">
-                      {{ index + 1 }}
-                    </div>
-                  </td>
-                  <!-- プレイヤー名 -->
-                  <td class="py-3">
-                    <span class="font-bold text-slate-800 dark:text-slate-100 text-sm">{{ entry.displayName }}</span>
-                  </td>
-                  <!-- BEAT-TIERアイコン -->
-                  <td class="py-3 px-2 text-center">
-                    <div class="flex justify-center">
-                      <RankIcon
-                        :rank-name="getRankInfo(entry.totalBeatPt).name"
-                        :tier="getRankInfo(entry.totalBeatPt).tier"
-                        size="sm"
-                        :is-supporter="user?.isSupporter && user?.showSupporterBorder"
-                      />
-                    </div>
-                  </td>
-                  <!-- スコア -->
-                  <td class="py-3 text-right">
-                    <span class="font-black text-slate-800 dark:text-slate-100 text-sm tabular-nums">{{ entry.score.toLocaleString() }}</span>
-                  </td>
-                  <!-- スコアレート -->
-                  <td class="py-3 text-right">
-                    <span
-                      v-if="selectedRecord && selectedRecord.maxScore > 0"
-                      class="font-bold text-sm tabular-nums"
-                      :class="(entry.score / selectedRecord.maxScore * 100) >= 94.45 ? 'text-purple-600 dark:text-purple-400' : (entry.score / selectedRecord.maxScore * 100) >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-300'"
-                    >
-                      {{ (entry.score / selectedRecord.maxScore * 100).toFixed(2) }}%
-                    </span>
-                    <span v-else class="text-slate-400 text-sm">---</span>
-                  </td>
-                  <!-- BEAT-PT -->
-                  <td class="py-3 pr-3 text-right">
-                    <span
-                      v-if="selectedRecord && selectedRecord.maxScore > 0 && selectedRecord.informalRank"
-                      class="font-black text-indigo-600 dark:text-indigo-400 text-sm tabular-nums"
-                    >
-                      {{ calculatePoints(entry.score / selectedRecord.maxScore * 100, selectedRecord.informalRank).toFixed(1) }}
-                    </span>
-                    <span v-else class="text-slate-400 text-sm">---</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         <!-- Rate-Tier Tab -->
-        <div v-else-if="modalTab === 'rate-tier'" class="w-full max-w-4xl mx-auto space-y-6">
+        <div v-if="modalTab === 'rate-tier'" class="w-full max-w-4xl mx-auto space-y-6">
           <!-- 獲得PT display -->
           <div class="grid grid-cols-2 gap-4">
             <div class="bg-emerald-900/10 dark:bg-emerald-900/20 p-6 sm:p-8 rounded-2xl shadow-md flex flex-col items-center justify-center border border-emerald-100 dark:border-emerald-800/50">
@@ -573,94 +478,152 @@
           </div>
         </div>
 
-        <!-- Rivals Tab -->
+        <!-- Ranking Tab (merged: self + friends + optional public + optional virtual) -->
         <div v-else-if="modalTab === 'rivals'" class="w-full">
-          <div v-if="isLoadingRivals" class="flex flex-col items-center justify-center py-20">
+          <!-- Filter checkboxes -->
+          <div class="flex flex-wrap items-center gap-4 mb-4 p-3 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700">
+            <label class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+              <input type="checkbox" v-model="showPublicUsers" class="w-4 h-4 rounded accent-blue-600" />
+              スコア公開ユーザーも表示
+            </label>
+            <label class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+              <input type="checkbox" v-model="showVirtualUsers" class="w-4 h-4 rounded accent-amber-500" />
+              TOPランカー仮想ユーザーを表示
+            </label>
+          </div>
+
+          <div v-if="isLoadingRivals || isLoadingSongRanking" class="flex flex-col items-center justify-center py-20">
             <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
             <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
           </div>
-          <div v-else-if="rivalList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+          <div v-else-if="rankingList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <p class="font-bold">{{ t('table.rivalNotPlayed') }}</p>
           </div>
-          <div v-else class="space-y-2">
-            <div
-              v-for="(rival, index) in rivalList"
-              :key="rival.id"
-              class="rounded-xl border px-4 py-3 flex items-center gap-4"
-              :class="rival.isSelf
-                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
-            >
-              <!-- Rank number -->
-              <div class="w-10 text-center shrink-0">
-                <span v-if="rival.score != null" class="text-base font-black text-slate-500 dark:text-slate-400">#{{ index + 1 }}</span>
-                <span v-else class="text-sm font-bold text-slate-400 dark:text-slate-500">-</span>
-              </div>
-
-              <!-- Avatar + Name -->
-              <div class="flex items-center gap-3 flex-1 min-w-0">
-                <div
-                  class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0"
-                  :class="rival.isSelf ? 'bg-blue-500' : 'bg-gradient-to-br from-slate-400 to-slate-600'"
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-3 pl-3 text-xs font-black text-slate-400 uppercase tracking-widest w-12">{{ t('table.colRankNum') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('table.colPlayer') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest w-14 text-center">{{ t('table.colTier') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-24">{{ t('table.colScore') }}</th>
+                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">{{ t('table.colRate') }}</th>
+                  <th class="pb-3 pr-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right w-20">{{ t('table.colBeatPt') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr
+                  v-for="row in rankingList"
+                  :key="row.key"
+                  class="transition-colors"
+                  :class="[
+                    row.isSelf ? 'bg-blue-50/60 dark:bg-blue-900/20'
+                      : row.kind === 'virtual' ? 'bg-amber-50/30 dark:bg-amber-900/10'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
+                    row.kind === 'virtual' || (row.kind === 'user' && row.userId && (row.privacyLevel ?? 1) === 0 && !row.isSelf) ? 'cursor-pointer' : ''
+                  ]"
+                  @click="row.kind === 'virtual' ? handleSongTopRankerRowClick(row.virtualEntry!) : (row.kind === 'user' && !row.isSelf ? handleSongUserRowClick({ userId: row.userId ?? null, iidxId: row.iidxId, privacyLevel: row.privacyLevel ?? null, displayName: row.displayName, score: row.score ?? 0, totalBeatPt: row.totalBeatPt ?? 0 }) : null)"
                 >
-                  {{ rival.displayName?.charAt(0) || 'U' }}
-                </div>
-                <p class="text-sm font-bold truncate" :class="rival.isSelf ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">{{ rival.displayName }}</p>
-              </div>
-
-              <!-- Private: lock icon -->
-              <div v-if="!rival.isSelf && rival.privacyLevel === 2" class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span class="text-sm font-bold">{{ t('table.privateShort') }}</span>
-              </div>
-
-              <template v-else-if="rival.score != null">
-                <!-- Clear Lamp -->
-                <div class="text-center shrink-0 w-14">
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">CLEAR</p>
-                  <p class="text-sm font-black" :class="getClearTypeColor(rival.clearType)">
-                    {{ rival.clearType === 'FULLCOMBO CLEAR' ? 'FC' : rival.clearType === 'EX HARD CLEAR' ? 'EXH' : rival.clearType === 'HARD CLEAR' ? 'H' : rival.clearType === 'CLEAR' ? 'C' : rival.clearType === 'EASY CLEAR' ? 'E' : rival.clearType === 'ASSIST CLEAR' ? 'AC' : 'F' }}
-                  </p>
-                </div>
-
-                <!-- DJ Level -->
-                <div class="text-center shrink-0 w-14">
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">DJ LV</p>
-                  <p class="text-base font-black" :class="getDjLevelColor(rival.djLevel)">{{ rival.djLevel !== '---' ? rival.djLevel : '-' }}</p>
-                </div>
-
-                <!-- Score -->
-                <div class="text-center shrink-0 w-24">
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">SCORE</p>
-                  <p class="text-base font-black text-slate-800 dark:text-slate-100">{{ rival.score.toLocaleString() }}</p>
-                </div>
-
-                <!-- Score Rate -->
-                <div class="text-center shrink-0 w-20">
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">RATE</p>
-                  <p class="text-sm font-bold" :class="selectedRecord && selectedRecord.maxScore > 0 && (rival.score / selectedRecord.maxScore * 100) >= 94.45 ? 'text-purple-600 dark:text-purple-400' : selectedRecord && selectedRecord.maxScore > 0 && (rival.score / selectedRecord.maxScore * 100) >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-300'">
-                    {{ selectedRecord && selectedRecord.maxScore > 0 ? (rival.score / selectedRecord.maxScore * 100).toFixed(2) + '%' : '---' }}
-                  </p>
-                </div>
-
-                <!-- BEAT-PT -->
-                <div class="text-center shrink-0 w-20">
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-0.5">BEAT-PT</p>
-                  <p class="text-base font-black text-indigo-600 dark:text-indigo-400">
-                    {{ selectedRecord && selectedRecord.maxScore > 0 && selectedRecord.informalRank
-                      ? calculatePoints(rival.score / selectedRecord.maxScore * 100, selectedRecord.informalRank).toFixed(1)
-                      : '---' }}
-                  </p>
-                </div>
-              </template>
-
-              <div v-else-if="rival.isSelf || rival.privacyLevel !== 2" class="text-sm text-slate-400 dark:text-slate-500 font-bold shrink-0">{{ t('table.notPlayedShort') }}</div>
-            </div>
+                  <!-- 順位 -->
+                  <td class="py-3 pl-3">
+                    <div v-if="row.rank != null" class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                      :class="[
+                        row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                        row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                        row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                        'text-slate-400 border border-slate-100 dark:border-slate-700'
+                      ]">
+                      {{ row.rank }}
+                    </div>
+                    <div v-else class="flex items-center justify-center w-7 h-7 font-bold text-xs text-slate-300 dark:text-slate-600">-</div>
+                  </td>
+                  <!-- プレイヤー名 / 仮想ユーザ -->
+                  <td class="py-3">
+                    <template v-if="row.kind === 'virtual'">
+                      <div class="flex items-center gap-2 min-w-0">
+                        <span
+                          v-if="row.virtualBadge === 'allTimeGlobal' || row.virtualBadge === 'globalAllTime'"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-500 text-white text-[10px] font-black tracking-wider shrink-0"
+                        >歴代</span>
+                        <span
+                          v-else-if="row.virtualBadge === 'allTimeArea'"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-500 text-white text-[10px] font-black tracking-wider shrink-0"
+                        >エリア歴代</span>
+                        <span
+                          v-else-if="row.virtualBadge === 'versionTop'"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-indigo-500 text-white text-[10px] font-black tracking-wider shrink-0"
+                        >バージョンTOP</span>
+                        <span
+                          v-else
+                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-black tracking-wider shrink-0"
+                        >TOP</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100 text-sm truncate">
+                          {{ row.virtualEntry!.versionName }} {{ row.virtualEntry!.prefectureName }}
+                          <span class="ml-1 text-xs text-slate-500 dark:text-slate-400">({{ row.virtualEntry!.djName }})</span>
+                        </span>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div class="flex items-center gap-2 min-w-0">
+                        <span class="font-bold text-sm truncate" :class="row.isSelf ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
+                          {{ row.displayName }}
+                        </span>
+                        <span v-if="!row.isSelf && (row.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400 shrink-0" :title="(row.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="row.isFriend && !row.isSelf" class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider shrink-0">Friend</span>
+                      </div>
+                    </template>
+                  </td>
+                  <!-- BEAT-TIERアイコン -->
+                  <td class="py-3 px-2 text-center">
+                    <div v-if="row.kind === 'user' && row.totalBeatPt != null && row.totalBeatPt > 0" class="flex justify-center">
+                      <RankIcon
+                        :rank-name="getRankInfo(row.totalBeatPt).name"
+                        :tier="getRankInfo(row.totalBeatPt).tier"
+                        size="sm"
+                        :is-supporter="user?.isSupporter && user?.showSupporterBorder"
+                      />
+                    </div>
+                    <span v-else class="text-slate-300 dark:text-slate-600 text-xs">-</span>
+                  </td>
+                  <!-- スコア -->
+                  <td class="py-3 text-right">
+                    <template v-if="row.kind === 'user' && !row.isSelf && (row.privacyLevel ?? 1) === 2 && !row.isFriend">
+                      <span class="text-slate-400 dark:text-slate-500 text-sm font-bold">{{ t('table.privateShort') }}</span>
+                    </template>
+                    <template v-else-if="row.score != null">
+                      <span class="font-black text-slate-800 dark:text-slate-100 text-sm tabular-nums">{{ row.score.toLocaleString() }}</span>
+                    </template>
+                    <template v-else>
+                      <span class="text-slate-400 text-sm">---</span>
+                    </template>
+                  </td>
+                  <!-- スコアレート -->
+                  <td class="py-3 text-right">
+                    <span
+                      v-if="row.score != null && selectedRecord && selectedRecord.maxScore > 0"
+                      class="font-bold text-sm tabular-nums"
+                      :class="(row.score / selectedRecord.maxScore * 100) >= 94.45 ? 'text-purple-600 dark:text-purple-400' : (row.score / selectedRecord.maxScore * 100) >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-300'"
+                    >
+                      {{ (row.score / selectedRecord.maxScore * 100).toFixed(2) }}%
+                    </span>
+                    <span v-else class="text-slate-400 text-sm">---</span>
+                  </td>
+                  <!-- BEAT-PT -->
+                  <td class="py-3 pr-3 text-right">
+                    <span
+                      v-if="row.score != null && selectedRecord && selectedRecord.maxScore > 0 && selectedRecord.informalRank"
+                      class="font-black text-indigo-600 dark:text-indigo-400 text-sm tabular-nums"
+                    >
+                      {{ calculatePoints(row.score / selectedRecord.maxScore * 100, selectedRecord.informalRank).toFixed(1) }}
+                    </span>
+                    <span v-else class="text-slate-400 text-sm">---</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -983,6 +946,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const props = defineProps<{
   scores: ScoreData[];
+  viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | null;
 }>();
 
 // Emits are handled below after totalBeatTierPoints definition
@@ -1135,7 +1099,25 @@ const allRecords = computed<ScoreRecord[]>(() => {
 const emit = defineEmits<{
   (e: 'reset'): void;
   (e: 'update:totalPoints', points: number): void;
+  (e: 'view-user', payload: { id: number; displayName: string; iidxId: string }): void;
+  (e: 'view-top-ranker', payload: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }): void;
 }>();
+
+function handleSongUserRowClick(entry: SongRankingEntry) {
+  if (!entry.userId) return;
+  const priv = entry.privacyLevel ?? 1;
+  if (priv !== 0) return;
+  emit('view-user', { id: entry.userId, displayName: entry.displayName, iidxId: entry.iidxId ?? '' });
+}
+
+function handleSongTopRankerRowClick(entry: SongTopRankerEntry) {
+  emit('view-top-ranker', {
+    versionNum: entry.versionNum,
+    versionName: entry.versionName,
+    prefectureFileNum: entry.prefectureFileNum,
+    prefectureName: entry.prefectureName,
+  });
+}
 
 const totalBeatTierPoints = computed(() => {
     // Sort all records by beatTierPoints descending and take top 100
@@ -1168,6 +1150,12 @@ const rateTop100Keys = computed(() => {
         .sort((a, b) => calculateScoreRateTierPoints(b.scoreRate) - calculateScoreRateTierPoints(a.scoreRate));
     return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
 });
+
+// Highlight perfect-rate songs (individual RATE-PT = 512) when the total
+// RATE-PT has overflowed 51200 (i.e. there are more than 100 perfect-rate songs).
+const hasPerfectRateOverflow = computed(() =>
+    rateAllRecords.value.filter(r => r.scoreRate >= 100).length > 100
+);
 
 // 100th song's Beat-PT (= threshold to enter top 100)
 const top100Threshold = computed(() => {
@@ -1265,12 +1253,29 @@ const rivalScores = ref<RivalScore[]>([]);
 
 // Song ranking state
 interface SongRankingEntry {
+  userId?: number | null;
+  iidxId?: string;
+  privacyLevel?: number | null;
   displayName: string;
   score: number;
+  clearType?: string;
+  djLevel?: string;
   totalBeatPt: number;
 }
 const songRankingList = ref<SongRankingEntry[]>([]);
 const isLoadingSongRanking = ref(false);
+const showPublicUsers = ref(false);
+const showVirtualUsers = ref(false);
+
+interface SongTopRankerEntry {
+  versionNum: number;
+  versionName: string;
+  prefectureFileNum: number;
+  prefectureName: string;
+  djName: string;
+  score: number;
+}
+const songTopRankersList = ref<SongTopRankerEntry[]>([]);
 
 const fetchSongRanking = async () => {
   if (!selectedRecord.value) return;
@@ -1280,9 +1285,15 @@ const fetchSongRanking = async () => {
       title: selectedRecord.value.title,
       difficultyName: selectedRecord.value.difficultyName
     });
-    const res = await fetch(`${API_BASE}/api/scores/song-ranking?${params}`, { headers: authHeaders() });
-    if (res.ok) {
-      songRankingList.value = await res.json();
+    const [userRes, topRes] = await Promise.all([
+      fetch(`${API_BASE}/api/scores/song-ranking?${params}`, { headers: authHeaders() }),
+      fetch(`${API_BASE}/api/scores/song-top-rankers?${params}`),
+    ]);
+    if (userRes.ok) {
+      songRankingList.value = await userRes.json();
+    }
+    if (topRes.ok) {
+      songTopRankersList.value = await topRes.json();
     }
   } catch {
     // Silently fail
@@ -1291,41 +1302,181 @@ const fetchSongRanking = async () => {
   }
 };
 
-const handleRankingTabClick = () => {
-  modalTab.value = 'ranking';
-  if (songRankingList.value.length === 0 && !isLoadingSongRanking.value) {
-    fetchSongRanking();
-  }
-};
+interface RankingRow {
+  key: string;
+  kind: 'user' | 'virtual';
+  isSelf?: boolean;
+  isFriend?: boolean;
+  userId?: number | null;
+  iidxId?: string;
+  displayName: string;
+  score: number | null;
+  clearType?: string;
+  djLevel?: string;
+  privacyLevel?: number | null;
+  totalBeatPt?: number;
+  virtualEntry?: SongTopRankerEntry;
+  virtualBadge?: 'allTimeGlobal' | 'globalAllTime' | 'allTimeArea' | 'versionTop' | 'top';
+  rank: number | null;
+}
 
-const rivalList = computed(() => {
+const rankingList = computed<RankingRow[]>(() => {
   if (!selectedRecord.value) return [];
   const rec = selectedRecord.value;
+  const myIidx = user.value?.iidxId ?? '';
 
-  // Build self entry
-  const selfEntry: RivalScore = {
-    id: -1,
+  const friendIidxSet = new Set(rivalScores.value.map(r => r.iidxId).filter(Boolean));
+
+  // Merge songRankingList + rivalScores, dedupe by iidxId, exclude self.
+  const usersByIidx = new Map<string, RankingRow>();
+  for (const entry of songRankingList.value) {
+    const iidxId = entry.iidxId ?? '';
+    if (!iidxId || iidxId === myIidx) continue;
+    usersByIidx.set(iidxId, {
+      key: 'u_' + iidxId,
+      kind: 'user',
+      userId: entry.userId ?? null,
+      iidxId,
+      displayName: entry.displayName,
+      score: entry.score ?? null,
+      clearType: entry.clearType,
+      djLevel: entry.djLevel,
+      privacyLevel: entry.privacyLevel ?? null,
+      totalBeatPt: entry.totalBeatPt ?? 0,
+      isFriend: friendIidxSet.has(iidxId),
+      rank: null,
+    });
+  }
+  for (const f of rivalScores.value) {
+    if (!f.iidxId || f.iidxId === myIidx) continue;
+    const existing = usersByIidx.get(f.iidxId);
+    if (existing) {
+      existing.isFriend = true;
+    } else {
+      usersByIidx.set(f.iidxId, {
+        key: 'f_' + f.iidxId,
+        kind: 'user',
+        userId: f.id,
+        iidxId: f.iidxId,
+        displayName: f.displayName,
+        score: f.score ?? null,
+        clearType: f.clearType,
+        djLevel: f.djLevel,
+        privacyLevel: f.privacyLevel ?? null,
+        totalBeatPt: 0,
+        isFriend: true,
+        rank: null,
+      });
+    }
+  }
+
+  const selfRow: RankingRow = {
+    key: 'self',
+    kind: 'user',
     displayName: 'あなた',
-    iidxId: '',
+    iidxId: myIidx,
+    userId: null,
     score: rec.score > 0 ? rec.score : null,
     clearType: rec.clearType,
     djLevel: rec.djLevel,
-    pgreat: rec.pgreat,
-    great: rec.great,
-    missCount: rec.missCount,
-    isSelf: true
+    privacyLevel: null,
+    isSelf: true,
+    rank: null,
   };
 
-  const all: RivalScore[] = [selfEntry, ...rivalScores.value];
+  const virtualRows: RankingRow[] = [];
+  if (showVirtualUsers.value) {
+    const allTimeByPref = new Map<number, { djName: string; score: number }>();
+    for (const e of songTopRankersList.value) {
+      if (e.versionNum === 0) allTimeByPref.set(e.prefectureFileNum, { djName: e.djName, score: e.score });
+    }
+    const globalAllTime = allTimeByPref.get(0);
+    let prefectureMatchesGlobalAllTime = false;
+    if (globalAllTime) {
+      for (const [prefNum, at] of allTimeByPref) {
+        if (prefNum !== 0 && at.djName === globalAllTime.djName && at.score === globalAllTime.score) {
+          prefectureMatchesGlobalAllTime = true;
+          break;
+        }
+      }
+    }
+    const globalTopByVersion = new Map<number, { djName: string; score: number }>();
+    for (const e of songTopRankersList.value) {
+      if (e.versionNum !== 0 && e.prefectureFileNum === 0) {
+        globalTopByVersion.set(e.versionNum, { djName: e.djName, score: e.score });
+      }
+    }
+    const versionHasPrefectureMatch = new Set<number>();
+    for (const e of songTopRankersList.value) {
+      if (e.versionNum === 0 || e.prefectureFileNum === 0) continue;
+      const g = globalTopByVersion.get(e.versionNum);
+      if (g && g.djName === e.djName && g.score === e.score) versionHasPrefectureMatch.add(e.versionNum);
+    }
+    let idx = 0;
+    for (const e of songTopRankersList.value) {
+      if (e.versionNum === 0) continue;
+      const at = allTimeByPref.get(e.prefectureFileNum);
+      const isAllTime = at !== undefined && at.djName === e.djName && at.score === e.score;
+      if (isAllTime && e.prefectureFileNum === 0 && prefectureMatchesGlobalAllTime) continue;
+      if (e.prefectureFileNum === 0 && versionHasPrefectureMatch.has(e.versionNum)) continue;
+      const isGlobalAllTime = isAllTime && e.prefectureFileNum !== 0 && globalAllTime !== undefined
+        && globalAllTime.djName === e.djName && globalAllTime.score === e.score;
+      let isVersionTop = false;
+      if (e.prefectureFileNum !== 0) {
+        const g = globalTopByVersion.get(e.versionNum);
+        if (g && g.djName === e.djName && g.score === e.score) isVersionTop = true;
+      }
+      let badge: RankingRow['virtualBadge'] = 'top';
+      if (isAllTime && e.prefectureFileNum === 0) badge = 'allTimeGlobal';
+      else if (isGlobalAllTime) badge = 'globalAllTime';
+      else if (isAllTime && e.prefectureFileNum !== 0) badge = 'allTimeArea';
+      else if (isVersionTop) badge = 'versionTop';
+      virtualRows.push({
+        key: 'v_' + (idx++) + '_' + e.versionNum + '_' + e.prefectureFileNum,
+        kind: 'virtual',
+        displayName: e.versionName + ' ' + e.prefectureName,
+        score: e.score,
+        virtualEntry: e,
+        virtualBadge: badge,
+        rank: null,
+      });
+    }
+  }
 
-  // Sort: scored first (desc), unplayed last
-  return all.sort((a, b) => {
+  const all: RankingRow[] = [selfRow, ...usersByIidx.values(), ...virtualRows];
+
+  // Assign rank (dense, 1-indexed) across every scored entry — includes hidden users.
+  const scored = all.filter(r => r.score != null).slice().sort((a, b) => (b.score as number) - (a.score as number));
+  let prevScore: number | null = null;
+  let prevRank = 0;
+  scored.forEach((r, i) => {
+    const s = r.score as number;
+    if (s !== prevScore) {
+      prevRank = i + 1;
+      prevScore = s;
+    }
+    r.rank = prevRank;
+  });
+
+  // Filter for display.
+  const display = all.filter(r => {
+    if (r.isSelf) return true;
+    if (r.kind === 'virtual') return true;
+    if (r.isFriend) return true;
+    if (showPublicUsers.value && (r.privacyLevel ?? 1) === 0) return true;
+    return false;
+  });
+
+  display.sort((a, b) => {
     if (a.score == null && b.score == null) return 0;
     if (a.score == null) return 1;
     if (b.score == null) return -1;
-    return b.score - a.score;
+    return (b.score as number) - (a.score as number);
   });
+
+  return display;
 });
+
 const isLoadingRivals = ref(false);
 
 const fetchRivalScores = async () => {
@@ -1353,6 +1504,9 @@ const handleRivalTabClick = () => {
   modalTab.value = 'rivals';
   if (rivalScores.value.length === 0 && !isLoadingRivals.value) {
     fetchRivalScores();
+  }
+  if (songRankingList.value.length === 0 && songTopRankersList.value.length === 0 && !isLoadingSongRanking.value) {
+    fetchSongRanking();
   }
 };
 
@@ -1402,6 +1556,7 @@ watch(() => selectedRecord.value?.title, () => {
   targetBeatPtSlider.value = 0;
   rivalScores.value = [];
   songRankingList.value = [];
+  songTopRankersList.value = [];
   songHistory.value = [];
   // Fetch votes for the new record
   if (selectedRecord.value) {

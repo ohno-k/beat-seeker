@@ -19,6 +19,7 @@ import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.SongRankBatchService;
+import com.beatseeker.backend.service.TopRankersBeatPtService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,7 @@ public class ScoreController {
     private final ScoreRecalculationService scoreRecalculationService;
     private final EmailService emailService;
     private final SongDefinitionRepository songDefinitionRepository;
+    private final TopRankersBeatPtService topRankersBeatPtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Long ADMIN_USER_ID = 18L;
@@ -60,7 +62,8 @@ public class ScoreController {
             SongRankBatchService songRankBatchService,
             ScoreRecalculationService scoreRecalculationService,
             EmailService emailService,
-            SongDefinitionRepository songDefinitionRepository) {
+            SongDefinitionRepository songDefinitionRepository,
+            TopRankersBeatPtService topRankersBeatPtService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -73,6 +76,7 @@ public class ScoreController {
         this.scoreRecalculationService = scoreRecalculationService;
         this.emailService = emailService;
         this.songDefinitionRepository = songDefinitionRepository;
+        this.topRankersBeatPtService = topRankersBeatPtService;
     }
 
     /**
@@ -434,6 +438,43 @@ public class ScoreController {
         return ResponseEntity.ok(ranking);
     }
 
+    @GetMapping("/ranking/arena-averages")
+    public ResponseEntity<List<Map<String, Object>>> getArenaRankAverages() {
+        List<Map<String, Object>> averages = scoreHistoryLogRepository.getArenaRankAverageBeatPt();
+        return ResponseEntity.ok(averages);
+    }
+
+    @GetMapping("/ranking/top-rankers")
+    public ResponseEntity<List<Map<String, Object>>> getTopRankersBeatPt() {
+        return ResponseEntity.ok(topRankersBeatPtService.getRanking());
+    }
+
+    @GetMapping("/rate-ranking/arena-averages")
+    public ResponseEntity<List<Map<String, Object>>> getArenaRankAverageRatePt() {
+        return ResponseEntity.ok(scoreHistoryLogRepository.getArenaRankAverageRatePt());
+    }
+
+    @GetMapping("/rate-ranking/top-rankers")
+    public ResponseEntity<List<Map<String, Object>>> getTopRankersRatePt() {
+        return ResponseEntity.ok(topRankersBeatPtService.getRateRanking());
+    }
+
+    @GetMapping("/song-top-rankers")
+    public ResponseEntity<List<com.beatseeker.backend.service.TopRankersBeatPtService.SongScoreEntry>> getSongTopRankers(
+            @RequestParam String title,
+            @RequestParam String difficultyName) {
+        return ResponseEntity.ok(topRankersBeatPtService.getSongTopRankers(title, difficultyName));
+    }
+
+    @GetMapping("/top-ranker-profile")
+    public ResponseEntity<com.beatseeker.backend.service.TopRankersBeatPtService.AreaProfile> getTopRankerProfile(
+            @RequestParam int versionNum,
+            @RequestParam int prefectureFileNum) {
+        var profile = topRankersBeatPtService.getAreaProfile(versionNum, prefectureFileNum);
+        if (profile == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(profile);
+    }
+
     @GetMapping("/precision-ranking")
     public ResponseEntity<List<Map<String, Object>>> getPrecisionRanking() {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getPrecisionRanking();
@@ -444,6 +485,16 @@ public class ScoreController {
     public ResponseEntity<List<Map<String, Object>>> getRateRanking() {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getRateTierRanking();
         return ResponseEntity.ok(ranking);
+    }
+
+    @GetMapping("/user-tier-totals/{userId}")
+    public ResponseEntity<Map<String, Object>> getUserTierTotals(@PathVariable Long userId) {
+        Double beatPt = userRepository.findById(userId).map(User::getTotalBeatPt).orElse(0.0);
+        Double ratePt = scoreHistoryLogRepository.getLatestTotalRatePtByUserId(userId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalBeatPt", beatPt != null ? beatPt : 0.0);
+        result.put("totalRatePt", ratePt != null ? ratePt : 0.0);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -557,17 +608,13 @@ public class ScoreController {
     }
 
     /**
-     * Get per-song ranking for a specific song (admin only).
+     * Get per-song ranking for a specific song (all authenticated users).
      */
     @GetMapping("/song-ranking")
     public ResponseEntity<List<Map<String, Object>>> getSongRanking(
             Authentication auth,
             @RequestParam String title,
             @RequestParam String difficultyName) {
-        if (auth == null || !auth.isAuthenticated()
-                || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
-            return ResponseEntity.ok(List.of());
-        }
         List<Map<String, Object>> ranking = scoreRepository.findSongRanking(title, difficultyName);
         return ResponseEntity.ok(ranking);
     }

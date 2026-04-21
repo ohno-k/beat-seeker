@@ -8,6 +8,8 @@ import { useI18n } from '../composables/useI18n';
 import { diffTable as diffTableRanks } from '../composables/useGameData';
 
 interface BeatRankingEntry {
+  userId: number | null;
+  privacyLevel: number | null;
   displayName: string;
   iidxId: string;
   totalBeatPt: number;
@@ -15,13 +17,39 @@ interface BeatRankingEntry {
   lastUpdatedAt: string | null;
 }
 
+interface TopRankerEntry {
+  versionNum: number;
+  versionName: string;
+  prefectureFileNum: number;
+  prefectureName: string;
+  beatPt: number;
+}
+
+type MergedBeatRow =
+  | { kind: 'user'; rank: number; entry: BeatRankingEntry }
+  | { kind: 'topRanker'; totalBeatPt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string };
+
 interface RateRankingEntry {
+  userId: number | null;
+  privacyLevel: number | null;
   displayName: string;
   iidxId: string;
   totalRatePt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
 }
+
+interface RateTopRankerEntry {
+  versionNum: number;
+  versionName: string;
+  prefectureFileNum: number;
+  prefectureName: string;
+  ratePt: number;
+}
+
+type MergedRateRow =
+  | { kind: 'user'; rank: number; entry: RateRankingEntry }
+  | { kind: 'topRanker'; totalRatePt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string };
 
 interface SimulationEntry {
   displayName: string;
@@ -48,6 +76,59 @@ function formatLastUpdated(dateStr: string | null): string {
 
 const { t } = useI18n();
 
+const emit = defineEmits<{
+    (e: 'view-user', payload: { id: number; displayName: string; iidxId: string }): void;
+    (e: 'view-private-user', payload: { id: number; displayName: string; iidxId: string; totalBeatPt: number; totalRatePt: number }): void;
+    (e: 'view-top-ranker', payload: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }): void;
+}>();
+
+async function handleUserRowClick(entry: { userId: number | null; privacyLevel: number | null; displayName: string; iidxId: string }) {
+    if (entry.userId == null) return;
+    const priv = entry.privacyLevel ?? 1;
+    if (priv !== 0) {
+        let totalBeatPt = 0;
+        let totalRatePt = 0;
+        try {
+            const resp = await fetch(`${API_BASE}/api/scores/user-tier-totals/${entry.userId}`, { headers: authHeaders.value });
+            if (resp.ok) {
+                const data = await resp.json();
+                totalBeatPt = Number(data.totalBeatPt ?? 0);
+                totalRatePt = Number(data.totalRatePt ?? 0);
+            }
+        } catch {}
+        if (totalBeatPt === 0 || totalRatePt === 0) {
+            if (beatRanking.value.length === 0) { try { await fetchBeatRanking(); } catch {} }
+            if (rateRanking.value.length === 0) { try { await fetchRateRanking(); } catch {} }
+            if (totalBeatPt === 0) {
+                const beatEntry = beatRanking.value.find(u => u.iidxId === entry.iidxId);
+                if (beatEntry?.totalBeatPt) totalBeatPt = beatEntry.totalBeatPt;
+            }
+            if (totalRatePt === 0) {
+                const rateEntry = rateRanking.value.find(u => u.iidxId === entry.iidxId);
+                if (rateEntry?.totalRatePt) totalRatePt = rateEntry.totalRatePt;
+            }
+        }
+        emit('view-private-user', {
+            id: entry.userId,
+            displayName: entry.displayName,
+            iidxId: entry.iidxId,
+            totalBeatPt,
+            totalRatePt,
+        });
+        return;
+    }
+    emit('view-user', { id: entry.userId, displayName: entry.displayName, iidxId: entry.iidxId });
+}
+
+function handleTopRankerRowClick(row: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }) {
+    emit('view-top-ranker', {
+        versionNum: row.versionNum,
+        versionName: row.versionName,
+        prefectureFileNum: row.prefectureFileNum,
+        prefectureName: row.prefectureName,
+    });
+}
+
 const { user, authHeaders } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
@@ -60,33 +141,83 @@ watch(showRateTier, (val) => {
 });
 const beatRanking = ref<BeatRankingEntry[]>([]);
 const rateRanking = ref<RateRankingEntry[]>([]);
+const topRankers = ref<TopRankerEntry[]>([]);
+const rateTopRankers = ref<RateTopRankerEntry[]>([]);
 const isLoading = ref(true);
 const error = ref('');
+const showTopRankers = ref(false);
 
 // Pagination
 const PAGE_SIZE = 50;
 const beatPage = ref(1);
 const ratePage = ref(1);
 
-const beatTotalPages = computed(() => Math.max(1, Math.ceil(beatRanking.value.length / PAGE_SIZE)));
-const rateTotalPages = computed(() => Math.max(1, Math.ceil(rateRanking.value.length / PAGE_SIZE)));
+const mergedBeatRanking = computed<MergedBeatRow[]>(() => {
+    const userRows: MergedBeatRow[] = beatRanking.value.map((entry, i) => ({
+        kind: 'user',
+        rank: i + 1,
+        entry,
+    }));
+    const topRows: MergedBeatRow[] = showTopRankers.value ? topRankers.value.map(r => ({
+        kind: 'topRanker',
+        totalBeatPt: r.beatPt,
+        versionNum: r.versionNum,
+        versionName: r.versionName,
+        prefectureFileNum: r.prefectureFileNum,
+        prefectureName: r.prefectureName,
+    })) : [];
+    const all = [...userRows, ...topRows];
+    all.sort((a, b) => {
+        const aPt = a.kind === 'user' ? a.entry.totalBeatPt : a.totalBeatPt;
+        const bPt = b.kind === 'user' ? b.entry.totalBeatPt : b.totalBeatPt;
+        return bPt - aPt;
+    });
+    return all;
+});
+
+const mergedRateRanking = computed<MergedRateRow[]>(() => {
+    const userRows: MergedRateRow[] = rateRanking.value.map((entry, i) => ({
+        kind: 'user',
+        rank: i + 1,
+        entry,
+    }));
+    const topRows: MergedRateRow[] = showTopRankers.value ? rateTopRankers.value.map(r => ({
+        kind: 'topRanker',
+        totalRatePt: r.ratePt,
+        versionNum: r.versionNum,
+        versionName: r.versionName,
+        prefectureFileNum: r.prefectureFileNum,
+        prefectureName: r.prefectureName,
+    })) : [];
+    const all = [...userRows, ...topRows];
+    all.sort((a, b) => {
+        const aPt = a.kind === 'user' ? a.entry.totalRatePt : a.totalRatePt;
+        const bPt = b.kind === 'user' ? b.entry.totalRatePt : b.totalRatePt;
+        return bPt - aPt;
+    });
+    return all;
+});
+
+const beatTotalPages = computed(() => Math.max(1, Math.ceil(mergedBeatRanking.value.length / PAGE_SIZE)));
+const rateTotalPages = computed(() => Math.max(1, Math.ceil(mergedRateRanking.value.length / PAGE_SIZE)));
 
 const paginatedBeatRanking = computed(() => {
     const start = (beatPage.value - 1) * PAGE_SIZE;
-    return beatRanking.value.slice(start, start + PAGE_SIZE);
+    return mergedBeatRanking.value.slice(start, start + PAGE_SIZE);
 });
 const paginatedRateRanking = computed(() => {
     const start = (ratePage.value - 1) * PAGE_SIZE;
-    return rateRanking.value.slice(start, start + PAGE_SIZE);
+    return mergedRateRanking.value.slice(start, start + PAGE_SIZE);
 });
-
-const beatPageStartIndex = computed(() => (beatPage.value - 1) * PAGE_SIZE);
-const ratePageStartIndex = computed(() => (ratePage.value - 1) * PAGE_SIZE);
 
 function goToMyRank() {
     if (!user.value) return;
-    const list = viewMode.value === 'rate' ? rateRanking.value : beatRanking.value;
-    const idx = list.findIndex(e => e.iidxId === user.value!.iidxId);
+    let idx: number;
+    if (viewMode.value === 'rate') {
+        idx = mergedRateRanking.value.findIndex(r => r.kind === 'user' && r.entry.iidxId === user.value!.iidxId);
+    } else {
+        idx = mergedBeatRanking.value.findIndex(r => r.kind === 'user' && r.entry.iidxId === user.value!.iidxId);
+    }
     if (idx === -1) return;
     const page = Math.floor(idx / PAGE_SIZE) + 1;
     if (viewMode.value === 'rate') {
@@ -116,15 +247,29 @@ const promotionChanges = computed(() => draftDiffChanges.value.filter(c => parse
 const demotionChanges = computed(() => draftDiffChanges.value.filter(c => parseFloat(c.newRank) < parseFloat(c.oldRank)));
 
 async function fetchBeatRanking() {
-    const res = await fetch(`${API_BASE}/api/scores/ranking`);
-    if (res.ok) beatRanking.value = await res.json();
-    else throw new Error('beat');
+    const [rankRes, topRes] = await Promise.all([
+        fetch(`${API_BASE}/api/scores/ranking`),
+        fetch(`${API_BASE}/api/scores/ranking/top-rankers`),
+    ]);
+    if (!rankRes.ok) throw new Error('beat');
+    beatRanking.value = await rankRes.json();
+    if (topRes.ok) {
+        const raw: TopRankerEntry[] = await topRes.json();
+        topRankers.value = raw.filter(r => r.beatPt > 0);
+    }
 }
 
 async function fetchRateRanking() {
-    const res = await fetch(`${API_BASE}/api/scores/rate-ranking`);
-    if (res.ok) rateRanking.value = await res.json();
-    else throw new Error('rate');
+    const [rankRes, topRes] = await Promise.all([
+        fetch(`${API_BASE}/api/scores/rate-ranking`),
+        fetch(`${API_BASE}/api/scores/rate-ranking/top-rankers`),
+    ]);
+    if (!rankRes.ok) throw new Error('rate');
+    rateRanking.value = await rankRes.json();
+    if (topRes.ok) {
+        const raw: RateTopRankerEntry[] = await topRes.json();
+        rateTopRankers.value = raw.filter(r => r.ratePt > 0);
+    }
 }
 
 
@@ -249,30 +394,40 @@ watch(viewMode, async (mode) => {
       </div>
 
       <!-- Mode Toggle -->
-      <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl mb-6 w-fit">
-        <button
-          @click="viewMode = 'beat'"
-          class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
-          :class="viewMode === 'beat'
-            ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
-            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-        >Beat-Tier</button>
-        <button
-          v-if="showRateTier"
-          @click="viewMode = 'rate'"
-          class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
-          :class="viewMode === 'rate'
-            ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm'
-            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-        >Rate-Tier</button>
-        <button
-          v-if="isAdmin"
-          @click="viewMode = 'simulation'"
-          class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
-          :class="viewMode === 'simulation'
-            ? 'bg-white dark:bg-slate-600 text-amber-600 dark:text-amber-400 shadow-sm'
-            : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-        >難易度シミュ</button>
+      <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
+        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl w-fit">
+          <button
+            @click="viewMode = 'beat'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="viewMode === 'beat'
+              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >Beat-Tier</button>
+          <button
+            v-if="showRateTier"
+            @click="viewMode = 'rate'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="viewMode === 'rate'
+              ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >Rate-Tier</button>
+          <button
+            v-if="isAdmin"
+            @click="viewMode = 'simulation'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="viewMode === 'simulation'
+              ? 'bg-white dark:bg-slate-600 text-amber-600 dark:text-amber-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >難易度シミュ</button>
+        </div>
+        <label v-if="viewMode === 'beat' || viewMode === 'rate'" class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
+          <div class="relative inline-flex items-center">
+            <input type="checkbox" v-model="showTopRankers" class="sr-only peer">
+            <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-amber-500 dark:peer-checked:bg-amber-600 transition-colors"></div>
+            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+          </div>
+          <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">TOPランカー仮想ユーザを表示</span>
+        </label>
       </div>
 
       <!-- Loading / Error / Empty -->
@@ -303,63 +458,99 @@ watch(viewMode, async (mode) => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr v-for="(entry, idx) in paginatedBeatRanking" :key="entry.iidxId"
-                  :id="`ranking-row-${entry.iidxId}`"
-                  class="group transition-colors"
-                  :class="user && entry.iidxId === user.iidxId
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
-                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'">
-                  <td class="py-3 pl-4">
-                    <div class="flex items-center gap-2">
-                      <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
-                        :class="[
-                          beatPageStartIndex + idx === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                          beatPageStartIndex + idx === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                          beatPageStartIndex + idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
-                          user && entry.iidxId === user.iidxId ? 'bg-blue-500 text-white' :
-                          'text-slate-400 border border-slate-100 dark:border-slate-700'
-                        ]">
-                        {{ beatPageStartIndex + idx + 1 }}
+                <template v-for="(row, idx) in paginatedBeatRanking" :key="row.kind === 'user' ? `u-${row.entry.iidxId}` : `t-${row.versionName}-${row.prefectureName}`">
+                  <tr v-if="row.kind === 'user'"
+                    :id="`ranking-row-${row.entry.iidxId}`"
+                    class="group transition-colors"
+                    :class="[
+                      user && row.entry.iidxId === user.iidxId
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
+                      row.entry.userId != null ? 'cursor-pointer' : ''
+                    ]"
+                    @click="handleUserRowClick(row.entry)">
+                    <td class="py-3 pl-4">
+                      <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                          :class="[
+                            row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                            row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                            row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                            user && row.entry.iidxId === user.iidxId ? 'bg-blue-500 text-white' :
+                            'text-slate-400 border border-slate-100 dark:border-slate-700'
+                          ]">
+                          {{ row.rank }}
+                        </div>
+                        <span v-if="row.entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
+                        <span v-else-if="row.entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ row.entry.rankChange }}</span>
+                        <span v-else-if="row.entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(row.entry.rankChange) }}</span>
+                        <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
                       </div>
-                      <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
-                      <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
-                      <span v-else-if="entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(entry.rankChange) }}</span>
-                      <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
-                    </div>
-                  </td>
-                  <td class="py-3">
-                    <div class="flex items-center gap-2">
-                      <span class="font-bold text-base transition-colors"
-                        :class="user && entry.iidxId === user.iidxId
-                          ? 'text-blue-700 dark:text-blue-300'
-                          : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400'">
-                        {{ entry.displayName || 'Unnamed Player' }}
+                    </td>
+                    <td class="py-3">
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-base transition-colors"
+                          :class="user && row.entry.iidxId === user.iidxId
+                            ? 'text-blue-700 dark:text-blue-300'
+                            : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400'">
+                          {{ row.entry.displayName || 'Unnamed Player' }}
+                        </span>
+                        <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="user && row.entry.iidxId === user.iidxId"
+                          class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                      <div class="flex justify-center">
+                        <RankIcon :rank-name="getRankInfo(row.entry.totalBeatPt).name" :tier="getRankInfo(row.entry.totalBeatPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                      </div>
+                    </td>
+                    <td class="py-3 text-right">
+                      <div class="flex items-baseline justify-end gap-1">
+                        <span class="text-xl font-black tabular-nums"
+                          :class="user && row.entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
+                          {{ row.entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
+                      </div>
+                    </td>
+                    <td class="py-3 text-right pr-4">
+                      <span class="text-xs font-medium tabular-nums"
+                        :class="formatLastUpdated(row.entry.lastUpdatedAt) === t('common.today') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+                        {{ formatLastUpdated(row.entry.lastUpdatedAt) }}
                       </span>
-                      <span v-if="user && entry.iidxId === user.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
-                    </div>
-                  </td>
-                  <td class="py-3 px-2 text-center">
-                    <div class="flex justify-center">
-                      <RankIcon :rank-name="getRankInfo(entry.totalBeatPt).name" :tier="getRankInfo(entry.totalBeatPt).tier" size="md" disable-party :is-supporter="entry.isSupporter" />
-                    </div>
-                  </td>
-                  <td class="py-3 text-right">
-                    <div class="flex items-baseline justify-end gap-1">
-                      <span class="text-xl font-black tabular-nums"
-                        :class="user && entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
-                        {{ entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
-                      </span>
-                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
-                    </div>
-                  </td>
-                  <td class="py-3 text-right pr-4">
-                    <span class="text-xs font-medium tabular-nums"
-                      :class="formatLastUpdated(entry.lastUpdatedAt) === t('common.today') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
-                      {{ formatLastUpdated(entry.lastUpdatedAt) }}
-                    </span>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  <tr v-else
+                    class="bg-amber-50/50 dark:bg-amber-900/10 cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
+                    @click="handleTopRankerRowClick(row)">
+                    <td class="py-2 pl-4">
+                      <div class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-300 dark:text-slate-600 text-sm">―</div>
+                    </td>
+                    <td class="py-2">
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
+                        <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
+                          {{ row.versionName }} × {{ row.prefectureName }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-2 px-2 text-center">
+                      <div class="flex justify-center">
+                        <RankIcon :rank-name="getRankInfo(row.totalBeatPt).name" :tier="getRankInfo(row.totalBeatPt).tier" size="md" disable-party />
+                      </div>
+                    </td>
+                    <td class="py-2 text-right">
+                      <div class="flex items-baseline justify-end gap-1">
+                        <span class="text-lg font-black tabular-nums text-slate-500 dark:text-slate-400">
+                          {{ row.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
+                      </div>
+                    </td>
+                    <td class="py-2 text-right pr-4"></td>
+                  </tr>
+                </template>
               </tbody>
             </table>
             <!-- Beat Pagination -->
@@ -404,63 +595,99 @@ watch(viewMode, async (mode) => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr v-for="(entry, idx) in paginatedRateRanking" :key="entry.iidxId"
-                  :id="`ranking-row-${entry.iidxId}`"
-                  class="group transition-colors"
-                  :class="user && entry.iidxId === user.iidxId
-                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-l-emerald-500'
-                    : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'">
-                  <td class="py-3 pl-4">
-                    <div class="flex items-center gap-2">
-                      <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
-                        :class="[
-                          ratePageStartIndex + idx === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                          ratePageStartIndex + idx === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                          ratePageStartIndex + idx === 2 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
-                          user && entry.iidxId === user.iidxId ? 'bg-emerald-500 text-white' :
-                          'text-slate-400 border border-slate-100 dark:border-slate-700'
-                        ]">
-                        {{ ratePageStartIndex + idx + 1 }}
+                <template v-for="row in paginatedRateRanking" :key="row.kind === 'user' ? `u-${row.entry.iidxId}` : `t-${row.versionName}-${row.prefectureName}`">
+                  <tr v-if="row.kind === 'user'"
+                    :id="`ranking-row-${row.entry.iidxId}`"
+                    class="group transition-colors"
+                    :class="[
+                      user && row.entry.iidxId === user.iidxId
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-l-emerald-500'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
+                      row.entry.userId != null ? 'cursor-pointer' : ''
+                    ]"
+                    @click="handleUserRowClick(row.entry)">
+                    <td class="py-3 pl-4">
+                      <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                          :class="[
+                            row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                            row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                            row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                            user && row.entry.iidxId === user.iidxId ? 'bg-emerald-500 text-white' :
+                            'text-slate-400 border border-slate-100 dark:border-slate-700'
+                          ]">
+                          {{ row.rank }}
+                        </div>
+                        <span v-if="row.entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
+                        <span v-else-if="row.entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ row.entry.rankChange }}</span>
+                        <span v-else-if="row.entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(row.entry.rankChange) }}</span>
+                        <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
                       </div>
-                      <span v-if="entry.rankChange === null" class="text-[10px] font-bold text-blue-500">NEW</span>
-                      <span v-else-if="entry.rankChange > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankChange }}</span>
-                      <span v-else-if="entry.rankChange < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(entry.rankChange) }}</span>
-                      <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
-                    </div>
-                  </td>
-                  <td class="py-3">
-                    <div class="flex items-center gap-2">
-                      <span class="font-bold text-base transition-colors"
-                        :class="user && entry.iidxId === user.iidxId
-                          ? 'text-emerald-700 dark:text-emerald-300'
-                          : 'text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'">
-                        {{ entry.displayName || 'Unnamed Player' }}
+                    </td>
+                    <td class="py-3">
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-base transition-colors"
+                          :class="user && row.entry.iidxId === user.iidxId
+                            ? 'text-emerald-700 dark:text-emerald-300'
+                            : 'text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'">
+                          {{ row.entry.displayName || 'Unnamed Player' }}
+                        </span>
+                        <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="user && row.entry.iidxId === user.iidxId"
+                          class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500 text-white">{{ t('ranking.you') }}</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                      <div class="flex justify-center">
+                        <RankIcon :rank-name="getRateTierRankInfo(row.entry.totalRatePt).name" :tier="getRateTierRankInfo(row.entry.totalRatePt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                      </div>
+                    </td>
+                    <td class="py-3 text-right">
+                      <div class="flex items-baseline justify-end gap-1">
+                        <span class="text-xl font-black tabular-nums"
+                          :class="user && row.entry.iidxId === user.iidxId ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'">
+                          {{ row.entry.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        </span>
+                        <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">RATE-PT</span>
+                      </div>
+                    </td>
+                    <td class="py-3 text-right pr-4">
+                      <span class="text-xs font-medium tabular-nums"
+                        :class="formatLastUpdated(row.entry.lastUpdatedAt) === t('common.today') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+                        {{ formatLastUpdated(row.entry.lastUpdatedAt) }}
                       </span>
-                      <span v-if="user && entry.iidxId === user.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500 text-white">{{ t('ranking.you') }}</span>
-                    </div>
-                  </td>
-                  <td class="py-3 px-2 text-center">
-                    <div class="flex justify-center">
-                      <RankIcon :rank-name="getRateTierRankInfo(entry.totalRatePt).name" :tier="getRateTierRankInfo(entry.totalRatePt).tier" size="md" disable-party :is-supporter="entry.isSupporter" />
-                    </div>
-                  </td>
-                  <td class="py-3 text-right">
-                    <div class="flex items-baseline justify-end gap-1">
-                      <span class="text-xl font-black tabular-nums"
-                        :class="user && entry.iidxId === user.iidxId ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'">
-                        {{ entry.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
-                      </span>
-                      <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">RATE-PT</span>
-                    </div>
-                  </td>
-                  <td class="py-3 text-right pr-4">
-                    <span class="text-xs font-medium tabular-nums"
-                      :class="formatLastUpdated(entry.lastUpdatedAt) === t('common.today') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
-                      {{ formatLastUpdated(entry.lastUpdatedAt) }}
-                    </span>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  <tr v-else
+                    class="bg-amber-50/50 dark:bg-amber-900/10 cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
+                    @click="handleTopRankerRowClick(row)">
+                    <td class="py-2 pl-4">
+                      <div class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-300 dark:text-slate-600 text-sm">―</div>
+                    </td>
+                    <td class="py-2">
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
+                        <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
+                          {{ row.versionName }} × {{ row.prefectureName }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-2 px-2 text-center">
+                      <div class="flex justify-center">
+                        <RankIcon :rank-name="getRateTierRankInfo(row.totalRatePt).name" :tier="getRateTierRankInfo(row.totalRatePt).tier" size="md" disable-party />
+                      </div>
+                    </td>
+                    <td class="py-2 text-right">
+                      <div class="flex items-baseline justify-end gap-1">
+                        <span class="text-lg font-black tabular-nums text-slate-500 dark:text-slate-400">
+                          {{ row.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        </span>
+                        <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">RATE-PT</span>
+                      </div>
+                    </td>
+                    <td class="py-2 text-right pr-4"></td>
+                  </tr>
+                </template>
               </tbody>
             </table>
             <!-- Rate Pagination -->

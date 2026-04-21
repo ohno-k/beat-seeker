@@ -1,9 +1,12 @@
 package com.beatseeker.backend.service;
 
+import com.beatseeker.backend.entity.DifficultyRank;
+import com.beatseeker.backend.entity.DifficultyRankSong;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
@@ -27,6 +30,7 @@ public class ScoreRecalculationService {
     private final ScoreRepository scoreRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     private final SongDefinitionRepository songDefinitionRepository;
+    private final DifficultyRankRepository difficultyRankRepository;
     private final ObjectMapper objectMapper;
 
     // Weights configuration mapped from beatTier.ts
@@ -55,12 +59,70 @@ public class ScoreRecalculationService {
             {100.0, 512.0}
     };
 
-    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, ObjectMapper objectMapper) {
+    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, DifficultyRankRepository difficultyRankRepository, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.songDefinitionRepository = songDefinitionRepository;
+        this.difficultyRankRepository = difficultyRankRepository;
         this.objectMapper = objectMapper;
+    }
+
+    /**
+     * Calculates total BEAT-PT for the given scores using the active song definitions and
+     * difficulty-rank tables stored in DB. Used as a server-side fallback when the stored
+     * total_beat_pt is missing or zero (e.g. legacy logs).
+     */
+    public double calculateBeatPtFromActiveData(List<Score> scores) {
+        List<SongDefinition> activeSongs = songDefinitionRepository.findByRevision("active");
+        Map<String, Integer> songMaxScores = new HashMap<>();
+        for (SongDefinition s : activeSongs) {
+            if (s.getNotes() != null && s.getNotes() > 0) {
+                songMaxScores.put(s.getTitle() + "_" + s.getDifficulty(), s.getNotes() * 2);
+            }
+        }
+
+        Map<String, String> informalRanks = new HashMap<>();
+        List<DifficultyRank> ranks = difficultyRankRepository.findByRevisionOrderBySortOrderAsc("active");
+        for (DifficultyRank rank : ranks) {
+            String rankText = rank.getRankValue();
+            for (DifficultyRankSong song : rank.getSongs()) {
+                String songTitle = song.getSongTitle() == null ? "" : song.getSongTitle().trim();
+                if (songTitle.isEmpty()) continue;
+                if (songTitle.endsWith("[L]")) {
+                    String baseTitle = songTitle.substring(0, songTitle.length() - 3).trim();
+                    informalRanks.put(baseTitle + "_LEGGENDARIA", rankText);
+                } else {
+                    informalRanks.put(songTitle + "_ANOTHER", rankText);
+                }
+            }
+        }
+        System.out.println("[calcBeat] songMaxScores=" + songMaxScores.size() + " informalRanks=" + informalRanks.size() + " scores=" + scores.size());
+
+        List<Double> beatPts = new ArrayList<>();
+        int matchedRank = 0;
+        int matchedMax = 0;
+        for (Score score : scores) {
+            if ("---".equals(score.getClearType()) || "NO PLAY".equals(score.getClearType())) continue;
+            String diffName = normalizeDiffName(score.getDifficultyName());
+            String code = getDifficultyCode(diffName);
+            if (code == null) continue;
+            Integer maxScore = songMaxScores.get(score.getTitle() + "_" + code);
+            if (maxScore == null || maxScore == 0) continue;
+            matchedMax++;
+            double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
+            String informalRankString = informalRanks.get(score.getTitle() + "_" + diffName);
+            if (informalRankString != null) matchedRank++;
+            boolean isHyperNonTarget = "HYPER".equals(diffName) && score.getDifficultyLevel() != null && score.getDifficultyLevel() >= 11;
+            if (isHyperNonTarget) continue;
+            double pt = calculatePoints(scoreRate, informalRankString);
+            if (pt > 0) beatPts.add(pt);
+        }
+        System.out.println("[calcBeat] matchedMax=" + matchedMax + " matchedRank=" + matchedRank + " beatPts=" + beatPts.size());
+        beatPts.sort(Collections.reverseOrder());
+        double total = 0;
+        for (int i = 0; i < Math.min(100, beatPts.size()); i++) total += beatPts.get(i);
+        return Math.round(total * 10.0) / 10.0;
     }
 
     /**
@@ -77,6 +139,7 @@ public class ScoreRecalculationService {
         }
 
         List<Double> ratePts = new ArrayList<>();
+        int perfectRateCount = 0;
         for (Score score : scores) {
             String diffName = normalizeDiffName(score.getDifficultyName());
             boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
@@ -89,10 +152,12 @@ public class ScoreRecalculationService {
             if (scoreRate <= 0) continue;
             double rPt = calculateScoreRateTierPoints(scoreRate);
             if (rPt > 0) ratePts.add(rPt);
+            if (scoreRate >= 100.0) perfectRateCount++;
         }
         ratePts.sort(Collections.reverseOrder());
         double totalRatePtAcc = 0;
         for (int i = 0; i < Math.min(100, ratePts.size()); i++) totalRatePtAcc += ratePts.get(i);
+        if (perfectRateCount > 100) totalRatePtAcc += (perfectRateCount - 100);
         return Math.round(totalRatePtAcc * 10.0) / 10.0;
     }
 
@@ -151,6 +216,7 @@ public class ScoreRecalculationService {
 
         List<Double> beatPts = new ArrayList<>();
         List<Double> ratePts = new ArrayList<>();
+        int perfectRateCount = 0;
 
         long totalScore = 0;
         int fcCount = 0;
@@ -198,6 +264,7 @@ public class ScoreRecalculationService {
             if (isRateEligible && scoreRate > 0) {
                 double rPt = calculateScoreRateTierPoints(scoreRate);
                 if (rPt > 0) ratePts.add(rPt);
+                if (scoreRate >= 100.0) perfectRateCount++;
             }
         }
 
@@ -209,6 +276,7 @@ public class ScoreRecalculationService {
         ratePts.sort(Collections.reverseOrder());
         double totalRatePtAcc = 0;
         for (int i = 0; i < Math.min(100, ratePts.size()); i++) totalRatePtAcc += ratePts.get(i);
+        if (perfectRateCount > 100) totalRatePtAcc += (perfectRateCount - 100);
         double finalRatePt = Math.round(totalRatePtAcc * 10.0) / 10.0;
 
         List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
@@ -252,6 +320,7 @@ public class ScoreRecalculationService {
             // Calculate current rate-pt from user's scores
             List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
             List<Double> ratePts = new ArrayList<>();
+            int perfectRateCount = 0;
             for (Score score : scores) {
                 String diffName = normalizeDiffName(score.getDifficultyName());
                 boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
@@ -264,10 +333,12 @@ public class ScoreRecalculationService {
                 if (scoreRate <= 0) continue;
                 double rPt = calculateScoreRateTierPoints(scoreRate);
                 if (rPt > 0) ratePts.add(rPt);
+                if (scoreRate >= 100.0) perfectRateCount++;
             }
             ratePts.sort(Collections.reverseOrder());
             double totalRatePtAcc = 0;
             for (int i = 0; i < Math.min(100, ratePts.size()); i++) totalRatePtAcc += ratePts.get(i);
+            if (perfectRateCount > 100) totalRatePtAcc += (perfectRateCount - 100);
             double calculatedRatePt = Math.round(totalRatePtAcc * 10.0) / 10.0;
             if (calculatedRatePt <= 0) continue;
 

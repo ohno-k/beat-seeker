@@ -24,6 +24,7 @@ export interface ScoreRecord {
     beatTierPoints: number;
     maxBeatTierPoints: number;
     memo?: string;
+    djName?: string;
 }
 
 const difficulties = ['beginner', 'normal', 'hyper', 'another', 'leggendaria'] as const;
@@ -109,7 +110,8 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
     scores.forEach(song => {
         difficulties.forEach(diff => {
             const stats = song[diff as keyof ScoreData] as any;
-            if (stats && stats.clearType !== 'NO PLAY' && stats.clearType !== '---') {
+            const hasActivity = stats && ((stats.clearType !== 'NO PLAY' && stats.clearType !== '---') || stats.score > 0);
+            if (hasActivity) {
 
                 let scoreRate = -1;
                 let maxScore = 0;
@@ -160,7 +162,8 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                     lastPlayTime: song.lastPlayTime,
                     beatTierPoints: beatTierPoints,
                     maxBeatTierPoints: getMaxPoints(informalRank),
-                    memo: stats.memo
+                    memo: stats.memo,
+                    djName: stats.djName
                 });
             }
         });

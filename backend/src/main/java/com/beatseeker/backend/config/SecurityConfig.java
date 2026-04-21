@@ -47,15 +47,26 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/game-data/**").permitAll()
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/rate-ranking",
+                                                                "/api/scores/ranking/arena-averages",
+                                                                "/api/scores/ranking/top-rankers",
+                                                                "/api/scores/rate-ranking/arena-averages",
+                                                                "/api/scores/rate-ranking/top-rankers",
+                                                                "/api/scores/song-top-rankers",
+                                                                "/api/scores/top-ranker-profile",
                                                                 "/api/scores/all-user-scores",
                                                                 "/api/scores/song-arena-averages",
                                                                 "/api/scores/song-avg-score-rates",
+                                                                "/api/scores/user-tier-totals/**",
                                                                 "/api/scores/debug-ranking",
                                                                 "/api/scores/debug-user-scores/**", "/api/friends/test",
                                                                 "/api/test-root")
                                                 .permitAll()
                                                 .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                                                 .requestMatchers("/api/activity/feed").permitAll()
+                                                .requestMatchers("/api/users/*/profile", "/api/users/*/scores",
+                                                                "/api/users/*/history")
+                                                .permitAll()
+                                                .requestMatchers("/api/users/*/friend-status").authenticated()
                                                 .requestMatchers("/api/kofi/webhook").permitAll()
                                                 .requestMatchers("/api/auth/me", "/api/auth/me/profile").authenticated()
                                                 .requestMatchers("/api/notifications/**").authenticated()

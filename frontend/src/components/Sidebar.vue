@@ -350,7 +350,7 @@ const filteredNavItems = computed(() => {
         <!-- Sidebar Footer -->
         <div class="p-6 pt-0 text-center">
           <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-            v1.4.0 | beat-seeker
+            v1.5.0 | beat-seeker
           </p>
         </div>
       </div>

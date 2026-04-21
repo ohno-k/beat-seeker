@@ -32,7 +32,8 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS prev_latest " +
             ") " +
-            "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
+            "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
+            "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
             "       cr.total_beat_pt AS \"totalBeatPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
@@ -97,7 +98,8 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS prev_latest " +
             ") " +
-            "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
+            "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
+            "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
             "       cr.total_rate_pt AS \"totalRatePt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
@@ -108,4 +110,45 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
             "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getRateTierRanking();
+
+    @Query(value =
+            "SELECT u.arena_rank AS \"arenaRank\", " +
+            "       AVG(cr.total_beat_pt) AS \"avgBeatPt\", " +
+            "       COUNT(*) AS \"userCount\" " +
+            "FROM ( " +
+            "    SELECT DISTINCT ON (user_id) user_id, total_beat_pt " +
+            "    FROM score_history_logs " +
+            "    ORDER BY user_id, uploaded_at DESC " +
+            ") cr " +
+            "JOIN users u ON cr.user_id = u.id " +
+            "WHERE u.arena_rank IS NOT NULL AND u.arena_rank <> '' " +
+            "GROUP BY u.arena_rank " +
+            "ORDER BY AVG(cr.total_beat_pt) DESC", nativeQuery = true)
+    List<Map<String, Object>> getArenaRankAverageBeatPt();
+
+    @Query(value =
+            "SELECT u.arena_rank AS \"arenaRank\", " +
+            "       AVG(cr.total_rate_pt) AS \"avgRatePt\", " +
+            "       COUNT(*) AS \"userCount\" " +
+            "FROM ( " +
+            "    SELECT DISTINCT ON (user_id) user_id, total_rate_pt " +
+            "    FROM score_history_logs " +
+            "    WHERE total_rate_pt > 0 " +
+            "    ORDER BY user_id, uploaded_at DESC " +
+            ") cr " +
+            "JOIN users u ON cr.user_id = u.id " +
+            "WHERE u.arena_rank IS NOT NULL AND u.arena_rank <> '' " +
+            "GROUP BY u.arena_rank " +
+            "ORDER BY AVG(cr.total_rate_pt) DESC", nativeQuery = true)
+    List<Map<String, Object>> getArenaRankAverageRatePt();
+
+    @Query(value =
+            "SELECT MAX(total_beat_pt) FROM score_history_logs " +
+            "WHERE user_id = :userId", nativeQuery = true)
+    Double getLatestTotalBeatPtByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
+
+    @Query(value =
+            "SELECT MAX(total_rate_pt) FROM score_history_logs " +
+            "WHERE user_id = :userId", nativeQuery = true)
+    Double getLatestTotalRatePtByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
 }

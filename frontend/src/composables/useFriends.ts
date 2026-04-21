@@ -12,6 +12,17 @@ export interface Friend {
     hasSentRequest?: boolean;
 }
 
+export interface VirtualRival {
+    id: number;
+    versionNum: number;
+    versionName: string;
+    prefectureFileNum: number;
+    prefectureName: string;
+    totalBeatPt: number;
+    totalRatePt: number;
+    createdAt: string | null;
+}
+
 export interface PendingRequest {
     id: number;
     senderId: number;
@@ -159,6 +170,59 @@ export function useFriends() {
         }
     };
 
+    const fetchVirtualRivals = async (): Promise<VirtualRival[]> => {
+        try {
+            const res = await fetch(`${API_BASE}/api/friends/virtual-rivals`, {
+                headers: authHeaders()
+            });
+            if (!res.ok) return [];
+            return await res.json();
+        } catch {
+            return [];
+        }
+    };
+
+    const fetchVirtualRivalStatus = async (versionNum: number, prefectureFileNum: number): Promise<boolean> => {
+        try {
+            const url = `${API_BASE}/api/friends/virtual-rivals/status?versionNum=${versionNum}&prefectureFileNum=${prefectureFileNum}`;
+            const res = await fetch(url, { headers: authHeaders() });
+            if (!res.ok) return false;
+            const data = await res.json();
+            return !!data.registered;
+        } catch {
+            return false;
+        }
+    };
+
+    const addVirtualRival = async (payload: {
+        versionNum: number;
+        prefectureFileNum: number;
+        versionName?: string;
+        prefectureName?: string;
+    }) => {
+        const res = await fetch(`${API_BASE}/api/friends/virtual-rivals`, {
+            method: 'POST',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.message || 'ライバル登録に失敗しました');
+        }
+    };
+
+    const removeVirtualRival = async (versionNum: number, prefectureFileNum: number) => {
+        const url = `${API_BASE}/api/friends/virtual-rivals?versionNum=${versionNum}&prefectureFileNum=${prefectureFileNum}`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: authHeaders()
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.message || 'ライバル解除に失敗しました');
+        }
+    };
+
     const updatePushSubscription = async (subscription: string) => {
         try {
             await fetch(`${API_BASE}/api/friends/push-subscription`, {
@@ -276,5 +340,9 @@ export function useFriends() {
         requestNotificationPermission,
         fetchAppNotifications,
         markAllNotificationsRead,
+        fetchVirtualRivals,
+        fetchVirtualRivalStatus,
+        addVirtualRival,
+        removeVirtualRival,
     };
 }

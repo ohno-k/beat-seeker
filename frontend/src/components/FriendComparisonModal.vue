@@ -7,6 +7,7 @@ import type { ScoreData } from '../types/ScoreData';
 
 const props = defineProps<{
   friend: Friend;
+  virtualArea?: { versionNum: number; prefectureFileNum: number } | null;
   isOpen: boolean;
 }>();
 
@@ -15,7 +16,7 @@ const emit = defineEmits<{
 }>();
 
 const { fetchFriendScores, isLoading: isFriendLoading } = useFriends();
-const { fetchMyScores, isFetching: isMyLoading } = useScores();
+const { fetchMyScores, fetchTopRankerProfile, isFetching: isMyLoading } = useScores();
 
 const myProcessedScores = ref<ScoreRecord[]>([]);
 const friendProcessedScores = ref<ScoreRecord[]>([]);
@@ -26,24 +27,54 @@ const isLoading = computed(() => isFriendLoading.value || isMyLoading.value);
 const loadData = async () => {
   if (!props.isOpen) return;
   error.value = null;
+  console.log('[FriendComparisonModal] loadData called', {
+    isOpen: props.isOpen,
+    virtualArea: props.virtualArea,
+    friendId: props.friend.id,
+  });
   try {
-    const [myRaw, friendRaw] = await Promise.all([
-      fetchMyScores(),
-      fetchFriendScores(props.friend.id)
-    ]);
-    
-    myProcessedScores.value = flattenScores(myRaw);
-    friendProcessedScores.value = flattenScores(groupScores(friendRaw));
+    if (props.virtualArea) {
+      console.log('[FriendComparisonModal] virtual path', props.virtualArea);
+      const [myRaw, topRanker] = await Promise.all([
+        fetchMyScores(),
+        fetchTopRankerProfile(props.virtualArea.versionNum, props.virtualArea.prefectureFileNum)
+      ]);
+      console.log('[FriendComparisonModal] virtual fetch done', {
+        mySize: myRaw.length,
+        topRankerScoresSize: topRanker.scores.length,
+      });
+      myProcessedScores.value = flattenScores(myRaw);
+      friendProcessedScores.value = flattenScores(topRanker.scores);
+    } else {
+      console.log('[FriendComparisonModal] regular friend path', props.friend.id);
+      const [myRaw, friendRaw] = await Promise.all([
+        fetchMyScores(),
+        fetchFriendScores(props.friend.id)
+      ]);
+      myProcessedScores.value = flattenScores(myRaw);
+      friendProcessedScores.value = flattenScores(groupScores(friendRaw));
+    }
   } catch (e: any) {
+    console.error('[FriendComparisonModal] loadData error', e);
     error.value = e.message;
   }
 };
 
 onMounted(() => {
+  console.log('[FriendComparisonModal] onMounted', {
+    isOpen: props.isOpen,
+    virtualArea: props.virtualArea,
+    friendId: props.friend.id,
+  });
   if (props.isOpen) loadData();
 });
 
-watch(() => [props.isOpen, props.friend.id], ([open]) => {
+watch(() => [props.isOpen, props.friend.id, props.virtualArea?.versionNum, props.virtualArea?.prefectureFileNum], ([open]) => {
+  console.log('[FriendComparisonModal] watch triggered', {
+    isOpen: props.isOpen,
+    virtualArea: props.virtualArea,
+    friendId: props.friend.id,
+  });
   if (open) loadData();
 });
 

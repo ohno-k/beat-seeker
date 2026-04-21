@@ -53,6 +53,19 @@
           Next: {{ nextRankInfo.nextRank.name }} {{ nextRankInfo.nextRank.tier || '' }}<br/>
           {{ t('dashboard.remaining') }} ({{ nextRankInfo.nextRank.minPoints - totalPoints > 0 ? (nextRankInfo.nextRank.minPoints - totalPoints).toFixed(1) : 0 }} pt)
         </p>
+        <!-- DJ Name pie (topRanker only) -->
+        <div v-if="isTopRankerView && beatTierDjPie.length > 0" class="w-full mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 z-10 flex flex-col sm:flex-row items-center gap-4">
+          <svg viewBox="0 0 100 100" class="w-24 h-24 shrink-0" role="img" aria-label="DJNAME別 対象入り曲 内訳">
+            <path v-for="(slice, i) in beatTierDjPie" :key="i" :d="slice.path" :fill="slice.color" stroke="white" stroke-width="0.5" />
+          </svg>
+          <ul class="flex-1 w-full grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-1 max-h-[28rem] overflow-y-auto text-[10px] sm:text-[11px]">
+            <li v-for="(slice, i) in beatTierDjPie" :key="i" class="flex items-center gap-1.5 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: slice.color }"></span>
+              <span class="truncate font-bold text-slate-700 dark:text-slate-200" :title="slice.name">{{ slice.name }}</span>
+              <span class="ml-auto tabular-nums text-slate-500 dark:text-slate-400 shrink-0">{{ slice.count }}曲 ({{ slice.pct.toFixed(0) }}%)</span>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <!-- Rate-Tier (全難度 ANOTHER/LEGGENDARIA) -->
@@ -88,13 +101,26 @@
           Next: {{ rateTierNextRankInfo.nextRank.name }} {{ rateTierNextRankInfo.nextRank.tier || '' }}<br/>
           {{ t('dashboard.remaining') }} ({{ rateTierNextRankInfo.nextRank.minPoints - rateTierPoints > 0 ? (rateTierNextRankInfo.nextRank.minPoints - rateTierPoints).toFixed(1) : 0 }} pt)
         </p>
+        <!-- DJ Name pie (topRanker only) -->
+        <div v-if="isTopRankerView && rateTierDjPie.length > 0" class="w-full mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 z-10 flex flex-col sm:flex-row items-center gap-4">
+          <svg viewBox="0 0 100 100" class="w-24 h-24 shrink-0" role="img" aria-label="DJNAME別 対象入り曲 内訳">
+            <path v-for="(slice, i) in rateTierDjPie" :key="i" :d="slice.path" :fill="slice.color" stroke="white" stroke-width="0.5" />
+          </svg>
+          <ul class="flex-1 w-full grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-1 max-h-[28rem] overflow-y-auto text-[10px] sm:text-[11px]">
+            <li v-for="(slice, i) in rateTierDjPie" :key="i" class="flex items-center gap-1.5 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: slice.color }"></span>
+              <span class="truncate font-bold text-slate-700 dark:text-slate-200" :title="slice.name">{{ slice.name }}</span>
+              <span class="ml-auto tabular-nums text-slate-500 dark:text-slate-400 shrink-0">{{ slice.count }}曲 ({{ slice.pct.toFixed(0) }}%)</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
     <!-- Ranking + Lv12 Stats Row -->
-    <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
+    <div v-if="!isTopRankerView && !isPrivateView" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
         <!-- Ranking Position -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
+        <div v-if="!isTopRankerView && !isPrivateView" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
           <div>
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ t('dashboard.currentRank') }}</p>
             <div class="flex items-end gap-3">
@@ -128,7 +154,7 @@
         </div>
 
         <!-- Lv12 Quick Stats (fixed, no settings needed) -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-auto">
+        <div v-if="!isTopRankerView && !isPrivateView" class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-auto">
           <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50/50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700">
             <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ t('dashboard.lv12Total') }}</p>
             <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-700 dark:text-slate-200">{{ lv12Total }}</h3>
@@ -154,14 +180,22 @@
         </div>
     </div>
 
+    <!-- Private user notice: hide per-song breakdowns since scores are unavailable -->
+    <div v-if="isPrivateView" class="bg-amber-50 dark:bg-amber-900/20 p-5 rounded-2xl border border-amber-200 dark:border-amber-800 text-center">
+      <div class="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-bold">
+        <span>🔒</span>
+        <span>{{ t('dashboard.privateUserNotice') }}</span>
+      </div>
+    </div>
+
     <!-- Unofficial Difficulty Table -->
-    <UnofficialDifficultyTable :scores="allFlattenedScores" />
+    <UnofficialDifficultyTable v-if="!isPrivateView" :scores="allFlattenedScores" />
 
     <!-- Rank Up Advice -->
-    <RankUpAdvice :flat-scores="allFlattenedScores" :total-points="props.totalPoints" />
+    <RankUpAdvice v-if="!isPrivateView" :flat-scores="allFlattenedScores" :total-points="props.totalPoints" />
 
     <!-- Activity Feed (全体ニュース) -->
-    <ActivityFeed />
+    <ActivityFeed v-if="!isPrivateView" />
 
     <!-- Info Modal -->
     <BeatTierInfoModal v-if="showInfoModal" @close="showInfoModal = false" />
@@ -196,9 +230,84 @@ const props = defineProps<{
   totalPoints: number;
   viewingIidxId?: string;
   viewingDisplayName?: string;
+  viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | 'private' | null;
+  rateTierPointsOverride?: number | null;
 }>();
 
 const isViewingOther = computed(() => !!props.viewingIidxId);
+const isTopRankerView = computed(() => props.viewingMode === 'topRanker');
+const isPrivateView = computed(() => props.viewingMode === 'private');
+
+// DJ palette for pie slices
+const DJ_PALETTE = [
+  '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+  '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
+  '#06b6d4', '#a855f7', '#eab308', '#22c55e', '#f43f5e'
+];
+
+function buildPieSlices(entries: { name: string; count: number }[]) {
+  const total = entries.reduce((s, e) => s + e.count, 0);
+  if (total === 0) return [] as Array<{ name: string; count: number; pct: number; color: string; path: string }>;
+  let angle = -Math.PI / 2;
+  return entries.map((e, i) => {
+    const sweep = (e.count / total) * 2 * Math.PI;
+    const x1 = 50 + 40 * Math.cos(angle);
+    const y1 = 50 + 40 * Math.sin(angle);
+    const endAngle = angle + sweep;
+    const x2 = 50 + 40 * Math.cos(endAngle);
+    const y2 = 50 + 40 * Math.sin(endAngle);
+    const largeArc = sweep > Math.PI ? 1 : 0;
+    let path: string;
+    if (entries.length === 1) {
+      path = 'M10,50 A40,40 0 1,1 90,50 A40,40 0 1,1 10,50 Z';
+    } else {
+      path = `M50,50 L${x1.toFixed(3)},${y1.toFixed(3)} A40,40 0 ${largeArc},1 ${x2.toFixed(3)},${y2.toFixed(3)} Z`;
+    }
+    angle = endAngle;
+    return {
+      name: e.name,
+      count: e.count,
+      pct: (e.count / total) * 100,
+      color: DJ_PALETTE[i % DJ_PALETTE.length],
+      path
+    };
+  });
+}
+
+const beatTierDjPie = computed(() => {
+  if (!isTopRankerView.value) return [];
+  const top100 = [...allFlattenedScores.value]
+    .filter(s => s.beatTierPoints > 0)
+    .sort((a, b) => b.beatTierPoints - a.beatTierPoints)
+    .slice(0, 100);
+  const counts = new Map<string, number>();
+  for (const s of top100) {
+    const name = (s.djName && s.djName.trim()) || '(不明)';
+    counts.set(name, (counts.get(name) || 0) + 1);
+  }
+  const entries = Array.from(counts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+  return buildPieSlices(entries);
+});
+
+const rateTierDjPie = computed(() => {
+  if (!isTopRankerView.value) return [];
+  const top100 = allFlattenedScores.value
+    .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
+    .map(s => ({ djName: (s.djName && s.djName.trim()) || '(不明)', pt: calculateScoreRateTierPoints(s.scoreRate) }))
+    .filter(e => e.pt > 0)
+    .sort((a, b) => b.pt - a.pt)
+    .slice(0, 100);
+  const counts = new Map<string, number>();
+  for (const e of top100) {
+    counts.set(e.djName, (counts.get(e.djName) || 0) + 1);
+  }
+  const entries = Array.from(counts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+  return buildPieSlices(entries);
+});
 
 const showInfoModal = ref(false);
 const showRateInfoModal = ref(false);
@@ -210,15 +319,21 @@ const nextRankInfo = computed(() => getNextRankInfo(props.totalPoints));
 // Flat Scores processing
 const allFlattenedScores = computed(() => flattenScores(props.scores));
 
-// Rate-Tier: top 100 ANOTHER/LEGGENDARIA songs across all levels
+// Rate-Tier: top 100 ANOTHER/LEGGENDARIA songs across all levels.
+// Matches backend ScoreRecalculationService: perfect-rate (100%) songs beyond top 100
+// contribute +1 pt each as an overflow bonus.
 const rateTierPoints = computed(() => {
-  const top100 = allFlattenedScores.value
-    .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
+  if (props.rateTierPointsOverride != null) return props.rateTierPointsOverride;
+  const eligible = allFlattenedScores.value
+    .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0);
+  const pts = eligible
     .map(s => calculateScoreRateTierPoints(s.scoreRate))
     .filter(pt => pt > 0)
-    .sort((a, b) => b - a)
-    .slice(0, 100);
-  const sum = top100.reduce((acc, pt) => acc + pt, 0);
+    .sort((a, b) => b - a);
+  const top100 = pts.slice(0, 100);
+  let sum = top100.reduce((acc, pt) => acc + pt, 0);
+  const perfectRateCount = eligible.filter(s => s.scoreRate >= 100.0).length;
+  if (perfectRateCount > 100) sum += (perfectRateCount - 100);
   return Math.round(sum * 10) / 10;
 });
 const rateTierRankInfo = computed(() => getRateTierRankInfo(rateTierPoints.value));

@@ -36,7 +36,14 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScoresWithUserInfo();
 
     @Query(value =
-        "SELECT u.display_name as \"displayName\", s.score as \"score\", " +
+        "SELECT u.id as \"userId\", u.iidx_id as \"iidxId\", u.display_name as \"displayName\", " +
+        "COALESCE(u.privacy_level, 1) as \"privacyLevel\", " +
+        "s.score as \"score\", " +
+        "s.clear_type as \"clearType\", " +
+        "s.dj_level as \"djLevel\", " +
+        "s.pgreat as \"pgreat\", " +
+        "s.great as \"great\", " +
+        "s.miss_count as \"missCount\", " +
         "COALESCE(latest.total_beat_pt, 0) as \"totalBeatPt\" " +
         "FROM scores s " +
         "JOIN users u ON s.user_id = u.id " +

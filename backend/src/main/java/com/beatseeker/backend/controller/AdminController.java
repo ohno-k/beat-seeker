@@ -10,6 +10,7 @@ import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.beatseeker.backend.service.ScoreRecalculationService;
+import com.beatseeker.backend.service.TopRankersBeatPtService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ public class AdminController {
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     private final ArenaMatchRepository arenaMatchRepository;
     private final ScoreRecalculationService scoreRecalculationService;
+    private final TopRankersBeatPtService topRankersBeatPtService;
     private final ObjectMapper objectMapper;
 
     @PersistenceContext
@@ -41,12 +43,14 @@ public class AdminController {
                            ScoreHistoryLogRepository scoreHistoryLogRepository,
                            ArenaMatchRepository arenaMatchRepository,
                            ScoreRecalculationService scoreRecalculationService,
+                           TopRankersBeatPtService topRankersBeatPtService,
                            ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.arenaMatchRepository = arenaMatchRepository;
         this.scoreRecalculationService = scoreRecalculationService;
+        this.topRankersBeatPtService = topRankersBeatPtService;
         this.objectMapper = objectMapper;
     }
 
@@ -238,6 +242,8 @@ public class AdminController {
 
         try {
             scoreRecalculationService.recalculateAllUsersAsync(req.songDataJson(), req.difficultyTableJson());
+            // Song data / difficulty table changed → refresh top-rankers BEAT-PT cache too.
+            new Thread(() -> topRankersBeatPtService.recompute(), "top-rankers-recompute").start();
             return ResponseEntity.accepted().body(Map.of("message", "Recalculation started in background"));
         } catch (Exception e) {
             e.printStackTrace();
