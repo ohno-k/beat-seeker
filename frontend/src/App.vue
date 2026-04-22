@@ -22,7 +22,7 @@
  *  - `useI18n`: 多言語化
  *  - `useAprilFools`: エイプリルフール演出フラグ
  */
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import ResetPasswordView from './views/ResetPasswordView.vue';
 import CsvDropzone from './components/CsvDropzone.vue';
 import UnifiedImport from './components/UnifiedImport.vue';
@@ -102,13 +102,17 @@ const reloadPage = () => window.location.reload();
 
 /**
  * 【関数の役割】 OCR で曲がマッチしたときの処理。
- *  - 認識した曲名を `ocrPrefilledSearch` に入れ、譜面一覧タブに切替
- *  - ChartListView が watch で拾い、検索欄にセット
+ *  - スコア一覧タブに切替し、ScoreSummary の詳細モーダルを曲名で開く。
+ *  - ScoreSummary は ☆11/☆12 ANOTHER/LEGGENDARIA しか扱わないため、範囲外の曲は
+ *    `openSongByTitle` が false を返す。その場合は何も開かない（仕様）。
  */
-const handleOcrMatched = (song: SongDataEntry) => {
-  ocrPrefilledSearch.value = song.title;
+const scoreSummaryRef = ref<InstanceType<typeof ScoreSummary> | null>(null);
+const handleOcrMatched = async (song: SongDataEntry) => {
   isOcrSearchModalOpen.value = false;
-  activeTab.value = 'chart-list';
+  activeTab.value = 'table';
+  // v-show で常にマウントされているはずだが、初回描画タイミングを保険で待つ
+  await nextTick();
+  scoreSummaryRef.value?.openSongByTitle(song.title);
 };
 
 /** ログイン中ユーザーまたは閲覧対象ユーザーのスコアデータ（曲単位）。 */
@@ -152,8 +156,6 @@ const isAdminModalOpen = ref(false);
 const isOnboardingOpen = ref(false);
 /** カメラ OCR 曲検索モーダルの開閉。サイドバーの「カメラで曲検索」ボタンから起動。 */
 const isOcrSearchModalOpen = ref(false);
-/** OCR でマッチした曲名を譜面一覧に引き継ぐための一時保持。 */
-const ocrPrefilledSearch = ref<string>('');
 
 /** 現在閲覧中のユーザー ID（自分閲覧時は null）。 */
 const viewingUserId = ref<number | null>(null);
@@ -1704,13 +1706,9 @@ const handleUnifiedClose = async () => {
           <DifficultyTableView class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
-        <!-- 譜面一覧: OCR 検索で特定した曲を検索欄にプリセット可能 -->
+        <!-- 譜面一覧 -->
         <template v-else-if="activeTab === 'chart-list'">
-          <ChartListView
-            class="w-full max-w-6xl mx-auto animate-fade-in"
-            :initial-search="ocrPrefilledSearch"
-            @consumed-initial-search="ocrPrefilledSearch = ''"
-          />
+          <ChartListView class="w-full max-w-6xl mx-auto animate-fade-in" />
         </template>
 
         <!-- ランク比較（特定ユーザーのみ表示） -->
@@ -1843,6 +1841,7 @@ const handleUnifiedClose = async () => {
 
             <!-- スコア一覧タブ: ScoreSummary が BEAT-TIER / RATE-TIER モード切替と詳細モーダルを担当 -->
             <ScoreSummary
+              ref="scoreSummaryRef"
               v-show="activeTab === 'table'"
               :scores="scoreData"
               :viewing-mode="viewingMode"

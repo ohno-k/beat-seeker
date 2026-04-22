@@ -2317,6 +2317,23 @@ const getDjLevelBgColor = (djLevel: string) => {
     default: return isDarkMode.value ? 'bg-slate-700' : 'bg-slate-200';
   }
 };
+
+/**
+ * 【外部公開】 曲名からレコードを引いて詳細モーダルを開く。
+ * OCR カメラ検索などの外部導線から呼ばれる。allRecords は ☆11/☆12 ANOTHER/LEGGENDARIA
+ * のみを含むため、範囲外の曲は見つからず false を返す（呼び出し側で「開かない」判断に使える）。
+ * ANOTHER → LEGGENDARIA → その他 の順で優先してマッチさせる。
+ */
+const openSongByTitle = (title: string): boolean => {
+  const records = allRecords.value;
+  const exact = records.find(r => r.title === title && r.difficultyName === 'ANOTHER')
+    ?? records.find(r => r.title === title && r.difficultyName === 'LEGGENDARIA')
+    ?? records.find(r => r.title === title);
+  if (!exact) return false;
+  openDetailModal(exact);
+  return true;
+};
+defineExpose({ openSongByTitle });
 </script>
 
 <style scoped>

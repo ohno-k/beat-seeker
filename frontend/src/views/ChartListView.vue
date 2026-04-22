@@ -13,21 +13,12 @@
  *  - `useGameData.songData` — 全譜面データ（リアクティブ）。
  *  - `useI18n` — 多言語。
  */
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { songData as songDataBody } from '../composables/useGameData';
 import type { SongDataEntry } from '../composables/useGameData';
 
 const { t } = useI18n();
-
-/** 【props】 親から渡される初期検索語。OCR カメラ検索で確定した曲名を引き継ぐ用途。 */
-const props = defineProps<{
-  initialSearch?: string;
-}>();
-
-const emit = defineEmits<{
-  (e: 'consumed-initial-search'): void;
-}>();
 
 /** 難易度コード→表示用情報のマップ（名称・文字色・背景色） */
 const DIFF_MAP: Record<string, { name: string; color: string; bg: string }> = {
@@ -40,20 +31,6 @@ const DIFF_MAP: Record<string, { name: string; color: string; bg: string }> = {
 
 /** 検索クエリ。title／artist に対する部分一致 */
 const searchQuery = ref('');
-
-/**
- * 親から `initialSearch` が来たら検索欄に反映する（OCR カメラ検索からの導線）。
- * 反映後は親に通知して props 側をクリアさせる（同じ値で再入力できるように）。
- */
-const applyInitialSearch = () => {
-  if (props.initialSearch && props.initialSearch.length > 0) {
-    searchQuery.value = props.initialSearch;
-    currentPage.value = 1;
-    emit('consumed-initial-search');
-  }
-};
-onMounted(applyInitialSearch);
-watch(() => props.initialSearch, applyInitialSearch);
 /** 難易度フィルタ。空文字なら全難易度 */
 const selectedDifficulty = ref<string>('');
 /** レベルフィルタ。空文字なら全レベル */
