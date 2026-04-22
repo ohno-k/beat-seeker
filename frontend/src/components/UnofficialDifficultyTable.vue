@@ -1,9 +1,17 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 非公式難易度表（☆11.0〜☆13.0）を折返し可能な行で一覧表示する。
+ * - 難易度表に定義された全曲を、ユーザーのプレイ済みスコア / 未プレイのプレースホルダに分けて集約
+ * - 各難易度ランクごとに平均スコアレート・獲得 Beat-PT を集計し、フォルダランク（A/AA/AAA 等）を算出
+ * - 展開/折りたたみで曲一覧を表示、情報モーダルとレート早見表モーダルを内包
+ *
+ * @prop scores プレイ済みスコアレコード配列。
+ */
 import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
 import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
-import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
+import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 
 const props = defineProps<{
@@ -11,33 +19,41 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+/** 展開中のランクキー集合（Set でトグル）。 */
 const expandedRanks = ref<Set<string>>(new Set());
+/** 「フォルダランクとは？」ツールチップ表示フラグ。 */
 const showInfo = ref(false);
+/** レート早見表モーダル表示フラグ。 */
 const showRateTable = ref(false);
 
-// All folders ☆11.0 ~ ☆13.0
+// ☆11.0 〜 ☆13.0 までの 0.1 刻みラベル配列を生成（レート早見表の列）。
 const allFolders: string[] = [];
 for (let i = 0; i <= 20; i++) allFolders.push((11.0 + i * 0.1).toFixed(1));
 
-// Rate table: all ranks × all folders
+/**
+ * 【computed の役割】 レート早見表の行データを生成する。
+ * 各フォルダランク定義 × 各難易度ランクの組合せで「必要レート」を算出し、
+ * 66.67% 以下は "-"、AAA/MAX-/MAX 帯域は色分けする。
+ */
 const rateTableRows = computed(() => {
   return FOLDER_RANK_DEFS.map(def => {
     const label = def.tier ? `${def.name} ${def.tier}` : def.name;
     const rates = allFolders.map(f => {
       const rate = getFolderLegendRate(f) - def.offset;
       if (rate <= 66.666) return { text: '-', color: 'text-slate-400 dark:text-slate-500' };
-      
+
       let rateColor = 'text-slate-600 dark:text-slate-300';
       if (rate >= 94.45) rateColor = 'text-purple-600 dark:text-purple-400 font-bold';
       else if (rate >= 88.88) rateColor = 'text-amber-500 dark:text-amber-400 font-bold';
       else if (rate >= 77.77) rateColor = 'text-emerald-600 dark:text-emerald-400 font-bold';
-      
+
       return { text: rate.toFixed(2) + '%', color: rateColor };
     });
     return { label, color: def.color, rates };
   });
 });
 
+/** 【関数の役割】 ランク行の展開状態を反転する（展開済みなら閉じる、そうでなければ開く）。 */
 const toggleRank = (rank: string) => {
   if (expandedRanks.value.has(rank)) {
     expandedRanks.value.delete(rank);
@@ -46,7 +62,8 @@ const toggleRank = (rank: string) => {
   }
 };
 
-// Build song definition lookup by "title_difficultyCode"
+// 曲定義 (songData) を "title_difficultyCode" キーで検索可能にするルックアップ。
+// ANOTHER=4 / LEGGENDARIA=10 という難易度コードで引くため事前 Map 化する。
 const songDict = new Map<string, any>();
 if (songDataBodyRef.value && Array.isArray(songDataBodyRef.value)) {
   songDataBodyRef.value.forEach((s: any) => {
@@ -54,11 +71,17 @@ if (songDataBodyRef.value && Array.isArray(songDataBodyRef.value)) {
   });
 }
 
-// Group all songs by informalRank, including unplayed ones from the difficulty table
+/**
+ * 【computed の役割】 非公式ランク別に曲をグループ化する。
+ *   - プレイ済み曲は既存 ScoreRecord をそのまま採用
+ *   - 未プレイ曲は songDict から情報を引き、scoreRate=-1 のプレースホルダを生成
+ *   - "Uncategorized" ランクは除外
+ * 難易度表の順にイテレートするので、同じランク内の表示順はテーブル定義順になる。
+ */
 const groupedByRank = computed(() => {
   const groups: Record<string, ScoreRecord[]> = {};
 
-  // Build lookup from played scores by title + difficultyName
+  // プレイ済みスコアを "title_difficultyName" でマップ化（O(1) ルックアップ用）。
   const scoreMap = new Map<string, ScoreRecord>();
   props.scores.forEach(s => {
     if (s.informalRank && !s.informalRank.includes('Uncategorized')) {
@@ -66,7 +89,7 @@ const groupedByRank = computed(() => {
     }
   });
 
-  // Iterate all songs defined in the difficulty table
+  // 難易度表の全曲を走査し、ランク別グループを構築。
   (diffTableRanksRef.value || []).forEach((r: any) => {
     const rank = r.rank;
     if (rank.includes('Uncategorized')) return;
@@ -76,16 +99,17 @@ const groupedByRank = computed(() => {
       const isLeggendaria = songTitle.endsWith('[L]');
       const baseTitle = isLeggendaria ? songTitle.slice(0, -3) : songTitle;
       const diffName = isLeggendaria ? 'LEGGENDARIA' : 'ANOTHER';
-      const diffCode = isLeggendaria ? '10' : '4';
+      // 難易度名 → コードの変換は useGameData の getDifficultyCode に集約済み。
+      const diffCode = String(getDifficultyCode(diffName));
 
       const scoreKey = `${baseTitle}_${diffName}`;
       if (scoreMap.has(scoreKey)) {
-        // Played song – use existing score record
+        // プレイ済み: 既存の ScoreRecord をそのまま採用。
         groups[rank].push(scoreMap.get(scoreKey)!);
       } else {
-        // Unplayed song – create placeholder using song definition data
+        // 未プレイ: 曲定義から notes（ノーツ数 × 2 = 満点）を引いてプレースホルダ生成。
         const def = songDict.get(`${baseTitle}_${diffCode}`);
-        if (!def) return; // skip if no song definition found (uncategorized)
+        if (!def) return; // 定義が無ければスキップ（uncategorized）
         const maxScore = def.notes * 2;
         groups[rank].push({
           title: baseTitle,
@@ -118,7 +142,7 @@ const groupedByRank = computed(() => {
   return groups;
 });
 
-// Calculate total songs per rank from the difficulty table
+/** 【computed の役割】 非公式ランクごとの曲数を集計（難易度表定義の総数、プレイ有無不問）。 */
 const rankSongCounts = computed(() => {
   const counts: Record<string, number> = {};
   (diffTableRanksRef.value || []).forEach((r: any) => {
@@ -127,11 +151,15 @@ const rankSongCounts = computed(() => {
   return counts;
 });
 
-// Calculate statistics for each rank and sort them descending (e.g., 12.9 down to 11.6)
+/**
+ * 【computed の役割】 ランクごとの集計行データ（平均レート、合計 pt、フォルダランク等）を構築。
+ * ランク順は数値降順（☆12.9 → ☆11.0）。各ランク内の曲もスコアレート降順に並べる。
+ * 「MAX 基準 pt」は legendPtPerSong × totalCount。レート算出は プレイ済み曲のみを対象とする。
+ */
 const tableData = computed(() => {
   const ranks = Object.keys(groupedByRank.value);
-  
-  // Sort ranks as numbers descending, treating "12.x" strings as floats
+
+  // "12.x" 文字列を数値として比較し、降順ソート。
   ranks.sort((a, b) => parseFloat(b) - parseFloat(a));
 
   return ranks.map(rank => {
@@ -140,15 +168,15 @@ const tableData = computed(() => {
     let totalMaxScore = 0;
     let totalBeatPoints = 0;
     let maxBeatPoints = 0;
-    
-    // Sort songs: highest score rate first
+
+    // スコアレート降順（未プレイ曲は scoreRate=-1 なので末尾にまとまる）。
     songs.sort((a, b) => b.scoreRate - a.scoreRate);
 
     songs.forEach(s => {
-      // Points accumulation
+      // Beat-PT は未プレイ曲でも 0 として累積（全 playthrough の合計値）。
       totalBeatPoints += s.beatTierPoints;
 
-      // Only include songs with a max score (i.e. we have note data for them)
+      // 平均レートは「プレイ済みかつ maxScore がある曲」だけで計算する。
       if (s.maxScore > 0 && s.score > 0) {
         totalScore += s.score;
         totalMaxScore += s.maxScore;
@@ -160,7 +188,7 @@ const tableData = computed(() => {
 
     const totalCount = rankSongCounts.value[rank] || songs.length;
 
-    // Legend threshold for display (MAX reference)
+    // MAX 参照値（Legend 到達時の理論 pt = 1 曲あたり pt × 総曲数）
     const legendPtPerSong = getLegendPtPerSong(rank);
     maxBeatPoints = legendPtPerSong > 0 ? legendPtPerSong * totalCount : 0;
 
@@ -199,6 +227,8 @@ const tableData = computed(() => {
         <div class="relative">
           <button
             @click.stop="showInfo = !showInfo"
+            :aria-label="t('table.aboutSummary')"
+            :aria-expanded="showInfo"
             class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 hover:bg-indigo-200 dark:hover:bg-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[10px] font-black flex items-center justify-center transition-colors"
             :title="t('table.aboutSummary')"
           >?</button>
@@ -208,7 +238,7 @@ const tableData = computed(() => {
           >
             <div class="flex items-center justify-between mb-2">
                <span class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ t('table.aboutFolderRank') }}</span>
-              <button @click="showInfo = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-base leading-none">×</button>
+              <button @click="showInfo = false" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-base leading-none">×</button>
             </div>
             <p class="mb-2 text-slate-600 dark:text-slate-400">{{ t('table.folderRankExplanation') }}</p>
             <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-2 space-y-1">
@@ -240,15 +270,15 @@ const tableData = computed(() => {
             <div>
               <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">{{ t('table.rateTableTitle') }}</h3>
             </div>
-            <button @click="showRateTable = false" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors shrink-0 ml-2">×</button>
+            <button @click="showRateTable = false" aria-label="閉じる" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors shrink-0 ml-2">×</button>
           </div>
           <!-- Scrollable table -->
           <div class="overflow-auto flex-1">
             <table class="text-[10px] sm:text-xs border-collapse">
               <thead class="sticky top-0 z-20">
                 <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
-                  <th class="py-1.5 px-2 text-left font-bold sticky left-0 z-30 bg-slate-100 dark:bg-slate-900 min-w-[80px] sm:min-w-[110px]">{{ t('table.colRank') }}</th>
-                  <th v-for="f in allFolders" :key="f" class="py-1.5 px-1 sm:px-2 text-center font-bold whitespace-nowrap">☆{{ f }}</th>
+                  <th scope="col" class="py-1.5 px-2 text-left font-bold sticky left-0 z-30 bg-slate-100 dark:bg-slate-900 min-w-[80px] sm:min-w-[110px]">{{ t('table.colRank') }}</th>
+                  <th v-for="f in allFolders" :key="f" scope="col" class="py-1.5 px-1 sm:px-2 text-center font-bold whitespace-nowrap">☆{{ f }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -267,17 +297,23 @@ const tableData = computed(() => {
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[10px] sm:text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">{{ t('table.colDifficulty') }}</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">{{ t('table.colAvgRate') }}</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">{{ t('table.colTotalPt') }}</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">{{ t('table.colPlayed') }}</th>
-            <th class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"></th>
+            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">{{ t('table.colDifficulty') }}</th>
+            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">{{ t('table.colAvgRate') }}</th>
+            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">{{ t('table.colTotalPt') }}</th>
+            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">{{ t('table.colPlayed') }}</th>
+            <th scope="col" class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"><span class="sr-only">{{ t('diffTable.expandAll') }}</span></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-xs sm:text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
           <template v-for="data in tableData" :key="data.rank">
-            <tr 
+            <tr
               @click="toggleRank(data.rank)"
+              @keydown.enter.prevent="toggleRank(data.rank)"
+              @keydown.space.prevent="toggleRank(data.rank)"
+              role="button"
+              tabindex="0"
+              :aria-expanded="expandedRanks.has(data.rank)"
+              :aria-controls="`unofficial-rank-panel-${data.rank}`"
               class="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group"
               :class="{ 'bg-slate-50 dark:bg-slate-800/80': expandedRanks.has(data.rank) }"
             >
@@ -328,7 +364,7 @@ const tableData = computed(() => {
               </td>
             </tr>
             <!-- Expanded Details Row -->
-            <tr v-if="expandedRanks.has(data.rank)" class="bg-slate-50/80 dark:bg-slate-800/40 border-t-0 shadow-inner">
+            <tr v-if="expandedRanks.has(data.rank)" :id="`unofficial-rank-panel-${data.rank}`" class="bg-slate-50/80 dark:bg-slate-800/40 border-t-0 shadow-inner">
               <td colspan="5" class="px-6 py-4">
                 <!-- Summary Board -->
                 <div class="mb-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-200">

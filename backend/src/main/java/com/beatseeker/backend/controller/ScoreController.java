@@ -31,27 +31,79 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 【クラスの役割】 スコアの登録・閲覧・ランキング・履歴・曲別分析を集約する REST コントローラ。
+ *
+ * 本アプリ最大級のコントローラで、eagate CSV 由来の成績をアップロードする中核 API と、
+ * そこから派生する多数の集計・ランキング・予測系エンドポイントを抱える。
+ *
+ * 責務:
+ *  - スコア upsert（/upload）: 新規 or ベスト更新時のみ Score を書き換え、差分を返す
+ *  - 履歴ログ（/save-history-log）: フロントで集計した差分 JSON をスナップショットに保存
+ *  - 個別スコア取得（/me）・履歴取得（/history）
+ *  - 大域 / ARENA 平均 / 精度 / RATE / トップランカー等の各種ランキング
+ *  - 曲単位のランキング・平均スコアレート・傾向分析用データ
+ *  - メモ編集、フレンドのスコア追い抜き通知、ランクアップ通知
+ *
+ * 依存:
+ *  - {@link ScoreRepository}: 最新スコア
+ *  - {@link ScoreHistoryLogRepository}: スナップショット（BEAT-PT 履歴）
+ *  - {@link FriendshipRepository}: 通知先・スコア可視範囲計算
+ *  - {@link AppNotificationRepository} / {@link ActivityLogRepository}: アプリ内通知・アクティビティ
+ *  - {@link PushNotificationService}: Web Push 送信
+ *  - {@link UserSongRankRepository} / {@link SongRankBatchService}: 曲別ランクの事前計算キャッシュ
+ *  - {@link ScoreRecalculationService}: 再計算系
+ *  - {@link EmailService}: 管理者向けメール通知
+ *  - {@link SongDefinitionRepository}: 曲の正規データ（notes など）
+ *  - {@link TopRankersBeatPtService}: トップランカー／エリアプロファイル
+ *
+ * 主なエンドポイント:
+ *  - POST /api/scores/upload
+ *  - POST /api/scores/save-history-log
+ *  - GET  /api/scores/me / /history
+ *  - GET  /api/scores/ranking, /ranking/*, /rate-ranking/*
+ *  - GET  /api/scores/song-ranking, /my-song-ranks, /song-history, /song-avg-score-rates
+ *  - PUT  /api/scores/{id}/memo
+ */
 @RestController
 @RequestMapping("/api/scores")
 public class ScoreController {
 
+    /** スコア本体のリポジトリ。曲単位の最新ベスト値を保持。 */
     private final ScoreRepository scoreRepository;
+    /** ユーザーリポジトリ。iidxId 解決・プロフィール取得に使う。 */
     private final UserRepository userRepository;
+    /** スコアスナップショット履歴リポジトリ（BEAT-PT 推移の元データ）。 */
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
+    /** 双方向フレンド関係リポジトリ。ランキング可視範囲や通知先の計算に使う。 */
     private final FriendshipRepository friendshipRepository;
+    /** アプリ内通知（ベル通知）を保存するリポジトリ。 */
     private final AppNotificationRepository appNotificationRepository;
+    /** ランクアップ等のアクティビティログを保存するリポジトリ。 */
     private final ActivityLogRepository activityLogRepository;
+    /** Web Push の送信サービス。 */
     private final PushNotificationService pushNotificationService;
+    /** ユーザー × 曲 のランキングキャッシュテーブル。 */
     private final UserSongRankRepository userSongRankRepository;
+    /** UserSongRank を一括再計算するバッチサービス。 */
     private final SongRankBatchService songRankBatchService;
+    /** BEAT-PT/RATE-PT の再計算サービス。 */
     private final ScoreRecalculationService scoreRecalculationService;
+    /** 管理者向けメール送信サービス。 */
     private final EmailService emailService;
+    /** 曲の正規定義（title, difficulty, level, notes 等）リポジトリ。 */
     private final SongDefinitionRepository songDefinitionRepository;
+    /** トップランカー BEAT-PT/RATE-PT ランキングのキャッシュサービス。 */
     private final TopRankersBeatPtService topRankersBeatPtService;
+    /** diffJson など JSON 文字列を List/Map に復元するための Jackson。 */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final Long ADMIN_USER_ID = 18L;
+    /** 管理者判定のロジックを共通化した Service（id / iidxId どちらでも判定可能）。 */
+    private final com.beatseeker.backend.service.AdminAuthService adminAuthService;
 
+    /**
+     * 【コンストラクタ】 Spring DI で全依存を受け取る。
+     */
     public ScoreController(ScoreRepository scoreRepository, UserRepository userRepository,
             ScoreHistoryLogRepository scoreHistoryLogRepository,
             FriendshipRepository friendshipRepository,
@@ -63,7 +115,8 @@ public class ScoreController {
             ScoreRecalculationService scoreRecalculationService,
             EmailService emailService,
             SongDefinitionRepository songDefinitionRepository,
-            TopRankersBeatPtService topRankersBeatPtService) {
+            TopRankersBeatPtService topRankersBeatPtService,
+            com.beatseeker.backend.service.AdminAuthService adminAuthService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -77,11 +130,21 @@ public class ScoreController {
         this.emailService = emailService;
         this.songDefinitionRepository = songDefinitionRepository;
         this.topRankersBeatPtService = topRankersBeatPtService;
+        this.adminAuthService = adminAuthService;
     }
 
     /**
-     * Upload (upsert) scores for the current user.
-     * Keeps only the best scores and returns the diff.
+     * 【メソッドの役割】 現在ユーザーのスコアを upsert し、更新差分リストを返す。
+     *
+     * 処理の流れ:
+     *  1. 既存スコアを一括取得して lookup Map を作る（曲+難易度+レベルをキー）。
+     *  2. リクエスト毎に新規 or 更新判定。ベストスコア/ベストクリア/ベスト BP いずれかが
+     *     改善した場合のみ Score を書き換える（ゲーム実機の「ベスト記録」挙動を模倣）。
+     *  3. 差分があれば updatedSongs に積み、最終的にフレンドの通知処理を回す。
+     *
+     * @param auth     認証情報
+     * @param requests フロントから送られる ScoreUploadRequest のリスト
+     * @return 更新件数・差分リスト・メッセージを含む Map
      */
     @PostMapping("/upload")
     @Transactional
@@ -91,7 +154,7 @@ public class ScoreController {
 
         User user = getUser(auth);
 
-        // Load existing scores for the user for lookup
+        // 手順1: 既存スコアを 1 クエリで読み込み、キー文字列で O(1) lookup 可能にする。
         List<Score> existingScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         Map<String, Score> scoreMap = new HashMap<>();
         for (Score s : existingScores) {
@@ -110,19 +173,22 @@ public class ScoreController {
             String oldClearType = "NO PLAY";
 
             if (existing == null) {
-                // New score
+                // 新規スコア: 既存行が無いので必ず保存する。
                 isImproved = true;
                 Score newScore = new Score();
                 newScore.setUser(user);
                 updateScoreFields(newScore, req);
                 scoreRepository.save(newScore);
             } else {
+                // 既存スコアとの比較用に各値を null セーフに取り出す。
                 oldScore = existing.getScore() != null ? existing.getScore() : 0;
                 oldClearType = existing.getClearType() != null ? existing.getClearType() : "NO PLAY";
 
+                // ミスカウントは「小さいほど優秀」なので、null は最悪値（MAX_VALUE）に置換して比較する。
                 int oldMiss = existing.getMissCount() != null ? existing.getMissCount() : Integer.MAX_VALUE;
                 int newMiss = req.missCount() != null ? req.missCount() : Integer.MAX_VALUE;
 
+                // クリア種別は文字列なので順序付きの整数（rank）に変換して比較。
                 int oldRank = getClearTypeRank(oldClearType);
                 int newRank = getClearTypeRank(req.clearType());
 
@@ -130,8 +196,8 @@ public class ScoreController {
                 boolean rankBetter = newRank > oldRank;
                 boolean missBetter = newMiss < oldMiss;
 
-                // Typical IIDX tracking: Best Score, Best Clear, Best BP are tracked.
-                // Since this app has a single Score entity per song, any improvement triggers an update.
+                // IIDX 実機は「ベストスコア / ベストクリア / ベスト BP」を個別に保持するが、
+                // このアプリでは 1 レコードで集約するため、いずれかが改善していたら一括更新する。
                 if (scoreBetter || rankBetter || missBetter) {
                     isImproved = true;
                     updateScoreFields(existing, req);
@@ -139,12 +205,14 @@ public class ScoreController {
                 }
             }
 
+            // 差分が存在する曲のみ updatedSongs に記録。後続のフロント差分表示・通知に使う。
             if (isImproved) {
                 Map<String, Object> diff = new HashMap<>();
                 diff.put("title", req.title());
                 diff.put("difficulty", req.difficultyName());
                 diff.put("oldScore", oldScore);
                 diff.put("newScore", req.score());
+                // 負の差分が出ないよう Math.max で 0 にクランプする。
                 diff.put("scoreIncrease", Math.max(0, req.score() - oldScore));
                 diff.put("oldClearType", oldClearType);
                 diff.put("newClearType", req.clearType());
@@ -153,6 +221,7 @@ public class ScoreController {
             }
         }
 
+        // 1 曲でも更新された場合に限り、最終アップロード日時の更新とフレンド通知を行う。
         if (!updatedSongs.isEmpty()) {
             updateLastUploadTime(user);
             notifyFriendsOfScoreBeat(user, updatedSongs);
@@ -164,13 +233,29 @@ public class ScoreController {
                 "message", "スコアを更新しました"));
     }
 
+    /**
+     * 【メソッドの役割】 User.lastUploadedAt に現在時刻を記録する内部ヘルパー。
+     *
+     * @param user 更新対象ユーザー
+     */
     private void updateLastUploadTime(User user) {
         user.setLastUploadedAt(java.time.LocalDateTime.now());
         userRepository.save(user);
     }
 
     /**
-     * Save history log (snapshot) with diff data from frontend
+     * 【メソッドの役割】 フロントで計算済みのスナップショット情報を score_history_logs に保存する。
+     *
+     * 処理の流れ:
+     *  1. 対象ユーザーのスコアを取得し、1 件もなければ 400 を返す。
+     *  2. リクエストの BEAT-PT / RATE-PT / 差分 JSON 等を ScoreHistoryLog に詰める。
+     *     RATE-PT が 0 以下（フロント未計算）の場合はバックエンドで再計算する。
+     *  3. クリア種別・DJ ランクの各カウントを集計して保存。
+     *  4. users.total_beat_pt のキャッシュ更新、ランクアップ通知、管理者メール送信を行う。
+     *
+     * @param auth 認証情報
+     * @param req  スナップショット内容（BEAT-PT・差分 JSON・ティア名など）
+     * @return 成功メッセージ。スコアが空なら 400
      */
     @PostMapping("/save-history-log")
     @Transactional
@@ -179,11 +264,13 @@ public class ScoreController {
             @RequestBody SaveHistoryLogRequest req) {
 
         User user = getUser(auth);
+        // 手順1: スコアが 1 件もない状態でのスナップショット保存は意味がないので弾く。
         List<Score> allScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         if (allScores.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "No scores found to snapshot"));
         }
 
+        // 手順2: フロントで集計済みの値を ScoreHistoryLog に詰める。
         ScoreHistoryLog log = new ScoreHistoryLog();
         log.setUser(user);
         log.setUploadedAt(java.time.LocalDateTime.now());
@@ -193,11 +280,13 @@ public class ScoreController {
         log.setDiffJson(req.diffJson());
         log.setTotalPrecisionPt(req.totalPrecisionPt() != null ? req.totalPrecisionPt() : 0.0);
         double totalRatePt = req.totalRatePt() != null ? req.totalRatePt() : 0.0;
+        // フロント未計算・未送信（0 以下）の場合はバックエンド側で active 曲データから再計算。
         if (totalRatePt <= 0) {
             totalRatePt = scoreRecalculationService.calculateRatePtFromActiveData(allScores);
         }
         log.setTotalRatePt(totalRatePt);
 
+        // 手順3: スコア全件を 1 周して totalScore と各クリア種別・DJ ランクのカウントを集計する。
         long totalScore = 0;
         int fcCount = 0;
         int exhCount = 0;
@@ -209,8 +298,10 @@ public class ScoreController {
         int aCount = 0;
 
         for (Score s : allScores) {
+            // totalScore は null スキップし加算。
             if (s.getScore() != null)
                 totalScore += s.getScore();
+            // クリア種別は排他なので各カウンタを if の羅列でインクリメント（switch より可読）。
             if ("FULLCOMBO CLEAR".equals(s.getClearType()))
                 fcCount++;
             if ("EX HARD CLEAR".equals(s.getClearType()))
@@ -221,6 +312,7 @@ public class ScoreController {
                 clearCount++;
             if ("EASY CLEAR".equals(s.getClearType()))
                 easyCount++;
+            // DJ ランクも同様。B 以下は集計対象外。
             if ("AAA".equals(s.getDjLevel()))
                 aaaCount++;
             if ("AA".equals(s.getDjLevel()))
@@ -241,13 +333,13 @@ public class ScoreController {
 
         scoreHistoryLogRepository.save(log);
 
-        // ユーザーのtotalBeatPtをキャッシュ（ティア別平均クエリの高速化）
+        // 手順4a: ユーザーの totalBeatPt を users テーブルにキャッシュ（ティア別平均クエリを高速化するため）。
         if (req.totalBeatPt() != null) {
             user.setTotalBeatPt(req.totalBeatPt());
             userRepository.save(user);
         }
 
-        // ランクアップ通知とActivityLog
+        // 手順4b: ティア名が変化していればランクアップとみなし、フレンド通知 + アクティビティログを残す。
         if (req.tierName() != null && req.prevTierName() != null
                 && !req.tierName().equals(req.prevTierName())) {
             notifyFriendsOfRankUp(user, req.prevTierName(), req.tierName());
@@ -259,15 +351,18 @@ public class ScoreController {
             activityLogRepository.save(activity);
         }
 
-        // 管理者以外のユーザーが更新した場合、管理者(ID=18)にメール通知
-        if (!ADMIN_USER_ID.equals(user.getId()) && req.diffJson() != null && !req.diffJson().isBlank()) {
-            userRepository.findById(ADMIN_USER_ID).ifPresent(admin -> {
+        // 手順4c: 管理者以外のユーザーがスコア更新した場合、管理者にメール通知する。
+        // diffJson が空だと通知する意味がないので早期スキップ。
+        if (!adminAuthService.isAdmin(user) && req.diffJson() != null && !req.diffJson().isBlank()) {
+            userRepository.findById(adminAuthService.getAdminUserId()).ifPresent(admin -> {
                 if (admin.getEmail() != null) {
                     try {
+                        // diffJson を List<Map<String,Object>> にパース（TypeReference で型情報を保持）。
                         List<Map<String, Object>> diffs = objectMapper.readValue(
                                 req.diffJson(), new TypeReference<>() {});
                         emailService.sendScoreUpdateNotification(
                                 admin.getEmail(),
+                                // 表示名が空の場合は iidxId をフォールバックに使う。
                                 user.getDisplayName() != null ? user.getDisplayName() : user.getIidxId(),
                                 user.getIidxId() != null ? user.getIidxId() : "",
                                 diffs,
@@ -276,6 +371,7 @@ public class ScoreController {
                                 req.tierName(),
                                 req.prevTierName());
                     } catch (Exception e) {
+                        // メール送信失敗はスコア保存の正当性を損ねないので、標準エラーに記録するのみ。
                         System.err.println("Failed to parse diffJson for email: " + e.getMessage());
                     }
                 }
@@ -285,6 +381,15 @@ public class ScoreController {
         return ResponseEntity.ok(Map.of("message", "History log saved"));
     }
 
+    /**
+     * 【メソッドの役割】 Score エンティティのフィールドを ScoreUploadRequest から一括で更新する内部ヘルパー。
+     *
+     * 新規／更新のどちらのパスからも呼ばれるため、ここではフィールド設定のみを行い
+     * save() は呼び出し側で行う。uploadedAt は現在時刻で上書きする。
+     *
+     * @param score 更新対象の Score
+     * @param req   リクエスト DTO
+     */
     private void updateScoreFields(Score score, ScoreUploadRequest req) {
         score.setTitle(req.title());
         score.setArtist(req.artist());
@@ -301,6 +406,15 @@ public class ScoreController {
         score.setUploadedAt(java.time.LocalDateTime.now());
     }
 
+    /**
+     * 【メソッドの役割】 クリア種別文字列を順序比較できる整数 rank に変換する。
+     *
+     * FULLCOMBO → EX HARD → HARD → CLEAR → EASY → ASSIST → FAILED → NO PLAY の順で
+     * 大きいほど優秀とする慣習に従う。未知の値は 0 を返す。
+     *
+     * @param clearType "FULLCOMBO CLEAR" 等のクリア種別文字列
+     * @return 0〜7 の整数 rank
+     */
     private int getClearTypeRank(String clearType) {
         if (clearType == null)
             return 0;
@@ -317,7 +431,12 @@ public class ScoreController {
     }
 
     /**
-     * Get all scores for the current user.
+     * 【メソッドの役割】 ログインユーザーの全スコアを Map リストで返す。
+     *
+     * マイページ・スコア一覧画面の主要データソース。null は空文字 / 0 に置換する。
+     *
+     * @param auth 認証情報
+     * @return スコア Map の List
      */
     @GetMapping("/me")
     public ResponseEntity<List<Map<String, Object>>> getMyScores(
@@ -347,7 +466,12 @@ public class ScoreController {
     }
 
     /**
-     * Get history aggregates for the current user from score_history_logs.
+     * 【メソッドの役割】 ログインユーザーのスナップショット履歴を時系列順で返す。
+     *
+     * BEAT-PT 推移グラフ、クリア種別件数推移、差分 JSON のドリルダウン等に利用される。
+     *
+     * @param auth 認証情報
+     * @return スナップショット Map の List（uploadedAt 昇順）
      */
     @GetMapping("/history")
     public ResponseEntity<List<Map<String, Object>>> getHistory(
@@ -360,7 +484,7 @@ public class ScoreController {
 
         for (ScoreHistoryLog log : logs) {
             Map<String, Object> snapshotData = new HashMap<>();
-            snapshotData.put("snapshotId", log.getId().toString()); // Use ID as pseudo-snapshot ID
+            snapshotData.put("snapshotId", log.getId().toString()); // ID をスナップショット ID として流用
             snapshotData.put("date", log.getUploadedAt().toString());
             snapshotData.put("totalScore", log.getTotalScore());
             snapshotData.put("fcCount", log.getFcCount());
@@ -372,7 +496,7 @@ public class ScoreController {
             snapshotData.put("aaCount", log.getAaCount());
             snapshotData.put("aCount", log.getACount());
 
-            // New fields
+            // 新フィールド（BEAT-PT / RATE-PT 系）。履歴画面の主要指標。
             snapshotData.put("totalBeatPt", log.getTotalBeatPt());
             snapshotData.put("beatPtIncrease", log.getBeatPtIncrease());
             snapshotData.put("updatedCount", log.getUpdatedCount());
@@ -386,7 +510,12 @@ public class ScoreController {
     }
 
     /**
-     * Get global BEAT-PT ranking.
+     * 【メソッドの役割】 開発者向けの BEAT-PT ランキングデバッグエンドポイント。
+     *
+     * 全ユーザーの最新 BEAT-PT と、上位 10 名の生データを同時に返す。
+     * 本番では利用しない予定（削除候補）。
+     *
+     * @return ユーザー概要と top10 を含む Map
      */
     @GetMapping("/debug-ranking")
     public ResponseEntity<Map<String, Object>> debugRanking() {
@@ -412,6 +541,14 @@ public class ScoreController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 【メソッドの役割】 指定ユーザーのスコアを手早く確認するデバッグ用エンドポイント（認証不要）。
+     *
+     * 本番では開発者以外に触れさせないよう、後で削除／認証追加する想定。
+     *
+     * @param userId 対象ユーザー ID
+     * @return スコア Map の List
+     */
     @GetMapping("/debug-user-scores/{userId}")
     public ResponseEntity<List<Map<String, Object>>> debugUserScores(@PathVariable Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
@@ -432,33 +569,59 @@ public class ScoreController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 【メソッドの役割】 全ユーザーの BEAT-PT グローバルランキングを返す。
+     *
+     * @return BEAT-PT 降順のランキング行 List
+     */
     @GetMapping("/ranking")
     public ResponseEntity<List<Map<String, Object>>> getGlobalRanking() {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getGlobalRanking();
         return ResponseEntity.ok(ranking);
     }
 
+    /**
+     * 【メソッドの役割】 ARENA ランクごとの BEAT-PT 平均を返す。
+     *
+     * ARENA クラス（A1〜SS 等）別の実力感覚を可視化するのに使う。
+     */
     @GetMapping("/ranking/arena-averages")
     public ResponseEntity<List<Map<String, Object>>> getArenaRankAverages() {
         List<Map<String, Object>> averages = scoreHistoryLogRepository.getArenaRankAverageBeatPt();
         return ResponseEntity.ok(averages);
     }
 
+    /**
+     * 【メソッドの役割】 KONAMI 公式のエリア別トップランカー BEAT-PT ランキングを返す（キャッシュ）。
+     */
     @GetMapping("/ranking/top-rankers")
     public ResponseEntity<List<Map<String, Object>>> getTopRankersBeatPt() {
         return ResponseEntity.ok(topRankersBeatPtService.getRanking());
     }
 
+    /**
+     * 【メソッドの役割】 ARENA ランクごとの RATE-PT 平均を返す。
+     */
     @GetMapping("/rate-ranking/arena-averages")
     public ResponseEntity<List<Map<String, Object>>> getArenaRankAverageRatePt() {
         return ResponseEntity.ok(scoreHistoryLogRepository.getArenaRankAverageRatePt());
     }
 
+    /**
+     * 【メソッドの役割】 公式トップランカーの RATE-PT ランキングを返す（キャッシュ）。
+     */
     @GetMapping("/rate-ranking/top-rankers")
     public ResponseEntity<List<Map<String, Object>>> getTopRankersRatePt() {
         return ResponseEntity.ok(topRankersBeatPtService.getRateRanking());
     }
 
+    /**
+     * 【メソッドの役割】 曲 × 難易度の公式トップランカーのベストスコア一覧を返す。
+     *
+     * @param title          曲名
+     * @param difficultyName 難易度名
+     * @return SongScoreEntry の List
+     */
     @GetMapping("/song-top-rankers")
     public ResponseEntity<List<com.beatseeker.backend.service.TopRankersBeatPtService.SongScoreEntry>> getSongTopRankers(
             @RequestParam String title,
@@ -466,30 +629,54 @@ public class ScoreController {
         return ResponseEntity.ok(topRankersBeatPtService.getSongTopRankers(title, difficultyName));
     }
 
+    /**
+     * 【メソッドの役割】 特定エリア（version × 都道府県）のトップランカープロファイルを返す。
+     *
+     * @param versionNum        IIDX バージョン番号
+     * @param prefectureFileNum 都道府県ファイル番号
+     * @return プロファイル。見つからなければ 404
+     */
     @GetMapping("/top-ranker-profile")
     public ResponseEntity<com.beatseeker.backend.service.TopRankersBeatPtService.AreaProfile> getTopRankerProfile(
             @RequestParam int versionNum,
             @RequestParam int prefectureFileNum) {
         var profile = topRankersBeatPtService.getAreaProfile(versionNum, prefectureFileNum);
+        // キャッシュに該当エリアが無ければ 404 を返す。
         if (profile == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(profile);
     }
 
+    /**
+     * 【メソッドの役割】 精度 PT（totalPrecisionPt）に基づくランキングを返す。
+     */
     @GetMapping("/precision-ranking")
     public ResponseEntity<List<Map<String, Object>>> getPrecisionRanking() {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getPrecisionRanking();
         return ResponseEntity.ok(ranking);
     }
 
+    /**
+     * 【メソッドの役割】 RATE-PT に基づくランキング（ティア込み）を返す。
+     */
     @GetMapping("/rate-ranking")
     public ResponseEntity<List<Map<String, Object>>> getRateRanking() {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getRateTierRanking();
         return ResponseEntity.ok(ranking);
     }
 
+    /**
+     * 【メソッドの役割】 指定ユーザーの BEAT-PT / RATE-PT 合計を取得する。
+     *
+     * プロフィール閲覧時に素早くユーザーの実力値を表示するためのエンドポイント。
+     *
+     * @param userId 対象ユーザー ID
+     * @return {totalBeatPt, totalRatePt}（存在しない場合は 0.0）
+     */
     @GetMapping("/user-tier-totals/{userId}")
     public ResponseEntity<Map<String, Object>> getUserTierTotals(@PathVariable Long userId) {
+        // BEAT-PT は users テーブルにキャッシュ済みの値を使う。ユーザー不在なら 0.0 にフォールバック。
         Double beatPt = userRepository.findById(userId).map(User::getTotalBeatPt).orElse(0.0);
+        // RATE-PT は最新スナップショットから引く。
         Double ratePt = scoreHistoryLogRepository.getLatestTotalRatePtByUserId(userId);
         Map<String, Object> result = new HashMap<>();
         result.put("totalBeatPt", beatPt != null ? beatPt : 0.0);
@@ -498,8 +685,11 @@ public class ScoreController {
     }
 
     /**
-     * Returns all users' ANOTHER and LEGGENDARIA scores for song ranking aggregation.
-     * The frontend uses this to determine which songs appear in each user's top-100.
+     * 【メソッドの役割】 曲別ランキング集計に使う、全ユーザーの ANOTHER/LEGGENDARIA スコアを返す。
+     *
+     * フロントエンドはこの結果を使って「各ユーザーのトップ 100 にどの曲が入るか」を決定する。
+     *
+     * @return スコア行の List
      */
     @GetMapping("/all-user-scores")
     public ResponseEntity<List<Map<String, Object>>> getAllUserScores() {
@@ -507,16 +697,21 @@ public class ScoreController {
         return ResponseEntity.ok(scores);
     }
 
+    /**
+     * 【メソッドの役割】 曲別ランキングの集計データ（DB 側で集計済み）を返す。
+     */
     @GetMapping("/song-ranking-aggregate")
     public ResponseEntity<List<Map<String, Object>>> getSongRankingAggregate() {
         return ResponseEntity.ok(scoreRepository.findAllSongRankingAggregates());
     }
 
-    private static final String ADMIN_IIDX_ID = "5787-1145";
-
     /**
-     * Get raw best scores per user per song with BEAT-TIER label.
-     * Only Lv11 and Lv12 ANOTHER/LEGGENDARIA. Aggregation (A-rank filter) done client-side.
+     * 【メソッドの役割】 曲×難易度×ユーザーごとの素のベストスコアに BEAT-TIER ラベルを付けて返す。
+     *
+     * Lv11 / Lv12 の ANOTHER/LEGGENDARIA のみ対象。A ランク以上のフィルタ等の
+     * さらに重い集計はクライアント側に任せる設計。
+     *
+     * @return スコア行の List
      */
     @GetMapping("/song-arena-averages")
     public ResponseEntity<List<Map<String, Object>>> getSongBeatTierAverages() {
@@ -524,16 +719,27 @@ public class ScoreController {
     }
 
     /**
-     * Get average score rates per song (ANOTHER/LEGGENDARIA, score rate >= 66.67%).
-     * Uses lightweight single-table aggregation + Java-side notes resolution.
+     * 【メソッドの役割】 曲単位で「平均スコアレート」「MAX- 率」「AAA 率」を返す。
+     *
+     * 処理の流れ:
+     *  1. active リビジョンの SongDefinition から notes lookup（Lv11 以上の A/L のみ）を構築。
+     *  2. DB から per-song 平均スコア、MAX- 数、AAA 数をそれぞれ取得して lookup を作る。
+     *  3. 平均スコアを「notes × 2」で割って scoreRate に変換し、各種レートを整形して出力。
+     *  4. 平均スコアレート昇順でソート（詰まり気味 → 緩い順）。
+     *
+     * 分離クエリ × Java 側マージ方式を採るのは、単一重量 JOIN を避けてレスポンスを短縮するため。
+     *
+     * @return 曲別集計 Map の List
      */
     @GetMapping("/song-avg-score-rates")
     public ResponseEntity<List<Map<String, Object>>> getSongAvgScoreRates() {
-        // 1. Build notes lookup: "title|difficultyName" -> notes (fast, single table)
+        // 手順1: 「曲名|難易度名」→ notes 数 の lookup を構築（高速・シングルテーブル）。
         List<SongDefinition> songDefs = songDefinitionRepository.findByRevision("active");
         Map<String, Integer> notesMap = new HashMap<>();
         for (SongDefinition sd : songDefs) {
+            // Lv11 未満は対象外なのでスキップ。
             if (sd.getLevel() == null || sd.getLevel() < 11) continue;
+            // 難易度コード 4 = ANOTHER、10 = LEGGENDARIA という IIDX の内部規約に従う。
             if ("4".equals(sd.getDifficulty())) {
                 notesMap.put(sd.getTitle() + "|ANOTHER", sd.getNotes());
             } else if ("10".equals(sd.getDifficulty())) {
@@ -541,20 +747,21 @@ public class ScoreController {
             }
         }
 
-        // 2. Fetch per-song avg scores (lightweight, no JOIN, single-table GROUP BY)
+        // 手順2: 曲単位の平均スコアを取得（単一テーブル GROUP BY で軽量）。
         List<Map<String, Object>> songAvgs = scoreRepository.findSongAvgScores();
 
-        // 3. Fetch MAX- counts per song (aggregated JOIN, returns ~1000 rows)
+        // 手順3: MAX-（1 点差 AAA）の曲別カウントを集計 JOIN で取得（約 1000 行）。
         List<Map<String, Object>> maxMinusData = scoreRepository.findSongMaxMinusCounts();
         Map<String, int[]> maxMinusStats = new HashMap<>();
         for (Map<String, Object> row : maxMinusData) {
             String key = row.get("title") + "|" + row.get("difficultyName");
             int maxMinusCount = ((Number) row.get("maxMinusCount")).intValue();
             int totalCount = ((Number) row.get("totalCount")).intValue();
+            // 値 2 要素を持つ int[] に詰めて lookup に保存する（Map<String, Stats> より軽量）。
             maxMinusStats.put(key, new int[]{maxMinusCount, totalCount});
         }
 
-        // 3b. Fetch AAA counts per song
+        // 手順3b: AAA の曲別カウントも同様に集計。
         List<Map<String, Object>> aaaData = scoreRepository.findSongAaaCounts();
         Map<String, int[]> aaaStats = new HashMap<>();
         for (Map<String, Object> row : aaaData) {
@@ -564,7 +771,7 @@ public class ScoreController {
             aaaStats.put(key, new int[]{aaaCount, totalCount});
         }
 
-        // 4. Convert avg scores to score rates using notes, filter >= 66.667%
+        // 手順4: 平均スコアを scoreRate（%）に変換しつつ、各種レートを組み立てて返す。
         List<Map<String, Object>> result = new java.util.ArrayList<>();
         for (Map<String, Object> row : songAvgs) {
             String title = (String) row.get("title");
@@ -574,11 +781,14 @@ public class ScoreController {
 
             String key = title + "|" + diffName;
             Integer notes = notesMap.get(key);
+            // notes 情報が無い曲（SongDefinition 未登録、もしくは Lv11 未満）はスキップ。
             if (notes == null || notes <= 0) continue;
 
+            // MAX スコアは notes × 2。% 化するために 100 倍を掛ける。
             double avgScoreRate = avgScore * 100.0 / (notes * 2.0);
 
             int[] stats = maxMinusStats.get(key);
+            // 10000 倍してから丸めて /100 することで小数 2 桁の % を生成する。
             double maxMinusRate = (stats != null && stats[1] > 0)
                 ? Math.round(stats[0] * 10000.0 / stats[1]) / 100.0
                 : 0.0;
@@ -600,6 +810,7 @@ public class ScoreController {
             result.add(entry);
         }
 
+        // 平均スコアレート昇順（= 難しい／詰まってない曲順）でソートして返す。
         result.sort((a, b) -> Double.compare(
             ((Number) a.get("avgScoreRate")).doubleValue(),
             ((Number) b.get("avgScoreRate")).doubleValue()));
@@ -608,8 +819,16 @@ public class ScoreController {
     }
 
     /**
-     * Get per-song ranking for a specific song.
-     * Only returns rows visible to the caller: public users, self, or friends whose privacyLevel == 1.
+     * 【メソッドの役割】 指定曲 × 難易度の曲別ランキングを「呼び出し元が見える範囲」だけに絞って返す。
+     *
+     * 処理の流れ:
+     *  1. ログインユーザーのフレンド ID 配列を取得。フレンドが居なければ -1 だけ入れて SQL に NULL を渡さないようにする。
+     *  2. リポジトリに「自分 / フレンド / 公開ユーザー」のいずれかに該当する行のみを返すクエリを委譲する。
+     *
+     * @param auth           認証情報
+     * @param title          曲名
+     * @param difficultyName 難易度名
+     * @return 可視範囲に絞った曲別ランキング
      */
     @GetMapping("/song-ranking")
     public ResponseEntity<List<Map<String, Object>>> getSongRanking(
@@ -617,18 +836,25 @@ public class ScoreController {
             @RequestParam String title,
             @RequestParam String difficultyName) {
         User me = getUser(auth);
+        // 手順1: フレンド ID を収集する。IN 句に空リストを渡すと SQL エラーになるので、
+        // 空なら存在し得ない値（-1）を一件入れておく。
         List<Long> friendIds = friendshipRepository.findByUser(me).stream()
                 .map(f -> f.getFriend().getId())
                 .toList();
         if (friendIds.isEmpty()) friendIds = List.of(-1L);
+        // 手順2: 可視性フィルタ付きクエリに委譲。
         List<Map<String, Object>> ranking = scoreRepository.findSongRanking(
                 title, difficultyName, me.getId(), friendIds);
         return ResponseEntity.ok(ranking);
     }
 
     /**
-     * Get current user's rank for every ANOTHER/LEGGENDARIA song they have played.
-     * Reads from the pre-calculated cache table (refreshed daily by SongRankBatchService).
+     * 【メソッドの役割】 ログインユーザーが既プレイの全譜面の曲別順位を返す。
+     *
+     * UserSongRank キャッシュテーブル（日次バッチで再計算）から読み込むため高速。
+     *
+     * @param auth 認証情報
+     * @return 各曲の順位 Map の List
      */
     @GetMapping("/my-song-ranks")
     public ResponseEntity<List<Map<String, Object>>> getMySongRanks(Authentication auth) {
@@ -647,16 +873,22 @@ public class ScoreController {
     }
 
     /**
-     * Get admin's rank for every song (admin only).
-     * Reads from the pre-calculated cache table.
+     * 【メソッドの役割】 管理者の全曲順位を返す（管理者限定）。
+     *
+     * 認証が無い／管理者 iidxId と一致しない場合は空リストを 200 で返す。
+     * UserSongRank キャッシュテーブルから読み込む。
+     *
+     * @param auth 認証情報
+     * @return 管理者の曲順位 Map の List。非管理者は空リスト
      */
     @GetMapping("/admin-song-ranks")
     public ResponseEntity<List<Map<String, Object>>> getAdminSongRanks(Authentication auth) {
+        // 権限が無い場合は空 List を返す（403 でも良いがフロントの分岐を減らすため 200 + []）。
         if (auth == null || !auth.isAuthenticated()
-                || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
             return ResponseEntity.ok(List.of());
         }
-        List<UserSongRank> ranks = userSongRankRepository.findByUserId(18L);
+        List<UserSongRank> ranks = userSongRankRepository.findByUserId(adminAuthService.getAdminUserId());
         List<Map<String, Object>> result = ranks.stream().map(r -> {
             Map<String, Object> map = new HashMap<>();
             map.put("title", r.getTitle());
@@ -670,13 +902,17 @@ public class ScoreController {
     }
 
     /**
-     * Manually trigger song rank recalculation (admin only).
-     * Use after deploying or when ranks seem stale.
+     * 【メソッドの役割】 管理者の手動操作で曲別ランクの全件再計算を非同期起動する。
+     *
+     * デプロイ直後やランクが古い疑いがある時に使用する運用ボタン。
+     *
+     * @param auth 認証情報（管理者限定）
+     * @return 202 + 開始メッセージ。非管理者は 403
      */
     @PostMapping("/recalculate-song-ranks")
     public ResponseEntity<Map<String, Object>> recalculateSongRanks(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()
-                || !ADMIN_IIDX_ID.equals(auth.getPrincipal())) {
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
             return ResponseEntity.status(403).build();
         }
         songRankBatchService.recalculateAllAsync();
@@ -684,7 +920,19 @@ public class ScoreController {
     }
 
     /**
-     * Get score update history for a specific song by parsing diffJson in score_history_logs.
+     * 【メソッドの役割】 指定曲 × 難易度における、ログインユーザーのスコア更新履歴を返す。
+     *
+     * 処理の流れ:
+     *  1. ScoreHistoryLog を昇順で走査し、各スナップショットの diffJson を解析。
+     *  2. diffs の中から (title, difficulty) 一致する差分だけ拾って、uploadedAt / newScore / newBeatPt を集める。
+     *  3. 最後に uploadedAt 降順に並び替えて返す。
+     *
+     * 壊れた diffJson は try-catch で無視する（他のスナップショットへの影響を防ぐため）。
+     *
+     * @param auth           認証情報
+     * @param title          曲名
+     * @param difficultyName 難易度名
+     * @return 時系列の差分履歴
      */
     @GetMapping("/song-history")
     public ResponseEntity<List<Map<String, Object>>> getSongHistory(
@@ -694,11 +942,13 @@ public class ScoreController {
         User user = getUser(auth);
         List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
 
+        // 本メソッド内だけで使うローカル ObjectMapper（クラスメンバと同じ挙動）。
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         List<Map<String, Object>> result = new java.util.ArrayList<>();
 
         for (ScoreHistoryLog log : logs) {
             String diffJson = log.getDiffJson();
+            // diffJson が null/空/"[]" のスナップショットは該当差分がないのでスキップ。
             if (diffJson == null || diffJson.isEmpty() || "[]".equals(diffJson)) continue;
             try {
                 List<Map<String, Object>> diffs = mapper.readValue(diffJson,
@@ -706,6 +956,7 @@ public class ScoreController {
                 for (Map<String, Object> diff : diffs) {
                     Object t = diff.get("title");
                     Object d = diff.get("difficulty");
+                    // (title, difficulty) が一致する差分のみを拾う。
                     if (title.equals(t) && difficultyName.equals(d)) {
                         Map<String, Object> entry = new HashMap<>();
                         entry.put("uploadedAt", log.getUploadedAt().toString());
@@ -715,16 +966,27 @@ public class ScoreController {
                     }
                 }
             } catch (Exception e) {
-                // skip malformed diffJson
+                // 壊れた diffJson は静かにスキップ（他のログ表示を壊さないため）。
             }
         }
 
+        // uploadedAt 文字列（ISO 形式なので辞書順＝時系列）で降順ソート。
         result.sort((a, b) -> ((String) b.get("uploadedAt")).compareTo((String) a.get("uploadedAt")));
         return ResponseEntity.ok(result);
     }
 
     /**
-     * Update the memo for a specific score.
+     * 【メソッドの役割】 指定スコアに紐づくメモ文字列を更新する。
+     *
+     * 処理の流れ:
+     *  1. ログインユーザーを特定し、対象 Score を取得。
+     *  2. 所有者が本人でなければ 403（他人のメモを書き換えられないように）。
+     *  3. memo フィールドを上書き保存する。
+     *
+     * @param auth    認証情報
+     * @param id      Score の ID
+     * @param request メモ文字列を持つ DTO
+     * @return 成功メッセージ。所有者違反は 403
      */
     @PutMapping("/{id}/memo")
     @Transactional
@@ -737,6 +999,7 @@ public class ScoreController {
         Score score = scoreRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Score not found"));
 
+        // スコアの所有者と現ユーザーが一致しなければ 403（他人のメモ改ざん防止）。
         if (!score.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
@@ -748,21 +1011,37 @@ public class ScoreController {
     }
 
     /**
-     * フレンドのスコアを自分のスコアが上回った場合、そのフレンドに通知する
+     * 【メソッドの役割】 アップロードしたユーザーがフレンドのスコアを上回った曲について、当該フレンドに通知する。
+     *
+     * 処理の流れ:
+     *  1. アップロード者が非公開（privacyLevel==2）か更新が空なら即終了。
+     *  2. フレンドごとに、更新対象曲のスコアを 1 クエリで一括取得（N×M クエリを避ける）。
+     *  3. 各曲について「更新前は負けていたが、更新後に勝った」条件を満たす場合のみ AppNotification + push を送る。
+     *
+     * 通知条件の 3 点セット:
+     *   - newScore > friendScoreVal ... 追い抜いた
+     *   - friendScoreVal > 0         ... フレンドが未プレイではない（0 への追い越しは通知しない）
+     *   - oldScore <= friendScoreVal ... 直前までは負けていた
+     *
+     * @param uploader     スコアをアップロードしたユーザー
+     * @param updatedSongs uploadScores() が生成した差分情報リスト
      */
     private void notifyFriendsOfScoreBeat(User uploader, List<Map<String, Object>> updatedSongs) {
+        // 手順1a: 非公開ユーザーは通知を飛ばさない（スコアが漏れないように）。
         if (uploader.getPrivacyLevel() != null && uploader.getPrivacyLevel() == 2) return;
         if (updatedSongs.isEmpty()) return;
         List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(uploader);
 
+        // 手順2a: 更新対象の title と difficulty を IN 句用に展開する。
         List<String> titles = updatedSongs.stream().map(s -> (String) s.get("title")).toList();
         List<String> difficulties = updatedSongs.stream().map(s -> (String) s.get("difficulty")).distinct().toList();
 
         for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
             User friend = friendship.getFriend();
+            // 非公開フレンドはスキップ（そもそも比較対象にしない）。
             if (friend.getPrivacyLevel() != null && friend.getPrivacyLevel() == 2) continue;
 
-            // Batch-fetch all relevant friend scores in one query (instead of N×M individual queries)
+            // 手順2b: フレンドのスコアを IN 句で一括取得。N×M クエリ化を避けるための最適化。
             List<com.beatseeker.backend.entity.Score> friendScores =
                     scoreRepository.findByUserAndTitlesAndDifficulties(friend, titles, difficulties);
             Map<String, Integer> friendScoreMap = new HashMap<>();
@@ -771,6 +1050,7 @@ public class ScoreController {
                 friendScoreMap.put(key, fs.getScore() != null ? fs.getScore() : 0);
             }
 
+            // 手順3: 更新曲ごとに「追い抜いた」判定を行い、該当時のみ通知を作る。
             for (Map<String, Object> song : updatedSongs) {
                 String title = (String) song.get("title");
                 String difficulty = (String) song.get("difficulty");
@@ -778,8 +1058,9 @@ public class ScoreController {
                 int oldScore = (int) song.get("oldScore");
                 int friendScoreVal = friendScoreMap.getOrDefault(title + "_" + difficulty, 0);
 
-                // 更新前はフレンドに負けていて、更新後に抜かした場合のみ通知する
+                // 条件: 更新後は勝ち／フレンドがプレイ済み／更新前は負けていた、の 3 点セット。
                 if (newScore > friendScoreVal && friendScoreVal > 0 && oldScore <= friendScoreVal) {
+                    // アプリ内通知（ベル通知）を保存。
                     AppNotification notification = new AppNotification();
                     notification.setRecipient(friend);
                     notification.setType("SCORE_BEAT");
@@ -788,6 +1069,7 @@ public class ScoreController {
                             newScore + " を記録し、あなたのスコア " + friendScoreVal + " を上回りました！");
                     appNotificationRepository.save(notification);
 
+                    // push 購読が登録済みなら Web Push も送る。
                     if (friend.getPushSubscription() != null) {
                         pushNotificationService.sendNotification(
                                 friend.getPushSubscription(),
@@ -801,13 +1083,20 @@ public class ScoreController {
     }
 
     /**
-     * ランクアップした際にフレンド全員に通知する
+     * 【メソッドの役割】 ユーザーがティアアップ（Beat-Tier が変化）した際、フレンド全員に通知する。
+     *
+     * 非公開ユーザーの場合は通知を飛ばさない。
+     *
+     * @param user    ランクアップしたユーザー
+     * @param oldTier 旧ティア名
+     * @param newTier 新ティア名
      */
     private void notifyFriendsOfRankUp(User user, String oldTier, String newTier) {
         if (user.getPrivacyLevel() != null && user.getPrivacyLevel() == 2) return;
         List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(user);
         for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
             User friend = friendship.getFriend();
+            // アプリ内通知は必ず保存する。
             AppNotification notification = new AppNotification();
             notification.setRecipient(friend);
             notification.setType("FRIEND_RANK_UP");
@@ -815,6 +1104,7 @@ public class ScoreController {
                     user.getDisplayName() + "さんが Beat-Tier「" + oldTier + "」から「" + newTier + "」にランクアップしました！");
             appNotificationRepository.save(notification);
 
+            // push は購読者だけに送る。
             if (friend.getPushSubscription() != null) {
                 pushNotificationService.sendNotification(
                         friend.getPushSubscription(),
@@ -825,6 +1115,13 @@ public class ScoreController {
         }
     }
 
+    /**
+     * 【メソッドの役割】 認証情報から User を解決する共通ヘルパー。
+     *
+     * @param auth 認証情報
+     * @return ログインユーザー
+     * @throws RuntimeException 未認証 or User 不在
+     */
     private User getUser(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
             throw new RuntimeException("Not authenticated");
@@ -834,7 +1131,11 @@ public class ScoreController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    // DTO for upload request
+    /**
+     * 【レコード】 スコアアップロードのリクエスト DTO。
+     *
+     * eagate CSV パース結果の 1 行に相当し、曲・難易度・各種スコア値をフロントから送る。
+     */
     public record ScoreUploadRequest(
             String title,
             String artist,
@@ -850,6 +1151,9 @@ public class ScoreController {
             Integer playCount) {
     }
 
+    /**
+     * 【レコード】 メモ更新のリクエスト DTO。メモ文字列だけを持つ薄いコンテナ。
+     */
     public record MemoUpdateRequest(String memo) {
     }
 }

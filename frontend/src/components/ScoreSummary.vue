@@ -1,5 +1,16 @@
 <template>
+  <!--
+    ============================================================
+    ScoreSummary.vue ルートテンプレート
+      - ヘッダ: タイトル + 件数表示 + フィルタ群（ゼロ非表示/レベル/難易度/DJ LEVEL/クリアタイプ/検索）
+      - モードタブ（BEAT-TIER / RATE-TIER）
+      - データテーブル（displayScores を v-for）
+      - ページネーション
+      - 詳細モーダル（selectedRecord !== null の間だけ v-if 表示）
+    ============================================================
+  -->
   <div class="w-full mx-auto space-y-6 animate-fade-in relative">
+    <!-- ===== フィルタ・検索ヘッダ ===== -->
     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-colors duration-200">
       <div>
         <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('table.title') }}</h2>
@@ -133,7 +144,7 @@
       </div>
     </div>
 
-    <!-- Mode Tabs -->
+    <!-- ===== モードタブ（BEAT-TIER / RATE-TIER 切替。showRateTier が true のときのみ表示） ===== -->
     <div v-if="showRateTier" class="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl w-fit border border-slate-200 dark:border-slate-700">
       <button
         @click="viewMode = 'beat'"
@@ -147,7 +158,7 @@
       >RATE-TIER</button>
     </div>
 
-    <!-- Data Table -->
+    <!-- ===== データテーブル（displayScores を描画。ヘッダ列クリックで toggleSort） ===== -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-[10px] sm:text-sm text-slate-600 dark:text-slate-300">
@@ -332,7 +343,7 @@
         </table>
       </div>
       
-      <!-- Pagination -->
+      <!-- ===== ページネーション（件数表示 + 1 ページあたり件数セレクタ + 前後ボタン） ===== -->
       <div v-if="filteredScores.length > 0" class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors duration-200">
         <div class="flex flex-col sm:flex-row items-center gap-4">
           <div class="text-sm text-slate-500 dark:text-slate-400">
@@ -368,11 +379,18 @@
       </div>
     </div>
 
-    <!-- Fullscreen Detail Modal -->
+    <!--
+      ===== 全画面詳細モーダル =====
+      selectedRecord が非 null の間だけ Teleport で <body> 直下にレンダリングされる。
+      構造:
+        - Sticky Header: 曲名/アーティスト + 閉じるボタン + タブバー（detail / rate-tier / rivals / ranking / history）
+        - 各タブのコンテンツ（v-if でひとつだけ表示）
+        - Sticky Footer: モバイル閉じるボタン
+    -->
     <Teleport to="body">
       <div v-if="selectedRecord" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200" @click.self="closeDetailModal">
-      
-      <!-- Sticky Header -->
+
+      <!-- ===== モーダル Sticky ヘッダ（曲情報 + 閉じるボタン + タブバー） ===== -->
       <div class="bg-white dark:bg-slate-900 sticky top-0 z-10 w-full shadow-sm border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
         <div class="px-4 py-3 sm:px-6 sm:py-5 flex justify-between items-center">
           <div class="flex flex-col pr-4 max-w-full overflow-hidden">
@@ -385,7 +403,7 @@
             </svg>
           </button>
         </div>
-        <!-- Modal Tabs -->
+        <!-- モーダル内タブバー: detail / rate-tier / rivals(=ranking) / history。ログイン状態や難易度で一部のみ表示 -->
         <div class="flex border-t border-slate-100 dark:border-slate-800">
           <button
             @click="modalTab = 'detail'"
@@ -416,12 +434,12 @@
         </div>
       </div>
       
-      <!-- Scrollable Body -->
+      <!-- ===== モーダルのスクロール可能な本体領域 ===== -->
       <div class="flex-1 overflow-y-auto p-3 sm:p-8 lg:p-12 pb-24">
 
-        <!-- Rate-Tier Tab -->
+        <!-- ===== Rate-Tier タブ: 獲得PT + スコアレート + 閾値表 ===== -->
         <div v-if="modalTab === 'rate-tier'" class="w-full max-w-4xl mx-auto space-y-6">
-          <!-- 獲得PT display -->
+          <!-- 獲得PT と スコアレート を大きく横並びで表示 -->
           <div class="grid grid-cols-2 gap-4">
             <div class="bg-emerald-900/10 dark:bg-emerald-900/20 p-6 sm:p-8 rounded-2xl shadow-md flex flex-col items-center justify-center border border-emerald-100 dark:border-emerald-800/50">
               <p class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">{{ t('table.colPoints') }}</p>
@@ -440,7 +458,7 @@
             </div>
           </div>
 
-          <!-- Threshold Table -->
+          <!-- Rate-Tier の閾値テーブル（各閾値の到達/未到達を ✓ / +差% で表示） -->
           <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-3 border-b border-slate-200 dark:border-slate-700">
               <p class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('table.rateTierThresholds') }}</p>
@@ -478,9 +496,9 @@
           </div>
         </div>
 
-        <!-- Ranking Tab (merged: self + friends + optional public + optional virtual) -->
+        <!-- ===== Ranking タブ: 自分 + フレンド + (任意)公開ユーザー + (任意)TOPランカー仮想ユーザーを統合表示 ===== -->
         <div v-else-if="modalTab === 'rivals'" class="w-full">
-          <!-- Filter checkboxes -->
+          <!-- 表示フィルタ: 公開ユーザー / 仮想ユーザーの表示切替 -->
           <div class="flex flex-wrap items-center gap-4 mb-4 p-3 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700">
             <label class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
               <input type="checkbox" v-model="showPublicUsers" class="w-4 h-4 rounded accent-blue-600" />
@@ -627,7 +645,7 @@
           </div>
         </div>
 
-        <!-- History Tab -->
+        <!-- ===== History タブ: 譜面のスコア更新履歴を時系列表示 ===== -->
         <div v-else-if="modalTab === 'history'" class="w-full">
           <div v-if="isLoadingHistory" class="flex flex-col items-center justify-center py-20">
             <div class="w-10 h-10 border-4 border-violet-100 border-t-violet-500 rounded-full animate-spin mb-4"></div>
@@ -669,8 +687,10 @@
           </div>
         </div>
 
+        <!-- ===== デフォルト（Detail）タブ: 譜面情報 + 各スコアパネル + 判定内訳 + 投票 + 目標計算 + メモ ===== -->
         <div v-else class="max-w-4xl mx-auto space-y-4 sm:space-y-8">
 
+          <!-- 譜面メタ情報（難易度バッジ + タイトル） -->
           <div class="flex flex-col items-center sm:items-start gap-2 sm:gap-4">
             <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
               <span :class="['px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide shadow-sm', selectedRecord.difficultyColor]">
@@ -684,12 +704,14 @@
               {{ selectedRecord.title }}
             </h3>
           </div>
+          <!-- 最終プレー日時バッジ -->
           <div class="flex flex-wrap items-center justify-between gap-3">
             <span class="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm transition-colors">
               {{ t('table.lastPlayTime') }}: <span class="text-slate-700 dark:text-slate-200 font-black">{{ selectedRecord.lastPlayTime || t('table.unknown') }}</span>
             </span>
           </div>
 
+          <!-- スコアパネル 2×2 グリッド: ランプ / DJ LEVEL / BEAT-PT / EX スコア + スコアレート -->
           <div class="grid grid-cols-2 gap-3 sm:gap-6">
             <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
               <div class="absolute top-0 left-0 w-full h-1 sm:h-2" :class="getClearTypeBgColor(selectedRecord.clearType)"></div>
@@ -745,6 +767,7 @@
             </div>
           </div>
 
+          <!-- 判定内訳: PGREAT / GREAT / MISS を 3 カラムで表示 -->
           <div class="border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-2 sm:py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
               <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('table.judgmentDetail') }}</p>
@@ -765,7 +788,7 @@
             </div>
           </div>
 
-          <!-- Option Vote Section -->
+          <!-- ===== オプション投票セクション（正規/MIRROR/RANDOM/R-RAN/S-RAN）===== -->
           <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-emerald-50 dark:bg-emerald-900/30 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-100 dark:border-emerald-800/50 flex items-center justify-between transition-colors duration-200">
               <p class="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-2">
@@ -783,7 +806,7 @@
                 </p>
               </div>
               
-              <!-- Vote Buttons -->
+              <!-- 投票ボタン（ログイン中のみ）: 自分の票と一致したボタンは active 色で強調 -->
               <div v-if="isLoggedIn" class="flex flex-wrap gap-2 mb-4">
                 <button
                   v-for="opt in optionTypes"
@@ -804,7 +827,7 @@
                 {{ t('table.loginToVote') }}
               </div>
               
-              <!-- Vote Results Bar Chart -->
+              <!-- 投票結果のバーチャート表示（各オプションの票数と割合） -->
               <div v-if="voteData.totalVotes > 0" class="space-y-2">
                 <div v-for="opt in optionTypes" :key="opt.value" class="flex items-center gap-2">
                   <span class="text-[10px] sm:text-xs font-bold w-20 sm:w-24 text-right shrink-0" :class="opt.labelColor">{{ opt.label }}</span>
@@ -827,7 +850,7 @@
             </div>
           </div>
 
-          <!-- BEAT-PT Target Calculator -->
+          <!-- ===== BEAT-PT 目標計算セクション: スライダーで目標 PT 増分を選ぶと、必要スコアを逆算して表示 ===== -->
           <div v-if="selectedRecord.maxScore > 0 && selectedRecord.maxBeatTierPoints > 0 && selectedRecord.beatTierPoints < selectedRecord.maxBeatTierPoints" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-indigo-50 dark:bg-indigo-900/30 px-6 py-4 border-b border-indigo-100 dark:border-indigo-800/50 flex items-center justify-between transition-colors duration-200">
               <p class="text-sm font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-widest flex items-center gap-2">
@@ -874,7 +897,7 @@
             </div>
           </div>
 
-          <!-- Memo Section -->
+          <!-- ===== メモ セクション: 譜面ごとのフリーテキストメモ（ログイン時のみ編集可） ===== -->
           <div v-if="selectedRecord.id || !isLoggedIn" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
               <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('scores.memo') }}</p>
@@ -910,7 +933,7 @@
         </div>
       </div>
       
-      <!-- Sticky Footer -->
+      <!-- ===== モーダル Sticky フッタ: 「一覧に戻る」ボタン（全タブ共通） ===== -->
       <div class="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.2)] w-full flex justify-center z-10 transition-colors duration-200">
          <button @click="closeDetailModal" class="w-full max-w-md px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-2xl shadow-lg transition-colors flex items-center justify-center gap-2">
            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -925,6 +948,40 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 曲別スコア一覧画面の中核。テーブル描画・フィルタ・並び替え・詳細モーダルをすべて担当する。
+ *
+ * 画面全体構造:
+ *  - 上段フィルタ: レベル / 難易度 / DJ LEVEL / クリアランプ / 検索語 / 0 点非表示
+ *  - モード切替: BEAT-TIER モードと RATE-TIER モードのタブ（RATE 機能は composable で制御）
+ *  - データテーブル: 曲・譜面・スコアレート・BEAT-PT（または RATE-PT）を一覧表示
+ *      - BEAT-TIER: TOP100 ハイライト＋「あと何点で TOP100 に入れるか」を表示
+ *      - RATE-TIER: RATE-PT の TOP100 ハイライト＋パーフェクト超過時の強調
+ *  - ページネーション: 10/25/50/100 件切替
+ *  - 詳細モーダル（フルスクリーン Teleport）:
+ *      - 詳細タブ: ランプ/AAA/PGREAT/GREAT/MISS 等の細かいステータス
+ *      - Rate-Tier タブ: 閾値テーブル
+ *      - ランキングタブ: 自分+フレンド+公開+仮想(TOPランカー) をマージしたマルチソース順位表
+ *      - 履歴タブ: 自分のアップロード履歴からスコア推移を表示
+ *      - オプション投票・メモ編集・目標PT電卓 もモーダル内に収録
+ *
+ * Props:
+ *  - scores: 画面外から渡されるスコアデータ（曲単位の配列）
+ *  - viewingMode: 他ユーザー閲覧モード。'topRanker' のときは djName 等の仮想ユーザー表示を追加する
+ *
+ * Emits:
+ *  - reset: 親コンポーネントに「やり直し/再取り込み」を要求
+ *  - update:totalPoints: 総 BEAT-PT を親へ通知（TOP100 合計）
+ *  - view-user: テーブル行/ランキング行から公開ユーザー閲覧へ遷移
+ *  - view-top-ranker: TOP ランカー（仮想ユーザー）閲覧へ遷移
+ *
+ * 依存 Composable:
+ *  - `useScores`: メモ更新 API
+ *  - `useDarkMode`: ダークモード判定（色分岐で参照）
+ *  - `useAuth`: 認証・ヘッダ付与
+ *  - `useRateTierVisibility`: RATE-TIER 機能の ON/OFF フラグ（サーバー側の段階的リリース対応）
+ *  - `useGameData`: song_data.json / 難易度表マスター
+ */
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
@@ -934,14 +991,17 @@ import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoint
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
+import { useAdmin } from '../composables/useAdmin';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import RankIcon from './RankIcon.vue';
 
 const { updateMemo } = useScores();
 const { isDarkMode } = useDarkMode();
 const { isLoggedIn, authHeaders, user } = useAuth();
-const isAdmin = computed(() => user.value?.iidxId === '5787-1145');
+/** 管理者判定。判定ロジックは useAdmin composable に集約されている。 */
+const { isAdmin } = useAdmin();
 
+/** API ベース URL。未設定時はローカル開発用のデフォルト。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const props = defineProps<{
@@ -949,15 +1009,20 @@ const props = defineProps<{
   viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | null;
 }>();
 
-// Emits are handled below after totalBeatTierPoints definition
+// emit の定義は totalBeatTierPoints の定義直後にまとめる（参照順の都合）
 
 const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
+/** 現在のモード。'beat' は BEAT-TIER、'rate' は RATE-TIER 表示。 */
 const viewMode = ref<'beat' | 'rate'>('beat');
 
-// Song rank data: map of "title|difficultyName" -> { rank, total }
+/** 譜面別ランキングマップ。キーは `title|difficultyName`。自分が全ユーザー中何位かを格納する。 */
 const songRankMap = ref<Map<string, { rank: number; total: number }>>(new Map());
 
+/**
+ * 【関数の役割】 自分の譜面別順位をバックエンドから取得し、`songRankMap` に詰め替える。
+ * 未ログインなら何もしない。エラーは握り潰して UI を壊さない。
+ */
 const fetchSongRanks = async () => {
   if (!isLoggedIn.value) return;
   try {
@@ -968,24 +1033,37 @@ const fetchSongRanks = async () => {
       data.forEach(r => map.set(`${r.title}|${r.difficultyName}`, { rank: r.rank, total: r.total }));
       songRankMap.value = map;
     }
-  } catch { /* silent */ }
+  } catch { /* 握り潰し */ }
 };
+// 【watch】 RATE-TIER 機能フラグが OFF に切り替わった瞬間、RATE モード表示なら BEAT モードへ自動復帰。
 watch(showRateTier, (val) => { if (!val && viewMode.value === 'rate') viewMode.value = 'beat'; });
 
 
+/** テキスト検索クエリ。タイトル/アーティスト/ジャンル/ランプに対して部分一致する。 */
 const searchQuery = ref('');
+/** 難易度フィルタ（'ANOTHER' / 'LEGGENDARIA' の多選択）。空配列は「全て」。 */
 const filterDifficulty = ref<string[]>([]);
+/** レベルフィルタ（'11' / '12' など。RATE モードでは 1〜12）。空配列は「全て」。 */
 const filterLevel = ref<string[]>([]);
+/** DJ LEVEL フィルタ（'AAA' 〜 'F'）。空配列は「全て」。 */
 const filterDjLevel = ref<string[]>([]);
+/** クリアランプフィルタ（'FULLCOMBO CLEAR' など）。空配列は「全て」。 */
 const filterClearType = ref<string[]>([]);
+/** 0 点譜面を非表示にするトグル。未プレイ曲を隠したい場合に使う。 */
 const hideZeroScore = ref(false);
 
+/** 現在開いているドロップダウン名。null は閉じた状態。 */
 const openDropdown = ref<string | null>(null);
 
+/** 指定ドロップダウンを開閉する。既に開いていれば閉じる。 */
 const toggleDropdown = (name: string) => {
   openDropdown.value = openDropdown.value === name ? null : name;
 };
 
+/**
+ * 【関数の役割】 フィルタ配列に対する値のトグル操作。
+ * 配列に値があれば取り除き、無ければ末尾に追加する。
+ */
 const toggleFilterValue = (arr: string[], value: string) => {
   const index = arr.indexOf(value);
   if (index === -1) {
@@ -995,19 +1073,28 @@ const toggleFilterValue = (arr: string[], value: string) => {
   }
 };
 
+/** チェックボックスの選択状態判定用ヘルパ。 */
 const isSelected = (arr: string[], value: string) => {
   return arr.includes(value);
 };
 
+/** 現在のページ番号（1 始まり）。 */
 const currentPage = ref(1);
+/** 1 ページあたりの表示件数。10/25/50/100 から選択可能。 */
 const itemsPerPage = ref(50);
 
 type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | 'songRank' | null;
 type SortOrder = 'asc' | 'desc';
 
+/** 現在の並び替えキー。初期値は「非公式難易度（informalRank）」降順。 */
 const sortKey = ref<SortKey>('informalRank');
+/** 並び替え順。asc/desc。 */
 const sortOrder = ref<SortOrder>('desc');
 
+/**
+ * クリアランプの強弱を数値化したテーブル。並び替え時に使う。
+ * 大きいほど「上位ランプ」（FULLCOMBO > EX HARD > HARD > CLEAR > ...）。
+ */
 const clearTypeRankings: Record<string, number> = {
   'FULLCOMBO CLEAR': 7,
   'EX HARD CLEAR': 6,
@@ -1020,19 +1107,30 @@ const clearTypeRankings: Record<string, number> = {
   '---': 0
 };
 
+/**
+ * 【computed】 BEAT-TIER モード用の「☆11/☆12 の ANOTHER/LEGGENDARIA 全譜面」配列。
+ *
+ * 処理の流れ:
+ *  手順1: 渡された props.scores をフラット化し、対象譜面だけ抽出（プレイ済み）。
+ *  手順2: タイトル+難易度をキーにプレイ済みマップを構築。
+ *  手順3: 難易度表から非公式ランクを辞書化（未プレイ曲でも informalRank を付けるため）。
+ *  手順4: song_data.json の全譜面をループし、プレイ済みなら既存レコードを返し、未プレイなら
+ *         score=0 のダミーレコードを生成して返す（テーブル上「未プレイ」として表示するため）。
+ */
 const allRecords = computed<ScoreRecord[]>(() => {
-  // First, get the user's played scores
-  const playedRecords = flattenScores(props.scores).filter(r => 
+  // 手順1: ユーザーのプレイ済みスコアから ☆11/☆12 ANOTHER/LEGGENDARIA のみ抽出
+  const playedRecords = flattenScores(props.scores).filter(r =>
     r.difficultyLevel &&
     r.difficultyLevel >= 11 &&
     ['ANOTHER', 'LEGGENDARIA'].includes(r.difficultyName)
   );
 
-  // Build a map for fast lookup
+  // 手順2: タイトル+難易度をキーにする Map を組んで O(1) で引けるようにする
   const playedMap = new Map<string, ScoreRecord>();
   playedRecords.forEach(r => playedMap.set(`${r.title}|${r.difficultyName}`, r));
 
-  // Index informal difficulty table for unplayed songs
+  // 手順3: 未プレイ曲にも非公式ランクを付けたいので、難易度表マスターから辞書化する
+  //        曲名末尾 '[L]' は LEGGENDARIA 指定。それ以外は ANOTHER 扱い。
   const informalDict = new Map<string, string>();
   if (diffTableRanksRef.value && Array.isArray(diffTableRanksRef.value)) {
       diffTableRanksRef.value.forEach((r: any) => {
@@ -1047,7 +1145,8 @@ const allRecords = computed<ScoreRecord[]>(() => {
       });
   }
 
-  // Create empty records for songs in song_data.json that the user hasn't played
+  // 手順4: song_data.json 側で定義されている全譜面を走査して、未プレイなら空レコードを生成する。
+  //        difficulty "4" = ANOTHER、"10" = LEGGENDARIA に対応。
   const difMap: Record<string, string> = { "4": "ANOTHER", "10": "LEGGENDARIA" };
   const baseRecords: ScoreRecord[] = (songDataBodyRef.value as any[])
     .filter((s: any) => s.level >= 11 && (s.difficulty === "4" || s.difficulty === "10"))
@@ -1055,18 +1154,20 @@ const allRecords = computed<ScoreRecord[]>(() => {
       const diffName = difMap[s.difficulty];
       const key = `${s.title}|${diffName}`;
       
+      // プレイ済みならそのまま既存のレコードを採用。
       if (playedMap.has(key)) {
         return playedMap.get(key)!;
       }
 
-      // Look up informal rank
+      // 未プレイなら辞書から非公式ランクを引く（見つからない場合は undefined のまま）
       const informalKey = `${s.title}_${diffName}`;
       let informalRank = informalDict.get(informalKey);
       if (!informalRank && diffName === 'ANOTHER') {
           informalRank = informalDict.get(`${s.title}_ANOTHER`);
       }
 
-      // Generate a default empty record
+      // 未プレイ譜面の空レコードを生成（score=0 / clearType='NO PLAY'）。
+      // maxScore は notes * 2（IIDX の EX スコア理論値）で計算する。
       return {
         id: undefined,
         playStyle: 'SP',
@@ -1103,6 +1204,11 @@ const emit = defineEmits<{
   (e: 'view-top-ranker', payload: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }): void;
 }>();
 
+/**
+ * 【関数の役割】 ランキング行のうち実在ユーザー行をクリックしたときの遷移ハンドラ。
+ *  - userId が無い（通信エラー等）なら何もしない
+ *  - privacyLevel が 0 以外（= 非公開 / フレンド限定）はクリック不可とする（誤タップで遷移させない）
+ */
 function handleSongUserRowClick(entry: SongRankingEntry) {
   if (!entry.userId) return;
   const priv = entry.privacyLevel ?? 1;
@@ -1110,6 +1216,10 @@ function handleSongUserRowClick(entry: SongRankingEntry) {
   emit('view-user', { id: entry.userId, displayName: entry.displayName, iidxId: entry.iidxId ?? '' });
 }
 
+/**
+ * 【関数の役割】 ランキング行のうち仮想 TOP ランカー行をクリックしたときの遷移ハンドラ。
+ * 親コンポーネント（App.vue）へ view-top-ranker イベントを上げ、エリア情報を渡す。
+ */
 function handleSongTopRankerRowClick(entry: SongTopRankerEntry) {
   emit('view-top-ranker', {
     versionNum: entry.versionNum,
@@ -1119,31 +1229,43 @@ function handleSongTopRankerRowClick(entry: SongTopRankerEntry) {
   });
 }
 
+/**
+ * 【computed】 BEAT-PT 総合値。全譜面から BEAT-PT 降順で並べ、上位 100 譜面を合計して返す。
+ * これが BEAT-Tier 段位判定の元値になる。
+ */
 const totalBeatTierPoints = computed(() => {
-    // Sort all records by beatTierPoints descending and take top 100
+    // 全譜面を BEAT-PT 降順でソートし、上位 100 譜面の合計を算出
     const sorted = [...allRecords.value].sort((a, b) => b.beatTierPoints - a.beatTierPoints);
     const top100 = sorted.slice(0, 100);
     return top100.reduce((acc, curr) => acc + curr.beatTierPoints, 0);
 });
 
+// 【watch】 BEAT-PT 総合値が変わるたびに親へ emit する。
+// immediate: true でマウント直後の初期値も親に伝える。
 watch(totalBeatTierPoints, (newVal) => {
     emit('update:totalPoints', newVal);
 }, { immediate: true });
 
-// Top 100 status for highlighting (BEAT-TIER)
+/**
+ * 【computed】 BEAT-TIER の TOP100 譜面キー集合。ハイライト表示用に Set 化。
+ * キーは `title|difficultyName` 形式。
+ */
 const top100Keys = computed(() => {
     const sorted = [...allRecords.value].sort((a, b) => b.beatTierPoints - a.beatTierPoints);
     return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
 });
 
-// RATE-TIER: all played ANOTHER/LEGGENDARIA songs across all levels (unlimited)
+/**
+ * 【computed】 RATE-TIER 用の全譜面リスト。
+ * BEAT-TIER と違いレベル制限なし（☆1〜☆12 すべて対象）、ANOTHER/LEGGENDARIA のプレイ済みのみ。
+ */
 const rateAllRecords = computed<ScoreRecord[]>(() =>
     flattenScores(props.scores).filter(r =>
         ['ANOTHER', 'LEGGENDARIA'].includes(r.difficultyName)
     )
 );
 
-// RATE-TIER: top 100 keys by score rate tier points (for highlighting)
+/** 【computed】 RATE-TIER の TOP100 キー集合。RATE-PT 降順で上位 100 譜面を取り出す。 */
 const rateTop100Keys = computed(() => {
     const sorted = [...rateAllRecords.value]
         .filter(r => r.scoreRate > 0)
@@ -1151,13 +1273,18 @@ const rateTop100Keys = computed(() => {
     return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
 });
 
-// Highlight perfect-rate songs (individual RATE-PT = 512) when the total
-// RATE-PT has overflowed 51200 (i.e. there are more than 100 perfect-rate songs).
+/**
+ * 【computed】 パーフェクト（100% 達成）の曲が 100 譜面を超えたかどうか。
+ * 超えた場合、個別 RATE-PT 512 の曲をより強調表示する（合計 51200 を超えるオーバーフロー状態の明示）。
+ */
 const hasPerfectRateOverflow = computed(() =>
     rateAllRecords.value.filter(r => r.scoreRate >= 100).length > 100
 );
 
-// 100th song's Beat-PT (= threshold to enter top 100)
+/**
+ * 【computed】 TOP100 のボーダーライン（=100 位の BEAT-PT）。
+ * 100 譜面未満しかプレイしていない場合は 0 を返す。
+ */
 const top100Threshold = computed(() => {
     const sorted = [...allRecords.value]
         .filter(r => r.beatTierPoints > 0)
@@ -1165,21 +1292,31 @@ const top100Threshold = computed(() => {
     return sorted.length >= 100 ? sorted[99].beatTierPoints : 0;
 });
 
-// Map of (title|diff) -> score points needed to exceed top-100 threshold
+/**
+ * 【computed】 各 TOP100 外の譜面について「あと何点伸ばせば TOP100 入りできるか」を算出した Map。
+ * キー: `title|difficultyName`、値: 必要な素スコア増加量。
+ *
+ * 処理の流れ:
+ *  手順1: そもそも TOP100 が埋まっていない場合は空 Map を返す。
+ *  手順2: TOP100 内の譜面・無効譜面はスキップ。
+ *  手順3: 理論値（100%）でも閾値に届かない譜面は表示対象外。
+ *  手順4: 現在スコア〜最大スコアの範囲で二分探索し、閾値超えする最小スコアを発見。
+ *  手順5: その差分（＝必要点数）を Map に格納。
+ */
 const top100ScoreNeededMap = computed(() => {
     const map = new Map<string, number>();
     if (top100Threshold.value === 0) return map;
 
     for (const record of allRecords.value) {
         const key = `${record.title}|${record.difficultyName}`;
-        if (top100Keys.value.has(key)) continue;
-        if (!record.informalRank || record.maxScore <= 0) continue;
+        if (top100Keys.value.has(key)) continue; // 既に TOP100 入りしている譜面はスキップ
+        if (!record.informalRank || record.maxScore <= 0) continue; // 計算不能なデータはスキップ
 
         const targetPt = top100Threshold.value;
-        // Can't reach threshold even with perfect score
+        // 100% でも閾値に届かない譜面は（理論上 TOP100 入りできないので）表示しない
         if (calculatePoints(100, record.informalRank) <= targetPt) continue;
 
-        // Binary search: find minimum score that gives Beat-PT > threshold
+        // 二分探索: BEAT-PT > 閾値 となる最小スコアを探す
         let low = record.score;
         let high = record.maxScore;
         let bestScore = record.maxScore;
@@ -1201,17 +1338,20 @@ const top100ScoreNeededMap = computed(() => {
     return map;
 });
 
-// タッチスクロール判定
+// --- タッチスクロール判定 ---
+// モバイルで「行タップ = 詳細モーダル」と「縦スクロール」を区別するための状態。
 let touchStartY = 0;
 let touchStartX = 0;
 let isTouchScrolling = false;
 
+/** タッチ開始位置を記録し、スクロールフラグをリセットする。 */
 const handleTouchStart = (e: TouchEvent) => {
   touchStartY = e.touches[0].clientY;
   touchStartX = e.touches[0].clientX;
   isTouchScrolling = false;
 };
 
+/** 指が 8px を超えて動いたらスクロール中と判定し、後続のクリックイベントを無視させる。 */
 const handleTouchMove = (e: TouchEvent) => {
   const dy = Math.abs(e.touches[0].clientY - touchStartY);
   const dx = Math.abs(e.touches[0].clientX - touchStartX);
@@ -1220,22 +1360,29 @@ const handleTouchMove = (e: TouchEvent) => {
   }
 };
 
+/** 行クリック: スクロール判定が立っていなければ詳細モーダルを開く。 */
 const handleRowClick = (record: ScoreRecord) => {
   if (isTouchScrolling) return;
   openDetailModal(record);
 };
 
-// Modal state
+// --- 詳細モーダルの状態 ---
+/** 現在選択中の譜面レコード。null のときはモーダル非表示。 */
 const selectedRecord = ref<ScoreRecord | null>(null);
+/** 詳細モーダル内で表示中のタブ。 */
 const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking' | 'history'>('detail');
 
+/** メモ編集モード切替フラグ。 */
 const isEditingMemo = ref(false);
+/** メモ編集用テキスト入力バッファ。 */
 const editMemoText = ref('');
+/** メモ保存中フラグ。二重送信防止。 */
 const isSavingMemo = ref(false);
 
+/** 目標 BEAT-PT スライダーの値（0〜 最大残 PT）。目標到達に必要なスコアを逆算して表示する。 */
 const targetBeatPtSlider = ref(0);
 
-// Rival scores state
+// --- ライバル（フレンド）スコア取得用の状態と型 ---
 interface RivalScore {
   id: number;
   displayName: string;
@@ -1249,9 +1396,10 @@ interface RivalScore {
   isSelf?: boolean;
   privacyLevel?: number;
 }
+/** フレンドの該当譜面スコア一覧。タブ初表示時に取得する。 */
 const rivalScores = ref<RivalScore[]>([]);
 
-// Song ranking state
+// --- 譜面別ランキング（他ユーザー）用の状態と型 ---
 interface SongRankingEntry {
   userId?: number | null;
   iidxId?: string;
@@ -1262,9 +1410,13 @@ interface SongRankingEntry {
   djLevel?: string;
   totalBeatPt: number;
 }
+/** 譜面ランキング（公開/フレンド/自分）の生データ。 */
 const songRankingList = ref<SongRankingEntry[]>([]);
+/** 譜面ランキング取得中フラグ。 */
 const isLoadingSongRanking = ref(false);
+/** 「スコア公開ユーザーも表示」チェック。 */
 const showPublicUsers = ref(false);
+/** 「TOPランカー仮想ユーザーを表示」チェック。 */
 const showVirtualUsers = ref(false);
 
 interface SongTopRankerEntry {
@@ -1275,8 +1427,13 @@ interface SongTopRankerEntry {
   djName: string;
   score: number;
 }
+/** 譜面に紐づく仮想ユーザー（TOPランカー）の一覧。タブ表示時に取得する。 */
 const songTopRankersList = ref<SongTopRankerEntry[]>([]);
 
+/**
+ * 【関数の役割】 譜面ランキング（実ユーザー）と TOP ランカー（仮想ユーザー）を並行取得する。
+ * Promise.all で 2 本の API を同時に呼び、どちらかが失敗しても UI を壊さない。
+ */
 const fetchSongRanking = async () => {
   if (!selectedRecord.value) return;
   isLoadingSongRanking.value = true;
@@ -1296,12 +1453,13 @@ const fetchSongRanking = async () => {
       songTopRankersList.value = await topRes.json();
     }
   } catch {
-    // Silently fail
+    // 握り潰し: ランキング表示は補助情報なので失敗してもモーダルは動かす
   } finally {
     isLoadingSongRanking.value = false;
   }
 };
 
+/** 詳細モーダルのランキングタブで描画する行の共通型。実ユーザー行と仮想ユーザー行を一本化する。 */
 interface RankingRow {
   key: string;
   kind: 'user' | 'virtual';
@@ -1320,14 +1478,33 @@ interface RankingRow {
   rank: number | null;
 }
 
+/**
+ * 【computed の役割】 ランキングタブで表示する行を組み立てる。
+ *
+ * 処理フロー:
+ *  手順1: songRankingList（API 取得の実ユーザー）を iidxId で Map に投入。自分は除外。
+ *  手順2: rivalScores（フレンド）を同じ Map にマージ。既存なら isFriend フラグだけ立てる。
+ *  手順3: 自分（selfRow）を作成し、合算対象に加える。
+ *  手順4: showVirtualUsers が true のとき、TOP ランカー仮想ユーザーを以下のルールで分類:
+ *           - allTimeGlobal: 全国(prefNum=0)の歴代 TOP
+ *           - globalAllTime: 県別の歴代 TOP が全国歴代 TOP と同スコア/同名なら昇格
+ *           - allTimeArea:   県別の歴代 TOP（全国と一致しないもの）
+ *           - versionTop:    バージョン別全国 TOP
+ *           - top:           その他バージョン別県別 TOP
+ *         重複（全国＝県, version 全国＝県）は一方だけ残す。
+ *  手順5: スコアのあるすべての行に対し dense 1-indexed の順位を付与（同点は同順位）。
+ *  手順6: 表示用にフィルタ: 自分 + 仮想 + 公開フレンド + (showPublicUsers かつ privacy=0)。
+ *  手順7: スコア降順でソートして返す。スコア null は末尾。
+ */
 const rankingList = computed<RankingRow[]>(() => {
   if (!selectedRecord.value) return [];
   const rec = selectedRecord.value;
   const myIidx = user.value?.iidxId ?? '';
 
+  // フレンドの iidxId セット。実ユーザー行へ isFriend フラグを立てるのに使う。
   const friendIidxSet = new Set(rivalScores.value.map(r => r.iidxId).filter(Boolean));
 
-  // Merge songRankingList + rivalScores, dedupe by iidxId, exclude self.
+  // 手順1〜2: songRankingList + rivalScores を iidxId でマージ。自分は除外。
   const usersByIidx = new Map<string, RankingRow>();
   for (const entry of songRankingList.value) {
     const iidxId = entry.iidxId ?? '';
@@ -1370,6 +1547,7 @@ const rankingList = computed<RankingRow[]>(() => {
     }
   }
 
+  // 手順3: 自分の行を合成（displayName は固定で「あなた」）。
   const selfRow: RankingRow = {
     key: 'self',
     kind: 'user',
@@ -1384,13 +1562,18 @@ const rankingList = computed<RankingRow[]>(() => {
     rank: null,
   };
 
+  // 手順4: 仮想ユーザー行を構築。各バッジの判定ロジックは以下。
   const virtualRows: RankingRow[] = [];
   if (showVirtualUsers.value) {
+    // 県別の歴代 TOP を集める（versionNum === 0 が「歴代」の意味）。
     const allTimeByPref = new Map<number, { djName: string; score: number }>();
     for (const e of songTopRankersList.value) {
       if (e.versionNum === 0) allTimeByPref.set(e.prefectureFileNum, { djName: e.djName, score: e.score });
     }
+    // 全国（prefectureFileNum === 0）の歴代 TOP。
     const globalAllTime = allTimeByPref.get(0);
+    // 全国歴代 TOP と完全一致する県別歴代 TOP があるかを検出。
+    // 両方表示すると重複するので、後段で全国歴代を間引く根拠にする。
     let prefectureMatchesGlobalAllTime = false;
     if (globalAllTime) {
       for (const [prefNum, at] of allTimeByPref) {
@@ -1400,32 +1583,43 @@ const rankingList = computed<RankingRow[]>(() => {
         }
       }
     }
+    // バージョン別 全国 TOP を集める。
     const globalTopByVersion = new Map<number, { djName: string; score: number }>();
     for (const e of songTopRankersList.value) {
       if (e.versionNum !== 0 && e.prefectureFileNum === 0) {
         globalTopByVersion.set(e.versionNum, { djName: e.djName, score: e.score });
       }
     }
+    // 「バージョン別 全国 TOP」と同じスコア/名前を持つ「バージョン別 県別 TOP」があるバージョンを検出。
+    // 該当する場合、バージョン別 全国行は冗長なので後段で除外する。
     const versionHasPrefectureMatch = new Set<number>();
     for (const e of songTopRankersList.value) {
       if (e.versionNum === 0 || e.prefectureFileNum === 0) continue;
       const g = globalTopByVersion.get(e.versionNum);
       if (g && g.djName === e.djName && g.score === e.score) versionHasPrefectureMatch.add(e.versionNum);
     }
+    // key 用のユニークインデックス。
     let idx = 0;
+    // バージョンごとのエントリを走査し、バッジを決める。versionNum === 0（歴代行）はバージョン列の前段で既に処理済みなのでスキップ。
     for (const e of songTopRankersList.value) {
       if (e.versionNum === 0) continue;
+      // このエントリが、県別歴代 TOP と同一（= 歴代記録）か判定。
       const at = allTimeByPref.get(e.prefectureFileNum);
       const isAllTime = at !== undefined && at.djName === e.djName && at.score === e.score;
+      // 全国歴代と県別歴代が一致するなら、全国歴代行は冗長なので除外。
       if (isAllTime && e.prefectureFileNum === 0 && prefectureMatchesGlobalAllTime) continue;
+      // バージョン全国 TOP と同バージョン県別 TOP が同スコアなら、全国行は除外。
       if (e.prefectureFileNum === 0 && versionHasPrefectureMatch.has(e.versionNum)) continue;
+      // 県別歴代 TOP のうち、全国歴代 TOP と一致しているものを昇格扱いにする。
       const isGlobalAllTime = isAllTime && e.prefectureFileNum !== 0 && globalAllTime !== undefined
         && globalAllTime.djName === e.djName && globalAllTime.score === e.score;
+      // バージョン別全国 TOP と一致する県別エントリか？
       let isVersionTop = false;
       if (e.prefectureFileNum !== 0) {
         const g = globalTopByVersion.get(e.versionNum);
         if (g && g.djName === e.djName && g.score === e.score) isVersionTop = true;
       }
+      // バッジ優先度: allTimeGlobal > globalAllTime > allTimeArea > versionTop > top。
       let badge: RankingRow['virtualBadge'] = 'top';
       if (isAllTime && e.prefectureFileNum === 0) badge = 'allTimeGlobal';
       else if (isGlobalAllTime) badge = 'globalAllTime';
@@ -1443,9 +1637,11 @@ const rankingList = computed<RankingRow[]>(() => {
     }
   }
 
+  // すべての行を 1 本の配列に集約（自分 + 実ユーザー + 仮想）。
   const all: RankingRow[] = [selfRow, ...usersByIidx.values(), ...virtualRows];
 
-  // Assign rank (dense, 1-indexed) across every scored entry — includes hidden users.
+  // 手順5: スコア保有者に dense 1-indexed の順位を付与。非表示ユーザーも順位計算には含める
+  //        （= 表示上「4位」が欠番に見えても、裏で隠れた 3 位が存在し得る）。
   const scored = all.filter(r => r.score != null).slice().sort((a, b) => (b.score as number) - (a.score as number));
   let prevScore: number | null = null;
   let prevRank = 0;
@@ -1458,7 +1654,9 @@ const rankingList = computed<RankingRow[]>(() => {
     r.rank = prevRank;
   });
 
-  // Filter for display.
+  // 手順6: 表示フィルタ。自分・仮想ユーザーは常に表示、フレンドはプライバシー 2（完全非公開）以外、
+  //        公開ユーザーは showPublicUsers チェック時のみ表示。
+
   const display = all.filter(r => {
     if (r.isSelf) return true;
     if (r.kind === 'virtual') return true;
@@ -1467,6 +1665,7 @@ const rankingList = computed<RankingRow[]>(() => {
     return false;
   });
 
+  // 手順7: スコア降順でソート。score === null の行は末尾に寄せる。
   display.sort((a, b) => {
     if (a.score == null && b.score == null) return 0;
     if (a.score == null) return 1;
@@ -1477,8 +1676,13 @@ const rankingList = computed<RankingRow[]>(() => {
   return display;
 });
 
+/** フレンドスコア取得中フラグ。 */
 const isLoadingRivals = ref(false);
 
+/**
+ * 【関数の役割】 選択中譜面に対するフレンドスコアを API から取得。
+ * 結果は rivalScores に格納され、rankingList computed にも反映される。
+ */
 const fetchRivalScores = async () => {
   if (!selectedRecord.value) return;
   isLoadingRivals.value = true;
@@ -1494,12 +1698,16 @@ const fetchRivalScores = async () => {
       rivalScores.value = await res.json();
     }
   } catch {
-    // Silently fail
+    // 握り潰し: ライバルタブは補助情報のためモーダルは維持
   } finally {
     isLoadingRivals.value = false;
   }
 };
 
+/**
+ * 【関数の役割】 ライバルタブクリック時のハンドラ。
+ * タブ切替 + 初回のみ rivalScores / songRanking を取得する（キャッシュ効果）。
+ */
 const handleRivalTabClick = () => {
   modalTab.value = 'rivals';
   if (rivalScores.value.length === 0 && !isLoadingRivals.value) {
@@ -1510,15 +1718,22 @@ const handleRivalTabClick = () => {
   }
 };
 
-// Song history state
+// --- 譜面単位の成長履歴 ---
+/** スコア変化を時系列で表示する際の 1 レコード。 */
 interface SongHistoryEntry {
   uploadedAt: string;
   score: number | null;
   beatPt: number | null;
 }
+/** ヒストリータブで表示する履歴データ。タブ初表示時に取得。 */
 const songHistory = ref<SongHistoryEntry[]>([]);
+/** 履歴読込中フラグ。 */
 const isLoadingHistory = ref(false);
 
+/**
+ * 【関数の役割】 選択中譜面のスコア更新履歴（uploadedAt / score / beatPt）を取得。
+ * グラフ/表の元データになる。
+ */
 const fetchSongHistory = async () => {
   if (!selectedRecord.value) return;
   isLoadingHistory.value = true;
@@ -1532,12 +1747,16 @@ const fetchSongHistory = async () => {
       songHistory.value = await res.json();
     }
   } catch {
-    // Silently fail
+    // 握り潰し: 履歴は補助情報
   } finally {
     isLoadingHistory.value = false;
   }
 };
 
+/**
+ * 【関数の役割】 ヒストリータブクリック時のハンドラ。
+ * 初回のみ songHistory をフェッチ（以降はキャッシュを再利用）。
+ */
 const handleHistoryTabClick = () => {
   modalTab.value = 'history';
   if (songHistory.value.length === 0 && !isLoadingHistory.value) {
@@ -1545,39 +1764,52 @@ const handleHistoryTabClick = () => {
   }
 };
 
+/**
+ * 【関数の役割】 バックエンドの LocalDateTime 文字列（タイムゾーンなし）を JST 扱いで整形する。
+ * 既にタイムゾーンが付いていればそのまま使用、無ければ `+09:00` を付与して Date 化する。
+ */
 const formatHistoryDate = (dateStr: string) => {
-  // Backend returns LocalDateTime without timezone — treat as JST (UTC+9)
+  // バックエンドはタイムゾーン情報を持たない LocalDateTime を返す。JST として解釈する。
   const jstStr = /[Z+\-]\d{2}:?\d{2}$/.test(dateStr) ? dateStr : dateStr + '+09:00';
   return new Date(jstStr).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 };
 
-// Reset target slider when a new record is selected
+/**
+ * 【watch の役割】 選択中譜面が変わるたびに、モーダル内タブごとのキャッシュをリセットし、
+ * 投票データを再取得する。ここで rivalScores / songRanking / history を空にしておくことで、
+ * 次回タブクリック時に fetch が再度走るよう仕向ける。
+ */
 watch(() => selectedRecord.value?.title, () => {
   targetBeatPtSlider.value = 0;
   rivalScores.value = [];
   songRankingList.value = [];
   songTopRankersList.value = [];
   songHistory.value = [];
-  // Fetch votes for the new record
+  // 新しい譜面の投票データを即時取得（タブ切替に依らずメインタブでも表示するため）。
   if (selectedRecord.value) {
     fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);
   }
 });
 
-// Option Vote System
+// --- オプション投票システム ---
+// 譜面ごとに「どのオプション（正規/MIRROR/RANDOM/R-RAN/S-RAN）で遊んでいるか」を投票・集計する仕組み。
+/** バックエンドから受け取る投票集計データの形。 */
 interface VoteDataType {
   counts: Record<string, number>;
   totalVotes: number;
   myVote: string | null;
 }
 
+/** 現在表示中譜面の投票データ。譜面切替時に fetch しなおす。 */
 const voteData = ref<VoteDataType>({
   counts: { REGULAR: 0, MIRROR: 0, RANDOM: 0, 'R-RANDOM': 0, 'S-RANDOM': 0 },
   totalVotes: 0,
   myVote: null
 });
+/** 投票 POST/DELETE 中の二重送信防止フラグ。 */
 const isVoting = ref(false);
 
+/** 投票ボタンの並び + 色テーマ定義。テンプレ側で v-for して描画する。 */
 const optionTypes = [
   { value: 'REGULAR', label: '正規', icon: '▶', activeBg: 'bg-blue-50 dark:bg-blue-900/30', activeText: 'text-blue-700 dark:text-blue-400', activeBorder: 'border-blue-300 dark:border-blue-700', barColor: 'bg-blue-500', labelColor: 'text-blue-600 dark:text-blue-400' },
   { value: 'MIRROR', label: 'MIRROR', icon: '◀', activeBg: 'bg-purple-50 dark:bg-purple-900/30', activeText: 'text-purple-700 dark:text-purple-400', activeBorder: 'border-purple-300 dark:border-purple-700', barColor: 'bg-purple-500', labelColor: 'text-purple-600 dark:text-purple-400' },
@@ -1586,11 +1818,19 @@ const optionTypes = [
   { value: 'S-RANDOM', label: 'S-RAN', icon: '🎰', activeBg: 'bg-rose-50 dark:bg-rose-900/30', activeText: 'text-rose-700 dark:text-rose-400', activeBorder: 'border-rose-300 dark:border-rose-700', barColor: 'bg-rose-500', labelColor: 'text-rose-600 dark:text-rose-400' },
 ];
 
+/**
+ * 【関数の役割】 指定オプションの投票数を全体のパーセンテージで返す。
+ * プログレスバー幅の算出に使う。0 票の場合は 0 を返す（ゼロ除算回避）。
+ */
 const getVotePercent = (optionValue: string): number => {
   if (voteData.value.totalVotes === 0) return 0;
   return ((voteData.value.counts[optionValue] || 0) / voteData.value.totalVotes) * 100;
 };
 
+/**
+ * 【関数の役割】 指定譜面の投票データを取得する。ログイン中なら myVote も含まれる。
+ * 失敗しても黙殺（UI を壊さない）。
+ */
 const fetchVotes = async (title: string, difficultyName: string) => {
   try {
     const params = new URLSearchParams({ title, difficultyName });
@@ -1602,15 +1842,21 @@ const fetchVotes = async (title: string, difficultyName: string) => {
       voteData.value = data;
     }
   } catch {
-    // Silently fail
+    // 握り潰し
   }
 };
 
+/**
+ * 【関数の役割】 投票の Toggle 動作を行う。
+ *   - 自分が既に同じオプションに投票していた場合 → DELETE（取消）
+ *   - それ以外                                       → POST（新規/変更）
+ * 最後に fetchVotes で集計を最新化する。
+ */
 const castVote = async (optionType: string) => {
   if (!selectedRecord.value) return;
   isVoting.value = true;
   try {
-    // If already voted for this option, delete the vote
+    // 既に同じオプションに投票済みなら取消扱いで DELETE。
     if (voteData.value.myVote === optionType) {
       const params = new URLSearchParams({
         title: selectedRecord.value.title,
@@ -1631,15 +1877,24 @@ const castVote = async (optionType: string) => {
         })
       });
     }
-    // Refresh vote data
+    // 送信後、自分の票を含めて最新の集計を再取得。
     await fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);
   } catch {
-    // Silently fail
+    // 握り潰し
   } finally {
     isVoting.value = false;
   }
 };
 
+/**
+ * 【computed の役割】 targetBeatPtSlider（目標 BEAT-PT 増分）に対し、
+ * 「現スコアから何点上げれば目標 PT に到達するか」を二分探索で逆算する。
+ *
+ * 処理フロー:
+ *  手順1: 現在 PT + スライダー値 = 目標 PT。
+ *  手順2: 探索範囲を [現スコア, maxScore] に取り、BEAT-PT が目標以上になる最小スコアを探す。
+ *  手順3: (必要スコア - 現スコア) を返す。既に到達済みなら 0。
+ */
 const targetScoreNeeded = computed(() => {
   if (!selectedRecord.value || selectedRecord.value.maxScore <= 0 || selectedRecord.value.maxBeatTierPoints <= 0) return 0;
   
@@ -1670,6 +1925,10 @@ const targetScoreNeeded = computed(() => {
   return Math.max(0, bestScore - selectedRecord.value.score);
 });
 
+/**
+ * 【関数の役割】 行クリック等で呼ばれ、詳細モーダルを開く。
+ * 同時に editMemoText に現在のメモを載せ、body のスクロールを固定する（背景が動かないように）。
+ */
 const openDetailModal = (record: ScoreRecord) => {
   selectedRecord.value = record;
   modalTab.value = 'detail';
@@ -1678,6 +1937,10 @@ const openDetailModal = (record: ScoreRecord) => {
   document.body.style.overflow = 'hidden';
 };
 
+/**
+ * 【関数の役割】 メモ編集を保存する。API 成功時はモーダル内の表示も即時反映。
+ * 失敗時はアラートで通知。保存中フラグで二重送信を防ぐ。
+ */
 const saveMemo = async () => {
     if (!selectedRecord.value?.id) return;
     isSavingMemo.value = true;
@@ -1692,18 +1955,22 @@ const saveMemo = async () => {
     }
 };
 
+/**
+ * 【関数の役割】 詳細モーダルを閉じる。
+ * selectedRecord を null にすれば v-if でモーダルが消える。body のスクロール固定も解除。
+ */
 const closeDetailModal = () => {
   selectedRecord.value = null;
   document.body.style.overflow = '';
 };
 
-// Refetch song ranks when scores prop changes (after upload)
+/** 親から渡される scores が変わった（アップロード後など）ら、クリアタイプ集計のために再取得。 */
 watch(() => props.scores, () => { fetchSongRanks(); }, { deep: false });
 
-// Fetch song ranks when auth completes (isLoggedIn may be false on mount)
+/** ログイン状態が後から確定する場合があるので、isLoggedIn が true に遷移した瞬間にも取得。 */
 watch(isLoggedIn, (val) => { if (val) fetchSongRanks(); });
 
-// Watch for filter changes to reset pagination
+/** フィルタ/ソート/件数のどれかが変わったらページ番号を 1 に戻す（UX 改善）。 */
 watch(
   [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
   () => {
@@ -1712,29 +1979,40 @@ watch(
   { deep: true }
 );
 
+/**
+ * 【関数の役割】 ドロップダウン（フィルタのチェックボックス群）外クリックで閉じるためのハンドラ。
+ * 対象が .relative ラッパーの内側かどうかで判定している。
+ */
 const handleClickOutside = (event: MouseEvent) => {
   if (openDropdown.value && !(event.target as Element).closest('.relative')) {
     openDropdown.value = null;
   }
 };
 
+/** マウント時に外クリック監視を登録し、songRanks（クリアタイプ別集計）を取得。 */
 onMounted(() => {
   window.addEventListener('click', handleClickOutside);
   fetchSongRanks();
 });
 
+/** アンマウント時にイベントリスナ解除 + 万一残っている body のスクロール固定を解除。 */
 onUnmounted(() => {
   window.removeEventListener('click', handleClickOutside);
   document.body.style.overflow = '';
 });
 
+/**
+ * 【関数の役割】 ソート列ヘッダクリック時の処理。
+ *   - 同じ列を再クリック: 昇順/降順をトグル
+ *   - 別の列をクリック:   列を切替え、デフォルトの向き（スコア系は desc / ランクは asc）を設定
+ */
 const toggleSort = (key: SortKey) => {
   if (sortKey.value === key) {
-    // Toggle between asc and desc
+    // 既に選択中の列なら asc/desc を反転。
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
   } else {
     sortKey.value = key;
-    // Set default order for specific keys
+    // 列ごとの既定ソート向き（スコア/PT/クリアタイプ/段階は降順、ランキングは昇順）。
     if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints' || key === 'clearType' || key === 'djLevel') {
         sortOrder.value = 'desc';
     } else if (key === 'songRank') {
@@ -1745,6 +2023,20 @@ const toggleSort = (key: SortKey) => {
   }
 };
 
+/**
+ * 【computed の役割】 全レコードに対し、絞り込み + 検索 + ソートを適用した最終リストを返す。
+ *
+ * 処理フロー:
+ *  手順1: モード（通常 / rate）に応じたベースリストを複製。
+ *  手順2: hideZeroScore / difficulty / level / djLevel / clearType のフィルタを順次適用。
+ *  手順3: 検索ワードで title / artist / genre / clearType の部分一致フィルタ。
+ *  手順4: sortKey ごとに専用のソート比較関数を適用。
+ *         - informalRank: 末尾の数値（例 "12.5"）を抽出して比較、次点で difficultyLevel → title。
+ *         - beatTierPoints: rate モードでは scoreRateTierPoints を再計算して比較。
+ *         - clearType:   clearTypeRankings で定めた順位テーブルで比較。
+ *         - djLevel:     AAA→F→--- の順位マップで比較。
+ *         - songRank:    未知は 999999 扱いで末尾送り。
+ */
 const filteredScores = computed(() => {
   let result = viewMode.value === 'rate' ? [...rateAllRecords.value] : [...allRecords.value];
 
@@ -1867,7 +2159,10 @@ const filteredScores = computed(() => {
   return result;
 });
 
-// Reset page and set default sort when switching modes
+/**
+ * 【watch の役割】 モード（通常/rate）切替時にページ番号・レベルフィルタ・ソートを初期化。
+ * モードが変わると表示レコードの種類が変わるため、ユーザー期待に合わせてリセットする。
+ */
 watch(viewMode, () => {
   currentPage.value = 1;
   filterLevel.value = [];
@@ -1875,23 +2170,28 @@ watch(viewMode, () => {
   sortOrder.value = 'desc';
 });
 
+/** 全ページ数（最低 1）。Math.ceil で端数切り上げ。 */
 const totalPages = computed(() => Math.ceil(filteredScores.value.length / itemsPerPage.value) || 1);
 
+/** 現在ページに表示する行のみをスライスした表示用リスト。 */
 const displayScores = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
   return filteredScores.value.slice(start, end);
 });
 
+/** ページネーション: 前ページへ移動。1 ページ目では何もしない。 */
 const prevPage = () => {
   if (currentPage.value > 1) currentPage.value--;
 };
 
+/** ページネーション: 次ページへ移動。最終ページでは何もしない。 */
 const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
 };
 
-// Utility for colors
+// --- 色ユーティリティ ---
+/** クリアタイプごとの文字色（テーブル表示用）。ダークモード対応。 */
 const getClearTypeColor = (clearType: string) => {
   switch (clearType) {
     case 'FULLCOMBO CLEAR': return isDarkMode.value ? 'text-cyan-400' : 'text-cyan-600';
@@ -1904,6 +2204,7 @@ const getClearTypeColor = (clearType: string) => {
   }
 };
 
+/** クリアタイプごとの背景色（バッジ・進捗バー用）。 */
 const getClearTypeBgColor = (clearType: string) => {
   switch (clearType) {
     case 'FULLCOMBO CLEAR': return 'bg-cyan-500';
@@ -1916,10 +2217,20 @@ const getClearTypeBgColor = (clearType: string) => {
   }
 };
 
+/**
+ * 【関数の役割】 テーブル上でスコアの「近さ」を示す 2 段ラベルを作る。
+ *
+ * 判定基準:
+ *  - scoreRate >= 94.45% (MAX に近い)  → primary: MAX-残差 / secondary: AAA+差分
+ *  - scoreRate >= 88.89% (AAA 以上)    → primary: AAA+差分 / secondary: MAX-残差
+ *  - それ以下                          → primary: AAA-不足 / secondary: AA±差分
+ * スコア未プレイ（<= 0）や maxScore 不明の場合は null を返し、テンプレは何も表示しない。
+ */
 const getScoreGradeLabel = (record: ScoreRecord) => {
   if (record.maxScore <= 0 || record.scoreRate < 0 || record.score <= 0) return null;
   const maxScore = record.maxScore;
   const score = record.score;
+  // AAA/AA の閾値は 8/9, 7/9 で切り上げ（IIDX 公式仕様）。
   const aaaThreshold = Math.ceil(maxScore * 8 / 9);
   const aaThreshold = Math.ceil(maxScore * 7 / 9);
   if (record.scoreRate >= 94.45) {
@@ -1932,6 +2243,7 @@ const getScoreGradeLabel = (record: ScoreRecord) => {
   }
 };
 
+/** DJ LEVEL（AAA/AA/A/...）の文字色。ダークモードで明度を上げる。 */
 const getDjLevelColor = (djLevel: string) => {
   switch (djLevel) {
     case 'AAA': return isDarkMode.value ? 'text-amber-400' : 'text-amber-500';
@@ -1941,6 +2253,7 @@ const getDjLevelColor = (djLevel: string) => {
   }
 };
 
+/** DJ LEVEL の背景色。バッジ・進捗バー用。 */
 const getDjLevelBgColor = (djLevel: string) => {
   switch (djLevel) {
     case 'AAA': return 'bg-amber-500';

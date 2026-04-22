@@ -17,93 +17,120 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 /**
- * Loads top-rankers CSV snapshots from classpath and computes BEAT-PT per
- * (version, prefecture) combination. Uses the same formula as
- * {@link ScoreRecalculationService} but drives it from the scraped TOP-scores
- * instead of a specific user's scores.
+ * 【Service の役割】 classpath 同梱の「トップランカー CSV スナップショット」を読み込み、
+ * バージョン×都道府県の単位で BEAT-PT / RATE-PT ランキングを集計しキャッシュするサービス。
+ *
+ * 責務:
+ *  - 起動直後に別スレッドでマニフェストと CSV を読み、集計結果をメモリ上にキャッシュ
+ *  - 読み込み失敗時は指数的バックオフで最大 5 回リトライ
+ *  - 曲単位のトップランカー一覧（getSongTopRankers）
+ *  - 地域（バージョン+都道府県）プロファイル（getAreaProfile）の提供
+ *
+ * 依存:
+ *  - {@link SongDefinitionRepository}: active 曲定義から maxScore / level を取得
+ *  - {@link DifficultyRankRepository}: active 難易度テーブルから informalRank を取得
+ *  - classpath: top-rankers-data/manifest.json と配下の gzip 圧縮 CSV
+ *
+ * 主要ロジックの概観:
+ *  - BEAT-PT / RATE-PT の公式は {@link ScoreRecalculationService} と同一（重複定義）
+ *  - 個人ユーザーのスコアではなく「地域のトップスコア群」を入力として集計する点が異なる
+ *  - キャッシュは volatile の不変コレクションで、書き換え時は参照全体を差し替える
  */
 @Service
 public class TopRankersBeatPtService {
 
     private static final Logger log = LoggerFactory.getLogger(TopRankersBeatPtService.class);
 
+    /** classpath 上のマニフェスト JSON パス */
     private static final String MANIFEST_PATH = "top-rankers-data/manifest.json";
 
+    /** 初期化リトライの最大試行回数 */
     private static final int MAX_INIT_ATTEMPTS = 5;
+    /** 初期化リトライの基本待機時間（attempt 番号に比例した待機） */
     private static final long INIT_RETRY_BASE_DELAY_MS = 15_000L;
 
-    private static final Map<String, Integer> WEIGHTS = new HashMap<>();
-
-    static {
-        int weight = 145;
-        for (int i = 0; i <= 20; i++) {
-            double rankValue = 11.0 + i * 0.1;
-            String rank = String.format(Locale.US, "%.1f", rankValue);
-            WEIGHTS.put(rank, weight);
-            weight += (rankValue >= 12.49) ? 3 : 2;
-        }
-    }
-
-    // Mirrors ScoreRecalculationService.SCORE_RATE_THRESHOLDS.
-    private static final double[][] SCORE_RATE_THRESHOLDS = {
-            {77.77, 1.0},   {88.89, 2.0},   {94.44, 4.0},
-            {97.22, 8.0},   {98.61, 16.0},  {99.31, 32.0},
-            {99.65, 64.0},  {99.83, 128.0}, {99.91, 256.0},
-            {100.0, 512.0}
-    };
-
-    // Columns in CSV: バージョン, タイトル,
-    // BEGINNER EXスコア, BEGINNER DJName, BEGINNER 都道府県,
-    // NORMAL   EXスコア, NORMAL   DJName, NORMAL   都道府県,
-    // HYPER    EXスコア, HYPER    DJName, HYPER    都道府県,
-    // ANOTHER  EXスコア, ANOTHER  DJName, ANOTHER  都道府県,
-    // LEGGENDARIA EXスコア, LEGGENDARIA DJName, LEGGENDARIA 都道府県
+    /*
+     * CSV のカラム順:
+     *   バージョン, タイトル,
+     *   BEGINNER EXスコア, BEGINNER DJName, BEGINNER 都道府県,
+     *   NORMAL   EXスコア, NORMAL   DJName, NORMAL   都道府県,
+     *   HYPER    EXスコア, HYPER    DJName, HYPER    都道府県,
+     *   ANOTHER  EXスコア, ANOTHER  DJName, ANOTHER  都道府県,
+     *   LEGGENDARIA EXスコア, LEGGENDARIA DJName, LEGGENDARIA 都道府県
+     */
+    /** CSV カラム解釈時の難易度名の順序 */
     private static final String[] DIFF_NAMES = {"BEGINNER", "NORMAL", "HYPER", "ANOTHER", "LEGGENDARIA"};
+    /** {@link #DIFF_NAMES} と同じ順で並ぶ難易度コード */
     private static final String[] DIFF_CODES = {"1", "2", "3", "4", "10"};
 
+    /** active 曲定義から maxScore / level を作るためのリポジトリ */
     private final SongDefinitionRepository songDefinitionRepository;
+    /** active 難易度テーブルから informalRank を作るためのリポジトリ */
     private final DifficultyRankRepository difficultyRankRepository;
+    /** マニフェスト JSON のパース用 */
     private final ObjectMapper objectMapper;
+    /** BEAT-PT / RATE-PT の単曲計算を担う共通ユーティリティ（ScoreRecalculationService と共有）。 */
+    private final BeatPtCalculator beatPtCalculator;
 
+    /** BEAT-PT のバージョン×都道府県ランキングキャッシュ（BEAT-PT 降順）*/
     private volatile List<Map<String, Object>> cached = Collections.emptyList();
+    /** RATE-PT のバージョン×都道府県ランキングキャッシュ（RATE-PT 降順）*/
     private volatile List<Map<String, Object>> cachedRate = Collections.emptyList();
-    // key: title + "\0" + diffName  →  list of entries sorted desc by score
+    /** key: title + "\0" + diffName → スコア降順の SongScoreEntry リスト */
     private volatile Map<String, List<SongScoreEntry>> cachedSongScores = Collections.emptyMap();
-    // key: versionNum + "\0" + prefectureFileNum  →  full score list for that area
+    /** key: versionNum + "\0" + prefectureFileNum → その地域の全スコア行 */
     private volatile Map<String, AreaProfile> cachedAreaProfiles = Collections.emptyMap();
 
+    /** 初期化の進行状態 */
     public enum InitState { PENDING, RUNNING, SUCCESS, FAILED }
 
+    /** 現在の初期化状態 */
     private volatile InitState initState = InitState.PENDING;
+    /** これまでの試行回数 */
     private volatile int initAttempts = 0;
+    /** 直近エラーメッセージ（成功時は null） */
     private volatile String lastError = null;
+    /** 最終再計算に要した時間（ms） */
     private volatile long lastRecomputeDurationMs = -1L;
+    /** 最終再計算が完了したエポックミリ秒 */
     private volatile long lastRecomputeFinishedAt = -1L;
 
+    /** 曲・難易度単位のランカーエントリ（どのバージョン・都道府県の誰が何点か） */
     public record SongScoreEntry(int versionNum, String versionName,
                                   int prefectureFileNum, String prefectureName,
                                   String djName, int score) {}
 
+    /** 地域プロファイル内部で保持する 1 曲 1 難易度の行 */
     public record AreaScoreRow(String title, String difficultyName, int difficultyLevel,
                                 int score, String djName, double scoreRate, String djLevel, String clearType) {}
 
+    /** ある（バージョン、都道府県）の全スコアをまとめた仮想プロファイル */
     public record AreaProfile(int versionNum, String versionName,
                                int prefectureFileNum, String prefectureName,
                                List<AreaScoreRow> scores) {}
 
+    /**
+     * 【コンストラクタ】 Spring が Repository 群と ObjectMapper、BEAT-PT 計算ユーティリティを注入する。
+     */
     public TopRankersBeatPtService(SongDefinitionRepository songDefinitionRepository,
                                    DifficultyRankRepository difficultyRankRepository,
-                                   ObjectMapper objectMapper) {
+                                   ObjectMapper objectMapper,
+                                   BeatPtCalculator beatPtCalculator) {
         this.songDefinitionRepository = songDefinitionRepository;
         this.difficultyRankRepository = difficultyRankRepository;
         this.objectMapper = objectMapper;
+        this.beatPtCalculator = beatPtCalculator;
     }
 
+    /**
+     * 【メソッドの役割】 Bean 初期化時に、デーモンスレッドで初期化処理を開始する。
+     *
+     * CSV 読み込みは時間がかかるため同期初期化すると起動が遅くなる。
+     * 別スレッドに退避させ、起動は即座に完了させる。
+     */
     @PostConstruct
     public void init() {
         Thread t = new Thread(this::initWithRetry, "top-rankers-init");
@@ -111,6 +138,11 @@ public class TopRankersBeatPtService {
         t.start();
     }
 
+    /**
+     * 再計算をリトライ付きで実行する内部処理。
+     * 失敗時は {@link #INIT_RETRY_BASE_DELAY_MS} × attempt の指数的バックオフで待機し、
+     * {@link #MAX_INIT_ATTEMPTS} 回まで試行する。
+     */
     private void initWithRetry() {
         for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS; attempt++) {
             initAttempts = attempt;
@@ -151,6 +183,9 @@ public class TopRankersBeatPtService {
                 MAX_INIT_ATTEMPTS, lastError);
     }
 
+    /**
+     * 初期化状態（試行回数・最終エラー・キャッシュサイズ等）を返す。管理者画面で可視化する用途。
+     */
     public Map<String, Object> getInitStatus() {
         Map<String, Object> status = new LinkedHashMap<>();
         status.put("state", initState.name());
@@ -164,28 +199,47 @@ public class TopRankersBeatPtService {
         return status;
     }
 
+    /** キャッシュ済みの BEAT-PT ランキング（バージョン×都道府県単位）を返す。 */
     public List<Map<String, Object>> getRanking() {
         return cached;
     }
 
+    /** キャッシュ済みの RATE-PT ランキング（バージョン×都道府県単位）を返す。 */
     public List<Map<String, Object>> getRateRanking() {
         return cachedRate;
     }
 
+    /**
+     * 曲・難易度指定でランカー（バージョン/都道府県/DJ 名/スコア）を返す。
+     * 事前にスコア降順でソート済み。
+     */
     public List<SongScoreEntry> getSongTopRankers(String title, String diffName) {
         if (title == null || diffName == null) return Collections.emptyList();
         return cachedSongScores.getOrDefault(title + "\0" + diffName, Collections.emptyList());
     }
 
+    /** 指定バージョン×都道府県の仮想プロファイルを返す。未知の場合は null。 */
     public AreaProfile getAreaProfile(int versionNum, int prefectureFileNum) {
         return cachedAreaProfiles.get(versionNum + "\0" + prefectureFileNum);
     }
 
-    /** Rebuild the cache. Call this when song definitions or difficulty ranks change. */
+    /**
+     * 【メソッドの役割】 キャッシュを再構築する。曲定義や難易度テーブルを更新した際に呼ぶ。
+     *
+     * 処理の流れ:
+     *  - 手順1: active 曲定義から (title_diffCode → maxScore / level) マップを作成
+     *  - 手順2: active 難易度テーブルから (title_diffName → rankValue) マップを作成
+     *  - 手順3: マニフェストを読み、対象 CSV それぞれについて BEAT-PT / RATE-PT を集計
+     *  - 手順4: 地域単位のランキング配列を BEAT-PT / RATE-PT それぞれ降順にソート
+     *  - 手順5: 曲・難易度単位のスコアリストをスコア降順ソートし freeze
+     *  - 手順6: すべての volatile フィールドを不変コレクションで差し替え
+     *
+     * synchronized で同時再計算をシリアライズする。
+     */
     public synchronized void recompute() {
         long t0 = System.currentTimeMillis();
 
-        // Build (title,diffCode) -> maxScore and (title,diffCode) -> level from active song definitions.
+        // 手順1: active 曲定義から (title,diffCode) → maxScore / level マップを構築
         List<SongDefinition> activeSongs = songDefinitionRepository.findByRevision("active");
         Map<String, Integer> maxScoreMap = new HashMap<>();
         Map<String, Integer> levelMap = new HashMap<>();
@@ -198,7 +252,7 @@ public class TopRankersBeatPtService {
         log.info("TopRankersBeatPtService: loaded {} active song definitions (maxScoreMap={}, levelMap={})",
                 activeSongs.size(), maxScoreMap.size(), levelMap.size());
 
-        // Build (title,diffName) -> informalRank from active difficulty ranks.
+        // 手順2: active 難易度テーブルから (title,diffName) → informalRank マップを構築
         Map<String, String> informalRankMap = new HashMap<>();
         List<DifficultyRank> ranks = difficultyRankRepository.findByRevisionOrderBySortOrderAsc("active");
         for (DifficultyRank r : ranks) {
@@ -285,7 +339,7 @@ public class TopRankersBeatPtService {
                 ((Number) b.get("ratePt")).doubleValue(),
                 ((Number) a.get("ratePt")).doubleValue()));
 
-        // Sort each (title, diff) list by score desc and freeze.
+        // 手順5: 曲・難易度単位のスコアリストをスコア降順でソートし、不変化して確定
         Map<String, List<SongScoreEntry>> finalized = new HashMap<>(songScoresBuilder.size() * 2);
         for (Map.Entry<String, List<SongScoreEntry>> e : songScoresBuilder.entrySet()) {
             List<SongScoreEntry> list = e.getValue();
@@ -313,7 +367,29 @@ public class TopRankersBeatPtService {
         }
     }
 
-    /** Returns [beatPt, ratePt] for the CSV at resourcePath. Also appends per-song entries to songScoresBuilder and per-area score rows to areaRows. */
+    /**
+     * 【メソッドの役割】 1 つの CSV ファイルを処理し、その地域の BEAT-PT / RATE-PT を計算する。
+     *
+     * 処理の流れ:
+     *  - 手順1: gzip 圧縮 CSV を UTF-8 で開き、ヘッダー行を読み捨てる
+     *  - 手順2: 各行について title と 5 難易度分のスコア/DJ 名を取り出す
+     *  - 手順3: スコア > 0 で maxScore が確定している難易度のみ処理
+     *  - 手順4: 曲単位インデックス songScoresBuilder と地域プロファイル areaRows にエントリ追加
+     *  - 手順5: HYPER レベル 11 以上は BEAT-PT 対象外、ANOTHER/LEGGENDARIA のみ RATE-PT 対象
+     *  - 手順6: 集計した BEAT-PT / RATE-PT を上位 100 件合計で返す（RATE-PT は 100% 超過を加算）
+     *
+     * @param resourcePath       classpath 上の gzip CSV パス
+     * @param maxScoreMap        title_diffCode → maxScore
+     * @param levelMap           title_diffCode → level
+     * @param informalRankMap    title_diffName → informalRank
+     * @param versionNum         対象バージョン番号
+     * @param versionName        表示用バージョン名
+     * @param prefFileNum        都道府県ファイル番号
+     * @param prefectureName     都道府県名
+     * @param songScoresBuilder  曲単位のインデックスへ追加書き込み
+     * @param areaRows           地域プロファイル用の行リストへ追加書き込み
+     * @return {@code [beatPt, ratePt]} の配列
+     */
     private double[] computePtsForCsv(String resourcePath,
                                       Map<String, Integer> maxScoreMap,
                                       Map<String, Integer> levelMap,
@@ -328,11 +404,11 @@ public class TopRankersBeatPtService {
         try (InputStream in = new ClassPathResource(resourcePath).getInputStream();
              GZIPInputStream gz = new GZIPInputStream(in);
              BufferedReader reader = new BufferedReader(new InputStreamReader(gz, StandardCharsets.UTF_8))) {
-            String line = reader.readLine(); // header
+            String line = reader.readLine(); // ヘッダー行
             if (line == null) return new double[]{0.0, 0.0};
             while ((line = reader.readLine()) != null) {
                 String[] cols = splitCsv(line);
-                // Expect at least 2 + 5*3 = 17 columns
+                // 期待: 少なくとも 2 + 5*3 = 17 カラム（バージョン+タイトル+5難易度×(EX/DJName/都道府県)）
                 if (cols.length < 2 + 5 * 3) continue;
                 String title = cols[1];
                 for (int d = 0; d < DIFF_NAMES.length; d++) {
@@ -353,31 +429,31 @@ public class TopRankersBeatPtService {
                     if (maxScore == null || maxScore == 0) continue;
                     double scoreRate = score * 100.0 / maxScore;
 
-                    // Per-song top-rankers index (for song-detail ranking tab).
+                    // 曲単位トップランカーインデックスへ追加（曲詳細ランキングタブで使用）
                     String djName = cols[3 + d * 3];
                     songScoresBuilder
                             .computeIfAbsent(title + "\0" + diffName, k -> new ArrayList<>())
                             .add(new SongScoreEntry(versionNum, versionName, prefFileNum, prefectureName,
                                     djName == null ? "" : djName, score));
 
-                    // Area profile row (for TOP ranker virtual profile view).
+                    // 地域プロファイル用の行を追加（TOP ランカー仮想プロファイル表示）
                     Integer level = levelMap.get(keyCode);
                     String djLevel = calcDjLevel(scoreRate);
                     areaRows.add(new AreaScoreRow(title, diffName, level == null ? 0 : level,
                             score, djName == null ? "" : djName, scoreRate, djLevel, "NO PLAY"));
 
-                    // BEAT-PT: exclude HYPER with level >= 11 (matches ScoreRecalculationService).
+                    // BEAT-PT: HYPER でレベル 11 以上の譜面は対象外（ScoreRecalculationService と同条件）
                     boolean beatEligible = !("HYPER".equals(diffName)
                             && levelMap.get(keyCode) != null && levelMap.get(keyCode) >= 11);
                     if (beatEligible) {
                         String informalRank = informalRankMap.get(title + "\0" + diffName);
-                        double pt = calculatePoints(scoreRate, informalRank);
+                        double pt = beatPtCalculator.calculatePoints(scoreRate, informalRank);
                         if (pt > 0) beatPts.add(pt);
                     }
 
-                    // RATE-PT: only ANOTHER and LEGGENDARIA.
+                    // RATE-PT: ANOTHER / LEGGENDARIA のみ対象
                     if ("ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName)) {
-                        double rPt = calculateScoreRateTierPoints(scoreRate);
+                        double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
                         if (rPt > 0) ratePts.add(rPt);
                         if (scoreRate >= 100.0) perfectRateCount++;
                     }
@@ -394,39 +470,10 @@ public class TopRankersBeatPtService {
         return new double[]{beatTotal, rateTotal};
     }
 
-    private static double calculateScoreRateTierPoints(double scoreRate) {
-        if (scoreRate <= 0 || scoreRate < SCORE_RATE_THRESHOLDS[0][0]) return 0.0;
-        double lastRate = SCORE_RATE_THRESHOLDS[SCORE_RATE_THRESHOLDS.length - 1][0];
-        double lastPt = SCORE_RATE_THRESHOLDS[SCORE_RATE_THRESHOLDS.length - 1][1];
-        if (scoreRate >= lastRate) return lastPt;
-
-        for (int i = 0; i < SCORE_RATE_THRESHOLDS.length - 1; i++) {
-            double loRate = SCORE_RATE_THRESHOLDS[i][0];
-            double loPt = SCORE_RATE_THRESHOLDS[i][1];
-            double hiRate = SCORE_RATE_THRESHOLDS[i + 1][0];
-            double hiPt = SCORE_RATE_THRESHOLDS[i + 1][1];
-            if (scoreRate < hiRate) {
-                double t = (scoreRate - loRate) / (hiRate - loRate);
-                return loPt + t * (hiPt - loPt);
-            }
-        }
-        return 0.0;
-    }
-
-    private static double calculatePoints(double scoreRate, String informalRank) {
-        if (informalRank == null) return 0.0;
-        int weight = getWeight(informalRank);
-        if (weight == 0 || scoreRate <= 66.666) return 0.0;
-
-        double basePoints = Math.pow(scoreRate / 100.0, 1.3) * weight;
-        double bonus = 0;
-        if (scoreRate > 77.77) bonus += weight * 0.01;
-        if (scoreRate > 88.88) bonus += weight * 0.01;
-        if (scoreRate > 94.44) bonus += weight * 0.01;
-        return basePoints + bonus;
-    }
-
-    /** Compute DJ level (AAA/AA/…/F) from score rate, matching existing client-side logic. */
+    /**
+     * スコア率から DJ LEVEL (AAA/AA/…/F) を計算する。
+     * 既存のクライアント側ロジックと同じ境界（100/9 × n）を使用している。
+     */
     private static String calcDjLevel(double scoreRate) {
         if (scoreRate >= 100.0 / 9 * 8) return "AAA";
         if (scoreRate >= 100.0 / 9 * 7) return "AA";
@@ -438,14 +485,11 @@ public class TopRankersBeatPtService {
         return "F";
     }
 
-    private static int getWeight(String informalRank) {
-        if (informalRank == null || informalRank.isEmpty()) return 0;
-        Matcher m = Pattern.compile("(\\d+\\.\\d+)").matcher(informalRank);
-        String key = m.find() ? m.group(1) : informalRank;
-        return WEIGHTS.getOrDefault(key, 0);
-    }
-
-    /** Minimal CSV splitter: handles double-quoted fields with embedded commas and escaped quotes. */
+    /**
+     * 最小限の CSV スプリッタ。
+     * ダブルクォートで囲まれたフィールドと、その内部のエスケープダブルクォート（""）に対応する。
+     * 外部ライブラリを入れずに済ませるための実装。
+     */
     private static String[] splitCsv(String line) {
         List<String> out = new ArrayList<>();
         StringBuilder cur = new StringBuilder();

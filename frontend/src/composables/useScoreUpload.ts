@@ -1,11 +1,18 @@
 import type { ScoreData } from '../types/ScoreData';
 import { useAuth } from './useAuth';
 
+/** バックエンド API のベース URL。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-// Flatten ScoreData (one per song) into individual chart records for API
+/**
+ * 【内部関数】 UI 側では「曲単位（1 行に beginner〜leggendaria が同居）」でスコアを保持しているが、
+ * API 側は「譜面単位（難易度ごとに 1 レコード）」を要求する。ここでフラット化変換を行う。
+ *
+ * 'NO PLAY' や '---' のような未プレイ譜面はサーバへ送らない（サーバ側負荷削減）。
+ */
 function flattenToUploadRecords(scores: ScoreData[]) {
     const difficulties = ['beginner', 'normal', 'hyper', 'another', 'leggendaria'] as const;
+    // UI 側のキー（小文字） → API 側のラベル（大文字）への変換表
     const difficultyLabels: Record<string, string> = {
         beginner: 'BEGINNER',
         normal: 'NORMAL',
@@ -19,6 +26,7 @@ function flattenToUploadRecords(scores: ScoreData[]) {
     scores.forEach(song => {
         difficulties.forEach(diff => {
             const stats = song[diff as keyof ScoreData] as any;
+            // 未プレイ譜面はスキップ（転送量削減と、サーバ側の不要上書き防止）
             if (!stats || stats.clearType === 'NO PLAY' || stats.clearType === '---') return;
 
             records.push({
@@ -41,9 +49,33 @@ function flattenToUploadRecords(scores: ScoreData[]) {
     return records;
 }
 
+/**
+ * 【Composable の役割】 スコアデータをバックエンドへアップロードする。
+ *
+ * 機能:
+ *  - `upload()`: CSV から読んだ `ScoreData[]` を一括送信（60 秒タイムアウト付き）
+ *  - `saveHistoryLog()`: アップロード後の履歴ログを保存
+ *
+ * 使い方:
+ * ```ts
+ * const { upload, saveHistoryLog } = useScoreUpload();
+ * const result = await upload(parsedScores);
+ * await saveHistoryLog(result.totalBeatPt, ...);
+ * ```
+ */
 export function useScoreUpload() {
     const { authHeaders } = useAuth();
 
+    /**
+     * スコアをまとめてアップロードする。
+     *
+     * 注意:
+     *  - 60 秒で AbortController により強制中断（大量データで DB 処理が長引くため）
+     *  - 非 2xx 応答は例外として投げる（呼び出し側で UI エラーハンドリング）
+     *
+     * @param scores 曲単位のスコア配列
+     * @returns 更新件数・更新譜面一覧・サーバメッセージ
+     */
     const upload = async (scores: ScoreData[]): Promise<{ updatedCount: number; updatedSongs: any[]; message: string }> => {
         const records = flattenToUploadRecords(scores);
         const controller = new AbortController();
@@ -62,10 +94,17 @@ export function useScoreUpload() {
 
             return res.json();
         } finally {
+            // 正常/異常いずれの場合もタイマーを解除（メモリリーク防止）
             clearTimeout(timeoutId);
         }
     };
 
+    /**
+     * アップロード結果の履歴ログを保存する。
+     *
+     * BeatPt / RatePt の推移・Tier 変動をユーザー個別の履歴に残すため、
+     * `upload()` 成功後に呼ぶ設計。
+     */
     const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number): Promise<void> => {
         const res = await fetch(`${API_BASE}/api/scores/save-history-log`, {
             method: 'POST',
@@ -78,5 +117,10 @@ export function useScoreUpload() {
         }
     };
 
-    return { upload, saveHistoryLog };
+    return {
+        /** スコア一括アップロード。 */
+        upload,
+        /** 履歴ログ保存。`upload` 成功後に呼ぶ。 */
+        saveHistoryLog
+    };
 }

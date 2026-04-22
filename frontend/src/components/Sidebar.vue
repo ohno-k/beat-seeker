@@ -1,12 +1,31 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 モバイル/PC 共通のサイドバーナビゲーション。
+ * - 主要タブ（ダッシュボード、スコア一覧、プロフィール、ランキング、フレンド 等）を v-model:activeTab で制御
+ * - 権限ベースで各メニューを出し分け（ログイン必須、特定ユーザー ID 限定、サポーター限定 等）
+ * - 閲覧モード（admin / friend）時は一部メニューを非表示（hideOnViewing）
+ * - 多言語切替、ログイン/ログアウト/プロフィール編集ボタンを内包
+ * - サポーター（Ko-fi）用の Sプリフト 付きランチャー（トークンをクリップボードコピー付きで ko-fi.com を開く）
+ *
+ * @emits update:isOpen サイドバー開閉状態を親と同期。
+ * @emits update:activeTab タブ選択通知。
+ * @emits login/logout/editProfile/openAdmin/upload 対応するアクションを親に通知。
+ */
 import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import { useAdmin } from '../composables/useAdmin';
 
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
+/** Ko-fi 支援トークンをコピー済みの一時フラグ（5 秒で戻る）。 */
 const kofiCopied = ref(false);
+/** Ko-fi 確認モーダルの表示フラグ（サポーターのみ使用）。 */
 const showKofiModal = ref(false);
 
+/**
+ * 【関数の役割】 Ko-fi ボタン押下時のハンドラ。
+ * supporterToken を持つ既存サポーターは確認モーダルを先に表示し、未サポーターはそのまま外部リンクを開く。
+ */
 const handleKofiClick = () => {
   const token = props.user?.supporterToken;
   if (token) {
@@ -16,6 +35,11 @@ const handleKofiClick = () => {
   }
 };
 
+/**
+ * 【関数の役割】 Ko-fi 確認モーダルで「開く」を押したときの処理。
+ * サポーターのトークンをクリップボードへコピーしつつ、新規タブで ko-fi.com を開く。
+ * コピー失敗はサイレントに無視（機能は支障なく継続する）。
+ */
 const confirmKofiOpen = () => {
   const token = props.user?.supporterToken;
   if (token) {
@@ -48,20 +72,27 @@ const emit = defineEmits<{
   (e: 'upload'): void;
 }>();
 
+/** 【関数の役割】 サイドバーを閉じる（v-model:isOpen → false）。 */
 const closeSidebar = () => {
   emit('update:isOpen', false);
 };
 
+/** 【関数の役割】 タブを選択して即座にサイドバーを閉じる（モバイル想定）。 */
 const selectTab = (tab: string) => {
   emit('update:activeTab', tab);
   closeSidebar();
 };
 
+/** 【関数の役割】 アップロードボタン押下時、親にスコア取り込みを通知して閉じる。 */
 const handleUploadClick = () => {
   emit('upload');
   closeSidebar();
 };
 
+/**
+ * 【関数の役割】 ログイン/ログアウト等のアクション用共通ハンドラ。
+ * 型システムをバイパスして emit イベント名を動的に発火するため (emit as any) を使用している。
+ */
 const handleAction = (event: 'login' | 'logout' | 'editProfile' | 'openAdmin') => {
   (emit as any)(event);
   closeSidebar();
@@ -83,20 +114,33 @@ const navigationItems = computed(() => [
   { id: 'score-prediction', label: t('nav.scorePrediction'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
 ]);
 
+/**
+ * 【computed の役割】 主要ナビゲーションの下に置く副次メニュー（更新履歴・About・利用規約）。
+ * 権限による出し分けは無く全ユーザーに見せる。
+ */
 const secondaryItems = computed(() => [
   { id: 'changelog', label: t('nav.changelog'), icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
   { id: 'about', label: t('nav.about'), icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
   { id: 'terms', label: t('nav.terms'), icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
 ]);
 
-const isAdmin = computed(() => {
-  return props.user?.id == 18 || props.user?.iidxId === '5787-1145';
-});
+/**
+ * 【computed の役割】 管理者判定。
+ * 判定ロジックは {@link useAdmin} に集約しており、
+ * 設定値（`VITE_ADMIN_USER_ID` / `VITE_ADMIN_IIDX_ID`）で上書き可能。
+ */
+const { isAdmin } = useAdmin();
 
+/**
+ * 【computed の役割】 現在のユーザー状態に基づいて navigationItems を絞り込む。
+ * - requiresAuth: 未ログインなら除外
+ * - hideOnViewing: 他ユーザー閲覧モード中は除外（ただし score-prediction は admin モードでは許可）
+ * - allowedUserIds: 指定 ID のユーザーのみ表示
+ */
 const filteredNavItems = computed(() => {
   return navigationItems.value.filter(item => {
     if (item.requiresAuth && !props.isLoggedIn) return false;
-    // adminモードの場合はscore-predictionを許可（他のhideOnViewingはそのまま非表示）
+    // admin モード閲覧中は score-prediction だけ例外的に許可（管理者がユーザー挙動確認のため）
     if (item.hideOnViewing && props.viewingUserId) {
       if (item.id === 'score-prediction' && props.viewingMode === 'admin') return true;
       return false;

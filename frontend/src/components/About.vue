@@ -1,12 +1,22 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 「このサイトについて」ページ。
+ *
+ * 機能:
+ *  - Hero/3 ステップ/機能一覧/FAQ を i18n で翻訳しながら表示する静的ページ
+ *  - 翻訳キーは `about.*` に集約されている
+ *
+ * props/emits: なし（純粋な表示コンポーネント）。
+ */
 import { useI18n } from '../composables/useI18n';
 
+// 翻訳関数を取り出す。現在の言語は i18n 側でリアクティブに切り替わる。
 const { t } = useI18n();
 </script>
 
 <template>
   <div class="space-y-16 pb-20 animate-fade-in text-slate-900 dark:text-white">
-    <!-- Hero Section -->
+    <!-- ヒーロー（キャッチコピー）セクション -->
     <section class="relative overflow-hidden bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-16 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors duration-200">
       <div class="relative z-10 max-w-3xl">
         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-6 border border-blue-100 dark:border-blue-800/50">
@@ -27,12 +37,12 @@ const { t } = useI18n();
         </p>
       </div>
       
-      <!-- Background elements -->
+      <!-- 背景装飾（ぼかした大きな円を配置して雰囲気を出す） -->
       <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-blue-100 dark:bg-blue-900/20 rounded-full blur-3xl opacity-50"></div>
       <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-96 h-96 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl opacity-50"></div>
     </section>
 
-    <!-- How it works (3 Steps) -->
+    <!-- 使い方を 3 ステップで示すセクション -->
     <section>
       <h3 class="text-2xl font-black mb-10 flex items-center gap-3">
         <div class="w-8 h-1.5 bg-blue-600 dark:bg-blue-500 rounded-full"></div>
@@ -66,7 +76,7 @@ const { t } = useI18n();
       </div>
     </section>
 
-    <!-- Features -->
+    <!-- 機能一覧（ダッシュボード／BeatTier／難易度表 等） -->
     <section>
       <h3 class="text-2xl font-black mb-10 flex items-center gap-3">
         <div class="w-8 h-1.5 bg-indigo-600 dark:bg-indigo-500 rounded-full"></div>
@@ -167,7 +177,7 @@ const { t } = useI18n();
       </div>
     </section>
 
-    <!-- FAQ -->
+    <!-- FAQ（よくある質問） -->
     <section>
       <h3 class="text-2xl font-black mb-10 flex items-center gap-3">
         <div class="w-8 h-1.5 bg-emerald-600 dark:bg-emerald-500 rounded-full"></div>

@@ -1,4 +1,19 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 ログイン / 新規登録 / パスワードリセットの 3 モードを持つモーダル。
+ *
+ * 機能:
+ *  - タブ切替で 3 モードを 1 ダイアログに統合
+ *  - IIDX ID（NNNN-NNNN）を入力中に自動フォーマット
+ *  - 登録時は段位・アリーナランク・プレイサイドまで同時に入力
+ *  - forgotPassword 送信で成功メッセージをそのまま表示（マスキング方針はサーバ側）
+ *
+ * props:
+ *  - isOpen: 開閉フラグ
+ * emits:
+ *  - close: ×ボタンや背景クリックで発火
+ *  - registered: 新規登録成功時（オンボーディング起動用）
+ */
 import { ref } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
@@ -14,14 +29,19 @@ const emit = defineEmits<{
   (e: 'registered'): void;
 }>();
 
+// 認証系の API はすべてこの composable 経由で叩く。
 const { login, registerUser, forgotPassword } = useAuth();
 
+/** 現在のモード（ログイン/登録/パスワード忘れ）。 */
 const mode = ref<'login' | 'register' | 'forgot'>('login');
+/** 送信中フラグ（ボタンの二重押し抑制 + スピナー）。 */
 const isSubmitting = ref(false);
+/** エラー時に画面上部へ赤バナーで出すメッセージ。 */
 const errorMsg = ref('');
+/** 成功時の緑バナー（主に forgotPassword 用）。 */
 const successMsg = ref('');
 
-// Form fields
+// ===== フォーム入力値 =====
 const inputIidxId = ref('');
 const password = ref('');
 const passwordConfirm = ref('');
@@ -30,6 +50,7 @@ const danRank = ref('初段');
 const arenaRank = ref('C5');
 const playSide = ref('1P');
 
+/** 段位プルダウンの選択肢。value は日本語段位（バックエンドが期待する表現）、labelKey は i18n キー。 */
 const danRankOptions = [
   { value: '七級', labelKey: 'dan.7kyu' },
   { value: '六級', labelKey: 'dan.6kyu' },
@@ -52,6 +73,7 @@ const danRankOptions = [
   { value: '皆伝', labelKey: 'dan.kaiden' }
 ];
 
+/** アリーナランクの選択肢（A1〜D5 の 20 段階）。 */
 const arenaRanks = [
   'A1', 'A2', 'A3', 'A4', 'A5',
   'B1', 'B2', 'B3', 'B4', 'B5',
@@ -59,20 +81,29 @@ const arenaRanks = [
   'D1', 'D2', 'D3', 'D4', 'D5'
 ];
 
+/**
+ * 【関数の役割】 IIDX ID 入力欄の値を「NNNN-NNNN」形式に自動整形する。
+ * 数字以外を除去し、5 文字目の直前にハイフンを差し込んでフォーマットを固定する。
+ */
 const formatIidxId = (e: Event) => {
   const target = e.target as HTMLInputElement;
-  let val = target.value.replace(/[^\d]/g, ''); // Remove non-digits
-  
+  let val = target.value.replace(/[^\d]/g, ''); // 数字以外を除去
+
   if (val.length > 4) {
     val = val.substring(0, 4) + '-' + val.substring(4, 8);
   }
-  
+
   inputIidxId.value = val;
   target.value = val;
 };
 
+/** パスワードリセット時に入力する登録メールアドレス。 */
 const forgotEmail = ref('');
 
+/**
+ * 【関数の役割】 モードに応じて「ログイン / 登録 / パスワードリセット」の適切な API を叩く。
+ * バリデーション → 送信 → エラー/成功メッセージの表示 → 閉じる or イベント発火。
+ */
 const handleSubmit = async () => {
   errorMsg.value = '';
   successMsg.value = '';
@@ -135,6 +166,10 @@ const handleSubmit = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 タブ切替。モード変更時にメッセージ類を掃除する。
+ * @param newMode 'login' | 'register' | 'forgot'
+ */
 const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
   mode.value = newMode;
   errorMsg.value = '';
@@ -146,7 +181,7 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
   <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" @click.self="emit('close')">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
       
-      <!-- Tabs -->
+      <!-- タブ切替（ログイン / 新規登録 / パスワードを忘れた） -->
       <div class="flex border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
         <button
           @click="switchMode('login')"
@@ -187,7 +222,7 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
             {{ successMsg }}
           </div>
 
-          <!-- Forgot Password Form -->
+          <!-- パスワードリセットフォーム -->
           <template v-if="mode === 'forgot'">
             <p class="text-sm text-slate-600 dark:text-slate-400">{{ t('auth.forgotHint') }}</p>
             <div>

@@ -3,7 +3,7 @@
     <div v-if="isOpen" class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in" @click.self="close">
       <div id="report-container" ref="reportContent" class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] animate-slide-up border border-slate-200 dark:border-slate-800">
         
-        <!-- Header: Hero Section -->
+        <!-- ヘッダー: グラデーションのヒーロー領域 + 閉じるボタン -->
         <div class="relative bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 overflow-hidden shrink-0">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
 
@@ -28,11 +28,11 @@
           </div>
         </div>
 
-        <!-- Scrollable Body -->
+        <!-- スクロール可能な本文領域（ティア/PT/フォルダ/更新曲） -->
         <div id="report-body" class="flex-1 overflow-y-auto p-6 sm:p-8 bg-slate-50 dark:bg-slate-900">
           <div v-if="diffData" class="space-y-8 max-w-2xl mx-auto">
             
-            <!-- Tier Up Notification -->
+            <!-- ティア UP 通知（旧ティア minPoints < 新ティア minPoints のときのみ表示） -->
             <div v-if="diffData.oldTier && diffData.newTier && diffData.oldTier.minPoints < diffData.newTier.minPoints" class="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-yellow-900/40 dark:to-amber-800/40 border border-amber-300 dark:border-amber-700/50 p-6 rounded-2xl shadow-sm text-center transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
               <div class="absolute inset-0 bg-yellow-200/50 dark:bg-yellow-500/10 mix-blend-overlay animate-pulse"></div>
               <p class="text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest text-sm mb-2 relative z-10">{{ t('report.tierUp') }}</p>
@@ -45,13 +45,13 @@
               </div>
             </div>
 
-            <!-- Total Points Change Details -->
+            <!-- Beat-Tier 総合ポイント変動（旧ティア → 新ティア + 増分 PT） -->
             <div class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
               <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
 
               <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">{{ t('report.beatTierChange') }}</p>
               
-              <!-- Tier Context -->
+              <!-- ティア名の比較表示（左: Previous / 右: Current） -->
               <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
                 <div class="flex flex-col items-center flex-1">
                   <span class="text-xs font-bold text-slate-400 mb-1">{{ t('report.previous') }} ({{ diffData.oldTotalBeatPt.toFixed(1) }})</span>
@@ -70,7 +70,7 @@
                 </div>
               </div>
               
-              <!-- PT Increase -->
+              <!-- 増分 PT（+3.5 pt のような大きな数字） -->
               <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-xl border border-slate-100 dark:border-slate-800 relative z-10">
                 <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">{{ t('report.increase') }}:</span>
                 <span class="text-4xl font-black tracking-tight" :class="diffData.totalBeatPtIncrease > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'">
@@ -80,7 +80,7 @@
               </div>
             </div>
 
-            <!-- Rate-Tier Change -->
+            <!-- Rate-Tier 変動（Rate 表示が ON かつ +0.1 以上増えた場合のみ） -->
             <div v-if="showRateTier && diffData.newTotalRatePt > 0 && (diffData.newTotalRatePt - diffData.oldTotalRatePt) >= 0.1" class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
               <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
 
@@ -111,7 +111,7 @@
               </div>
             </div>
 
-            <!-- Folder Announcements -->
+            <!-- フォルダアナウンス（☆11/☆12 フォルダのランクアサイン、ランクアップ、残り数を通知） -->
             <div v-if="diffData.folderAnnouncements && diffData.folderAnnouncements.length > 0" class="space-y-2">
               <h3 class="flex items-center gap-2 text-lg font-black text-slate-800 dark:text-slate-200 mb-3 px-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
@@ -148,7 +148,7 @@
               </div>
             </div>
 
-            <!-- Updated Songs List -->
+            <!-- 更新曲リスト（Beat-PT 降順。各行: 難易度バッジ / ランキング / LAMP UP / DJ LEVEL / 投票） -->
             <div>
               <h3 class="flex items-center gap-2 text-lg font-black text-slate-800 dark:text-slate-200 mb-4 px-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
@@ -164,7 +164,7 @@
               <div v-else class="space-y-2">
                 <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
 
-                  <!-- Row 1: Difficulty badge + LAMP UP + grade labels -->
+                  <!-- 行 1: 難易度バッジ / ソングランク / LAMP UP バッジ / DJ LEVEL 情報 / RATE TOP100 -->
                   <div class="flex items-center gap-1.5 mb-1 flex-wrap">
                     <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
                       {{ song.difficulty }}
@@ -189,7 +189,7 @@
                     <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">RATE TOP100</span>
                   </div>
 
-                  <!-- Row 2: Title + scores -->
+                  <!-- 行 2: タイトル + 新スコア(+増分) + 新 Beat-PT -->
                   <div class="flex items-baseline justify-between gap-2">
                     <h4 class="font-black text-slate-800 dark:text-slate-100 text-base leading-tight" :title="song.title">{{ song.title }}</h4>
                     <div class="flex items-baseline gap-2 shrink-0 text-right">
@@ -198,14 +198,14 @@
                     </div>
                   </div>
 
-                  <!-- Row 3: LAMP change (if any) -->
+                  <!-- 行 3: LAMP 変化（改善した場合のみ、旧 → 新） -->
                   <div v-if="song.clearTypeImproved" class="flex items-center gap-1.5 mt-0.5">
                     <span class="text-[10px] font-bold text-slate-400 line-through">{{ song.oldClearType }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                     <span class="text-[10px] font-black" :class="getClearTypeColor(song.newClearType)">{{ song.newClearType }}</span>
                   </div>
 
-                  <!-- Row 4: Vote buttons -->
+                  <!-- 行 4: オプション投票ボタン（正規/MIRROR/RANDOM/R-RAN/S-RAN） -->
                   <div class="flex flex-wrap gap-1 mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
                     <button
                       v-for="opt in optionTypes"
@@ -225,7 +225,7 @@
           </div>
         </div>
         
-        <!-- Footer -->
+        <!-- フッター: X シェアボタン + 閉じるボタン -->
         <div id="modal-footer" class="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex flex-col sm:flex-row gap-3">
           <button @click="openShareOptions" :disabled="isSharing" class="flex-1 py-3.5 sm:py-4 bg-black hover:bg-slate-800 text-white font-bold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50 text-sm sm:text-base">
             <template v-if="!isSharing">
@@ -247,7 +247,7 @@
           </button>
         </div>
 
-        <!-- Image Output Options Modal -->
+        <!-- 画像出力オプション（Beat-PT 順 / Rate-PT 順の選択） -->
         <div v-if="isShareOptionsOpen" class="absolute inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 rounded-3xl" @click.self="isShareOptionsOpen = false">
           <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700">
@@ -299,7 +299,7 @@
       </div>
     </div>
 
-    <!-- Offscreen container for X image sharing (1080x1920px fixed size 9:16) -->
+    <!-- X シェア用オフスクリーン領域（1080x1920 / 9:16 固定、画面外に配置して html2canvas でキャプチャ） -->
     <div 
       ref="shareContainer"
       class="fixed -top-[2000px] -left-[2000px] bg-slate-50 dark:bg-slate-900 w-[1080px] h-[1920px] flex flex-col z-[-1] border-none overflow-hidden pointer-events-none"
@@ -314,9 +314,9 @@
       </div>
       
       <div class="p-12 flex-1 flex flex-col bg-slate-50 dark:bg-slate-900" v-if="diffData">
-        <!-- Beat-Tier + Rate-Tier summary row -->
+        <!-- ティアサマリー行（Rate 表示 ON なら 2 列、OFF なら 1 列中央寄せ） -->
         <div class="grid gap-8 mb-10 shrink-0" :class="showRateTier ? 'grid-cols-2' : 'grid-cols-1 max-w-sm mx-auto w-full'">
-          <!-- BEAT-TIER -->
+          <!-- シェア画像: Beat-Tier カード -->
           <div class="border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
             <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
             <div class="relative z-10 mb-6">
@@ -340,7 +340,7 @@
               </div>
             </div>
           </div>
-          <!-- RATE-TIER -->
+          <!-- シェア画像: Rate-Tier カード -->
           <div v-if="showRateTier" class="border-2 border-emerald-100 dark:border-emerald-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
             <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
             <div class="relative z-10 mb-6">
@@ -366,7 +366,7 @@
           </div>
         </div>
 
-        <!-- Top Updated Songs (max 10) -->
+        <!-- シェア画像: 更新曲 TOP10（Beat-PT または Rate-PT 降順） -->
         <div v-if="diffData.updatedSongs.length > 0" class="flex-1 flex flex-col">
            <h3 class="text-3xl font-black text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 shrink-0 leading-tight">
               <span class="w-2.5 h-8 bg-emerald-500 rounded-full"></span>
@@ -430,6 +430,22 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 アップロード結果 / 履歴差分を表示するモーダル。
+ *
+ * 機能:
+ *  - ティア UP / Beat-PT 増減 / Rate-PT 増減 / フォルダアナウンス / 更新曲リストを表示
+ *  - X (Twitter) 共有用の 1080x1920 縦長画像を html2canvas でオフスクリーン生成
+ *  - Web Share API でファイル共有、不可ならクリップボードコピー + ツイート画面オープン（iOS 対応）
+ *  - 更新曲ごとに「正規 / MIRROR / RANDOM / R-RAN / S-RAN」のオプション投票も可能
+ *
+ * props:
+ *  - isOpen: モーダル開閉
+ *  - diffData: 差分情報（UploadDiffResult 型）
+ * emits:
+ *  - close: 閉じる
+ *  - navigate: 他タブへのナビゲーション要求
+ */
 import { ref, computed } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
 import { getNextRankInfo, getNextRateTierRankInfo } from '../utils/beatTier';
@@ -448,21 +464,25 @@ const props = defineProps<{
 const { authHeaders } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 
+/** 次ランクまでの進捗情報（Beat-Tier）。プログレスバー表示に使う。 */
 const nextRankData = computed(() => {
   if (!props.diffData) return null;
   return getNextRankInfo(props.diffData.newTotalBeatPt);
 });
 
+/** 次ランクまでの進捗情報（Rate-Tier）。 */
 const nextRateTierData = computed(() => {
   if (!props.diffData) return null;
   return getNextRateTierRankInfo(props.diffData.newTotalRatePt ?? 0);
 });
 
+/** 本文に表示する更新曲。Beat-PT 降順。 */
 const sortedUpdatedSongs = computed(() => {
   if (!props.diffData) return [];
   return [...props.diffData.updatedSongs].sort((a, b) => b.newBeatPt - a.newBeatPt);
 });
 
+/** シェア画像（TOP10）に出す更新曲。シェアモード（beat/rate）で並び替えを切替。 */
 const imageSortedSongs = computed(() => {
   if (!props.diffData) return [];
   if (shareSortMode.value === 'rate') {
@@ -471,7 +491,14 @@ const imageSortedSongs = computed(() => {
   return [...props.diffData.updatedSongs].sort((a, b) => b.newBeatPt - a.newBeatPt);
 });
 
-// Score grade label: "MAX", "MAX-n", "AAA+n", "AAA", "AA+n", etc.
+/**
+ * 【関数の役割】 スコアを DJ LEVEL に変換し、MAX からの距離 / 現在グレード / 次グレードまでの距離を返す。
+ * 返り値例:
+ *  - fromMax: "MAX" または "MAX-n"
+ *  - grade: "AAA" / "AA+123" / "A+0" など
+ *  - nextGrade: 一つ上のグレードに到達するまでの不足 EX-SCORE
+ * AAA=8/9, AA=7/9 ... の公式しきい値を使い、切り上げで判定する。
+ */
 function getScoreGradeInfo(newScore: number, maxScore: number): { fromMax: string; grade: string; gradeColor: string; nextGrade: { name: string; gap: number } | null } {
   if (!maxScore || maxScore <= 0) return { fromMax: '', grade: '', gradeColor: '', nextGrade: null };
   const fromMaxN = maxScore - newScore;
@@ -496,7 +523,7 @@ function getScoreGradeInfo(newScore: number, maxScore: number): { fromMax: strin
       return { fromMax, grade: above === 0 ? g.name : `${g.name}+${above}`, gradeColor: g.color, nextGrade };
     }
   }
-  // Below E: next grade is E
+  // E 未満の場合は次ターゲットを E に設定して F として返す。
   const eThresh = Math.ceil(maxScore * 2 / 9);
   return { fromMax, grade: 'F', gradeColor: 'text-slate-400', nextGrade: { name: 'E-', gap: eThresh - newScore } };
 }
@@ -506,15 +533,19 @@ const emit = defineEmits<{
   (e: 'navigate', tab: string): void;
 }>();
 
+/** 【関数の役割】 モーダルを閉じる。 */
 const close = () => {
   emit('close');
 };
 
-// Option vote state
+// オプション投票関連の状態
 interface SongVoteState { myVote: string | null; }
+/** 曲+難易度キーに対する自分の投票。再描画用に ref で保持。 */
 const songVotes = ref<Record<string, SongVoteState>>({});
+/** 投票中の行キー（ボタン無効化用）。 */
 const votingKey = ref<string | null>(null);
 
+/** 投票できるオプションの定義。ボタンの色クラスもここに集約。 */
 const optionTypes = [
   { value: 'REGULAR', label: '正規', icon: '▶', activeBg: 'bg-blue-50 dark:bg-blue-900/30', activeText: 'text-blue-700 dark:text-blue-400', activeBorder: 'border-blue-300 dark:border-blue-700' },
   { value: 'MIRROR', label: 'MIRROR', icon: '◀', activeBg: 'bg-purple-50 dark:bg-purple-900/30', activeText: 'text-purple-700 dark:text-purple-400', activeBorder: 'border-purple-300 dark:border-purple-700' },
@@ -523,6 +554,10 @@ const optionTypes = [
   { value: 'S-RANDOM', label: 'S-RAN', icon: '🎰', activeBg: 'bg-rose-50 dark:bg-rose-900/30', activeText: 'text-rose-700 dark:text-rose-400', activeBorder: 'border-rose-300 dark:border-rose-700' },
 ];
 
+/**
+ * 【関数の役割】 投票ボタンに適用する Tailwind クラスを返す。
+ * 自分が投票済みのオプションは色付きハイライトに、それ以外はグレー枠に。
+ */
 const getVoteClass = (title: string, difficulty: string, optValue: string, opt: typeof optionTypes[0]) => {
   const key = title + difficulty;
   const isVoted = songVotes.value[key]?.myVote === optValue;
@@ -530,6 +565,11 @@ const getVoteClass = (title: string, difficulty: string, optValue: string, opt: 
   return 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800';
 };
 
+/**
+ * 【関数の役割】 曲ごとのオプション投票を送信/取り消しする。
+ * 既に同じ選択で投票済みなら DELETE でキャンセル、そうでなければ POST で上書き。
+ * 成功/失敗ともサイレント（UI はローカル state の切替のみ）。
+ */
 const castVote = async (title: string, difficultyName: string, optionType: string) => {
   const key = title + difficultyName;
   votingKey.value = key;
@@ -554,20 +594,34 @@ const castVote = async (title: string, difficultyName: string, optionType: strin
   }
 };
 
+/** シェア用オフスクリーン DOM への参照。html2canvas のキャプチャ対象。 */
 const shareContainer = ref<HTMLElement | null>(null);
+/** 画像生成 + シェア進行中フラグ（ボタンにスピナー表示）。 */
 const isSharing = ref(false);
+/** シェアオプション（ソート軸選択）モーダルの開閉。 */
 const isShareOptionsOpen = ref(false);
+/** シェア画像の楽曲ソート軸。'beat' なら Beat-PT、'rate' なら Rate-PT で降順。 */
 const shareSortMode = ref<'beat' | 'rate'>('beat');
 
+/** 【関数の役割】 シェアオプションを開く。ユーザーはソート軸（Beat or Rate）を選択できる。 */
 const openShareOptions = () => {
   isShareOptionsOpen.value = true;
 };
 
+/** 【関数の役割】 シェアオプションを閉じて本体の共有処理を走らせる。 */
 const confirmShare = () => {
   isShareOptionsOpen.value = false;
   shareOnX();
 };
 
+/**
+ * 【関数の役割】 X 向けの 1080x1920 PNG を生成し、共有可能な経路で送り出す。
+ * 優先順位:
+ *  1. Web Share API（navigator.share）でファイルごと共有
+ *  2. Clipboard.write で PNG をコピーしてから twitter.com/intent/tweet を開く
+ *  3. 上記が失敗したら自動ダウンロード + ツイート画面オープン
+ * iOS Safari での user-gesture チェーンを切らさないため、toBlob は Promise 化して await する。
+ */
 const shareOnX = async () => {
   if (!shareContainer.value || isSharing.value) return;
   isSharing.value = true;
@@ -585,13 +639,13 @@ const shareOnX = async () => {
       scrollY: 0,
     });
 
-    // Use await+Promise instead of callback to preserve the user gesture chain on iOS Safari
+    // iOS Safari での user-gesture を切らさないためにコールバックではなく await で Blob 化する。
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
     if (!blob) throw new Error('Blob is null');
 
     const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
 
-    // Try Web Share API first (iOS Safari / Android / newer desktop Chrome)
+    // まず Web Share API を試す（iOS Safari / Android / 最新デスクトップ Chrome）。
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
@@ -606,11 +660,11 @@ const shareOnX = async () => {
           isSharing.value = false;
           return;
         }
-        // Non-abort error → fall through to clipboard
+        // AbortError 以外はクリップボード経路にフォールバック。
       }
     }
 
-    // Fallback: Clipboard Web API + Window Open
+    // フォールバック: Clipboard API で画像コピー → Twitter 投稿画面を開く。
     try {
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob })
@@ -636,6 +690,9 @@ const shareOnX = async () => {
   isSharing.value = false;
 };
 
+/**
+ * 【関数の役割】 難易度名を受け取って、BEG/NOR/HYP/ANO/LEG の IIDX 慣用色（Tailwind クラス）を返す。
+ */
 const getDifficultyColorClass = (difficulty: string) => {
   switch (difficulty.toLowerCase()) {
     case 'beginner': return 'text-emerald-700 bg-emerald-100 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50';
@@ -647,6 +704,10 @@ const getDifficultyColorClass = (difficulty: string) => {
   }
 };
 
+/**
+ * 【関数の役割】 CLEAR TYPE（FULLCOMBO / EX HARD / HARD / CLEAR / EASY / ASSIST / FAILED）に応じた色を返す。
+ * 未対応タイプはグレー。
+ */
 const getClearTypeColor = (type: string) => {
     switch (type) {
         case 'FULLCOMBO CLEAR': return 'text-cyan-500 dark:text-cyan-400';

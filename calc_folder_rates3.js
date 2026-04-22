@@ -1,3 +1,4 @@
+// UNUSED: 旧 v3。後継: calc_folder_rates_final.js。詳細は UNUSED.md 参照。
 // Updated calculation with 99.5% base and t^1.3 power curve
 
 const WEIGHTS = {};

@@ -11,26 +11,44 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * スキルツリー生成サービス — 全譜面対象・カテゴリなし貪欲法チェーン構築。
+ * 【Service の役割】 スキルツリー生成サービス。全譜面対象・カテゴリなし貪欲法でチェーンを構築する。
  *
- * 全譜面を対象に類似度ベースで数珠つなぎチェーンを構築する。
- * 各チェーンは到達先（末端）の最高難度譜面名で識別される。
- * 類似譜面が見つからない譜面は独立ノードとして保持する。
+ * 責務:
+ *  - 全譜面の {@link ChartTendencyProfile} を EDS（実効難易度スコア）で昇順ソート
+ *  - 類似度と難易度近接度をスコア化して貪欲法で「数珠つなぎチェーン」を複数本生成
+ *  - ユーザーの最高クリアタイプを textage ごとに集計し、進捗マップを返す
+ *  - フロントエンドが「このチェーンを順番に伸ばせばよい」と可視化できる形に整形
+ *
+ * 依存:
+ *  - {@link ChartTendencyProfileRepository}: 譜面傾向プロファイル（DB 上に全譜面分）
+ *  - {@link ScoreRepository}: ユーザースコアを取得し進捗表示に利用
+ *
+ * 主要ロジックの概観:
+ *  - EDS = レベル + 密度成分(最大0.4) + ノーツ数成分(最大0.3)
+ *  - チェーン延長: current から EDS が大きい譜面のうち「類似度×0.7 + 近接ボーナス×0.3」が最大のものを貪欲に選択
+ *  - 類似度 0.20 未満で打ち切り（独立ノード扱い）
+ *  - 各チェーンは末端（最高 EDS）の譜面名で識別される
  */
 @Service
 public class SkillTreeService {
 
+    /** 譜面傾向プロファイルのリポジトリ */
     private final ChartTendencyProfileRepository profileRepo;
+    /** ユーザースコアのリポジトリ */
     private final ScoreRepository scoreRepo;
 
-    /** チェーンを延長する最低類似度 */
+    /** チェーンを延長する最低類似度しきい値。これ未満は独立ノード扱い。 */
     private static final double SIMILARITY_THRESHOLD = 0.20;
 
+    /** クリアタイプ文字列 → 数値ランク。大小比較のマップ。 */
     private static final Map<String, Integer> CLEAR_RANK = Map.of(
             "FAILED", 0, "ASSIST CLEAR", 1, "EASY CLEAR", 2,
             "CLEAR", 3, "HARD CLEAR", 4, "EX HARD CLEAR", 5, "FULLCOMBO CLEAR", 6
     );
 
+    /**
+     * 【コンストラクタ】 Spring が 2 つの Repository を注入する。
+     */
     public SkillTreeService(ChartTendencyProfileRepository profileRepo,
                             ScoreRepository scoreRepo) {
         this.profileRepo = profileRepo;
@@ -38,34 +56,43 @@ public class SkillTreeService {
     }
 
     /**
-     * スキルツリーを生成。
-     * 全譜面をEDS順にソートし、貪欲法で類似チェーンを構築する。
-     * チェーン名はチェーン末端（最高難度）の譜面名。
+     * 【メソッドの役割】 ユーザー向けのスキルツリーを生成して返す。
+     *
+     * 処理の流れ:
+     *  - 手順1: 全譜面プロファイルを取得し、notes が無いものは除外
+     *  - 手順2: 各譜面の EDS（実効難易度スコア）を計算してキャッシュ
+     *  - 手順3: EDS 昇順でソートし、未使用の最小 EDS 譜面を start として貪欲にチェーンを伸ばす
+     *  - 手順4: 伸ばせなくなった（類似度しきい値未達）ら別チェーンへ移行、全譜面を使い切るまで繰り返し
+     *  - 手順5: チェーンを長い順に並べ、ノード情報 + ユーザー進捗マップを返す
+     *
+     * @param user ログインユーザー。null の場合は userProgress を空で返す。
+     * @return chains / userProgress を含むレスポンス Map
      */
     public Map<String, Object> generateSkillTree(User user) {
-        // 全譜面対象（レベルフィルタなし）
+        // 手順1: 全譜面対象（レベルフィルタなし、notes が 0 や null の譜面のみ除外）
         List<ChartTendencyProfile> allProfiles = profileRepo.findAll().stream()
                 .filter(p -> p.getNotes() != null && p.getNotes() > 0)
                 .collect(Collectors.toList());
 
-        // EDS計算
+        // 手順2: 譜面ごとに EDS を計算して textage をキーにキャッシュ
         Map<String, Double> edsMap = new HashMap<>();
         for (ChartTendencyProfile p : allProfiles) {
             edsMap.put(p.getTextage(), computeEDS(p));
         }
 
-        // EDS昇順ソート
+        // EDS 昇順ソート（易しい譜面から開始する）
         List<ChartTendencyProfile> sorted = allProfiles.stream()
                 .sorted(Comparator.comparingDouble(p -> edsMap.get(p.getTextage())))
                 .collect(Collectors.toList());
 
-        // 貪欲法で複数チェーン構築
+        // 手順3: 貪欲法で複数チェーンを構築
         Set<String> used = new HashSet<>();
         List<List<ChainLink>> rawChains = new ArrayList<>();
 
         for (ChartTendencyProfile start : sorted) {
             if (used.contains(start.getTextage())) continue;
 
+            // 新しいチェーンを start から開始
             List<ChainLink> chain = new ArrayList<>();
             chain.add(new ChainLink(start, 0.0, ""));
             used.add(start.getTextage());
@@ -77,11 +104,14 @@ public class SkillTreeService {
                 double bestScore = -1;
                 double bestSimilarity = 0;
 
+                // current より EDS が大きい未使用候補の中から最良スコアのものを探す
                 for (ChartTendencyProfile candidate : sorted) {
                     if (used.contains(candidate.getTextage())) continue;
                     double candidateEds = edsMap.get(candidate.getTextage());
                     if (candidateEds <= currentEds) continue;
 
+                    // 評価値 = 類似度×0.7 + 近接ボーナス×0.3
+                    // 近接ボーナスは EDS 差が小さいほど大きくなる
                     double similarity = computeQuickSimilarity(current, candidate);
                     double edsDiff = candidateEds - currentEds;
                     double proximityBonus = Math.exp(-0.3 * edsDiff);
@@ -94,6 +124,7 @@ public class SkillTreeService {
                     }
                 }
 
+                // 手順4: 類似度が閾値未満ならチェーン打ち切り
                 if (bestNext == null || bestSimilarity < SIMILARITY_THRESHOLD) break;
 
                 String reason = buildConnectionReason(current, bestNext);
@@ -105,10 +136,10 @@ public class SkillTreeService {
             rawChains.add(chain);
         }
 
-        // チェーン長降順でソート（長いチェーンが先）
+        // チェーン長降順でソート（長いチェーンが先＝UI で上位に配置する）
         rawChains.sort((a, b) -> Integer.compare(b.size(), a.size()));
 
-        // レスポンス構築
+        // 手順5: レスポンス用データの構築
         List<Map<String, Object>> chains = new ArrayList<>();
         for (List<ChainLink> chain : rawChains) {
             ChainLink top = chain.get(chain.size() - 1);
@@ -150,9 +181,10 @@ public class SkillTreeService {
     // ── EDS（実効難易度スコア）──────────────────────────────
 
     /**
-     * 実効難易度スコア。
-     * レベルを基盤に、密度・ノーツ数で小数点以下を付与。
-     * レベル未設定の場合は難易度コードからの推定値を使用。
+     * 実効難易度スコアを計算する。
+     * 公式レベルを整数部分とし、密度（dominantEff16 / 300）で最大 0.4、
+     * ノーツ数（notes / 2000）で最大 0.3 の小数を加算する。
+     * レベル未設定時は難易度コードからの推定値を用いる。
      */
     private double computeEDS(ChartTendencyProfile p) {
         double level;
@@ -171,7 +203,7 @@ public class SkillTreeService {
         return level + densityComponent + notesComponent;
     }
 
-    /** レベル未設定時の推定値 */
+    /** レベル未設定時の推定値。難易度コード（"1".."10"）から仮レベルを返す。 */
     private double estimateLevelFromDifficulty(String dc) {
         if (dc == null) return 5;
         return switch (dc) {
@@ -186,6 +218,12 @@ public class SkillTreeService {
 
     // ── 類似度 ──────────────────────────────────────────
 
+    /**
+     * 2 譜面間の簡易類似度を 0〜1 で返す。
+     * 密度差・皿率差・同時押し率差・CN 有無・ソフラン有無を順次減衰係数として乗算していく。
+     * {@link ChartTendencyService#computeSimilarity} より大幅に軽量なので、
+     * 貪欲チェーン構築のように呼び出し回数が多い文脈で使う。
+     */
     private double computeQuickSimilarity(ChartTendencyProfile a, ChartTendencyProfile b) {
         double sim = 1.0;
 
@@ -219,6 +257,11 @@ public class SkillTreeService {
 
     // ── 接続理由 ──────────────────────────────────────────
 
+    /**
+     * チェーンの接続理由を日本語で最大 3 個まで並べて返す。
+     * 「密度が近い」「皿が近い」「同時押し率が近い」「CN」「ソフラン」などの要素を拾う。
+     * UI 側で矢印ラベルとして表示される。
+     */
     private String buildConnectionReason(ChartTendencyProfile from, ChartTendencyProfile to) {
         List<String> r = new ArrayList<>();
         double effFrom = safe(from.getDominantEff16()), effTo = safe(to.getDominantEff16());
@@ -241,6 +284,7 @@ public class SkillTreeService {
 
     // ── ノード変換 ──────────────────────────────────────────
 
+    /** プロファイルをフロントエンドで消費しやすい LinkedHashMap に変換する。 */
     private Map<String, Object> profileToNode(ChartTendencyProfile p) {
         Map<String, Object> n = new LinkedHashMap<>();
         n.put("textage", p.getTextage());
@@ -261,6 +305,10 @@ public class SkillTreeService {
 
     // ── ユーザー進捗 ──────────────────────────────────────────
 
+    /**
+     * ユーザースコアから「textage → 最良クリア情報」のマップを作る。
+     * 同じ曲の複数履歴を走査し、CLEAR_RANK の高い順に上書きしていくことで最高到達を残す。
+     */
     private Map<String, Object> buildUserProgress(List<Score> scores, List<ChartTendencyProfile> profiles) {
         Map<String, ChartTendencyProfile> byTitle = new HashMap<>();
         for (ChartTendencyProfile p : profiles) {
@@ -290,8 +338,10 @@ public class SkillTreeService {
 
     // ── ヘルパー ──────────────────────────────────────────
 
+    /** null の Double を 0.0 に畳み込むユーティリティ */
     private double safe(Double d) { return d != null ? d : 0.0; }
 
+    /** 難易度コード → 1 文字（B/N/H/A/L）。UI バッジ表示用。 */
     private String diffShort(String dc) {
         if (dc == null) return "A";
         return switch (dc) {
@@ -300,6 +350,7 @@ public class SkillTreeService {
         };
     }
 
+    /** 難易度コード → 完全名（BEGINNER/NORMAL/...）。Score.difficultyName と整合させるため。 */
     private String diffCodeToName(String dc) {
         if (dc == null) return "ANOTHER";
         return switch (dc) {
@@ -308,10 +359,15 @@ public class SkillTreeService {
         };
     }
 
+    /** クリアタイプ文字列同士を CLEAR_RANK に基づいて比較する。高い方が大きい値。 */
     private int compareClear(String a, String b) {
         return Integer.compare(CLEAR_RANK.getOrDefault(a, -1), CLEAR_RANK.getOrDefault(b, -1));
     }
 
+    /**
+     * 貪欲法で構築したチェーン内の 1 ノードを表す値クラス。
+     * 対象プロファイルと、チェーンで 1 つ前のノードとの類似度・接続理由を保持する。
+     */
     private static class ChainLink {
         final ChartTendencyProfile profile;
         final double similarityToPrev;

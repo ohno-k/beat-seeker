@@ -1,7 +1,7 @@
 <template>
-  <!-- Dancing Rank Icon Wrapper -->
+  <!-- ランクアイコンのラッパー（エイプリルフール時はダンス + 画面徘徊） -->
   <div class="relative flex items-center justify-center select-none shrink-0" :class="[sizeClass, { 'april-fools-icon af-wander-screen': isAprilFoolsActive }]" :style="wanderStyle">
-    <!-- Dancing Limbs (April Fools only) -->
+    <!-- ダンスする手足（エイプリルフールの時だけ表示） -->
     <svg
       v-if="isAprilFoolsActive"
       :viewBox="limbsViewBox"
@@ -38,7 +38,7 @@
       </g>
     </svg>
 
-    <!-- SVG Icon -->
+    <!-- 本体の SVG アイコン（ランクごとに形状とグラデが変わる） -->
     <svg 
       viewBox="0 0 100 100" 
       fill="none" 
@@ -244,6 +244,22 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 称号ランクをリッチな SVG アイコンで描画する。
+ *
+ * 機能:
+ *  - ランク名ごとに形状（盾/円/三角...）とメタリック配色を決定
+ *  - tier（1〜5）で内部セグメント数やダイヤ紋を変える
+ *  - Supporter 判定で金縁を追加
+ *  - エイプリルフール期間中はパステル配色 + 手足アニメ + 画面上を徘徊する演出
+ *
+ * props:
+ *  - rankName: 'Beginner'〜'Legend' の称号名（必須）
+ *  - tier: ランク内の更なる段階（1〜5、未指定時はセグメント非表示）
+ *  - size: 'xs' | 'sm' | 'md' | 'lg'（未指定時はデフォルトの中サイズ）
+ *  - disableParty: true にするとエイプリルフール演出を無効化
+ *  - isSupporter: サポーター会員なら金縁付与
+ */
 import { computed } from 'vue';
 import { useAprilFools } from '../composables/useAprilFools';
 
@@ -255,12 +271,15 @@ const props = defineProps<{
   isSupporter?: boolean;
 }>();
 
+/** SVG 内の `id` 衝突を防ぐためのユニーク ID（グラデ・フィルタ用）。 */
 const uid = Math.random().toString(36).substring(2, 11);
+// 現在がエイプリルフール期間中かを返すフラグ。
 const { isAprilFools } = useAprilFools();
 
+/** エイプリルフール演出を実際に有効化するか（期間中 && 個別に無効化されていない）。 */
 const isAprilFoolsActive = computed(() => isAprilFools.value && !props.disableParty);
 
-// Generate random wandering parameters
+// 画面を徘徊するためのランダムなパラメータ（CSS 変数経由でアニメに渡す）。
 const wanderStyle = computed(() => {
   if (!isAprilFoolsActive.value) return {};
   const duration = 15 + Math.random() * 20; // 15-35s
@@ -284,6 +303,7 @@ const wanderStyle = computed(() => {
   };
 });
 
+/** props.size からアイコンの外形 Tailwind クラスを決める。 */
 const sizeClass = computed(() => {
   switch (props.size) {
     case 'xs': return 'w-6 h-6 sm:w-8 sm:h-8';
@@ -294,8 +314,10 @@ const sizeClass = computed(() => {
   }
 });
 
+/** Legend ランクは特別なオーラ/シマーを出すため、判定用の computed を用意。 */
 const isLegend = computed(() => props.rankName === 'Legend');
 
+/** 【通常時の配色パレット】 ランク名→メタリック/宝石調の primary/highlight/secondary/stroke を返す。 */
 const colors = computed(() => {
   const name = props.rankName.toLowerCase();
   // Premium metallic/jewel palettes
@@ -314,7 +336,7 @@ const colors = computed(() => {
   return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
 });
 
-// April Fools pastel rainbow colors
+// 【エイプリルフール時の配色】 通常時とは別にパステルレインボー調のパレットを用意。
 const aprilColors = computed(() => {
   const name = props.rankName.toLowerCase();
   if (name === 'beginner') return { primary: '#f9a8d4', highlight: '#fbcfe8', secondary: '#f472b6' };
@@ -332,13 +354,15 @@ const aprilColors = computed(() => {
   return { primary: '#f9a8d4', highlight: '#fbcfe8', secondary: '#f472b6' };
 });
 
+/** 手足（SVG の腕・脚）の描画色。ストローク色を流用する。 */
 const limbColor = computed(() => {
   return colors.value.stroke;
 });
 
+/** 手足アニメ SVG の viewBox。高さ 115 にして足元の余裕を確保。 */
 const limbsViewBox = '0 0 100 115';
 
-// Rank intensity: lower ranks dance slowly, higher ranks dance wildly
+// ランク強度：低ランクはゆったり、高ランクほど激しく踊る。
 const rankIntensity = computed(() => {
   const name = props.rankName.toLowerCase();
   const intensityMap: Record<string, number> = {
@@ -358,7 +382,7 @@ const rankIntensity = computed(() => {
   return intensityMap[name] || 1;
 });
 
-// Dance class that determines the animation style
+// ランク強度から「どの系統のダンス（sway/wave/groove/disco/breakdance/rave）」かを決める。
 const danceClass = computed(() => {
   const intensity = rankIntensity.value;
   if (intensity <= 2) return 'af-dance-sway';
@@ -369,7 +393,7 @@ const danceClass = computed(() => {
   return 'af-dance-rave';
 });
 
-// Animation speed varies by rank
+// ランクごとにアニメ速度が変わる。手足ごとに位相差（delay）を付けてバラバラに動かす。
 const limbStyle = (limb: string) => {
   const baseSpeed = Math.max(0.3, 1.5 - rankIntensity.value * 0.1);
   const delays: Record<string, number> = {
@@ -385,7 +409,7 @@ const limbStyle = (limb: string) => {
   };
 };
 
-// Shape Paths
+// ランク名ごとの SVG Path（盾・円・三角・ダイヤ・五角形…の外形）。
 const shapePath = computed(() => {
   const name = props.rankName.toLowerCase();
   if (name === 'beginner') return "M50 10 L85 25 L85 75 L50 90 L15 75 L15 25 Z"; // shield
@@ -403,8 +427,12 @@ const shapePath = computed(() => {
   return "M50 15 A35 35 0 1 1 49.9 15 Z";
 });
 
+/**
+ * 【関数の役割】 tier セグメント（階段状の短冊バー）1 本分の Path を作る。
+ * tier 1〜4 用のエネルギーバー描画に使用。
+ */
 const getSegmentPath = (n: number) => {
-  // Bolder, more visible segments centered in the shape
+  // 形状中央に太めで視認性の高いセグメントを生成する。
   const width = 12;
   const height = 3;
   const spacing = 6;

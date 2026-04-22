@@ -1,6 +1,14 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 利用規約・免責・プライバシー・広告・解析・お問い合わせを
+ * まとめて表示する静的ページ。
+ *
+ * 翻訳キーは `terms.*` に集約され、日付やメール/X リンクはテンプレートに直書き。
+ * props/emits: なし。
+ */
 import { useI18n } from '../composables/useI18n';
 
+// 翻訳関数だけ使う。
 const { t } = useI18n();
 </script>
 

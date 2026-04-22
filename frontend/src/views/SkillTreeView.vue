@@ -1,4 +1,18 @@
 <script setup lang="ts">
+/**
+ * 【Viewの役割】 スキルツリー可視化ページ。
+ *
+ * 機能:
+ *  - API `/api/analysis/skill-tree` から譜面チェーン（類似度で繋げた段位ラダー）を取得する。
+ *  - チェーンを階段状に描画し、ユーザーのクリア状況（bestClear）で点の色を変える。
+ *  - チェーンに属さない独立譜面は折りたたみセクションで別途表示。
+ *  - ノードクリックで詳細（BPM／ノーツ／皿・同時押し率など）を展開表示。
+ *  - ユーザーの現在地を「NEXT」バッジで強調（クリアした最後のノードの次が推奨譜面）。
+ *
+ * 依存:
+ *  - `useAuth` — API 認証ヘッダ。
+ *  - `useI18n` — 多言語。
+ */
 import { ref, computed, onMounted } from 'vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
@@ -6,6 +20,7 @@ import { useI18n } from '../composables/useI18n';
 const { t } = useI18n();
 const { isLoggedIn, authHeaders } = useAuth();
 
+/** ツリー上のノード（譜面1つぶん）。BPM／ノーツ／特性指標などを含む */
 interface ChartNode {
   textage: string; title: string; artist: string;
   level: number; difficulty: string; notes: number;
@@ -14,27 +29,45 @@ interface ChartNode {
   dominantEff16: number;
   similarityToPrev: number; connectionReason: string;
 }
+/** 譜面チェーン（類似譜面を繋げた連鎖 or 独立1譜面）のデータ構造 */
 interface SkillChain {
   categoryId: string; categoryLabel: string; categoryDescription: string;
   totalInCategory: number; isIndependent: boolean; nodes: ChartNode[];
 }
+/** ノード単位のユーザー進捗情報 */
 interface UserProgress { bestClear: string; clearRank: number; missCount: number | null; }
+/** API 全体のレスポンス型 */
 interface TreeData { chains: SkillChain[]; userProgress: Record<string, UserProgress>; }
 
+/** API fetch 中フラグ */
 const loading = ref(true);
+/** API エラー表示用 */
 const error = ref('');
+/** サーバーから取得したツリーデータ */
 const data = ref<TreeData | null>(null);
+/** 詳細展開対象のノード textage。null なら何も展開しない */
 const selectedNode = ref<string | null>(null);
+/** 独立譜面セクションの折りたたみ状態 */
 const showIndependent = ref(false);
 
+/** 複数ノードからなるチェーン（本体の階段表示対象） */
 const multiChains = computed(() => data.value?.chains.filter(c => !c.isIndependent) || []);
+/** 単独ノードのチェーン（グリッド表示対象） */
 const independentCharts = computed(() => data.value?.chains.filter(c => c.isIndependent) || []);
 
-/** チェーン末端レベルに応じた色 */
+/**
+ * 【関数の役割】 チェーン末端ノードのレベルに応じた色セットを返す。
+ * 末端が最終目標なので、チェーン全体のカラーリングに採用。
+ */
 function chainColor(chain: SkillChain) {
   const last = chain.nodes[chain.nodes.length - 1];
   return levelColor(last?.level || 0);
 }
+
+/**
+ * 【関数の役割】 レベル値から Tailwind カラークラスを返す。
+ * バッジ・接続線・テキストの3要素を一組にして返す。
+ */
 function levelColor(lv: number) {
   if (lv <= 0) return { badge: 'bg-slate-600', line: 'bg-slate-400', text: 'text-slate-400' };
   if (lv <= 3) return { badge: 'bg-emerald-600', line: 'bg-emerald-400', text: 'text-emerald-400' };
@@ -43,20 +76,29 @@ function levelColor(lv: number) {
   return { badge: 'bg-rose-600', line: 'bg-rose-400', text: 'text-rose-400' };
 }
 
+/** クリアタイプごとの文字色（FULLCOMBO は金、EXHARDは黄、HARDは赤…） */
 const clearColors: Record<string, string> = {
   'FULLCOMBO CLEAR': 'text-amber-400', 'EX HARD CLEAR': 'text-yellow-300',
   'HARD CLEAR': 'text-red-400', 'CLEAR': 'text-blue-400',
   'EASY CLEAR': 'text-green-400', 'ASSIST CLEAR': 'text-purple-400', 'FAILED': 'text-slate-500',
 };
+/** クリアタイプごとのカード左ボーダー色（カードの装飾用） */
 const clearBorders: Record<string, string> = {
   'FULLCOMBO CLEAR': 'border-amber-400/60', 'EX HARD CLEAR': 'border-yellow-300/50',
   'HARD CLEAR': 'border-red-400/40', 'CLEAR': 'border-blue-400/30',
   'EASY CLEAR': 'border-green-400/30', 'ASSIST CLEAR': 'border-purple-400/20', 'FAILED': 'border-slate-500/20',
 };
+/** 難易度コード→短縮記号（A=ANOTHER, L=LEGGENDARIA, H=HYPER, N=NORMAL, B=BEGINNER） */
 const diffLabel = (d: string) => ({ '4': 'A', '10': 'L', '3': 'H', '2': 'N', '1': 'B' }[d] || d);
+/** "FULLCOMBO CLEAR" → "FC" のようにクリア種別を短縮表示する */
 function clearLabel(c: string) { return c.replace(' CLEAR', '').replace('FULLCOMBO', 'FC'); }
+/** textage ID からユーザー進捗を引く。未プレイなら null */
 function prog(t: string): UserProgress | null { return data.value?.userProgress?.[t] || null; }
 
+/**
+ * 【関数の役割】 API からスキルツリーデータを取得する。
+ * 処理の流れ: ローディング開始 → GET → 成功時 data に格納 → finally でローディング解除。
+ */
 async function fetchData() {
   loading.value = true; error.value = '';
   try {
@@ -67,6 +109,11 @@ async function fetchData() {
 }
 onMounted(fetchData);
 
+/**
+ * 【関数の役割】 チェーン内で「ユーザーがクリアした最後のノードのインデックス」を返す。
+ * clearRank >= 2 を「クリア済み」と判定する。NEXT バッジの基準として使う。
+ * @returns クリア済みノードのインデックス（未クリアのみなら -1）
+ */
 function currentPos(chain: SkillChain): number {
   let last = -1;
   for (let i = 0; i < chain.nodes.length; i++) {
@@ -109,7 +156,7 @@ function currentPos(chain: SkillChain): number {
 
     <div v-else-if="data" class="space-y-8">
 
-      <!-- ===== チェーン一覧 ===== -->
+      <!-- ===== チェーン一覧: 類似譜面チェーンを階段状に描画 ===== -->
       <section v-for="chain in multiChains" :key="chain.categoryId">
         <!-- セクションヘッダー: 到達先の譜面名 -->
         <div class="flex items-center gap-3 mb-3">
@@ -123,12 +170,12 @@ function currentPos(chain: SkillChain): number {
           </div>
         </div>
 
-        <!-- チェーン本体 -->
+        <!-- チェーン本体: 縦のガイド線とノードカードを並べる。左端の円がプレイ状況を示す -->
         <div class="relative pl-6">
           <div class="absolute left-[15px] top-0 bottom-0 w-0.5 rounded-full" :class="chainColor(chain).line" style="opacity:0.25"></div>
 
           <div v-for="(node, idx) in chain.nodes" :key="node.textage" class="relative flex items-start gap-3 mb-1">
-            <!-- ドット -->
+            <!-- ノードドット: クリア済みなら色付き、NEXT なら点滅、未プレイなら中空白 -->
             <div class="absolute -left-6 top-2.5 z-10">
               <div
                 class="w-3 h-3 rounded-full border-2"
@@ -140,7 +187,7 @@ function currentPos(chain: SkillChain): number {
               ></div>
             </div>
 
-            <!-- カード -->
+            <!-- ノードカード: 難易度・曲名・ノーツ数・クリアランク・NEXTバッジ。クリックで詳細展開 -->
             <div
               class="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all cursor-pointer hover:shadow-sm text-sm"
               :class="[
@@ -168,7 +215,7 @@ function currentPos(chain: SkillChain): number {
           </div>
         </div>
 
-        <!-- 展開された詳細 -->
+        <!-- 展開された詳細: BPM・ノーツ・皿割合など追加情報を表示 -->
         <template v-for="node in chain.nodes" :key="'detail-' + node.textage">
           <div v-if="selectedNode === node.textage" class="ml-6 mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
             <div class="flex items-center gap-2 mb-2">
@@ -194,7 +241,7 @@ function currentPos(chain: SkillChain): number {
         </template>
       </section>
 
-      <!-- ===== 独立譜面セクション ===== -->
+      <!-- ===== 独立譜面セクション: どのチェーンにも属さない譜面を2カラムグリッドで表示 ===== -->
       <section v-if="independentCharts.length > 0">
         <button
           @click="showIndependent = !showIndependent"
@@ -224,7 +271,7 @@ function currentPos(chain: SkillChain): number {
           </div>
         </div>
 
-        <!-- 独立譜面の詳細展開 -->
+        <!-- 独立譜面クリック時の詳細展開 -->
         <template v-for="chain in independentCharts" :key="'ind-detail-' + chain.categoryId">
           <div v-if="selectedNode === chain.nodes[0].textage" class="mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
             <div class="flex items-center gap-2 mb-2">

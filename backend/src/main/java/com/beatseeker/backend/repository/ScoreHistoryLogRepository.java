@@ -8,10 +8,61 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 【Repository の役割】 {@code ScoreHistoryLog}（スコア更新の履歴スナップショット）を扱うリポジトリ。
+ *
+ * ユーザーがスコアを更新した時点ごとに、そのときの合計 beat_pt / rate_pt / precision_pt 等を
+ * スナップショットとして 1 レコード保存している。ランキング推移や差分計算に利用する。
+ *
+ * {@link JpaRepository}{@code <ScoreHistoryLog, Long>} を継承しており、基本 CRUD は自動提供。
+ *
+ * 主要なクエリの目的:
+ *  - ユーザーの履歴を時系列取得／最新 1 件取得
+ *  - グローバルランキング（beat_pt / precision_pt / rate_pt）の算出
+ *    いずれも「各ユーザーの最新スナップショットから順位付け」＋「前日との順位変動算出」を
+ *    CTE（WITH 句）で行うネイティブクエリ
+ *  - ARENA ランク別の平均 pt 集計
+ *  - 任意ユーザーの最新 pt 取得
+ */
 public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog, Long> {
+    /**
+     * 【メソッドの役割】 指定ユーザーの履歴を古い順（昇順）で全件取得する。
+     *
+     * 派生クエリメソッド: {@code WHERE user_id = ? ORDER BY uploaded_at ASC}。
+     * 推移グラフ描画などに使う。0 件なら空リスト。
+     *
+     * @param user 対象ユーザー
+     * @return 古い順の履歴リスト
+     */
     List<ScoreHistoryLog> findByUserOrderByUploadedAtAsc(User user);
+
+    /**
+     * 【メソッドの役割】 指定ユーザーの最新履歴（1 件）を取得する。
+     *
+     * 派生クエリメソッド: {@code ORDER BY uploaded_at DESC LIMIT 1}。
+     * 直近の合計 pt を取り出すのに使う。履歴未作成なら {@link Optional#empty()}。
+     *
+     * @param user 対象ユーザー
+     * @return 最新スナップショット（なければ空）
+     */
     Optional<ScoreHistoryLog> findFirstByUserOrderByUploadedAtDesc(User user);
 
+    /**
+     * 【メソッドの役割】 グローバルランキング（beat_pt）を取得する。順位変動付き。
+     *
+     * ネイティブ SQL（PostgreSQL）。概要:
+     *  - {@code current_ranks}: 全ユーザーについて「最新の履歴」を {@code DISTINCT ON} で抽出し、
+     *    {@code total_beat_pt DESC} で順位を付与
+     *  - {@code previous_ranks}: 同じことを「本日 0 時より前」に絞って行い、前日分の順位を算出
+     *  - 最終 SELECT で users と JOIN し、表示名・IIDX ID・プライバシー・サポーターバッジ・
+     *    前日差分（rank_pos 差）を返す
+     *
+     * {@code DISTINCT ON (user_id)} は PostgreSQL 固有で、先頭行のみ残す効率的な書き方。
+     * 返却キー: userId / displayName / iidxId / privacyLevel / totalBeatPt / lastUpdatedAt /
+     *           isSupporter / rankChange
+     *
+     * @return ランキング配列（0 件でも空リスト）
+     */
     @Query(value =
             "WITH current_ranks AS ( " +
             "    SELECT user_id, total_beat_pt, uploaded_at, " +
@@ -45,6 +96,18 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getGlobalRanking();
 
+    /**
+     * 【メソッドの役割】 精度（precision_pt）のグローバルランキングを取得する。順位変動付き。
+     *
+     * ネイティブ SQL。構造は {@link #getGlobalRanking()} と同じ（現時点と前日で順位を出し差分を取る）。
+     * 違い:
+     *  - {@code WHERE total_precision_pt > 0} で 0 pt ユーザーを除外
+     *  - 並び順キーが {@code total_precision_pt DESC}
+     *
+     * 返却キー: displayName / iidxId / totalPrecisionPt / isSupporter / rankChange
+     *
+     * @return 精度ランキング配列
+     */
     @Query(value =
             "WITH current_ranks AS ( " +
             "    SELECT user_id, total_precision_pt, " +
@@ -77,6 +140,15 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getPrecisionRanking();
 
+    /**
+     * 【メソッドの役割】 rate_pt（ティア rate 系）のグローバルランキングを取得する。順位変動付き。
+     *
+     * 構造は {@link #getGlobalRanking()} と同一。並び順キーと対象カラムが {@code total_rate_pt} に変わる。
+     * 返却キー: userId / displayName / iidxId / privacyLevel / totalRatePt / lastUpdatedAt /
+     *           isSupporter / rankChange
+     *
+     * @return レートランキング配列
+     */
     @Query(value =
             "WITH current_ranks AS ( " +
             "    SELECT user_id, total_rate_pt, uploaded_at, " +
@@ -111,6 +183,17 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getRateTierRanking();
 
+    /**
+     * 【メソッドの役割】 ARENA ランク（SS／S+／S／A など）ごとの平均 beat_pt とユーザー数を集計する。
+     *
+     * ネイティブ SQL。{@code DISTINCT ON (user_id)} で各ユーザーの最新履歴を取り、
+     * users.arena_rank でグルーピングして平均を算出する。
+     * {@code arena_rank IS NOT NULL AND arena_rank <> ''} で未設定ユーザーを除外している。
+     *
+     * 返却キー: arenaRank / avgBeatPt / userCount
+     *
+     * @return ARENA ランク別集計のリスト
+     */
     @Query(value =
             "SELECT u.arena_rank AS \"arenaRank\", " +
             "       AVG(cr.total_beat_pt) AS \"avgBeatPt\", " +
@@ -126,6 +209,16 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "ORDER BY AVG(cr.total_beat_pt) DESC", nativeQuery = true)
     List<Map<String, Object>> getArenaRankAverageBeatPt();
 
+    /**
+     * 【メソッドの役割】 ARENA ランクごとの平均 rate_pt とユーザー数を集計する。
+     *
+     * 構造は {@link #getArenaRankAverageBeatPt()} と同じで、対象カラムが {@code total_rate_pt} に変わる。
+     * 併せて {@code total_rate_pt > 0} のユーザーのみ対象とする。
+     *
+     * 返却キー: arenaRank / avgRatePt / userCount
+     *
+     * @return ARENA ランク別集計のリスト
+     */
     @Query(value =
             "SELECT u.arena_rank AS \"arenaRank\", " +
             "       AVG(cr.total_rate_pt) AS \"avgRatePt\", " +
@@ -142,11 +235,28 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "ORDER BY AVG(cr.total_rate_pt) DESC", nativeQuery = true)
     List<Map<String, Object>> getArenaRankAverageRatePt();
 
+    /**
+     * 【メソッドの役割】 指定ユーザーの {@code total_beat_pt} の最大値を返す。
+     *
+     * ネイティブ SQL。自己ベスト pt の参照用途（必ずしも最新 = 最大ではない場合がある）。
+     * 履歴 0 件の場合は {@code null} が返る点に注意。
+     *
+     * @param userId ユーザー ID
+     * @return 最大 beat_pt（履歴なしなら null）
+     */
     @Query(value =
             "SELECT MAX(total_beat_pt) FROM score_history_logs " +
             "WHERE user_id = :userId", nativeQuery = true)
     Double getLatestTotalBeatPtByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
 
+    /**
+     * 【メソッドの役割】 指定ユーザーの {@code total_rate_pt} の最大値を返す。
+     *
+     * ネイティブ SQL。自己ベストレート pt 参照用途。履歴 0 件なら {@code null}。
+     *
+     * @param userId ユーザー ID
+     * @return 最大 rate_pt（履歴なしなら null）
+     */
     @Query(value =
             "SELECT MAX(total_rate_pt) FROM score_history_logs " +
             "WHERE user_id = :userId", nativeQuery = true)

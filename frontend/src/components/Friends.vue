@@ -1,4 +1,17 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 フレンド一覧 + バーチャルライバル（地域 TOP）一覧のページ。
+ *
+ * 機能:
+ *  - 通常フレンドとバーチャルライバル（versionNum×prefectureFileNum のトップ）をカードで並べる
+ *  - 「比較する」ボタンで FriendComparisonModal を開く
+ *  - 名前クリックで親に `view-user` / `view-top-ranker` を emit してダッシュボード遷移
+ *  - フレンド検索モーダル（FriendSearchModal）も内包
+ *
+ * emits:
+ *  - view-user: 通常ユーザープロフの閲覧要求
+ *  - view-top-ranker: バーチャルライバル（地域 TOP）プロフの閲覧要求
+ */
 import { ref, onMounted, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
 import type { Friend, VirtualRival } from '../composables/useFriends';
@@ -13,24 +26,38 @@ const emit = defineEmits<{
 }>();
 
 const { friends, fetchFriends, removeFriend, fetchVirtualRivals, removeVirtualRival } = useFriends();
+/** フレンド検索モーダルの開閉。 */
 const isSearchModalOpen = ref(false);
+/** スコア比較モーダルの開閉。 */
 const isComparisonModalOpen = ref(false);
+/** 比較モーダルへ渡すフレンド（バーチャルライバル時はダミー Friend 形で渡す）。 */
 const selectedFriend = ref<Friend | null>(null);
+/** バーチャルライバル時のみ有効。どの地域 TOP か特定するキー。 */
 const selectedVirtualArea = ref<{ versionNum: number; prefectureFileNum: number } | null>(null);
+/** 削除中のフレンド ID（ボタンをスピナー化）。 */
 const removingId = ref<number | null>(null);
 
+/** バーチャルライバル一覧（地域 TOP プレイヤー）。 */
 const virtualRivals = ref<VirtualRival[]>([]);
+/** 削除中のバーチャルライバル ID。 */
 const removingVirtualId = ref<number | null>(null);
+/** 初回ロード完了フラグ（空表示用のプレースホルダ切替）。 */
 const isLoaded = ref(false);
 
+/** フレンドかバーチャルライバルが 1 人以上いるか。 */
 const hasAnyRival = computed(() => friends.value.length > 0 || virtualRivals.value.length > 0);
 
+/** 通常フレンドとの比較モーダルを開く。 */
 const openComparison = (friend: Friend) => {
   selectedFriend.value = friend;
   selectedVirtualArea.value = null;
   isComparisonModalOpen.value = true;
 };
 
+/**
+ * 【関数の役割】 バーチャルライバル（地域 TOP）との比較モーダルを開く。
+ * 比較モーダルは Friend 型を受け取るため、ID を負数にしたダミー Friend を構築して渡す。
+ */
 const openVirtualComparison = (rival: VirtualRival) => {
   console.log('[Friends] openVirtualComparison', rival);
   selectedFriend.value = {
@@ -49,6 +76,7 @@ const openVirtualComparison = (rival: VirtualRival) => {
   });
 };
 
+/** 【関数の役割】 フレンド削除。confirm ダイアログで確認してから実行。 */
 const handleRemoveFriend = async (friend: Friend) => {
   if (!confirm(`${friend.displayName} さんをフレンドから削除しますか？`)) return;
   removingId.value = friend.id;
@@ -59,10 +87,12 @@ const handleRemoveFriend = async (friend: Friend) => {
   }
 };
 
+/** 【関数の役割】 バーチャルライバルリストを再取得する。削除後や初期表示で使う。 */
 const refreshVirtualRivals = async () => {
   virtualRivals.value = await fetchVirtualRivals();
 };
 
+/** 【関数の役割】 バーチャルライバル解除。解除後にリストを再フェッチして UI を更新。 */
 const handleRemoveVirtualRival = async (rival: VirtualRival) => {
   if (!confirm(`${rival.versionName} ${rival.prefectureName} TOP をライバルから解除しますか？`)) return;
   removingVirtualId.value = rival.id;
@@ -74,6 +104,7 @@ const handleRemoveVirtualRival = async (rival: VirtualRival) => {
   }
 };
 
+// マウント時にフレンドとバーチャルライバルを並列取得。どちらかが失敗しても空表示は抜ける。
 onMounted(async () => {
   try {
     await Promise.all([fetchFriends(), refreshVirtualRivals()]);
@@ -82,6 +113,7 @@ onMounted(async () => {
   }
 });
 
+/** 【関数の役割】 ISO 日時を「YYYY/MM/DD HH:mm」形式で日本語整形。未指定時は「未アップロード」。 */
 const formatDate = (dateStr: string | null) => {
   if (!dateStr) return '未アップロード';
   const date = new Date(dateStr);
@@ -91,13 +123,16 @@ const formatDate = (dateStr: string | null) => {
   });
 };
 
+/** 相手のプライバシーレベルが 2（完全非公開）でない限り、ダッシュボードを覗ける。 */
 const canViewDashboard = (friend: Friend) => (friend.privacyLevel ?? 0) !== 2;
 
+/** 名前クリックで親に閲覧イベント発火。非公開ユーザーの場合は無反応。 */
 const handleNameClick = (friend: Friend) => {
   if (!canViewDashboard(friend)) return;
   emit('view-user', { id: friend.id, displayName: friend.displayName, iidxId: friend.iidxId });
 };
 
+/** バーチャルライバル（地域 TOP）名クリック時のハンドラ。 */
 const handleVirtualNameClick = (rival: VirtualRival) => {
   emit('view-top-ranker', {
     versionNum: rival.versionNum,

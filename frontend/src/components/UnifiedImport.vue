@@ -1,4 +1,16 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 CSV スコア + ARENA バトル履歴をまとめて取り込む統合インポート UI。
+ * - タブ切替で「テキスト貼り付け」／「ファイルアップロード」の 2 経路
+ * - テキスト貼り付け経路は JSON（ブックマークレット出力）/ CSV 生文字列の両対応
+ *     - JSON の場合: scoresCsv → 親へ emit、battles → /api/arena/import に POST
+ *     - CSV の場合: そのまま BOM 付きで File 化して親に emit
+ * - ファイル経路は .csv のみ受付（D&D + クリックの両対応）
+ * - ブックマークレット導入方法のヘルプモーダル（PC/SP タブ）を内包
+ *
+ * @emits close 処理完了時にモーダルを閉じる。
+ * @emits score-file スコア CSV を File として親（メインインポート処理）に引き渡す。
+ */
 import { ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 
@@ -10,34 +22,59 @@ const emit = defineEmits<{
   (e: 'score-file', file: File): void;
 }>();
 
-// Help modal
+// ---- ブックマークレット使い方モーダル関連 ----
+/** ヘルプモーダル表示フラグ。 */
 const showHelpModal = ref(false);
+/** ヘルプ内「PC / SP」タブの選択状態（初期値は SP）。 */
 const deviceTab = ref<'pc' | 'sp'>('sp');
+/** ブックマークレットコードをコピー済みかの一時フラグ（2 秒で戻る）。 */
 const codeCopied = ref(false);
 
-// Tab
+// ---- メインタブ ----
+/** インポート方式タブ（テキスト貼り付け / ファイルアップロード）。 */
 const importTab = ref<'text' | 'file'>('text');
 
-// File upload
+// ---- ファイルアップロード状態 ----
+/** D&D 中のハイライト表示フラグ。 */
 const isDragging = ref(false);
+/** 非表示の <input type=file> への参照。 */
 const fileInput = ref<HTMLInputElement | null>(null);
+/** 選択／ドロップで確定した CSV ファイル（送信前の一時保持）。 */
 const selectedFile = ref<File | null>(null);
 
+/** テキストタブの入力欄バインド。空の場合はクリップボードから読み込む。 */
 const pastedText = ref('');
 
-// State
+// ---- 処理状態メッセージ ----
+/** 送信中フラグ（ボタン無効化・スピナー表示用）。 */
 const isImporting = ref(false);
+/** 成功メッセージ（緑表示）。 */
 const resultMsg = ref('');
+/** エラーメッセージ（赤表示）。 */
 const resultError = ref('');
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+/**
+ * 【関数の役割】 CSV テキストを UTF-8 BOM 付き File に変換する。
+ * Excel が BOM なしを Shift_JIS と誤認して文字化けするのを防ぐため先頭に EF BB BF を付与する。
+ */
 const makeCsvFile = (csvText: string): File => {
   const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
   const blob = new Blob([bom, csvText], { type: 'text/csv;charset=utf-8;' });
   return new File([blob], 'scores.csv', { type: 'text/csv' });
 };
 
+/**
+ * 【関数の役割】 テキストタブ／クリップボードから取得した文字列を JSON か CSV に振り分けて処理する。
+ * 流れ：
+ *   1. JSON.parse を試みる → 失敗なら CSV とみなす
+ *   2. CSV ならそのまま親へファイル emit
+ *   3. JSON なら
+ *       - scoresCsv があれば CSV File に変換して親へ emit
+ *       - battles 配列があれば /api/arena/import に POST してバトル履歴投入
+ *   4. 処理結果メッセージを合成して 1.5 秒後にモーダルを閉じる
+ */
 const processText = async (text: string) => {
   isImporting.value = true;
   resultMsg.value = '';
@@ -49,6 +86,7 @@ const processText = async (text: string) => {
     try {
       parsed = JSON.parse(text);
     } catch {
+      // JSON ではなかった → CSV として扱う。
       isCsv = true;
     }
 
@@ -59,6 +97,7 @@ const processText = async (text: string) => {
       emit('score-file', makeCsvFile(text));
       scoresReady = true;
     } else {
+      // JSON ルート: scoresCsv と battles を別々に処理する。
       if (parsed.scoresCsv) {
         try {
           emit('score-file', makeCsvFile(parsed.scoresCsv));
@@ -68,6 +107,7 @@ const processText = async (text: string) => {
         }
       }
       if (parsed.battles && Array.isArray(parsed.battles) && parsed.battles.length > 0) {
+        // ARENA バトル履歴はサーバに直接 POST（スコアとは経路が異なる）。
         const token = localStorage.getItem('beat-seeker-token');
         const res = await fetch(`${API_BASE}/api/arena/import`, {
           method: 'POST',
@@ -84,6 +124,7 @@ const processText = async (text: string) => {
       }
     }
 
+    // 結果メッセージを合成（scores / arena の両方走った場合は連結）。
     const parts = [];
     if (scoresReady) parts.push(t('import.scoresProcessing'));
     if (arenaResultMsg) parts.push(arenaResultMsg);
@@ -96,6 +137,11 @@ const processText = async (text: string) => {
   }
 };
 
+/**
+ * 【関数の役割】 メインの送信ボタン押下ハンドラ。現在のタブに応じて処理を分岐する。
+ * - file タブ: 選択済みファイルをそのまま親に emit
+ * - text タブ: 入力欄が空なら clipboard.readText() へフォールバック
+ */
 const handleSubmit = async () => {
   if (importTab.value === 'file') {
     if (!selectedFile.value) return;
@@ -106,7 +152,7 @@ const handleSubmit = async () => {
     setTimeout(() => emit('close'), 1500);
     return;
   }
-  // Text tab: use pasted text if present, otherwise read clipboard
+  // テキストタブ: 手動入力があれば優先、なければクリップボード読取。
   const typed = pastedText.value.trim();
   if (typed) {
     await processText(typed);
@@ -120,11 +166,16 @@ const handleSubmit = async () => {
       }
       await processText(text);
     } catch {
+      // 権限拒否・非対応ブラウザ等で readText が失敗するケース。
       resultError.value = t('import.errorAccess');
     }
   }
 };
 
+/**
+ * 【関数の役割】 ドロップまたは選択されたファイルを検証して selectedFile にセットする。
+ * 拡張子 .csv もしくは MIME type text/csv / application/vnd.ms-excel を受け付ける。
+ */
 const stageFile = (file: File) => {
   if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv' && file.type !== 'application/vnd.ms-excel') {
     resultError.value = t('import.errorCsv');
@@ -134,18 +185,22 @@ const stageFile = (file: File) => {
   selectedFile.value = file;
 };
 
+/** 【関数の役割】 ドロップイベントハンドラ。デフォルトの「ブラウザがファイルを開く」動作を止めて stageFile に委譲。 */
 const handleDrop = (e: DragEvent) => {
   e.preventDefault();
   isDragging.value = false;
   if (e.dataTransfer?.files.length) stageFile(e.dataTransfer.files[0]);
 };
 
+/** 【関数の役割】 ブックマークレットコード（javascript:... 文字列）をクリップボードへコピーし 2 秒だけ成功表示する。 */
 const copyBookmarkletCode = async () => {
   try {
     await navigator.clipboard.writeText(props.bookmarkletCode);
     codeCopied.value = true;
     setTimeout(() => { codeCopied.value = false; }, 2000);
-  } catch {}
+  } catch {
+    // コピー権限拒否は黙って無視（ユーザーが手動で長押しコピーできる）。
+  }
 };
 </script>
 

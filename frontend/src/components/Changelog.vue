@@ -1,11 +1,24 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 アプリ更新履歴と「難易度表改訂履歴」の 2 タブを表示するページ。
+ *
+ * 機能:
+ *  - `activeTab` でタブ切替（アプリ更新 / 難易度改訂）
+ *  - 難易度改訂は `data/difficulty_revisions.json` を読み込み、追加曲・変更曲を一覧化
+ *  - 日付表記と「第N版」のラベルを言語ごとに整形
+ *
+ * props/emits: なし。
+ */
 import { ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import difficultyRevisions from '../data/difficulty_revisions.json';
 
+// 翻訳関数と現在言語。`currentLang` は日付の整形ロジックに使用。
 const { t, currentLang } = useI18n();
+/** 現在表示中のタブ。'changelog'（更新履歴）か 'difficulty'（難易度改訂）。 */
 const activeTab = ref<'changelog' | 'difficulty'>('changelog');
 
+/** 難易度改訂 1 回分を表す型（JSON のスキーマ）。 */
 interface RevisionEntry {
   version: number;
   label: string;
@@ -15,8 +28,14 @@ interface RevisionEntry {
   changed: { title: string; from: string; to: string }[];
 }
 
+// JSON を型付きで扱う。`as` キャストは静的データの明示的な型付け用途。
 const revisions = difficultyRevisions as RevisionEntry[];
 
+/**
+ * 【関数の役割】 "YYYY-MM" 形式の日付を言語に応じた表現へ整形する。
+ * @param dateStr 例: "2026-03"
+ * @returns 日本語: "2026年3月" / 韓国語: "2026년 3월" / 英語: "March 2026"
+ */
 function formatDate(dateStr: string): string {
   const [year, month] = dateStr.split('-');
   const m = parseInt(month, 10);
@@ -26,6 +45,11 @@ function formatDate(dateStr: string): string {
   return `${months[m - 1]} ${year}`;
 }
 
+/**
+ * 【関数の役割】 難易度改訂の版数をラベル化する。
+ * @param version 版数（1, 2, 3 ...）
+ * @returns 日本語: "第N版" / 韓国語: "제N판" / 英語: "Nst/nd/rd/th Edition"
+ */
 function editionLabel(version: number): string {
   if (currentLang.value === 'ja') return `第${version}版`;
   if (currentLang.value === 'ko') return `제${version}판`;
@@ -36,7 +60,7 @@ function editionLabel(version: number): string {
 
 <template>
   <div class="space-y-8 animate-fade-in pb-16">
-    <!-- Header -->
+    <!-- ヘッダー部（タイトル + タブ切替ボタン） -->
     <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h2 class="text-3xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -48,7 +72,7 @@ function editionLabel(version: number): string {
         {{ t('changelog.desc') }}
       </p>
 
-      <!-- Tabs -->
+      <!-- タブ切替ボタン（システム更新 / 難易度改訂） -->
       <div class="flex flex-wrap mt-6 gap-2 border-t border-slate-100 dark:border-slate-700 pt-6">
         <button
           @click="activeTab = 'changelog'"
@@ -227,7 +251,7 @@ function editionLabel(version: number): string {
       <!-- Older entries can be added here with similar structure -->
     </div>
 
-    <!-- Difficulty History Tab -->
+    <!-- 難易度改訂履歴タブ（JSON からループ描画） -->
     <div v-else-if="activeTab === 'difficulty'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
 
       <div v-for="rev in revisions" :key="rev.version" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
@@ -240,7 +264,7 @@ function editionLabel(version: number): string {
         </div>
 
         <div class="p-8 space-y-6">
-          <!-- Added Songs -->
+          <!-- 追加曲ブロック（その版で新規に難易度が付いた曲） -->
           <div v-if="rev.added.length > 0">
             <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
@@ -254,7 +278,7 @@ function editionLabel(version: number): string {
             </div>
           </div>
 
-          <!-- Changed Songs -->
+          <!-- 変更曲ブロック（from → to で難易度が変動した曲） -->
           <div v-if="rev.changed.length > 0">
             <h4 class="text-sm font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1-1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>

@@ -1,3 +1,4 @@
+// UNUSED: パーサ単体テスト用のワンショットスクリプト。詳細は UNUSED.md 参照。
 const fs = require('fs');
 const songData = JSON.parse(fs.readFileSync('frontend/src/data/song_data.json', 'utf8'));
 const diffTable = JSON.parse(fs.readFileSync('frontend/src/data/difficulty_table.json', 'utf8'));

@@ -145,9 +145,19 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 管理者専用の「曲別順位」閲覧画面。
+ * - ログイン中の管理者自身が各譜面で全体の何位にいるかの一覧を表示
+ * - Lv8〜12 / ANOTHER / LEGGENDARIA のチェックボックスで絞り込み
+ * - 1 位数・TOP3 数・総登録曲数を集計カードで表示
+ * - 追加のメンテナンス操作：
+ *     - totalBeatPt 移行（score_history_logs から user テーブルへ集計値を一度だけ移行）
+ *     - 全員の順位再計算（サーバで非同期バックグラウンド処理、202 Accepted で即応答）
+ */
 import { ref, computed, onMounted } from 'vue';
 import { useAuth } from '../composables/useAuth';
 
+/** 曲単位の順位情報（1 曲 × 1 難易度 = 1 行）。 */
 interface SongRankRow {
   title: string;
   difficultyName: string;
@@ -159,20 +169,33 @@ interface SongRankRow {
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const { authHeaders } = useAuth();
 
+/** サーバから取得した曲別順位の全件。 */
 const rows = ref<SongRankRow[]>([]);
+/** 順位取得 API 呼び出し中フラグ。 */
 const isLoading = ref(false);
+/** 全員再計算 API 呼び出し中フラグ。 */
 const isRecalculating = ref(false);
+/** 初回ロードが完了したか（空データ表示の切り分け用）。 */
 const loaded = ref(false);
 
+/** レベル絞り込み用チェックボックスの状態（Lv8〜12）。 */
 const showLevels = ref<Record<number, boolean>>({ 8: true, 9: true, 10: true, 11: true, 12: true });
+/** ANOTHER 譜面を表示するか。 */
 const showAnother = ref(true);
+/** LEGGENDARIA 譜面を表示するか。 */
 const showLeggendaria = ref(true);
 
+/** 【computed の役割】 実データに存在するレベルだけを昇順で返す（UI のチェックボックス表示用）。 */
 const availableLevels = computed(() => {
   const lvs = new Set(rows.value.map(r => r.difficultyLevel));
   return [8, 9, 10, 11, 12].filter(lv => lvs.has(lv));
 });
 
+/**
+ * 【computed の役割】 チェックボックス条件で絞り込んだ行リスト。
+ * - Lv8〜12 以外（例: Lv7 以下）は常に表示
+ * - ANOTHER / LEGGENDARIA は個別トグルで制御
+ */
 const filteredRows = computed(() =>
   rows.value.filter(r => {
     const lvInRange = [8, 9, 10, 11, 12].includes(r.difficultyLevel);
@@ -183,9 +206,15 @@ const filteredRows = computed(() =>
   })
 );
 
+/** 【computed の役割】 フィルタ後の 1 位の数（上部サマリ表示用）。 */
 const firstPlaceCount = computed(() => filteredRows.value.filter(r => r.rank === 1).length);
+/** 【computed の役割】 フィルタ後の 3 位以内の数（TOP3 カード表示用）。 */
 const top3Count = computed(() => filteredRows.value.filter(r => r.rank <= 3).length);
 
+/**
+ * 【関数の役割】 管理 API から現在の管理者自身の曲別順位を取得する。
+ * 数値フィールドは Number() で再変換し、BigInt 由来の文字列や浮動小数を整数化する。
+ */
 const load = async () => {
   isLoading.value = true;
   try {
@@ -201,13 +230,14 @@ const load = async () => {
       }));
     }
   } catch {
-    // ignore
+    // エラーは静かに握りつぶす（UI 上はローディング解除のみ）。
   } finally {
     isLoading.value = false;
     loaded.value = true;
   }
 };
 
+/** 【関数の役割】 順位バッジの背景色クラスを返す（1 位=金、2 位=銀、3 位=銅、10 位以内=青、その他=灰）。 */
 const rankBadgeClass = (rank: number) => {
   if (rank === 1) return 'bg-amber-400 text-white';
   if (rank === 2) return 'bg-slate-300 dark:bg-slate-500 text-white';
@@ -216,15 +246,22 @@ const rankBadgeClass = (rank: number) => {
   return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
 };
 
+/** 【関数の役割】 難易度名に応じた色クラスを返す（LEGGENDARIA=紫、ANOTHER=赤、その他=灰）。 */
 const diffClass = (name: string) => {
   if (name === 'LEGGENDARIA') return 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300';
   if (name === 'ANOTHER') return 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300';
   return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
 };
 
+/** 再計算や移行の処理結果メッセージ（画面上部に表示される）。 */
 const recalculateMsg = ref('');
+/** BeatPt 移行 API 呼び出し中フラグ。 */
 const isMigrating = ref(false);
 
+/**
+ * 【関数の役割】 既存ユーザーの totalBeatPt を score_history_logs から集計して user テーブルに書き戻す一回限りの移行バッチ。
+ * 初回デプロイ時だけ管理者が手動実行することを想定（多重押下防止 + 確認ダイアログ付き）。
+ */
 const migrateBeatPt = async () => {
   if (isMigrating.value) return;
   if (!confirm('既存ユーザーのtotalBeatPtを移行します。初回デプロイ後に一度だけ実行してください。続けますか？')) return;
@@ -243,6 +280,11 @@ const migrateBeatPt = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 全プレイヤーの順位再計算をサーバに依頼する。
+ * サーバ側は 202 Accepted を返して非同期バックグラウンドで処理するため、
+ * クライアントは即座にメッセージを表示して再読込は手動任せ（負荷対策）。
+ */
 const recalculate = async () => {
   if (isRecalculating.value) return;
   isRecalculating.value = true;
@@ -262,5 +304,6 @@ const recalculate = async () => {
   }
 };
 
+// 初回マウント時に曲別順位を取得する。
 onMounted(load);
 </script>

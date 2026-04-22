@@ -1,3 +1,4 @@
+// UNUSED: evaluate_oono.js（ESM 版）の旧 CommonJS 版。重複のため未使用。frontend/SCRIPTS.md §3 参照。
 const fs = require('fs');
 
 const diffTable = JSON.parse(fs.readFileSync('./src/data/difficulty_table.json', 'utf-8'));

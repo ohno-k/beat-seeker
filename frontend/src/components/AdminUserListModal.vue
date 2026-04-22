@@ -117,6 +117,20 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 管理者専用のプレイヤー一覧モーダル。
+ *
+ * 機能:
+ *  - 全ユーザーの一覧を取得してカードグリッド表示
+ *  - ユーザーカードのクリックで 'select' イベント（親で該当ユーザーの履歴等を開く）
+ *  - ツールバー: データ管理 / 全ユーザー再集計 / 譜面プロファイル JSON 投入 / Push 通知リセット
+ *
+ * props:
+ *  - isOpen: モーダル開閉
+ * emits:
+ *  - close: 閉じる
+ *  - select: ユーザー選択
+ */
 import { ref, watch } from 'vue';
 import { useScores } from '../composables/useScores';
 import { useAuth } from '../composables/useAuth';
@@ -124,7 +138,9 @@ import { useGameData } from '../composables/useGameData';
 import AdminGameDataModal from './AdminGameDataModal.vue';
 
 const { songDataBody: songDataRef, diffTableRanks: diffTableRef } = useGameData();
+/** 再集計 API に POST する生データ（body プロパティ付きの曲データ）。 */
 const songDataRaw = { body: songDataRef.value };
+/** 再集計 API に POST する難易度表（ranks プロパティ付き）。 */
 const diffTableRaw = { ranks: diffTableRef.value };
 
 const props = defineProps<{
@@ -137,10 +153,17 @@ const emit = defineEmits<{
 }>();
 
 const { fetchAllUsers } = useScores();
+/** 取得済みユーザー配列。displayName 昇順でソート済み。 */
 const users = ref<any[]>([]);
+/** 取得中フラグ。 */
 const loading = ref(false);
+/** 取得エラー文言。 */
 const error = ref('');
 
+/**
+ * 【関数の役割】 ユーザー一覧を取得して users に格納する。
+ * 既に取得済み（users が空でない）ならキャッシュ代わりにスキップ。
+ */
 const loadUsers = async () => {
   if (!props.isOpen || users.value.length > 0) return;
   
@@ -158,19 +181,29 @@ const loadUsers = async () => {
   }
 };
 
+// モーダル開放時にユーザー一覧を取得（初回のみ）。
 watch(() => props.isOpen, (newVal) => {
   if (newVal) loadUsers();
 });
 
+/** 【関数の役割】 カードクリックで親へ選択通知。 */
 const selectUser = (u: any) => {
   emit('select', u);
 };
 
+/** 全ユーザー再集計中フラグ。 */
 const isRecalculating = ref(false);
+/** 各種管理アクションのエラー文言（共通）。 */
 const recalculateError = ref('');
+/** 各種管理アクションの成功文言（共通）。 */
 const recalculateSuccess = ref('');
+/** ゲームデータ管理モーダルの表示状態。 */
 const showGameDataModal = ref(false);
 
+/**
+ * 【関数の役割】 全ユーザーの BEAT-PT / Rate-PT を最新の楽曲データ + 難易度表で再計算する。
+ * 重い処理なのでバックエンド側は 202 Accepted で非同期受付する。
+ */
 const handleRecalculateAll = async () => {
   if (!confirm('全ユーザーのポイント再計算を実行しますか？この操作は取り消せません。')) return;
   
@@ -200,18 +233,26 @@ const handleRecalculateAll = async () => {
   }
 };
 
+/** 譜面プロファイル JSON 投入中フラグ。 */
 const isImportingProfiles = ref(false);
+/** 非表示の <input type="file"> への参照。 */
 const profileFileInput = ref<HTMLInputElement | null>(null);
 
+/** 【関数の役割】 非表示 input をクリックして JSON ファイル選択ダイアログを開く。 */
 const handleImportChartProfiles = () => {
   profileFileInput.value?.click();
 };
 
+/**
+ * 【関数の役割】 ファイル選択後、JSON を読み込んでそのまま管理 API に POST する。
+ * export_profiles.py で生成した譜面傾向プロファイル（配列形式）を DB に一括登録する想定。
+ * サイズ表示 + 確認ダイアログ付き。
+ */
 const onProfileFileSelected = async (event: Event) => {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
-  input.value = ''; // reset for re-upload
+  input.value = ''; // 同じファイルを再選択可能にするためクリア。
 
   if (!confirm(`${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB) をDBに投入します。\n既存データは上書きされます。続行しますか？`)) return;
 
@@ -233,7 +274,7 @@ const onProfileFileSelected = async (event: Event) => {
     const res = await fetch(`${API_BASE}/api/admin/chart-tendencies/import-json`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: text, // 読み込み済みテキストをそのまま送信
+      body: text, // JSON.parse 済みだが送信はテキストのまま（パースコスト削減 + サーバ側で再検証）。
     });
 
     const data = await res.json();
@@ -246,7 +287,14 @@ const onProfileFileSelected = async (event: Event) => {
   }
 };
 
+/** Push 通知クリア中フラグ（ボタン多重押下防止）。 */
 const isClearingPush = ref(false);
+
+/**
+ * 【関数の役割】 全ユーザーのプッシュ通知購読データを一括削除する。
+ * VAPID 鍵をローテーションした際、旧鍵で登録された購読データは送信不可になるため全削除する運用を想定。
+ * 確認ダイアログ → API 呼び出し → 結果メッセージ更新、の流れ。
+ */
 const handleClearPushAll = async () => {
   if (!confirm('全ユーザーのプッシュ通知設定を初期化しますか？古いVAPID鍵での登録データが全て削除され、ユーザーは再設定が必要になります。')) return;
   

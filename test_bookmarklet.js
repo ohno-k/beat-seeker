@@ -1,3 +1,4 @@
+// UNUSED: ブックマークレット検証用のワンショットスクリプト。詳細は UNUSED.md 参照。
 const fs = require('fs');
 
 // Read the TS source

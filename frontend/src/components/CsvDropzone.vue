@@ -1,39 +1,63 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 CSV の受け取り口（ドラッグ&ドロップ + テキスト貼り付けの 2 タブ）。
+ *
+ * 機能:
+ *  - [text] タブ: e-amusement のスコア CSV テキストを貼り付けて取り込み。空ならクリップボードから自動読み込み
+ *  - [file] タブ: ファイルを D&D もしくはクリックで選択。*.csv または text/csv のみ許可
+ *  - どちらの経路でも File オブジェクトを作って 'file-dropped' イベントで親に渡す
+ *  - テキスト経由の場合は UTF-8 BOM を付与して Excel との互換性を確保
+ *
+ * emits:
+ *  - file-dropped: 検証後の File オブジェクトを親に通知（親側でアップロード/解析処理）
+ */
 import { ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 
 const { t } = useI18n();
 
+/** ドラッグ中かどうか。UI の枠線色を変えるためのフラグ。 */
 const isDragging = ref(false);
+/** 非表示の <input type="file"> への参照。プログラム的にクリックして開く。 */
 const fileInput = ref<HTMLInputElement | null>(null);
+/** 現在アクティブなタブ。初期値は貼り付けタブ。 */
 const activeTab = ref<'text' | 'file'>('text');
+/** 貼り付け用テキストエリアの内容。 */
 const pastedCsvText = ref('');
+/** クリップボード読み込み中フラグ（ボタンのスピナー表示）。 */
 const isLoadingFromClipboard = ref(false);
 
 const emit = defineEmits<{
   (e: 'file-dropped', file: File): void
 }>();
 
+/** 【関数の役割】 D&D 中の視覚フィードバック用。dragover のデフォルト動作抑止必須。 */
 const handleDragOver = (e: DragEvent) => {
   e.preventDefault();
   isDragging.value = true;
 };
 
+/** 【関数の役割】 D&D 領域から離れた際の視覚リセット。 */
 const handleDragLeave = (e: DragEvent) => {
   e.preventDefault();
   isDragging.value = false;
 };
 
+/**
+ * 【関数の役割】 ファイルがドロップされた瞬間のハンドラ。
+ * 最初の 1 ファイルのみ採用して validateAndEmit に委譲。
+ */
 const handleDrop = (e: DragEvent) => {
   e.preventDefault();
   isDragging.value = false;
-  
+
   if (e.dataTransfer && e.dataTransfer.files.length > 0) {
     const file = e.dataTransfer.files[0];
     validateAndEmit(file);
   }
 };
 
+/** 【関数の役割】 <input type="file"> で選ばれた際のハンドラ。 */
 const handleFileSelect = (e: Event) => {
   const target = e.target as HTMLInputElement;
   if (target.files && target.files.length > 0) {
@@ -41,12 +65,17 @@ const handleFileSelect = (e: Event) => {
   }
 };
 
+/** 【関数の役割】 非表示の <input type="file"> を動的にクリックしてファイル選択ダイアログを開く。 */
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
 
+/**
+ * 【関数の役割】 受け取ったファイルが CSV かを判定し、正しければ親に渡す。
+ * 判定条件: 拡張子 .csv / MIME text/csv / Excel が付ける application/vnd.ms-excel のいずれか。
+ * 拒否時はアラートのみ。
+ */
 const validateAndEmit = (file: File) => {
-  // Check if it's a CSV based on name or type
   if (file.name.toLowerCase().endsWith('.csv') || file.type === 'text/csv' || file.type === 'application/vnd.ms-excel') {
     emit('file-dropped', file);
   } else {
@@ -54,17 +83,24 @@ const validateAndEmit = (file: File) => {
   }
 };
 
+/**
+ * 【関数の役割】 テキストタブの「読み込む」ボタン処理。
+ * 1. テキストエリアが空ならクリップボードから自動取得
+ * 2. カンマ/タブ/改行の有無で雑に CSV っぽさをチェック
+ * 3. BOM 付き UTF-8 の Blob にして File オブジェクトを作り、親に渡す
+ * 最後にテキストエリアをクリア。
+ */
 const handleTextSubmit = async () => {
   let textToProcess = pastedCsvText.value.trim();
 
-  // If textarea is empty, try to read from clipboard
+  // テキストエリアが空ならクリップボードから読み込む。
   if (!textToProcess) {
     try {
       isLoadingFromClipboard.value = true;
       const clipboardText = await navigator.clipboard.readText();
       if (clipboardText.trim()) {
         textToProcess = clipboardText.trim();
-        pastedCsvText.value = textToProcess; // Optional: fill the textarea to show what was read
+        pastedCsvText.value = textToProcess; // 取得した内容をユーザーに見せるためにテキストエリアにも反映。
       } else {
         alert(t('import.errorEmpty'));
         isLoadingFromClipboard.value = false;
@@ -78,24 +114,24 @@ const handleTextSubmit = async () => {
     }
   }
 
-  // Basic validation to see if it looks somewhat like a CSV
+  // 簡易 CSV チェック: カンマ・タブ・改行がまったく無ければ弾く。
   if (!textToProcess.includes(',') && !textToProcess.includes('\t') && textToProcess.split('\n').length < 2) {
     alert(t('upload.errorInvalid'));
     isLoadingFromClipboard.value = false;
     return;
   }
 
-  // Create a File object from the text string
+  // テキストを File オブジェクトに変換。
   const blob = new Blob([textToProcess], { type: 'text/csv;charset=utf-8;' });
-  // Add a BOM so Excel and some parsers handle Japanese characters properly, though PapaParse usually handles it.
+  // UTF-8 BOM を先頭に付与。Excel や一部パーサで日本語が文字化けするのを防ぐ保険（PapaParse は通常不要）。
   const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
   const combinedBlob = new Blob([bom, blob]);
 
   const file = new File([combinedBlob], 'pasted_scores.csv', { type: 'text/csv' });
-  
+
   emit('file-dropped', file);
   isLoadingFromClipboard.value = false;
-  pastedCsvText.value = ''; // Clear text after successful load
+  pastedCsvText.value = ''; // 成功時はテキストエリアをクリア。
 };
 
 </script>
@@ -103,7 +139,7 @@ const handleTextSubmit = async () => {
 <template>
   <div class="w-full max-w-2xl mx-auto flex flex-col items-center">
     
-    <!-- Tab Navigation -->
+    <!-- タブ切替（テキスト貼り付け / ファイルドロップ） -->
     <div class="flex w-full mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl transition-colors duration-200">
       <button 
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
@@ -121,9 +157,9 @@ const handleTextSubmit = async () => {
       </button>
     </div>
 
-    <!-- Active Tab Content -->
+    <!-- タブ内容（2 つを絶対配置して fade でクロスフェード） -->
     <div class="w-full relative min-h-[300px]">
-        <!-- File Upload Area -->
+        <!-- ファイルアップロード領域（D&D + クリックで選択） -->
         <transition name="fade">
             <div 
             v-if="activeTab === 'file'"
@@ -166,7 +202,7 @@ const handleTextSubmit = async () => {
             </div>
         </transition>
 
-        <!-- Text Paste Area -->
+        <!-- テキスト貼り付け領域（空ならクリップボード自動読み込み） -->
         <transition name="fade">
             <div 
             v-if="activeTab === 'text'"

@@ -1,13 +1,23 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 曲別プレイ人口ランキング（「みんなやってる曲 / みんなやってない曲」）を一覧表示する。
+ * - useSongRanking コンポーザブルから ranking（降順）と leastRanking（昇順）を取得
+ * - sortMode でソート方向を切り替え（most = 人気順 / least = マイナー順）
+ * - 表示項目: 順位、曲名、難易度（ANOTHER / LEGGENDARIA）、非公式難易度、平均 BeatPt、プレイ人数
+ * - レスポンシブ対応：SP では曲名下に難易度と非公式ランクをインライン表示、PC では個別カラム
+ */
 import { ref, onMounted } from 'vue';
 import { useSongRanking } from '../composables/useSongRanking';
 import { useI18n } from '../composables/useI18n';
 
 const { t } = useI18n();
 
+// サーバから取得するランキング（多い順 / 少ない順）とローディング状態。
 const { ranking, leastRanking, isLoading, error, totalUsers, fetchSongRanking } = useSongRanking();
+/** ソート方向（most = プレイ人口降順, least = 昇順）。 */
 const sortMode = ref<'most' | 'least'>('most');
 
+// マウント時に一度だけ集計 API を呼び出す（タブ切り替えで再生成されるためキャッシュは不要）。
 onMounted(() => {
     fetchSongRanking();
 });

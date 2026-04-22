@@ -1,3 +1,4 @@
+// UNUSED: ワンショット検証用。他から参照されていない。詳細は UNUSED.md 参照。
 const fs = require('fs');
 const path = require('path');
 

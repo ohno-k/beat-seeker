@@ -1,22 +1,22 @@
 <template>
   <Teleport to="body">
-    <!-- Global April Fools overlay effects -->
+    <!-- 画面全体に被せるエイプリルフールのオーバーレイ効果 -->
     <div v-if="isAprilFools" class="af-overlay pointer-events-none fixed inset-0 z-[9999]" aria-hidden="true">
-      <!-- Floating emoji particles -->
+      <!-- 画面上部から落ちてくる絵文字パーティクル -->
       <div v-for="p in particles" :key="p.id" class="af-particle" :style="p.style">
         {{ p.emoji }}
       </div>
 
-      <!-- Rainbow border accent -->
+      <!-- 画面外枠をレインボーに光らせる装飾ボーダー -->
       <div class="af-rainbow-border"></div>
 
-      <!-- Corner decoration: top-left -->
+      <!-- 左上コーナーの絵文字装飾 -->
       <div class="af-corner af-corner-tl">🎉</div>
-      <!-- Corner decoration: top-right -->
+      <!-- 右上コーナーの絵文字装飾 -->
       <div class="af-corner af-corner-tr">🎊</div>
     </div>
 
-    <!-- April Fools Banner (dismissible) -->
+    <!-- エイプリルフール用のバナー（ユーザーが×で閉じられる） -->
     <div
       v-if="isAprilFools && !bannerDismissed"
       class="fixed top-0 left-0 right-0 z-[10000] pointer-events-none"
@@ -35,21 +35,39 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 エイプリルフール期間中に画面全体へ被せる「パーティー演出」オーバーレイ。
+ *
+ * 機能:
+ *  - 画面上から落下する絵文字パーティクル
+ *  - レインボーに変化する外枠ボーダー
+ *  - 四隅の装飾（🎉🎊）
+ *  - 画面上部のスクロール式バナー（閉じるボタン付き）
+ *
+ * NOTE: 現在 `useAprilFools` 側で強制 false に抑止されているため、
+ *       期間中でも描画されない。将来復活させる時は composable 側のフラグを戻すだけで動く。
+ *
+ * props/emits: なし（グローバル演出なので `<Teleport to="body">` で body に投入）。
+ */
 import { ref, computed } from 'vue';
 import { useAprilFools } from '../composables/useAprilFools';
 
+// エイプリルフール判定（期間中なら true）。
 const { isAprilFools } = useAprilFools();
+/** バナー閉じるボタンを押したかどうか。ページをリロードしない限り閉じたままにする。 */
 const bannerDismissed = ref(false);
 
-// Generate random floating particles
+// パーティクル用の絵文字プール。一通り回るようにインデックス剰余で循環させる。
 const emojis = ['🎵', '🎶', '🎸', '🎤', '🎹', '🥁', '🎺', '🎷', '💃', '🕺', '🌸', '⭐', '✨', '🎀', '🍭', '🦄', '🌈', '🎠'];
 
+/** 1 個のパーティクルを表す型。`style` は CSS 変数/値を直接 bind するため Record で保持。 */
 interface Particle {
   id: number;
   emoji: string;
   style: Record<string, string>;
 }
 
+/** 画面に落下させる 20 個のパーティクル。ランダムな左位置・遅延・速度・サイズを持たせて賑やかに演出。 */
 const particles = computed<Particle[]>(() => {
   if (!isAprilFools.value) return [];
   const result: Particle[] = [];

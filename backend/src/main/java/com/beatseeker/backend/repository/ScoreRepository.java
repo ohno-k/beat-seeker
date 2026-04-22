@@ -12,29 +12,185 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 【Repository の役割】 {@code Score}（曲×譜面×ユーザーの成績レコード）を扱うリポジトリ。
+ *
+ * beat-seeker における最重要エンティティの一つで、スコア・クリアタイプ・DJ LEVEL・
+ * PGREAT / GREAT 数などを保持する。
+ *
+ * {@link JpaRepository}{@code <Score, Long>} を継承しており、基本 CRUD は自動提供。
+ *
+ * 主要なクエリの目的:
+ *  - ユーザー単位での取得（アップロード順・曲別ベスト など）
+ *  - 曲×譜面ごとのランキング（フレンド／自分／公開ユーザーの可視範囲を尊重）
+ *  - ANOTHER / LEGGENDARIA 譜面に対する各種ランク・集計（順位・AAA 数・平均点など）
+ *  - 非公式難易度表に基づく beat_pt シミュレーション（active ⇔ draft 差分）
+ *  - {@code user_song_ranks} テーブルへの一括 INSERT / TRUNCATE（ランキングキャッシュ）
+ */
 @Repository
 public interface ScoreRepository extends JpaRepository<Score, Long> {
+
+    // ========================================================================
+    // ネイティブクエリ共通 SQL 断片（DRY 化用の文字列定数）
+    // ------------------------------------------------------------------------
+    // 以下の定数は findAllSongRankingAggregates / calculateDifficultySimulation
+    // で共通して使われる SQL 断片。物理 SQL を変えないまま、同一の文字列を
+    // 一箇所にまとめて参照させることで重複を解消している。
+    // コンパイル時定数 (static final String) なので @Query の value に文字列
+    // 連結 (+) で埋め込んでも問題ない。
+    // ========================================================================
+
+    /**
+     * 非公式難易度表のランク値 (11.0〜13.0) と beat_pt 計算に使う重みの対応表。
+     * PostgreSQL の VALUES 句として使う想定で、WITH 句の内側に差し込む。
+     */
+    String WEIGHT_MAP_VALUES =
+        "weight_map(rv, wt) AS ( " +
+        "  VALUES ('11.0', 145), ('11.1', 147), ('11.2', 149), ('11.3', 151), ('11.4', 153), " +
+        "  ('11.5', 155), ('11.6', 157), ('11.7', 159), ('11.8', 161), ('11.9', 163), " +
+        "  ('12.0', 165), ('12.1', 167), ('12.2', 169), ('12.3', 171), ('12.4', 173), " +
+        "  ('12.5', 175), ('12.6', 178), ('12.7', 181), ('12.8', 184), ('12.9', 187), ('13.0', 190) " +
+        ")";
+
+    /**
+     * score から score_rate (パーセンテージ 0〜100) を算出する式。
+     * notes が 0 の場合の 0 除算を防ぐため NULLIF でガードしている。
+     * SELECT リスト内の式としてそのまま埋め込む想定。
+     */
+    String SCORE_RATE_FORMULA = "(s.score * 100.0 / NULLIF(sd.notes * 2.0, 0))";
+
+    // 注: beat_pt の boost CASE 式も 2 クエリで類似しているが、
+    //     findAllSongRankingAggregates は列 "score_rate" を、
+    //     calculateDifficultySimulation は列 "b.score_rate" を参照しており、
+    //     列別名が異なるため完全な同一文字列としての抽出はできない。
+    //     さらに元の @Query 文字列内の空白配置を 1 文字たりとも変えない制約から、
+    //     文字列定数での抽出は今回見送り、コメントで重複箇所を明示するに留める。
+
+    /**
+     * 【メソッドの役割】 指定ユーザーのスコアをアップロード日時の新しい順で取得する。
+     *
+     * 派生クエリメソッド: {@code WHERE user_id = ? ORDER BY uploaded_at DESC}。
+     * 最新アップロードの一覧表示用。0 件なら空リスト。
+     *
+     * @param user 対象ユーザー
+     * @return スコア一覧（新しい順）
+     */
     List<Score> findByUserOrderByUploadedAtDesc(User user);
 
+    /**
+     * 【メソッドの役割】 指定ユーザーのスコアをアップロード日時の古い順で取得する。
+     *
+     * 派生クエリメソッド: {@code ORDER BY uploaded_at ASC}。
+     * 伸び率計算など、古い方から処理したい場面で使う。
+     *
+     * @param user 対象ユーザー
+     * @return スコア一覧（古い順）
+     */
     List<Score> findByUserOrderByUploadedAtAsc(User user);
 
+    /**
+     * 【メソッドの役割】 指定ユーザーの最新アップロード 1 件を取得する。
+     *
+     * 派生クエリメソッド: {@code ORDER BY uploaded_at DESC LIMIT 1}。
+     * 「最新アップロードがいつか」を判定するのに使う。未登録なら {@link Optional#empty()}。
+     *
+     * @param user 対象ユーザー
+     * @return 最新のスコア（なければ空）
+     */
     Optional<Score> findFirstByUserOrderByUploadedAtDesc(User user);
 
+    /**
+     * 【メソッドの役割】 ユーザーの指定スナップショット（1 回のアップロードバッチ）に属する全スコアを返す。
+     *
+     * 派生クエリメソッド: {@code WHERE user_id = ? AND snapshot_id = ?}。
+     * 同一アップロードから取り込んだレコード群をまとめて扱うのに使う。
+     *
+     * @param user 対象ユーザー
+     * @param snapshotId スナップショット ID
+     * @return 該当スコア一覧
+     */
     List<Score> findByUserAndSnapshotId(User user, String snapshotId);
 
+    /**
+     * 【メソッドの役割】 指定ユーザーのスコアを全削除する。
+     *
+     * 派生クエリメソッド: {@code DELETE FROM scores WHERE user_id = ?} に変換される。
+     * アカウント削除時や完全リセット時の用途。呼び出し側はトランザクション必須。
+     *
+     * @param user 対象ユーザー
+     */
     void deleteByUser(User user);
 
+    /**
+     * 【メソッドの役割】 ユーザー×曲×難易度名で最新のスコアを 1 件取得する。
+     *
+     * 派生クエリメソッド: {@code WHERE user_id = ? AND title = ? AND difficulty_name = ? ORDER BY uploaded_at DESC LIMIT 1}。
+     * 曲別ベスト（直近値）取得に使う。未登録なら {@link Optional#empty()}。
+     *
+     * @param user 対象ユーザー
+     * @param title 曲タイトル
+     * @param difficultyName 難易度名
+     * @return 最新スコア（なければ空）
+     */
     java.util.Optional<Score> findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(User user, String title, String difficultyName);
 
+    /**
+     * 【メソッドの役割】 ユーザー × 複数曲 × 複数難易度 の IN 検索でスコアをまとめて取得する。
+     *
+     * 曲名リスト／難易度リストのいずれも {@code IN (...)} 句にバインドされる。
+     * まとめて取りたいときに N+1 を避けるためのユーティリティ。
+     *
+     * @param user 対象ユーザー
+     * @param titles 曲名リスト
+     * @param difficulties 難易度名リスト
+     * @return 該当スコア一覧
+     */
     @Query("SELECT s FROM Score s WHERE s.user = :user AND s.title IN :titles AND s.difficultyName IN :difficulties")
     List<Score> findByUserAndTitlesAndDifficulties(@Param("user") User user, @Param("titles") List<String> titles, @Param("difficulties") List<String> difficulties);
 
+    /**
+     * 【メソッドの役割】 全ユーザーの ANOTHER / LEGGENDARIA スコアを軽量に取得する。
+     *
+     * ネイティブ SQL。user 情報は含めずコンパクトに返す。集計バッチ処理で使用。
+     * 返却キー: userId / title / difficultyName / difficultyLevel / score
+     *
+     * @return 集計結果リスト
+     */
     @Query(value = "SELECT s.user_id as \"userId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.difficulty_level as \"difficultyLevel\", s.score as \"score\" FROM scores s WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')", nativeQuery = true)
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScores();
 
+    /**
+     * 【メソッドの役割】 {@link #findAllUserAnotherAndLeggendariaScores()} のユーザー情報付き版。
+     *
+     * users テーブルを JOIN し、表示名・IIDX ID を含めて返す。
+     * 返却キー: userId / displayName / iidxId / title / difficultyName / score
+     *
+     * @return 集計結果リスト
+     */
     @Query(value = "SELECT s.user_id as \"userId\", u.display_name as \"displayName\", u.iidx_id as \"iidxId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.score as \"score\" FROM scores s JOIN users u ON s.user_id = u.id WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')", nativeQuery = true)
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScoresWithUserInfo();
 
+    /**
+     * 【メソッドの役割】 指定曲×譜面の「スコアランキング」を、プライバシー設定を考慮して返す。
+     *
+     * ネイティブ SQL。ポイント:
+     *  - users と JOIN し、各ユーザーのプライバシーレベルと最新 total_beat_pt（LEFT JOIN）を取得
+     *  - {@code DISTINCT ON (user_id)} で score_history_logs から各ユーザーの最新スナップショットを取り出す
+     *  - WHERE 句の可視性判定:
+     *      ・ privacy_level = 0（全体公開）
+     *      ・ 自分自身（u.id = :myUserId）
+     *      ・ privacy_level = 1（フレンドまで公開） かつ :friendIds に含まれる
+     *  - スコア降順で並べる
+     *
+     * 返却キー: userId / iidxId / displayName / privacyLevel / score / clearType / djLevel /
+     *           pgreat / great / missCount / totalBeatPt
+     *
+     * @param title 曲タイトル
+     * @param difficultyName 難易度名
+     * @param myUserId 閲覧者自身の user.id
+     * @param friendIds 閲覧者のフレンド ID 一覧
+     * @return ランキング行のリスト
+     */
     @Query(value =
         "SELECT u.id as \"userId\", u.iidx_id as \"iidxId\", u.display_name as \"displayName\", " +
         "COALESCE(u.privacy_level, 1) as \"privacyLevel\", " +
@@ -66,6 +222,20 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
             @Param("myUserId") Long myUserId,
             @Param("friendIds") List<Long> friendIds);
 
+    /**
+     * 【メソッドの役割】 管理者ユーザーの曲別順位を一覧化する（基準値確認用）。
+     *
+     * ネイティブ SQL。CTE の構成:
+     *  - {@code best_scores}: 曲×譜面×ユーザー単位で最大スコアを抽出（ANOTHER/LEGGENDARIA 限定）
+     *  - {@code all_ranks}: {@code RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC)}
+     *    で順位を付け、PARTITION ごとの全参加者数を total として付与
+     *  - 最後に {@code WHERE user_id = :adminUserId} で管理者分のみ抽出
+     *
+     * 返却キー: title / difficultyName / difficultyLevel / rank / total
+     *
+     * @param adminUserId 管理者ユーザー ID
+     * @return 曲ごとの順位一覧
+     */
     @Query(value =
         "WITH best_scores AS (" +
         "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score" +
@@ -87,6 +257,15 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         nativeQuery = true)
     List<Map<String, Object>> findAdminSongRanks(@Param("adminUserId") Long adminUserId);
 
+    /**
+     * 【メソッドの役割】 任意ユーザーの曲別順位を一覧化する。
+     *
+     * クエリ構造は {@link #findAdminSongRanks(Long)} と同一で、対象ユーザー ID の扱いだけ異なる。
+     * マイページの「曲別ランク」表示などに使う。
+     *
+     * @param userId 対象ユーザー ID
+     * @return 曲ごとの順位一覧
+     */
     @Query(value =
         "WITH best_scores AS (" +
         "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score" +
@@ -108,6 +287,16 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         nativeQuery = true)
     List<Map<String, Object>> findUserSongRanks(@Param("userId") Long userId);
 
+    /**
+     * 【メソッドの役割】 全ユーザー×全曲の順位をまとめて取得する。
+     *
+     * {@link #findAdminSongRanks(Long)} と同じ CTE 構成だが、WHERE を外して全件返す。
+     * {@code user_song_ranks} テーブルへの再構築用途など、バッチ用のヘビークエリ。
+     *
+     * 返却キー: userId / title / difficultyName / difficultyLevel / rank / total
+     *
+     * @return 全ユーザー分の順位レコード
+     */
     @Query(value =
         "WITH best_scores AS (" +
         "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score" +
@@ -128,6 +317,26 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         nativeQuery = true)
     List<Map<String, Object>> findAllUserSongRanks();
 
+    /**
+     * 【メソッドの役割】 「BeatTier（total_beat_pt によるティア）別の曲×難易度ごとの平均スコア」を集計する。
+     *
+     * ネイティブ SQL。CTE 概要:
+     *  - {@code user_tier}: total_beat_pt の閾値から beat_tier（Legend／Mythic／…）と
+     *    tier_level（ティア内小ランク）を CASE 式で決定
+     *  - {@code best_scores}: ANOTHER/LEGGENDARIA かつ level 11/12 の曲について
+     *    ユーザー×曲×譜面ごとの最高点を算出
+     *  - {@code agg_scores}: best_scores と user_tier を JOIN し、さらに song_definitions とも
+     *    JOIN（ANOTHER → difficulty '4'、LEGGENDARIA → difficulty '10' のマッピング）。
+     *    {@code WHERE (b.score * 3) >= (sd.notes * 4)} は
+     *    「スコア率 ≥ (notes*4 / 3) / (notes*2) = 66.66...%」を指す足切り条件。
+     *    そのうえで tier × 曲 × 譜面でグループ化し平均・人数をとる
+     *  - 最終 SELECT は曲×譜面単位で tier ごとの集計を json_agg で JSON 配列化し、
+     *    {@code ::text} でテキストにキャストして返す
+     *
+     * 返却キー: title / difficultyName / difficultyLevel / tierData（JSON 文字列）
+     *
+     * @return 曲ごとの tier 別集計
+     */
     @Query(value =
         "WITH user_tier AS (" +
         "  SELECT id AS user_id," +
@@ -181,6 +390,9 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "    ON b.title = sd.title " +
         "    AND sd.revision = 'active' " +
         "    AND ((b.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (b.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        // 注: 以下の足切り条件 (b.score*3 >= sd.notes*4) はスコア率 66.66...% に相当。
+        //     findAllSongRankingAggregates / calculateDifficultySimulation の
+        //     "score_rate > 66.666" と同じ意味的閾値（ただし式形が異なるため文字列共通化はしていない）。
         "  WHERE (b.score * 3) >= (sd.notes * 4) " +
         "  GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier, t.tier_level" +
         ") " +
@@ -198,13 +410,29 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY title, difficulty_name",
         nativeQuery = true)
     List<Map<String, Object>> findRawSongScoresWithBeatTier();
+    /**
+     * 【メソッドの役割】 非公式難易度表（active）に基づく曲×譜面ごとの beat_pt 集計。
+     *
+     * ネイティブ SQL。CTE 概要:
+     *  - {@code weight_map}: ランク値（11.0〜13.0）を beat_pt 計算用の重みにマップ
+     *  - {@code song_ranks}: difficulty_ranks（revision='active'）と曲を結合し重みを付与
+     *  - {@code scored_data}: scores と song_definitions を JOIN し
+     *    {@code score_rate = score * 100 / (notes * 2)} を算出。
+     *    LEGGENDARIA は title に {@code ' [L]'} を付与してランク表のキーと合わせる
+     *  - {@code valid_scores}: score_rate > 66.666% に絞り、beat_pt を算式
+     *      {@code POWER(rate/100, 1.3) * weight + weight * boost}
+     *    （boost は rate 帯に応じた加算）で計算
+     *  - {@code ranked_scores}: ユーザー単位で beat_pt 降順に {@code ROW_NUMBER()} を振る
+     *  - 最終 SELECT で {@code rn <= 100}（各ユーザーの上位 100 曲）に絞り、
+     *    曲×譜面×ランク値ごとの集計（人数・平均・最大）を返す
+     *
+     * 返却キー: title / difficultyName / informalRank / userCount / avgBeatPt / maxBeatPt
+     *
+     * @return 集計行のリスト
+     */
     @Query(value =
-        "WITH weight_map(rv, wt) AS ( " +
-        "  VALUES ('11.0', 145), ('11.1', 147), ('11.2', 149), ('11.3', 151), ('11.4', 153), " +
-        "  ('11.5', 155), ('11.6', 157), ('11.7', 159), ('11.8', 161), ('11.9', 163), " +
-        "  ('12.0', 165), ('12.1', 167), ('12.2', 169), ('12.3', 171), ('12.4', 173), " +
-        "  ('12.5', 175), ('12.6', 178), ('12.7', 181), ('12.8', 184), ('12.9', 187), ('13.0', 190) " +
-        "), " +
+        // 注意: weight_map 定義は calculateDifficultySimulation と共通。WEIGHT_MAP_VALUES 定数を参照。
+        "WITH " + WEIGHT_MAP_VALUES + ", " +
         "song_ranks AS ( " +
         "  SELECT drs.song_title AS mapped_title, dr.rank_value, wm.wt AS weight " +
         "  FROM difficulty_ranks dr " +
@@ -216,7 +444,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  SELECT " +
         "    s.user_id, s.title, s.difficulty_name, " +
         "    sr.rank_value AS informal_rank, sr.weight, " +
-        "    (s.score * 100.0 / NULLIF(sd.notes * 2.0, 0)) AS score_rate " +
+        // 注意: score_rate 算式は calculateDifficultySimulation と共通。SCORE_RATE_FORMULA 定数を参照。
+        "    " + SCORE_RATE_FORMULA + " AS score_rate " +
         "  FROM scores s " +
         "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
         "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
@@ -226,6 +455,9 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "valid_scores AS ( " +
         "  SELECT " +
         "    user_id, title, difficulty_name, informal_rank, " +
+        // 注意: 以下の boost CASE 式は calculateDifficultySimulation にも同様の式が存在。
+        //       ただし参照する列名 (score_rate / b.score_rate) の違い、および元の @Query
+        //       文字列を 1 文字たりとも変えない制約により、定数化は行わずコメントで明示。
         "    (POWER(score_rate / 100.0, 1.3) * weight) + " +
         "    (weight * CASE " +
         "      WHEN score_rate > 94.44 THEN 0.03 " +
@@ -248,6 +480,17 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY \"userCount\" DESC, \"avgBeatPt\" DESC", nativeQuery = true)
     List<Map<String, Object>> findAllSongRankingAggregates();
 
+    /**
+     * 【メソッドの役割】 レベル 11/12 の ANOTHER/LEGGENDARIA について、曲×譜面ごとの平均スコアと
+     * プレイ人数を集計する。
+     *
+     * シンプルな集計。{@code score > 0} で未プレイを除外、
+     * {@code ROUND(AVG(score)::numeric, 1)} で小数第 1 位までの平均を返す。
+     *
+     * 返却キー: title / difficultyName / avgScore / playerCount
+     *
+     * @return 集計リスト
+     */
     @Query(value =
         "SELECT title AS \"title\", difficulty_name AS \"difficultyName\", " +
         "  ROUND(AVG(score)::numeric, 1) AS \"avgScore\", COUNT(*) AS \"playerCount\" " +
@@ -259,6 +502,17 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY title, difficulty_name", nativeQuery = true)
     List<Map<String, Object>> findSongAvgScores();
 
+    /**
+     * 【メソッドの役割】 曲×譜面ごとに「MAX-（理論値の 17/18 相当）達成人数」と総プレイ人数を集計する。
+     *
+     * {@code score * 9 >= notes * 17} は数式変形すると「スコア率 ≥ 17/18 ≒ 94.44%」を意味し、
+     * いわゆる「MAX-」相当の達成判定。
+     * song_definitions（active）と JOIN し、譜面メタの notes を使って厳密判定する。
+     *
+     * 返却キー: title / difficultyName / maxMinusCount / totalCount
+     *
+     * @return 集計リスト
+     */
     @Query(value =
         "SELECT s.title AS \"title\", s.difficulty_name AS \"difficultyName\", " +
         "  COUNT(CASE WHEN s.score * 9 >= sd.notes * 17 THEN 1 END) AS \"maxMinusCount\", " +
@@ -274,6 +528,16 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "GROUP BY s.title, s.difficulty_name", nativeQuery = true)
     List<Map<String, Object>> findSongMaxMinusCounts();
 
+    /**
+     * 【メソッドの役割】 曲×譜面ごとに AAA（スコア率 ≥ 8/9 ≒ 88.88%）達成人数と総プレイ人数を集計する。
+     *
+     * 判定式 {@code score * 9 >= notes * 16} は「スコア率 ≥ 16/18 = 8/9」に等しい。
+     * クエリ構造は {@link #findSongMaxMinusCounts()} と同じで、閾値だけが異なる。
+     *
+     * 返却キー: title / difficultyName / aaaCount / totalCount
+     *
+     * @return 集計リスト
+     */
     @Query(value =
         "SELECT s.title AS \"title\", s.difficulty_name AS \"difficultyName\", " +
         "  COUNT(CASE WHEN s.score * 9 >= sd.notes * 16 THEN 1 END) AS \"aaaCount\", " +
@@ -289,13 +553,29 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "GROUP BY s.title, s.difficulty_name", nativeQuery = true)
     List<Map<String, Object>> findSongAaaCounts();
 
+    /**
+     * 【メソッドの役割】 非公式難易度表の draft 版を「仮適用」した場合の beat_pt 推移を
+     * ユーザーごとにシミュレーションする。
+     *
+     * ネイティブ SQL。ロジック概要:
+     *  - {@code weight_map}: ランク値 → 重みマッピング
+     *  - {@code active_weights} / {@code draft_weights}: active と draft それぞれで曲別重みを算出
+     *  - {@code changed_weights}: draft で重みが変化した曲（比率を保持）
+     *  - {@code draft_only}: draft で新規追加された曲
+     *  - {@code base_scores}: score_rate > 66.666% のスコア基礎集計（LEGGENDARIA の title マッピング含む）
+     *  - {@code active_calc} / {@code active_ranked} / {@code sum_active}:
+     *    active の重みで beat_pt を算出 → ユーザー上位 100 を集計
+     *  - {@code draft_calc}: 既存曲は (active bg_pt × 重み比率) に補正、draft 新規曲は素の計算式で追加
+     *  - {@code draft_ranked} / {@code sum_draft}: 同様に上位 100 を集計
+     *  - 最終 SELECT: ユーザーごとに「現在 beat_pt」「draft 適用時 beat_pt」「差分」を並べる
+     *
+     * 返却キー: displayName / iidxId / currentBeatPt / simulatedBeatPt / ptDelta
+     *
+     * @return シミュレーション結果リスト
+     */
     @Query(value =
-        "WITH weight_map(rv, wt) AS ( " +
-        "  VALUES ('11.0', 145), ('11.1', 147), ('11.2', 149), ('11.3', 151), ('11.4', 153), " +
-        "  ('11.5', 155), ('11.6', 157), ('11.7', 159), ('11.8', 161), ('11.9', 163), " +
-        "  ('12.0', 165), ('12.1', 167), ('12.2', 169), ('12.3', 171), ('12.4', 173), " +
-        "  ('12.5', 175), ('12.6', 178), ('12.7', 181), ('12.8', 184), ('12.9', 187), ('13.0', 190) " +
-        "), " +
+        // 注意: weight_map 定義は findAllSongRankingAggregates と共通。WEIGHT_MAP_VALUES 定数を参照。
+        "WITH " + WEIGHT_MAP_VALUES + ", " +
         "active_weights AS ( " +
         "  SELECT drs.song_title AS mapped_title, wm.wt AS weight " +
         "  FROM difficulty_ranks dr " +
@@ -325,18 +605,22 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  SELECT " +
         "    s.user_id, u.display_name, u.iidx_id, " +
         "    (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || '[L]' ELSE s.title END) AS mapped_title, " +
-        "    (s.score * 100.0 / NULLIF(sd.notes * 2.0, 0)) AS score_rate " +
+        // 注意: score_rate 算式は findAllSongRankingAggregates と共通。SCORE_RATE_FORMULA 定数を参照。
+        "    " + SCORE_RATE_FORMULA + " AS score_rate " +
         "  FROM scores s " +
         "  JOIN users u ON s.user_id = u.id " +
         "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
         "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
         "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0 " +
         "    AND s.difficulty_level >= 11 " +
-        "    AND (s.score * 100.0 / NULLIF(sd.notes * 2.0, 0)) > 66.666 " +
+        "    AND " + SCORE_RATE_FORMULA + " > 66.666 " +
         "), " +
         "active_calc AS ( " +
         "  SELECT b.user_id, b.display_name, b.iidx_id, b.mapped_title, " +
         "         (POWER(b.score_rate / 100.0, 1.3) * aw.weight) + " +
+        // 注意: boost の CASE 式は findAllSongRankingAggregates と共通だが、ここでは b.score_rate
+        //       列を参照するため BEAT_PT_BOOST_CASE 定数（列名 score_rate 参照）は使えない。
+        //       列別名で揃えるために敢えて展開維持。
         "         (aw.weight * CASE WHEN b.score_rate > 94.44 THEN 0.03 WHEN b.score_rate > 88.88 THEN 0.02 WHEN b.score_rate > 77.77 THEN 0.01 ELSE 0.0 END) AS bg_pt " +
         "  FROM base_scores b " +
         "  JOIN active_weights aw ON b.mapped_title = aw.mapped_title " +
@@ -358,6 +642,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  UNION ALL " +
         "  SELECT b.user_id, " +
         "         (POWER(b.score_rate / 100.0, 1.3) * donly.weight) + " +
+        // 同上（b.score_rate 参照のため展開維持）。
         "         (donly.weight * CASE WHEN b.score_rate > 94.44 THEN 0.03 WHEN b.score_rate > 88.88 THEN 0.02 WHEN b.score_rate > 77.77 THEN 0.01 ELSE 0.0 END) AS bg_pt " +
         "  FROM base_scores b " +
         "  JOIN draft_only donly ON b.mapped_title = donly.mapped_title " +
@@ -380,6 +665,17 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY \"simulatedBeatPt\" DESC", nativeQuery = true)
     List<Map<String, Object>> calculateDifficultySimulation();
 
+    /**
+     * 【メソッドの役割】 {@code user_song_ranks} テーブルへ、全ユーザーの曲別順位を一括 INSERT する。
+     *
+     * ネイティブ SQL の {@code INSERT ... SELECT}。
+     *  - {@code best_scores}: ユーザー×曲×譜面単位で最大スコアを抽出
+     *  - {@code all_ranks}: RANK() で順位、COUNT() OVER で参加者総数を付与
+     *  - 最終 SELECT で user_song_ranks のカラム順に並べて NOW() を calculated_at に入れる
+     *
+     * 通常は直前に {@link #truncateUserSongRanks()} を呼んでから実行し、
+     * ランキング表示用のキャッシュを再構築する。
+     */
     @Modifying
     @Query(value =
         "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank, total, calculated_at) " +
@@ -399,6 +695,13 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "FROM all_ranks", nativeQuery = true)
     void insertAllUserSongRanks();
 
+    /**
+     * 【メソッドの役割】 {@code user_song_ranks} テーブルを TRUNCATE（全削除）する。
+     *
+     * ネイティブ SQL。{@link #insertAllUserSongRanks()} と組み合わせて
+     * 順位キャッシュを丸ごとリビルドするバッチで使う。
+     * {@code TRUNCATE} は DELETE より高速だが、トランザクション／制約の扱いに注意。
+     */
     @Modifying
     @Query(value = "TRUNCATE TABLE user_song_ranks", nativeQuery = true)
     void truncateUserSongRanks();

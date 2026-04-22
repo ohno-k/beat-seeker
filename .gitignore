@@ -1,1 +1,96 @@
-node_modules
+# --- Dependencies ---
+node_modules/
+**/node_modules/
+
+# --- Maven (Maven 本体は `backend/setup_maven.ps1` が毎回DLする想定) ---
+backend/apache-maven-*/
+.mvn/
+
+# --- Build outputs ---
+target/
+**/target/
+dist/
+**/dist/
+build/
+out/
+*.class
+*.jar
+*.war
+
+# --- Python ---
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- TypeScript / Vite ---
+*.tsbuildinfo
+
+# --- Logs ---
+*.log
+*.log.*
+boot_run.log
+build.log
+compile.log
+install.log
+scrape.log
+smoke_test.log
+
+# --- Debug / temp textfiles (プロジェクトルート & サブディレクトリ) ---
+backend_logs*.txt
+latest_*.txt
+tail_logs.txt
+ui_*_trace*.txt
+docker_ps*.txt
+netstat.txt
+process_list.txt
+java_ver.log
+java_out.txt
+java_where.txt
+java_src.txt
+mvn_version.log
+compile_utf8.log
+out.txt
+out_utf8.txt
+err.txt
+errors.txt
+error_out.txt
+debug_*.txt
+diag.txt
+hex_check.txt
+test_res*.txt
+test_node.txt
+test_write.txt
+test_login_res.txt
+foo.txt
+oono_points.txt
+results.txt
+results_enc.txt
+mismatch_results.txt
+missing_json.txt
+apply_output.txt
+
+# --- DB / commandline 出力 (*.csv, *.txt 系) ---
+db_users_export*.csv
+db_status.txt
+db_tables.txt
+dblist.txt
+count.txt
+user_count.txt
+user_log_counts.txt
+is_public_dist.txt
+vapid_keys.txt
+scores_schema*.txt
+
+# ---誤パス産物 (Windows "C:tmp..." がそのままファイル名になったもの) ---
+C:tmp*
+C:\\tmp*
+
+# --- 検証結果ファイル (明示的にチェックインしたい場合はコメントアウト) ---
+verification_report.txt
+verification_results.txt
+
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db

@@ -204,6 +204,21 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 メインダッシュボードのスコアカード一式。
+ * - Beat-Tier（Lv11/12 ANOTHER 中心）と Rate-Tier（全曲対象）の 2 系統ランクを並置
+ * - 次ランクまでの差分、進捗バー、ランクアップに効く推奨曲（RankUpAdvice）を表示
+ * - 非公式難易度表のランク別集計（UnofficialDifficultyTable）も埋込み
+ * - 閲覧モード (admin/friend/public/topRanker/private) によって利用可能な情報範囲を切替
+ * - TOP ランカー閲覧時はバーチャルプロフィール用に DJ 名ごとの TOP100 譜面を円グラフ化する特殊表示
+ *
+ * @prop scores 階層化されたスコアデータ。
+ * @prop totalPoints 現在の Beat-PT 合計。
+ * @prop viewingIidxId 他人を閲覧中なら IIDX ID が入る（自分のダッシュボード表示時は undefined）。
+ * @prop viewingMode 閲覧モード。UI の「編集ボタン」表示・API 呼出先・機能制限の分岐に使用。
+ * @prop rateTierPointsOverride TOP ランカー等、サーバ算出済み Rate-PT が優先される場合に使用する値。
+ * @emits open-profile-edit メール未登録等の促しバナーからプロフィール編集を要求。
+ */
 import { computed, ref, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
@@ -234,8 +249,11 @@ const props = defineProps<{
   rateTierPointsOverride?: number | null;
 }>();
 
+/** 【computed の役割】 他ユーザーを閲覧中かどうか（viewingIidxId が存在する）。 */
 const isViewingOther = computed(() => !!props.viewingIidxId);
+/** 【computed の役割】 都道府県 TOP ランカー（バーチャル）の閲覧中かどうか。 */
 const isTopRankerView = computed(() => props.viewingMode === 'topRanker');
+/** 【computed の役割】 プライベート設定ユーザーの閲覧中かどうか（詳細非表示モード）。 */
 const isPrivateView = computed(() => props.viewingMode === 'private');
 
 // DJ palette for pie slices
@@ -245,6 +263,11 @@ const DJ_PALETTE = [
   '#06b6d4', '#a855f7', '#eab308', '#22c55e', '#f43f5e'
 ];
 
+/**
+ * 【関数の役割】 円グラフのスライス用 SVG path 配列を生成する。
+ * 入力 { name, count } から比率を計算し、-90°（真上）開始で時計回りに描画する。
+ * 単一スライスの場合は SVG A 要素が動作しないため円全体のフォールバック path を使う。
+ */
 function buildPieSlices(entries: { name: string; count: number }[]) {
   const total = entries.reduce((s, e) => s + e.count, 0);
   if (total === 0) return [] as Array<{ name: string; count: number; pct: number; color: string; path: string }>;
@@ -274,6 +297,10 @@ function buildPieSlices(entries: { name: string; count: number }[]) {
   });
 }
 
+/**
+ * 【computed の役割】 TOP ランカー閲覧時の Beat-Tier DJ 名円グラフ。
+ * beatTierPoints 降順 TOP100 譜面を DJ 名でグループ化し、件数比率の円グラフに変換する。
+ */
 const beatTierDjPie = computed(() => {
   if (!isTopRankerView.value) return [];
   const top100 = [...allFlattenedScores.value]
@@ -291,6 +318,10 @@ const beatTierDjPie = computed(() => {
   return buildPieSlices(entries);
 });
 
+/**
+ * 【computed の役割】 TOP ランカー閲覧時の Rate-Tier DJ 名円グラフ。
+ * ANOTHER / LEGGENDARIA に絞って scoreRate から Rate-PT を再計算し、上位 100 件を DJ 名で集計する。
+ */
 const rateTierDjPie = computed(() => {
   if (!isTopRankerView.value) return [];
   const top100 = allFlattenedScores.value
@@ -309,19 +340,26 @@ const rateTierDjPie = computed(() => {
   return buildPieSlices(entries);
 });
 
+// Beat-Tier / Rate-Tier の情報モーダル表示フラグ。
 const showInfoModal = ref(false);
 const showRateInfoModal = ref(false);
 
-// Beat-Tier Calculations
+// ---- Beat-Tier 算出 ----
+/** 【computed の役割】 現在の Beat-PT に対応するティア情報（名称、色、アイコン等）。 */
 const rankInfo = computed(() => getRankInfo(props.totalPoints));
+/** 【computed の役割】 次のティアまでの差分情報（必要 pt、ティア名）。 */
 const nextRankInfo = computed(() => getNextRankInfo(props.totalPoints));
 
-// Flat Scores processing
+/** 【computed の役割】 階層化スコアをフラット配列に変換（曲 × 難易度 1 レコード）。 */
 const allFlattenedScores = computed(() => flattenScores(props.scores));
 
-// Rate-Tier: top 100 ANOTHER/LEGGENDARIA songs across all levels.
-// Matches backend ScoreRecalculationService: perfect-rate (100%) songs beyond top 100
-// contribute +1 pt each as an overflow bonus.
+/**
+ * 【computed の役割】 Rate-Tier ポイント算出。
+ *   - ANOTHER/LEGGENDARIA の 上位 100 曲分の Rate-PT を合算
+ *   - 100% 達成曲が 100 件を超えた場合、超過分 1 件あたり +1 pt のオーバーフローボーナスを加算
+ *     （バックエンド ScoreRecalculationService と一致する挙動）
+ *   - rateTierPointsOverride（TOP ランカー等の既計算値）が与えられていればそれを優先
+ */
 const rateTierPoints = computed(() => {
   if (props.rateTierPointsOverride != null) return props.rateTierPointsOverride;
   const eligible = allFlattenedScores.value
@@ -336,32 +374,40 @@ const rateTierPoints = computed(() => {
   if (perfectRateCount > 100) sum += (perfectRateCount - 100);
   return Math.round(sum * 10) / 10;
 });
+/** 【computed の役割】 Rate-Tier の現在ティア情報。 */
 const rateTierRankInfo = computed(() => getRateTierRankInfo(rateTierPoints.value));
+/** 【computed の役割】 Rate-Tier の次ティア情報。 */
 const rateTierNextRankInfo = computed(() => getNextRateTierRankInfo(rateTierPoints.value));
 
-// Lv12 quick stats (no settings needed)
+// ---- Lv12 クイック統計（UI サマリーカードで使う軽量集計）----
+/** 【computed の役割】 Lv12 全譜面の配列。 */
 const lv12All = computed(() => allFlattenedScores.value.filter(s => s.difficultyLevel === 12));
+/** 【computed の役割】 Lv12 譜面総数。 */
 const lv12Total = computed(() => lv12All.value.length);
+/** 【computed の役割】 Lv12 クリア率（FAILED/NO PLAY/--- 以外を「クリア済」とする）。 */
 const lv12ClearRate = computed(() => {
   if (!lv12Total.value) return 0;
   const cleared = lv12All.value.filter(s => !['FAILED', 'NO PLAY', '---'].includes(s.clearType)).length;
   return Math.round((cleared / lv12Total.value) * 100);
 });
+/** 【computed の役割】 Lv12 AAA 達成率。 */
 const lv12AaaRate = computed(() => {
   if (!lv12Total.value) return 0;
   const aaa = lv12All.value.filter(s => s.djLevel === 'AAA').length;
   return Math.round((aaa / lv12Total.value) * 100);
 });
+/** 【computed の役割】 Lv12 MAX-（94.45%）以上達成率。 */
 const lv12MaxMinusRate = computed(() => {
   if (!lv12Total.value) return 0;
   const mm = lv12All.value.filter(s => s.scoreRate >= 94.45).length;
   return Math.round((mm / lv12Total.value) * 100);
 });
 
-// Ranking
+// ---- ランキング（自分の近隣を表示するため全体ランキングを取得）----
 interface RankingEntry { displayName: string; iidxId: string; totalBeatPt: number; rankChange: number | null; }
 const rankingData = ref<RankingEntry[]>([]);
 
+// マウント時に全体ランキングを取得（失敗しても UI は継続表示）。
 onMounted(async () => {
   try {
     const res = await fetch(`${API_BASE}/api/scores/ranking`);
@@ -369,9 +415,13 @@ onMounted(async () => {
   } catch {}
 });
 
+/**
+ * 【computed の役割】 対象ユーザーの全体順位と前回差分を返す。
+ * 閲覧対象が他人（viewingIidxId あり）ならその人、そうでなければ自分の iidxId で検索。
+ */
 const myRankingPosition = computed(() => {
   if (!rankingData.value.length) return null;
-  // フレンド/管理者閲覧中は対象ユーザーのiidxIdを、それ以外は自分のiidxIdを使う
+  // フレンド/管理者閲覧中は対象ユーザーの iidxId を、それ以外は自分の iidxId を使う。
   const targetIidxId = props.viewingIidxId || user.value?.iidxId;
   if (!targetIidxId) return null;
   const idx = rankingData.value.findIndex(r => r.iidxId === targetIidxId);
@@ -379,6 +429,7 @@ const myRankingPosition = computed(() => {
   return { position: idx + 1, total: rankingData.value.length, rankChange: rankingData.value[idx].rankChange };
 });
 
+/** 【computed の役割】 自分の 1 個上と 1 個下のランキングエントリを返す（追い越し表示用）。 */
 const rankingNeighbors = computed(() => {
   if (!myRankingPosition.value) return { above: null, below: null };
   const pos = myRankingPosition.value.position;

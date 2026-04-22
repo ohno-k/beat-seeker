@@ -1,4 +1,17 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 アップロード履歴の一覧表示。
+ *
+ * 機能:
+ *  - GET /api/scores/history（管理者が他人を見る場合は /api/admin/users/{id}/history）
+ *  - ティアアイコン + アップロード日時 + 更新曲数 + Beat-PT/Rate-PT 増減を表で表示
+ *  - 行クリックで UploadResultModal を開き差分確認
+ *  - 「日付でまとめる」トグルで同日分をマージ表示（複数アップロード分を 1 行に統合）
+ *  - updatedCount=0 でも PT 変動があれば「難易度改訂」バッジで表示
+ *
+ * props:
+ *  - viewingUserId: 管理者が他ユーザーの履歴を閲覧する際の対象 ID
+ */
 import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
@@ -16,14 +29,24 @@ const props = defineProps<{
   viewingUserId?: number | null;
 }>();
 
+/** 履歴エントリ配列。fetchHistory() で populate される。新しい順。 */
 const historyList = ref<any[]>([]);
+/** 取得中フラグ。 */
 const isLoading = ref(false);
+/** 取得エラー文言。 */
 const errorMsg = ref('');
+/** 「日付でまとめる」トグル。true なら同日分を 1 行に統合表示。 */
 const groupByDay = ref(false);
 
+/** モーダルに渡す差分結果。行クリックで設定される。 */
 const selectedDiff = ref<UploadDiffResult | null>(null);
+/** 差分モーダルの開閉。 */
 const isModalOpen = ref(false);
 
+/**
+ * 【関数の役割】 ISO 日時文字列を「YYYY/MM/DD」形式（JST）に整形して返す。グルーピングのキーに使用。
+ * バックエンドが Z 抜きで返す場合に備えて末尾補完を行う。
+ */
 const getDateKey = (dateStr: string) => {
   const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
   const d = new Date(zDateStr);
@@ -31,7 +54,13 @@ const getDateKey = (dateStr: string) => {
   return d.toLocaleDateString(locale, { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' });
 };
 
-/** 同日エントリをまとめたリストを返す */
+/**
+ * 【computed の役割】 groupByDay が OFF ならそのまま、ON なら同日アップロードを 1 行にマージして返す。
+ * マージ時には:
+ *  - updatedCount は合算
+ *  - Beat-PT/Rate-PT 増分は「前日最終値」との差分で再計算
+ *  - 当日更新曲を diffJson からまとめて重複除外（title+difficulty キー、新しい方を残す）
+ */
 const groupedList = computed(() => {
   if (!groupByDay.value) return historyList.value;
 
@@ -79,6 +108,11 @@ const groupedList = computed(() => {
   });
 });
 
+/**
+ * 【関数の役割】 行クリック時に差分モーダルを開く。
+ * item._isGrouped が true なら合算 diff を、そうでなければ元の diffJson を使う。
+ * 旧 Beat-PT は現在値 − 増分、旧ティアも再計算してモーダルに渡す。
+ */
 const openDiffModal = (item: any) => {
   const diffJson = item._isGrouped ? item._mergedDiffJson : item.diffJson;
   if (!diffJson || diffJson === '[]') return;
@@ -105,6 +139,12 @@ const openDiffModal = (item: any) => {
   }
 };
 
+/**
+ * 【関数の役割】 履歴データを取得し、tier 情報や前回差分で加工した配列を historyList に格納する。
+ * 特殊処理:
+ *  - updatedCount=0 は「難易度改訂による再計算」とみなし、前エントリとの差分から増減を算出
+ *  - Beat-PT/Rate-PT 変動が ±0.1 未満かつ更新 0 曲のエントリは除外（ノイズ排除）
+ */
 const fetchHistory = async () => {
   if (!isLoggedIn.value) return;
 
@@ -124,7 +164,7 @@ const fetchHistory = async () => {
     if (!res.ok) throw new Error(t('history.error'));
     const data = await res.json();
 
-    // Sort descending by date
+    // 日時降順（新しい順）に並び替え。
     const sortedData = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     historyList.value = sortedData.map((item: any, idx: number) => {
@@ -136,7 +176,7 @@ const fetchHistory = async () => {
       let calcRatePtIncrease = 0;
 
       if (item.updatedCount === 0) {
-          // System recalculation (difficulty revision)
+          // 難易度改訂に伴うシステム再計算。Beat/Rate 両方を差分計算。
           if (prevItem) {
               calcBeatPtIncrease = beatPt - (prevItem.totalBeatPt || 0);
               calcRatePtIncrease = ratePt - (prevItem.totalRatePt || 0);
@@ -145,7 +185,7 @@ const fetchHistory = async () => {
               calcRatePtIncrease = ratePt;
           }
       } else {
-          // Normal upload
+          // 通常アップロード。Beat-PT はサーバが算出した値を使い、Rate-PT のみ差分計算。
           if (prevItem) {
               calcRatePtIncrease = ratePt - (prevItem.totalRatePt || 0);
           } else {
@@ -166,7 +206,7 @@ const fetchHistory = async () => {
       };
     }).filter((item: any) => {
       if ((item.updatedCount || 0) > 0) return true;
-      // updatedCount=0 でも BEAT-PT か RATE-PT が変動していれば難易度改訂として表示
+      // updatedCount=0 でも BEAT-PT か RATE-PT が 0.1 以上変動していれば難易度改訂として残す。
       return Math.abs(item.beatPtIncrease) >= 0.1 || Math.abs(item.ratePtIncrease) >= 0.1;
     });
   } catch (err: any) {
@@ -176,6 +216,10 @@ const fetchHistory = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 表示用に日時を JST 5 桁フォーマット（YYYY/MM/DD HH:mm）で返す。
+ * バックエンドが Z を付けない場合に備えて末尾補完を行う。
+ */
 const formatDate = (dateStr: string) => {
   const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
   const d = new Date(zDateStr);
@@ -187,6 +231,7 @@ const formatDate = (dateStr: string) => {
   });
 };
 
+// マウント時に初回取得。
 onMounted(() => {
   fetchHistory();
 });
@@ -247,7 +292,7 @@ onMounted(() => {
             :class="(item._isGrouped ? item._mergedDiffJson !== '[]' : (item.diffJson && item.diffJson !== '[]')) ? 'cursor-pointer' : ''"
             @click="openDiffModal(item)"
           >
-            <!-- Beat-Tier Icon (+ Rate-Tier Icon) -->
+            <!-- ティアアイコン列（Beat-Tier、RateTier 表示が有効なら Rate-Tier も） -->
             <td class="p-4 text-center align-middle">
               <div class="flex justify-center items-center gap-1">
                 <RankIcon
@@ -268,7 +313,7 @@ onMounted(() => {
               </div>
             </td>
 
-            <!-- Upload Date -->
+            <!-- アップロード日時列（グループ時は日付のみ + 回数バッジ） -->
             <td class="p-4 font-medium text-slate-800 dark:text-slate-100 text-center align-middle">
               <template v-if="item._isGrouped">
                 {{ item._dateKey }}
@@ -279,7 +324,7 @@ onMounted(() => {
               </template>
             </td>
 
-            <!-- Updated Count -->
+            <!-- 種別列（更新曲数 or 難易度改訂バッジ） -->
             <td class="p-4 text-center align-middle font-black">
               <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-base">
                 {{ item.updatedCount }} {{ t('history.unitSongs') }}
@@ -289,7 +334,7 @@ onMounted(() => {
               </span>
             </td>
 
-            <!-- Beat-PT -->
+            <!-- Beat-PT 列（合計値 + 増減バッジ） -->
             <td class="p-4 text-center align-middle w-36">
               <div class="font-black text-slate-700 dark:text-slate-200 text-lg">
                 {{ item.totalBeatPt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
@@ -302,7 +347,7 @@ onMounted(() => {
               </div>
             </td>
 
-            <!-- Rate-PT -->
+            <!-- Rate-PT 列（有効時のみ、合計値 + 増減バッジ） -->
             <td v-if="showRateTier" class="p-4 text-center align-middle w-36">
               <div class="font-black text-slate-700 dark:text-slate-200 text-lg">
                 {{ item.totalRatePt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
@@ -319,7 +364,7 @@ onMounted(() => {
       </table>
     </div>
 
-    <!-- Upload Result Diff Modal -->
+    <!-- アップロード差分モーダル（行クリックで開く） -->
     <UploadResultModal
       :is-open="isModalOpen"
       :diff-data="selectedDiff"

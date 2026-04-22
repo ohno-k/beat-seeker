@@ -1,3 +1,17 @@
+/**
+ * 英語ロケール定義（i18n キー → 英訳文字列のフラットなマップ）。
+ *
+ * 【このファイルの役割】
+ *  - ja.ts と 1:1 対応のキー構造を保つ（useI18n では currentLang に応じて切替）
+ *  - 値文字列は英語のまま。コメントのみ日本語で注釈する（値を翻訳してはならない）
+ *  - 未翻訳キーは ja.ts の内容がフォールバックされる設計ではないため、必ず全キー揃える
+ *
+ * 【セクション構成】ja.ts と同じ並び: Common / Navigation / Auth / Dashboard /
+ * Score / Upload / Ranking / Profile / Friends / Arena / CSV / Onboarding /
+ * Notifications / Tier Info / About / UnifiedImport / Terms / Changelog /
+ * Tier Voting / Arcade Assist / Song Average / Difficulty Table /
+ * Score Prediction / Supporter / Rank Comparison / Dan Ranks
+ */
 export const en = {
   // Common
   'common.back': 'Back',

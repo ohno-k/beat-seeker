@@ -1,4 +1,27 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 beat-seeker アプリのルートコンポーネント。
+ *
+ * 画面全体構造:
+ *  - ルーティング: `activeTab` という文字列 ref で SPA 的に画面を切り替える（Vue Router は未使用）。
+ *    例: 'dashboard' / 'table' / 'ranking' / 'history' / 'profile' / 'arena' / ...
+ *  - サイドバー: `Sidebar` コンポーネントに `isSidebarOpen` と `activeTab` を双方向バインド。
+ *  - グローバルモーダル: ログイン / プロフィール編集 / アップロード結果 / 管理ユーザー一覧 /
+ *    Ko-fi 確認 / フレンド申請 / 取り込みエリア などを一括で保持する。
+ *  - ユーザー視点の切替: 自分のデータ / フレンドデータ / 公開ユーザー / TOPランカー / 管理者閲覧
+ *    を `viewingMode` で管理し、`loadSavedScores` が閲覧対象に応じて fetch を切り替える。
+ *
+ * 依存 Composable:
+ *  - `useAuth`: ログイン状態・ユーザー情報
+ *  - `useScoreUpload`: CSV アップロード / 履歴ログ保存
+ *  - `useScores`: スコアフェッチ（自分 / 他ユーザー / TOPランカー）
+ *  - `useDarkMode`: ライト/ダーク切替
+ *  - `useFriends`: フレンド申請・通知・バーチャルライバル
+ *  - `useGameData`: song_data.json / 難易度表などのマスターデータ
+ *  - `useAppUpdate`: Service Worker からの更新通知
+ *  - `useI18n`: 多言語化
+ *  - `useAprilFools`: エイプリルフール演出フラグ
+ */
 import { ref } from 'vue';
 import ResetPasswordView from './views/ResetPasswordView.vue';
 import CsvDropzone from './components/CsvDropzone.vue';
@@ -51,7 +74,7 @@ import { watch, watchEffect, onMounted } from 'vue';
 const { t } = useI18n();
 const { isAprilFools } = useAprilFools();
 
-// Toggle af-mode class on <html> element for global CSS overrides
+// エイプリルフール演出: <html> に af-mode class を付け外しし、全体 CSS オーバーライドを有効化する。
 watchEffect(() => {
   if (isAprilFools.value) {
     document.documentElement.classList.add('af-mode');
@@ -60,34 +83,65 @@ watchEffect(() => {
   }
 });
 
-// Fetch game data from API on initialization
+// 起動直後にゲームデータ（曲一覧・難易度表）を API から取得する。
+// コンポーネント外から呼んでも問題ないように、composable 側で多重呼び出しはガードされている。
 const { fetchGameData } = useGameData();
 fetchGameData();
 
+/** 現在 URL が `/reset-password` かどうか。パスワード再設定画面はルートコンポーネントを丸ごと差し替える。 */
 const isResetPasswordPage = ref(window.location.pathname === '/reset-password');
 
 const { hasUpdate } = useAppUpdate();
+/** Service Worker による新バージョン通知を受けた際の更新ボタン。単純にページ再読込を行う。 */
 const reloadPage = () => window.location.reload();
 
+/** ログイン中ユーザーまたは閲覧対象ユーザーのスコアデータ（曲単位）。 */
 const scoreData = ref<ScoreData[]>([]);
+/** CSV 解析中フラグ。ローディング表示用。 */
 const isParsing = ref(false);
+/** エラーメッセージ表示用。空文字で非表示。 */
 const errorMsg = ref('');
+/**
+ * 現在アクティブなタブ（= SPA 的な現在ルート）。
+ * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
+ */
 const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison'>('dashboard')
+/**
+ * 閲覧モード。自分のデータを見る場合は null。
+ *  - 'admin': 管理者が他ユーザーのデータを閲覧中
+ *  - 'friend': フレンドのデータを閲覧中
+ *  - 'public': スコア公開ユーザーを閲覧中（自分が非フレンドでも閲覧可）
+ *  - 'topRanker': 県別・バージョン別の TOP ランカー（仮想ユーザー）を閲覧中
+ *  - 'private': 非公開ユーザーの BEAT-PT/RATE-PT 総合値のみ閲覧（曲別データは持たない）
+ */
 const viewingMode = ref<'admin' | 'friend' | 'public' | 'topRanker' | 'private' | null>(null);
+/** TOP ランカー閲覧時のエリア情報（バージョン+都道府県）。それ以外は null。 */
 const viewingTopRanker = ref<{ versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string } | null>(null);
+/** 現在表示中のユーザーの総 BEAT-PT（= TOP100 合計）。 */
 const totalBeatTierPoints = ref(0);
+/** 非公開ユーザー閲覧時に外部から渡される RATE-PT。通常閲覧時は null。 */
 const privateRateTierPoints = ref<number | null>(null);
 
+/** アップロード差分結果。モーダル内で新旧スコア比較を表示するために保持する。 */
 const diffResult = ref<UploadDiffResult | null>(null);
+/** アップロード結果モーダル（スコア差分）の開閉。 */
 const isDiffModalOpen = ref(false);
+/** ログイン/登録モーダルの開閉。 */
 const isLoginModalOpen = ref(false);
+/** プロフィール編集モーダルの開閉。 */
 const isProfileModalOpen = ref(false);
+/** 管理者用ユーザー一覧モーダルの開閉。 */
 const isAdminModalOpen = ref(false);
+/** 新規登録直後に出すオンボーディングモーダルの開閉。 */
 const isOnboardingOpen = ref(false);
 
+/** 現在閲覧中のユーザー ID（自分閲覧時は null）。 */
 const viewingUserId = ref<number | null>(null);
+/** 現在閲覧中のユーザー表示名。バナー等に表示。 */
 const viewingUserName = ref<string>('');
+/** 現在閲覧中のユーザーの IIDX ID。 */
 const viewingUserIidxId = ref<string>('');
+/** モバイル用サイドバーの開閉状態。 */
 const isSidebarOpen = ref(false);
 
 const { user, isLoggedIn, logout, isLoading: authLoading, authHeaders } = useAuth();
@@ -96,12 +150,23 @@ const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, isFetching } = us
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission, sendFriendRequest, fetchVirtualRivalStatus, addVirtualRival, removeVirtualRival } = useFriends();
 
+/** 閲覧中ユーザーとのフレンド関係。null はログイン前 or 取得前。 */
 const friendStatus = ref<'none' | 'friend' | 'requested' | 'incoming' | 'self' | null>(null);
+/** フレンド申請モーダルの開閉。 */
 const isFriendRequestModalOpen = ref(false);
+/** フレンド申請時に添えるメッセージ（任意、100 文字以内）。 */
 const friendRequestMessage = ref('');
+/** フレンド申請送信中フラグ。ボタン二重押下防止。 */
 const friendRequestSending = ref(false);
+/** フレンド申請エラーメッセージ。 */
 const friendRequestError = ref('');
 
+/**
+ * 【関数の役割】 対象ユーザーと自分のフレンド状態を API から取得する。
+ *  - 未ログインなら即 null のままで何もしない。
+ *  - ネットワークエラーは握り潰す（フレンド状態は補助情報なので UI を壊さない方針）。
+ * @param userId 対象ユーザーの ID
+ */
 const fetchFriendStatus = async (userId: number) => {
   friendStatus.value = null;
   if (!isLoggedIn.value) return;
@@ -114,15 +179,24 @@ const fetchFriendStatus = async (userId: number) => {
   } catch {}
 };
 
+/**
+ * 【関数の役割】 フレンド申請モーダルを開く前に、入力欄とエラーをリセットする。
+ */
 const openFriendRequestModal = () => {
   friendRequestMessage.value = '';
   friendRequestError.value = '';
   isFriendRequestModalOpen.value = true;
 };
 
+/** 仮想ライバル（TOPランカー）が既に登録済みかどうか。null は取得前または未ログイン。 */
 const virtualRivalRegistered = ref<boolean | null>(null);
+/** 仮想ライバル追加/削除 API 実行中フラグ。ボタン連打防止。 */
 const virtualRivalBusy = ref(false);
 
+/**
+ * 【関数の役割】 現在閲覧中の TOP ランカーが自分の仮想ライバル登録済みか再取得する。
+ * TOP ランカー閲覧画面を開いた直後に呼び出される。
+ */
 const refreshVirtualRivalStatus = async () => {
   virtualRivalRegistered.value = null;
   if (!isLoggedIn.value) return;
@@ -131,6 +205,13 @@ const refreshVirtualRivalStatus = async () => {
   virtualRivalRegistered.value = await fetchVirtualRivalStatus(area.versionNum, area.prefectureFileNum);
 };
 
+/**
+ * 【関数の役割】 仮想ライバル（TOPランカー）の登録/解除をトグルする。
+ * 処理の流れ:
+ *  手順1: 閲覧中エリアがなければ何もしない。
+ *  手順2: 登録済みなら API で削除、未登録なら API で追加。
+ *  手順3: ローカルフラグも即時更新して UI に反映する。
+ */
 const toggleVirtualRival = async () => {
   const area = viewingTopRanker.value;
   if (!area || !isLoggedIn.value) return;
@@ -155,6 +236,14 @@ const toggleVirtualRival = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 フレンド申請を送信する。
+ * 処理の流れ:
+ *  手順1: 閲覧ユーザー ID が無ければ早期 return。
+ *  手順2: `sendFriendRequest` で POST。メッセージが空なら undefined を渡す。
+ *  手順3: 成功したら `friendStatus` を 'requested' に切り替え、モーダルを閉じる。
+ *  手順4: 失敗したらエラーメッセージを表示しモーダルは開いたまま維持する。
+ */
 const submitFriendRequest = async () => {
   if (viewingUserId.value == null) return;
   friendRequestSending.value = true;
@@ -170,13 +259,22 @@ const submitFriendRequest = async () => {
   }
 };
 
+/** 通知ベルのドロップダウン表示状態。 */
 const isNotificationOpen = ref(false);
+/** PWA インストール用のプロンプトイベント（`beforeinstallprompt` で受け取る）。 */
 const deferredPrompt = ref<any>(null);
 
-// Ko-fi support modal
+// Ko-fi（サポーター機能）用のモーダル状態
+/** Ko-fi 確認モーダルの開閉。サポータートークンを案内する。 */
 const showKofiModal = ref(false);
+/** Ko-fi トークンのコピー完了トースト用フラグ。 */
 const kofiCopied = ref(false);
 
+/**
+ * 【関数の役割】 Ko-fi ボタン押下時の挙動を分岐する。
+ *  - すでにサポータートークンを持つユーザー → 確認モーダルを表示
+ *  - 未サポーター → 直接 Ko-fi ページを新タブで開く
+ */
 const handleKofiClick = () => {
   if (user.value?.supporterToken) {
     showKofiModal.value = true;
@@ -185,6 +283,11 @@ const handleKofiClick = () => {
   }
 };
 
+/**
+ * 【関数の役割】 Ko-fi 確認モーダルで「確認して開く」を押した際の処理。
+ *  - サポータートークンをクリップボードにコピー（5 秒後にトースト消滅）。
+ *  - モーダルを閉じて Ko-fi ページを新タブで開く。
+ */
 const confirmKofiOpen = () => {
   const token = user.value?.supporterToken;
   if (token) {
@@ -196,16 +299,23 @@ const confirmKofiOpen = () => {
   showKofiModal.value = false;
   window.open('https://ko-fi.com/beat_seeker', '_blank');
 };
+/** PWA インストールバナーの表示フラグ。`beforeinstallprompt` 受領時に true。 */
 const showInstallBanner = ref(false);
+/** 未ログイン状態で取り込みが要求された場合に「ログイン後に開く」ための保留フラグ。 */
 const pendingImportOpen = ref(false);
+/** 未ログイン状態で URL フラグメント経由のデータ取り込みが要求された場合の保留データ。 */
 const pendingFragmentData = ref<string | null>(null);
 
-/** Decode bookmarklet data from URL fragment */
+/**
+ * 【関数の役割】 ブックマークレット経由の URL フラグメント (#data=...) を base64 デコードする。
+ * 戻り値: デコード済み JSON テキスト。フォーマット不正時は null。
+ */
 const decodeFragmentData = (): string | null => {
   const hash = window.location.hash;
   if (!hash.startsWith('#data=')) return null;
   try {
-    const b64 = hash.slice(6); // strip '#data='
+    const b64 = hash.slice(6); // '#data=' の 6 文字を取り除く
+    // escape + decodeURIComponent の順で日本語含む UTF-8 を安全に復元する
     return decodeURIComponent(escape(atob(b64)));
   } catch (e) {
     console.warn('Failed to decode fragment data:', e);
@@ -213,13 +323,22 @@ const decodeFragmentData = (): string | null => {
   }
 };
 
-/** Process bookmarklet JSON data: handle ARENA import + score CSV */
+/**
+ * 【関数の役割】 ブックマークレットから送り込まれた JSON を解釈し、
+ *   ARENA 対戦ログの取り込み＋スコア CSV の取り込みをまとめて処理する。
+ * 処理の流れ:
+ *  手順1: type が 'beat-seeker-combined' でなければ無視。
+ *  手順2: battles 配列があれば /api/arena/import へ POST（失敗は握り潰し）。
+ *  手順3: scoresCsv があれば Blob→File 化して通常の取り込みフローへ流す。
+ * @param jsonText ブックマークレットから受け渡された JSON 文字列
+ */
 const processBookmarkletData = async (jsonText: string) => {
   try {
     const parsed = JSON.parse(jsonText);
     if (!parsed || parsed.type !== 'beat-seeker-combined') return;
 
     // Handle ARENA battles
+    // ARENA 対戦データ: あれば専用エンドポイントへ POST。成否に関わらず後続のスコア取り込みは続行。
     if (parsed.battles && Array.isArray(parsed.battles) && parsed.battles.length > 0) {
       const token = localStorage.getItem('beat-seeker-token');
       try {
@@ -237,7 +356,7 @@ const processBookmarkletData = async (jsonText: string) => {
       }
     }
 
-    // Handle score CSV
+    // スコア CSV: 先頭に BOM を付けて Excel 等で正しく UTF-8 と認識される File に変換し、通常ドロップと同じ処理に流す。
     if (parsed.scoresCsv) {
       const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
       const blob = new Blob([bom, parsed.scoresCsv], { type: 'text/csv;charset=utf-8;' });
@@ -249,21 +368,32 @@ const processBookmarkletData = async (jsonText: string) => {
   }
 };
 
+/** API ベース URL。Vite の環境変数から取得し、未設定時はローカル開発用のデフォルト。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+// 【onMounted】 ルートコンポーネント初期化時の一括セットアップ。
+// タイミング: アプリが DOM に載った直後に 1 回だけ実行。
+// 目的:
+//  1) PWA のインストールプロンプト捕捉
+//  2) ログイン済みなら通知権限を要求
+//  3) URL パスから初期タブを決定（クローラー向けの静的 URL 対応）
+//  4) ブックマークレット経由のデータ取り込み
 onMounted(() => {
+  // PWA インストールプロンプト: ブラウザが表示できるタイミングで発火。
+  // 既定の挙動を preventDefault して、アプリ側の独自 UI で後から発火させるために保存しておく。
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt.value = e;
     showInstallBanner.value = true;
   });
 
-  // Request notification permission if logged in
+  // ログイン済みのセッション復元時は通知権限をリクエストする。
   if (isLoggedIn.value) {
     requestNotificationPermission();
   }
 
-  // URLパスに応じてタブを設定（直接アクセス・クローラー対応）
+  // URLパスに応じてタブを設定（直接アクセス・クローラー対応）。
+  // Vue Router ではなく純粋なパス判定で初期タブを決める。
   const pathToTab: Record<string, typeof activeTab.value> = {
     '/about': 'about',
     '/terms': 'terms',
@@ -276,22 +406,25 @@ onMounted(() => {
     activeTab.value = pathToTab[currentPath];
   }
 
-  // ブックマークレットからのリダイレクト時：URLフラグメントからデータを自動取り込み
+  // ブックマークレットからのリダイレクト時: URL フラグメントからデータを自動取り込み。
+  // ?import=open が付いていたらフラグメント確認 → 未ログインなら保留 → ログイン後に実行。
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('import') === 'open') {
     const fragmentData = decodeFragmentData();
+    // URL に個人データを残さないよう、クエリもフラグメントもこの時点で除去する。
     window.history.replaceState({}, document.title, window.location.pathname);
 
     if (fragmentData) {
-      // URLフラグメントにデータあり → 自動取り込み
+      // URL フラグメントにデータあり → 自動取り込み
       if (isLoggedIn.value) {
         processBookmarkletData(fragmentData);
       } else {
+        // 未ログインなら保留し、ログイン完了の watch で実行する。
         pendingFragmentData.value = fragmentData;
         pendingImportOpen.value = true;
       }
     } else {
-      // フラグメントなし（従来のクリップボード方式フォールバック）
+      // フラグメントなし（従来のクリップボード方式フォールバック）。アップロードエリアを開くだけ。
       if (isLoggedIn.value) {
         showUploadArea.value = true;
       } else {
@@ -302,8 +435,12 @@ onMounted(() => {
 });
 
 
-// Notification permission is handled by useFriends
+// 通知権限の要求自体は useFriends で扱う。
 
+/**
+ * 【関数の役割】 `beforeinstallprompt` で取得しておいたプロンプトを発火し、PWA としてインストールさせる。
+ * ユーザーが accept したらバナーを閉じ、deferredPrompt は使い捨てなので破棄する。
+ */
 const installApp = async () => {
   if (!deferredPrompt.value) return;
   deferredPrompt.value.prompt();
@@ -314,6 +451,17 @@ const installApp = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 閲覧モードに応じたスコアデータを取得し、ローカル状態に反映する。
+ *
+ * 処理の流れ:
+ *  手順1: フェッチ失敗時に古いデータが残ってフレンド画面に見えてしまう問題を防ぐため、先にクリア。
+ *  手順2: `viewingMode` に応じて API を切替:
+ *         - topRanker: 仮想ユーザーのプロファイル＋スコア
+ *         - admin/friend/public: 特定ユーザーのスコア
+ *         - 自分: ログインユーザーのスコア
+ *  手順3: 取得した曲データから BEAT-PT 合計を計算し、`totalBeatTierPoints` を更新する。
+ */
 const loadSavedScores = async () => {
   // フェッチ失敗時に古い（自分の）データが残ってフレンド画面に表示されてしまう問題を防ぐため
   // フェッチ前に必ずクリアする
@@ -351,6 +499,10 @@ const loadSavedScores = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 管理者用ユーザー一覧モーダルから特定ユーザーを選択したときのハンドラ。
+ * 閲覧モードを 'admin' に切り替え、ユーザー情報をセットしてスコアを再フェッチする。
+ */
 const handleSelectUser = async (selectedUser: any) => {
   isAdminModalOpen.value = false;
   viewingUserId.value = selectedUser.id;
@@ -360,6 +512,10 @@ const handleSelectUser = async (selectedUser: any) => {
   await loadSavedScores();
 };
 
+/**
+ * 【関数の役割】 フレンド一覧画面からフレンドのデータを閲覧開始する。
+ * ダッシュボードタブに移動し、TOP ランカー情報はクリアする。
+ */
 const handleViewFriend = async (friend: { id: number; displayName: string; iidxId?: string }) => {
   viewingUserId.value = friend.id;
   viewingUserName.value = friend.displayName;
@@ -370,6 +526,10 @@ const handleViewFriend = async (friend: { id: number; displayName: string; iidxI
   await loadSavedScores();
 };
 
+/**
+ * 【関数の役割】 ランキング一覧から「スコア公開ユーザー」を閲覧開始する。
+ * フレンド申請ボタンを出すために `fetchFriendStatus` も並行実行する。
+ */
 const handleViewPublicUser = async (u: { id: number; displayName: string; iidxId?: string }) => {
   viewingUserId.value = u.id;
   viewingUserName.value = u.displayName;
@@ -381,6 +541,10 @@ const handleViewPublicUser = async (u: { id: number; displayName: string; iidxId
   await loadSavedScores();
 };
 
+/**
+ * 【関数の役割】 TOP ランカー（県別/バージョン別の仮想ユーザー）を閲覧開始する。
+ * バーチャルライバル登録状況を同時取得し、バナーのボタン表示を即時適切にする。
+ */
 const handleViewTopRanker = async (area: {
   versionNum: number;
   versionName: string;
@@ -397,6 +561,11 @@ const handleViewTopRanker = async (area: {
   await loadSavedScores();
 };
 
+/**
+ * 【関数の役割】 非公開ユーザーのダッシュボードを閲覧開始する。
+ * 非公開ユーザーは曲別データを持たないため `scoreData` は空にし、
+ * ランキング側から渡された BEAT-PT / RATE-PT 総合値のみを表示する。
+ */
 const handleViewPrivateUser = (u: { id: number; displayName: string; iidxId: string; totalBeatPt: number; totalRatePt: number }) => {
   viewingUserId.value = u.id;
   viewingUserName.value = u.displayName;
@@ -410,6 +579,10 @@ const handleViewPrivateUser = (u: { id: number; displayName: string; iidxId: str
   fetchFriendStatus(u.id);
 };
 
+/**
+ * 【関数の役割】 閲覧モード（他人データ閲覧）を解除し、自分のデータに戻る。
+ * 全閲覧系 ref を初期化してから、自分のスコアを再取得する。
+ */
 const returnToMyData = async () => {
   viewingUserId.value = null;
   viewingUserName.value = '';
@@ -423,6 +596,13 @@ const returnToMyData = async () => {
   await loadSavedScores();
 };
 
+// 【watch】 ログイン状態の変化を監視し、状態遷移に応じた画面リセットとフェッチを行う。
+// タイミング: ログイン成功時 / ログアウト時 / セッション復元直後。
+// 目的:
+//  - ログイン成功時: 閲覧対象を自分に戻し、自分のスコア・申請・通知を一括取得。
+//    保留していたブックマークレットデータがあればこのタイミングで取り込み。
+//    Google OAuth リダイレクト直後は URL をクリーンにしてダッシュボードに飛ばす。
+//  - ログアウト時: すべてのユーザー情報をクリアし、グラフやテーブルをゲスト状態に戻す。
 watch(isLoggedIn, (newVal) => {
   if (newVal) {
     viewingUserId.value = null;
@@ -437,7 +617,7 @@ watch(isLoggedIn, (newVal) => {
     if (pendingImportOpen.value) {
       pendingImportOpen.value = false;
       if (pendingFragmentData.value) {
-        // URLフラグメントデータがある場合は自動取り込み
+        // URLフラグメントデータがある場合は自動取り込み（未ログインで保留していた分）
         const data = pendingFragmentData.value;
         pendingFragmentData.value = null;
         processBookmarkletData(data);
@@ -446,12 +626,12 @@ watch(isLoggedIn, (newVal) => {
       }
     }
 
-    // Check if we just logged in via Google OAuth redirect
+    // Google OAuth リダイレクト経由のログインをクエリで判定し、URL を綺麗にする。
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('login') === 'success') {
       activeTab.value = 'dashboard';
 
-      // Clean up the URL without reloading the page
+      // ページをリロードせず URL だけ差し替える（履歴は残さない）
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   } else {
@@ -464,6 +644,10 @@ watch(isLoggedIn, (newVal) => {
   }
 });
 
+/**
+ * クリアタイプの強弱を数値化したテーブル。
+ * スコア差分算出時に「ランプが上がったか」判定するための順序比較に使う。
+ */
 const clearTypeRankings: Record<string, number> = {
   'FULLCOMBO CLEAR': 7,
   'EX HARD CLEAR': 6,
@@ -477,10 +661,22 @@ const clearTypeRankings: Record<string, number> = {
 };
 
 /**
- * Compare old vs new scores to generate folder-level announcements.
- * - 'rank_assigned': all songs in a folder are now played and a rank was assigned
- * - 'rank_up': folder rank improved
- * - 'remaining': at every 5-song boundary, announce how many songs remain
+ * 【関数の役割】 旧スコアと新スコアを比較し、Folder-Rank レベルの発表イベントを生成する。
+ *
+ * 発表タイプ:
+ *  - 'rank_assigned': フォルダ内の全曲を今回初めて埋めきり、Folder-Rank が初認定された
+ *  - 'rank_up': フォルダ内全曲埋め済みの状態で、平均スコアレートが上がりランクアップした
+ *  - 'remaining': 残り曲数が 5 曲単位の閾値を跨いだ場合の進捗告知
+ *
+ * 処理の流れ:
+ *  手順1: 難易度表マスターが無い場合は空配列で早期 return。
+ *  手順2: 旧/新それぞれについてフォルダ別のプレイ曲数＆平均スコアレートを集計。
+ *  手順3: フォルダ毎に比較して、rank_assigned > rank_up > remaining の優先順で発表を積む。
+ *  手順4: フォルダ番号（☆12.0 など）降順に並べ替えて返す。
+ *
+ * @param oldFlat アップロード前の全譜面フラット配列
+ * @param newFlat アップロード後の全譜面フラット配列
+ * @returns フォルダ単位の発表イベント配列
  */
 const computeFolderAnnouncements = (
   oldFlat: ReturnType<typeof flattenScores>,
@@ -490,7 +686,7 @@ const computeFolderAnnouncements = (
   const ranks = diffTableRanksRef.value;
   if (!ranks || !Array.isArray(ranks)) return announcements;
 
-  // Build play-count maps per folder: count songs with score > 0
+  // フォルダ毎の「プレイ済み曲数」を集計するヘルパー。score > 0 を「プレイ済み」と定義。
   const buildPlayCounts = (flat: ReturnType<typeof flattenScores>) => {
     const counts = new Map<string, number>();
     flat.forEach(s => {
@@ -501,7 +697,7 @@ const computeFolderAnnouncements = (
     return counts;
   };
 
-  // Build average score rate per folder (played songs only)
+  // フォルダ毎の「平均スコアレート（%）」を集計するヘルパー。プレイ済みの曲のみを分母に含める。
   const buildAvgRates = (flat: ReturnType<typeof flattenScores>) => {
     const sums = new Map<string, { totalScore: number; totalMax: number }>();
     flat.forEach(s => {
@@ -524,7 +720,7 @@ const computeFolderAnnouncements = (
   const oldAvgRates = buildAvgRates(oldFlat);
   const newAvgRates = buildAvgRates(newFlat);
 
-  // Total song count per folder from the difficulty table
+  // フォルダ毎の全体曲数を難易度表から取得。'Uncategorized' フォルダは除外する。
   const folderTotals = new Map<string, number>();
   ranks.forEach((r: any) => {
     if (!r.rank.includes('Uncategorized')) {
@@ -535,12 +731,12 @@ const computeFolderAnnouncements = (
   folderTotals.forEach((totalCount, folder) => {
     const oldPlayed = oldPlayCounts.get(folder) || 0;
     const newPlayed = newPlayCounts.get(folder) || 0;
-    if (newPlayed <= oldPlayed) return; // no new plays in this folder
+    if (newPlayed <= oldPlayed) return; // このフォルダに新たなプレイは無い
 
     const remaining = totalCount - newPlayed;
     const oldRemaining = totalCount - oldPlayed;
 
-    // Check: all songs now played (rank assigned for the first time)
+    // 判定1: 全曲埋まって初めてランクが認定されたケース
     if (remaining === 0 && oldRemaining > 0) {
       const newRate = newAvgRates.get(folder) || 0;
       const newRank = getFolderRankInfoByRate(newRate, folder);
@@ -549,10 +745,10 @@ const computeFolderAnnouncements = (
         type: 'rank_assigned',
         newRankName: newRank.name + (newRank.tier ? ' ' + newRank.tier : ''),
       });
-      return; // rank_assigned takes priority
+      return; // rank_assigned が最優先。他の判定は行わない。
     }
 
-    // Check: rank up (both old and new have all songs played)
+    // 判定2: 既に全曲埋まっていた状態で、平均スコアレートが上がってランクアップしたケース
     if (remaining === 0 && oldRemaining === 0) {
       const oldRate = oldAvgRates.get(folder) || 0;
       const newRate = newAvgRates.get(folder) || 0;
@@ -569,13 +765,12 @@ const computeFolderAnnouncements = (
       return;
     }
 
-    // Check: remaining songs milestone (every 5 songs)
+    // 判定3: 残曲数が 5 の倍数境界を跨いだ（例: 17 → 14 なら「15」を跨いだ）。
     if (remaining > 0) {
-      // Crossed a 5-song boundary? e.g. old=17 remaining, new=14 remaining → crossed 15
       const oldBucket = Math.floor(oldRemaining / 5);
       const newBucket = Math.floor(remaining / 5);
       if (newBucket < oldBucket || remaining <= 5) {
-        // Only announce if remaining is a multiple of 5, or <= 5
+        // 残曲が 5 の倍数、または残 5 曲以下のときに発表する（終盤は細かく通知）。
         if (remaining % 5 === 0 || remaining <= 5) {
           announcements.push({
             folder,
@@ -587,11 +782,25 @@ const computeFolderAnnouncements = (
     }
   });
 
-  // Sort by folder descending
+  // フォルダ番号（☆12.0 等）を数値として降順に並べる（難しい順に先に表示）。
   announcements.sort((a, b) => parseFloat(b.folder) - parseFloat(a.folder));
   return announcements;
 };
 
+/**
+ * 【関数の役割】 ドロップされた CSV ファイルを読み取り、解析→差分計算→サーバー保存→差分モーダル表示までを一括で行う。
+ *
+ * 処理の流れ（大ブロック）:
+ *  手順1: CSV をパースし曲単位の配列に変換。
+ *  手順2: 現在のスコア（旧）と新スコアを flatten し、タイトル+難易度で突き合わせ。
+ *  手順3: TOP100 判定（BEAT-PT 上位 / RATE-PT 上位）用の Set を構築。
+ *  手順4: 譜面ごとにスコア・ランプが向上したら updatedSongs に積む。
+ *  手順5: ログイン済みならサーバーにアップロードし、バックエンドの差分で上書き。
+ *         アップロード直後に全スコア再取得 → 正確な合計 BEAT-PT / RATE-PT を再計算。
+ *         成功時はアップロード履歴にログを保存。
+ *  手順6: 未ログイン（ゲストモード）ならクライアント計算のみで差分モーダルを表示。
+ *  手順7: 完了後はアップロードエリアを閉じ、ダッシュボードに遷移する。
+ */
 const handleFileDropped = async (file: File) => {
   errorMsg.value = '';
   isParsing.value = true;
@@ -599,19 +808,22 @@ const handleFileDropped = async (file: File) => {
   try {
     const newData = await parseScoreCsv(file);
     console.log(`Successfully parsed ${newData.length} songs.`);
-    
-    // Calculate Diff (compare with current scoreData)
+
+    // 差分計算: 現在表示中の scoreData（旧）と今回アップロードした newData（新）を突き合わせる。
     const oldFlat = flattenScores(scoreData.value);
     const newFlat = flattenScores(newData);
-    
+
+    // title_difficultyName をキーに旧スコアを O(1) 検索できる Map を構築。
     const oldScoreMap = new Map();
     oldFlat.forEach(r => oldScoreMap.set(`${r.title}_${r.difficultyName}`, r));
-    
+
     const updatedSongs: UpdatedSong[] = [];
 
+    // ゲスト向け BEAT-PT TOP100 判定セット。アップロード済みデータの上位 100 譜面をキー化。
     const sortedNewFlatDesc = newFlat.filter(s => s.beatTierPoints > 0).sort((a, b) => b.beatTierPoints - a.beatTierPoints);
     const top100SetGuest = new Set(sortedNewFlatDesc.slice(0, 100).map(s => `${s.title}_${s.difficultyName}`));
 
+    // ゲスト向け RATE-PT TOP100 判定セット。ANOTHER/LEGGENDARIA のみを対象にレート由来 PT で上位 100 抽出。
     const sortedByRatePtDescGuest = newFlat
       .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
       .map(s => ({ key: `${s.title}_${s.difficultyName}`, pt: calculateScoreRateTierPoints(s.scoreRate) }))
@@ -619,8 +831,9 @@ const handleFileDropped = async (file: File) => {
       .sort((a, b) => b.pt - a.pt);
     const rateTop100SetGuest = new Set(sortedByRatePtDescGuest.slice(0, 100).map(s => s.key));
 
+    // 全譜面について旧→新の変化を突き合わせ、スコアアップ/ランプアップがあれば報告対象に積む。
     newFlat.forEach(newR => {
-        // Report on level 11 and 12 improvements primarily, but you can see all in table
+        // レベル 11 / 12 の向上を中心にレポートする（それ以外のレベルはスコア一覧で確認可能）。
         const oldR = oldScoreMap.get(`${newR.title}_${newR.difficultyName}`);
 
         const oldScore = oldR ? oldR.score : 0;
@@ -639,13 +852,14 @@ const handleFileDropped = async (file: File) => {
         const scoreIncrease = scoreImproved ? newScore - oldScore : 0;
         const beatPtIncrease = newBeatPt > oldBeatPt ? newBeatPt - oldBeatPt : 0;
 
+        // RATE-PT 対象は ANOTHER / LEGGENDARIA のみ。旧新両方を計算して差分を取る。
         const isRateEligible = ['ANOTHER', 'LEGGENDARIA'].includes(newR.difficultyName);
         const newRatePt = (isRateEligible && newR.scoreRate > 0) ? calculateScoreRateTierPoints(newR.scoreRate) : 0;
         const oldRateScore = oldR ? oldR.scoreRate : 0;
         const oldRatePt = (isRateEligible && oldRateScore > 0) ? calculateScoreRateTierPoints(oldRateScore) : 0;
         const ratePtIncrease = Math.max(0, newRatePt - oldRatePt);
 
-        // Only report if there is an actual improvement in score or lamp
+        // スコアかランプの少なくとも一方が向上していれば報告対象。
         if (scoreImproved || clearTypeImproved) {
             updatedSongs.push({
                 title: newR.title,
@@ -669,7 +883,7 @@ const handleFileDropped = async (file: File) => {
         }
     });
 
-    // Sort updated songs by beatPtIncrease descending, then scoreIncrease
+    // 更新曲を BEAT-PT 増加量降順、次点で素スコア増加量降順で並べ替える。
     updatedSongs.sort((a, b) => {
         if (b.beatPtIncrease !== a.beatPtIncrease) return b.beatPtIncrease - a.beatPtIncrease;
         return b.scoreIncrease - a.scoreIncrease;
@@ -680,7 +894,11 @@ const handleFileDropped = async (file: File) => {
     const oldTier = getRankInfo(oldTotalBeatPt);
     const newTier = getRankInfo(newTotalBeatPt);
 
-    // Rate-Tier totals helper
+    /**
+     * RATE-Tier 合計 PT を算出するローカル関数。
+     * 仕様: ANOTHER/LEGGENDARIA のうち RATE-PT > 0 の譜面を PT 降順で並べ、上位 100 譜面を加算。
+     *       小数第 1 位に丸める（`* 10` して `Math.round` して `/ 10`）。
+     */
     const calcFlatRatePt = (flat: ReturnType<typeof flattenScores>) => {
       const top100 = flat
         .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
@@ -693,20 +911,21 @@ const handleFileDropped = async (file: File) => {
     const oldTotalRatePt = calcFlatRatePt(oldFlat);
 
     if (isLoggedIn.value && newData.length > 0) {
-      // PRO-UPGRADE: Use backend-provided diff for accuracy against DB
-      isParsing.value = true; // Keep loading state
+      // ログイン時の正規ルート: DB との差分をバックエンドから受け取り、これを正解として採用する。
+      isParsing.value = true; // ローディング表示を維持したまま次の処理へ
       try {
         const result = await upload(newData);
         console.log("Scores persisted to database.");
         
-        // Map the backend diff to our UploadDiffResult format, adding beat points
+        // バックエンド差分を UploadDiffResult 形式に変換し、BEAT-PT を補って返す。
+        // （バックエンドは score だけ返すので、クライアント側で PT を再算出する必要がある）
         const backendUpdates = result.updatedSongs.map(s => {
-          // We need original chart data to calculate Beat Points (maxScore, informalRank)
+          // PT 算出には maxScore と informalRank が要るので、新フラットから該当譜面を引く。
           const chartData = newFlat.find(nf => nf.title === s.title && nf.difficultyName === s.difficulty);
           const informalRank = chartData?.informalRank || (chartData?.difficultyLevel ? chartData.difficultyLevel.toFixed(1) : '12.0');
-          const maxScore = chartData?.maxScore || (s.newScore > 0 ? s.newScore : 3000); // Fallback
+          const maxScore = chartData?.maxScore || (s.newScore > 0 ? s.newScore : 3000); // 最低限のフォールバック
 
-          // Helper to get points
+          // ローカル関数: 指定スコア → BEAT-PT
           const getPoints = (score: number) => {
              const scoreRate = (score / maxScore) * 100;
              return calculatePoints(scoreRate, informalRank);
@@ -723,11 +942,12 @@ const handleFileDropped = async (file: File) => {
           };
         });
 
-        // Update local state by fetching ALL scores from the server to get an accurate total
+        // アップロード成功後、全スコアをサーバーから再取得して正確な合計値を得る。
+        // （1 ファイルだけでは見えない、過去に登録済みのスコアも合算するため）
         await loadSavedScores();
         const accurateTotalBeatPt = totalBeatTierPoints.value;
 
-        // Determine top-100 set for isInTop100 and isInRateTop100 flags
+        // アップロード後の全譜面データから isInTop100 / isInRateTop100 を判定するセットを構築。
         const allFlatAfterUpload = flattenScores(scoreData.value);
         const sortedByPtDesc = allFlatAfterUpload
           .filter(s => s.beatTierPoints > 0)
@@ -742,7 +962,7 @@ const handleFileDropped = async (file: File) => {
         const rateTop100Set = new Set(sortedByRatePtDesc.slice(0, 100).map(s => s.key));
         const accurateTotalRatePt = calcFlatRatePt(allFlatAfterUpload);
 
-        // Enrich backendUpdates with rate-tier and scoreRate fields
+        // backendUpdates に scoreRate / maxScore / RATE-PT 関連フィールドを追加補完する。
         const enrichedUpdates = backendUpdates.map(s => {
           const maxScore = getSongMaxScore(s.title, s.difficulty);
           const scoreRate = maxScore > 0 ? (s.newScore / maxScore) * 100 : 0;
@@ -759,7 +979,7 @@ const handleFileDropped = async (file: File) => {
           };
         });
 
-        // Fetch user's song ranks for the report (with timeout to avoid blocking upload flow)
+        // 譜面ランキング（自分がその曲で何位か）を取得。15 秒タイムアウトでアップロード画面を長時間止めない。
         const songRankMap = new Map<string, { rank: number; total: number }>();
         try {
           const token = localStorage.getItem('beat-seeker-token');
@@ -778,9 +998,9 @@ const handleFileDropped = async (file: File) => {
           } finally {
             clearTimeout(rankTimeout);
           }
-        } catch { /* silent - timeout or network error, proceed without ranks */ }
+        } catch { /* 握り潰し: タイムアウトやネットワーク断でも順位情報なしでレポートを続行 */ }
 
-        // Filter and sort for the report
+        // レポート対象をフィルタ（スコア or ランプが上がっただけ）、並べ替え、順位等を合成。
         const reportSongs = enrichedUpdates
           .filter(s => s.scoreIncrease > 0 || s.clearTypeImproved)
           .map(s => {
@@ -809,9 +1029,11 @@ const handleFileDropped = async (file: File) => {
             folderAnnouncements: computeFolderAnnouncements(oldFlat, allFlatAfterUpload),
         };
 
+        // 実際にスコアが上がった譜面がある、または初回アップロード（旧データ空 → 新データあり）なら
+        // 差分モーダルを開き、履歴ログも保存する。
         if (reportSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
             isDiffModalOpen.value = true;
-            // Save the history log only when there are actual score improvements
+            // 実際に更新があったときだけ履歴ログを残す（NO-OP アップロードでは履歴を増やさない）。
             try {
                 const newTierInfo = getRankInfo(accurateTotalBeatPt);
                 const newTierLabel = newTierInfo.name + (newTierInfo.tier ? ' ' + newTierInfo.tier : '');
@@ -836,8 +1058,9 @@ const handleFileDropped = async (file: File) => {
       } catch (err) {
         console.error("Auto upload failed", err);
         errorMsg.value = t('app.error.uploadFailed');
-        // フォールバック: クライアント側差分でモーダルを表示
-        // (サーバー側でスコアが保存されていた場合に備えて history log も試みる)
+        // フォールバック: サーバー通信に失敗してもクライアント側差分でモーダル表示を諦めない。
+        // 稀に「サーバーには保存されたがレスポンス取得だけ失敗」という状況があり得るため、
+        // そのケースでユーザー体験を損なわないよう history log 保存も念のため試行する。
         const guestNewTotalRatePt = calcFlatRatePt(newFlat);
         diffResult.value = {
             oldTotalBeatPt,
@@ -875,7 +1098,8 @@ const handleFileDropped = async (file: File) => {
         }
       }
     } else {
-        // Guest mode - stay with frontend calculation
+        // ゲストモード（未ログイン or 空データ）: クライアント計算の差分だけでモーダルを出す。
+        // スコアはサーバーに保存されないので履歴ログも作らない。
         const guestNewTotalRatePt = calcFlatRatePt(newFlat);
         diffResult.value = {
             oldTotalBeatPt,
@@ -895,11 +1119,12 @@ const handleFileDropped = async (file: File) => {
             isDiffModalOpen.value = true;
         }
         
+        // ゲストは DB 非永続化のため、クライアント上の scoreData を直接差し替える。
         scoreData.value = newData;
         totalBeatTierPoints.value = newTotalBeatPt;
     }
-    
-    // Always hide upload area and return to dashboard view after successful parse
+
+    // パース成功後は常にアップロードエリアを閉じ、ダッシュボードタブに戻す。
     showUploadArea.value = false;
     activeTab.value = 'dashboard';
 
@@ -911,22 +1136,34 @@ const handleFileDropped = async (file: File) => {
   }
 };
 
+/** アップロードモーダル（UnifiedImport）の表示フラグ。 */
 const showUploadArea = ref(false);
 
+/** UnifiedImport で選ばれたがまだ送信していないファイル。モーダルを閉じる瞬間にアップロードする用。 */
 const pendingScoreFile = ref<File | null>(null);
 
+/**
+ * 【関数の役割】 サイドバーの「アップロード/リセット」ボタン押下時のハンドラ。
+ *  - ログイン中: スコアは消さず、取り込みモーダルだけ開く
+ *  - ゲスト: スコア表示を丸ごとクリアしてやり直す
+ */
 const resetData = () => {
   if (isLoggedIn.value) {
-    // If logged in, we shouldn't clear the data, just show the upload area
+    // ログイン中はサーバーにデータがあるのでクリアせず、取り込みモーダルだけ出す。
     showUploadArea.value = true;
   } else {
-    // If guest, clear it to start over
+    // ゲストはローカルのみなのでクリアしてゼロからやり直せるようにする。
     scoreData.value = [];
     totalBeatTierPoints.value = 0;
   }
   errorMsg.value = '';
 };
 
+/**
+ * 【関数の役割】 UnifiedImport モーダルを閉じるときのハンドラ。
+ *  - pendingScoreFile があれば閉じると同時にそのファイルを取り込みに回す。
+ *  - なければ保存済みスコアを再取得して画面を最新化する。
+ */
 const handleUnifiedClose = async () => {
   showUploadArea.value = false;
   errorMsg.value = '';
@@ -941,11 +1178,16 @@ const handleUnifiedClose = async () => {
 </script>
 
 <template>
+  <!-- パスワード再設定画面は独立ビューとして丸ごと差し替え、通常 UI は描画しない -->
   <ResetPasswordView v-if="isResetPasswordPage" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
-    <!-- April Fools Overlay -->
+    <!-- ============================================================ -->
+    <!-- エイプリルフール限定オーバーレイ（常時マウントだが中身は日付判定） -->
+    <!-- ============================================================ -->
     <AprilFoolsOverlay />
-    <!-- Sidebar Component -->
+    <!-- ============================================================ -->
+    <!-- サイドバー（モバイル時はオフキャンバス、PC 時は常時 lg:ml-72） -->
+    <!-- ============================================================ -->
     <Sidebar 
       v-model:is-open="isSidebarOpen"
       v-model:active-tab="activeTab"
@@ -961,7 +1203,10 @@ const handleUnifiedClose = async () => {
       @upload="resetData"
     />
 
-    <!-- Modals -->
+    <!-- ============================================================ -->
+    <!-- グローバルモーダル群（アプリ全体から開閉される共有モーダル）        -->
+    <!-- ログイン / オンボーディング / プロフィール編集 / アップロード結果 / 管理者一覧 -->
+    <!-- ============================================================ -->
     <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" @registered="isOnboardingOpen = true" />
     <OnboardingModal :is-open="isOnboardingOpen" :deferred-prompt="deferredPrompt" @close="isOnboardingOpen = false" />
     <ProfileEditModal :is-open="isProfileModalOpen" @close="isProfileModalOpen = false" />
@@ -977,8 +1222,12 @@ const handleUnifiedClose = async () => {
       @select="handleSelectUser"
     />
 
+    <!-- ============================================================ -->
+    <!-- メインコンテナ（サイドバー右側の本文領域）                        -->
+    <!-- lg:ml-72 でサイドバーぶんのオフセットを確保                      -->
+    <!-- ============================================================ -->
     <div class="flex-1 flex flex-col h-screen overflow-x-hidden overflow-y-auto relative custom-scrollbar lg:ml-72">
-      <!-- Header -->
+      <!-- ========== ヘッダー: ロゴ / PC タブナビ / ダーク切替 / 通知 / アバター ========== -->
       <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm transition-colors duration-200 h-16 shrink-0">
         <div class="max-w-7xl lg:max-w-none mx-auto lg:mx-0 px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div class="flex items-center gap-4">
@@ -1146,9 +1395,9 @@ const handleUnifiedClose = async () => {
         </div>
       </header>
 
-      <!-- Main Content -->
+      <!-- ========== メインコンテンツ（タブ別のビューをここに描画） ========== -->
       <main class="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <!-- Mobile Navigation Tabs (Body Portion) -->
+        <!-- モバイル用ナビゲーションタブ（PC ではヘッダー内に展開される） -->
         <nav class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
           <button 
             @click="activeTab = 'dashboard'"
@@ -1237,7 +1486,8 @@ const handleUnifiedClose = async () => {
             {{ t('nav.rankComparison') }}
           </button>
         </nav>
-        <!-- Admin Viewing Banner -->
+        <!-- ========== 閲覧中バナー: 他ユーザー/TOPランカー閲覧時に最上部へ固定表示 ========== -->
+        <!-- 「自分のデータに戻る」「フレンド申請」「仮想ライバル登録」などの操作ボタンを配置 -->
         <div v-if="viewingUserId || viewingMode === 'topRanker'" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-indigo-500 to-purple-600 p-4 rounded-xl shadow-md text-white border border-indigo-400 dark:border-indigo-700 animate-fade-in relative overflow-hidden shrink-0">
           <div class="absolute right-0 top-0 bottom-0 w-32 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 to-transparent pointer-events-none"></div>
           <div class="flex items-center gap-3 relative z-10 w-full justify-center sm:justify-start">
@@ -1307,7 +1557,7 @@ const handleUnifiedClose = async () => {
           </div>
         </div>
 
-        <!-- Friend Request Modal -->
+        <!-- ========== フレンド申請モーダル: メッセージを添えて申請を送信する ========== -->
         <div v-if="isFriendRequestModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in" @click.self="isFriendRequestModalOpen = false">
           <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700">
             <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
@@ -1352,7 +1602,7 @@ const handleUnifiedClose = async () => {
           </div>
         </div>
         
-        <!-- Import Modal -->
+        <!-- ========== スコア取り込みモーダル: ブックマークレットコード案内＋ CSV ドロップ ========== -->
       <div v-if="showUploadArea && isLoggedIn" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="handleUnifiedClose">
         <div class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
           <div class="flex justify-between items-center mb-4">
@@ -1367,11 +1617,16 @@ const handleUnifiedClose = async () => {
         </div>
       </div>
 
-      <!-- Main Views -->
+      <!-- ============================================================ -->
+      <!-- ルータービュー相当: activeTab による条件付き描画ブロック        -->
+      <!-- 各タブが独立したビューコンポーネントを呼び出す                 -->
+      <!-- ============================================================ -->
+        <!-- 更新履歴 -->
         <template v-if="activeTab === 'changelog'">
           <Changelog class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
+        <!-- ランキング: 他ユーザーへの導線を 3 種類（公開/非公開/TOPランカー）発火する -->
         <template v-else-if="activeTab === 'ranking'">
           <RankingList
             class="w-full max-w-5xl mx-auto animate-fade-in"
@@ -1381,42 +1636,52 @@ const handleUnifiedClose = async () => {
           />
         </template>
 
+        <!-- 管理者専用: 曲別順位管理 -->
         <template v-else-if="activeTab === 'admin-song-ranks'">
           <AdminSongRanksView class="w-full max-w-5xl mx-auto" />
         </template>
-        
+
+        <!-- 利用規約 -->
         <template v-else-if="activeTab === 'terms'">
           <Terms class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
-        
+
+        <!-- アプリについて -->
         <template v-else-if="activeTab === 'about'">
           <About class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
+        <!-- ARENA: 対戦ログ -->
         <template v-else-if="activeTab === 'arena'">
           <ArenaView class="w-full max-w-5xl mx-auto animate-fade-in" :viewing-user-id="viewingUserId" />
         </template>
 
+        <!-- Tier Voting: 難易度投票 -->
         <template v-else-if="activeTab === 'tier-voting'">
           <TierVotingView class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
+        <!-- ARCADE アシスト（ログイン必須） -->
         <template v-else-if="activeTab === 'arcade-assist'">
           <ArcadeAssistView class="w-full max-w-lg mx-auto animate-fade-in" />
         </template>
 
+        <!-- 曲別平均スコア閲覧 -->
         <template v-else-if="activeTab === 'song-avg'">
           <SongAverageView class="w-full max-w-7xl mx-auto animate-fade-in" />
         </template>
 
+        <!-- 非公式難易度表 -->
         <template v-else-if="activeTab === 'diff-table'">
           <DifficultyTableView class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
+        <!-- ランク比較（特定ユーザーのみ表示） -->
         <template v-else-if="activeTab === 'rank-comparison'">
           <RankComparisonView class="w-full max-w-6xl mx-auto animate-fade-in" />
         </template>
 
+        <!-- スコア予測: サポーター限定機能。非サポーターには課金誘導カードを表示 -->
         <template v-else-if="activeTab === 'score-prediction'">
           <div v-if="!user?.isSupporter" class="w-full max-w-2xl mx-auto animate-fade-in">
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center shadow-sm">
@@ -1446,6 +1711,7 @@ const handleUnifiedClose = async () => {
           />
         </template>
 
+        <!-- プロフィール: 統計ダッシュボード（グラフ多数） -->
         <template v-else-if="activeTab === 'profile'">
           <ProfileDashboard
             class="w-full max-w-6xl"
@@ -1453,6 +1719,7 @@ const handleUnifiedClose = async () => {
           />
         </template>
 
+        <!-- アップロード履歴: 過去の差分ログ一覧 -->
         <template v-else-if="activeTab === 'history'">
           <UploadHistory
             class="w-full max-w-6xl animate-fade-in"
@@ -1460,6 +1727,7 @@ const handleUnifiedClose = async () => {
           />
         </template>
 
+        <!-- フレンド一覧 + 申請管理 -->
         <template v-else-if="activeTab === 'friends'">
           <Friends
             class="w-full max-w-6xl animate-fade-in"
@@ -1468,8 +1736,9 @@ const handleUnifiedClose = async () => {
           />
         </template>
 
+        <!-- デフォルト（dashboard / table）: ヒーロー → CSV ドロップ → スコア結果 の 3 段構え -->
         <template v-else>
-          <!-- Hero Section (Visible only when no data) -->
+          <!-- ヒーローセクション: スコア未登録時のみ表示する導入文 -->
           <div v-if="!scoreData.length && viewingMode !== 'private'" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
             <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight sm:text-5xl mb-4">
               {{ t('app.hero.title') }}
@@ -1478,7 +1747,7 @@ const handleUnifiedClose = async () => {
               {{ t('app.hero.subtitle') }}
             </p>
 
-            <!-- PWA Install Banner -->
+            <!-- PWA インストールバナー: beforeinstallprompt を受けたときだけ出現 -->
             <div v-if="showInstallBanner" class="mt-8 p-6 bg-blue-600 rounded-2xl shadow-xl text-white flex flex-col sm:flex-row items-center gap-4 animate-in zoom-in duration-300">
               <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1496,7 +1765,7 @@ const handleUnifiedClose = async () => {
             </div>
           </div>
 
-          <!-- Loading State -->
+          <!-- ローディング表示: CSV 解析中 / スコア取得中 / 認証中のいずれかで表示 -->
           <div v-if="isParsing || isFetching || authLoading" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
             <div class="w-full flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
               <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
@@ -1504,10 +1773,10 @@ const handleUnifiedClose = async () => {
             </div>
           </div>
 
-          <!-- Empty State (no data yet) -->
+          <!-- エンプティ状態: CSV ドロップエリアを中央に表示（非公開ユーザー閲覧時は出さない） -->
           <div v-else-if="!scoreData.length && viewingMode !== 'private'" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
             <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
-            <!-- Error Message -->
+            <!-- エラーメッセージバナー -->
             <div
               v-if="errorMsg"
               class="w-full mt-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 animate-fade-in"
@@ -1519,9 +1788,9 @@ const handleUnifiedClose = async () => {
             </div>
           </div>
 
-          <!-- Score Results View -->
+          <!-- スコア結果表示: dashboard / table タブを v-show で切り替える（マウント状態を維持） -->
           <div v-if="scoreData.length > 0 || viewingMode === 'private'" class="w-full flex flex-col items-center animate-fade-in">
-            <!-- Dashboard Tab -->
+            <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
               <ScoreDashboard
                 :scores="scoreData"
@@ -1535,7 +1804,7 @@ const handleUnifiedClose = async () => {
               />
             </div>
 
-            <!-- Table Tab -->
+            <!-- スコア一覧タブ: ScoreSummary が BEAT-TIER / RATE-TIER モード切替と詳細モーダルを担当 -->
             <ScoreSummary
               v-show="activeTab === 'table'"
               :scores="scoreData"
@@ -1550,7 +1819,7 @@ const handleUnifiedClose = async () => {
         </template>
       </main>
 
-      <!-- Footer -->
+      <!-- ========== フッター: コピーライト / 主要ページへの導線 ========== -->
       <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 transition-colors duration-200 shrink-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p class="text-sm text-slate-500 dark:text-slate-400">
@@ -1564,7 +1833,10 @@ const handleUnifiedClose = async () => {
         </div>
       </footer>
     </div>
-  <!-- Update banner -->
+  <!-- ============================================================ -->
+  <!-- グローバルバナー/モーダル（Teleport で body 直下に描画）         -->
+  <!-- ============================================================ -->
+  <!-- アプリ更新バナー: Service Worker が新バージョン検知時に下部に固定表示 -->
   <Teleport to="body">
     <div
       v-if="hasUpdate"
@@ -1584,7 +1856,7 @@ const handleUnifiedClose = async () => {
       </button>
     </div>
   </Teleport>
-  <!-- Ko-fi Confirmation Modal -->
+  <!-- Ko-fi 確認モーダル: サポーター向けに限定トークンをコピーしてから Ko-fi を開く導線 -->
   <Teleport to="body">
     <Transition
       enter-active-class="transition-opacity duration-200"

@@ -1,4 +1,20 @@
 <script setup lang="ts">
+/**
+ * 【Viewの役割】 アーケードモード。今プレイすべき譜面をユースケース別に提案する画面。
+ *
+ * 機能（4モード切替）:
+ *  - Rival:   フレンドを選んで「自分が負けている曲」を差分順に列挙。
+ *  - Border:  AA / AAA / MAX- のスコアボーダー目前曲を並べ、ちょい伸ばしを支援。
+ *  - Beat-PT: BEAT-Tier ポイントを上げるために次に伸ばすべき曲候補。単曲目標 Pt も指定可。
+ *  - Rate-PT: RATE-Tier ポイントを上げるための曲候補（ANOTHER/LEGGENDARIA 限定）。
+ *  - 共通フィルタ: Lv.11 / Lv.12 のトグル、上位50件だけを表示。
+ *
+ * 依存:
+ *  - `useScores.fetchMyScores` — 自分のスコア取得。
+ *  - `useFriends` — フレンド一覧＆フレンドスコア取得。
+ *  - `utils/beatTier` — Tier ポイント計算。
+ *  - `utils/scoreData.flattenScores` — ScoreData（曲ごと）を ScoreRecord（譜面ごと）にフラット化。
+ */
 import { ref, computed, onMounted, watch } from 'vue';
 import { useScores } from '../composables/useScores';
 import { useFriends } from '../composables/useFriends';
@@ -9,9 +25,12 @@ import { calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, calculatePoints } 
 
 const { t } = useI18n();
 
+/** モード選択 */
 type Mode = 'rival' | 'border' | 'beat-pt' | 'rate-pt';
+/** Border モードのターゲットグレード */
 type BorderTarget = 'aa' | 'aaa' | 'max-minus';
 
+/** 推奨カード1枚ぶんの表示データ（どのモードでも共通型） */
 interface SongCard {
   key: string;
   title: string;
@@ -34,23 +53,39 @@ interface SongCard {
 const { fetchMyScores } = useScores();
 const { fetchFriends, fetchFriendScores, friends } = useFriends();
 
+/** 初期データロード中フラグ */
 const isLoading = ref(true);
+/** 自分のスコア（ScoreRecord にフラット化済み） */
 const myScores = ref<ScoreRecord[]>([]);
+/** 現在のモード。null なら選択画面 */
 const mode = ref<Mode | null>(null);
+/** Lv.11 譜面を対象に含めるか */
 const showLv11 = ref(true);
+/** Lv.12 譜面を対象に含めるか */
 const showLv12 = ref(true);
+/** Rival モードで選択中のフレンドID */
 const selectedFriendId = ref<number | null>(null);
+/** 選択中フレンドのスコア */
 const friendScores = ref<ScoreRecord[]>([]);
+/** フレンドスコア取得中フラグ */
 const isFriendLoading = ref(false);
+/** Rival 並び替え: 接戦順 / 差が大きい順 */
 const rivalSortClosest = ref(true);
+/** Border モードの目標グレード */
 const borderTarget = ref<BorderTarget>('aa');
+/** Beat-PT 目標ポイント（単曲目標） */
 const beatPtTarget = ref<number | null>(null);
+/** Rate-PT 目標ポイント（単曲目標） */
 const ratePtTarget = ref<number | null>(null);
 
+/** AA のスコア率下限（%） */
 const AA_RATE = 77.77;
+/** AAA のスコア率下限（%） */
 const AAA_RATE = 88.88;
+/** MAX- のスコア率下限（%） */
 const MAX_MINUS_RATE = 94.44;
 
+/** BEAT-Tier のボーナス区切り。次の閾値達成までの曲抽出に使う */
 const BEAT_BONUS_THRESHOLDS = [
   { rate: 77.78, label: 'AA' },
   { rate: 88.89, label: 'AAA' },
@@ -59,11 +94,15 @@ const BEAT_BONUS_THRESHOLDS = [
 ] as const;
 
 
-// Only friends whose scores are public (privacyLevel !== 2)
+/** privacyLevel=2（スコア非公開）のフレンドを除外した選択肢 */
 const publicFriends = computed(() =>
   friends.value.filter(f => (f.privacyLevel ?? 0) !== 2)
 );
 
+/**
+ * 【関数の役割】 API が返すフラットなスコア配列を、曲単位＋難易度別の ScoreData 構造に組み直す。
+ * フレンドスコアは別形式で返ってくるため、一旦自分用と同じ形へ寄せる。
+ */
 function groupFriendScores(flatScores: any[]): ScoreData[] {
   const grouped = new Map<string, any>();
   const emptyDiff = (): DifficultyStats => ({
@@ -92,11 +131,20 @@ function groupFriendScores(flatScores: any[]): ScoreData[] {
   return Array.from(grouped.values());
 }
 
+/**
+ * 【関数の役割】 スコアレート閾値を越えるための最小スコアを算出。
+ * `floor(max * t / 100) + 1` で、「ちょうどそのラインを越える」最小値を返す。
+ */
 function borderScore(maxScore: number, threshold: number): number {
   return Math.floor(maxScore * threshold / 100) + 1;
 }
 
-// Binary search: find the scoreRate that gives exactly targetPt BEAT-PT for a given informalRank
+/**
+ * 【関数の役割】 ある非公式ランクで、指定 BEAT-PT ちょうどを与えるスコアレートを二分探索で求める。
+ * `calculatePoints` は単調増加なので二分探索で精度よく逆算できる。
+ * @param targetPt 目標ポイント
+ * @param informalRank 非公式ランク（未定なら 100% で打ち切り）
+ */
 function findScoreRateForBeatPt(targetPt: number, informalRank: string | undefined): number {
   if (!informalRank) return 100;
   let lo = 66.667, hi = 100;
@@ -108,6 +156,7 @@ function findScoreRateForBeatPt(targetPt: number, informalRank: string | undefin
   return hi;
 }
 
+/** Beat-PT 目標に対し、現時点で達成済みの曲数を集計（達成状況バッジ用） */
 const beatPtAchievedCount = computed(() => {
   if (!beatPtTarget.value || beatPtTarget.value <= 0) return null;
   const eligible = myScores.value.filter(s => s.informalRank && s.maxScore > 0);
@@ -115,6 +164,7 @@ const beatPtAchievedCount = computed(() => {
   return { achieved: achieved.length, total: eligible.length };
 });
 
+/** Rate-PT 目標に対し、現時点で達成済みの曲数を集計 */
 const ratePtAchievedCount = computed(() => {
   if (!ratePtTarget.value || ratePtTarget.value <= 0) return null;
   const eligible = myScores.value.filter(s =>
@@ -124,6 +174,7 @@ const ratePtAchievedCount = computed(() => {
   return { achieved: achieved.length, total: eligible.length };
 });
 
+// マウント時に自分のスコアとフレンド一覧を並列取得する
 onMounted(async () => {
   isLoading.value = true;
   try {
@@ -135,6 +186,7 @@ onMounted(async () => {
   fetchFriends();
 });
 
+// フレンド選択変更時に、そのフレンドのスコアを取得する（空選択時はクリア）
 watch(selectedFriendId, async (id) => {
   if (!id) { friendScores.value = []; return; }
   isFriendLoading.value = true;
@@ -146,6 +198,7 @@ watch(selectedFriendId, async (id) => {
   }
 });
 
+/** Lv.11/Lv.12 チェックボックスでフィルタした自スコア */
 const levelFiltered = computed(() =>
   myScores.value.filter(s =>
     (s.difficultyLevel === 11 && showLv11.value) ||
@@ -153,6 +206,16 @@ const levelFiltered = computed(() =>
   )
 );
 
+/**
+ * 【主要 computed】 4モード共通の推奨カード配列を返す。
+ *
+ * 処理の流れ:
+ *  - Rival:   フレンドスコアと照合し「負けている曲」だけ抽出して差分順に並べる。
+ *  - Border:  目標グレードに達していない曲を「必要スコア差」で並べる。
+ *  - Beat-PT: 目標 Pt 指定時は単曲目標、未指定時は「次のスコア率閾値」を狙う。
+ *  - Rate-PT: 同じロジックを ANOTHER/LEGGENDARIA 限定・Rate 閾値ベースで適用。
+ *  - 各モード共通で上位50件にトリムする（表示パフォーマンス配慮）。
+ */
 const suggestions = computed((): SongCard[] => {
   if (!mode.value) return [];
   const base = levelFiltered.value;
@@ -316,6 +379,7 @@ const suggestions = computed((): SongCard[] => {
   return [];
 });
 
+/** 現在のモードラベル（結果ヘッダに表示） */
 const modeLabel = computed((): string => {
   if (!mode.value) return '';
   return {
@@ -326,6 +390,7 @@ const modeLabel = computed((): string => {
   }[mode.value] ?? '';
 });
 
+/** 現在のモードの並び替えルール説明文 */
 const modeSortNote = computed((): string => {
   if (!mode.value) return '';
   if (mode.value === 'rival') return rivalSortClosest.value ? t('arcade.sortNoteRivalClosest') : t('arcade.sortNoteRivalWidest');
@@ -336,6 +401,7 @@ const modeSortNote = computed((): string => {
   }[mode.value] ?? '';
 });
 
+/** 選択中フレンドオブジェクト（空メッセージ時の名前表示用） */
 const selectedFriend = computed(() =>
   friends.value.find(f => f.id === selectedFriendId.value) ?? null
 );
@@ -344,7 +410,7 @@ const selectedFriend = computed(() =>
 <template>
   <div class="min-h-screen bg-slate-50 dark:bg-slate-900 pb-12">
 
-    <!-- Sticky Filter Bar -->
+    <!-- スティッキーなフィルタバー: 画面上端に固定されタイトルとLv.11/12トグルを表示 -->
     <div class="sticky top-0 z-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
       <div class="px-4 py-3 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2">
@@ -354,7 +420,7 @@ const selectedFriend = computed(() =>
           <span class="font-black text-slate-800 dark:text-white text-sm tracking-wide">{{ t('arcade.title') }}</span>
         </div>
 
-        <!-- Level Checkboxes -->
+        <!-- レベル絞り込みチェックボックス -->
         <div class="flex items-center gap-3">
           <label class="flex items-center gap-1 cursor-pointer select-none">
             <input type="checkbox" v-model="showLv11" class="w-4 h-4 rounded accent-violet-500 cursor-pointer" />
@@ -370,7 +436,7 @@ const selectedFriend = computed(() =>
 
     <div class="px-4 py-5 space-y-5">
 
-      <!-- Loading -->
+      <!-- 初期ロード中のスピナー -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 gap-4">
         <div class="w-10 h-10 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin"></div>
         <p class="text-slate-500 font-bold text-sm">{{ t('arcade.loading') }}</p>
@@ -378,12 +444,12 @@ const selectedFriend = computed(() =>
 
       <template v-else>
 
-        <!-- Mode Selection Grid (1x2) -->
+        <!-- モード選択: 2x2 グリッド。同じモード再クリックで null に戻す -->
         <div>
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">{{ t('arcade.chooseGoal') }}</p>
           <div class="grid grid-cols-2 gap-3">
 
-            <!-- BEAT-PT -->
+            <!-- BEAT-PT ボタン（紫） -->
             <button
               @click="mode = mode === 'beat-pt' ? null : 'beat-pt'"
               class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
@@ -395,7 +461,7 @@ const selectedFriend = computed(() =>
               <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.beatPtBtn') }}</span>
             </button>
 
-            <!-- RATE-PT -->
+            <!-- RATE-PT ボタン（藍） -->
             <button
               @click="mode = mode === 'rate-pt' ? null : 'rate-pt'"
               class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
@@ -407,7 +473,7 @@ const selectedFriend = computed(() =>
               <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.ratePtBtn') }}</span>
             </button>
 
-            <!-- Rival -->
+            <!-- Rival ボタン（赤） -->
             <button
               @click="mode = mode === 'rival' ? null : 'rival'"
               class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
@@ -419,7 +485,7 @@ const selectedFriend = computed(() =>
               <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.rivalBtn') }}</span>
             </button>
 
-            <!-- Border -->
+            <!-- Border ボタン（琥珀） -->
             <button
               @click="mode = mode === 'border' ? null : 'border'"
               class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
@@ -434,7 +500,7 @@ const selectedFriend = computed(() =>
           </div>
         </div>
 
-        <!-- Rival: Friend Selector -->
+        <!-- Rival モード: フレンド選択＋並び替え切替 -->
         <div v-if="mode === 'rival'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
           <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.selectRival') }}</p>
           <select
@@ -445,7 +511,7 @@ const selectedFriend = computed(() =>
             <option v-for="f in publicFriends" :key="f.id" :value="f.id">{{ f.displayName }}</option>
           </select>
 
-          <!-- Sort Toggle -->
+          <!-- 並び替えトグル: 接戦順 / 差が大きい順 -->
           <div v-if="selectedFriendId" class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-500">{{ t('arcade.sort') }}</span>
             <div class="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 text-xs font-bold">
@@ -462,14 +528,14 @@ const selectedFriend = computed(() =>
             </div>
           </div>
 
-          <!-- Loading friend scores -->
+          <!-- フレンドスコア取得中のインジケータ -->
           <div v-if="isFriendLoading" class="flex items-center gap-2 text-xs text-slate-500 font-bold">
             <div class="w-4 h-4 border-2 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
             {{ t('arcade.loadingScores') }}
           </div>
         </div>
 
-        <!-- Border: Target Selector -->
+        <!-- Border モード: 目標グレード選択（AA/AAA/MAX-） -->
         <div v-if="mode === 'border'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
           <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.borderTarget') }}</p>
           <select
@@ -482,7 +548,7 @@ const selectedFriend = computed(() =>
           </select>
         </div>
 
-        <!-- BEAT-PT: Target Input -->
+        <!-- BEAT-PT モード: 単曲目標 Pt 入力（未入力なら次の閾値狙いに自動切替） -->
         <div v-if="mode === 'beat-pt'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
           <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.beatPtTargetLabel') }}</p>
           <input
@@ -498,7 +564,7 @@ const selectedFriend = computed(() =>
           </p>
         </div>
 
-        <!-- RATE-PT: Target Input -->
+        <!-- RATE-PT モード: 単曲目標 Pt 入力 -->
         <div v-if="mode === 'rate-pt'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
           <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.ratePtTargetLabel') }}</p>
           <input
@@ -514,9 +580,9 @@ const selectedFriend = computed(() =>
           </p>
         </div>
 
-        <!-- Results -->
+        <!-- 結果表示: ヘッダ＋空状態メッセージ＋カードリスト -->
         <template v-if="mode">
-          <!-- Header -->
+          <!-- 結果ヘッダ: モード名・ソート説明・件数 -->
           <div class="flex items-center justify-between">
             <div>
               <p class="font-black text-slate-800 dark:text-white text-sm">{{ modeLabel }}</p>
@@ -527,7 +593,7 @@ const selectedFriend = computed(() =>
             </span>
           </div>
 
-          <!-- Empty States -->
+          <!-- 空状態メッセージ: モードごとに文言を変える -->
           <div v-if="mode === 'rival' && !selectedFriendId" class="text-center py-12">
             <p class="text-4xl mb-3">👆</p>
             <p class="text-sm font-bold text-slate-500">{{ t('arcade.pickFriendHint') }}</p>
@@ -543,24 +609,24 @@ const selectedFriend = computed(() =>
             <p class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t('arcade.noSongs') }}</p>
           </div>
 
-          <!-- Song Cards -->
+          <!-- 推奨曲カードリスト: 上位50件まで -->
           <div v-else-if="suggestions.length > 0" class="space-y-2">
             <div
               v-for="(s, i) in suggestions"
               :key="s.key"
               class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-3.5 flex items-start gap-3 shadow-sm"
             >
-              <!-- Rank Number -->
+              <!-- 順位番号: ソート順に 1 から振る -->
               <div class="shrink-0 w-6 text-center text-[11px] font-black text-slate-400 dark:text-slate-500 pt-0.5">
                 {{ i + 1 }}
               </div>
 
-              <!-- Main Content -->
+              <!-- メインコンテンツ: タイトル・バッジ・スコア情報・サブラベル -->
               <div class="flex-1 min-w-0">
-                <!-- Title -->
+                <!-- 曲タイトル -->
                 <p class="font-black text-slate-900 dark:text-white text-sm leading-tight truncate">{{ s.title }}</p>
 
-                <!-- Badges Row -->
+                <!-- バッジ列: 難易度・非公式ランク・DJ LEVEL -->
                 <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
                   <span class="px-1.5 py-0.5 rounded text-[10px] font-black" :class="s.difficultyColor">
                     {{ s.difficultyName.slice(0, 3) }} {{ s.difficultyLevel }}
@@ -573,7 +639,7 @@ const selectedFriend = computed(() =>
                   </span>
                 </div>
 
-                <!-- Score Row -->
+                <!-- スコア行: 現在スコア／最大スコア／レート -->
                 <div class="flex items-baseline gap-2 mt-1.5">
                   <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
                     {{ s.score.toLocaleString() }}
@@ -584,11 +650,11 @@ const selectedFriend = computed(() =>
                   </span>
                 </div>
 
-                <!-- Sub Label -->
+                <!-- サブラベル: モードごとに「現在値→目標値」等の補足情報 -->
                 <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5">{{ s.subLabel }}</p>
               </div>
 
-              <!-- Gap Label -->
+              <!-- ギャップラベル: 目標までの差分を色付きバッジで表示 -->
               <div class="shrink-0 text-right">
                 <span
                   class="inline-block px-2.5 py-1 rounded-xl text-xs font-black whitespace-nowrap"

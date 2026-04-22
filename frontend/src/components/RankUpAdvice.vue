@@ -73,6 +73,23 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 次のティアまで残 pt を埋めるのに効率の良い楽曲を推薦するパネル。
+ * - props.flatScores（全譜面スコア）と totalPoints（現在の Beat-PT 合計）から、
+ *   次ランクまでの差分 nextRankGap を算出する
+ * - 各譜面ごとにスコア加算（AA/AAA/MAX- の達成ボーダー越えを優先）を試算して ptGain を計算
+ * - 効率（ptGain / scoreIncrease）の高い順に、上限 19 曲または gap を超えるまで選出
+ * - TOP100 外の譜面は threshold（100 位のスコア）を基準に「TOP100 に入った後の増分」で評価
+ *
+ * 【アルゴリズム概要】
+ *   1. sortedScored: beatTierPoints > 0 の曲を降順ソート（TOP100 判定用）
+ *   2. getScoreCap: 自分の中の順位に応じて score 加算上限を 10〜50 pts で制限（上位曲は伸ばしづらい補正）
+ *   3. buildCandidates: 各曲で最も近いボーダー（AA/AAA/MAX-）を優先的に狙い、無ければ +cap
+ *   4. pickBestSuggestions: 効率降順で貪欲法、gap を埋めきるまで採用
+ *
+ * @prop flatScores フラットなスコアレコード配列。
+ * @prop totalPoints 現在の Beat-PT 合計。次ランクの gap 計算に使用。
+ */
 import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
@@ -85,33 +102,37 @@ const props = defineProps<{
   totalPoints: number;
 }>();
 
-// ── Top-100 state ────────────────────────────────────────────────────────
+// ── Top-100 状態 ────────────────────────────────────────────────────────
 
+/** 【computed の役割】 自分の Beat-PT TOP 順にソートした譜面リスト（0 pt の譜面は除外）。 */
 const sortedScored = computed(() =>
   props.flatScores
     .filter(s => s.beatTierPoints > 0)
     .sort((a, b) => b.beatTierPoints - a.beatTierPoints)
 );
 
+/** 【computed の役割】 TOP100 圏内の最低 pt（100 位の pt）。未達の曲が TOP100 に入るために超えるべきライン。 */
 const threshold = computed(() => {
   const s = sortedScored.value;
   return s.length >= 100 ? s[99].beatTierPoints : 0;
 });
 
+/** 【computed の役割】 TOP100 圏内の譜面キーセット（"title|difficultyName"）。候補評価時の判定に使用。 */
 const top100Set = computed(() =>
   new Set(sortedScored.value.slice(0, 100).map(s => `${s.title}|${s.difficultyName}`))
 );
 
-// ── Rank-up gap ──────────────────────────────────────────────────────────
+// ── ランクアップまでの差分 ──────────────────────────────────────────────
 
+/** 【computed の役割】 次ランクの必要 pt と現在 pt の差。既に最高位なら 0 を返す。 */
 const nextRankGap = computed(() => {
   const { nextRank } = getNextRankInfo(props.totalPoints);
   if (!nextRank) return 0;
   return Math.max(0, nextRank.minPoints - props.totalPoints);
 });
 
-// ── Improvement thresholds (AA / AAA / MAX- give bonus points) ───────────
-// Each threshold slightly above the bonus trigger point so the bonus is included.
+// ── スコア向上の目標ボーダー（AA / AAA / MAX- を超えるとボーナス pt が付く） ─
+// ボーナス判定が確実に含まれるよう、実境界値よりわずかに上の rate を使う。
 const IMPROVEMENT_THRESHOLDS = [
   { rate: 66.67, label: t('advice.thresholdBorder') },
   { rate: 77.78, label: t('advice.thresholdAa') },
@@ -119,28 +140,38 @@ const IMPROVEMENT_THRESHOLDS = [
   { rate: 94.45, label: t('advice.thresholdMax') },
 ];
 
+/** 提案 1 件の構造（曲、目標ラベル、増加量、予想 Beat-PT 増分）。 */
 interface Suggestion {
   song: ScoreRecord;
-  targetLabel: string;   // highest border crossed, or ''
+  targetLabel: string;   // 越える最大のボーダー名（なければ空文字）
   crossesBorder: boolean;
-  scoreIncrease: number; // raw score points added (≤ 50)
-  newScoreRate: number;  // score rate after improvement
-  ptGain: number;        // net Beat-PT gain
+  scoreIncrease: number; // 加算するスコア量（≤ 50）
+  newScoreRate: number;  // 加算後のスコアレート %
+  ptGain: number;        // 実質 Beat-PT 増分
 }
 
-// Score cap decreases for songs that are already high in your personal ranking,
-// since those songs are harder to push further.
+/**
+ * 【関数の役割】 曲ごとの score 加算上限 (cap) を、自分の中の順位から決める。
+ * 上位曲ほど伸ばしづらいため狭く、TOP100 外は 50 点まで自由に見積もる。
+ */
 function getScoreCap(song: ScoreRecord): number {
   const idx = sortedScored.value.findIndex(
     s => s.title === song.title && s.difficultyName === song.difficultyName
   );
-  if (idx < 0 || idx >= 100) return 50; // outside top-100
-  if (idx < 10) return 10;              // #1-10: very hard to improve
-  if (idx < 25) return 20;             // #11-25
-  if (idx < 50) return 35;             // #26-50
-  return 50;                            // #51-100
+  if (idx < 0 || idx >= 100) return 50; // TOP100 外は最大 50 点
+  if (idx < 10) return 10;              // 1〜10 位: 伸ばしにくい
+  if (idx < 25) return 20;              // 11〜25 位
+  if (idx < 50) return 35;              // 26〜50 位
+  return 50;                            // 51〜100 位
 }
 
+/**
+ * 【関数の役割】 全譜面を走査して、Beat-PT を稼げる候補 Suggestion 配列を組み立てる。
+ * - 既に満点 or 非公式ランク無 → スキップ
+ * - cap 以内で届く一番高いボーダー（AA → AAA → MAX-）を目標に採用
+ * - TOP100 圏外の場合は threshold (100 位) を基準に純増分を計算
+ * - 0.05 pt 未満の候補は UI 上 "+0.0 pt" と表示されるため除外
+ */
 function buildCandidates(): Suggestion[] {
   const candidates: Suggestion[] = [];
   const th = threshold.value;
@@ -151,7 +182,7 @@ function buildCandidates(): Suggestion[] {
 
     const cap = getScoreCap(song);
 
-    // Find the nearest border reachable within cap pts; fall back to +cap if none
+    // 最も近いボーダーを探索。届かなければ +cap で据え置き。
     let scoreIncrease = cap;
     let targetLabel = '';
     let crossesBorder = false;
@@ -179,14 +210,16 @@ function buildCandidates(): Suggestion[] {
     const inTop100 = top100Set.value.has(`${song.title}|${song.difficultyName}`);
     let netGain: number;
     if (inTop100) {
+      // TOP100 内は rawGain がそのまま合計 pt に反映される。
       netGain = rawGain;
     } else if (th > 0) {
+      // TOP100 外は「100 位 pt を押し出した分」だけが純増分になる。
       netGain = newBeatPT - th;
     } else {
       netGain = rawGain;
     }
 
-    if (netGain < 0.05) continue; // skip if gain would display as 0.0 pt
+    if (netGain < 0.05) continue; // 表示上 0.0 pt になる候補は捨てる
 
     candidates.push({ song, targetLabel, crossesBorder, scoreIncrease: actualIncrease, newScoreRate, ptGain: netGain });
   }
@@ -194,6 +227,10 @@ function buildCandidates(): Suggestion[] {
   return candidates;
 }
 
+/**
+ * 【関数の役割】 候補群から効率順に採用し、gap が埋まるまで 19 曲以内で選ぶ貪欲選択。
+ * 同効率ならボーダー越え（AA/AAA/MAX-）の候補を優先、それも同じなら ptGain の大きい方。
+ */
 function pickBestSuggestions(): Suggestion[] {
   const gap = nextRankGap.value;
   if (gap <= 0) return [];
@@ -201,8 +238,7 @@ function pickBestSuggestions(): Suggestion[] {
   const candidates = buildCandidates();
   if (candidates.length === 0) return [];
 
-  // Sort by efficiency: ptGain per scoreIncrease (descending).
-  // Border-crossing songs (AA/AAA/MAX-) get priority among ties.
+  // 効率（ptGain / scoreIncrease）で降順、タイなら crossesBorder を優先、さらに ptGain 降順。
   const sorted = [...candidates].sort((a, b) => {
     const effA = a.ptGain / a.scoreIncrease;
     const effB = b.ptGain / b.scoreIncrease;
@@ -211,7 +247,7 @@ function pickBestSuggestions(): Suggestion[] {
     return b.ptGain - a.ptGain;
   });
 
-  // Pick most efficient songs until the gap is covered (up to 19 songs).
+  // 効率の高い曲から順に、gap を超えるまで採用（最大 19 曲）。
   const result: Suggestion[] = [];
   let accumulated = 0;
 
@@ -225,13 +261,17 @@ function pickBestSuggestions(): Suggestion[] {
   return result;
 }
 
+/** 表示用の提案リスト（onMounted + watch で最新化）。 */
 const suggestions = ref<Suggestion[]>([]);
 
+// 初回マウント時に 1 回算出。
 onMounted(() => { suggestions.value = pickBestSuggestions(); });
+// props.flatScores / totalPoints が変化するたびに再算出（deep は不要、参照変更のみ監視）。
 watch(() => [props.flatScores, props.totalPoints], () => {
   suggestions.value = pickBestSuggestions();
 }, { deep: false });
 
+/** 【computed の役割】 採用候補の ptGain 合計。gap と比較して「達成可能 / 不足」を表示するのに使用。 */
 const totalSuggestionGain = computed(() =>
   suggestions.value.reduce((acc, s) => acc + s.ptGain, 0)
 );

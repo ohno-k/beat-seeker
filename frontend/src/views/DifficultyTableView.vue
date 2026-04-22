@@ -1,4 +1,18 @@
 <script setup lang="ts">
+/**
+ * 【Viewの役割】 非公式難易度表（譜面難易度ランクごとの曲リスト）を表示するページ。
+ *
+ * 機能:
+ *  - `useGameData` が保持する `diffTableRanks` をベースに、ランクをアコーディオン UI で表示する。
+ *  - 数値ランク（12.0 等）と非数値ランク（個人差・未定義 等）を分けて並べる。
+ *  - 曲名フリーワード検索で該当のみフィルタし、ヒットしたランクを自動展開する。
+ *  - 未ログインユーザーに向けたログインCTAバナーを先頭に表示する。
+ *
+ * 依存:
+ *  - `useGameData` — `diffTableRanks`（ランク別曲リスト）。
+ *  - `useAuth` — ログイン判定。
+ *  - `useI18n` — 多言語対応。
+ */
 import { ref, computed } from 'vue';
 import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
@@ -8,21 +22,31 @@ const { t } = useI18n();
 const { diffTableRanks } = useGameData();
 const { isLoggedIn } = useAuth();
 
+/** 検索ボックスの入力文字列（小文字化して曲名と照合） */
 const searchQuery = ref('');
+/** 展開中のランク名の集合。Setにしている理由は O(1) でトグルしたいため */
 const expandedRanks = ref<Set<string>>(new Set());
 
+/**
+ * 【関数の役割】 ランク文字列が数値（12.0, 11.5 等）として解釈できるか判定。
+ * @param rank ランク名
+ * @returns 数値として扱える場合 true
+ */
 function isNumericRank(rank: string): boolean {
   return !isNaN(parseFloat(rank)) && isFinite(Number(rank));
 }
 
+/** 数値ランクのみ抽出し、降順（難しい順）に並べ替えた配列 */
 const numericRanks = computed(() =>
   [...diffTableRanks.value].filter(r => isNumericRank(r.rank)).reverse()
 );
 
+/** 非数値ランク（個人差・未定義 等）のみ抽出 */
 const nonNumericRanks = computed(() =>
   diffTableRanks.value.filter(r => !isNumericRank(r.rank))
 );
 
+/** 検索文字列で曲名をフィルタリングしたランク配列。空クエリなら全件返す */
 const filteredRanks = computed(() => {
   const q = searchQuery.value.trim().toLowerCase();
   if (!q) return [...numericRanks.value, ...nonNumericRanks.value];
@@ -35,10 +59,15 @@ const filteredRanks = computed(() => {
     .filter(r => r.songs.length > 0);
 });
 
+/** 表内の総曲数（ヘッダー統計用） */
 const totalSongs = computed(() =>
   diffTableRanks.value.reduce((acc, r) => acc + r.songs.length, 0)
 );
 
+/**
+ * 【関数の役割】 ランクアコーディオンの展開／折りたたみをトグルする。
+ * @param rank クリックされたランク名
+ */
 function toggleRank(rank: string) {
   if (expandedRanks.value.has(rank)) {
     expandedRanks.value.delete(rank);
@@ -47,14 +76,20 @@ function toggleRank(rank: string) {
   }
 }
 
+/** フィルタ後に見えている全ランクを展開する */
 function expandAll() {
   filteredRanks.value.forEach(r => expandedRanks.value.add(r.rank));
 }
 
+/** すべてのランクを折りたたむ */
 function collapseAll() {
   expandedRanks.value.clear();
 }
 
+/**
+ * 【関数の役割】 ランク値に応じた文字色クラスを返す。
+ * 13以上=赤、12.5以上=橙、12.0以上=琥珀、11.5以上=緑、それ以外=青。
+ */
 function rankColor(rank: string): string {
   if (!isNumericRank(rank)) return 'text-slate-500 dark:text-slate-400';
   const v = parseFloat(rank);
@@ -65,6 +100,9 @@ function rankColor(rank: string): string {
   return 'text-blue-600 dark:text-blue-400';
 }
 
+/**
+ * 【関数の役割】 ランクカードの背景色＋ボーダー色クラスを返す（上の色分けと統一感を持たせる）。
+ */
 function rankBadgeBg(rank: string): string {
   if (!isNumericRank(rank)) return 'bg-slate-100 dark:bg-slate-700';
   const v = parseFloat(rank);
@@ -75,7 +113,7 @@ function rankBadgeBg(rank: string): string {
   return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
 }
 
-// Open all matching ranks when searching
+/** 検索入力のたびにヒット対象を一括展開して可視化する */
 function handleSearch() {
   if (searchQuery.value.trim()) {
     expandAll();
@@ -85,7 +123,7 @@ function handleSearch() {
 
 <template>
   <div class="space-y-6 pb-20 animate-fade-in">
-    <!-- Header -->
+    <!-- ヘッダー: タイトル・統計・展開／折りたたみボタン・検索ボックス -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -112,7 +150,7 @@ function handleSearch() {
         </div>
       </div>
 
-      <!-- Search -->
+      <!-- 検索ボックス: 入力のたびに handleSearch で該当ランクを展開 -->
       <div class="mt-4 relative">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -127,7 +165,7 @@ function handleSearch() {
       </div>
     </div>
 
-    <!-- Login CTA (non-logged-in) -->
+    <!-- ログイン促進バナー: 未ログイン時のみ表示 -->
     <div
       v-if="!isLoggedIn"
       class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg"
@@ -145,7 +183,7 @@ function handleSearch() {
       </div>
     </div>
 
-    <!-- Rank list -->
+    <!-- ランクリスト: アコーディオン形式でランクごとに曲一覧を展開 -->
     <div v-if="filteredRanks.length === 0" class="text-center py-12 text-slate-400 dark:text-slate-500">
       {{ t('diffTable.noResults') }}
     </div>
@@ -157,9 +195,11 @@ function handleSearch() {
         class="bg-white dark:bg-slate-800 rounded-2xl border shadow-sm overflow-hidden transition-colors"
         :class="rankBadgeBg(rankEntry.rank)"
       >
-        <!-- Rank header (clickable) -->
+        <!-- ランクヘッダー（クリックで展開／折りたたみトグル） -->
         <button
           class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          :aria-expanded="expandedRanks.has(rankEntry.rank)"
+          :aria-controls="`diff-rank-panel-${rankEntry.rank}`"
           @click="toggleRank(rankEntry.rank)"
         >
           <div class="flex items-center gap-3">
@@ -182,8 +222,8 @@ function handleSearch() {
           </svg>
         </button>
 
-        <!-- Song list -->
-        <div v-if="expandedRanks.has(rankEntry.rank)" class="px-5 pb-4">
+        <!-- 曲リスト: 3カラムグリッドで並べる。曲名末尾 [L] は LEGGENDARIA バッジとして装飾 -->
+        <div v-if="expandedRanks.has(rankEntry.rank)" :id="`diff-rank-panel-${rankEntry.rank}`" class="px-5 pb-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1">
             <div
               v-for="song in rankEntry.songs"
@@ -204,6 +244,7 @@ function handleSearch() {
 </template>
 
 <style scoped>
+/* scoped: このコンポーネント内の要素のみに適用されるフェードインアニメーション */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }

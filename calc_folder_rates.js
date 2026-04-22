@@ -1,3 +1,4 @@
+// UNUSED: 旧 v1。後継: calc_folder_rates_final.js。詳細は UNUSED.md 参照。
 /**
  * Calculate the average score rate needed for each folder rank tier,
  * for each folder (11.0 to 13.0).

@@ -1,13 +1,24 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 Rate-Pt 用の曲別プレイ人口ランキング表示。
+ * - Rate-Pt 対象難易度（概ね Lv7 以下 ANOTHER/LEGGENDARIA 等）での「みんなやってる / やってない」を表示
+ * - SongRankingList.vue（Beat-Pt 版）と対の関係。集計元コンポーザブルとメトリクスが異なる
+ *   - Beat-Pt 版: avgBeatPt（整数換算）
+ *   - Rate-Pt 版: avgRatePt（小数点 2 桁）
+ * - sortMode で人気順 / マイナー順を切替
+ */
 import { ref, onMounted } from 'vue';
 import { useRateSongRanking } from '../composables/useRateSongRanking';
 import { useI18n } from '../composables/useI18n';
 
 const { t } = useI18n();
 
+// Rate-Pt 曲別集計（多い順・少ない順・総ユーザー数）。
 const { mostRanking, leastRanking, isLoading, error, totalUsers, fetchRateSongRanking } = useRateSongRanking();
+/** ソート方向（most = プレイ人口降順, least = 昇順）。 */
 const sortMode = ref<'most' | 'least'>('most');
 
+// マウント時に 1 回だけサーバから集計結果を取得する。
 onMounted(() => {
     fetchRateSongRanking();
 });

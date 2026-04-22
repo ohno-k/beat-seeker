@@ -20,58 +20,77 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+/**
+ * 【Service の役割】 スコア取り込み後の BEAT-PT / RATE-PT を再計算するサービス。
+ *
+ * 責務:
+ *  - 単発計算: {@link #calculateBeatPtFromActiveData(List)} / {@link #calculateRatePtFromActiveData(List)}
+ *    は API エンドポイントなどから「今のスコア集合に対するポイント」を即時求めたいときに使う
+ *  - 一括再計算: {@link #recalculateAllUsersAsync(String, String)} は曲データ/難易度テーブルを
+ *    更新した際に、全ユーザーの BEAT-PT / RATE-PT を別スレッドで再計算する
+ *  - 個別ユーザー再計算: {@link #processUserRecalculation(User, Map, Map)} は REQUIRES_NEW で
+ *    独立トランザクションを切り、1 ユーザー分の集計結果を ScoreHistoryLog として追加記録する
+ *  - パッチ: {@link #patchZeroRatePtLogs(Map)} は総 RATE-PT が 0 の履歴を救済する
+ *
+ * 依存:
+ *  - {@link UserRepository} / {@link ScoreRepository} / {@link ScoreHistoryLogRepository}:
+ *    ユーザー、スコア、履歴ログ
+ *  - {@link SongDefinitionRepository} / {@link DifficultyRankRepository}: 曲定義と非公式難易度
+ *  - {@link ObjectMapper}: recalculateAllUsersAsync 用の JSON パース
+ *
+ * 主要ロジックの概観:
+ *  - BEAT-PT: scoreRate^1.3 × weight + しきい値ボーナス。HYPER でレベル 11 以上の譜面は対象外
+ *  - RATE-PT: ANOTHER/LEGGENDARIA のみ対象。スコア率 77.77% から 100% までのしきい値で
+ *    ピースワイズ線形補間。100% 超過は 100 件以降 +1pt ずつ加算
+ *  - 上位 100 件までを合計して 0.1 桁で丸める（beatTier.ts と同じ公式）
+ */
 @Service
 public class ScoreRecalculationService {
 
+    /** ユーザーリポジトリ（全ユーザーループ用） */
     private final UserRepository userRepository;
+    /** スコアリポジトリ */
     private final ScoreRepository scoreRepository;
+    /** 集計結果の履歴ログリポジトリ */
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
+    /** 曲定義リポジトリ（notes からスコア最大値を計算） */
     private final SongDefinitionRepository songDefinitionRepository;
+    /** 非公式難易度リポジトリ（ランク値→weight 取得用） */
     private final DifficultyRankRepository difficultyRankRepository;
+    /** JSON パース用 Jackson マッパー */
     private final ObjectMapper objectMapper;
+    /** BEAT-PT / RATE-PT 単曲計算の共通ユーティリティ */
+    private final BeatPtCalculator beatPtCalculator;
 
-    // Weights configuration mapped from beatTier.ts
-    private static final Map<String, Integer> WEIGHTS = new HashMap<>();
-
-    static {
-        int weight = 145;
-        for (int i = 0; i <= 20; i++) {
-            double rankValue = 11.0 + i * 0.1;
-            String rank = String.format(Locale.US, "%.1f", rankValue);
-            WEIGHTS.put(rank, weight);
-            weight += (rankValue >= 12.49) ? 3 : 2;
-        }
-    }
-
-    private static final double[][] SCORE_RATE_THRESHOLDS = {
-            {77.77, 1.0},
-            {88.89, 2.0},
-            {94.44, 4.0},
-            {97.22, 8.0},
-            {98.61, 16.0},
-            {99.31, 32.0},
-            {99.65, 64.0},
-            {99.83, 128.0},
-            {99.91, 256.0},
-            {100.0, 512.0}
-    };
-
-    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, DifficultyRankRepository difficultyRankRepository, ObjectMapper objectMapper) {
+    /**
+     * 【コンストラクタ】 Spring が Repository 群と {@link ObjectMapper} を注入する。
+     */
+    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, DifficultyRankRepository difficultyRankRepository, ObjectMapper objectMapper, BeatPtCalculator beatPtCalculator) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.songDefinitionRepository = songDefinitionRepository;
         this.difficultyRankRepository = difficultyRankRepository;
         this.objectMapper = objectMapper;
+        this.beatPtCalculator = beatPtCalculator;
     }
 
     /**
-     * Calculates total BEAT-PT for the given scores using the active song definitions and
-     * difficulty-rank tables stored in DB. Used as a server-side fallback when the stored
-     * total_beat_pt is missing or zero (e.g. legacy logs).
+     * 【メソッドの役割】 与えられたスコア集合から BEAT-PT の総合値を計算する。
+     *
+     * DB 上の active な曲定義と非公式難易度テーブルを引き当てて、上位 100 件の合計を返す。
+     * 履歴ログの total_beat_pt が欠損・0 の場合のサーバーサイドフォールバックとして使われる。
+     *
+     * 処理の流れ:
+     *  - 手順1: active 曲定義から (title_difficultyCode → maxScore=notes*2) マップを作る
+     *  - 手順2: active 難易度テーブルから (title_diffName → rankValue) マップを作る
+     *    ※曲タイトル末尾 "[L]" は LEGGENDARIA として扱う
+     *  - 手順3: スコアごとに score rate を計算し、HYPER レベル11以上の譜面は除外
+     *  - 手順4: {@link #calculatePoints(double, String)} で点数を算出し上位 100 件合計を返す
+     *
+     * @param scores 対象スコア一覧
+     * @return 0.1 桁まで丸めた BEAT-PT 合計値
      */
     public double calculateBeatPtFromActiveData(List<Score> scores) {
         List<SongDefinition> activeSongs = songDefinitionRepository.findByRevision("active");
@@ -115,7 +134,7 @@ public class ScoreRecalculationService {
             if (informalRankString != null) matchedRank++;
             boolean isHyperNonTarget = "HYPER".equals(diffName) && score.getDifficultyLevel() != null && score.getDifficultyLevel() >= 11;
             if (isHyperNonTarget) continue;
-            double pt = calculatePoints(scoreRate, informalRankString);
+            double pt = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
             if (pt > 0) beatPts.add(pt);
         }
         System.out.println("[calcBeat] matchedMax=" + matchedMax + " matchedRank=" + matchedRank + " beatPts=" + beatPts.size());
@@ -126,8 +145,20 @@ public class ScoreRecalculationService {
     }
 
     /**
-     * Calculates total RATE-PT for the given scores using the active song definitions from DB.
-     * Used as a server-side fallback when the frontend-provided value is 0 or missing.
+     * 【メソッドの役割】 与えられたスコア集合から RATE-PT の総合値を計算する。
+     *
+     * ANOTHER / LEGGENDARIA のみを対象に、{@link #SCORE_RATE_THRESHOLDS} で
+     * ピースワイズ線形にポイント化し、上位 100 件の合計を返す。
+     * フロントエンドから送られた値が 0/欠損の場合のサーバーサイドフォールバックとして使われる。
+     *
+     * 処理の流れ:
+     *  - 手順1: active 曲定義から maxScore マップを作る
+     *  - 手順2: ANOTHER/LEGGENDARIA 以外は除外して scoreRate を計算
+     *  - 手順3: scoreRate を {@link #calculateScoreRateTierPoints(double)} で点数化し集める
+     *  - 手順4: 上位 100 件を合計、さらに 100% 超過ぶんだけ +1pt ずつ上乗せ
+     *
+     * @param scores 対象スコア一覧
+     * @return 0.1 桁まで丸めた RATE-PT 合計値
      */
     public double calculateRatePtFromActiveData(List<Score> scores) {
         List<SongDefinition> activeSongs = songDefinitionRepository.findByRevision("active");
@@ -150,7 +181,7 @@ public class ScoreRecalculationService {
             if (maxScore == null || maxScore == 0) continue;
             double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
             if (scoreRate <= 0) continue;
-            double rPt = calculateScoreRateTierPoints(scoreRate);
+            double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
             if (rPt > 0) ratePts.add(rPt);
             if (scoreRate >= 100.0) perfectRateCount++;
         }
@@ -161,12 +192,28 @@ public class ScoreRecalculationService {
         return Math.round(totalRatePtAcc * 10.0) / 10.0;
     }
 
+    /**
+     * 【メソッドの役割】 渡された JSON を元に、全ユーザーの BEAT-PT / RATE-PT を非同期で再計算する。
+     *
+     * 管理者が曲定義や難易度テーブルを更新した直後に {@link GameDataService#applyDraft()} から呼ばれる。
+     * 個別ユーザーの再計算は {@link #processUserRecalculation(User, Map, Map)} に委譲し、
+     * 1 ユーザーの失敗が全体を止めないよう try/catch で包む。
+     *
+     * 処理の流れ:
+     *  - 手順1: 渡された song_data JSON から (title_code → maxScore) マップを構築
+     *  - 手順2: 渡された difficulty_table JSON から (title_diffName → rankValue) マップを構築
+     *  - 手順3: 全ユーザーを走査し、各々について新規トランザクションで再計算を実行
+     *
+     * @param songDataJson       最新の曲定義 JSON
+     * @param difficultyTableJson 最新の難易度テーブル JSON
+     * @throws Exception JSON パース失敗時
+     */
     @Async
     public void recalculateAllUsersAsync(String songDataJson, String difficultyTableJson) throws Exception {
         JsonNode songDataRoot = objectMapper.readTree(songDataJson);
         JsonNode diffTableRoot = objectMapper.readTree(difficultyTableJson);
 
-        // 1. Build map for maxScore (title_code -> maxScore)
+        // 手順1: maxScore マップ構築（title_difficultyCode → notes*2）
         Map<String, Integer> songMaxScores = new HashMap<>();
         if (songDataRoot.has("body") && songDataRoot.get("body").isArray()) {
             for (JsonNode s : songDataRoot.get("body")) {
@@ -179,7 +226,7 @@ public class ScoreRecalculationService {
             }
         }
 
-        // 2. Build map for informal rank (title_diffName -> informalRank text)
+        // 手順2: 非公式難易度マップ構築（title_diffName → rankValue 文字列）
         Map<String, String> informalRanks = new HashMap<>();
         if (diffTableRoot.has("ranks") && diffTableRoot.get("ranks").isArray()) {
             for (JsonNode r : diffTableRoot.get("ranks")) {
@@ -198,7 +245,7 @@ public class ScoreRecalculationService {
             }
         }
 
-        // 3. Iterate users — each user saved in its own transaction
+        // 手順3: 全ユーザーを走査して、各々を独立トランザクションで再計算
         List<User> users = userRepository.findAll();
         for (User user : users) {
             try {
@@ -209,6 +256,22 @@ public class ScoreRecalculationService {
         }
     }
 
+    /**
+     * 【メソッドの役割】 1 ユーザー分の BEAT-PT / RATE-PT と各種カウンタを再計算して履歴ログに保存する。
+     *
+     * {@code REQUIRES_NEW} で独立トランザクションを起動するため、一部ユーザーで失敗しても他に影響しない。
+     *
+     * 処理の流れ:
+     *  - 手順1: ユーザーの全スコアを取得、空ならスキップ
+     *  - 手順2: スコアを 1 件ずつ走査しながら、BEAT-PT / RATE-PT 用の値と各種カウンタを集計
+     *  - 手順3: 上位 100 件合計で BEAT-PT / RATE-PT を確定、100% 超過ぶんは RATE-PT に +1ずつ加算
+     *  - 手順4: 直近の履歴ログから旧 BEAT-PT を取得し、差分を計算
+     *  - 手順5: 新しい {@link ScoreHistoryLog} を insert
+     *
+     * @param user          対象ユーザー
+     * @param songMaxScores title_code → maxScore マップ
+     * @param informalRanks title_diffName → rankValue マップ
+     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processUserRecalculation(User user, Map<String, Integer> songMaxScores, Map<String, String> informalRanks) {
         List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
@@ -255,14 +318,14 @@ public class ScoreRecalculationService {
             // BEAT-PT
             boolean isHyperNonTarget = "HYPER".equals(diffName) && score.getDifficultyLevel() != null && score.getDifficultyLevel() >= 11;
             if (!isHyperNonTarget) {
-                double pt = calculatePoints(scoreRate, informalRankString);
+                double pt = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
                 if (pt > 0) beatPts.add(pt);
             }
 
             // RATE-PT
             boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
             if (isRateEligible && scoreRate > 0) {
-                double rPt = calculateScoreRateTierPoints(scoreRate);
+                double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
                 if (rPt > 0) ratePts.add(rPt);
                 if (scoreRate >= 100.0) perfectRateCount++;
             }
@@ -305,8 +368,19 @@ public class ScoreRecalculationService {
     }
 
     /**
-     * total_rate_pt が 0 のhistory logエントリを現在のスコアから再計算して補正する。
-     * songMaxScores: title_difficultyCode -> maxScore のマップ
+     * 【メソッドの役割】 total_rate_pt が 0 のまま残っている履歴ログを、現在のスコアから再計算して補正する。
+     *
+     * RATE-PT 機能導入以前の古い履歴ログを救済する目的の一括パッチ。
+     * 全ユーザーを走査し、履歴内に 0 または null の total_rate_pt があれば
+     * 現在のスコアから計算し直した値で上書きする。
+     *
+     * 処理の流れ:
+     *  - 手順1: 全ユーザーについてログ一覧をチェック、0 が混ざるユーザーのみ対象
+     *  - 手順2: 現在のスコアから RATE-PT を再計算
+     *  - 手順3: 0 となっているログをその値で上書きして保存
+     *
+     * @param songMaxScores title_difficultyCode → maxScore のマップ
+     * @return パッチ適用したログ件数
      */
     @Transactional
     public int patchZeroRatePtLogs(Map<String, Integer> songMaxScores) {
@@ -317,7 +391,7 @@ public class ScoreRecalculationService {
             boolean hasZero = logs.stream().anyMatch(l -> l.getTotalRatePt() == null || l.getTotalRatePt() == 0.0);
             if (!hasZero) continue;
 
-            // Calculate current rate-pt from user's scores
+            // 現在のスコアから RATE-PT を再計算する
             List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
             List<Double> ratePts = new ArrayList<>();
             int perfectRateCount = 0;
@@ -331,7 +405,7 @@ public class ScoreRecalculationService {
                 if (maxScore == null || maxScore == 0) continue;
                 double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
                 if (scoreRate <= 0) continue;
-                double rPt = calculateScoreRateTierPoints(scoreRate);
+                double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
                 if (rPt > 0) ratePts.add(rPt);
                 if (scoreRate >= 100.0) perfectRateCount++;
             }
@@ -353,11 +427,13 @@ public class ScoreRecalculationService {
         return patchedCount;
     }
 
+    /** 難易度名を大文字化して正規化する（"Another" → "ANOTHER"）。 */
     private String normalizeDiffName(String diff) {
         if (diff == null) return "UNKNOWN";
         return diff.toUpperCase();
     }
 
+    /** 大文字難易度名 → 内部コード（1/2/3/4/10）。該当なしは null。 */
     private String getDifficultyCode(String upperDiff) {
         return switch (upperDiff) {
             case "BEGINNER" -> "1";
@@ -369,45 +445,4 @@ public class ScoreRecalculationService {
         };
     }
 
-    private int getWeight(String informalRank) {
-        if (informalRank == null || informalRank.isEmpty()) return 0;
-        Matcher m = Pattern.compile("(\\d+\\.\\d+)").matcher(informalRank);
-        String key = m.find() ? m.group(1) : informalRank;
-        return WEIGHTS.getOrDefault(key, 0);
-    }
-
-    private double calculatePoints(double scoreRate, String informalRank) {
-        if (informalRank == null) return 0.0;
-        int weight = getWeight(informalRank);
-        if (weight == 0 || scoreRate <= 66.666) return 0.0;
-
-        double basePoints = Math.pow(scoreRate / 100.0, 1.3) * weight;
-
-        double bonus = 0;
-        if (scoreRate > 77.77) bonus += weight * 0.01;
-        if (scoreRate > 88.88) bonus += weight * 0.01;
-        if (scoreRate > 94.44) bonus += weight * 0.01;
-
-        return basePoints + bonus;
-    }
-
-    private double calculateScoreRateTierPoints(double scoreRate) {
-        if (scoreRate <= 0 || scoreRate < SCORE_RATE_THRESHOLDS[0][0]) return 0.0;
-        double lastRate = SCORE_RATE_THRESHOLDS[SCORE_RATE_THRESHOLDS.length - 1][0];
-        double lastPt = SCORE_RATE_THRESHOLDS[SCORE_RATE_THRESHOLDS.length - 1][1];
-        if (scoreRate >= lastRate) return lastPt;
-
-        for (int i = 0; i < SCORE_RATE_THRESHOLDS.length - 1; i++) {
-            double loRate = SCORE_RATE_THRESHOLDS[i][0];
-            double loPt = SCORE_RATE_THRESHOLDS[i][1];
-            double hiRate = SCORE_RATE_THRESHOLDS[i + 1][0];
-            double hiPt = SCORE_RATE_THRESHOLDS[i + 1][1];
-
-            if (scoreRate < hiRate) {
-                double t = (scoreRate - loRate) / (hiRate - loRate);
-                return loPt + t * (hiPt - loPt);
-            }
-        }
-        return 0.0;
-    }
 }

@@ -38,3 +38,11 @@ npm run dev
 ## Tech Stack (Same as PoiSpo)
 - **Frontend**: Vue 3, TS, Vite, Tailwind CSS
 - **Backend**: Spring Boot 3.3.0, JPA, PostgreSQL/H2, Spring Security, OAuth2
+
+## Repository Docs
+
+- [docs/完全設計書.md](docs/%E5%AE%8C%E5%85%A8%E8%A8%AD%E8%A8%88%E6%9B%B8.md) — 機能・構造・API仕様のワンドキュメント
+- [SCRIPTS.md](SCRIPTS.md) — プロジェクトルート直下のスクリプト説明
+- [backend/SCRIPTS.md](backend/SCRIPTS.md) — backend のビルド・テスト用バッチ説明
+- [frontend/SCRIPTS.md](frontend/SCRIPTS.md) — frontend のデータ整備スクリプト説明
+- [UNUSED.md](UNUSED.md) — 未使用ファイル・メソッド、要整理対象の一覧

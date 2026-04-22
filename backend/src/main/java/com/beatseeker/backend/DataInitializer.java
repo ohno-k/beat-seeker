@@ -1,6 +1,8 @@
 package com.beatseeker.backend;
 
 import com.beatseeker.backend.service.GameDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -11,51 +13,107 @@ import jakarta.transaction.Transactional;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 【クラスの役割】 アプリケーション起動直後に 1 度だけ実行される初期化処理。
+ *
+ * Spring Boot の {@link ApplicationRunner} 実装なので、
+ * {@link com.beatseeker.backend.BackendApplication} の起動後、
+ * 受信前のタイミングで {@link #run(ApplicationArguments)} が自動呼び出しされる。
+ *
+ * 主な責務:
+ *  - 既存ユーザーの未設定カラム（language, showRateTier）にデフォルト値を埋める
+ *  - 曲データ / 難易度表のマスターデータを JSON リソースから投入（未シード時のみ）
+ *
+ * データ重複を避ける仕組みは {@link GameDataService} 側の seed メソッドに委ねており、
+ * 既に投入済みであれば再投入されない想定。
+ *
+ * 例外方針: 初期化に失敗してもアプリ本体は起動させる。
+ *   リソース未配置・JSON 形式不正などは警告ログのみ出して握り潰す。
+ */
 @Component
 public class DataInitializer implements ApplicationRunner {
 
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
+
+    /** JPA の EntityManager。簡易な UPDATE 文を直接発行するために使う。 */
     private final EntityManager entityManager;
+
+    /** 曲データ・難易度表の投入処理を担うサービス層。 */
     private final GameDataService gameDataService;
 
+    /**
+     * 【コンストラクタ】 Spring の DI コンテナから依存オブジェクトを注入する。
+     *
+     * @param entityManager   JPA の EntityManager
+     * @param gameDataService 曲・難易度表シード用サービス
+     */
     public DataInitializer(EntityManager entityManager, GameDataService gameDataService) {
         this.entityManager = entityManager;
         this.gameDataService = gameDataService;
     }
 
+    /**
+     * 【メソッドの役割】 アプリ起動直後に Spring が自動で呼び出すエントリポイント。
+     *
+     * {@code @Transactional} によって UPDATE 群は単一トランザクションでまとめて commit される。
+     *
+     * @param args コマンドライン引数（本処理では未使用）
+     */
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        // 手順1: 既存ユーザーの language カラムが未設定（NULL）なら 'ja' を既定値として埋める。
+        //        後からカラム追加した際のバックフィル処理。
         entityManager.createQuery("UPDATE User u SET u.language = 'ja' WHERE u.language IS NULL")
                 .executeUpdate();
+        // 手順2: showRateTier フラグが未設定のユーザーには true を入れる。
+        //        Rate-Tier 機能追加時に既存ユーザーで表示が OFF にならないようにするための初期化。
         entityManager.createQuery("UPDATE User u SET u.showRateTier = true WHERE u.showRateTier IS NULL")
                 .executeUpdate();
 
-        // Seed song data and difficulty table from JSON resources if tables are empty
+        // 手順3: 曲データと難易度表を JSON から投入する（テーブルが空の場合のみ実効）。
+        //        失敗してもアプリ起動は続行させるため、try 内で握り潰す。
         try {
             seedFromResource("data/song_data.json", "song");
             seedFromResource("data/difficulty_table.json", "difficulty");
         } catch (Exception e) {
-            System.err.println("Warning: Could not seed game data from JSON: " + e.getMessage());
+            logger.error("Warning: Could not seed game data from JSON: {}", e.getMessage(), e);
         }
     }
 
+    /**
+     * 【メソッドの役割】 クラスパス上の JSON リソースを読み込み、対応するシード処理に渡す。
+     *
+     * リソースが見つからない場合はスキップし、読み込みや投入中に例外が出ても警告のみ。
+     *
+     * @param resourcePath クラスパスリソースのパス（例: {@code data/song_data.json}）
+     * @param type         投入対象の種別。{@code "song"} なら曲データ、それ以外は難易度表として扱う
+     * @throws Exception 外側の呼び出し元には実質伝播しない（内部で catch 済み）
+     */
     private void seedFromResource(String resourcePath, String type) throws Exception {
         try {
+            // 手順1: クラスパスからリソースを取得。
             ClassPathResource resource = new ClassPathResource(resourcePath);
+            // 手順2: リソースが無い場合は黙ってスキップ。jar 内に含め忘れた場合の保険。
             if (!resource.exists()) {
-                System.out.println("Seed resource not found: " + resourcePath + " (skipping)");
+                logger.info("Seed resource not found: {} (skipping)", resourcePath);
                 return;
             }
+            // 手順3: try-with-resources でストリームを開き、必ずクローズさせる。
             try (InputStream is = resource.getInputStream()) {
+                // UTF-8 固定でテキストに変換（日本語タイトル等が文字化けしないように）。
                 String json = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                 if ("song".equals(type)) {
+                    // 曲データの投入
                     gameDataService.seedSongData(json);
                 } else {
+                    // それ以外（= 難易度表）の投入
                     gameDataService.seedDifficultyTable(json);
                 }
             }
         } catch (Exception e) {
-            System.err.println("Could not seed " + type + " data: " + e.getMessage());
+            // リソース読み込み失敗や JSON パース失敗はアプリ起動を止めないよう警告のみ。
+            logger.error("Could not seed {} data: {}", type, e.getMessage(), e);
         }
     }
 }

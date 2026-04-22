@@ -1,9 +1,24 @@
 <script setup lang="ts">
+/**
+ * ScorePredictionView.vue
+ *
+ * 【Viewの役割】
+ * 選択した曲に対して、過去の類似曲スコアから「予測スコア」を算出して表示するページ。
+ * 譜面の傾向プロファイル（実効BPM、皿率、同時押し率、配置パターン、小節ごとノーツ密度など）も
+ * まとめて表示し、さらに類似曲との比較や、管理者向けの類似度デバッグ機能も持つ。
+ *
+ * 【主な機能】
+ * - 曲選択（Lv11/12 の ANOTHER/LEGGENDARIA、textage 有りのみ）
+ * - 予測APIの呼び出しと結果表示（自分 or 閲覧中ユーザー）
+ * - 傾向プロファイル取得、タグ/配置パターン/ノーツ分布可視化
+ * - 管理者モードでは類似度計算の内訳を取得可能
+ */
 import { ref, computed, watch } from 'vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useGameData, type SongDataEntry } from '../composables/useGameData';
 
+// props: 他人のIDを指定された場合の閲覧モード（admin=管理者、friend=フレンド閲覧）
 const props = defineProps<{
   viewingUserId?: number | null;
   viewingMode?: 'admin' | 'friend' | null;
@@ -19,16 +34,23 @@ const isAdminViewing = computed(() =>
 );
 
 // ── 曲選択 ──────────────────────────────────────────────────
-const searchQuery = ref('');
-const selectedEntry = ref<SongDataEntry | null>(null);
+const searchQuery = ref('');                          // 検索文字列（曲名/アーティスト）
+const selectedEntry = ref<SongDataEntry | null>(null); // 現在選択中の曲
 
-// ANOTHER(4) / LEGGENDARIA(10) で Lv11-12、textage を持つ曲のみ
+/**
+ * 予測対象として使える曲の集合を computed で取得。
+ * ANOTHER(difficulty=4) / LEGGENDARIA(10) で、かつレベル11-12、かつ textage（譜面コード）を持つものに限定。
+ */
 const targetEntries = computed((): SongDataEntry[] => {
   return songDataBody.value.filter(
     s => (s.difficulty === '4' || s.difficulty === '10') && (s.level === 11 || s.level === 12) && !!s.textage
   );
 });
 
+/**
+ * 検索文字列を考慮してフィルタした曲リスト。
+ * 空クエリなら先頭50件、クエリ有りなら部分一致で最大80件。
+ */
 const filteredEntries = computed((): SongDataEntry[] => {
   const q = searchQuery.value.trim().toLowerCase();
   if (!q) return targetEntries.value.slice(0, 50);
@@ -37,6 +59,10 @@ const filteredEntries = computed((): SongDataEntry[] => {
     .slice(0, 80);
 });
 
+/**
+ * 曲を選択する。
+ * 同じ曲の重複選択は（管理者閲覧モードでなければ）スキップし、それ以外なら予測APIを発火。
+ */
 function selectEntry(entry: SongDataEntry) {
   if (selectedEntry.value?.textage === entry.textage && !isAdminViewing.value) return;
   selectedEntry.value = entry;
@@ -45,7 +71,7 @@ function selectEntry(entry: SongDataEntry) {
   fetchPrediction(entry.textage!);
 }
 
-// 閲覧ユーザーが変わったら現在の曲の予測を再取得
+// 閲覧ユーザーが変わったら、現在の曲で再度予測を取り直す（管理者がユーザー切替時など）
 watch(() => props.viewingUserId, () => {
   predictionResult.value = null;
   predictionError.value = '';
@@ -54,17 +80,20 @@ watch(() => props.viewingUserId, () => {
   }
 });
 
+// difficulty コードから表示名 ("ANOTHER"/"LEGGENDARIA") に変換
 function diffLabel(difficulty: string): string {
   return difficulty === '10' ? 'LEGGENDARIA' : 'ANOTHER';
 }
 
+// 難易度バッジの Tailwind クラス（LEGGENDARIA=紫、ANOTHER=赤）
 function diffBadgeClass(difficulty: string): string {
   return difficulty === '10'
     ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
     : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';
 }
 
-// ── 予測API ─────────────────────────────────────────────────
+// ── 予測API関連の型定義 ─────────────────────────────────────
+// 類似曲1件分のデータ（類似度 + 参照ユーザーのスコア）
 interface SimilarSong {
   title: string;
   difficultyName: string;
@@ -75,10 +104,14 @@ interface SimilarSong {
   played: boolean;
 }
 
-// ── 類似度デバッグ ───────────────────────────────────────────
-const debugResult = ref<Record<string, any> | null>(null);
-const isDebugLoading = ref(false);
+// ── 類似度デバッグ（管理者モード専用） ───────────────────────
+const debugResult = ref<Record<string, any> | null>(null); // 内訳レスポンス
+const isDebugLoading = ref(false);                          // 取得中フラグ
 
+/**
+ * 選択中の曲と別曲 (textageB) の類似度内訳を管理者APIから取得する。
+ * @param textageB 比較対象の曲のtextage
+ */
 async function fetchSimilarityDebug(textageB: string) {
   if (!selectedEntry.value?.textage) return;
   isDebugLoading.value = true;
@@ -96,18 +129,19 @@ async function fetchSimilarityDebug(textageB: string) {
   }
 }
 
+// 予測結果の型。予測スコア・現在スコア・類似曲の配列などを持つ
 interface PredictionResult {
   textage: string;
   title: string;
   difficulty: string;
   level: number;
   notes: number;
-  dominantEff16: number;
-  predictedScore: number;
-  predictedScoreRate: number;
-  currentScore?: number;
+  dominantEff16: number;       // 主要実効16分BPM
+  predictedScore: number;      // 予測スコア
+  predictedScoreRate: number;  // 予測達成率
+  currentScore?: number;       // 現在のベストスコア（あれば）
   currentScoreRate?: number;
-  similarSongs: SimilarSong[];
+  similarSongs: SimilarSong[]; // 予測元になった類似曲一覧
   message?: string;
   error?: string;
 }
@@ -116,6 +150,13 @@ const predictionResult = ref<PredictionResult | null>(null);
 const predictionError = ref('');
 const isLoading = ref(false);
 
+/**
+ * 予測APIを呼び出す。
+ * 手順1: 未ログインなら何もしない
+ * 手順2: 管理者閲覧なら /api/admin/score-prediction?userId=... を叩く
+ * 手順3: 通常は /api/analysis/score-prediction を叩く
+ * 手順4: error フィールドが入っていた場合もエラー扱い
+ */
 async function fetchPrediction(textage: string) {
   if (!isLoggedIn.value) return;
   isLoading.value = true;
@@ -123,6 +164,7 @@ async function fetchPrediction(textage: string) {
   predictionResult.value = null;
 
   try {
+    // エンドポイントを閲覧モードによって切替
     const url = isAdminViewing.value
       ? `${API_BASE}/api/admin/score-prediction?textage=${encodeURIComponent(textage)}&userId=${props.viewingUserId}`
       : `${API_BASE}/api/analysis/score-prediction?textage=${encodeURIComponent(textage)}`;
@@ -141,6 +183,10 @@ async function fetchPrediction(textage: string) {
 }
 
 // ── 表示ヘルパー ─────────────────────────────────────────────
+/**
+ * 達成率 (0〜100%) から DJ LEVEL（MAX/MAX-/AAA/AA/A/B/C/D/E/F）を算出。
+ * 閾値は公式の理論値に合わせ、MAX=100、AAA=8/9(88.89%)、AA=7/9(77.78%)...。
+ */
 function djLevel(rate: number): string {
   if (rate >= 100) return 'MAX';
   if (rate >= 94.45) return 'MAX-';
@@ -154,6 +200,7 @@ function djLevel(rate: number): string {
   return 'F';
 }
 
+// DJ LEVEL 用の色クラス（MAX-=紫、AAA=黄、AA=青、A=緑、B=暗灰、それ以下=灰）
 function djLevelClass(rate: number): string {
   if (rate >= 94.45) return 'text-purple-600 dark:text-purple-400 font-extrabold';
   if (rate >= 88.89) return 'text-yellow-500 dark:text-yellow-400 font-extrabold';
@@ -163,6 +210,11 @@ function djLevelClass(rate: number): string {
   return 'text-slate-500 dark:text-slate-400';
 }
 
+/**
+ * 表示用スコアデータをまとめる computed。
+ * 予測スコア・予測達成率に加え、現在スコア／達成率との差分を計算。
+ * 差分は小数第2位で四捨五入（x10 → 整数化 → /10）
+ */
 const displayScore = computed(() => {
   const r = predictionResult.value;
   if (!r) return null;
@@ -175,7 +227,12 @@ const displayScore = computed(() => {
   return { score: r.predictedScore, rate: r.predictedScoreRate, diff, diffRate };
 });
 
-// ── プロファイル詳細取得 ────────────────────────────────────
+// ── 譜面傾向プロファイルの型定義 ────────────────────────────
+/**
+ * 譜面1つ分の「傾向」を示すデータ。
+ * BPM、皿率、同時押し率、配置パターン（縦連/階段/トリル/二重階段）、
+ * 小節ごとのノーツ分布（全体/鍵盤/皿）、タグなどを保持する。
+ */
 interface TendencyProfile {
   title: string;
   difficulty: string;
@@ -209,7 +266,7 @@ interface TendencyProfile {
   dstairsPct: number | null;
 }
 
-// ── 配置パターンバッジ ─────────────────────────────────────
+// ── 配置パターンバッジ（トリル/階段/二重階段/縦連打）─────────
 interface PatternBadge {
   key: string;
   label: string;
@@ -218,6 +275,7 @@ interface PatternBadge {
   colorClass: string;
 }
 
+// 各配置パターンの定義テーブル: ラベル・色・countKey/pctKey（プロファイル上のフィールド名）
 const PATTERN_DEFS: { key: string; label: string; countKey: keyof TendencyProfile; pctKey: keyof TendencyProfile; color: string; colorBg: string }[] = [
   { key: 'trill',   label: 'トリル',   countKey: 'trillCount',   pctKey: 'trillPct',   color: 'text-sky-700 dark:text-sky-300',    colorBg: 'bg-sky-100 dark:bg-sky-900/40' },
   { key: 'stairs',  label: '階段',     countKey: 'stairsCount',  pctKey: 'stairsPct',  color: 'text-emerald-700 dark:text-emerald-300', colorBg: 'bg-emerald-100 dark:bg-emerald-900/40' },
@@ -225,6 +283,12 @@ const PATTERN_DEFS: { key: string; label: string; countKey: keyof TendencyProfil
   { key: 'jack',    label: '縦連打',   countKey: 'jackCount',    pctKey: 'jackPct',    color: 'text-rose-700 dark:text-rose-300',   colorBg: 'bg-rose-100 dark:bg-rose-900/40' },
 ];
 
+/**
+ * プロファイルから配置パターンバッジ配列を構築する computed。
+ * 手順1: プロファイル未取得なら空配列
+ * 手順2: PATTERN_DEFS をループしつつ、countKey の値が null/0 ではないものだけ採用
+ * 手順3: ラベル・カウント・割合・色クラスをセットしたバッジ配列を返す
+ */
 const patternBadges = computed((): PatternBadge[] => {
   const p = tendencyProfile.value;
   if (!p) return [];
@@ -239,9 +303,10 @@ const patternBadges = computed((): PatternBadge[] => {
     }));
 });
 
-// ── タグバッジ ─────────────────────────────────────────────
+// ── タグバッジ（譜面属性: 皿多い/同時押し寄り/32分あり/高速 など） ─────
 interface TagBadge { tag: string; label: string; colorClass: string; }
 
+// サーバから返ってくるタグ文字列 → 表示ラベル + 色 の対応表
 const TAG_DISPLAY: Record<string, { label: string; colorClass: string }> = {
   scratch_very_heavy: { label: '皿: 非常に多い', colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
   scratch_heavy:      { label: '皿: 多い',       colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
@@ -256,12 +321,17 @@ const TAG_DISPLAY: Record<string, { label: string; colorClass: string }> = {
   low_effective_bpm:  { label: '低速',            colorClass: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300' },
 };
 
+/**
+ * tagsJson（配列が JSON 文字列）から表示用のバッジ配列を算出。
+ * has_jack/trill/stairs/dstairs 系は patternBadges で別扱いするので除外。
+ */
 const tagBadges = computed((): TagBadge[] => {
   const p = tendencyProfile.value;
   if (!p?.tagsJson) return [];
   try {
     const tags = JSON.parse(p.tagsJson) as string[];
     return tags
+      // 配置パターン系のタグは patternBadges で表示しているためここでは除外
       .filter(t => TAG_DISPLAY[t] && !t.startsWith('has_jack') && !t.startsWith('jack_')
                  && !t.startsWith('has_trill') && !t.startsWith('trill_')
                  && !t.startsWith('has_stairs') && !t.startsWith('stairs_')
@@ -270,30 +340,36 @@ const tagBadges = computed((): TagBadge[] => {
   } catch { return []; }
 });
 
-// ── 小節ごとノーツ数グラフ ──────────────────────────────────
+// ── 小節ごとノーツ数の折れ線／棒グラフ用データ ──────────────
+// 小節単位の全ノーツ数配列（JSON 文字列 → number[] にパース）
 const measureNotes = computed((): number[] => {
   if (!tendencyProfile.value?.measureNotesJson) return [];
   try { return JSON.parse(tendencyProfile.value.measureNotesJson); }
   catch { return []; }
 });
 
+// 小節単位の鍵盤ノーツ数（皿と分けて可視化するため）
 const measureNotesKbd = computed((): number[] => {
   if (!tendencyProfile.value?.measureNotesKbdJson) return [];
   try { return JSON.parse(tendencyProfile.value.measureNotesKbdJson); }
   catch { return []; }
 });
 
+// 小節単位の皿ノーツ数
 const measureNotesScr = computed((): number[] => {
   if (!tendencyProfile.value?.measureNotesScrJson) return [];
   try { return JSON.parse(tendencyProfile.value.measureNotesScrJson); }
   catch { return []; }
 });
 
+// 鍵盤/皿の分離データが存在するかどうか（存在するなら積み上げ表示）
 const hasSplitMeasure = computed(() => measureNotesKbd.value.length > 0);
 
+// グラフの高さスケール用: 最大ノーツ数（1未満にならないように）
 const measureMax = computed(() => Math.max(...measureNotes.value, 1));
 
-// tick値 → 日本語音符名のマッピング（96 ticks/quarter note基準）
+// tick値 → 日本語音符名のマッピング（96 ticks/4分音符基準）
+// 例: 96→4分、24→16分、12→32分。同じ tick 数の別表記（6分=64 等）も含む
 const TICK_TO_NOTE: { tick: number; label: string }[] = [
   { tick: 384, label: '全音符' },
   { tick: 288, label: '付点2分' },
@@ -313,12 +389,14 @@ const TICK_TO_NOTE: { tick: number; label: string }[] = [
   { tick: 6,   label: '64分' },
 ];
 
+// ノーツ分布1エントリ分: 音符名・割合(%)・実数
 interface NoteDistEntry {
   label: string;
   pct: number;
   count: number;
 }
 
+// 分布バーの色候補（項目順にラウンドロビンで割り当て）
 const NOTE_COLORS = [
   'bg-blue-500',
   'bg-emerald-500',
@@ -333,6 +411,13 @@ const NOTE_COLORS = [
   'bg-lime-500',
 ];
 
+/**
+ * ノーツ分布配列の computed。
+ * 手順1: intervalDistJson を tick(文字列キー) → 詳細 の Map としてパース
+ * 手順2: TICK_TO_NOTE で既知の tick のみラベル付きで entries に追加
+ * 手順3: TICK_TO_NOTE の表記順（全音符→64分）にソート
+ * 手順4: 合計が100未満なら「その他」で埋める
+ */
 const noteDistribution = computed((): NoteDistEntry[] => {
   if (!tendencyProfile.value?.intervalDistJson) return [];
   try {
@@ -351,7 +436,7 @@ const noteDistribution = computed((): NoteDistEntry[] => {
     // TICK_TO_NOTE の順に並べる（全音符→64分）
     const order = new Map(TICK_TO_NOTE.map((t, i) => [t.label, i]));
     entries.sort((a, b) => (order.get(a.label) ?? 99) - (order.get(b.label) ?? 99));
-    // 残りを「その他」として追加
+    // 未知の tick による残りを「その他」として追加
     const otherPct = Math.round((100 - knownPct) * 10) / 10;
     if (otherPct > 0) {
       entries.push({ label: 'その他', pct: otherPct, count: 0 });
@@ -362,8 +447,10 @@ const noteDistribution = computed((): NoteDistEntry[] => {
   }
 });
 
+// 現在の曲の傾向プロファイル（選択変更時にAPIから取得して格納）
 const tendencyProfile = ref<TendencyProfile | null>(null);
 
+// 選択曲が変更されたら傾向プロファイルをAPIから取得する watch
 watch(selectedEntry, async (entry) => {
   tendencyProfile.value = null;
   if (!entry?.textage) return;
@@ -376,7 +463,7 @@ watch(selectedEntry, async (entry) => {
       tendencyProfile.value = await res.json();
     }
   } catch {
-    // 取得失敗は無視
+    // 取得失敗はフェイルセーフで無視（予測自体は独立に動作）
   }
 });
 
@@ -384,6 +471,7 @@ watch(selectedEntry, async (entry) => {
 
 <template>
   <div class="px-4 py-6">
+    <!-- ページ見出しとサブタイトル -->
     <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
       {{ t('nav.scorePrediction') }}
     </h2>
@@ -391,7 +479,7 @@ watch(selectedEntry, async (entry) => {
       {{ t('scorePrediction.subtitle') }}
     </p>
 
-    <!-- adminモード中バナー -->
+    <!-- 管理者が他ユーザーを閲覧中の注意バナー -->
     <div v-if="isAdminViewing"
       class="mb-5 flex items-center gap-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 px-4 py-2.5 text-sm text-indigo-700 dark:text-indigo-300 font-medium"
     >
@@ -401,15 +489,16 @@ watch(selectedEntry, async (entry) => {
       閲覧中ユーザーのスコアを使用して予測しています
     </div>
 
-    <!-- 未ログイン -->
+    <!-- 未ログイン時: この機能はスコア参照が必要なのでログイン促しのみ表示 -->
     <div v-if="!isLoggedIn"
       class="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-6 text-center">
       <p class="text-amber-700 dark:text-amber-300 font-medium">{{ t('scorePrediction.loginRequired') }}</p>
     </div>
 
+    <!-- メインレイアウト: 左カラム=曲選択 / 右カラム=予測結果 -->
     <div v-else class="flex flex-col lg:flex-row gap-6">
 
-      <!-- 左: 曲選択 -->
+      <!-- 左カラム: 検索ボックス + 曲リスト -->
       <div class="w-full lg:w-80 shrink-0 flex flex-col gap-3">
         <input
           v-model="searchQuery"
@@ -447,16 +536,16 @@ watch(selectedEntry, async (entry) => {
         </div>
       </div>
 
-      <!-- 右: 結果パネル -->
+      <!-- 右カラム: 結果パネル（未選択/ローディング/エラー/結果の4状態） -->
       <div class="flex-1 min-w-0">
 
-        <!-- 未選択 -->
+        <!-- 未選択: ユーザーに曲選択を促すプレースホルダー -->
         <div v-if="!selectedEntry"
           class="h-48 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
           {{ t('scorePrediction.selectSong') }}
         </div>
 
-        <!-- ローディング -->
+        <!-- ローディング: 予測APIレスポンス待ちのスピナー -->
         <div v-else-if="isLoading"
           class="h-48 flex items-center justify-center text-slate-400 dark:text-slate-500">
           <svg class="animate-spin h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24">
@@ -466,16 +555,16 @@ watch(selectedEntry, async (entry) => {
           {{ t('scorePrediction.calculating') }}
         </div>
 
-        <!-- エラー -->
+        <!-- エラー: サーバエラー or 通信エラー表示 -->
         <div v-else-if="predictionError"
           class="rounded-xl border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-6">
           <p class="text-red-600 dark:text-red-400 text-sm">{{ predictionError }}</p>
         </div>
 
-        <!-- 結果 -->
+        <!-- 結果: 予測成功時に曲ヘッダ/傾向/予測スコア/類似曲を縦に表示 -->
         <div v-else-if="predictionResult" class="flex flex-col gap-4">
 
-          <!-- 曲ヘッダ -->
+          <!-- 曲ヘッダ: 難易度バッジ + タイトル + Lv/ノーツ数/BPM/ソフラン表示 -->
           <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <div class="flex flex-wrap items-start gap-3 mb-3">
               <span
@@ -495,7 +584,7 @@ watch(selectedEntry, async (entry) => {
               </div>
             </div>
 
-            <!-- 傾向数値 -->
+            <!-- 3指標サマリ: 実効BPM / SCR(皿)率 / 同時押し率 -->
             <div v-if="tendencyProfile" class="grid grid-cols-3 gap-3 text-center">
               <div class="rounded-lg bg-slate-50 dark:bg-slate-700/50 p-2">
                 <div class="text-xs text-slate-400 dark:text-slate-500">実効BPM</div>
@@ -511,7 +600,7 @@ watch(selectedEntry, async (entry) => {
               </div>
             </div>
 
-            <!-- 譜面属性タグ -->
+            <!-- 譜面属性バッジ: タグ(皿多い/高速 等) + 配置パターン(トリル/階段/縦連/二重階段) -->
             <div v-if="tagBadges.length || patternBadges.length" class="mt-3">
               <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mb-2">譜面属性</div>
               <div class="flex flex-wrap gap-1.5">
@@ -530,7 +619,7 @@ watch(selectedEntry, async (entry) => {
               </div>
             </div>
 
-            <!-- 小節ごとノーツ密度グラフ（ブロック積み上げ） -->
+            <!-- 小節ごとノーツ密度グラフ: 小節=列、各列に鍵盤ノーツ(灰)/皿ノーツ(赤)を積み上げ -->
             <div v-if="measureNotes.length" class="mt-3">
               <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mb-2">ノーツ密度（小節）</div>
               <div class="flex items-end gap-px bg-slate-50 dark:bg-slate-700/30 rounded-lg p-1"
@@ -539,7 +628,7 @@ watch(selectedEntry, async (entry) => {
                   class="flex-1 min-w-0 flex flex-col-reverse gap-px"
                   :title="`小節${i + 1}: ${n}ノーツ${hasSplitMeasure ? ` (鍵盤${measureNotesKbd[i] ?? 0} / 皿${measureNotesScr[i] ?? 0})` : ''}`"
                 >
-                  <!-- 皿ノーツ（赤）が上 -->
+                  <!-- 皿ノーツ(赤)が上に、鍵盤ノーツ(灰)が下に積み上がる -->
                   <template v-if="hasSplitMeasure">
                     <div v-for="b in (measureNotesScr[i] ?? 0)" :key="'s' + b"
                       class="w-full rounded-[1px] bg-rose-500"
@@ -550,7 +639,7 @@ watch(selectedEntry, async (entry) => {
                       style="height: 3px"
                     />
                   </template>
-                  <!-- フォールバック: 分割データなし -->
+                  <!-- フォールバック: 分割データが無い時は密度に応じて色を変える単一バー -->
                   <template v-else>
                     <div v-for="b in n" :key="b"
                       class="w-full rounded-[1px]"
@@ -566,10 +655,10 @@ watch(selectedEntry, async (entry) => {
               </div>
             </div>
 
-            <!-- 音符割合分布（スタックバー） -->
+            <!-- 音符割合分布: 全音符〜64分までの割合をスタックバー + 凡例で表示 -->
             <div v-if="noteDistribution.length" class="mt-3">
               <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mb-2">音符割合</div>
-              <!-- スタックバー -->
+              <!-- スタックバー本体: 各音符の割合で幅を決める -->
               <div class="w-full h-6 rounded-lg overflow-hidden flex">
                 <div v-for="(nd, i) in noteDistribution" :key="nd.label"
                   class="h-full flex items-center justify-center text-[10px] font-bold text-white transition-all"
@@ -580,7 +669,7 @@ watch(selectedEntry, async (entry) => {
                   <span v-if="nd.pct >= 5">{{ nd.pct }}%</span>
                 </div>
               </div>
-              <!-- 凡例 -->
+              <!-- 色と音符名の凡例 -->
               <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2">
                 <div v-for="(nd, i) in noteDistribution" :key="nd.label"
                   class="flex items-center gap-1 text-[11px]">
@@ -593,7 +682,7 @@ watch(selectedEntry, async (entry) => {
             </div>
           </div>
 
-          <!-- 予測スコア -->
+          <!-- 予測スコアパネル: 大きなスコア表示 + DJ LEVEL + 現在との差分 + 達成率プログレスバー -->
           <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
               {{ t('scorePrediction.prediction') }}
@@ -605,7 +694,7 @@ watch(selectedEntry, async (entry) => {
             </div>
 
             <div v-else-if="displayScore" class="flex flex-col sm:flex-row items-center gap-6">
-              <!-- スコア大表示 -->
+              <!-- 予測スコア大表示 + MAX表記 + DJ LEVEL + 現在スコアとの差分 -->
               <div class="text-center shrink-0">
                 <div class="text-4xl font-extrabold text-slate-800 dark:text-white tabular-nums">
                   {{ displayScore.score.toLocaleString() }}
@@ -616,7 +705,7 @@ watch(selectedEntry, async (entry) => {
                 <div class="mt-2 text-2xl font-bold" :class="djLevelClass(displayScore.rate)">
                   {{ djLevel(displayScore.rate) }}
                 </div>
-                <!-- 現在スコアとの差分 -->
+                <!-- 現在の自分のベストとの差分（プラスは緑、マイナスは赤） -->
                 <div v-if="displayScore.diff != null" class="mt-2 text-xs tabular-nums"
                   :class="displayScore.diff > 0
                     ? 'text-emerald-600 dark:text-emerald-400'
@@ -630,7 +719,7 @@ watch(selectedEntry, async (entry) => {
                 </div>
               </div>
 
-              <!-- プログレスバー -->
+              <!-- 達成率プログレスバー: スコアレート(%)を塗り、A/AA/AAA の目安目盛をその下に表示 -->
               <div class="flex-1 w-full">
                 <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
                   <span>{{ t('scorePrediction.scoreRate') }}</span>
@@ -649,7 +738,7 @@ watch(selectedEntry, async (entry) => {
                     :style="{ width: `${Math.min(displayScore.rate, 100)}%` }"
                   />
                 </div>
-                <!-- DJランク目安ライン -->
+                <!-- A/AA/AAA の目安位置ラベル（プログレスバーの下にマーカー配置） -->
                 <div class="relative h-4 mt-1">
                   <div v-for="(mark, idx) in [
                     { label: 'A', pct: 66.67, cls: 'text-green-500' },
@@ -665,7 +754,7 @@ watch(selectedEntry, async (entry) => {
             </div>
           </div>
 
-          <!-- 類似譜面 -->
+          <!-- 類似譜面テーブル: 予測の根拠になった類似曲一覧。行クリックで類似度デバッグモーダル -->
           <div v-if="predictionResult.similarSongs.length"
             class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
@@ -716,7 +805,7 @@ watch(selectedEntry, async (entry) => {
             </div>
           </div>
 
-          <!-- 類似度デバッグモーダル -->
+          <!-- 類似度デバッグモーダル（管理者機能）: 計算過程を4グループに分けて表示 -->
           <Teleport to="body">
             <div v-if="debugResult || isDebugLoading"
               class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -730,7 +819,7 @@ watch(selectedEntry, async (entry) => {
                   <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
                 </div>
                 <div v-else-if="debugResult">
-                  <!-- 曲名 -->
+                  <!-- 上部: 比較対象2曲(A,B)の情報カード -->
                   <div class="flex gap-3 mb-4 text-sm">
                     <div class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
                       <div class="text-xs text-slate-400 mb-1">対象曲 (A)</div>
@@ -743,7 +832,7 @@ watch(selectedEntry, async (entry) => {
                       <div class="text-xs text-slate-500">難易度 {{ debugResult.songB?.informalRank }}</div>
                     </div>
                   </div>
-                  <!-- 生データ比較 -->
+                  <!-- 生データ比較テーブル: ノーツ密度・BPM・スクラッチ割合などを並べて表示 -->
                   <div class="mb-4">
                     <div class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">生データ比較</div>
                     <table class="w-full text-xs">
@@ -764,7 +853,7 @@ watch(selectedEntry, async (entry) => {
                       </tbody>
                     </table>
                   </div>
-                  <!-- グループ別結果 -->
+                  <!-- グループ別の類似度内訳（密度/スクラッチ/鍵盤パターン/CN の4グループ） -->
                   <div class="space-y-3">
                     <div v-for="[label, key, color, paramLabels] in ([
                       ['Group1: 密度', 'group1_density', 'blue', {
@@ -818,7 +907,7 @@ watch(selectedEntry, async (entry) => {
                       </div>
                     </div>
                   </div>
-                  <!-- 最終結果 -->
+                  <!-- 最終類似度: 各グループ寄与度を掛け合わせた最終値 -->
                   <div class="mt-4 rounded-xl bg-slate-900 dark:bg-slate-950 p-4 text-center">
                     <div class="text-xs text-slate-400 mb-1">最終類似度</div>
                     <div class="text-3xl font-black text-white">{{ debugResult.result?.finalSimilarityPct }}</div>
@@ -836,7 +925,7 @@ watch(selectedEntry, async (entry) => {
       </div><!-- /右パネル -->
     </div><!-- /flex -->
 
-    <!-- 謝辞 -->
+    <!-- 謝辞: 譜面データ提供元 TexTage へのクレジット -->
     <div class="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center text-xs text-slate-400 dark:text-slate-500">
       譜面データは
       <a href="https://textage.cc/" target="_blank" rel="noopener noreferrer"

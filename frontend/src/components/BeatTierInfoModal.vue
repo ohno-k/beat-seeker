@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 z-[110] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200">
-      <!-- Header -->
+      <!-- ヘッダー（タイトル + ×閉じる） -->
       <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
         <div>
           <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('beatTierInfo.title') }}</h3>
@@ -14,9 +14,9 @@
         </button>
       </div>
 
-      <!-- Content -->
+      <!-- 本体スクロール領域 -->
       <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50 transition-colors duration-200">
-        <!-- Tabs -->
+        <!-- タブ切替（解説 / 対象曲一覧） -->
         <div class="px-8 pt-6 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md z-10 transition-colors duration-200">
           <div class="flex border-b border-slate-200 dark:border-slate-700 gap-8">
             <button 
@@ -37,7 +37,7 @@
         </div>
 
         <div class="p-4 sm:p-8">
-          <!-- About Tab -->
+          <!-- 解説タブ（Beat-PT の仕組み・計算式・階段） -->
           <div v-if="activeTab === 'about'" class="space-y-8 animate-fade-in">
             <section>
               <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
@@ -63,7 +63,7 @@
               </div>
             </section>
 
-            <!-- Rank Board -->
+            <!-- ランク一覧ボード（階段を可視化） -->
             <section class="space-y-8">
               <div class="flex items-center justify-between">
                 <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -143,7 +143,7 @@
             </section>
           </div>
 
-          <!-- Songs Tab -->
+          <!-- 対象曲一覧タブ（難易度ごとに weight と曲リスト） -->
           <div v-else class="space-y-6 animate-fade-in h-full flex flex-col">
             <div class="flex flex-col sm:flex-row gap-4">
               <div class="relative flex-1">
@@ -191,7 +191,7 @@
         </div>
       </div>
       
-      <!-- Footer -->
+      <!-- フッター（更新日表示） -->
       <div class="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 text-center transition-colors duration-200">
         <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
           {{ t('beatTierInfo.footerDesc') }} • {{ new Date().toLocaleDateString() }}
@@ -202,6 +202,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 BeatTier の仕組み解説を全画面モーダルで表示する。
+ *
+ * タブ構成:
+ *  - about: Beat-PT の計算式、ランク階段の可視化
+ *  - songs: 非公式難易度表ごとの weight と楽曲一覧（検索可）
+ *
+ * emits:
+ *  - close: ×ボタンで閉じる
+ */
 import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { WEIGHTS, getGroupedRanks } from '../utils/beatTier';
@@ -211,16 +221,28 @@ import RankIcon from './RankIcon.vue';
 const { t } = useI18n();
 defineEmits(['close']);
 
+/** アクティブなタブ。`about`（解説） / `songs`（対象曲一覧）。 */
 const activeTab = ref<'about' | 'songs'>('about');
+/** 曲名検索キーワード。大文字小文字を無視して部分一致。 */
 const songSearch = ref('');
 
+/** ランク名ごとに tier でまとめた配列。階段表示用。 */
 const groupedRanks = computed(() => getGroupedRanks());
+/** Beginner と Legend 以外のランク名（中間層）。表示順を一覧で固定。 */
 const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Commander', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
 
+/**
+ * 【関数の役割】 ランク名と tier から該当ランク情報を取得する。
+ * 見つからない場合は undefined（階段の一部が欠けるケース）。
+ */
 const getRankForTier = (name: string, tier: number) => {
   return groupedRanks.value[name]?.find(r => r.tier === tier);
 };
 
+/**
+ * 【computed の役割】 非公式難易度表を「weight > 0 のランクだけ」に整形した配列。
+ * weight 0 の層は Beat-PT に寄与しないので解説対象から除外。
+ */
 const songGroups = computed(() => {
   return (diffTableRanksRef.value || []).map((r: any) => ({
     rank: r.rank,
@@ -229,11 +251,15 @@ const songGroups = computed(() => {
   })).filter((g: any) => g.weight > 0);
 });
 
+/**
+ * 【computed の役割】 検索キーワードに応じて楽曲を絞り込む。
+ * 空文字のときは全件を返す。マッチ 0 件のランク層は結果から除外。
+ */
 const filteredSongGroups = computed(() => {
   if (!songSearch.value) return songGroups.value;
-  
+
   return songGroups.value.map(group => {
-    const matchedSongs = group.songs.filter((s: string) => 
+    const matchedSongs = group.songs.filter((s: string) =>
       s.toLowerCase().includes(songSearch.value.toLowerCase())
     );
     return { ...group, songs: matchedSongs };

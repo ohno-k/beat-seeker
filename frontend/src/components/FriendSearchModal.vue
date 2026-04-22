@@ -1,4 +1,19 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 フレンド検索モーダル。
+ *
+ * 機能:
+ *  - 表示名 または IIDX ID（ハイフン無し）の完全一致で検索
+ *  - 検索結果一覧から「申請」ボタンで友達申請を送信
+ *  - 既にフレンド／申請済みの場合はそれぞれバッジ表示
+ *  - 任意メッセージ（最大 100 文字）を添付可能
+ *
+ * props:
+ *  - isOpen: モーダルの開閉状態
+ * emits:
+ *  - close: 閉じる要求
+ *  - request-sent: 申請送信成功時（親の通知件数更新用）
+ */
 import { ref } from 'vue';
 import { useFriends, type Friend } from '../composables/useFriends';
 import { getRankInfo } from '../utils/beatTier';
@@ -13,11 +28,19 @@ const emit = defineEmits<{
 }>();
 
 const { searchUsers, sendFriendRequest, error } = useFriends();
+/** 検索クエリ（表示名 or IIDX ID）。 */
 const searchQuery = ref('');
+/** バックエンドから返ってきた検索結果一覧。 */
 const searchResults = ref<Friend[]>([]);
+/** 検索中フラグ（スピナー表示と二重送信防止）。 */
 const isSearching = ref(false);
+/** 申請成功後 3 秒間だけ表示する成功メッセージ。 */
 const successMsg = ref('');
 
+/**
+ * 【関数の役割】 検索クエリを API に送り、結果を searchResults に格納する。
+ * 空クエリは無視。結果 0 件は「見つかりませんでした」エラー扱いで表示する。
+ */
 const handleSearch = async () => {
   if (!searchQuery.value.trim()) return;
   isSearching.value = true;
@@ -39,8 +62,14 @@ const handleSearch = async () => {
   }
 };
 
+/** 申請対象ユーザーごとの任意メッセージ。user.id をキーにした辞書。 */
 const requestMessages = ref<Record<number, string>>({});
 
+/**
+ * 【関数の役割】 指定フレンドに友達申請を送信する。
+ * 成功したら該当行の hasSentRequest をローカルで true にし、3 秒だけトーストを出す。
+ * 失敗は composable 側の error に委ねる。
+ */
 const handleSendRequest = async (friend: Friend) => {
   try {
     const message = requestMessages.value[friend.id] || '';
@@ -50,7 +79,7 @@ const handleSendRequest = async (friend: Friend) => {
     emit('request-sent');
     setTimeout(() => { successMsg.value = ''; }, 3000);
   } catch (e: any) {
-    // Error is handled by composable
+    // エラーは composable が error に反映済みなのでここでは握り潰す。
   }
 };
 
@@ -71,7 +100,7 @@ const handleSendRequest = async (friend: Friend) => {
         </div>
 
         <div class="p-6 space-y-6 overflow-y-auto">
-          <!-- Search Form -->
+          <!-- 検索フォーム（虫眼鏡アイコン付きテキスト + 検索ボタン） -->
           <form @submit.prevent="handleSearch" class="flex gap-2">
             <div class="relative flex-1">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -96,7 +125,7 @@ const handleSendRequest = async (friend: Friend) => {
             </button>
           </form>
 
-          <!-- Messages -->
+          <!-- エラー／成功メッセージ表示領域 -->
           <div v-if="error" class="p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-xl border border-red-200 dark:border-red-800/50 flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
@@ -111,7 +140,7 @@ const handleSendRequest = async (friend: Friend) => {
             <span class="font-medium">{{ successMsg }}</span>
           </div>
 
-          <!-- Search Results -->
+          <!-- 検索結果一覧（アバター頭文字 + 表示名 + Beat-PT + ランク + 申請ボタン） -->
           <div class="space-y-3">
             <div v-for="result in searchResults" :key="result.id" 
               class="flex items-center gap-4 p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl hover:border-blue-200 dark:hover:border-blue-900 transition-all shadow-sm"
@@ -130,7 +159,7 @@ const handleSendRequest = async (friend: Friend) => {
                     {{ getRankInfo(result.totalBeatPt).name }} {{ getRankInfo(result.totalBeatPt).tier }}
                   </span>
                 </div>
-                <!-- Message Input -->
+                <!-- 申請メッセージ入力欄（100 文字まで、任意） -->
                 <div v-if="!result.isFriend && !result.hasSentRequest" class="mt-2">
                   <input 
                     type="text" 

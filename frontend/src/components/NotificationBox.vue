@@ -1,4 +1,17 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 ヘッダーの鐘アイコン押下時にポップオーバーで表示する通知パネル。
+ *
+ * 機能:
+ *  - フレンド申請タブ: 承認/拒否ボタン
+ *  - アクティビティタブ: スコア抜かれ/フレンド昇格などの通知一覧、まとめて既読
+ *  - 30 秒ごとにポーリングして新着を自動取得
+ *
+ * props:
+ *  - isOpen: 表示/非表示
+ * emits:
+ *  - close: 外部から閉じる（背景クリック等）
+ */
 import { onMounted, onUnmounted, ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
 
@@ -10,10 +23,15 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
+// フレンド関連・通知関連の API をまとめたコンポーザブルから必要分を取得。
 const { pendingRequests, fetchPendingRequests, acceptRequest, rejectRequest, appNotifications, fetchAppNotifications, markAllNotificationsRead } = useFriends();
+/** 現在「処理中」のフレンド申請 ID（ボタンの二度押し防止用）。 */
 const isActionLoading = ref<number | null>(null);
+/** アクティブなタブ（フレンド申請 or アプリ通知）。 */
 const activeTab = ref<'friend' | 'app'>('friend');
 
+// マウント時に即座に一度取得し、その後 30 秒間隔でポーリング。
+// NOTE: onUnmounted を onMounted の中で呼んでいるが、setup スコープで登録されていれば機能する。
 onMounted(() => {
   fetchPendingRequests();
   fetchAppNotifications();
@@ -24,8 +42,13 @@ onMounted(() => {
   onUnmounted(() => clearInterval(interval));
 });
 
+/** 未読のアクティビティ通知件数（バッジ表示用）。 */
 const unreadAppCount = computed(() => appNotifications.value.filter(n => !n.read).length);
 
+/**
+ * 【関数の役割】 フレンド申請を承認する。
+ * @param id 申請 ID
+ */
 const handleAccept = async (id: number) => {
   isActionLoading.value = id;
   try {
@@ -35,6 +58,10 @@ const handleAccept = async (id: number) => {
   }
 };
 
+/**
+ * 【関数の役割】 フレンド申請を拒否する。
+ * @param id 申請 ID
+ */
 const handleReject = async (id: number) => {
   isActionLoading.value = id;
   try {
@@ -44,10 +71,15 @@ const handleReject = async (id: number) => {
   }
 };
 
+/** 【関数の役割】 未読のアクティビティ通知をまとめて既読化する。 */
 const handleMarkAllRead = async () => {
   await markAllNotificationsRead();
 };
 
+/**
+ * 【関数の役割】 通知種別から絵文字アイコンを決定する。
+ * @param type 通知タイプ（SCORE_BEAT / FRIEND_RANK_UP / その他）
+ */
 const notificationIcon = (type: string) => {
   if (type === 'SCORE_BEAT') return '⚡';
   if (type === 'FRIEND_RANK_UP') return '🏆';
@@ -71,7 +103,7 @@ const notificationIcon = (type: string) => {
       </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- タブ切替（フレンド申請 / アクティビティ通知） -->
     <div class="flex border-b border-slate-100 dark:border-slate-700">
       <button
         @click="activeTab = 'friend'"
@@ -98,7 +130,7 @@ const notificationIcon = (type: string) => {
     </div>
 
     <div class="max-h-96 overflow-y-auto">
-      <!-- Friend Requests Tab -->
+      <!-- フレンド申請タブの中身 -->
       <template v-if="activeTab === 'friend'">
         <div v-if="pendingRequests.length === 0" class="p-8 text-center">
           <div class="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -140,7 +172,7 @@ const notificationIcon = (type: string) => {
         </div>
       </template>
 
-      <!-- App Notifications Tab -->
+      <!-- アプリ内通知タブ（スコア抜かれ・フレンド昇格など） -->
       <template v-if="activeTab === 'app'">
         <div v-if="appNotifications.length === 0" class="p-8 text-center">
           <div class="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-3">

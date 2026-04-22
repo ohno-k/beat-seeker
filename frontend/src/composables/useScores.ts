@@ -2,12 +2,35 @@ import { ref } from 'vue';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 import { useAuth } from './useAuth';
 
+/** バックエンド API のベース URL。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+/**
+ * 【Composable の役割】 スコア取得系 API（自分 / 他ユーザ / トップランカー / プロフィール / メモ）を一括提供する。
+ *
+ * API が返す「譜面フラット配列」を、UI が扱いやすい「曲単位にグルーピングした構造」に変換する
+ * ロジックが本 composable の主な責務。
+ *
+ * 使い方:
+ * ```ts
+ * const { fetchMyScores, fetchUserScores, updateMemo } = useScores();
+ * const myScores = await fetchMyScores();
+ * ```
+ */
 export function useScores() {
+    /** 何らかのフェッチ実行中フラグ（スピナー表示用）。 */
     const isFetching = ref(false);
     const { authHeaders } = useAuth();
 
+    /**
+     * 自分のスコア一覧を取得する。
+     *
+     * 変換:
+     *  - API は「譜面 1 件 = 1 レコード」で返してくるので、同一タイトル内で
+     *    beginner / normal / hyper / another / leggendaria を 1 オブジェクトにまとめる
+     *
+     * 認証エラー (401) の場合は空配列を返す（ログアウト中でもクラッシュしない）。
+     */
     const fetchMyScores = async (): Promise<ScoreData[]> => {
         isFetching.value = true;
         try {
@@ -24,9 +47,10 @@ export function useScores() {
 
             const flatScores = await res.json();
 
-            // Group by title
+            // タイトル単位でグルーピング
             const grouped = new Map<string, any>();
 
+            /** 未プレイ状態の 1 難易度分のダミー値。全難易度を埋めておくため。 */
             const emptyDiff = (): DifficultyStats => ({
                 difficulty: null,
                 score: 0,
@@ -41,6 +65,7 @@ export function useScores() {
 
             flatScores.forEach((s: any) => {
                 const title = s.title;
+                // 初出タイトルは「全難易度 NO PLAY」のテンプレートを用意
                 if (!grouped.has(title)) {
                     grouped.set(title, {
                         version: '0',
@@ -58,6 +83,7 @@ export function useScores() {
                 }
 
                 const entry = grouped.get(title);
+                // API の 'ANOTHER' を UI の 'another' キーに正規化
                 const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
 
                 if (entry[diffKey]) {
@@ -82,6 +108,10 @@ export function useScores() {
     };
 
 
+    /**
+     * 管理画面で使う「全ユーザー一覧」取得。
+     * 管理者権限が無い場合はサーバ側で 403 が返る。
+     */
     const fetchAllUsers = async () => {
         isFetching.value = true;
         try {
@@ -98,6 +128,14 @@ export function useScores() {
         }
     };
 
+    /**
+     * 他ユーザーのスコア一覧を取得する（閲覧権限は mode で切り分け）。
+     *
+     * @param userId 対象ユーザーの ID
+     * @param mode   - `admin`: 管理者閲覧 / `friend`: フレンド閲覧 / `public`: 全公開ユーザー閲覧
+     *
+     * 401 / 403 は空配列を返す（「見れない」だけで例外にはしない）。
+     */
     const fetchUserScores = async (
         userId: number,
         mode: 'admin' | 'friend' | 'public' = 'admin'
@@ -121,6 +159,7 @@ export function useScores() {
             }
 
             const flatScores = await res.json();
+            // fetchMyScores と同じグルーピング処理
             const grouped = new Map<string, any>();
 
             const emptyDiff = (): DifficultyStats => ({
@@ -177,6 +216,13 @@ export function useScores() {
         }
     };
 
+    /**
+     * 特定バージョン × 都道府県の「トップランカー」プロフィールとスコアを取得する。
+     *
+     * 公開 API なので未ログインでも叩ける（認証ヘッダなし）。
+     *
+     * @returns プロフィールとスコア。失敗時は `{ profile: null, scores: [] }`
+     */
     const fetchTopRankerProfile = async (
         versionNum: number,
         prefectureFileNum: number
@@ -202,6 +248,7 @@ export function useScores() {
                 id: undefined
             });
 
+            // トップランカー API は pgreat/great/missCount を持たないため、その辺は 0/null で埋める
             (data.scores ?? []).forEach((s: any) => {
                 const title = s.title;
                 if (!grouped.has(title)) {
@@ -252,12 +299,19 @@ export function useScores() {
         }
     };
 
+    /**
+     * ユーザーの公開プロフィール情報を取得する（未ログインでも叩ける）。
+     */
     const fetchPublicProfile = async (userId: number): Promise<any | null> => {
         const res = await fetch(`${API_BASE}/api/users/${userId}/profile`);
         if (!res.ok) return null;
         return await res.json();
     };
 
+    /**
+     * 指定ユーザーとの「フレンド関係」を問い合わせる。
+     * @returns `'none' | 'friend' | 'pending'` 等のステータス文字列
+     */
     const fetchFriendStatus = async (userId: number): Promise<string> => {
         const res = await fetch(`${API_BASE}/api/users/${userId}/friend-status`, {
             headers: authHeaders(),
@@ -267,6 +321,9 @@ export function useScores() {
         return data.status ?? 'none';
     };
 
+    /**
+     * スコアレコードに紐付くメモ文を更新する（譜面ごとの自分用コメント）。
+     */
     const updateMemo = async (id: number, memo: string) => {
         const res = await fetch(`${API_BASE}/api/scores/${id}/memo`, {
             method: 'PUT',
@@ -278,13 +335,21 @@ export function useScores() {
     };
 
     return {
+        /** 自分のスコア一覧取得。 */
         fetchMyScores,
+        /** 他ユーザーのスコア一覧取得（権限モード切替可）。 */
         fetchUserScores,
+        /** 管理画面用: 全ユーザー一覧。 */
         fetchAllUsers,
+        /** トップランカーのプロフィール + スコア取得。 */
         fetchTopRankerProfile,
+        /** 公開プロフィール取得。 */
         fetchPublicProfile,
+        /** フレンド関係ステータス取得。 */
         fetchFriendStatus,
+        /** 譜面メモ更新。 */
         updateMemo,
+        /** フェッチ実行中フラグ。 */
         isFetching,
     };
 }

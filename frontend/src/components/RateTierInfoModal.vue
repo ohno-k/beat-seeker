@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 z-[110] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200">
-      <!-- Header -->
+      <!-- ヘッダー（タイトル + 閉じるボタン） -->
       <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
         <div>
           <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('rateTierInfo.title') }}</h3>
@@ -14,9 +14,9 @@
         </button>
       </div>
 
-      <!-- Content -->
+      <!-- スクロール可能な本文領域 -->
       <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50 transition-colors duration-200">
-        <!-- Tabs -->
+        <!-- タブ切替（解説 / 閾値表） -->
         <div class="px-8 pt-6 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md z-10 transition-colors duration-200">
           <div class="flex border-b border-slate-200 dark:border-slate-700 gap-8">
             <button
@@ -37,7 +37,7 @@
         </div>
 
         <div class="p-4 sm:p-8">
-          <!-- About Tab -->
+          <!-- 解説タブ（Rate-PT の仕組みと計算式） -->
           <div v-if="activeTab === 'about'" class="space-y-8 animate-fade-in">
             <section>
               <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
@@ -63,7 +63,7 @@
               </div>
             </section>
 
-            <!-- Rank Board -->
+            <!-- ランク階段表示 -->
             <section class="space-y-8">
               <div class="flex items-center justify-between">
                 <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -137,7 +137,7 @@
             </section>
           </div>
 
-          <!-- Score Rate Table Tab -->
+          <!-- スコアレート閾値テーブルタブ -->
           <div v-else class="space-y-6 animate-fade-in">
             <section>
               <h4 class="text-lg font-black text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
@@ -183,7 +183,7 @@
         </div>
       </div>
 
-      <!-- Footer -->
+      <!-- フッター（更新日表示） -->
       <div class="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 text-center transition-colors duration-200">
         <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
           {{ t('rateTierInfo.footerDesc') }} • {{ new Date().toLocaleDateString() }}
@@ -194,6 +194,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 RateTier（スコアレート式称号）の仕組み解説モーダル。
+ *
+ * タブ構成:
+ *  - about: Rate-PT 計算式とランク階段
+ *  - table: スコアレート閾値ごとの付与ポイント表 + 例（3000 満点換算）
+ *
+ * emits:
+ *  - close: 閉じる
+ */
 import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { RATE_TIER_RANKS, SCORE_RATE_THRESHOLDS, getGroupedRateTierRanks } from '../utils/beatTier';
@@ -202,15 +212,20 @@ import RankIcon from './RankIcon.vue';
 const { t } = useI18n();
 defineEmits(['close']);
 
+/** 現在のタブ（解説 / 閾値テーブル）。 */
 const activeTab = ref<'about' | 'table'>('about');
 
+/** RateTier のランク一覧を tier でグルーピングしたもの。 */
 const groupedRanks = computed(() => getGroupedRateTierRanks());
+/** 中間ランク名を表示順に固定。 */
 const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Commander', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
 
+/** 【関数の役割】 指定ランク・tier のエントリを取得。階段の穴表示判定に使用。 */
 const getRankForTier = (name: string, tier: number) => {
   return groupedRanks.value[name]?.find(r => r.tier === tier);
 };
 
+/** 【関数の役割】 閾値表の左端カラーマーカーを points 規模で決定する。 */
 function thresholdColor(points: number): string {
   if (points >= 256) return 'bg-amber-400';
   if (points >= 64) return 'bg-emerald-500';
@@ -219,6 +234,7 @@ function thresholdColor(points: number): string {
   return 'bg-slate-300';
 }
 
+/** 【関数の役割】 閾値表の「points pt」テキスト色を points 規模で決定する。 */
 function thresholdTextColor(points: number): string {
   if (points >= 256) return 'text-amber-500 dark:text-amber-400';
   if (points >= 64) return 'text-emerald-600 dark:text-emerald-400';

@@ -1,4 +1,19 @@
 <script setup lang="ts">
+/**
+ * 【Viewの役割】 譜面 Tier 投票ページ。ユーザーが譜面ごとに昇格/据え置き/降格 or Tier 値を投票できる。
+ *
+ * 機能:
+ *  - 既にランクが付いている譜面には PROMOTE / STAY / DEMOTE の3択ボタンを表示し、投票を集計する。
+ *  - 未カテゴリ（uncategorized）譜面は 11.0〜13.0 の 0.1 刻み Tier 値プルダウンで投票する。
+ *  - 同じ投票を再クリックで取り消し（トグル）、違う投票でも上書き（前の票をデクリメント）する。
+ *  - 譜面クリック or コメントバッジクリックで `TierCommentModal` を開いてディスカッション可能。
+ *  - 検索で曲名絞り込み、最新コメント時刻が新しい順に並べ替え。
+ *
+ * 依存:
+ *  - `useGameData.diffTableRanks` — ランク別の曲一覧。
+ *  - API: `/api/tier-votes/all`, `/api/tier-votes/mine`, `/api/tier-votes`, `/api/tier-comments/stats`。
+ *  - `TierCommentModal` — コメント閲覧/投稿。
+ */
 import { ref, computed, onMounted, watch } from 'vue';
 import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
@@ -10,25 +25,35 @@ const { t } = useI18n();
 const { diffTableRanks } = useGameData();
 const { isLoggedIn, authHeaders } = useAuth();
 
-// Tier select options: 11.0 ~ 13.0 in 0.1 steps
+// Tier 選択肢: 11.0 〜 13.0 を 0.1 刻みで生成（整数ループで浮動小数誤差を回避）
 const TIER_OPTIONS: string[] = [];
 for (let i = 110; i <= 130; i++) {
   TIER_OPTIONS.push((i / 10).toFixed(1));
 }
 
-// Vote counts map: "title|difficultyName" -> { voteType: count, ... }
+/** 全ユーザーの投票集計: "title|difficultyName" → { 投票タイプ: 票数 } */
 const allVotes = ref<Map<string, Record<string, number>>>(new Map());
-// User's own votes: "title|difficultyName" -> vote string
+/** ログインユーザー本人の投票: "title|difficultyName" → 投票文字列（PROMOTE/STAY/DEMOTE or Tier 値） */
 const myVotes = ref<Map<string, string>>(new Map());
 
+/** 投票データのロード中フラグ */
 const isLoadingVotes = ref(false);
+/** 曲名検索クエリ */
 const searchQuery = ref('');
 
+/** コメント統計（件数と最新投稿時刻） */
 const commentStats = ref<Map<string, { count: number; latest: string }>>(new Map());
+/** コメントモーダルの表示フラグ */
 const showCommentModal = ref(false);
+/** モーダルに表示中の曲名 */
 const activeCommentTitle = ref('');
+/** モーダルに表示中の難易度名 */
 const activeCommentDiff = ref('');
 
+/**
+ * 【関数の役割】 全曲のコメント統計を取得してキャッシュする。
+ * APIが返す配列を「title|difficultyName → {count, latest}」の Map に再構築する。
+ */
 const fetchCommentStats = async () => {
   try {
     const res = await fetch(`${API_BASE}/api/tier-comments/stats`);
@@ -41,16 +66,21 @@ const fetchCommentStats = async () => {
       commentStats.value = map;
     }
   } catch {
-    // ignore
+    // ネットワークエラー等は静かに無視（統計は補助的情報なので致命ではない）
   }
 };
 
+/** コメントモーダルを特定譜面で開く */
 const openCommentModal = (title: string, difficultyName: string) => {
   activeCommentTitle.value = title;
   activeCommentDiff.value = difficultyName;
   showCommentModal.value = true;
 };
 
+/**
+ * 【関数の役割】 全員の投票集計を取得して `allVotes` に反映する。
+ * サーバ側では投票タイプ別カラムで返ってくるため、title/difficultyName を分離してキー化する。
+ */
 const fetchAllVotes = async () => {
   isLoadingVotes.value = true;
   try {
@@ -73,6 +103,9 @@ const fetchAllVotes = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 自分自身の投票履歴を取得。未ログインなら即 return。
+ */
 const fetchMyVotes = async () => {
   if (!isLoggedIn.value) return;
   try {
@@ -92,18 +125,23 @@ const fetchMyVotes = async () => {
   }
 };
 
+// マウント時に 3 種類のデータを直列で取得する（依存はないが順序固定で予測可能性を上げる）
 onMounted(async () => {
   await fetchAllVotes();
   await fetchCommentStats();
   await fetchMyVotes();
 });
 
+// ログイン状態が切り替わったら自分の投票を再取得／クリアする
 watch(isLoggedIn, (val) => {
   if (val) fetchMyVotes();
   else myVotes.value = new Map();
 });
 
-// Parse song entry: "[L]" suffix = LEGGENDARIA
+/**
+ * 【関数の役割】 "曲名[L]" の形式をパースして ANOTHER/LEGGENDARIA に分ける。
+ * "[L]" サフィックスが LEGGENDARIA の印。
+ */
 const parseSong = (songTitle: string): { title: string; difficultyName: 'ANOTHER' | 'LEGGENDARIA' } => {
   if (songTitle.endsWith('[L]')) {
     return { title: songTitle.slice(0, -3), difficultyName: 'LEGGENDARIA' };
@@ -111,17 +149,24 @@ const parseSong = (songTitle: string): { title: string; difficultyName: 'ANOTHER
   return { title: songTitle, difficultyName: 'ANOTHER' };
 };
 
+/** ランク名が未カテゴリ（まだ Tier が決まっていない）か判定 */
 const isUncategorized = (rankName: string) => rankName.toLowerCase().includes('uncategorized');
 
+/** 指定譜面の全員分の投票集計を取得。無ければ空オブジェクト */
 const getVotes = (title: string, difficultyName: string): Record<string, number> => {
   return allVotes.value.get(`${title}|${difficultyName}`) ?? {};
 };
 
+/** 自分のこの譜面への投票。未投票なら null */
 const getMyVote = (title: string, difficultyName: string): string | null => {
   return myVotes.value.get(`${title}|${difficultyName}`) ?? null;
 };
 
-// Returns the top-voted tier for uncategorized songs: { tier, count } | null
+/**
+ * 【関数の役割】 未カテゴリ譜面における「最多票を集めた Tier 値」とその票数を返す。
+ * TIER_OPTIONS に含まれるキーのみを対象とし、0票は除外する。
+ * @returns 最多Tier と票数、無ければ null
+ */
 const getTopTier = (title: string, difficultyName: string): { tier: string; count: number } | null => {
   const counts = getVotes(title, difficultyName);
   let best: { tier: string; count: number } | null = null;
@@ -133,12 +178,20 @@ const getTopTier = (title: string, difficultyName: string): { tier: string; coun
   return best;
 };
 
+/** 未カテゴリ譜面の Tier 投票総数（全 Tier の合算） */
 const getTotalTierVotes = (title: string, difficultyName: string): number => {
   const counts = getVotes(title, difficultyName);
   return TIER_OPTIONS.reduce((sum, t) => sum + (counts[t] ?? 0), 0);
 };
 
-// Cast or toggle a PROMOTE/STAY/DEMOTE vote
+/**
+ * 【関数の役割】 PROMOTE/STAY/DEMOTE 投票を行う。同じ投票を再度押したら取り消し（トグル）。
+ *
+ * 処理の流れ:
+ *  - 手順1: 未ログインなら何もしない。
+ *  - 手順2: 同じ票の再クリックなら DELETE でサーバから削除し、ローカルの集計もデクリメント。
+ *  - 手順3: 新規/変更なら POST で送信。旧票があればデクリメントしてから新票を+1。
+ */
 const castVote = async (title: string, difficultyName: string, voteType: string) => {
   if (!isLoggedIn.value) return;
   const key = `${title}|${difficultyName}`;
@@ -170,7 +223,10 @@ const castVote = async (title: string, difficultyName: string, voteType: string)
   }
 };
 
-// Cast a tier placement vote for uncategorized songs ('' = delete)
+/**
+ * 【関数の役割】 未カテゴリ譜面への Tier 値投票。空文字 `''` 指定で削除。
+ * PROMOTE/STAY/DEMOTE 用の `castVote` と分離されているが、動作はほぼ同じ（トグル＋書き換え）。
+ */
 const castTierVote = async (title: string, difficultyName: string, tier: string) => {
   if (!isLoggedIn.value) return;
   const key = `${title}|${difficultyName}`;
@@ -178,7 +234,7 @@ const castTierVote = async (title: string, difficultyName: string, tier: string)
   const counts = { ...(allVotes.value.get(key) ?? {}) };
 
   if (!tier || tier === currentVote) {
-    // Delete vote
+    // 投票削除: 未選択を選んだ or 同じ Tier を再選択
     const res = await fetch(
       `${API_BASE}/api/tier-votes?title=${encodeURIComponent(title)}&difficultyName=${encodeURIComponent(difficultyName)}`,
       { method: 'DELETE', headers: authHeaders() }
@@ -203,6 +259,12 @@ const castTierVote = async (title: string, difficultyName: string, tier: string)
   }
 };
 
+/**
+ * 検索クエリと最新コメント時刻でランクごとに並べ替えたリスト。
+ *  - 手順1: クエリで曲名絞り込み。
+ *  - 手順2: 同じランク内の曲を最新コメント降順で並べ替え（活発な議論を上に）。
+ *  - 手順3: 曲が 0 件になったランクは表示しない。
+ */
 const filteredRanks = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
   return diffTableRanks.value
@@ -212,7 +274,7 @@ const filteredRanks = computed(() => {
         filteredSongs = filteredSongs.filter(s => s.toLowerCase().includes(query));
       }
 
-      // Sort by recent comment descending
+      // 最新コメント時刻の降順でソート（未コメントは 0 扱いで末尾へ）
       filteredSongs = [...filteredSongs].sort((a, b) => {
         const aParsed = parseSong(a);
         const bParsed = parseSong(b);
@@ -225,7 +287,7 @@ const filteredRanks = computed(() => {
         if (aTime !== bTime) {
           return bTime - aTime;
         }
-        return 0; // retain original diffTableRanks ordering if no comments or same time
+        return 0; // コメントなし or 同時刻なら元順序を維持
       });
 
       return {
@@ -236,12 +298,13 @@ const filteredRanks = computed(() => {
     .filter(rank => rank.songs.length > 0);
 });
 
+/** 自分が投票した譜面の総数（上部カウンタ表示用） */
 const totalVotedCount = computed(() => myVotes.value.size);
 </script>
 
 <template>
   <div class="w-full">
-    <!-- Page Header -->
+    <!-- ページヘッダー: タイトルと説明 -->
     <div class="mb-6">
       <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">
         {{ t('nav.tierVoting') }}
@@ -251,7 +314,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
       </p>
     </div>
 
-    <!-- Criteria -->
+    <!-- 投票基準の案内文 -->
     <div class="mb-5 p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl">
       <p class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">{{ t('tierVoting.criteriaTitle') }}</p>
       <ul class="space-y-1 text-sm text-slate-700 dark:text-slate-300">
@@ -266,7 +329,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
       </ul>
     </div>
 
-    <!-- Legend (ranked songs only) -->
+    <!-- 凡例: ランク付き譜面で使う ↑ → ↓ の意味説明 -->
     <div class="mb-4 flex flex-wrap gap-2 text-xs font-bold">
       <span class="flex items-center gap-1 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg">
         ↑ {{ t('tierVoting.promote') }}
@@ -279,17 +342,17 @@ const totalVotedCount = computed(() => myVotes.value.size);
       </span>
     </div>
 
-    <!-- Login hint -->
+    <!-- 未ログイン警告: ログインしないと投票できない旨を表示 -->
     <div v-if="!isLoggedIn" class="mb-5 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl text-sm text-amber-700 dark:text-amber-400">
       {{ t('tierVoting.loginHint') }}
     </div>
 
-    <!-- Voted count -->
+    <!-- 投票済み曲数: ログイン済かつ1件以上投票があるときのみ表示 -->
     <div v-if="isLoggedIn && totalVotedCount > 0" class="mb-5 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl text-sm text-blue-700 dark:text-blue-400">
       {{ t('tierVoting.votedCount', { n: totalVotedCount }) }}
     </div>
 
-    <!-- Search -->
+    <!-- 検索入力: 曲名部分一致 -->
     <div class="mb-6">
       <input
         v-model="searchQuery"
@@ -299,19 +362,19 @@ const totalVotedCount = computed(() => myVotes.value.size);
       />
     </div>
 
-    <!-- Loading -->
+    <!-- ロード中スピナー -->
     <div v-if="isLoadingVotes" class="flex justify-center py-16">
       <div class="w-8 h-8 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
     </div>
 
-    <!-- Rank List -->
+    <!-- ランクごとのリスト: ランクヘッダ＋曲行を縦に並べる -->
     <div v-else class="space-y-6">
       <div
         v-for="rank in filteredRanks"
         :key="rank.rank"
         class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
       >
-        <!-- Rank Header -->
+        <!-- ランクヘッダ: ランク名・曲数・未カテゴリならTier選択ヒント -->
         <div class="px-5 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 flex items-center gap-3">
           <span class="text-base font-black text-slate-800 dark:text-white tracking-tight">{{ rank.rank }}</span>
           <span class="text-xs text-slate-400 dark:text-slate-500">{{ rank.songs.length }}{{ t('tierVoting.songs') }}</span>
@@ -320,7 +383,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
           </span>
         </div>
 
-        <!-- Song Rows -->
+        <!-- 曲の行: 行クリックでコメントモーダル。投票ボタンは stop で行のクリックを阻止 -->
         <div class="divide-y divide-slate-100 dark:divide-slate-700/60">
           <div
             v-for="songEntry in rank.songs"
@@ -328,7 +391,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
             class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 transition-colors group hover:bg-slate-50 dark:hover:bg-slate-700/30 cursor-pointer"
             @click="openCommentModal(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
           >
-            <!-- Song Info -->
+            <!-- 曲情報: 難易度バッジ＋曲名＋コメントバッジ -->
             <div class="flex items-center gap-2 flex-1 min-w-0 pr-4">
               <span
                 class="shrink-0 text-[10px] px-1.5 py-0.5 rounded font-bold"
@@ -342,7 +405,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
                 {{ parseSong(songEntry).title }}
               </span>
 
-              <!-- Comment Button / Badge -->
+              <!-- コメントバッジ／ボタン: コメント数があれば青、無ければグレー -->
               <button 
                 @click.stop="openCommentModal(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
                 class="inline-flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg text-[10px] font-bold transition-all ml-1"
@@ -360,7 +423,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
               </button>
             </div>
 
-            <!-- Uncategorized: Tier Select -->
+            <!-- 未カテゴリ譜面: Tier 値をプルダウンで投票 -->
             <template v-if="isUncategorized(rank.rank)">
               <div class="flex items-center gap-3 shrink-0" @click.stop>
                 <select
@@ -376,7 +439,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   <option value="">{{ t('tierVoting.noVote') }}</option>
                   <option v-for="tier in TIER_OPTIONS" :key="tier" :value="tier">{{ tier }}</option>
                 </select>
-                <!-- Top voted tier display -->
+                <!-- 最多票Tierの表示: 現在の Tier 投票の最頻値を参考として表示 -->
                 <span v-if="getTopTier(parseSong(songEntry).title, parseSong(songEntry).difficultyName)" class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
                   {{ t('tierVoting.topVoted') }}: <span class="font-black text-slate-700 dark:text-slate-200">{{ getTopTier(parseSong(songEntry).title, parseSong(songEntry).difficultyName)!.tier }}</span>
                   <span class="text-slate-400"> ({{ getTotalTierVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName) }})</span>
@@ -384,10 +447,10 @@ const totalVotedCount = computed(() => myVotes.value.size);
               </div>
             </template>
 
-            <!-- Ranked: PROMOTE / STAY / DEMOTE buttons -->
+            <!-- ランク付き譜面: 3種類のボタンで投票。選択中は背景色変化 -->
             <template v-else>
               <div class="flex items-center gap-1.5 shrink-0" @click.stop>
-                <!-- PROMOTE -->
+                <!-- 昇格（PROMOTE）ボタン: 票数も表示 -->
                 <button
                   @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'PROMOTE')"
                   :disabled="!isLoggedIn"
@@ -401,7 +464,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   <span>↑</span>
                   <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
                 </button>
-                <!-- STAY -->
+                <!-- 据え置き（STAY）ボタン -->
                 <button
                   @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'STAY')"
                   :disabled="!isLoggedIn"
@@ -415,7 +478,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   <span>→</span>
                   <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
                 </button>
-                <!-- DEMOTE -->
+                <!-- 降格（DEMOTE）ボタン -->
                 <button
                   @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'DEMOTE')"
                   :disabled="!isLoggedIn"
@@ -440,7 +503,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
       </div>
     </div>
 
-    <!-- Comment Modal -->
+    <!-- コメントモーダル: 行クリック or バッジクリックで開く。投稿後は統計を再取得 -->
     <TierCommentModal
       :show="showCommentModal"
       :title="activeCommentTitle"

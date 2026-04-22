@@ -1,4 +1,20 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 フレンド（または都道府県 TOP ランカー＝バーチャルライバル）とスコア比較を行うモーダル。
+ *
+ * 機能:
+ *  - 自分と相手のスコアを取得し、Lv.11/Lv.12 に絞って EX-SCORE を突き合わせる
+ *  - WIN / LOSS / DRAW / YOU Only / FRIEND Only をカウント
+ *  - 非公式難易度（例: 12.2, 12.A+）別に集計し、クリックで詳細楽曲リストを展開
+ *  - レベル表示トグル・両者プレイ済みのみトグルでフィルタ可能
+ *
+ * props:
+ *  - friend: 比較相手（バーチャル時は負の ID のダミー Friend）
+ *  - virtualArea: バーチャルライバル時の取得元（versionNum + prefectureFileNum）
+ *  - isOpen: モーダル開閉
+ * emits:
+ *  - close: 閉じる
+ */
 import { ref, computed, onMounted, watch } from 'vue';
 import { useFriends, type Friend } from '../composables/useFriends';
 import { useScores } from '../composables/useScores';
@@ -18,12 +34,21 @@ const emit = defineEmits<{
 const { fetchFriendScores, isLoading: isFriendLoading } = useFriends();
 const { fetchMyScores, fetchTopRankerProfile, isFetching: isMyLoading } = useScores();
 
+/** 自分の ScoreRecord（flatten 済み）。 */
 const myProcessedScores = ref<ScoreRecord[]>([]);
+/** 相手（フレンド or バーチャルライバル）の ScoreRecord（flatten 済み）。 */
 const friendProcessedScores = ref<ScoreRecord[]>([]);
+/** 取得エラー文言。存在すれば赤帯表示。 */
 const error = ref<string | null>(null);
 
+/** 自分 or 相手どちらかが取得中なら true。スピナー表示用。 */
 const isLoading = computed(() => isFriendLoading.value || isMyLoading.value);
 
+/**
+ * 【関数の役割】 自分と相手のスコアを並列取得し、flatten 済み配列に格納する。
+ * virtualArea が指定されていれば TOP ランカープロフィール API、そうでなければフレンド用 API を叩く。
+ * フレンド API は生 flat 形式なので groupScores() で ScoreData 風に整形してから flatten し直す。
+ */
 const loadData = async () => {
   if (!props.isOpen) return;
   error.value = null;
@@ -60,6 +85,7 @@ const loadData = async () => {
   }
 };
 
+// マウント時に既に isOpen なら即ロード（親が v-if ではなく :isOpen で切り替える場合に備える）。
 onMounted(() => {
   console.log('[FriendComparisonModal] onMounted', {
     isOpen: props.isOpen,
@@ -69,6 +95,7 @@ onMounted(() => {
   if (props.isOpen) loadData();
 });
 
+// モーダル開閉・比較相手変更・バーチャルエリア変更のいずれかで再取得する。
 watch(() => [props.isOpen, props.friend.id, props.virtualArea?.versionNum, props.virtualArea?.prefectureFileNum], ([open]) => {
   console.log('[FriendComparisonModal] watch triggered', {
     isOpen: props.isOpen,
@@ -78,7 +105,11 @@ watch(() => [props.isOpen, props.friend.id, props.virtualArea?.versionNum, props
   if (open) loadData();
 });
 
-// Helper to group flat scores into ScoreData[]
+/**
+ * 【関数の役割】 フレンド API の flat 形式スコア配列を ScoreData[]（楽曲単位にまとめた形式）に変換する。
+ * flattenScores() に再度渡して差分比較可能な ScoreRecord[] に戻すための橋渡し関数。
+ * 難易度キーは difficultyName を小文字化したもの（beginner/normal/hyper/another/leggendaria）。
+ */
 function groupScores(flatScores: any[]): ScoreData[] {
   const grouped = new Map<string, any>();
   const emptyDiff = () => ({
@@ -108,6 +139,7 @@ function groupScores(flatScores: any[]): ScoreData[] {
   return Array.from(grouped.values());
 }
 
+/** 楽曲 1 行分の比較結果。WIN/LOSS/DRAW 表の詳細セクションで使用。 */
 interface SongComparison {
   title: string;
   difficultyName: string;
@@ -118,6 +150,7 @@ interface SongComparison {
   friendClearType: string;
 }
 
+/** 集計結果（カウント + 各カテゴリの楽曲リスト）。overall/lv11/lv12/非公式ランク毎に持つ。 */
 interface ComparisonResult {
   win: number;
   loss: number;
@@ -132,8 +165,15 @@ interface ComparisonResult {
   friendOnlySongs: SongComparison[];
 }
 
+/**
+ * 【computed の役割】 自分と相手のスコアから全集計結果を一気に算出する。
+ * 返り値:
+ *  - summary: overall / lv11 / lv12 のカード表示用結果
+ *  - unofficial: [非公式ランク文字列, 結果] のタプル配列（降順ソート）
+ * 集計対象: Lv.11 または Lv.12 のみ。レベル表示トグル（showLv11/showLv12）で除外可。
+ */
 const comparisonStats = computed(() => {
-  const initStats = (): ComparisonResult => ({ 
+  const initStats = (): ComparisonResult => ({
     win: 0, loss: 0, draw: 0, myOnly: 0, friendOnly: 0, total: 0,
     winSongs: [], lossSongs: [], drawSongs: [], myOnlySongs: [], friendOnlySongs: []
   });
@@ -145,7 +185,7 @@ const comparisonStats = computed(() => {
 
   const unofficialRanks: Record<string, ComparisonResult> = {};
 
-  // Create a map for all unique song+difficulty keys that appear in either set
+  // 両者スコアの「曲+難易度」キーを統合。myMap/friendMap で O(1) アクセス用に保持。
   const allKeys = new Set<string>();
   const myMap = new Map<string, ScoreRecord>();
   const friendMap = new Map<string, ScoreRecord>();
@@ -172,14 +212,14 @@ const comparisonStats = computed(() => {
     const myScore = myMap.get(key);
     const friendScore = friendMap.get(key);
 
-    const s = myScore || friendScore; // Representative record for basic info
+    const s = myScore || friendScore; // タイトル等の取得用の代表レコード
     if (!s) return;
 
     const myPlay = myScore && myScore.score > 0;
     const friendPlay = friendScore && friendScore.score > 0;
 
-    if (!myPlay && !friendPlay) return; // Both 0 -> Skip
-    if (showBothPlayedOnly.value && !(myPlay && friendPlay)) return; // Filter: both played only
+    if (!myPlay && !friendPlay) return; // 両者未プレイはスキップ
+    if (showBothPlayedOnly.value && !(myPlay && friendPlay)) return; // 「両者プレイ済みのみ」トグル有効時は片方だけプレイも除外
 
     const lvKey = s.difficultyLevel === 11 ? 'lv11' : 'lv12';
     const rank = s.informalRank && !s.informalRank.includes('Uncategorized') ? s.informalRank : null;
@@ -224,10 +264,10 @@ const comparisonStats = computed(() => {
     }
   });
 
-  // Sort song lists
+  // 楽曲リストを並び替える: WIN は差が大きい順、LOSS は差の値が小さい順（例: -10, -50, -100）、それ以外はタイトル順。
   const sortSongs = (stats: ComparisonResult) => {
-    stats.winSongs.sort((a, b) => b.diff - a.diff); // Win: Large gap first (Descending)
-    stats.lossSongs.sort((a, b) => b.diff - a.diff); // Loss: Small gap first (Ascending order of value: -10, -50, -100)
+    stats.winSongs.sort((a, b) => b.diff - a.diff);
+    stats.lossSongs.sort((a, b) => b.diff - a.diff);
     stats.drawSongs.sort((a, b) => a.title.localeCompare(b.title));
     stats.myOnlySongs.sort((a, b) => a.title.localeCompare(b.title));
     stats.friendOnlySongs.sort((a, b) => a.title.localeCompare(b.title));
@@ -238,7 +278,7 @@ const comparisonStats = computed(() => {
   sortSongs(res.lv12);
   Object.values(unofficialRanks).forEach(sortSongs);
 
-  // Sort unofficial ranks descending
+  // 非公式ランクを数値降順に並べる（12.A+ → 12.A → 12.B のように強い順）。
   const sortedUnofficial = Object.entries(unofficialRanks)
     .sort(([a], [b]) => parseFloat(b) - parseFloat(a));
 
@@ -248,7 +288,9 @@ const comparisonStats = computed(() => {
   };
 });
 
+/** 現在展開している非公式ランクのセット。クリックで行詳細を出し入れする。 */
 const expandedRanks = ref<Set<string>>(new Set());
+/** 【関数の役割】 対象ランクの展開状態を反転させる。 */
 const toggleRank = (rank: string) => {
   if (expandedRanks.value.has(rank)) {
     expandedRanks.value.delete(rank);
@@ -257,8 +299,11 @@ const toggleRank = (rank: string) => {
   }
 };
 
+/** 「両者プレイ済みのみ」表示トグル。true なら YOU Only / FRIEND Only を除外。 */
 const showBothPlayedOnly = ref(false);
+/** Lv.11 を集計に含めるか。 */
 const showLv11 = ref(true);
+/** Lv.12 を集計に含めるか。 */
 const showLv12 = ref(true);
 </script>
 
@@ -266,7 +311,7 @@ const showLv12 = ref(true);
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
       <div class="bg-white dark:bg-slate-800 w-full max-w-5xl my-12 rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
-        <!-- Header -->
+        <!-- ヘッダー（タイトル + 相手表示名 + ×ボタン） -->
         <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
           <div>
             <h2 class="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -286,7 +331,7 @@ const showLv12 = ref(true);
           </button>
         </div>
 
-        <!-- Content -->
+        <!-- コンテンツ本体（ローディング/エラー/本文 を状態で切替） -->
         <div class="flex-1 p-4 sm:p-6 space-y-8">
           <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
             <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
@@ -298,9 +343,9 @@ const showLv12 = ref(true);
           </div>
 
           <div v-else class="space-y-8">
-            <!-- Filter Toggle -->
+            <!-- フィルタートグル群（レベルチェック + 両者プレイ済み） -->
             <div class="flex flex-wrap items-center justify-end gap-4">
-              <!-- Level Checkboxes -->
+              <!-- レベル選択チェックボックス -->
               <div class="flex items-center gap-3">
                 <span class="text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
@@ -320,9 +365,9 @@ const showLv12 = ref(true);
                   <span class="text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.12</span>
                 </label>
               </div>
-              <!-- Divider -->
+              <!-- 仕切り線 -->
               <span class="w-px h-5 bg-slate-200 dark:bg-slate-600"></span>
-              <!-- Both Played Toggle -->
+              <!-- 両者プレイ済みのみ表示トグル -->
               <div class="flex items-center gap-3">
                 <span class="text-sm font-bold text-slate-600 dark:text-slate-300">両者プレイ済みのみ表示</span>
                 <button
@@ -338,7 +383,7 @@ const showLv12 = ref(true);
               </div>
             </div>
 
-            <!-- Summary Cards -->
+            <!-- サマリーカード（overall / lv11 / lv12 の 3 カード並び、WIN/DRAW/LOSS の大数字 + 進捗バー） -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div v-for="(stats, key) in comparisonStats.summary" :key="key"
                 v-show="key === 'overall' || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
@@ -368,7 +413,7 @@ const showLv12 = ref(true);
                     <span class="text-[8px] text-slate-400 dark:text-slate-500">LOSS</span>
                   </div>
                 </div>
-                <!-- Progress Bar -->
+                <!-- 進捗バー（割合の帯グラフ。WIN→YOU→DRAW→FRIEND→LOSS の順） -->
                 <div class="mt-4 h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex">
                   <div class="h-full bg-blue-500" :style="{ width: `${(stats.win/stats.total)*100}%` }"></div>
                   <div v-if="!showBothPlayedOnly" class="h-full bg-blue-300" :style="{ width: `${(stats.myOnly/stats.total)*100}%` }"></div>
@@ -380,7 +425,7 @@ const showLv12 = ref(true);
               </div>
             </div>
 
-            <!-- Unofficial Rank Table -->
+            <!-- 非公式難易度別テーブル（行クリックで詳細リストを展開） -->
             <div>
               <h3 class="text-xl font-black text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                 <span class="w-1.5 h-6 bg-indigo-500 rounded-full"></span>
@@ -416,11 +461,11 @@ const showLv12 = ref(true);
                         <td v-if="!showBothPlayedOnly" class="p-4 text-center font-black text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ stats.friendOnly }}</td>
                         <td class="p-4 text-center font-black text-red-500 dark:text-red-400">{{ stats.loss }}</td>
                       </tr>
-                      <!-- Expanded Breakdown -->
+                      <!-- 展開時の詳細内訳（WIN/LOSS/DRAW/YOU Only/FRIEND Only を楽曲単位で列挙） -->
                       <tr v-if="expandedRanks.has(rank)">
                         <td :colspan="showBothPlayedOnly ? 4 : 6" class="p-0 bg-slate-50/50 dark:bg-slate-900/20">
                           <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- WIN Section -->
+                            <!-- WIN セクション（差分が大きい順） -->
                             <div v-if="stats.winSongs.length > 0" class="space-y-2">
                               <h4 class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1">
                                 <span class="w-1 h-3 bg-blue-500 rounded-full"></span>
@@ -433,7 +478,7 @@ const showLv12 = ref(true);
                                 </div>
                               </div>
                             </div>
-                            <!-- LOSS Section -->
+                            <!-- LOSS セクション（負け幅が大きい順） -->
                             <div v-if="stats.lossSongs.length > 0" class="space-y-2">
                               <h4 class="text-[10px] font-black text-red-500 dark:text-red-400 uppercase tracking-widest flex items-center gap-1">
                                 <span class="w-1 h-3 bg-red-500 rounded-full"></span>
@@ -446,7 +491,7 @@ const showLv12 = ref(true);
                                 </div>
                               </div>
                             </div>
-                            <!-- DRAW Section -->
+                            <!-- DRAW セクション（完全同点） -->
                             <div v-if="stats.drawSongs.length > 0" class="space-y-2">
                               <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                                 <span class="w-1 h-3 bg-slate-400 rounded-full"></span>
@@ -459,7 +504,7 @@ const showLv12 = ref(true);
                                 </div>
                               </div>
                             </div>
-                            <!-- YOU Only Section -->
+                            <!-- YOU Only セクション（自分だけがプレイ済み） -->
                             <div v-if="stats.myOnlySongs.length > 0" class="space-y-2">
                               <h4 class="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
                                 <span class="w-1 h-3 bg-blue-300 rounded-full"></span>
@@ -471,7 +516,7 @@ const showLv12 = ref(true);
                                 </div>
                               </div>
                             </div>
-                            <!-- FRIEND Only Section -->
+                            <!-- FRIEND Only セクション（相手だけがプレイ済み） -->
                             <div v-if="stats.friendOnlySongs.length > 0" class="space-y-2">
                               <h4 class="text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
                                 <span class="w-1 h-3 bg-red-300 rounded-full"></span>
@@ -492,7 +537,7 @@ const showLv12 = ref(true);
               </div>
             </div>
 
-            <!-- Note -->
+            <!-- 注意書き（集計ルールの補足表示） -->
             <div class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -506,7 +551,7 @@ const showLv12 = ref(true);
           </div>
         </div>
 
-        <!-- Footer -->
+        <!-- フッター（閉じるボタン） -->
         <div class="p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-right">
           <button @click="emit('close')" class="w-full sm:w-auto px-12 py-4 bg-slate-900 hover:bg-black text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 text-lg">
             閉じる

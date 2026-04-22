@@ -1,3 +1,4 @@
+// UNUSED: fetch_rankings.js のログ出力強化派生版。後継フロー: scripts/scrape-top-rankers.js。詳細は UNUSED.md 参照。
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 

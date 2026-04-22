@@ -333,6 +333,16 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 プロフィールダッシュボード。成長軌跡（時系列推移）とスコア分析をまとめて描画する。
+ * - ユーザーの履歴スナップショットから Beat-PT・EX スコア・AAA 数・FC 数などの推移を Chart.js で可視化
+ * - 最新スナップショットに基づき現在値カード（成長サマリー）を表示
+ * - 日単位に集約（同日の複数アップロードは最終値を採用、増加量は合算）
+ * - スコア分析ブロックでは ANOTHER/LEGGENDARIA の全曲をグルーピングして PGREAT 率、非公式難易度別統計などを計算
+ * - プッシュ通知の許可要求・テスト送信ボタンも内包（ログイン中ユーザー本人のみ）
+ *
+ * @prop viewingUserId null/undefined なら自分のプロフィール、数値なら管理者が他ユーザーを閲覧中（admin 用 API に切替）。
+ */
 import { ref, onMounted, computed } from 'vue';
 import {
   Chart as ChartJS, CategoryScale, LinearScale,
@@ -346,7 +356,7 @@ import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
 import { calculatePoints, WEIGHTS } from '../utils/beatTier';
-import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
+import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 
 const props = defineProps<{
   viewingUserId?: number | null;
@@ -355,13 +365,20 @@ const props = defineProps<{
 const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
 const { t } = useI18n();
-// For push notifications, we only show/allow if it's the current user (no viewingUserId)
+// プッシュ通知は「自分を閲覧中」のみ有効（viewingUserId が無いケース）。
 const { requestNotificationPermission, sendTestNotification } = useFriends();
 
+/** ブラウザのプッシュ通知許可状態（'default' / 'granted' / 'denied'）。 */
 const notificationStatus = ref(typeof Notification !== 'undefined' ? (Notification.permission || 'default') : 'default');
+/** 通知登録 API 呼び出し中フラグ。 */
 const isSubscribing = ref(false);
+/** テスト送信 API 呼び出し中フラグ。 */
 const isTesting = ref(false);
 
+/**
+ * 【関数の役割】 プッシュ通知の許可要求 → サービスワーカー購読を試みる。
+ * 成功時は permission 再読取り、失敗時は i18n メッセージで alert 通知。
+ */
 const handleEnableNotifications = async () => {
   isSubscribing.value = true;
   try {
@@ -380,6 +397,7 @@ const handleEnableNotifications = async () => {
   }
 };
 
+/** 【関数の役割】 テスト用プッシュ通知を自分宛てに送信する（ちゃんと届くか確認用）。 */
 const handleTestNotification = async () => {
   isTesting.value = true;
   try {
@@ -400,6 +418,11 @@ ChartJS.register(
   Title, Tooltip, Legend
 );
 
+/**
+ * 履歴スナップショット 1 件を表す型。
+ * updatedCount: そのアップロードで実際にスコアが更新された曲数（0 なら難易度表改定などのメンテナンス的変化）。
+ * beatPtIncrease: 前回スナップショットからの Beat-PT 増分。
+ */
 interface HistoryRecord {
   snapshotId: string;
   date: string;
@@ -444,12 +467,17 @@ if (diffTableRanksRef.value && Array.isArray(diffTableRanksRef.value)) {
   });
 }
 
+/**
+ * 初回マウント時に履歴と現在スコアを並列取得する。
+ * 閲覧ユーザーが自分以外（props.viewingUserId が数値）のときは /api/admin/users/{id}/... に切替える。
+ * allSettled で取得するため片方が失敗しても他方の表示は続行する。
+ */
 onMounted(async () => {
   try {
-    const histEndpoint = props.viewingUserId 
+    const histEndpoint = props.viewingUserId
         ? `${API_BASE}/api/admin/users/${props.viewingUserId}/history`
         : `${API_BASE}/api/scores/history`;
-    const scoresEndpoint = props.viewingUserId 
+    const scoresEndpoint = props.viewingUserId
         ? `${API_BASE}/api/admin/users/${props.viewingUserId}/scores`
         : `${API_BASE}/api/scores/me`;
 
@@ -480,7 +508,11 @@ const latestTotalScore = computed(() => latestRecord.value?.totalScore ?? 0);
 const latestAaaCount = computed(() => latestRecord.value?.aaaCount ?? 0);
 const latestFcCount = computed(() => latestRecord.value?.fcCount ?? 0);
 
-// 日単位に集約したデータ（同じ日の複数スナップショットをまとめる）
+/**
+ * 【computed の役割】 日単位に集約した履歴データ。
+ * 同じ日の複数スナップショットは「最終値」を totalBeatPt 等の累計値として採用し、
+ * beatPtIncrease はその日の合計として合算する。
+ */
 const dailyHistory = computed<HistoryRecord[]>(() => {
   if (!historyData.value.length) return [];
   const byDate = new Map<string, HistoryRecord[]>();
@@ -611,7 +643,7 @@ const myAnotherLegg = computed(() =>
 // Enriched with scoreRate, beatPt, informalRank (all entries including score=0)
 const myScoresEnriched = computed(() =>
   myAnotherLegg.value.map(s => {
-    const diffCode = s.difficultyName === 'ANOTHER' ? '4' : '10';
+    const diffCode = String(getDifficultyCode(s.difficultyName));
     const maxScore = songDict.get(`${s.title}_${diffCode}`) ?? 0;
     const scoreRate = maxScore > 0 ? (s.score / maxScore) * 100 : 0;
     const informalRank = informalDict.get(`${s.title}_${s.difficultyName}`);

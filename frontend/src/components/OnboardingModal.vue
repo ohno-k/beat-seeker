@@ -1,4 +1,18 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 新規登録直後に表示する 2 ステップのオンボーディング。
+ *
+ * 機能:
+ *  - Step 1: PWA インストール（`beforeinstallprompt` を受け取った場合のみボタン活性化）
+ *  - Step 2: プッシュ通知の許可を要求し、結果でバッジ切替
+ *  - iOS は beforeinstallprompt 非対応なので、ホーム画面追加の手順案内を表示
+ *
+ * props:
+ *  - isOpen: 開閉フラグ
+ *  - deferredPrompt: App 側で取り置いた `beforeinstallprompt` イベント（未対応なら null）
+ * emits:
+ *  - close: 「後で」「始める」どちらでも同じく閉じる
+ */
 import { ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
 
@@ -11,11 +25,15 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
+// プッシュ通知購読をサーバに登録するための関数を取得。
 const { requestNotificationPermission } = useFriends();
 
+/** 通知許可リクエストを処理中かどうか。 */
 const isSubscribing = ref(false);
+/** 現在の Notification 許可状態。'granted' になるとボタンが「設定済み」表示になる。 */
 const notificationStatus = ref(typeof Notification !== 'undefined' ? (Notification.permission || 'default') : 'default');
 
+/** 端末が iOS か判定。iOS 13 以降の iPad は Mac を名乗るため `ontouchend` 検出を併用。 */
 const isIOS = computed(() => {
   return [
     'iPad Simulator',
@@ -25,10 +43,14 @@ const isIOS = computed(() => {
     'iPhone',
     'iPod'
   ].includes(navigator.platform)
-  // iPad on iOS 13 detection
+  // iOS 13 以降の iPad は navigator.platform が 'MacIntel' を返すため、タッチ判定で補完。
   || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 });
 
+/**
+ * 【関数の役割】 PWA インストールプロンプトを表示し、ユーザーが承諾したらモーダルを閉じる。
+ * deferredPrompt は親（App.vue 等）が `beforeinstallprompt` をキャッチして渡す。
+ */
 const handleInstall = async () => {
   if (!props.deferredPrompt) return;
   props.deferredPrompt.prompt();
@@ -38,6 +60,9 @@ const handleInstall = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 Web プッシュ通知の許可リクエストを行い、成功時にバッジを granted に切替。
+ */
 const handleEnableNotifications = async () => {
   isSubscribing.value = true;
   try {
@@ -69,7 +94,7 @@ const handleEnableNotifications = async () => {
       </div>
 
       <div class="p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
-        <!-- Step 1: PWA -->
+        <!-- ステップ 1: PWA としてホーム画面にインストール -->
         <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 transition-colors">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
@@ -104,7 +129,7 @@ const handleEnableNotifications = async () => {
           </div>
         </div>
 
-        <!-- Step 2: Notifications -->
+        <!-- ステップ 2: プッシュ通知を有効化 -->
         <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 transition-colors">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400">

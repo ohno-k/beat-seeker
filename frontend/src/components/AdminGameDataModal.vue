@@ -328,6 +328,21 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 管理者用のゲームデータ管理モーダル（2 タブ）。
+ *
+ * 機能:
+ *  - [songs] タブ: 新曲をドラフト追加（難易度別ノーツ数 + レベル + ANO/LEGG 用詳細）
+ *  - [difficulty] タブ: 非公式難易度表の GUI 編集。曲をドラッグではなくセレクトで移動
+ *  - 投票結果からドラフトを自動生成（PROMOTE/STAY/DEMOTE 多数決 + Uncategorized の tier 配置）
+ *  - [適用（公開）] ボタンでドラフトを本番公開 → 全ユーザーの PT 再計算がキックされる
+ *  - 難易度表の楽曲にホバーすると tier コメントが吹き出しで表示される
+ *
+ * props:
+ *  - isOpen: モーダル開閉
+ * emits:
+ *  - close: 閉じる
+ */
 import { ref, watch, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useGameData } from '../composables/useGameData';
@@ -346,19 +361,29 @@ const { authHeaders } = useAuth();
 const { songDataBody } = useGameData();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+/** 現在アクティブなタブ。 */
 const activeTab = ref<'songs' | 'difficulty'>('songs');
+/** 赤帯で表示するエラー文言。 */
 const errorMsg = ref('');
+/** 緑帯で表示する成功文言。 */
 const successMsg = ref('');
 
-// ── Draft status ────────────────────────────────────────
+// ── ドラフト状態 ─────────────────────────────────────
+/** draft_songs テーブルに未公開楽曲があるか。 */
 const hasDraftSongs = ref(false);
+/** difficulty_table_draft が本番と乖離しているか。 */
 const hasDraftDiffTable = ref(false);
+/** ドラフト追加済みの楽曲（難易度単位で複数行の可能性あり）。 */
 const draftSongs = ref<any[]>([]);
 
 const difficultyCodeToName: Record<string, string> = {
   '1': 'BEG', '2': 'NOR', '3': 'HYP', '4': 'ANO', '10': 'LEG'
 };
 
+/**
+ * 【computed の役割】 ドラフト楽曲を曲名単位にまとめて、難易度ラベルの配列と id の配列を合成して返す。
+ * 1 曲に対して複数難易度が存在する場合、一覧表示で 1 行に統合するための整形。
+ */
 const groupedDraftSongs = computed(() => {
   const groups: Record<string, { title: string; artist: string; genre: string; difficulties: string[]; ids: number[] }> = {};
   for (const song of draftSongs.value) {
@@ -371,7 +396,8 @@ const groupedDraftSongs = computed(() => {
   return Object.values(groups);
 });
 
-// ── Song form ───────────────────────────────────────────
+// ── 楽曲追加フォーム定義 ────────────────────────────
+/** 難易度 5 種のメタデータ（コード / ラベル / フォームのキー名 / 色クラス）。 */
 const difficultyDefs = [
   { code: '1', label: 'BEG', notesKey: 'beginnerNotes' as const, levelKey: 'beginnerLevel' as const, bgClass: 'bg-emerald-50/50 dark:bg-emerald-900/10', labelClass: 'text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-900/50' },
   { code: '2', label: 'NOR', notesKey: 'normalNotes' as const, levelKey: 'normalLevel' as const, bgClass: 'bg-blue-50/50 dark:bg-blue-900/10', labelClass: 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/50' },
@@ -402,6 +428,7 @@ interface SongForm {
   [key: string]: string | number | null;
 }
 
+/** 【関数の役割】 フォームの初期値。追加完了後にこれで ref をリセット。 */
 const defaultForm = (): SongForm => ({
   title: '', artist: '', genre: '', bpm: '',
   beginnerNotes: null, beginnerLevel: null,
@@ -412,30 +439,48 @@ const defaultForm = (): SongForm => ({
   wr: null, avg: null, coef: null, textage: '',
 });
 
+/** 楽曲追加フォームの状態。 */
 const form = ref<SongForm>(defaultForm());
 
+/** 新曲追加ボタンの二重送信防止フラグ。 */
 const isSubmitting = ref(false);
+/** 「適用（公開）」実行中フラグ。 */
 const isApplying = ref(false);
+/** 難易度表のドラフト保存中フラグ。 */
 const isSavingDiff = ref(false);
+/** 「投票から生成」実行中フラグ。 */
 const isGeneratingDraft = ref(false);
 
-// Comment tooltip
+// コメントツールチップ関連（楽曲ホバー時に出す吹き出し）
+/** 現在ホバー中の楽曲キー（"title|difficultyName"）。 */
 const tooltipSongKey = ref('');
+/** ツールチップに表示するコメント一覧。 */
 const tooltipComments = ref<Array<{ totalBeatPt: number; content: string; createdAt: string }>>([]);
+/** コメント読み込み中フラグ。 */
 const tooltipLoading = ref(false);
+/** ツールチップの絶対位置。画面端で見切れないよう動的に調整。 */
 const tooltipPosition = ref({ top: 0, left: 0, maxHeight: 240 });
+/** コメント取得結果のキャッシュ（楽曲キー -> コメント配列）。モーダル再オープンで消える。 */
 const commentCache = new Map<string, Array<any>>();
 
+/** 現在公開中の難易度表（比較用）。 */
 const activeDiffTable = ref<{ranks: {rank: string, songs: string[]}[]}>({ranks: []});
+/** 現在のドラフト版難易度表。編集はこれをコピーして差分生成。 */
 const originalDiffTable = ref<{ranks: {rank: string, songs: string[]}[]}>({ranks: []});
+/** 未保存の変更。保存ボタン押下までメモリに留める。 */
 const pendingDiffChanges = ref<{title: string, oldRank: string, newRank: string}[]>([]);
+/** 移動対象の楽曲タイトル（セレクト）。 */
 const diffEditSongTitle = ref('');
+/** 移動先ランク（セレクト）。 */
 const diffEditNewRank = ref('');
 
-// Level filter (based on official level from song_data)
+// レベルフィルター（song_data の公式レベルを参照）
+/** ☆12 を表示するか。 */
 const showLv12 = ref(true);
+/** ☆11 を表示するか。 */
 const showLv11 = ref(true);
 
+/** 【computed の役割】 song_data から「曲名|難易度名」→ 公式レベル のマップを構築。レベルフィルターで使用。 */
 const officialLevelMap = computed(() => {
   const map = new Map<string, number>();
   for (const song of songDataBody.value) {
@@ -445,14 +490,22 @@ const officialLevelMap = computed(() => {
   return map;
 });
 
+/**
+ * 【関数の役割】 難易度表のエントリがレベルフィルタ条件を満たすかを判定する。
+ * 公式レベルが取得できない曲はどちらかのトグルが ON なら表示する（安全側フォールバック）。
+ */
 const matchesLevelFilter = (songEntry: string): boolean => {
   const parsed = parseSongTitle(songEntry);
   const level = officialLevelMap.value.get(`${parsed.title}|${parsed.difficultyName}`);
   if (level === 12) return showLv12.value;
   if (level === 11) return showLv11.value;
-  return showLv12.value || showLv11.value; // unknown → show if either checked
+  return showLv12.value || showLv11.value;
 };
 
+/**
+ * 【computed の役割】 現在公開中の難易度表 vs ドラフト版の差分を抽出する。
+ * 保存済みだが未公開の変更のみが対象。未保存の pendingDiffChanges は含まない。
+ */
 const savedDiffChanges = computed(() => {
   if (!activeDiffTable.value?.ranks?.length || !originalDiffTable.value?.ranks?.length) return [];
   const activeMap = new Map<string, string>();
@@ -471,17 +524,24 @@ const savedDiffChanges = computed(() => {
   return changes;
 });
 
+/** 数値化できない（Uncategorized → 数値ティア）移動 = 「配置」に分類。 */
 const savedPlacements = computed(() => savedDiffChanges.value.filter(c =>
   (isNaN(parseFloat(c.oldRank)) || isNaN(parseFloat(c.newRank))) && matchesLevelFilter(c.title)));
+/** 数値比較で上位へ移動 = 「昇格」。 */
 const savedPromotions = computed(() => savedDiffChanges.value.filter(c => {
   const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
   return !isNaN(o) && !isNaN(n) && n > o && matchesLevelFilter(c.title);
 }));
+/** 数値比較で下位へ移動 = 「降格」。 */
 const savedDemotions = computed(() => savedDiffChanges.value.filter(c => {
   const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
   return !isNaN(o) && !isNaN(n) && n < o && matchesLevelFilter(c.title);
 }));
 
+/**
+ * 【computed の役割】 ドラフト + 未保存変更を反映した「実効ランク」で並べた曲一覧。
+ * 移動セレクトの選択肢として使う。タイトル昇順。
+ */
 const effectiveSongsList = computed(() => {
   if (!originalDiffTable.value?.ranks) return [];
   const list: {title: string, rank: string}[] = [];
@@ -496,15 +556,18 @@ const effectiveSongsList = computed(() => {
   return list.sort((a, b) => a.title.localeCompare(b.title));
 });
 
+/** 未保存変更のうち、レベルフィルタ条件を満たすもののみに絞った配列。 */
 const filteredPendingChanges = computed(() =>
   pendingDiffChanges.value.filter(c => matchesLevelFilter(c.title))
 );
 
+/** 移動先ランクのセレクト選択肢（ドラフト版ランクの全名前）。 */
 const availableRanks = computed(() => {
   if (!originalDiffTable.value?.ranks) return [];
   return originalDiffTable.value.ranks.map(r => r.rank);
 });
 
+/** 【関数の役割】 指定楽曲の、ドラフト上での現在ランクを返す（差分ベースライン）。 */
 const originalRankOf = (title: string) => {
     for (const r of originalDiffTable.value.ranks) {
         if (r.songs.includes(title)) return r.rank;
@@ -512,6 +575,10 @@ const originalRankOf = (title: string) => {
     return '';
 };
 
+/**
+ * 【関数の役割】 難易度表エントリの文字列を "曲名" と "難易度名" に分解する。
+ * 末尾 [L] 付きは LEGGENDARIA、それ以外は ANOTHER 扱い。
+ */
 const parseSongTitle = (songEntry: string): { title: string; difficultyName: 'ANOTHER' | 'LEGGENDARIA' } => {
   if (songEntry.endsWith('[L]')) {
     return { title: songEntry.slice(0, -3), difficultyName: 'LEGGENDARIA' };
@@ -519,6 +586,10 @@ const parseSongTitle = (songEntry: string): { title: string; difficultyName: 'AN
   return { title: songEntry, difficultyName: 'ANOTHER' };
 };
 
+/**
+ * 【関数の役割】 曲行をホバーした際のツールチップ表示処理。
+ * 画面端の見切れ対策で位置を調整し、キャッシュ済みなら即表示、未取得なら API 経由で取得する。
+ */
 const handleSongHover = async (songEntry: string, event: MouseEvent) => {
   const parsed = parseSongTitle(songEntry);
   const key = `${parsed.title}|${parsed.difficultyName}`;
@@ -549,11 +620,16 @@ const handleSongHover = async (songEntry: string, event: MouseEvent) => {
   }
 };
 
+/** 【関数の役割】 ホバーから外れた際にツールチップを閉じる。 */
 const handleSongLeave = () => {
   tooltipSongKey.value = '';
   tooltipComments.value = [];
 };
 
+/**
+ * 【関数の役割】 「追加」ボタンで未保存変更 pendingDiffChanges に 1 件エントリする。
+ * 元のランクと同じ場所に戻す操作なら、既存エントリを削除して差分 0 にする。
+ */
 const handleAddDiffChange = () => {
     if (!diffEditSongTitle.value || !diffEditNewRank.value) return;
     const currentEffective = effectiveSongsList.value.find(s => s.title === diffEditSongTitle.value)?.rank;
@@ -579,10 +655,15 @@ const handleAddDiffChange = () => {
     diffEditNewRank.value = '';
 };
 
+/** 【関数の役割】 未保存変更から 1 件を取り消す。 */
 const handleRemoveDiffChange = (title: string) => {
     pendingDiffChanges.value = pendingDiffChanges.value.filter(p => p.title !== title);
 };
 
+/**
+ * 【関数の役割】 保存済み（ドラフトに書き込み済みだが未公開）の変更を取り消し、
+ * 指定楽曲を「現在公開中の位置」に戻した新しいドラフトを PUT で保存する。
+ */
 const handleRevertSavedChange = async (change: {title: string, oldRank: string, newRank: string}) => {
     if (!confirm(`「${change.title}」のドラフト変更を取り消しますか？`)) return;
 
@@ -617,10 +698,14 @@ const handleRevertSavedChange = async (change: {title: string, oldRank: string, 
     }
 };
 
-// ── Load data ───────────────────────────────────────────
+// ── データロード ────────────────────────────────────
+/**
+ * 【関数の役割】 モーダル表示時に初期データを並列取得する。
+ * 取得対象: ドラフト状態フラグ / ドラフト楽曲 / ドラフト難易度表 / 公開中の難易度表（差分比較用）。
+ */
 const loadData = async () => {
   try {
-    // Fetch draft status
+    // ドラフト状態（バッジ表示と「適用」ボタン有効化用）。
     const statusRes = await fetch(`${API_BASE}/api/admin/game-data/status`, { headers: authHeaders() });
     if (statusRes.ok) {
       const status = await statusRes.json();
@@ -628,13 +713,13 @@ const loadData = async () => {
       hasDraftDiffTable.value = status.hasDraftDifficultyTable;
     }
 
-    // Fetch draft songs
+    // ドラフト楽曲の取得。
     const songsRes = await fetch(`${API_BASE}/api/admin/game-data/songs/draft`, { headers: authHeaders() });
     if (songsRes.ok) {
       draftSongs.value = await songsRes.json();
     }
 
-    // Fetch difficulty table draft
+    // 難易度表のドラフト取得。未保存変更はリセット。
     const diffRes = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, { headers: authHeaders() });
     if (diffRes.ok) {
       originalDiffTable.value = await diffRes.json();
@@ -644,7 +729,7 @@ const loadData = async () => {
     console.error('Failed to load admin game data:', e);
   }
 
-  // Fetch active difficulty table independently (for diff comparison)
+  // 公開中の難易度表（差分比較のベースライン）。認証不要なので失敗しても致命的ではない。
   try {
     const activeRes = await fetch(`${API_BASE}/api/game-data/difficulty-table`);
     if (activeRes.ok) {
@@ -655,6 +740,7 @@ const loadData = async () => {
   }
 };
 
+// モーダルが開かれた瞬間にメッセージ類をリセットしてデータを再取得する。
 watch(() => props.isOpen, (val) => {
   if (val) {
     errorMsg.value = '';
@@ -664,7 +750,11 @@ watch(() => props.isOpen, (val) => {
   }
 });
 
-// ── Add song ────────────────────────────────────────────
+// ── 楽曲追加 ────────────────────────────────────────
+/**
+ * 【関数の役割】 フォームの内容をドラフト楽曲として POST し、追加後に
+ * ANOTHER / LEGGENDARIA が Lv11 or Lv12 であれば Uncategorized(other) に自動配置する。
+ */
 const handleAddSong = async () => {
   if (!form.value.title) return;
   isSubmitting.value = true;
@@ -680,7 +770,7 @@ const handleAddSong = async () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Error');
     
-    // Auto-add to Uncategorized(other) if Lv11 or 12
+    // Lv11/12 の ANOTHER/LEGGENDARIA は Uncategorized(other) に自動配置（忘れ防止）。
     const addedSongsToDiff: string[] = [];
     if (form.value.anotherLevel === 11 || form.value.anotherLevel === 12) {
         addedSongsToDiff.push(form.value.title);
@@ -722,7 +812,7 @@ const handleAddSong = async () => {
     form.value = defaultForm();
     hasDraftSongs.value = true;
     
-    // Refresh draft songs
+    // ドラフト楽曲リストを最新化。
     const songsRes = await fetch(`${API_BASE}/api/admin/game-data/songs/draft`, { headers: authHeaders() });
     if (songsRes.ok) draftSongs.value = await songsRes.json();
   } catch (e: any) {
@@ -732,7 +822,8 @@ const handleAddSong = async () => {
   }
 };
 
-// ── Delete draft song ───────────────────────────────────
+// ── ドラフト楽曲削除 ─────────────────────────────
+/** 【関数の役割】 1 曲（＝関連する難易度行すべて）をドラフトから削除する。 */
 const handleDeleteDraftSong = async (ids: number[]) => {
   if (!confirm('このドラフト楽曲を削除しますか？')) return;
   errorMsg.value = '';
@@ -751,7 +842,7 @@ const handleDeleteDraftSong = async (ids: number[]) => {
     }
     successMsg.value = '削除しました';
     
-    // Refresh
+    // 最新化。
     const songsRes = await fetch(`${API_BASE}/api/admin/game-data/songs/draft`, { headers: authHeaders() });
     if (songsRes.ok) draftSongs.value = await songsRes.json();
     hasDraftSongs.value = draftSongs.value.length > 0;
@@ -760,7 +851,15 @@ const handleDeleteDraftSong = async (ids: number[]) => {
   }
 };
 
-// ── Generate draft from votes ─────────────────────────
+// ── 投票結果からドラフトを生成 ───────────────
+/**
+ * 【関数の役割】 ユーザーの投票結果を集計してドラフト難易度表を生成する。
+ * 判定ロジック:
+ *  - Uncategorized 配下: 数値ティア(11.0〜13.0)で最多得票のティアへ配置
+ *  - 既存ランク配下: PROMOTE/STAY/DEMOTE の多数決。STAY が最多 or tie なら現状維持
+ *    PROMOTE > DEMOTE なら 1 段上、逆なら 1 段下へ移動。
+ * Phase 1 で全 move を記録し、Phase 2 で一括適用（走行中の配列変化で漏れを防ぐ）。
+ */
 const generateDraftFromVotes = async () => {
   if (!confirm('現在のドラフトを全削除し、投票結果からドラフトを再生成しますか？')) return;
 
@@ -778,7 +877,7 @@ const generateDraftFromVotes = async () => {
     const activeTable: { ranks: Array<{ rank: string; songs: string[] }> } = await activeRes.json();
     const votesData: Array<Record<string, any>> = await votesRes.json();
 
-    // Build vote map: "title|difficultyName" -> { PROMOTE: n, STAY: n, DEMOTE: n, "12.3": n, ... }
+    // 投票集計マップ: "title|difficultyName" -> { PROMOTE: n, STAY: n, DEMOTE: n, "12.3": n, ... }
     const voteMap = new Map<string, Record<string, number>>();
     for (const item of votesData) {
       const { title, difficultyName, ...rest } = item;
@@ -790,17 +889,17 @@ const generateDraftFromVotes = async () => {
     const newTable = JSON.parse(JSON.stringify(activeTable));
     const ranks: Array<{ rank: string; songs: string[] }> = newTable.ranks;
 
-    // Identify numeric (non-uncategorized) rank indices
+    // 数値ランクのインデックスだけを抽出（Uncategorized を除外して昇降格計算に使う）。
     const numericRankIndices: number[] = [];
     for (let i = 0; i < ranks.length; i++) {
       if (!ranks[i].rank.toLowerCase().includes('uncategorized')) numericRankIndices.push(i);
     }
 
-    // Tier options for uncategorized (11.0-13.0 in 0.1 steps)
+    // Uncategorized 楽曲の配置候補となる数値ティア（11.0 〜 13.0 を 0.1 刻み）。
     const TIER_OPTIONS: string[] = [];
     for (let i = 110; i <= 130; i++) TIER_OPTIONS.push((i / 10).toFixed(1));
 
-    // Phase 1: Collect all moves (iterate originals, apply later to avoid double-moves)
+    // Phase 1: 全 move を収集（反復中に ranks を書き換えると漏れるため、後でまとめて適用）。
     const moves: Array<{ song: string; fromIdx: number; toIdx: number }> = [];
 
     for (let ri = 0; ri < ranks.length; ri++) {
@@ -814,7 +913,7 @@ const generateDraftFromVotes = async () => {
         if (!votes) continue;
 
         if (isUncat) {
-          // Uncategorized: place at top-voted tier
+          // Uncategorized: 最多得票のティアに配置。
           let bestTier: string | null = null;
           let bestCount = 0;
           for (const tier of TIER_OPTIONS) {
@@ -826,7 +925,7 @@ const generateDraftFromVotes = async () => {
             if (targetIdx !== -1) moves.push({ song: songEntry, fromIdx: ri, toIdx: targetIdx });
           }
         } else {
-          // Ranked: majority vote (STAY wins if >= both, tie = no change)
+          // ランク済み: 多数決（STAY が両者以上なら維持、PROMOTE == DEMOTE の同数も変更なし）。
           const promote = votes['PROMOTE'] ?? 0;
           const stay = votes['STAY'] ?? 0;
           const demote = votes['DEMOTE'] ?? 0;
@@ -846,13 +945,13 @@ const generateDraftFromVotes = async () => {
       }
     }
 
-    // Phase 2: Apply all moves at once
+    // Phase 2: 記録した移動を一括適用。
     for (const { song, fromIdx, toIdx } of moves) {
       ranks[fromIdx].songs = ranks[fromIdx].songs.filter((s: string) => s !== song);
       ranks[toIdx].songs.push(song);
     }
 
-    // Save the new draft
+    // 新ドラフトを保存。
     const saveRes = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, {
       method: 'PUT',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
@@ -873,7 +972,11 @@ const generateDraftFromVotes = async () => {
   }
 };
 
-// ── Save difficulty table ───────────────────────────────
+// ── 難易度表ドラフトの保存 ───────────────────
+/**
+ * 【関数の役割】 pendingDiffChanges を適用した新しい難易度表を PUT で保存する。
+ * 同じ曲が元のランクに残らないよう全ランクから除去してから移動先に追加。
+ */
 const handleSaveDiffTable = async () => {
   isSavingDiff.value = true;
   errorMsg.value = '';
@@ -911,7 +1014,11 @@ const handleSaveDiffTable = async () => {
   }
 };
 
-// ── Apply draft ─────────────────────────────────────────
+// ── ドラフト適用（本番公開） ───────────────────
+/**
+ * 【関数の役割】 ドラフトを公開して全ユーザーの PT 再計算を走らせる。
+ * 重い処理なのでバックエンド側は非同期（202 Accepted）で受け付ける。
+ */
 const handleApplyDraft = async () => {
   if (!confirm('ドラフトを適用しますか？全ユーザーのポイント再計算が実行されます。')) return;
   

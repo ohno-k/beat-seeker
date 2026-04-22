@@ -1,3 +1,4 @@
+// UNUSED: 初期疎通確認用の手動APIテスト。test_req2.js とほぼ同一。backend/SCRIPTS.md §2 参照。
 const http = require('http');
 
 const data = JSON.stringify({

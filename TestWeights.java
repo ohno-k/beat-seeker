@@ -1,3 +1,4 @@
+// UNUSED: BEAT-Tier 重み付けの手元検証スクリプト。本番コードに統合済みのため不要。詳細は UNUSED.md 参照。
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;

@@ -65,3 +65,9 @@ vapid:
 kofi:
   verification:
     token: ${KOFI_VERIFICATION_TOKEN:}
+
+# 管理者判定用の設定（Role テーブル未導入のため、ユーザー ID と IIDX ID で判定している）
+# いずれかに一致したユーザーを管理者として扱う。
+admin:
+  user-id: ${ADMIN_USER_ID:18}
+  iidx-id: ${ADMIN_IIDX_ID:5787-1145}

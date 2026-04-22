@@ -1,4 +1,18 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 プロフィール編集モーダル。表示名・段位・パスワード・メール・公開範囲などを一括変更。
+ *
+ * 機能:
+ *  - `user` の現在値でフォームを初期化（モーダルが開いた瞬間）
+ *  - パスワード変更は「現在パス + 新パス + 確認」がそろった時のみ送信
+ *  - RateTier 表示トグルは `useRateTierVisibility` 側でローカルストレージに永続化
+ *  - Supporter のみ金縁トグルを表示
+ *
+ * props:
+ *  - isOpen: 開閉フラグ
+ * emits:
+ *  - close: 閉じる
+ */
 import { ref, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
@@ -14,14 +28,19 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
+// 認証 composable: ログインユーザー情報 + 更新 API。
 const { user, updateProfile } = useAuth();
+// RateTier 表示可否（ユーザーの見た目設定）。
 const { showRateTier, setRateTier } = useRateTierVisibility();
 
+/** 送信中フラグ（二重送信防止）。 */
 const isSubmitting = ref(false);
+/** エラー赤バナー。 */
 const errorMsg = ref('');
+/** 成功緑バナー。 */
 const successMsg = ref('');
 
-// Form fields
+// ===== フォーム入力値（開くたびに user の値で再初期化される） =====
 const displayName = ref('');
 const danRank = ref('');
 const arenaRank = ref('');
@@ -34,11 +53,13 @@ const newPassword = ref('');
 const newPasswordConfirm = ref('');
 const showSupporterBorder = ref(true);
 
+/** 段位プルダウン選択肢（登録時と同じ日本語段位）。 */
 const danRanks = [
   '七級', '六級', '五級', '四級', '三級', '二級', '一級',
   '初段', '二段', '三段', '四段', '五段', '六段', '七段', '八段', '九段', '十段', '中伝', '皆伝'
 ];
 
+/** アリーナランク選択肢。 */
 const arenaRanks = [
   'A1', 'A2', 'A3', 'A4', 'A5',
   'B1', 'B2', 'B3', 'B4', 'B5',
@@ -46,7 +67,8 @@ const arenaRanks = [
   'D1', 'D2', 'D3', 'D4', 'D5'
 ];
 
-// Initialize form when modal opens
+// モーダルが開かれたタイミング（isOpen が true になった時）にフォームへ現在値をコピー。
+// この `watch` は「再オープンしても下書きが残っていた」という UX バグを防ぐ役割。
 watch(() => props.isOpen, (newVal) => {
   if (newVal && user.value) {
     displayName.value = user.value.displayName;
@@ -65,16 +87,20 @@ watch(() => props.isOpen, (newVal) => {
   }
 });
 
+/**
+ * 【関数の役割】 更新ボタン押下時に実行。バリデーション → payload 組立 → サーバ送信 → 成功/失敗表示。
+ * 成功から 1.5 秒後に自動でモーダルを閉じる（successMsg が残っている場合のみ）。
+ */
 const handleUpdate = async () => {
   errorMsg.value = '';
   successMsg.value = '';
-  
+
   if (!displayName.value.trim()) {
     errorMsg.value = t('profile.displayNameRequired');
     return;
   }
 
-  // Password change validation
+  // パスワード変更用 3 入力がいずれか埋まっている場合のみ、厳しめにバリデーション。
   if (newPassword.value || currentPassword.value || newPasswordConfirm.value) {
     if (!currentPassword.value) {
       errorMsg.value = t('profile.currentPasswordRequired');
@@ -111,7 +137,7 @@ const handleUpdate = async () => {
     await updateProfile(payload);
     successMsg.value = t('profile.updateSuccess');
     
-    // Clear password fields
+    // パスワード入力欄は送信後に必ずクリア（画面に残すのは危険）。
     currentPassword.value = '';
     newPassword.value = '';
     newPasswordConfirm.value = '';
@@ -208,7 +234,7 @@ const handleUpdate = async () => {
             </div>
           </div>
 
-          <!-- Email section -->
+          <!-- メール登録セクション（未登録ならバッジで促す） -->
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <div class="flex items-center gap-2">
               <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ t('profile.emailSection') }}</h4>
@@ -244,7 +270,7 @@ const handleUpdate = async () => {
             </div>
           </div>
 
-          <!-- Display Settings -->
+          <!-- 表示設定（RateTier トグル / サポーター金縁トグル） -->
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ t('profile.displaySettings') }}</h4>
             <label class="flex items-center justify-between cursor-pointer group">

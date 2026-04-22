@@ -1,3 +1,17 @@
+/**
+ * 韓国語ロケール定義（i18n キー → 韓国語訳文字列のフラットなマップ）。
+ *
+ * 【このファイルの役割】
+ *  - ja.ts / en.ts と同一のキー構造を保つ必要がある
+ *  - 値文字列は韓国語のまま保持（コメントのみ日本語で注釈）
+ *  - キー追加・変更時は ja.ts / en.ts / ko.ts 3 つ同時に更新する運用
+ *
+ * 【セクション構成】ja.ts と揃えた順序:
+ *  Common / Navigation / Auth / Dashboard / Score / Upload / Ranking / Profile /
+ *  Friends / Arena / CSV / Onboarding / Notifications / Tier Info / About /
+ *  UnifiedImport / Terms / Changelog / Tier Voting / Arcade Assist / Song Average /
+ *  Difficulty Table / Score Prediction / Supporter / Rank Comparison / Dan Ranks
+ */
 export const ko = {
   // Common
   'common.back': '뒤로',

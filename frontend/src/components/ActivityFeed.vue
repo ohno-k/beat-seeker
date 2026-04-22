@@ -1,8 +1,19 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 サイドバーやダッシュボードに表示する「全ユーザー最新アクティビティ」一覧。
+ *
+ * 機能:
+ *  - `/api/activity/feed` から公開アクティビティを取得し、RANK_UP 等を種別表示
+ *  - バックエンドが返す LocalDateTime を JST として扱い「◯分前/時間前」の相対表記へ整形
+ *  - リロードボタンで手動更新可能
+ *
+ * props/emits: なし。
+ */
 import { ref, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { API_BASE } from '../composables/useAuth';
 
+/** アクティビティ 1 件分の型（API レスポンス）。 */
 interface ActivityItem {
   id: number;
   type: string;
@@ -12,10 +23,17 @@ interface ActivityItem {
   createdAt: string;
 }
 
+// 翻訳関数と現在言語。相対時刻の翻訳および日付整形の locale 選択に使う。
 const { t, currentLang } = useI18n();
+/** 取得済みのアクティビティ配列。 */
 const activities = ref<ActivityItem[]>([]);
+/** ロード中スピナー表示用。 */
 const isLoading = ref(false);
 
+/**
+ * 【関数の役割】 バックエンドから公開アクティビティ一覧を取得する。
+ * 失敗時は警告ログを出すだけで UI は空のまま（信頼性の低い公開情報なので throw しない）。
+ */
 const fetchFeed = async () => {
   isLoading.value = true;
   try {
@@ -30,8 +48,13 @@ const fetchFeed = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 ISO 風の日時文字列を「◯分前」「◯時間前」等に整形する。
+ * バックエンドは LocalDateTime をタイムゾーン無しで返すため、JST (+09:00) を補って解釈する。
+ * @param isoStr 例: "2026-04-23T12:34:56"（TZ 未指定）または "...Z"
+ */
 const formatDate = (isoStr: string) => {
-  // Backend returns LocalDateTime without timezone — treat as JST (UTC+9)
+  // タイムゾーン情報が含まれていなければ JST (+09:00) を付与する。
   const jstStr = /[Z+\-]\d{2}:?\d{2}$/.test(isoStr) ? isoStr : isoStr + '+09:00';
   const d = new Date(jstStr);
   const now = new Date();
@@ -43,9 +66,11 @@ const formatDate = (isoStr: string) => {
   if (diffH < 24) return t('activity.hoursAgo', { n: diffH });
   const diffD = Math.floor(diffH / 24);
   if (diffD < 7) return t('activity.daysAgo', { n: diffD });
+  // 1 週間以上前は日付表記（言語毎に locale を切替）。
   return d.toLocaleDateString(currentLang.value === 'ko' ? 'ko-KR' : currentLang.value === 'en' ? 'en-US' : 'ja-JP', { month: 'short', day: 'numeric' });
 };
 
+// マウント時に一度だけフィードを取得。
 onMounted(fetchFeed);
 </script>
 
@@ -75,7 +100,7 @@ onMounted(fetchFeed);
       </div>
 
       <div v-else v-for="item in activities" :key="item.id" class="px-5 py-3.5 flex items-start gap-3 hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-        <!-- Icon -->
+        <!-- 左側のアイコン（RANK_UP なら琥珀色、その他は青） -->
         <div class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5"
              :class="item.type === 'RANK_UP' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-blue-100 dark:bg-blue-900/30'">
           <svg v-if="item.type === 'RANK_UP'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" viewBox="0 0 20 20" fill="currentColor">
@@ -83,7 +108,7 @@ onMounted(fetchFeed);
           </svg>
         </div>
 
-        <!-- Content -->
+        <!-- 右側のテキスト部（メッセージ + 相対時刻） -->
         <div class="flex-1 min-w-0">
           <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
             <template v-if="item.type === 'RANK_UP'">

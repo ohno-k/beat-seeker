@@ -1,4 +1,19 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 非公式難易度表の 1 曲（タイトル + 難易度）に紐づくコメントスレッド。
+ *
+ * 機能:
+ *  - GET /api/tier-comments でコメント取得 → 下部にスクロール
+ *  - ログインしていれば POST で新規コメント投稿
+ *  - 投稿者の Beat-PT に応じてランクアイコンを表示（プロフ紐付け）
+ *
+ * props:
+ *  - show: 開閉フラグ
+ *  - title / difficultyName: 対象楽曲の識別子（例: "冥" / "LEGGENDARIA"）
+ * emits:
+ *  - close: 閉じる
+ *  - update: コメント投稿成功時（親の件数バッジ更新用）
+ */
 import { ref, watch, nextTick } from 'vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import RankIcon from './RankIcon.vue';
@@ -17,13 +32,23 @@ const emit = defineEmits<{
 
 const { isLoggedIn, authHeaders } = useAuth();
 
+/** 取得済みのコメント配列。 */
 const comments = ref<Array<{ id: number; userId: number; totalBeatPt: number; content: string; createdAt: string }>>([]);
+/** 取得中フラグ（スピナー表示）。 */
 const isLoading = ref(false);
+/** テキストエリアの下書き。 */
 const newComment = ref('');
+/** 送信中フラグ（二重送信防止）。 */
 const isSubmitting = ref(false);
+/** 直近のエラーメッセージ。 */
 const errorMsg = ref('');
+/** コメントリストのスクロール DOM 参照。最新を自動表示するために使う。 */
 const commentsContainer = ref<HTMLElement | null>(null);
 
+/**
+ * 【関数の役割】 指定楽曲のコメントを取得し、末尾までスクロールする。
+ * title が空なら何もしない（初期表示の競合対策）。
+ */
 const fetchComments = async () => {
   if (!props.title) return;
   isLoading.value = true;
@@ -46,12 +71,17 @@ const fetchComments = async () => {
   }
 };
 
+// モーダルが開かれたタイミングで自動取得。immediate: true で初回も発火。
 watch(() => props.show, (newVal) => {
   if (newVal) {
     fetchComments();
   }
 }, { immediate: true });
 
+/**
+ * 【関数の役割】 コメントを POST 送信する。
+ * 文字数上限 1000 をフロントでもチェック。成功時は下書きをクリアして再取得。
+ */
 const submitComment = async () => {
   if (!newComment.value.trim() || isSubmitting.value) return;
   if (newComment.value.length > 1000) {
@@ -87,6 +117,10 @@ const submitComment = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 バックエンドが返す ISO 風日時を、ブラウザのロケールで整形する。
+ * バックエンドが Z 抜きで返すことがあるため、末尾に 'Z' を補って UTC として解釈。
+ */
 const formatDate = (dateString: string) => {
   const ds = dateString.endsWith('Z') ? dateString : dateString + 'Z';
   const d = new Date(ds);
@@ -100,7 +134,7 @@ const formatDate = (dateString: string) => {
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" @mousedown.self="emit('close')">
       <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
       
-      <!-- Header -->
+      <!-- ヘッダー（曲名 + 難易度バッジ + ×ボタン） -->
       <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
@@ -117,7 +151,7 @@ const formatDate = (dateString: string) => {
         </button>
       </div>
 
-      <!-- Messages Body -->
+      <!-- コメント表示領域（チャット風） -->
       <div ref="commentsContainer" class="flex-1 overflow-y-auto p-6 space-y-4 bg-white dark:bg-slate-800">
         <div v-if="isLoading" class="flex justify-center py-8">
           <div class="w-6 h-6 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
@@ -140,7 +174,7 @@ const formatDate = (dateString: string) => {
         </template>
       </div>
 
-      <!-- Input Area -->
+      <!-- 入力フォーム（未ログイン時は案内を表示） -->
       <div class="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
         <div v-if="errorMsg" class="mb-2 text-xs text-red-500 dark:text-red-400 px-2">{{ errorMsg }}</div>
         

@@ -1,3 +1,4 @@
+// UNUSED: スクレイピング動作確認用のワンショットスクリプト。詳細は UNUSED.md 参照。
 const https = require('https');
 
 https.get('https://masaoblue.github.io/iidx-top-rankers-viewer/sp/ranking', (res) => {

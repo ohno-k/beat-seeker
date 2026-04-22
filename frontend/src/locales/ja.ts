@@ -1,3 +1,19 @@
+/**
+ * 日本語ロケール定義（i18n キー → 日本語文字列のフラットなマップ）。
+ *
+ * 【このファイルの役割】
+ *  - useI18n コンポーザブル経由で t(key) として参照される
+ *  - キーは "エリア.用途" のドット区切り（例: 'nav.dashboard', 'dashboard.title'）
+ *  - 同じキーが en.ts / ko.ts にも同構造で存在するため、追加時は 3 ファイル同時に更新すること
+ *  - 値に `{n}` などのプレースホルダを含む場合は useI18n 側で置換される
+ *
+ * 【主なセクション】
+ *  Common / Navigation / Auth / Dashboard / Score / Upload / Ranking / Profile /
+ *  Friends / Arena / CSV Upload / Onboarding / Notifications / Tier Info Modals /
+ *  FriendComparisonModal / About / UnifiedImport / Terms / Changelog / Tier Voting /
+ *  Arcade Assist / Song Average / Difficulty Table / Score Prediction /
+ *  Supporter / Rank Comparison / Dan Ranks
+ */
 export const ja = {
   // Common
   'common.back': '戻る',

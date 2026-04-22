@@ -1,12 +1,29 @@
 <script setup lang="ts">
+/**
+ * 【コンポーネントの役割】 全ユーザーの Beat-PT / Rate-PT ランキング表示 + 管理者用シミュレーション機能。
+ * - 3 モード切替:
+ *    1. beat       … Beat-PT ランキング（全員）
+ *    2. rate       … Rate-PT ランキング（showRateTier が true のときのみ選択可能）
+ *    3. simulation … 管理者限定。非公式難易度表の「ドラフト」が採用された場合の順位変動を試算
+ * - 都道府県 TOP ランカー（バーチャル）を混ぜて表示できるトグル付き
+ * - プライベートプロフィールのユーザーは個別 API で合計 pt を追加取得してから専用ビューへ遷移
+ * - 自分の行までスクロールする "goToMyRank" ボタンを内包
+ * - ページネーション（1 ページ 50 件）
+ *
+ * @emits view-user 公開ユーザーの詳細表示要求。
+ * @emits view-private-user プライベートユーザー閲覧時（合計 pt を同梱）。
+ * @emits view-top-ranker 都道府県 TOP ランカー（バーチャルプロフィール）閲覧要求。
+ */
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
+import { useAdmin } from '../composables/useAdmin';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { diffTable as diffTableRanks } from '../composables/useGameData';
 
+/** Beat-PT ランキング API が返すユーザー 1 人分のエントリ。 */
 interface BeatRankingEntry {
   userId: number | null;
   privacyLevel: number | null;
@@ -62,6 +79,10 @@ interface SimulationEntry {
   rankDelta: number;
 }
 
+/**
+ * 【関数の役割】 最終更新日時を「今日/昨日/一昨日/N 日前/1 週間以上前」の相対表現に変換する。
+ * i18n キー経由でローカライズ済みの文字列を返す。
+ */
 function formatLastUpdated(dateStr: string | null): string {
   if (!dateStr) return '-';
   const now = new Date();
@@ -82,6 +103,13 @@ const emit = defineEmits<{
     (e: 'view-top-ranker', payload: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }): void;
 }>();
 
+/**
+ * 【関数の役割】 ランキング行クリック時のハンドラ。
+ * - 匿名ユーザー（userId null）は無視
+ * - privacyLevel !== 0（非公開寄り）はプライベートビュー用に合計 pt を追加取得してから view-private-user を emit
+ *    - 一覧 API でも未取得なら既存 ranking キャッシュから iidxId で探索してフォールバック
+ * - 公開ユーザーは view-user をそのまま emit
+ */
 async function handleUserRowClick(entry: { userId: number | null; privacyLevel: number | null; displayName: string; iidxId: string }) {
     if (entry.userId == null) return;
     const priv = entry.privacyLevel ?? 1;
@@ -120,6 +148,7 @@ async function handleUserRowClick(entry: { userId: number | null; privacyLevel: 
     emit('view-user', { id: entry.userId, displayName: entry.displayName, iidxId: entry.iidxId });
 }
 
+/** 【関数の役割】 都道府県 TOP ランカー（バーチャルプロフィール）行クリック時、view-top-ranker を発火する。 */
 function handleTopRankerRowClick(row: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }) {
     emit('view-top-ranker', {
         versionNum: row.versionNum,
@@ -133,25 +162,39 @@ const { user, authHeaders } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-const isAdmin = computed(() => user.value?.iidxId === '5787-1145');
+/** 【computed の役割】 管理者判定。simulation モード表示制御に使用。判定ロジックは useAdmin に集約。 */
+const { isAdmin } = useAdmin();
 
+/** 現在のビューモード（beat / rate / simulation）。 */
 const viewMode = ref<'beat' | 'rate' | 'simulation'>('beat');
+// Rate-Tier 表示設定がオフに切り替わったら、rate モードから beat へ強制退避する。
 watch(showRateTier, (val) => {
     if (!val && viewMode.value === 'rate') viewMode.value = 'beat';
 });
+/** Beat-PT ランキング本体（API 取得後）。 */
 const beatRanking = ref<BeatRankingEntry[]>([]);
+/** Rate-PT ランキング本体。 */
 const rateRanking = ref<RateRankingEntry[]>([]);
+/** Beat-PT 都道府県 TOP ランカー一覧。 */
 const topRankers = ref<TopRankerEntry[]>([]);
+/** Rate-PT 都道府県 TOP ランカー一覧。 */
 const rateTopRankers = ref<RateTopRankerEntry[]>([]);
+/** 初回ロード中フラグ。 */
 const isLoading = ref(true);
+/** エラーメッセージ（i18n キー非経由の文字列）。 */
 const error = ref('');
+/** 都道府県 TOP ランカー（バーチャル）を表に混ぜて表示するか。 */
 const showTopRankers = ref(false);
 
-// Pagination
+// ページネーション（1 ページ 50 件）
 const PAGE_SIZE = 50;
 const beatPage = ref(1);
 const ratePage = ref(1);
 
+/**
+ * 【computed の役割】 Beat-PT のユーザー行と都道府県 TOP ランカー行を pt 降順でマージした統合ビュー。
+ * showTopRankers が false のときはユーザー行だけ。ユーザー行に連番 rank を付与する。
+ */
 const mergedBeatRanking = computed<MergedBeatRow[]>(() => {
     const userRows: MergedBeatRow[] = beatRanking.value.map((entry, i) => ({
         kind: 'user',
@@ -175,6 +218,7 @@ const mergedBeatRanking = computed<MergedBeatRow[]>(() => {
     return all;
 });
 
+/** 【computed の役割】 mergedBeatRanking の Rate-PT 版。構造は同じで合計値が totalRatePt に置換される。 */
 const mergedRateRanking = computed<MergedRateRow[]>(() => {
     const userRows: MergedRateRow[] = rateRanking.value.map((entry, i) => ({
         kind: 'user',
@@ -210,6 +254,11 @@ const paginatedRateRanking = computed(() => {
     return mergedRateRanking.value.slice(start, start + PAGE_SIZE);
 });
 
+/**
+ * 【関数の役割】 ログインユーザー自身の行までページを切り替えスムーズスクロールする。
+ * rate モードなら ratePage を、それ以外なら beatPage を変更し、DOM 更新後に scrollIntoView。
+ * 自分がランキング対象外（iidxId 未マッチ）なら何もしない。
+ */
 function goToMyRank() {
     if (!user.value) return;
     let idx: number;
@@ -225,27 +274,34 @@ function goToMyRank() {
     } else {
         beatPage.value = page;
     }
-    // Scroll to the row after DOM updates
+    // DOM 更新後に対象行へスクロール。
     nextTick(() => {
         const row = document.getElementById(`ranking-row-${user.value!.iidxId}`);
         if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 }
 
-// Reset page when switching modes
+// モード切替時はどちらのページカーソルも 1 ページ目に戻す。
 watch(viewMode, () => {
     beatPage.value = 1;
     ratePage.value = 1;
 });
 
-// Simulation state
+// ---- シミュレーションモード（管理者用）----
+/** シミュレーション結果（ドラフト採用時の順位変動予測）。 */
 const simulationData = ref<SimulationEntry[]>([]);
+/** シミュレーション API 呼び出し中フラグ。 */
 const isSimulationLoading = ref(false);
+/** シミュレーションエラーメッセージ。 */
 const simulationError = ref('');
+/** ドラフト難易度表 vs 現行との差分リスト（昇格 / 降格表示用）。 */
 const draftDiffChanges = ref<{ title: string; oldRank: string; newRank: string }[]>([]);
+/** 【computed の役割】 昇格（新ランク > 旧ランク）の差分のみ抽出。 */
 const promotionChanges = computed(() => draftDiffChanges.value.filter(c => parseFloat(c.newRank) > parseFloat(c.oldRank)));
+/** 【computed の役割】 降格（新ランク < 旧ランク）の差分のみ抽出。 */
 const demotionChanges = computed(() => draftDiffChanges.value.filter(c => parseFloat(c.newRank) < parseFloat(c.oldRank)));
 
+/** 【関数の役割】 Beat-PT ランキング本体と都道府県 TOP ランカーを並列取得し、0 pt の TOP ランカーは除外する。 */
 async function fetchBeatRanking() {
     const [rankRes, topRes] = await Promise.all([
         fetch(`${API_BASE}/api/scores/ranking`),
@@ -259,6 +315,7 @@ async function fetchBeatRanking() {
     }
 }
 
+/** 【関数の役割】 Rate-PT ランキング本体と都道府県 TOP ランカー（Rate 版）を並列取得する。 */
 async function fetchRateRanking() {
     const [rankRes, topRes] = await Promise.all([
         fetch(`${API_BASE}/api/scores/rate-ranking`),
@@ -274,11 +331,19 @@ async function fetchRateRanking() {
 
 
 
+/**
+ * 【関数の役割】 ドラフト難易度表が採用された場合のランク変動をシミュレートする（管理者限定）。
+ * 流れ：
+ *   1. 現行ランキング未ロードなら先に取得
+ *   2. simulation-aggregate / draft / active-difficulty-table を並列取得
+ *   3. 現行とドラフトの差分（changes[]）を計算
+ *   4. simEntries にシミュレーション後の順位 (simulatedRank) を付与して simulationData にセット
+ */
 async function fetchSimulationData() {
     isSimulationLoading.value = true;
     simulationError.value = '';
     try {
-        // Ensure the regular ranking is loaded to set current ranks
+        // 通常ランキング未ロードなら現在順位を埋めるため先に取得する。
         if (beatRanking.value.length === 0) {
             await fetchBeatRanking();
         }
@@ -334,6 +399,7 @@ async function fetchSimulationData() {
     }
 }
 
+// 初回マウントで Beat-PT ランキングを取得（Rate は lazy、simulation も lazy）。
 onMounted(async () => {
     try {
         await fetchBeatRanking();
@@ -345,6 +411,8 @@ onMounted(async () => {
     }
 });
 
+// モード切替時に未取得なら lazy にデータを引く。
+// rate / simulation はユーザーが明示的に切り替えない限りネットワークを消費しない設計。
 watch(viewMode, async (mode) => {
     if (mode === 'rate' && rateRanking.value.length === 0) {
         isLoading.value = true;

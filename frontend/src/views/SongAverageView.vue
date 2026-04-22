@@ -1,8 +1,21 @@
 <script setup lang="ts">
+/**
+ * SongAverageView.vue
+ *
+ * 【Viewの役割】
+ * 各 BEAT-Tier（Legend〜Beginner の12階層）ごとに算出した
+ * 「曲別の平均スコア」を一覧化して表示する。
+ * 自分のベストスコアと比較して「勝っている/負けている」フィルタも可能。
+ *
+ * 【主な機能】
+ * - 曲ごと × Tier 別の平均スコア＋達成率を表形式で表示
+ * - Tier の "小分類"（同じ Tier 内の1〜5）へのドリルダウン
+ * - Lv11/Lv12、検索、勝敗フィルタ、カラムソート、ページネーション対応
+ */
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
-import { songData as songDataBody } from '../composables/useGameData';
+import { songData as songDataBody, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from '../components/RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 
@@ -10,18 +23,21 @@ const { t } = useI18n();
 const { user, authHeaders } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+// BEAT-Tier の順序（上位が先頭）。列の並びや「有効 Tier」判定に使用。
 const TIER_ORDER = [
   'Legend', 'Mythic', 'Ancient', 'Master', 'Elite',
   'Commander', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice', 'Beginner',
 ] as const;
 type BeatTierName = typeof TIER_ORDER[number];
 
+// サブ Tier（同じ BEAT-Tier の 1〜5 段階）単位の平均
 interface SubTierEntry {
   avgScore: number;
   avgRate: number;
   userCount: number;
 }
 
+// 大分類（例: Master 全体）の平均エントリ。内部に 1〜5 の subTiers を保持
 interface AverageEntry {
   avgScore: number;
   avgRate: number;
@@ -29,38 +45,46 @@ interface AverageEntry {
   subTiers: Record<number, SubTierEntry>;
 }
 
+// 表示用の曲1行ぶんのデータ
 interface SongRow {
   title: string;
   difficultyName: 'ANOTHER' | 'LEGGENDARIA';
   difficultyLevel: number;
   averages: Partial<Record<BeatTierName, AverageEntry>>;
-  maxScore: number;
+  maxScore: number; // この譜面のMAXスコア（notes×2）
 }
 
+// サーバから生データとして受け取る配列。tierData は JSON 文字列で保存されている
 const rawData = ref<{
   title: string; difficultyName: string; difficultyLevel: number;
   tierData: string;
 }[]>([]);
-// key: "title_ANOTHER" or "title_LEGGENDARIA" → my best score
+// キー: "曲名_ANOTHER" または "曲名_LEGGENDARIA" → 自分のベストスコア
 const myScoresMap = ref<Map<string, number>>(new Map());
 const isLoading = ref(true);
 const error = ref('');
 
+// Tier 内の1〜5 にドリルダウン中の Tier 名（null の時は大分類表示）
 const detailTier = ref<BeatTierName | null>(null);
 
+// 検索・レベル表示の絞り込み
 const searchQuery = ref('');
 const showLv11 = ref(true);
 const showLv12 = ref(true);
 
-// Comparison filter
+// 勝敗比較フィルタ（選択中の値。「適用」ボタンを押すまでは反映されない）
 const filterTier = ref<BeatTierName | ''>('');
 const filterWinning = ref(false);
 const filterLosing = ref(false);
-// Applied state (only updates when Apply is clicked)
+// 実際に反映されているフィルタの state（Apply 時にコピーされる）
 const appliedFilterTier = ref<BeatTierName | ''>('');
 const appliedFilterWinning = ref(false);
 const appliedFilterLosing = ref(false);
 
+/**
+ * 勝敗フィルタを「適用」する。選択中の値を applied* 変数にコピー。
+ * ページを1ページ目にリセット。
+ */
 function applyFilter() {
   appliedFilterTier.value = filterTier.value;
   appliedFilterWinning.value = filterWinning.value;
@@ -68,12 +92,14 @@ function applyFilter() {
   currentPage.value = 1;
 }
 
+// ソート設定（level/title/Tier名 または "Tier名-サブレベル" 形式）
 const sortKey = ref<'level' | 'title' | BeatTierName | string>('level');
 const sortDir = ref<'asc' | 'desc'>('desc');
 const currentPage = ref(1);
 const PAGE_SIZE = 50;
 
-// ── Notes lookup ───────────────────────────────────────────
+// ── ノーツ数→MAXスコア の検索用 Map ────────────────────────
+// songDataBody から "タイトル_難易度コード" → MAXスコア（notes×2）の Map を構築
 const notesMap = computed(() => {
   const map = new Map<string, number>();
   if (songDataBody.value) {
@@ -84,17 +110,32 @@ const notesMap = computed(() => {
   return map;
 });
 
+/**
+ * 難易度名（ANOTHER/LEGGENDARIA）からMAXスコアを取得する。
+ * 難易度名 → コードの変換は useGameData の getDifficultyCode に集約済み。
+ * @param title 曲名
+ * @param difficultyName "ANOTHER" または "LEGGENDARIA"
+ */
 function getMaxScore(title: string, difficultyName: string): number {
-  const code = difficultyName === 'ANOTHER' ? '4' : '10';
+  // song_data.json 側の difficulty コード: ANOTHER=4, LEGGENDARIA=10
+  const code = getDifficultyCode(difficultyName);
+  if (code === undefined) return 0;
   return notesMap.value.get(`${title}_${code}`) ?? 0;
 }
 
-// ── Build rows ─────────────────────────────────────────────
+// ── 生データから表示用 SongRow[] を構築 ──────────────────────
+/**
+ * rawData を正規化して表示用の配列に変換する computed。
+ * 手順1: 曲 × 難易度ごとに Map を作成（MAXスコア不明な曲はスキップ）
+ * 手順2: tierData JSON を parse し、大分類の下に小分類(サブTier)を格納
+ * 手順3: 最後に小分類の加重平均から大分類の avgScore/avgRate/userCount を算出
+ */
 const rows = computed<SongRow[]>(() => {
   const songMap = new Map<string, SongRow>();
 
   for (const entry of rawData.value) {
     const songKey = `${entry.title}_${entry.difficultyName}`;
+    // 曲の初期化（未登録なら MAX を調べて登録。MAX不明な曲はスキップ）
     if (!songMap.has(songKey)) {
       const maxScore = getMaxScore(entry.title, entry.difficultyName);
       if (maxScore === 0) continue;
@@ -107,20 +148,23 @@ const rows = computed<SongRow[]>(() => {
       });
     }
     const row = songMap.get(songKey)!;
-    
+
+    // tierData は JSON 文字列なので parse。壊れていても無視して続行
     let tiersArr: any[] = [];
     try {
       if (entry.tierData) tiersArr = JSON.parse(entry.tierData);
     } catch { /* IGNORE */ }
-    
+
     for (const tData of tiersArr) {
       const tier = tData.beatTier as BeatTierName;
-      if (!TIER_ORDER.includes(tier)) continue;
-      
+      if (!TIER_ORDER.includes(tier)) continue; // 未知の Tier 名は無視
+
+      // 大分類エントリを未生成なら作成
       if (!row.averages[tier]) {
         row.averages[tier] = { avgScore: 0, avgRate: 0, userCount: 0, subTiers: {} };
       }
-      
+
+      // サブ Tier (1〜5) の平均スコア・達成率・ユーザ数を格納
       const level = Number(tData.tierLevel || 0);
       const avgScore = Math.round(Number(tData.avgScore));
       row.averages[tier].subTiers[level] = {
@@ -131,7 +175,7 @@ const rows = computed<SongRow[]>(() => {
     }
   }
 
-  // Calculate weighted average for broad tiers
+  // 大分類の「加重平均」を算出（サブTierごとの userCount で重み付け）
   for (const row of songMap.values()) {
     for (const tier of Object.keys(row.averages) as BeatTierName[]) {
       const avg = row.averages[tier]!;
@@ -152,6 +196,7 @@ const rows = computed<SongRow[]>(() => {
   return Array.from(songMap.values());
 });
 
+// 実際にデータが存在する Tier の一覧（TIER_ORDER と同じ順序で返す）
 const activeTiers = computed<BeatTierName[]>(() => {
   const present = new Set<BeatTierName>();
   for (const row of rows.value) {
@@ -162,8 +207,14 @@ const activeTiers = computed<BeatTierName[]>(() => {
   return TIER_ORDER.filter(t => present.has(t));
 });
 
+// 表の列定義: 大分類（broad）か小分類（sub）かの判別 + その Tier/レベル
 type ColumnDef = { type: 'broad', tier: BeatTierName } | { type: 'sub', tier: BeatTierName, level: number };
 
+/**
+ * 現在表示すべき列の一覧。
+ * detailTier が指定されていれば、その Tier の 5→4→3→2→1 の小分類列を返す。
+ * そうでなければ、大分類の Tier 一覧を返す。
+ */
 const activeColumns = computed<ColumnDef[]>(() => {
   if (detailTier.value) {
     return [5, 4, 3, 2, 1].map(l => ({ type: 'sub', tier: detailTier.value!, level: l }));
@@ -171,31 +222,43 @@ const activeColumns = computed<ColumnDef[]>(() => {
   return activeTiers.value.map(t => ({ type: 'broad', tier: t }));
 });
 
+/**
+ * 検索・レベル・勝敗フィルタを適用し、ソートした行を返す computed。
+ * 手順1: Lv11/Lv12 表示トグルでフィルタ
+ * 手順2: タイトル部分一致検索（小文字化して比較）
+ * 手順3: 勝敗フィルタ（選択中 Tier の平均 vs 自分ベスト。ユーザ数<3 の Tier は母数不足で除外）
+ * 手順4: sortKey/sortDir に従ってソート。"Master-5" のような形式はサブTierソート
+ * 達成率が無効（ユーザ数<3）な値は -1 として並べ、末尾へ送る
+ */
 const filteredRows = computed<SongRow[]>(() => {
   let result = rows.value;
+  // レベルでフィルタ
   result = result.filter(r =>
     (r.difficultyLevel === 11 && showLv11.value) ||
     (r.difficultyLevel === 12 && showLv12.value)
   );
+  // タイトル検索（部分一致、大文字小文字無視）
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.trim().toLowerCase();
     result = result.filter(r => r.title.toLowerCase().includes(q));
   }
-  // Comparison filter (applied on button click)
+  // 勝敗フィルタ（適用ボタンを押した時だけ有効）
   if (appliedFilterTier.value && (appliedFilterWinning.value || appliedFilterLosing.value)) {
     const tier = appliedFilterTier.value as BeatTierName;
     result = result.filter(r => {
       const avg = r.averages[tier];
-      if (!avg || avg.userCount < 3) return false;
+      if (!avg || avg.userCount < 3) return false; // 母数3未満は統計的に弱いので除外
       const myScore = myScoresMap.value.get(`${r.title}_${r.difficultyName}`);
       if (!myScore) return true; // 未プレイ曲は常に表示（灰色で表示）
-      if (appliedFilterWinning.value && appliedFilterLosing.value) return true;
+      if (appliedFilterWinning.value && appliedFilterLosing.value) return true; // 両方チェック = フィルタ無し相当
       if (appliedFilterWinning.value) return myScore > avg.avgScore;
       if (appliedFilterLosing.value) return myScore < avg.avgScore;
       return false;
     });
   }
+  // 配列コピーしてからソート（元の rows を破壊しないため）
   return [...result].sort((a, b) => {
+    // タイトル列は日本語ロケールで文字列比較
     if (sortKey.value === 'title') {
       const cmp = a.title.localeCompare(b.title, 'ja');
       return sortDir.value === 'asc' ? cmp : -cmp;
@@ -205,13 +268,14 @@ const filteredRows = computed<SongRow[]>(() => {
       va = a.difficultyLevel;
       vb = b.difficultyLevel;
     } else if (typeof sortKey.value === 'string' && sortKey.value.includes('-')) {
-      // e.g. "Master-5"
+      // 例: "Master-5" → サブTier(Master の 5)の達成率でソート
       const [tName, tLevel] = sortKey.value.split('-');
       const ak = a.averages[tName as BeatTierName]?.subTiers[Number(tLevel)];
       const bk = b.averages[tName as BeatTierName]?.subTiers[Number(tLevel)];
       va = (ak && ak.userCount >= 3) ? ak.avgRate : -1;
       vb = (bk && bk.userCount >= 3) ? bk.avgRate : -1;
     } else {
+      // 大分類 Tier 単位でソート
       const ak = a.averages[sortKey.value as BeatTierName];
       const bk = b.averages[sortKey.value as BeatTierName];
       va = (ak && ak.userCount >= 3) ? ak.avgRate : -1;
@@ -221,12 +285,19 @@ const filteredRows = computed<SongRow[]>(() => {
   });
 });
 
+// 総ページ数（少なくとも1ページ）
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / PAGE_SIZE)));
 
+// 現在ページ分だけスライスした行
 const pagedRows = computed(() =>
   filteredRows.value.slice((currentPage.value - 1) * PAGE_SIZE, currentPage.value * PAGE_SIZE)
 );
 
+/**
+ * 列ヘッダクリック時にソート方向をトグル / 別列ならソートキーを切替。
+ * 同じ列 → desc ↔ asc 反転、別の列 → desc に初期化。
+ * @param col ソート対象の列キー
+ */
 function toggleSort(col: typeof sortKey.value) {
   if (sortKey.value === col) {
     sortDir.value = sortDir.value === 'desc' ? 'asc' : 'desc';
@@ -237,16 +308,24 @@ function toggleSort(col: typeof sortKey.value) {
   currentPage.value = 1;
 }
 
-// ── Display helpers ────────────────────────────────────────
+// ── 表示用のヘルパー ────────────────────────────────────────
+/**
+ * 達成率(%)に応じた色クラス。MAX-/AAA/AA/A の閾値で色分け。
+ * データ無し (0) は極薄グレーで "—" を表示するための色
+ */
 function rateColorClass(rate: number): string {
-  if (rate >= 94.44) return 'text-purple-500 dark:text-purple-400';
-  if (rate >= 88.88) return 'text-yellow-500 dark:text-yellow-400';
-  if (rate >= 77.77) return 'text-blue-500 dark:text-blue-400';
-  if (rate >= 66.66) return 'text-emerald-500 dark:text-emerald-400';
+  if (rate >= 94.44) return 'text-purple-500 dark:text-purple-400';  // MAX- 以上
+  if (rate >= 88.88) return 'text-yellow-500 dark:text-yellow-400';  // AAA 以上
+  if (rate >= 77.77) return 'text-blue-500 dark:text-blue-400';      // AA 以上
+  if (rate >= 66.66) return 'text-emerald-500 dark:text-emerald-400';// A 以上
   if (rate > 0)      return 'text-slate-500 dark:text-slate-400';
   return 'text-slate-200 dark:text-slate-700';
 }
 
+/**
+ * 平均と自分ベストの比較による色クラス。
+ * 自分のスコアが平均より高い = 緑、低い = 赤、未プレイ or 同点 = 灰。
+ */
 function comparisonClass(avgScore: number, rowTitle: string, rowDiff: string): string {
   const myScore = myScoresMap.value.get(`${rowTitle}_${rowDiff}`);
   if (!myScore) return 'text-slate-400 dark:text-slate-500';
@@ -255,6 +334,10 @@ function comparisonClass(avgScore: number, rowTitle: string, rowDiff: string): s
   return 'text-slate-400 dark:text-slate-500';
 }
 
+/**
+ * Tier 名から、その Tier に対応する Rate-Tier の代表色を返す。
+ * 各 Tier の代表レート値から getRankInfo の色を取得し、font-bold 類は除去。
+ */
 function tierColor(tier: BeatTierName): string {
   const map: Record<BeatTierName, number> = {
     Legend: 18000, Mythic: 17500, Ancient: 17000, Master: 16500,
@@ -264,23 +347,33 @@ function tierColor(tier: BeatTierName): string {
   return getRankInfo(map[tier]).color.replace(' font-black', '').replace(' font-bold', '');
 }
 
+// 絞り込み条件やドリルダウンが変わったら必ず1ページ目に戻す
 watch([searchQuery, showLv11, showLv12, detailTier], () => { currentPage.value = 1; });
 
-// ── Fetch ──────────────────────────────────────────────────
+// ── データ取得 ──────────────────────────────────────────────
+/**
+ * 平均データと自分のベストスコアを並列フェッチする。
+ * 手順1: /api/scores/song-arena-averages で公開の Tier 別平均を取得
+ * 手順2: ログイン中なら /api/scores/me で自分のスコアも取得し、
+ *        "タイトル_難易度" → ベストスコア の Map を作成
+ */
 async function loadData() {
   isLoading.value = true;
   error.value = '';
   try {
     const fetches: Promise<void>[] = [
+      // 公開データ: Tier別の平均
       fetch(`${API_BASE}/api/scores/song-arena-averages`)
         .then(r => { if (!r.ok) throw new Error('データの取得に失敗しました'); return r.json(); })
         .then(d => { rawData.value = d; }),
     ];
     if (user.value) {
+      // ログイン時のみ自分のベストスコアも取得
       fetches.push(
         fetch(`${API_BASE}/api/scores/me`, { headers: authHeaders() })
           .then(r => r.ok ? r.json() : [])
           .then((flat: { title: string; difficultyName: string; score: number }[]) => {
+            // 同じ譜面でも複数プレイ履歴があるため、最大値のみ保持
             const map = new Map<string, number>();
             for (const s of flat) {
               const k = `${s.title}_${s.difficultyName}`;
@@ -298,6 +391,7 @@ async function loadData() {
   }
 }
 
+// マウント時に1度だけデータを取得
 onMounted(loadData);
 </script>
 
@@ -305,7 +399,7 @@ onMounted(loadData);
   <div class="w-full max-w-full space-y-6 animate-fade-in">
     <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
 
-      <!-- Header -->
+      <!-- ページヘッダ: タイトルアイコン + 見出し + サブタイトル -->
       <div class="flex items-center gap-4 mb-6">
         <div class="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -319,7 +413,7 @@ onMounted(loadData);
         </div>
       </div>
 
-      <!-- Search + legend -->
+      <!-- 検索ボックス + レベルトグル + 勝敗フィルタ + 色凡例 -->
       <div class="flex flex-wrap items-center gap-3 mb-5">
         <input
           v-model="searchQuery"
@@ -336,7 +430,7 @@ onMounted(loadData);
           ☆12
         </label>
 
-        <!-- Comparison filter (only shown when logged in) -->
+        <!-- 勝敗比較フィルタ（ログイン時のみ表示。未ログインだと自分のベストが無いので意味が無い） -->
         <template v-if="user">
           <div class="flex items-center gap-2 flex-wrap">
             <select
@@ -373,7 +467,7 @@ onMounted(loadData);
         </div>
       </div>
 
-      <!-- Loading / Error -->
+      <!-- ローディング / エラー 表示分岐 -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
         <div class="w-12 h-12 border-4 border-indigo-100 dark:border-slate-700 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin mb-4"></div>
         <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('songAvg.loading') }}</p>
@@ -382,7 +476,7 @@ onMounted(loadData);
         {{ error }}
       </div>
 
-      <!-- Table -->
+      <!-- メインの平均スコア比較テーブル -->
       <div v-else class="overflow-x-auto">
         <p class="text-xs text-slate-400 dark:text-slate-500 mb-2">
           {{ filteredRows.length }} {{ t('songAvg.songs') }}
@@ -448,7 +542,7 @@ onMounted(loadData);
               :key="`${row.title}_${row.difficultyName}`"
               class="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
             >
-              <!-- Level + diff badge -->
+              <!-- 左端: ☆レベル + 難易度（ANOTHER=A/LEGGENDARIA=L）バッジ -->
               <td class="py-2 pl-2 pr-1 whitespace-nowrap">
                 <div class="flex flex-col items-start gap-0.5">
                   <span class="text-xs font-black text-slate-500 dark:text-slate-400">☆{{ row.difficultyLevel }}</span>
@@ -460,13 +554,13 @@ onMounted(loadData);
                   >{{ row.difficultyName === 'LEGGENDARIA' ? 'L' : 'A' }}</span>
                 </div>
               </td>
-              <!-- Song title -->
+              <!-- 曲名（長い場合は省略記号で1行表示） -->
               <td class="py-2 pr-6 max-w-[200px]">
                 <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-tight line-clamp-1 block" :title="row.title">
                   {{ row.title }}
                 </span>
               </td>
-              <!-- BEAT-TIER averages -->
+              <!-- Tier別 平均スコア + 達成率 + 自分との勝敗色 -->
               <td v-for="col in activeColumns" :key="col.type === 'broad' ? col.tier : col.tier + '-' + col.level" class="py-2 px-2 text-center">
                 
                 <template v-if="col.type === 'broad'">
@@ -497,7 +591,7 @@ onMounted(loadData);
             </tr>
           </tbody>
         </table>
-        <!-- Pagination -->
+        <!-- ページネーション: 最初/前/ページ番号/次/最後 -->
         <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-6">
           <button
             @click="currentPage = 1"
