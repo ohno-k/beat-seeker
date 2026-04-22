@@ -27,8 +27,16 @@ const emit = defineEmits<{
   (e: 'matched', song: SongDataEntry): void;
 }>();
 
-/** 状態マシン。UI の表示切替に使う。 */
-type Status = 'idle' | 'initializing' | 'scanning' | 'matched' | 'error';
+/**
+ * 状態マシン。UI の表示切替に使う。
+ *  - idle: モーダル起動直後
+ *  - initializing: カメラ／OCR ワーカー起動中
+ *  - ready: カメラ映像ライブ、ユーザーのボタン押下待ち
+ *  - capturing: ボタン押下後、OCR 実行中
+ *  - matched: 認識成功、結果表示中
+ *  - error: カメラ取得失敗等
+ */
+type Status = 'idle' | 'initializing' | 'ready' | 'capturing' | 'matched' | 'error';
 const status = ref<Status>('idle');
 
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -37,15 +45,13 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 const errorMessage = ref('');
 const recognizedText = ref('');
 const lastMatch = ref<{ song: SongDataEntry; score: number } | null>(null);
+/** 前回の認識試行で「マッチなし」だった場合の UI 通知。 */
+const noMatchMessage = ref('');
 
 /** OCR ワーカー本体。アンマウント時に terminate する必要がある。 */
 let worker: TesseractWorker | null = null;
 /** カメラストリーム。アンマウント時に tracks を stop する必要がある。 */
 let stream: MediaStream | null = null;
-/** 次回スキャンまでの setTimeout ハンドル。 */
-let scanTimer: number | null = null;
-/** 現在 OCR 実行中か（多重実行防止）。 */
-let isRecognizing = false;
 
 interface FuseEntry { key: string; song: SongDataEntry; }
 let fuse: Fuse<FuseEntry> | null = null;
@@ -75,12 +81,12 @@ const buildFuseIndex = () => {
     keys: [
       { name: 'song.title', weight: 2 },
       { name: 'key', weight: 2 },
-      { name: 'song.artist', weight: 0.7 },
-      { name: 'song.genre', weight: 0.5 },
     ],
-    threshold: 0.45,
+    // 誤マッチ防止のため閾値をきつく絞る（Fuse の内部スコアは 0=完全一致 / 1=全く一致しない）
+    threshold: 0.25,
     includeScore: true,
-    minMatchCharLength: 2,
+    // 3 文字未満の語では過剰一致するため除外
+    minMatchCharLength: 3,
     ignoreLocation: true,
   });
 };
@@ -134,8 +140,7 @@ const openCamera = async () => {
     }
 
     buildFuseIndex();
-    status.value = 'scanning';
-    startScanLoop();
+    status.value = 'ready';
   } catch (e: any) {
     console.error('Camera/OCR init failed:', e);
     errorMessage.value = e?.message || t('ocrSearch.cameraError');
@@ -148,10 +153,6 @@ const openCamera = async () => {
  * カメラとワーカーの解放。状態は変更しない（呼び出し側で制御）。
  */
 const cleanupResources = () => {
-  if (scanTimer !== null) {
-    clearTimeout(scanTimer);
-    scanTimer = null;
-  }
   if (stream) {
     stream.getTracks().forEach(track => track.stop());
     stream = null;
@@ -164,31 +165,18 @@ const cleanupResources = () => {
 };
 
 /**
- * スキャンループ。約 700ms 間隔で一コマずつ OCR に回す。
- * setTimeout チェーンにしているので OCR 実行時間分だけ間隔が伸びる（= 暴走しない）。
+ * ユーザーがシャッターボタンを押したときのハンドラ。
+ * 現在のフレームを 1 枚だけキャプチャして OCR → ファジー検索。
+ *
+ * 誤マッチ対策:
+ *  1. クロップ領域を狭くして曲名以外（UI 要素・背景）を除外
+ *  2. Tesseract の confidence が低いフレームは「認識失敗」として弾く
+ *  3. 記号除去後の実質文字数が短すぎるフレームは「認識失敗」
+ *  4. Fuse のスコアしきい値を厳しく（0.2 以下）
+ *  5. OCR 結果と曲名で最低 4 文字の連続部分一致を要求
  */
-const startScanLoop = () => {
-  const tick = async () => {
-    if (status.value !== 'scanning') return;
-    try {
-      await scanFrame();
-    } catch (e) {
-      // 個別の OCR 失敗はログだけ出して継続（偶発ノイズでループを止めない）
-      console.warn('OCR frame failed:', e);
-    }
-    if (status.value === 'scanning') {
-      scanTimer = window.setTimeout(tick, 700);
-    }
-  };
-  tick();
-};
-
-/**
- * 1 フレームをキャプチャして OCR → ファジー検索。
- * 画面中央の帯（楽曲タイトルが大きく表示される領域）をクロップして OCR 精度を上げる。
- */
-const scanFrame = async () => {
-  if (isRecognizing) return;
+const captureAndRecognize = async () => {
+  if (status.value !== 'ready') return;
   if (!videoRef.value || !canvasRef.value || !worker || !fuse) return;
   const video = videoRef.value;
   if (video.readyState < 2 || video.videoWidth === 0) return;
@@ -197,12 +185,13 @@ const scanFrame = async () => {
   const vw = video.videoWidth;
   const vh = video.videoHeight;
 
-  // 中央 80% × 上下 25%〜65% の帯をクロップ
-  // （IIDX 選曲画面で曲名が出る位置を想定。画面外でも Fuse のしきい値で弾ける）
-  const cropX = Math.floor(vw * 0.10);
-  const cropY = Math.floor(vh * 0.25);
-  const cropW = Math.floor(vw * 0.80);
-  const cropH = Math.floor(vh * 0.40);
+  // 画面中央の曲名が出る領域だけを切り出す。
+  // IIDX ARENA 選曲画面: タイトルは中央 60% × 上下 22%〜42% に収まる。
+  // クロップを狭くするほど背景ノイズが減り OCR 精度が上がる。
+  const cropX = Math.floor(vw * 0.20);
+  const cropY = Math.floor(vh * 0.22);
+  const cropW = Math.floor(vw * 0.60);
+  const cropH = Math.floor(vh * 0.20);
 
   canvas.width = cropW;
   canvas.height = cropH;
@@ -210,43 +199,88 @@ const scanFrame = async () => {
   if (!ctx) return;
   ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
-  isRecognizing = true;
+  status.value = 'capturing';
+  noMatchMessage.value = '';
+  recognizedText.value = '';
+
   let text = '';
+  let ocrConfidence = 0;
   try {
     const result = await worker.recognize(canvas);
     text = (result.data.text || '').trim();
-  } finally {
-    isRecognizing = false;
+    ocrConfidence = Number(result.data.confidence || 0);
+  } catch (e) {
+    console.warn('OCR failed:', e);
   }
-  if (!text) return;
-  recognizedText.value = text.replace(/\s+/g, ' ').slice(0, 80);
 
-  // 行ごと・全文ごとに検索して最良一致を拾う
-  const candidates: string[] = [];
-  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length >= 2);
-  candidates.push(...lines);
-  candidates.push(normalizeText(text));
+  // 表示用テキストを更新（たとえマッチしなくても、何を読んだかは見せる）
+  const cleanedForDisplay = text.replace(/\s+/g, ' ').trim().slice(0, 80);
+  recognizedText.value = cleanedForDisplay;
 
-  let best: { score: number; song: SongDataEntry } | null = null;
-  for (const q of candidates) {
-    if (q.length < 2) continue;
-    const results = fuse.search(q);
-    if (results.length === 0) continue;
-    const r = results[0];
-    if (r.score === undefined) continue;
-    if (!best || r.score < best.score) {
-      best = { score: r.score, song: r.item.song };
-    }
+  // (2) Tesseract 自身が自信なし
+  if (ocrConfidence < 55) {
+    status.value = 'ready';
+    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
+    return;
   }
-  if (best && best.score <= 0.3) {
-    // score 0 = 完全一致, 1 = 全く一致しない。0.3 以下なら確信度高い
-    lastMatch.value = {
-      song: best.song,
-      score: Math.max(0, Math.min(100, Math.round((1 - best.score) * 100))),
-    };
-    status.value = 'matched';
-    cleanupResources();
+
+  // (3) 記号・空白以外の実質文字を抽出。短すぎるフレームは破棄
+  const cleaned = text
+    .replace(/[^A-Za-z0-9'&\-\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const alnumCount = (cleaned.match(/[A-Za-z0-9]/g) || []).length;
+  if (cleaned.length < 4 || alnumCount < 4) {
+    status.value = 'ready';
+    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
+    return;
   }
+
+  // (4) Fuse 検索
+  const results = fuse.search(cleaned);
+  if (results.length === 0) {
+    status.value = 'ready';
+    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
+    return;
+  }
+  const best = results[0];
+  if (best.score === undefined || best.score > 0.2) {
+    status.value = 'ready';
+    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
+    return;
+  }
+
+  // (5) OCR 結果と曲名で 4 文字以上の連続部分一致を要求
+  const lowerTitle = best.item.song.title.toLowerCase();
+  const lowerOcr = cleaned.toLowerCase();
+  const hasOverlap =
+    hasSubstringOverlap(lowerOcr, lowerTitle, 4) ||
+    hasSubstringOverlap(lowerTitle, lowerOcr, 4);
+  if (!hasOverlap) {
+    status.value = 'ready';
+    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
+    return;
+  }
+
+  // マッチ確定
+  const song = best.item.song;
+  const scorePct = Math.max(0, Math.min(100, Math.round((1 - best.score) * 100)));
+  lastMatch.value = { song, score: scorePct };
+  status.value = 'matched';
+  cleanupResources();
+};
+
+/**
+ * needle の中に haystack に含まれる長さ `minLen` 以上の連続部分文字列が存在するか。
+ * （OCR テキストと曲名の双方向でオーバーラップ検出する用途）
+ */
+const hasSubstringOverlap = (haystack: string, needle: string, minLen: number): boolean => {
+  if (needle.length < minLen) return false;
+  for (let i = 0; i + minLen <= needle.length; i++) {
+    const sub = needle.slice(i, i + minLen);
+    if (haystack.includes(sub)) return true;
+  }
+  return false;
 };
 
 const retry = () => {
@@ -319,8 +353,8 @@ onBeforeUnmount(() => {
             </button>
           </div>
 
-          <!-- カメラ起動中 / スキャン中 -->
-          <div v-else-if="status === 'initializing' || status === 'scanning'" class="space-y-3">
+          <!-- カメラ映像 + シャッターボタン（ready/capturing/initializing 共通） -->
+          <div v-else-if="status === 'initializing' || status === 'ready' || status === 'capturing'" class="space-y-3">
             <div class="relative aspect-video bg-black rounded-xl overflow-hidden">
               <video
                 ref="videoRef"
@@ -329,19 +363,48 @@ onBeforeUnmount(() => {
                 muted
                 class="absolute inset-0 w-full h-full object-cover"
               />
-              <!-- スキャンエリアのオーバーレイ枠 -->
+              <!-- スキャンエリアのオーバーレイ枠（OCR クロップ領域と同じ位置・サイズ） -->
               <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
                 <div
                   class="border-2 border-blue-400 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]"
-                  :style="{ width: '80%', height: '40%', marginTop: '-5%' }"
+                  :style="{ width: '60%', height: '20%', marginTop: '-18%' }"
                 ></div>
               </div>
               <!-- 状態バッジ -->
               <div class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-2">
-                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                {{ status === 'initializing' ? t('ocrSearch.initializing') : t('ocrSearch.scanning') }}
+                <span
+                  class="inline-block w-1.5 h-1.5 rounded-full"
+                  :class="status === 'capturing' ? 'bg-amber-400 animate-ping' : 'bg-emerald-400 animate-pulse'"
+                ></span>
+                {{ status === 'initializing' ? t('ocrSearch.initializing') : (status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.ready')) }}
               </div>
             </div>
+
+            <!-- シャッターボタン -->
+            <button
+              @click="captureAndRecognize"
+              :disabled="status !== 'ready'"
+              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-fuchsia-500/20 hover:shadow-fuchsia-500/40 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+            >
+              <svg v-if="status === 'capturing'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.3" />
+                <path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {{ status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.capture') }}
+            </button>
+
+            <!-- マッチ失敗メッセージ -->
+            <div
+              v-if="noMatchMessage"
+              class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl text-sm text-amber-700 dark:text-amber-300 font-medium"
+            >
+              {{ noMatchMessage }}
+            </div>
+
             <p v-if="recognizedText" class="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg">
               {{ t('ocrSearch.recognized', { text: recognizedText }) }}
             </p>
