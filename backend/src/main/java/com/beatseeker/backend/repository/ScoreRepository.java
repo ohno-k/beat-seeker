@@ -176,10 +176,10 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      * ネイティブ SQL。ポイント:
      *  - users と JOIN し、各ユーザーのプライバシーレベルと最新 total_beat_pt（LEFT JOIN）を取得
      *  - {@code DISTINCT ON (user_id)} で score_history_logs から各ユーザーの最新スナップショットを取り出す
-     *  - WHERE 句の可視性判定:
-     *      ・ privacy_level = 0（全体公開）
-     *      ・ 自分自身（u.id = :myUserId）
-     *      ・ privacy_level = 1（フレンドまで公開） かつ :friendIds に含まれる
+     *  - 非公開ユーザーも「順位算出のため」返却するが、閲覧者に可視でない場合は
+     *    userId / iidxId / displayName など識別情報を NULL でマスクして返す。
+     *      ・ 可視: privacy_level = 0、自分自身、または privacy_level = 1 かつ :friendIds に含まれる
+     *      ・ 非可視: それ以外（= privacy_level = 2 全般、および privacy_level = 1 の非フレンド）
      *  - スコア降順で並べる
      *
      * 返却キー: userId / iidxId / displayName / privacyLevel / score / clearType / djLevel /
@@ -192,29 +192,36 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      * @return ランキング行のリスト
      */
     @Query(value =
-        "SELECT u.id as \"userId\", u.iidx_id as \"iidxId\", u.display_name as \"displayName\", " +
-        "COALESCE(u.privacy_level, 1) as \"privacyLevel\", " +
-        "s.score as \"score\", " +
-        "s.clear_type as \"clearType\", " +
-        "s.dj_level as \"djLevel\", " +
-        "s.pgreat as \"pgreat\", " +
-        "s.great as \"great\", " +
-        "s.miss_count as \"missCount\", " +
-        "COALESCE(latest.total_beat_pt, 0) as \"totalBeatPt\" " +
-        "FROM scores s " +
-        "JOIN users u ON s.user_id = u.id " +
-        "LEFT JOIN (" +
-        "  SELECT DISTINCT ON (user_id) user_id, total_beat_pt " +
-        "  FROM score_history_logs " +
-        "  ORDER BY user_id, uploaded_at DESC" +
-        ") latest ON u.id = latest.user_id " +
-        "WHERE s.title = :title AND s.difficulty_name = :difficultyName " +
-        "  AND (" +
-        "    COALESCE(u.privacy_level, 1) = 0" +
-        "    OR u.id = :myUserId" +
-        "    OR (COALESCE(u.privacy_level, 1) = 1 AND u.id IN (:friendIds))" +
-        "  ) " +
-        "ORDER BY s.score DESC",
+        "WITH v AS (" +
+        "  SELECT s.score, s.clear_type, s.dj_level, s.pgreat, s.great, s.miss_count, " +
+        "         u.id as uid, u.iidx_id, u.display_name, COALESCE(u.privacy_level, 1) as pl, " +
+        "         latest.total_beat_pt, " +
+        "         (COALESCE(u.privacy_level, 1) = 0 " +
+        "          OR u.id = :myUserId " +
+        "          OR (COALESCE(u.privacy_level, 1) = 1 AND u.id IN (:friendIds))) as vis " +
+        "  FROM scores s " +
+        "  JOIN users u ON s.user_id = u.id " +
+        "  LEFT JOIN (" +
+        "    SELECT DISTINCT ON (user_id) user_id, total_beat_pt " +
+        "    FROM score_history_logs " +
+        "    ORDER BY user_id, uploaded_at DESC" +
+        "  ) latest ON u.id = latest.user_id " +
+        "  WHERE s.title = :title AND s.difficulty_name = :difficultyName" +
+        ") " +
+        "SELECT " +
+        "  CASE WHEN vis THEN uid ELSE NULL END as \"userId\", " +
+        "  CASE WHEN vis THEN iidx_id ELSE NULL END as \"iidxId\", " +
+        "  CASE WHEN vis THEN display_name ELSE NULL END as \"displayName\", " +
+        "  pl as \"privacyLevel\", " +
+        "  score as \"score\", " +
+        "  CASE WHEN vis THEN clear_type ELSE NULL END as \"clearType\", " +
+        "  CASE WHEN vis THEN dj_level ELSE NULL END as \"djLevel\", " +
+        "  CASE WHEN vis THEN pgreat ELSE NULL END as \"pgreat\", " +
+        "  CASE WHEN vis THEN great ELSE NULL END as \"great\", " +
+        "  CASE WHEN vis THEN miss_count ELSE NULL END as \"missCount\", " +
+        "  CASE WHEN vis THEN COALESCE(total_beat_pt, 0) ELSE NULL END as \"totalBeatPt\" " +
+        "FROM v " +
+        "ORDER BY score DESC",
         nativeQuery = true)
     List<Map<String, Object>> findSongRanking(
             @Param("title") String title,

@@ -1402,15 +1402,17 @@ interface RivalScore {
 const rivalScores = ref<RivalScore[]>([]);
 
 // --- 譜面別ランキング（他ユーザー）用の状態と型 ---
+// 非可視ユーザーは順位算出のためだけに返ってくるので、識別情報（userId / iidxId / displayName 等）
+// や totalBeatPt は null でマスクされ得る。
 interface SongRankingEntry {
   userId?: number | null;
-  iidxId?: string;
+  iidxId?: string | null;
   privacyLevel?: number | null;
-  displayName: string;
+  displayName: string | null;
   score: number;
-  clearType?: string;
-  djLevel?: string;
-  totalBeatPt: number;
+  clearType?: string | null;
+  djLevel?: string | null;
+  totalBeatPt: number | null;
 }
 /** 譜面ランキング（公開/フレンド/自分）の生データ。 */
 const songRankingList = ref<SongRankingEntry[]>([]);
@@ -1532,10 +1534,26 @@ const rankingList = computed<RankingRow[]>(() => {
   const friendIidxSet = new Set(rivalScores.value.map(r => r.iidxId).filter(Boolean));
 
   // 手順1〜2: songRankingList + rivalScores を iidxId でマージ。自分は除外。
+  // 非可視ユーザー（バックエンドで iidxId が NULL にマスクされた行）は順位算出のためだけに
+  // 別配列で保持し、表示フィルタで自然に除外する。
   const usersByIidx = new Map<string, RankingRow>();
+  const hiddenRows: RankingRow[] = [];
+  let hiddenIdx = 0;
   for (const entry of songRankingList.value) {
     const iidxId = entry.iidxId ?? '';
-    if (!iidxId || iidxId === myIidx) continue;
+    if (iidxId === myIidx && iidxId) continue;
+    if (!iidxId) {
+      // 非可視ユーザー: 識別情報がマスクされている。スコアのみ順位計算に寄与させる。
+      hiddenRows.push({
+        key: 'h_' + (hiddenIdx++),
+        kind: 'user',
+        displayName: '',
+        score: entry.score ?? null,
+        privacyLevel: entry.privacyLevel ?? 2,
+        rank: null,
+      });
+      continue;
+    }
     usersByIidx.set(iidxId, {
       key: 'u_' + iidxId,
       kind: 'user',
@@ -1669,8 +1687,9 @@ const rankingList = computed<RankingRow[]>(() => {
     }
   }
 
-  // すべての行を 1 本の配列に集約（自分 + 実ユーザー + 仮想）。
-  const all: RankingRow[] = [selfRow, ...usersByIidx.values(), ...virtualRows];
+  // すべての行を 1 本の配列に集約（自分 + 実ユーザー + 非公開ユーザー + 仮想）。
+  // hiddenRows は順位計算のためだけに含める（表示フィルタで自然に除外される）。
+  const all: RankingRow[] = [selfRow, ...usersByIidx.values(), ...hiddenRows, ...virtualRows];
 
   // 手順5: スコア保有者に dense 1-indexed の順位を付与。非表示ユーザーも順位計算には含める
   //        （= 表示上「4位」が欠番に見えても、裏で隠れた 3 位が存在し得る）。
