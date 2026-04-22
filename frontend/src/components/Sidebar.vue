@@ -70,6 +70,7 @@ const emit = defineEmits<{
   (e: 'editProfile'): void;
   (e: 'openAdmin'): void;
   (e: 'upload'): void;
+  (e: 'openOcrSearch'): void;
 }>();
 
 /** 【関数の役割】 サイドバーを閉じる（v-model:isOpen → false）。 */
@@ -86,6 +87,12 @@ const selectTab = (tab: string) => {
 /** 【関数の役割】 アップロードボタン押下時、親にスコア取り込みを通知して閉じる。 */
 const handleUploadClick = () => {
   emit('upload');
+  closeSidebar();
+};
+
+/** 【関数の役割】 カメラ OCR 曲検索ボタン押下時、親に OCR モーダル起動を通知してサイドバーを閉じる。 */
+const handleOcrSearchClick = () => {
+  emit('openOcrSearch');
   closeSidebar();
 };
 
@@ -286,6 +293,23 @@ const filteredNavItems = computed(() => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 {{ t('nav.uploadCsv') }}
+              </button>
+            </div>
+
+            <!--
+              カメラ OCR 曲検索: ARENA で降ってきた曲の候補を即特定するためのクイックアクション。
+              現在は開発中のため、userID=18 のみに公開（PoC 段階）。
+            -->
+            <div v-if="user?.id === 18" class="flex flex-col gap-1 mt-2">
+              <button
+                @click="handleOcrSearchClick"
+                class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-fuchsia-500/20 hover:shadow-fuchsia-500/40 hover:-translate-y-0.5 transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {{ t('nav.ocrSearch') }}
               </button>
             </div>
           </div>

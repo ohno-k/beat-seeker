@@ -35,6 +35,7 @@ export const ja = {
   'nav.arcadeAssist': '選曲アシスト',
   'nav.songAvg': 'ティア別平均',
   'nav.chartList': '譜面一覧',
+  'nav.ocrSearch': 'カメラで曲検索',
   'nav.diffTable': '難易度表',
   'nav.scorePrediction': '譜面分析',
   'nav.skillTree': 'スキルツリー',
@@ -1026,6 +1027,23 @@ export const ja = {
   'rankComparison.legendOverrated': '= 実際のランクがスコアレート予測より高い（過大評価の可能性）',
   'rankComparison.legendUnderrated': '= 実際のランクがスコアレート予測より低い（過小評価の可能性）',
   'rankComparison.legendNote': '※ スコアレート66.67%以上のプレイヤーの平均値を使用。曲数に応じてバケット分割。',
+
+  // OCR Camera Search
+  'ocrSearch.title': 'カメラで曲検索',
+  'ocrSearch.subtitle': '選曲画面にカメラを向けると、OCRで自動検索します',
+  'ocrSearch.openCamera': 'カメラを開く',
+  'ocrSearch.closeCamera': 'カメラを閉じる',
+  'ocrSearch.initializing': 'OCRエンジンを初期化中...',
+  'ocrSearch.scanning': '検索中... 曲名にカメラを向けてください',
+  'ocrSearch.recognized': '認識した文字: "{text}"',
+  'ocrSearch.matched': '一致: {title}（一致度 {score}%）',
+  'ocrSearch.noMatch': '該当する曲が見つかりませんでした。別の角度で試してください。',
+  'ocrSearch.cameraError': 'カメラにアクセスできませんでした。ブラウザの権限設定を確認してください。',
+  'ocrSearch.httpsRequired': 'カメラ利用にはHTTPS接続が必要です。',
+  'ocrSearch.retry': 'もう一度スキャン',
+  'ocrSearch.manualInput': '手動で検索する',
+  'ocrSearch.hint': 'ヒント: 曲名が画面中央に大きく映るようにしてください',
+  'ocrSearch.goToChart': '譜面一覧で開く',
 
   // Dan Ranks
   'dan.7kyu': '七級', 'dan.6kyu': '六級', 'dan.5kyu': '五級', 'dan.4kyu': '四級', 'dan.3kyu': '三級', 'dan.2kyu': '二級', 'dan.1kyu': '一級',

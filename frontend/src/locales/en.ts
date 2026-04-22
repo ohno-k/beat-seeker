@@ -33,6 +33,7 @@ export const en = {
   'nav.arcadeAssist': 'Song Assist',
   'nav.songAvg': 'Tier Averages',
   'nav.chartList': 'Chart List',
+  'nav.ocrSearch': 'Camera Search',
   'nav.diffTable': 'Difficulty Table',
   'nav.scorePrediction': 'Score Prediction',
   'nav.skillTree': 'Skill Tree',
@@ -1020,6 +1021,23 @@ export const en = {
   'rankComparison.legendOverrated': '= Actual rank is higher than predicted by score rate (possibly overrated)',
   'rankComparison.legendUnderrated': '= Actual rank is lower than predicted by score rate (possibly underrated)',
   'rankComparison.legendNote': '* Uses average score rates of players with >= 66.67%. Songs divided into buckets matching table sizes.',
+
+  // OCR Camera Search
+  'ocrSearch.title': 'Camera Song Search',
+  'ocrSearch.subtitle': 'Point your camera at the song selection screen for automatic OCR search',
+  'ocrSearch.openCamera': 'Open Camera',
+  'ocrSearch.closeCamera': 'Close Camera',
+  'ocrSearch.initializing': 'Initializing OCR engine...',
+  'ocrSearch.scanning': 'Scanning... Point camera at the song title',
+  'ocrSearch.recognized': 'Recognized text: "{text}"',
+  'ocrSearch.matched': 'Match: {title} ({score}% confidence)',
+  'ocrSearch.noMatch': 'No matching song found. Try a different angle.',
+  'ocrSearch.cameraError': 'Failed to access camera. Please check browser permissions.',
+  'ocrSearch.httpsRequired': 'Camera access requires HTTPS.',
+  'ocrSearch.retry': 'Scan Again',
+  'ocrSearch.manualInput': 'Search Manually',
+  'ocrSearch.hint': 'Tip: Make sure the song title is centered and large in the frame',
+  'ocrSearch.goToChart': 'Open in Chart List',
 
   // Dan Ranks
   'dan.7kyu': '7th Kyu', 'dan.6kyu': '6th Kyu', 'dan.5kyu': '5th Kyu', 'dan.4kyu': '4th Kyu', 'dan.3kyu': '3rd Kyu', 'dan.2kyu': '2nd Kyu', 'dan.1kyu': '1st Kyu',

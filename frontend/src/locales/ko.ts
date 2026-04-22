@@ -33,6 +33,7 @@ export const ko = {
   'nav.arcadeAssist': '선곡 어시스트',
   'nav.songAvg': '티어별 평균',
   'nav.chartList': '채보 목록',
+  'nav.ocrSearch': '카메라 곡 검색',
   'nav.diffTable': '난이도표',
   'nav.scorePrediction': '스코어 예측',
   'nav.skillTree': '스킬 트리',
@@ -1021,6 +1022,23 @@ export const ko = {
   'rankComparison.legendOverrated': '= 실제 랭크가 스코어 레이트 예측보다 높음 (과대평가 가능성)',
   'rankComparison.legendUnderrated': '= 실제 랭크가 스코어 레이트 예측보다 낮음 (과소평가 가능성)',
   'rankComparison.legendNote': '※ 스코어 레이트 66.67% 이상 플레이어의 평균값 사용. 곡수에 맞춰 버킷 분할.',
+
+  // OCR Camera Search
+  'ocrSearch.title': '카메라로 곡 검색',
+  'ocrSearch.subtitle': '선곡 화면에 카메라를 비추면 OCR로 자동 검색합니다',
+  'ocrSearch.openCamera': '카메라 열기',
+  'ocrSearch.closeCamera': '카메라 닫기',
+  'ocrSearch.initializing': 'OCR 엔진 초기화 중...',
+  'ocrSearch.scanning': '검색 중... 곡명에 카메라를 비춰주세요',
+  'ocrSearch.recognized': '인식된 문자: "{text}"',
+  'ocrSearch.matched': '일치: {title} (일치도 {score}%)',
+  'ocrSearch.noMatch': '일치하는 곡을 찾지 못했습니다. 다른 각도로 시도해보세요.',
+  'ocrSearch.cameraError': '카메라에 접근할 수 없습니다. 브라우저 권한 설정을 확인해주세요.',
+  'ocrSearch.httpsRequired': '카메라 사용에는 HTTPS 연결이 필요합니다.',
+  'ocrSearch.retry': '다시 스캔',
+  'ocrSearch.manualInput': '수동으로 검색',
+  'ocrSearch.hint': '팁: 곡명이 화면 중앙에 크게 보이도록 해주세요',
+  'ocrSearch.goToChart': '채보 목록에서 열기',
 
   // Dan Ranks
   'dan.7kyu': '7급', 'dan.6kyu': '6급', 'dan.5kyu': '5급', 'dan.4kyu': '4급', 'dan.3kyu': '3급', 'dan.2kyu': '2급', 'dan.1kyu': '1급',

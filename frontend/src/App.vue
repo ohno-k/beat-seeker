@@ -53,6 +53,11 @@ import RankComparisonView from './views/RankComparisonView.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
+import { defineAsyncComponent } from 'vue';
+// OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
+// ユーザーがカメラ検索ボタンを押した時点で初めてチャンクをフェッチする。
+const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
+import type { SongDataEntry } from './composables/useGameData';
 import { parseScoreCsv } from './utils/csvParser';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores, getSongMaxScore } from './utils/scoreData';
@@ -95,6 +100,17 @@ const { hasUpdate } = useAppUpdate();
 /** Service Worker による新バージョン通知を受けた際の更新ボタン。単純にページ再読込を行う。 */
 const reloadPage = () => window.location.reload();
 
+/**
+ * 【関数の役割】 OCR で曲がマッチしたときの処理。
+ *  - 認識した曲名を `ocrPrefilledSearch` に入れ、譜面一覧タブに切替
+ *  - ChartListView が watch で拾い、検索欄にセット
+ */
+const handleOcrMatched = (song: SongDataEntry) => {
+  ocrPrefilledSearch.value = song.title;
+  isOcrSearchModalOpen.value = false;
+  activeTab.value = 'chart-list';
+};
+
 /** ログイン中ユーザーまたは閲覧対象ユーザーのスコアデータ（曲単位）。 */
 const scoreData = ref<ScoreData[]>([]);
 /** CSV 解析中フラグ。ローディング表示用。 */
@@ -134,6 +150,10 @@ const isProfileModalOpen = ref(false);
 const isAdminModalOpen = ref(false);
 /** 新規登録直後に出すオンボーディングモーダルの開閉。 */
 const isOnboardingOpen = ref(false);
+/** カメラ OCR 曲検索モーダルの開閉。サイドバーの「カメラで曲検索」ボタンから起動。 */
+const isOcrSearchModalOpen = ref(false);
+/** OCR でマッチした曲名を譜面一覧に引き継ぐための一時保持。 */
+const ocrPrefilledSearch = ref<string>('');
 
 /** 現在閲覧中のユーザー ID（自分閲覧時は null）。 */
 const viewingUserId = ref<number | null>(null);
@@ -1201,6 +1221,14 @@ const handleUnifiedClose = async () => {
       @edit-profile="isProfileModalOpen = true"
       @open-admin="isAdminModalOpen = true"
       @upload="resetData"
+      @open-ocr-search="isOcrSearchModalOpen = true"
+    />
+
+    <!-- カメラ OCR 曲検索モーダル: 一致時は譜面一覧タブに切替して検索語を引き継ぐ -->
+    <OcrSearchModal
+      v-if="isOcrSearchModalOpen"
+      @close="isOcrSearchModalOpen = false"
+      @matched="handleOcrMatched"
     />
 
     <!-- ============================================================ -->
@@ -1674,6 +1702,15 @@ const handleUnifiedClose = async () => {
         <!-- 非公式難易度表 -->
         <template v-else-if="activeTab === 'diff-table'">
           <DifficultyTableView class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- 譜面一覧: OCR 検索で特定した曲を検索欄にプリセット可能 -->
+        <template v-else-if="activeTab === 'chart-list'">
+          <ChartListView
+            class="w-full max-w-6xl mx-auto animate-fade-in"
+            :initial-search="ocrPrefilledSearch"
+            @consumed-initial-search="ocrPrefilledSearch = ''"
+          />
         </template>
 
         <!-- ランク比較（特定ユーザーのみ表示） -->
