@@ -582,6 +582,7 @@
                           {{ row.virtualEntry!.versionName }} {{ row.virtualEntry!.prefectureName }}
                           <span class="ml-1 text-xs text-slate-500 dark:text-slate-400">({{ row.virtualEntry!.djName }})</span>
                         </span>
+                        <span v-if="row.isFriend" class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider shrink-0">Friend</span>
                       </div>
                     </template>
                     <template v-else>
@@ -993,6 +994,7 @@ import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useFriends } from '../composables/useFriends';
 import RankIcon from './RankIcon.vue';
 
 const { updateMemo } = useScores();
@@ -1430,6 +1432,31 @@ interface SongTopRankerEntry {
 /** 譜面に紐づく仮想ユーザー（TOPランカー）の一覧。タブ表示時に取得する。 */
 const songTopRankersList = ref<SongTopRankerEntry[]>([]);
 
+// --- 自分が登録済みの仮想ライバル（フレンド扱いで常時表示する対象）---
+const { fetchVirtualRivals } = useFriends();
+/** 自分が登録済みの仮想ライバルを `${versionNum}:${prefectureFileNum}` 形式で保持したセット。 */
+const registeredVirtualRivalKeys = ref<Set<string>>(new Set());
+/** 仮想ライバル一覧を取得済みかどうか。ランキングタブ初表示時に一度だけフェッチする。 */
+const virtualRivalsLoaded = ref(false);
+
+/**
+ * 【関数の役割】 自分が登録済みの仮想ライバルをフェッチし、セットに詰め直す。
+ * ランキングタブ初表示時に一度だけ呼ばれる。失敗時は空のまま（UI は壊さない）。
+ */
+const loadRegisteredVirtualRivals = async () => {
+  if (!isLoggedIn.value) return;
+  try {
+    const rivals = await fetchVirtualRivals();
+    const set = new Set<string>();
+    for (const r of rivals) set.add(`${r.versionNum}:${r.prefectureFileNum}`);
+    registeredVirtualRivalKeys.value = set;
+  } catch {
+    // 握り潰し
+  } finally {
+    virtualRivalsLoaded.value = true;
+  }
+};
+
 /**
  * 【関数の役割】 譜面ランキング（実ユーザー）と TOP ランカー（仮想ユーザー）を並行取得する。
  * Promise.all で 2 本の API を同時に呼び、どちらかが失敗しても UI を壊さない。
@@ -1558,13 +1585,16 @@ const rankingList = computed<RankingRow[]>(() => {
     clearType: rec.clearType,
     djLevel: rec.djLevel,
     privacyLevel: null,
+    totalBeatPt: totalBeatTierPoints.value,
     isSelf: true,
     rank: null,
   };
 
   // 手順4: 仮想ユーザー行を構築。各バッジの判定ロジックは以下。
+  // 表示フィルタは後段で行う。登録済みの仮想ライバルはフレンド扱いで常時表示するため、
+  // ここでは showVirtualUsers の値に関係なく全件作ってから絞り込む。
   const virtualRows: RankingRow[] = [];
-  if (showVirtualUsers.value) {
+  {
     // 県別の歴代 TOP を集める（versionNum === 0 が「歴代」の意味）。
     const allTimeByPref = new Map<number, { djName: string; score: number }>();
     for (const e of songTopRankersList.value) {
@@ -1625,6 +1655,7 @@ const rankingList = computed<RankingRow[]>(() => {
       else if (isGlobalAllTime) badge = 'globalAllTime';
       else if (isAllTime && e.prefectureFileNum !== 0) badge = 'allTimeArea';
       else if (isVersionTop) badge = 'versionTop';
+      const isRegisteredRival = registeredVirtualRivalKeys.value.has(`${e.versionNum}:${e.prefectureFileNum}`);
       virtualRows.push({
         key: 'v_' + (idx++) + '_' + e.versionNum + '_' + e.prefectureFileNum,
         kind: 'virtual',
@@ -1632,6 +1663,7 @@ const rankingList = computed<RankingRow[]>(() => {
         score: e.score,
         virtualEntry: e,
         virtualBadge: badge,
+        isFriend: isRegisteredRival,
         rank: null,
       });
     }
@@ -1654,12 +1686,13 @@ const rankingList = computed<RankingRow[]>(() => {
     r.rank = prevRank;
   });
 
-  // 手順6: 表示フィルタ。自分・仮想ユーザーは常に表示、フレンドはプライバシー 2（完全非公開）以外、
+  // 手順6: 表示フィルタ。自分は常に表示、仮想ユーザーは showVirtualUsers チェック時または
+  //        登録済み仮想ライバル（フレンド扱い）のみ表示、実フレンドはプライバシー 2（完全非公開）以外、
   //        公開ユーザーは showPublicUsers チェック時のみ表示。
 
   const display = all.filter(r => {
     if (r.isSelf) return true;
-    if (r.kind === 'virtual') return true;
+    if (r.kind === 'virtual') return showVirtualUsers.value || !!r.isFriend;
     if (r.isFriend && (r.privacyLevel ?? 1) !== 2) return true;
     if (showPublicUsers.value && (r.privacyLevel ?? 1) === 0) return true;
     return false;
@@ -1715,6 +1748,9 @@ const handleRivalTabClick = () => {
   }
   if (songRankingList.value.length === 0 && songTopRankersList.value.length === 0 && !isLoadingSongRanking.value) {
     fetchSongRanking();
+  }
+  if (!virtualRivalsLoaded.value) {
+    loadRegisteredVirtualRivals();
   }
 };
 
