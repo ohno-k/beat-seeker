@@ -15,7 +15,7 @@
  *  - `songData` — 既存の楽曲一覧（title/artist/genre を含む）
  */
 import { ref, onBeforeUnmount } from 'vue';
-import { createWorker, type Worker as TesseractWorker } from 'tesseract.js';
+import { createWorker, PSM, type Worker as TesseractWorker } from 'tesseract.js';
 import Fuse from 'fuse.js';
 import { useI18n } from '../composables/useI18n';
 import { songData, type SongDataEntry } from '../composables/useGameData';
@@ -53,6 +53,20 @@ const noMatchMessage = ref('');
 const MAX_CANDIDATES = 8;
 /** この Fuse スコアを超える候補は切り捨てる（数値が大きい = 遠い）。ゆるめに設定して候補を確保。 */
 const CANDIDATE_SCORE_CUTOFF = 0.55;
+
+/**
+ * OCR 対象となる青枠領域の位置・サイズ。video 要素のクライアント box（≒ モーダル内の映像エリア）
+ * 基準の割合で指定する。
+ *
+ * 【重要】テンプレート側の青枠オーバーレイと `captureAndRecognize` のクロップ計算は
+ * 必ずこの定数を共通で参照すること。映像の aspect と video 要素の aspect が一致しないケース
+ * （`object-cover` で端が切れているケース）では、生の videoWidth/Height 基準で計算すると
+ * 「見えていない外側の文字」まで OCR に渡ってしまい誤認識の原因になる。
+ */
+const CROP_TOP_PCT = 0.22;
+const CROP_LEFT_PCT = 0.10;
+const CROP_WIDTH_PCT = 0.80;
+const CROP_HEIGHT_PCT = 0.40;
 
 /** OCR ワーカー本体。アンマウント時に terminate する必要がある。 */
 let worker: TesseractWorker | null = null;
@@ -110,6 +124,82 @@ const normalizeText = (s: string): string => {
     .trim();
 };
 
+/**
+ * クロップしたフレームを OCR 用に前処理して canvas に焼き付ける。
+ * Impact フォントのような太字曲名で精度を上げるため:
+ *  1) 2 倍に拡大（Tesseract は 300dpi 相当が理想。スマホ映像は小さすぎることが多い）
+ *  2) グレースケール化
+ *  3) 大津法で閾値を自動算出して二値化
+ *  4) 平均輝度が暗ければ反転（IIDX の「暗背景 + 明文字」→「白背景 + 黒文字」へ正規化）
+ */
+const preprocessFrame = (
+  video: HTMLVideoElement,
+  canvas: HTMLCanvasElement,
+  cropX: number,
+  cropY: number,
+  cropW: number,
+  cropH: number,
+) => {
+  const SCALE = 2;
+  canvas.width = cropW * SCALE;
+  canvas.height = cropH * SCALE;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  const pixelCount = data.length >> 2;
+
+  // 輝度配列とヒストグラムを一度の走査で作る
+  const gray = new Uint8Array(pixelCount);
+  const hist = new Uint32Array(256);
+  let lumSum = 0;
+  for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+    // BT.709 係数で輝度計算（赤緑青の視覚重み）
+    const v = (data[i] * 0.2126 + data[i + 1] * 0.7152 + data[i + 2] * 0.0722) | 0;
+    gray[j] = v;
+    hist[v]++;
+    lumSum += v;
+  }
+
+  // 大津法: クラス間分散が最大になる閾値を探す
+  let sum = 0;
+  for (let t = 0; t < 256; t++) sum += t * hist[t];
+  let sumB = 0;
+  let wB = 0;
+  let maxVar = -1;
+  let threshold = 127;
+  for (let t = 0; t < 256; t++) {
+    wB += hist[t];
+    if (wB === 0) continue;
+    const wF = pixelCount - wB;
+    if (wF === 0) break;
+    sumB += t * hist[t];
+    const mB = sumB / wB;
+    const mF = (sum - sumB) / wF;
+    const between = wB * wF * (mB - mF) * (mB - mF);
+    if (between > maxVar) {
+      maxVar = between;
+      threshold = t;
+    }
+  }
+
+  // 平均輝度が暗い（背景が暗い）場合は反転して「白背景 + 黒文字」に揃える
+  const invert = lumSum / pixelCount < 128;
+
+  for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+    let v = gray[j] >= threshold ? 255 : 0;
+    if (invert) v = 255 - v;
+    data[i] = data[i + 1] = data[i + 2] = v;
+    data[i + 3] = 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
+};
+
 const openCamera = async () => {
   errorMessage.value = '';
   recognizedText.value = '';
@@ -139,6 +229,15 @@ const openCamera = async () => {
     ]);
     stream = mediaStream;
     worker = ocrWorker;
+
+    // OCR パラメータを Impact 曲名向けにチューニング:
+    //  - PSM.SINGLE_BLOCK (6): 複数行ブロックとして扱う（副題込みで改行されるケースに対応）
+    //  - 文字ホワイトリスト: IIDX 英字曲名で実用上十分な ASCII と記号のみ。記号ノイズを抑止
+    await worker.setParameters({
+      tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
+      tessedit_char_whitelist:
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 '&!?().,-:/~*+",
+    });
 
     if (videoRef.value) {
       videoRef.value.srcObject = stream;
@@ -186,18 +285,38 @@ const captureAndRecognize = async () => {
   const vw = video.videoWidth;
   const vh = video.videoHeight;
 
-  // 画面中央の曲名が出る領域だけを切り出す。
-  // 画面全体を OCR に渡すと背景の UI 文字や装飾で誤認識が増えるため。
-  const cropX = Math.floor(vw * 0.10);
-  const cropY = Math.floor(vh * 0.25);
-  const cropW = Math.floor(vw * 0.80);
-  const cropH = Math.floor(vh * 0.40);
+  // 【重要】画面に見えている青枠と同じ領域を OCR に渡すための座標変換。
+  //
+  // video 要素は `object-cover` で表示しているため、映像アスペクトが要素アスペクトと
+  // 違うと映像の左右 or 上下が画面外に切れる。素直に videoWidth/videoHeight の割合で
+  // クロップすると「ユーザーに見えていない領域」まで読み取ってしまい、枠外の UI 文字で
+  // 誤マッチが起きる。object-cover の拡大率とオフセットを逆算して、青枠（コンテナ CSS
+  // 基準の矩形）を video のピクセル座標に写像する。
+  const containerW = video.clientWidth;
+  const containerH = video.clientHeight;
+  if (containerW === 0 || containerH === 0) return;
 
-  canvas.width = cropW;
-  canvas.height = cropH;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  // object-cover は「コンテナを完全に覆う」ようにスケールする = max(横倍率, 縦倍率)
+  const scale = Math.max(containerW / vw, containerH / vh);
+  const displayedW = vw * scale;
+  const displayedH = vh * scale;
+  // 映像の左上がコンテナ内のどこに来るか（負の値 = 画面外にはみ出している）
+  const offX = (containerW - displayedW) / 2;
+  const offY = (containerH - displayedH) / 2;
+
+  // 青枠のコンテナ CSS 座標上の矩形（テンプレートのスタイルと同じ定数を参照）
+  const boxLeft = containerW * CROP_LEFT_PCT;
+  const boxTop = containerH * CROP_TOP_PCT;
+  const boxW = containerW * CROP_WIDTH_PCT;
+  const boxH = containerH * CROP_HEIGHT_PCT;
+
+  // コンテナ CSS → 映像ピクセルへ変換。映像端でクランプ。
+  const cropX = Math.max(0, Math.round((boxLeft - offX) / scale));
+  const cropY = Math.max(0, Math.round((boxTop - offY) / scale));
+  const cropW = Math.max(1, Math.min(vw - cropX, Math.round(boxW / scale)));
+  const cropH = Math.max(1, Math.min(vh - cropY, Math.round(boxH / scale)));
+
+  preprocessFrame(video, canvas, cropX, cropY, cropW, cropH);
 
   status.value = 'capturing';
   noMatchMessage.value = '';
@@ -333,11 +452,16 @@ onBeforeUnmount(() => {
                 muted
                 class="absolute inset-0 w-full h-full object-cover"
               />
-              <!-- スキャンエリアのオーバーレイ枠（OCR クロップ領域と同じ位置・サイズ） -->
-              <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <!-- スキャンエリアのオーバーレイ枠（CROP_*_PCT 定数と同じ位置・サイズに揃える） -->
+              <div class="absolute inset-0 pointer-events-none">
                 <div
-                  class="border-2 border-blue-400 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]"
-                  :style="{ width: '80%', height: '40%', marginTop: '-5%' }"
+                  class="absolute border-2 border-blue-400 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]"
+                  :style="{
+                    top: `${CROP_TOP_PCT * 100}%`,
+                    left: `${CROP_LEFT_PCT * 100}%`,
+                    width: `${CROP_WIDTH_PCT * 100}%`,
+                    height: `${CROP_HEIGHT_PCT * 100}%`,
+                  }"
                 ></div>
               </div>
               <!-- 状態バッジ -->
