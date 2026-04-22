@@ -608,14 +608,21 @@ public class ScoreController {
     }
 
     /**
-     * Get per-song ranking for a specific song (all authenticated users).
+     * Get per-song ranking for a specific song.
+     * Only returns rows visible to the caller: public users, self, or friends whose privacyLevel == 1.
      */
     @GetMapping("/song-ranking")
     public ResponseEntity<List<Map<String, Object>>> getSongRanking(
             Authentication auth,
             @RequestParam String title,
             @RequestParam String difficultyName) {
-        List<Map<String, Object>> ranking = scoreRepository.findSongRanking(title, difficultyName);
+        User me = getUser(auth);
+        List<Long> friendIds = friendshipRepository.findByUser(me).stream()
+                .map(f -> f.getFriend().getId())
+                .toList();
+        if (friendIds.isEmpty()) friendIds = List.of(-1L);
+        List<Map<String, Object>> ranking = scoreRepository.findSongRanking(
+                title, difficultyName, me.getId(), friendIds);
         return ResponseEntity.ok(ranking);
     }
 

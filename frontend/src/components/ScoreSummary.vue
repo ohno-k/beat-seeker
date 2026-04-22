@@ -1462,7 +1462,7 @@ const rankingList = computed<RankingRow[]>(() => {
   const display = all.filter(r => {
     if (r.isSelf) return true;
     if (r.kind === 'virtual') return true;
-    if (r.isFriend) return true;
+    if (r.isFriend && (r.privacyLevel ?? 1) !== 2) return true;
     if (showPublicUsers.value && (r.privacyLevel ?? 1) === 0) return true;
     return false;
   });

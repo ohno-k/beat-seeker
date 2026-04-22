@@ -53,9 +53,18 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  ORDER BY user_id, uploaded_at DESC" +
         ") latest ON u.id = latest.user_id " +
         "WHERE s.title = :title AND s.difficulty_name = :difficultyName " +
+        "  AND (" +
+        "    COALESCE(u.privacy_level, 1) = 0" +
+        "    OR u.id = :myUserId" +
+        "    OR (COALESCE(u.privacy_level, 1) = 1 AND u.id IN (:friendIds))" +
+        "  ) " +
         "ORDER BY s.score DESC",
         nativeQuery = true)
-    List<Map<String, Object>> findSongRanking(@Param("title") String title, @Param("difficultyName") String difficultyName);
+    List<Map<String, Object>> findSongRanking(
+            @Param("title") String title,
+            @Param("difficultyName") String difficultyName,
+            @Param("myUserId") Long myUserId,
+            @Param("friendIds") List<Long> friendIds);
 
     @Query(value =
         "WITH best_scores AS (" +
