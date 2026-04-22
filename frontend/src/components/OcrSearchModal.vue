@@ -33,10 +33,10 @@ const emit = defineEmits<{
  *  - initializing: カメラ／OCR ワーカー起動中
  *  - ready: カメラ映像ライブ、ユーザーのボタン押下待ち
  *  - capturing: ボタン押下後、OCR 実行中
- *  - matched: 認識成功、結果表示中
+ *  - candidates: 認識成功、候補一覧をユーザーに選ばせている
  *  - error: カメラ取得失敗等
  */
-type Status = 'idle' | 'initializing' | 'ready' | 'capturing' | 'matched' | 'error';
+type Status = 'idle' | 'initializing' | 'ready' | 'capturing' | 'candidates' | 'error';
 const status = ref<Status>('idle');
 
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -44,9 +44,15 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 
 const errorMessage = ref('');
 const recognizedText = ref('');
-const lastMatch = ref<{ song: SongDataEntry; score: number } | null>(null);
+/** 認識結果の候補リスト。ユーザーが一覧から選ぶ。スコアは 0〜100 の百分率（高いほど一致）。 */
+const matchCandidates = ref<{ song: SongDataEntry; score: number }[]>([]);
 /** 前回の認識試行で「マッチなし」だった場合の UI 通知。 */
 const noMatchMessage = ref('');
+
+/** 候補として表示する件数の上限。画面を見てすぐ判別できる程度に絞る。 */
+const MAX_CANDIDATES = 8;
+/** この Fuse スコアを超える候補は切り捨てる（数値が大きい = 遠い）。ゆるめに設定して候補を確保。 */
+const CANDIDATE_SCORE_CUTOFF = 0.55;
 
 /** OCR ワーカー本体。アンマウント時に terminate する必要がある。 */
 let worker: TesseractWorker | null = null;
@@ -107,7 +113,7 @@ const normalizeText = (s: string): string => {
 const openCamera = async () => {
   errorMessage.value = '';
   recognizedText.value = '';
-  lastMatch.value = null;
+  matchCandidates.value = [];
 
   // HTTPS 必須（localhost は例外）
   if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -167,7 +173,8 @@ const cleanupResources = () => {
 /**
  * ユーザーがシャッターボタンを押したときのハンドラ。
  * 現在のフレームを 1 枚だけキャプチャして OCR → ファジー検索。
- * OCR 結果を行単位と全文で Fuse に投げ、最もスコアが良い候補を採用する。
+ * OCR 結果を行単位と全文で Fuse に投げ、全クエリの上位結果を
+ * 曲タイトルでユニーク化しつつスコア順に集約して候補リストを作る。
  */
 const captureAndRecognize = async () => {
   if (status.value !== 'ready') return;
@@ -208,51 +215,56 @@ const captureAndRecognize = async () => {
   const cleanedForDisplay = text.replace(/\s+/g, ' ').trim().slice(0, 80);
   recognizedText.value = cleanedForDisplay;
 
-  // 行ごとと全文の両方で検索し、最良スコアを採用する。
-  // 曲名は 1 行で表示されることが多いため、行単位クエリが当たりやすい。
-  const candidates: string[] = [];
+  // 行ごとと全文の両方で検索する。曲名は 1 行で表示されることが多い一方、
+  // 副題や改行を含むケースでは全文クエリが当たりやすい。
+  const queries: string[] = [];
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length >= 2);
-  candidates.push(...lines);
+  queries.push(...lines);
   const whole = normalizeText(text);
-  if (whole.length >= 2) candidates.push(whole);
+  if (whole.length >= 2) queries.push(whole);
 
-  let best: { item: FuseEntry; score: number } | null = null;
-  for (const q of candidates) {
-    const results = fuse.search(q);
-    if (results.length === 0) continue;
-    const top = results[0];
-    if (top.score === undefined) continue;
-    if (!best || top.score < best.score) {
-      best = { item: top.item, score: top.score };
+  // タイトル+アーティスト単位でベストスコアだけを残す Map を構築。
+  const pool = new Map<string, { song: SongDataEntry; score: number }>();
+  for (const q of queries) {
+    const results = fuse.search(q, { limit: MAX_CANDIDATES });
+    for (const r of results) {
+      if (r.score === undefined) continue;
+      if (r.score > CANDIDATE_SCORE_CUTOFF) continue;
+      const key = `${r.item.song.title}|${r.item.song.artist}`;
+      const existing = pool.get(key);
+      if (!existing || r.score < existing.score) {
+        pool.set(key, { song: r.item.song, score: r.score });
+      }
     }
   }
 
-  if (!best || best.score > 0.3) {
+  const sorted = Array.from(pool.values()).sort((a, b) => a.score - b.score).slice(0, MAX_CANDIDATES);
+  if (sorted.length === 0) {
     status.value = 'ready';
     noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
     return;
   }
 
-  // マッチ確定
-  const song = best.item.song;
-  const scorePct = Math.max(0, Math.min(100, Math.round((1 - best.score) * 100)));
-  lastMatch.value = { song, score: scorePct };
-  status.value = 'matched';
+  // Fuse のスコア（0=完全一致 .. 1=遠い）を 0〜100 の一致度に変換して保持
+  matchCandidates.value = sorted.map(({ song, score }) => ({
+    song,
+    score: Math.max(0, Math.min(100, Math.round((1 - score) * 100))),
+  }));
+  status.value = 'candidates';
   cleanupResources();
 };
 
 const retry = () => {
-  lastMatch.value = null;
+  matchCandidates.value = [];
   recognizedText.value = '';
   errorMessage.value = '';
   status.value = 'idle';
   openCamera();
 };
 
-const confirmMatch = () => {
-  if (lastMatch.value) {
-    emit('matched', lastMatch.value.song);
-  }
+/** 候補一覧からひとつを選んで確定。親に `matched` を伝える。 */
+const pickCandidate = (c: { song: SongDataEntry; score: number }) => {
+  emit('matched', c.song);
 };
 
 const closeModal = () => {
@@ -368,39 +380,51 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <!-- マッチ成功 -->
-          <div v-else-if="status === 'matched' && lastMatch" class="space-y-4">
-            <div class="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 shrink-0 rounded-full bg-emerald-500 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
-                    {{ lastMatch.score }}% match
-                  </p>
-                  <h3 class="text-lg font-black text-slate-900 dark:text-white break-words">{{ lastMatch.song.title }}</h3>
-                  <p class="text-sm text-slate-600 dark:text-slate-300 truncate">{{ lastMatch.song.artist }}</p>
-                  <p v-if="lastMatch.song.genre" class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ lastMatch.song.genre }}</p>
-                </div>
-              </div>
+          <!-- 候補一覧: スコア順でカード表示し、ユーザーにタップで選ばせる -->
+          <div v-else-if="status === 'candidates'" class="space-y-3">
+            <div class="flex items-baseline justify-between">
+              <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('ocrSearch.selectSong') }}</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ matchCandidates.length }}</p>
             </div>
-            <div class="flex gap-2">
+
+            <p v-if="recognizedText" class="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg">
+              {{ t('ocrSearch.recognized', { text: recognizedText }) }}
+            </p>
+
+            <div class="space-y-2 max-h-[55vh] overflow-y-auto -mx-1 px-1">
               <button
-                @click="retry"
-                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
+                v-for="(c, i) in matchCandidates"
+                :key="`${c.song.title}|${c.song.artist}|${i}`"
+                @click="pickCandidate(c)"
+                class="w-full text-left p-3 rounded-xl border transition-all hover:-translate-y-0.5"
+                :class="i === 0
+                  ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-emerald-200 dark:border-emerald-800 hover:shadow-md hover:shadow-emerald-500/10'
+                  : 'bg-white dark:bg-slate-700/40 border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-slate-700'"
               >
-                {{ t('ocrSearch.retry') }}
-              </button>
-              <button
-                @click="confirmMatch"
-                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all text-sm"
-              >
-                {{ t('ocrSearch.goToChart') }}
+                <div class="flex items-start gap-3">
+                  <div
+                    class="shrink-0 min-w-[3rem] h-8 flex items-center justify-center rounded-lg text-xs font-black tabular-nums"
+                    :class="i === 0
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                  >
+                    {{ c.score }}%
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-black text-slate-900 dark:text-white break-words leading-tight">{{ c.song.title }}</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">{{ c.song.artist }}</p>
+                    <p v-if="c.song.genre" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ c.song.genre }}</p>
+                  </div>
+                </div>
               </button>
             </div>
+
+            <button
+              @click="retry"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
+            >
+              {{ t('ocrSearch.retry') }}
+            </button>
           </div>
 
           <!-- エラー -->

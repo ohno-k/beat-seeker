@@ -1048,6 +1048,7 @@ export const ja = {
   'ocrSearch.manualInput': '手動で検索する',
   'ocrSearch.hint': 'ヒント: 曲名が画面中央に大きく映るようにしてください',
   'ocrSearch.goToChart': '譜面一覧で開く',
+  'ocrSearch.selectSong': '候補から曲を選択',
 
   // Dan Ranks
   'dan.7kyu': '七級', 'dan.6kyu': '六級', 'dan.5kyu': '五級', 'dan.4kyu': '四級', 'dan.3kyu': '三級', 'dan.2kyu': '二級', 'dan.1kyu': '一級',

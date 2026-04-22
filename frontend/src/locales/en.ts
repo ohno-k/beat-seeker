@@ -1042,6 +1042,7 @@ export const en = {
   'ocrSearch.manualInput': 'Search Manually',
   'ocrSearch.hint': 'Tip: Make sure the song title is centered and large in the frame',
   'ocrSearch.goToChart': 'Open in Chart List',
+  'ocrSearch.selectSong': 'Pick a song from the candidates',
 
   // Dan Ranks
   'dan.7kyu': '7th Kyu', 'dan.6kyu': '6th Kyu', 'dan.5kyu': '5th Kyu', 'dan.4kyu': '4th Kyu', 'dan.3kyu': '3rd Kyu', 'dan.2kyu': '2nd Kyu', 'dan.1kyu': '1st Kyu',

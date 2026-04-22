@@ -1043,6 +1043,7 @@ export const ko = {
   'ocrSearch.manualInput': '수동으로 검색',
   'ocrSearch.hint': '팁: 곡명이 화면 중앙에 크게 보이도록 해주세요',
   'ocrSearch.goToChart': '채보 목록에서 열기',
+  'ocrSearch.selectSong': '후보에서 곡을 선택',
 
   // Dan Ranks
   'dan.7kyu': '7급', 'dan.6kyu': '6급', 'dan.5kyu': '5급', 'dan.4kyu': '4급', 'dan.3kyu': '3급', 'dan.2kyu': '2급', 'dan.1kyu': '1급',
