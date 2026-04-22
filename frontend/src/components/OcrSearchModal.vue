@@ -81,12 +81,12 @@ const buildFuseIndex = () => {
     keys: [
       { name: 'song.title', weight: 2 },
       { name: 'key', weight: 2 },
+      { name: 'song.artist', weight: 0.7 },
+      { name: 'song.genre', weight: 0.5 },
     ],
-    // 誤マッチ防止のため閾値をきつく絞る（Fuse の内部スコアは 0=完全一致 / 1=全く一致しない）
-    threshold: 0.25,
+    threshold: 0.45,
     includeScore: true,
-    // 3 文字未満の語では過剰一致するため除外
-    minMatchCharLength: 3,
+    minMatchCharLength: 2,
     ignoreLocation: true,
   });
 };
@@ -167,13 +167,7 @@ const cleanupResources = () => {
 /**
  * ユーザーがシャッターボタンを押したときのハンドラ。
  * 現在のフレームを 1 枚だけキャプチャして OCR → ファジー検索。
- *
- * 誤マッチ対策:
- *  1. クロップ領域を狭くして曲名以外（UI 要素・背景）を除外
- *  2. Tesseract の confidence が低いフレームは「認識失敗」として弾く
- *  3. 記号除去後の実質文字数が短すぎるフレームは「認識失敗」
- *  4. Fuse のスコアしきい値を厳しく（0.2 以下）
- *  5. OCR 結果と曲名で最低 4 文字の連続部分一致を要求
+ * OCR 結果を行単位と全文で Fuse に投げ、最もスコアが良い候補を採用する。
  */
 const captureAndRecognize = async () => {
   if (status.value !== 'ready') return;
@@ -186,12 +180,11 @@ const captureAndRecognize = async () => {
   const vh = video.videoHeight;
 
   // 画面中央の曲名が出る領域だけを切り出す。
-  // IIDX ARENA 選曲画面: タイトルは中央 60% × 上下 22%〜42% に収まる。
-  // クロップを狭くするほど背景ノイズが減り OCR 精度が上がる。
-  const cropX = Math.floor(vw * 0.20);
-  const cropY = Math.floor(vh * 0.22);
-  const cropW = Math.floor(vw * 0.60);
-  const cropH = Math.floor(vh * 0.20);
+  // 画面全体を OCR に渡すと背景の UI 文字や装飾で誤認識が増えるため。
+  const cropX = Math.floor(vw * 0.10);
+  const cropY = Math.floor(vh * 0.25);
+  const cropW = Math.floor(vw * 0.80);
+  const cropH = Math.floor(vh * 0.40);
 
   canvas.width = cropW;
   canvas.height = cropH;
@@ -204,11 +197,9 @@ const captureAndRecognize = async () => {
   recognizedText.value = '';
 
   let text = '';
-  let ocrConfidence = 0;
   try {
     const result = await worker.recognize(canvas);
     text = (result.data.text || '').trim();
-    ocrConfidence = Number(result.data.confidence || 0);
   } catch (e) {
     console.warn('OCR failed:', e);
   }
@@ -217,46 +208,26 @@ const captureAndRecognize = async () => {
   const cleanedForDisplay = text.replace(/\s+/g, ' ').trim().slice(0, 80);
   recognizedText.value = cleanedForDisplay;
 
-  // (2) Tesseract 自身が自信なし
-  if (ocrConfidence < 55) {
-    status.value = 'ready';
-    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
-    return;
+  // 行ごとと全文の両方で検索し、最良スコアを採用する。
+  // 曲名は 1 行で表示されることが多いため、行単位クエリが当たりやすい。
+  const candidates: string[] = [];
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length >= 2);
+  candidates.push(...lines);
+  const whole = normalizeText(text);
+  if (whole.length >= 2) candidates.push(whole);
+
+  let best: { item: FuseEntry; score: number } | null = null;
+  for (const q of candidates) {
+    const results = fuse.search(q);
+    if (results.length === 0) continue;
+    const top = results[0];
+    if (top.score === undefined) continue;
+    if (!best || top.score < best.score) {
+      best = { item: top.item, score: top.score };
+    }
   }
 
-  // (3) 記号・空白以外の実質文字を抽出。短すぎるフレームは破棄
-  const cleaned = text
-    .replace(/[^A-Za-z0-9'&\-\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const alnumCount = (cleaned.match(/[A-Za-z0-9]/g) || []).length;
-  if (cleaned.length < 4 || alnumCount < 4) {
-    status.value = 'ready';
-    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
-    return;
-  }
-
-  // (4) Fuse 検索
-  const results = fuse.search(cleaned);
-  if (results.length === 0) {
-    status.value = 'ready';
-    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
-    return;
-  }
-  const best = results[0];
-  if (best.score === undefined || best.score > 0.2) {
-    status.value = 'ready';
-    noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
-    return;
-  }
-
-  // (5) OCR 結果と曲名で 4 文字以上の連続部分一致を要求
-  const lowerTitle = best.item.song.title.toLowerCase();
-  const lowerOcr = cleaned.toLowerCase();
-  const hasOverlap =
-    hasSubstringOverlap(lowerOcr, lowerTitle, 4) ||
-    hasSubstringOverlap(lowerTitle, lowerOcr, 4);
-  if (!hasOverlap) {
+  if (!best || best.score > 0.3) {
     status.value = 'ready';
     noMatchMessage.value = t('ocrSearch.noMatchTryAgain');
     return;
@@ -268,19 +239,6 @@ const captureAndRecognize = async () => {
   lastMatch.value = { song, score: scorePct };
   status.value = 'matched';
   cleanupResources();
-};
-
-/**
- * needle の中に haystack に含まれる長さ `minLen` 以上の連続部分文字列が存在するか。
- * （OCR テキストと曲名の双方向でオーバーラップ検出する用途）
- */
-const hasSubstringOverlap = (haystack: string, needle: string, minLen: number): boolean => {
-  if (needle.length < minLen) return false;
-  for (let i = 0; i + minLen <= needle.length; i++) {
-    const sub = needle.slice(i, i + minLen);
-    if (haystack.includes(sub)) return true;
-  }
-  return false;
 };
 
 const retry = () => {
@@ -367,7 +325,7 @@ onBeforeUnmount(() => {
               <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
                 <div
                   class="border-2 border-blue-400 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]"
-                  :style="{ width: '60%', height: '20%', marginTop: '-18%' }"
+                  :style="{ width: '80%', height: '40%', marginTop: '-5%' }"
                 ></div>
               </div>
               <!-- 状態バッジ -->
