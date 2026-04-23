@@ -278,14 +278,19 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
             @Param("diffA") String diffA);
 
     /**
-     * 【メソッドの役割】 ANOTHER / LEGGENDARIA 全譜面の (title, difficultyName, notes) を返す。
+     * 【メソッドの役割】 ANOTHER / LEGGENDARIA Lv11+ 譜面の (title, difficultyName, notes) を返す。
+     *
+     * 伸びしろランキングは Lv11+ プレイヤー向け機能なので、Lv10 以下を除外して
+     * メモリ使用量を抑える（本番 OOM 対策）。
      */
     @Query(value =
         "SELECT title AS \"title\", " +
         "       CASE difficulty WHEN '4' THEN 'ANOTHER' WHEN '10' THEN 'LEGGENDARIA' END AS \"difficultyName\", " +
         "       notes AS \"notes\" " +
         "FROM song_definitions " +
-        "WHERE revision = 'active' AND difficulty IN ('4', '10') AND notes IS NOT NULL AND notes > 0",
+        "WHERE revision = 'active' AND difficulty IN ('4', '10') " +
+        "  AND level >= 11 " +
+        "  AND notes IS NOT NULL AND notes > 0",
         nativeQuery = true)
     List<Map<String, Object>> findAllAnotherLeggChartNotes();
 
@@ -302,7 +307,9 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "SELECT s.user_id AS \"userId\", s.title AS \"title\", " +
         "       s.difficulty_name AS \"difficultyName\", s.score AS \"score\" " +
         "FROM scores s " +
-        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score >= 400",
+        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND s.difficulty_level >= 11 " +
+        "  AND s.score >= 400",
         nativeQuery = true)
     List<Map<String, Object>> findAllAnotherLeggScores();
 
