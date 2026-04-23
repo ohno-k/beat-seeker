@@ -292,12 +292,17 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     /**
      * 【メソッドの役割】 全ユーザーの ANOTHER / LEGGENDARIA スコアを (userId, title, difficultyName, score) で返す。
      * ペア回帰キャッシュ（{@code PairRegressionService}）構築時に一度だけ呼ばれる。
+     *
+     * メモリ消費抑制のため、SQL 段階で「最小ノーツ譜面の A 相当」を粗くフィルタする。
+     * 400 EX = 300 notes 譜面の A 相当（300 × 2 × 0.6667 ≒ 400）。これ未満は
+     * どの譜面でも A 未満なので、回帰計算の対象から確実に外せる。
+     * Java 側で各譜面の正確な notes に基づくレートフィルタを再適用する。
      */
     @Query(value =
         "SELECT s.user_id AS \"userId\", s.title AS \"title\", " +
         "       s.difficulty_name AS \"difficultyName\", s.score AS \"score\" " +
         "FROM scores s " +
-        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0",
+        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score >= 400",
         nativeQuery = true)
     List<Map<String, Object>> findAllAnotherLeggScores();
 

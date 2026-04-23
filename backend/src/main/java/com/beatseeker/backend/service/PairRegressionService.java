@@ -107,61 +107,102 @@ public class PairRegressionService {
             if (n > 0) notesMap.put(key, n);
         }
 
-        // 2) 全 ANOTHER/LEGG スコアを取得し、A 以上のみ user 別にグループ化
-        List<Map<String, Object>> rows = scoreRepository.findAllAnotherLeggScores();
-        Map<Long, List<Object[]>> byUser = new HashMap<>();
-        for (Map<String, Object> row : rows) {
-            long userId = ((Number) row.get("userId")).longValue();
-            String title = (String) row.get("title");
-            String diff = (String) row.get("difficultyName");
-            int score = ((Number) row.get("score")).intValue();
-            String key = title + "\0" + diff;
+        // 2) 譜面 → int インデックス変換テーブルを作る。
+        // 以後はメモリ節約のため String キーではなく int でペアを扱う。
+        String[] chartKeys = notesMap.keySet().toArray(new String[0]);
+        Map<String, Integer> chartIdxMap = new HashMap<>(chartKeys.length * 2);
+        for (int i = 0; i < chartKeys.length; i++) {
+            chartIdxMap.put(chartKeys[i], i);
+        }
+        int numCharts = chartKeys.length;
 
+        // 3) 全 ANOTHER/LEGG スコアを取得し、A 以上のみ user 別に
+        // long[] へパック格納する。packed = (chartIdx << 32) | (score & 0xFFFFFFFFL)
+        // String/Integer のボックス化を避けてヒープ消費を抑える。
+        Map<Long, java.util.List<long[]>> userScoresBuilder = new HashMap<>();
+        for (Map<String, Object> row : scoreRepository.findAllAnotherLeggScores()) {
+            String key = row.get("title") + "\0" + row.get("difficultyName");
+            Integer chartIdx = chartIdxMap.get(key);
+            if (chartIdx == null) continue;
             Integer notes = notesMap.get(key);
             if (notes == null) continue;
+            int score = ((Number) row.get("score")).intValue();
             if (score < notes * 2.0 * A_GRADE_RATE) continue;
-
-            byUser.computeIfAbsent(userId, k -> new ArrayList<>())
-                  .add(new Object[]{key, score});
+            long userId = ((Number) row.get("userId")).longValue();
+            long packed = ((long) chartIdx << 32) | (score & 0xFFFFFFFFL);
+            userScoresBuilder.computeIfAbsent(userId, k -> new java.util.ArrayList<>()).add(new long[]{packed});
         }
-        log.info("PairRegressionService: {} users with A-grade scores", byUser.size());
 
-        // 3) 各ユーザーについて、譜面の全ペアの累積和を作る
-        // 順序: A→B と B→A は別の回帰（slope が異なる）として両方積む。
-        Map<String, Map<String, Acc>> accs = new HashMap<>();
-        long pairContribCount = 0;
-        for (List<Object[]> scores : byUser.values()) {
-            int sz = scores.size();
-            for (int i = 0; i < sz; i++) {
-                Object[] a = scores.get(i);
-                String aKey = (String) a[0];
-                int aScore = (Integer) a[1];
-                Map<String, Acc> aMap = accs.computeIfAbsent(aKey, k -> new HashMap<>());
-                for (int j = 0; j < sz; j++) {
-                    if (i == j) continue;
-                    Object[] b = scores.get(j);
-                    String bKey = (String) b[0];
-                    int bScore = (Integer) b[1];
-                    aMap.computeIfAbsent(bKey, k -> new Acc()).add(aScore, bScore);
-                    pairContribCount++;
-                }
+        // List<long[]> → 単一 long[] に圧縮
+        Map<Long, long[]> userScores = new HashMap<>(userScoresBuilder.size() * 2);
+        // 同時に「譜面 idx → 演奏したユーザー集合」インデックスも作る（per-A 処理の高速化用）
+        @SuppressWarnings("unchecked")
+        java.util.List<Long>[] chartUsers = new java.util.List[numCharts];
+        for (Map.Entry<Long, java.util.List<long[]>> e : userScoresBuilder.entrySet()) {
+            java.util.List<long[]> list = e.getValue();
+            long[] arr = new long[list.size()];
+            for (int i = 0; i < arr.length; i++) {
+                arr[i] = list.get(i)[0];
+                int idx = (int) (arr[i] >>> 32);
+                if (chartUsers[idx] == null) chartUsers[idx] = new java.util.ArrayList<>();
+                chartUsers[idx].add(e.getKey());
             }
+            userScores.put(e.getKey(), arr);
         }
-        log.info("PairRegressionService: {} pair contributions accumulated", pairContribCount);
+        userScoresBuilder = null; // GC 促進
+        log.info("PairRegressionService: {} users, {} charts in scope", userScores.size(), numCharts);
 
-        // 4) 回帰計算 + フィルタ
+        // 4) 譜面 A ごとに per-A 累積→回帰計算→フィルタ→キャッシュ格納
+        // 各 A の処理が終わった時点で Acc[] は GC 対象になるため、ピークメモリ << 全ペア
         Map<String, Map<String, Reg>> newCache = new HashMap<>();
         long keptPairs = 0;
-        for (Map.Entry<String, Map<String, Acc>> aEntry : accs.entrySet()) {
-            Map<String, Reg> bMap = new HashMap<>();
-            for (Map.Entry<String, Acc> bEntry : aEntry.getValue().entrySet()) {
-                Reg reg = bEntry.getValue().compute();
+        Acc[] accsBuf = new Acc[numCharts]; // 再利用する固定サイズバッファ
+
+        for (int aIdx = 0; aIdx < numCharts; aIdx++) {
+            java.util.List<Long> users = chartUsers[aIdx];
+            if (users == null) continue;
+            // 前回のループ結果をクリア（new しない、null 代入で参照を切る）
+            java.util.Arrays.fill(accsBuf, null);
+
+            for (Long uid : users) {
+                long[] uScores = userScores.get(uid);
+                if (uScores == null) continue;
+                // この user の A スコアを取り出す
+                int aScore = -1;
+                for (long packed : uScores) {
+                    if ((int) (packed >>> 32) == aIdx) {
+                        aScore = (int) packed;
+                        break;
+                    }
+                }
+                if (aScore < 0) continue; // 起こらないはずだが防御
+                // user のその他譜面ごとに (aScore, bScore) を Acc に追加
+                for (long packed : uScores) {
+                    int bIdx = (int) (packed >>> 32);
+                    if (bIdx == aIdx) continue;
+                    int bScore = (int) packed;
+                    Acc acc = accsBuf[bIdx];
+                    if (acc == null) {
+                        acc = new Acc();
+                        accsBuf[bIdx] = acc;
+                    }
+                    acc.add(aScore, bScore);
+                }
+            }
+
+            // この A 分の回帰計算 + フィルタ
+            Map<String, Reg> bMap = null;
+            for (int bIdx = 0; bIdx < numCharts; bIdx++) {
+                Acc acc = accsBuf[bIdx];
+                if (acc == null) continue;
+                Reg reg = acc.compute();
                 if (reg != null && reg.n >= MIN_N && Math.abs(reg.r) >= MIN_R) {
-                    bMap.put(bEntry.getKey(), reg);
+                    if (bMap == null) bMap = new HashMap<>();
+                    bMap.put(chartKeys[bIdx], reg);
                     keptPairs++;
                 }
             }
-            if (!bMap.isEmpty()) newCache.put(aEntry.getKey(), bMap);
+            if (bMap != null) newCache.put(chartKeys[aIdx], bMap);
         }
 
         cache = newCache;
