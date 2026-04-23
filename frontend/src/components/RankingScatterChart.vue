@@ -40,24 +40,102 @@ function tierLabel(rank: { name: string; tier?: number }): string {
   return `${rank.name} ${ROMAN[rank.tier] ?? rank.tier}`;
 }
 
-// 大ティア境界（各ランク名の最低 minPoints のみ）を抽出してグリッド／目盛に使う。
-// サブティア（5 段階）まで全部出すと密集してしまうため、ランク単位で間引く。
-function majorTickValues(table: typeof RANKS): number[] {
+// 大ティア境界（各ランク名の最低 minPoints）→ ランク名 のマップ。
+// 目盛りラベルとして「数値」より「ランク名」を表示することで意味が伝わるようにする。
+function majorTierBoundaries(table: typeof RANKS): { value: number; name: string }[] {
   const minByName = new Map<string, number>();
   for (const r of table) {
     const cur = minByName.get(r.name);
     if (cur === undefined || r.minPoints < cur) minByName.set(r.name, r.minPoints);
   }
-  return [...minByName.values()].sort((a, b) => a - b);
+  return [...minByName.entries()]
+    .map(([name, value]) => ({ value, name }))
+    .sort((a, b) => a.value - b.value);
 }
-const BEAT_TICKS = majorTickValues(RANKS);
+const BEAT_BOUNDARIES = majorTierBoundaries(RANKS);
 // 対数軸のため 0 は除外（Beginner=0 は軸に乗らない）
-const RATE_TICKS = majorTickValues(RATE_TIER_RANKS).filter(v => v > 0);
+const RATE_BOUNDARIES = majorTierBoundaries(RATE_TIER_RANKS).filter(b => b.value > 0);
+
+// X 軸の下限。Beginner（0〜10000）の散らばりを切り捨てて主要レンジに集中する。
+const BEAT_X_MIN = 10000;
+const BEAT_TICKS = BEAT_BOUNDARIES.filter(b => b.value >= BEAT_X_MIN);
+const BEAT_LABEL = new Map(BEAT_TICKS.map(b => [b.value, b.name]));
+const RATE_LABEL = new Map(RATE_BOUNDARIES.map(b => [b.value, b.name]));
+
+// ティア名 → 背景バンド色（Tailwind のティアカラーと整合させた極薄塗り）。
+const BAND_COLORS_LIGHT: Record<string, string> = {
+  Legend: 'rgba(245,158,11,0.10)',
+  Mythic: 'rgba(168,85,247,0.08)',
+  Ancient: 'rgba(99,102,241,0.08)',
+  Master: 'rgba(239,68,68,0.07)',
+  Elite: 'rgba(249,115,22,0.07)',
+  Commander: 'rgba(234,179,8,0.07)',
+  Veteran: 'rgba(16,185,129,0.07)',
+  Expert: 'rgba(20,184,166,0.06)',
+  Advanced: 'rgba(6,182,212,0.06)',
+  Intermediate: 'rgba(59,130,246,0.06)',
+  Novice: 'rgba(100,116,139,0.06)',
+};
+const BAND_COLORS_DARK: Record<string, string> = {
+  Legend: 'rgba(245,158,11,0.14)',
+  Mythic: 'rgba(168,85,247,0.13)',
+  Ancient: 'rgba(99,102,241,0.13)',
+  Master: 'rgba(239,68,68,0.12)',
+  Elite: 'rgba(249,115,22,0.12)',
+  Commander: 'rgba(234,179,8,0.12)',
+  Veteran: 'rgba(16,185,129,0.12)',
+  Expert: 'rgba(20,184,166,0.11)',
+  Advanced: 'rgba(6,182,212,0.11)',
+  Intermediate: 'rgba(59,130,246,0.11)',
+  Novice: 'rgba(100,116,139,0.10)',
+};
+
+/**
+ * ティア境界配列から「[start, end, name]」のバンド情報を作る。
+ * 末尾（Legend など）は対応軸の最大値まで伸びる。
+ */
+function makeBands(boundaries: { value: number; name: string }[], axisMax: number) {
+  const bands: { start: number; end: number; name: string }[] = [];
+  for (let i = 0; i < boundaries.length; i++) {
+    const start = boundaries[i].value;
+    const end = i + 1 < boundaries.length ? boundaries[i + 1].value : axisMax;
+    bands.push({ start, end, name: boundaries[i].name });
+  }
+  return bands;
+}
+
+// プラグイン: BEAT-Tier 縦バンド（背景）を描画。
+const tierBandPlugin = {
+  id: 'beatTierBands',
+  beforeDatasetsDraw(chart: any) {
+    const { ctx, chartArea, scales } = chart;
+    if (!chartArea || !scales?.x) return;
+    const xScale = scales.x;
+    const xMax = xScale.max ?? 18000;
+    const isDark = chart.options?.plugins?.beatTierBands?.dark ?? false;
+    const palette = isDark ? BAND_COLORS_DARK : BAND_COLORS_LIGHT;
+    const beatBands = makeBands(BEAT_TICKS, Math.max(xMax, 18000));
+
+    ctx.save();
+    for (const band of beatBands) {
+      const xStart = xScale.getPixelForValue(band.start);
+      const xEnd = xScale.getPixelForValue(band.end);
+      const left = Math.max(xStart, chartArea.left);
+      const right = Math.min(xEnd, chartArea.right);
+      if (right <= left) continue;
+      ctx.fillStyle = palette[band.name] ?? 'rgba(148,163,184,0.05)';
+      ctx.fillRect(left, chartArea.top, right - left, chartArea.bottom - chartArea.top);
+    }
+    ctx.restore();
+  },
+};
 
 const chartData = computed(() => {
-  const userPts = props.points.filter(p => !p.isTopRanker && !p.isMe);
-  const myPts   = props.points.filter(p => p.isMe);
-  const topPts  = props.points.filter(p => p.isTopRanker);
+  // X 軸下限未満は表示対象外（Beginner レンジを切り捨てて主要分布に集中）
+  const visible = props.points.filter(p => p.beatPt >= BEAT_X_MIN);
+  const userPts = visible.filter(p => !p.isTopRanker && !p.isMe);
+  const myPts   = visible.filter(p => p.isMe);
+  const topPts  = visible.filter(p => p.isTopRanker);
 
   const datasets: any[] = [
     {
@@ -110,43 +188,51 @@ const chartOptions = computed(() => {
     scales: {
       x: {
         type: 'linear' as const,
+        min: BEAT_X_MIN,
+        max: 18000,
         title: {
           display: true,
-          text: 'BEAT-PT',
+          text: 'BEAT-TIER',
           color: titleColor,
           font: { weight: 'bold' as const, size: 12 },
         },
-        grid: { color: gridColor },
+        grid: { color: gridColor, drawTicks: false },
         border: { color: gridColor },
         ticks: {
           color: tickColor,
           autoSkip: false,
-          maxRotation: 0,
-          callback: (val: number | string) => Number(val).toLocaleString(),
+          maxRotation: 45,
+          minRotation: 45,
+          font: { size: 10 },
+          padding: 4,
+          // ティア境界の数値はそのまま、表示文字列だけランク名に差し替える。
+          callback: (val: number | string) => BEAT_LABEL.get(Number(val)) ?? '',
         },
         afterBuildTicks: (axis: any) => {
-          axis.ticks = BEAT_TICKS.map(v => ({ value: v }));
+          axis.ticks = BEAT_TICKS.map(b => ({ value: b.value }));
         },
       },
       y: {
         type: 'logarithmic' as const,
         title: {
           display: true,
-          text: 'RATE-PT',
+          text: 'RATE-TIER',
           color: titleColor,
           font: { weight: 'bold' as const, size: 12 },
         },
-        grid: { color: gridColor },
+        grid: { color: gridColor, drawTicks: false },
         border: { color: gridColor },
-        min: RATE_TICKS[0],
-        max: RATE_TICKS[RATE_TICKS.length - 1],
+        min: RATE_BOUNDARIES[0].value,
+        max: RATE_BOUNDARIES[RATE_BOUNDARIES.length - 1].value,
         ticks: {
           color: tickColor,
           autoSkip: false,
-          callback: (val: number | string) => Number(val).toLocaleString(),
+          font: { size: 10 },
+          padding: 4,
+          callback: (val: number | string) => RATE_LABEL.get(Number(val)) ?? '',
         },
         afterBuildTicks: (axis: any) => {
-          axis.ticks = RATE_TICKS.map(v => ({ value: v }));
+          axis.ticks = RATE_BOUNDARIES.map(b => ({ value: b.value }));
         },
       },
     },
@@ -155,6 +241,8 @@ const chartOptions = computed(() => {
         position: 'top' as const,
         labels: { color: titleColor, usePointStyle: true, boxWidth: 8 },
       },
+      // 自前プラグインへ「ダーク or ライト」を伝える（背景バンド色の切替用）。
+      beatTierBands: { dark: isDarkMode.value },
       tooltip: {
         backgroundColor: tooltipBg,
         titleColor: tooltipText,
@@ -182,7 +270,7 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div class="w-full h-72 sm:h-80 md:h-96">
-    <Scatter :data="chartData" :options="chartOptions" />
+  <div class="w-full h-80 sm:h-96 md:h-[28rem]">
+    <Scatter :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin]" />
   </div>
 </template>
