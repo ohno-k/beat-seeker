@@ -195,7 +195,7 @@ public class ScoreRecalculationService {
     /**
      * 【メソッドの役割】 渡された JSON を元に、全ユーザーの BEAT-PT / RATE-PT を非同期で再計算する。
      *
-     * 管理者が曲定義や難易度テーブルを更新した直後に {@link GameDataService#applyDraft()} から呼ばれる。
+     * 管理者が曲定義や難易度テーブルのドラフトを適用した直後に GameDataService から呼ばれる。
      * 個別ユーザーの再計算は {@link #processUserRecalculation(User, Map, Map)} に委譲し、
      * 1 ユーザーの失敗が全体を止めないよう try/catch で包む。
      *

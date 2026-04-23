@@ -186,19 +186,38 @@ public class GameDataController {
     }
 
     /**
-     * 【メソッドの役割】 ドラフト内容を「公開データ」として適用する。
+     * 【メソッドの役割】 楽曲ドラフトのみを「公開データ」として適用する。
      *
      * Service 側で重い処理（全ユーザースコアのポイント再計算）をバックグラウンド実行するため、
      * レスポンスは 202 Accepted（受け付け完了、処理は非同期）で返す。
      *
      * @param auth 管理者認証
      */
-    @PostMapping("/admin/game-data/apply")
-    public ResponseEntity<Map<String, Object>> applyDraft(Authentication auth) {
+    @PostMapping("/admin/game-data/apply/songs")
+    public ResponseEntity<Map<String, Object>> applyDraftSongs(Authentication auth) {
         checkAdminAccess(auth);
         try {
-            gameDataService.applyDraft();
-            return ResponseEntity.accepted().body(Map.of("message", "ドラフトを適用しました。バックグラウンドでポイント再計算を開始します。"));
+            gameDataService.applyDraftSongs();
+            return ResponseEntity.accepted().body(Map.of("message", "楽曲ドラフトを適用しました。バックグラウンドでポイント再計算を開始します。"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "適用エラー: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 難易度表ドラフトのみを「公開データ」として適用する。
+     *
+     * Service 側で重い処理（全ユーザースコアのポイント再計算）をバックグラウンド実行するため、
+     * レスポンスは 202 Accepted（受け付け完了、処理は非同期）で返す。
+     *
+     * @param auth 管理者認証
+     */
+    @PostMapping("/admin/game-data/apply/difficulty")
+    public ResponseEntity<Map<String, Object>> applyDraftDifficultyTable(Authentication auth) {
+        checkAdminAccess(auth);
+        try {
+            gameDataService.applyDraftDifficultyTable();
+            return ResponseEntity.accepted().body(Map.of("message", "難易度表ドラフトを適用しました。バックグラウンドでポイント再計算を開始します。"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", "適用エラー: " + e.getMessage()));
         }

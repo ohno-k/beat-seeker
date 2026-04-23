@@ -237,26 +237,32 @@ public class GameDataService {
     // ── Draft 昇格（管理者用）────────────────────────────────
 
     /**
-     * 【メソッドの役割】 draft データを active に昇格し、全ユーザーの BEAT-PT を再計算する。
-     *
-     * 処理の流れ:
-     *  - 手順1: draft 曲定義を走査し、revision を "active" に書き換えて保存（マージ）
-     *  - 手順2: draft 難易度テーブルがあれば、active を全削除してから draft を active に付け替え
-     *  - 手順3: 更新後の active JSON を取得
-     *  - 手順4: 非同期で {@link ScoreRecalculationService#recalculateAllUsersAsync(String, String)} を起動
+     * 【メソッドの役割】 draft の楽曲のみを active に昇格し、全ユーザーの BEAT-PT を再計算する。
+     * 難易度表の draft には触れない（別エンドポイントで独立に適用する）。
      *
      * @throws Exception JSON 生成や再計算キックに失敗した場合
      */
     @Transactional
-    public void applyDraft() throws Exception {
-        // 1. draft 曲を active にマージする
+    public void applyDraftSongs() throws Exception {
         List<SongDefinition> draftSongs = songDefRepo.findByRevision("draft");
         for (SongDefinition ds : draftSongs) {
             ds.setRevision("active");
             songDefRepo.save(ds);
         }
 
-        // 2. draft 難易度テーブルがあれば active を全置換する
+        String songDataJson = getActiveSongDataJson();
+        String diffTableJson = getActiveDifficultyTableJson();
+        recalcService.recalculateAllUsersAsync(songDataJson, diffTableJson);
+    }
+
+    /**
+     * 【メソッドの役割】 draft の難易度表のみを active に昇格し、全ユーザーの BEAT-PT を再計算する。
+     * 楽曲の draft には触れない（別エンドポイントで独立に適用する）。
+     *
+     * @throws Exception JSON 生成や再計算キックに失敗した場合
+     */
+    @Transactional
+    public void applyDraftDifficultyTable() throws Exception {
         List<DifficultyRank> draftRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("draft");
         if (!draftRanks.isEmpty()) {
             List<DifficultyRank> activeRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("active");
@@ -268,7 +274,6 @@ public class GameDataService {
             }
         }
 
-        // 3. 更新後データで全ユーザーの BEAT-PT 再計算を非同期起動
         String songDataJson = getActiveSongDataJson();
         String diffTableJson = getActiveDifficultyTableJson();
         recalcService.recalculateAllUsersAsync(songDataJson, diffTableJson);

@@ -12,14 +12,22 @@
             ゲームデータ管理
           </h2>
           <div class="flex items-center gap-2">
-            <!-- Apply button -->
-            <button 
-              @click="handleApplyDraft" 
-              :disabled="isApplying || (draftSongs.length === 0 && savedDiffChanges.length === 0)"
+            <!-- Apply buttons (楽曲と難易度表で独立に適用) -->
+            <button
+              @click="handleApplyDraftSongs"
+              :disabled="isApplyingSongs || isApplyingDiff || draftSongs.length === 0"
               class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <svg v-if="isApplying" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              {{ isApplying ? '適用中...' : '適用（公開）' }}
+              <svg v-if="isApplyingSongs" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              {{ isApplyingSongs ? '適用中...' : '楽曲を適用' }}
+            </button>
+            <button
+              @click="handleApplyDraftDiffTable"
+              :disabled="isApplyingSongs || isApplyingDiff || savedDiffChanges.length === 0"
+              class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg v-if="isApplyingDiff" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              {{ isApplyingDiff ? '適用中...' : '難易度表を適用' }}
             </button>
             <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -227,6 +235,16 @@
 
             <!-- Saved draft changes (applied to draft, not yet published) -->
             <div v-if="savedDiffChanges.length > 0" class="mb-3 space-y-2">
+              <div v-if="hasSavedPromotionsOrDemotions" class="flex justify-end">
+                <button
+                  @click="handleRevertAllPromotionsDemotions"
+                  :disabled="isSavingDiff"
+                  class="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-800/50 rounded-lg text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="新規配置（Uncategorized との相互移動）はそのまま残し、昇格・降格のみを取り消します"
+                >
+                  昇格・降格を一括取り消し
+                </button>
+              </div>
               <div v-if="savedPromotions.length > 0">
                 <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">▲ 昇格 ({{ savedPromotions.length }}件)</h4>
                 <div class="space-y-1">
@@ -444,8 +462,10 @@ const form = ref<SongForm>(defaultForm());
 
 /** 新曲追加ボタンの二重送信防止フラグ。 */
 const isSubmitting = ref(false);
-/** 「適用（公開）」実行中フラグ。 */
-const isApplying = ref(false);
+/** 楽曲ドラフトの「適用（公開）」実行中フラグ。 */
+const isApplyingSongs = ref(false);
+/** 難易度表ドラフトの「適用（公開）」実行中フラグ。 */
+const isApplyingDiff = ref(false);
 /** 難易度表のドラフト保存中フラグ。 */
 const isSavingDiff = ref(false);
 /** 「投票から生成」実行中フラグ。 */
@@ -536,6 +556,12 @@ const savedPromotions = computed(() => savedDiffChanges.value.filter(c => {
 const savedDemotions = computed(() => savedDiffChanges.value.filter(c => {
   const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
   return !isNaN(o) && !isNaN(n) && n < o && matchesLevelFilter(c.title);
+}));
+
+/** レベルフィルタを無視した「昇格 or 降格」全件（一括取り消しボタンの有効化判定に使う）。 */
+const hasSavedPromotionsOrDemotions = computed(() => savedDiffChanges.value.some(c => {
+  const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
+  return !isNaN(o) && !isNaN(n);
 }));
 
 /**
@@ -686,6 +712,56 @@ const handleRevertSavedChange = async (change: {title: string, oldRank: string, 
         if (!res.ok) throw new Error(data.message || 'Error');
         originalDiffTable.value = newTable;
         successMsg.value = 'ドラフト変更を取り消しました';
+        const statusRes = await fetch(`${API_BASE}/api/admin/game-data/status`, { headers: authHeaders() });
+        if (statusRes.ok) {
+            const status = await statusRes.json();
+            hasDraftDiffTable.value = status.hasDraftDifficultyTable;
+        }
+    } catch (e: any) {
+        errorMsg.value = '取り消しエラー: ' + e.message;
+    } finally {
+        isSavingDiff.value = false;
+    }
+};
+
+/**
+ * 【関数の役割】 ドラフトに保存済みの「昇格」「降格」をまとめて取り消し、それぞれ公開中の位置に戻す。
+ * 新規配置（Uncategorized ↔ 数値ランクの移動）は対象外で、そのまま残る。
+ * レベルフィルタに関係なく全昇格・降格が対象。
+ */
+const handleRevertAllPromotionsDemotions = async () => {
+    const targets = savedDiffChanges.value.filter(c => {
+        const o = parseFloat(c.oldRank), n = parseFloat(c.newRank);
+        return !isNaN(o) && !isNaN(n);
+    });
+    if (targets.length === 0) {
+        errorMsg.value = '取り消し対象の昇格・降格はありません';
+        return;
+    }
+    if (!confirm(`${targets.length} 件の昇格・降格をまとめて取り消します（新規配置は残ります）。よろしいですか？`)) return;
+
+    const newTable = JSON.parse(JSON.stringify(originalDiffTable.value));
+    for (const c of targets) {
+        for (const r of newTable.ranks) {
+            r.songs = r.songs.filter((s: string) => s !== c.title);
+        }
+        const targetRank = newTable.ranks.find((r: any) => r.rank === c.oldRank);
+        if (targetRank) targetRank.songs.push(c.title);
+    }
+
+    isSavingDiff.value = true;
+    errorMsg.value = '';
+    successMsg.value = '';
+    try {
+        const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, {
+            method: 'PUT',
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify(newTable),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Error');
+        originalDiffTable.value = newTable;
+        successMsg.value = `${targets.length} 件の昇格・降格を取り消しました`;
         const statusRes = await fetch(`${API_BASE}/api/admin/game-data/status`, { headers: authHeaders() });
         if (statusRes.ok) {
             const status = await statusRes.json();
@@ -1016,32 +1092,60 @@ const handleSaveDiffTable = async () => {
 
 // ── ドラフト適用（本番公開） ───────────────────
 /**
- * 【関数の役割】 ドラフトを公開して全ユーザーの PT 再計算を走らせる。
+ * 【関数の役割】 楽曲ドラフトのみを公開して全ユーザーの PT 再計算を走らせる。
  * 重い処理なのでバックエンド側は非同期（202 Accepted）で受け付ける。
  */
-const handleApplyDraft = async () => {
-  if (!confirm('ドラフトを適用しますか？全ユーザーのポイント再計算が実行されます。')) return;
-  
-  isApplying.value = true;
+const handleApplyDraftSongs = async () => {
+  if (!confirm('楽曲ドラフトを適用しますか？全ユーザーのポイント再計算が実行されます。')) return;
+
+  isApplyingSongs.value = true;
   errorMsg.value = '';
   successMsg.value = '';
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/game-data/apply`, {
+    const res = await fetch(`${API_BASE}/api/admin/game-data/apply/songs`, {
       method: 'POST',
       headers: authHeaders(),
     });
     const data = await res.json();
     if (!res.ok && res.status !== 202) throw new Error(data.message || 'Error');
-    
+
     successMsg.value = data.message;
     hasDraftSongs.value = false;
-    hasDraftDiffTable.value = false;
     draftSongs.value = [];
   } catch (e: any) {
     errorMsg.value = '適用エラー: ' + e.message;
   } finally {
-    isApplying.value = false;
+    isApplyingSongs.value = false;
+  }
+};
+
+/**
+ * 【関数の役割】 難易度表ドラフトのみを公開して全ユーザーの PT 再計算を走らせる。
+ * 重い処理なのでバックエンド側は非同期（202 Accepted）で受け付ける。
+ */
+const handleApplyDraftDiffTable = async () => {
+  if (!confirm('難易度表ドラフトを適用しますか？全ユーザーのポイント再計算が実行されます。')) return;
+
+  isApplyingDiff.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/game-data/apply/difficulty`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok && res.status !== 202) throw new Error(data.message || 'Error');
+
+    successMsg.value = data.message;
+    hasDraftDiffTable.value = false;
+    activeDiffTable.value = JSON.parse(JSON.stringify(originalDiffTable.value));
+  } catch (e: any) {
+    errorMsg.value = '適用エラー: ' + e.message;
+  } finally {
+    isApplyingDiff.value = false;
   }
 };
 </script>
