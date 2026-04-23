@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 【Repository の役割】 {@code SongDefinition}（曲・譜面の定義マスタ）を扱うリポジトリ。
@@ -33,6 +34,18 @@ public interface SongDefinitionRepository extends JpaRepository<SongDefinition, 
      * @return 楽曲定義一覧
      */
     List<SongDefinition> findByRevision(String revision);
+
+    /**
+     * 【メソッドの役割】 (title, difficulty, revision) のトリオで 1 件取得する。
+     *
+     * 楽曲 × 難易度 × リビジョンは一意である前提（同じ譜面の draft/active コピーを区別する）。
+     *
+     * @param title      楽曲タイトル
+     * @param difficulty 難易度コード（"1".."4", "10"）
+     * @param revision   リビジョン名（"active" / "draft"）
+     * @return 見つかれば SongDefinition、なければ empty
+     */
+    Optional<SongDefinition> findByTitleAndDifficultyAndRevision(String title, String difficulty, String revision);
 
     /**
      * 【メソッドの役割】 指定リビジョンの楽曲定義件数をカウントする。

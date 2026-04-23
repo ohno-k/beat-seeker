@@ -150,6 +150,58 @@ public class GameDataController {
     }
 
     /**
+     * 【メソッドの役割】 active 楽曲一覧（管理者向け）。既存曲の編集対象選択 UI で使う。
+     */
+    @GetMapping("/admin/game-data/songs/active")
+    public ResponseEntity<List<SongDefinition>> getActiveSongsForAdmin(Authentication auth) {
+        checkAdminAccess(auth);
+        return ResponseEntity.ok(gameDataService.getActiveSongs());
+    }
+
+    /**
+     * 【メソッドの役割】 指定 active 曲を draft 側にコピーして編集用レコードを用意する。
+     * 既に同 (title, difficulty) の draft がある場合はそれをそのまま返す。
+     */
+    @PostMapping("/admin/game-data/songs/draft/from-active/{activeId}")
+    public ResponseEntity<Map<String, Object>> createDraftFromActive(
+            Authentication auth,
+            @PathVariable Long activeId) {
+        checkAdminAccess(auth);
+        try {
+            SongDefinition draft = gameDataService.createOrGetDraftFromActive(activeId);
+            return ResponseEntity.ok(Map.of(
+                "message", "編集用ドラフトを用意しました",
+                "draft", draft
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 ドラフト楽曲 1 件のフィールドを更新する（既存曲の編集）。
+     *
+     * 受け入れるフィールド: title/artist/genre/bpm（同タイトルの他 draft にも波及）、
+     * notes/level/wr/avg/coef/textage/difficultyLevel/dpLevel（この譜面のみ）。
+     */
+    @PutMapping("/admin/game-data/songs/draft/{id}")
+    public ResponseEntity<Map<String, Object>> updateDraftSong(
+            Authentication auth,
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> form) {
+        checkAdminAccess(auth);
+        try {
+            SongDefinition updated = gameDataService.updateDraftSong(id, form);
+            return ResponseEntity.ok(Map.of(
+                "message", "ドラフト楽曲を更新しました",
+                "draft", updated
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
      * 【メソッドの役割】 ドラフト状態の難易度表 JSON を取得する。
      *
      * @param auth 管理者認証

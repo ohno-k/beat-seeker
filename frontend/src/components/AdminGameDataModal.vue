@@ -70,9 +70,47 @@
 
           <!-- Songs Tab -->
           <div v-if="activeTab === 'songs'">
+            <!-- Edit existing active song -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
+              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">既存曲を編集</h3>
+              <input
+                v-model="activeSearchQuery"
+                :disabled="isEditingExistingSong"
+                type="text"
+                placeholder="曲名で検索..."
+                class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50"
+              />
+              <div v-if="filteredActiveSongs.length > 0 && !isEditingExistingSong" class="mt-2 max-h-48 overflow-y-auto space-y-1">
+                <button
+                  v-for="g in filteredActiveSongs"
+                  :key="g.title"
+                  @click="handleBeginEditActiveSong(g)"
+                  :disabled="isPreparingEdit"
+                  class="w-full text-left px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <div class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ g.title }}</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ g.artist }} / {{ g.genre }} / {{ g.difficulties.join(', ') }}
+                  </div>
+                </button>
+              </div>
+              <div v-else-if="activeSearchQuery && !isEditingExistingSong" class="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                該当する楽曲が見つかりません
+              </div>
+              <div v-if="isPreparingEdit" class="mt-2 text-xs text-slate-500 dark:text-slate-400">編集用ドラフトを準備中...</div>
+            </div>
+
             <!-- Add Song Form -->
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
-              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-3">新曲追加</h3>
+              <div v-if="isEditingExistingSong" class="flex items-center justify-between mb-3 p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800/50">
+                <div class="text-sm text-indigo-700 dark:text-indigo-400">
+                  <span class="font-bold">編集中:</span> {{ editingSongTitle }}
+                </div>
+                <button @click="cancelEditExistingSong" class="text-xs px-2 py-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  キャンセル
+                </button>
+              </div>
+              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-3">{{ isEditingExistingSong ? '楽曲情報の編集' : '新曲追加' }}</h3>
               
               <!-- Basic info -->
               <div class="grid grid-cols-2 gap-3 mb-3">
@@ -133,13 +171,13 @@
                 </div>
               </details>
 
-              <button 
-                @click="handleAddSong" 
+              <button
+                @click="isEditingExistingSong ? handleUpdateEditingSong() : handleAddSong()"
                 :disabled="isSubmitting || !form.title"
                 class="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <svg v-if="isSubmitting" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                ドラフトに追加
+                {{ isEditingExistingSong ? 'ドラフトを更新' : 'ドラフトに追加' }}
               </button>
             </div>
 
@@ -393,6 +431,20 @@ const hasDraftSongs = ref(false);
 const hasDraftDiffTable = ref(false);
 /** ドラフト追加済みの楽曲（難易度単位で複数行の可能性あり）。 */
 const draftSongs = ref<any[]>([]);
+/** 現在公開中の active 楽曲（既存曲編集の検索対象）。 */
+const activeSongs = ref<any[]>([]);
+
+// ── 既存曲編集モード ─────────────────────────────────
+/** フォームが「既存曲編集」モードに入っているか。 */
+const isEditingExistingSong = ref(false);
+/** 編集中の楽曲タイトル（表示用）。 */
+const editingSongTitle = ref('');
+/** 編集対象の難易度ごとの draft レコード ID マップ（code → draftId）。保存時の PUT 先 ID を決めるために使う。 */
+const editingDraftIdByDiff = ref<Record<string, number | null>>({});
+/** 既存曲検索の文字列。 */
+const activeSearchQuery = ref('');
+/** 編集用 draft 作成中（from-active 呼び出し中）のフラグ。 */
+const isPreparingEdit = ref(false);
 
 const difficultyCodeToName: Record<string, string> = {
   '1': 'BEG', '2': 'NOR', '3': 'HYP', '4': 'ANO', '10': 'LEG'
@@ -412,6 +464,29 @@ const groupedDraftSongs = computed(() => {
     groups[song.title].ids.push(song.id);
   }
   return Object.values(groups);
+});
+
+/**
+ * 【computed の役割】 active 楽曲を曲名単位にまとめる（既存曲編集の検索候補として表示）。
+ * 各グループに生レコード配列を添えておき、選択時にそのまま from-active へ回せるようにする。
+ */
+const groupedActiveSongs = computed(() => {
+  const groups: Record<string, { title: string; artist: string; genre: string; difficulties: string[]; records: any[] }> = {};
+  for (const song of activeSongs.value) {
+    if (!groups[song.title]) {
+      groups[song.title] = { title: song.title, artist: song.artist || '', genre: song.genre || '', difficulties: [], records: [] };
+    }
+    groups[song.title].difficulties.push(difficultyCodeToName[song.difficulty] || song.difficulty);
+    groups[song.title].records.push(song);
+  }
+  return Object.values(groups);
+});
+
+/** 検索文字列で絞り込んだ active 曲。最大 30 件まで（候補が多いときに UI が潰れないように）。 */
+const filteredActiveSongs = computed(() => {
+  const q = activeSearchQuery.value.trim().toLowerCase();
+  if (!q) return [];
+  return groupedActiveSongs.value.filter(g => g.title.toLowerCase().includes(q)).slice(0, 30);
 });
 
 // ── 楽曲追加フォーム定義 ────────────────────────────
@@ -795,6 +870,12 @@ const loadData = async () => {
       draftSongs.value = await songsRes.json();
     }
 
+    // active 楽曲の取得（既存曲編集の検索対象）。
+    const activeSongsRes = await fetch(`${API_BASE}/api/admin/game-data/songs/active`, { headers: authHeaders() });
+    if (activeSongsRes.ok) {
+      activeSongs.value = await activeSongsRes.json();
+    }
+
     // 難易度表のドラフト取得。未保存変更はリセット。
     const diffRes = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, { headers: authHeaders() });
     if (diffRes.ok) {
@@ -822,6 +903,7 @@ watch(() => props.isOpen, (val) => {
     errorMsg.value = '';
     successMsg.value = '';
     commentCache.clear();
+    cancelEditExistingSong();
     loadData();
   }
 });
@@ -893,6 +975,134 @@ const handleAddSong = async () => {
     if (songsRes.ok) draftSongs.value = await songsRes.json();
   } catch (e: any) {
     errorMsg.value = '追加エラー: ' + e.message;
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// ── 既存曲編集 ────────────────────────────────
+/**
+ * 【関数の役割】 active 楽曲グループ（曲名単位）の編集を開始する。
+ *
+ * 手順:
+ *  1. 各難易度の active レコードについて from-active を呼び、編集用 draft レコードを用意する
+ *  2. 取得した draft の値を共通フォーム（form）に流し込み、編集モードに切り替える
+ *  3. 保存時は難易度ごとに PUT を発行する
+ */
+const handleBeginEditActiveSong = async (group: { title: string; records: any[] }) => {
+  isPreparingEdit.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+
+  try {
+    const drafts = await Promise.all(group.records.map(async (rec: any) => {
+      const res = await fetch(`${API_BASE}/api/admin/game-data/songs/draft/from-active/${rec.id}`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Error');
+      return data.draft as any;
+    }));
+
+    const newForm = defaultForm();
+    const draftIdMap: Record<string, number | null> = {};
+    newForm.title = group.title;
+    for (const d of drafts) {
+      if (d.artist != null) newForm.artist = d.artist;
+      if (d.genre != null) newForm.genre = d.genre;
+      if (d.bpm != null) newForm.bpm = d.bpm;
+      draftIdMap[d.difficulty] = d.id;
+      const def = difficultyDefs.find(def => def.code === d.difficulty);
+      if (def) {
+        newForm[def.notesKey] = d.notes ?? null;
+        newForm[def.levelKey] = d.level ?? null;
+      }
+      // ANOTHER / LEGGENDARIA は共通フィールドを上書き（最後に処理した譜面の値が入る）
+      if (d.difficulty === '4' || d.difficulty === '10') {
+        newForm.wr = d.wr ?? null;
+        newForm.avg = d.avg ?? null;
+        newForm.coef = d.coef ?? null;
+        newForm.textage = d.textage ?? '';
+      }
+    }
+
+    form.value = newForm;
+    editingDraftIdByDiff.value = draftIdMap;
+    editingSongTitle.value = group.title;
+    isEditingExistingSong.value = true;
+    hasDraftSongs.value = true;
+    activeSearchQuery.value = '';
+
+    // ドラフト楽曲一覧を最新化（新しく作成された draft が反映される）。
+    const songsRes = await fetch(`${API_BASE}/api/admin/game-data/songs/draft`, { headers: authHeaders() });
+    if (songsRes.ok) draftSongs.value = await songsRes.json();
+  } catch (e: any) {
+    errorMsg.value = '編集準備エラー: ' + e.message;
+  } finally {
+    isPreparingEdit.value = false;
+  }
+};
+
+/** 【関数の役割】 編集モードを終了してフォームを新規追加状態に戻す。 */
+const cancelEditExistingSong = () => {
+  form.value = defaultForm();
+  editingDraftIdByDiff.value = {};
+  editingSongTitle.value = '';
+  isEditingExistingSong.value = false;
+};
+
+/**
+ * 【関数の役割】 編集中の draft レコードを PUT でまとめて更新する。
+ * 難易度ごとに notes/level と、ANOTHER/LEGGENDARIA なら wr/avg/coef/textage も送る。
+ */
+const handleUpdateEditingSong = async () => {
+  if (!form.value.title) return;
+  isSubmitting.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+
+  try {
+    const entries = Object.entries(editingDraftIdByDiff.value).filter(([, id]) => id != null);
+    for (const [code, id] of entries) {
+      const def = difficultyDefs.find(d => d.code === code);
+      if (!def) continue;
+      const body: Record<string, any> = {
+        title: form.value.title,
+        artist: form.value.artist,
+        genre: form.value.genre,
+        bpm: form.value.bpm,
+        notes: form.value[def.notesKey],
+        level: form.value[def.levelKey],
+      };
+      if (code === '4' || code === '10') {
+        body.wr = form.value.wr;
+        body.avg = form.value.avg;
+        body.coef = form.value.coef;
+        body.textage = form.value.textage;
+      }
+      const res = await fetch(`${API_BASE}/api/admin/game-data/songs/draft/${id}`, {
+        method: 'PUT',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Error');
+    }
+
+    successMsg.value = `「${form.value.title}」のドラフトを更新しました`;
+
+    // 一覧を最新化。
+    const [songsRes, activeSongsRes] = await Promise.all([
+      fetch(`${API_BASE}/api/admin/game-data/songs/draft`, { headers: authHeaders() }),
+      fetch(`${API_BASE}/api/admin/game-data/songs/active`, { headers: authHeaders() }),
+    ]);
+    if (songsRes.ok) draftSongs.value = await songsRes.json();
+    if (activeSongsRes.ok) activeSongs.value = await activeSongsRes.json();
+
+    cancelEditExistingSong();
+  } catch (e: any) {
+    errorMsg.value = '更新エラー: ' + e.message;
   } finally {
     isSubmitting.value = false;
   }

@@ -169,6 +169,111 @@ public class GameDataService {
         songDefRepo.delete(sd);
     }
 
+    /** active リビジョンの曲定義一覧を返す（管理画面の既存曲編集用）。 */
+    public List<SongDefinition> getActiveSongs() {
+        return songDefRepo.findByRevision("active");
+    }
+
+    /**
+     * 【メソッドの役割】 指定 active 曲に対応する draft コピーを確実に用意して返す。
+     *
+     *  - 同一 (title, difficulty) の draft が既にあればそれをそのまま返す
+     *  - なければ active レコードのフィールドを複製した draft レコードを新規作成する
+     *
+     * フロントから「既存曲を編集」開始時に呼び、返ってきた draft の id を PUT 先に使う想定。
+     *
+     * @param activeId 編集対象の active {@link SongDefinition} ID
+     * @return 編集用 draft レコード
+     */
+    @Transactional
+    public SongDefinition createOrGetDraftFromActive(Long activeId) {
+        SongDefinition active = songDefRepo.findById(activeId)
+                .orElseThrow(() -> new RuntimeException("Song not found: " + activeId));
+        if (!"active".equals(active.getRevision())) {
+            throw new RuntimeException("Source song must be active");
+        }
+        return songDefRepo.findByTitleAndDifficultyAndRevision(
+                active.getTitle(), active.getDifficulty(), "draft")
+            .orElseGet(() -> {
+                SongDefinition d = new SongDefinition();
+                d.setTitle(active.getTitle());
+                d.setArtist(active.getArtist());
+                d.setGenre(active.getGenre());
+                d.setNotes(active.getNotes());
+                d.setBpm(active.getBpm());
+                d.setDifficulty(active.getDifficulty());
+                d.setLevel(active.getLevel());
+                d.setWr(active.getWr());
+                d.setAvg(active.getAvg());
+                d.setTextage(active.getTextage());
+                d.setCoef(active.getCoef());
+                d.setDifficultyLevel(active.getDifficultyLevel());
+                d.setDpLevel(active.getDpLevel());
+                d.setRevision("draft");
+                return songDefRepo.save(d);
+            });
+    }
+
+    /**
+     * 【メソッドの役割】 draft 曲の編集フォームを 1 件適用する。
+     *
+     * 編集対象は「楽曲 × 難易度」単位の 1 レコードなので、ここで受け取るのは
+     * 単一の譜面（{@code form.difficulty} は存在するが UI 側では固定表示する想定）。
+     *
+     *  - title/artist/genre/bpm は全難易度共通の情報（同じ title の他 draft も合わせて更新する）
+     *  - notes/level/wr/avg/coef/textage はその譜面固有
+     *
+     * @param id   更新対象 draft {@link SongDefinition} の ID
+     * @param form フロントのフォーム JSON。null のフィールドは既存値を残す
+     */
+    @Transactional
+    public SongDefinition updateDraftSong(Long id, Map<String, Object> form) {
+        SongDefinition sd = songDefRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Song not found: " + id));
+        if (!"draft".equals(sd.getRevision())) {
+            throw new RuntimeException("Can only update draft songs");
+        }
+
+        // 譜面固有フィールド
+        if (form.containsKey("notes")) sd.setNotes(toInteger(form.get("notes")));
+        if (form.containsKey("level")) sd.setLevel(toInteger(form.get("level")));
+        if (form.containsKey("wr")) sd.setWr(toInteger(form.get("wr")));
+        if (form.containsKey("avg")) sd.setAvg(toInteger(form.get("avg")));
+        if (form.containsKey("coef")) sd.setCoef(toDouble(form.get("coef")));
+        if (form.containsKey("textage")) sd.setTextage((String) form.get("textage"));
+        if (form.containsKey("difficultyLevel")) sd.setDifficultyLevel((String) form.get("difficultyLevel"));
+        if (form.containsKey("dpLevel") && form.get("dpLevel") != null) sd.setDpLevel(form.get("dpLevel").toString());
+
+        // 楽曲共通フィールド（同じ title の他 draft レコードも揃える）
+        boolean commonChanged = false;
+        String newTitle = form.containsKey("title") ? (String) form.get("title") : null;
+        String newArtist = form.containsKey("artist") ? (String) form.get("artist") : null;
+        String newGenre = form.containsKey("genre") ? (String) form.get("genre") : null;
+        String newBpm = form.containsKey("bpm") ? (String) form.get("bpm") : null;
+
+        String originalTitle = sd.getTitle();
+        if (newTitle != null && !newTitle.equals(sd.getTitle())) { sd.setTitle(newTitle); commonChanged = true; }
+        if (newArtist != null && !newArtist.equals(sd.getArtist())) { sd.setArtist(newArtist); commonChanged = true; }
+        if (newGenre != null && !newGenre.equals(sd.getGenre())) { sd.setGenre(newGenre); commonChanged = true; }
+        if (newBpm != null && !newBpm.equals(sd.getBpm())) { sd.setBpm(newBpm); commonChanged = true; }
+
+        SongDefinition saved = songDefRepo.save(sd);
+
+        if (commonChanged) {
+            for (SongDefinition sibling : songDefRepo.findByRevision("draft")) {
+                if (sibling.getId().equals(saved.getId())) continue;
+                if (!originalTitle.equals(sibling.getTitle())) continue;
+                if (newTitle != null) sibling.setTitle(newTitle);
+                if (newArtist != null) sibling.setArtist(newArtist);
+                if (newGenre != null) sibling.setGenre(newGenre);
+                if (newBpm != null) sibling.setBpm(newBpm);
+                songDefRepo.save(sibling);
+            }
+        }
+
+        return saved;
+    }
+
     // ── Draft 難易度テーブル（管理者用）────────────────────────
 
     /**
@@ -237,19 +342,28 @@ public class GameDataService {
     // ── Draft 昇格（管理者用）────────────────────────────────
 
     /**
-     * 【メソッドの役割】 draft の楽曲のみを active に昇格する。
+     * 【メソッドの役割】 draft の楽曲を active に昇格する（既存曲編集にも対応した置換型）。
      *
+     *  - 同じ (title, difficulty) の active レコードが存在すれば先に削除する
+     *    （= 既存曲の編集が draft に反映されると、それが新しい active になる）
      *  - ANOTHER(4) / LEGGENDARIA(10) のうちレベル 11 / 12 の譜面は active 難易度表の
-     *    "Uncategorized(other)" にも自動追加する（管理画面で個別配置する手間を省くため）。
-     *  - 配置先は Uncategorized なので BEAT-PT 算出ロジックには影響しない。よって
-     *    重い再計算は走らせない（再計算は難易度表適用側に集約）。
-     *  - 難易度表の draft には触れない。
+     *    "Uncategorized(other)" にも自動追加する（管理画面で個別配置する手間を省くため）
+     *  - 配置先は Uncategorized のみ、かつ BEAT-PT 算出ロジックは譜面メタの表面的変更で
+     *    結果が大きくは変わらないため、重い再計算はスキップする（再計算は難易度表適用側に集約）
+     *  - 難易度表の draft には触れない
      *
      * @throws Exception 永続化に失敗した場合
      */
     @Transactional
     public void applyDraftSongs() throws Exception {
         List<SongDefinition> draftSongs = songDefRepo.findByRevision("draft");
+
+        // 既存曲編集（= 同じ title+difficulty の active が既にある）分は、active 側を先に削除する。
+        for (SongDefinition ds : draftSongs) {
+            songDefRepo.findByTitleAndDifficultyAndRevision(ds.getTitle(), ds.getDifficulty(), "active")
+                .ifPresent(existing -> songDefRepo.delete(existing));
+        }
+        songDefRepo.flush();
 
         // Lv11/12 の ANOTHER/LEGGENDARIA を active 難易度表 Uncategorized 行に追加するための候補集合。
         // LEGGENDARIA は難易度表表記上 "<title>[L]" となる。
@@ -273,7 +387,7 @@ public class GameDataService {
         if (!uncatTargets.isEmpty()) {
             addToActiveUncategorized(uncatTargets);
         }
-        // BEAT-PT 再計算は意図的にスキップ（Uncategorized 配置のみで PT 算出に影響しないため）。
+        // BEAT-PT 再計算は意図的にスキップ。
     }
 
     /**
