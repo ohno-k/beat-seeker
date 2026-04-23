@@ -16,6 +16,7 @@
  */
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import RankIcon from './RankIcon.vue';
+import RankingScatterChart, { type ScatterPoint } from './RankingScatterChart.vue';
 import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
@@ -242,6 +243,54 @@ const mergedRateRanking = computed<MergedRateRow[]>(() => {
     return all;
 });
 
+/**
+ * 【computed の役割】 散布図用にユーザーごとの BEAT-PT × RATE-PT 座標を生成する。
+ * - iidxId をキーに beatRanking と rateRanking をジョイン
+ * - 両方とも > 0 のユーザーのみ採用（log 軸に乗らない 0 値を除外）
+ * - showTopRankers が ON のときは都道府県 TOP ランカーも (versionName×prefectureName) で結合して追加
+ * - 自分の点は isMe=true でハイライト対象に分類される
+ */
+const scatterPoints = computed<ScatterPoint[]>(() => {
+    const myIidx = user.value?.iidxId;
+    const ratePtByIidx = new Map<string, number>();
+    for (const r of rateRanking.value) {
+        ratePtByIidx.set(r.iidxId, r.totalRatePt);
+    }
+    const points: ScatterPoint[] = [];
+    for (const b of beatRanking.value) {
+        const rate = ratePtByIidx.get(b.iidxId) ?? 0;
+        if (b.totalBeatPt <= 0 || rate <= 0) continue;
+        points.push({
+            iidxId: b.iidxId,
+            displayName: b.displayName || 'Unnamed Player',
+            beatPt: b.totalBeatPt,
+            ratePt: rate,
+            isMe: !!myIidx && b.iidxId === myIidx,
+            isTopRanker: false,
+        });
+    }
+    if (showTopRankers.value) {
+        const rateTopByKey = new Map<string, number>();
+        for (const t of rateTopRankers.value) {
+            rateTopByKey.set(`${t.versionNum} ${t.prefectureFileNum}`, t.ratePt);
+        }
+        for (const t of topRankers.value) {
+            const key = `${t.versionNum} ${t.prefectureFileNum}`;
+            const rate = rateTopByKey.get(key) ?? 0;
+            if (t.beatPt <= 0 || rate <= 0) continue;
+            points.push({
+                iidxId: key,
+                displayName: `TOP: ${t.versionName} × ${t.prefectureName}`,
+                beatPt: t.beatPt,
+                ratePt: rate,
+                isMe: false,
+                isTopRanker: true,
+            });
+        }
+    }
+    return points;
+});
+
 const beatTotalPages = computed(() => Math.max(1, Math.ceil(mergedBeatRanking.value.length / PAGE_SIZE)));
 const rateTotalPages = computed(() => Math.max(1, Math.ceil(mergedRateRanking.value.length / PAGE_SIZE)));
 
@@ -399,10 +448,15 @@ async function fetchSimulationData() {
     }
 }
 
-// 初回マウントで Beat-PT ランキングを取得（Rate は lazy、simulation も lazy）。
+// 初回マウントで Beat-PT ランキングを取得。
+// 散布図（BEAT × RATE）を表示するために、RATE 表示が有効ならマウント時に Rate も並行取得する。
 onMounted(async () => {
     try {
-        await fetchBeatRanking();
+        const tasks: Promise<unknown>[] = [fetchBeatRanking()];
+        if (showRateTier.value) {
+            tasks.push(fetchRateRanking().catch(e => console.error(e)));
+        }
+        await Promise.all(tasks);
     } catch (e) {
         console.error(e);
         error.value = t('ranking.error');
@@ -448,6 +502,20 @@ watch(viewMode, async (mode) => {
         </div>
       </div>
 
+
+      <!-- BEAT-TIER × RATE-TIER 散布図 -->
+      <div v-if="showRateTier && !isLoading && !error && scatterPoints.length > 0"
+        class="mb-6 p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
+          <h3 class="text-sm font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
+            BEAT-TIER × RATE-TIER 分布
+          </h3>
+          <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
+            {{ scatterPoints.length.toLocaleString() }} プレイヤー
+          </span>
+        </div>
+        <RankingScatterChart :points="scatterPoints" />
+      </div>
 
       <!-- Find My Rank Button + Mode Toggle -->
       <div class="flex items-center gap-3 mb-6 flex-wrap">
