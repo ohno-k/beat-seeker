@@ -118,7 +118,9 @@ const navigationItems = computed(() => [
   { id: 'song-avg', label: t('nav.songAvg'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
   { id: 'diff-table', label: t('nav.diffTable'), icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
   { id: 'rank-comparison', label: t('nav.rankComparison'), icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3', allowedUserIds: [18, 23, 24] },
-  { id: 'score-prediction', label: t('nav.scorePrediction'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
+  { id: 'score-prediction', label: t('nav.scorePrediction'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', requiresAuth: true, hideOnViewing: true },
+  // スコアペア散布図はサポーター限定（最下部）
+  { id: 'score-scatter', label: t('nav.scoreScatter'), icon: 'M3 3v18h18M7 17l4-8 3 5 5-9', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
 ]);
 
 /**
@@ -418,7 +420,7 @@ const filteredNavItems = computed(() => {
         <!-- Sidebar Footer -->
         <div class="p-6 pt-0 text-center">
           <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-            v1.5.0 | beat-seeker
+            v1.6.0 | beat-seeker
           </p>
         </div>
       </div>

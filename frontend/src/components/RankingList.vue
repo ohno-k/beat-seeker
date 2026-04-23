@@ -508,10 +508,10 @@ watch(viewMode, async (mode) => {
         class="mb-6 p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <h3 class="text-sm font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
-            BEAT-TIER × RATE-TIER 分布
+            {{ t('scatter.distributionTitle') }}
           </h3>
           <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-            {{ scatterPoints.length.toLocaleString() }} プレイヤー
+            {{ scatterPoints.length.toLocaleString() }} {{ t('scatter.playerCountSuffix') }}
           </span>
         </div>
         <RankingScatterChart :points="scatterPoints" />

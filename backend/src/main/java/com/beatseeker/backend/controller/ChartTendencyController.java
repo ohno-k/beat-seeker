@@ -2,9 +2,11 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.ChartTendencyProfile;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.ChartTendencyService;
+import com.beatseeker.backend.service.PairRegressionService;
 import com.beatseeker.backend.service.SkillTreeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -55,6 +57,10 @@ public class ChartTendencyController {
     private final UserRepository userRepository;
     /** 管理者判定のロジックを共通化した Service。 */
     private final AdminAuthService adminAuthService;
+    /** スコアテーブル直接参照用（pair-scatter エンドポイント）。 */
+    private final ScoreRepository scoreRepository;
+    /** 譜面ペア回帰のキャッシュ（伸びしろ算出に使う）。 */
+    private final PairRegressionService pairRegressionService;
 
     /**
      * 【コンストラクタ】 Spring DI によりサービス・リポジトリを注入する。
@@ -62,11 +68,15 @@ public class ChartTendencyController {
     public ChartTendencyController(ChartTendencyService service,
                                    SkillTreeService skillTreeService,
                                    UserRepository userRepository,
-                                   AdminAuthService adminAuthService) {
+                                   AdminAuthService adminAuthService,
+                                   ScoreRepository scoreRepository,
+                                   PairRegressionService pairRegressionService) {
         this.service = service;
         this.skillTreeService = skillTreeService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
+        this.scoreRepository = scoreRepository;
+        this.pairRegressionService = pairRegressionService;
     }
 
     // ── 管理者エンドポイント ─────────────────────────────────────
@@ -345,6 +355,222 @@ public class ChartTendencyController {
      * @param auth 認証情報（nullable）
      * @return スキルツリー構造の Map
      */
+    /**
+     * 【メソッドの役割】 2 譜面の両方をプレイしているユーザー全員の (scoreA, scoreB) ペアを返す。
+     *
+     * フロントエンドはこのレスポンスを散布図にし、相関や予測の傾向を可視化する。
+     * INNER JOIN によりサンプル数 n = 「両方をプレイしているユーザー数」となる。
+     *
+     * GET /api/analysis/score-pair-scatter?titleA=...&difficultyA=ANOTHER&difficultyCodeA=4
+     *                                     &titleB=...&difficultyB=ANOTHER&difficultyCodeB=4
+     *
+     * @param titleA          譜面 A の曲名
+     * @param difficultyA     譜面 A の難易度名（"ANOTHER" / "LEGGENDARIA" など）
+     * @param difficultyCodeA 譜面 A の難易度コード（"4" = ANOTHER, "10" = LEGGENDARIA）
+     * @param titleB          譜面 B の曲名
+     * @param difficultyB     譜面 B の難易度名
+     * @param difficultyCodeB 譜面 B の難易度コード
+     * @return {n: int, points: [{userId, displayName, scoreA, scoreB, notesA, notesB}, ...]}
+     */
+    /**
+     * 【メソッドの役割】 譜面 A と相関の強い譜面候補（B 候補）を上位 limit 件返す。
+     *
+     * フロントエンドが譜面 A 選択時に「自動で B を埋める」ために使う。
+     *
+     * GET /api/analysis/top-correlated?title=...&difficulty=ANOTHER&difficultyCode=4&limit=10
+     *
+     * @param title          譜面 A の曲名
+     * @param difficulty     譜面 A の難易度名
+     * @param difficultyCode 譜面 A の難易度コード（"4" or "10"）
+     * @param limit          返却件数（デフォルト 10）
+     * @param minN           最小サンプル数（デフォルト 30）
+     * @return {candidates: [{title, difficultyName, n, r}, ...]}
+     */
+    @GetMapping("/api/analysis/top-correlated")
+    public ResponseEntity<Map<String, Object>> topCorrelated(
+            @RequestParam String title,
+            @RequestParam String difficulty,
+            @RequestParam String difficultyCode,
+            @RequestParam(required = false, defaultValue = "10") int limit,
+            @RequestParam(required = false, defaultValue = "30") int minN,
+            @RequestParam(required = false, defaultValue = "2.0") double minStddevPct) {
+
+        // PostgreSQL の planner が JOIN + GROUP BY + 集計関数の組合せで巨大なプランを生成し
+        // 30 秒タイムアウトを超える事象が発生したため、Java 側で集計する方式に切り替えた。
+        // データ量は ANOTHER/LEGGENDARIA の A 以上スコアで数万行程度なのでメモリで余裕。
+
+        // 1) 譜面 A のノーツ数（A 以上のしきい値計算用）を取得
+        List<Map<String, Object>> chartNotes = scoreRepository.findAllAnotherLeggChartNotes();
+        java.util.Map<String, Integer> notesByKey = new java.util.HashMap<>();
+        for (Map<String, Object> row : chartNotes) {
+            String t = (String) row.get("title");
+            String d = (String) row.get("difficultyName");
+            Integer n = ((Number) row.get("notes")).intValue();
+            notesByKey.put(t + "\0" + d, n);
+        }
+        Integer notesA = notesByKey.get(title + "\0" + difficulty);
+        if (notesA == null || notesA == 0) {
+            return ResponseEntity.ok(java.util.Map.of("candidates", java.util.List.of()));
+        }
+        double aGradeThresholdA = notesA * 2.0 * 0.6667;
+
+        // 2) 譜面 A のスコアを取得し、A 以上のユーザーのみを (userId -> scoreA) マップへ
+        List<Map<String, Object>> aScores = scoreRepository.findUserScoresForChart(title, difficulty);
+        java.util.Map<Long, Integer> scoreAByUser = new java.util.HashMap<>();
+        for (Map<String, Object> row : aScores) {
+            int score = ((Number) row.get("score")).intValue();
+            if (score >= aGradeThresholdA) {
+                scoreAByUser.put(((Number) row.get("userId")).longValue(), score);
+            }
+        }
+        if (scoreAByUser.isEmpty()) {
+            return ResponseEntity.ok(java.util.Map.of("candidates", java.util.List.of()));
+        }
+
+        // 3) 該当ユーザー集合の ANOTHER/LEGG 全スコアを 1 クエリで取得
+        // Java 側で IN リストを組み立てると数百個の user_id が SQL 文字列に展開されて
+        // パース/プランニングに時間がかかる。サブクエリ版で DB 内部で解決させる。
+        List<Map<String, Object>> bScores = scoreRepository.findAnotherLeggScoresForChartAUsers(title, difficulty);
+
+        // 4) (title, difficultyName) ごとに (scoreA, scoreB) ペアを集めて相関係数を計算
+        java.util.Map<String, java.util.List<int[]>> pairsByKey = new java.util.HashMap<>();
+        for (Map<String, Object> row : bScores) {
+            String bTitle = (String) row.get("title");
+            String bDiff = (String) row.get("difficultyName");
+            // 譜面 A 自身は除外
+            if (bTitle.equals(title) && bDiff.equals(difficulty)) continue;
+
+            Integer notesB = notesByKey.get(bTitle + "\0" + bDiff);
+            if (notesB == null || notesB == 0) continue;
+            int scoreB = ((Number) row.get("score")).intValue();
+            // B 側も A 以上の rate でフィルタ
+            if (scoreB < notesB * 2.0 * 0.6667) continue;
+
+            Long uid = ((Number) row.get("userId")).longValue();
+            Integer scoreA = scoreAByUser.get(uid);
+            if (scoreA == null) continue;
+
+            pairsByKey.computeIfAbsent(bTitle + "\0" + bDiff, k -> new java.util.ArrayList<>())
+                      .add(new int[]{scoreA, scoreB});
+        }
+
+        // 5) 各候補について Pearson r と σ(B 率) を計算し、フィルタ＆ランキング
+        java.util.List<Map<String, Object>> candidates = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, java.util.List<int[]>> e : pairsByKey.entrySet()) {
+            java.util.List<int[]> pairs = e.getValue();
+            int n = pairs.size();
+            if (n < minN) continue;
+
+            double meanA = 0, meanB = 0;
+            for (int[] p : pairs) { meanA += p[0]; meanB += p[1]; }
+            meanA /= n; meanB /= n;
+
+            double sxx = 0, syy = 0, sxy = 0;
+            for (int[] p : pairs) {
+                double dx = p[0] - meanA, dy = p[1] - meanB;
+                sxx += dx * dx; syy += dy * dy; sxy += dx * dy;
+            }
+            if (sxx == 0 || syy == 0) continue;
+            double r = sxy / Math.sqrt(sxx * syy);
+
+            // σ(B) を rate (%) 単位に換算: stddev_score * 100 / max_score
+            String[] keyParts = e.getKey().split("\0");
+            int notesB = notesByKey.get(e.getKey());
+            double stddevBScore = Math.sqrt(syy / n);
+            double stddevBPct = stddevBScore * 100.0 / (notesB * 2.0);
+            if (stddevBPct < minStddevPct) continue;
+
+            Map<String, Object> cand = new java.util.HashMap<>();
+            cand.put("title", keyParts[0]);
+            cand.put("difficultyName", keyParts[1]);
+            cand.put("n", n);
+            cand.put("r", r);
+            cand.put("stddevB", stddevBPct);
+            candidates.add(cand);
+        }
+
+        // 6) |r| 降順ソート、上位 limit 件
+        candidates.sort((a, b) -> Double.compare(
+                Math.abs(((Number) b.get("r")).doubleValue()),
+                Math.abs(((Number) a.get("r")).doubleValue())));
+        if (candidates.size() > limit) candidates = candidates.subList(0, limit);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("candidates", candidates);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 【メソッドの役割】 ログインユーザーの「伸びしろ」一覧を返す。
+     *
+     * 各譜面 B（A 以上で出している）について、同じ A 以上で出している他譜面 A 達の
+     * 回帰式 (B = slope·A + intercept, 重み = r²) で予測スコアを加重平均し、
+     * (predicted − actual) を伸びしろとして降順ソートして返す。
+     *
+     * GET /api/analysis/growth-potential
+     *
+     * @return {items: [{title, difficultyName, difficultyLevel, currentScore, predictedScore, gap, supportCount, ...}]}
+     */
+    @GetMapping("/api/analysis/growth-potential")
+    public ResponseEntity<Map<String, Object>> growthPotential(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        String iidxId = (String) auth.getPrincipal();
+        User user = userRepository.findByIidxId(iidxId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        List<Map<String, Object>> items = pairRegressionService.computeGrowthPotential(user.getId());
+        Map<String, Object> result = new HashMap<>();
+        result.put("items", items);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 【メソッドの役割】 管理者向け: 指定ユーザーの伸びしろランキングを返す（予測精度の検証用）。
+     *
+     * GET /api/admin/growth-potential?userId=...
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param userId 対象ユーザーの DB 主キー
+     * @return {items: [...]}（{@link #growthPotential} と同形）。ユーザー不在なら 404
+     */
+    @GetMapping("/api/admin/growth-potential")
+    public ResponseEntity<Map<String, Object>> growthPotentialForUser(
+            Authentication auth,
+            @RequestParam long userId) {
+
+        checkAdmin(auth);
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        List<Map<String, Object>> items = pairRegressionService.computeGrowthPotential(user.getId());
+        Map<String, Object> result = new HashMap<>();
+        result.put("items", items);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/api/analysis/score-pair-scatter")
+    public ResponseEntity<Map<String, Object>> scorePairScatter(
+            @RequestParam String titleA,
+            @RequestParam String difficultyA,
+            @RequestParam String difficultyCodeA,
+            @RequestParam String titleB,
+            @RequestParam String difficultyB,
+            @RequestParam String difficultyCodeB) {
+
+        List<Map<String, Object>> rows = scoreRepository.findPairScoreScatter(
+                titleA, difficultyA, difficultyCodeA,
+                titleB, difficultyB, difficultyCodeB);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("n", rows.size());
+        result.put("points", rows);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/api/analysis/skill-tree")
     public ResponseEntity<Map<String, Object>> getSkillTree(Authentication auth) {
         User user = null;

@@ -47,6 +47,7 @@ import ArcadeAssistView from './views/ArcadeView.vue';
 import SongAverageView from './views/SongAverageView.vue';
 import DifficultyTableView from './views/DifficultyTableView.vue';
 import ScorePredictionView from './views/ScorePredictionView.vue';
+import ScoreScatterView from './views/ScoreScatterView.vue';
 import SkillTreeView from './views/SkillTreeView.vue';
 import ChartListView from './views/ChartListView.vue';
 import RankComparisonView from './views/RankComparisonView.vue';
@@ -125,7 +126,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter'>('dashboard')
 /**
  * 閲覧モード。自分のデータを見る場合は null。
  *  - 'admin': 管理者が他ユーザーのデータを閲覧中
@@ -1716,8 +1717,8 @@ const handleUnifiedClose = async () => {
           <RankComparisonView class="w-full max-w-6xl mx-auto animate-fade-in" />
         </template>
 
-        <!-- スコア予測: サポーター限定機能。非サポーターには課金誘導カードを表示 -->
-        <template v-else-if="activeTab === 'score-prediction'">
+        <!-- スコアペア散布図: サポーター限定機能。非サポーターには課金誘導カードを表示 -->
+        <template v-else-if="activeTab === 'score-scatter'">
           <div v-if="!user?.isSupporter" class="w-full max-w-2xl mx-auto animate-fade-in">
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-12 text-center shadow-sm">
               <div class="w-20 h-20 mx-auto mb-6 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center">
@@ -1738,8 +1739,12 @@ const handleUnifiedClose = async () => {
               </button>
             </div>
           </div>
+          <ScoreScatterView v-else />
+        </template>
+
+        <!-- 譜面分析（スコア予測）: 全ユーザー利用可 -->
+        <template v-else-if="activeTab === 'score-prediction'">
           <ScorePredictionView
-            v-else
             class="w-full max-w-6xl mx-auto animate-fade-in"
             :viewing-user-id="viewingUserId"
             :viewing-mode="viewingMode"

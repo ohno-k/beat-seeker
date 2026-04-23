@@ -18,15 +18,19 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useScores } from '../composables/useScores';
 import { useFriends } from '../composables/useFriends';
+import { useAuth, API_BASE } from '../composables/useAuth';
+import { useAdmin } from '../composables/useAdmin';
 import { useI18n } from '../composables/useI18n';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 import { calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, calculatePoints } from '../utils/beatTier';
 
 const { t } = useI18n();
+const { authHeaders } = useAuth();
+const { isAdmin } = useAdmin();
 
-/** モード選択 */
-type Mode = 'rival' | 'border' | 'beat-pt' | 'rate-pt';
+/** モード選択。'potential' = 伸びしろ（pair-scatter 予測ベース） */
+type Mode = 'rival' | 'border' | 'beat-pt' | 'rate-pt' | 'potential';
 /** Border モードのターゲットグレード */
 type BorderTarget = 'aa' | 'aaa' | 'max-minus';
 
@@ -77,6 +81,32 @@ const borderTarget = ref<BorderTarget>('aa');
 const beatPtTarget = ref<number | null>(null);
 /** Rate-PT 目標ポイント（単曲目標） */
 const ratePtTarget = ref<number | null>(null);
+
+/** 伸びしろモード: API レスポンスをキャッシュ */
+interface GrowthPotentialItem {
+  title: string;
+  difficultyName: string;
+  difficultyLevel: number;
+  currentScore: number;
+  predictedScore: number;
+  gap: number;
+  supportCount: number;
+  maxScore?: number;
+  currentRate?: number;
+  predictedRate?: number;
+}
+const potentialItems = ref<GrowthPotentialItem[]>([]);
+/** 伸びしろデータ取得中フラグ（初回計算は数秒かかる） */
+const isPotentialLoading = ref(false);
+const potentialError = ref('');
+/** 検証用: 閲覧対象ユーザー ID。null = 自分。管理者のみ切替可能。 */
+const potentialViewUserId = ref<number | null>(null);
+/** 検証用: ユーザー一覧（管理者ドロップダウンのソース） */
+interface AdminUser { id: number; displayName: string; iidxId: string; }
+const adminUsers = ref<AdminUser[]>([]);
+/** 検証用: 他人のスコア（被験者の現在スコアを表示するため別途取得） */
+const viewedUserScores = ref<ScoreRecord[]>([]);
+const isLoadingViewedScores = ref(false);
 
 /** AA のスコア率下限（%） */
 const AA_RATE = 77.77;
@@ -184,6 +214,90 @@ onMounted(async () => {
     isLoading.value = false;
   }
   fetchFriends();
+});
+
+/**
+ * 【関数】 伸びしろデータを取得する。初回はバックエンドのキャッシュ構築（数秒）が走る。
+ * potentialViewUserId が null なら自分（/api/analysis/growth-potential）、
+ * それ以外なら管理者向け（/api/admin/growth-potential?userId=X）を叩く。
+ * @param force 既存データを破棄して再取得するかどうか
+ */
+async function fetchPotential(force = false) {
+  if (!force && potentialItems.value.length > 0 && !potentialError.value) return;
+  isPotentialLoading.value = true;
+  potentialError.value = '';
+  potentialItems.value = [];
+  try {
+    const url = potentialViewUserId.value == null
+      ? `${API_BASE}/api/analysis/growth-potential`
+      : `${API_BASE}/api/admin/growth-potential?userId=${potentialViewUserId.value}`;
+    const res = await fetch(url, { headers: authHeaders() });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json() as { items: GrowthPotentialItem[] };
+    potentialItems.value = data.items ?? [];
+  } catch (e: any) {
+    potentialError.value = e?.message ?? '通信エラー';
+  } finally {
+    isPotentialLoading.value = false;
+  }
+}
+
+/**
+ * 【関数】 管理者用ユーザー一覧を取得（初回のみ）。検証ドロップダウンのソース。
+ */
+async function loadAdminUsers() {
+  if (adminUsers.value.length > 0 || !isAdmin.value) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/users`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const list = await res.json() as AdminUser[];
+    // 表示名で並べる（昇順）
+    adminUsers.value = list.sort((a, b) =>
+      (a.displayName || a.iidxId).localeCompare(b.displayName || b.iidxId, 'ja'));
+  } catch (e) {
+    console.error('loadAdminUsers failed', e);
+  }
+}
+
+/**
+ * 【関数】 閲覧対象ユーザーのスコアを取得する（被験者の現在スコアと比較するため）。
+ * 自分（potentialViewUserId=null）の場合は myScores を使うので何もしない。
+ */
+async function loadViewedUserScores() {
+  if (potentialViewUserId.value == null) {
+    viewedUserScores.value = [];
+    return;
+  }
+  isLoadingViewedScores.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/users/${potentialViewUserId.value}/scores`, { headers: authHeaders() });
+    if (!res.ok) { viewedUserScores.value = []; return; }
+    const raw = await res.json();
+    // /api/admin/users/{id}/scores はフラットな配列で返ってくるので、
+    // groupFriendScores で曲単位 ScoreData に組み直してから flattenScores で ScoreRecord に展開する。
+    viewedUserScores.value = flattenScores(groupFriendScores(raw));
+  } catch (e) {
+    console.error('loadViewedUserScores failed', e);
+    viewedUserScores.value = [];
+  } finally {
+    isLoadingViewedScores.value = false;
+  }
+}
+
+// 伸びしろモードに切り替えたら（初回のみ）取得する。管理者ならユーザー一覧も同時に取得。
+watch(mode, (m) => {
+  if (m === 'potential') {
+    fetchPotential();
+    if (isAdmin.value) loadAdminUsers();
+  }
+});
+
+// 検証対象ユーザーが切り替わったら、伸びしろと該当ユーザーのスコアを再取得
+watch(potentialViewUserId, () => {
+  if (mode.value === 'potential') {
+    fetchPotential(true);
+    loadViewedUserScores();
+  }
 });
 
 // フレンド選択変更時に、そのフレンドのスコアを取得する（空選択時はクリア）
@@ -326,6 +440,50 @@ const suggestions = computed((): SongCard[] => {
     return cards.sort((a, b) => a.gap - b.gap).slice(0, 50);
   }
 
+  if (mode.value === 'potential') {
+    // 伸びしろモード: backend の予測スコアと現在スコアの差分を表示
+    if (potentialItems.value.length === 0) return [];
+    // 表示情報の参照元: 自分閲覧時は myScores、他ユーザー検証時は viewedUserScores
+    const sourceScores = potentialViewUserId.value == null ? myScores.value : viewedUserScores.value;
+    const myMap = new Map(sourceScores.map(s => [`${s.title}_${s.difficultyName}`, s]));
+    const cards: SongCard[] = [];
+    for (const item of potentialItems.value) {
+      if (item.gap <= 0) continue; // 伸びしろがない or マイナスは無視
+      // Lv11/12 フィルタ（他モードと同じ）
+      if (item.difficultyLevel === 11 && !showLv11.value) continue;
+      if (item.difficultyLevel === 12 && !showLv12.value) continue;
+      if (item.difficultyLevel !== 11 && item.difficultyLevel !== 12) continue;
+
+      const my = myMap.get(`${item.title}_${item.difficultyName}`);
+      if (!my) continue; // 自分のスコアが見つからない（理論的にはあり得ない）
+
+      const predictedScoreRounded = Math.round(item.predictedScore);
+      const gapRounded = Math.round(item.gap);
+      cards.push({
+        key: `${item.title}_${item.difficultyName}`,
+        title: item.title,
+        difficultyName: item.difficultyName,
+        difficultyColor: my.difficultyColor,
+        difficultyLevel: item.difficultyLevel,
+        score: item.currentScore,
+        maxScore: item.maxScore ?? my.maxScore,
+        scoreRate: item.currentRate ?? my.scoreRate,
+        djLevel: my.djLevel,
+        informalRank: my.informalRank,
+        beatTierPoints: my.beatTierPoints,
+        maxBeatTierPoints: my.maxBeatTierPoints,
+        gap: gapRounded,
+        gapLabel: `+${gapRounded.toLocaleString()}`,
+        subLabel: t('arcade.subPotential', {
+          predicted: predictedScoreRounded.toLocaleString(),
+          count: item.supportCount,
+        }),
+      });
+    }
+    // backend が gap 降順で返すのでそのまま、上位50件
+    return cards.slice(0, 50);
+  }
+
   if (mode.value === 'rate-pt') {
     const target = ratePtTarget.value;
     const cards: SongCard[] = [];
@@ -383,10 +541,11 @@ const suggestions = computed((): SongCard[] => {
 const modeLabel = computed((): string => {
   if (!mode.value) return '';
   return {
-    'rival':    t('arcade.modeLabelRival'),
-    'border':   t('arcade.modeLabelBorder'),
-    'beat-pt':  t('arcade.modeLabelBeatPt'),
-    'rate-pt':  t('arcade.modeLabelRatePt'),
+    'rival':     t('arcade.modeLabelRival'),
+    'border':    t('arcade.modeLabelBorder'),
+    'beat-pt':   t('arcade.modeLabelBeatPt'),
+    'rate-pt':   t('arcade.modeLabelRatePt'),
+    'potential': t('arcade.modeLabelPotential'),
   }[mode.value] ?? '';
 });
 
@@ -395,9 +554,10 @@ const modeSortNote = computed((): string => {
   if (!mode.value) return '';
   if (mode.value === 'rival') return rivalSortClosest.value ? t('arcade.sortNoteRivalClosest') : t('arcade.sortNoteRivalWidest');
   return {
-    'border':  t('arcade.sortNoteBorder'),
-    'beat-pt': t('arcade.sortNoteBeatPt'),
-    'rate-pt': t('arcade.sortNoteRatePt'),
+    'border':    t('arcade.sortNoteBorder'),
+    'beat-pt':   t('arcade.sortNoteBeatPt'),
+    'rate-pt':   t('arcade.sortNoteRatePt'),
+    'potential': t('arcade.sortNotePotential'),
   }[mode.value] ?? '';
 });
 
@@ -497,7 +657,49 @@ const selectedFriend = computed(() =>
               <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.borderBtn') }}</span>
             </button>
 
+            <!-- 伸びしろ ボタン（青緑、全幅）。新機能アピールのため col-span-2 -->
+            <button
+              @click="mode = mode === 'potential' ? null : 'potential'"
+              class="col-span-2 flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              :class="mode === 'potential'
+                ? 'bg-cyan-600 border-cyan-600 text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+            >
+              <div class="flex items-center gap-2 w-full">
+                <span class="text-2xl">🌱</span>
+                <div class="flex-1">
+                  <div class="text-sm font-black">{{ t('arcade.potentialBtn') }}</div>
+                  <div class="text-[10px] font-bold opacity-70 mt-0.5">{{ t('arcade.potentialBtnDesc') }}</div>
+                </div>
+                <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
+                  :class="mode === 'potential' ? 'bg-white/20' : 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300'">
+                  NEW
+                </span>
+              </div>
+            </button>
+
           </div>
+        </div>
+
+        <!-- 伸びしろモード（管理者限定）: 検証用ユーザー切替ドロップダウン -->
+        <div v-if="mode === 'potential' && isAdmin" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-2">
+          <div class="flex items-baseline justify-between gap-2">
+            <p class="text-xs font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">{{ t('arcade.adminViewLabel') }}</p>
+            <span class="text-[10px] font-bold text-slate-400">{{ t('arcade.adminOnly') }}</span>
+          </div>
+          <select
+            v-model="potentialViewUserId"
+            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+          >
+            <option :value="null">{{ t('arcade.viewSelf') }}</option>
+            <option v-for="u in adminUsers" :key="u.id" :value="u.id">
+              {{ u.displayName || t('scatter.noName') }} ({{ u.iidxId }})
+            </option>
+          </select>
+          <p v-if="isLoadingViewedScores" class="text-[10px] text-slate-400">{{ t('arcade.loadingViewedScores') }}</p>
+          <p v-else-if="potentialViewUserId != null" class="text-[10px] text-slate-500 dark:text-slate-400">
+            {{ t('arcade.adminViewHint') }}
+          </p>
         </div>
 
         <!-- Rival モード: フレンド選択＋並び替え切替 -->
@@ -604,6 +806,18 @@ const selectedFriend = computed(() =>
             <p class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t('arcade.noRivalLoss', { name: selectedFriend?.displayName ?? '' }) }}</p>
           </div>
 
+          <!-- 伸びしろモード: ローディング / エラー -->
+          <div v-else-if="mode === 'potential' && (isPotentialLoading || isLoadingViewedScores)" class="text-center py-12">
+            <div class="w-10 h-10 border-4 border-cyan-100 border-t-cyan-600 rounded-full animate-spin mx-auto mb-3"></div>
+            <p class="text-sm font-bold text-slate-500">
+              {{ potentialViewUserId == null ? t('arcade.buildingModel') : t('arcade.computingForUser') }}
+            </p>
+          </div>
+          <div v-else-if="mode === 'potential' && potentialError" class="text-center py-12">
+            <p class="text-4xl mb-3">⚠️</p>
+            <p class="text-sm font-bold text-red-600 dark:text-red-400">{{ potentialError }}</p>
+          </div>
+
           <div v-else-if="mode !== 'rival' && suggestions.length === 0" class="text-center py-12">
             <p class="text-4xl mb-3">✨</p>
             <p class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t('arcade.noSongs') }}</p>
@@ -663,6 +877,7 @@ const selectedFriend = computed(() =>
                     'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300': mode === 'border',
                     'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300': mode === 'beat-pt',
                     'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300': mode === 'rate-pt',
+                    'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300': mode === 'potential',
                   }"
                 >
                   {{ s.gapLabel }}

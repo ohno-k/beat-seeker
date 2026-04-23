@@ -171,6 +171,153 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScoresWithUserInfo();
 
     /**
+     * 【メソッドの役割】 2 譜面の両方をプレイしているユーザーの (scoreA, scoreB) ペアを返す。
+     *
+     * INNER JOIN を user_id でかけるため「両方プレイ済み」のユーザーだけが残る。
+     * ノーツ数（max score 算出用）も同梱して返し、フロントエンドで score_rate を計算できるようにする。
+     *
+     * 返却キー:
+     *   userId / displayName / privacyLevel / scoreA / scoreB
+     *   notesA / notesB（max_score = notes * 2 で求められる）
+     *
+     * @param titleA 譜面 A の曲名
+     * @param diffA  譜面 A の難易度名（"ANOTHER" / "LEGGENDARIA" など）
+     * @param titleB 譜面 B の曲名
+     * @param diffB  譜面 B の難易度名
+     * @return ペア行リスト（プレイヤー数 = list.size()）
+     */
+    @Query(value =
+        "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.privacy_level AS \"privacyLevel\", " +
+        "       sa.score AS \"scoreA\", sb.score AS \"scoreB\", " +
+        "       sda.notes AS \"notesA\", sdb.notes AS \"notesB\" " +
+        "FROM scores sa " +
+        "JOIN scores sb ON sb.user_id = sa.user_id " +
+        "JOIN users u ON u.id = sa.user_id " +
+        "LEFT JOIN song_definitions sda " +
+        "       ON sda.title = sa.title AND sda.difficulty = :diffCodeA AND sda.revision = 'active' " +
+        "LEFT JOIN song_definitions sdb " +
+        "       ON sdb.title = sb.title AND sdb.difficulty = :diffCodeB AND sdb.revision = 'active' " +
+        "WHERE sa.title = :titleA AND sa.difficulty_name = :diffA AND sa.score > 0 " +
+        "  AND sb.title = :titleB AND sb.difficulty_name = :diffB AND sb.score > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findPairScoreScatter(
+            @Param("titleA") String titleA,
+            @Param("diffA") String diffA,
+            @Param("diffCodeA") String diffCodeA,
+            @Param("titleB") String titleB,
+            @Param("diffB") String diffB,
+            @Param("diffCodeB") String diffCodeB);
+
+    /**
+     * 【メソッドの役割】 譜面 A と相関の強い譜面（B 候補）を上位 limit 件返す。
+     *
+     * - 集計対象は ANOTHER / LEGGENDARIA 譜面のみ
+     * - 両方 A 以上でプレイしているサンプルのみを使う
+     * - サンプル数 >= minN
+     * - **飽和譜面除外**: B 側スコア率の標準偏差 >= minStddevPct (%)
+     *   （CONCEPTUAL のような「全員ほぼ満点」譜面は σ≈0 で除外され、
+     *     高 r でも「予測情報量がほぼゼロ」の候補が上位に残らなくなる）
+     * - ピアソン相関 r で |r| 降順ソート
+     *
+     * 返却キー: title / difficultyName / n / r / stddevB
+     *
+     * @param titleA         譜面 A の曲名
+     * @param diffA          譜面 A の難易度名
+     * @param diffCodeA      譜面 A の難易度コード
+     * @param minN           最小サンプル数
+     * @param minStddevPct   B 側 score rate (%) の最低標準偏差。例 2.0 → σ(B%) >= 2%
+     * @param limit          返す候補数の上限
+     */
+    /**
+     * 【メソッドの役割】 指定譜面に対する全ユーザーのスコアを返す（軽量版）。
+     * 返却キー: userId / score
+     */
+    @Query(value =
+        "SELECT s.user_id AS \"userId\", s.score AS \"score\" " +
+        "FROM scores s " +
+        "WHERE s.title = :title AND s.difficulty_name = :difficultyName AND s.score > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findUserScoresForChart(
+            @Param("title") String title,
+            @Param("difficultyName") String difficultyName);
+
+    /**
+     * 【メソッドの役割】 指定ユーザー集合の ANOTHER / LEGGENDARIA 全スコアを返す。
+     * 返却キー: userId / title / difficultyName / score
+     */
+    @Query(value =
+        "SELECT s.user_id AS \"userId\", s.title AS \"title\", " +
+        "       s.difficulty_name AS \"difficultyName\", s.score AS \"score\" " +
+        "FROM scores s " +
+        "WHERE s.user_id IN (:userIds) " +
+        "  AND s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND s.score > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findAnotherLeggScoresForUsers(
+            @Param("userIds") java.util.Collection<Long> userIds);
+
+    /**
+     * 【メソッドの役割】 「譜面 A をプレイしているユーザー」の ANOTHER/LEGG 全スコアを 1 クエリで返す。
+     *
+     * Java 側の 2 段階フェッチを 1 クエリに統合し、user_id の IN リスト送信のコストを避ける。
+     * 返却キー: userId / title / difficultyName / score
+     */
+    @Query(value =
+        "SELECT s.user_id AS \"userId\", s.title AS \"title\", " +
+        "       s.difficulty_name AS \"difficultyName\", s.score AS \"score\" " +
+        "FROM scores s " +
+        "WHERE s.user_id IN ( " +
+        "  SELECT sa.user_id FROM scores sa " +
+        "  WHERE sa.title = :titleA AND sa.difficulty_name = :diffA AND sa.score > 0 " +
+        ") " +
+        "AND s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "AND s.score > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findAnotherLeggScoresForChartAUsers(
+            @Param("titleA") String titleA,
+            @Param("diffA") String diffA);
+
+    /**
+     * 【メソッドの役割】 ANOTHER / LEGGENDARIA 全譜面の (title, difficultyName, notes) を返す。
+     */
+    @Query(value =
+        "SELECT title AS \"title\", " +
+        "       CASE difficulty WHEN '4' THEN 'ANOTHER' WHEN '10' THEN 'LEGGENDARIA' END AS \"difficultyName\", " +
+        "       notes AS \"notes\" " +
+        "FROM song_definitions " +
+        "WHERE revision = 'active' AND difficulty IN ('4', '10') AND notes IS NOT NULL AND notes > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findAllAnotherLeggChartNotes();
+
+    /**
+     * 【メソッドの役割】 全ユーザーの ANOTHER / LEGGENDARIA スコアを (userId, title, difficultyName, score) で返す。
+     * ペア回帰キャッシュ（{@code PairRegressionService}）構築時に一度だけ呼ばれる。
+     */
+    @Query(value =
+        "SELECT s.user_id AS \"userId\", s.title AS \"title\", " +
+        "       s.difficulty_name AS \"difficultyName\", s.score AS \"score\" " +
+        "FROM scores s " +
+        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findAllAnotherLeggScores();
+
+    /**
+     * 【メソッドの役割】 指定ユーザーの ANOTHER / LEGGENDARIA スコアを返す。
+     * 伸びしろ算出時、対象ユーザーの「自分の点」を引くのに使う。
+     */
+    @Query(value =
+        "SELECT s.title AS \"title\", " +
+        "       s.difficulty_name AS \"difficultyName\", " +
+        "       s.score AS \"score\", " +
+        "       s.difficulty_level AS \"difficultyLevel\" " +
+        "FROM scores s " +
+        "WHERE s.user_id = :userId " +
+        "  AND s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND s.score > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findUserAnotherLeggScores(@Param("userId") Long userId);
+
+    /**
      * 【メソッドの役割】 指定曲×譜面の「スコアランキング」を、プライバシー設定を考慮して返す。
      *
      * ネイティブ SQL。ポイント:

@@ -183,24 +183,8 @@ async function fetchPrediction(textage: string) {
 }
 
 // ── 表示ヘルパー ─────────────────────────────────────────────
-/**
- * 達成率 (0〜100%) から DJ LEVEL（MAX/MAX-/AAA/AA/A/B/C/D/E/F）を算出。
- * 閾値は公式の理論値に合わせ、MAX=100、AAA=8/9(88.89%)、AA=7/9(77.78%)...。
- */
-function djLevel(rate: number): string {
-  if (rate >= 100) return 'MAX';
-  if (rate >= 94.45) return 'MAX-';
-  if (rate >= 88.89) return 'AAA';
-  if (rate >= 77.78) return 'AA';
-  if (rate >= 66.67) return 'A';
-  if (rate >= 55.56) return 'B';
-  if (rate >= 44.44) return 'C';
-  if (rate >= 33.33) return 'D';
-  if (rate >= 22.22) return 'E';
-  return 'F';
-}
-
-// DJ LEVEL 用の色クラス（MAX-=紫、AAA=黄、AA=青、A=緑、B=暗灰、それ以下=灰）
+// DJ LEVEL 用の色クラス（MAX-=紫、AAA=黄、AA=青、A=緑、B=暗灰、それ以下=灰）。
+// 類似譜面テーブルのスコアレート色付けで使用。
 function djLevelClass(rate: number): string {
   if (rate >= 94.45) return 'text-purple-600 dark:text-purple-400 font-extrabold';
   if (rate >= 88.89) return 'text-yellow-500 dark:text-yellow-400 font-extrabold';
@@ -209,23 +193,6 @@ function djLevelClass(rate: number): string {
   if (rate >= 55.56) return 'text-slate-700 dark:text-slate-300 font-semibold';
   return 'text-slate-500 dark:text-slate-400';
 }
-
-/**
- * 表示用スコアデータをまとめる computed。
- * 予測スコア・予測達成率に加え、現在スコア／達成率との差分を計算。
- * 差分は小数第2位で四捨五入（x10 → 整数化 → /10）
- */
-const displayScore = computed(() => {
-  const r = predictionResult.value;
-  if (!r) return null;
-  const diff = (r.currentScore != null)
-    ? r.predictedScore - r.currentScore
-    : null;
-  const diffRate = (r.currentScoreRate != null)
-    ? Math.round((r.predictedScoreRate - r.currentScoreRate) * 10) / 10
-    : null;
-  return { score: r.predictedScore, rate: r.predictedScoreRate, diff, diffRate };
-});
 
 // ── 譜面傾向プロファイルの型定義 ────────────────────────────
 /**
@@ -313,7 +280,6 @@ const TAG_DISPLAY: Record<string, { label: string; colorClass: string }> = {
   scratch_low:        { label: '皿: 少ない',     colorClass: 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-slate-300' },
   chord_heavy:        { label: '同時押し寄り',   colorClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
   single_heavy:       { label: '単鍵寄り',       colorClass: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300' },
-  has_32nd:           { label: '32分あり',        colorClass: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
   has_triplet:        { label: '3連あり',         colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
   soflan:             { label: 'ソフラン',        colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
   high_effective_bpm: { label: '高速',            colorClass: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
@@ -682,77 +648,6 @@ watch(selectedEntry, async (entry) => {
             </div>
           </div>
 
-          <!-- 予測スコアパネル: 大きなスコア表示 + DJ LEVEL + 現在との差分 + 達成率プログレスバー -->
-          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
-            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
-              {{ t('scorePrediction.prediction') }}
-            </h3>
-
-            <div v-if="predictionResult.message && predictionResult.predictedScore === 0"
-              class="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">
-              {{ predictionResult.message }}
-            </div>
-
-            <div v-else-if="displayScore" class="flex flex-col sm:flex-row items-center gap-6">
-              <!-- 予測スコア大表示 + MAX表記 + DJ LEVEL + 現在スコアとの差分 -->
-              <div class="text-center shrink-0">
-                <div class="text-4xl font-extrabold text-slate-800 dark:text-white tabular-nums">
-                  {{ displayScore.score.toLocaleString() }}
-                </div>
-                <div class="text-sm text-slate-400 dark:text-slate-500 mt-0.5">
-                  / {{ (predictionResult.notes * 2).toLocaleString() }}
-                </div>
-                <div class="mt-2 text-2xl font-bold" :class="djLevelClass(displayScore.rate)">
-                  {{ djLevel(displayScore.rate) }}
-                </div>
-                <!-- 現在の自分のベストとの差分（プラスは緑、マイナスは赤） -->
-                <div v-if="displayScore.diff != null" class="mt-2 text-xs tabular-nums"
-                  :class="displayScore.diff > 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : displayScore.diff < 0
-                    ? 'text-red-500 dark:text-red-400'
-                    : 'text-slate-400 dark:text-slate-500'"
-                >
-                  <span class="font-bold">{{ displayScore.diff > 0 ? '+' : '' }}{{ displayScore.diff.toLocaleString() }}</span>
-                  <span class="ml-1">({{ displayScore.diffRate! > 0 ? '+' : '' }}{{ displayScore.diffRate }}%)</span>
-                  <div class="text-slate-400 dark:text-slate-500 font-normal mt-0.5">vs 現在スコア</div>
-                </div>
-              </div>
-
-              <!-- 達成率プログレスバー: スコアレート(%)を塗り、A/AA/AAA の目安目盛をその下に表示 -->
-              <div class="flex-1 w-full">
-                <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
-                  <span>{{ t('scorePrediction.scoreRate') }}</span>
-                  <span>{{ displayScore.rate }}%</span>
-                </div>
-                <div class="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    class="h-full rounded-full transition-all duration-700"
-                    :class="displayScore.rate >= 88.89
-                      ? 'bg-yellow-400'
-                      : displayScore.rate >= 77.78
-                      ? 'bg-blue-400'
-                      : displayScore.rate >= 66.67
-                      ? 'bg-green-400'
-                      : 'bg-slate-400'"
-                    :style="{ width: `${Math.min(displayScore.rate, 100)}%` }"
-                  />
-                </div>
-                <!-- A/AA/AAA の目安位置ラベル（プログレスバーの下にマーカー配置） -->
-                <div class="relative h-4 mt-1">
-                  <div v-for="(mark, idx) in [
-                    { label: 'A', pct: 66.67, cls: 'text-green-500' },
-                    { label: 'AA', pct: 77.78, cls: 'text-blue-500' },
-                    { label: 'AAA', pct: 88.89, cls: 'text-yellow-500' },
-                  ]" :key="idx"
-                    class="absolute text-xs font-bold -translate-x-1/2"
-                    :class="mark.cls"
-                    :style="{ left: `${mark.pct}%` }"
-                  >{{ mark.label }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- 類似譜面テーブル: 予測の根拠になった類似曲一覧。行クリックで類似度デバッグモーダル -->
           <div v-if="predictionResult.similarSongs.length"

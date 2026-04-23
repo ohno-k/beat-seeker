@@ -19,6 +19,9 @@ import {
   RANKS, RATE_TIER_RANKS,
 } from '../utils/beatTier';
 import { useDarkMode } from '../composables/useDarkMode';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 
 ChartJS.register(LinearScale, LogarithmicScale, PointElement, Tooltip, Legend);
 
@@ -139,7 +142,7 @@ const chartData = computed(() => {
 
   const datasets: any[] = [
     {
-      label: 'プレイヤー',
+      label: t('scatter.player'),
       data: userPts.map(p => ({ x: p.beatPt, y: p.ratePt, _meta: p })),
       backgroundColor: isDarkMode.value ? 'rgba(96,165,250,0.55)' : 'rgba(59,130,246,0.55)',
       borderColor: isDarkMode.value ? 'rgba(96,165,250,0.9)' : 'rgba(59,130,246,0.9)',
@@ -149,7 +152,7 @@ const chartData = computed(() => {
   ];
   if (topPts.length > 0) {
     datasets.push({
-      label: 'TOPランカー',
+      label: t('scatter.topRanker'),
       data: topPts.map(p => ({ x: p.beatPt, y: p.ratePt, _meta: p })),
       backgroundColor: isDarkMode.value ? 'rgba(251,191,36,0.45)' : 'rgba(245,158,11,0.55)',
       borderColor: isDarkMode.value ? 'rgba(251,191,36,0.85)' : 'rgba(245,158,11,0.9)',
@@ -160,7 +163,7 @@ const chartData = computed(() => {
   }
   if (myPts.length > 0) {
     datasets.push({
-      label: 'あなた',
+      label: t('scatter.you'),
       data: myPts.map(p => ({ x: p.beatPt, y: p.ratePt, _meta: p })),
       backgroundColor: 'rgba(16,185,129,1)',
       borderColor: isDarkMode.value ? '#fff' : '#0f172a',
