@@ -1092,11 +1092,12 @@ const handleSaveDiffTable = async () => {
 
 // ── ドラフト適用（本番公開） ───────────────────
 /**
- * 【関数の役割】 楽曲ドラフトのみを公開して全ユーザーの PT 再計算を走らせる。
- * 重い処理なのでバックエンド側は非同期（202 Accepted）で受け付ける。
+ * 【関数の役割】 楽曲ドラフトのみを公開する。
+ * Lv11/12 の ANOTHER/LEGGENDARIA は active 難易度表の Uncategorized に自動追加される。
+ * 配置先が Uncategorized のみで PT 算出に影響しないため、BEAT-PT 再計算は走らない。
  */
 const handleApplyDraftSongs = async () => {
-  if (!confirm('楽曲ドラフトを適用しますか？全ユーザーのポイント再計算が実行されます。')) return;
+  if (!confirm('楽曲ドラフトを適用しますか？（Lv11/12 譜面は Uncategorized に自動配置されます。BEAT-PT 再計算は行いません）')) return;
 
   isApplyingSongs.value = true;
   errorMsg.value = '';

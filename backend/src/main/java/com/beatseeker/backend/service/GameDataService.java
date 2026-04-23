@@ -237,22 +237,78 @@ public class GameDataService {
     // ── Draft 昇格（管理者用）────────────────────────────────
 
     /**
-     * 【メソッドの役割】 draft の楽曲のみを active に昇格し、全ユーザーの BEAT-PT を再計算する。
-     * 難易度表の draft には触れない（別エンドポイントで独立に適用する）。
+     * 【メソッドの役割】 draft の楽曲のみを active に昇格する。
      *
-     * @throws Exception JSON 生成や再計算キックに失敗した場合
+     *  - ANOTHER(4) / LEGGENDARIA(10) のうちレベル 11 / 12 の譜面は active 難易度表の
+     *    "Uncategorized(other)" にも自動追加する（管理画面で個別配置する手間を省くため）。
+     *  - 配置先は Uncategorized なので BEAT-PT 算出ロジックには影響しない。よって
+     *    重い再計算は走らせない（再計算は難易度表適用側に集約）。
+     *  - 難易度表の draft には触れない。
+     *
+     * @throws Exception 永続化に失敗した場合
      */
     @Transactional
     public void applyDraftSongs() throws Exception {
         List<SongDefinition> draftSongs = songDefRepo.findByRevision("draft");
+
+        // Lv11/12 の ANOTHER/LEGGENDARIA を active 難易度表 Uncategorized 行に追加するための候補集合。
+        // LEGGENDARIA は難易度表表記上 "<title>[L]" となる。
+        Set<String> uncatTargets = new LinkedHashSet<>();
+        for (SongDefinition ds : draftSongs) {
+            Integer lv = ds.getLevel();
+            if (lv == null || (lv != 11 && lv != 12)) continue;
+            String diff = ds.getDifficulty();
+            if ("4".equals(diff)) {
+                uncatTargets.add(ds.getTitle());
+            } else if ("10".equals(diff)) {
+                uncatTargets.add(ds.getTitle() + "[L]");
+            }
+        }
+
         for (SongDefinition ds : draftSongs) {
             ds.setRevision("active");
             songDefRepo.save(ds);
         }
 
-        String songDataJson = getActiveSongDataJson();
-        String diffTableJson = getActiveDifficultyTableJson();
-        recalcService.recalculateAllUsersAsync(songDataJson, diffTableJson);
+        if (!uncatTargets.isEmpty()) {
+            addToActiveUncategorized(uncatTargets);
+        }
+        // BEAT-PT 再計算は意図的にスキップ（Uncategorized 配置のみで PT 算出に影響しないため）。
+    }
+
+    /**
+     * 【メソッドの役割】 active 難易度表の "Uncategorized(other)" ランクに楽曲を追加する。
+     * 既に同名エントリがある場合はスキップする。該当ランクが存在しない場合は何もしない。
+     */
+    private void addToActiveUncategorized(Set<String> songTitles) {
+        List<DifficultyRank> activeRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("active");
+        DifficultyRank uncat = null;
+        for (DifficultyRank r : activeRanks) {
+            if ("Uncategorized(other)".equals(r.getRankValue())) {
+                uncat = r;
+                break;
+            }
+        }
+        if (uncat == null) return;
+
+        Set<String> existing = new HashSet<>();
+        int maxOrder = 0;
+        for (DifficultyRankSong s : uncat.getSongs()) {
+            existing.add(s.getSongTitle());
+            if (s.getSortOrder() != null && s.getSortOrder() > maxOrder) {
+                maxOrder = s.getSortOrder();
+            }
+        }
+
+        for (String title : songTitles) {
+            if (existing.contains(title)) continue;
+            DifficultyRankSong newSong = new DifficultyRankSong();
+            newSong.setDifficultyRank(uncat);
+            newSong.setSongTitle(title);
+            newSong.setSortOrder(++maxOrder);
+            uncat.getSongs().add(newSong);
+        }
+        diffRankRepo.save(uncat);
     }
 
     /**

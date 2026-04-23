@@ -198,7 +198,7 @@ public class GameDataController {
         checkAdminAccess(auth);
         try {
             gameDataService.applyDraftSongs();
-            return ResponseEntity.accepted().body(Map.of("message", "楽曲ドラフトを適用しました。バックグラウンドでポイント再計算を開始します。"));
+            return ResponseEntity.ok(Map.of("message", "楽曲ドラフトを適用しました（Lv11/12 譜面は Uncategorized に追加。BEAT-PT 再計算なし）"));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", "適用エラー: " + e.getMessage()));
         }
