@@ -52,6 +52,8 @@ interface SongCard {
   gapLabel: string;
   subLabel: string;
   friendScore?: number;
+  /** 伸びしろモード専用: 予測精度。LOW のときは UI でバッジ表示する */
+  accuracy?: 'HIGH' | 'LOW';
 }
 
 const { fetchMyScores } = useScores();
@@ -91,6 +93,8 @@ interface GrowthPotentialItem {
   predictedScore: number;
   gap: number;
   supportCount: number;
+  /** "HIGH" = |r|≧0.95 ペアで算出、"LOW" = |r|≧0.90 までフォールバック */
+  accuracy?: 'HIGH' | 'LOW';
   maxScore?: number;
   currentRate?: number;
   predictedRate?: number;
@@ -478,6 +482,7 @@ const suggestions = computed((): SongCard[] => {
           predicted: predictedScoreRounded.toLocaleString(),
           count: item.supportCount,
         }),
+        accuracy: item.accuracy,
       });
     }
     // backend が gap 降順で返すのでそのまま、上位50件
@@ -850,6 +855,14 @@ const selectedFriend = computed(() =>
                   </span>
                   <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-50 dark:bg-slate-700/50 text-slate-500">
                     {{ s.djLevel }}
+                  </span>
+                  <!-- 伸びしろモード LOW 精度バッジ: 0.90 フォールバックで算出された予測 -->
+                  <span
+                    v-if="s.accuracy === 'LOW'"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                    :title="t('arcade.lowAccuracyTooltip')"
+                  >
+                    {{ t('arcade.lowAccuracyBadge') }}
                   </span>
                 </div>
 

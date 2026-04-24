@@ -45,6 +45,8 @@ export const en = {
   'arcade.modeLabelPotential': 'Growth Potential Ranking',
   'arcade.sortNotePotential': 'Sorted by predicted score gap (predicted − current) descending, derived from cross-chart correlations',
   'arcade.subPotential': 'Predicted {predicted} pt (from {count} reference charts)',
+  'arcade.lowAccuracyBadge': 'Approx',
+  'arcade.lowAccuracyTooltip': 'Few high-correlation (|r|≧0.95) reference charts available; computed by relaxing the threshold to |r|≧0.90',
   'arcade.adminViewLabel': 'Verification: viewing user',
   'arcade.adminOnly': 'Admin only',
   'arcade.viewSelf': 'Self',

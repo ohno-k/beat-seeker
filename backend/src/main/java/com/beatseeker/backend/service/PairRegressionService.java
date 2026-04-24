@@ -33,8 +33,20 @@ public class PairRegressionService {
 
     /** 集計に必要な最小サンプル数（両譜面プレイ済みユーザー数）。 */
     private static final int MIN_N = 30;
-    /** 採用する最小相関係数の絶対値。これ未満はノイズとして捨てる。 */
-    private static final double MIN_R = 0.4;
+    /**
+     * キャッシュ採用する最小相関係数の絶対値。
+     * 予測時はさらに {@link #PRIMARY_R} / {@link #FALLBACK_R} で再フィルタする。
+     */
+    private static final double MIN_R = 0.90;
+    /** 1段目（HIGH精度）の最小相関係数。 */
+    private static final double PRIMARY_R = 0.95;
+    /** 2段目（LOW精度フォールバック）の最小相関係数。 */
+    private static final double FALLBACK_R = 0.90;
+    /** 表示する gap (= predicted - actual) に掛ける補正係数。
+     *  低相関ペア除外で予測が控えめになる傾向を補正し、現行ベースに近い体感の伸びしろを提示する。 */
+    private static final double GAP_COEFFICIENT = 1.2;
+    /** 加重平均に必要な最小サポート数（少なすぎる予測は不安定なので捨てる）。 */
+    private static final int SUPPORT_MIN = 3;
     /** A グレード閾値（scoreRate %）。 */
     private static final double A_GRADE_RATE = 0.6667;
 
@@ -216,12 +228,16 @@ public class PairRegressionService {
     /**
      * 【メソッドの役割】 指定ユーザーの「伸びしろ」一覧を返す。
      *
-     * 各譜面 B（ユーザーが A 以上で出している）について、同じく A 以上で出している他譜面 A 達から
-     * 回帰式で予測スコアを算出し、|r|^2 を重みに加重平均する。
-     * ＞ 0 な (predicted − actual) を伸びしろとして降順で並べる。
+     * 2段階の予測を行う:
+     *  - 1段目 (HIGH 精度): |r| ≧ {@link #PRIMARY_R} のペアだけで加重平均
+     *  - 2段目 (LOW 精度): 1段目の support が {@link #SUPPORT_MIN} 未満の譜面だけ
+     *    |r| ≧ {@link #FALLBACK_R} で再計算し、accuracy=LOW として表示
+     *
+     * 表示用の predicted/gap は {@link #GAP_COEFFICIENT} でスケール後 maxScore でクランプ。
      *
      * @param userId 対象ユーザー ID
-     * @return 各譜面の {title, difficultyName, difficultyLevel, currentScore, predictedScore, gap, ...}
+     * @return 各譜面の {title, difficultyName, difficultyLevel, currentScore, predictedScore,
+     *         gap, supportCount, accuracy("HIGH"|"LOW"), ...}
      */
     public List<Map<String, Object>> computeGrowthPotential(Long userId) {
         ensureBuilt();
@@ -242,16 +258,17 @@ public class PairRegressionService {
             myByKey.put(key, new int[]{score, level});
         }
 
-        // 2) 各 B について加重平均予測
+        // 2) 各 B について HIGH (|r|≧PRIMARY_R) と LOW (|r|≧FALLBACK_R) の加重平均を同時に算出
         List<Map<String, Object>> results = new ArrayList<>();
         for (Map.Entry<String, int[]> bEntry : myByKey.entrySet()) {
             String chartB = bEntry.getKey();
             int actualB = bEntry.getValue()[0];
             int levelB = bEntry.getValue()[1];
 
-            double sumW = 0.0;
-            double sumWP = 0.0;
-            int support = 0;
+            double sumWHigh = 0.0, sumWPHigh = 0.0;
+            double sumWLow  = 0.0, sumWPLow  = 0.0;
+            int supHigh = 0, supLow = 0;
+
             for (Map.Entry<String, int[]> aEntry : myByKey.entrySet()) {
                 String chartA = aEntry.getKey();
                 if (chartA.equals(chartB)) continue;
@@ -260,20 +277,46 @@ public class PairRegressionService {
                 Reg reg = getRegression(chartA, chartB);
                 if (reg == null) continue;
 
+                double absR = Math.abs(reg.r);
+                if (absR < FALLBACK_R) continue; // キャッシュ側で既に弾かれているはずだが念のため
+
                 double pred = reg.slope * actualA + reg.intercept;
                 double w = reg.r * reg.r; // r²
-                sumW += w;
-                sumWP += pred * w;
-                support++;
+                sumWLow += w;
+                sumWPLow += pred * w;
+                supLow++;
+                if (absR >= PRIMARY_R) {
+                    sumWHigh += w;
+                    sumWPHigh += pred * w;
+                    supHigh++;
+                }
             }
-            if (support < 3 || sumW <= 0) continue; // サポート薄すぎ → スキップ
 
-            double predicted = sumWP / sumW;
+            // HIGH 優先、足りなければ LOW フォールバック
+            String accuracy;
+            int support;
+            double rawPredicted;
+            if (supHigh >= SUPPORT_MIN && sumWHigh > 0) {
+                accuracy = "HIGH";
+                support = supHigh;
+                rawPredicted = sumWPHigh / sumWHigh;
+            } else if (supLow >= SUPPORT_MIN && sumWLow > 0) {
+                accuracy = "LOW";
+                support = supLow;
+                rawPredicted = sumWPLow / sumWLow;
+            } else {
+                continue; // どちらでもサポート不足
+            }
+
             Integer notes = notesByKey.get(chartB);
             int maxScore = notes == null ? 0 : notes * 2;
-            // 物理的にあり得ない範囲をクランプ
-            if (maxScore > 0) predicted = Math.min(maxScore, Math.max(0, predicted));
-            double gap = predicted - actualB;
+
+            // raw を [0, maxScore] にクランプし、(clamp - actual) を係数倍してから再クランプ
+            double clampedRaw = rawPredicted;
+            if (maxScore > 0) clampedRaw = Math.min(maxScore, Math.max(0, clampedRaw));
+            double scaledPredicted = actualB + (clampedRaw - actualB) * GAP_COEFFICIENT;
+            if (maxScore > 0) scaledPredicted = Math.min(maxScore, Math.max(0, scaledPredicted));
+            double gap = scaledPredicted - actualB;
 
             String[] keyParts = chartB.split("\0");
             Map<String, Object> r = new HashMap<>();
@@ -281,13 +324,14 @@ public class PairRegressionService {
             r.put("difficultyName", keyParts[1]);
             r.put("difficultyLevel", levelB);
             r.put("currentScore", actualB);
-            r.put("predictedScore", predicted);
+            r.put("predictedScore", scaledPredicted);
             r.put("gap", gap);
             r.put("supportCount", support);
+            r.put("accuracy", accuracy);
             if (maxScore > 0) {
                 r.put("maxScore", maxScore);
                 r.put("currentRate", actualB * 100.0 / maxScore);
-                r.put("predictedRate", predicted * 100.0 / maxScore);
+                r.put("predictedRate", scaledPredicted * 100.0 / maxScore);
             }
             results.add(r);
         }

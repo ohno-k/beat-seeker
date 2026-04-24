@@ -47,6 +47,8 @@ export const ja = {
   'arcade.modeLabelPotential': '伸びしろランキング',
   'arcade.sortNotePotential': '他譜面との相関から予測した「あと伸ばせるはずのスコア」が大きい順',
   'arcade.subPotential': '予測 {predicted} pt（{count}譜面から推定）',
+  'arcade.lowAccuracyBadge': '概算',
+  'arcade.lowAccuracyTooltip': '高相関(|r|≧0.95)の参照譜面が少ないため、|r|≧0.90 まで条件を緩めて算出した参考値です',
   'arcade.adminViewLabel': '検証用: 閲覧対象ユーザー',
   'arcade.adminOnly': '管理者のみ',
   'arcade.viewSelf': '自分',
