@@ -44,7 +44,7 @@ export const ko = {
   'arcade.potentialBtnDesc': '다른 사람의 경향에서 「더 낼 수 있을 것 같은」 보면을 찾기',
   'arcade.modeLabelPotential': '성장 여지 랭킹',
   'arcade.sortNotePotential': '다른 보면과의 상관관계로 예측한 「더 낼 수 있을 것 같은 점수」가 큰 순',
-  'arcade.subPotential': '예측 {predicted} pt ({count}보면에서 추정)',
+  'arcade.subPotential': '{count}보면에서 추정',
   'arcade.lowAccuracyBadge': '개산',
   'arcade.lowAccuracyTooltip': '고상관(|r|≧0.95)의 참조 보면이 적어, |r|≧0.90까지 조건을 완화하여 산출한 참고값입니다',
   'arcade.adminViewLabel': '검증용: 열람 대상 유저',

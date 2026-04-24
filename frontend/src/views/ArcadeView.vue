@@ -54,6 +54,9 @@ interface SongCard {
   friendScore?: number;
   /** 伸びしろモード専用: 予測精度。LOW のときは UI でバッジ表示する */
   accuracy?: 'HIGH' | 'LOW';
+  /** 伸びしろモード専用: 予測スコア / 予測レート(%)。スコア行に「現在 → 予測」で表示する */
+  predictedScore?: number;
+  predictedRate?: number;
 }
 
 const { fetchMyScores } = useScores();
@@ -478,11 +481,10 @@ const suggestions = computed((): SongCard[] => {
         maxBeatTierPoints: my.maxBeatTierPoints,
         gap: gapRounded,
         gapLabel: `+${gapRounded.toLocaleString()}`,
-        subLabel: t('arcade.subPotential', {
-          predicted: predictedScoreRounded.toLocaleString(),
-          count: item.supportCount,
-        }),
+        subLabel: t('arcade.subPotential', { count: item.supportCount }),
         accuracy: item.accuracy,
+        predictedScore: predictedScoreRounded,
+        predictedRate: item.predictedRate,
       });
     }
     // backend が gap 降順で返すのでそのまま、上位50件
@@ -866,14 +868,22 @@ const selectedFriend = computed(() =>
                   </span>
                 </div>
 
-                <!-- スコア行: 現在スコア／最大スコア／レート -->
+                <!-- スコア行: 現在スコア／最大スコア／レート。
+                     伸びしろモード(predictedScore あり)では「現在 → 予測」を矢印で表示 -->
                 <div class="flex items-baseline gap-2 mt-1.5">
                   <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
                     {{ s.score.toLocaleString() }}
+                    <template v-if="s.predictedScore != null">
+                      <span class="mx-1 text-cyan-600 dark:text-cyan-400">→</span>
+                      <span class="text-cyan-700 dark:text-cyan-300">{{ s.predictedScore.toLocaleString() }}</span>
+                    </template>
                     <span v-if="s.maxScore > 0" class="text-[10px] font-normal"> / {{ s.maxScore.toLocaleString() }}</span>
                   </span>
                   <span v-if="s.scoreRate > 0" class="text-[10px] font-bold text-slate-400">
-                    {{ s.scoreRate.toFixed(2) }}%
+                    {{ s.scoreRate.toFixed(2) }}%<template v-if="s.predictedRate != null">
+                      <span class="mx-0.5 text-cyan-600 dark:text-cyan-400">→</span>
+                      <span class="text-cyan-700 dark:text-cyan-300">{{ s.predictedRate.toFixed(2) }}%</span>
+                    </template>
                   </span>
                 </div>
 
