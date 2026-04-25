@@ -56,6 +56,9 @@ public class PairRegressionService {
     private volatile Map<String, Map<String, Reg>> cache = Collections.emptyMap();
     /** chartKey -> notes。max_score = notes * 2。再構築時に同時に作る。 */
     private volatile Map<String, Integer> notesByKey = Collections.emptyMap();
+    /** chartKey -> 全ユーザー (A以上) の actual スコア最大値。
+     *  予測スコアのクランプ上限に使い、誰も達成していない非現実的な予測 (例: 理論値貼り付き) を防ぐ。 */
+    private volatile Map<String, Integer> communityMaxByKey = Collections.emptyMap();
     /** 構築済みフラグ。 */
     private volatile boolean built = false;
     /** 再構築の同時実行を防ぐロック。 */
@@ -131,7 +134,9 @@ public class PairRegressionService {
         // 3) 全 ANOTHER/LEGG スコアを取得し、A 以上のみ user 別に
         // long[] へパック格納する。packed = (chartIdx << 32) | (score & 0xFFFFFFFFL)
         // String/Integer のボックス化を避けてヒープ消費を抑える。
+        // 同時に各譜面の community max（A以上の中での最大値 = そのまま実測最高）を集計。
         Map<Long, java.util.List<long[]>> userScoresBuilder = new HashMap<>();
+        Map<String, Integer> communityMaxMap = new HashMap<>();
         for (Map<String, Object> row : scoreRepository.findAllAnotherLeggScores()) {
             String key = row.get("title") + "\0" + row.get("difficultyName");
             Integer chartIdx = chartIdxMap.get(key);
@@ -143,6 +148,8 @@ public class PairRegressionService {
             long userId = ((Number) row.get("userId")).longValue();
             long packed = ((long) chartIdx << 32) | (score & 0xFFFFFFFFL);
             userScoresBuilder.computeIfAbsent(userId, k -> new java.util.ArrayList<>()).add(new long[]{packed});
+            Integer prevMax = communityMaxMap.get(key);
+            if (prevMax == null || score > prevMax) communityMaxMap.put(key, score);
         }
 
         // List<long[]> → 単一 long[] に圧縮
@@ -219,6 +226,7 @@ public class PairRegressionService {
 
         cache = newCache;
         notesByKey = notesMap;
+        communityMaxByKey = communityMaxMap;
         built = true;
         long elapsed = System.currentTimeMillis() - t0;
         log.info("PairRegressionService rebuilt in {} ms ({} chartA, {} kept pairs after filter)",
@@ -310,12 +318,16 @@ public class PairRegressionService {
 
             Integer notes = notesByKey.get(chartB);
             int maxScore = notes == null ? 0 : notes * 2;
+            // 予測の上限はコミュニティ実測最高（無ければ理論値）。
+            // 「誰も達成していないスコアは予測しない」原則で、理論値貼り付きの非現実的な提示を避ける。
+            Integer communityMax = communityMaxByKey.get(chartB);
+            int predCap = (communityMax != null && communityMax < maxScore) ? communityMax : maxScore;
 
-            // raw を [0, maxScore] にクランプし、(clamp - actual) を係数倍してから再クランプ
+            // raw を [0, predCap] にクランプし、(clamp - actual) を係数倍してから再クランプ
             double clampedRaw = rawPredicted;
-            if (maxScore > 0) clampedRaw = Math.min(maxScore, Math.max(0, clampedRaw));
+            if (predCap > 0) clampedRaw = Math.min(predCap, Math.max(0, clampedRaw));
             double scaledPredicted = actualB + (clampedRaw - actualB) * GAP_COEFFICIENT;
-            if (maxScore > 0) scaledPredicted = Math.min(maxScore, Math.max(0, scaledPredicted));
+            if (predCap > 0) scaledPredicted = Math.min(predCap, Math.max(0, scaledPredicted));
             double gap = scaledPredicted - actualB;
 
             String[] keyParts = chartB.split("\0");
