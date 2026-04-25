@@ -14,7 +14,19 @@
   <meta property="og:title" content="beat-seeker | beatmania IIDX スコア管理・分析ツール" />
   <meta property="og:description" content="beatmania IIDXのスコアデータをCSVからアップロードして可視化・分析できる無料ツール。" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://beat-seeker-1.onrender.com/" />
+  <meta property="og:url" content="https://beat-seeker.com/" />
+  <link rel="canonical" href="https://beat-seeker.com/" />
+  <script>
+    // 旧 Render デフォルトドメインからカスタムドメインへのリダイレクト。
+    // 旧 URL のブックマーク・SNS シェア・検索結果からのアクセスを救済する。
+    (function () {
+      try {
+        if (location.hostname === 'beat-seeker-1.onrender.com') {
+          location.replace('https://beat-seeker.com' + location.pathname + location.search + location.hash);
+        }
+      } catch (e) { /* noop */ }
+    })();
+  </script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5415089169023407"
     crossorigin="anonymous"></script>
 

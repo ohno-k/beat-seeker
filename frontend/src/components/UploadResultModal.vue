@@ -626,7 +626,7 @@ const shareOnX = async () => {
   if (!shareContainer.value || isSharing.value) return;
   isSharing.value = true;
 
-  const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`);
+  const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker.com \n#BeatSeeker`);
 
   try {
     const canvas = await html2canvas(shareContainer.value, {
@@ -650,7 +650,7 @@ const shareOnX = async () => {
       try {
         await navigator.share({
           title: 'beat-seeker Report',
-          text: `${t('report.shareText')}\nhttps://beat-seeker-1.onrender.com \n#BeatSeeker`,
+          text: `${t('report.shareText')}\nhttps://beat-seeker.com \n#BeatSeeker`,
           files: [file]
         });
         isSharing.value = false;
