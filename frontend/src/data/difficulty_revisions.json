@@ -65,5 +65,26 @@
         "to": "12.4"
       }
     ]
+  },
+  {
+    "version": 2,
+    "label": "v2",
+    "appVersion": "Ver 1.6.0",
+    "date": "2026-04",
+    "added": [
+      {
+        "title": "RUINA",
+        "rank": "12.9"
+      },
+      {
+        "title": "ZED[L]",
+        "rank": "12.7"
+      },
+      {
+        "title": "pique",
+        "rank": "11.4"
+      }
+    ],
+    "changed": []
   }
 ]
