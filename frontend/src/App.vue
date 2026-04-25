@@ -41,6 +41,10 @@ import AdminSongRanksView from './components/AdminSongRanksView.vue';
 import Sidebar from './components/Sidebar.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
+import Landing from './components/Landing.vue';
+import PrivacyPolicy from './components/PrivacyPolicy.vue';
+import Contact from './components/Contact.vue';
+import Guide from './components/Guide.vue';
 import ArenaView from './views/ArenaView.vue';
 import TierVotingView from './views/TierVotingView.vue';
 import ArcadeAssistView from './views/ArcadeView.vue';
@@ -126,7 +130,9 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide'>('dashboard')
+/** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
+const currentGuideSlug = ref<string | null>(null);
 /**
  * 閲覧モード。自分のデータを見る場合は null。
  *  - 'admin': 管理者が他ユーザーのデータを閲覧中
@@ -420,13 +426,29 @@ onMounted(() => {
   const pathToTab: Record<string, typeof activeTab.value> = {
     '/about': 'about',
     '/terms': 'terms',
+    '/privacy-policy': 'privacy-policy',
+    '/contact': 'contact',
     '/ranking': 'ranking',
     '/changelog': 'changelog',
     '/difficulty-table': 'diff-table',
+    '/guide': 'guide',
   };
   const currentPath = window.location.pathname;
   if (pathToTab[currentPath]) {
     activeTab.value = pathToTab[currentPath];
+  } else if (currentPath.startsWith('/guide/')) {
+    // /guide/:slug 形式のパスを Guide ビューに振り分け、スラッグを保持する。
+    const slug = currentPath.slice('/guide/'.length).replace(/\/$/, '');
+    if (slug) {
+      activeTab.value = 'guide';
+      currentGuideSlug.value = slug;
+    }
+  } else if (currentPath === '/') {
+    // ルートに来たログイン前ユーザーには公開ランディングを見せる。
+    // ログイン済みユーザーは従来通りダッシュボード（既定の activeTab）に着地する。
+    if (!isLoggedIn.value) {
+      activeTab.value = 'landing';
+    }
   }
 
   // ブックマークレットからのリダイレクト時: URL フラグメントからデータを自動取り込み。
@@ -1677,6 +1699,37 @@ const handleUnifiedClose = async () => {
           <Terms class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
+        <!-- プライバシーポリシー -->
+        <template v-else-if="activeTab === 'privacy-policy'">
+          <PrivacyPolicy class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- お問い合わせ -->
+        <template v-else-if="activeTab === 'contact'">
+          <Contact class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- 攻略ガイド -->
+        <template v-else-if="activeTab === 'guide'">
+          <Guide
+            class="w-full max-w-4xl mx-auto animate-fade-in"
+            :slug="currentGuideSlug"
+            @navigate-guide="(slug) => {
+              currentGuideSlug = slug;
+              window.history.pushState({}, '', `/guide/${slug}`);
+            }"
+          />
+        </template>
+
+        <!-- 公開ランディング (未ログイン /) -->
+        <template v-else-if="activeTab === 'landing'">
+          <Landing
+            class="w-full max-w-6xl mx-auto"
+            @navigate="(tab) => activeTab = tab as any"
+            @open-login="isLoginModalOpen = true"
+          />
+        </template>
+
         <!-- アプリについて -->
         <template v-else-if="activeTab === 'about'">
           <About class="w-full max-w-5xl mx-auto animate-fade-in" />
@@ -1863,12 +1916,16 @@ const handleUnifiedClose = async () => {
       <!-- ========== フッター: コピーライト / 主要ページへの導線 ========== -->
       <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 transition-colors duration-200 shrink-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p class="text-sm text-slate-500 dark:text-slate-400">
-            © 2026 beat-seeker.
-          </p>
+          <div class="text-sm text-slate-500 dark:text-slate-400 text-center sm:text-left">
+            <p>© 2026 beat-seeker.</p>
+            <p class="text-xs mt-1 max-w-md">{{ t('landing.copyrightDisclaimer') }}</p>
+          </div>
           <div class="flex items-center gap-4 flex-wrap justify-center">
             <button @click="activeTab = 'about'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('app.footer.desc') }}</button>
             <button @click="activeTab = 'terms'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.terms') }}</button>
+            <button @click="activeTab = 'privacy-policy'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('privacyPolicy.title') }}</button>
+            <button @click="activeTab = 'contact'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('contactPage.title') }}</button>
+            <button @click="() => { activeTab = 'guide'; currentGuideSlug = null; }" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('guide.indexTitle') }}</button>
             <button v-if="!viewingUserId" @click="activeTab = 'ranking'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.ranking') }}</button>
           </div>
         </div>

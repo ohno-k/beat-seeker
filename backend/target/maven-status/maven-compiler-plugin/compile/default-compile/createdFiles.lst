@@ -1,5 +1,6 @@
 com\beatseeker\backend\controller\LoginRequest.class
 com\beatseeker\backend\controller\ArenaController$PlayerData.class
+com\beatseeker\backend\service\PairRegressionService.class
 com\beatseeker\backend\service\SkillTreeService$ChainLink.class
 com\beatseeker\backend\entity\TierComment.class
 com\beatseeker\backend\TestController.class
@@ -44,6 +45,8 @@ com\beatseeker\backend\service\AdminAuthService.class
 com\beatseeker\backend\entity\UserSongRank.class
 com\beatseeker\backend\service\PushNotificationService.class
 com\beatseeker\backend\controller\KofiWebhookController.class
+com\beatseeker\backend\service\SongArenaAveragesCacheService.class
+com\beatseeker\backend\service\PairRegressionService$Reg.class
 com\beatseeker\backend\service\TopRankersBeatPtService$AreaProfile.class
 com\beatseeker\backend\repository\ChartTendencyProfileRepository.class
 com\beatseeker\backend\entity\TierVote.class
@@ -63,6 +66,7 @@ com\beatseeker\backend\controller\OptionVoteController.class
 com\beatseeker\backend\entity\Friendship.class
 com\beatseeker\backend\entity\ChartTendencyProfile.class
 com\beatseeker\backend\controller\FriendController.class
+com\beatseeker\backend\service\PairRegressionService$Acc.class
 com\beatseeker\backend\service\SongRankBatchService.class
 com\beatseeker\backend\controller\AuthController.class
 com\beatseeker\backend\repository\ScoreHistoryLogRepository.class

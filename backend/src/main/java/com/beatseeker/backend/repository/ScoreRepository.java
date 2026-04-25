@@ -486,81 +486,72 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     /**
      * 【メソッドの役割】 「BeatTier（total_beat_pt によるティア）別の曲×難易度ごとの平均スコア」を集計する。
      *
-     * ネイティブ SQL。CTE 概要:
-     *  - {@code user_tier}: total_beat_pt の閾値から beat_tier（Legend／Mythic／…）と
-     *    tier_level（ティア内小ランク）を CASE 式で決定
-     *  - {@code best_scores}: ANOTHER/LEGGENDARIA かつ level 11/12 の曲について
-     *    ユーザー×曲×譜面ごとの最高点を算出
-     *  - {@code agg_scores}: best_scores と user_tier を JOIN し、さらに song_definitions とも
-     *    JOIN（ANOTHER → difficulty '4'、LEGGENDARIA → difficulty '10' のマッピング）。
-     *    {@code WHERE (b.score * 3) >= (sd.notes * 4)} は
-     *    「スコア率 ≥ (notes*4 / 3) / (notes*2) = 66.66...%」を指す足切り条件。
-     *    そのうえで tier × 曲 × 譜面でグループ化し平均・人数をとる
-     *  - 最終 SELECT は曲×譜面単位で tier ごとの集計を json_agg で JSON 配列化し、
-     *    {@code ::text} でテキストにキャストして返す
+     * ネイティブ SQL（フラット化版）:
+     *  - scores × users × song_definitions を 1 段で JOIN する
+     *  - users.total_beat_pt の閾値から beat_tier（Legend／Mythic／…）と
+     *    tier_level（ティア内小ランク）を CASE 式でその場に算出
+     *  - song_definitions は ANOTHER → difficulty '4'、LEGGENDARIA → difficulty '10' のマッピング
+     *  - {@code WHERE (s.score * 3) >= (sd.notes * 4)} は
+     *    「スコア率 ≥ (notes*4 / 3) / (notes*2) = 66.66...%」の足切り（A 相当）
+     *  - tier × 曲 × 譜面でグループ化し平均・人数をとり、
+     *    最終 SELECT で曲×譜面単位に json_agg → ::text 化して返す
+     *
+     * 旧実装にあった {@code best_scores} の MAX(score) GROUP BY は、
+     * scores テーブルの一意制約 (user_id, title, difficulty_name, difficulty_level)
+     * により 1 グループ 1 行が保証されているため不要であり、削除済み。
+     * ペイロードの増加に伴うクエリタイムアウト（statement_timeout 30s）回避のための最適化。
      *
      * 返却キー: title / difficultyName / difficultyLevel / tierData（JSON 文字列）
      *
      * @return 曲ごとの tier 別集計
      */
     @Query(value =
-        "WITH user_tier AS (" +
-        "  SELECT id AS user_id," +
+        "WITH agg_scores AS (" +
+        "  SELECT s.title, s.difficulty_name, s.difficulty_level," +
         "    CASE" +
-        "      WHEN total_beat_pt >= 18000 THEN 'Legend'" +
-        "      WHEN total_beat_pt >= 17500 THEN 'Mythic'" +
-        "      WHEN total_beat_pt >= 17000 THEN 'Ancient'" +
-        "      WHEN total_beat_pt >= 16500 THEN 'Master'" +
-        "      WHEN total_beat_pt >= 16000 THEN 'Elite'" +
-        "      WHEN total_beat_pt >= 15500 THEN 'Commander'" +
-        "      WHEN total_beat_pt >= 15000 THEN 'Veteran'" +
-        "      WHEN total_beat_pt >= 14000 THEN 'Expert'" +
-        "      WHEN total_beat_pt >= 13000 THEN 'Advanced'" +
-        "      WHEN total_beat_pt >= 12000 THEN 'Intermediate'" +
-        "      WHEN total_beat_pt >= 10000 THEN 'Novice'" +
+        "      WHEN u.total_beat_pt >= 18000 THEN 'Legend'" +
+        "      WHEN u.total_beat_pt >= 17500 THEN 'Mythic'" +
+        "      WHEN u.total_beat_pt >= 17000 THEN 'Ancient'" +
+        "      WHEN u.total_beat_pt >= 16500 THEN 'Master'" +
+        "      WHEN u.total_beat_pt >= 16000 THEN 'Elite'" +
+        "      WHEN u.total_beat_pt >= 15500 THEN 'Commander'" +
+        "      WHEN u.total_beat_pt >= 15000 THEN 'Veteran'" +
+        "      WHEN u.total_beat_pt >= 14000 THEN 'Expert'" +
+        "      WHEN u.total_beat_pt >= 13000 THEN 'Advanced'" +
+        "      WHEN u.total_beat_pt >= 12000 THEN 'Intermediate'" +
+        "      WHEN u.total_beat_pt >= 10000 THEN 'Novice'" +
         "      ELSE 'Beginner'" +
         "    END AS beat_tier," +
         "    CASE" +
-        "      WHEN total_beat_pt >= 18000 THEN 0" +
-        "      WHEN total_beat_pt >= 17500 THEN FLOOR((total_beat_pt - 17500)/100) + 1" +
-        "      WHEN total_beat_pt >= 17000 THEN FLOOR((total_beat_pt - 17000)/100) + 1" +
-        "      WHEN total_beat_pt >= 16500 THEN FLOOR((total_beat_pt - 16500)/100) + 1" +
-        "      WHEN total_beat_pt >= 16000 THEN FLOOR((total_beat_pt - 16000)/100) + 1" +
-        "      WHEN total_beat_pt >= 15500 THEN FLOOR((total_beat_pt - 15500)/100) + 1" +
-        "      WHEN total_beat_pt >= 15000 THEN FLOOR((total_beat_pt - 15000)/100) + 1" +
-        "      WHEN total_beat_pt >= 14000 THEN FLOOR((total_beat_pt - 14000)/200) + 1" +
-        "      WHEN total_beat_pt >= 13000 THEN FLOOR((total_beat_pt - 13000)/200) + 1" +
-        "      WHEN total_beat_pt >= 12000 THEN FLOOR((total_beat_pt - 12000)/200) + 1" +
-        "      WHEN total_beat_pt >= 10000 THEN FLOOR((total_beat_pt - 10000)/400) + 1" +
+        "      WHEN u.total_beat_pt >= 18000 THEN 0" +
+        "      WHEN u.total_beat_pt >= 17500 THEN FLOOR((u.total_beat_pt - 17500)/100) + 1" +
+        "      WHEN u.total_beat_pt >= 17000 THEN FLOOR((u.total_beat_pt - 17000)/100) + 1" +
+        "      WHEN u.total_beat_pt >= 16500 THEN FLOOR((u.total_beat_pt - 16500)/100) + 1" +
+        "      WHEN u.total_beat_pt >= 16000 THEN FLOOR((u.total_beat_pt - 16000)/100) + 1" +
+        "      WHEN u.total_beat_pt >= 15500 THEN FLOOR((u.total_beat_pt - 15500)/100) + 1" +
+        "      WHEN u.total_beat_pt >= 15000 THEN FLOOR((u.total_beat_pt - 15000)/100) + 1" +
+        "      WHEN u.total_beat_pt >= 14000 THEN FLOOR((u.total_beat_pt - 14000)/200) + 1" +
+        "      WHEN u.total_beat_pt >= 13000 THEN FLOOR((u.total_beat_pt - 13000)/200) + 1" +
+        "      WHEN u.total_beat_pt >= 12000 THEN FLOOR((u.total_beat_pt - 12000)/200) + 1" +
+        "      WHEN u.total_beat_pt >= 10000 THEN FLOOR((u.total_beat_pt - 10000)/400) + 1" +
         "      ELSE 0" +
-        "    END AS tier_level" +
-        "  FROM users" +
-        "  WHERE total_beat_pt > 0" +
-        "), " +
-        "best_scores AS (" +
-        "  SELECT s.user_id, s.title, s.difficulty_name, s.difficulty_level, MAX(s.score) AS score" +
+        "    END AS tier_level," +
+        "    ROUND(AVG(s.score)) AS avg_score," +
+        "    COUNT(*) AS user_count" +
         "  FROM scores s" +
-        "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0" +
+        "  JOIN users u ON s.user_id = u.id AND u.total_beat_pt > 0" +
+        "  JOIN song_definitions sd" +
+        "    ON sd.title = s.title" +
+        "    AND sd.revision = 'active'" +
+        "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10'))" +
+        "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')" +
         "    AND s.difficulty_level IN (11, 12)" +
-        "  GROUP BY s.user_id, s.title, s.difficulty_name, s.difficulty_level" +
-        "), " +
-        "agg_scores AS (" +
-        "  SELECT b.title, b.difficulty_name, b.difficulty_level," +
-        "    t.beat_tier," +
-        "    t.tier_level," +
-        "    ROUND(AVG(b.score)) as avg_score," +
-        "    COUNT(*) as user_count" +
-        "  FROM best_scores b " +
-        "  JOIN user_tier t ON b.user_id = t.user_id " +
-        "  JOIN song_definitions sd " +
-        "    ON b.title = sd.title " +
-        "    AND sd.revision = 'active' " +
-        "    AND ((b.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (b.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
-        // 注: 以下の足切り条件 (b.score*3 >= sd.notes*4) はスコア率 66.66...% に相当。
-        //     findAllSongRankingAggregates / calculateDifficultySimulation の
-        //     "score_rate > 66.666" と同じ意味的閾値（ただし式形が異なるため文字列共通化はしていない）。
-        "  WHERE (b.score * 3) >= (sd.notes * 4) " +
-        "  GROUP BY b.title, b.difficulty_name, b.difficulty_level, t.beat_tier, t.tier_level" +
+        "    AND s.score > 0" +
+        // 足切り (s.score*3 >= sd.notes*4) はスコア率 66.66...% に相当。
+        // findAllSongRankingAggregates / calculateDifficultySimulation の
+        // "score_rate > 66.666" と同じ意味的閾値。
+        "    AND (s.score * 3) >= (sd.notes * 4)" +
+        "  GROUP BY s.title, s.difficulty_name, s.difficulty_level, beat_tier, tier_level" +
         ") " +
         "SELECT title as \"title\", difficulty_name as \"difficultyName\", difficulty_level as \"difficultyLevel\"," +
         "  json_agg(" +

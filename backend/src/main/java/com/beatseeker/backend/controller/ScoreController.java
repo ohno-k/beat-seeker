@@ -18,6 +18,7 @@ import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
+import com.beatseeker.backend.service.SongArenaAveragesCacheService;
 import com.beatseeker.backend.service.SongRankBatchService;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -95,6 +96,8 @@ public class ScoreController {
     private final SongDefinitionRepository songDefinitionRepository;
     /** トップランカー BEAT-PT/RATE-PT ランキングのキャッシュサービス。 */
     private final TopRankersBeatPtService topRankersBeatPtService;
+    /** ティア別平均スコア（song-arena-averages）の集計結果キャッシュ。 */
+    private final SongArenaAveragesCacheService songArenaAveragesCacheService;
     /** diffJson など JSON 文字列を List/Map に復元するための Jackson。 */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -116,6 +119,7 @@ public class ScoreController {
             EmailService emailService,
             SongDefinitionRepository songDefinitionRepository,
             TopRankersBeatPtService topRankersBeatPtService,
+            SongArenaAveragesCacheService songArenaAveragesCacheService,
             com.beatseeker.backend.service.AdminAuthService adminAuthService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
@@ -130,6 +134,7 @@ public class ScoreController {
         this.emailService = emailService;
         this.songDefinitionRepository = songDefinitionRepository;
         this.topRankersBeatPtService = topRankersBeatPtService;
+        this.songArenaAveragesCacheService = songArenaAveragesCacheService;
         this.adminAuthService = adminAuthService;
     }
 
@@ -711,11 +716,15 @@ public class ScoreController {
      * Lv11 / Lv12 の ANOTHER/LEGGENDARIA のみ対象。A ランク以上のフィルタ等の
      * さらに重い集計はクライアント側に任せる設計。
      *
+     * 集計クエリ自体は重く {@code statement_timeout} を超えやすいため、
+     * {@link SongArenaAveragesCacheService} が 30 分毎に再計算してメモリに保持し、
+     * 本エンドポイントはその結果を即時返却する（初回ロード前は空リスト）。
+     *
      * @return スコア行の List
      */
     @GetMapping("/song-arena-averages")
     public ResponseEntity<List<Map<String, Object>>> getSongBeatTierAverages() {
-        return ResponseEntity.ok(scoreRepository.findRawSongScoresWithBeatTier());
+        return ResponseEntity.ok(songArenaAveragesCacheService.get());
     }
 
     /**

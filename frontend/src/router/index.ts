@@ -28,12 +28,16 @@ import ChartListView from '../views/ChartListView.vue'
 /**
  * SPA のルートテーブル定義。
  * main.ts で app.use(router) されて Vue アプリに組み込まれる。
+ *
+ * 注: 実際のビュー切替は App.vue 内の `activeTab` ベースで行っており、
+ * このルータは主に router.push 経由のユーザー間遷移と URL の構築に使われる。
  */
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // ルート（/）に来たらダッシュボードへリダイレクト
-    { path: '/', redirect: '/dashboard' },
+    // ルート (/) は公開ランディング。未ログインユーザーが直接来る場合のクロール対象。
+    // ログイン済みユーザーは App.vue 側で activeTab を 'dashboard' に切り替える。
+    { path: '/', name: 'home', component: DashboardView },
     // パスワードリセット画面（メールリンクから直接遷移）
     { path: '/reset-password', name: 'reset-password', component: ResetPasswordView },
     // 自分のダッシュボード
@@ -52,8 +56,17 @@ const router = createRouter({
     { path: '/changelog', name: 'changelog', component: ChangelogView },
     // 利用規約
     { path: '/terms', name: 'terms', component: TermsView },
+    // プライバシーポリシー (利用規約から分離: AdSense 審査向け)
+    { path: '/privacy-policy', name: 'privacy-policy', component: TermsView },
+    // お問い合わせ・運営者情報 (利用規約から分離)
+    { path: '/contact', name: 'contact', component: TermsView },
     // サービス説明（About）
     { path: '/about', name: 'about', component: AboutView },
+    // 攻略ガイド (一覧 + 各記事)
+    { path: '/guide', name: 'guide-list', component: AboutView },
+    { path: '/guide/:slug', name: 'guide-article', component: AboutView },
+    // 非公式難易度表
+    { path: '/difficulty-table', name: 'difficulty-table', component: AboutView },
     // 譜面リスト
     { path: '/chart-list', name: 'chart-list', component: ChartListView },
     // 他ユーザーのスコアを共有リンクで閲覧するルート
