@@ -12,11 +12,20 @@
         {{ t('advice.title') }}
       </h3>
     </div>
-    <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">
+    <p class="text-xs text-slate-400 dark:text-slate-500 mb-1">
       {{ t('advice.remaining', { n: nextRankGap.toFixed(1) }) }}
     </p>
+    <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-4">
+      {{ t('advice.basedOnPotential') }}
+    </p>
 
-    <div v-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+    <div v-if="isGrowthLoading" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+      {{ t('advice.computingPotential') }}
+    </div>
+    <div v-else-if="growthError" class="text-center py-6 text-rose-500 text-xs">
+      {{ t('advice.potentialError', { msg: growthError }) }}
+    </div>
+    <div v-else-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
       {{ t('advice.noSuggestions') }}
     </div>
     <div v-else class="space-y-2">
@@ -92,15 +101,54 @@
  */
 import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import { useAuth } from '../composables/useAuth';
 import type { ScoreRecord } from '../utils/scoreData';
 import { calculatePoints, getNextRankInfo } from '../utils/beatTier';
 
 const { t } = useI18n();
+const { authHeaders } = useAuth();
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const props = defineProps<{
   flatScores: ScoreRecord[];
   totalPoints: number;
 }>();
+
+// ── 伸びしろ API: 「現実的に出せるはずのスコア」を譜面ごとに供給 ────────
+interface GrowthPotentialItem {
+  title: string;
+  difficultyName: string;
+  currentScore: number;
+  predictedScore: number;
+  gap: number;
+}
+/** key = "title|difficultyName" -> 伸びしろ gap (正の整数)。
+ *  ランクアップアドバイスでは、各譜面の score 上限値として使う。 */
+const growthGapMap = ref<Map<string, number>>(new Map());
+const isGrowthLoading = ref(false);
+const growthError = ref('');
+
+/** バックエンドの伸びしろAPIを叩いて map に変換。初回はキャッシュ構築で数秒かかることがある。 */
+async function fetchGrowthPotential() {
+  isGrowthLoading.value = true;
+  growthError.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/api/analysis/growth-potential`, { headers: authHeaders() });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json() as { items: GrowthPotentialItem[] };
+    const m = new Map<string, number>();
+    for (const it of data.items ?? []) {
+      const g = Math.floor(it.gap);
+      if (g > 0) m.set(`${it.title}|${it.difficultyName}`, g);
+    }
+    growthGapMap.value = m;
+  } catch (e: any) {
+    growthError.value = e?.message ?? 'fetch failed';
+    growthGapMap.value = new Map();
+  } finally {
+    isGrowthLoading.value = false;
+  }
+}
 
 // ── Top-100 状態 ────────────────────────────────────────────────────────
 
@@ -151,24 +199,19 @@ interface Suggestion {
 }
 
 /**
- * 【関数の役割】 曲ごとの score 加算上限 (cap) を、自分の中の順位から決める。
- * 上位曲ほど伸ばしづらいため狭く、TOP100 外は 50 点まで自由に見積もる。
+ * 【関数の役割】 曲ごとの score 加算上限 (cap) を、伸びしろAPIの予測 gap から取得する。
+ * 伸びしろAPIに含まれない譜面（Lv11/12 ANOTHER/LEGG 以外、または support 不足）は 0 を返し、
+ * 呼び出し側で skip させる。
  */
 function getScoreCap(song: ScoreRecord): number {
-  const idx = sortedScored.value.findIndex(
-    s => s.title === song.title && s.difficultyName === song.difficultyName
-  );
-  if (idx < 0 || idx >= 100) return 50; // TOP100 外は最大 50 点
-  if (idx < 10) return 10;              // 1〜10 位: 伸ばしにくい
-  if (idx < 25) return 20;              // 11〜25 位
-  if (idx < 50) return 35;              // 26〜50 位
-  return 50;                            // 51〜100 位
+  return growthGapMap.value.get(`${song.title}|${song.difficultyName}`) ?? 0;
 }
 
 /**
  * 【関数の役割】 全譜面を走査して、Beat-PT を稼げる候補 Suggestion 配列を組み立てる。
  * - 既に満点 or 非公式ランク無 → スキップ
- * - cap 以内で届く一番高いボーダー（AA → AAA → MAX-）を目標に採用
+ * - 伸びしろAPIに予測がない譜面 → スキップ（=「他者傾向から押せる根拠がない」ため除外）
+ * - cap (= 伸びしろ gap) 以内で届く一番高いボーダー（AA → AAA → MAX-）を目標に採用
  * - TOP100 圏外の場合は threshold (100 位) を基準に純増分を計算
  * - 0.05 pt 未満の候補は UI 上 "+0.0 pt" と表示されるため除外
  */
@@ -181,6 +224,7 @@ function buildCandidates(): Suggestion[] {
     if (song.score >= song.maxScore) continue;
 
     const cap = getScoreCap(song);
+    if (cap <= 0) continue; // 伸びしろ予測なし or gap=0 → スキップ
 
     // 最も近いボーダーを探索。届かなければ +cap で据え置き。
     let scoreIncrease = cap;
@@ -264,10 +308,13 @@ function pickBestSuggestions(): Suggestion[] {
 /** 表示用の提案リスト（onMounted + watch で最新化）。 */
 const suggestions = ref<Suggestion[]>([]);
 
-// 初回マウント時に 1 回算出。
-onMounted(() => { suggestions.value = pickBestSuggestions(); });
-// props.flatScores / totalPoints が変化するたびに再算出（deep は不要、参照変更のみ監視）。
-watch(() => [props.flatScores, props.totalPoints], () => {
+// 初回マウント時に 伸びしろ取得 → 候補算出。
+onMounted(async () => {
+  await fetchGrowthPotential();
+  suggestions.value = pickBestSuggestions();
+});
+// props.flatScores / totalPoints / 伸びしろ map が変化するたびに再算出。
+watch(() => [props.flatScores, props.totalPoints, growthGapMap.value], () => {
   suggestions.value = pickBestSuggestions();
 }, { deep: false });
 
