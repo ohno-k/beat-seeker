@@ -223,6 +223,10 @@ export const ko = {
   'table.hideZero': '스코어 0 숨기기',
   'table.level': '레벨',
   'table.difficulty': '난이도',
+  'table.difficulty.normal': 'NORMAL',
+  'table.difficulty.hyper': 'HYPER',
+  'table.difficulty.another': 'ANOTHER',
+  'table.difficulty.leggendaria': 'LEGGENDARIA',
   'table.rank': '랭크',
   'table.lamp': '램프',
   'table.individualRate': '단일 곡 스코어 레이트',
@@ -948,6 +952,30 @@ export const ko = {
   'app.update.reload': '지금 업데이트',
   'app.sidebar.support': '지원 및 정보',
   'app.sidebar.language': '언어',
+
+  // Filter chips (ScoreSummary 상단의 적용된 필터 표시)
+  'filter.clearAll': '모두 지우기',
+  'filter.searchTag': '검색: {q}',
+  'filter.hideZeroTag': '0점 숨김',
+  'filter.removeChip': '{label} 해제',
+
+  // Empty state (스코어 미업로드 시 안내)
+  'empty.title': '먼저 스코어를 가져와 보세요',
+  'empty.desc': 'CSV 또는 공식 사이트 페이지에서 과거 플레이 기록을 가져올 수 있습니다.\n가져오면 대시보드, BEAT-TIER 등 모든 기능을 사용할 수 있습니다.',
+  'empty.uploadCta': '스코어 가져오기',
+  'empty.guideLink': '가져오는 방법 보기',
+
+  // Accessibility (aria-label / sr-only)
+  'a11y.nav.main': '메인 내비게이션',
+  'a11y.nav.primary': '주요 메뉴',
+  'a11y.nav.secondary': '보조 메뉴',
+  'a11y.sidebar.close': '사이드바 닫기',
+  'a11y.modal.close': '닫기',
+  'a11y.dialog.login': '로그인 / 회원가입',
+  'a11y.dialog.profileEdit': '프로필 편집',
+  'a11y.dialog.onboarding': '튜토리얼',
+  'a11y.dialog.kofi': 'Ko-fi 후원 확인',
+  'a11y.lang.switch': '언어를 {lang}로 변경',
 
   // Arcade Assist
   'arcade.title': '선곡 어시스턴트',

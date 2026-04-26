@@ -17,8 +17,12 @@ import { ref, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
+import { useToast } from '../composables/useToast';
+import { useModalEscape } from '../composables/useModalEscape';
+import { DAN_RANK_OPTIONS, ARENA_RANKS } from '../composables/constants';
 
 const { t } = useI18n();
+const toast = useToast();
 
 const props = defineProps<{
   isOpen: boolean;
@@ -27,6 +31,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
+
+// Esc キーで閉じる（背景クリックと同等）。
+useModalEscape(() => props.isOpen, () => emit('close'));
 
 // 認証 composable: ログインユーザー情報 + 更新 API。
 const { user, updateProfile } = useAuth();
@@ -53,19 +60,11 @@ const newPassword = ref('');
 const newPasswordConfirm = ref('');
 const showSupporterBorder = ref(true);
 
-/** 段位プルダウン選択肢（登録時と同じ日本語段位）。 */
-const danRanks = [
-  '七級', '六級', '五級', '四級', '三級', '二級', '一級',
-  '初段', '二段', '三段', '四段', '五段', '六段', '七段', '八段', '九段', '十段', '中伝', '皆伝'
-];
+/** 段位プルダウン選択肢（constants から共通定義を参照、i18n ラベル付き）。 */
+const danRankOptions = DAN_RANK_OPTIONS;
 
-/** アリーナランク選択肢。 */
-const arenaRanks = [
-  'A1', 'A2', 'A3', 'A4', 'A5',
-  'B1', 'B2', 'B3', 'B4', 'B5',
-  'C1', 'C2', 'C3', 'C4', 'C5',
-  'D1', 'D2', 'D3', 'D4', 'D5'
-];
+/** アリーナランク選択肢（constants から共通定義を参照）。 */
+const arenaRanks = ARENA_RANKS;
 
 // モーダルが開かれたタイミング（isOpen が true になった時）にフォームへ現在値をコピー。
 // この `watch` は「再オープンしても下書きが残っていた」という UX バグを防ぐ役割。
@@ -135,16 +134,16 @@ const handleUpdate = async () => {
     }
 
     await updateProfile(payload);
-    successMsg.value = t('profile.updateSuccess');
-    
+
     // パスワード入力欄は送信後に必ずクリア（画面に残すのは危険）。
     currentPassword.value = '';
     newPassword.value = '';
     newPasswordConfirm.value = '';
-    
-    setTimeout(() => {
-        if (successMsg.value) emit('close');
-    }, 1500);
+
+    // モーダルを即時に閉じ、保存完了は画面右下のトーストで通知する
+    // （閉じてから視認できるので、画面遷移後でも見落としにくい）。
+    toast.success(t('profile.updateSuccess'));
+    emit('close');
 
   } catch (err: any) {
     errorMsg.value = err.message || t('profile.updateFailed');
@@ -155,13 +154,20 @@ const handleUpdate = async () => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" @click.self="emit('close')">
+  <div
+    v-if="isOpen"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="profile-edit-title"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
+    @click.self="emit('close')"
+  >
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
-      
+
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('profile.editTitle') }}</h3>
-        <button @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <h3 id="profile-edit-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('profile.editTitle') }}</h3>
+        <button type="button" :aria-label="t('a11y.modal.close')" @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -196,7 +202,7 @@ const handleUpdate = async () => {
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.danRank') }}</label>
                 <select v-model="danRank" 
                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option v-for="rank in danRanks" :key="rank" :value="rank">{{ rank }}</option>
+                  <option v-for="rank in danRankOptions" :key="rank.value" :value="rank.value">{{ t(rank.labelKey) }}</option>
                 </select>
               </div>
               <div>

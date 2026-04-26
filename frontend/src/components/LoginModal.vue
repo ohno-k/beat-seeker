@@ -17,6 +17,8 @@
 import { ref } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
+import { useModalEscape } from '../composables/useModalEscape';
+import { DAN_RANK_OPTIONS, ARENA_RANKS } from '../composables/constants';
 
 const { t } = useI18n();
 
@@ -28,6 +30,9 @@ const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'registered'): void;
 }>();
+
+// Esc キーで閉じられるようにする（背景クリックと同等の挙動）。
+useModalEscape(() => props.isOpen, () => emit('close'));
 
 // 認証系の API はすべてこの composable 経由で叩く。
 const { login, registerUser, forgotPassword } = useAuth();
@@ -50,36 +55,11 @@ const danRank = ref('初段');
 const arenaRank = ref('C5');
 const playSide = ref('1P');
 
-/** 段位プルダウンの選択肢。value は日本語段位（バックエンドが期待する表現）、labelKey は i18n キー。 */
-const danRankOptions = [
-  { value: '七級', labelKey: 'dan.7kyu' },
-  { value: '六級', labelKey: 'dan.6kyu' },
-  { value: '五級', labelKey: 'dan.5kyu' },
-  { value: '四級', labelKey: 'dan.4kyu' },
-  { value: '三級', labelKey: 'dan.3kyu' },
-  { value: '二級', labelKey: 'dan.2kyu' },
-  { value: '一級', labelKey: 'dan.1kyu' },
-  { value: '初段', labelKey: 'dan.shodan' },
-  { value: '二段', labelKey: 'dan.2dan' },
-  { value: '三段', labelKey: 'dan.3dan' },
-  { value: '四段', labelKey: 'dan.4dan' },
-  { value: '五段', labelKey: 'dan.5dan' },
-  { value: '六段', labelKey: 'dan.6dan' },
-  { value: '七段', labelKey: 'dan.7dan' },
-  { value: '八段', labelKey: 'dan.8dan' },
-  { value: '九段', labelKey: 'dan.9dan' },
-  { value: '十段', labelKey: 'dan.10dan' },
-  { value: '中伝', labelKey: 'dan.chuden' },
-  { value: '皆伝', labelKey: 'dan.kaiden' }
-];
+/** 段位プルダウンの選択肢（constants から共通定義を参照）。 */
+const danRankOptions = DAN_RANK_OPTIONS;
 
-/** アリーナランクの選択肢（A1〜D5 の 20 段階）。 */
-const arenaRanks = [
-  'A1', 'A2', 'A3', 'A4', 'A5',
-  'B1', 'B2', 'B3', 'B4', 'B5',
-  'C1', 'C2', 'C3', 'C4', 'C5',
-  'D1', 'D2', 'D3', 'D4', 'D5'
-];
+/** アリーナランクの選択肢（constants から共通定義を参照）。 */
+const arenaRanks = ARENA_RANKS;
 
 /**
  * 【関数の役割】 IIDX ID 入力欄の値を「NNNN-NNNN」形式に自動整形する。
@@ -178,7 +158,14 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200" @click.self="emit('close')">
+  <div
+    v-if="isOpen"
+    role="dialog"
+    aria-modal="true"
+    :aria-label="t('a11y.dialog.login')"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
+    @click.self="emit('close')"
+  >
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
       
       <!-- タブ切替（ログイン / 新規登録 / パスワードを忘れた） -->

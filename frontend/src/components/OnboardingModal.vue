@@ -15,6 +15,7 @@
  */
 import { ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
+import { useModalEscape } from '../composables/useModalEscape';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -24,6 +25,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
+
+// Esc キーで閉じる（背景クリックと同等）。
+useModalEscape(() => props.isOpen, () => emit('close'));
 
 // プッシュ通知購読をサーバに登録するための関数を取得。
 const { requestNotificationPermission } = useFriends();
@@ -80,16 +84,23 @@ const handleEnableNotifications = async () => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" @click.self="emit('close')">
+  <div
+    v-if="isOpen"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="onboarding-title"
+    class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+    @click.self="emit('close')"
+  >
     <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transition-all duration-300 scale-in-center">
-      
+
       <div class="p-8 text-center border-b border-slate-100 dark:border-slate-700">
         <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-600 dark:text-blue-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
           </svg>
         </div>
-        <h2 class="text-3xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">登録ありがとうございます！</h2>
+        <h2 id="onboarding-title" class="text-3xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">登録ありがとうございます！</h2>
         <p class="text-slate-500 dark:text-slate-400 font-medium">beat-seekerを最大限に活用するための設定です。</p>
       </div>
 

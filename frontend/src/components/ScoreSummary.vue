@@ -66,14 +66,14 @@
               </svg>
             </button>
             <div v-if="openDropdown === 'difficulty'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="d in ['ANOTHER', 'LEGGENDARIA']" :key="d" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input 
-                  type="checkbox" 
+              <label v-for="d in DIFFICULTY_FILTER_OPTIONS" :key="d" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
+                <input
+                  type="checkbox"
                   :checked="isSelected(filterDifficulty, d)"
                   @change="toggleFilterValue(filterDifficulty, d)"
                   class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
                 >
-                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ d }}</span>
+                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ t(`table.difficulty.${d.toLowerCase()}`) }}</span>
               </label>
             </div>
           </div>
@@ -90,7 +90,7 @@
               </svg>
             </button>
             <div v-if="openDropdown === 'djLevel'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="lvl in ['AAA', 'AA', 'A', 'B', 'C', 'D', 'E', 'F']" :key="lvl" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
+              <label v-for="lvl in DJ_LEVELS" :key="lvl" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
                 <input
                   type="checkbox"
                   :checked="isSelected(filterDjLevel, lvl)"
@@ -142,6 +142,38 @@
           >
         </div>
       </div>
+    </div>
+
+    <!-- ===== 適用済みフィルタチップ行（フィルタが 1 つ以上掛かっている時だけ表示） ===== -->
+    <!-- 各チップの × で個別解除、右端の「全クリア」で一括解除できる。 -->
+    <div v-if="appliedFilterChips.length > 0" class="flex flex-wrap items-center gap-2 animate-fade-in">
+      <span
+        v-for="chip in appliedFilterChips"
+        :key="chip.id"
+        class="inline-flex items-center gap-1.5 pl-3 pr-1 py-1 text-xs font-bold rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+      >
+        {{ chip.label }}
+        <button
+          type="button"
+          :aria-label="t('filter.removeChip', { label: chip.label })"
+          class="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+          @click="chip.remove()"
+        >
+          <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </span>
+      <button
+        type="button"
+        @click="clearAllFilters"
+        class="ml-auto inline-flex items-center gap-1 px-3 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+      >
+        <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        {{ t('filter.clearAll') }}
+      </button>
     </div>
 
     <!-- ===== モードタブ（BEAT-TIER / RATE-TIER 切替。showRateTier が true のときのみ表示） ===== -->
@@ -995,7 +1027,11 @@ import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useFriends } from '../composables/useFriends';
+import { DJ_LEVELS } from '../composables/constants';
 import RankIcon from './RankIcon.vue';
+
+/** 難易度フィルタの選択肢（ANOTHER / LEGGENDARIA に固定。BEAT-PT 集計対象）。 */
+const DIFFICULTY_FILTER_OPTIONS = ['ANOTHER', 'LEGGENDARIA'] as const;
 
 const { updateMemo } = useScores();
 const { isDarkMode } = useDarkMode();
@@ -1078,6 +1114,72 @@ const toggleFilterValue = (arr: string[], value: string) => {
 /** チェックボックスの選択状態判定用ヘルパ。 */
 const isSelected = (arr: string[], value: string) => {
   return arr.includes(value);
+};
+
+/**
+ * 【computed の役割】 現在適用中のフィルタをチップ表示用の配列に正規化する。
+ *
+ * 各エントリは `{ id, label, remove }` の形で、チップの `×` ボタンで `remove()` を呼ぶと
+ * 該当フィルタだけが解除される。フィルタが何もかかっていなければ空配列を返し、
+ * チップ行とその「全クリア」ボタン自体を非表示にできる。
+ */
+const appliedFilterChips = computed<Array<{ id: string; label: string; remove: () => void }>>(() => {
+  const chips: Array<{ id: string; label: string; remove: () => void }> = [];
+
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim();
+    chips.push({
+      id: 'search',
+      label: t('filter.searchTag', { q }),
+      remove: () => { searchQuery.value = ''; },
+    });
+  }
+  filterLevel.value.forEach((lv) => {
+    chips.push({
+      id: `level:${lv}`,
+      label: `☆${lv}`,
+      remove: () => { filterLevel.value = filterLevel.value.filter(x => x !== lv); },
+    });
+  });
+  filterDifficulty.value.forEach((d) => {
+    chips.push({
+      id: `diff:${d}`,
+      label: t(`table.difficulty.${d.toLowerCase()}`),
+      remove: () => { filterDifficulty.value = filterDifficulty.value.filter(x => x !== d); },
+    });
+  });
+  filterDjLevel.value.forEach((lv) => {
+    chips.push({
+      id: `dj:${lv}`,
+      label: lv,
+      remove: () => { filterDjLevel.value = filterDjLevel.value.filter(x => x !== lv); },
+    });
+  });
+  filterClearType.value.forEach((ct) => {
+    chips.push({
+      id: `clear:${ct}`,
+      label: ct,
+      remove: () => { filterClearType.value = filterClearType.value.filter(x => x !== ct); },
+    });
+  });
+  if (hideZeroScore.value) {
+    chips.push({
+      id: 'hideZero',
+      label: t('filter.hideZeroTag'),
+      remove: () => { hideZeroScore.value = false; },
+    });
+  }
+  return chips;
+});
+
+/** 【関数の役割】 全フィルタを一括解除する。検索ボックスと「0点非表示」トグルも初期状態に戻す。 */
+const clearAllFilters = () => {
+  searchQuery.value = '';
+  filterLevel.value = [];
+  filterDifficulty.value = [];
+  filterDjLevel.value = [];
+  filterClearType.value = [];
+  hideZeroScore.value = false;
 };
 
 /** 現在のページ番号（1 始まり）。 */

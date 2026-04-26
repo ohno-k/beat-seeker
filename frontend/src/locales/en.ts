@@ -224,6 +224,10 @@ export const en = {
   'table.hideZero': 'Hide 0 Score',
   'table.level': 'Level',
   'table.difficulty': 'Difficulty',
+  'table.difficulty.normal': 'NORMAL',
+  'table.difficulty.hyper': 'HYPER',
+  'table.difficulty.another': 'ANOTHER',
+  'table.difficulty.leggendaria': 'LEGGENDARIA',
   'table.rank': 'Rank',
   'table.lamp': 'Lamp',
   'table.individualRate': 'Individual Rate',
@@ -947,6 +951,30 @@ export const en = {
   'app.update.reload': 'Update Now',
   'app.sidebar.support': 'Support & Info',
   'app.sidebar.language': 'Language',
+
+  // Filter chips (applied-filter row at the top of ScoreSummary)
+  'filter.clearAll': 'Clear all',
+  'filter.searchTag': 'Search: {q}',
+  'filter.hideZeroTag': 'Hide 0 score',
+  'filter.removeChip': 'Remove {label}',
+
+  // Empty state (no scores uploaded yet)
+  'empty.title': "Let's import your first scores",
+  'empty.desc': 'Import your play history from a CSV or the official site.\nOnce imported, you can use the dashboard, BEAT-TIER, and every other feature.',
+  'empty.uploadCta': 'Import scores',
+  'empty.guideLink': 'See how to import',
+
+  // Accessibility (aria-label / sr-only)
+  'a11y.nav.main': 'Main navigation',
+  'a11y.nav.primary': 'Primary menu',
+  'a11y.nav.secondary': 'Secondary menu',
+  'a11y.sidebar.close': 'Close sidebar',
+  'a11y.modal.close': 'Close',
+  'a11y.dialog.login': 'Login / Sign up',
+  'a11y.dialog.profileEdit': 'Edit profile',
+  'a11y.dialog.onboarding': 'Welcome tutorial',
+  'a11y.dialog.kofi': 'Ko-fi support confirmation',
+  'a11y.lang.switch': 'Switch language to {lang}',
 
   // Arcade Assist
   'arcade.title': 'Song Assistant',

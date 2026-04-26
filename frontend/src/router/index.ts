@@ -8,22 +8,24 @@
  *   → URL に `#` を付けずに `/dashboard` のような見た目の綺麗なパスで遷移できる。
  *     本番環境ではサーバー側で「存在しないパスは index.html にフォールバック」させる必要あり。
  *
- * 各ビューのロードは通常の import（同期インポート）で行っており、
- * 初回ロード時にすべてのビューが 1 バンドルに含まれる点に注意。
- * もしチャンク分割したい場合は `() => import('./...')` の遅延インポートに切り替える。
+ * 各ビューは遅延インポート（`() => import(...)`）にしてあり、
+ * 初回ロードでは必要なビューのチャンクだけをフェッチする。
+ * ルート / ダッシュボードは多くのユーザーの最初の着地点なので、
+ * 初回応答性のため同期インポートとし、残りはルート遷移時に遅延ロードする。
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
-import ScoresView from '../views/ScoresView.vue'
-import RankingView from '../views/RankingView.vue'
-import HistoryView from '../views/HistoryView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import FriendsView from '../views/FriendsView.vue'
-import ChangelogView from '../views/ChangelogView.vue'
-import TermsView from '../views/TermsView.vue'
-import AboutView from '../views/AboutView.vue'
-import ResetPasswordView from '../views/ResetPasswordView.vue'
-import ChartListView from '../views/ChartListView.vue'
+
+const ScoresView = () => import('../views/ScoresView.vue')
+const RankingView = () => import('../views/RankingView.vue')
+const HistoryView = () => import('../views/HistoryView.vue')
+const ProfileView = () => import('../views/ProfileView.vue')
+const FriendsView = () => import('../views/FriendsView.vue')
+const ChangelogView = () => import('../views/ChangelogView.vue')
+const TermsView = () => import('../views/TermsView.vue')
+const AboutView = () => import('../views/AboutView.vue')
+const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
+const ChartListView = () => import('../views/ChartListView.vue')
 
 /**
  * SPA のルートテーブル定義。

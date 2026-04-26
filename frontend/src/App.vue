@@ -45,22 +45,23 @@ import Landing from './components/Landing.vue';
 import PrivacyPolicy from './components/PrivacyPolicy.vue';
 import Contact from './components/Contact.vue';
 import Guide from './components/Guide.vue';
-import ArenaView from './views/ArenaView.vue';
-import TierVotingView from './views/TierVotingView.vue';
-import ArcadeAssistView from './views/ArcadeView.vue';
-import SongAverageView from './views/SongAverageView.vue';
-import DifficultyTableView from './views/DifficultyTableView.vue';
-import ScorePredictionView from './views/ScorePredictionView.vue';
-import ScoreScatterView from './views/ScoreScatterView.vue';
-import SkillTreeView from './views/SkillTreeView.vue';
-import ChartListView from './views/ChartListView.vue';
-import RankComparisonView from './views/RankComparisonView.vue';
 import Friends from './components/Friends.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
 import { defineAsyncComponent } from 'vue';
+// 重いサブビュー / モーダルは遅延ロード。各タブが選択された時に初めて該当チャンクがフェッチされる。
+// chart.js / html2canvas / tesseract.js などの大きな依存をユーザーが触るタイミングまで遅らせる効果がある。
+const ArenaView = defineAsyncComponent(() => import('./views/ArenaView.vue'));
+const TierVotingView = defineAsyncComponent(() => import('./views/TierVotingView.vue'));
+const ArcadeAssistView = defineAsyncComponent(() => import('./views/ArcadeView.vue'));
+const SongAverageView = defineAsyncComponent(() => import('./views/SongAverageView.vue'));
+const DifficultyTableView = defineAsyncComponent(() => import('./views/DifficultyTableView.vue'));
+const ScorePredictionView = defineAsyncComponent(() => import('./views/ScorePredictionView.vue'));
+const ScoreScatterView = defineAsyncComponent(() => import('./views/ScoreScatterView.vue'));
+const SkillTreeView = defineAsyncComponent(() => import('./views/SkillTreeView.vue'));
+const ChartListView = defineAsyncComponent(() => import('./views/ChartListView.vue'));
+const RankComparisonView = defineAsyncComponent(() => import('./views/RankComparisonView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
-// ユーザーがカメラ検索ボタンを押した時点で初めてチャンクをフェッチする。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
 import { parseScoreCsv } from './utils/csvParser';
@@ -79,6 +80,7 @@ import { useI18n } from './composables/useI18n';
 import { useGameData } from './composables/useGameData';
 import { useAprilFools } from './composables/useAprilFools';
 import AprilFoolsOverlay from './components/AprilFoolsOverlay.vue';
+import ToastContainer from './components/ToastContainer.vue';
 import { watch, watchEffect, onMounted } from 'vue';
 
 const { t } = useI18n();
@@ -1881,8 +1883,44 @@ const handleUnifiedClose = async () => {
             </div>
           </div>
 
+          <!-- エンプティステート: ログイン済みでまだスコアが 1 件もない時の案内 -->
+          <!-- dashboard / table タブのときだけ出し、ranking や about など他のタブは邪魔しない -->
+          <div
+            v-if="isLoggedIn && !viewingUserId && scoreData.length === 0 && (activeTab === 'dashboard' || activeTab === 'table')"
+            class="w-full max-w-2xl mx-auto animate-fade-in"
+          >
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 sm:p-12 text-center">
+              <div class="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mb-6 text-blue-600 dark:text-blue-400">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">{{ t('empty.title') }}</h2>
+              <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line mb-8">{{ t('empty.desc') }}</p>
+              <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  @click="showUploadArea = true"
+                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
+                >
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  {{ t('empty.uploadCta') }}
+                </button>
+                <button
+                  type="button"
+                  @click="activeTab = 'guide'"
+                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  {{ t('empty.guideLink') }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- スコア結果表示: dashboard / table タブを v-show で切り替える（マウント状態を維持） -->
-          <div v-if="scoreData.length > 0 || viewingMode === 'private'" class="w-full flex flex-col items-center animate-fade-in">
+          <div v-else-if="scoreData.length > 0 || viewingMode === 'private'" class="w-full flex flex-col items-center animate-fade-in">
             <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
               <ScoreDashboard
@@ -1994,6 +2032,9 @@ const handleUnifiedClose = async () => {
       </div>
     </Transition>
   </Teleport>
+
+  <!-- グローバルトースト通知レイヤ（useToast() ストアの内容を画面右下に重ねる） -->
+  <ToastContainer />
   </div>
 </template>
 

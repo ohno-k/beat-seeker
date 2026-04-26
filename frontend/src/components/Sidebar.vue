@@ -14,6 +14,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAdmin } from '../composables/useAdmin';
+import { useModalEscape } from '../composables/useModalEscape';
 
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
@@ -21,6 +22,9 @@ const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 const kofiCopied = ref(false);
 /** Ko-fi 確認モーダルの表示フラグ（サポーターのみ使用）。 */
 const showKofiModal = ref(false);
+
+// Ko-fi 確認モーダル: Esc キーで閉じる。
+useModalEscape(() => showKofiModal.value, () => { showKofiModal.value = false; });
 
 /**
  * 【関数の役割】 Ko-fi ボタン押下時のハンドラ。
@@ -179,7 +183,9 @@ const filteredNavItems = computed(() => {
     </Transition>
 
     <!-- Sidebar Panel -->
-    <aside 
+    <aside
+      role="navigation"
+      :aria-label="t('a11y.nav.main')"
       class="fixed inset-y-0 left-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shadow-xl transition-all duration-300 ease-in-out flex flex-col z-50 w-72 lg:translate-x-0 lg:shadow-none lg:h-screen lg:z-40"
       :class="[
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -202,8 +208,13 @@ const filteredNavItems = computed(() => {
               beat-seeker
             </span>
           </div>
-          <button @click="closeSidebar" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors lg:hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button
+            type="button"
+            :aria-label="t('a11y.sidebar.close')"
+            @click="closeSidebar"
+            class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors lg:hidden"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -317,16 +328,18 @@ const filteredNavItems = computed(() => {
           </div>
 
           <!-- Primary Navigation -->
-          <nav class="space-y-1">
+          <nav class="space-y-1" :aria-label="t('a11y.nav.primary')">
             <template v-for="item in filteredNavItems" :key="item.id">
               <button
+                type="button"
                 @click="selectTab(item.id)"
+                :aria-current="activeTab === item.id ? 'page' : undefined"
                 class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all group"
                 :class="activeTab === item.id
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                 </svg>
                 {{ item.label }}
@@ -345,16 +358,18 @@ const filteredNavItems = computed(() => {
             <h3 class="px-4 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
               {{ t('app.sidebar.support') }}
             </h3>
-            <nav class="space-y-1">
+            <nav class="space-y-1" :aria-label="t('a11y.nav.secondary')">
               <template v-for="item in secondaryItems" :key="item.id">
                 <button
+                  type="button"
                   @click="selectTab(item.id)"
+                  :aria-current="activeTab === item.id ? 'page' : undefined"
                   class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition-all"
-                  :class="activeTab === item.id 
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white' 
+                  :class="activeTab === item.id
+                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
                     : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-white'"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                   </svg>
                   {{ item.label }}
@@ -370,13 +385,16 @@ const filteredNavItems = computed(() => {
             </h3>
             <div class="px-2">
               <div class="flex flex-wrap gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
-                <button 
-                  v-for="lang in availableLanguages" 
+                <button
+                  v-for="lang in availableLanguages"
                   :key="lang"
+                  type="button"
                   @click="setLanguage(lang)"
+                  :aria-pressed="currentLang === lang"
+                  :aria-label="t('a11y.lang.switch', { lang: t(`lang.${lang}`) })"
                   class="flex-1 py-1 px-2 text-[10px] font-bold rounded-lg transition-all"
-                  :class="currentLang === lang 
-                    ? 'bg-blue-600 text-white shadow-sm' 
+                  :class="currentLang === lang
+                    ? 'bg-blue-600 text-white shadow-sm'
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-700'"
                 >
                   {{ t(`lang.${lang}`) }}
@@ -436,17 +454,23 @@ const filteredNavItems = computed(() => {
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
       >
-        <div v-if="showKofiModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div
+          v-if="showKofiModal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="kofi-modal-title"
+          class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        >
           <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showKofiModal = false"></div>
           <div class="relative bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-sm w-full p-6 space-y-4">
             <!-- Header -->
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('supporter.modalTitle') }}</h3>
+              <h3 id="kofi-modal-title" class="text-lg font-bold text-slate-900 dark:text-white">{{ t('supporter.modalTitle') }}</h3>
             </div>
 
             <!-- Body -->

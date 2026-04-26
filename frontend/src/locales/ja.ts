@@ -227,6 +227,10 @@ export const ja = {
   'table.hideZero': 'スコア0を非表示',
   'table.level': 'レベル',
   'table.difficulty': '難易度',
+  'table.difficulty.normal': 'NORMAL',
+  'table.difficulty.hyper': 'HYPER',
+  'table.difficulty.another': 'ANOTHER',
+  'table.difficulty.leggendaria': 'LEGGENDARIA',
   'table.rank': 'ランク',
   'table.lamp': 'ランプ',
   'table.individualRate': '単曲スコアレート',
@@ -1021,6 +1025,30 @@ export const ja = {
   'app.update.reload': '今すぐ更新',
   'app.sidebar.support': 'サポート & 情報',
   'app.sidebar.language': '言語',
+
+  // Filter chips (ScoreSummary 上部の適用済みフィルタ表示)
+  'filter.clearAll': '全クリア',
+  'filter.searchTag': '検索: {q}',
+  'filter.hideZeroTag': '0点を非表示',
+  'filter.removeChip': '{label} を解除',
+
+  // Empty state (スコア未アップロード時のガイド)
+  'empty.title': 'まずはスコアを取り込んでみましょう',
+  'empty.desc': 'CSV または公式サイトのページから、過去のプレイ履歴を取り込めます。\n取り込むと、ダッシュボードや BEAT-TIER などすべての機能が使えます。',
+  'empty.uploadCta': 'スコアを取り込む',
+  'empty.guideLink': '取り込み方法を見る',
+
+  // Accessibility (aria-label / sr-only)
+  'a11y.nav.main': 'メインナビゲーション',
+  'a11y.nav.primary': '主要メニュー',
+  'a11y.nav.secondary': 'サブメニュー',
+  'a11y.sidebar.close': 'サイドバーを閉じる',
+  'a11y.modal.close': '閉じる',
+  'a11y.dialog.login': 'ログイン / 新規登録',
+  'a11y.dialog.profileEdit': 'プロフィール編集',
+  'a11y.dialog.onboarding': '初回チュートリアル',
+  'a11y.dialog.kofi': 'Ko-fi 支援の確認',
+  'a11y.lang.switch': '言語を {lang} に切り替え',
 
   // Arcade Assist
   'arcade.title': '選曲アシスタント',
