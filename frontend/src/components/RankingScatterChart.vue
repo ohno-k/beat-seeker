@@ -61,6 +61,12 @@ const RATE_BOUNDARIES = majorTierBoundaries(RATE_TIER_RANKS).filter(b => b.value
 
 // X 軸の下限。Beginner（0〜10000）の散らばりを切り捨てて主要レンジに集中する。
 const BEAT_X_MIN = 10000;
+// X 軸の上限。Legend(18000pt)以上のプレイヤー用に、Mythic と同じ 500pt 分の余白を確保する。
+// 理論最大 ~18,464pt（コメント参照）も内包できる。
+const BEAT_X_MAX = 18500;
+// Y 軸の上限。Legend(25600pt)以上のプレイヤー用に、対数スケールで 1 octave 分（= 51,200pt）の余白を確保する。
+// 51,200pt = 1 譜面理論最大 512pt × 上位 100 譜面 = Rate-Tier の理論最大。
+const RATE_Y_MAX = 51200;
 const BEAT_TICKS = BEAT_BOUNDARIES.filter(b => b.value >= BEAT_X_MIN);
 const BEAT_LABEL = new Map(BEAT_TICKS.map(b => [b.value, b.name]));
 const RATE_LABEL = new Map(RATE_BOUNDARIES.map(b => [b.value, b.name]));
@@ -114,10 +120,10 @@ const tierBandPlugin = {
     const { ctx, chartArea, scales } = chart;
     if (!chartArea || !scales?.x) return;
     const xScale = scales.x;
-    const xMax = xScale.max ?? 18000;
+    const xMax = xScale.max ?? BEAT_X_MAX;
     const isDark = chart.options?.plugins?.beatTierBands?.dark ?? false;
     const palette = isDark ? BAND_COLORS_DARK : BAND_COLORS_LIGHT;
-    const beatBands = makeBands(BEAT_TICKS, Math.max(xMax, 18000));
+    const beatBands = makeBands(BEAT_TICKS, Math.max(xMax, BEAT_X_MAX));
 
     ctx.save();
     for (const band of beatBands) {
@@ -192,7 +198,7 @@ const chartOptions = computed(() => {
       x: {
         type: 'linear' as const,
         min: BEAT_X_MIN,
-        max: 18000,
+        max: BEAT_X_MAX,
         title: {
           display: true,
           text: 'BEAT-TIER',
@@ -226,7 +232,7 @@ const chartOptions = computed(() => {
         grid: { color: gridColor, drawTicks: false },
         border: { color: gridColor },
         min: RATE_BOUNDARIES[0].value,
-        max: RATE_BOUNDARIES[RATE_BOUNDARIES.length - 1].value,
+        max: RATE_Y_MAX,
         ticks: {
           color: tickColor,
           autoSkip: false,
@@ -273,7 +279,14 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div class="w-full h-80 sm:h-96 md:h-[28rem]">
-    <Scatter :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin]" />
+  <!--
+    モバイル幅では 11 個の X 軸ティアラベル（Intermediate, Commander 等）が
+    45° 回転でも収まらないため、外枠を横スクロール可能にし、内側に最小横幅を持たせる。
+    sm 以上では親幅にフィットするので scroll は発生しない。
+  -->
+  <div class="w-full overflow-x-auto -mx-1 px-1">
+    <div class="min-w-[640px] h-80 sm:h-96 md:h-[28rem]">
+      <Scatter :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin]" />
+    </div>
   </div>
 </template>
