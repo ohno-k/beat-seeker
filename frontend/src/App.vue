@@ -71,6 +71,7 @@ import type { UploadDiffResult, UpdatedSong, FolderAnnouncement } from './types/
 import { getRankInfo, getRateTierRankInfo, calculateTotalPoints, calculatePoints, calculateScoreRateTierPoints, getFolderRankInfoByRate } from './utils/beatTier';
 import { diffTable as diffTableRanksRef } from './composables/useGameData';
 import { useAuth } from './composables/useAuth';
+import { TOKEN_KEY } from './composables/constants';
 import { useScoreUpload } from './composables/useScoreUpload';
 import { useAppUpdate } from './composables/useAppUpdate';
 import { useScores } from './composables/useScores';
@@ -81,7 +82,9 @@ import { useGameData } from './composables/useGameData';
 import { useAprilFools } from './composables/useAprilFools';
 import AprilFoolsOverlay from './components/AprilFoolsOverlay.vue';
 import ToastContainer from './components/ToastContainer.vue';
-import { watch, watchEffect, onMounted } from 'vue';
+import CommandPalette from './components/CommandPalette.vue';
+import BackToTop from './components/BackToTop.vue';
+import { computed, watch, watchEffect, onMounted, onBeforeUnmount } from 'vue';
 
 const { t } = useI18n();
 const { isAprilFools } = useAprilFools();
@@ -121,6 +124,81 @@ const handleOcrMatched = async (song: SongDataEntry) => {
   await nextTick();
   scoreSummaryRef.value?.openSongByTitle(song.title);
 };
+
+// ---------- Command Palette (Cmd/Ctrl + K) ----------
+
+/** コマンドパレットの開閉。Cmd/Ctrl + K でトグル。 */
+const isCmdkOpen = ref(false);
+
+/**
+ * 【computed の役割】 コマンドパレットに渡す利用可能タブ ID 一覧。
+ *
+ * Sidebar.vue の filteredNavItems と同じ条件（requiresAuth / hideOnViewing / score-prediction の admin 例外）
+ * を再現する。サイドバーで隠れているタブはコマンドパレットからも開けないようにして UI の一貫性を保つ。
+ */
+const availableCmdkTabIds = computed<string[]>(() => {
+  const ALL = [
+    'dashboard', 'table', 'profile', 'ranking', 'friends', 'history', 'arena',
+    'arcade-assist', 'tier-voting', 'song-avg', 'diff-table', 'rank-comparison',
+    'score-prediction', 'score-scatter', 'changelog', 'about',
+  ];
+  // Sidebar.vue navigationItems と同じ判定
+  const REQUIRES_AUTH = new Set(['profile', 'friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
+  const HIDE_ON_VIEWING = new Set(['friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
+  const RANK_COMPARISON_ALLOWED_IDS = [18, 23, 24];
+
+  return ALL.filter((id) => {
+    if (REQUIRES_AUTH.has(id) && !isLoggedIn.value) return false;
+    if (HIDE_ON_VIEWING.has(id) && viewingUserId.value) {
+      if (id === 'score-prediction' && viewingMode.value === 'admin') return true;
+      return false;
+    }
+    if (id === 'rank-comparison' && (!user.value || !RANK_COMPARISON_ALLOWED_IDS.includes(user.value.id))) return false;
+    return true;
+  });
+});
+
+/** 【関数の役割】 パレットからタブ選択時のハンドラ。activeTab を更新して閉じる。 */
+const handleCmdkSelectTab = (tabId: string) => {
+  activeTab.value = tabId as any;
+};
+
+/** 【関数の役割】 パレットから曲選択時のハンドラ。スコア一覧タブへ移動して詳細モーダルを開く。 */
+const handleCmdkSelectSong = async (title: string) => {
+  activeTab.value = 'table';
+  await nextTick();
+  scoreSummaryRef.value?.openSongByTitle(title);
+};
+
+/** 【関数の役割】 パレットからクイックアクション選択時のハンドラ。 */
+const handleCmdkAction = (name: 'upload' | 'profile-edit' | 'toggle-dark' | 'logout') => {
+  if (name === 'upload') showUploadArea.value = true;
+  else if (name === 'profile-edit') isProfileModalOpen.value = true;
+  else if (name === 'toggle-dark') toggleDarkMode();
+  else if (name === 'logout') logout();
+};
+
+/**
+ * 【関数の役割】 グローバル keydown ハンドラ。Cmd/Ctrl + K でコマンドパレットをトグル。
+ *
+ * input/textarea/contentEditable にフォーカス中でも反応させる（コマンドパレットの開閉は IME 入力中でなければ常に有効）。
+ * IME 確定中は e.isComposing で除外する。
+ */
+const onGlobalKeydown = (e: KeyboardEvent) => {
+  if (e.isComposing) return;
+  const isCmdK = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k';
+  if (isCmdK) {
+    e.preventDefault();
+    isCmdkOpen.value = !isCmdkOpen.value;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('keydown', onGlobalKeydown);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onGlobalKeydown);
+});
 
 /** ログイン中ユーザーまたは閲覧対象ユーザーのスコアデータ（曲単位）。 */
 const scoreData = ref<ScoreData[]>([]);
@@ -447,8 +525,14 @@ onMounted(() => {
     }
   } else if (currentPath === '/') {
     // ルートに来たログイン前ユーザーには公開ランディングを見せる。
-    // ログイン済みユーザーは従来通りダッシュボード（既定の activeTab）に着地する。
-    if (!isLoggedIn.value) {
+    // ログイン済みユーザーは /dashboard に遷移させる（URL も書き換え、再アクセス時もダッシュボードに直接戻れるようにする）。
+    // 認証復元 (/api/auth/me) は非同期なので、JWT の有無を同期的に確認して仮判定する。
+    // 復元後にトークンが無効と判明した場合は下の watch 側で landing に戻す。
+    const hasToken = !!localStorage.getItem(TOKEN_KEY);
+    if (hasToken) {
+      activeTab.value = 'dashboard';
+      window.history.replaceState({}, document.title, '/dashboard');
+    } else {
       activeTab.value = 'landing';
     }
   }
@@ -2035,6 +2119,23 @@ const handleUnifiedClose = async () => {
 
   <!-- グローバルトースト通知レイヤ（useToast() ストアの内容を画面右下に重ねる） -->
   <ToastContainer />
+
+  <!-- グローバルコマンドパレット（Cmd/Ctrl + K で開く全画面検索） -->
+  <CommandPalette
+    v-model:isOpen="isCmdkOpen"
+    :active-tab="activeTab"
+    :is-logged-in="isLoggedIn"
+    :is-dark="isDarkMode"
+    :score-data="scoreData"
+    :available-tab-ids="availableCmdkTabIds"
+    :is-viewing-other="!!viewingUserId"
+    @select-tab="handleCmdkSelectTab"
+    @select-song="handleCmdkSelectSong"
+    @action="handleCmdkAction"
+  />
+
+  <!-- ページ上部へ戻る FAB（スクロール量がしきい値超で出現） -->
+  <BackToTop />
   </div>
 </template>
 

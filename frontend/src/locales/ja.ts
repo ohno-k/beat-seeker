@@ -1026,6 +1026,22 @@ export const ja = {
   'app.sidebar.support': 'サポート & 情報',
   'app.sidebar.language': '言語',
 
+  // Command Palette (Cmd/Ctrl+K で開くグローバル検索)
+  'cmdk.placeholder': '画面・曲を検索（↑↓ で移動、Enter で決定）',
+  'cmdk.empty': '一致する項目がありません',
+  'cmdk.group.nav': '画面',
+  'cmdk.group.action': 'クイックアクション',
+  'cmdk.group.song': '曲',
+  'cmdk.action.upload': 'スコアを取り込む',
+  'cmdk.action.profileEdit': 'プロフィール編集',
+  'cmdk.action.toggleDark': 'ダークモードを切替',
+  'cmdk.action.logout': 'ログアウト',
+  'cmdk.shortcut.hint': 'Cmd/Ctrl + K',
+  'cmdk.kbdEnter': 'Enter で決定',
+  'cmdk.kbdEsc': 'Esc で閉じる',
+  'a11y.cmdk.title': 'コマンドパレット',
+  'a11y.backToTop': 'ページ上部へ戻る',
+
   // Filter chips (ScoreSummary 上部の適用済みフィルタ表示)
   'filter.clearAll': '全クリア',
   'filter.searchTag': '検索: {q}',

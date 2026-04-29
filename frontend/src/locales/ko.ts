@@ -953,6 +953,22 @@ export const ko = {
   'app.sidebar.support': '지원 및 정보',
   'app.sidebar.language': '언어',
 
+  // Command Palette (Cmd/Ctrl+K 글로벌 검색)
+  'cmdk.placeholder': '화면 / 곡 검색 (↑↓ 이동, Enter 선택)',
+  'cmdk.empty': '일치하는 항목이 없습니다',
+  'cmdk.group.nav': '화면',
+  'cmdk.group.action': '빠른 작업',
+  'cmdk.group.song': '곡',
+  'cmdk.action.upload': '스코어 가져오기',
+  'cmdk.action.profileEdit': '프로필 편집',
+  'cmdk.action.toggleDark': '다크 모드 전환',
+  'cmdk.action.logout': '로그아웃',
+  'cmdk.shortcut.hint': 'Cmd/Ctrl + K',
+  'cmdk.kbdEnter': 'Enter로 선택',
+  'cmdk.kbdEsc': 'Esc로 닫기',
+  'a11y.cmdk.title': '커맨드 팔레트',
+  'a11y.backToTop': '맨 위로',
+
   // Filter chips (ScoreSummary 상단의 적용된 필터 표시)
   'filter.clearAll': '모두 지우기',
   'filter.searchTag': '검색: {q}',

@@ -952,6 +952,22 @@ export const en = {
   'app.sidebar.support': 'Support & Info',
   'app.sidebar.language': 'Language',
 
+  // Command Palette (Cmd/Ctrl+K global search)
+  'cmdk.placeholder': 'Search screens & songs (↑↓ to move, Enter to select)',
+  'cmdk.empty': 'No matches',
+  'cmdk.group.nav': 'Screens',
+  'cmdk.group.action': 'Quick actions',
+  'cmdk.group.song': 'Songs',
+  'cmdk.action.upload': 'Import scores',
+  'cmdk.action.profileEdit': 'Edit profile',
+  'cmdk.action.toggleDark': 'Toggle dark mode',
+  'cmdk.action.logout': 'Log out',
+  'cmdk.shortcut.hint': 'Cmd/Ctrl + K',
+  'cmdk.kbdEnter': 'Enter to select',
+  'cmdk.kbdEsc': 'Esc to close',
+  'a11y.cmdk.title': 'Command palette',
+  'a11y.backToTop': 'Back to top',
+
   // Filter chips (applied-filter row at the top of ScoreSummary)
   'filter.clearAll': 'Clear all',
   'filter.searchTag': 'Search: {q}',

@@ -194,7 +194,7 @@
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-[10px] sm:text-sm text-slate-600 dark:text-slate-300">
-          <thead class="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold h-10 sm:h-12">
+          <thead class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold h-10 sm:h-12 shadow-sm">
             <tr>
               <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-4/12" @click="toggleSort('title')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
@@ -1623,7 +1623,8 @@ interface RankingRow {
  *           - versionTop:    バージョン別全国 TOP
  *           - top:           その他バージョン別県別 TOP
  *         重複（全国＝県, version 全国＝県）は一方だけ残す。
- *  手順5: スコアのあるすべての行に対し dense 1-indexed の順位を付与（同点は同順位）。
+ *  手順5: スコアのある実ユーザー行に dense 1-indexed の順位を付与（同点は同順位）。
+ *         仮想ユーザー（TOP ランカー）はプレイ実績ではないため順位対象から外す。
  *  手順6: 表示用にフィルタ: 自分 + 仮想 + 公開フレンド + (showPublicUsers かつ privacy=0)。
  *  手順7: スコア降順でソートして返す。スコア null は末尾。
  */
@@ -1795,7 +1796,9 @@ const rankingList = computed<RankingRow[]>(() => {
 
   // 手順5: スコア保有者に dense 1-indexed の順位を付与。非表示ユーザーも順位計算には含める
   //        （= 表示上「4位」が欠番に見えても、裏で隠れた 3 位が存在し得る）。
-  const scored = all.filter(r => r.score != null).slice().sort((a, b) => (b.score as number) - (a.score as number));
+  //        仮想ユーザー (TOP ランカー) は実プレイヤーではないため順位計算から除外し、
+  //        rank: null のままにしておく（テンプレート側で「-」表示になる）。
+  const scored = all.filter(r => r.score != null && r.kind === 'user').slice().sort((a, b) => (b.score as number) - (a.score as number));
   let prevScore: number | null = null;
   let prevRank = 0;
   scored.forEach((r, i) => {
