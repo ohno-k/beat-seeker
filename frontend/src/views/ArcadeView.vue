@@ -24,13 +24,18 @@ import { useI18n } from '../composables/useI18n';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 import { calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, calculatePoints } from '../utils/beatTier';
+import GrowthPotentialDetailsModal from '../components/GrowthPotentialDetailsModal.vue';
 
 const { t } = useI18n();
 const { authHeaders } = useAuth();
 const { isAdmin } = useAdmin();
 
-/** モード選択。'potential' = 伸びしろ（pair-scatter 予測ベース） */
-type Mode = 'rival' | 'border' | 'beat-pt' | 'rate-pt' | 'potential';
+/**
+ * モード選択。
+ *  - 'potential' = 伸びしろ（pair-scatter 予測ベース、gap > 0 の譜面を提示）
+ *  - 'strength'  = 得意曲（同じく予測ベース、gap < 0 = 同実力帯より上振れている譜面を提示）
+ */
+type Mode = 'rival' | 'border' | 'beat-pt' | 'rate-pt' | 'potential' | 'strength';
 /** Border モードのターゲットグレード */
 type BorderTarget = 'aa' | 'aaa' | 'max-minus';
 
@@ -52,11 +57,11 @@ interface SongCard {
   gapLabel: string;
   subLabel: string;
   friendScore?: number;
-  /** 伸びしろモード専用: 予測精度。LOW のときは UI でバッジ表示する */
-  accuracy?: 'HIGH' | 'LOW';
   /** 伸びしろモード専用: 予測スコア / 予測レート(%)。スコア行に「現在 → 予測」で表示する */
   predictedScore?: number;
   predictedRate?: number;
+  /** 伸びしろモード専用: 推定に使われた譜面数（モーダルへ渡す） */
+  supportCount?: number;
 }
 
 const { fetchMyScores } = useScores();
@@ -86,6 +91,29 @@ const borderTarget = ref<BorderTarget>('aa');
 const beatPtTarget = ref<number | null>(null);
 /** Rate-PT 目標ポイント（単曲目標） */
 const ratePtTarget = ref<number | null>(null);
+/**
+ * 伸びしろ／得意曲モードの並び替え基準。
+ *  - 'score': 点数差（predicted − current のポイント）で降順
+ *  - 'rate' : スコアレート差（predictedRate − currentRate の %）で降順
+ *
+ * 高 notes 譜面は同じ %差でも点差が大きく出るため、点数ソートだと長尺曲が上位に偏る。
+ * レートに切り替えると「率としてどれだけ離れているか」で並び、長尺バイアスを除外できる。
+ */
+const potentialSortMode = ref<'score' | 'rate'>('score');
+
+/**
+ * 「○譜面から推定」内訳モーダルの表示状態。
+ * 開くときに対象の SongCard をそのままセットする。null = 非表示。
+ */
+const detailsModalCard = ref<SongCard | null>(null);
+function openDetails(card: SongCard) {
+  // 伸びしろ／得意曲のカードのみ意味があるので、predictedScore があるものだけ受け付ける
+  if (card.predictedScore == null) return;
+  detailsModalCard.value = card;
+}
+function closeDetails() {
+  detailsModalCard.value = null;
+}
 
 /** 伸びしろモード: API レスポンスをキャッシュ */
 interface GrowthPotentialItem {
@@ -96,8 +124,6 @@ interface GrowthPotentialItem {
   predictedScore: number;
   gap: number;
   supportCount: number;
-  /** "HIGH" = |r|≧0.95 ペアで算出、"LOW" = |r|≧0.90 までフォールバック */
-  accuracy?: 'HIGH' | 'LOW';
   maxScore?: number;
   currentRate?: number;
   predictedRate?: number;
@@ -291,17 +317,18 @@ async function loadViewedUserScores() {
   }
 }
 
-// 伸びしろモードに切り替えたら（初回のみ）取得する。管理者ならユーザー一覧も同時に取得。
+// 伸びしろ／得意曲モードに切り替えたら（初回のみ）取得する。管理者ならユーザー一覧も同時に取得。
+// 両モードは backend のレスポンス（gap 込みの一覧）を共有するので、データ取得は共通。
 watch(mode, (m) => {
-  if (m === 'potential') {
+  if (m === 'potential' || m === 'strength') {
     fetchPotential();
     if (isAdmin.value) loadAdminUsers();
   }
 });
 
-// 検証対象ユーザーが切り替わったら、伸びしろと該当ユーザーのスコアを再取得
+// 検証対象ユーザーが切り替わったら、伸びしろ／得意曲と該当ユーザーのスコアを再取得
 watch(potentialViewUserId, () => {
-  if (mode.value === 'potential') {
+  if (mode.value === 'potential' || mode.value === 'strength') {
     fetchPotential(true);
     loadViewedUserScores();
   }
@@ -447,15 +474,24 @@ const suggestions = computed((): SongCard[] => {
     return cards.sort((a, b) => a.gap - b.gap).slice(0, 50);
   }
 
-  if (mode.value === 'potential') {
-    // 伸びしろモード: backend の予測スコアと現在スコアの差分を表示
+  if (mode.value === 'potential' || mode.value === 'strength') {
+    // 伸びしろ / 得意曲モード: backend の予測スコアと現在スコアの差分を表示
+    //  - potential: gap > 0（予測 > 現在 = まだ伸ばせる）
+    //  - strength : gap < 0（予測 < 現在 = 同実力帯より上振れている = 得意曲）
+    // 並び替え基準は potentialSortMode で切替: 'score'（点差）or 'rate'（%差）
     if (potentialItems.value.length === 0) return [];
+    const isStrength = mode.value === 'strength';
+    const useRate = potentialSortMode.value === 'rate';
     // 表示情報の参照元: 自分閲覧時は myScores、他ユーザー検証時は viewedUserScores
     const sourceScores = potentialViewUserId.value == null ? myScores.value : viewedUserScores.value;
     const myMap = new Map(sourceScores.map(s => [`${s.title}_${s.difficultyName}`, s]));
     const cards: SongCard[] = [];
     for (const item of potentialItems.value) {
-      if (item.gap <= 0) continue; // 伸びしろがない or マイナスは無視
+      if (isStrength) {
+        if (item.gap >= 0) continue; // 伸びしろがある or ぴったりは「得意」ではない
+      } else {
+        if (item.gap <= 0) continue; // 伸びしろがない or マイナスは無視
+      }
       // Lv11/12 フィルタ（他モードと同じ）
       if (item.difficultyLevel === 11 && !showLv11.value) continue;
       if (item.difficultyLevel === 12 && !showLv12.value) continue;
@@ -465,7 +501,21 @@ const suggestions = computed((): SongCard[] => {
       if (!my) continue; // 自分のスコアが見つからない（理論的にはあり得ない）
 
       const predictedScoreRounded = Math.round(item.predictedScore);
-      const gapRounded = Math.round(item.gap);
+
+      // 並び替え用の絶対値と表示ラベル: スコア基準とレート基準で切替。
+      // SongCard.gap は数値ソート専用に正の値で持つ（label は別文字列）。
+      const scoreGapAbs = Math.round(Math.abs(item.gap));
+      const rateGapAbs = (item.predictedRate != null && item.currentRate != null)
+        ? Math.abs(item.predictedRate - item.currentRate)
+        : null;
+      // レート基準を選んでいるのに rate が欠落している譜面は表示しない（事故防止）。
+      if (useRate && rateGapAbs == null) continue;
+
+      const gapForSort = useRate ? rateGapAbs! : scoreGapAbs;
+      const gapLabel = useRate
+        ? `+${rateGapAbs!.toFixed(2)}%`
+        : `+${scoreGapAbs.toLocaleString()}`;
+
       cards.push({
         key: `${item.title}_${item.difficultyName}`,
         title: item.title,
@@ -479,16 +529,16 @@ const suggestions = computed((): SongCard[] => {
         informalRank: my.informalRank,
         beatTierPoints: my.beatTierPoints,
         maxBeatTierPoints: my.maxBeatTierPoints,
-        gap: gapRounded,
-        gapLabel: `+${gapRounded.toLocaleString()}`,
+        gap: gapForSort,
+        gapLabel,
         subLabel: t('arcade.subPotential', { count: item.supportCount }),
-        accuracy: item.accuracy,
         predictedScore: predictedScoreRounded,
         predictedRate: item.predictedRate,
+        supportCount: item.supportCount,
       });
     }
-    // backend が gap 降順で返すのでそのまま、上位50件
-    return cards.slice(0, 50);
+    // gap は常に「正の絶対値」になっているので、降順=効果が大きい順
+    return cards.sort((a, b) => b.gap - a.gap).slice(0, 50);
   }
 
   if (mode.value === 'rate-pt') {
@@ -553,6 +603,7 @@ const modeLabel = computed((): string => {
     'beat-pt':   t('arcade.modeLabelBeatPt'),
     'rate-pt':   t('arcade.modeLabelRatePt'),
     'potential': t('arcade.modeLabelPotential'),
+    'strength':  t('arcade.modeLabelStrength'),
   }[mode.value] ?? '';
 });
 
@@ -560,11 +611,17 @@ const modeLabel = computed((): string => {
 const modeSortNote = computed((): string => {
   if (!mode.value) return '';
   if (mode.value === 'rival') return rivalSortClosest.value ? t('arcade.sortNoteRivalClosest') : t('arcade.sortNoteRivalWidest');
+  // 伸びしろ／得意曲はソート基準（点 / %）でも文言を切り替える
+  if (mode.value === 'potential') {
+    return potentialSortMode.value === 'rate' ? t('arcade.sortNotePotentialRate') : t('arcade.sortNotePotential');
+  }
+  if (mode.value === 'strength') {
+    return potentialSortMode.value === 'rate' ? t('arcade.sortNoteStrengthRate') : t('arcade.sortNoteStrength');
+  }
   return {
-    'border':    t('arcade.sortNoteBorder'),
-    'beat-pt':   t('arcade.sortNoteBeatPt'),
-    'rate-pt':   t('arcade.sortNoteRatePt'),
-    'potential': t('arcade.sortNotePotential'),
+    'border':  t('arcade.sortNoteBorder'),
+    'beat-pt': t('arcade.sortNoteBeatPt'),
+    'rate-pt': t('arcade.sortNoteRatePt'),
   }[mode.value] ?? '';
 });
 
@@ -685,11 +742,32 @@ const selectedFriend = computed(() =>
               </div>
             </button>
 
+            <!-- 得意曲 ボタン（緑、全幅）。伸びしろの対になる新機能 -->
+            <button
+              @click="mode = mode === 'strength' ? null : 'strength'"
+              class="col-span-2 flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              :class="mode === 'strength'
+                ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+            >
+              <div class="flex items-center gap-2 w-full">
+                <span class="text-2xl">💪</span>
+                <div class="flex-1">
+                  <div class="text-sm font-black">{{ t('arcade.strengthBtn') }}</div>
+                  <div class="text-[10px] font-bold opacity-70 mt-0.5">{{ t('arcade.strengthBtnDesc') }}</div>
+                </div>
+                <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
+                  :class="mode === 'strength' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'">
+                  NEW
+                </span>
+              </div>
+            </button>
+
           </div>
         </div>
 
-        <!-- 伸びしろモード（管理者限定）: 検証用ユーザー切替ドロップダウン -->
-        <div v-if="mode === 'potential' && isAdmin" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-2">
+        <!-- 伸びしろ／得意曲モード（管理者限定）: 検証用ユーザー切替ドロップダウン -->
+        <div v-if="(mode === 'potential' || mode === 'strength') && isAdmin" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-2">
           <div class="flex items-baseline justify-between gap-2">
             <p class="text-xs font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">{{ t('arcade.adminViewLabel') }}</p>
             <span class="text-[10px] font-bold text-slate-400">{{ t('arcade.adminOnly') }}</span>
@@ -707,6 +785,29 @@ const selectedFriend = computed(() =>
           <p v-else-if="potentialViewUserId != null" class="text-[10px] text-slate-500 dark:text-slate-400">
             {{ t('arcade.adminViewHint') }}
           </p>
+        </div>
+
+        <!-- 伸びしろ／得意曲モード: 並び替え基準（スコア / レート）の切替 -->
+        <div v-if="mode === 'potential' || mode === 'strength'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.potentialSortLabel') }}</span>
+            <div class="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 text-xs font-bold">
+              <button
+                @click="potentialSortMode = 'score'"
+                class="px-3 py-1.5 transition-colors"
+                :class="potentialSortMode === 'score'
+                  ? (mode === 'strength' ? 'bg-emerald-600 text-white' : 'bg-cyan-600 text-white')
+                  : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
+              >{{ t('arcade.potentialSortScore') }}</button>
+              <button
+                @click="potentialSortMode = 'rate'"
+                class="px-3 py-1.5 transition-colors"
+                :class="potentialSortMode === 'rate'
+                  ? (mode === 'strength' ? 'bg-emerald-600 text-white' : 'bg-cyan-600 text-white')
+                  : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
+              >{{ t('arcade.potentialSortRate') }}</button>
+            </div>
+          </div>
         </div>
 
         <!-- Rival モード: フレンド選択＋並び替え切替 -->
@@ -813,14 +914,19 @@ const selectedFriend = computed(() =>
             <p class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t('arcade.noRivalLoss', { name: selectedFriend?.displayName ?? '' }) }}</p>
           </div>
 
-          <!-- 伸びしろモード: ローディング / エラー -->
-          <div v-else-if="mode === 'potential' && (isPotentialLoading || isLoadingViewedScores)" class="text-center py-12">
-            <div class="w-10 h-10 border-4 border-cyan-100 border-t-cyan-600 rounded-full animate-spin mx-auto mb-3"></div>
+          <!-- 伸びしろ／得意曲モード: ローディング / エラー -->
+          <div v-else-if="(mode === 'potential' || mode === 'strength') && (isPotentialLoading || isLoadingViewedScores)" class="text-center py-12">
+            <div
+              class="w-10 h-10 border-4 rounded-full animate-spin mx-auto mb-3"
+              :class="mode === 'strength'
+                ? 'border-emerald-100 border-t-emerald-600'
+                : 'border-cyan-100 border-t-cyan-600'"
+            ></div>
             <p class="text-sm font-bold text-slate-500">
               {{ potentialViewUserId == null ? t('arcade.buildingModel') : t('arcade.computingForUser') }}
             </p>
           </div>
-          <div v-else-if="mode === 'potential' && potentialError" class="text-center py-12">
+          <div v-else-if="(mode === 'potential' || mode === 'strength') && potentialError" class="text-center py-12">
             <p class="text-4xl mb-3">⚠️</p>
             <p class="text-sm font-bold text-red-600 dark:text-red-400">{{ potentialError }}</p>
           </div>
@@ -858,37 +964,60 @@ const selectedFriend = computed(() =>
                   <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-50 dark:bg-slate-700/50 text-slate-500">
                     {{ s.djLevel }}
                   </span>
-                  <!-- 伸びしろモード LOW 精度バッジ: 0.90 フォールバックで算出された予測 -->
-                  <span
-                    v-if="s.accuracy === 'LOW'"
-                    class="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-                    :title="t('arcade.lowAccuracyTooltip')"
-                  >
-                    {{ t('arcade.lowAccuracyBadge') }}
-                  </span>
                 </div>
 
                 <!-- スコア行: 現在スコア／最大スコア／レート。
-                     伸びしろモード(predictedScore あり)では「現在 → 予測」を矢印で表示 -->
+                     伸びしろモード: 「現在 → 予測」（左=現在 右=より高い予測）
+                     得意曲モード:   「予測 → 現在」（左=同実力帯予測 右=より高い実測） -->
                 <div class="flex items-baseline gap-2 mt-1.5">
                   <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
-                    {{ s.score.toLocaleString() }}
-                    <template v-if="s.predictedScore != null">
-                      <span class="mx-1 text-cyan-600 dark:text-cyan-400">→</span>
-                      <span class="text-cyan-700 dark:text-cyan-300">{{ s.predictedScore.toLocaleString() }}</span>
+                    <template v-if="mode === 'strength' && s.predictedScore != null">
+                      <span>{{ s.predictedScore.toLocaleString() }}</span>
+                      <span class="mx-1 text-emerald-600 dark:text-emerald-400">→</span>
+                      <span class="text-emerald-700 dark:text-emerald-300">{{ s.score.toLocaleString() }}</span>
+                    </template>
+                    <template v-else>
+                      {{ s.score.toLocaleString() }}
+                      <template v-if="s.predictedScore != null">
+                        <span class="mx-1 text-cyan-600 dark:text-cyan-400">→</span>
+                        <span class="text-cyan-700 dark:text-cyan-300">{{ s.predictedScore.toLocaleString() }}</span>
+                      </template>
                     </template>
                     <span v-if="s.maxScore > 0" class="text-[10px] font-normal"> / {{ s.maxScore.toLocaleString() }}</span>
                   </span>
                   <span v-if="s.scoreRate > 0" class="text-[10px] font-bold text-slate-400">
-                    {{ s.scoreRate.toFixed(2) }}%<template v-if="s.predictedRate != null">
-                      <span class="mx-0.5 text-cyan-600 dark:text-cyan-400">→</span>
-                      <span class="text-cyan-700 dark:text-cyan-300">{{ s.predictedRate.toFixed(2) }}%</span>
+                    <template v-if="mode === 'strength' && s.predictedRate != null">
+                      <span>{{ s.predictedRate.toFixed(2) }}%</span>
+                      <span class="mx-0.5 text-emerald-600 dark:text-emerald-400">→</span>
+                      <span class="text-emerald-700 dark:text-emerald-300">{{ s.scoreRate.toFixed(2) }}%</span>
+                    </template>
+                    <template v-else>
+                      {{ s.scoreRate.toFixed(2) }}%<template v-if="s.predictedRate != null">
+                        <span class="mx-0.5 text-cyan-600 dark:text-cyan-400">→</span>
+                        <span class="text-cyan-700 dark:text-cyan-300">{{ s.predictedRate.toFixed(2) }}%</span>
+                      </template>
                     </template>
                   </span>
                 </div>
 
-                <!-- サブラベル: モードごとに「現在値→目標値」等の補足情報 -->
-                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5">{{ s.subLabel }}</p>
+                <!-- サブラベル: モードごとに「現在値→目標値」等の補足情報。
+                     伸びしろ／得意曲モードでは「○譜面から推定」をクリック可にして内訳モーダルを開く。 -->
+                <button
+                  v-if="(mode === 'potential' || mode === 'strength') && s.predictedScore != null"
+                  type="button"
+                  @click="openDetails(s)"
+                  class="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold underline decoration-dotted underline-offset-2 transition-colors"
+                  :class="mode === 'strength'
+                    ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'
+                    : 'text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300'"
+                  :aria-label="t('potentialDetails.openButtonAria')"
+                >
+                  {{ s.subLabel }}
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                <p v-else class="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5">{{ s.subLabel }}</p>
               </div>
 
               <!-- ギャップラベル: 目標までの差分を色付きバッジで表示 -->
@@ -901,6 +1030,7 @@ const selectedFriend = computed(() =>
                     'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300': mode === 'beat-pt',
                     'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300': mode === 'rate-pt',
                     'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300': mode === 'potential',
+                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300': mode === 'strength',
                   }"
                 >
                   {{ s.gapLabel }}
@@ -912,5 +1042,23 @@ const selectedFriend = computed(() =>
 
       </template>
     </div>
+
+    <!-- 「○譜面から推定」内訳モーダル: 左=参照譜面リスト / 右=散布図 -->
+    <GrowthPotentialDetailsModal
+      v-if="detailsModalCard"
+      :target-title="detailsModalCard.title"
+      :target-difficulty-name="detailsModalCard.difficultyName"
+      :target-difficulty-level="detailsModalCard.difficultyLevel ?? 0"
+      :target-difficulty-color="detailsModalCard.difficultyColor"
+      :target-current-score="detailsModalCard.score"
+      :target-predicted-score="detailsModalCard.predictedScore ?? 0"
+      :target-current-rate="detailsModalCard.scoreRate"
+      :target-predicted-rate="detailsModalCard.predictedRate"
+      :target-max-score="detailsModalCard.maxScore"
+      :target-support-count="detailsModalCard.supportCount"
+      :mode="mode === 'strength' ? 'strength' : 'potential'"
+      :view-user-id="potentialViewUserId"
+      @close="closeDetails"
+    />
   </div>
 </template>

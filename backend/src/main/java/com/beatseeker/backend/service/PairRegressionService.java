@@ -47,6 +47,24 @@ public class PairRegressionService {
     private static final double GAP_COEFFICIENT = 1.2;
     /** 加重平均に必要な最小サポート数（少なすぎる予測は不安定なので捨てる）。 */
     private static final int SUPPORT_MIN = 3;
+    /**
+     * 重み関数で使う底点。|r| からこの値を引いた残差に対して {@link #WEIGHT_EXP} 乗を適用する。
+     * 0.85 に設定すると、|r| ∈ [0.90, 1.00] のレンジで残差が 0.05〜0.15 となり、
+     * その間の高次乗が大きく差をつけるためコントラストが効く。
+     */
+    private static final double WEIGHT_BASE = 0.85;
+    /**
+     * 重み関数の指数。値を上げるほど高 |r| の寄与が支配的になり、貢献度が偏る。
+     *  - 旧来の r² 相当: 約 2 乗（r=0.90 と r=0.95 で重み比 ~0.90 → ほぼ均等）
+     *  - 6 乗: r=0.90 と r=0.95 で重み比 ~0.016 → 高相関譜面に強く集中
+     */
+    private static final double WEIGHT_EXP = 6.0;
+    /**
+     * logit 変換時のクランプ値。スコアレートが 0 または 1 の極値だと logit が ±∞ になるので、
+     * [LOGIT_RATE_CLAMP, 1 − LOGIT_RATE_CLAMP] に押し込む。
+     * 1e-4 は理論値貼り付き相当（rate=0.9999）まで許容するので、実データでは事実上ノークランプ。
+     */
+    private static final double LOGIT_RATE_CLAMP = 1e-4;
     /** A グレード閾値（scoreRate %）。 */
     private static final double A_GRADE_RATE = 0.6667;
 
@@ -177,9 +195,18 @@ public class PairRegressionService {
         long keptPairs = 0;
         Acc[] accsBuf = new Acc[numCharts]; // 再利用する固定サイズバッファ
 
+        // notes を idx でひける配列にしておく（タイトループ内の Map.get を避けるため）
+        int[] notesByIdx = new int[numCharts];
+        for (int i = 0; i < numCharts; i++) {
+            Integer n = notesMap.get(chartKeys[i]);
+            notesByIdx[i] = n == null ? 0 : n;
+        }
+
         for (int aIdx = 0; aIdx < numCharts; aIdx++) {
             java.util.List<Long> users = chartUsers[aIdx];
             if (users == null) continue;
+            int notesA = notesByIdx[aIdx];
+            if (notesA <= 0) continue;
             // 前回のループ結果をクリア（new しない、null 代入で参照を切る）
             java.util.Arrays.fill(accsBuf, null);
 
@@ -195,17 +222,22 @@ public class PairRegressionService {
                     }
                 }
                 if (aScore < 0) continue; // 起こらないはずだが防御
-                // user のその他譜面ごとに (aScore, bScore) を Acc に追加
+                // 回帰は logit 空間で行う（飽和する境界を自然に表現するため）
+                double logitA = scoreToLogit(aScore, notesA);
+                // user のその他譜面ごとに (logitA, logitB) を Acc に追加
                 for (long packed : uScores) {
                     int bIdx = (int) (packed >>> 32);
                     if (bIdx == aIdx) continue;
+                    int notesB = notesByIdx[bIdx];
+                    if (notesB <= 0) continue;
                     int bScore = (int) packed;
+                    double logitB = scoreToLogit(bScore, notesB);
                     Acc acc = accsBuf[bIdx];
                     if (acc == null) {
                         acc = new Acc();
                         accsBuf[bIdx] = acc;
                     }
-                    acc.add(aScore, bScore);
+                    acc.add(logitA, logitB);
                 }
             }
 
@@ -267,11 +299,15 @@ public class PairRegressionService {
         }
 
         // 2) 各 B について HIGH (|r|≧PRIMARY_R) と LOW (|r|≧FALLBACK_R) の加重平均を同時に算出
+        // 予測は logit 空間で行い、最後にスコア空間へ戻す。
         List<Map<String, Object>> results = new ArrayList<>();
         for (Map.Entry<String, int[]> bEntry : myByKey.entrySet()) {
             String chartB = bEntry.getKey();
             int actualB = bEntry.getValue()[0];
             int levelB = bEntry.getValue()[1];
+            Integer notesB = notesByKey.get(chartB);
+            if (notesB == null || notesB <= 0) continue;
+            double maxScoreB = notesB * 2.0;
 
             double sumWHigh = 0.0, sumWPHigh = 0.0;
             double sumWLow  = 0.0, sumWPLow  = 0.0;
@@ -281,6 +317,8 @@ public class PairRegressionService {
                 String chartA = aEntry.getKey();
                 if (chartA.equals(chartB)) continue;
                 int actualA = aEntry.getValue()[0];
+                Integer notesA = notesByKey.get(chartA);
+                if (notesA == null || notesA <= 0) continue;
 
                 Reg reg = getRegression(chartA, chartB);
                 if (reg == null) continue;
@@ -288,8 +326,12 @@ public class PairRegressionService {
                 double absR = Math.abs(reg.r);
                 if (absR < FALLBACK_R) continue; // キャッシュ側で既に弾かれているはずだが念のため
 
-                double pred = reg.slope * actualA + reg.intercept;
-                double w = reg.r * reg.r; // r²
+                // logit 空間での線形予測 → sigmoid でスコアレートへ → スコアへ
+                double logitA = scoreToLogit(actualA, notesA);
+                double predLogitB = reg.slope * logitA + reg.intercept;
+                double predRateB = logitToScoreRate(predLogitB);
+                double pred = predRateB * maxScoreB;
+                double w = computeWeight(reg.r);
                 sumWLow += w;
                 sumWPLow += pred * w;
                 supLow++;
@@ -355,18 +397,156 @@ public class PairRegressionService {
         return results;
     }
 
+    /**
+     * 【メソッドの役割】 指定ユーザーの「ある譜面 B の伸びしろ」を支えた参照譜面 A の一覧を返す。
+     *
+     * フロントの「○譜面から推定」表示の内訳モーダル用。
+     * {@link #computeGrowthPotential(Long)} と同じスコープ（A 以上の myByKey）で
+     * 各 A について B への単体予測 (slope·actualA + intercept) と相関係数を返す。
+     * |r| ≧ {@link #FALLBACK_R} のものだけ採用し、HIGH 採用かどうかも `isPrimary` で示す。
+     *
+     * @param userId               対象ユーザー
+     * @param targetTitle          対象譜面 B の曲名
+     * @param targetDifficultyName 対象譜面 B の難易度名（"ANOTHER" / "LEGGENDARIA"）
+     * @return 各 A について {title, difficultyName, difficultyLevel, actualA, notesA, notesB,
+     *         r, n, slope, intercept, weight, predScore, isPrimary} を |r| 降順で並べたリスト
+     */
+    public List<Map<String, Object>> computePotentialRefs(Long userId, String targetTitle, String targetDifficultyName) {
+        ensureBuilt();
+
+        // 1) computeGrowthPotential と同じく自分の ANOTHER/LEGG スコアを取得して A 以上を残す
+        List<Map<String, Object>> userRows = scoreRepository.findUserAnotherLeggScores(userId);
+        Map<String, int[]> myByKey = new HashMap<>();
+        for (Map<String, Object> row : userRows) {
+            String title = (String) row.get("title");
+            String diff = (String) row.get("difficultyName");
+            int score = ((Number) row.get("score")).intValue();
+            int level = row.get("difficultyLevel") == null ? 0 : ((Number) row.get("difficultyLevel")).intValue();
+            String key = title + "\0" + diff;
+            Integer notes = notesByKey.get(key);
+            if (notes == null) continue;
+            if (score < notes * 2.0 * A_GRADE_RATE) continue;
+            myByKey.put(key, new int[]{score, level});
+        }
+
+        String chartB = targetTitle + "\0" + targetDifficultyName;
+        Integer notesB = notesByKey.get(chartB);
+        if (notesB == null || notesB <= 0) return new ArrayList<>();
+        double maxScoreB = notesB * 2.0;
+
+        // 2) 自分が A 以上で出している全譜面 A について、B への回帰を引いて単体予測値を集める
+        // 予測は logit 空間で行い、最後に rate→score に戻す（モデルと整合）。
+        List<Map<String, Object>> refs = new ArrayList<>();
+        for (Map.Entry<String, int[]> aEntry : myByKey.entrySet()) {
+            String chartA = aEntry.getKey();
+            if (chartA.equals(chartB)) continue;
+            Integer notesA = notesByKey.get(chartA);
+            if (notesA == null || notesA <= 0) continue;
+
+            Reg reg = getRegression(chartA, chartB);
+            if (reg == null) continue;
+            double absR = Math.abs(reg.r);
+            if (absR < FALLBACK_R) continue;
+
+            int actualA = aEntry.getValue()[0];
+            int levelA = aEntry.getValue()[1];
+            double logitA = scoreToLogit(actualA, notesA);
+            double predLogitB = reg.slope * logitA + reg.intercept;
+            double predScore = logitToScoreRate(predLogitB) * maxScoreB;
+            double weight = computeWeight(reg.r);
+
+            String[] parts = chartA.split("\0");
+            Map<String, Object> ref = new HashMap<>();
+            ref.put("title", parts[0]);
+            ref.put("difficultyName", parts[1]);
+            ref.put("difficultyLevel", levelA);
+            ref.put("actualA", actualA);
+            ref.put("notesA", notesA);
+            ref.put("notesB", notesB);
+            ref.put("r", reg.r);
+            ref.put("n", reg.n);
+            ref.put("slope", reg.slope);
+            ref.put("intercept", reg.intercept);
+            ref.put("weight", weight);
+            ref.put("predScore", predScore);
+            // HIGH 精度の加重平均に組み込まれた A かどうか（フロントでバッジ表示に使う）
+            ref.put("isPrimary", absR >= PRIMARY_R);
+            refs.add(ref);
+        }
+
+        // 3) |r| 降順で並べる（最も寄与の大きい譜面を上に）
+        refs.sort((a, b) -> Double.compare(
+                Math.abs(((Number) b.get("r")).doubleValue()),
+                Math.abs(((Number) a.get("r")).doubleValue())));
+        return refs;
+    }
+
+    /**
+     * 【メソッドの役割】 加重平均の重み w を相関係数 r から計算する。
+     *
+     * 旧来は r² だったが、|r| が 0.90〜0.95 に集まる実データでは差がほぼ出ず、
+     * 弱相関ペアまで均等に効いて予測がぼやけていた。
+     * 底点を {@link #WEIGHT_BASE}、指数を {@link #WEIGHT_EXP} とするシフト乗数式に切り替え、
+     * 高 |r| ほど重みが急峻に立ち上がるようにする。
+     *
+     * @param r 相関係数（負値もあり得るので abs を取る）
+     * @return 加重平均で使う重み w（≥ 0）
+     */
+    private static double computeWeight(double r) {
+        double absR = Math.abs(r);
+        // フィルタ済みなので来ない想定だが、念のため底点未満は 0 に潰す。
+        if (absR <= WEIGHT_BASE) return 0;
+        return Math.pow(absR - WEIGHT_BASE, WEIGHT_EXP);
+    }
+
+    /**
+     * 【メソッドの役割】 スコアレート (0〜1) を logit (= log(p/(1−p))) に変換する。
+     *
+     * IIDX のスコアは理論値（rate=1.0）に到達不可能で、MAX-→MAX 付近で
+     * 1 点の重みが指数関数的に増す（飽和する）。生スコア空間で線形回帰を取ると
+     * その飽和を表現できず、上位スコアの予測が回帰直線の上に逸脱する。
+     * logit 空間で回帰すれば、sigmoid の逆関数なので 0〜1 の境界で自然に
+     * 頭打ちになり、上端での 1 点の重みが指数的に効くようにモデル化される。
+     *
+     * @param rate 0〜1 のスコアレート（fraction、% ではない）
+     * @return logit 変換後の値（クランプにより ±9.21 程度に収まる）
+     */
+    private static double scoreRateToLogit(double rate) {
+        double clamped = Math.max(LOGIT_RATE_CLAMP, Math.min(1.0 - LOGIT_RATE_CLAMP, rate));
+        return Math.log(clamped / (1.0 - clamped));
+    }
+
+    /**
+     * 【メソッドの役割】 logit 値をスコアレート (0〜1) に戻す（sigmoid）。
+     *
+     * @param logit logit 空間の値
+     * @return 0〜1 のスコアレート
+     */
+    private static double logitToScoreRate(double logit) {
+        return 1.0 / (1.0 + Math.exp(-logit));
+    }
+
+    /**
+     * 【メソッドの役割】 EX スコアと notes から logit 空間の値を計算する。
+     * 内部的には rate = score / (notes×2) を取って logit へ。
+     */
+    private static double scoreToLogit(int score, int notes) {
+        if (notes <= 0) return 0;
+        return scoreRateToLogit(score / (notes * 2.0));
+    }
+
     /** 単一 (A, B) ペアの累積和。compute() で回帰係数に変換する。 */
     static class Acc {
         long n = 0;
         double sumX = 0, sumY = 0, sumXY = 0, sumXX = 0, sumYY = 0;
 
-        void add(int x, int y) {
+        void add(double x, double y) {
             n++;
             sumX += x;
             sumY += y;
-            sumXY += (double) x * y;
-            sumXX += (double) x * x;
-            sumYY += (double) y * y;
+            sumXY += x * y;
+            sumXX += x * x;
+            sumYY += y * y;
         }
 
         Reg compute() {

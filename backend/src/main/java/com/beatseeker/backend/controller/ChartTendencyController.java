@@ -552,6 +552,55 @@ public class ChartTendencyController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 【メソッドの役割】 ログインユーザーの「ある譜面 B の伸びしろ／得意度」を支えた参照譜面 A の一覧を返す。
+     *
+     * 選曲アシストの「○譜面から推定」内訳モーダル用。
+     * フロントは左カラムにこの一覧、右カラムに散布図を出して内訳を可視化する。
+     *
+     * GET /api/analysis/growth-potential-refs?title=...&difficultyName=ANOTHER
+     */
+    @GetMapping("/api/analysis/growth-potential-refs")
+    public ResponseEntity<Map<String, Object>> growthPotentialRefs(
+            Authentication auth,
+            @RequestParam String title,
+            @RequestParam String difficultyName) {
+
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        String iidxId = (String) auth.getPrincipal();
+        User user = userRepository.findByIidxId(iidxId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        List<Map<String, Object>> refs = pairRegressionService.computePotentialRefs(
+                user.getId(), title, difficultyName);
+        return ResponseEntity.ok(Map.of("refs", refs));
+    }
+
+    /**
+     * 【メソッドの役割】 管理者向け: 任意ユーザーの参照譜面一覧を返す（管理者が他ユーザーの内訳を検証するため）。
+     *
+     * GET /api/admin/growth-potential-refs?userId=...&title=...&difficultyName=...
+     */
+    @GetMapping("/api/admin/growth-potential-refs")
+    public ResponseEntity<Map<String, Object>> growthPotentialRefsForUser(
+            Authentication auth,
+            @RequestParam long userId,
+            @RequestParam String title,
+            @RequestParam String difficultyName) {
+
+        checkAdmin(auth);
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        List<Map<String, Object>> refs = pairRegressionService.computePotentialRefs(
+                user.getId(), title, difficultyName);
+        return ResponseEntity.ok(Map.of("refs", refs));
+    }
+
     @GetMapping("/api/analysis/score-pair-scatter")
     public ResponseEntity<Map<String, Object>> scorePairScatter(
             @RequestParam String titleA,
