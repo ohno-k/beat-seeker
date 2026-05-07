@@ -13,7 +13,8 @@
  * - 傾向プロファイル取得、タグ/配置パターン/ノーツ分布可視化
  * - 管理者モードでは類似度計算の内訳を取得可能
  */
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useGameData, type SongDataEntry } from '../composables/useGameData';
@@ -27,6 +28,33 @@ const props = defineProps<{
 const { t } = useI18n();
 const { isLoggedIn, authHeaders } = useAuth();
 const { songDataBody } = useGameData();
+const route = useRoute();
+const router = useRouter();
+
+/**
+ * textage 識別子（例: `30/_cmflg.html?1AC00`）を URL パスに変換する。
+ * パスは 3 セグメントに分解して `/chart/<version>/<slug>/<diffCode>` の形にする。
+ * @returns 変換できない textage の場合は null
+ */
+function textageToPath(textage: string): string | null {
+  const m = textage.match(/^([^/]+)\/(.+?)\.html\?(.+)$/);
+  if (!m) return null;
+  return `/chart/${m[1]}/${m[2]}/${m[3]}`;
+}
+
+/**
+ * 現在のルートが `chart-analysis` ルートなら textage 文字列を組み立てて返す。
+ * 3 セグメントを `<version>/<slug>.html?<diffCode>` の形式に再構成する。
+ */
+function textageFromRoute(): string | null {
+  if (route.name !== 'chart-analysis') return null;
+  const { version, slug, diff } = route.params;
+  if (typeof version !== 'string' || typeof slug !== 'string' || typeof diff !== 'string') return null;
+  return `${version}/${slug}.html?${diff}`;
+}
+
+// URL から指定された textage が songData に存在しなかった場合の表示用
+const unknownTextageFromUrl = ref<string | null>(null);
 
 // adminモードで別ユーザーを閲覧中かどうか
 const isAdminViewing = computed(() =>
@@ -62,14 +90,68 @@ const filteredEntries = computed((): SongDataEntry[] => {
 /**
  * 曲を選択する。
  * 同じ曲の重複選択は（管理者閲覧モードでなければ）スキップし、それ以外なら予測APIを発火。
+ * 選択時にブラウザ URL も `/chart/...` 形式に同期させ、外部共有可能なリンクにする。
  */
 function selectEntry(entry: SongDataEntry) {
   if (selectedEntry.value?.textage === entry.textage && !isAdminViewing.value) return;
   selectedEntry.value = entry;
+  unknownTextageFromUrl.value = null;
   predictionResult.value = null;
   predictionError.value = '';
-  fetchPrediction(entry.textage!);
+
+  // URL を譜面ディープリンクに更新。同 URL なら無駄な history 追加を避ける。
+  if (entry.textage) {
+    const path = textageToPath(entry.textage);
+    if (path && route.fullPath !== path) {
+      router.push(path);
+    }
+  }
+
+  if (entry.textage) {
+    fetchPrediction(entry.textage);
+  }
 }
+
+/**
+ * 現在のルートから対象 textage を読み取り、対応する曲を自動選択する。
+ * songData がまだロードされていない場合は何もしない（ロード完了後の watch で再試行する）。
+ */
+function applyRouteToSelection() {
+  const textage = textageFromRoute();
+  if (!textage) return;
+  if (songDataBody.value.length === 0) return;
+  // 既に同じ曲を選択済みなら何もしない
+  if (selectedEntry.value?.textage === textage) return;
+
+  const entry = songDataBody.value.find(s => s.textage === textage);
+  if (entry) {
+    unknownTextageFromUrl.value = null;
+    selectedEntry.value = entry;
+    predictionResult.value = null;
+    predictionError.value = '';
+    fetchPrediction(textage);
+  } else {
+    // 該当譜面が見つからなかった場合のフォールバック表示用
+    selectedEntry.value = null;
+    unknownTextageFromUrl.value = textage;
+  }
+}
+
+onMounted(() => {
+  applyRouteToSelection();
+});
+
+// songData が遅延ロードされた直後にもう一度マッチを試行する
+watch(() => songDataBody.value.length, (newLen, oldLen) => {
+  if (oldLen === 0 && newLen > 0) {
+    applyRouteToSelection();
+  }
+});
+
+// ブラウザの戻る/進むやプログラム的な router.push に追従する
+watch(() => route.fullPath, () => {
+  applyRouteToSelection();
+});
 
 // 閲覧ユーザーが変わったら、現在の曲で再度予測を取り直す（管理者がユーザー切替時など）
 watch(() => props.viewingUserId, () => {
@@ -455,14 +537,9 @@ watch(selectedEntry, async (entry) => {
       閲覧中ユーザーのスコアを使用して予測しています
     </div>
 
-    <!-- 未ログイン時: この機能はスコア参照が必要なのでログイン促しのみ表示 -->
-    <div v-if="!isLoggedIn"
-      class="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-6 text-center">
-      <p class="text-amber-700 dark:text-amber-300 font-medium">{{ t('scorePrediction.loginRequired') }}</p>
-    </div>
-
-    <!-- メインレイアウト: 左カラム=曲選択 / 右カラム=予測結果 -->
-    <div v-else class="flex flex-col lg:flex-row gap-6">
+    <!-- メインレイアウト: 左カラム=曲選択 / 右カラム=譜面分析結果 -->
+    <!-- 未ログインでも譜面情報・傾向プロファイルは閲覧可能。スコア予測のみ要ログイン。 -->
+    <div class="flex flex-col lg:flex-row gap-6">
 
       <!-- 左カラム: 検索ボックス + 曲リスト -->
       <div class="w-full lg:w-80 shrink-0 flex flex-col gap-3">
@@ -502,46 +579,42 @@ watch(selectedEntry, async (entry) => {
         </div>
       </div>
 
-      <!-- 右カラム: 結果パネル（未選択/ローディング/エラー/結果の4状態） -->
+      <!-- 右カラム: 結果パネル -->
+      <!-- 状態: URL指定の譜面なし / 未選択 / 計算中 / エラー / 結果 -->
       <div class="flex-1 min-w-0">
 
+        <!-- URL で指定された textage が songData に見つからなかった場合のフォールバック -->
+        <div v-if="unknownTextageFromUrl"
+          class="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-6 text-center">
+          <p class="text-amber-700 dark:text-amber-300 font-medium mb-1">
+            {{ t('chartAnalysis.notFound') }}
+          </p>
+          <p class="text-xs text-amber-600/80 dark:text-amber-400/80 break-all">{{ unknownTextageFromUrl }}</p>
+        </div>
+
         <!-- 未選択: ユーザーに曲選択を促すプレースホルダー -->
-        <div v-if="!selectedEntry"
+        <div v-else-if="!selectedEntry"
           class="h-48 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
           {{ t('scorePrediction.selectSong') }}
         </div>
 
-        <!-- ローディング: 予測APIレスポンス待ちのスピナー -->
-        <div v-else-if="isLoading"
-          class="h-48 flex items-center justify-center text-slate-400 dark:text-slate-500">
-          <svg class="animate-spin h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-          </svg>
-          {{ t('scorePrediction.calculating') }}
-        </div>
-
-        <!-- エラー: サーバエラー or 通信エラー表示 -->
-        <div v-else-if="predictionError"
-          class="rounded-xl border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-6">
-          <p class="text-red-600 dark:text-red-400 text-sm">{{ predictionError }}</p>
-        </div>
-
-        <!-- 結果: 予測成功時に曲ヘッダ/傾向/予測スコア/類似曲を縦に表示 -->
-        <div v-else-if="predictionResult" class="flex flex-col gap-4">
+        <!-- 結果: 曲が選択されたら譜面ヘッダ＋傾向プロファイルを表示。 -->
+        <!-- 予測スコア／類似譜面はログイン時かつ predictionResult があるときのみ追加表示。 -->
+        <!-- 予測ロード中・エラーは曲ヘッダ配下にインライン表示する。 -->
+        <div v-else-if="selectedEntry" class="flex flex-col gap-4">
 
           <!-- 曲ヘッダ: 難易度バッジ + タイトル + Lv/ノーツ数/BPM/ソフラン表示 -->
           <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <div class="flex flex-wrap items-start gap-3 mb-3">
               <span
                 class="px-2 py-1 rounded text-xs font-bold shrink-0"
-                :class="diffBadgeClass(predictionResult.difficulty)"
-              >{{ diffLabel(predictionResult.difficulty) }}</span>
+                :class="diffBadgeClass(selectedEntry.difficulty)"
+              >{{ diffLabel(selectedEntry.difficulty) }}</span>
               <div>
-                <div class="text-lg font-bold text-slate-800 dark:text-white">{{ predictionResult.title }}</div>
+                <div class="text-lg font-bold text-slate-800 dark:text-white">{{ selectedEntry.title }}</div>
                 <div class="text-sm text-slate-500 dark:text-slate-400">
-                  Lv.{{ predictionResult.level }}
-                  &nbsp;·&nbsp;{{ predictionResult.notes }} notes
+                  Lv.{{ selectedEntry.level }}
+                  &nbsp;·&nbsp;{{ selectedEntry.notes }} notes
                   <template v-if="tendencyProfile">
                     &nbsp;·&nbsp;{{ tendencyProfile.bpmRaw }} BPM
                     <span v-if="tendencyProfile.isSoflan" class="ml-1 text-amber-500 font-semibold">(ソフラン)</span>
@@ -648,9 +721,32 @@ watch(selectedEntry, async (entry) => {
             </div>
           </div>
 
+          <!-- 未ログイン時のログイン促し: 予測スコア・類似譜面比較はログイン必須 -->
+          <div v-if="!isLoggedIn"
+            class="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-5 text-center">
+            <p class="text-sm text-amber-700 dark:text-amber-300 font-medium">
+              {{ t('chartAnalysis.loginToSeeMore') }}
+            </p>
+          </div>
+
+          <!-- 予測ロード中: 類似譜面取得中のスピナー（曲ヘッダ配下に表示） -->
+          <div v-else-if="isLoading"
+            class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 flex items-center justify-center text-slate-400 dark:text-slate-500">
+            <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <span class="text-sm">{{ t('scorePrediction.calculating') }}</span>
+          </div>
+
+          <!-- 予測エラー: バックエンドからのエラー文言を曲ヘッダ配下にインライン表示 -->
+          <div v-else-if="predictionError"
+            class="rounded-xl border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-5">
+            <p class="text-red-600 dark:text-red-400 text-sm">{{ predictionError }}</p>
+          </div>
 
           <!-- 類似譜面テーブル: 予測の根拠になった類似曲一覧。行クリックで類似度デバッグモーダル -->
-          <div v-if="predictionResult.similarSongs.length"
+          <div v-if="predictionResult?.similarSongs.length"
             class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
               {{ t('scorePrediction.similarSongs') }}

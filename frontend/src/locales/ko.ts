@@ -1104,6 +1104,10 @@ export const ko = {
   'scorePrediction.scoreRate': '스코어율',
   'scorePrediction.similarSongs': '유사 채보',
 
+  // Chart Analysis (딥 링크)
+  'chartAnalysis.notFound': '지정된 채보를 찾을 수 없습니다',
+  'chartAnalysis.loginToSeeMore': '로그인하면 자신의 스코어를 기반으로 한 예측 스코어와 유사 채보 비교를 확인할 수 있습니다',
+
   // Supporter
   'supporter.lockedTitle': '서포터 전용 기능',
   'supporter.lockedDesc': '이 기능은 Ko-fi에서 beat-seeker를 후원해 주신 분들만 이용하실 수 있습니다. 서포터가 되시면 개발 중인 기능을 먼저 체험하실 수 있습니다.',

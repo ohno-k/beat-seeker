@@ -26,6 +26,7 @@ const TermsView = () => import('../views/TermsView.vue')
 const AboutView = () => import('../views/AboutView.vue')
 const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
 const ChartListView = () => import('../views/ChartListView.vue')
+const ScorePredictionView = () => import('../views/ScorePredictionView.vue')
 
 /**
  * SPA のルートテーブル定義。
@@ -71,6 +72,11 @@ const router = createRouter({
     { path: '/difficulty-table', name: 'difficulty-table', component: AboutView },
     // 譜面リスト
     { path: '/chart-list', name: 'chart-list', component: ChartListView },
+    // 譜面分析（スコア予測）の譜面別ディープリンク
+    // textage の譜面ID `<version>/<slug>.html?<diffCode>` を 3 つのパスセグメントに分解して保持。
+    // 例: textage `30/_cmflg.html?1AC00` → URL `/chart/30/_cmflg/1AC00`
+    // 外部サイトからのリンクや SNS 共有用の安定した URL として使う。
+    { path: '/chart/:version/:slug/:diff', name: 'chart-analysis', component: ScorePredictionView },
     // 他ユーザーのスコアを共有リンクで閲覧するルート
     // DashboardView / ScoresView を使い回し、URL パラメータ :userId で表示対象を切り替える
     { path: '/user/:userId', name: 'user-dashboard', component: DashboardView },

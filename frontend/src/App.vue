@@ -523,6 +523,10 @@ onMounted(() => {
       activeTab.value = 'guide';
       currentGuideSlug.value = slug;
     }
+  } else if (currentPath.startsWith('/chart/')) {
+    // /chart/:version/:slug/:diff 形式の譜面分析ディープリンク。
+    // ScorePredictionView 自身が useRoute() でパラメータを読み取り曲を自動選択する。
+    activeTab.value = 'score-prediction';
   } else if (currentPath === '/') {
     // ルートに来たログイン前ユーザーには公開ランディングを見せる。
     // ログイン済みユーザーは /dashboard に遷移させる（URL も書き換え、再アクセス時もダッシュボードに直接戻れるようにする）。

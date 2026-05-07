@@ -1103,6 +1103,10 @@ export const en = {
   'scorePrediction.scoreRate': 'Score Rate',
   'scorePrediction.similarSongs': 'Similar Charts',
 
+  // Chart Analysis (deep links)
+  'chartAnalysis.notFound': 'The requested chart was not found',
+  'chartAnalysis.loginToSeeMore': 'Log in to see your predicted score and similar-chart comparison',
+
   // Supporter
   'supporter.lockedTitle': 'Supporter Only',
   'supporter.lockedDesc': 'This feature is exclusively available to Ko-fi supporters of beat-seeker. Become a supporter to get early access to features in development.',

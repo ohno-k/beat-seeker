@@ -1178,6 +1178,10 @@ export const ja = {
   'scorePrediction.scoreRate': 'スコア率',
   'scorePrediction.similarSongs': '類似譜面',
 
+  // Chart Analysis (譜面分析ディープリンク)
+  'chartAnalysis.notFound': '指定された譜面が見つかりませんでした',
+  'chartAnalysis.loginToSeeMore': 'ログインすると、自分のスコアに基づいた予測スコアと類似譜面比較が表示されます',
+
   // Supporter
   'supporter.lockedTitle': 'サポーター限定機能',
   'supporter.lockedDesc': 'この機能はKo-fiでbeat-seekerを支援してくださった方限定でご利用いただけます。サポーターになると、開発中の機能をいち早く体験できます。',
