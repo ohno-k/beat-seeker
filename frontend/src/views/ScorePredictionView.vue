@@ -77,11 +77,11 @@ const targetEntries = computed((): SongDataEntry[] => {
 
 /**
  * 検索文字列を考慮してフィルタした曲リスト。
- * 空クエリなら先頭50件、クエリ有りなら部分一致で最大80件。
+ * 空クエリなら何も表示せず、ユーザーが検索を開始した時点で部分一致結果を最大80件返す。
  */
 const filteredEntries = computed((): SongDataEntry[] => {
   const q = searchQuery.value.trim().toLowerCase();
-  if (!q) return targetEntries.value.slice(0, 50);
+  if (!q) return [];
   return targetEntries.value
     .filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q))
     .slice(0, 80);
@@ -551,7 +551,8 @@ watch(selectedEntry, async (entry) => {
                  bg-white dark:bg-slate-800 text-slate-800 dark:text-white
                  focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
-        <div class="text-xs text-slate-400 dark:text-slate-500">
+        <!-- 検索クエリがある時のみヒット件数を表示する -->
+        <div v-if="searchQuery.trim()" class="text-xs text-slate-400 dark:text-slate-500">
           {{ filteredEntries.length }} {{ t('scorePrediction.songCount') }}
         </div>
 
