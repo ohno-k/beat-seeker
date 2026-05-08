@@ -27,6 +27,8 @@ const { user, isLoggedIn, authHeaders } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 const props = defineProps<{
   viewingUserId?: number | null;
+  /** 共有 URL 経由の閲覧時に渡される。指定時は /api/share/{token}/history から取得する。 */
+  shareToken?: string | null;
 }>();
 
 /** 履歴エントリ配列。fetchHistory() で populate される。新しい順。 */
@@ -146,19 +148,22 @@ const openDiffModal = (item: any) => {
  *  - Beat-PT/Rate-PT 変動が ±0.1 未満かつ更新 0 曲のエントリは除外（ノイズ排除）
  */
 const fetchHistory = async () => {
-  if (!isLoggedIn.value) return;
+  // share-token モードでは未ログインでも履歴を取得できる必要がある。
+  if (!props.shareToken && !isLoggedIn.value) return;
 
   isLoading.value = true;
   errorMsg.value = '';
 
   try {
     const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
-    const endpoint = props.viewingUserId
+    const endpoint = props.shareToken
+        ? `${API_BASE}/api/share/${encodeURIComponent(props.shareToken)}/history`
+        : props.viewingUserId
         ? `${API_BASE}/api/admin/users/${props.viewingUserId}/history`
         : `${API_BASE}/api/scores/history`;
 
     const res = await fetch(endpoint, {
-        headers: authHeaders()
+        headers: props.shareToken ? {} : authHeaders()
     });
 
     if (!res.ok) throw new Error(t('history.error'));

@@ -13,6 +13,7 @@ import type { ScoreRecord } from '../utils/scoreData';
 import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
+import DifficultyRankingModal from './DifficultyRankingModal.vue';
 
 const props = defineProps<{
   scores: ScoreRecord[];
@@ -25,6 +26,8 @@ const expandedRanks = ref<Set<string>>(new Set());
 const showInfo = ref(false);
 /** レート早見表モーダル表示フラグ。 */
 const showRateTable = ref(false);
+/** 難易度別ランキングモーダルの対象難易度（null なら非表示）。 */
+const rankingModalRank = ref<{ rank: string; totalCount: number } | null>(null);
 
 // ☆11.0 〜 ☆13.0 までの 0.1 刻みラベル配列を生成（レート早見表の列）。
 const allFolders: string[] = [];
@@ -260,6 +263,14 @@ const tableData = computed(() => {
     <!-- Click-outside backdrop for info tooltip -->
     <div v-if="showInfo" class="fixed inset-0 z-10" @click="showInfo = false"></div>
 
+    <!-- Difficulty Ranking Modal -->
+    <DifficultyRankingModal
+      v-if="rankingModalRank"
+      :rank="rankingModalRank.rank"
+      :total-count="rankingModalRank.totalCount"
+      @close="rankingModalRank = null"
+    />
+
     <!-- Rate Table Modal -->
     <Teleport to="body">
       <div v-if="showRateTable" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
@@ -299,6 +310,7 @@ const tableData = computed(() => {
           <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[10px] sm:text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">{{ t('table.colDifficulty') }}</th>
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">{{ t('table.colAvgRate') }}</th>
+            <th scope="col" class="py-2 px-1 sm:py-3 sm:px-2 font-bold text-center w-auto sm:w-12"><span class="sr-only">{{ t('table.colRanking') }}</span></th>
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">{{ t('table.colTotalPt') }}</th>
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">{{ t('table.colPlayed') }}</th>
             <th scope="col" class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"><span class="sr-only">{{ t('diffTable.expandAll') }}</span></th>
@@ -330,6 +342,19 @@ const tableData = computed(() => {
                     <div class="h-full bg-indigo-500 dark:bg-indigo-400" :style="{ width: `${data.averageRate}%` }"></div>
                   </div>
                 </div>
+              </td>
+              <td class="py-2 px-1 sm:py-3 sm:px-2 text-center">
+                <button
+                  type="button"
+                  @click.stop="rankingModalRank = { rank: data.rank, totalCount: data.totalCount }"
+                  :title="t('table.viewDifficultyRanking')"
+                  :aria-label="t('table.viewDifficultyRanking')"
+                  class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                </button>
               </td>
               <td class="py-2 px-2 sm:py-3 sm:px-4 text-right cursor-pointer" @click.stop="toggleRank(data.rank)">
                 <div class="flex items-center justify-end gap-1 sm:gap-2">
@@ -365,7 +390,7 @@ const tableData = computed(() => {
             </tr>
             <!-- Expanded Details Row -->
             <tr v-if="expandedRanks.has(data.rank)" :id="`unofficial-rank-panel-${data.rank}`" class="bg-slate-50/80 dark:bg-slate-800/40 border-t-0 shadow-inner">
-              <td colspan="5" class="px-6 py-4">
+              <td colspan="6" class="px-6 py-4">
                 <!-- Summary Board -->
                 <div class="mb-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-200">
                   <div class="flex flex-col">
@@ -434,7 +459,7 @@ const tableData = computed(() => {
           </template>
           
           <tr v-if="tableData.length === 0">
-            <td colspan="5" class="py-12 text-center text-slate-500 dark:text-slate-400">
+            <td colspan="6" class="py-12 text-center text-slate-500 dark:text-slate-400">
               {{ t('table.noUnofficialData') }}
             </td>
           </tr>

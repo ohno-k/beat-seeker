@@ -605,6 +605,20 @@ public class ScoreController {
     }
 
     /**
+     * 【メソッドの役割】 指定した非公式難易度（☆11.0〜☆13.0）の BEAT-PT ランキングを返す。
+     *
+     * 非公式難易度表サマリーの「ランキングボタン」クリック時に呼ばれる。
+     * 集計範囲はそのフォルダ内の全プレイ曲（top100 キャップなし）。
+     *
+     * @param rank 非公式ランクの先頭部分（例 "12.0"）
+     * @return ランキング行リスト（合計 BEAT-PT 降順）
+     */
+    @GetMapping("/ranking/by-rank")
+    public ResponseEntity<List<Map<String, Object>>> getRankingByInformalRank(@RequestParam String rank) {
+        return ResponseEntity.ok(scoreRepository.findRankingByInformalRank(rank));
+    }
+
+    /**
      * 【メソッドの役割】 ARENA ランクごとの RATE-PT 平均を返す。
      */
     @GetMapping("/rate-ranking/arena-averages")

@@ -286,8 +286,30 @@
       </div>
     </Teleport>
 
+    <!-- URL 共有 -->
+    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+        </svg>
+        URL共有
+      </h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+        ログインしていない人に向けて、ダッシュボードやスコア一覧を期間限定で公開できます。
+      </p>
+      <button
+        type="button"
+        @click="isShareModalOpen = true"
+        class="px-6 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all shadow-sm"
+      >
+        共有 URL を管理
+      </button>
+    </div>
+
+    <ShareTokenModal :is-open="isShareModalOpen" @close="isShareModalOpen = false" />
+
     <!-- 通知設定 -->
-    <div v-if="!props.viewingUserId" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -357,9 +379,12 @@ import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
 import { calculatePoints, WEIGHTS } from '../utils/beatTier';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
+import ShareTokenModal from './ShareTokenModal.vue';
 
 const props = defineProps<{
   viewingUserId?: number | null;
+  /** 共有 URL 経由の閲覧時に渡される。指定時は /api/share/{token}/... から取得する。 */
+  shareToken?: string | null;
 }>();
 
 const { isDarkMode } = useDarkMode();
@@ -367,6 +392,9 @@ const { authHeaders } = useAuth();
 const { t } = useI18n();
 // プッシュ通知は「自分を閲覧中」のみ有効（viewingUserId が無いケース）。
 const { requestNotificationPermission, sendTestNotification } = useFriends();
+
+/** URL 共有モーダルの開閉状態。 */
+const isShareModalOpen = ref(false);
 
 /** ブラウザのプッシュ通知許可状態（'default' / 'granted' / 'denied'）。 */
 const notificationStatus = ref(typeof Notification !== 'undefined' ? (Notification.permission || 'default') : 'default');
@@ -474,16 +502,22 @@ if (diffTableRanksRef.value && Array.isArray(diffTableRanksRef.value)) {
  */
 onMounted(async () => {
   try {
-    const histEndpoint = props.viewingUserId
+    const histEndpoint = props.shareToken
+        ? `${API_BASE}/api/share/${encodeURIComponent(props.shareToken)}/history`
+        : props.viewingUserId
         ? `${API_BASE}/api/admin/users/${props.viewingUserId}/history`
         : `${API_BASE}/api/scores/history`;
-    const scoresEndpoint = props.viewingUserId
+    const scoresEndpoint = props.shareToken
+        ? `${API_BASE}/api/share/${encodeURIComponent(props.shareToken)}/scores`
+        : props.viewingUserId
         ? `${API_BASE}/api/admin/users/${props.viewingUserId}/scores`
         : `${API_BASE}/api/scores/me`;
 
+    // share-token モードでは認証ヘッダ不要（公開エンドポイント）。
+    const headers = props.shareToken ? {} : authHeaders();
     const [histRes, scoresRes] = await Promise.allSettled([
-      fetch(histEndpoint, { headers: authHeaders() }),
-      fetch(scoresEndpoint, { headers: authHeaders() }),
+      fetch(histEndpoint, { headers }),
+      fetch(scoresEndpoint, { headers }),
     ]);
 
     if (histRes.status === 'fulfilled' && histRes.value.ok) {

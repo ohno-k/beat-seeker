@@ -286,6 +286,11 @@ export const ko = {
   'table.paleIconExplanation': '플레이한 곡으로만 산출한 랭크입니다. 모든 곡을 플레이한 경우 표시되지 않습니다.',
   'table.viewRateTable': '📊 필요 스코어 레이트 표 보기',
   'table.rateTableTitle': '📊 필요 스코어 레이트 표',
+  'table.colRanking': '랭킹',
+  'table.viewDifficultyRanking': '이 난이도의 랭킹 보기',
+  'table.difficultyRankingTitle': '폴더 랭킹',
+  'table.onlyFullPlay': '전곡 플레이 완료 유저만 표시',
+  'table.noFullPlayUsers': '전곡 플레이를 완료한 유저가 없습니다.',
   'table.folderBeatTier': '폴더 내 BEAT-TIER',
   'table.noUnofficialData': '비공식 난이도 데이터를 찾을 수 없습니다. 대상 레벨(☆11, ☆12)이 포함되어 있는지 확인해 주세요.',
 

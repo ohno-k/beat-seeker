@@ -286,6 +286,11 @@ export const ja = {
   'table.paleIconExplanation': 'プレイ済みの曲のみで算出したランクです。全曲プレイ済みの場合は表示されません。',
   'table.viewRateTable': '📊 必要スコアレート表を見る',
   'table.rateTableTitle': '📊 必要スコアレート表',
+  'table.colRanking': 'ランキング',
+  'table.viewDifficultyRanking': 'この難易度のランキングを見る',
+  'table.difficultyRankingTitle': 'フォルダランキング',
+  'table.onlyFullPlay': '全曲プレイ済みのみ表示',
+  'table.noFullPlayUsers': '全曲プレイ済みのユーザーがいません。',
   'table.folderBeatTier': 'フォルダ内 BEAT-TIER',
   'table.noUnofficialData': '非公式難易度データが見つかりません。対象レベル（☆11、☆12）が含まれているか確認してください。',
 

@@ -27,6 +27,7 @@ const AboutView = () => import('../views/AboutView.vue')
 const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
 const ChartListView = () => import('../views/ChartListView.vue')
 const ScorePredictionView = () => import('../views/ScorePredictionView.vue')
+const ShareView = () => import('../views/ShareView.vue')
 
 /**
  * SPA のルートテーブル定義。
@@ -81,6 +82,8 @@ const router = createRouter({
     // DashboardView / ScoresView を使い回し、URL パラメータ :userId で表示対象を切り替える
     { path: '/user/:userId', name: 'user-dashboard', component: DashboardView },
     { path: '/user/:userId/scores', name: 'user-scores', component: ScoresView },
+    // ログイン不要の URL 共有ページ（発行されたトークンで閲覧）
+    { path: '/share/:token', name: 'share-view', component: ShareView },
   ],
 })
 

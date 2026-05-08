@@ -400,6 +400,39 @@ public class AdminController {
     }
 
     /**
+     * 【メソッドの役割】 指定 1 ユーザーの履歴ログを「初回登録扱い」で生成・追加する。
+     *
+     * 用途: スコアは登録されているが {@code score_history_logs} に行が無く、
+     * ランキング・トレンド表示から漏れてしまっているユーザーを救済する。
+     * active な曲定義 / 難易度表を使って BEAT-PT / RATE-PT / 各カウンタを再計算し、
+     * 新しいスナップショットを 1 件追加する。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param userId 対象ユーザーの DB 主キー
+     * @return 成功メッセージ。スコア 0 件なら 400、ユーザー不在なら 404
+     */
+    @PostMapping("/users/{userId}/recalculate")
+    public ResponseEntity<Map<String, Object>> recalculateSingleUser(Authentication auth,
+                                                                     @PathVariable Long userId) {
+        checkAdminAccess(auth);
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "User " + userId + " not found");
+            return ResponseEntity.status(404).body(body);
+        }
+        boolean added = scoreRecalculationService.recalculateSingleUserFromActiveData(user);
+        Map<String, Object> body = new HashMap<>();
+        if (!added) {
+            body.put("message", "User " + userId + " has no scores to snapshot");
+            return ResponseEntity.badRequest().body(body);
+        }
+        body.put("message", "User " + userId + " のスナップショットを追加しました");
+        body.put("userId", userId);
+        return ResponseEntity.ok(body);
+    }
+
+    /**
      * 【メソッドの役割】 score_history_logs の最新レコードから users.total_beat_pt を一括移行する。
      *
      * 新カラム {@code users.total_beat_pt} 追加直後に一度だけ実行する用途のマイグレーション API。

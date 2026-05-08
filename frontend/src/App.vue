@@ -61,6 +61,7 @@ const ScoreScatterView = defineAsyncComponent(() => import('./views/ScoreScatter
 const SkillTreeView = defineAsyncComponent(() => import('./views/SkillTreeView.vue'));
 const ChartListView = defineAsyncComponent(() => import('./views/ChartListView.vue'));
 const RankComparisonView = defineAsyncComponent(() => import('./views/RankComparisonView.vue'));
+const ShareView = defineAsyncComponent(() => import('./views/ShareView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
@@ -210,7 +211,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share'>('dashboard')
 /** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
 const currentGuideSlug = ref<string | null>(null);
 /**
@@ -527,6 +528,9 @@ onMounted(() => {
     // /chart/:version/:slug/:diff 形式の譜面分析ディープリンク。
     // ScorePredictionView 自身が useRoute() でパラメータを読み取り曲を自動選択する。
     activeTab.value = 'score-prediction';
+  } else if (currentPath.startsWith('/share/')) {
+    // /share/:token 形式の URL 共有ページ。ShareView がトークンを読み取って描画する。
+    activeTab.value = 'share';
   } else if (currentPath === '/') {
     // ルートに来たログイン前ユーザーには公開ランディングを見せる。
     // ログイン済みユーザーは /dashboard に遷移させる（URL も書き換え、再アクセス時もダッシュボードに直接戻れるようにする）。
@@ -1823,6 +1827,11 @@ const handleUnifiedClose = async () => {
         <!-- アプリについて -->
         <template v-else-if="activeTab === 'about'">
           <About class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- URL 共有ビュー（ログイン不要） -->
+        <template v-else-if="activeTab === 'share'">
+          <ShareView class="w-full" />
         </template>
 
         <!-- ARENA: 対戦ログ -->

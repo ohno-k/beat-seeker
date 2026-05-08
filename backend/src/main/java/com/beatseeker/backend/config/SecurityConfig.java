@@ -99,6 +99,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/scores/ranking", "/api/scores/rate-ranking",
                                                                 "/api/scores/ranking/arena-averages",
                                                                 "/api/scores/ranking/top-rankers",
+                                                                "/api/scores/ranking/by-rank",
                                                                 "/api/scores/rate-ranking/arena-averages",
                                                                 "/api/scores/rate-ranking/top-rankers",
                                                                 "/api/scores/song-top-rankers",
@@ -113,6 +114,10 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 // パスワード忘れ・リセットはログイン前に叩かれるので公開
                                                 .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                                                // 共有トークンの管理（発行・一覧・失効）は要ログイン
+                                                .requestMatchers("/api/share/tokens", "/api/share/tokens/**").authenticated()
+                                                // 共有トークン経由のビュー（/api/share/{token}/...）はログイン不要
+                                                .requestMatchers("/api/share/**").permitAll()
                                                 // アクティビティフィードも未ログイン閲覧を許可
                                                 .requestMatchers("/api/activity/feed").permitAll()
                                                 // 他ユーザーのプロフィール・スコア・履歴参照は公開

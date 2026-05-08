@@ -823,6 +823,93 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> calculateDifficultySimulation();
 
     /**
+     * 【メソッドの役割】 指定した非公式難易度（ランク値 "11.0"〜"13.0"）に属する全曲の合計 BEAT-PT で
+     * ユーザーをランキング集計する。
+     *
+     * 計算方式は {@link #findAllSongRankingAggregates()} と同じ式（POWER + boost）だが、
+     * 集計範囲をフォルダ単位に絞り、ユーザー上位 100 曲のキャップは適用しない。
+     * これは「☆XX フォルダ単体のランキング」という用途のため、各フォルダ内の全プレイ曲を合算する。
+     *
+     * 平均スコアレートは（合計スコア / 合計最大スコア × 100）でフロントエンド側で算出可能なように
+     * totalScore / totalMaxScore も同梱して返す。
+     *
+     * 返却キー:
+     *   userId / displayName / iidxId / privacyLevel / lastUpdatedAt / isSupporter /
+     *   totalBeatPt / totalScore / totalMaxScore / playedCount
+     *
+     * @param rank 非公式ランクの先頭部分（"11.0" 〜 "13.0"）。dr.rank_value の SUBSTRING と比較する
+     * @return ユーザーごとの集計行（合計 BEAT-PT 降順）
+     */
+    @Query(value =
+        "WITH " + WEIGHT_MAP_VALUES + ", " +
+        "rank_songs AS ( " +
+        "  SELECT drs.song_title AS mapped_title " +
+        "  FROM difficulty_ranks dr " +
+        "  JOIN difficulty_rank_songs drs ON dr.id = drs.difficulty_rank_id " +
+        "  WHERE dr.revision = 'active' " +
+        "    AND SUBSTRING(dr.rank_value FROM '^\\d+\\.\\d+') = :rank " +
+        "), " +
+        "weight_for_rank AS ( SELECT wt FROM weight_map WHERE rv = :rank ), " +
+        "scored_data AS ( " +
+        "  SELECT " +
+        "    s.user_id, " +
+        // 注意: difficulty_rank_songs.song_title は LEGGENDARIA 譜面の場合「タイトル + '[L]'」（スペース無し）で
+        //       格納されているため、ここでも同じ結合キーに揃える。スペースを入れると 0 件マッチになる。
+        "    (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || '[L]' ELSE s.title END) AS mapped_title, " +
+        "    s.score AS raw_score, " +
+        "    sd.notes * 2 AS max_score, " +
+        "    " + SCORE_RATE_FORMULA + " AS score_rate " +
+        "  FROM scores s " +
+        "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
+        "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0 " +
+        "), " +
+        "in_rank AS ( " +
+        "  SELECT sd.user_id, sd.raw_score, sd.max_score, sd.score_rate " +
+        "  FROM scored_data sd " +
+        "  JOIN rank_songs rs ON rs.mapped_title = sd.mapped_title " +
+        "), " +
+        "with_pt AS ( " +
+        "  SELECT ir.user_id, ir.raw_score, ir.max_score, ir.score_rate, " +
+        "    CASE WHEN ir.score_rate > 66.666 THEN " +
+        "      (POWER(ir.score_rate / 100.0, 1.3) * w.wt) + " +
+        "      (w.wt * CASE " +
+        "        WHEN ir.score_rate > 94.44 THEN 0.03 " +
+        "        WHEN ir.score_rate > 88.88 THEN 0.02 " +
+        "        WHEN ir.score_rate > 77.77 THEN 0.01 " +
+        "        ELSE 0.0 END) " +
+        "    ELSE 0.0 END AS beat_pt " +
+        "  FROM in_rank ir CROSS JOIN weight_for_rank w " +
+        "), " +
+        "user_totals AS ( " +
+        "  SELECT user_id, " +
+        "         SUM(beat_pt) AS total_pt, " +
+        "         SUM(raw_score) AS total_score, " +
+        "         SUM(max_score) AS total_max_score, " +
+        "         COUNT(*) AS played_count " +
+        "  FROM with_pt " +
+        "  GROUP BY user_id " +
+        "), " +
+        "latest_log AS ( " +
+        "  SELECT DISTINCT ON (user_id) user_id, uploaded_at " +
+        "  FROM score_history_logs " +
+        "  ORDER BY user_id, uploaded_at DESC " +
+        ") " +
+        "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
+        "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
+        "       ll.uploaded_at AS \"lastUpdatedAt\", " +
+        "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\", " +
+        "       ROUND(ut.total_pt::numeric, 1) AS \"totalBeatPt\", " +
+        "       ut.total_score AS \"totalScore\", " +
+        "       ut.total_max_score AS \"totalMaxScore\", " +
+        "       ut.played_count AS \"playedCount\" " +
+        "FROM user_totals ut " +
+        "JOIN users u ON ut.user_id = u.id " +
+        "LEFT JOIN latest_log ll ON ll.user_id = u.id " +
+        "ORDER BY ut.total_pt DESC, ut.played_count DESC", nativeQuery = true)
+    List<Map<String, Object>> findRankingByInformalRank(@Param("rank") String rank);
+
+    /**
      * 【メソッドの役割】 {@code user_song_ranks} テーブルへ、全ユーザーの曲別順位を一括 INSERT する。
      *
      * ネイティブ SQL の {@code INSERT ... SELECT}。

@@ -287,6 +287,11 @@ export const en = {
   'table.paleIconExplanation': 'Ranks calculated using only played songs. Not shown if all songs are played.',
   'table.viewRateTable': '📊 View Required Rate Table',
   'table.rateTableTitle': '📊 Required Score Rate Table',
+  'table.colRanking': 'Ranking',
+  'table.viewDifficultyRanking': 'View ranking for this difficulty',
+  'table.difficultyRankingTitle': 'Folder Ranking',
+  'table.onlyFullPlay': 'Only users who played all songs',
+  'table.noFullPlayUsers': 'No users have played all songs in this folder.',
   'table.folderBeatTier': 'Folder BEAT-TIER',
   'table.noUnofficialData': 'No unofficial difficulty data found. Please check if level ☆11/☆12 scores are included.',
 

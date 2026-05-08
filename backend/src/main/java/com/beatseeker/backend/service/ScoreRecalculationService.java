@@ -257,6 +257,62 @@ public class ScoreRecalculationService {
     }
 
     /**
+     * 【メソッドの役割】 active な DB データ（曲定義 / 難易度表）から、指定 1 ユーザーの履歴ログを
+     * 「初回登録扱い」で生成・追加する。
+     *
+     * 用途: アップロードはされているが {@code save-history-log} が呼ばれなかった等で
+     * {@code score_history_logs} にレコードが無くランキングに出てこないユーザーを救済する。
+     *
+     * 内部的には active な SongDefinition / DifficultyRank からマップを組み、
+     * {@link #processUserRecalculation(User, Map, Map)} に委譲して新規スナップショットを 1 件追加する。
+     * 履歴が既にあるユーザーに呼んでも単に最新スナップショットが追加されるだけで害はない。
+     *
+     * @param user 対象ユーザー（必須）
+     * @return 履歴ログを追加した場合 true、スコアが 1 件もなく追加されなかった場合 false
+     */
+    @Transactional
+    public boolean recalculateSingleUserFromActiveData(User user) {
+        // 手順1: active 曲定義から (title_difficultyCode → maxScore = notes*2) マップを作る。
+        Map<String, Integer> songMaxScores = new HashMap<>();
+        for (SongDefinition s : songDefinitionRepository.findByRevision("active")) {
+            if (s.getNotes() != null && s.getNotes() > 0) {
+                songMaxScores.put(s.getTitle() + "_" + s.getDifficulty(), s.getNotes() * 2);
+            }
+        }
+
+        // 手順2: active 難易度表から (title_diffName → rankValue) マップを作る。
+        Map<String, String> informalRanks = new HashMap<>();
+        for (DifficultyRank rank : difficultyRankRepository.findByRevisionOrderBySortOrderAsc("active")) {
+            String rankText = rank.getRankValue();
+            for (DifficultyRankSong song : rank.getSongs()) {
+                String songTitle = song.getSongTitle() == null ? "" : song.getSongTitle().trim();
+                if (songTitle.isEmpty()) continue;
+                if (songTitle.endsWith("[L]")) {
+                    String baseTitle = songTitle.substring(0, songTitle.length() - 3).trim();
+                    informalRanks.put(baseTitle + "_LEGGENDARIA", rankText);
+                } else {
+                    informalRanks.put(songTitle + "_ANOTHER", rankText);
+                }
+            }
+        }
+
+        // 手順3: スコア 0 件ならスキップ（履歴ログを作っても意味がない）。
+        if (scoreRepository.findByUserOrderByUploadedAtAsc(user).isEmpty()) return false;
+
+        // 手順4: 既存の per-user 再計算ロジックに委譲。これが新規 ScoreHistoryLog を 1 件追加する。
+        processUserRecalculation(user, songMaxScores, informalRanks);
+
+        // 手順5: users.total_beat_pt キャッシュも追従させる（ランキング集計の高速化用）。
+        scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(user).ifPresent(log -> {
+            if (log.getTotalBeatPt() != null) {
+                user.setTotalBeatPt(log.getTotalBeatPt());
+                userRepository.save(user);
+            }
+        });
+        return true;
+    }
+
+    /**
      * 【メソッドの役割】 1 ユーザー分の BEAT-PT / RATE-PT と各種カウンタを再計算して履歴ログに保存する。
      *
      * {@code REQUIRES_NEW} で独立トランザクションを起動するため、一部ユーザーで失敗しても他に影響しない。
