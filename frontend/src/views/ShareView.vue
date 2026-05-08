@@ -24,7 +24,17 @@ import { flattenScores } from '../utils/scoreData';
 import { calculateTotalPoints } from '../utils/beatTier';
 
 const route = useRoute();
-const token = computed(() => String(route.params.token || ''));
+/**
+ * トークン文字列。
+ * 通常は Vue Router の params から取得するが、初期ロード時の競合に備えて
+ * window.location.pathname からのフォールバックを併用する。
+ */
+const token = computed(() => {
+    const fromRoute = String(route.params.token || '');
+    if (fromRoute) return fromRoute;
+    const match = window.location.pathname.match(/^\/share\/([^/]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+});
 
 /** 共有ビューの中で表示中のセクション。 */
 type ShareSection = 'dashboard' | 'scores' | 'history' | 'profile';
@@ -243,6 +253,12 @@ const errorBody = computed(() => {
       </div>
       <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ errorTitle }}</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400">{{ errorBody }}</p>
+      <button
+        v-if="errorState === 'notfound' || errorState === 'unknown'"
+        type="button"
+        @click="loadShare"
+        class="mt-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
+      >再読み込み</button>
     </div>
 
     <!-- 本体 -->
