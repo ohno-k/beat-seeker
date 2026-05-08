@@ -3,6 +3,7 @@ package com.beatseeker.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -44,18 +45,22 @@ public class ShareToken {
 
     /** ダッシュボードを公開するか。 */
     @Column(nullable = false)
+    @ColumnDefault("false")
     private Boolean scopeDashboard = false;
 
     /** スコア一覧を公開するか。 */
     @Column(nullable = false)
+    @ColumnDefault("false")
     private Boolean scopeScores = false;
 
     /** 成長記録（アップロード履歴）を公開するか。 */
     @Column(nullable = false)
+    @ColumnDefault("false")
     private Boolean scopeHistory = false;
 
     /** プロフィール（成長軌跡＋スコア分析）を公開するか。URL共有・通知設定は含めない。 */
     @Column(nullable = false)
+    @ColumnDefault("false")
     private Boolean scopeProfile = false;
 
     /** 有効期限。null は無期限。 */
