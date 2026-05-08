@@ -1400,8 +1400,8 @@ const handleUnifiedClose = async () => {
               </div>
             </div>
             
-            <div class="hidden lg:flex items-center gap-4 overflow-x-auto no-scrollbar ml-4 h-full flex-1">
-              <button 
+            <div v-if="activeTab !== 'share'" class="hidden lg:flex items-center gap-4 overflow-x-auto no-scrollbar ml-4 h-full flex-1">
+              <button
                 @click="activeTab = 'dashboard'"
                 class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
                 :class="activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
@@ -1545,7 +1545,7 @@ const handleUnifiedClose = async () => {
       <!-- ========== メインコンテンツ（タブ別のビューをここに描画） ========== -->
       <main class="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <!-- モバイル用ナビゲーションタブ（PC ではヘッダー内に展開される） -->
-        <nav class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <nav v-if="activeTab !== 'share'" class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
           <button 
             @click="activeTab = 'dashboard'"
             class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"

@@ -21,7 +21,7 @@ const emit = defineEmits<{ (e: 'close'): void }>();
 
 useModalEscape(() => props.isOpen, () => emit('close'));
 
-const { listTokens, issueToken, revokeToken, buildShareUrl, isLoading } = useShareTokens();
+const { listTokens, issueToken, revokeToken, deleteToken, buildShareUrl, isLoading } = useShareTokens();
 const toast = useToast();
 
 const tokens = ref<ShareTokenInfo[]>([]);
@@ -107,6 +107,17 @@ const handleRevoke = async (t: ShareTokenInfo) => {
         await refresh();
     } catch (e: any) {
         toast.error(e?.message || '失効に失敗しました');
+    }
+};
+
+const handleDelete = async (t: ShareTokenInfo) => {
+    if (!confirm('このリンクを一覧から完全に削除しますか？この操作は取り消せません。')) return;
+    try {
+        await deleteToken(t.id);
+        toast.success('リンクを削除しました');
+        await refresh();
+    } catch (e: any) {
+        toast.error(e?.message || '削除に失敗しました');
     }
 };
 
@@ -238,18 +249,24 @@ const statusLabel = (t: ShareTokenInfo) => {
                 公開: {{ scopeLabel(t) }} ／ 期限: {{ formatDateTime(t.expiresAt) }}
               </div>
 
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2">
                 <button
                   type="button"
                   @click="handleCopy(t)"
                   class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                 >URL をコピー</button>
                 <button
-                  v-if="!t.revokedAt"
+                  v-if="t.active"
                   type="button"
                   @click="handleRevoke(t)"
-                  class="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                  class="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
                 >失効する</button>
+                <button
+                  v-else
+                  type="button"
+                  @click="handleDelete(t)"
+                  class="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                >一覧から削除</button>
               </div>
             </li>
           </ul>

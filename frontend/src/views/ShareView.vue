@@ -12,7 +12,7 @@
  *  - 410（失効/期限切れ）・404 を専用メッセージで案内
  *  - `<meta name="robots" content="noindex">` を動的に挿入（検索インデックス除外）
  */
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ScoreDashboard from '../components/ScoreDashboard.vue';
 import ScoreSummary from '../components/ScoreSummary.vue';
@@ -25,6 +25,10 @@ import { calculateTotalPoints } from '../utils/beatTier';
 
 const route = useRoute();
 const token = computed(() => String(route.params.token || ''));
+
+/** 共有ビューの中で表示中のセクション。 */
+type ShareSection = 'dashboard' | 'scores' | 'history' | 'profile';
+const activeSection = ref<ShareSection>('dashboard');
 
 interface ShareInfo {
     scopeDashboard: boolean;
@@ -176,6 +180,25 @@ const errorTitle = computed(() => {
     }
 });
 
+/** scope フラグから利用可能なセクション一覧を導出。 */
+const availableSections = computed<Array<{ key: ShareSection; label: string }>>(() => {
+    if (!info.value) return [];
+    const list: Array<{ key: ShareSection; label: string }> = [];
+    if (info.value.scopeDashboard) list.push({ key: 'dashboard', label: 'ダッシュボード' });
+    if (info.value.scopeScores) list.push({ key: 'scores', label: 'スコア一覧' });
+    if (info.value.scopeHistory) list.push({ key: 'history', label: '成長記録' });
+    if (info.value.scopeProfile) list.push({ key: 'profile', label: 'プロフィール' });
+    return list;
+});
+
+// info 取得後、利用可能な最初のセクションを初期表示にする。
+watch(availableSections, (list) => {
+    if (list.length === 0) return;
+    if (!list.find(s => s.key === activeSection.value)) {
+        activeSection.value = list[0].key;
+    }
+});
+
 const errorBody = computed(() => {
     switch (errorState.value) {
         case 'notfound': return 'URL が間違っているか、すでに削除された可能性があります。';
@@ -224,9 +247,27 @@ const errorBody = computed(() => {
 
     <!-- 本体 -->
     <template v-else-if="info">
+      <!-- 共有範囲のみのタブナビ -->
+      <nav v-if="availableSections.length > 0" class="w-full overflow-x-auto no-scrollbar border-b border-slate-200 dark:border-slate-700 -mx-3 px-3 sm:mx-0 sm:px-0">
+        <div class="flex items-center gap-1">
+          <button
+            v-for="s in availableSections"
+            :key="s.key"
+            type="button"
+            @click="activeSection = s.key"
+            class="flex items-center px-4 py-3 border-b-2 transition-all font-bold text-sm tracking-wide whitespace-nowrap"
+            :class="activeSection === s.key
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"
+          >
+            {{ s.label }}
+          </button>
+        </div>
+      </nav>
+
       <!-- ダッシュボード -->
       <ScoreDashboard
-        v-if="info.scopeDashboard"
+        v-if="info.scopeDashboard && activeSection === 'dashboard'"
         :scores="scoreData"
         :totalPoints="totalBeatTierPoints"
         :viewing-iidx-id="info.user.iidxId"
@@ -237,7 +278,7 @@ const errorBody = computed(() => {
 
       <!-- スコア一覧 -->
       <ScoreSummary
-        v-if="info.scopeScores"
+        v-if="info.scopeScores && activeSection === 'scores'"
         :scores="scoreData"
         viewing-mode="public"
         class="w-full"
@@ -245,20 +286,20 @@ const errorBody = computed(() => {
 
       <!-- 成長記録（アップロード履歴） -->
       <UploadHistory
-        v-if="info.scopeHistory"
+        v-if="info.scopeHistory && activeSection === 'history'"
         :share-token="token"
         class="w-full"
       />
 
       <!-- プロフィール（成長軌跡＋スコア分析。URL共有・通知設定は非表示） -->
       <ProfileDashboard
-        v-if="info.scopeProfile"
+        v-if="info.scopeProfile && activeSection === 'profile'"
         :share-token="token"
         class="w-full"
       />
 
       <!-- 全 OFF（理論上はサーバが弾くが念のため） -->
-      <div v-if="!info.scopeDashboard && !info.scopeScores && !info.scopeHistory && !info.scopeProfile" class="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+      <div v-if="availableSections.length === 0" class="py-12 text-center text-sm text-slate-500 dark:text-slate-400">
         このリンクで公開されている画面はありません。
       </div>
     </template>

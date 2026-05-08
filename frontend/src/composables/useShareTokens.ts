@@ -79,7 +79,7 @@ export function useShareTokens() {
         }
     };
 
-    /** 共有トークンを失効させる。 */
+    /** 共有トークンをソフト失効させる（DB レコードは保持）。 */
     const revokeToken = async (id: number): Promise<void> => {
         isLoading.value = true;
         try {
@@ -89,6 +89,23 @@ export function useShareTokens() {
             });
             if (!res.ok) {
                 throw new Error(`失効に失敗しました (status=${res.status})`);
+            }
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    /** 共有トークンを DB から完全削除する（一覧から消す）。アクティブな場合はサーバが 400 を返す。 */
+    const deleteToken = async (id: number): Promise<void> => {
+        isLoading.value = true;
+        try {
+            const res = await fetch(`${API_BASE}/api/share/tokens/${id}/permanent`, {
+                method: 'DELETE',
+                headers: authHeaders(),
+            });
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.error || `削除に失敗しました (status=${res.status})`);
             }
         } finally {
             isLoading.value = false;
@@ -109,6 +126,7 @@ export function useShareTokens() {
         listTokens,
         issueToken,
         revokeToken,
+        deleteToken,
         buildShareUrl,
     };
 }

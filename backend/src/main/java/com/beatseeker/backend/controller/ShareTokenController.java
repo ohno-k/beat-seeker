@@ -94,7 +94,7 @@ public class ShareTokenController {
     }
 
     /**
-     * 【メソッドの役割】 共有トークンを失効させる。
+     * 【メソッドの役割】 共有トークンをソフト失効させる（DB レコードは保持）。
      *
      * 自分が発行したトークン以外は 403。
      */
@@ -113,6 +113,36 @@ public class ShareTokenController {
             shareTokenRepository.save(token);
         }
         return ResponseEntity.ok(toMap(token));
+    }
+
+    /**
+     * 【メソッドの役割】 共有トークンを DB から完全削除する（一覧から消す）。
+     *
+     * 失効済み・期限切れのトークンを整理する用途。アクティブなトークンを誤って消すと
+     * 共有先の URL が突然 404 になるため、サーバ側でアクティブ判定をブロックする。
+     */
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<?> deleteToken(Authentication auth, @PathVariable Long id) {
+        User user = getUser(auth);
+        if (user == null) return ResponseEntity.status(401).build();
+
+        ShareToken token = shareTokenRepository.findById(id).orElse(null);
+        if (token == null) return ResponseEntity.notFound().build();
+        if (!token.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+        if (isActive(token)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "アクティブなトークンは削除できません。先に失効させてください。"));
+        }
+        shareTokenRepository.delete(token);
+        return ResponseEntity.noContent().build();
+    }
+
+    /** トークンが現在有効か（未失効かつ期限内）。 */
+    private boolean isActive(ShareToken t) {
+        if (t.getRevokedAt() != null) return false;
+        if (t.getExpiresAt() != null && t.getExpiresAt().isBefore(LocalDateTime.now())) return false;
+        return true;
     }
 
     /** 期限指定文字列 → 期限日時の変換。"unlimited" or 不正値は null（無期限）。 */
@@ -142,12 +172,6 @@ public class ShareTokenController {
         m.put("createdAt", t.getCreatedAt());
         m.put("active", isActive(t));
         return m;
-    }
-
-    private boolean isActive(ShareToken t) {
-        if (t.getRevokedAt() != null) return false;
-        if (t.getExpiresAt() != null && t.getExpiresAt().isBefore(LocalDateTime.now())) return false;
-        return true;
     }
 
     private User getUser(Authentication auth) {
