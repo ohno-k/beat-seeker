@@ -363,7 +363,7 @@ const toggleFullscreen = async () => {
 
         <!-- プレイヤー名バナー (REVEAL 突入時から常時表示) -->
         <div v-if="leftPlayer" class="player-banner player-banner-left absolute top-8 left-0 right-0 z-20 text-center pointer-events-none">
-          <p class="inline-block px-6 py-2 text-xl sm:text-3xl md:text-4xl font-black tracking-wider text-white">
+          <p class="inline-block px-6 py-2 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider text-white">
             {{ leftPlayer }}
           </p>
         </div>
@@ -383,27 +383,27 @@ const toggleFullscreen = async () => {
         </div>
 
         <!-- 曲情報 -->
-        <div class="relative z-10 text-center w-full max-w-2xl space-y-5 sm:space-y-8 px-2">
+        <div class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="leftStage.title"
-            class="title-cascade text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight"
+            class="title-cascade text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-tight"
           >
             <span
               v-for="(ch, i) in titleCharsOf(selectedLeft)"
               :key="i"
               class="cascade-char inline-block"
               :style="{ animationDelay: `${i * 70}ms` }"
-            >{{ ch === ' ' ? ' ' : ch }}</span>
+            >{{ ch === ' ' ? ' ' : ch }}</span>
           </p>
           <p
             v-if="leftStage.artist"
-            class="artist-fade text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-cyan-100"
+            class="artist-fade text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider text-cyan-100"
           >
             {{ selectedLeft?.artist }}
           </p>
           <div v-if="leftStage.diffBadge" class="diff-slam inline-block">
             <p
-              class="diff-text text-3xl sm:text-5xl md:text-6xl font-black tracking-widest italic skew-x-[-8deg]"
+              class="diff-text text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-widest italic skew-x-[-8deg]"
               :class="selectedLeft?.difficulty === '10' ? 'diff-leggendaria' : 'diff-another'"
             >
               {{ diffName(selectedLeft?.difficulty || '') }} {{ selectedLeft?.level }}
@@ -419,7 +419,7 @@ const toggleFullscreen = async () => {
 
         <!-- プレイヤー名バナー -->
         <div v-if="rightPlayer" class="player-banner player-banner-right absolute top-8 left-0 right-0 z-20 text-center pointer-events-none">
-          <p class="inline-block px-6 py-2 text-xl sm:text-3xl md:text-4xl font-black tracking-wider text-white">
+          <p class="inline-block px-6 py-2 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider text-white">
             {{ rightPlayer }}
           </p>
         </div>
@@ -436,27 +436,27 @@ const toggleFullscreen = async () => {
           <div class="burst-ring burst-ring-3"></div>
         </div>
 
-        <div class="relative z-10 text-center w-full max-w-2xl space-y-5 sm:space-y-8 px-2">
+        <div class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="rightStage.title"
-            class="title-cascade text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight"
+            class="title-cascade text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-tight"
           >
             <span
               v-for="(ch, i) in titleCharsOf(selectedRight)"
               :key="i"
               class="cascade-char inline-block"
               :style="{ animationDelay: `${i * 70}ms` }"
-            >{{ ch === ' ' ? ' ' : ch }}</span>
+            >{{ ch === ' ' ? ' ' : ch }}</span>
           </p>
           <p
             v-if="rightStage.artist"
-            class="artist-fade text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-cyan-100"
+            class="artist-fade text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider text-cyan-100"
           >
             {{ selectedRight?.artist }}
           </p>
           <div v-if="rightStage.diffBadge" class="diff-slam inline-block">
             <p
-              class="diff-text text-3xl sm:text-5xl md:text-6xl font-black tracking-widest italic skew-x-[-8deg]"
+              class="diff-text text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-widest italic skew-x-[-8deg]"
               :class="selectedRight?.difficulty === '10' ? 'diff-leggendaria' : 'diff-another'"
             >
               {{ diffName(selectedRight?.difficulty || '') }} {{ selectedRight?.level }}
@@ -672,12 +672,19 @@ const toggleFullscreen = async () => {
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 30px rgba(251, 146, 60, 0.7);
 }
+/* LEGGENDARIA 公式ロゴ準拠: 上から明ピンク → ホットピンク → 濃マゼンタの縦グラデ + 黒太アウトライン。
+   text-shadow を 4 方向 + ぼかしで重ねることで「アウトライン + 外側グロー」の両立を実現する。 */
 .diff-leggendaria {
-  color: #fbbf24;
-  background: linear-gradient(180deg, #fef3c7 0%, #fbbf24 50%, #92400e 100%);
+  color: #ec4899;
+  background: linear-gradient(180deg, #fdf2f8 0%, #f472b6 35%, #db2777 65%, #831843 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px rgba(251, 191, 36, 0.7);
+  text-shadow:
+    -3px -3px 0 #0f0f0f,
+     3px -3px 0 #0f0f0f,
+    -3px  3px 0 #0f0f0f,
+     3px  3px 0 #0f0f0f,
+     0    0    32px rgba(236, 72, 153, 0.85);
 }
 </style>
