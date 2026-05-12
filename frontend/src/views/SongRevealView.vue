@@ -386,7 +386,7 @@ const toggleFullscreen = async () => {
         <div class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="leftStage.title"
-            class="title-cascade text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-tight"
+            class="title-cascade text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-tight"
           >
             <span
               v-for="(ch, i) in titleCharsOf(selectedLeft)"
@@ -397,7 +397,7 @@ const toggleFullscreen = async () => {
           </p>
           <p
             v-if="leftStage.artist"
-            class="artist-fade text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider text-cyan-100"
+            class="artist-fade text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-wider text-cyan-100"
           >
             {{ selectedLeft?.artist }}
           </p>
@@ -439,7 +439,7 @@ const toggleFullscreen = async () => {
         <div class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="rightStage.title"
-            class="title-cascade text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-tight"
+            class="title-cascade text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-tight"
           >
             <span
               v-for="(ch, i) in titleCharsOf(selectedRight)"
@@ -450,7 +450,7 @@ const toggleFullscreen = async () => {
           </p>
           <p
             v-if="rightStage.artist"
-            class="artist-fade text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider text-cyan-100"
+            class="artist-fade text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-wider text-cyan-100"
           >
             {{ selectedRight?.artist }}
           </p>
@@ -672,19 +672,23 @@ const toggleFullscreen = async () => {
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 30px rgba(251, 146, 60, 0.7);
 }
-/* LEGGENDARIA 公式ロゴ準拠: 上から明ピンク → ホットピンク → 濃マゼンタの縦グラデ + 黒太アウトライン。
-   text-shadow を 4 方向 + ぼかしで重ねることで「アウトライン + 外側グロー」の両立を実現する。 */
+/* LEGGENDARIA 公式ロゴ準拠: 明ピンク → ホットピンク → 濃マゼンタの縦グラデ + 細めの黒アウトライン。
+   text-shadow を 4 方向で重ねる方式は文字内部のピンクが見えなくなりがちなので、
+   ネイティブの -webkit-text-stroke を使って細い黒輪郭だけを描く。
+   グローは .diff-text の filter: drop-shadow アニメーションが担う。 */
 .diff-leggendaria {
-  color: #ec4899;
-  background: linear-gradient(180deg, #fdf2f8 0%, #f472b6 35%, #db2777 65%, #831843 100%);
+  color: #ec4899; /* fallback (stroke を持たないブラウザ用) */
+  background: linear-gradient(180deg,
+    #fdf2f8 0%,    /* ハイライト */
+    #fbcfe8 15%,
+    #f472b6 45%,   /* メインのホットピンク */
+    #db2777 75%,
+    #9d174d 100%   /* 下部の影 */
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow:
-    -3px -3px 0 #0f0f0f,
-     3px -3px 0 #0f0f0f,
-    -3px  3px 0 #0f0f0f,
-     3px  3px 0 #0f0f0f,
-     0    0    32px rgba(236, 72, 153, 0.85);
+  -webkit-text-stroke: 1.5px #0a0a0a;
+  paint-order: stroke fill; /* 先に stroke を描いてから fill を上に → 縁が潰れない */
 }
 </style>
