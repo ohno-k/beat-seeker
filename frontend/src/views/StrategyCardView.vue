@@ -17,7 +17,7 @@
  * データソース: `frontend/src/data/strategy_card_songs.json`
  *   (プロジェクトルート直下の {genre}.txt を `scripts/build_strategy_cards.cjs` で変換)
  */
-import { ref, computed, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onUnmounted, onMounted, nextTick } from 'vue';
 import strategySongs from '../data/strategy_card_songs.json';
 
 type Genre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
@@ -70,6 +70,32 @@ const stripEl = ref<HTMLElement | null>(null);
 
 // アニメーション制御用 timer ID
 let stopTimer: number | null = null;
+// 抽選を多段階で進めるためのチェーン用タイマー (途中で reset された場合に全部キャンセル)
+const stageTimers: number[] = [];
+
+// フルスクリーン状態
+const containerEl = ref<HTMLElement | null>(null);
+const isFullscreen = ref(false);
+
+const onFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement;
+};
+
+const toggleFullscreen = async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (containerEl.value) {
+      await containerEl.value.requestFullscreen();
+    }
+  } catch {
+    // フルスクリーン拒否時はサイレントに無視
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+});
 
 /** 候補曲リスト (現在選択中のジャンル × 戦) */
 const candidates = computed<Song[]>(() => {
@@ -95,14 +121,19 @@ const canSpin = computed(() => {
 
 /**
  * 【関数の役割】 抽選を開始する。スロットマシン風に曲名リストが上方向にスクロールし、
- * 徐々に減速して中央の当選ラインに最終結果が止まる。
+ * 多段階で減速、当選ライン手前で「止まりそう」な緊張感を見せたあと最終結果に止まる。
+ *
+ * 減速プロファイル (合計 約 8.0 秒):
+ *  Stage 1 (~3.0s): 0 → 当選行 4 行手前。高速 → 中速。
+ *  Stage 2 (~2.6s): 当選行 1 行手前まで。明らかに減速、ほぼ停止状態に見える。
+ *  Stage 3 (~2.0s): 最後の 1 行を非常にゆっくり通過。緊張のクライマックス。
+ *  これにより「直前で止まりそう」な演出 → わずかに進んで本命に着地、というスロット風の見せ場ができる。
  *
  * フロー:
  *  1. 候補プールからランダムに最終曲を決定
- *  2. ストリップに表示する行リストを生成 (ダミー多数 → 最終曲は固定位置)
- *  3. CSS transition で `translateY` を 0 → 最終オフセットへアニメーション
- *     - easing は cubic-bezier の easeOut で「最初速く・最後ゆっくり」のルーレット感
- *  4. アニメーション終了時に結果フラッシュ + 結果セクション表示
+ *  2. ダミー多数 + 当選曲 + 末尾バッファでストリップを生成
+ *  3. transition と translateY を段階ごとに張り替える
+ *  4. 全段階終了で結果フラッシュ + 結果セクション表示
  */
 const spin = async () => {
   if (!canSpin.value) return;
@@ -115,12 +146,8 @@ const spin = async () => {
 
   const finalSong = pool[Math.floor(Math.random() * pool.length)];
 
-  // ストリップに並べる項目を組み立てる:
-  //  - ダミー: pool からランダムに選んだ曲を 40 行
-  //  - 当選行: ダミーの直後 (最後尾の1つ前)
-  //  - 末尾ダミー: 当選行のあとに 1 行 (overshoot 用ではなく見た目のバッファ)
-  // 直前数行に同じ曲が並ばないように軽く工夫する。
-  const TOTAL_DUMMY = 40;
+  // ストリップ構築: ダミー 60 行 → 当選行 → 末尾バッファ 2 行
+  const TOTAL_DUMMY = 60;
   const items: Song[] = [];
   let lastIdx = -1;
   for (let i = 0; i < TOTAL_DUMMY; i++) {
@@ -129,46 +156,66 @@ const spin = async () => {
     lastIdx = idx;
     items.push(pool[idx]);
   }
-  const finalIndex = items.length;          // 当選行の位置
+  const finalIndex = items.length; // 当選行の位置
   items.push(finalSong);
-  // 末尾バッファ (見えはしないが overflow に余裕を持たせる)
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 2; i++) {
     items.push(pool[Math.floor(Math.random() * pool.length)]);
   }
   scrollItems.value = items;
 
-  // DOM 反映を待ってから transform を打つ
   await nextTick();
   const strip = stripEl.value;
   if (!strip) return;
 
-  // ストリップ位置をリセット (transition なしで瞬間移動)
+  // 位置リセット
   strip.style.transition = 'none';
   strip.style.transform = 'translateY(0)';
-  // 強制 reflow して上記が即時反映されるようにする
-  void strip.offsetHeight;
+  void strip.offsetHeight; // 強制 reflow
 
-  // 当選行をビューポート中央に止めるためのオフセット
-  // ビューポートは VISIBLE_ROWS 行ぶん高さ、中央行のインデックスは Math.floor(VISIBLE_ROWS/2)
   const centerRowOffset = Math.floor(VISIBLE_ROWS / 2);
-  const targetTranslate = -(finalIndex - centerRowOffset) * ROW_HEIGHT;
+  const offsetForRow = (rowIdx: number) => -(rowIdx - centerRowOffset) * ROW_HEIGHT;
 
-  // 抽選アニメーション本体 (4.8 秒で easeOut)
-  const DURATION_MS = 4800;
-  strip.style.transition = `transform ${DURATION_MS}ms cubic-bezier(0.16, 0.74, 0.22, 1)`;
-  strip.style.transform = `translateY(${targetTranslate}px)`;
+  // 段階目標。各段階の終点位置は「当選行から N 行手前」。
+  const stage1Target = offsetForRow(finalIndex - 4);
+  const stage2Target = offsetForRow(finalIndex - 1);
+  const stage3Target = offsetForRow(finalIndex);
 
-  // アニメーション終了後に結果確定
+  // 段階ごとのアニメーション仕様
+  const STAGE1_MS = 3000;
+  const STAGE2_MS = 2600;
+  const STAGE3_MS = 2000;
+  const TOTAL_MS = STAGE1_MS + STAGE2_MS + STAGE3_MS;
+
+  // Stage 1: 高速で当選行 4 行手前まで滑る (中速で着地)
+  strip.style.transition = `transform ${STAGE1_MS}ms cubic-bezier(0.10, 0.70, 0.30, 1)`;
+  strip.style.transform = `translateY(${stage1Target}px)`;
+
+  // Stage 2: 残り 3 行を 2.6 秒。明確に減速し「直前で止まりそう」に見せる
+  stageTimers.push(window.setTimeout(() => {
+    strip.style.transition = `transform ${STAGE2_MS}ms cubic-bezier(0.15, 0.65, 0.45, 1)`;
+    strip.style.transform = `translateY(${stage2Target}px)`;
+  }, STAGE1_MS));
+
+  // Stage 3: ラスト 1 行を 2.0 秒で這うように。ease-in-out で
+  //          「ほぼ静止 → ゆっくり加速 → ふわっと着地」の緊張クライマックス。
+  stageTimers.push(window.setTimeout(() => {
+    strip.style.transition = `transform ${STAGE3_MS}ms cubic-bezier(0.55, 0.0, 0.45, 1)`;
+    strip.style.transform = `translateY(${stage3Target}px)`;
+  }, STAGE1_MS + STAGE2_MS));
+
+  // 全体終了
   stopTimer = window.setTimeout(() => {
     resultSong.value = finalSong;
     isSpinning.value = false;
     showResultFlash.value = true;
     window.setTimeout(() => { showResultFlash.value = false; }, 1500);
-  }, DURATION_MS);
+  }, TOTAL_MS);
 };
 
 const reset = () => {
   if (stopTimer !== null) { clearTimeout(stopTimer); stopTimer = null; }
+  for (const id of stageTimers) clearTimeout(id);
+  stageTimers.length = 0;
   isSpinning.value = false;
   resultSong.value = null;
   scrollItems.value = [];
@@ -198,6 +245,8 @@ const selectMatch = (m: MatchKind) => {
 
 onUnmounted(() => {
   if (stopTimer !== null) clearTimeout(stopTimer);
+  for (const id of stageTimers) clearTimeout(id);
+  document.removeEventListener('fullscreenchange', onFullscreenChange);
 });
 
 const activeGenreMeta = computed(() => GENRES.find(g => g.key === selectedGenre.value));
@@ -205,12 +254,33 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
 </script>
 
 <template>
-  <div class="strategy-card-view min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-4 sm:p-8 relative overflow-hidden">
+  <div
+    ref="containerEl"
+    class="strategy-card-view min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-4 sm:p-8 relative overflow-hidden"
+    :class="{ 'is-fullscreen': isFullscreen }"
+  >
     <!-- 背景の装飾的グリッド -->
     <div class="absolute inset-0 opacity-10 pointer-events-none bg-grid"></div>
 
+    <!-- フルスクリーン切替ボタン (右上に固定表示) -->
+    <button
+      type="button"
+      @click="toggleFullscreen"
+      class="absolute top-4 right-4 z-30 p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
+      :title="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
+      :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
+    >
+      <!-- 全画面化アイコン (4つの角矢印) / 解除アイコン (内向き矢印) -->
+      <svg v-if="!isFullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
+      </svg>
+      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" />
+      </svg>
+    </button>
+
     <!-- ヘッダ -->
-    <div class="relative max-w-6xl mx-auto mb-8">
+    <div class="relative max-w-6xl mx-auto mb-8 pr-14">
       <h1 class="text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-amber-300 drop-shadow-[0_0_25px_rgba(186,85,255,0.4)]">
         STRATEGY CARD
       </h1>
@@ -423,6 +493,14 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
     linear-gradient(rgba(139, 92, 246, 0.4) 1px, transparent 1px),
     linear-gradient(90deg, rgba(139, 92, 246, 0.4) 1px, transparent 1px);
   background-size: 40px 40px;
+}
+
+/* フルスクリーン時はビューポートを 100vh 占有し、スクロール可能に保つ */
+.strategy-card-view.is-fullscreen,
+.strategy-card-view:fullscreen {
+  min-height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
 }
 
 /* ルーレット (スロットマシン) のスクロールストリップ。
