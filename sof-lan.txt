@@ -1,0 +1,84 @@
+曲管理番号	バージョン	曲名	Diff	Lv
+1812	4th style	empathy	A	8
+1813	4th style	Voltage (feat. Hidemaru)	A	8
+1814	3rd style	era (nostalmix)	A	9
+1815	4th style	era (step mix)	A	9
+1816	HAPPY SKY	mind the gap	A	9
+1817	GOLD	2hot2eat	A	9
+1818	IIDX RED	大桟橋	A	9
+1819	HAPPY SKY	Agnus Dei	A	10
+1820	DJ TROOPERS	avant-guerre	A	10
+1821	RESIDENT	AWA AWA	A	10
+1822	EPOLIS	Bitter & Lucky	A	10
+1823	9th style	Cradle	A	10
+1824	9th style	fun	A	10
+1825	10th style	GRADIUS -FULL SPEED-	A	10
+1826	6th style	L’amour et la liberté	A	10
+1827	SPADA	Odin	A	10
+1828	GOLD	op.31 叙情	A	10
+1829	9th style	PARANOIA survivor MAX	A	10
+1830	HEROIC VERSE	Silly Love	A	10
+1831	SINOBUZ	Surf on the Light	A	10
+1832	6th style	VJ ARMY	A	10
+1833	RESIDENT	罪過の聖堂	A	10
+1834	BISTROVER	Ah Hah Yeah	A	11
+1835	SINOBUZ	AsiaN distractive	A	11
+1836	RESIDENT	C-C-C-N-N-N	A	11
+1837	SIRIUS	D	A	11
+1838	PENDUAL	Discloze	A	11
+1839	DJ TROOPERS	four pieces of heaven	A	11
+1840	CANNON BALLERS	FUTURE is Dead	A	11
+1841	Sparkle Shower	GOLD RUSH 2025	A	11
+1842	EPOLIS	GLORIOUS HAMMER	A	11
+1843	Sparkle Shower	Hallucination	A	11
+1844	CastHour	kors k's How to make OTOGE CORE	A	11
+1845	6th style	Linus	A	11
+1846	EMPRESS	Marie Antoinette	A	11
+1847	EPOLIS	Monkey Business	A	11
+1848	SINOBUZ	nostos	A	11
+1849	CastHour	Onyx	A	11
+1850	PENDUAL	PENDUAL TALISMAN	A	11
+1851	Resort Anthem	SABER WING	A	11
+1852	Pinky Crush	Space In Time	A	11
+1853	Sparkle Shower	Substance	A	11
+1854	GOLD	TRANOID	A	11
+1855	EPOLIS	T.R.O.L.L.	A	11
+1856	Resort Anthem	ZETA～素数の世界と超越者～	A	11
+1857	SINOBUZ	(This Is Not) The Angels	A	11
+1858	Sparkle Shower	華麗なる！音戯探偵ひなビタ♫	A	11
+1859	HEROIC VERSE	シャムシールの舞	A	11
+1860	DistorteD	Concertino in Blue	A	12
+1861	tricoro	DAY DREAM	A	12
+1862	CANNON BALLERS	DropZ-Line-	A	12
+1863	Rootage	EVANESCENT	A	12
+1864	GOLD	Fascination MAXX	A	12
+1865	BISTROVER	Fire Beat	A	12
+1866	Sparkle Shower	fixer	A	12
+1867	EPOLIS	Glitch N Ride	A	12
+1868	DJ TROOPERS	ICARUS	A	12
+1869	Pinky Crush	hora de verdad	A	12
+1870	tricoro	JOMANDA	A	12
+1871	Rootage	Lethal Weapon	A	12
+1872	EMPRESS	Marie Antoinette	L	12
+1873	Resort Anthem	New Castle Legions	A	12
+1874	DJ TROOPERS	PARANOiA ～HADES～	A	12
+1875	copula	POSSESSION	A	12
+1876	CastHour	Push on Beats!～音ゲの国のeX-ストリーマー～	A	12
+1877	Rootage	ruin of opals	A	12
+1878	CastHour	Silver Bullet	A	12
+1879	Pinky Crush	SISYPHUS	A	12
+1880	Lincle	TITANS RETURN	L	12
+1881	GOLD	TRANOID	L	12
+1882	RESIDENT	VØID	A	12
+1883	EMPRESS	Y&Co. is dead or alive	A	12
+1884	SPADA	ÆTHER	L	12
+1885	tricoro	音楽	A	12
+1886	HEROIC VERSE	華麗なる大犬円舞曲	A	12
+1887	8th style	桜	A	12
+1888	Lincle	聖人の塔	A	12
+1889	IIDX RED	ピアノ協奏曲第１番”蠍火”	A	12
+1890	CastHour	ピアノ独奏無言歌 "灰燼"	A	12
+1891	BISTROVER	二人ノ廃城幽踊宴	A	12
+1892	BISTROVER	魔法のかくれんぼ	A	12
+1893	RESIDENT	恋愛＝精度×認識力	A	12
+1894	SIRIUS	ワルツ第17番 ト短調”大犬のワルツ”	A	12

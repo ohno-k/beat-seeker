@@ -21,6 +21,7 @@ import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { diffTable as diffTableRanks } from '../composables/useGameData';
 
@@ -68,6 +69,26 @@ interface RateTopRankerEntry {
 type MergedRateRow =
   | { kind: 'user'; rank: number; entry: RateRankingEntry }
   | { kind: 'topRanker'; totalRatePt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string };
+
+/** KENBAN-TIER ランキング API のエントリ（暫定: rankChange / lastUpdatedAt なし）。 */
+interface KenbanRankingEntry {
+  userId: number | null;
+  privacyLevel: number | null;
+  displayName: string;
+  iidxId: string;
+  totalKenbanPt: number;
+  isSupporter: boolean;
+}
+
+/** SARA-TIER ランキング API のエントリ。 */
+interface SaraRankingEntry {
+  userId: number | null;
+  privacyLevel: number | null;
+  displayName: string;
+  iidxId: string;
+  totalSaraPt: number;
+  isSupporter: boolean;
+}
 
 interface SimulationEntry {
   displayName: string;
@@ -161,13 +182,20 @@ function handleTopRankerRowClick(row: { versionNum: number; versionName: string;
 
 const { user, authHeaders } = useAuth();
 const { showRateTier } = useRateTierVisibility();
+const { showKenbanSaraTier } = useKenbanSaraTierVisibility();
+// KENBAN/SARA トグルが OFF に切り替わったら、その viewMode から beat へ強制退避する。
+watch(showKenbanSaraTier, (val) => {
+    if (!val && (viewMode.value === 'kenban' || viewMode.value === 'sara')) {
+        viewMode.value = 'beat';
+    }
+});
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 /** 【computed の役割】 管理者判定。simulation モード表示制御に使用。判定ロジックは useAdmin に集約。 */
 const { isAdmin } = useAdmin();
 
-/** 現在のビューモード（beat / rate / simulation）。 */
-const viewMode = ref<'beat' | 'rate' | 'simulation'>('beat');
+/** 現在のビューモード（beat / rate / kenban / sara / simulation）。 */
+const viewMode = ref<'beat' | 'rate' | 'kenban' | 'sara' | 'simulation'>('beat');
 // Rate-Tier 表示設定がオフに切り替わったら、rate モードから beat へ強制退避する。
 watch(showRateTier, (val) => {
     if (!val && viewMode.value === 'rate') viewMode.value = 'beat';
@@ -176,6 +204,10 @@ watch(showRateTier, (val) => {
 const beatRanking = ref<BeatRankingEntry[]>([]);
 /** Rate-PT ランキング本体。 */
 const rateRanking = ref<RateRankingEntry[]>([]);
+/** KENBAN-PT ランキング本体（暫定オンザフライ計算結果）。 */
+const kenbanRanking = ref<KenbanRankingEntry[]>([]);
+/** SARA-PT ランキング本体（暫定オンザフライ計算結果）。 */
+const saraRanking = ref<SaraRankingEntry[]>([]);
 /** Beat-PT 都道府県 TOP ランカー一覧。 */
 const topRankers = ref<TopRankerEntry[]>([]);
 /** Rate-PT 都道府県 TOP ランカー一覧。 */
@@ -191,6 +223,8 @@ const showTopRankers = ref(false);
 const PAGE_SIZE = 50;
 const beatPage = ref(1);
 const ratePage = ref(1);
+const kenbanPage = ref(1);
+const saraPage = ref(1);
 
 /**
  * 【computed の役割】 Beat-PT のユーザー行と都道府県 TOP ランカー行を pt 降順でマージした統合ビュー。
@@ -303,6 +337,18 @@ const paginatedRateRanking = computed(() => {
     return mergedRateRanking.value.slice(start, start + PAGE_SIZE);
 });
 
+const kenbanTotalPages = computed(() => Math.max(1, Math.ceil(kenbanRanking.value.length / PAGE_SIZE)));
+const saraTotalPages   = computed(() => Math.max(1, Math.ceil(saraRanking.value.length   / PAGE_SIZE)));
+
+const paginatedKenbanRanking = computed(() => {
+    const start = (kenbanPage.value - 1) * PAGE_SIZE;
+    return kenbanRanking.value.slice(start, start + PAGE_SIZE).map((entry, i) => ({ rank: start + i + 1, entry }));
+});
+const paginatedSaraRanking = computed(() => {
+    const start = (saraPage.value - 1) * PAGE_SIZE;
+    return saraRanking.value.slice(start, start + PAGE_SIZE).map((entry, i) => ({ rank: start + i + 1, entry }));
+});
+
 /**
  * 【関数の役割】 ログインユーザー自身の行までページを切り替えスムーズスクロールする。
  * rate モードなら ratePage を、それ以外なら beatPage を変更し、DOM 更新後に scrollIntoView。
@@ -330,10 +376,12 @@ function goToMyRank() {
     });
 }
 
-// モード切替時はどちらのページカーソルも 1 ページ目に戻す。
+// モード切替時はどのページカーソルも 1 ページ目に戻す。
 watch(viewMode, () => {
     beatPage.value = 1;
     ratePage.value = 1;
+    kenbanPage.value = 1;
+    saraPage.value = 1;
 });
 
 // ---- シミュレーションモード（管理者用）----
@@ -362,6 +410,20 @@ async function fetchBeatRanking() {
         const raw: TopRankerEntry[] = await topRes.json();
         topRankers.value = raw.filter(r => r.beatPt > 0);
     }
+}
+
+/** 【関数の役割】 KENBAN-TIER ランキングを取得する（暫定オンザフライ API）。 */
+async function fetchKenbanRanking() {
+    const res = await fetch(`${API_BASE}/api/scores/kenban-ranking`);
+    if (!res.ok) throw new Error('kenban');
+    kenbanRanking.value = await res.json();
+}
+
+/** 【関数の役割】 SARA-TIER ランキングを取得する（暫定オンザフライ API）。 */
+async function fetchSaraRanking() {
+    const res = await fetch(`${API_BASE}/api/scores/sara-ranking`);
+    if (!res.ok) throw new Error('sara');
+    saraRanking.value = await res.json();
 }
 
 /** 【関数の役割】 Rate-PT ランキング本体と都道府県 TOP ランカー（Rate 版）を並列取得する。 */
@@ -483,6 +545,20 @@ watch(viewMode, async (mode) => {
     if (mode === 'simulation' && simulationData.value.length === 0) {
         fetchSimulationData();
     }
+    if (mode === 'kenban' && kenbanRanking.value.length === 0) {
+        isLoading.value = true;
+        error.value = '';
+        try { await fetchKenbanRanking(); }
+        catch (e) { console.error(e); error.value = t('ranking.error'); }
+        finally { isLoading.value = false; }
+    }
+    if (mode === 'sara' && saraRanking.value.length === 0) {
+        isLoading.value = true;
+        error.value = '';
+        try { await fetchSaraRanking(); }
+        catch (e) { console.error(e); error.value = t('ranking.error'); }
+        finally { isLoading.value = false; }
+    }
 });
 </script>
 
@@ -547,6 +623,22 @@ watch(viewMode, async (mode) => {
               ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Rate-Tier</button>
+          <button
+            v-if="showKenbanSaraTier"
+            @click="viewMode = 'kenban'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="viewMode === 'kenban'
+              ? 'bg-white dark:bg-slate-600 text-cyan-600 dark:text-cyan-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >Kenban-Tier</button>
+          <button
+            v-if="showKenbanSaraTier"
+            @click="viewMode = 'sara'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="viewMode === 'sara'
+              ? 'bg-white dark:bg-slate-600 text-orange-600 dark:text-orange-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >Sara-Tier</button>
           <button
             v-if="isAdmin"
             @click="viewMode = 'simulation'"
@@ -850,6 +942,156 @@ watch(viewMode, async (mode) => {
             </div>
           </div>
         </div>
+        <!-- KENBAN-Tier ranking (暫定: rankChange / 更新日時 / TOP ランカー無し) -->
+        <div v-else-if="viewMode === 'kenban'">
+          <div v-if="kenbanRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+            <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 pr-4 text-xs font-black text-cyan-500 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'KENBAN' }) }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr v-for="row in paginatedKenbanRanking" :key="`k-${row.entry.iidxId}`"
+                  class="group transition-colors"
+                  :class="[
+                    user && row.entry.iidxId === user.iidxId
+                      ? 'bg-cyan-50 dark:bg-cyan-900/20 border-l-4 border-l-cyan-500'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
+                    row.entry.userId != null ? 'cursor-pointer' : ''
+                  ]"
+                  @click="handleUserRowClick(row.entry)">
+                  <td class="py-3 pl-4">
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                      :class="[
+                        row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                        row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                        row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                        user && row.entry.iidxId === user.iidxId ? 'bg-cyan-500 text-white' :
+                        'text-slate-400 border border-slate-100 dark:border-slate-700'
+                      ]">{{ row.rank }}</div>
+                  </td>
+                  <td class="py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-base transition-colors"
+                        :class="user && row.entry.iidxId === user.iidxId
+                          ? 'text-cyan-700 dark:text-cyan-300'
+                          : 'text-slate-800 dark:text-slate-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400'">
+                        {{ row.entry.displayName || 'Unnamed Player' }}
+                      </span>
+                      <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                      <span v-if="user && row.entry.iidxId === user.iidxId"
+                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-500 text-white">{{ t('ranking.you') }}</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-2 text-center">
+                    <div class="flex justify-center">
+                      <RankIcon :rank-name="getRankInfo(row.entry.totalKenbanPt).name" :tier="getRankInfo(row.entry.totalKenbanPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                    </div>
+                  </td>
+                  <td class="py-3 pr-4 text-right">
+                    <span class="font-black text-base text-cyan-600 dark:text-cyan-400 tabular-nums">{{ row.entry.totalKenbanPt.toFixed(1) }}</span>
+                    <span class="text-xs text-slate-400 ml-0.5">pt</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- KENBAN Pagination -->
+            <div class="flex items-center justify-end gap-1 mt-4 pr-4">
+              <button @click="kenbanPage = 1" :disabled="kenbanPage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&laquo;</button>
+              <button @click="kenbanPage--" :disabled="kenbanPage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&lsaquo;</button>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">{{ kenbanPage }} / {{ kenbanTotalPages }}</span>
+              <button @click="kenbanPage++" :disabled="kenbanPage === kenbanTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&rsaquo;</button>
+              <button @click="kenbanPage = kenbanTotalPages" :disabled="kenbanPage === kenbanTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&raquo;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SARA-Tier ranking -->
+        <div v-else-if="viewMode === 'sara'">
+          <div v-if="saraRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+            <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 pr-4 text-xs font-black text-orange-500 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'SARA' }) }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr v-for="row in paginatedSaraRanking" :key="`s-${row.entry.iidxId}`"
+                  class="group transition-colors"
+                  :class="[
+                    user && row.entry.iidxId === user.iidxId
+                      ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-l-orange-500'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
+                    row.entry.userId != null ? 'cursor-pointer' : ''
+                  ]"
+                  @click="handleUserRowClick(row.entry)">
+                  <td class="py-3 pl-4">
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                      :class="[
+                        row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                        row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                        row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                        user && row.entry.iidxId === user.iidxId ? 'bg-orange-500 text-white' :
+                        'text-slate-400 border border-slate-100 dark:border-slate-700'
+                      ]">{{ row.rank }}</div>
+                  </td>
+                  <td class="py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-base transition-colors"
+                        :class="user && row.entry.iidxId === user.iidxId
+                          ? 'text-orange-700 dark:text-orange-300'
+                          : 'text-slate-800 dark:text-slate-100 group-hover:text-orange-600 dark:group-hover:text-orange-400'">
+                        {{ row.entry.displayName || 'Unnamed Player' }}
+                      </span>
+                      <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                      <span v-if="user && row.entry.iidxId === user.iidxId"
+                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500 text-white">{{ t('ranking.you') }}</span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-2 text-center">
+                    <div class="flex justify-center">
+                      <RankIcon :rank-name="getRankInfo(row.entry.totalSaraPt).name" :tier="getRankInfo(row.entry.totalSaraPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                    </div>
+                  </td>
+                  <td class="py-3 pr-4 text-right">
+                    <span class="font-black text-base text-orange-600 dark:text-orange-400 tabular-nums">{{ row.entry.totalSaraPt.toFixed(1) }}</span>
+                    <span class="text-xs text-slate-400 ml-0.5">pt</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- SARA Pagination -->
+            <div class="flex items-center justify-end gap-1 mt-4 pr-4">
+              <button @click="saraPage = 1" :disabled="saraPage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&laquo;</button>
+              <button @click="saraPage--" :disabled="saraPage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&lsaquo;</button>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">{{ saraPage }} / {{ saraTotalPages }}</span>
+              <button @click="saraPage++" :disabled="saraPage === saraTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&rsaquo;</button>
+              <button @click="saraPage = saraTotalPages" :disabled="saraPage === saraTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&raquo;</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Simulation tab (admin only) -->
         <div v-if="viewMode === 'simulation' && isAdmin">
           <!-- Draft changes summary -->

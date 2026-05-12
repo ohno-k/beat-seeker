@@ -327,6 +327,183 @@ export const getFolderColorClass = (rankName: string): string => {
 };
 
 /**
+ * 【KENBAN/SARA-TIER】 譜面の皿率がこの値以上なら完全に皿曲扱い、0% なら完全に鍵盤曲扱い。
+ * 間は線形で按分する。
+ *
+ * IIDX の高難度 ANOTHER 譜面はほぼ全てが皿率 5〜15% 帯に分布しており、閾値が低すぎると
+ * 「ほんの少し皿が混ざっただけの鍵盤譜面」も KENBAN 評価が大きく削られてしまう。
+ * 100 人規模の上位プレイヤー実測で T=30 のとき KENBAN/BEAT 比が 0.90 前後で安定したため、
+ * これを採用している。
+ */
+export const SCRATCH_FULL_THRESHOLD_PCT = 30;
+
+/**
+ * 【KENBAN-TIER pt 補正倍率】 独立 top-100 の生 KENBAN-PT に掛けて BEAT-PT 同等のスケールに揃える係数。
+ *
+ * 鍵盤特化プレイヤーが BEAT 以上のティアに、皿特化プレイヤーが大きく下がる設計。
+ */
+export const KENBAN_PT_MULTIPLIER = 1.125;
+
+/**
+ * 【SARA-TIER pt 補正倍率】 SARA 側は皿曲の絶対数が少ないため生 ratio が低めに出る。
+ *
+ * 皿特化プレイヤーは BEAT 以上のティアに、鍵盤特化プレイヤーは大きく下がる設計。
+ */
+export const SARA_PT_MULTIPLIER = 1.5;
+
+/**
+ * 【関数の役割】 譜面の皿率から鍵盤側の貢献重み（0〜1）を返す。
+ *
+ * scratchPct = 0 → 1.0（純鍵盤）、scratchPct ≥ 20% → 0（皿曲扱い）。
+ * scratchPct が null/undefined の譜面（傾向プロファイル未生成）は 0 を返し、
+ * KENBAN-TIER の集計対象から除外される。
+ *
+ * @param scratchPct 皿率（%）。null/undefined は不明扱い
+ * @returns          0〜1 の重み
+ */
+export function getKenbanWeight(scratchPct: number | null | undefined): number {
+    if (scratchPct == null) return 0;
+    const w = 1 - scratchPct / SCRATCH_FULL_THRESHOLD_PCT;
+    return Math.max(0, Math.min(1, w));
+}
+
+/**
+ * 【関数の役割】 譜面の皿率から皿側の貢献重み（0〜1）を返す。
+ *
+ * {@link getKenbanWeight} と対をなす。scratchPct = 0 → 0（純鍵盤）、≥ 20% → 1（皿曲）。
+ *
+ * @param scratchPct 皿率（%）。null/undefined は不明扱い（0 を返す）
+ * @returns          0〜1 の重み
+ */
+export function getSaraWeight(scratchPct: number | null | undefined): number {
+    if (scratchPct == null) return 0;
+    const w = scratchPct / SCRATCH_FULL_THRESHOLD_PCT;
+    return Math.max(0, Math.min(1, w));
+}
+
+/**
+ * 譜面タイプの分類（皿率ベース）。UI のバッジ表示で使う。
+ *
+ *  - `kenban`  : 皿率 < 5%
+ *  - `balance` : 皿率 5〜15%
+ *  - `sara`    : 皿率 ≥ 15%
+ *  - `unknown` : 傾向プロファイル未生成（皿率不明）
+ */
+export type ChartType = 'kenban' | 'balance' | 'sara' | 'unknown';
+
+/** 譜面タイプ分類の境界値。`getChartType` の判定に使う。 */
+export const CHART_TYPE_THRESHOLDS = { kenbanMax: 5, saraMin: 15 } as const;
+
+/**
+ * 【関数の役割】 譜面の皿率からタイプ分類を返す。バッジ表示・フィルタ等で使用する。
+ *
+ * @param scratchPct 皿率（%）。null/undefined は `unknown`
+ */
+export function getChartType(scratchPct: number | null | undefined): ChartType {
+    if (scratchPct == null) return 'unknown';
+    if (scratchPct < CHART_TYPE_THRESHOLDS.kenbanMax) return 'kenban';
+    if (scratchPct < CHART_TYPE_THRESHOLDS.saraMin)   return 'balance';
+    return 'sara';
+}
+
+/**
+ * 1 譜面分の貢献度計算結果（KENBAN/SARA-TIER の内訳表示用）。
+ *
+ * `contribution = beatTierPoints × weight` で、KENBAN/SARA-TIER の合計に算入される値。
+ */
+export interface SideContribution {
+    title: string;
+    difficultyName: string;
+    informalRank: string | undefined;
+    scoreRate: number;
+    beatTierPoints: number;
+    scratchPct: number | undefined;
+    weight: number;
+    contribution: number;
+}
+
+/**
+ * 【関数の役割】 全プレイ譜面について「鍵盤側 or 皿側」の貢献 pt を計算し、
+ * 上位 N 譜面（既定 100）の合計を返す。
+ *
+ * 計算手順:
+ *  1. 譜面ごとに `beatTierPoints × kenban_w(scratchPct)` または `× sara_w(scratchPct)` を算出
+ *  2. 0 を超える譜面のみ降順ソート
+ *  3. 上位 N（既定 100）を合計
+ *  4. 小数第 1 位まで丸めて返す
+ *
+ * 鍵盤側 / 皿側を **独立に** top-N するため、それぞれの「最大限の実力」を測れる。
+ * （BEAT-TIER の top-100 集合に縛られないので、片方に偏った譜面集合でも下限を引かない）
+ *
+ * @param scores      `{ title, difficultyName, beatTierPoints }` を持つ全譜面レコード
+ * @param scratchMap  `"<title>|<difficultyName>"` → 皿率(%) の Map
+ * @param side        `'kenban'` で鍵盤側集計、`'sara'` で皿側集計
+ * @returns           総合ポイント（小数第 1 位まで）
+ */
+export const calculateWeightedTotalPoints = (
+    scores: { title: string; difficultyName: string; beatTierPoints: number }[],
+    scratchMap: Map<string, number>,
+    side: 'kenban' | 'sara'
+): number => {
+    const getWeightFn = side === 'kenban' ? getKenbanWeight : getSaraWeight;
+    const multiplier  = side === 'kenban' ? KENBAN_PT_MULTIPLIER : SARA_PT_MULTIPLIER;
+    const weighted = scores
+        .filter(s => s.beatTierPoints > 0)
+        .map(s => {
+            const pct = scratchMap.get(`${s.title}|${s.difficultyName}`);
+            return s.beatTierPoints * getWeightFn(pct);
+        })
+        .filter(pt => pt > 0)
+        .sort((a, b) => b - a);
+    const top = weighted.slice(0, TOP_CHART_LIMIT);
+    const sum = top.reduce((acc, pt) => acc + pt, 0) * multiplier;
+    return Math.round(sum * ROUND_TO_ONE_DECIMAL) / ROUND_TO_ONE_DECIMAL;
+};
+
+/**
+ * 【関数の役割】 KENBAN/SARA-TIER の内訳モーダル表示用に、貢献度上位 N 譜面を
+ * `SideContribution[]` として返す。
+ *
+ * {@link calculateWeightedTotalPoints} と同じスコアリングで上位 N を切り出すが、
+ * こちらは合計ではなく譜面メタ情報込みの配列を返す。
+ *
+ * @param scores      全譜面レコード（title/difficultyName/beatTierPoints/informalRank/scoreRate を含む）
+ * @param scratchMap  `"<title>|<difficultyName>"` → 皿率(%) の Map
+ * @param side        `'kenban'` で鍵盤側、`'sara'` で皿側
+ * @param limit       上位件数（既定 100）
+ * @returns           貢献 pt 降順に並んだ配列
+ */
+export const buildTopSideContributions = (
+    scores: { title: string; difficultyName: string; beatTierPoints: number; informalRank: string | undefined; scoreRate: number }[],
+    scratchMap: Map<string, number>,
+    side: 'kenban' | 'sara',
+    limit: number = TOP_CHART_LIMIT
+): SideContribution[] => {
+    const getWeightFn = side === 'kenban' ? getKenbanWeight : getSaraWeight;
+    const multiplier  = side === 'kenban' ? KENBAN_PT_MULTIPLIER : SARA_PT_MULTIPLIER;
+    return scores
+        .filter(s => s.beatTierPoints > 0)
+        .map<SideContribution>(s => {
+            const pct = scratchMap.get(`${s.title}|${s.difficultyName}`);
+            const weight = getWeightFn(pct);
+            // contribution には BEAT 比 1 補正倍率を適用する（モーダル列合計 = カード表示 pt と一致させるため）
+            return {
+                title: s.title,
+                difficultyName: s.difficultyName,
+                informalRank: s.informalRank,
+                scoreRate: s.scoreRate,
+                beatTierPoints: s.beatTierPoints,
+                scratchPct: pct,
+                weight,
+                contribution: s.beatTierPoints * weight * multiplier,
+            };
+        })
+        .filter(c => c.contribution > 0)
+        .sort((a, b) => b.contribution - a.contribution)
+        .slice(0, limit);
+};
+
+/**
  * 【関数の役割】 譜面レコード群から総合 BEAT-PT を算出する（上位 100 譜面の和）。
  *
  * 手順:

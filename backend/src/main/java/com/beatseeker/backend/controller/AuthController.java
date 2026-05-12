@@ -183,6 +183,7 @@ public class AuthController {
             responseBody.put("privacyLevel", user.getPrivacyLevel());
             responseBody.put("language", user.getLanguage() != null ? user.getLanguage() : "ja");
             responseBody.put("showRateTier", user.getShowRateTier() != null ? user.getShowRateTier() : true);
+            responseBody.put("showKenbanSaraTier", user.getShowKenbanSaraTier() != null ? user.getShowKenbanSaraTier() : false);
             responseBody.put("isSupporter", user.getIsSupporter() != null ? user.getIsSupporter() : false);
             responseBody.put("showSupporterBorder", user.getShowSupporterBorder() != null ? user.getShowSupporterBorder() : true);
             // サポータートークンが未発行なら、Ko-fi webhook が参照できるよう自動で付与する
@@ -257,6 +258,11 @@ public class AuthController {
             user.setLanguage(request.language());
         if (request.showRateTier() != null)
             user.setShowRateTier(request.showRateTier());
+        // KENBAN/SARA-TIER 表示はサポーター限定機能。非サポーターからの true 指定は無視する。
+        if (request.showKenbanSaraTier() != null) {
+            boolean isSupporter = Boolean.TRUE.equals(user.getIsSupporter());
+            user.setShowKenbanSaraTier(isSupporter && request.showKenbanSaraTier());
+        }
         if (request.showSupporterBorder() != null)
             user.setShowSupporterBorder(request.showSupporterBorder());
         if (request.email() != null && !request.email().isBlank()) {

@@ -271,6 +271,20 @@ const filteredNavItems = computed(() => {
                     </svg>
                     {{ t('nav.adminPanel') }}
                   </button>
+                  <!--
+                    ストラテジーカード: IIDX 非公式大会の課題曲ランダム抽選用。
+                    大会主催 (ID=19) と運営担当 (ID=18) のみに表示。
+                  -->
+                  <button
+                    v-if="(user?.id === 18 || user?.id === 19) && !viewingUserId"
+                    @click="selectTab('strategy-card')"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-fuchsia-600 dark:text-fuchsia-400 bg-gradient-to-r from-fuchsia-50 to-amber-50 dark:from-fuchsia-900/30 dark:to-amber-900/20 rounded-xl hover:from-fuchsia-100 hover:to-amber-100 dark:hover:from-fuchsia-900/50 dark:hover:to-amber-900/40 transition-all border border-fuchsia-100 dark:border-fuchsia-800 relative overflow-hidden"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    Strategy Card
+                  </button>
                   <button 
                     @click="handleAction('logout')"
                     class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"

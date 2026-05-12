@@ -81,6 +81,19 @@ public interface ChartTendencyProfileRepository extends JpaRepository<ChartTende
     List<String> findAllIds();
 
     /**
+     * 【メソッドの役割】 KENBAN-TIER / SARA-TIER 算出用に、ANOTHER / LEGGENDARIA の
+     * `(title, difficulty, scratchPct)` だけを軽量に返す。
+     *
+     * フロントエンドで全 ANOTHER/LEGGENDARIA 譜面の皿率を一括取得するための専用クエリ。
+     * 重い JSON 列は返さないため、ペイロードを最小限に抑える。
+     *
+     * @return 各要素は `[title:String, difficulty:String, scratchPct:Double]` の Object 配列
+     */
+    @Query("SELECT p.title, p.difficulty, p.scratchPct FROM ChartTendencyProfile p " +
+           "WHERE p.difficulty IN ('4','10') AND p.scratchPct IS NOT NULL")
+    List<Object[]> findScratchSummaryForAnotherLegg();
+
+    /**
      * 【メソッドの役割】 ベース URL（クエリパラメータを含まない部分）で前方一致検索し、
      * 同一曲の全難易度のプロファイルを返す。
      *

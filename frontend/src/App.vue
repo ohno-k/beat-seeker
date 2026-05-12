@@ -62,6 +62,8 @@ const SkillTreeView = defineAsyncComponent(() => import('./views/SkillTreeView.v
 const ChartListView = defineAsyncComponent(() => import('./views/ChartListView.vue'));
 const RankComparisonView = defineAsyncComponent(() => import('./views/RankComparisonView.vue'));
 const ShareView = defineAsyncComponent(() => import('./views/ShareView.vue'));
+// ストラテジーカード: 大会主催者 + 当該管理者のみ到達可能な隠し機能 (Sidebar.vue 側で出し分け)。
+const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCardView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
@@ -211,7 +213,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'strategy-card'>('dashboard')
 /** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
 const currentGuideSlug = ref<string | null>(null);
 /**
@@ -1786,6 +1788,11 @@ const handleUnifiedClose = async () => {
         <!-- 管理者専用: 曲別順位管理 -->
         <template v-else-if="activeTab === 'admin-song-ranks'">
           <AdminSongRanksView class="w-full max-w-5xl mx-auto" />
+        </template>
+
+        <!-- ストラテジーカード抽選 (大会用) -->
+        <template v-else-if="activeTab === 'strategy-card'">
+          <StrategyCardView class="w-full" />
         </template>
 
         <!-- 利用規約 -->

@@ -1,6 +1,7 @@
 import { ref, computed, readonly } from 'vue';
 import { currentLang } from './useI18n';
 import { showRateTierRef } from './useRateTierVisibility';
+import { showKenbanSaraTierRef } from './useKenbanSaraTierVisibility';
 import { TOKEN_KEY, API_BASE } from './constants';
 
 // 他の composable でも `API_BASE` を使うため再エクスポート（利便性のため）。
@@ -23,6 +24,7 @@ export interface AuthUser {
     privacyLevel: number;
     language: string;
     showRateTier: boolean;
+    showKenbanSaraTier: boolean;
     isSupporter: boolean;
     showSupporterBorder: boolean;
     supporterToken: string;
@@ -106,6 +108,11 @@ async function fetchCurrentUser(): Promise<void> {
             if (data.showRateTier !== undefined) {
                 showRateTierRef.value = data.showRateTier;
                 localStorage.setItem('showRateTier', String(data.showRateTier));
+            }
+            // KENBAN/SARA-Tier 表示設定も同期（サポーター限定機能）
+            if (data.showKenbanSaraTier !== undefined) {
+                showKenbanSaraTierRef.value = data.showKenbanSaraTier;
+                localStorage.setItem('showKenbanSaraTier', String(data.showKenbanSaraTier));
             }
         } else {
             user.value = null;

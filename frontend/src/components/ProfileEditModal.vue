@@ -16,6 +16,7 @@
 import { ref, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { useToast } from '../composables/useToast';
 import { useModalEscape } from '../composables/useModalEscape';
@@ -39,6 +40,8 @@ useModalEscape(() => props.isOpen, () => emit('close'));
 const { user, updateProfile } = useAuth();
 // RateTier 表示可否（ユーザーの見た目設定）。
 const { showRateTier, setRateTier } = useRateTierVisibility();
+// KENBAN/SARA-Tier 表示可否（サポーター限定オプトイン）。
+const { showKenbanSaraTier, setKenbanSaraTier } = useKenbanSaraTierVisibility();
 
 /** 送信中フラグ（二重送信防止）。 */
 const isSubmitting = ref(false);
@@ -287,6 +290,17 @@ const handleUpdate = async () => {
               <div class="relative inline-flex items-center ml-4 shrink-0">
                 <input type="checkbox" :checked="showRateTier" @change="setRateTier(($event.target as HTMLInputElement).checked)" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </div>
+            </label>
+            <!-- KENBAN/SARA-Tier 表示トグル（サポーター限定） -->
+            <label v-if="user?.isSupporter" class="flex items-center justify-between cursor-pointer group">
+              <div>
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">KENBAN / SARA-TIER を表示</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">譜面の鍵盤/皿傾向で別ティアを算出するサポーター限定機能（実験段階）</p>
+              </div>
+              <div class="relative inline-flex items-center ml-4 shrink-0">
+                <input type="checkbox" :checked="showKenbanSaraTier" @change="setKenbanSaraTier(($event.target as HTMLInputElement).checked)" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-cyan-300 dark:peer-focus:ring-cyan-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
               </div>
             </label>
             <label v-if="user?.isSupporter" class="flex items-center justify-between cursor-pointer group">

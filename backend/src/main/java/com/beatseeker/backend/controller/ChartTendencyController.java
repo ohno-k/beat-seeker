@@ -258,6 +258,50 @@ public class ChartTendencyController {
     }
 
     /**
+     * 【メソッドの役割】 KENBAN-TIER / SARA-TIER 算出用の軽量サマリを返す。
+     *
+     * ANOTHER / LEGGENDARIA 全譜面について `(title, difficulty, scratchPct)` のみを返す。
+     * 重い JSON 列を含めず、ダッシュボード起動時に一括取得できるサイズに抑える。
+     *
+     * GET /api/analysis/tendency-scratch-summary
+     *
+     * @return 各譜面の `{title, difficulty, scratchPct}` を持つ Map のリスト
+     */
+    @GetMapping("/api/analysis/tendency-scratch-summary")
+    public ResponseEntity<List<Map<String, Object>>> getScratchSummary() {
+        return ResponseEntity.ok(service.getScratchSummaryForAnotherLegg());
+    }
+
+    /**
+     * 【メソッドの役割】 KENBAN-TIER ランキングを返す（暫定オンザフライ計算）。
+     *
+     * 現状は users テーブルに事前計算カラムを持たず、ChartTendencyService がメモリキャッシュ
+     * (5 分 TTL) で全ユーザー分を一括計算する。本格運用時は BEAT/RATE 同様に
+     * users.total_kenban_pt 等を持たせて事前計算する想定。
+     *
+     * GET /api/scores/kenban-ranking
+     *
+     * @return `{userId, displayName, iidxId, privacyLevel, totalKenbanPt, isSupporter}` のリスト
+     */
+    @GetMapping("/api/scores/kenban-ranking")
+    public ResponseEntity<List<Map<String, Object>>> getKenbanRanking() {
+        return ResponseEntity.ok(service.getKenbanRanking());
+    }
+
+    /**
+     * 【メソッドの役割】 SARA-TIER ランキングを返す（暫定オンザフライ計算）。
+     * {@link #getKenbanRanking()} と同じデータソース・タイミングで返却する。
+     *
+     * GET /api/scores/sara-ranking
+     *
+     * @return `{userId, displayName, iidxId, privacyLevel, totalSaraPt, isSupporter}` のリスト
+     */
+    @GetMapping("/api/scores/sara-ranking")
+    public ResponseEntity<List<Map<String, Object>>> getSaraRanking() {
+        return ResponseEntity.ok(service.getSaraRanking());
+    }
+
+    /**
      * 【メソッドの役割】 ログイン中のユーザーに対して、指定譜面の予測スコアを返す。
      *
      * 処理の流れ:

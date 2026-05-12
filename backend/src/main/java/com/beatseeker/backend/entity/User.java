@@ -74,6 +74,10 @@ public class User {
     @ColumnDefault("true")
     private Boolean showRateTier = true;
 
+    /** KENBAN-TIER / SARA-TIER を UI に表示するかどうか。サポーター限定のオプトイン機能。 */
+    @ColumnDefault("false")
+    private Boolean showKenbanSaraTier = false;
+
     /** サポーター（課金支援者）かどうか。true の場合は特別 UI が有効になる。 */
     @ColumnDefault("false")
     private Boolean isSupporter = false;

@@ -1,0 +1,359 @@
+曲管理番号	バージョン	曲名	Diff	Lv
+835	GOLD	Air Bell	A	8
+836	10th style	ALIEN TEMPLE	A	8
+837	9th style	BAD BOY BASS!! (dj Remo-con MIX)	A	8
+838	DistorteD	BALLAD THE FEATHERS	A	8
+839	6th style	Blueberry Stream	A	8
+840	Lincle	CALL	A	8
+841	HAPPY SKY	EMPTY OF THE SKY	A	8
+842	6th style	fly through the night	A	8
+843	GOLD	four-leaf	A	8
+844	IIDX RED	HORIZON	A	8
+845	2nd style	Indigo Vision(full flavour hide around mix)	A	8
+846	4th style	Jam&Marmalade	A	8
+847	9th style	lights	A	8
+848	tricoro	mnemoniq	A	8
+849	GOLD	never…	A	8
+850	substream	PARANOIA MAX～DIRTY MIX～	A	8
+851	3rd style	Presto	A	8
+852	5th style	RIDE ON THE LIGHT (HI GREAT MIX)	A	8
+853	DJ TROOPERS	scar in the earth	A	8
+854	5th style	sometime	A	8
+855	Resort Anthem	Stay my side	A	8
+856	8th style	蒼い衝動	A	8
+857	10th style	システムロマンス	A	8
+858	GOLD	花吹雪 ～ IIDX LIMITED ～	A	8
+859	IIDX RED	AGEHA	A	9
+860	EMPRESS	ALL I NEED YOUR LOVE	A	9
+861	8th style	ALL RIGHT	A	9
+862	10th style	ASTRAL VOYAGE	A	9
+863	8th style	Attitude	A	9
+864	7th style	AVE DE RAPINA	A	9
+865	DJ TROOPERS	beatonic nation	A	9
+866	9th style	BRIGHTNESS DARKNESS	A	9
+867	GOLD	CaptivAte～裁き～	A	9
+868	10th style	CARRY ON NIGHT (English version)	A	9
+869	4th style	Clione	A	9
+870	BISTROVER	Don't Stop The Music feat. Kanae Asaba	A	9
+871	copula	Exchange Place	A	9
+872	10th style	Freezing atmosphere	A	9
+873	substream	GENOM SCREAMS	A	9
+874	substream	gentle stress	A	9
+875	9th style	Golden Horn	A	9
+876	GOLD	heaven above	A	9
+877	Resort Anthem	I FIGHT ME	A	9
+878	8th style	Luv 2 Feel Your Body	A	9
+879	9th style	MARIA (I believe... )	A	9
+880	GOLD	METALLIC MIND	A	9
+881	4th style	minimalian	A	9
+882	HAPPY SKY	MOON RACE	A	9
+883	8th style	MUSIC TO YOUR HEAD	A	9
+884	EMPRESS	neogenesis	A	9
+885	10th style	pandora	A	9
+886	Rootage	Psycho Sheep Riddim	A	9
+887	5th style	Real	A	9
+888	substream	RUGGED ASH	A	9
+889	IIDX RED	SPEEDY CAT	A	9
+890	5th style	STILL IN MY HEART	A	9
+891	7th style	Tomorrow Perfume	A	9
+892	EPOLIS	Too Late Snow	A	9
+893	IIDX RED	ＵＬＴｉＭΛＴＥ	A	9
+894	HAPPY SKY	Under the Sky	A	9
+895	CastHour	808monkey	A	9
+896	IIDX RED	太陽～T・A・I・Y・O～	A	9
+897	EMPRESS	まほろば	A	9
+898	EPOLIS	リメンバーリメンバー	A	9
+899	9th style	ADVANCE	A	10
+900	DistorteD	ALFARSHEAR 双神威に廻る夢	A	10
+901	HAPPY SKY	alla turca con passione	A	10
+902	DistorteD	Apocalypse ～dirge of swans～	A	10
+903	IIDX RED	awakening	A	10
+904	4th style	B4U	A	10
+905	HEROIC VERSE	Backyard Stars	A	10
+906	EMPRESS	Bahram Attack-猫叉Master Remix-	A	10
+907	CANNON BALLERS	Best of Me	A	10
+908	IIDX RED	BREATH	A	10
+909	GOLD	CaptivAte～誓い～	A	10
+910	PENDUAL	Chain of pain	A	10
+911	Pinky Crush	Chasing After YOU ～夢の欠片～ ft. 小林マナ	A	10
+912	Sparkle Shower	COLOR BURST	A	10
+913	EMPRESS	Cyber Force -DJ Yoshitaka Remix-	A	10
+914	IIDX RED	D.A.N.C.E.!	A	10
+915	BISTROVER	DENIM	A	10
+916	6th style	DIVE ～INTO YOUR HEART～	A	10
+917	HEROIC VERSE	Do What You Want	A	10
+918	IIDX RED	Don't be afraid myself	A	10
+919	4th style	DXY!	A	10
+920	9th style	e-motion 2003 -romantic extra-	A	10
+921	DistorteD	EURO-ROMANCE	A	10
+922	DJ TROOPERS	evergreen	A	10
+923	10th style	FEEL IT	A	10
+924	HEROIC VERSE	Fly Above (Vicissitude Remix)	A	10
+925	DJ TROOPERS	Freeway Shuffle	A	10
+926	Rootage	Geirskögul	A	10
+927	9th style	HYPER EUROBEAT (2DX style)	A	10
+928	Lincle	Infinite cave	A	10
+929	EMPRESS	Jack	A	10
+930	EPOLIS	Jumper	A	10
+931	9th style	Karma	A	10
+932	SIRIUS	Keep it-秋葉工房mix-	A	10
+933	copula	La dolce primavera	A	10
+934	DistorteD	Leaving...	A	10
+935	Lincle	LETHEBOLG ～双神威に斬り咲けり～	A	10
+936	HAPPY SKY	Love Magic	A	10
+937	9th style	lower world	A	10
+938	Lincle	Lucky Days	A	10
+939	DJ TROOPERS	madrugada	A	10
+940	SPADA	Miracle 5ympho X	A	10
+941	EMPRESS	Monkey Dance '09	A	10
+942	copula	Musik LoverZ	A	10
+943	10th style	Narcissus At Oasis	A	10
+944	DJ TROOPERS	NEW GENERATION -もう、お前しか見えない-	A	10
+945	copula	Nowhere	A	10
+946	SPADA	Odin	A	10
+947	GOLD	PHOTONGENIC	A	10
+948	tricoro	POINT ZERO	A	10
+949	tricoro	Rainbow after snow	A	10
+950	tricoro	Reflection Into the EDEN	A	10
+951	5th style	Regulus	A	10
+952	Lincle	SA.YO.NA.RA. SUPER STAR	A	10
+953	copula	Sephirot	A	10
+954	copula	Set U Free feat. Kanae Asaba	A	10
+955	SIRIUS	She is my wife	A	10
+956	Pinky Crush	Shirdal	A	10
+957	9th style	SNOW	A	10
+958	DistorteD	So Fabulous !!	A	10
+959	6th style	SOMETHING WONDERFUL	A	10
+960	Resort Anthem	Space Time	A	10
+961	Rootage	SPEED ROCKER	A	10
+962	IIDX RED	Sphere	A	10
+963	Sparkle Shower	SPLASH!!!!!!!!!	A	10
+964	Lincle	Star Trail	A	10
+965	CANNON BALLERS	Static State	A	10
+966	5th style	sync	A	10
+967	EMPRESS	THANK YOU FOR PLAYING	A	10
+968	BISTROVER	That Feeling	A	10
+969	Resort Anthem	THE DOOR INTO RAINBOW	A	10
+970	IIDX RED	The Hope of Tomorrow	A	10
+971	DistorteD	This is Love	A	10
+972	copula	Tori-no-kimochi	A	10
+973	7th style	traces	A	10
+974	DJ TROOPERS	TRIP MACHINE PhoeniX	A	10
+975	HAPPY SKY	Twelfth Style	A	10
+976	HEROIC VERSE	VIBRΛ	A	10
+977	HAPPY SKY	Votum stellarum	A	10
+978	Sparkle Shower	Watermelon Explosion	A	10
+979	CastHour	Wonderful Escape	A	10
+980	Resort Anthem	Wuv U	A	10
+981	PENDUAL	十六夜セツナ	A	10
+982	copula	ギョギョっと人魚♨爆婚ブライダル	A	10
+983	GOLD	クルクル☆ラブ～Opioid Peptide MIX～	A	10
+984	Rootage	グラナダの風	A	10
+985	SINOBUZ	恋はどう？モロ◎波動OK☆方程式!!	A	10
+986	SIRIUS	水上の提督(Short mix from "幻想水滸伝V")	A	10
+987	SPADA	罪と罰	A	10
+988	CANNON BALLERS	Abraxas	A	11
+989	PENDUAL	AFRO KNUCKLE	A	11
+990	EMPRESS	ALL MY TURN -このターンに、オレの全てを賭ける-	A	11
+991	EPOLIS	Amethyst	A	11
+992	copula	Angelic Jelly	A	11
+993	CANNON BALLERS	Around the Future	A	11
+994	HAPPY SKY	Aurora	A	11
+995	CANNON BALLERS	Back Spin Sweeper	A	11
+996	CANNON BALLERS	Battleground	A	11
+997	IIDX RED	Be quiet	A	11
+998	tricoro	Beastie Starter	A	11
+999	8th style	Blame	A	11
+1000	GOLD	Blind Justice ～Torn souls, Hurt Faiths～	A	11
+1001	IIDX RED	BLOCKS	A	11
+1002	DJ TROOPERS	Blue Rain	A	11
+1003	SPADA	BRAVE OUT	L	11
+1004	SINOBUZ	BREAK OVER	A	11
+1005	DistorteD	Broadbanded	A	11
+1006	Pinky Crush	Butterfly Twist	A	11
+1007	EMPRESS	CaptivAte2～覚醒～	A	11
+1008	copula	chaos eater -IIDX edition-	A	11
+1009	SPADA	Cleopatrysm	A	11
+1010	PENDUAL	Cosmic Cat	A	11
+1011	SPADA	Critical Crystal	A	11
+1012	SINOBUZ	Cyber True Color	A	11
+1013	DistorteD	D.C.fish	A	11
+1014	10th style	Debtty Daddy	A	11
+1015	SIRIUS	DESIRE	A	11
+1016	SPADA	diagram	A	11
+1017	DJ TROOPERS	Do it!! Do it!!	A	11
+1018	SIRIUS	DROP	A	11
+1019	CANNON BALLERS	Eine Haube ～聖地の果てにあるもの～	A	11
+1020	BISTROVER	Farewell to Marrakech	A	11
+1021	EMPRESS	Flash Back 90's	L	11
+1022	tricoro	FLOWER	A	11
+1023	SPADA	Funny shuffle	A	11
+1024	DistorteD	Ganymede	A	11
+1025	EPOLIS	Get Higher	A	11
+1026	HEROIC VERSE	GHOST	A	11
+1027	8th style	Giudecca	A	11
+1028	copula	GOBBLE	A	11
+1029	DistorteD	Harmony and Lovely	A	11
+1030	3rd style	Holic	A	11
+1031	SPADA	Insane Techniques	A	11
+1032	HEROIC VERSE	Into The Madness	A	11
+1033	SINOBUZ	INVISIBLE STRIX	A	11
+1034	EPOLIS	Just Gimme	A	11
+1035	DJ TROOPERS	MENTAL MELTDOWN	A	11
+1036	Sparkle Shower	Meteor☆Shower	A	11
+1037	HEROIC VERSE	Nasty Techniques	A	11
+1038	6th style	NEMESIS	A	11
+1039	EMPRESS	neogenesis	L	11
+1040	Rootage	Next Tales 2 Oath (IIDX 20th Anniv "Ring" Theme)	A	11
+1041	PENDUAL	Night sky	A	11
+1042	BISTROVER	OTOKOZAKA	A	11
+1043	SPADA	Pharaoh	A	11
+1044	CastHour	Pout	A	11
+1045	SIRIUS	Programmed Sun	A	11
+1046	EMPRESS	Programmed World	A	11
+1047	9th style	quasar	A	11
+1048	HEROIC VERSE	Queen Kaguya	A	11
+1049	3rd style	R5	A	11
+1050	8th style	rainbow flyer	A	11
+1051	SPADA	rainbow guitar weeps	A	11
+1052	IIDX RED	RESONATE 1794	A	11
+1053	DJ TROOPERS	Rising in the Sun(original mix)	A	11
+1054	9th style	RISLIM -Remix-	A	11
+1055	tricoro	S!ck	A	11
+1056	PENDUAL	Sakura Mirage	A	11
+1057	SINOBUZ	Sarutobi Champion is 拙者	A	11
+1058	SPADA	SCHWARZSCHILD FIELD	A	11
+1059	HAPPY SKY	Scripted Connection⇒ N mix	L	11
+1060	GOLD	Second Heaven	A	11
+1061	IIDX RED	Secret of Love	A	11
+1062	RESIDENT	Seraph	A	11
+1063	SIRIUS	Session 1 -Genesis-	A	11
+1064	7th style	Spica	A	11
+1065	EPOLIS	squall	A	11
+1066	DJ TROOPERS	STEEL NEEDLE	A	11
+1067	DJ TROOPERS	switch	A	11
+1068	Resort Anthem	THE BLACK KNIGHT	A	11
+1069	DistorteD	The Dirty of Loudness	A	11
+1070	SIRIUS	THE LAST STRIKER	A	11
+1071	DistorteD	tripping contact(teranoid&MC Natsack Remix)	A	11
+1072	SPADA	Unicorn tail	A	11
+1073	DistorteD	waxing and wanding	A	11
+1074	Rootage	Yum Yum Jelly	A	11
+1075	tricoro	ZED	A	11
+1076	HAPPY SKY	100％ minimoo-G	A	11
+1077	Lincle	24th Century BOY	A	11
+1078	Rootage	50th Memorial Songs -The BEMANI History-	A	11
+1079	CastHour	青の洞窟	A	11
+1080	copula	朝焼けから始まるボクらの小さな旅	A	11
+1081	CANNON BALLERS	命の標本	A	11
+1082	CastHour	オールトの雲	A	11
+1083	Lincle	蛇神	A	11
+1084	HAPPY SKY	合体せよ！ストロングイェーガー！！ (Ryu☆ remix)	A	11
+1085	copula	セロトニン	A	11
+1086	Rootage	泰東ノ翠霞	A	11
+1087	Resort Anthem	旅人リラン	A	11
+1088	Pinky Crush	断罪の一花	A	11
+1089	PENDUAL	超青少年ノ為ノ超多幸ナ超古典的超舞曲	A	11
+1090	SPADA	牧神笛吹きて	A	11
+1091	7th style	A	A	12
+1092	SIRIUS	AIR RAID FROM THA UNDAGROUND	L	12
+1093	CANNON BALLERS	ANCHOR	A	12
+1094	CANNON BALLERS	Arca	A	12
+1095	RESIDENT	Bad Encryption	A	12
+1096	SIRIUS	Bad Maniacs	A	12
+1097	CastHour	Binary Black Hole	A	12
+1098	DJ TROOPERS	Blue Rain	L	12
+1099	copula	Blue Spring Express	A	12
+1100	Resort Anthem	Broken	A	12
+1101	RESIDENT	Chaotoxin	A	12
+1102	PENDUAL	cinder	A	12
+1103	EMPRESS	Colorful Cookie	A	12
+1104	6th style	Colors (radio edit)	A	12
+1105	tricoro	Confiserie	A	12
+1106	DistorteD	CONTRACT	L	12
+1107	EPOLIS	Dahlia	A	12
+1108	Resort Anthem	Dances with Snow Fairies	A	12
+1109	copula	Devil's Gear	A	12
+1110	tricoro	Devilz Staircase	A	12
+1111	DJ TROOPERS	Do it!! Do it!!	L	12
+1112	SIRIUS	DOMINION	A	12
+1113	SINOBUZ	DORNWALD ～Junge～	A	12
+1114	Pinky Crush	Drop Syndicate	A	12
+1115	DistorteD	DUE TOMORROW	A	12
+1116	IIDX RED	FAKE TIME	A	12
+1117	GOLD	FIRE FIRE	A	12
+1118	EPOLIS	Ghost Pulse	A	12
+1119	IIDX RED	gigadelic	A	12
+1120	CastHour	GiGaGaHell	A	12
+1121	SINOBUZ	HADES	A	12
+1122	Lincle	HAERETICUS	A	12
+1123	PENDUAL	IMPLANTATION	A	12
+1124	HEROIC VERSE	Inferno of Fomalhaut	A	12
+1125	10th style	Innocent Walls	A	12
+1126	Rootage	L.F.O	A	12
+1127	SPADA	Last Dance	A	12
+1128	CANNON BALLERS	Life Is A Game ft.DD"ナカタ"Metal	A	12
+1129	Rootage	Mächö Mönky	A	12
+1130	7th style	MAX 300	A	12
+1131	RESIDENT	MAX 360	A	12
+1132	BISTROVER	MEGAERA	A	12
+1133	HEROIC VERSE	Megalara Garuda	A	12
+1134	RESIDENT	Meissa	A	12
+1135	DJ TROOPERS	MENDES	A	12
+1136	9th style	moon_child	A	12
+1137	tricoro	neu	A	12
+1138	DJ TROOPERS	NEW GENERATION -もう、お前しか見えない-	L	12
+1139	copula	Nightmare before oversleep	A	12
+1140	RESIDENT	ONE AND ONLY	A	12
+1141	10th style	One More Lovely	A	12
+1142	9th style	one or eight	A	12
+1143	DJ TROOPERS	oratio	A	12
+1144	BISTROVER	Pārvatī	A	12
+1145	8th style	PLEASE DON'T GO	A	12
+1146	tricoro	Proof of the existence	A	12
+1147	SINOBUZ	Quakes	A	12
+1148	Lincle	QUANTUM TELEPORTATION	L	12
+1149	SPADA	ra'am	A	12
+1150	HAPPY SKY	rage against usual	A	12
+1151	HEROIC VERSE	Rave Patroller	A	12
+1152	DJ TROOPERS	Ristaccia	A	12
+1153	Sparkle Shower	RUINA	A	12
+1154	tricoro	Saturn	L	12
+1155	HAPPY SKY	Scripted Connection⇒ A mix	L	12
+1156	HAPPY SKY	Scripted Connection⇒ H mix	L	12
+1157	GOLD	Sense 2007	A	12
+1158	CANNON BALLERS	Slipstream	A	12
+1159	SIRIUS	SOLID STATE SQUAD	A	12
+1160	DJ TROOPERS	STEEL NEEDLE	L	12
+1161	copula	StrayedCatz	A	12
+1162	tricoro	STULTI	A	12
+1163	RESIDENT	TECHNOPHOBIA	A	12
+1164	HEROIC VERSE	THE F∀UST	A	12
+1165	HAPPY SKY	Twelfth Style	L	12
+1166	5th style	V	A	12
+1167	RESIDENT	Xerulean	A	12
+1168	tricoro	Zirkfied	A	12
+1169	Pinky Crush	1116	A	12
+1170	copula	紫陽花 -AZISAI-	A	12
+1171	Pinky Crush	uən	A	12
+1172	Sparkle Shower	ιgniЯRuina	A	12
+1173	Rootage	お菓子の王国	A	12
+1174	DistorteD	カゴノトリ～弐式～	A	12
+1175	BISTROVER	閠槞彁の願い	A	12
+1176	tricoro	狂イ咲ケ焔ノ華	A	12
+1177	Lincle	子供の落書き帳	A	12
+1178	Rootage	金野火織の金色提言	A	12
+1179	CANNON BALLERS	シムルグの目醒め	A	12
+1180	DJ TROOPERS	少年A	A	12
+1181	PENDUAL	少年は空を辿る	A	12
+1182	10th style	雪月花	A	12
+1183	tricoro	たまゆら	A	12
+1184	BISTROVER	∀	A	12
+1185	SINOBUZ	津軽雪	A	12
+1186	Pinky Crush	天使のカンタータ -Cantata of Angels-	A	12
+1187	CANNON BALLERS	東京神話	A	12
+1188	DistorteD	嘆きの樹	A	12
+1189	HEROIC VERSE	ピアノ協奏曲第1番”蠍火” (BlackY Remix)	A	12
+1190	EMPRESS	不沈艦CANDY	A	12
+1191	HEROIC VERSE	魅惑のYUMMYスイーツ	A	12
+1192	SPADA	煉獄のエルフェリア	A	12

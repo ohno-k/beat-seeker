@@ -32,6 +32,8 @@ public record ProfileUpdateRequest(
                 String language,
                 /** レートティアをプロフィール上で表示するか。 */
                 Boolean showRateTier,
+                /** KENBAN-TIER / SARA-TIER を表示するか（サポーター限定オプトイン）。 */
+                Boolean showKenbanSaraTier,
                 /** サポーター用ボーダー（枠）を表示するか。 */
                 Boolean showSupporterBorder) {
 }
