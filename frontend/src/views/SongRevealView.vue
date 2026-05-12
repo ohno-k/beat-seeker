@@ -62,6 +62,10 @@ const searchResults = computed<SongDataEntry[]>(() => {
 const selectedLeft = ref<SongDataEntry | null>(null);
 const selectedRight = ref<SongDataEntry | null>(null);
 
+// ── プレイヤー名 (自由入力。REVEAL フェーズ中、各半面の上部に常時表示) ──
+const leftPlayer = ref('');
+const rightPlayer = ref('');
+
 const selectChart = (chart: SongDataEntry) => {
   if (phase.value !== 'select') return;
   if (activeSide.value === 'left') selectedLeft.value = chart;
@@ -201,6 +205,30 @@ const toggleFullscreen = async () => {
         <p class="text-slate-400 mt-2 text-sm tracking-widest uppercase">選曲発表演出 (2 曲対応 / 左右分割)</p>
       </div>
 
+      <!-- プレイヤー名 (自由入力。REVEAL 時に各半面の上部に表示) -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[10px] font-mono text-cyan-300 tracking-[0.3em] mb-1">LEFT PLAYER</label>
+          <input
+            v-model="leftPlayer"
+            type="text"
+            maxlength="40"
+            placeholder="プレイヤー名を入力"
+            class="w-full px-4 py-3 bg-slate-900/70 border-2 border-white/10 focus:border-cyan-400 rounded-xl text-white placeholder-slate-500 outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono text-amber-300 tracking-[0.3em] mb-1">RIGHT PLAYER</label>
+          <input
+            v-model="rightPlayer"
+            type="text"
+            maxlength="40"
+            placeholder="プレイヤー名を入力"
+            class="w-full px-4 py-3 bg-slate-900/70 border-2 border-white/10 focus:border-amber-400 rounded-xl text-white placeholder-slate-500 outline-none transition-colors"
+          />
+        </div>
+      </div>
+
       <!-- スロット 2 つ (Left / Right) と Active 切替 -->
       <div class="grid grid-cols-2 gap-3">
         <button
@@ -333,6 +361,13 @@ const toggleFullscreen = async () => {
         <div class="absolute inset-0 reveal-half-bg-left"></div>
         <div class="absolute inset-0 reveal-rays pointer-events-none"></div>
 
+        <!-- プレイヤー名バナー (REVEAL 突入時から常時表示) -->
+        <div v-if="leftPlayer" class="player-banner player-banner-left absolute top-8 left-0 right-0 z-20 text-center pointer-events-none">
+          <p class="inline-block px-6 py-2 text-xl sm:text-3xl md:text-4xl font-black tracking-wider text-white">
+            {{ leftPlayer }}
+          </p>
+        </div>
+
         <!-- 待機表示 (まだ公開されていない) -->
         <div v-if="!leftStage.title" class="relative text-center text-slate-700 font-mono text-xs tracking-[0.4em] z-10">
           <p>LEFT SIDE</p>
@@ -381,6 +416,13 @@ const toggleFullscreen = async () => {
       <div class="reveal-half relative w-1/2 flex items-center justify-center overflow-hidden p-4">
         <div class="absolute inset-0 reveal-half-bg-right"></div>
         <div class="absolute inset-0 reveal-rays pointer-events-none"></div>
+
+        <!-- プレイヤー名バナー -->
+        <div v-if="rightPlayer" class="player-banner player-banner-right absolute top-8 left-0 right-0 z-20 text-center pointer-events-none">
+          <p class="inline-block px-6 py-2 text-xl sm:text-3xl md:text-4xl font-black tracking-wider text-white">
+            {{ rightPlayer }}
+          </p>
+        </div>
 
         <div v-if="!rightStage.title" class="relative text-center text-slate-700 font-mono text-xs tracking-[0.4em] z-10">
           <p>RIGHT SIDE</p>
@@ -502,6 +544,20 @@ const toggleFullscreen = async () => {
     rgba(2, 6, 23, 1) 100%
   );
 }
+
+/* プレイヤー名バナー: REVEAL 突入時にスーッと出現してそのまま居続ける。
+   左右で下線アクセントの色を変えて陣営を分かりやすく。 */
+@keyframes playerBannerKf {
+  0%   { opacity: 0; transform: translateY(-20px); letter-spacing: 0.4em; filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0);     letter-spacing: 0.1em; filter: blur(0);   }
+}
+.player-banner p {
+  animation: playerBannerKf 0.8s cubic-bezier(0.16, 0.74, 0.22, 1) forwards;
+  border-bottom: 3px solid currentColor;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+}
+.player-banner-left p  { color: #67e8f9; } /* cyan-300 */
+.player-banner-right p { color: #fcd34d; } /* amber-300 */
 
 @keyframes burstRadialKf {
   0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }

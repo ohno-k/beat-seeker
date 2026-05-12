@@ -273,12 +273,12 @@ const filteredNavItems = computed(() => {
                   </button>
                   <!--
                     ストラテジーカード: IIDX 非公式大会の課題曲ランダム抽選用。
-                    大会主催 (ID=19) と運営担当 (ID=18) のみに表示。
+                    大会主催 (ID=19) / 運営担当 (ID=18) / ID=23 のみに表示。
                     OBS ブラウザソースからも使えるよう `/strategy-card` のスタンドアロン URL に遷移する
                     (内部タブ切替ではなく、ページ遷移)。
                   -->
                   <a
-                    v-if="(user?.id === 18 || user?.id === 19) && !viewingUserId"
+                    v-if="(user?.id === 18 || user?.id === 19 || user?.id === 23) && !viewingUserId"
                     href="/strategy-card"
                     @click="closeSidebar"
                     class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-fuchsia-600 dark:text-fuchsia-400 bg-gradient-to-r from-fuchsia-50 to-amber-50 dark:from-fuchsia-900/30 dark:to-amber-900/20 rounded-xl hover:from-fuchsia-100 hover:to-amber-100 dark:hover:from-fuchsia-900/50 dark:hover:to-amber-900/40 transition-all border border-fuchsia-100 dark:border-fuchsia-800 relative overflow-hidden"
@@ -290,10 +290,10 @@ const filteredNavItems = computed(() => {
                   </a>
                   <!--
                     選曲発表 (Song Reveal): 大会の選曲発表演出。`/song-reveal` のスタンドアロン URL に遷移。
-                    ID 18/19 のみに表示。
+                    ID 18/19/23 のみに表示。
                   -->
                   <a
-                    v-if="(user?.id === 18 || user?.id === 19) && !viewingUserId"
+                    v-if="(user?.id === 18 || user?.id === 19 || user?.id === 23) && !viewingUserId"
                     href="/song-reveal"
                     @click="closeSidebar"
                     class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-cyan-600 dark:text-cyan-400 bg-gradient-to-r from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/20 rounded-xl hover:from-cyan-100 hover:to-sky-100 dark:hover:from-cyan-900/50 dark:hover:to-sky-900/40 transition-all border border-cyan-100 dark:border-cyan-800 relative overflow-hidden"
