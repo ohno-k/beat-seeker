@@ -109,6 +109,15 @@ fetchGameData();
 /** 現在 URL が `/reset-password` かどうか。パスワード再設定画面はルートコンポーネントを丸ごと差し替える。 */
 const isResetPasswordPage = ref(window.location.pathname === '/reset-password');
 
+/**
+ * 現在 URL が `/strategy-card` かどうか。
+ *
+ * OBS のブラウザソースから直接読み込ませる用途のためのスタンドアロン URL。
+ * サイドバー / ヘッダ / モーダル群を一切描画せず、StrategyCardView だけを画面に出す。
+ * 認証も不要 (大会本番中に OBS から繋ぐため)。
+ */
+const isStrategyCardObsPage = ref(window.location.pathname === '/strategy-card');
+
 const { hasUpdate } = useAppUpdate();
 /** Service Worker による新バージョン通知を受けた際の更新ボタン。単純にページ再読込を行う。 */
 const reloadPage = () => window.location.reload();
@@ -1321,6 +1330,8 @@ const handleUnifiedClose = async () => {
 <template>
   <!-- パスワード再設定画面は独立ビューとして丸ごと差し替え、通常 UI は描画しない -->
   <ResetPasswordView v-if="isResetPasswordPage" />
+  <!-- OBS ブラウザソース用: ストラテジーカードだけを単独描画。サイドバー等は全部省略。 -->
+  <StrategyCardView v-else-if="isStrategyCardObsPage" class="w-full min-h-screen" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
     <!-- ============================================================ -->
     <!-- エイプリルフール限定オーバーレイ（常時マウントだが中身は日付判定） -->
