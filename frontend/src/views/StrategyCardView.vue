@@ -56,7 +56,9 @@ const selectedMatch = ref<MatchKind | null>(null);
 // 抽選状態
 const isSpinning = ref(false);
 const resultSong = ref<Song | null>(null);
-const showResultFlash = ref(false);
+// 当選時の演出フラグ。リング波紋 + 画面端ゴールドフラッシュをトリガする。
+// 旧実装の「全画面ホワイトアウト」はタイトルが読めなくなるため廃止。
+const showResultBurst = ref(false);
 
 // スロットマシン風スクロール用の状態
 // 1行の高さ (px) — CSS の .row { height } と同期。
@@ -203,7 +205,7 @@ const spin = async () => {
 
   isSpinning.value = true;
   resultSong.value = null;
-  showResultFlash.value = false;
+  showResultBurst.value = false;
 
   const finalSong = pool[Math.floor(Math.random() * pool.length)];
 
@@ -257,8 +259,9 @@ const spin = async () => {
   stopTimer = window.setTimeout(() => {
     resultSong.value = finalSong;
     isSpinning.value = false;
-    showResultFlash.value = true;
-    window.setTimeout(() => { showResultFlash.value = false; }, 1500);
+    showResultBurst.value = true;
+    // バースト演出 (リング波紋 + エッジフラッシュ) は約 1.6 秒で自然消滅
+    window.setTimeout(() => { showResultBurst.value = false; }, 1600);
   }, cumulative);
 };
 
@@ -269,7 +272,7 @@ const reset = () => {
   isSpinning.value = false;
   resultSong.value = null;
   scrollItems.value = [];
-  showResultFlash.value = false;
+  showResultBurst.value = false;
   if (stripEl.value) {
     stripEl.value.style.transition = 'none';
     stripEl.value.style.transform = 'translateY(0)';
@@ -423,22 +426,22 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-fuchsia-500/20 to-amber-500/20 animate-pulse"></div>
           </div>
 
-          <!-- 結果フラッシュ -->
-          <Transition
-            enter-active-class="transition-opacity duration-200"
-            enter-from-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="transition-opacity duration-700"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-          >
-            <div v-if="showResultFlash" class="absolute inset-0 bg-white pointer-events-none z-30"></div>
-          </Transition>
-
           <!-- 結果確定セクション (抽選後) -->
-          <div v-if="resultSong && !isSpinning" class="relative z-10 p-8 sm:p-12 text-center result-pop space-y-3">
-            <p class="text-xs font-mono tracking-[0.4em] text-amber-300">DECIDED</p>
-            <div class="flex items-center justify-center gap-2 flex-wrap">
+          <div v-if="resultSong && !isSpinning" class="relative z-10 p-8 sm:p-12 text-center result-pop space-y-3 overflow-hidden">
+            <!-- 背景: ゆっくり回転する光線 (常時) -->
+            <div class="absolute inset-0 -z-10 result-rays pointer-events-none"></div>
+
+            <!-- 当選バースト: 金リングが中央から3連波紋 + エッジフラッシュ (1.6 秒で自然消滅) -->
+            <div v-if="showResultBurst" class="absolute inset-0 z-20 pointer-events-none">
+              <span class="ring-burst ring-burst-1"></span>
+              <span class="ring-burst ring-burst-2"></span>
+              <span class="ring-burst ring-burst-3"></span>
+              <!-- 四辺だけが光るボーダーフラッシュ。中央の文字には被らない。 -->
+              <div class="absolute inset-0 edge-flash"></div>
+            </div>
+
+            <p class="relative text-xs font-mono tracking-[0.4em] text-amber-300">DECIDED</p>
+            <div class="relative flex items-center justify-center gap-2 flex-wrap">
               <span v-if="activeGenreMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeGenreMeta.gradient">{{ activeGenreMeta.label }}</span>
               <span v-if="activeMatchMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeMatchMeta.gradient">{{ activeMatchMeta.label }}</span>
               <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ resultSong.level }}</span>
@@ -446,10 +449,10 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
                 {{ resultSong.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
               </span>
             </div>
-            <p class="text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-white to-amber-200 drop-shadow-[0_0_30px_rgba(252,211,77,0.5)] result-title">
+            <p class="relative text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-white to-amber-200 drop-shadow-[0_0_30px_rgba(252,211,77,0.5)] result-title">
               {{ resultSong.title }}
             </p>
-            <p class="text-sm font-mono text-slate-300">{{ resultSong.version }}</p>
+            <p class="relative text-sm font-mono text-slate-300">{{ resultSong.version }}</p>
           </div>
 
           <!-- ルーレット (スクロール) - スピン中は常時表示、停止後も結果が出るまでは見せる -->
@@ -596,5 +599,66 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
 .button-shine {
   background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
   animation: buttonShine 2.5s linear infinite;
+}
+
+/* === 当選時の演出 (ホワイトアウトの代わり) === */
+
+/* 金色のリングが中央から広がっていく波紋。3連で重ねて派手に。
+   mix-blend-mode: screen で背景を持ち上げつつ文字には被らない (リング自体が透過)。 */
+@keyframes ringBurst {
+  0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0.0; }
+  10%  { opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(6.0); opacity: 0; }
+}
+.ring-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  border-radius: 9999px;
+  border: 4px solid rgba(252, 211, 77, 0.85);
+  box-shadow: 0 0 30px rgba(252, 211, 77, 0.6), inset 0 0 30px rgba(252, 211, 77, 0.4);
+  mix-blend-mode: screen;
+  animation: ringBurst 1.4s cubic-bezier(0.18, 0.85, 0.30, 1) forwards;
+}
+.ring-burst-1 { animation-delay: 0s; }
+.ring-burst-2 { animation-delay: 0.18s; border-color: rgba(255, 255, 255, 0.85); }
+.ring-burst-3 { animation-delay: 0.36s; border-color: rgba(252, 165, 100, 0.85); }
+
+/* 画面四辺だけが金色に光ってフェードアウトする。中央の文字は隠さない。 */
+@keyframes edgeFlash {
+  0%   { box-shadow: inset 0 0 0 0 rgba(252, 211, 77, 0); }
+  20%  { box-shadow: inset 0 0 80px 8px rgba(252, 211, 77, 0.9); }
+  100% { box-shadow: inset 0 0 120px 0 rgba(252, 211, 77, 0); }
+}
+.edge-flash {
+  animation: edgeFlash 1.4s ease-out forwards;
+  border-radius: inherit;
+}
+
+/* 結果セクション背後の回転する光線 (常時): 注目を集めつつ視認性は維持。 */
+@keyframes raySpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.result-rays {
+  background: conic-gradient(
+    from 0deg,
+    rgba(252, 211, 77, 0.18) 0deg,
+    transparent 25deg,
+    rgba(252, 211, 77, 0.18) 60deg,
+    transparent 85deg,
+    rgba(252, 211, 77, 0.18) 120deg,
+    transparent 145deg,
+    rgba(252, 211, 77, 0.18) 180deg,
+    transparent 205deg,
+    rgba(252, 211, 77, 0.18) 240deg,
+    transparent 265deg,
+    rgba(252, 211, 77, 0.18) 300deg,
+    transparent 325deg
+  );
+  filter: blur(8px);
+  animation: raySpin 14s linear infinite;
 }
 </style>
