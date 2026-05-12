@@ -64,6 +64,8 @@ const RankComparisonView = defineAsyncComponent(() => import('./views/RankCompar
 const ShareView = defineAsyncComponent(() => import('./views/ShareView.vue'));
 // ストラテジーカード: 大会主催者 + 当該管理者のみ到達可能な隠し機能 (Sidebar.vue 側で出し分け)。
 const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCardView.vue'));
+// 選曲発表 (SONG REVEAL): 大会主催 + 運営担当のみ到達可能。`/song-reveal` のスタンドアロン URL で OBS から読み込む。
+const SongRevealView = defineAsyncComponent(() => import('./views/SongRevealView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
@@ -117,6 +119,13 @@ const isResetPasswordPage = ref(window.location.pathname === '/reset-password');
  * 認証も不要 (大会本番中に OBS から繋ぐため)。
  */
 const isStrategyCardObsPage = ref(window.location.pathname === '/strategy-card');
+
+/**
+ * 現在 URL が `/song-reveal` かどうか。
+ * OBS ブラウザソース用のスタンドアロン URL。SongRevealView だけを単独描画する。
+ * 認証不要。OBS の Interact 機能で曲を選んでから REVEAL する想定。
+ */
+const isSongRevealPage = ref(window.location.pathname === '/song-reveal');
 
 const { hasUpdate } = useAppUpdate();
 /** Service Worker による新バージョン通知を受けた際の更新ボタン。単純にページ再読込を行う。 */
@@ -1332,6 +1341,8 @@ const handleUnifiedClose = async () => {
   <ResetPasswordView v-if="isResetPasswordPage" />
   <!-- OBS ブラウザソース用: ストラテジーカードだけを単独描画。サイドバー等は全部省略。 -->
   <StrategyCardView v-else-if="isStrategyCardObsPage" class="w-full min-h-screen" />
+  <!-- OBS ブラウザソース用: 選曲発表 (SONG REVEAL) も同様に単独描画。 -->
+  <SongRevealView v-else-if="isSongRevealPage" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
     <!-- ============================================================ -->
     <!-- エイプリルフール限定オーバーレイ（常時マウントだが中身は日付判定） -->

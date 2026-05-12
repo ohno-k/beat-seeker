@@ -288,6 +288,21 @@ const filteredNavItems = computed(() => {
                     </svg>
                     Strategy Card
                   </a>
+                  <!--
+                    選曲発表 (Song Reveal): 大会の選曲発表演出。`/song-reveal` のスタンドアロン URL に遷移。
+                    ID 18/19 のみに表示。
+                  -->
+                  <a
+                    v-if="(user?.id === 18 || user?.id === 19) && !viewingUserId"
+                    href="/song-reveal"
+                    @click="closeSidebar"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-cyan-600 dark:text-cyan-400 bg-gradient-to-r from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/20 rounded-xl hover:from-cyan-100 hover:to-sky-100 dark:hover:from-cyan-900/50 dark:hover:to-sky-900/40 transition-all border border-cyan-100 dark:border-cyan-800 relative overflow-hidden"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
+                    </svg>
+                    Song Reveal
+                  </a>
                   <button 
                     @click="handleAction('logout')"
                     class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
