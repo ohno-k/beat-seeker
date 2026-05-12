@@ -17,7 +17,7 @@
  * データソース: `frontend/src/data/strategy_card_songs.json`
  *   (プロジェクトルート直下の {genre}.txt を `scripts/build_strategy_cards.cjs` で変換)
  */
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted, nextTick } from 'vue';
 import strategySongs from '../data/strategy_card_songs.json';
 
 type Genre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
@@ -55,12 +55,20 @@ const selectedMatch = ref<MatchKind | null>(null);
 
 // 抽選状態
 const isSpinning = ref(false);
-const currentDisplay = ref<Song | null>(null);
 const resultSong = ref<Song | null>(null);
 const showResultFlash = ref(false);
 
+// スロットマシン風スクロール用の状態
+// 1行の高さ (px) — CSS の .row { height } と同期。
+const ROW_HEIGHT = 96;
+// ルーレットウィンドウに同時表示する行数。中央行が当選位置。
+const VISIBLE_ROWS = 3;
+// スクロールのストリップに並べる曲リスト。spin 開始時に毎回生成。
+const scrollItems = ref<Song[]>([]);
+// ストリップ要素 (CSS transform を JS から直接いじる)
+const stripEl = ref<HTMLElement | null>(null);
+
 // アニメーション制御用 timer ID
-let spinTimer: number | null = null;
 let stopTimer: number | null = null;
 
 /** 候補曲リスト (現在選択中のジャンル × 戦) */
@@ -86,15 +94,17 @@ const canSpin = computed(() => {
 });
 
 /**
- * 【関数の役割】 抽選を開始する。ルーレットを高速回転させ、徐々に減速して停止する。
+ * 【関数の役割】 抽選を開始する。スロットマシン風に曲名リストが上方向にスクロールし、
+ * 徐々に減速して中央の当選ラインに最終結果が止まる。
  *
  * フロー:
- *  1. 候補プールからランダム値を生成し、最終結果を先に決定 (見た目の遅さに関係なく結果は等確率)
- *  2. setInterval で表示曲を切り替え続ける
- *  3. 一定時間ごとに切替速度を遅くしていく (60ms → 110 → 180 → ...) → 物理ルーレット風の減速
- *  4. 最後に最終結果を確定表示し、結果フラッシュ演出を出す
+ *  1. 候補プールからランダムに最終曲を決定
+ *  2. ストリップに表示する行リストを生成 (ダミー多数 → 最終曲は固定位置)
+ *  3. CSS transition で `translateY` を 0 → 最終オフセットへアニメーション
+ *     - easing は cubic-bezier の easeOut で「最初速く・最後ゆっくり」のルーレット感
+ *  4. アニメーション終了時に結果フラッシュ + 結果セクション表示
  */
-const spin = () => {
+const spin = async () => {
   if (!canSpin.value) return;
   const pool = candidates.value;
   if (pool.length === 0) return;
@@ -103,69 +113,70 @@ const spin = () => {
   resultSong.value = null;
   showResultFlash.value = false;
 
-  const finalIndex = Math.floor(Math.random() * pool.length);
-  const finalSong = pool[finalIndex];
+  const finalSong = pool[Math.floor(Math.random() * pool.length)];
 
-  // 減速スケジュール: 各段階での切替間隔(ms) と それを維持する回数
-  const phases: { interval: number; ticks: number }[] = [
-    { interval: 50,  ticks: 25 },
-    { interval: 80,  ticks: 12 },
-    { interval: 130, ticks: 8 },
-    { interval: 200, ticks: 5 },
-    { interval: 320, ticks: 3 },
-    { interval: 500, ticks: 2 },
-  ];
-
-  let phaseIdx = 0;
-  let ticksInPhase = 0;
-  let lastShownIdx = -1;
-
-  const showRandom = () => {
+  // ストリップに並べる項目を組み立てる:
+  //  - ダミー: pool からランダムに選んだ曲を 40 行
+  //  - 当選行: ダミーの直後 (最後尾の1つ前)
+  //  - 末尾ダミー: 当選行のあとに 1 行 (overshoot 用ではなく見た目のバッファ)
+  // 直前数行に同じ曲が並ばないように軽く工夫する。
+  const TOTAL_DUMMY = 40;
+  const items: Song[] = [];
+  let lastIdx = -1;
+  for (let i = 0; i < TOTAL_DUMMY; i++) {
     let idx = Math.floor(Math.random() * pool.length);
-    // 同じ曲が連続しないように軽く除外
-    if (idx === lastShownIdx && pool.length > 1) {
-      idx = (idx + 1) % pool.length;
-    }
-    lastShownIdx = idx;
-    currentDisplay.value = pool[idx];
-  };
+    if (pool.length > 1 && idx === lastIdx) idx = (idx + 1) % pool.length;
+    lastIdx = idx;
+    items.push(pool[idx]);
+  }
+  const finalIndex = items.length;          // 当選行の位置
+  items.push(finalSong);
+  // 末尾バッファ (見えはしないが overflow に余裕を持たせる)
+  for (let i = 0; i < 1; i++) {
+    items.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+  scrollItems.value = items;
 
-  const scheduleNext = () => {
-    const phase = phases[phaseIdx];
-    spinTimer = window.setTimeout(() => {
-      showRandom();
-      ticksInPhase++;
-      if (ticksInPhase >= phase.ticks) {
-        phaseIdx++;
-        ticksInPhase = 0;
-      }
-      if (phaseIdx >= phases.length) {
-        // 最終演出: ゆっくり最後の一回を見せたあと結果に着地
-        stopTimer = window.setTimeout(() => {
-          currentDisplay.value = finalSong;
-          resultSong.value = finalSong;
-          isSpinning.value = false;
-          showResultFlash.value = true;
-          // フラッシュは少し経ったら静まる
-          window.setTimeout(() => { showResultFlash.value = false; }, 1500);
-        }, 600);
-        return;
-      }
-      scheduleNext();
-    }, phase.interval);
-  };
+  // DOM 反映を待ってから transform を打つ
+  await nextTick();
+  const strip = stripEl.value;
+  if (!strip) return;
 
-  showRandom();
-  scheduleNext();
+  // ストリップ位置をリセット (transition なしで瞬間移動)
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+  // 強制 reflow して上記が即時反映されるようにする
+  void strip.offsetHeight;
+
+  // 当選行をビューポート中央に止めるためのオフセット
+  // ビューポートは VISIBLE_ROWS 行ぶん高さ、中央行のインデックスは Math.floor(VISIBLE_ROWS/2)
+  const centerRowOffset = Math.floor(VISIBLE_ROWS / 2);
+  const targetTranslate = -(finalIndex - centerRowOffset) * ROW_HEIGHT;
+
+  // 抽選アニメーション本体 (4.8 秒で easeOut)
+  const DURATION_MS = 4800;
+  strip.style.transition = `transform ${DURATION_MS}ms cubic-bezier(0.16, 0.74, 0.22, 1)`;
+  strip.style.transform = `translateY(${targetTranslate}px)`;
+
+  // アニメーション終了後に結果確定
+  stopTimer = window.setTimeout(() => {
+    resultSong.value = finalSong;
+    isSpinning.value = false;
+    showResultFlash.value = true;
+    window.setTimeout(() => { showResultFlash.value = false; }, 1500);
+  }, DURATION_MS);
 };
 
 const reset = () => {
-  if (spinTimer !== null) { clearTimeout(spinTimer); spinTimer = null; }
   if (stopTimer !== null) { clearTimeout(stopTimer); stopTimer = null; }
   isSpinning.value = false;
-  currentDisplay.value = null;
   resultSong.value = null;
+  scrollItems.value = [];
   showResultFlash.value = false;
+  if (stripEl.value) {
+    stripEl.value.style.transition = 'none';
+    stripEl.value.style.transform = 'translateY(0)';
+  }
 };
 
 const selectGenre = (g: Genre) => {
@@ -175,20 +186,17 @@ const selectGenre = (g: Genre) => {
   if (g === 'INSANE' && selectedMatch.value && selectedMatch.value !== 'captain') {
     selectedMatch.value = null;
   }
-  resultSong.value = null;
-  currentDisplay.value = null;
+  reset();
 };
 
 const selectMatch = (m: MatchKind) => {
   if (isSpinning.value) return;
   if (matchDisabled(m)) return;
   selectedMatch.value = m;
-  resultSong.value = null;
-  currentDisplay.value = null;
+  reset();
 };
 
 onUnmounted(() => {
-  if (spinTimer !== null) clearTimeout(spinTimer);
   if (stopTimer !== null) clearTimeout(stopTimer);
 });
 
@@ -289,9 +297,9 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
         </div>
 
         <!-- ルーレット表示エリア -->
-        <div class="relative rounded-3xl bg-gradient-to-br from-slate-950 to-slate-900 border-2 border-white/10 p-8 sm:p-12 min-h-[260px] flex items-center justify-center overflow-hidden">
+        <div class="relative rounded-3xl bg-gradient-to-br from-slate-950 to-slate-900 border-2 border-white/10 overflow-hidden">
           <!-- 背景パルス -->
-          <div v-if="isSpinning" class="absolute inset-0 pointer-events-none">
+          <div v-if="isSpinning" class="absolute inset-0 pointer-events-none z-0">
             <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-fuchsia-500/20 to-amber-500/20 animate-pulse"></div>
           </div>
 
@@ -304,43 +312,71 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
           >
-            <div v-if="showResultFlash" class="absolute inset-0 bg-white pointer-events-none"></div>
+            <div v-if="showResultFlash" class="absolute inset-0 bg-white pointer-events-none z-30"></div>
           </Transition>
 
-          <!-- 表示中 / 結果 -->
-          <div v-if="currentDisplay" class="relative z-10 text-center w-full">
-            <!-- スピン中 -->
-            <div v-if="isSpinning" class="space-y-2">
-              <p class="text-xs font-mono text-cyan-300 tracking-[0.4em] animate-pulse">DRAWING...</p>
-              <p
-                :key="currentDisplay.id"
-                class="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-[0_0_15px_rgba(96,165,250,0.6)] song-flicker"
-              >
-                {{ currentDisplay.title }}
-              </p>
-              <p class="text-xs sm:text-sm font-mono text-slate-400">{{ currentDisplay.version }} / Lv{{ currentDisplay.level }} {{ currentDisplay.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}</p>
+          <!-- 結果確定セクション (抽選後) -->
+          <div v-if="resultSong && !isSpinning" class="relative z-10 p-8 sm:p-12 text-center result-pop space-y-3">
+            <p class="text-xs font-mono tracking-[0.4em] text-amber-300">DECIDED</p>
+            <div class="flex items-center justify-center gap-2 flex-wrap">
+              <span v-if="activeGenreMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeGenreMeta.gradient">{{ activeGenreMeta.label }}</span>
+              <span v-if="activeMatchMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeMatchMeta.gradient">{{ activeMatchMeta.label }}</span>
+              <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ resultSong.level }}</span>
+              <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase" :class="resultSong.diff === 'L' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'">
+                {{ resultSong.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
+              </span>
             </div>
-
-            <!-- 結果確定 -->
-            <div v-else-if="resultSong" class="result-pop space-y-3">
-              <p class="text-xs font-mono tracking-[0.4em]" :class="activeGenreMeta ? 'text-amber-300' : 'text-slate-300'">DECIDED</p>
-              <div class="flex items-center justify-center gap-2 flex-wrap">
-                <span v-if="activeGenreMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeGenreMeta.gradient">{{ activeGenreMeta.label }}</span>
-                <span v-if="activeMatchMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeMatchMeta.gradient">{{ activeMatchMeta.label }}</span>
-                <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ resultSong.level }}</span>
-                <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase" :class="resultSong.diff === 'L' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'">
-                  {{ resultSong.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
-                </span>
-              </div>
-              <p class="text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-white to-amber-200 drop-shadow-[0_0_30px_rgba(252,211,77,0.5)] result-title">
-                {{ resultSong.title }}
-              </p>
-              <p class="text-sm font-mono text-slate-300">{{ resultSong.version }}</p>
-            </div>
+            <p class="text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-white to-amber-200 drop-shadow-[0_0_30px_rgba(252,211,77,0.5)] result-title">
+              {{ resultSong.title }}
+            </p>
+            <p class="text-sm font-mono text-slate-300">{{ resultSong.version }}</p>
           </div>
 
-          <div v-else class="text-center text-slate-500 font-mono text-sm tracking-wider relative z-10">
-            <p>ジャンルと戦を選択してください</p>
+          <!-- ルーレット (スクロール) - スピン中は常時表示、停止後も結果が出るまでは見せる -->
+          <div
+            v-else
+            class="roulette-window relative z-10"
+            :style="{ height: `${ROW_HEIGHT * VISIBLE_ROWS}px` }"
+          >
+            <!-- 中央の当選ラインインジケータ -->
+            <div
+              class="absolute left-0 right-0 pointer-events-none z-20 border-y-2 border-amber-300 bg-amber-300/5"
+              :style="{ top: `${ROW_HEIGHT * Math.floor(VISIBLE_ROWS / 2)}px`, height: `${ROW_HEIGHT}px` }"
+            >
+              <!-- 左右の矢印マーカー -->
+              <div class="absolute left-2 top-1/2 -translate-y-1/2 text-amber-300 text-xl font-black drop-shadow-[0_0_8px_rgba(252,211,77,0.8)] animate-pulse">▶</div>
+              <div class="absolute right-2 top-1/2 -translate-y-1/2 text-amber-300 text-xl font-black drop-shadow-[0_0_8px_rgba(252,211,77,0.8)] animate-pulse">◀</div>
+            </div>
+
+            <!-- 上下のフェードマスク -->
+            <div class="absolute inset-x-0 top-0 z-20 pointer-events-none bg-gradient-to-b from-slate-950 to-transparent" :style="{ height: `${ROW_HEIGHT}px` }"></div>
+            <div class="absolute inset-x-0 bottom-0 z-20 pointer-events-none bg-gradient-to-t from-slate-950 to-transparent" :style="{ height: `${ROW_HEIGHT}px` }"></div>
+
+            <!-- スクロールするストリップ -->
+            <div ref="stripEl" class="strip will-change-transform">
+              <template v-if="scrollItems.length > 0">
+                <div
+                  v-for="(s, i) in scrollItems"
+                  :key="i"
+                  class="row flex flex-col items-center justify-center px-4"
+                  :style="{ height: `${ROW_HEIGHT}px` }"
+                >
+                  <p class="text-xl sm:text-2xl font-black tracking-tight text-white truncate max-w-full">{{ s.title }}</p>
+                  <p class="text-[10px] sm:text-xs font-mono text-slate-400 mt-1 truncate max-w-full">
+                    {{ s.version }} <span class="mx-1 text-slate-600">·</span> Lv{{ s.level }} <span class="mx-1 text-slate-600">·</span> {{ s.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
+                  </p>
+                </div>
+              </template>
+              <!-- アイドル時のプレースホルダ (中央行に1行ぶん) -->
+              <template v-else>
+                <div class="row" :style="{ height: `${ROW_HEIGHT}px` }"></div>
+                <div class="row flex items-center justify-center text-center text-slate-500 font-mono text-sm tracking-wider" :style="{ height: `${ROW_HEIGHT}px` }">
+                  <p v-if="!selectedGenre || !selectedMatch">ジャンルと戦を選択してください</p>
+                  <p v-else>抽選ボタンを押してください</p>
+                </div>
+                <div class="row" :style="{ height: `${ROW_HEIGHT}px` }"></div>
+              </template>
+            </div>
           </div>
         </div>
 
@@ -389,13 +425,21 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
   background-size: 40px 40px;
 }
 
-/* スピン中のタイトル文字をチカチカ */
-@keyframes songFlicker {
-  0%, 100% { opacity: 1; transform: translateY(0) scale(1); }
-  50% { opacity: 0.85; transform: translateY(-2px) scale(1.02); }
+/* ルーレット (スロットマシン) のスクロールストリップ。
+   transition は JS から動的に付け外しする (初回リセット時は無効、抽選開始時に有効化)。 */
+.strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(0);
 }
-.song-flicker {
-  animation: songFlicker 0.18s ease-in-out infinite;
+.row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 /* 結果確定時のポップ */
