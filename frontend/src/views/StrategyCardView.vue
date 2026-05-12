@@ -120,19 +120,80 @@ const canSpin = computed(() => {
 });
 
 /**
- * 【関数の役割】 抽選を開始する。スロットマシン風に曲名リストが上方向にスクロールし、
- * 多段階で減速、当選ライン手前で「止まりそう」な緊張感を見せたあと最終結果に止まる。
+ * 1 ステージぶんの transition 仕様 (張り替えのための情報)。
+ * target: そのステージで到達したい translateY (px)
+ */
+type SpinStage = { target: number; duration: number; easing: string };
+
+/**
+ * ランダムに選んだ「抽選パターン」に応じて減速プロファイル (段階配列) を組み立てる。
  *
- * 減速プロファイル (合計 約 8.0 秒):
- *  Stage 1 (~3.0s): 0 → 当選行 4 行手前。高速 → 中速。
- *  Stage 2 (~2.6s): 当選行 1 行手前まで。明らかに減速、ほぼ停止状態に見える。
- *  Stage 3 (~2.0s): 最後の 1 行を非常にゆっくり通過。緊張のクライマックス。
- *  これにより「直前で止まりそう」な演出 → わずかに進んで本命に着地、というスロット風の見せ場ができる。
+ * 大会で毎回同じ尺・同じ緩急で止まると相手に傾向を読まれてしまうため、
+ * 抽選ごとに以下から 1 つランダム選択し、さらに各段階の所要時間にも揺らぎを入れる。
+ *
+ *  - 'smooth' (素直)   : 単一の easeOut でそのまま着地。トリックなし。
+ *  - 'quick'  (短め)   : 2段階。当選行2行手前で少し減速し、サッと着地。短時間。
+ *  - 'tension'(緊張感) : 3段階。当選行 1 行手前でほぼ停止 → 這うように着地 (見せ場)。
+ *
+ * 同じ確率 (1/3) で選ぶことで、観客視点から「いつ止まりかけるか」が予測しにくくなる。
+ */
+const buildSpinStages = (finalIndex: number, offsetForRow: (rowIdx: number) => number): SpinStage[] => {
+  const r = Math.random();
+  const jitter = (base: number, range: number) => base + Math.floor(Math.random() * range);
+
+  if (r < 1 / 3) {
+    // smooth: 単発 easeOut で 4.5-5.3 秒
+    return [{
+      target: offsetForRow(finalIndex),
+      duration: jitter(4500, 800),
+      easing: 'cubic-bezier(0.12, 0.72, 0.20, 1)',
+    }];
+  }
+
+  if (r < 2 / 3) {
+    // quick: 2段階、合計 約 4.0-4.7 秒
+    return [
+      {
+        target: offsetForRow(finalIndex - 2),
+        duration: jitter(2400, 600),
+        easing: 'cubic-bezier(0.10, 0.65, 0.30, 1)',
+      },
+      {
+        target: offsetForRow(finalIndex),
+        duration: jitter(1500, 400),
+        easing: 'cubic-bezier(0.30, 0.50, 0.40, 1)',
+      },
+    ];
+  }
+
+  // tension: 3段階、合計 約 7.0-8.7 秒
+  return [
+    {
+      target: offsetForRow(finalIndex - 4),
+      duration: jitter(2800, 700),
+      easing: 'cubic-bezier(0.10, 0.70, 0.30, 1)',
+    },
+    {
+      target: offsetForRow(finalIndex - 1),
+      duration: jitter(2400, 600),
+      easing: 'cubic-bezier(0.15, 0.65, 0.45, 1)',
+    },
+    {
+      target: offsetForRow(finalIndex),
+      duration: jitter(1800, 500),
+      easing: 'cubic-bezier(0.55, 0.0, 0.45, 1)',
+    },
+  ];
+};
+
+/**
+ * 【関数の役割】 抽選を開始する。スロットマシン風に曲名リストが上方向にスクロールし、
+ * `buildSpinStages` が選んだランダムプロファイルに従って減速・着地する。
  *
  * フロー:
  *  1. 候補プールからランダムに最終曲を決定
  *  2. ダミー多数 + 当選曲 + 末尾バッファでストリップを生成
- *  3. transition と translateY を段階ごとに張り替える
+ *  3. ランダム選択された減速パターンに従い、transition と translateY を段階ごとに張り替える
  *  4. 全段階終了で結果フラッシュ + 結果セクション表示
  */
 const spin = async () => {
@@ -175,41 +236,30 @@ const spin = async () => {
   const centerRowOffset = Math.floor(VISIBLE_ROWS / 2);
   const offsetForRow = (rowIdx: number) => -(rowIdx - centerRowOffset) * ROW_HEIGHT;
 
-  // 段階目標。各段階の終点位置は「当選行から N 行手前」。
-  const stage1Target = offsetForRow(finalIndex - 4);
-  const stage2Target = offsetForRow(finalIndex - 1);
-  const stage3Target = offsetForRow(finalIndex);
+  // ランダム選択された段階リストを取得して順番に適用
+  const stages = buildSpinStages(finalIndex, offsetForRow);
 
-  // 段階ごとのアニメーション仕様
-  const STAGE1_MS = 3000;
-  const STAGE2_MS = 2600;
-  const STAGE3_MS = 2000;
-  const TOTAL_MS = STAGE1_MS + STAGE2_MS + STAGE3_MS;
+  let cumulative = 0;
+  stages.forEach((stage, i) => {
+    const applyStage = () => {
+      strip.style.transition = `transform ${stage.duration}ms ${stage.easing}`;
+      strip.style.transform = `translateY(${stage.target}px)`;
+    };
+    if (i === 0) {
+      applyStage();
+    } else {
+      stageTimers.push(window.setTimeout(applyStage, cumulative));
+    }
+    cumulative += stage.duration;
+  });
 
-  // Stage 1: 高速で当選行 4 行手前まで滑る (中速で着地)
-  strip.style.transition = `transform ${STAGE1_MS}ms cubic-bezier(0.10, 0.70, 0.30, 1)`;
-  strip.style.transform = `translateY(${stage1Target}px)`;
-
-  // Stage 2: 残り 3 行を 2.6 秒。明確に減速し「直前で止まりそう」に見せる
-  stageTimers.push(window.setTimeout(() => {
-    strip.style.transition = `transform ${STAGE2_MS}ms cubic-bezier(0.15, 0.65, 0.45, 1)`;
-    strip.style.transform = `translateY(${stage2Target}px)`;
-  }, STAGE1_MS));
-
-  // Stage 3: ラスト 1 行を 2.0 秒で這うように。ease-in-out で
-  //          「ほぼ静止 → ゆっくり加速 → ふわっと着地」の緊張クライマックス。
-  stageTimers.push(window.setTimeout(() => {
-    strip.style.transition = `transform ${STAGE3_MS}ms cubic-bezier(0.55, 0.0, 0.45, 1)`;
-    strip.style.transform = `translateY(${stage3Target}px)`;
-  }, STAGE1_MS + STAGE2_MS));
-
-  // 全体終了
+  // 全段階終了で結果確定
   stopTimer = window.setTimeout(() => {
     resultSong.value = finalSong;
     isSpinning.value = false;
     showResultFlash.value = true;
     window.setTimeout(() => { showResultFlash.value = false; }, 1500);
-  }, TOTAL_MS);
+  }, cumulative);
 };
 
 const reset = () => {
