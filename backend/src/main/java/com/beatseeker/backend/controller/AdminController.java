@@ -479,21 +479,32 @@ public class AdminController {
      * @return 更新件数を含むメッセージ
      */
     @PostMapping("/backfill-kenban-sara-pt")
-    public ResponseEntity<Map<String, Object>> backfillKenbanSaraPt(Authentication auth) {
+    public ResponseEntity<Map<String, Object>> backfillKenbanSaraPt(
+            Authentication auth,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") long from,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "50") int limit) {
         checkAdminAccess(auth);
+
         var songMaxScores = scoreRecalculationService.loadSongMaxScores();
         var informalRanks = scoreRecalculationService.loadInformalRanks();
         var scratchMap    = scoreRecalculationService.loadScratchMap();
 
-        List<User> users = userRepository.findAll();
+        // id 昇順で from より大きい id を limit 件取り出す。0 件取得 = 全件処理済み
+        List<User> users = userRepository.findAll().stream()
+            .filter(u -> u.getId() != null && u.getId() > from)
+            .sorted((a, b) -> Long.compare(a.getId(), b.getId()))
+            .limit(Math.max(1, limit))
+            .toList();
+
         int updatedLogs = 0;
         int updatedUsers = 0;
+        long lastUserId = from;
         for (User u : users) {
+            lastUserId = u.getId();
             var scores = scoreRepository.findByUserOrderByUploadedAtAsc(u);
             if (scores.isEmpty()) continue;
             double[] ks = scoreRecalculationService.calculateKenbanSaraPtFromActiveData(
                 scores, songMaxScores, informalRanks, scratchMap);
-            // 最新の履歴ログがあれば総合 pt を上書き
             var latestLog = scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(u);
             if (latestLog.isPresent()) {
                 var log = latestLog.get();
@@ -502,15 +513,22 @@ public class AdminController {
                 scoreHistoryLogRepository.save(log);
                 updatedLogs++;
             }
-            // users テーブルのキャッシュも同期
             u.setTotalKenbanPt(ks[0]);
             u.setTotalSaraPt(ks[1]);
             userRepository.save(u);
             updatedUsers++;
         }
-        return ResponseEntity.ok(Map.of(
-            "message", "KENBAN/SARA-PT バックフィル完了: users=" + updatedUsers + " 件, history_logs=" + updatedLogs + " 件"
-        ));
+
+        // limit に満たなければ「もう次は無い」とみなす
+        boolean hasMore = users.size() >= limit && users.size() > 0;
+
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("processed",   users.size());
+        body.put("updatedUsers", updatedUsers);
+        body.put("updatedLogs",  updatedLogs);
+        body.put("lastUserId",   lastUserId);
+        body.put("hasMore",      hasMore);
+        return ResponseEntity.ok(body);
     }
 
     /**

@@ -43,7 +43,7 @@
                 class="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/50 dark:hover:bg-orange-800/80 dark:text-orange-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
               >
                 <svg v-if="isBackfillingKenbanSara" class="animate-spin -ml-1 mr-1 h-4 w-4 text-orange-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                {{ isBackfillingKenbanSara ? 'バックフィル中...' : 'KENBAN/SARA-PT 計算' }}
+                {{ isBackfillingKenbanSara ? `バックフィル中... (${backfillProcessed})` : 'KENBAN/SARA-PT 計算' }}
               </button>
               <div class="admin-tooltip">全ユーザーの KENBAN-PT / SARA-PT を再計算して users と score_history_logs に保存します。1 度実行すれば以降のアップロードで自動更新されます</div>
             </div>
@@ -248,37 +248,59 @@ const handleRecalculateAll = async () => {
 
 /** KENBAN/SARA-PT バックフィル実行中フラグ。 */
 const isBackfillingKenbanSara = ref(false);
+/** バックフィル進捗の人数表示用（処理済みユーザー数）。 */
+const backfillProcessed = ref(0);
 
 /**
- * 【関数の役割】 全ユーザーの KENBAN-PT / SARA-PT を一括再計算し、users と score_history_logs に保存する。
+ * 【関数の役割】 全ユーザーの KENBAN-PT / SARA-PT を **バッチ分割で順番に**再計算する。
  *
- * バックエンドは {@code POST /api/admin/backfill-kenban-sara-pt} で 1 リクエスト内で全件処理する同期エンドポイント。
- * 数十秒〜数分かかる想定。
+ * バックエンドは {@code POST /api/admin/backfill-kenban-sara-pt?from=<id>&limit=<n>} を取り、
+ * 1 リクエストごとに limit 件のユーザーだけを処理して {@code lastUserId} と {@code hasMore} を返す。
+ * hasMore が false になるまでループする。Render の HTTP タイムアウトを避けるための分割実行。
  */
 const handleBackfillKenbanSara = async () => {
-  if (!confirm('全ユーザーの KENBAN-PT / SARA-PT を再計算しますか？ 数十秒〜数分かかります。')) return;
+  if (!confirm('全ユーザーの KENBAN-PT / SARA-PT を再計算しますか？ ' +
+               '50 件ずつバッチで処理します（数分かかります、ボタン下のカウンタで進捗確認）')) return;
 
   isBackfillingKenbanSara.value = true;
+  backfillProcessed.value = 0;
   recalculateError.value = '';
   recalculateSuccess.value = '';
 
+  const { authHeaders } = useAuth();
+  const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+
+  let from = 0;
+  let totalUpdatedUsers = 0;
+  let totalUpdatedLogs = 0;
+  let batchIdx = 0;
   try {
-    const { authHeaders } = useAuth();
-    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
-
-    const res = await fetch(`${API_BASE}/api/admin/backfill-kenban-sara-pt`, {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`API error ${res.status}: ${body || '(empty body)'}`);
+    while (true) {
+      batchIdx++;
+      const url = `${API_BASE}/api/admin/backfill-kenban-sara-pt?from=${from}&limit=50`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`バッチ ${batchIdx} (from=${from}) で API error ${res.status}: ${body || '(empty body)'}`);
+      }
+      const data = await res.json();
+      backfillProcessed.value += (data.processed ?? 0);
+      totalUpdatedUsers     += (data.updatedUsers ?? 0);
+      totalUpdatedLogs      += (data.updatedLogs ?? 0);
+      // 進捗を画面に反映するためメッセージも更新
+      recalculateSuccess.value = `バックフィル進行中... 処理済み ${backfillProcessed.value} ユーザー (バッチ ${batchIdx})`;
+      if (!data.hasMore) break;
+      from = data.lastUserId;
+      // 安全装置: 無限ループ防止
+      if (batchIdx > 1000) throw new Error('バッチ数が想定上限 1000 を超えました（ループ防止のため中断）');
     }
-    const data = await res.json();
-    recalculateSuccess.value = data.message || 'KENBAN/SARA-PT のバックフィルが完了しました。';
+    recalculateSuccess.value = `KENBAN/SARA-PT バックフィル完了: users=${totalUpdatedUsers} 件, history_logs=${totalUpdatedLogs} 件`;
   } catch (e: any) {
-    recalculateError.value = 'KENBAN/SARA-PT バックフィルに失敗しました: ' + e.message;
+    recalculateError.value = 'KENBAN/SARA-PT バックフィルに失敗しました: ' + e.message
+                          + ` (途中まで ${backfillProcessed.value} ユーザー処理済み、from=${from} から再開してください)`;
   } finally {
     isBackfillingKenbanSara.value = false;
   }
