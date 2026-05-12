@@ -8,9 +8,11 @@
  *
  * 利用フロー:
  *  1. アクティブ側を Left / Right で切り替えながらそれぞれ検索 → 選曲
- *  2. 両方セットしたら REVEAL ボタンで演出開始 (左側がアニメ)
+ *  2. 両方セットしたら REVEAL ボタンで演出フェーズへ遷移
+ *     (この時点では両側ともまだ表示されず、待機状態のまま)
  *  3. 演出中は **画面のどこでもクリック** すると次の 1 曲ぶんのアニメが進む:
- *     - 左公開済み + クリック → 右公開
+ *     - 待機中 + クリック → 左公開 (1 曲目)
+ *     - 左公開済み + クリック → 右公開 (2 曲目)
  *     - 両方公開済み + クリック → 何もしない (誤爆防止)
  *  4. OBS は「左半分のみ」「右半分のみ」をそれぞれクロップして 2 つのソースにできる
  *
@@ -101,15 +103,21 @@ const triggerSide = (side: 'left' | 'right') => {
 };
 
 /**
- * REVEAL ボタン / Space キー共通のハンドラ。
- * step 0 → 左側演出開始 → step 1
- * step 1 → 右側演出開始 → step 2
- * step 2 → ループ的に Reset (選択画面に戻る)
+ * REVEAL ボタン (SELECT → REVEAL 遷移) と、REVEAL 中のクリック進行の両方を担う。
+ *
+ *  - SELECT 中: 演出フェーズへ遷移するだけ。両側とも待機状態 (step 0)。
+ *  - REVEAL 中 step 0 → 左公開 (step 1)
+ *  - REVEAL 中 step 1 → 右公開 (step 2)
+ *  - REVEAL 中 step 2 → 何もしない (誤爆防止)。Reset は専用ボタン。
  */
 const onReveal = () => {
   if (phase.value === 'select') {
     if (!selectedLeft.value || !selectedRight.value) return;
     phase.value = 'reveal';
+    revealStep.value = 0; // 両側とも待機。次のクリックで左が動き出す。
+    return;
+  }
+  if (revealStep.value === 0) {
     revealStep.value = 1;
     triggerSide('left');
     return;
@@ -119,7 +127,6 @@ const onReveal = () => {
     triggerSide('right');
     return;
   }
-  // 2 回目以降の Space は何もしない (誤爆防止)。Reset は専用ボタン側で。
 };
 
 const reset = () => {
@@ -419,7 +426,8 @@ const toggleFullscreen = async () => {
       <!-- フッター: 進行ガイド + Reset (画面中央下、OBS の左右クロップに被らない極小領域) -->
       <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3">
         <div class="px-4 py-2 rounded-full bg-slate-900/80 border border-white/10 text-[10px] font-mono tracking-widest text-slate-300 backdrop-blur">
-          <span v-if="revealStep === 1">CLICK → RIGHT</span>
+          <span v-if="revealStep === 0">CLICK → LEFT</span>
+          <span v-else-if="revealStep === 1">CLICK → RIGHT</span>
           <span v-else-if="revealStep === 2">REVEAL COMPLETE</span>
         </div>
         <button
