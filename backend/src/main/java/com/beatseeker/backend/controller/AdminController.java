@@ -462,6 +462,58 @@ public class AdminController {
     }
 
     /**
+     * 【メソッドの役割】 全ユーザーの KENBAN-PT / SARA-PT を現在のスコアから一括計算し、
+     * users と各ユーザーの最新 ScoreHistoryLog の総合 pt カラムにバックフィルする。
+     *
+     * 暫定オンザフライ計算からの本実装移行（カラム追加直後の初回データ投入）用。
+     * 2 回目以降は通常の {@link ScoreRecalculationService#recalculateAllUsersAsync} で
+     * 自動的に値が更新されるため、本エンドポイントは原則 1 回だけ叩けばよい。
+     *
+     * 処理の流れ:
+     *  1. songMaxScores / informalRanks / scratchMap を 1 度だけロード
+     *  2. 全ユーザーのスコアを引いて KENBAN/SARA-PT を計算
+     *  3. ユーザーの最新 ScoreHistoryLog があれば、その総合 pt 列を更新
+     *  4. users テーブルのキャッシュ列も同期
+     *
+     * @param auth 認証情報（管理者限定）
+     * @return 更新件数を含むメッセージ
+     */
+    @PostMapping("/backfill-kenban-sara-pt")
+    public ResponseEntity<Map<String, Object>> backfillKenbanSaraPt(Authentication auth) {
+        checkAdminAccess(auth);
+        var songMaxScores = scoreRecalculationService.loadSongMaxScores();
+        var informalRanks = scoreRecalculationService.loadInformalRanks();
+        var scratchMap    = scoreRecalculationService.loadScratchMap();
+
+        List<User> users = userRepository.findAll();
+        int updatedLogs = 0;
+        int updatedUsers = 0;
+        for (User u : users) {
+            var scores = scoreRepository.findByUserOrderByUploadedAtAsc(u);
+            if (scores.isEmpty()) continue;
+            double[] ks = scoreRecalculationService.calculateKenbanSaraPtFromActiveData(
+                scores, songMaxScores, informalRanks, scratchMap);
+            // 最新の履歴ログがあれば総合 pt を上書き
+            var latestLog = scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(u);
+            if (latestLog.isPresent()) {
+                var log = latestLog.get();
+                log.setTotalKenbanPt(ks[0]);
+                log.setTotalSaraPt(ks[1]);
+                scoreHistoryLogRepository.save(log);
+                updatedLogs++;
+            }
+            // users テーブルのキャッシュも同期
+            u.setTotalKenbanPt(ks[0]);
+            u.setTotalSaraPt(ks[1]);
+            userRepository.save(u);
+            updatedUsers++;
+        }
+        return ResponseEntity.ok(Map.of(
+            "message", "KENBAN/SARA-PT バックフィル完了: users=" + updatedUsers + " 件, history_logs=" + updatedLogs + " 件"
+        ));
+    }
+
+    /**
      * 【メソッドの役割】 全ユーザーの Web Push 購読情報を一括で null クリアする。
      *
      * VAPID 鍵の再発行等、購読情報を強制的に捨てたい運用時に使う緊急ボタン。

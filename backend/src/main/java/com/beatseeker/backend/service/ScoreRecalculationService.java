@@ -6,6 +6,7 @@ import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.repository.ChartTendencyProfileRepository;
 import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
@@ -62,11 +63,21 @@ public class ScoreRecalculationService {
     private final ObjectMapper objectMapper;
     /** BEAT-PT / RATE-PT 単曲計算の共通ユーティリティ */
     private final BeatPtCalculator beatPtCalculator;
+    /** 譜面傾向プロファイル（KENBAN/SARA-PT 算出に必要な皿率を取得） */
+    private final ChartTendencyProfileRepository chartTendencyProfileRepository;
+
+    // ── KENBAN/SARA-TIER 算出定数（フロントの beatTier.ts と同期） ──────────────
+    /** 皿率の按分しきい値 (%)。この値以上は完全に皿曲扱い。 */
+    private static final double SCRATCH_FULL_THRESHOLD_PCT = 30.0;
+    /** KENBAN-PT の BEAT 同等スケール補正倍率。 */
+    private static final double KENBAN_PT_MULTIPLIER = 1.125;
+    /** SARA-PT の BEAT 同等スケール補正倍率。 */
+    private static final double SARA_PT_MULTIPLIER = 1.5;
 
     /**
      * 【コンストラクタ】 Spring が Repository 群と {@link ObjectMapper} を注入する。
      */
-    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, DifficultyRankRepository difficultyRankRepository, ObjectMapper objectMapper, BeatPtCalculator beatPtCalculator) {
+    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, DifficultyRankRepository difficultyRankRepository, ObjectMapper objectMapper, BeatPtCalculator beatPtCalculator, ChartTendencyProfileRepository chartTendencyProfileRepository) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -74,6 +85,7 @@ public class ScoreRecalculationService {
         this.difficultyRankRepository = difficultyRankRepository;
         this.objectMapper = objectMapper;
         this.beatPtCalculator = beatPtCalculator;
+        this.chartTendencyProfileRepository = chartTendencyProfileRepository;
     }
 
     /**
@@ -92,6 +104,125 @@ public class ScoreRecalculationService {
      * @param scores 対象スコア一覧
      * @return 0.1 桁まで丸めた BEAT-PT 合計値
      */
+    /**
+     * 【メソッドの役割】 active 曲定義から `(title_difficultyCode) → maxScore (= notes*2)` の Map を構築する。
+     * 各種計算で繰り返し利用するため public で公開している（外部から再利用可）。
+     */
+    public Map<String, Integer> loadSongMaxScores() {
+        Map<String, Integer> songMaxScores = new HashMap<>();
+        for (SongDefinition s : songDefinitionRepository.findByRevision("active")) {
+            if (s.getNotes() != null && s.getNotes() > 0) {
+                songMaxScores.put(s.getTitle() + "_" + s.getDifficulty(), s.getNotes() * 2);
+            }
+        }
+        return songMaxScores;
+    }
+
+    /**
+     * 【メソッドの役割】 active 難易度表から `(title_diffName) → 非公式ランク文字列` の Map を構築する。
+     * "[L]" サフィックスは LEGGENDARIA として展開する。
+     */
+    public Map<String, String> loadInformalRanks() {
+        Map<String, String> informalRanks = new HashMap<>();
+        for (DifficultyRank rank : difficultyRankRepository.findByRevisionOrderBySortOrderAsc("active")) {
+            String rankText = rank.getRankValue();
+            for (DifficultyRankSong song : rank.getSongs()) {
+                String songTitle = song.getSongTitle() == null ? "" : song.getSongTitle().trim();
+                if (songTitle.isEmpty()) continue;
+                if (songTitle.endsWith("[L]")) {
+                    informalRanks.put(songTitle.substring(0, songTitle.length() - 3).trim() + "_LEGGENDARIA", rankText);
+                } else {
+                    informalRanks.put(songTitle + "_ANOTHER", rankText);
+                }
+            }
+        }
+        return informalRanks;
+    }
+
+    /**
+     * 【メソッドの役割】 chart_tendency_profiles から `(title_diffName) → 皿率(%)` の Map を構築する。
+     *
+     * KENBAN/SARA-PT 算出に必要な皿率マスタを一括読み込みする。`difficulty='4'`→ANOTHER、`difficulty='10'`→LEGGENDARIA。
+     *
+     * @return 皿率 Map（`scratchPct IS NOT NULL` のレコードのみ含む）
+     */
+    public Map<String, Double> loadScratchMap() {
+        Map<String, Double> map = new HashMap<>();
+        for (Object[] row : chartTendencyProfileRepository.findScratchSummaryForAnotherLegg()) {
+            String title = (String) row[0];
+            String diff = (String) row[1];
+            String diffName = "4".equals(diff) ? "ANOTHER" : "10".equals(diff) ? "LEGGENDARIA" : null;
+            if (diffName == null) continue;
+            map.put(title + "_" + diffName, ((Number) row[2]).doubleValue());
+        }
+        return map;
+    }
+
+    /** KENBAN-TIER 側の重み: scratchPct が低いほど高い (0〜1)。null は 0。 */
+    private static double kenbanWeight(Double scratchPct) {
+        if (scratchPct == null) return 0.0;
+        double w = 1.0 - scratchPct / SCRATCH_FULL_THRESHOLD_PCT;
+        return Math.max(0.0, Math.min(1.0, w));
+    }
+
+    /** SARA-TIER 側の重み: scratchPct が高いほど高い (0〜1)。null は 0。 */
+    private static double saraWeight(Double scratchPct) {
+        if (scratchPct == null) return 0.0;
+        double w = scratchPct / SCRATCH_FULL_THRESHOLD_PCT;
+        return Math.max(0.0, Math.min(1.0, w));
+    }
+
+    /**
+     * 【メソッドの役割】 BEAT-PT 計算と同じスコア集合から KENBAN-PT / SARA-PT を一括算出する。
+     *
+     * 計算ロジック:
+     *  - 各 ANOTHER/LEGGENDARIA 譜面の BP に kenbanWeight / saraWeight を掛けた値を「貢献 pt」とする
+     *  - 各 side ごとに独立に降順ソート → 上位 100 譜面の合計
+     *  - 補正倍率 (KENBAN: ×1.125, SARA: ×1.5) を掛けて BEAT 同等スケールに揃え
+     *  - 0.1 桁で丸める
+     *
+     * @param scores         対象ユーザーの全スコア（事前ロード済み）
+     * @param songMaxScores  title_difficultyCode → maxScore(=notes*2)
+     * @param informalRanks  title_diffName → 非公式ランク文字列
+     * @param scratchMap     title_diffName → 皿率(%) （{@link #loadScratchMap()} の戻り値）
+     * @return `[KENBAN-PT, SARA-PT]` の 2 要素配列
+     */
+    public double[] calculateKenbanSaraPtFromActiveData(List<Score> scores, Map<String, Integer> songMaxScores,
+                                                       Map<String, String> informalRanks, Map<String, Double> scratchMap) {
+        List<Double> kenContribs = new ArrayList<>();
+        List<Double> sarContribs = new ArrayList<>();
+        for (Score score : scores) {
+            if ("---".equals(score.getClearType()) || "NO PLAY".equals(score.getClearType())) continue;
+            String diffName = normalizeDiffName(score.getDifficultyName());
+            // KENBAN/SARA は ANOTHER/LEGGENDARIA のみ対象
+            if (!"ANOTHER".equals(diffName) && !"LEGGENDARIA".equals(diffName)) continue;
+            String code = getDifficultyCode(diffName);
+            if (code == null) continue;
+            Integer maxScore = songMaxScores.get(score.getTitle() + "_" + code);
+            if (maxScore == null || maxScore == 0) continue;
+            double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
+            String informalRankString = informalRanks.get(score.getTitle() + "_" + diffName);
+            double bp = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
+            if (bp <= 0) continue;
+            Double scratchPct = scratchMap.get(score.getTitle() + "_" + diffName);
+            double kw = kenbanWeight(scratchPct);
+            double sw = saraWeight(scratchPct);
+            double kc = bp * kw;
+            double sc = bp * sw;
+            if (kc > 0) kenContribs.add(kc);
+            if (sc > 0) sarContribs.add(sc);
+        }
+        kenContribs.sort(Collections.reverseOrder());
+        sarContribs.sort(Collections.reverseOrder());
+        double kenSum = 0;
+        for (int i = 0; i < Math.min(100, kenContribs.size()); i++) kenSum += kenContribs.get(i);
+        double sarSum = 0;
+        for (int i = 0; i < Math.min(100, sarContribs.size()); i++) sarSum += sarContribs.get(i);
+        double kenbanPt = Math.round(kenSum * KENBAN_PT_MULTIPLIER * 10.0) / 10.0;
+        double saraPt   = Math.round(sarSum * SARA_PT_MULTIPLIER   * 10.0) / 10.0;
+        return new double[]{kenbanPt, saraPt};
+    }
+
     public double calculateBeatPtFromActiveData(List<Score> scores) {
         List<SongDefinition> activeSongs = songDefinitionRepository.findByRevision("active");
         Map<String, Integer> songMaxScores = new HashMap<>();
@@ -245,11 +376,14 @@ public class ScoreRecalculationService {
             }
         }
 
+        // 手順3 (前段): 皿率マスタを 1 度だけロード（KENBAN/SARA-PT 算出用）
+        Map<String, Double> scratchMap = loadScratchMap();
+
         // 手順3: 全ユーザーを走査して、各々を独立トランザクションで再計算
         List<User> users = userRepository.findAll();
         for (User user : users) {
             try {
-                processUserRecalculation(user, songMaxScores, informalRanks);
+                processUserRecalculation(user, songMaxScores, informalRanks, scratchMap);
             } catch (Exception e) {
                 System.err.println("Failed to recalculate user " + user.getId() + ": " + e.getMessage());
             }
@@ -299,15 +433,16 @@ public class ScoreRecalculationService {
         // 手順3: スコア 0 件ならスキップ（履歴ログを作っても意味がない）。
         if (scoreRepository.findByUserOrderByUploadedAtAsc(user).isEmpty()) return false;
 
-        // 手順4: 既存の per-user 再計算ロジックに委譲。これが新規 ScoreHistoryLog を 1 件追加する。
-        processUserRecalculation(user, songMaxScores, informalRanks);
+        // 手順4: 皿率マスタもロードし、既存の per-user 再計算ロジックに委譲。これが新規 ScoreHistoryLog を 1 件追加する。
+        Map<String, Double> scratchMap = loadScratchMap();
+        processUserRecalculation(user, songMaxScores, informalRanks, scratchMap);
 
-        // 手順5: users.total_beat_pt キャッシュも追従させる（ランキング集計の高速化用）。
+        // 手順5: users.total_beat_pt / total_kenban_pt / total_sara_pt キャッシュを追従させる（ランキング集計の高速化用）。
         scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(user).ifPresent(log -> {
-            if (log.getTotalBeatPt() != null) {
-                user.setTotalBeatPt(log.getTotalBeatPt());
-                userRepository.save(user);
-            }
+            if (log.getTotalBeatPt()   != null) user.setTotalBeatPt(log.getTotalBeatPt());
+            if (log.getTotalKenbanPt() != null) user.setTotalKenbanPt(log.getTotalKenbanPt());
+            if (log.getTotalSaraPt()   != null) user.setTotalSaraPt(log.getTotalSaraPt());
+            userRepository.save(user);
         });
         return true;
     }
@@ -327,9 +462,10 @@ public class ScoreRecalculationService {
      * @param user          対象ユーザー
      * @param songMaxScores title_code → maxScore マップ
      * @param informalRanks title_diffName → rankValue マップ
+     * @param scratchMap    title_diffName → 皿率(%) （KENBAN/SARA-PT 算出用）
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void processUserRecalculation(User user, Map<String, Integer> songMaxScores, Map<String, String> informalRanks) {
+    public void processUserRecalculation(User user, Map<String, Integer> songMaxScores, Map<String, String> informalRanks, Map<String, Double> scratchMap) {
         List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         if (scores.isEmpty()) return;
 
@@ -420,7 +556,17 @@ public class ScoreRecalculationService {
         newLog.setTotalPrecisionPt(0.0);
         newLog.setTotalRatePt(finalRatePt);
 
+        // KENBAN-PT / SARA-PT を派生計算（同じスコア集合から皿率重み付きで集計）
+        double[] kenbanSara = calculateKenbanSaraPtFromActiveData(scores, songMaxScores, informalRanks, scratchMap);
+        newLog.setTotalKenbanPt(kenbanSara[0]);
+        newLog.setTotalSaraPt(kenbanSara[1]);
+
         scoreHistoryLogRepository.save(newLog);
+
+        // users テーブルのキャッシュも同期更新（ランキング クエリの高速化用）
+        user.setTotalKenbanPt(kenbanSara[0]);
+        user.setTotalSaraPt(kenbanSara[1]);
+        userRepository.save(user);
     }
 
     /**

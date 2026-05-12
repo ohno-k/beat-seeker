@@ -291,6 +291,22 @@ public class ScoreController {
         }
         log.setTotalRatePt(totalRatePt);
 
+        // KENBAN-PT / SARA-PT もバックエンドで一括算出してログに保存（フロントは送ってこない）。
+        try {
+            var songMaxScores = scoreRecalculationService.loadSongMaxScores();
+            var informalRanks = scoreRecalculationService.loadInformalRanks();
+            var scratchMap    = scoreRecalculationService.loadScratchMap();
+            double[] kenbanSara = scoreRecalculationService.calculateKenbanSaraPtFromActiveData(
+                allScores, songMaxScores, informalRanks, scratchMap);
+            log.setTotalKenbanPt(kenbanSara[0]);
+            log.setTotalSaraPt(kenbanSara[1]);
+            user.setTotalKenbanPt(kenbanSara[0]);
+            user.setTotalSaraPt(kenbanSara[1]);
+        } catch (Exception e) {
+            // 失敗してもメイン保存処理は続行（KENBAN/SARA は事後再計算で救済可能）。
+            System.err.println("Failed to compute KENBAN/SARA-PT in saveHistoryLog: " + e.getMessage());
+        }
+
         // 手順3: スコア全件を 1 周して totalScore と各クリア種別・DJ ランクのカウントを集計する。
         long totalScore = 0;
         int fcCount = 0;

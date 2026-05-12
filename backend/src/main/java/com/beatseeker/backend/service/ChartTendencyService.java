@@ -202,32 +202,10 @@ public class ChartTendencyService {
     private final DifficultyRankRepository difficultyRankRepo;
     /** Jackson JSON マッパー（JSON フィールドの読み書き） */
     private final ObjectMapper objectMapper;
-    /** BEAT-PT 計算ロジック（KENBAN/SARA ランキング算出に再利用） */
-    private final BeatPtCalculator beatPtCalculator;
 
     /** バルク INSERT 中に EntityManager#clear を呼ぶために保持 */
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
-
-    // ── KENBAN/SARA-TIER ランキング用の定数（フロントの beatTier.ts と同期） ──
-
-    /** KENBAN/SARA-TIER の按分しきい値 (%)。皿率がこの値以上で完全に皿曲扱い。 */
-    private static final double SCRATCH_FULL_THRESHOLD_PCT = 30.0;
-    /** KENBAN-PT の BEAT 同等スケール補正倍率。 */
-    private static final double KENBAN_PT_MULTIPLIER = 1.125;
-    /** SARA-PT の BEAT 同等スケール補正倍率。 */
-    private static final double SARA_PT_MULTIPLIER = 1.5;
-    /** 上位 N 譜面で合計を打ち切るカットオフ（BEAT-TIER と同じ）。 */
-    private static final int TOP_CHART_LIMIT = 100;
-    /** ランキングキャッシュ TTL（5 分）。 */
-    private static final long RANKING_CACHE_TTL_MS = 5L * 60L * 1000L;
-
-    /** 計算済みランキングのキャッシュ。"kenban" / "sara" をキーにそれぞれ降順リストを保持。 */
-    private volatile Map<String, List<Map<String, Object>>> cachedRankings;
-    /** キャッシュ有効期限（System.currentTimeMillis）。 */
-    private volatile long rankingCacheExpiry = 0L;
-    /** 計算が二重実行されないようにする排他ロック。 */
-    private final Object rankingComputeLock = new Object();
 
     /**
      * 【コンストラクタ】 Spring が各 Repository と ObjectMapper を注入する。
@@ -236,14 +214,12 @@ public class ChartTendencyService {
                                 ScoreRepository scoreRepo,
                                 SongDefinitionRepository songDefRepo,
                                 DifficultyRankRepository difficultyRankRepo,
-                                ObjectMapper objectMapper,
-                                BeatPtCalculator beatPtCalculator) {
+                                ObjectMapper objectMapper) {
         this.profileRepo = profileRepo;
         this.scoreRepo = scoreRepo;
         this.songDefRepo = songDefRepo;
         this.difficultyRankRepo = difficultyRankRepo;
         this.objectMapper = objectMapper;
-        this.beatPtCalculator = beatPtCalculator;
     }
 
     // ── インポート ──────────────────────────────────────────────
@@ -504,225 +480,6 @@ public class ChartTendencyService {
                     return m;
                 })
                 .toList();
-    }
-
-    // ── KENBAN-TIER / SARA-TIER ランキング（暫定オンザフライ実装） ─────────────────────
-
-    /**
-     * 【メソッドの役割】 KENBAN-TIER ランキング（pt 降順）を返す。
-     *
-     * 内部でキャッシュを参照し、必要なら全ユーザー一括計算を実行する。本格的な production 移行時には
-     * users テーブルの `total_kenban_pt` カラム等で事前計算する想定だが、現状は暫定実装としてオンザフライで返す。
-     *
-     * @return 各要素 `{userId, displayName, iidxId, privacyLevel, totalKenbanPt, isSupporter}` のリスト
-     */
-    public List<Map<String, Object>> getKenbanRanking() {
-        ensureRankingCache();
-        return cachedRankings.get("kenban");
-    }
-
-    /**
-     * 【メソッドの役割】 SARA-TIER ランキング（pt 降順）を返す。
-     * {@link #getKenbanRanking()} と同じデータソース・タイミングで計算される。
-     *
-     * @return 各要素 `{userId, displayName, iidxId, privacyLevel, totalSaraPt, isSupporter}` のリスト
-     */
-    public List<Map<String, Object>> getSaraRanking() {
-        ensureRankingCache();
-        return cachedRankings.get("sara");
-    }
-
-    /**
-     * 【メソッドの役割】 キャッシュ TTL が切れていれば KENBAN/SARA 両方のランキングを一括再計算する。
-     *
-     * 並行リクエストが同時に到達してもダブル計算しないよう排他ロックで保護する。
-     */
-    private void ensureRankingCache() {
-        if (cachedRankings != null && System.currentTimeMillis() < rankingCacheExpiry) return;
-        synchronized (rankingComputeLock) {
-            if (cachedRankings != null && System.currentTimeMillis() < rankingCacheExpiry) return;
-            cachedRankings = computeKenbanSaraRankings();
-            rankingCacheExpiry = System.currentTimeMillis() + RANKING_CACHE_TTL_MS;
-        }
-    }
-
-    /**
-     * 【メソッドの役割】 全ユーザーの ANOTHER/LEGGENDARIA スコアから KENBAN/SARA-TIER pt を一括計算する。
-     *
-     * 処理の流れ:
-     *  - 手順1: active 曲定義・難易度表・皿率プロファイルを読み込み、参照用 Map を構築
-     *  - 手順2: 全ユーザー × A/L スコアを 1 度に取得し、user_id でグルーピング
-     *  - 手順3: ユーザーごとに各譜面の BP を {@link BeatPtCalculator} で算出し、
-     *           独立に kenban / sara 側 top-100 contribution を合計
-     *  - 手順4: 補正倍率を掛けて totals を出し、それぞれ降順で並べたランキングを返す
-     *
-     * @return `kenban` / `sara` をキーとし、各ランキング配列を値に持つ Map
-     */
-    private Map<String, List<Map<String, Object>>> computeKenbanSaraRankings() {
-        // 手順1: マスタ系の参照 Map を構築
-        Map<String, Integer> songMaxScores = new HashMap<>();
-        for (SongDefinition s : songDefRepo.findByRevision("active")) {
-            if (s.getNotes() != null && s.getNotes() > 0) {
-                songMaxScores.put(s.getTitle() + "_" + s.getDifficulty(), s.getNotes() * 2);
-            }
-        }
-        Map<String, String> informalRanks = new HashMap<>();
-        for (DifficultyRank rank : difficultyRankRepo.findByRevisionOrderBySortOrderAsc("active")) {
-            String rankText = rank.getRankValue();
-            for (DifficultyRankSong song : rank.getSongs()) {
-                String songTitle = song.getSongTitle() == null ? "" : song.getSongTitle().trim();
-                if (songTitle.isEmpty()) continue;
-                if (songTitle.endsWith("[L]")) {
-                    informalRanks.put(songTitle.substring(0, songTitle.length() - 3).trim() + "_LEGGENDARIA", rankText);
-                } else {
-                    informalRanks.put(songTitle + "_ANOTHER", rankText);
-                }
-            }
-        }
-        Map<String, Double> scratchMap = new HashMap<>();
-        for (Object[] row : profileRepo.findScratchSummaryForAnotherLegg()) {
-            String title = (String) row[0];
-            String diff = (String) row[1];
-            String diffName = "4".equals(diff) ? "ANOTHER" : "10".equals(diff) ? "LEGGENDARIA" : null;
-            if (diffName == null) continue;
-            scratchMap.put(title + "_" + diffName, ((Number) row[2]).doubleValue());
-        }
-
-        // 手順2: 全ユーザー × A/L スコアを取得、user_id でグルーピング
-        // 既存のネイティブクエリ findAllUserAnotherAndLeggendariaScoresWithUserInfo を再利用
-        List<Map<String, Object>> rows = scoreRepo.findAllUserAnotherAndLeggendariaScoresWithUserInfo();
-
-        // user_id → 表示名/iidxId/プロパティ
-        Map<Long, UserMeta> userMetas = new HashMap<>();
-        // user_id → 計算用譜面リスト
-        Map<Long, List<double[]>> userBpEntries = new HashMap<>();
-
-        for (Map<String, Object> r : rows) {
-            Object userIdObj = r.get("userId");
-            if (userIdObj == null) continue;
-            Long userId = ((Number) userIdObj).longValue();
-
-            UserMeta meta = userMetas.computeIfAbsent(userId, id -> {
-                UserMeta m = new UserMeta();
-                m.userId = id;
-                Object dn = r.get("displayName");
-                Object ix = r.get("iidxId");
-                m.displayName = dn == null ? null : dn.toString();
-                m.iidxId      = ix == null ? null : ix.toString();
-                return m;
-            });
-            // displayName / iidxId は同じユーザーで使い回し、毎行で更新する必要はない（先勝ち）。
-            // 不足分は後で users テーブルから補完する余地あり。
-            if (meta.displayName == null && r.get("displayName") != null) meta.displayName = r.get("displayName").toString();
-            if (meta.iidxId == null && r.get("iidxId") != null) meta.iidxId = r.get("iidxId").toString();
-
-            String title = (String) r.get("title");
-            String diffName = (String) r.get("difficultyName");
-            Object scoreObj = r.get("score");
-            if (title == null || diffName == null || scoreObj == null) continue;
-            int score = ((Number) scoreObj).intValue();
-            if (score <= 0) continue;
-
-            String code = "ANOTHER".equals(diffName) ? "4" : "LEGGENDARIA".equals(diffName) ? "10" : null;
-            if (code == null) continue;
-            Integer maxScore = songMaxScores.get(title + "_" + code);
-            if (maxScore == null || maxScore == 0) continue;
-
-            double scoreRate = score * 100.0 / maxScore;
-            String informalRank = informalRanks.get(title + "_" + diffName);
-            double bp = beatPtCalculator.calculatePoints(scoreRate, informalRank);
-            if (bp <= 0) continue;
-
-            Double scratchPct = scratchMap.get(title + "_" + diffName);
-            // [0]=bp, [1]=kenban_w, [2]=sara_w  (scratchPct なし譜面は両方 0)
-            double kw = 0, sw = 0;
-            if (scratchPct != null) {
-                kw = Math.max(0, Math.min(1, 1 - scratchPct / SCRATCH_FULL_THRESHOLD_PCT));
-                sw = Math.max(0, Math.min(1, scratchPct / SCRATCH_FULL_THRESHOLD_PCT));
-            }
-            userBpEntries.computeIfAbsent(userId, k -> new ArrayList<>()).add(new double[]{bp, kw, sw});
-        }
-
-        // 手順3: ユーザーごとに独立 top-100 で kenban/sara 集計
-        List<Map<String, Object>> kenbanRows = new ArrayList<>();
-        List<Map<String, Object>> saraRows = new ArrayList<>();
-        for (Map.Entry<Long, List<double[]>> e : userBpEntries.entrySet()) {
-            Long userId = e.getKey();
-            List<double[]> entries = e.getValue();
-
-            // KENBAN 寄与降順
-            List<Double> kenContribs = new ArrayList<>(entries.size());
-            List<Double> sarContribs = new ArrayList<>(entries.size());
-            for (double[] x : entries) {
-                double k = x[0] * x[1];
-                double s = x[0] * x[2];
-                if (k > 0) kenContribs.add(k);
-                if (s > 0) sarContribs.add(s);
-            }
-            kenContribs.sort(Collections.reverseOrder());
-            sarContribs.sort(Collections.reverseOrder());
-            double kenSum = 0, sarSum = 0;
-            for (int i = 0; i < Math.min(TOP_CHART_LIMIT, kenContribs.size()); i++) kenSum += kenContribs.get(i);
-            for (int i = 0; i < Math.min(TOP_CHART_LIMIT, sarContribs.size()); i++) sarSum += sarContribs.get(i);
-            double totalKenbanPt = Math.round(kenSum * KENBAN_PT_MULTIPLIER * 10.0) / 10.0;
-            double totalSaraPt   = Math.round(sarSum * SARA_PT_MULTIPLIER   * 10.0) / 10.0;
-
-            UserMeta meta = userMetas.get(userId);
-            kenbanRows.add(buildRankingRow(meta, "totalKenbanPt", totalKenbanPt));
-            saraRows.add(buildRankingRow(meta, "totalSaraPt", totalSaraPt));
-        }
-
-        // 手順4: privacy_level / is_supporter / show_supporter_border を users テーブルから補完
-        @SuppressWarnings("unchecked")
-        List<Object[]> userInfoRows = entityManager.createNativeQuery(
-                "SELECT id, COALESCE(privacy_level, 1), COALESCE(is_supporter, false), COALESCE(show_supporter_border, true) FROM users"
-        ).getResultList();
-        Map<Long, int[]> privacyMap = new HashMap<>();
-        Map<Long, Boolean> supporterMap = new HashMap<>();
-        for (Object[] row : userInfoRows) {
-            Long id = ((Number) row[0]).longValue();
-            int privacy = ((Number) row[1]).intValue();
-            boolean isSupporter = (Boolean) row[2];
-            boolean showBorder = (Boolean) row[3];
-            privacyMap.put(id, new int[]{privacy});
-            supporterMap.put(id, isSupporter && showBorder);
-        }
-        for (Map<String, Object> row : kenbanRows) {
-            Long id = (Long) row.get("userId");
-            row.put("privacyLevel", privacyMap.getOrDefault(id, new int[]{1})[0]);
-            row.put("isSupporter", supporterMap.getOrDefault(id, false));
-        }
-        for (Map<String, Object> row : saraRows) {
-            Long id = (Long) row.get("userId");
-            row.put("privacyLevel", privacyMap.getOrDefault(id, new int[]{1})[0]);
-            row.put("isSupporter", supporterMap.getOrDefault(id, false));
-        }
-
-        // 降順ソート
-        kenbanRows.sort((a, b) -> Double.compare((Double) b.get("totalKenbanPt"), (Double) a.get("totalKenbanPt")));
-        saraRows.sort  ((a, b) -> Double.compare((Double) b.get("totalSaraPt"),   (Double) a.get("totalSaraPt")));
-
-        Map<String, List<Map<String, Object>>> result = new HashMap<>();
-        result.put("kenban", kenbanRows);
-        result.put("sara",   saraRows);
-        return result;
-    }
-
-    /** 計算中ユーザー単位のメタ情報（表示名等）を保持する内部用 POJO。 */
-    private static final class UserMeta {
-        Long userId;
-        String displayName;
-        String iidxId;
-    }
-
-    /** ランキング 1 行分の共通フィールドを組み立てる小ヘルパー（pt 列名と値のみ変化）。 */
-    private Map<String, Object> buildRankingRow(UserMeta meta, String ptKey, double ptValue) {
-        Map<String, Object> row = new HashMap<>(6);
-        row.put("userId",      meta == null ? null : meta.userId);
-        row.put("displayName", meta == null ? null : meta.displayName);
-        row.put("iidxId",      meta == null ? null : meta.iidxId);
-        row.put(ptKey, ptValue);
-        return row;
     }
 
     // ── スコア予測 ───────────────────────────────────────────────

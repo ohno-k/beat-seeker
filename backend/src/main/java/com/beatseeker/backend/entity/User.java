@@ -97,6 +97,14 @@ public class User {
     @ColumnDefault("0")
     private Double totalBeatPt = 0.0;
 
+    /** 累計 KENBAN-PT（鍵盤側ティア指標）。BEAT-PT 算出時に同じスコアから派生計算する。 */
+    @ColumnDefault("0")
+    private Double totalKenbanPt = 0.0;
+
+    /** 累計 SARA-PT（皿側ティア指標）。BEAT-PT 算出時に同じスコアから派生計算する。 */
+    @ColumnDefault("0")
+    private Double totalSaraPt = 0.0;
+
     /** Web Push 購読情報（ブラウザから発行される JSON）。通知配信時に利用。 */
     @Column(columnDefinition = "TEXT")
     private String pushSubscription; // Web Push の購読情報 JSON

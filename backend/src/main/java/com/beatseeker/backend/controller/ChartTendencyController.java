@@ -2,6 +2,7 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.ChartTendencyProfile;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
@@ -61,6 +62,8 @@ public class ChartTendencyController {
     private final ScoreRepository scoreRepository;
     /** 譜面ペア回帰のキャッシュ（伸びしろ算出に使う）。 */
     private final PairRegressionService pairRegressionService;
+    /** 履歴ログリポジトリ（KENBAN/SARA ランキングを DB から直接引く用）。 */
+    private final ScoreHistoryLogRepository scoreHistoryLogRepository;
 
     /**
      * 【コンストラクタ】 Spring DI によりサービス・リポジトリを注入する。
@@ -70,13 +73,15 @@ public class ChartTendencyController {
                                    UserRepository userRepository,
                                    AdminAuthService adminAuthService,
                                    ScoreRepository scoreRepository,
-                                   PairRegressionService pairRegressionService) {
+                                   PairRegressionService pairRegressionService,
+                                   ScoreHistoryLogRepository scoreHistoryLogRepository) {
         this.service = service;
         this.skillTreeService = skillTreeService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
         this.scoreRepository = scoreRepository;
         this.pairRegressionService = pairRegressionService;
+        this.scoreHistoryLogRepository = scoreHistoryLogRepository;
     }
 
     // ── 管理者エンドポイント ─────────────────────────────────────
@@ -273,32 +278,27 @@ public class ChartTendencyController {
     }
 
     /**
-     * 【メソッドの役割】 KENBAN-TIER ランキングを返す（暫定オンザフライ計算）。
+     * 【メソッドの役割】 KENBAN-TIER ランキングを {@code score_history_logs.total_kenban_pt} から返す。
      *
-     * 現状は users テーブルに事前計算カラムを持たず、ChartTendencyService がメモリキャッシュ
-     * (5 分 TTL) で全ユーザー分を一括計算する。本格運用時は BEAT/RATE 同様に
-     * users.total_kenban_pt 等を持たせて事前計算する想定。
+     * BEAT-PT / RATE-PT と同じパターンで事前計算済みのスナップショットを利用する。
+     * 再計算は CSV アップロード時 ({@code save-history-log}) や管理者再計算 API で行われる。
      *
      * GET /api/scores/kenban-ranking
-     *
-     * @return `{userId, displayName, iidxId, privacyLevel, totalKenbanPt, isSupporter}` のリスト
      */
     @GetMapping("/api/scores/kenban-ranking")
     public ResponseEntity<List<Map<String, Object>>> getKenbanRanking() {
-        return ResponseEntity.ok(service.getKenbanRanking());
+        return ResponseEntity.ok(scoreHistoryLogRepository.getKenbanTierRanking());
     }
 
     /**
-     * 【メソッドの役割】 SARA-TIER ランキングを返す（暫定オンザフライ計算）。
-     * {@link #getKenbanRanking()} と同じデータソース・タイミングで返却する。
+     * 【メソッドの役割】 SARA-TIER ランキングを {@code score_history_logs.total_sara_pt} から返す。
+     * {@link #getKenbanRanking()} と対称な構造。
      *
      * GET /api/scores/sara-ranking
-     *
-     * @return `{userId, displayName, iidxId, privacyLevel, totalSaraPt, isSupporter}` のリスト
      */
     @GetMapping("/api/scores/sara-ranking")
     public ResponseEntity<List<Map<String, Object>>> getSaraRanking() {
-        return ResponseEntity.ok(service.getSaraRanking());
+        return ResponseEntity.ok(scoreHistoryLogRepository.getSaraTierRanking());
     }
 
     /**

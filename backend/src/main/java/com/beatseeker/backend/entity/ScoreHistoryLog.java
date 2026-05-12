@@ -69,6 +69,11 @@ public class ScoreHistoryLog {
     /** 累計レートポイント。 */
     private Double totalRatePt = 0.0;
 
+    /** 累計 KENBAN-PT（鍵盤側ティア指標）。 */
+    private Double totalKenbanPt = 0.0;
+    /** 累計 SARA-PT（皿側ティア指標）。 */
+    private Double totalSaraPt = 0.0;
+
     /** 更新された個別譜面の詳細 JSON（差分表示用）。 */
     @Column(columnDefinition = "TEXT")
     private String diffJson;
