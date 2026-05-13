@@ -178,12 +178,19 @@ const applyStrategyIfNeeded = (
  * strategy が使われた側は相手 pick がランダム抽選結果に差し替わる。
  */
 const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
+  // エラーフィードバックは「手動でモーダルから取り込んだ場合」(= 主催だけが見ている画面) のみトースト表示。
+  // URL パラメータ自動読込時 (= 全画面 OBS で映ってる可能性) はトーストを出さず console.warn のみ。
+  const notify = (msg: string) => {
+    if (isImportModalOpen.value) toast.error(msg);
+    else console.warn('[SongReveal]', msg);
+  };
+
   if (!match.playerAName || !match.playerBName) {
-    toast.error('両サイドにプレイヤーがアサインされていない試合は取り込めません');
+    notify('両サイドにプレイヤーがアサインされていない試合は取り込めません');
     return;
   }
   if (!match.playerAPick || !match.playerBPick) {
-    toast.error('両サイドの自選曲が揃っていない試合は取り込めません');
+    notify('両サイドの自選曲が揃っていない試合は取り込めません');
     return;
   }
 
@@ -194,14 +201,14 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
   const effectiveA = applyStrategyIfNeeded(match, 'a');
   const effectiveB = applyStrategyIfNeeded(match, 'b');
   if (!effectiveA || !effectiveB) {
-    toast.error('自選曲の解決に失敗しました');
+    notify('自選曲の解決に失敗しました');
     return;
   }
   const songEffectiveA = resolveSongData(effectiveA);
   const songEffectiveB = resolveSongData(effectiveB);
 
   if (!songOriginalA || !songOriginalB || !songEffectiveA || !songEffectiveB) {
-    toast.error('SongData に該当曲が見つかりません');
+    notify('SongData に該当曲が見つかりません');
     return;
   }
 
@@ -216,11 +223,8 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
   strategyDeclaredByLeft.value = match.playerAStrategyUsed;
   strategyDeclaredByRight.value = match.playerBStrategyUsed;
 
-  const noteParts: string[] = [];
-  if (match.playerAStrategyUsed) noteParts.push('A 側が StrategyCard 発動 → B の曲をランダム化');
-  if (match.playerBStrategyUsed) noteParts.push('B 側が StrategyCard 発動 → A の曲をランダム化');
-  if (noteParts.length > 0) toast.info(noteParts.join(' / '));
-  toast.success(`取り込みました: ${match.teamAName} vs ${match.teamBName}`);
+  // ネタバレ防止のため、Strategy 発動の有無や曲名などの告知トーストは出さない。
+  // (OBS キャプチャや会場映像に映ったら台無しになる)
   closeImportModal();
 };
 
@@ -244,7 +248,9 @@ const autoLoadFromUrlParams = async (): Promise<void> => {
     const data = await fetchRevealData(competitionId);
     const match = data.matches.find(m => m.matchId === matchId);
     if (!match) {
-      toast.error(`大会 ${competitionId} に match ${matchId} が見つかりません`);
+      // ネタバレを避けるためトーストは出さず、コンソールにだけ記録する。
+      // (会場画面に「match が見つかりません」と出ると Strategy 発動が読まれる恐れもあるため)
+      console.warn(`[SongReveal] 大会 ${competitionId} に match ${matchId} が見つかりません`);
       return;
     }
     handleApplyMatchToReveal(match);
@@ -254,7 +260,7 @@ const autoLoadFromUrlParams = async (): Promise<void> => {
       revealStep.value = 0;
     }
   } catch (e) {
-    toast.error('大会データの読込に失敗しました: ' + (e as Error).message);
+    console.warn('[SongReveal] 大会データの読込に失敗:', e);
   }
 };
 
@@ -1014,18 +1020,11 @@ const toggleFullscreen = async () => {
         </div>
       </div>
 
-      <!-- フッター: 進行ガイド + Reset (画面中央下、OBS の左右クロップに被らない極小領域) -->
-      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3">
-        <div class="px-4 py-2 rounded-full bg-slate-900/80 border border-white/10 text-[10px] font-mono tracking-widest text-slate-300 backdrop-blur">
-          <span v-if="revealStep === 0">CLICK → LEFT</span>
-          <span v-else-if="revealStep === 1">CLICK → RIGHT</span>
-          <span v-else-if="revealStep === 2">
-            {{ strategyDeclaredByLeft || strategyDeclaredByRight ? 'CLICK → STRATEGY' : 'REVEAL COMPLETE' }}
-          </span>
-          <span v-else-if="revealStep === 3 && strategyOverlayActive">CLICK → SPIN START</span>
-          <span v-else-if="revealStep === 3 && (spinningLeft || spinningRight)">SPINNING…</span>
-          <span v-else-if="revealStep === 3">REVEAL COMPLETE</span>
-        </div>
+      <!--
+        フッター: Reset のみ (進行ガイドは Strategy 発動の有無が文言で漏れるためネタバレ防止で撤去)。
+        Reset ボタンは主催だけが押せる極小ボタンとして残す。
+      -->
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-50">
         <button
           @click.stop="reset"
           class="px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase bg-slate-800/80 hover:bg-slate-700 border border-white/10 text-slate-300 hover:text-white backdrop-blur transition-all"
