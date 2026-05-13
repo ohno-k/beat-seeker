@@ -15,32 +15,31 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useCompetitionTl, type MatchKind, type TlMatchDto, type TlMatchupDto } from '../composables/useCompetitionTl';
 import { useToast } from '../composables/useToast';
+import { useI18n } from '../composables/useI18n';
 
 const props = defineProps<{ token: string }>();
 
 const { view, isLoading, fetchView, assign, unassign } = useCompetitionTl();
 const toast = useToast();
+const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
 onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 
-const KIND_LABEL: Record<MatchKind, string> = {
-  vanguard: '先鋒戦',
-  middle: '中堅戦',
-  captain: '大将戦',
-};
+/** 戦種別ラベルは i18n 経由。 */
+const kindLabel = (kind: MatchKind) => t(`competition.matchKind.${kind}`);
 const KIND_LV: Record<MatchKind, string> = {
   vanguard: 'Lv 8-10',
   middle: 'Lv 11',
   captain: 'Lv 12',
 };
 
-const statusLabel = (s: string) => ({
-  draft: '編成中',
-  open: '受付中',
-  locked: 'ロック済',
-  finished: '終了',
-} as Record<string, string>)[s] ?? s;
+const statusLabel = (s: string) => {
+  if (['draft', 'open', 'locked', 'finished'].includes(s)) {
+    return t(`competition.status.${s}`);
+  }
+  return s;
+};
 
 /**
  * セレクタの change イベント。値は数値 (participantId) または空文字 ('') = 未割当。
@@ -101,15 +100,30 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
 </script>
 
 <template>
-  <div class="competition-tl-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8">
-    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">読み込み中…</div>
+  <div class="competition-tl-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8 relative">
+    <!-- 言語切替ボタン群 (右上固定) -->
+    <div class="absolute top-3 right-3 z-30 flex items-center gap-1 p-1 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm">
+      <button
+        v-for="lang in availableLanguages"
+        :key="lang"
+        type="button"
+        @click="setLanguage(lang)"
+        :aria-pressed="currentLang === lang"
+        class="px-2 py-1 text-[11px] font-bold rounded-lg transition-all"
+        :class="currentLang === lang
+          ? 'bg-blue-600 text-white shadow-sm'
+          : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'"
+      >{{ t(`lang.${lang}`) }}</button>
+    </div>
+
+    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">{{ t('competition.player.loading') }}</div>
 
     <div
       v-else-if="!view"
       class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center"
     >
-      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">TL URL が無効です</p>
-      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">URL を再確認するか、主催者にお問い合わせください。</p>
+      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">{{ t('competition.tl.invalidToken') }}</p>
+      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ t('competition.tl.invalidTokenHint') }}</p>
     </div>
 
     <div v-else class="max-w-5xl mx-auto space-y-6">
@@ -118,23 +132,23 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
         <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ view.team.teamName }}</h1>
-          <span class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">TL 管理画面</span>
+          <span class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlAdminBadge') }}</span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
-          状態 <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
-          <span v-if="view.competition.deadlineAt"> · 締切 {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
+          {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
+          <span v-if="view.competition.deadlineAt"> · {{ t('competition.common.deadline') }} {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
         </p>
       </div>
 
       <!-- メンバー一覧 + 予選コスト残量 -->
       <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
         <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-          <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">所属メンバー</p>
+          <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.tl.membersHeader') }}</p>
           <p class="text-[10px] font-mono text-slate-400">
-            初期 {{ view.initialCost }} pt /
-            先鋒 {{ view.costPerKind.vanguard }} ·
-            中堅 {{ view.costPerKind.middle }} ·
-            大将 {{ view.costPerKind.captain }}
+            {{ t('competition.tl.costInitial', { n: view.initialCost }) }} /
+            {{ t('competition.matchKind.vanguard') }} {{ view.costPerKind.vanguard }} ·
+            {{ t('competition.matchKind.middle') }} {{ view.costPerKind.middle }} ·
+            {{ t('competition.matchKind.captain') }} {{ view.costPerKind.captain }}
           </p>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -145,10 +159,10 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
           >
             <p class="font-bold text-sm truncate">
               {{ m.displayName }}
-              <span v-if="m.isTl" class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider align-middle">TL</span>
+              <span v-if="m.isTl" class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider align-middle">{{ t('competition.common.tlBadge') }}</span>
             </p>
             <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
-              <span class="text-slate-400">残コスト</span>
+              <span class="text-slate-400">{{ t('competition.tl.costRemaining') }}</span>
               <span
                 class="font-bold tabular-nums"
                 :class="m.remainingCost <= 0
@@ -165,9 +179,9 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
 
       <!-- 4 matchup ぶんのアサイン UI -->
       <section class="space-y-4">
-        <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">対戦カード ({{ sortedMatchups.length }} matchup)</p>
+        <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.tl.matchupsHeader', { n: sortedMatchups.length }) }}</p>
         <p v-if="sortedMatchups.length === 0" class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
-          対戦カードがまだ生成されていません。<br />主催者が大会を Open に遷移するのをお待ちください。
+          {{ t('competition.tl.noMatchups') }}<br />{{ t('competition.tl.noMatchupsHint') }}
         </p>
 
         <div
@@ -177,21 +191,19 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
         >
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm">
-              vs <span class="text-blue-600 dark:text-blue-400">{{ mu.opponentTeam.teamName ?? '未設定' }}</span>
+              {{ t('competition.player.vs') }} <span class="text-blue-600 dark:text-blue-400">{{ mu.opponentTeam.teamName ?? '?' }}</span>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
               <span
                 v-if="mu.myLineupPublished"
                 class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
-                title="自軍の起用が相手チームに公開されています"
-              >自軍 公開中</span>
+              >{{ t('competition.tl.mySidePublished') }}</span>
               <span
                 v-else
                 class="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
-                title="自軍の起用は相手チームから見えない状態です"
-              >自軍 非公開</span>
+              >{{ t('competition.tl.mySideUnpublished') }}</span>
               <p class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
-                Matchup #{{ mu.matchupOrder }} · 自軍 {{ mu.mySide.toUpperCase() }} 側
+                {{ t('competition.tl.matchupOrder', { n: mu.matchupOrder }) }} · {{ t('competition.tl.mySideLabel', { side: mu.mySide.toUpperCase() }) }}
               </p>
             </div>
           </div>
@@ -200,25 +212,25 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
             <li v-for="match in mu.matches" :key="match.matchId" class="px-4 py-3 grid grid-cols-1 sm:grid-cols-[140px_1fr_1fr] gap-3 items-center">
               <!-- 戦表記 + 運営指定ジャンルバッジ -->
               <div>
-                <p class="font-bold text-sm">{{ KIND_LABEL[match.matchKind] }}</p>
+                <p class="font-bold text-sm">{{ kindLabel(match.matchKind) }}</p>
                 <p class="text-[10px] font-mono text-slate-400">{{ KIND_LV[match.matchKind] }}</p>
                 <span
                   v-if="match.requiredGenre"
                   class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
                 >
-                  指定: {{ match.requiredGenre }}
+                  {{ t('competition.tl.requiredGenrePrefix') }} {{ match.requiredGenre }}
                 </span>
                 <span
                   v-else
                   class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
                 >
-                  ジャンル未指定
+                  {{ t('competition.tl.genreUnspecified') }}
                 </span>
               </div>
 
               <!-- 自軍 slot: select で 4 メンバーから選ぶ -->
               <div>
-                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">自軍</p>
+                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{{ t('competition.tl.myArmy') }}</p>
                 <div class="flex items-center gap-2">
                   <select
                     :value="match.myAssigned?.participantId ?? ''"
@@ -242,35 +254,35 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
                 </div>
                 <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
                   <span v-if="match.myAssigned" class="text-slate-400">
-                    自選曲:
+                    {{ t('competition.tl.pickLabel') }}
                     <span :class="match.myAssigned.pickSubmitted ? 'text-emerald-500 font-bold' : 'text-rose-500 font-bold'">
-                      {{ match.myAssigned.pickSubmitted ? '✓ 提出済' : '× 未提出' }}
+                      {{ match.myAssigned.pickSubmitted ? t('competition.tl.pickSubmitted') : t('competition.tl.pickNotSubmitted') }}
                     </span>
                   </span>
                   <span
                     class="ml-auto"
                     :class="match.myLocked ? 'text-amber-600 dark:text-amber-300 font-bold' : 'text-slate-400'"
                   >
-                    {{ match.myLocked ? '🔒 ロック済' : 'ロック前' }}
+                    {{ match.myLocked ? t('competition.tl.lockedAlready') : t('competition.tl.lockBefore') }}
                   </span>
                 </div>
               </div>
 
               <!-- 相手軍 slot: ラインアップ公開済のときだけ起用名を表示 -->
               <div>
-                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">相手軍</p>
+                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{{ t('competition.tl.opponentArmy') }}</p>
                 <p class="px-3 py-1.5 rounded-lg text-sm bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 truncate">
                   <template v-if="!mu.opponentLineupPublished">
-                    <span class="text-slate-400 italic">起用未公開</span>
+                    <span class="text-slate-400 italic">{{ t('competition.tl.opponentLineupHidden') }}</span>
                   </template>
                   <span v-else-if="match.opponentAssigned">{{ match.opponentAssigned.displayName }}</span>
-                  <span v-else class="text-slate-400 italic">未割当</span>
+                  <span v-else class="text-slate-400 italic">{{ t('competition.tl.unassigned') }}</span>
                 </p>
                 <p
                   class="mt-1 text-[10px] font-mono text-right"
                   :class="match.opponentLocked ? 'text-amber-600 dark:text-amber-300 font-bold' : 'text-slate-400'"
                 >
-                  {{ match.opponentLocked ? '🔒 ロック済' : 'ロック前' }}
+                  {{ match.opponentLocked ? t('competition.tl.lockedAlready') : t('competition.tl.lockBefore') }}
                 </p>
               </div>
             </li>

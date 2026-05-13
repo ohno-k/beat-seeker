@@ -25,11 +25,13 @@ import {
   type PlayerMatchDto,
 } from '../composables/useCompetitionPlayer';
 import { useToast } from '../composables/useToast';
+import { useI18n } from '../composables/useI18n';
 
 const props = defineProps<{ token: string }>();
 
 const { view, isLoading, fetchView, upsertPick, deletePick, setStrategy } = useCompetitionPlayer();
 const toast = useToast();
+const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
 onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
@@ -43,11 +45,8 @@ const LEVELS_FOR_KIND: Record<MatchKind, number[]> = {
   middle: [11],
   captain: [12],
 };
-const KIND_LABEL: Record<MatchKind, string> = {
-  vanguard: '先鋒戦',
-  middle: '中堅戦',
-  captain: '大将戦',
-};
+/** 戦種別ラベルは i18n 経由で解決する (テンプレート/ハンドラ両方から呼べるよう関数化)。 */
+const kindLabel = (kind: MatchKind) => t(`competition.matchKind.${kind}`);
 
 // ── 編集状態 ──────────────────────────────────────────────
 /** どの試合の pick エディタを開いているか。null なら全カード閉じ。 */
@@ -168,14 +167,14 @@ const submitByDirectId = async () => {
     if (hit) { found = hit; break; }
   }
   if (!found) {
-    toast.error(`${KIND_LABEL[kind]} の ${genre} に管理番号 ${idNum} は存在しません`);
+    toast.error(`${kindLabel(kind)} の ${genre} に管理番号 ${idNum} は存在しません`);
     return;
   }
   await submitSong(found);
 };
 
 const removePick = async (m: PlayerMatchDto) => {
-  if (!confirm(`${KIND_LABEL[m.matchKind]}の自選曲を取り消しますか?`)) return;
+  if (!confirm(`${kindLabel(m.matchKind)} ${t('competition.player.cancelButton')}?`)) return;
   try {
     await deletePick(props.token, m.matchId);
     toast.success('取り消しました');
@@ -195,12 +194,12 @@ const toggleStrategy = async (matchId: number, currentEnabled: boolean) => {
 };
 
 // ── 表示補助 ──────────────────────────────────────────────
-const statusLabel = (s: string) => ({
-  draft: '編成中',
-  open: '受付中',
-  locked: 'ロック済',
-  finished: '終了',
-} as Record<string, string>)[s] ?? s;
+const statusLabel = (s: string) => {
+  if (['draft', 'open', 'locked', 'finished'].includes(s)) {
+    return t(`competition.status.${s}`);
+  }
+  return s;
+};
 
 /** 編集ボタンを出して良いか。ロック済 / ジャンル未指定 / 大会終了で false。 */
 const canEditMatch = (m: PlayerMatchDto): boolean => {
@@ -231,15 +230,30 @@ const canEnableStrategyHere = (matchId: number): boolean => {
 </script>
 
 <template>
-  <div class="competition-player-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8">
-    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">読み込み中…</div>
+  <div class="competition-player-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8 relative">
+    <!-- 言語切替ボタン群 (右上固定) -->
+    <div class="absolute top-3 right-3 z-30 flex items-center gap-1 p-1 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm">
+      <button
+        v-for="lang in availableLanguages"
+        :key="lang"
+        type="button"
+        @click="setLanguage(lang)"
+        :aria-pressed="currentLang === lang"
+        class="px-2 py-1 text-[11px] font-bold rounded-lg transition-all"
+        :class="currentLang === lang
+          ? 'bg-blue-600 text-white shadow-sm'
+          : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'"
+      >{{ t(`lang.${lang}`) }}</button>
+    </div>
+
+    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">{{ t('competition.player.loading') }}</div>
 
     <div
       v-else-if="!view"
       class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center"
     >
-      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">招待 URL が無効です</p>
-      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">URL を再確認するか、主催者にお問い合わせください。</p>
+      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">{{ t('competition.player.invalidToken') }}</p>
+      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ t('competition.player.invalidTokenHint') }}</p>
     </div>
 
     <div v-else class="max-w-4xl mx-auto space-y-6">
@@ -250,35 +264,35 @@ const canEnableStrategyHere = (matchId: number): boolean => {
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ view.team.teamName }}</h1>
           <span class="text-slate-400">·</span>
           <p class="text-lg sm:text-2xl font-bold">{{ view.participant.displayName }}</p>
-          <span v-if="view.participant.isTl" class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">TL</span>
+          <span v-if="view.participant.isTl" class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlBadge') }}</span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
-          状態 <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
-          <span v-if="view.competition.deadlineAt"> · 締切 {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
+          {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
+          <span v-if="view.competition.deadlineAt"> · {{ t('competition.common.deadline') }} {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
         </p>
         <!-- 自チームの StrategyCard 使用枠 (予選: 4 matchup 中 2 まで) -->
         <p class="text-xs mt-1 font-mono">
-          <span class="text-slate-500">Strategy Card 使用枠:</span>
+          <span class="text-slate-500">{{ t('competition.player.strategyQuota') }}:</span>
           <span
             class="ml-1 font-bold tabular-nums"
             :class="view.strategyQuota.usedMatchupCount >= view.strategyQuota.limit
               ? 'text-rose-500 dark:text-rose-300'
               : 'text-emerald-600 dark:text-emerald-300'"
           >
-            {{ view.strategyQuota.usedMatchupCount }} / {{ view.strategyQuota.limit }} matchup
+            {{ view.strategyQuota.usedMatchupCount }} / {{ view.strategyQuota.limit }} {{ t('competition.player.matchupUnit') }}
           </span>
-          <span class="text-slate-400 ml-1">(自チーム合計)</span>
+          <span class="text-slate-400 ml-1">{{ t('competition.player.strategyQuotaSuffix') }}</span>
         </p>
       </div>
 
       <!-- ===== 担当試合 ===== -->
       <section class="space-y-3">
-        <h2 class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">担当試合</h2>
+        <h2 class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.player.matchesHeader') }}</h2>
         <p
           v-if="view.matches.length === 0"
           class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl"
         >
-          担当試合はまだアサインされていません。<br />TL のラインアップ確定をお待ちください。
+          {{ t('competition.player.noMatchesAssigned') }}<br />{{ t('competition.player.noMatchesAssignedHint') }}
         </p>
 
         <div
@@ -289,15 +303,15 @@ const canEnableStrategyHere = (matchId: number): boolean => {
           <!-- カードヘッダ -->
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm">
-              vs
+              {{ t('competition.player.vs') }}
               <span v-if="m.opponent" class="text-blue-600 dark:text-blue-400">{{ m.opponent.displayName }}</span>
-              <span v-else-if="!m.opponentLineupPublished" class="text-slate-400 italic">起用未公開</span>
-              <span v-else class="text-slate-400 italic">未アサイン</span>
+              <span v-else-if="!m.opponentLineupPublished" class="text-slate-400 italic">{{ t('competition.player.opponentLineupHidden') }}</span>
+              <span v-else class="text-slate-400 italic">{{ t('competition.player.unassigned') }}</span>
               <span v-if="m.opponent?.teamName" class="text-xs text-slate-400 font-mono ml-1">({{ m.opponent.teamName }})</span>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
               <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
-                {{ KIND_LABEL[m.matchKind] }} ·
+                {{ kindLabel(m.matchKind) }} ·
                 {{ LEVELS_FOR_KIND[m.matchKind].length === 1
                     ? `Lv ${LEVELS_FOR_KIND[m.matchKind][0]}`
                     : `Lv ${LEVELS_FOR_KIND[m.matchKind].join('/')}` }}
@@ -306,13 +320,13 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                 v-if="m.requiredGenre"
                 class="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
               >
-                指定: {{ m.requiredGenre }}
+                {{ t('competition.player.requiredGenrePrefix') }} {{ m.requiredGenre }}
               </span>
               <span
                 v-else
                 class="text-[10px] font-black px-2 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
               >
-                ジャンル未指定
+                {{ t('competition.player.genreUnspecified') }}
               </span>
             </div>
           </div>
@@ -321,7 +335,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
           <div class="px-4 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <!-- 自分 -->
             <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 space-y-2">
-              <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">自分</p>
+              <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ t('competition.player.mySide') }}</p>
               <div v-if="m.myPick" class="space-y-0.5">
                 <p class="font-bold truncate text-sm">{{ m.myPick.songTitle }}</p>
                 <p class="text-[10px] font-mono text-slate-400">
@@ -329,8 +343,8 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                   {{ m.myPick.songDiff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
                 </p>
               </div>
-              <p v-else-if="m.requiredGenre" class="italic text-slate-400">未提出</p>
-              <p v-else class="italic text-slate-400">運営のジャンル指定待ち</p>
+              <p v-else-if="m.requiredGenre" class="italic text-slate-400">{{ t('competition.player.notSubmitted') }}</p>
+              <p v-else class="italic text-slate-400">{{ t('competition.player.waitingGenre') }}</p>
 
               <!-- 編集 / 取消 ボタン -->
               <div v-if="canEditMatch(m) && editingMatchId !== m.matchId" class="flex items-center gap-2 pt-1">
@@ -338,29 +352,29 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                   type="button"
                   @click="startEditing(m)"
                   class="px-3 py-1 text-[11px] font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >{{ m.myPick ? '編集' : '+ 曲を選ぶ' }}</button>
+                >{{ m.myPick ? t('competition.player.editButton') : t('competition.player.selectSongButton') }}</button>
                 <button
                   v-if="m.myPick"
                   type="button"
                   @click="removePick(m)"
                   class="px-2 py-1 text-[10px] font-bold rounded bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300"
-                >取消</button>
+                >{{ t('competition.player.cancelButton') }}</button>
               </div>
 
               <p
                 class="text-[10px] mt-1 font-mono"
                 :class="m.myLocked ? 'text-amber-600 dark:text-amber-300 font-bold' : 'text-slate-400'"
               >
-                {{ m.myLocked ? '🔒 ロック済' : 'ロック前' }}
+                {{ m.myLocked ? t('competition.player.lockedAlready') : t('competition.player.lockBefore') }}
               </p>
             </div>
 
             <!-- 相手 -->
             <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 space-y-2">
-              <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">相手</p>
+              <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ t('competition.player.opponentSide') }}</p>
               <p v-if="m.opponentPick" class="font-bold truncate text-sm">{{ m.opponentPick.songTitle }}</p>
               <p v-else class="italic text-slate-400">
-                {{ m.opponentPickPublished ? '未提出' : '選曲未公開' }}
+                {{ m.opponentPickPublished ? t('competition.player.notSubmitted') : t('competition.player.opponentPickHidden') }}
               </p>
               <p
                 v-if="m.opponentPick"
@@ -373,7 +387,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                 class="text-[10px] mt-1 font-mono"
                 :class="m.opponentPickPublished ? 'text-emerald-600 dark:text-emerald-300 font-bold' : 'text-slate-400'"
               >
-                {{ m.opponentPickPublished ? '✓ 公開済' : m.opponentLocked ? 'ロック済 · 未公開' : '未公開' }}
+                {{ m.opponentPickPublished ? t('competition.player.published') : m.opponentLocked ? t('competition.player.lockedNotPublished') : t('competition.player.hiddenShort') }}
               </p>
             </div>
           </div>
@@ -385,13 +399,13 @@ const canEnableStrategyHere = (matchId: number): boolean => {
           >
             <div class="flex items-center justify-between flex-wrap gap-2">
               <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500">
-                {{ KIND_LABEL[m.matchKind] }} - <span class="text-emerald-600 dark:text-emerald-300 font-black">{{ m.requiredGenre }}</span> から選曲
+                {{ kindLabel(m.matchKind) }} - <span class="text-emerald-600 dark:text-emerald-300 font-black">{{ m.requiredGenre }}</span> {{ t('competition.player.fromGenre') }}
               </p>
               <button
                 type="button"
                 @click="cancelEditing"
                 class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
-              >× 閉じる</button>
+              >{{ t('competition.player.closeButton') }}</button>
             </div>
 
             <!--
@@ -401,7 +415,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
             -->
             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg p-3">
               <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">
-                曲管理番号で直接指定
+                {{ t('competition.player.directIdSection') }}
               </p>
               <div class="flex items-center gap-2">
                 <input
@@ -409,7 +423,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                   type="text"
                   inputmode="numeric"
                   pattern="[0-9]*"
-                  placeholder="例: 23"
+                  :placeholder="t('competition.player.directIdPlaceholder')"
                   class="flex-1 px-3 py-1.5 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
                   @keydown.enter.prevent="submitByDirectId"
                 />
@@ -419,17 +433,17 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                   class="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
                   :disabled="!String(directIdInput).trim()"
                 >
-                  確定
+                  {{ t('competition.player.confirmInput') }}
                 </button>
               </div>
               <p class="text-[10px] font-mono text-slate-400 mt-1">
-                ジャンルごとの TXT (NOTES.txt 等) の先頭列「曲管理番号」と一致。下のリストから選んでも OK。
+                {{ t('competition.player.directIdHint') }}
               </p>
             </div>
 
             <!-- Step 1: Lv (vanguard のみ複数選択肢、他は自動セット済) -->
             <div v-if="availableLevels.length > 1">
-              <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">Step 1: Lv</p>
+              <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">{{ t('competition.player.step1Lv') }}</p>
               <div class="flex gap-2">
                 <button
                   v-for="lv in availableLevels"
@@ -447,7 +461,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
             <!-- Step 2: 曲リスト -->
             <div v-if="editingLevel">
               <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">
-                {{ availableLevels.length > 1 ? 'Step 2' : 'Step 1' }}: 曲を選ぶ ({{ availableSongs.length }} 曲)
+                {{ availableLevels.length > 1 ? 'Step 2' : 'Step 1' }}: {{ t('competition.player.stepSelectSong') }} ({{ availableSongs.length }})
               </p>
               <div class="max-h-72 overflow-y-auto border border-slate-200 dark:border-slate-600 rounded-lg divide-y divide-slate-100 dark:divide-slate-700/60 bg-white dark:bg-slate-800">
                 <button
@@ -473,13 +487,13 @@ const canEnableStrategyHere = (matchId: number): boolean => {
           <div class="px-4 py-3 border-t border-slate-200 dark:border-slate-700">
             <div v-if="m.opponentPickPublished" class="flex items-center gap-3 flex-wrap">
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-bold">Strategy Card</p>
-                <p class="text-[10px] text-slate-400">相手の自選曲を同じジャンル × Lv 帯でランダム化する</p>
+                <p class="text-xs font-bold">{{ t('competition.player.strategyCard') }}</p>
+                <p class="text-[10px] text-slate-400">{{ t('competition.player.strategyCardDescription') }}</p>
                 <p
                   v-if="!canEnableStrategyHere(m.matchId)"
                   class="text-[10px] text-rose-500 mt-0.5"
                 >
-                  ※ 予選 {{ view.strategyQuota.limit }} matchup 上限に達しています
+                  {{ t('competition.player.strategyLimitReached', { limit: view.strategyQuota.limit }) }}
                 </p>
               </div>
               <button
@@ -493,11 +507,11 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                     ? 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'
                     : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
               >
-                {{ m.myStrategyUse?.enabled ? '✓ 使用する' : '使用しない' }}
+                {{ m.myStrategyUse?.enabled ? t('competition.player.strategyEnabled') : t('competition.player.strategyDisabled') }}
               </button>
             </div>
             <p v-else class="text-[11px] text-slate-400 italic">
-              Strategy Card: 相手の自選曲が公開されてから判断できます
+              {{ t('competition.player.strategyWaitOpponent') }}
             </p>
           </div>
         </div>
@@ -511,10 +525,10 @@ const canEnableStrategyHere = (matchId: number): boolean => {
       @click.self="cancelSubmitConfirm"
     >
       <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-        <p class="text-xs font-mono uppercase tracking-[0.3em] text-slate-500">提出確認</p>
+        <p class="text-xs font-mono uppercase tracking-[0.3em] text-slate-500">{{ t('competition.player.confirmTitle') }}</p>
         <p class="text-base font-bold leading-relaxed">
-          下記の曲を{{ editingMatch ? KIND_LABEL[editingMatch.matchKind] : '' }}用に提出します。<br />
-          <span class="text-rose-500 text-sm">よろしいですか?</span>
+          {{ t('competition.player.confirmHeading', { kind: editingMatch ? kindLabel(editingMatch.matchKind) : '' }) }}<br />
+          <span class="text-rose-500 text-sm">{{ t('competition.player.confirmQuestion') }}</span>
         </p>
         <div class="rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
           <p class="text-xl font-black truncate">{{ pendingSubmitSong.title }}</p>
@@ -525,23 +539,23 @@ const canEnableStrategyHere = (matchId: number): boolean => {
             · Lv {{ pendingSubmitSong.level }}
           </p>
           <p v-if="editingMatch?.requiredGenre" class="text-[10px] font-mono text-slate-400 mt-1">
-            ジャンル: <span class="text-emerald-600 dark:text-emerald-300">{{ editingMatch.requiredGenre }}</span>
+            {{ t('competition.player.confirmGenreLabel') }} <span class="text-emerald-600 dark:text-emerald-300">{{ editingMatch.requiredGenre }}</span>
           </p>
         </div>
         <p class="text-[11px] text-slate-500 leading-relaxed">
-          ※ ロック前であれば、提出後でも変更/取消ができます。
+          {{ t('competition.player.confirmNote') }}
         </p>
         <div class="flex gap-2 justify-end">
           <button
             type="button"
             @click="cancelSubmitConfirm"
             class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
-          >キャンセル</button>
+          >{{ t('competition.player.confirmCancel') }}</button>
           <button
             type="button"
             @click="submitSongConfirmed"
             class="px-5 py-2 rounded-xl text-sm font-black tracking-wider uppercase bg-blue-600 text-white hover:bg-blue-700 shadow-md"
-          >✓ はい、提出</button>
+          >{{ t('competition.player.confirmYes') }}</button>
         </div>
       </div>
     </div>

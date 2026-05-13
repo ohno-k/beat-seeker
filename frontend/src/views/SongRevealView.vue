@@ -187,27 +187,32 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
     return;
   }
 
+  // 元の自選曲 (original)
+  const songOriginalA = resolveSongData(match.playerAPick);
+  const songOriginalB = resolveSongData(match.playerBPick);
+  // ストラテジー発動で置き換わる曲 (effective)。発動無しなら original と同じ。
   const effectiveA = applyStrategyIfNeeded(match, 'a');
   const effectiveB = applyStrategyIfNeeded(match, 'b');
   if (!effectiveA || !effectiveB) {
     toast.error('自選曲の解決に失敗しました');
     return;
   }
+  const songEffectiveA = resolveSongData(effectiveA);
+  const songEffectiveB = resolveSongData(effectiveB);
 
-  const songA = resolveSongData(effectiveA);
-  const songB = resolveSongData(effectiveB);
-  if (!songA || !songB) {
-    toast.error('SongData に該当曲が見つかりません: '
-      + (!songA ? `「${effectiveA.songTitle}」 ` : '')
-      + (!songB ? `「${effectiveB.songTitle}」` : ''));
+  if (!songOriginalA || !songOriginalB || !songEffectiveA || !songEffectiveB) {
+    toast.error('SongData に該当曲が見つかりません');
     return;
   }
 
   leftPlayer.value = match.playerAName;
   rightPlayer.value = match.playerBName;
-  selectedLeft.value = songA;
-  selectedRight.value = songB;
-  // R-3: Strategy 申告フラグを反映。左 = playerA、右 = playerB の申告。
+  // R-3: 初期表示は ORIGINAL。スピン着地後に effective に置換される。
+  selectedLeft.value = songOriginalA;
+  selectedRight.value = songOriginalB;
+  effectiveLeftSong.value = songEffectiveA;
+  effectiveRightSong.value = songEffectiveB;
+  // Strategy 申告フラグを反映。左 = playerA、右 = playerB の申告。
   strategyDeclaredByLeft.value = match.playerAStrategyUsed;
   strategyDeclaredByRight.value = match.playerBStrategyUsed;
 
@@ -279,7 +284,8 @@ const clearSlot = (side: 'left' | 'right') => {
 const phase = ref<'select' | 'reveal'>('select');
 /**
  * R-3: Strategy 演出 step を追加。
- * 0 = 両側未公開 / 1 = 左公開済 / 2 = 両側公開済 / 3 = Strategy 演出表示中 (片側か両側で発動時のみ通過)。
+ * 0 = 両側未公開 / 1 = 左公開済 / 2 = 両側公開済 / 3 = Strategy 演出 + スピン中。
+ * step 3 中に affected 側で抽選スピン → 着地で曲が effective に入れ替わる。
  */
 const revealStep = ref<0 | 1 | 2 | 3>(0);
 
@@ -291,6 +297,41 @@ const rightStage = ref({ burst: false, title: false, artist: false, diffBadge: f
 // right = playerB (申告すると A/left 側の選曲がランダム化)
 const strategyDeclaredByLeft = ref(false);
 const strategyDeclaredByRight = ref(false);
+
+/**
+ * 「abandoned (original) pick」と「actual played (effective) pick」を別々に保持する。
+ *  - selectedLeft / selectedRight: 現在画面に表示中の SongDataEntry。
+ *    step 0〜2 は original (= プレイヤーの自選曲) を表示。
+ *    step 3 スピン着地後に affected 側のみ effective に置換される。
+ *  - effectiveLeft / effectiveRight: ストラテジー発動で抽選された曲 (発動無しなら original と同じ)。
+ *    StrategyCardView と同じプール (strategy_card_songs) からクライアント抽選。
+ */
+const effectiveLeftSong = ref<SongDataEntry | null>(null);
+const effectiveRightSong = ref<SongDataEntry | null>(null);
+
+/**
+ * 「affected 側」= 相手が Strategy Card を申告した側。スピンアニメの対象。
+ * affectingLeft = 右 (B) が申告 → 左 (A) の曲がランダム化される
+ * affectingRight = 左 (A) が申告 → 右 (B) の曲がランダム化される
+ */
+const affectingLeft = computed(() => strategyDeclaredByRight.value);
+const affectingRight = computed(() => strategyDeclaredByLeft.value);
+
+// スピンアニメ用ストリップ (StrategyCardView と同パターン)
+type StrategyPoolSong2 = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
+const SPIN_ROW_HEIGHT = 64;        // ストリップ 1 行の高さ (px)
+const SPIN_VISIBLE_ROWS = 3;
+const spinItemsLeft = ref<StrategyPoolSong2[]>([]);
+const spinItemsRight = ref<StrategyPoolSong2[]>([]);
+const spinStripLeft = ref<HTMLElement | null>(null);
+const spinStripRight = ref<HTMLElement | null>(null);
+const spinningLeft = ref(false);
+const spinningRight = ref(false);
+const spinBurstLeft = ref(false);
+const spinBurstRight = ref(false);
+/** step 3 前半: 「⚡ STRATEGY CARD ⚡」全画面演出表示中 (約 1.8 秒)。 */
+const strategyOverlayActive = ref(false);
+let spinTimers: number[] = [];
 
 let stageTimers: number[] = [];
 
@@ -330,11 +371,14 @@ const onReveal = () => {
   if (revealStep.value === 1) {
     revealStep.value = 2;
     triggerSide('right');
-    // 両側公開後、Strategy 申告があれば自動的に step 3 (演出) へ進めるため
-    // 少し遅延 (右側のアニメ完了後の余韻分) を入れる。
+    // 両側公開後、Strategy 申告があれば自動的に step 3 (演出 + スピン) へ進める。
+    // 右側 reveal アニメ完了後の余韻を待ってから遷移。
     if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
       stageTimers.push(window.setTimeout(() => {
-        if (revealStep.value === 2) revealStep.value = 3;
+        if (revealStep.value === 2) {
+          revealStep.value = 3;
+          startStrategySpins();
+        }
       }, 3000));
     }
     return;
@@ -343,21 +387,124 @@ const onReveal = () => {
     // 手動で次へ進むときも Strategy 申告があれば 3 へ
     if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
       revealStep.value = 3;
+      startStrategySpins();
     }
     return;
   }
   // revealStep === 3 は誤爆防止で何もしない。Reset 専用。
 };
 
+/**
+ * Step 3 に入ったとき、まず Strategy Card 演出オーバーレイを表示し、
+ * 1.8 秒後にオーバーレイを消してスピンを起動する。
+ * affected 側 (相手が strategy 申告) ごとにスロットマシン式スピン → 着地で曲が effective に置換。
+ */
+const startStrategySpins = () => {
+  strategyOverlayActive.value = true;
+  spinTimers.push(window.setTimeout(() => {
+    strategyOverlayActive.value = false;
+    if (affectingLeft.value) startSpinForSide('left');
+    if (affectingRight.value) startSpinForSide('right');
+  }, 1800));
+};
+
+const startSpinForSide = async (side: 'left' | 'right') => {
+  const original = side === 'left' ? selectedLeft.value : selectedRight.value;
+  const effective = side === 'left' ? effectiveLeftSong.value : effectiveRightSong.value;
+  if (!original || !effective) return;
+
+  // プール構築: 元の自選曲のジャンル × 戦の Lv 帯 (strategy_card_songs から)
+  // 元の自選曲のジャンル/Lv 帯は match から直接わからないので、effectiveLeftSong/RightSong の
+  // genre/level を逆引き or プレイヤー pick の情報をスピン用 ref に保存する方式が必要だが、
+  // ここでは「effective が存在する = strategy 発動済」のシンプル前提で
+  // 「effective の Lv ± 周辺と同 genre」っぽい曲をランダムプールとする。
+  // 簡易実装: 全 strategy_card_songs を flat にしてランダムに 50 件選ぶ (派手な見た目目的)。
+  const pool: StrategyPoolSong2[] = [];
+  for (const genre of Object.keys(strategyPool) as (keyof typeof strategyPool)[]) {
+    for (const lv of Object.keys(strategyPool[genre])) {
+      pool.push(...strategyPool[genre][lv]);
+    }
+  }
+  // 着地行を effective の SongDataEntry に最も近いプール曲に統一しておく。
+  // タイトル + diff (A/L → 4/10) でマッチさせる。
+  const targetDiff = effective.difficulty === '10' ? 'L' : 'A';
+  const finalSong: StrategyPoolSong2 = pool.find(s => s.title === effective.title && s.diff === targetDiff)
+    ?? { id: 0, version: '', title: effective.title, diff: targetDiff, level: Number(effective.level) };
+
+  // ストリップ構築: ダミー 50 行 → 当選行 → 末尾バッファ 2 行
+  const TOTAL_DUMMY = 50;
+  const items: StrategyPoolSong2[] = [];
+  for (let i = 0; i < TOTAL_DUMMY; i++) {
+    items.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+  const finalIndex = items.length;
+  items.push(finalSong);
+  for (let i = 0; i < 2; i++) {
+    items.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+
+  // 反応 ref に流し込み + スピン開始
+  if (side === 'left') {
+    spinItemsLeft.value = items;
+    spinningLeft.value = true;
+  } else {
+    spinItemsRight.value = items;
+    spinningRight.value = true;
+  }
+
+  await nextTick();
+  const strip = side === 'left' ? spinStripLeft.value : spinStripRight.value;
+  if (!strip) return;
+
+  // 位置リセット
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+  void strip.offsetHeight; // 強制 reflow
+
+  const centerRowOffset = Math.floor(SPIN_VISIBLE_ROWS / 2);
+  const targetY = -(finalIndex - centerRowOffset) * SPIN_ROW_HEIGHT;
+  // 単一 easeOut で 4.5 秒着地 (StrategyCardView の smooth プロファイル相当)
+  spinTimers.push(window.setTimeout(() => {
+    strip.style.transition = 'transform 4500ms cubic-bezier(0.12, 0.72, 0.20, 1)';
+    strip.style.transform = `translateY(${targetY}px)`;
+  }, 50));
+
+  // 着地完了 → effective に置換 + burst
+  spinTimers.push(window.setTimeout(() => {
+    if (side === 'left') {
+      selectedLeft.value = effective;
+      spinningLeft.value = false;
+      spinBurstLeft.value = true;
+      window.setTimeout(() => { spinBurstLeft.value = false; }, 1600);
+    } else {
+      selectedRight.value = effective;
+      spinningRight.value = false;
+      spinBurstRight.value = true;
+      window.setTimeout(() => { spinBurstRight.value = false; }, 1600);
+    }
+  }, 4700));
+};
+
 const reset = () => {
   for (const id of stageTimers) clearTimeout(id);
   stageTimers = [];
+  for (const id of spinTimers) clearTimeout(id);
+  spinTimers = [];
   phase.value = 'select';
   revealStep.value = 0;
   leftStage.value  = { burst: false, title: false, artist: false, diffBadge: false };
   rightStage.value = { burst: false, title: false, artist: false, diffBadge: false };
   strategyDeclaredByLeft.value = false;
   strategyDeclaredByRight.value = false;
+  effectiveLeftSong.value = null;
+  effectiveRightSong.value = null;
+  spinningLeft.value = false;
+  spinningRight.value = false;
+  spinItemsLeft.value = [];
+  spinItemsRight.value = [];
+  spinBurstLeft.value = false;
+  spinBurstRight.value = false;
+  strategyOverlayActive.value = false;
 };
 
 /**
@@ -685,23 +832,57 @@ const toggleFullscreen = async () => {
           <p class="text-slate-800 mt-1">...</p>
         </div>
 
-        <!-- バースト -->
-        <div v-if="leftStage.burst" class="absolute inset-0 pointer-events-none">
+        <!-- バースト (通常 reveal + Strategy 着地で共通) -->
+        <div v-if="leftStage.burst || spinBurstLeft" class="absolute inset-0 pointer-events-none">
           <div class="burst-radial"></div>
           <div class="burst-ring burst-ring-1"></div>
           <div class="burst-ring burst-ring-2"></div>
           <div class="burst-ring burst-ring-3"></div>
         </div>
 
-        <!-- 曲情報 -->
-        <div class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
+        <!--
+          R-3: Strategy 抽選スピンストリップ (左)。
+          spinningLeft = true の間表示し、着地で selectedLeft が effective に置換されると同時に消える。
+        -->
+        <div v-if="spinningLeft" class="relative z-10 w-full max-w-2xl px-2">
+          <div
+            class="relative overflow-hidden rounded-2xl border-2 border-amber-300/40 bg-slate-950/80 backdrop-blur"
+            :style="{ height: `${SPIN_ROW_HEIGHT * SPIN_VISIBLE_ROWS}px` }"
+          >
+            <div
+              class="absolute left-0 right-0 pointer-events-none z-20 border-y-2 border-amber-300 bg-amber-300/10"
+              :style="{ top: `${SPIN_ROW_HEIGHT * Math.floor(SPIN_VISIBLE_ROWS / 2)}px`, height: `${SPIN_ROW_HEIGHT}px` }"
+            ></div>
+            <div class="absolute inset-x-0 top-0 z-20 pointer-events-none bg-gradient-to-b from-slate-950 to-transparent" :style="{ height: `${SPIN_ROW_HEIGHT}px` }"></div>
+            <div class="absolute inset-x-0 bottom-0 z-20 pointer-events-none bg-gradient-to-t from-slate-950 to-transparent" :style="{ height: `${SPIN_ROW_HEIGHT}px` }"></div>
+            <div ref="spinStripLeft" class="strategy-spin-strip will-change-transform">
+              <div
+                v-for="(s, i) in spinItemsLeft"
+                :key="i"
+                class="flex flex-col items-center justify-center px-3 text-center"
+                :style="{ height: `${SPIN_ROW_HEIGHT}px` }"
+              >
+                <p class="text-base sm:text-xl font-black text-white truncate max-w-full">{{ s.title }}</p>
+                <p class="text-[10px] font-mono text-slate-400 mt-0.5 truncate max-w-full">
+                  {{ s.version }} · Lv{{ s.level }} · {{ s.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="mt-4 text-[10px] font-mono uppercase tracking-[0.4em] text-amber-300 text-center strategy-flicker">
+            ⚡ Strategy Card Spinning ⚡
+          </p>
+        </div>
+
+        <!-- 曲情報 (左) -->
+        <div v-show="!spinningLeft" class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="leftStage.title"
             class="title-cascade text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-tight"
           >
             <span
               v-for="(ch, i) in titleCharsOf(selectedLeft)"
-              :key="i"
+              :key="`${selectedLeft?.title}-${i}`"
               class="cascade-char inline-block"
               :style="{ animationDelay: `${i * 70}ms` }"
             >{{ ch === ' ' ? ' ' : ch }}</span>
@@ -740,21 +921,52 @@ const toggleFullscreen = async () => {
           <p class="text-slate-800 mt-1">...</p>
         </div>
 
-        <div v-if="rightStage.burst" class="absolute inset-0 pointer-events-none">
+        <div v-if="rightStage.burst || spinBurstRight" class="absolute inset-0 pointer-events-none">
           <div class="burst-radial"></div>
           <div class="burst-ring burst-ring-1"></div>
           <div class="burst-ring burst-ring-2"></div>
           <div class="burst-ring burst-ring-3"></div>
         </div>
 
-        <div class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
+        <!-- R-3: Strategy 抽選スピンストリップ (右) -->
+        <div v-if="spinningRight" class="relative z-10 w-full max-w-2xl px-2">
+          <div
+            class="relative overflow-hidden rounded-2xl border-2 border-amber-300/40 bg-slate-950/80 backdrop-blur"
+            :style="{ height: `${SPIN_ROW_HEIGHT * SPIN_VISIBLE_ROWS}px` }"
+          >
+            <div
+              class="absolute left-0 right-0 pointer-events-none z-20 border-y-2 border-amber-300 bg-amber-300/10"
+              :style="{ top: `${SPIN_ROW_HEIGHT * Math.floor(SPIN_VISIBLE_ROWS / 2)}px`, height: `${SPIN_ROW_HEIGHT}px` }"
+            ></div>
+            <div class="absolute inset-x-0 top-0 z-20 pointer-events-none bg-gradient-to-b from-slate-950 to-transparent" :style="{ height: `${SPIN_ROW_HEIGHT}px` }"></div>
+            <div class="absolute inset-x-0 bottom-0 z-20 pointer-events-none bg-gradient-to-t from-slate-950 to-transparent" :style="{ height: `${SPIN_ROW_HEIGHT}px` }"></div>
+            <div ref="spinStripRight" class="strategy-spin-strip will-change-transform">
+              <div
+                v-for="(s, i) in spinItemsRight"
+                :key="i"
+                class="flex flex-col items-center justify-center px-3 text-center"
+                :style="{ height: `${SPIN_ROW_HEIGHT}px` }"
+              >
+                <p class="text-base sm:text-xl font-black text-white truncate max-w-full">{{ s.title }}</p>
+                <p class="text-[10px] font-mono text-slate-400 mt-0.5 truncate max-w-full">
+                  {{ s.version }} · Lv{{ s.level }} · {{ s.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <p class="mt-4 text-[10px] font-mono uppercase tracking-[0.4em] text-amber-300 text-center strategy-flicker">
+            ⚡ Strategy Card Spinning ⚡
+          </p>
+        </div>
+
+        <div v-show="!spinningRight" class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="rightStage.title"
             class="title-cascade text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-tight"
           >
             <span
               v-for="(ch, i) in titleCharsOf(selectedRight)"
-              :key="i"
+              :key="`${selectedRight?.title}-${i}`"
               class="cascade-char inline-block"
               :style="{ animationDelay: `${i * 70}ms` }"
             >{{ ch === ' ' ? ' ' : ch }}</span>
@@ -777,11 +989,11 @@ const toggleFullscreen = async () => {
       </div>
 
       <!--
-        R-3: Strategy 演出オーバーレイ。両側公開後 (revealStep === 3) に表示。
-        申告者と被影響側を明示してドラマを作る。クリック / リセットで消える。
+        R-3: Strategy 演出オーバーレイ。step 3 進入直後の約 1.8 秒だけ表示し、
+        その後消えてスピンアニメに切り替わる。
       -->
       <div
-        v-if="revealStep === 3 && (strategyDeclaredByLeft || strategyDeclaredByRight)"
+        v-if="strategyOverlayActive"
         class="absolute inset-0 z-50 flex items-center justify-center pointer-events-none strategy-overlay-fade"
       >
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
@@ -1072,5 +1284,12 @@ const toggleFullscreen = async () => {
 .strategy-fade-in {
   opacity: 0;
   animation: strategyFadeInKf 0.6s ease-out forwards;
+}
+
+/* Strategy 抽選スピンのストリップ。JS から transform を直接いじって動かす。 */
+.strategy-spin-strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(0);
 }
 </style>
