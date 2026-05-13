@@ -371,41 +371,36 @@ const onReveal = () => {
   if (revealStep.value === 1) {
     revealStep.value = 2;
     triggerSide('right');
-    // 両側公開後、Strategy 申告があれば自動的に step 3 (演出 + スピン) へ進める。
-    // 右側 reveal アニメ完了後の余韻を待ってから遷移。
-    if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
-      stageTimers.push(window.setTimeout(() => {
-        if (revealStep.value === 2) {
-          revealStep.value = 3;
-          startStrategySpins();
-        }
-      }, 3000));
-    }
+    // step 2 から先 (Strategy 演出 / スピン) は自動進行せず、毎回クリックで前進する。
     return;
   }
   if (revealStep.value === 2) {
-    // 手動で次へ進むときも Strategy 申告があれば 3 へ
+    // クリック → Strategy 申告があれば演出オーバーレイ表示 (step 3 へ)。無ければ何もしない。
     if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
       revealStep.value = 3;
+      strategyOverlayActive.value = true;
+    }
+    return;
+  }
+  if (revealStep.value === 3) {
+    // クリック → オーバーレイ表示中ならオーバーレイを消してスピン開始。
+    // スピン進行中は誤操作防止のため何もしない (どちらかが回ってる間は無視)。
+    if (strategyOverlayActive.value) {
+      strategyOverlayActive.value = false;
       startStrategySpins();
     }
     return;
   }
-  // revealStep === 3 は誤爆防止で何もしない。Reset 専用。
 };
 
 /**
- * Step 3 に入ったとき、まず Strategy Card 演出オーバーレイを表示し、
- * 1.8 秒後にオーバーレイを消してスピンを起動する。
- * affected 側 (相手が strategy 申告) ごとにスロットマシン式スピン → 着地で曲が effective に置換。
+ * Strategy Card 抽選スピンを起動する。affected 側 (相手が strategy 申告) ごとに
+ * スロットマシン式スピンを開始し、着地で {@code selectedLeft / selectedRight} を effective に置換。
+ * step 3 のオーバーレイをクリックで消した直後に呼ばれる。
  */
 const startStrategySpins = () => {
-  strategyOverlayActive.value = true;
-  spinTimers.push(window.setTimeout(() => {
-    strategyOverlayActive.value = false;
-    if (affectingLeft.value) startSpinForSide('left');
-    if (affectingRight.value) startSpinForSide('right');
-  }, 1800));
+  if (affectingLeft.value) startSpinForSide('left');
+  if (affectingRight.value) startSpinForSide('right');
 };
 
 const startSpinForSide = async (side: 'left' | 'right') => {
@@ -1024,8 +1019,12 @@ const toggleFullscreen = async () => {
         <div class="px-4 py-2 rounded-full bg-slate-900/80 border border-white/10 text-[10px] font-mono tracking-widest text-slate-300 backdrop-blur">
           <span v-if="revealStep === 0">CLICK → LEFT</span>
           <span v-else-if="revealStep === 1">CLICK → RIGHT</span>
-          <span v-else-if="revealStep === 2">{{ strategyDeclaredByLeft || strategyDeclaredByRight ? 'STRATEGY を表示中…' : 'REVEAL COMPLETE' }}</span>
-          <span v-else-if="revealStep === 3">⚡ STRATEGY DECLARED ⚡</span>
+          <span v-else-if="revealStep === 2">
+            {{ strategyDeclaredByLeft || strategyDeclaredByRight ? 'CLICK → STRATEGY' : 'REVEAL COMPLETE' }}
+          </span>
+          <span v-else-if="revealStep === 3 && strategyOverlayActive">CLICK → SPIN START</span>
+          <span v-else-if="revealStep === 3 && (spinningLeft || spinningRight)">SPINNING…</span>
+          <span v-else-if="revealStep === 3">REVEAL COMPLETE</span>
         </div>
         <button
           @click.stop="reset"

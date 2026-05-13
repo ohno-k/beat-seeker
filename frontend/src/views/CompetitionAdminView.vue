@@ -431,15 +431,53 @@ const resultDraft = ref<MatchResultPayload>({
   song2ScoreA: null, song2ScoreB: null,
 });
 
+/**
+ * 結果記録モーダルを開く。既に記録済の値があればそれを優先、なければ以下のロジックで自動入力する:
+ *
+ * 1 戦 = 2 曲制を「song1 = A 側が演奏する曲 / song2 = B 側が演奏する曲」と定義し、
+ *  - 通常 (strategy 未発動): song1 = A の自選曲、song2 = B の自選曲
+ *  - B 側が strategy 申告 → A 側の曲がランダム化: song1 = revealMatch.playerBStrategyResult
+ *  - A 側が strategy 申告 → B 側の曲がランダム化: song2 = revealMatch.playerAStrategyResult
+ *
+ * これによりスコア欄を開いた瞬間に管理番号 / 曲名がプリセットされる。
+ */
 const beginResultEdit = (match: CompetitionMatchDto) => {
   resultEditingMatchId.value = match.id;
+  const rm = revealMatchOf(match.id);
+
+  // song1 = A 側が演奏する曲
+  // B が strategy 申告 → playerBStrategyResult が A 側の演奏曲
+  // 申告無し → A の自選曲
+  let defaultSong1Id: number | null = null;
+  let defaultSong1Title: string | null = null;
+  if (rm?.playerBStrategyResult) {
+    defaultSong1Id = rm.playerBStrategyResult.songStrategyId;
+    defaultSong1Title = rm.playerBStrategyResult.songTitle;
+  } else if (rm?.playerAPick) {
+    defaultSong1Id = rm.playerAPick.songStrategyId;
+    defaultSong1Title = rm.playerAPick.songTitle;
+  }
+
+  // song2 = B 側が演奏する曲
+  // A が strategy 申告 → playerAStrategyResult が B 側の演奏曲
+  let defaultSong2Id: number | null = null;
+  let defaultSong2Title: string | null = null;
+  if (rm?.playerAStrategyResult) {
+    defaultSong2Id = rm.playerAStrategyResult.songStrategyId;
+    defaultSong2Title = rm.playerAStrategyResult.songTitle;
+  } else if (rm?.playerBPick) {
+    defaultSong2Id = rm.playerBPick.songStrategyId;
+    defaultSong2Title = rm.playerBPick.songTitle;
+  }
+
   resultDraft.value = {
-    song1StrategyId: match.song1StrategyId,
-    song1Title: match.song1Title,
+    // 既存記録があればそれを尊重、無ければ自動入力で埋める。
+    song1StrategyId: match.song1StrategyId ?? defaultSong1Id,
+    song1Title: match.song1Title ?? defaultSong1Title,
     song1ScoreA: match.song1ScoreA,
     song1ScoreB: match.song1ScoreB,
-    song2StrategyId: match.song2StrategyId,
-    song2Title: match.song2Title,
+    song2StrategyId: match.song2StrategyId ?? defaultSong2Id,
+    song2Title: match.song2Title ?? defaultSong2Title,
     song2ScoreA: match.song2ScoreA,
     song2ScoreB: match.song2ScoreB,
   };
@@ -1121,17 +1159,23 @@ const statusColor = (s: string) => ({
                   </template>
                   <!-- 編集モード: 2 曲 × (管理番号 + A スコア + B スコア) -->
                   <template v-else>
-                    <p class="text-slate-400 uppercase tracking-wider mb-2">スコア記録 (両スコアが揃った曲だけ勝敗判定)</p>
+                    <p class="text-slate-400 uppercase tracking-wider mb-2">スコア記録 (曲名 = A/B 自選曲もしくは Strategy 抽選曲を自動入力)</p>
                     <div class="space-y-2">
-                      <!-- Song 1 -->
-                      <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
-                        <span class="text-slate-500">1 曲目</span>
+                      <!-- Song 1 (A 側演奏曲) -->
+                      <div class="grid grid-cols-[60px_60px_1fr_70px_70px] gap-2 items-center">
+                        <span class="text-slate-500">1 曲目<br /><span class="text-[9px] text-slate-600">A 演奏</span></span>
                         <input
                           v-model.number="resultDraft.song1StrategyId"
                           type="number"
                           min="0"
-                          placeholder="管理番号"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs"
+                          placeholder="#"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                        />
+                        <input
+                          v-model="resultDraft.song1Title"
+                          type="text"
+                          placeholder="曲名"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs truncate"
                         />
                         <input
                           v-model.number="resultDraft.song1ScoreA"
@@ -1148,15 +1192,21 @@ const statusColor = (s: string) => ({
                           class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
                         />
                       </div>
-                      <!-- Song 2 -->
-                      <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
-                        <span class="text-slate-500">2 曲目</span>
+                      <!-- Song 2 (B 側演奏曲) -->
+                      <div class="grid grid-cols-[60px_60px_1fr_70px_70px] gap-2 items-center">
+                        <span class="text-slate-500">2 曲目<br /><span class="text-[9px] text-slate-600">B 演奏</span></span>
                         <input
                           v-model.number="resultDraft.song2StrategyId"
                           type="number"
                           min="0"
-                          placeholder="管理番号"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs"
+                          placeholder="#"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                        />
+                        <input
+                          v-model="resultDraft.song2Title"
+                          type="text"
+                          placeholder="曲名"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs truncate"
                         />
                         <input
                           v-model.number="resultDraft.song2ScoreA"

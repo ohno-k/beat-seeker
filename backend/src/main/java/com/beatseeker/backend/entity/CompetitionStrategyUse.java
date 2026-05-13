@@ -54,4 +54,34 @@ public class CompetitionStrategyUse {
 
     /** 意思決定日時 (= 最終更新日時)。 */
     private LocalDateTime decidedAt = LocalDateTime.now();
+
+    // ── 抽選結果 (StrategyCard 発動時にサーバが決定する曲) ──────────────────────
+    // enabled = true にした瞬間にサーバが strategy_card_songs プールから 1 曲ランダム抽選し
+    // 以下フィールドに保存する。SongRevealView のスピンも、AdminView の結果記録時の
+    // 曲名自動入力も、両方ここに格納された曲を参照する。enabled = false に戻すと NULL クリア。
+    // 「相手の自選曲ジャンル × match の Lv 帯」がプール条件で、対象 = 相手の選曲が置き換わる側。
+
+    /** 抽選曲の管理番号 ({@code strategy_card_songs.json} の id)。 */
+    @Column(name = "result_song_strategy_id")
+    private Integer resultSongStrategyId;
+
+    /** 抽選曲のタイトル。 */
+    @Column(name = "result_song_title", length = 200)
+    private String resultSongTitle;
+
+    /** 抽選曲のバージョン (記録用)。 */
+    @Column(name = "result_song_version", length = 50)
+    private String resultSongVersion;
+
+    /** 抽選曲の難易度 ('A' or 'L')。 */
+    @Column(name = "result_song_diff", length = 2)
+    private String resultSongDiff;
+
+    /** 抽選曲の Lv。 */
+    @Column(name = "result_song_level")
+    private Integer resultSongLevel;
+
+    /** 抽選曲のジャンル (= 相手の自選曲ジャンル)。 */
+    @Column(name = "result_song_genre", length = 16)
+    private String resultSongGenre;
 }

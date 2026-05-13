@@ -370,12 +370,41 @@ public class CompetitionAdminController {
                     ? pickRepository.findByMatchAndParticipant(m, pb).map(this::pickRevealMap).orElse(null)
                     : null);
 
-            e.put("playerAStrategyUsed", pa != null
-                    && strategyUseRepository.findByMatchAndUsedByParticipant(m, pa)
-                            .map(CompetitionStrategyUse::getEnabled).orElse(false));
-            e.put("playerBStrategyUsed", pb != null
-                    && strategyUseRepository.findByMatchAndUsedByParticipant(m, pb)
-                            .map(CompetitionStrategyUse::getEnabled).orElse(false));
+            CompetitionStrategyUse suA = pa == null ? null
+                    : strategyUseRepository.findByMatchAndUsedByParticipant(m, pa).orElse(null);
+            CompetitionStrategyUse suB = pb == null ? null
+                    : strategyUseRepository.findByMatchAndUsedByParticipant(m, pb).orElse(null);
+            e.put("playerAStrategyUsed", suA != null && Boolean.TRUE.equals(suA.getEnabled()));
+            e.put("playerBStrategyUsed", suB != null && Boolean.TRUE.equals(suB.getEnabled()));
+
+            // R-4 自動入力連携: A 側が strategy 申告 → B 側の played song は suA に保存された抽選結果。
+            // B 側が strategy 申告 → A 側の played song は suB に保存された抽選結果。
+            // 自分の strategy 申告は「相手の曲をランダム化」なので、result_song_* は ON 側の suX に格納。
+            // フロントは strategyResultForSide(a/b) で受け取り、結果記録 UI の自動入力に使う。
+            if (suA != null && Boolean.TRUE.equals(suA.getEnabled()) && suA.getResultSongStrategyId() != null) {
+                Map<String, Object> rs = new LinkedHashMap<>();
+                rs.put("songStrategyId", suA.getResultSongStrategyId());
+                rs.put("songTitle", suA.getResultSongTitle());
+                rs.put("songVersion", suA.getResultSongVersion());
+                rs.put("songDiff", suA.getResultSongDiff());
+                rs.put("songLevel", suA.getResultSongLevel());
+                rs.put("songGenre", suA.getResultSongGenre());
+                e.put("playerAStrategyResult", rs);
+            } else {
+                e.put("playerAStrategyResult", null);
+            }
+            if (suB != null && Boolean.TRUE.equals(suB.getEnabled()) && suB.getResultSongStrategyId() != null) {
+                Map<String, Object> rs = new LinkedHashMap<>();
+                rs.put("songStrategyId", suB.getResultSongStrategyId());
+                rs.put("songTitle", suB.getResultSongTitle());
+                rs.put("songVersion", suB.getResultSongVersion());
+                rs.put("songDiff", suB.getResultSongDiff());
+                rs.put("songLevel", suB.getResultSongLevel());
+                rs.put("songGenre", suB.getResultSongGenre());
+                e.put("playerBStrategyResult", rs);
+            } else {
+                e.put("playerBStrategyResult", null);
+            }
 
             entries.add(e);
         }

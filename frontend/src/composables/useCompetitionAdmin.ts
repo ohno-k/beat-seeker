@@ -109,6 +109,20 @@ export interface CompetitionRevealPick {
   songDiff: 'A' | 'L';
 }
 
+/**
+ * Strategy 発動側がサーバで抽選した曲。playerXStrategyResult として返る。
+ * 「相手の曲がランダム化される」結果なので、A 側 strategy 申告 → playerAStrategyResult には
+ * B 側の置き換わった曲 (B が実際に演奏する曲) が入る。
+ */
+export interface CompetitionStrategyResult {
+  songStrategyId: number;
+  songTitle: string;
+  songVersion: string;
+  songDiff: 'A' | 'L';
+  songLevel: number;
+  songGenre: CompetitionSongGenre;
+}
+
 export interface CompetitionRevealMatch {
   matchId: number;
   matchKind: 'vanguard' | 'middle' | 'captain';
@@ -122,6 +136,10 @@ export interface CompetitionRevealMatch {
   playerBPick: CompetitionRevealPick | null;
   playerAStrategyUsed: boolean;
   playerBStrategyUsed: boolean;
+  /** A 側申告時の抽選結果 = B 側が演奏する曲。 */
+  playerAStrategyResult: CompetitionStrategyResult | null;
+  /** B 側申告時の抽選結果 = A 側が演奏する曲。 */
+  playerBStrategyResult: CompetitionStrategyResult | null;
 }
 
 export interface CompetitionRevealData {

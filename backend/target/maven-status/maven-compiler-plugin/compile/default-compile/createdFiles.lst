@@ -31,6 +31,7 @@ com\beatseeker\backend\controller\CompetitionAdminController$SetMatchResultReque
 com\beatseeker\backend\controller\TierVoteController$VoteRequest.class
 com\beatseeker\backend\service\BeatPtCalculator.class
 com\beatseeker\backend\controller\ScoreController.class
+com\beatseeker\backend\service\StrategyPoolService$PoolSong.class
 com\beatseeker\backend\service\SkillTreeService.class
 com\beatseeker\backend\entity\DifficultyRank.class
 com\beatseeker\backend\entity\DifficultyRankSong.class
@@ -49,6 +50,7 @@ com\beatseeker\backend\repository\CompetitionTeamRepository.class
 com\beatseeker\backend\service\ChartTendencyService.class
 com\beatseeker\backend\controller\CompetitionAdminController$SetMatchGenreRequest.class
 com\beatseeker\backend\entity\ActivityLog.class
+com\beatseeker\backend\service\StrategyPoolService$1.class
 com\beatseeker\backend\repository\UserSongRankRepository.class
 com\beatseeker\backend\repository\CompetitionMatchRepository.class
 com\beatseeker\backend\controller\OptionVoteController$VoteRequest.class
@@ -96,6 +98,7 @@ com\beatseeker\backend\service\PairRegressionService$Acc.class
 com\beatseeker\backend\service\SongRankBatchService.class
 com\beatseeker\backend\controller\AuthController.class
 com\beatseeker\backend\repository\ScoreHistoryLogRepository.class
+com\beatseeker\backend\service\StrategyPoolService.class
 com\beatseeker\backend\controller\TierVoteController.class
 com\beatseeker\backend\controller\NotificationController.class
 com\beatseeker\backend\repository\ScoreRepository.class

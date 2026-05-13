@@ -2,6 +2,7 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
+import com.beatseeker.backend.service.StrategyPoolService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -57,15 +58,18 @@ public class CompetitionPlayerController {
     private final CompetitionPickRepository pickRepository;
     private final CompetitionMatchRepository matchRepository;
     private final CompetitionStrategyUseRepository strategyUseRepository;
+    private final StrategyPoolService strategyPoolService;
 
     public CompetitionPlayerController(CompetitionParticipantRepository participantRepository,
                                        CompetitionPickRepository pickRepository,
                                        CompetitionMatchRepository matchRepository,
-                                       CompetitionStrategyUseRepository strategyUseRepository) {
+                                       CompetitionStrategyUseRepository strategyUseRepository,
+                                       StrategyPoolService strategyPoolService) {
         this.participantRepository = participantRepository;
         this.pickRepository = pickRepository;
         this.matchRepository = matchRepository;
         this.strategyUseRepository = strategyUseRepository;
+        this.strategyPoolService = strategyPoolService;
     }
 
     /**
@@ -373,6 +377,42 @@ public class CompetitionPlayerController {
                     fresh.setUsedByParticipant(me);
                     return fresh;
                 });
+
+        boolean wasEnabled = Boolean.TRUE.equals(su.getEnabled());
+        boolean willEnable = Boolean.TRUE.equals(req.enabled());
+
+        // false → true への切替時にサーバ側で抽選曲を 1 件決定して result_song_* に保存。
+        // 既に true だった場合は既存抽選結果を保持 (再ランダム化しない)。
+        // true → false への切替時は抽選結果をクリア。
+        if (willEnable && !wasEnabled) {
+            // 相手 (= ランダム化される側) の自選曲を取得し、そのジャンルでプール抽選
+            CompetitionParticipant opponent = me.getId().equals(match.getPlayerA() != null ? match.getPlayerA().getId() : null)
+                    ? match.getPlayerB()
+                    : match.getPlayerA();
+            if (opponent != null) {
+                CompetitionPick opponentPick = pickRepository.findByMatchAndParticipant(match, opponent).orElse(null);
+                if (opponentPick != null) {
+                    StrategyPoolService.PoolSong drawn = strategyPoolService.drawRandom(
+                            opponentPick.getSongGenre(), match.getMatchKind());
+                    if (drawn != null) {
+                        su.setResultSongStrategyId(drawn.id);
+                        su.setResultSongTitle(drawn.title);
+                        su.setResultSongVersion(drawn.version);
+                        su.setResultSongDiff(drawn.diff);
+                        su.setResultSongLevel(drawn.level);
+                        su.setResultSongGenre(opponentPick.getSongGenre());
+                    }
+                }
+            }
+        } else if (!willEnable && wasEnabled) {
+            su.setResultSongStrategyId(null);
+            su.setResultSongTitle(null);
+            su.setResultSongVersion(null);
+            su.setResultSongDiff(null);
+            su.setResultSongLevel(null);
+            su.setResultSongGenre(null);
+        }
+
         su.setEnabled(req.enabled());
         su.setDecidedAt(LocalDateTime.now());
         su = strategyUseRepository.save(su);
@@ -449,6 +489,14 @@ public class CompetitionPlayerController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("enabled", su.getEnabled());
         m.put("decidedAt", su.getDecidedAt());
+        // R-4 連携: enabled=true 時にサーバが抽選した曲 (相手から見えるとは限らず、AdminView の
+        // スコア入力 / SongRevealView スピン着地で使う)。
+        m.put("resultSongStrategyId", su.getResultSongStrategyId());
+        m.put("resultSongTitle", su.getResultSongTitle());
+        m.put("resultSongVersion", su.getResultSongVersion());
+        m.put("resultSongDiff", su.getResultSongDiff());
+        m.put("resultSongLevel", su.getResultSongLevel());
+        m.put("resultSongGenre", su.getResultSongGenre());
         return m;
     }
 
