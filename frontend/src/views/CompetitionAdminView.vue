@@ -52,6 +52,7 @@ const {
   clearMatchResult,
   fetchStandings,
   generateFinals,
+  fetchRevealData,
 } = useCompetitionAdmin();
 
 /** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
