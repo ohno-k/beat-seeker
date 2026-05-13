@@ -252,13 +252,13 @@ const filteredNavItems = computed(() => {
                 <div class="flex flex-col gap-1">
                   <button
                     v-if="isAdmin && !viewingUserId"
-                    @click="selectTab('admin-song-ranks')"
+                    @click="selectTab('popular-songs')"
                     class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all border border-amber-100 dark:border-amber-800"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    {{ t('nav.songRankings') }}
+                    {{ t('nav.popularSongs') }}
                   </button>
                   <button
                     v-if="isAdmin && !viewingUserId"

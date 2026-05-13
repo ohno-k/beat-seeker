@@ -37,7 +37,7 @@ import Changelog from './components/Changelog.vue';
 import UploadResultModal from './components/UploadResultModal.vue';
 import RankingList from './components/RankingList.vue';
 import AdminUserListModal from './components/AdminUserListModal.vue';
-import AdminSongRanksView from './components/AdminSongRanksView.vue';
+import SongRankingList from './components/SongRankingList.vue';
 import Sidebar from './components/Sidebar.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
@@ -231,7 +231,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'admin-song-ranks' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share'>('dashboard')
 /** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
 const currentGuideSlug = ref<string | null>(null);
 /**
@@ -1807,9 +1807,9 @@ const handleUnifiedClose = async () => {
           />
         </template>
 
-        <!-- 管理者専用: 曲別順位管理 -->
-        <template v-else-if="activeTab === 'admin-song-ranks'">
-          <AdminSongRanksView class="w-full max-w-5xl mx-auto" />
+        <!-- 管理者専用: 人気曲ランキング（BEAT-PT TOP100 集計） -->
+        <template v-else-if="activeTab === 'popular-songs'">
+          <SongRankingList class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
         <!-- 利用規約 -->

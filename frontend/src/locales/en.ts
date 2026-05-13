@@ -28,7 +28,7 @@ export const en = {
   'nav.about': 'About',
   'nav.terms': 'Terms of Service',
   'nav.adminPanel': 'Admin Panel',
-  'nav.songRankings': 'Song Rankings',
+  'nav.popularSongs': 'Popular Songs',
   'nav.tierVoting': 'Voting Station',
   'nav.arcadeAssist': 'Song Assist',
   'nav.songAvg': 'Tier Averages',

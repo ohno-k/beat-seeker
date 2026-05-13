@@ -28,7 +28,7 @@ export const ko = {
   'nav.about': '이 사이트에 대해',
   'nav.terms': '이용 약관',
   'nav.adminPanel': '관리자 패널',
-  'nav.songRankings': '곡별 순위',
+  'nav.popularSongs': '인기 곡 랭킹',
   'nav.tierVoting': '투표소',
   'nav.arcadeAssist': '선곡 어시스트',
   'nav.songAvg': '티어별 평균',

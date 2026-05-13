@@ -30,7 +30,7 @@ export const ja = {
   'nav.about': 'このサイトについて',
   'nav.terms': '利用規約',
   'nav.adminPanel': '管理者パネル',
-  'nav.songRankings': '曲別順位',
+  'nav.popularSongs': '人気曲ランキング',
   'nav.tierVoting': '投票所',
   'nav.arcadeAssist': '選曲アシスト',
   'nav.songAvg': 'ティア別平均',
