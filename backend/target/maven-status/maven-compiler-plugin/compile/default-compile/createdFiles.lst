@@ -1,4 +1,5 @@
 com\beatseeker\backend\controller\LoginRequest.class
+com\beatseeker\backend\service\SongRankingAggregateCacheService.class
 com\beatseeker\backend\controller\ArenaController$PlayerData.class
 com\beatseeker\backend\service\PairRegressionService.class
 com\beatseeker\backend\controller\ShareTokenController.class

@@ -20,6 +20,7 @@ import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.SongArenaAveragesCacheService;
 import com.beatseeker.backend.service.SongRankBatchService;
+import com.beatseeker.backend.service.SongRankingAggregateCacheService;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,6 +99,8 @@ public class ScoreController {
     private final TopRankersBeatPtService topRankersBeatPtService;
     /** ティア別平均スコア（song-arena-averages）の集計結果キャッシュ。 */
     private final SongArenaAveragesCacheService songArenaAveragesCacheService;
+    /** 人気曲ランキング（song-ranking-aggregate）の集計結果キャッシュ。 */
+    private final SongRankingAggregateCacheService songRankingAggregateCacheService;
     /** diffJson など JSON 文字列を List/Map に復元するための Jackson。 */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -120,6 +123,7 @@ public class ScoreController {
             SongDefinitionRepository songDefinitionRepository,
             TopRankersBeatPtService topRankersBeatPtService,
             SongArenaAveragesCacheService songArenaAveragesCacheService,
+            SongRankingAggregateCacheService songRankingAggregateCacheService,
             com.beatseeker.backend.service.AdminAuthService adminAuthService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
@@ -135,6 +139,7 @@ public class ScoreController {
         this.songDefinitionRepository = songDefinitionRepository;
         this.topRankersBeatPtService = topRankersBeatPtService;
         this.songArenaAveragesCacheService = songArenaAveragesCacheService;
+        this.songRankingAggregateCacheService = songRankingAggregateCacheService;
         this.adminAuthService = adminAuthService;
     }
 
@@ -733,11 +738,16 @@ public class ScoreController {
     }
 
     /**
-     * 【メソッドの役割】 曲別ランキングの集計データ（DB 側で集計済み）を返す。
+     * 【メソッドの役割】 人気曲ランキングの集計データ（DB 側で集計済み）を返す。
+     *
+     * 集計クエリは scores × song_definitions × difficulty_ranks の重 JOIN で
+     * {@code statement_timeout = 30s} を超えるため、{@link SongRankingAggregateCacheService}
+     * が定期的に in-memory にリフレッシュし、本エンドポイントはその結果を即時返す。
+     * 初回ロード完了前は空リスト。
      */
     @GetMapping("/song-ranking-aggregate")
     public ResponseEntity<List<Map<String, Object>>> getSongRankingAggregate() {
-        return ResponseEntity.ok(scoreRepository.findAllSongRankingAggregates());
+        return ResponseEntity.ok(songRankingAggregateCacheService.get());
     }
 
     /**
