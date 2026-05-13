@@ -574,22 +574,35 @@ const handleGenerateFinals = async () => {
 
 // ── 途中経過マトリクス 用ヘルパ ───────────────────────
 /**
- * row 行のチームが col 列のチームに対して獲得した「総合ポイント」を返す。
- *  - 対角 (row == col): null (画面で「-」表示)
- *  - 該当 matchup が未記録: undefined (画面で「?」表示)
- *  - 記録済: 数値 (= aTotalPoints もしくは bTotalPoints)
+ * row × col セルの表示内容。
+ *  - null: 対角 (同チーム同士)
+ *  - undefined: 該当 matchup が未記録
+ *  - object: row 視点の戦ポイント + 相手の戦ポイント + 勝敗マーカー
+ *    例) テクノが ADX に対し戦pt 13、ADX は 8 で記録済 → { rowPts: 13, colPts: 8, marker: '○' }
  */
-const matrixCellPoints = (rowTeamId: number, colTeamId: number): number | null | undefined => {
+interface MatrixCell {
+  /** 行チームが獲得した戦ポイント (3 戦合計、勝ち点は含まない)。 */
+  rowPts: number;
+  /** 列チームが獲得した戦ポイント。 */
+  colPts: number;
+  /** 行視点の勝敗: ○=勝ち / ×=負け / △=引分。 */
+  marker: '○' | '×' | '△';
+}
+
+const matrixCellOf = (rowTeamId: number, colTeamId: number): MatrixCell | null | undefined => {
   if (rowTeamId === colTeamId) return null;
   const breakdown = standings.value?.matchupBreakdown ?? [];
-  // matchup は (teamA, teamB) で一意。row が A 側 or B 側 どちらかにマッチする。
   for (const e of breakdown) {
-    if (e.teamAId === rowTeamId && e.teamBId === colTeamId) {
-      return e.recorded ? e.aTotalPoints : undefined;
-    }
-    if (e.teamBId === rowTeamId && e.teamAId === colTeamId) {
-      return e.recorded ? e.bTotalPoints : undefined;
-    }
+    const isAB = e.teamAId === rowTeamId && e.teamBId === colTeamId;
+    const isBA = e.teamBId === rowTeamId && e.teamAId === colTeamId;
+    if (!isAB && !isBA) continue;
+    if (!e.recorded) return undefined;
+    const rowPts = isAB ? e.aSongPoints : e.bSongPoints;
+    const colPts = isAB ? e.bSongPoints : e.aSongPoints;
+    const marker: '○' | '×' | '△' =
+      rowPts > colPts ? '○' :
+      rowPts < colPts ? '×' : '△';
+    return { rowPts, colPts, marker };
   }
   return undefined;
 };
@@ -938,7 +951,7 @@ const statusColor = (s: string) => ({
         >
           <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">途中経過</h2>
           <p class="text-[11px] text-slate-500">
-            行のチームが列のチームから獲得した総合ポイント (戦pt + 勝ち点)。「?」 = 試合結果未記録 / 「-」 = 同チーム同士。
+            セル「自軍戦pt ○/×/△ 相手戦pt」: ○=行チームが勝ち / ×=負け / △=引分。「?」 = 未記録、「-」 = 同チーム同士。合計列は順位表と同じ総合ポイント (戦pt + matchup 勝ち点)。
           </p>
           <div class="overflow-x-auto">
             <table class="text-xs border-collapse">
@@ -948,7 +961,7 @@ const statusColor = (s: string) => ({
                   <th
                     v-for="colTeam in currentCompetition.teams"
                     :key="colTeam.id"
-                    class="py-2 px-3 text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700 text-center min-w-[80px]"
+                    class="py-2 px-3 text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700 text-center min-w-[90px]"
                   >
                     {{ colTeam.teamName }}
                   </th>
@@ -975,10 +988,21 @@ const statusColor = (s: string) => ({
                     <template v-if="rowTeam.id === colTeam.id">
                       <span class="text-slate-400">-</span>
                     </template>
+                    <template v-else-if="matrixCellOf(rowTeam.id, colTeam.id) === undefined">
+                      <span class="text-slate-400">?</span>
+                    </template>
                     <template v-else>
-                      <span v-if="matrixCellPoints(rowTeam.id, colTeam.id) === undefined" class="text-slate-400">?</span>
-                      <span v-else class="font-bold text-slate-700 dark:text-slate-200">
-                        {{ matrixCellPoints(rowTeam.id, colTeam.id) }}
+                      <span
+                        class="font-bold whitespace-nowrap"
+                        :class="(() => {
+                          const c = matrixCellOf(rowTeam.id, colTeam.id);
+                          if (!c) return '';
+                          if (c.marker === '○') return 'text-emerald-600 dark:text-emerald-300';
+                          if (c.marker === '×') return 'text-rose-500 dark:text-rose-400';
+                          return 'text-amber-600 dark:text-amber-300';
+                        })()"
+                      >
+                        {{ matrixCellOf(rowTeam.id, colTeam.id)?.rowPts }}<span class="mx-0.5">{{ matrixCellOf(rowTeam.id, colTeam.id)?.marker }}</span>{{ matrixCellOf(rowTeam.id, colTeam.id)?.colPts }}
                       </span>
                     </template>
                   </td>
