@@ -103,8 +103,23 @@ const availableSongs = computed<Song[]>(() => {
 
 const selectLevel = (lv: number) => { editingLevel.value = lv; };
 
-const submitSong = async (s: Song) => {
+/**
+ * 確認ダイアログ用の保留中の曲。
+ * 曲を選んだ後、すぐにサーバ送信ぜずにこの ref にセットしてモーダル表示する。
+ * ユーザーが「はい」を押したら submitSongConfirmed() で確定送信。
+ */
+const pendingSubmitSong = ref<Song | null>(null);
+
+/** 曲リスト or 管理番号で曲が選ばれた最初のエントリポイント。確認モーダルを開く。 */
+const submitSong = (s: Song) => {
+  pendingSubmitSong.value = s;
+};
+
+/** 確認モーダル「はい」で実際にサーバへ提出する。 */
+const submitSongConfirmed = async () => {
+  if (!pendingSubmitSong.value) return;
   if (!editingMatch.value || !editingMatch.value.requiredGenre) return;
+  const s = pendingSubmitSong.value;
   const matchId = editingMatch.value.matchId;
   const genre = editingMatch.value.requiredGenre;
   try {
@@ -116,10 +131,15 @@ const submitSong = async (s: Song) => {
       songDiff: s.diff,
     });
     toast.success('自選曲を更新しました');
+    pendingSubmitSong.value = null;
     cancelEditing();
   } catch (e) {
     toast.error((e as Error).message);
   }
+};
+
+const cancelSubmitConfirm = () => {
+  pendingSubmitSong.value = null;
 };
 
 /**
@@ -190,6 +210,24 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
   if (!m.requiredGenre) return false;
   return true;
 };
+
+/**
+ * 当該試合の matchup で StrategyCard を新規に使えるか。
+ * 既にこの matchup で自チームが card を使っているなら ON/OFF 切替 OK。
+ * そうでない場合、自チームの使用済 matchup 数が limit 未満であれば OK。
+ */
+const canEnableStrategyHere = (matchId: number): boolean => {
+  if (!view.value) return false;
+  const quota = view.value.strategyQuota;
+  const match = view.value.matches.find(mm => mm.matchId === matchId);
+  if (!match) return false;
+  // この matchup の matchId を直接持っていないので、同 matchup の他 match と組で判定するのは難しい。
+  // サーバ側は matchup 単位で判定するが、フロントは match 単位の matchId しか持っていないので、
+  // すでにこの matchId で enabled なら ON 維持可能 / OFF→ON も同じ matchup 内ならカウント増えない。
+  // ここでは保守的に「strategyQuota.usedMatchupCount < limit OR この match で既に enabled」のみ許可する。
+  if (match.myStrategyUse?.enabled) return true;
+  return quota.usedMatchupCount < quota.limit;
+};
 </script>
 
 <template>
@@ -217,6 +255,19 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           状態 <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
           <span v-if="view.competition.deadlineAt"> · 締切 {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
+        </p>
+        <!-- 自チームの StrategyCard 使用枠 (予選: 4 matchup 中 2 まで) -->
+        <p class="text-xs mt-1 font-mono">
+          <span class="text-slate-500">Strategy Card 使用枠:</span>
+          <span
+            class="ml-1 font-bold tabular-nums"
+            :class="view.strategyQuota.usedMatchupCount >= view.strategyQuota.limit
+              ? 'text-rose-500 dark:text-rose-300'
+              : 'text-emerald-600 dark:text-emerald-300'"
+          >
+            {{ view.strategyQuota.usedMatchupCount }} / {{ view.strategyQuota.limit }} matchup
+          </span>
+          <span class="text-slate-400 ml-1">(自チーム合計)</span>
         </p>
       </div>
 
@@ -424,14 +475,23 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               <div class="flex-1 min-w-0">
                 <p class="text-xs font-bold">Strategy Card</p>
                 <p class="text-[10px] text-slate-400">相手の自選曲を同じジャンル × Lv 帯でランダム化する</p>
+                <p
+                  v-if="!canEnableStrategyHere(m.matchId)"
+                  class="text-[10px] text-rose-500 mt-0.5"
+                >
+                  ※ 予選 {{ view.strategyQuota.limit }} matchup 上限に達しています
+                </p>
               </div>
               <button
                 type="button"
                 @click="toggleStrategy(m.matchId, m.myStrategyUse?.enabled ?? false)"
+                :disabled="!canEnableStrategyHere(m.matchId) && !(m.myStrategyUse?.enabled)"
                 class="px-4 py-2 text-xs font-black tracking-wider uppercase rounded-lg transition-all"
                 :class="m.myStrategyUse?.enabled
                   ? 'bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white shadow hover:shadow-lg'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                  : !canEnableStrategyHere(m.matchId)
+                    ? 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
               >
                 {{ m.myStrategyUse?.enabled ? '✓ 使用する' : '使用しない' }}
               </button>
@@ -442,6 +502,48 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
           </div>
         </div>
       </section>
+    </div>
+
+    <!-- 自選曲提出の確認モーダル -->
+    <div
+      v-if="pendingSubmitSong"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      @click.self="cancelSubmitConfirm"
+    >
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+        <p class="text-xs font-mono uppercase tracking-[0.3em] text-slate-500">提出確認</p>
+        <p class="text-base font-bold leading-relaxed">
+          下記の曲を{{ editingMatch ? KIND_LABEL[editingMatch.matchKind] : '' }}用に提出します。<br />
+          <span class="text-rose-500 text-sm">よろしいですか?</span>
+        </p>
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+          <p class="text-xl font-black truncate">{{ pendingSubmitSong.title }}</p>
+          <p class="text-xs font-mono text-slate-500 mt-1">
+            <span class="text-emerald-600 dark:text-emerald-300 font-bold">#{{ pendingSubmitSong.id }}</span>
+            · {{ pendingSubmitSong.version }}
+            · {{ pendingSubmitSong.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
+            · Lv {{ pendingSubmitSong.level }}
+          </p>
+          <p v-if="editingMatch?.requiredGenre" class="text-[10px] font-mono text-slate-400 mt-1">
+            ジャンル: <span class="text-emerald-600 dark:text-emerald-300">{{ editingMatch.requiredGenre }}</span>
+          </p>
+        </div>
+        <p class="text-[11px] text-slate-500 leading-relaxed">
+          ※ ロック前であれば、提出後でも変更/取消ができます。
+        </p>
+        <div class="flex gap-2 justify-end">
+          <button
+            type="button"
+            @click="cancelSubmitConfirm"
+            class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+          >キャンセル</button>
+          <button
+            type="button"
+            @click="submitSongConfirmed"
+            class="px-5 py-2 rounded-xl text-sm font-black tracking-wider uppercase bg-blue-600 text-white hover:bg-blue-700 shadow-md"
+          >✓ はい、提出</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -72,6 +72,27 @@ const usedInMatchup = (matchup: TlMatchupDto, exceptMatchId: number): Set<number
   return set;
 };
 
+/**
+ * 当該プレイヤーをこの戦に新規アサインしようとしたとき、コスト不足になるか。
+ * 既にこの slot にアサイン済みなら自分自身の分は除外して判定する。
+ * 決勝 matchup ではコスト無制限のため常に false。
+ */
+const wouldExceedCostFor = (
+  participantId: number,
+  match: TlMatchDto,
+): boolean => {
+  if (!view.value) return false;
+  const member = view.value.members.find(mm => mm.id === participantId);
+  if (!member) return false;
+  const costForThisKind = view.value.costPerKind[match.matchKind] ?? 0;
+  // この slot に既に同じプレイヤーがアサイン済みなら、その分は member.spentCost に含まれているので二重カウント回避
+  const alreadyAssignedHere = match.myAssigned?.participantId === participantId;
+  const spentExceptThis = alreadyAssignedHere
+    ? member.spentCost - costForThisKind
+    : member.spentCost;
+  return spentExceptThis + costForThisKind > view.value.initialCost;
+};
+
 /** 4 matchup の表示順 (matchupOrder の昇順を保証)。 */
 const sortedMatchups = computed<TlMatchupDto[]>(() => {
   if (!view.value) return [];
@@ -105,9 +126,17 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
         </p>
       </div>
 
-      <!-- メンバー一覧 -->
+      <!-- メンバー一覧 + 予選コスト残量 -->
       <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
-        <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500 mb-3">所属メンバー</p>
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">所属メンバー</p>
+          <p class="text-[10px] font-mono text-slate-400">
+            初期 {{ view.initialCost }} pt /
+            先鋒 {{ view.costPerKind.vanguard }} ·
+            中堅 {{ view.costPerKind.middle }} ·
+            大将 {{ view.costPerKind.captain }}
+          </p>
+        </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div
             v-for="m in view.members"
@@ -118,6 +147,18 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
               {{ m.displayName }}
               <span v-if="m.isTl" class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider align-middle">TL</span>
             </p>
+            <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
+              <span class="text-slate-400">残コスト</span>
+              <span
+                class="font-bold tabular-nums"
+                :class="m.remainingCost <= 0
+                  ? 'text-rose-600 dark:text-rose-300'
+                  : m.remainingCost < view.costPerKind.captain
+                    ? 'text-amber-600 dark:text-amber-300'
+                    : 'text-emerald-600 dark:text-emerald-300'"
+              >{{ m.remainingCost }}</span>
+              <span class="text-slate-500">/ {{ view.initialCost }}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -190,10 +231,12 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
                       v-for="m in view.members"
                       :key="m.id"
                       :value="m.id"
-                      :disabled="usedInMatchup(mu, match.matchId).has(m.id)"
+                      :disabled="usedInMatchup(mu, match.matchId).has(m.id) || wouldExceedCostFor(m.id, match)"
                     >
                       {{ m.displayName }}{{ m.isTl ? ' (TL)' : '' }}
+                      (残{{ m.remainingCost }})
                       <template v-if="usedInMatchup(mu, match.matchId).has(m.id)"> ※他試合で起用中</template>
+                      <template v-else-if="wouldExceedCostFor(m.id, match)"> ※コスト不足</template>
                     </option>
                   </select>
                 </div>

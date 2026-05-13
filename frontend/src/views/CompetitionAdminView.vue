@@ -22,6 +22,8 @@ import {
   type CompetitionMatchDto,
   type CompetitionSongGenre,
   type CompetitionRevealData,
+  type CompetitionStandingsDto,
+  type MatchResultPayload,
 } from '../composables/useCompetitionAdmin';
 import { useToast } from '../composables/useToast';
 
@@ -46,6 +48,10 @@ const {
   deleteCompetition,
   regenerateParticipantToken,
   regenerateTlToken,
+  setMatchResult,
+  clearMatchResult,
+  fetchStandings,
+  generateFinals,
 } = useCompetitionAdmin();
 
 /** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
@@ -110,6 +116,7 @@ const handleOpenCompetition = async (id: number) => {
   try {
     await fetchCompetition(id);
     await refreshRevealData(id);
+    await refreshStandings();
   } catch (e) {
     toast.error((e as Error).message);
   }
@@ -400,6 +407,118 @@ const handleRefreshRevealData = async () => {
   toast.success('提出状況を再読込しました');
 };
 
+// ── 試合結果記録 (R-4: スコアベース) ───────────────────
+/**
+ * 試合の結果入力。matchId 単位で開閉し、両曲ぶんの管理番号 / スコア を受け付ける。
+ * 両スコアが揃った曲だけ判定対象。サーバ側で aSongsWon / bSongsWon を自動算出する。
+ */
+const resultEditingMatchId = ref<number | null>(null);
+const resultDraft = ref<MatchResultPayload>({
+  song1StrategyId: null, song1Title: null,
+  song1ScoreA: null, song1ScoreB: null,
+  song2StrategyId: null, song2Title: null,
+  song2ScoreA: null, song2ScoreB: null,
+});
+
+const beginResultEdit = (match: CompetitionMatchDto) => {
+  resultEditingMatchId.value = match.id;
+  resultDraft.value = {
+    song1StrategyId: match.song1StrategyId,
+    song1Title: match.song1Title,
+    song1ScoreA: match.song1ScoreA,
+    song1ScoreB: match.song1ScoreB,
+    song2StrategyId: match.song2StrategyId,
+    song2Title: match.song2Title,
+    song2ScoreA: match.song2ScoreA,
+    song2ScoreB: match.song2ScoreB,
+  };
+};
+const cancelResultEdit = () => {
+  resultEditingMatchId.value = null;
+};
+const handleSaveResult = async (matchId: number) => {
+  if (!currentCompetition.value) return;
+  // 部分入力 OK だが、負の数は弾く
+  const allScores = [
+    resultDraft.value.song1ScoreA, resultDraft.value.song1ScoreB,
+    resultDraft.value.song2ScoreA, resultDraft.value.song2ScoreB,
+  ];
+  if (allScores.some(v => v !== null && (v as number) < 0)) {
+    toast.error('スコアは 0 以上の整数で入力してください');
+    return;
+  }
+  try {
+    await setMatchResult(currentCompetition.value.id, matchId, resultDraft.value);
+    await refreshStandings();
+    toast.success('結果を記録しました');
+    cancelResultEdit();
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+const handleClearResult = async (matchId: number) => {
+  if (!currentCompetition.value) return;
+  if (!confirm('この試合の結果を未記録に戻しますか?')) return;
+  try {
+    await clearMatchResult(currentCompetition.value.id, matchId);
+    await refreshStandings();
+    toast.success('結果を未記録に戻しました');
+    cancelResultEdit();
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+/**
+ * 編集中ドラフトから勝敗プレビューを計算 (リアルタイム表示)。
+ * 両スコアが揃った曲だけ判定対象 (片方欠けてる曲はスキップ)。
+ */
+const draftWinnerPreview = computed<{ a: number; b: number; verdict: string }>(() => {
+  const d = resultDraft.value;
+  let a = 0, b = 0, recorded = 0;
+  if (d.song1ScoreA !== null && d.song1ScoreB !== null) {
+    recorded++;
+    if (d.song1ScoreA > d.song1ScoreB) a++;
+    else if (d.song1ScoreA < d.song1ScoreB) b++;
+  }
+  if (d.song2ScoreA !== null && d.song2ScoreB !== null) {
+    recorded++;
+    if (d.song2ScoreA > d.song2ScoreB) a++;
+    else if (d.song2ScoreA < d.song2ScoreB) b++;
+  }
+  let verdict = '未記録';
+  if (recorded > 0) {
+    if (a > b) verdict = 'A 勝ち';
+    else if (a < b) verdict = 'B 勝ち';
+    else verdict = '引分';
+  }
+  return { a, b, verdict };
+});
+
+// ── 順位表 / 決勝生成 ─────────────────────────────────
+const standings = ref<CompetitionStandingsDto | null>(null);
+const refreshStandings = async () => {
+  if (!currentCompetition.value) return;
+  try {
+    standings.value = await fetchStandings(currentCompetition.value.id);
+  } catch {
+    standings.value = null;
+  }
+};
+
+const handleGenerateFinals = async () => {
+  if (!currentCompetition.value) return;
+  if (!confirm('予選 TOP2 チームで決勝 matchup を生成しますか?')) return;
+  try {
+    await generateFinals(currentCompetition.value.id);
+    await refreshStandings();
+    await refreshRevealData(currentCompetition.value.id);
+    toast.success('決勝を生成しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
 /** matchup の両側ラインアップ公開状態を判定 (none / partial / both)。 */
 const lineupPublishStateOf = (mu: { lineupPublishedA: boolean; lineupPublishedB: boolean }): 'none' | 'partial' | 'both' => {
   if (mu.lineupPublishedA && mu.lineupPublishedB) return 'both';
@@ -660,6 +779,155 @@ const statusColor = (s: string) => ({
           </div>
         </div>
 
+        <!-- 順位表 + 決勝生成ボタン (open 以降のみ表示) -->
+        <section
+          v-if="standings && standings.rows.length > 0"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+              順位表 ({{ standings.prelimRecordedCount }} / {{ standings.prelimMatchupCount }} matchup 記録済)
+            </h2>
+            <button
+              type="button"
+              @click="refreshStandings"
+              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+            >🔄 再計算</button>
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <th class="text-left py-1 px-2">順位</th>
+                <th class="text-left py-1 px-2">チーム</th>
+                <th class="text-right py-1 px-2">勝</th>
+                <th class="text-right py-1 px-2">分</th>
+                <th class="text-right py-1 px-2">負</th>
+                <th class="text-right py-1 px-2">戦pt</th>
+                <th class="text-right py-1 px-2">勝点</th>
+                <th class="text-right py-1 px-2 font-black text-slate-700 dark:text-slate-200">合計</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="row in standings.rows"
+                :key="row.teamId"
+                class="border-b border-slate-100 dark:border-slate-700/60"
+                :class="row.rank <= 2 ? 'bg-amber-50/40 dark:bg-amber-900/10 font-bold' : ''"
+              >
+                <td class="py-1.5 px-2 tabular-nums">
+                  <span v-if="row.rank === 1">🥇</span>
+                  <span v-else-if="row.rank === 2">🥈</span>
+                  <span v-else>{{ row.rank }}</span>
+                </td>
+                <td class="py-1.5 px-2 truncate">{{ row.teamName }}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums text-emerald-600 dark:text-emerald-300">{{ row.wins }}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums text-slate-500">{{ row.draws }}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums text-rose-500 dark:text-rose-400">{{ row.losses }}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums">{{ row.songPoints }}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums">{{ row.matchupPoints }}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums font-black">{{ row.totalPoints }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- 決勝生成ボタン -->
+          <div class="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-slate-700/40">
+            <p class="text-[11px] text-slate-500">
+              <span v-if="standings.finalsExists" class="text-amber-600 dark:text-amber-300 font-bold">🏆 決勝生成済</span>
+              <span v-else-if="standings.allPrelimRecorded">予選全結果記録済。TOP2 で決勝を生成できます。</span>
+              <span v-else>予選 {{ standings.prelimMatchupCount - standings.prelimRecordedCount }} 試合の結果記録待ち</span>
+            </p>
+            <button
+              v-if="!standings.finalsExists"
+              type="button"
+              @click="handleGenerateFinals"
+              :disabled="!standings.allPrelimRecorded"
+              class="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all"
+              :class="standings.allPrelimRecorded
+                ? 'bg-gradient-to-r from-amber-400 to-rose-500 text-white hover:shadow-lg'
+                : 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'"
+            >
+              🏆 決勝を生成
+            </button>
+          </div>
+        </section>
+
+        <!-- R-5: 途中経過テーブル (matchup ごとに 3 戦のスコア表示) -->
+        <section
+          v-if="currentCompetition.matchups && currentCompetition.matches && currentCompetition.matchups.length > 0"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-2"
+        >
+          <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">途中経過</h2>
+          <p class="text-[11px] text-slate-500">
+            記録済みの試合スコアを matchup 単位でまとめます。○=該当チーム勝ち / ●=引分 / -=未記録。
+          </p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                  <th class="text-left py-1 px-2">対戦</th>
+                  <th class="text-center py-1 px-2">先鋒</th>
+                  <th class="text-center py-1 px-2">中堅</th>
+                  <th class="text-center py-1 px-2">大将</th>
+                  <th class="text-center py-1 px-2 font-black text-slate-700 dark:text-slate-200">結果</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="mu in currentCompetition.matchups"
+                  :key="mu.id"
+                  class="border-b border-slate-100 dark:border-slate-700/60"
+                  :class="mu.isFinals ? 'bg-gradient-to-r from-amber-50/40 to-rose-50/40 dark:from-amber-900/10 dark:to-rose-900/10' : ''"
+                >
+                  <td class="py-1.5 px-2 whitespace-nowrap">
+                    <span class="font-bold">{{ teamNameOf(mu.teamAId) }}</span>
+                    <span class="text-slate-400 mx-1">vs</span>
+                    <span class="font-bold">{{ teamNameOf(mu.teamBId) }}</span>
+                    <span v-if="mu.isFinals" class="ml-1 text-[9px] font-black px-1 py-0.5 rounded bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">🏆</span>
+                  </td>
+                  <td v-for="kind in (['vanguard', 'middle', 'captain'] as const)" :key="kind" class="py-1.5 px-2 text-center tabular-nums">
+                    <template v-for="match in matchesForMatchup(mu.id).filter(m => m.matchKind === kind)" :key="match.id">
+                      <template v-if="match.aSongsWon !== null && match.bSongsWon !== null">
+                        <span class="text-slate-500">{{ match.aSongsWon }}-{{ match.bSongsWon }}</span>
+                        <span class="ml-1 text-[10px]" :class="match.aSongsWon > match.bSongsWon ? 'text-emerald-600 dark:text-emerald-300 font-bold' : match.aSongsWon < match.bSongsWon ? 'text-rose-500 font-bold' : 'text-amber-500'">
+                          {{ match.aSongsWon > match.bSongsWon ? '○A' : match.aSongsWon < match.bSongsWon ? '○B' : '●' }}
+                        </span>
+                      </template>
+                      <span v-else class="text-slate-400">-</span>
+                    </template>
+                  </td>
+                  <td class="py-1.5 px-2 text-center">
+                    <template v-if="matchesForMatchup(mu.id).every(m => m.aSongsWon !== null && m.bSongsWon !== null)">
+                      <template v-for="(_, idx) in [0]" :key="idx">
+                        <span
+                          class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                          :class="(() => {
+                            const ms = matchesForMatchup(mu.id);
+                            const aWon = ms.filter(m => (m.aSongsWon ?? 0) > (m.bSongsWon ?? 0)).length;
+                            const bWon = ms.filter(m => (m.aSongsWon ?? 0) < (m.bSongsWon ?? 0)).length;
+                            if (aWon > bWon) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300';
+                            if (aWon < bWon) return 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300';
+                            return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
+                          })()"
+                        >
+                          {{ (() => {
+                            const ms = matchesForMatchup(mu.id);
+                            const aWon = ms.filter(m => (m.aSongsWon ?? 0) > (m.bSongsWon ?? 0)).length;
+                            const bWon = ms.filter(m => (m.aSongsWon ?? 0) < (m.bSongsWon ?? 0)).length;
+                            if (aWon > bWon) return `${teamNameOf(mu.teamAId)} 勝`;
+                            if (aWon < bWon) return `${teamNameOf(mu.teamBId)} 勝`;
+                            return '引分';
+                          })() }}
+                        </span>
+                      </template>
+                    </template>
+                    <span v-else class="text-slate-400 italic text-[10px]">記録中</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         <!-- 対戦表: 全 30 試合に対する運営ジャンル指定 (open 以降のみ表示) -->
         <section
           v-if="currentCompetition.matchups && currentCompetition.matches && currentCompetition.matchups.length > 0"
@@ -693,6 +961,9 @@ const statusColor = (s: string) => ({
                   <span class="text-blue-600 dark:text-blue-400">{{ teamNameOf(mu.teamAId) }}</span>
                   <span class="text-slate-400 mx-2">vs</span>
                   <span class="text-blue-600 dark:text-blue-400">{{ teamNameOf(mu.teamBId) }}</span>
+                  <span v-if="mu.isFinals" class="ml-2 text-[10px] font-black px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-rose-500 text-white tracking-wider">
+                    🏆 FINALS
+                  </span>
                 </p>
                 <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
                   Matchup #{{ mu.matchupOrder }}
@@ -812,6 +1083,106 @@ const statusColor = (s: string) => ({
                   >
                     {{ match.lockedA && match.lockedB ? '両方解除' : '両方ロック' }}
                   </button>
+                </div>
+
+                <!-- 結果記録 UI (R-4: 曲管理番号 + スコア入力 → 勝敗自動表示) -->
+                <div class="pt-1 border-t border-slate-100 dark:border-slate-700/40 text-[10px] font-mono">
+                  <!-- 折り畳み: 編集中以外は 1 行サマリ -->
+                  <template v-if="resultEditingMatchId !== match.id">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-slate-400 uppercase tracking-wider">結果:</span>
+                      <span v-if="match.aSongsWon !== null && match.bSongsWon !== null" class="text-slate-300 dark:text-slate-200">
+                        <span class="font-bold tabular-nums">{{ match.aSongsWon }} - {{ match.bSongsWon }}</span>
+                        ({{ match.aSongsWon > match.bSongsWon ? 'A 勝ち' : match.aSongsWon < match.bSongsWon ? 'B 勝ち' : '引分' }})
+                      </span>
+                      <span v-else class="text-slate-400 italic">未記録</span>
+                      <span v-if="match.song1ScoreA !== null && match.song1ScoreB !== null" class="text-slate-500">
+                        | 1曲目: {{ match.song1ScoreA }} - {{ match.song1ScoreB }}
+                      </span>
+                      <span v-if="match.song2ScoreA !== null && match.song2ScoreB !== null" class="text-slate-500">
+                        | 2曲目: {{ match.song2ScoreA }} - {{ match.song2ScoreB }}
+                      </span>
+                      <button type="button" @click="beginResultEdit(match)" class="ml-auto px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">
+                        {{ match.aSongsWon !== null ? '編集' : '記録' }}
+                      </button>
+                      <button v-if="match.aSongsWon !== null" type="button" @click="handleClearResult(match.id)" class="px-2 py-1 rounded bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300">クリア</button>
+                    </div>
+                  </template>
+                  <!-- 編集モード: 2 曲 × (管理番号 + A スコア + B スコア) -->
+                  <template v-else>
+                    <p class="text-slate-400 uppercase tracking-wider mb-2">スコア記録 (両スコアが揃った曲だけ勝敗判定)</p>
+                    <div class="space-y-2">
+                      <!-- Song 1 -->
+                      <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
+                        <span class="text-slate-500">1 曲目</span>
+                        <input
+                          v-model.number="resultDraft.song1StrategyId"
+                          type="number"
+                          min="0"
+                          placeholder="管理番号"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs"
+                        />
+                        <input
+                          v-model.number="resultDraft.song1ScoreA"
+                          type="number"
+                          min="0"
+                          placeholder="A スコア"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                        />
+                        <input
+                          v-model.number="resultDraft.song1ScoreB"
+                          type="number"
+                          min="0"
+                          placeholder="B スコア"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                        />
+                      </div>
+                      <!-- Song 2 -->
+                      <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
+                        <span class="text-slate-500">2 曲目</span>
+                        <input
+                          v-model.number="resultDraft.song2StrategyId"
+                          type="number"
+                          min="0"
+                          placeholder="管理番号"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs"
+                        />
+                        <input
+                          v-model.number="resultDraft.song2ScoreA"
+                          type="number"
+                          min="0"
+                          placeholder="A スコア"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                        />
+                        <input
+                          v-model.number="resultDraft.song2ScoreB"
+                          type="number"
+                          min="0"
+                          placeholder="B スコア"
+                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                        />
+                      </div>
+                    </div>
+                    <!-- 勝敗プレビュー -->
+                    <div class="mt-2 flex items-center gap-2 flex-wrap">
+                      <span class="text-slate-400 uppercase tracking-wider">判定:</span>
+                      <span class="font-bold tabular-nums text-sm">
+                        A {{ draftWinnerPreview.a }} - {{ draftWinnerPreview.b }} B
+                      </span>
+                      <span
+                        class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                        :class="draftWinnerPreview.verdict === 'A 勝ち'
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                          : draftWinnerPreview.verdict === 'B 勝ち'
+                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                            : draftWinnerPreview.verdict === '引分'
+                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                              : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400'"
+                      >{{ draftWinnerPreview.verdict }}</span>
+                      <button type="button" @click="handleSaveResult(match.id)" class="ml-auto px-3 py-1 rounded bg-emerald-500 text-white hover:bg-emerald-600 font-bold">保存</button>
+                      <button type="button" @click="cancelResultEdit" class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                    </div>
+                  </template>
                 </div>
 
                 <!-- REVEAL 再生ボタン (両側自選曲が揃っている試合だけ有効) -->

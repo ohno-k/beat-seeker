@@ -35,6 +35,15 @@ import java.util.*;
 @RequestMapping("/api/competition-access/tl")
 public class CompetitionTlController {
 
+    /** 各プレイヤーの予選初期コスト。 */
+    public static final int INITIAL_COST = 80;
+    /** 戦種別ごとの消費コスト。決勝 (isFinals) では適用しない。 */
+    public static final Map<String, Integer> COST_PER_KIND = Map.of(
+            "vanguard", 10,
+            "middle", 20,
+            "captain", 30
+    );
+
     private final CompetitionTeamRepository teamRepository;
     private final CompetitionParticipantRepository participantRepository;
     private final CompetitionMatchupRepository matchupRepository;
@@ -86,12 +95,32 @@ public class CompetitionTlController {
         root.put("team", teamMap(myTeam));
         root.put("competition", competitionMap(comp));
 
-        // 自チームの 4 人
+        // 自チームの 4 人 + 各人の予選コスト消費・残量を計算
         List<CompetitionParticipant> members =
                 participantRepository.findByTeamOrderByCreatedAtAsc(myTeam);
+
+        // 大会全試合をスキャンして、自チームメンバーが何戦に起用されているか集計
+        List<CompetitionMatch> allMatches = matchRepository.findAllByCompetition(comp);
+        Map<Long, Integer> spentByParticipantId = new HashMap<>();
+        for (CompetitionMatch m : allMatches) {
+            // 決勝 matchup はコスト計算対象外
+            if (Boolean.TRUE.equals(m.getMatchup().getIsFinals())) continue;
+            int cost = COST_PER_KIND.getOrDefault(m.getMatchKind(), 0);
+            for (CompetitionParticipant p : new CompetitionParticipant[] { m.getPlayerA(), m.getPlayerB() }) {
+                if (p == null) continue;
+                if (!myTeam.getId().equals(p.getTeam().getId())) continue;
+                spentByParticipantId.merge(p.getId(), cost, Integer::sum);
+            }
+        }
+
         List<Map<String, Object>> memberMaps = new ArrayList<>();
-        for (CompetitionParticipant m : members) memberMaps.add(memberMap(m));
+        for (CompetitionParticipant m : members) {
+            int spent = spentByParticipantId.getOrDefault(m.getId(), 0);
+            memberMaps.add(memberMap(m, spent));
+        }
         root.put("members", memberMaps);
+        root.put("initialCost", INITIAL_COST);
+        root.put("costPerKind", COST_PER_KIND);
 
         // 自チームが関与する matchup を 4 件抽出
         List<CompetitionMatchup> allMatchups =
@@ -213,6 +242,30 @@ public class CompetitionTlController {
             }
         }
 
+        // 予選コスト制限のチェック (決勝 matchup は対象外)。
+        // 既に他の予選試合で消費したコスト + 今回の戦コストが INITIAL_COST を超えないこと。
+        if (!Boolean.TRUE.equals(matchup.getIsFinals())) {
+            int costForThisKind = COST_PER_KIND.getOrDefault(match.getMatchKind(), 0);
+            int spentExceptThis = 0;
+            List<CompetitionMatch> allMatches = matchRepository.findAllByCompetition(comp);
+            for (CompetitionMatch m : allMatches) {
+                if (Boolean.TRUE.equals(m.getMatchup().getIsFinals())) continue;
+                if (m.getId().equals(match.getId())) continue; // 今回上書きする slot は除外
+                CompetitionParticipant pa = m.getPlayerA();
+                CompetitionParticipant pb = m.getPlayerB();
+                if ((pa != null && pa.getId().equals(assignee.getId()))
+                        || (pb != null && pb.getId().equals(assignee.getId()))) {
+                    spentExceptThis += COST_PER_KIND.getOrDefault(m.getMatchKind(), 0);
+                }
+            }
+            int wouldSpend = spentExceptThis + costForThisKind;
+            if (wouldSpend > INITIAL_COST) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", assignee.getDisplayName() + " のコストが不足しています "
+                                + "(消費予定 " + wouldSpend + " > 初期 " + INITIAL_COST + ")"));
+            }
+        }
+
         if (iAmA) match.setPlayerA(assignee); else match.setPlayerB(assignee);
         matchRepository.save(match);
         return ResponseEntity.ok(Map.of(
@@ -273,11 +326,17 @@ public class CompetitionTlController {
         return m;
     }
 
-    private Map<String, Object> memberMap(CompetitionParticipant p) {
+    /**
+     * メンバー 1 人の表示用 Map。予選コスト消費 (spent) と残量 (remaining = INITIAL - spent) を含める。
+     * 決勝 matchup は呼び出し側で除外している前提。
+     */
+    private Map<String, Object> memberMap(CompetitionParticipant p, int spentCost) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", p.getId());
         m.put("displayName", p.getDisplayName());
         m.put("isTl", p.getIsTl());
+        m.put("spentCost", spentCost);
+        m.put("remainingCost", INITIAL_COST - spentCost);
         return m;
     }
 

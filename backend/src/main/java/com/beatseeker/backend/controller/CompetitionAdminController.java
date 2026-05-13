@@ -47,6 +47,20 @@ public class CompetitionAdminController {
     private static final Set<String> ALLOWED_GENRES =
             Set.of("NOTES", "PEAK", "CHORD", "CHARGE", "SCRATCH", "SOF-LAN", "INSANE");
 
+    /** 戦種別ごとの 1 曲あたり獲得ポイント (予選: 先鋒2 / 中堅3 / 大将4)。 */
+    private static final Map<String, Integer> POINTS_PER_SONG_BY_KIND = Map.of(
+            "vanguard", 2,
+            "middle", 3,
+            "captain", 4
+    );
+
+    /** matchup 勝利時のチーム勝ち点。 */
+    private static final int MATCHUP_WIN_PT = 3;
+    /** matchup 引き分け時のチーム勝ち点。 */
+    private static final int MATCHUP_DRAW_PT = 1;
+    /** 予選 matchup 数 (= C(5,2))。これらすべての結果が記録されたら決勝生成可能。 */
+    private static final int PRELIM_MATCHUP_COUNT = 10;
+
     private final CompetitionRepository competitionRepository;
     private final CompetitionTeamRepository teamRepository;
     private final CompetitionParticipantRepository participantRepository;
@@ -388,6 +402,277 @@ public class CompetitionAdminController {
         m.put("songTitle", p.getSongTitle());
         m.put("songDiff", p.getSongDiff());
         return m;
+    }
+
+    // ── 試合結果記録 / 集計 / 決勝生成 ─────────────────────
+
+    /**
+     * 【メソッドの役割】 試合 1 件の詳細スコア (2 曲分) を記録/更新する。
+     *
+     * <p>R-4 要件: 曲管理番号 + スコアを入れて、勝敗を自動で導く。
+     * 1 戦 = 2 曲制を想定。リクエストには両曲ぶんの管理番号 / タイトル / A スコア / B スコアを含む。
+     * 入力された値から {@code aSongsWon} / {@code bSongsWon} を計算してフィールドへ反映する。
+     *
+     * <p>scoreA == scoreB の場合はその曲は引分扱いとし、どちらの win count にも加算しない。
+     */
+    @PutMapping("/{competitionId}/matches/{matchId}/result")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> setMatchResult(
+            Authentication auth,
+            @PathVariable Long competitionId,
+            @PathVariable Long matchId,
+            @RequestBody SetMatchResultRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if (req == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "リクエストボディが必要です"));
+        }
+        CompetitionMatch match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found: " + matchId));
+        if (!match.getMatchup().getCompetition().getId().equals(comp.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "指定試合はこの大会に属していません"));
+        }
+
+        // 各曲のスコアは正の整数。null は未入力扱いで、当該曲は勝敗判定からスキップ。
+        for (Integer v : new Integer[] {
+                req.song1ScoreA(), req.song1ScoreB(), req.song2ScoreA(), req.song2ScoreB() }) {
+            if (v != null && v < 0) {
+                return ResponseEntity.badRequest().body(Map.of("message", "スコアは 0 以上の整数で入力してください"));
+            }
+        }
+
+        match.setSong1StrategyId(req.song1StrategyId());
+        match.setSong1Title(req.song1Title());
+        match.setSong1ScoreA(req.song1ScoreA());
+        match.setSong1ScoreB(req.song1ScoreB());
+        match.setSong2StrategyId(req.song2StrategyId());
+        match.setSong2Title(req.song2Title());
+        match.setSong2ScoreA(req.song2ScoreA());
+        match.setSong2ScoreB(req.song2ScoreB());
+
+        // スコアから勝ち曲数を導出。両スコアが揃っている曲だけ判定対象。
+        int aWon = 0, bWon = 0;
+        boolean anyEntered = false;
+        if (req.song1ScoreA() != null && req.song1ScoreB() != null) {
+            anyEntered = true;
+            if (req.song1ScoreA() > req.song1ScoreB()) aWon++;
+            else if (req.song1ScoreA() < req.song1ScoreB()) bWon++;
+        }
+        if (req.song2ScoreA() != null && req.song2ScoreB() != null) {
+            anyEntered = true;
+            if (req.song2ScoreA() > req.song2ScoreB()) aWon++;
+            else if (req.song2ScoreA() < req.song2ScoreB()) bWon++;
+        }
+        if (anyEntered) {
+            match.setASongsWon(aWon);
+            match.setBSongsWon(bWon);
+            match.setResultRecordedAt(java.time.LocalDateTime.now());
+        } else {
+            // 全曲のスコアが揃っていない場合は集計値もクリア
+            match.setASongsWon(null);
+            match.setBSongsWon(null);
+            match.setResultRecordedAt(null);
+        }
+        matchRepository.save(match);
+        return ResponseEntity.ok(toMatchMap(match));
+    }
+
+    /**
+     * 【メソッドの役割】 結果を未記録に戻す (誤入力修正用)。
+     */
+    @DeleteMapping("/{competitionId}/matches/{matchId}/result")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> clearMatchResult(
+            Authentication auth,
+            @PathVariable Long competitionId,
+            @PathVariable Long matchId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        CompetitionMatch match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found: " + matchId));
+        if (!match.getMatchup().getCompetition().getId().equals(comp.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "指定試合はこの大会に属していません"));
+        }
+        match.setASongsWon(null);
+        match.setBSongsWon(null);
+        match.setResultRecordedAt(null);
+        matchRepository.save(match);
+        return ResponseEntity.ok(toMatchMap(match));
+    }
+
+    /**
+     * 【メソッドの役割】 大会のチーム順位表を計算して返す。
+     *
+     * <p>計算方法 (予選 matchup のみ対象、決勝は除外):
+     * <ul>
+     *   <li>1 戦 (= 1 match) ごと: 勝った曲数 × 戦ポイント (先鋒2/中堅3/大将4) を勝った側のチームに加算</li>
+     *   <li>1 matchup ごと: 3 戦の勝ち数 (戦の勝者カウント) を比較し、より多い側が matchup 勝利</li>
+     *   <li>matchup 勝利 = +3pt / 引分 = +1pt / 敗北 = 0pt</li>
+     *   <li>合計 = 戦ポイント合計 + matchup 勝ち点合計</li>
+     * </ul>
+     */
+    @GetMapping("/{competitionId}/standings")
+    public ResponseEntity<Map<String, Object>> getStandings(
+            Authentication auth, @PathVariable Long competitionId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+
+        List<CompetitionTeam> teams = teamRepository.findByCompetitionOrderByTeamOrderAsc(comp);
+        // 各チームの集計値
+        Map<Long, Integer> songPts = new LinkedHashMap<>();
+        Map<Long, Integer> matchupPts = new LinkedHashMap<>();
+        Map<Long, Integer> wins = new LinkedHashMap<>();
+        Map<Long, Integer> draws = new LinkedHashMap<>();
+        Map<Long, Integer> losses = new LinkedHashMap<>();
+        for (CompetitionTeam t : teams) {
+            songPts.put(t.getId(), 0);
+            matchupPts.put(t.getId(), 0);
+            wins.put(t.getId(), 0);
+            draws.put(t.getId(), 0);
+            losses.put(t.getId(), 0);
+        }
+
+        List<CompetitionMatchup> matchups = matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp);
+        int prelimRecordedCount = 0;
+        for (CompetitionMatchup mu : matchups) {
+            if (Boolean.TRUE.equals(mu.getIsFinals())) continue; // 決勝は予選順位の集計対象外
+            List<CompetitionMatch> matches = matchRepository.findByMatchupOrderByIdAsc(mu);
+            // 戦単位の勝者カウント
+            int aWonMatches = 0, bWonMatches = 0;
+            boolean allRecorded = true;
+            for (CompetitionMatch m : matches) {
+                Integer aw = m.getASongsWon();
+                Integer bw = m.getBSongsWon();
+                if (aw == null || bw == null) { allRecorded = false; continue; }
+                int kindPt = POINTS_PER_SONG_BY_KIND.getOrDefault(m.getMatchKind(), 0);
+                songPts.merge(mu.getTeamA().getId(), aw * kindPt, Integer::sum);
+                songPts.merge(mu.getTeamB().getId(), bw * kindPt, Integer::sum);
+                if (aw > bw) aWonMatches++;
+                else if (bw > aw) bWonMatches++;
+                // 同点 (aw == bw) は戦引分扱い、どちらにも加算しない
+            }
+            if (!allRecorded) continue;
+            prelimRecordedCount++;
+            // matchup 勝者判定 (戦勝ち数で比較)
+            Long aId = mu.getTeamA().getId();
+            Long bId = mu.getTeamB().getId();
+            if (aWonMatches > bWonMatches) {
+                matchupPts.merge(aId, MATCHUP_WIN_PT, Integer::sum);
+                wins.merge(aId, 1, Integer::sum);
+                losses.merge(bId, 1, Integer::sum);
+            } else if (bWonMatches > aWonMatches) {
+                matchupPts.merge(bId, MATCHUP_WIN_PT, Integer::sum);
+                wins.merge(bId, 1, Integer::sum);
+                losses.merge(aId, 1, Integer::sum);
+            } else {
+                matchupPts.merge(aId, MATCHUP_DRAW_PT, Integer::sum);
+                matchupPts.merge(bId, MATCHUP_DRAW_PT, Integer::sum);
+                draws.merge(aId, 1, Integer::sum);
+                draws.merge(bId, 1, Integer::sum);
+            }
+        }
+
+        // 順位 = total 降順、tie-break は songPts 降順 → matchupPts 降順 → teamOrder 昇順
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (CompetitionTeam t : teams) {
+            int sp = songPts.get(t.getId());
+            int mp = matchupPts.get(t.getId());
+            Map<String, Object> r = new LinkedHashMap<>();
+            r.put("teamId", t.getId());
+            r.put("teamName", t.getTeamName());
+            r.put("teamOrder", t.getTeamOrder());
+            r.put("songPoints", sp);
+            r.put("matchupPoints", mp);
+            r.put("totalPoints", sp + mp);
+            r.put("wins", wins.get(t.getId()));
+            r.put("draws", draws.get(t.getId()));
+            r.put("losses", losses.get(t.getId()));
+            rows.add(r);
+        }
+        rows.sort((x, y) -> {
+            int byTotal = Integer.compare((Integer) y.get("totalPoints"), (Integer) x.get("totalPoints"));
+            if (byTotal != 0) return byTotal;
+            int bySong = Integer.compare((Integer) y.get("songPoints"), (Integer) x.get("songPoints"));
+            if (bySong != 0) return bySong;
+            int byMu = Integer.compare((Integer) y.get("matchupPoints"), (Integer) x.get("matchupPoints"));
+            if (byMu != 0) return byMu;
+            return Integer.compare((Integer) x.get("teamOrder"), (Integer) y.get("teamOrder"));
+        });
+        for (int i = 0; i < rows.size(); i++) rows.get(i).put("rank", i + 1);
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("rows", rows);
+        root.put("prelimMatchupCount", PRELIM_MATCHUP_COUNT);
+        root.put("prelimRecordedCount", prelimRecordedCount);
+        root.put("allPrelimRecorded", prelimRecordedCount >= PRELIM_MATCHUP_COUNT);
+        // 決勝 matchup が既に存在するか
+        root.put("finalsExists", matchups.stream().anyMatch(mu -> Boolean.TRUE.equals(mu.getIsFinals())));
+        return ResponseEntity.ok(root);
+    }
+
+    /**
+     * 【メソッドの役割】 予選 10 試合全結果記録後に、上位 2 チームで決勝 matchup を 1 件生成する。
+     *
+     * <p>決勝 matchup は {@code isFinals=true} としてマークされ、コスト計算・StrategyCard 2-of-4 制限の対象外。
+     * 既に決勝が生成済みの場合は 400。
+     */
+    @PostMapping("/{competitionId}/generate-finals")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> generateFinals(
+            Authentication auth, @PathVariable Long competitionId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+
+        List<CompetitionMatchup> existing = matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp);
+        boolean finalsAlready = existing.stream().anyMatch(mu -> Boolean.TRUE.equals(mu.getIsFinals()));
+        if (finalsAlready) {
+            return ResponseEntity.badRequest().body(Map.of("message", "決勝はすでに生成済みです"));
+        }
+
+        // standings を内部的に同ロジックで計算
+        ResponseEntity<Map<String, Object>> standingsResp = getStandings(auth, competitionId);
+        Map<String, Object> standings = standingsResp.getBody();
+        if (standings == null
+                || !Boolean.TRUE.equals(standings.get("allPrelimRecorded"))) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "予選 " + PRELIM_MATCHUP_COUNT + " 試合の結果がすべて記録されていません"));
+        }
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> rows = (List<Map<String, Object>>) standings.get("rows");
+        if (rows.size() < 2) {
+            return ResponseEntity.badRequest().body(Map.of("message", "チーム数が不足しています"));
+        }
+        Long firstTeamId = ((Number) rows.get(0).get("teamId")).longValue();
+        Long secondTeamId = ((Number) rows.get(1).get("teamId")).longValue();
+        CompetitionTeam first = teamRepository.findById(firstTeamId)
+                .orElseThrow(() -> new RuntimeException("Top team not found"));
+        CompetitionTeam second = teamRepository.findById(secondTeamId)
+                .orElseThrow(() -> new RuntimeException("Second team not found"));
+
+        // 既存 matchupOrder の最大値 + 1 を採番 (10+1=11 想定)
+        int nextOrder = existing.stream().mapToInt(CompetitionMatchup::getMatchupOrder).max().orElse(0) + 1;
+
+        CompetitionMatchup finalsMu = new CompetitionMatchup();
+        finalsMu.setCompetition(comp);
+        finalsMu.setTeamA(first);
+        finalsMu.setTeamB(second);
+        finalsMu.setMatchupOrder(nextOrder);
+        finalsMu.setIsFinals(true);
+        finalsMu = matchupRepository.save(finalsMu);
+
+        for (String kind : MATCH_KINDS) {
+            CompetitionMatch m = new CompetitionMatch();
+            m.setMatchup(finalsMu);
+            m.setMatchKind(kind);
+            matchRepository.save(m);
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "message", "決勝を生成しました: " + first.getTeamName() + " vs " + second.getTeamName(),
+                "matchupId", finalsMu.getId(),
+                "teamAId", first.getId(),
+                "teamBId", second.getId()
+        ));
     }
 
     // ── 大会削除 (cascade) ────────────────────────────────
@@ -824,6 +1109,7 @@ public class CompetitionAdminController {
         m.put("teamBId", mu.getTeamB() != null ? mu.getTeamB().getId() : null);
         m.put("lineupPublishedA", mu.getLineupPublishedA());
         m.put("lineupPublishedB", mu.getLineupPublishedB());
+        m.put("isFinals", mu.getIsFinals());
         return m;
     }
 
@@ -841,6 +1127,18 @@ public class CompetitionAdminController {
         m.put("lockedBAt", match.getLockedBAt());
         m.put("pickPublishedA", match.getPickPublishedA());
         m.put("pickPublishedB", match.getPickPublishedB());
+        m.put("aSongsWon", match.getASongsWon());
+        m.put("bSongsWon", match.getBSongsWon());
+        m.put("resultRecordedAt", match.getResultRecordedAt());
+        // R-4: 詳細スコア (各曲)
+        m.put("song1StrategyId", match.getSong1StrategyId());
+        m.put("song1Title", match.getSong1Title());
+        m.put("song1ScoreA", match.getSong1ScoreA());
+        m.put("song1ScoreB", match.getSong1ScoreB());
+        m.put("song2StrategyId", match.getSong2StrategyId());
+        m.put("song2Title", match.getSong2Title());
+        m.put("song2ScoreA", match.getSong2ScoreA());
+        m.put("song2ScoreB", match.getSong2ScoreB());
         return m;
     }
 
@@ -871,4 +1169,22 @@ public class CompetitionAdminController {
      * {@code side} = "a" / "b" / "both"。{@code locked} = true でロック (編集禁止)、false で解除。
      */
     public record LockRequest(String side, Boolean locked) {}
+
+    /**
+     * 試合結果記録リクエスト (R-4: スコア入力で勝敗自動判定)。
+     *
+     * <p>1 戦 = 2 曲制を想定。両曲ぶんの管理番号 / タイトル / 両サイドのスコアを受け取り、
+     * サーバ側でスコア比較により {@code aSongsWon} / {@code bSongsWon} を導出。
+     * 未入力 (null) のフィールドはスキップ扱い (= 部分記録)。
+     */
+    public record SetMatchResultRequest(
+            Integer song1StrategyId,
+            String song1Title,
+            Integer song1ScoreA,
+            Integer song1ScoreB,
+            Integer song2StrategyId,
+            String song2Title,
+            Integer song2ScoreA,
+            Integer song2ScoreB
+    ) {}
 }

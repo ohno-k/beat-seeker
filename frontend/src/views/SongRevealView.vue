@@ -207,6 +207,9 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
   rightPlayer.value = match.playerBName;
   selectedLeft.value = songA;
   selectedRight.value = songB;
+  // R-3: Strategy 申告フラグを反映。左 = playerA、右 = playerB の申告。
+  strategyDeclaredByLeft.value = match.playerAStrategyUsed;
+  strategyDeclaredByRight.value = match.playerBStrategyUsed;
 
   const noteParts: string[] = [];
   if (match.playerAStrategyUsed) noteParts.push('A 側が StrategyCard 発動 → B の曲をランダム化');
@@ -274,10 +277,20 @@ const clearSlot = (side: 'left' | 'right') => {
  *   revealStep == 2 → 両側公開済み
  */
 const phase = ref<'select' | 'reveal'>('select');
-const revealStep = ref<0 | 1 | 2>(0);
+/**
+ * R-3: Strategy 演出 step を追加。
+ * 0 = 両側未公開 / 1 = 左公開済 / 2 = 両側公開済 / 3 = Strategy 演出表示中 (片側か両側で発動時のみ通過)。
+ */
+const revealStep = ref<0 | 1 | 2 | 3>(0);
 
 const leftStage  = ref({ burst: false, title: false, artist: false, diffBadge: false });
 const rightStage = ref({ burst: false, title: false, artist: false, diffBadge: false });
+
+// R-3: 大会から取り込んだ試合で誰が Strategy Card を申告したか。
+// left = playerA (申告すると B/right 側の選曲がランダム化)
+// right = playerB (申告すると A/left 側の選曲がランダム化)
+const strategyDeclaredByLeft = ref(false);
+const strategyDeclaredByRight = ref(false);
 
 let stageTimers: number[] = [];
 
@@ -317,8 +330,23 @@ const onReveal = () => {
   if (revealStep.value === 1) {
     revealStep.value = 2;
     triggerSide('right');
+    // 両側公開後、Strategy 申告があれば自動的に step 3 (演出) へ進めるため
+    // 少し遅延 (右側のアニメ完了後の余韻分) を入れる。
+    if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
+      stageTimers.push(window.setTimeout(() => {
+        if (revealStep.value === 2) revealStep.value = 3;
+      }, 3000));
+    }
     return;
   }
+  if (revealStep.value === 2) {
+    // 手動で次へ進むときも Strategy 申告があれば 3 へ
+    if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
+      revealStep.value = 3;
+    }
+    return;
+  }
+  // revealStep === 3 は誤爆防止で何もしない。Reset 専用。
 };
 
 const reset = () => {
@@ -328,6 +356,8 @@ const reset = () => {
   revealStep.value = 0;
   leftStage.value  = { burst: false, title: false, artist: false, diffBadge: false };
   rightStage.value = { burst: false, title: false, artist: false, diffBadge: false };
+  strategyDeclaredByLeft.value = false;
+  strategyDeclaredByRight.value = false;
 };
 
 /**
@@ -746,12 +776,44 @@ const toggleFullscreen = async () => {
         </div>
       </div>
 
+      <!--
+        R-3: Strategy 演出オーバーレイ。両側公開後 (revealStep === 3) に表示。
+        申告者と被影響側を明示してドラマを作る。クリック / リセットで消える。
+      -->
+      <div
+        v-if="revealStep === 3 && (strategyDeclaredByLeft || strategyDeclaredByRight)"
+        class="absolute inset-0 z-50 flex items-center justify-center pointer-events-none strategy-overlay-fade"
+      >
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative text-center px-8 py-10 space-y-6 max-w-3xl">
+          <p class="text-xs sm:text-sm font-mono uppercase tracking-[0.6em] text-amber-300 strategy-flicker">
+            ⚡ Strategy Card Declared ⚡
+          </p>
+          <h2 class="text-5xl sm:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 via-amber-200 to-fuchsia-300 drop-shadow-[0_0_30px_rgba(252,211,77,0.8)] strategy-pop">
+            STRATEGY CARD
+          </h2>
+          <div class="space-y-2 strategy-fade-in" style="animation-delay: 0.6s">
+            <p v-if="strategyDeclaredByLeft" class="text-2xl sm:text-3xl font-black">
+              <span class="text-cyan-300">{{ leftPlayer }}</span>
+              <span class="text-slate-300 mx-2">の申告</span>
+              <span class="text-rose-300 text-base">→ {{ rightPlayer }} の選曲がランダム化</span>
+            </p>
+            <p v-if="strategyDeclaredByRight" class="text-2xl sm:text-3xl font-black">
+              <span class="text-amber-300">{{ rightPlayer }}</span>
+              <span class="text-slate-300 mx-2">の申告</span>
+              <span class="text-rose-300 text-base">→ {{ leftPlayer }} の選曲がランダム化</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- フッター: 進行ガイド + Reset (画面中央下、OBS の左右クロップに被らない極小領域) -->
-      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3">
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3">
         <div class="px-4 py-2 rounded-full bg-slate-900/80 border border-white/10 text-[10px] font-mono tracking-widest text-slate-300 backdrop-blur">
           <span v-if="revealStep === 0">CLICK → LEFT</span>
           <span v-else-if="revealStep === 1">CLICK → RIGHT</span>
-          <span v-else-if="revealStep === 2">REVEAL COMPLETE</span>
+          <span v-else-if="revealStep === 2">{{ strategyDeclaredByLeft || strategyDeclaredByRight ? 'STRATEGY を表示中…' : 'REVEAL COMPLETE' }}</span>
+          <span v-else-if="revealStep === 3">⚡ STRATEGY DECLARED ⚡</span>
         </div>
         <button
           @click.stop="reset"
@@ -971,5 +1033,44 @@ const toggleFullscreen = async () => {
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke: 1.5px #0a0a0a;
   paint-order: stroke fill; /* 先に stroke を描いてから fill を上に → 縁が潰れない */
+}
+
+/* ===== R-3: Strategy 演出オーバーレイ ===== */
+@keyframes strategyOverlayFadeKf {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+.strategy-overlay-fade {
+  animation: strategyOverlayFadeKf 0.5s ease-out forwards;
+}
+
+@keyframes strategyPopKf {
+  0%   { opacity: 0; transform: scale(0.4) rotate(-8deg); filter: blur(20px); }
+  40%  { opacity: 1; transform: scale(1.12) rotate(2deg); filter: blur(0); }
+  60%  { transform: scale(0.96) rotate(-1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); }
+}
+.strategy-pop {
+  animation: strategyPopKf 0.9s cubic-bezier(0.16, 1, 0.3, 1.2) forwards;
+}
+
+@keyframes strategyFlickerKf {
+  0%, 100% { opacity: 1; text-shadow: 0 0 20px rgba(252, 211, 77, 0.9), 0 0 40px rgba(252, 211, 77, 0.5); }
+  45%      { opacity: 0.6; text-shadow: 0 0 8px rgba(252, 211, 77, 0.4); }
+  50%      { opacity: 1;   text-shadow: 0 0 32px rgba(252, 211, 77, 1.0), 0 0 60px rgba(252, 211, 77, 0.7); }
+  55%      { opacity: 0.6; text-shadow: 0 0 8px rgba(252, 211, 77, 0.4); }
+}
+.strategy-flicker {
+  animation: strategyFlickerKf 1.6s ease-in-out infinite;
+}
+
+@keyframes strategyFadeInKf {
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.strategy-fade-in {
+  opacity: 0;
+  animation: strategyFadeInKf 0.6s ease-out forwards;
 }
 </style>

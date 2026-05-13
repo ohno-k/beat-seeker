@@ -27,6 +27,7 @@ com\beatseeker\backend\repository\CompetitionMatchupRepository.class
 com\beatseeker\backend\repository\FriendshipRepository.class
 com\beatseeker\backend\controller\ChartTendencyController.class
 com\beatseeker\backend\controller\ScoreController$1.class
+com\beatseeker\backend\controller\CompetitionAdminController$SetMatchResultRequest.class
 com\beatseeker\backend\controller\TierVoteController$VoteRequest.class
 com\beatseeker\backend\service\BeatPtCalculator.class
 com\beatseeker\backend\controller\ScoreController.class

@@ -46,6 +46,13 @@ public class CompetitionPlayerController {
     private static final Set<String> ALLOWED_GENRES =
             Set.of("NOTES", "PEAK", "CHORD", "CHARGE", "SCRATCH", "SOF-LAN", "INSANE");
 
+    /**
+     * StrategyCard を使える「予選 matchup 数」上限。
+     * 各チームは予選 4 matchup のうち、card.enabled = true の matchup を最大この数まで持てる。
+     * 決勝 matchup ({@code isFinals = true}) はカウント対象外。
+     */
+    private static final int STRATEGY_MATCHUP_LIMIT_PER_TEAM = 2;
+
     private final CompetitionParticipantRepository participantRepository;
     private final CompetitionPickRepository pickRepository;
     private final CompetitionMatchRepository matchRepository;
@@ -94,6 +101,22 @@ public class CompetitionPlayerController {
         root.put("participant", participantSelfMap(me));
         root.put("team", teamMap(myTeam));
         root.put("competition", competitionMap(comp));
+
+        // 自チームが現時点で StrategyCard を使用している予選 matchup ID 集合を集計し、残り使用可能数を expose
+        Set<Long> teamUsedPrelimMatchupIds = new HashSet<>();
+        for (CompetitionStrategyUse su : strategyUseRepository.findAllByCompetition(comp)) {
+            if (!Boolean.TRUE.equals(su.getEnabled())) continue;
+            CompetitionParticipant user = su.getUsedByParticipant();
+            if (user == null || !myTeam.getId().equals(user.getTeam().getId())) continue;
+            CompetitionMatchup mu = su.getMatch().getMatchup();
+            if (Boolean.TRUE.equals(mu.getIsFinals())) continue;
+            teamUsedPrelimMatchupIds.add(mu.getId());
+        }
+        Map<String, Object> strategyQuota = new LinkedHashMap<>();
+        strategyQuota.put("limit", STRATEGY_MATCHUP_LIMIT_PER_TEAM);
+        strategyQuota.put("usedMatchupCount", teamUsedPrelimMatchupIds.size());
+        strategyQuota.put("usedMatchupIds", new ArrayList<>(teamUsedPrelimMatchupIds));
+        root.put("strategyQuota", strategyQuota);
 
         // 担当試合: 大会全試合をスキャンして自分が player_a / player_b の物を抽出
         List<CompetitionMatch> allMatches = matchRepository.findAllByCompetition(comp);
@@ -313,6 +336,34 @@ public class CompetitionPlayerController {
 
         if ("finished".equals(match.getMatchup().getCompetition().getStatus())) {
             return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では決定できません"));
+        }
+
+        // 予選ルール: 各チームは予選 matchup のうち最大 STRATEGY_MATCHUP_LIMIT_PER_TEAM (= 2) 試合でしか
+        // StrategyCard を使えない。enabled=true へ切り替えるときだけチェック (offにする/維持はスキップ)。
+        // 決勝 matchup (isFinals=true) はカウント対象外。
+        Competition comp = match.getMatchup().getCompetition();
+        CompetitionTeam myTeam = me.getTeam();
+        boolean wasAlreadyEnabledHere = strategyUseRepository.findByMatchAndUsedByParticipant(match, me)
+                .map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false);
+        boolean turningOn = Boolean.TRUE.equals(req.enabled()) && !wasAlreadyEnabledHere;
+        if (turningOn && !Boolean.TRUE.equals(match.getMatchup().getIsFinals())) {
+            // 自チームメンバーが現在 enabled=true にしている予選 matchup ID 集合を集計
+            Set<Long> usedPrelimMatchupIds = new HashSet<>();
+            for (CompetitionStrategyUse su : strategyUseRepository.findAllByCompetition(comp)) {
+                if (!Boolean.TRUE.equals(su.getEnabled())) continue;
+                CompetitionParticipant user = su.getUsedByParticipant();
+                if (user == null || !myTeam.getId().equals(user.getTeam().getId())) continue;
+                CompetitionMatchup mu = su.getMatch().getMatchup();
+                if (Boolean.TRUE.equals(mu.getIsFinals())) continue;
+                usedPrelimMatchupIds.add(mu.getId());
+            }
+            // 既に上限に達していて、今回新しい matchup を使おうとしている場合は拒否
+            if (!usedPrelimMatchupIds.contains(match.getMatchup().getId())
+                    && usedPrelimMatchupIds.size() >= STRATEGY_MATCHUP_LIMIT_PER_TEAM) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "予選では 1 チームあたり最大 " + STRATEGY_MATCHUP_LIMIT_PER_TEAM
+                                + " matchup までしか StrategyCard を使えません (既に上限到達)"));
+            }
         }
 
         CompetitionStrategyUse su = strategyUseRepository.findByMatchAndUsedByParticipant(match, me)

@@ -86,10 +86,21 @@ export interface PlayerMatchDto {
   myStrategyUse: PlayerMatchStrategyDto | null;
 }
 
+/**
+ * 自チームの StrategyCard 使用枠。予選では 1 チームあたり 2 matchup 上限。
+ * 既に使用済 matchup の ID 集合と上限値を返す。
+ */
+export interface PlayerStrategyQuotaDto {
+  limit: number;
+  usedMatchupCount: number;
+  usedMatchupIds: number[];
+}
+
 export interface PlayerViewDto {
   participant: PlayerSelfDto;
   team: PlayerTeamDto;
   competition: PlayerCompetitionDto;
+  strategyQuota: PlayerStrategyQuotaDto;
   matches: PlayerMatchDto[];
 }
 

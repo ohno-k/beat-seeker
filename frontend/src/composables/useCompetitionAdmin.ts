@@ -48,6 +48,8 @@ export interface CompetitionMatchupDto {
   lineupPublishedA: boolean;
   /** B 側のラインアップを A 側に公開しているか。 */
   lineupPublishedB: boolean;
+  /** 決勝 matchup フラグ。コスト/StrategyCard 制限の対象外。 */
+  isFinals: boolean;
 }
 
 export type CompetitionSongGenre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
@@ -68,6 +70,33 @@ export interface CompetitionMatchDto {
   pickPublishedA: boolean;
   /** B 側の自選曲を A 側に公開しているか。 */
   pickPublishedB: boolean;
+  /** 試合結果: A 側勝ち曲数 (0/1/2)。null = 未記録。スコアから自動派生。 */
+  aSongsWon: number | null;
+  /** 試合結果: B 側勝ち曲数 (0/1/2)。null = 未記録。 */
+  bSongsWon: number | null;
+  /** 試合結果が記録された日時。null = 未記録。 */
+  resultRecordedAt: string | null;
+  // R-4: 1 戦 = 2 曲制の詳細スコア
+  song1StrategyId: number | null;
+  song1Title: string | null;
+  song1ScoreA: number | null;
+  song1ScoreB: number | null;
+  song2StrategyId: number | null;
+  song2Title: string | null;
+  song2ScoreA: number | null;
+  song2ScoreB: number | null;
+}
+
+/** 試合結果スコア入力 payload (両曲ぶん)。 */
+export interface MatchResultPayload {
+  song1StrategyId: number | null;
+  song1Title: string | null;
+  song1ScoreA: number | null;
+  song1ScoreB: number | null;
+  song2StrategyId: number | null;
+  song2Title: string | null;
+  song2ScoreA: number | null;
+  song2ScoreB: number | null;
 }
 
 // ── Song Reveal 連携用 DTO ─────────────────────────────
@@ -99,6 +128,33 @@ export interface CompetitionRevealData {
   competitionId: number;
   competitionName: string;
   matches: CompetitionRevealMatch[];
+}
+
+// ── 順位表 / 決勝生成 ────────────────────────────────
+
+export interface CompetitionStandingsRow {
+  teamId: number;
+  teamName: string;
+  teamOrder: number;
+  rank: number;
+  songPoints: number;
+  matchupPoints: number;
+  totalPoints: number;
+  wins: number;
+  draws: number;
+  losses: number;
+}
+
+export interface CompetitionStandingsDto {
+  rows: CompetitionStandingsRow[];
+  /** 予選 matchup の総数 (= 10)。 */
+  prelimMatchupCount: number;
+  /** 結果記録済みの予選 matchup 数。 */
+  prelimRecordedCount: number;
+  /** 全予選結果が記録済か。これが true なら決勝生成可能。 */
+  allPrelimRecorded: boolean;
+  /** 決勝 matchup が既に生成されているか。 */
+  finalsExists: boolean;
 }
 
 export interface CompetitionDetail extends CompetitionSummary {
@@ -248,6 +304,53 @@ export function useCompetitionAdmin() {
     await fetchCompetition(competitionId);
   };
 
+  /**
+   * 試合 1 件の詳細スコア (2 曲分) を記録/更新する。
+   * サーバ側でスコア比較 → aSongsWon / bSongsWon を自動算出する。
+   */
+  const setMatchResult = async (
+    competitionId: number,
+    matchId: number,
+    payload: MatchResultPayload,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/matches/${matchId}/result`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify(payload) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 試合結果を未記録に戻す。 */
+  const clearMatchResult = async (competitionId: number, matchId: number): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/matches/${matchId}/result`,
+      { method: 'DELETE', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 現在の順位表を取得する。 */
+  const fetchStandings = async (competitionId: number): Promise<CompetitionStandingsDto> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/standings`,
+      { headers: authHeaders() },
+    );
+    await throwIfError(res);
+    return (await res.json()) as CompetitionStandingsDto;
+  };
+
+  /** 予選全試合記録後、TOP2 で決勝 matchup を生成。 */
+  const generateFinals = async (competitionId: number): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/generate-finals`,
+      { method: 'POST', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
   /** TL トークンを再採番する。 */
   const regenerateTlToken = async (competitionId: number, teamId: number): Promise<void> => {
     const res = await fetch(
@@ -389,5 +492,9 @@ export function useCompetitionAdmin() {
     regenerateParticipantToken,
     regenerateTlToken,
     fetchRevealData,
+    setMatchResult,
+    clearMatchResult,
+    fetchStandings,
+    generateFinals,
   };
 }

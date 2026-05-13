@@ -93,4 +93,55 @@ public class CompetitionMatch {
     @Column(name = "pick_published_b", nullable = false)
     @ColumnDefault("false")
     private Boolean pickPublishedB = false;
+
+    /**
+     * 試合結果: A 側が勝った曲数 (0/1/2)。1 戦 2 曲制を想定。
+     * null = 未記録、0〜2 = 記録済。
+     */
+    @Column(name = "a_songs_won")
+    private Integer aSongsWon;
+
+    /** 試合結果: B 側が勝った曲数 (0/1/2)。null = 未記録。 */
+    @Column(name = "b_songs_won")
+    private Integer bSongsWon;
+
+    /** 試合結果が記録された日時。null = 未記録。 */
+    private LocalDateTime resultRecordedAt;
+
+    // ── 詳細スコア記録 (1 戦 = 2 曲制) ───────────────────────
+    // R-4: 「曲(管理番号)とスコア入力で勝敗自動表示」要件のために導入。
+    // song1 / song2 は実際にプレイされた曲 (A 側自選 + B 側自選、もしくは Strategy 発動で
+    // ランダム化された曲)。aSongsWon / bSongsWon は本フィールドから派生してサーバ側で計算する。
+
+    /** 1 曲目の管理番号 ({@code strategy_card_songs.json} 内の id)。 */
+    @Column(name = "song1_strategy_id")
+    private Integer song1StrategyId;
+
+    /** 1 曲目の曲タイトル (記録用、表示で使う)。 */
+    @Column(name = "song1_title", length = 200)
+    private String song1Title;
+
+    /** 1 曲目 A 側スコア (0〜 上限なし)。null = 未入力。 */
+    @Column(name = "song1_score_a")
+    private Integer song1ScoreA;
+
+    /** 1 曲目 B 側スコア。 */
+    @Column(name = "song1_score_b")
+    private Integer song1ScoreB;
+
+    /** 2 曲目の管理番号。 */
+    @Column(name = "song2_strategy_id")
+    private Integer song2StrategyId;
+
+    /** 2 曲目の曲タイトル。 */
+    @Column(name = "song2_title", length = 200)
+    private String song2Title;
+
+    /** 2 曲目 A 側スコア。 */
+    @Column(name = "song2_score_a")
+    private Integer song2ScoreA;
+
+    /** 2 曲目 B 側スコア。 */
+    @Column(name = "song2_score_b")
+    private Integer song2ScoreB;
 }

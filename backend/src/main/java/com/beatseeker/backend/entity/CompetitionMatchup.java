@@ -63,4 +63,16 @@ public class CompetitionMatchup {
     @Column(name = "lineup_published_b", nullable = false)
     @ColumnDefault("false")
     private Boolean lineupPublishedB = false;
+
+    /**
+     * 決勝 matchup フラグ。
+     * <ul>
+     *   <li>true: 予選 10 試合終了後に勝ち点 TOP2 で組まれる決勝 matchup。
+     *       コスト制限・StrategyCard 2-of-4 制限の対象外。</li>
+     *   <li>false (デフォルト): 予選 matchup。コスト/StrategyCard 制限あり。</li>
+     * </ul>
+     */
+    @Column(name = "is_finals", nullable = false)
+    @ColumnDefault("false")
+    private Boolean isFinals = false;
 }

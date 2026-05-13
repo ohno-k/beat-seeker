@@ -30,6 +30,10 @@ export interface TlMemberDto {
   id: number;
   displayName: string;
   isTl: boolean;
+  /** 予選で既に消費済のコスト (決勝 matchup は除外)。 */
+  spentCost: number;
+  /** 残りコスト = 初期 - spentCost。負の値にはならない (サーバ側で 0 未満アサインを拒否)。 */
+  remainingCost: number;
 }
 
 export interface TlAssignedMineDto {
@@ -55,6 +59,7 @@ export interface TlMatchDto {
   opponentAssigned: TlAssignedOpponentDto | null;
 }
 
+
 export interface TlMatchupDto {
   matchupId: number;
   matchupOrder: number;
@@ -73,6 +78,10 @@ export interface TlViewDto {
   competition: TlCompetitionDto;
   members: TlMemberDto[];
   matchups: TlMatchupDto[];
+  /** 予選プレイヤー初期コスト (デフォルト 80)。 */
+  initialCost: number;
+  /** matchKind → 1 戦あたりの消費コスト。 */
+  costPerKind: Record<MatchKind, number>;
 }
 
 async function throwIfError(res: Response): Promise<void> {
