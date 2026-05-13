@@ -11,10 +11,11 @@
  * @emits update:activeTab タブ選択通知。
  * @emits login/logout/editProfile/openAdmin/upload 対応するアクションを親に通知。
  */
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAdmin } from '../composables/useAdmin';
 import { useModalEscape } from '../composables/useModalEscape';
+import { useRankQuiz } from '../composables/useRankQuiz';
 
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
@@ -75,7 +76,22 @@ const emit = defineEmits<{
   (e: 'openAdmin'): void;
   (e: 'upload'): void;
   (e: 'openOcrSearch'): void;
+  (e: 'openRankQuiz'): void;
 }>();
+
+// 非公式難易度クイズ: ログイン直後に進捗をプリフェッチして Lv/XP をサイドバーに即表示する。
+const { progress: rankQuizProgress, levelProgressPct: rankQuizPct, fetchProgress: fetchRankQuizProgress } = useRankQuiz();
+onMounted(() => {
+  if (props.isLoggedIn) fetchRankQuizProgress();
+});
+watch(() => props.isLoggedIn, (logged) => {
+  if (logged) fetchRankQuizProgress();
+});
+
+const handleRankQuizClick = () => {
+  emit('openRankQuiz');
+  closeSidebar();
+};
 
 /** 【関数の役割】 サイドバーを閉じる（v-model:isOpen → false）。 */
 const closeSidebar = () => {
@@ -340,6 +356,37 @@ const filteredNavItems = computed(() => {
                 {{ t('nav.uploadCsv') }}
               </button>
             </div>
+
+            <!-- 非公式難易度クイズ ミニウィジェット: ログイン中 & 自分閲覧時のみ表示。
+                 主張を抑えるためインラインの細めカード。 -->
+            <button
+              v-if="isLoggedIn && !viewingUserId"
+              type="button"
+              @click="handleRankQuizClick"
+              class="mt-2 w-full text-left bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl px-3 py-2.5 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all group"
+              :title="t('rankQuiz.tooltip')"
+            >
+              <div class="flex items-center gap-2 mb-1.5">
+                <svg class="h-4 w-4 text-indigo-500 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.518-4.674z" />
+                </svg>
+                <span class="text-[11px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-wider truncate">{{ t('rankQuiz.title') }}</span>
+                <span class="ml-auto text-[10px] font-black text-indigo-600 dark:text-indigo-400 tabular-nums">Lv.{{ rankQuizProgress?.level ?? 1 }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-1 bg-white/60 dark:bg-slate-900/40 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" :style="{ width: rankQuizPct + '%' }"></div>
+                </div>
+                <span class="text-[9px] font-mono text-indigo-500 dark:text-indigo-400 tabular-nums whitespace-nowrap">{{ rankQuizProgress?.xp ?? 0 }}/{{ rankQuizProgress?.xpForNextLevel ?? 100 }}</span>
+              </div>
+              <div class="flex items-center justify-between mt-1.5 text-[10px] font-bold">
+                <span v-if="(rankQuizProgress?.reviewPoolCount ?? 0) > 0" class="text-purple-600 dark:text-purple-400">
+                  {{ t('rankQuiz.reviewBadge', { n: rankQuizProgress?.reviewPoolCount ?? 0 }) }}
+                </span>
+                <span v-else class="text-slate-400 dark:text-slate-500">{{ t('rankQuiz.startHint') }}</span>
+                <span class="text-indigo-500 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">▶</span>
+              </div>
+            </button>
 
             <!--
               カメラ OCR 曲検索: ARENA で降ってきた曲の候補を即特定するためのクイックアクション。

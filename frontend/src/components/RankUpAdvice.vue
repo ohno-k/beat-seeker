@@ -39,7 +39,10 @@
       >
         <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
         <div class="flex-1 min-w-0">
-          <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.song.title }}</p>
+          <div class="flex items-center gap-1.5 min-w-0">
+            <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.song.title }}</p>
+            <InformalRankBadge :rank="sug.song.informalRank" size="xs" class="shrink-0" />
+          </div>
           <p class="text-[10px] text-slate-500 dark:text-slate-400">
             {{ sug.song.difficultyName }} / {{ t('common.current') }} {{ sug.song.beatTierPoints.toFixed(1) }} pt
           </p>
@@ -104,6 +107,7 @@ import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import type { ScoreRecord } from '../utils/scoreData';
 import { calculatePoints, getNextRankInfo } from '../utils/beatTier';
+import InformalRankBadge from './InformalRankBadge.vue';
 
 const { t } = useI18n();
 const { authHeaders } = useAuth();

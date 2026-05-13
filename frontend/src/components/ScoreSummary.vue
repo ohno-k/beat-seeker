@@ -299,9 +299,7 @@
                 </div>
               </td>
               <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
-                  <span v-if="record.informalRank" class="text-[8px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                    {{ record.informalRank }}
-                  </span>
+                  <InformalRankBadge :rank="record.informalRank" size="xs" />
               </td>
               <td class="max-sm:hidden px-1 sm:px-6 py-1.5 sm:py-2">
                 <div class="flex flex-col gap-0.5">
@@ -1037,6 +1035,7 @@ import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVis
 import { useFriends } from '../composables/useFriends';
 import { DJ_LEVELS } from '../composables/constants';
 import RankIcon from './RankIcon.vue';
+import InformalRankBadge from './InformalRankBadge.vue';
 
 /** 難易度フィルタの選択肢（ANOTHER / LEGGENDARIA に固定。BEAT-PT 集計対象）。 */
 const DIFFICULTY_FILTER_OPTIONS = ['ANOTHER', 'LEGGENDARIA'] as const;

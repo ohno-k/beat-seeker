@@ -1177,4 +1177,10 @@ export const ko = {
   // Dan Ranks
   'dan.7kyu': '7급', 'dan.6kyu': '6급', 'dan.5kyu': '5급', 'dan.4kyu': '4급', 'dan.3kyu': '3급', 'dan.2kyu': '2급', 'dan.1kyu': '1급',
   'dan.shodan': '초단', 'dan.2dan': '2단', 'dan.3dan': '3단', 'dan.4단': '4단', 'dan.5dan': '5단', 'dan.6dan': '6단', 'dan.7dan': '7단', 'dan.8dan': '8단', 'dan.9dan': '9단', 'dan.10dan': '10단', 'dan.chuden': '중전', 'dan.kaiden': '개전',
+
+  // 비공식 난이도 퀴즈 (사이드바 위젯)
+  'rankQuiz.title': '★ 퀴즈',
+  'rankQuiz.tooltip': '곡명↔비공식 난이도 암기 미니게임',
+  'rankQuiz.reviewBadge': '복습 {n}건',
+  'rankQuiz.startHint': '5문 / Lv UP',
 };

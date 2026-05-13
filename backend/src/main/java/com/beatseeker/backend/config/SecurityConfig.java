@@ -158,6 +158,8 @@ public class SecurityConfig {
                                                 // フレンド操作・アリーナ系はすべて要ログイン
                                                 .requestMatchers("/api/friends/**").authenticated()
                                                 .requestMatchers("/api/arena/**").authenticated()
+                                                // 非公式難易度クイズ: 進捗永続化のため要ログイン
+                                                .requestMatchers("/api/rank-quiz/**").authenticated()
                                                 // 上記いずれにも該当しないリクエストは公開扱い（静的リソース等）
                                                 .anyRequest().permitAll())
                                 // 未認証で要ログインエンドポイントへアクセスされた場合は 401 を返す

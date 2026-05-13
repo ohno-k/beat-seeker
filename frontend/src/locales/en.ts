@@ -1176,4 +1176,10 @@ export const en = {
   // Dan Ranks
   'dan.7kyu': '7th Kyu', 'dan.6kyu': '6th Kyu', 'dan.5kyu': '5th Kyu', 'dan.4kyu': '4th Kyu', 'dan.3kyu': '3rd Kyu', 'dan.2kyu': '2nd Kyu', 'dan.1kyu': '1st Kyu',
   'dan.shodan': '1st Dan', 'dan.2dan': '2nd Dan', 'dan.3dan': '3rd Dan', 'dan.4dan': '4th Dan', 'dan.5dan': '5th Dan', 'dan.6dan': '6th Dan', 'dan.7dan': '7th Dan', 'dan.8dan': '8th Dan', 'dan.9dan': '9th Dan', 'dan.10dan': '10th Dan', 'dan.chuden': 'Chuden', 'dan.kaiden': 'Kaiden',
+
+  // Rank Quiz (sidebar widget)
+  'rankQuiz.title': '★ Quiz',
+  'rankQuiz.tooltip': 'Mini-game: memorize song↔unofficial rank',
+  'rankQuiz.reviewBadge': '{n} to review',
+  'rankQuiz.startHint': '5 Qs / Lv UP',
 };
