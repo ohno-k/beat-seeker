@@ -102,13 +102,23 @@ const handleCreate = async () => {
  * 大会一覧 → 大会選択時、と「再読込」相当の場面で更新される。
  */
 const revealData = ref<CompetitionRevealData | null>(null);
+/** reveal データの取得状態。サイレント失敗を可視化するために導入。 */
+const revealLoadState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle');
+const revealLoadError = ref<string>('');
 
 const refreshRevealData = async (compId: number) => {
+  revealLoadState.value = 'loading';
+  revealLoadError.value = '';
   try {
     revealData.value = await fetchRevealData(compId);
-  } catch {
-    // reveal データ取得失敗時は REVEAL ボタンを隠す (致命的ではない)
+    revealLoadState.value = 'ready';
+  } catch (e) {
+    const msg = (e as Error).message;
+    console.error('[CompetitionAdmin] reveal データ取得失敗:', e);
     revealData.value = null;
+    revealLoadState.value = 'error';
+    revealLoadError.value = msg;
+    toast.error('提出状況の読込に失敗しました: ' + msg);
   }
 };
 
@@ -1188,8 +1198,12 @@ const statusColor = (s: string) => ({
                 <!-- REVEAL 再生ボタン (両側自選曲が揃っている試合だけ有効) -->
                 <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono pt-1 border-t border-slate-100 dark:border-slate-700/40">
                   <span class="text-slate-400 uppercase tracking-wider">Reveal:</span>
-                  <span v-if="!canReveal(match.id)" class="text-slate-400 italic">
-                    {{ revealMatchOf(match.id) === null ? '提出状況読込中…' : '両側の自選曲提出待ち' }}
+                  <span v-if="revealLoadState === 'loading'" class="text-slate-400 italic">提出状況読込中…</span>
+                  <span v-else-if="revealLoadState === 'error'" class="text-rose-500 italic">
+                    読込失敗 ({{ revealLoadError }}) — 🔄 ボタンで再試行
+                  </span>
+                  <span v-else-if="!canReveal(match.id)" class="text-slate-400 italic">
+                    {{ revealMatchOf(match.id) === null ? '試合データ未取得' : '両側の自選曲提出待ち' }}
                   </span>
                   <button
                     v-else
