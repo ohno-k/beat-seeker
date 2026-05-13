@@ -480,17 +480,20 @@ public class CompetitionAdminController {
         match.setSong2ScoreB(req.song2ScoreB());
 
         // スコアから勝ち曲数を導出。両スコアが揃っている曲だけ判定対象。
+        // 同スコア (引分) の曲は、両者が勝ったものとして両側に +1 する (運営仕様)。
         int aWon = 0, bWon = 0;
         boolean anyEntered = false;
         if (req.song1ScoreA() != null && req.song1ScoreB() != null) {
             anyEntered = true;
             if (req.song1ScoreA() > req.song1ScoreB()) aWon++;
             else if (req.song1ScoreA() < req.song1ScoreB()) bWon++;
+            else { aWon++; bWon++; }
         }
         if (req.song2ScoreA() != null && req.song2ScoreB() != null) {
             anyEntered = true;
             if (req.song2ScoreA() > req.song2ScoreB()) aWon++;
             else if (req.song2ScoreA() < req.song2ScoreB()) bWon++;
+            else { aWon++; bWon++; }
         }
         if (anyEntered) {
             match.setASongsWon(aWon);

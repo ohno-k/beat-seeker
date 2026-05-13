@@ -521,6 +521,8 @@ const handleClearResult = async (matchId: number) => {
 /**
  * 編集中ドラフトから勝敗プレビューを計算 (リアルタイム表示)。
  * 両スコアが揃った曲だけ判定対象 (片方欠けてる曲はスキップ)。
+ * 同スコア (引分) の曲は、両者が勝ったものとして両側に +1 する (運営仕様)。
+ * サーバ側 setMatchResult と同じロジックなので、プレビューと保存後の値が一致する。
  */
 const draftWinnerPreview = computed<{ a: number; b: number; verdict: string }>(() => {
   const d = resultDraft.value;
@@ -529,11 +531,13 @@ const draftWinnerPreview = computed<{ a: number; b: number; verdict: string }>((
     recorded++;
     if (d.song1ScoreA > d.song1ScoreB) a++;
     else if (d.song1ScoreA < d.song1ScoreB) b++;
+    else { a++; b++; }
   }
   if (d.song2ScoreA !== null && d.song2ScoreB !== null) {
     recorded++;
     if (d.song2ScoreA > d.song2ScoreB) a++;
     else if (d.song2ScoreA < d.song2ScoreB) b++;
+    else { a++; b++; }
   }
   let verdict = '未記録';
   if (recorded > 0) {
