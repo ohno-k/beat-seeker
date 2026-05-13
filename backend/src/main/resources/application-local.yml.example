@@ -1,0 +1,32 @@
+# =============================================================
+# Spring Boot ローカル開発プロファイル (雛形)
+# =============================================================
+#
+# 使い方:
+#   1. このファイルを application-local.yml にコピー
+#      (例) cp application-local.yml.example application-local.yml
+#   2. 下記の <...> を自分の環境に合わせて埋める
+#   3. 起動時に SPRING_PROFILES_ACTIVE=local を渡す
+#      (例) PowerShell:  $env:SPRING_PROFILES_ACTIVE = "local"
+#           bash:        export SPRING_PROFILES_ACTIVE=local
+#
+# application.yml の値をオーバーライドする形で読み込まれる。
+# 本番 (Render) では SPRING_PROFILES_ACTIVE を設定しないので、本ファイルは無視されて
+# 環境変数による設定が効く。
+#
+# 機密値を含むため application-local.yml は .gitignore 対象。
+# =============================================================
+
+spring:
+  datasource:
+    # ローカル DB を立てている場合:
+    #   url: jdbc:postgresql://localhost:5432/beatseeker
+    #   username: postgres
+    #   password: <ローカルパスワード>
+    # 本番 (Render) DB をそのまま開発でも使う場合は、Render ダッシュボードから取得した接続情報を貼り付け:
+    url: jdbc:postgresql://<RENDER_DB_HOST>/beatseeker
+    username: <RENDER_DB_USER>
+    password: <RENDER_DB_PASSWORD>
+
+# 必要に応じてここで他の設定も上書きできる (mail / kofi 等)。
+# 何も書かなければ application.yml の値がそのまま使われる。

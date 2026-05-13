@@ -16,18 +16,31 @@
  *     - 両方公開済み + クリック → 何もしない (誤爆防止)
  *  4. OBS は「左半分のみ」「右半分のみ」をそれぞれクロップして 2 つのソースにできる
  *
- * 主催 (ID=19) と運営担当 (ID=18) のみがサイドバーから到達。URL は `/song-reveal`。
+ * 主催 (ID=19) / 運営担当 (ID=18) / ID=23 / ID=210 のみがサイドバーから到達。URL は `/song-reveal`。
  *
  * データソース: `song_data.json` を ANOTHER (4) / LEGGENDARIA (10) のみフィルタ。
  */
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useGameData, type SongDataEntry } from '../composables/useGameData';
+import {
+  useCompetitionAdmin,
+  type CompetitionRevealData,
+  type CompetitionRevealMatch,
+  type CompetitionRevealPick,
+  type CompetitionSongGenre,
+} from '../composables/useCompetitionAdmin';
+import strategySongs from '../data/strategy_card_songs.json';
+import { useToast } from '../composables/useToast';
 
 const { songDataBody, fetchGameData } = useGameData();
+const { competitions, fetchCompetitions, fetchRevealData } = useCompetitionAdmin();
+const toast = useToast();
 
-onMounted(() => {
-  if (songDataBody.value.length === 0) fetchGameData();
+onMounted(async () => {
+  if (songDataBody.value.length === 0) await fetchGameData();
   document.addEventListener('fullscreenchange', onFullscreenChange);
+  // URL パラメータからの自動取り込み (CompetitionAdminView から新規タブで開かれた場合の経路)
+  await autoLoadFromUrlParams();
 });
 
 onUnmounted(() => {
@@ -61,6 +74,181 @@ const searchResults = computed<SongDataEntry[]>(() => {
 // ── 選曲スロット ────────────────────────────────────────
 const selectedLeft = ref<SongDataEntry | null>(null);
 const selectedRight = ref<SongDataEntry | null>(null);
+
+// ── 大会から取り込み (CompetitionRevealData) ─────────────
+/** 「大会から取り込み」モーダルを開いているか。 */
+const isImportModalOpen = ref(false);
+/** 選択中の大会 ID (モーダル内 step1)。 */
+const selectedImportCompetitionId = ref<number | null>(null);
+/** 選択中の大会の reveal データ (matches 一覧)。 */
+const importRevealData = ref<CompetitionRevealData | null>(null);
+const isImportLoading = ref(false);
+
+/** モーダルを開き、大会一覧の取得が未済なら fetch する。 */
+const openImportModal = async () => {
+  isImportModalOpen.value = true;
+  selectedImportCompetitionId.value = null;
+  importRevealData.value = null;
+  if (competitions.value.length === 0) {
+    try {
+      await fetchCompetitions();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+};
+const closeImportModal = () => {
+  isImportModalOpen.value = false;
+  selectedImportCompetitionId.value = null;
+  importRevealData.value = null;
+};
+
+/** 大会を選択 → その大会の試合一覧を取得。 */
+const handleSelectImportCompetition = async (compId: number) => {
+  selectedImportCompetitionId.value = compId;
+  isImportLoading.value = true;
+  try {
+    importRevealData.value = await fetchRevealData(compId);
+  } catch (e) {
+    toast.error((e as Error).message);
+    importRevealData.value = null;
+  } finally {
+    isImportLoading.value = false;
+  }
+};
+
+/**
+ * 競技 pick (タイトル + 難易度) を SongDataEntry に逆引きする。
+ * difficulty: 'A' → '4' / 'L' → '10' でマッチング。見つからなければ null。
+ */
+const resolveSongData = (pick: CompetitionRevealPick): SongDataEntry | null => {
+  const targetDiff = pick.songDiff === 'L' ? '10' : '4';
+  return songDataBody.value.find(s => s.title === pick.songTitle && s.difficulty === targetDiff) ?? null;
+};
+
+/**
+ * StrategyCard 発動時のランダムプール。matchKind の Lv 帯 × 相手 pick のジャンル。
+ * frontend に持っている strategy_card_songs.json を使ってクライアント側で抽選する。
+ */
+type StrategyPoolSong = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
+const strategyPool = strategySongs as Record<CompetitionSongGenre, Record<string, StrategyPoolSong[]>>;
+const LEVELS_FOR_KIND: Record<'vanguard' | 'middle' | 'captain', number[]> = {
+  vanguard: [8, 9, 10],
+  middle: [11],
+  captain: [12],
+};
+
+/** matchKind と相手の pick から、ランダム化用プール (genre × Lv帯) を集める。 */
+const buildSpinPool = (matchKind: 'vanguard' | 'middle' | 'captain', opponentPick: CompetitionRevealPick): StrategyPoolSong[] => {
+  const pool: StrategyPoolSong[] = [];
+  for (const lv of LEVELS_FOR_KIND[matchKind]) {
+    const arr = strategyPool[opponentPick.songGenre]?.[String(lv)];
+    if (arr) pool.push(...arr);
+  }
+  return pool;
+};
+
+/** 「相手の pick が strategy で置き換わるべきか」を判定して、置換後の pick を返す (or 元の pick)。 */
+const applyStrategyIfNeeded = (
+  match: CompetitionRevealMatch,
+  side: 'a' | 'b',
+): CompetitionRevealPick | null => {
+  // side の自分の pick を返す関数。相手が strategy を使った場合、自分の pick がランダム化される。
+  const myPick = side === 'a' ? match.playerAPick : match.playerBPick;
+  const opponentUsedStrategy = side === 'a' ? match.playerBStrategyUsed : match.playerAStrategyUsed;
+  if (!myPick) return null;
+  if (!opponentUsedStrategy) return myPick;
+
+  // 相手が strategy を使ったので、自分の pick (= myPick のジャンル) を Lv 帯内でランダム化する
+  const pool = buildSpinPool(match.matchKind, myPick);
+  if (pool.length === 0) return myPick;
+  const random = pool[Math.floor(Math.random() * pool.length)];
+  return {
+    songGenre: myPick.songGenre,
+    songLevel: random.level,
+    songStrategyId: random.id,
+    songTitle: random.title,
+    songDiff: random.diff,
+  };
+};
+
+/**
+ * 試合を選択 → 左右にプレイヤー名と曲を流し込む。
+ * playerA → left, playerB → right にマッピング。
+ * strategy が使われた側は相手 pick がランダム抽選結果に差し替わる。
+ */
+const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
+  if (!match.playerAName || !match.playerBName) {
+    toast.error('両サイドにプレイヤーがアサインされていない試合は取り込めません');
+    return;
+  }
+  if (!match.playerAPick || !match.playerBPick) {
+    toast.error('両サイドの自選曲が揃っていない試合は取り込めません');
+    return;
+  }
+
+  const effectiveA = applyStrategyIfNeeded(match, 'a');
+  const effectiveB = applyStrategyIfNeeded(match, 'b');
+  if (!effectiveA || !effectiveB) {
+    toast.error('自選曲の解決に失敗しました');
+    return;
+  }
+
+  const songA = resolveSongData(effectiveA);
+  const songB = resolveSongData(effectiveB);
+  if (!songA || !songB) {
+    toast.error('SongData に該当曲が見つかりません: '
+      + (!songA ? `「${effectiveA.songTitle}」 ` : '')
+      + (!songB ? `「${effectiveB.songTitle}」` : ''));
+    return;
+  }
+
+  leftPlayer.value = match.playerAName;
+  rightPlayer.value = match.playerBName;
+  selectedLeft.value = songA;
+  selectedRight.value = songB;
+
+  const noteParts: string[] = [];
+  if (match.playerAStrategyUsed) noteParts.push('A 側が StrategyCard 発動 → B の曲をランダム化');
+  if (match.playerBStrategyUsed) noteParts.push('B 側が StrategyCard 発動 → A の曲をランダム化');
+  if (noteParts.length > 0) toast.info(noteParts.join(' / '));
+  toast.success(`取り込みました: ${match.teamAName} vs ${match.teamBName}`);
+  closeImportModal();
+};
+
+const KIND_LABEL: Record<'vanguard' | 'middle' | 'captain', string> = {
+  vanguard: '先鋒戦',
+  middle: '中堅戦',
+  captain: '大将戦',
+};
+
+/**
+ * URL に {@code ?competitionId=X&matchId=Y} があれば、その試合を自動取り込み + REVEAL フェーズへ遷移。
+ * CompetitionAdminView の対戦表から「▶ REVEAL を再生」で新規タブを開いた経路で使われる。
+ * フェッチに失敗したり対象試合が見つからない場合はトーストでエラー通知し、SELECT フェーズに留まる。
+ */
+const autoLoadFromUrlParams = async (): Promise<void> => {
+  const params = new URLSearchParams(window.location.search);
+  const competitionId = Number(params.get('competitionId'));
+  const matchId = Number(params.get('matchId'));
+  if (!competitionId || !matchId) return;
+  try {
+    const data = await fetchRevealData(competitionId);
+    const match = data.matches.find(m => m.matchId === matchId);
+    if (!match) {
+      toast.error(`大会 ${competitionId} に match ${matchId} が見つかりません`);
+      return;
+    }
+    handleApplyMatchToReveal(match);
+    // handleApplyMatchToReveal は失敗時に selectedLeft/Right を設定しないので、それを判定して遷移
+    if (selectedLeft.value && selectedRight.value) {
+      phase.value = 'reveal';
+      revealStep.value = 0;
+    }
+  } catch (e) {
+    toast.error('大会データの読込に失敗しました: ' + (e as Error).message);
+  }
+};
 
 // ── プレイヤー名 (自由入力。REVEAL フェーズ中、各半面の上部に常時表示) ──
 const leftPlayer = ref('');
@@ -198,11 +386,21 @@ const toggleFullscreen = async () => {
 
     <!-- ========== Phase: SELECT ========== -->
     <div v-if="phase === 'select'" class="relative z-10 max-w-6xl mx-auto p-4 sm:p-8 space-y-6">
-      <div>
-        <h1 class="text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-sky-300 to-amber-300 drop-shadow-[0_0_25px_rgba(56,189,248,0.4)]">
-          SONG REVEAL
-        </h1>
-        <p class="text-slate-400 mt-2 text-sm tracking-widest uppercase">選曲発表演出 (2 曲対応 / 左右分割)</p>
+      <div class="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-sky-300 to-amber-300 drop-shadow-[0_0_25px_rgba(56,189,248,0.4)]">
+            SONG REVEAL
+          </h1>
+          <p class="text-slate-400 mt-2 text-sm tracking-widest uppercase">選曲発表演出 (2 曲対応 / 左右分割)</p>
+        </div>
+        <button
+          type="button"
+          @click="openImportModal"
+          class="px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase bg-gradient-to-r from-violet-500 via-fuchsia-500 to-amber-500 text-white hover:shadow-lg transition-all"
+          title="主催権限でログイン中の場合のみ動作"
+        >
+          📥 大会から取り込み
+        </button>
       </div>
 
       <!-- プレイヤー名 (自由入力。REVEAL 時に各半面の上部に表示) -->
@@ -345,6 +543,89 @@ const toggleFullscreen = async () => {
           <span v-if="canReveal" class="absolute inset-0 button-shine pointer-events-none"></span>
         </button>
         <p class="text-[11px] font-mono text-slate-500 tracking-widest">REVEAL 後は画面のどこでもクリックで次の 1 曲を発表</p>
+      </div>
+    </div>
+
+    <!-- ========== 大会から取り込みモーダル ==========
+         主催 (4 ID) ログイン状態で開く想定。SELECT フェーズ中のみ起動可能。
+         競技側で組まれた matchups から 1 試合を選ぶと、左右のプレイヤー名 + 自選曲が
+         自動的にスロットへ流し込まれる。StrategyCard が使われていた側は
+         相手の pick が strategy_card_songs プール内でランダム化される。 -->
+    <div
+      v-if="isImportModalOpen"
+      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      @click.self="closeImportModal"
+    >
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+        <!-- ヘッダ -->
+        <div class="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
+          <p class="text-sm font-black tracking-widest uppercase text-cyan-300">大会から取り込み</p>
+          <button type="button" @click="closeImportModal" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+        </div>
+
+        <!-- Step 1: 大会選択 -->
+        <div v-if="!selectedImportCompetitionId" class="flex-1 overflow-y-auto">
+          <p class="px-5 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-500">Step 1: 大会を選ぶ</p>
+          <ul v-if="competitions.length > 0" class="divide-y divide-slate-800">
+            <li
+              v-for="c in competitions"
+              :key="c.id"
+              class="px-5 py-3 hover:bg-slate-800 cursor-pointer transition-colors"
+              @click="handleSelectImportCompetition(c.id)"
+            >
+              <p class="font-bold">{{ c.name }}</p>
+              <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · status: {{ c.status }} · 作成 {{ new Date(c.createdAt).toLocaleString() }}</p>
+            </li>
+          </ul>
+          <p v-else class="px-5 py-8 text-center text-slate-500 text-sm">取り込める大会がありません (主催権限でログインしていることを確認してください)</p>
+        </div>
+
+        <!-- Step 2: 試合選択 -->
+        <div v-else class="flex-1 flex flex-col min-h-0">
+          <div class="px-5 py-2 flex items-center justify-between border-b border-slate-800">
+            <p class="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+              Step 2: 試合を選ぶ - <span class="text-cyan-300">{{ importRevealData?.competitionName ?? '...' }}</span>
+            </p>
+            <button
+              type="button"
+              @click="selectedImportCompetitionId = null; importRevealData = null"
+              class="text-[10px] text-slate-400 hover:text-white"
+            >← 大会を選び直す</button>
+          </div>
+          <div v-if="isImportLoading" class="px-5 py-8 text-center text-slate-500 text-sm">読み込み中…</div>
+          <ul v-else-if="importRevealData && importRevealData.matches.length > 0" class="flex-1 overflow-y-auto divide-y divide-slate-800">
+            <li
+              v-for="m in importRevealData.matches"
+              :key="m.matchId"
+              class="px-5 py-3 hover:bg-slate-800 cursor-pointer transition-colors"
+              :class="(!m.playerAPick || !m.playerBPick) ? 'opacity-50' : ''"
+              @click="handleApplyMatchToReveal(m)"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <p class="font-bold text-sm">
+                  <span class="text-cyan-300">{{ m.playerAName ?? '?' }}</span>
+                  <span class="text-slate-500 mx-1">({{ m.teamAName }})</span>
+                  <span class="text-slate-500 mx-2">vs</span>
+                  <span class="text-amber-300">{{ m.playerBName ?? '?' }}</span>
+                  <span class="text-slate-500 mx-1">({{ m.teamBName }})</span>
+                </p>
+                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-widest shrink-0">
+                  M#{{ m.matchupOrder }} · {{ KIND_LABEL[m.matchKind] }}
+                  <span v-if="m.requiredGenre" class="ml-1 text-emerald-300">[{{ m.requiredGenre }}]</span>
+                </p>
+              </div>
+              <div class="mt-1 text-[11px] font-mono text-slate-400 flex items-center gap-3 flex-wrap">
+                <span v-if="m.playerAPick">A: {{ m.playerAPick.songTitle }}</span>
+                <span v-else class="text-rose-400">A: 未提出</span>
+                <span v-if="m.playerBPick">B: {{ m.playerBPick.songTitle }}</span>
+                <span v-else class="text-rose-400">B: 未提出</span>
+                <span v-if="m.playerAStrategyUsed" class="text-fuchsia-300">⚡ A 発動</span>
+                <span v-if="m.playerBStrategyUsed" class="text-fuchsia-300">⚡ B 発動</span>
+              </div>
+            </li>
+          </ul>
+          <p v-else class="px-5 py-8 text-center text-slate-500 text-sm">この大会には試合がありません</p>
+        </div>
       </div>
     </div>
 

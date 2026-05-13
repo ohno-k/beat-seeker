@@ -67,6 +67,14 @@ const ShareView = defineAsyncComponent(() => import('./views/ShareView.vue'));
 const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCardView.vue'));
 // 選曲発表 (SONG REVEAL): 大会主催 + 運営担当のみ到達可能。`/song-reveal` のスタンドアロン URL で OBS から読み込む。
 const SongRevealView = defineAsyncComponent(() => import('./views/SongRevealView.vue'));
+// 大会管理画面: Competition セクションの 4 ID 限定。サイドバーから activeTab 経由で遷移する通常タブ。
+const CompetitionAdminView = defineAsyncComponent(() => import('./views/CompetitionAdminView.vue'));
+// 大会参加者画面 (招待 URL 専用): `/competition/player/{token}` で直接アクセス。
+// ログイン不要・サイドバーなしのスタンドアロン描画。
+const CompetitionPlayerView = defineAsyncComponent(() => import('./views/CompetitionPlayerView.vue'));
+// 大会 TL (チームリーダー) 管理画面: `/competition/tl/{token}` で直接アクセス。
+// 自チームのラインアップ (4 matchup × 3 試合 = 12 試合) のアサインを編集する。
+const CompetitionTlView = defineAsyncComponent(() => import('./views/CompetitionTlView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
@@ -127,6 +135,32 @@ const isStrategyCardObsPage = ref(window.location.pathname === '/strategy-card')
  * 認証不要。OBS の Interact 機能で曲を選んでから REVEAL する想定。
  */
 const isSongRevealPage = ref(window.location.pathname === '/song-reveal');
+
+/**
+ * 現在 URL が `/competition/player/{token}` かどうかと、抽出した招待トークン。
+ *
+ * このページは大会参加者が招待 URL からアクセスする「自選曲提出 + StrategyCard 決定」用の
+ * スタンドアロン画面。サイドバー・グローバルヘッダなしで CompetitionPlayerView だけ描画する。
+ * トークン文字列自体が認証材料 (beat-seeker アカウント不要)。
+ */
+const isCompetitionPlayerPage = ref(window.location.pathname.startsWith('/competition/player/'));
+const competitionPlayerToken = ref<string>(
+  isCompetitionPlayerPage.value
+    ? (window.location.pathname.replace(/^\/competition\/player\//, '').replace(/\/.*$/, '') || '')
+    : ''
+);
+
+/**
+ * 現在 URL が `/competition/tl/{token}` かどうかと、抽出した TL トークン。
+ * TL (チームリーダー) 専用 URL で、自チームの試合へのアサインを管理する。
+ * 同じくログイン不要のスタンドアロン画面。
+ */
+const isCompetitionTlPage = ref(window.location.pathname.startsWith('/competition/tl/'));
+const competitionTlToken = ref<string>(
+  isCompetitionTlPage.value
+    ? (window.location.pathname.replace(/^\/competition\/tl\//, '').replace(/\/.*$/, '') || '')
+    : ''
+);
 
 const { hasUpdate } = useAppUpdate();
 /** Service Worker による新バージョン通知を受けた際の更新ボタン。単純にページ再読込を行う。 */
@@ -234,7 +268,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin'>('dashboard')
 /** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
 const currentGuideSlug = ref<string | null>(null);
 /**
@@ -283,6 +317,26 @@ const { user, isLoggedIn, logout, isLoading: authLoading, authHeaders } = useAut
 const { upload, saveHistoryLog } = useScoreUpload();
 const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
+
+/**
+ * 【computed の役割】 Competition セクション (大会管理 / Strategy Card / Song Reveal) を
+ * ヘッダーに表示してよいかの判定。サイドバー側の canAccessCompetition と同じ 4 ID。
+ * 他人ダッシュボード閲覧中 (viewingUserId) は隠す。
+ */
+const canAccessCompetition = computed(() => {
+  const id = user.value?.id;
+  return (id === 18 || id === 19 || id === 23 || id === 210) && !viewingUserId.value;
+});
+
+/** ヘッダー「beat-seeker for competition」ドロップダウンの開閉。 */
+const isCompetitionMenuOpen = ref(false);
+
+/** ドロップダウンから大会管理タブへ遷移。 */
+const goCompetitionAdmin = () => {
+  activeTab.value = 'competition-admin';
+  window.history.replaceState({}, '', '/competition-admin');
+  isCompetitionMenuOpen.value = false;
+};
 const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission, sendFriendRequest, fetchVirtualRivalStatus, addVirtualRival, removeVirtualRival } = useFriends();
 
 /** 閲覧中ユーザーとのフレンド関係。null はログイン前 or 取得前。 */
@@ -538,6 +592,7 @@ onMounted(() => {
     '/changelog': 'changelog',
     '/difficulty-table': 'diff-table',
     '/guide': 'guide',
+    '/competition-admin': 'competition-admin',
   };
   const currentPath = window.location.pathname;
   if (pathToTab[currentPath]) {
@@ -1348,6 +1403,10 @@ const handleUnifiedClose = async () => {
   <StrategyCardView v-else-if="isStrategyCardObsPage" class="w-full min-h-screen" />
   <!-- OBS ブラウザソース用: 選曲発表 (SONG REVEAL) も同様に単独描画。 -->
   <SongRevealView v-else-if="isSongRevealPage" />
+  <!-- 大会参加者用招待ページ: token を抽出して View に渡す。ログイン不要のスタンドアロン。 -->
+  <CompetitionPlayerView v-else-if="isCompetitionPlayerPage" :token="competitionPlayerToken" />
+  <!-- 大会 TL 管理ページ: token を抽出してラインアップ管理 View を表示。ログイン不要のスタンドアロン。 -->
+  <CompetitionTlView v-else-if="isCompetitionTlPage" :token="competitionTlToken" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
     <!-- ============================================================ -->
     <!-- エイプリルフール限定オーバーレイ（常時マウントだが中身は日付判定） -->
@@ -1535,6 +1594,82 @@ const handleUnifiedClose = async () => {
           </div>
           
           <div class="flex items-center gap-4">
+            <!--
+              beat-seeker for competition: 大会主催 4 ID 限定の機能群。
+              クリックで大会管理 / Strategy Card / Song Reveal の 3 リンクをドロップダウン表示する。
+              ダークモード切替の左隣に常時表示 (権限のあるユーザーのみ)。
+            -->
+            <div v-if="canAccessCompetition" class="relative">
+              <button
+                type="button"
+                @click="isCompetitionMenuOpen = !isCompetitionMenuOpen"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wider bg-gradient-to-r from-violet-600 via-fuchsia-600 to-amber-500 text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+                :class="isCompetitionMenuOpen ? 'ring-2 ring-violet-300 dark:ring-violet-400' : ''"
+                title="beat-seeker for competition"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span class="hidden sm:inline whitespace-nowrap">beat-seeker for competition</span>
+                <span class="sm:hidden">Competition</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- ドロップダウン本体: 外側クリックで閉じる用のオーバーレイ + 浮動メニュー -->
+              <template v-if="isCompetitionMenuOpen">
+                <div class="fixed inset-0 z-40" @click="isCompetitionMenuOpen = false"></div>
+                <div class="absolute right-0 mt-2 w-72 z-50 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl overflow-hidden">
+                  <div class="px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700/60">
+                    Competition Tools
+                  </div>
+                  <!-- 大会管理 (内部タブ) -->
+                  <button
+                    type="button"
+                    @click="goCompetitionAdmin"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/30 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <div class="flex-1 min-w-0">
+                      <p>大会管理</p>
+                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">5チーム×4人 総当たり編成</p>
+                    </div>
+                  </button>
+                  <!-- Strategy Card (スタンドアロン URL) -->
+                  <a
+                    href="/strategy-card"
+                    @click="isCompetitionMenuOpen = false"
+                    class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-fuchsia-700 dark:text-fuchsia-300 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/30 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <div class="flex-1 min-w-0">
+                      <p>Strategy Card</p>
+                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">課題曲ランダム抽選 (OBS用)</p>
+                    </div>
+                  </a>
+                  <!-- Song Reveal (スタンドアロン URL) -->
+                  <a
+                    href="/song-reveal"
+                    @click="isCompetitionMenuOpen = false"
+                    class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-cyan-700 dark:text-cyan-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
+                    </svg>
+                    <div class="flex-1 min-w-0">
+                      <p>Song Reveal</p>
+                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">選曲発表演出 (OBS用)</p>
+                    </div>
+                  </a>
+                </div>
+              </template>
+            </div>
+
             <!-- Dark Mode Toggle -->
             <button @click="toggleDarkMode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none">
               <svg v-if="isDarkMode" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
@@ -1819,6 +1954,12 @@ const handleUnifiedClose = async () => {
         <!-- 管理者専用: 人気曲ランキング（BEAT-PT TOP100 集計） -->
         <template v-else-if="activeTab === 'popular-songs'">
           <SongRankingList class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- 大会主催専用: Competition 管理画面 (4 ID ホワイトリスト)。
+             サイドバーの Competition セクションから遷移する通常タブ。 -->
+        <template v-else-if="activeTab === 'competition-admin'">
+          <CompetitionAdminView class="w-full animate-fade-in" />
         </template>
 
         <!-- 利用規約 -->
@@ -2163,8 +2304,8 @@ const handleUnifiedClose = async () => {
     </Transition>
   </Teleport>
 
-  <!-- グローバルトースト通知レイヤ（useToast() ストアの内容を画面右下に重ねる） -->
-  <ToastContainer />
+  <!-- ToastContainer は template 末尾 (v-else の外) に移動済。
+       スタンドアロン画面 (Player/TL/StrategyCard 等) でも通知を表示するため。 -->
 
   <!-- グローバルコマンドパレット（Cmd/Ctrl + K で開く全画面検索） -->
   <CommandPalette
@@ -2183,6 +2324,14 @@ const handleUnifiedClose = async () => {
   <!-- ページ上部へ戻る FAB（スクロール量がしきい値超で出現） -->
   <BackToTop />
   </div>
+
+  <!--
+    トースト通知のグローバルレイヤ。
+    上記の <div v-else> の中ではなく外側に置くことで、
+    CompetitionPlayerView / CompetitionTlView / StrategyCardView 等のスタンドアロン画面でも
+    useToast() の通知が表示できるようにする。
+  -->
+  <ToastContainer />
 </template>
 
 <style scoped>

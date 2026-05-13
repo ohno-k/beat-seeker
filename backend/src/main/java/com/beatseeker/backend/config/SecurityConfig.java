@@ -160,6 +160,12 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/arena/**").authenticated()
                                                 // 非公式難易度クイズ: 進捗永続化のため要ログイン
                                                 .requestMatchers("/api/rank-quiz/**").authenticated()
+                                                // 大会主催 API: 4 ID ホワイトリスト判定は Controller 側で行う。
+                                                // ログインだけは Spring Security でガード。
+                                                .requestMatchers("/api/competitions/**").authenticated()
+                                                // 参加者・TL 向け API: 招待 URL に埋め込まれたトークン自体が本人確認材料。
+                                                // ログイン不要 (beat-seeker アカウントを持たない参加者を想定)。
+                                                .requestMatchers("/api/competition-access/**").permitAll()
                                                 // 上記いずれにも該当しないリクエストは公開扱い（静的リソース等）
                                                 .anyRequest().permitAll())
                                 // 未認証で要ログインエンドポイントへアクセスされた場合は 401 を返す

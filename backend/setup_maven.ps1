@@ -17,5 +17,7 @@ Write-Host "Maven set up successfully."
 .\mvn.cmd -version
 
 # Run Maven goals
+# application-local.yml の値 (機密 DB 接続情報など) を読み込ませるためにローカルプロファイルを有効化。
+# application-local.yml が存在しない場合は application.yml + 環境変数だけで動作する想定。
 .\mvn.cmd clean compile
-.\mvn.cmd spring-boot:run
+.\mvn.cmd spring-boot:run "-Dspring-boot.run.profiles=local"

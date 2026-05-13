@@ -1,0 +1,872 @@
+<script setup lang="ts">
+/**
+ * 【View の役割】 大会主催 (Competition セクションのホワイトリスト 4 ID) 向け管理画面。
+ *
+ * 機能:
+ *  - 大会一覧 (新しい順) + 「新規作成」ボタン
+ *  - 大会詳細: 5 チーム × 4 名の編成 / TL 兼任設定 / 招待 URL コピー / open 遷移
+ *
+ * draft 状態の間のみチーム名・参加者の編集が可能。
+ * open に遷移すると 10 matchup × 3 戦 = 30 試合がサーバ側で自動生成される。
+ * 試合へのプレイヤーアサインは別画面 (TL 専用) で行う想定 (フェーズ 2 では未実装)。
+ *
+ * 4 ID 判定はサーバ側で行うため、本 View はサイドバーガードと併せた二重防御の片側として、
+ * 表示上の権限警告のみクライアントで出す (実際のリクエストブロックはサーバ側)。
+ */
+import { ref, computed, onMounted } from 'vue';
+import { useAuth } from '../composables/useAuth';
+import {
+  useCompetitionAdmin,
+  type CompetitionParticipantDto,
+  type CompetitionTeamDto,
+  type CompetitionMatchDto,
+  type CompetitionSongGenre,
+  type CompetitionRevealData,
+} from '../composables/useCompetitionAdmin';
+import { useToast } from '../composables/useToast';
+
+const { user } = useAuth();
+const toast = useToast();
+const {
+  competitions,
+  currentCompetition,
+  isLoading,
+  fetchCompetitions,
+  createCompetition,
+  fetchCompetition,
+  renameTeam,
+  addParticipant,
+  updateParticipant,
+  deleteParticipant,
+  openCompetition,
+  setMatchGenre,
+  publishLineup,
+  publishPick,
+  setMatchLock,
+  deleteCompetition,
+  regenerateParticipantToken,
+  regenerateTlToken,
+} = useCompetitionAdmin();
+
+/** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
+const ALL_GENRES: CompetitionSongGenre[] = ['NOTES', 'PEAK', 'CHORD', 'CHARGE', 'SCRATCH', 'SOF-LAN', 'INSANE'];
+const KIND_LABEL: Record<'vanguard' | 'middle' | 'captain', string> = {
+  vanguard: '先鋒戦',
+  middle: '中堅戦',
+  captain: '大将戦',
+};
+
+/** Competition セクション (Strategy Card / Song Reveal / 自選曲送信) と同じ 4 ID。 */
+const ORGANIZER_IDS = [18, 19, 23, 210];
+const isOrganizer = computed(() => !!user.value && ORGANIZER_IDS.includes(user.value.id));
+
+// ── 一覧/詳細モード切替 ───────────────────────────────────
+/**
+ * 詳細モードに入っているかは currentCompetition の有無で判定。
+ * 「← 一覧へ」ボタンで null に戻す。
+ */
+const backToList = () => {
+  currentCompetition.value = null;
+};
+
+// ── 新規作成フォーム ──────────────────────────────────────
+const createName = ref('');
+const isCreating = ref(false);
+const handleCreate = async () => {
+  if (!createName.value.trim()) {
+    toast.error('大会名を入力してください');
+    return;
+  }
+  isCreating.value = true;
+  try {
+    await createCompetition(createName.value.trim());
+    createName.value = '';
+    toast.success('大会を作成しました');
+    await fetchCompetitions();
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isCreating.value = false;
+  }
+};
+
+// ── 大会選択 + Reveal データ ──────────────────────────
+/**
+ * 「両側の自選曲が提出済」か判定するため、詳細ロード時に reveal データも取得する。
+ * 大会一覧 → 大会選択時、と「再読込」相当の場面で更新される。
+ */
+const revealData = ref<CompetitionRevealData | null>(null);
+
+const refreshRevealData = async (compId: number) => {
+  try {
+    revealData.value = await fetchRevealData(compId);
+  } catch {
+    // reveal データ取得失敗時は REVEAL ボタンを隠す (致命的ではない)
+    revealData.value = null;
+  }
+};
+
+const handleOpenCompetition = async (id: number) => {
+  try {
+    await fetchCompetition(id);
+    await refreshRevealData(id);
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+// ── チーム名編集 ──────────────────────────────────────────
+/** リネーム編集中のチーム ID と入力値。1 つのチームだけ編集可能。 */
+const editingTeamId = ref<number | null>(null);
+const editingTeamName = ref('');
+
+const beginRenameTeam = (team: CompetitionTeamDto) => {
+  editingTeamId.value = team.id;
+  editingTeamName.value = team.teamName;
+};
+const cancelRenameTeam = () => {
+  editingTeamId.value = null;
+  editingTeamName.value = '';
+};
+const commitRenameTeam = async (team: CompetitionTeamDto) => {
+  if (!currentCompetition.value) return;
+  if (!editingTeamName.value.trim() || editingTeamName.value.trim() === team.teamName) {
+    cancelRenameTeam();
+    return;
+  }
+  try {
+    await renameTeam(currentCompetition.value.id, team.id, editingTeamName.value.trim());
+    toast.success('チーム名を変更しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    cancelRenameTeam();
+  }
+};
+
+// ── 参加者追加 ────────────────────────────────────────────
+/** どのチームに対して追加フォームを開いているか。同時に開けるのは 1 つ。 */
+const addingForTeamId = ref<number | null>(null);
+const addingDisplayName = ref('');
+const addingIsTl = ref(false);
+
+const beginAddParticipant = (teamId: number) => {
+  addingForTeamId.value = teamId;
+  addingDisplayName.value = '';
+  addingIsTl.value = false;
+};
+const cancelAddParticipant = () => {
+  addingForTeamId.value = null;
+  addingDisplayName.value = '';
+  addingIsTl.value = false;
+};
+const commitAddParticipant = async () => {
+  if (!currentCompetition.value || addingForTeamId.value === null) return;
+  if (!addingDisplayName.value.trim()) {
+    toast.error('表示名を入力してください');
+    return;
+  }
+  try {
+    await addParticipant(currentCompetition.value.id, addingForTeamId.value, {
+      displayName: addingDisplayName.value.trim(),
+      isTl: addingIsTl.value,
+    });
+    toast.success('参加者を追加しました');
+    cancelAddParticipant();
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+// ── 参加者編集 (TL 昇格 / 削除) ───────────────────────────
+const handleToggleTl = async (p: CompetitionParticipantDto) => {
+  if (!currentCompetition.value) return;
+  try {
+    await updateParticipant(currentCompetition.value.id, p.id, { isTl: !p.isTl });
+    toast.success(p.isTl ? 'TL を解除しました' : 'TL に設定しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+const handleDeleteParticipant = async (p: CompetitionParticipantDto) => {
+  if (!currentCompetition.value) return;
+  if (!confirm(`「${p.displayName}」を削除しますか?`)) return;
+  try {
+    await deleteParticipant(currentCompetition.value.id, p.id);
+    toast.success('参加者を削除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+// ── トークン再発行 (誤公開時のリカバリ) ──────────────
+const handleRegenerateParticipantToken = async (p: CompetitionParticipantDto) => {
+  if (!currentCompetition.value) return;
+  if (!confirm(`「${p.displayName}」の招待 URL を再発行します。旧 URL は即無効になります。続けますか?`)) return;
+  try {
+    await regenerateParticipantToken(currentCompetition.value.id, p.id);
+    toast.success('招待 URL を再発行しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+const handleRegenerateTlToken = async (team: CompetitionTeamDto) => {
+  if (!currentCompetition.value) return;
+  if (!confirm(`「${team.teamName}」の TL URL を再発行します。旧 URL は即無効になります。続けますか?`)) return;
+  try {
+    await regenerateTlToken(currentCompetition.value.id, team.id);
+    toast.success('TL URL を再発行しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+// ── 招待 URL コピー ───────────────────────────────────────
+/** Origin (例: https://beat-seeker.com) + token から完全 URL を組み立てる。 */
+const buildPlayerUrl = (token: string) => `${window.location.origin}/competition/player/${token}`;
+const buildTlUrl = (token: string) => `${window.location.origin}/competition/tl/${token}`;
+
+const copyToClipboard = async (text: string, label: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success(`${label} をコピーしました`);
+  } catch {
+    toast.error('コピーに失敗しました');
+  }
+};
+
+// ── open 遷移 ─────────────────────────────────────────────
+const handleOpenStatus = async () => {
+  if (!currentCompetition.value) return;
+  if (!confirm('この大会を open に遷移しますか?\n10 試合 × 3 戦 = 30 試合が生成されます。')) return;
+  try {
+    await openCompetition(currentCompetition.value.id);
+    toast.success('open に遷移しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+// ── 削除 ─────────────────────────────────────────────────
+/**
+ * 大会を関連データごと完全削除する。
+ * 2 段階確認 (1回目: 警告ダイアログ、2回目: 大会名を入力させる) で誤操作を防ぐ。
+ */
+const handleDeleteCompetition = async (id: number, name: string) => {
+  if (!confirm(`大会「${name}」を削除します。\nチーム / 参加者 / 試合 / 自選曲 / StrategyCard 使用記録まで全て消えます。続けますか?`)) return;
+  const typed = prompt(`確認のため、もう一度大会名「${name}」を入力してください:`);
+  if (typed !== name) {
+    toast.error('入力が一致しなかったため中止しました');
+    return;
+  }
+  try {
+    await deleteCompetition(id);
+    toast.success('大会を削除しました');
+    await fetchCompetitions();
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+// ── 補助: チーム別に参加者を絞る ─────────────────────────
+/** チームに所属する参加者だけを返す (作成順、最大 4 名)。 */
+const membersOf = (teamId: number): CompetitionParticipantDto[] => {
+  if (!currentCompetition.value) return [];
+  return currentCompetition.value.participants.filter(p => p.teamId === teamId);
+};
+
+/** チームの残り空きスロット数 (0〜4)。0 になったら追加 UI を隠す。 */
+const remainingSlotsOf = (teamId: number): number => Math.max(0, 4 - membersOf(teamId).length);
+
+// ── ライフサイクル ────────────────────────────────────────
+onMounted(() => {
+  if (isOrganizer.value) {
+    fetchCompetitions().catch(e => toast.error((e as Error).message));
+  }
+});
+
+// ── 対戦表 (matchup ごとの試合と運営ジャンル指定) ────────
+/** チーム ID → チーム名。matchup の表示用。 */
+const teamNameOf = (teamId: number | null): string => {
+  if (!currentCompetition.value || teamId === null) return '?';
+  return currentCompetition.value.teams.find(t => t.id === teamId)?.teamName ?? '?';
+};
+
+/** 参加者 ID → 表示名。matchup でアサイン済みプレイヤー表示に使う。 */
+const participantNameOf = (participantId: number | null): string => {
+  if (!currentCompetition.value || participantId === null) return '未割当';
+  return currentCompetition.value.participants.find(p => p.id === participantId)?.displayName ?? '?';
+};
+
+/** matchup ID に紐づく 3 試合 (vanguard → middle → captain) を返す。 */
+const matchesForMatchup = (matchupId: number): CompetitionMatchDto[] => {
+  if (!currentCompetition.value?.matches) return [];
+  const KIND_ORDER: Record<string, number> = { vanguard: 0, middle: 1, captain: 2 };
+  return currentCompetition.value.matches
+    .filter(m => m.matchupId === matchupId)
+    .sort((a, b) => KIND_ORDER[a.matchKind] - KIND_ORDER[b.matchKind]);
+};
+
+/**
+ * ジャンルセレクタの change ハンドラ。
+ * 空文字 ('') を選んだら null を送ってサーバ側で指定解除する。
+ */
+const handleGenreChange = async (match: CompetitionMatchDto, raw: string) => {
+  if (!currentCompetition.value) return;
+  const genre = raw === '' ? null : (raw as CompetitionSongGenre);
+  // INSANE × 非 captain の組み合わせはサーバが拒否するが、UI 側でも先回りで止める
+  if (genre === 'INSANE' && match.matchKind !== 'captain') {
+    toast.error('INSANE は大将戦のみ指定できます');
+    return;
+  }
+  try {
+    await setMatchGenre(currentCompetition.value.id, match.id, genre);
+    toast.success(genre === null ? 'ジャンル指定を解除しました' : `${genre} に指定しました`);
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+/** matchKind 制約に応じてセレクタに出すジャンル候補。INSANE は captain のみ。 */
+const genresForKind = (matchKind: 'vanguard' | 'middle' | 'captain'): CompetitionSongGenre[] => {
+  return ALL_GENRES.filter(g => !(g === 'INSANE' && matchKind !== 'captain'));
+};
+
+// ── 公開トグル ────────────────────────────────────────────
+const handlePublishLineup = async (matchupId: number, side: 'a' | 'b' | 'both', published: boolean) => {
+  if (!currentCompetition.value) return;
+  try {
+    await publishLineup(currentCompetition.value.id, matchupId, side, published);
+    toast.success(published ? 'ラインアップを公開しました' : 'ラインアップ公開を解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+const handlePublishPick = async (matchId: number, side: 'a' | 'b' | 'both', published: boolean) => {
+  if (!currentCompetition.value) return;
+  try {
+    await publishPick(currentCompetition.value.id, matchId, side, published);
+    toast.success(published ? '自選曲を公開しました' : '自選曲公開を解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+const handleSetLock = async (matchId: number, side: 'a' | 'b' | 'both', locked: boolean) => {
+  if (!currentCompetition.value) return;
+  try {
+    await setMatchLock(currentCompetition.value.id, matchId, side, locked);
+    toast.success(locked ? 'ロックしました (編集禁止)' : 'ロックを解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+// ── REVEAL 再生 (Song Reveal 連携) ────────────────────
+/**
+ * 試合 1 件分の reveal メタを返す (両側自選曲の提出有無を判定するため)。
+ * revealData がまだロードされていない場合は null。
+ */
+const revealMatchOf = (matchId: number) => {
+  if (!revealData.value) return null;
+  return revealData.value.matches.find(rm => rm.matchId === matchId) ?? null;
+};
+
+/** REVEAL を再生できるか: 両プレイヤーがアサイン済み + 両側に自選曲提出済み。 */
+const canReveal = (matchId: number): boolean => {
+  const rm = revealMatchOf(matchId);
+  if (!rm) return false;
+  return !!rm.playerAName && !!rm.playerBName && !!rm.playerAPick && !!rm.playerBPick;
+};
+
+/**
+ * 新規タブで Song Reveal を開く。
+ * URL パラメータ {@code competitionId} / {@code matchId} を渡すと、SongRevealView は
+ * 該当試合を自動で取り込み、REVEAL フェーズに遷移する。
+ */
+const handleOpenReveal = (matchId: number) => {
+  if (!currentCompetition.value) return;
+  const url = `/song-reveal?competitionId=${currentCompetition.value.id}&matchId=${matchId}`;
+  window.open(url, '_blank');
+};
+
+/** 手動で reveal データを再取得 (プレイヤー提出状況を最新化したいとき)。 */
+const handleRefreshRevealData = async () => {
+  if (!currentCompetition.value) return;
+  await refreshRevealData(currentCompetition.value.id);
+  toast.success('提出状況を再読込しました');
+};
+
+/** matchup の両側ラインアップ公開状態を判定 (none / partial / both)。 */
+const lineupPublishStateOf = (mu: { lineupPublishedA: boolean; lineupPublishedB: boolean }): 'none' | 'partial' | 'both' => {
+  if (mu.lineupPublishedA && mu.lineupPublishedB) return 'both';
+  if (mu.lineupPublishedA || mu.lineupPublishedB) return 'partial';
+  return 'none';
+};
+
+// ── ステータスバッジ ──────────────────────────────────────
+const statusLabel = (s: string) => ({
+  draft: '編成中',
+  open: '受付中',
+  locked: 'ロック済',
+  finished: '終了',
+} as Record<string, string>)[s] ?? s;
+const statusColor = (s: string) => ({
+  draft: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+  open: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  locked: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  finished: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+} as Record<string, string>)[s] ?? 'bg-slate-100 text-slate-700';
+</script>
+
+<template>
+  <div class="competition-admin-view bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8">
+    <!-- 権限が無いユーザー向けの注意書き (4 ID 以外がこの URL に直接来た場合) -->
+    <div v-if="!isOrganizer" class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center">
+      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">大会管理画面</p>
+      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">主催権限がありません。サイドバーから他のページへ戻ってください。</p>
+    </div>
+
+    <template v-else>
+      <!-- ────────── 一覧モード ────────── -->
+      <div v-if="!currentCompetition" class="max-w-5xl mx-auto space-y-6">
+        <div>
+          <h1 class="text-3xl font-black tracking-tight">大会管理</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">5 チーム × 4 名の総当たり団体戦を作成・編成する</p>
+        </div>
+
+        <!-- 新規作成カード -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+          <p class="text-sm font-bold mb-3">新規大会を作成</p>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input
+              v-model="createName"
+              type="text"
+              placeholder="大会名 (例: BPL 模擬戦 2026 春)"
+              class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-blue-400"
+              :disabled="isCreating"
+              @keydown.enter="handleCreate"
+            />
+            <button
+              type="button"
+              @click="handleCreate"
+              :disabled="isCreating || !createName.trim()"
+              class="px-6 py-2.5 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
+            >
+              {{ isCreating ? '作成中…' : '作成' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 一覧 -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+          <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <p class="text-sm font-bold">既存大会</p>
+            <button type="button" @click="fetchCompetitions" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">再読込</button>
+          </div>
+          <div v-if="isLoading && competitions.length === 0" class="px-5 py-8 text-center text-slate-400 text-sm">読み込み中…</div>
+          <div v-else-if="competitions.length === 0" class="px-5 py-8 text-center text-slate-400 text-sm">大会はまだありません</div>
+          <ul v-else class="divide-y divide-slate-200 dark:divide-slate-700">
+            <li v-for="c in competitions" :key="c.id" class="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer" @click="handleOpenCompetition(c.id)">
+              <div class="flex-1 min-w-0">
+                <p class="font-bold truncate">{{ c.name }}</p>
+                <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · 作成 {{ new Date(c.createdAt).toLocaleString() }}</p>
+              </div>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider" :class="statusColor(c.status)">{{ statusLabel(c.status) }}</span>
+              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ────────── 詳細モード ────────── -->
+      <div v-else class="max-w-6xl mx-auto space-y-6">
+        <!-- ヘッダ -->
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="button" @click="backToList" class="px-3 py-1.5 rounded-xl text-sm font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">
+            ← 一覧へ
+          </button>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ currentCompetition.name }}</h1>
+          <span class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider" :class="statusColor(currentCompetition.status)">{{ statusLabel(currentCompetition.status) }}</span>
+          <p class="text-xs text-slate-500 font-mono">ID #{{ currentCompetition.id }}</p>
+
+          <button
+            v-if="currentCompetition.status === 'draft'"
+            type="button"
+            @click="handleOpenStatus"
+            class="ml-auto px-5 py-2 rounded-xl text-sm font-black tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 shadow-sm"
+          >
+            ▶ Open に遷移
+          </button>
+
+          <!-- 削除ボタン (常時表示。2 段階確認付き) -->
+          <button
+            type="button"
+            @click="handleDeleteCompetition(currentCompetition.id, currentCompetition.name)"
+            :class="currentCompetition.status === 'draft' ? '' : 'ml-auto'"
+            class="px-3 py-2 rounded-xl text-xs font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+          >
+            🗑 大会を削除
+          </button>
+        </div>
+
+        <!-- 5 チームグリッド -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="team in currentCompetition.teams"
+            :key="team.id"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden"
+          >
+            <!-- チームヘッダ -->
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
+              <div v-if="editingTeamId === team.id" class="flex items-center gap-2">
+                <input
+                  v-model="editingTeamName"
+                  type="text"
+                  class="flex-1 px-2 py-1 rounded-lg text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                  @keydown.enter="commitRenameTeam(team)"
+                  @keydown.esc="cancelRenameTeam"
+                />
+                <button type="button" @click="commitRenameTeam(team)" class="text-xs font-bold text-blue-600 dark:text-blue-400">保存</button>
+                <button type="button" @click="cancelRenameTeam" class="text-xs text-slate-500">×</button>
+              </div>
+              <div v-else class="flex items-center gap-2">
+                <p class="flex-1 font-bold truncate">{{ team.teamName }}</p>
+                <button
+                  v-if="currentCompetition.status === 'draft'"
+                  type="button"
+                  @click="beginRenameTeam(team)"
+                  class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  title="チーム名を編集"
+                >
+                  ✎
+                </button>
+              </div>
+              <!-- TL 専用 URL -->
+              <div class="mt-2 flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                <span class="truncate">TL: {{ buildTlUrl(team.tlToken) }}</span>
+                <button
+                  type="button"
+                  @click="copyToClipboard(buildTlUrl(team.tlToken), 'TL URL')"
+                  class="shrink-0 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+                >コピー</button>
+                <button
+                  type="button"
+                  @click="handleRegenerateTlToken(team)"
+                  class="shrink-0 px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                  title="トークンを再発行 (誤公開時のリカバリ)"
+                >再発行</button>
+              </div>
+            </div>
+
+            <!-- 既存メンバーのみリスト表示 -->
+            <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
+              <li
+                v-for="m in membersOf(team.id)"
+                :key="m.id"
+                class="px-4 py-3"
+              >
+                <div class="flex items-center gap-2">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <p class="font-bold truncate">{{ m.displayName }}</p>
+                      <span
+                        v-if="m.isTl"
+                        class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider"
+                      >TL</span>
+                    </div>
+                    <div class="mt-0.5 flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                      <span class="truncate">{{ buildPlayerUrl(m.inviteToken) }}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    @click="copyToClipboard(buildPlayerUrl(m.inviteToken), '参加者 URL')"
+                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+                  >URL</button>
+                  <button
+                    type="button"
+                    @click="handleRegenerateParticipantToken(m)"
+                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                    title="招待 URL を再発行 (誤公開時)"
+                  >再発行</button>
+                  <button
+                    type="button"
+                    @click="handleToggleTl(m)"
+                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold"
+                    :class="m.isTl
+                      ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300'
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'"
+                    :title="m.isTl ? 'TL を解除' : 'TL に設定'"
+                  >
+                    {{ m.isTl ? 'TL ✓' : 'TL' }}
+                  </button>
+                  <button
+                    v-if="currentCompetition.status === 'draft'"
+                    type="button"
+                    @click="handleDeleteParticipant(m)"
+                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300"
+                    title="削除"
+                  >×</button>
+                </div>
+              </li>
+            </ul>
+
+            <!--
+              参加者追加 UI: チームごとに 1 つだけ表示。
+              既存メンバーが 4 名揃ったら隠す。draft 状態以外でも (open 後の閲覧時) 隠す。
+            -->
+            <div
+              v-if="currentCompetition.status === 'draft' && remainingSlotsOf(team.id) > 0"
+              class="px-4 py-3 border-t border-slate-100 dark:border-slate-700/60"
+            >
+              <div v-if="addingForTeamId === team.id" class="space-y-2">
+                <input
+                  v-model="addingDisplayName"
+                  type="text"
+                  placeholder="表示名 (DJ 名)"
+                  class="w-full px-3 py-1.5 text-sm rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                  @keydown.enter="commitAddParticipant"
+                />
+                <label class="flex items-center gap-2 text-xs text-slate-500">
+                  <input type="checkbox" v-model="addingIsTl" class="rounded" />
+                  TL (チームリーダー) として登録
+                </label>
+                <div class="flex gap-2">
+                  <button type="button" @click="commitAddParticipant" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">追加</button>
+                  <button type="button" @click="cancelAddParticipant" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                </div>
+              </div>
+              <button
+                v-else
+                type="button"
+                @click="beginAddParticipant(team.id)"
+                class="w-full px-3 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 transition-colors"
+              >
+                + 参加者を追加 (残り {{ remainingSlotsOf(team.id) }} 名)
+              </button>
+            </div>
+
+            <!-- 満員表示 (open 前後共通) -->
+            <div
+              v-else-if="membersOf(team.id).length === 4"
+              class="px-4 py-2 text-[10px] font-mono text-slate-400 dark:text-slate-500 text-center border-t border-slate-100 dark:border-slate-700/60"
+            >
+              満員 4 / 4
+            </div>
+          </div>
+        </div>
+
+        <!-- 対戦表: 全 30 試合に対する運営ジャンル指定 (open 以降のみ表示) -->
+        <section
+          v-if="currentCompetition.matchups && currentCompetition.matches && currentCompetition.matchups.length > 0"
+          class="space-y-3"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+              対戦表 ({{ currentCompetition.matchups.length }} matchup / {{ currentCompetition.matches.length }} 試合)
+            </h2>
+            <button
+              type="button"
+              @click="handleRefreshRevealData"
+              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+              title="プレイヤーの提出状況を最新化します"
+            >🔄 提出状況を再読込</button>
+          </div>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            各試合の運営指定ジャンルをセレクタから設定します。プレイヤーは指定されたジャンルの曲しか提出できません。<br />
+            プレイヤーへのアサインは TL 専用 URL からチームごとに行います。両側の自選曲が揃った試合は「▶ REVEAL」で演出ページを開けます。
+          </p>
+
+          <div
+            v-for="mu in currentCompetition.matchups"
+            :key="mu.id"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
+          >
+            <!-- matchup ヘッダ + ラインアップ公開トグル -->
+            <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 space-y-2">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <p class="font-bold text-sm">
+                  <span class="text-blue-600 dark:text-blue-400">{{ teamNameOf(mu.teamAId) }}</span>
+                  <span class="text-slate-400 mx-2">vs</span>
+                  <span class="text-blue-600 dark:text-blue-400">{{ teamNameOf(mu.teamBId) }}</span>
+                </p>
+                <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
+                  Matchup #{{ mu.matchupOrder }}
+                </p>
+              </div>
+              <!-- ラインアップ公開ボタン群 -->
+              <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono">
+                <span class="text-slate-400 uppercase tracking-wider">起用公開:</span>
+                <button
+                  type="button"
+                  @click="handlePublishLineup(mu.id, 'a', !mu.lineupPublishedA)"
+                  class="px-2 py-1 rounded transition-colors"
+                  :class="mu.lineupPublishedA
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                >
+                  {{ teamNameOf(mu.teamAId) }} {{ mu.lineupPublishedA ? '✓ 公開中' : '未公開' }}
+                </button>
+                <button
+                  type="button"
+                  @click="handlePublishLineup(mu.id, 'b', !mu.lineupPublishedB)"
+                  class="px-2 py-1 rounded transition-colors"
+                  :class="mu.lineupPublishedB
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                >
+                  {{ teamNameOf(mu.teamBId) }} {{ mu.lineupPublishedB ? '✓ 公開中' : '未公開' }}
+                </button>
+                <button
+                  type="button"
+                  @click="handlePublishLineup(mu.id, 'both', lineupPublishStateOf(mu) !== 'both')"
+                  class="px-2 py-1 rounded bg-violet-500 text-white hover:bg-violet-600 ml-auto"
+                  :title="lineupPublishStateOf(mu) === 'both' ? '両方解除' : '両方公開'"
+                >
+                  {{ lineupPublishStateOf(mu) === 'both' ? '両方解除' : '両方公開' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- 3 試合 (vanguard → middle → captain) -->
+            <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
+              <li
+                v-for="match in matchesForMatchup(mu.id)"
+                :key="match.id"
+                class="px-4 py-3 space-y-2"
+              >
+                <div class="grid grid-cols-1 sm:grid-cols-[120px_1fr_1fr_1fr] gap-3 items-center">
+                  <!-- 戦表記 -->
+                  <div>
+                    <p class="font-bold text-sm">{{ KIND_LABEL[match.matchKind] }}</p>
+                    <p class="text-[10px] font-mono text-slate-400">
+                      Lv {{ match.matchKind === 'vanguard' ? '8-10' : match.matchKind === 'middle' ? '11' : '12' }}
+                    </p>
+                  </div>
+
+                  <!-- A 側プレイヤー -->
+                  <div class="text-xs">
+                    <p class="text-[10px] font-mono text-slate-400 uppercase">A 側 ({{ teamNameOf(mu.teamAId) }})</p>
+                    <p class="font-bold truncate" :class="match.playerAId ? '' : 'italic text-slate-400'">
+                      {{ participantNameOf(match.playerAId) }}
+                    </p>
+                  </div>
+
+                  <!-- B 側プレイヤー -->
+                  <div class="text-xs">
+                    <p class="text-[10px] font-mono text-slate-400 uppercase">B 側 ({{ teamNameOf(mu.teamBId) }})</p>
+                    <p class="font-bold truncate" :class="match.playerBId ? '' : 'italic text-slate-400'">
+                      {{ participantNameOf(match.playerBId) }}
+                    </p>
+                  </div>
+
+                  <!-- ジャンル指定セレクタ -->
+                  <div>
+                    <p class="text-[10px] font-mono text-slate-400 uppercase mb-1">指定ジャンル</p>
+                    <select
+                      :value="match.requiredGenre ?? ''"
+                      @change="handleGenreChange(match, ($event.target as HTMLSelectElement).value)"
+                      :disabled="currentCompetition.status === 'finished'"
+                      class="w-full px-2 py-1.5 rounded-lg text-sm bg-white dark:bg-slate-800 border outline-none focus:border-blue-400 disabled:opacity-50"
+                      :class="match.requiredGenre
+                        ? 'border-emerald-300 dark:border-emerald-700'
+                        : 'border-slate-300 dark:border-slate-600'"
+                    >
+                      <option value="">未指定</option>
+                      <option v-for="g in genresForKind(match.matchKind)" :key="g" :value="g">{{ g }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- ロックトグル群 (締切時刻に編集禁止に切替) -->
+                <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono pt-1 border-t border-slate-100 dark:border-slate-700/40">
+                  <span class="text-slate-400 uppercase tracking-wider">ロック:</span>
+                  <button
+                    type="button"
+                    @click="handleSetLock(match.id, 'a', !match.lockedA)"
+                    class="px-2 py-1 rounded transition-colors"
+                    :class="match.lockedA
+                      ? 'bg-amber-500 text-white hover:bg-amber-600'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                  >
+                    A 側 {{ match.lockedA ? '🔒 ロック中' : '未ロック' }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="handleSetLock(match.id, 'b', !match.lockedB)"
+                    class="px-2 py-1 rounded transition-colors"
+                    :class="match.lockedB
+                      ? 'bg-amber-500 text-white hover:bg-amber-600'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                  >
+                    B 側 {{ match.lockedB ? '🔒 ロック中' : '未ロック' }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="handleSetLock(match.id, 'both', !(match.lockedA && match.lockedB))"
+                    class="px-2 py-1 rounded bg-violet-500 text-white hover:bg-violet-600 ml-auto"
+                  >
+                    {{ match.lockedA && match.lockedB ? '両方解除' : '両方ロック' }}
+                  </button>
+                </div>
+
+                <!-- REVEAL 再生ボタン (両側自選曲が揃っている試合だけ有効) -->
+                <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono pt-1 border-t border-slate-100 dark:border-slate-700/40">
+                  <span class="text-slate-400 uppercase tracking-wider">Reveal:</span>
+                  <span v-if="!canReveal(match.id)" class="text-slate-400 italic">
+                    {{ revealMatchOf(match.id) === null ? '提出状況読込中…' : '両側の自選曲提出待ち' }}
+                  </span>
+                  <button
+                    v-else
+                    type="button"
+                    @click="handleOpenReveal(match.id)"
+                    class="ml-auto px-3 py-1 rounded bg-gradient-to-r from-cyan-500 via-sky-500 to-amber-500 text-white font-bold tracking-wider uppercase hover:shadow-md transition-all"
+                    title="新規タブで Song Reveal を開く"
+                  >
+                    ▶ REVEAL を再生
+                  </button>
+                </div>
+
+                <!-- 自選曲公開トグル群 (試合直前に公開する想定) -->
+                <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono">
+                  <span class="text-slate-400 uppercase tracking-wider">選曲公開:</span>
+                  <button
+                    type="button"
+                    @click="handlePublishPick(match.id, 'a', !match.pickPublishedA)"
+                    class="px-2 py-1 rounded transition-colors"
+                    :class="match.pickPublishedA
+                      ? 'bg-fuchsia-500 text-white hover:bg-fuchsia-600'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                  >
+                    A 側 {{ match.pickPublishedA ? '✓ 公開中' : '未公開' }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="handlePublishPick(match.id, 'b', !match.pickPublishedB)"
+                    class="px-2 py-1 rounded transition-colors"
+                    :class="match.pickPublishedB
+                      ? 'bg-fuchsia-500 text-white hover:bg-fuchsia-600'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                  >
+                    B 側 {{ match.pickPublishedB ? '✓ 公開中' : '未公開' }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="handlePublishPick(match.id, 'both', !(match.pickPublishedA && match.pickPublishedB))"
+                    class="px-2 py-1 rounded bg-violet-500 text-white hover:bg-violet-600 ml-auto"
+                  >
+                    {{ match.pickPublishedA && match.pickPublishedB ? '両方解除' : '両方公開' }}
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </template>
+  </div>
+</template>

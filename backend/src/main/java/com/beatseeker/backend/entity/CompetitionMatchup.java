@@ -1,0 +1,66 @@
+package com.beatseeker.backend.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
+/**
+ * 【エンティティの役割】 5 チーム総当たりにおける「チーム X vs チーム Y」1 対戦カード。
+ *
+ * 1 大会あたり {@code C(5, 2) = 10} 件。各 matchup の中に先鋒/中堅/大将の 3 試合
+ * ({@link CompetitionMatch}) がぶら下がる構造になっている。
+ *
+ * マッピング先テーブル: {@code competition_matchups}。
+ */
+@Entity
+@Table(name = "competition_matchups")
+@Data
+@NoArgsConstructor
+public class CompetitionMatchup {
+
+    /** 主キー。 */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /** 所属する大会。 */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "competition_id", nullable = false)
+    private Competition competition;
+
+    /** チーム A 側。 */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_a_id", nullable = false)
+    private CompetitionTeam teamA;
+
+    /** チーム B 側。 */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_b_id", nullable = false)
+    private CompetitionTeam teamB;
+
+    /** 大会内での対戦表示順 (1〜10)。 */
+    @Column(nullable = false)
+    private Integer matchupOrder;
+
+    /**
+     * チーム A 側の起用 (ラインアップ) が相手 (B) に公開されているか。
+     * 主催が任意のタイミングで true に切替可能。デフォルト false。
+     * false の間、相手チームの TL / プレイヤーには「未公開」扱いで A の起用名は伏せられる。
+     *
+     * <p>{@code @Column(name = ...)} を明示しているのは、Hibernate の
+     * {@code SpringPhysicalNamingStrategy} が末尾 1 文字の大文字前にアンダースコアを入れない
+     * ({@code lineupPublishedA → lineup_publisheda} となってしまう) ため、
+     * マイグレーション SQL 側の列名 {@code lineup_published_a} と揃える必要があるから。
+     */
+    @Column(name = "lineup_published_a", nullable = false)
+    @ColumnDefault("false")
+    private Boolean lineupPublishedA = false;
+
+    /**
+     * チーム B 側の起用が相手 (A) に公開されているか。挙動は {@link #lineupPublishedA} と対称。
+     */
+    @Column(name = "lineup_published_b", nullable = false)
+    @ColumnDefault("false")
+    private Boolean lineupPublishedB = false;
+}

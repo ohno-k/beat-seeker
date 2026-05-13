@@ -15,10 +15,12 @@ spring:
             enable: true
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://dpg-d6f68314tr6s73bnbhag-a.oregon-postgres.render.com/beatseeker}
+    # 本番 URL / ユーザー / パスワードは環境変数で渡す。
+    # ローカル開発時のみフォールバックとして localhost を使う (本番に紛れ込まないよう機密値は持たせない)。
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/beatseeker}
     driver-class-name: org.postgresql.Driver
-    username: ${SPRING_DATASOURCE_USERNAME:postgress}
-    password: ${SPRING_DATASOURCE_PASSWORD:kAw2xymPeLH4mOZuV76hsJCR4L9kFkgM}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10

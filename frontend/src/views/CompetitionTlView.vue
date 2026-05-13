@@ -1,0 +1,239 @@
+<script setup lang="ts">
+/**
+ * 【View の役割】 TL (チームリーダー) 専用 URL `/competition/tl/{token}` のスタンドアロン画面。
+ *
+ * App.vue の最上位 v-else-if で StrategyCardView / CompetitionPlayerView と並列にレンダリングされる。
+ * ログイン不要・サイドバーなし。URL の token がそのまま認証材料。
+ *
+ * 機能:
+ *  - 自チーム情報の表示 (チーム名・大会名・メンバー 4 人一覧)
+ *  - 4 matchup ぶんの一覧表示 (相手チーム別)
+ *  - 各 matchup 内の 3 試合 (先鋒/中堅/大将) に対する自チームメンバーのアサイン UI
+ *  - 同一 matchup 内で同じメンバー二重アサインを試みるとサーバ側でブロック (エラー表示)
+ *  - 自チーム側がロックされた slot は読み取り専用
+ */
+import { ref, onMounted, watch, computed } from 'vue';
+import { useCompetitionTl, type MatchKind, type TlMatchDto, type TlMatchupDto } from '../composables/useCompetitionTl';
+import { useToast } from '../composables/useToast';
+
+const props = defineProps<{ token: string }>();
+
+const { view, isLoading, fetchView, assign, unassign } = useCompetitionTl();
+const toast = useToast();
+
+onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
+watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
+
+const KIND_LABEL: Record<MatchKind, string> = {
+  vanguard: '先鋒戦',
+  middle: '中堅戦',
+  captain: '大将戦',
+};
+const KIND_LV: Record<MatchKind, string> = {
+  vanguard: 'Lv 8-10',
+  middle: 'Lv 11',
+  captain: 'Lv 12',
+};
+
+const statusLabel = (s: string) => ({
+  draft: '編成中',
+  open: '受付中',
+  locked: 'ロック済',
+  finished: '終了',
+} as Record<string, string>)[s] ?? s;
+
+/**
+ * セレクタの change イベント。値は数値 (participantId) または空文字 ('') = 未割当。
+ * 楽観更新せずサーバ反映後に再 fetch で同期する。
+ */
+const handleAssign = async (match: TlMatchDto, raw: string) => {
+  const id = raw === '' ? null : Number(raw);
+  if (id !== null && Number.isNaN(id)) return;
+  try {
+    if (id === null) await unassign(props.token, match.matchId);
+    else await assign(props.token, match.matchId, id);
+    toast.success(id === null ? '未割当に戻しました' : 'アサインしました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+/**
+ * matchup 1 件の中で、現在その matchup の他 slot に割り当て済みの participantId 集合。
+ * <option> を disabled 表示してダブルアサインを UI 側でも誘導しないようにする
+ * (サーバ側の検証は別途あるので二重防御)。
+ */
+const usedInMatchup = (matchup: TlMatchupDto, exceptMatchId: number): Set<number> => {
+  const set = new Set<number>();
+  for (const m of matchup.matches) {
+    if (m.matchId === exceptMatchId) continue;
+    if (m.myAssigned?.participantId) set.add(m.myAssigned.participantId);
+  }
+  return set;
+};
+
+/** 4 matchup の表示順 (matchupOrder の昇順を保証)。 */
+const sortedMatchups = computed<TlMatchupDto[]>(() => {
+  if (!view.value) return [];
+  return [...view.value.matchups].sort((a, b) => a.matchupOrder - b.matchupOrder);
+});
+</script>
+
+<template>
+  <div class="competition-tl-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8">
+    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">読み込み中…</div>
+
+    <div
+      v-else-if="!view"
+      class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center"
+    >
+      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">TL URL が無効です</p>
+      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">URL を再確認するか、主催者にお問い合わせください。</p>
+    </div>
+
+    <div v-else class="max-w-5xl mx-auto space-y-6">
+      <!-- ヘッダ: 大会名・自チーム名・メンバー -->
+      <div>
+        <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
+        <div class="flex items-baseline gap-2 mt-1 flex-wrap">
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ view.team.teamName }}</h1>
+          <span class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">TL 管理画面</span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
+          状態 <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
+          <span v-if="view.competition.deadlineAt"> · 締切 {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
+        </p>
+      </div>
+
+      <!-- メンバー一覧 -->
+      <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+        <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500 mb-3">所属メンバー</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div
+            v-for="m in view.members"
+            :key="m.id"
+            class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700"
+          >
+            <p class="font-bold text-sm truncate">
+              {{ m.displayName }}
+              <span v-if="m.isTl" class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider align-middle">TL</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 matchup ぶんのアサイン UI -->
+      <section class="space-y-4">
+        <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">対戦カード ({{ sortedMatchups.length }} matchup)</p>
+        <p v-if="sortedMatchups.length === 0" class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+          対戦カードがまだ生成されていません。<br />主催者が大会を Open に遷移するのをお待ちください。
+        </p>
+
+        <div
+          v-for="mu in sortedMatchups"
+          :key="mu.matchupId"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
+        >
+          <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
+            <p class="font-bold text-sm">
+              vs <span class="text-blue-600 dark:text-blue-400">{{ mu.opponentTeam.teamName ?? '未設定' }}</span>
+            </p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span
+                v-if="mu.myLineupPublished"
+                class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
+                title="自軍の起用が相手チームに公開されています"
+              >自軍 公開中</span>
+              <span
+                v-else
+                class="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
+                title="自軍の起用は相手チームから見えない状態です"
+              >自軍 非公開</span>
+              <p class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
+                Matchup #{{ mu.matchupOrder }} · 自軍 {{ mu.mySide.toUpperCase() }} 側
+              </p>
+            </div>
+          </div>
+
+          <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
+            <li v-for="match in mu.matches" :key="match.matchId" class="px-4 py-3 grid grid-cols-1 sm:grid-cols-[140px_1fr_1fr] gap-3 items-center">
+              <!-- 戦表記 + 運営指定ジャンルバッジ -->
+              <div>
+                <p class="font-bold text-sm">{{ KIND_LABEL[match.matchKind] }}</p>
+                <p class="text-[10px] font-mono text-slate-400">{{ KIND_LV[match.matchKind] }}</p>
+                <span
+                  v-if="match.requiredGenre"
+                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
+                >
+                  指定: {{ match.requiredGenre }}
+                </span>
+                <span
+                  v-else
+                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
+                >
+                  ジャンル未指定
+                </span>
+              </div>
+
+              <!-- 自軍 slot: select で 4 メンバーから選ぶ -->
+              <div>
+                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">自軍</p>
+                <div class="flex items-center gap-2">
+                  <select
+                    :value="match.myAssigned?.participantId ?? ''"
+                    :disabled="match.myLocked"
+                    @change="handleAssign(match, ($event.target as HTMLSelectElement).value)"
+                    class="flex-1 px-3 py-1.5 rounded-lg text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">未割当</option>
+                    <option
+                      v-for="m in view.members"
+                      :key="m.id"
+                      :value="m.id"
+                      :disabled="usedInMatchup(mu, match.matchId).has(m.id)"
+                    >
+                      {{ m.displayName }}{{ m.isTl ? ' (TL)' : '' }}
+                      <template v-if="usedInMatchup(mu, match.matchId).has(m.id)"> ※他試合で起用中</template>
+                    </option>
+                  </select>
+                </div>
+                <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
+                  <span v-if="match.myAssigned" class="text-slate-400">
+                    自選曲:
+                    <span :class="match.myAssigned.pickSubmitted ? 'text-emerald-500 font-bold' : 'text-rose-500 font-bold'">
+                      {{ match.myAssigned.pickSubmitted ? '✓ 提出済' : '× 未提出' }}
+                    </span>
+                  </span>
+                  <span
+                    class="ml-auto"
+                    :class="match.myLocked ? 'text-amber-600 dark:text-amber-300 font-bold' : 'text-slate-400'"
+                  >
+                    {{ match.myLocked ? '🔒 ロック済' : 'ロック前' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- 相手軍 slot: ラインアップ公開済のときだけ起用名を表示 -->
+              <div>
+                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">相手軍</p>
+                <p class="px-3 py-1.5 rounded-lg text-sm bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 truncate">
+                  <template v-if="!mu.opponentLineupPublished">
+                    <span class="text-slate-400 italic">起用未公開</span>
+                  </template>
+                  <span v-else-if="match.opponentAssigned">{{ match.opponentAssigned.displayName }}</span>
+                  <span v-else class="text-slate-400 italic">未割当</span>
+                </p>
+                <p
+                  class="mt-1 text-[10px] font-mono text-right"
+                  :class="match.opponentLocked ? 'text-amber-600 dark:text-amber-300 font-bold' : 'text-slate-400'"
+                >
+                  {{ match.opponentLocked ? '🔒 ロック済' : 'ロック前' }}
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </div>
+</template>

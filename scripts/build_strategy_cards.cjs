@@ -25,6 +25,7 @@ const GENRES = [
   { key: 'SCRATCH', file: 'scratch.txt' },
   { key: 'SOF-LAN', file: 'sof-lan.txt' },
   { key: 'INSANE',  file: 'insane.txt'  },
+  { key: '12ALL',   file: '12all.txt'   },
 ];
 
 const result = {};

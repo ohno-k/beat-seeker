@@ -3,7 +3,7 @@
  * 【Viewの役割】 IIDX 非公式大会向け「ストラテジーカード」抽選画面。
  *
  * 大会主催 / 当該ユーザーのみがサイドバーから到達できる隠し機能。
- * ジャンル (NOTES/PEAK/CHORD/CHARGE/SCRATCH/SOF-LAN/INSANE) と
+ * ジャンル (NOTES/PEAK/CHORD/CHARGE/SCRATCH/SOF-LAN/INSANE/12ALL) と
  * 戦 (先鋒/中堅/大将) を選んで「抽選」を押すと、ルーレットがぐるぐる回ったのちに
  * 着地した課題曲を結果として大写しにする。
  *
@@ -12,7 +12,7 @@
  *  - 中堅 (middle):   Lv11
  *  - 大将 (captain):  Lv12
  *
- * INSANE はカテゴリ性質上 Lv12 しか存在しないため大将のみ選択可能 (UI で他をロック)。
+ * INSANE / 12ALL はカテゴリ性質上 Lv12 しか存在しないため大将のみ選択可能 (UI で他をロック)。
  *
  * データソース: `frontend/src/data/strategy_card_songs.json`
  *   (プロジェクトルート直下の {genre}.txt を `scripts/build_strategy_cards.cjs` で変換)
@@ -20,7 +20,7 @@
 import { ref, computed, onUnmounted, onMounted, nextTick } from 'vue';
 import strategySongs from '../data/strategy_card_songs.json';
 
-type Genre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
+type Genre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE' | '12ALL';
 type MatchKind = 'vanguard' | 'middle' | 'captain';
 
 interface Song {
@@ -40,6 +40,7 @@ const GENRES: { key: Genre; label: string; gradient: string; glow: string; icon:
   { key: 'SCRATCH', label: 'SCRATCH', gradient: 'from-violet-500 via-purple-500 to-fuchsia-600', glow: 'shadow-purple-500/50',  icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
   { key: 'SOF-LAN', label: 'SOF-LAN', gradient: 'from-pink-500 via-fuchsia-500 to-purple-600',   glow: 'shadow-fuchsia-500/50', icon: 'M3 12h3l3-9 4 18 3-9h5' },
   { key: 'INSANE',  label: 'INSANE',  gradient: 'from-slate-800 via-red-700 to-black',           glow: 'shadow-red-600/60',     icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' },
+  { key: '12ALL',   label: '12ALL',   gradient: 'from-yellow-300 via-fuchsia-400 to-cyan-300',   glow: 'shadow-fuchsia-400/50', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
 ];
 
 const MATCHES: { key: MatchKind; label: string; sub: string; levels: number[]; gradient: string }[] = [
@@ -111,9 +112,10 @@ const candidates = computed<Song[]>(() => {
   return pool;
 });
 
-/** INSANE は Lv12 のみ → 先鋒/中堅は無効化 */
+/** INSANE / 12ALL は Lv12 のみ → 先鋒/中堅は無効化 */
+const captainOnlyGenres: Genre[] = ['INSANE', '12ALL'];
 const matchDisabled = (m: MatchKind): boolean => {
-  if (selectedGenre.value === 'INSANE' && m !== 'captain') return true;
+  if (selectedGenre.value && captainOnlyGenres.includes(selectedGenre.value) && m !== 'captain') return true;
   return false;
 };
 
@@ -282,8 +284,8 @@ const reset = () => {
 const selectGenre = (g: Genre) => {
   if (isSpinning.value) return;
   selectedGenre.value = g;
-  // INSANE 選択時に先鋒/中堅が選ばれていたらリセット
-  if (g === 'INSANE' && selectedMatch.value && selectedMatch.value !== 'captain') {
+  // INSANE / 12ALL 選択時に先鋒/中堅が選ばれていたらリセット
+  if (captainOnlyGenres.includes(g) && selectedMatch.value && selectedMatch.value !== 'captain') {
     selectedMatch.value = null;
   }
   reset();
@@ -349,7 +351,7 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
           <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center font-black text-sm shadow-lg shadow-cyan-500/40">1</div>
           <h2 class="text-xl font-bold tracking-wide">ジャンル選択</h2>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           <button
             v-for="g in GENRES"
             :key="g.key"
@@ -408,7 +410,7 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             <div v-if="selectedMatch === m.key" class="absolute inset-0 rounded-2xl ring-2 ring-white/40 animate-pulse pointer-events-none"></div>
           </button>
         </div>
-        <p v-if="selectedGenre === 'INSANE'" class="mt-3 text-[11px] text-rose-300/80 font-mono">※ INSANE は大将戦 (Lv12) のみ抽選可能</p>
+        <p v-if="selectedGenre && captainOnlyGenres.includes(selectedGenre)" class="mt-3 text-[11px] text-rose-300/80 font-mono">※ {{ selectedGenre }} は大将戦 (Lv12) のみ抽選可能</p>
       </section>
 
       <!-- Step 3: 抽選 -->

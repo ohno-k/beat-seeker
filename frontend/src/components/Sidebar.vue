@@ -287,39 +287,7 @@ const filteredNavItems = computed(() => {
                     </svg>
                     {{ t('nav.adminPanel') }}
                   </button>
-                  <!--
-                    ストラテジーカード: IIDX 非公式大会の課題曲ランダム抽選用。
-                    大会主催 (ID=19) / 運営担当 (ID=18) / ID=23 のみに表示。
-                    OBS ブラウザソースからも使えるよう `/strategy-card` のスタンドアロン URL に遷移する
-                    (内部タブ切替ではなく、ページ遷移)。
-                  -->
-                  <a
-                    v-if="(user?.id === 18 || user?.id === 19 || user?.id === 23) && !viewingUserId"
-                    href="/strategy-card"
-                    @click="closeSidebar"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-fuchsia-600 dark:text-fuchsia-400 bg-gradient-to-r from-fuchsia-50 to-amber-50 dark:from-fuchsia-900/30 dark:to-amber-900/20 rounded-xl hover:from-fuchsia-100 hover:to-amber-100 dark:hover:from-fuchsia-900/50 dark:hover:to-amber-900/40 transition-all border border-fuchsia-100 dark:border-fuchsia-800 relative overflow-hidden"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                    Strategy Card
-                  </a>
-                  <!--
-                    選曲発表 (Song Reveal): 大会の選曲発表演出。`/song-reveal` のスタンドアロン URL に遷移。
-                    ID 18/19/23 のみに表示。
-                  -->
-                  <a
-                    v-if="(user?.id === 18 || user?.id === 19 || user?.id === 23) && !viewingUserId"
-                    href="/song-reveal"
-                    @click="closeSidebar"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-cyan-600 dark:text-cyan-400 bg-gradient-to-r from-cyan-50 to-sky-50 dark:from-cyan-900/30 dark:to-sky-900/20 rounded-xl hover:from-cyan-100 hover:to-sky-100 dark:hover:from-cyan-900/50 dark:hover:to-sky-900/40 transition-all border border-cyan-100 dark:border-cyan-800 relative overflow-hidden"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
-                    </svg>
-                    Song Reveal
-                  </a>
-                  <button 
+                  <button
                     @click="handleAction('logout')"
                     class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
