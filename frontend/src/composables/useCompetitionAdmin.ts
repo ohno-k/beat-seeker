@@ -163,6 +163,23 @@ export interface CompetitionStandingsRow {
   losses: number;
 }
 
+/**
+ * 5x5 マトリクス表示用に、各 matchup での両側総合ポイントを返す entry。
+ * recorded=false のエントリも含まれる (画面で「?」表示)。
+ */
+export interface CompetitionMatchupBreakdown {
+  matchupId: number;
+  teamAId: number;
+  teamBId: number;
+  aSongPoints: number;
+  bSongPoints: number;
+  aMatchupPoints: number;
+  bMatchupPoints: number;
+  aTotalPoints: number;
+  bTotalPoints: number;
+  recorded: boolean;
+}
+
 export interface CompetitionStandingsDto {
   rows: CompetitionStandingsRow[];
   /** 予選 matchup の総数 (= 10)。 */
@@ -173,6 +190,8 @@ export interface CompetitionStandingsDto {
   allPrelimRecorded: boolean;
   /** 決勝 matchup が既に生成されているか。 */
   finalsExists: boolean;
+  /** マトリクス用 breakdown (10 matchup ぶん)。 */
+  matchupBreakdown: CompetitionMatchupBreakdown[];
 }
 
 export interface CompetitionDetail extends CompetitionSummary {

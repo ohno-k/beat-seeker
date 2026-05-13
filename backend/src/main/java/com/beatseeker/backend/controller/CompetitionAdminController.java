@@ -566,39 +566,63 @@ public class CompetitionAdminController {
 
         List<CompetitionMatchup> matchups = matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp);
         int prelimRecordedCount = 0;
+        // matchupBreakdown: マトリクス表示用に、各 matchup での両側総合ポイントを返す。
+        // recorded=false の場合も entry は含めるが、ポイントは集計しない (画面で「?」表示にする)。
+        List<Map<String, Object>> matchupBreakdown = new ArrayList<>();
         for (CompetitionMatchup mu : matchups) {
             if (Boolean.TRUE.equals(mu.getIsFinals())) continue; // 決勝は予選順位の集計対象外
             List<CompetitionMatch> matches = matchRepository.findByMatchupOrderByIdAsc(mu);
-            // 戦単位の勝者カウント
-            int aWonMatches = 0, bWonMatches = 0;
-            boolean allRecorded = true;
+            // matchup 内の戦ポイント累計 (= この matchup で A 側 / B 側が獲得した曲ポイント合計)
+            int matchupAPts = 0, matchupBPts = 0;
+            boolean allRecorded = !matches.isEmpty();
             for (CompetitionMatch m : matches) {
                 Integer aw = m.getASongsWon();
                 Integer bw = m.getBSongsWon();
                 if (aw == null || bw == null) { allRecorded = false; continue; }
                 int kindPt = POINTS_PER_SONG_BY_KIND.getOrDefault(m.getMatchKind(), 0);
-                songPts.merge(mu.getTeamA().getId(), aw * kindPt, Integer::sum);
-                songPts.merge(mu.getTeamB().getId(), bw * kindPt, Integer::sum);
-                if (aw > bw) aWonMatches++;
-                else if (bw > aw) bWonMatches++;
-                // 同点 (aw == bw) は戦引分扱い、どちらにも加算しない
+                matchupAPts += aw * kindPt;
+                matchupBPts += bw * kindPt;
             }
-            if (!allRecorded) continue;
-            prelimRecordedCount++;
-            // matchup 勝者判定 (戦勝ち数で比較)
+
+            // matchup 勝者判定: 戦ポイント合計の大小で W/D/L (運営スペック)
             Long aId = mu.getTeamA().getId();
             Long bId = mu.getTeamB().getId();
-            if (aWonMatches > bWonMatches) {
-                matchupPts.merge(aId, MATCHUP_WIN_PT, Integer::sum);
+            int aMatchupPt = 0, bMatchupPt = 0;
+            if (allRecorded) {
+                if (matchupAPts > matchupBPts) aMatchupPt = MATCHUP_WIN_PT;
+                else if (matchupBPts > matchupAPts) bMatchupPt = MATCHUP_WIN_PT;
+                else { aMatchupPt = MATCHUP_DRAW_PT; bMatchupPt = MATCHUP_DRAW_PT; }
+            }
+
+            // breakdown 用 entry (フロントが 5x5 マトリクスにピボット)
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("matchupId", mu.getId());
+            entry.put("teamAId", aId);
+            entry.put("teamBId", bId);
+            entry.put("aSongPoints", matchupAPts);
+            entry.put("bSongPoints", matchupBPts);
+            entry.put("aMatchupPoints", aMatchupPt);
+            entry.put("bMatchupPoints", bMatchupPt);
+            entry.put("aTotalPoints", matchupAPts + aMatchupPt);
+            entry.put("bTotalPoints", matchupBPts + bMatchupPt);
+            entry.put("recorded", allRecorded);
+            matchupBreakdown.add(entry);
+
+            if (!allRecorded) continue;
+            prelimRecordedCount++;
+
+            // standings に集計
+            songPts.merge(aId, matchupAPts, Integer::sum);
+            songPts.merge(bId, matchupBPts, Integer::sum);
+            matchupPts.merge(aId, aMatchupPt, Integer::sum);
+            matchupPts.merge(bId, bMatchupPt, Integer::sum);
+            if (aMatchupPt > bMatchupPt) {
                 wins.merge(aId, 1, Integer::sum);
                 losses.merge(bId, 1, Integer::sum);
-            } else if (bWonMatches > aWonMatches) {
-                matchupPts.merge(bId, MATCHUP_WIN_PT, Integer::sum);
+            } else if (bMatchupPt > aMatchupPt) {
                 wins.merge(bId, 1, Integer::sum);
                 losses.merge(aId, 1, Integer::sum);
             } else {
-                matchupPts.merge(aId, MATCHUP_DRAW_PT, Integer::sum);
-                matchupPts.merge(bId, MATCHUP_DRAW_PT, Integer::sum);
                 draws.merge(aId, 1, Integer::sum);
                 draws.merge(bId, 1, Integer::sum);
             }
@@ -639,6 +663,8 @@ public class CompetitionAdminController {
         root.put("allPrelimRecorded", prelimRecordedCount >= PRELIM_MATCHUP_COUNT);
         // 決勝 matchup が既に存在するか
         root.put("finalsExists", matchups.stream().anyMatch(mu -> Boolean.TRUE.equals(mu.getIsFinals())));
+        // 5x5 マトリクス表示用の matchup ごと総合ポイント (recorded=false の matchup も含む)
+        root.put("matchupBreakdown", matchupBreakdown);
         return ResponseEntity.ok(root);
     }
 

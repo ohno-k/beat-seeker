@@ -572,6 +572,33 @@ const handleGenerateFinals = async () => {
   }
 };
 
+// ── 途中経過マトリクス 用ヘルパ ───────────────────────
+/**
+ * row 行のチームが col 列のチームに対して獲得した「総合ポイント」を返す。
+ *  - 対角 (row == col): null (画面で「-」表示)
+ *  - 該当 matchup が未記録: undefined (画面で「?」表示)
+ *  - 記録済: 数値 (= aTotalPoints もしくは bTotalPoints)
+ */
+const matrixCellPoints = (rowTeamId: number, colTeamId: number): number | null | undefined => {
+  if (rowTeamId === colTeamId) return null;
+  const breakdown = standings.value?.matchupBreakdown ?? [];
+  // matchup は (teamA, teamB) で一意。row が A 側 or B 側 どちらかにマッチする。
+  for (const e of breakdown) {
+    if (e.teamAId === rowTeamId && e.teamBId === colTeamId) {
+      return e.recorded ? e.aTotalPoints : undefined;
+    }
+    if (e.teamBId === rowTeamId && e.teamAId === colTeamId) {
+      return e.recorded ? e.bTotalPoints : undefined;
+    }
+  }
+  return undefined;
+};
+
+/** standings から指定チームの合計ポイントを取得 (見つからなければ 0)。 */
+const teamTotalPoints = (teamId: number): number => {
+  return standings.value?.rows.find(r => r.teamId === teamId)?.totalPoints ?? 0;
+};
+
 /** matchup の両側ラインアップ公開状態を判定 (none / partial / both)。 */
 const lineupPublishStateOf = (mu: { lineupPublishedA: boolean; lineupPublishedB: boolean }): 'none' | 'partial' | 'both' => {
   if (mu.lineupPublishedA && mu.lineupPublishedB) return 'both';
@@ -904,76 +931,59 @@ const statusColor = (s: string) => ({
           </div>
         </section>
 
-        <!-- R-5: 途中経過テーブル (matchup ごとに 3 戦のスコア表示) -->
+        <!-- 途中経過マトリクス: 5×5 で各 matchup の row 視点の総合ポイントを表示 -->
         <section
-          v-if="currentCompetition.matchups && currentCompetition.matches && currentCompetition.matchups.length > 0"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-2"
+          v-if="standings && currentCompetition.teams && currentCompetition.teams.length > 0"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
         >
           <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">途中経過</h2>
           <p class="text-[11px] text-slate-500">
-            記録済みの試合スコアを matchup 単位でまとめます。○=該当チーム勝ち / ●=引分 / -=未記録。
+            行のチームが列のチームから獲得した総合ポイント (戦pt + 勝ち点)。「?」 = 試合結果未記録 / 「-」 = 同チーム同士。
           </p>
           <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="text-xs border-collapse">
               <thead>
-                <tr class="text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
-                  <th class="text-left py-1 px-2">対戦</th>
-                  <th class="text-center py-1 px-2">先鋒</th>
-                  <th class="text-center py-1 px-2">中堅</th>
-                  <th class="text-center py-1 px-2">大将</th>
-                  <th class="text-center py-1 px-2 font-black text-slate-700 dark:text-slate-200">結果</th>
+                <tr>
+                  <th class="py-1 px-2 text-[10px] font-mono uppercase text-slate-400"></th>
+                  <th
+                    v-for="colTeam in currentCompetition.teams"
+                    :key="colTeam.id"
+                    class="py-2 px-3 text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700 text-center min-w-[80px]"
+                  >
+                    {{ colTeam.teamName }}
+                  </th>
+                  <th class="py-2 px-3 text-[10px] font-mono uppercase text-slate-700 dark:text-slate-200 font-black border-b border-slate-200 dark:border-slate-700 text-center min-w-[80px]">
+                    合計
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="mu in currentCompetition.matchups"
-                  :key="mu.id"
+                  v-for="rowTeam in currentCompetition.teams"
+                  :key="rowTeam.id"
                   class="border-b border-slate-100 dark:border-slate-700/60"
-                  :class="mu.isFinals ? 'bg-gradient-to-r from-amber-50/40 to-rose-50/40 dark:from-amber-900/10 dark:to-rose-900/10' : ''"
                 >
-                  <td class="py-1.5 px-2 whitespace-nowrap">
-                    <span class="font-bold">{{ teamNameOf(mu.teamAId) }}</span>
-                    <span class="text-slate-400 mx-1">vs</span>
-                    <span class="font-bold">{{ teamNameOf(mu.teamBId) }}</span>
-                    <span v-if="mu.isFinals" class="ml-1 text-[9px] font-black px-1 py-0.5 rounded bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">🏆</span>
-                  </td>
-                  <td v-for="kind in (['vanguard', 'middle', 'captain'] as const)" :key="kind" class="py-1.5 px-2 text-center tabular-nums">
-                    <template v-for="match in matchesForMatchup(mu.id).filter(m => m.matchKind === kind)" :key="match.id">
-                      <template v-if="match.aSongsWon !== null && match.bSongsWon !== null">
-                        <span class="text-slate-500">{{ match.aSongsWon }}-{{ match.bSongsWon }}</span>
-                        <span class="ml-1 text-[10px]" :class="match.aSongsWon > match.bSongsWon ? 'text-emerald-600 dark:text-emerald-300 font-bold' : match.aSongsWon < match.bSongsWon ? 'text-rose-500 font-bold' : 'text-amber-500'">
-                          {{ match.aSongsWon > match.bSongsWon ? '○A' : match.aSongsWon < match.bSongsWon ? '○B' : '●' }}
-                        </span>
-                      </template>
-                      <span v-else class="text-slate-400">-</span>
+                  <th class="py-2 px-3 text-left text-xs font-bold whitespace-nowrap">
+                    {{ rowTeam.teamName }}
+                  </th>
+                  <td
+                    v-for="colTeam in currentCompetition.teams"
+                    :key="colTeam.id"
+                    class="py-2 px-3 text-center tabular-nums"
+                    :class="rowTeam.id === colTeam.id ? 'bg-slate-100 dark:bg-slate-900/40' : ''"
+                  >
+                    <template v-if="rowTeam.id === colTeam.id">
+                      <span class="text-slate-400">-</span>
+                    </template>
+                    <template v-else>
+                      <span v-if="matrixCellPoints(rowTeam.id, colTeam.id) === undefined" class="text-slate-400">?</span>
+                      <span v-else class="font-bold text-slate-700 dark:text-slate-200">
+                        {{ matrixCellPoints(rowTeam.id, colTeam.id) }}
+                      </span>
                     </template>
                   </td>
-                  <td class="py-1.5 px-2 text-center">
-                    <template v-if="matchesForMatchup(mu.id).every(m => m.aSongsWon !== null && m.bSongsWon !== null)">
-                      <template v-for="(_, idx) in [0]" :key="idx">
-                        <span
-                          class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
-                          :class="(() => {
-                            const ms = matchesForMatchup(mu.id);
-                            const aWon = ms.filter(m => (m.aSongsWon ?? 0) > (m.bSongsWon ?? 0)).length;
-                            const bWon = ms.filter(m => (m.aSongsWon ?? 0) < (m.bSongsWon ?? 0)).length;
-                            if (aWon > bWon) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300';
-                            if (aWon < bWon) return 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300';
-                            return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
-                          })()"
-                        >
-                          {{ (() => {
-                            const ms = matchesForMatchup(mu.id);
-                            const aWon = ms.filter(m => (m.aSongsWon ?? 0) > (m.bSongsWon ?? 0)).length;
-                            const bWon = ms.filter(m => (m.aSongsWon ?? 0) < (m.bSongsWon ?? 0)).length;
-                            if (aWon > bWon) return `${teamNameOf(mu.teamAId)} 勝`;
-                            if (aWon < bWon) return `${teamNameOf(mu.teamBId)} 勝`;
-                            return '引分';
-                          })() }}
-                        </span>
-                      </template>
-                    </template>
-                    <span v-else class="text-slate-400 italic text-[10px]">記録中</span>
+                  <td class="py-2 px-3 text-center tabular-nums font-black text-base bg-slate-50 dark:bg-slate-900/30">
+                    {{ teamTotalPoints(rowTeam.id) }}
                   </td>
                 </tr>
               </tbody>
