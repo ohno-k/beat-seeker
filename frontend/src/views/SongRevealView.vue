@@ -223,6 +223,11 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
   strategyDeclaredByLeft.value = match.playerAStrategyUsed;
   strategyDeclaredByRight.value = match.playerBStrategyUsed;
 
+  // スピン用プールの絞り込みコンテキスト (ジャンル × matchKind の Lv 帯) を保存
+  const levels = LEVELS_FOR_KIND[match.matchKind];
+  spinContextLeft.value  = { genre: match.playerAPick.songGenre, levels };
+  spinContextRight.value = { genre: match.playerBPick.songGenre, levels };
+
   // ネタバレ防止のため、Strategy 発動の有無や曲名などの告知トーストは出さない。
   // (OBS キャプチャや会場映像に映ったら台無しになる)
   closeImportModal();
@@ -323,6 +328,14 @@ const effectiveRightSong = ref<SongDataEntry | null>(null);
 const affectingLeft = computed(() => strategyDeclaredByRight.value);
 const affectingRight = computed(() => strategyDeclaredByLeft.value);
 
+/**
+ * スピン用プール構築コンテキスト。各 affected 側ごとに「自分の pick のジャンル」と
+ * 「matchKind の Lv 帯」を覚えておき、ルーレットで通り過ぎる候補もこの範囲内に限定する。
+ */
+type SpinContext = { genre: CompetitionSongGenre; levels: number[] };
+const spinContextLeft = ref<SpinContext | null>(null);
+const spinContextRight = ref<SpinContext | null>(null);
+
 // スピンアニメ用ストリップ (StrategyCardView と同パターン)
 type StrategyPoolSong2 = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
 const SPIN_ROW_HEIGHT = 64;        // ストリップ 1 行の高さ (px)
@@ -412,20 +425,17 @@ const startStrategySpins = () => {
 const startSpinForSide = async (side: 'left' | 'right') => {
   const original = side === 'left' ? selectedLeft.value : selectedRight.value;
   const effective = side === 'left' ? effectiveLeftSong.value : effectiveRightSong.value;
-  if (!original || !effective) return;
+  const ctx = side === 'left' ? spinContextLeft.value : spinContextRight.value;
+  if (!original || !effective || !ctx) return;
 
-  // プール構築: 元の自選曲のジャンル × 戦の Lv 帯 (strategy_card_songs から)
-  // 元の自選曲のジャンル/Lv 帯は match から直接わからないので、effectiveLeftSong/RightSong の
-  // genre/level を逆引き or プレイヤー pick の情報をスピン用 ref に保存する方式が必要だが、
-  // ここでは「effective が存在する = strategy 発動済」のシンプル前提で
-  // 「effective の Lv ± 周辺と同 genre」っぽい曲をランダムプールとする。
-  // 簡易実装: 全 strategy_card_songs を flat にしてランダムに 50 件選ぶ (派手な見た目目的)。
+  // プール構築: 自分の pick のジャンル × matchKind の Lv 帯 (strategy_card_songs から)。
+  // ルーレットで通り過ぎる曲もこの範囲内に絞り、ジャンル外の曲が映らないようにする。
   const pool: StrategyPoolSong2[] = [];
-  for (const genre of Object.keys(strategyPool) as (keyof typeof strategyPool)[]) {
-    for (const lv of Object.keys(strategyPool[genre])) {
-      pool.push(...strategyPool[genre][lv]);
-    }
+  for (const lv of ctx.levels) {
+    const arr = strategyPool[ctx.genre]?.[String(lv)];
+    if (arr) pool.push(...arr);
   }
+  if (pool.length === 0) return;
   // 着地行を effective の SongDataEntry に最も近いプール曲に統一しておく。
   // タイトル + diff (A/L → 4/10) でマッチさせる。
   const targetDiff = effective.difficulty === '10' ? 'L' : 'A';
@@ -464,9 +474,10 @@ const startSpinForSide = async (side: 'left' | 'right') => {
 
   const centerRowOffset = Math.floor(SPIN_VISIBLE_ROWS / 2);
   const targetY = -(finalIndex - centerRowOffset) * SPIN_ROW_HEIGHT;
-  // 単一 easeOut で 4.5 秒着地 (StrategyCardView の smooth プロファイル相当)
+  // 単一 easeOut で 6.8 秒着地。最後のスロー区間を長めに取るため、
+  // 終端に重みのある cubic-bezier プロファイルを使用する。
   spinTimers.push(window.setTimeout(() => {
-    strip.style.transition = 'transform 4500ms cubic-bezier(0.12, 0.72, 0.20, 1)';
+    strip.style.transition = 'transform 6800ms cubic-bezier(0.05, 0.78, 0.12, 1)';
     strip.style.transform = `translateY(${targetY}px)`;
   }, 50));
 
@@ -483,7 +494,7 @@ const startSpinForSide = async (side: 'left' | 'right') => {
       spinBurstRight.value = true;
       window.setTimeout(() => { spinBurstRight.value = false; }, 1600);
     }
-  }, 4700));
+  }, 7000));
 };
 
 const reset = () => {
@@ -505,6 +516,8 @@ const reset = () => {
   spinItemsRight.value = [];
   spinBurstLeft.value = false;
   spinBurstRight.value = false;
+  spinContextLeft.value = null;
+  spinContextRight.value = null;
   strategyOverlayActive.value = false;
 };
 

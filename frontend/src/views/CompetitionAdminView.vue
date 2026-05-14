@@ -607,9 +607,9 @@ const matrixCellOf = (rowTeamId: number, colTeamId: number): MatrixCell | null |
   return undefined;
 };
 
-/** standings から指定チームの合計ポイントを取得 (見つからなければ 0)。 */
-const teamTotalPoints = (teamId: number): number => {
-  return standings.value?.rows.find(r => r.teamId === teamId)?.totalPoints ?? 0;
+/** standings から指定チームの勝ち点合計 (matchup 勝点) を取得 (見つからなければ 0)。 */
+const teamMatchupPoints = (teamId: number): number => {
+  return standings.value?.rows.find(r => r.teamId === teamId)?.matchupPoints ?? 0;
 };
 
 /** matchup の両側ラインアップ公開状態を判定 (none / partial / both)。 */
@@ -896,8 +896,7 @@ const statusColor = (s: string) => ({
                 <th class="text-right py-1 px-2">分</th>
                 <th class="text-right py-1 px-2">負</th>
                 <th class="text-right py-1 px-2">戦pt</th>
-                <th class="text-right py-1 px-2">勝点</th>
-                <th class="text-right py-1 px-2 font-black text-slate-700 dark:text-slate-200">合計</th>
+                <th class="text-right py-1 px-2 font-black text-slate-700 dark:text-slate-200">勝点</th>
               </tr>
             </thead>
             <tbody>
@@ -917,8 +916,7 @@ const statusColor = (s: string) => ({
                 <td class="py-1.5 px-2 text-right tabular-nums text-slate-500">{{ row.draws }}</td>
                 <td class="py-1.5 px-2 text-right tabular-nums text-rose-500 dark:text-rose-400">{{ row.losses }}</td>
                 <td class="py-1.5 px-2 text-right tabular-nums">{{ row.songPoints }}</td>
-                <td class="py-1.5 px-2 text-right tabular-nums">{{ row.matchupPoints }}</td>
-                <td class="py-1.5 px-2 text-right tabular-nums font-black">{{ row.totalPoints }}</td>
+                <td class="py-1.5 px-2 text-right tabular-nums font-black">{{ row.matchupPoints }}</td>
               </tr>
             </tbody>
           </table>
@@ -951,7 +949,7 @@ const statusColor = (s: string) => ({
         >
           <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">途中経過</h2>
           <p class="text-[11px] text-slate-500">
-            セル「自軍戦pt ○/×/△ 相手戦pt」: ○=行チームが勝ち / ×=負け / △=引分。「?」 = 未記録、「-」 = 同チーム同士。合計列は順位表と同じ総合ポイント (戦pt + matchup 勝ち点)。
+            セル「自軍戦pt ○/×/△ 相手戦pt」: ○=行チームが勝ち / ×=負け / △=引分。「?」 = 未記録、「-」 = 同チーム同士。合計列は勝ち点合計 (matchup 勝点のみ)。
           </p>
           <div class="overflow-x-auto">
             <table class="text-xs border-collapse">
@@ -1007,7 +1005,7 @@ const statusColor = (s: string) => ({
                     </template>
                   </td>
                   <td class="py-2 px-3 text-center tabular-nums font-black text-base bg-slate-50 dark:bg-slate-900/30">
-                    {{ teamTotalPoints(rowTeam.id) }}
+                    {{ teamMatchupPoints(rowTeam.id) }}
                   </td>
                 </tr>
               </tbody>
