@@ -7,6 +7,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -42,6 +44,8 @@ import java.util.Optional;
 @Component
 public class ApiTokenAuthFilter extends OncePerRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(ApiTokenAuthFilter.class);
+
     /** 外部 API のパスプレフィックス。これに一致した場合のみ本フィルタが動く。 */
     private static final String EXTERNAL_PATH_PREFIX = "/api/external/";
 
@@ -73,22 +77,30 @@ public class ApiTokenAuthFilter extends OncePerRequestFilter {
             if (!plain.isEmpty()) {
                 // 手順3〜4: SHA-256 ハッシュで DB を検索。
                 String hash = tokenService.hash(plain);
-                Optional<ExternalApiToken> opt = tokenRepository.findByTokenHash(hash);
-                if (opt.isPresent() && isActive(opt.get())) {
-                    ExternalApiToken token = opt.get();
-                    // 手順5: 所有ユーザーの iidxId を principal にして SecurityContext へ。
-                    String iidxId = token.getUser().getIidxId();
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            iidxId, null, Collections.emptyList());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                // 手順3〜6 を一括 try/catch。LazyInitializationException など想定外の例外で
+                // 500 を返さず、認証不成立（=401）として穏便に扱う。詳細は ERROR ログに残す。
+                try {
+                    Optional<ExternalApiToken> opt = tokenRepository.findByTokenHash(hash);
+                    if (opt.isPresent() && isActive(opt.get())) {
+                        ExternalApiToken token = opt.get();
+                        // 手順5: 所有ユーザーの iidxId を principal にして SecurityContext へ。
+                        String iidxId = token.getUser().getIidxId();
+                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                                iidxId, null, Collections.emptyList());
+                        SecurityContextHolder.getContext().setAuthentication(auth);
 
-                    // 手順6: 監視用に lastUsedAt を更新。失敗しても認証自体は通す。
-                    try {
-                        token.setLastUsedAt(LocalDateTime.now());
-                        tokenRepository.save(token);
-                    } catch (Exception ignored) {
-                        // last_used_at 更新失敗はリクエスト本体の処理を阻害しない。
+                        // 手順6: 監視用に lastUsedAt を更新。失敗しても認証自体は通す。
+                        try {
+                            token.setLastUsedAt(LocalDateTime.now());
+                            tokenRepository.save(token);
+                        } catch (Exception ignored) {
+                            // last_used_at 更新失敗はリクエスト本体の処理を阻害しない。
+                        }
                     }
+                } catch (Exception e) {
+                    // LazyInit やその他の DB 例外で認証処理が転んだ場合、500 を撒くより
+                    // 「認証不成立 = 401」に倒した方が連携先にとってデバッグ容易。
+                    log.error("ApiTokenAuthFilter: token resolution failed for path={}", path, e);
                 }
             }
         }

@@ -37,8 +37,17 @@ public class ExternalApiToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** トークンの所有者。 */
-    @ManyToOne(fetch = FetchType.LAZY)
+    /**
+     * トークンの所有者。
+     *
+     * EAGER 必須: 認証フィルタ ({@link com.beatseeker.backend.config.ApiTokenAuthFilter})
+     * は Spring Boot の Open-in-View が効く前に走るため、LAZY だと
+     * {@code token.getUser().getIidxId()} で {@link org.hibernate.LazyInitializationException}
+     * になる。Repository に {@code @EntityGraph} を付けても derived query では
+     * 確実に効かないケースがあったため、エンティティ側で EAGER を強制する。
+     * トークンと User は 1:1 で常にペアで使うのでパフォーマンス影響も無い。
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
