@@ -3,10 +3,18 @@
 このドキュメントは、iidx-memo 等の **連携先アプリ** が beat-seeker のユーザー情報を
 読み取るために利用する公開 API の仕様です。
 
-- ベース URL（本番）: `https://<beat-seeker のドメイン>`
+- ベース URL（本番・推奨）: `https://beat-seeker.com`
+- ベース URL（本番・直叩き）: `https://beat-seeker.onrender.com`
 - ベース URL（開発）: `http://localhost:8080`
 - すべて JSON 応答（`Content-Type: application/json`）
 - 認証: **個人 API トークン**（Bearer 方式）
+
+### ベース URL についての補足
+
+beat-seeker はフロント（`beat-seeker.com`）とバックエンド（`beat-seeker.onrender.com`）を
+別サービスとして運用していますが、`beat-seeker.com/api/*` は Static Site のリライト設定で
+バックエンドに透過プロキシしているため、連携アプリからは **どちらの URL を使っても**
+同じレスポンスが返ります。URL を覚えやすい `beat-seeker.com` を推奨します。
 
 ## 認証
 
@@ -138,7 +146,7 @@ Authorization: Bearer bs_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #### 例（curl）
 
 ```bash
-curl -s "https://<host>/api/external/v1/song-detail?title=灼熱Beach%20Side%20Bunny&difficulty=ANOTHER" \
+curl -s "https://beat-seeker.com/api/external/v1/song-detail?title=灼熱Beach%20Side%20Bunny&difficulty=ANOTHER" \
      -H "Authorization: Bearer bs_live_xxxxxxxxxxxxxxxx"
 ```
 

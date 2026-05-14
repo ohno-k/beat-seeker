@@ -1,0 +1,13 @@
+# Render Static Site のプロキシ・リダイレクト設定（Netlify 互換書式）。
+#
+# beat-seeker は「フロントエンド（このサイト）= beat-seeker.com」と
+# 「バックエンド = https://beat-seeker.onrender.com」を別サービスとして分離している。
+#
+# 通常ブラウザ操作では useAuth.ts 等が VITE_API_BASE 経由で直接バックエンドを叩くため
+# 問題ないが、iidx-memo など外部連携アプリは `beat-seeker.com/api/...` を叩くことを
+# 想定するケースがある。この場合 Static Site の SPA フォールバック（index.html）に
+# 落ちて HTML が返るため、ここで /api/* をバックエンドへ透過プロキシする。
+#
+# `200` ステータス = リダイレクトではなく Rewrite（URL バーは beat-seeker.com のまま）。
+# `:splat` は `*` でキャプチャしたパス全体を埋め込むプレースホルダ。
+/api/*  https://beat-seeker.onrender.com/api/:splat  200
