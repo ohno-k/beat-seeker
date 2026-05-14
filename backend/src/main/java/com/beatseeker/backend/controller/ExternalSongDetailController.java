@@ -16,6 +16,8 @@ import com.beatseeker.backend.repository.UserSongOptionRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +60,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/external/v1")
 public class ExternalSongDetailController {
+
+    private static final Logger log = LoggerFactory.getLogger(ExternalSongDetailController.class);
 
     private final UserRepository userRepository;
     private final ScoreRepository scoreRepository;
@@ -119,51 +123,84 @@ public class ExternalSongDetailController {
         User user = getUser(auth);
         if (user == null) return ResponseEntity.status(401).build();
 
-        // ── 3. 譜面メタ取得（song_definitions, active 限定） ──
-        Optional<SongDefinition> songOpt = songDefinitionRepository
-                .findByTitleAndDifficultyAndRevision(title, difficultyCode, "active");
-        if (songOpt.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "error", "Song not found",
-                    "title", title,
-                    "difficulty", difficultyName));
+        // 個別ステップごとに try/catch を挟み、どの段階で例外が出たかをログ + レスポンスに残す。
+        // これにより 500 の原因が「テーブル未作成」「特定列の型不一致」など切り分け可能になる。
+        String stage = "init";
+        try {
+            // ── 3. 譜面メタ取得（song_definitions, active 限定） ──
+            stage = "songDefinition";
+            Optional<SongDefinition> songOpt = songDefinitionRepository
+                    .findByTitleAndDifficultyAndRevision(title, difficultyCode, "active");
+            if (songOpt.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of(
+                        "error", "Song not found",
+                        "title", title,
+                        "difficulty", difficultyName));
+            }
+            SongDefinition song = songOpt.get();
+
+            // ── 4. ユーザースコア取得（未プレイなら null） ───────
+            stage = "score";
+            Optional<Score> scoreOpt = scoreRepository
+                    .findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(user, title, difficultyName);
+
+            // ── 5. 順位キャッシュ取得（ANOTHER / LEGGENDARIA のみ通常存在） ──
+            stage = "rank";
+            Optional<UserSongRank> rankOpt = userSongRankRepository
+                    .findByUserIdAndTitleAndDifficultyName(user.getId(), title, difficultyName);
+
+            // ── 6. 譜面傾向プロファイル（任意。textage URL をキーにマップ） ──
+            stage = "tendency";
+            String textage = song.getTextage();
+            Optional<ChartTendencyProfile> tendencyOpt = textage == null
+                    ? Optional.empty()
+                    : chartTendencyProfileRepository.findById(textage);
+
+            // ── 7. 個別曲の履歴（diffJson から該当タイトル/難易度を抜粋） ──
+            stage = "history";
+            List<Map<String, Object>> history = collectSongHistory(user, title, difficultyName);
+
+            // ── 8. 同期済みオプション（iidx-memo 等から POST されたもの） ──
+            // user_song_options テーブルが本番に未作成の場合はここで例外になる。
+            stage = "options";
+            List<String> options;
+            try {
+                options = userSongOptionRepository
+                        .findByUserAndTitleAndDifficultyName(user, title, difficultyName)
+                        .map(o -> parseOptionsJson(o.getOptionsJson()))
+                        .orElse(List.of());
+            } catch (Exception optEx) {
+                // options は新規追加機能。テーブル未作成等で取得失敗しても
+                // 残りの応答は返す方が連携先にとって有用なので、ログだけ残して空配列にフォールバック。
+                log.error("song-detail: options lookup failed (table missing?), falling back to [] (user={} title={} diff={})",
+                        user.getIidxId(), title, difficultyName, optEx);
+                options = List.of();
+            }
+
+            // ── 9. レスポンス組み立て ───────────────────────────
+            stage = "build";
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("user", buildUserBlock(user));
+            body.put("song", buildSongBlock(song, difficultyName));
+            body.put("score", scoreOpt.map(this::buildScoreBlock).orElse(null));
+            body.put("rank", rankOpt.map(this::buildRankBlock).orElse(null));
+            body.put("options", options);
+            body.put("history", history);
+            body.put("chartTendency", tendencyOpt.map(this::buildTendencyBlock).orElse(null));
+
+            return ResponseEntity.ok(body);
+        } catch (Exception e) {
+            // 上記いずれかのステージで未捕捉の例外が出たケース。
+            // スタックトレース付きでログし、レスポンスにも要約 JSON を返して相互デバッグ可能にする。
+            log.error("song-detail: unhandled exception at stage={} (user={} title={} diff={})",
+                    stage, user.getIidxId(), title, difficultyName, e);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("error", "Internal failure during song-detail");
+            body.put("stage", stage);
+            body.put("exception", e.getClass().getSimpleName());
+            body.put("message", e.getMessage() == null ? "" : e.getMessage());
+            return ResponseEntity.status(500).body(body);
         }
-        SongDefinition song = songOpt.get();
-
-        // ── 4. ユーザースコア取得（未プレイなら null） ───────
-        Optional<Score> scoreOpt = scoreRepository
-                .findFirstByUserAndTitleAndDifficultyNameOrderByUploadedAtDesc(user, title, difficultyName);
-
-        // ── 5. 順位キャッシュ取得（ANOTHER / LEGGENDARIA のみ通常存在） ──
-        Optional<UserSongRank> rankOpt = userSongRankRepository
-                .findByUserIdAndTitleAndDifficultyName(user.getId(), title, difficultyName);
-
-        // ── 6. 譜面傾向プロファイル（任意。textage URL をキーにマップ） ──
-        String textage = song.getTextage();
-        Optional<ChartTendencyProfile> tendencyOpt = textage == null
-                ? Optional.empty()
-                : chartTendencyProfileRepository.findById(textage);
-
-        // ── 7. 個別曲の履歴（diffJson から該当タイトル/難易度を抜粋） ──
-        List<Map<String, Object>> history = collectSongHistory(user, title, difficultyName);
-
-        // ── 8. 同期済みオプション（iidx-memo 等から POST されたもの） ──
-        List<String> options = userSongOptionRepository
-                .findByUserAndTitleAndDifficultyName(user, title, difficultyName)
-                .map(o -> parseOptionsJson(o.getOptionsJson()))
-                .orElse(List.of());
-
-        // ── 9. レスポンス組み立て ───────────────────────────
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("user", buildUserBlock(user));
-        body.put("song", buildSongBlock(song, difficultyName));
-        body.put("score", scoreOpt.map(this::buildScoreBlock).orElse(null));
-        body.put("rank", rankOpt.map(this::buildRankBlock).orElse(null));
-        body.put("options", options);
-        body.put("history", history);
-        body.put("chartTendency", tendencyOpt.map(this::buildTendencyBlock).orElse(null));
-
-        return ResponseEntity.ok(body);
     }
 
     /**
@@ -190,49 +227,69 @@ public class ExternalSongDetailController {
         if (user == null) return ResponseEntity.status(401).build();
 
         if (req == null || req.options() == null) {
+            log.warn("sync-options: missing 'options' array (user={})", user.getIidxId());
             return ResponseEntity.badRequest().body(Map.of("error", "Missing 'options' array"));
         }
 
+        log.info("sync-options: user={} payloadCount={}", user.getIidxId(), req.options().size());
+
         ObjectMapper mapper = new ObjectMapper();
         int synced = 0;
+        int skipped = 0;
+        String lastTitle = null;
+        String lastDifficulty = null;
 
-        for (SyncOptionsItem item : req.options()) {
-            if (item == null) continue;
-            String title = item.title();
-            String difficulty = item.difficulty();
-            List<String> opts = item.options();
+        try {
+            for (SyncOptionsItem item : req.options()) {
+                if (item == null) { skipped++; continue; }
+                String title = item.title();
+                String difficulty = item.difficulty();
+                List<String> opts = item.options();
+                lastTitle = title;
+                lastDifficulty = difficulty;
 
-            // 必須項目チェック。一件不正でも他は処理を続ける（全件 400 にしない設計）。
-            if (title == null || title.isBlank()) continue;
-            if (difficulty == null || toDifficultyCode(difficulty.trim().toUpperCase()) == null) continue;
-            if (opts == null || opts.isEmpty()) continue;
+                // 必須項目チェック。一件不正でも他は処理を続ける（全件 400 にしない設計）。
+                if (title == null || title.isBlank()) { skipped++; continue; }
+                if (difficulty == null || toDifficultyCode(difficulty.trim().toUpperCase()) == null) {
+                    skipped++; continue;
+                }
+                if (opts == null || opts.isEmpty()) { skipped++; continue; }
 
-            String difficultyName = difficulty.trim().toUpperCase();
-            String optionsJson;
-            try {
-                optionsJson = mapper.writeValueAsString(opts);
-            } catch (Exception e) {
-                // 文字列リストのシリアライズが失敗することは現実には起きないが、安全に skip。
-                continue;
+                String difficultyName = difficulty.trim().toUpperCase();
+                String optionsJson = mapper.writeValueAsString(opts);
+
+                UserSongOption entity = userSongOptionRepository
+                        .findByUserAndTitleAndDifficultyName(user, title, difficultyName)
+                        .orElseGet(() -> {
+                            UserSongOption created = new UserSongOption();
+                            created.setUser(user);
+                            created.setTitle(title);
+                            created.setDifficultyName(difficultyName);
+                            return created;
+                        });
+                entity.setOptionsJson(optionsJson);
+                entity.setSource("iidx-memo");
+                entity.setUpdatedAt(java.time.LocalDateTime.now());
+                userSongOptionRepository.save(entity);
+                synced++;
             }
-
-            UserSongOption entity = userSongOptionRepository
-                    .findByUserAndTitleAndDifficultyName(user, title, difficultyName)
-                    .orElseGet(() -> {
-                        UserSongOption created = new UserSongOption();
-                        created.setUser(user);
-                        created.setTitle(title);
-                        created.setDifficultyName(difficultyName);
-                        return created;
-                    });
-            entity.setOptionsJson(optionsJson);
-            entity.setSource("iidx-memo");
-            entity.setUpdatedAt(java.time.LocalDateTime.now());
-            userSongOptionRepository.save(entity);
-            synced++;
+        } catch (Exception e) {
+            // 例外内容を Render のログにスタックトレース付きで残し、レスポンスにも要約を含めることで
+            // 連携先と相互にデバッグできるようにする。
+            log.error("sync-options: unhandled exception (user={} lastTitle={} lastDifficulty={} syncedSoFar={})",
+                    user.getIidxId(), lastTitle, lastDifficulty, synced, e);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("error", "Internal failure during sync");
+            body.put("exception", e.getClass().getSimpleName());
+            body.put("message", e.getMessage() == null ? "" : e.getMessage());
+            body.put("syncedBeforeError", synced);
+            body.put("lastTitle", lastTitle);
+            body.put("lastDifficulty", lastDifficulty);
+            return ResponseEntity.status(500).body(body);
         }
 
-        return ResponseEntity.ok(Map.of("synced", synced));
+        log.info("sync-options: done user={} synced={} skipped={}", user.getIidxId(), synced, skipped);
+        return ResponseEntity.ok(Map.of("synced", synced, "skipped", skipped));
     }
 
     /**
