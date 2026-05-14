@@ -13,7 +13,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
  *
  * 使い方:
  * ```ts
- * const { fetchMyScores, fetchUserScores, updateMemo } = useScores();
+ * const { fetchMyScores, fetchUserScores } = useScores();
  * const myScores = await fetchMyScores();
  * ```
  */
@@ -59,7 +59,7 @@ export function useScores() {
                 missCount: null,
                 clearType: 'NO PLAY',
                 djLevel: '---',
-                memo: undefined,
+                options: undefined,
                 id: undefined
             });
 
@@ -96,7 +96,7 @@ export function useScores() {
                         missCount: s.missCount,
                         clearType: s.clearType,
                         djLevel: s.djLevel,
-                        memo: s.memo || undefined
+                        options: Array.isArray(s.options) ? s.options : undefined
                     };
                 }
             });
@@ -170,7 +170,7 @@ export function useScores() {
                 missCount: null,
                 clearType: 'NO PLAY',
                 djLevel: '---',
-                memo: undefined,
+                options: undefined,
                 id: undefined
             });
 
@@ -205,7 +205,7 @@ export function useScores() {
                         missCount: s.missCount,
                         clearType: s.clearType,
                         djLevel: s.djLevel,
-                        memo: s.memo || undefined
+                        options: Array.isArray(s.options) ? s.options : undefined
                     };
                 }
             });
@@ -244,7 +244,7 @@ export function useScores() {
                 missCount: null,
                 clearType: 'NO PLAY',
                 djLevel: '---',
-                memo: undefined,
+                options: undefined,
                 id: undefined
             });
 
@@ -279,7 +279,7 @@ export function useScores() {
                         missCount: null,
                         clearType: s.clearType ?? 'NO PLAY',
                         djLevel: s.djLevel ?? '---',
-                        memo: undefined,
+                        options: undefined,
                         djName: s.djName ?? undefined,
                     } as any;
                 }
@@ -321,19 +321,6 @@ export function useScores() {
         return data.status ?? 'none';
     };
 
-    /**
-     * スコアレコードに紐付くメモ文を更新する（譜面ごとの自分用コメント）。
-     */
-    const updateMemo = async (id: number, memo: string) => {
-        const res = await fetch(`${API_BASE}/api/scores/${id}/memo`, {
-            method: 'PUT',
-            headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ memo })
-        });
-        if (!res.ok) throw new Error('Failed to update memo');
-        return res.json();
-    };
-
     return {
         /** 自分のスコア一覧取得。 */
         fetchMyScores,
@@ -347,8 +334,6 @@ export function useScores() {
         fetchPublicProfile,
         /** フレンド関係ステータス取得。 */
         fetchFriendStatus,
-        /** 譜面メモ更新。 */
-        updateMemo,
         /** フェッチ実行中フラグ。 */
         isFetching,
     };

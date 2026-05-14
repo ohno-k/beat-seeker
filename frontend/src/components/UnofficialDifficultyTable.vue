@@ -136,7 +136,7 @@ const groupedByRank = computed(() => {
           lastPlayTime: '',
           beatTierPoints: 0,
           maxBeatTierPoints: getMaxPoints(rank),
-          memo: undefined,
+          options: undefined,
         });
       }
     });
@@ -201,9 +201,16 @@ const tableData = computed(() => {
     // レートベースのランクは既にプレイ済み曲の平均レートで算出されるため playedRankInfo は同値
     const playedRankInfo = rankInfo;
 
+    // 単曲ごとのランク（必要スコアレート表に対応）。未プレイは null。
+    const songsWithRank = songs.map(s => ({
+      song: s,
+      songRank: s.scoreRate > 0 ? getFolderRankInfoByRate(s.scoreRate, rank) : null,
+    }));
+
     return {
       rank,
       songs,
+      songsWithRank,
       totalScore,
       totalMaxScore,
       totalBeatPoints,
@@ -432,24 +439,34 @@ const tableData = computed(() => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div v-for="song in data.songs" :key="song.title + song.difficultyName" class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col shadow-sm transition-colors duration-200">
+                  <div v-for="entry in data.songsWithRank" :key="entry.song.title + entry.song.difficultyName" class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col shadow-sm transition-colors duration-200">
                     <div class="flex items-start justify-between mb-2">
-                       <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-2 pr-2" :title="song.title">{{ song.title }}</h4>
-                       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0" :class="song.difficultyColor">
-                         {{ song.difficultyName.substring(0, 3) }}
+                       <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-2 pr-2" :title="entry.song.title">{{ entry.song.title }}</h4>
+                       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0" :class="entry.song.difficultyColor">
+                         {{ entry.song.difficultyName.substring(0, 3) }}
                        </span>
                     </div>
-                    
-                    <div class="flex items-end justify-between mt-auto">
+
+                    <div class="flex items-end justify-between mt-auto gap-2">
                       <div class="flex flex-col">
                         <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">RATE</span>
-                        <span class="font-black text-sm" :class="song.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : song.scoreRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
-                          {{ song.scoreRate > 0 ? song.scoreRate.toFixed(2) + '%' : '-' }}
+                        <span class="font-black text-sm" :class="entry.song.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : entry.song.scoreRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
+                          {{ entry.song.scoreRate > 0 ? entry.song.scoreRate.toFixed(2) + '%' : '-' }}
                         </span>
+                      </div>
+                      <div class="flex flex-col items-center">
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">RANK</span>
+                        <div v-if="entry.songRank" class="flex items-center gap-1">
+                          <RankIcon :rank-name="entry.songRank.name" :tier="entry.songRank.tier" size="xs" />
+                          <span class="text-[10px] font-black whitespace-nowrap" :class="entry.songRank.color">
+                            {{ entry.songRank.name }}<template v-if="entry.songRank.tier"> {{ entry.songRank.tier }}</template>
+                          </span>
+                        </div>
+                        <span v-else class="text-sm font-bold text-slate-400 dark:text-slate-500">-</span>
                       </div>
                       <div class="flex flex-col text-right">
                         <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">PT</span>
-                        <span class="font-mono text-sm text-slate-700 dark:text-slate-300 font-bold">{{ song.beatTierPoints > 0 ? song.beatTierPoints.toFixed(1) : '-' }}</span>
+                        <span class="font-mono text-sm text-slate-700 dark:text-slate-300 font-bold">{{ entry.song.beatTierPoints > 0 ? entry.song.beatTierPoints.toFixed(1) : '-' }}</span>
                       </div>
                     </div>
                   </div>

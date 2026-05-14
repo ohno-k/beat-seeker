@@ -241,6 +241,15 @@
                   <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
+              <th class="px-1 sm:px-2 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-8 sm:w-12" @click="toggleSort('unofficialSongRank')">
+                <div class="flex items-center gap-0.5 sm:gap-1">
+                  {{ t('table.colRank') }}
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'unofficialSongRank'">
+                    {{ sortOrder === 'asc' ? '▲' : '▼' }}
+                  </span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
+                </div>
+              </th>
               <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-2/12"
                 :class="viewMode === 'rate' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'"
                 @click="toggleSort('beatTierPoints')">
@@ -323,7 +332,15 @@
                 <span v-if="record.scoreRate >= 0" class="font-bold text-[9px] sm:text-xs" :class="record.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : record.scoreRate >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'">{{ record.scoreRate.toFixed(2) }}%</span>
                 <span v-else class="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">---</span>
               </td>
-              
+
+              <!-- 単曲ランク（必要スコアレート表対応）。アイコンのみ表示。 -->
+              <td class="px-1 sm:px-2 py-1.5 sm:py-2 whitespace-nowrap w-8 sm:w-12">
+                <template v-for="rankInfo of [getSongUnofficialRank(record)]" :key="0">
+                  <RankIcon v-if="rankInfo" :rank-name="rankInfo.name" :tier="rankInfo.tier" size="xs" />
+                  <span v-else class="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">---</span>
+                </template>
+              </td>
+
               <!-- BEAT-TIER mode: BEAT-PT cell -->
               <td v-if="viewMode === 'beat'" class="px-1 sm:px-6 py-1.5 sm:py-2 whitespace-nowrap transition-colors" :class="[
                 top100Keys.has(record.title + '|' + record.difficultyName) ? 'bg-blue-50/80 dark:bg-blue-900/20' : '',
@@ -371,7 +388,7 @@
               </td>
             </tr>
             <tr v-if="displayScores.length === 0">
-              <td colspan="7" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
+              <td colspan="8" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
                 {{ t('table.noMatchingScores') }}
               </td>
             </tr>
@@ -937,32 +954,26 @@
           <!-- ===== メモ セクション: 譜面ごとのフリーテキストメモ（ログイン時のみ編集可） ===== -->
           <div v-if="selectedRecord.id || !isLoggedIn" class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
-              <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('scores.memo') }}</p>
-              <button @click="isEditingMemo = true" v-if="!isEditingMemo && isLoggedIn" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-bold flex items-center gap-1 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              <p class="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{{ t('scores.options') }}</p>
+              <a href="https://www.iidx-memo.com/" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs font-bold flex items-center gap-1 transition-colors">
+                iidx-memo
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                  <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
                 </svg>
-                {{ t('common.edit') }}
-              </button>
+              </a>
             </div>
             <div class="p-6">
-              <template v-if="!isLoggedIn">
-                <div class="text-slate-500 dark:text-slate-400 italic text-sm text-center py-2">
-                  {{ t('scores.memoLoginHint') }}
-                </div>
-              </template>
-              <template v-else-if="isEditingMemo">
-                <textarea v-model="editMemoText" rows="4" class="w-full border border-slate-300 dark:border-slate-600 rounded-xl p-3 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-blue-500 dark:focus:border-blue-500 text-slate-700 dark:text-slate-200 resize-y transition-colors duration-200" :placeholder="t('scores.memoPlaceholder')"></textarea>
-                <div class="flex justify-end gap-3 mt-4">
-                  <button @click="isEditingMemo = false" class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">{{ t('common.cancel') }}</button>
-                  <button @click="saveMemo" :disabled="isSavingMemo" class="px-6 py-2 bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50">
-                    {{ isSavingMemo ? t('common.saving') : t('common.save') }}
-                  </button>
+              <template v-if="selectedRecord.options && selectedRecord.options.length > 0">
+                <div class="flex flex-wrap gap-2">
+                  <span v-for="opt in selectedRecord.options" :key="opt"
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                    {{ opt }}
+                  </span>
                 </div>
               </template>
               <template v-else>
-                <div v-if="selectedRecord.memo" class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{{ selectedRecord.memo }}</div>
-                <div v-else class="text-slate-400 dark:text-slate-500 italic text-sm">{{ t('scores.noMemo') }}</div>
+                <div class="text-slate-400 dark:text-slate-500 italic text-sm">{{ t('scores.noOptions') }}</div>
               </template>
             </div>
           </div>
@@ -1024,7 +1035,7 @@ import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
-import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getChartType, type ChartType } from '../utils/beatTier';
+import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getChartType, getFolderRankInfoByRate, FOLDER_RANK_DEFS, type ChartType, type RankInfo } from '../utils/beatTier';
 import { useScratchSummary } from '../composables/useScratchSummary';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
@@ -1040,7 +1051,6 @@ import InformalRankBadge from './InformalRankBadge.vue';
 /** 難易度フィルタの選択肢（ANOTHER / LEGGENDARIA に固定。BEAT-PT 集計対象）。 */
 const DIFFICULTY_FILTER_OPTIONS = ['ANOTHER', 'LEGGENDARIA'] as const;
 
-const { updateMemo } = useScores();
 const { isDarkMode } = useDarkMode();
 const { isLoggedIn, authHeaders, user } = useAuth();
 /** 管理者判定。判定ロジックは useAdmin composable に集約されている。 */
@@ -1194,7 +1204,7 @@ const currentPage = ref(1);
 /** 1 ページあたりの表示件数。10/25/50/100 から選択可能。 */
 const itemsPerPage = ref(50);
 
-type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | 'songRank' | null;
+type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | 'songRank' | 'unofficialSongRank' | null;
 type SortOrder = 'asc' | 'desc';
 
 /** 現在の並び替えキー。初期値は「非公式難易度（informalRank）」降順。 */
@@ -1216,6 +1226,26 @@ const clearTypeRankings: Record<string, number> = {
   'FAILED': 1,
   'NO PLAY': 0,
   '---': 0
+};
+
+/**
+ * 【関数の役割】 単曲のレートと所属難易度から、必要スコアレート表に対応するランクを返す。
+ * 未プレイ（scoreRate <= 0）または非公式ランク無しの曲は null。
+ * Novice 1 にも届かないスコアは Beginner として表示する（null にはしない）。
+ */
+const getSongUnofficialRank = (record: ScoreRecord): RankInfo | null => {
+  if (record.scoreRate <= 0 || !record.informalRank) return null;
+  return getFolderRankInfoByRate(record.scoreRate, record.informalRank);
+};
+
+/**
+ * 【関数の役割】 RankInfo を「Legend が最大、Beginner が最小」の数値に変換する。
+ * FOLDER_RANK_DEFS の並び（先頭が Legend）を逆順序として使い、未該当は -1 を返す。
+ */
+const getRankOrderValue = (info: RankInfo | null): number => {
+  if (!info) return -1;
+  const idx = FOLDER_RANK_DEFS.findIndex(d => d.name === info.name && (d.tier ?? null) === (info.tier ?? null));
+  return idx === -1 ? -1 : (FOLDER_RANK_DEFS.length - idx);
 };
 
 /**
@@ -1299,7 +1329,7 @@ const allRecords = computed<ScoreRecord[]>(() => {
         informalRank: informalRank,
         beatTierPoints: 0,
         maxBeatTierPoints: getMaxPoints(informalRank),
-        memo: undefined,
+        options: undefined,
         difficultyColor: diffName === 'LEGGENDARIA' ? 'text-purple-700 bg-purple-100 border border-purple-300' : 'text-red-700 bg-red-100 border border-red-300',
         lastPlayTime: ''
       } as ScoreRecord;
@@ -1482,13 +1512,6 @@ const handleRowClick = (record: ScoreRecord) => {
 const selectedRecord = ref<ScoreRecord | null>(null);
 /** 詳細モーダル内で表示中のタブ。 */
 const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking' | 'history'>('detail');
-
-/** メモ編集モード切替フラグ。 */
-const isEditingMemo = ref(false);
-/** メモ編集用テキスト入力バッファ。 */
-const editMemoText = ref('');
-/** メモ保存中フラグ。二重送信防止。 */
-const isSavingMemo = ref(false);
 
 /** 目標 BEAT-PT スライダーの値（0〜 最大残 PT）。目標到達に必要なスコアを逆算して表示する。 */
 const targetBeatPtSlider = ref(0);
@@ -2093,14 +2116,11 @@ const targetScoreNeeded = computed(() => {
 });
 
 /**
- * 【関数の役割】 行クリック等で呼ばれ、詳細モーダルを開く。
- * 同時に editMemoText に現在のメモを載せ、body のスクロールを固定する（背景が動かないように）。
+ * 【関数の役割】 行クリック等で呼ばれ、詳細モーダルを開く。body のスクロールを固定する（背景が動かないように）。
  */
 const openDetailModal = (record: ScoreRecord) => {
   selectedRecord.value = record;
   modalTab.value = 'detail';
-  isEditingMemo.value = false;
-  editMemoText.value = record.memo || '';
   document.body.style.overflow = 'hidden';
 };
 
@@ -2108,19 +2128,6 @@ const openDetailModal = (record: ScoreRecord) => {
  * 【関数の役割】 メモ編集を保存する。API 成功時はモーダル内の表示も即時反映。
  * 失敗時はアラートで通知。保存中フラグで二重送信を防ぐ。
  */
-const saveMemo = async () => {
-    if (!selectedRecord.value?.id) return;
-    isSavingMemo.value = true;
-    try {
-        await updateMemo(selectedRecord.value.id, editMemoText.value);
-        selectedRecord.value.memo = editMemoText.value;
-        isEditingMemo.value = false;
-    } catch (e) {
-        alert('メモの保存に失敗しました');
-    } finally {
-        isSavingMemo.value = false;
-    }
-};
 
 /**
  * 【関数の役割】 詳細モーダルを閉じる。
@@ -2217,7 +2224,7 @@ const toggleSort = (key: SortKey) => {
   } else {
     sortKey.value = key;
     // 列ごとの既定ソート向き（スコア/PT/クリアタイプ/段階は降順、ランキングは昇順）。
-    if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints' || key === 'clearType' || key === 'djLevel') {
+    if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints' || key === 'clearType' || key === 'djLevel' || key === 'unofficialSongRank') {
         sortOrder.value = 'desc';
     } else if (key === 'songRank') {
         sortOrder.value = 'asc';
@@ -2357,6 +2364,16 @@ const filteredScores = computed(() => {
       const rankA = songRankMap.value.get(`${a.title}|${a.difficultyName}`)?.rank ?? 999999;
       const rankB = songRankMap.value.get(`${b.title}|${b.difficultyName}`)?.rank ?? 999999;
       return sortOrder.value === 'asc' ? rankA - rankB : rankB - rankA;
+    });
+  } else if (sortKey.value === 'unofficialSongRank') {
+    result.sort((a, b) => {
+      const valA = getRankOrderValue(getSongUnofficialRank(a));
+      const valB = getRankOrderValue(getSongUnofficialRank(b));
+      if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+      // 同一ランク内ではレート降順で安定させる
+      const rateA = a.scoreRate >= 0 ? a.scoreRate : -2;
+      const rateB = b.scoreRate >= 0 ? b.scoreRate : -2;
+      return sortOrder.value === 'asc' ? rateA - rateB : rateB - rateA;
     });
   }
 

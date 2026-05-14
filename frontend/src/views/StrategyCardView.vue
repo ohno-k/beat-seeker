@@ -19,6 +19,9 @@
  */
 import { ref, computed, onUnmounted, onMounted, nextTick } from 'vue';
 import strategySongs from '../data/strategy_card_songs.json';
+import { useSe } from '../composables/useSe';
+
+const se = useSe();
 
 type Genre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE' | '12ALL';
 type MatchKind = 'vanguard' | 'middle' | 'captain';
@@ -98,6 +101,7 @@ const toggleFullscreen = async () => {
 
 onMounted(() => {
   document.addEventListener('fullscreenchange', onFullscreenChange);
+  se.preload();
 });
 
 /** 候補曲リスト (現在選択中のジャンル × 戦) */
@@ -205,9 +209,14 @@ const spin = async () => {
   const pool = candidates.value;
   if (pool.length === 0) return;
 
+  // 初回抽選時に autoplay 制限を解除 (ボタン押下経由なのでユーザージェスチャ起源)
+  se.unlock();
+
   isSpinning.value = true;
   resultSong.value = null;
   showResultBurst.value = false;
+  // スピン開始: 立ち上がりホワーシュ
+  se.play('whoosh4');
 
   const finalSong = pool[Math.floor(Math.random() * pool.length)];
 
@@ -257,11 +266,16 @@ const spin = async () => {
     cumulative += stage.duration;
   });
 
+  // 着地直前の減速ブースト (cumulative の 0.85 倍時点で長尺ホワーシュを被せる)
+  const preLandDelay = Math.max(0, Math.floor(cumulative * 0.85));
+  stageTimers.push(window.setTimeout(() => { se.play('whoosh2'); }, preLandDelay));
+
   // 全段階終了で結果確定
   stopTimer = window.setTimeout(() => {
     resultSong.value = finalSong;
     isSpinning.value = false;
     showResultBurst.value = true;
+    se.play('impact');
     // バースト演出 (リング波紋 + エッジフラッシュ) は約 1.6 秒で自然消滅
     window.setTimeout(() => { showResultBurst.value = false; }, 1600);
   }, cumulative);
@@ -284,6 +298,7 @@ const reset = () => {
 const selectGenre = (g: Genre) => {
   if (isSpinning.value) return;
   selectedGenre.value = g;
+  se.play('ui');
   // INSANE / 12ALL 選択時に先鋒/中堅が選ばれていたらリセット
   if (captainOnlyGenres.includes(g) && selectedMatch.value && selectedMatch.value !== 'captain') {
     selectedMatch.value = null;
@@ -295,6 +310,7 @@ const selectMatch = (m: MatchKind) => {
   if (isSpinning.value) return;
   if (matchDisabled(m)) return;
   selectedMatch.value = m;
+  se.play('ui');
   reset();
 };
 
@@ -317,22 +333,49 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
     <!-- 背景の装飾的グリッド -->
     <div class="absolute inset-0 opacity-10 pointer-events-none bg-grid"></div>
 
-    <!-- フルスクリーン切替ボタン (右上に固定表示) -->
-    <button
-      type="button"
-      @click="toggleFullscreen"
-      class="absolute top-4 right-4 z-30 p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
-      :title="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
-      :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
-    >
-      <!-- 全画面化アイコン (4つの角矢印) / 解除アイコン (内向き矢印) -->
-      <svg v-if="!isFullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
-      </svg>
-      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" />
-      </svg>
-    </button>
+    <!-- SE 音量 / ミュート + フルスクリーン切替ボタン (右上に固定表示) -->
+    <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
+      <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 backdrop-blur shadow-lg">
+        <button
+          type="button"
+          @click="se.toggleMuted()"
+          class="text-slate-300 hover:text-white transition-colors"
+          :title="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
+          :aria-label="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
+        >
+          <svg v-if="!se.muted.value" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9zM17 9l4 4m0-4l-4 4" />
+          </svg>
+        </button>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          :value="Math.round(se.volume.value * 100)"
+          @input="se.setVolume((Number(($event.target as HTMLInputElement).value) || 0) / 100)"
+          class="w-20 accent-fuchsia-400"
+          aria-label="SE 音量"
+        />
+      </div>
+      <button
+        type="button"
+        @click="toggleFullscreen"
+        class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
+        :title="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
+        :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
+      >
+        <!-- 全画面化アイコン (4つの角矢印) / 解除アイコン (内向き矢印) -->
+        <svg v-if="!isFullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" />
+        </svg>
+      </button>
+    </div>
 
     <!-- ヘッダ -->
     <div class="relative max-w-6xl mx-auto mb-8 pr-14">

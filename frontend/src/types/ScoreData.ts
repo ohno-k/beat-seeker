@@ -7,7 +7,8 @@ export interface DifficultyStats {
     clearType: string;
     djLevel: string;
     id?: number;
-    memo?: string;
+    /** iidx-memo 等から同期された譜面オプション。読み取り専用。 */
+    options?: string[];
     djName?: string;
 }
 

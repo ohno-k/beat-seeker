@@ -46,7 +46,8 @@ export interface ScoreRecord {
     lastPlayTime: string;
     beatTierPoints: number;
     maxBeatTierPoints: number;
-    memo?: string;
+    /** iidx-memo 等から同期された譜面オプション。読み取り専用。 */
+    options?: string[];
     djName?: string;
 }
 
@@ -232,7 +233,7 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                     lastPlayTime: song.lastPlayTime,
                     beatTierPoints: beatTierPoints,
                     maxBeatTierPoints: getMaxPoints(informalRank),
-                    memo: stats.memo,
+                    options: stats.options,
                     djName: stats.djName
                 });
             }

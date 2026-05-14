@@ -577,7 +577,7 @@ export const ja = {
   'scores.clearOnly': 'クリア済みのみ',
   'scores.notCleared': '未クリア',
   'scores.sortBy': '並び替え',
-  'scores.memo': 'メモ',
+  'scores.options': 'オプション',
   'scores.save': '保存',
   'scores.detail': '楽曲スコア詳細',
   'scores.hideZero': 'スコア0を非表示',
@@ -594,9 +594,7 @@ export const ja = {
   'scores.targetScoreNeededLabel': '目標達成に必要なスコアの伸び',
   'scores.targetScoreNeededValue': '+{n} 点',
   'scores.targetFinalScore': '目標スコア: {score} / {max} ({rate}%)',
-  'scores.memoLoginHint': '※ログインすると、各楽曲にメモを残せるようになります。',
-  'scores.memoPlaceholder': 'オプション（RANDOMなど）や攻略のメモを残せます...',
-  'scores.noMemo': 'メモはありません。',
+  'scores.noOptions': '未設定。iidx-memo で設定すると同期されます。',
 
   // Arena Mode
   'arena.title': 'ARENAモード戦績',

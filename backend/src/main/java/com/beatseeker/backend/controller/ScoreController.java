@@ -65,7 +65,6 @@ import java.util.Map;
  *  - GET  /api/scores/me / /history
  *  - GET  /api/scores/ranking, /ranking/*, /rate-ranking/*
  *  - GET  /api/scores/song-ranking, /my-song-ranks, /song-history, /song-avg-score-rates
- *  - PUT  /api/scores/{id}/memo
  */
 @RestController
 @RequestMapping("/api/scores")
@@ -101,6 +100,8 @@ public class ScoreController {
     private final SongArenaAveragesCacheService songArenaAveragesCacheService;
     /** 人気曲ランキング（song-ranking-aggregate）の集計結果キャッシュ。 */
     private final SongRankingAggregateCacheService songRankingAggregateCacheService;
+    /** 連携アプリ（iidx-memo 等）から同期された譜面オプション。スコア応答に options を埋めるのに使う。 */
+    private final com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository;
     /** diffJson など JSON 文字列を List/Map に復元するための Jackson。 */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -124,6 +125,7 @@ public class ScoreController {
             TopRankersBeatPtService topRankersBeatPtService,
             SongArenaAveragesCacheService songArenaAveragesCacheService,
             SongRankingAggregateCacheService songRankingAggregateCacheService,
+            com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository,
             com.beatseeker.backend.service.AdminAuthService adminAuthService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
@@ -140,7 +142,40 @@ public class ScoreController {
         this.topRankersBeatPtService = topRankersBeatPtService;
         this.songArenaAveragesCacheService = songArenaAveragesCacheService;
         this.songRankingAggregateCacheService = songRankingAggregateCacheService;
+        this.userSongOptionRepository = userSongOptionRepository;
         this.adminAuthService = adminAuthService;
+    }
+
+    /**
+     * 【メソッドの役割】 指定ユーザーの全 UserSongOption を (title, difficultyName) キーの
+     * Map に展開し、options 配列に変換して返す。スコア応答ビルダから 1 回だけ呼ぶことで
+     * N+1 を回避する。
+     *
+     * 値の取得失敗（壊れた JSON 等）は空配列にフォールバックする。
+     *
+     * @param user 対象ユーザー
+     * @return キー = {@code "<title>||<difficultyName>"}、値 = options 配列
+     */
+    private Map<String, List<String>> loadOptionsMap(User user) {
+        Map<String, List<String>> result = new HashMap<>();
+        for (com.beatseeker.backend.entity.UserSongOption o : userSongOptionRepository.findByUser(user)) {
+            String key = optionsKey(o.getTitle(), o.getDifficultyName());
+            List<String> parsed;
+            try {
+                parsed = objectMapper.readValue(
+                        o.getOptionsJson() == null ? "[]" : o.getOptionsJson(),
+                        new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+            } catch (Exception e) {
+                parsed = List.of();
+            }
+            result.put(key, parsed);
+        }
+        return result;
+    }
+
+    /** {@link #loadOptionsMap(User)} と整合する複合キー組み立て。 */
+    private String optionsKey(String title, String difficultyName) {
+        return (title == null ? "" : title) + "||" + (difficultyName == null ? "" : difficultyName);
     }
 
     /**
@@ -471,6 +506,7 @@ public class ScoreController {
         User user = getUser(auth);
 
         List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+        Map<String, List<String>> optionsMap = loadOptionsMap(user);
 
         List<Map<String, Object>> result = scores.stream().map(s -> {
             Map<String, Object> map = new HashMap<>();
@@ -484,7 +520,7 @@ public class ScoreController {
             map.put("pgreat", s.getPgreat() != null ? s.getPgreat() : 0);
             map.put("great", s.getGreat() != null ? s.getGreat() : 0);
             map.put("missCount", s.getMissCount());
-            map.put("memo", s.getMemo() != null ? s.getMemo() : "");
+            map.put("options", optionsMap.getOrDefault(optionsKey(s.getTitle(), s.getDifficultyName()), List.of()));
             return map;
         }).toList();
 
@@ -1025,41 +1061,6 @@ public class ScoreController {
     }
 
     /**
-     * 【メソッドの役割】 指定スコアに紐づくメモ文字列を更新する。
-     *
-     * 処理の流れ:
-     *  1. ログインユーザーを特定し、対象 Score を取得。
-     *  2. 所有者が本人でなければ 403（他人のメモを書き換えられないように）。
-     *  3. memo フィールドを上書き保存する。
-     *
-     * @param auth    認証情報
-     * @param id      Score の ID
-     * @param request メモ文字列を持つ DTO
-     * @return 成功メッセージ。所有者違反は 403
-     */
-    @PutMapping("/{id}/memo")
-    @Transactional
-    public ResponseEntity<Map<String, Object>> updateMemo(
-            Authentication auth,
-            @PathVariable Long id,
-            @RequestBody MemoUpdateRequest request) {
-
-        User user = getUser(auth);
-        Score score = scoreRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Score not found"));
-
-        // スコアの所有者と現ユーザーが一致しなければ 403（他人のメモ改ざん防止）。
-        if (!score.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build();
-        }
-
-        score.setMemo(request.memo());
-        scoreRepository.save(score);
-
-        return ResponseEntity.ok(Map.of("message", "メモを保存しました"));
-    }
-
-    /**
      * 【メソッドの役割】 アップロードしたユーザーがフレンドのスコアを上回った曲について、当該フレンドに通知する。
      *
      * 処理の流れ:
@@ -1198,11 +1199,5 @@ public class ScoreController {
             Integer great,
             Integer missCount,
             Integer playCount) {
-    }
-
-    /**
-     * 【レコード】 メモ更新のリクエスト DTO。メモ文字列だけを持つ薄いコンテナ。
-     */
-    public record MemoUpdateRequest(String memo) {
     }
 }

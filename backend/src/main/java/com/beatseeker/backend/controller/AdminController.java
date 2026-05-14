@@ -8,6 +8,8 @@ import com.beatseeker.backend.repository.ArenaMatchRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.repository.UserSongOptionRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
@@ -76,6 +78,8 @@ public class AdminController {
     private final ObjectMapper objectMapper;
     /** 管理者判定のロジックを共通化した Service。 */
     private final AdminAuthService adminAuthService;
+    /** 連携アプリから同期された譜面オプション。スコア応答に options を埋めるのに使う。 */
+    private final UserSongOptionRepository userSongOptionRepository;
 
     /**
      * JPA が注入する永続化コンテキスト。
@@ -95,7 +99,9 @@ public class AdminController {
                            ScoreRecalculationService scoreRecalculationService,
                            TopRankersBeatPtService topRankersBeatPtService,
                            ObjectMapper objectMapper,
-                           AdminAuthService adminAuthService) {
+                           AdminAuthService adminAuthService,
+                           UserSongOptionRepository userSongOptionRepository) {
+        this.userSongOptionRepository = userSongOptionRepository;
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -179,6 +185,7 @@ public class AdminController {
                 .orElseThrow(() -> new RuntimeException("Target user not found"));
 
         List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(targetUser);
+        Map<String, List<String>> optionsMap = loadOptionsMap(targetUser);
 
         List<Map<String, Object>> result = scores.stream().map(s -> {
             Map<String, Object> map = new HashMap<>();
@@ -194,11 +201,33 @@ public class AdminController {
             map.put("great", s.getGreat() != null ? s.getGreat() : 0);
             // missCount だけは null を許容（未計測を意味する）。
             map.put("missCount", s.getMissCount());
-            map.put("memo", s.getMemo() != null ? s.getMemo() : "");
+            map.put("options", optionsMap.getOrDefault(optionsKey(s.getTitle(), s.getDifficultyName()), List.of()));
             return map;
         }).toList();
 
         return ResponseEntity.ok(result);
+    }
+
+    /** ユーザーの UserSongOption を一括取得し (title||difficulty) キーの options マップに変換。 */
+    private Map<String, List<String>> loadOptionsMap(User user) {
+        Map<String, List<String>> result = new HashMap<>();
+        for (com.beatseeker.backend.entity.UserSongOption o : userSongOptionRepository.findByUser(user)) {
+            List<String> parsed;
+            try {
+                parsed = objectMapper.readValue(
+                        o.getOptionsJson() == null ? "[]" : o.getOptionsJson(),
+                        new TypeReference<List<String>>() {});
+            } catch (Exception e) {
+                parsed = List.of();
+            }
+            result.put(optionsKey(o.getTitle(), o.getDifficultyName()), parsed);
+        }
+        return result;
+    }
+
+    /** loadOptionsMap と整合する複合キー。 */
+    private String optionsKey(String title, String difficultyName) {
+        return (title == null ? "" : title) + "||" + (difficultyName == null ? "" : difficultyName);
     }
 
     /**

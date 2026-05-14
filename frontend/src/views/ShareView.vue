@@ -77,7 +77,7 @@ function groupScores(flat: any[]): ScoreData[] {
         missCount: null,
         clearType: 'NO PLAY',
         djLevel: '---',
-        memo: undefined,
+        options: undefined,
         id: undefined,
     });
 
@@ -110,7 +110,7 @@ function groupScores(flat: any[]): ScoreData[] {
                 missCount: s.missCount,
                 clearType: s.clearType,
                 djLevel: s.djLevel,
-                memo: s.memo || undefined,
+                options: Array.isArray(s.options) ? s.options : undefined,
             };
         }
     });

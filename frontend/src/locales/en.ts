@@ -575,7 +575,7 @@ export const en = {
   'scores.clearOnly': 'Cleared Only',
   'scores.notCleared': 'Not Cleared',
   'scores.sortBy': 'Sort By',
-  'scores.memo': 'Memo',
+  'scores.options': 'Options',
   'scores.save': 'Save',
   'scores.detail': 'Score Details',
   'scores.hideZero': 'Hide zero scores',
@@ -592,9 +592,7 @@ export const en = {
   'scores.targetScoreNeededLabel': 'Required score increase',
   'scores.targetScoreNeededValue': '+{n} pts',
   'scores.targetFinalScore': 'Target: {score} / {max} ({rate}%)',
-  'scores.memoLoginHint': '*Login to leave memos for each song.',
-  'scores.memoPlaceholder': 'Leave notes on options (RANDOM, etc.) or strategy...',
-  'scores.noMemo': 'No memo.',
+  'scores.noOptions': 'Not set. Configure in iidx-memo to sync.',
 
   // Arena Mode
   'arena.title': 'ARENA Mode Records',

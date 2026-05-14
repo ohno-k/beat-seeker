@@ -18,6 +18,8 @@ com\beatseeker\backend\controller\ArenaController$SongData.class
 com\beatseeker\backend\repository\CompetitionRepository.class
 com\beatseeker\backend\entity\OptionVote.class
 com\beatseeker\backend\repository\TierCommentRepository.class
+com\beatseeker\backend\entity\UserSongOption.class
+com\beatseeker\backend\controller\ShareViewController$1.class
 com\beatseeker\backend\controller\TierCommentController.class
 com\beatseeker\backend\controller\ShareViewController.class
 com\beatseeker\backend\entity\ArenaMatch.class
@@ -68,6 +70,7 @@ com\beatseeker\backend\entity\FriendRequest.class
 com\beatseeker\backend\service\AdminAuthService.class
 com\beatseeker\backend\entity\UserSongRank.class
 com\beatseeker\backend\service\PushNotificationService.class
+com\beatseeker\backend\controller\ScoreController$3.class
 com\beatseeker\backend\controller\KofiWebhookController.class
 com\beatseeker\backend\service\SongArenaAveragesCacheService.class
 com\beatseeker\backend\service\PairRegressionService$Reg.class
@@ -83,11 +86,13 @@ com\beatseeker\backend\repository\ExternalApiTokenRepository.class
 com\beatseeker\backend\service\ScoreRecalculationService.class
 com\beatseeker\backend\entity\ScoreHistoryLog.class
 com\beatseeker\backend\repository\CompetitionPickRepository.class
+com\beatseeker\backend\controller\UserController$1.class
 com\beatseeker\backend\controller\GameDataController.class
 com\beatseeker\backend\controller\ScoreController$ScoreUploadRequest.class
 com\beatseeker\backend\entity\RankQuizProgress.class
 com\beatseeker\backend\repository\RankQuizProgressRepository.class
 com\beatseeker\backend\controller\ScoreController$2.class
+com\beatseeker\backend\controller\AdminController$1.class
 com\beatseeker\backend\config\JwtUtil.class
 com\beatseeker\backend\service\TopRankersBeatPtService.class
 com\beatseeker\backend\repository\OptionVoteRepository.class
@@ -100,6 +105,7 @@ com\beatseeker\backend\repository\CompetitionParticipantRepository.class
 com\beatseeker\backend\entity\ExternalApiToken.class
 com\beatseeker\backend\controller\ExternalSongDetailController$1.class
 com\beatseeker\backend\controller\FriendController.class
+com\beatseeker\backend\controller\ExternalSongDetailController$2.class
 com\beatseeker\backend\service\PairRegressionService$Acc.class
 com\beatseeker\backend\service\SongRankBatchService.class
 com\beatseeker\backend\controller\AuthController.class
@@ -110,11 +116,13 @@ com\beatseeker\backend\controller\NotificationController.class
 com\beatseeker\backend\repository\ScoreRepository.class
 com\beatseeker\backend\entity\CompetitionPick.class
 com\beatseeker\backend\DataInitializer.class
+com\beatseeker\backend\controller\ExternalSongDetailController$SyncOptionsItem.class
 com\beatseeker\backend\service\TopRankersBeatPtService$SongScoreEntry.class
 com\beatseeker\backend\repository\SongDefinitionRepository.class
 com\beatseeker\backend\repository\ShareTokenRepository.class
 com\beatseeker\backend\controller\CompetitionPlayerController$StrategyRequest.class
 com\beatseeker\backend\controller\ExternalSongDetailController.class
+com\beatseeker\backend\repository\UserSongOptionRepository.class
 com\beatseeker\backend\controller\ArenaController$SongScore.class
 com\beatseeker\backend\controller\SaveHistoryLogRequest.class
 com\beatseeker\backend\repository\TierVoteRepository.class
@@ -126,10 +134,10 @@ com\beatseeker\backend\controller\IntegrationTokenController$IssueTokenRequest.c
 com\beatseeker\backend\entity\CompetitionMatchup.class
 com\beatseeker\backend\entity\ShareToken.class
 com\beatseeker\backend\entity\Score.class
-com\beatseeker\backend\controller\ScoreController$MemoUpdateRequest.class
 com\beatseeker\backend\controller\TierCommentController$CommentRequest.class
 com\beatseeker\backend\controller\CompetitionAdminController$RenameTeamRequest.class
 com\beatseeker\backend\entity\SongDefinition.class
+com\beatseeker\backend\controller\ExternalSongDetailController$SyncOptionsRequest.class
 com\beatseeker\backend\controller\CompetitionAdminController.class
 com\beatseeker\backend\controller\ShareTokenController$IssueTokenRequest.class
 com\beatseeker\backend\config\JwtAuthFilter.class

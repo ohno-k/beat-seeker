@@ -118,4 +118,21 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<!--
+		ローカル開発時に `mvn spring-boot:run` だけで application-local.yml を読み込ませるための Maven プロファイル。
+		デフォルトで有効化されるため -P 指定不要。-Dspring-boot.run.profiles=... を明示すればこの値は上書きされる。
+		本番 (Render) は `java -jar` で起動するためこのプロファイルは作用しない。
+	-->
+	<profiles>
+		<profile>
+			<id>local-dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<spring-boot.run.profiles>local</spring-boot.run.profiles>
+			</properties>
+		</profile>
+	</profiles>
 </project>

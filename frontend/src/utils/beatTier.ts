@@ -82,15 +82,15 @@ const SCORE_RATE_TIER_MAX_MINUS = 94.44;
 
 /**
  * 【Folder Legend】 ☆11.0 側の Legend 到達 score rate（%）。
- * 低難度帯では Legend ≒ 全 MAX- 一桁でほぼ理論値付近を要求する。
+ * 最小難易度では理論値近辺を要求する（ただし達成余地は残す）。
  */
-const LEGEND_RATE_LOW_END = 99.75;
+const LEGEND_RATE_LOW_END = 99.80;
 
 /**
  * 【Folder Legend】 ☆13.0 側の Legend 到達 score rate（%）。
- * 高難度帯では MAX- (94.44%) 水準まで要求ラインを下げる。
+ * 高難度帯でも 95% 台後半を要求ラインに置き、Legend を達成感のある目標に保つ。
  */
-const LEGEND_RATE_HIGH_END = 94.44;
+const LEGEND_RATE_HIGH_END = 95.65;
 
 /**
  * 【Folder Legend】 Legend 判定 score rate の対応範囲下限（非公式ランク）。
@@ -103,8 +103,9 @@ const LEGEND_RANK_MIN = 11.0;
 const LEGEND_RANK_MAX = 13.0;
 
 /**
- * 【Folder Legend】 ランクの正規化に t^n を掛ける際の指数。
- * n=4 にすると低難度帯でほぼ平坦、高難度帯で急激に要求 rate が落ちるカーブになる。
+ * 【Folder Legend】 単一の累乗カーブ t^n の指数。
+ * 4 にすると ☆11 帯ではほぼフラット（理論値近く）、☆12 後半〜☆13 で急激に要求 rate が落ちる。
+ * 高難度帯ほど落差が大きくなる「実プレイ感に近い」ライン。
  */
 const LEGEND_RATE_CURVE_EXPONENT = 4;
 
@@ -208,10 +209,9 @@ export function getMaxPoints(informalRank: string | undefined): number {
 /**
  * 【関数の役割】 各フォルダの Legend（最高ランク）到達に必要な score rate を返す。
  *
- * ☆11.0 で 99.75%、☆13.0 で 94.44% を両端とし、
- * 累乗カーブ（t^4）で滑らかに減衰させる。
- *  - ☆11.0 近辺ではほぼフラット（= Legend ≒ 全 MAX- 一桁）
- *  - ☆13.0 に近づくほど要求 rate が下がる
+ * 単一の累乗カーブ t^n（n=2.5）で [☆11.0, ☆13.0] を [99.90%, 94.44%] にマッピングする。
+ *  - 継ぎ目が無いため、隣接難易度間の落差がなめらか
+ *  - 低難度帯では小さな差、高難度帯では大きな差というカーブ形
  *
  * @param informalRank 非公式ランク文字列
  * @returns            Legend 判定用の score rate（%）。範囲外は 0。
@@ -223,11 +223,8 @@ export function getFolderLegendRate(informalRank: string | undefined): number {
     // 対応範囲は ☆11.0〜☆13.0 のみ
     if (rankValue < LEGEND_RANK_MIN || rankValue > LEGEND_RANK_MAX) return 0;
 
-    const LEGEND_RATE_LOW = LEGEND_RATE_LOW_END;   // ☆11.0 側: ほぼ全譜面 MAX- 一桁のライン
-    const LEGEND_RATE_HIGH = LEGEND_RATE_HIGH_END;  // ☆13.0 側: MAX- 表記の閾値
     const t = (rankValue - LEGEND_RANK_MIN) / (LEGEND_RANK_MAX - LEGEND_RANK_MIN);
-    // t^4 により ☆11 付近はほぼ平坦、☆13 に近づくと急激に落ちる
-    return LEGEND_RATE_LOW - Math.pow(t, LEGEND_RATE_CURVE_EXPONENT) * (LEGEND_RATE_LOW - LEGEND_RATE_HIGH);
+    return LEGEND_RATE_LOW_END - Math.pow(t, LEGEND_RATE_CURVE_EXPONENT) * (LEGEND_RATE_LOW_END - LEGEND_RATE_HIGH_END);
 }
 
 /**
@@ -761,74 +758,71 @@ export function calculateScoreRateTierPoints(scoreRate: number): number {
 }
 
 /**
- * フォルダランクのオフセット定義表。
+ * 【FOLDER 用】 サブランクブロック定義（高い順）。Mythic=最上位ブロック、Novice=最下位ブロック。
+ * 各ブロックは内部で 5 サブティア（V〜I）に分解される。Legend は単一ティアでこのリスト外。
+ */
+const FOLDER_RANK_BLOCKS: { name: string; color: string }[] = [
+    { name: 'Mythic',       color: 'text-purple-600' },
+    { name: 'Ancient',      color: 'text-indigo-600' },
+    { name: 'Master',       color: 'text-red-600' },
+    { name: 'Elite',        color: 'text-orange-600' },
+    { name: 'Commander',    color: 'text-yellow-700' },
+    { name: 'Veteran',      color: 'text-emerald-600' },
+    { name: 'Expert',       color: 'text-teal-600' },
+    { name: 'Advanced',     color: 'text-cyan-600' },
+    { name: 'Intermediate', color: 'text-blue-600' },
+    { name: 'Novice',       color: 'text-slate-600' },
+];
+
+/** 【FOLDER 用】 サブランク総数 = 10 ブロック × 5 ティア = 50。 */
+const FOLDER_SUB_RANK_COUNT = FOLDER_RANK_BLOCKS.length * TIERS_PER_RANK_BLOCK;
+
+/** 【FOLDER 用】 最下位（Novice 1）の Legend からの offset(%)。これが各 ☆ 列の縦の総スパン。 */
+const FOLDER_RANK_OFFSET_MAX = 18;
+
+/**
+ * 【FOLDER 用】 オフセット生成カーブの指数。
+ * offset(i) = MAX × (1 − (1 − i/N)^p) 形式の累乗カーブを使う。
+ *  - p > 1 にすると Legend 側ほど隣接ランク間の差が大きく、Novice 側ほど詰まる。
+ *  - p < 1 にすると逆に Novice 側ほど段差が大きく、上位ランクは詰まる。
+ *  - p = 0.5 / MAX = 18 で「Legend→Mythic 5 ≈ 0.18%、Novice 末端 ≈ 2.55%」の段差。
+ */
+const FOLDER_RANK_OFFSET_POWER = 0.5;
+
+/**
+ * 【関数の役割】 サブランク順位 i (1〜50) に対応する Legend からのオフセット(%)を返す。
+ * i=0 は Legend で常に 0 を返す。
+ */
+function computeFolderRankOffset(i: number): number {
+    if (i <= 0) return 0;
+    const t = i / FOLDER_SUB_RANK_COUNT;
+    return FOLDER_RANK_OFFSET_MAX * (1 - Math.pow(1 - t, FOLDER_RANK_OFFSET_POWER));
+}
+
+/**
+ * フォルダランクのオフセット定義表（自動生成）。
  *
  * 各ランクの score rate 閾値は `Legend の score rate − offset(%)`。
- * つまり Legend（offset 0）を最上位とし、0.25% ずつ下がるたびに 1 サブティア下がる設計。
+ * Legend を先頭に、Mythic V → Mythic I → Ancient V → ... → Novice I の順で並ぶ。
+ * オフセットは {@link computeFolderRankOffset} の累乗カーブで生成され、上位ランクほど
+ * 段差が大きくなる（=Legend と Mythic の差が、Novice 内の差より明確に大きい）。
+ *
  * Legend のベース rate は曲の非公式ランクに応じて {@link getFolderLegendRate} で決まる。
  */
 export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; color: string }[] = [
     { offset: 0, name: 'Legend', color: 'text-amber-500 font-black' },
-
-    { offset: 0.25, name: 'Mythic', tier: 5, color: 'text-purple-600' },
-    { offset: 0.50, name: 'Mythic', tier: 4, color: 'text-purple-600' },
-    { offset: 0.75, name: 'Mythic', tier: 3, color: 'text-purple-600' },
-    { offset: 1.00, name: 'Mythic', tier: 2, color: 'text-purple-600' },
-    { offset: 1.25, name: 'Mythic', tier: 1, color: 'text-purple-600' },
-
-    { offset: 1.50, name: 'Ancient', tier: 5, color: 'text-indigo-600' },
-    { offset: 1.75, name: 'Ancient', tier: 4, color: 'text-indigo-600' },
-    { offset: 2.00, name: 'Ancient', tier: 3, color: 'text-indigo-600' },
-    { offset: 2.25, name: 'Ancient', tier: 2, color: 'text-indigo-600' },
-    { offset: 2.50, name: 'Ancient', tier: 1, color: 'text-indigo-600' },
-
-    { offset: 2.75, name: 'Master', tier: 5, color: 'text-red-600' },
-    { offset: 3.00, name: 'Master', tier: 4, color: 'text-red-600' },
-    { offset: 3.25, name: 'Master', tier: 3, color: 'text-red-600' },
-    { offset: 3.50, name: 'Master', tier: 2, color: 'text-red-600' },
-    { offset: 3.75, name: 'Master', tier: 1, color: 'text-red-600' },
-
-    { offset: 4.00, name: 'Elite', tier: 5, color: 'text-orange-600' },
-    { offset: 4.25, name: 'Elite', tier: 4, color: 'text-orange-600' },
-    { offset: 4.50, name: 'Elite', tier: 3, color: 'text-orange-600' },
-    { offset: 4.75, name: 'Elite', tier: 2, color: 'text-orange-600' },
-    { offset: 5.00, name: 'Elite', tier: 1, color: 'text-orange-600' },
-
-    { offset: 5.25, name: 'Commander', tier: 5, color: 'text-yellow-700' },
-    { offset: 5.50, name: 'Commander', tier: 4, color: 'text-yellow-700' },
-    { offset: 5.75, name: 'Commander', tier: 3, color: 'text-yellow-700' },
-    { offset: 6.00, name: 'Commander', tier: 2, color: 'text-yellow-700' },
-    { offset: 6.25, name: 'Commander', tier: 1, color: 'text-yellow-700' },
-
-    { offset: 6.50, name: 'Veteran', tier: 5, color: 'text-emerald-600' },
-    { offset: 6.75, name: 'Veteran', tier: 4, color: 'text-emerald-600' },
-    { offset: 7.00, name: 'Veteran', tier: 3, color: 'text-emerald-600' },
-    { offset: 7.25, name: 'Veteran', tier: 2, color: 'text-emerald-600' },
-    { offset: 7.50, name: 'Veteran', tier: 1, color: 'text-emerald-600' },
-
-    { offset: 7.75, name: 'Expert', tier: 5, color: 'text-teal-600' },
-    { offset: 8.00, name: 'Expert', tier: 4, color: 'text-teal-600' },
-    { offset: 8.25, name: 'Expert', tier: 3, color: 'text-teal-600' },
-    { offset: 8.50, name: 'Expert', tier: 2, color: 'text-teal-600' },
-    { offset: 8.75, name: 'Expert', tier: 1, color: 'text-teal-600' },
-
-    { offset: 9.00, name: 'Advanced', tier: 5, color: 'text-cyan-600' },
-    { offset: 9.25, name: 'Advanced', tier: 4, color: 'text-cyan-600' },
-    { offset: 9.50, name: 'Advanced', tier: 3, color: 'text-cyan-600' },
-    { offset: 9.75, name: 'Advanced', tier: 2, color: 'text-cyan-600' },
-    { offset: 10.00, name: 'Advanced', tier: 1, color: 'text-cyan-600' },
-
-    { offset: 10.25, name: 'Intermediate', tier: 5, color: 'text-blue-600' },
-    { offset: 10.50, name: 'Intermediate', tier: 4, color: 'text-blue-600' },
-    { offset: 10.75, name: 'Intermediate', tier: 3, color: 'text-blue-600' },
-    { offset: 11.00, name: 'Intermediate', tier: 2, color: 'text-blue-600' },
-    { offset: 11.25, name: 'Intermediate', tier: 1, color: 'text-blue-600' },
-
-    { offset: 11.50, name: 'Novice', tier: 5, color: 'text-slate-600' },
-    { offset: 11.75, name: 'Novice', tier: 4, color: 'text-slate-600' },
-    { offset: 12.00, name: 'Novice', tier: 3, color: 'text-slate-600' },
-    { offset: 12.25, name: 'Novice', tier: 2, color: 'text-slate-600' },
-    { offset: 12.50, name: 'Novice', tier: 1, color: 'text-slate-600' },
+    ...FOLDER_RANK_BLOCKS.flatMap((block, blockIdx) =>
+        Array.from({ length: TIERS_PER_RANK_BLOCK }, (_, tierWithinBlockIdx) => {
+            const i = blockIdx * TIERS_PER_RANK_BLOCK + tierWithinBlockIdx + 1;
+            const tier = TIERS_PER_RANK_BLOCK - tierWithinBlockIdx; // 5,4,3,2,1
+            return {
+                offset: computeFolderRankOffset(i),
+                name: block.name,
+                tier,
+                color: block.color,
+            };
+        })
+    ),
 ];
 
 /**

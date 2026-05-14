@@ -575,7 +575,7 @@ export const ko = {
   'scores.clearOnly': '클리어한 것만',
   'scores.notCleared': '미클리어',
   'scores.sortBy': '정렬',
-  'scores.memo': '메모',
+  'scores.options': '옵션',
   'scores.save': '저장',
   'scores.detail': '곡 점수 상세',
   'scores.hideZero': '점수 0 숨기기',
@@ -592,9 +592,7 @@ export const ko = {
   'scores.targetScoreNeededLabel': '목표 달성에 필요한 스코어 상승량',
   'scores.targetScoreNeededValue': '+{n} 점',
   'scores.targetFinalScore': '목표 스코어: {score} / {max} ({rate}%)',
-  'scores.memoLoginHint': '*로그인하면 곡마다 메모를 남길 수 있습니다.',
-  'scores.memoPlaceholder': '옵션(RANDOM 등)이나 공략 메모를 남길 수 있습니다...',
-  'scores.noMemo': '메모가 없습니다.',
+  'scores.noOptions': '미설정. iidx-memo에서 설정하면 동기화됩니다.',
 
   // Arena Mode
   'arena.title': 'ARENA 모드 전적',

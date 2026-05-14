@@ -8,6 +8,9 @@ import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.repository.UserSongOptionRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +47,10 @@ public class UserController {
     private final FriendshipRepository friendshipRepository;
     /** フレンド申請（未承認含む）の Repository。 */
     private final FriendRequestRepository friendRequestRepository;
+    /** 連携アプリから同期された譜面オプション。公開スコア応答に options を埋めるのに使う。 */
+    private final UserSongOptionRepository userSongOptionRepository;
+    /** options_json の文字列リスト復元用。 */
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 【コンストラクタ】 Spring が DI で各 Repository を注入する。
@@ -52,12 +59,14 @@ public class UserController {
                           ScoreRepository scoreRepository,
                           ScoreHistoryLogRepository scoreHistoryLogRepository,
                           FriendshipRepository friendshipRepository,
-                          FriendRequestRepository friendRequestRepository) {
+                          FriendRequestRepository friendRequestRepository,
+                          UserSongOptionRepository userSongOptionRepository) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.friendshipRepository = friendshipRepository;
         this.friendRequestRepository = friendRequestRepository;
+        this.userSongOptionRepository = userSongOptionRepository;
     }
 
     /**
@@ -116,6 +125,7 @@ public class UserController {
         }
 
         List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+        Map<String, List<String>> optionsMap = loadOptionsMap(user);
         // 各フィールドに null 安全なフォールバックを入れながら整形
         List<Map<String, Object>> result = scores.stream().map(s -> {
             Map<String, Object> map = new HashMap<>();
@@ -130,11 +140,33 @@ public class UserController {
             map.put("great", s.getGreat() != null ? s.getGreat() : 0);
             // missCount は null のままクライアントに渡す（未計測 vs 0 を区別したい）
             map.put("missCount", s.getMissCount());
-            map.put("memo", s.getMemo() != null ? s.getMemo() : "");
+            map.put("options", optionsMap.getOrDefault(optionsKey(s.getTitle(), s.getDifficultyName()), List.of()));
             return map;
         }).toList();
 
         return ResponseEntity.ok(result);
+    }
+
+    /** ユーザーの UserSongOption を一括取得し (title||difficulty) キーの options マップに変換。 */
+    private Map<String, List<String>> loadOptionsMap(User user) {
+        Map<String, List<String>> result = new HashMap<>();
+        for (com.beatseeker.backend.entity.UserSongOption o : userSongOptionRepository.findByUser(user)) {
+            List<String> parsed;
+            try {
+                parsed = objectMapper.readValue(
+                        o.getOptionsJson() == null ? "[]" : o.getOptionsJson(),
+                        new TypeReference<List<String>>() {});
+            } catch (Exception e) {
+                parsed = List.of();
+            }
+            result.put(optionsKey(o.getTitle(), o.getDifficultyName()), parsed);
+        }
+        return result;
+    }
+
+    /** loadOptionsMap と整合する複合キー。 */
+    private String optionsKey(String title, String difficultyName) {
+        return (title == null ? "" : title) + "||" + (difficultyName == null ? "" : difficultyName);
     }
 
     /**

@@ -153,8 +153,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/admin/game-data/**").authenticated()
                                                 // スコア書き込み・自分のスコア読み出しは要ログイン
                                                 .requestMatchers("/api/scores/upload", "/api/scores/save-history-log",
-                                                                "/api/scores/me", "/api/scores/history",
-                                                                "/api/scores/*/memo")
+                                                                "/api/scores/me", "/api/scores/history")
                                                 .authenticated()
                                                 // 上記で permitAll/authenticated に該当しなかったスコア系 API はデフォルト要ログイン
                                                 .requestMatchers("/api/scores/**").authenticated()

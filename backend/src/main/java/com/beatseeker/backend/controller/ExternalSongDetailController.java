@@ -5,18 +5,23 @@ import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.entity.UserSongOption;
 import com.beatseeker.backend.entity.UserSongRank;
 import com.beatseeker.backend.repository.ChartTendencyProfileRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.repository.UserSongOptionRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,19 +65,22 @@ public class ExternalSongDetailController {
     private final UserSongRankRepository userSongRankRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     private final ChartTendencyProfileRepository chartTendencyProfileRepository;
+    private final UserSongOptionRepository userSongOptionRepository;
 
     public ExternalSongDetailController(UserRepository userRepository,
                                         ScoreRepository scoreRepository,
                                         SongDefinitionRepository songDefinitionRepository,
                                         UserSongRankRepository userSongRankRepository,
                                         ScoreHistoryLogRepository scoreHistoryLogRepository,
-                                        ChartTendencyProfileRepository chartTendencyProfileRepository) {
+                                        ChartTendencyProfileRepository chartTendencyProfileRepository,
+                                        UserSongOptionRepository userSongOptionRepository) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.songDefinitionRepository = songDefinitionRepository;
         this.userSongRankRepository = userSongRankRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.chartTendencyProfileRepository = chartTendencyProfileRepository;
+        this.userSongOptionRepository = userSongOptionRepository;
     }
 
     /**
@@ -131,24 +139,119 @@ public class ExternalSongDetailController {
                 .findByUserIdAndTitleAndDifficultyName(user.getId(), title, difficultyName);
 
         // ── 6. 譜面傾向プロファイル（任意。textage URL をキーにマップ） ──
-        Optional<ChartTendencyProfile> tendencyOpt = song.getTextage() == null
+        String textage = song.getTextage();
+        Optional<ChartTendencyProfile> tendencyOpt = textage == null
                 ? Optional.empty()
-                : chartTendencyProfileRepository.findById(song.getTextage());
+                : chartTendencyProfileRepository.findById(textage);
 
         // ── 7. 個別曲の履歴（diffJson から該当タイトル/難易度を抜粋） ──
         List<Map<String, Object>> history = collectSongHistory(user, title, difficultyName);
 
-        // ── 8. レスポンス組み立て ───────────────────────────
+        // ── 8. 同期済みオプション（iidx-memo 等から POST されたもの） ──
+        List<String> options = userSongOptionRepository
+                .findByUserAndTitleAndDifficultyName(user, title, difficultyName)
+                .map(o -> parseOptionsJson(o.getOptionsJson()))
+                .orElse(List.of());
+
+        // ── 9. レスポンス組み立て ───────────────────────────
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("user", buildUserBlock(user));
         body.put("song", buildSongBlock(song, difficultyName));
         body.put("score", scoreOpt.map(this::buildScoreBlock).orElse(null));
         body.put("rank", rankOpt.map(this::buildRankBlock).orElse(null));
+        body.put("options", options);
         body.put("history", history);
         body.put("chartTendency", tendencyOpt.map(this::buildTendencyBlock).orElse(null));
 
         return ResponseEntity.ok(body);
     }
+
+    /**
+     * 【メソッドの役割】 連携アプリ（iidx-memo 等）から譜面オプションを一括 upsert する。
+     *
+     * 仕様（docs/bs-op-sync.md）:
+     *  - Body: {@code { "options": [ { "title", "difficulty", "options": [...] }, ... ] }}
+     *  - {@code difficulty} は beat-seeker 形式（"ANOTHER" / "LEGGENDARIA" / ...）
+     *  - 既存レコードが (user, title, difficulty) で見つかれば options を上書き
+     *  - 見つからなければ新規 INSERT
+     *  - {@code options} が null / 空配列の場合はスキップ（削除はしない）
+     *
+     * レスポンス: {@code { "synced": <処理件数> }}
+     *
+     * ステータスコード:
+     *  - 200: 成功
+     *  - 400: body 不正 / 必須フィールド欠落 / difficulty 不正
+     *  - 401: トークン無効（Security 側で返る）
+     */
+    @PostMapping("/sync-options")
+    @Transactional
+    public ResponseEntity<?> syncOptions(Authentication auth, @RequestBody SyncOptionsRequest req) {
+        User user = getUser(auth);
+        if (user == null) return ResponseEntity.status(401).build();
+
+        if (req == null || req.options() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing 'options' array"));
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        int synced = 0;
+
+        for (SyncOptionsItem item : req.options()) {
+            if (item == null) continue;
+            String title = item.title();
+            String difficulty = item.difficulty();
+            List<String> opts = item.options();
+
+            // 必須項目チェック。一件不正でも他は処理を続ける（全件 400 にしない設計）。
+            if (title == null || title.isBlank()) continue;
+            if (difficulty == null || toDifficultyCode(difficulty.trim().toUpperCase()) == null) continue;
+            if (opts == null || opts.isEmpty()) continue;
+
+            String difficultyName = difficulty.trim().toUpperCase();
+            String optionsJson;
+            try {
+                optionsJson = mapper.writeValueAsString(opts);
+            } catch (Exception e) {
+                // 文字列リストのシリアライズが失敗することは現実には起きないが、安全に skip。
+                continue;
+            }
+
+            UserSongOption entity = userSongOptionRepository
+                    .findByUserAndTitleAndDifficultyName(user, title, difficultyName)
+                    .orElseGet(() -> {
+                        UserSongOption created = new UserSongOption();
+                        created.setUser(user);
+                        created.setTitle(title);
+                        created.setDifficultyName(difficultyName);
+                        return created;
+                    });
+            entity.setOptionsJson(optionsJson);
+            entity.setSource("iidx-memo");
+            entity.setUpdatedAt(java.time.LocalDateTime.now());
+            userSongOptionRepository.save(entity);
+            synced++;
+        }
+
+        return ResponseEntity.ok(Map.of("synced", synced));
+    }
+
+    /**
+     * options_json 列の JSON 配列文字列をパースする。壊れた値は空リストを返す（API を 500 にしない）。
+     */
+    private List<String> parseOptionsJson(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            return new ObjectMapper().readValue(json, new TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    /** sync-options のリクエスト body 全体。 */
+    public record SyncOptionsRequest(List<SyncOptionsItem> options) {}
+
+    /** sync-options の各レコード。{@code options} はオプション文字列の配列。 */
+    public record SyncOptionsItem(String title, String difficulty, List<String> options) {}
 
     // ── ヘルパ群 ────────────────────────────────────────────
 

@@ -64,10 +64,6 @@ public class Score {
     /** プレー回数。 */
     private Integer playCount;
 
-    /** ユーザーがこの譜面に残したメモ。長文可（TEXT 型）。 */
-    @Column(columnDefinition = "TEXT")
-    private String memo;
-
     /** スナップショット ID。過去時点のスコアを参照するためのラベル（任意）。 */
     private String snapshotId;
 

@@ -31,14 +31,17 @@ import {
 } from '../composables/useCompetitionAdmin';
 import strategySongs from '../data/strategy_card_songs.json';
 import { useToast } from '../composables/useToast';
+import { useSe } from '../composables/useSe';
 
 const { songDataBody, fetchGameData } = useGameData();
 const { competitions, fetchCompetitions, fetchRevealData } = useCompetitionAdmin();
 const toast = useToast();
+const se = useSe();
 
 onMounted(async () => {
   if (songDataBody.value.length === 0) await fetchGameData();
   document.addEventListener('fullscreenchange', onFullscreenChange);
+  se.preload();
   // URL パラメータからの自動取り込み (CompetitionAdminView から新規タブで開かれた場合の経路)
   await autoLoadFromUrlParams();
 });
@@ -361,10 +364,12 @@ let stageTimers: number[] = [];
 const triggerSide = (side: 'left' | 'right') => {
   const ref = side === 'left' ? leftStage : rightStage;
   ref.value = { burst: false, title: false, artist: false, diffBadge: false };
-  stageTimers.push(window.setTimeout(() => { ref.value.burst     = true; }, 50));
+  // 0ms: 直前にホワーシュで「飛んでくる」気配を作る (短尺 whoosh4)
+  se.play('whoosh4');
+  stageTimers.push(window.setTimeout(() => { ref.value.burst     = true; se.play('impact'); }, 50));
   stageTimers.push(window.setTimeout(() => { ref.value.title     = true; }, 300));
-  stageTimers.push(window.setTimeout(() => { ref.value.artist    = true; }, 1500));
-  stageTimers.push(window.setTimeout(() => { ref.value.diffBadge = true; }, 2300));
+  stageTimers.push(window.setTimeout(() => { ref.value.artist    = true; se.play('ui2'); }, 1500));
+  stageTimers.push(window.setTimeout(() => { ref.value.diffBadge = true; se.play('ui'); }, 2300));
 };
 
 /**
@@ -376,6 +381,8 @@ const triggerSide = (side: 'left' | 'right') => {
  *  - REVEAL 中 step 2 → 何もしない (誤爆防止)。Reset は専用ボタン。
  */
 const onReveal = () => {
+  // 初回 REVEAL 押下時に autoplay 制限を解除
+  se.unlock();
   if (phase.value === 'select') {
     if (!selectedLeft.value || !selectedRight.value) return;
     phase.value = 'reveal';
@@ -398,6 +405,8 @@ const onReveal = () => {
     if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
       revealStep.value = 3;
       strategyOverlayActive.value = true;
+      // 長尺ホワーシュでオーバーレイ突入を盛り上げる
+      se.play('whoosh');
     }
     return;
   }
@@ -406,6 +415,8 @@ const onReveal = () => {
     // スピン進行中は誤操作防止のため何もしない (どちらかが回ってる間は無視)。
     if (strategyOverlayActive.value) {
       strategyOverlayActive.value = false;
+      // 低域ドゥンでオーバーレイから抽選へバトンタッチ
+      se.play('whoosh3');
       startStrategySpins();
     }
     return;
@@ -479,7 +490,11 @@ const startSpinForSide = async (side: 'left' | 'right') => {
   spinTimers.push(window.setTimeout(() => {
     strip.style.transition = 'transform 6800ms cubic-bezier(0.05, 0.78, 0.12, 1)';
     strip.style.transform = `translateY(${targetY}px)`;
+    // スピン開始直後にホワーシュで「回り始め」を強調
+    se.play('whoosh4');
   }, 50));
+  // 着地直前 (6.0s 付近) に長尺ホワーシュで減速をブースト
+  spinTimers.push(window.setTimeout(() => { se.play('whoosh2'); }, 5400));
 
   // 着地完了 → effective に置換 + burst
   spinTimers.push(window.setTimeout(() => {
@@ -494,6 +509,7 @@ const startSpinForSide = async (side: 'left' | 'right') => {
       spinBurstRight.value = true;
       window.setTimeout(() => { spinBurstRight.value = false; }, 1600);
     }
+    se.play('impact');
   }, 7000));
 };
 
@@ -560,20 +576,50 @@ const toggleFullscreen = async () => {
       <div class="absolute inset-0 neon-streaks opacity-30"></div>
     </div>
 
-    <!-- フルスクリーン切替 (REVEAL フェーズ中のクリックには反応させない) -->
-    <button
-      type="button"
-      @click.stop="toggleFullscreen"
-      class="absolute top-4 right-4 z-50 p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
-      :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
-    >
-      <svg v-if="!isFullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
-      </svg>
-      <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" />
-      </svg>
-    </button>
+    <!-- SE 音量 / ミュート + フルスクリーン切替 (REVEAL フェーズ中のクリックには反応させない) -->
+    <div class="absolute top-4 right-4 z-50 flex items-center gap-2">
+      <div
+        @click.stop
+        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 backdrop-blur shadow-lg"
+      >
+        <button
+          type="button"
+          @click.stop="se.toggleMuted()"
+          class="text-slate-300 hover:text-white transition-colors"
+          :aria-label="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
+          :title="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
+        >
+          <svg v-if="!se.muted.value" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9zM17 9l4 4m0-4l-4 4" />
+          </svg>
+        </button>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          :value="Math.round(se.volume.value * 100)"
+          @input="se.setVolume((Number(($event.target as HTMLInputElement).value) || 0) / 100)"
+          class="w-20 accent-cyan-400"
+          aria-label="SE 音量"
+        />
+      </div>
+      <button
+        type="button"
+        @click.stop="toggleFullscreen"
+        class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
+        :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
+      >
+        <svg v-if="!isFullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" />
+        </svg>
+      </button>
+    </div>
 
     <!-- ========== Phase: SELECT ========== -->
     <div v-if="phase === 'select'" class="relative z-10 max-w-6xl mx-auto p-4 sm:p-8 space-y-6">

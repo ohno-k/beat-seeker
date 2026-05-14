@@ -49,6 +49,71 @@ Authorization: Bearer bs_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## エンドポイント
 
+### POST /api/external/v1/sync-options
+
+iidx-memo 等の連携アプリが、ユーザーの譜面オプション選択（鍵盤乱・皿乱・正規 等）を
+beat-seeker に一括同期するためのエンドポイント。
+
+beat-seeker は同期されたオプションを楽曲詳細画面の「オプション」セクションに
+読み取り専用で表示します（beat-seeker 単独では編集できません）。
+
+#### リクエスト
+
+```json
+{
+  "options": [
+    { "title": "灼熱Beach Side Bunny", "difficulty": "ANOTHER",    "options": ["乱"] },
+    { "title": "灼熱Beach Side Bunny", "difficulty": "LEGGENDARIA", "options": ["正規"] }
+  ]
+}
+```
+
+| フィールド | 型 | 必須 | 説明 |
+| --- | --- | --- | --- |
+| `options` | array | yes | 同期するレコードの配列 |
+| `options[].title` | string | yes | 楽曲タイトル（IIDX 公式表記） |
+| `options[].difficulty` | string | yes | `BEGINNER` / `NORMAL` / `HYPER` / `ANOTHER` / `LEGGENDARIA` |
+| `options[].options` | string[] | yes | オプション文字列の配列（例: `["乱", "鏡"]`）。空配列のレコードはスキップされる |
+
+#### レスポンス（200 OK）
+
+```json
+{ "synced": 2 }
+```
+
+`synced` は実際に upsert された件数。バリデーション NG（title 欠落 / difficulty 不正 /
+options 空）でスキップされたレコードはカウントに含まれない。
+
+#### upsert セマンティクス
+
+- `(user_id, title, difficulty)` の組で既存レコードがあれば options を上書き。
+- 無ければ新規 INSERT。
+- **削除は行わない**。連携アプリ側で options を消したい場合、現状の仕様では
+  beat-seeker 側の表示は古い状態のまま残る。明示削除 API が必要なら別途設計する。
+
+#### ステータスコード
+
+| コード | 内容 |
+| --- | --- |
+| 200 | 成功 |
+| 400 | body 自体が不正（{"options": null} 等） |
+| 401 | トークン不一致 / 失効 / 期限切れ |
+
+#### 例（curl）
+
+```bash
+curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
+     -H "Authorization: Bearer bs_live_xxxxxxxxxxxxxxxx" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "options": [
+         {"title":"灼熱Beach Side Bunny","difficulty":"ANOTHER","options":["乱"]}
+       ]
+     }'
+```
+
+---
+
 ### GET /api/external/v1/song-detail
 
 トークン所有者の楽曲詳細（ユーザー情報・譜面メタ・自分のスコア・順位・履歴・
@@ -102,6 +167,7 @@ Authorization: Bearer bs_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     "total": 5821,
     "calculatedAt": "2026-05-13T03:00:00"
   },
+  "options": ["乱"],
   "history": [
     { "uploadedAt": "2026-05-12T22:31:14", "score": 3402, "beatPt": 162.8 },
     { "uploadedAt": "2026-04-30T19:02:01", "score": 3380, "beatPt": 161.4 }
@@ -131,6 +197,7 @@ Authorization: Bearer bs_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 | `song` | 該当譜面が存在しなければ 404（このフィールドが null になることはない） |
 | `score` | ユーザーが未プレイの場合は `null` |
 | `rank` | 順位キャッシュ未生成（ANOTHER / LEGGENDARIA 以外は基本 `null`） |
+| `options` | sync-options で同期がなければ `[]` |
 | `history` | プレイ履歴がなければ `[]` |
 | `chartTendency` | 譜面傾向プロファイル未登録の場合は `null` |
 
