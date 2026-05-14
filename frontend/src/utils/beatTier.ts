@@ -82,15 +82,16 @@ const SCORE_RATE_TIER_MAX_MINUS = 94.44;
 
 /**
  * 【Folder Legend】 ☆11.0 側の Legend 到達 score rate（%）。
- * 最小難易度では理論値近辺を要求する（ただし達成余地は残す）。
+ * 最低難易度ではほぼ理論値（99.99%）を要求し、低 Lv 譜面が容易に Legend に
+ * 流れ込むのを防ぐ。Legend は「真に近い完璧」を表す指標とする。
  */
-const LEGEND_RATE_LOW_END = 99.80;
+const LEGEND_RATE_LOW_END = 99.99;
 
 /**
  * 【Folder Legend】 ☆13.0 側の Legend 到達 score rate（%）。
- * 高難度帯でも 95% 台後半を要求ラインに置き、Legend を達成感のある目標に保つ。
+ * 歴代 TOP スコア平均（≈95.77%）に揃える。Legend は「TOP プレイヤー基準」を意味する。
  */
-const LEGEND_RATE_HIGH_END = 95.65;
+const LEGEND_RATE_HIGH_END = 95.80;
 
 /**
  * 【Folder Legend】 Legend 判定 score rate の対応範囲下限（非公式ランク）。
@@ -105,7 +106,7 @@ const LEGEND_RANK_MAX = 13.0;
 /**
  * 【Folder Legend】 単一の累乗カーブ t^n の指数。
  * 4 にすると ☆11 帯ではほぼフラット（理論値近く）、☆12 後半〜☆13 で急激に要求 rate が落ちる。
- * 高難度帯ほど落差が大きくなる「実プレイ感に近い」ライン。
+ * 歴代 TOP スコアの実カーブ（☆11.0=99.98, ☆12.0=99.60, ☆13.0=95.77）に近い形。
  */
 const LEGEND_RATE_CURVE_EXPONENT = 4;
 
@@ -777,37 +778,66 @@ const FOLDER_RANK_BLOCKS: { name: string; color: string }[] = [
 /** 【FOLDER 用】 サブランク総数 = 10 ブロック × 5 ティア = 50。 */
 const FOLDER_SUB_RANK_COUNT = FOLDER_RANK_BLOCKS.length * TIERS_PER_RANK_BLOCK;
 
-/** 【FOLDER 用】 最下位（Novice 1）の Legend からの offset(%)。これが各 ☆ 列の縦の総スパン。 */
-const FOLDER_RANK_OFFSET_MAX = 18;
+/**
+ * 【FOLDER 用】 ☆11.0 における Legend → Novice 1 の総スパン(%)。
+ * 上位ランクは bottom-heavy 分布（OFFSET_POWER=0.5）で僅差を保ちつつ、
+ * Novice 末端まで届くよう総スパンを十分に確保する。
+ */
+const FOLDER_RANK_OFFSET_MAX_AT_LOW = 6;
+
+/**
+ * 【FOLDER 用】 ☆13.0 における Legend → Novice 1 の総スパン(%)。
+ * 高難度帯はプレイヤー間のスコア差が極大（TOP=95.77, Mythic 1 player avg=88.48）。
+ */
+const FOLDER_RANK_OFFSET_MAX_AT_HIGH = 28;
 
 /**
  * 【FOLDER 用】 オフセット生成カーブの指数。
- * offset(i) = MAX × (1 − (1 − i/N)^p) 形式の累乗カーブを使う。
+ * offset_norm(i) = 1 − (1 − i/N)^p 形式の累乗カーブを使う（[0, 1] 正規化）。
  *  - p > 1 にすると Legend 側ほど隣接ランク間の差が大きく、Novice 側ほど詰まる。
  *  - p < 1 にすると逆に Novice 側ほど段差が大きく、上位ランクは詰まる。
- *  - p = 0.5 / MAX = 18 で「Legend→Mythic 5 ≈ 0.18%、Novice 末端 ≈ 2.55%」の段差。
+ *  - p = 0.5 で「高スコア帯ほど 1 点の重みが大きい」感覚に合わせ、Legend 周辺は僅差、
+ *    Novice 末端で大きく開く bottom-heavy 配置。
  */
 const FOLDER_RANK_OFFSET_POWER = 0.5;
 
 /**
- * 【関数の役割】 サブランク順位 i (1〜50) に対応する Legend からのオフセット(%)を返す。
- * i=0 は Legend で常に 0 を返す。
+ * 【関数の役割】 難易度に応じた最大 offset スパン(%)を **幾何補間** で返す。
+ * ☆11.0 は MAX_AT_LOW、☆13.0 は MAX_AT_HIGH、間は exp 補間（log 軸で線形）。
+ * 実プレイヤーデータ（Mythic 1 player avg）の MAX が ☆11→12→13 で 約 1.6→7.5→38 と
+ * 倍率変化するため、線形補間ではなく幾何補間が現実に合う。
  */
-function computeFolderRankOffset(i: number): number {
+export function getFolderRankOffsetMax(informalRank: string | undefined): number {
+    if (!informalRank) return FOLDER_RANK_OFFSET_MAX_AT_HIGH;
+    const m = informalRank.match(/(\d+\.\d+)/);
+    const v = m ? parseFloat(m[1]) : LEGEND_RANK_MAX;
+    if (v <= LEGEND_RANK_MIN) return FOLDER_RANK_OFFSET_MAX_AT_LOW;
+    if (v >= LEGEND_RANK_MAX) return FOLDER_RANK_OFFSET_MAX_AT_HIGH;
+    const t = (v - LEGEND_RANK_MIN) / (LEGEND_RANK_MAX - LEGEND_RANK_MIN);
+    return FOLDER_RANK_OFFSET_MAX_AT_LOW * Math.pow(FOLDER_RANK_OFFSET_MAX_AT_HIGH / FOLDER_RANK_OFFSET_MAX_AT_LOW, t);
+}
+
+/**
+ * 【関数の役割】 サブランク順位 i (1〜50) に対応する正規化 offset [0, 1] を返す。
+ * 実際の % offset は consumer 側で `getFolderRankOffsetMax(informalRank)` を掛けて算出する。
+ * i=0 は Legend で常に 0。
+ */
+function computeFolderRankNormalizedOffset(i: number): number {
     if (i <= 0) return 0;
     const t = i / FOLDER_SUB_RANK_COUNT;
-    return FOLDER_RANK_OFFSET_MAX * (1 - Math.pow(1 - t, FOLDER_RANK_OFFSET_POWER));
+    return 1 - Math.pow(1 - t, FOLDER_RANK_OFFSET_POWER);
 }
 
 /**
  * フォルダランクのオフセット定義表（自動生成）。
  *
- * 各ランクの score rate 閾値は `Legend の score rate − offset(%)`。
- * Legend を先頭に、Mythic V → Mythic I → Ancient V → ... → Novice I の順で並ぶ。
- * オフセットは {@link computeFolderRankOffset} の累乗カーブで生成され、上位ランクほど
- * 段差が大きくなる（=Legend と Mythic の差が、Novice 内の差より明確に大きい）。
+ * `offset` は **正規化値 [0, 1]** を保持する（0=Legend、1=Novice 1）。
+ * 実際の score rate 閾値は `legendRate − offset × getFolderRankOffsetMax(informalRank)`。
+ * このスケール係数を ☆11.0 では小、☆13.0 では大に取ることで、低難度では上位ランクが密集し、
+ * 高難度では Legend と Mythic 1 が大きく開く設計が成立する。
  *
- * Legend のベース rate は曲の非公式ランクに応じて {@link getFolderLegendRate} で決まる。
+ * 並び順: Legend → Mythic V → Mythic I → Ancient V → ... → Novice I の順。
+ * Legend のベース rate は {@link getFolderLegendRate} で決まる。
  */
 export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; color: string }[] = [
     { offset: 0, name: 'Legend', color: 'text-amber-500 font-black' },
@@ -816,7 +846,7 @@ export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; co
             const i = blockIdx * TIERS_PER_RANK_BLOCK + tierWithinBlockIdx + 1;
             const tier = TIERS_PER_RANK_BLOCK - tierWithinBlockIdx; // 5,4,3,2,1
             return {
-                offset: computeFolderRankOffset(i),
+                offset: computeFolderRankNormalizedOffset(i),
                 name: block.name,
                 tier,
                 color: block.color,
@@ -845,8 +875,9 @@ export function getFolderRankInfo(totalPoints: number, informalRank: string | un
     const legendRate = getFolderLegendRate(informalRank);
     if (legendRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 
+    const offsetScale = getFolderRankOffsetMax(informalRank);
     for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset;
+        const thresholdRate = legendRate - def.offset * offsetScale;
         // score rate が C 帯（66.666%）以下まで落ちた時点で以降は Beginner 扱い
         if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
         const thresholdPoints = calculatePoints(thresholdRate, informalRank) * songCount;
@@ -881,9 +912,10 @@ export function getNextFolderRankInfo(totalPoints: number, informalRank: string 
     if (legendRate <= 0) return { progress: 0 };
 
     // 手順1: ランクごとの閾値ポイント配列を先に組み立てる。
+    const offsetScale = getFolderRankOffsetMax(informalRank);
     const thresholds: { def: typeof FOLDER_RANK_DEFS[0]; points: number }[] = [];
     for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset;
+        const thresholdRate = legendRate - def.offset * offsetScale;
         if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
         thresholds.push({ def, points: calculatePoints(thresholdRate, informalRank) * songCount });
     }
@@ -939,8 +971,9 @@ export function getFolderRankInfoByRate(averageRate: number, informalRank: strin
     const legendRate = getFolderLegendRate(informalRank);
     if (legendRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 
+    const offsetScale = getFolderRankOffsetMax(informalRank);
     for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset;
+        const thresholdRate = legendRate - def.offset * offsetScale;
         if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
         if (averageRate >= thresholdRate) {
             return { name: def.name, tier: def.tier, minPoints: thresholdRate, color: def.color };
@@ -964,9 +997,10 @@ export function getNextFolderRankInfoByRate(averageRate: number, informalRank: s
     const legendRate = getFolderLegendRate(informalRank);
     if (legendRate <= 0) return { progress: 0 };
 
+    const offsetScale = getFolderRankOffsetMax(informalRank);
     const thresholds: { def: typeof FOLDER_RANK_DEFS[0]; rate: number }[] = [];
     for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset;
+        const thresholdRate = legendRate - def.offset * offsetScale;
         if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
         thresholds.push({ def, rate: thresholdRate });
     }

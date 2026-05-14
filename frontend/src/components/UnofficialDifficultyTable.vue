@@ -10,7 +10,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
-import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
+import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, getFolderRankOffsetMax, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import DifficultyRankingModal from './DifficultyRankingModal.vue';
@@ -42,7 +42,7 @@ const rateTableRows = computed(() => {
   return FOLDER_RANK_DEFS.map(def => {
     const label = def.tier ? `${def.name} ${def.tier}` : def.name;
     const rates = allFolders.map(f => {
-      const rate = getFolderLegendRate(f) - def.offset;
+      const rate = getFolderLegendRate(f) - def.offset * getFolderRankOffsetMax(f);
       if (rate <= 66.666) return { text: '-', color: 'text-slate-400 dark:text-slate-500' };
 
       let rateColor = 'text-slate-600 dark:text-slate-300';
