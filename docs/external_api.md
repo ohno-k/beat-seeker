@@ -137,7 +137,9 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
     "arenaRank": "A1",
     "totalBeatPt": 16234.5,
     "totalKenbanPt": 8120.3,
-    "totalSaraPt": 8014.2
+    "totalSaraPt": 8014.2,
+    "totalRatePt": 9532.1,
+    "totalPrecisionPt": 6217.8
   },
   "song": {
     "title": "灼熱Beach Side Bunny",
@@ -169,8 +171,8 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
   },
   "options": ["乱"],
   "history": [
-    { "uploadedAt": "2026-05-12T22:31:14", "score": 3402, "beatPt": 162.8 },
-    { "uploadedAt": "2026-04-30T19:02:01", "score": 3380, "beatPt": 161.4 }
+    { "uploadedAt": "2026-05-12T22:31:14", "score": 3402, "beatPt": 162.8, "ratePt": 95.2 },
+    { "uploadedAt": "2026-04-30T19:02:01", "score": 3380, "beatPt": 161.4, "ratePt": 94.8 }
   ],
   "chartTendency": {
     "bpmMain": 153,

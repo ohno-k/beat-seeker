@@ -342,6 +342,17 @@ public class ExternalSongDetailController {
         m.put("totalBeatPt", u.getTotalBeatPt());
         m.put("totalKenbanPt", u.getTotalKenbanPt());
         m.put("totalSaraPt", u.getTotalSaraPt());
+
+        // RATE-PT / 精度 PT は User エンティティに直接持たず、ScoreHistoryLog の最新スナップショットから取る。
+        // 履歴 0 件のユーザーは null（未集計）を返す。
+        scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(u).ifPresent(latest -> {
+            m.put("totalRatePt", latest.getTotalRatePt());
+            m.put("totalPrecisionPt", latest.getTotalPrecisionPt());
+        });
+        if (!m.containsKey("totalRatePt")) {
+            m.put("totalRatePt", null);
+            m.put("totalPrecisionPt", null);
+        }
         return m;
     }
 
@@ -429,6 +440,8 @@ public class ExternalSongDetailController {
                         entry.put("uploadedAt", log.getUploadedAt());
                         entry.put("score", diff.get("newScore"));
                         entry.put("beatPt", diff.get("newBeatPt"));
+                        // 譜面別 RATE-PT。RATE 対象外（HYPER 以下や RATE-INELIGIBLE 譜面）では null/0 になり得る。
+                        entry.put("ratePt", diff.get("newRatePt"));
                         result.add(entry);
                     }
                 }
