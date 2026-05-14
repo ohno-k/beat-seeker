@@ -57,6 +57,7 @@ import java.util.Map;
  *  - POST /api/admin/migrate-user-beat-pt           … users.total_beat_pt の一括移行
  *  - POST /api/admin/push/clear-all                 … 全ユーザーの push 購読を初期化
  *  - POST /api/admin/patch-rate-pt                  … RATE-PT = 0 の履歴ログを補正
+ *  - POST /api/admin/patch-history-rate-pt          … diffJson 内の newRatePt = 0/null を補正
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -614,6 +615,54 @@ public class AdminController {
             // 手順2: サービスに RATE-PT=0 ログの補正を委譲する。
             int patched = scoreRecalculationService.patchZeroRatePtLogs(songMaxScores);
             return ResponseEntity.ok(Map.of("message", patched + " 件の履歴ログを補正しました"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 score_history_logs.diffJson 内の譜面別 {@code newRatePt} が
+     * 欠落／null／0 になっている要素を、現在の楽曲マスタから再計算して埋める。
+     *
+     * 用途: 外部公開 API {@code /api/external/v1/song-detail} のレスポンス
+     * {@code history[].ratePt} が、RATE-PT 機能の導入前に作られた古いスナップショットだけ
+     * null になる問題を解消する一括パッチ。
+     *
+     * {@link #patchRatePt(Authentication, RecalculatePointsRequest)} はユーザー単位の
+     * 累計 {@code total_rate_pt} だけを補正するのに対し、こちらは個別曲の RATE-PT
+     * スナップショットを diffJson 内で補正する。
+     *
+     * リクエストボディは {@code /patch-rate-pt} と共用（songDataJson のみ使用）。
+     *
+     * @param auth 認証情報（管理者限定）
+     * @param req  songDataJson を含むリクエスト
+     * @return 修正したログ件数を含むメッセージ
+     */
+    @PostMapping("/patch-history-rate-pt")
+    public ResponseEntity<Map<String, Object>> patchHistoryRatePt(
+            Authentication auth,
+            @RequestBody RecalculatePointsRequest req) {
+
+        checkAdminAccess(auth);
+
+        try {
+            // patch-rate-pt と同じ手順で songMaxScores ルックアップを作る。
+            com.fasterxml.jackson.databind.JsonNode songDataRoot = objectMapper.readTree(req.songDataJson());
+            java.util.Map<String, Integer> songMaxScores = new java.util.HashMap<>();
+            if (songDataRoot.has("body") && songDataRoot.get("body").isArray()) {
+                for (com.fasterxml.jackson.databind.JsonNode s : songDataRoot.get("body")) {
+                    String title = s.path("title").asText().trim();
+                    String diffCode = s.path("difficulty").asText();
+                    int notes = s.path("notes").asInt(0);
+                    if (notes > 0) {
+                        songMaxScores.put(title + "_" + diffCode, notes * 2);
+                    }
+                }
+            }
+            int patched = scoreRecalculationService.patchZeroRatePtInDiffJson(songMaxScores);
+            return ResponseEntity.ok(Map.of(
+                    "message", patched + " 件のスナップショットの diffJson を補正しました"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("message", "Error: " + e.getMessage()));

@@ -629,6 +629,87 @@ public class ScoreRecalculationService {
         return patchedCount;
     }
 
+    /**
+     * 【メソッドの役割】 全 ScoreHistoryLog の {@code diffJson} を走査し、
+     * 譜面別 {@code newRatePt} が欠落／null／0 の要素を、現在の songMaxScores から
+     * 再計算して埋め直す。
+     *
+     * 用途:
+     *  - 外部 API (`/api/external/v1/song-detail`) の {@code history[].ratePt} が
+     *    古いスナップショットだけ null になる問題を解消する一括パッチ。
+     *  - {@link #patchZeroRatePtLogs(Map)} はユーザー単位の {@code total_rate_pt} だけを
+     *    補正するが、こちらは「個別曲の RATE-PT スナップショット」を補正する。
+     *
+     * 計算式は {@link #patchZeroRatePtLogs(Map)} と同等:
+     *  - ANOTHER / LEGGENDARIA のみ対象。それ以外は本来 0 が正なので触らない。
+     *  - {@code scoreRate = newScore * 100 / (notes * 2)}
+     *  - {@link BeatPtCalculator#calculateScoreRateTierPoints(double)} を適用
+     *
+     * 冪等性: 既に正の値が入っている要素はスキップする。
+     *
+     * @param songMaxScores {@code title + "_" + difficultyCode} → maxScore のマップ
+     * @return 修正したログレコード件数（参考値、実際に書き換わった要素数ではない）
+     */
+    @Transactional
+    public int patchZeroRatePtInDiffJson(Map<String, Integer> songMaxScores) {
+        ObjectMapper mapper = new ObjectMapper();
+        List<ScoreHistoryLog> allLogs = scoreHistoryLogRepository.findAll();
+        int patchedLogs = 0;
+
+        for (ScoreHistoryLog log : allLogs) {
+            String diffJsonStr = log.getDiffJson();
+            if (diffJsonStr == null || diffJsonStr.isBlank() || "[]".equals(diffJsonStr)) continue;
+
+            try {
+                List<Map<String, Object>> diffs = mapper.readValue(diffJsonStr,
+                        new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
+                boolean modified = false;
+
+                for (Map<String, Object> diff : diffs) {
+                    // 既に正の数値が入っていれば触らない（冪等）。
+                    Object existing = diff.get("newRatePt");
+                    boolean isMissingOrZero = existing == null
+                            || (existing instanceof Number && ((Number) existing).doubleValue() == 0.0);
+                    if (!isMissingOrZero) continue;
+
+                    Object titleObj = diff.get("title");
+                    Object diffObj = diff.get("difficulty");
+                    Object newScoreObj = diff.get("newScore");
+                    if (!(titleObj instanceof String) || !(diffObj instanceof String) || !(newScoreObj instanceof Number)) {
+                        continue;
+                    }
+                    String diffUpper = normalizeDiffName((String) diffObj);
+                    boolean isRateEligible = "ANOTHER".equals(diffUpper) || "LEGGENDARIA".equals(diffUpper);
+                    // RATE 対象外は元から 0 が正解なので、null も 0 のまま残す（ノイズを増やさない）。
+                    if (!isRateEligible) continue;
+
+                    String code = getDifficultyCode(diffUpper);
+                    if (code == null) continue;
+                    Integer maxScore = songMaxScores.get(((String) titleObj) + "_" + code);
+                    if (maxScore == null || maxScore == 0) continue;
+
+                    int newScore = ((Number) newScoreObj).intValue();
+                    double scoreRate = newScore * 100.0 / maxScore;
+                    if (scoreRate <= 0) continue;
+                    double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
+                    if (rPt <= 0) continue;
+
+                    diff.put("newRatePt", rPt);
+                    modified = true;
+                }
+
+                if (modified) {
+                    log.setDiffJson(mapper.writeValueAsString(diffs));
+                    scoreHistoryLogRepository.save(log);
+                    patchedLogs++;
+                }
+            } catch (Exception e) {
+                // 壊れた diffJson は静かにスキップ。1 件壊れててもバッチ全体は止めない。
+            }
+        }
+        return patchedLogs;
+    }
+
     /** 難易度名を大文字化して正規化する（"Another" → "ANOTHER"）。 */
     private String normalizeDiffName(String diff) {
         if (diff == null) return "UNKNOWN";
