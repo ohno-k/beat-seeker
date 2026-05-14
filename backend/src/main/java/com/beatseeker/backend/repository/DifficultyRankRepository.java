@@ -4,8 +4,10 @@ import com.beatseeker.backend.entity.DifficultyRank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 【Repository の役割】 {@code DifficultyRank}（非公式難易度表のランク定義）を扱うリポジトリ。
@@ -69,4 +71,23 @@ public interface DifficultyRankRepository extends JpaRepository<DifficultyRank, 
     @Modifying
     @Query("UPDATE DifficultyRank d SET d.revision = :newRevision WHERE d.revision = :oldRevision")
     void updateRevision(String oldRevision, String newRevision);
+
+    /**
+     * 【メソッドの役割】 楽曲タイトルから「非公式難易度ランク値」を引く。
+     *
+     * 非公式難易度表（difficulty_ranks + difficulty_rank_songs）を JOIN して、
+     * 指定リビジョン（通常は "active"）かつ songTitle 一致のエントリを探す。
+     * 該当ランクが無ければ {@link Optional#empty()}。
+     *
+     * LEGGENDARIA 譜面は呼び出し側で {@code "<title>[L]"} 形式の文字列を渡すこと
+     * （difficulty_rank_songs.song_title はこの形式で格納されている）。
+     *
+     * @param revision  リビジョン名（"active" / "draft"）
+     * @param songTitle 楽曲タイトル（LEGGENDARIA は "[L]" 付き）
+     * @return ランク値文字列（例: "12.2"）
+     */
+    @Query("SELECT dr.rankValue FROM DifficultyRank dr JOIN dr.songs drs " +
+           "WHERE dr.revision = :revision AND drs.songTitle = :songTitle")
+    Optional<String> findRankValueBySongTitle(@Param("revision") String revision,
+                                              @Param("songTitle") String songTitle);
 }

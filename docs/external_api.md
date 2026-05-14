@@ -147,7 +147,8 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
     "genre": "HARD DANCE",
     "difficulty": "ANOTHER",
     "level": 12,
-    "difficultyLevel": "12.4",
+    "difficultyLevel": "12",
+    "informalRank": "12.4",
     "notes": 1857,
     "bpm": "153",
     "textage": "20/beach_a.html?...",
@@ -202,6 +203,15 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
 | `options` | sync-options で同期がなければ `[]` |
 | `history` | プレイ履歴がなければ `[]` |
 | `chartTendency` | 譜面傾向プロファイル未登録の場合は `null` |
+| `song.informalRank` | 非公式難易度表（`difficulty_ranks`）未登録の譜面は `null` |
+
+### `level` / `difficultyLevel` / `informalRank` の違い
+
+| フィールド | 出典 | 例 | 用途 |
+| --- | --- | --- | --- |
+| `level` | 公式 `★` 表記 | `12` | 公式の星 1〜12 |
+| `difficultyLevel` | `song_definitions.difficulty_level`（拡張欄、レガシー） | `"12"` | 一部譜面のみ小数値が入っていることがあるが、基本は公式 level と同じ |
+| `informalRank` | 非公式難易度表 `difficulty_ranks.rank_value` | `"12.4"` `"12.2"` | beat-seeker が独自管理している小数点付きの非公式難易度 |
 
 #### ステータスコード
 

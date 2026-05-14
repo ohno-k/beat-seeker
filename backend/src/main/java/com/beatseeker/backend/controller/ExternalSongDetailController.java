@@ -8,6 +8,7 @@ import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.entity.UserSongOption;
 import com.beatseeker.backend.entity.UserSongRank;
 import com.beatseeker.backend.repository.ChartTendencyProfileRepository;
+import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
@@ -70,6 +71,7 @@ public class ExternalSongDetailController {
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     private final ChartTendencyProfileRepository chartTendencyProfileRepository;
     private final UserSongOptionRepository userSongOptionRepository;
+    private final DifficultyRankRepository difficultyRankRepository;
 
     public ExternalSongDetailController(UserRepository userRepository,
                                         ScoreRepository scoreRepository,
@@ -77,7 +79,8 @@ public class ExternalSongDetailController {
                                         UserSongRankRepository userSongRankRepository,
                                         ScoreHistoryLogRepository scoreHistoryLogRepository,
                                         ChartTendencyProfileRepository chartTendencyProfileRepository,
-                                        UserSongOptionRepository userSongOptionRepository) {
+                                        UserSongOptionRepository userSongOptionRepository,
+                                        DifficultyRankRepository difficultyRankRepository) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.songDefinitionRepository = songDefinitionRepository;
@@ -85,6 +88,7 @@ public class ExternalSongDetailController {
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.chartTendencyProfileRepository = chartTendencyProfileRepository;
         this.userSongOptionRepository = userSongOptionRepository;
+        this.difficultyRankRepository = difficultyRankRepository;
     }
 
     /**
@@ -177,11 +181,21 @@ public class ExternalSongDetailController {
                 options = List.of();
             }
 
-            // ── 9. レスポンス組み立て ───────────────────────────
+            // ── 9. 非公式難易度ランク（例: "12.2"） ──
+            // difficulty_ranks + difficulty_rank_songs を JOIN して引く。
+            // LEGGENDARIA は difficulty_rank_songs.song_title が "<title>[L]" 形式で格納されているため
+            // ルックアップキーをそれに合わせる。
+            stage = "informalRank";
+            String rankLookupKey = "LEGGENDARIA".equals(difficultyName) ? title + "[L]" : title;
+            String informalRank = difficultyRankRepository
+                    .findRankValueBySongTitle("active", rankLookupKey)
+                    .orElse(null);
+
+            // ── 10. レスポンス組み立て ───────────────────────────
             stage = "build";
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("user", buildUserBlock(user));
-            body.put("song", buildSongBlock(song, difficultyName));
+            body.put("song", buildSongBlock(song, difficultyName, informalRank));
             body.put("score", scoreOpt.map(this::buildScoreBlock).orElse(null));
             body.put("rank", rankOpt.map(this::buildRankBlock).orElse(null));
             body.put("options", options);
@@ -356,15 +370,24 @@ public class ExternalSongDetailController {
         return m;
     }
 
-    /** 譜面メタ情報ブロック。連携先のキャッシュキーにも使える。 */
-    private Map<String, Object> buildSongBlock(SongDefinition sd, String difficultyName) {
+    /**
+     * 譜面メタ情報ブロック。連携先のキャッシュキーにも使える。
+     *
+     * @param sd             song_definitions の行
+     * @param difficultyName 難易度名（"ANOTHER" / "LEGGENDARIA" 等）
+     * @param informalRank   非公式難易度表のランク値（例 "12.2"）。未登録なら null
+     */
+    private Map<String, Object> buildSongBlock(SongDefinition sd, String difficultyName, String informalRank) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("title", sd.getTitle());
         m.put("artist", sd.getArtist());
         m.put("genre", sd.getGenre());
         m.put("difficulty", difficultyName);
         m.put("level", sd.getLevel());
+        // 注意: difficultyLevel は song_definitions.difficulty_level（レガシー拡張欄）の値。
+        // 小数点付きの「非公式難易度ランク」が欲しい場合は informalRank を参照すること。
         m.put("difficultyLevel", sd.getDifficultyLevel());
+        m.put("informalRank", informalRank);
         m.put("notes", sd.getNotes());
         m.put("bpm", sd.getBpm());
         m.put("textage", sd.getTextage());
