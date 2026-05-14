@@ -50,12 +50,20 @@ public class SecurityConfig {
         private final JwtAuthFilter jwtAuthFilter;
 
         /**
-         * 【コンストラクタ】 {@link JwtAuthFilter} を Spring が注入して初期化する。
-         *
-         * @param jwtAuthFilter JWT 検証フィルタ Bean
+         * 外部 API（{@code /api/external/**}）専用の Bearer トークン検証フィルタ。
+         * 連携アプリ（iidx-memo 等）からの呼び出し時に SecurityContext を整える。
          */
-        public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        private final ApiTokenAuthFilter apiTokenAuthFilter;
+
+        /**
+         * 【コンストラクタ】 認証系フィルタを Spring が注入して初期化する。
+         *
+         * @param jwtAuthFilter      通常ユーザー向け JWT 検証フィルタ
+         * @param apiTokenAuthFilter 外部連携アプリ向け API トークン検証フィルタ
+         */
+        public SecurityConfig(JwtAuthFilter jwtAuthFilter, ApiTokenAuthFilter apiTokenAuthFilter) {
                 this.jwtAuthFilter = jwtAuthFilter;
+                this.apiTokenAuthFilter = apiTokenAuthFilter;
         }
 
         /**
@@ -120,6 +128,14 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/share/tokens", "/api/share/tokens/**").authenticated()
                                                 // 共有トークン経由のビュー（/api/share/{token}/...）はログイン不要
                                                 .requestMatchers("/api/share/**").permitAll()
+                                                // 外部 API 連携トークンの管理（発行・一覧・失効）は要ログイン
+                                                .requestMatchers("/api/integrations/tokens",
+                                                                "/api/integrations/tokens/**")
+                                                .authenticated()
+                                                // 外部公開 API（/api/external/**）は ApiTokenAuthFilter が
+                                                // Bearer トークンを検証して SecurityContext を埋めるため、
+                                                // ここでは「要認証」のラインに乗せる。
+                                                .requestMatchers("/api/external/**").authenticated()
                                                 // アクティビティフィードも未ログイン閲覧を許可
                                                 .requestMatchers("/api/activity/feed").permitAll()
                                                 // 他ユーザーのプロフィール・スコア・履歴参照は公開
@@ -173,7 +189,10 @@ public class SecurityConfig {
                                                 .authenticationEntryPoint(
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                                 // JWT 検証フィルタを UsernamePasswordAuthenticationFilter の直前に差し込む
-                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                                // 外部公開 API 用の Bearer トークン検証フィルタ。JwtAuthFilter とは
+                                // 担当パスが排他的（/api/external/** のみ）なので、相互干渉はしない。
+                                .addFilterBefore(apiTokenAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }
