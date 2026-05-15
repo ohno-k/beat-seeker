@@ -215,7 +215,7 @@
                       class="px-2 py-1 rounded-md text-[10px] font-bold border transition-all disabled:opacity-50 flex items-center gap-0.5"
                       :class="getVoteClass(song.title, song.difficulty, opt.value, opt)"
                     >
-                      {{ opt.icon }} {{ opt.label }}<span v-if="songVotes[song.title + song.difficulty]?.myVote === opt.value"> ✔</span>
+                      {{ opt.icon }} {{ opt.label }}<span v-if="songVotes[song.title + song.difficulty]?.myVotes?.includes(opt.value)"> ✔</span>
                     </button>
                   </div>
 
@@ -538,9 +538,9 @@ const close = () => {
   emit('close');
 };
 
-// オプション投票関連の状態
-interface SongVoteState { myVote: string | null; }
-/** 曲+難易度キーに対する自分の投票。再描画用に ref で保持。 */
+// オプション投票関連の状態（複数選択対応）
+interface SongVoteState { myVotes: string[]; }
+/** 曲+難易度キーに対する自分の投票一覧。再描画用に ref で保持。 */
 const songVotes = ref<Record<string, SongVoteState>>({});
 /** 投票中の行キー（ボタン無効化用）。 */
 const votingKey = ref<string | null>(null);
@@ -560,32 +560,33 @@ const optionTypes = [
  */
 const getVoteClass = (title: string, difficulty: string, optValue: string, opt: typeof optionTypes[0]) => {
   const key = title + difficulty;
-  const isVoted = songVotes.value[key]?.myVote === optValue;
+  const isVoted = songVotes.value[key]?.myVotes?.includes(optValue) ?? false;
   if (isVoted) return `${opt.activeBg} ${opt.activeText} ${opt.activeBorder}`;
   return 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800';
 };
 
 /**
- * 【関数の役割】 曲ごとのオプション投票を送信/取り消しする。
- * 既に同じ選択で投票済みなら DELETE でキャンセル、そうでなければ POST で上書き。
- * 成功/失敗ともサイレント（UI はローカル state の切替のみ）。
+ * 【関数の役割】 曲ごとのオプション投票を toggle する（複数選択対応）。
+ * 既にそのオプションを投票済みなら DELETE で取消、そうでなければ POST で追加。
+ * 他のオプションには影響しない。成功/失敗ともサイレント（UI はローカル state の切替のみ）。
  */
 const castVote = async (title: string, difficultyName: string, optionType: string) => {
   const key = title + difficultyName;
   votingKey.value = key;
   try {
-    const currentVote = songVotes.value[key]?.myVote;
-    if (currentVote === optionType) {
-      const params = new URLSearchParams({ title, difficultyName });
+    const current = songVotes.value[key]?.myVotes ?? [];
+    const alreadyVoted = current.includes(optionType);
+    if (alreadyVoted) {
+      const params = new URLSearchParams({ title, difficultyName, optionType });
       await fetch(`${API_BASE}/api/votes?${params}`, { method: 'DELETE', headers: authHeaders() });
-      songVotes.value[key] = { myVote: null };
+      songVotes.value[key] = { myVotes: current.filter(v => v !== optionType) };
     } else {
       await fetch(`${API_BASE}/api/votes`, {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, difficultyName, optionType })
       });
-      songVotes.value[key] = { myVote: optionType };
+      songVotes.value[key] = { myVotes: [...current, optionType] };
     }
   } catch {
     // silent

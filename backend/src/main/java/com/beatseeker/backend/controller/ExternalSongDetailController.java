@@ -1,6 +1,7 @@
 package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.ChartTendencyProfile;
+import com.beatseeker.backend.entity.OptionVote;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.SongDefinition;
@@ -9,6 +10,7 @@ import com.beatseeker.backend.entity.UserSongOption;
 import com.beatseeker.backend.entity.UserSongRank;
 import com.beatseeker.backend.repository.ChartTendencyProfileRepository;
 import com.beatseeker.backend.repository.DifficultyRankRepository;
+import com.beatseeker.backend.repository.OptionVoteRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
@@ -72,6 +74,7 @@ public class ExternalSongDetailController {
     private final ChartTendencyProfileRepository chartTendencyProfileRepository;
     private final UserSongOptionRepository userSongOptionRepository;
     private final DifficultyRankRepository difficultyRankRepository;
+    private final OptionVoteRepository optionVoteRepository;
 
     public ExternalSongDetailController(UserRepository userRepository,
                                         ScoreRepository scoreRepository,
@@ -80,7 +83,8 @@ public class ExternalSongDetailController {
                                         ScoreHistoryLogRepository scoreHistoryLogRepository,
                                         ChartTendencyProfileRepository chartTendencyProfileRepository,
                                         UserSongOptionRepository userSongOptionRepository,
-                                        DifficultyRankRepository difficultyRankRepository) {
+                                        DifficultyRankRepository difficultyRankRepository,
+                                        OptionVoteRepository optionVoteRepository) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.songDefinitionRepository = songDefinitionRepository;
@@ -89,6 +93,7 @@ public class ExternalSongDetailController {
         this.chartTendencyProfileRepository = chartTendencyProfileRepository;
         this.userSongOptionRepository = userSongOptionRepository;
         this.difficultyRankRepository = difficultyRankRepository;
+        this.optionVoteRepository = optionVoteRepository;
     }
 
     /**
@@ -285,6 +290,11 @@ public class ExternalSongDetailController {
                 entity.setSource("iidx-memo");
                 entity.setUpdatedAt(java.time.LocalDateTime.now());
                 userSongOptionRepository.save(entity);
+
+                // 同じ譜面の option_votes も iidx-memo 由来の内容で **全リプレース** する。
+                // ユーザーが手動投票していた既存票は捨てて、iidx-memo を真とする運用。
+                replaceOptionVotes(user, title, difficultyName, opts);
+
                 synced++;
             }
         } catch (Exception e) {
@@ -304,6 +314,60 @@ public class ExternalSongDetailController {
 
         log.info("sync-options: done user={} synced={} skipped={}", user.getIidxId(), synced, skipped);
         return ResponseEntity.ok(Map.of("synced", synced, "skipped", skipped));
+    }
+
+    /**
+     * iidx-memo の日本語オプション → beat-seeker の英語コードのマッピングテーブル。
+     * 該当しない文字列（HARD / EASY / SUDDEN+ 等の鍵盤回転以外のもの）は無視する。
+     */
+    private static final Map<String, String> IIDX_MEMO_OPTION_TO_CODE = Map.of(
+            "正規", "REGULAR",
+            "鏡",   "MIRROR",
+            "乱",   "RANDOM",
+            "R乱",  "R-RANDOM",
+            "S乱",  "S-RANDOM");
+
+    /**
+     * 【メソッドの役割】 iidx-memo 同期で受け取ったオプション配列を {@code option_votes} に
+     * 全リプレースする。
+     *
+     * 処理:
+     *  1. 既存の (user, title, difficultyName) の票を全削除
+     *  2. iidx-memo 文字列 → beat-seeker コードにマッピング（マップ外は黙ってスキップ）
+     *  3. ユーザーの playSide に合わせて 1P 視点に正規化
+     *  4. 1 オプション 1 行で INSERT
+     *
+     * 例外を投げず、失敗してもログのみ残す（sync-options 本体の成功を妨げないため）。
+     */
+    private void replaceOptionVotes(User user, String title, String difficultyName, List<String> rawOptions) {
+        try {
+            optionVoteRepository.deleteByUserAndTitleAndDifficultyName(user, title, difficultyName);
+
+            String playSide = user.getPlaySide() != null ? user.getPlaySide() : "1P";
+            for (String raw : rawOptions) {
+                if (raw == null) continue;
+                String code = IIDX_MEMO_OPTION_TO_CODE.get(raw.trim());
+                if (code == null) continue; // 対象外オプションは黙ってスキップ
+
+                // 2P プレイヤーの REGULAR / MIRROR を 1P 視点に変換
+                String normalized = code;
+                if ("2P".equals(playSide)) {
+                    if ("REGULAR".equals(code)) normalized = "MIRROR";
+                    else if ("MIRROR".equals(code)) normalized = "REGULAR";
+                }
+
+                OptionVote vote = new OptionVote();
+                vote.setUser(user);
+                vote.setTitle(title);
+                vote.setDifficultyName(difficultyName);
+                vote.setOptionType(normalized);
+                vote.setVotedAt(java.time.LocalDateTime.now());
+                optionVoteRepository.save(vote);
+            }
+        } catch (Exception e) {
+            log.error("replaceOptionVotes failed (user={} title={} diff={})",
+                    user.getIidxId(), title, difficultyName, e);
+        }
     }
 
     /**

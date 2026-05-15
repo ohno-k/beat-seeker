@@ -868,13 +868,13 @@
                   @click="castVote(opt.value)"
                   :disabled="isVoting"
                   class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 transition-all flex items-center gap-1.5 disabled:opacity-50"
-                  :class="voteData.myVote === opt.value 
-                    ? `${opt.activeBg} ${opt.activeText} ${opt.activeBorder} shadow-sm` 
+                  :class="voteData.myVotes.includes(opt.value)
+                    ? `${opt.activeBg} ${opt.activeText} ${opt.activeBorder} shadow-sm`
                     : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'"
                 >
                   <span>{{ opt.icon }}</span>
                   {{ opt.label }}
-                  <span v-if="voteData.myVote === opt.value" class="text-[10px]">✔</span>
+                  <span v-if="voteData.myVotes.includes(opt.value)" class="text-[10px]">✔</span>
                 </button>
               </div>
               <div v-else class="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl text-sm text-slate-500 dark:text-slate-400 italic text-center">
@@ -1983,18 +1983,25 @@ watch(() => selectedRecord.value?.title, () => {
 
 // --- オプション投票システム ---
 // 譜面ごとに「どのオプション（正規/MIRROR/RANDOM/R-RAN/S-RAN）で遊んでいるか」を投票・集計する仕組み。
-/** バックエンドから受け取る投票集計データの形。 */
+/**
+ * バックエンドから受け取る投票集計データの形。
+ *
+ * 複数選択対応:
+ *  - {@code myVotes} は配列。1 ユーザーが同一譜面に複数オプションを投票できる。
+ *  - {@code totalVotes} は **ユニークユーザー数**（複数選択でも 1 と数える）。
+ *    バーチャートの分母として使う。複数選択なので％合計は 100% を超え得る。
+ */
 interface VoteDataType {
   counts: Record<string, number>;
   totalVotes: number;
-  myVote: string | null;
+  myVotes: string[];
 }
 
 /** 現在表示中譜面の投票データ。譜面切替時に fetch しなおす。 */
 const voteData = ref<VoteDataType>({
   counts: { REGULAR: 0, MIRROR: 0, RANDOM: 0, 'R-RANDOM': 0, 'S-RANDOM': 0 },
   totalVotes: 0,
-  myVote: null
+  myVotes: []
 });
 /** 投票 POST/DELETE 中の二重送信防止フラグ。 */
 const isVoting = ref(false);
@@ -2037,20 +2044,22 @@ const fetchVotes = async (title: string, difficultyName: string) => {
 };
 
 /**
- * 【関数の役割】 投票の Toggle 動作を行う。
- *   - 自分が既に同じオプションに投票していた場合 → DELETE（取消）
- *   - それ以外                                       → POST（新規/変更）
+ * 【関数の役割】 個別オプションの toggle を行う（複数選択対応）。
+ *   - 自分が既にそのオプションに投票していた場合 → そのオプションだけを DELETE
+ *   - それ以外                                       → POST で追加（他のオプションは温存）
  * 最後に fetchVotes で集計を最新化する。
  */
 const castVote = async (optionType: string) => {
   if (!selectedRecord.value) return;
   isVoting.value = true;
   try {
-    // 既に同じオプションに投票済みなら取消扱いで DELETE。
-    if (voteData.value.myVote === optionType) {
+    const alreadyVoted = voteData.value.myVotes.includes(optionType);
+    if (alreadyVoted) {
+      // そのオプションだけを取り消す。他の投票には影響しない。
       const params = new URLSearchParams({
         title: selectedRecord.value.title,
-        difficultyName: selectedRecord.value.difficultyName
+        difficultyName: selectedRecord.value.difficultyName,
+        optionType
       });
       await fetch(`${API_BASE}/api/votes?${params}`, {
         method: 'DELETE',

@@ -137,6 +137,7 @@ com\beatseeker\backend\entity\Score.class
 com\beatseeker\backend\controller\TierCommentController$CommentRequest.class
 com\beatseeker\backend\controller\CompetitionAdminController$RenameTeamRequest.class
 com\beatseeker\backend\entity\SongDefinition.class
+com\beatseeker\backend\service\ScoreRecalculationService$1.class
 com\beatseeker\backend\controller\ExternalSongDetailController$SyncOptionsRequest.class
 com\beatseeker\backend\controller\CompetitionAdminController.class
 com\beatseeker\backend\controller\ShareTokenController$IssueTokenRequest.class

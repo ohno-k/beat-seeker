@@ -14,15 +14,17 @@ import java.time.LocalDateTime;
  * 集計結果は「この譜面はランダム派が多い」といった攻略情報として表示される。
  * マッピング先テーブル: {@code option_votes}。
  *
- * 一意性制約: (user_id, title, difficulty_name) でユニーク。同一譜面に対する票は 1 ユーザー 1 票のみ。
- * 再投票時は既存レコードを上書きする運用。
+ * 一意性制約: (user_id, title, difficulty_name, option_type) でユニーク。
+ * 1 ユーザーが同一譜面に対して **複数オプション** を投票できる（例: RANDOM と MIRROR を併用）。
+ * iidx-memo 等の外部連携アプリから複数選択のオプションを同期できるように設計変更したもの。
  *
  * 主要な関連:
  *  - {@link #user} … 投票したユーザーへの ManyToOne。
  */
 @Entity
 @Table(name = "option_votes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "user_id", "title", "difficulty_name" })
+        @UniqueConstraint(name = "uk_option_votes_user_song_option",
+                          columnNames = { "user_id", "title", "difficulty_name", "option_type" })
 })
 @Data
 @NoArgsConstructor
