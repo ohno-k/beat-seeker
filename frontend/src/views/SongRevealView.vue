@@ -546,8 +546,61 @@ const onStageClick = () => {
   onReveal();
 };
 
-/** タイトルを文字単位で配列化 (絵文字/サロゲートペア安全) */
-const titleCharsOf = (s: SongDataEntry | null): string[] => (s ? Array.from(s.title) : []);
+/**
+ * タイトルを「英語の語 (連続するラテン文字)」と「CJK 1 文字」「空白」「その他記号」に分割。
+ * cascade アニメ用に文字ごとの spans を返すが、英語語内では改行を許さない (`white-space: nowrap`)。
+ * これで `ALL MY TURN-...` のような英字語が途中で折り返さなくなる。
+ *
+ * 各文字には元タイトル内のグローバル index を持たせ、cascade アニメの delay 計算に使う。
+ */
+type TitleToken = { chars: { text: string; index: number }[] };
+const titleTokensOf = (s: SongDataEntry | null): TitleToken[] => {
+  if (!s) return [];
+  // U+3000-U+9FFF (CJK 全般 + ひらがな/カタカナ + CJK 統合漢字) と
+  // U+FF00-U+FFEF (全角英数 + 半角カナ) を「ここで折り返してよい文字」と扱う
+  const isCJKOrPunct = (c: string) => /[　-鿿＀-￯]/.test(c);
+  const isSpace = (c: string) => /\s/.test(c);
+  const arr = Array.from(s.title);
+  const tokens: TitleToken[] = [];
+  let buffer: { text: string; index: number }[] = [];
+  arr.forEach((c, i) => {
+    if (isCJKOrPunct(c) || isSpace(c)) {
+      if (buffer.length > 0) {
+        tokens.push({ chars: buffer });
+        buffer = [];
+      }
+      tokens.push({ chars: [{ text: c, index: i }] });
+    } else {
+      buffer.push({ text: c, index: i });
+    }
+  });
+  if (buffer.length > 0) tokens.push({ chars: buffer });
+  return tokens;
+};
+
+/**
+ * タイトル長に応じて段階的にフォントサイズを縮小。
+ * 半画面 (w-1/2) 内に最大 2 行程度で収まるよう調整。
+ * デフォルト (短い): text-9xl 相当。最大長 (40+): text-4xl 相当。
+ */
+const titleSizeClass = (s: SongDataEntry | null): string => {
+  if (!s) return 'text-6xl sm:text-7xl md:text-8xl lg:text-9xl';
+  const len = Array.from(s.title).length;
+  if (len <= 10) return 'text-6xl sm:text-7xl md:text-8xl lg:text-9xl';
+  if (len <= 16) return 'text-5xl sm:text-6xl md:text-7xl lg:text-8xl';
+  if (len <= 22) return 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl';
+  if (len <= 30) return 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl';
+  return 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl';
+};
+
+/** アーティスト長に応じたサイズ。タイトルよりは軽めに段階分け。 */
+const artistSizeClass = (s: SongDataEntry | null): string => {
+  if (!s) return 'text-xl sm:text-2xl md:text-3xl lg:text-4xl';
+  const len = Array.from(s.artist || '').length;
+  if (len <= 20) return 'text-xl sm:text-2xl md:text-3xl lg:text-4xl';
+  if (len <= 32) return 'text-lg sm:text-xl md:text-2xl lg:text-3xl';
+  return 'text-base sm:text-lg md:text-xl lg:text-2xl';
+};
 
 const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
 
@@ -906,7 +959,7 @@ const toggleFullscreen = async () => {
         -->
         <div v-if="spinningLeft" class="relative z-10 w-full max-w-2xl px-2">
           <div
-            class="relative overflow-hidden rounded-2xl border-2 border-amber-300/40 bg-slate-950/80 backdrop-blur"
+            class="relative overflow-hidden rounded-2xl border-2 border-amber-300/40 bg-slate-950/95"
             :style="{ height: `${SPIN_ROW_HEIGHT * SPIN_VISIBLE_ROWS}px` }"
           >
             <div
@@ -938,18 +991,26 @@ const toggleFullscreen = async () => {
         <div v-show="!spinningLeft" class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="leftStage.title"
-            class="title-cascade text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-tight"
+            class="title-cascade font-black tracking-tight leading-tight"
+            :class="titleSizeClass(selectedLeft)"
           >
             <span
-              v-for="(ch, i) in titleCharsOf(selectedLeft)"
-              :key="`${selectedLeft?.title}-${i}`"
-              class="cascade-char inline-block"
-              :style="{ animationDelay: `${i * 70}ms` }"
-            >{{ ch === ' ' ? ' ' : ch }}</span>
+              v-for="(tok, ti) in titleTokensOf(selectedLeft)"
+              :key="`l-tok-${ti}`"
+              class="title-token"
+            >
+              <span
+                v-for="ch in tok.chars"
+                :key="ch.index"
+                class="cascade-char inline-block"
+                :style="{ animationDelay: `${ch.index * 70}ms` }"
+              >{{ ch.text === ' ' ? ' ' : ch.text }}</span>
+            </span>
           </p>
           <p
             v-if="leftStage.artist"
-            class="artist-fade text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-wider text-cyan-100"
+            class="artist-fade font-bold tracking-wider text-cyan-100"
+            :class="artistSizeClass(selectedLeft)"
           >
             {{ selectedLeft?.artist }}
           </p>
@@ -991,7 +1052,7 @@ const toggleFullscreen = async () => {
         <!-- R-3: Strategy 抽選スピンストリップ (右) -->
         <div v-if="spinningRight" class="relative z-10 w-full max-w-2xl px-2">
           <div
-            class="relative overflow-hidden rounded-2xl border-2 border-amber-300/40 bg-slate-950/80 backdrop-blur"
+            class="relative overflow-hidden rounded-2xl border-2 border-amber-300/40 bg-slate-950/95"
             :style="{ height: `${SPIN_ROW_HEIGHT * SPIN_VISIBLE_ROWS}px` }"
           >
             <div
@@ -1022,18 +1083,26 @@ const toggleFullscreen = async () => {
         <div v-show="!spinningRight" class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="rightStage.title"
-            class="title-cascade text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-tight"
+            class="title-cascade font-black tracking-tight leading-tight"
+            :class="titleSizeClass(selectedRight)"
           >
             <span
-              v-for="(ch, i) in titleCharsOf(selectedRight)"
-              :key="`${selectedRight?.title}-${i}`"
-              class="cascade-char inline-block"
-              :style="{ animationDelay: `${i * 70}ms` }"
-            >{{ ch === ' ' ? ' ' : ch }}</span>
+              v-for="(tok, ti) in titleTokensOf(selectedRight)"
+              :key="`r-tok-${ti}`"
+              class="title-token"
+            >
+              <span
+                v-for="ch in tok.chars"
+                :key="ch.index"
+                class="cascade-char inline-block"
+                :style="{ animationDelay: `${ch.index * 70}ms` }"
+              >{{ ch.text === ' ' ? ' ' : ch.text }}</span>
+            </span>
           </p>
           <p
             v-if="rightStage.artist"
-            class="artist-fade text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-wider text-cyan-100"
+            class="artist-fade font-bold tracking-wider text-cyan-100"
+            :class="artistSizeClass(selectedRight)"
           >
             {{ selectedRight?.artist }}
           </p>
@@ -1056,7 +1125,7 @@ const toggleFullscreen = async () => {
         v-if="strategyOverlayActive"
         class="absolute inset-0 z-50 flex items-center justify-center pointer-events-none strategy-overlay-fade"
       >
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="absolute inset-0 bg-black/80"></div>
         <div class="relative text-center px-8 py-10 space-y-6 max-w-3xl">
           <p class="text-xs sm:text-sm font-mono uppercase tracking-[0.6em] text-amber-300 strategy-flicker">
             ⚡ Strategy Card Declared ⚡
@@ -1159,9 +1228,11 @@ const toggleFullscreen = async () => {
 
 /* プレイヤー名バナー: REVEAL 突入時にスーッと出現してそのまま居続ける。
    左右で下線アクセントの色を変えて陣営を分かりやすく。 */
+/* NOTE: 動画エンコード時にブラーが潰れて見えるため、filter: blur(...) を使わず
+   opacity + transform + letter-spacing だけで「ふわっと出現」を表現する。 */
 @keyframes playerBannerKf {
-  0%   { opacity: 0; transform: translateY(-20px); letter-spacing: 0.4em; filter: blur(6px); }
-  100% { opacity: 1; transform: translateY(0);     letter-spacing: 0.1em; filter: blur(0);   }
+  0%   { opacity: 0; transform: translateY(-20px) scale(0.94); letter-spacing: 0.4em; }
+  100% { opacity: 1; transform: translateY(0)     scale(1);    letter-spacing: 0.1em; }
 }
 .player-banner p {
   animation: playerBannerKf 0.8s cubic-bezier(0.16, 0.74, 0.22, 1) forwards;
@@ -1227,14 +1298,16 @@ const toggleFullscreen = async () => {
     rgba(56, 189, 248, 0.18) 300deg,
     transparent 325deg
   );
-  filter: blur(10px);
+  /* filter: blur を外したぶん、コニックグラデーションを薄めにして
+     回転時のラスタライズざらつきを目立たなくする (動画エンコード対策)。 */
+  opacity: 0.7;
   animation: rayRotateKf 18s linear infinite;
 }
 
 @keyframes cascadeCharKf {
-  0%   { opacity: 0; transform: translateY(-60px) scale(1.5) rotateX(-90deg); filter: blur(8px); }
-  60%  { opacity: 1; transform: translateY(8px)   scale(1.05) rotateX(0deg);   filter: blur(0);    }
-  100% { opacity: 1; transform: translateY(0)     scale(1)    rotateX(0deg);   filter: blur(0);    }
+  0%   { opacity: 0; transform: translateY(-60px) scale(1.5) rotateX(-90deg); }
+  60%  { opacity: 1; transform: translateY(8px)   scale(1.05) rotateX(0deg);  }
+  100% { opacity: 1; transform: translateY(0)     scale(1)    rotateX(0deg);  }
 }
 .title-cascade {
   color: #fff;
@@ -1242,6 +1315,13 @@ const toggleFullscreen = async () => {
     0 0 18px rgba(255, 255, 255, 0.8),
     0 0 36px rgba(56, 189, 248, 0.7),
     0 0 60px rgba(56, 189, 248, 0.5);
+}
+/* 英字語 ("ALL", "TURN-") は token 単位でまとめ、内部での折り返しを禁止する。
+   CJK / 空白は 1 文字ずつ別 token になるので、トークン境界で自然に改行できる。 */
+.title-token {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: top;
 }
 .cascade-char {
   display: inline-block;
@@ -1251,8 +1331,8 @@ const toggleFullscreen = async () => {
 }
 
 @keyframes artistFadeKf {
-  0%   { opacity: 0; transform: translateY(10px); letter-spacing: 0.5em; filter: blur(6px); }
-  100% { opacity: 1; transform: translateY(0);    letter-spacing: 0.1em; filter: blur(0);   }
+  0%   { opacity: 0; transform: translateY(10px); letter-spacing: 0.5em; }
+  100% { opacity: 1; transform: translateY(0);    letter-spacing: 0.1em; }
 }
 .artist-fade {
   animation: artistFadeKf 0.9s cubic-bezier(0.16, 0.74, 0.22, 1) forwards;
@@ -1260,10 +1340,10 @@ const toggleFullscreen = async () => {
 }
 
 @keyframes diffSlamKf {
-  0%   { opacity: 0; transform: translateY(120%) scale(2.4) skewX(-8deg); filter: blur(10px); }
-  55%  { opacity: 1; transform: translateY(-8%)   scale(1.18) skewX(-8deg); filter: blur(0);   }
+  0%   { opacity: 0; transform: translateY(120%) scale(2.4) skewX(-8deg); }
+  55%  { opacity: 1; transform: translateY(-8%)   scale(1.18) skewX(-8deg); }
   75%  { transform: translateY(2%) scale(0.95) skewX(-8deg); }
-  100% { opacity: 1; transform: translateY(0)    scale(1)    skewX(-8deg); filter: blur(0);   }
+  100% { opacity: 1; transform: translateY(0)    scale(1)    skewX(-8deg); }
 }
 .diff-slam {
   animation: diffSlamKf 0.9s cubic-bezier(0.22, 0.95, 0.28, 1.15) forwards;
@@ -1315,10 +1395,10 @@ const toggleFullscreen = async () => {
 }
 
 @keyframes strategyPopKf {
-  0%   { opacity: 0; transform: scale(0.4) rotate(-8deg); filter: blur(20px); }
-  40%  { opacity: 1; transform: scale(1.12) rotate(2deg); filter: blur(0); }
+  0%   { opacity: 0; transform: scale(0.4) rotate(-8deg); }
+  40%  { opacity: 1; transform: scale(1.12) rotate(2deg); }
   60%  { transform: scale(0.96) rotate(-1deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 .strategy-pop {
   animation: strategyPopKf 0.9s cubic-bezier(0.16, 1, 0.3, 1.2) forwards;
