@@ -69,6 +69,8 @@ const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCard
 const SongRevealView = defineAsyncComponent(() => import('./views/SongRevealView.vue'));
 // 大会管理画面: Competition セクションの 4 ID 限定。サイドバーから activeTab 経由で遷移する通常タブ。
 const CompetitionAdminView = defineAsyncComponent(() => import('./views/CompetitionAdminView.vue'));
+// 管理者用 2 ユーザー比較画面: URL `/admin/user-comparison` での直接アクセス専用 (サイドバー導線なし)。
+const AdminUserComparisonView = defineAsyncComponent(() => import('./views/AdminUserComparisonView.vue'));
 // 大会参加者画面 (招待 URL 専用): `/competition/player/{token}` で直接アクセス。
 // ログイン不要・サイドバーなしのスタンドアロン描画。
 const CompetitionPlayerView = defineAsyncComponent(() => import('./views/CompetitionPlayerView.vue'));
@@ -268,7 +270,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
 /** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
 const currentGuideSlug = ref<string | null>(null);
 /**
@@ -593,6 +595,7 @@ onMounted(() => {
     '/difficulty-table': 'diff-table',
     '/guide': 'guide',
     '/competition-admin': 'competition-admin',
+    '/admin/user-comparison': 'admin-user-comparison',
   };
   const currentPath = window.location.pathname;
   if (pathToTab[currentPath]) {
@@ -1960,6 +1963,12 @@ const handleUnifiedClose = async () => {
              サイドバーの Competition セクションから遷移する通常タブ。 -->
         <template v-else-if="activeTab === 'competition-admin'">
           <CompetitionAdminView class="w-full animate-fade-in" />
+        </template>
+
+        <!-- 管理者専用: 任意の 2 ユーザー間スコア比較。
+             サイドバー導線なし。URL `/admin/user-comparison` 直叩き専用。 -->
+        <template v-else-if="activeTab === 'admin-user-comparison'">
+          <AdminUserComparisonView class="w-full animate-fade-in" />
         </template>
 
         <!-- 利用規約 -->

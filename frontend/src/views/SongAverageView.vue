@@ -15,7 +15,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
-import { songData as songDataBody, getDifficultyCode } from '../composables/useGameData';
+import { songData as songDataBody, diffTable as diffTableRanks, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from '../components/RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 
@@ -97,6 +97,30 @@ const sortKey = ref<'level' | 'title' | BeatTierName | string>('level');
 const sortDir = ref<'asc' | 'desc'>('desc');
 const currentPage = ref(1);
 const PAGE_SIZE = 50;
+
+// ── 非公式難易度ランクの検索用 Map ────────────────────────
+// diffTableRanks から "タイトル_難易度名" → ランク値 (例: "12.5") の Map を構築
+// LEGGENDARIA は表上 "曲名[L]" で格納されているため分離して逆引きする。
+const songRankMap = computed(() => {
+  const m = new Map<string, string>();
+  for (const r of diffTableRanks.value) {
+    // 数値ランクのみ対象 (Uncategorized 等は除外)
+    if (Number.isNaN(parseFloat(r.rank))) continue;
+    for (const s of r.songs) {
+      const isL = s.endsWith('[L]');
+      const title = isL ? s.slice(0, -3) : s;
+      const diff = isL ? 'LEGGENDARIA' : 'ANOTHER';
+      m.set(`${title}_${diff}`, r.rank);
+    }
+  }
+  return m;
+});
+
+/** SongRow から非公式ランクの数値を取得。未登録は -1。 */
+function getRowRank(row: SongRow): number {
+  const r = songRankMap.value.get(`${row.title}_${row.difficultyName}`);
+  return r ? parseFloat(r) : -1;
+}
 
 // ── ノーツ数→MAXスコア の検索用 Map ────────────────────────
 // songDataBody から "タイトル_難易度コード" → MAXスコア（notes×2）の Map を構築
@@ -265,8 +289,20 @@ const filteredRows = computed<SongRow[]>(() => {
     }
     let va: number, vb: number;
     if (sortKey.value === 'level') {
-      va = a.difficultyLevel;
-      vb = b.difficultyLevel;
+      // ☆ 列ソートは「非公式難易度ランク」基準。ランク未登録は -1 (末尾) 扱い。
+      // 同ランク内は IIDX レベル (12 > 11) と曲名でタイブレーク。
+      const ra = getRowRank(a);
+      const rb = getRowRank(b);
+      if (ra !== rb) {
+        return sortDir.value === 'asc' ? ra - rb : rb - ra;
+      }
+      if (a.difficultyLevel !== b.difficultyLevel) {
+        return sortDir.value === 'asc'
+          ? a.difficultyLevel - b.difficultyLevel
+          : b.difficultyLevel - a.difficultyLevel;
+      }
+      const cmp = a.title.localeCompare(b.title, 'ja');
+      return sortDir.value === 'asc' ? cmp : -cmp;
     } else if (typeof sortKey.value === 'string' && sortKey.value.includes('-')) {
       // 例: "Master-5" → サブTier(Master の 5)の達成率でソート
       const [tName, tLevel] = sortKey.value.split('-');
@@ -292,6 +328,18 @@ const totalPages = computed(() => Math.max(1, Math.ceil(filteredRows.value.lengt
 const pagedRows = computed(() =>
   filteredRows.value.slice((currentPage.value - 1) * PAGE_SIZE, currentPage.value * PAGE_SIZE)
 );
+
+/**
+ * 行 idx の直下に「非公式ランクの区切り線」を引くかどうか。
+ * ☆ 列 (= 非公式ランク) でソートしている時のみ、隣接行とランクが異なる位置に true を返す。
+ */
+function isRankBoundary(idx: number): boolean {
+  if (sortKey.value !== 'level') return false;
+  const cur = pagedRows.value[idx];
+  const next = pagedRows.value[idx + 1];
+  if (!cur || !next) return false;
+  return getRowRank(cur) !== getRowRank(next);
+}
 
 /**
  * 列ヘッダクリック時にソート方向をトグル / 別列ならソートキーを切替。
@@ -538,11 +586,12 @@ onMounted(loadData);
           </thead>
           <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
             <tr
-              v-for="row in pagedRows"
+              v-for="(row, idx) in pagedRows"
               :key="`${row.title}_${row.difficultyName}`"
               class="group hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+              :class="isRankBoundary(idx) ? 'border-b-2 !border-indigo-400 dark:!border-indigo-500' : ''"
             >
-              <!-- 左端: ☆レベル + 難易度（ANOTHER=A/LEGGENDARIA=L）バッジ -->
+              <!-- 左端: ☆レベル + 難易度（ANOTHER=A/LEGGENDARIA=L）バッジ + 非公式ランク -->
               <td class="py-2 pl-2 pr-1 whitespace-nowrap">
                 <div class="flex flex-col items-start gap-0.5">
                   <span class="text-xs font-black text-slate-500 dark:text-slate-400">☆{{ row.difficultyLevel }}</span>
@@ -552,6 +601,10 @@ onMounted(loadData);
                       ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                       : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'"
                   >{{ row.difficultyName === 'LEGGENDARIA' ? 'L' : 'A' }}</span>
+                  <span
+                    v-if="getRowRank(row) >= 0"
+                    class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 tabular-nums"
+                  >{{ getRowRank(row).toFixed(1) }}</span>
                 </div>
               </td>
               <!-- 曲名（長い場合は省略記号で1行表示） -->
