@@ -1191,7 +1191,7 @@ public class CompetitionAdminController {
         return m;
     }
 
-    /** individual4 試合 1 件 + 4 スロット をマップ化。 */
+    /** individual4 試合 1 件 + 4 スロット をマップ化 (ARENA 風 4×4 構造)。 */
     private Map<String, Object> toIndividualMatchMap(CompetitionIndividualMatch im) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", im.getId());
@@ -1199,21 +1199,19 @@ public class CompetitionAdminController {
         m.put("isFinals", im.getIsFinals());
         m.put("finalsBucket", im.getFinalsBucket());
         m.put("resultRecordedAt", im.getResultRecordedAt());
+        m.put("song1StrategyId", im.getSong1StrategyId());
+        m.put("song1Title", im.getSong1Title());
+        m.put("song2StrategyId", im.getSong2StrategyId());
+        m.put("song2Title", im.getSong2Title());
+        m.put("song3StrategyId", im.getSong3StrategyId());
+        m.put("song3Title", im.getSong3Title());
+        m.put("song4StrategyId", im.getSong4StrategyId());
+        m.put("song4Title", im.getSong4Title());
         List<CompetitionIndividualMatchSlot> slots =
                 individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(im);
         List<Map<String, Object>> slotMaps = new ArrayList<>();
         for (CompetitionIndividualMatchSlot s : slots) {
-            Map<String, Object> sm = new LinkedHashMap<>();
-            sm.put("id", s.getId());
-            sm.put("slotPosition", s.getSlotPosition());
-            sm.put("participantId", s.getParticipant() != null ? s.getParticipant().getId() : null);
-            sm.put("participantName", s.getParticipant() != null ? s.getParticipant().getDisplayName() : null);
-            sm.put("songStrategyId", s.getSongStrategyId());
-            sm.put("songTitle", s.getSongTitle());
-            sm.put("score", s.getScore());
-            sm.put("rankInMatch", s.getRankInMatch());
-            sm.put("points", s.getPoints());
-            slotMaps.add(sm);
+            slotMaps.add(CompetitionIndividualAdminController.individualSlotMap(s));
         }
         m.put("slots", slotMaps);
         return m;

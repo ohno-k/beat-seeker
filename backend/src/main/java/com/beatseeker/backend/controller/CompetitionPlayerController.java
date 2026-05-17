@@ -484,6 +484,14 @@ public class CompetitionPlayerController {
             mm.put("isFinals", m.getIsFinals());
             mm.put("finalsBucket", m.getFinalsBucket());
             mm.put("resultRecordedAt", m.getResultRecordedAt());
+            mm.put("song1StrategyId", m.getSong1StrategyId());
+            mm.put("song1Title", m.getSong1Title());
+            mm.put("song2StrategyId", m.getSong2StrategyId());
+            mm.put("song2Title", m.getSong2Title());
+            mm.put("song3StrategyId", m.getSong3StrategyId());
+            mm.put("song3Title", m.getSong3Title());
+            mm.put("song4StrategyId", m.getSong4StrategyId());
+            mm.put("song4Title", m.getSong4Title());
             List<CompetitionIndividualMatchSlot> slots =
                     individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(m);
             List<Map<String, Object>> slotMaps = new ArrayList<>();
@@ -493,10 +501,19 @@ public class CompetitionPlayerController {
                 sm.put("participantId", s.getParticipant() != null ? s.getParticipant().getId() : null);
                 sm.put("participantName", s.getParticipant() != null ? s.getParticipant().getDisplayName() : null);
                 sm.put("isMe", s.getParticipant() != null && s.getParticipant().getId().equals(me.getId()));
-                sm.put("songTitle", s.getSongTitle());
-                sm.put("score", s.getScore());
-                sm.put("rankInMatch", s.getRankInMatch());
-                sm.put("points", s.getPoints());
+                sm.put("score1", s.getScore1());
+                sm.put("score2", s.getScore2());
+                sm.put("score3", s.getScore3());
+                sm.put("score4", s.getScore4());
+                sm.put("rank1", s.getRank1());
+                sm.put("rank2", s.getRank2());
+                sm.put("rank3", s.getRank3());
+                sm.put("rank4", s.getRank4());
+                sm.put("points1", s.getPoints1());
+                sm.put("points2", s.getPoints2());
+                sm.put("points3", s.getPoints3());
+                sm.put("points4", s.getPoints4());
+                sm.put("totalPoints", s.getTotalPoints());
                 slotMaps.add(sm);
             }
             mm.put("slots", slotMaps);

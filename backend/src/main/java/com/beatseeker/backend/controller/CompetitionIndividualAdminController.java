@@ -217,14 +217,16 @@ public class CompetitionIndividualAdminController {
     // ── 試合結果記録 ────────────────────────────────────────
 
     /**
-     * 【メソッドの役割】 1 試合 4 スロット分の曲・スコアを保存し、順位 / ポイントを派生する。
+     * 【メソッドの役割】 1 試合分の 4 曲 + 4 プレイヤースロット × 各曲順位 (= 16 セル) を保存し、
+     * 各スロットのポイントと総ポイントを派生する。
      *
-     * <p>順位ロジック: スコア降順で 1〜4 位。同点 (タイ) は両者を上位扱いとし、次は欠番。
-     * 例: A=950, B=900, C=900, D=800 → A:1 位, B:1 位, C:1 位, D:4 位 ではなく、
-     * 同スコアの C/B は同順位とする (= 両者 2 位)。実装は「自分より高スコアの人数 + 1」を rank に。
+     * <p>IIDX ARENA モードと同じ集計。順位は運営がクリック UI で直接指定する (スコア入力は廃止)。
+     * 同じ順位を複数プレイヤーに付与することも可能 (タイ扱い)。順位値は 1〜4 のみ受理。
      *
-     * <p>ポイント: rank=1 → 2pt / rank=2 → 1pt / それ以外 → 0pt。
-     * 1 位タイの場合は両者 1 位 = 両者 2pt、その次は 3 位 (= 0pt) 扱い。
+     * <p>ポイント: rank=1 → 2pt / rank=2 → 1pt / rank=3 または 4 → 0pt。試合全体ポイント = 4 曲合計。
+     *
+     * <p>結果記録の条件: 4 スロット × 4 曲 = 16 セルすべてに順位が入っていること。
+     * 1 つでも欠ければ partial 扱いで順位 / ポイントはクリアし、resultRecordedAt も null に戻す。
      */
     @PutMapping("/matches/{matchId}/result")
     @Transactional
@@ -244,12 +246,22 @@ public class CompetitionIndividualAdminController {
             return ResponseEntity.badRequest().body(Map.of("message", "指定試合はこの大会に属していません"));
         }
 
+        // 4 曲のメタを反映 (タイトル / strategy_id)
+        match.setSong1StrategyId(req.song1StrategyId());
+        match.setSong1Title(emptyToNull(req.song1Title()));
+        match.setSong2StrategyId(req.song2StrategyId());
+        match.setSong2Title(emptyToNull(req.song2Title()));
+        match.setSong3StrategyId(req.song3StrategyId());
+        match.setSong3Title(emptyToNull(req.song3Title()));
+        match.setSong4StrategyId(req.song4StrategyId());
+        match.setSong4Title(emptyToNull(req.song4Title()));
+
         List<CompetitionIndividualMatchSlot> slots =
                 individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(match);
         Map<Integer, CompetitionIndividualMatchSlot> bySlot = new HashMap<>();
         for (CompetitionIndividualMatchSlot s : slots) bySlot.put(s.getSlotPosition(), s);
 
-        // 入力スロットを適用 (slotPosition で照合)
+        // 入力スロット (= 各プレイヤーの 4 曲ぶんの順位 1〜4) を適用
         for (SetIndividualResultSlot in : req.slots()) {
             if (in == null || in.slotPosition() == null) continue;
             CompetitionIndividualMatchSlot s = bySlot.get(in.slotPosition());
@@ -257,35 +269,40 @@ public class CompetitionIndividualAdminController {
                 return ResponseEntity.badRequest().body(Map.of(
                         "message", "不正なスロット位置: " + in.slotPosition()));
             }
-            if (in.score() != null && in.score() < 0) {
-                return ResponseEntity.badRequest().body(Map.of("message", "スコアは 0 以上で入力してください"));
+            for (Integer v : new Integer[] { in.rank1(), in.rank2(), in.rank3(), in.rank4() }) {
+                if (v != null && (v < 1 || v > 4)) {
+                    return ResponseEntity.badRequest().body(Map.of("message", "順位は 1〜4 の範囲で指定してください"));
+                }
             }
-            s.setSongStrategyId(in.songStrategyId());
-            s.setSongTitle(in.songTitle());
-            s.setScore(in.score());
+            s.setRank1(in.rank1());
+            s.setRank2(in.rank2());
+            s.setRank3(in.rank3());
+            s.setRank4(in.rank4());
+            // 順位からポイントを派生 (rank=1→2pt / rank=2→1pt / それ以外→0pt)
+            s.setPoints1(in.rank1() == null ? null : rankToPoints(in.rank1()));
+            s.setPoints2(in.rank2() == null ? null : rankToPoints(in.rank2()));
+            s.setPoints3(in.rank3() == null ? null : rankToPoints(in.rank3()));
+            s.setPoints4(in.rank4() == null ? null : rankToPoints(in.rank4()));
         }
 
-        // 全 4 スロットにスコアが揃っているか
-        boolean allScored = slots.size() == 4
-                && slots.stream().allMatch(s -> s.getScore() != null);
+        // 全 4 スロット × 4 曲 = 16 セルすべてに順位が揃っているか判定
+        boolean allRanked = slots.size() == 4
+                && slots.stream().allMatch(s ->
+                        s.getRank1() != null && s.getRank2() != null
+                        && s.getRank3() != null && s.getRank4() != null);
 
-        if (allScored) {
-            // 「自分より高スコアの人数 + 1」を rank に。タイは上位を共有。
+        if (allRanked) {
+            // totalPoints = 4 曲ぶんの points 合計
             for (CompetitionIndividualMatchSlot s : slots) {
-                int better = 0;
-                for (CompetitionIndividualMatchSlot other : slots) {
-                    if (other.getScore() != null && other.getScore() > s.getScore()) better++;
-                }
-                int rank = better + 1;
-                s.setRankInMatch(rank);
-                s.setPoints(rankToPoints(rank));
+                int total = zero(s.getPoints1()) + zero(s.getPoints2())
+                        + zero(s.getPoints3()) + zero(s.getPoints4());
+                s.setTotalPoints(total);
             }
             match.setResultRecordedAt(LocalDateTime.now());
         } else {
-            // 部分入力: 順位 / ポイントはクリア
+            // 部分入力: totalPoints はクリア (個別の順位 / ポイントは入力された値をそのまま保持)
             for (CompetitionIndividualMatchSlot s : slots) {
-                s.setRankInMatch(null);
-                s.setPoints(null);
+                s.setTotalPoints(null);
             }
             match.setResultRecordedAt(null);
         }
@@ -296,7 +313,7 @@ public class CompetitionIndividualAdminController {
     }
 
     /**
-     * 【メソッドの役割】 試合結果を未記録に戻す (誤入力修正用)。
+     * 【メソッドの役割】 試合結果を未記録に戻す (誤入力修正用)。曲メタも全クリアする。
      */
     @DeleteMapping("/matches/{matchId}/result")
     @Transactional
@@ -311,19 +328,26 @@ public class CompetitionIndividualAdminController {
         if (!match.getCompetition().getId().equals(comp.getId())) {
             return ResponseEntity.badRequest().body(Map.of("message", "指定試合はこの大会に属していません"));
         }
+        match.setSong1StrategyId(null); match.setSong1Title(null);
+        match.setSong2StrategyId(null); match.setSong2Title(null);
+        match.setSong3StrategyId(null); match.setSong3Title(null);
+        match.setSong4StrategyId(null); match.setSong4Title(null);
         List<CompetitionIndividualMatchSlot> slots =
                 individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(match);
         for (CompetitionIndividualMatchSlot s : slots) {
-            s.setSongStrategyId(null);
-            s.setSongTitle(null);
-            s.setScore(null);
-            s.setRankInMatch(null);
-            s.setPoints(null);
+            s.setScore1(null); s.setScore2(null); s.setScore3(null); s.setScore4(null);
+            s.setRank1(null); s.setRank2(null); s.setRank3(null); s.setRank4(null);
+            s.setPoints1(null); s.setPoints2(null); s.setPoints3(null); s.setPoints4(null);
+            s.setTotalPoints(null);
             individualMatchSlotRepository.save(s);
         }
         match.setResultRecordedAt(null);
         individualMatchRepository.save(match);
         return ResponseEntity.ok(toIndividualMatchMap(match));
+    }
+
+    private static String emptyToNull(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
     }
 
     // ── 順位表 ──────────────────────────────────────────────
@@ -381,18 +405,35 @@ public class CompetitionIndividualAdminController {
             }
             if (!recorded) continue;
             List<CompetitionIndividualMatchSlot> slots = slotsByMatch.get(m.getId());
+
+            // 決勝試合は「試合内総合順位」を別途算出する (totalPoints 降順、同点はタイ)
+            Map<Long, Integer> finalsMatchRank = new HashMap<>();
+            if (isFinals) {
+                for (CompetitionIndividualMatchSlot s : slots) {
+                    int myTp = zero(s.getTotalPoints());
+                    int better = 0;
+                    for (CompetitionIndividualMatchSlot other : slots) {
+                        if (zero(other.getTotalPoints()) > myTp) better++;
+                    }
+                    finalsMatchRank.put(s.getParticipant().getId(), better + 1);
+                }
+            }
+
             for (CompetitionIndividualMatchSlot s : slots) {
                 Long pid = s.getParticipant().getId();
                 ParticipantAgg a = agg.get(pid);
                 if (a == null) continue;
+                int total = zero(s.getTotalPoints());
+                // 1〜4 曲ぶんの順位カウントを加算
+                Integer[] ranks = { s.getRank1(), s.getRank2(), s.getRank3(), s.getRank4() };
                 if (isFinals) {
-                    a.finalsPoints += zero(s.getPoints());
-                    a.finalsRank = s.getRankInMatch();
+                    a.finalsPoints += total;
+                    a.finalsRank = finalsMatchRank.get(pid);
                     a.finalsBucket = m.getFinalsBucket();
                 } else {
-                    a.prelimPoints += zero(s.getPoints());
-                    Integer r = s.getRankInMatch();
-                    if (r != null) {
+                    a.prelimPoints += total;
+                    for (Integer r : ranks) {
+                        if (r == null) continue;
                         if (r == 1) a.first++;
                         else if (r == 2) a.second++;
                         else if (r == 3) a.third++;
@@ -579,24 +620,45 @@ public class CompetitionIndividualAdminController {
         m.put("isFinals", im.getIsFinals());
         m.put("finalsBucket", im.getFinalsBucket());
         m.put("resultRecordedAt", im.getResultRecordedAt());
+        m.put("song1StrategyId", im.getSong1StrategyId());
+        m.put("song1Title", im.getSong1Title());
+        m.put("song2StrategyId", im.getSong2StrategyId());
+        m.put("song2Title", im.getSong2Title());
+        m.put("song3StrategyId", im.getSong3StrategyId());
+        m.put("song3Title", im.getSong3Title());
+        m.put("song4StrategyId", im.getSong4StrategyId());
+        m.put("song4Title", im.getSong4Title());
         List<CompetitionIndividualMatchSlot> slots =
                 individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(im);
         List<Map<String, Object>> slotMaps = new ArrayList<>();
         for (CompetitionIndividualMatchSlot s : slots) {
-            Map<String, Object> sm = new LinkedHashMap<>();
-            sm.put("id", s.getId());
-            sm.put("slotPosition", s.getSlotPosition());
-            sm.put("participantId", s.getParticipant() != null ? s.getParticipant().getId() : null);
-            sm.put("participantName", s.getParticipant() != null ? s.getParticipant().getDisplayName() : null);
-            sm.put("songStrategyId", s.getSongStrategyId());
-            sm.put("songTitle", s.getSongTitle());
-            sm.put("score", s.getScore());
-            sm.put("rankInMatch", s.getRankInMatch());
-            sm.put("points", s.getPoints());
-            slotMaps.add(sm);
+            slotMaps.add(individualSlotMap(s));
         }
         m.put("slots", slotMaps);
         return m;
+    }
+
+    /** スロット 1 件分のレスポンス map (4 曲ぶんのスコア・順位・ポイント含む)。 */
+    static Map<String, Object> individualSlotMap(CompetitionIndividualMatchSlot s) {
+        Map<String, Object> sm = new LinkedHashMap<>();
+        sm.put("id", s.getId());
+        sm.put("slotPosition", s.getSlotPosition());
+        sm.put("participantId", s.getParticipant() != null ? s.getParticipant().getId() : null);
+        sm.put("participantName", s.getParticipant() != null ? s.getParticipant().getDisplayName() : null);
+        sm.put("score1", s.getScore1());
+        sm.put("score2", s.getScore2());
+        sm.put("score3", s.getScore3());
+        sm.put("score4", s.getScore4());
+        sm.put("rank1", s.getRank1());
+        sm.put("rank2", s.getRank2());
+        sm.put("rank3", s.getRank3());
+        sm.put("rank4", s.getRank4());
+        sm.put("points1", s.getPoints1());
+        sm.put("points2", s.getPoints2());
+        sm.put("points3", s.getPoints3());
+        sm.put("points4", s.getPoints4());
+        sm.put("totalPoints", s.getTotalPoints());
+        return sm;
     }
 
     // ── 集計内部表現 ──────────────────────────────────────
@@ -620,14 +682,24 @@ public class CompetitionIndividualAdminController {
     /** 個人戦の参加者更新リクエスト (表示名のみ)。 */
     public record UpdateIndividualParticipantRequest(String displayName) {}
 
-    /** 個人戦の試合結果記録リクエスト。 */
-    public record SetIndividualResultRequest(List<SetIndividualResultSlot> slots) {}
+    /**
+     * 個人戦 1 試合の結果記録リクエスト (ARENA モード相当)。
+     * 4 曲のメタ (タイトル / strategy_id) + 4 スロット × 各曲スコア。
+     */
+    public record SetIndividualResultRequest(
+            Integer song1StrategyId, String song1Title,
+            Integer song2StrategyId, String song2Title,
+            Integer song3StrategyId, String song3Title,
+            Integer song4StrategyId, String song4Title,
+            List<SetIndividualResultSlot> slots
+    ) {}
 
-    /** 試合結果の 1 スロット分。 */
+    /** 試合結果の 1 スロット分 (= 1 プレイヤーの 4 曲ぶんの順位 1〜4)。 */
     public record SetIndividualResultSlot(
             Integer slotPosition,
-            Integer songStrategyId,
-            String songTitle,
-            Integer score
+            Integer rank1,
+            Integer rank2,
+            Integer rank3,
+            Integer rank4
     ) {}
 }

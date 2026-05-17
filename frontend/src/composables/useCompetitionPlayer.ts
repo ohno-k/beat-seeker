@@ -113,10 +113,19 @@ export interface PlayerIndividualSlotDto {
   participantId: number | null;
   participantName: string | null;
   isMe: boolean;
-  songTitle: string | null;
-  score: number | null;
-  rankInMatch: number | null;
-  points: number | null;
+  score1: number | null;
+  score2: number | null;
+  score3: number | null;
+  score4: number | null;
+  rank1: number | null;
+  rank2: number | null;
+  rank3: number | null;
+  rank4: number | null;
+  points1: number | null;
+  points2: number | null;
+  points3: number | null;
+  points4: number | null;
+  totalPoints: number | null;
 }
 export interface PlayerIndividualMatchDto {
   matchId: number;
@@ -124,6 +133,10 @@ export interface PlayerIndividualMatchDto {
   isFinals: boolean;
   finalsBucket: number | null;
   resultRecordedAt: string | null;
+  song1Title: string | null;
+  song2Title: string | null;
+  song3Title: string | null;
+  song4Title: string | null;
   slots: PlayerIndividualSlotDto[];
 }
 export interface PlayerIndividualSelfDto {

@@ -214,17 +214,27 @@ export interface CompetitionDetail extends CompetitionSummary {
 }
 
 // ── 個人戦 (individual4) 用 DTO ───────────────────────
+// IIDX ARENA モード相当: 1 試合 = 4 曲 × 4 人。曲は match 側 (song1〜song4) に、
+// 各プレイヤースロットには 4 曲ぶんのスコア + 1 曲ごとの順位 + ポイント + 試合総ポイントを格納。
 
 export interface CompetitionIndividualSlotDto {
   id: number;
   slotPosition: number; // 1..4
   participantId: number | null;
   participantName: string | null;
-  songStrategyId: number | null;
-  songTitle: string | null;
-  score: number | null;
-  rankInMatch: number | null;
-  points: number | null;
+  score1: number | null;
+  score2: number | null;
+  score3: number | null;
+  score4: number | null;
+  rank1: number | null;
+  rank2: number | null;
+  rank3: number | null;
+  rank4: number | null;
+  points1: number | null;
+  points2: number | null;
+  points3: number | null;
+  points4: number | null;
+  totalPoints: number | null;
 }
 
 export interface CompetitionIndividualMatchDto {
@@ -233,17 +243,35 @@ export interface CompetitionIndividualMatchDto {
   isFinals: boolean;
   finalsBucket: number | null;
   resultRecordedAt: string | null;
+  song1StrategyId: number | null;
+  song1Title: string | null;
+  song2StrategyId: number | null;
+  song2Title: string | null;
+  song3StrategyId: number | null;
+  song3Title: string | null;
+  song4StrategyId: number | null;
+  song4Title: string | null;
   slots: CompetitionIndividualSlotDto[];
 }
 
-/** 個人戦の試合結果記録 payload。slot 単位で score / songTitle / songStrategyId を送る。 */
+/** 個人戦の試合結果記録 payload。4 曲のメタ + 4 スロット × 各曲順位 (1〜4)。 */
 export interface IndividualResultSlotPayload {
   slotPosition: number;
-  songStrategyId: number | null;
-  songTitle: string | null;
-  score: number | null;
+  /** 1 曲目の順位 (1〜4 / null)。クリックでサイクル選択。 */
+  rank1: number | null;
+  rank2: number | null;
+  rank3: number | null;
+  rank4: number | null;
 }
 export interface IndividualResultPayload {
+  song1StrategyId: number | null;
+  song1Title: string | null;
+  song2StrategyId: number | null;
+  song2Title: string | null;
+  song3StrategyId: number | null;
+  song3Title: string | null;
+  song4StrategyId: number | null;
+  song4Title: string | null;
   slots: IndividualResultSlotPayload[];
 }
 

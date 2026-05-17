@@ -30,6 +30,7 @@ import {
   type MatchResultPayload,
 } from '../composables/useCompetitionAdmin';
 import { useToast } from '../composables/useToast';
+import SongPickerModal from '../components/SongPickerModal.vue';
 
 const { user } = useAuth();
 const toast = useToast();
@@ -701,25 +702,37 @@ const handleOpenIndividualStatus = async () => {
   }
 };
 
-/** 個人戦 試合結果記録: 編集中の matchId と 4 スロット分の入力 draft。 */
+/**
+ * 個人戦 試合結果記録: 編集中の matchId と 4 曲メタ + 4 スロット × 4 曲順位の入力 draft。
+ * IIDX ARENA モード相当の 4×4 グリッドを管理する。クリック 1 回で順位を 1→2→3→4→未選択 にサイクル。
+ */
 const editingIndividualMatchId = ref<number | null>(null);
 const individualResultDraft = ref<IndividualResultPayload>({
+  song1StrategyId: null, song1Title: null,
+  song2StrategyId: null, song2Title: null,
+  song3StrategyId: null, song3Title: null,
+  song4StrategyId: null, song4Title: null,
   slots: [
-    { slotPosition: 1, songStrategyId: null, songTitle: null, score: null },
-    { slotPosition: 2, songStrategyId: null, songTitle: null, score: null },
-    { slotPosition: 3, songStrategyId: null, songTitle: null, score: null },
-    { slotPosition: 4, songStrategyId: null, songTitle: null, score: null },
+    { slotPosition: 1, rank1: null, rank2: null, rank3: null, rank4: null },
+    { slotPosition: 2, rank1: null, rank2: null, rank3: null, rank4: null },
+    { slotPosition: 3, rank1: null, rank2: null, rank3: null, rank4: null },
+    { slotPosition: 4, rank1: null, rank2: null, rank3: null, rank4: null },
   ],
 });
 
 const beginEditIndividualResult = (m: CompetitionIndividualMatchDto) => {
   editingIndividualMatchId.value = m.id;
   individualResultDraft.value = {
+    song1StrategyId: m.song1StrategyId, song1Title: m.song1Title,
+    song2StrategyId: m.song2StrategyId, song2Title: m.song2Title,
+    song3StrategyId: m.song3StrategyId, song3Title: m.song3Title,
+    song4StrategyId: m.song4StrategyId, song4Title: m.song4Title,
     slots: m.slots.map(s => ({
       slotPosition: s.slotPosition,
-      songStrategyId: s.songStrategyId,
-      songTitle: s.songTitle,
-      score: s.score,
+      rank1: s.rank1,
+      rank2: s.rank2,
+      rank3: s.rank3,
+      rank4: s.rank4,
     })),
   };
 };
@@ -727,14 +740,25 @@ const cancelEditIndividualResult = () => {
   editingIndividualMatchId.value = null;
 };
 
+/** クリック時の順位サイクル: null → 1 → 2 → 3 → 4 → null。 */
+const cycleRank = (cur: number | null): number | null => {
+  if (cur === null) return 1;
+  if (cur >= 4) return null;
+  return cur + 1;
+};
+
+/**
+ * 指定スロット (slotIdx 0-3) × 曲 (songIdx 1-4) の順位を 1 段サイクルさせる。
+ */
+const bumpDraftRank = (slotIdx: number, songIdx: number) => {
+  const slot = individualResultDraft.value.slots[slotIdx];
+  if (!slot) return;
+  const key = `rank${songIdx}` as 'rank1' | 'rank2' | 'rank3' | 'rank4';
+  slot[key] = cycleRank(slot[key]);
+};
+
 const handleSaveIndividualResult = async (matchId: number) => {
   if (!currentCompetition.value) return;
-  for (const s of individualResultDraft.value.slots) {
-    if (s.score !== null && s.score < 0) {
-      toast.error('スコアは 0 以上で入力してください');
-      return;
-    }
-  }
   try {
     await setIndividualMatchResult(currentCompetition.value.id, matchId, individualResultDraft.value);
     await refreshIndividualStandings();
@@ -743,6 +767,43 @@ const handleSaveIndividualResult = async (matchId: number) => {
   } catch (e) {
     toast.error((e as Error).message);
   }
+};
+
+// ── 楽曲選択モーダル ──────────────────────────────
+/**
+ * 楽曲選択モーダルの開閉状態と編集対象 (どの song slot 1〜4 を編集中か)。
+ * 個人戦の試合結果編集モードでのみ使用。
+ */
+const songPickerOpen = ref(false);
+const songPickerTargetSlot = ref<1 | 2 | 3 | 4 | null>(null);
+
+const openSongPicker = (slot: 1 | 2 | 3 | 4) => {
+  songPickerTargetSlot.value = slot;
+  songPickerOpen.value = true;
+};
+const closeSongPicker = () => {
+  songPickerOpen.value = false;
+  songPickerTargetSlot.value = null;
+};
+const handleSongPicked = (song: { strategyId: number; title: string }) => {
+  const slot = songPickerTargetSlot.value;
+  if (slot === null) {
+    closeSongPicker();
+    return;
+  }
+  if (slot === 1) { individualResultDraft.value.song1StrategyId = song.strategyId; individualResultDraft.value.song1Title = song.title; }
+  else if (slot === 2) { individualResultDraft.value.song2StrategyId = song.strategyId; individualResultDraft.value.song2Title = song.title; }
+  else if (slot === 3) { individualResultDraft.value.song3StrategyId = song.strategyId; individualResultDraft.value.song3Title = song.title; }
+  else if (slot === 4) { individualResultDraft.value.song4StrategyId = song.strategyId; individualResultDraft.value.song4Title = song.title; }
+  closeSongPicker();
+};
+
+/** 編集中ドラフトの曲タイトル 4 つを配列で参照しやすくする。 */
+const draftSongTitle = (idx: 1 | 2 | 3 | 4): string | null => {
+  if (idx === 1) return individualResultDraft.value.song1Title;
+  if (idx === 2) return individualResultDraft.value.song2Title;
+  if (idx === 3) return individualResultDraft.value.song3Title;
+  return individualResultDraft.value.song4Title;
 };
 
 const handleClearIndividualResult = async (matchId: number) => {
@@ -771,24 +832,50 @@ const handleGenerateIndividualFinals = async () => {
 };
 
 /**
- * 編集中ドラフトから順位プレビューを計算 (4 全スロットにスコアが入っている時のみ表示)。
- * サーバと同じく「自分より高スコアの人数 + 1」を rank としており、タイは両者を上位扱い。
+ * 編集中ドラフトから 4 曲 × 4 スロットのポイントプレビュー + 各スロット総ポイントを算出。
+ * 順位はユーザーがクリックで直接指定するため、ここでは「順位 → ポイント」のマッピングと
+ * 「全 16 セルが揃ったときの総和」を計算するだけ。
  */
-const draftIndividualRanks = computed<Array<{ slotPosition: number; rank: number | null; points: number | null }>>(() => {
+type DraftRankRow = {
+  slotPosition: number;
+  ranks: Array<number | null>;
+  points: Array<number | null>;
+  total: number | null;
+};
+const rankToPoints = (rank: number | null): number | null => {
+  if (rank === null) return null;
+  if (rank === 1) return 2;
+  if (rank === 2) return 1;
+  return 0;
+};
+const draftIndividualRanks = computed<DraftRankRow[]>(() => {
   const slots = individualResultDraft.value.slots;
-  const allScored = slots.length === 4 && slots.every(s => s.score !== null);
-  if (!allScored) {
-    return slots.map(s => ({ slotPosition: s.slotPosition, rank: null, points: null }));
-  }
-  return slots.map(s => {
-    let better = 0;
-    for (const other of slots) {
-      if (other.score !== null && s.score !== null && other.score > s.score) better++;
-    }
-    const rank = better + 1;
-    const points = rank === 1 ? 2 : rank === 2 ? 1 : 0;
-    return { slotPosition: s.slotPosition, rank, points };
+  const getRank = (s: typeof slots[number], idx: number): number | null => {
+    return idx === 0 ? s.rank1 : idx === 1 ? s.rank2 : idx === 2 ? s.rank3 : s.rank4;
+  };
+  const rows: DraftRankRow[] = slots.map(s => {
+    const ranks: Array<number | null> = [s.rank1, s.rank2, s.rank3, s.rank4];
+    const points = ranks.map(rankToPoints);
+    return {
+      slotPosition: s.slotPosition,
+      ranks,
+      points,
+      total: null,
+    };
   });
+  // 試合全 16 セルが揃っている場合のみ total を出す (部分入力時は null のまま)
+  const allRanked = slots.every(s =>
+    s.rank1 !== null && s.rank2 !== null && s.rank3 !== null && s.rank4 !== null);
+  if (allRanked) {
+    for (let i = 0; i < rows.length; i++) {
+      rows[i].total =
+        (rows[i].points[0] ?? 0) + (rows[i].points[1] ?? 0)
+        + (rows[i].points[2] ?? 0) + (rows[i].points[3] ?? 0);
+    }
+  }
+  // getRank は将来 (順位の直接表示用に) 使えるようエクスポートしないが lint 警告を消すため touch
+  void getRank;
+  return rows;
 });
 
 /** 個人戦の試合一覧を予選 → 決勝の順で返す。 */
@@ -1804,12 +1891,12 @@ const statusColor = (s: string) => ({
               予選 ({{ individualPrelimMatches.length }} 試合)
             </h2>
             <p class="text-[11px] text-slate-500">
-              各試合 4 人の曲タイトル / スコアを入力すると、順位 (1位2pt / 2位1pt / 3位4位0pt) が自動算出されます。
+              IIDX ARENA モードと同じく、4 人が共通の 4 曲をプレイ。曲ごとに 1 位 2pt / 2 位 1pt / 3 位・4 位 0pt。
             </p>
             <div
               v-for="m in individualPrelimMatches"
               :key="m.id"
-              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-x-auto"
             >
               <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between flex-wrap gap-2">
                 <p class="font-bold text-sm">予選 第 {{ m.matchOrder }} 試合</p>
@@ -1818,33 +1905,60 @@ const statusColor = (s: string) => ({
                   <span v-else class="italic">未記録</span>
                 </p>
               </div>
-              <!-- スロット 4 人を一覧 + 編集モード -->
+
+              <!-- 表示モード: 4x4 グリッド (プレイヤー × 4 曲) -->
               <template v-if="editingIndividualMatchId !== m.id">
-                <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
-                  <li
-                    v-for="s in m.slots"
-                    :key="s.id"
-                    class="px-4 py-2 grid grid-cols-[40px_1fr_1fr_80px_60px_60px] gap-2 items-center text-sm"
-                  >
-                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ s.slotPosition }}</span>
-                    <span class="font-bold truncate">{{ s.participantName }}</span>
-                    <span class="text-xs text-slate-500 truncate" :class="s.songTitle ? '' : 'italic'">{{ s.songTitle || '曲未記録' }}</span>
-                    <span class="text-right tabular-nums" :class="s.score !== null ? '' : 'text-slate-400 italic text-xs'">{{ s.score !== null ? s.score : '-' }}</span>
-                    <span
-                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
-                      :class="s.rankInMatch === 1
-                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                        : s.rankInMatch === 2
-                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                          : s.rankInMatch
-                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                            : 'bg-transparent text-slate-300'"
-                    >{{ s.rankInMatch ? s.rankInMatch + '位' : '-' }}</span>
-                    <span class="text-right tabular-nums font-bold" :class="s.points ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">
-                      {{ s.points !== null ? s.points + 'pt' : '-' }}
-                    </span>
-                  </li>
-                </ul>
+                <table class="w-full text-xs min-w-[640px]">
+                  <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono uppercase text-slate-400">
+                      <th class="px-3 py-2 text-left">プレイヤー</th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲1</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song1Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲2</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song2Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲3</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song3Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲4</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song4Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="s in m.slots" :key="s.id" class="border-t border-slate-100 dark:border-slate-700/50">
+                      <td class="px-3 py-2">
+                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1">P{{ s.slotPosition }}</span>
+                        <span class="font-bold">{{ s.participantName }}</span>
+                      </td>
+                      <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-3 py-2 text-center">
+                        <span
+                          v-if="(s as any)[`rank${songIdx}`]"
+                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider"
+                          :class="(s as any)[`rank${songIdx}`] === 1
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            : (s as any)[`rank${songIdx}`] === 2
+                              ? 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100'
+                              : (s as any)[`rank${songIdx}`] === 3
+                                ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
+                        >
+                          {{ (s as any)[`rank${songIdx}`] }}位 ({{ (s as any)[`points${songIdx}`] }}pt)
+                        </span>
+                        <span v-else class="text-slate-300 italic text-xs">-</span>
+                      </td>
+                      <td class="px-3 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
+                        {{ s.totalPoints !== null ? s.totalPoints : '-' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
                 <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700/40 flex gap-2 justify-end">
                   <button type="button" @click="beginEditIndividualResult(m)" class="px-3 py-1 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                     {{ m.resultRecordedAt ? '編集' : '記録' }}
@@ -1852,43 +1966,71 @@ const statusColor = (s: string) => ({
                   <button v-if="m.resultRecordedAt" type="button" @click="handleClearIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300">クリア</button>
                 </div>
               </template>
+
+              <!-- 編集モード: 4 曲 (GUI 選択) + 4×4 順位ボタン -->
               <template v-else>
-                <div class="px-4 py-3 space-y-2">
-                  <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400">スコア記録 (曲タイトル + EX SCORE)</p>
-                  <div
-                    v-for="(draftSlot, idx) in individualResultDraft.slots"
-                    :key="draftSlot.slotPosition"
-                    class="grid grid-cols-[40px_1fr_1fr_100px_60px] gap-2 items-center text-sm"
-                  >
-                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ draftSlot.slotPosition }}</span>
-                    <span class="font-bold truncate">{{ m.slots[idx]?.participantName }}</span>
-                    <input
-                      v-model="individualResultDraft.slots[idx].songTitle"
-                      type="text"
-                      placeholder="曲タイトル"
-                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
-                    />
-                    <input
-                      v-model.number="individualResultDraft.slots[idx].score"
-                      type="number"
-                      min="0"
-                      placeholder="EX SCORE"
-                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 tabular-nums outline-none focus:border-blue-400"
-                    />
-                    <span
-                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
-                      :class="draftIndividualRanks[idx]?.rank === 1
-                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                        : draftIndividualRanks[idx]?.rank === 2
-                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                          : draftIndividualRanks[idx]?.rank
-                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                            : 'bg-transparent text-slate-300'"
-                    >
-                      {{ draftIndividualRanks[idx]?.rank ? draftIndividualRanks[idx]?.rank + '位' : '-' }}
-                      <span v-if="draftIndividualRanks[idx]?.points !== null" class="ml-1">({{ draftIndividualRanks[idx]?.points }}pt)</span>
-                    </span>
-                  </div>
+                <div class="px-4 py-3 space-y-3">
+                  <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                    順位記録 (4 曲 × 4 人) — セルをクリックすると 1位→2位→3位→4位→未選択 でサイクル
+                  </p>
+                  <table class="w-full text-xs min-w-[700px]">
+                    <thead>
+                      <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono uppercase text-slate-400">
+                        <th class="px-2 py-2 text-left">プレイヤー</th>
+                        <th v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center min-w-[150px]">
+                          <button
+                            type="button"
+                            @click="openSongPicker(songIdx as 1 | 2 | 3 | 4)"
+                            class="w-full px-2 py-1 rounded font-bold normal-case truncate transition-colors"
+                            :class="draftSongTitle(songIdx as 1 | 2 | 3 | 4)
+                              ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60'
+                              : 'bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:border-blue-400'"
+                            :title="draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `曲${songIdx} を選択`"
+                          >
+                            {{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}
+                          </button>
+                        </th>
+                        <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(draftSlot, idx) in individualResultDraft.slots" :key="draftSlot.slotPosition" class="border-t border-slate-100 dark:border-slate-700/50">
+                        <td class="px-2 py-2">
+                          <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1">P{{ draftSlot.slotPosition }}</span>
+                          <span class="font-bold">{{ m.slots[idx]?.participantName }}</span>
+                        </td>
+                        <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center">
+                          <button
+                            type="button"
+                            @click="bumpDraftRank(idx, songIdx)"
+                            class="w-full py-2 rounded font-black text-sm transition-colors"
+                            :class="(() => {
+                              const r = draftIndividualRanks[idx]?.ranks[songIdx - 1];
+                              if (r === 1) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60';
+                              if (r === 2) return 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-500';
+                              if (r === 3) return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700';
+                              if (r === 4) return 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50';
+                              return 'bg-slate-50 dark:bg-slate-900/60 text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600';
+                            })()"
+                          >
+                            <span v-if="draftIndividualRanks[idx]?.ranks[songIdx - 1]" class="block">
+                              {{ draftIndividualRanks[idx]?.ranks[songIdx - 1] }}位
+                            </span>
+                            <span v-else class="block text-[11px] italic">クリック</span>
+                            <span
+                              v-if="draftIndividualRanks[idx]?.points[songIdx - 1] !== null"
+                              class="block text-[10px] font-bold opacity-80"
+                            >
+                              {{ draftIndividualRanks[idx]?.points[songIdx - 1] }}pt
+                            </span>
+                          </button>
+                        </td>
+                        <td class="px-2 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
+                          {{ draftIndividualRanks[idx]?.total !== null ? draftIndividualRanks[idx]?.total : '-' }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                   <div class="flex gap-2 justify-end pt-2 border-t border-slate-100 dark:border-slate-700/40">
                     <button type="button" @click="handleSaveIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">保存</button>
                     <button type="button" @click="cancelEditIndividualResult" class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
@@ -1907,12 +2049,12 @@ const statusColor = (s: string) => ({
               🏆 決勝 ({{ individualFinalsMatches.length }} 試合)
             </h2>
             <p class="text-[11px] text-slate-500">
-              バケット内で 1 位 = 全体 (バケット-1)×4+1 位、… 4 位 = (バケット-1)×4+4 位 になります。
+              バケット内総合ポイントが多い順 = 全体 (バケット-1)×4+順位。同点はタイ扱い。
             </p>
             <div
               v-for="m in individualFinalsMatches"
               :key="m.id"
-              class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-2xl overflow-hidden"
+              class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-2xl overflow-x-auto"
             >
               <div class="px-4 py-2 border-b border-amber-200 dark:border-amber-700/60 bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-900/20 dark:to-rose-900/20 flex items-center justify-between flex-wrap gap-2">
                 <p class="font-bold text-sm">
@@ -1924,31 +2066,57 @@ const statusColor = (s: string) => ({
                 </p>
               </div>
               <template v-if="editingIndividualMatchId !== m.id">
-                <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
-                  <li
-                    v-for="s in m.slots"
-                    :key="s.id"
-                    class="px-4 py-2 grid grid-cols-[40px_1fr_1fr_80px_60px_60px] gap-2 items-center text-sm"
-                  >
-                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ s.slotPosition }}</span>
-                    <span class="font-bold truncate">{{ s.participantName }}</span>
-                    <span class="text-xs text-slate-500 truncate" :class="s.songTitle ? '' : 'italic'">{{ s.songTitle || '曲未記録' }}</span>
-                    <span class="text-right tabular-nums" :class="s.score !== null ? '' : 'text-slate-400 italic text-xs'">{{ s.score !== null ? s.score : '-' }}</span>
-                    <span
-                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
-                      :class="s.rankInMatch === 1
-                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                        : s.rankInMatch === 2
-                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                          : s.rankInMatch
-                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                            : 'bg-transparent text-slate-300'"
-                    >{{ s.rankInMatch ? s.rankInMatch + '位' : '-' }}</span>
-                    <span class="text-right tabular-nums font-bold" :class="s.points ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">
-                      {{ s.points !== null ? s.points + 'pt' : '-' }}
-                    </span>
-                  </li>
-                </ul>
+                <table class="w-full text-xs min-w-[640px]">
+                  <thead>
+                    <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono uppercase text-slate-400">
+                      <th class="px-3 py-2 text-left">プレイヤー</th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲1</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song1Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲2</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song2Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲3</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song3Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center">
+                        <span class="block">曲4</span>
+                        <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song4Title || '-' }}</span>
+                      </th>
+                      <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="s in m.slots" :key="s.id" class="border-t border-slate-100 dark:border-slate-700/50">
+                      <td class="px-3 py-2">
+                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1">P{{ s.slotPosition }}</span>
+                        <span class="font-bold">{{ s.participantName }}</span>
+                      </td>
+                      <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-3 py-2 text-center">
+                        <span
+                          v-if="(s as any)[`rank${songIdx}`]"
+                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider"
+                          :class="(s as any)[`rank${songIdx}`] === 1
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            : (s as any)[`rank${songIdx}`] === 2
+                              ? 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100'
+                              : (s as any)[`rank${songIdx}`] === 3
+                                ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
+                        >
+                          {{ (s as any)[`rank${songIdx}`] }}位 ({{ (s as any)[`points${songIdx}`] }}pt)
+                        </span>
+                        <span v-else class="text-slate-300 italic text-xs">-</span>
+                      </td>
+                      <td class="px-3 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
+                        {{ s.totalPoints !== null ? s.totalPoints : '-' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
                 <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700/40 flex gap-2 justify-end">
                   <button type="button" @click="beginEditIndividualResult(m)" class="px-3 py-1 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                     {{ m.resultRecordedAt ? '編集' : '記録' }}
@@ -1957,42 +2125,68 @@ const statusColor = (s: string) => ({
                 </div>
               </template>
               <template v-else>
-                <div class="px-4 py-3 space-y-2">
-                  <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400">スコア記録</p>
-                  <div
-                    v-for="(draftSlot, idx) in individualResultDraft.slots"
-                    :key="draftSlot.slotPosition"
-                    class="grid grid-cols-[40px_1fr_1fr_100px_60px] gap-2 items-center text-sm"
-                  >
-                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ draftSlot.slotPosition }}</span>
-                    <span class="font-bold truncate">{{ m.slots[idx]?.participantName }}</span>
-                    <input
-                      v-model="individualResultDraft.slots[idx].songTitle"
-                      type="text"
-                      placeholder="曲タイトル"
-                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
-                    />
-                    <input
-                      v-model.number="individualResultDraft.slots[idx].score"
-                      type="number"
-                      min="0"
-                      placeholder="EX SCORE"
-                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 tabular-nums outline-none focus:border-blue-400"
-                    />
-                    <span
-                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
-                      :class="draftIndividualRanks[idx]?.rank === 1
-                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                        : draftIndividualRanks[idx]?.rank === 2
-                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                          : draftIndividualRanks[idx]?.rank
-                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                            : 'bg-transparent text-slate-300'"
-                    >
-                      {{ draftIndividualRanks[idx]?.rank ? draftIndividualRanks[idx]?.rank + '位' : '-' }}
-                      <span v-if="draftIndividualRanks[idx]?.points !== null" class="ml-1">({{ draftIndividualRanks[idx]?.points }}pt)</span>
-                    </span>
-                  </div>
+                <div class="px-4 py-3 space-y-3">
+                  <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                    順位記録 (4 曲 × 4 人) — セルをクリックすると 1位→2位→3位→4位→未選択 でサイクル
+                  </p>
+                  <table class="w-full text-xs min-w-[700px]">
+                    <thead>
+                      <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono uppercase text-slate-400">
+                        <th class="px-2 py-2 text-left">プレイヤー</th>
+                        <th v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center min-w-[150px]">
+                          <button
+                            type="button"
+                            @click="openSongPicker(songIdx as 1 | 2 | 3 | 4)"
+                            class="w-full px-2 py-1 rounded font-bold normal-case truncate transition-colors"
+                            :class="draftSongTitle(songIdx as 1 | 2 | 3 | 4)
+                              ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60'
+                              : 'bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:border-blue-400'"
+                            :title="draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `曲${songIdx} を選択`"
+                          >
+                            {{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}
+                          </button>
+                        </th>
+                        <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(draftSlot, idx) in individualResultDraft.slots" :key="draftSlot.slotPosition" class="border-t border-slate-100 dark:border-slate-700/50">
+                        <td class="px-2 py-2">
+                          <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1">P{{ draftSlot.slotPosition }}</span>
+                          <span class="font-bold">{{ m.slots[idx]?.participantName }}</span>
+                        </td>
+                        <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center">
+                          <button
+                            type="button"
+                            @click="bumpDraftRank(idx, songIdx)"
+                            class="w-full py-2 rounded font-black text-sm transition-colors"
+                            :class="(() => {
+                              const r = draftIndividualRanks[idx]?.ranks[songIdx - 1];
+                              if (r === 1) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60';
+                              if (r === 2) return 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-500';
+                              if (r === 3) return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700';
+                              if (r === 4) return 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50';
+                              return 'bg-slate-50 dark:bg-slate-900/60 text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600';
+                            })()"
+                          >
+                            <span v-if="draftIndividualRanks[idx]?.ranks[songIdx - 1]" class="block">
+                              {{ draftIndividualRanks[idx]?.ranks[songIdx - 1] }}位
+                            </span>
+                            <span v-else class="block text-[11px] italic">クリック</span>
+                            <span
+                              v-if="draftIndividualRanks[idx]?.points[songIdx - 1] !== null"
+                              class="block text-[10px] font-bold opacity-80"
+                            >
+                              {{ draftIndividualRanks[idx]?.points[songIdx - 1] }}pt
+                            </span>
+                          </button>
+                        </td>
+                        <td class="px-2 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
+                          {{ draftIndividualRanks[idx]?.total !== null ? draftIndividualRanks[idx]?.total : '-' }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                   <div class="flex gap-2 justify-end pt-2 border-t border-slate-100 dark:border-slate-700/40">
                     <button type="button" @click="handleSaveIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">保存</button>
                     <button type="button" @click="cancelEditIndividualResult" class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
@@ -2005,5 +2199,13 @@ const statusColor = (s: string) => ({
         <!-- ────────── /individual4 専用セクション群 ────────── -->
       </div>
     </template>
+
+    <!-- 楽曲選択モーダル (個人戦の試合結果編集中のみアクティブ) -->
+    <SongPickerModal
+      :open="songPickerOpen"
+      :current-title="songPickerTargetSlot ? draftSongTitle(songPickerTargetSlot) : null"
+      @close="closeSongPicker"
+      @select="handleSongPicked"
+    />
   </div>
 </template>

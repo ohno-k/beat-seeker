@@ -310,7 +310,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
         <div
           v-for="m in individualPlayer.view.value.matches"
           :key="m.matchId"
-          class="bg-white dark:bg-slate-800 border rounded-2xl overflow-hidden"
+          class="bg-white dark:bg-slate-800 border rounded-2xl overflow-x-auto"
           :class="m.isFinals ? 'border-amber-300 dark:border-amber-700' : 'border-slate-200 dark:border-slate-700'"
         >
           <div
@@ -328,32 +328,59 @@ const canEnableStrategyHere = (matchId: number): boolean => {
               <span v-else class="italic">未記録</span>
             </p>
           </div>
-          <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
-            <li
-              v-for="s in m.slots"
-              :key="s.slotPosition"
-              class="px-4 py-2 grid grid-cols-[40px_1fr_1fr_70px_60px_50px] gap-2 items-center text-sm"
-              :class="s.isMe ? 'bg-blue-50 dark:bg-blue-900/20 font-bold' : ''"
-            >
-              <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ s.slotPosition }}</span>
-              <span class="truncate">{{ s.participantName }}<span v-if="s.isMe" class="ml-1 text-[10px] font-mono text-blue-600 dark:text-blue-300">(自分)</span></span>
-              <span class="text-xs text-slate-500 truncate" :class="s.songTitle ? '' : 'italic'">{{ s.songTitle || '-' }}</span>
-              <span class="text-right tabular-nums" :class="s.score !== null ? '' : 'text-slate-400 italic text-xs'">{{ s.score !== null ? s.score : '-' }}</span>
-              <span
-                class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
-                :class="s.rankInMatch === 1
-                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                  : s.rankInMatch === 2
-                    ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-                    : s.rankInMatch
-                      ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-                      : 'bg-transparent text-slate-300'"
-              >{{ s.rankInMatch ? s.rankInMatch + '位' : '-' }}</span>
-              <span class="text-right tabular-nums font-bold" :class="s.points ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">
-                {{ s.points !== null ? s.points + 'pt' : '-' }}
-              </span>
-            </li>
-          </ul>
+          <table class="w-full text-xs min-w-[600px]">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono uppercase text-slate-400">
+                <th class="px-3 py-2 text-left">プレイヤー</th>
+                <th class="px-3 py-2 text-center">
+                  <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[110px] mx-auto">{{ m.song1Title || '曲1' }}</span>
+                </th>
+                <th class="px-3 py-2 text-center">
+                  <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[110px] mx-auto">{{ m.song2Title || '曲2' }}</span>
+                </th>
+                <th class="px-3 py-2 text-center">
+                  <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[110px] mx-auto">{{ m.song3Title || '曲3' }}</span>
+                </th>
+                <th class="px-3 py-2 text-center">
+                  <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[110px] mx-auto">{{ m.song4Title || '曲4' }}</span>
+                </th>
+                <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="s in m.slots"
+                :key="s.slotPosition"
+                class="border-t border-slate-100 dark:border-slate-700/50"
+                :class="s.isMe ? 'bg-blue-50 dark:bg-blue-900/20 font-bold' : ''"
+              >
+                <td class="px-3 py-2">
+                  <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1">P{{ s.slotPosition }}</span>
+                  <span>{{ s.participantName }}</span>
+                  <span v-if="s.isMe" class="ml-1 text-[10px] font-mono text-blue-600 dark:text-blue-300">(自分)</span>
+                </td>
+                <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-3 py-2 text-center">
+                  <span
+                    v-if="(s as any)[`rank${songIdx}`]"
+                    class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider"
+                    :class="(s as any)[`rank${songIdx}`] === 1
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                      : (s as any)[`rank${songIdx}`] === 2
+                        ? 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100'
+                        : (s as any)[`rank${songIdx}`] === 3
+                          ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                          : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
+                  >
+                    {{ (s as any)[`rank${songIdx}`] }}位 ({{ (s as any)[`points${songIdx}`] }}pt)
+                  </span>
+                  <span v-else class="text-slate-300 italic text-xs">-</span>
+                </td>
+                <td class="px-3 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
+                  {{ s.totalPoints !== null ? s.totalPoints : '-' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </div>

@@ -10,10 +10,12 @@ import java.time.LocalDateTime;
 /**
  * 【エンティティの役割】 個人戦フォーマット ({@code Competition.format = "individual4"}) の 1 試合。
  *
- * 1 試合 = 4 人対戦 × 各自 1 曲提出 × 計 4 曲プレイ。順位は試合終了時にスロット別スコアから自動算出。
- * ポイント: 1 位 = 2pt / 2 位 = 1pt / 3 位・4 位 = 0pt。
+ * IIDX ARENA モードと同じ構造で、4 人のプレイヤーが共通の 4 曲を全員プレイする。
+ * 1 曲ごとに 4 人のスコアを比較して順位を付け、順位ごとのポイント (1 位 = 2pt / 2 位 = 1pt /
+ * 3 位・4 位 = 0pt) を集計する。試合全体での総ポイント = 4 曲ぶんの合計。
  *
- * 4 つのプレイヤースロット ({@link CompetitionIndividualMatchSlot}) を持つ。
+ * 4 つの楽曲は本テーブルの song1〜song4 カラムに格納し、4 名のプレイヤーは
+ * {@link CompetitionIndividualMatchSlot} に slot 1〜4 として配置される。
  *
  * マッピング先テーブル: {@code competition_individual_matches}。
  */
@@ -57,4 +59,14 @@ public class CompetitionIndividualMatch {
 
     /** 試合結果記録日時。null = 未記録。 */
     private LocalDateTime resultRecordedAt;
+
+    // ── 試合で使う 4 曲 (ARENA モード相当) ──
+    @Column(name = "song1_strategy_id") private Integer song1StrategyId;
+    @Column(name = "song1_title", length = 200) private String song1Title;
+    @Column(name = "song2_strategy_id") private Integer song2StrategyId;
+    @Column(name = "song2_title", length = 200) private String song2Title;
+    @Column(name = "song3_strategy_id") private Integer song3StrategyId;
+    @Column(name = "song3_title", length = 200) private String song3Title;
+    @Column(name = "song4_strategy_id") private Integer song4StrategyId;
+    @Column(name = "song4_title", length = 200) private String song4Title;
 }
