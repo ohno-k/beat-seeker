@@ -226,6 +226,22 @@ const toggleStrategy = async (matchId: number, currentEnabled: boolean) => {
   }
 };
 
+/**
+ * 個人戦 (individual4) 試合内の総合順位を totalPoints から計算する。
+ * 自分より上の人数 + 1 を rank に。同点は上位を共有 (タイ扱い)。
+ */
+const playerOverallMatchRank = (
+  slot: { totalPoints: number | null },
+  allSlots: { totalPoints: number | null }[],
+): number | null => {
+  if (slot.totalPoints === null) return null;
+  let better = 0;
+  for (const other of allSlots) {
+    if (other.totalPoints !== null && other.totalPoints > slot.totalPoints) better++;
+  }
+  return better + 1;
+};
+
 // ── 表示補助 ──────────────────────────────────────────────
 const statusLabel = (s: string) => {
   if (['draft', 'open', 'locked', 'finished'].includes(s)) {
@@ -344,7 +360,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                 <th class="px-3 py-2 text-center">
                   <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[110px] mx-auto">{{ m.song4Title || '曲4' }}</span>
                 </th>
-                <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総合順位</th>
               </tr>
             </thead>
             <tbody>
@@ -362,7 +378,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                 <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-3 py-2 text-center">
                   <span
                     v-if="(s as any)[`rank${songIdx}`]"
-                    class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider"
+                    class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
                     :class="(s as any)[`rank${songIdx}`] === 1
                       ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                       : (s as any)[`rank${songIdx}`] === 2
@@ -371,12 +387,25 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                           ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                           : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
                   >
-                    {{ (s as any)[`rank${songIdx}`] }}位 ({{ (s as any)[`points${songIdx}`] }}pt)
+                    {{ (s as any)[`points${songIdx}`] }}pt
                   </span>
                   <span v-else class="text-slate-300 italic text-xs">-</span>
                 </td>
-                <td class="px-3 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
-                  {{ s.totalPoints !== null ? s.totalPoints : '-' }}
+                <td class="px-3 py-2 text-center">
+                  <span
+                    v-if="playerOverallMatchRank(s, m.slots) !== null"
+                    class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
+                    :class="playerOverallMatchRank(s, m.slots) === 1
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                      : playerOverallMatchRank(s, m.slots) === 2
+                        ? 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100'
+                        : playerOverallMatchRank(s, m.slots) === 3
+                          ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                          : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
+                  >
+                    {{ playerOverallMatchRank(s, m.slots) }}位 ({{ s.totalPoints }}pt)
+                  </span>
+                  <span v-else class="text-slate-300 italic text-xs">-</span>
                 </td>
               </tr>
             </tbody>

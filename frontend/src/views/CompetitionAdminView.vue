@@ -886,6 +886,47 @@ const individualFinalsMatches = computed<CompetitionIndividualMatchDto[]>(() => 
   return (currentCompetition.value?.individualMatches ?? []).filter(m => m.isFinals);
 });
 
+/**
+ * 予選順位に応じた背景色クラス。決勝バケット (1-4 / 5-8 / 9-12 / 13-16) ごとに別色。
+ * 4 人ずつ決勝で同卓するので、視覚的に同卓予定者がグループ化されて見える効果も狙う。
+ */
+const prelimBucketRowClass = (rank: number | null | undefined): string => {
+  if (rank == null) return '';
+  if (rank <= 4) return 'bg-amber-50/60 dark:bg-amber-900/15 font-bold';
+  if (rank <= 8) return 'bg-sky-50/60 dark:bg-sky-900/15';
+  if (rank <= 12) return 'bg-emerald-50/60 dark:bg-emerald-900/15';
+  if (rank <= 16) return 'bg-violet-50/60 dark:bg-violet-900/15';
+  return '';
+};
+
+/**
+ * 1 試合内 (= 4 スロット) の totalPoints から各スロットの総合順位を算出する。
+ * 「自分より高 totalPoints の人数 + 1」を rank に。タイは両者を上位扱い。
+ * totalPoints が null (未確定) のスロットは null を返す。
+ */
+const overallMatchRank = (slot: { totalPoints: number | null }, allSlots: { totalPoints: number | null }[]): number | null => {
+  if (slot.totalPoints === null) return null;
+  let better = 0;
+  for (const other of allSlots) {
+    if (other.totalPoints !== null && other.totalPoints > slot.totalPoints) better++;
+  }
+  return better + 1;
+};
+
+/**
+ * 編集中ドラフトから idx 番目スロットの総合順位 (プレビュー用) を計算する。
+ * 全 16 セル揃った時点で確定値となる (draftIndividualRanks の total が null でなくなる)。
+ */
+const draftOverallRank = (idx: number): number | null => {
+  const myT = draftIndividualRanks.value[idx]?.total;
+  if (myT === null || myT === undefined) return null;
+  let better = 0;
+  for (const r of draftIndividualRanks.value) {
+    if (r.total !== null && r.total !== undefined && r.total > myT) better++;
+  }
+  return better + 1;
+};
+
 // ── 途中経過マトリクス 用ヘルパ ───────────────────────
 /**
  * row × col セルの表示内容。
@@ -1837,7 +1878,7 @@ const statusColor = (s: string) => ({
                     v-for="row in individualStandings.rows"
                     :key="row.participantId"
                     class="border-b border-slate-100 dark:border-slate-700/60"
-                    :class="row.prelimRank <= 4 ? 'bg-amber-50/40 dark:bg-amber-900/10 font-bold' : ''"
+                    :class="prelimBucketRowClass(row.prelimRank)"
                   >
                     <td class="py-1.5 px-2 tabular-nums">{{ row.prelimRank }}</td>
                     <td class="py-1.5 px-2 truncate">{{ row.displayName }}</td>
@@ -1928,7 +1969,7 @@ const statusColor = (s: string) => ({
                         <span class="block">曲4</span>
                         <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song4Title || '-' }}</span>
                       </th>
-                      <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                      <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総合順位</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1940,7 +1981,7 @@ const statusColor = (s: string) => ({
                       <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-3 py-2 text-center">
                         <span
                           v-if="(s as any)[`rank${songIdx}`]"
-                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider"
+                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
                           :class="(s as any)[`rank${songIdx}`] === 1
                             ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                             : (s as any)[`rank${songIdx}`] === 2
@@ -1949,12 +1990,25 @@ const statusColor = (s: string) => ({
                                 ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                                 : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
                         >
-                          {{ (s as any)[`rank${songIdx}`] }}位 ({{ (s as any)[`points${songIdx}`] }}pt)
+                          {{ (s as any)[`points${songIdx}`] }}pt
                         </span>
                         <span v-else class="text-slate-300 italic text-xs">-</span>
                       </td>
-                      <td class="px-3 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
-                        {{ s.totalPoints !== null ? s.totalPoints : '-' }}
+                      <td class="px-3 py-2 text-center">
+                        <span
+                          v-if="overallMatchRank(s, m.slots) !== null"
+                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
+                          :class="overallMatchRank(s, m.slots) === 1
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            : overallMatchRank(s, m.slots) === 2
+                              ? 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100'
+                              : overallMatchRank(s, m.slots) === 3
+                                ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
+                        >
+                          {{ overallMatchRank(s, m.slots) }}位 ({{ s.totalPoints }}pt)
+                        </span>
+                        <span v-else class="text-slate-300 italic text-xs">-</span>
                       </td>
                     </tr>
                   </tbody>
@@ -1990,7 +2044,7 @@ const statusColor = (s: string) => ({
                             {{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}
                           </button>
                         </th>
-                        <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                        <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総合順位</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2025,8 +2079,21 @@ const statusColor = (s: string) => ({
                             </span>
                           </button>
                         </td>
-                        <td class="px-2 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
-                          {{ draftIndividualRanks[idx]?.total !== null ? draftIndividualRanks[idx]?.total : '-' }}
+                        <td class="px-2 py-2 text-center">
+                          <span
+                            v-if="draftOverallRank(idx) !== null"
+                            class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
+                            :class="(() => {
+                              const ovr = draftOverallRank(idx);
+                              if (ovr === 1) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
+                              if (ovr === 2) return 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100';
+                              if (ovr === 3) return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+                              return 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300';
+                            })()"
+                          >
+                            {{ draftOverallRank(idx) }}位 ({{ draftIndividualRanks[idx]?.total }}pt)
+                          </span>
+                          <span v-else class="text-slate-300 italic text-xs">-</span>
                         </td>
                       </tr>
                     </tbody>
@@ -2086,7 +2153,7 @@ const statusColor = (s: string) => ({
                         <span class="block">曲4</span>
                         <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[120px] mx-auto">{{ m.song4Title || '-' }}</span>
                       </th>
-                      <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                      <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総合順位</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2098,7 +2165,7 @@ const statusColor = (s: string) => ({
                       <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-3 py-2 text-center">
                         <span
                           v-if="(s as any)[`rank${songIdx}`]"
-                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider"
+                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
                           :class="(s as any)[`rank${songIdx}`] === 1
                             ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                             : (s as any)[`rank${songIdx}`] === 2
@@ -2107,12 +2174,25 @@ const statusColor = (s: string) => ({
                                 ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                                 : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
                         >
-                          {{ (s as any)[`rank${songIdx}`] }}位 ({{ (s as any)[`points${songIdx}`] }}pt)
+                          {{ (s as any)[`points${songIdx}`] }}pt
                         </span>
                         <span v-else class="text-slate-300 italic text-xs">-</span>
                       </td>
-                      <td class="px-3 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
-                        {{ s.totalPoints !== null ? s.totalPoints : '-' }}
+                      <td class="px-3 py-2 text-center">
+                        <span
+                          v-if="overallMatchRank(s, m.slots) !== null"
+                          class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
+                          :class="overallMatchRank(s, m.slots) === 1
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            : overallMatchRank(s, m.slots) === 2
+                              ? 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100'
+                              : overallMatchRank(s, m.slots) === 3
+                                ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                : 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300'"
+                        >
+                          {{ overallMatchRank(s, m.slots) }}位 ({{ s.totalPoints }}pt)
+                        </span>
+                        <span v-else class="text-slate-300 italic text-xs">-</span>
                       </td>
                     </tr>
                   </tbody>
@@ -2146,7 +2226,7 @@ const statusColor = (s: string) => ({
                             {{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}
                           </button>
                         </th>
-                        <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総pt</th>
+                        <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総合順位</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2181,8 +2261,21 @@ const statusColor = (s: string) => ({
                             </span>
                           </button>
                         </td>
-                        <td class="px-2 py-2 text-center tabular-nums font-black text-emerald-600 dark:text-emerald-300">
-                          {{ draftIndividualRanks[idx]?.total !== null ? draftIndividualRanks[idx]?.total : '-' }}
+                        <td class="px-2 py-2 text-center">
+                          <span
+                            v-if="draftOverallRank(idx) !== null"
+                            class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
+                            :class="(() => {
+                              const ovr = draftOverallRank(idx);
+                              if (ovr === 1) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
+                              if (ovr === 2) return 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100';
+                              if (ovr === 3) return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+                              return 'bg-rose-50 text-rose-500 dark:bg-rose-900/30 dark:text-rose-300';
+                            })()"
+                          >
+                            {{ draftOverallRank(idx) }}位 ({{ draftIndividualRanks[idx]?.total }}pt)
+                          </span>
+                          <span v-else class="text-slate-300 italic text-xs">-</span>
                         </td>
                       </tr>
                     </tbody>
