@@ -9,6 +9,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\AuthController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\ChartTendencyController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\CompetitionAdminController.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\CompetitionIndividualAdminController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\CompetitionPlayerController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\CompetitionTlController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\ExternalSongDetailController.java
@@ -36,6 +37,8 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\ArenaMatch.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\ChartTendencyProfile.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\Competition.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\CompetitionIndividualMatch.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\CompetitionIndividualMatchSlot.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\CompetitionMatch.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\CompetitionMatchup.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\CompetitionParticipant.java
@@ -64,6 +67,8 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\AppNotificationRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ArenaMatchRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ChartTendencyProfileRepository.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\CompetitionIndividualMatchRepository.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\CompetitionIndividualMatchSlotRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\CompetitionMatchRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\CompetitionMatchupRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\CompetitionParticipantRepository.java
@@ -94,6 +99,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\EmailService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\ExternalApiTokenService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\GameDataService.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\IndividualScheduleService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\OrganizerAuthService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\PairRegressionService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\PushNotificationService.java

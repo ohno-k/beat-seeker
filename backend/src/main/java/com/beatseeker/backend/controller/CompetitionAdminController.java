@@ -68,6 +68,8 @@ public class CompetitionAdminController {
     private final CompetitionMatchRepository matchRepository;
     private final CompetitionPickRepository pickRepository;
     private final CompetitionStrategyUseRepository strategyUseRepository;
+    private final CompetitionIndividualMatchRepository individualMatchRepository;
+    private final CompetitionIndividualMatchSlotRepository individualMatchSlotRepository;
     private final UserRepository userRepository;
     private final OrganizerAuthService organizerAuthService;
 
@@ -78,6 +80,8 @@ public class CompetitionAdminController {
                                       CompetitionMatchRepository matchRepository,
                                       CompetitionPickRepository pickRepository,
                                       CompetitionStrategyUseRepository strategyUseRepository,
+                                      CompetitionIndividualMatchRepository individualMatchRepository,
+                                      CompetitionIndividualMatchSlotRepository individualMatchSlotRepository,
                                       UserRepository userRepository,
                                       OrganizerAuthService organizerAuthService) {
         this.competitionRepository = competitionRepository;
@@ -87,9 +91,14 @@ public class CompetitionAdminController {
         this.matchRepository = matchRepository;
         this.pickRepository = pickRepository;
         this.strategyUseRepository = strategyUseRepository;
+        this.individualMatchRepository = individualMatchRepository;
+        this.individualMatchSlotRepository = individualMatchSlotRepository;
         this.userRepository = userRepository;
         this.organizerAuthService = organizerAuthService;
     }
+
+    /** サポートする大会フォーマット文字列。 */
+    static final Set<String> ALLOWED_FORMATS = Set.of("team5", "individual4");
 
     // ── 大会本体 ──────────────────────────────────────────────
 
@@ -108,22 +117,30 @@ public class CompetitionAdminController {
         if (req == null || req.name() == null || req.name().isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("message", "大会名を入力してください"));
         }
+        String format = (req.format() == null || req.format().isBlank()) ? "team5" : req.format();
+        if (!ALLOWED_FORMATS.contains(format)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "未知のフォーマット: " + format));
+        }
 
         Competition comp = new Competition();
         comp.setName(req.name().trim());
         comp.setStatus("draft");
+        comp.setFormat(format);
         comp.setCreatedBy(organizer);
         comp = competitionRepository.save(comp);
 
-        // 5 チーム枠を初期生成 (TL トークン込み)
-        for (int i = 1; i <= TEAMS_PER_COMPETITION; i++) {
-            CompetitionTeam team = new CompetitionTeam();
-            team.setCompetition(comp);
-            team.setTeamName("チーム" + i);
-            team.setTeamOrder(i);
-            team.setTlToken(newToken());
-            teamRepository.save(team);
+        if ("team5".equals(format)) {
+            // 5 チーム枠を初期生成 (TL トークン込み)
+            for (int i = 1; i <= TEAMS_PER_COMPETITION; i++) {
+                CompetitionTeam team = new CompetitionTeam();
+                team.setCompetition(comp);
+                team.setTeamName("チーム" + i);
+                team.setTeamOrder(i);
+                team.setTlToken(newToken());
+                teamRepository.save(team);
+            }
         }
+        // individual4 ではチーム/参加者ともに draft 中に空のままで、運営が個別追加していく。
 
         return ResponseEntity.ok(toCompetitionDetailMap(comp));
     }
@@ -763,6 +780,9 @@ public class CompetitionAdminController {
         pickRepository.deleteAll(pickRepository.findAllByCompetition(comp));
         matchRepository.deleteAll(matchRepository.findAllByCompetition(comp));
         matchupRepository.deleteAll(matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp));
+        // individual4 用テーブルも同トランザクションで cascade 削除
+        individualMatchSlotRepository.deleteAll(individualMatchSlotRepository.findAllByCompetition(comp));
+        individualMatchRepository.deleteAll(individualMatchRepository.findByCompetitionOrderByMatchOrderAsc(comp));
         participantRepository.deleteAll(participantRepository.findByCompetitionOrderByCreatedAtAsc(comp));
         teamRepository.deleteAll(teamRepository.findByCompetitionOrderByTeamOrderAsc(comp));
         competitionRepository.delete(comp);
@@ -1102,6 +1122,7 @@ public class CompetitionAdminController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", c.getId());
         m.put("name", c.getName());
+        m.put("format", c.getFormat());
         m.put("status", c.getStatus());
         m.put("deadlineAt", c.getDeadlineAt());
         m.put("createdAt", c.getCreatedAt());
@@ -1110,9 +1131,40 @@ public class CompetitionAdminController {
         return m;
     }
 
-    private Map<String, Object> toCompetitionDetailMap(Competition c) {
+    /**
+     * 詳細レスポンス。format により含めるフィールドが変わる:
+     * <ul>
+     *   <li>team5: teams[], participants[], (open 以降) matchups[], matches[]</li>
+     *   <li>individual4: participants[] (team_id は null), (open 以降) individualMatches[]</li>
+     * </ul>
+     */
+    Map<String, Object> toCompetitionDetailMap(Competition c) {
         Map<String, Object> m = toCompetitionSummaryMap(c);
+        String fmt = c.getFormat();
 
+        if ("individual4".equals(fmt)) {
+            // individual4: teams は不要、参加者リストのみ
+            m.put("teams", new ArrayList<>());
+
+            List<CompetitionParticipant> participants =
+                    participantRepository.findByCompetitionOrderByCreatedAtAsc(c);
+            List<Map<String, Object>> participantMaps = new ArrayList<>();
+            for (CompetitionParticipant p : participants) participantMaps.add(toParticipantMap(p));
+            m.put("participants", participantMaps);
+
+            if (!"draft".equals(c.getStatus())) {
+                List<CompetitionIndividualMatch> matches =
+                        individualMatchRepository.findByCompetitionOrderByMatchOrderAsc(c);
+                List<Map<String, Object>> matchMaps = new ArrayList<>();
+                for (CompetitionIndividualMatch im : matches) {
+                    matchMaps.add(toIndividualMatchMap(im));
+                }
+                m.put("individualMatches", matchMaps);
+            }
+            return m;
+        }
+
+        // 既定 (team5)
         List<CompetitionTeam> teams = teamRepository.findByCompetitionOrderByTeamOrderAsc(c);
         List<Map<String, Object>> teamMaps = new ArrayList<>();
         for (CompetitionTeam t : teams) teamMaps.add(toTeamMap(t));
@@ -1136,6 +1188,34 @@ public class CompetitionAdminController {
             m.put("matches", matchMaps);
         }
 
+        return m;
+    }
+
+    /** individual4 試合 1 件 + 4 スロット をマップ化。 */
+    private Map<String, Object> toIndividualMatchMap(CompetitionIndividualMatch im) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", im.getId());
+        m.put("matchOrder", im.getMatchOrder());
+        m.put("isFinals", im.getIsFinals());
+        m.put("finalsBucket", im.getFinalsBucket());
+        m.put("resultRecordedAt", im.getResultRecordedAt());
+        List<CompetitionIndividualMatchSlot> slots =
+                individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(im);
+        List<Map<String, Object>> slotMaps = new ArrayList<>();
+        for (CompetitionIndividualMatchSlot s : slots) {
+            Map<String, Object> sm = new LinkedHashMap<>();
+            sm.put("id", s.getId());
+            sm.put("slotPosition", s.getSlotPosition());
+            sm.put("participantId", s.getParticipant() != null ? s.getParticipant().getId() : null);
+            sm.put("participantName", s.getParticipant() != null ? s.getParticipant().getDisplayName() : null);
+            sm.put("songStrategyId", s.getSongStrategyId());
+            sm.put("songTitle", s.getSongTitle());
+            sm.put("score", s.getScore());
+            sm.put("rankInMatch", s.getRankInMatch());
+            sm.put("points", s.getPoints());
+            slotMaps.add(sm);
+        }
+        m.put("slots", slotMaps);
         return m;
     }
 
@@ -1202,8 +1282,12 @@ public class CompetitionAdminController {
 
     // ── DTO ──────────────────────────────────────────────────
 
-    /** 大会作成リクエスト。 */
-    public record CreateCompetitionRequest(String name) {}
+    /**
+     * 大会作成リクエスト。
+     * {@code format} は省略可: 未指定なら {@code "team5"} として扱う。
+     * 受理値は {@link CompetitionAdminController#ALLOWED_FORMATS} を参照。
+     */
+    public record CreateCompetitionRequest(String name, String format) {}
 
     /** チームリネームリクエスト。 */
     public record RenameTeamRequest(String teamName) {}

@@ -24,17 +24,50 @@ import {
   type SongGenre,
   type PlayerMatchDto,
 } from '../composables/useCompetitionPlayer';
+import { useCompetitionPlayerIndividual } from '../composables/useCompetitionPlayerIndividual';
+import { API_BASE } from '../composables/constants';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
 
 const props = defineProps<{ token: string }>();
 
 const { view, isLoading, fetchView, upsertPick, deletePick, setStrategy } = useCompetitionPlayer();
+const individualPlayer = useCompetitionPlayerIndividual();
 const toast = useToast();
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
-onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
-watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
+/**
+ * 大会フォーマット (peek 結果)。null = まだ peek 中。
+ * 'individual4' なら個人戦ビュー、それ以外は team5 既存ロジック。
+ */
+const peekedFormat = ref<'team5' | 'individual4' | null>(null);
+
+/** 大会フォーマットを peek してから本体取得を分岐する。 */
+const loadView = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/competition-access/player/${props.token}`);
+    if (!res.ok) {
+      // peek 失敗時は既存 team5 ロジック側でエラーを表示
+      peekedFormat.value = 'team5';
+      await fetchView(props.token);
+      return;
+    }
+    const data = await res.json();
+    const format = data?.competition?.format === 'individual4' ? 'individual4' : 'team5';
+    peekedFormat.value = format;
+    if (format === 'individual4') {
+      // 既に取得済みのデータを直接 individualPlayer.view に流し込む (二重 fetch 回避)
+      individualPlayer.view.value = data;
+    } else {
+      view.value = data;
+    }
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+onMounted(loadView);
+watch(() => props.token, loadView);
 
 // ── 静的データ ────────────────────────────────────────────
 type Song = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
@@ -246,8 +279,86 @@ const canEnableStrategyHere = (matchId: number): boolean => {
       >{{ t(`lang.${lang}`) }}</button>
     </div>
 
-    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">{{ t('competition.player.loading') }}</div>
+    <div v-if="peekedFormat === null && (isLoading || individualPlayer.isLoading.value)" class="text-center py-20 text-slate-400 text-sm">{{ t('competition.player.loading') }}</div>
 
+    <!-- ────────── 個人戦 (individual4) リードオンリービュー ────────── -->
+    <div
+      v-else-if="peekedFormat === 'individual4' && individualPlayer.view.value"
+      class="max-w-4xl mx-auto space-y-6"
+    >
+      <div>
+        <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
+          {{ individualPlayer.view.value.competition.name }}
+        </p>
+        <div class="flex items-baseline gap-2 mt-1 flex-wrap">
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ individualPlayer.view.value.participant.displayName }}</h1>
+          <span class="text-[10px] font-black px-2 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 tracking-wider">個人戦</span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
+          状態: <span class="font-bold">{{ statusLabel(individualPlayer.view.value.competition.status) }}</span>
+        </p>
+      </div>
+
+      <section class="space-y-3">
+        <h2 class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">出場試合 ({{ individualPlayer.view.value.matches.length }} 試合)</h2>
+        <p
+          v-if="individualPlayer.view.value.matches.length === 0"
+          class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl"
+        >
+          まだ試合表が作成されていません。
+        </p>
+        <div
+          v-for="m in individualPlayer.view.value.matches"
+          :key="m.matchId"
+          class="bg-white dark:bg-slate-800 border rounded-2xl overflow-hidden"
+          :class="m.isFinals ? 'border-amber-300 dark:border-amber-700' : 'border-slate-200 dark:border-slate-700'"
+        >
+          <div
+            class="px-4 py-2 border-b flex items-center justify-between flex-wrap gap-2"
+            :class="m.isFinals
+              ? 'border-amber-200 dark:border-amber-700/60 bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-900/20 dark:to-rose-900/20'
+              : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60'"
+          >
+            <p class="font-bold text-sm">
+              <span v-if="m.isFinals">🏆 決勝 バケット {{ m.finalsBucket }}</span>
+              <span v-else>予選 第 {{ m.matchOrder }} 試合</span>
+            </p>
+            <p class="text-[10px] font-mono text-slate-400">
+              <span v-if="m.resultRecordedAt" class="text-emerald-600 dark:text-emerald-300">記録済</span>
+              <span v-else class="italic">未記録</span>
+            </p>
+          </div>
+          <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
+            <li
+              v-for="s in m.slots"
+              :key="s.slotPosition"
+              class="px-4 py-2 grid grid-cols-[40px_1fr_1fr_70px_60px_50px] gap-2 items-center text-sm"
+              :class="s.isMe ? 'bg-blue-50 dark:bg-blue-900/20 font-bold' : ''"
+            >
+              <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ s.slotPosition }}</span>
+              <span class="truncate">{{ s.participantName }}<span v-if="s.isMe" class="ml-1 text-[10px] font-mono text-blue-600 dark:text-blue-300">(自分)</span></span>
+              <span class="text-xs text-slate-500 truncate" :class="s.songTitle ? '' : 'italic'">{{ s.songTitle || '-' }}</span>
+              <span class="text-right tabular-nums" :class="s.score !== null ? '' : 'text-slate-400 italic text-xs'">{{ s.score !== null ? s.score : '-' }}</span>
+              <span
+                class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                :class="s.rankInMatch === 1
+                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                  : s.rankInMatch === 2
+                    ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                    : s.rankInMatch
+                      ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                      : 'bg-transparent text-slate-300'"
+              >{{ s.rankInMatch ? s.rankInMatch + '位' : '-' }}</span>
+              <span class="text-right tabular-nums font-bold" :class="s.points ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">
+                {{ s.points !== null ? s.points + 'pt' : '-' }}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- ────────── 既存 team5 ビュー ────────── -->
     <div
       v-else-if="!view"
       class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center"

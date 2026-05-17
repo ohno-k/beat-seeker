@@ -3,6 +3,7 @@ package com.beatseeker.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -36,6 +37,18 @@ public class Competition {
     /** 大会名 (例: "BPL 模擬戦 2026 春")。 */
     @Column(length = 200, nullable = false)
     private String name;
+
+    /**
+     * 大会フォーマット。
+     * <ul>
+     *   <li>{@code team5} (デフォルト): 既存の 5 チーム×4 名・10 matchup 総当たり団体戦。</li>
+     *   <li>{@code individual4}: 4 人対戦×1 曲制の個人戦。12 or 16 名で予選 → 上位 4 名ずつの決勝。</li>
+     * </ul>
+     * 文字列で保持し、コントローラ層で分岐する。
+     */
+    @Column(length = 16, nullable = false)
+    @ColumnDefault("'team5'")
+    private String format = "team5";
 
     /**
      * 状態。{@code draft / open / locked / finished}。

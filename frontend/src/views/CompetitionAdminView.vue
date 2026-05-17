@@ -23,6 +23,10 @@ import {
   type CompetitionSongGenre,
   type CompetitionRevealData,
   type CompetitionStandingsDto,
+  type CompetitionIndividualMatchDto,
+  type CompetitionIndividualStandingsDto,
+  type CompetitionFormat,
+  type IndividualResultPayload,
   type MatchResultPayload,
 } from '../composables/useCompetitionAdmin';
 import { useToast } from '../composables/useToast';
@@ -53,6 +57,15 @@ const {
   fetchStandings,
   generateFinals,
   fetchRevealData,
+  addIndividualParticipant,
+  updateIndividualParticipant,
+  deleteIndividualParticipant,
+  regenerateIndividualParticipantToken,
+  openIndividualCompetition,
+  setIndividualMatchResult,
+  clearIndividualMatchResult,
+  fetchIndividualStandings,
+  generateIndividualFinals,
 } = useCompetitionAdmin();
 
 /** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
@@ -78,6 +91,8 @@ const backToList = () => {
 
 // ── 新規作成フォーム ──────────────────────────────────────
 const createName = ref('');
+/** 作成時に選択する大会フォーマット。デフォルト team5 で既存挙動を維持。 */
+const createFormat = ref<CompetitionFormat>('team5');
 const isCreating = ref(false);
 const handleCreate = async () => {
   if (!createName.value.trim()) {
@@ -86,7 +101,7 @@ const handleCreate = async () => {
   }
   isCreating.value = true;
   try {
-    await createCompetition(createName.value.trim());
+    await createCompetition(createName.value.trim(), createFormat.value);
     createName.value = '';
     toast.success('大会を作成しました');
     await fetchCompetitions();
@@ -126,8 +141,13 @@ const refreshRevealData = async (compId: number) => {
 const handleOpenCompetition = async (id: number) => {
   try {
     await fetchCompetition(id);
-    await refreshRevealData(id);
-    await refreshStandings();
+    if (currentCompetition.value?.format === 'individual4') {
+      // individual4: Strategy/Reveal は使わないので standings のみ
+      await refreshIndividualStandings();
+    } else {
+      await refreshRevealData(id);
+      await refreshStandings();
+    }
   } catch (e) {
     toast.error((e as Error).message);
   }
@@ -572,6 +592,213 @@ const handleGenerateFinals = async () => {
   }
 };
 
+// ── 個人戦 (individual4) ───────────────────────────────────
+
+/** 個人戦の参加者追加フォームの入力値。 */
+const addingIndividualName = ref('');
+const isAddingIndividual = ref(false);
+/** 個人戦の順位表 (取得済み)。 */
+const individualStandings = ref<CompetitionIndividualStandingsDto | null>(null);
+
+const refreshIndividualStandings = async () => {
+  if (!currentCompetition.value) return;
+  try {
+    individualStandings.value = await fetchIndividualStandings(currentCompetition.value.id);
+  } catch {
+    individualStandings.value = null;
+  }
+};
+
+/** 個人戦参加者を 1 名追加。 */
+const handleAddIndividualParticipant = async () => {
+  if (!currentCompetition.value) return;
+  const name = addingIndividualName.value.trim();
+  if (!name) {
+    toast.error('表示名を入力してください');
+    return;
+  }
+  isAddingIndividual.value = true;
+  try {
+    await addIndividualParticipant(currentCompetition.value.id, name);
+    addingIndividualName.value = '';
+    toast.success('参加者を追加しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isAddingIndividual.value = false;
+  }
+};
+
+/** 個人戦参加者の表示名を編集。inline 編集状態を管理。 */
+const editingIndividualParticipantId = ref<number | null>(null);
+const editingIndividualName = ref('');
+const beginEditIndividualParticipant = (p: CompetitionParticipantDto) => {
+  editingIndividualParticipantId.value = p.id;
+  editingIndividualName.value = p.displayName;
+};
+const cancelEditIndividualParticipant = () => {
+  editingIndividualParticipantId.value = null;
+  editingIndividualName.value = '';
+};
+const commitEditIndividualParticipant = async (p: CompetitionParticipantDto) => {
+  if (!currentCompetition.value) return;
+  const name = editingIndividualName.value.trim();
+  if (!name || name === p.displayName) {
+    cancelEditIndividualParticipant();
+    return;
+  }
+  try {
+    await updateIndividualParticipant(currentCompetition.value.id, p.id, name);
+    toast.success('表示名を変更しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    cancelEditIndividualParticipant();
+  }
+};
+
+const handleDeleteIndividualParticipant = async (p: CompetitionParticipantDto) => {
+  if (!currentCompetition.value) return;
+  if (!confirm(`「${p.displayName}」を削除しますか?`)) return;
+  try {
+    await deleteIndividualParticipant(currentCompetition.value.id, p.id);
+    toast.success('参加者を削除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+const handleRegenerateIndividualToken = async (p: CompetitionParticipantDto) => {
+  if (!currentCompetition.value) return;
+  if (!confirm(`「${p.displayName}」の招待 URL を再発行します。続けますか?`)) return;
+  try {
+    await regenerateIndividualParticipantToken(currentCompetition.value.id, p.id);
+    toast.success('招待 URL を再発行しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+/** 個人戦の参加者数 (現在登録済)。12 / 16 のときだけ open に進める。 */
+const individualParticipantCount = computed<number>(() => {
+  return currentCompetition.value?.participants?.length ?? 0;
+});
+const canOpenIndividual = computed<boolean>(() => {
+  const n = individualParticipantCount.value;
+  return n === 12 || n === 16;
+});
+
+const handleOpenIndividualStatus = async () => {
+  if (!currentCompetition.value) return;
+  const n = individualParticipantCount.value;
+  if (!confirm(`この大会を open に遷移しますか?\n参加者 ${n} 名から予選試合表が自動生成されます。`)) return;
+  try {
+    await openIndividualCompetition(currentCompetition.value.id);
+    await refreshIndividualStandings();
+    toast.success('open に遷移しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+/** 個人戦 試合結果記録: 編集中の matchId と 4 スロット分の入力 draft。 */
+const editingIndividualMatchId = ref<number | null>(null);
+const individualResultDraft = ref<IndividualResultPayload>({
+  slots: [
+    { slotPosition: 1, songStrategyId: null, songTitle: null, score: null },
+    { slotPosition: 2, songStrategyId: null, songTitle: null, score: null },
+    { slotPosition: 3, songStrategyId: null, songTitle: null, score: null },
+    { slotPosition: 4, songStrategyId: null, songTitle: null, score: null },
+  ],
+});
+
+const beginEditIndividualResult = (m: CompetitionIndividualMatchDto) => {
+  editingIndividualMatchId.value = m.id;
+  individualResultDraft.value = {
+    slots: m.slots.map(s => ({
+      slotPosition: s.slotPosition,
+      songStrategyId: s.songStrategyId,
+      songTitle: s.songTitle,
+      score: s.score,
+    })),
+  };
+};
+const cancelEditIndividualResult = () => {
+  editingIndividualMatchId.value = null;
+};
+
+const handleSaveIndividualResult = async (matchId: number) => {
+  if (!currentCompetition.value) return;
+  for (const s of individualResultDraft.value.slots) {
+    if (s.score !== null && s.score < 0) {
+      toast.error('スコアは 0 以上で入力してください');
+      return;
+    }
+  }
+  try {
+    await setIndividualMatchResult(currentCompetition.value.id, matchId, individualResultDraft.value);
+    await refreshIndividualStandings();
+    toast.success('結果を記録しました');
+    cancelEditIndividualResult();
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+const handleClearIndividualResult = async (matchId: number) => {
+  if (!currentCompetition.value) return;
+  if (!confirm('この試合の結果を未記録に戻しますか?')) return;
+  try {
+    await clearIndividualMatchResult(currentCompetition.value.id, matchId);
+    await refreshIndividualStandings();
+    toast.success('結果を未記録に戻しました');
+    cancelEditIndividualResult();
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+const handleGenerateIndividualFinals = async () => {
+  if (!currentCompetition.value) return;
+  if (!confirm('予選順位に基づき決勝試合 (4 人ずつのバケット) を生成しますか?')) return;
+  try {
+    await generateIndividualFinals(currentCompetition.value.id);
+    await refreshIndividualStandings();
+    toast.success('決勝を生成しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
+/**
+ * 編集中ドラフトから順位プレビューを計算 (4 全スロットにスコアが入っている時のみ表示)。
+ * サーバと同じく「自分より高スコアの人数 + 1」を rank としており、タイは両者を上位扱い。
+ */
+const draftIndividualRanks = computed<Array<{ slotPosition: number; rank: number | null; points: number | null }>>(() => {
+  const slots = individualResultDraft.value.slots;
+  const allScored = slots.length === 4 && slots.every(s => s.score !== null);
+  if (!allScored) {
+    return slots.map(s => ({ slotPosition: s.slotPosition, rank: null, points: null }));
+  }
+  return slots.map(s => {
+    let better = 0;
+    for (const other of slots) {
+      if (other.score !== null && s.score !== null && other.score > s.score) better++;
+    }
+    const rank = better + 1;
+    const points = rank === 1 ? 2 : rank === 2 ? 1 : 0;
+    return { slotPosition: s.slotPosition, rank, points };
+  });
+});
+
+/** 個人戦の試合一覧を予選 → 決勝の順で返す。 */
+const individualPrelimMatches = computed<CompetitionIndividualMatchDto[]>(() => {
+  return (currentCompetition.value?.individualMatches ?? []).filter(m => !m.isFinals);
+});
+const individualFinalsMatches = computed<CompetitionIndividualMatchDto[]>(() => {
+  return (currentCompetition.value?.individualMatches ?? []).filter(m => m.isFinals);
+});
+
 // ── 途中経過マトリクス 用ヘルパ ───────────────────────
 /**
  * row × col セルの表示内容。
@@ -651,8 +878,34 @@ const statusColor = (s: string) => ({
         </div>
 
         <!-- 新規作成カード -->
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
-          <p class="text-sm font-bold mb-3">新規大会を作成</p>
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm space-y-3">
+          <p class="text-sm font-bold">新規大会を作成</p>
+          <!-- フォーマット選択 (ラジオ) -->
+          <div>
+            <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">フォーマット</p>
+            <div class="flex flex-wrap gap-2">
+              <label
+                class="flex-1 min-w-[180px] cursor-pointer px-3 py-2 rounded-xl border-2 transition-colors"
+                :class="createFormat === 'team5'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+              >
+                <input type="radio" v-model="createFormat" value="team5" class="sr-only" :disabled="isCreating" />
+                <p class="text-sm font-bold">団体戦 (5 チーム)</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">5 チーム × 4 名の総当たり、10 matchup × 3 戦</p>
+              </label>
+              <label
+                class="flex-1 min-w-[180px] cursor-pointer px-3 py-2 rounded-xl border-2 transition-colors"
+                :class="createFormat === 'individual4'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'"
+              >
+                <input type="radio" v-model="createFormat" value="individual4" class="sr-only" :disabled="isCreating" />
+                <p class="text-sm font-bold">個人戦 (4 人対戦)</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">12 or 16 名・各人 6 or 5 試合の予選 + 上位 4 名ずつの決勝</p>
+              </label>
+            </div>
+          </div>
           <div class="flex flex-col sm:flex-row gap-2">
             <input
               v-model="createName"
@@ -687,6 +940,12 @@ const statusColor = (s: string) => ({
                 <p class="font-bold truncate">{{ c.name }}</p>
                 <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · 作成 {{ new Date(c.createdAt).toLocaleString() }}</p>
               </div>
+              <span
+                class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                :class="c.format === 'individual4'
+                  ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                  : 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'"
+              >{{ c.format === 'individual4' ? '個人戦' : '団体戦' }}</span>
               <span class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider" :class="statusColor(c.status)">{{ statusLabel(c.status) }}</span>
               <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
             </li>
@@ -702,16 +961,37 @@ const statusColor = (s: string) => ({
             ← 一覧へ
           </button>
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ currentCompetition.name }}</h1>
+          <span
+            class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+            :class="currentCompetition.format === 'individual4'
+              ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+              : 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'"
+          >{{ currentCompetition.format === 'individual4' ? '個人戦' : '団体戦' }}</span>
           <span class="text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider" :class="statusColor(currentCompetition.status)">{{ statusLabel(currentCompetition.status) }}</span>
           <p class="text-xs text-slate-500 font-mono">ID #{{ currentCompetition.id }}</p>
 
+          <!-- team5 用 Open ボタン -->
           <button
-            v-if="currentCompetition.status === 'draft'"
+            v-if="currentCompetition.status === 'draft' && currentCompetition.format !== 'individual4'"
             type="button"
             @click="handleOpenStatus"
             class="ml-auto px-5 py-2 rounded-xl text-sm font-black tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 shadow-sm"
           >
             ▶ Open に遷移
+          </button>
+          <!-- individual4 用 Open ボタン (12 or 16 名揃った時のみ active) -->
+          <button
+            v-else-if="currentCompetition.status === 'draft' && currentCompetition.format === 'individual4'"
+            type="button"
+            @click="handleOpenIndividualStatus"
+            :disabled="!canOpenIndividual"
+            class="ml-auto px-5 py-2 rounded-xl text-sm font-black tracking-wider uppercase transition-all"
+            :class="canOpenIndividual
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 shadow-sm'
+              : 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'"
+            :title="canOpenIndividual ? '予選試合表を自動生成して open に遷移します' : '参加者を 12 名または 16 名 ちょうど登録してください'"
+          >
+            ▶ Open に遷移 ({{ individualParticipantCount }} / 12 or 16)
           </button>
 
           <!-- 削除ボタン (常時表示。2 段階確認付き) -->
@@ -725,6 +1005,8 @@ const statusColor = (s: string) => ({
           </button>
         </div>
 
+        <!-- ────────── team5 専用セクション群 ────────── -->
+        <template v-if="currentCompetition.format !== 'individual4'">
         <!-- 5 チームグリッド -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div
@@ -1338,6 +1620,389 @@ const statusColor = (s: string) => ({
             </ul>
           </div>
         </section>
+        </template>
+        <!-- ────────── /team5 専用セクション群 ────────── -->
+
+        <!-- ────────── individual4 専用セクション群 ────────── -->
+        <template v-if="currentCompetition.format === 'individual4'">
+          <!-- 参加者リスト (draft 中は追加 UI、open 以降は閲覧のみ) -->
+          <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+                参加者 ({{ individualParticipantCount }} 名)
+              </h2>
+              <p class="text-[11px] text-slate-500">
+                <span v-if="currentCompetition.status === 'draft'">
+                  参加者を 12 名または 16 名 ちょうど登録して open に進んでください。
+                </span>
+                <span v-else>
+                  open 後の参加者編集は不可。誤公開時のみ招待 URL を再発行できます。
+                </span>
+              </p>
+            </div>
+
+            <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
+              <li
+                v-for="(p, idx) in (currentCompetition.participants ?? [])"
+                :key="p.id"
+                class="py-2 flex items-center gap-2"
+              >
+                <span class="w-6 text-[10px] font-mono text-slate-400 tabular-nums text-right">{{ idx + 1 }}</span>
+                <div class="flex-1 min-w-0">
+                  <div v-if="editingIndividualParticipantId === p.id" class="flex items-center gap-2">
+                    <input
+                      v-model="editingIndividualName"
+                      type="text"
+                      class="flex-1 px-2 py-1 rounded-lg text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                      @keydown.enter="commitEditIndividualParticipant(p)"
+                      @keydown.esc="cancelEditIndividualParticipant"
+                    />
+                    <button type="button" @click="commitEditIndividualParticipant(p)" class="text-xs font-bold text-blue-600 dark:text-blue-400">保存</button>
+                    <button type="button" @click="cancelEditIndividualParticipant" class="text-xs text-slate-500">×</button>
+                  </div>
+                  <div v-else class="flex items-center gap-2">
+                    <p class="font-bold truncate">{{ p.displayName }}</p>
+                    <button
+                      v-if="currentCompetition.status === 'draft'"
+                      type="button"
+                      @click="beginEditIndividualParticipant(p)"
+                      class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      title="表示名を編集"
+                    >✎</button>
+                  </div>
+                  <p class="text-[10px] font-mono text-slate-400 truncate">{{ buildPlayerUrl(p.inviteToken) }}</p>
+                </div>
+                <button
+                  type="button"
+                  @click="copyToClipboard(buildPlayerUrl(p.inviteToken), '参加者 URL')"
+                  class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+                >URL</button>
+                <button
+                  type="button"
+                  @click="handleRegenerateIndividualToken(p)"
+                  class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                  title="招待 URL を再発行"
+                >再発行</button>
+                <button
+                  v-if="currentCompetition.status === 'draft'"
+                  type="button"
+                  @click="handleDeleteIndividualParticipant(p)"
+                  class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300"
+                  title="削除"
+                >×</button>
+              </li>
+            </ul>
+
+            <!-- 参加者追加フォーム (draft かつ 16 名未満) -->
+            <div
+              v-if="currentCompetition.status === 'draft' && individualParticipantCount < 16"
+              class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60"
+            >
+              <input
+                v-model="addingIndividualName"
+                type="text"
+                placeholder="新規参加者の表示名"
+                class="flex-1 px-3 py-1.5 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                @keydown.enter="handleAddIndividualParticipant"
+                :disabled="isAddingIndividual"
+              />
+              <button
+                type="button"
+                @click="handleAddIndividualParticipant"
+                :disabled="isAddingIndividual || !addingIndividualName.trim()"
+                class="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
+              >+ 追加</button>
+            </div>
+          </section>
+
+          <!-- 順位表 (open 以降) -->
+          <section
+            v-if="individualStandings && individualStandings.rows.length > 0"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+          >
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+                順位表 (予選 {{ individualStandings.prelimRecordedCount }} / {{ individualStandings.prelimMatchCount }} 試合記録済)
+              </h2>
+              <button
+                type="button"
+                @click="refreshIndividualStandings"
+                class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+              >🔄 再計算</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                    <th class="text-left py-1 px-2">順位</th>
+                    <th class="text-left py-1 px-2">参加者</th>
+                    <th class="text-right py-1 px-2 font-black text-slate-700 dark:text-slate-200">予選pt</th>
+                    <th class="text-right py-1 px-2">1位</th>
+                    <th class="text-right py-1 px-2">2位</th>
+                    <th class="text-right py-1 px-2">3位</th>
+                    <th class="text-right py-1 px-2">4位</th>
+                    <th class="text-right py-1 px-2">決勝</th>
+                    <th class="text-right py-1 px-2 font-black text-slate-700 dark:text-slate-200">最終</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in individualStandings.rows"
+                    :key="row.participantId"
+                    class="border-b border-slate-100 dark:border-slate-700/60"
+                    :class="row.prelimRank <= 4 ? 'bg-amber-50/40 dark:bg-amber-900/10 font-bold' : ''"
+                  >
+                    <td class="py-1.5 px-2 tabular-nums">{{ row.prelimRank }}</td>
+                    <td class="py-1.5 px-2 truncate">{{ row.displayName }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums font-black">{{ row.prelimPoints }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums text-amber-600 dark:text-amber-300">{{ row.first }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums">{{ row.second }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums">{{ row.third }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums text-rose-500 dark:text-rose-400">{{ row.fourth }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums text-slate-500">
+                      <span v-if="row.finalsBucket">B{{ row.finalsBucket }}</span>
+                      <span v-else>-</span>
+                      <span v-if="row.finalsRank"> / {{ row.finalsRank }}位</span>
+                    </td>
+                    <td class="py-1.5 px-2 text-right tabular-nums font-black">
+                      <span v-if="row.finalRank">{{ row.finalRank }}</span>
+                      <span v-else class="text-slate-400">-</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- 決勝生成ボタン -->
+            <div class="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-slate-700/40">
+              <p class="text-[11px] text-slate-500">
+                <span v-if="individualStandings.allFinalsRecorded" class="text-amber-600 dark:text-amber-300 font-bold">🏆 決勝記録完了 — 最終順位確定</span>
+                <span v-else-if="individualStandings.finalsExists">決勝生成済 ({{ individualStandings.finalsRecordedCount }} / {{ individualStandings.finalsMatchCount }} 試合記録済)</span>
+                <span v-else-if="individualStandings.allPrelimRecorded">予選全試合記録済。決勝を生成できます。</span>
+                <span v-else>予選 {{ individualStandings.prelimMatchCount - individualStandings.prelimRecordedCount }} 試合の結果記録待ち</span>
+              </p>
+              <button
+                v-if="!individualStandings.finalsExists"
+                type="button"
+                @click="handleGenerateIndividualFinals"
+                :disabled="!individualStandings.allPrelimRecorded"
+                class="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all"
+                :class="individualStandings.allPrelimRecorded
+                  ? 'bg-gradient-to-r from-amber-400 to-rose-500 text-white hover:shadow-lg'
+                  : 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'"
+              >
+                🏆 決勝を生成
+              </button>
+            </div>
+          </section>
+
+          <!-- 予選試合一覧 + 結果入力 (open 以降) -->
+          <section
+            v-if="individualPrelimMatches.length > 0"
+            class="space-y-3"
+          >
+            <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+              予選 ({{ individualPrelimMatches.length }} 試合)
+            </h2>
+            <p class="text-[11px] text-slate-500">
+              各試合 4 人の曲タイトル / スコアを入力すると、順位 (1位2pt / 2位1pt / 3位4位0pt) が自動算出されます。
+            </p>
+            <div
+              v-for="m in individualPrelimMatches"
+              :key="m.id"
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
+            >
+              <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between flex-wrap gap-2">
+                <p class="font-bold text-sm">予選 第 {{ m.matchOrder }} 試合</p>
+                <p class="text-[10px] font-mono text-slate-400">
+                  <span v-if="m.resultRecordedAt" class="text-emerald-600 dark:text-emerald-300">記録済 {{ new Date(m.resultRecordedAt).toLocaleString() }}</span>
+                  <span v-else class="italic">未記録</span>
+                </p>
+              </div>
+              <!-- スロット 4 人を一覧 + 編集モード -->
+              <template v-if="editingIndividualMatchId !== m.id">
+                <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                  <li
+                    v-for="s in m.slots"
+                    :key="s.id"
+                    class="px-4 py-2 grid grid-cols-[40px_1fr_1fr_80px_60px_60px] gap-2 items-center text-sm"
+                  >
+                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ s.slotPosition }}</span>
+                    <span class="font-bold truncate">{{ s.participantName }}</span>
+                    <span class="text-xs text-slate-500 truncate" :class="s.songTitle ? '' : 'italic'">{{ s.songTitle || '曲未記録' }}</span>
+                    <span class="text-right tabular-nums" :class="s.score !== null ? '' : 'text-slate-400 italic text-xs'">{{ s.score !== null ? s.score : '-' }}</span>
+                    <span
+                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                      :class="s.rankInMatch === 1
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                        : s.rankInMatch === 2
+                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                          : s.rankInMatch
+                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            : 'bg-transparent text-slate-300'"
+                    >{{ s.rankInMatch ? s.rankInMatch + '位' : '-' }}</span>
+                    <span class="text-right tabular-nums font-bold" :class="s.points ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">
+                      {{ s.points !== null ? s.points + 'pt' : '-' }}
+                    </span>
+                  </li>
+                </ul>
+                <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700/40 flex gap-2 justify-end">
+                  <button type="button" @click="beginEditIndividualResult(m)" class="px-3 py-1 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                    {{ m.resultRecordedAt ? '編集' : '記録' }}
+                  </button>
+                  <button v-if="m.resultRecordedAt" type="button" @click="handleClearIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300">クリア</button>
+                </div>
+              </template>
+              <template v-else>
+                <div class="px-4 py-3 space-y-2">
+                  <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400">スコア記録 (曲タイトル + EX SCORE)</p>
+                  <div
+                    v-for="(draftSlot, idx) in individualResultDraft.slots"
+                    :key="draftSlot.slotPosition"
+                    class="grid grid-cols-[40px_1fr_1fr_100px_60px] gap-2 items-center text-sm"
+                  >
+                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ draftSlot.slotPosition }}</span>
+                    <span class="font-bold truncate">{{ m.slots[idx]?.participantName }}</span>
+                    <input
+                      v-model="individualResultDraft.slots[idx].songTitle"
+                      type="text"
+                      placeholder="曲タイトル"
+                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                    />
+                    <input
+                      v-model.number="individualResultDraft.slots[idx].score"
+                      type="number"
+                      min="0"
+                      placeholder="EX SCORE"
+                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 tabular-nums outline-none focus:border-blue-400"
+                    />
+                    <span
+                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                      :class="draftIndividualRanks[idx]?.rank === 1
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                        : draftIndividualRanks[idx]?.rank === 2
+                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                          : draftIndividualRanks[idx]?.rank
+                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            : 'bg-transparent text-slate-300'"
+                    >
+                      {{ draftIndividualRanks[idx]?.rank ? draftIndividualRanks[idx]?.rank + '位' : '-' }}
+                      <span v-if="draftIndividualRanks[idx]?.points !== null" class="ml-1">({{ draftIndividualRanks[idx]?.points }}pt)</span>
+                    </span>
+                  </div>
+                  <div class="flex gap-2 justify-end pt-2 border-t border-slate-100 dark:border-slate-700/40">
+                    <button type="button" @click="handleSaveIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">保存</button>
+                    <button type="button" @click="cancelEditIndividualResult" class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <!-- 決勝試合一覧 + 結果入力 (生成後) -->
+          <section
+            v-if="individualFinalsMatches.length > 0"
+            class="space-y-3"
+          >
+            <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+              🏆 決勝 ({{ individualFinalsMatches.length }} 試合)
+            </h2>
+            <p class="text-[11px] text-slate-500">
+              バケット内で 1 位 = 全体 (バケット-1)×4+1 位、… 4 位 = (バケット-1)×4+4 位 になります。
+            </p>
+            <div
+              v-for="m in individualFinalsMatches"
+              :key="m.id"
+              class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-2xl overflow-hidden"
+            >
+              <div class="px-4 py-2 border-b border-amber-200 dark:border-amber-700/60 bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-900/20 dark:to-rose-900/20 flex items-center justify-between flex-wrap gap-2">
+                <p class="font-bold text-sm">
+                  バケット {{ m.finalsBucket }}: 全体 {{ (m.finalsBucket! - 1) * 4 + 1 }} 〜 {{ (m.finalsBucket! - 1) * 4 + 4 }} 位
+                </p>
+                <p class="text-[10px] font-mono text-slate-400">
+                  <span v-if="m.resultRecordedAt" class="text-emerald-600 dark:text-emerald-300">記録済 {{ new Date(m.resultRecordedAt).toLocaleString() }}</span>
+                  <span v-else class="italic">未記録</span>
+                </p>
+              </div>
+              <template v-if="editingIndividualMatchId !== m.id">
+                <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
+                  <li
+                    v-for="s in m.slots"
+                    :key="s.id"
+                    class="px-4 py-2 grid grid-cols-[40px_1fr_1fr_80px_60px_60px] gap-2 items-center text-sm"
+                  >
+                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ s.slotPosition }}</span>
+                    <span class="font-bold truncate">{{ s.participantName }}</span>
+                    <span class="text-xs text-slate-500 truncate" :class="s.songTitle ? '' : 'italic'">{{ s.songTitle || '曲未記録' }}</span>
+                    <span class="text-right tabular-nums" :class="s.score !== null ? '' : 'text-slate-400 italic text-xs'">{{ s.score !== null ? s.score : '-' }}</span>
+                    <span
+                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                      :class="s.rankInMatch === 1
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                        : s.rankInMatch === 2
+                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                          : s.rankInMatch
+                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            : 'bg-transparent text-slate-300'"
+                    >{{ s.rankInMatch ? s.rankInMatch + '位' : '-' }}</span>
+                    <span class="text-right tabular-nums font-bold" :class="s.points ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">
+                      {{ s.points !== null ? s.points + 'pt' : '-' }}
+                    </span>
+                  </li>
+                </ul>
+                <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700/40 flex gap-2 justify-end">
+                  <button type="button" @click="beginEditIndividualResult(m)" class="px-3 py-1 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                    {{ m.resultRecordedAt ? '編集' : '記録' }}
+                  </button>
+                  <button v-if="m.resultRecordedAt" type="button" @click="handleClearIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300">クリア</button>
+                </div>
+              </template>
+              <template v-else>
+                <div class="px-4 py-3 space-y-2">
+                  <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400">スコア記録</p>
+                  <div
+                    v-for="(draftSlot, idx) in individualResultDraft.slots"
+                    :key="draftSlot.slotPosition"
+                    class="grid grid-cols-[40px_1fr_1fr_100px_60px] gap-2 items-center text-sm"
+                  >
+                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">P{{ draftSlot.slotPosition }}</span>
+                    <span class="font-bold truncate">{{ m.slots[idx]?.participantName }}</span>
+                    <input
+                      v-model="individualResultDraft.slots[idx].songTitle"
+                      type="text"
+                      placeholder="曲タイトル"
+                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                    />
+                    <input
+                      v-model.number="individualResultDraft.slots[idx].score"
+                      type="number"
+                      min="0"
+                      placeholder="EX SCORE"
+                      class="px-2 py-1 rounded text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 tabular-nums outline-none focus:border-blue-400"
+                    />
+                    <span
+                      class="text-center text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider"
+                      :class="draftIndividualRanks[idx]?.rank === 1
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                        : draftIndividualRanks[idx]?.rank === 2
+                          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                          : draftIndividualRanks[idx]?.rank
+                            ? 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                            : 'bg-transparent text-slate-300'"
+                    >
+                      {{ draftIndividualRanks[idx]?.rank ? draftIndividualRanks[idx]?.rank + '位' : '-' }}
+                      <span v-if="draftIndividualRanks[idx]?.points !== null" class="ml-1">({{ draftIndividualRanks[idx]?.points }}pt)</span>
+                    </span>
+                  </div>
+                  <div class="flex gap-2 justify-end pt-2 border-t border-slate-100 dark:border-slate-700/40">
+                    <button type="button" @click="handleSaveIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">保存</button>
+                    <button type="button" @click="cancelEditIndividualResult" class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+        </template>
+        <!-- ────────── /individual4 専用セクション群 ────────── -->
       </div>
     </template>
   </div>

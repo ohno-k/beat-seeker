@@ -13,9 +13,17 @@ import { TOKEN_KEY } from './constants';
 
 export type CompetitionStatus = 'draft' | 'open' | 'locked' | 'finished';
 
+/**
+ * 大会フォーマット。
+ * - {@code team5}: 5 チーム × 4 名総当たり団体戦 (既存)。
+ * - {@code individual4}: 4 人対戦 × 1 曲制の個人戦 (12 名 or 16 名)。
+ */
+export type CompetitionFormat = 'team5' | 'individual4';
+
 export interface CompetitionSummary {
   id: number;
   name: string;
+  format: CompetitionFormat;
   status: CompetitionStatus;
   deadlineAt: string | null;
   createdAt: string;
@@ -197,10 +205,72 @@ export interface CompetitionStandingsDto {
 export interface CompetitionDetail extends CompetitionSummary {
   teams: CompetitionTeamDto[];
   participants: CompetitionParticipantDto[];
-  /** draft 状態の間は欠落。open 以降に 10 件登場する。 */
+  /** draft 状態の間は欠落。open 以降に 10 件登場する (team5)。 */
   matchups?: CompetitionMatchupDto[];
-  /** draft 状態の間は欠落。open 以降に 30 件登場する。 */
+  /** draft 状態の間は欠落。open 以降に 30 件登場する (team5)。 */
   matches?: CompetitionMatchDto[];
+  /** individual4 専用: open 以降に予選 18 or 20 試合 + 決勝 3 or 4 試合が登場する。 */
+  individualMatches?: CompetitionIndividualMatchDto[];
+}
+
+// ── 個人戦 (individual4) 用 DTO ───────────────────────
+
+export interface CompetitionIndividualSlotDto {
+  id: number;
+  slotPosition: number; // 1..4
+  participantId: number | null;
+  participantName: string | null;
+  songStrategyId: number | null;
+  songTitle: string | null;
+  score: number | null;
+  rankInMatch: number | null;
+  points: number | null;
+}
+
+export interface CompetitionIndividualMatchDto {
+  id: number;
+  matchOrder: number;
+  isFinals: boolean;
+  finalsBucket: number | null;
+  resultRecordedAt: string | null;
+  slots: CompetitionIndividualSlotDto[];
+}
+
+/** 個人戦の試合結果記録 payload。slot 単位で score / songTitle / songStrategyId を送る。 */
+export interface IndividualResultSlotPayload {
+  slotPosition: number;
+  songStrategyId: number | null;
+  songTitle: string | null;
+  score: number | null;
+}
+export interface IndividualResultPayload {
+  slots: IndividualResultSlotPayload[];
+}
+
+/** 個人戦の順位表 1 行 (参加者単位)。 */
+export interface CompetitionIndividualStandingsRow {
+  participantId: number;
+  displayName: string;
+  prelimRank: number;
+  prelimPoints: number;
+  first: number;
+  second: number;
+  third: number;
+  fourth: number;
+  finalsBucket: number | null;
+  finalsRank: number | null;
+  finalsPoints: number;
+  finalRank: number | null;
+}
+export interface CompetitionIndividualStandingsDto {
+  rows: CompetitionIndividualStandingsRow[];
+  prelimMatchCount: number;
+  prelimRecordedCount: number;
+  allPrelimRecorded: boolean;
+  finalsExists: boolean;
+  finalsMatchCount: number;
+  finalsRecordedCount: number;
+  allFinalsRecorded: boolean;
 }
 
 /** Authorization ヘッダを共通生成 (useAuth と同じ TOKEN_KEY を参照)。 */
@@ -245,14 +315,20 @@ export function useCompetitionAdmin() {
     }
   };
 
-  /** 新規大会を作成。レスポンスは詳細 (5 チーム枠込み)。 */
-  const createCompetition = async (name: string): Promise<CompetitionDetail> => {
+  /**
+   * 新規大会を作成。format=team5 (デフォルト) なら 5 チーム枠を生成、
+   * format=individual4 ならチーム枠は作らず空の draft を返す。
+   */
+  const createCompetition = async (
+    name: string,
+    format: CompetitionFormat = 'team5',
+  ): Promise<CompetitionDetail> => {
     isLoading.value = true;
     try {
       const res = await fetch(`${API_BASE}/api/competitions`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, format }),
       });
       await throwIfError(res);
       const detail = (await res.json()) as CompetitionDetail;
@@ -509,6 +585,120 @@ export function useCompetitionAdmin() {
     await fetchCompetition(competitionId);
   };
 
+  // ── 個人戦 (individual4) 用 API ─────────────────────
+
+  /** 個人戦に参加者を追加 (招待トークンも自動発行)。 */
+  const addIndividualParticipant = async (
+    competitionId: number,
+    displayName: string,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/participants`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify({ displayName }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 個人戦の参加者表示名を更新。 */
+  const updateIndividualParticipant = async (
+    competitionId: number,
+    participantId: number,
+    displayName: string,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/participants/${participantId}`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ displayName }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 個人戦の参加者を削除。 */
+  const deleteIndividualParticipant = async (
+    competitionId: number,
+    participantId: number,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/participants/${participantId}`,
+      { method: 'DELETE', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 個人戦の参加者の招待トークンを再採番。 */
+  const regenerateIndividualParticipantToken = async (
+    competitionId: number,
+    participantId: number,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/participants/${participantId}/regenerate-token`,
+      { method: 'POST', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 個人戦を draft → open へ遷移し、予選試合表を自動生成する。 */
+  const openIndividualCompetition = async (competitionId: number): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/open`,
+      { method: 'POST', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 個人戦の試合 1 件の 4 スロット分の結果 (曲・スコア) を記録/更新。 */
+  const setIndividualMatchResult = async (
+    competitionId: number,
+    matchId: number,
+    payload: IndividualResultPayload,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/matches/${matchId}/result`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify(payload) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 個人戦の試合結果を未記録に戻す。 */
+  const clearIndividualMatchResult = async (
+    competitionId: number,
+    matchId: number,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/matches/${matchId}/result`,
+      { method: 'DELETE', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 個人戦の順位表を取得。 */
+  const fetchIndividualStandings = async (
+    competitionId: number,
+  ): Promise<CompetitionIndividualStandingsDto> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/standings`,
+      { headers: authHeaders() },
+    );
+    await throwIfError(res);
+    return (await res.json()) as CompetitionIndividualStandingsDto;
+  };
+
+  /** 個人戦で予選全試合記録後、上位 4 人ずつのバケットで決勝を生成。 */
+  const generateIndividualFinals = async (competitionId: number): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/generate-finals`,
+      { method: 'POST', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
   return {
     competitions,
     currentCompetition,
@@ -533,5 +723,15 @@ export function useCompetitionAdmin() {
     clearMatchResult,
     fetchStandings,
     generateFinals,
+    // 個人戦 (individual4) 用
+    addIndividualParticipant,
+    updateIndividualParticipant,
+    deleteIndividualParticipant,
+    regenerateIndividualParticipantToken,
+    openIndividualCompetition,
+    setIndividualMatchResult,
+    clearIndividualMatchResult,
+    fetchIndividualStandings,
+    generateIndividualFinals,
   };
 }

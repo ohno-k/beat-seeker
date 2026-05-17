@@ -34,9 +34,11 @@ public class CompetitionParticipant {
     @JoinColumn(name = "competition_id", nullable = false)
     private Competition competition;
 
-    /** 所属チーム。 */
+    /**
+     * 所属チーム。team5 フォーマットでは必須、individual4 フォーマットでは null。
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id", nullable = false)
+    @JoinColumn(name = "team_id")
     private CompetitionTeam team;
 
     /** 参加者の表示名 (DJ ネーム相当。主催または TL が登録)。 */

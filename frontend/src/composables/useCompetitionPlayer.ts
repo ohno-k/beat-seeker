@@ -31,6 +31,8 @@ export interface PlayerTeamDto {
 export interface PlayerCompetitionDto {
   id: number;
   name: string;
+  /** "team5" (既存) または "individual4" (個人戦)。view 内ロジックの分岐用。 */
+  format?: 'team5' | 'individual4';
   status: 'draft' | 'open' | 'locked' | 'finished';
   deadlineAt: string | null;
   lockedAt: string | null;
@@ -104,6 +106,43 @@ export interface PlayerViewDto {
   matches: PlayerMatchDto[];
 }
 
+// ── 個人戦 (individual4) 用 read-only ビュー ────────────
+
+export interface PlayerIndividualSlotDto {
+  slotPosition: number;
+  participantId: number | null;
+  participantName: string | null;
+  isMe: boolean;
+  songTitle: string | null;
+  score: number | null;
+  rankInMatch: number | null;
+  points: number | null;
+}
+export interface PlayerIndividualMatchDto {
+  matchId: number;
+  matchOrder: number;
+  isFinals: boolean;
+  finalsBucket: number | null;
+  resultRecordedAt: string | null;
+  slots: PlayerIndividualSlotDto[];
+}
+export interface PlayerIndividualSelfDto {
+  id: number;
+  displayName: string;
+  teamId: null;
+  isTl: false;
+}
+export interface PlayerIndividualViewDto {
+  participant: PlayerIndividualSelfDto;
+  competition: PlayerCompetitionDto; // format === 'individual4'
+  matches: PlayerIndividualMatchDto[];
+}
+
+/** 取得結果が team5 か individual4 のどちらの shape か判別するための discriminator。 */
+export type AnyPlayerView =
+  | { kind: 'team5'; data: PlayerViewDto }
+  | { kind: 'individual4'; data: PlayerIndividualViewDto };
+
 /** 自選曲 upsert の payload。songGenre は match.requiredGenre と一致する必要あり。 */
 export interface PickPayload {
   songGenre: SongGenre;
@@ -124,6 +163,7 @@ async function throwIfError(res: Response): Promise<void> {
 }
 
 export function useCompetitionPlayer() {
+  /** team5 用 view。individual4 大会の場合は別 composable を使う。 */
   const view = ref<PlayerViewDto | null>(null);
   const isLoading = ref(false);
 

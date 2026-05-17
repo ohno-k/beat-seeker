@@ -59,17 +59,23 @@ public class CompetitionPlayerController {
     private final CompetitionMatchRepository matchRepository;
     private final CompetitionStrategyUseRepository strategyUseRepository;
     private final StrategyPoolService strategyPoolService;
+    private final CompetitionIndividualMatchRepository individualMatchRepository;
+    private final CompetitionIndividualMatchSlotRepository individualMatchSlotRepository;
 
     public CompetitionPlayerController(CompetitionParticipantRepository participantRepository,
                                        CompetitionPickRepository pickRepository,
                                        CompetitionMatchRepository matchRepository,
                                        CompetitionStrategyUseRepository strategyUseRepository,
-                                       StrategyPoolService strategyPoolService) {
+                                       StrategyPoolService strategyPoolService,
+                                       CompetitionIndividualMatchRepository individualMatchRepository,
+                                       CompetitionIndividualMatchSlotRepository individualMatchSlotRepository) {
         this.participantRepository = participantRepository;
         this.pickRepository = pickRepository;
         this.matchRepository = matchRepository;
         this.strategyUseRepository = strategyUseRepository;
         this.strategyPoolService = strategyPoolService;
+        this.individualMatchRepository = individualMatchRepository;
+        this.individualMatchSlotRepository = individualMatchSlotRepository;
     }
 
     /**
@@ -100,6 +106,11 @@ public class CompetitionPlayerController {
 
         Competition comp = me.getCompetition();
         CompetitionTeam myTeam = me.getTeam();
+
+        // 個人戦は構造が大きく異なるため (チーム無し / 4 人試合 / StrategyCard 無し) 別レスポンスを返す
+        if ("individual4".equals(comp.getFormat())) {
+            return ResponseEntity.ok(buildIndividualPlayerView(me, comp));
+        }
 
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("participant", participantSelfMap(me));
@@ -432,6 +443,69 @@ public class CompetitionPlayerController {
         };
     }
 
+    // ── 個人戦プレイヤー Read-only ビュー ──────────────────
+
+    /**
+     * 個人戦 ({@code format = "individual4"}) 参加者向けビュー。
+     *
+     * <p>個人戦には StrategyCard / 自選曲提出フェーズが無いので、本人スケジュールと
+     * 試合結果 (順位 / ポイント) のリードオンリー表示のみ提供する。
+     */
+    private Map<String, Object> buildIndividualPlayerView(CompetitionParticipant me, Competition comp) {
+        Map<String, Object> root = new LinkedHashMap<>();
+        Map<String, Object> participant = new LinkedHashMap<>();
+        participant.put("id", me.getId());
+        participant.put("displayName", me.getDisplayName());
+        participant.put("teamId", null);
+        participant.put("isTl", false);
+        root.put("participant", participant);
+        Map<String, Object> compMap = new LinkedHashMap<>();
+        compMap.put("id", comp.getId());
+        compMap.put("name", comp.getName());
+        compMap.put("format", comp.getFormat());
+        compMap.put("status", comp.getStatus());
+        compMap.put("deadlineAt", comp.getDeadlineAt());
+        compMap.put("lockedAt", comp.getLockedAt());
+        root.put("competition", compMap);
+
+        // 担当試合: 自分が参加するスロット → 試合 ID で逆引きしてユニーク化
+        List<CompetitionIndividualMatchSlot> mySlots = individualMatchSlotRepository.findByParticipant(me);
+        Set<Long> myMatchIds = new HashSet<>();
+        for (CompetitionIndividualMatchSlot s : mySlots) myMatchIds.add(s.getMatch().getId());
+
+        List<CompetitionIndividualMatch> allMatches =
+                individualMatchRepository.findByCompetitionOrderByMatchOrderAsc(comp);
+        List<Map<String, Object>> matchMaps = new ArrayList<>();
+        for (CompetitionIndividualMatch m : allMatches) {
+            if (!myMatchIds.contains(m.getId())) continue;
+            Map<String, Object> mm = new LinkedHashMap<>();
+            mm.put("matchId", m.getId());
+            mm.put("matchOrder", m.getMatchOrder());
+            mm.put("isFinals", m.getIsFinals());
+            mm.put("finalsBucket", m.getFinalsBucket());
+            mm.put("resultRecordedAt", m.getResultRecordedAt());
+            List<CompetitionIndividualMatchSlot> slots =
+                    individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(m);
+            List<Map<String, Object>> slotMaps = new ArrayList<>();
+            for (CompetitionIndividualMatchSlot s : slots) {
+                Map<String, Object> sm = new LinkedHashMap<>();
+                sm.put("slotPosition", s.getSlotPosition());
+                sm.put("participantId", s.getParticipant() != null ? s.getParticipant().getId() : null);
+                sm.put("participantName", s.getParticipant() != null ? s.getParticipant().getDisplayName() : null);
+                sm.put("isMe", s.getParticipant() != null && s.getParticipant().getId().equals(me.getId()));
+                sm.put("songTitle", s.getSongTitle());
+                sm.put("score", s.getScore());
+                sm.put("rankInMatch", s.getRankInMatch());
+                sm.put("points", s.getPoints());
+                slotMaps.add(sm);
+            }
+            mm.put("slots", slotMaps);
+            matchMaps.add(mm);
+        }
+        root.put("matches", matchMaps);
+        return root;
+    }
+
     // ── レスポンス整形 ───────────────────────────────────────
 
     private Map<String, Object> participantSelfMap(CompetitionParticipant p) {
@@ -455,6 +529,7 @@ public class CompetitionPlayerController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", c.getId());
         m.put("name", c.getName());
+        m.put("format", c.getFormat());
         m.put("status", c.getStatus());
         m.put("deadlineAt", c.getDeadlineAt());
         m.put("lockedAt", c.getLockedAt());
