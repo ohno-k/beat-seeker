@@ -520,6 +520,68 @@ public class AdminController {
         } catch (Exception e) {
             result.put("rowCountAfterError", e.getClass().getSimpleName() + ": " + e.getMessage());
         }
+
+        // 手順5: users.total_average_rank も同じ流れで更新する。
+        // user_song_ranks が埋まった状態を前提に、リセット → 計算 UPDATE を単一トランザクションで実行。
+        try {
+            Integer updated = transactionTemplate.execute(status -> {
+                jdbcTemplate.execute("SET LOCAL statement_timeout = 0");
+                jdbcTemplate.update(
+                        "UPDATE users SET total_average_rank = NULL, total_average_rank_played = NULL " +
+                        "WHERE total_average_rank IS NOT NULL OR total_average_rank_played IS NOT NULL");
+                return jdbcTemplate.update(
+                        "WITH target_songs AS ( " +
+                        "  SELECT title, difficulty_name, MAX(total) AS player_total " +
+                        "  FROM user_song_ranks " +
+                        "  WHERE difficulty_level IN (11, 12) " +
+                        "    AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+                        "  GROUP BY title, difficulty_name " +
+                        "), " +
+                        "played_users AS ( " +
+                        "  SELECT DISTINCT user_id FROM user_song_ranks " +
+                        "  WHERE difficulty_level IN (11, 12) " +
+                        "    AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+                        "), " +
+                        "avg_per_user AS ( " +
+                        "  SELECT pu.user_id, " +
+                        "         AVG(COALESCE(usr.rank_position, ts.player_total + 1)) AS avg_rank, " +
+                        "         COUNT(usr.rank_position) AS played_count " +
+                        "  FROM played_users pu " +
+                        "  CROSS JOIN target_songs ts " +
+                        "  LEFT JOIN user_song_ranks usr " +
+                        "    ON usr.user_id = pu.user_id " +
+                        "   AND usr.title = ts.title " +
+                        "   AND usr.difficulty_name = ts.difficulty_name " +
+                        "  GROUP BY pu.user_id " +
+                        ") " +
+                        "UPDATE users u " +
+                        "SET total_average_rank = ROUND(apu.avg_rank::numeric, 2), " +
+                        "    total_average_rank_played = apu.played_count " +
+                        "FROM avg_per_user apu " +
+                        "WHERE u.id = apu.user_id");
+            });
+            result.put("avgUpdateOk", true);
+            result.put("avgUpdated", updated);
+        } catch (Exception e) {
+            result.put("avgUpdateOk", false);
+            result.put("avgUpdateError", e.getClass().getName() + ": " + e.getMessage());
+            Throwable cause = e.getCause();
+            int depth = 0;
+            while (cause != null && depth < 5) {
+                result.put("avgUpdateCause" + depth, cause.getClass().getName() + ": " + cause.getMessage());
+                cause = cause.getCause();
+                depth++;
+            }
+        }
+
+        // 手順6: total_average_rank が埋まったユーザー数を確認する。
+        try {
+            Integer avgUsers = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM users WHERE total_average_rank IS NOT NULL", Integer.class);
+            result.put("usersWithAvgRank", avgUsers);
+        } catch (Exception e) {
+            result.put("usersWithAvgRankError", e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
         return ResponseEntity.ok(result);
     }
 
