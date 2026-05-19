@@ -922,7 +922,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      */
     @Modifying
     @Query(value =
-        "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank, total, calculated_at) " +
+        "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank_position, total, calculated_at) " +
         "WITH best_scores AS ( " +
         "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score " +
         "  FROM scores " +
@@ -931,11 +931,11 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "), " +
         "all_ranks AS ( " +
         "  SELECT title, difficulty_name, difficulty_level, user_id, score, " +
-        "    RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC) AS rank, " +
+        "    RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC) AS rank_position, " +
         "    COUNT(*) OVER (PARTITION BY title, difficulty_name) AS total " +
         "  FROM best_scores " +
         ") " +
-        "SELECT user_id, title, difficulty_name, difficulty_level, rank, total, NOW() " +
+        "SELECT user_id, title, difficulty_name, difficulty_level, rank_position, total, NOW() " +
         "FROM all_ranks", nativeQuery = true)
     void insertAllUserSongRanks();
 
