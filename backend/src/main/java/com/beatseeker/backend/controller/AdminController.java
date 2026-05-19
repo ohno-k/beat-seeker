@@ -17,6 +17,7 @@ import com.beatseeker.backend.service.TopRankersBeatPtService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -81,6 +82,8 @@ public class AdminController {
     private final AdminAuthService adminAuthService;
     /** 連携アプリから同期された譜面オプション。スコア応答に options を埋めるのに使う。 */
     private final UserSongOptionRepository userSongOptionRepository;
+    /** 個別トランザクションで直接 SQL を流すための JDBC テンプレート（診断用途）。 */
+    private final JdbcTemplate jdbcTemplate;
 
     /**
      * JPA が注入する永続化コンテキスト。
@@ -101,7 +104,8 @@ public class AdminController {
                            TopRankersBeatPtService topRankersBeatPtService,
                            ObjectMapper objectMapper,
                            AdminAuthService adminAuthService,
-                           UserSongOptionRepository userSongOptionRepository) {
+                           UserSongOptionRepository userSongOptionRepository,
+                           JdbcTemplate jdbcTemplate) {
         this.userSongOptionRepository = userSongOptionRepository;
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
@@ -111,6 +115,7 @@ public class AdminController {
         this.topRankersBeatPtService = topRankersBeatPtService;
         this.objectMapper = objectMapper;
         this.adminAuthService = adminAuthService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
@@ -442,26 +447,41 @@ public class AdminController {
      * @return 診断結果
      */
     @PostMapping("/recalculate-song-ranks-sync")
-    @Transactional
     public ResponseEntity<Map<String, Object>> recalculateSongRanksSync(Authentication auth) {
         checkAdminAccess(auth);
         Map<String, Object> result = new HashMap<>();
+
         // 手順1: user_song_ranks テーブルの実カラム名を information_schema から取得する。
         try {
-            @SuppressWarnings("unchecked")
-            List<String> columns = entityManager.createNativeQuery(
+            List<String> columns = jdbcTemplate.queryForList(
                     "SELECT column_name FROM information_schema.columns " +
-                    "WHERE table_name = 'user_song_ranks' ORDER BY ordinal_position"
-            ).getResultList();
+                    "WHERE table_name = 'user_song_ranks' ORDER BY ordinal_position",
+                    String.class);
             result.put("columns", columns);
         } catch (Exception e) {
-            result.put("columnsError", e.getMessage());
+            result.put("columnsError", e.getClass().getSimpleName() + ": " + e.getMessage());
         }
 
-        // 手順2: TRUNCATE + INSERT を同期実行。例外があれば catch してメッセージを返す。
+        // 手順2: INSERT 前の現在行数を記録する。
         try {
-            entityManager.createNativeQuery("TRUNCATE TABLE user_song_ranks").executeUpdate();
-            int inserted = entityManager.createNativeQuery(
+            Integer before = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user_song_ranks", Integer.class);
+            result.put("rowCountBefore", before);
+        } catch (Exception e) {
+            result.put("rowCountBeforeError", e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+
+        // 手順3: TRUNCATE + INSERT を JdbcTemplate で個別に実行（@Transactional なしで各操作が独立）。
+        // 例外があれば catch して詳細メッセージを result に詰める。
+        try {
+            jdbcTemplate.execute("TRUNCATE TABLE user_song_ranks");
+            result.put("truncateOk", true);
+        } catch (Exception e) {
+            result.put("truncateOk", false);
+            result.put("truncateError", e.getClass().getName() + ": " + e.getMessage());
+        }
+
+        try {
+            int inserted = jdbcTemplate.update(
                     "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank_position, total, calculated_at) " +
                     "WITH best_scores AS ( " +
                     "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score " +
@@ -476,30 +496,27 @@ public class AdminController {
                     "  FROM best_scores " +
                     ") " +
                     "SELECT user_id, title, difficulty_name, difficulty_level, rank_position, total, NOW() " +
-                    "FROM all_ranks"
-            ).executeUpdate();
-            result.put("ok", true);
+                    "FROM all_ranks");
+            result.put("insertOk", true);
             result.put("inserted", inserted);
         } catch (Exception e) {
-            result.put("ok", false);
-            result.put("error", e.getClass().getName() + ": " + e.getMessage());
+            result.put("insertOk", false);
+            result.put("insertError", e.getClass().getName() + ": " + e.getMessage());
             Throwable cause = e.getCause();
             int depth = 0;
             while (cause != null && depth < 5) {
-                result.put("cause" + depth, cause.getClass().getName() + ": " + cause.getMessage());
+                result.put("insertCause" + depth, cause.getClass().getName() + ": " + cause.getMessage());
                 cause = cause.getCause();
                 depth++;
             }
         }
 
-        // 手順3: 現在の行数を返す（INSERT 失敗時はトランザクションロールバックされている可能性に注意）。
+        // 手順4: INSERT 後の現在行数を返す。
         try {
-            Object countObj = entityManager.createNativeQuery(
-                    "SELECT COUNT(*) FROM user_song_ranks"
-            ).getSingleResult();
-            result.put("rowCount", ((Number) countObj).longValue());
+            Integer after = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user_song_ranks", Integer.class);
+            result.put("rowCountAfter", after);
         } catch (Exception e) {
-            result.put("rowCountError", e.getMessage());
+            result.put("rowCountAfterError", e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         return ResponseEntity.ok(result);
     }
