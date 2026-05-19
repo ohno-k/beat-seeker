@@ -53,50 +53,30 @@ public interface UserSongRankRepository extends JpaRepository<UserSongRank, Long
     /**
      * 【メソッドの役割】 公式難易度 Lv11/Lv12 の ANOTHER/LEGGENDARIA 全譜面に対する「平均順位ランキング」を取得する。
      *
-     * 各ユーザーごとに対象譜面の順位を平均し、低い順（＝強い順）に並べる。
-     * 未プレイ譜面は「その譜面のプレイ人数 + 1」を順位として算入する仕様。
-     * 集計対象は「対象セット内の少なくとも 1 曲をプレイ済み（user_song_ranks に行がある）」のユーザーのみ。
+     * 集計値は {@code users.total_average_rank} に日次バッチで事前計算済み。本クエリは
+     * 単純な ORDER BY で読み出すだけのため高速。{@code total_average_rank IS NULL} の
+     * ユーザー（対象セット内で 1 曲もプレイしていない / バッチ未実行）は除外される。
      *
      * 返却キー: userId / displayName / iidxId / privacyLevel / averageRank / playedCount / totalSongs / isSupporter
+     *
+     * totalSongs（対象セットの譜面数）は全ユーザー共通の値なので、サブクエリで
+     * 全行に同じ値を埋め込む（追加の往復クエリを避けるため）。
      */
     @Query(value =
-            "WITH target_songs AS ( " +
-            "    SELECT title, difficulty_name, MAX(total) AS player_total " +
-            "    FROM user_song_ranks " +
-            "    WHERE difficulty_level IN (11, 12) " +
-            "      AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
-            "    GROUP BY title, difficulty_name " +
-            "), " +
-            "song_count AS ( " +
-            "    SELECT COUNT(*) AS n FROM target_songs " +
-            "), " +
-            "played_users AS ( " +
-            "    SELECT DISTINCT user_id FROM user_song_ranks " +
-            "    WHERE difficulty_level IN (11, 12) " +
-            "      AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
-            "), " +
-            "agg AS ( " +
-            "    SELECT pu.user_id, " +
-            "           AVG(COALESCE(usr.rank_position, ts.player_total + 1)) AS avg_rank, " +
-            "           COUNT(usr.rank_position) AS played_count " +
-            "    FROM played_users pu " +
-            "    CROSS JOIN target_songs ts " +
-            "    LEFT JOIN user_song_ranks usr " +
-            "      ON usr.user_id = pu.user_id " +
-            "     AND usr.title = ts.title " +
-            "     AND usr.difficulty_name = ts.difficulty_name " +
-            "    GROUP BY pu.user_id " +
-            ") " +
             "SELECT u.id AS \"userId\", " +
             "       u.display_name AS \"displayName\", " +
             "       u.iidx_id AS \"iidxId\", " +
             "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
-            "       ROUND(a.avg_rank::numeric, 2) AS \"averageRank\", " +
-            "       a.played_count AS \"playedCount\", " +
-            "       (SELECT n FROM song_count) AS \"totalSongs\", " +
+            "       u.total_average_rank AS \"averageRank\", " +
+            "       COALESCE(u.total_average_rank_played, 0) AS \"playedCount\", " +
+            "       (SELECT COUNT(*) FROM ( " +
+            "           SELECT DISTINCT title, difficulty_name FROM user_song_ranks " +
+            "           WHERE difficulty_level IN (11, 12) " +
+            "             AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+            "       ) t) AS \"totalSongs\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\" " +
-            "FROM agg a " +
-            "JOIN users u ON u.id = a.user_id " +
-            "ORDER BY a.avg_rank ASC", nativeQuery = true)
+            "FROM users u " +
+            "WHERE u.total_average_rank IS NOT NULL " +
+            "ORDER BY u.total_average_rank ASC", nativeQuery = true)
     List<Map<String, Object>> getAverageRanking();
 }

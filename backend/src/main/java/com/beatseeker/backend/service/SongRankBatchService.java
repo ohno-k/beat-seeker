@@ -75,5 +75,9 @@ public class SongRankBatchService {
         // PostgreSQLの内部で直接全データをINSERT/置換する
         scoreRepository.truncateUserSongRanks();
         scoreRepository.insertAllUserSongRanks();
+        // AVERAGE ランキング用に users.total_average_rank も同じトランザクションで更新する。
+        // user_song_ranks 再構築直後のデータを使うため、整合性が保たれる。
+        scoreRepository.resetAllAverageRanks();
+        scoreRepository.updateAllAverageRanks();
     }
 }

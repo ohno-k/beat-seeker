@@ -949,4 +949,63 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     @Modifying
     @Query(value = "TRUNCATE TABLE user_song_ranks", nativeQuery = true)
     void truncateUserSongRanks();
+
+    /**
+     * 【メソッドの役割】 {@code users.total_average_rank} / {@code users.total_average_rank_played}
+     * を一旦 NULL にリセットする。
+     *
+     * 翌バッチで対象から外れたユーザー（プレイ実績が消えた等）の値を残さないために、
+     * {@link #updateAllAverageRanks()} の直前に実行する。
+     */
+    @Modifying
+    @Query(value =
+        "UPDATE users SET total_average_rank = NULL, total_average_rank_played = NULL " +
+        "WHERE total_average_rank IS NOT NULL OR total_average_rank_played IS NOT NULL",
+        nativeQuery = true)
+    void resetAllAverageRanks();
+
+    /**
+     * 【メソッドの役割】 公式難易度 Lv11/Lv12 の ANOTHER/LEGGENDARIA 全曲における
+     * 各ユーザーの平均順位を {@code users.total_average_rank} に書き込む。
+     *
+     * 未プレイ譜面は「その譜面のプレイ人数 + 1」を順位として算入する。
+     * 対象セット内で 1 曲もプレイ実績がないユーザーは更新されない（NULL のまま）。
+     *
+     * 集計元は {@code user_song_ranks} キャッシュ（先に {@link #insertAllUserSongRanks()}
+     * が完了している必要あり）。バッチ {@link com.beatseeker.backend.service.SongRankBatchService}
+     * 内で同一トランザクション・statement_timeout 解除済みの状態で呼ぶ前提。
+     */
+    @Modifying
+    @Query(value =
+        "WITH target_songs AS ( " +
+        "  SELECT title, difficulty_name, MAX(total) AS player_total " +
+        "  FROM user_song_ranks " +
+        "  WHERE difficulty_level IN (11, 12) " +
+        "    AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  GROUP BY title, difficulty_name " +
+        "), " +
+        "played_users AS ( " +
+        "  SELECT DISTINCT user_id FROM user_song_ranks " +
+        "  WHERE difficulty_level IN (11, 12) " +
+        "    AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "), " +
+        "avg_per_user AS ( " +
+        "  SELECT pu.user_id, " +
+        "         AVG(COALESCE(usr.rank_position, ts.player_total + 1)) AS avg_rank, " +
+        "         COUNT(usr.rank_position) AS played_count " +
+        "  FROM played_users pu " +
+        "  CROSS JOIN target_songs ts " +
+        "  LEFT JOIN user_song_ranks usr " +
+        "    ON usr.user_id = pu.user_id " +
+        "   AND usr.title = ts.title " +
+        "   AND usr.difficulty_name = ts.difficulty_name " +
+        "  GROUP BY pu.user_id " +
+        ") " +
+        "UPDATE users u " +
+        "SET total_average_rank = ROUND(apu.avg_rank::numeric, 2), " +
+        "    total_average_rank_played = apu.played_count " +
+        "FROM avg_per_user apu " +
+        "WHERE u.id = apu.user_id",
+        nativeQuery = true)
+    void updateAllAverageRanks();
 }

@@ -105,6 +105,17 @@ public class User {
     @ColumnDefault("0")
     private Double totalSaraPt = 0.0;
 
+    /**
+     * 公式難易度 Lv11/Lv12 ANOTHER/LEGGENDARIA 全曲における平均順位（AVERAGE ランキング用）。
+     * 未プレイ譜面は「その譜面のプレイ人数 + 1」を順位として算入し、それを全曲平均した値。
+     * 対象セット内に 1 曲もプレイ実績が無いユーザーは null（ランキング除外）。
+     * 日次バッチ {@code SongRankBatchService.recalculateAll()} で全員一括更新される。
+     */
+    private Double totalAverageRank;
+
+    /** AVERAGE ランキングの「対象セット内で実際にプレイ済の譜面数」。表示用。 */
+    private Integer totalAverageRankPlayed;
+
     /** Web Push 購読情報（ブラウザから発行される JSON）。通知配信時に利用。 */
     @Column(columnDefinition = "TEXT")
     private String pushSubscription; // Web Push の購読情報 JSON
