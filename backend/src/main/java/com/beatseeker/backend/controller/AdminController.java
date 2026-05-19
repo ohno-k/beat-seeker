@@ -430,6 +430,81 @@ public class AdminController {
     }
 
     /**
+     * 【メソッドの役割】 user_song_ranks キャッシュを **同期実行** で再構築する診断用エンドポイント。
+     *
+     * 通常版（{@code /api/scores/recalculate-song-ranks}）は非同期で 202 を返すため SQL 失敗が見えない。
+     * このエンドポイントは TRUNCATE → INSERT を同期で走らせ、行数と例外メッセージを返す。
+     *
+     * 返却例（成功）: {@code {"ok": true, "rowCount": 24501, "columns": ["id", "user_id", ...]}}
+     * 返却例（失敗）: {@code {"ok": false, "error": "...", "columns": [...]}}
+     *
+     * @param auth 認証情報（管理者限定）
+     * @return 診断結果
+     */
+    @PostMapping("/recalculate-song-ranks-sync")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> recalculateSongRanksSync(Authentication auth) {
+        checkAdminAccess(auth);
+        Map<String, Object> result = new HashMap<>();
+        // 手順1: user_song_ranks テーブルの実カラム名を information_schema から取得する。
+        try {
+            @SuppressWarnings("unchecked")
+            List<String> columns = entityManager.createNativeQuery(
+                    "SELECT column_name FROM information_schema.columns " +
+                    "WHERE table_name = 'user_song_ranks' ORDER BY ordinal_position"
+            ).getResultList();
+            result.put("columns", columns);
+        } catch (Exception e) {
+            result.put("columnsError", e.getMessage());
+        }
+
+        // 手順2: TRUNCATE + INSERT を同期実行。例外があれば catch してメッセージを返す。
+        try {
+            entityManager.createNativeQuery("TRUNCATE TABLE user_song_ranks").executeUpdate();
+            int inserted = entityManager.createNativeQuery(
+                    "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank_position, total, calculated_at) " +
+                    "WITH best_scores AS ( " +
+                    "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score " +
+                    "  FROM scores " +
+                    "  WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+                    "  GROUP BY title, difficulty_name, difficulty_level, user_id " +
+                    "), " +
+                    "all_ranks AS ( " +
+                    "  SELECT title, difficulty_name, difficulty_level, user_id, score, " +
+                    "    RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC) AS rank_position, " +
+                    "    COUNT(*) OVER (PARTITION BY title, difficulty_name) AS total " +
+                    "  FROM best_scores " +
+                    ") " +
+                    "SELECT user_id, title, difficulty_name, difficulty_level, rank_position, total, NOW() " +
+                    "FROM all_ranks"
+            ).executeUpdate();
+            result.put("ok", true);
+            result.put("inserted", inserted);
+        } catch (Exception e) {
+            result.put("ok", false);
+            result.put("error", e.getClass().getName() + ": " + e.getMessage());
+            Throwable cause = e.getCause();
+            int depth = 0;
+            while (cause != null && depth < 5) {
+                result.put("cause" + depth, cause.getClass().getName() + ": " + cause.getMessage());
+                cause = cause.getCause();
+                depth++;
+            }
+        }
+
+        // 手順3: 現在の行数を返す（INSERT 失敗時はトランザクションロールバックされている可能性に注意）。
+        try {
+            Object countObj = entityManager.createNativeQuery(
+                    "SELECT COUNT(*) FROM user_song_ranks"
+            ).getSingleResult();
+            result.put("rowCount", ((Number) countObj).longValue());
+        } catch (Exception e) {
+            result.put("rowCountError", e.getMessage());
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /**
      * 【メソッドの役割】 指定 1 ユーザーの履歴ログを「初回登録扱い」で生成・追加する。
      *
      * 用途: スコアは登録されているが {@code score_history_logs} に行が無く、
