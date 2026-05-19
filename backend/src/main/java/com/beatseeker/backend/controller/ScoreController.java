@@ -741,6 +741,19 @@ public class ScoreController {
     }
 
     /**
+     * 【メソッドの役割】 公式難易度 Lv11/Lv12 の ANOTHER/LEGGENDARIA 全曲を対象とした
+     * 「平均順位ランキング」を返す（AVERAGE-RANKING）。
+     *
+     * 各譜面ごとに算出済みの順位（{@code user_song_ranks}）を全曲平均し、低い順に並べる。
+     * 未プレイ譜面は「その譜面のプレイ人数 + 1」を順位とみなす。
+     * 対象セット内で 1 曲もプレイ実績がないユーザーは結果から除外する。
+     */
+    @GetMapping("/average-ranking")
+    public ResponseEntity<List<Map<String, Object>>> getAverageRanking() {
+        return ResponseEntity.ok(userSongRankRepository.getAverageRanking());
+    }
+
+    /**
      * 【メソッドの役割】 指定ユーザーの BEAT-PT / RATE-PT 合計を取得する。
      *
      * プロフィール閲覧時に素早くユーザーの実力値を表示するためのエンドポイント。

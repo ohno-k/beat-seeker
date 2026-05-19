@@ -90,6 +90,18 @@ interface SaraRankingEntry {
   isSupporter: boolean;
 }
 
+/** AVERAGE ランキング API のエントリ（Lv11/Lv12 ANOTHER/LEGGENDARIA の平均順位）。 */
+interface AverageRankingEntry {
+  userId: number | null;
+  privacyLevel: number | null;
+  displayName: string;
+  iidxId: string;
+  averageRank: number;
+  playedCount: number;
+  totalSongs: number;
+  isSupporter: boolean;
+}
+
 interface SimulationEntry {
   displayName: string;
   iidxId: string;
@@ -194,8 +206,8 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 /** 【computed の役割】 管理者判定。simulation モード表示制御に使用。判定ロジックは useAdmin に集約。 */
 const { isAdmin } = useAdmin();
 
-/** 現在のビューモード（beat / rate / kenban / sara / simulation）。 */
-const viewMode = ref<'beat' | 'rate' | 'kenban' | 'sara' | 'simulation'>('beat');
+/** 現在のビューモード（beat / rate / kenban / sara / average / simulation）。 */
+const viewMode = ref<'beat' | 'rate' | 'kenban' | 'sara' | 'average' | 'simulation'>('beat');
 // Rate-Tier 表示設定がオフに切り替わったら、rate モードから beat へ強制退避する。
 watch(showRateTier, (val) => {
     if (!val && viewMode.value === 'rate') viewMode.value = 'beat';
@@ -208,6 +220,8 @@ const rateRanking = ref<RateRankingEntry[]>([]);
 const kenbanRanking = ref<KenbanRankingEntry[]>([]);
 /** SARA-PT ランキング本体（暫定オンザフライ計算結果）。 */
 const saraRanking = ref<SaraRankingEntry[]>([]);
+/** AVERAGE ランキング本体（Lv11/Lv12 ANOTHER/LEGGENDARIA の平均順位）。 */
+const averageRanking = ref<AverageRankingEntry[]>([]);
 /** Beat-PT 都道府県 TOP ランカー一覧。 */
 const topRankers = ref<TopRankerEntry[]>([]);
 /** Rate-PT 都道府県 TOP ランカー一覧。 */
@@ -225,6 +239,7 @@ const beatPage = ref(1);
 const ratePage = ref(1);
 const kenbanPage = ref(1);
 const saraPage = ref(1);
+const averagePage = ref(1);
 
 /**
  * 【computed の役割】 Beat-PT のユーザー行と都道府県 TOP ランカー行を pt 降順でマージした統合ビュー。
@@ -349,6 +364,12 @@ const paginatedSaraRanking = computed(() => {
     return saraRanking.value.slice(start, start + PAGE_SIZE).map((entry, i) => ({ rank: start + i + 1, entry }));
 });
 
+const averageTotalPages = computed(() => Math.max(1, Math.ceil(averageRanking.value.length / PAGE_SIZE)));
+const paginatedAverageRanking = computed(() => {
+    const start = (averagePage.value - 1) * PAGE_SIZE;
+    return averageRanking.value.slice(start, start + PAGE_SIZE).map((entry, i) => ({ rank: start + i + 1, entry }));
+});
+
 /**
  * 【関数の役割】 ログインユーザー自身の行までページを切り替えスムーズスクロールする。
  * rate モードなら ratePage を、それ以外なら beatPage を変更し、DOM 更新後に scrollIntoView。
@@ -382,6 +403,7 @@ watch(viewMode, () => {
     ratePage.value = 1;
     kenbanPage.value = 1;
     saraPage.value = 1;
+    averagePage.value = 1;
 });
 
 // ---- シミュレーションモード（管理者用）----
@@ -424,6 +446,13 @@ async function fetchSaraRanking() {
     const res = await fetch(`${API_BASE}/api/scores/sara-ranking`);
     if (!res.ok) throw new Error('sara');
     saraRanking.value = await res.json();
+}
+
+/** 【関数の役割】 AVERAGE ランキング（Lv11/Lv12 ANOTHER/LEGGENDARIA 全曲の平均順位）を取得する。 */
+async function fetchAverageRanking() {
+    const res = await fetch(`${API_BASE}/api/scores/average-ranking`);
+    if (!res.ok) throw new Error('average');
+    averageRanking.value = await res.json();
 }
 
 /** 【関数の役割】 Rate-PT ランキング本体と都道府県 TOP ランカー（Rate 版）を並列取得する。 */
@@ -559,6 +588,13 @@ watch(viewMode, async (mode) => {
         catch (e) { console.error(e); error.value = t('ranking.error'); }
         finally { isLoading.value = false; }
     }
+    if (mode === 'average' && averageRanking.value.length === 0) {
+        isLoading.value = true;
+        error.value = '';
+        try { await fetchAverageRanking(); }
+        catch (e) { console.error(e); error.value = t('ranking.error'); }
+        finally { isLoading.value = false; }
+    }
 });
 </script>
 
@@ -639,6 +675,13 @@ watch(viewMode, async (mode) => {
               ? 'bg-white dark:bg-slate-600 text-orange-600 dark:text-orange-400 shadow-sm'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Sara-Tier</button>
+          <button
+            @click="viewMode = 'average'"
+            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            :class="viewMode === 'average'
+              ? 'bg-white dark:bg-slate-600 text-purple-600 dark:text-purple-400 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
+          >Average</button>
           <button
             v-if="isAdmin"
             @click="viewMode = 'simulation'"
@@ -1087,6 +1130,87 @@ watch(viewMode, async (mode) => {
               <button @click="saraPage++" :disabled="saraPage === saraTotalPages"
                 class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&rsaquo;</button>
               <button @click="saraPage = saraTotalPages" :disabled="saraPage === saraTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&raquo;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AVERAGE ranking (Lv11/Lv12 ANOTHER/LEGGENDARIA) -->
+        <div v-else-if="viewMode === 'average'">
+          <div v-if="averageRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+            <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
+          </div>
+          <div v-else class="overflow-x-auto">
+            <div class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">
+              公式難易度 Lv11/Lv12 の ANOTHER/LEGGENDARIA 全曲（{{ averageRanking[0]?.totalSongs ?? 0 }}曲）における平均順位ランキング。未プレイ曲は「プレイ人数+1」位として算入されます。
+            </div>
+            <table class="w-full">
+              <thead>
+                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
+                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">プレイ済</th>
+                  <th class="pb-4 pr-4 text-xs font-black text-purple-500 uppercase tracking-widest text-right">平均順位</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr v-for="row in paginatedAverageRanking" :key="`a-${row.entry.iidxId}`"
+                  :id="`ranking-row-${row.entry.iidxId}`"
+                  class="group transition-colors"
+                  :class="[
+                    user && row.entry.iidxId === user.iidxId
+                      ? 'bg-purple-50 dark:bg-purple-900/20 border-l-4 border-l-purple-500'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
+                    row.entry.userId != null ? 'cursor-pointer' : ''
+                  ]"
+                  @click="handleUserRowClick(row.entry)">
+                  <td class="py-3 pl-4">
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                      :class="[
+                        row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
+                        row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
+                        row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
+                        user && row.entry.iidxId === user.iidxId ? 'bg-purple-500 text-white' :
+                        'text-slate-400 border border-slate-100 dark:border-slate-700'
+                      ]">{{ row.rank }}</div>
+                  </td>
+                  <td class="py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-base transition-colors"
+                        :class="user && row.entry.iidxId === user.iidxId
+                          ? 'text-purple-700 dark:text-purple-300'
+                          : 'text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400'">
+                        {{ row.entry.displayName || 'Unnamed Player' }}
+                      </span>
+                      <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                      <span v-if="user && row.entry.iidxId === user.iidxId"
+                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500 text-white">{{ t('ranking.you') }}</span>
+                    </div>
+                  </td>
+                  <td class="py-3 text-right">
+                    <span class="text-xs font-bold tabular-nums text-slate-500 dark:text-slate-400">
+                      {{ row.entry.playedCount }} / {{ row.entry.totalSongs }}
+                    </span>
+                  </td>
+                  <td class="py-3 pr-4 text-right">
+                    <span class="font-black text-base text-purple-600 dark:text-purple-400 tabular-nums">
+                      {{ row.entry.averageRank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                    </span>
+                    <span class="text-xs text-slate-400 ml-0.5">位</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- AVERAGE Pagination -->
+            <div class="flex items-center justify-end gap-1 mt-4 pr-4">
+              <button @click="averagePage = 1" :disabled="averagePage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&laquo;</button>
+              <button @click="averagePage--" :disabled="averagePage === 1"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&lsaquo;</button>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">{{ averagePage }} / {{ averageTotalPages }}</span>
+              <button @click="averagePage++" :disabled="averagePage === averageTotalPages"
+                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&rsaquo;</button>
+              <button @click="averagePage = averageTotalPages" :disabled="averagePage === averageTotalPages"
                 class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&raquo;</button>
             </div>
           </div>
