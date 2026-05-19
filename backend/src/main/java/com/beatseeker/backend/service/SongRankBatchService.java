@@ -1,6 +1,7 @@
 package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.repository.ScoreRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * 依存:
  *  - {@link ScoreRepository}: truncate / insert を直接発行するネイティブクエリに委譲
+ *  - {@link JdbcTemplate}: 同一トランザクション内で {@code SET LOCAL statement_timeout = 0}
+ *    を流し、重い INSERT が 30 秒制限で打ち切られるのを防ぐ
  *
  * 主要ロジックの概観:
  *  - Java 側にデータを一切引き上げず、PostgreSQL 内部で TRUNCATE → INSERT ... SELECT を実行する
@@ -28,12 +31,15 @@ public class SongRankBatchService {
 
     /** user_song_ranks に対するネイティブクエリ発行用リポジトリ */
     private final ScoreRepository scoreRepository;
+    /** 同一トランザクション内で statement_timeout を解除するための JdbcTemplate */
+    private final JdbcTemplate jdbcTemplate;
 
     /**
-     * 【コンストラクタ】 Spring が {@link ScoreRepository} を注入する。
+     * 【コンストラクタ】 Spring が依存を注入する。
      */
-    public SongRankBatchService(ScoreRepository scoreRepository) {
+    public SongRankBatchService(ScoreRepository scoreRepository, JdbcTemplate jdbcTemplate) {
         this.scoreRepository = scoreRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
@@ -62,6 +68,9 @@ public class SongRankBatchService {
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void recalculateAll() {
+        // 全ユーザー × 全譜面の集計は HikariCP の connection-init-sql で設定された
+        // 30 秒 statement_timeout を超えるため、本トランザクション内に限り無効化する。
+        jdbcTemplate.execute("SET LOCAL statement_timeout = 0");
         // メモリ不足（OOM）を回避するため、Java側にデータを全く取得せず、
         // PostgreSQLの内部で直接全データをINSERT/置換する
         scoreRepository.truncateUserSongRanks();

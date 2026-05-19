@@ -18,6 +18,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +85,8 @@ public class AdminController {
     private final UserSongOptionRepository userSongOptionRepository;
     /** 個別トランザクションで直接 SQL を流すための JDBC テンプレート（診断用途）。 */
     private final JdbcTemplate jdbcTemplate;
+    /** SET LOCAL を効かせるための明示的トランザクション境界（診断用途）。 */
+    private final TransactionTemplate transactionTemplate;
 
     /**
      * JPA が注入する永続化コンテキスト。
@@ -105,7 +108,8 @@ public class AdminController {
                            ObjectMapper objectMapper,
                            AdminAuthService adminAuthService,
                            UserSongOptionRepository userSongOptionRepository,
-                           JdbcTemplate jdbcTemplate) {
+                           JdbcTemplate jdbcTemplate,
+                           TransactionTemplate transactionTemplate) {
         this.userSongOptionRepository = userSongOptionRepository;
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
@@ -116,6 +120,7 @@ public class AdminController {
         this.objectMapper = objectMapper;
         this.adminAuthService = adminAuthService;
         this.jdbcTemplate = jdbcTemplate;
+        this.transactionTemplate = transactionTemplate;
     }
 
     /**
@@ -470,33 +475,30 @@ public class AdminController {
             result.put("rowCountBeforeError", e.getClass().getSimpleName() + ": " + e.getMessage());
         }
 
-        // 手順3: TRUNCATE + INSERT を JdbcTemplate で個別に実行（@Transactional なしで各操作が独立）。
-        // 例外があれば catch して詳細メッセージを result に詰める。
+        // 手順3: TRUNCATE + INSERT を **単一トランザクション** で実行し、その中で
+        // SET LOCAL statement_timeout = 0 を発行することで重い集計クエリのタイムアウトを回避する。
+        // 失敗時は両方ロールバックされるためデータ消失も防げる。
         try {
-            jdbcTemplate.execute("TRUNCATE TABLE user_song_ranks");
-            result.put("truncateOk", true);
-        } catch (Exception e) {
-            result.put("truncateOk", false);
-            result.put("truncateError", e.getClass().getName() + ": " + e.getMessage());
-        }
-
-        try {
-            int inserted = jdbcTemplate.update(
-                    "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank_position, total, calculated_at) " +
-                    "WITH best_scores AS ( " +
-                    "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score " +
-                    "  FROM scores " +
-                    "  WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
-                    "  GROUP BY title, difficulty_name, difficulty_level, user_id " +
-                    "), " +
-                    "all_ranks AS ( " +
-                    "  SELECT title, difficulty_name, difficulty_level, user_id, score, " +
-                    "    RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC) AS rank_position, " +
-                    "    COUNT(*) OVER (PARTITION BY title, difficulty_name) AS total " +
-                    "  FROM best_scores " +
-                    ") " +
-                    "SELECT user_id, title, difficulty_name, difficulty_level, rank_position, total, NOW() " +
-                    "FROM all_ranks");
+            Integer inserted = transactionTemplate.execute(status -> {
+                jdbcTemplate.execute("SET LOCAL statement_timeout = 0");
+                jdbcTemplate.execute("TRUNCATE TABLE user_song_ranks");
+                return jdbcTemplate.update(
+                        "INSERT INTO user_song_ranks (user_id, title, difficulty_name, difficulty_level, rank_position, total, calculated_at) " +
+                        "WITH best_scores AS ( " +
+                        "  SELECT title, difficulty_name, difficulty_level, user_id, MAX(score) AS score " +
+                        "  FROM scores " +
+                        "  WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+                        "  GROUP BY title, difficulty_name, difficulty_level, user_id " +
+                        "), " +
+                        "all_ranks AS ( " +
+                        "  SELECT title, difficulty_name, difficulty_level, user_id, score, " +
+                        "    RANK() OVER (PARTITION BY title, difficulty_name ORDER BY score DESC) AS rank_position, " +
+                        "    COUNT(*) OVER (PARTITION BY title, difficulty_name) AS total " +
+                        "  FROM best_scores " +
+                        ") " +
+                        "SELECT user_id, title, difficulty_name, difficulty_level, rank_position, total, NOW() " +
+                        "FROM all_ranks");
+            });
             result.put("insertOk", true);
             result.put("inserted", inserted);
         } catch (Exception e) {
