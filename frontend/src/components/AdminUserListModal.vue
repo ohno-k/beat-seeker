@@ -48,6 +48,19 @@
               <div class="admin-tooltip">全ユーザーの KENBAN-PT / SARA-PT を再計算して users と score_history_logs に保存します。1 度実行すれば以降のアップロードで自動更新されます</div>
             </div>
 
+            <!-- 曲別ランクキャッシュ再構築 (AVERAGE-RANKING 用) -->
+            <div class="relative group">
+              <button
+                @click="handleRecalculateSongRanks"
+                :disabled="isRecalculatingSongRanks"
+                class="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/50 dark:hover:bg-purple-800/80 dark:text-purple-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
+              >
+                <svg v-if="isRecalculatingSongRanks" class="animate-spin -ml-1 mr-1 h-4 w-4 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                {{ isRecalculatingSongRanks ? '再構築中...' : '曲別ランク再構築' }}
+              </button>
+              <div class="admin-tooltip">user_song_ranks キャッシュ（曲別の全ユーザー順位）を再構築します。AVERAGE ランキングが空になっている場合に実行してください</div>
+            </div>
+
             <!-- 譜面プロファイルDB投入 -->
             <div class="relative group">
               <input ref="profileFileInput" type="file" accept=".json" class="hidden" @change="onProfileFileSelected" />
@@ -357,6 +370,41 @@ const onProfileFileSelected = async (event: Event) => {
     recalculateError.value = '投入に失敗しました: ' + e.message;
   } finally {
     isImportingProfiles.value = false;
+  }
+};
+
+/** 曲別ランクキャッシュ再構築中フラグ（多重押下防止）。 */
+const isRecalculatingSongRanks = ref(false);
+
+/**
+ * 【関数の役割】 user_song_ranks（曲別の全ユーザー順位キャッシュ）を再構築する。
+ *
+ * バックエンドは {@code POST /api/scores/recalculate-song-ranks} を 202 で受け付け、
+ * 非同期で TRUNCATE → INSERT を実行する。AVERAGE ランキングはこのキャッシュを
+ * 元に集計されるため、空になっていればこのボタンで再構築する。
+ */
+const handleRecalculateSongRanks = async () => {
+  if (!confirm('曲別ランクキャッシュ（user_song_ranks）を再構築しますか？ 全ユーザーの全譜面の順位を再計算します（数十秒〜数分かかります）。')) return;
+
+  isRecalculatingSongRanks.value = true;
+  recalculateError.value = '';
+  recalculateSuccess.value = '';
+
+  try {
+    const { authHeaders } = useAuth();
+    const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+
+    const res = await fetch(`${API_BASE}/api/scores/recalculate-song-ranks`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+
+    if (!res.ok && res.status !== 202) throw new Error(`API error: ${res.status}`);
+    recalculateSuccess.value = 'バックグラウンドで曲別ランクの再構築を開始しました。数分後に AVERAGE ランキングを確認してください。';
+  } catch (e: any) {
+    recalculateError.value = '曲別ランク再構築に失敗しました: ' + e.message;
+  } finally {
+    isRecalculatingSongRanks.value = false;
   }
 };
 
