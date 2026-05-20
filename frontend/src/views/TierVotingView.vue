@@ -162,26 +162,24 @@ const getMyVote = (title: string, difficultyName: string): string | null => {
   return myVotes.value.get(`${title}|${difficultyName}`) ?? null;
 };
 
-/**
- * 【関数の役割】 未カテゴリ譜面における「最多票を集めた Tier 値」とその票数を返す。
- * TIER_OPTIONS に含まれるキーのみを対象とし、0票は除外する。
- * @returns 最多Tier と票数、無ければ null
- */
-const getTopTier = (title: string, difficultyName: string): { tier: string; count: number } | null => {
-  const counts = getVotes(title, difficultyName);
-  let best: { tier: string; count: number } | null = null;
-  for (const [k, v] of Object.entries(counts)) {
-    if (TIER_OPTIONS.includes(k) && v > 0) {
-      if (!best || v > best.count) best = { tier: k, count: v };
-    }
-  }
-  return best;
-};
-
 /** 未カテゴリ譜面の Tier 投票総数（全 Tier の合算） */
 const getTotalTierVotes = (title: string, difficultyName: string): number => {
   const counts = getVotes(title, difficultyName);
   return TIER_OPTIONS.reduce((sum, t) => sum + (counts[t] ?? 0), 0);
+};
+
+/**
+ * 【関数の役割】 未カテゴリ譜面の Tier 投票の内訳を Tier 昇順で返す。
+ * 票が 0 の Tier は除外。`isTop` は最多得票 Tier に true（同票なら全員に true）。
+ */
+const getTierBreakdown = (title: string, difficultyName: string): Array<{ tier: string; count: number; isTop: boolean }> => {
+  const counts = getVotes(title, difficultyName);
+  const entries = TIER_OPTIONS
+    .map(tier => ({ tier, count: counts[tier] ?? 0 }))
+    .filter(e => e.count > 0);
+  if (entries.length === 0) return [];
+  const max = entries.reduce((m, e) => Math.max(m, e.count), 0);
+  return entries.map(e => ({ ...e, isTop: e.count === max }));
 };
 
 /**
@@ -442,9 +440,9 @@ const totalVotedCount = computed(() => myVotes.value.size);
               </button>
             </div>
 
-            <!-- 未カテゴリ譜面: Tier 値をプルダウンで投票 -->
+            <!-- 未カテゴリ譜面: Tier 値をプルダウンで投票 + 全 Tier 票分布チップ -->
             <template v-if="isUncategorized(rank.rank)">
-              <div class="flex items-center gap-3 shrink-0" @click.stop>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-2 shrink-0" @click.stop>
                 <select
                   :value="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) ?? ''"
                   :disabled="!isLoggedIn"
@@ -458,11 +456,27 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   <option value="">{{ t('tierVoting.noVote') }}</option>
                   <option v-for="tier in TIER_OPTIONS" :key="tier" :value="tier">{{ tier }}</option>
                 </select>
-                <!-- 最多票Tierの表示: 現在の Tier 投票の最頻値を参考として表示 -->
-                <span v-if="getTopTier(parseSong(songEntry).title, parseSong(songEntry).difficultyName)" class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                  {{ t('tierVoting.topVoted') }}: <span class="font-black text-slate-700 dark:text-slate-200">{{ getTopTier(parseSong(songEntry).title, parseSong(songEntry).difficultyName)!.tier }}</span>
-                  <span class="text-slate-400"> ({{ getTotalTierVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName) }})</span>
-                </span>
+
+                <!-- Tier 票分布: 投票された全 Tier をチップで列挙。最多はハイライト -->
+                <div
+                  v-if="getTierBreakdown(parseSong(songEntry).title, parseSong(songEntry).difficultyName).length > 0"
+                  class="flex flex-wrap items-center gap-1"
+                >
+                  <span
+                    v-for="entry in getTierBreakdown(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
+                    :key="entry.tier"
+                    class="inline-flex items-baseline gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border whitespace-nowrap transition-colors"
+                    :class="entry.isTop
+                      ? 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700'
+                      : 'bg-white text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600'"
+                  >
+                    <span class="font-black tracking-tight">{{ entry.tier }}</span>
+                    <span class="text-[10px] opacity-75">×{{ entry.count }}</span>
+                  </span>
+                  <span class="text-[10px] text-slate-400 dark:text-slate-500 ml-1 whitespace-nowrap">
+                    計{{ getTotalTierVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName) }}票
+                  </span>
+                </div>
               </div>
             </template>
 
