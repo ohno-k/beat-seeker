@@ -288,6 +288,8 @@ export const ja = {
   'table.rateTableTitle': '📊 必要スコアレート表',
   'table.colRanking': 'ランキング',
   'table.viewDifficultyRanking': 'この難易度のランキングを見る',
+  'table.viewGrowthChart': 'この難易度の成長記録を見る',
+  'table.growthChartTitle': '成長記録',
   'table.difficultyRankingTitle': 'フォルダランキング',
   'table.onlyFullPlay': '全曲プレイ済みのみ表示',
   'table.noFullPlayUsers': '全曲プレイ済みのユーザーがいません。',

@@ -14,6 +14,7 @@ import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSon
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import DifficultyRankingModal from './DifficultyRankingModal.vue';
+import RankGrowthChartModal from './RankGrowthChartModal.vue';
 
 const props = defineProps<{
   scores: ScoreRecord[];
@@ -28,6 +29,8 @@ const showInfo = ref(false);
 const showRateTable = ref(false);
 /** 難易度別ランキングモーダルの対象難易度（null なら非表示）。 */
 const rankingModalRank = ref<{ rank: string; totalCount: number } | null>(null);
+/** 成長グラフモーダルの対象難易度（null なら非表示）。 */
+const growthChartRank = ref<{ rank: string; songCount: number; currentTotalBeatPoints: number } | null>(null);
 
 // ☆11.0 〜 ☆13.0 までの 0.1 刻みラベル配列を生成（レート早見表の列）。
 const allFolders: string[] = [];
@@ -278,6 +281,15 @@ const tableData = computed(() => {
       @close="rankingModalRank = null"
     />
 
+    <!-- Rank Growth Chart Modal -->
+    <RankGrowthChartModal
+      v-if="growthChartRank"
+      :rank="growthChartRank.rank"
+      :song-count="growthChartRank.songCount"
+      :current-total-beat-points="growthChartRank.currentTotalBeatPoints"
+      @close="growthChartRank = null"
+    />
+
     <!-- Rate Table Modal -->
     <Teleport to="body">
       <div v-if="showRateTable" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
@@ -317,7 +329,7 @@ const tableData = computed(() => {
           <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[10px] sm:text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">{{ t('table.colDifficulty') }}</th>
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">{{ t('table.colAvgRate') }}</th>
-            <th scope="col" class="py-2 px-1 sm:py-3 sm:px-2 font-bold text-center w-auto sm:w-12"><span class="sr-only">{{ t('table.colRanking') }}</span></th>
+            <th scope="col" class="py-2 px-1 sm:py-3 sm:px-2 font-bold text-center w-auto sm:w-24"><span class="sr-only">{{ t('table.colRanking') }}</span></th>
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">{{ t('table.colTotalPt') }}</th>
             <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">{{ t('table.colPlayed') }}</th>
             <th scope="col" class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"><span class="sr-only">{{ t('diffTable.expandAll') }}</span></th>
@@ -351,17 +363,30 @@ const tableData = computed(() => {
                 </div>
               </td>
               <td class="py-2 px-1 sm:py-3 sm:px-2 text-center">
-                <button
-                  type="button"
-                  @click.stop="rankingModalRank = { rank: data.rank, totalCount: data.totalCount }"
-                  :title="t('table.viewDifficultyRanking')"
-                  :aria-label="t('table.viewDifficultyRanking')"
-                  class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                </button>
+                <div class="inline-flex items-center gap-1">
+                  <button
+                    type="button"
+                    @click.stop="rankingModalRank = { rank: data.rank, totalCount: data.totalCount }"
+                    :title="t('table.viewDifficultyRanking')"
+                    :aria-label="t('table.viewDifficultyRanking')"
+                    class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    @click.stop="growthChartRank = { rank: data.rank, songCount: data.totalCount, currentTotalBeatPoints: data.totalBeatPoints }"
+                    :title="t('table.viewGrowthChart')"
+                    :aria-label="t('table.viewGrowthChart')"
+                    class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l5-5 4 4 7-7M14 9h6v6" />
+                    </svg>
+                  </button>
+                </div>
               </td>
               <td class="py-2 px-2 sm:py-3 sm:px-4 text-right cursor-pointer" @click.stop="toggleRank(data.rank)">
                 <div class="flex items-center justify-end gap-1 sm:gap-2">

@@ -288,6 +288,8 @@ export const ko = {
   'table.rateTableTitle': '📊 필요 스코어 레이트 표',
   'table.colRanking': '랭킹',
   'table.viewDifficultyRanking': '이 난이도의 랭킹 보기',
+  'table.viewGrowthChart': '이 난이도의 성장 기록 보기',
+  'table.growthChartTitle': '성장 기록',
   'table.difficultyRankingTitle': '폴더 랭킹',
   'table.onlyFullPlay': '전곡 플레이 완료 유저만 표시',
   'table.noFullPlayUsers': '전곡 플레이를 완료한 유저가 없습니다.',

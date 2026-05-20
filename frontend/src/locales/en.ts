@@ -289,6 +289,8 @@ export const en = {
   'table.rateTableTitle': '📊 Required Score Rate Table',
   'table.colRanking': 'Ranking',
   'table.viewDifficultyRanking': 'View ranking for this difficulty',
+  'table.viewGrowthChart': 'View growth chart for this difficulty',
+  'table.growthChartTitle': 'Growth Chart',
   'table.difficultyRankingTitle': 'Folder Ranking',
   'table.onlyFullPlay': 'Only users who played all songs',
   'table.noFullPlayUsers': 'No users have played all songs in this folder.',
