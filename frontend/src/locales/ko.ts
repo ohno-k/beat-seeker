@@ -290,6 +290,8 @@ export const ko = {
   'table.viewDifficultyRanking': '이 난이도의 랭킹 보기',
   'table.viewGrowthChart': '이 난이도의 성장 기록 보기',
   'table.growthChartTitle': '성장 기록',
+  'table.resetZoom': '줌 해제',
+  'table.zoomHint': '마우스 휠 / 핀치로 확대, 드래그로 이동',
   'table.difficultyRankingTitle': '폴더 랭킹',
   'table.onlyFullPlay': '전곡 플레이 완료 유저만 표시',
   'table.noFullPlayUsers': '전곡 플레이를 완료한 유저가 없습니다.',

@@ -290,6 +290,8 @@ export const ja = {
   'table.viewDifficultyRanking': 'この難易度のランキングを見る',
   'table.viewGrowthChart': 'この難易度の成長記録を見る',
   'table.growthChartTitle': '成長記録',
+  'table.resetZoom': 'ズーム解除',
+  'table.zoomHint': 'マウスホイール / ピンチで拡大、ドラッグで移動',
   'table.difficultyRankingTitle': 'フォルダランキング',
   'table.onlyFullPlay': '全曲プレイ済みのみ表示',
   'table.noFullPlayUsers': '全曲プレイ済みのユーザーがいません。',

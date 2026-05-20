@@ -291,6 +291,8 @@ export const en = {
   'table.viewDifficultyRanking': 'View ranking for this difficulty',
   'table.viewGrowthChart': 'View growth chart for this difficulty',
   'table.growthChartTitle': 'Growth Chart',
+  'table.resetZoom': 'Reset zoom',
+  'table.zoomHint': 'Mouse wheel / pinch to zoom, drag to pan',
   'table.difficultyRankingTitle': 'Folder Ranking',
   'table.onlyFullPlay': 'Only users who played all songs',
   'table.noFullPlayUsers': 'No users have played all songs in this folder.',
