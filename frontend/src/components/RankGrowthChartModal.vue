@@ -38,33 +38,32 @@ const { t, currentLang } = useI18n();
 const { authHeaders, isLoggedIn } = useAuth();
 const { isDarkMode } = useDarkMode();
 
-// ランキング散布図と揃えたティア背景バンドカラー。
-const BAND_COLORS_LIGHT: Record<string, string> = {
-  Legend: 'rgba(245,158,11,0.14)',
-  Mythic: 'rgba(168,85,247,0.12)',
-  Ancient: 'rgba(99,102,241,0.12)',
-  Master: 'rgba(239,68,68,0.10)',
-  Elite: 'rgba(249,115,22,0.10)',
-  Commander: 'rgba(234,179,8,0.10)',
-  Veteran: 'rgba(16,185,129,0.10)',
-  Expert: 'rgba(20,184,166,0.09)',
-  Advanced: 'rgba(6,182,212,0.09)',
-  Intermediate: 'rgba(59,130,246,0.09)',
-  Novice: 'rgba(100,116,139,0.09)',
+// ランキング散布図と揃えたティアごとの基本 RGB。サブティア内でアルファだけ変える。
+const TIER_RGB: Record<string, string> = {
+  Legend: '245,158,11',
+  Mythic: '168,85,247',
+  Ancient: '99,102,241',
+  Master: '239,68,68',
+  Elite: '249,115,22',
+  Commander: '234,179,8',
+  Veteran: '16,185,129',
+  Expert: '20,184,166',
+  Advanced: '6,182,212',
+  Intermediate: '59,130,246',
+  Novice: '100,116,139',
 };
-const BAND_COLORS_DARK: Record<string, string> = {
-  Legend: 'rgba(245,158,11,0.20)',
-  Mythic: 'rgba(168,85,247,0.18)',
-  Ancient: 'rgba(99,102,241,0.18)',
-  Master: 'rgba(239,68,68,0.16)',
-  Elite: 'rgba(249,115,22,0.16)',
-  Commander: 'rgba(234,179,8,0.16)',
-  Veteran: 'rgba(16,185,129,0.16)',
-  Expert: 'rgba(20,184,166,0.14)',
-  Advanced: 'rgba(6,182,212,0.14)',
-  Intermediate: 'rgba(59,130,246,0.14)',
-  Novice: 'rgba(100,116,139,0.14)',
-};
+
+/**
+ * サブティア tier（1〜5）に対する背景塗りの不透明度。上位ティアほど濃く（V > IV > ... > I）。
+ * Legend (tier=undefined) は最も濃い固定値。
+ */
+function bandAlpha(tier: number | undefined, isDark: boolean): number {
+  if (!tier) return isDark ? 0.26 : 0.18; // Legend
+  // tier 1..5 を 0.06..0.18 (light) / 0.08..0.24 (dark) に線形マップ
+  const t = (tier - 1) / 4;
+  if (isDark) return 0.08 + t * 0.16;
+  return 0.06 + t * 0.12;
+}
 
 const isLoading = ref(false);
 const errorMsg = ref('');
@@ -89,16 +88,18 @@ const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
 const subTierLabel = (def: { name: string; tier?: number }) =>
   def.tier ? `${def.name} ${ROMAN[def.tier] ?? def.tier}` : def.name;
 
+type SubTierBoundary = { name: string; label: string; pt: number; tier: number | undefined };
+
 /**
- * サブティアまで含む全境界（Y 軸ラベル用）。Legend / Mythic V / Mythic IV / ... / Novice I。
+ * サブティアまで含む全境界（Y 軸ラベル用 & 背景塗り分け用）。Legend / Mythic V / Mythic IV / ... / Novice I。
  * 結果は PT 昇順。
  */
 const subTierBoundaries = computed(() => {
   const legendRate = getFolderLegendRate(props.rank);
-  if (legendRate <= 0) return [] as { name: string; label: string; pt: number }[];
+  if (legendRate <= 0) return [] as SubTierBoundary[];
   const offsetScale = getFolderRankOffsetMax(props.rank);
 
-  const out: { name: string; label: string; pt: number }[] = [];
+  const out: SubTierBoundary[] = [];
   for (const def of FOLDER_RANK_DEFS) {
     const thresholdRate = legendRate - def.offset * offsetScale;
     if (thresholdRate <= 66.666) continue;
@@ -106,28 +107,8 @@ const subTierBoundaries = computed(() => {
       name: def.name,
       label: subTierLabel(def),
       pt: calculatePoints(thresholdRate, props.rank) * props.songCount,
+      tier: def.tier,
     });
-  }
-  out.sort((a, b) => a.pt - b.pt);
-  return out;
-});
-
-/**
- * 大ブロック単位の境界（背景色の塗り分け用）。各ブロック (tier=1) の入口 PT。Legend は単独。
- * 結果は PT 昇順。
- */
-const tierBoundaries = computed(() => {
-  const legendRate = getFolderLegendRate(props.rank);
-  if (legendRate <= 0) return [] as { name: string; pt: number }[];
-  const offsetScale = getFolderRankOffsetMax(props.rank);
-
-  const out: { name: string; pt: number }[] = [];
-  out.push({ name: 'Legend', pt: calculatePoints(legendRate, props.rank) * props.songCount });
-  for (const def of FOLDER_RANK_DEFS) {
-    if (def.tier !== 1) continue;
-    const thresholdRate = legendRate - def.offset * offsetScale;
-    if (thresholdRate <= 66.666) continue;
-    out.push({ name: def.name, pt: calculatePoints(thresholdRate, props.rank) * props.songCount });
   }
   out.sort((a, b) => a.pt - b.pt);
   return out;
@@ -206,10 +187,10 @@ const yMinMax = computed(() => {
 });
 
 /**
- * Chart.js プラグイン: ティア領域を Y 軸方向に薄く塗り分ける。
- * 各ブロック (Novice → ... → Mythic → Legend) の下端境界をもとに、
- * 上端を「1 つ上の境界 PT」（Legend は yScale.max）として塗る。
- * リアクティブな `tierBoundaries` / `isDarkMode` は描画時に参照する。
+ * Chart.js プラグイン: サブティア領域を Y 軸方向に塗り分ける。
+ * - 各サブティア境界 (Novice I → ... → Mythic V → Legend) を下端として帯を構築
+ * - 同じ大ティア内では上位サブティアほど不透明度を高くしてグラデーションを表現
+ * - リアクティブな `subTierBoundaries` / `isDarkMode` は描画時に参照する。
  */
 const tierBandPlugin = {
   id: 'rankGrowthTierBands',
@@ -217,21 +198,23 @@ const tierBandPlugin = {
     const { ctx, chartArea, scales } = chart;
     if (!chartArea || !scales?.y) return;
     const yScale = scales.y;
-    const palette = isDarkMode.value ? BAND_COLORS_DARK : BAND_COLORS_LIGHT;
-    const sorted = [...tierBoundaries.value].sort((a, b) => a.pt - b.pt);
+    const sorted = [...subTierBoundaries.value].sort((a, b) => a.pt - b.pt);
     if (sorted.length === 0) return;
+    const isDark = isDarkMode.value;
 
     ctx.save();
     for (let i = 0; i < sorted.length; i++) {
       const bandStart = sorted[i].pt;
       const bandEnd = i + 1 < sorted.length ? sorted[i + 1].pt : yScale.max;
-      const name = sorted[i].name;
+      const { name, tier } = sorted[i];
       const yTop = yScale.getPixelForValue(bandEnd);
       const yBot = yScale.getPixelForValue(bandStart);
       const top = Math.max(yTop, chartArea.top);
       const bot = Math.min(yBot, chartArea.bottom);
       if (bot <= top) continue;
-      ctx.fillStyle = palette[name] ?? 'rgba(148,163,184,0.06)';
+      const rgb = TIER_RGB[name] ?? '148,163,184';
+      const alpha = bandAlpha(tier, isDark);
+      ctx.fillStyle = `rgba(${rgb},${alpha})`;
       ctx.fillRect(chartArea.left, top, chartArea.right - chartArea.left, bot - top);
     }
     ctx.restore();
