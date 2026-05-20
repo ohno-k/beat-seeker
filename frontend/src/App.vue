@@ -1109,7 +1109,8 @@ const handleFileDropped = async (file: File) => {
                 maxScore: newR.maxScore,
                 newRatePt,
                 ratePtIncrease,
-                isInRateTop100: rateTop100SetGuest.has(`${newR.title}_${newR.difficultyName}`)
+                isInRateTop100: rateTop100SetGuest.has(`${newR.title}_${newR.difficultyName}`),
+                informalRank: newR.informalRank,
             });
         }
     });
@@ -1169,7 +1170,8 @@ const handleFileDropped = async (file: File) => {
             ...s,
             oldBeatPt,
             newBeatPt,
-            beatPtIncrease: Math.max(0, newBeatPt - oldBeatPt)
+            beatPtIncrease: Math.max(0, newBeatPt - oldBeatPt),
+            informalRank,
           };
         });
 

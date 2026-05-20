@@ -164,11 +164,19 @@
               <div v-else class="space-y-2">
                 <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
 
-                  <!-- 行 1: 難易度バッジ / ソングランク / LAMP UP バッジ / DJ LEVEL 情報 / RATE TOP100 -->
+                  <!-- 行 1: 難易度バッジ / 単曲ティア / ソングランク / LAMP UP バッジ / DJ LEVEL 情報 / RATE TOP100 -->
                   <div class="flex items-center gap-1.5 mb-1 flex-wrap">
                     <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
                       {{ song.difficulty }}
                     </span>
+                    <template v-for="rankNum in [getNumericRank(song.informalRank)]" :key="'rank'">
+                      <span v-if="rankNum" class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNum }}</span>
+                    </template>
+                    <template v-for="tier in [getSongTierInfo(song)]" :key="'tier'">
+                      <span v-if="tier" class="px-1.5 py-0.5 rounded text-[9px] font-black border shrink-0 bg-white dark:bg-slate-900/50 border-slate-300 dark:border-slate-600" :class="tier.color">
+                        {{ tier.name }}{{ tier.tier ? ' ' + tier.tier : '' }}
+                      </span>
+                    </template>
                     <span v-if="song.songRank" class="px-1.5 py-0.5 rounded text-[9px] font-black border shrink-0"
                       :class="song.songRank === 1 ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700' : 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'"
                     >#{{ song.songRank }}<span class="font-medium">/{{ song.songRankTotal }}</span></span>
@@ -377,6 +385,14 @@
                <div class="flex-1 min-w-0 pr-4">
                  <div class="flex items-center gap-2 mb-2 flex-wrap">
                     <span class="px-3 py-1 rounded text-sm font-black border shrink-0" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
+                    <template v-for="rankNumImg in [getNumericRank(song.informalRank)]" :key="'rank-img'">
+                      <span v-if="rankNumImg" class="px-2 py-1 rounded text-sm font-black border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNumImg }}</span>
+                    </template>
+                    <template v-for="tierImg in [getSongTierInfo(song)]" :key="'tier-img'">
+                      <span v-if="tierImg" class="px-2 py-1 rounded text-sm font-black border shrink-0 bg-white dark:bg-slate-900/50 border-slate-300 dark:border-slate-600" :class="tierImg.color">
+                        {{ tierImg.name }}{{ tierImg.tier ? ' ' + tierImg.tier : '' }}
+                      </span>
+                    </template>
                     <span v-if="song.songRank" class="px-2 py-0.5 rounded text-sm font-black border shrink-0"
                       :class="song.songRank === 1 ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-300'"
                     >#{{ song.songRank }}/{{ song.songRankTotal }}</span>
@@ -448,7 +464,8 @@
  */
 import { ref, computed } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
-import { getNextRankInfo, getNextRateTierRankInfo } from '../utils/beatTier';
+import { getNextRankInfo, getNextRateTierRankInfo, getFolderRankInfoByRate } from '../utils/beatTier';
+import type { RankInfo } from '../utils/beatTier';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
@@ -689,6 +706,28 @@ const shareOnX = async () => {
   }
 
   isSharing.value = false;
+};
+
+/**
+ * 【関数の役割】 informalRank 文字列から数値部分（例: "12.0"）だけを抽出。
+ * "Uncategorized(other)" 等の非数値ランクは null を返す（バッジ表示の判定に使う）。
+ */
+const getNumericRank = (informalRank: string | undefined): string | null => {
+  if (!informalRank) return null;
+  const m = informalRank.match(/(\d+\.\d+)/);
+  return m ? m[1] : null;
+};
+
+/**
+ * 【関数の役割】 1 譜面の score rate と informalRank から、単曲ティア（フォルダランクと同基準）を返す。
+ * informalRank（☆11.0〜13.0）が無い・スコアが 0 以下・非数値ランクの場合は null。
+ */
+const getSongTierInfo = (song: { scoreRate?: number; informalRank?: string }): RankInfo | null => {
+  const rank = getNumericRank(song.informalRank);
+  if (!rank || !song.scoreRate || song.scoreRate <= 0) return null;
+  const info = getFolderRankInfoByRate(song.scoreRate, rank);
+  if (!info || info.name === 'Beginner') return null;
+  return info;
 };
 
 /**

@@ -29,6 +29,8 @@ export interface UpdatedSong {
     isInRateTop100?: boolean;
     songRank?: number;
     songRankTotal?: number;
+    /** 非公式難易度ランク（例: '12.0'）。レポート上で単曲ティアを表示するために保持。 */
+    informalRank?: string;
 }
 
 export interface UploadDiffResult {

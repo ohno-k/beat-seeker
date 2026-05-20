@@ -779,19 +779,6 @@ const FOLDER_RANK_BLOCKS: { name: string; color: string }[] = [
 const FOLDER_SUB_RANK_COUNT = FOLDER_RANK_BLOCKS.length * TIERS_PER_RANK_BLOCK;
 
 /**
- * 【FOLDER 用】 ☆11.0 における Legend → Novice 1 の総スパン(%)。
- * 上位ランクは bottom-heavy 分布（OFFSET_POWER=0.5）で僅差を保ちつつ、
- * Novice 末端まで届くよう総スパンを十分に確保する。
- */
-const FOLDER_RANK_OFFSET_MAX_AT_LOW = 6;
-
-/**
- * 【FOLDER 用】 ☆13.0 における Legend → Novice 1 の総スパン(%)。
- * 高難度帯はプレイヤー間のスコア差が極大（TOP=95.77, Mythic 1 player avg=88.48）。
- */
-const FOLDER_RANK_OFFSET_MAX_AT_HIGH = 28;
-
-/**
  * 【FOLDER 用】 オフセット生成カーブの指数。
  * offset_norm(i) = 1 − (1 − i/N)^p 形式の累乗カーブを使う（[0, 1] 正規化）。
  *  - p > 1 にすると Legend 側ほど隣接ランク間の差が大きく、Novice 側ほど詰まる。
@@ -802,19 +789,75 @@ const FOLDER_RANK_OFFSET_MAX_AT_HIGH = 28;
 const FOLDER_RANK_OFFSET_POWER = 0.5;
 
 /**
- * 【関数の役割】 難易度に応じた最大 offset スパン(%)を **幾何補間** で返す。
- * ☆11.0 は MAX_AT_LOW、☆13.0 は MAX_AT_HIGH、間は exp 補間（log 軸で線形）。
- * 実プレイヤーデータ（Mythic 1 player avg）の MAX が ☆11→12→13 で 約 1.6→7.5→38 と
- * 倍率変化するため、線形補間ではなく幾何補間が現実に合う。
+ * 【FOLDER 用】 ☆値 → offsetScale（Legend → Novice 1 の総スパン%）の制御点表。
+ *
+ * 設計意図:
+ *  - ユーザー体感で「☆11.2〜☆12.7」のレンジは現行式の値そのものを採用しており、
+ *    この区間内ではティア閾値が一切変化しない（中央域維持）。
+ *  - 一方、両端の `☆11.0=4` と `☆13.0=35` はそれぞれ「甘い／厳しい」の体感を
+ *    緩和するための独立調整値。区間 [☆11.0, ☆11.2] と [☆12.7, ☆13.0] では
+ *    隣接 2 制御点で対数線形（=区間幾何）補間を行う。
+ *  - 既存の幾何補間 6×(28/6)^t と等価な ☆11.2 = 7.00, ☆12.7 = 22.22 を制御点に
+ *    据えることで、中央域は連続かつ現行と完全一致する。
+ *
+ * バランス調整時はこのテーブルを編集する（両端の値が体感のチューニング用つまみ）。
+ */
+const FOLDER_OFFSET_CONTROL: readonly { v: number; scale: number }[] = [
+    { v: 11.0, scale: 4 },     // ← 旧 6 から圧縮（低難度の甘さ抑制）
+    { v: 11.2, scale: 7.00 },  // 旧 6×(28/6)^0.1 ≒ 6.9992 と一致（中央域維持アンカー）
+    { v: 12.7, scale: 22.22 }, // 旧 6×(28/6)^0.85 ≒ 22.2225 と一致（中央域維持アンカー）
+    { v: 13.0, scale: 35 },    // ← 旧 28 から拡張（高難度の厳しさ緩和）
+];
+
+/**
+ * 【FOLDER 用】 全難易度のティア閾値を一律に「~1 サブティア上」へシフトする全体ブースト係数。
+ *
+ * 効果:
+ *  - scale × BOOST により、同じスコアに対する T_norm（=gap/scale）が縮み、結果としてより高いティアに割り振られる。
+ *  - 1.00 = シフト無し。1.05 で中央〜下位帯（Master〜Novice）が約 1 サブティア上、上位帯（Mythic）は約 0.2 サブティア上にシフト。
+ *  - offset_norm が bottom-heavy（power=0.5）のため、ブースト効果は上位ほど小さく下位ほど大きくなる非対称特性を持つ。
+ *
+ * チューニング目安:
+ *  - 0.5 サブティア上げ: 1.025
+ *  - 1.0 サブティア上げ: 1.05  ← 採用値
+ *  - 1.5 サブティア上げ: 1.07
+ *  - 2.0 サブティア上げ: 1.10
+ */
+const FOLDER_OFFSET_GLOBAL_BOOST = 1.05;
+
+/**
+ * 【関数の役割】 難易度に応じた最大 offset スパン(%)を制御点表からの**区間幾何補間**で返し、
+ * 全体ブースト係数 {@link FOLDER_OFFSET_GLOBAL_BOOST} を乗じて返す。
+ * 区間ごとに `lo.scale × (hi.scale / lo.scale)^t` で結ぶ。中央域 [☆11.2, ☆12.7] の制御点は
+ * 旧式（LOW=6, HIGH=28 の全域幾何補間）と完全一致しており、両端 [☆11.0, ☆11.2] と
+ * [☆12.7, ☆13.0] だけ独立に勾配が変わる。BOOST はその上に一律に作用する。
  */
 export function getFolderRankOffsetMax(informalRank: string | undefined): number {
-    if (!informalRank) return FOLDER_RANK_OFFSET_MAX_AT_HIGH;
-    const m = informalRank.match(/(\d+\.\d+)/);
-    const v = m ? parseFloat(m[1]) : LEGEND_RANK_MAX;
-    if (v <= LEGEND_RANK_MIN) return FOLDER_RANK_OFFSET_MAX_AT_LOW;
-    if (v >= LEGEND_RANK_MAX) return FOLDER_RANK_OFFSET_MAX_AT_HIGH;
-    const t = (v - LEGEND_RANK_MIN) / (LEGEND_RANK_MAX - LEGEND_RANK_MIN);
-    return FOLDER_RANK_OFFSET_MAX_AT_LOW * Math.pow(FOLDER_RANK_OFFSET_MAX_AT_HIGH / FOLDER_RANK_OFFSET_MAX_AT_LOW, t);
+    const last = FOLDER_OFFSET_CONTROL[FOLDER_OFFSET_CONTROL.length - 1];
+    let scale: number;
+    if (!informalRank) {
+        scale = last.scale;
+    } else {
+        const m = informalRank.match(/(\d+\.\d+)/);
+        const v = m ? parseFloat(m[1]) : LEGEND_RANK_MAX;
+        if (v <= FOLDER_OFFSET_CONTROL[0].v) {
+            scale = FOLDER_OFFSET_CONTROL[0].scale;
+        } else if (v >= last.v) {
+            scale = last.scale;
+        } else {
+            scale = last.scale;
+            for (let i = 0; i < FOLDER_OFFSET_CONTROL.length - 1; i++) {
+                const lo = FOLDER_OFFSET_CONTROL[i];
+                const hi = FOLDER_OFFSET_CONTROL[i + 1];
+                if (v >= lo.v && v <= hi.v) {
+                    const t = (v - lo.v) / (hi.v - lo.v);
+                    scale = lo.scale * Math.pow(hi.scale / lo.scale, t);
+                    break;
+                }
+            }
+        }
+    }
+    return scale * FOLDER_OFFSET_GLOBAL_BOOST;
 }
 
 /**
