@@ -162,6 +162,11 @@ const getMyVote = (title: string, difficultyName: string): string | null => {
   return myVotes.value.get(`${title}|${difficultyName}`) ?? null;
 };
 
+/** 自分がこの譜面に投票済みか（他の人の票を見せるか判定するゲート） */
+const hasVoted = (title: string, difficultyName: string): boolean => {
+  return myVotes.value.has(`${title}|${difficultyName}`);
+};
+
 /** 未カテゴリ譜面の Tier 投票総数（全 Tier の合算） */
 const getTotalTierVotes = (title: string, difficultyName: string): number => {
   const counts = getVotes(title, difficultyName);
@@ -440,14 +445,15 @@ const totalVotedCount = computed(() => myVotes.value.size);
               </button>
             </div>
 
-            <!-- 未カテゴリ譜面: Tier 値をプルダウンで投票 + 全 Tier 票分布チップ -->
+            <!-- 未カテゴリ譜面: Tier 値をプルダウンで投票 + 全 Tier 票分布チップ
+                 縦積みで select を上段に固定して、行ごとの横位置ズレを防ぐ -->
             <template v-if="isUncategorized(rank.rank)">
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-2 shrink-0" @click.stop>
+              <div class="flex flex-col items-end gap-1.5 shrink-0" @click.stop>
                 <select
                   :value="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) ?? ''"
                   :disabled="!isLoggedIn"
                   @change="castTierVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, ($event.target as HTMLSelectElement).value)"
-                  class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-24 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
                   :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName)
                     ? 'bg-blue-500 text-white border-blue-500'
                     : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600',
@@ -457,10 +463,11 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   <option v-for="tier in TIER_OPTIONS" :key="tier" :value="tier">{{ tier }}</option>
                 </select>
 
-                <!-- Tier 票分布: 投票された全 Tier をチップで列挙。最多はハイライト -->
+                <!-- Tier 票分布: 自分が投票済みのときだけ表示。未投票なら伏字プレースホルダ -->
                 <div
-                  v-if="getTierBreakdown(parseSong(songEntry).title, parseSong(songEntry).difficultyName).length > 0"
-                  class="flex flex-wrap items-center gap-1"
+                  v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)
+                    && getTierBreakdown(parseSong(songEntry).title, parseSong(songEntry).difficultyName).length > 0"
+                  class="flex flex-wrap justify-end items-center gap-1"
                 >
                   <span
                     v-for="entry in getTierBreakdown(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
@@ -477,6 +484,13 @@ const totalVotedCount = computed(() => myVotes.value.size);
                     計{{ getTotalTierVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName) }}票
                   </span>
                 </div>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-400 dark:text-slate-500 bg-slate-100/60 dark:bg-slate-700/40 border border-dashed border-slate-300 dark:border-slate-600 whitespace-nowrap"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  {{ t('tierVoting.hiddenUntilVoted') }}
+                </span>
               </div>
             </template>
 
@@ -495,7 +509,8 @@ const totalVotedCount = computed(() => myVotes.value.size);
                     !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>↑</span>
-                  <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
+                  <span class="font-black" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
+                  <span class="font-black opacity-50" v-else>?</span>
                 </button>
                 <!-- 据え置き（STAY）ボタン -->
                 <button
@@ -509,7 +524,8 @@ const totalVotedCount = computed(() => myVotes.value.size);
                     !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>→</span>
-                  <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
+                  <span class="font-black" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
+                  <span class="font-black opacity-50" v-else>?</span>
                 </button>
                 <!-- 降格（DEMOTE）ボタン -->
                 <button
@@ -523,7 +539,8 @@ const totalVotedCount = computed(() => myVotes.value.size);
                     !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>↓</span>
-                  <span class="font-black">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['DEMOTE'] ?? 0 }}</span>
+                  <span class="font-black" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['DEMOTE'] ?? 0 }}</span>
+                  <span class="font-black opacity-50" v-else>?</span>
                 </button>
               </div>
             </template>
