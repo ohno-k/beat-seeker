@@ -129,7 +129,22 @@ public class GameDataService {
             Integer level = toInteger(songForm.get(d[2]));
             if (notes == null || notes <= 0) continue;
 
-            SongDefinition sd = new SongDefinition();
+            // 既存の draft 行があれば上書き、無ければ新規作成 (upsert)。
+            // 過去のバグで重複行が残っていた場合は ID 最大の 1 件だけ残し、他は削除して
+            // (title, difficulty) で実質的にユニークな状態に揃える。
+            List<SongDefinition> existing =
+                    songDefRepo.findAllByTitleAndDifficultyAndRevision(title, code, "draft");
+            SongDefinition sd;
+            if (existing.isEmpty()) {
+                sd = new SongDefinition();
+            } else {
+                existing.sort((a, b) -> Long.compare(b.getId(), a.getId()));
+                sd = existing.get(0);
+                for (int i = 1; i < existing.size(); i++) {
+                    songDefRepo.delete(existing.get(i));
+                }
+            }
+
             sd.setTitle(title);
             sd.setArtist(artist);
             sd.setGenre(genre);
@@ -192,26 +207,33 @@ public class GameDataService {
         if (!"active".equals(active.getRevision())) {
             throw new RuntimeException("Source song must be active");
         }
-        return songDefRepo.findByTitleAndDifficultyAndRevision(
-                active.getTitle(), active.getDifficulty(), "draft")
-            .orElseGet(() -> {
-                SongDefinition d = new SongDefinition();
-                d.setTitle(active.getTitle());
-                d.setArtist(active.getArtist());
-                d.setGenre(active.getGenre());
-                d.setNotes(active.getNotes());
-                d.setBpm(active.getBpm());
-                d.setDifficulty(active.getDifficulty());
-                d.setLevel(active.getLevel());
-                d.setWr(active.getWr());
-                d.setAvg(active.getAvg());
-                d.setTextage(active.getTextage());
-                d.setCoef(active.getCoef());
-                d.setDifficultyLevel(active.getDifficultyLevel());
-                d.setDpLevel(active.getDpLevel());
-                d.setRevision("draft");
-                return songDefRepo.save(d);
-            });
+        // (title, difficulty) で複数ドラフトが残っているケースに備えて List 版で取得し、
+        // ID 最大の 1 件を採用、他は削除して以後の重複を防ぐ。
+        List<SongDefinition> existing = songDefRepo.findAllByTitleAndDifficultyAndRevision(
+                active.getTitle(), active.getDifficulty(), "draft");
+        if (!existing.isEmpty()) {
+            existing.sort((a, b) -> Long.compare(b.getId(), a.getId()));
+            for (int i = 1; i < existing.size(); i++) {
+                songDefRepo.delete(existing.get(i));
+            }
+            return existing.get(0);
+        }
+        SongDefinition d = new SongDefinition();
+        d.setTitle(active.getTitle());
+        d.setArtist(active.getArtist());
+        d.setGenre(active.getGenre());
+        d.setNotes(active.getNotes());
+        d.setBpm(active.getBpm());
+        d.setDifficulty(active.getDifficulty());
+        d.setLevel(active.getLevel());
+        d.setWr(active.getWr());
+        d.setAvg(active.getAvg());
+        d.setTextage(active.getTextage());
+        d.setCoef(active.getCoef());
+        d.setDifficultyLevel(active.getDifficultyLevel());
+        d.setDpLevel(active.getDpLevel());
+        d.setRevision("draft");
+        return songDefRepo.save(d);
     }
 
     /**
@@ -358,17 +380,46 @@ public class GameDataService {
     public void applyDraftSongs() throws Exception {
         List<SongDefinition> draftSongs = songDefRepo.findByRevision("draft");
 
-        // 既存曲編集（= 同じ title+difficulty の active が既にある）分は、active 側を先に削除する。
+        // 過去の apply で draft 重複が active に流れ込んだ等の理由で、
+        // (title, difficulty) が重複しているレコードが存在しうる。
+        // 重複したまま昇格すると次回 apply で NonUniqueResultException が出るため、
+        // ここで draft 側を「同一 (title, difficulty) なら最新 (ID 最大) だけ採用」してデデュープする。
+        Map<String, SongDefinition> dedupedDrafts = new LinkedHashMap<>();
+        List<SongDefinition> obsoleteDrafts = new ArrayList<>();
         for (SongDefinition ds : draftSongs) {
-            songDefRepo.findByTitleAndDifficultyAndRevision(ds.getTitle(), ds.getDifficulty(), "active")
-                .ifPresent(existing -> songDefRepo.delete(existing));
+            String key = ds.getTitle() + "\0" + ds.getDifficulty();
+            SongDefinition prior = dedupedDrafts.get(key);
+            if (prior == null) {
+                dedupedDrafts.put(key, ds);
+            } else if (ds.getId() > prior.getId()) {
+                obsoleteDrafts.add(prior);
+                dedupedDrafts.put(key, ds);
+            } else {
+                obsoleteDrafts.add(ds);
+            }
+        }
+        if (!obsoleteDrafts.isEmpty()) {
+            songDefRepo.deleteAll(obsoleteDrafts);
+            songDefRepo.flush();
+        }
+        List<SongDefinition> draftsToApply = new ArrayList<>(dedupedDrafts.values());
+
+        // 既存曲編集（= 同じ title+difficulty の active が既にある）分は、active 側を先に削除する。
+        // 過去のバグで active にも (title, difficulty) 重複行がありうるので、List 版で全件削除する。
+        for (SongDefinition ds : draftsToApply) {
+            List<SongDefinition> existingActives =
+                    songDefRepo.findAllByTitleAndDifficultyAndRevision(
+                            ds.getTitle(), ds.getDifficulty(), "active");
+            if (!existingActives.isEmpty()) {
+                songDefRepo.deleteAll(existingActives);
+            }
         }
         songDefRepo.flush();
 
         // Lv11/12 の ANOTHER/LEGGENDARIA を active 難易度表 Uncategorized 行に追加するための候補集合。
         // LEGGENDARIA は難易度表表記上 "<title>[L]" となる。
         Set<String> uncatTargets = new LinkedHashSet<>();
-        for (SongDefinition ds : draftSongs) {
+        for (SongDefinition ds : draftsToApply) {
             Integer lv = ds.getLevel();
             if (lv == null || (lv != 11 && lv != 12)) continue;
             String diff = ds.getDifficulty();
@@ -379,7 +430,7 @@ public class GameDataService {
             }
         }
 
-        for (SongDefinition ds : draftSongs) {
+        for (SongDefinition ds : draftsToApply) {
             ds.setRevision("active");
             songDefRepo.save(ds);
         }
@@ -397,25 +448,30 @@ public class GameDataService {
     private void addToActiveUncategorized(Set<String> songTitles) {
         List<DifficultyRank> activeRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("active");
         DifficultyRank uncat = null;
+        // 「全ランクに既に登場しているタイトル」を集計する。Uncategorized だけでなく
+        // 11.7 などの数値ランクに既に配置されている曲も対象にする必要がある (それを Uncategorized に
+        // 再追加すると、同一タイトルが複数ランクに重複して UI 上「元の位置から消えた」ように見える)。
+        Set<String> placedInAnyRank = new HashSet<>();
         for (DifficultyRank r : activeRanks) {
             if ("Uncategorized(other)".equals(r.getRankValue())) {
                 uncat = r;
-                break;
+            }
+            for (DifficultyRankSong s : r.getSongs()) {
+                placedInAnyRank.add(s.getSongTitle());
             }
         }
         if (uncat == null) return;
 
-        Set<String> existing = new HashSet<>();
         int maxOrder = 0;
         for (DifficultyRankSong s : uncat.getSongs()) {
-            existing.add(s.getSongTitle());
             if (s.getSortOrder() != null && s.getSortOrder() > maxOrder) {
                 maxOrder = s.getSortOrder();
             }
         }
 
         for (String title : songTitles) {
-            if (existing.contains(title)) continue;
+            // 既にいずれかのランクに配置されている曲は、その位置を尊重して触らない。
+            if (placedInAnyRank.contains(title)) continue;
             DifficultyRankSong newSong = new DifficultyRankSong();
             newSong.setDifficultyRank(uncat);
             newSong.setSongTitle(title);

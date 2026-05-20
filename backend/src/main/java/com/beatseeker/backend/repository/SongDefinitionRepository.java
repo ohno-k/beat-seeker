@@ -48,6 +48,20 @@ public interface SongDefinitionRepository extends JpaRepository<SongDefinition, 
     Optional<SongDefinition> findByTitleAndDifficultyAndRevision(String title, String difficulty, String revision);
 
     /**
+     * 【メソッドの役割】 (title, difficulty, revision) で 0..N 件取得する。
+     *
+     * テーブルには (title, difficulty, revision) の UNIQUE 制約が無いため、
+     * 重複行が混入しているケースに備えて List 版を用意している。
+     * 管理画面側の apply 処理で「重複した active 行を全件削除」する用途で使う。
+     *
+     * @param title      楽曲タイトル
+     * @param difficulty 難易度コード
+     * @param revision   リビジョン名
+     * @return 一致した SongDefinition のリスト（0..N 件）
+     */
+    List<SongDefinition> findAllByTitleAndDifficultyAndRevision(String title, String difficulty, String revision);
+
+    /**
      * 【メソッドの役割】 指定リビジョンの楽曲定義件数をカウントする。
      *
      * 派生クエリメソッド: {@code SELECT COUNT(*) WHERE revision = ?}。
