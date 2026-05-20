@@ -85,9 +85,35 @@ const songToRank = computed(() => {
   return m;
 });
 
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
+const subTierLabel = (def: { name: string; tier?: number }) =>
+  def.tier ? `${def.name} ${ROMAN[def.tier] ?? def.tier}` : def.name;
+
 /**
- * 大ブロック単位のティア境界（Legend / Mythic / Ancient / ... / Novice）。
- * 各ブロックの「下端」(=tier I) の閾値 PT を境界として採用する。Legend のみ単独。
+ * サブティアまで含む全境界（Y 軸ラベル用）。Legend / Mythic V / Mythic IV / ... / Novice I。
+ * 結果は PT 昇順。
+ */
+const subTierBoundaries = computed(() => {
+  const legendRate = getFolderLegendRate(props.rank);
+  if (legendRate <= 0) return [] as { name: string; label: string; pt: number }[];
+  const offsetScale = getFolderRankOffsetMax(props.rank);
+
+  const out: { name: string; label: string; pt: number }[] = [];
+  for (const def of FOLDER_RANK_DEFS) {
+    const thresholdRate = legendRate - def.offset * offsetScale;
+    if (thresholdRate <= 66.666) continue;
+    out.push({
+      name: def.name,
+      label: subTierLabel(def),
+      pt: calculatePoints(thresholdRate, props.rank) * props.songCount,
+    });
+  }
+  out.sort((a, b) => a.pt - b.pt);
+  return out;
+});
+
+/**
+ * 大ブロック単位の境界（背景色の塗り分け用）。各ブロック (tier=1) の入口 PT。Legend は単独。
  * 結果は PT 昇順。
  */
 const tierBoundaries = computed(() => {
@@ -96,9 +122,7 @@ const tierBoundaries = computed(() => {
   const offsetScale = getFolderRankOffsetMax(props.rank);
 
   const out: { name: string; pt: number }[] = [];
-  // Legend は offset=0（単一ティア）。
   out.push({ name: 'Legend', pt: calculatePoints(legendRate, props.rank) * props.songCount });
-  // 各大ブロックは tier=1 (= ブロックへの入口) の閾値を採用。
   for (const def of FOLDER_RANK_DEFS) {
     if (def.tier !== 1) continue;
     const thresholdRate = legendRate - def.offset * offsetScale;
@@ -138,20 +162,22 @@ const chartData = computed(() => {
 });
 
 /**
- * Y 軸範囲。データ上下に「隣接ティア境界」を含めることで、現在地が見やすくなる。
- * - max: dataMax より上にある最初の境界 PT（無ければ dataMax の上に少し余白）
- * - min: dataMin より下にある最後の境界 PT（無ければ 0 まで落とす）
+ * Y 軸範囲。データ周辺のサブティア境界に合わせてズームイン。
+ * - max: dataMax より上にある最初のサブティア PT（無ければ dataMax * 1.05）
+ * - min: dataMin より下にある最後のサブティア PT（無ければ 0）
+ *
+ * サブティア表示が密集しないよう、軸ラベルは subTierBoundaries 全件を渡して
+ * Chart.js 側の autoSkip 抑制と afterBuildTicks で位置を強制する。
  */
 const yMinMax = computed(() => {
   const ptsInSeries = series.value.map(p => p.pt);
   const dataMax = Math.max(props.currentTotalBeatPoints, ptsInSeries.length > 0 ? Math.max(...ptsInSeries) : 0);
   const dataMin = ptsInSeries.length > 0 ? Math.min(...ptsInSeries) : 0;
 
-  const sorted = [...tierBoundaries.value].sort((a, b) => a.pt - b.pt);
+  const sorted = [...subTierBoundaries.value].sort((a, b) => a.pt - b.pt);
 
-  // データ上端より上にある最初の境界、データ下端より下にある最後の境界
-  let max = dataMax * 1.1 + 1;
-  let min = Math.max(0, dataMin - (dataMax - dataMin) * 0.1);
+  let max = dataMax * 1.05 + 1;
+  let min = Math.max(0, dataMin - Math.max(1, (dataMax - dataMin) * 0.05));
 
   const above = sorted.find(b => b.pt > dataMax);
   if (above) max = above.pt;
@@ -162,7 +188,8 @@ const yMinMax = computed(() => {
 
   if (max - min < 1) max = min + 1;
 
-  const visibleTicks = tierBoundaries.value.filter(t => t.pt >= min && t.pt <= max);
+  // 軸ラベル: 範囲内の全サブティア境界を出す（ズーム済みなのでラベル密度は許容範囲）。
+  const visibleTicks = subTierBoundaries.value.filter(t => t.pt >= min && t.pt <= max);
   return { min, max, visibleTicks };
 });
 
@@ -204,7 +231,7 @@ const chartOptions = computed(() => {
   const tickColor = isDarkMode.value ? '#cbd5e1' : '#475569';
   const ticks = yMinMax.value.visibleTicks;
   const tickPositions = ticks.map(t => t.pt);
-  const tickLabels = new Map(ticks.map(t => [t.pt, t.name]));
+  const tickLabels = new Map(ticks.map(t => [t.pt, t.label]));
 
   const yScale: any = {
     min: yMinMax.value.min,
@@ -264,6 +291,36 @@ async function loadHistory() {
     const asc = [...data].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     const lookup = songToRank.value;
+
+    // Pre-pass: 各曲の初回登場 ts と oldScore を記録する。
+    // - oldScore === 0 で初登場 → そのタイミングで「初プレイ」
+    // - oldScore > 0 で初登場 → 履歴より前から既プレイ（時刻不明 → -∞ 扱い）
+    // - 履歴に一切登場しない曲 → 全プレイ済み行に来ている前提なので履歴より前から既プレイ扱い
+    const firstAppear = new Map<string, { ts: number; oldScore: number }>();
+    for (const entry of asc) {
+      if (!entry.diffJson || entry.diffJson === '[]') continue;
+      const ts = new Date(entry.date.endsWith('Z') ? entry.date : `${entry.date}Z`).getTime();
+      try {
+        const songs = JSON.parse(entry.diffJson) as any[];
+        for (const s of songs) {
+          const key = `${s.title}_${s.difficulty || s.difficultyName}`;
+          if (lookup.get(key) !== props.rank) continue;
+          if (!firstAppear.has(key)) {
+            firstAppear.set(key, { ts, oldScore: Number(s.oldScore ?? 0) });
+          }
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    // 全曲埋まった ts = 履歴中で初プレイされた曲の最終タイムスタンプ。
+    // 履歴内で初プレイが 1 件も無ければ -∞（= 履歴開始時点で既に全埋まり）。
+    let fullFilledTs = -Infinity;
+    for (const { ts, oldScore } of firstAppear.values()) {
+      if (oldScore === 0) {
+        if (ts > fullFilledTs) fullFilledTs = ts;
+      }
+    }
+
     let cum = 0;
     const points: TimePoint[] = [];
     for (const entry of asc) {
@@ -282,7 +339,8 @@ async function loadHistory() {
         }
       } catch (_) { /* ignore parse failure */ }
       cum += diff;
-      if (diff !== 0 || points.length === 0) {
+      // 全曲埋まった ts 以降だけプロットする。
+      if (ts >= fullFilledTs && (diff !== 0 || points.length === 0)) {
         points.push({ ts, pt: Math.max(0, cum) });
       }
     }

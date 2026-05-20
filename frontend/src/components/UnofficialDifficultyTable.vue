@@ -376,6 +376,7 @@ const tableData = computed(() => {
                     </svg>
                   </button>
                   <button
+                    v-if="data.playCount >= data.totalCount && data.totalCount > 0"
                     type="button"
                     @click.stop="growthChartRank = { rank: data.rank, songCount: data.totalCount, currentTotalBeatPoints: data.totalBeatPoints }"
                     :title="t('table.viewGrowthChart')"
