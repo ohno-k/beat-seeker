@@ -264,10 +264,16 @@ const castTierVote = async (title: string, difficultyName: string, tier: string)
  *  - 手順1: クエリで曲名絞り込み。
  *  - 手順2: 同じランク内の曲を最新コメント降順で並べ替え（活発な議論を上に）。
  *  - 手順3: 曲が 0 件になったランクは表示しない。
+ *  - 手順4: Uncategorized (未配置) ランクを先頭に出す。
  */
 const filteredRanks = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
-  return diffTableRanks.value
+  const ranks = [...diffTableRanks.value].sort((a, b) => {
+    const aUnc = isUncategorized(a.rank) ? 0 : 1;
+    const bUnc = isUncategorized(b.rank) ? 0 : 1;
+    return aUnc - bUnc;
+  });
+  return ranks
     .map(rank => {
       let filteredSongs = rank.songs;
       if (query) {
@@ -372,13 +378,26 @@ const totalVotedCount = computed(() => myVotes.value.size);
       <div
         v-for="rank in filteredRanks"
         :key="rank.rank"
-        class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden"
+        class="rounded-2xl border shadow-sm overflow-hidden"
+        :class="isUncategorized(rank.rank)
+          ? 'bg-amber-50/60 dark:bg-amber-900/10 border-amber-300 dark:border-amber-700 ring-1 ring-amber-300/60 dark:ring-amber-600/40'
+          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
       >
         <!-- ランクヘッダ: ランク名・曲数・未カテゴリならTier選択ヒント -->
-        <div class="px-5 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 flex items-center gap-3">
-          <span class="text-base font-black text-slate-800 dark:text-white tracking-tight">{{ rank.rank }}</span>
+        <div
+          class="px-5 py-3 border-b flex items-center gap-3"
+          :class="isUncategorized(rank.rank)
+            ? 'bg-amber-100/70 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/60'
+            : 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'"
+        >
+          <span
+            class="text-base font-black tracking-tight"
+            :class="isUncategorized(rank.rank)
+              ? 'text-amber-900 dark:text-amber-100'
+              : 'text-slate-800 dark:text-white'"
+          >{{ rank.rank }}</span>
           <span class="text-xs text-slate-400 dark:text-slate-500">{{ rank.songs.length }}{{ t('tierVoting.songs') }}</span>
-          <span v-if="isUncategorized(rank.rank)" class="text-[10px] px-2 py-0.5 bg-slate-200 dark:bg-slate-600 text-slate-500 dark:text-slate-300 rounded font-bold uppercase tracking-wide">
+          <span v-if="isUncategorized(rank.rank)" class="text-[10px] px-2 py-0.5 bg-amber-200 dark:bg-amber-700/60 text-amber-800 dark:text-amber-100 rounded font-bold uppercase tracking-wide">
             {{ t('tierVoting.selectTierHint') }}
           </span>
         </div>
