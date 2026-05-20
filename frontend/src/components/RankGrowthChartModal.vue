@@ -3,8 +3,9 @@
  * 【コンポーネントの役割】 非公式難易度（例: ☆12.1）単位の Beat-PT 推移を折れ線グラフで表示する。
  *
  * - X 軸: 日付（アップロード日時）
- * - Y 軸: その難易度内の累計 Beat-PT（実数）。目盛ラベルは「フォルダティア名」になっており、
- *   対応する PT 閾値の位置にプロットされる。
+ * - Y 軸: その難易度内の累計 Beat-PT（実数）。目盛ラベルは「フォルダティアの大ブロック名」
+ *   （Legend / Mythic / Ancient / ... / Novice）で、対応する PT 閾値の位置にプロットされる。
+ * - 各ティア領域は薄い色で塗り分け（ランキング散布図と同じパレット）。
  * - データ源: /api/scores/history の各 ScoreHistoryLog.diffJson を時系列で walk-forward して構築。
  *   - 各更新曲の `beatPtIncrease` を、その曲が属する非公式ランクに加算する
  *   - 難易度改訂 (updatedCount=0) は本グラフでは反映しない（diffJson が空のため）
@@ -37,9 +38,33 @@ const { t, currentLang } = useI18n();
 const { authHeaders, isLoggedIn } = useAuth();
 const { isDarkMode } = useDarkMode();
 
-const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
-const tierLabel = (def: typeof FOLDER_RANK_DEFS[number]) =>
-  def.tier ? `${def.name} ${ROMAN[def.tier] ?? def.tier}` : def.name;
+// ランキング散布図と揃えたティア背景バンドカラー。
+const BAND_COLORS_LIGHT: Record<string, string> = {
+  Legend: 'rgba(245,158,11,0.14)',
+  Mythic: 'rgba(168,85,247,0.12)',
+  Ancient: 'rgba(99,102,241,0.12)',
+  Master: 'rgba(239,68,68,0.10)',
+  Elite: 'rgba(249,115,22,0.10)',
+  Commander: 'rgba(234,179,8,0.10)',
+  Veteran: 'rgba(16,185,129,0.10)',
+  Expert: 'rgba(20,184,166,0.09)',
+  Advanced: 'rgba(6,182,212,0.09)',
+  Intermediate: 'rgba(59,130,246,0.09)',
+  Novice: 'rgba(100,116,139,0.09)',
+};
+const BAND_COLORS_DARK: Record<string, string> = {
+  Legend: 'rgba(245,158,11,0.20)',
+  Mythic: 'rgba(168,85,247,0.18)',
+  Ancient: 'rgba(99,102,241,0.18)',
+  Master: 'rgba(239,68,68,0.16)',
+  Elite: 'rgba(249,115,22,0.16)',
+  Commander: 'rgba(234,179,8,0.16)',
+  Veteran: 'rgba(16,185,129,0.16)',
+  Expert: 'rgba(20,184,166,0.14)',
+  Advanced: 'rgba(6,182,212,0.14)',
+  Intermediate: 'rgba(59,130,246,0.14)',
+  Novice: 'rgba(100,116,139,0.14)',
+};
 
 const isLoading = ref(false);
 const errorMsg = ref('');
@@ -60,18 +85,27 @@ const songToRank = computed(() => {
   return m;
 });
 
-/** 各フォルダティア境界の PT 閾値（Legend → Novice I の順）。Y 軸ラベル用。 */
-const tierThresholds = computed(() => {
+/**
+ * 大ブロック単位のティア境界（Legend / Mythic / Ancient / ... / Novice）。
+ * 各ブロックの「下端」(=tier I) の閾値 PT を境界として採用する。Legend のみ単独。
+ * 結果は PT 昇順。
+ */
+const tierBoundaries = computed(() => {
   const legendRate = getFolderLegendRate(props.rank);
-  if (legendRate <= 0) return [] as { label: string; pt: number; color: string }[];
+  if (legendRate <= 0) return [] as { name: string; pt: number }[];
   const offsetScale = getFolderRankOffsetMax(props.rank);
-  const out: { label: string; pt: number; color: string }[] = [];
+
+  const out: { name: string; pt: number }[] = [];
+  // Legend は offset=0（単一ティア）。
+  out.push({ name: 'Legend', pt: calculatePoints(legendRate, props.rank) * props.songCount });
+  // 各大ブロックは tier=1 (= ブロックへの入口) の閾値を採用。
   for (const def of FOLDER_RANK_DEFS) {
+    if (def.tier !== 1) continue;
     const thresholdRate = legendRate - def.offset * offsetScale;
-    if (thresholdRate <= 66.666) break;
-    const pt = calculatePoints(thresholdRate, props.rank) * props.songCount;
-    out.push({ label: tierLabel(def), pt, color: def.color });
+    if (thresholdRate <= 66.666) continue;
+    out.push({ name: def.name, pt: calculatePoints(thresholdRate, props.rank) * props.songCount });
   }
+  out.sort((a, b) => a.pt - b.pt);
   return out;
 });
 
@@ -93,7 +127,7 @@ const chartData = computed(() => {
         data,
         borderColor: lineColor,
         backgroundColor: lineColor + '33',
-        borderWidth: 2,
+        borderWidth: 2.5,
         pointRadius: 3,
         pointHoverRadius: 5,
         tension: 0.15,
@@ -103,43 +137,97 @@ const chartData = computed(() => {
   };
 });
 
+/**
+ * Y 軸範囲。データ上下に「隣接ティア境界」を含めることで、現在地が見やすくなる。
+ * - max: dataMax より上にある最初の境界 PT（無ければ dataMax の上に少し余白）
+ * - min: dataMin より下にある最後の境界 PT（無ければ 0 まで落とす）
+ */
 const yMinMax = computed(() => {
   const ptsInSeries = series.value.map(p => p.pt);
+  const dataMax = Math.max(props.currentTotalBeatPoints, ptsInSeries.length > 0 ? Math.max(...ptsInSeries) : 0);
   const dataMin = ptsInSeries.length > 0 ? Math.min(...ptsInSeries) : 0;
-  const dataMax = ptsInSeries.length > 0 ? Math.max(...ptsInSeries, props.currentTotalBeatPoints) : props.currentTotalBeatPoints;
-  const pad = Math.max((dataMax - dataMin) * 0.15, 1);
-  const min = Math.max(0, dataMin - pad);
-  const max = dataMax + pad;
-  // ティア閾値のうち軸範囲に含まれるものだけ抽出（極端な高ランク閾値で軸が潰れるのを防ぐ）
-  const visibleTicks = tierThresholds.value.filter(t => t.pt >= min && t.pt <= max);
+
+  const sorted = [...tierBoundaries.value].sort((a, b) => a.pt - b.pt);
+
+  // データ上端より上にある最初の境界、データ下端より下にある最後の境界
+  let max = dataMax * 1.1 + 1;
+  let min = Math.max(0, dataMin - (dataMax - dataMin) * 0.1);
+
+  const above = sorted.find(b => b.pt > dataMax);
+  if (above) max = above.pt;
+
+  const belowList = sorted.filter(b => b.pt < dataMin);
+  if (belowList.length > 0) min = belowList[belowList.length - 1].pt;
+  else min = 0;
+
+  if (max - min < 1) max = min + 1;
+
+  const visibleTicks = tierBoundaries.value.filter(t => t.pt >= min && t.pt <= max);
   return { min, max, visibleTicks };
 });
+
+/**
+ * Chart.js プラグイン: ティア領域を Y 軸方向に薄く塗り分ける。
+ * 各ブロック (Novice → ... → Mythic → Legend) の下端境界をもとに、
+ * 上端を「1 つ上の境界 PT」（Legend は yScale.max）として塗る。
+ * リアクティブな `tierBoundaries` / `isDarkMode` は描画時に参照する。
+ */
+const tierBandPlugin = {
+  id: 'rankGrowthTierBands',
+  beforeDatasetsDraw(chart: any) {
+    const { ctx, chartArea, scales } = chart;
+    if (!chartArea || !scales?.y) return;
+    const yScale = scales.y;
+    const palette = isDarkMode.value ? BAND_COLORS_DARK : BAND_COLORS_LIGHT;
+    const sorted = [...tierBoundaries.value].sort((a, b) => a.pt - b.pt);
+    if (sorted.length === 0) return;
+
+    ctx.save();
+    for (let i = 0; i < sorted.length; i++) {
+      const bandStart = sorted[i].pt;
+      const bandEnd = i + 1 < sorted.length ? sorted[i + 1].pt : yScale.max;
+      const name = sorted[i].name;
+      const yTop = yScale.getPixelForValue(bandEnd);
+      const yBot = yScale.getPixelForValue(bandStart);
+      const top = Math.max(yTop, chartArea.top);
+      const bot = Math.min(yBot, chartArea.bottom);
+      if (bot <= top) continue;
+      ctx.fillStyle = palette[name] ?? 'rgba(148,163,184,0.06)';
+      ctx.fillRect(chartArea.left, top, chartArea.right - chartArea.left, bot - top);
+    }
+    ctx.restore();
+  },
+};
 
 const chartOptions = computed(() => {
   const grid = isDarkMode.value ? 'rgba(148,163,184,0.18)' : 'rgba(148,163,184,0.25)';
   const tickColor = isDarkMode.value ? '#cbd5e1' : '#475569';
   const ticks = yMinMax.value.visibleTicks;
   const tickPositions = ticks.map(t => t.pt);
-  const tickLabels = new Map(ticks.map(t => [t.pt, t.label]));
+  const tickLabels = new Map(ticks.map(t => [t.pt, t.name]));
+
   const yScale: any = {
     min: yMinMax.value.min,
     max: yMinMax.value.max,
     ticks: {
       color: tickColor,
+      font: { size: 11, weight: 'bold' as const },
       callback: (val: any) => {
         const v = Number(val);
-        return tickLabels.get(v) ?? v.toFixed(0);
+        return tickLabels.get(v) ?? '';
       },
       autoSkip: false,
+      padding: 6,
     },
-    grid: { color: grid },
+    grid: { color: grid, drawTicks: false },
+    border: { display: false },
   };
-  // ティア閾値が取得できているときだけ Y 軸の目盛位置を強制差し替える。
   if (tickPositions.length > 0) {
     yScale.afterBuildTicks = (axis: any) => {
       axis.ticks = tickPositions.map(v => ({ value: v }));
     };
   }
+
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -173,7 +261,6 @@ async function loadHistory() {
     const res = await fetch(`${API_BASE}/api/scores/history`, { headers: authHeaders() });
     if (!res.ok) throw new Error(t('history.error'));
     const data = await res.json();
-    // 古い順に並べる
     const asc = [...data].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     const lookup = songToRank.value;
@@ -195,17 +282,13 @@ async function loadHistory() {
         }
       } catch (_) { /* ignore parse failure */ }
       cum += diff;
-      // 同じランク内に変化が無いアップロードでもライン上に点を残すと過密になるため、
-      // 差分があった or 初回 or 最後尾は必ず記録、それ以外は前回値と同じならスキップ
       if (diff !== 0 || points.length === 0) {
         points.push({ ts, pt: Math.max(0, cum) });
       }
     }
-    // 現在値が確定値なので、最終ポイントを差し替えて誤差を吸収。
     if (points.length > 0) {
       points[points.length - 1] = { ts: points[points.length - 1].ts, pt: props.currentTotalBeatPoints };
     } else {
-      // 履歴ゼロでも現在値だけは描画する
       points.push({ ts: Date.now(), pt: props.currentTotalBeatPoints });
     }
     series.value = points;
@@ -238,7 +321,7 @@ watch(() => props.rank, loadHistory);
           <div v-else-if="errorMsg" class="py-8 text-center text-red-500 dark:text-red-400">{{ errorMsg }}</div>
           <div v-else-if="series.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400">{{ t('history.empty') }}</div>
           <div v-else class="w-full" style="height: clamp(260px, 60vh, 480px);">
-            <Line :data="chartData" :options="chartOptions" />
+            <Line :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin]" />
           </div>
         </div>
       </div>
