@@ -162,12 +162,13 @@ const chartData = computed(() => {
 });
 
 /**
- * Y 軸範囲。データ周辺のサブティア境界に合わせてズームイン。
- * - max: dataMax より上にある最初のサブティア PT（無ければ dataMax * 1.05）
- * - min: dataMin より下にある最後のサブティア PT（無ければ 0）
+ * Y 軸範囲。データ範囲にタイトにズームする。
+ * - データ ± 8% パディング
+ * - データ上端の直上 / 直下にサブティア境界が「ごく近く」にある場合のみスナップ
+ * - 表示ラベルは Y 軸スパンの 5% 以下の間隔で重なる場合は上位優先で間引く
  *
- * サブティア表示が密集しないよう、軸ラベルは subTierBoundaries 全件を渡して
- * Chart.js 側の autoSkip 抑制と afterBuildTicks で位置を強制する。
+ * これにより、サブティア境界が PT 上で密集している低 difficulty 帯でも
+ * ラベルが互いに重なって読めなくなることを避けつつ、データを最大限拡大表示できる。
  */
 const yMinMax = computed(() => {
   const ptsInSeries = series.value.map(p => p.pt);
@@ -175,21 +176,32 @@ const yMinMax = computed(() => {
   const dataMin = ptsInSeries.length > 0 ? Math.min(...ptsInSeries) : 0;
 
   const sorted = [...subTierBoundaries.value].sort((a, b) => a.pt - b.pt);
+  const range = Math.max(dataMax - dataMin, 1);
+  const pad = range * 0.08;
 
-  let max = dataMax * 1.05 + 1;
-  let min = Math.max(0, dataMin - Math.max(1, (dataMax - dataMin) * 0.05));
+  let max = dataMax + pad;
+  let min = Math.max(0, dataMin - pad);
 
-  const above = sorted.find(b => b.pt > dataMax);
+  // 直近にサブティア境界がパディング 2 倍以内にあるならスナップする（軸端の見栄えを揃える）。
+  const above = sorted.find(b => b.pt > dataMax && b.pt <= dataMax + pad * 2);
   if (above) max = above.pt;
-
-  const belowList = sorted.filter(b => b.pt < dataMin);
+  const belowList = sorted.filter(b => b.pt < dataMin && b.pt >= dataMin - pad * 2);
   if (belowList.length > 0) min = belowList[belowList.length - 1].pt;
-  else min = 0;
 
   if (max - min < 1) max = min + 1;
 
-  // 軸ラベル: 範囲内の全サブティア境界を出す（ズーム済みなのでラベル密度は許容範囲）。
-  const visibleTicks = subTierBoundaries.value.filter(t => t.pt >= min && t.pt <= max);
+  // 範囲内のサブティア境界をリストアップし、上位優先で 5% 以下の間隔を間引く。
+  const inRangeDesc = subTierBoundaries.value
+    .filter(t => t.pt >= min && t.pt <= max)
+    .sort((a, b) => b.pt - a.pt);
+  const minSpacing = (max - min) * 0.05;
+  const spaced: typeof inRangeDesc = [];
+  for (const t of inRangeDesc) {
+    if (spaced.length === 0 || (spaced[spaced.length - 1].pt - t.pt) >= minSpacing) {
+      spaced.push(t);
+    }
+  }
+  const visibleTicks = spaced.sort((a, b) => a.pt - b.pt);
   return { min, max, visibleTicks };
 });
 
@@ -292,10 +304,20 @@ async function loadHistory() {
 
     const lookup = songToRank.value;
 
-    // Pre-pass: 各曲の初回登場 ts と oldScore を記録する。
-    // - oldScore === 0 で初登場 → そのタイミングで「初プレイ」
-    // - oldScore > 0 で初登場 → 履歴より前から既プレイ（時刻不明 → -∞ 扱い）
-    // - 履歴に一切登場しない曲 → 全プレイ済み行に来ている前提なので履歴より前から既プレイ扱い
+    // ランクに属する全曲キーのリスト（現在の難易度表ベース）。
+    const rankSongKeys: string[] = [];
+    (diffTableRanksRef.value || []).forEach((r: any) => {
+      if (r.rank !== props.rank) return;
+      r.songs.forEach((songTitle: string) => {
+        const isLegg = songTitle.endsWith('[L]');
+        const baseTitle = isLegg ? songTitle.slice(0, -3) : songTitle;
+        const diffName = isLegg ? 'LEGGENDARIA' : 'ANOTHER';
+        rankSongKeys.push(`${baseTitle}_${diffName}`);
+      });
+    });
+    const requiredCount = rankSongKeys.length;
+
+    // 履歴中で「いつ初登場したか / そのときの oldScore」を曲別に記録。
     const firstAppear = new Map<string, { ts: number; oldScore: number }>();
     for (const entry of asc) {
       if (!entry.diffJson || entry.diffJson === '[]') continue;
@@ -312,17 +334,23 @@ async function loadHistory() {
       } catch (_) { /* ignore */ }
     }
 
-    // 全曲埋まった ts = 履歴中で初プレイされた曲の最終タイムスタンプ。
-    // 履歴内で初プレイが 1 件も無ければ -∞（= 履歴開始時点で既に全埋まり）。
+    // 履歴前から既プレイの曲（履歴中に一切登場しない曲は currently fully filled の前提でこのカテゴリに分類）。
+    const preHistoryPlayed = new Set<string>();
+    for (const key of rankSongKeys) {
+      if (!firstAppear.has(key)) preHistoryPlayed.add(key);
+    }
+
+    // 走査しながら playedSet を成長させ、全曲埋まった瞬間の ts を fullFilledTs として記録する。
+    const playedSet = new Set<string>(preHistoryPlayed);
     let fullFilledTs = -Infinity;
-    for (const { ts, oldScore } of firstAppear.values()) {
-      if (oldScore === 0) {
-        if (ts > fullFilledTs) fullFilledTs = ts;
-      }
+    // preHistory のみで既に全曲揃っているなら、最初の history エントリから「埋まり済み」とみなす。
+    if (playedSet.size >= requiredCount && asc.length > 0) {
+      fullFilledTs = new Date(asc[0].date.endsWith('Z') ? asc[0].date : `${asc[0].date}Z`).getTime();
     }
 
     let cum = 0;
-    const points: TimePoint[] = [];
+    type Snapshot = { ts: number; cum: number };
+    const snapshots: Snapshot[] = [];
     for (const entry of asc) {
       const ts = new Date(entry.date.endsWith('Z') ? entry.date : `${entry.date}Z`).getTime();
       let diff = 0;
@@ -334,17 +362,31 @@ async function loadHistory() {
             if (lookup.get(key) === props.rank) {
               const inc = Number(s.beatPtIncrease ?? (Number(s.newBeatPt ?? 0) - Number(s.oldBeatPt ?? 0)));
               if (Number.isFinite(inc)) diff += inc;
+              playedSet.add(key);
             }
           }
         }
-      } catch (_) { /* ignore parse failure */ }
+      } catch (_) { /* ignore */ }
       cum += diff;
-      // 全曲埋まった ts 以降だけプロットする。
-      if (ts >= fullFilledTs && (diff !== 0 || points.length === 0)) {
-        points.push({ ts, pt: Math.max(0, cum) });
+      // 全曲が初めて揃った瞬間を fullFilledTs として記録（一度しか上書きしない）。
+      if (fullFilledTs === -Infinity && playedSet.size >= requiredCount) {
+        fullFilledTs = ts;
+      }
+      // 全曲埋まり以降のエントリだけスナップショットを残す。
+      if (fullFilledTs !== -Infinity && ts >= fullFilledTs && (diff !== 0 || snapshots.length === 0)) {
+        snapshots.push({ ts, cum });
       }
     }
+
+    // cum は diff_json に基づく「履歴中の増分の合計」。履歴前から既プレイの曲の寄与は含まれない。
+    // 現在の合計 PT と「cum の最終値」の差を base として全スナップショットに加算することで、
+    // 履歴前寄与分を反映した累計 PT に整える。
+    const finalCum = snapshots.length > 0 ? snapshots[snapshots.length - 1].cum : cum;
+    const base = Math.max(0, props.currentTotalBeatPoints - finalCum);
+    const points: TimePoint[] = snapshots.map(s => ({ ts: s.ts, pt: Math.max(0, s.cum + base) }));
+
     if (points.length > 0) {
+      // 微小な丸め誤差で現在値とずれないよう、最終点だけは現在値そのものに合わせる。
       points[points.length - 1] = { ts: points[points.length - 1].ts, pt: props.currentTotalBeatPoints };
     } else {
       points.push({ ts: Date.now(), pt: props.currentTotalBeatPoints });
