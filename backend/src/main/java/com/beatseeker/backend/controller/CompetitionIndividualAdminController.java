@@ -599,19 +599,18 @@ public class CompetitionIndividualAdminController {
             if (!recorded) continue;
             List<CompetitionIndividualMatchSlot> slots = slotsByMatch.get(m.getId());
 
-            // 決勝試合は「試合内総合順位」を別途算出する (totalPoints 降順、同点はタイ)
-            Map<Long, Integer> finalsMatchRank = new HashMap<>();
-            if (isFinals) {
-                for (CompetitionIndividualMatchSlot s : slots) {
-                    if (s.getParticipant() == null) continue; // 抽選番号モードで未割当のスロットは無視
-                    int myTp = zero(s.getTotalPoints());
-                    int better = 0;
-                    for (CompetitionIndividualMatchSlot other : slots) {
-                        if (other.getParticipant() == null) continue;
-                        if (zero(other.getTotalPoints()) > myTp) better++;
-                    }
-                    finalsMatchRank.put(s.getParticipant().getId(), better + 1);
+            // 試合内総合順位 (totalPoints 降順、同点はタイ扱いで両者を上位扱い)。
+            // 予選/決勝とも同じ算出。決勝側 finalsMatchRank は a.finalsRank の入力に使う。
+            Map<Long, Integer> matchRank = new HashMap<>();
+            for (CompetitionIndividualMatchSlot s : slots) {
+                if (s.getParticipant() == null) continue; // 抽選番号モードで未割当のスロットは無視
+                int myTp = zero(s.getTotalPoints());
+                int better = 0;
+                for (CompetitionIndividualMatchSlot other : slots) {
+                    if (other.getParticipant() == null) continue;
+                    if (zero(other.getTotalPoints()) > myTp) better++;
                 }
+                matchRank.put(s.getParticipant().getId(), better + 1);
             }
 
             for (CompetitionIndividualMatchSlot s : slots) {
@@ -620,16 +619,16 @@ public class CompetitionIndividualAdminController {
                 ParticipantAgg a = agg.get(pid);
                 if (a == null) continue;
                 int total = zero(s.getTotalPoints());
-                // 1〜4 曲ぶんの順位カウントを加算
-                Integer[] ranks = { s.getRank1(), s.getRank2(), s.getRank3(), s.getRank4() };
                 if (isFinals) {
                     a.finalsPoints += total;
-                    a.finalsRank = finalsMatchRank.get(pid);
+                    a.finalsRank = matchRank.get(pid);
                     a.finalsBucket = m.getFinalsBucket();
                 } else {
                     a.prelimPoints += total;
-                    for (Integer r : ranks) {
-                        if (r == null) continue;
+                    // 試合の総合順位 (totalPoints ベース) を 1 試合 1 カウントとして集計。
+                    // 1 曲ごとの順位ではないので、4 試合に出ても各カテゴリの最大カウントは 4。
+                    Integer r = matchRank.get(pid);
+                    if (r != null) {
                         if (r == 1) a.first++;
                         else if (r == 2) a.second++;
                         else if (r == 3) a.third++;

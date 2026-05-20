@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
         <tr
           v-for="row in data.rows"
           :key="row.displayName"
-          :class="{ 'is-top1': row.prelimRank === 1, 'is-top2': row.prelimRank === 2, 'is-top3': row.prelimRank === 3 }"
+          :class="`bucket-${Math.ceil(row.prelimRank / 4)}`"
         >
           <td class="col-rank">{{ row.prelimRank }}</td>
           <td class="col-name">{{ row.displayName }}</td>
@@ -170,9 +170,12 @@ onBeforeUnmount(() => {
 .col-name { text-align: left !important; min-width: 180px; font-weight: 700; }
 .col-num  { width: 100px; }
 
-/* 上位ハイライト (BPL 風の金/銀/銅) */
-.is-top1 td { background: rgba(202, 138, 4, 0.85); }   /* gold */
-.is-top1 .col-rank { color: #fef3c7; }
-.is-top2 td { background: rgba(100, 116, 139, 0.85); } /* silver */
-.is-top3 td { background: rgba(180, 83, 9, 0.85); }    /* bronze */
+/* 4 人ずつのバケット色分け (決勝の同卓予定者をグルーピング)。
+   B1=金 (1〜4位 / 決勝 1 卓目) / B2=青 (5〜8位) / B3=緑 (9〜12位) / B4=紫 (13〜16位)。
+   admin 画面の prelimBucketRowClass と同じ配色を維持して視覚整合を取る。 */
+.bucket-1 td { background: rgba(202, 138, 4, 0.85); }   /* amber-600 */
+.bucket-1 .col-rank { color: #fef3c7; }
+.bucket-2 td { background: rgba(2, 132, 199, 0.80); }    /* sky-600 */
+.bucket-3 td { background: rgba(5, 150, 105, 0.80); }    /* emerald-600 */
+.bucket-4 td { background: rgba(124, 58, 237, 0.80); }   /* violet-600 */
 </style>
