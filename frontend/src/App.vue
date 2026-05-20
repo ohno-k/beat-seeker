@@ -67,6 +67,8 @@ const ShareView = defineAsyncComponent(() => import('./views/ShareView.vue'));
 const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCardView.vue'));
 // 選曲発表 (SONG REVEAL): 大会主催 + 運営担当のみ到達可能。`/song-reveal` のスタンドアロン URL で OBS から読み込む。
 const SongRevealView = defineAsyncComponent(() => import('./views/SongRevealView.vue'));
+// 個人戦順位表 (OBS): `/obs/individual/:token` のスタンドアロン URL。透過背景で OBS のブラウザソースに重ねる。
+const ObsIndividualStandingsView = defineAsyncComponent(() => import('./views/ObsIndividualStandingsView.vue'));
 // 大会管理画面: Competition セクションの 4 ID 限定。サイドバーから activeTab 経由で遷移する通常タブ。
 const CompetitionAdminView = defineAsyncComponent(() => import('./views/CompetitionAdminView.vue'));
 // 管理者用 2 ユーザー比較画面: URL `/admin/user-comparison` での直接アクセス専用 (サイドバー導線なし)。
@@ -137,6 +139,13 @@ const isStrategyCardObsPage = ref(window.location.pathname === '/strategy-card')
  * 認証不要。OBS の Interact 機能で曲を選んでから REVEAL する想定。
  */
 const isSongRevealPage = ref(window.location.pathname === '/song-reveal');
+
+/**
+ * 現在 URL が `/obs/individual/:token` かどうか。
+ * OBS ブラウザソース用に個人戦の順位表だけを透過背景で描画する。認証不要。
+ * トークンは ObsIndividualStandingsView 側で route から拾うのでここでは何も持たない。
+ */
+const isObsIndividualStandingsPage = ref(window.location.pathname.startsWith('/obs/individual/'));
 
 /**
  * 現在 URL が `/competition/player/{token}` かどうかと、抽出した招待トークン。
@@ -1406,6 +1415,8 @@ const handleUnifiedClose = async () => {
   <StrategyCardView v-else-if="isStrategyCardObsPage" class="w-full min-h-screen" />
   <!-- OBS ブラウザソース用: 選曲発表 (SONG REVEAL) も同様に単独描画。 -->
   <SongRevealView v-else-if="isSongRevealPage" />
+  <!-- OBS ブラウザソース用: 個人戦順位表。透過背景で重ねる前提のためサイドバー等は一切描画しない。 -->
+  <ObsIndividualStandingsView v-else-if="isObsIndividualStandingsPage" />
   <!-- 大会参加者用招待ページ: token を抽出して View に渡す。ログイン不要のスタンドアロン。 -->
   <CompetitionPlayerView v-else-if="isCompetitionPlayerPage" :token="competitionPlayerToken" />
   <!-- 大会 TL 管理ページ: token を抽出してラインアップ管理 View を表示。ログイン不要のスタンドアロン。 -->

@@ -46,10 +46,22 @@ public class CompetitionIndividualMatchSlot {
     @Column(name = "slot_position", nullable = false)
     private Integer slotPosition;
 
-    /** 配置された参加者。スケジュール生成時に確定する。 */
+    /**
+     * 配置された参加者。
+     * 自動配置モード ({@code openCompetition}) では生成時に確定するため非 NULL。
+     * 抽選番号モード ({@code openWithNumbers}) では生成時は NULL のままで、
+     * 後段の {@code lotteryAssign} で番号→参加者マッピングを適用して埋める。
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "participant_id", nullable = false)
+    @JoinColumn(name = "participant_id")
     private CompetitionParticipant participant;
+
+    /**
+     * 抽選番号モードで使用するスロット番号 (1〜12 or 1〜16)。
+     * 自動配置モードでは NULL。同じ番号は複数試合に登場し得るが、1 試合内で重複してはならない。
+     */
+    @Column(name = "slot_number")
+    private Integer slotNumber;
 
     // ── 4 曲ぶんのスコア (未入力時は null)。曲は match.song1〜song4 に対応 ──
     @Column(name = "score1") private Integer score1;

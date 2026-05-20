@@ -1128,6 +1128,7 @@ public class CompetitionAdminController {
         m.put("createdAt", c.getCreatedAt());
         m.put("lockedAt", c.getLockedAt());
         m.put("createdById", c.getCreatedBy() != null ? c.getCreatedBy().getId() : null);
+        m.put("obsToken", c.getObsToken());
         return m;
     }
 

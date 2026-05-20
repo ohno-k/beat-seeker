@@ -13,7 +13,7 @@
  * 4 ID 判定はサーバ側で行うため、本 View はサイドバーガードと併せた二重防御の片側として、
  * 表示上の権限警告のみクライアントで出す (実際のリクエストブロックはサーバ側)。
  */
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import {
   useCompetitionAdmin,
@@ -67,6 +67,9 @@ const {
   clearIndividualMatchResult,
   fetchIndividualStandings,
   generateIndividualFinals,
+  openIndividualWithNumbers,
+  assignIndividualLottery,
+  regenerateObsToken,
 } = useCompetitionAdmin();
 
 /** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
@@ -699,6 +702,159 @@ const handleOpenIndividualStatus = async () => {
     toast.success('open に遷移しました');
   } catch (e) {
     toast.error((e as Error).message);
+  }
+};
+
+// ── 抽選番号モードでの open 処理 ─────────────────────────
+/**
+ * 抽選番号モード用のテキストエリア入力。1 行 1 試合、スペース/カンマ区切りで 4 つの番号。
+ * 例:
+ *   1 2 3 4
+ *   5 6 7 8
+ *   9 10 11 12
+ *
+ * 12 名→6 試合 × 3 テーブル = 18 行 / 16 名→5 試合 × 4 テーブル = 20 行を想定。
+ */
+const numberModeText = ref('');
+const isOpeningWithNumbers = ref(false);
+
+const parseNumberModeText = (text: string): number[][] => {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  const out: number[][] = [];
+  for (const line of lines) {
+    const nums = line.split(/[\s,]+/).map(s => Number(s));
+    out.push(nums);
+  }
+  return out;
+};
+
+const handleOpenWithNumbers = async () => {
+  if (!currentCompetition.value) return;
+  const matches = parseNumberModeText(numberModeText.value);
+  if (matches.length === 0) {
+    toast.error('番号入力が空です。1 行 1 試合、4 つの番号を入力してください。');
+    return;
+  }
+  for (let i = 0; i < matches.length; i++) {
+    if (matches[i].length !== 4 || matches[i].some(n => !Number.isInteger(n) || n <= 0)) {
+      toast.error(`試合 ${i + 1}: 4 つの正の整数を入力してください`);
+      return;
+    }
+  }
+  if (!confirm(`抽選番号モードで open に遷移しますか?\n${matches.length} 試合 / 参加者数 ${individualParticipantCount.value} 名`)) return;
+  isOpeningWithNumbers.value = true;
+  try {
+    await openIndividualWithNumbers(currentCompetition.value.id, matches);
+    await refreshIndividualStandings();
+    numberModeText.value = '';
+    toast.success(`open に遷移しました (${matches.length} 試合生成)`);
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isOpeningWithNumbers.value = false;
+  }
+};
+
+// ── 抽選結果割当 (番号 → 参加者) ─────────────────────────
+/**
+ * 試合スロットから抽出した「使用中の番号」のソート済みリスト。
+ * 各番号に対して draft 1 件のドロップダウンを並べる UI で使う。
+ */
+const numbersInUse = computed<number[]>(() => {
+  const set = new Set<number>();
+  for (const m of currentCompetition.value?.individualMatches ?? []) {
+    for (const s of m.slots) {
+      if (s.slotNumber != null) set.add(s.slotNumber);
+    }
+  }
+  return Array.from(set).sort((a, b) => a - b);
+});
+
+/** 現在の参加者 ID → 表示名のマップ (重複番号チェック用)。 */
+const lotteryDraft = ref<Record<number, number | ''>>({});
+
+/** 既に試合スロットに割当済の (番号 → 参加者 ID) を初期値として読み出す。 */
+const seedLotteryDraft = () => {
+  const seed: Record<number, number | ''> = {};
+  for (const num of numbersInUse.value) {
+    seed[num] = '';
+  }
+  for (const m of currentCompetition.value?.individualMatches ?? []) {
+    for (const s of m.slots) {
+      if (s.slotNumber != null && s.participantId != null) {
+        seed[s.slotNumber] = s.participantId;
+      }
+    }
+  }
+  lotteryDraft.value = seed;
+};
+
+watch(numbersInUse, () => {
+  if (numbersInUse.value.length > 0 && Object.keys(lotteryDraft.value).length === 0) {
+    seedLotteryDraft();
+  }
+}, { immediate: true });
+
+const isAssigningLottery = ref(false);
+const handleAssignLottery = async () => {
+  if (!currentCompetition.value) return;
+  const entries = Object.entries(lotteryDraft.value)
+    .filter(([, pid]) => pid !== '' && pid != null)
+    .map(([num, pid]) => ({ number: Number(num), participantId: Number(pid) }));
+  if (entries.length === 0) {
+    toast.error('1 件以上の対応を入力してください');
+    return;
+  }
+  // 参加者重複の早期検知 (サーバ側でも弾くが、UI で先に知らせる)
+  const pidSet = new Set<number>();
+  for (const e of entries) {
+    if (pidSet.has(e.participantId)) {
+      toast.error(`同じ参加者が複数の番号に割り当てられています`);
+      return;
+    }
+    pidSet.add(e.participantId);
+  }
+  isAssigningLottery.value = true;
+  try {
+    await assignIndividualLottery(currentCompetition.value.id, entries);
+    await refreshIndividualStandings();
+    toast.success(`${entries.length} 件の番号を割り当てました`);
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isAssigningLottery.value = false;
+  }
+};
+
+const hasUnassignedSlots = computed<boolean>(() => {
+  for (const m of currentCompetition.value?.individualMatches ?? []) {
+    for (const s of m.slots) {
+      if (s.slotNumber != null && s.participantId == null) return true;
+    }
+  }
+  return false;
+});
+
+// ── OBS ブラウザソース URL ──────────────────────────────
+const obsUrl = computed<string>(() => {
+  const token = currentCompetition.value?.obsToken;
+  if (!token) return '';
+  return `${window.location.origin}/obs/individual/${token}`;
+});
+
+const isGeneratingObsToken = ref(false);
+const handleGenerateObsToken = async () => {
+  if (!currentCompetition.value) return;
+  if (currentCompetition.value.obsToken
+      && !confirm('OBS URL を再発行しますか?\n旧 URL は無効になります。')) return;
+  isGeneratingObsToken.value = true;
+  try {
+    await regenerateObsToken(currentCompetition.value.id);
+    toast.success('OBS URL を発行しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isGeneratingObsToken.value = false;
   }
 };
 
@@ -1841,6 +1997,143 @@ const statusColor = (s: string) => ({
                 class="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
               >+ 追加</button>
             </div>
+          </section>
+
+          <!-- 抽選番号モード: draft 中、参加者 12 / 16 名揃ったら表示 -->
+          <section
+            v-if="currentCompetition.status === 'draft' && canOpenIndividual"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+          >
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+                抽選番号モードで open
+              </h2>
+              <p class="text-[11px] text-slate-500">
+                ヘッダの ▶ Open は参加者を自動配置。こちらは番号を先に入れて後で抽選結果を割り当てます。
+              </p>
+            </div>
+            <p class="text-[11px] text-slate-500">
+              1 行 1 試合、半角スペースかカンマで区切って 4 つの番号 (1〜{{ individualParticipantCount }}) を入力。
+              番号 → 参加者の対応は open 後の「抽選結果割当」フォームから入力します。
+            </p>
+            <textarea
+              v-model="numberModeText"
+              rows="8"
+              placeholder="1 2 3 4&#10;5 6 7 8&#10;9 10 11 12&#10;…"
+              class="w-full px-3 py-2 text-sm font-mono rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+              :disabled="isOpeningWithNumbers"
+            />
+            <div class="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                @click="handleOpenWithNumbers"
+                :disabled="isOpeningWithNumbers || !numberModeText.trim()"
+                class="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase bg-gradient-to-r from-indigo-500 to-violet-500 text-white hover:from-indigo-600 hover:to-violet-600 disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed"
+              >
+                ▶ 番号枠で open
+              </button>
+            </div>
+          </section>
+
+          <!-- 抽選結果割当: open 後、未割当スロットがあるとき表示 -->
+          <section
+            v-if="currentCompetition.status !== 'draft' && numbersInUse.length > 0"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+          >
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+                抽選結果割当 (番号 → 参加者)
+              </h2>
+              <span
+                v-if="hasUnassignedSlots"
+                class="text-[11px] font-bold text-amber-600 dark:text-amber-400"
+              >⚠ 未割当のスロットがあります</span>
+              <span
+                v-else
+                class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400"
+              >✓ 全スロット割当済</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div
+                v-for="num in numbersInUse"
+                :key="num"
+                class="flex items-center gap-2 text-sm"
+              >
+                <span class="w-10 text-right font-mono font-bold tabular-nums">{{ num }} =</span>
+                <select
+                  v-model="lotteryDraft[num]"
+                  class="flex-1 min-w-0 px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                >
+                  <option value="">(未選択)</option>
+                  <option
+                    v-for="p in (currentCompetition.participants ?? [])"
+                    :key="p.id"
+                    :value="p.id"
+                  >{{ p.displayName }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                @click="seedLotteryDraft"
+                class="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+              >現在の割当を再読込</button>
+              <button
+                type="button"
+                @click="handleAssignLottery"
+                :disabled="isAssigningLottery"
+                class="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase bg-gradient-to-r from-indigo-500 to-violet-500 text-white hover:from-indigo-600 hover:to-violet-600 disabled:from-slate-300 disabled:to-slate-300"
+              >
+                ✓ 適用
+              </button>
+            </div>
+          </section>
+
+          <!-- OBS ブラウザソース URL: open 以降 -->
+          <section
+            v-if="currentCompetition.status !== 'draft'"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+          >
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+                OBS ブラウザソース (順位表)
+              </h2>
+              <p class="text-[11px] text-slate-500">
+                透過背景。OBS の「ブラウザ」ソースにこの URL を貼り付けてください。
+              </p>
+            </div>
+            <div v-if="obsUrl" class="flex items-center gap-2">
+              <input
+                :value="obsUrl"
+                readonly
+                class="flex-1 min-w-0 px-3 py-2 text-xs font-mono rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600"
+              />
+              <button
+                type="button"
+                @click="copyToClipboard(obsUrl, 'OBS URL')"
+                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+              >コピー</button>
+              <button
+                type="button"
+                @click="handleGenerateObsToken"
+                :disabled="isGeneratingObsToken"
+                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+              >再発行</button>
+            </div>
+            <div v-else class="flex items-center justify-between gap-2">
+              <p class="text-[11px] text-slate-500">まだ発行されていません。</p>
+              <button
+                type="button"
+                @click="handleGenerateObsToken"
+                :disabled="isGeneratingObsToken"
+                class="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600"
+              >▶ OBS URL を発行</button>
+            </div>
+            <p v-if="obsUrl" class="text-[10px] text-slate-400">
+              背景を半透明黒にしたい場合は URL 末尾に <code class="px-1 bg-slate-100 dark:bg-slate-800 rounded">?bg=dark</code>、
+              更新頻度を変えたい場合は <code class="px-1 bg-slate-100 dark:bg-slate-800 rounded">?interval=3000</code> (ms) を付与。
+            </p>
           </section>
 
           <!-- 順位表 (open 以降) -->

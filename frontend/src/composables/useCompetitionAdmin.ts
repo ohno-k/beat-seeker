@@ -29,6 +29,8 @@ export interface CompetitionSummary {
   createdAt: string;
   lockedAt: string | null;
   createdById: number | null;
+  /** OBS ブラウザソース公開トークン。発行前は null。 */
+  obsToken: string | null;
 }
 
 export interface CompetitionTeamDto {
@@ -220,6 +222,8 @@ export interface CompetitionDetail extends CompetitionSummary {
 export interface CompetitionIndividualSlotDto {
   id: number;
   slotPosition: number; // 1..4
+  /** 抽選番号モード用。自動配置モードでは null。 */
+  slotNumber: number | null;
   participantId: number | null;
   participantName: string | null;
   score1: number | null;
@@ -285,6 +289,8 @@ export interface CompetitionIndividualStandingsRow {
   second: number;
   third: number;
   fourth: number;
+  /** 「参加者が割当済かつ未記録」の予選試合数。OBS 順位表で「残試合数」として表示。 */
+  remainingMatches: number;
   finalsBucket: number | null;
   finalsRank: number | null;
   finalsPoints: number;
@@ -727,6 +733,47 @@ export function useCompetitionAdmin() {
     await fetchCompetition(competitionId);
   };
 
+  /**
+   * 抽選番号モードで個人戦を draft → open に遷移する。
+   * matches[i] = 試合 i+1 の 4 件のスロット番号 (1〜参加者数)。
+   */
+  const openIndividualWithNumbers = async (
+    competitionId: number,
+    matches: number[][],
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/open-with-numbers`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify({ matches }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** 抽選結果 (番号 → 参加者 ID) を適用し、全スロットを埋める。 */
+  const assignIndividualLottery = async (
+    competitionId: number,
+    assignments: { number: number; participantId: number }[],
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/lottery-assign`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ assignments }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /** OBS ブラウザソース公開トークンを発行/再発行する。 */
+  const regenerateObsToken = async (competitionId: number): Promise<string> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/individual/regenerate-obs-token`,
+      { method: 'POST', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    const data = await res.json();
+    await fetchCompetition(competitionId);
+    return data.obsToken as string;
+  };
+
   return {
     competitions,
     currentCompetition,
@@ -761,5 +808,8 @@ export function useCompetitionAdmin() {
     clearIndividualMatchResult,
     fetchIndividualStandings,
     generateIndividualFinals,
+    openIndividualWithNumbers,
+    assignIndividualLottery,
+    regenerateObsToken,
   };
 }

@@ -5,6 +5,7 @@ import com.beatseeker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 【Repository の役割】 {@link Competition} (大会本体) を扱うリポジトリ。
@@ -21,4 +22,12 @@ public interface CompetitionRepository extends JpaRepository<Competition, Long> 
      * @return 大会リスト (新しい順、0 件なら空 List)
      */
     List<Competition> findByCreatedByOrderByCreatedAtDesc(User createdBy);
+
+    /**
+     * 【メソッドの役割】 OBS ブラウザソース公開トークンで大会 1 件を引く。
+     *
+     * @param obsToken {@code regenerate-obs-token} で発行された 32 桁の UUID
+     * @return 一致する大会 (発行済かつ未失効)。一致しない場合は空。
+     */
+    Optional<Competition> findByObsToken(String obsToken);
 }

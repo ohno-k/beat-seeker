@@ -129,6 +129,8 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/share/tokens", "/api/share/tokens/**").authenticated()
                                                 // 共有トークン経由のビュー（/api/share/{token}/...）はログイン不要
                                                 .requestMatchers("/api/share/**").permitAll()
+                                                // OBS ブラウザソース公開トークン経由の順位表 API はログイン不要
+                                                .requestMatchers("/api/obs/**").permitAll()
                                                 // 外部 API 連携トークンの管理（発行・一覧・失効）は要ログイン
                                                 .requestMatchers("/api/integrations/tokens",
                                                                 "/api/integrations/tokens/**")

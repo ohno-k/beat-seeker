@@ -30,6 +30,7 @@ const ScorePredictionView = () => import('../views/ScorePredictionView.vue')
 const ShareView = () => import('../views/ShareView.vue')
 const CompetitionAdminView = () => import('../views/CompetitionAdminView.vue')
 const AdminUserComparisonView = () => import('../views/AdminUserComparisonView.vue')
+const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandingsView.vue')
 
 /**
  * SPA のルートテーブル定義。
@@ -89,6 +90,8 @@ const router = createRouter({
     // 大会管理: Competition セクションの 4 ID ホワイトリストで保護。
     // 直接アクセス・ブックマーク用エントリ。実際の権限判定はサーバ側 + View 側で行う。
     { path: '/competition-admin', name: 'competition-admin', component: CompetitionAdminView },
+    // OBS ブラウザソース用の個人戦順位表 (公開トークン経由・認証不要・透過背景)。
+    { path: '/obs/individual/:token', name: 'obs-individual-standings', component: ObsIndividualStandingsView },
     // 管理者用: 任意の 2 ユーザー間のスコア勝敗比較。
     // useAdmin.isAdmin で表示ガード + サーバ側 /api/admin/** で実権限チェック。
     { path: '/admin/user-comparison', name: 'admin-user-comparison', component: AdminUserComparisonView },

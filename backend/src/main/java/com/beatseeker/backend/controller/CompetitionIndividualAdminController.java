@@ -214,6 +214,185 @@ public class CompetitionIndividualAdminController {
         return ResponseEntity.ok(competitionAdminController.toCompetitionDetailMap(comp));
     }
 
+    // ── 開幕処理 (抽選番号モード) ───────────────────────────
+
+    /**
+     * 【メソッドの役割】 抽選番号モードで draft → open に遷移する。
+     *
+     * <p>自動配置 ({@code openCompetition}) と違って、参加者を直接マッチに配置せず、
+     * 各スロットに「抽選番号 (1〜N)」だけ持たせた状態で試合表を作成する。
+     * 抽選結果は別エンドポイント {@code lotteryAssign} で番号→参加者 ID の対応を渡して埋める。
+     *
+     * <p>必須条件:
+     * <ul>
+     *   <li>大会フォーマットが individual4、status が draft</li>
+     *   <li>各試合に 4 件のスロット番号 (1 試合内は重複不可)</li>
+     *   <li>使用される番号集合は 1〜N で穴が無く、N は参加者数と一致 (12 or 16)</li>
+     * </ul>
+     */
+    @PostMapping("/open-with-numbers")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> openWithNumbers(
+            Authentication auth,
+            @PathVariable Long competitionId,
+            @RequestBody OpenWithNumbersRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireIndividualCompetition(competitionId);
+        if (!"draft".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "draft 状態の大会のみ open に遷移できます"));
+        }
+        List<CompetitionParticipant> participants =
+                participantRepository.findByCompetitionOrderByCreatedAtAsc(comp);
+        if (!ALLOWED_PARTICIPANT_COUNTS.contains(participants.size())) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "参加者数は 12 名または 16 名 (現在 " + participants.size() + " 名)"));
+        }
+        if (req == null || req.matches() == null || req.matches().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "matches[] を含む payload が必要です"));
+        }
+        int n = participants.size();
+        // 各番号の出現回数を集計しつつ、各試合内の重複もチェック
+        int[] perNumberCount = new int[n + 1];
+        int matchIndex = 0;
+        for (List<Integer> nums : req.matches()) {
+            matchIndex++;
+            if (nums == null || nums.size() != 4) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "試合 " + matchIndex + ": 4 件の番号を指定してください"));
+            }
+            Set<Integer> seen = new HashSet<>();
+            for (Integer num : nums) {
+                if (num == null || num < 1 || num > n) {
+                    return ResponseEntity.badRequest().body(Map.of(
+                            "message", "試合 " + matchIndex + ": 番号は 1〜" + n + " の範囲で指定してください"));
+                }
+                if (!seen.add(num)) {
+                    return ResponseEntity.badRequest().body(Map.of(
+                            "message", "試合 " + matchIndex + ": 番号 " + num + " が重複しています"));
+                }
+                perNumberCount[num]++;
+            }
+        }
+        // 全参加者が同じ回数出現していることを推奨 (12 名→6 試合 / 16 名→5 試合) だが、
+        // ここでは「最低 1 回は登場すること」だけを検証して柔軟性を持たせる。
+        for (int i = 1; i <= n; i++) {
+            if (perNumberCount[i] == 0) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "番号 " + i + " がどの試合にも登場していません"));
+            }
+        }
+
+        int order = 1;
+        for (List<Integer> nums : req.matches()) {
+            CompetitionIndividualMatch m = new CompetitionIndividualMatch();
+            m.setCompetition(comp);
+            m.setMatchOrder(order++);
+            m.setIsFinals(false);
+            m = individualMatchRepository.save(m);
+            for (int i = 0; i < 4; i++) {
+                CompetitionIndividualMatchSlot s = new CompetitionIndividualMatchSlot();
+                s.setMatch(m);
+                s.setSlotPosition(i + 1);
+                s.setSlotNumber(nums.get(i));
+                s.setParticipant(null); // 抽選未実施
+                individualMatchSlotRepository.save(s);
+            }
+        }
+        comp.setStatus("open");
+        competitionRepository.save(comp);
+        return ResponseEntity.ok(competitionAdminController.toCompetitionDetailMap(comp));
+    }
+
+    /**
+     * 【メソッドの役割】 抽選番号 → 参加者 ID のマッピングを適用し、全 (未割当) スロットを埋める。
+     *
+     * <p>同じ番号を持つ全スロット (= 各参加者の出場予定試合) に、対応する参加者を一括で割り当てる。
+     * 部分マッピング (一部の番号だけ確定) も受理する。
+     */
+    @PutMapping("/lottery-assign")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> lotteryAssign(
+            Authentication auth,
+            @PathVariable Long competitionId,
+            @RequestBody LotteryAssignRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireIndividualCompetition(competitionId);
+        if (req == null || req.assignments() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "assignments[] を含む payload が必要です"));
+        }
+        // 参加者重複チェック
+        Set<Long> seenParticipantIds = new HashSet<>();
+        for (LotteryAssignment a : req.assignments()) {
+            if (a == null || a.number() == null || a.participantId() == null) continue;
+            if (!seenParticipantIds.add(a.participantId())) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "参加者 " + a.participantId() + " が複数の番号に割り当てられています"));
+            }
+        }
+        // 番号重複チェック
+        Set<Integer> seenNumbers = new HashSet<>();
+        for (LotteryAssignment a : req.assignments()) {
+            if (a == null || a.number() == null || a.participantId() == null) continue;
+            if (!seenNumbers.add(a.number())) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "番号 " + a.number() + " が複数の参加者に割り当てられています"));
+            }
+        }
+
+        List<CompetitionIndividualMatch> matches =
+                individualMatchRepository.findByCompetitionOrderByMatchOrderAsc(comp);
+        Map<Long, CompetitionParticipant> byId = new HashMap<>();
+        for (CompetitionParticipant p :
+                participantRepository.findByCompetitionOrderByCreatedAtAsc(comp)) {
+            byId.put(p.getId(), p);
+        }
+
+        int updated = 0;
+        for (LotteryAssignment a : req.assignments()) {
+            if (a == null || a.number() == null || a.participantId() == null) continue;
+            CompetitionParticipant p = byId.get(a.participantId());
+            if (p == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "参加者が見つかりません: " + a.participantId()));
+            }
+            for (CompetitionIndividualMatch m : matches) {
+                List<CompetitionIndividualMatchSlot> slots =
+                        individualMatchSlotRepository.findByMatchOrderBySlotPositionAsc(m);
+                for (CompetitionIndividualMatchSlot s : slots) {
+                    if (a.number().equals(s.getSlotNumber())) {
+                        s.setParticipant(p);
+                        individualMatchSlotRepository.save(s);
+                        updated++;
+                    }
+                }
+            }
+        }
+        return ResponseEntity.ok(Map.of(
+                "message", updated + " スロットを更新しました",
+                "updated", updated
+        ));
+    }
+
+    // ── OBS ブラウザソース用トークン ────────────────────────
+
+    /**
+     * 【メソッドの役割】 OBS ブラウザソース公開用トークンを発行 / 再発行する。
+     *
+     * <p>誤って共有してしまった場合や、配信用 URL を更新したい場合に再採番できる。
+     * トークンは 32 文字の UUID (ハイフン無し)。
+     */
+    @PostMapping("/regenerate-obs-token")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> regenerateObsToken(
+            Authentication auth,
+            @PathVariable Long competitionId) {
+        requireOrganizer(auth);
+        Competition comp = requireIndividualCompetition(competitionId);
+        comp.setObsToken(UUID.randomUUID().toString().replace("-", ""));
+        competitionRepository.save(comp);
+        return ResponseEntity.ok(Map.of("obsToken", comp.getObsToken()));
+    }
+
     // ── 試合結果記録 ────────────────────────────────────────
 
     /**
@@ -368,8 +547,11 @@ public class CompetitionIndividualAdminController {
         return ResponseEntity.ok(computeStandings(comp));
     }
 
-    /** 内部用: 予選/決勝の集計を計算しレスポンス map を作る。 */
-    Map<String, Object> computeStandings(Competition comp) {
+    /**
+     * 内部用: 予選/決勝の集計を計算しレスポンス map を作る。
+     * OBS 公開コントローラ ({@link CompetitionObsController}) からも呼ばれるため public。
+     */
+    public Map<String, Object> computeStandings(Competition comp) {
         List<CompetitionParticipant> participants =
                 participantRepository.findByCompetitionOrderByCreatedAtAsc(comp);
         List<CompetitionIndividualMatch> matches =
@@ -403,6 +585,17 @@ public class CompetitionIndividualAdminController {
                 prelimMatchCount++;
                 if (recorded) prelimRecorded++;
             }
+            // 残試合数: 「参加者が割当済 (participant != null) かつ未記録」の予選試合を参加者ごとに数える。
+            // 自動配置モードでは参加者は必ず割当済なので、これは単に未記録試合数。
+            // 抽選番号モードでは未割当スロットは数に含めない。
+            if (!isFinals && !recorded) {
+                List<CompetitionIndividualMatchSlot> ss = slotsByMatch.get(m.getId());
+                for (CompetitionIndividualMatchSlot s : ss) {
+                    if (s.getParticipant() == null) continue;
+                    ParticipantAgg a = agg.get(s.getParticipant().getId());
+                    if (a != null) a.remainingMatches++;
+                }
+            }
             if (!recorded) continue;
             List<CompetitionIndividualMatchSlot> slots = slotsByMatch.get(m.getId());
 
@@ -410,9 +603,11 @@ public class CompetitionIndividualAdminController {
             Map<Long, Integer> finalsMatchRank = new HashMap<>();
             if (isFinals) {
                 for (CompetitionIndividualMatchSlot s : slots) {
+                    if (s.getParticipant() == null) continue; // 抽選番号モードで未割当のスロットは無視
                     int myTp = zero(s.getTotalPoints());
                     int better = 0;
                     for (CompetitionIndividualMatchSlot other : slots) {
+                        if (other.getParticipant() == null) continue;
                         if (zero(other.getTotalPoints()) > myTp) better++;
                     }
                     finalsMatchRank.put(s.getParticipant().getId(), better + 1);
@@ -420,6 +615,7 @@ public class CompetitionIndividualAdminController {
             }
 
             for (CompetitionIndividualMatchSlot s : slots) {
+                if (s.getParticipant() == null) continue; // 未割当スロットは集計対象外
                 Long pid = s.getParticipant().getId();
                 ParticipantAgg a = agg.get(pid);
                 if (a == null) continue;
@@ -477,6 +673,7 @@ public class CompetitionIndividualAdminController {
             r.put("second", a.second);
             r.put("third", a.third);
             r.put("fourth", a.fourth);
+            r.put("remainingMatches", a.remainingMatches);
             r.put("finalsBucket", a.finalsBucket);
             r.put("finalsRank", a.finalsRank);
             r.put("finalsPoints", a.finalsPoints);
@@ -643,6 +840,7 @@ public class CompetitionIndividualAdminController {
         Map<String, Object> sm = new LinkedHashMap<>();
         sm.put("id", s.getId());
         sm.put("slotPosition", s.getSlotPosition());
+        sm.put("slotNumber", s.getSlotNumber());
         sm.put("participantId", s.getParticipant() != null ? s.getParticipant().getId() : null);
         sm.put("participantName", s.getParticipant() != null ? s.getParticipant().getDisplayName() : null);
         sm.put("score1", s.getScore1());
@@ -667,6 +865,7 @@ public class CompetitionIndividualAdminController {
         int prelimPoints = 0;
         int first = 0, second = 0, third = 0, fourth = 0;
         int prelimRank = 0;
+        int remainingMatches = 0;
         Integer finalsBucket = null;
         Integer finalsRank = null;
         int finalsPoints = 0;
@@ -693,6 +892,18 @@ public class CompetitionIndividualAdminController {
             Integer song4StrategyId, String song4Title,
             List<SetIndividualResultSlot> slots
     ) {}
+
+    /**
+     * 抽選番号モードでの開幕リクエスト。
+     * matches[i] = 試合 i+1 の 4 件のスロット番号 (1〜参加者数)。
+     */
+    public record OpenWithNumbersRequest(List<List<Integer>> matches) {}
+
+    /** 抽選結果の番号 → 参加者 ID 対応 1 件。 */
+    public record LotteryAssignment(Integer number, Long participantId) {}
+
+    /** 抽選結果適用リクエスト。 */
+    public record LotteryAssignRequest(List<LotteryAssignment> assignments) {}
 
     /** 試合結果の 1 スロット分 (= 1 プレイヤーの 4 曲ぶんの順位 1〜4)。 */
     public record SetIndividualResultSlot(

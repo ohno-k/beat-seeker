@@ -71,4 +71,11 @@ public class Competition {
 
     /** 全試合がロック完了し locked ステータスに移った日時。 */
     private LocalDateTime lockedAt;
+
+    /**
+     * OBS ブラウザソース公開用トークン。NULL の間は OBS 公開エンドポイントから到達不可。
+     * 管理画面の「OBS URL 発行」で UUID を生成する。誤公開時はトークン再採番で旧 URL を無効化できる。
+     */
+    @Column(name = "obs_token", length = 64, unique = true)
+    private String obsToken;
 }
