@@ -1055,6 +1055,10 @@ const cancelEditExistingSong = () => {
 /**
  * 【関数の役割】 編集中の draft レコードを PUT でまとめて更新する。
  * 難易度ごとに notes/level と、ANOTHER/LEGGENDARIA なら wr/avg/coef/textage も送る。
+ *
+ * 元の曲に無かった難易度 (例: ANO だけの曲に HYP を追加する) はまだ draft ID を持たないので、
+ * PUT ではなく POST /songs/draft で新規 SongDefinition を作る。これをしないと「フォームに
+ * 値を入れて更新したのに保存されない」というサイレント無視が発生する。
  */
 const handleUpdateEditingSong = async () => {
   if (!form.value.title) return;
@@ -1063,6 +1067,7 @@ const handleUpdateEditingSong = async () => {
   successMsg.value = '';
 
   try {
+    // 既存ドラフトの更新 (PUT)
     const entries = Object.entries(editingDraftIdByDiff.value).filter(([, id]) => id != null);
     for (const [code, id] of entries) {
       const def = difficultyDefs.find(d => d.code === code);
@@ -1085,6 +1090,38 @@ const handleUpdateEditingSong = async () => {
         method: 'PUT',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Error');
+    }
+
+    // 元の曲に無かった難易度 (draft ID 無し かつ notes > 0) を POST で新規追加。
+    // addDraftSong は notes が null/0 の難易度をスキップするので、新規追加対象の
+    // notes/level だけ詰めて 1 回 POST すれば必要な行だけが作られる。
+    const missingDiffs = difficultyDefs.filter(def => {
+      if (editingDraftIdByDiff.value[def.code] != null) return false;
+      const n = form.value[def.notesKey];
+      return typeof n === 'number' && n > 0;
+    });
+    if (missingDiffs.length > 0) {
+      const addBody: Record<string, any> = {
+        title: form.value.title,
+        artist: form.value.artist,
+        genre: form.value.genre,
+        bpm: form.value.bpm,
+        wr: form.value.wr,
+        avg: form.value.avg,
+        coef: form.value.coef,
+        textage: form.value.textage,
+      };
+      for (const def of missingDiffs) {
+        addBody[def.notesKey] = form.value[def.notesKey];
+        addBody[def.levelKey] = form.value[def.levelKey];
+      }
+      const res = await fetch(`${API_BASE}/api/admin/game-data/songs/draft`, {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(addBody),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Error');
