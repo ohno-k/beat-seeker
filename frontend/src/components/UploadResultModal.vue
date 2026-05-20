@@ -197,10 +197,19 @@
                     <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">RATE TOP100</span>
                   </div>
 
-                  <!-- 行 2: タイトル + 新スコア(+増分) + 新 Beat-PT -->
+                  <!-- 行 2: タイトル + 単曲ティアアイコン + 新スコア(+増分) + 新 Beat-PT -->
                   <div class="flex items-baseline justify-between gap-2">
                     <h4 class="font-black text-slate-800 dark:text-slate-100 text-base leading-tight" :title="song.title">{{ song.title }}</h4>
-                    <div class="flex items-baseline gap-2 shrink-0 text-right">
+                    <div class="flex items-center gap-2 shrink-0 text-right">
+                      <template v-for="tierIcon in [getSongTierInfo(song)]" :key="'tier-icon'">
+                        <RankIcon
+                          v-if="tierIcon"
+                          :rank-name="tierIcon.name"
+                          :tier="tierIcon.tier"
+                          size="xs"
+                          disable-party
+                        />
+                      </template>
                       <span v-if="song.scoreIncrease > 0" class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ song.newScore }}<span class="text-blue-500 dark:text-blue-400">(+{{ song.scoreIncrease }})</span></span>
                       <span v-if="song.beatPtIncrease > 0" class="text-xs font-black whitespace-nowrap" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.newBeatPt.toFixed(1) }}pt</span>
                     </div>
@@ -412,7 +421,16 @@
                    <span class="text-sm font-black" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
                  </div>
                </div>
-               <div class="text-right flex justify-end gap-6 shrink-0">
+               <div class="text-right flex items-center justify-end gap-4 shrink-0">
+                 <template v-for="tierIconImg in [getSongTierInfo(song)]" :key="'tier-icon-img'">
+                   <RankIcon
+                     v-if="tierIconImg"
+                     :rank-name="tierIconImg.name"
+                     :tier="tierIconImg.tier"
+                     size="md"
+                     disable-party
+                   />
+                 </template>
                  <div v-if="song.scoreIncrease > 0" class="text-right">
                    <p class="text-sm font-bold text-slate-500 mb-1">EX SCORE</p>
                    <p class="font-black text-3xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-lg font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
@@ -466,6 +484,7 @@ import { ref, computed } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
 import { getNextRankInfo, getNextRateTierRankInfo, getFolderRankInfoByRate } from '../utils/beatTier';
 import type { RankInfo } from '../utils/beatTier';
+import RankIcon from './RankIcon.vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
