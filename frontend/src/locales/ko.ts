@@ -26,6 +26,7 @@ export const ko = {
   'nav.arena': 'ARENA 모드',
   'nav.changelog': '업데이트 내역',
   'nav.about': '이 사이트에 대해',
+  'nav.manual': '사용 방법 가이드',
   'nav.terms': '이용 약관',
   'nav.adminPanel': '관리자 패널',
   'nav.popularSongs': '인기 곡 랭킹',

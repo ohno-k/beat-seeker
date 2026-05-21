@@ -69,6 +69,8 @@ const router = createRouter({
     { path: '/contact', name: 'contact', component: TermsView },
     // サービス説明（About）
     { path: '/about', name: 'about', component: AboutView },
+    // 使い方ガイド (各機能の操作手順)。実体は AboutView を流用し、App.vue 側で activeTab='manual' を表示する。
+    { path: '/manual', name: 'manual', component: AboutView },
     // 攻略ガイド (一覧 + 各記事)
     { path: '/guide', name: 'guide-list', component: AboutView },
     { path: '/guide/:slug', name: 'guide-article', component: AboutView },

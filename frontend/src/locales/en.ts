@@ -26,6 +26,7 @@ export const en = {
   'nav.arena': 'ARENA Mode',
   'nav.changelog': 'Changelog',
   'nav.about': 'About',
+  'nav.manual': 'User Guide',
   'nav.terms': 'Terms of Service',
   'nav.adminPanel': 'Admin Panel',
   'nav.popularSongs': 'Popular Songs',

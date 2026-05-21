@@ -28,6 +28,7 @@ export const ja = {
   'nav.arena': 'ARENAモード',
   'nav.changelog': '更新履歴',
   'nav.about': 'このサイトについて',
+  'nav.manual': '使い方ガイド',
   'nav.terms': '利用規約',
   'nav.adminPanel': '管理者パネル',
   'nav.popularSongs': '人気曲ランキング',

@@ -42,6 +42,7 @@ import Sidebar from './components/Sidebar.vue';
 import RankQuizModal from './components/RankQuizModal.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
+import Manual from './components/Manual.vue';
 import Landing from './components/Landing.vue';
 import PrivacyPolicy from './components/PrivacyPolicy.vue';
 import Contact from './components/Contact.vue';
@@ -279,7 +280,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
 /** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
 const currentGuideSlug = ref<string | null>(null);
 /**
@@ -596,6 +597,7 @@ onMounted(() => {
   // Vue Router ではなく純粋なパス判定で初期タブを決める。
   const pathToTab: Record<string, typeof activeTab.value> = {
     '/about': 'about',
+    '/manual': 'manual',
     '/terms': 'terms',
     '/privacy-policy': 'privacy-policy',
     '/contact': 'contact',
@@ -2023,6 +2025,11 @@ const handleUnifiedClose = async () => {
         <!-- アプリについて -->
         <template v-else-if="activeTab === 'about'">
           <About class="w-full max-w-5xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- 使い方ガイド: 各機能の操作手順をまとめたページ -->
+        <template v-else-if="activeTab === 'manual'">
+          <Manual class="w-full max-w-5xl mx-auto" />
         </template>
 
         <!-- URL 共有ビュー（ログイン不要） -->
