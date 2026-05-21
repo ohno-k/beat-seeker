@@ -172,11 +172,6 @@
                     <template v-for="rankNum in [getNumericRank(song.informalRank)]" :key="'rank'">
                       <span v-if="rankNum" class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNum }}</span>
                     </template>
-                    <template v-for="tier in [getSongTierInfo(song)]" :key="'tier'">
-                      <span v-if="tier" class="px-1.5 py-0.5 rounded text-[9px] font-black border shrink-0 bg-white dark:bg-slate-900/50 border-slate-300 dark:border-slate-600" :class="tier.color">
-                        {{ tier.name }}{{ tier.tier ? ' ' + tier.tier : '' }}
-                      </span>
-                    </template>
                     <span v-if="song.songRank" class="px-1.5 py-0.5 rounded text-[9px] font-black border shrink-0"
                       :class="song.songRank === 1 ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700' : 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'"
                     >#{{ song.songRank }}<span class="font-medium">/{{ song.songRankTotal }}</span></span>
@@ -201,14 +196,24 @@
                   <div class="flex items-baseline justify-between gap-2">
                     <h4 class="font-black text-slate-800 dark:text-slate-100 text-base leading-tight" :title="song.title">{{ song.title }}</h4>
                     <div class="flex items-center gap-2 shrink-0 text-right">
-                      <template v-for="tierIcon in [getSongTierInfo(song)]" :key="'tier-icon'">
-                        <RankIcon
-                          v-if="tierIcon"
-                          :rank-name="tierIcon.name"
-                          :tier="tierIcon.tier"
-                          size="xs"
-                          disable-party
-                        />
+                      <template v-for="t in [getSongTierTransition(song)]" :key="'tier-icon'">
+                        <template v-if="t.newTier">
+                          <RankIcon
+                            v-if="t.oldTier"
+                            :rank-name="t.oldTier.name"
+                            :tier="t.oldTier.tier"
+                            size="xs"
+                            disable-party
+                            class="opacity-60"
+                          />
+                          <svg v-if="t.oldTier" xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                          <RankIcon
+                            :rank-name="t.newTier.name"
+                            :tier="t.newTier.tier"
+                            size="xs"
+                            disable-party
+                          />
+                        </template>
                       </template>
                       <span v-if="song.scoreIncrease > 0" class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ song.newScore }}<span class="text-blue-500 dark:text-blue-400">(+{{ song.scoreIncrease }})</span></span>
                       <span v-if="song.beatPtIncrease > 0" class="text-xs font-black whitespace-nowrap" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.newBeatPt.toFixed(1) }}pt</span>
@@ -741,12 +746,34 @@ const getNumericRank = (informalRank: string | undefined): string | null => {
  * 【関数の役割】 1 譜面の score rate と informalRank から、単曲ティア（フォルダランクと同基準）を返す。
  * informalRank（☆11.0〜13.0）が無い・スコアが 0 以下・非数値ランクの場合は null。
  */
-const getSongTierInfo = (song: { scoreRate?: number; informalRank?: string }): RankInfo | null => {
-  const rank = getNumericRank(song.informalRank);
-  if (!rank || !song.scoreRate || song.scoreRate <= 0) return null;
-  const info = getFolderRankInfoByRate(song.scoreRate, rank);
+const getSongTierInfoByRate = (rate: number | undefined, informalRank: string | undefined): RankInfo | null => {
+  const rank = getNumericRank(informalRank);
+  if (!rank || !rate || rate <= 0) return null;
+  const info = getFolderRankInfoByRate(rate, rank);
   if (!info || info.name === 'Beginner') return null;
   return info;
+};
+
+const getSongTierInfo = (song: { scoreRate?: number; informalRank?: string }): RankInfo | null => {
+  return getSongTierInfoByRate(song.scoreRate, song.informalRank);
+};
+
+/**
+ * 【関数の役割】 旧スコアでの単曲ティアと新スコアでの単曲ティアを返す。
+ * スコア更新でティアが変動した場合のみ `oldTier` を非 null で返す（変動なしなら null）。
+ * 旧スコア = 0 や maxScore 不明の場合は oldTier は出さない（=「初プレイで上がった」扱い）。
+ */
+const getSongTierTransition = (song: { scoreRate?: number; oldScore?: number; maxScore?: number; informalRank?: string }): { oldTier: RankInfo | null; newTier: RankInfo | null } => {
+  const newTier = getSongTierInfoByRate(song.scoreRate, song.informalRank);
+  if (!newTier) return { oldTier: null, newTier: null };
+  const maxScore = song.maxScore ?? 0;
+  const oldScore = song.oldScore ?? 0;
+  if (maxScore <= 0 || oldScore <= 0) return { oldTier: null, newTier };
+  const oldRate = (oldScore / maxScore) * 100;
+  const oldTier = getSongTierInfoByRate(oldRate, song.informalRank);
+  if (!oldTier) return { oldTier: null, newTier };
+  const same = oldTier.name === newTier.name && (oldTier.tier ?? '') === (newTier.tier ?? '');
+  return { oldTier: same ? null : oldTier, newTier };
 };
 
 /**

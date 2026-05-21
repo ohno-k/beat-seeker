@@ -16,6 +16,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
+import { diffTable as diffTableRef } from '../composables/useGameData';
+import { getSongMaxScore } from '../utils/scoreData';
 
 const { t, currentLang } = useI18n();
 import UploadResultModal from './UploadResultModal.vue';
@@ -111,6 +113,52 @@ const groupedList = computed(() => {
 });
 
 /**
+ * 【computed の役割】 「タイトル_難易度ラベル」→ 非公式 rank の辞書を構築。
+ * 2026-05-21 より前に保存された diffJson には informalRank フィールドが含まれず
+ * 単曲ティアバッジが描画できないため、現在の難易度表から補完する用途で使う。
+ */
+const informalDict = computed(() => {
+  const dict = new Map<string, string>();
+  const ranks = diffTableRef.value;
+  if (ranks && Array.isArray(ranks)) {
+    ranks.forEach((r: any) => {
+      r.songs.forEach((songTitle: string) => {
+        if (songTitle.endsWith('[L]')) {
+          dict.set(`${songTitle.slice(0, -3)}_LEGGENDARIA`, r.rank);
+        } else {
+          dict.set(`${songTitle}_ANOTHER`, r.rank);
+        }
+      });
+    });
+  }
+  return dict;
+});
+
+/**
+ * 【関数の役割】 古い diffJson の 1 曲分エントリに、欠けている informalRank /
+ * scoreRate / maxScore を現在のゲームデータから補完して返す。
+ * 既に値が入っているフィールドは尊重して上書きしない。
+ */
+const enrichDiffSong = (s: any) => {
+  let informalRank: string | undefined = s.informalRank;
+  if (!informalRank) {
+    informalRank = informalDict.value.get(`${s.title}_${s.difficulty}`);
+  }
+
+  let maxScore: number = s.maxScore;
+  if (!maxScore || maxScore <= 0) {
+    maxScore = getSongMaxScore(s.title, s.difficulty);
+  }
+
+  let scoreRate: number = s.scoreRate;
+  if ((!scoreRate || scoreRate <= 0) && maxScore > 0 && s.newScore > 0) {
+    scoreRate = (s.newScore / maxScore) * 100;
+  }
+
+  return { ...s, informalRank, maxScore, scoreRate };
+};
+
+/**
  * 【関数の役割】 行クリック時に差分モーダルを開く。
  * item._isGrouped が true なら合算 diff を、そうでなければ元の diffJson を使う。
  * 旧 Beat-PT は現在値 − 増分、旧ティアも再計算してモーダルに渡す。
@@ -120,7 +168,7 @@ const openDiffModal = (item: any) => {
   if (!diffJson || diffJson === '[]') return;
 
   try {
-    const updatedSongs = JSON.parse(diffJson);
+    const updatedSongs = JSON.parse(diffJson).map(enrichDiffSong);
     const oldTotal = Math.max(0, item.totalBeatPt - item.beatPtIncrease);
 
     selectedDiff.value = {
