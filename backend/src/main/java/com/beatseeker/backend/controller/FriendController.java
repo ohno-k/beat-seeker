@@ -485,6 +485,64 @@ public class FriendController {
     }
 
     /**
+     * 【メソッドの役割】 指定フレンドの履歴スナップショット（ScoreHistoryLog）を時系列昇順で返す。
+     *
+     * 勝敗変遷グラフでフレンド側の過去スコアを再構築するために利用する。
+     * フレンド関係必須。privacyLevel==0（公開）と 1（フレンドのみ）は取得可、2（非公開）は 403。
+     *
+     * レスポンス形式は {@link ScoreController#getHistory(Authentication)} と一致させ、
+     * フロントは同一パーサで扱える。
+     *
+     * @param auth     認証情報
+     * @param friendId 対象フレンドの User ID
+     * @return 履歴ログ Map の List（uploadedAt 昇順）。無権限は 403
+     */
+    @GetMapping("/{friendId}/history")
+    public ResponseEntity<List<Map<String, Object>>> getFriendHistory(
+            Authentication auth,
+            @PathVariable Long friendId) {
+        User user = getUser(auth);
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // フレンド関係必須。/scores と同様に他人の履歴は閲覧不可。
+        if (friendshipRepository.findByUserAndFriend(user, friend).isEmpty()) {
+            return ResponseEntity.status(403).build();
+        }
+
+        // privacyLevel==2 (非公開) はフレンドにも履歴を開示しない。
+        // 0 (公開) と 1 (フレンドのみ) はどちらも取得可能。
+        Integer privacyLevel = friend.getPrivacyLevel() != null ? friend.getPrivacyLevel() : 0;
+        if (privacyLevel == 2) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(friend);
+        List<Map<String, Object>> history = logs.stream().map(log -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("snapshotId", log.getId().toString());
+            m.put("date", log.getUploadedAt().toString());
+            m.put("totalScore", log.getTotalScore());
+            m.put("fcCount", log.getFcCount());
+            m.put("exhCount", log.getExhCount());
+            m.put("hCount", log.getHCount());
+            m.put("clearCount", log.getClearCount());
+            m.put("easyCount", log.getEasyCount());
+            m.put("aaaCount", log.getAaaCount());
+            m.put("aaCount", log.getAaCount());
+            m.put("aCount", log.getACount());
+            m.put("totalBeatPt", log.getTotalBeatPt());
+            m.put("beatPtIncrease", log.getBeatPtIncrease());
+            m.put("updatedCount", log.getUpdatedCount());
+            m.put("diffJson", log.getDiffJson());
+            m.put("totalRatePt", log.getTotalRatePt());
+            return m;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(history);
+    }
+
+    /**
      * 【メソッドの役割】 双方向の Friendship レコードを削除してフレンド関係を解除する。
      *
      * 片側だけ残すとリストに整合性違反が発生するため、必ず両方向を削除する。

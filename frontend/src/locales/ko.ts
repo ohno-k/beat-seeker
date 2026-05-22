@@ -180,6 +180,7 @@ export const ko = {
   'dashboard.clearTypeDist': '클리어 타입 분포',
   'dashboard.djLevelDist': 'DJ 레벨 분포',
   'dashboard.scoreRateDist': '스코어 레이트 분포 (0점 제외)',
+  'dashboard.songRankDist': '단일 곡 티어 분포 (0점 제외)',
   'dashboard.clickForList': '막대를 클릭하면 곡 목록 표시',
   'dashboard.informalClearStatus': '비공식 난이도별 클리어 상황',
   'dashboard.remainingPoints': '{n}점 남음',

@@ -134,6 +134,10 @@
               <h4 class="chart-title">{{ t('dashboard.scoreRateDist') }} <span class="text-[10px] font-normal text-slate-400 ml-2">{{ t('dashboard.clickForList') }}</span></h4>
               <div class="h-44"><BarChart v-if="scoreRateHistData" :data="scoreRateHistData" :options="scoreRateHistOpts" /></div>
             </div>
+            <div class="chart-card lg:col-span-2">
+              <h4 class="chart-title">{{ t('dashboard.songRankDist') }}</h4>
+              <div class="h-44"><BarChart v-if="songRankDistData" :data="songRankDistData" :options="songRankBarOpts" /></div>
+            </div>
           </div>
         </div>
 
@@ -399,7 +403,7 @@ import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
-import { calculatePoints, WEIGHTS } from '../utils/beatTier';
+import { calculatePoints, WEIGHTS, getFolderRankInfoByRate } from '../utils/beatTier';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import ShareTokenModal from './ShareTokenModal.vue';
 import IntegrationTokenModal from './IntegrationTokenModal.vue';
@@ -830,6 +834,81 @@ const scoreRateHistData = computed(() => {
   };
 });
 
+/**
+ * 【computed の役割】 単曲ティア（= スコア一覧「ランク」列の Folder Rank）別の曲数分布。
+ *
+ * 各譜面のスコアレートと非公式ランクから `getFolderRankInfoByRate` でランクを判定し、
+ * Beginner（左端）→ Novice I..V → ... → Mythic I..V → Legend（右端）の 52 バーで集計する。
+ * 各ランクブロックは I（最下位 = 明） 〜 V（最上位 = 濃）の濃淡で表現する。
+ *
+ * 0 点曲は集計対象外（`myScoresActive` を使用）。
+ */
+const songRankDistData = computed(() => {
+  if (!myScoresActive.value.length) return null;
+  // 下位ランクから上位ランクへ昇順に並べたブロック定義（色は beatTier.ts の各ブロックと揃える）
+  const blocks: { name: string; color: string; sub: boolean }[] = [
+    { name: 'Beginner',     color: '#94a3b8', sub: false },
+    { name: 'Novice',       color: '#475569', sub: true  },
+    { name: 'Intermediate', color: '#2563eb', sub: true  },
+    { name: 'Advanced',     color: '#0891b2', sub: true  },
+    { name: 'Expert',       color: '#0d9488', sub: true  },
+    { name: 'Veteran',      color: '#059669', sub: true  },
+    { name: 'Commander',    color: '#a16207', sub: true  },
+    { name: 'Elite',        color: '#ea580c', sub: true  },
+    { name: 'Master',       color: '#dc2626', sub: true  },
+    { name: 'Ancient',      color: '#4f46e5', sub: true  },
+    { name: 'Mythic',       color: '#9333ea', sub: true  },
+    { name: 'Legend',       color: '#f59e0b', sub: false },
+  ];
+  // ベース色を白方向に lightenPct% だけ薄める。tier 1 が最も薄く、tier 5 がベース色そのまま。
+  const shade = (hex: string, lightenPct: number): string => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const m = lightenPct / 100;
+    return `rgb(${Math.round(r + (255 - r) * m)}, ${Math.round(g + (255 - g) * m)}, ${Math.round(b + (255 - b) * m)})`;
+  };
+  // 全バー（左 = 低位、右 = 高位）を組み立てる。ラベルにはフルネームを入れて
+  // ツールチップで "Ancient II" などサブティアまで表示されるようにする。
+  // X 軸の表示は songRankBarOpts の ticks.callback 側で親ランク名（tier III 位置）だけに間引く。
+  const romans = ['I', 'II', 'III', 'IV', 'V'];
+  const bars: { label: string; key: string; color: string }[] = [];
+  blocks.forEach(block => {
+    if (!block.sub) {
+      bars.push({ label: block.name, key: block.name, color: block.color });
+    } else {
+      for (let tier = 1; tier <= 5; tier++) {
+        // tier 5 → 0%（濃）, tier 1 → 60%（淡）
+        const lightenPct = (5 - tier) * 15;
+        bars.push({
+          label: `${block.name} ${romans[tier - 1]}`,
+          key: `${block.name}|${tier}`,
+          color: shade(block.color, lightenPct),
+        });
+      }
+    }
+  });
+  const counts: Record<string, number> = Object.fromEntries(bars.map(b => [b.key, 0]));
+  myScoresActive.value.forEach(s => {
+    if (!s.informalRank) return;
+    const rank = getFolderRankInfoByRate(s.scoreRate, s.informalRank);
+    const key = rank.tier ? `${rank.name}|${rank.tier}` : rank.name;
+    if (counts[key] !== undefined) counts[key]++;
+  });
+  return {
+    labels: bars.map(b => b.label),
+    datasets: [{
+      label: t('common.songCount'),
+      data: bars.map(b => counts[b.key]),
+      backgroundColor: bars.map(b => b.color),
+      borderRadius: 1,
+      // バー間隔を詰める（1.0 で隙間なし）
+      categoryPercentage: 1.0,
+      barPercentage: 1.0,
+    }],
+  };
+});
+
 // Informal rank table (includes score=0 for clear status)
 const informalRankStats = computed(() => {
   const stats: Record<string, { fc: number; exh: number; hard: number; clear: number; easy: number; other: number; total: number }> = {};
@@ -948,6 +1027,33 @@ const scoreRateHistOpts = computed(() => ({
   plugins: {
     ...barOpts.value.plugins,
     tooltip: { ...barOpts.value.plugins.tooltip },
+  },
+}));
+
+// 単曲ティア分布用: 52 バー × 親ランクだけ X 軸ラベルを表示する設定。
+// データのラベル自体はフルネーム（"Novice III" など）なのでツールチップにはサブティアまで出る。
+// X 軸はコールバックで「tier III の親ランク名」「Beginner」「Legend」だけ残し、他は空にする。
+const songRankBarOpts = computed(() => ({
+  ...barOpts.value,
+  scales: {
+    ...barOpts.value.scales,
+    x: {
+      ...barOpts.value.scales.x,
+      ticks: {
+        ...barOpts.value.scales.x.ticks,
+        font: { size: 10 },
+        autoSkip: false,
+        maxRotation: 0,
+        minRotation: 0,
+        callback(this: any, value: any) {
+          const label = this.getLabelForValue(value);
+          if (label === 'Beginner' || label === 'Legend') return label;
+          const m = label.match(/^(\S+) III$/);
+          return m ? m[1] : '';
+        },
+      },
+      grid: { display: false },
+    },
   },
 }));
 

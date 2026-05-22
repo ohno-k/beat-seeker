@@ -176,7 +176,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
       <p class="text-slate-400 dark:text-slate-500 text-sm mt-1">右上のボタンからフレンドを探してみましょう！</p>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       <div v-for="friend in friends" :key="'u-' + friend.id"
         class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all group"
       >

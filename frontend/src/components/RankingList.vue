@@ -137,14 +137,39 @@ const emit = defineEmits<{
     (e: 'view-top-ranker', payload: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }): void;
 }>();
 
+// --- タッチスクロール判定（モバイルの誤タップ防止） ---
+// 行をスクロール目的でなぞった指が end 時に click を発火させてしまう挙動を抑える。
+// ScoreSummary.vue と同じ仕組み: 8px 以上動いたら「スクロール中」と見なし、後続クリックを無視する。
+let touchStartY = 0;
+let touchStartX = 0;
+let isTouchScrolling = false;
+
+/** タッチ開始位置を記録し、スクロールフラグをリセットする。 */
+const handleTouchStart = (e: TouchEvent) => {
+    touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
+    isTouchScrolling = false;
+};
+
+/** 指が 8px を超えて動いたらスクロール中と判定し、後続のクリックイベントを無視させる。 */
+const handleTouchMove = (e: TouchEvent) => {
+    const dy = Math.abs(e.touches[0].clientY - touchStartY);
+    const dx = Math.abs(e.touches[0].clientX - touchStartX);
+    if (dy > 8 || dx > 8) {
+        isTouchScrolling = true;
+    }
+};
+
 /**
  * 【関数の役割】 ランキング行クリック時のハンドラ。
+ * - タッチスクロール中（誤タップ）は何もしない
  * - 匿名ユーザー（userId null）は無視
  * - privacyLevel !== 0（非公開寄り）はプライベートビュー用に合計 pt を追加取得してから view-private-user を emit
  *    - 一覧 API でも未取得なら既存 ranking キャッシュから iidxId で探索してフォールバック
  * - 公開ユーザーは view-user をそのまま emit
  */
 async function handleUserRowClick(entry: { userId: number | null; privacyLevel: number | null; displayName: string; iidxId: string }) {
+    if (isTouchScrolling) return;
     if (entry.userId == null) return;
     const priv = entry.privacyLevel ?? 1;
     if (priv !== 0) {
@@ -182,8 +207,9 @@ async function handleUserRowClick(entry: { userId: number | null; privacyLevel: 
     emit('view-user', { id: entry.userId, displayName: entry.displayName, iidxId: entry.iidxId });
 }
 
-/** 【関数の役割】 都道府県 TOP ランカー（バーチャルプロフィール）行クリック時、view-top-ranker を発火する。 */
+/** 【関数の役割】 都道府県 TOP ランカー（バーチャルプロフィール）行クリック時、view-top-ranker を発火する。タッチスクロール中は無視。 */
 function handleTopRankerRowClick(row: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }) {
+    if (isTouchScrolling) return;
     emit('view-top-ranker', {
         versionNum: row.versionNum,
         versionName: row.versionName,
@@ -739,7 +765,7 @@ watch(viewMode, async (mode) => {
                         : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
                       row.entry.userId != null ? 'cursor-pointer' : ''
                     ]"
-                    @click="handleUserRowClick(row.entry)">
+                    @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                     <td class="py-3 pl-4">
                       <div class="flex items-center gap-2">
                         <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
@@ -794,7 +820,7 @@ watch(viewMode, async (mode) => {
                   </tr>
                   <tr v-else
                     class="bg-amber-50/50 dark:bg-amber-900/10 cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
-                    @click="handleTopRankerRowClick(row)">
+                    @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleTopRankerRowClick(row)">
                     <td class="py-2 pl-4">
                       <div class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-300 dark:text-slate-600 text-sm">―</div>
                     </td>
@@ -876,7 +902,7 @@ watch(viewMode, async (mode) => {
                         : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
                       row.entry.userId != null ? 'cursor-pointer' : ''
                     ]"
-                    @click="handleUserRowClick(row.entry)">
+                    @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                     <td class="py-3 pl-4">
                       <div class="flex items-center gap-2">
                         <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
@@ -931,7 +957,7 @@ watch(viewMode, async (mode) => {
                   </tr>
                   <tr v-else
                     class="bg-amber-50/50 dark:bg-amber-900/10 cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
-                    @click="handleTopRankerRowClick(row)">
+                    @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleTopRankerRowClick(row)">
                     <td class="py-2 pl-4">
                       <div class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-300 dark:text-slate-600 text-sm">―</div>
                     </td>
@@ -1009,7 +1035,7 @@ watch(viewMode, async (mode) => {
                       : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
                     row.entry.userId != null ? 'cursor-pointer' : ''
                   ]"
-                  @click="handleUserRowClick(row.entry)">
+                  @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                   <td class="py-3 pl-4">
                     <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
                       :class="[
@@ -1084,7 +1110,7 @@ watch(viewMode, async (mode) => {
                       : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
                     row.entry.userId != null ? 'cursor-pointer' : ''
                   ]"
-                  @click="handleUserRowClick(row.entry)">
+                  @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                   <td class="py-3 pl-4">
                     <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
                       :class="[
@@ -1163,7 +1189,7 @@ watch(viewMode, async (mode) => {
                       : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
                     row.entry.userId != null ? 'cursor-pointer' : ''
                   ]"
-                  @click="handleUserRowClick(row.entry)">
+                  @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                   <td class="py-3 pl-4">
                     <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
                       :class="[

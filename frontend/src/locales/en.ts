@@ -180,6 +180,7 @@ export const en = {
   'dashboard.clearTypeDist': 'Clear Type Distribution',
   'dashboard.djLevelDist': 'DJ Level Distribution',
   'dashboard.scoreRateDist': 'Score Rate Distribution (Excl. 0)',
+  'dashboard.songRankDist': 'Per-Song Tier Distribution (Excl. 0)',
   'dashboard.clickForList': 'Click bar for song list',
   'dashboard.informalClearStatus': 'Informal Difficulty Clear Status',
   'dashboard.remainingPoints': '{n} points remaining',

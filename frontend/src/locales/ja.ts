@@ -183,6 +183,7 @@ export const ja = {
   'dashboard.clearTypeDist': 'クリアタイプ分布',
   'dashboard.djLevelDist': 'DJレベル分布',
   'dashboard.scoreRateDist': 'スコアレート分布（0点除く）',
+  'dashboard.songRankDist': '単曲ティア分布（0点除く）',
   'dashboard.clickForList': '棒をクリックで曲一覧',
   'dashboard.informalClearStatus': '非公式難易度別クリア状況',
   'dashboard.remainingPoints': 'あと {n} 点',

@@ -283,10 +283,14 @@ const chartOptions = computed(() => {
     モバイル幅では 11 個の X 軸ティアラベル（Intermediate, Commander 等）が
     45° 回転でも収まらないため、外枠を横スクロール可能にし、内側に最小横幅を持たせる。
     sm 以上では親幅にフィットするので scroll は発生しない。
+    Z Fold3 折りたたみ画面 (280-340px) では横スクロールが必須なので、ヒントを表示する。
   -->
-  <div class="w-full overflow-x-auto -mx-1 px-1">
-    <div class="min-w-[640px] h-80 sm:h-96 md:h-[28rem]">
-      <Scatter :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin]" />
+  <div class="w-full">
+    <p class="sm:hidden text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-1 text-center">↔ 横にスクロールしてグラフ全体を確認</p>
+    <div class="w-full overflow-x-auto -mx-1 px-1">
+      <div class="min-w-[640px] h-80 sm:h-96 md:h-[28rem]">
+        <Scatter :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin]" />
+      </div>
     </div>
   </div>
 </template>
