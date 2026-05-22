@@ -32,6 +32,7 @@ export interface ScatterPoint {
   ratePt: number;
   isMe: boolean;
   isTopRanker: boolean;
+  isFriend?: boolean;
 }
 
 const props = defineProps<{ points: ScatterPoint[] }>();
@@ -142,9 +143,11 @@ const tierBandPlugin = {
 const chartData = computed(() => {
   // X 軸下限未満は表示対象外（Beginner レンジを切り捨てて主要分布に集中）
   const visible = props.points.filter(p => p.beatPt >= BEAT_X_MIN);
-  const userPts = visible.filter(p => !p.isTopRanker && !p.isMe);
-  const myPts   = visible.filter(p => p.isMe);
-  const topPts  = visible.filter(p => p.isTopRanker);
+  // 「あなた」優先 → フレンド → TOPランカー → その他 の順で分類（重複防止）
+  const userPts   = visible.filter(p => !p.isMe && !p.isTopRanker && !p.isFriend);
+  const myPts     = visible.filter(p => p.isMe);
+  const friendPts = visible.filter(p => !p.isMe && p.isFriend);
+  const topPts    = visible.filter(p => !p.isMe && !p.isFriend && p.isTopRanker);
 
   const datasets: any[] = [
     {
@@ -165,6 +168,17 @@ const chartData = computed(() => {
       pointStyle: 'triangle',
       pointRadius: 4,
       pointHoverRadius: 7,
+    });
+  }
+  if (friendPts.length > 0) {
+    datasets.push({
+      label: t('scatter.friend'),
+      data: friendPts.map(p => ({ x: p.beatPt, y: p.ratePt, _meta: p })),
+      backgroundColor: isDarkMode.value ? 'rgba(248,113,113,0.85)' : 'rgba(239,68,68,0.85)',
+      borderColor: isDarkMode.value ? '#fff' : '#0f172a',
+      borderWidth: 1.5,
+      pointRadius: 6,
+      pointHoverRadius: 9,
     });
   }
   if (myPts.length > 0) {

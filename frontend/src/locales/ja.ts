@@ -95,6 +95,7 @@ export const ja = {
   'scatter.player': 'プレイヤー',
   'scatter.regression': '回帰直線',
   'scatter.topRanker': 'TOPランカー',
+  'scatter.friend': 'フレンド',
   'scatter.you': 'あなた',
   'scatter.noName': '(no name)',
   'scatter.privateUser': '(非公開ユーザー)',

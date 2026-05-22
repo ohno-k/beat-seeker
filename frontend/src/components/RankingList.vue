@@ -20,6 +20,7 @@ import RankingScatterChart, { type ScatterPoint } from './RankingScatterChart.vu
 import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
+import { useFriends } from '../composables/useFriends';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
 import { useI18n } from '../composables/useI18n';
@@ -219,6 +220,7 @@ function handleTopRankerRowClick(row: { versionNum: number; versionName: string;
 }
 
 const { user, authHeaders } = useAuth();
+const { friends, fetchFriends } = useFriends();
 const { showRateTier } = useRateTierVisibility();
 const { showKenbanSaraTier } = useKenbanSaraTierVisibility();
 // KENBAN/SARA トグルが OFF に切り替わったら、その viewMode から beat へ強制退避する。
@@ -331,6 +333,10 @@ const scatterPoints = computed<ScatterPoint[]>(() => {
     for (const r of rateRanking.value) {
         ratePtByIidx.set(r.iidxId, r.totalRatePt);
     }
+    const friendIidxSet = new Set<string>();
+    for (const f of friends.value) {
+        if (f.iidxId) friendIidxSet.add(f.iidxId);
+    }
     const points: ScatterPoint[] = [];
     for (const b of beatRanking.value) {
         const rate = ratePtByIidx.get(b.iidxId) ?? 0;
@@ -342,6 +348,7 @@ const scatterPoints = computed<ScatterPoint[]>(() => {
             ratePt: rate,
             isMe: !!myIidx && b.iidxId === myIidx,
             isTopRanker: false,
+            isFriend: friendIidxSet.has(b.iidxId),
         });
     }
     if (showTopRankers.value) {
@@ -572,6 +579,10 @@ onMounted(async () => {
         const tasks: Promise<unknown>[] = [fetchBeatRanking()];
         if (showRateTier.value) {
             tasks.push(fetchRateRanking().catch(e => console.error(e)));
+        }
+        // ログイン中なら散布図で赤丸表示するためにフレンド一覧も取得（失敗は無視）
+        if (user.value) {
+            tasks.push(fetchFriends().catch(e => console.error(e)));
         }
         await Promise.all(tasks);
     } catch (e) {

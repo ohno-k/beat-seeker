@@ -93,6 +93,7 @@ export const en = {
   'scatter.player': 'Players',
   'scatter.regression': 'Regression',
   'scatter.topRanker': 'Top Rankers',
+  'scatter.friend': 'Friends',
   'scatter.you': 'You',
   'scatter.noName': '(no name)',
   'scatter.privateUser': '(private user)',

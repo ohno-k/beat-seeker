@@ -93,6 +93,7 @@ export const ko = {
   'scatter.player': '플레이어',
   'scatter.regression': '회귀 직선',
   'scatter.topRanker': 'TOP 랭커',
+  'scatter.friend': '친구',
   'scatter.you': '당신',
   'scatter.noName': '(이름 없음)',
   'scatter.privateUser': '(비공개 유저)',
