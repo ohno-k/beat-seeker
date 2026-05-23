@@ -971,6 +971,12 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      * 未プレイ譜面は「その譜面のプレイ人数 + 1」を順位として算入する。
      * 対象セット内で 1 曲もプレイ実績がないユーザーは更新されない（NULL のまま）。
      *
+     * 対象セットは active リビジョンの {@code song_definitions} に存在する譜面のみ。
+     * 削除曲（過去バージョン由来で {@code user_song_ranks} にのみ残っている譜面）は除外する。
+     * difficulty コードの対応は 4=ANOTHER, 10=LEGGENDARIA。読み出し側
+     * {@link com.beatseeker.backend.repository.UserSongRankRepository#getAverageRanking()}
+     * の totalSongs サブクエリと同じ集合定義になるよう揃えている（分母の整合性のため）。
+     *
      * 集計元は {@code user_song_ranks} キャッシュ（先に {@link #insertAllUserSongRanks()}
      * が完了している必要あり）。バッチ {@link com.beatseeker.backend.service.SongRankBatchService}
      * 内で同一トランザクション・statement_timeout 解除済みの状態で呼ぶ前提。
@@ -978,16 +984,32 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     @Modifying
     @Query(value =
         "WITH target_songs AS ( " +
-        "  SELECT title, difficulty_name, MAX(total) AS player_total " +
-        "  FROM user_song_ranks " +
-        "  WHERE difficulty_level IN (11, 12) " +
-        "    AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
-        "  GROUP BY title, difficulty_name " +
+        "  SELECT usr.title, usr.difficulty_name, MAX(usr.total) AS player_total " +
+        "  FROM user_song_ranks usr " +
+        "  WHERE usr.difficulty_level IN (11, 12) " +
+        "    AND usr.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "    AND EXISTS ( " +
+        "      SELECT 1 FROM song_definitions sd " +
+        "      WHERE sd.revision = 'active' " +
+        "        AND sd.title = usr.title " +
+        "        AND sd.level = usr.difficulty_level " +
+        "        AND ((sd.difficulty = '4'  AND usr.difficulty_name = 'ANOTHER') " +
+        "          OR (sd.difficulty = '10' AND usr.difficulty_name = 'LEGGENDARIA')) " +
+        "    ) " +
+        "  GROUP BY usr.title, usr.difficulty_name " +
         "), " +
         "played_users AS ( " +
-        "  SELECT DISTINCT user_id FROM user_song_ranks " +
-        "  WHERE difficulty_level IN (11, 12) " +
-        "    AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  SELECT DISTINCT usr.user_id FROM user_song_ranks usr " +
+        "  WHERE usr.difficulty_level IN (11, 12) " +
+        "    AND usr.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "    AND EXISTS ( " +
+        "      SELECT 1 FROM song_definitions sd " +
+        "      WHERE sd.revision = 'active' " +
+        "        AND sd.title = usr.title " +
+        "        AND sd.level = usr.difficulty_level " +
+        "        AND ((sd.difficulty = '4'  AND usr.difficulty_name = 'ANOTHER') " +
+        "          OR (sd.difficulty = '10' AND usr.difficulty_name = 'LEGGENDARIA')) " +
+        "    ) " +
         "), " +
         "avg_per_user AS ( " +
         "  SELECT pu.user_id, " +

@@ -61,6 +61,12 @@ public interface UserSongRankRepository extends JpaRepository<UserSongRank, Long
      *
      * totalSongs（対象セットの譜面数）は全ユーザー共通の値なので、サブクエリで
      * 全行に同じ値を埋め込む（追加の往復クエリを避けるため）。
+     *
+     * 対象セットは active リビジョンの {@code song_definitions} に存在する譜面のみ。
+     * 削除曲（過去バージョン由来で {@code user_song_ranks} にのみ残っている譜面）は除外する。
+     * difficulty コードの対応は 4=ANOTHER, 10=LEGGENDARIA。集計バッチ
+     * {@link com.beatseeker.backend.repository.ScoreRepository#updateAllAverageRanks()}
+     * と同じ集合定義になるよう揃えている（分母の整合性のため）。
      */
     @Query(value =
             "SELECT u.id AS \"userId\", " +
@@ -70,9 +76,17 @@ public interface UserSongRankRepository extends JpaRepository<UserSongRank, Long
             "       u.total_average_rank AS \"averageRank\", " +
             "       COALESCE(u.total_average_rank_played, 0) AS \"playedCount\", " +
             "       (SELECT COUNT(*) FROM ( " +
-            "           SELECT DISTINCT title, difficulty_name FROM user_song_ranks " +
-            "           WHERE difficulty_level IN (11, 12) " +
-            "             AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+            "           SELECT DISTINCT usr.title, usr.difficulty_name FROM user_song_ranks usr " +
+            "           WHERE usr.difficulty_level IN (11, 12) " +
+            "             AND usr.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+            "             AND EXISTS ( " +
+            "               SELECT 1 FROM song_definitions sd " +
+            "               WHERE sd.revision = 'active' " +
+            "                 AND sd.title = usr.title " +
+            "                 AND sd.level = usr.difficulty_level " +
+            "                 AND ((sd.difficulty = '4'  AND usr.difficulty_name = 'ANOTHER') " +
+            "                   OR (sd.difficulty = '10' AND usr.difficulty_name = 'LEGGENDARIA')) " +
+            "             ) " +
             "       ) t) AS \"totalSongs\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\" " +
             "FROM users u " +
