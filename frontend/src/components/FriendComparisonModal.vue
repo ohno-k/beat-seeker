@@ -3,7 +3,9 @@
  * 【コンポーネントの役割】 フレンド（または都道府県 TOP ランカー＝バーチャルライバル）とスコア比較を行うモーダル。
  *
  * 機能:
- *  - 自分と相手のスコアを取得し、Lv.11/Lv.12 に絞って EX-SCORE を突き合わせる
+ *  - 自分と相手のスコアを取得し、ANOTHER/LEGGENDARIA 譜面に絞って EX-SCORE を突き合わせる
+ *  - 集計対象は Lv.10以下 / Lv.11 / Lv.12 の 3 バケット（チェックボックスで個別 ON/OFF 可能）
+ *  - Lv.10以下はデフォルト OFF（既存ユーザーの体験を変えないため）
  *  - WIN / LOSS / DRAW / YOU Only / FRIEND Only をカウント
  *  - 非公式難易度（例: 12.2, 12.A+）別に集計し、クリックで詳細楽曲リストを展開
  *  - レベル表示トグル・両者プレイ済みのみトグルでフィルタ可能
@@ -23,7 +25,7 @@ import type { ScoreData } from '../types/ScoreData';
 import FriendComparisonChartModal from './FriendComparisonChartModal.vue';
 
 /** グラフモーダルが対象とする集計単位の指定。 'rank:12.0' で非公式難易度を指定。 */
-type ChartScope = 'overall' | 'lv11' | 'lv12' | `rank:${string}`;
+type ChartScope = 'overall' | 'lv10minus' | 'lv11' | 'lv12' | `rank:${string}`;
 
 const props = defineProps<{
   friend: Friend;
@@ -172,9 +174,9 @@ interface ComparisonResult {
 /**
  * 【computed の役割】 自分と相手のスコアから全集計結果を一気に算出する。
  * 返り値:
- *  - summary: overall / lv11 / lv12 のカード表示用結果
+ *  - summary: overall / lv10minus / lv11 / lv12 のカード表示用結果
  *  - unofficial: [非公式ランク文字列, 結果] のタプル配列（降順ソート）
- * 集計対象: Lv.11 または Lv.12 のみ。レベル表示トグル（showLv11/showLv12）で除外可。
+ * 集計対象: ANOTHER / LEGGENDARIA 譜面に限定。レベル表示トグルで Lv.10以下 / Lv.11 / Lv.12 を個別除外可。
  */
 const comparisonStats = computed(() => {
   const initStats = (): ComparisonResult => ({
@@ -183,6 +185,7 @@ const comparisonStats = computed(() => {
   });
   const res: Record<string, ComparisonResult> = {
     overall: initStats(),
+    lv10minus: initStats(),
     lv11: initStats(),
     lv12: initStats()
   };
@@ -194,19 +197,26 @@ const comparisonStats = computed(() => {
   const myMap = new Map<string, ScoreRecord>();
   const friendMap = new Map<string, ScoreRecord>();
 
+  // ANOTHER / LEGGENDARIA かつ、現在 ON になっているレベル帯のみ採用する。
+  const isTargetRecord = (s: ScoreRecord): boolean => {
+    if (s.difficultyName !== 'ANOTHER' && s.difficultyName !== 'LEGGENDARIA') return false;
+    const lv = s.difficultyLevel;
+    if (lv == null) return false;
+    if (lv <= 10) return showLv10Minus.value;
+    if (lv === 11) return showLv11.value;
+    if (lv === 12) return showLv12.value;
+    return false;
+  };
+
   myProcessedScores.value.forEach(s => {
-    if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return;
-    if (s.difficultyLevel === 11 && !showLv11.value) return;
-    if (s.difficultyLevel === 12 && !showLv12.value) return;
+    if (!isTargetRecord(s)) return;
     const key = `${s.title}_${s.difficultyName}`;
     allKeys.add(key);
     myMap.set(key, s);
   });
 
   friendProcessedScores.value.forEach(s => {
-    if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return;
-    if (s.difficultyLevel === 11 && !showLv11.value) return;
-    if (s.difficultyLevel === 12 && !showLv12.value) return;
+    if (!isTargetRecord(s)) return;
     const key = `${s.title}_${s.difficultyName}`;
     allKeys.add(key);
     friendMap.set(key, s);
@@ -225,7 +235,8 @@ const comparisonStats = computed(() => {
     if (!myPlay && !friendPlay) return; // 両者未プレイはスキップ
     if (showBothPlayedOnly.value && !(myPlay && friendPlay)) return; // 「両者プレイ済みのみ」トグル有効時は片方だけプレイも除外
 
-    const lvKey = s.difficultyLevel === 11 ? 'lv11' : 'lv12';
+    const lv = s.difficultyLevel ?? 0;
+    const lvKey = lv <= 10 ? 'lv10minus' : lv === 11 ? 'lv11' : 'lv12';
     const rank = s.informalRank && !s.informalRank.includes('Uncategorized') ? s.informalRank : null;
 
     const update = (stats: ComparisonResult) => {
@@ -278,6 +289,7 @@ const comparisonStats = computed(() => {
   };
 
   sortSongs(res.overall);
+  sortSongs(res.lv10minus);
   sortSongs(res.lv11);
   sortSongs(res.lv12);
   Object.values(unofficialRanks).forEach(sortSongs);
@@ -305,6 +317,8 @@ const toggleRank = (rank: string) => {
 
 /** 「両者プレイ済みのみ」表示トグル。true なら YOU Only / FRIEND Only を除外。 */
 const showBothPlayedOnly = ref(false);
+/** Lv.10 以下 (ANOTHER/LEGGENDARIA) を集計に含めるか。デフォルト OFF。 */
+const showLv10Minus = ref(false);
 /** Lv.11 を集計に含めるか。 */
 const showLv11 = ref(true);
 /** Lv.12 を集計に含めるか。 */
@@ -318,8 +332,12 @@ const chartScope = ref<ChartScope>('overall');
 const chartScopeLabel = ref<string>('');
 
 /** サマリーカード用に scope に対応するラベルを返す。 */
-const summaryLabel = (key: string) =>
-  key === 'overall' ? '全体 (11 & 12)' : key === 'lv11' ? 'レベル 11' : 'レベル 12';
+const summaryLabel = (key: string) => {
+  if (key === 'overall') return '全体';
+  if (key === 'lv10minus') return 'レベル 10 以下';
+  if (key === 'lv11') return 'レベル 11';
+  return 'レベル 12';
+};
 
 /** サマリーカードのグラフボタン押下。クリックバブリングを防いで対象 scope でモーダルを開く。 */
 const openSummaryChart = (key: string, ev: Event) => {
@@ -376,9 +394,17 @@ const openRankChart = (rank: string, ev: Event) => {
           <div v-else class="space-y-6 sm:space-y-8">
             <!-- フィルタートグル群（レベルチェック + 両者プレイ済み）。狭幅では行ごとに折り返してタップ領域を確保 -->
             <div class="flex flex-wrap items-center justify-start sm:justify-end gap-x-3 gap-y-2 sm:gap-4">
-              <!-- レベル選択チェックボックス -->
+              <!-- レベル選択チェックボックス (ANOTHER/LEGGENDARIA 譜面のみ集計) -->
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    v-model="showLv10Minus"
+                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
+                  />
+                  <span class="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
+                </label>
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
@@ -414,11 +440,11 @@ const openRankChart = (rank: string, ev: Event) => {
               </div>
             </div>
 
-            <!-- サマリーカード（overall / lv11 / lv12 の 3 カード並び、WIN/DRAW/LOSS の大数字 + 進捗バー）。
-                 Z Fold3 展開時 (sm:) で 3列、折りたたみ・iPhone 時は 1 列 -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <!-- サマリーカード（overall / lv10minus / lv11 / lv12 の最大 4 カード並び、WIN/DRAW/LOSS の大数字 + 進捗バー）。
+                 iPhone は 1 列、Z Fold3 展開時 (sm:) で 2 列、lg 以上で 4 列 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div v-for="(stats, key) in comparisonStats.summary" :key="key"
-                v-show="key === 'overall' || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
+                v-show="key === 'overall' || (key === 'lv10minus' && showLv10Minus) || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
                 class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all hover:shadow-md">
                 <div class="flex items-center justify-between mb-3">
                   <h3 class="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
@@ -602,6 +628,7 @@ const openRankChart = (rank: string, ev: Event) => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
+                <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
                 <p>・WIN/DRAW/LOSS: 両者がプレイ済みの楽曲のEX-SCORE比較</p>
                 <p>・YOU Only: 自分のみプレイ済み / FRIEND Only: 相手のみプレイ済み</p>
                 <p>・両者未プレイの楽曲は集計から除外して表示しています。</p>

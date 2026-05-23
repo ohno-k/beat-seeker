@@ -115,6 +115,7 @@ const comparisonStats = computed(() => {
   });
   const res: Record<string, ComparisonResult> = {
     overall: initStats(),
+    lv10minus: initStats(),
     lv11: initStats(),
     lv12: initStats()
   };
@@ -125,19 +126,26 @@ const comparisonStats = computed(() => {
   const aMap = new Map<string, ScoreRecord>();
   const bMap = new Map<string, ScoreRecord>();
 
+  // ANOTHER / LEGGENDARIA かつ、現在 ON になっているレベル帯のみ採用する。
+  const isTargetRecord = (s: ScoreRecord): boolean => {
+    if (s.difficultyName !== 'ANOTHER' && s.difficultyName !== 'LEGGENDARIA') return false;
+    const lv = s.difficultyLevel;
+    if (lv == null) return false;
+    if (lv <= 10) return showLv10Minus.value;
+    if (lv === 11) return showLv11.value;
+    if (lv === 12) return showLv12.value;
+    return false;
+  };
+
   aProcessedScores.value.forEach(s => {
-    if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return;
-    if (s.difficultyLevel === 11 && !showLv11.value) return;
-    if (s.difficultyLevel === 12 && !showLv12.value) return;
+    if (!isTargetRecord(s)) return;
     const key = `${s.title}_${s.difficultyName}`;
     allKeys.add(key);
     aMap.set(key, s);
   });
 
   bProcessedScores.value.forEach(s => {
-    if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return;
-    if (s.difficultyLevel === 11 && !showLv11.value) return;
-    if (s.difficultyLevel === 12 && !showLv12.value) return;
+    if (!isTargetRecord(s)) return;
     const key = `${s.title}_${s.difficultyName}`;
     allKeys.add(key);
     bMap.set(key, s);
@@ -156,7 +164,8 @@ const comparisonStats = computed(() => {
     if (!aPlay && !bPlay) return;
     if (showBothPlayedOnly.value && !(aPlay && bPlay)) return;
 
-    const lvKey = s.difficultyLevel === 11 ? 'lv11' : 'lv12';
+    const lv = s.difficultyLevel ?? 0;
+    const lvKey = lv <= 10 ? 'lv10minus' : lv === 11 ? 'lv11' : 'lv12';
     const rank = s.informalRank && !s.informalRank.includes('Uncategorized') ? s.informalRank : null;
 
     const update = (stats: ComparisonResult) => {
@@ -208,6 +217,7 @@ const comparisonStats = computed(() => {
   };
 
   sortSongs(res.overall);
+  sortSongs(res.lv10minus);
   sortSongs(res.lv11);
   sortSongs(res.lv12);
   Object.values(unofficialRanks).forEach(sortSongs);
@@ -232,6 +242,8 @@ const toggleRank = (rank: string) => {
 };
 
 const showBothPlayedOnly = ref(false);
+/** Lv.10 以下 (ANOTHER/LEGGENDARIA) を集計に含めるか。デフォルト OFF。 */
+const showLv10Minus = ref(false);
 const showLv11 = ref(true);
 const showLv12 = ref(true);
 </script>
@@ -281,6 +293,14 @@ const showLv12 = ref(true);
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
+                    v-model="showLv10Minus"
+                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
+                  />
+                  <span class="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
                     v-model="showLv11"
                     class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
                   />
@@ -312,12 +332,12 @@ const showLv12 = ref(true);
             </div>
 
             <!-- サマリーカード -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div v-for="(stats, key) in comparisonStats.summary" :key="key"
-                v-show="key === 'overall' || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
+                v-show="key === 'overall' || (key === 'lv10minus' && showLv10Minus) || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
                 class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all hover:shadow-md">
                 <h3 class="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
-                  {{ key === 'overall' ? '全体 (11 & 12)' : key === 'lv11' ? 'レベル 11' : 'レベル 12' }}
+                  {{ key === 'overall' ? '全体' : key === 'lv10minus' ? 'レベル 10 以下' : key === 'lv11' ? 'レベル 11' : 'レベル 12' }}
                 </h3>
                 <div class="font-black text-center" :class="showBothPlayedOnly ? 'grid grid-cols-3 gap-1' : 'grid grid-cols-5 gap-1'">
                   <div class="flex flex-col">
@@ -467,6 +487,7 @@ const showLv12 = ref(true);
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
+                <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
                 <p>・WIN/DRAW/LOSS: 両者がプレイ済みの楽曲のEX-SCORE比較 (A 視点)</p>
                 <p>・A Only: ユーザー A のみプレイ済み / B Only: ユーザー B のみプレイ済み</p>
                 <p>・両者未プレイの楽曲は集計から除外して表示しています。</p>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 【コンポーネントの役割】 フレンド比較モーダル内の各集計単位（overall/lv11/lv12 サマリーカード、
+ * 【コンポーネントの役割】 フレンド比較モーダル内の各集計単位（overall/lv10minus/lv11/lv12 サマリーカード、
  * 非公式難易度ランク 1 行）について、自分と相手の勝敗カウント
  * （WIN/LOSS/DRAW/YOU Only/FRIEND Only）の時系列推移を折れ線グラフで表示する。
  *
@@ -11,14 +11,14 @@
  *   - バーチャルライバル（friend.id<0）の場合は相手側履歴を取得しない（現在値で固定）
  *
  * 集計ロジック:
- *   - 親から渡された現在の ScoreRecord（Lv.11/12 ANOTHER/LEGGENDARIA）から開始マップを構築
+ *   - 親から渡された現在の ScoreRecord（Lv.12 以下の ANOTHER/LEGGENDARIA）から開始マップを構築
  *   - 履歴中の最初のイベントの oldScore/oldClearType に巻き戻して「履歴開始時点」を再現
  *   - 全イベントを時系列マージし walk-forward。曲ごとの WIN/LOSS/DRAW/YOU Only/FRIEND Only カテゴリ
  *     の前後変化のみ差分更新（O(N) 走査）
  *   - 各イベント時点でスナップショットを記録 → 折れ線データに変換
  *
  * 限界:
- *   - 「現在 Lv.11/12 ANOTHER/LEGGENDARIA としてプレイ済み」の曲のみ追跡対象。過去の難易度改訂は無視。
+ *   - 「現在 ANOTHER/LEGGENDARIA としてプレイ済み」の曲のみ追跡対象。過去の難易度改訂は無視。
  *   - 相手側履歴が取れない場合、相手スコアは時系列で動かない（フォールバックで現在値固定）
  */
 import { ref, computed, onMounted, watch } from 'vue';
@@ -37,7 +37,7 @@ import type { ScoreRecord } from '../utils/scoreData';
 ChartJS.register(LinearScale, CategoryScale, TimeScale, PointElement, LineElement, Filler, Tooltip, Legend, zoomPlugin);
 
 /** 集計対象の指定。 'rank:12.0' のような形式で非公式難易度を指定できる。 */
-type Scope = 'overall' | 'lv11' | 'lv12' | `rank:${string}`;
+type Scope = 'overall' | 'lv10minus' | 'lv11' | 'lv12' | `rank:${string}`;
 
 const props = defineProps<{
   friend: Friend;
@@ -85,13 +85,15 @@ interface SongState {
 }
 
 /**
- * 【関数の役割】 ScoreRecord 配列を Lv.11/Lv.12 ANOTHER/LEGGENDARIA のみに絞り込み
+ * 【関数の役割】 ScoreRecord 配列を ANOTHER/LEGGENDARIA かつ Lv.12 以下のみに絞り込み
  * key (`${title}_${difficultyName}`) → SongState の Map にする。比較対象の母集合になる。
+ * scope 側で Lv 帯のさらなる絞り込みを行う前提なので、Lv.12 以下を全て含める。
  */
 function buildStateMap(records: ScoreRecord[]): Map<string, SongState> {
   const m = new Map<string, SongState>();
   records.forEach(r => {
-    if (r.difficultyLevel !== 11 && r.difficultyLevel !== 12) return;
+    if (r.difficultyLevel == null) return;
+    if (r.difficultyLevel > 12) return;
     if (r.difficultyName !== 'ANOTHER' && r.difficultyName !== 'LEGGENDARIA') return;
     const key = `${r.title}_${r.difficultyName}`;
     m.set(key, {
@@ -107,7 +109,8 @@ function buildStateMap(records: ScoreRecord[]): Map<string, SongState> {
 /** scope に応じて、その key を集計対象に含めるか判定する。 */
 function inScope(meta: SongState | undefined): boolean {
   if (!meta) return false;
-  if (props.scope === 'overall') return meta.difficultyLevel === 11 || meta.difficultyLevel === 12;
+  if (props.scope === 'overall') return meta.difficultyLevel <= 12;
+  if (props.scope === 'lv10minus') return meta.difficultyLevel <= 10;
   if (props.scope === 'lv11') return meta.difficultyLevel === 11;
   if (props.scope === 'lv12') return meta.difficultyLevel === 12;
   if (props.scope.startsWith('rank:')) return meta.informalRank === props.scope.slice(5);
@@ -128,7 +131,7 @@ interface HistoryEvent {
 /**
  * 【関数の役割】 履歴 API の戻り値（ScoreHistoryLog の配列）を平坦化し
  * HistoryEvent 配列に変換する。
- *  - keySet に含まれないキーは無視（=現在 Lv.11/12 ANOTHER/LEGGENDARIA でない曲）
+ *  - keySet に含まれないキーは無視（=現在 ANOTHER/LEGGENDARIA でない / Lv.12 を超える曲）
  *  - diffJson の difficulty フィールドは 'ANOTHER' / 'LEGGENDARIA' のいずれかのみ採用
  */
 function flattenHistoryEvents(rawHistory: any[], side: Side, keySet: Set<string>): HistoryEvent[] {

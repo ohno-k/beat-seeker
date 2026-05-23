@@ -1465,7 +1465,12 @@ const handleUnifiedClose = async () => {
     <!-- ログイン / オンボーディング / プロフィール編集 / アップロード結果 / 管理者一覧 -->
     <!-- ============================================================ -->
     <LoginModal :is-open="isLoginModalOpen" @close="isLoginModalOpen = false" @registered="isOnboardingOpen = true" />
-    <OnboardingModal :is-open="isOnboardingOpen" :deferred-prompt="deferredPrompt" @close="isOnboardingOpen = false" />
+    <OnboardingModal
+      :is-open="isOnboardingOpen"
+      :deferred-prompt="deferredPrompt"
+      @close="isOnboardingOpen = false"
+      @open-upload="isOnboardingOpen = false; showUploadArea = true"
+    />
     <ProfileEditModal :is-open="isProfileModalOpen" @close="isProfileModalOpen = false" />
     <UploadResultModal
       :is-open="isDiffModalOpen"

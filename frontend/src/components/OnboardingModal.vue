@@ -1,17 +1,19 @@
 <script setup lang="ts">
 /**
- * 【コンポーネントの役割】 新規登録直後に表示する 2 ステップのオンボーディング。
+ * 【コンポーネントの役割】 新規登録直後に表示する 3 ステップのオンボーディング。
  *
  * 機能:
- *  - Step 1: PWA インストール（`beforeinstallprompt` を受け取った場合のみボタン活性化）
- *  - Step 2: プッシュ通知の許可を要求し、結果でバッジ切替
+ *  - Step 1: スコアを取り込む（最重要。アプリの価値体験はここから始まる）
+ *  - Step 2: PWA インストール（`beforeinstallprompt` を受け取った場合のみボタン活性化）
+ *  - Step 3: プッシュ通知の許可を要求し、結果でバッジ切替
  *  - iOS は beforeinstallprompt 非対応なので、ホーム画面追加の手順案内を表示
  *
  * props:
  *  - isOpen: 開閉フラグ
  *  - deferredPrompt: App 側で取り置いた `beforeinstallprompt` イベント（未対応なら null）
  * emits:
- *  - close: 「後で」「始める」どちらでも同じく閉じる
+ *  - close: 「後で」「はじめる」どちらでも同じく閉じる
+ *  - open-upload: Step 1 から UnifiedImport を開く要求。親がモーダルを閉じてアップロード UI を開く
  */
 import { ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
@@ -24,6 +26,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void;
+  (e: 'open-upload'): void;
 }>();
 
 // Esc キーで閉じる（背景クリックと同等）。
@@ -105,7 +108,35 @@ const handleEnableNotifications = async () => {
       </div>
 
       <div class="p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
-        <!-- ステップ 1: PWA としてホーム画面にインストール -->
+        <!-- ステップ 1: スコアを取り込む（最重要。アプリの価値体験の起点） -->
+        <div class="bg-blue-50 dark:bg-blue-950/40 p-6 rounded-2xl border-2 border-blue-200 dark:border-blue-800/60 transition-colors ring-1 ring-blue-100 dark:ring-blue-900/30">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-xl flex items-center justify-center shrink-0 text-white shadow-md shadow-blue-500/30">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="font-bold text-slate-800 dark:text-slate-100 italic">1. スコアを取り込む</h3>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white">まずはここから</span>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                CSV / ブックマークレット / OCR のいずれかで過去のプレイ履歴を取り込みます。
+                1 件でも取り込めば BEAT-TIER や成長記録など、すべての機能が動き始めます。
+              </p>
+
+              <button
+                @click="emit('open-upload')"
+                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-95"
+              >
+                スコアを取り込む
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ステップ 2: PWA としてホーム画面にインストール -->
         <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 transition-colors">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
@@ -114,7 +145,7 @@ const handleEnableNotifications = async () => {
               </svg>
             </div>
             <div class="flex-1">
-              <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1 italic">1. アプリとしてインストール</h3>
+              <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1 italic">2. アプリとしてインストール</h3>
               <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
                 ホーム画面に追加すると、Webブラウザの枠がなくなり、フルスクリーンで快適にスコア管理ができます。
               </p>
@@ -140,7 +171,7 @@ const handleEnableNotifications = async () => {
           </div>
         </div>
 
-        <!-- ステップ 2: プッシュ通知を有効化 -->
+        <!-- ステップ 3: プッシュ通知を有効化 -->
         <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 transition-colors">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400">
@@ -149,7 +180,7 @@ const handleEnableNotifications = async () => {
               </svg>
             </div>
             <div class="flex-1">
-              <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1 italic">2. プッシュ通知を有効化</h3>
+              <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1 italic">3. プッシュ通知を有効化</h3>
               <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
                 ライバル申請が届いた際にリアルタイムで通知を受け取れます。※後からオフにすることも可能です。
               </p>
