@@ -132,6 +132,14 @@ const sharePublicUrl = computed(() => {
 });
 
 /**
+ * シェア画像内の曲タイトル表示。LEGGENDARIA 譜面は [L] サフィックスを付けて
+ * ANOTHER と区別する (IIDX コミュニティの慣習表記)。
+ */
+function displayTitleForShare(title: string, difficulty: string): string {
+  return difficulty === 'LEGGENDARIA' ? `${title} [L]` : title;
+}
+
+/**
  * Twitter 投稿用テンプレート。
  *
  * X の intent/tweet は `text=...&url=...` を受け取ると本文末尾に半角スペースで URL を連結するため、
@@ -569,7 +577,7 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
                       {{ i + 1 }}
                     </span>
                     <span class="flex-1 truncate" style="font-size: 17px; height: 44px; line-height: 44px;">
-                      {{ s.title }}
+                      {{ displayTitleForShare(s.title, s.difficulty) }}
                     </span>
                     <span class="text-violet-300 font-bold whitespace-nowrap" style="font-size: 22px; height: 44px; line-height: 44px;">
                       {{ s.newBeatPt.toFixed(1) }}
@@ -595,7 +603,7 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
                       {{ i + 1 }}
                     </span>
                     <span class="flex-1 truncate" style="font-size: 17px; height: 44px; line-height: 44px;">
-                      {{ s.title }}
+                      {{ displayTitleForShare(s.title, s.difficulty) }}
                     </span>
                     <span class="text-rose-300 font-bold whitespace-nowrap" style="font-size: 22px; height: 44px; line-height: 44px;">
                       +{{ s.ratePtIncrease.toFixed(1) }}
@@ -633,7 +641,9 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
                   >
                     {{ a.achievementType }}
                   </span>
-                  <span style="font-size: 12px; height: 24px; line-height: 24px;">{{ a.title }}</span>
+                  <span style="font-size: 12px; height: 24px; line-height: 24px;">
+                    {{ displayTitleForShare(a.title, a.difficulty) }}
+                  </span>
                   <span class="opacity-60" style="font-size: 11px; height: 24px; line-height: 24px;">
                     ☆{{ a.informalRank ?? '?' }}
                   </span>
