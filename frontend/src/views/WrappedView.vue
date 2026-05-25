@@ -452,10 +452,18 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
           <button
             @click="handleShare"
             :disabled="isGeneratingShare"
-            class="px-8 py-4 bg-black text-white font-bold text-base md:text-lg rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+            class="px-8 py-4 bg-black text-white font-bold text-base md:text-lg rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-wait inline-flex items-center gap-3"
           >
-            <span v-if="isGeneratingShare">画像を生成中...</span>
-            <span v-else>𝕏 でシェア</span>
+            <template v-if="isGeneratingShare">
+              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>画像を生成中...</span>
+            </template>
+            <template v-else>
+              <span>𝕏 でシェア</span>
+            </template>
           </button>
           <button
             @click="router.push('/dashboard')"
@@ -479,10 +487,11 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
 
       <!--
         オフスクリーンのシェア画像生成用 DOM (1200×675、X の summary_large_image 比率)。
-        - BEAT-PT TOP5
-        - RATE-PT TOP5 (data.showRateTier=true のときのみ)
-        - 新規 AAA / MAX- TOP5 (非公式難易度降順)
-        の 2〜3 カラム構成。html2canvas で PNG 化してシェア。
+        レイアウト:
+          - 上 3/4: BEAT-PT TOP5 と RATE-PT TOP5 (showRateTier=false なら BEAT-PT が全幅)
+          - 下 1/4: 新規 AAA / MAX- TOP5
+        各テキスト行は leading-normal + py-2 で垂直方向の中央位置を明示。
+        html2canvas のフォントベースライン補正で文字が下寄り/見切れになる問題への対策。
       -->
       <div
         ref="shareImageRef"
@@ -490,84 +499,95 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
         style="width: 1200px; height: 675px;"
         aria-hidden="true"
       >
-        <div class="w-full h-full bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white p-10 flex flex-col">
-          <!-- ヘッダー: 月 + ユーザー名 + 軽い統計 -->
-          <div class="flex items-end justify-between mb-5">
+        <div class="w-full h-full bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white p-8 flex flex-col leading-normal">
+          <!-- ヘッダー: 月 + ユーザー名 -->
+          <div class="flex items-end justify-between mb-4 flex-shrink-0">
             <div>
-              <p class="text-sm tracking-[0.4em] opacity-70">BEAT-SEEKER WRAPPED</p>
-              <h1 class="text-5xl font-black mt-1">{{ data.displayMonth }}</h1>
+              <p class="text-xs tracking-[0.4em] opacity-70 leading-normal py-1">BEAT-SEEKER WRAPPED</p>
+              <h1 class="text-4xl font-black leading-normal py-1">{{ data.displayMonth }}</h1>
             </div>
             <div class="text-right">
-              <p class="text-xl opacity-90 font-bold">{{ data.displayName }}</p>
-              <p class="text-xs opacity-60 mt-1">
+              <p class="text-lg opacity-90 font-bold leading-normal py-1">{{ data.displayName }}</p>
+              <p class="text-xs opacity-60 leading-normal py-1">
                 更新譜面 {{ data.uniqueUpdatedSongCount }} 曲 / 新規 AAA +{{ data.djLevelIncrease?.aaa ?? 0 }}
               </p>
             </div>
           </div>
 
-          <!-- 2 or 3 カラムリスト -->
-          <div :class="['grid gap-4 flex-1', data.showRateTier ? 'grid-cols-3' : 'grid-cols-2']">
-            <!-- BEAT-PT TOP5 -->
-            <div class="bg-white/5 rounded-2xl p-5 flex flex-col">
-              <p class="text-xs tracking-wider opacity-70 mb-3 font-semibold">BEAT-PT を支える譜面</p>
-              <div class="space-y-2 flex-1">
-                <div
-                  v-for="(s, i) in data.topBeatPtSongs.slice(0, 5)"
-                  :key="`sbp-${i}`"
-                  class="flex items-center gap-2"
-                >
-                  <span class="opacity-60 font-bold w-4 text-xs text-center">{{ i + 1 }}</span>
-                  <span class="flex-1 truncate text-xs">{{ s.title }}</span>
-                  <span class="text-violet-300 font-bold text-sm whitespace-nowrap">{{ s.newBeatPt.toFixed(1) }}</span>
+          <!-- 上 3/4 と 下 1/4 を 3fr:1fr で分配 -->
+          <div class="grid gap-4 flex-1 min-h-0" style="grid-template-rows: 3fr 1fr;">
+            <!-- 上段: BEAT-PT + RATE-PT を横並び (showRateTier=false なら BEAT-PT が全幅) -->
+            <div :class="['grid gap-4 min-h-0', data.showRateTier ? 'grid-cols-2' : 'grid-cols-1']">
+              <!-- BEAT-PT TOP5 -->
+              <div class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0">
+                <p class="text-sm tracking-wider opacity-70 mb-3 font-semibold leading-normal py-1">
+                  BEAT-PT を支える譜面
+                </p>
+                <div class="flex-1 flex flex-col justify-between gap-2">
+                  <div
+                    v-for="(s, i) in data.topBeatPtSongs.slice(0, 5)"
+                    :key="`sbp-${i}`"
+                    class="flex items-center gap-3 py-2 leading-normal"
+                  >
+                    <span class="opacity-60 font-bold w-5 text-sm text-center leading-normal">{{ i + 1 }}</span>
+                    <span class="flex-1 truncate text-base leading-normal">{{ s.title }}</span>
+                    <span class="text-violet-300 font-bold text-xl whitespace-nowrap leading-normal">
+                      {{ s.newBeatPt.toFixed(1) }}
+                    </span>
+                  </div>
+                  <p v-if="data.topBeatPtSongs.length === 0" class="text-sm opacity-50 leading-normal">該当なし</p>
                 </div>
-                <p v-if="data.topBeatPtSongs.length === 0" class="text-xs opacity-50">該当なし</p>
+              </div>
+
+              <!-- RATE-PT TOP5 (showRateTier のみ) -->
+              <div v-if="data.showRateTier" class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0">
+                <p class="text-sm tracking-wider opacity-70 mb-3 font-semibold leading-normal py-1">
+                  RATE-PT 増加
+                </p>
+                <div class="flex-1 flex flex-col justify-between gap-2">
+                  <div
+                    v-for="(s, i) in data.topRatePtSongs.slice(0, 5)"
+                    :key="`srp-${i}`"
+                    class="flex items-center gap-3 py-2 leading-normal"
+                  >
+                    <span class="opacity-60 font-bold w-5 text-sm text-center leading-normal">{{ i + 1 }}</span>
+                    <span class="flex-1 truncate text-base leading-normal">{{ s.title }}</span>
+                    <span class="text-rose-300 font-bold text-xl whitespace-nowrap leading-normal">
+                      +{{ s.ratePtIncrease.toFixed(1) }}
+                    </span>
+                  </div>
+                  <p v-if="data.topRatePtSongs.length === 0" class="text-sm opacity-50 leading-normal">該当なし</p>
+                </div>
               </div>
             </div>
 
-            <!-- RATE-PT TOP5 (showRateTier のみ) -->
-            <div v-if="data.showRateTier" class="bg-white/5 rounded-2xl p-5 flex flex-col">
-              <p class="text-xs tracking-wider opacity-70 mb-3 font-semibold">RATE-PT 増加</p>
-              <div class="space-y-2 flex-1">
-                <div
-                  v-for="(s, i) in data.topRatePtSongs.slice(0, 5)"
-                  :key="`srp-${i}`"
-                  class="flex items-center gap-2"
-                >
-                  <span class="opacity-60 font-bold w-4 text-xs text-center">{{ i + 1 }}</span>
-                  <span class="flex-1 truncate text-xs">{{ s.title }}</span>
-                  <span class="text-rose-300 font-bold text-sm whitespace-nowrap">+{{ s.ratePtIncrease.toFixed(1) }}</span>
-                </div>
-                <p v-if="data.topRatePtSongs.length === 0" class="text-xs opacity-50">該当なし</p>
-              </div>
-            </div>
-
-            <!-- 新規 AAA / MAX- TOP5 (非公式難易度降順) -->
-            <div class="bg-white/5 rounded-2xl p-5 flex flex-col">
-              <p class="text-xs tracking-wider opacity-70 mb-3 font-semibold">新規 AAA / MAX-</p>
-              <div class="space-y-2 flex-1">
+            <!-- 下段: 新規 AAA / MAX- (横並びチップリスト) -->
+            <div class="bg-white/5 rounded-2xl p-4 flex flex-col min-h-0">
+              <p class="text-xs tracking-wider opacity-70 mb-2 font-semibold leading-normal py-1">新規 AAA / MAX-</p>
+              <div v-if="data.topAchievements.length > 0" class="flex gap-2 flex-wrap items-center">
                 <div
                   v-for="(a, i) in data.topAchievements.slice(0, 5)"
                   :key="`sa-${i}`"
-                  class="flex items-center gap-2"
+                  class="flex items-center gap-2 bg-white/10 rounded-lg px-2.5 py-1.5 leading-normal"
                 >
                   <span
                     :class="[
-                      'font-black text-[10px] text-center px-1.5 py-0.5 rounded w-12 flex-shrink-0',
+                      'font-black text-[10px] text-center px-1.5 py-1 rounded leading-none',
                       a.achievementType === 'MAX-' ? 'bg-amber-300 text-slate-900' : 'bg-white/20'
                     ]"
                   >
                     {{ a.achievementType }}
                   </span>
-                  <span class="flex-1 truncate text-xs">{{ a.title }}</span>
-                  <span class="opacity-60 text-xs whitespace-nowrap">☆{{ a.informalRank ?? '?' }}</span>
+                  <span class="text-sm leading-normal">{{ a.title }}</span>
+                  <span class="opacity-60 text-xs leading-normal">☆{{ a.informalRank ?? '?' }}</span>
                 </div>
-                <p v-if="data.topAchievements.length === 0" class="text-xs opacity-50">該当なし</p>
               </div>
+              <p v-else class="text-xs opacity-50 leading-normal">今月の新規 AAA / MAX- はありませんでした</p>
             </div>
           </div>
 
           <!-- フッター -->
-          <p class="text-xs opacity-60 mt-4 text-right">beat-seeker.com</p>
+          <p class="text-xs opacity-60 mt-3 text-right leading-normal py-1 flex-shrink-0">beat-seeker.com</p>
         </div>
       </div>
     </template>
