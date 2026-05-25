@@ -17,7 +17,7 @@
  *  - Web Share API（files 対応）が使える場合はネイティブ共有ダイアログ、
  *    無ければ画像ダウンロード＋X 投稿フォームを別タブで開くフォールバック。
  */
-import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../composables/useAuth';
@@ -45,7 +45,9 @@ async function load() {
     return;
   }
   if (isPublicView.value) {
-    await fetchPublicWrapped(targetUserId.value!, year.value, month.value);
+    // 公開ビューは URL クエリ ?t=:hmacToken が必須。無ければ 403 を返させる。
+    const token = String(route.query.t ?? '');
+    await fetchPublicWrapped(targetUserId.value!, year.value, month.value, token);
   } else {
     await fetchMyWrapped(year.value, month.value);
   }
@@ -92,6 +94,12 @@ async function generateShareBlob(): Promise<Blob | null> {
   const target = shareImageRef.value;
   if (!target) return null;
   isGeneratingShare.value = true;
+  // スピナー表示を確実に画面に描画してから html2canvas に入る。
+  // nextTick で Vue の DOM 反映、続けて 2 回 rAF で次フレームの paint を待つ。
+  // (html2canvas は同期的にイベントループをブロックしがちで、これが無いと
+  //  ボタン上のローディング表示がクリック直後に切り替わらず体感反応が遅く見える)
+  await nextTick();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
   try {
     const canvas = await html2canvas(target, {
       width: 1200,
@@ -108,11 +116,19 @@ async function generateShareBlob(): Promise<Blob | null> {
   }
 }
 
-/** シェア用の公開 URL（OGP が展開される /user/:userId/wrapped/... 形式）。 */
+/**
+ * シェア用の公開 URL（OGP が展開される /user/:userId/wrapped/... 形式）。
+ *
+ * URL を予測されただけで他人の振り返りが見られないよう、HMAC ベースの shareToken を
+ * クエリパラメータ ?t= に付与する。本人取得時のみ shareToken が返るので、
+ * 公開ビューでシェアボタンを押した場合は現在 URL の t をそのまま使う。
+ */
 const sharePublicUrl = computed(() => {
   if (!data.value) return '';
   const uid = data.value.userId;
-  return `${window.location.origin}/user/${uid}/wrapped/${year.value}/${month.value}`;
+  const token = data.value.shareToken ?? String(route.query.t ?? '');
+  const base = `${window.location.origin}/user/${uid}/wrapped/${year.value}/${month.value}`;
+  return token ? `${base}?t=${encodeURIComponent(token)}` : base;
 });
 
 /** Twitter 投稿用テンプレート。 */
@@ -499,16 +515,27 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
         style="width: 1200px; height: 675px;"
         aria-hidden="true"
       >
-        <div class="w-full h-full bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white p-8 flex flex-col leading-normal">
+        <div class="w-full h-full bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white p-8 flex flex-col">
+          <!--
+            html2canvas のフォントベースライン補正対策で、すべての行に
+              height = line-height（同値の数値 px）
+            を明示し、文字を厳密に中央配置している。flex items-center だけだとずれるため。
+          -->
           <!-- ヘッダー: 月 + ユーザー名 -->
           <div class="flex items-end justify-between mb-4 flex-shrink-0">
             <div>
-              <p class="text-xs tracking-[0.4em] opacity-70 leading-normal py-1">BEAT-SEEKER WRAPPED</p>
-              <h1 class="text-4xl font-black leading-normal py-1">{{ data.displayMonth }}</h1>
+              <p class="tracking-[0.4em] opacity-70" style="font-size: 14px; height: 24px; line-height: 24px;">
+                BEAT-SEEKER WRAPPED
+              </p>
+              <h1 class="font-black" style="font-size: 56px; height: 68px; line-height: 68px;">
+                {{ data.displayMonth }}
+              </h1>
             </div>
             <div class="text-right">
-              <p class="text-lg opacity-90 font-bold leading-normal py-1">{{ data.displayName }}</p>
-              <p class="text-xs opacity-60 leading-normal py-1">
+              <p class="opacity-90 font-bold" style="font-size: 28px; height: 40px; line-height: 40px;">
+                {{ data.displayName }}
+              </p>
+              <p class="opacity-60" style="font-size: 16px; height: 26px; line-height: 26px;">
                 更新譜面 {{ data.uniqueUpdatedSongCount }} 曲 / 新規 AAA +{{ data.djLevelIncrease?.aaa ?? 0 }}
               </p>
             </div>
@@ -519,75 +546,99 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
             <!-- 上段: BEAT-PT + RATE-PT を横並び (showRateTier=false なら BEAT-PT が全幅) -->
             <div :class="['grid gap-4 min-h-0', data.showRateTier ? 'grid-cols-2' : 'grid-cols-1']">
               <!-- BEAT-PT TOP5 -->
-              <div class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0">
-                <p class="text-sm tracking-wider opacity-70 mb-3 font-semibold leading-normal py-1">
+              <div class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0 overflow-hidden">
+                <p class="tracking-wider opacity-70 mb-3 font-semibold" style="font-size: 18px; height: 28px; line-height: 28px;">
                   BEAT-PT を支える譜面
                 </p>
-                <div class="flex-1 flex flex-col justify-between gap-2">
+                <div class="flex-1 flex flex-col gap-1 min-h-0">
                   <div
                     v-for="(s, i) in data.topBeatPtSongs.slice(0, 5)"
                     :key="`sbp-${i}`"
-                    class="flex items-center gap-3 py-2 leading-normal"
+                    class="flex items-center gap-3 px-2"
+                    style="height: 56px;"
                   >
-                    <span class="opacity-60 font-bold w-5 text-sm text-center leading-normal">{{ i + 1 }}</span>
-                    <span class="flex-1 truncate text-base leading-normal">{{ s.title }}</span>
-                    <span class="text-violet-300 font-bold text-xl whitespace-nowrap leading-normal">
+                    <span class="opacity-60 font-bold text-center" style="font-size: 18px; width: 28px; height: 56px; line-height: 56px;">
+                      {{ i + 1 }}
+                    </span>
+                    <span class="flex-1 truncate" style="font-size: 20px; height: 56px; line-height: 56px;">
+                      {{ s.title }}
+                    </span>
+                    <span class="text-violet-300 font-bold whitespace-nowrap" style="font-size: 26px; height: 56px; line-height: 56px;">
                       {{ s.newBeatPt.toFixed(1) }}
                     </span>
                   </div>
-                  <p v-if="data.topBeatPtSongs.length === 0" class="text-sm opacity-50 leading-normal">該当なし</p>
+                  <p v-if="data.topBeatPtSongs.length === 0" style="font-size: 16px; line-height: 24px;" class="opacity-50">該当なし</p>
                 </div>
               </div>
 
               <!-- RATE-PT TOP5 (showRateTier のみ) -->
-              <div v-if="data.showRateTier" class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0">
-                <p class="text-sm tracking-wider opacity-70 mb-3 font-semibold leading-normal py-1">
+              <div v-if="data.showRateTier" class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0 overflow-hidden">
+                <p class="tracking-wider opacity-70 mb-3 font-semibold" style="font-size: 18px; height: 28px; line-height: 28px;">
                   RATE-PT 増加
                 </p>
-                <div class="flex-1 flex flex-col justify-between gap-2">
+                <div class="flex-1 flex flex-col gap-1 min-h-0">
                   <div
                     v-for="(s, i) in data.topRatePtSongs.slice(0, 5)"
                     :key="`srp-${i}`"
-                    class="flex items-center gap-3 py-2 leading-normal"
+                    class="flex items-center gap-3 px-2"
+                    style="height: 56px;"
                   >
-                    <span class="opacity-60 font-bold w-5 text-sm text-center leading-normal">{{ i + 1 }}</span>
-                    <span class="flex-1 truncate text-base leading-normal">{{ s.title }}</span>
-                    <span class="text-rose-300 font-bold text-xl whitespace-nowrap leading-normal">
+                    <span class="opacity-60 font-bold text-center" style="font-size: 18px; width: 28px; height: 56px; line-height: 56px;">
+                      {{ i + 1 }}
+                    </span>
+                    <span class="flex-1 truncate" style="font-size: 20px; height: 56px; line-height: 56px;">
+                      {{ s.title }}
+                    </span>
+                    <span class="text-rose-300 font-bold whitespace-nowrap" style="font-size: 26px; height: 56px; line-height: 56px;">
                       +{{ s.ratePtIncrease.toFixed(1) }}
                     </span>
                   </div>
-                  <p v-if="data.topRatePtSongs.length === 0" class="text-sm opacity-50 leading-normal">該当なし</p>
+                  <p v-if="data.topRatePtSongs.length === 0" style="font-size: 16px; line-height: 24px;" class="opacity-50">該当なし</p>
                 </div>
               </div>
             </div>
 
-            <!-- 下段: 新規 AAA / MAX- (横並びチップリスト) -->
-            <div class="bg-white/5 rounded-2xl p-4 flex flex-col min-h-0">
-              <p class="text-xs tracking-wider opacity-70 mb-2 font-semibold leading-normal py-1">新規 AAA / MAX-</p>
-              <div v-if="data.topAchievements.length > 0" class="flex gap-2 flex-wrap items-center">
+            <!--
+              下段: 新規 AAA / MAX- (横並びチップリスト)。
+              「要素に入るだけ入れる、はみ出しはやめる」要件のため、
+                - 配列は slice せず全件描画
+                - コンテナに overflow:hidden で物理クリップ (はみ出した最後のチップは見えなくなる)
+                - 各チップは height/line-height 固定で中央配置を担保
+            -->
+            <div class="bg-white/5 rounded-2xl p-4 flex flex-col min-h-0 overflow-hidden">
+              <p class="tracking-wider opacity-70 mb-2 font-semibold" style="font-size: 16px; height: 26px; line-height: 26px;">
+                新規 AAA / MAX-
+              </p>
+              <div v-if="data.topAchievements.length > 0" class="flex gap-2 flex-wrap content-start overflow-hidden flex-1 min-h-0">
                 <div
-                  v-for="(a, i) in data.topAchievements.slice(0, 5)"
+                  v-for="(a, i) in data.topAchievements"
                   :key="`sa-${i}`"
-                  class="flex items-center gap-2 bg-white/10 rounded-lg px-2.5 py-1.5 leading-normal"
+                  class="flex items-center gap-2 bg-white/10 rounded-lg px-3"
+                  style="height: 36px;"
                 >
                   <span
                     :class="[
-                      'font-black text-[10px] text-center px-1.5 py-1 rounded leading-none',
+                      'font-black rounded',
                       a.achievementType === 'MAX-' ? 'bg-amber-300 text-slate-900' : 'bg-white/20'
                     ]"
+                    style="font-size: 13px; height: 22px; line-height: 22px; padding: 0 6px;"
                   >
                     {{ a.achievementType }}
                   </span>
-                  <span class="text-sm leading-normal">{{ a.title }}</span>
-                  <span class="opacity-60 text-xs leading-normal">☆{{ a.informalRank ?? '?' }}</span>
+                  <span style="font-size: 16px; height: 36px; line-height: 36px;">{{ a.title }}</span>
+                  <span class="opacity-60" style="font-size: 14px; height: 36px; line-height: 36px;">
+                    ☆{{ a.informalRank ?? '?' }}
+                  </span>
                 </div>
               </div>
-              <p v-else class="text-xs opacity-50 leading-normal">今月の新規 AAA / MAX- はありませんでした</p>
+              <p v-else style="font-size: 16px; line-height: 26px;" class="opacity-50">今月の新規 AAA / MAX- はありませんでした</p>
             </div>
           </div>
 
           <!-- フッター -->
-          <p class="text-xs opacity-60 mt-3 text-right leading-normal py-1 flex-shrink-0">beat-seeker.com</p>
+          <p class="opacity-60 mt-3 text-right flex-shrink-0" style="font-size: 14px; height: 22px; line-height: 22px;">
+            beat-seeker.com
+          </p>
         </div>
       </div>
     </template>

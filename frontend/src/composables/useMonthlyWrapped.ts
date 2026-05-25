@@ -104,6 +104,8 @@ export interface MonthlyWrapped {
   allTimeMaxRatePt: number;
   newBeatPtBest: boolean;
   newRatePtBest: boolean;
+  /** 公開 URL を発行するための HMAC トークン。本人取得時のみ有効値、公開エンドポイントから取得時は null。 */
+  shareToken: string | null;
 }
 
 export function useMonthlyWrapped() {
@@ -138,14 +140,28 @@ export function useMonthlyWrapped() {
 
   /**
    * 指定ユーザーの公開振り返りを取得する（SNS 流入経由・OGP 展開用）。
-   * privacyLevel != 0 のユーザーや存在しない userId は 403/404 で error にメッセージが入る。
+   *
+   * URL の userId を書き換えただけで他人の振り返りが見える脆弱性を塞ぐため、
+   * 本人がシェアボタンを押したときに発行された HMAC トークンが必須。
+   * トークン不正・未指定・privacyLevel != 0 / 存在しない userId はすべて 403/404 で
+   * error にメッセージが入り data は null のまま。
    */
-  const fetchPublicWrapped = async (userId: number, year: number, month: number) => {
+  const fetchPublicWrapped = async (
+    userId: number,
+    year: number,
+    month: number,
+    token: string,
+  ) => {
     isLoading.value = true;
     error.value = null;
     try {
+      const params = new URLSearchParams({
+        year: String(year),
+        month: String(month),
+        token,
+      });
       const res = await fetch(
-        `${API_BASE}/api/users/${userId}/monthly-wrapped?year=${year}&month=${month}`
+        `${API_BASE}/api/users/${userId}/monthly-wrapped?${params.toString()}`,
       );
       if (!res.ok) {
         throw new Error(`Fetch failed: ${res.status}`);

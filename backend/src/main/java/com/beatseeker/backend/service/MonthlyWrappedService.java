@@ -5,8 +5,13 @@ import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Comparator;
@@ -40,6 +45,14 @@ public class MonthlyWrappedService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
+     * 月末振り返りシェア URL の HMAC 秘密鍵。
+     * 本番では環境変数 {@code WRAPPED_SHARE_SECRET} で 32 文字以上のランダム値を設定すること。
+     * デフォルト値はローカル開発用で、production では絶対にこの値を使わないこと。
+     */
+    @Value("${WRAPPED_SHARE_SECRET:dev-only-change-me-in-production-3f9e2b8a}")
+    private String shareSecret;
+
+    /**
      * 【コンストラクタ】 Spring が依存を DI で注入する。
      */
     public MonthlyWrappedService(ScoreHistoryLogRepository historyRepo,
@@ -48,6 +61,43 @@ public class MonthlyWrappedService {
         this.historyRepo = historyRepo;
         this.beatPtCalculator = beatPtCalculator;
         this.scoreRecalcService = scoreRecalcService;
+    }
+
+    /**
+     * 指定 (userId, year, month) に対する共有トークンを HMAC-SHA256 で生成する。
+     *
+     * URL を予測されただけで他人の振り返りが見られないよう、シェアボタン発行時に
+     * このトークンをクエリに付与する。検証は {@link #isValidShareToken(Long, int, int, String)} で行う。
+     *
+     * 出力は hex 24 文字 (= 96 ビット)。十分なエントロピーがあり、URL に収まる長さ。
+     */
+    public String generateShareToken(Long userId, int year, int month) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(shareSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] hash = mac.doFinal(String.format("%d:%d:%d", userId, year, month).getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(24);
+            for (int i = 0; i < 12; i++) {
+                sb.append(String.format("%02x", hash[i]));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate share token", e);
+        }
+    }
+
+    /**
+     * 共有トークンの一致を **タイミング攻撃に強い** 定数時間比較で検証する。
+     * 普通の {@code String.equals} は文字列の先頭から差分が見つかった時点で短絡するため、
+     * 攻撃者が 1 文字ずつ正解を当てるサイドチャネル攻撃が原理的に可能になる。
+     * {@link MessageDigest#isEqual(byte[], byte[])} は同じバイト長を最後まで比較する実装。
+     */
+    public boolean isValidShareToken(Long userId, int year, int month, String token) {
+        if (token == null || token.isBlank()) return false;
+        String expected = generateShareToken(userId, year, month);
+        return MessageDigest.isEqual(
+                expected.getBytes(StandardCharsets.UTF_8),
+                token.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -105,7 +155,8 @@ public class MonthlyWrappedService {
         // 月内更新譜面を (title|difficulty) で集約し、各譜面の PT 値・新規達成・難易度を計算する
         List<MergedSong> merged = mergeAllSongs(monthLogs);
         enrichWithPtValues(merged);
-        List<TopAchievement> topAchievements = extractTopAchievements(merged, 5);
+        // 新規達成は「入るだけ入れる」要件のため上限を多めに返し、フロントで物理クリップする
+        List<TopAchievement> topAchievements = extractTopAchievements(merged, 30);
 
         // TOP10:
         //  - BEAT-PT は「現在の newBeatPt 降順」で並べる。
@@ -147,6 +198,9 @@ public class MonthlyWrappedService {
         // showRateTier はデフォルト true（User.java で @ColumnDefault("true")）。null も true 扱いに揃える。
         boolean showRateTier = !Boolean.FALSE.equals(user.getShowRateTier());
 
+        // シェア URL に付与するトークン。本人取得時のみ意味があり、公開エンドポイントの検証用。
+        String shareToken = generateShareToken(user.getId(), year, month);
+
         return new MonthlyWrappedResponse(
                 year, month,
                 String.format("%d年%d月", year, month),
@@ -174,7 +228,8 @@ public class MonthlyWrappedService {
                 allTimeMaxBeatPt,
                 allTimeMaxRatePt,
                 newBeatPtBest,
-                newRatePtBest
+                newRatePtBest,
+                shareToken
         );
     }
 
@@ -448,7 +503,9 @@ public class MonthlyWrappedService {
             double allTimeMaxBeatPt,
             double allTimeMaxRatePt,
             boolean newBeatPtBest,
-            boolean newRatePtBest
+            boolean newRatePtBest,
+            /** 公開エンドポイントの認可に使う HMAC トークン。null/空ならアクセス不可。 */
+            String shareToken
     ) {}
 
     /**

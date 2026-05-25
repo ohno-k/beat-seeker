@@ -68,20 +68,31 @@ public class MonthlyWrappedController {
     /**
      * 【メソッドの役割】 指定ユーザーの公開振り返りを返す（OGP 展開・他人からの SNS 流入対応）。
      *
-     * privacyLevel != 0（非公開設定）は 403。存在しないユーザーは 404。
+     * セキュリティ:
+     *  - クエリ {@code token} は (userId, year, month, server-secret) から導かれる HMAC で、本人がシェアボタンを
+     *    押した時にのみ発行される。これが正しくないとデータを返さない（403）。
+     *    → URL の userId 部分を書き換えて他人の振り返りを覗き見るのを防ぐ。
+     *  - 加えて privacyLevel != 0（非公開設定）も 403。
+     *  - 存在しないユーザーは 404。
      *
      * @param userId 対象ユーザー ID
      * @param year   年
      * @param month  月
+     * @param token  HMAC シェアトークン（必須）
      * @return 月末振り返り DTO
      */
     @GetMapping("/api/users/{userId}/monthly-wrapped")
     public ResponseEntity<MonthlyWrappedResponse> getPublicMonthlyWrapped(
             @PathVariable Long userId,
             @RequestParam int year,
-            @RequestParam int month) {
+            @RequestParam int month,
+            @RequestParam(name = "token", required = false) String token) {
         if (!isValidYearMonth(year, month)) {
             return ResponseEntity.badRequest().build();
+        }
+        // トークン検証を先に行う（ユーザー存在の有無を漏らさないため）
+        if (!monthlyWrappedService.isValidShareToken(userId, year, month, token)) {
+            return ResponseEntity.status(403).build();
         }
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
