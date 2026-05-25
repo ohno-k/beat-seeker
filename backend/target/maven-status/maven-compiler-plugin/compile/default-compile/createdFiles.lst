@@ -9,6 +9,7 @@ com\beatseeker\backend\entity\CompetitionParticipant.class
 com\beatseeker\backend\controller\ShareTokenController.class
 com\beatseeker\backend\controller\IntegrationTokenController.class
 com\beatseeker\backend\service\SkillTreeService$ChainLink.class
+com\beatseeker\backend\entity\TimelineEvent.class
 com\beatseeker\backend\entity\TierComment.class
 com\beatseeker\backend\TestController.class
 com\beatseeker\backend\repository\FriendRequestRepository.class
@@ -66,6 +67,7 @@ com\beatseeker\backend\repository\CompetitionMatchRepository.class
 com\beatseeker\backend\service\ExternalApiTokenService.class
 com\beatseeker\backend\controller\OptionVoteController$VoteRequest.class
 com\beatseeker\backend\entity\CompetitionStrategyUse.class
+com\beatseeker\backend\controller\TimelineController.class
 com\beatseeker\backend\repository\VirtualRivalRepository.class
 com\beatseeker\backend\config\SecurityConfig.class
 com\beatseeker\backend\controller\RegisterRequest.class
@@ -84,6 +86,7 @@ com\beatseeker\backend\service\TopRankersBeatPtService$AreaProfile.class
 com\beatseeker\backend\repository\ChartTendencyProfileRepository.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$LotteryAssignRequest.class
 com\beatseeker\backend\entity\TierVote.class
+com\beatseeker\backend\service\TimelineBackfillService.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$LotteryAssignment.class
 com\beatseeker\backend\entity\CompetitionMatch.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$SetIndividualResultSlot.class
@@ -94,6 +97,7 @@ com\beatseeker\backend\controller\ActivityController.class
 com\beatseeker\backend\repository\ExternalApiTokenRepository.class
 com\beatseeker\backend\service\ScoreRecalculationService.class
 com\beatseeker\backend\entity\ScoreHistoryLog.class
+com\beatseeker\backend\repository\TimelineEventRepository.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$SetIndividualResultRequest.class
 com\beatseeker\backend\repository\CompetitionPickRepository.class
 com\beatseeker\backend\controller\UserController$1.class
@@ -101,6 +105,7 @@ com\beatseeker\backend\controller\GameDataController.class
 com\beatseeker\backend\controller\ScoreController$ScoreUploadRequest.class
 com\beatseeker\backend\entity\RankQuizProgress.class
 com\beatseeker\backend\repository\RankQuizProgressRepository.class
+com\beatseeker\backend\controller\TimelineController$1.class
 com\beatseeker\backend\controller\ScoreController$2.class
 com\beatseeker\backend\controller\AdminController$1.class
 com\beatseeker\backend\config\JwtUtil.class
@@ -125,6 +130,7 @@ com\beatseeker\backend\repository\CompetitionIndividualMatchSlotRepository.class
 com\beatseeker\backend\controller\TierVoteController.class
 com\beatseeker\backend\controller\NotificationController.class
 com\beatseeker\backend\repository\ScoreRepository.class
+com\beatseeker\backend\controller\ScoreController$4.class
 com\beatseeker\backend\entity\CompetitionPick.class
 com\beatseeker\backend\DataInitializer.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$ParticipantAgg.class

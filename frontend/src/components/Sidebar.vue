@@ -136,14 +136,32 @@ const handleAction = (event: 'login' | 'logout' | 'editProfile' | 'openAdmin') =
   closeSidebar();
 };
 
-const navigationItems = computed(() => [
+/**
+ * 【computed の役割】 主要ナビゲーション項目（常時表示）。
+ *
+ * 「いつもサイドバーを開いて最初に目に入る場所」に置きたいものだけここに残す。
+ * 並び順は「日常の利用フロー（記録 → 確認 → 比較）」を意識した順序。
+ * その他のメニューは {@link extraItems} に分け、「もっと見る」で折りたたむ。
+ */
+const primaryItems = computed(() => [
   { id: 'dashboard', label: t('nav.dashboard'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
   { id: 'table', label: t('nav.scoreList'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
-  { id: 'profile', label: t('nav.profile'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', requiresAuth: true },
+  // タイムラインはユーザ要望によりスコア一覧の直後に置く。
+  { id: 'timeline', label: t('nav.timeline'), icon: 'M13 10V3L4 14h7v7l9-11h-7z', requiresAuth: true, hideOnViewing: true },
   { id: 'ranking', label: t('nav.ranking'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+  { id: 'profile', label: t('nav.profile'), icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', requiresAuth: true },
   { id: 'friends', label: t('nav.friends'), icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', requiresAuth: true, hideOnViewing: true },
   { id: 'history', label: t('nav.history'), icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', requiresAuth: true, hideOnViewing: true },
   { id: 'arena', label: t('nav.arena'), icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z', requiresAuth: true, hideOnViewing: true },
+]);
+
+/**
+ * 【computed の役割】 副次ナビゲーション項目（「もっと見る」で展開される）。
+ *
+ * 主要メニューと同じ構造を持ち、選曲補助 / ティア集計 / 分析系をまとめている。
+ * 並び順は「補助 → 集計 → 個別分析」の頻度順を意識。
+ */
+const extraItems = computed(() => [
   { id: 'arcade-assist', label: t('nav.arcadeAssist'), icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7', requiresAuth: true, hideOnViewing: true },
   { id: 'tier-voting', label: t('nav.tierVoting'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 7l2 2 4-4' },
   { id: 'song-avg', label: t('nav.songAvg'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
@@ -153,6 +171,11 @@ const navigationItems = computed(() => [
   // スコアペア散布図はサポーター限定（最下部）
   { id: 'score-scatter', label: t('nav.scoreScatter'), icon: 'M3 3v18h18M7 17l4-8 3 5 5-9', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
 ]);
+
+/** 「もっと見る」を押した状態。展開すると extraItems がインライン表示される。 */
+const showExtra = ref(false);
+/** 「もっと見る」の開閉トグル。 */
+const toggleExtra = () => { showExtra.value = !showExtra.value; };
 
 /**
  * 【computed の役割】 主要ナビゲーションの下に置く副次メニュー（更新履歴・About・利用規約）。
@@ -174,23 +197,39 @@ const secondaryItems = computed(() => [
 const { isAdmin } = useAdmin();
 
 /**
- * 【computed の役割】 現在のユーザー状態に基づいて navigationItems を絞り込む。
+ * 【内部ヘルパー】 ユーザー状態に応じてナビゲーション項目を絞り込む。
  * - requiresAuth: 未ログインなら除外
  * - hideOnViewing: 他ユーザー閲覧モード中は除外（ただし score-prediction は admin モードでは許可）
  * - allowedUserIds: 指定 ID のユーザーのみ表示
  */
-const filteredNavItems = computed(() => {
-  return navigationItems.value.filter(item => {
+type NavItem = { id: string; label: string; icon: string; requiresAuth?: boolean; hideOnViewing?: boolean; allowedUserIds?: number[]; supporterOnly?: boolean };
+const applyVisibilityFilter = (items: NavItem[]): NavItem[] => {
+  return items.filter(item => {
     if (item.requiresAuth && !props.isLoggedIn) return false;
-    // admin モード閲覧中は score-prediction だけ例外的に許可（管理者がユーザー挙動確認のため）
     if (item.hideOnViewing && props.viewingUserId) {
+      // admin モード閲覧中は score-prediction だけ例外的に許可（管理者がユーザー挙動確認のため）
       if (item.id === 'score-prediction' && props.viewingMode === 'admin') return true;
       return false;
     }
     if (item.allowedUserIds && (!props.user || !item.allowedUserIds.includes(props.user.id))) return false;
     return true;
   });
-});
+};
+
+/** 表示する主要メニュー。 */
+const filteredPrimary = computed(() => applyVisibilityFilter(primaryItems.value));
+/** 表示する副次メニュー（「もっと見る」内）。 */
+const filteredExtra = computed(() => applyVisibilityFilter(extraItems.value));
+
+/**
+ * 現在の activeTab が extra 側にあるなら、初期表示で「もっと見る」を自動展開して
+ * ユーザが「選んだ項目が見えなくなる」状態を防ぐ。
+ */
+watch(() => props.activeTab, (tab) => {
+  if (filteredExtra.value.some(i => i.id === tab)) {
+    showExtra.value = true;
+  }
+}, { immediate: true });
 </script>
 
 <template>
@@ -399,7 +438,7 @@ const filteredNavItems = computed(() => {
 
           <!-- Primary Navigation -->
           <nav class="space-y-1" :aria-label="t('a11y.nav.primary')">
-            <template v-for="item in filteredNavItems" :key="item.id">
+            <template v-for="item in filteredPrimary" :key="item.id">
               <button
                 type="button"
                 @click="selectTab(item.id)"
@@ -416,6 +455,45 @@ const filteredNavItems = computed(() => {
                 <span v-if="item.supporterOnly" class="ml-auto text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
                   Supporter
                 </span>
+              </button>
+            </template>
+
+            <!-- もっと見る: extra に表示すべき項目があるときだけボタンを出す -->
+            <template v-if="filteredExtra.length > 0">
+              <!-- 展開時のみ extra 項目を表示。主要メニューと同スタイルで連続感を持たせる。 -->
+              <template v-if="showExtra">
+                <button
+                  v-for="item in filteredExtra"
+                  :key="item.id"
+                  type="button"
+                  @click="selectTab(item.id)"
+                  :aria-current="activeTab === item.id ? 'page' : undefined"
+                  class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all group"
+                  :class="activeTab === item.id
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
+                  </svg>
+                  {{ item.label }}
+                  <span v-if="item.supporterOnly" class="ml-auto text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+                    Supporter
+                  </span>
+                </button>
+              </template>
+
+              <!-- もっと見る/閉じる トグル。主要メニューより一回り小さく控えめに表示。 -->
+              <button
+                type="button"
+                @click="toggleExtra"
+                class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform" :class="{ 'rotate-180': showExtra }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                {{ showExtra ? t('nav.less') : t('nav.more') }}
+                <span v-if="!showExtra" class="ml-auto text-[10px] font-mono text-slate-400 dark:text-slate-500">+{{ filteredExtra.length }}</span>
               </button>
             </template>
           </nav>

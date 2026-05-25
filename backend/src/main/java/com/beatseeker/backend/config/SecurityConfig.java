@@ -175,6 +175,8 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/tier-votes/mine").authenticated()
                                                 // フレンド操作・アリーナ系はすべて要ログイン
                                                 .requestMatchers("/api/friends/**").authenticated()
+                                                // フレンド画面のタイムライン: 自分とフレンドの活動を返すため要ログイン
+                                                .requestMatchers("/api/timeline", "/api/timeline/**").authenticated()
                                                 .requestMatchers("/api/arena/**").authenticated()
                                                 // 非公式難易度クイズ: 進捗永続化のため要ログイン
                                                 .requestMatchers("/api/rank-quiz/**").authenticated()

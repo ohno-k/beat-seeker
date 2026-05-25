@@ -53,6 +53,9 @@ const router = createRouter({
     { path: '/scores', name: 'scores', component: ScoresView },
     // ランキング
     { path: '/ranking', name: 'ranking', component: RankingView },
+    // タイムライン (自分 + フレンドのアップロード活動)。
+    // 実体は DashboardView を流用し、App.vue 側で activeTab='timeline' を表示する設計。
+    { path: '/timeline', name: 'timeline', component: DashboardView },
     // プレイ履歴
     { path: '/history', name: 'history', component: HistoryView },
     // プロフィール設定

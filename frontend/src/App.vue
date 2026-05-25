@@ -48,6 +48,7 @@ import PrivacyPolicy from './components/PrivacyPolicy.vue';
 import Contact from './components/Contact.vue';
 import Guide from './components/Guide.vue';
 import Friends from './components/Friends.vue';
+import FriendTimeline from './components/FriendTimeline.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
 import { defineAsyncComponent } from 'vue';
@@ -280,7 +281,41 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
+
+/**
+ * 現在のタブ ID から表示用ラベル（ヘッダーのパンくず・タイトルで使う）への解決を行う computed。
+ *
+ * - サイドバーと完全に整合する nav.* キーを使うので翻訳ファイルを増やさずに済む。
+ * - マップに無い ID（dashboard など）は空文字を返す → パンくずを 1 階層に省略する用途。
+ */
+const activeTabLabel = computed<string>(() => {
+  const labels: Record<string, string> = {
+    table: t('nav.scoreList'),
+    timeline: t('nav.timeline'),
+    ranking: t('nav.ranking'),
+    profile: t('nav.profile'),
+    friends: t('nav.friends'),
+    history: t('nav.history'),
+    arena: t('nav.arena'),
+    'arcade-assist': t('nav.arcadeAssist'),
+    'tier-voting': t('nav.tierVoting'),
+    'song-avg': t('nav.songAvg'),
+    'diff-table': t('nav.diffTable'),
+    'rank-comparison': t('nav.rankComparison'),
+    'score-prediction': t('nav.scorePrediction'),
+    'score-scatter': t('nav.scoreScatter'),
+    'popular-songs': t('nav.popularSongs'),
+    'skill-tree': t('nav.skillTree'),
+    'chart-list': t('nav.chartList'),
+    changelog: t('nav.changelog'),
+    terms: t('nav.terms'),
+    about: t('nav.about'),
+    manual: t('nav.manual'),
+    'admin-user-comparison': 'ユーザー間スコア比較',
+  };
+  return labels[activeTab.value] ?? '';
+});
 /** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
 const currentGuideSlug = ref<string | null>(null);
 /**
@@ -1515,105 +1550,25 @@ const handleUnifiedClose = async () => {
               </div>
             </div>
             
-            <div v-if="activeTab !== 'share'" class="hidden lg:flex items-center gap-4 overflow-x-auto no-scrollbar ml-4 h-full flex-1">
+            <!-- パンくず: 現在地のみを示す。ナビゲーション操作はサイドバーに一本化。 -->
+            <nav v-if="activeTab !== 'share'" class="hidden lg:flex items-center gap-2 ml-4 text-sm" aria-label="現在地">
               <button
+                type="button"
                 @click="activeTab = 'dashboard'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                class="font-medium transition-colors"
+                :class="activeTab === 'dashboard'
+                  ? 'text-slate-800 dark:text-slate-100'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100'"
               >
                 {{ t('nav.dashboard') }}
               </button>
-              <button 
-                @click="activeTab = 'table'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.scoreList') }}
-              </button>
-              <button
-                v-if="!viewingUserId"
-                @click="activeTab = 'ranking'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.ranking') }}
-              </button>
-              <button 
-                v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
-                @click="activeTab = 'history'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.history') }}
-              </button>
-              <button 
-                v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
-                @click="activeTab = 'profile'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.profile') }}
-              </button>
-              
-              <button 
-                v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
-                @click="activeTab = 'arena'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.arena') }}
-              </button>
-
-              <button
-                v-if="isLoggedIn && !viewingUserId"
-                @click="activeTab = 'arcade-assist'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'arcade-assist' ? 'border-violet-600 text-violet-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.arcadeAssist') }}
-              </button>
-
-              <button
-                v-if="!viewingUserId"
-                @click="activeTab = 'tier-voting'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'tier-voting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.tierVoting') }}
-              </button>
-
-              <button
-                v-if="!viewingUserId"
-                @click="activeTab = 'song-avg'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'song-avg' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.songAvg') }}
-              </button>
-
-              <button
-                v-if="!viewingUserId"
-                @click="activeTab = 'diff-table'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'diff-table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.diffTable') }}
-              </button>
-
-              <button
-                v-if="!viewingUserId && user && [18, 23, 24].includes(user.id)"
-                @click="activeTab = 'rank-comparison'"
-                class="flex items-center h-full px-3 border-b-2 transition-all font-bold text-sm tracking-wide shrink-0 whitespace-nowrap"
-                :class="activeTab === 'rank-comparison' ? 'border-teal-600 text-teal-600' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
-              >
-                {{ t('nav.rankComparison') }}
-              </button>
-
-              <!-- Special Titles for non-tab pages -->
-              <span v-if="['changelog', 'terms', 'about'].includes(activeTab)" class="ml-4 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0 capitalize">
-                {{ t(`nav.${activeTab}`) }}
-              </span>
-            </div>
+              <template v-if="activeTabLabel">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+                <span class="font-bold text-slate-800 dark:text-slate-100 truncate max-w-[16rem]">{{ activeTabLabel }}</span>
+              </template>
+            </nav>
           </div>
           
           <div class="flex items-center gap-4">
@@ -1735,94 +1690,19 @@ const handleUnifiedClose = async () => {
 
       <!-- ========== メインコンテンツ（タブ別のビューをここに描画） ========== -->
       <main class="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <!-- モバイル用ナビゲーションタブ（PC ではヘッダー内に展開される） -->
-        <nav v-if="activeTab !== 'share'" class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-8 flex items-center gap-1 overflow-x-auto no-scrollbar">
-          <button 
+        <!-- モバイル用パンくず: ハンバーガーで開くサイドバーがあるので、ここでは現在地のみ示す。 -->
+        <nav v-if="activeTab !== 'share' && activeTabLabel" class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-6 py-2.5 flex items-center gap-2 text-sm" aria-label="現在地">
+          <button
+            type="button"
             @click="activeTab = 'dashboard'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'dashboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
+            class="font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"
           >
             {{ t('nav.dashboard') }}
           </button>
-          <button 
-            @click="activeTab = 'table'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.scoreList') }}
-          </button>
-          <button
-            v-if="!viewingUserId"
-            @click="activeTab = 'ranking'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'ranking' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.ranking') }}
-          </button>
-          <button 
-            v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
-            @click="activeTab = 'history'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.history') }}
-          </button>
-          <button
-            v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
-            @click="activeTab = 'profile'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'profile' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.profile') }}
-          </button>
-          <button
-            v-if="isLoggedIn && (!viewingUserId || viewingMode === 'admin')"
-            @click="activeTab = 'arena'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'arena' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.arena') }}
-          </button>
-          <button
-            v-if="isLoggedIn && !viewingUserId"
-            @click="activeTab = 'arcade-assist'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'arcade-assist' ? 'border-violet-600 text-violet-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.arcadeAssist') }}
-          </button>
-          <button
-            v-if="!viewingUserId"
-            @click="activeTab = 'tier-voting'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'tier-voting' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.tierVoting') }}
-          </button>
-          <button
-            v-if="!viewingUserId"
-            @click="activeTab = 'song-avg'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'song-avg' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.songAvg') }}
-          </button>
-          <button
-            v-if="!viewingUserId"
-            @click="activeTab = 'diff-table'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'diff-table' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.diffTable') }}
-          </button>
-          <button
-            v-if="!viewingUserId && user && [18, 23, 24].includes(user.id)"
-            @click="activeTab = 'rank-comparison'"
-            class="py-3 px-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
-            :class="activeTab === 'rank-comparison' ? 'border-teal-600 text-teal-600' : 'border-transparent text-slate-500'"
-          >
-            {{ t('nav.rankComparison') }}
-          </button>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+          <span class="font-bold text-slate-800 dark:text-slate-100 truncate">{{ activeTabLabel }}</span>
         </nav>
         <!-- ========== 閲覧中バナー: 他ユーザー/TOPランカー閲覧時に最上部へ固定表示 ========== -->
         <!-- 「自分のデータに戻る」「フレンド申請」「仮想ライバル登録」などの操作ボタンを配置 -->
@@ -2134,6 +2014,11 @@ const handleUnifiedClose = async () => {
             @view-user="handleViewFriend"
             @view-top-ranker="handleViewTopRanker"
           />
+        </template>
+
+        <!-- タイムライン: 自分 + フレンドのアップロード活動 -->
+        <template v-else-if="(activeTab as string) === 'timeline'">
+          <FriendTimeline class="w-full max-w-6xl animate-fade-in" />
         </template>
 
         <!-- デフォルト（dashboard / table）: ヒーロー → CSV ドロップ → スコア結果 の 3 段構え -->

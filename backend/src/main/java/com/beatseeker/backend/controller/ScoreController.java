@@ -4,16 +4,20 @@ import com.beatseeker.backend.entity.ActivityLog;
 import com.beatseeker.backend.entity.AppNotification;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
+import com.beatseeker.backend.entity.TimelineEvent;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.entity.UserSongRank;
+import com.beatseeker.backend.entity.VirtualRival;
 import com.beatseeker.backend.repository.ActivityLogRepository;
 import com.beatseeker.backend.repository.AppNotificationRepository;
 import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
+import com.beatseeker.backend.repository.TimelineEventRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
+import com.beatseeker.backend.repository.VirtualRivalRepository;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.PushNotificationService;
@@ -102,6 +106,10 @@ public class ScoreController {
     private final SongRankingAggregateCacheService songRankingAggregateCacheService;
     /** 連携アプリ（iidx-memo 等）から同期された譜面オプション。スコア応答に options を埋めるのに使う。 */
     private final com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository;
+    /** タイムライン用イベント（スコア更新／フレンド・仮想ライバル抜き）を保存するリポジトリ。 */
+    private final TimelineEventRepository timelineEventRepository;
+    /** 仮想ライバル登録の取得に使う。タイムラインで「自分が抜いた仮想ライバル」を判定するため。 */
+    private final VirtualRivalRepository virtualRivalRepository;
     /** diffJson など JSON 文字列を List/Map に復元するための Jackson。 */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -126,6 +134,8 @@ public class ScoreController {
             SongArenaAveragesCacheService songArenaAveragesCacheService,
             SongRankingAggregateCacheService songRankingAggregateCacheService,
             com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository,
+            TimelineEventRepository timelineEventRepository,
+            VirtualRivalRepository virtualRivalRepository,
             com.beatseeker.backend.service.AdminAuthService adminAuthService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
@@ -143,6 +153,8 @@ public class ScoreController {
         this.songArenaAveragesCacheService = songArenaAveragesCacheService;
         this.songRankingAggregateCacheService = songRankingAggregateCacheService;
         this.userSongOptionRepository = userSongOptionRepository;
+        this.timelineEventRepository = timelineEventRepository;
+        this.virtualRivalRepository = virtualRivalRepository;
         this.adminAuthService = adminAuthService;
     }
 
@@ -393,6 +405,13 @@ public class ScoreController {
         log.setACount(aCount);
 
         scoreHistoryLogRepository.save(log);
+
+        // 手順4a-pre: タイムライン用のイベントを発行する。
+        // user.totalBeatPt は次の手順 4a でキャッシュ更新されるため、ここでは old/new を引数で受け取って処理する。
+        double newTotalBeatPt = req.totalBeatPt() != null ? req.totalBeatPt() : 0.0;
+        double increase = req.beatPtIncrease() != null ? req.beatPtIncrease() : 0.0;
+        double oldTotalBeatPt = newTotalBeatPt - increase;
+        recordTimelineEvents(user, req.diffJson(), oldTotalBeatPt, newTotalBeatPt);
 
         // 手順4a: ユーザーの totalBeatPt を users テーブルにキャッシュ（ティア別平均クエリを高速化するため）。
         if (req.totalBeatPt() != null) {
@@ -1143,6 +1162,214 @@ public class ScoreController {
                 }
             }
         }
+    }
+
+    /**
+     * 【メソッドの役割】 タイムライン表示用に、今回のアップロード由来のイベントを {@link TimelineEvent} として保存する。
+     *
+     * 発行されるイベント:
+     *  - SCORE_UPDATE: スコア更新譜面の配列 (diffJson) をそのまま payload にして 1 件
+     *  - OVERTAKE_SONG: 譜面単位 EX スコアでフレンド／仮想ライバルを抜いた件、抜いた相手×譜面ごとに 1 件
+     *  - OVERTAKE_TOTAL: 総合 BEAT-PT でフレンド／仮想ライバルを抜いた件、相手ごとに 1 件
+     *
+     * 仮想ライバルの曲別スコア・総合 BEAT-PT は {@link TopRankersBeatPtService} のキャッシュから取得する。
+     * キャッシュ未ロード時は仮想ライバル比較をスキップする（フレンド比較は実施）。
+     *
+     * 例外は握りつぶす: タイムライン保存はメイン処理（スコア保存）を妨げてはいけない。
+     *
+     * @param uploader        アップロード主体
+     * @param diffJson        更新譜面リストの JSON 文字列（フロントから渡されたもの）
+     * @param oldTotalBeatPt  アップロード前の総合 BEAT-PT
+     * @param newTotalBeatPt  アップロード後の総合 BEAT-PT
+     */
+    private void recordTimelineEvents(User uploader, String diffJson,
+                                      double oldTotalBeatPt, double newTotalBeatPt) {
+        try {
+            // 非公開（privacyLevel == 2）ユーザーはタイムラインに出さない。
+            if (uploader.getPrivacyLevel() != null && uploader.getPrivacyLevel() == 2) return;
+
+            List<Map<String, Object>> diffs = List.of();
+            if (diffJson != null && !diffJson.isBlank()) {
+                try {
+                    diffs = objectMapper.readValue(diffJson, new TypeReference<>() {});
+                } catch (Exception e) {
+                    // diffJson のフォーマットが想定外でも、Overtake 判定は続行する。
+                    System.err.println("Failed to parse diffJson for timeline: " + e.getMessage());
+                }
+            }
+
+            // 1) SCORE_UPDATE: 更新譜面が 1 件以上ある場合のみ発行。
+            if (!diffs.isEmpty()) {
+                TimelineEvent ev = new TimelineEvent();
+                ev.setUser(uploader);
+                ev.setType("SCORE_UPDATE");
+                ev.setPayload(diffJson);
+                timelineEventRepository.save(ev);
+            }
+
+            // 2) OVERTAKE_SONG / OVERTAKE_TOTAL のために、抜き判定対象を集める。
+            List<com.beatseeker.backend.entity.Friendship> friendships = friendshipRepository.findByUser(uploader);
+            List<VirtualRival> virtualRivals = virtualRivalRepository.findByOwner(uploader);
+
+            // 2a) OVERTAKE_TOTAL（総合 BEAT-PT）: 旧 BEAT-PT < 相手 ≤ 新 BEAT-PT を満たす相手を抽出。
+            for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
+                User friend = friendship.getFriend();
+                if (friend.getPrivacyLevel() != null && friend.getPrivacyLevel() == 2) continue;
+                double rivalPt = friend.getTotalBeatPt() != null ? friend.getTotalBeatPt() : 0.0;
+                if (rivalPt > 0 && oldTotalBeatPt < rivalPt && rivalPt <= newTotalBeatPt) {
+                    saveOvertakeTotalEvent(uploader, friend.getId(), false,
+                            friend.getDisplayName() != null ? friend.getDisplayName() : "プレイヤー",
+                            rivalPt, oldTotalBeatPt, newTotalBeatPt);
+                }
+            }
+            // 仮想ライバルの BEAT-PT は TopRankersBeatPtService.getRanking() からルックアップ。
+            Map<String, Map<String, Object>> areaRankingMap = new HashMap<>();
+            for (Map<String, Object> row : topRankersBeatPtService.getRanking()) {
+                Object v = row.get("versionNum");
+                Object p = row.get("prefectureFileNum");
+                if (v != null && p != null) {
+                    areaRankingMap.put(v + "\0" + p, row);
+                }
+            }
+            for (VirtualRival rival : virtualRivals) {
+                Map<String, Object> row = areaRankingMap.get(rival.getVersionNum() + "\0" + rival.getPrefectureFileNum());
+                if (row == null) continue;
+                double rivalPt = toDouble(row.get("totalBeatPt"));
+                if (rivalPt > 0 && oldTotalBeatPt < rivalPt && rivalPt <= newTotalBeatPt) {
+                    String label = (rival.getPrefectureName() != null ? rival.getPrefectureName() : "?")
+                            + " TOP (" + (rival.getVersionName() != null ? rival.getVersionName() : "?") + ")";
+                    saveOvertakeTotalEvent(uploader, rival.getId(), true,
+                            label, rivalPt, oldTotalBeatPt, newTotalBeatPt);
+                }
+            }
+
+            // 2b) OVERTAKE_SONG（譜面単位 EX スコア）: 更新譜面ごとに相手スコアを比較。
+            if (!diffs.isEmpty()) {
+                // フロントの diffJson キーは "difficulty"、Score テーブルは "difficultyName"。混在に注意。
+                List<String> titles = diffs.stream()
+                        .map(d -> (String) d.get("title"))
+                        .filter(java.util.Objects::nonNull)
+                        .distinct()
+                        .toList();
+                List<String> difficulties = diffs.stream()
+                        .map(d -> (String) d.get("difficulty"))
+                        .filter(java.util.Objects::nonNull)
+                        .distinct()
+                        .toList();
+                if (!titles.isEmpty() && !difficulties.isEmpty()) {
+                    // 各フレンドのスコアを IN 句で取得して比較。
+                    for (com.beatseeker.backend.entity.Friendship friendship : friendships) {
+                        User friend = friendship.getFriend();
+                        if (friend.getPrivacyLevel() != null && friend.getPrivacyLevel() == 2) continue;
+                        Map<String, Integer> friendScoreMap = new HashMap<>();
+                        for (Score fs : scoreRepository.findByUserAndTitlesAndDifficulties(friend, titles, difficulties)) {
+                            friendScoreMap.put(fs.getTitle() + "\0" + fs.getDifficultyName(),
+                                    fs.getScore() != null ? fs.getScore() : 0);
+                        }
+                        for (Map<String, Object> d : diffs) {
+                            int oldScore = toInt(d.get("oldScore"));
+                            int newScore = toInt(d.get("newScore"));
+                            String title = (String) d.get("title");
+                            String difficulty = (String) d.get("difficulty");
+                            if (title == null || difficulty == null) continue;
+                            int rivalScore = friendScoreMap.getOrDefault(title + "\0" + difficulty, 0);
+                            if (rivalScore > 0 && oldScore < rivalScore && rivalScore <= newScore) {
+                                saveOvertakeSongEvent(uploader, friend.getId(), false,
+                                        friend.getDisplayName() != null ? friend.getDisplayName() : "プレイヤー",
+                                        title, difficulty, rivalScore, oldScore, newScore);
+                            }
+                        }
+                    }
+                    // 仮想ライバルは AreaProfile から (title, difficultyName) で引く。
+                    for (VirtualRival rival : virtualRivals) {
+                        var profile = topRankersBeatPtService.getAreaProfile(
+                                rival.getVersionNum(), rival.getPrefectureFileNum());
+                        if (profile == null) continue;
+                        Map<String, Integer> areaScoreMap = new HashMap<>();
+                        for (var row : profile.scores()) {
+                            areaScoreMap.put(row.title() + "\0" + row.difficultyName(), row.score());
+                        }
+                        String label = (rival.getPrefectureName() != null ? rival.getPrefectureName() : "?")
+                                + " TOP (" + (rival.getVersionName() != null ? rival.getVersionName() : "?") + ")";
+                        for (Map<String, Object> d : diffs) {
+                            int oldScore = toInt(d.get("oldScore"));
+                            int newScore = toInt(d.get("newScore"));
+                            String title = (String) d.get("title");
+                            String difficulty = (String) d.get("difficulty");
+                            if (title == null || difficulty == null) continue;
+                            int rivalScore = areaScoreMap.getOrDefault(title + "\0" + difficulty, 0);
+                            if (rivalScore > 0 && oldScore < rivalScore && rivalScore <= newScore) {
+                                saveOvertakeSongEvent(uploader, rival.getId(), true,
+                                        label, title, difficulty, rivalScore, oldScore, newScore);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // タイムライン保存の失敗は致命的ではない（メイン処理を巻き込まない）。
+            System.err.println("Failed to record timeline events: " + e.getMessage());
+        }
+    }
+
+    /** OVERTAKE_TOTAL イベントを 1 件保存する。payload は JSON 文字列に変換して格納。 */
+    private void saveOvertakeTotalEvent(User uploader, Long rivalId, boolean isVirtual,
+                                        String rivalName, double rivalPt,
+                                        double myOldPt, double myNewPt) {
+        try {
+            TimelineEvent ev = new TimelineEvent();
+            ev.setUser(uploader);
+            ev.setType("OVERTAKE_TOTAL");
+            ev.setPayload(objectMapper.writeValueAsString(Map.of(
+                    "rivalId", rivalId,
+                    "isVirtual", isVirtual,
+                    "rivalName", rivalName,
+                    "rivalBeatPt", rivalPt,
+                    "myOldBeatPt", myOldPt,
+                    "myNewBeatPt", myNewPt
+            )));
+            timelineEventRepository.save(ev);
+        } catch (Exception e) {
+            System.err.println("Failed to save OVERTAKE_TOTAL: " + e.getMessage());
+        }
+    }
+
+    /** OVERTAKE_SONG イベントを 1 件保存する。payload は JSON 文字列に変換して格納。 */
+    private void saveOvertakeSongEvent(User uploader, Long rivalId, boolean isVirtual,
+                                       String rivalName, String title, String difficulty,
+                                       int rivalScore, int myOldScore, int myNewScore) {
+        try {
+            TimelineEvent ev = new TimelineEvent();
+            ev.setUser(uploader);
+            ev.setType("OVERTAKE_SONG");
+            ev.setPayload(objectMapper.writeValueAsString(Map.of(
+                    "rivalId", rivalId,
+                    "isVirtual", isVirtual,
+                    "rivalName", rivalName,
+                    "title", title,
+                    "difficulty", difficulty,
+                    "rivalScore", rivalScore,
+                    "myOldScore", myOldScore,
+                    "myNewScore", myNewScore
+            )));
+            timelineEventRepository.save(ev);
+        } catch (Exception e) {
+            System.err.println("Failed to save OVERTAKE_SONG: " + e.getMessage());
+        }
+    }
+
+    /** Number/String 混在の値を安全に double に変換する。 */
+    private double toDouble(Object o) {
+        if (o == null) return 0.0;
+        if (o instanceof Number n) return n.doubleValue();
+        try { return Double.parseDouble(o.toString()); } catch (Exception e) { return 0.0; }
+    }
+
+    /** Number/String 混在の値を安全に int に変換する。 */
+    private int toInt(Object o) {
+        if (o == null) return 0;
+        if (o instanceof Number n) return n.intValue();
+        try { return Integer.parseInt(o.toString()); } catch (Exception e) { return 0; }
     }
 
     /**
