@@ -5,9 +5,12 @@ com\beatseeker\backend\controller\RankQuizController.class
 com\beatseeker\backend\service\IndividualScheduleService.class
 com\beatseeker\backend\controller\CompetitionAdminController$PublishRequest.class
 com\beatseeker\backend\service\PairRegressionService.class
+com\beatseeker\backend\service\MonthlyWrappedService$MonthlyWrappedResponse.class
 com\beatseeker\backend\entity\CompetitionParticipant.class
 com\beatseeker\backend\controller\ShareTokenController.class
 com\beatseeker\backend\controller\IntegrationTokenController.class
+com\beatseeker\backend\service\MonthlyWrappedService$TopAchievement.class
+com\beatseeker\backend\service\MonthlyWrappedService$TopUpdatedSong.class
 com\beatseeker\backend\service\SkillTreeService$ChainLink.class
 com\beatseeker\backend\entity\TimelineEvent.class
 com\beatseeker\backend\entity\TierComment.class
@@ -47,6 +50,7 @@ com\beatseeker\backend\controller\CompetitionIndividualAdminController$AddIndivi
 com\beatseeker\backend\controller\ArenaController$BattleData.class
 com\beatseeker\backend\controller\CompetitionPlayerController.class
 com\beatseeker\backend\repository\ArenaMatchRepository.class
+com\beatseeker\backend\service\MonthlyWrappedService$MergedSong.class
 com\beatseeker\backend\BackendApplication.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$OpenWithNumbersRequest.class
 com\beatseeker\backend\controller\AdminController.class
@@ -73,6 +77,7 @@ com\beatseeker\backend\config\SecurityConfig.class
 com\beatseeker\backend\controller\RegisterRequest.class
 com\beatseeker\backend\entity\AppNotification.class
 com\beatseeker\backend\service\TopRankersBeatPtService$InitState.class
+com\beatseeker\backend\service\MonthlyWrappedService.class
 com\beatseeker\backend\controller\CompetitionAdminController$UpsertParticipantRequest.class
 com\beatseeker\backend\entity\FriendRequest.class
 com\beatseeker\backend\service\AdminAuthService.class
@@ -98,6 +103,7 @@ com\beatseeker\backend\repository\ExternalApiTokenRepository.class
 com\beatseeker\backend\service\ScoreRecalculationService.class
 com\beatseeker\backend\entity\ScoreHistoryLog.class
 com\beatseeker\backend\repository\TimelineEventRepository.class
+com\beatseeker\backend\controller\MonthlyWrappedController.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$SetIndividualResultRequest.class
 com\beatseeker\backend\repository\CompetitionPickRepository.class
 com\beatseeker\backend\controller\UserController$1.class
@@ -124,6 +130,7 @@ com\beatseeker\backend\controller\ExternalSongDetailController$2.class
 com\beatseeker\backend\service\PairRegressionService$Acc.class
 com\beatseeker\backend\service\SongRankBatchService.class
 com\beatseeker\backend\controller\AuthController.class
+com\beatseeker\backend\service\MonthlyWrappedService$1.class
 com\beatseeker\backend\repository\ScoreHistoryLogRepository.class
 com\beatseeker\backend\service\StrategyPoolService.class
 com\beatseeker\backend\repository\CompetitionIndividualMatchSlotRepository.class

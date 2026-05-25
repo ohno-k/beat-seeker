@@ -4,6 +4,7 @@ import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -339,4 +340,32 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "SELECT MAX(total_rate_pt) FROM score_history_logs " +
             "WHERE user_id = :userId", nativeQuery = true)
     Double getLatestTotalRatePtByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
+
+    /**
+     * 【メソッドの役割】 指定ユーザーの履歴を「期間 [startDate, endDate)」で昇順取得する。
+     *
+     * 派生クエリ: {@code WHERE user_id = ? AND uploaded_at >= ? AND uploaded_at < ? ORDER BY uploaded_at ASC}。
+     * 月末振り返り（Spotify Wrapped 風）の月次集計で「当月分のスナップショット群」を抜き出すために使う。
+     * endDate は「含まない」点に注意（月境界を [月初, 翌月初) で表現する想定）。
+     *
+     * @param user      対象ユーザー
+     * @param startDate 期間開始（含む）
+     * @param endDate   期間終了（含まない）
+     * @return uploadedAt 昇順の履歴リスト（0 件なら空）
+     */
+    List<ScoreHistoryLog> findByUserAndUploadedAtGreaterThanEqualAndUploadedAtLessThanOrderByUploadedAtAsc(
+            User user, LocalDateTime startDate, LocalDateTime endDate);
+
+    /**
+     * 【メソッドの役割】 指定ユーザーの履歴のうち、{@code uploadedAt < threshold} を満たす最新 1 件を返す。
+     *
+     * 月末振り返りで「先月末のスナップショット」「月初時点のベース値」を求めるのに使う。
+     * 履歴が無ければ {@link Optional#empty()}。
+     *
+     * @param user      対象ユーザー
+     * @param threshold 比較境界（このより前の最新スナップショットを取得）
+     * @return 直近の履歴（無ければ空）
+     */
+    Optional<ScoreHistoryLog> findFirstByUserAndUploadedAtLessThanOrderByUploadedAtDesc(
+            User user, LocalDateTime threshold);
 }

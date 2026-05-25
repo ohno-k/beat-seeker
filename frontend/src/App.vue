@@ -29,6 +29,7 @@ import UnifiedImport from './components/UnifiedImport.vue';
 import { BOOKMARKLET_CODE } from './utils/bookmarklet';
 import ScoreSummary from './components/ScoreSummary.vue';
 import ScoreDashboard from './components/ScoreDashboard.vue';
+import WrappedBanner from './components/WrappedBanner.vue';
 import ProfileDashboard from './components/ProfileDashboard.vue';
 import LoginModal from './components/LoginModal.vue';
 import ProfileEditModal from './components/ProfileEditModal.vue';
@@ -71,6 +72,8 @@ const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCard
 const SongRevealView = defineAsyncComponent(() => import('./views/SongRevealView.vue'));
 // 個人戦順位表 (OBS): `/obs/individual/:token` のスタンドアロン URL。透過背景で OBS のブラウザソースに重ねる。
 const ObsIndividualStandingsView = defineAsyncComponent(() => import('./views/ObsIndividualStandingsView.vue'));
+// 月末振り返り (Spotify Wrapped 風)。/wrapped/:year/:month 系のパスで全画面オーバーレイ表示する。
+const WrappedView = defineAsyncComponent(() => import('./views/WrappedView.vue'));
 // 大会管理画面: Competition セクションの 4 ID 限定。サイドバーから activeTab 経由で遷移する通常タブ。
 const CompetitionAdminView = defineAsyncComponent(() => import('./views/CompetitionAdminView.vue'));
 // 管理者用 2 ユーザー比較画面: URL `/admin/user-comparison` での直接アクセス専用 (サイドバー導線なし)。
@@ -2112,7 +2115,9 @@ const handleUnifiedClose = async () => {
           <!-- スコア結果表示: dashboard / table タブを v-show で切り替える（マウント状態を維持） -->
           <div v-else-if="scoreData.length > 0 || viewingMode === 'private'" class="w-full flex flex-col items-center animate-fade-in">
             <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
-            <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center">
+            <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center gap-4">
+              <!-- 月末振り返りバナー: 自分のダッシュボード閲覧時かつ表示ウィンドウ内のみ -->
+              <WrappedBanner v-if="!viewingUserId && isLoggedIn" />
               <ScoreDashboard
                 :scores="scoreData"
                 :totalPoints="totalBeatTierPoints"
@@ -2251,6 +2256,13 @@ const handleUnifiedClose = async () => {
     useToast() の通知が表示できるようにする。
   -->
   <ToastContainer />
+
+  <!--
+    月末振り返り (Spotify Wrapped 風) の全画面オーバーレイ。
+    /wrapped/:year/:month あるいは /user/:userId/wrapped/:year/:month のパスでのみ表示する。
+    fixed inset-0 z-50 で App.vue 本体の上に被せ、サイドバー/ヘッダーをスキップした没入レイアウトにする。
+  -->
+  <WrappedView v-if="$route.path.includes('/wrapped/')" />
 </template>
 
 <style scoped>

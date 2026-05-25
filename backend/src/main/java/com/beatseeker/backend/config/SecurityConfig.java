@@ -141,9 +141,10 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/external/**").authenticated()
                                                 // アクティビティフィードも未ログイン閲覧を許可
                                                 .requestMatchers("/api/activity/feed").permitAll()
-                                                // 他ユーザーのプロフィール・スコア・履歴参照は公開
+                                                // 他ユーザーのプロフィール・スコア・履歴・月末振り返り参照は公開
                                                 .requestMatchers("/api/users/*/profile", "/api/users/*/scores",
-                                                                "/api/users/*/history")
+                                                                "/api/users/*/history",
+                                                                "/api/users/*/monthly-wrapped")
                                                 .permitAll()
                                                 // フレンド状態確認は要ログイン（自分との関係を返すため）
                                                 .requestMatchers("/api/users/*/friend-status").authenticated()
@@ -154,9 +155,10 @@ public class SecurityConfig {
                                                 // 通知・管理系も要ログイン
                                                 .requestMatchers("/api/notifications/**").authenticated()
                                                 .requestMatchers("/api/admin/game-data/**").authenticated()
-                                                // スコア書き込み・自分のスコア読み出しは要ログイン
+                                                // スコア書き込み・自分のスコア読み出し・自分の月末振り返りは要ログイン
                                                 .requestMatchers("/api/scores/upload", "/api/scores/save-history-log",
-                                                                "/api/scores/me", "/api/scores/history")
+                                                                "/api/scores/me", "/api/scores/history",
+                                                                "/api/scores/monthly-wrapped")
                                                 .authenticated()
                                                 // 上記で permitAll/authenticated に該当しなかったスコア系 API はデフォルト要ログイン
                                                 .requestMatchers("/api/scores/**").authenticated()

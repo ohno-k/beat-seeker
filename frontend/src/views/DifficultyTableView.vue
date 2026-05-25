@@ -19,7 +19,7 @@ import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 
 const { t } = useI18n();
-const { diffTableRanks } = useGameData();
+const { diffTableRanks, extraOfficialLevelRanks } = useGameData();
 const { isLoggedIn } = useAuth();
 
 /** 検索ボックスの入力文字列（小文字化して曲名と照合） */
@@ -46,12 +46,18 @@ const nonNumericRanks = computed(() =>
   diffTableRanks.value.filter(r => !isNumericRank(r.rank))
 );
 
+/**
+ * 非公式表の末尾に並べる「公式 LV10 以下」の追加カテゴリ。
+ * useGameData 側で `informalRank` 用途とは分離して提供されているので、ここでだけ結合する。
+ */
+const officialLowLevelRanks = computed(() => [...extraOfficialLevelRanks.value]);
+
 /** 検索文字列で曲名をフィルタリングしたランク配列。空クエリなら全件返す */
 const filteredRanks = computed(() => {
+  const all = [...numericRanks.value, ...nonNumericRanks.value, ...officialLowLevelRanks.value];
   const q = searchQuery.value.trim().toLowerCase();
-  if (!q) return [...numericRanks.value, ...nonNumericRanks.value];
-
-  return [...numericRanks.value, ...nonNumericRanks.value]
+  if (!q) return all;
+  return all
     .map(r => ({
       ...r,
       songs: r.songs.filter(s => s.toLowerCase().includes(q)),
@@ -62,6 +68,7 @@ const filteredRanks = computed(() => {
 /** 表内の総曲数（ヘッダー統計用） */
 const totalSongs = computed(() =>
   diffTableRanks.value.reduce((acc, r) => acc + r.songs.length, 0)
+  + extraOfficialLevelRanks.value.reduce((acc, r) => acc + r.songs.length, 0)
 );
 
 /**

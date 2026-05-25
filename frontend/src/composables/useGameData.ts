@@ -58,8 +58,22 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 // 同じ ref インスタンスを共有する（シングルトン状態）。
 /** 楽曲一覧（最新版。取得前は静的 JSON フォールバック）。 */
 const songDataBody = ref<SongDataEntry[]>([]);
-/** 非公式難易度表（最新版）。 */
+/**
+ * 非公式難易度表（最新版）。
+ *
+ * 「★12.0」「★11.5」のような非公式ランクの集合。集計や `informalRank` 引きでは
+ * この純粋な非公式表だけを参照する。公式 LV10 以下の譜面はここに含まれない。
+ */
 const diffTableRanks = ref<DifficultyRankEntry[]>([]);
+/**
+ * 公式 LV10 以下の ANOTHER/LEGGENDARIA を「公式 Lv10」「公式 Lv9」… でまとめた
+ * 追加カテゴリ。難易度表 UI で {@link diffTableRanks} の末尾に並べて表示する用途。
+ *
+ * informalRank（非公式難易度ランク）として使ってはいけない: そもそも Lv10 以下に
+ * 非公式難易度は定義されていないので、これを informalRank に流すと「単曲ティア」が
+ * 偽情報で計算される。
+ */
+const extraOfficialLevelRanks = ref<DifficultyRankEntry[]>([]);
 /** API からの取得が 1 度でも成功したかどうか。 */
 const isLoaded = ref(false);
 /** 現在 API 取得中かどうか（二重実行防止にも使う）。 */
@@ -71,13 +85,68 @@ const loadError = ref('');
 import songDataFallback from '../data/song_data.json';
 import diffTableFallback from '../data/difficulty_table.json';
 
+/**
+ * 【内部関数】 公式 LV 10 以下の ANOTHER/LEGGENDARIA 譜面を集めて、
+ * 非公式難易度表に追加するための {@link DifficultyRankEntry} 配列を生成する。
+ *
+ * 非公式難易度表は通常 Lv11.0 以上だけを扱うため、Lv10 以下の譜面は対象から
+ * 漏れてしまい譜面別ランキング画面へ辿り着けない。これを補うため、公式 LV ベースの
+ * 仮想カテゴリ（例: "公式 Lv10 (ANOTHER)"）を後付けする。
+ *
+ * 既に非公式表に載っている曲名は除外して二重表示を防ぐ。
+ *
+ * @param songs         楽曲データ全件（song_data.json の body）
+ * @param existingRanks 既存の非公式難易度表エントリ群
+ * @returns 公式 LV 別の追加カテゴリ配列（Lv10 → Lv1 の順）
+ */
+function buildOfficialLowLevelRanks(
+  songs: SongDataEntry[],
+  existingRanks: DifficultyRankEntry[]
+): DifficultyRankEntry[] {
+  // 既存表に載っている曲名集合（タイトル単位、難易度は問わない）。
+  const inExistingTable = new Set<string>();
+  for (const r of existingRanks) {
+    for (const t of r.songs) inExistingTable.add(t);
+  }
+  // (level, difficultyCode) ごとに曲名を集める。
+  // beat-seeker は ANOTHER/LEGGENDARIA のみ対応なので、その 2 種に絞る。
+  const ANOTHER = '4';
+  const LEGGENDARIA = '10';
+  const byKey = new Map<string, Set<string>>();
+  for (const s of songs) {
+    if (s.difficulty !== ANOTHER && s.difficulty !== LEGGENDARIA) continue;
+    if (typeof s.level !== 'number' || s.level < 1 || s.level > 10) continue;
+    if (inExistingTable.has(s.title)) continue;
+    const diffLabel = s.difficulty === LEGGENDARIA ? 'LEGGENDARIA' : 'ANOTHER';
+    const key = s.level + '|' + diffLabel;
+    if (!byKey.has(key)) byKey.set(key, new Set());
+    byKey.get(key)!.add(s.title);
+  }
+  // Lv10 → Lv1 の順、ANOTHER → LEGGENDARIA の順で並べる。
+  const result: DifficultyRankEntry[] = [];
+  for (let lv = 10; lv >= 1; lv--) {
+    for (const diffLabel of ['ANOTHER', 'LEGGENDARIA'] as const) {
+      const set = byKey.get(lv + '|' + diffLabel);
+      if (!set || set.size === 0) continue;
+      result.push({
+        rank: `公式 Lv${lv} (${diffLabel})`,
+        songs: [...set].sort(),
+      });
+    }
+  }
+  return result;
+}
+
 /** 静的 JSON をリアクティブ状態へ反映する。API 取得成功前の初期表示を担う。 */
 function applyFallback() {
   if (songDataFallback && Array.isArray(songDataFallback.body)) {
     songDataBody.value = songDataFallback.body as SongDataEntry[];
   }
   if (diffTableFallback && Array.isArray(diffTableFallback.ranks)) {
-    diffTableRanks.value = diffTableFallback.ranks as DifficultyRankEntry[];
+    const base = diffTableFallback.ranks as DifficultyRankEntry[];
+    diffTableRanks.value = base;
+    // 難易度表 UI 専用の追加カテゴリは別 ref に格納し、informalRank 用途から隔離する。
+    extraOfficialLevelRanks.value = buildOfficialLowLevelRanks(songDataBody.value, base);
   }
 }
 
@@ -111,6 +180,8 @@ export function useGameData() {
         const diffJson: DifficultyTableRoot = await diffRes.json();
         if (diffJson.ranks && Array.isArray(diffJson.ranks)) {
           diffTableRanks.value = diffJson.ranks;
+          // 公式 LV10 以下の追加カテゴリは別 ref へ。informalRank 用途から完全に隔離する。
+          extraOfficialLevelRanks.value = buildOfficialLowLevelRanks(songDataBody.value, diffJson.ranks);
         }
       }
 
@@ -130,6 +201,8 @@ export function useGameData() {
     songDataBody: readonly(songDataBody),
     /** 非公式難易度表（readonly）。 */
     diffTableRanks: readonly(diffTableRanks),
+    /** 公式 LV10 以下の追加カテゴリ（難易度表 UI 表示専用、informalRank 用途禁止）。 */
+    extraOfficialLevelRanks: readonly(extraOfficialLevelRanks),
     /** 初回取得が成功したかどうか。 */
     isLoaded: readonly(isLoaded),
     /** ロード中フラグ。 */

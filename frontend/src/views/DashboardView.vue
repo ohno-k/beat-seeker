@@ -17,6 +17,7 @@ import { inject, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Ref } from 'vue'
 import ScoreDashboard from '../components/ScoreDashboard.vue'
+import WrappedBanner from '../components/WrappedBanner.vue'
 import type { ScoreData } from '../types/ScoreData'
 import { useAuth } from '../composables/useAuth'
 import { useFriends } from '../composables/useFriends'
@@ -73,6 +74,9 @@ const handleSendRequest = async () => {
 
 <template>
   <div class="w-full max-w-6xl flex flex-col items-center gap-4">
+
+    <!-- 月末振り返りバナー: 自分のダッシュボード閲覧時かつ表示ウィンドウ内のみ表示 -->
+    <WrappedBanner v-if="!viewingUserId && isLoggedIn" />
 
     <!-- フレンド申請バナー: 他ユーザーの公開ダッシュボード閲覧時のみ表示。adminモード時は隠す -->
     <div

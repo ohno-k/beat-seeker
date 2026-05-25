@@ -31,6 +31,7 @@ const ShareView = () => import('../views/ShareView.vue')
 const CompetitionAdminView = () => import('../views/CompetitionAdminView.vue')
 const AdminUserComparisonView = () => import('../views/AdminUserComparisonView.vue')
 const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandingsView.vue')
+const WrappedView = () => import('../views/WrappedView.vue')
 
 /**
  * SPA のルートテーブル定義。
@@ -90,6 +91,9 @@ const router = createRouter({
     // DashboardView / ScoresView を使い回し、URL パラメータ :userId で表示対象を切り替える
     { path: '/user/:userId', name: 'user-dashboard', component: DashboardView },
     { path: '/user/:userId/scores', name: 'user-scores', component: ScoresView },
+    // 月末振り返り（Spotify Wrapped 風）。自分用は要ログイン、/user/:userId/wrapped は公開（OGP 展開対象）
+    { path: '/wrapped/:year/:month', name: 'wrapped', component: WrappedView },
+    { path: '/user/:userId/wrapped/:year/:month', name: 'user-wrapped', component: WrappedView },
     // ログイン不要の URL 共有ページ（発行されたトークンで閲覧）
     { path: '/share/:token', name: 'share-view', component: ShareView },
     // 大会管理: Competition セクションの 4 ID ホワイトリストで保護。
