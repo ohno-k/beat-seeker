@@ -131,13 +131,21 @@ const sharePublicUrl = computed(() => {
   return token ? `${base}?t=${encodeURIComponent(token)}` : base;
 });
 
-/** Twitter 投稿用テンプレート。 */
+/**
+ * Twitter 投稿用テンプレート。
+ *
+ * X の intent/tweet は `text=...&url=...` を受け取ると本文末尾に半角スペースで URL を連結するため、
+ * shareText の末尾に改行 (\n\n) を入れて URL との間に空行を作る。
+ * 加えてハッシュタグの前にも空行を入れて、本文 / ハッシュタグ / URL の 3 ブロックを視覚的に区切る。
+ */
 const shareText = computed(() => {
   if (!data.value) return '';
   const d = data.value;
   return `${d.displayName} の ${d.displayMonth} の記録\n` +
     `更新譜面 ${d.uniqueUpdatedSongCount} 曲 / 新規 AAA +${d.djLevelIncrease?.aaa ?? 0} / BEAT-PT ${d.beatPtIncrease >= 0 ? '+' : ''}${d.beatPtIncrease.toFixed(2)}\n` +
-    `#beatseeker #beatmaniaIIDX`;
+    `\n` +
+    `#beatseeker #beatmaniaIIDX\n` +
+    `\n`;
 });
 
 async function handleShare() {
