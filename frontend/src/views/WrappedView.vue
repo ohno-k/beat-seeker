@@ -546,54 +546,54 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
             <!-- 上段: BEAT-PT + RATE-PT を横並び (showRateTier=false なら BEAT-PT が全幅) -->
             <div :class="['grid gap-4 min-h-0', data.showRateTier ? 'grid-cols-2' : 'grid-cols-1']">
               <!-- BEAT-PT TOP5 -->
-              <div class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0 overflow-hidden">
-                <p class="tracking-wider opacity-70 mb-3 font-semibold" style="font-size: 18px; height: 28px; line-height: 28px;">
+              <div class="bg-white/5 rounded-2xl p-4 flex flex-col min-h-0 overflow-hidden">
+                <p class="tracking-wider opacity-70 mb-2 font-semibold" style="font-size: 16px; height: 24px; line-height: 24px;">
                   BEAT-PT を支える譜面
                 </p>
-                <div class="flex-1 flex flex-col gap-1 min-h-0">
+                <div class="flex-1 flex flex-col min-h-0">
                   <div
                     v-for="(s, i) in data.topBeatPtSongs.slice(0, 5)"
                     :key="`sbp-${i}`"
-                    class="flex items-center gap-3 px-2"
-                    style="height: 56px;"
+                    class="flex items-center gap-3 px-1"
+                    style="height: 44px;"
                   >
-                    <span class="opacity-60 font-bold text-center" style="font-size: 18px; width: 28px; height: 56px; line-height: 56px;">
+                    <span class="opacity-60 font-bold text-center" style="font-size: 15px; width: 22px; height: 44px; line-height: 44px;">
                       {{ i + 1 }}
                     </span>
-                    <span class="flex-1 truncate" style="font-size: 20px; height: 56px; line-height: 56px;">
+                    <span class="flex-1 truncate" style="font-size: 17px; height: 44px; line-height: 44px;">
                       {{ s.title }}
                     </span>
-                    <span class="text-violet-300 font-bold whitespace-nowrap" style="font-size: 26px; height: 56px; line-height: 56px;">
+                    <span class="text-violet-300 font-bold whitespace-nowrap" style="font-size: 22px; height: 44px; line-height: 44px;">
                       {{ s.newBeatPt.toFixed(1) }}
                     </span>
                   </div>
-                  <p v-if="data.topBeatPtSongs.length === 0" style="font-size: 16px; line-height: 24px;" class="opacity-50">該当なし</p>
+                  <p v-if="data.topBeatPtSongs.length === 0" style="font-size: 15px; line-height: 22px;" class="opacity-50">該当なし</p>
                 </div>
               </div>
 
               <!-- RATE-PT TOP5 (showRateTier のみ) -->
-              <div v-if="data.showRateTier" class="bg-white/5 rounded-2xl p-5 flex flex-col min-h-0 overflow-hidden">
-                <p class="tracking-wider opacity-70 mb-3 font-semibold" style="font-size: 18px; height: 28px; line-height: 28px;">
+              <div v-if="data.showRateTier" class="bg-white/5 rounded-2xl p-4 flex flex-col min-h-0 overflow-hidden">
+                <p class="tracking-wider opacity-70 mb-2 font-semibold" style="font-size: 16px; height: 24px; line-height: 24px;">
                   RATE-PT 増加
                 </p>
-                <div class="flex-1 flex flex-col gap-1 min-h-0">
+                <div class="flex-1 flex flex-col min-h-0">
                   <div
                     v-for="(s, i) in data.topRatePtSongs.slice(0, 5)"
                     :key="`srp-${i}`"
-                    class="flex items-center gap-3 px-2"
-                    style="height: 56px;"
+                    class="flex items-center gap-3 px-1"
+                    style="height: 44px;"
                   >
-                    <span class="opacity-60 font-bold text-center" style="font-size: 18px; width: 28px; height: 56px; line-height: 56px;">
+                    <span class="opacity-60 font-bold text-center" style="font-size: 15px; width: 22px; height: 44px; line-height: 44px;">
                       {{ i + 1 }}
                     </span>
-                    <span class="flex-1 truncate" style="font-size: 20px; height: 56px; line-height: 56px;">
+                    <span class="flex-1 truncate" style="font-size: 17px; height: 44px; line-height: 44px;">
                       {{ s.title }}
                     </span>
-                    <span class="text-rose-300 font-bold whitespace-nowrap" style="font-size: 26px; height: 56px; line-height: 56px;">
+                    <span class="text-rose-300 font-bold whitespace-nowrap" style="font-size: 22px; height: 44px; line-height: 44px;">
                       +{{ s.ratePtIncrease.toFixed(1) }}
                     </span>
                   </div>
-                  <p v-if="data.topRatePtSongs.length === 0" style="font-size: 16px; line-height: 24px;" class="opacity-50">該当なし</p>
+                  <p v-if="data.topRatePtSongs.length === 0" style="font-size: 15px; line-height: 22px;" class="opacity-50">該当なし</p>
                 </div>
               </div>
             </div>
@@ -605,33 +605,33 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
                 - コンテナに overflow:hidden で物理クリップ (はみ出した最後のチップは見えなくなる)
                 - 各チップは height/line-height 固定で中央配置を担保
             -->
-            <div class="bg-white/5 rounded-2xl p-4 flex flex-col min-h-0 overflow-hidden">
-              <p class="tracking-wider opacity-70 mb-2 font-semibold" style="font-size: 16px; height: 26px; line-height: 26px;">
+            <div class="bg-white/5 rounded-2xl p-3 flex flex-col min-h-0 overflow-hidden">
+              <p class="tracking-wider opacity-70 mb-1.5 font-semibold" style="font-size: 13px; height: 20px; line-height: 20px;">
                 新規 AAA / MAX-
               </p>
-              <div v-if="data.topAchievements.length > 0" class="flex gap-2 flex-wrap content-start overflow-hidden flex-1 min-h-0">
+              <div v-if="data.topAchievements.length > 0" class="flex gap-1.5 flex-wrap content-start overflow-hidden flex-1 min-h-0">
                 <div
                   v-for="(a, i) in data.topAchievements"
                   :key="`sa-${i}`"
-                  class="flex items-center gap-2 bg-white/10 rounded-lg px-3"
-                  style="height: 36px;"
+                  class="flex items-center gap-1.5 bg-white/10 rounded"
+                  style="height: 24px; padding: 0 8px;"
                 >
                   <span
                     :class="[
                       'font-black rounded',
                       a.achievementType === 'MAX-' ? 'bg-amber-300 text-slate-900' : 'bg-white/20'
                     ]"
-                    style="font-size: 13px; height: 22px; line-height: 22px; padding: 0 6px;"
+                    style="font-size: 10px; height: 16px; line-height: 16px; padding: 0 4px;"
                   >
                     {{ a.achievementType }}
                   </span>
-                  <span style="font-size: 16px; height: 36px; line-height: 36px;">{{ a.title }}</span>
-                  <span class="opacity-60" style="font-size: 14px; height: 36px; line-height: 36px;">
+                  <span style="font-size: 12px; height: 24px; line-height: 24px;">{{ a.title }}</span>
+                  <span class="opacity-60" style="font-size: 11px; height: 24px; line-height: 24px;">
                     ☆{{ a.informalRank ?? '?' }}
                   </span>
                 </div>
               </div>
-              <p v-else style="font-size: 16px; line-height: 26px;" class="opacity-50">今月の新規 AAA / MAX- はありませんでした</p>
+              <p v-else style="font-size: 13px; line-height: 20px;" class="opacity-50">今月の新規 AAA / MAX- はありませんでした</p>
             </div>
           </div>
 
