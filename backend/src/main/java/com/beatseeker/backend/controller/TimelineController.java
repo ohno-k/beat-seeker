@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -201,22 +202,71 @@ public class TimelineController {
         int effLimit = limit == null ? DEFAULT_LIMIT : Math.min(Math.max(limit, 1), MAX_LIMIT);
 
         // 手順1: 自分 + フレンドの User 集合を作る（重複は Set で除く）。
+        // 同時にフレンド ID 集合 (friendIds) を作っておき、OVERTAKE 系の rival プライバシー判定に使う。
         Set<User> targetUsers = new HashSet<>();
         targetUsers.add(me);
+        Set<Long> friendIds = new HashSet<>();
         for (Friendship f : friendshipRepository.findByUser(me)) {
             // 非公開フレンドはタイムラインから除外する。
             User friend = f.getFriend();
             if (friend.getPrivacyLevel() != null && friend.getPrivacyLevel() == 2) continue;
             targetUsers.add(friend);
+            friendIds.add(friend.getId());
         }
 
         // 手順2: イベントを新しい順に取得。
         List<TimelineEvent> events = timelineEventRepository.findRecentByUsers(
                 targetUsers, PageRequest.of(0, effLimit));
 
-        // 手順3: フロントが扱いやすい Map 形式に整形。
-        List<Map<String, Object>> result = new ArrayList<>(events.size());
+        // 手順3: OVERTAKE_SONG / OVERTAKE_TOTAL の rival (= 抜かれた側) プライバシー判定。
+        //
+        // ※ payload にはライバルのスコアそのものが埋め込まれているので、フロントが
+        //   「BETWEEN_OTHERS」として描画する分岐に入った時点でビューワーへ漏洩する。
+        //   そのため payload を残したままフロントで非表示にする方式ではなく、
+        //   バックエンドでイベントごと丸ごとドロップする方式を採る。
+        //
+        // 表示可否の判定:
+        //   - 仮想ライバル (isVirtual=true)        → 常に OK（プライバシー対象外）
+        //   - rival が自分 (rivalId == me.id)      → OK
+        //   - rival が自分のフレンド               → OK（フレンドは privacyLevel != 2 で既にフィルタ済み）
+        //   - rival.privacyLevel == 0 (公開)       → OK
+        //   - それ以外（非公開、または非フレンドの「フレンドのみ」） → ドロップ
+        //
+        // 事前に必要な rival User をまとめて 1 クエリでロード（N+1 回避）。
+        List<Object> parsedPayloads = new ArrayList<>(events.size());
+        Set<Long> rivalIdsToLoad = new HashSet<>();
         for (TimelineEvent ev : events) {
+            Object payload = parsePayload(ev.getPayload());
+            parsedPayloads.add(payload);
+            if (!"OVERTAKE_SONG".equals(ev.getType()) && !"OVERTAKE_TOTAL".equals(ev.getType())) continue;
+            if (!(payload instanceof Map)) continue;
+            Map<?, ?> m = (Map<?, ?>) payload;
+            if (Boolean.TRUE.equals(m.get("isVirtual"))) continue;
+            Object ridObj = m.get("rivalId");
+            if (!(ridObj instanceof Number)) continue;
+            long rid = ((Number) ridObj).longValue();
+            if (rid == me.getId() || friendIds.contains(rid)) continue;
+            rivalIdsToLoad.add(rid);
+        }
+        Map<Long, Integer> rivalPrivacyById = new HashMap<>();
+        if (!rivalIdsToLoad.isEmpty()) {
+            for (User u : userRepository.findAllById(rivalIdsToLoad)) {
+                rivalPrivacyById.put(u.getId(),
+                        u.getPrivacyLevel() != null ? u.getPrivacyLevel() : 1);
+            }
+        }
+
+        // 手順4: フロントが扱いやすい Map 形式に整形（プライバシー違反の OVERTAKE_* はスキップ）。
+        List<Map<String, Object>> result = new ArrayList<>(events.size());
+        for (int i = 0; i < events.size(); i++) {
+            TimelineEvent ev = events.get(i);
+            Object payload = parsedPayloads.get(i);
+
+            if (("OVERTAKE_SONG".equals(ev.getType()) || "OVERTAKE_TOTAL".equals(ev.getType()))
+                    && !isOvertakeRivalVisibleToViewer(payload, me.getId(), friendIds, rivalPrivacyById)) {
+                continue;
+            }
+
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("id", ev.getId());
             entry.put("type", ev.getType());
@@ -225,13 +275,35 @@ public class TimelineController {
                     ? ev.getUser().getDisplayName() : "プレイヤー");
             entry.put("isMe", ev.getUser().getId().equals(me.getId()));
             // payload は JSON 文字列。SCORE_UPDATE は配列、OVERTAKE_* は Map。
-            entry.put("payload", parsePayload(ev.getPayload()));
+            entry.put("payload", payload);
             entry.put("createdAt", ev.getCreatedAt()
                     .atZone(ZoneId.systemDefault()).withZoneSameInstant(JST).format(ISO_JST));
             result.add(entry);
         }
 
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * OVERTAKE_SONG / OVERTAKE_TOTAL の rival 側スコア・名前をビューワーに見せて良いか判定する。
+     *
+     * 戻り値 true ならイベントをそのまま返してよい。false なら丸ごとドロップする。
+     * payload が壊れている場合（Map でない・rivalId 欠落）は安全側に倒して false を返す。
+     */
+    private boolean isOvertakeRivalVisibleToViewer(Object payload, Long viewerId,
+                                                   Set<Long> viewerFriendIds,
+                                                   Map<Long, Integer> rivalPrivacyById) {
+        if (!(payload instanceof Map)) return false;
+        Map<?, ?> m = (Map<?, ?>) payload;
+        if (Boolean.TRUE.equals(m.get("isVirtual"))) return true;
+        Object ridObj = m.get("rivalId");
+        if (!(ridObj instanceof Number)) return false;
+        long rid = ((Number) ridObj).longValue();
+        if (rid == viewerId) return true;
+        if (viewerFriendIds.contains(rid)) return true;
+        Integer pl = rivalPrivacyById.get(rid);
+        // 公開 (0) のみ非フレンド視点でも開示する。1 (フレンドのみ) / 2 (非公開) は隠す。
+        return pl != null && pl == 0;
     }
 
     /**
