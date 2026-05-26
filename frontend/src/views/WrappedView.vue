@@ -156,35 +156,63 @@ const shareText = computed(() => {
     `\n`;
 });
 
+/** 直近のシェア結果メッセージ（ボタン下に表示してユーザーに次の操作を案内する）。 */
+const shareHintMessage = ref<string>('');
+
 async function handleShare() {
+  shareHintMessage.value = '';
   const blob = await generateShareBlob();
   if (!blob) return;
   const fileName = `beat-seeker-wrapped-${year.value}-${String(month.value).padStart(2, '0')}.png`;
   const file = new File([blob], fileName, { type: 'image/png' });
 
-  // Web Share API（files 対応ブラウザ）
+  // モバイル等の Web Share API（files 対応）はネイティブ共有シートで X アプリが選べる。
+  // この場合は画像が直接添付された状態で X が起動するため、デスクトップのフォールバックは不要。
   const nav = navigator as any;
   if (nav.canShare && nav.canShare({ files: [file] })) {
     try {
       await nav.share({ files: [file], text: shareText.value, url: sharePublicUrl.value });
       return;
     } catch {
-      // ユーザーがキャンセル等。フォールバックへ。
+      // ユーザーがキャンセル等。デスクトップ向けフォールバックへ進む。
     }
   }
 
-  // フォールバック：画像ダウンロード + X 投稿フォーム別タブ
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // デスクトップ: X の Web 投稿フォーム (intent/tweet) は画像の自動添付 URL パラメータを
+  // 公式にサポートしていない。そのため次善策として:
+  //   (a) 画像を**クリップボードに自動コピー**
+  //   (b) ダメなら画像をダウンロード
+  //   (c) X 投稿フォームを別タブで開く
+  //   (d) ボタン下にどの方法でやればよいかを案内
+  // を順に行う。ユーザーは X タブで Ctrl+V (Mac は Cmd+V) するだけで画像が添付される。
+  let copiedToClipboard = false;
+  try {
+    const ClipboardItemCtor = (window as any).ClipboardItem;
+    if (navigator.clipboard && ClipboardItemCtor) {
+      await navigator.clipboard.write([new ClipboardItemCtor({ [blob.type]: blob })]);
+      copiedToClipboard = true;
+    }
+  } catch {
+    // Permissions Policy・Safari の未対応・user gesture 切れなどでコピー失敗。ダウンロードへ。
+  }
+
+  if (!copiedToClipboard) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   const tweet = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText.value)}&url=${encodeURIComponent(sharePublicUrl.value)}`;
   window.open(tweet, '_blank', 'noopener');
+
+  shareHintMessage.value = copiedToClipboard
+    ? '画像をクリップボードにコピーしました。X の投稿画面で Ctrl+V (Mac は Cmd+V) で貼り付けてください。'
+    : '画像をダウンロードしました。X の投稿画面でファイルを添付してください。';
 }
 
 // ─── OGP / Twitter Card メタタグ（公開ビューのみ） ─────────────────
@@ -497,6 +525,10 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
               <span>𝕏 でシェア</span>
             </template>
           </button>
+          <!-- シェア後の案内: クリップボード成功 or ダウンロードのどちらか。fade-in で柔らかく出す。 -->
+          <p v-if="shareHintMessage" class="text-xs md:text-sm opacity-90 mt-4 max-w-md leading-relaxed">
+            {{ shareHintMessage }}
+          </p>
           <button
             @click="router.push('/dashboard')"
             class="mt-6 text-xs md:text-sm opacity-60 hover:opacity-100 underline"

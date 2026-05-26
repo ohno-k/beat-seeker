@@ -72,8 +72,11 @@ public class MonthlyWrappedController {
      *  - クエリ {@code token} は (userId, year, month, server-secret) から導かれる HMAC で、本人がシェアボタンを
      *    押した時にのみ発行される。これが正しくないとデータを返さない（403）。
      *    → URL の userId 部分を書き換えて他人の振り返りを覗き見るのを防ぐ。
-     *  - 加えて privacyLevel != 0（非公開設定）も 403。
      *  - 存在しないユーザーは 404。
+     *
+     * 設計上の判断: 本人がシェアボタンを押して URL を発行している時点で「この月の振り返りを公開する」意思が
+     * あると見なし、privacyLevel（プロフィール全体の公開範囲）はチェックしない。すなわち非公開ユーザーでも
+     * トークン付き URL を渡された相手はその月の振り返りだけは閲覧できる。
      *
      * @param userId 対象ユーザー ID
      * @param year   年
@@ -98,11 +101,7 @@ public class MonthlyWrappedController {
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        // null は「非公開 (1)」と同等に扱う（安全側に倒す）
-        Integer privacyLevel = user.getPrivacyLevel() != null ? user.getPrivacyLevel() : 1;
-        if (privacyLevel != 0) {
-            return ResponseEntity.status(403).build();
-        }
+        // privacyLevel は意図的にチェックしない（トークンが本人の公開意思を担保している）
         return ResponseEntity.ok(monthlyWrappedService.generate(user, year, month));
     }
 
