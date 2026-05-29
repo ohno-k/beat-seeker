@@ -1073,7 +1073,21 @@ export interface RecognizedResult {
  * 検出は digit hash の成否と完全に独立。スコアの値が読めなくてもラベルがあれば検出され、
  * 結果としてユーザーが確認モーダルで値を確定 → auto-learn が回る流れが成立する。
  */
-const PLAYER_LABEL_MATCH_THRESHOLD = 0.99;
+/**
+ * PLAYER ラベル一致率のしきい値。
+ *
+ * 当初 0.99 にしていたが、EXTRA STAGE RESULT のように背景が鮮やか（明るい）な演出だと
+ * 二値化（max(R,G,B)≥200）に背景ノイズが乗り、ローカル画像でも 0.9923、画面共有経由の
+ * 映像劣化込みでは 0.99 を割って検出漏れする事例が出た。
+ *
+ * 実測のマージン:
+ *  - リザルト画面の「正しい側」一致率: 最低 0.965（2P リザルト・EXTRA STAGE 含む）
+ *  - プレイ中など非リザルト画面: 最高 0.716
+ * 間に大きなギャップがあるため 0.93 に下げる。リザルトは確実に拾い、非リザルトは
+ * まだ 0.21 のマージンで弾ける。1P/2P 両方がしきい値を超える場合は高い方を採る
+ * （2P リザルトは 1P テンプレにも 0.965 当たるが 2P=1.000 なので正しく 2P 判定される）。
+ */
+const PLAYER_LABEL_MATCH_THRESHOLD = 0.93;
 
 type PackedTemplate = {
   x: number; y: number; w: number; h: number;
