@@ -39,8 +39,15 @@ public class SongArenaAveragesCacheService {
     /** 再計算間隔（ミリ秒）。30 分。 */
     private static final long REFRESH_INTERVAL_MS = 30L * 60L * 1000L;
 
-    /** 起動から初回リフレッシュまでの遅延（ミリ秒）。アプリ初期化が落ち着く頃合い。 */
-    private static final long INITIAL_DELAY_MS = 10L * 1000L;
+    /**
+     * 起動から初回リフレッシュまでの遅延（ミリ秒）。
+     *
+     * 旧値 10 秒だと、起動直後に走る {@link com.beatseeker.backend.DataInitializer} の
+     * {@code ALTER TABLE scores}（ACCESS EXCLUSIVE 必要）と、この重い SELECT（ACCESS SHARE を
+     * 長時間保持）がロック競合し、DDL が statement_timeout で中断 → 起動失敗の一因になっていた。
+     * 起動時の DDL が確実に終わってから初回集計が走るよう、十分な余裕（2 分）を取る。
+     */
+    private static final long INITIAL_DELAY_MS = 120L * 1000L;
 
     private final ScoreRepository scoreRepository;
     private final JdbcTemplate jdbcTemplate;
@@ -88,8 +95,11 @@ public class SongArenaAveragesCacheService {
         }
         long start = System.currentTimeMillis();
         try {
-            // 重集計クエリを 30s タイムアウトから解放（このトランザクション内限定）
-            jdbcTemplate.execute("SET LOCAL statement_timeout = 0");
+            // 重集計クエリを接続レベルの 30s 上限から解放するが、無制限(0)にはしない。
+            // 無制限だと暴走クエリが DB 接続を延々と握り、メモリ/DB 負荷の逼迫（→ Render の
+            // メモリ逼迫 SIGTERM 再起動）を悪化させる。現状の所要(約50秒)に十分余裕を持たせた
+            // 有限上限にして、想定外に長引いたら PostgreSQL 側でクリーンに中断させる。
+            jdbcTemplate.execute("SET LOCAL statement_timeout = '180s'");
             List<Map<String, Object>> next = scoreRepository.findRawSongScoresWithBeatTier();
             this.cache = next;
             log.info("Refreshed song-arena-averages cache: {} rows in {} ms",

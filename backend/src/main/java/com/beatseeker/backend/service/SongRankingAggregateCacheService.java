@@ -38,7 +38,8 @@ public class SongRankingAggregateCacheService {
     private static final Logger log = LoggerFactory.getLogger(SongRankingAggregateCacheService.class);
 
     private static final long REFRESH_INTERVAL_MS = 30L * 60L * 1000L;
-    private static final long INITIAL_DELAY_MS = 10L * 1000L;
+    // 起動直後の DataInitializer の ALTER TABLE とロック競合しないよう初回を遅延（[[SongArenaAveragesCacheService]] と同様）。
+    private static final long INITIAL_DELAY_MS = 120L * 1000L;
 
     private final ScoreRepository scoreRepository;
     private final JdbcTemplate jdbcTemplate;
@@ -64,7 +65,8 @@ public class SongRankingAggregateCacheService {
         }
         long start = System.currentTimeMillis();
         try {
-            jdbcTemplate.execute("SET LOCAL statement_timeout = 0");
+            // 無制限(0)ではなく有限上限。暴走クエリが接続を握り続けてインスタンスを不安定化させない。
+            jdbcTemplate.execute("SET LOCAL statement_timeout = '180s'");
             List<Map<String, Object>> next = scoreRepository.findAllSongRankingAggregates();
             this.cache = next;
             log.info("Refreshed song-ranking-aggregate cache: {} rows in {} ms",
