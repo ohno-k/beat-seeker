@@ -97,7 +97,11 @@ public class DataInitializer implements ApplicationRunner {
                     "    AND array_length(conkey, 1) = 4 " +
                     "    AND (SELECT array_agg(attname ORDER BY attname) FROM pg_attribute " +
                     "         WHERE attrelid = 'scores'::regclass AND attnum = ANY(conkey)) " +
-                    "        = ARRAY['difficultyLevel','difficultyName','title','user_id']::name[] " +
+                    // 実際の DB 物理カラム名はスネークケース（difficulty_level / difficulty_name）。
+                    // 旧実装はここがキャメルケース（difficultyLevel / difficultyName）で実カラム名と
+                    // 一致せず、古い 4 列制約が永遠に DROP されず残り続けていた（INFINITAS スコア
+                    // 保存時に source を無視した重複違反 → 500 の原因）。
+                    "        = ARRAY['difficulty_level','difficulty_name','title','user_id']::name[] " +
                     "LOOP " +
                     "  EXECUTE 'ALTER TABLE scores DROP CONSTRAINT ' || quote_ident(c.conname); " +
                     "END LOOP; END $$;"
@@ -105,6 +109,26 @@ public class DataInitializer implements ApplicationRunner {
         } catch (Exception e) {
             // 既に DROP 済み or PostgreSQL 以外で動かしている場合は無視。
             logger.warn("Legacy unique constraint cleanup skipped: {}", e.getMessage());
+        }
+
+        // 手順2e: 新しい 5 列ユニーク制約（source 含む）が無ければ作成する。
+        //         Score エンティティの @UniqueConstraint で宣言済みだが、ddl-auto=update は
+        //         既存テーブルへの UNIQUE 制約追加を行わないため、ここで明示的に作成する。
+        //         これが無いと「source を含まないユニーク性」しか効かず、arcade で保有済みの曲を
+        //         INFINITAS から取り込めない（旧 4 列制約の名残）。PostgreSQL 限定・冪等。
+        try {
+            entityManager.createNativeQuery(
+                    "DO $$ BEGIN " +
+                    "IF NOT EXISTS (SELECT 1 FROM pg_constraint " +
+                    "    WHERE conname = 'uk_scores_user_title_diff_source' " +
+                    "      AND conrelid = 'scores'::regclass) THEN " +
+                    "  ALTER TABLE scores ADD CONSTRAINT uk_scores_user_title_diff_source " +
+                    "    UNIQUE (user_id, title, difficulty_name, difficulty_level, source); " +
+                    "END IF; END $$;"
+            ).executeUpdate();
+        } catch (Exception e) {
+            // PostgreSQL 以外、または既存データに重複があり追加できない場合は警告のみ。
+            logger.warn("5-column unique constraint creation skipped: {}", e.getMessage());
         }
 
         // 手順3: 曲データと難易度表を JSON から投入する（テーブルが空の場合のみ実効）。
