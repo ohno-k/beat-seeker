@@ -35,6 +35,7 @@ const emit = defineEmits<{
 /** ANOTHER (4) / LEGGENDARIA (10) のみ。 */
 const DIFF_CODES: Record<'ANOTHER' | 'LEGGENDARIA', string> = { ANOTHER: '4', LEGGENDARIA: '10' };
 const CLEAR_TYPE_OPTIONS = [
+  'NO PLAY',
   'FAILED',
   'ASSIST CLEAR',
   'EASY CLEAR',
