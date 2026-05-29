@@ -1204,6 +1204,7 @@ export const en = {
   'infinitas.recent': 'Recent captures',
   'infinitas.uploading': 'Uploading…',
   'infinitas.uploadSuccess': 'Imported ({count} updated)',
+  'infinitas.autoUploadSuccess': 'Auto-imported: {title} ({count} updated)',
   'infinitas.uploadFailed': 'Upload failed',
   'infinitas.skippedInfinitasOnly': 'This song is INFINITAS-only and is not eligible for score saving',
   'infinitas.confirmTitle': 'Confirm result',

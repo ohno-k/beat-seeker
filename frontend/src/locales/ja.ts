@@ -1279,6 +1279,7 @@ export const ja = {
   'infinitas.recent': '直近の取込',
   'infinitas.uploading': '送信中…',
   'infinitas.uploadSuccess': '取り込み完了 ({count} 件更新)',
+  'infinitas.autoUploadSuccess': '自動登録: {title} ({count} 件更新)',
   'infinitas.uploadFailed': '送信に失敗しました',
   'infinitas.skippedInfinitasOnly': 'この曲はINFINITASのみの収録のため、スコア保存対象外です',
   'infinitas.confirmTitle': 'リザルトを確認',

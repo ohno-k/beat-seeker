@@ -1205,6 +1205,7 @@ export const ko = {
   'infinitas.recent': '최근 취득',
   'infinitas.uploading': '전송 중…',
   'infinitas.uploadSuccess': '취득 완료 ({count} 건 갱신)',
+  'infinitas.autoUploadSuccess': '자동 등록: {title} ({count} 건 갱신)',
   'infinitas.uploadFailed': '전송에 실패했습니다',
   'infinitas.skippedInfinitasOnly': '이 곡은 INFINITAS 전용 수록이므로 스코어 저장 대상이 아닙니다',
   'infinitas.confirmTitle': '리절트 확인',

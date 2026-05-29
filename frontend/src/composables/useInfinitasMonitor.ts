@@ -36,6 +36,7 @@ import {
   type NumberFieldRecord,
   type RecognizerPlaySide,
 } from './infinitasResultRecognizer';
+import type { ImportDecision } from './infinitasAutoImport';
 
 /** 認識した 1 リザルト分のデータ。null は「読み取れなかった」を意味する。 */
 export interface InfinitasResult {
@@ -115,10 +116,31 @@ export type PlaySide = '1P' | '2P' | 'auto';
 
 /** 検出ループの間隔（ms）。 */
 const DETECTION_INTERVAL_MS = 800;
+/**
+ * リザルト画面を検出してから最初に抽出するまでの最小待機時間（ms）。
+ *
+ * INFINITAS のリザルト演出は約1秒以内で、EX SCORE はカウントアップせず演出明けに最終値が
+ * 「ぱっと」表示される（＝途中値は無い）。よって長い固定待ちは不要で、演出が始まった瞬間に
+ * 抽出して 0/空 を掴むのだけ避けられればよい。最小限の猶予として 300ms。
+ *
+ * その後は EX SCORE が出る（classify が skip を返さなくなる）まで SETTLE_POLL_MS 間隔で
+ * ポーリングし、演出明けを検知した直後に確定する。
+ */
+const RESULT_SETTLE_DELAY_MS = 300;
+/** 演出明け待ちのポーリング間隔（ms）。演出は約1秒なので 300ms で素早く拾う。 */
+const SETTLE_POLL_MS = 300;
 /** 同一スコアの再検出を抑制する期間（ms）。INFINITAS のリザルト表示時間より長め。 */
 const DUPLICATE_SUPPRESS_MS = 30_000;
 
-export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
+/**
+ * @param playSide ユーザー登録のプレイサイド。
+ * @param classify 抽出結果を auto/manual/skip に分類する関数。skip は「未確定（演出中等）」として
+ *   無視し監視を継続する。未指定なら常に 'manual'（必ず確認モーダル）= 従来挙動。
+ */
+export function useInfinitasMonitor(
+  playSide: PlaySide = 'auto',
+  classify: (result: InfinitasResult) => ImportDecision = () => 'manual',
+) {
   const status = ref<MonitorStatus>('idle');
   const errorMessage = ref('');
   /** 検出ループの起動からの累計検出回数（UI 表示用）。 */
@@ -131,10 +153,13 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
   /** 認識用 FHD canvas（毎フレーム再利用）。 */
   let fhdCanvas: HTMLCanvasElement | null = null;
   let detectionTimer: number | null = null;
-  let onResultDetected: ((result: InfinitasResult) => void) | null = null;
+  let onResultDetected: ((result: InfinitasResult, decision: ImportDecision) => void) | null = null;
 
   /** 直近で確定したリザルトの (曲|score|diff) → タイムスタンプ。重複抑制用。 */
   const recentHashes = new Map<string, number>();
+
+  /** リザルト画面を最初に検出した時刻（ms）。演出待機の起点。未検出なら null。 */
+  let resultFirstSeenAt: number | null = null;
 
   /**
    * 現フレームを 1920x1080 の認識用 canvas へ転写して返す。
@@ -284,7 +309,17 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
     recentHashes.set(dupKey(result), Date.now());
   }
 
-  /** 検出ループ本体。setTimeout で自己再帰。 */
+  /**
+   * 検出ループ本体。setTimeout で自己再帰。
+   *
+   * フロー:
+   *  1. PLAYER ラベルでリザルト画面 & 1P/2P を検出
+   *  2. 検出した瞬間は抽出せず、RESULT_SETTLE_DELAY_MS だけ待つ（CLEAR/FULL COMBO 演出 &
+   *     EX SCORE カウントアップの終了待ち）。待機中は SETTLE_POLL_MS で再チェック
+   *  3. 待機後に抽出 → classify で auto/manual/skip 判定
+   *     - skip（まだ演出中=score 0 等）→ もう少し待って再抽出
+   *     - auto/manual → onResult を発火（親が自動登録 or 確認モーダル）
+   */
   function detectionLoop(): void {
     if (status.value !== 'monitoring') return;
     if (!videoEl || videoEl.readyState < 2 || videoEl.videoWidth === 0) {
@@ -296,26 +331,53 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
     const detectedSide = canvas ? detectResultScreen(canvas) : null;
     if (status.value !== 'monitoring') return;
 
-    if (detectedSide !== null) {
-      // playSide が明示指定されていればそれを優先（誤検出に強い）。
-      const useSide: RecognizerPlaySide = playSide === '1P' || playSide === '2P' ? playSide : detectedSide;
-      status.value = 'extracting';
-      try {
-        const result = extractResult(useSide);
-        if (!isDuplicate(result)) {
-          markHandled(result);
-          detectionCount.value++;
-          recentResults.value = [result, ...recentResults.value].slice(0, 10);
-          status.value = 'awaiting';
-          onResultDetected?.(result);
-          // 親側で resumeMonitoring() が呼ばれるまで停止
-          return;
-        }
+    if (detectedSide === null) {
+      // リザルト画面ではない（曲間・選曲画面など）→ 演出待機をリセット
+      resultFirstSeenAt = null;
+      detectionTimer = window.setTimeout(detectionLoop, DETECTION_INTERVAL_MS);
+      return;
+    }
+
+    // リザルト画面を検出
+    const now = Date.now();
+    if (resultFirstSeenAt === null) {
+      // 初検出 → 演出が終わるまで待つ
+      resultFirstSeenAt = now;
+      detectionTimer = window.setTimeout(detectionLoop, SETTLE_POLL_MS);
+      return;
+    }
+    if (now - resultFirstSeenAt < RESULT_SETTLE_DELAY_MS) {
+      // まだ演出待機中
+      detectionTimer = window.setTimeout(detectionLoop, SETTLE_POLL_MS);
+      return;
+    }
+
+    // 待機完了 → 抽出
+    const useSide: RecognizerPlaySide = playSide === '1P' || playSide === '2P' ? playSide : detectedSide;
+    status.value = 'extracting';
+    try {
+      const result = extractResult(useSide);
+      const decision = classify(result);
+      if (decision === 'skip') {
+        // 待機後もまだ未確定（演出が長い等）→ さらに少し待って再挑戦
+        resultFirstSeenAt = now;
         status.value = 'monitoring';
-      } catch (e: any) {
-        console.warn('[infinitas-monitor] extraction failed:', e);
-        status.value = 'monitoring';
+        detectionTimer = window.setTimeout(detectionLoop, SETTLE_POLL_MS);
+        return;
       }
+      if (!isDuplicate(result)) {
+        markHandled(result);
+        detectionCount.value++;
+        recentResults.value = [result, ...recentResults.value].slice(0, 10);
+        status.value = 'awaiting';
+        onResultDetected?.(result, decision);
+        // 親側で resumeMonitoring() が呼ばれるまで停止
+        return;
+      }
+      status.value = 'monitoring';
+    } catch (e: any) {
+      console.warn('[infinitas-monitor] extraction failed:', e);
+      status.value = 'monitoring';
     }
 
     detectionTimer = window.setTimeout(detectionLoop, DETECTION_INTERVAL_MS);
@@ -373,6 +435,7 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
     recentResults.value = [];
     detectionCount.value = 0;
     recentHashes.clear();
+    resultFirstSeenAt = null;
   }
 
   /** リソース解放（内部用）。 */
@@ -387,8 +450,8 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
     fhdCanvas = null;
   }
 
-  /** リザルト検出時のコールバック登録。 */
-  function onResult(cb: (result: InfinitasResult) => void): void {
+  /** リザルト検出時のコールバック登録。第 2 引数 decision は auto/manual。 */
+  function onResult(cb: (result: InfinitasResult, decision: ImportDecision) => void): void {
     onResultDetected = cb;
   }
 

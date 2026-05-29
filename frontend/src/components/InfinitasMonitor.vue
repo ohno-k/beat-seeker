@@ -14,6 +14,7 @@
  */
 import { ref, onBeforeUnmount } from 'vue';
 import { useInfinitasMonitor, type InfinitasResult, type PlaySide } from '../composables/useInfinitasMonitor';
+import { classifyResult, resolveScoreSource, buildScoreData } from '../composables/infinitasAutoImport';
 import { useScoreUpload } from '../composables/useScoreUpload';
 import { useScores } from '../composables/useScores';
 import { useAuth } from '../composables/useAuth';
@@ -27,7 +28,10 @@ const { user } = useAuth();
 const playSide: PlaySide = user.value?.playSide === '2P' ? '2P'
   : user.value?.playSide === '1P' ? '1P'
   : 'auto';
-const { status, errorMessage, detectionCount, recentResults, start, stop, resumeMonitoring, onResult } = useInfinitasMonitor(playSide);
+// classifyResult を注入: 全情報が揃って整合していれば 'auto'（モーダル無しで自動登録）、
+// 曖昧なら 'manual'（確認モーダル）、演出中は 'skip'（無視して監視継続）。
+const { status, errorMessage, detectionCount, recentResults, start, stop, resumeMonitoring, onResult } =
+  useInfinitasMonitor(playSide, classifyResult);
 const { upload } = useScoreUpload();
 const { fetchMyScores } = useScores();
 
@@ -46,9 +50,27 @@ const uploadErrorMessage = ref('');
 /** 累計アップロード件数。 */
 const uploadedCount = ref(0);
 
-onResult((result) => {
-  pendingResult.value = result;
+onResult((result, decision) => {
+  if (decision === 'auto') {
+    // 全情報が揃って整合 → 確認モーダルを出さずに自動登録
+    autoImport(result);
+  } else {
+    // 曖昧 → 確認モーダルで人手確認
+    pendingResult.value = result;
+  }
 });
+
+/**
+ * 確認モーダルを介さず自動登録する。
+ * resolveScoreSource で今回/ベストを選び、buildScoreData で ScoreData を組み立てて送信。
+ * 送信後は監視を再開する。auto-learn は行わない（ユーザー確定値ではないため）。
+ */
+const autoImport = async (result: InfinitasResult) => {
+  const source = resolveScoreSource(result, existingScores.value);
+  const scoreData = buildScoreData(result, source);
+  if (!scoreData) { resumeMonitoring(); return; }
+  await doUpload(scoreData, true);
+};
 
 const handleStart = async () => {
   if (!videoRef.value) return;
@@ -67,8 +89,12 @@ const handleStop = () => {
   pendingResult.value = null;
 };
 
-const handleConfirm = async (scoreData: ScoreData) => {
-  pendingResult.value = null;
+/**
+ * ScoreData を送信する共通処理。手動確認(handleConfirm)と自動登録(autoImport)の両方から使う。
+ * @param scoreData 送信するスコア
+ * @param auto 自動登録か（成功メッセージの文言出し分けのみ）
+ */
+const doUpload = async (scoreData: ScoreData, auto = false) => {
   uploadingMessage.value = t('infinitas.uploading');
   uploadErrorMessage.value = '';
   try {
@@ -81,7 +107,10 @@ const handleConfirm = async (scoreData: ScoreData) => {
       uploadErrorMessage.value = t('infinitas.skippedInfinitasOnly');
     } else {
       uploadedCount.value++;
-      uploadingMessage.value = t('infinitas.uploadSuccess', { count: res.updatedCount });
+      const msg = auto
+        ? t('infinitas.autoUploadSuccess', { title: scoreData.title, count: res.updatedCount })
+        : t('infinitas.uploadSuccess', { count: res.updatedCount });
+      uploadingMessage.value = msg;
       setTimeout(() => { uploadingMessage.value = ''; }, 3500);
     }
   } catch (e: any) {
@@ -90,6 +119,11 @@ const handleConfirm = async (scoreData: ScoreData) => {
   } finally {
     resumeMonitoring();
   }
+};
+
+const handleConfirm = async (scoreData: ScoreData) => {
+  pendingResult.value = null;
+  await doUpload(scoreData, false);
 };
 
 const handleSkip = () => {
