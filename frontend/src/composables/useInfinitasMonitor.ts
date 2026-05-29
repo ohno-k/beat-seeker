@@ -37,6 +37,7 @@ import {
   type NumberFieldRecord,
   type RecognizerPlaySide,
 } from './infinitasResultRecognizer';
+import { matchSongTitleByOcr, terminateSongTitleOcr } from './infinitasSongTitleOcr';
 import type { ImportDecision } from './infinitasAutoImport';
 
 /** 認識した 1 リザルト分のデータ。null は「読み取れなかった」を意味する。 */
@@ -356,7 +357,7 @@ export function useInfinitasMonitor(
    *     - skip（まだ演出中=score 0 等）→ もう少し待って再抽出
    *     - auto/manual → onResult を発火（親が自動登録 or 確認モーダル）
    */
-  function detectionLoop(): void {
+  async function detectionLoop(): Promise<void> {
     if (status.value !== 'monitoring') return;
     if (!videoEl || videoEl.readyState < 2 || videoEl.videoWidth === 0) {
       detectionTimer = window.setTimeout(detectionLoop, DETECTION_INTERVAL_MS);
@@ -408,6 +409,15 @@ export function useInfinitasMonitor(
         status.value = 'monitoring';
         detectionTimer = window.setTimeout(detectionLoop, SETTLE_POLL_MS);
         return;
+      }
+      // (難易度, NOTES[, BPM]) で一意特定できず候補が複数残ったときだけ、確定直前に曲名 ROI を
+      // OCR し、文字列距離で最良候補へ絞る。OCR ワーカーはここで初めて遅延初期化される。
+      // OCR でも決められなければ songEntry は null のまま（確認モーダルでユーザーが選ぶ）。
+      if (result.songEntry === null && result.candidates.length >= 2 && fhdCanvas) {
+        const ocrMatch = await matchSongTitleByOcr(fhdCanvas, result.candidates);
+        // await 中に stop()/再開で状態が変わっていたら破棄して仕切り直す
+        if (status.value !== 'extracting') return;
+        if (ocrMatch) result.songEntry = ocrMatch;
       }
       if (!isDuplicate(result)) {
         markHandled(result);
@@ -479,6 +489,7 @@ export function useInfinitasMonitor(
       detectionTimer = null;
     }
     cleanup();
+    terminateSongTitleOcr();
     recentResults.value = [];
     detectionCount.value = 0;
     recentHashes.clear();
