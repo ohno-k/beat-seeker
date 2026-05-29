@@ -29,12 +29,14 @@ function isValidCurrentClear(clearType: string | null): boolean {
  *
  * skip（未確定・取り込まない）:
  *  - EX SCORE が null か 0（演出中・カウントアップ前）
- *  - NOTES 数が取れていない（曲特定不能 = 認識が安定していない）
- *  - EX SCORE が最大値(notes×2)を超える（ありえない＝カウントアップ途中 or 誤読）
+ *  - EX SCORE が最大値(notes×2)を超える（ありえない＝カウントアップ途中 or 誤読。NOTES が読めた時のみ判定）
  *  - PGREAT×2 > EX SCORE（great が負＝途中値 or 誤読）
  *  - 難易度が取れていない
  *
  * manual（確定はしたが要確認）:
+ *  - NOTES 数が取れていない（数字テンプレ未収録など）。以前は skip でサイレント破棄していたが、
+ *    EX SCORE 等は読めているのに丸ごと捨てるのは惜しいので manual に回す。確認モーダルでユーザーが
+ *    曲を選べば、確定時のオートラーニングで未知の NOTES 桁 hash を学習でき次回以降は自動認識できる。
  *  - 曲が一意特定できていない（songEntry が null）
  *  - クリアタイプが不正（null / NO PLAY）
  *  - JUDGE 整合性 NG（BAD+POOR ≠ MISS COUNT。両方読めている場合のみ判定）
@@ -48,12 +50,15 @@ export function classifyResult(result: InfinitasResult): ImportDecision {
 
   // ── skip: 未確定フレーム ──
   if (sc == null || sc <= 0) return 'skip';
-  if (notes == null || notes <= 0) return 'skip';
-  if (sc > notes * 2) return 'skip';
+  // NOTES が読めている時だけ「最大値(notes×2)超え＝カウントアップ途中/誤読」を未確定として弾く。
+  // NOTES が読めない場合はこの判定を飛ばし、下の manual に回す（スコアごとサイレント破棄しない）。
+  if (notes != null && notes > 0 && sc > notes * 2) return 'skip';
   if (result.pgreat != null && result.pgreat * 2 > sc) return 'skip';
   if (!result.difficulty) return 'skip';
 
   // ── manual: 確定したが曖昧 ──
+  // NOTES 不明 → 曲を一意特定できない（songEntry も null）。確認モーダルで手動選択 → オートラーニング。
+  if (notes == null || notes <= 0) return 'manual';
   if (!result.songEntry) return 'manual';
   if (!isValidCurrentClear(result.clearType)) return 'manual';
   if (result.playSide === 'DP') return 'manual';
