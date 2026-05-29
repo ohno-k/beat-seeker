@@ -20,6 +20,7 @@ import notesEmptyHashes from './notes_empty_hashes.json';
 import playerLabelTemplates from './player_label_templates.json';
 import pgreatDigitTable from './pgreat_digit_table.json';
 import spdpTemplates from './spdp_templates.json';
+import bpmDigitTable from './bpm_digit_table.json';
 
 /** 認識対象のプレイサイド。 */
 export type RecognizerPlaySide = '1P' | '2P';
@@ -445,6 +446,131 @@ export function recognizeNotesWithRecord(canvas: HTMLCanvasElement): NumberField
 
 export function recognizeNotesCount(canvas: HTMLCanvasElement): number | null {
   return recognizeNotesWithRecord(canvas).value;
+}
+
+/* ───────────────────────── プレイ中 BPM 読み取り ─────────────────────────
+ *
+ * リザルトではなく **プレイ画面**の右下/中央下に出る「○○○ BPM」を読む。曲特定の補助情報
+ * （難易度 × NOTES × BPM で song_data を一意化する）として useInfinitasMonitor が常時呼ぶ。
+ *
+ * フォントは score/notes/pgreat いずれとも別系統（高さ約20px・固定ピッチ36px・右詰め3桁）。
+ * 専用テーブル [[file:bpm_digit_table.json]] で照合する。digit 間の最小ハミング距離が 2 しかない
+ * ため、score/notes のような Hamming フォールバックは **使わず完全一致のみ**。1 桁でも未知なら
+ * 「読めなかった (null)」とする。誤った BPM は曲を取り違えさせるので、無理に読むより捨てる。
+ *
+ * パネル位置はプレイ形態で変わる。既知レイアウト（右下=1P SP, 中央下）を順に試し、3 桁すべてが
+ * 完全一致した最初のレイアウトを採用する。未知レイアウトは後から候補を足せる。
+ */
+
+/** BPM digit テーブル（プレイ画面専用フォント、cellW=36, cellH=24, th=120）。 */
+const BPM_DIGIT_MAP = new Map<string, number>(
+  Object.entries(bpmDigitTable as Record<string, number>),
+);
+
+/** BPM セル寸法とサンプリンググリッド(8 行 × 6 列 = 48 bit → 12 hex)。 */
+const BPM_CELL_W = 36;
+const BPM_CELL_H = 24;
+const BPM_DIGIT_PITCH = 36;
+/** BPM 数字帯の上端 Y（FHD）。プレイ画面の「BPM」ラベル上の数字。 */
+const BPM_AREA_Y = 964;
+/** 二値化しきい値。数字は純白なので max(R,G,B) >= 120 で十分。 */
+const BPM_BRIGHTNESS_THRESHOLD = 120;
+const BPM_HASH_Y_INDICES = [1, 4, 7, 10, 13, 16, 19, 22];
+const BPM_HASH_X_INDICES = [3, 9, 15, 21, 27, 33];
+
+/**
+ * 既知の BPM パネル右端 X 座標（FHD）。右詰め描画なので右端基準で 3 桁を切る。
+ * INFINITAS の 1P はプレイ画面レイアウトが 3 通りあり、BPM パネルの横位置が変わる
+ * （実測: 同一曲 BPM=163 が下記 3 箇所のいずれかに出る）:
+ *  - 1493: 右下（プレイフィールドが左の標準配置）
+ *  - 1284: 中央やや右
+ *  - 1076: 中央下
+ * 各候補を順に試し、3 桁が完全一致した最初の位置を採用する。2P は左右反転位置に出るが
+ * サンプル未取得のため未対応。候補をこの配列に足せば自動で試行対象になる。
+ */
+const BPM_PANEL_RIGHT_CANDIDATES = [1493, 1284, 1076];
+
+function computeBpmDigitHash(rgba: Uint8ClampedArray, cellWidth: number, cellHeight: number): string {
+  const bits: number[] = [];
+  for (const y of BPM_HASH_Y_INDICES) {
+    if (y >= cellHeight) continue;
+    for (const x of BPM_HASH_X_INDICES) {
+      if (x >= cellWidth) continue;
+      const o = (y * cellWidth + x) * 4;
+      const brightness = Math.max(rgba[o], rgba[o + 1], rgba[o + 2]);
+      bits.push(brightness >= BPM_BRIGHTNESS_THRESHOLD ? 1 : 0);
+    }
+  }
+  let hex = '';
+  for (let i = 0; i < bits.length; i += 4) {
+    const v = ((bits[i] || 0) << 3) | ((bits[i + 1] || 0) << 2) | ((bits[i + 2] || 0) << 1) | (bits[i + 3] || 0);
+    hex += v.toString(16);
+  }
+  return hex;
+}
+
+/** BPM 1 桁を完全一致のみで引く。曖昧マッチはしない（誤読防止）。 */
+function lookupBpmDigit(hash: string): number | null {
+  const d = BPM_DIGIT_MAP.get(hash);
+  return d === undefined ? null : d;
+}
+
+/** BPM 数字の縦位置揺らぎ吸収。UI バリエーションで ±1〜2px ずれるため Y を微小スライドして試す。 */
+const BPM_Y_OFFSETS = [0, -1, 1, -2, 2];
+
+/**
+ * 指定した右端 X・Y オフセットでBPM 3 桁スロットを読み、数値化する。
+ * 桁は右端から左へ pos=0,1,2。空セル（パネル背景）は null になる。右詰めなので
+ * 「左から null が続き、最初に数字が出たらそれ以降は全桁数字」を満たす並びのみ採用。
+ *
+ * @param yOff BPM_AREA_Y に加える縦オフセット（フォントの縦揺らぎ補正）。
+ * @returns 2〜3 桁の正整数、または null（3 桁読めない/不正な並び）。
+ */
+function readBpmAtRight(ctx: CanvasRenderingContext2D, rightX: number, yOff: number): number | null {
+  const y0 = BPM_AREA_Y + yOff;
+  if (y0 < 0) return null;
+  const predicted: (number | null)[] = [];
+  for (let pos = 0; pos < 3; pos++) {
+    const xr = rightX - pos * BPM_DIGIT_PITCH;
+    const xl = xr - BPM_CELL_W;
+    if (xl < 0) return null;
+    const data = ctx.getImageData(xl, y0, BPM_CELL_W, BPM_CELL_H).data;
+    const hash = computeBpmDigitHash(data, BPM_CELL_W, BPM_CELL_H);
+    predicted.push(lookupBpmDigit(hash));
+  }
+  // predicted は [最右, 中, 最左]。読み順に直す（最左→最右）
+  const ordered = predicted.slice().reverse();
+  let started = false, val = 0, any = false;
+  for (const d of ordered) {
+    if (d === null) {
+      if (started) return null; // 桁の途中で欠け = 不正
+      continue; // 左の空セル
+    }
+    started = true; any = true;
+    val = val * 10 + d;
+  }
+  if (!any) return null;
+  // BPM の妥当域でガード（IIDX は概ね 30〜1000）。範囲外は誤読とみなす。
+  if (val < 30 || val > 999) return null;
+  return val;
+}
+
+/**
+ * プレイ画面から BPM を読み取る。既知パネル位置 × 縦オフセットを順に試し、最初に妥当値が
+ * 取れたものを返す。リザルト画面・選曲画面など BPM 表示が無いフレームでは null。
+ *
+ * @returns BPM 値、または null。
+ */
+export function recognizeBpm(canvas: HTMLCanvasElement): number | null {
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return null;
+  for (const rightX of BPM_PANEL_RIGHT_CANDIDATES) {
+    for (const yOff of BPM_Y_OFFSETS) {
+      const bpm = readBpmAtRight(ctx, rightX, yOff);
+      if (bpm != null) return bpm;
+    }
+  }
+  return null;
 }
 
 /** 学習辞書の種類。score 系（大型フォント）・notes 系（細字）・pgreat 系（JUDGE 小型フォント）。 */

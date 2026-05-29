@@ -32,6 +32,7 @@ import {
   recognizeNumberFieldWithRecord,
   recognizeNotesWithRecord,
   recognizePgreatWithRecord,
+  recognizeBpm,
   PANEL_LOCAL_ROI,
   type NumberFieldRecord,
   type RecognizerPlaySide,
@@ -162,6 +163,12 @@ export function useInfinitasMonitor(
   let resultFirstSeenAt: number | null = null;
 
   /**
+   * プレイ中に観測した BPM。リザルトより前のプレイ画面で読み取り、曲特定の補助に使う。
+   * （BPM 読み取りは別途実装予定。未取得時は null で、(難易度, NOTES) のみで絞り込む。）
+   */
+  let observedBpm: number | null = null;
+
+  /**
    * 現フレームを 1920x1080 の認識用 canvas へ転写して返す。
    * 入力映像が FHD でなくてもここで FHD にリサイズするため、ピクセル ROI が一定になる。
    */
@@ -199,16 +206,44 @@ export function useInfinitasMonitor(
   }
 
   /**
-   * (難易度, NOTES 数) で songData をフィルタする。INFINITAS は (難易度コード, notes) でほぼユニーク。
-   * 衝突しても 2〜3 曲なので確認モーダルで候補提示できる。ANOTHER=4 / LEGGENDARIA=10。
+   * 観測 BPM が songData の bpm 表記に合致するか判定する。
+   *  - 単一 "155"      → observed == 155
+   *  - 範囲 "33-130"   → 33 <= observed <= 130（変化曲: プレイ中に観測した値が範囲内なら可）
+   *  - 不明 "〓" 等     → 判定不能 → ワイルドカード（除外しない）
+   * observed が null（BPM 未取得）の場合も true（フィルタしない）。
+   */
+  function bpmMatches(songBpm: string, observed: number | null): boolean {
+    if (observed == null) return true;
+    const b = String(songBpm).trim();
+    const m = b.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (m) {
+      const lo = Number(m[1]), hi = Number(m[2]);
+      return observed >= lo && observed <= hi;
+    }
+    const single = Number(b);
+    if (Number.isNaN(single)) return true; // 不明 BPM はワイルドカード
+    return observed === single;
+  }
+
+  /**
+   * (難易度, NOTES 数[, BPM]) で songData をフィルタする。
+   * INFINITAS は (難易度, notes) でほぼユニーク。さらに観測 BPM を足すと衝突が大幅に減る
+   * （実測: 525 衝突グループ → BPM 追加で 113 まで減少）。ANOTHER=4 / LEGGENDARIA=10。
+   *
+   * @param observedBpm プレイ中に観測した BPM（変化曲はその時点の値）。null ならノーツ+難易度のみ。
    */
   function findCandidatesByChartInfo(
     diff: 'ANOTHER' | 'LEGGENDARIA' | null,
     notes: number | null,
+    observedBpm: number | null = null,
   ): SongDataEntry[] {
     if (!diff || !notes) return [];
     const diffCode = diff === 'LEGGENDARIA' ? '10' : '4';
-    return songData.value.filter(s => s.difficulty === diffCode && s.notes === notes);
+    return songData.value.filter(s =>
+      s.difficulty === diffCode &&
+      s.notes === notes &&
+      bpmMatches(s.bpm, observedBpm),
+    );
   }
 
   /**
@@ -243,8 +278,9 @@ export function useInfinitasMonitor(
     // GREAT は EX_SCORE-2*PGREAT で確定（IIDX のスコア定義により厳密）。JUDGE 行読みより確実。
     const great = (scoreCurrent != null && rec.pgreat != null) ? scoreCurrent - 2 * rec.pgreat : null;
 
-    // 曲特定: (難易度, NOTES) 候補が一意なら自動採用
-    const candidates = findCandidatesByChartInfo(diff, notes);
+    // 曲特定: (難易度, NOTES[, BPM]) 候補が一意なら自動採用。
+    // observedBpm はプレイ中に観測した BPM（recognizeBpm で随時更新、未取得なら null）。
+    const candidates = findCandidatesByChartInfo(diff, notes, observedBpm);
     const songEntry = candidates.length === 1 ? candidates[0] : null;
     // DJ LEVEL は EX SCORE / (notes×2) で計算。曲が一意特定できたらその notes を優先（より確実）。
     const notesForDj = songEntry?.notes ?? notes;
@@ -332,8 +368,16 @@ export function useInfinitasMonitor(
     if (status.value !== 'monitoring') return;
 
     if (detectedSide === null) {
-      // リザルト画面ではない（曲間・選曲画面など）→ 演出待機をリセット
+      // リザルト画面ではない（プレイ中・曲間・選曲画面など）→ 演出待機をリセット
       resultFirstSeenAt = null;
+      // プレイ中なら BPM 表示が出ているので随時読み取り、曲特定の補助に蓄える。
+      // 選曲・曲間など BPM 非表示のフレームでは null が返るが、その場合は直前に読めた値を
+      // 保持する（上書きしない）。リザルトはプレイ直後に来るため、最後に読めた BPM が
+      // そのプレイ曲のものになる。次のリザルト確定時にリセットする。
+      if (canvas) {
+        const bpm = recognizeBpm(canvas);
+        if (bpm != null) observedBpm = bpm;
+      }
       detectionTimer = window.setTimeout(detectionLoop, DETECTION_INTERVAL_MS);
       return;
     }
@@ -369,6 +413,9 @@ export function useInfinitasMonitor(
         markHandled(result);
         detectionCount.value++;
         recentResults.value = [result, ...recentResults.value].slice(0, 10);
+        // このプレイの BPM は使い終わったのでリセット。次の曲のプレイ画面で読み直す。
+        // （持ち越すと、次に BPM を読めなかった曲へ古い値が誤って効いてしまう）
+        observedBpm = null;
         status.value = 'awaiting';
         onResultDetected?.(result, decision);
         // 親側で resumeMonitoring() が呼ばれるまで停止
@@ -436,6 +483,7 @@ export function useInfinitasMonitor(
     detectionCount.value = 0;
     recentHashes.clear();
     resultFirstSeenAt = null;
+    observedBpm = null;
   }
 
   /** リソース解放（内部用）。 */
