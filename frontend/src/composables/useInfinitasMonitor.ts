@@ -115,18 +115,8 @@ export type PlaySide = '1P' | '2P' | 'auto';
 
 /** 検出ループの間隔（ms）。 */
 const DETECTION_INTERVAL_MS = 800;
-/** リザルト確定待ち中の再チェック間隔（ms）。確定までのラグを抑えるため通常より短め。 */
-const SETTLE_INTERVAL_MS = 450;
 /** 同一スコアの再検出を抑制する期間（ms）。INFINITAS のリザルト表示時間より長め。 */
 const DUPLICATE_SUPPRESS_MS = 30_000;
-/**
- * EX SCORE が「同じ非ゼロ値」を何回連続で読めたら確定とみなすか。
- *
- * INFINITAS のリザルトは表示直後に「FULL COMBO」等の演出 + EX SCORE のカウントアップ
- * アニメーションがあり、その間は値が 0 だったり増加中だったりする。値が安定するまで待つことで
- * 演出中の 0/0 や途中値を誤って取り込むのを防ぐ（inf-notebook の is_savable 相当）。
- */
-const SETTLE_STABLE_TICKS = 2;
 
 export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
   const status = ref<MonitorStatus>('idle');
@@ -145,10 +135,6 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
 
   /** 直近で確定したリザルトの (曲|score|diff) → タイムスタンプ。重複抑制用。 */
   const recentHashes = new Map<string, number>();
-
-  /** 安定化ゲート: 直近に読めた非ゼロ EX SCORE と、その連続一致回数。 */
-  let settleScore: number | null = null;
-  let settleCount = 0;
 
   /**
    * 現フレームを 1920x1080 の認識用 canvas へ転写して返す。
@@ -298,27 +284,11 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
     recentHashes.set(dupKey(result), Date.now());
   }
 
-  /** 安定化ゲートの状態をリセットする（リザルト画面を離れた時・確定後）。 */
-  function resetSettle(): void {
-    settleScore = null;
-    settleCount = 0;
-  }
-
-  /**
-   * 検出ループ本体。setTimeout で自己再帰。
-   *
-   * フロー:
-   *  1. PLAYER ラベルでリザルト画面 & 1P/2P を検出
-   *  2. 検出できたら EX SCORE(今回) だけを軽く読む
-   *  3. 「非ゼロの同一スコア」が SETTLE_STABLE_TICKS 回連続で読めたら確定とみなし全項目を抽出
-   *     - 演出中(FULL COMBO 等)やカウントアップ中は値が 0 or 変動 → 安定するまで待つ
-   *  4. 安定したら onResult を発火（重複抑制つき）
-   */
+  /** 検出ループ本体。setTimeout で自己再帰。 */
   function detectionLoop(): void {
     if (status.value !== 'monitoring') return;
-    let nextDelay = DETECTION_INTERVAL_MS;
     if (!videoEl || videoEl.readyState < 2 || videoEl.videoWidth === 0) {
-      detectionTimer = window.setTimeout(detectionLoop, nextDelay);
+      detectionTimer = window.setTimeout(detectionLoop, DETECTION_INTERVAL_MS);
       return;
     }
 
@@ -326,55 +296,29 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
     const detectedSide = canvas ? detectResultScreen(canvas) : null;
     if (status.value !== 'monitoring') return;
 
-    if (canvas && detectedSide !== null) {
+    if (detectedSide !== null) {
       // playSide が明示指定されていればそれを優先（誤検出に強い）。
       const useSide: RecognizerPlaySide = playSide === '1P' || playSide === '2P' ? playSide : detectedSide;
+      status.value = 'extracting';
       try {
-        // ── 安定化ゲート: EX SCORE(今回) だけ軽く読む ──
-        const origin = resolvePanelOrigin(canvas, useSide);
-        const sc = recognizeNumberFieldWithRecord(canvas, origin, PANEL_LOCAL_ROI.scoreCurrent).value;
-
-        if (sc == null || sc === 0) {
-          // 演出中・カウントアップ前。まだ確定しない。
-          resetSettle();
-        } else if (sc === settleScore) {
-          settleCount++;
-        } else {
-          // 値が変わった（カウントアップ中 or 初回）→ 計測し直し
-          settleScore = sc;
-          settleCount = 1;
+        const result = extractResult(useSide);
+        if (!isDuplicate(result)) {
+          markHandled(result);
+          detectionCount.value++;
+          recentResults.value = [result, ...recentResults.value].slice(0, 10);
+          status.value = 'awaiting';
+          onResultDetected?.(result);
+          // 親側で resumeMonitoring() が呼ばれるまで停止
+          return;
         }
-
-        if (settleScore != null && settleCount >= SETTLE_STABLE_TICKS) {
-          // 安定 → 全項目を抽出して確定
-          status.value = 'extracting';
-          const result = extractResult(useSide);
-          resetSettle();
-          if (!isDuplicate(result)) {
-            markHandled(result);
-            detectionCount.value++;
-            recentResults.value = [result, ...recentResults.value].slice(0, 10);
-            status.value = 'awaiting';
-            onResultDetected?.(result);
-            // 親側で resumeMonitoring() が呼ばれるまで停止
-            return;
-          }
-          status.value = 'monitoring';
-        } else {
-          // 確定待ち中は短い間隔で再チェックしてラグを抑える
-          nextDelay = SETTLE_INTERVAL_MS;
-        }
+        status.value = 'monitoring';
       } catch (e: any) {
         console.warn('[infinitas-monitor] extraction failed:', e);
-        resetSettle();
         status.value = 'monitoring';
       }
-    } else {
-      // リザルト画面を離れた（曲間・選曲画面など）→ ゲートをリセット
-      resetSettle();
     }
 
-    detectionTimer = window.setTimeout(detectionLoop, nextDelay);
+    detectionTimer = window.setTimeout(detectionLoop, DETECTION_INTERVAL_MS);
   }
 
   /**
@@ -429,7 +373,6 @@ export function useInfinitasMonitor(playSide: PlaySide = 'auto') {
     recentResults.value = [];
     detectionCount.value = 0;
     recentHashes.clear();
-    resetSettle();
   }
 
   /** リソース解放（内部用）。 */
