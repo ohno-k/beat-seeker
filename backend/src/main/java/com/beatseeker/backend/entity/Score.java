@@ -3,6 +3,7 @@ package com.beatseeker.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -12,9 +13,10 @@ import java.time.LocalDateTime;
  * 現実世界の概念: 「あるユーザーが、ある楽曲の、ある難易度で現在出している最新スコア」を 1 行で表す。
  * マッピング先テーブル: {@code scores}。
  *
- * 一意性制約: (user_id, title, difficultyName, difficultyLevel) の 4 項目でユニーク。
- *   つまり 1 ユーザーにつき「同じ曲・同じ難易度」のレコードは 1 つだけ存在する。
- *   スコア更新時は既存レコードを上書きする運用。
+ * 一意性制約: (user_id, title, difficultyName, difficultyLevel, source) の 5 項目でユニーク。
+ *   1 ユーザーにつき「同じ曲・同じ難易度・同じ取得元（arcade/infinitas）」のレコードは 1 つだけ存在し、
+ *   アーケード（CSV）由来と INFINITAS 画面取得由来のスコアは別レコードとして並走する。
+ *   旧 4 項目制約は DataInitializer で起動時に DROP する（PostgreSQL の autogen 名 {@code uk_xxxx} を直叩き）。
  *
  * 主要な関連:
  *  - {@link #user} … このスコアを保持するユーザーへの ManyToOne（多対一）。
@@ -23,7 +25,8 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "scores", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "user_id", "title", "difficultyName", "difficultyLevel" })
+        @UniqueConstraint(name = "uk_scores_user_title_diff_source",
+                columnNames = { "user_id", "title", "difficultyName", "difficultyLevel", "source" })
 })
 @Data
 @NoArgsConstructor
@@ -66,6 +69,16 @@ public class Score {
 
     /** スナップショット ID。過去時点のスコアを参照するためのラベル（任意）。 */
     private String snapshotId;
+
+    /**
+     * このスコアの取得元。
+     *  - {@code "arcade"}: e-amusement の CSV / ブックマークレットから取り込んだスコア
+     *  - {@code "infinitas"}: ブラウザの画面共有 OCR で取り込んだ INFINITAS のリザルト
+     * UI の表示フィルタや集計対象切り替えに利用する。
+     */
+    @Column(length = 20, nullable = false)
+    @ColumnDefault("'arcade'")
+    private String source = "arcade";
 
     /** このスコアがアップロード（更新）された日時。 */
     @Column(nullable = false)

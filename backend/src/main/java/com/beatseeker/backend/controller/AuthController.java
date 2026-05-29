@@ -184,6 +184,8 @@ public class AuthController {
             responseBody.put("language", user.getLanguage() != null ? user.getLanguage() : "ja");
             responseBody.put("showRateTier", user.getShowRateTier() != null ? user.getShowRateTier() : true);
             responseBody.put("showKenbanSaraTier", user.getShowKenbanSaraTier() != null ? user.getShowKenbanSaraTier() : false);
+            responseBody.put("showArcadeScores", user.getShowArcadeScores() != null ? user.getShowArcadeScores() : true);
+            responseBody.put("showInfinitasScores", user.getShowInfinitasScores() != null ? user.getShowInfinitasScores() : true);
             responseBody.put("isSupporter", user.getIsSupporter() != null ? user.getIsSupporter() : false);
             responseBody.put("showSupporterBorder", user.getShowSupporterBorder() != null ? user.getShowSupporterBorder() : true);
             // サポータートークンが未発行なら、Ko-fi webhook が参照できるよう自動で付与する
@@ -265,6 +267,12 @@ public class AuthController {
         }
         if (request.showSupporterBorder() != null)
             user.setShowSupporterBorder(request.showSupporterBorder());
+        // アーケード／INFINITAS スコアの表示トグル。両方とも単純な PATCH 的更新。
+        // 「両方 false」のような極端な設定もユーザー責任で許容する（UI からはほぼ起きない）。
+        if (request.showArcadeScores() != null)
+            user.setShowArcadeScores(request.showArcadeScores());
+        if (request.showInfinitasScores() != null)
+            user.setShowInfinitasScores(request.showInfinitasScores());
         if (request.email() != null && !request.email().isBlank()) {
             // メールアドレスは小文字化して保存。他ユーザーと衝突しないかを確認してから更新する
             String newEmail = request.email().trim().toLowerCase();

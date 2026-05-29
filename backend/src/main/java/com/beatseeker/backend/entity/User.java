@@ -74,6 +74,20 @@ public class User {
     @ColumnDefault("true")
     private Boolean showRateTier = true;
 
+    /**
+     * アーケード（CSV/ブックマークレット）由来のスコアを UI 上に表示するかどうか。
+     * INFINITAS 取得スコアと並走させた場合に「アーケードのスコアだけ見たい / 逆」をユーザーが切り替えるためのフラグ。
+     */
+    @ColumnDefault("true")
+    private Boolean showArcadeScores = true;
+
+    /**
+     * INFINITAS 画面共有 OCR 由来のスコアを UI 上に表示するかどうか。
+     * INFINITAS モードを使うユーザーがアーケードのスコアと別フィルタで切り替えたい時に使う。
+     */
+    @ColumnDefault("true")
+    private Boolean showInfinitasScores = true;
+
     /** KENBAN-TIER / SARA-TIER を UI に表示するかどうか。サポーター限定のオプトイン機能。 */
     @ColumnDefault("false")
     private Boolean showKenbanSaraTier = false;

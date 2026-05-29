@@ -71,6 +71,42 @@ public class DataInitializer implements ApplicationRunner {
         entityManager.createQuery("UPDATE User u SET u.showRateTier = true WHERE u.showRateTier IS NULL")
                 .executeUpdate();
 
+        // 手順2b: arcade / INFINITAS スコア表示トグルも未設定なら true で埋める。
+        //         両方とも「既存ユーザーの見た目を壊さない」よう既定 true。
+        entityManager.createQuery("UPDATE User u SET u.showArcadeScores = true WHERE u.showArcadeScores IS NULL")
+                .executeUpdate();
+        entityManager.createQuery("UPDATE User u SET u.showInfinitasScores = true WHERE u.showInfinitasScores IS NULL")
+                .executeUpdate();
+
+        // 手順2c: 既存スコアの source カラムが未設定ならアーケード扱いで埋める。
+        //         INFINITAS 機能追加前のレコードは当然 arcade 出自なので、安全に一括代入できる。
+        entityManager.createNativeQuery("UPDATE scores SET source = 'arcade' WHERE source IS NULL")
+                .executeUpdate();
+
+        // 手順2d: 旧ユニーク制約（source 列を含まない 4 列バージョン）を DROP する。
+        //         Hibernate ddl-auto=update は既存制約を自動で落とさないため、PostgreSQL 限定で
+        //         pg_constraint から「conkey が user_id, title, difficultyName, difficultyLevel の 4 列だけを指す UNIQUE 制約」を
+        //         動的検索して DROP する。新しい 5 列制約（source 含む）は Hibernate が別名で作るので衝突しない。
+        try {
+            entityManager.createNativeQuery(
+                    "DO $$ DECLARE c RECORD; BEGIN " +
+                    "FOR c IN " +
+                    "  SELECT conname FROM pg_constraint " +
+                    "  WHERE conrelid = 'scores'::regclass " +
+                    "    AND contype = 'u' " +
+                    "    AND array_length(conkey, 1) = 4 " +
+                    "    AND (SELECT array_agg(attname ORDER BY attname) FROM pg_attribute " +
+                    "         WHERE attrelid = 'scores'::regclass AND attnum = ANY(conkey)) " +
+                    "        = ARRAY['difficultyLevel','difficultyName','title','user_id']::name[] " +
+                    "LOOP " +
+                    "  EXECUTE 'ALTER TABLE scores DROP CONSTRAINT ' || quote_ident(c.conname); " +
+                    "END LOOP; END $$;"
+            ).executeUpdate();
+        } catch (Exception e) {
+            // 既に DROP 済み or PostgreSQL 以外で動かしている場合は無視。
+            logger.warn("Legacy unique constraint cleanup skipped: {}", e.getMessage());
+        }
+
         // 手順3: 曲データと難易度表を JSON から投入する（テーブルが空の場合のみ実効）。
         //        失敗してもアプリ起動は続行させるため、try 内で握り潰す。
         try {

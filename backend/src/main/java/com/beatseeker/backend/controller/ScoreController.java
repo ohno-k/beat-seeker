@@ -211,18 +211,41 @@ public class ScoreController {
 
         User user = getUser(auth);
 
+        // 手順0: INFINITAS のみ収録された曲は arcade マスタに存在しない。受け入れ可否を判定するため、
+        // active リビジョンの SongDefinition を (title|difficultyName) でセット化しておく。
+        // arcade ソースのスコアは従来通り無条件で受け入れる（マスタ未登録曲は新リリース時にあり得る）。
+        java.util.Set<String> arcadeChartKeys = new java.util.HashSet<>();
+        for (SongDefinition sd : songDefinitionRepository.findByRevision("active")) {
+            String diffName = mapDifficultyCodeToName(sd.getDifficulty());
+            if (diffName == null) continue;
+            arcadeChartKeys.add(sd.getTitle() + "||" + diffName);
+        }
+
         // 手順1: 既存スコアを 1 クエリで読み込み、キー文字列で O(1) lookup 可能にする。
+        // 取得元（source）が異なれば別レコードとして並走するので、キーに source も含める。
         List<Score> existingScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         Map<String, Score> scoreMap = new HashMap<>();
         for (Score s : existingScores) {
-            String key = s.getTitle() + "_" + s.getDifficultyName() + "_" + s.getDifficultyLevel();
+            String sourceKey = s.getSource() != null ? s.getSource() : "arcade";
+            String key = s.getTitle() + "_" + s.getDifficultyName() + "_" + s.getDifficultyLevel() + "_" + sourceKey;
             scoreMap.put(key, s);
         }
 
         List<Map<String, Object>> updatedSongs = new java.util.ArrayList<>();
+        int skippedInfinitasOnly = 0;
 
         for (ScoreUploadRequest req : requests) {
-            String key = req.title() + "_" + req.difficultyName() + "_" + req.difficultyLevel();
+            String source = req.effectiveSource();
+
+            // INFINITAS 由来のレコードについては、arcade マスタに存在しない曲を保存対象から除外する。
+            // OCR フェーズで似た arcade 曲に誤マッチした場合、ここで安全側に倒す保険でもある。
+            if ("infinitas".equals(source)
+                    && !arcadeChartKeys.contains(req.title() + "||" + req.difficultyName())) {
+                skippedInfinitasOnly++;
+                continue;
+            }
+
+            String key = req.title() + "_" + req.difficultyName() + "_" + req.difficultyLevel() + "_" + source;
             Score existing = scoreMap.get(key);
 
             boolean isImproved = false;
@@ -234,6 +257,7 @@ public class ScoreController {
                 isImproved = true;
                 Score newScore = new Score();
                 newScore.setUser(user);
+                newScore.setSource(source);
                 updateScoreFields(newScore, req);
                 scoreRepository.save(newScore);
             } else {
@@ -284,10 +308,31 @@ public class ScoreController {
             notifyFriendsOfScoreBeat(user, updatedSongs);
         }
 
-        return ResponseEntity.ok(Map.of(
-                "updatedCount", updatedSongs.size(),
-                "updatedSongs", updatedSongs,
-                "message", "スコアを更新しました"));
+        Map<String, Object> response = new HashMap<>();
+        response.put("updatedCount", updatedSongs.size());
+        response.put("updatedSongs", updatedSongs);
+        response.put("skippedInfinitasOnly", skippedInfinitasOnly);
+        response.put("message", "スコアを更新しました");
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 【メソッドの役割】 SongDefinition の難易度コード（文字列）を、Score/CSV 側の難易度名に変換する。
+     *
+     * 既知のコード:
+     *  - "1" → BEGINNER, "2" → NORMAL, "3" → HYPER, "4" → ANOTHER, "10" → LEGGENDARIA
+     * 未知のコードは null を返す（呼び出し側はマスタから除外する判断材料に使う）。
+     */
+    private String mapDifficultyCodeToName(String code) {
+        if (code == null) return null;
+        return switch (code) {
+            case "1" -> "BEGINNER";
+            case "2" -> "NORMAL";
+            case "3" -> "HYPER";
+            case "4" -> "ANOTHER";
+            case "10" -> "LEGGENDARIA";
+            default -> null;
+        };
     }
 
     /**
@@ -524,24 +569,36 @@ public class ScoreController {
 
         User user = getUser(auth);
 
+        // 取得元（arcade / infinitas）の表示トグルに応じてフィルタする。
+        // 未設定は true 扱い（既存ユーザーが取りこぼされないようにする）。
+        boolean showArcade = user.getShowArcadeScores() == null || user.getShowArcadeScores();
+        boolean showInfinitas = user.getShowInfinitasScores() == null || user.getShowInfinitasScores();
+
         List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         Map<String, List<String>> optionsMap = loadOptionsMap(user);
 
-        List<Map<String, Object>> result = scores.stream().map(s -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", s.getId());
-            map.put("title", s.getTitle() != null ? s.getTitle() : "");
-            map.put("difficultyName", s.getDifficultyName() != null ? s.getDifficultyName() : "");
-            map.put("difficultyLevel", s.getDifficultyLevel() != null ? s.getDifficultyLevel() : 0);
-            map.put("score", s.getScore() != null ? s.getScore() : 0);
-            map.put("clearType", s.getClearType() != null ? s.getClearType() : "");
-            map.put("djLevel", s.getDjLevel() != null ? s.getDjLevel() : "");
-            map.put("pgreat", s.getPgreat() != null ? s.getPgreat() : 0);
-            map.put("great", s.getGreat() != null ? s.getGreat() : 0);
-            map.put("missCount", s.getMissCount());
-            map.put("options", optionsMap.getOrDefault(optionsKey(s.getTitle(), s.getDifficultyName()), List.of()));
-            return map;
-        }).toList();
+        List<Map<String, Object>> result = scores.stream()
+            .filter(s -> {
+                String src = s.getSource() != null ? s.getSource() : "arcade";
+                if ("infinitas".equals(src)) return showInfinitas;
+                return showArcade; // arcade（既定）として扱う
+            })
+            .map(s -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", s.getId());
+                map.put("title", s.getTitle() != null ? s.getTitle() : "");
+                map.put("difficultyName", s.getDifficultyName() != null ? s.getDifficultyName() : "");
+                map.put("difficultyLevel", s.getDifficultyLevel() != null ? s.getDifficultyLevel() : 0);
+                map.put("score", s.getScore() != null ? s.getScore() : 0);
+                map.put("clearType", s.getClearType() != null ? s.getClearType() : "");
+                map.put("djLevel", s.getDjLevel() != null ? s.getDjLevel() : "");
+                map.put("pgreat", s.getPgreat() != null ? s.getPgreat() : 0);
+                map.put("great", s.getGreat() != null ? s.getGreat() : 0);
+                map.put("missCount", s.getMissCount());
+                map.put("source", s.getSource() != null ? s.getSource() : "arcade");
+                map.put("options", optionsMap.getOrDefault(optionsKey(s.getTitle(), s.getDifficultyName()), List.of()));
+                return map;
+            }).toList();
 
         return ResponseEntity.ok(result);
     }
@@ -1438,6 +1495,22 @@ public class ScoreController {
             Integer pgreat,
             Integer great,
             Integer missCount,
-            Integer playCount) {
+            Integer playCount,
+            /**
+             * スコア取得元。{@code "arcade"}（既定）または {@code "infinitas"}。
+             * 旧クライアントは送ってこないので null フォールバックを {@link #effectiveSource()} で吸収する。
+             */
+            String source) {
+        /**
+         * null/空白を "arcade" にフォールバックして返す。旧フロントとの互換維持と、
+         * 不正値（任意の文字列）が来た場合の安全策を兼ねる。
+         */
+        public String effectiveSource() {
+            if (source == null || source.isBlank()) return "arcade";
+            // 既知ソース以外は "arcade" に正規化する（将来の追加時はここに足す）。
+            String s = source.toLowerCase();
+            if ("infinitas".equals(s) || "arcade".equals(s)) return s;
+            return "arcade";
+        }
     }
 }

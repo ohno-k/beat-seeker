@@ -35,5 +35,9 @@ public record ProfileUpdateRequest(
                 /** KENBAN-TIER / SARA-TIER を表示するか（サポーター限定オプトイン）。 */
                 Boolean showKenbanSaraTier,
                 /** サポーター用ボーダー（枠）を表示するか。 */
-                Boolean showSupporterBorder) {
+                Boolean showSupporterBorder,
+                /** アーケード（CSV）由来のスコアを UI 上に表示するか。 */
+                Boolean showArcadeScores,
+                /** INFINITAS 画面取得由来のスコアを UI 上に表示するか。 */
+                Boolean showInfinitasScores) {
 }

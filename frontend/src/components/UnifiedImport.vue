@@ -11,16 +11,25 @@
  * @emits close 処理完了時にモーダルを閉じる。
  * @emits score-file スコア CSV を File として親（メインインポート処理）に引き渡す。
  */
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import { useAuth } from '../composables/useAuth';
+import InfinitasMonitor from './InfinitasMonitor.vue';
 
 const { t } = useI18n();
+const { user } = useAuth();
 
 const props = defineProps<{ bookmarkletCode: string }>();
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'score-file', file: File): void;
 }>();
+
+/**
+ * INFINITAS モードへのアクセス可否。サポーター限定機能。
+ * user.isSupporter フラグで判定する。
+ */
+const canUseInfinitas = computed(() => !!user.value && user.value.isSupporter === true);
 
 // ---- ブックマークレット使い方モーダル関連 ----
 /** ヘルプモーダル表示フラグ。 */
@@ -31,8 +40,8 @@ const deviceTab = ref<'pc' | 'sp'>('sp');
 const codeCopied = ref(false);
 
 // ---- メインタブ ----
-/** インポート方式タブ（テキスト貼り付け / ファイルアップロード）。 */
-const importTab = ref<'text' | 'file'>('text');
+/** インポート方式タブ（テキスト貼り付け / ファイルアップロード / INFINITAS 画面取込）。 */
+const importTab = ref<'text' | 'file' | 'infinitas'>('text');
 
 // ---- ファイルアップロード状態 ----
 /** D&D 中のハイライト表示フラグ。 */
@@ -240,6 +249,12 @@ const copyBookmarkletCode = async () => {
         :class="importTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="importTab = 'file'"
       >{{ t('import.tabFile') }}</button>
+      <button
+        v-if="canUseInfinitas"
+        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
+        :class="importTab === 'infinitas' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        @click="importTab = 'infinitas'"
+      >{{ t('import.tabInfinitas') }}</button>
     </div>
 
     <!-- Text paste tab -->
@@ -252,8 +267,13 @@ const copyBookmarkletCode = async () => {
       ></textarea>
     </div>
 
+    <!-- INFINITAS monitor tab (許可ユーザーのみ) -->
+    <div v-else-if="importTab === 'infinitas' && canUseInfinitas">
+      <InfinitasMonitor />
+    </div>
+
     <!-- File upload tab -->
-    <div v-else class="space-y-2">
+    <div v-else-if="importTab === 'file'" class="space-y-2">
       <div
         class="border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-all"
         :class="isDragging
@@ -284,8 +304,9 @@ const copyBookmarkletCode = async () => {
       </div>
     </div>
 
-    <!-- Unified submit button -->
+    <!-- Unified submit button（INFINITAS タブでは非表示。InfinitasMonitor が独自のコントロールを持つため） -->
     <button
+      v-if="importTab !== 'infinitas'"
       @click="handleSubmit"
       :disabled="isImporting || (importTab === 'file' && !selectedFile)"
       class="w-full py-2.5 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"

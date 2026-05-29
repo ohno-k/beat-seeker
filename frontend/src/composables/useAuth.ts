@@ -30,6 +30,10 @@ export interface AuthUser {
     supporterToken: string;
     lastUploadedAt: string | null;
     email: string;
+    /** アーケード（CSV）由来スコアを UI に表示するか。 */
+    showArcadeScores: boolean;
+    /** INFINITAS 画面取得由来スコアを UI に表示するか。 */
+    showInfinitasScores: boolean;
 }
 
 /**

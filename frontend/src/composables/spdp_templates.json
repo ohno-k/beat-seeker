@@ -1,0 +1,19 @@
+{
+  "roi": {
+    "x": 948,
+    "y": 1041,
+    "w": 37,
+    "h": 24
+  },
+  "maxShift": 2,
+  "SP": {
+    "template_hex": "003e00001801f00004ffff83fc03fffc1ff81fffe0ffe0ffff07ff0400f800003fffc01f0100fe01fc0803f00000400f800002007c00001f01e00004fe0f0003c3f0781ffc1f83c0ffe0001e07f00880f00000400f800000003c03800001e03807808f0181fbfc7f1dff1fc3f8dfc0",
+    "mask_hex": "003e00001801f00000ffff81fc03fffc1ff81fffe0ffe0ffff07ff040079c0062007ce003dff3e7003fffdf3ffff800f9f00f8007cf8038f01e7c0087c0f3e0387f079cffc7f83ce7f86079e73f4603ef380467ff39c0439ff9ce0400ff8e704018007382043f83e09f81f81f05f80",
+    "mask_bit_count": 440
+  },
+  "DP": {
+    "template_hex": "ff81ffffe7fe0fffffbff87ffffc1fc3f00ff07e1f803f83f8fc01fc0fc7e00fe07e3f007f03f1f807f81f8fffff80fc7ffffc07e3ffffc03f1ffffc01f8ffff801fc7e00000fe3f00010fe1f8181fff0fc181fff07e1801ff03f1800ff01f98007f00fc8003c007ec000000004000",
+    "mask_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "mask_bit_count": 888
+  }
+}
