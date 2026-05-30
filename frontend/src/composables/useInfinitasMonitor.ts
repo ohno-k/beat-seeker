@@ -8,7 +8,8 @@
  *     リザルト画面か否か & 1P/2P を検出（[[file:infinitasResultRecognizer]] の detectResultScreen）
  *  3. 検出したら全フィールドをピクセル認識 → InfinitasResult に整形
  *  4. onResult コールバックで結果を返す（親で確認モーダルを表示）
- *  5. resumeMonitoring() で再開（同一スコアの再抽出は 30 秒の重複抑制でブロック）
+ *  5. resumeMonitoring() で再開（1 回確定したら 60 秒は再読み込みしないクールダウン +
+ *     同一スコアの再抽出を 30 秒抑制する重複ガードの二段で二重取り込み/誤読を防ぐ）
  *
  * 認識方式（すべて infinitasResultRecognizer に委譲）:
  *  - EX SCORE / MISS COUNT / NOTES … 数字テンプレ hash
@@ -133,6 +134,16 @@ const RESULT_SETTLE_DELAY_MS = 300;
 const SETTLE_POLL_MS = 300;
 /** 同一スコアの再検出を抑制する期間（ms）。INFINITAS のリザルト表示時間より長め。 */
 const DUPLICATE_SUPPRESS_MS = 30_000;
+/**
+ * 1 回読み込みを確定したあと、曲の内容に関係なく次の読み込みを一切行わないクールダウン（ms）。
+ *
+ * DUPLICATE_SUPPRESS_MS は「(曲|score|難易度) が完全一致」した時しか弾けないため、
+ * 暗転フレームの誤読で曲が不明(notes:null)になると別キー扱いで素通りし、同じリザルトから
+ * 不明曲モーダルが出てしまう。また auto 登録直後の resumeMonitoring で、まだ表示中の同じ
+ * リザルト画面を再度掴む二重取り込みも起きる。これらをまとめて防ぐため、確定後はリザルト画面を
+ * 検出しても 60 秒間は抽出に進まない。1 曲のプレイには十分な間隔があり実害はない。
+ */
+const ACCEPT_COOLDOWN_MS = 60_000;
 
 /**
  * @param playSide ユーザー登録のプレイサイド。
@@ -162,6 +173,9 @@ export function useInfinitasMonitor(
 
   /** リザルト画面を最初に検出した時刻（ms）。演出待機の起点。未検出なら null。 */
   let resultFirstSeenAt: number | null = null;
+
+  /** 直近で読み込みを確定した時刻（ms）。ACCEPT_COOLDOWN_MS のクールダウン起点。未確定なら null。 */
+  let lastAcceptedAt: number | null = null;
 
   /**
    * プレイ中に観測した BPM。リザルトより前のプレイ画面で読み取り、曲特定の補助に使う。
@@ -385,6 +399,12 @@ export function useInfinitasMonitor(
 
     // リザルト画面を検出
     const now = Date.now();
+    // 直近の確定から ACCEPT_COOLDOWN_MS 以内は、リザルト画面でも一切抽出しない。
+    // （同一曲の二重取り込み・暗転フレーム誤読による不明曲モーダルをまとめて防ぐ）
+    if (lastAcceptedAt !== null && now - lastAcceptedAt < ACCEPT_COOLDOWN_MS) {
+      detectionTimer = window.setTimeout(detectionLoop, DETECTION_INTERVAL_MS);
+      return;
+    }
     if (resultFirstSeenAt === null) {
       // 初検出 → 演出が終わるまで待つ
       resultFirstSeenAt = now;
@@ -421,6 +441,8 @@ export function useInfinitasMonitor(
       }
       if (!isDuplicate(result)) {
         markHandled(result);
+        // クールダウン起点を更新。以後 ACCEPT_COOLDOWN_MS は新たな読み込みをしない。
+        lastAcceptedAt = Date.now();
         detectionCount.value++;
         recentResults.value = [result, ...recentResults.value].slice(0, 10);
         // このプレイの BPM は使い終わったのでリセット。次の曲のプレイ画面で読み直す。
@@ -494,6 +516,7 @@ export function useInfinitasMonitor(
     detectionCount.value = 0;
     recentHashes.clear();
     resultFirstSeenAt = null;
+    lastAcceptedAt = null;
     observedBpm = null;
   }
 
