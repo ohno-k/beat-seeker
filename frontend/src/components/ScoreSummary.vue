@@ -299,6 +299,12 @@
                   <span :class="['px-1 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] font-bold whitespace-nowrap inline-block w-fit', record.difficultyColor]">
                     {{ record.difficultyName.charAt(0) }}<span class="hidden sm:inline">{{ record.difficultyName.slice(1) }}</span> {{ record.difficultyLevel || '' }}
                   </span>
+                  <!-- INF タグ: 表示中のスコアが INFINITAS 取得（アーケードより高い／アーケード未プレイ）の場合に付与。 -->
+                  <span v-if="record.source === 'infinitas'"
+                        class="px-1 sm:px-1.5 py-0 rounded text-[7px] sm:text-[9px] font-black whitespace-nowrap inline-block w-fit text-sky-700 bg-sky-100 border border-sky-300 dark:text-sky-300 dark:bg-sky-900/40 dark:border-sky-700"
+                        title="INFINITAS で取り込んだスコア（アーケードとは別管理。両方ある場合は EX SCORE が高い方を表示）">
+                    INF
+                  </span>
                   <!-- 譜面タイプ（鍵盤/バランス/皿）バッジ。KENBAN/SARA-Tier トグル ON のときだけ表示。 -->
                   <span v-if="showKenbanSaraTier && recordChartType(record) !== 'unknown'"
                         :class="['px-1 sm:px-1.5 py-0 rounded text-[7px] sm:text-[9px] font-bold whitespace-nowrap inline-block w-fit', chartTypeBadgeClass(recordChartType(record))]"

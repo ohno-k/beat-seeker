@@ -6,6 +6,25 @@ import { useAuth } from './useAuth';
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 /**
+ * 【内部ヘルパー】 同一(曲,難易度)に複数 source（arcade / infinitas）の行が来たとき、
+ * 表示用に 1 つの DifficultyStats へ集約する。
+ *
+ * ルール:
+ *  - スロットがまだ emptyDiff プレースホルダ（`source` 未設定）なら無条件で採用する
+ *  - 既に実レコードが入っている場合は **EX SCORE が高い方を残す**（同点は先着＝先に
+ *    アップロードされた方を維持。CSV→画面取得の順で取り込むため通常 arcade が残る）
+ *
+ * stat には呼び出し側で `source` を必ず付与しておくこと（API が source を返さない場合は
+ * 'arcade' 既定にする）。これにより「source 未設定＝プレースホルダ」が安定して判定できる。
+ */
+function assignBestStat(entry: any, diffKey: string, stat: DifficultyStats): void {
+    const cur = entry[diffKey] as DifficultyStats | undefined;
+    if (!cur || cur.source === undefined || stat.score > cur.score) {
+        entry[diffKey] = stat;
+    }
+}
+
+/**
  * 【Composable の役割】 スコア取得系 API（自分 / 他ユーザ / トップランカー / プロフィール / メモ）を一括提供する。
  *
  * API が返す「譜面フラット配列」を、UI が扱いやすい「曲単位にグルーピングした構造」に変換する
@@ -86,19 +105,19 @@ export function useScores() {
                 // API の 'ANOTHER' を UI の 'another' キーに正規化
                 const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
 
-                if (entry[diffKey]) {
-                    entry[diffKey] = {
-                        id: s.id,
-                        difficulty: s.difficultyLevel,
-                        score: s.score,
-                        pgreat: s.pgreat || 0,
-                        great: s.great || 0,
-                        missCount: s.missCount,
-                        clearType: s.clearType,
-                        djLevel: s.djLevel,
-                        options: Array.isArray(s.options) ? s.options : undefined
-                    };
-                }
+                // arcade / infinitas が並走する場合は EX SCORE が高い方を残し、その source を持たせる。
+                assignBestStat(entry, diffKey, {
+                    id: s.id,
+                    difficulty: s.difficultyLevel,
+                    score: s.score,
+                    pgreat: s.pgreat || 0,
+                    great: s.great || 0,
+                    missCount: s.missCount,
+                    clearType: s.clearType,
+                    djLevel: s.djLevel,
+                    options: Array.isArray(s.options) ? s.options : undefined,
+                    source: s.source || 'arcade',
+                });
             });
 
             return Array.from(grouped.values());
@@ -195,19 +214,19 @@ export function useScores() {
                 const entry = grouped.get(title);
                 const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
 
-                if (entry[diffKey]) {
-                    entry[diffKey] = {
-                        id: s.id,
-                        difficulty: s.difficultyLevel,
-                        score: s.score,
-                        pgreat: s.pgreat || 0,
-                        great: s.great || 0,
-                        missCount: s.missCount,
-                        clearType: s.clearType,
-                        djLevel: s.djLevel,
-                        options: Array.isArray(s.options) ? s.options : undefined
-                    };
-                }
+                // arcade / infinitas が並走する場合は EX SCORE が高い方を残し、その source を持たせる。
+                assignBestStat(entry, diffKey, {
+                    id: s.id,
+                    difficulty: s.difficultyLevel,
+                    score: s.score,
+                    pgreat: s.pgreat || 0,
+                    great: s.great || 0,
+                    missCount: s.missCount,
+                    clearType: s.clearType,
+                    djLevel: s.djLevel,
+                    options: Array.isArray(s.options) ? s.options : undefined,
+                    source: s.source || 'arcade',
+                });
             });
 
             return Array.from(grouped.values());
@@ -269,20 +288,19 @@ export function useScores() {
                 }
                 const entry = grouped.get(title);
                 const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
-                if (entry[diffKey]) {
-                    entry[diffKey] = {
-                        id: undefined,
-                        difficulty: s.difficultyLevel,
-                        score: s.score,
-                        pgreat: 0,
-                        great: 0,
-                        missCount: null,
-                        clearType: s.clearType ?? 'NO PLAY',
-                        djLevel: s.djLevel ?? '---',
-                        options: undefined,
-                        djName: s.djName ?? undefined,
-                    } as any;
-                }
+                assignBestStat(entry, diffKey, {
+                    id: undefined,
+                    difficulty: s.difficultyLevel,
+                    score: s.score,
+                    pgreat: 0,
+                    great: 0,
+                    missCount: null,
+                    clearType: s.clearType ?? 'NO PLAY',
+                    djLevel: s.djLevel ?? '---',
+                    options: undefined,
+                    djName: s.djName ?? undefined,
+                    source: s.source || 'arcade',
+                } as any);
             });
 
             return {

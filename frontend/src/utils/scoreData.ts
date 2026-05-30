@@ -49,6 +49,8 @@ export interface ScoreRecord {
     /** iidx-memo 等から同期された譜面オプション。読み取り専用。 */
     options?: string[];
     djName?: string;
+    /** スコア取得元。"arcade" / "infinitas"。表示の INF タグ判定に使う。 */
+    source?: string;
 }
 
 /** ScoreData プロパティ名として存在する 5 難易度のキー列挙。forEach の対象に使う。 */
@@ -234,7 +236,8 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
                     beatTierPoints: beatTierPoints,
                     maxBeatTierPoints: getMaxPoints(informalRank),
                     options: stats.options,
-                    djName: stats.djName
+                    djName: stats.djName,
+                    source: stats.source
                 });
             }
         });
