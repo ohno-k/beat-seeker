@@ -10,7 +10,7 @@
  *
  * 注意:
  *  - INFINITAS は FHD 解像度。画面共有はフルスクリーンの INFINITAS ウィンドウ全体を選ぶ前提
- *  - この機能は親側で表示制御されており、許可ユーザー以外には届かない設計
+ *  - この機能はログイン済みユーザーへ一般開放（親側で未ログイン時は導線を出さない）
  */
 import { ref, onBeforeUnmount } from 'vue';
 import { useInfinitasMonitor, type InfinitasResult, type PlaySide } from '../composables/useInfinitasMonitor';

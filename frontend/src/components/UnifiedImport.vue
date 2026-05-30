@@ -26,10 +26,10 @@ const emit = defineEmits<{
 }>();
 
 /**
- * INFINITAS モードへのアクセス可否。サポーター限定機能。
- * user.isSupporter フラグで判定する。
+ * INFINITAS モードへのアクセス可否。ログイン済みユーザーへ一般開放。
+ * （スコアをサーバーへ保存するためログインは必須。未ログイン＝ゲストは不可。）
  */
-const canUseInfinitas = computed(() => !!user.value && user.value.isSupporter === true);
+const canUseInfinitas = computed(() => !!user.value);
 
 // ---- ブックマークレット使い方モーダル関連 ----
 /** ヘルプモーダル表示フラグ。 */
@@ -267,7 +267,7 @@ const copyBookmarkletCode = async () => {
       ></textarea>
     </div>
 
-    <!-- INFINITAS monitor tab (許可ユーザーのみ) -->
+    <!-- INFINITAS monitor tab (ログイン済みユーザーのみ) -->
     <div v-else-if="importTab === 'infinitas' && canUseInfinitas">
       <InfinitasMonitor />
     </div>
