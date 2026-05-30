@@ -104,6 +104,8 @@ const groupedList = computed(() => {
       _isGrouped: true,
       _dateKey: dateKey,
       _itemCount: items.length,
+      // 同日内に INFINITAS 取り込み由来のログが 1 件でもあれば INF バッジを出す。
+      _hasInf: items.some((i: any) => i.tag === 'INFINITAS'),
       updatedCount: items.reduce((sum: number, i: any) => sum + (i.updatedCount || 0), 0),
       beatPtIncrease: latest.totalBeatPt - prevBeatPt,
       ratePtIncrease: latest.totalRatePt - prevRatePt,
@@ -377,14 +379,21 @@ onMounted(() => {
               </template>
             </td>
 
-            <!-- 種別列（更新曲数 or 難易度改訂バッジ） -->
+            <!-- 種別列（更新曲数 or 難易度改訂バッジ、+ INFINITAS 取り込みなら INF バッジ） -->
             <td class="p-4 text-center align-middle font-black">
-              <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-base">
-                {{ item.updatedCount }} {{ t('history.unitSongs') }}
-              </span>
-              <span v-else class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-sm">
-                {{ t('history.revision') }}
-              </span>
+              <div class="flex items-center justify-center gap-1.5">
+                <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-base">
+                  {{ item.updatedCount }} {{ t('history.unitSongs') }}
+                </span>
+                <span v-else class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-sm">
+                  {{ t('history.revision') }}
+                </span>
+                <span
+                  v-if="item._isGrouped ? item._hasInf : item.tag === 'INFINITAS'"
+                  class="px-2 py-1 bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 rounded-full text-xs font-bold"
+                  :title="t('history.infBadgeHint')"
+                >{{ t('history.infBadge') }}</span>
+              </div>
             </td>
 
             <!-- Beat-PT 列（合計値 + 増減バッジ） -->

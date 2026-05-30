@@ -686,6 +686,8 @@ export const ko = {
   'history.unitSongs': '곡',
   'history.revision': '난이도 개정',
   'history.difficultyRevision': '난이도 개정',
+  'history.infBadge': 'INF',
+  'history.infBadgeHint': 'INFINITAS 화면 캡처로 기록 (그날의 기록을 하나로 통합)',
 
   // Onboarding
   'onboarding.welcome': '등록해 주셔서 감사합니다!',
@@ -1214,6 +1216,7 @@ export const ko = {
   'infinitas.changeSong': '다른 곡으로 변경',
   'infinitas.songNotMatched': '곡명을 자동 검출하지 못했습니다. 수동으로 선택해 주세요.',
   'infinitas.candidatesFromChartInfo': '채보 정보(NOTES: {notes})에서 {n}개 후보를 찾았습니다:',
+  'infinitas.maybeAcOnly': '채보 정보(NOTES: {notes})와 일치하는 곡을 찾지 못했습니다. AC(아케이드) 미수록 INFINITAS 전용 곡일 가능성이 있습니다.',
   'infinitas.pickSongManually': '곡을 수동으로 선택',
   'infinitas.searchPlaceholder': '곡명으로 검색…',
   'infinitas.noResults': '결과가 없습니다',

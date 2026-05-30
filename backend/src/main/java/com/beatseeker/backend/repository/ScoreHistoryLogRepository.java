@@ -372,4 +372,21 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
      */
     Optional<ScoreHistoryLog> findFirstByUserAndUploadedAtLessThanOrderByUploadedAtDesc(
             User user, LocalDateTime threshold);
+
+    /**
+     * 【メソッドの役割】 指定ユーザーの、特定タグ・指定期間 [startDate, endDate) 内の最新 1 件を返す。
+     *
+     * 派生クエリ: {@code WHERE user_id = ? AND tag = ? AND uploaded_at >= ? AND uploaded_at < ?
+     * ORDER BY uploaded_at DESC LIMIT 1}。
+     * INFINITAS 取り込みの「その日 1 レコード」集約で、当日分の既存ログを引き当てるのに使う
+     * （見つかれば upsert、無ければ新規作成）。endDate は含まない（[日初, 翌日初) の半開区間）。
+     *
+     * @param user      対象ユーザー
+     * @param tag       タグ（例 "INFINITAS"）
+     * @param startDate 期間開始（含む）
+     * @param endDate   期間終了（含まない）
+     * @return 当日分の既存ログ（無ければ空）
+     */
+    Optional<ScoreHistoryLog> findFirstByUserAndTagAndUploadedAtGreaterThanEqualAndUploadedAtLessThanOrderByUploadedAtDesc(
+            User user, String tag, LocalDateTime startDate, LocalDateTime endDate);
 }

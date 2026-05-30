@@ -686,6 +686,8 @@ export const en = {
   'history.unitSongs': 'songs',
   'history.revision': 'Difficulty Revision',
   'history.difficultyRevision': 'Difficulty Revision',
+  'history.infBadge': 'INF',
+  'history.infBadgeHint': 'Recorded via INFINITAS screen capture (the day\'s imports merged into one record)',
 
   // Onboarding
   'onboarding.welcome': 'Welcome to beat-seeker!',
@@ -1213,6 +1215,7 @@ export const en = {
   'infinitas.changeSong': 'Change song',
   'infinitas.songNotMatched': 'Could not detect the song title. Pick it manually.',
   'infinitas.candidatesFromChartInfo': 'Found {n} candidate(s) by chart info (NOTES: {notes}):',
+  'infinitas.maybeAcOnly': 'No song matched the chart info (NOTES: {notes}). It may be an INFINITAS-only song not available in the arcade (AC) version.',
   'infinitas.pickSongManually': 'Pick song manually',
   'infinitas.searchPlaceholder': 'Search by title…',
   'infinitas.noResults': 'No matches',

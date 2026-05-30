@@ -37,6 +37,14 @@ public class ScoreHistoryLog {
     @Column(nullable = false)
     private LocalDateTime uploadedAt;
 
+    /**
+     * 記録の種別タグ。通常の一括アップロードは null（無印）。
+     * INFINITAS 画面取り込みによる自動記録は "INFINITAS"。成長記録ページの「INF」バッジ表示と、
+     * 同日 1 レコードに集約する upsert のマッチングキーに使う。
+     */
+    @Column(length = 20)
+    private String tag;
+
     /** 累計 EX スコア（全曲合計）。 */
     private Long totalScore = 0L;
 

@@ -691,6 +691,8 @@ export const ja = {
   'history.unitSongs': '曲',
   'history.revision': '難易度改訂',
   'history.difficultyRevision': '難易度改訂',
+  'history.infBadge': 'INF',
+  'history.infBadgeHint': 'INFINITAS 画面取り込みによる記録（その日の分をまとめて1レコード）',
 
   // Onboarding
   'onboarding.welcome': '登録ありがとうございます！',
@@ -1288,6 +1290,7 @@ export const ja = {
   'infinitas.changeSong': '別の曲に変更',
   'infinitas.songNotMatched': '曲名を自動検出できませんでした。手動で選択してください。',
   'infinitas.candidatesFromChartInfo': '譜面情報（NOTES: {notes}）から {n} 件の候補が見つかりました:',
+  'infinitas.maybeAcOnly': '譜面情報（NOTES: {notes}）に一致する曲が見つかりませんでした。AC（アーケード）未収録の INFINITAS 限定曲の可能性があります。',
   'infinitas.pickSongManually': '曲を手動で選ぶ',
   'infinitas.searchPlaceholder': '曲名で検索…',
   'infinitas.noResults': '候補が見つかりません',

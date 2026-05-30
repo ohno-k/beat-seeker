@@ -298,6 +298,8 @@ public class ScoreController {
                 diff.put("oldClearType", oldClearType);
                 diff.put("newClearType", req.clearType());
                 diff.put("clearTypeImproved", getClearTypeRank(req.clearType()) > getClearTypeRank(oldClearType));
+                // 取得元（arcade/infinitas）を残す。INFINITAS 由来の更新だけを日次 INF 履歴へ集約する判定に使う。
+                diff.put("source", source);
                 updatedSongs.add(diff);
             }
         }
@@ -306,6 +308,20 @@ public class ScoreController {
         if (!updatedSongs.isEmpty()) {
             updateLastUploadTime(user);
             notifyFriendsOfScoreBeat(user, updatedSongs);
+
+            // INFINITAS 由来の更新があれば、その日 1 レコードの成長記録（tag=INFINITAS）へ集約する。
+            // 画面取り込みは 1 曲ずつ届くため、同日内は既存ログに曲を追記・各 PT を再計算する upsert。
+            List<Map<String, Object>> infUpdated = updatedSongs.stream()
+                    .filter(d -> "infinitas".equals(d.get("source")))
+                    .collect(java.util.stream.Collectors.toList());
+            if (!infUpdated.isEmpty()) {
+                try {
+                    scoreRecalculationService.upsertDailyInfinitasLog(user, infUpdated);
+                } catch (Exception e) {
+                    // 履歴集約の失敗はスコア保存自体を巻き戻さない（成長記録は事後再計算で救済可能）。
+                    System.err.println("Failed to upsert daily INFINITAS history log: " + e.getMessage());
+                }
+            }
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -642,6 +658,8 @@ public class ScoreController {
             snapshotData.put("updatedCount", log.getUpdatedCount());
             snapshotData.put("diffJson", log.getDiffJson());
             snapshotData.put("totalRatePt", log.getTotalRatePt());
+            // 記録の種別タグ（"INFINITAS" など）。成長記録ページの「INF」バッジ表示に使う。null は無印。
+            snapshotData.put("tag", log.getTag());
 
             history.add(snapshotData);
         }

@@ -296,6 +296,13 @@ const confirm = () => {
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ c.artist }}</p>
                   </button>
                 </div>
+                <!--
+                  候補が 1 件も無い = (難易度, NOTES) に一致する譜面が songData に存在しない。
+                  AC 未収録（INFINITAS 限定）曲の可能性が高いのでその旨を明示する。
+                -->
+                <p v-else class="mt-2 text-[11px] font-bold text-red-700 dark:text-red-300">
+                  {{ t('infinitas.maybeAcOnly', { notes: result.notesCount ?? '?' }) }}
+                </p>
                 <button @click="showSongPicker = true" class="mt-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">
                   {{ t('infinitas.pickSongManually') }}
                 </button>

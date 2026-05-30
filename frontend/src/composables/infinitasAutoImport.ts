@@ -39,7 +39,8 @@ function isValidCurrentClear(clearType: string | null): boolean {
  *    曲を選べば、確定時のオートラーニングで未知の NOTES 桁 hash を学習でき次回以降は自動認識できる。
  *  - 曲が一意特定できていない（songEntry が null）
  *  - クリアタイプが不正（null / NO PLAY）
- *  - JUDGE 整合性 NG（BAD+POOR ≠ MISS COUNT。両方読めている場合のみ判定）
+ *  - JUDGE 整合性 NG（BAD+POOR が MISS COUNT を超過＝誤読。空POOR は POOR 欄に出ないため
+ *    BAD+POOR <= MISS COUNT が正常。3 値とも読めている場合のみ判定）
  *  - DP プレー（beat-seeker は SP 前提のため、自動では入れず人手確認に回す）
  *
  * auto（全自動登録）: 上記いずれにも該当しない。
@@ -62,9 +63,11 @@ export function classifyResult(result: InfinitasResult): ImportDecision {
   if (!result.songEntry) return 'manual';
   if (!isValidCurrentClear(result.clearType)) return 'manual';
   if (result.playSide === 'DP') return 'manual';
-  // JUDGE 整合性（BAD+POOR == MISS COUNT）。3 値とも読めている時だけ厳密判定。
+  // JUDGE 整合性。MISS COUNT = BAD + 見逃しPOOR + 空POOR だが、リザルト詳細の POOR 欄は
+  // 空POOR（2度押し等でコンボ継続するもの）を含まないため bad + poor <= missCount が正常
+  // （差分が空POOR）。よって「超過」した時だけ誤読とみなして弾く。3 値とも読めている時のみ判定。
   if (result.bad != null && result.poor != null && result.missCount != null) {
-    if (result.bad + result.poor !== result.missCount) return 'manual';
+    if (result.bad + result.poor > result.missCount) return 'manual';
   }
 
   return 'auto';
