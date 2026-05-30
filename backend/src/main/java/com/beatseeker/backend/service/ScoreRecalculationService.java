@@ -466,11 +466,24 @@ public class ScoreRecalculationService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processUserRecalculation(User user, Map<String, Integer> songMaxScores, Map<String, String> informalRanks, Map<String, Double> scratchMap) {
-        List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
-        if (scores.isEmpty()) return;
+        List<Score> rawScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+        if (rawScores.isEmpty()) return;
 
-        List<Double> beatPts = new ArrayList<>();
-        List<Double> ratePts = new ArrayList<>();
+        // arcade / infinitas が並走する場合は (曲, 難易度) ごとに EX SCORE が高い方だけを採用し、
+        // 二重計上を防ぐ（表示の「高い方を表示」ルールと集計を一致させる）。同点は先着(=arcade)を維持。
+        java.util.Map<String, Score> bestByChart = new java.util.LinkedHashMap<>();
+        for (Score s : rawScores) {
+            String key = s.getTitle() + " " + s.getDifficultyName();
+            Score cur = bestByChart.get(key);
+            int sv = s.getScore() != null ? s.getScore() : 0;
+            int cv = (cur != null && cur.getScore() != null) ? cur.getScore() : -1;
+            if (cur == null || sv > cv) bestByChart.put(key, s);
+        }
+        List<Score> scores = new ArrayList<>(bestByChart.values());
+
+        // pt は [値, INFINITAS由来か(1/0)] の対で保持し、上位100曲に INF が含まれるか判定する。
+        List<double[]> beatPts = new ArrayList<>();
+        List<double[]> ratePts = new ArrayList<>();
         int perfectRateCount = 0;
 
         long totalScore = 0;
@@ -507,32 +520,46 @@ public class ScoreRecalculationService {
 
             String informalRankString = informalRanks.get(score.getTitle() + "_" + diffName);
 
+            // この譜面ベストが INFINITAS 取得か（null/未設定は arcade 扱い）。
+            boolean isInf = "infinitas".equals(score.getSource());
+
             // BEAT-PT
             boolean isHyperNonTarget = "HYPER".equals(diffName) && score.getDifficultyLevel() != null && score.getDifficultyLevel() >= 11;
             if (!isHyperNonTarget) {
                 double pt = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
-                if (pt > 0) beatPts.add(pt);
+                if (pt > 0) beatPts.add(new double[]{pt, isInf ? 1 : 0});
             }
 
             // RATE-PT
             boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
             if (isRateEligible && scoreRate > 0) {
                 double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
-                if (rPt > 0) ratePts.add(rPt);
+                if (rPt > 0) ratePts.add(new double[]{rPt, isInf ? 1 : 0});
                 if (scoreRate >= 100.0) perfectRateCount++;
             }
         }
 
-        beatPts.sort(Collections.reverseOrder());
+        beatPts.sort((a, b) -> Double.compare(b[0], a[0]));
         double totalBeatPtAcc = 0;
-        for (int i = 0; i < Math.min(100, beatPts.size()); i++) totalBeatPtAcc += beatPts.get(i);
+        boolean beatHasInf = false;
+        for (int i = 0; i < Math.min(100, beatPts.size()); i++) {
+            totalBeatPtAcc += beatPts.get(i)[0];
+            if (beatPts.get(i)[1] > 0) beatHasInf = true;
+        }
         double finalBeatPt = Math.round(totalBeatPtAcc * 10.0) / 10.0;
 
-        ratePts.sort(Collections.reverseOrder());
+        ratePts.sort((a, b) -> Double.compare(b[0], a[0]));
         double totalRatePtAcc = 0;
-        for (int i = 0; i < Math.min(100, ratePts.size()); i++) totalRatePtAcc += ratePts.get(i);
+        boolean rateHasInf = false;
+        for (int i = 0; i < Math.min(100, ratePts.size()); i++) {
+            totalRatePtAcc += ratePts.get(i)[0];
+            if (ratePts.get(i)[1] > 0) rateHasInf = true;
+        }
         if (perfectRateCount > 100) totalRatePtAcc += (perfectRateCount - 100);
         double finalRatePt = Math.round(totalRatePtAcc * 10.0) / 10.0;
+
+        // 上位100曲(BEAT/RATE)に INFINITAS 由来ベストが含まれるか → ランキング行の INF バッジ用。
+        boolean includesInfinitas = beatHasInf || rateHasInf;
 
         List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
         double oldBeatPt = logs.isEmpty() ? 0 : (logs.get(logs.size() - 1).getTotalBeatPt() != null ? logs.get(logs.size() - 1).getTotalBeatPt() : 0);
@@ -566,6 +593,7 @@ public class ScoreRecalculationService {
         // users テーブルのキャッシュも同期更新（ランキング クエリの高速化用）
         user.setTotalKenbanPt(kenbanSara[0]);
         user.setTotalSaraPt(kenbanSara[1]);
+        user.setRankingIncludesInfinitas(includesInfinitas);
         userRepository.save(user);
     }
 

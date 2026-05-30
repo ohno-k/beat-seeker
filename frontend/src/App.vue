@@ -1235,6 +1235,18 @@ const handleFileDropped = async (file: File) => {
         const rateTop100Set = new Set(sortedByRatePtDesc.slice(0, 100).map(s => s.key));
         const accurateTotalRatePt = calcFlatRatePt(allFlatAfterUpload);
 
+        // ランキング行の INF バッジ用: 集計対象（BEAT/RATE の上位100曲）に INFINITAS 由来ベストが
+        // 含まれるか。flattenScores の record.source は arcade/infinitas のうち「採用された高い方」を指す。
+        const beatTop100HasInf = sortedByPtDesc.slice(0, 100).some(s => s.source === 'infinitas');
+        const rateTop100HasInf = allFlatAfterUpload
+          .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
+          .map(s => ({ rec: s, pt: calculateScoreRateTierPoints(s.scoreRate) }))
+          .filter(x => x.pt > 0)
+          .sort((a, b) => b.pt - a.pt)
+          .slice(0, 100)
+          .some(x => x.rec.source === 'infinitas');
+        const includesInfinitas = beatTop100HasInf || rateTop100HasInf;
+
         // backendUpdates に scoreRate / maxScore / RATE-PT 関連フィールドを追加補完する。
         const enrichedUpdates = backendUpdates.map(s => {
           const maxScore = getSongMaxScore(s.title, s.difficulty);
@@ -1318,7 +1330,8 @@ const handleFileDropped = async (file: File) => {
                     JSON.stringify(reportSongs),
                     newTierLabel,
                     oldTierLabel,
-                    accurateTotalRatePt
+                    accurateTotalRatePt,
+                    includesInfinitas
                 );
                 console.log("History log saved successfully.");
             } catch (err) {

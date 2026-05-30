@@ -35,6 +35,8 @@ interface BeatRankingEntry {
   totalBeatPt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
+  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
+  includesInfinitas?: boolean;
 }
 
 interface TopRankerEntry {
@@ -57,6 +59,8 @@ interface RateRankingEntry {
   totalRatePt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
+  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
+  includesInfinitas?: boolean;
 }
 
 interface RateTopRankerEntry {
@@ -79,6 +83,8 @@ interface KenbanRankingEntry {
   iidxId: string;
   totalKenbanPt: number;
   isSupporter: boolean;
+  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
+  includesInfinitas?: boolean;
 }
 
 /** SARA-TIER ランキング API のエントリ。 */
@@ -89,6 +95,8 @@ interface SaraRankingEntry {
   iidxId: string;
   totalSaraPt: number;
   isSupporter: boolean;
+  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
+  includesInfinitas?: boolean;
 }
 
 /** AVERAGE ランキング API のエントリ（Lv11/Lv12 ANOTHER/LEGGENDARIA の平均順位）。 */
@@ -101,6 +109,8 @@ interface AverageRankingEntry {
   playedCount: number;
   totalSongs: number;
   isSupporter: boolean;
+  /** 型整合用。AVERAGE ランキングは対象外のため API では返さず常に undefined（バッジ非表示）。 */
+  includesInfinitas?: boolean;
 }
 
 interface SimulationEntry {
@@ -804,6 +814,7 @@ watch(viewMode, async (mode) => {
                           {{ row.entry.displayName || 'Unnamed Player' }}
                         </span>
                         <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="row.entry.includesInfinitas" class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                         <span v-if="user && row.entry.iidxId === user.iidxId"
                           class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
                       </div>
@@ -941,6 +952,7 @@ watch(viewMode, async (mode) => {
                           {{ row.entry.displayName || 'Unnamed Player' }}
                         </span>
                         <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="row.entry.includesInfinitas" class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                         <span v-if="user && row.entry.iidxId === user.iidxId"
                           class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500 text-white">{{ t('ranking.you') }}</span>
                       </div>
@@ -1066,6 +1078,7 @@ watch(viewMode, async (mode) => {
                         {{ row.entry.displayName || 'Unnamed Player' }}
                       </span>
                       <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="row.entry.includesInfinitas" class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                       <span v-if="user && row.entry.iidxId === user.iidxId"
                         class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-500 text-white">{{ t('ranking.you') }}</span>
                     </div>
@@ -1141,6 +1154,7 @@ watch(viewMode, async (mode) => {
                         {{ row.entry.displayName || 'Unnamed Player' }}
                       </span>
                       <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="row.entry.includesInfinitas" class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                       <span v-if="user && row.entry.iidxId === user.iidxId"
                         class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500 text-white">{{ t('ranking.you') }}</span>
                     </div>
@@ -1220,6 +1234,7 @@ watch(viewMode, async (mode) => {
                         {{ row.entry.displayName || 'Unnamed Player' }}
                       </span>
                       <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
+                        <span v-if="row.entry.includesInfinitas" class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                       <span v-if="user && row.entry.iidxId === user.iidxId"
                         class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500 text-white">{{ t('ranking.you') }}</span>
                     </div>

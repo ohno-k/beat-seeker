@@ -89,6 +89,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "       cr.total_beat_pt AS \"totalBeatPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -176,6 +177,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "       cr.total_rate_pt AS \"totalRatePt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -216,6 +218,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "       cr.total_kenban_pt AS \"totalKenbanPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -254,6 +257,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "       cr.total_sara_pt AS \"totalSaraPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +

@@ -48,48 +48,10 @@ const CLEAR_TYPE_OPTIONS = [
 /** スコアの取得元。 */
 type ScoreSource = 'current' | 'best';
 
-/**
- * beat-seeker 上に該当曲・難易度のスコアが存在するかを判定する。
- */
-function hasExistingScore(title: string, diff: 'ANOTHER' | 'LEGGENDARIA'): boolean {
-  const diffKey = diff.toLowerCase() as 'another' | 'leggendaria';
-  return props.existingScores.some(s =>
-    s.title === title &&
-    s[diffKey] &&
-    (s[diffKey] as DifficultyStats).clearType !== 'NO PLAY' &&
-    (s[diffKey] as DifficultyStats).score > 0
-  );
-}
-
-/**
- * 今回プレイと自己ベストのどちらを使うかを決定する。
- * - 自己ベスト更新（今回 ≥ ベスト）→ current
- * - beat-seeker にスコアなし → best（自己ベストが今回より高い場合）
- * - それ以外 → current
- */
-function resolveScoreSource(): ScoreSource {
-  const currentScore = props.result.score ?? 0;
-  const bestScore = props.result.bestScore ?? 0;
-
-  // 自己ベストが読み取れなかった場合は今回プレイを使用
-  if (bestScore === 0) return 'current';
-
-  // 自己ベスト更新時（今回プレイ ≥ 自己ベスト）→ 今回プレイを使用
-  if (currentScore >= bestScore) return 'current';
-
-  // beat-seeker 上にスコアが存在しない場合 → 自己ベストを使用
-  const title = props.result.songEntry?.title;
-  const diff = props.result.difficulty;
-  if (title && diff && !hasExistingScore(title, diff)) {
-    return 'best';
-  }
-
-  // beat-seeker 上に既存スコアありかつ自己ベスト未更新 → 今回プレイ（サーバー側で棄却）
-  return 'current';
-}
-
-// ── スコアソース選択 ──
-const scoreSource = ref<ScoreSource>(resolveScoreSource());
+// ── スコアソース ──
+// 【方針変更】 自己ベスト(bestScore)送信は廃止。INFINITAS 取り込みは常に今回プレイ(current)を登録する。
+// （リザルトの自己ベスト欄は取得元が曖昧で、アーケード等のベストを INFINITAS として誤登録し得るため）
+const scoreSource = ref<ScoreSource>('current');
 
 /** 自己ベストが OCR で取得できたか。 */
 const hasBestData = computed(() => (props.result.bestScore ?? 0) > 0);
@@ -132,30 +94,6 @@ const great = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.great
 const good = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.good ?? 0));
 const bad = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.bad ?? 0));
 const poor = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.poor ?? 0));
-
-// scoreSource が切り替えられたら編集値を復元する
-watch(scoreSource, (src) => {
-  if (src === 'best') {
-    score.value = props.result.bestScore ?? 0;
-    missCount.value = props.result.bestMissCount ?? 0;
-    // djLevel は computed（score から自動再計算）なので代入不要
-    clearType.value = props.result.bestClearType || 'CLEAR';
-    pgreat.value = 0;
-    great.value = 0;
-    good.value = 0;
-    bad.value = 0;
-    poor.value = 0;
-  } else {
-    score.value = props.result.score ?? 0;
-    missCount.value = props.result.missCount ?? 0;
-    clearType.value = props.result.clearType || 'CLEAR';
-    pgreat.value = props.result.pgreat ?? 0;
-    great.value = props.result.great ?? 0;
-    good.value = props.result.good ?? 0;
-    bad.value = props.result.bad ?? 0;
-    poor.value = props.result.poor ?? 0;
-  }
-});
 
 // ── 曲名検索ボックス ──
 const songSearchQuery = ref('');
@@ -316,23 +254,6 @@ const confirm = () => {
               <div class="text-slate-500 dark:text-slate-400">DJ LV</div>
               <div class="text-center" :class="scoreSource === 'current' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.djLevel || '-' }}</div>
               <div class="text-center" :class="scoreSource === 'best' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.bestDjLevel || '-' }}</div>
-            </div>
-            <!-- ソース切り替えボタン -->
-            <div class="mt-2 flex gap-2">
-              <button
-                @click="scoreSource = 'current'"
-                class="flex-1 px-2 py-1.5 text-[11px] font-bold rounded-lg border transition-colors"
-                :class="scoreSource === 'current'
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'"
-              >{{ t('infinitas.current') }}</button>
-              <button
-                @click="scoreSource = 'best'"
-                class="flex-1 px-2 py-1.5 text-[11px] font-bold rounded-lg border transition-colors"
-                :class="scoreSource === 'best'
-                  ? 'bg-amber-600 border-amber-600 text-white'
-                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'"
-              >{{ t('infinitas.best') }}</button>
             </div>
           </div>
 

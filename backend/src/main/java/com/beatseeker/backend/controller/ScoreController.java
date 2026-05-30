@@ -461,6 +461,8 @@ public class ScoreController {
         // 手順4a: ユーザーの totalBeatPt を users テーブルにキャッシュ（ティア別平均クエリを高速化するため）。
         if (req.totalBeatPt() != null) {
             user.setTotalBeatPt(req.totalBeatPt());
+            // ランキング行の INF バッジ用フラグ。フロントが top-100(BEAT/RATE) から算出して送る。
+            if (req.includesInfinitas() != null) user.setRankingIncludesInfinitas(req.includesInfinitas());
             userRepository.save(user);
         }
 

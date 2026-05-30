@@ -23,5 +23,10 @@ public record SaveHistoryLogRequest(
         /** 今回到達したティア名（RATE）。 */
         String tierName,
         /** 直前のティア名。ティア昇降格判定に使う。 */
-        String prevTierName) {
+        String prevTierName,
+        /**
+         * 集計（上位100曲: BEAT/RATE）に INFINITAS 取得のベストが含まれるか。
+         * TIER ランキング行の「INF」バッジ表示用。フロントが top-100 から算出して送る。
+         */
+        Boolean includesInfinitas) {
 }

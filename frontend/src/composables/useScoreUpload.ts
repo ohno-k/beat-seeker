@@ -112,11 +112,11 @@ export function useScoreUpload() {
      * BeatPt / RatePt の推移・Tier 変動をユーザー個別の履歴に残すため、
      * `upload()` 成功後に呼ぶ設計。
      */
-    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number): Promise<void> => {
+    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number, includesInfinitas?: boolean): Promise<void> => {
         const res = await fetch(`${API_BASE}/api/scores/save-history-log`, {
             method: 'POST',
             headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson, totalRatePt: totalRatePt ?? 0, tierName, prevTierName }),
+            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson, totalRatePt: totalRatePt ?? 0, tierName, prevTierName, includesInfinitas: includesInfinitas ?? false }),
         });
 
         if (!res.ok) {

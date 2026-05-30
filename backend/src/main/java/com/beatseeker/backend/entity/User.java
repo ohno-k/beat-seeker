@@ -120,6 +120,14 @@ public class User {
     private Double totalSaraPt = 0.0;
 
     /**
+     * ランキング集計（上位100曲）に INFINITAS 取得のベストが 1 曲でも含まれるか。
+     * TIER 系ランキング（BEAT/RATE/KENBAN/SARA）の行に「INF」バッジを出すための表示フラグ。
+     * saveHistoryLog 時にフロントが算出した値を保存する（AVERAGE ランキングは対象外）。
+     */
+    @ColumnDefault("false")
+    private Boolean rankingIncludesInfinitas = false;
+
+    /**
      * 公式難易度 Lv11/Lv12 ANOTHER/LEGGENDARIA 全曲における平均順位（AVERAGE ランキング用）。
      * 未プレイ譜面は「その譜面のプレイ人数 + 1」を順位として算入し、それを全曲平均した値。
      * 対象セット内に 1 曲もプレイ実績が無いユーザーは null（ランキング除外）。

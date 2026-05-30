@@ -71,29 +71,15 @@ export function classifyResult(result: InfinitasResult): ImportDecision {
 }
 
 /**
- * 今回プレイと自己ベストのどちらを登録に使うかを決定する（モーダルの resolveScoreSource と同等）。
- *  - 自己ベスト未読 → current
- *  - 今回プレイ ≥ 自己ベスト → current
- *  - beat-seeker 上にスコアが無い & 自己ベストが今回より上 → best（取りこぼし防止）
- *  - それ以外 → current（サーバ側でベスト判定）
+ * 登録に使うスコアソースを決定する。
+ *
+ * 【方針変更】 INFINITAS 取り込みでは「自己ベスト(bestScore)送信」を廃止し、**常に今回プレイ(current)** を登録する。
+ *   リザルト画面の自己ベスト欄は取得元が曖昧で（アーケード等のベストが混ざり得る）、それを INFINITAS の
+ *   スコアとして登録してしまうと別管理の前提が崩れるため。今回プレイした結果のみを記録する。
+ *
+ * 引数は将来の判定拡張・呼び出し側互換のため残置（現状は未使用）。
  */
-export function resolveScoreSource(result: InfinitasResult, existingScores: ScoreData[]): ScoreSource {
-  const current = result.score ?? 0;
-  const best = result.bestScore ?? 0;
-  if (best === 0) return 'current';
-  if (current >= best) return 'current';
-  const title = result.songEntry?.title;
-  const diff = result.difficulty;
-  if (title && diff) {
-    const diffKey = diff.toLowerCase() as 'another' | 'leggendaria';
-    const has = existingScores.some(s =>
-      s.title === title &&
-      s[diffKey] &&
-      (s[diffKey] as DifficultyStats).clearType !== 'NO PLAY' &&
-      (s[diffKey] as DifficultyStats).score > 0
-    );
-    if (!has) return 'best';
-  }
+export function resolveScoreSource(_result: InfinitasResult, _existingScores: ScoreData[]): ScoreSource {
   return 'current';
 }
 
