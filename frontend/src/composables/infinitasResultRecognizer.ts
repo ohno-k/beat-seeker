@@ -64,7 +64,10 @@ function countDirectDigitHits(canvas: HTMLCanvasElement, originX: number, y0: nu
     for (let i = 0; i < 4; i++) {
       const data = ctx.getImageData(originX + roi.x + i * cellW, y0 + roi.y, cellW, roi.h).data;
       const h = computeDigitHash(data, cellW, roi.h);
-      if (DIGIT_HASH_MAP.has(h) || LEARNED_DIGIT_MAP.has(h)) hits++;
+      if (DIGIT_HASH_MAP.has(h) || LEARNED_DIGIT_MAP.has(h)) { hits++; continue; }
+      // 明るい背景で固定 hash が潰れる画面でも Y0 を正しく合焦させるため、適応 hash の直接一致も数える。
+      const a = computeDigitHashAdaptive(data, cellW, roi.h);
+      if (a !== null && (DIGIT_HASH_MAP.has(a) || LEARNED_DIGIT_MAP.has(a))) hits++;
     }
   }
   return hits;
@@ -111,6 +114,28 @@ const HASH_X_INDICES = [4, 8, 12, 16, 20, 24, 28, 32];
 const BRIGHTNESS_THRESHOLD = 180;
 /** ハミング距離による曖昧マッチの最大距離（hex 文字数換算）。 */
 const HAMMING_MAX_DISTANCE = 3;
+
+/**
+ * 適応的二値化（明るい背景の救済）用パラメータ。
+ *
+ * 固定しきい値 {@link BRIGHTNESS_THRESHOLD}=180 は「暗い背景＋明るい数字」前提。EXTRA STAGE RESULT の
+ * ように鮮やかなキャラ絵が半透明パネル越しに透ける演出では CURRENT 列の背景自体が明るく(～190)、
+ * 空セルも数字も全ビット 1 に潰れてハッシュが辞書に当たらない（＝スコアが読めず classify が skip して
+ * サイレント無視＝「読み込んでもらいにくい」の主因）。
+ *
+ * 固定方式で読めなかったセルに限り、セル内サンプル点の min/max から相対しきい値
+ * `min + (max-min)*RATIO` で二値化し直す。背景(～190)と数字(～255)の差が残っていれば暗背景時と
+ * 同じビットパターンへ正規化され、既存 digit 辞書にそのまま当たる（実測: bright 背景の "2046" を全桁復元）。
+ */
+const ADAPTIVE_THRESHOLD_RATIO = 0.4;
+/** 適応二値化を使う最小コントラスト。これ未満は一様セル（数字なし）とみなし不使用。 */
+const ADAPTIVE_CONTRAST_MIN = 45;
+/**
+ * 適応二値化を使う最小背景明度（セル内サンプルの min）。これ未満（＝暗背景セル）は固定方式で十分なので
+ * 適応を使わない。これにより通常の暗背景画面では挙動が一切変わらず（固定で読めなければ従来通り null）、
+ * 明るい背景で潰れたセルだけを救済する。
+ */
+const ADAPTIVE_MIN_BACKGROUND = 120;
 
 /** Score / MISS COUNT 用 digit 辞書（白/シアン、cellW=36, cellH=18）。 */
 const DIGIT_HASH_MAP = new Map<string, number>(
@@ -163,6 +188,41 @@ export function computeDigitHash(rgba: Uint8ClampedArray, cellWidth: number, cel
   let hex = '';
   for (let i = 0; i < bits.length; i += 4) {
     const v = ((bits[i] || 0) << 3) | ((bits[i + 1] || 0) << 2) | ((bits[i + 2] || 0) << 1) | (bits[i + 3] || 0);
+    hex += v.toString(16);
+  }
+  return hex;
+}
+
+/**
+ * {@link computeDigitHash} の適応二値化版。明るい背景で潰れたセルの救済専用。
+ *
+ * サンプル点の min/max から相対しきい値で二値化する。暗背景セル（min が低い）や一様セル
+ * （コントラストが小さい＝数字なし）には使わず null を返す。詳細は {@link ADAPTIVE_THRESHOLD_RATIO}。
+ *
+ * @returns 18 文字 hex（救済対象セル）/ null（暗背景・一様セルで適応不要）。
+ */
+export function computeDigitHashAdaptive(rgba: Uint8ClampedArray, cellWidth: number, cellHeight: number): string | null {
+  const vals: number[] = [];
+  for (const y of HASH_Y_INDICES) {
+    if (y >= cellHeight) break;
+    for (const x of HASH_X_INDICES) {
+      if (x >= cellWidth) break;
+      const offset = (y * cellWidth + x) * 4;
+      vals.push(Math.max(rgba[offset], rgba[offset + 1], rgba[offset + 2]));
+    }
+  }
+  let mn = 255, mx = 0;
+  for (const v of vals) { if (v < mn) mn = v; if (v > mx) mx = v; }
+  // 暗背景セルは固定方式で十分（＝救済不要）。一様セルは数字なし。どちらも適応しない。
+  if (mn < ADAPTIVE_MIN_BACKGROUND) return null;
+  if (mx - mn < ADAPTIVE_CONTRAST_MIN) return null;
+  const threshold = mn + (mx - mn) * ADAPTIVE_THRESHOLD_RATIO;
+  let hex = '';
+  for (let i = 0; i < vals.length; i += 4) {
+    const v = (((vals[i] ?? 0) >= threshold ? 1 : 0) << 3)
+            | (((vals[i + 1] ?? 0) >= threshold ? 1 : 0) << 2)
+            | (((vals[i + 2] ?? 0) >= threshold ? 1 : 0) << 1)
+            | ((vals[i + 3] ?? 0) >= threshold ? 1 : 0);
     hex += v.toString(16);
   }
   return hex;
@@ -240,6 +300,19 @@ export function lookupDigit(hash: string): number | null {
 }
 
 /**
+ * 1 桁セルの RGBA から数字を引く。まず固定二値化で照合し、読めなければ明るい背景セルに限って
+ * 適応二値化で再挑戦する（{@link computeDigitHashAdaptive}）。暗背景セルでは適応が null を返すため
+ * 従来挙動（固定で読めなければ未知=null）と完全に一致し、回帰しない。
+ */
+function lookupDigitCell(rgba: Uint8ClampedArray, cellWidth: number, cellHeight: number): number | null {
+  const fixed = lookupDigit(computeDigitHash(rgba, cellWidth, cellHeight));
+  if (fixed !== null) return fixed;
+  const adaptiveHash = computeDigitHashAdaptive(rgba, cellWidth, cellHeight);
+  if (adaptiveHash === null) return null;
+  return lookupDigit(adaptiveHash);
+}
+
+/**
  * パネル内ローカル ROI を FHD 上の矩形に変換する。
  */
 export function panelLocalToFhd(
@@ -275,8 +348,7 @@ export function recognizeNumberField(
     const dx = fhd.x + i * cellWidth;
     const dy = fhd.y;
     const data = ctx.getImageData(dx, dy, cellWidth, fhd.h).data;
-    const hash = computeDigitHash(data, cellWidth, fhd.h);
-    digits.push(lookupDigit(hash));
+    digits.push(lookupDigitCell(data, cellWidth, fhd.h));
   }
   // 右詰めで読み取る。左から null が並ぶうちは「空」、最初の数字以降は全部数字として連結。
   let started = false;
@@ -402,9 +474,10 @@ export function recognizeNumberFieldWithRecord(
   const predicted: (number | null)[] = [];
   for (let i = 0; i < nDigits; i++) {
     const data = ctx.getImageData(fhd.x + i * cellWidth, fhd.y, cellWidth, fhd.h).data;
-    const h = computeDigitHash(data, cellWidth, fhd.h);
-    hashes.push(h);
-    predicted.push(lookupDigit(h));
+    // hashes は auto-learn 用に固定二値化の生 hash を保持（未知セルの学習対象はこちら）。
+    // predicted は明るい背景の救済込みで読む（適応二値化フォールバック）。
+    hashes.push(computeDigitHash(data, cellWidth, fhd.h));
+    predicted.push(lookupDigitCell(data, cellWidth, fhd.h));
   }
   let started = false, val = 0, any = false, broken = false;
   for (const d of predicted) {

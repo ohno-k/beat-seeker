@@ -39,7 +39,7 @@ import {
   type RecognizerPlaySide,
 } from './infinitasResultRecognizer';
 import { matchSongTitleByOcr, terminateSongTitleOcr } from './infinitasSongTitleOcr';
-import type { ImportDecision } from './infinitasAutoImport';
+import { getConsistencyWarnings, type ImportDecision, type ConsistencyWarning } from './infinitasAutoImport';
 
 /** 認識した 1 リザルト分のデータ。null は「読み取れなかった」を意味する。 */
 export interface InfinitasResult {
@@ -64,8 +64,14 @@ export interface InfinitasResult {
   clearType: string | null;
   /** PGREAT。 */
   pgreat: number | null;
-  /** GREAT（EX_SCORE - 2*PGREAT で逆算）。 */
+  /** GREAT（EX_SCORE - 2*PGREAT で逆算した確定値。登録に使う）。 */
   great: number | null;
+  /**
+   * JUDGE 内訳行から **独立に読み取った** GREAT。`great`（EX から逆算）とは別経路。
+   * EX SCORE 欄の誤読を検出するためのクロスチェック専用（`2*pgreat + judgeGreat == score` を検証）。
+   * JUDGE 行が読めなければ null。詳細は [[file:infinitasAutoImport.ts]] の `getConsistencyWarnings`。
+   */
+  judgeGreat: number | null;
   /** GOOD（ピクセル認識対象外。常に null）。 */
   good: number | null;
   /** BAD（同上）。 */
@@ -103,6 +109,11 @@ export interface InfinitasResult {
     notes: NumberFieldRecord;
     pgreat: NumberFieldRecord;
   } | null;
+  /**
+   * 整合性チェックの警告（① JUDGE クロスチェック / ② 妥当性ガード）。空配列なら問題なし。
+   * 非空のときは自動登録せず確認モーダルへ回し、該当フィールドを強調表示する。
+   */
+  validationWarnings: ConsistencyWarning[];
 }
 
 /** 監視状態。 */
@@ -292,6 +303,8 @@ export function useInfinitasMonitor(
     const scoreBest = rec.scoreBest;
     // GREAT は EX_SCORE-2*PGREAT で確定（IIDX のスコア定義により厳密）。JUDGE 行読みより確実。
     const great = (scoreCurrent != null && rec.pgreat != null) ? scoreCurrent - 2 * rec.pgreat : null;
+    // JUDGE 内訳行から独立に読んだ GREAT。EX SCORE 欄の誤読検出用クロスチェックに使う（登録には使わない）。
+    const judgeGreat = rec.great;
 
     // 曲特定: (難易度, NOTES[, BPM]) 候補が一意なら自動採用。
     // observedBpm はプレイ中に観測した BPM（recognizeBpm で随時更新、未取得なら null）。
@@ -302,7 +315,7 @@ export function useInfinitasMonitor(
 
     const titleSnapshot = captureSongTitleSnapshot(canvas);
 
-    return {
+    const result: InfinitasResult = {
       songEntry,
       ocrTitle: '',
       ocrArtist: '',
@@ -315,6 +328,7 @@ export function useInfinitasMonitor(
       missCount: rec.missCountCurrent,
       pgreat: rec.pgreat,
       great,
+      judgeGreat,
       good: rec.good,
       bad: rec.bad,
       poor: rec.poor,
@@ -329,7 +343,12 @@ export function useInfinitasMonitor(
       titleSnapshot,
       candidates,
       hashRecords,
+      validationWarnings: [],
     };
+    // 独立読み取り同士の照合・妥当性チェック。非空なら classifyResult が自動登録を避け、
+    // 確認モーダルが該当フィールドを強調表示する。
+    result.validationWarnings = getConsistencyWarnings(result);
+    return result;
   }
 
   /** 認識失敗時の空結果。 */
@@ -337,10 +356,10 @@ export function useInfinitasMonitor(
     return {
       songEntry: null, ocrTitle: '', ocrArtist: '', difficulty: null, playSide: null,
       clearType: null, djLevel: null, score: null, missCount: null,
-      pgreat: null, great: null, good: null, bad: null, poor: null,
+      pgreat: null, great: null, judgeGreat: null, good: null, bad: null, poor: null,
       bestScore: null, bestDjLevel: null, bestClearType: null, bestMissCount: null,
       notesCount: null, capturedAt: new Date(), snapshot, titleSnapshot: null,
-      candidates: [], hashRecords: null,
+      candidates: [], hashRecords: null, validationWarnings: [],
     };
   }
 

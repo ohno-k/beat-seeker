@@ -15,6 +15,7 @@
  */
 import { ref, computed, watch } from 'vue';
 import type { InfinitasResult } from '../composables/useInfinitasMonitor';
+import type { ConsistencyWarning } from '../composables/infinitasAutoImport';
 import { songData, type SongDataEntry } from '../composables/useGameData';
 import { learnFromConfirmation, computeDjLevel } from '../composables/infinitasResultRecognizer';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
@@ -121,6 +122,21 @@ const pickSong = (s: SongDataEntry) => {
 };
 
 // ── 検証 ──
+/**
+ * 認識時の整合性警告（① JUDGE クロスチェック / ② 妥当性ガード）を i18n メッセージへ変換する。
+ * useInfinitasMonitor が抽出時に算出した {@link InfinitasResult.validationWarnings} をそのまま表示する。
+ * 1 箇所の誤読が EX SCORE → great/djLevel に波及するため、ここで「どの値が怪しいか」をユーザーに明示する。
+ */
+const WARN_KEYS: Record<ConsistencyWarning['code'], string> = {
+  'judge-mismatch': 'infinitas.warnJudgeMismatch',
+  'over-max': 'infinitas.warnOverMax',
+  'negative-great': 'infinitas.warnNegativeGreat',
+  'miss-over-notes': 'infinitas.warnMissOverNotes',
+};
+const consistencyMessages = computed(() =>
+  props.result.validationWarnings.map(w => t(WARN_KEYS[w.code], w.params)),
+);
+
 /** SCORE = PGREAT*2 + GREAT が一致するかの整合性チェック。自己ベスト選択時は JUDGE 内訳が無いのでスキップ。 */
 const scoreMatchesJudge = computed(() => {
   if (scoreSource.value === 'best') return true;
@@ -219,6 +235,19 @@ const confirm = () => {
           <!-- スナップショット -->
           <div v-if="result.snapshot" class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
             <img :src="result.snapshot" alt="captured" class="w-full" />
+          </div>
+
+          <!-- 整合性警告バナー（独立読み取りの不一致・妥当性 NG）。誤読の可能性が高い項目を明示する。 -->
+          <div v-if="consistencyMessages.length" class="p-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40">
+            <div class="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-2.99l-6.93-12a2 2 0 00-3.48 0l-6.93 12A2 2 0 005.07 19z" />
+              </svg>
+              <span class="text-xs font-bold text-amber-700 dark:text-amber-300">{{ t('infinitas.warnTitle') }}</span>
+            </div>
+            <ul class="list-disc list-inside space-y-0.5">
+              <li v-for="(m, i) in consistencyMessages" :key="i" class="text-[11px] text-amber-700 dark:text-amber-300">{{ m }}</li>
+            </ul>
           </div>
 
           <!-- スコアソース表示（今回プレイ vs 自己ベスト） -->

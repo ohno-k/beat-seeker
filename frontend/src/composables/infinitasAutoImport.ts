@@ -19,6 +19,65 @@ export type ImportDecision =
 /** スコア取得元。 */
 export type ScoreSource = 'current' | 'best';
 
+/**
+ * 認識結果の整合性警告。複数の独立した読み取り（EX SCORE / PGREAT / JUDGE GREAT 行）が
+ * 矛盾していないか、また物理的に妥当な値かをチェックした結果。空配列なら問題なし。
+ *
+ * 確認モーダルで強調表示し、`classifyResult` では非空なら自動登録を避けて 'manual'（人手確認）に倒す。
+ * 1 箇所の OCR 誤読が EX SCORE → great/djLevel と波及するため、独立読み取り同士の照合が誤読検出の要。
+ */
+export interface ConsistencyWarning {
+  /** 警告種別。モーダルで i18n キーに対応付けて表示する。 */
+  code: 'judge-mismatch' | 'over-max' | 'negative-great' | 'miss-over-notes';
+  /** 強調表示すべき編集フィールド。 */
+  fields: ReadonlyArray<'score' | 'pgreat' | 'great' | 'missCount'>;
+  /** メッセージ補間用のパラメータ。 */
+  params: Record<string, number>;
+}
+
+/**
+ * 認識結果の整合性を検証して警告リストを返す。
+ *
+ * ① JUDGE クロスチェック（最重要）:
+ *   IIDX のスコア定義 `EX = 2*PGREAT + GREAT` は厳密な恒等式。画面の EX SCORE 欄とは独立に
+ *   JUDGE 内訳行から読んだ GREAT（{@link InfinitasResult.judgeGreat}）を使い、
+ *   `2*pgreat + judgeGreat` が EX SCORE と一致するか照合する。一致しなければ EX SCORE か
+ *   PGREAT か GREAT 行のいずれかが誤読されている（例: EX を 2241→2641 と読み違えるケースを検出）。
+ *
+ * ② 妥当性ガード:
+ *   - EX SCORE が理論値（notes×2）を超える
+ *   - PGREAT×2 が EX SCORE を超える（great が負になる）
+ *   - MISS COUNT が NOTES を超える
+ *
+ * notes は曲特定できていればその notes を優先（より確実）、無ければ認識した notesCount を使う。
+ */
+export function getConsistencyWarnings(result: InfinitasResult): ConsistencyWarning[] {
+  const warnings: ConsistencyWarning[] = [];
+  const { score, pgreat, judgeGreat, missCount } = result;
+  const notes = result.songEntry?.notes ?? result.notesCount ?? null;
+
+  // ① JUDGE クロスチェック（独立読み取り同士の照合）
+  if (score != null && pgreat != null && judgeGreat != null) {
+    const judgeEx = pgreat * 2 + judgeGreat;
+    if (judgeEx !== score) {
+      warnings.push({ code: 'judge-mismatch', fields: ['score', 'pgreat', 'great'], params: { judgeEx, score } });
+    }
+  }
+
+  // ② 妥当性ガード
+  if (score != null && notes != null && notes > 0 && score > notes * 2) {
+    warnings.push({ code: 'over-max', fields: ['score'], params: { max: notes * 2, score } });
+  }
+  if (score != null && pgreat != null && pgreat * 2 > score) {
+    warnings.push({ code: 'negative-great', fields: ['score', 'pgreat'], params: { pgreat, score } });
+  }
+  if (missCount != null && notes != null && notes > 0 && missCount > notes) {
+    warnings.push({ code: 'miss-over-notes', fields: ['missCount'], params: { missCount, notes } });
+  }
+
+  return warnings;
+}
+
 /** 認識済みクリアタイプとして妥当か（現在プレイ列に NO PLAY はありえない）。 */
 function isValidCurrentClear(clearType: string | null): boolean {
   return !!clearType && clearType !== 'NO PLAY';
@@ -69,6 +128,11 @@ export function classifyResult(result: InfinitasResult): ImportDecision {
   if (result.bad != null && result.poor != null && result.missCount != null) {
     if (result.bad + result.poor > result.missCount) return 'manual';
   }
+  // 整合性チェック（① JUDGE クロスチェック / ② 妥当性）に引っかかったら自動登録しない。
+  // over-max / negative-great は上の skip ゲートで既に弾かれているため、ここに残るのは
+  // judge-mismatch（独立読み取りの不一致）/ miss-over-notes。いずれも誤読の可能性が高いので
+  // サイレント登録せず確認モーダルへ回す。
+  if (result.validationWarnings.length > 0) return 'manual';
 
   return 'auto';
 }
