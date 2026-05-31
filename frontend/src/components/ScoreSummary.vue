@@ -125,6 +125,30 @@
               </label>
             </div>
           </div>
+
+          <!-- Source Filter（INFINITAS / アーケード）。INFINITAS スコアを取り込んでいる場合のみ表示。 -->
+          <div v-if="hasInfinitasScores" class="relative w-full md:w-36">
+            <button
+              @click.stop="toggleDropdown('source')"
+              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800 shadow-sm"
+            >
+              <span class="truncate">{{ t('table.source') }}{{ filterSource.length > 0 ? ` (${filterSource.length})` : '' }}</span>
+              <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div v-if="openDropdown === 'source'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
+              <label v-for="src in ['infinitas', 'arcade']" :key="src" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  :checked="isSelected(filterSource, src)"
+                  @change="toggleFilterValue(filterSource, src)"
+                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+                >
+                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ t(`table.source.${src}`) }}</span>
+              </label>
+            </div>
+          </div>
           </div>
         </div>
         <!-- Search -->
@@ -1110,6 +1134,8 @@ const filterLevel = ref<string[]>([]);
 const filterDjLevel = ref<string[]>([]);
 /** クリアランプフィルタ（'FULLCOMBO CLEAR' など）。空配列は「全て」。 */
 const filterClearType = ref<string[]>([]);
+/** 取得元フィルタ（'infinitas' / 'arcade'）。空配列は「全て」。 */
+const filterSource = ref<string[]>([]);
 /** 0 点譜面を非表示にするトグル。未プレイ曲を隠したい場合に使う。 */
 const hideZeroScore = ref(false);
 
@@ -1185,6 +1211,13 @@ const appliedFilterChips = computed<Array<{ id: string; label: string; remove: (
       remove: () => { filterClearType.value = filterClearType.value.filter(x => x !== ct); },
     });
   });
+  filterSource.value.forEach((src) => {
+    chips.push({
+      id: `source:${src}`,
+      label: t(`table.source.${src}`),
+      remove: () => { filterSource.value = filterSource.value.filter(x => x !== src); },
+    });
+  });
   if (hideZeroScore.value) {
     chips.push({
       id: 'hideZero',
@@ -1202,6 +1235,7 @@ const clearAllFilters = () => {
   filterDifficulty.value = [];
   filterDjLevel.value = [];
   filterClearType.value = [];
+  filterSource.value = [];
   hideZeroScore.value = false;
 };
 
@@ -1343,6 +1377,9 @@ const allRecords = computed<ScoreRecord[]>(() => {
 
   return baseRecords;
 });
+
+/** INFINITAS 取得スコアが 1 件でも存在するか。取得元フィルタの表示要否に使う。 */
+const hasInfinitasScores = computed(() => allRecords.value.some(r => r.source === 'infinitas'));
 
 const emit = defineEmits<{
   (e: 'reset'): void;
@@ -2161,7 +2198,7 @@ watch(isLoggedIn, (val) => { if (val) fetchSongRanks(); });
 
 /** フィルタ/ソート/件数のどれかが変わったらページ番号を 1 に戻す（UX 改善）。 */
 watch(
-  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
+  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, filterSource, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
   () => {
     currentPage.value = 1;
   },
@@ -2284,6 +2321,10 @@ const filteredScores = computed(() => {
 
   if (filterClearType.value.length > 0) {
     result = result.filter(r => filterClearType.value.includes(r.clearType));
+  }
+
+  if (filterSource.value.length > 0) {
+    result = result.filter(r => r.source != null && filterSource.value.includes(r.source));
   }
 
   const query = searchQuery.value.toLowerCase().trim();
