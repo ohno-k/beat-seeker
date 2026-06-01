@@ -92,15 +92,19 @@ function isValidCurrentClear(clearType: string | null): boolean {
  *  - PGREAT×2 > EX SCORE（great が負＝途中値 or 誤読）
  *  - 難易度が取れていない
  *
- * manual（確定はしたが要確認）:
- *  - NOTES 数が取れていない（数字テンプレ未収録など）。以前は skip でサイレント破棄していたが、
- *    EX SCORE 等は読めているのに丸ごと捨てるのは惜しいので manual に回す。確認モーダルでユーザーが
- *    曲を選べば、確定時のオートラーニングで未知の NOTES 桁 hash を学習でき次回以降は自動認識できる。
- *  - 曲が一意特定できていない（songEntry が null）
+ * 曲名が検知できない（曲を一意特定できない＝songEntry が null）時の扱い【ユーザー要望】:
+ *  - 候補が複数（NOTES は読めたが同 NOTES の別曲と区別できない）→ manual（選択モーダル）
+ *  - 候補が 0 件（NOTES が読めない / INFINITAS 限定曲で song_data に無い）→ skip（黙って監視継続）
+ *  以前は NOTES 不明や songEntry=null を一律 manual にしていたが、「曲名が検知できない時はモーダルで
+ *  煩わせず、候補が複数の時だけ確認する」方針へ変更。曲が特定できなければスコアは組み立てられないため
+ *  0 件は破棄する。なお EXSCORE 相違（JUDGE クロスチェック不一致）があれば候補複数モーダルで警告が出る。
+ *
+ * manual（曲は特定できたが要確認）:
  *  - クリアタイプが不正（null / NO PLAY）
  *  - JUDGE 整合性 NG（BAD+POOR が MISS COUNT を超過＝誤読。空POOR は POOR 欄に出ないため
  *    BAD+POOR <= MISS COUNT が正常。3 値とも読めている場合のみ判定）
  *  - DP プレー（beat-seeker は SP 前提のため、自動では入れず人手確認に回す）
+ *  - 整合性チェック NG（EXSCORE 相違＝JUDGE クロスチェック不一致 / miss-over-notes）
  *
  * auto（全自動登録）: 上記いずれにも該当しない。
  */
@@ -111,15 +115,18 @@ export function classifyResult(result: InfinitasResult): ImportDecision {
   // ── skip: 未確定フレーム ──
   if (sc == null || sc <= 0) return 'skip';
   // NOTES が読めている時だけ「最大値(notes×2)超え＝カウントアップ途中/誤読」を未確定として弾く。
-  // NOTES が読めない場合はこの判定を飛ばし、下の manual に回す（スコアごとサイレント破棄しない）。
   if (notes != null && notes > 0 && sc > notes * 2) return 'skip';
   if (result.pgreat != null && result.pgreat * 2 > sc) return 'skip';
   if (!result.difficulty) return 'skip';
 
-  // ── manual: 確定したが曖昧 ──
-  // NOTES 不明 → 曲を一意特定できない（songEntry も null）。確認モーダルで手動選択 → オートラーニング。
-  if (notes == null || notes <= 0) return 'manual';
-  if (!result.songEntry) return 'manual';
+  // ── 曲名が検知できない（曲を一意特定できない）時 ──
+  // 候補が複数 → 選択モーダル（manual）。候補 0 件（NOTES 読めず / INFINITAS 限定曲）→ 黙ってスキップ。
+  // 曲が特定できなければスコアは組み立てられないので、モーダルで煩わせずそのまま監視を続ける。
+  if (!result.songEntry) {
+    return result.candidates.length >= 2 ? 'manual' : 'skip';
+  }
+
+  // ── manual: 曲は特定できたが要確認 ──
   if (!isValidCurrentClear(result.clearType)) return 'manual';
   if (result.playSide === 'DP') return 'manual';
   // JUDGE 整合性。MISS COUNT = BAD + 見逃しPOOR + 空POOR だが、リザルト詳細の POOR 欄は

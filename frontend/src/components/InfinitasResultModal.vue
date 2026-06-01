@@ -46,40 +46,15 @@ const CLEAR_TYPE_OPTIONS = [
   'FULLCOMBO CLEAR',
 ];
 
-/** スコアの取得元。 */
-type ScoreSource = 'current' | 'best';
-
-// ── スコアソース ──
-// 【方針変更】 自己ベスト(bestScore)送信は廃止。INFINITAS 取り込みは常に今回プレイ(current)を登録する。
-// （リザルトの自己ベスト欄は取得元が曖昧で、アーケード等のベストを INFINITAS として誤登録し得るため）
-const scoreSource = ref<ScoreSource>('current');
-
-/** 自己ベストが OCR で取得できたか。 */
-const hasBestData = computed(() => (props.result.bestScore ?? 0) > 0);
-
-/** 自己ベスト更新かどうか。 */
-const isBestUpdated = computed(() => {
-  const current = props.result.score ?? 0;
-  const best = props.result.bestScore ?? 0;
-  return current >= best && current > 0;
-});
-
-// ── 編集用のローカル state（scoreSource に応じて初期化）──
-function initScore() {
-  return scoreSource.value === 'best' ? (props.result.bestScore ?? 0) : (props.result.score ?? 0);
-}
-function initMissCount() {
-  return scoreSource.value === 'best' ? (props.result.bestMissCount ?? 0) : (props.result.missCount ?? 0);
-}
-function initClearType() {
-  return scoreSource.value === 'best' ? (props.result.bestClearType || 'CLEAR') : (props.result.clearType || 'CLEAR');
-}
-
+// ── 編集用のローカル state ──
+// INFINITAS 取り込みは常に今回プレイ(current)を登録する（自己ベスト送信は廃止済み）。
+// リザルトの自己ベスト欄は取得元が曖昧で（アーケード等のベストが混ざり得る）、また確認時に
+// INFINITAS を最小化してクリックする手間になるため、自己ベストとの比較表示は廃止した。
 const selectedSong = ref<SongDataEntry | null>(props.result.songEntry);
 const difficulty = ref<'ANOTHER' | 'LEGGENDARIA'>(props.result.difficulty || 'ANOTHER');
-const score = ref<number>(initScore());
-const missCount = ref<number>(initMissCount());
-const clearType = ref<string>(initClearType());
+const score = ref<number>(props.result.score ?? 0);
+const missCount = ref<number>(props.result.missCount ?? 0);
+const clearType = ref<string>(props.result.clearType || 'CLEAR');
 /**
  * DJ LEVEL は EX SCORE と最大スコア(notes×2)から計算する（OCR せず）。
  * notes は「特定できた曲の notes」を最優先し、無ければ認識した notesCount を使う。
@@ -89,12 +64,12 @@ const djLevel = computed<string>(() => {
   const notes = selectedSong.value?.notes ?? props.result.notesCount ?? null;
   return computeDjLevel(score.value, notes) ?? '---';
 });
-// JUDGE 内訳は今回プレイのみ取得可能。自己ベスト選択時は 0 で初期化。
-const pgreat = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.pgreat ?? 0));
-const great = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.great ?? 0));
-const good = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.good ?? 0));
-const bad = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.bad ?? 0));
-const poor = ref<number>(scoreSource.value === 'best' ? 0 : (props.result.poor ?? 0));
+// JUDGE 内訳は今回プレイのみ取得可能。
+const pgreat = ref<number>(props.result.pgreat ?? 0);
+const great = ref<number>(props.result.great ?? 0);
+const good = ref<number>(props.result.good ?? 0);
+const bad = ref<number>(props.result.bad ?? 0);
+const poor = ref<number>(props.result.poor ?? 0);
 
 // ── 曲名検索ボックス ──
 const songSearchQuery = ref('');
@@ -137,9 +112,8 @@ const consistencyMessages = computed(() =>
   props.result.validationWarnings.map(w => t(WARN_KEYS[w.code], w.params)),
 );
 
-/** SCORE = PGREAT*2 + GREAT が一致するかの整合性チェック。自己ベスト選択時は JUDGE 内訳が無いのでスキップ。 */
+/** SCORE = PGREAT*2 + GREAT が一致するかの整合性チェック。 */
 const scoreMatchesJudge = computed(() => {
-  if (scoreSource.value === 'best') return true;
   const expected = pgreat.value * 2 + great.value;
   return expected === score.value;
 });
@@ -160,11 +134,11 @@ const emptyStats = (): DifficultyStats => ({
 /**
  * 確定値から未知 digit hash を学習辞書に追加する。
  *
- * 対応マッピング:
- *  - score.value × hashRecords.scoreCurrent または scoreBest（scoreSource に従う）
- *  - missCount.value × hashRecords.missCountCurrent または missCountBest（同上）
+ * 対応マッピング（常に今回プレイ列）:
+ *  - score.value × hashRecords.scoreCurrent
+ *  - missCount.value × hashRecords.missCountCurrent
  *  - 選択された曲の notes × hashRecords.notes
- *  - pgreat.value × hashRecords.pgreat（今回プレイ時のみ）
+ *  - pgreat.value × hashRecords.pgreat
  *
  * 未認識セル（左パディング）は学習対象外。組み込み辞書既知の hash は触らない。
  * 詳細は [[file:infinitasResultRecognizer.ts]] の `learnFromConfirmation` を参照。
@@ -172,15 +146,12 @@ const emptyStats = (): DifficultyStats => ({
 function applyAutoLearning(): void {
   const rec = props.result.hashRecords;
   if (!rec) return;
-  const scoreRecord = scoreSource.value === 'best' ? rec.scoreBest : rec.scoreCurrent;
-  const missRecord  = scoreSource.value === 'best' ? rec.missCountBest : rec.missCountCurrent;
-  const learnedScore = learnFromConfirmation(scoreRecord, score.value, 'score');
-  const learnedMiss  = learnFromConfirmation(missRecord, missCount.value, 'score');
+  const learnedScore = learnFromConfirmation(rec.scoreCurrent, score.value, 'score');
+  const learnedMiss  = learnFromConfirmation(rec.missCountCurrent, missCount.value, 'score');
   const learnedNotes = selectedSong.value?.notes
     ? learnFromConfirmation(rec.notes, selectedSong.value.notes, 'notes')
     : 0;
-  // PGREAT は今回プレイ列のみ認識対象。自己ベスト選択時は pgreat=0 になるので学習しない。
-  const learnedPg = scoreSource.value === 'best' ? 0 : learnFromConfirmation(rec.pgreat, pgreat.value, 'pgreat');
+  const learnedPg = learnFromConfirmation(rec.pgreat, pgreat.value, 'pgreat');
   if (learnedScore + learnedMiss + learnedNotes + learnedPg > 0) {
     console.info(`[infinitas-monitor] auto-learn: +${learnedScore} score / +${learnedMiss} miss / +${learnedNotes} notes / +${learnedPg} pgreat hashes`);
   }
@@ -248,42 +219,6 @@ const confirm = () => {
             <ul class="list-disc list-inside space-y-0.5">
               <li v-for="(m, i) in consistencyMessages" :key="i" class="text-[11px] text-amber-700 dark:text-amber-300">{{ m }}</li>
             </ul>
-          </div>
-
-          <!-- スコアソース表示（今回プレイ vs 自己ベスト） -->
-          <div v-if="hasBestData" class="p-3 rounded-xl border" :class="{
-            'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800': scoreSource === 'current',
-            'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800': scoreSource === 'best',
-          }">
-            <div class="flex items-center gap-2 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" :class="scoreSource === 'current' ? 'text-blue-500' : 'text-amber-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-bold" :class="scoreSource === 'current' ? 'text-blue-700 dark:text-blue-300' : 'text-amber-700 dark:text-amber-300'">
-                {{ scoreSource === 'current' ? t('infinitas.usingCurrentPlay') : t('infinitas.usingBestScore') }}
-              </span>
-              <span v-if="isBestUpdated" class="ml-auto text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded-full">
-                ★ {{ t('infinitas.bestUpdated') }}
-              </span>
-            </div>
-            <!-- スコア比較テーブル -->
-            <div class="grid grid-cols-3 gap-1 text-[11px] tabular-nums">
-              <div></div>
-              <div class="text-center font-bold" :class="scoreSource === 'current' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'">{{ t('infinitas.current') }}</div>
-              <div class="text-center font-bold" :class="scoreSource === 'best' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'">{{ t('infinitas.best') }}</div>
-
-              <div class="text-slate-500 dark:text-slate-400">EX SCORE</div>
-              <div class="text-center" :class="scoreSource === 'current' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.score ?? '-' }}</div>
-              <div class="text-center" :class="scoreSource === 'best' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.bestScore ?? '-' }}</div>
-
-              <div class="text-slate-500 dark:text-slate-400">CLEAR</div>
-              <div class="text-center" :class="scoreSource === 'current' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.clearType || '-' }}</div>
-              <div class="text-center" :class="scoreSource === 'best' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.bestClearType || '-' }}</div>
-
-              <div class="text-slate-500 dark:text-slate-400">DJ LV</div>
-              <div class="text-center" :class="scoreSource === 'current' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.djLevel || '-' }}</div>
-              <div class="text-center" :class="scoreSource === 'best' ? 'font-bold text-slate-800 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'">{{ result.bestDjLevel || '-' }}</div>
-            </div>
           </div>
 
           <!-- 曲名 -->
