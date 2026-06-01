@@ -86,5 +86,42 @@
       }
     ],
     "changed": []
+  },
+  {
+    "version": 3,
+    "label": "v3",
+    "appVersion": "Ver 1.7.0",
+    "date": "2026-06",
+    "added": [
+      {
+        "title": "THE BLACK KNIGHT[L]",
+        "rank": "12.7"
+      },
+      {
+        "title": "Funky Quirky",
+        "rank": "11.6"
+      },
+      {
+        "title": "Dusk Endir",
+        "rank": "12.4"
+      },
+      {
+        "title": "OMEGA",
+        "rank": "12.7"
+      },
+      {
+        "title": "Τέλος",
+        "rank": "11.8"
+      },
+      {
+        "title": "BitRacer",
+        "rank": "12.8"
+      },
+      {
+        "title": "GENE[L]",
+        "rank": "12.5"
+      }
+    ],
+    "changed": []
   }
 ]
