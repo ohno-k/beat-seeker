@@ -60,6 +60,12 @@ export interface CompetitionMatchupDto {
   lineupPublishedB: boolean;
   /** 決勝 matchup フラグ。コスト/StrategyCard 制限の対象外。 */
   isFinals: boolean;
+  /**
+   * 運営が「設定済み (実施対象)」にしたか。
+   * false の間は未設定 (matchupOrder=0) でプレイヤー/TL に表示されない。
+   * 設定すると選んだ順に matchupOrder が採番され公開される。
+   */
+  configured: boolean;
 }
 
 export type CompetitionSongGenre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
@@ -584,6 +590,24 @@ export function useCompetitionAdmin() {
   };
 
   /**
+   * matchup を「設定済み (実施対象)」⇄「未設定」に切り替える。
+   * 設定すると選んだ順に matchupOrder が採番され、プレイヤー/TL に公開される。
+   * 解除すると未設定に戻り、残りの設定済み matchup の順番が 1..k に詰め直される。
+   */
+  const configureMatchup = async (
+    competitionId: number,
+    matchupId: number,
+    configured: boolean,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/matchups/${matchupId}/configure`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ configured }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /**
    * match の自選曲ロック (編集禁止フラグ) を切替。公開とは独立で、ロックされても未公開状態を維持できる。
    * 通常フロー: 締切時刻にロック → 試合直前に publishPick で開示。
    */
@@ -788,6 +812,7 @@ export function useCompetitionAdmin() {
     openCompetition,
     setMatchGenre,
     publishLineup,
+    configureMatchup,
     publishPick,
     setMatchLock,
     deleteCompetition,

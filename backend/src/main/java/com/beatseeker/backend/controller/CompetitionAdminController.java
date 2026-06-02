@@ -733,6 +733,7 @@ public class CompetitionAdminController {
         finalsMu.setTeamB(second);
         finalsMu.setMatchupOrder(nextOrder);
         finalsMu.setIsFinals(true);
+        finalsMu.setConfigured(true);
         finalsMu = matchupRepository.save(finalsMu);
 
         for (String kind : MATCH_KINDS) {
@@ -847,7 +848,10 @@ public class CompetitionAdminController {
      *   <li>5 チームそれぞれが {@value #PARTICIPANTS_PER_TEAM} 名揃っている</li>
      *   <li>各チームに TL がちょうど 1 名いる</li>
      * </ul>
-     * 同トランザクション内で 10 matchup (C(5,2)) と 30 match (各 matchup × 3 戦) を自動生成する。
+     * 同トランザクション内で 10 matchup (C(5,2)) と 30 match (各 matchup × 3 戦) を生成する。
+     * <p>生成される matchup は全て <b>未設定 (configured=false, matchupOrder=0)</b> 状態。
+     * 運営が「設定」エンドポイント ({@code /matchups/{id}/configure}) で 1 件ずつ実施対象にし、
+     * 選んだ順に matchupOrder が採番される。未設定の matchup はプレイヤー / TL には表示されない。
      */
     @PostMapping("/{competitionId}/open")
     @Transactional
@@ -881,15 +885,15 @@ public class CompetitionAdminController {
             }
         }
 
-        // matchups と matches を生成
-        int order = 1;
+        // matchups と matches を生成 (全て未設定 = configured=false / matchupOrder=0)
         for (int i = 0; i < teams.size(); i++) {
             for (int j = i + 1; j < teams.size(); j++) {
                 CompetitionMatchup matchup = new CompetitionMatchup();
                 matchup.setCompetition(comp);
                 matchup.setTeamA(teams.get(i));
                 matchup.setTeamB(teams.get(j));
-                matchup.setMatchupOrder(order++);
+                matchup.setMatchupOrder(0);
+                matchup.setConfigured(false);
                 matchup = matchupRepository.save(matchup);
                 for (String kind : MATCH_KINDS) {
                     CompetitionMatch match = new CompetitionMatch();
@@ -902,6 +906,81 @@ public class CompetitionAdminController {
 
         comp.setStatus("open");
         competitionRepository.save(comp);
+        return ResponseEntity.ok(toCompetitionDetailMap(comp));
+    }
+
+    // ── マッチアップの設定 (実施対象化 / 順番採番) ───────────
+
+    /**
+     * 【メソッドの役割】 1 matchup を「設定済み (実施対象)」⇄「未設定」に切り替える。
+     *
+     * <ul>
+     *   <li>{@code configured=true}: 未設定の matchup を実施対象にする。
+     *       既存の設定済み予選 matchup の最大 order + 1 を採番する (＝運営が選んだ順に第 1, 2 … 試合)。
+     *       これで初めてプレイヤー / TL に表示され、自選曲提出が解禁される。</li>
+     *   <li>{@code configured=false}: 設定を解除して未設定に戻す。matchupOrder を 0 にし、
+     *       残りの設定済み予選 matchup を 1..k に詰め直して欠番を防ぐ。</li>
+     * </ul>
+     * 決勝 matchup ({@code isFinals=true}) は生成時から設定済みであり、このエンドポイントの対象外。
+     */
+    @PutMapping("/{competitionId}/matchups/{matchupId}/configure")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> configureMatchup(
+            Authentication auth,
+            @PathVariable Long competitionId,
+            @PathVariable Long matchupId,
+            @RequestBody ConfigureMatchupRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if ("finished".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
+        }
+        if (req == null || req.configured() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "configured が必要です"));
+        }
+
+        CompetitionMatchup mu = matchupRepository.findById(matchupId)
+                .orElseThrow(() -> new RuntimeException("Matchup not found: " + matchupId));
+        if (!mu.getCompetition().getId().equals(comp.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "指定 matchup はこの大会に属していません"));
+        }
+        if (Boolean.TRUE.equals(mu.getIsFinals())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "決勝 matchup は設定変更できません"));
+        }
+
+        boolean target = req.configured();
+        if (Boolean.TRUE.equals(mu.getConfigured()) == target) {
+            // 変化なし: 冪等に現状を返す
+            return ResponseEntity.ok(toMatchupMap(mu));
+        }
+
+        List<CompetitionMatchup> all = matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp);
+        if (target) {
+            int maxOrder = all.stream()
+                    .filter(m -> !Boolean.TRUE.equals(m.getIsFinals()))
+                    .filter(m -> Boolean.TRUE.equals(m.getConfigured()))
+                    .mapToInt(CompetitionMatchup::getMatchupOrder)
+                    .max().orElse(0);
+            mu.setMatchupOrder(maxOrder + 1);
+            mu.setConfigured(true);
+            matchupRepository.save(mu);
+        } else {
+            mu.setConfigured(false);
+            mu.setMatchupOrder(0);
+            matchupRepository.save(mu);
+            // 残りの設定済み予選 matchup を現在の順序を保ったまま 1..k に詰め直す
+            int order = 1;
+            for (CompetitionMatchup m : all) {
+                if (m.getId().equals(mu.getId())) continue;
+                if (Boolean.TRUE.equals(m.getIsFinals())) continue;
+                if (!Boolean.TRUE.equals(m.getConfigured())) continue;
+                if (m.getMatchupOrder() != order) {
+                    m.setMatchupOrder(order);
+                    matchupRepository.save(m);
+                }
+                order++;
+            }
+        }
         return ResponseEntity.ok(toCompetitionDetailMap(comp));
     }
 
@@ -1247,6 +1326,7 @@ public class CompetitionAdminController {
         m.put("lineupPublishedA", mu.getLineupPublishedA());
         m.put("lineupPublishedB", mu.getLineupPublishedB());
         m.put("isFinals", mu.getIsFinals());
+        m.put("configured", mu.getConfigured());
         return m;
     }
 
@@ -1304,6 +1384,9 @@ public class CompetitionAdminController {
      * {@code side} = "a" / "b" / "both"。{@code published} = true で公開、false で非公開に戻す。
      */
     public record PublishRequest(String side, Boolean published) {}
+
+    /** matchup の設定済み / 未設定を切り替えるリクエスト。 */
+    public record ConfigureMatchupRequest(Boolean configured) {}
 
     /**
      * 自選曲ロック状態切替リクエスト。

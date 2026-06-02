@@ -20,6 +20,7 @@ import {
   type CompetitionParticipantDto,
   type CompetitionTeamDto,
   type CompetitionMatchDto,
+  type CompetitionMatchupDto,
   type CompetitionSongGenre,
   type CompetitionRevealData,
   type CompetitionStandingsDto,
@@ -48,6 +49,7 @@ const {
   openCompetition,
   setMatchGenre,
   publishLineup,
+  configureMatchup,
   publishPick,
   setMatchLock,
   deleteCompetition,
@@ -282,7 +284,7 @@ const copyToClipboard = async (text: string, label: string) => {
 // ── open 遷移 ─────────────────────────────────────────────
 const handleOpenStatus = async () => {
   if (!currentCompetition.value) return;
-  if (!confirm('この大会を open に遷移しますか?\n10 試合 × 3 戦 = 30 試合が生成されます。')) return;
+  if (!confirm('この大会を open に遷移しますか?\n10 組 × 3 戦 = 30 試合が「未設定」状態で生成されます。\nopen 後、対戦表で実施する対戦を 1 つずつ選んで設定してください。')) return;
   try {
     await openCompetition(currentCompetition.value.id);
     toast.success('open に遷移しました');
@@ -1130,6 +1132,38 @@ const lineupPublishStateOf = (mu: { lineupPublishedA: boolean; lineupPublishedB:
   return 'none';
 };
 
+// ── 対戦表: 設定済み / 未設定の振り分け ──────────────────
+/** 設定済み matchup (実施対象)。matchupOrder 昇順 (= 運営が設定した順)。 */
+const configuredMatchups = computed<CompetitionMatchupDto[]>(() => {
+  return (currentCompetition.value?.matchups ?? [])
+    .filter(mu => mu.configured)
+    .slice()
+    .sort((a, b) => a.matchupOrder - b.matchupOrder);
+});
+
+/** 未設定 matchup (運営がまだ実施対象にしていない組み合わせ)。チーム順で安定表示。 */
+const unconfiguredMatchups = computed<CompetitionMatchupDto[]>(() => {
+  return (currentCompetition.value?.matchups ?? [])
+    .filter(mu => !mu.configured && !mu.isFinals)
+    .slice()
+    .sort((a, b) => (a.teamAId - b.teamAId) || (a.teamBId - b.teamBId));
+});
+
+/**
+ * matchup を設定済み ⇄ 未設定 に切り替える。
+ * 設定すると選んだ順に第 N 試合として採番され、プレイヤー/TL に公開される。
+ */
+const handleConfigureMatchup = async (matchupId: number, configured: boolean) => {
+  if (!currentCompetition.value) return;
+  if (!configured && !confirm('この対戦を未設定に戻しますか?\nプレイヤー/TL から見えなくなり、以降の試合番号が繰り上がります。')) return;
+  try {
+    await configureMatchup(currentCompetition.value.id, matchupId, configured);
+    toast.success(configured ? '対戦を設定しました' : '設定を解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
 // ── ステータスバッジ ──────────────────────────────────────
 const statusLabel = (s: string) => ({
   draft: '編成中',
@@ -1586,7 +1620,7 @@ const statusColor = (s: string) => ({
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
-              対戦表 ({{ currentCompetition.matchups.length }} matchup / {{ currentCompetition.matches.length }} 試合)
+              対戦表 (設定済み {{ configuredMatchups.length }} / 全 {{ currentCompetition.matchups.length }} 組)
             </h2>
             <button
               type="button"
@@ -1596,12 +1630,46 @@ const statusColor = (s: string) => ({
             >🔄 提出状況を再読込</button>
           </div>
           <p class="text-[11px] text-slate-500 leading-relaxed">
-            各試合の運営指定ジャンルをセレクタから設定します。プレイヤーは指定されたジャンルの曲しか提出できません。<br />
-            プレイヤーへのアサインは TL 専用 URL からチームごとに行います。両側の自選曲が揃った試合は「▶ REVEAL」で演出ページを開けます。
+            下の「未設定の組み合わせ」から実施する対戦を 1 つずつ選んで設定します。設定した順に第 1・第 2 … 試合として並び、<b>設定済みの対戦だけがプレイヤー / TL に公開</b>されます。<br />
+            各試合の運営指定ジャンルはセレクタから設定します。プレイヤーへのアサインは TL 専用 URL からチームごとに行います。両側の自選曲が揃った試合は「▶ REVEAL」で演出ページを開けます。
           </p>
 
+          <!-- 未設定の組み合わせ: 運営が1つずつ選んで設定する -->
           <div
-            v-for="mu in currentCompetition.matchups"
+            v-if="unconfiguredMatchups.length > 0"
+            class="bg-slate-50 dark:bg-slate-900/40 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-4 space-y-2"
+          >
+            <p class="text-[11px] font-black tracking-[0.25em] uppercase text-slate-400">
+              未設定の組み合わせ ({{ unconfiguredMatchups.length }} 組)
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                v-for="mu in unconfiguredMatchups"
+                :key="mu.id"
+                class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+              >
+                <p class="font-bold text-sm truncate">
+                  <span class="text-slate-600 dark:text-slate-300">{{ teamNameOf(mu.teamAId) }}</span>
+                  <span class="text-slate-400 mx-1.5">vs</span>
+                  <span class="text-slate-600 dark:text-slate-300">{{ teamNameOf(mu.teamBId) }}</span>
+                </p>
+                <button
+                  type="button"
+                  @click="handleConfigureMatchup(mu.id, true)"
+                  :disabled="currentCompetition.status === 'finished'"
+                  class="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                >＋ この対戦を設定</button>
+              </div>
+            </div>
+          </div>
+
+          <p v-if="configuredMatchups.length === 0" class="text-[11px] text-slate-400 italic">
+            まだ設定済みの対戦はありません。上の組み合わせから選んで設定してください。
+          </p>
+
+          <!-- 設定済み (実施順): 従来の対戦表 UI -->
+          <div
+            v-for="mu in configuredMatchups"
             :key="mu.id"
             class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
           >
@@ -1616,9 +1684,19 @@ const statusColor = (s: string) => ({
                     🏆 FINALS
                   </span>
                 </p>
-                <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
-                  Matchup #{{ mu.matchupOrder }}
-                </p>
+                <div class="flex items-center gap-2">
+                  <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
+                    {{ mu.isFinals ? 'FINALS' : '第 ' + mu.matchupOrder + ' 試合' }}
+                  </p>
+                  <button
+                    v-if="!mu.isFinals"
+                    type="button"
+                    @click="handleConfigureMatchup(mu.id, false)"
+                    :disabled="currentCompetition.status === 'finished'"
+                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/40 dark:hover:text-rose-300 disabled:opacity-50"
+                    title="この対戦を未設定に戻す"
+                  >設定解除</button>
+                </div>
               </div>
               <!-- ラインアップ公開ボタン群 -->
               <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono">

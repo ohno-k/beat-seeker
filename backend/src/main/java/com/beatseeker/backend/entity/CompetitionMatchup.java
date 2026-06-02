@@ -39,9 +39,28 @@ public class CompetitionMatchup {
     @JoinColumn(name = "team_b_id", nullable = false)
     private CompetitionTeam teamB;
 
-    /** 大会内での対戦表示順 (1〜10)。 */
+    /**
+     * 大会内での実施・対戦表示順。
+     * 未設定 (configured=false) の間は {@code 0}。運営が「設定」した順に 1, 2, ... と採番される。
+     */
     @Column(nullable = false)
     private Integer matchupOrder;
+
+    /**
+     * 運営がこの対戦カードを「設定済み (実施対象)」にしたか。
+     * <ul>
+     *   <li>false (デフォルト): 未設定。プレイヤー / TL には表示されず、自選曲提出もできない。
+     *       open 遷移時は全 matchup がこの状態で生成される。</li>
+     *   <li>true: 運営が設定済み。{@link #matchupOrder} が 1 以上で採番され、プレイヤー / TL に公開される。</li>
+     * </ul>
+     * 決勝 matchup ({@link #isFinals}) は生成時から true。
+     *
+     * <p>列名を明示しているのは {@code SpringPhysicalNamingStrategy} 由来の命名ぶれを避けるため
+     * ({@link #lineupPublishedA} のコメント参照)。
+     */
+    @Column(name = "configured", nullable = false)
+    @ColumnDefault("false")
+    private Boolean configured = false;
 
     /**
      * チーム A 側の起用 (ラインアップ) が相手 (B) に公開されているか。

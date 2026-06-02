@@ -137,6 +137,8 @@ public class CompetitionPlayerController {
         List<CompetitionMatch> allMatches = matchRepository.findAllByCompetition(comp);
         List<Map<String, Object>> matchMaps = new ArrayList<>();
         for (CompetitionMatch m : allMatches) {
+            // 運営が未設定の matchup に属する試合はプレイヤーに表示しない (設定済みになって初めて公開)
+            if (!Boolean.TRUE.equals(m.getMatchup().getConfigured())) continue;
             CompetitionParticipant pa = m.getPlayerA();
             CompetitionParticipant pb = m.getPlayerB();
             boolean iAmA = pa != null && pa.getId().equals(me.getId());

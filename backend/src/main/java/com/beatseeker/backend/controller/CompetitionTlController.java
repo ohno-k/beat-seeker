@@ -127,6 +127,8 @@ public class CompetitionTlController {
                 matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp);
         List<Map<String, Object>> matchupMaps = new ArrayList<>();
         for (CompetitionMatchup mu : allMatchups) {
+            // 運営が未設定の matchup は TL に表示しない (設定済みになって初めて公開)
+            if (!Boolean.TRUE.equals(mu.getConfigured())) continue;
             boolean iAmA = mu.getTeamA() != null && mu.getTeamA().getId().equals(myTeam.getId());
             boolean iAmB = mu.getTeamB() != null && mu.getTeamB().getId().equals(myTeam.getId());
             if (!iAmA && !iAmB) continue;
