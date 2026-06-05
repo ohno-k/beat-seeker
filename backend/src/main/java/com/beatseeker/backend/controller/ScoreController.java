@@ -260,6 +260,9 @@ public class ScoreController {
                 newScore.setSource(source);
                 updateScoreFields(newScore, req);
                 scoreRepository.save(newScore);
+                // 同一ペイロード内に同じ譜面が複数回含まれた場合、2 件目以降を新規 INSERT して
+                // 重複行を作らないよう、保存した行を lookup Map に登録しておく（以降は更新判定に回る）。
+                scoreMap.put(key, newScore);
             } else {
                 // 既存スコアとの比較用に各値を null セーフに取り出す。
                 oldScore = existing.getScore() != null ? existing.getScore() : 0;

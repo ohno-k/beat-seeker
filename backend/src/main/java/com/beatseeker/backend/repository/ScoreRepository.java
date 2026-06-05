@@ -603,7 +603,11 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "    sr.rank_value AS informal_rank, sr.weight, " +
         // 注意: score_rate 算式は calculateDifficultySimulation と共通。SCORE_RATE_FORMULA 定数を参照。
         "    " + SCORE_RATE_FORMULA + " AS score_rate " +
-        "  FROM scores s " +
+        // 重複行（重複アップロード・source/level 違い）による多重カウントを防ぐため、
+        // user×曲×譜面で MAX(score) に集約（best_scores 相当）してから集計する。
+        "  FROM (SELECT user_id, title, difficulty_name, MAX(score) AS score FROM scores " +
+        "        WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        "        GROUP BY user_id, title, difficulty_name) s " +
         "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
         "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
         "  JOIN song_ranks sr ON sr.mapped_title = (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || ' [L]' ELSE s.title END) " +
@@ -764,12 +768,15 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "    (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || '[L]' ELSE s.title END) AS mapped_title, " +
         // 注意: score_rate 算式は findAllSongRankingAggregates と共通。SCORE_RATE_FORMULA 定数を参照。
         "    " + SCORE_RATE_FORMULA + " AS score_rate " +
-        "  FROM scores s " +
+        // 重複行による多重カウントを防ぐため、user×曲×譜面で MAX(score) に集約してから集計する
+        // （level >= 11 の絞り込みは集約前の WHERE で適用）。
+        "  FROM (SELECT user_id, title, difficulty_name, MAX(score) AS score FROM scores " +
+        "        WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 AND difficulty_level >= 11 " +
+        "        GROUP BY user_id, title, difficulty_name) s " +
         "  JOIN users u ON s.user_id = u.id " +
         "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
         "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
         "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0 " +
-        "    AND s.difficulty_level >= 11 " +
         "    AND " + SCORE_RATE_FORMULA + " > 66.666 " +
         "), " +
         "active_calc AS ( " +
@@ -850,19 +857,28 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "    AND SUBSTRING(dr.rank_value FROM '^\\d+\\.\\d+') = :rank " +
         "), " +
         "weight_for_rank AS ( SELECT wt FROM weight_map WHERE rv = :rank ), " +
+        // 重要: scores は (user_id, title, difficulty_name, difficulty_level, source) 単位の行を持ち得るため、
+        //       同一ユーザー×同一曲×同一譜面で複数行（重複アップロード・source 違い・level 違い）が存在し得る。
+        //       生 scores のまま合算するとフォルダ内で 1 曲が複数回カウントされ、playedCount や合計 BEAT-PT が
+        //       水増しされてランキングが壊れる。リポジトリ他箇所と同様に best_scores へ集約してから集計する。
+        "best_scores AS ( " +
+        "  SELECT user_id, title, difficulty_name, MAX(score) AS score " +
+        "  FROM scores " +
+        "  WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        "  GROUP BY user_id, title, difficulty_name " +
+        "), " +
         "scored_data AS ( " +
         "  SELECT " +
-        "    s.user_id, " +
+        "    bs.user_id, " +
         // 注意: difficulty_rank_songs.song_title は LEGGENDARIA 譜面の場合「タイトル + '[L]'」（スペース無し）で
         //       格納されているため、ここでも同じ結合キーに揃える。スペースを入れると 0 件マッチになる。
-        "    (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || '[L]' ELSE s.title END) AS mapped_title, " +
-        "    s.score AS raw_score, " +
+        "    (CASE WHEN bs.difficulty_name = 'LEGGENDARIA' THEN bs.title || '[L]' ELSE bs.title END) AS mapped_title, " +
+        "    bs.score AS raw_score, " +
         "    sd.notes * 2 AS max_score, " +
-        "    " + SCORE_RATE_FORMULA + " AS score_rate " +
-        "  FROM scores s " +
-        "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
-        "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
-        "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0 " +
+        "    (bs.score * 100.0 / NULLIF(sd.notes * 2.0, 0)) AS score_rate " +
+        "  FROM best_scores bs " +
+        "  JOIN song_definitions sd ON bs.title = sd.title AND sd.revision = 'active' " +
+        "    AND ((bs.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (bs.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
         "), " +
         "in_rank AS ( " +
         "  SELECT sd.user_id, sd.raw_score, sd.max_score, sd.score_rate " +

@@ -54,6 +54,7 @@ com\beatseeker\backend\service\MonthlyWrappedService$MergedSong.class
 com\beatseeker\backend\BackendApplication.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$OpenWithNumbersRequest.class
 com\beatseeker\backend\controller\AdminController.class
+com\beatseeker\backend\controller\CompetitionAdminController$ConfigureMatchupRequest.class
 com\beatseeker\backend\controller\ProfileUpdateRequest.class
 com\beatseeker\backend\config\ApiTokenAuthFilter.class
 com\beatseeker\backend\service\GameDataService.class
@@ -159,6 +160,7 @@ com\beatseeker\backend\service\TopRankersBeatPtService$1.class
 com\beatseeker\backend\controller\CompetitionTlController.class
 com\beatseeker\backend\controller\IntegrationTokenController$IssueTokenRequest.class
 com\beatseeker\backend\entity\CompetitionMatchup.class
+com\beatseeker\backend\service\ScoreRecalculationService$2.class
 com\beatseeker\backend\entity\ShareToken.class
 com\beatseeker\backend\entity\Score.class
 com\beatseeker\backend\controller\TierCommentController$CommentRequest.class

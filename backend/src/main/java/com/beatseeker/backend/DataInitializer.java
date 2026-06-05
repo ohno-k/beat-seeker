@@ -122,6 +122,20 @@ public class DataInitializer implements ApplicationRunner {
                     "END LOOP; END $$;"
             ).executeUpdate());
 
+        // 手順3.5: 5 列ユニークキー (user_id, title, difficulty_name, difficulty_level, source) で
+        //          重複している行を削除する（各キーで score 最大・id 最大の 1 行のみ残す）。
+        //          ユニーク制約が無かった期間に重複アップロード等で生まれた重複行を掃除する。
+        //          これを先に行わないと手順4の UNIQUE 制約追加が「重複あり」で失敗し、毎回スキップされ続ける。
+        runStep("dedupe scores before unique constraint", () ->
+            entityManager.createNativeQuery(
+                    "DELETE FROM scores s USING ( " +
+                    "  SELECT id, ROW_NUMBER() OVER ( " +
+                    "    PARTITION BY user_id, title, difficulty_name, difficulty_level, source " +
+                    "    ORDER BY score DESC NULLS LAST, id DESC " +
+                    "  ) AS rn FROM scores " +
+                    ") d WHERE s.id = d.id AND d.rn > 1"
+            ).executeUpdate());
+
         // 手順4: 新しい 5 列ユニーク制約（source 含む）が無ければ作成する。
         //        Score エンティティの @UniqueConstraint で宣言済みだが、ddl-auto=update は
         //        既存テーブルへの UNIQUE 制約追加を行わないため、ここで明示的に作成する。
