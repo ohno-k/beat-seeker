@@ -312,7 +312,7 @@ const tableData = computed(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, idx) in rateTableRows" :key="row.label" :class="idx % 5 === 0 ? 'border-t border-slate-200 dark:border-slate-700' : ''">
+                <tr v-for="(row, idx) in rateTableRows" :key="row.label" :class="idx % 5 === 1 ? 'border-t border-slate-200 dark:border-slate-700' : ''">
                   <td class="py-1 px-2 font-bold whitespace-nowrap sticky left-0 z-10 bg-white dark:bg-slate-800" :class="row.color">{{ row.label }}</td>
                   <td v-for="(rate, i) in row.rates" :key="i" class="py-1 px-1 sm:px-2 text-center font-mono whitespace-nowrap" :class="rate.color">{{ rate.text }}</td>
                 </tr>
