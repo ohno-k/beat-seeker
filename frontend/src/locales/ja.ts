@@ -306,7 +306,10 @@ export const ja = {
   'table.noFullPlayUsers': '全曲プレイ済みのユーザーがいません。',
   'table.folderBeatTier': 'フォルダ内 BEAT-TIER',
   'table.noUnofficialData': '非公式難易度データが見つかりません。対象レベル（☆11、☆12）が含まれているか確認してください。',
-
+  'table.colSongRank': '単曲ランク',
+  'table.songRankDist': '単曲ランク分布',
+  'table.songRankDistNote': '{n}人のスコアを集計（非公開ユーザー含む・匿名）',
+  
   'beatTierInfo.title': 'Beat-Tier 統計システム',
   'beatTierInfo.subtitle': 'システム解説 と 対象楽曲リスト',
   'beatTierInfo.tabAbout': '仕組み・ランク',
