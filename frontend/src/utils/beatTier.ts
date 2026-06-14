@@ -1028,6 +1028,27 @@ export function getFolderRankInfoByRate(averageRate: number, informalRank: strin
 }
 
 /**
+ * 【関数の役割】 指定した目標フォルダランク (name + tier) に到達するために必要な
+ * score rate（%）を、対象譜面の非公式ランクに合わせて返す。
+ *
+ * 各フォルダ（非公式ランク）ごとに Legend rate と offsetScale が異なるため、
+ * 同じ「Master III」でも要求 rate は譜面によって変わる。プロフィールの単曲ティア
+ * 目標設定で「あと何点」を算出する際に使う。
+ *
+ * @param name         目標ランク名（例: 'Master', 'Legend'）
+ * @param tier         目標サブティア（1〜5）。Legend は undefined。
+ * @param informalRank 対象譜面の非公式ランク
+ * @returns            到達に必要な score rate（%）。判定不能時は 0。
+ */
+export function getFolderRankThresholdRate(name: string, tier: number | undefined, informalRank: string | undefined): number {
+    const legendRate = getFolderLegendRate(informalRank);
+    if (legendRate <= 0) return 0;
+    const def = FOLDER_RANK_DEFS.find(d => d.name === name && d.tier === tier);
+    if (!def) return 0;
+    return legendRate - def.offset * getFolderRankOffsetMax(informalRank);
+}
+
+/**
  * 【関数の役割】 平均 score rate ベースでの「次ランクまでの進捗」を返す。
  *
  * 返される nextRank には通常の {@link RankInfo} に加えて `minRate`（次ランクの要求 rate）が付く。

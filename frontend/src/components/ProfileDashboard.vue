@@ -135,7 +135,7 @@
               <div class="h-44"><BarChart v-if="scoreRateHistData" :data="scoreRateHistData" :options="scoreRateHistOpts" /></div>
             </div>
             <div class="chart-card lg:col-span-2">
-              <h4 class="chart-title">{{ t('dashboard.songRankDist') }}</h4>
+              <h4 class="chart-title">{{ t('dashboard.songRankDist') }} <span class="text-[10px] font-normal text-slate-400 ml-2">{{ t('dashboard.clickForList') }}</span></h4>
               <div class="h-44"><BarChart v-if="songRankDistData" :data="songRankDistData" :options="songRankBarOpts" /></div>
             </div>
           </div>
@@ -290,6 +290,76 @@
       </div>
     </Teleport>
 
+    <!-- Single-Song Tier Modal -->
+    <Teleport to="body">
+      <div v-if="tierModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="tierModalOpen = false">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
+          <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+            <div class="min-w-0">
+              <h3 class="font-bold text-slate-800 dark:text-slate-100 truncate">{{ tierModalLabel }}</h3>
+              <p class="text-xs text-slate-400 mt-0.5">{{ tierModalSongs.length }} 曲</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <label class="text-xs font-bold text-slate-500 dark:text-slate-400 hidden sm:inline">{{ t('dashboard.targetRank') }}</label>
+              <select v-model="tierTargetKey"
+                class="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1.5 max-w-[9rem] focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <template v-for="g in tierTargetGroups" :key="g.name">
+                  <optgroup v-if="g.items.length > 1" :label="g.name">
+                    <option v-for="b in g.items" :key="b.key" :value="b.key">{{ b.label }}</option>
+                  </optgroup>
+                  <option v-else :value="g.items[0].key">{{ g.items[0].label }}</option>
+                </template>
+              </select>
+              <button @click="tierModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="overflow-y-auto flex-1">
+            <table class="w-full text-sm">
+              <thead class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+                <tr class="text-xs font-black uppercase text-slate-400 tracking-wide">
+                  <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
+                  <th class="pb-3 pt-3 text-center w-14">☆</th>
+                  <th class="pb-3 pt-3 text-center w-14">{{ t('table.colInformal') }}</th>
+                  <th class="pb-3 pt-3 text-right w-24">{{ t('table.exScore') }}</th>
+                  <th class="pb-3 pt-3 text-right pr-6 w-32">{{ t('table.toTargetRank') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr v-for="s in tierModalSongs" :key="`${s.title}_${s.difficultyName}`"
+                  class="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
+                  <td class="py-2 pl-6">
+                    <div class="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">{{ s.title }}</div>
+                    <div class="text-xs text-slate-400">{{ s.difficultyName }}</div>
+                  </td>
+                  <td class="py-2 text-center font-bold text-slate-600 dark:text-slate-300 text-xs">{{ s.difficultyLevel }}</td>
+                  <td class="py-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400">{{ s.informalRank || '-' }}</td>
+                  <td class="py-2 text-right font-mono text-xs text-slate-600 dark:text-slate-300 tabular-nums">
+                    <div>{{ s.score.toLocaleString() }}</div>
+                    <div class="text-slate-400 text-[10px]">{{ s.scoreRate.toFixed(2) }}%</div>
+                  </td>
+                  <td class="py-2 pr-6 text-right text-xs tabular-nums">
+                    <template v-if="s.remaining === null">
+                      <span class="text-slate-400">-</span>
+                    </template>
+                    <template v-else-if="s.remaining > 0">
+                      <div class="font-bold text-blue-600 dark:text-blue-400">{{ t('dashboard.remainingPoints', { n: s.remaining.toLocaleString() }) }}</div>
+                      <div class="text-slate-400 text-[10px]">{{ s.targetRate.toFixed(2) }}%</div>
+                    </template>
+                    <template v-else>
+                      <span class="text-purple-500 font-bold text-[10px]">{{ t('table.achieved') }}</span>
+                    </template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- URL 共有 -->
     <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
@@ -403,7 +473,7 @@ import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
-import { calculatePoints, WEIGHTS, getFolderRankInfoByRate } from '../utils/beatTier';
+import { calculatePoints, WEIGHTS, getFolderRankInfoByRate, getFolderRankThresholdRate } from '../utils/beatTier';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import ShareTokenModal from './ShareTokenModal.vue';
 import IntegrationTokenModal from './IntegrationTokenModal.vue';
@@ -834,6 +904,68 @@ const scoreRateHistData = computed(() => {
   };
 });
 
+// ── 単曲ティア分布: バー定義（静的・チャートとモーダルで共有） ─────────────────
+// 下位ランク（左）→ 上位ランク（右）の順に並べたブロック定義（色は beatTier.ts の各ブロックと揃える）。
+const SONG_RANK_BLOCKS: { name: string; color: string; sub: boolean }[] = [
+  { name: 'Beginner',     color: '#94a3b8', sub: false },
+  { name: 'Novice',       color: '#475569', sub: true  },
+  { name: 'Intermediate', color: '#2563eb', sub: true  },
+  { name: 'Advanced',     color: '#0891b2', sub: true  },
+  { name: 'Expert',       color: '#0d9488', sub: true  },
+  { name: 'Veteran',      color: '#059669', sub: true  },
+  { name: 'Commander',    color: '#a16207', sub: true  },
+  { name: 'Elite',        color: '#ea580c', sub: true  },
+  { name: 'Master',       color: '#dc2626', sub: true  },
+  { name: 'Ancient',      color: '#4f46e5', sub: true  },
+  { name: 'Mythic',       color: '#9333ea', sub: true  },
+  { name: 'Legend',       color: '#f59e0b', sub: false },
+];
+
+const SONG_RANK_ROMANS = ['I', 'II', 'III', 'IV', 'V'];
+
+/** ベース色を白方向に lightenPct% だけ薄める。tier 1 が最も薄く、tier 5 がベース色そのまま。 */
+function shadeRankColor(hex: string, lightenPct: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const m = lightenPct / 100;
+  return `rgb(${Math.round(r + (255 - r) * m)}, ${Math.round(g + (255 - g) * m)}, ${Math.round(b + (255 - b) * m)})`;
+}
+
+interface SongRankBar { label: string; key: string; color: string; name: string; tier?: number; }
+
+/**
+ * 全 52 バー（左 = 低位、右 = 高位）。label はフルネームでツールチップに "Ancient II" などを出す。
+ * key は曲のランク判定キー（`getFolderRankInfoByRate` 由来）と一致させ、クリック時の曲抽出に使う。
+ * X 軸の表示は songRankBarOpts の ticks.callback 側で親ランク名（tier III 位置）だけに間引く。
+ */
+const SONG_RANK_BARS: SongRankBar[] = (() => {
+  const bars: SongRankBar[] = [];
+  SONG_RANK_BLOCKS.forEach(block => {
+    if (!block.sub) {
+      bars.push({ label: block.name, key: block.name, color: block.color, name: block.name });
+    } else {
+      for (let tier = 1; tier <= 5; tier++) {
+        // tier 5 → 0%（濃）, tier 1 → 60%（淡）
+        bars.push({
+          label: `${block.name} ${SONG_RANK_ROMANS[tier - 1]}`,
+          key: `${block.name}|${tier}`,
+          color: shadeRankColor(block.color, (5 - tier) * 15),
+          name: block.name,
+          tier,
+        });
+      }
+    }
+  });
+  return bars;
+})();
+
+/** 曲のスコアレート + 非公式ランクから、所属する単曲ティアバーの key を返す。 */
+function songRankKeyOf(scoreRate: number, informalRank: string | undefined): string {
+  const rank = getFolderRankInfoByRate(scoreRate, informalRank);
+  return rank.tier ? `${rank.name}|${rank.tier}` : rank.name;
+}
+
 /**
  * 【computed の役割】 単曲ティア（= スコア一覧「ランク」列の Folder Rank）別の曲数分布。
  *
@@ -845,62 +977,18 @@ const scoreRateHistData = computed(() => {
  */
 const songRankDistData = computed(() => {
   if (!myScoresActive.value.length) return null;
-  // 下位ランクから上位ランクへ昇順に並べたブロック定義（色は beatTier.ts の各ブロックと揃える）
-  const blocks: { name: string; color: string; sub: boolean }[] = [
-    { name: 'Beginner',     color: '#94a3b8', sub: false },
-    { name: 'Novice',       color: '#475569', sub: true  },
-    { name: 'Intermediate', color: '#2563eb', sub: true  },
-    { name: 'Advanced',     color: '#0891b2', sub: true  },
-    { name: 'Expert',       color: '#0d9488', sub: true  },
-    { name: 'Veteran',      color: '#059669', sub: true  },
-    { name: 'Commander',    color: '#a16207', sub: true  },
-    { name: 'Elite',        color: '#ea580c', sub: true  },
-    { name: 'Master',       color: '#dc2626', sub: true  },
-    { name: 'Ancient',      color: '#4f46e5', sub: true  },
-    { name: 'Mythic',       color: '#9333ea', sub: true  },
-    { name: 'Legend',       color: '#f59e0b', sub: false },
-  ];
-  // ベース色を白方向に lightenPct% だけ薄める。tier 1 が最も薄く、tier 5 がベース色そのまま。
-  const shade = (hex: string, lightenPct: number): string => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const m = lightenPct / 100;
-    return `rgb(${Math.round(r + (255 - r) * m)}, ${Math.round(g + (255 - g) * m)}, ${Math.round(b + (255 - b) * m)})`;
-  };
-  // 全バー（左 = 低位、右 = 高位）を組み立てる。ラベルにはフルネームを入れて
-  // ツールチップで "Ancient II" などサブティアまで表示されるようにする。
-  // X 軸の表示は songRankBarOpts の ticks.callback 側で親ランク名（tier III 位置）だけに間引く。
-  const romans = ['I', 'II', 'III', 'IV', 'V'];
-  const bars: { label: string; key: string; color: string }[] = [];
-  blocks.forEach(block => {
-    if (!block.sub) {
-      bars.push({ label: block.name, key: block.name, color: block.color });
-    } else {
-      for (let tier = 1; tier <= 5; tier++) {
-        // tier 5 → 0%（濃）, tier 1 → 60%（淡）
-        const lightenPct = (5 - tier) * 15;
-        bars.push({
-          label: `${block.name} ${romans[tier - 1]}`,
-          key: `${block.name}|${tier}`,
-          color: shade(block.color, lightenPct),
-        });
-      }
-    }
-  });
-  const counts: Record<string, number> = Object.fromEntries(bars.map(b => [b.key, 0]));
+  const counts: Record<string, number> = Object.fromEntries(SONG_RANK_BARS.map(b => [b.key, 0]));
   myScoresActive.value.forEach(s => {
     if (!s.informalRank) return;
-    const rank = getFolderRankInfoByRate(s.scoreRate, s.informalRank);
-    const key = rank.tier ? `${rank.name}|${rank.tier}` : rank.name;
+    const key = songRankKeyOf(s.scoreRate, s.informalRank);
     if (counts[key] !== undefined) counts[key]++;
   });
   return {
-    labels: bars.map(b => b.label),
+    labels: SONG_RANK_BARS.map(b => b.label),
     datasets: [{
       label: t('common.songCount'),
-      data: bars.map(b => counts[b.key]),
-      backgroundColor: bars.map(b => b.color),
+      data: SONG_RANK_BARS.map(b => counts[b.key]),
+      backgroundColor: SONG_RANK_BARS.map(b => b.color),
       borderRadius: 1,
       // バー間隔を詰める（1.0 で隙間なし）
       categoryPercentage: 1.0,
@@ -975,6 +1063,73 @@ function openHistModal(idx: number) {
   histModalOpen.value = true;
 }
 
+// ── 単曲ティア分布モーダル（バークリックで該当ティアの曲一覧 + 目標ランクまでの残点） ──
+
+const tierModalOpen = ref(false);
+/** クリックされたバーの index（SONG_RANK_BARS）。 */
+const tierModalIndex = ref<number | null>(null);
+/** 目標ランクの key（SONG_RANK_BARS.key）。 */
+const tierTargetKey = ref<string | null>(null);
+
+/** 目標ランクとして選べるランク（Beginner を除く、Legend を含む）を高位 → 低位に optgroup でまとめる。 */
+const tierTargetGroups = computed(() => {
+  const groups: { name: string; items: SongRankBar[] }[] = [];
+  for (const bar of [...SONG_RANK_BARS].reverse()) {
+    if (bar.key === 'Beginner') continue;
+    let g = groups.find(x => x.name === bar.name);
+    if (!g) { g = { name: bar.name, items: [] }; groups.push(g); }
+    g.items.push(bar);
+  }
+  return groups;
+});
+
+const tierModalLabel = computed(() =>
+  tierModalIndex.value !== null ? SONG_RANK_BARS[tierModalIndex.value].label : ''
+);
+
+/**
+ * 【computed の役割】 クリックされたティアに属する曲一覧。
+ * 各曲について、選択中の目標ランクに到達するのに必要な EX スコア差（remaining）を算出する。
+ * remaining が null = 算出不能（曲の理論値不明）、0 以下 = すでに目標到達。
+ * 未達成（remaining>0）を残点昇順で先頭に、達成済みを末尾に並べる。
+ */
+const tierModalSongs = computed(() => {
+  if (tierModalIndex.value === null) return [];
+  const barKey = SONG_RANK_BARS[tierModalIndex.value].key;
+  const target = SONG_RANK_BARS.find(b => b.key === tierTargetKey.value) ?? null;
+  return myScoresActive.value
+    .filter(s => s.informalRank && songRankKeyOf(s.scoreRate, s.informalRank) === barKey)
+    .map(s => {
+      let remaining: number | null = null;
+      let targetRate = 0;
+      if (target) {
+        targetRate = getFolderRankThresholdRate(target.name, target.tier, s.informalRank);
+        if (targetRate > 0 && s.maxScore > 0) {
+          remaining = Math.max(0, Math.ceil(s.maxScore * targetRate / 100) - s.score);
+        }
+      }
+      return { ...s, remaining, targetRate };
+    })
+    .sort((a, b) => {
+      const ra = a.remaining, rb = b.remaining;
+      const aDone = ra === null || ra <= 0;
+      const bDone = rb === null || rb <= 0;
+      if (aDone !== bDone) return aDone ? 1 : -1;        // 未達成を先頭へ
+      return (ra ?? Infinity) - (rb ?? Infinity);         // 残点が小さい順
+    });
+});
+
+/** バークリックで該当ティアのモーダルを開く。目標ランクは 1 つ上のランクを既定値にする。 */
+function openTierModal(idx: number) {
+  tierModalIndex.value = idx;
+  // 目標選択肢（Beginner 除く）を低位 → 高位で並べ、クリックしたティアの 1 つ上を既定にする。
+  const ordered = SONG_RANK_BARS.filter(b => b.key !== 'Beginner');
+  const pos = ordered.findIndex(b => b.key === SONG_RANK_BARS[idx].key);
+  const targetPos = pos === -1 ? 0 : Math.min(pos + 1, ordered.length - 1);
+  tierTargetKey.value = ordered[targetPos]?.key ?? null;
+  tierModalOpen.value = true;
+}
+
 // ── Chart options ─────────────────────────────────────────────────────────────
 
 const lineOpts = computed(() => ({
@@ -1035,6 +1190,10 @@ const scoreRateHistOpts = computed(() => ({
 // X 軸はコールバックで「tier III の親ランク名」「Beginner」「Legend」だけ残し、他は空にする。
 const songRankBarOpts = computed(() => ({
   ...barOpts.value,
+  onClick: (_event: any, elements: any[]) => {
+    if (!elements.length) return;
+    openTierModal(elements[0].index);
+  },
   scales: {
     ...barOpts.value.scales,
     x: {
