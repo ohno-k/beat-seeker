@@ -764,9 +764,31 @@ const clearChartData = computed(() => {
 // Level filter for score analysis section
 const selectedAnalysisLevel = ref<'ALL' | '11' | '12'>('ALL');
 
+/**
+ * 同一(曲名, 難易度)に複数 source（arcade / infinitas）の行が並走する場合、
+ * EX スコアが高い行だけを残す（best-per-chart 集約）。
+ *
+ * `/api/scores/me` は source ごとに別レコードを返すため、集約せずに使うと
+ * 低い source の行（例: INFINITAS スコア）が別ティアに混入し、ティア分布・
+ * スコア率ヒストグラム・「次に伸ばすべき譜面」候補などで同一譜面が二重計上される。
+ *
+ * スコア一覧（useScores の assignBestStat）およびサーバの beat-pt 集計
+ * （ScoreRecalculationService の bestByChart）と同じポリシーに揃えるための前処理。
+ * `findByUserOrderByUploadedAtAsc` 順で渡るため、同点時は先着（先にアップした方）を残す。
+ */
+const myScoresBest = computed(() => {
+  const best = new Map<string, any>();
+  for (const s of myScores.value) {
+    const key = `${s.title}_${s.difficultyName}`;
+    const cur = best.get(key);
+    if (!cur || (s.score ?? 0) > (cur.score ?? 0)) best.set(key, s);
+  }
+  return Array.from(best.values());
+});
+
 // All Lv11/12 ANOTHER/LEGGENDARIA entries (including score=0, for clear status table)
 const myAnotherLegg = computed(() =>
-  myScores.value.filter(s => {
+  myScoresBest.value.filter(s => {
     if (s.difficultyName !== 'ANOTHER' && s.difficultyName !== 'LEGGENDARIA') return false;
     if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return false;
     if (selectedAnalysisLevel.value !== 'ALL' && s.difficultyLevel !== parseInt(selectedAnalysisLevel.value)) return false;
