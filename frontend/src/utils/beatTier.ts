@@ -81,17 +81,26 @@ const SCORE_RATE_TIER_AAA = 88.88;
 const SCORE_RATE_TIER_MAX_MINUS = 94.44;
 
 /**
- * 【Folder Legend】 ☆11.0 側の Legend 到達 score rate（%）。
- * 最低難易度ではほぼ理論値（99.99%）を要求し、低 Lv 譜面が容易に Legend に
- * 流れ込むのを防ぐ。Legend は「真に近い完璧」を表す指標とする。
+ * 【Folder Legend】 ☆値 → Legend 到達 score rate（%）の制御点表（区間線形補間）。
+ *
+ * 2026-06 データ再調整: リポジトリ同梱の歴代トップランカーデータ
+ * （top-rankers-data/0/ = 歴代・全国＋47都道府県）から各フォルダの
+ * 「歴代全国レコードの score rate 分布」を集計し、その下位25%点
+ * （= 歴代レコードの約75%が到達できる水準）に Legend を揃えた。
+ * 旧 t^4 カーブは ☆11.2〜12.1 帯で歴代レコードの中央値すら下回って
+ * おり（例: ☆11.8 要求 99.88% vs 歴代中央値 99.71%）、「人類未到達の
+ * Legend」が多数発生していたための是正。☆12.5・☆12.9 は旧カーブと
+ * 同値で再合流させ、☆13.0 のみ歴代中央値 95.54% が旧閾値 95.80% に
+ * 届かなかったため 95.30%（歴代p25）へ引き下げ。
  */
-const LEGEND_RATE_LOW_END = 99.99;
-
-/**
- * 【Folder Legend】 ☆13.0 側の Legend 到達 score rate（%）。
- * 歴代 TOP スコア平均（≈95.77%）に揃える。Legend は「TOP プレイヤー基準」を意味する。
- */
-const LEGEND_RATE_HIGH_END = 95.80;
+const LEGEND_RATE_CONTROL: readonly { v: number; rate: number }[] = [
+    { v: 11.0, rate: 99.95 },
+    { v: 11.5, rate: 99.79 },
+    { v: 12.0, rate: 99.46 },
+    { v: 12.5, rate: 98.66 }, // 旧 t^4 カーブと同値（ここで旧式と再合流）
+    { v: 12.9, rate: 96.58 }, // 旧 t^4 カーブと同値（維持）
+    { v: 13.0, rate: 95.30 }, // 歴代p25。旧 95.80 では歴代中央値が未到達だった
+];
 
 /**
  * 【Folder Legend】 Legend 判定 score rate の対応範囲下限（非公式ランク）。
@@ -102,13 +111,6 @@ const LEGEND_RANK_MIN = 11.0;
  * 【Folder Legend】 Legend 判定 score rate の対応範囲上限（非公式ランク）。
  */
 const LEGEND_RANK_MAX = 13.0;
-
-/**
- * 【Folder Legend】 単一の累乗カーブ t^n の指数。
- * 4 にすると ☆11 帯ではほぼフラット（理論値近く）、☆12 後半〜☆13 で急激に要求 rate が落ちる。
- * 歴代 TOP スコアの実カーブ（☆11.0=99.98, ☆12.0=99.60, ☆13.0=95.77）に近い形。
- */
-const LEGEND_RATE_CURVE_EXPONENT = 4;
 
 /**
  * 【総合 BEAT-PT】 合計対象となる上位譜面数。譜面数が多いユーザー同士を公平に比較するため
@@ -210,9 +212,10 @@ export function getMaxPoints(informalRank: string | undefined): number {
 /**
  * 【関数の役割】 各フォルダの Legend（最高ランク）到達に必要な score rate を返す。
  *
- * 単一の累乗カーブ t^n（n=2.5）で [☆11.0, ☆13.0] を [99.90%, 94.44%] にマッピングする。
- *  - 継ぎ目が無いため、隣接難易度間の落差がなめらか
- *  - 低難度帯では小さな差、高難度帯では大きな差というカーブ形
+ * {@link LEGEND_RATE_CONTROL}（歴代トップランカーデータの下位25%点に
+ * フィットさせた制御点表）を区間線形補間して返す。
+ *  - 制御点間は線形なので隣接難易度間の落差がなめらか
+ *  - 歴代レコードが原則 Legend に到達できる水準を全フォルダで保証
  *
  * @param informalRank 非公式ランク文字列
  * @returns            Legend 判定用の score rate（%）。範囲外は 0。
@@ -224,8 +227,18 @@ export function getFolderLegendRate(informalRank: string | undefined): number {
     // 対応範囲は ☆11.0〜☆13.0 のみ
     if (rankValue < LEGEND_RANK_MIN || rankValue > LEGEND_RANK_MAX) return 0;
 
-    const t = (rankValue - LEGEND_RANK_MIN) / (LEGEND_RANK_MAX - LEGEND_RANK_MIN);
-    return LEGEND_RATE_LOW_END - Math.pow(t, LEGEND_RATE_CURVE_EXPONENT) * (LEGEND_RATE_LOW_END - LEGEND_RATE_HIGH_END);
+    const ctrl = LEGEND_RATE_CONTROL;
+    if (rankValue <= ctrl[0].v) return ctrl[0].rate;
+    if (rankValue >= ctrl[ctrl.length - 1].v) return ctrl[ctrl.length - 1].rate;
+    for (let i = 0; i < ctrl.length - 1; i++) {
+        const lo = ctrl[i];
+        const hi = ctrl[i + 1];
+        if (rankValue >= lo.v && rankValue <= hi.v) {
+            const t = (rankValue - lo.v) / (hi.v - lo.v);
+            return lo.rate + t * (hi.rate - lo.rate);
+        }
+    }
+    return ctrl[ctrl.length - 1].rate;
 }
 
 /**
@@ -791,23 +804,24 @@ const FOLDER_RANK_OFFSET_POWER = 0.5;
 /**
  * 【FOLDER 用】 ☆値 → offsetScale（Legend → Novice 1 の総スパン%）の制御点表。
  *
- * 設計意図:
- *  - ☆11.2 と ☆12.2 は元の幾何補間 6×(28/6)^t を再現する自然値で固定し、
- *    [☆11.0, ☆12.2] 区間は旧式と完全一致させる（中央左の維持アンカー）。
- *  - ☆13.0 も独立した緩和つまみとして固定。
- *  - ☆12.7 と ☆12.9 は「☆12.2〜☆12.9 をもう少しキツく」したい体感を満たすため、
- *    自然値（旧 22.22 / 30.10 相当）から数 % 下げてある。これにより ☆12.7 付近を
- *    ピークとして bell 状に offsetScale が圧縮され、要求 rate が ~+0.4% 厳しくなる。
+ * 2026-06 データ再調整: 歴代県別トップデータ（top-rankers-data/0/01〜47）から
+ * 各譜面の「47都道府県トップスコアの中央値」を集計し、その中央値が
+ * Ancient 1（i=10, offset_norm≈0.1056）に一致するよう各☆のスパンを逆算した。
+ * これにより「Legend=歴代級 / Mythic=全国トップ・強豪県1位級 /
+ * Ancient=県1位級」という序列が全フォルダで一貫する
+ * （旧テーブルでは県トップ中央値の到達ティアが Ancient 1〜Master 2 まで
+ * ☆帯によってばらついていた）。
+ * ☆12.9・☆13.0 は前回調整（☆12.9 引き締め・☆13.0 緩和）の意図を尊重して旧値を維持。
  *
  * バランス調整時はこのテーブルを編集する。
  */
 const FOLDER_OFFSET_CONTROL: readonly { v: number; scale: number }[] = [
-    { v: 11.0, scale: 4 },     // 低難度の甘さ抑制（旧 6）
-    { v: 11.2, scale: 7.00 },  // 旧 6×(28/6)^0.1 自然値（中央左維持アンカー）
-    { v: 12.2, scale: 15.12 }, // 旧 6×(28/6)^0.6 自然値（[☆11.2,☆12.2] を旧式と一致させる）
-    { v: 12.7, scale: 20.00 }, // ← ☆12.2〜☆12.9 引き締めの中心。旧 22.22 から累積 -10%
-    { v: 12.9, scale: 28.00 }, // ← 引き締め範囲の右端。旧 30.10 相当から累積 -7%
-    { v: 13.0, scale: 35 },    // 高難度の厳しさ緩和（旧 28）
+    { v: 11.0, scale: 4.10 },  // 県トップ中央値 99.58% → Ancient 1 アンカー
+    { v: 11.5, scale: 9.20 },  // 同 98.77%
+    { v: 12.0, scale: 14.85 }, // 同 97.82%
+    { v: 12.5, scale: 22.50 }, // 同 96.16%
+    { v: 12.9, scale: 28.00 }, // 旧値維持（前回の引き締め意図を尊重）
+    { v: 13.0, scale: 35.00 }, // 旧値維持（高難度の厳しさ緩和）
 ];
 
 /**

@@ -1696,9 +1696,8 @@ const songRankOfScore = (score: number | null | undefined): RankInfo | null => {
  *
  *  - 集計対象: songRankingList の全実ユーザー（非公開のため匿名化された行も含む）
  *    + フレンド（rivalScores、iidxId で重複排除）+ 自分。仮想 TOP ランカーは除外。
- *  - ProfileDashboard の単曲ティア分布に準じた 51 バー構成
- *    （各ブロック I〜V / Legend、I=淡 → V=濃、左=低位 → 右=高位）。
- *    Beginner 帯（レート 66.666% 以下）はスコアはあっても分布には算入しない。
+ *  - ProfileDashboard の単曲ティア分布と同じ 52 バー構成
+ *    （Beginner / 各ブロック I〜V / Legend、I=淡 → V=濃、左=低位 → 右=高位）。
  *  - 戻り値: { data: chart.js データ, total: 集計人数 } / 集計不能時は null。
  */
 const songTierDist = computed(() => {
@@ -1727,8 +1726,9 @@ const songTierDist = computed(() => {
   if (rec.score > 0) rates.push(rec.scoreRate);
   if (rates.length === 0) return null;
 
-  // --- 51 バー定義（Beginner を除く。配色は ProfileDashboard の単曲ティア分布と同じ） ---
+  // --- 52 バー定義（ProfileDashboard の単曲ティア分布と同じ並び・配色） ---
   const blocks: { name: string; color: string; sub: boolean }[] = [
+    { name: 'Beginner',     color: '#94a3b8', sub: false },
     { name: 'Novice',       color: '#475569', sub: true  },
     { name: 'Intermediate', color: '#2563eb', sub: true  },
     { name: 'Advanced',     color: '#0891b2', sub: true  },
@@ -1765,20 +1765,17 @@ const songTierDist = computed(() => {
     }
   });
   const counts: Record<string, number> = Object.fromEntries(bars.map(b => [b.key, 0]));
-  let included = 0;
   rates.forEach(rate => {
     const rank = getFolderRankInfoByRate(rate, rec.informalRank);
-    if (rank.name === 'Beginner') return; // C帯未満（66.666%以下）は分布に算入しない
     const key = rank.tier ? `${rank.name}|${rank.tier}` : rank.name;
-    if (counts[key] !== undefined) { counts[key]++; included++; }
+    if (counts[key] !== undefined) counts[key]++;
   });
-  if (included === 0) return null;
   return {
-    total: included,
+    total: rates.length,
     data: {
       labels: bars.map(b => b.label),
       datasets: [{
-        label: t('rankComparison.players'),
+        label: t('common.songCount'),
         data: bars.map(b => counts[b.key]),
         backgroundColor: bars.map(b => b.color),
         borderRadius: 1,
@@ -1809,7 +1806,7 @@ const songTierDistOpts = computed(() => ({
         font: { size: 10 }, autoSkip: false, maxRotation: 0, minRotation: 0,
         callback(this: any, value: any) {
           const label = this.getLabelForValue(value);
-          if (label === 'Legend') return label;
+          if (label === 'Beginner' || label === 'Legend') return label;
           const m = label.match(/^(\S+) III$/);
           return m ? m[1] : '';
         },
