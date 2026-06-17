@@ -273,6 +273,9 @@ const showTopRankers = ref(false);
 
 // ページネーション（1 ページ 50 件）
 const PAGE_SIZE = 50;
+// 散布図に描画する仮想 TOP ランカーの上限。表（mergedBeatRanking）は全件表示のまま、
+// canvas に全点を描画する散布図側だけ BEAT-PT 上位この件数に間引く（モバイルのメモリ枯渇対策）。
+const SCATTER_TOP_RANKER_LIMIT = 50;
 const beatPage = ref(1);
 const ratePage = ref(1);
 const kenbanPage = ref(1);
@@ -366,7 +369,13 @@ const scatterPoints = computed<ScatterPoint[]>(() => {
         for (const t of rateTopRankers.value) {
             rateTopByKey.set(`${t.versionNum} ${t.prefectureFileNum}`, t.ratePt);
         }
+        // 散布図はページネーションが無く全点を canvas に描画するため、仮想 TOP ランカーは
+        // BEAT-PT 上位 SCATTER_TOP_RANKER_LIMIT 件だけ描画する（表 mergedBeatRanking は全件のまま）。
+        // モバイル Safari の canvas メモリ枯渇によるクラッシュ対策。
+        // topRankers は backend で beatPt 降順ソート済みなので、先頭から拾えば上位順になる。
+        let addedTopRankers = 0;
         for (const t of topRankers.value) {
+            if (addedTopRankers >= SCATTER_TOP_RANKER_LIMIT) break;
             const key = `${t.versionNum} ${t.prefectureFileNum}`;
             const rate = rateTopByKey.get(key) ?? 0;
             if (t.beatPt <= 0 || rate <= 0) continue;
@@ -378,6 +387,7 @@ const scatterPoints = computed<ScatterPoint[]>(() => {
                 isMe: false,
                 isTopRanker: true,
             });
+            addedTopRankers++;
         }
     }
     return points;

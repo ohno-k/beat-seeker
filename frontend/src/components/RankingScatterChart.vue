@@ -208,6 +208,9 @@ const chartOptions = computed(() => {
     responsive: true,
     maintainAspectRatio: false,
     animation: false as const,
+    // Retina（モバイルは最大3倍）の canvas バッキングストアを上限2倍に抑えてメモリ使用量を削減する。
+    // 描画品質はほぼ維持しつつ、iOS Safari の WebContent プロセスのメモリ枯渇クラッシュを防ぐ。
+    devicePixelRatio: Math.min(typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1, 2),
     scales: {
       x: {
         type: 'linear' as const,
