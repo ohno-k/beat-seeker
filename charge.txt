@@ -1,121 +1,94 @@
 曲管理番号	バージョン	曲名	Diff	Lv
-1535	HAPPY SKY	Pink Rose	A	8
-1536	9th style	ATOMIC AGE	A	9
-1537	BISTROVER	IIDX RED Ending (Ryu☆Remix)	A	9
-1538	Lincle	Miami Sunset Drive	A	9
-1539	Sparkle Shower	REcorrection	A	9
-1540	SINOBUZ	獅子霞麗ノ舞	A	9
-1541	9th style	真夏の花・真夏の夢	A	9
-1542	Pinky Crush	ロマンシングエスケープ	A	9
-1543	Lincle	Almace	A	10
-1544	copula	Arcana	A	10
-1545	Pinky Crush	Arcanos	A	10
-1546	EPOLIS	Deep Sea Mystery	A	10
-1547	copula	Donkey Donk	A	10
-1548	Resort Anthem	Everlasting Resort	A	10
-1549	Pinky Crush	Galaxy Collapse	A	10
-1550	Resort Anthem	Golden Palms	A	10
-1551	tricoro	GRADIUS 2012	A	10
-1552	HEROIC VERSE	Infinity Mirror	A	10
-1553	SIRIUS	Light Shine	A	10
-1554	HEROIC VERSE	OUTER PLANETS	A	10
-1555	HAPPY SKY	Pink Rose	L	10
-1556	5th style	RIDE ON THE LIGHT (HI GREAT MIX)	L	10
-1557	SPADA	RISE	A	10
-1558	Sparkle Shower	Show Time	A	10
-1559	Sparkle Shower	SILKY BRAVE	A	10
-1560	RESIDENT	Sunny Day Vibes	A	10
-1561	Rootage	The Best of Both Worlds	A	10
-1562	HEROIC VERSE	Virus Funk	A	10
-1563	BISTROVER	WAKE UP NOW	L	10
-1564	Pinky Crush	最強頂戴girl♡	A	10
-1565	copula	少女アリスと箱庭幻想コンチェルト	A	10
-1566	BISTROVER	新宝島	A	10
-1567	EPOLIS	ないないルーティン	A	10
-1568	BISTROVER	霧幻メモリア	A	10
-1569	CANNON BALLERS	ラストセンチュリーメランコリック	A	10
-1570	EPOLIS	流桜ノ門	A	10
-1571	4th style	ABSOLUTE	L	11
-1572	BISTROVER	ABSOLUTE (kors k Remix)	A	11
-1573	copula	Acid Pumper	A	11
-1574	Pinky Crush	ADAMANT	A	11
-1575	Sparkle Shower	BattleRoyal	A	11
-1576	Lincle	CALL	L	11
-1577	PENDUAL	Chronos	A	11
-1578	4th style	Clione	L	11
-1579	copula	Daily Lunch Special	A	11
-1580	BISTROVER	Dawn Saga	A	11
-1581	SIRIUS	Elisha	A	11
-1582	Resort Anthem	Energy Drive	A	11
-1583	CastHour	Ergosphere	A	11
-1584	Pinky Crush	Fiery Stallion	A	11
-1585	BISTROVER	GIGA RAID	A	11
-1586	Lincle	GIGANT	L	11
-1587	Resort Anthem	Golden Palms	L	11
-1588	Resort Anthem	Kailua	A	11
-1589	SIRIUS	MIRACLE MEETS	A	11
-1590	CastHour	Nocturnal 2097	A	11
-1591	BISTROVER	of the first magnitude	A	11
-1592	RESIDENT	Perfect Plan	A	11
-1593	BISTROVER	Rejection Girl	A	11
-1594	Rootage	ROCK女 feat. 大山愛未, Ken	A	11
-1595	HEROIC VERSE	S!ck (Nhato Remix)	A	11
-1596	Resort Anthem	Sakura Reflection	A	11
-1597	PENDUAL	Scars of FAUNA	A	11
-1598	Lincle	Scharfrichter	A	11
-1599	CastHour	Souhait bleu	A	11
-1600	Lincle	Star Trail	L	11
-1601	Rootage	Urban Constellations	A	11
-1602	tricoro	VALLIS-NERIA	A	11
-1603	Rootage	Wolf 1061	A	11
-1604	SINOBUZ	XINOBIKILL	A	11
-1605	BISTROVER	Zenith	A	11
-1606	CastHour	10000 MILES AWAY	A	11
-1607	PENDUAL	鬼天	A	11
-1608	RESIDENT	《ORDERBREAKER》	A	11
-1609	BISTROVER	乱膳の舞姫	A	11
-1610	CastHour	ABSOLUTE EVIL	A	12
-1611	SPADA	Adularia	A	12
-1612	CastHour	Aftermath	A	12
-1613	SPADA	ALBA -黎明-	L	12
-1614	HEROIC VERSE	BEAT PRISONER	A	12
-1615	BISTROVER	BIGソムタム	A	12
-1616	Sparkle Shower	chaplet -IIDX re:build-	A	12
-1617	copula	DIAMOND CROSSING	A	12
-1618	Pinky Crush	DIVINE JUDGEMENT	A	12
-1619	SINOBUZ	ECHIDNA	A	12
-1620	Rootage	Ember Lights	L	12
-1621	Sparkle Shower	FiZZλ_PØT!OИ	A	12
-1622	PENDUAL	fallen leaves -IIDX edition-	A	12
-1623	copula	Godspeed	A	12
-1624	copula	Highcharge Divolt	A	12
-1625	tricoro	Hollywood Galaxy	A	12
-1626	BISTROVER	Ignis†Iræ	A	12
-1627	Pinky Crush	NOIXIA	A	12
-1628	copula	NZM	A	12
-1629	Rootage	Painful Fate	A	12
-1630	Resort Anthem	PARADISE LOST	A	12
-1631	PENDUAL	Reflux	A	12
-1632	CANNON BALLERS	REVOLVER	L	12
-1633	SINOBUZ	Snakey Kung-fu	A	12
-1634	SINOBUZ	Steel Edge	A	12
-1635	tricoro	Timepiece phase II (CN Ver.)	A	12
-1636	SINOBUZ	TOGAKUSHI	A	12
-1637	CastHour	Triple Cross	A	12
-1638	SINOBUZ	Umbral	L	12
-1639	Rootage	Unbelief	A	12
-1640	tricoro	Valanga	A	12
-1641	Lincle	蛇神	L	12
-1642	RESIDENT	神のシナリオ	A	12
-1643	PENDUAL	共鳴遊戯の華	A	12
-1644	RESIDENT	≡+≡	L	12
-1645	HEROIC VERSE	深淵に捧ぐレクイエム	A	12
-1646	BISTROVER	新宝島	L	12
-1647	CastHour	烽火連天の刃	A	12
-1648	EPOLIS	摩天楼	A	12
-1649	CastHour	禊	A	12
-1650	DJ TROOPERS	ミラージュ・レジデンス	L	12
-1651	Rootage	龍王の霊廟(Mausoleum Of The Primal Dragon)	L	12
-1652	SPADA	海神	A	12
-1653	SPADA	海神	L	12
-1654	SINOBUZ	#MAGiCVLGiRL_TRVP_B3VTZ	A	12
+1555	HAPPY SKY	Pink Rose	A	8
+1556	9th style	ATOMIC AGE	A	9
+1557	BISTROVER	IIDX RED Ending (Ryu☆Remix)	A	9
+1558	Lincle	Miami Sunset Drive	A	9
+1559	Sparkle Shower	REcorrection	A	9
+1560	SINOBUZ	獅子霞麗ノ舞	A	9
+1561	9th style	真夏の花・真夏の夢	A	9
+1562	SIRIUS	未来のプリズム	A	9
+1563	Pinky Crush	ロマンシングエスケープ	A	9
+1564	copula	Arcana	A	10
+1565	Pinky Crush	Arcanos	A	10
+1566	EPOLIS	Deep Sea Mystery	A	10
+1567	copula	Donkey Donk	A	10
+1568	Pinky Crush	Galaxy Collapse	A	10
+1569	Resort Anthem	Golden Palms	A	10
+1570	HEROIC VERSE	Infinity Mirror	A	10
+1571	SIRIUS	Light Shine	A	10
+1572	HEROIC VERSE	OUTER PLANETS	A	10
+1573	HAPPY SKY	Pink Rose	L	10
+1574	SPADA	RISE	A	10
+1575	Sparkle Shower	Show Time	A	10
+1576	Sparkle Shower	SILKY BRAVE	A	10
+1577	RESIDENT	Sunny Day Vibes	A	10
+1578	Rootage	The Best of Both Worlds	A	10
+1579	HEROIC VERSE	Virus Funk	A	10
+1580	BISTROVER	WAKE UP NOW	L	10
+1581	copula	少女アリスと箱庭幻想コンチェルト	A	10
+1582	EPOLIS	ないないルーティン	A	10
+1583	CANNON BALLERS	ラストセンチュリーメランコリック	A	10
+1584	EPOLIS	流桜ノ門	A	10
+1585	4th style	ABSOLUTE	L	11
+1586	BISTROVER	ABSOLUTE (kors k Remix)	A	11
+1587	copula	Acid Pumper	A	11
+1588	Sparkle Shower	BattleRoyal	A	11
+1589	Lincle	CALL	L	11
+1590	PENDUAL	Chronos	A	11
+1591	4th style	Clione	L	11
+1592	BISTROVER	Dawn Saga	A	11
+1593	SIRIUS	Elisha	A	11
+1594	CastHour	Ergosphere	A	11
+1595	Pinky Crush	Fiery Stallion	A	11
+1596	BISTROVER	GIGA RAID	A	11
+1597	Lincle	GIGANT	L	11
+1598	Resort Anthem	Golden Palms	L	11
+1599	Resort Anthem	Kailua	A	11
+1600	SIRIUS	MIRACLE MEETS	A	11
+1601	CastHour	Nocturnal 2097	A	11
+1602	BISTROVER	of the first magnitude	A	11
+1603	BISTROVER	Para siempre	A	11
+1604	RESIDENT	Perfect Plan	A	11
+1605	HAPPY SKY	POODLE	L	11
+1606	BISTROVER	Rejection Girl	A	11
+1607	Lincle	Scharfrichter	A	11
+1608	CastHour	Souhait bleu	A	11
+1609	Lincle	Star Trail	L	11
+1610	Rootage	Urban Constellations	A	11
+1611	Rootage	Yum Yum Jelly	A	11
+1612	BISTROVER	Zenith	A	11
+1613	RESIDENT	《ORDERBREAKER》	A	11
+1614	BISTROVER	乱膳の舞姫	A	11
+1615	SPADA	Adularia	A	12
+1616	CastHour	Aftermath	A	12
+1617	SPADA	ALBA -黎明-	L	12
+1618	HEROIC VERSE	BEAT PRISONER	A	12
+1619	Sparkle Shower	chaplet -IIDX re:build-	A	12
+1620	copula	DIAMOND CROSSING	A	12
+1621	Pinky Crush	DIVINE JUDGEMENT	A	12
+1622	SINOBUZ	ECHIDNA	A	12
+1623	Rootage	Ember Lights	L	12
+1624	Sparkle Shower	FiZZλ_PØT!OИ	A	12
+1625	PENDUAL	fallen leaves -IIDX edition-	A	12
+1626	copula	Godspeed	A	12
+1627	tricoro	Hollywood Galaxy	A	12
+1628	Pinky Crush	NOIXIA	A	12
+1629	copula	NZM	A	12
+1630	Rootage	Painful Fate	A	12
+1631	CANNON BALLERS	REVOLVER	L	12
+1632	SINOBUZ	Snakey Kung-fu	A	12
+1633	SINOBUZ	Steel Edge	A	12
+1634	tricoro	Timepiece phase II (CN Ver.)	A	12
+1635	SINOBUZ	TOGAKUSHI	A	12
+1636	CastHour	Triple Cross	A	12
+1637	SINOBUZ	Umbral	L	12
+1638	Rootage	Unbelief	A	12
+1639	Lincle	蛇神	L	12
+1640	RESIDENT	神のシナリオ	A	12
+1641	HEROIC VERSE	深淵に捧ぐレクイエム	A	12
+1642	CastHour	烽火連天の刃	A	12
+1643	EPOLIS	摩天楼	A	12
+1644	CastHour	禊	A	12
+1645	DJ TROOPERS	ミラージュ・レジデンス	L	12
+1646	SPADA	海神	A	12
+1647	SPADA	海神	L	12

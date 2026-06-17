@@ -1,53 +1,51 @@
 曲管理番号	バージョン	曲名	Diff	Lv
-1895	EMPRESS	3y3s	A	12
-1896	SIRIUS	Almagest	A	12
-1897	RESIDENT	Beyond Evolution	A	12
-1898	Rootage	Carmina	A	12
-1899	PENDUAL	Chrono Diver -PENDULUMs-	A	12
-1900	Resort Anthem	Dances with Snow Fairies	L	12
-1901	HEROIC VERSE	Dans la nuit de l'éternité	A	12
-1902	CANNON BALLERS	DEATH†ZIGOQ ～怒りの高速爆走野郎～	L	12
-1903	Lincle	DIAVOLO	A	12
-1904	tricoro	Elemental Creation	A	12
-1905	CANNON BALLERS	EMERALDAS	A	12
-1906	HEROIC VERSE	EROICA	A	12
-1907	HEROIC VERSE	Everlasting Message	A	12
-1908	SPADA	Feel The Beat	L	12
-1909	DJ TROOPERS	four pieces of heaven	L	12
-1910	DistorteD	Ganymede	L	12
-1911	SINOBUZ	Go Ahead!!	A	12
-1912	EMPRESS	Go Beyond!!	A	12
-1913	SINOBUZ	GuNGNiR	L	12
-1914	CastHour	hard-wired	A	12
-1915	DJ TROOPERS	ICARUS	L	12
-1916	tricoro	Illegal Function Call	L	12
-1917	SPADA	IX	A	12
-1918	SPADA	KAISER PHOENIX	L	12
-1919	GOLD	KAMAITACHI	L	12
-1920	HEROIC VERSE	LIGHTNING STRIKES	L	12
-1921	Sparkle Shower	Lisa-RICCIA	L	12
-1922	HEROIC VERSE	Lost Souls	L	12
-1923	SINOBUZ	Mare Nectaris	A	12
-1924	CastHour	n/a	A	12
-1925	Resort Anthem	perditus†paradisus	A	12
-1926	SPADA	Sigmund	L	12
-1927	BISTROVER	Sinus Iridum	A	12
-1928	EPOLIS	SOLAR ECLIPSE	A	12
-1929	RESIDENT	Somnidiscotheque	A	12
-1930	Pinky Crush	SμG@R RU$#	A	12
-1931	Resort Anthem	THE BLACK KNIGHT	L	12
-1932	Lincle	The Limbo	L	12
-1933	tricoro	Thor's Hammer	A	12
-1934	GOLD	VANESSA	L	12
-1935	SPADA	Verflucht	L	12
-1936	Rootage	X-DEN	A	12
-1937	Pinky Crush	XHRONOXAPSULΞ	A	12
-1938	RESIDENT	栄冠のカンパネラ	A	12
-1939	copula	駅猫のワルツ	A	12
-1940	SPADA	疾風迅雷	L	12
-1941	Lincle	聖人の塔	L	12
-1942	BISTROVER	ディスコルディア	A	12
-1943	EMPRESS	卑弥呼	A	12
-1944	CastHour	烽火連天の刃	L	12
-1945	HAPPY SKY	冥	A	12
-1946	EPOLIS	惑星鉄道	A	12
+1885	EMPRESS	3y3s	A	12
+1886	SIRIUS	Almagest	A	12
+1887	RESIDENT	Beyond Evolution	A	12
+1888	Rootage	Carmina	A	12
+1889	PENDUAL	Chrono Diver -PENDULUMs-	A	12
+1890	Resort Anthem	Dances with Snow Fairies	L	12
+1891	HEROIC VERSE	Dans la nuit de l'éternité	A	12
+1892	CANNON BALLERS	DEATH†ZIGOQ ～怒りの高速爆走野郎～	L	12
+1893	Lincle	DIAVOLO	A	12
+1894	tricoro	Elemental Creation	A	12
+1895	CANNON BALLERS	EMERALDAS	A	12
+1896	HEROIC VERSE	EROICA	A	12
+1897	HEROIC VERSE	Everlasting Message	A	12
+1898	SPADA	Feel The Beat	L	12
+1899	DistorteD	Ganymede	L	12
+1900	SINOBUZ	Go Ahead!!	A	12
+1901	EMPRESS	Go Beyond!!	A	12
+1902	SINOBUZ	GuNGNiR	L	12
+1903	CastHour	hard-wired	A	12
+1904	DJ TROOPERS	ICARUS	L	12
+1905	tricoro	Illegal Function Call	L	12
+1906	SPADA	KAISER PHOENIX	L	12
+1907	GOLD	KAMAITACHI	L	12
+1908	Sparkle Shower	Lisa-RICCIA	L	12
+1909	SINOBUZ	Mare Nectaris	A	12
+1910	CastHour	n/a	A	12
+1911	Resort Anthem	perditus†paradisus	A	12
+1912	Sparkle Shower	RUINA	A	12
+1913	SPADA	Sigmund	L	12
+1914	BISTROVER	Sinus Iridum	A	12
+1915	RESIDENT	Somnidiscotheque	A	12
+1916	Pinky Crush	SμG@R RU$#	A	12
+1917	Resort Anthem	THE BLACK KNIGHT	L	12
+1918	Lincle	The Limbo	L	12
+1919	tricoro	Thor's Hammer	A	12
+1920	GOLD	VANESSA	L	12
+1921	SPADA	Verflucht	L	12
+1922	Rootage	X-DEN	A	12
+1923	Pinky Crush	XHRONOXAPSULΞ	A	12
+1924	RESIDENT	栄冠のカンパネラ	A	12
+1925	copula	駅猫のワルツ	A	12
+1926	PENDUAL	共鳴遊戯の華	A	12
+1927	SPADA	疾風迅雷	L	12
+1928	Lincle	聖人の塔	L	12
+1929	BISTROVER	ディスコルディア	A	12
+1930	SPADA	IX	A	12
+1931	EMPRESS	卑弥呼	A	12
+1932	CastHour	烽火連天の刃	L	12
+1933	HAPPY SKY	冥	A	12
+1934	EPOLIS	惑星鉄道	A	12

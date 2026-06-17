@@ -1,343 +1,288 @@
 曲管理番号	バージョン	曲名	Diff	Lv
-1193	8th style	bit mania	A	8
-1194	EMPRESS	Fly Above	A	8
-1195	DJ TROOPERS	PROMISE FOR LIFE	A	8
-1196	SIRIUS	バビロニア	A	8
-1197	DJ TROOPERS	マチ子の唄	A	8
-1198	Lincle	A MINSTREL ～ ver. short-scape ～	A	9
-1199	HEROIC VERSE	And-RoiD	A	9
-1200	7th style	Bad Routine	A	9
-1201	10th style	Boundary	A	9
-1202	EMPRESS	BRIDAL FESTIVAL !!!	A	9
-1203	PENDUAL	chrono diver -fragment-	A	9
-1204	SPADA	Claiomh Solais	A	9
-1205	CANNON BALLERS	COSMIC☆WONDER☆REVOLUTION	A	9
-1206	HEROIC VERSE	Crank It	A	9
-1207	DistorteD	Double♡♡Loving Heart	A	9
-1208	SPADA	Element of SPADA	A	9
-1209	10th style	HIGH	A	9
-1210	GOLD	High School Love	A	9
-1211	Rootage	Hurry Hurry	A	9
-1212	Sparkle Shower	JUST SYNC ft.Kanae Asaba	A	9
-1213	DJ TROOPERS	Kick Out 仮面	A	9
-1214	HAPPY SKY	LESSON 5	A	9
-1215	7th style	Love Me Do	A	9
-1216	tricoro	LUV CAN SAVE U	A	9
-1217	Resort Anthem	Medicine of love	A	9
-1218	EMPRESS	Mind Mapping	A	9
-1219	SPADA	Recollection	A	9
-1220	SIRIUS	Roots of my way!	A	9
-1221	EPOLIS	So What	A	9
-1222	copula	SURVIVOR	A	9
-1223	EMPRESS	thunder HOUSE NATION Remix	A	9
-1224	Rootage	ToyCube Pf.(RX-Ver.S.P.L.)	A	9
-1225	Lincle	Voxane	A	9
-1226	RESIDENT	雨のちパノラマセカイ	A	9
-1227	BISTROVER	犬に雨傘	A	9
-1228	tricoro	下弦の月	A	9
-1229	Sparkle Shower	鏡像都市	A	9
-1230	CastHour	黒紅掬い	A	9
-1231	SIRIUS	コスモス	A	9
-1232	PENDUAL	白露の風	A	9
-1233	Rootage	セカンドピアス	A	9
-1234	SIRIUS	たからもの	A	9
-1235	DistorteD	タシカナモノ	A	9
-1236	EPOLIS	れとりば！	A	9
-1237	EPOLIS	Aeterna	A	10
-1238	Sparkle Shower	AGETEKE ONDO	A	10
-1239	CastHour	AMICABLE	A	10
-1240	PENDUAL	Beat Radiance	A	10
-1241	HEROIC VERSE	beatAffection	A	10
-1242	SIRIUS	being torn the sky	A	10
-1243	SINOBUZ	Believe in you	A	10
-1244	DistorteD	Bloody Tears(IIDX EDITION)	A	10
-1245	SINOBUZ	Breakin' Chain	A	10
-1246	Resort Anthem	Breaking the ground	A	10
-1247	HEROIC VERSE	Calvados Queen	A	10
-1248	SIRIUS	CaptivAte～裁き～(SUBLIME TECHNO MIX)	A	10
-1249	PENDUAL	chrono diver -fragment-	L	10
-1250	Rootage	CoMAAAAAAA	A	10
-1251	GOLD	CROSSROAD ～Left Story～	A	10
-1252	copula	Damage Per Second	L	10
-1253	Resort Anthem	DAYDREAMER	A	10
-1254	DJ TROOPERS	Dazzlin' Darlin	A	10
-1255	copula	do the thing feat. Kanae Asaba	A	10
-1256	RESIDENT	Dreaming Dream	A	10
-1257	Lincle	Drive Me Crazy	A	10
-1258	HAPPY SKY	EDEN	A	10
-1259	Pinky Crush	Eleanor	A	10
-1260	CastHour	EMOTiON TRiPPER	A	10
-1261	BISTROVER	Euphoric Lagoon	A	10
-1262	CANNON BALLERS	Expanded !!	A	10
-1263	Resort Anthem	Fantasia	A	10
-1264	Pinky Crush	FERMI♡PARADOX	A	10
-1265	Lincle	Flip Flap	A	10
-1266	Lincle	Follow Tomorrow	A	10
-1267	HAPPY SKY	garden	A	10
-1268	Pinky Crush	get set mind	A	10
-1269	EPOLIS	Get Wicked	A	10
-1270	GOLD	GRID KNIGHT	A	10
-1271	HEROIC VERSE	Hold My Hand	A	10
-1272	SPADA	Hypersonik	A	10
-1273	4th style	KAMIKAZE	A	10
-1274	RESIDENT	LADS	A	10
-1275	Lincle	LAX5 feat.Ryota Yoshinari	A	10
-1276	DJ TROOPERS	LOVELY STORM	A	10
-1277	tricoro	LUV CAN SAVE U	L	10
-1278	9th style	Make A Difference	A	10
-1279	GOLD	Make Me Your Own	A	10
-1280	DJ TROOPERS	MAX LOVE	A	10
-1281	HEROIC VERSE	Mel	L	10
-1282	Resort Anthem	Mermaid girl	A	10
-1283	Pinky Crush	Mighty Cutie	A	10
-1284	EMPRESS	Mind Mapping	L	10
-1285	4th style	Mr.T.(take me higher)	A	10
-1286	copula	NANAIRO	A	10
-1287	EPOLIS	NEEDLESS MY LOVE FOR YOU	A	10
-1288	tricoro	New Lights	A	10
-1289	BISTROVER	Ocean Blue feat. Luschel	A	10
-1290	CANNON BALLERS	Only for now	A	10
-1291	SINOBUZ	OOO	A	10
-1292	Rootage	OVER TIME	L	10
-1293	Resort Anthem	passionate fate	A	10
-1294	CastHour	PIRATES BLADE	A	10
-1295	EMPRESS	Punch Love♡仮面	A	10
-1296	DJ TROOPERS	REMINISCENCE	A	10
-1297	Lincle	RESISTANCE	A	10
-1298	SPADA	RIZING YOU UP	A	10
-1299	9th style	rottel-the-Mercury	A	10
-1300	10th style	SCORE	A	10
-1301	Pinky Crush	Secret Rouge	A	10
-1302	Sparkle Shower	SHINING☆DANCE	A	10
-1303	tricoro	SHION	A	10
-1304	HAPPY SKY	SigSig	A	10
-1305	Sparkle Shower	Skywalking	A	10
-1306	SINOBUZ	SINOBUZ Fantasy	A	10
-1307	Pinky Crush	Slumber☆Party	A	10
-1308	SIRIUS	Sorrows	A	10
-1309	BISTROVER	Sugarplum	A	10
-1310	PENDUAL	Sweet Radar	A	10
-1311	Rootage	Technicolour Dreams	A	10
-1312	SINOBUZ	The Commanders	A	10
-1313	BISTROVER	The Wind of China Express(The 4th Mashup)	A	10
-1314	HEROIC VERSE	Voo Doo Bamboleo	A	10
-1315	SINOBUZ	Warrior	A	10
-1316	Rootage	Wing of Hearts	A	10
-1317	Resort Anthem	XANADU OF TWO	A	10
-1318	CANNON BALLERS	1001 -ESCAPE-	A	10
-1319	Rootage	50th Memorial Songs -Beginning Story-	A	10
-1320	Rootage	50th Memorial Songs -Flagship medley-	A	10
-1321	Rootage	50th Memorial Songs -二人の時 ～under the cherry blossoms～-	A	10
-1322	tricoro	8bit Princess	A	10
-1323	Pinky Crush	朱と碧のランページ	A	10
-1324	tricoro	梅雪夜	A	10
-1325	CANNON BALLERS	エディブルフラワーの独白	A	10
-1326	Resort Anthem	おおきなこえで	L	10
-1327	SPADA	お願いアインシュタイン	A	10
-1328	RESIDENT	きゅんです。	A	10
-1329	CANNON BALLERS	共犯ヘヴンズコード	A	10
-1330	RESIDENT	昏き甲鉄のヴェルガ	A	10
-1331	HAPPY SKY	月光	A	10
-1332	BISTROVER	ここからよろしく大作戦143	A	10
-1333	RESIDENT	サヨナラ・ヘヴン-Celtic Chip Dance Mix-	A	10
-1334	RESIDENT	湘南ロンリーMIDNIGHT RAIN	A	10
-1335	Lincle	衰色小町メランコリア	A	10
-1336	HEROIC VERSE	セピアの軌跡 ft. 天宮みや(少女フラクタル)	A	10
-1337	CANNON BALLERS	草原の王女-軌跡を辿って-	A	10
-1338	RESIDENT	月と夢の跡 ft. マナ	A	10
-1339	SINOBUZ	月雪に舞う華のように	A	10
-1340	EMPRESS	翼	L	10
-1341	EMPRESS	鉄甲乙女-under the steel-	A	10
-1342	Lincle	突撃!ガラスのニーソ姫!	A	10
-1343	Rootage	夏の匂い。キミの残像。 ft. Kanae Asaba	A	10
-1344	EMPRESS	ハリツヤランデヴー	A	10
-1345	Pinky Crush	ハルイロメロディー	A	10
-1346	Sparkle Shower	百恋ラブラスター	A	10
-1347	Lincle	ビューティフルレシート	A	10
-1348	EPOLIS	ポラリスノウタ	A	10
-1349	DJ TROOPERS	ミラージュ・レジデンス	A	10
-1350	CastHour	めでてえ	A	10
-1351	HEROIC VERSE	ラブキラ☆スプラッシュ	A	10
-1352	GOLD	リグレット	A	10
-1353	EMPRESS	凛として咲く花の如く	A	10
-1354	Sparkle Shower	レシピのリドル	A	10
-1355	Sparkle Shower	恋愛観測	A	10
-1356	DistorteD	罠	A	10
-1357	IIDX RED	AGEHA	L	11
-1358	SPADA	ALBA -黎明-	A	11
-1359	DJ TROOPERS	Anisakis -somatic mutation type"Forza"-	A	11
-1360	SINOBUZ	BabeL ～Grand Story～	A	11
-1361	EMPRESS	Bahram Attack-猫叉Master Remix-	L	11
-1362	Pinky Crush	Bang-Boo Bumble	A	11
-1363	SINOBUZ	Be A Star	A	11
-1364	PENDUAL	Beyond The Earth	A	11
-1365	SINOBUZ	Beyond The Seven	A	11
-1366	PENDUAL	Blaze it UP!	A	11
-1367	Resort Anthem	BLUST OF WIND	L	11
-1368	SINOBUZ	BroGamer	A	11
-1369	HAPPY SKY	CaptivAte～浄化～	A	11
-1370	PENDUAL	Chronos	L	11
-1371	CANNON BALLERS	City Never Sleeps (IIDX Edition)	A	11
-1372	IIDX RED	Click Again	A	11
-1373	PENDUAL	COLOSSEUM	A	11
-1374	tricoro	Cookie Bouquets	A	11
-1375	SIRIUS	DAWN -THE NEXT ENDEAVOUR-	A	11
-1376	EPOLIS	DAZZLE ATTACK	A	11
-1377	DistorteD	DEEP ROAR	A	11
-1378	CastHour	Divine Heaven	A	11
-1379	HAPPY SKY	EDEN	L	11
-1380	SINOBUZ	Egret and Willow	A	11
-1381	SPADA	Element of SPADA	L	11
-1382	CastHour	Emera	A	11
-1383	tricoro	examination leave	A	11
-1384	CANNON BALLERS	Exhaust Hype	A	11
-1385	CANNON BALLERS	Fervidex	A	11
-1386	CANNON BALLERS	FREEDOM	A	11
-1387	Rootage	HEISEI	A	11
-1388	PENDUAL	HELL SCAPER -Last Escape Remix-	A	11
-1389	10th style	HIGH	L	11
-1390	Rootage	IDOL syndrome.	L	11
-1391	Pinky Crush	IN BETWEEN	A	11
-1392	DJ TROOPERS	in the Sky	A	11
-1393	copula	Journey	L	11
-1394	Sparkle Shower	kors k's Let's make an Image Song!	A	11
-1395	9th style	Logic Board	A	11
-1396	Pinky Crush	lowercase lifetime	A	11
-1397	10th style	Lucy	A	11
-1398	Pinky Crush	MVP	A	11
-1399	PENDUAL	No Tears	A	11
-1400	SINOBUZ	OOO	L	11
-1401	copula	Outbreak	A	11
-1402	BISTROVER	Para siempre	A	11
-1403	HAPPY SKY	Pollinosis	A	11
-1404	Pinky Crush	PopなEDEN	A	11
-1405	EMPRESS	Punch Love♡仮面	L	11
-1406	Pinky Crush	Raspberry Potion (feat.あれたん♡ & ぎゃるのしん☆)	A	11
-1407	PENDUAL	Realize Maze	A	11
-1408	Rootage	R∞tAge	A	11
-1409	Lincle	SHADE	A	11
-1410	RESIDENT	Shadow World	A	11
-1411	GOLD	smile	A	11
-1412	EMPRESS	smooooch・∀・	L	11
-1413	Sparkle Shower	SnapSkipSpark	A	11
-1414	DJ TROOPERS	SOUND OF GIALLARHORN	A	11
-1415	10th style	SPACE FIGHT	A	11
-1416	EPOLIS	Speculation	A	11
-1417	Pinky Crush	Stargazing Trip ～星 探す旅～ ft. 小林マナ	A	11
-1418	copula	STARLIGHT DANCEHALL	A	11
-1419	CANNON BALLERS	STARLIGHT JUNCTION	L	11
-1420	6th style	Take It Easy	A	11
-1421	DJ TROOPERS	THE DEEP STRIKER	A	11
-1422	SPADA	THE DETONATOR	A	11
-1423	Resort Anthem	THE FALLEN	A	11
-1424	DJ TROOPERS	the trigger of innocence	L	11
-1425	DJ TROOPERS	Time to Air	A	11
-1426	Resort Anthem	Tropical April	A	11
-1427	EMPRESS	V2	A	11
-1428	SPADA	Valgus	A	11
-1429	HEROIC VERSE	VALKYRIAS -英雄誕生-	A	11
-1430	CastHour	Ventriloquist	A	11
-1431	CastHour	Victory Of Ravers	A	11
-1432	HEROIC VERSE	Volcanic Dragon	A	11
-1433	DJ TROOPERS	Wanna Party?	L	11
-1434	copula	Welcome	A	11
-1435	Resort Anthem	WISE UP!	L	11
-1436	Resort Anthem	XANADU OF TWO	L	11
-1437	CastHour	Xyndrome	A	11
-1438	DJ TROOPERS	2 tribe 4 K	A	11
-1439	tricoro	朧	L	11
-1440	SINOBUZ	鴉	A	11
-1441	PENDUAL	恋は白帯、サンシロー	L	11
-1442	BISTROVER	ここからよろしく大作戦143	L	11
-1443	RESIDENT	≡+≡	A	11
-1444	RESIDENT	少年リップルズ	A	11
-1445	CANNON BALLERS	純真可憐デザイア	L	11
-1446	SIRIUS	たからもの	L	11
-1447	RESIDENT	チェイスチェイスジョーカーズのうた (オニスタイルリミックス)	A	11
-1448	PENDUAL	Ｘ↑Ｘ↓	A	11
-1449	SINOBUZ	ディッシュウォッシャー◎彡おいわちゃん	A	11
-1450	PENDUAL	ドッキン☆サマーあばんちゅーる	A	11
-1451	EPOLIS	果たせぬ約束 ft. 小林マナ	A	11
-1452	HEROIC VERSE	バッドエンド・シンドローム	A	11
-1453	Pinky Crush	無双	A	11
-1454	copula	明鏡止水	A	11
-1455	EPOLIS	めうめうぺったんたん！！ (ZAQUVA Remix)	A	11
-1456	Lincle	ユミル	A	11
-1457	EPOLIS	ラビットホール	A	11
-1458	EMPRESS	凛として咲く花の如く	L	11
-1459	HEROIC VERSE	錬成人間トリコロイダー	A	11
-1460	Lincle	A MINSTREL ～ ver. short-scape ～	L	12
-1461	HEROIC VERSE	AKASHIC BREAK	A	12
-1462	Resort Anthem	ALBIDA	A	12
-1463	SINOBUZ	Amazing Mirage	L	12
-1464	DJ TROOPERS	Anisakis -somatic mutation type"Forza"-	L	12
-1465	Sparkle Shower	Astra Blaze	A	12
-1466	EMPRESS	B4U(BEMANI FOR YOU MIX)	L	12
-1467	PENDUAL	Beat Radiance	L	12
-1468	RESIDENT	BIGWAVERS	A	12
-1469	EMPRESS	BITTER CHOCOLATE STRIKER	A	12
-1470	HEROIC VERSE	Bow shock!!	L	12
-1471	SINOBUZ	BroGamer	L	12
-1472	HAPPY SKY	CaptivAte～浄化～	L	12
-1473	PENDUAL	CHRONO DIVER -NORNIR-	L	12
-1474	Rootage	CoMAAAAAAA	L	12
-1475	PENDUAL	Cosmic Cat	L	12
-1476	SPADA	DARK LEGACY	A	12
-1477	PENDUAL	Despair of ELFERIA	A	12
-1478	SIRIUS	eRAseRmOToRpHAntOM	A	12
-1479	Pinky Crush	EX-MASSIVE FIGHTER	A	12
-1480	SIRIUS	G59	A	12
-1481	HAPPY SKY	garden	L	12
-1482	Rootage	GO OVER WITH GLARE -ROOTAGE 26-	A	12
-1483	GOLD	GRID KNIGHT	L	12
-1484	Pinky Crush	Here We Go Now	A	12
-1485	SPADA	Idola	A	12
-1486	HAPPY SKY	INAZUMA	L	12
-1487	CANNON BALLERS	Initiation	A	12
-1488	SPADA	INSOMNIA	A	12
-1489	EPOLIS	JUSTICE/GUILTY feat. Nana Takahashi & 709sec.	A	12
-1490	EMPRESS	Kung-fu Empire	L	12
-1491	Sparkle Shower	Lisa-RICCIA	A	12
-1492	HAPPY SKY	Little Little Princess	L	12
-1493	CastHour	LIVE DRIVING!! feat. 花たん	A	12
-1494	copula	M4K3 1T B0UNC3	A	12
-1495	SIRIUS	mosaic	A	12
-1496	PENDUAL	NEO GENERATOR SEVEN	A	12
-1497	Lincle	NNRT	A	12
-1498	CastHour	One for All	A	12
-1499	HEROIC VERSE	Override	L	12
-1500	CastHour	PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.	A	12
-1501	CANNON BALLERS	Rampage	A	12
-1502	PENDUAL	Rave*it!! Rave*it!!	A	12
-1503	Sparkle Shower	Regina vespaE	A	12
-1504	Resort Anthem	reunion	A	12
-1505	RESIDENT	RINИE	A	12
-1506	BISTROVER	rommmo	A	12
-1507	PENDUAL	Say YEEEAHH	A	12
-1508	EMPRESS	Secrets	L	12
-1509	EPOLIS	Sirius	A	12
-1510	SIRIUS	SOLID STATE SQUAD	L	12
-1511	PENDUAL	Sounds Of Summer	A	12
-1512	copula	Super Duper Racers	L	12
-1513	SINOBUZ	Super Rush	A	12
-1514	HEROIC VERSE	THE BRAVE MUST DIE	A	12
-1515	DJ TROOPERS	THE DEEP STRIKER	L	12
-1516	EPOLIS	The Onlyonez	A	12
-1517	EMPRESS	thunder HOUSE NATION Remix	L	12
-1518	Lincle	Thunderbolt	A	12
-1519	copula	Triple Counter	A	12
-1520	SINOBUZ	Venom	A	12
-1521	DistorteD	waxing and wanding	L	12
-1522	copula	Welcome	L	12
-1523	tricoro	仮想空間の旅人たち	L	12
-1524	DistorteD	華蝶風雪	L	12
-1525	SINOBUZ	九尾狐夜行	A	12
-1526	CastHour	グッバイ宣言	L	12
-1527	CastHour	逆月	A	12
-1528	PENDUAL	#The_Relentless	L	12
-1529	SINOBUZ	〆	A	12
-1530	Pinky Crush	スパークリング☆彡ハイパーチューン！！	A	12
-1531	BISTROVER	世界の果てに約束の凱歌を -ReUnion-	A	12
-1532	RESIDENT	ちょえちょえまぎか	L	12
-1533	Sparkle Shower	ベンガル vs. アムール Battle	A	12
-1534	EPOLIS	《PL|RAYER》	A	12
+1268	8th style	bit mania	A	8
+1269	HAPPY SKY	EMPTY OF THE SKY	A	8
+1270	EMPRESS	Fly Above	A	8
+1271	DJ TROOPERS	PROMISE FOR LIFE	A	8
+1272	Resort Anthem	Stay my side	A	8
+1273	DJ TROOPERS	マチ子の唄	A	8
+1274	Lincle	A MINSTREL ～ ver. short-scape ～	A	9
+1275	HEROIC VERSE	And-RoiD	A	9
+1276	7th style	Bad Routine	A	9
+1277	10th style	Boundary	A	9
+1278	EMPRESS	BRIDAL FESTIVAL !!!	A	9
+1279	PENDUAL	chrono diver -fragment-	A	9
+1280	SPADA	Claiomh Solais	A	9
+1281	CANNON BALLERS	COSMIC☆WONDER☆REVOLUTION	A	9
+1282	HEROIC VERSE	Crank It	A	9
+1283	DistorteD	Double♡♡Loving Heart	A	9
+1284	10th style	HIGH	A	9
+1285	GOLD	High School Love	A	9
+1286	Rootage	Hurry Hurry	A	9
+1287	Resort Anthem	I FIGHT ME	A	9
+1288	Sparkle Shower	JUST SYNC ft.Kanae Asaba	A	9
+1289	DJ TROOPERS	Kick Out 仮面	A	9
+1290	7th style	Love Me Do	A	9
+1291	tricoro	LUV CAN SAVE U	A	9
+1292	Resort Anthem	Medicine of love	A	9
+1293	EMPRESS	Mind Mapping	A	9
+1294	SIRIUS	Roots of my way!	A	9
+1295	EPOLIS	So What	A	9
+1296	copula	SURVIVOR	A	9
+1297	EMPRESS	thunder HOUSE NATION Remix	A	9
+1298	Lincle	Voxane	A	9
+1299	RESIDENT	雨のちパノラマセカイ	A	9
+1300	BISTROVER	犬に雨傘	A	9
+1301	Sparkle Shower	鏡像都市	A	9
+1302	CastHour	黒紅掬い	A	9
+1303	SIRIUS	コスモス	A	9
+1304	PENDUAL	白露の風	A	9
+1305	Rootage	セカンドピアス	A	9
+1306	SIRIUS	たからもの	A	9
+1307	DistorteD	タシカナモノ	A	9
+1308	EPOLIS	れとりば！	A	9
+1309	EPOLIS	Aeterna	A	10
+1310	Sparkle Shower	AGETEKE ONDO	A	10
+1311	HAPPY SKY	Agnus Dei	A	10
+1312	CastHour	AMICABLE	A	10
+1313	9th style	bag	A	10
+1314	PENDUAL	Beat Radiance	A	10
+1315	HEROIC VERSE	beatAffection	A	10
+1316	SINOBUZ	Believe in you	A	10
+1317	DistorteD	Bloody Tears(IIDX EDITION)	A	10
+1318	SINOBUZ	Breakin' Chain	A	10
+1319	SIRIUS	CaptivAte～裁き～(SUBLIME TECHNO MIX)	A	10
+1320	PENDUAL	chrono diver -fragment-	L	10
+1321	Rootage	CoMAAAAAAA	A	10
+1322	GOLD	CROSSROAD ～Left Story～	A	10
+1323	copula	Damage Per Second	L	10
+1324	Resort Anthem	DAYDREAMER	A	10
+1325	DJ TROOPERS	Dazzlin' Darlin	A	10
+1326	RESIDENT	Dreaming Dream	A	10
+1327	Lincle	Drive Me Crazy	A	10
+1328	HAPPY SKY	EDEN	A	10
+1329	Pinky Crush	Eleanor	A	10
+1330	CastHour	EMOTiON TRiPPER	A	10
+1331	CANNON BALLERS	Expanded !!	A	10
+1332	Resort Anthem	Fantasia	A	10
+1333	Pinky Crush	FERMI♡PARADOX	A	10
+1334	Lincle	Flip Flap	A	10
+1335	Lincle	Follow Tomorrow	A	10
+1336	HAPPY SKY	garden	A	10
+1337	Pinky Crush	get set mind	A	10
+1338	EPOLIS	Get Wicked	A	10
+1339	GOLD	GRID KNIGHT	A	10
+1340	HEROIC VERSE	Hold My Hand	A	10
+1341	SPADA	Hypersonik	A	10
+1342	EMPRESS	Jack	A	10
+1343	4th style	KAMIKAZE	A	10
+1344	RESIDENT	LADS	A	10
+1345	Lincle	LAX5 feat.Ryota Yoshinari	A	10
+1346	9th style	LOVE♡SHINE	A	10
+1347	DJ TROOPERS	LOVELY STORM	A	10
+1348	tricoro	LUV CAN SAVE U	L	10
+1349	DJ TROOPERS	MAX LOVE	A	10
+1350	HEROIC VERSE	Mel	L	10
+1351	Resort Anthem	Mermaid girl	A	10
+1352	Pinky Crush	Mighty Cutie	A	10
+1353	EMPRESS	Mind Mapping	L	10
+1354	SPADA	Miracle 5ympho X	A	10
+1355	4th style	Mr.T.(take me higher)	A	10
+1356	EPOLIS	NEEDLESS MY LOVE FOR YOU	A	10
+1357	tricoro	New Lights	A	10
+1358	BISTROVER	Ocean Blue feat. Luschel	A	10
+1359	CANNON BALLERS	Only for now	A	10
+1360	SINOBUZ	OOO	A	10
+1361	Rootage	OVER TIME	L	10
+1362	Resort Anthem	passionate fate	A	10
+1363	CastHour	PIRATES BLADE	A	10
+1364	Lincle	RESISTANCE	A	10
+1365	RESIDENT	Rewind Time	A	10
+1366	6th style	rottel-da-sun	A	10
+1367	9th style	rottel-the-Mercury	A	10
+1368	Pinky Crush	Secret Rouge	A	10
+1369	Sparkle Shower	SHINING☆DANCE	A	10
+1370	tricoro	SHION	A	10
+1371	Sparkle Shower	Skywalking	A	10
+1372	SINOBUZ	SINOBUZ Fantasy	A	10
+1373	Pinky Crush	Slumber☆Party	A	10
+1374	SIRIUS	Sorrows	A	10
+1375	Rootage	Technicolour Dreams	A	10
+1376	SINOBUZ	The Commanders	A	10
+1377	BISTROVER	The Wind of China Express(The 4th Mashup)	A	10
+1378	HEROIC VERSE	Voo Doo Bamboleo	A	10
+1379	8th style	WAR GAME	A	10
+1380	SINOBUZ	Warrior	A	10
+1381	Rootage	Wing of Hearts	A	10
+1382	Resort Anthem	XANADU OF TWO	A	10
+1383	CANNON BALLERS	1001 -ESCAPE-	A	10
+1384	Rootage	50th Memorial Songs -Beginning Story-	A	10
+1385	Rootage	50th Memorial Songs -二人の時 ～under the cherry blossoms～-	A	10
+1386	tricoro	梅雪夜	A	10
+1387	CANNON BALLERS	エディブルフラワーの独白	A	10
+1388	Resort Anthem	おおきなこえで	L	10
+1389	SPADA	お願いアインシュタイン	A	10
+1390	RESIDENT	きゅんです。	A	10
+1391	CANNON BALLERS	共犯ヘヴンズコード	A	10
+1392	RESIDENT	昏き甲鉄のヴェルガ	A	10
+1393	Rootage	グラナダの風	A	10
+1394	BISTROVER	ここからよろしく大作戦143	A	10
+1395	RESIDENT	サヨナラ・ヘヴン-Celtic Chip Dance Mix-	A	10
+1396	HEROIC VERSE	セピアの軌跡 ft. 天宮みや(少女フラクタル)	A	10
+1397	CANNON BALLERS	草原の王女-軌跡を辿って-	A	10
+1398	RESIDENT	月と夢の跡 ft. マナ	A	10
+1399	EMPRESS	翼	L	10
+1400	EMPRESS	鉄甲乙女-under the steel-	A	10
+1401	EPOLIS	夏風邪デスコ	A	10
+1402	Rootage	夏の匂い。キミの残像。 ft. Kanae Asaba	A	10
+1403	EMPRESS	ハリツヤランデヴー	A	10
+1404	Pinky Crush	ハルイロメロディー	A	10
+1405	Sparkle Shower	百恋ラブラスター	A	10
+1406	Lincle	ビューティフルレシート	A	10
+1407	EPOLIS	ポラリスノウタ	A	10
+1408	DJ TROOPERS	ミラージュ・レジデンス	A	10
+1409	CastHour	めでてえ	A	10
+1410	HEROIC VERSE	ラブキラ☆スプラッシュ	A	10
+1411	GOLD	リグレット	A	10
+1412	EMPRESS	凛として咲く花の如く	A	10
+1413	Sparkle Shower	レシピのリドル	A	10
+1414	Sparkle Shower	恋愛観測	A	10
+1415	DistorteD	罠	A	10
+1416	Pinky Crush	ADAMANT	A	11
+1417	PENDUAL	AFRO KNUCKLE	A	11
+1418	DJ TROOPERS	Anisakis -somatic mutation type"Forza"-	A	11
+1419	SINOBUZ	AsiaN distractive	A	11
+1420	SINOBUZ	Be A Star	A	11
+1421	PENDUAL	Beyond The Earth	A	11
+1422	SINOBUZ	Beyond The Seven	A	11
+1423	PENDUAL	Blaze it UP!	A	11
+1424	SIRIUS	bloomin' feeling	A	11
+1425	Resort Anthem	BLUST OF WIND	L	11
+1426	SINOBUZ	BroGamer	A	11
+1427	HAPPY SKY	CaptivAte～浄化～	A	11
+1428	copula	chaos eater -IIDX edition-	A	11
+1429	PENDUAL	Chronos	L	11
+1430	CANNON BALLERS	City Never Sleeps (IIDX Edition)	A	11
+1431	PENDUAL	COLOSSEUM	A	11
+1432	tricoro	Cookie Bouquets	A	11
+1433	SIRIUS	DAWN -THE NEXT ENDEAVOUR-	A	11
+1434	EPOLIS	DAZZLE ATTACK	A	11
+1435	10th style	Debtty Daddy	A	11
+1436	DistorteD	DEEP ROAR	A	11
+1437	HAPPY SKY	EDEN	L	11
+1438	SINOBUZ	Egret and Willow	A	11
+1439	SPADA	Element of SPADA	L	11
+1440	CastHour	Emera	A	11
+1441	tricoro	examination leave	A	11
+1442	CANNON BALLERS	Exhaust Hype	A	11
+1443	CANNON BALLERS	Fervidex	A	11
+1444	CANNON BALLERS	FREEDOM	A	11
+1445	Rootage	HEISEI	A	11
+1446	10th style	HIGH	L	11
+1447	Pinky Crush	IN BETWEEN	A	11
+1448	copula	Journey	L	11
+1449	IIDX RED	KEY	A	11
+1450	Sparkle Shower	kors k's Let's make an Image Song!	A	11
+1451	9th style	Logic Board	A	11
+1452	Pinky Crush	lowercase lifetime	A	11
+1453	10th style	Lucy	A	11
+1454	Pinky Crush	MVP	A	11
+1455	PENDUAL	Night sky	A	11
+1456	copula	On the FM	A	11
+1457	SINOBUZ	OOO	L	11
+1458	copula	Outbreak	A	11
+1459	PENDUAL	PENDUAL TALISMAN	A	11
+1460	HAPPY SKY	Pollinosis	A	11
+1461	Pinky Crush	Raspberry Potion (feat.あれたん♡ & ぎゃるのしん☆)	A	11
+1462	PENDUAL	Realize Maze	A	11
+1463	9th style	RISLIM -Remix-	A	11
+1464	SINOBUZ	ROTTERDAM SHOGUN	A	11
+1465	Resort Anthem	Sakura Reflection	A	11
+1466	RESIDENT	Seraph	A	11
+1467	Lincle	SHADE	A	11
+1468	RESIDENT	Shadow World	A	11
+1469	GOLD	smile	A	11
+1470	EMPRESS	smooooch・∀・	L	11
+1471	Sparkle Shower	SnapSkipSpark	A	11
+1472	DJ TROOPERS	SOUND OF GIALLARHORN	A	11
+1473	10th style	SPACE FIGHT	A	11
+1474	Pinky Crush	Stargazing Trip ～星 探す旅～ ft. 小林マナ	A	11
+1475	copula	STARLIGHT DANCEHALL	A	11
+1476	CANNON BALLERS	STARLIGHT JUNCTION	L	11
+1477	BISTROVER	Swarm Of Scarabs	A	11
+1478	DJ TROOPERS	THE DEEP STRIKER	A	11
+1479	Resort Anthem	THE FALLEN	A	11
+1480	DJ TROOPERS	the trigger of innocence	L	11
+1481	DJ TROOPERS	Time to Air	A	11
+1482	SPADA	Valgus	A	11
+1483	HEROIC VERSE	VALKYRIAS -英雄誕生-	A	11
+1484	CastHour	Ventriloquist	A	11
+1485	CastHour	Victory Of Ravers	A	11
+1486	HEROIC VERSE	Volcanic Dragon	A	11
+1487	DJ TROOPERS	Wanna Party?	L	11
+1488	DistorteD	waxing and wanding	A	11
+1489	copula	Welcome	A	11
+1490	Resort Anthem	WISE UP!	L	11
+1491	Resort Anthem	XANADU OF TWO	L	11
+1492	CastHour	Xyndrome	A	11
+1493	DJ TROOPERS	2 tribe 4 K	A	11
+1494	tricoro	朧	L	11
+1495	SINOBUZ	鴉	A	11
+1496	PENDUAL	恋は白帯、サンシロー	L	11
+1497	BISTROVER	ここからよろしく大作戦143	L	11
+1498	RESIDENT	≡+≡	A	11
+1499	RESIDENT	少年リップルズ	A	11
+1500	CANNON BALLERS	純真可憐デザイア	L	11
+1501	SIRIUS	たからもの	L	11
+1502	PENDUAL	打打打打打打打打打打	A	11
+1503	EPOLIS	果たせぬ約束 ft. 小林マナ	A	11
+1504	HEROIC VERSE	バッドエンド・シンドローム	A	11
+1505	Lincle	ユミル	A	11
+1506	Lincle	A MINSTREL ～ ver. short-scape ～	L	12
+1507	CastHour	ALTERNATOR	A	12
+1508	Sparkle Shower	Astra Blaze	A	12
+1509	SIRIUS	Bad Maniacs	A	12
+1510	PENDUAL	Beat Radiance	L	12
+1511	BISTROVER	BIGソムタム	A	12
+1512	EMPRESS	BITTER CHOCOLATE STRIKER	A	12
+1513	HAPPY SKY	CaptivAte～浄化～	L	12
+1514	PENDUAL	CHRONO DIVER -NORNIR-	L	12
+1515	PENDUAL	cinder	A	12
+1516	Rootage	CoMAAAAAAA	L	12
+1517	PENDUAL	Despair of ELFERIA	A	12
+1518	HAPPY SKY	garden	L	12
+1519	GOLD	GRID KNIGHT	L	12
+1520	Pinky Crush	Here We Go Now	A	12
+1521	EPOLIS	JUSTICE/GUILTY feat. Nana Takahashi & 709sec.	A	12
+1522	EMPRESS	Kung-fu Empire	L	12
+1523	Sparkle Shower	Lisa-RICCIA	A	12
+1524	copula	M4K3 1T B0UNC3	A	12
+1525	SIRIUS	mosaic	A	12
+1526	CastHour	One for All	A	12
+1527	CANNON BALLERS	Rampage	A	12
+1528	PENDUAL	Rave*it!! Rave*it!!	A	12
+1529	HEROIC VERSE	Rave Patroller	A	12
+1530	Sparkle Shower	Regina vespaE	A	12
+1531	RESIDENT	RINИE	A	12
+1532	DJ TROOPERS	Ristaccia	A	12
+1533	BISTROVER	rommmo	A	12
+1534	PENDUAL	Say YEEEAHH	A	12
+1535	EMPRESS	Secrets	L	12
+1536	EPOLIS	Sirius	A	12
+1537	PENDUAL	Sounds Of Summer	A	12
+1538	copula	Super Duper Racers	L	12
+1539	SINOBUZ	Super Rush	A	12
+1540	HEROIC VERSE	THE BRAVE MUST DIE	A	12
+1541	DJ TROOPERS	THE DEEP STRIKER	L	12
+1542	EMPRESS	thunder HOUSE NATION Remix	L	12
+1543	DJ TROOPERS	TROOPERS	A	12
+1544	tricoro	Valanga	A	12
+1545	DistorteD	waxing and wanding	L	12
+1546	copula	Welcome	L	12
+1547	tricoro	仮想空間の旅人たち	L	12
+1548	DistorteD	華蝶風雪	L	12
+1549	Pinky Crush	スパークリング☆彡ハイパーチューン！！	A	12
+1550	BISTROVER	世界の果てに約束の凱歌を -ReUnion-	A	12
+1551	RESIDENT	ちょえちょえまぎか	L	12
+1552	EPOLIS	《PL|RAYER》	A	12
+1553	Sparkle Shower	ベンガル vs. アムール Battle	A	12
+1554	Rootage	龍王の霊廟(Mausoleum Of The Primal Dragon)	L	12
