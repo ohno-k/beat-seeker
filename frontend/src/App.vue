@@ -53,6 +53,7 @@ import FriendTimeline from './components/FriendTimeline.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
 import WhatsNewModal from './components/WhatsNewModal.vue';
+import ShareImportModal from './components/ShareImportModal.vue';
 import { defineAsyncComponent } from 'vue';
 // 重いサブビュー / モーダルは遅延ロード。各タブが選択された時に初めて該当チャンクがフェッチされる。
 // chart.js / html2canvas / tesseract.js などの大きな依存をユーザーが触るタイミングまで遅らせる効果がある。
@@ -610,6 +611,37 @@ const processBookmarkletData = async (jsonText: string) => {
 
 /** API ベース URL。Vite の環境変数から取得し、未設定時はローカル開発用のデフォルト。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+
+// 【Share Target】 OS の「共有」から送られた画像を受け取り、リザルト登録モーダルを開く。
+// Service Worker が POST /share-target を横取りして画像を Cache に保存し /?sharetarget=1 へ遷移。
+// ここではその画像を取り出して ShareImportModal を開く。
+const isShareImportOpen = ref(false);
+const shareImageBlob = ref<Blob | null>(null);
+
+async function initShareTarget() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('sharetarget') !== '1') return;
+    // クエリを除去（リロード/戻るで再発火しないように）。
+    history.replaceState({}, '', window.location.pathname);
+    if (!('caches' in window)) return;
+    const cache = await caches.open('shared-images');
+    const resp = await cache.match('/__shared-image');
+    if (resp) {
+      shareImageBlob.value = await resp.blob();
+      await cache.delete('/__shared-image');
+      isShareImportOpen.value = true;
+    }
+  } catch {
+    /* 失敗時は何もしない */
+  }
+}
+onMounted(initShareTarget);
+
+function closeShareImport() {
+  isShareImportOpen.value = false;
+  shareImageBlob.value = null;
+}
 
 // 【onMounted】 ルートコンポーネント初期化時の一括セットアップ。
 // タイミング: アプリが DOM に載った直後に 1 回だけ実行。
@@ -1538,6 +1570,14 @@ const handleUnifiedClose = async () => {
 
     <!-- アップデート告知モーダル（ログイン後・未読の告知があれば1回だけ表示） -->
     <WhatsNewModal />
+
+    <!-- 共有/選択した画像を曲名検索して保存するモーダル（PWA Share Target の受け皿） -->
+    <ShareImportModal
+      :open="isShareImportOpen"
+      :image-blob="shareImageBlob"
+      @close="closeShareImport"
+      @login="isLoginModalOpen = true"
+    />
 
     <!-- ============================================================ -->
     <!-- メインコンテナ（サイドバー右側の本文領域）                        -->

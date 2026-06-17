@@ -35,13 +35,13 @@ function supportsWebp(): boolean {
 /**
  * 画像ファイルを縮小・再圧縮する。
  *
- * @param file    入力ファイル（`<input type="file">` から得た File）
+ * @param file    入力画像（`<input type="file">` の File、共有/クリップボード由来の Blob いずれも可）
  * @param maxEdge 長辺の最大ピクセル数（既定 1600）。これより小さい画像は拡大しない。
  * @param quality エンコード品質 0〜1（既定 0.82）
  * @returns 圧縮後の Blob と寸法・MIME タイプ
  */
 export async function compressImage(
-  file: File,
+  file: Blob,
   maxEdge = 1600,
   quality = 0.82
 ): Promise<CompressedImage> {
@@ -77,8 +77,8 @@ export async function compressImage(
   return { blob, width: w, height: h, type };
 }
 
-/** File を ImageBitmap（不可なら HTMLImageElement）として読み込む。EXIF 回転も反映する。 */
-async function loadImage(file: File): Promise<ImageBitmap | HTMLImageElement> {
+/** 画像 Blob/File を ImageBitmap（不可なら HTMLImageElement）として読み込む。EXIF 回転も反映する。 */
+async function loadImage(file: Blob): Promise<ImageBitmap | HTMLImageElement> {
   if (typeof createImageBitmap === 'function') {
     try {
       return await createImageBitmap(file, { imageOrientation: 'from-image' } as ImageBitmapOptions);
