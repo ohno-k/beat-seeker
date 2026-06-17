@@ -885,8 +885,10 @@
             </div>
           </div>
 
-          <!-- ===== リザルト画像セクション（端末ファイルから登録 → R2 保存 → タップで拡大）===== -->
+          <!-- ===== リザルト画像セクション（端末ファイルから登録 → R2 保存 → タップで拡大）=====
+               リザルト画像は本人専用。他ユーザーのスコア閲覧時（viewingMode あり）は表示しない。 -->
           <ResultImageSection
+            v-if="isOwnData"
             :title="selectedRecord.title"
             :difficulty-name="selectedRecord.difficultyName"
             :difficulty-level="selectedRecord.difficultyLevel"
@@ -1118,6 +1120,13 @@ const props = defineProps<{
   scores: ScoreData[];
   viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | null;
 }>();
+
+/**
+ * 自分のデータを表示中か（他ユーザー閲覧モードでないか）。
+ * viewingMode が立っている＝他人のスコアを閲覧中なので false。
+ * リザルト画像など「本人専用」のUIを出し分けるのに使う。
+ */
+const isOwnData = computed(() => !props.viewingMode);
 
 // emit の定義は totalBeatTierPoints の定義直後にまとめる（参照順の都合）
 
