@@ -61,7 +61,8 @@ self.addEventListener('fetch', (event) => {
                 // 解析に失敗してもアプリへは遷移させる（アプリ側で「画像なし」を表示）。
             }
             // 303 See Other で GET 遷移させる（POST の再送を避ける）。
-            return Response.redirect('/?sharetarget=1', 303);
+            // Response.redirect は絶対 URL を要求するため origin から組み立てる。
+            return Response.redirect(new URL('/?sharetarget=1', self.location.origin).href, 303);
         })());
     }
     // 上記以外は respondWith しない → ブラウザ既定の処理に委ねる。
