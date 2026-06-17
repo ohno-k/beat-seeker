@@ -54,6 +54,7 @@ public class EmailService {
     private String passwordResetTemplate;
     private String scoreUpdateTemplate;
     private String supporterActivatedTemplate;
+    private String resultImageTemplate;
 
     // --- フォールバック用の組み込みテンプレート（リソース読み込み失敗時に使用） ---
     private static final String FALLBACK_PASSWORD_RESET = """
@@ -136,6 +137,24 @@ public class EmailService {
             </html>
             """;
 
+    private static final String FALLBACK_RESULT_IMAGE = """
+            <!DOCTYPE html>
+            <html lang="ja">
+            <body style="font-family:sans-serif;background:#f8fafc;padding:32px;">
+              <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
+                <h2 style="color:#1e293b;margin-top:0;">%sさんがリザルト画像を保存しました</h2>
+                <p style="color:#475569;">IIDX ID: <strong>%s</strong></p>
+                <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0;">
+                  <div style="font-size:11px;color:#64748b;margin-bottom:4px;">対象譜面</div>
+                  <div style="font-size:16px;font-weight:900;color:#1e293b;">%s</div>
+                </div>
+                <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+                <p style="color:#94a3b8;font-size:11px;">beat-seeker</p>
+              </div>
+            </body>
+            </html>
+            """;
+
     /**
      * 【コンストラクタ】 Spring から {@link JavaMailSender} を注入する。
      */
@@ -153,6 +172,7 @@ public class EmailService {
         this.passwordResetTemplate       = loadTemplate("templates/email/password_reset.html",       FALLBACK_PASSWORD_RESET);
         this.scoreUpdateTemplate         = loadTemplate("templates/email/score_update.html",         FALLBACK_SCORE_UPDATE);
         this.supporterActivatedTemplate  = loadTemplate("templates/email/supporter_activated.html",  FALLBACK_SUPPORTER_ACTIVATED);
+        this.resultImageTemplate         = loadTemplate("templates/email/result_image.html",         FALLBACK_RESULT_IMAGE);
     }
 
     /**
@@ -308,6 +328,39 @@ public class EmailService {
             mailSender.send(message);
         } catch (MessagingException e) {
             System.err.println("Failed to send supporter notification: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 リザルト画像の保存通知メールを管理者向けに非同期送信する。
+     *
+     * スコア更新通知（{@link #sendScoreUpdateNotification}）と同様に、管理者以外のユーザーが
+     * リザルト画像を登録したときに管理者へ知らせる用途。送信失敗は stderr ログのみで処理はブロックしない。
+     *
+     * @param toEmail         宛先メールアドレス（管理者）
+     * @param userName        保存したユーザーの表示名
+     * @param iidxId          保存したユーザーの IIDX ID
+     * @param title           対象楽曲タイトル
+     * @param difficultyName  難易度名（ANOTHER 等）
+     * @param difficultyLevel 難易度レベル（null 可）
+     */
+    @Async
+    public void sendResultImageNotification(String toEmail, String userName, String iidxId,
+            String title, String difficultyName, Integer difficultyLevel) {
+        String chart = escapeHtml(title) + " [" + escapeHtml(difficultyName)
+                + (difficultyLevel != null ? " ☆" + difficultyLevel : "") + "]";
+        String html = resultImageTemplate.formatted(escapeHtml(userName), escapeHtml(iidxId), chart);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject("[beat-seeker] " + userName + "さんがリザルト画像を保存しました");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            System.err.println("Failed to send result image notification: " + e.getMessage());
         }
     }
 

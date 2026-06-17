@@ -4,6 +4,8 @@ import com.beatseeker.backend.entity.ResultImage;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.ResultImageRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.service.AdminAuthService;
+import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.R2StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,13 +54,19 @@ public class ResultImageController {
     private final ResultImageRepository resultImageRepository;
     private final UserRepository userRepository;
     private final R2StorageService storage;
+    private final EmailService emailService;
+    private final AdminAuthService adminAuthService;
 
     public ResultImageController(ResultImageRepository resultImageRepository,
                                  UserRepository userRepository,
-                                 R2StorageService storage) {
+                                 R2StorageService storage,
+                                 EmailService emailService,
+                                 AdminAuthService adminAuthService) {
         this.resultImageRepository = resultImageRepository;
         this.userRepository = userRepository;
         this.storage = storage;
+        this.emailService = emailService;
+        this.adminAuthService = adminAuthService;
     }
 
     /** 指定譜面のリザルト画像一覧を、署名付き GET URL 付きで返す。 */
@@ -129,6 +137,24 @@ public class ResultImageController {
         img.setWidth(width);
         img.setHeight(height);
         resultImageRepository.save(img);
+
+        // 管理者以外のユーザーがリザルト画像を保存したら管理者にメール通知（スコア保存時と同様）。
+        // メール失敗で保存自体を失敗させないよう、例外は握り潰してログのみ。
+        if (!adminAuthService.isAdmin(user)) {
+            try {
+                userRepository.findById(adminAuthService.getAdminUserId()).ifPresent(admin -> {
+                    if (admin.getEmail() != null) {
+                        emailService.sendResultImageNotification(
+                                admin.getEmail(),
+                                user.getDisplayName() != null ? user.getDisplayName() : user.getIidxId(),
+                                user.getIidxId() != null ? user.getIidxId() : "",
+                                title, difficultyName, difficultyLevel);
+                    }
+                });
+            } catch (Exception e) {
+                log.warn("リザルト画像の管理者メール通知に失敗しました: {}", e.getMessage());
+            }
+        }
 
         return ResponseEntity.ok(toDto(img));
     }
