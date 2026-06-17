@@ -162,6 +162,9 @@ public class SecurityConfig {
                                                 .authenticated()
                                                 // 上記で permitAll/authenticated に該当しなかったスコア系 API はデフォルト要ログイン
                                                 .requestMatchers("/api/scores/**").authenticated()
+                                                // リザルト画像（一覧/登録/削除）は本人のデータのみ扱うため要ログイン。
+                                                // 末尾の anyRequest().permitAll() に落ちると公開されてしまうので明示する。
+                                                .requestMatchers("/api/result-images/**").authenticated()
                                                 // 投票 API（POST/DELETE）は要ログイン。GET はデフォルトで permitAll に落ちる
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/votes")
                                                 .authenticated()

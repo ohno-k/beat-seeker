@@ -26,6 +26,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\RankQuizController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\RecalculatePointsRequest.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\RegisterRequest.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\ResultImageController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\SaveHistoryLogRequest.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\ScoreController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\ShareTokenController.java
@@ -56,6 +57,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\OptionVote.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\RankQuizMistake.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\RankQuizProgress.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\ResultImage.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\Score.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\ScoreHistoryLog.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\ShareToken.java
@@ -87,6 +89,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\OptionVoteRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\RankQuizMistakeRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\RankQuizProgressRepository.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ResultImageRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ScoreHistoryLogRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ScoreRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ShareTokenRepository.java
@@ -109,6 +112,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\OrganizerAuthService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\PairRegressionService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\PushNotificationService.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\R2StorageService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\ScoreRecalculationService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\SkillTreeService.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\service\SongArenaAveragesCacheService.java

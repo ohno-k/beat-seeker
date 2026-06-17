@@ -885,6 +885,13 @@
             </div>
           </div>
 
+          <!-- ===== リザルト画像セクション（端末ファイルから登録 → R2 保存 → タップで拡大）===== -->
+          <ResultImageSection
+            :title="selectedRecord.title"
+            :difficulty-name="selectedRecord.difficultyName"
+            :difficulty-level="selectedRecord.difficultyLevel"
+          />
+
           <!-- ===== オプション投票セクション（正規/MIRROR/RANDOM/R-RAN/S-RAN）===== -->
           <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-emerald-50 dark:bg-emerald-900/30 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-100 dark:border-emerald-800/50 flex items-center justify-between transition-colors duration-200">
@@ -1088,6 +1095,7 @@ import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
 import { useFriends } from '../composables/useFriends';
 import { DJ_LEVELS } from '../composables/constants';
+import ResultImageSection from './ResultImageSection.vue';
 import RankIcon from './RankIcon.vue';
 import InformalRankBadge from './InformalRankBadge.vue';
 import { Bar as BarChart } from 'vue-chartjs';

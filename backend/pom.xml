@@ -100,6 +100,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+		<!--
+			リザルト画像を Cloudflare R2 / S3 互換オブジェクトストレージに保存するための AWS SDK v2。
+			画像バイト列は DB には持たず R2 に置き、DB にはオブジェクトキー＋メタ情報のみ保存する。
+			R2 は S3 互換なのでエンドポイントを差し替えるだけで同じ SDK が使える（S3Presigner も含む）。
+		-->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.28.16</version>
+		</dependency>
 	</dependencies>
 
 	<build>

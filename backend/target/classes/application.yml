@@ -68,6 +68,22 @@ kofi:
   verification:
     token: ${KOFI_VERIFICATION_TOKEN:}
 
+# リザルト画像の保存先（Cloudflare R2 / S3 互換オブジェクトストレージ）。
+# 画像本体は R2 に置き、DB にはオブジェクトキーとメタ情報のみを保存する（DB 肥大化を回避）。
+# 機密値（access-key / secret-key）はリポジトリにコミットせず、本番は Render の環境変数で渡すこと。
+# 未設定（endpoint 等が空）の場合、リザルト画像 API は 503 を返し、他機能には影響しない。
+storage:
+  r2:
+    # 例: https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+    endpoint: ${R2_ENDPOINT:}
+    access-key: ${R2_ACCESS_KEY:}
+    secret-key: ${R2_SECRET_KEY:}
+    bucket: ${R2_BUCKET:beat-seeker-results}
+    # R2 は署名用リージョンに "auto" を使う（S3 を使う場合は us-east-1 等の実リージョン）。
+    region: ${R2_REGION:auto}
+    # 一覧取得時に発行する署名付き GET URL の有効秒数（既定 1 時間）。
+    presign-expiry-seconds: ${R2_PRESIGN_EXPIRY:3600}
+
 # 管理者判定用の設定（Role テーブル未導入のため、ユーザー ID と IIDX ID で判定している）
 # いずれかに一致したユーザーを管理者として扱う。
 admin:

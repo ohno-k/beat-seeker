@@ -1,0 +1,5255 @@
+{
+  "changes": [
+    {
+      "table_title": "Catch Me[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.7,
+      "n": 508
+    },
+    {
+      "table_title": "Catch ya Getcha!",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.2,
+      "n": 650
+    },
+    {
+      "table_title": "Digitank System",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.8,
+      "n": 449
+    },
+    {
+      "table_title": "VOLCANIC BIGBEAT",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.5,
+      "n": 417
+    },
+    {
+      "table_title": "グッバイ宣言[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.5",
+      "maxminus_pct": 33.8,
+      "n": 542
+    },
+    {
+      "table_title": "ベンガル vs. アムール Battle",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.4",
+      "maxminus_pct": 36.6,
+      "n": 437
+    },
+    {
+      "table_title": "フォニイ[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.8,
+      "n": 598
+    },
+    {
+      "table_title": "BroGamer",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "12.2",
+      "maxminus_pct": 19.3,
+      "n": 342
+    },
+    {
+      "table_title": "HYPE THE CORE",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.0,
+      "n": 392
+    },
+    {
+      "table_title": "ALBA -黎明-[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.2,
+      "n": 474
+    },
+    {
+      "table_title": "新宝島[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.2,
+      "n": 523
+    },
+    {
+      "table_title": "Nothing but Theory[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.9,
+      "n": 511
+    },
+    {
+      "table_title": "GAME ON",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.2,
+      "n": 432
+    },
+    {
+      "table_title": "Just a Little Smile",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.9,
+      "n": 367
+    },
+    {
+      "table_title": "BattleRoyal",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.2,
+      "n": 714
+    },
+    {
+      "table_title": "Substance",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.7,
+      "n": 688
+    },
+    {
+      "table_title": "V",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.6,
+      "n": 577
+    },
+    {
+      "table_title": "Selfish Sweet[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.8",
+      "maxminus_pct": 1.3,
+      "n": 550
+    },
+    {
+      "table_title": "EYE OF THE HEAVEN",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.0",
+      "maxminus_pct": 23.1,
+      "n": 350
+    },
+    {
+      "table_title": "No Border",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.9,
+      "n": 465
+    },
+    {
+      "table_title": "SOLID STATE SQUAD -RISEN RELIC REMIX-",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.6,
+      "n": 371
+    },
+    {
+      "table_title": "華麗なる！音戯探偵ひなビタ",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.5",
+      "maxminus_pct": 8.8,
+      "n": 500
+    },
+    {
+      "table_title": "TOKAKU=ALMiRAJ",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.8,
+      "n": 563
+    },
+    {
+      "table_title": "CoMAAAAAAA[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.5,
+      "n": 477
+    },
+    {
+      "table_title": "Sense 2007",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.9,
+      "n": 505
+    },
+    {
+      "table_title": "Do it!! Do it!!",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.7,
+      "n": 371
+    },
+    {
+      "table_title": "Space Battleship S4TO",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.2,
+      "n": 658
+    },
+    {
+      "table_title": "naughty girl@Queen's Palace",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.4,
+      "n": 515
+    },
+    {
+      "table_title": "Smalt #28598F",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.1,
+      "n": 464
+    },
+    {
+      "table_title": "Hallucination",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.3,
+      "n": 520
+    },
+    {
+      "table_title": "VANESSA",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.3,
+      "n": 456
+    },
+    {
+      "table_title": "FIRE FIRE",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.4,
+      "n": 558
+    },
+    {
+      "table_title": "THE TIME MACHINE",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.6,
+      "n": 454
+    },
+    {
+      "table_title": "Bow shock!!",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.7,
+      "n": 525
+    },
+    {
+      "table_title": "量子の海のリントヴルム",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.1,
+      "n": 391
+    },
+    {
+      "table_title": "Override",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.6,
+      "n": 312
+    },
+    {
+      "table_title": "voice of echo.",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.5,
+      "n": 563
+    },
+    {
+      "table_title": "GOLD RUSH",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.8,
+      "n": 421
+    },
+    {
+      "table_title": "煉獄コンフィチュール",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.9,
+      "n": 627
+    },
+    {
+      "table_title": "めいさいアイドル☆あいむちゃん♪",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.4,
+      "n": 450
+    },
+    {
+      "table_title": "THE DEEP STRIKER[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.8,
+      "n": 374
+    },
+    {
+      "table_title": "電人、暁に斃れる。",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.8,
+      "n": 725
+    },
+    {
+      "table_title": "Castle on the Moon",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.2",
+      "maxminus_pct": 19.0,
+      "n": 316
+    },
+    {
+      "table_title": "ICARUS",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.1,
+      "n": 437
+    },
+    {
+      "table_title": "The Chase",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.3,
+      "n": 526
+    },
+    {
+      "table_title": "ラブコメトキドキシリアス",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.7,
+      "n": 424
+    },
+    {
+      "table_title": "Flashes[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.8,
+      "n": 615
+    },
+    {
+      "table_title": "Funny shuffle",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.5,
+      "n": 307
+    },
+    {
+      "table_title": "Ember Lights[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.6,
+      "n": 624
+    },
+    {
+      "table_title": "灼熱 Lost Summer Dayz",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.5,
+      "n": 549
+    },
+    {
+      "table_title": "Hydrogen Blueback[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.3,
+      "n": 515
+    },
+    {
+      "table_title": "HADES",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.1,
+      "n": 477
+    },
+    {
+      "table_title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.3,
+      "n": 494
+    },
+    {
+      "table_title": "恋する☆宇宙戦争っ！！",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.5,
+      "n": 427
+    },
+    {
+      "table_title": "SAMURAI-Scramble",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.7,
+      "n": 626
+    },
+    {
+      "table_title": "FlyAway",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.2,
+      "n": 519
+    },
+    {
+      "table_title": "M4K3 1T B0UNC3",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.1,
+      "n": 455
+    },
+    {
+      "table_title": "CaptivAte～浄化～[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.1,
+      "n": 447
+    },
+    {
+      "table_title": "Ypsilon[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.6,
+      "n": 447
+    },
+    {
+      "table_title": "Unicorn tail",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.5",
+      "maxminus_pct": 33.5,
+      "n": 421
+    },
+    {
+      "table_title": "XENON II ～TOMOYUKIの野望～",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.8,
+      "n": 419
+    },
+    {
+      "table_title": "Tail Lights",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.7,
+      "n": 311
+    },
+    {
+      "table_title": "Kailua",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "12.0",
+      "maxminus_pct": 23.4,
+      "n": 548
+    },
+    {
+      "table_title": "A Certified Rave Moment",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.1,
+      "n": 692
+    },
+    {
+      "table_title": "IN BETWEEN",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.2",
+      "maxminus_pct": 45.2,
+      "n": 321
+    },
+    {
+      "table_title": "TRANOID[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.1,
+      "n": 325
+    },
+    {
+      "table_title": "Ancient Scapes[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.9,
+      "n": 422
+    },
+    {
+      "table_title": "T.R.O.L.L.",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.8,
+      "n": 379
+    },
+    {
+      "table_title": "uen",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.7,
+      "n": 437
+    },
+    {
+      "table_title": "真 地獄超特急 -HELL or HELL-",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.7",
+      "maxminus_pct": 4.9,
+      "n": 510
+    },
+    {
+      "table_title": "灼熱Beach Side Bunny (かめりあ's \"Summertime D'n'B\" Remix)",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.0,
+      "n": 424
+    },
+    {
+      "table_title": "IDC feat.REVERBEE (Mo'Cuts Ver)",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.3,
+      "n": 396
+    },
+    {
+      "table_title": "naughty girl@Queen's Palace[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.6,
+      "n": 417
+    },
+    {
+      "table_title": "Flamingo",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.8,
+      "n": 440
+    },
+    {
+      "table_title": "AKASHIC BREAK",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.6,
+      "n": 440
+    },
+    {
+      "table_title": "INAZUMA[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.4,
+      "n": 512
+    },
+    {
+      "table_title": "kors k's How to make OTOGE CORE",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.3,
+      "n": 305
+    },
+    {
+      "table_title": "NEO GENERATOR SEVEN",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.6,
+      "n": 415
+    },
+    {
+      "table_title": "摩天楼",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.0,
+      "n": 454
+    },
+    {
+      "table_title": "Snakey Kung-fu",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.5,
+      "n": 548
+    },
+    {
+      "table_title": "rommmo",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.0,
+      "n": 397
+    },
+    {
+      "table_title": "King of Tribe",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.3,
+      "n": 487
+    },
+    {
+      "table_title": "One More Lovely",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.3,
+      "n": 474
+    },
+    {
+      "table_title": "Innocent Walls",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.1,
+      "n": 387
+    },
+    {
+      "table_title": "rough percussionythm",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.4,
+      "n": 425
+    },
+    {
+      "table_title": "Super Freak",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.4,
+      "n": 429
+    },
+    {
+      "table_title": "One for All",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.2",
+      "maxminus_pct": 19.2,
+      "n": 386
+    },
+    {
+      "table_title": "TRIP THE DEEP",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.7,
+      "n": 470
+    },
+    {
+      "table_title": "LAB[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.1,
+      "n": 536
+    },
+    {
+      "table_title": "ちょえちょえまぎか[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.6,
+      "n": 308
+    },
+    {
+      "table_title": "華蝶風雪[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.3",
+      "maxminus_pct": 41.2,
+      "n": 556
+    },
+    {
+      "table_title": "KAMAITACHI",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.3,
+      "n": 373
+    },
+    {
+      "table_title": "月下繚乱",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.3,
+      "n": 697
+    },
+    {
+      "table_title": "とろぴかる倶楽部",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.1,
+      "n": 306
+    },
+    {
+      "table_title": "Blue Rain",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.0,
+      "n": 359
+    },
+    {
+      "table_title": "スパークリング☆彡ハイパーチューン！！",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.1,
+      "n": 545
+    },
+    {
+      "table_title": "AGEHA[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.3,
+      "n": 337
+    },
+    {
+      "table_title": "Fashion Fruit",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.2,
+      "n": 640
+    },
+    {
+      "table_title": "INAZUMA",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.7,
+      "n": 303
+    },
+    {
+      "table_title": "君のハートにロックオン[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.8,
+      "n": 431
+    },
+    {
+      "table_title": "ChaserXX[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.6",
+      "maxminus_pct": 7.6,
+      "n": 489
+    },
+    {
+      "table_title": "Miracle 5ympho X[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "maxminus_pct": 1.3,
+      "n": 466
+    },
+    {
+      "table_title": "Do it!! Do it!![L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.2,
+      "n": 314
+    },
+    {
+      "table_title": "MAD ATTACK[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "maxminus_pct": 1.8,
+      "n": 494
+    },
+    {
+      "table_title": "Arabian Rave Night[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.3,
+      "n": 405
+    },
+    {
+      "table_title": "Scripted Connection⇒ A mix[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.1,
+      "n": 385
+    },
+    {
+      "table_title": "SOLID WYVERN[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.6,
+      "n": 483
+    },
+    {
+      "table_title": "Demon March",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.0,
+      "n": 501
+    },
+    {
+      "table_title": "255",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.0,
+      "n": 560
+    },
+    {
+      "table_title": "Memoria Obscura",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.2,
+      "n": 628
+    },
+    {
+      "table_title": "ΕΛΠΙΣ[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.3,
+      "n": 415
+    },
+    {
+      "table_title": "Twelfth Style[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.8,
+      "n": 507
+    },
+    {
+      "table_title": "STEEL NEEDLE[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.4,
+      "n": 456
+    },
+    {
+      "table_title": "New Castle Legions",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.1,
+      "n": 337
+    },
+    {
+      "table_title": "Regina vespaE",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.7,
+      "n": 642
+    },
+    {
+      "table_title": "≡+≡[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.8,
+      "n": 605
+    },
+    {
+      "table_title": "THANK YOU FOR PLAYING[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.9,
+      "n": 338
+    },
+    {
+      "table_title": "Anisakis -somatic mutation type\"Forza\"-[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.4,
+      "n": 499
+    },
+    {
+      "table_title": "Slipstream",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.5,
+      "n": 411
+    },
+    {
+      "table_title": "G59",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.5,
+      "n": 472
+    },
+    {
+      "table_title": "ぞうしょく！？マイデンティティ",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.5,
+      "n": 435
+    },
+    {
+      "table_title": "海神[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.8,
+      "n": 445
+    },
+    {
+      "table_title": "Session 9 -Chronicles-",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.1,
+      "n": 353
+    },
+    {
+      "table_title": "GUILTY[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.6,
+      "n": 407
+    },
+    {
+      "table_title": "BLACK or WHITE?",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.0,
+      "n": 553
+    },
+    {
+      "table_title": "童話回廊",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.4,
+      "n": 393
+    },
+    {
+      "table_title": "GO OVER WITH GLARE -ROOTAGE 26-",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.0,
+      "n": 495
+    },
+    {
+      "table_title": "CHECKING YOU OUT",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.4,
+      "n": 334
+    },
+    {
+      "table_title": "one or eight",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.2,
+      "n": 493
+    },
+    {
+      "table_title": "I",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.4,
+      "n": 447
+    },
+    {
+      "table_title": "Initiation",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.6,
+      "n": 683
+    },
+    {
+      "table_title": "Monopole.",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.0,
+      "n": 434
+    },
+    {
+      "table_title": "FAKE TIME",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.0,
+      "n": 416
+    },
+    {
+      "table_title": "DropZ-Line-",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.6,
+      "n": 366
+    },
+    {
+      "table_title": "Caterpillar",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.8,
+      "n": 444
+    },
+    {
+      "table_title": "Secrets[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.3,
+      "n": 517
+    },
+    {
+      "table_title": "BLACK.by X-Cross Fade",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.8,
+      "n": 623
+    },
+    {
+      "table_title": "ONE AND ONLY",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.8,
+      "n": 491
+    },
+    {
+      "table_title": "Devilz Staircase",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.8,
+      "n": 448
+    },
+    {
+      "table_title": "GOLD RUSH 2025",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.6,
+      "n": 536
+    },
+    {
+      "table_title": "Bad Maniacs",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.3,
+      "n": 583
+    },
+    {
+      "table_title": "THE BRAVE MUST DIE",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.7,
+      "n": 670
+    },
+    {
+      "table_title": "GRAVITON",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.7,
+      "n": 435
+    },
+    {
+      "table_title": "SYNC-ANTHEM",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.3,
+      "n": 452
+    },
+    {
+      "table_title": "S!ck",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.2,
+      "n": 363
+    },
+    {
+      "table_title": "たまゆら",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.2,
+      "n": 504
+    },
+    {
+      "table_title": "10000 MILES AWAY",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.1,
+      "n": 355
+    },
+    {
+      "table_title": "PUNISHER",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.9,
+      "n": 395
+    },
+    {
+      "table_title": "quaver♪",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.7,
+      "n": 511
+    },
+    {
+      "table_title": "Lisa-RICCIA",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.1,
+      "n": 733
+    },
+    {
+      "table_title": "WONDER WALKER",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.8,
+      "n": 500
+    },
+    {
+      "table_title": "oratio",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.6",
+      "maxminus_pct": 33.0,
+      "n": 443
+    },
+    {
+      "table_title": "Broken Sword",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.6",
+      "maxminus_pct": 33.4,
+      "n": 569
+    },
+    {
+      "table_title": "Marie Antoinette[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.6",
+      "maxminus_pct": 33.4,
+      "n": 308
+    },
+    {
+      "table_title": "Colorful Cookie",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.2,
+      "n": 735
+    },
+    {
+      "table_title": "Dawn Saga",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.7,
+      "n": 350
+    },
+    {
+      "table_title": "Sword of Vengeance",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.5,
+      "n": 518
+    },
+    {
+      "table_title": "深淵に捧ぐレクイエム",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.0,
+      "n": 489
+    },
+    {
+      "table_title": "黒髪乱れし修羅となりて",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.5,
+      "n": 506
+    },
+    {
+      "table_title": "Like+it!",
+      "direction": "DEMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.2",
+      "maxminus_pct": 42.6,
+      "n": 303
+    },
+    {
+      "table_title": "Outbreak",
+      "direction": "DEMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.2",
+      "maxminus_pct": 42.7,
+      "n": 323
+    },
+    {
+      "table_title": "XANADU OF TWO[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.2",
+      "maxminus_pct": 46.8,
+      "n": 564
+    },
+    {
+      "table_title": "Beat Radiance[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.1",
+      "maxminus_pct": 49.1,
+      "n": 581
+    },
+    {
+      "table_title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 37.6,
+      "n": 370
+    },
+    {
+      "table_title": "CUE CUE RESCUE[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 36.9,
+      "n": 540
+    },
+    {
+      "table_title": "朧[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.7,
+      "n": 419
+    },
+    {
+      "table_title": "STARLIGHT JUNCTION[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.4,
+      "n": 302
+    },
+    {
+      "table_title": "winkle 2 winkle",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 37.3,
+      "n": 332
+    },
+    {
+      "table_title": "ANDROMEDA",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.1,
+      "n": 368
+    },
+    {
+      "table_title": "MIRACLE MEETS",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.1,
+      "n": 478
+    },
+    {
+      "table_title": "残像ニ繋ガレタ追憶ノHIDEAWAY",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.3,
+      "n": 631
+    },
+    {
+      "table_title": "Realize Maze",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.6,
+      "n": 311
+    },
+    {
+      "table_title": "quasar",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.3",
+      "maxminus_pct": 41.5,
+      "n": 615
+    },
+    {
+      "table_title": "Line 4 Ruin",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.3",
+      "maxminus_pct": 42.4,
+      "n": 455
+    },
+    {
+      "table_title": "XHRONOXAPSULΞ",
+      "direction": "DEMOTE",
+      "old_rank": "13.0",
+      "new_rank": "12.8",
+      "maxminus_pct": 1.2,
+      "n": 502
+    },
+    {
+      "table_title": "Cross Fire",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.1,
+      "n": 451
+    },
+    {
+      "table_title": "Vulnerability",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.2,
+      "n": 501
+    },
+    {
+      "table_title": "CADENZA",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.4,
+      "n": 599
+    },
+    {
+      "table_title": "ORCA",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.8,
+      "n": 416
+    },
+    {
+      "table_title": "VOX UP",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.2,
+      "n": 418
+    },
+    {
+      "table_title": "廿[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.1,
+      "n": 340
+    },
+    {
+      "table_title": "お米の美味しい炊き方、そしてお米を食べることによるその効果。[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.3,
+      "n": 446
+    },
+    {
+      "table_title": "1116",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.9,
+      "n": 489
+    },
+    {
+      "table_title": "RUGGED ASH[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.7,
+      "n": 357
+    },
+    {
+      "table_title": "Watch Out Pt.2",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "maxminus_pct": 4.4,
+      "n": 728
+    },
+    {
+      "table_title": "Go Beyond!!",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "maxminus_pct": 5.3,
+      "n": 527
+    },
+    {
+      "table_title": "Cult Invitation",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "maxminus_pct": 5.4,
+      "n": 551
+    },
+    {
+      "table_title": "SCREW // owo // SCREW",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "maxminus_pct": 4.8,
+      "n": 460
+    },
+    {
+      "table_title": "アラビアン ハイパー ナイト",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.6,
+      "n": 404
+    },
+    {
+      "table_title": "Empire of Fury",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.2,
+      "n": 422
+    },
+    {
+      "table_title": "#The_Relentless[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.1,
+      "n": 458
+    },
+    {
+      "table_title": "Pinky Happy Crazy",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.3,
+      "n": 450
+    },
+    {
+      "table_title": "Feel The Beat[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.8,
+      "n": 550
+    },
+    {
+      "table_title": "B4U(BEMANI FOR YOU MIX)[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.2,
+      "n": 546
+    },
+    {
+      "table_title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.3,
+      "n": 479
+    },
+    {
+      "table_title": "Godspeed",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.8,
+      "n": 474
+    },
+    {
+      "table_title": "THE F∀UST",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.2,
+      "n": 482
+    },
+    {
+      "table_title": "Level 2",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.8,
+      "n": 517
+    },
+    {
+      "table_title": "聖人の塔",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.7,
+      "n": 448
+    },
+    {
+      "table_title": "Be quiet[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.3,
+      "n": 441
+    },
+    {
+      "table_title": "Bling-Bang-Bang-Born[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.0,
+      "n": 625
+    },
+    {
+      "table_title": "Zirkfied",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.7,
+      "n": 513
+    },
+    {
+      "table_title": "rage against usual",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.0,
+      "n": 439
+    },
+    {
+      "table_title": "Peaktime Booster",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.6,
+      "n": 437
+    },
+    {
+      "table_title": "アストライアの双皿",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.6,
+      "n": 396
+    },
+    {
+      "table_title": "魅惑のYUMMYスイーツ",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.4,
+      "n": 441
+    },
+    {
+      "table_title": "Quakes",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.6,
+      "n": 461
+    },
+    {
+      "table_title": "MENTAL MELTDOWN",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.8,
+      "n": 324
+    },
+    {
+      "table_title": "PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.8,
+      "n": 565
+    },
+    {
+      "table_title": "squall",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.9,
+      "n": 329
+    },
+    {
+      "table_title": "ZEPHYRANTHES[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.5,
+      "n": 382
+    },
+    {
+      "table_title": "#CMFLG",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.1,
+      "n": 484
+    },
+    {
+      "table_title": "∀",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.1,
+      "n": 534
+    },
+    {
+      "table_title": "九尾狐夜行",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.7,
+      "n": 422
+    },
+    {
+      "table_title": "Fire Beat",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 23.4,
+      "n": 397
+    },
+    {
+      "table_title": "refrain",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.0",
+      "maxminus_pct": 23.0,
+      "n": 447
+    },
+    {
+      "table_title": "ミラージュ・レジデンス[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.5,
+      "n": 510
+    },
+    {
+      "table_title": "覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.9,
+      "n": 360
+    },
+    {
+      "table_title": "Countdown to Heaven or Hell",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.7,
+      "n": 697
+    },
+    {
+      "table_title": "Super Duper Racers[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.2,
+      "n": 574
+    },
+    {
+      "table_title": "CHRONO DIVER -NORNIR-[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.8,
+      "n": 525
+    },
+    {
+      "table_title": "T-REX vs Velociraptor (In the Far east euphoria)",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.6,
+      "n": 500
+    },
+    {
+      "table_title": "cinder",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.6,
+      "n": 394
+    },
+    {
+      "table_title": "Begin",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.4,
+      "n": 708
+    },
+    {
+      "table_title": "neu",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.5,
+      "n": 412
+    },
+    {
+      "table_title": "EX-MASSIVE FIGHTER",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.5,
+      "n": 372
+    },
+    {
+      "table_title": "狂イ咲ケ焔ノ華",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.1,
+      "n": 447
+    },
+    {
+      "table_title": "CODE:1 [revision1.0.1]",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.6,
+      "n": 490
+    },
+    {
+      "table_title": "MAX 300",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.2",
+      "maxminus_pct": 19.0,
+      "n": 469
+    },
+    {
+      "table_title": "Here We Go Now",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.1,
+      "n": 399
+    },
+    {
+      "table_title": "Little Little Princess[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.4,
+      "n": 409
+    },
+    {
+      "table_title": "爆ぜりゃんせ",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.4,
+      "n": 361
+    },
+    {
+      "table_title": "神謳 -RESONANCE-",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.4,
+      "n": 482
+    },
+    {
+      "table_title": "garden[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.8,
+      "n": 407
+    },
+    {
+      "table_title": "Aegis",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.1,
+      "n": 340
+    },
+    {
+      "table_title": "Kung-fu Empire[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.3,
+      "n": 395
+    },
+    {
+      "table_title": "Critical Crystal",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.4,
+      "n": 402
+    },
+    {
+      "table_title": "TRIUMPH",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.4,
+      "n": 551
+    },
+    {
+      "table_title": "Seven Times Four",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.5,
+      "n": 452
+    },
+    {
+      "table_title": "Dynamite",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.5,
+      "n": 589
+    },
+    {
+      "table_title": "Halfway of promise",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.9,
+      "n": 339
+    },
+    {
+      "table_title": "The Limbo",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.3,
+      "n": 483
+    },
+    {
+      "table_title": "雪月花",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.3,
+      "n": 576
+    },
+    {
+      "table_title": "POSSESSION",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.1,
+      "n": 550
+    },
+    {
+      "table_title": "儚キ戀ノ幻想譚",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.6,
+      "n": 569
+    },
+    {
+      "table_title": "New Decade IIDX Edition",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.1,
+      "n": 303
+    },
+    {
+      "table_title": "B4U(BEMANI FOR YOU MIX)",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.8,
+      "n": 330
+    },
+    {
+      "table_title": "27th style",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.4,
+      "n": 434
+    },
+    {
+      "table_title": "Psycho Sheep Riddim[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.6,
+      "n": 301
+    },
+    {
+      "table_title": "V2",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.1,
+      "n": 525
+    },
+    {
+      "table_title": "moon_child",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "12.0",
+      "maxminus_pct": 23.3,
+      "n": 476
+    },
+    {
+      "table_title": "NINJA IS DEAD IIDX ver.",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.5",
+      "maxminus_pct": 33.8,
+      "n": 461
+    },
+    {
+      "table_title": "Rejection Girl",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.0,
+      "n": 437
+    },
+    {
+      "table_title": "Super Rush",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.4",
+      "maxminus_pct": 36.8,
+      "n": 536
+    },
+    {
+      "table_title": "24th Century BOY",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.4",
+      "maxminus_pct": 37.3,
+      "n": 316
+    },
+    {
+      "table_title": "kors k's Let's make an Image Song!",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.2,
+      "n": 665
+    },
+    {
+      "table_title": "Broken",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.4,
+      "n": 665
+    },
+    {
+      "table_title": "Raspberry Potion (feat.あれたん & ぎゃるのしん☆)",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.3",
+      "maxminus_pct": 41.0,
+      "n": 322
+    },
+    {
+      "table_title": "龍と少女とデコヒーレンス",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.7,
+      "n": 322
+    },
+    {
+      "table_title": "Vitamin",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.9,
+      "n": 687
+    },
+    {
+      "table_title": "SPACE FIGHT",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.2,
+      "n": 304
+    },
+    {
+      "table_title": "of the first magnitude",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.6",
+      "maxminus_pct": 33.2,
+      "n": 382
+    },
+    {
+      "table_title": "Bang Bang Dance",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.5,
+      "n": 741
+    },
+    {
+      "table_title": "Anisakis -somatic mutation type\"Forza\"-",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.4,
+      "n": 346
+    },
+    {
+      "table_title": "BLOCKS",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.8,
+      "n": 396
+    },
+    {
+      "table_title": "Explorer feat. ぷにぷに電機[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.7,
+      "n": 350
+    },
+    {
+      "table_title": "千年ノ理",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.4,
+      "n": 615
+    },
+    {
+      "table_title": "(This Is Not) The Angels",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "maxminus_pct": 36.5,
+      "n": 509
+    },
+    {
+      "table_title": "カゴノトリ～弐式～",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.5,
+      "n": 572
+    },
+    {
+      "table_title": "Shadow World",
+      "direction": "PROMOTE",
+      "old_rank": "11.0",
+      "new_rank": "11.2",
+      "maxminus_pct": 47.6,
+      "n": 715
+    },
+    {
+      "table_title": "Sigmund[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 2.7,
+      "n": 438
+    },
+    {
+      "table_title": "hard-wired",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 2.7,
+      "n": 490
+    },
+    {
+      "table_title": "天使のカンタータ -Cantata of Angels-",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 2.9,
+      "n": 520
+    },
+    {
+      "table_title": "聖人の塔[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 2.8,
+      "n": 436
+    },
+    {
+      "table_title": "Ignis†Irae",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 2.9,
+      "n": 621
+    },
+    {
+      "table_title": "perditus†paradisus",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.1,
+      "n": 556
+    },
+    {
+      "table_title": "疾風迅雷[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.5,
+      "n": 433
+    },
+    {
+      "table_title": "卑弥呼",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.6,
+      "n": 612
+    },
+    {
+      "table_title": "東京神話",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.6,
+      "n": 562
+    },
+    {
+      "table_title": "Dances with Snow Fairies[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 4.1,
+      "n": 516
+    },
+    {
+      "table_title": "烽火連天の刃[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.7",
+      "maxminus_pct": 5.0,
+      "n": 480
+    },
+    {
+      "table_title": "199024club -Re:BounceKiller-",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.1,
+      "n": 528
+    },
+    {
+      "table_title": "Amor∞Fati",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.4,
+      "n": 419
+    },
+    {
+      "table_title": "DUE TOMORROW",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.3,
+      "n": 434
+    },
+    {
+      "table_title": "Plan 8",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.5,
+      "n": 528
+    },
+    {
+      "table_title": "Illegal Function Call",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.4,
+      "n": 338
+    },
+    {
+      "table_title": "Level 4",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.4,
+      "n": 498
+    },
+    {
+      "table_title": "CODE:0[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.5,
+      "n": 326
+    },
+    {
+      "table_title": "ピアノ協奏曲第１番”蠍火”",
+      "direction": "PROMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "maxminus_pct": 2.6,
+      "n": 548
+    },
+    {
+      "table_title": "KYAMISAMA ONEGAI![L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 16.7,
+      "n": 424
+    },
+    {
+      "table_title": "gigadelic",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 16.9,
+      "n": 438
+    },
+    {
+      "table_title": "BLUE DRAGON(雷龍RemixIIDX)",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.1,
+      "n": 468
+    },
+    {
+      "table_title": "NOIXIA",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 16.8,
+      "n": 549
+    },
+    {
+      "table_title": "Plazma[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.0,
+      "n": 689
+    },
+    {
+      "table_title": "夏色DIARY - L.E.D.-G STYLE MIX -",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.1,
+      "n": 403
+    },
+    {
+      "table_title": "Colors (radio edit)",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.6,
+      "n": 517
+    },
+    {
+      "table_title": "Life Is A Game ft.DD\"ナカタ\"Metal",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.1,
+      "n": 433
+    },
+    {
+      "table_title": "Little Star",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.7,
+      "n": 464
+    },
+    {
+      "table_title": "UMMU",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.1,
+      "n": 371
+    },
+    {
+      "table_title": "LASER CRUSTER (IGNITE REMIX)",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.5,
+      "n": 361
+    },
+    {
+      "table_title": "Vinculum stellarum",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.6,
+      "n": 440
+    },
+    {
+      "table_title": "Close the World feat.a☆ru[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.8,
+      "n": 436
+    },
+    {
+      "table_title": "Always We Trust In You",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.6,
+      "n": 463
+    },
+    {
+      "table_title": "HyperTwist",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.6,
+      "n": 558
+    },
+    {
+      "table_title": "Flying Castle",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.3,
+      "n": 459
+    },
+    {
+      "table_title": "EVANESCENT",
+      "direction": "DEMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.2",
+      "maxminus_pct": 19.3,
+      "n": 389
+    },
+    {
+      "table_title": "TECHNOPHOBIA",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.8,
+      "n": 521
+    },
+    {
+      "table_title": "MENDES",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.1,
+      "n": 614
+    },
+    {
+      "table_title": "-65℃",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.9,
+      "n": 478
+    },
+    {
+      "table_title": "ACT0",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.5,
+      "n": 453
+    },
+    {
+      "table_title": "chaplet -IIDX re:build-",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.6,
+      "n": 628
+    },
+    {
+      "table_title": "蛇神[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.8,
+      "n": 481
+    },
+    {
+      "table_title": "Amazing Mirage[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.5,
+      "n": 468
+    },
+    {
+      "table_title": "AO-1",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.7,
+      "n": 453
+    },
+    {
+      "table_title": "DIAMOND CROSSING",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.5,
+      "n": 587
+    },
+    {
+      "table_title": "Fegrix",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.3,
+      "n": 453
+    },
+    {
+      "table_title": "CONTRACT[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.7,
+      "n": 407
+    },
+    {
+      "table_title": "The Last Apocalypse",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.4,
+      "n": 426
+    },
+    {
+      "table_title": "逆月",
+      "direction": "PROMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.7,
+      "n": 563
+    },
+    {
+      "table_title": "Uh-Oh",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.0,
+      "n": 329
+    },
+    {
+      "table_title": "invoker",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.0,
+      "n": 425
+    },
+    {
+      "table_title": "Chaotoxin",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.5,
+      "n": 481
+    },
+    {
+      "table_title": "Shooting Fireball",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.8,
+      "n": 511
+    },
+    {
+      "table_title": "With You",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.1,
+      "n": 359
+    },
+    {
+      "table_title": "NNRT",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.4,
+      "n": 469
+    },
+    {
+      "table_title": "dAuntl3ss",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.5,
+      "n": 441
+    },
+    {
+      "table_title": "Nightmare before oversleep",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.3,
+      "n": 502
+    },
+    {
+      "table_title": "frequent",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.4,
+      "n": 486
+    },
+    {
+      "table_title": "FUZIN RIZIN",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.4,
+      "n": 461
+    },
+    {
+      "table_title": "Valanga",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.3,
+      "n": 557
+    },
+    {
+      "table_title": "Summerlights(IIDX Edition)",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.3,
+      "n": 459
+    },
+    {
+      "table_title": "Megalara Garuda",
+      "direction": "DEMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.4,
+      "n": 503
+    },
+    {
+      "table_title": "THE CANNONBALLER",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.2,
+      "n": 389
+    },
+    {
+      "table_title": "Last Card",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.1,
+      "n": 587
+    },
+    {
+      "table_title": "Snow Goose",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.9,
+      "n": 405
+    },
+    {
+      "table_title": "No.13",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.7,
+      "n": 352
+    },
+    {
+      "table_title": "GOLDEN CROSS",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.1,
+      "n": 549
+    },
+    {
+      "table_title": "LIVE DRIVING!! feat. 花たん",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.2,
+      "n": 475
+    },
+    {
+      "table_title": "destination",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.6,
+      "n": 425
+    },
+    {
+      "table_title": "Aqvion",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.8,
+      "n": 562
+    },
+    {
+      "table_title": "Pollinosis",
+      "direction": "PROMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.0,
+      "n": 330
+    },
+    {
+      "table_title": "ゲシュタルト[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.2",
+      "maxminus_pct": 44.4,
+      "n": 617
+    },
+    {
+      "table_title": "City Never Sleeps (IIDX Edition)",
+      "direction": "DEMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.2",
+      "maxminus_pct": 46.8,
+      "n": 340
+    },
+    {
+      "table_title": "GRID KNIGHT[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.2",
+      "maxminus_pct": 46.7,
+      "n": 501
+    },
+    {
+      "table_title": "無双",
+      "direction": "DEMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.2",
+      "maxminus_pct": 46.8,
+      "n": 344
+    },
+    {
+      "table_title": "waxing and wanding",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 39.9,
+      "n": 351
+    },
+    {
+      "table_title": "果たせぬ約束 ft. 小林マナ",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 40.4,
+      "n": 334
+    },
+    {
+      "table_title": "Harmony and Lovely",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 40.8,
+      "n": 390
+    },
+    {
+      "table_title": "Aurora",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 40.9,
+      "n": 428
+    },
+    {
+      "table_title": "寝起きヤシの木",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 40.2,
+      "n": 415
+    },
+    {
+      "table_title": "KING",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 42.1,
+      "n": 368
+    },
+    {
+      "table_title": "AMRITA -不滅ノ花-",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 40.4,
+      "n": 354
+    },
+    {
+      "table_title": "Nothing but Theory",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 42.2,
+      "n": 325
+    },
+    {
+      "table_title": "DAZZLE ATTACK",
+      "direction": "PROMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.3",
+      "maxminus_pct": 42.0,
+      "n": 355
+    },
+    {
+      "table_title": "Illegal Function Call[L]",
+      "direction": "DEMOTE",
+      "old_rank": "13.0",
+      "new_rank": "12.9",
+      "maxminus_pct": 0.8,
+      "n": 496
+    },
+    {
+      "table_title": "Somnidiscotheque",
+      "direction": "PROMOTE",
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "maxminus_pct": 0.2,
+      "n": 638
+    },
+    {
+      "table_title": "灼熱Beach Side Bunny",
+      "direction": "PROMOTE",
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "maxminus_pct": 0.3,
+      "n": 654
+    },
+    {
+      "table_title": "X-DEN",
+      "direction": "DEMOTE",
+      "old_rank": "12.9",
+      "new_rank": "12.8",
+      "maxminus_pct": 1.1,
+      "n": 449
+    },
+    {
+      "table_title": "灼熱 Pt.2 Long Train Running",
+      "direction": "DEMOTE",
+      "old_rank": "12.9",
+      "new_rank": "12.8",
+      "maxminus_pct": 1.2,
+      "n": 507
+    },
+    {
+      "table_title": "RAGE feat.H14 of LEONAIR",
+      "direction": "PROMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "maxminus_pct": 0.4,
+      "n": 518
+    },
+    {
+      "table_title": "Inferno of Fomalhaut",
+      "direction": "PROMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "maxminus_pct": 0.5,
+      "n": 407
+    },
+    {
+      "table_title": "HEROES",
+      "direction": "PROMOTE",
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "maxminus_pct": 1.1,
+      "n": 469
+    },
+    {
+      "table_title": "子供の落書き帳",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.7,
+      "n": 459
+    },
+    {
+      "table_title": "TITANS RETURN[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.6,
+      "n": 378
+    },
+    {
+      "table_title": "Bad Encryption",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.7,
+      "n": 647
+    },
+    {
+      "table_title": "Everlasting Message",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.9,
+      "n": 524
+    },
+    {
+      "table_title": "Macho Monky",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.0,
+      "n": 430
+    },
+    {
+      "table_title": "Artist",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.9,
+      "n": 451
+    },
+    {
+      "table_title": "Unbelief",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.9,
+      "n": 461
+    },
+    {
+      "table_title": "EBONY & IVORY[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 7.6,
+      "n": 396
+    },
+    {
+      "table_title": "LOCUS OF THE TRAVEL",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 7.0,
+      "n": 469
+    },
+    {
+      "table_title": "LOUDER ROLLING THUNDER",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 7.7,
+      "n": 379
+    },
+    {
+      "table_title": "REVOLVER[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.7,
+      "n": 497
+    },
+    {
+      "table_title": "The Rebellion of Sequencer",
+      "direction": "DEMOTE",
+      "old_rank": "12.7",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.2,
+      "n": 367
+    },
+    {
+      "table_title": "色を喪った街",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 2.7,
+      "n": 586
+    },
+    {
+      "table_title": "Fascination MAXX",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.0,
+      "n": 559
+    },
+    {
+      "table_title": "Level One",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.5,
+      "n": 511
+    },
+    {
+      "table_title": "火影",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.3,
+      "n": 461
+    },
+    {
+      "table_title": "Level 3",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.5,
+      "n": 543
+    },
+    {
+      "table_title": "焔極OVERKILL",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.6,
+      "n": 472
+    },
+    {
+      "table_title": "POLKAMANIA[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 3.8,
+      "n": 598
+    },
+    {
+      "table_title": "ベィスドロップ・フリークス[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 4.2,
+      "n": 498
+    },
+    {
+      "table_title": "Concertino in Blue",
+      "direction": "PROMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "maxminus_pct": 5.1,
+      "n": 429
+    },
+    {
+      "table_title": "Reflux",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 8.8,
+      "n": 490
+    },
+    {
+      "table_title": "VANESSA[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.3,
+      "n": 496
+    },
+    {
+      "table_title": "キャトられ恋はモ～モク",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.6,
+      "n": 469
+    },
+    {
+      "table_title": "IX",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.2,
+      "n": 479
+    },
+    {
+      "table_title": "Purple Perplex",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.6,
+      "n": 460
+    },
+    {
+      "table_title": "Violet Pulse[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 8.9,
+      "n": 505
+    },
+    {
+      "table_title": "Ambivalent Vermilia",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.7,
+      "n": 485
+    },
+    {
+      "table_title": "桜",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.4,
+      "n": 446
+    },
+    {
+      "table_title": "PERFECT GREAT!!",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.8,
+      "n": 439
+    },
+    {
+      "table_title": "Routing",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.8,
+      "n": 397
+    },
+    {
+      "table_title": "未完成ノ蒸氣驅動乙女",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.1,
+      "n": 467
+    },
+    {
+      "table_title": "RIZING-GAMERS.",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.3,
+      "n": 447
+    },
+    {
+      "table_title": "Confiserie",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.7,
+      "n": 561
+    },
+    {
+      "table_title": "Without Heaven",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.3,
+      "n": 429
+    },
+    {
+      "table_title": "お菓子の王国",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.3,
+      "n": 619
+    },
+    {
+      "table_title": "Zenith",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.4,
+      "n": 364
+    },
+    {
+      "table_title": "Almagest",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.5,
+      "n": 592
+    },
+    {
+      "table_title": "恋愛＝精度×認識力",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.5,
+      "n": 504
+    },
+    {
+      "table_title": "時空トラベローグ",
+      "direction": "DEMOTE",
+      "old_rank": "12.6",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.7,
+      "n": 317
+    },
+    {
+      "table_title": "ECHIDNA",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.8,
+      "n": 570
+    },
+    {
+      "table_title": "Go Ahead!!",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.9,
+      "n": 546
+    },
+    {
+      "table_title": "Caldwell 99[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.1,
+      "n": 375
+    },
+    {
+      "table_title": "GO!",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.3,
+      "n": 463
+    },
+    {
+      "table_title": "Red. by Jack Trance",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 5.8,
+      "n": 514
+    },
+    {
+      "table_title": "StrayedCatz",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 6.1,
+      "n": 476
+    },
+    {
+      "table_title": "COSMIC RAY",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 7.2,
+      "n": 377
+    },
+    {
+      "table_title": "TOMAHAWK",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 7.1,
+      "n": 451
+    },
+    {
+      "table_title": "KAMAITACHI[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.5,
+      "n": 520
+    },
+    {
+      "table_title": "ROCK女 feat. 大山愛未， Ken",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.2,
+      "n": 355
+    },
+    {
+      "table_title": "烽火連天の刃",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.4,
+      "n": 462
+    },
+    {
+      "table_title": "魔法のかくれんぼ",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 7.7,
+      "n": 404
+    },
+    {
+      "table_title": "Lords Of The Roundtable",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.7,
+      "n": 520
+    },
+    {
+      "table_title": "OTENAMI Hurricane",
+      "direction": "PROMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "maxminus_pct": 8.6,
+      "n": 371
+    },
+    {
+      "table_title": "神っぽいな[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.2,
+      "n": 482
+    },
+    {
+      "table_title": "共鳴遊戯の華",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.2,
+      "n": 482
+    },
+    {
+      "table_title": "KAISER PHOENIX[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.4,
+      "n": 484
+    },
+    {
+      "table_title": "kors k's How to make OTOGE CORE 「LONG」",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.2,
+      "n": 454
+    },
+    {
+      "table_title": "Satellite Burst",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.8,
+      "n": 450
+    },
+    {
+      "table_title": "今宵、ロマンス横丁。",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.6,
+      "n": 517
+    },
+    {
+      "table_title": "UNDO THE NIGHT",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.4,
+      "n": 465
+    },
+    {
+      "table_title": "雪上断火",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.6,
+      "n": 528
+    },
+    {
+      "table_title": "Uaigh Gealai",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.9,
+      "n": 425
+    },
+    {
+      "table_title": "The Limbo[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.2,
+      "n": 499
+    },
+    {
+      "table_title": "Time to Air[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.5,
+      "n": 519
+    },
+    {
+      "table_title": "がっつり陰キャ!? 怪盗いいんちょの億劫^^;",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.4,
+      "n": 510
+    },
+    {
+      "table_title": "轟け！恋のビーンボール！！",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.9,
+      "n": 425
+    },
+    {
+      "table_title": "Verflucht[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.5",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.5,
+      "n": 563
+    },
+    {
+      "table_title": "少年は空を辿る",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 8.9,
+      "n": 483
+    },
+    {
+      "table_title": "Red. by Full Metal Jacket",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 8.9,
+      "n": 609
+    },
+    {
+      "table_title": "SISYPHUS",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.6,
+      "n": 407
+    },
+    {
+      "table_title": "Spica",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.8,
+      "n": 327
+    },
+    {
+      "table_title": "24h Endurance Race",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 9.7,
+      "n": 390
+    },
+    {
+      "table_title": "Smashing Wedge",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.7,
+      "n": 494
+    },
+    {
+      "table_title": "dica dica",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.8,
+      "n": 501
+    },
+    {
+      "table_title": "ベラ・ベ・カラベラ",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.7,
+      "n": 703
+    },
+    {
+      "table_title": "Out of Control",
+      "direction": "PROMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "maxminus_pct": 10.6,
+      "n": 377
+    },
+    {
+      "table_title": "YAKSHA",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.5,
+      "n": 426
+    },
+    {
+      "table_title": "NZM",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 13.9,
+      "n": 502
+    },
+    {
+      "table_title": "Sol Cosine Job 2",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.4,
+      "n": 375
+    },
+    {
+      "table_title": "Push on Beats!～音ゲの国のeX-ストリーマー～",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.4,
+      "n": 356
+    },
+    {
+      "table_title": "Trill auf G",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.4,
+      "n": 403
+    },
+    {
+      "table_title": "hora de verdad",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.6,
+      "n": 340
+    },
+    {
+      "table_title": "fffff",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.8,
+      "n": 446
+    },
+    {
+      "table_title": "2 Be Continued",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 14.8,
+      "n": 660
+    },
+    {
+      "table_title": "Flashes",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.0,
+      "n": 499
+    },
+    {
+      "table_title": "From Human Blood",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.7,
+      "n": 648
+    },
+    {
+      "table_title": "ピアノ協奏曲第1番”蠍火” (BlackY Remix)",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.4,
+      "n": 462
+    },
+    {
+      "table_title": "Override[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.9,
+      "n": 555
+    },
+    {
+      "table_title": "Million Dollar",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.8,
+      "n": 436
+    },
+    {
+      "table_title": "電腦都市",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.4,
+      "n": 446
+    },
+    {
+      "table_title": "BroGamer[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 15.6,
+      "n": 563
+    },
+    {
+      "table_title": "VOLAQUAS",
+      "direction": "DEMOTE",
+      "old_rank": "12.4",
+      "new_rank": "12.3",
+      "maxminus_pct": 16.2,
+      "n": 470
+    },
+    {
+      "table_title": "KAISER PHOENIX",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.7,
+      "n": 495
+    },
+    {
+      "table_title": "MEGAERA",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.8,
+      "n": 516
+    },
+    {
+      "table_title": "Don't believe the hype",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 11.6,
+      "n": 455
+    },
+    {
+      "table_title": "MAXIMUM CHEAT GIRL",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.5,
+      "n": 425
+    },
+    {
+      "table_title": "INSOMNIA",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.9,
+      "n": 442
+    },
+    {
+      "table_title": "疾風迅雷",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.1,
+      "n": 413
+    },
+    {
+      "table_title": "Wonder Bullfighter",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 12.3,
+      "n": 309
+    },
+    {
+      "table_title": "最小三倍完全数",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.0,
+      "n": 354
+    },
+    {
+      "table_title": "スキッテイエェエエェ!!!!",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.1,
+      "n": 613
+    },
+    {
+      "table_title": "Binary Black Hole",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.4,
+      "n": 506
+    },
+    {
+      "table_title": "ONIGOROSHI",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.1,
+      "n": 337
+    },
+    {
+      "table_title": "Papilio ulysses",
+      "direction": "PROMOTE",
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "maxminus_pct": 13.7,
+      "n": 502
+    },
+    {
+      "table_title": "Illusionary Waterlily",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.4,
+      "n": 396
+    },
+    {
+      "table_title": "LIGHTNING STRIKES[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.8,
+      "n": 558
+    },
+    {
+      "table_title": "Konzert V",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.9,
+      "n": 502
+    },
+    {
+      "table_title": "suspicions",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.8,
+      "n": 455
+    },
+    {
+      "table_title": "fallen leaves -IIDX edition-",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.2,
+      "n": 466
+    },
+    {
+      "table_title": "MAX 360",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.2,
+      "n": 425
+    },
+    {
+      "table_title": "Ancient Scapes",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.3,
+      "n": 443
+    },
+    {
+      "table_title": "世界の果てに約束の凱歌を -ReUnion-",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.0,
+      "n": 467
+    },
+    {
+      "table_title": "ATHER[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.2",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.2,
+      "n": 363
+    },
+    {
+      "table_title": "Xperanza",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.0,
+      "n": 471
+    },
+    {
+      "table_title": "RALLY '25",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.0,
+      "n": 716
+    },
+    {
+      "table_title": "BLAZING_LAZER",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.9,
+      "n": 446
+    },
+    {
+      "table_title": "電光",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.2,
+      "n": 470
+    },
+    {
+      "table_title": "Blue Rain[L]",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.3,
+      "n": 544
+    },
+    {
+      "table_title": "Feel The Beat",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 17.2,
+      "n": 470
+    },
+    {
+      "table_title": "TOGAKUSHI",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.7,
+      "n": 504
+    },
+    {
+      "table_title": "Lethal Weapon",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.8,
+      "n": 511
+    },
+    {
+      "table_title": "The Sampling Paradise",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 18.3,
+      "n": 584
+    },
+    {
+      "table_title": "海神",
+      "direction": "PROMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "maxminus_pct": 19.1,
+      "n": 439
+    },
+    {
+      "table_title": "BIGWAVERS",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.5,
+      "n": 460
+    },
+    {
+      "table_title": "SOLID STATE SQUAD[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.4,
+      "n": 393
+    },
+    {
+      "table_title": "刃図羅",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.4,
+      "n": 545
+    },
+    {
+      "table_title": "We're so Happy (P*Light Remix) IIDX ver.",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.9,
+      "n": 423
+    },
+    {
+      "table_title": "Bow shock!![L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.3,
+      "n": 530
+    },
+    {
+      "table_title": "千年ノ理[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.9,
+      "n": 543
+    },
+    {
+      "table_title": "Mid-Corner (Magic Maker)",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.9,
+      "n": 415
+    },
+    {
+      "table_title": "Close the World feat.a☆ru",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.3,
+      "n": 539
+    },
+    {
+      "table_title": "スーパー戦湯ババンバーン",
+      "direction": "DEMOTE",
+      "old_rank": "12.1",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.7,
+      "n": 366
+    },
+    {
+      "table_title": "COSMIC V3LOCITY",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.9,
+      "n": 392
+    },
+    {
+      "table_title": "Boomy and The Boost",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.5,
+      "n": 518
+    },
+    {
+      "table_title": "トリカゴノ鳳凰",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 19.9,
+      "n": 442
+    },
+    {
+      "table_title": "Arkadia",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.6,
+      "n": 499
+    },
+    {
+      "table_title": "Scripted Connection⇒ A mix",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.4,
+      "n": 539
+    },
+    {
+      "table_title": "EXUSIA",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.2,
+      "n": 556
+    },
+    {
+      "table_title": "ビビッド ☆+*。キラキライム",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.0,
+      "n": 677
+    },
+    {
+      "table_title": "MARLIN",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.1,
+      "n": 460
+    },
+    {
+      "table_title": "Hollywood Galaxy",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 20.7,
+      "n": 473
+    },
+    {
+      "table_title": "Disco Killer Music Lover",
+      "direction": "PROMOTE",
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "maxminus_pct": 21.1,
+      "n": 692
+    },
+    {
+      "table_title": "TECHNO Style Essentials",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.6,
+      "n": 437
+    },
+    {
+      "table_title": "B.O.D.Y.",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.5,
+      "n": 481
+    },
+    {
+      "table_title": "抱きしめてモナムール",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.0,
+      "n": 446
+    },
+    {
+      "table_title": "THE DAY OF JUBILATIONS",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.9,
+      "n": 393
+    },
+    {
+      "table_title": "Gravigazer",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.6,
+      "n": 423
+    },
+    {
+      "table_title": "L.F.O",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.8,
+      "n": 500
+    },
+    {
+      "table_title": "Nemophila",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.6,
+      "n": 398
+    },
+    {
+      "table_title": "Scripted Connection⇒ H mix[L]",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.6,
+      "n": 355
+    },
+    {
+      "table_title": "ΕΛΠΙΣ",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.9,
+      "n": 547
+    },
+    {
+      "table_title": "Vermilion Carol",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.0,
+      "n": 428
+    },
+    {
+      "table_title": "Acid Pumper",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.2,
+      "n": 400
+    },
+    {
+      "table_title": "#MAGiCVLGiRL_TRVP_B3VTZ",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.3,
+      "n": 466
+    },
+    {
+      "table_title": "Usual Days-remix",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.0,
+      "n": 340
+    },
+    {
+      "table_title": "Lightspeed",
+      "direction": "DEMOTE",
+      "old_rank": "12.0",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.1,
+      "n": 415
+    },
+    {
+      "table_title": "Despair of ELFERIA",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.9,
+      "n": 567
+    },
+    {
+      "table_title": "Friction[!]Function",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.9,
+      "n": 465
+    },
+    {
+      "table_title": "Painful Fate",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.5,
+      "n": 489
+    },
+    {
+      "table_title": "DRUNK MONKY",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.6,
+      "n": 426
+    },
+    {
+      "table_title": "神のシナリオ",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.3,
+      "n": 593
+    },
+    {
+      "table_title": "ファイナルレター",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.5,
+      "n": 306
+    },
+    {
+      "table_title": "C-C-C-N-N-N",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.0,
+      "n": 328
+    },
+    {
+      "table_title": "PLEASE DON'T GO",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 21.6,
+      "n": 357
+    },
+    {
+      "table_title": "津軽雪",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 22.2,
+      "n": 549
+    },
+    {
+      "table_title": "Amazing Mirage",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 23.4,
+      "n": 337
+    },
+    {
+      "table_title": "天邪鬼",
+      "direction": "PROMOTE",
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "maxminus_pct": 23.5,
+      "n": 541
+    },
+    {
+      "table_title": "Ubertreffen[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.4,
+      "n": 424
+    },
+    {
+      "table_title": "DARK LEGACY",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.7,
+      "n": 501
+    },
+    {
+      "table_title": "RINNE",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.7,
+      "n": 390
+    },
+    {
+      "table_title": "Cosmic Cat[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.5,
+      "n": 425
+    },
+    {
+      "table_title": "Aftermath",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.9,
+      "n": 390
+    },
+    {
+      "table_title": "ALBIDA",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.5,
+      "n": 476
+    },
+    {
+      "table_title": "TECHNO RUMBLE",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 26.4,
+      "n": 397
+    },
+    {
+      "table_title": "不沈艦CANDY",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.4,
+      "n": 562
+    },
+    {
+      "table_title": "HARD BRAIN",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.3,
+      "n": 495
+    },
+    {
+      "table_title": "BITTER CHOCOLATE STRIKER",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.3,
+      "n": 594
+    },
+    {
+      "table_title": "EBONY & IVORY",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.1,
+      "n": 424
+    },
+    {
+      "table_title": "SpaceLand☆TOYBOX",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.4,
+      "n": 449
+    },
+    {
+      "table_title": "Stereo Beasts",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.7,
+      "n": 459
+    },
+    {
+      "table_title": "イザナミノナゲキ",
+      "direction": "DEMOTE",
+      "old_rank": "11.9",
+      "new_rank": "11.8",
+      "maxminus_pct": 27.1,
+      "n": 431
+    },
+    {
+      "table_title": "F",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.8,
+      "n": 559
+    },
+    {
+      "table_title": "VALLIS-NERIA",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 23.8,
+      "n": 400
+    },
+    {
+      "table_title": "Rave Cannon",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.4,
+      "n": 468
+    },
+    {
+      "table_title": "Night sky",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.5,
+      "n": 322
+    },
+    {
+      "table_title": "Bring The Fire",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.7,
+      "n": 397
+    },
+    {
+      "table_title": "smooooch・∀・[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.9,
+      "n": 329
+    },
+    {
+      "table_title": "旅人リラン",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 24.0,
+      "n": 408
+    },
+    {
+      "table_title": "旋律のドグマ～Miserables～",
+      "direction": "PROMOTE",
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "maxminus_pct": 25.4,
+      "n": 448
+    },
+    {
+      "table_title": "GENE",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.5,
+      "n": 603
+    },
+    {
+      "table_title": "AA",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.4,
+      "n": 707
+    },
+    {
+      "table_title": "532nm",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.4,
+      "n": 358
+    },
+    {
+      "table_title": "Thunderbolt",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.0,
+      "n": 455
+    },
+    {
+      "table_title": "ADAMANT",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.1,
+      "n": 325
+    },
+    {
+      "table_title": "Apocalypse",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.6,
+      "n": 513
+    },
+    {
+      "table_title": "シュレーディンガーの猫",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.8,
+      "n": 490
+    },
+    {
+      "table_title": "Burning Flame",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.9,
+      "n": 335
+    },
+    {
+      "table_title": "TROOPERS",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.2,
+      "n": 423
+    },
+    {
+      "table_title": "Candy Galy",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.8,
+      "n": 506
+    },
+    {
+      "table_title": "THE BLACK KNIGHT",
+      "direction": "DEMOTE",
+      "old_rank": "11.7",
+      "new_rank": "11.6",
+      "maxminus_pct": 33.2,
+      "n": 419
+    },
+    {
+      "table_title": "The Dirty of Loudness",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.7,
+      "n": 411
+    },
+    {
+      "table_title": "Scars of FAUNA",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.8,
+      "n": 358
+    },
+    {
+      "table_title": "Crazy Jackpot",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.6,
+      "n": 329
+    },
+    {
+      "table_title": "Meteor☆Shower",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.5,
+      "n": 380
+    },
+    {
+      "table_title": "Time To Empress[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.2,
+      "n": 461
+    },
+    {
+      "table_title": "ZED",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.1,
+      "n": 306
+    },
+    {
+      "table_title": "INORI",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.7,
+      "n": 366
+    },
+    {
+      "table_title": "CODE -CRiMSON-",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.5,
+      "n": 346
+    },
+    {
+      "table_title": "Symmetry",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 29.0,
+      "n": 513
+    },
+    {
+      "table_title": "えだまめカレークッキング",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 28.7,
+      "n": 363
+    },
+    {
+      "table_title": "sakura storm",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.0,
+      "n": 503
+    },
+    {
+      "table_title": "SPECIAL SUMMER CAMPAIGN!",
+      "direction": "PROMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "maxminus_pct": 30.1,
+      "n": 495
+    },
+    {
+      "table_title": "Dr. Chemical & Killing Machine",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.1,
+      "n": 528
+    },
+    {
+      "table_title": "CALL[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 33.7,
+      "n": 383
+    },
+    {
+      "table_title": "True Blue",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.0,
+      "n": 530
+    },
+    {
+      "table_title": "entelecheia",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.3,
+      "n": 551
+    },
+    {
+      "table_title": "Drastic Dramatic",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.9,
+      "n": 527
+    },
+    {
+      "table_title": "夕焼け ～Fading Day～",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.8,
+      "n": 322
+    },
+    {
+      "table_title": "Rave Patroller",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 36.1,
+      "n": 509
+    },
+    {
+      "table_title": "狂水一華",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 36.5,
+      "n": 304
+    },
+    {
+      "table_title": "MAGIC & LOVE",
+      "direction": "DEMOTE",
+      "old_rank": "11.6",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.7,
+      "n": 305
+    },
+    {
+      "table_title": "ZERO-ONE[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.5,
+      "n": 325
+    },
+    {
+      "table_title": "FLOWER",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.6,
+      "n": 418
+    },
+    {
+      "table_title": "ZZ",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.2,
+      "n": 561
+    },
+    {
+      "table_title": "Primitive Vibes",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.5,
+      "n": 524
+    },
+    {
+      "table_title": "Night! Night! Night!",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 30.6,
+      "n": 327
+    },
+    {
+      "table_title": "snow storm[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.6,
+      "n": 529
+    },
+    {
+      "table_title": "R∞tAge",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.2,
+      "n": 332
+    },
+    {
+      "table_title": "MOCHIMOCHI DREAMIN!!",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.0,
+      "n": 682
+    },
+    {
+      "table_title": "INHERITANCE",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.9,
+      "n": 335
+    },
+    {
+      "table_title": "AFRO KNUCKLE",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 33.2,
+      "n": 322
+    },
+    {
+      "table_title": "Macuilxochitl",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.8,
+      "n": 468
+    },
+    {
+      "table_title": "Sounds Of Summer",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.2,
+      "n": 497
+    },
+    {
+      "table_title": "《PL|RAYER》",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.5,
+      "n": 496
+    },
+    {
+      "table_title": "Todestrieb",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.8,
+      "n": 632
+    },
+    {
+      "table_title": "紅牡丹",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.7,
+      "n": 566
+    },
+    {
+      "table_title": "CHAOTIC SUNBIRD",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 31.6,
+      "n": 316
+    },
+    {
+      "table_title": "Meissa",
+      "direction": "PROMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "maxminus_pct": 32.9,
+      "n": 453
+    },
+    {
+      "table_title": "LIGHTNING STRIKES",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 36.9,
+      "n": 609
+    },
+    {
+      "table_title": "CODE:2",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 36.7,
+      "n": 365
+    },
+    {
+      "table_title": "純真可憐デザイア[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 36.6,
+      "n": 568
+    },
+    {
+      "table_title": "アイドル[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 37.4,
+      "n": 372
+    },
+    {
+      "table_title": "冬椿 ft. Kanae Asaba[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.0,
+      "n": 374
+    },
+    {
+      "table_title": "waxing and wanding[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.4,
+      "n": 546
+    },
+    {
+      "table_title": "glacia",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.5,
+      "n": 550
+    },
+    {
+      "table_title": "Nocturnal 2097",
+      "direction": "DEMOTE",
+      "old_rank": "11.5",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.4,
+      "n": 322
+    },
+    {
+      "table_title": "Steel Edge",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.6,
+      "n": 534
+    },
+    {
+      "table_title": "Ristaccia",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 33.9,
+      "n": 496
+    },
+    {
+      "table_title": "Elisha",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.0,
+      "n": 514
+    },
+    {
+      "table_title": "Submerge Serenade",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.8,
+      "n": 322
+    },
+    {
+      "table_title": "Amethyst",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 34.2,
+      "n": 354
+    },
+    {
+      "table_title": "華爛漫 -Flowers-[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.7,
+      "n": 622
+    },
+    {
+      "table_title": "smile",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 35.4,
+      "n": 345
+    },
+    {
+      "table_title": "Rampage",
+      "direction": "PROMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "maxminus_pct": 36.5,
+      "n": 537
+    },
+    {
+      "table_title": "惑星☆ロリポップ",
+      "direction": "DEMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.3",
+      "maxminus_pct": 40.9,
+      "n": 421
+    },
+    {
+      "table_title": "儚き恋の華",
+      "direction": "DEMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.3",
+      "maxminus_pct": 41.4,
+      "n": 314
+    },
+    {
+      "table_title": "ハオ",
+      "direction": "DEMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.3",
+      "maxminus_pct": 41.1,
+      "n": 372
+    },
+    {
+      "table_title": "無意識のフィロソフィア",
+      "direction": "DEMOTE",
+      "old_rank": "11.4",
+      "new_rank": "11.3",
+      "maxminus_pct": 41.7,
+      "n": 314
+    },
+    {
+      "table_title": "405nm (Ryu☆mix)",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 37.4,
+      "n": 380
+    },
+    {
+      "table_title": "xenon",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 36.6,
+      "n": 328
+    },
+    {
+      "table_title": "examination leave",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.1,
+      "n": 381
+    },
+    {
+      "table_title": "Ember Lights",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.3,
+      "n": 368
+    },
+    {
+      "table_title": "bloomin' feeling",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.2,
+      "n": 435
+    },
+    {
+      "table_title": "Ambush Ace",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.9,
+      "n": 339
+    },
+    {
+      "table_title": "麗 ～うらら～",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.1,
+      "n": 371
+    },
+    {
+      "table_title": "Bahram Attack-猫叉Master Remix-[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.8,
+      "n": 382
+    },
+    {
+      "table_title": "ユミル",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.5,
+      "n": 340
+    },
+    {
+      "table_title": "n'pa pa BBQ",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 39.5,
+      "n": 324
+    },
+    {
+      "table_title": "crew",
+      "direction": "PROMOTE",
+      "old_rank": "11.3",
+      "new_rank": "11.4",
+      "maxminus_pct": 38.3,
+      "n": 345
+    },
+    {
+      "table_title": "月とミルク",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 48.1,
+      "n": 366
+    },
+    {
+      "table_title": "PopなEDEN",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 48.3,
+      "n": 346
+    },
+    {
+      "table_title": "SnapSkipSpark",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 50.0,
+      "n": 664
+    },
+    {
+      "table_title": "Butterfly Twist",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 48.9,
+      "n": 372
+    },
+    {
+      "table_title": "でんぱ どりる わんにゃー☆三",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 50.0,
+      "n": 688
+    },
+    {
+      "table_title": "メズマライザー",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 51.9,
+      "n": 509
+    },
+    {
+      "table_title": "ZENDEGI DANCE",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 52.7,
+      "n": 372
+    },
+    {
+      "table_title": "A MINSTREL ～ ver. short-scape ～[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 53.1,
+      "n": 604
+    },
+    {
+      "table_title": "Ruler or Loser",
+      "direction": "DEMOTE",
+      "old_rank": "11.2",
+      "new_rank": "11.1",
+      "maxminus_pct": 52.7,
+      "n": 317
+    },
+    {
+      "table_title": "≡+≡",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 45.9,
+      "n": 403
+    },
+    {
+      "table_title": "Logic Board",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 42.8,
+      "n": 339
+    },
+    {
+      "table_title": "勇者",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 45.7,
+      "n": 359
+    },
+    {
+      "table_title": "ミッドナイト☆WAR",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 46.0,
+      "n": 346
+    },
+    {
+      "table_title": "Second Heaven",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 46.5,
+      "n": 475
+    },
+    {
+      "table_title": "DEEP ROAR",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 47.0,
+      "n": 366
+    },
+    {
+      "table_title": "Lucy",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 47.3,
+      "n": 349
+    },
+    {
+      "table_title": "ここからよろしく大作戦143[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "maxminus_pct": 47.8,
+      "n": 389
+    },
+    {
+      "table_title": "怪物[L]",
+      "direction": "DEMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.0",
+      "maxminus_pct": 56.1,
+      "n": 478
+    },
+    {
+      "table_title": "in the Sky",
+      "direction": "DEMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.0",
+      "maxminus_pct": 57.3,
+      "n": 365
+    },
+    {
+      "table_title": "R5",
+      "direction": "DEMOTE",
+      "old_rank": "11.1",
+      "new_rank": "11.0",
+      "maxminus_pct": 57.6,
+      "n": 422
+    },
+    {
+      "table_title": "たからもの[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.0",
+      "new_rank": "11.1",
+      "maxminus_pct": 48.5,
+      "n": 464
+    },
+    {
+      "table_title": "EDEN[L]",
+      "direction": "PROMOTE",
+      "old_rank": "11.0",
+      "new_rank": "11.1",
+      "maxminus_pct": 49.5,
+      "n": 406
+    },
+    {
+      "table_title": "フォニイ",
+      "direction": "PROMOTE",
+      "old_rank": "11.0",
+      "new_rank": "11.1",
+      "maxminus_pct": 50.6,
+      "n": 451
+    },
+    {
+      "table_title": "Seraph",
+      "direction": "PROMOTE",
+      "old_rank": "11.0",
+      "new_rank": "11.1",
+      "maxminus_pct": 52.7,
+      "n": 332
+    }
+  ],
+  "total": 656,
+  "excluded_low_play": 357,
+  "method": "プレイ>300人のみMAX-割合の固定境界で分類。<= 300人は現状維持"
+}
