@@ -52,6 +52,7 @@ import Friends from './components/Friends.vue';
 import FriendTimeline from './components/FriendTimeline.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
+import WhatsNewModal from './components/WhatsNewModal.vue';
 import { defineAsyncComponent } from 'vue';
 // 重いサブビュー / モーダルは遅延ロード。各タブが選択された時に初めて該当チャンクがフェッチされる。
 // chart.js / html2canvas / tesseract.js などの大きな依存をユーザーが触るタイミングまで遅らせる効果がある。
@@ -1534,6 +1535,9 @@ const handleUnifiedClose = async () => {
       @close="isAdminModalOpen = false"
       @select="handleSelectUser"
     />
+
+    <!-- アップデート告知モーダル（ログイン後・未読の告知があれば1回だけ表示） -->
+    <WhatsNewModal />
 
     <!-- ============================================================ -->
     <!-- メインコンテナ（サイドバー右側の本文領域）                        -->
