@@ -473,6 +473,37 @@ const promotionChanges = computed(() => draftDiffChanges.value.filter(c => parse
 /** 【computed の役割】 降格（新ランク < 旧ランク）の差分のみ抽出。 */
 const demotionChanges = computed(() => draftDiffChanges.value.filter(c => parseFloat(c.newRank) < parseFloat(c.oldRank)));
 
+/** ティア表記のローマ数字（1→I 〜 5→V）。0/undefined は空文字。 */
+const TIER_ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
+/** 【関数の役割】 RankInfo を "Master III" 形式のラベルへ整形する（tier 無しの Legend/Beginner は名前のみ）。 */
+function tierLabel(r: { name: string; tier?: number }): string {
+    return r.tier ? `${r.name} ${TIER_ROMAN[r.tier] ?? r.tier}` : r.name;
+}
+/**
+ * 【computed の役割】 シミュレーション各行に現行 / 適用後の BEAT-Tier を付与する。
+ *  - curTier / simTier: それぞれ現在・適用後 BEAT-PT から判定したランク
+ *  - tierChanged: 称号 or サブティアが変わったか
+ *  - tierDir: +1=昇格 / -1=降格 / 0=同一（minPoints で比較）
+ */
+const simulationRows = computed(() =>
+    simulationData.value.map(e => {
+        const curTier = getRankInfo(e.currentBeatPt);
+        const simTier = getRankInfo(e.simulatedBeatPt);
+        const tierChanged = curTier.name !== simTier.name || curTier.tier !== simTier.tier;
+        const tierDir = simTier.minPoints === curTier.minPoints ? 0 : (simTier.minPoints > curTier.minPoints ? 1 : -1);
+        return { ...e, curTier, simTier, tierChanged, tierDir };
+    })
+);
+/** 【computed の役割】 ティアが変動したユーザー数（昇格 / 降格）の集計。サマリ表示用。 */
+const tierChangeStats = computed(() => {
+    let up = 0, down = 0;
+    for (const r of simulationRows.value) {
+        if (!r.tierChanged) continue;
+        if (r.tierDir > 0) up++; else if (r.tierDir < 0) down++;
+    }
+    return { up, down, total: up + down };
+});
+
 /** 【関数の役割】 Beat-PT ランキング本体と都道府県 TOP ランカーを並列取得し、0 pt の TOP ランカーは除外する。 */
 async function fetchBeatRanking() {
     const [rankRes, topRes] = await Promise.all([
@@ -1307,6 +1338,14 @@ watch(viewMode, async (mode) => {
             難易度表のドラフト変更がありません。
           </div>
 
+          <!-- ティア変動サマリ（適用で BEAT-Tier が上下したユーザー数） -->
+          <div v-if="!isSimulationLoading && !simulationError && tierChangeStats.total > 0"
+            class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl flex items-center gap-3 flex-wrap">
+            <span class="text-xs font-black text-amber-700 dark:text-amber-400">ティア変動 {{ tierChangeStats.total }}人</span>
+            <span v-if="tierChangeStats.up > 0" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">▲ 昇格 {{ tierChangeStats.up }}</span>
+            <span v-if="tierChangeStats.down > 0" class="text-xs font-bold text-red-600 dark:text-red-400">▼ 降格 {{ tierChangeStats.down }}</span>
+          </div>
+
           <div v-if="isSimulationLoading" class="flex flex-col items-center justify-center py-20">
             <div class="w-12 h-12 border-4 border-amber-100 dark:border-slate-700 border-t-amber-500 rounded-full animate-spin mb-4"></div>
             <p class="text-slate-500 dark:text-slate-400 font-bold">シミュレーション計算中...</p>
@@ -1321,48 +1360,58 @@ watch(viewMode, async (mode) => {
                   <th class="pb-3 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-24">順位変動</th>
                   <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
                   <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right">現在 BEAT-PT</th>
-                  <th class="pb-3 text-xs font-black text-amber-500 uppercase tracking-widest text-right pr-4">適用後 BEAT-PT</th>
+                  <th class="pb-3 text-xs font-black text-amber-500 uppercase tracking-widest text-right">適用後 BEAT-PT</th>
+                  <th class="pb-3 pr-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">ティア変動</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr v-for="entry in simulationData" :key="entry.iidxId"
+                <tr v-for="row in simulationRows" :key="row.iidxId"
                   class="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30">
                   <td class="py-3 pl-4">
                     <div class="flex items-center gap-2">
                       <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
-                        :class="entry.iidxId === user?.iidxId
+                        :class="row.iidxId === user?.iidxId
                           ? 'bg-blue-500 text-white'
                           : 'text-slate-400 border border-slate-100 dark:border-slate-700'">
-                        {{ entry.simulatedRank }}
+                        {{ row.simulatedRank }}
                       </div>
-                      <span v-if="entry.rankDelta > 0" class="text-[10px] font-bold text-emerald-500">▲{{ entry.rankDelta }}</span>
-                      <span v-else-if="entry.rankDelta < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(entry.rankDelta) }}</span>
+                      <span v-if="row.rankDelta > 0" class="text-[10px] font-bold text-emerald-500">▲{{ row.rankDelta }}</span>
+                      <span v-else-if="row.rankDelta < 0" class="text-[10px] font-bold text-red-500">▼{{ Math.abs(row.rankDelta) }}</span>
                       <span v-else class="text-[10px] font-bold text-slate-300 dark:text-slate-600">-</span>
                     </div>
                   </td>
                   <td class="py-3">
                     <div class="flex items-center gap-2">
-                      <span class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ entry.displayName || 'Unnamed' }}</span>
-                      <span v-if="entry.iidxId === user?.iidxId"
+                      <span class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ row.displayName || 'Unnamed' }}</span>
+                      <span v-if="row.iidxId === user?.iidxId"
                         class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">YOU</span>
                     </div>
-                    <div class="text-[10px] text-slate-400 mt-0.5">{{ entry.iidxId }} / 現在{{ entry.currentRank }}位</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">{{ row.iidxId }} / 現在{{ row.currentRank }}位</div>
                   </td>
                   <td class="py-3 text-right">
                     <span class="text-base font-bold tabular-nums text-slate-500 dark:text-slate-400">
-                      {{ entry.currentBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                      {{ row.currentBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                     </span>
                   </td>
-                  <td class="py-3 text-right pr-4">
+                  <td class="py-3 text-right">
                     <div class="flex flex-col items-end">
                       <span class="text-base font-black tabular-nums text-amber-600 dark:text-amber-400">
-                        {{ entry.simulatedBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        {{ row.simulatedBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                       </span>
                       <span class="text-[10px] font-bold tabular-nums"
-                        :class="entry.ptDelta > 0 ? 'text-emerald-500' : entry.ptDelta < 0 ? 'text-red-500' : 'text-slate-400'">
-                        {{ entry.ptDelta > 0 ? '+' : '' }}{{ entry.ptDelta.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        :class="row.ptDelta > 0 ? 'text-emerald-500' : row.ptDelta < 0 ? 'text-red-500' : 'text-slate-400'">
+                        {{ row.ptDelta > 0 ? '+' : '' }}{{ row.ptDelta.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                       </span>
                     </div>
+                  </td>
+                  <td class="py-3 pr-4 text-right">
+                    <!-- ティア変動: 変わった場合のみ 旧→新 を強調表示、変わらなければ現状ティアを淡色で表示 -->
+                    <div v-if="row.tierChanged" class="flex items-center justify-end gap-1 flex-wrap">
+                      <span class="text-[11px] font-bold text-slate-400 line-through whitespace-nowrap">{{ tierLabel(row.curTier) }}</span>
+                      <span class="text-[10px] font-black" :class="row.tierDir > 0 ? 'text-emerald-500' : 'text-red-500'">{{ row.tierDir > 0 ? '▲' : '▼' }}</span>
+                      <span class="text-xs font-black whitespace-nowrap" :class="row.tierDir > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">{{ tierLabel(row.simTier) }}</span>
+                    </div>
+                    <span v-else class="text-[11px] font-medium text-slate-400 whitespace-nowrap">{{ tierLabel(row.simTier) }}</span>
                   </td>
                 </tr>
               </tbody>
