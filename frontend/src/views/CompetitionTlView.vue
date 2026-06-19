@@ -16,6 +16,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useCompetitionTl, type MatchKind, type TlMatchDto, type TlMatchupDto } from '../composables/useCompetitionTl';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
+import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
 import CompetitionChatWidget from '../components/CompetitionChatWidget.vue';
 
 const props = defineProps<{ token: string }>();
@@ -132,7 +133,7 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
       <div>
         <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
-          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ view.team.teamName }}</h1>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight" :class="teamColorClass(view.team.teamName)">{{ view.team.teamName }}</h1>
           <span class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlAdminBadge') }}</span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
@@ -192,7 +193,7 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
         >
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm">
-              {{ t('competition.player.vs') }} <span class="text-blue-600 dark:text-blue-400">{{ mu.opponentTeam.teamName ?? '?' }}</span>
+              {{ t('competition.player.vs') }} <span :class="teamColorClass(mu.opponentTeam.teamName)">{{ mu.opponentTeam.teamName ?? '?' }}</span>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
               <span
@@ -217,7 +218,8 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
                 <p class="text-[10px] font-mono text-slate-400">{{ KIND_LV[match.matchKind] }}</p>
                 <span
                   v-if="match.requiredGenre"
-                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
+                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider"
+                  :class="genreBadgeClass(match.requiredGenre)"
                 >
                   {{ t('competition.tl.requiredGenrePrefix') }} {{ match.requiredGenre }}
                 </span>

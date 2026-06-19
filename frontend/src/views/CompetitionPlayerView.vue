@@ -28,6 +28,7 @@ import { useCompetitionPlayerIndividual } from '../composables/useCompetitionPla
 import { API_BASE } from '../composables/constants';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
+import { teamColorClass, genreBadgeClass, genreTextClass } from '../composables/competitionColors';
 
 const props = defineProps<{ token: string }>();
 
@@ -423,7 +424,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
       <div>
         <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
-          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ view.team.teamName }}</h1>
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight" :class="teamColorClass(view.team.teamName)">{{ view.team.teamName }}</h1>
           <span class="text-slate-400">·</span>
           <p class="text-lg sm:text-2xl font-bold">{{ view.participant.displayName }}</p>
           <span v-if="view.participant.isTl" class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlBadge') }}</span>
@@ -469,7 +470,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
               <span v-if="m.opponent" class="text-blue-600 dark:text-blue-400">{{ m.opponent.displayName }}</span>
               <span v-else-if="!m.opponentLineupPublished" class="text-slate-400 italic">{{ t('competition.player.opponentLineupHidden') }}</span>
               <span v-else class="text-slate-400 italic">{{ t('competition.player.unassigned') }}</span>
-              <span v-if="m.opponent?.teamName" class="text-xs text-slate-400 font-mono ml-1">({{ m.opponent.teamName }})</span>
+              <span v-if="m.opponent?.teamName" class="text-xs font-mono ml-1" :class="teamColorClass(m.opponent.teamName)">({{ m.opponent.teamName }})</span>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
               <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
@@ -480,7 +481,8 @@ const canEnableStrategyHere = (matchId: number): boolean => {
               </p>
               <span
                 v-if="m.requiredGenre"
-                class="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
+                class="text-[10px] font-black px-2 py-0.5 rounded tracking-wider"
+                :class="genreBadgeClass(m.requiredGenre)"
               >
                 {{ t('competition.player.requiredGenrePrefix') }} {{ m.requiredGenre }}
               </span>
@@ -554,7 +556,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
           >
             <div class="flex items-center justify-between flex-wrap gap-2">
               <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500">
-                {{ kindLabel(m.matchKind) }} - <span class="text-emerald-600 dark:text-emerald-300 font-black">{{ m.requiredGenre }}</span> {{ t('competition.player.fromGenre') }}
+                {{ kindLabel(m.matchKind) }} - <span class="font-black" :class="genreTextClass(m.requiredGenre)">{{ m.requiredGenre }}</span> {{ t('competition.player.fromGenre') }}
               </p>
               <button
                 type="button"

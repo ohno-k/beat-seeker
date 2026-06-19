@@ -32,6 +32,7 @@ import {
   type ChatThreadDto,
 } from '../composables/useCompetitionAdmin';
 import { useToast } from '../composables/useToast';
+import { teamColorClass, genreSelectClass } from '../composables/competitionColors';
 import SongPickerModal from '../components/SongPickerModal.vue';
 
 const { user } = useAuth();
@@ -348,46 +349,10 @@ const teamNameOf = (teamId: number | null): string => {
 };
 
 /**
- * チーム名 → 文字色クラス (観戦ページと共通の配色)。識別キーの部分一致 (大文字小文字無視) で判定。
- * Tailwind の purge を避けるためクラスは完全リテラルで保持する。
- *  テクノワールド→水色 / ADX MAMY→紺(青) / Fantasista→うすだいだい / G-STAGE→ピンク / CYGameWorld→オレンジ
+ * チーム ID から色クラスを引く (matchup は teamId しか持たないため)。
+ * 配色ルールの本体は competitionColors の {@link teamColorClass} に集約。
  */
-const TEAM_COLOR_RULES: { match: string; cls: string }[] = [
-  { match: 'テクノ', cls: 'text-sky-500 dark:text-sky-300' },          // テクノワールド → 水色
-  { match: 'mamy', cls: 'text-blue-800 dark:text-blue-300' },          // ADX MAMY → 紺 (青)
-  { match: 'fantasista', cls: 'text-orange-400 dark:text-orange-200' }, // Fantasista → うすだいだい
-  { match: 'g-stage', cls: 'text-pink-500 dark:text-pink-300' },       // G-STAGE → ピンク
-  { match: 'cygame', cls: 'text-orange-600 dark:text-orange-400' },    // CYGameWorld → オレンジ
-];
-const DEFAULT_TEAM_CLS = 'text-slate-600 dark:text-slate-300';
-/** チーム名文字列から色クラスを引く。 */
-const teamColorClass = (name?: string | null): string => {
-  if (!name) return DEFAULT_TEAM_CLS;
-  const lower = name.toLowerCase();
-  const rule = TEAM_COLOR_RULES.find(r => lower.includes(r.match.toLowerCase()));
-  return rule ? rule.cls : DEFAULT_TEAM_CLS;
-};
-/** チーム ID から色クラスを引く (matchup は teamId しか持たないため)。 */
 const teamColorClassById = (teamId: number | null): string => teamColorClass(teamNameOf(teamId));
-
-/**
- * 指定ジャンル → セレクタ用の文字色 + 枠線色クラス (観戦ページと共通の配色)。完全リテラルで保持。
- *  NOTES→ピンク / PEAK→オレンジ / CHORD→黄緑 / CHARGE→紫 / SCRATCH→赤 / SOF-LAN→青 / INSANE→中立
- */
-const GENRE_SELECT_COLOR: Record<string, string> = {
-  NOTES: 'text-pink-600 dark:text-pink-300 border-pink-300 dark:border-pink-700',
-  PEAK: 'text-orange-600 dark:text-orange-300 border-orange-300 dark:border-orange-700',
-  CHORD: 'text-lime-600 dark:text-lime-300 border-lime-300 dark:border-lime-700',
-  CHARGE: 'text-purple-600 dark:text-purple-300 border-purple-300 dark:border-purple-700',
-  SCRATCH: 'text-red-600 dark:text-red-300 border-red-300 dark:border-red-700',
-  'SOF-LAN': 'text-blue-600 dark:text-blue-300 border-blue-300 dark:border-blue-700',
-  INSANE: 'text-slate-600 dark:text-slate-300 border-slate-400 dark:border-slate-500',
-};
-/** ジャンルセレクタの色クラス。未指定時は標準の枠線色。 */
-const genreSelectClass = (g?: string | null): string =>
-  (g ? GENRE_SELECT_COLOR[g] : undefined)
-    ? `${GENRE_SELECT_COLOR[g as string]} font-bold`
-    : 'border-slate-300 dark:border-slate-600';
 
 /** 参加者 ID → 表示名。matchup でアサイン済みプレイヤー表示に使う。 */
 const participantNameOf = (participantId: number | null): string => {
