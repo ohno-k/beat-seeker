@@ -488,6 +488,23 @@ const revealMatchOf = (matchId: number) => {
   return revealData.value.matches.find(rm => rm.matchId === matchId) ?? null;
 };
 
+/**
+ * 指定試合・サイドの自選曲を返す。管理画面では公開状態 (選曲公開) に関係なく常に開示する。
+ * reveal データは主催認証 (requireOrganizer) 経由で取得しており、未公開の picks も含むため表示してよい。
+ */
+const pickForSide = (matchId: number, side: 'a' | 'b') => {
+  const rm = revealMatchOf(matchId);
+  if (!rm) return null;
+  return side === 'a' ? rm.playerAPick : rm.playerBPick;
+};
+/** 自選曲の表示用ラベル。未取得 / 未提出 / 曲名+メタ を区別する。 */
+const pickLabel = (matchId: number, side: 'a' | 'b'): string => {
+  if (!revealData.value) return '(提出状況未取得)';
+  const p = pickForSide(matchId, side);
+  if (!p) return '未提出';
+  return `${p.songTitle} [${p.songGenre}☆${p.songLevel}${p.songDiff}]`;
+};
+
 /** REVEAL を再生できるか: 両プレイヤーがアサイン済み + 両側に自選曲提出済み。 */
 const canReveal = (matchId: number): boolean => {
   const rm = revealMatchOf(matchId);
@@ -1893,20 +1910,32 @@ const statusColor = (s: string) => ({
                     </p>
                   </div>
 
-                  <!-- A 側プレイヤー -->
+                  <!-- A 側プレイヤー (起用は公開状態に関係なく管理者には常に表示) -->
                   <div class="text-xs">
                     <p class="text-[10px] font-mono text-slate-400 uppercase">A 側 (<span :class="teamColorClassById(mu.teamAId)">{{ teamNameOf(mu.teamAId) }}</span>)</p>
                     <p class="font-bold truncate" :class="match.playerAId ? '' : 'italic text-slate-400'">
                       {{ participantNameOf(match.playerAId) }}
                     </p>
+                    <!-- 自選曲 (選曲公開が未公開でも管理者には開示) -->
+                    <p
+                      class="text-[10px] mt-0.5 truncate"
+                      :class="pickForSide(match.id, 'a') ? 'text-violet-600 dark:text-violet-300 font-bold' : 'text-slate-400 italic'"
+                      :title="pickLabel(match.id, 'a')"
+                    >🎵 {{ pickLabel(match.id, 'a') }}</p>
                   </div>
 
-                  <!-- B 側プレイヤー -->
+                  <!-- B 側プレイヤー (起用は公開状態に関係なく管理者には常に表示) -->
                   <div class="text-xs">
                     <p class="text-[10px] font-mono text-slate-400 uppercase">B 側 (<span :class="teamColorClassById(mu.teamBId)">{{ teamNameOf(mu.teamBId) }}</span>)</p>
                     <p class="font-bold truncate" :class="match.playerBId ? '' : 'italic text-slate-400'">
                       {{ participantNameOf(match.playerBId) }}
                     </p>
+                    <!-- 自選曲 (選曲公開が未公開でも管理者には開示) -->
+                    <p
+                      class="text-[10px] mt-0.5 truncate"
+                      :class="pickForSide(match.id, 'b') ? 'text-violet-600 dark:text-violet-300 font-bold' : 'text-slate-400 italic'"
+                      :title="pickLabel(match.id, 'b')"
+                    >🎵 {{ pickLabel(match.id, 'b') }}</p>
                   </div>
 
                   <!-- ジャンル指定セレクタ -->
