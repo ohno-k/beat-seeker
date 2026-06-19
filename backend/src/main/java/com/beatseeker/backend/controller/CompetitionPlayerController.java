@@ -146,8 +146,10 @@ public class CompetitionPlayerController {
             if (!iAmA && !iAmB) continue;
 
             CompetitionParticipant opponent = iAmA ? pb : pa;
-            boolean opponentLocked = iAmA ? Boolean.TRUE.equals(m.getLockedB()) : Boolean.TRUE.equals(m.getLockedA());
-            boolean myLocked = iAmA ? Boolean.TRUE.equals(m.getLockedA()) : Boolean.TRUE.equals(m.getLockedB());
+            // 手動ロック廃止: 起用クローズ日時 (comp.deadlineAt) を過ぎたら両サイド一斉にロック扱い。
+            boolean closed = comp.isLineupClosed();
+            boolean opponentLocked = closed;
+            boolean myLocked = closed;
             // 公開フラグ: 相手側の起用と自選曲がそれぞれ「自分から見える」状態か
             CompetitionMatchup mu = m.getMatchup();
             boolean opponentLineupPublished = iAmA
@@ -247,10 +249,9 @@ public class CompetitionPlayerController {
             return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会には提出できません"));
         }
 
-        boolean myLocked = iAmA ? Boolean.TRUE.equals(match.getLockedA())
-                                : Boolean.TRUE.equals(match.getLockedB());
-        if (myLocked) {
-            return ResponseEntity.badRequest().body(Map.of("message", "この試合はロック済のため変更できません"));
+        // 手動ロック廃止: 起用クローズ日時を過ぎたら提出/変更不可。
+        if (comp.isLineupClosed()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ日時を過ぎたため変更できません"));
         }
 
         String requiredGenre = match.getRequiredGenre();
@@ -307,10 +308,9 @@ public class CompetitionPlayerController {
         if ("finished".equals(match.getMatchup().getCompetition().getStatus())) {
             return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では編集できません"));
         }
-        boolean myLocked = iAmA ? Boolean.TRUE.equals(match.getLockedA())
-                                : Boolean.TRUE.equals(match.getLockedB());
-        if (myLocked) {
-            return ResponseEntity.badRequest().body(Map.of("message", "この試合はロック済のため取消できません"));
+        // 手動ロック廃止: 起用クローズ日時を過ぎたら取消不可。
+        if (match.getMatchup().getCompetition().isLineupClosed()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ日時を過ぎたため取消できません"));
         }
 
         pickRepository.findByMatchAndParticipant(match, me).ifPresent(pickRepository::delete);

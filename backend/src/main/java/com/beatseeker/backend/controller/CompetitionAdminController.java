@@ -856,6 +856,39 @@ public class CompetitionAdminController {
         return ResponseEntity.ok(Map.of("spectatorToken", comp.getSpectatorToken()));
     }
 
+    /**
+     * 【メソッドの役割】 起用クローズ日時 ({@code deadlineAt}) を設定/解除する。
+     *
+     * <p>手動ロックの代替。設定した日時 (JST の壁時計時刻として保持) を過ぎると、
+     * TL の起用編集とプレイヤーの自選曲編集が自動的に締め切られる ({@link Competition#isLineupClosed()})。
+     *
+     * <p>リクエストの {@code deadlineAt} は ISO ローカル日時文字列 (例: {@code 2026-06-20T21:00})。
+     * 空文字 / null を渡すと締切解除 (= 締め切らない状態に戻す)。
+     */
+    @PutMapping("/{competitionId}/deadline")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> setDeadline(
+            Authentication auth, @PathVariable Long competitionId,
+            @RequestBody DeadlineRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if ("finished".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
+        }
+        if (req == null || req.deadlineAt() == null || req.deadlineAt().isBlank()) {
+            comp.setDeadlineAt(null);
+        } else {
+            try {
+                comp.setDeadlineAt(java.time.LocalDateTime.parse(req.deadlineAt()));
+            } catch (java.time.format.DateTimeParseException e) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "日時の形式が不正です (例: 2026-06-20T21:00)"));
+            }
+        }
+        competitionRepository.save(comp);
+        return ResponseEntity.ok(toCompetitionDetailMap(comp));
+    }
+
     // ── 状態遷移 ─────────────────────────────────────────────
 
     /**
@@ -1227,6 +1260,8 @@ public class CompetitionAdminController {
         m.put("createdById", c.getCreatedBy() != null ? c.getCreatedBy().getId() : null);
         m.put("obsToken", c.getObsToken());
         m.put("spectatorToken", c.getSpectatorToken());
+        // 起用クローズ: deadlineAt を「クローズ日時」として運用。lineupClosed は現在 (JST) 時点の派生状態。
+        m.put("lineupClosed", c.isLineupClosed());
         return m;
     }
 
@@ -1412,6 +1447,13 @@ public class CompetitionAdminController {
      * {@code side} = "a" / "b" / "both"。{@code locked} = true でロック (編集禁止)、false で解除。
      */
     public record LockRequest(String side, Boolean locked) {}
+
+    /**
+     * 起用クローズ日時設定リクエスト。
+     * {@code deadlineAt} = ISO ローカル日時 (例: {@code 2026-06-20T21:00}) を JST の壁時計時刻として保持。
+     * 空文字 / null で締切解除。
+     */
+    public record DeadlineRequest(String deadlineAt) {}
 
     /**
      * 試合結果記録リクエスト (R-4: スコア入力で勝敗自動判定)。

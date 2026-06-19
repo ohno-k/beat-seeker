@@ -51,7 +51,7 @@ const {
   publishLineup,
   configureMatchup,
   publishPick,
-  setMatchLock,
+  setDeadline,
   deleteCompetition,
   regenerateParticipantToken,
   regenerateTlToken,
@@ -442,14 +442,40 @@ const handlePublishPick = async (matchId: number, side: 'a' | 'b' | 'both', publ
   }
 };
 
-const handleSetLock = async (matchId: number, side: 'a' | 'b' | 'both', locked: boolean) => {
+// ── 起用クローズ日時 (JST) ── 手動ロックの代替 ──────────
+/**
+ * datetime-local 入力の現在値。currentCompetition.deadlineAt から初期化し、
+ * 大会切替時に同期する。形式は "YYYY-MM-DDTHH:mm" (秒なし)。
+ */
+const deadlineInput = ref<string>('');
+
+/** サーバの ISO 日時文字列 (例 "2026-06-20T21:00:00") を datetime-local 値 "2026-06-20T21:00" に整形。 */
+const toDatetimeLocal = (iso: string | null): string => (iso ? iso.slice(0, 16) : '');
+
+watch(
+  () => currentCompetition.value?.deadlineAt,
+  (iso) => { deadlineInput.value = toDatetimeLocal(iso ?? null); },
+  { immediate: true },
+);
+
+const isSavingDeadline = ref(false);
+/** 入力中の日時を保存 (空なら締切解除)。 */
+const handleSaveDeadline = async () => {
   if (!currentCompetition.value) return;
+  isSavingDeadline.value = true;
   try {
-    await setMatchLock(currentCompetition.value.id, matchId, side, locked);
-    toast.success(locked ? 'ロックしました (編集禁止)' : 'ロックを解除しました');
+    await setDeadline(currentCompetition.value.id, deadlineInput.value || null);
+    toast.success(deadlineInput.value ? '起用クローズ日時を設定しました' : 'クローズ日時を解除しました');
   } catch (e) {
     toast.error((e as Error).message);
+  } finally {
+    isSavingDeadline.value = false;
   }
+};
+/** 締切を解除 (入力クリア + 保存)。 */
+const handleClearDeadline = async () => {
+  deadlineInput.value = '';
+  await handleSaveDeadline();
 };
 
 // ── REVEAL 再生 (Song Reveal 連携) ────────────────────
@@ -1681,6 +1707,57 @@ const statusColor = (s: string) => ({
           </div>
         </section>
 
+        <!-- 起用クローズ日時 (JST): 手動ロックの代替。設定時刻を過ぎると TL 起用編集・プレイヤー自選曲提出が締切。 -->
+        <section
+          v-if="currentCompetition.status !== 'draft'"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+              起用クローズ日時 (JST)
+            </h2>
+            <span
+              class="text-[11px] font-black px-2 py-0.5 rounded tracking-wider"
+              :class="currentCompetition.lineupClosed
+                ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'"
+            >
+              {{ currentCompetition.lineupClosed ? '🔒 クローズ済み (編集締切)' : '✏ 受付中 (編集可)' }}
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            設定した日時を過ぎると、TL の起用編集とプレイヤーの自選曲提出が自動的に締め切られます (手動ロックは廃止)。
+            日時はあなたの端末のローカル時刻 = JST 想定で扱われます。
+          </p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <input
+              type="datetime-local"
+              v-model="deadlineInput"
+              :disabled="currentCompetition.status === 'finished'"
+              class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              @click="handleSaveDeadline"
+              :disabled="isSavingDeadline || currentCompetition.status === 'finished'"
+              class="shrink-0 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-300 disabled:to-slate-300"
+            >保存</button>
+            <button
+              v-if="currentCompetition.deadlineAt"
+              type="button"
+              @click="handleClearDeadline"
+              :disabled="isSavingDeadline || currentCompetition.status === 'finished'"
+              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
+            >締切解除</button>
+          </div>
+          <p v-if="currentCompetition.deadlineAt" class="text-[10px] font-mono text-slate-400">
+            現在の設定: {{ new Date(currentCompetition.deadlineAt).toLocaleString('ja-JP') }}
+          </p>
+          <p v-else class="text-[10px] font-mono text-slate-400">
+            未設定 (締め切らない)。日時を入れて「保存」すると有効になります。
+          </p>
+        </section>
+
         <!-- 対戦表: 全 30 試合に対する運営ジャンル指定 (open 以降のみ表示) -->
         <section
           v-if="currentCompetition.matchups && currentCompetition.matches && currentCompetition.matchups.length > 0"
@@ -1848,37 +1925,7 @@ const statusColor = (s: string) => ({
                   </div>
                 </div>
 
-                <!-- ロックトグル群 (締切時刻に編集禁止に切替) -->
-                <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono pt-1 border-t border-slate-100 dark:border-slate-700/40">
-                  <span class="text-slate-400 uppercase tracking-wider">ロック:</span>
-                  <button
-                    type="button"
-                    @click="handleSetLock(match.id, 'a', !match.lockedA)"
-                    class="px-2 py-1 rounded transition-colors"
-                    :class="match.lockedA
-                      ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
-                  >
-                    A 側 {{ match.lockedA ? '🔒 ロック中' : '未ロック' }}
-                  </button>
-                  <button
-                    type="button"
-                    @click="handleSetLock(match.id, 'b', !match.lockedB)"
-                    class="px-2 py-1 rounded transition-colors"
-                    :class="match.lockedB
-                      ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
-                  >
-                    B 側 {{ match.lockedB ? '🔒 ロック中' : '未ロック' }}
-                  </button>
-                  <button
-                    type="button"
-                    @click="handleSetLock(match.id, 'both', !(match.lockedA && match.lockedB))"
-                    class="px-2 py-1 rounded bg-violet-500 text-white hover:bg-violet-600 ml-auto"
-                  >
-                    {{ match.lockedA && match.lockedB ? '両方解除' : '両方ロック' }}
-                  </button>
-                </div>
+                <!-- 起用ロックは大会全体の「起用クローズ日時」で自動制御 (上部セクション参照)。手動ロックは廃止。 -->
 
                 <!-- 結果記録 UI (R-4: 曲管理番号 + スコア入力 → 勝敗自動表示) -->
                 <div class="pt-1 border-t border-slate-100 dark:border-slate-700/40 text-[10px] font-mono">

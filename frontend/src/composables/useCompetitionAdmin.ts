@@ -33,6 +33,11 @@ export interface CompetitionSummary {
   obsToken: string | null;
   /** 観戦客向け対戦表公開トークン (team5 用)。発行前は null。 */
   spectatorToken: string | null;
+  /**
+   * 起用クローズ済みか (サーバ側で deadlineAt と現在時刻(JST)から算出した派生状態)。
+   * true の間は TL の起用編集・プレイヤーの自選曲編集が締め切られる。
+   */
+  lineupClosed: boolean;
 }
 
 export interface CompetitionTeamDto {
@@ -609,23 +614,7 @@ export function useCompetitionAdmin() {
     await fetchCompetition(competitionId);
   };
 
-  /**
-   * match の自選曲ロック (編集禁止フラグ) を切替。公開とは独立で、ロックされても未公開状態を維持できる。
-   * 通常フロー: 締切時刻にロック → 試合直前に publishPick で開示。
-   */
-  const setMatchLock = async (
-    competitionId: number,
-    matchId: number,
-    side: 'a' | 'b' | 'both',
-    locked: boolean,
-  ): Promise<void> => {
-    const res = await fetch(
-      `${API_BASE}/api/competitions/${competitionId}/matches/${matchId}/lock`,
-      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ side, locked }) },
-    );
-    await throwIfError(res);
-    await fetchCompetition(competitionId);
-  };
+  // 手動ロック (setMatchLock) は廃止。起用クローズは大会全体の deadlineAt (setDeadline) で自動制御する。
 
   /**
    * match の自選曲公開状態を更新する。
@@ -800,6 +789,19 @@ export function useCompetitionAdmin() {
     return data.obsToken as string;
   };
 
+  /**
+   * 起用クローズ日時 (deadlineAt) を設定/解除する。
+   * @param deadlineAt ISO ローカル日時文字列 (例 "2026-06-20T21:00")。null / '' で締切解除。
+   */
+  const setDeadline = async (competitionId: number, deadlineAt: string | null): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/deadline`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ deadlineAt }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
   /** 観戦客向け対戦表公開トークンを発行/再発行する (team5 用)。 */
   const regenerateSpectatorToken = async (competitionId: number): Promise<string> => {
     const res = await fetch(
@@ -828,7 +830,6 @@ export function useCompetitionAdmin() {
     publishLineup,
     configureMatchup,
     publishPick,
-    setMatchLock,
     deleteCompetition,
     regenerateParticipantToken,
     regenerateTlToken,
@@ -852,5 +853,7 @@ export function useCompetitionAdmin() {
     regenerateObsToken,
     // team5 観戦公開用
     regenerateSpectatorToken,
+    // 起用クローズ日時 (手動ロックの代替)
+    setDeadline,
   };
 }

@@ -159,13 +159,13 @@ public class CompetitionTlController {
             matches.sort(Comparator.comparingInt(m -> matchKindOrder(m.getMatchKind())));
 
             List<Map<String, Object>> matchMaps = new ArrayList<>();
+            // 手動ロックは廃止。起用クローズ日時 (comp.deadlineAt) を過ぎたら両サイド一斉にロック扱い。
+            boolean closed = comp.isLineupClosed();
             for (CompetitionMatch match : matches) {
                 CompetitionParticipant mine = iAmA ? match.getPlayerA() : match.getPlayerB();
                 CompetitionParticipant theirs = iAmA ? match.getPlayerB() : match.getPlayerA();
-                boolean myLocked = iAmA ? Boolean.TRUE.equals(match.getLockedA())
-                                        : Boolean.TRUE.equals(match.getLockedB());
-                boolean theirLocked = iAmA ? Boolean.TRUE.equals(match.getLockedB())
-                                           : Boolean.TRUE.equals(match.getLockedA());
+                boolean myLocked = closed;
+                boolean theirLocked = closed;
 
                 Map<String, Object> mm = new LinkedHashMap<>();
                 mm.put("matchId", match.getId());
@@ -213,10 +213,9 @@ public class CompetitionTlController {
         if (!iAmA && !iAmB) {
             return ResponseEntity.badRequest().body(Map.of("message", "この試合は自チームの担当ではありません"));
         }
-        boolean myLocked = iAmA ? Boolean.TRUE.equals(match.getLockedA())
-                                : Boolean.TRUE.equals(match.getLockedB());
-        if (myLocked) {
-            return ResponseEntity.badRequest().body(Map.of("message", "ロック済の slot は変更できません"));
+        // 手動ロック廃止: 起用クローズ日時を過ぎていたら編成変更不可。
+        if (comp.isLineupClosed()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ日時を過ぎたため編成変更できません"));
         }
 
         if (req == null || req.participantId() == null) {

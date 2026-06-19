@@ -87,4 +87,20 @@ public class Competition {
      */
     @Column(name = "spectator_token", length = 64, unique = true)
     private String spectatorToken;
+
+    /**
+     * 【派生判定】 起用クローズ済みか。{@link #deadlineAt} を JST の壁時計時刻として解釈し、
+     * 現在 (JST) がそれ以降なら true。
+     *
+     * <p>手動ロックの代替。クローズ後は TL の起用編集とプレイヤーの自選曲編集が締め切られる。
+     * {@code deadlineAt} が null の間は常に false (締切未設定 = 締め切らない)。
+     * バックグラウンドジョブを使わず読み取り時に都度判定するため、締切変更/解除で即座に反映される。
+     *
+     * <p>{@code @Transient} で永続化対象外。エンティティはフィールドアクセスなので Hibernate は無視する。
+     */
+    @Transient
+    public boolean isLineupClosed() {
+        return deadlineAt != null
+                && !LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo")).isBefore(deadlineAt);
+    }
 }

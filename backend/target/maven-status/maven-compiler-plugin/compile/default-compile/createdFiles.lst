@@ -112,6 +112,7 @@ com\beatseeker\backend\controller\MonthlyWrappedController.class
 com\beatseeker\backend\controller\CompetitionIndividualAdminController$SetIndividualResultRequest.class
 com\beatseeker\backend\repository\CompetitionPickRepository.class
 com\beatseeker\backend\controller\UserController$1.class
+com\beatseeker\backend\controller\CompetitionAdminController$DeadlineRequest.class
 com\beatseeker\backend\controller\GameDataController.class
 com\beatseeker\backend\controller\ScoreController$ScoreUploadRequest.class
 com\beatseeker\backend\entity\RankQuizProgress.class
