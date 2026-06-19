@@ -35,7 +35,7 @@ export interface CompetitionSummary {
   spectatorToken: string | null;
   /**
    * 起用クローズ済みか (サーバ側で deadlineAt と現在時刻(JST)から算出した派生状態)。
-   * true の間は TL の起用編集・プレイヤーの自選曲編集が締め切られる。
+   * true の間は TL の起用編集 (選手の割り当て) のみが締め切られる。自選曲提出は対象外。
    */
   lineupClosed: boolean;
 }

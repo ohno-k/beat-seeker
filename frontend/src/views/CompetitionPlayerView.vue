@@ -104,10 +104,6 @@ const startEditing = (m: PlayerMatchDto) => {
     toast.error('運営がジャンルを指定するまで提出できません');
     return;
   }
-  if (m.myLocked) {
-    toast.error('ロック済のため変更できません');
-    return;
-  }
   editingMatchId.value = m.matchId;
   // Lv が一意の戦 (middle / captain) は自動セット
   editingLevel.value = m.matchKind === 'middle' ? 11 : m.matchKind === 'captain' ? 12 : null;
@@ -250,11 +246,10 @@ const statusLabel = (s: string) => {
   return s;
 };
 
-/** 編集ボタンを出して良いか。ロック済 / ジャンル未指定 / 大会終了で false。 */
+/** 編集ボタンを出して良いか。ジャンル未指定 / 大会終了で false。自選曲は起用クローズの対象外なので締切後も編集可。 */
 const canEditMatch = (m: PlayerMatchDto): boolean => {
   if (!view.value) return false;
   if (view.value.competition.status === 'finished') return false;
-  if (m.myLocked) return false;
   if (!m.requiredGenre) return false;
   return true;
 };
@@ -527,13 +522,6 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                   class="px-2 py-1 text-[10px] font-bold rounded bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300"
                 >{{ t('competition.player.cancelButton') }}</button>
               </div>
-
-              <p
-                class="text-[10px] mt-1 font-mono"
-                :class="m.myLocked ? 'text-amber-600 dark:text-amber-300 font-bold' : 'text-slate-400'"
-              >
-                {{ m.myLocked ? t('competition.player.lockedAlready') : t('competition.player.lockBefore') }}
-              </p>
             </div>
 
             <!-- 相手 -->
@@ -554,7 +542,7 @@ const canEnableStrategyHere = (matchId: number): boolean => {
                 class="text-[10px] mt-1 font-mono"
                 :class="m.opponentPickPublished ? 'text-emerald-600 dark:text-emerald-300 font-bold' : 'text-slate-400'"
               >
-                {{ m.opponentPickPublished ? t('competition.player.published') : m.opponentLocked ? t('competition.player.lockedNotPublished') : t('competition.player.hiddenShort') }}
+                {{ m.opponentPickPublished ? t('competition.player.published') : t('competition.player.hiddenShort') }}
               </p>
             </div>
           </div>

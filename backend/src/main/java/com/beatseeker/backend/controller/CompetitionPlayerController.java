@@ -146,10 +146,9 @@ public class CompetitionPlayerController {
             if (!iAmA && !iAmB) continue;
 
             CompetitionParticipant opponent = iAmA ? pb : pa;
-            // 手動ロック廃止: 起用クローズ日時 (comp.deadlineAt) を過ぎたら両サイド一斉にロック扱い。
-            boolean closed = comp.isLineupClosed();
-            boolean opponentLocked = closed;
-            boolean myLocked = closed;
+            // 自選曲は起用クローズ日時の対象外 (起用編集のみロック)。プレイヤー側の自選曲ロックは常に false。
+            boolean opponentLocked = false;
+            boolean myLocked = false;
             // 公開フラグ: 相手側の起用と自選曲がそれぞれ「自分から見える」状態か
             CompetitionMatchup mu = m.getMatchup();
             boolean opponentLineupPublished = iAmA
@@ -249,10 +248,7 @@ public class CompetitionPlayerController {
             return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会には提出できません"));
         }
 
-        // 手動ロック廃止: 起用クローズ日時を過ぎたら提出/変更不可。
-        if (comp.isLineupClosed()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ日時を過ぎたため変更できません"));
-        }
+        // 自選曲は起用クローズ日時の対象外。締切後も終了するまで提出/変更できる (起用編集のみがクローズ対象)。
 
         String requiredGenre = match.getRequiredGenre();
         if (requiredGenre == null) {
@@ -308,10 +304,7 @@ public class CompetitionPlayerController {
         if ("finished".equals(match.getMatchup().getCompetition().getStatus())) {
             return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では編集できません"));
         }
-        // 手動ロック廃止: 起用クローズ日時を過ぎたら取消不可。
-        if (match.getMatchup().getCompetition().isLineupClosed()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ日時を過ぎたため取消できません"));
-        }
+        // 自選曲は起用クローズ日時の対象外。締切後も終了するまで取消できる (起用編集のみがクローズ対象)。
 
         pickRepository.findByMatchAndParticipant(match, me).ifPresent(pickRepository::delete);
         return ResponseEntity.ok(Map.of("message", "削除しました"));

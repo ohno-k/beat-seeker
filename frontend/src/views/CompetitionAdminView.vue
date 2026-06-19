@@ -1739,12 +1739,12 @@ const statusColor = (s: string) => ({
                 ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
                 : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'"
             >
-              {{ currentCompetition.lineupClosed ? '🔒 クローズ済み (編集締切)' : '✏ 受付中 (編集可)' }}
+              {{ currentCompetition.lineupClosed ? '🔒 起用クローズ済み' : '✏ 起用受付中' }}
             </span>
           </div>
           <p class="text-[11px] text-slate-500">
-            設定した日時を過ぎると、TL の起用編集とプレイヤーの自選曲提出が自動的に締め切られます (手動ロックは廃止)。
-            日時はあなたの端末のローカル時刻 = JST 想定で扱われます。
+            設定した日時を過ぎると、<b>TL の起用編集 (選手の割り当て) のみ</b>が自動的に締め切られます (手動ロックは廃止)。
+            プレイヤーの自選曲提出は締め切られません。日時はあなたの端末のローカル時刻 = JST 想定で扱われます。
           </p>
           <div class="flex items-center gap-2 flex-wrap">
             <input
