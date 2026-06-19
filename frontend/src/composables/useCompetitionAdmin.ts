@@ -47,6 +47,23 @@ export interface CompetitionTeamDto {
   tlToken: string;
 }
 
+/** 運営チャット 1 メッセージ。sender = 'tl' (チームリーダー) / 'admin' (運営)。 */
+export interface ChatMessageDto {
+  id: number;
+  sender: 'tl' | 'admin';
+  body: string;
+  createdAt: string;
+}
+
+/** チーム単位のチャットスレッド (管理画面の一覧用)。 */
+export interface ChatThreadDto {
+  teamId: number;
+  teamName: string;
+  /** 未読 (TL 発・運営未読) 件数。 */
+  unreadCount: number;
+  messages: ChatMessageDto[];
+}
+
 export interface CompetitionParticipantDto {
   id: number;
   teamId: number;
@@ -789,6 +806,40 @@ export function useCompetitionAdmin() {
     return data.obsToken as string;
   };
 
+  // ── 運営チャット (TL ⇄ 運営) ─────────────────────────────
+  /** 大会内の全チームのチャットスレッドを取得 (未読数付き)。 */
+  const fetchChatThreads = async (competitionId: number): Promise<ChatThreadDto[]> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/chat`,
+      { headers: authHeaders() },
+    );
+    await throwIfError(res);
+    return (await res.json()) as ChatThreadDto[];
+  };
+
+  /** 指定チームの TL へ運営返信を送信する。 */
+  const sendChatReply = async (
+    competitionId: number,
+    teamId: number,
+    body: string,
+  ): Promise<ChatMessageDto> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/teams/${teamId}/chat`,
+      { method: 'POST', headers: authHeaders(), body: JSON.stringify({ body }) },
+    );
+    await throwIfError(res);
+    return (await res.json()) as ChatMessageDto;
+  };
+
+  /** 指定チームの TL 発メッセージを既読にする (未読バッジのクリア)。 */
+  const markChatRead = async (competitionId: number, teamId: number): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/teams/${teamId}/chat/mark-read`,
+      { method: 'POST', headers: authHeaders() },
+    );
+    await throwIfError(res);
+  };
+
   /**
    * 起用クローズ日時 (deadlineAt) を設定/解除する。
    * @param deadlineAt ISO ローカル日時文字列 (例 "2026-06-20T21:00")。null / '' で締切解除。
@@ -855,5 +906,9 @@ export function useCompetitionAdmin() {
     regenerateSpectatorToken,
     // 起用クローズ日時 (手動ロックの代替)
     setDeadline,
+    // 運営チャット
+    fetchChatThreads,
+    sendChatReply,
+    markChatRead,
   };
 }

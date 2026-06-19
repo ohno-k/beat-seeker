@@ -84,6 +84,14 @@ export interface TlViewDto {
   costPerKind: Record<MatchKind, number>;
 }
 
+/** 運営チャット 1 メッセージ。sender = 'tl' (自分) / 'admin' (運営)。 */
+export interface ChatMessageDto {
+  id: number;
+  sender: 'tl' | 'admin';
+  body: string;
+  createdAt: string;
+}
+
 async function throwIfError(res: Response): Promise<void> {
   if (res.ok) return;
   let msg = `HTTP ${res.status}`;
@@ -124,5 +132,24 @@ export function useCompetitionTl() {
 
   const unassign = (token: string, matchId: number) => assign(token, matchId, null);
 
-  return { view, isLoading, fetchView, assign, unassign };
+  // ── 運営チャット ─────────────────────────────────────────
+  /** 自チームスレッドのチャット履歴を取得 (古い順)。 */
+  const fetchChat = async (token: string): Promise<ChatMessageDto[]> => {
+    const res = await fetch(`${API_BASE}/api/competition-access/tl/${token}/chat`);
+    await throwIfError(res);
+    return (await res.json()) as ChatMessageDto[];
+  };
+
+  /** 運営へメッセージを送信 (送信時に運営へメール通知が飛ぶ)。 */
+  const sendChat = async (token: string, body: string): Promise<ChatMessageDto> => {
+    const res = await fetch(`${API_BASE}/api/competition-access/tl/${token}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body }),
+    });
+    await throwIfError(res);
+    return (await res.json()) as ChatMessageDto;
+  };
+
+  return { view, isLoading, fetchView, assign, unassign, fetchChat, sendChat };
 }

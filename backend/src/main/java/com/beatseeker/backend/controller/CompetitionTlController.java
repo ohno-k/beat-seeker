@@ -2,6 +2,8 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
+import com.beatseeker.backend.service.AdminAuthService;
+import com.beatseeker.backend.service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -49,17 +51,29 @@ public class CompetitionTlController {
     private final CompetitionMatchupRepository matchupRepository;
     private final CompetitionMatchRepository matchRepository;
     private final CompetitionPickRepository pickRepository;
+    private final CompetitionChatMessageRepository chatRepository;
+    private final UserRepository userRepository;
+    private final AdminAuthService adminAuthService;
+    private final EmailService emailService;
 
     public CompetitionTlController(CompetitionTeamRepository teamRepository,
                                    CompetitionParticipantRepository participantRepository,
                                    CompetitionMatchupRepository matchupRepository,
                                    CompetitionMatchRepository matchRepository,
-                                   CompetitionPickRepository pickRepository) {
+                                   CompetitionPickRepository pickRepository,
+                                   CompetitionChatMessageRepository chatRepository,
+                                   UserRepository userRepository,
+                                   AdminAuthService adminAuthService,
+                                   EmailService emailService) {
         this.teamRepository = teamRepository;
         this.participantRepository = participantRepository;
         this.matchupRepository = matchupRepository;
         this.matchRepository = matchRepository;
         this.pickRepository = pickRepository;
+        this.chatRepository = chatRepository;
+        this.userRepository = userRepository;
+        this.adminAuthService = adminAuthService;
+        this.emailService = emailService;
     }
 
     /**
@@ -287,6 +301,69 @@ public class CompetitionTlController {
         return assign(token, matchId, new AssignRequest(null));
     }
 
+    // ── 運営チャット ─────────────────────────────────────────
+
+    /**
+     * 【メソッドの役割】 自チームスレッドの運営チャット履歴を古い順で返す。
+     *
+     * <p>TL がポーリングして運営からの返信を受け取るのにも使う。
+     */
+    @GetMapping("/{token}/chat")
+    public ResponseEntity<List<Map<String, Object>>> getChat(@PathVariable String token) {
+        CompetitionTeam myTeam = teamRepository.findByTlToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid TL token"));
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (CompetitionChatMessage m : chatRepository.findByTeamOrderByCreatedAtAsc(myTeam)) {
+            out.add(chatMap(m));
+        }
+        return ResponseEntity.ok(out);
+    }
+
+    /**
+     * 【メソッドの役割】 TL から運営へチャットメッセージを送信する。
+     *
+     * <p>保存後、運営 (管理者ユーザー) のメールアドレス宛に「新着メッセージが届いた」旨を
+     * 非同期通知する。メール失敗は握り潰してメッセージ保存自体は成功させる。
+     */
+    @PostMapping("/{token}/chat")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> postChat(
+            @PathVariable String token,
+            @RequestBody ChatRequest req) {
+        CompetitionTeam myTeam = teamRepository.findByTlToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid TL token"));
+        if (req == null || req.body() == null || req.body().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "メッセージを入力してください"));
+        }
+        String body = req.body().trim();
+        if (body.length() > 2000) body = body.substring(0, 2000);
+
+        CompetitionChatMessage m = new CompetitionChatMessage();
+        m.setTeam(myTeam);
+        m.setSender("tl");
+        m.setBody(body);
+        m.setReadByAdmin(false);
+        m = chatRepository.save(m);
+
+        // 運営 (管理者ユーザー) にメール通知。失敗してもメッセージ送信は成功扱い。
+        final String notifyBody = body;
+        try {
+            userRepository.findById(adminAuthService.getAdminUserId()).ifPresent(admin -> {
+                if (admin.getEmail() != null && !admin.getEmail().isBlank()) {
+                    emailService.sendTlChatNotification(
+                            admin.getEmail(),
+                            myTeam.getCompetition().getName(),
+                            myTeam.getTeamName(),
+                            notifyBody);
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("Failed to enqueue TL chat notification: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(chatMap(m));
+    }
+
     // ── 内部ヘルパ ───────────────────────────────────────────
 
     private static int matchKindOrder(String kind) {
@@ -315,6 +392,16 @@ public class CompetitionTlController {
         m.put("teamName", t.getTeamName());
         m.put("teamOrder", t.getTeamOrder());
         return m;
+    }
+
+    /** チャットメッセージ 1 件を表示用 Map に整形 (id / sender / body / createdAt)。 */
+    static Map<String, Object> chatMap(CompetitionChatMessage m) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("id", m.getId());
+        map.put("sender", m.getSender());
+        map.put("body", m.getBody());
+        map.put("createdAt", m.getCreatedAt());
+        return map;
     }
 
     private Map<String, Object> competitionMap(Competition c) {
@@ -372,4 +459,9 @@ public class CompetitionTlController {
      * {@code participantId} が null の場合は空席に戻す。
      */
     public record AssignRequest(Long participantId) {}
+
+    /**
+     * 運営チャット送信リクエスト。{@code body} が本文。
+     */
+    public record ChatRequest(String body) {}
 }

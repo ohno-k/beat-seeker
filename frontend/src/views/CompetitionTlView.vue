@@ -16,6 +16,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useCompetitionTl, type MatchKind, type TlMatchDto, type TlMatchupDto } from '../composables/useCompetitionTl';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
+import CompetitionChatWidget from '../components/CompetitionChatWidget.vue';
 
 const props = defineProps<{ token: string }>();
 
@@ -289,6 +290,9 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
           </ul>
         </div>
       </section>
+
+      <!-- 運営チャット (チャットボット風フローティングウィジェット) -->
+      <CompetitionChatWidget :token="props.token" />
     </div>
   </div>
 </template>

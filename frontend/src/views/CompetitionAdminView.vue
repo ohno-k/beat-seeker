@@ -13,7 +13,7 @@
  * 4 ID 判定はサーバ側で行うため、本 View はサイドバーガードと併せた二重防御の片側として、
  * 表示上の権限警告のみクライアントで出す (実際のリクエストブロックはサーバ側)。
  */
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import {
   useCompetitionAdmin,
@@ -29,6 +29,7 @@ import {
   type CompetitionFormat,
   type IndividualResultPayload,
   type MatchResultPayload,
+  type ChatThreadDto,
 } from '../composables/useCompetitionAdmin';
 import { useToast } from '../composables/useToast';
 import SongPickerModal from '../components/SongPickerModal.vue';
@@ -73,6 +74,9 @@ const {
   assignIndividualLottery,
   regenerateObsToken,
   regenerateSpectatorToken,
+  fetchChatThreads,
+  sendChatReply,
+  markChatRead,
 } = useCompetitionAdmin();
 
 /** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
@@ -154,6 +158,10 @@ const handleOpenCompetition = async (id: number) => {
     } else {
       await refreshRevealData(id);
       await refreshStandings();
+      // 運営チャットスレッドも初回ロード (team5 のみ)
+      chatThreads.value = [];
+      selectedChatTeamId.value = null;
+      await loadChatThreads();
     }
   } catch (e) {
     toast.error((e as Error).message);
@@ -477,6 +485,90 @@ const handleClearDeadline = async () => {
   deadlineInput.value = '';
   await handleSaveDeadline();
 };
+
+// ── 運営チャット (TL ⇄ 運営) ────────────────────────────
+const chatThreads = ref<ChatThreadDto[]>([]);
+const selectedChatTeamId = ref<number | null>(null);
+const chatReplyDraft = ref('');
+const isSendingChatReply = ref(false);
+const chatListEl = ref<HTMLElement | null>(null);
+let chatPollTimer: ReturnType<typeof setInterval> | null = null;
+
+/** 現在選択中のチームスレッド。 */
+const selectedThread = computed<ChatThreadDto | null>(() =>
+  chatThreads.value.find(t => t.teamId === selectedChatTeamId.value) ?? null);
+
+/** 全チーム合計の未読数 (セクション見出しのバッジ用)。 */
+const totalChatUnread = computed<number>(() =>
+  chatThreads.value.reduce((sum, t) => sum + t.unreadCount, 0));
+
+const scrollChatToBottom = async () => {
+  await nextTick();
+  if (chatListEl.value) chatListEl.value.scrollTop = chatListEl.value.scrollHeight;
+};
+
+/** チャットスレッド取得。ポーリングでも呼ぶためエラーはサイレント。 */
+const loadChatThreads = async () => {
+  if (!currentCompetition.value || currentCompetition.value.format === 'individual4') return;
+  try {
+    chatThreads.value = await fetchChatThreads(currentCompetition.value.id);
+    if (selectedChatTeamId.value !== null) scrollChatToBottom();
+  } catch {
+    /* ポーリング失敗は無視 */
+  }
+};
+
+/** チームのスレッドを開く (既読化 + 末尾へスクロール)。 */
+const handleSelectChatTeam = async (teamId: number) => {
+  selectedChatTeamId.value = teamId;
+  await scrollChatToBottom();
+  if (!currentCompetition.value) return;
+  const thread = chatThreads.value.find(t => t.teamId === teamId);
+  if (thread && thread.unreadCount > 0) {
+    try {
+      await markChatRead(currentCompetition.value.id, teamId);
+      thread.unreadCount = 0;
+    } catch { /* 既読化失敗は無視 */ }
+  }
+};
+
+/** 運営返信を送信。 */
+const handleSendChatReply = async () => {
+  const body = chatReplyDraft.value.trim();
+  if (!body || isSendingChatReply.value || !currentCompetition.value || selectedChatTeamId.value === null) return;
+  isSendingChatReply.value = true;
+  try {
+    const msg = await sendChatReply(currentCompetition.value.id, selectedChatTeamId.value, body);
+    const thread = chatThreads.value.find(t => t.teamId === selectedChatTeamId.value);
+    if (thread) thread.messages.push(msg);
+    chatReplyDraft.value = '';
+    scrollChatToBottom();
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isSendingChatReply.value = false;
+  }
+};
+
+const onChatReplyKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    handleSendChatReply();
+  }
+};
+
+const formatChatTime = (iso: string): string => {
+  try {
+    return new Date(iso).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  } catch { return ''; }
+};
+
+onMounted(() => {
+  chatPollTimer = setInterval(loadChatThreads, 20000);
+});
+onBeforeUnmount(() => {
+  if (chatPollTimer) clearInterval(chatPollTimer);
+});
 
 // ── REVEAL 再生 (Song Reveal 連携) ────────────────────
 /**
@@ -2169,6 +2261,101 @@ const statusColor = (s: string) => ({
             公開されるのは「<span class="font-bold">起用公開</span>済みのラインアップ・指定ジャンル・記録済みの結果」のみ。
             未公開の起用や自選曲は伏せられます。誤って共有した場合は「再発行」で旧 URL を無効化できます。
           </p>
+        </section>
+
+        <!-- 運営チャット: TL からの問い合わせ受信・返信 (open 以降) -->
+        <section
+          v-if="currentCompetition.status !== 'draft'"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500 flex items-center gap-2">
+              運営チャット
+              <span
+                v-if="totalChatUnread > 0"
+                class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-rose-500 text-white tracking-normal"
+              >未読 {{ totalChatUnread }}</span>
+            </h2>
+            <button
+              type="button"
+              @click="loadChatThreads"
+              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+            >再読込</button>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            各チームの TL から届いたメッセージに返信できます (TL 送信時はあなたのメールにも通知が届きます)。
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-3">
+            <!-- チーム一覧 -->
+            <div class="space-y-1">
+              <button
+                v-for="th in chatThreads"
+                :key="th.teamId"
+                type="button"
+                @click="handleSelectChatTeam(th.teamId)"
+                class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-left text-sm border transition-colors"
+                :class="selectedChatTeamId === th.teamId
+                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600'
+                  : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'"
+              >
+                <span class="font-bold truncate" :class="teamColorClass(th.teamName)">{{ th.teamName }}</span>
+                <span class="flex items-center gap-1 shrink-0">
+                  <span class="text-[10px] text-slate-400">{{ th.messages.length }}</span>
+                  <span
+                    v-if="th.unreadCount > 0"
+                    class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-rose-500 text-white"
+                  >{{ th.unreadCount }}</span>
+                </span>
+              </button>
+            </div>
+
+            <!-- 選択スレッド -->
+            <div class="flex flex-col rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden min-h-[260px]">
+              <template v-if="selectedThread">
+                <div ref="chatListEl" class="flex-1 overflow-y-auto px-3 py-3 space-y-2 bg-slate-50 dark:bg-slate-900/40 max-h-[360px]">
+                  <p v-if="selectedThread.messages.length === 0" class="text-center text-[11px] text-slate-400 italic py-8">
+                    まだメッセージはありません。
+                  </p>
+                  <div
+                    v-for="m in selectedThread.messages"
+                    :key="m.id"
+                    class="flex flex-col"
+                    :class="m.sender === 'admin' ? 'items-end' : 'items-start'"
+                  >
+                    <span v-if="m.sender === 'tl'" class="text-[9px] font-black tracking-wider text-blue-500 dark:text-blue-300 mb-0.5 px-1">TL</span>
+                    <div
+                      class="max-w-[85%] px-3 py-2 rounded-2xl text-[13px] leading-relaxed whitespace-pre-wrap break-words"
+                      :class="m.sender === 'admin'
+                        ? 'bg-indigo-600 text-white rounded-br-sm'
+                        : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-600 rounded-bl-sm'"
+                    >{{ m.body }}</div>
+                    <span class="text-[9px] text-slate-400 mt-0.5 px-1">{{ formatChatTime(m.createdAt) }}</span>
+                  </div>
+                </div>
+                <div class="p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                  <div class="flex items-end gap-2">
+                    <textarea
+                      v-model="chatReplyDraft"
+                      @keydown="onChatReplyKeydown"
+                      rows="1"
+                      placeholder="返信を入力 (Enterで送信)"
+                      class="flex-1 resize-none max-h-24 px-3 py-2 text-[13px] rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                    ></textarea>
+                    <button
+                      type="button"
+                      @click="handleSendChatReply"
+                      :disabled="isSendingChatReply || !chatReplyDraft.trim()"
+                      class="shrink-0 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
+                    >送信</button>
+                  </div>
+                </div>
+              </template>
+              <p v-else class="m-auto text-[11px] text-slate-400 italic px-4 py-8 text-center">
+                左のチームを選ぶと会話が表示されます。
+              </p>
+            </div>
+          </div>
         </section>
         </template>
         <!-- ────────── /team5 専用セクション群 ────────── -->

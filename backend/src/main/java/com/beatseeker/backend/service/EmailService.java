@@ -365,6 +365,51 @@ public class EmailService {
     }
 
     /**
+     * 【メソッドの役割】 TL から運営チャットに新着メッセージが届いたことを運営へ非同期通知する。
+     *
+     * <p>TL 専用 URL（ログイン不要）から送られるため、本文・チーム名・大会名はユーザー入力由来。
+     * すべて {@link #escapeHtml(String)} を通し、本文の改行のみ {@code <br/>} に変換して表示する。
+     * 送信失敗は stderr ログのみで処理はブロックしない。
+     *
+     * @param toEmail         宛先メールアドレス（運営）
+     * @param competitionName 大会名
+     * @param teamName        送信元チーム名
+     * @param messageBody     メッセージ本文
+     */
+    @Async
+    public void sendTlChatNotification(String toEmail, String competitionName, String teamName, String messageBody) {
+        String safeBody = escapeHtml(messageBody).replace("\n", "<br/>");
+        String html = """
+                <!DOCTYPE html>
+                <html lang="ja">
+                <body style="font-family:sans-serif;background:#f8fafc;padding:32px;">
+                  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
+                    <h2 style="color:#1e293b;margin-top:0;">大会チャットに新着メッセージ</h2>
+                    <p style="color:#475569;margin:4px 0;">大会: <strong>%s</strong></p>
+                    <p style="color:#475569;margin:4px 0;">チーム (TL): <strong>%s</strong></p>
+                    <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0;color:#1e293b;font-size:14px;line-height:1.6;">%s</div>
+                    <p style="color:#94a3b8;font-size:12px;">管理画面の「運営チャット」から返信できます。</p>
+                    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+                    <p style="color:#94a3b8;font-size:11px;">beat-seeker</p>
+                  </div>
+                </body>
+                </html>
+                """.formatted(escapeHtml(competitionName), escapeHtml(teamName), safeBody);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject("[beat-seeker] 大会チャット: " + teamName + " から新着メッセージ");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            System.err.println("Failed to send TL chat notification: " + e.getMessage());
+        }
+    }
+
+    /**
      * HTML メール本文に埋め込む前の XSS 対策用エスケープ。
      * ユーザー入力由来の文字列（タイトル、ユーザー名、難易度等）はすべてこれを通す。
      */

@@ -72,6 +72,7 @@ public class CompetitionAdminController {
     private final CompetitionIndividualMatchSlotRepository individualMatchSlotRepository;
     private final UserRepository userRepository;
     private final OrganizerAuthService organizerAuthService;
+    private final CompetitionChatMessageRepository chatMessageRepository;
 
     public CompetitionAdminController(CompetitionRepository competitionRepository,
                                       CompetitionTeamRepository teamRepository,
@@ -83,7 +84,8 @@ public class CompetitionAdminController {
                                       CompetitionIndividualMatchRepository individualMatchRepository,
                                       CompetitionIndividualMatchSlotRepository individualMatchSlotRepository,
                                       UserRepository userRepository,
-                                      OrganizerAuthService organizerAuthService) {
+                                      OrganizerAuthService organizerAuthService,
+                                      CompetitionChatMessageRepository chatMessageRepository) {
         this.competitionRepository = competitionRepository;
         this.teamRepository = teamRepository;
         this.participantRepository = participantRepository;
@@ -95,6 +97,7 @@ public class CompetitionAdminController {
         this.individualMatchSlotRepository = individualMatchSlotRepository;
         this.userRepository = userRepository;
         this.organizerAuthService = organizerAuthService;
+        this.chatMessageRepository = chatMessageRepository;
     }
 
     /** サポートする大会フォーマット文字列。 */
@@ -856,6 +859,108 @@ public class CompetitionAdminController {
         return ResponseEntity.ok(Map.of("spectatorToken", comp.getSpectatorToken()));
     }
 
+    // ── 運営チャット (TL ⇄ 運営) ──────────────────────────────
+
+    /**
+     * 【メソッドの役割】 大会内の全チームの運営チャットスレッドをまとめて返す。
+     *
+     * <p>レスポンス: {@code [ { teamId, teamName, unreadCount, messages:[{id,sender,body,createdAt}] } ]}。
+     * {@code unreadCount} は当該チームの未読 (sender=tl かつ read_by_admin=false) 件数。
+     */
+    @GetMapping("/{competitionId}/chat")
+    public ResponseEntity<List<Map<String, Object>>> getChatThreads(
+            Authentication auth, @PathVariable Long competitionId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+
+        List<CompetitionTeam> teams = teamRepository.findByCompetitionOrderByTeamOrderAsc(comp);
+        // team_id → メッセージ列 (古い順) を一括ロードして振り分け
+        Map<Long, List<CompetitionChatMessage>> byTeam = new LinkedHashMap<>();
+        for (CompetitionTeam t : teams) byTeam.put(t.getId(), new ArrayList<>());
+        for (CompetitionChatMessage m : chatMessageRepository.findByTeam_CompetitionOrderByCreatedAtAsc(comp)) {
+            List<CompetitionChatMessage> list = byTeam.get(m.getTeam().getId());
+            if (list != null) list.add(m);
+        }
+
+        List<Map<String, Object>> threads = new ArrayList<>();
+        for (CompetitionTeam t : teams) {
+            List<CompetitionChatMessage> msgs = byTeam.getOrDefault(t.getId(), List.of());
+            int unread = 0;
+            List<Map<String, Object>> msgMaps = new ArrayList<>();
+            for (CompetitionChatMessage m : msgs) {
+                msgMaps.add(CompetitionTlController.chatMap(m));
+                if ("tl".equals(m.getSender()) && !m.isReadByAdmin()) unread++;
+            }
+            Map<String, Object> thread = new LinkedHashMap<>();
+            thread.put("teamId", t.getId());
+            thread.put("teamName", t.getTeamName());
+            thread.put("unreadCount", unread);
+            thread.put("messages", msgMaps);
+            threads.add(thread);
+        }
+        return ResponseEntity.ok(threads);
+    }
+
+    /**
+     * 【メソッドの役割】 運営から指定チームの TL へ返信を送信する (sender="admin")。
+     */
+    @PostMapping("/{competitionId}/teams/{teamId}/chat")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> postChatReply(
+            Authentication auth,
+            @PathVariable Long competitionId,
+            @PathVariable Long teamId,
+            @RequestBody ChatReplyRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        CompetitionTeam team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found: " + teamId));
+        if (!team.getCompetition().getId().equals(comp.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "指定チームはこの大会に属していません"));
+        }
+        if (req == null || req.body() == null || req.body().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "メッセージを入力してください"));
+        }
+        String body = req.body().trim();
+        if (body.length() > 2000) body = body.substring(0, 2000);
+
+        CompetitionChatMessage m = new CompetitionChatMessage();
+        m.setTeam(team);
+        m.setSender("admin");
+        m.setBody(body);
+        m.setReadByAdmin(true);
+        m = chatMessageRepository.save(m);
+        return ResponseEntity.ok(CompetitionTlController.chatMap(m));
+    }
+
+    /**
+     * 【メソッドの役割】 指定チームの TL 発メッセージをすべて既読 (read_by_admin=true) にする。
+     * 管理画面でそのスレッドを開いたときに呼ぶ想定 (未読バッジのクリア用)。
+     */
+    @PostMapping("/{competitionId}/teams/{teamId}/chat/mark-read")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> markChatRead(
+            Authentication auth,
+            @PathVariable Long competitionId,
+            @PathVariable Long teamId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        CompetitionTeam team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("Team not found: " + teamId));
+        if (!team.getCompetition().getId().equals(comp.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "指定チームはこの大会に属していません"));
+        }
+        int updated = 0;
+        for (CompetitionChatMessage m : chatMessageRepository.findByTeamOrderByCreatedAtAsc(team)) {
+            if ("tl".equals(m.getSender()) && !m.isReadByAdmin()) {
+                m.setReadByAdmin(true);
+                chatMessageRepository.save(m);
+                updated++;
+            }
+        }
+        return ResponseEntity.ok(Map.of("markedRead", updated));
+    }
+
     /**
      * 【メソッドの役割】 起用クローズ日時 ({@code deadlineAt}) を設定/解除する。
      *
@@ -1454,6 +1559,11 @@ public class CompetitionAdminController {
      * 空文字 / null で締切解除。
      */
     public record DeadlineRequest(String deadlineAt) {}
+
+    /**
+     * 運営チャット返信リクエスト。{@code body} が本文。
+     */
+    public record ChatReplyRequest(String body) {}
 
     /**
      * 試合結果記録リクエスト (R-4: スコア入力で勝敗自動判定)。
