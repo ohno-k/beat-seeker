@@ -232,7 +232,7 @@ const commitAddParticipant = async () => {
   }
 };
 
-// ── 参加者編集 (TL 昇格 / 削除) ───────────────────────────
+// ── 参加者編集 (DJ NAME 変更 / TL 昇格 / 削除) ────────────
 const handleToggleTl = async (p: CompetitionParticipantDto) => {
   if (!currentCompetition.value) return;
   try {
@@ -240,6 +240,34 @@ const handleToggleTl = async (p: CompetitionParticipantDto) => {
     toast.success(p.isTl ? 'TL を解除しました' : 'TL に設定しました');
   } catch (e) {
     toast.error((e as Error).message);
+  }
+};
+
+/** team5 参加者の表示名 (DJ NAME) を inline 編集。1 人だけ編集状態にできる。 */
+const editingMemberId = ref<number | null>(null);
+const editingMemberName = ref('');
+const beginEditMember = (p: CompetitionParticipantDto) => {
+  editingMemberId.value = p.id;
+  editingMemberName.value = p.displayName;
+};
+const cancelEditMember = () => {
+  editingMemberId.value = null;
+  editingMemberName.value = '';
+};
+const commitEditMember = async (p: CompetitionParticipantDto) => {
+  if (!currentCompetition.value) return;
+  const name = editingMemberName.value.trim();
+  if (!name || name === p.displayName) {
+    cancelEditMember();
+    return;
+  }
+  try {
+    await updateParticipant(currentCompetition.value.id, p.id, { displayName: name });
+    toast.success('DJ NAME を変更しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    cancelEditMember();
   }
 };
 
@@ -1550,8 +1578,36 @@ const statusColor = (s: string) => ({
               >
                 <div class="flex items-center gap-2">
                   <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-1.5">
+                    <!-- DJ NAME 編集中 -->
+                    <div v-if="editingMemberId === m.id" class="flex items-center gap-1.5">
+                      <input
+                        v-model="editingMemberName"
+                        type="text"
+                        maxlength="50"
+                        @keyup.enter="commitEditMember(m)"
+                        @keyup.esc="cancelEditMember"
+                        class="flex-1 min-w-0 px-2 py-1 text-sm font-bold rounded-lg bg-white dark:bg-slate-900 border border-blue-400 outline-none"
+                      />
+                      <button
+                        type="button"
+                        @click="commitEditMember(m)"
+                        class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-blue-600 text-white hover:bg-blue-700"
+                      >保存</button>
+                      <button
+                        type="button"
+                        @click="cancelEditMember"
+                        class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600"
+                      >取消</button>
+                    </div>
+                    <!-- 通常表示 -->
+                    <div v-else class="flex items-center gap-1.5">
                       <p class="font-bold truncate">{{ m.displayName }}</p>
+                      <button
+                        type="button"
+                        @click="beginEditMember(m)"
+                        class="shrink-0 text-slate-400 hover:text-blue-500 dark:hover:text-blue-300"
+                        title="DJ NAME を変更"
+                      >✎</button>
                       <span
                         v-if="m.isTl"
                         class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider"
