@@ -47,6 +47,42 @@ const STATUS_LABEL: Record<string, string> = {
 };
 const statusLabel = (s: string) => STATUS_LABEL[s] ?? s;
 
+/**
+ * チーム名 → 文字色クラス。チーム名は主催が自由に付けるため、識別キーの部分一致 (大文字小文字無視) で判定する。
+ * Tailwind の purge を避けるため、クラスは完全なリテラル文字列で保持する。
+ *  テクノワールド→水色 / ADX MAMY→紺(青) / Fantasista→うすだいだい / G-STAGE→ピンク / CYGameWorld→オレンジ
+ */
+const TEAM_COLOR_RULES: { match: string; cls: string }[] = [
+  { match: 'テクノ', cls: 'text-sky-500 dark:text-sky-300' },          // テクノワールド → 水色
+  { match: 'mamy', cls: 'text-blue-800 dark:text-blue-300' },          // ADX MAMY → 紺 (青)
+  { match: 'fantasista', cls: 'text-orange-400 dark:text-orange-200' }, // Fantasista → うすだいだい
+  { match: 'g-stage', cls: 'text-pink-500 dark:text-pink-300' },       // G-STAGE → ピンク
+  { match: 'cygame', cls: 'text-orange-600 dark:text-orange-400' },    // CYGameWorld → オレンジ
+];
+const teamColorClass = (name?: string | null): string => {
+  if (!name) return 'text-slate-700 dark:text-slate-200';
+  const lower = name.toLowerCase();
+  const rule = TEAM_COLOR_RULES.find(r => lower.includes(r.match.toLowerCase()));
+  return rule ? rule.cls : 'text-slate-700 dark:text-slate-200';
+};
+
+/**
+ * 指定ジャンル → バッジ色クラス (bg + text)。完全リテラルで保持し purge を避ける。
+ *  NOTES→ピンク / PEAK→オレンジ / CHORD→黄緑 / CHARGE→紫 / SCRATCH→赤 / SOF-LAN→青
+ * INSANE は指定が無いため中立色。
+ */
+const GENRE_BADGE: Record<string, string> = {
+  NOTES: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
+  PEAK: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  CHORD: 'bg-lime-100 text-lime-700 dark:bg-lime-900/40 dark:text-lime-300',
+  CHARGE: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  SCRATCH: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  'SOF-LAN': 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  INSANE: 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
+};
+const genreBadgeClass = (g?: string | null): string =>
+  (g ? GENRE_BADGE[g] : undefined) ?? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300';
+
 /** 設定済み matchup を matchupOrder 昇順で (サーバ側で既に整列済みだが念のため)。 */
 const sortedMatchups = computed(() => {
   if (!view.value) return [];
@@ -111,9 +147,9 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
           <!-- matchup ヘッダ -->
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm flex items-center gap-2 flex-wrap">
-              <span>{{ mu.teamA?.teamName ?? '?' }}</span>
+              <span :class="teamColorClass(mu.teamA?.teamName)">{{ mu.teamA?.teamName ?? '?' }}</span>
               <span class="text-slate-400 font-mono text-xs">vs</span>
-              <span class="text-blue-600 dark:text-blue-400">{{ mu.teamB?.teamName ?? '?' }}</span>
+              <span :class="teamColorClass(mu.teamB?.teamName)">{{ mu.teamB?.teamName ?? '?' }}</span>
             </p>
             <p class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
               {{ mu.isFinals ? 'FINALS' : '第 ' + mu.matchupOrder + ' 試合' }}
@@ -132,7 +168,8 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
                 <p class="text-[10px] font-mono text-slate-400">{{ KIND_LV[match.matchKind] }}</p>
                 <span
                   v-if="match.requiredGenre"
-                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
+                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider"
+                  :class="genreBadgeClass(match.requiredGenre)"
                 >
                   指定 {{ match.requiredGenre }}
                 </span>
@@ -146,7 +183,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
 
               <!-- A 側 -->
               <div>
-                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">
+                <p class="text-[10px] font-mono uppercase tracking-wider mb-1 font-bold" :class="teamColorClass(mu.teamA?.teamName)">
                   {{ mu.teamA?.teamName ?? 'A 側' }}
                 </p>
                 <p
@@ -166,7 +203,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
 
               <!-- B 側 -->
               <div>
-                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">
+                <p class="text-[10px] font-mono uppercase tracking-wider mb-1 font-bold" :class="teamColorClass(mu.teamB?.teamName)">
                   {{ mu.teamB?.teamName ?? 'B 側' }}
                 </p>
                 <p
