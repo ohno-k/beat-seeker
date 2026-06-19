@@ -339,6 +339,48 @@ const teamNameOf = (teamId: number | null): string => {
   return currentCompetition.value.teams.find(t => t.id === teamId)?.teamName ?? '?';
 };
 
+/**
+ * チーム名 → 文字色クラス (観戦ページと共通の配色)。識別キーの部分一致 (大文字小文字無視) で判定。
+ * Tailwind の purge を避けるためクラスは完全リテラルで保持する。
+ *  テクノワールド→水色 / ADX MAMY→紺(青) / Fantasista→うすだいだい / G-STAGE→ピンク / CYGameWorld→オレンジ
+ */
+const TEAM_COLOR_RULES: { match: string; cls: string }[] = [
+  { match: 'テクノ', cls: 'text-sky-500 dark:text-sky-300' },          // テクノワールド → 水色
+  { match: 'mamy', cls: 'text-blue-800 dark:text-blue-300' },          // ADX MAMY → 紺 (青)
+  { match: 'fantasista', cls: 'text-orange-400 dark:text-orange-200' }, // Fantasista → うすだいだい
+  { match: 'g-stage', cls: 'text-pink-500 dark:text-pink-300' },       // G-STAGE → ピンク
+  { match: 'cygame', cls: 'text-orange-600 dark:text-orange-400' },    // CYGameWorld → オレンジ
+];
+const DEFAULT_TEAM_CLS = 'text-slate-600 dark:text-slate-300';
+/** チーム名文字列から色クラスを引く。 */
+const teamColorClass = (name?: string | null): string => {
+  if (!name) return DEFAULT_TEAM_CLS;
+  const lower = name.toLowerCase();
+  const rule = TEAM_COLOR_RULES.find(r => lower.includes(r.match.toLowerCase()));
+  return rule ? rule.cls : DEFAULT_TEAM_CLS;
+};
+/** チーム ID から色クラスを引く (matchup は teamId しか持たないため)。 */
+const teamColorClassById = (teamId: number | null): string => teamColorClass(teamNameOf(teamId));
+
+/**
+ * 指定ジャンル → セレクタ用の文字色 + 枠線色クラス (観戦ページと共通の配色)。完全リテラルで保持。
+ *  NOTES→ピンク / PEAK→オレンジ / CHORD→黄緑 / CHARGE→紫 / SCRATCH→赤 / SOF-LAN→青 / INSANE→中立
+ */
+const GENRE_SELECT_COLOR: Record<string, string> = {
+  NOTES: 'text-pink-600 dark:text-pink-300 border-pink-300 dark:border-pink-700',
+  PEAK: 'text-orange-600 dark:text-orange-300 border-orange-300 dark:border-orange-700',
+  CHORD: 'text-lime-600 dark:text-lime-300 border-lime-300 dark:border-lime-700',
+  CHARGE: 'text-purple-600 dark:text-purple-300 border-purple-300 dark:border-purple-700',
+  SCRATCH: 'text-red-600 dark:text-red-300 border-red-300 dark:border-red-700',
+  'SOF-LAN': 'text-blue-600 dark:text-blue-300 border-blue-300 dark:border-blue-700',
+  INSANE: 'text-slate-600 dark:text-slate-300 border-slate-400 dark:border-slate-500',
+};
+/** ジャンルセレクタの色クラス。未指定時は標準の枠線色。 */
+const genreSelectClass = (g?: string | null): string =>
+  (g ? GENRE_SELECT_COLOR[g] : undefined)
+    ? `${GENRE_SELECT_COLOR[g as string]} font-bold`
+    : 'border-slate-300 dark:border-slate-600';
+
 /** 参加者 ID → 表示名。matchup でアサイン済みプレイヤー表示に使う。 */
 const participantNameOf = (participantId: number | null): string => {
   if (!currentCompetition.value || participantId === null) return '未割当';
@@ -1371,7 +1413,7 @@ const statusColor = (s: string) => ({
                 <button type="button" @click="cancelRenameTeam" class="text-xs text-slate-500">×</button>
               </div>
               <div v-else class="flex items-center gap-2">
-                <p class="flex-1 font-bold truncate">{{ team.teamName }}</p>
+                <p class="flex-1 font-bold truncate" :class="teamColorClass(team.teamName)">{{ team.teamName }}</p>
                 <button
                   v-if="currentCompetition.status === 'draft'"
                   type="button"
@@ -1536,7 +1578,7 @@ const statusColor = (s: string) => ({
                   <span v-else-if="row.rank === 2">🥈</span>
                   <span v-else>{{ row.rank }}</span>
                 </td>
-                <td class="py-1.5 px-2 truncate">{{ row.teamName }}</td>
+                <td class="py-1.5 px-2 truncate font-bold" :class="teamColorClass(row.teamName)">{{ row.teamName }}</td>
                 <td class="py-1.5 px-2 text-right tabular-nums text-emerald-600 dark:text-emerald-300">{{ row.wins }}</td>
                 <td class="py-1.5 px-2 text-right tabular-nums text-slate-500">{{ row.draws }}</td>
                 <td class="py-1.5 px-2 text-right tabular-nums text-rose-500 dark:text-rose-400">{{ row.losses }}</td>
@@ -1584,7 +1626,8 @@ const statusColor = (s: string) => ({
                   <th
                     v-for="colTeam in currentCompetition.teams"
                     :key="colTeam.id"
-                    class="py-2 px-3 text-[10px] font-mono uppercase text-slate-400 border-b border-slate-200 dark:border-slate-700 text-center min-w-[90px]"
+                    class="py-2 px-3 text-[10px] font-mono uppercase border-b border-slate-200 dark:border-slate-700 text-center min-w-[90px]"
+                    :class="teamColorClass(colTeam.teamName)"
                   >
                     {{ colTeam.teamName }}
                   </th>
@@ -1599,7 +1642,7 @@ const statusColor = (s: string) => ({
                   :key="rowTeam.id"
                   class="border-b border-slate-100 dark:border-slate-700/60"
                 >
-                  <th class="py-2 px-3 text-left text-xs font-bold whitespace-nowrap">
+                  <th class="py-2 px-3 text-left text-xs font-bold whitespace-nowrap" :class="teamColorClass(rowTeam.teamName)">
                     {{ rowTeam.teamName }}
                   </th>
                   <td
@@ -1674,9 +1717,9 @@ const statusColor = (s: string) => ({
                 class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
               >
                 <p class="font-bold text-sm truncate">
-                  <span class="text-slate-600 dark:text-slate-300">{{ teamNameOf(mu.teamAId) }}</span>
+                  <span :class="teamColorClassById(mu.teamAId)">{{ teamNameOf(mu.teamAId) }}</span>
                   <span class="text-slate-400 mx-1.5">vs</span>
-                  <span class="text-slate-600 dark:text-slate-300">{{ teamNameOf(mu.teamBId) }}</span>
+                  <span :class="teamColorClassById(mu.teamBId)">{{ teamNameOf(mu.teamBId) }}</span>
                 </p>
                 <button
                   type="button"
@@ -1702,16 +1745,16 @@ const statusColor = (s: string) => ({
             <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 space-y-2">
               <div class="flex items-center justify-between flex-wrap gap-2">
                 <p class="font-bold text-sm">
-                  <span class="text-blue-600 dark:text-blue-400">{{ teamNameOf(mu.teamAId) }}</span>
+                  <span :class="teamColorClassById(mu.teamAId)">{{ teamNameOf(mu.teamAId) }}</span>
                   <span class="text-slate-400 mx-2">vs</span>
-                  <span class="text-blue-600 dark:text-blue-400">{{ teamNameOf(mu.teamBId) }}</span>
+                  <span :class="teamColorClassById(mu.teamBId)">{{ teamNameOf(mu.teamBId) }}</span>
                   <span v-if="mu.isFinals" class="ml-2 text-[10px] font-black px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-rose-500 text-white tracking-wider">
                     🏆 FINALS
                   </span>
                 </p>
                 <div class="flex items-center gap-2">
                   <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
-                    {{ mu.isFinals ? 'FINALS' : '第 ' + mu.matchupOrder + ' 試合' }}
+                    {{ mu.isFinals ? 'FINALS' : '予選第 ' + mu.matchupOrder + ' 試合' }}
                   </p>
                   <button
                     v-if="!mu.isFinals"
@@ -1775,7 +1818,7 @@ const statusColor = (s: string) => ({
 
                   <!-- A 側プレイヤー -->
                   <div class="text-xs">
-                    <p class="text-[10px] font-mono text-slate-400 uppercase">A 側 ({{ teamNameOf(mu.teamAId) }})</p>
+                    <p class="text-[10px] font-mono text-slate-400 uppercase">A 側 (<span :class="teamColorClassById(mu.teamAId)">{{ teamNameOf(mu.teamAId) }}</span>)</p>
                     <p class="font-bold truncate" :class="match.playerAId ? '' : 'italic text-slate-400'">
                       {{ participantNameOf(match.playerAId) }}
                     </p>
@@ -1783,7 +1826,7 @@ const statusColor = (s: string) => ({
 
                   <!-- B 側プレイヤー -->
                   <div class="text-xs">
-                    <p class="text-[10px] font-mono text-slate-400 uppercase">B 側 ({{ teamNameOf(mu.teamBId) }})</p>
+                    <p class="text-[10px] font-mono text-slate-400 uppercase">B 側 (<span :class="teamColorClassById(mu.teamBId)">{{ teamNameOf(mu.teamBId) }}</span>)</p>
                     <p class="font-bold truncate" :class="match.playerBId ? '' : 'italic text-slate-400'">
                       {{ participantNameOf(match.playerBId) }}
                     </p>
@@ -1797,9 +1840,7 @@ const statusColor = (s: string) => ({
                       @change="handleGenreChange(match, ($event.target as HTMLSelectElement).value)"
                       :disabled="currentCompetition.status === 'finished'"
                       class="w-full px-2 py-1.5 rounded-lg text-sm bg-white dark:bg-slate-800 border outline-none focus:border-blue-400 disabled:opacity-50"
-                      :class="match.requiredGenre
-                        ? 'border-emerald-300 dark:border-emerald-700'
-                        : 'border-slate-300 dark:border-slate-600'"
+                      :class="genreSelectClass(match.requiredGenre)"
                     >
                       <option value="">未指定</option>
                       <option v-for="g in genresForKind(match.matchKind)" :key="g" :value="g">{{ g }}</option>

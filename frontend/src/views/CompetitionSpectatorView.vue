@@ -152,7 +152,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
               <span :class="teamColorClass(mu.teamB?.teamName)">{{ mu.teamB?.teamName ?? '?' }}</span>
             </p>
             <p class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
-              {{ mu.isFinals ? 'FINALS' : '第 ' + mu.matchupOrder + ' 試合' }}
+              {{ mu.isFinals ? 'FINALS' : '予選第 ' + mu.matchupOrder + ' 試合' }}
             </p>
           </div>
 
