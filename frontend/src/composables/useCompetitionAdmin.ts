@@ -31,6 +31,8 @@ export interface CompetitionSummary {
   createdById: number | null;
   /** OBS ブラウザソース公開トークン。発行前は null。 */
   obsToken: string | null;
+  /** 観戦客向け対戦表公開トークン (team5 用)。発行前は null。 */
+  spectatorToken: string | null;
 }
 
 export interface CompetitionTeamDto {
@@ -798,6 +800,18 @@ export function useCompetitionAdmin() {
     return data.obsToken as string;
   };
 
+  /** 観戦客向け対戦表公開トークンを発行/再発行する (team5 用)。 */
+  const regenerateSpectatorToken = async (competitionId: number): Promise<string> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/regenerate-spectator-token`,
+      { method: 'POST', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    const data = await res.json();
+    await fetchCompetition(competitionId);
+    return data.spectatorToken as string;
+  };
+
   return {
     competitions,
     currentCompetition,
@@ -836,5 +850,7 @@ export function useCompetitionAdmin() {
     openIndividualWithNumbers,
     assignIndividualLottery,
     regenerateObsToken,
+    // team5 観戦公開用
+    regenerateSpectatorToken,
   };
 }

@@ -78,4 +78,13 @@ public class Competition {
      */
     @Column(name = "obs_token", length = 64, unique = true)
     private String obsToken;
+
+    /**
+     * 観戦客向け対戦表公開用トークン (team5 用)。NULL の間は観戦公開エンドポイントから到達不可。
+     * 管理画面の「観戦用 URL 発行」で UUID を生成する。誤公開時はトークン再採番で旧 URL を無効化できる。
+     * 公開される内容は「起用公開済みのラインアップ・指定ジャンル・記録済みの結果」に限定される
+     * (未公開の起用や自選曲は伏せられ、staged reveal を壊さない)。
+     */
+    @Column(name = "spectator_token", length = 64, unique = true)
+    private String spectatorToken;
 }

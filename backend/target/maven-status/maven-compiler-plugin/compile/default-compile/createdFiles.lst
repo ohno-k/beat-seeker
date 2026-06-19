@@ -131,6 +131,7 @@ com\beatseeker\backend\repository\CompetitionParticipantRepository.class
 com\beatseeker\backend\entity\ExternalApiToken.class
 com\beatseeker\backend\controller\ExternalSongDetailController$1.class
 com\beatseeker\backend\controller\FriendController.class
+com\beatseeker\backend\controller\CompetitionSpectatorController.class
 com\beatseeker\backend\controller\ExternalSongDetailController$2.class
 com\beatseeker\backend\service\PairRegressionService$Acc.class
 com\beatseeker\backend\service\SongRankBatchService.class

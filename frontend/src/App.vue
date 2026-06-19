@@ -86,6 +86,9 @@ const CompetitionPlayerView = defineAsyncComponent(() => import('./views/Competi
 // 大会 TL (チームリーダー) 管理画面: `/competition/tl/{token}` で直接アクセス。
 // 自チームのラインアップ (4 matchup × 3 試合 = 12 試合) のアサインを編集する。
 const CompetitionTlView = defineAsyncComponent(() => import('./views/CompetitionTlView.vue'));
+// 観戦客向け対戦表: `/competition/spectator/{token}` で直接アクセス。
+// ログイン不要・読み取り専用。公開済みのラインアップ・指定ジャンル・結果だけを一覧表示する。
+const CompetitionSpectatorView = defineAsyncComponent(() => import('./views/CompetitionSpectatorView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
@@ -177,6 +180,17 @@ const isCompetitionTlPage = ref(window.location.pathname.startsWith('/competitio
 const competitionTlToken = ref<string>(
   isCompetitionTlPage.value
     ? (window.location.pathname.replace(/^\/competition\/tl\//, '').replace(/\/.*$/, '') || '')
+    : ''
+);
+
+/**
+ * 現在 URL が `/competition/spectator/{token}` かどうかと、抽出した観戦トークン。
+ * 一般観戦客がログイン不要で対戦表 (読み取り専用) を閲覧するスタンドアロン画面。
+ */
+const isCompetitionSpectatorPage = ref(window.location.pathname.startsWith('/competition/spectator/'));
+const competitionSpectatorToken = ref<string>(
+  isCompetitionSpectatorPage.value
+    ? (window.location.pathname.replace(/^\/competition\/spectator\//, '').replace(/\/.*$/, '') || '')
     : ''
 );
 
@@ -1509,6 +1523,8 @@ const handleUnifiedClose = async () => {
   <CompetitionPlayerView v-else-if="isCompetitionPlayerPage" :token="competitionPlayerToken" />
   <!-- 大会 TL 管理ページ: token を抽出してラインアップ管理 View を表示。ログイン不要のスタンドアロン。 -->
   <CompetitionTlView v-else-if="isCompetitionTlPage" :token="competitionTlToken" />
+  <!-- 観戦客向け対戦表ページ: token を抽出して読み取り専用 View を表示。ログイン不要のスタンドアロン。 -->
+  <CompetitionSpectatorView v-else-if="isCompetitionSpectatorPage" :token="competitionSpectatorToken" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
     <!-- ============================================================ -->
     <!-- エイプリルフール限定オーバーレイ（常時マウントだが中身は日付判定） -->

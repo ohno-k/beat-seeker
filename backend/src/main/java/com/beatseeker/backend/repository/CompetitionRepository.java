@@ -30,4 +30,12 @@ public interface CompetitionRepository extends JpaRepository<Competition, Long> 
      * @return 一致する大会 (発行済かつ未失効)。一致しない場合は空。
      */
     Optional<Competition> findByObsToken(String obsToken);
+
+    /**
+     * 【メソッドの役割】 観戦客向け対戦表公開トークンで大会 1 件を引く。
+     *
+     * @param spectatorToken {@code regenerate-spectator-token} で発行された 32 桁の UUID
+     * @return 一致する大会 (発行済かつ未失効)。一致しない場合は空。
+     */
+    Optional<Competition> findBySpectatorToken(String spectatorToken);
 }

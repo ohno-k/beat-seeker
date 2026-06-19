@@ -838,6 +838,24 @@ public class CompetitionAdminController {
         return ResponseEntity.ok(toTeamMap(team));
     }
 
+    /**
+     * 【メソッドの役割】 観戦客向け対戦表公開トークンを発行/再採番する (team5 用)。
+     *
+     * <p>1 トークンで誰でも対戦表 (起用公開済みラインアップ・指定ジャンル・記録済み結果) を閲覧できる。
+     * 誤公開時はこのエンドポイントを再実行すると新トークンが採番され旧 URL は即無効になる。
+     * 公開ページの実体は {@code /api/competition-access/spectator/{token}} (認証不要)。
+     */
+    @PostMapping("/{competitionId}/regenerate-spectator-token")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> regenerateSpectatorToken(
+            Authentication auth, @PathVariable Long competitionId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        comp.setSpectatorToken(newToken());
+        competitionRepository.save(comp);
+        return ResponseEntity.ok(Map.of("spectatorToken", comp.getSpectatorToken()));
+    }
+
     // ── 状態遷移 ─────────────────────────────────────────────
 
     /**
@@ -1208,6 +1226,7 @@ public class CompetitionAdminController {
         m.put("lockedAt", c.getLockedAt());
         m.put("createdById", c.getCreatedBy() != null ? c.getCreatedBy().getId() : null);
         m.put("obsToken", c.getObsToken());
+        m.put("spectatorToken", c.getSpectatorToken());
         return m;
     }
 

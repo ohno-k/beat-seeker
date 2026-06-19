@@ -72,6 +72,7 @@ const {
   openIndividualWithNumbers,
   assignIndividualLottery,
   regenerateObsToken,
+  regenerateSpectatorToken,
 } = useCompetitionAdmin();
 
 /** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
@@ -857,6 +858,30 @@ const handleGenerateObsToken = async () => {
     toast.error((e as Error).message);
   } finally {
     isGeneratingObsToken.value = false;
+  }
+};
+
+// ── 観戦用 対戦表 URL (team5) ───────────────────────────
+/** 発行済みなら観戦客向け対戦表の完全 URL。未発行なら空文字。 */
+const spectatorUrl = computed<string>(() => {
+  const token = currentCompetition.value?.spectatorToken;
+  if (!token) return '';
+  return `${window.location.origin}/competition/spectator/${token}`;
+});
+
+const isGeneratingSpectatorToken = ref(false);
+const handleGenerateSpectatorToken = async () => {
+  if (!currentCompetition.value) return;
+  if (currentCompetition.value.spectatorToken
+      && !confirm('観戦用 URL を再発行しますか?\n旧 URL は無効になります。')) return;
+  isGeneratingSpectatorToken.value = true;
+  try {
+    await regenerateSpectatorToken(currentCompetition.value.id);
+    toast.success('観戦用 URL を発行しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isGeneratingSpectatorToken.value = false;
   }
 };
 
@@ -1981,6 +2006,52 @@ const statusColor = (s: string) => ({
               </li>
             </ul>
           </div>
+        </section>
+
+        <!-- 観戦用 対戦表 URL: open 以降。ログイン不要で対戦表を一覧公開する。 -->
+        <section
+          v-if="currentCompetition.status !== 'draft'"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-black tracking-[0.3em] uppercase text-slate-500">
+              観戦用 対戦表 URL
+            </h2>
+            <p class="text-[11px] text-slate-500">
+              一般の観戦客がログイン不要で対戦表を閲覧できる公開 URL。
+            </p>
+          </div>
+          <div v-if="spectatorUrl" class="flex items-center gap-2">
+            <input
+              :value="spectatorUrl"
+              readonly
+              class="flex-1 min-w-0 px-3 py-2 text-xs font-mono rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600"
+            />
+            <button
+              type="button"
+              @click="copyToClipboard(spectatorUrl, '観戦用 URL')"
+              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+            >コピー</button>
+            <button
+              type="button"
+              @click="handleGenerateSpectatorToken"
+              :disabled="isGeneratingSpectatorToken"
+              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+            >再発行</button>
+          </div>
+          <div v-else class="flex items-center justify-between gap-2">
+            <p class="text-[11px] text-slate-500">まだ発行されていません。</p>
+            <button
+              type="button"
+              @click="handleGenerateSpectatorToken"
+              :disabled="isGeneratingSpectatorToken"
+              class="px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600"
+            >▶ 観戦用 URL を発行</button>
+          </div>
+          <p class="text-[10px] text-slate-400">
+            公開されるのは「<span class="font-bold">起用公開</span>済みのラインアップ・指定ジャンル・記録済みの結果」のみ。
+            未公開の起用や自選曲は伏せられます。誤って共有した場合は「再発行」で旧 URL を無効化できます。
+          </p>
         </section>
         </template>
         <!-- ────────── /team5 専用セクション群 ────────── -->
