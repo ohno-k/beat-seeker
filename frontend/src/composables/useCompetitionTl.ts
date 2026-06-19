@@ -57,6 +57,10 @@ export interface TlMatchDto {
   opponentLocked: boolean;
   myAssigned: TlAssignedMineDto | null;
   opponentAssigned: TlAssignedOpponentDto | null;
+  /** 自軍がこの試合で StrategyCard 発動予定か。 */
+  myStrategyEnabled: boolean;
+  /** いま発動可否を決定できるか (起用ロック + 相手起用公開 + 両者アサイン済 で true)。 */
+  strategyDecidable: boolean;
 }
 
 
@@ -82,6 +86,10 @@ export interface TlViewDto {
   initialCost: number;
   /** matchKind → 1 戦あたりの消費コスト。 */
   costPerKind: Record<MatchKind, number>;
+  /** StrategyCard を予選で使える matchup 数の上限 (チーム単位)。 */
+  strategyLimit: number;
+  /** 自チームが現在 StrategyCard 発動予定にしている予選 matchup 数。 */
+  strategyUsedMatchupCount: number;
 }
 
 /** 運営チャット 1 メッセージ。sender = 'tl' (自分) / 'admin' (運営)。 */
@@ -132,6 +140,19 @@ export function useCompetitionTl() {
 
   const unassign = (token: string, matchId: number) => assign(token, matchId, null);
 
+  /**
+   * StrategyCard 発動予定を ON/OFF する (起用ロック&相手起用公開後にのみ可)。
+   * サーバ側で上限・ゲートを検証。成功後は再 fetch で同期する。
+   */
+  const setStrategy = async (token: string, matchId: number, enabled: boolean): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competition-access/tl/${token}/match/${matchId}/strategy`,
+      { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) },
+    );
+    await throwIfError(res);
+    await fetchView(token);
+  };
+
   // ── 運営チャット ─────────────────────────────────────────
   /** 自チームスレッドのチャット履歴を取得 (古い順)。 */
   const fetchChat = async (token: string): Promise<ChatMessageDto[]> => {
@@ -151,5 +172,5 @@ export function useCompetitionTl() {
     return (await res.json()) as ChatMessageDto;
   };
 
-  return { view, isLoading, fetchView, assign, unassign, fetchChat, sendChat };
+  return { view, isLoading, fetchView, assign, unassign, setStrategy, fetchChat, sendChat };
 }

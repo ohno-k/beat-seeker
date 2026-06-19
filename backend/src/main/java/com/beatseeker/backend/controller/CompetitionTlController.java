@@ -45,12 +45,15 @@ public class CompetitionTlController {
             "middle", 20,
             "captain", 30
     );
+    /** 1 チームが予選で StrategyCard を使える matchup 数の上限 (決勝は対象外)。 */
+    public static final int STRATEGY_MATCHUP_LIMIT_PER_TEAM = 2;
 
     private final CompetitionTeamRepository teamRepository;
     private final CompetitionParticipantRepository participantRepository;
     private final CompetitionMatchupRepository matchupRepository;
     private final CompetitionMatchRepository matchRepository;
     private final CompetitionPickRepository pickRepository;
+    private final CompetitionStrategyUseRepository strategyUseRepository;
     private final CompetitionChatMessageRepository chatRepository;
     private final UserRepository userRepository;
     private final AdminAuthService adminAuthService;
@@ -61,6 +64,7 @@ public class CompetitionTlController {
                                    CompetitionMatchupRepository matchupRepository,
                                    CompetitionMatchRepository matchRepository,
                                    CompetitionPickRepository pickRepository,
+                                   CompetitionStrategyUseRepository strategyUseRepository,
                                    CompetitionChatMessageRepository chatRepository,
                                    UserRepository userRepository,
                                    AdminAuthService adminAuthService,
@@ -70,6 +74,7 @@ public class CompetitionTlController {
         this.matchupRepository = matchupRepository;
         this.matchRepository = matchRepository;
         this.pickRepository = pickRepository;
+        this.strategyUseRepository = strategyUseRepository;
         this.chatRepository = chatRepository;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
@@ -136,6 +141,21 @@ public class CompetitionTlController {
         root.put("initialCost", INITIAL_COST);
         root.put("costPerKind", COST_PER_KIND);
 
+        // StrategyCard: 自チームが現在 enabled にしている予選 matchup の集合 (上限判定/表示用)。決勝は対象外。
+        Set<Long> myEnabledPrelimMatchupIds = new HashSet<>();
+        for (CompetitionStrategyUse su : strategyUseRepository.findAllByCompetition(comp)) {
+            if (!Boolean.TRUE.equals(su.getEnabled())) continue;
+            CompetitionParticipant user = su.getUsedByParticipant();
+            if (user == null || user.getTeam() == null || !myTeam.getId().equals(user.getTeam().getId())) continue;
+            CompetitionMatchup mu2 = su.getMatch().getMatchup();
+            if (Boolean.TRUE.equals(mu2.getIsFinals())) continue;
+            myEnabledPrelimMatchupIds.add(mu2.getId());
+        }
+        root.put("strategyLimit", STRATEGY_MATCHUP_LIMIT_PER_TEAM);
+        root.put("strategyUsedMatchupCount", myEnabledPrelimMatchupIds.size());
+
+        boolean compFinished = "finished".equals(comp.getStatus());
+
         // 自チームが関与する matchup を 4 件抽出
         List<CompetitionMatchup> allMatchups =
                 matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp);
@@ -191,6 +211,16 @@ public class CompetitionTlController {
                 // 相手の起用名は「相手チーム側のラインアップ公開済」のときだけ可視
                 mm.put("opponentAssigned",
                         (theirs == null || !opponentLineupPublished) ? null : assignedOpponentMap(theirs));
+
+                // StrategyCard 発動: 起用ロック (closed) + 相手起用公開 + 両者アサイン済 で TL が決定可能。
+                // 決定の本体は「発動予定」フラグのみ。相手曲のランダム化抽選は Reveal 時に確定する。
+                boolean strategyDecidable = closed && opponentLineupPublished
+                        && mine != null && theirs != null && !compFinished;
+                boolean myStrategyEnabled = mine != null
+                        && strategyUseRepository.findByMatchAndUsedByParticipant(match, mine)
+                                .map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false);
+                mm.put("strategyDecidable", strategyDecidable);
+                mm.put("myStrategyEnabled", myStrategyEnabled);
                 matchMaps.add(mm);
             }
             mum.put("matches", matchMaps);
@@ -299,6 +329,109 @@ public class CompetitionTlController {
             @PathVariable String token,
             @PathVariable Long matchId) {
         return assign(token, matchId, new AssignRequest(null));
+    }
+
+    // ── StrategyCard 発動の決定 (TL が起用ロック&公開後に判断) ──────────
+
+    /**
+     * 【メソッドの役割】 自チーム側プレイヤーの StrategyCard 発動予定を ON/OFF する。
+     *
+     * <p>発動可能条件 (起用フェーズ完了後): 起用クローズ済み + 相手のオーダー(起用)公開済み + 両者アサイン済み。
+     * 予選は 1 チーム最大 {@value #STRATEGY_MATCHUP_LIMIT_PER_TEAM} matchup まで (決勝は無制限)。
+     *
+     * <p>ここでは「発動予定」フラグ ({@code enabled}) を更新するだけ。相手の自選曲をランダム化する抽選は
+     * Reveal データ生成時 (運営側) に確定するため、本エンドポイントでは抽選しない。
+     * OFF に戻した場合は確定済み抽選結果をクリアする。
+     */
+    @PutMapping("/{token}/match/{matchId}/strategy")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> setStrategy(
+            @PathVariable String token,
+            @PathVariable Long matchId,
+            @RequestBody StrategyRequest req) {
+        if (req == null || req.enabled() == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "enabled フラグが必要です"));
+        }
+        CompetitionTeam myTeam = teamRepository.findByTlToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid TL token"));
+        Competition comp = myTeam.getCompetition();
+        if ("finished".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
+        }
+
+        CompetitionMatch match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found: " + matchId));
+        CompetitionMatchup matchup = match.getMatchup();
+        boolean iAmA = matchup.getTeamA() != null && matchup.getTeamA().getId().equals(myTeam.getId());
+        boolean iAmB = matchup.getTeamB() != null && matchup.getTeamB().getId().equals(myTeam.getId());
+        if (!iAmA && !iAmB) {
+            return ResponseEntity.badRequest().body(Map.of("message", "この試合は自チームの担当ではありません"));
+        }
+
+        final CompetitionParticipant mine = iAmA ? match.getPlayerA() : match.getPlayerB();
+        CompetitionParticipant theirs = iAmA ? match.getPlayerB() : match.getPlayerA();
+
+        // 発動可能ゲート
+        if (!comp.isLineupClosed()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ後に発動を決定できます"));
+        }
+        boolean opponentLineupPublished = iAmA
+                ? Boolean.TRUE.equals(matchup.getLineupPublishedB())
+                : Boolean.TRUE.equals(matchup.getLineupPublishedA());
+        if (!opponentLineupPublished) {
+            return ResponseEntity.badRequest().body(Map.of("message", "相手のオーダー(起用)公開後に発動を決定できます"));
+        }
+        if (mine == null || theirs == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "両者の起用が揃ってから発動を決定できます"));
+        }
+
+        boolean willEnable = Boolean.TRUE.equals(req.enabled());
+
+        // 予選上限チェック (決勝は対象外)。新しい matchup を ON にするときだけ。
+        if (willEnable && !Boolean.TRUE.equals(matchup.getIsFinals())) {
+            boolean alreadyEnabledHere = strategyUseRepository.findByMatchAndUsedByParticipant(match, mine)
+                    .map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false);
+            if (!alreadyEnabledHere) {
+                Set<Long> usedPrelimMatchupIds = new HashSet<>();
+                for (CompetitionStrategyUse su : strategyUseRepository.findAllByCompetition(comp)) {
+                    if (!Boolean.TRUE.equals(su.getEnabled())) continue;
+                    CompetitionParticipant user = su.getUsedByParticipant();
+                    if (user == null || user.getTeam() == null
+                            || !myTeam.getId().equals(user.getTeam().getId())) continue;
+                    CompetitionMatchup mu = su.getMatch().getMatchup();
+                    if (Boolean.TRUE.equals(mu.getIsFinals())) continue;
+                    usedPrelimMatchupIds.add(mu.getId());
+                }
+                if (!usedPrelimMatchupIds.contains(matchup.getId())
+                        && usedPrelimMatchupIds.size() >= STRATEGY_MATCHUP_LIMIT_PER_TEAM) {
+                    return ResponseEntity.badRequest().body(Map.of("message",
+                            "予選では 1 チーム最大 " + STRATEGY_MATCHUP_LIMIT_PER_TEAM
+                                    + " matchup までしか発動できません (上限到達)"));
+                }
+            }
+        }
+
+        CompetitionStrategyUse su = strategyUseRepository.findByMatchAndUsedByParticipant(match, mine)
+                .orElseGet(() -> {
+                    CompetitionStrategyUse fresh = new CompetitionStrategyUse();
+                    fresh.setMatch(match);
+                    fresh.setUsedByParticipant(mine);
+                    return fresh;
+                });
+        // OFF に戻したら確定済み抽選結果をクリア (Reveal で再抽選される)。
+        if (!willEnable) {
+            su.setResultSongStrategyId(null);
+            su.setResultSongTitle(null);
+            su.setResultSongVersion(null);
+            su.setResultSongDiff(null);
+            su.setResultSongLevel(null);
+            su.setResultSongGenre(null);
+        }
+        su.setEnabled(willEnable);
+        su.setDecidedAt(java.time.LocalDateTime.now());
+        strategyUseRepository.save(su);
+
+        return ResponseEntity.ok(Map.of("matchId", match.getId(), "myStrategyEnabled", willEnable));
     }
 
     // ── 運営チャット ─────────────────────────────────────────
@@ -464,4 +597,9 @@ public class CompetitionTlController {
      * 運営チャット送信リクエスト。{@code body} が本文。
      */
     public record ChatRequest(String body) {}
+
+    /**
+     * StrategyCard 発動予定の ON/OFF リクエスト。{@code enabled} = true で発動予定。
+     */
+    public record StrategyRequest(Boolean enabled) {}
 }

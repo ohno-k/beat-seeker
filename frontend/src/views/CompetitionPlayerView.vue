@@ -32,7 +32,7 @@ import { teamColorClass, genreBadgeClass, genreTextClass } from '../composables/
 
 const props = defineProps<{ token: string }>();
 
-const { view, isLoading, fetchView, upsertPick, deletePick, setStrategy } = useCompetitionPlayer();
+const { view, isLoading, fetchView, upsertPick, deletePick } = useCompetitionPlayer();
 const individualPlayer = useCompetitionPlayerIndividual();
 const toast = useToast();
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
@@ -213,15 +213,7 @@ const removePick = async (m: PlayerMatchDto) => {
   }
 };
 
-// ── StrategyCard 切替 ─────────────────────────────────────
-const toggleStrategy = async (matchId: number, currentEnabled: boolean) => {
-  try {
-    await setStrategy(props.token, matchId, !currentEnabled);
-    toast.success(!currentEnabled ? 'StrategyCard を「使用」に設定しました' : 'StrategyCard を「不使用」に設定しました');
-  } catch (e) {
-    toast.error((e as Error).message);
-  }
-};
+// StrategyCard 発動可否は TL が決定 (CompetitionTlView)。選手画面は閲覧専用なので切替処理は持たない。
 
 /**
  * 個人戦 (individual4) 試合内の総合順位を totalPoints から計算する。
@@ -255,23 +247,6 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
   return true;
 };
 
-/**
- * 当該試合の matchup で StrategyCard を新規に使えるか。
- * 既にこの matchup で自チームが card を使っているなら ON/OFF 切替 OK。
- * そうでない場合、自チームの使用済 matchup 数が limit 未満であれば OK。
- */
-const canEnableStrategyHere = (matchId: number): boolean => {
-  if (!view.value) return false;
-  const quota = view.value.strategyQuota;
-  const match = view.value.matches.find(mm => mm.matchId === matchId);
-  if (!match) return false;
-  // この matchup の matchId を直接持っていないので、同 matchup の他 match と組で判定するのは難しい。
-  // サーバ側は matchup 単位で判定するが、フロントは match 単位の matchId しか持っていないので、
-  // すでにこの matchId で enabled なら ON 維持可能 / OFF→ON も同じ matchup 内ならカウント増えない。
-  // ここでは保守的に「strategyQuota.usedMatchupCount < limit OR この match で既に enabled」のみ許可する。
-  if (match.myStrategyUse?.enabled) return true;
-  return quota.usedMatchupCount < quota.limit;
-};
 </script>
 
 <template>
@@ -640,36 +615,20 @@ const canEnableStrategyHere = (matchId: number): boolean => {
             </div>
           </div>
 
-          <!-- StrategyCard 決定 (相手の自選曲が公開済のときだけ可) -->
-          <div class="px-4 py-3 border-t border-slate-200 dark:border-slate-700">
-            <div v-if="m.opponentPickPublished" class="flex items-center gap-3 flex-wrap">
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-bold">{{ t('competition.player.strategyCard') }}</p>
-                <p class="text-[10px] text-slate-400">{{ t('competition.player.strategyCardDescription') }}</p>
-                <p
-                  v-if="!canEnableStrategyHere(m.matchId)"
-                  class="text-[10px] text-rose-500 mt-0.5"
-                >
-                  {{ t('competition.player.strategyLimitReached', { limit: view.strategyQuota.limit }) }}
-                </p>
-              </div>
-              <button
-                type="button"
-                @click="toggleStrategy(m.matchId, m.myStrategyUse?.enabled ?? false)"
-                :disabled="!canEnableStrategyHere(m.matchId) && !(m.myStrategyUse?.enabled)"
-                class="px-4 py-2 text-xs font-black tracking-wider uppercase rounded-lg transition-all"
-                :class="m.myStrategyUse?.enabled
-                  ? 'bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white shadow hover:shadow-lg'
-                  : !canEnableStrategyHere(m.matchId)
-                    ? 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
-              >
-                {{ m.myStrategyUse?.enabled ? t('competition.player.strategyEnabled') : t('competition.player.strategyDisabled') }}
-              </button>
+          <!-- StrategyCard (発動可否はチームリーダー(TL)が決定。選手は閲覧のみ) -->
+          <div class="px-4 py-3 border-t border-slate-200 dark:border-slate-700 flex items-center gap-3 flex-wrap">
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-bold">{{ t('competition.player.strategyCard') }}</p>
+              <p class="text-[10px] text-slate-400">発動可否はチームリーダー(TL)が決定します。</p>
             </div>
-            <p v-else class="text-[11px] text-slate-400 italic">
-              {{ t('competition.player.strategyWaitOpponent') }}
-            </p>
+            <span
+              v-if="m.myStrategyUse?.enabled"
+              class="shrink-0 text-[11px] font-black px-2.5 py-1 rounded-lg bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white tracking-wider"
+            >⚡ 発動予定</span>
+            <span
+              v-else
+              class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-500 tracking-wider"
+            >発動予定なし</span>
           </div>
         </div>
       </section>

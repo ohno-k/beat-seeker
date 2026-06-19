@@ -110,6 +110,10 @@ export interface CompetitionMatchDto {
   pickPublishedA: boolean;
   /** B 側の自選曲を A 側に公開しているか。 */
   pickPublishedB: boolean;
+  /** A 側プレイヤーが StrategyCard 発動予定か (TL が決定)。 */
+  strategyUsedA: boolean;
+  /** B 側プレイヤーが StrategyCard 発動予定か (TL が決定)。 */
+  strategyUsedB: boolean;
   /** 試合結果: A 側勝ち曲数 (0/1/2)。null = 未記録。スコアから自動派生。 */
   aSongsWon: number | null;
   /** 試合結果: B 側勝ち曲数 (0/1/2)。null = 未記録。 */

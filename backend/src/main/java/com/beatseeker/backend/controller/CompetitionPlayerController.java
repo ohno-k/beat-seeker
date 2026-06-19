@@ -2,7 +2,6 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
-import com.beatseeker.backend.service.StrategyPoolService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +57,6 @@ public class CompetitionPlayerController {
     private final CompetitionPickRepository pickRepository;
     private final CompetitionMatchRepository matchRepository;
     private final CompetitionStrategyUseRepository strategyUseRepository;
-    private final StrategyPoolService strategyPoolService;
     private final CompetitionIndividualMatchRepository individualMatchRepository;
     private final CompetitionIndividualMatchSlotRepository individualMatchSlotRepository;
 
@@ -66,14 +64,12 @@ public class CompetitionPlayerController {
                                        CompetitionPickRepository pickRepository,
                                        CompetitionMatchRepository matchRepository,
                                        CompetitionStrategyUseRepository strategyUseRepository,
-                                       StrategyPoolService strategyPoolService,
                                        CompetitionIndividualMatchRepository individualMatchRepository,
                                        CompetitionIndividualMatchSlotRepository individualMatchSlotRepository) {
         this.participantRepository = participantRepository;
         this.pickRepository = pickRepository;
         this.matchRepository = matchRepository;
         this.strategyUseRepository = strategyUseRepository;
-        this.strategyPoolService = strategyPoolService;
         this.individualMatchRepository = individualMatchRepository;
         this.individualMatchSlotRepository = individualMatchSlotRepository;
     }
@@ -310,121 +306,9 @@ public class CompetitionPlayerController {
         return ResponseEntity.ok(Map.of("message", "削除しました"));
     }
 
-    /**
-     * 【メソッドの役割】 ある試合について、相手選曲に対する StrategyCard 使用フラグを upsert する。
-     *
-     * <p>必須条件: 対象 match で相手側が locked であること (= 相手の自選曲が開示済み)。
-     */
-    @PutMapping("/{token}/strategy/{matchId}")
-    @Transactional
-    public ResponseEntity<Map<String, Object>> upsertStrategy(
-            @PathVariable String token,
-            @PathVariable Long matchId,
-            @RequestBody StrategyRequest req) {
-        if (req == null || req.enabled() == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "enabled フラグが必要です"));
-        }
-        CompetitionParticipant me = participantRepository.findByInviteToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid invite token"));
-
-        CompetitionMatch match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found: " + matchId));
-
-        boolean iAmA = match.getPlayerA() != null && match.getPlayerA().getId().equals(me.getId());
-        boolean iAmB = match.getPlayerB() != null && match.getPlayerB().getId().equals(me.getId());
-        if (!iAmA && !iAmB) {
-            return ResponseEntity.badRequest().body(Map.of("message", "この試合の参加者ではありません"));
-        }
-
-        boolean opponentPickPublished = iAmA
-                ? Boolean.TRUE.equals(match.getPickPublishedB())
-                : Boolean.TRUE.equals(match.getPickPublishedA());
-        if (!opponentPickPublished) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "相手の自選曲がまだ公開されていません。公開後に決定できます"));
-        }
-
-        if ("finished".equals(match.getMatchup().getCompetition().getStatus())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では決定できません"));
-        }
-
-        // 予選ルール: 各チームは予選 matchup のうち最大 STRATEGY_MATCHUP_LIMIT_PER_TEAM (= 2) 試合でしか
-        // StrategyCard を使えない。enabled=true へ切り替えるときだけチェック (offにする/維持はスキップ)。
-        // 決勝 matchup (isFinals=true) はカウント対象外。
-        Competition comp = match.getMatchup().getCompetition();
-        CompetitionTeam myTeam = me.getTeam();
-        boolean wasAlreadyEnabledHere = strategyUseRepository.findByMatchAndUsedByParticipant(match, me)
-                .map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false);
-        boolean turningOn = Boolean.TRUE.equals(req.enabled()) && !wasAlreadyEnabledHere;
-        if (turningOn && !Boolean.TRUE.equals(match.getMatchup().getIsFinals())) {
-            // 自チームメンバーが現在 enabled=true にしている予選 matchup ID 集合を集計
-            Set<Long> usedPrelimMatchupIds = new HashSet<>();
-            for (CompetitionStrategyUse su : strategyUseRepository.findAllByCompetition(comp)) {
-                if (!Boolean.TRUE.equals(su.getEnabled())) continue;
-                CompetitionParticipant user = su.getUsedByParticipant();
-                if (user == null || !myTeam.getId().equals(user.getTeam().getId())) continue;
-                CompetitionMatchup mu = su.getMatch().getMatchup();
-                if (Boolean.TRUE.equals(mu.getIsFinals())) continue;
-                usedPrelimMatchupIds.add(mu.getId());
-            }
-            // 既に上限に達していて、今回新しい matchup を使おうとしている場合は拒否
-            if (!usedPrelimMatchupIds.contains(match.getMatchup().getId())
-                    && usedPrelimMatchupIds.size() >= STRATEGY_MATCHUP_LIMIT_PER_TEAM) {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "message", "予選では 1 チームあたり最大 " + STRATEGY_MATCHUP_LIMIT_PER_TEAM
-                                + " matchup までしか StrategyCard を使えません (既に上限到達)"));
-            }
-        }
-
-        CompetitionStrategyUse su = strategyUseRepository.findByMatchAndUsedByParticipant(match, me)
-                .orElseGet(() -> {
-                    CompetitionStrategyUse fresh = new CompetitionStrategyUse();
-                    fresh.setMatch(match);
-                    fresh.setUsedByParticipant(me);
-                    return fresh;
-                });
-
-        boolean wasEnabled = Boolean.TRUE.equals(su.getEnabled());
-        boolean willEnable = Boolean.TRUE.equals(req.enabled());
-
-        // false → true への切替時にサーバ側で抽選曲を 1 件決定して result_song_* に保存。
-        // 既に true だった場合は既存抽選結果を保持 (再ランダム化しない)。
-        // true → false への切替時は抽選結果をクリア。
-        if (willEnable && !wasEnabled) {
-            // 相手 (= ランダム化される側) の自選曲を取得し、そのジャンルでプール抽選
-            CompetitionParticipant opponent = me.getId().equals(match.getPlayerA() != null ? match.getPlayerA().getId() : null)
-                    ? match.getPlayerB()
-                    : match.getPlayerA();
-            if (opponent != null) {
-                CompetitionPick opponentPick = pickRepository.findByMatchAndParticipant(match, opponent).orElse(null);
-                if (opponentPick != null) {
-                    StrategyPoolService.PoolSong drawn = strategyPoolService.drawRandom(
-                            opponentPick.getSongGenre(), match.getMatchKind());
-                    if (drawn != null) {
-                        su.setResultSongStrategyId(drawn.id);
-                        su.setResultSongTitle(drawn.title);
-                        su.setResultSongVersion(drawn.version);
-                        su.setResultSongDiff(drawn.diff);
-                        su.setResultSongLevel(drawn.level);
-                        su.setResultSongGenre(opponentPick.getSongGenre());
-                    }
-                }
-            }
-        } else if (!willEnable && wasEnabled) {
-            su.setResultSongStrategyId(null);
-            su.setResultSongTitle(null);
-            su.setResultSongVersion(null);
-            su.setResultSongDiff(null);
-            su.setResultSongLevel(null);
-            su.setResultSongGenre(null);
-        }
-
-        su.setEnabled(req.enabled());
-        su.setDecidedAt(LocalDateTime.now());
-        su = strategyUseRepository.save(su);
-
-        return ResponseEntity.ok(strategyUseMap(su));
-    }
+    // StrategyCard 発動の決定は TL に移管 (CompetitionTlController#setStrategy)。
+    // 選手 (メンバー URL) からは発動できない (getView では myStrategyUse を閲覧専用で返すのみ)。
+    // 相手曲のランダム化抽選は Reveal データ生成時 (CompetitionAdminController#getRevealData) に確定する。
 
     // ── 内部ヘルパ ───────────────────────────────────────────
 
@@ -596,7 +480,4 @@ public class CompetitionPlayerController {
             Integer songStrategyId,
             String songTitle,
             String songDiff) {}
-
-    /** StrategyCard 使用フラグ更新リクエスト。 */
-    public record StrategyRequest(Boolean enabled) {}
 }

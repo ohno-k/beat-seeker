@@ -211,15 +211,8 @@ export function useCompetitionPlayer() {
     await fetchView(token);
   };
 
-  /** ある試合に対する StrategyCard 使用フラグを更新する。 */
-  const setStrategy = async (token: string, matchId: number, enabled: boolean): Promise<void> => {
-    const res = await fetch(
-      `${API_BASE}/api/competition-access/player/${token}/strategy/${matchId}`,
-      { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) },
-    );
-    await throwIfError(res);
-    await fetchView(token);
-  };
+  // StrategyCard 発動可否の決定は TL に移管 (useCompetitionTl#setStrategy)。
+  // 選手画面は myStrategyUse を閲覧表示するのみで、ここから更新はしない。
 
-  return { view, isLoading, fetchView, upsertPick, deletePick, setStrategy };
+  return { view, isLoading, fetchView, upsertPick, deletePick };
 }

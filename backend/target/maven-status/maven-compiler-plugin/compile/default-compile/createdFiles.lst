@@ -4,6 +4,7 @@ com\beatseeker\backend\controller\ArenaController$PlayerData.class
 com\beatseeker\backend\controller\RankQuizController.class
 com\beatseeker\backend\service\IndividualScheduleService.class
 com\beatseeker\backend\controller\CompetitionAdminController$PublishRequest.class
+com\beatseeker\backend\controller\CompetitionTlController$StrategyRequest.class
 com\beatseeker\backend\service\PairRegressionService.class
 com\beatseeker\backend\service\MonthlyWrappedService$MonthlyWrappedResponse.class
 com\beatseeker\backend\entity\CompetitionParticipant.class
@@ -154,7 +155,6 @@ com\beatseeker\backend\controller\ExternalSongDetailController$SyncOptionsItem.c
 com\beatseeker\backend\service\TopRankersBeatPtService$SongScoreEntry.class
 com\beatseeker\backend\repository\SongDefinitionRepository.class
 com\beatseeker\backend\repository\ShareTokenRepository.class
-com\beatseeker\backend\controller\CompetitionPlayerController$StrategyRequest.class
 com\beatseeker\backend\controller\ExternalSongDetailController.class
 com\beatseeker\backend\entity\CompetitionIndividualMatch.class
 com\beatseeker\backend\repository\UserSongOptionRepository.class

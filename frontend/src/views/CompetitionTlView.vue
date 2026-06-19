@@ -21,12 +21,22 @@ import CompetitionChatWidget from '../components/CompetitionChatWidget.vue';
 
 const props = defineProps<{ token: string }>();
 
-const { view, isLoading, fetchView, assign, unassign } = useCompetitionTl();
+const { view, isLoading, fetchView, assign, unassign, setStrategy } = useCompetitionTl();
 const toast = useToast();
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
 onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
+
+/** StrategyCard 発動予定の ON/OFF。サーバ反映後に再 fetch で同期。 */
+const handleSetStrategy = async (match: TlMatchDto, enabled: boolean) => {
+  try {
+    await setStrategy(props.token, match.matchId, enabled);
+    toast.success(enabled ? 'ストラテジー発動予定にしました' : '発動予定を解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
 
 /** 戦種別ラベルは i18n 経由。 */
 const kindLabel = (kind: MatchKind) => t(`competition.matchKind.${kind}`);
@@ -146,12 +156,17 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
       <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
         <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
           <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.tl.membersHeader') }}</p>
-          <p class="text-[10px] font-mono text-slate-400">
-            {{ t('competition.tl.costInitial', { n: view.initialCost }) }} /
-            {{ t('competition.matchKind.vanguard') }} {{ view.costPerKind.vanguard }} ·
-            {{ t('competition.matchKind.middle') }} {{ view.costPerKind.middle }} ·
-            {{ t('competition.matchKind.captain') }} {{ view.costPerKind.captain }}
-          </p>
+          <div class="flex items-center gap-3 flex-wrap">
+            <p class="text-[10px] font-mono text-slate-400">
+              {{ t('competition.tl.costInitial', { n: view.initialCost }) }} /
+              {{ t('competition.matchKind.vanguard') }} {{ view.costPerKind.vanguard }} ·
+              {{ t('competition.matchKind.middle') }} {{ view.costPerKind.middle }} ·
+              {{ t('competition.matchKind.captain') }} {{ view.costPerKind.captain }}
+            </p>
+            <span class="text-[10px] font-black px-2 py-0.5 rounded bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 tracking-wider">
+              ⚡ ストラテジー {{ view.strategyUsedMatchupCount }} / {{ view.strategyLimit }} 組
+            </span>
+          </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div
@@ -268,6 +283,25 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
                   >
                     {{ match.myLocked ? t('competition.tl.lockedAlready') : t('competition.tl.lockBefore') }}
                   </span>
+                </div>
+
+                <!-- StrategyCard 発動 (起用ロック&相手のオーダー公開後に TL が決定) -->
+                <div class="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700/40">
+                  <div v-if="match.strategyDecidable" class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">ストラテジー</span>
+                    <button
+                      type="button"
+                      @click="handleSetStrategy(match, !match.myStrategyEnabled)"
+                      class="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all"
+                      :class="match.myStrategyEnabled
+                        ? 'bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white shadow'
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                    >{{ match.myStrategyEnabled ? '⚡ 発動予定' : '発動しない' }}</button>
+                  </div>
+                  <p v-else class="text-[10px] font-mono">
+                    <span v-if="match.myStrategyEnabled" class="text-fuchsia-500 dark:text-fuchsia-300 font-black">⚡ 発動予定</span>
+                    <span v-else class="text-slate-400 italic">起用ロック&相手オーダー公開後に発動可</span>
+                  </p>
                 </div>
               </div>
 

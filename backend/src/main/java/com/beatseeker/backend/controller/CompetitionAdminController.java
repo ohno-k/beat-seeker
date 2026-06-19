@@ -3,6 +3,7 @@ package com.beatseeker.backend.controller;
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.OrganizerAuthService;
+import com.beatseeker.backend.service.StrategyPoolService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +74,7 @@ public class CompetitionAdminController {
     private final UserRepository userRepository;
     private final OrganizerAuthService organizerAuthService;
     private final CompetitionChatMessageRepository chatMessageRepository;
+    private final StrategyPoolService strategyPoolService;
 
     public CompetitionAdminController(CompetitionRepository competitionRepository,
                                       CompetitionTeamRepository teamRepository,
@@ -85,7 +87,8 @@ public class CompetitionAdminController {
                                       CompetitionIndividualMatchSlotRepository individualMatchSlotRepository,
                                       UserRepository userRepository,
                                       OrganizerAuthService organizerAuthService,
-                                      CompetitionChatMessageRepository chatMessageRepository) {
+                                      CompetitionChatMessageRepository chatMessageRepository,
+                                      StrategyPoolService strategyPoolService) {
         this.competitionRepository = competitionRepository;
         this.teamRepository = teamRepository;
         this.participantRepository = participantRepository;
@@ -98,6 +101,7 @@ public class CompetitionAdminController {
         this.userRepository = userRepository;
         this.organizerAuthService = organizerAuthService;
         this.chatMessageRepository = chatMessageRepository;
+        this.strategyPoolService = strategyPoolService;
     }
 
     /** サポートする大会フォーマット文字列。 */
@@ -350,6 +354,7 @@ public class CompetitionAdminController {
      * <p>未アサインの slot は playerXName が null。フロントは「両側 null」の試合は表示しない想定。
      */
     @GetMapping("/{competitionId}/reveal")
+    @Transactional
     public ResponseEntity<Map<String, Object>> getRevealData(
             Authentication auth, @PathVariable Long competitionId) {
         requireOrganizer(auth);
@@ -394,6 +399,12 @@ public class CompetitionAdminController {
                     : strategyUseRepository.findByMatchAndUsedByParticipant(m, pa).orElse(null);
             CompetitionStrategyUse suB = pb == null ? null
                     : strategyUseRepository.findByMatchAndUsedByParticipant(m, pb).orElse(null);
+
+            // 遅延抽選 (materialize at reveal): TL が「発動予定」にした StrategyCard の抽選を、
+            // Reveal データ生成時にここで確定する。発動側 (suA=A) は相手 (B) の自選曲ジャンルでプール抽選し、
+            // 相手 (B) が演奏する曲を置き換える。enabled かつ未抽選で相手の自選曲がある場合のみ 1 回引いて保存。
+            maybeDrawStrategy(suA, m, pb);
+            maybeDrawStrategy(suB, m, pa);
             e.put("playerAStrategyUsed", suA != null && Boolean.TRUE.equals(suA.getEnabled()));
             e.put("playerBStrategyUsed", suB != null && Boolean.TRUE.equals(suB.getEnabled()));
 
@@ -440,6 +451,32 @@ public class CompetitionAdminController {
             case "captain" -> 2;
             default -> 99;
         };
+    }
+
+    /**
+     * StrategyCard の遅延抽選。{@code su} が発動予定 (enabled) かつ未抽選で、置き換え対象 ({@code victim})
+     * の自選曲がある場合に、その曲のジャンル × 戦の Lv 帯でプールから 1 曲引いて {@code su} に保存する。
+     * 既に抽選済み (resultSong がある) の場合は何もしない (再抽選しない)。
+     *
+     * @param su     発動側の StrategyUse (= 相手曲を置き換える側)。null/未発動なら何もしない。
+     * @param match  対象試合 (Lv 帯の決定に matchKind を使う)。
+     * @param victim ランダム化される側のプレイヤー (= su の使用者の相手)。
+     */
+    private void maybeDrawStrategy(CompetitionStrategyUse su, CompetitionMatch match, CompetitionParticipant victim) {
+        if (su == null || !Boolean.TRUE.equals(su.getEnabled())) return;
+        if (su.getResultSongStrategyId() != null) return; // 既に抽選済み
+        if (victim == null) return;
+        CompetitionPick victimPick = pickRepository.findByMatchAndParticipant(match, victim).orElse(null);
+        if (victimPick == null) return; // 相手の自選曲が未提出なら抽選保留
+        StrategyPoolService.PoolSong drawn = strategyPoolService.drawRandom(victimPick.getSongGenre(), match.getMatchKind());
+        if (drawn == null) return;
+        su.setResultSongStrategyId(drawn.id);
+        su.setResultSongTitle(drawn.title);
+        su.setResultSongVersion(drawn.version);
+        su.setResultSongDiff(drawn.diff);
+        su.setResultSongLevel(drawn.level);
+        su.setResultSongGenre(victimPick.getSongGenre());
+        strategyUseRepository.save(su);
     }
 
     /** Reveal 用 pick 表現。SongReveal が songTitle + songDiff から SongDataEntry を逆引きする。 */
@@ -1489,6 +1526,13 @@ public class CompetitionAdminController {
         return m;
     }
 
+    /** 指定試合で当該プレイヤーが StrategyCard 発動予定 (enabled) かどうか。player が null なら false。 */
+    private boolean isStrategyEnabledFor(CompetitionMatch match, CompetitionParticipant player) {
+        if (player == null) return false;
+        return strategyUseRepository.findByMatchAndUsedByParticipant(match, player)
+                .map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false);
+    }
+
     private Map<String, Object> toMatchMap(CompetitionMatch match) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", match.getId());
@@ -1503,6 +1547,9 @@ public class CompetitionAdminController {
         m.put("lockedBAt", match.getLockedBAt());
         m.put("pickPublishedA", match.getPickPublishedA());
         m.put("pickPublishedB", match.getPickPublishedB());
+        // StrategyCard 発動予定 (TL が決定)。A 側/B 側それぞれの起用プレイヤーが発動予定か。
+        m.put("strategyUsedA", isStrategyEnabledFor(match, match.getPlayerA()));
+        m.put("strategyUsedB", isStrategyEnabledFor(match, match.getPlayerB()));
         m.put("aSongsWon", match.getASongsWon());
         m.put("bSongsWon", match.getBSongsWon());
         m.put("resultRecordedAt", match.getResultRecordedAt());

@@ -1979,6 +1979,11 @@ const statusColor = (s: string) => ({
                       :class="pickForSide(match.id, 'a') ? 'text-violet-600 dark:text-violet-300 font-bold' : 'text-slate-400 italic'"
                       :title="pickLabel(match.id, 'a')"
                     >🎵 {{ pickLabel(match.id, 'a') }}</p>
+                    <!-- StrategyCard 発動予定 (TL が決定) -->
+                    <span
+                      v-if="match.strategyUsedA"
+                      class="inline-block mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white tracking-wider"
+                    >⚡ 発動予定</span>
                   </div>
 
                   <!-- B 側プレイヤー (起用は公開状態に関係なく管理者には常に表示) -->
@@ -1993,6 +1998,11 @@ const statusColor = (s: string) => ({
                       :class="pickForSide(match.id, 'b') ? 'text-violet-600 dark:text-violet-300 font-bold' : 'text-slate-400 italic'"
                       :title="pickLabel(match.id, 'b')"
                     >🎵 {{ pickLabel(match.id, 'b') }}</p>
+                    <!-- StrategyCard 発動予定 (TL が決定) -->
+                    <span
+                      v-if="match.strategyUsedB"
+                      class="inline-block mt-0.5 text-[9px] font-black px-1.5 py-0.5 rounded bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white tracking-wider"
+                    >⚡ 発動予定</span>
                   </div>
 
                   <!-- ジャンル指定セレクタ -->
