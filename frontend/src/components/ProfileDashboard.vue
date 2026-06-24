@@ -194,7 +194,8 @@
           </div>
           <div class="chart-card">
             <h4 class="chart-title">{{ t('dashboard.top100CountByType') }}</h4>
-            <div class="h-44"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="barOpts" /></div>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 -mt-1 mb-1">{{ t('dashboard.top100Border') }}</p>
+            <div class="h-44"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="top100DiffBarOpts" /></div>
           </div>
         </div>
 
@@ -825,25 +826,68 @@ const beatPtTop100 = computed(() =>
     .slice(0, 100)
 );
 
+// 上位100曲の「カットオフ BEAT-PT」= 100位の beatPt。
+// 100曲に満たない場合は 0（=どのスコアでも上位100に入るのでボーダー無し）。
+const top100CutoffPt = computed(() => {
+  const list = beatPtTop100.value;
+  return list.length >= 100 ? list[list.length - 1].beatPt : 0;
+});
+
+/**
+ * 指定難易度（WEIGHTS のキー、例 "12.0"）で「上位100曲のカットオフ BEAT-PT」に
+ * 到達するのに必要なスコアレート(%)を二分探索で逆算する。
+ *
+ * calculatePoints は score rate に対し単調増加（AA/AAA/MAX- ボーナスは段差として加算）
+ * なので二分探索で解ける。
+ *  - cutoff <= 0           → 66.666%（C 境界。実質どのスコアでも上位100入り）
+ *  - cutoff > weight×1.03  → null（100% でも届かない難易度。"—" 表示）
+ *  - cutoff <= C 最小 pt   → 66.666%（C+ なら必ず入る）
+ *
+ * @returns 必要スコアレート(%)。到達不能な難易度は null。
+ */
+function borderRateForKey(cutoff: number, key: string): number | null {
+  const C_MIN = 66.666; // DJ LEVEL C 下限（これ以下は BEAT-PT 0）
+  const w = WEIGHTS[key];
+  if (!w) return null;
+  if (cutoff <= 0) return C_MIN;
+  if (cutoff > w * 1.03) return null; // 理論最大(100%)でもカットオフに届かない
+  if (cutoff <= calculatePoints(C_MIN + 0.001, key)) return C_MIN;
+  let lo = C_MIN, hi = 100;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (calculatePoints(mid, key) < cutoff) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// 難易度キーごとの { 上位100入りに必要なボーダーレート } を昇順で返す。
+// チャートのラベル／ツールチップ双方が同じ並び（index）で参照する。
+const top100DiffStats = computed(() => {
+  const keys = Object.keys(WEIGHTS).sort((a, b) => parseFloat(a) - parseFloat(b));
+  const cutoff = top100CutoffPt.value;
+  return keys.map(key => ({ key, border: borderRateForKey(cutoff, key) }));
+});
+
 const top100DiffHistData = computed(() => {
   if (!beatPtTop100.value.length) return null;
-  const keys = Object.keys(WEIGHTS).sort((a, b) => parseFloat(a) - parseFloat(b));
-  const counts: Record<string, number> = Object.fromEntries(keys.map(k => [k, 0]));
+  const stats = top100DiffStats.value;
+  const counts: Record<string, number> = Object.fromEntries(stats.map(s => [s.key, 0]));
   beatPtTop100.value.forEach(s => {
     const match = s.informalRank?.match(/(\d+\.\d+)/);
     const key = match ? match[1] : null;
     if (key && key in counts) counts[key]++;
   });
-  const colors = keys.map(k => {
-    const v = parseFloat(k);
+  const colors = stats.map(({ key }) => {
+    const v = parseFloat(key);
     if (v >= 12.5) return 'rgba(168,85,247,0.75)';
     if (v >= 12.0) return 'rgba(99,102,241,0.75)';
     if (v >= 11.5) return 'rgba(59,130,246,0.75)';
     return 'rgba(148,163,184,0.6)';
   });
   return {
-    labels: keys.map(k => `☆${k}`),
-    datasets: [{ label: t('common.songCount'), data: keys.map(k => counts[k]), backgroundColor: colors, borderRadius: 4 }]
+    // 2行ラベル: 1行目 = ☆難易度、2行目 = 上位100入りボーダーレート（到達不能は "—"）
+    labels: stats.map(s => [`☆${s.key}`, s.border == null ? '—' : `${s.border.toFixed(1)}%`]),
+    datasets: [{ label: t('common.songCount'), data: stats.map(s => counts[s.key]), backgroundColor: colors, borderRadius: 4 }]
   };
 });
 
@@ -1204,6 +1248,46 @@ const scoreRateHistOpts = computed(() => ({
   plugins: {
     ...barOpts.value.plugins,
     tooltip: { ...barOpts.value.plugins.tooltip },
+  },
+}));
+
+// BEAT-PT 上位100曲の難易度分布専用オプション。
+// X 軸は「☆難易度 / ボーダーレート」の2行ラベルなので、回転・間引きを止めて必ず2行表示する。
+// ツールチップでは曲数に加えて「上位100入りボーダー」を補足する。
+const top100DiffBarOpts = computed(() => ({
+  ...barOpts.value,
+  plugins: {
+    ...barOpts.value.plugins,
+    tooltip: {
+      ...barOpts.value.plugins.tooltip,
+      callbacks: {
+        // ラベルが配列（2行）なので 1 行目（☆難易度）だけをタイトルにする
+        title: (items: any[]) => {
+          const l = items[0]?.label;
+          return Array.isArray(l) ? l[0] : String(l).split(',')[0];
+        },
+        label: (item: any) => `${t('common.songCount')}: ${item.parsed.y}`,
+        afterLabel: (item: any) => {
+          const b = top100DiffStats.value[item.dataIndex]?.border;
+          const v = b == null ? t('dashboard.top100BorderImpossible') : `${b.toFixed(1)}%`;
+          return `${t('dashboard.top100BorderTip')}: ${v}`;
+        },
+      },
+    },
+  },
+  scales: {
+    ...barOpts.value.scales,
+    x: {
+      ...barOpts.value.scales.x,
+      ticks: {
+        ...barOpts.value.scales.x.ticks,
+        font: { size: 10 },
+        autoSkip: false,
+        maxRotation: 0,
+        minRotation: 0,
+      },
+      grid: { display: false },
+    },
   },
 }));
 
