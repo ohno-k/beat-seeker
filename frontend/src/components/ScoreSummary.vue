@@ -2120,7 +2120,11 @@ const handleRivalTabClick = () => {
   if (rivalScores.value.length === 0 && !isLoadingRivals.value) {
     fetchRivalScores();
   }
-  if (songRankingList.value.length === 0 && songTopRankersList.value.length === 0 && !isLoadingSongRanking.value) {
+  // ランキング(実ユーザー)または TOPランカー(仮想ユーザー)のどちらかが未取得なら取得する。
+  // バックエンドのコールドスタート等で song-top-rankers が一時的に空配列を返したケースでは、
+  // 実ユーザー側だけ埋まって「&&」だと二度と再取得されず仮想ユーザーが永続的に欠落するため、
+  // OR で判定して再クリック時に回復できるようにする。
+  if ((songRankingList.value.length === 0 || songTopRankersList.value.length === 0) && !isLoadingSongRanking.value) {
     fetchSongRanking();
   }
   if (!virtualRivalsLoaded.value) {

@@ -47,12 +47,13 @@ public class JwtUtil {
     /**
      * 【コンストラクタ】 Spring が application.yml の設定値を注入して初期化する。
      *
-     * @param secret       JWT 署名用の秘密鍵。本番では必ず環境変数で上書きすること。
-     *                     デフォルト値はあくまで開発用のフォールバック。
+     * @param secret       JWT 署名用の秘密鍵。環境変数 {@code JWT_SECRET}（256bit 以上）で必ず設定すること。
+     *                     コミット済み既定鍵は JWT 偽造（任意ユーザーへのなりすまし）を許すため撤去した。
+     *                     未設定の場合はアプリ起動に失敗する（fail-fast）。
      * @param expirationMs トークン有効期限（ミリ秒）。デフォルトは 7 日間。
      */
     public JwtUtil(
-            @Value("${jwt.secret:beatseeker-default-secret-key-change-in-production-at-least-256-bits!!}") String secret,
+            @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms:604800000}") long expirationMs) { // デフォルト 7 日間
         // 秘密文字列を UTF-8 バイト列に変換し、HMAC-SHA 鍵オブジェクトを構築する。
         // Keys.hmacShaKeyFor は 256bit 以上のキー長を要求するため、

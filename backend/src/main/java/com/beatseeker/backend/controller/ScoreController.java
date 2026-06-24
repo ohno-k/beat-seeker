@@ -670,65 +670,9 @@ public class ScoreController {
         return ResponseEntity.ok(history);
     }
 
-    /**
-     * 【メソッドの役割】 開発者向けの BEAT-PT ランキングデバッグエンドポイント。
-     *
-     * 全ユーザーの最新 BEAT-PT と、上位 10 名の生データを同時に返す。
-     * 本番では利用しない予定（削除候補）。
-     *
-     * @return ユーザー概要と top10 を含む Map
-     */
-    @GetMapping("/debug-ranking")
-    public ResponseEntity<Map<String, Object>> debugRanking() {
-        Map<String, Object> result = new HashMap<>();
-
-        List<Map<String, Object>> userSummary = userRepository.findAll().stream().map(u -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("displayName", u.getDisplayName());
-            map.put("privacyLevel", u.getPrivacyLevel());
-            List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(u);
-            map.put("historyCount", logs.size());
-            if (!logs.isEmpty()) {
-                ScoreHistoryLog latest = logs.get(logs.size() - 1);
-                map.put("latestPt", latest.getTotalBeatPt());
-                map.put("latestAt", latest.getUploadedAt().toString());
-            }
-            return map;
-        }).toList();
-
-        result.put("users", userSummary);
-        result.put("top10", scoreHistoryLogRepository.getGlobalRanking().stream().limit(10).toList());
-
-        return ResponseEntity.ok(result);
-    }
-
-    /**
-     * 【メソッドの役割】 指定ユーザーのスコアを手早く確認するデバッグ用エンドポイント（認証不要）。
-     *
-     * 本番では開発者以外に触れさせないよう、後で削除／認証追加する想定。
-     *
-     * @param userId 対象ユーザー ID
-     * @return スコア Map の List
-     */
-    @GetMapping("/debug-user-scores/{userId}")
-    public ResponseEntity<List<Map<String, Object>>> debugUserScores(@PathVariable Long userId) {
-        User user = userRepository.findById(userId).orElseThrow();
-        List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
-
-        List<Map<String, Object>> result = scores.stream().map(s -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", s.getId());
-            map.put("title", s.getTitle());
-            map.put("difficultyName", s.getDifficultyName());
-            map.put("difficultyLevel", s.getDifficultyLevel());
-            map.put("score", s.getScore());
-            map.put("clearType", s.getClearType());
-            map.put("uploadedAt", s.getUploadedAt().toString());
-            return map;
-        }).toList();
-
-        return ResponseEntity.ok(result);
-    }
+    // 開発用デバッグエンドポイント /debug-ranking と /debug-user-scores/{userId} は
+    // 認証・privacyLevel チェックを一切持たず、非公開ユーザーのスコア・識別情報を
+    // 匿名公開していたため削除した（SecurityConfig の permitAll リストからも除外済み）。
 
     /**
      * 【メソッドの役割】 全ユーザーの BEAT-PT グローバルランキングを返す。

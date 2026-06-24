@@ -119,8 +119,7 @@ public class SecurityConfig {
                                                                 "/api/scores/song-arena-averages",
                                                                 "/api/scores/song-avg-score-rates",
                                                                 "/api/scores/user-tier-totals/**",
-                                                                "/api/scores/debug-ranking",
-                                                                "/api/scores/debug-user-scores/**", "/api/friends/test",
+                                                                "/api/friends/test",
                                                                 "/api/test-root")
                                                 .permitAll()
                                                 // パスワード忘れ・リセットはログイン前に叩かれるので公開

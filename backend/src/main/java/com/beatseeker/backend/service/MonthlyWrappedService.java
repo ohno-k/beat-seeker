@@ -46,10 +46,12 @@ public class MonthlyWrappedService {
 
     /**
      * 月末振り返りシェア URL の HMAC 秘密鍵。
-     * 本番では環境変数 {@code WRAPPED_SHARE_SECRET} で 32 文字以上のランダム値を設定すること。
-     * デフォルト値はローカル開発用で、production では絶対にこの値を使わないこと。
+     * 環境変数 {@code WRAPPED_SHARE_SECRET}（32 文字以上のランダム値）で必ず設定すること。
+     * コミット済み既定値はトークン偽造（任意ユーザーの非公開振り返りの閲覧）を許すため撤去した。
+     * 未設定の場合はアプリ起動に失敗する（fail-fast）。本番は Render 環境変数、
+     * ローカル開発は application-local.yml（.gitignore 対象）で渡す。
      */
-    @Value("${WRAPPED_SHARE_SECRET:dev-only-change-me-in-production-3f9e2b8a}")
+    @Value("${WRAPPED_SHARE_SECRET}")
     private String shareSecret;
 
     /**

@@ -154,9 +154,13 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      * ネイティブ SQL。user 情報は含めずコンパクトに返す。集計バッチ処理で使用。
      * 返却キー: userId / title / difficultyName / difficultyLevel / score
      *
+     * プライバシー: 公開（privacy_level = 0）ユーザーのスコアのみ返す。userId が含まれ
+     * 他の公開エンドポイント（ランキング等）で displayName/iidxId に再紐付けできてしまうため、
+     * 非公開（1）・フレンドのみ（1）・Private（2）ユーザーの行は集合から除外して匿名公開リークを防ぐ。
+     *
      * @return 集計結果リスト
      */
-    @Query(value = "SELECT s.user_id as \"userId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.difficulty_level as \"difficultyLevel\", s.score as \"score\" FROM scores s WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')", nativeQuery = true)
+    @Query(value = "SELECT s.user_id as \"userId\", s.title as \"title\", s.difficulty_name as \"difficultyName\", s.difficulty_level as \"difficultyLevel\", s.score as \"score\" FROM scores s JOIN users u ON s.user_id = u.id WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND COALESCE(u.privacy_level, 1) = 0", nativeQuery = true)
     List<Map<String, Object>> findAllUserAnotherAndLeggendariaScores();
 
     /**
@@ -187,7 +191,11 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      * @return ペア行リスト（プレイヤー数 = list.size()）
      */
     @Query(value =
-        "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.privacy_level AS \"privacyLevel\", " +
+        // 非公開ユーザー(privacy_level<>0)は userId / displayName を NULL マスクして識別不能にする。
+        // 散布図の点(scoreA/scoreB)は匿名の集計データとして残すため、行自体は除外しない。
+        "SELECT CASE WHEN COALESCE(u.privacy_level, 1) = 0 THEN u.id ELSE NULL END AS \"userId\", " +
+        "       CASE WHEN COALESCE(u.privacy_level, 1) = 0 THEN u.display_name ELSE NULL END AS \"displayName\", " +
+        "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
         "       sa.score AS \"scoreA\", sb.score AS \"scoreB\", " +
         "       sda.notes AS \"notesA\", sdb.notes AS \"notesB\" " +
         "FROM scores sa " +
