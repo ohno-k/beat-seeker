@@ -9,7 +9,7 @@
  *
  * バックエンド: GET /api/timeline
  */
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, onUnmounted, watch, computed, ref } from 'vue';
 import { useTimeline } from '../composables/useTimeline';
 import { useAdmin } from '../composables/useAdmin';
 import { useAuth } from '../composables/useAuth';
@@ -20,7 +20,7 @@ import type {
   OvertakeTotalPayload,
 } from '../composables/useTimeline';
 
-const { entries, isLoading, error, fetchTimeline, backfillMine, backfillAll, backfillStatus } = useTimeline();
+const { entries, isLoading, error, fetchTimeline, hasMore, isLoadingMore, loadOlder, backfillMine, backfillAll, backfillStatus } = useTimeline();
 const { isAdmin } = useAdmin();
 const { user } = useAuth();
 
@@ -106,6 +106,26 @@ const backfillProgressPct = computed(() => {
 onMounted(() => {
   fetchTimeline();
 });
+
+/** 無限スクロール用センチネル要素。ビューポート手前に入ったら過去分を追加取得する。 */
+const sentinel = ref<HTMLElement | null>(null);
+let observer: IntersectionObserver | null = null;
+
+// センチネル要素が(再)描画されるたびに IntersectionObserver を貼り直す。
+// entries が空→ありに変わって初めて要素が現れるため、ref の変化を監視する。
+watch(sentinel, (el) => {
+  observer?.disconnect();
+  observer = null;
+  if (el) {
+    observer = new IntersectionObserver(
+      (obsEntries) => { if (obsEntries[0]?.isIntersecting) loadOlder(); },
+      { rootMargin: '300px' },
+    );
+    observer.observe(el);
+  }
+});
+
+onUnmounted(() => observer?.disconnect());
 
 /**
  * クリックで「ほか N 譜面を表示」を展開したイベント ID の集合。
@@ -218,7 +238,7 @@ const isThreadExpanded = (key: string) => expandedThreadKeys.value.has(key);
 const badgeLabel = (e: TimelineEntry): string => {
   if (e.type === 'SCORE_UPDATE') return 'SCORE';
   const r = viewerRelation(e);
-  if (e.type === 'OVERTAKE_SONG') return r === 'OVERTAKEN_BY_OTHER' ? '譜面で抜かれた' : '譜面で抜いた';
+  if (e.type === 'OVERTAKE_SONG') return r === 'OVERTAKEN_BY_OTHER' ? 'スコアを抜かれた' : 'スコアを抜いた';
   return r === 'OVERTAKEN_BY_OTHER' ? 'BEAT-PT で抜かれた' : 'BEAT-PT で抜いた';
 };
 
@@ -419,6 +439,15 @@ const badgeClass = (e: TimelineEntry): string => {
           </article>
         </div>
       </div>
+
+      <!-- 無限スクロール: 末尾のセンチネルがビューポート手前に来たら過去分を追加取得 -->
+      <div v-if="isLoadingMore" class="flex items-center justify-center py-6">
+        <div class="w-6 h-6 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+      <p v-else-if="!hasMore" class="text-center text-xs text-slate-400 dark:text-slate-500 py-6">
+        これ以上の活動はありません
+      </p>
+      <div ref="sentinel" class="h-px" aria-hidden="true"></div>
     </div>
   </div>
 </template>

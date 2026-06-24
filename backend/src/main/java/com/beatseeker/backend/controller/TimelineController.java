@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -185,18 +187,20 @@ public class TimelineController {
      * @return 整形済みのタイムラインエントリ配列
      */
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getTimeline(
+    public ResponseEntity<Map<String, Object>> getTimeline(
             Authentication auth,
-            @RequestParam(value = "limit", required = false) Integer limit) {
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "beforeMs", required = false) Long beforeMs,
+            @RequestParam(value = "beforeId", required = false) Long beforeId) {
 
         if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).body(List.of());
+            return ResponseEntity.status(401).body(emptyTimeline());
         }
 
         String iidxId = auth.getName();
         User me = userRepository.findByIidxId(iidxId).orElse(null);
         if (me == null) {
-            return ResponseEntity.status(401).body(List.of());
+            return ResponseEntity.status(401).body(emptyTimeline());
         }
 
         int effLimit = limit == null ? DEFAULT_LIMIT : Math.min(Math.max(limit, 1), MAX_LIMIT);
@@ -214,9 +218,17 @@ public class TimelineController {
             friendIds.add(friend.getId());
         }
 
-        // 手順2: イベントを新しい順に取得。
-        List<TimelineEvent> events = timelineEventRepository.findRecentByUsers(
-                targetUsers, PageRequest.of(0, effLimit));
+        // 手順2: イベントを新しい順に取得。beforeMs/beforeId が来ていればそれより古いものを取得する（無限スクロール）。
+        List<TimelineEvent> events;
+        if (beforeMs != null && beforeId != null) {
+            LocalDateTime beforeTime = Instant.ofEpochMilli(beforeMs)
+                    .atZone(ZoneId.systemDefault()).toLocalDateTime();
+            events = timelineEventRepository.findRecentByUsersBefore(
+                    targetUsers, beforeTime, beforeId, PageRequest.of(0, effLimit));
+        } else {
+            events = timelineEventRepository.findRecentByUsers(
+                    targetUsers, PageRequest.of(0, effLimit));
+        }
 
         // 手順3: OVERTAKE_SONG / OVERTAKE_TOTAL の rival (= 抜かれた側) プライバシー判定。
         //
@@ -281,7 +293,33 @@ public class TimelineController {
             result.add(entry);
         }
 
-        return ResponseEntity.ok(result);
+        // 次ページ用カーソル: このページで取得した「生イベント」の最後（= 最古）の createdAt/id。
+        // プライバシー判定で result から一部が落ちても、生イベント基準で続きを辿るため取りこぼし・重複が無い。
+        boolean hasMore = events.size() == effLimit;
+        Long nextBeforeMs = null;
+        Long nextBeforeId = null;
+        if (!events.isEmpty()) {
+            TimelineEvent last = events.get(events.size() - 1);
+            nextBeforeMs = last.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            nextBeforeId = last.getId();
+        }
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("entries", result);
+        body.put("hasMore", hasMore);
+        body.put("nextBeforeMs", nextBeforeMs);
+        body.put("nextBeforeId", nextBeforeId);
+        return ResponseEntity.ok(body);
+    }
+
+    /** 未認証・ユーザー不在時に返す空のタイムラインレスポンス（フロントが entries/hasMore を一律に扱えるようにする）。 */
+    private Map<String, Object> emptyTimeline() {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("entries", List.of());
+        body.put("hasMore", false);
+        body.put("nextBeforeMs", null);
+        body.put("nextBeforeId", null);
+        return body;
     }
 
     /**

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,8 +29,26 @@ public interface TimelineEventRepository extends JpaRepository<TimelineEvent, Lo
      * @param pageable ページング（件数制限）
      * @return 発生日時降順のイベントリスト
      */
-    @Query("SELECT e FROM TimelineEvent e JOIN FETCH e.user WHERE e.user IN :users ORDER BY e.createdAt DESC")
+    @Query("SELECT e FROM TimelineEvent e JOIN FETCH e.user WHERE e.user IN :users ORDER BY e.createdAt DESC, e.id DESC")
     List<TimelineEvent> findRecentByUsers(@Param("users") Collection<User> users, Pageable pageable);
+
+    /**
+     * 指定ユーザー集合のイベントのうち、カーソル (beforeTime, beforeId) より「古い」ものを新しい順で取得する。
+     * 無限スクロール（最下部で過去分を追加取得）用。createdAt が同値のイベントは id で安定的に区切る。
+     *
+     * @param users      取得対象ユーザー集合
+     * @param beforeTime カーソルの createdAt（これより古い、または同値かつ id がより小さいもの）
+     * @param beforeId   カーソルの id（createdAt 同値時のタイブレーク）
+     * @param pageable   ページング（件数制限）
+     * @return 発生日時降順のイベントリスト
+     */
+    @Query("SELECT e FROM TimelineEvent e JOIN FETCH e.user WHERE e.user IN :users " +
+           "AND (e.createdAt < :beforeTime OR (e.createdAt = :beforeTime AND e.id < :beforeId)) " +
+           "ORDER BY e.createdAt DESC, e.id DESC")
+    List<TimelineEvent> findRecentByUsersBefore(@Param("users") Collection<User> users,
+                                                @Param("beforeTime") LocalDateTime beforeTime,
+                                                @Param("beforeId") Long beforeId,
+                                                Pageable pageable);
 
     /**
      * 指定ユーザーがすでに 1 件でも TimelineEvent を持っているかを返す。

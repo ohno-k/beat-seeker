@@ -98,6 +98,13 @@ export function useTimeline() {
     const isLoading = ref(false);
     /** エラーメッセージ。失敗時に UI で表示する。 */
     const error = ref<string | null>(null);
+    /** さらに過去のイベントを取得できるか（無限スクロールの継続判定）。 */
+    const hasMore = ref(true);
+    /** 追加取得（過去方向）中フラグ。初回ロードの isLoading とは別管理。 */
+    const isLoadingMore = ref(false);
+    /** 次に取得するページのカーソル（取得済みの最古イベントの createdAt(epoch ms)/id）。 */
+    let nextBeforeMs: number | null = null;
+    let nextBeforeId: number | null = null;
 
     /**
      * タイムラインを取得して `entries` に格納する。
@@ -110,11 +117,65 @@ export function useTimeline() {
             const url = limit ? `${API_BASE}/api/timeline?limit=${limit}` : `${API_BASE}/api/timeline`;
             const res = await fetch(url, { headers: authHeaders() });
             if (!res.ok) throw new Error('Failed to fetch timeline');
-            entries.value = await res.json();
+            const data = await res.json();
+            // 新形式 { entries, hasMore, nextBeforeMs, nextBeforeId }。旧形式(配列)も後方互換で受ける。
+            if (Array.isArray(data)) {
+                entries.value = data;
+                hasMore.value = false;
+                nextBeforeMs = null;
+                nextBeforeId = null;
+            } else {
+                entries.value = data.entries ?? [];
+                hasMore.value = !!data.hasMore;
+                nextBeforeMs = data.nextBeforeMs ?? null;
+                nextBeforeId = data.nextBeforeId ?? null;
+            }
         } catch (e: any) {
             error.value = e.message;
         } finally {
             isLoading.value = false;
+        }
+    };
+
+    /**
+     * 最下部に到達したときに呼ぶ、過去方向の追加取得。
+     * 現在のカーソルより古いイベントを取得し `entries` の末尾へ追記する。
+     * OVERTAKE のプライバシー除外で 1 ページの表示が 0 件になり得るため、
+     * 表示が増えるか hasMore が尽きるまで最大 5 ページ辿る。
+     */
+    const loadOlder = async () => {
+        if (isLoading.value || isLoadingMore.value || !hasMore.value) return;
+        if (nextBeforeMs == null || nextBeforeId == null) { hasMore.value = false; return; }
+        isLoadingMore.value = true;
+        error.value = null;
+        try {
+            let guard = 0;
+            let appended = 0;
+            while (guard < 5 && hasMore.value && nextBeforeMs != null && nextBeforeId != null && appended === 0) {
+                guard++;
+                const url = `${API_BASE}/api/timeline?beforeMs=${nextBeforeMs}&beforeId=${nextBeforeId}`;
+                const res = await fetch(url, { headers: authHeaders() });
+                if (!res.ok) throw new Error('Failed to fetch timeline');
+                const data = await res.json();
+                const newEntries: TimelineEntry[] = Array.isArray(data) ? data : (data.entries ?? []);
+                if (Array.isArray(data)) {
+                    hasMore.value = false;
+                    nextBeforeMs = null;
+                    nextBeforeId = null;
+                } else {
+                    hasMore.value = !!data.hasMore;
+                    nextBeforeMs = data.nextBeforeMs ?? null;
+                    nextBeforeId = data.nextBeforeId ?? null;
+                }
+                if (newEntries.length > 0) {
+                    entries.value = [...entries.value, ...newEntries];
+                    appended += newEntries.length;
+                }
+            }
+        } catch (e: any) {
+            error.value = e.message;
+        } finally {
+            isLoadingMore.value = false;
         }
     };
 
@@ -210,6 +271,12 @@ export function useTimeline() {
         error,
         /** タイムラインを取得する。 */
         fetchTimeline,
+        /** さらに過去のイベントがあるか（無限スクロールの継続判定）。 */
+        hasMore,
+        /** 追加取得（過去方向）中フラグ。 */
+        isLoadingMore,
+        /** 最下部到達時に過去イベントを追加取得して entries に追記する。 */
+        loadOlder,
         /** 過去の ScoreHistoryLog から SCORE_UPDATE を再生成する。 */
         backfillMine,
         /** 管理者向け: 全ユーザの SCORE_UPDATE を再生成（非同期ジョブ + ポーリング）。 */
