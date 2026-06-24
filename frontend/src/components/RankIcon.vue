@@ -43,8 +43,8 @@
       viewBox="0 0 100 100" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
-      class="w-full h-full filter drop-shadow-xl"
-      :class="{ 'af-bounce': isAprilFoolsActive }"
+      class="w-full h-full"
+      :class="[lite ? '' : 'filter drop-shadow-xl', { 'af-bounce': isAprilFoolsActive }]"
     >
       <defs>
         <!-- Shape Clip for internal shading -->
@@ -126,18 +126,18 @@
       </defs>
 
       <!-- Glow Underlay for high ranks -->
-      <path 
-        v-if="tier && tier > 1 || isLegend"
-        :d="shapePath" 
-        :fill="colors.primary" 
-        fill-opacity="0.1" 
+      <path
+        v-if="!lite && ((tier && tier > 1) || isLegend)"
+        :d="shapePath"
+        :fill="colors.primary"
+        fill-opacity="0.1"
         :filter="`url(#outer-glow-${uid})`"
       />
 
       <!-- Extra Radiant Aura for Legend -->
-      <path 
-        v-if="isLegend"
-        :d="shapePath" 
+      <path
+        v-if="!lite && isLegend"
+        :d="shapePath"
         :fill="colors.highlight"
         fill-opacity="0.4"
         :filter="`url(#legend-aura-${uid})`"
@@ -148,6 +148,7 @@
       <g v-if="isSupporter">
         <!-- Soft gold glow behind border -->
         <path
+          v-if="!lite"
           :d="shapePath"
           fill="none"
           stroke="#fbbf24"
@@ -177,7 +178,7 @@
         :stroke="colors.stroke"
         stroke-width="2.5"
         stroke-linejoin="round"
-        :filter="`url(#inner-glow-${uid})`"
+        :filter="lite ? undefined : `url(#inner-glow-${uid})`"
       />
 
       <!-- Internal Premium Effects (clipped to shape) -->
@@ -207,7 +208,7 @@
       </g>
       
       <!-- Max Tier (5) Diamond Emblem -->
-      <g v-if="tier === 5" class="tier-segments" :filter="`url(#segment-shadow-${uid})`">
+      <g v-if="tier === 5" class="tier-segments" :filter="lite ? undefined : `url(#segment-shadow-${uid})`">
         <!-- Top Left Facet (Lightest) -->
         <path d="M50 35 L38 50 L50 50 Z" fill="#ffffff" />
         <!-- Top Right Facet -->
@@ -222,21 +223,21 @@
 
       <!-- Tier Segments (More visible "Energy Bars") for tiers 1-4 -->
       <g v-else-if="tier && tier > 0" class="tier-segments">
-        <path 
-          v-for="n in tier" 
-          :key="n" 
-          :d="getSegmentPath(n)" 
-          fill="white" 
-          :filter="`url(#segment-shadow-${uid})`"
+        <path
+          v-for="n in tier"
+          :key="n"
+          :d="getSegmentPath(n)"
+          fill="white"
+          :filter="lite ? undefined : `url(#segment-shadow-${uid})`"
         />
       </g>
 
       <!-- Advanced Highlight for special ranks -->
-      <path 
-        v-if="isLegend || rankName === 'Mythic'"
-        :d="shapePath" 
-        fill="white" 
-        fill-opacity="0.1" 
+      <path
+        v-if="!lite && (isLegend || rankName === 'Mythic')"
+        :d="shapePath"
+        fill="white"
+        fill-opacity="0.1"
         class="animate-shimmer"
       />
     </svg>
@@ -269,6 +270,9 @@ const props = defineProps<{
   size?: 'xs' | 'sm' | 'md' | 'lg';
   disableParty?: boolean;
   isSupporter?: boolean;
+  /** 軽量モード。重い SVG フィルタ（ガウシアンぼかし/ドロップシャドウ）を全て省く。
+   *  ランキング一覧など多数同時描画する箇所で指定し、モバイルのメモリ超過クラッシュを防ぐ。 */
+  lite?: boolean;
 }>();
 
 /** SVG 内の `id` 衝突を防ぐためのユニーク ID（グラデ・フィルタ用）。 */

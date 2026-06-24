@@ -366,7 +366,7 @@
               <!-- 単曲ランク（必要スコアレート表対応）。アイコンのみ表示。 -->
               <td class="px-1 sm:px-2 py-1.5 sm:py-2 whitespace-nowrap w-8 sm:w-12">
                 <template v-for="rankInfo of [getSongUnofficialRank(record)]" :key="0">
-                  <RankIcon v-if="rankInfo" :rank-name="rankInfo.name" :tier="rankInfo.tier" size="xs" />
+                  <RankIcon v-if="rankInfo" :rank-name="rankInfo.name" :tier="rankInfo.tier" size="xs" lite />
                   <span v-else class="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">---</span>
                 </template>
               </td>
@@ -626,7 +626,7 @@
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
                 <tr
-                  v-for="row in rankingList"
+                  v-for="row in displayedRankingRows"
                   :key="row.key"
                   class="transition-colors"
                   :class="[
@@ -698,6 +698,7 @@
                           :rank-name="songRankOfScore(row.score)!.name"
                           :tier="songRankOfScore(row.score)!.tier"
                           size="sm"
+                          lite
                         />
                       </div>
                       <span v-else class="text-slate-300 dark:text-slate-600 text-xs">-</span>
@@ -739,6 +740,17 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- 描画件数の上限超過分は「残りを表示」で段階的に追加（モバイルのメモリ保護） -->
+          <div v-if="hiddenRankingCount > 0" class="pt-3 text-center">
+            <button
+              type="button"
+              @click="showMoreRanking"
+              class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline focus:outline-none"
+            >
+              残り {{ hiddenRankingCount }} 件を表示
+            </button>
           </div>
         </div>
 
@@ -2083,6 +2095,30 @@ const rankingList = computed<RankingRow[]>(() => {
   return display;
 });
 
+/** ランキング一覧の初期描画件数（重い RankIcon を大量描画してモバイルでクラッシュするのを防ぐ）。 */
+const RIVALS_RENDER_CHUNK = 100;
+/** 現在の描画上限。「残りを表示」で増やす。曲を切り替えると既定値へ戻す。 */
+const rivalsRenderLimit = ref(RIVALS_RENDER_CHUNK);
+
+/**
+ * 実際にテンプレートへ渡す行。rankingList を rivalsRenderLimit 件までに絞る。
+ * 自分の行が上限より後ろにある場合でも必ず含める（自分の順位を常に確認できるように）。
+ */
+const displayedRankingRows = computed<RankingRow[]>(() => {
+  const all = rankingList.value;
+  if (all.length <= rivalsRenderLimit.value) return all;
+  const head = all.slice(0, rivalsRenderLimit.value);
+  const self = all.find(r => r.isSelf);
+  if (self && !head.includes(self)) head.push(self);
+  return head;
+});
+
+/** まだ描画していない（隠れている）行数。「残り N 件を表示」に使う。 */
+const hiddenRankingCount = computed(() => Math.max(0, rankingList.value.length - rivalsRenderLimit.value));
+
+/** 描画上限をさらに増やす（段階的に。一度に全件出すと再びクラッシュし得るためチャンク単位）。 */
+const showMoreRanking = () => { rivalsRenderLimit.value += 200; };
+
 /** フレンドスコア取得中フラグ。 */
 const isLoadingRivals = ref(false);
 
@@ -2199,6 +2235,7 @@ watch(() => selectedRecord.value?.title, () => {
   songRankingList.value = [];
   songTopRankersList.value = [];
   songHistory.value = [];
+  rivalsRenderLimit.value = RIVALS_RENDER_CHUNK;
   // 新しい譜面の投票データを即時取得（タブ切替に依らずメインタブでも表示するため）。
   if (selectedRecord.value) {
     fetchVotes(selectedRecord.value.title, selectedRecord.value.difficultyName);
