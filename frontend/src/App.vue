@@ -238,7 +238,8 @@ const availableCmdkTabIds = computed<string[]>(() => {
   return ALL.filter((id) => {
     if (REQUIRES_AUTH.has(id) && !isLoggedIn.value) return false;
     if (HIDE_ON_VIEWING.has(id) && viewingUserId.value) {
-      if (id === 'score-prediction' && viewingMode.value === 'admin') return true;
+      // admin モード閲覧中は score-prediction / history を例外的に許可（Sidebar.vue と同じ判定）
+      if ((id === 'score-prediction' || id === 'history') && viewingMode.value === 'admin') return true;
       return false;
     }
     if (id === 'rank-comparison' && (!user.value || !RANK_COMPARISON_ALLOWED_IDS.includes(user.value.id))) return false;

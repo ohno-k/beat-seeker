@@ -207,8 +207,9 @@ const applyVisibilityFilter = (items: NavItem[]): NavItem[] => {
   return items.filter(item => {
     if (item.requiresAuth && !props.isLoggedIn) return false;
     if (item.hideOnViewing && props.viewingUserId) {
-      // admin モード閲覧中は score-prediction だけ例外的に許可（管理者がユーザー挙動確認のため）
-      if (item.id === 'score-prediction' && props.viewingMode === 'admin') return true;
+      // admin モード閲覧中は score-prediction / history を例外的に許可
+      // （管理者がユーザー挙動・成長記録を確認するため。/api/admin/users/{id}/history を参照）
+      if ((item.id === 'score-prediction' || item.id === 'history') && props.viewingMode === 'admin') return true;
       return false;
     }
     if (item.allowedUserIds && (!props.user || !item.allowedUserIds.includes(props.user.id))) return false;
