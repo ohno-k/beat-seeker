@@ -135,21 +135,18 @@ public class KinjoCupController {
     }
 
     /**
-     * 【メソッドの役割】 参加者のメモを更新する（管理者のみ）。
+     * 【メソッドの役割】 参加者のメモを更新する。協同編集のため誰でも可（ログイン不要）。
      *
-     * @param auth 認証情報（管理者限定）
+     * 追加・削除は管理者のみだが、メモ（ドラフト選考の覚書）は閲覧者全員が書き込める。
+     *
      * @param id   参加者エントリ（KinjoCupParticipant）の ID
      * @param req  新しいメモ本文（null/空文字でメモ消去）
-     * @return 更新後の参加者サマリ。権限不足は 403、対象不在は 404、長すぎは 400。
+     * @return 更新後の参加者サマリ。対象不在は 404、長すぎは 400。
      */
     @PutMapping("/participants/{id}/note")
     @Transactional
-    public ResponseEntity<?> updateNote(Authentication auth, @PathVariable Long id,
+    public ResponseEntity<?> updateNote(@PathVariable Long id,
                                         @RequestBody UpdateNoteRequest req) {
-        User admin = requireAdmin(auth);
-        if (admin == null) {
-            return ResponseEntity.status(403).body(Map.of("error", "管理者のみメモを編集できます"));
-        }
         KinjoCupParticipant p = participantRepository.findById(id).orElse(null);
         if (p == null) {
             return ResponseEntity.status(404).body(Map.of("error", "対象の参加者が見つかりません"));

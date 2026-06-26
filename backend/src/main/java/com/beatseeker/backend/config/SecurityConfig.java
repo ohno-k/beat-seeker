@@ -190,10 +190,14 @@ public class SecurityConfig {
                                                 // 参加者・TL 向け API: 招待 URL に埋め込まれたトークン自体が本人確認材料。
                                                 // ログイン不要 (beat-seeker アカウントを持たない参加者を想定)。
                                                 .requestMatchers("/api/competition-access/**").permitAll()
-                                                // きんじょー杯 特設ページ: 参加者一覧の閲覧 (GET) は公開、
+                                                // きんじょー杯 特設ページ: 参加者一覧の閲覧 (GET) は公開。
+                                                // メモ編集 (PUT .../note) は誰でも可（協同編集のためログイン不要）。
                                                 // 追加・削除 (POST/DELETE) は要ログイン + Controller 側で管理者判定。
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,
                                                                 "/api/kinjocup/**")
+                                                .permitAll()
+                                                .requestMatchers(org.springframework.http.HttpMethod.PUT,
+                                                                "/api/kinjocup/participants/*/note")
                                                 .permitAll()
                                                 .requestMatchers("/api/kinjocup/**").authenticated()
                                                 // 上記いずれにも該当しないリクエストは公開扱い（静的リソース等）
