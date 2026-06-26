@@ -18,6 +18,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\FriendController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\GameDataController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\IntegrationTokenController.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\KinjoCupController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\KofiWebhookController.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\LoginRequest.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\controller\MonthlyWrappedController.java
@@ -56,6 +57,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\ExternalApiToken.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\FriendRequest.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\Friendship.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\KinjoCupParticipant.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\OptionVote.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\RankQuizMistake.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\entity\RankQuizProgress.java
@@ -89,6 +91,7 @@ C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\ExternalApiTokenRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\FriendRequestRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\FriendshipRepository.java
+C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\KinjoCupParticipantRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\OptionVoteRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\RankQuizMistakeRepository.java
 C:\Users\ohno\.gemini\antigravity\scratch\beat-seeker\backend\src\main\java\com\beatseeker\backend\repository\RankQuizProgressRepository.java

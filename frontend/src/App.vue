@@ -89,6 +89,9 @@ const CompetitionTlView = defineAsyncComponent(() => import('./views/Competition
 // 観戦客向け対戦表: `/competition/spectator/{token}` で直接アクセス。
 // ログイン不要・読み取り専用。公開済みのラインアップ・指定ジャンル・結果だけを一覧表示する。
 const CompetitionSpectatorView = defineAsyncComponent(() => import('./views/CompetitionSpectatorView.vue'));
+// きんじょー杯 特設ページ: `/kinjocup` のスタンドアロン URL。参加者一覧を公開閲覧する。
+// 追加・削除 UI は View 内で管理者ログイン時のみ表示する。
+const KinjoCupView = defineAsyncComponent(() => import('./views/KinjoCupView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
@@ -193,6 +196,13 @@ const competitionSpectatorToken = ref<string>(
     ? (window.location.pathname.replace(/^\/competition\/spectator\//, '').replace(/\/.*$/, '') || '')
     : ''
 );
+
+/**
+ * 現在 URL が `/kinjocup` かどうか。
+ * きんじょー杯の特設ページ。参加者一覧を公開閲覧でき、管理者ログイン時のみ追加/削除 UI が出る。
+ * サイドバー等を描画しないスタンドアロン。トークンは不要（参加者は DB 名簿から取得）。
+ */
+const isKinjoCupPage = ref(window.location.pathname.replace(/\/$/, '') === '/kinjocup');
 
 const { hasUpdate } = useAppUpdate();
 /** Service Worker による新バージョン通知を受けた際の更新ボタン。単純にページ再読込を行う。 */
@@ -1526,6 +1536,8 @@ const handleUnifiedClose = async () => {
   <CompetitionTlView v-else-if="isCompetitionTlPage" :token="competitionTlToken" />
   <!-- 観戦客向け対戦表ページ: token を抽出して読み取り専用 View を表示。ログイン不要のスタンドアロン。 -->
   <CompetitionSpectatorView v-else-if="isCompetitionSpectatorPage" :token="competitionSpectatorToken" />
+  <!-- きんじょー杯 特設ページ: 参加者一覧を公開閲覧。追加/削除 UI は View 内で管理者ログイン時のみ表示。 -->
+  <KinjoCupView v-else-if="isKinjoCupPage" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
     <!-- ============================================================ -->
     <!-- エイプリルフール限定オーバーレイ（常時マウントだが中身は日付判定） -->
