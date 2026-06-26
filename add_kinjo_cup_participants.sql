@@ -4,9 +4,13 @@
 CREATE TABLE IF NOT EXISTS kinjo_cup_participants (
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT      NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    note       VARCHAR(2000),
     created_at TIMESTAMP   NOT NULL DEFAULT NOW(),
     CONSTRAINT uk_kinjo_cup_participants_user UNIQUE (user_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_kinjo_cup_participants_user_id
     ON kinjo_cup_participants (user_id);
+
+-- 既にテーブルがある場合に note 列を後付けする（ドラフト選考メモ機能の追加）。
+ALTER TABLE kinjo_cup_participants ADD COLUMN IF NOT EXISTS note VARCHAR(2000);

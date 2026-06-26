@@ -39,6 +39,10 @@ public class KinjoCupParticipant {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    /** 主催者がドラフト選考の参考に書く自由メモ（任意）。全閲覧者に表示される。 */
+    @Column(length = 2000)
+    private String note;
+
     /** 名簿への登録日時。 */
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

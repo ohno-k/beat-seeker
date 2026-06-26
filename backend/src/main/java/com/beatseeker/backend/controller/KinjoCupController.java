@@ -135,6 +135,36 @@ public class KinjoCupController {
     }
 
     /**
+     * 【メソッドの役割】 参加者のメモを更新する（管理者のみ）。
+     *
+     * @param auth 認証情報（管理者限定）
+     * @param id   参加者エントリ（KinjoCupParticipant）の ID
+     * @param req  新しいメモ本文（null/空文字でメモ消去）
+     * @return 更新後の参加者サマリ。権限不足は 403、対象不在は 404、長すぎは 400。
+     */
+    @PutMapping("/participants/{id}/note")
+    @Transactional
+    public ResponseEntity<?> updateNote(Authentication auth, @PathVariable Long id,
+                                        @RequestBody UpdateNoteRequest req) {
+        User admin = requireAdmin(auth);
+        if (admin == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみメモを編集できます"));
+        }
+        KinjoCupParticipant p = participantRepository.findById(id).orElse(null);
+        if (p == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "対象の参加者が見つかりません"));
+        }
+        String note = req == null || req.note() == null ? null : req.note().trim();
+        if (note != null && note.length() > 2000) {
+            return ResponseEntity.badRequest().body(Map.of("error", "メモは2000文字以内で入力してください"));
+        }
+        // 空文字は「メモ無し」として null 化する。
+        p.setNote(note == null || note.isEmpty() ? null : note);
+        participantRepository.save(p);
+        return ResponseEntity.ok(toPublicMap(p));
+    }
+
+    /**
      * 【メソッドの役割】 参加者を名簿から削除する（管理者のみ）。
      *
      * @param auth 認証情報（管理者限定）
@@ -209,10 +239,15 @@ public class KinjoCupController {
         m.put("arenaRank", u.getArenaRank() != null ? u.getArenaRank() : "");
         m.put("totalBeatPt", u.getTotalBeatPt() != null ? u.getTotalBeatPt() : 0.0);
         m.put("lastUploadedAt", u.getLastUploadedAt());
+        m.put("note", p.getNote() != null ? p.getNote() : "");
         return m;
     }
 
     /** 参加者追加リクエストのボディ（追加対象ユーザーの ID）。 */
     public record AddParticipantRequest(Long userId) {
+    }
+
+    /** メモ更新リクエストのボディ。 */
+    public record UpdateNoteRequest(String note) {
     }
 }

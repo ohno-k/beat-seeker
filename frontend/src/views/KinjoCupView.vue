@@ -30,6 +30,12 @@
           <span class="font-mono font-bold text-slate-600 dark:text-slate-300 text-sm">総合力 {{ formatBeatPt(selectedParticipant.totalBeatPt) }}</span>
         </div>
 
+        <!-- メモ（あれば表示。編集は一覧の鉛筆アイコンから） -->
+        <div v-if="selectedParticipant.note" class="flex items-start gap-2 mb-5 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/50 text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap break-words">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+          <span>{{ selectedParticipant.note }}</span>
+        </div>
+
         <!-- タブ切替: ダッシュボード / スコア一覧 -->
         <div class="flex gap-1 mb-5 border-b border-slate-200 dark:border-slate-700">
           <button @click="detailTab = 'dashboard'" :class="tabClass('dashboard')">ダッシュボード</button>
@@ -117,17 +123,14 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-            <tr
-              v-for="(p, idx) in participants"
-              :key="p.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
-            >
+            <template v-for="(p, idx) in participants" :key="p.id">
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
               <!-- 順位 -->
-              <td class="px-3 sm:px-4 py-3 text-center">
+              <td class="px-3 sm:px-4 py-3 text-center align-top">
                 <span :class="rankBadgeClass(idx)">{{ idx + 1 }}</span>
               </td>
-              <!-- DJ名（クリックで /kinjocup 内に詳細を表示） -->
-              <td class="px-3 sm:px-4 py-3">
+              <!-- DJ名（クリックで /kinjocup 内に詳細を表示） + メモ -->
+              <td class="px-3 sm:px-4 py-3 align-top">
                 <button
                   @click="openDetail(p)"
                   class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline break-all text-left"
@@ -136,36 +139,73 @@
                   <span v-if="p.danRank" class="px-1.5 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold rounded">{{ p.danRank }}</span>
                   <span v-if="p.arenaRank" class="px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold rounded">{{ p.arenaRank }}</span>
                 </div>
+                <!-- メモ表示（全閲覧者） -->
+                <p v-if="p.note" class="text-xs text-slate-600 dark:text-slate-300 mt-1 whitespace-pre-wrap break-words flex items-start gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                  <span>{{ p.note }}</span>
+                </p>
                 <p v-if="p.lastUploadedAt" class="text-[11px] text-slate-400 mt-0.5">更新: {{ formatDate(p.lastUploadedAt) }}</p>
               </td>
               <!-- 総合力 -->
-              <td class="px-3 sm:px-4 py-3 text-right font-mono font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">
+              <td class="px-3 sm:px-4 py-3 text-right font-mono font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap align-top">
                 {{ formatBeatPt(p.totalBeatPt) }}
               </td>
               <!-- 段位 -->
-              <td class="px-3 sm:px-4 py-3 text-center hidden sm:table-cell">
+              <td class="px-3 sm:px-4 py-3 text-center hidden sm:table-cell align-top">
                 <span v-if="p.danRank" class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-bold rounded">{{ p.danRank }}</span>
                 <span v-else class="text-slate-300 dark:text-slate-600">—</span>
               </td>
               <!-- アリーナ -->
-              <td class="px-3 sm:px-4 py-3 text-center hidden sm:table-cell">
+              <td class="px-3 sm:px-4 py-3 text-center hidden sm:table-cell align-top">
                 <span v-if="p.arenaRank" class="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs font-bold rounded">{{ p.arenaRank }}</span>
                 <span v-else class="text-slate-300 dark:text-slate-600">—</span>
               </td>
-              <!-- 削除（管理者のみ） -->
-              <td v-if="isAdmin" class="px-3 sm:px-4 py-3 text-center">
-                <button
-                  @click="handleRemove(p)"
-                  :disabled="removingId === p.id"
-                  class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-40"
-                  title="名簿から削除"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                  </svg>
-                </button>
+              <!-- メモ編集・削除（管理者のみ） -->
+              <td v-if="isAdmin" class="px-3 sm:px-4 py-3 text-center align-top">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button
+                    @click="startEditNote(p)"
+                    class="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    :title="p.note ? 'メモを編集' : 'メモを追加'"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                  </button>
+                  <button
+                    @click="handleRemove(p)"
+                    :disabled="removingId === p.id"
+                    class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-40"
+                    title="名簿から削除"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               </td>
             </tr>
+            <!-- メモ インライン編集行（管理者のみ） -->
+            <tr v-if="isAdmin && editingNoteId === p.id" class="bg-indigo-50/50 dark:bg-indigo-900/10">
+              <td :colspan="6" class="px-3 sm:px-4 py-3">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ p.displayName || '名無し' }} のメモ</label>
+                <textarea
+                  v-model="noteDraft"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="ドラフト選考の参考メモ（例: 皿が得意 / 第1巡指名候補 / 縦連が苦手 など）"
+                  class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
+                ></textarea>
+                <div class="flex items-center justify-end gap-2 mt-2">
+                  <span v-if="noteError" class="text-xs text-red-600 dark:text-red-400 mr-auto">{{ noteError }}</span>
+                  <button @click="cancelEditNote" class="px-3 py-1.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">キャンセル</button>
+                  <button
+                    @click="saveNote(p)"
+                    :disabled="savingNote"
+                    class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50"
+                  >{{ savingNote ? '保存中...' : '保存' }}</button>
+                </div>
+              </td>
+            </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -259,7 +299,7 @@ import type { ScoreData } from '../types/ScoreData';
 import ScoreDashboard from '../components/ScoreDashboard.vue';
 import ScoreSummary from '../components/ScoreSummary.vue';
 
-const { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, removeParticipant } = useKinjoCup();
+const { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
 const { fetchAllUsers } = useScores();
 const { isAdmin } = useAdmin();
 
@@ -412,6 +452,49 @@ const handleAdd = async (u: any) => {
     addError.value = `${u.displayName || u.iidxId} の追加に失敗: ${e?.message || ''}`;
   } finally {
     addingId.value = null;
+  }
+};
+
+// ---------- メモ編集（管理者のみ・一覧でインライン編集） ----------
+/** 現在メモ編集中の参加者エントリ ID（null なら非編集）。 */
+const editingNoteId = ref<number | null>(null);
+/** 編集中メモの下書き。 */
+const noteDraft = ref('');
+/** メモ保存中フラグ。 */
+const savingNote = ref(false);
+/** メモ保存エラー文言。 */
+const noteError = ref('');
+
+/** メモ編集を開始（その行の下にテキストエリアを展開）。 */
+const startEditNote = (p: KinjoCupParticipant) => {
+  editingNoteId.value = p.id;
+  noteDraft.value = p.note || '';
+  noteError.value = '';
+};
+
+/** メモ編集をキャンセル。 */
+const cancelEditNote = () => {
+  editingNoteId.value = null;
+  noteDraft.value = '';
+  noteError.value = '';
+};
+
+/** メモを保存し、ローカルの参加者データへ即時反映する。 */
+const saveNote = async (p: KinjoCupParticipant) => {
+  savingNote.value = true;
+  noteError.value = '';
+  try {
+    const updated = await updateNote(p.id, noteDraft.value.trim());
+    // 一覧側のメモを即時反映（並び順は変わらない）。
+    const target = participants.value.find(x => x.id === p.id);
+    if (target) target.note = updated.note;
+    // 詳細表示中の同一参加者にも反映。
+    if (selectedParticipant.value?.id === p.id) selectedParticipant.value.note = updated.note;
+    cancelEditNote();
+  } catch (e: any) {
+    noteError.value = e?.message || 'メモの保存に失敗しました。';
+  } finally {
+    savingNote.value = false;
   }
 };
 

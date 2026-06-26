@@ -27,6 +27,8 @@ export interface KinjoCupParticipant {
   totalBeatPt: number;
   /** 最終アップロード日時（データ鮮度の目安）。null あり。 */
   lastUploadedAt: string | null;
+  /** 主催者が書くドラフト選考メモ（無ければ空文字）。 */
+  note: string;
 }
 
 /**
@@ -96,6 +98,25 @@ export function useKinjoCup() {
   };
 
   /**
+   * 参加者のメモを更新する（管理者のみ）。空文字を送るとメモ消去。
+   * @param id   参加者エントリの ID
+   * @param note 新しいメモ本文
+   * @returns 更新後の参加者サマリ
+   */
+  const updateNote = async (id: number, note: string): Promise<KinjoCupParticipant> => {
+    const res = await fetch(`${API_BASE}/api/kinjocup/participants/${id}/note`, {
+      method: 'PUT',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ note }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.error || `メモの保存に失敗しました (${res.status})`);
+    }
+    return (await res.json()) as KinjoCupParticipant;
+  };
+
+  /**
    * 参加者を名簿から削除する（管理者のみ）。
    * @param id 参加者エントリの ID（userId ではない）
    */
@@ -110,5 +131,5 @@ export function useKinjoCup() {
     }
   };
 
-  return { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, removeParticipant };
+  return { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, updateNote, removeParticipant };
 }
