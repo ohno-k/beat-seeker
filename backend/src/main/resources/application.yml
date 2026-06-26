@@ -89,9 +89,3 @@ storage:
 admin:
   user-id: ${ADMIN_USER_ID:18}
   iidx-id: ${ADMIN_IIDX_ID:5787-1145}
-
-# きんじょー杯 特設ページ（/kinjocup）の閲覧を許可するユーザー ID（ドラフト選考の関係者）。
-# カンマ区切り。ここに含まれるユーザー、および管理者だけが参加者一覧を閲覧できる。
-# 参加者の追加・削除は引き続き管理者のみ。
-kinjocup:
-  viewer-ids: ${KINJOCUP_VIEWER_IDS:18,24,30,655,134,108}

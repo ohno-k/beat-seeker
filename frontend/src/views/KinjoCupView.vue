@@ -10,33 +10,63 @@
     </header>
 
     <main class="max-w-5xl mx-auto px-4 py-6 sm:py-8">
-      <!-- 未ログイン: ログインへ誘導 -->
-      <div v-if="accessState === 'unauthorized'" class="max-w-md mx-auto text-center py-16">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-        <h2 class="text-lg font-bold text-slate-700 dark:text-slate-200">ログインが必要です</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          このページはきんじょー杯の選考関係者のみ閲覧できます。<br />beat-seeker にログインしてからアクセスしてください。
-        </p>
-        <a href="/" class="inline-block mt-5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-colors">
-          トップページでログイン
-        </a>
-      </div>
+      <!-- ============ 参加者詳細（ダッシュボード / スコア一覧） ============ -->
+      <section v-if="selectedParticipant">
+        <button
+          @click="closeDetail()"
+          class="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:underline mb-4"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          参加者一覧に戻る
+        </button>
 
-      <!-- ログイン済みだが権限なし -->
-      <div v-else-if="accessState === 'forbidden'" class="max-w-md mx-auto text-center py-16">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-        </svg>
-        <h2 class="text-lg font-bold text-slate-700 dark:text-slate-200">閲覧権限がありません</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          このページはきんじょー杯の選考関係者のみ閲覧できます。<br />
-          閲覧が必要な場合は主催者までご連絡ください。
-        </p>
-      </div>
+        <!-- 参加者ヘッダ -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4">
+          <h2 class="text-2xl font-black text-slate-800 dark:text-white break-all">{{ selectedParticipant.displayName || '名無し' }}</h2>
+          <span v-if="selectedParticipant.danRank" class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-bold rounded">{{ selectedParticipant.danRank }}</span>
+          <span v-if="selectedParticipant.arenaRank" class="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs font-bold rounded">{{ selectedParticipant.arenaRank }}</span>
+          <span class="font-mono font-bold text-slate-600 dark:text-slate-300 text-sm">総合力 {{ formatBeatPt(selectedParticipant.totalBeatPt) }}</span>
+        </div>
 
-      <!-- 閲覧可能: 通常表示 -->
+        <!-- タブ切替: ダッシュボード / スコア一覧 -->
+        <div class="flex gap-1 mb-5 border-b border-slate-200 dark:border-slate-700">
+          <button @click="detailTab = 'dashboard'" :class="tabClass('dashboard')">ダッシュボード</button>
+          <button @click="detailTab = 'scores'" :class="tabClass('scores')">スコア一覧</button>
+        </div>
+
+        <!-- 取得状態 -->
+        <div v-if="detailLoading" class="flex flex-col items-center justify-center py-16">
+          <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <p class="text-slate-500 font-medium">スコアを取得中...</p>
+        </div>
+        <div v-else-if="detailError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl border border-red-200 dark:border-red-800">
+          {{ detailError }}
+        </div>
+        <div v-else-if="detailScores.length === 0" class="text-center py-16 text-slate-500 dark:text-slate-400">
+          表示できるスコアデータがありません。
+        </div>
+        <template v-else>
+          <ScoreDashboard
+            v-if="detailTab === 'dashboard'"
+            :scores="detailScores"
+            :totalPoints="selectedParticipant.totalBeatPt"
+            :viewingMode="'public'"
+            :viewingIidxId="selectedParticipant.iidxId"
+            :viewingDisplayName="selectedParticipant.displayName"
+            class="w-full"
+          />
+          <ScoreSummary
+            v-else
+            :scores="detailScores"
+            :viewingMode="'public'"
+            class="w-full"
+          />
+        </template>
+      </section>
+
+      <!-- ============ 参加者一覧 ============ -->
       <template v-else>
       <!-- ツールバー: 件数 + (管理者のみ) 追加ボタン -->
       <div class="flex items-center justify-between gap-3 mb-4">
@@ -96,12 +126,12 @@
               <td class="px-3 sm:px-4 py-3 text-center">
                 <span :class="rankBadgeClass(idx)">{{ idx + 1 }}</span>
               </td>
-              <!-- DJ名（詳細ページへのリンク） -->
+              <!-- DJ名（クリックで /kinjocup 内に詳細を表示） -->
               <td class="px-3 sm:px-4 py-3">
-                <a
-                  :href="`/user/${p.userId}`"
-                  class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline break-all"
-                >{{ p.displayName || '名無し' }}</a>
+                <button
+                  @click="openDetail(p)"
+                  class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline break-all text-left"
+                >{{ p.displayName || '名無し' }}</button>
                 <div class="flex items-center gap-2 mt-0.5 sm:hidden">
                   <span v-if="p.danRank" class="px-1.5 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold rounded">{{ p.danRank }}</span>
                   <span v-if="p.arenaRank" class="px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold rounded">{{ p.arenaRank }}</span>
@@ -213,18 +243,23 @@
 /**
  * 【ビューの役割】「きんじょー杯」特設ページ（/kinjocup）。
  *
- * - 誰でも閲覧できる読み取り専用の参加者一覧（総合力 Beat-Pt 降順）。各行から /user/:userId の詳細へリンク。
+ * - 誰でも閲覧できる読み取り専用の参加者一覧（総合力 Beat-Pt 降順）。
+ *   DJ名クリックで /kinjocup 内に留まったまま、その参加者のダッシュボード/スコア一覧を表示する
+ *   （beat-seeker 本体へは遷移しない。?user=<id> のクエリで戻る/進む・直リンクに対応）。
  * - 管理者がログイン中のときだけ「参加者を追加 / 削除」の GUI を表示する。
  *   追加は既存ユーザーを検索して名簿に登録する方式（参加者は beat-seeker ユーザーであることが前提）。
  *
  * App.vue が `/kinjocup` パスを検知してこのビューを単独描画する（サイドバー等は描画しない）。
  */
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useKinjoCup, KinjoCupAccessError, type KinjoCupParticipant } from '../composables/useKinjoCup';
+import { useKinjoCup, type KinjoCupParticipant } from '../composables/useKinjoCup';
 import { useScores } from '../composables/useScores';
 import { useAdmin } from '../composables/useAdmin';
+import type { ScoreData } from '../types/ScoreData';
+import ScoreDashboard from '../components/ScoreDashboard.vue';
+import ScoreSummary from '../components/ScoreSummary.vue';
 
-const { isLoading, fetchParticipants, addParticipant, removeParticipant } = useKinjoCup();
+const { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, removeParticipant } = useKinjoCup();
 const { fetchAllUsers } = useScores();
 const { isAdmin } = useAdmin();
 
@@ -234,23 +269,88 @@ const participants = ref<KinjoCupParticipant[]>([]);
 const loadError = ref('');
 /** 削除中の参加者エントリ ID（多重押下防止）。 */
 const removingId = ref<number | null>(null);
-/** 閲覧アクセス状態。ok=表示 / unauthorized=未ログイン / forbidden=権限なし / error=その他失敗。 */
-const accessState = ref<'ok' | 'unauthorized' | 'forbidden' | 'error'>('ok');
 
-/** 参加者一覧を取得して participants に反映する。401/403 はアクセス状態に振り分ける。 */
+/** 参加者一覧を取得して participants に反映する。 */
 const loadParticipants = async () => {
   loadError.value = '';
   try {
     participants.value = await fetchParticipants();
-    accessState.value = 'ok';
   } catch (e: any) {
-    if (e instanceof KinjoCupAccessError) {
-      accessState.value = e.code; // 'unauthorized' | 'forbidden'
-    } else {
-      accessState.value = 'error';
-      loadError.value = e?.message || '参加者の取得に失敗しました。';
+    loadError.value = e?.message || '参加者の取得に失敗しました。';
+  }
+};
+
+// ---------- 参加者詳細（ダッシュボード / スコア一覧） ----------
+/** 現在詳細表示中の参加者（null なら一覧表示）。 */
+const selectedParticipant = ref<KinjoCupParticipant | null>(null);
+/** 詳細のスコア（曲単位グルーピング済み）。 */
+const detailScores = ref<ScoreData[]>([]);
+/** 詳細スコア取得中フラグ。 */
+const detailLoading = ref(false);
+/** 詳細スコア取得エラー。 */
+const detailError = ref('');
+/** 詳細の表示タブ。 */
+const detailTab = ref<'dashboard' | 'scores'>('dashboard');
+
+/** 詳細タブのボタン装飾。 */
+const tabClass = (tab: 'dashboard' | 'scores'): string => {
+  const base = 'px-4 py-2 text-sm font-bold -mb-px border-b-2 transition-colors';
+  return detailTab.value === tab
+    ? `${base} border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400`
+    : `${base} border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200`;
+};
+
+/**
+ * 参加者の詳細（ダッシュボード + スコア一覧）を /kinjocup 内で開く。
+ * 画面遷移はせず、URL のクエリ (?user=) だけ更新してブラウザの戻る/進むに対応する。
+ *
+ * @param p     対象参加者
+ * @param push  履歴に積むか（popstate からの復元時は false）
+ */
+const openDetail = async (p: KinjoCupParticipant, push = true) => {
+  selectedParticipant.value = p;
+  detailTab.value = 'dashboard';
+  detailScores.value = [];
+  detailError.value = '';
+  if (push) {
+    history.pushState({ kinjocupUser: p.userId }, '', `/kinjocup?user=${p.userId}`);
+  }
+  document.title = `${p.displayName || '参加者'} | きんじょー杯`;
+  window.scrollTo({ top: 0 });
+
+  detailLoading.value = true;
+  try {
+    detailScores.value = await fetchParticipantScores(p.userId);
+  } catch (e: any) {
+    detailError.value = e?.message || 'スコアの取得に失敗しました。';
+  } finally {
+    detailLoading.value = false;
+  }
+};
+
+/** 詳細を閉じて参加者一覧に戻る。 */
+const closeDetail = (push = true) => {
+  selectedParticipant.value = null;
+  detailScores.value = [];
+  detailError.value = '';
+  if (push) {
+    history.pushState({}, '', '/kinjocup');
+  }
+  document.title = 'きんじょー杯 参加者一覧 | beat-seeker';
+};
+
+/** URL のクエリ (?user=) を見て詳細/一覧の状態を同期する（初回ロード・popstate 用）。 */
+const syncFromUrl = () => {
+  const uid = new URLSearchParams(window.location.search).get('user');
+  if (uid) {
+    const p = participants.value.find(x => String(x.userId) === uid);
+    if (p) {
+      openDetail(p, false);
+      return;
     }
   }
+  // クエリが無い / 該当参加者が居ない場合は一覧に戻す（履歴は積まない）
+  if (selectedParticipant.value) closeDetail(false);
 };
 
 // ---------- 追加モーダル ----------
@@ -352,17 +452,25 @@ const rankBadgeClass = (idx: number): string => {
 
 // ---------- ライフサイクル ----------
 let robotsMeta: HTMLMetaElement | null = null;
-onMounted(() => {
+/** ブラウザの戻る/進むで詳細⇔一覧を同期する popstate ハンドラ。 */
+const onPopState = () => syncFromUrl();
+
+onMounted(async () => {
   document.title = 'きんじょー杯 参加者一覧 | beat-seeker';
   // 参加者の個人データを含むため検索エンジンには載せない。
   robotsMeta = document.createElement('meta');
   robotsMeta.name = 'robots';
   robotsMeta.content = 'noindex,nofollow';
   document.head.appendChild(robotsMeta);
-  loadParticipants();
+
+  await loadParticipants();
+  // 直リンク（/kinjocup?user=123）で開かれた場合は該当参加者の詳細を表示。
+  syncFromUrl();
+  window.addEventListener('popstate', onPopState);
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener('popstate', onPopState);
   if (robotsMeta) {
     document.head.removeChild(robotsMeta);
     robotsMeta = null;

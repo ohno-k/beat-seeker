@@ -25,6 +25,68 @@ function assignBestStat(entry: any, diffKey: string, stat: DifficultyStats): voi
 }
 
 /**
+ * API が返す「譜面 1 件 = 1 レコード」のフラット配列を、UI が扱いやすい
+ * 「曲単位にグルーピングした構造（全難易度を埋めた ScoreData）」へ変換する。
+ *
+ * fetchMyScores / fetchUserScores と、きんじょー杯の参加者詳細表示などで共通利用する。
+ * 同一(曲,難易度)に複数 source の行が来た場合は {@link assignBestStat} が EX 最高を残す。
+ */
+export function groupFlatScores(flatScores: any[]): ScoreData[] {
+    const grouped = new Map<string, any>();
+
+    /** 未プレイ状態の 1 難易度分のダミー値。全難易度を埋めておくため。 */
+    const emptyDiff = (): DifficultyStats => ({
+        difficulty: null,
+        score: 0,
+        pgreat: 0,
+        great: 0,
+        missCount: null,
+        clearType: 'NO PLAY',
+        djLevel: '---',
+        options: undefined,
+        id: undefined,
+    });
+
+    flatScores.forEach((s: any) => {
+        const title = s.title;
+        if (!grouped.has(title)) {
+            grouped.set(title, {
+                version: '0',
+                title: title,
+                genre: s.genre || '',
+                artist: s.artist || '',
+                playCount: s.playCount || 0,
+                lastPlayTime: '',
+                beginner: emptyDiff(),
+                normal: emptyDiff(),
+                hyper: emptyDiff(),
+                another: emptyDiff(),
+                leggendaria: emptyDiff(),
+            });
+        }
+
+        const entry = grouped.get(title);
+        // API の 'ANOTHER' を UI の 'another' キーに正規化
+        const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
+
+        assignBestStat(entry, diffKey, {
+            id: s.id,
+            difficulty: s.difficultyLevel,
+            score: s.score,
+            pgreat: s.pgreat || 0,
+            great: s.great || 0,
+            missCount: s.missCount,
+            clearType: s.clearType,
+            djLevel: s.djLevel,
+            options: Array.isArray(s.options) ? s.options : undefined,
+            source: s.source || 'arcade',
+        });
+    });
+
+    return Array.from(grouped.values());
+}
+
+/**
  * 【Composable の役割】 スコア取得系 API（自分 / 他ユーザ / トップランカー / プロフィール / メモ）を一括提供する。
  *
  * API が返す「譜面フラット配列」を、UI が扱いやすい「曲単位にグルーピングした構造」に変換する
@@ -66,61 +128,8 @@ export function useScores() {
 
             const flatScores = await res.json();
 
-            // タイトル単位でグルーピング
-            const grouped = new Map<string, any>();
-
-            /** 未プレイ状態の 1 難易度分のダミー値。全難易度を埋めておくため。 */
-            const emptyDiff = (): DifficultyStats => ({
-                difficulty: null,
-                score: 0,
-                pgreat: 0,
-                great: 0,
-                missCount: null,
-                clearType: 'NO PLAY',
-                djLevel: '---',
-                options: undefined,
-                id: undefined
-            });
-
-            flatScores.forEach((s: any) => {
-                const title = s.title;
-                // 初出タイトルは「全難易度 NO PLAY」のテンプレートを用意
-                if (!grouped.has(title)) {
-                    grouped.set(title, {
-                        version: '0',
-                        title: title,
-                        genre: s.genre || '',
-                        artist: s.artist || '',
-                        playCount: s.playCount || 0,
-                        lastPlayTime: '',
-                        beginner: emptyDiff(),
-                        normal: emptyDiff(),
-                        hyper: emptyDiff(),
-                        another: emptyDiff(),
-                        leggendaria: emptyDiff(),
-                    });
-                }
-
-                const entry = grouped.get(title);
-                // API の 'ANOTHER' を UI の 'another' キーに正規化
-                const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
-
-                // arcade / infinitas が並走する場合は EX SCORE が高い方を残し、その source を持たせる。
-                assignBestStat(entry, diffKey, {
-                    id: s.id,
-                    difficulty: s.difficultyLevel,
-                    score: s.score,
-                    pgreat: s.pgreat || 0,
-                    great: s.great || 0,
-                    missCount: s.missCount,
-                    clearType: s.clearType,
-                    djLevel: s.djLevel,
-                    options: Array.isArray(s.options) ? s.options : undefined,
-                    source: s.source || 'arcade',
-                });
-            });
-
-            return Array.from(grouped.values());
+            // タイトル単位でグルーピング（共通関数 groupFlatScores に集約）
+            return groupFlatScores(flatScores);
         } finally {
             isFetching.value = false;
         }
@@ -178,58 +187,8 @@ export function useScores() {
             }
 
             const flatScores = await res.json();
-            // fetchMyScores と同じグルーピング処理
-            const grouped = new Map<string, any>();
-
-            const emptyDiff = (): DifficultyStats => ({
-                difficulty: null,
-                score: 0,
-                pgreat: 0,
-                great: 0,
-                missCount: null,
-                clearType: 'NO PLAY',
-                djLevel: '---',
-                options: undefined,
-                id: undefined
-            });
-
-            flatScores.forEach((s: any) => {
-                const title = s.title;
-                if (!grouped.has(title)) {
-                    grouped.set(title, {
-                        version: '0',
-                        title: title,
-                        genre: s.genre || '',
-                        artist: s.artist || '',
-                        playCount: s.playCount || 0,
-                        lastPlayTime: '',
-                        beginner: emptyDiff(),
-                        normal: emptyDiff(),
-                        hyper: emptyDiff(),
-                        another: emptyDiff(),
-                        leggendaria: emptyDiff(),
-                    });
-                }
-
-                const entry = grouped.get(title);
-                const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
-
-                // arcade / infinitas が並走する場合は EX SCORE が高い方を残し、その source を持たせる。
-                assignBestStat(entry, diffKey, {
-                    id: s.id,
-                    difficulty: s.difficultyLevel,
-                    score: s.score,
-                    pgreat: s.pgreat || 0,
-                    great: s.great || 0,
-                    missCount: s.missCount,
-                    clearType: s.clearType,
-                    djLevel: s.djLevel,
-                    options: Array.isArray(s.options) ? s.options : undefined,
-                    source: s.source || 'arcade',
-                });
-            });
-
-            return Array.from(grouped.values());
+            // fetchMyScores と同じグルーピング処理（共通関数 groupFlatScores に集約）
+            return groupFlatScores(flatScores);
         } finally {
             isFetching.value = false;
         }

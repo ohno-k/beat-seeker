@@ -1,22 +1,10 @@
 import { ref } from 'vue';
 import { useAuth } from './useAuth';
+import { groupFlatScores } from './useScores';
+import type { ScoreData } from '../types/ScoreData';
 
 /** バックエンド API のベース URL。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
-
-/** 閲覧アクセス拒否の種別。401=未ログイン / 403=ホワイトリスト外。 */
-export type KinjoCupAccessCode = 'unauthorized' | 'forbidden';
-
-/**
- * 参加者一覧の取得が権限で弾かれたときに投げるエラー。
- * 呼び出し側は `code` を見て「ログインが必要」か「権限なし」かを出し分ける。
- */
-export class KinjoCupAccessError extends Error {
-  constructor(public code: KinjoCupAccessCode) {
-    super(code);
-    this.name = 'KinjoCupAccessError';
-  }
-}
 
 /**
  * きんじょー杯 特設ページ（/kinjocup）に掲載する参加者 1 人分のサマリ。
@@ -25,8 +13,10 @@ export class KinjoCupAccessError extends Error {
 export interface KinjoCupParticipant {
   /** 参加者エントリの ID（削除時に使う。userId とは別物）。 */
   id: number;
-  /** beat-seeker ユーザーの ID（/user/:userId の詳細リンクに使う）。 */
+  /** beat-seeker ユーザーの ID（詳細表示・スコア取得に使う）。 */
   userId: number;
+  /** IIDX ID（例: "1234-5678"）。詳細ダッシュボードのランキング照合に使う。 */
+  iidxId: string;
   /** DJ ネーム。 */
   displayName: string;
   /** 段位（例: "皆伝"）。未設定は空文字。 */
@@ -52,17 +42,13 @@ export function useKinjoCup() {
   const isLoading = ref(false);
 
   /**
-   * 参加者一覧を取得する（閲覧ホワイトリストのみ・総合力降順でサーバから返る）。
-   * 401/403 は {@link KinjoCupAccessError}、その他の失敗は通常の Error を投げる。
+   * 参加者一覧を取得する（公開・総合力降順でサーバから返る）。
+   * 失敗時は例外を投げる（呼び出し側でエラー表示）。
    */
   const fetchParticipants = async (): Promise<KinjoCupParticipant[]> => {
     isLoading.value = true;
     try {
-      const res = await fetch(`${API_BASE}/api/kinjocup/participants`, {
-        headers: authHeaders(),
-      });
-      if (res.status === 401) throw new KinjoCupAccessError('unauthorized');
-      if (res.status === 403) throw new KinjoCupAccessError('forbidden');
+      const res = await fetch(`${API_BASE}/api/kinjocup/participants`);
       if (!res.ok) {
         throw new Error(`一覧の取得に失敗しました (${res.status})`);
       }
@@ -70,6 +56,25 @@ export function useKinjoCup() {
     } finally {
       isLoading.value = false;
     }
+  };
+
+  /**
+   * 指定参加者のスコア一覧を取得する（特設ページ内のダッシュボード/スコア一覧用）。
+   * 名簿登録者のみ取得でき、プライバシー設定に関わらずサーバが返す。
+   * 戻り値は曲単位にグルーピング済みの ScoreData[]（ScoreDashboard/ScoreSummary にそのまま渡せる）。
+   *
+   * @param userId 参加者の beat-seeker ユーザー ID
+   */
+  const fetchParticipantScores = async (userId: number): Promise<ScoreData[]> => {
+    const res = await fetch(`${API_BASE}/api/kinjocup/participants/${userId}/scores`);
+    if (res.status === 404) {
+      throw new Error('対象は参加者として登録されていません');
+    }
+    if (!res.ok) {
+      throw new Error(`スコアの取得に失敗しました (${res.status})`);
+    }
+    const flat = await res.json();
+    return groupFlatScores(flat);
   };
 
   /**
@@ -105,5 +110,5 @@ export function useKinjoCup() {
     }
   };
 
-  return { isLoading, fetchParticipants, addParticipant, removeParticipant };
+  return { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, removeParticipant };
 }
