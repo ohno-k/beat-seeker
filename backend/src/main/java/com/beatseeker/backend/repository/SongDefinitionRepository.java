@@ -72,6 +72,21 @@ public interface SongDefinitionRepository extends JpaRepository<SongDefinition, 
     long countByRevision(String revision);
 
     /**
+     * 【メソッドの役割】 active リビジョンの LV12 ANOTHER/LEGGENDARIA 譜面数を返す。
+     *
+     * きんじょー杯の「AAA数 / MAX-数 ○○○/○○○」の分母（LV12 総数）に使う。
+     * notes が無い譜面は AAA/MAX- 判定不能のため分母からも除外し、達成率の上限を 100% に保つ。
+     *
+     * @return LV12 ANOTHER/LEGGENDARIA の譜面数
+     */
+    @Query(value =
+        "SELECT COUNT(*) FROM song_definitions " +
+        "WHERE revision = 'active' AND level = 12 AND difficulty IN ('4','10') " +
+        "  AND notes IS NOT NULL AND notes > 0",
+        nativeQuery = true)
+    long countActiveLv12AnotherLegg();
+
+    /**
      * 【メソッドの役割】 指定リビジョンの楽曲定義をまとめて削除する。
      *
      * {@link Modifying} は更新系クエリ実行の必須指定。

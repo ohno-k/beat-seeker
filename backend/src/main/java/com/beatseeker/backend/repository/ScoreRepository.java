@@ -265,6 +265,31 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
             @Param("userIds") java.util.Collection<Long> userIds);
 
     /**
+     * 【メソッドの役割】 指定ユーザー集合について、ANOTHER/LEGGENDARIA の譜面ごとベストスコアを
+     * song_definitions（active）の notes / level と一緒に返す。
+     *
+     * arcade/infinitas 等の重複行は user×曲×譜面で MAX(score) に集約してから notes/level を JOIN する
+     * （二重カウント防止）。きんじょー杯の「LV12 AAA数 / MAX-数 / RATE-TIER 下限」集計に使う。
+     *
+     * 返却キー: userId / title / difficultyName / score / notes / level
+     */
+    @Query(value =
+        "SELECT agg.user_id AS \"userId\", agg.title AS \"title\", " +
+        "       agg.difficulty_name AS \"difficultyName\", agg.score AS \"score\", " +
+        "       sd.notes AS \"notes\", sd.level AS \"level\" " +
+        "FROM (SELECT user_id, title, difficulty_name, MAX(score) AS score " +
+        "      FROM scores " +
+        "      WHERE difficulty_name IN ('ANOTHER','LEGGENDARIA') AND score > 0 AND user_id IN (:userIds) " +
+        "      GROUP BY user_id, title, difficulty_name) agg " +
+        "JOIN song_definitions sd ON sd.title = agg.title AND sd.revision = 'active' " +
+        "  AND ((agg.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') " +
+        "    OR (agg.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        "WHERE sd.notes IS NOT NULL AND sd.notes > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findBestAnotherLeggWithDefForUsers(
+            @Param("userIds") java.util.Collection<Long> userIds);
+
+    /**
      * 【メソッドの役割】 「譜面 A をプレイしているユーザー」の ANOTHER/LEGG 全スコアを 1 クエリで返す。
      *
      * Java 側の 2 段階フェッチを 1 クエリに統合し、user_id の IN リスト送信のコストを避ける。

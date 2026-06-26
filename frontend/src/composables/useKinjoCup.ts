@@ -29,6 +29,16 @@ export interface KinjoCupParticipant {
   lastUploadedAt: string | null;
   /** 主催者が書くドラフト選考メモ（無ければ空文字）。 */
   note: string;
+  /** LV12 ANOTHER/LEGGENDARIA の AAA 達成数。 */
+  lv12AaaCount: number;
+  /** LV12 ANOTHER/LEGGENDARIA の MAX- 達成数。 */
+  lv12MaxMinusCount: number;
+  /** LV12 ANOTHER/LEGGENDARIA の総譜面数（AAA数/MAX-数 の分母）。 */
+  lv12Total: number;
+  /** RATE-TIER 下限（100曲目）のスコアレート(%)。RATE-PT対象が100曲未満なら null。 */
+  rateFloorScoreRate: number | null;
+  /** RATE-PT 対象（スコア率 >= 77.77%）の譜面数。 */
+  rateEligibleCount: number;
 }
 
 /**

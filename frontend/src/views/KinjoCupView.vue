@@ -150,6 +150,9 @@
               <th class="px-3 sm:px-4 py-3 text-center font-semibold w-12">#</th>
               <th class="px-3 sm:px-4 py-3 text-left font-semibold">DJ名</th>
               <th class="px-3 sm:px-4 py-3 text-right font-semibold">総合力</th>
+              <th class="px-3 sm:px-4 py-3 text-center font-semibold hidden md:table-cell" title="LV12 ANOTHER/LEGGENDARIA の AAA 達成数 / 総数">AAA</th>
+              <th class="px-3 sm:px-4 py-3 text-center font-semibold hidden md:table-cell" title="LV12 ANOTHER/LEGGENDARIA の MAX- 達成数 / 総数">MAX-</th>
+              <th class="px-3 sm:px-4 py-3 text-center font-semibold hidden md:table-cell" title="RATE-TIER 下限（上位100曲目）のスコアレート">RATE下限</th>
               <th class="px-3 sm:px-4 py-3 text-center font-semibold hidden sm:table-cell">段位</th>
               <th class="px-3 sm:px-4 py-3 text-center font-semibold hidden sm:table-cell">アリーナ</th>
               <th class="px-3 sm:px-4 py-3 text-center font-semibold w-12">メモ</th>
@@ -172,6 +175,12 @@
                   <span v-if="p.danRank" class="px-1.5 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold rounded">{{ p.danRank }}</span>
                   <span v-if="p.arenaRank" class="px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold rounded">{{ p.arenaRank }}</span>
                 </div>
+                <!-- LV12/RATE 集計（モバイル: 名前下に集約表示） -->
+                <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 mt-1 md:hidden text-[11px] font-mono">
+                  <span class="text-slate-500 dark:text-slate-400">AAA <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ p.lv12AaaCount }}</span>/{{ p.lv12Total }}</span>
+                  <span class="text-slate-500 dark:text-slate-400">MAX- <span class="font-bold text-amber-600 dark:text-amber-400">{{ p.lv12MaxMinusCount }}</span>/{{ p.lv12Total }}</span>
+                  <span class="text-slate-500 dark:text-slate-400">下限 <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ formatRateFloor(p) }}</span></span>
+                </div>
                 <!-- メモ表示（全閲覧者） -->
                 <p v-if="p.note" class="text-xs text-slate-600 dark:text-slate-300 mt-1 whitespace-pre-wrap break-words flex items-start gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mt-0.5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -182,6 +191,19 @@
               <!-- 総合力 -->
               <td class="px-3 sm:px-4 py-3 text-right font-mono font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap align-top">
                 {{ formatBeatPt(p.totalBeatPt) }}
+              </td>
+              <!-- LV12 AAA数 / 総数 -->
+              <td class="px-3 sm:px-4 py-3 text-center hidden md:table-cell align-top whitespace-nowrap font-mono text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ p.lv12AaaCount }}</span> / {{ p.lv12Total }}
+              </td>
+              <!-- LV12 MAX-数 / 総数 -->
+              <td class="px-3 sm:px-4 py-3 text-center hidden md:table-cell align-top whitespace-nowrap font-mono text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-bold text-amber-600 dark:text-amber-400">{{ p.lv12MaxMinusCount }}</span> / {{ p.lv12Total }}
+              </td>
+              <!-- RATE-TIER 下限（100曲目）のスコアレート -->
+              <td class="px-3 sm:px-4 py-3 text-center hidden md:table-cell align-top whitespace-nowrap font-mono text-xs">
+                <span v-if="p.rateFloorScoreRate != null" class="font-bold text-indigo-600 dark:text-indigo-400">{{ p.rateFloorScoreRate.toFixed(2) }}%</span>
+                <span v-else class="text-slate-300 dark:text-slate-600" :title="`RATE-PT対象 ${p.rateEligibleCount} 曲（100曲未満）`">—</span>
               </td>
               <!-- 段位 -->
               <td class="px-3 sm:px-4 py-3 text-center hidden sm:table-cell align-top">
@@ -219,7 +241,7 @@
             </tr>
             <!-- メモ インライン編集行（全員） -->
             <tr v-if="editingNoteId === p.id" class="bg-indigo-50/50 dark:bg-indigo-900/10">
-              <td :colspan="6" class="px-3 sm:px-4 py-3">
+              <td :colspan="9" class="px-3 sm:px-4 py-3">
                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ p.displayName || '名無し' }} のメモ</label>
                 <textarea
                   v-model="noteDraft"
@@ -244,8 +266,9 @@
         </table>
       </div>
 
-      <p class="mt-4 text-[11px] text-slate-400 dark:text-slate-500">
-        ※ 総合力 (Beat-Pt) は beat-seeker の総合実力指標です。DJ名をタップすると各参加者の詳細データを確認できます。
+      <p class="mt-4 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
+        ※ 総合力 (Beat-Pt) は beat-seeker の総合実力指標です。DJ名をタップすると各参加者の詳細データを確認できます。<br />
+        ※ AAA数・MAX-数 は LV12（ANOTHER/LEGGENDARIA）の達成数 / 総譜面数。RATE下限 は RATE-TIER 上位100曲目のスコアレート（100曲未満は「—」）です。
       </p>
       </template>
     </main>
@@ -551,6 +574,10 @@ const handleRemove = async (p: KinjoCupParticipant) => {
 /** 総合力 Beat-Pt を見やすく整形する。 */
 const formatBeatPt = (v: number): string =>
   (v ?? 0).toLocaleString(undefined, { maximumFractionDigits: 1 });
+
+/** RATE-TIER 下限（100曲目）のスコアレートを整形する。100曲未満は "—"。 */
+const formatRateFloor = (p: KinjoCupParticipant): string =>
+  p.rateFloorScoreRate != null ? `${p.rateFloorScoreRate.toFixed(2)}%` : '—';
 
 /** ISO 日時を YYYY/MM/DD 表記にする。 */
 const formatDate = (iso: string): string => {

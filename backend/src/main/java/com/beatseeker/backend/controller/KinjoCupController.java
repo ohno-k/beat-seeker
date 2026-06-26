@@ -5,6 +5,7 @@ import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.KinjoCupParticipantRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
+import com.beatseeker.backend.repository.SongDefinitionRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +13,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 【クラスの役割】「きんじょー杯」特設ページ（/kinjocup）用の REST コントローラ。
@@ -46,16 +49,20 @@ public class KinjoCupController {
     private final UserRepository userRepository;
     /** 参加者の詳細表示（ダッシュボード/スコア一覧）用にスコアを引くリポジトリ。 */
     private final ScoreRepository scoreRepository;
+    /** LV12 総数・譜面メタ（notes/level）取得用リポジトリ。 */
+    private final SongDefinitionRepository songDefinitionRepository;
     /** 管理者判定ロジックを集約した Service。 */
     private final AdminAuthService adminAuthService;
 
     public KinjoCupController(KinjoCupParticipantRepository participantRepository,
                               UserRepository userRepository,
                               ScoreRepository scoreRepository,
+                              SongDefinitionRepository songDefinitionRepository,
                               AdminAuthService adminAuthService) {
         this.participantRepository = participantRepository;
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
+        this.songDefinitionRepository = songDefinitionRepository;
         this.adminAuthService = adminAuthService;
     }
 
@@ -69,13 +76,79 @@ public class KinjoCupController {
      */
     @GetMapping("/participants")
     public ResponseEntity<List<Map<String, Object>>> listParticipants() {
-        List<Map<String, Object>> result = participantRepository.findAllByOrderByCreatedAtAsc().stream()
-                .map(this::toPublicMap)
+        List<KinjoCupParticipant> parts = participantRepository.findAllByOrderByCreatedAtAsc();
+
+        // LV12 ANOTHER/LEGGENDARIA の総譜面数（AAA数/MAX-数 の分母）。全参加者共通の定数。
+        long lv12Total = songDefinitionRepository.countActiveLv12AnotherLegg();
+
+        // 参加者全員の譜面別ベストスコア（notes/level 付き）を 1 クエリで取得し、userId ごとに集計。
+        Map<Long, Lv12RateStats> statsByUser = new HashMap<>();
+        List<Long> userIds = parts.stream().map(p -> p.getUser().getId()).toList();
+        if (!userIds.isEmpty()) {
+            Map<Long, List<Map<String, Object>>> rowsByUser = scoreRepository
+                    .findBestAnotherLeggWithDefForUsers(userIds).stream()
+                    .collect(Collectors.groupingBy(r -> ((Number) r.get("userId")).longValue()));
+            rowsByUser.forEach((uid, rows) -> statsByUser.put(uid, computeStats(rows)));
+        }
+
+        List<Map<String, Object>> result = parts.stream()
+                .map(p -> {
+                    Map<String, Object> m = toPublicMap(p);
+                    Lv12RateStats st = statsByUser.getOrDefault(p.getUser().getId(), Lv12RateStats.EMPTY);
+                    m.put("lv12AaaCount", st.aaa());
+                    m.put("lv12MaxMinusCount", st.maxMinus());
+                    m.put("lv12Total", lv12Total);
+                    m.put("rateFloorScoreRate", st.rateFloor()); // 100曲未満なら null
+                    m.put("rateEligibleCount", st.rateEligible());
+                    return m;
+                })
                 .sorted(Comparator.comparingDouble(
                         (Map<String, Object> m) -> ((Number) m.getOrDefault("totalBeatPt", 0.0)).doubleValue())
                         .reversed())
                 .toList();
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 【メソッドの役割】 1 参加者分の「LV12 AAA数・MAX-数」と「RATE-TIER 下限（100曲目のスコアレート）」を計算する。
+     *
+     * 入力は {@link ScoreRepository#findBestAnotherLeggWithDefForUsers} の行
+     * （userId/title/difficultyName/score/notes/level、譜面別ベスト・重複排除済み）。
+     *
+     * - AAA  : LV12 かつ score*9 >= notes*16（スコア率 >= 8/9 ≒ 88.89%）
+     * - MAX- : LV12 かつ score*9 >= notes*17（スコア率 >= 17/18 ≒ 94.44%）
+     * - RATE-TIER 下限: ANOTHER/LEGGENDARIA 全レベルのうち RATE-PT 対象（スコア率 >= 77.77%）の
+     *   レートを降順に並べ、100 番目のスコアレート。100 曲未満なら null。
+     */
+    private Lv12RateStats computeStats(List<Map<String, Object>> rows) {
+        int aaa = 0;
+        int maxMinus = 0;
+        List<Double> eligibleRates = new ArrayList<>();
+        for (Map<String, Object> r : rows) {
+            long score = toLong(r.get("score"));
+            long notes = toLong(r.get("notes"));
+            if (notes <= 0) continue;
+            Object lvlObj = r.get("level");
+            int level = lvlObj == null ? 0 : ((Number) lvlObj).intValue();
+
+            if (level == 12) {
+                if (score * 9 >= notes * 16) aaa++;        // AAA 以上
+                if (score * 9 >= notes * 17) maxMinus++;   // MAX- 以上
+            }
+            // RATE-PT 対象（スコア率 >= 77.77% で PT > 0）。全レベル。
+            double rate = score * 100.0 / (notes * 2.0);
+            if (rate >= 77.77) eligibleRates.add(rate);
+        }
+        eligibleRates.sort(Comparator.reverseOrder());
+        Double rateFloor = eligibleRates.size() >= 100
+                ? Math.round(eligibleRates.get(99) * 100.0) / 100.0
+                : null;
+        return new Lv12RateStats(aaa, maxMinus, rateFloor, eligibleRates.size());
+    }
+
+    /** ネイティブクエリ由来の数値（Integer/Long/BigInteger 等）を long に正規化する。 */
+    private static long toLong(Object o) {
+        return o == null ? 0L : ((Number) o).longValue();
     }
 
     /**
@@ -246,5 +319,17 @@ public class KinjoCupController {
 
     /** メモ更新リクエストのボディ。 */
     public record UpdateNoteRequest(String note) {
+    }
+
+    /**
+     * 1 参加者分の集計結果。
+     * @param aaa          LV12 AAA 達成数
+     * @param maxMinus     LV12 MAX- 達成数
+     * @param rateFloor    RATE-TIER 下限（100曲目）のスコアレート。100曲未満なら null
+     * @param rateEligible RATE-PT 対象（スコア率 >= 77.77%）の譜面数
+     */
+    private record Lv12RateStats(int aaa, int maxMinus, Double rateFloor, int rateEligible) {
+        /** 集計対象スコアが無い参加者向けの空集計。 */
+        static final Lv12RateStats EMPTY = new Lv12RateStats(0, 0, null, 0);
     }
 }
