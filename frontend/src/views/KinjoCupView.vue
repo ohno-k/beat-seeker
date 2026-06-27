@@ -307,20 +307,26 @@
         <template v-else-if="currentBracket && currentBracket.players.length > 0">
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-relaxed">
             総当たりの勝敗表です。各セルは「行プレイヤーの 勝–負」（共通プレイ譜面で EX スコアを比較）。
-            列見出しの数字は対戦相手の順位。勝ち数の多い順に上から並べています。
+            列見出しは対戦相手（順位・DJ名）。勝ち数の多い順に上から並べています。
           </p>
           <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
             <table class="text-sm border-collapse">
               <thead>
                 <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs">
-                  <th class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-900/50 px-3 py-2 text-left font-semibold border border-slate-100 dark:border-slate-700">順位 / DJ名</th>
-                  <th class="px-2 py-2 text-center font-semibold border border-slate-100 dark:border-slate-700 whitespace-nowrap">成績</th>
+                  <th class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-900/50 px-3 py-2 text-left font-semibold border border-slate-100 dark:border-slate-700 align-bottom">順位 / DJ名</th>
+                  <th class="px-2 py-2 text-center font-semibold border border-slate-100 dark:border-slate-700 whitespace-nowrap align-bottom">成績</th>
                   <th
                     v-for="(col, ci) in currentBracket.players"
                     :key="col.userId"
                     :title="col.displayName"
-                    class="px-2 py-2 text-center font-semibold border border-slate-100 dark:border-slate-700"
-                  >{{ ci + 1 }}</th>
+                    class="p-0 border border-slate-100 dark:border-slate-700 align-bottom"
+                  >
+                    <div class="h-28 w-8 mx-auto flex items-center justify-center">
+                      <span class="-rotate-90 whitespace-nowrap text-xs font-bold text-slate-600 dark:text-slate-300">
+                        <span class="text-slate-400 font-normal">{{ ci + 1 }}</span> {{ col.displayName || '名無し' }}
+                      </span>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
