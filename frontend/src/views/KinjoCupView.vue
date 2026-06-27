@@ -2,14 +2,14 @@
   <div class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
     <!-- ヘッダ（大会ブランディング） -->
     <header class="bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-lg">
-      <div class="max-w-5xl mx-auto px-4 py-8 sm:py-10">
+      <div class="mx-auto px-4 py-8 sm:py-10 transition-[max-width] duration-200" :class="containerWidthClass">
         <p class="text-xs sm:text-sm font-semibold tracking-widest text-white/80 uppercase">beat-seeker 特設ページ</p>
         <h1 class="mt-1 text-3xl sm:text-4xl font-black tracking-tight">きんじょー杯</h1>
         <p class="mt-2 text-sm sm:text-base text-white/90">参加者一覧 ／ ドラフト選考 参考データ</p>
       </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-4 py-6 sm:py-8">
+    <main class="mx-auto w-full px-4 py-6 sm:py-8 transition-[max-width] duration-200" :class="containerWidthClass">
       <!-- ============ 参加者詳細（ダッシュボード / スコア一覧） ============ -->
       <section v-if="selectedParticipant">
         <button
@@ -456,6 +456,14 @@ const { isAdmin } = useAdmin();
 /** 表示中のトップタブ。 */
 const topTab = ref<'list' | 'matrix'>('list');
 
+/**
+ * マトリクス表示時はページ幅を広げて FHD で全列が見えるようにする。
+ * 一覧・詳細は読みやすさ優先で従来の幅（max-w-5xl）を維持。
+ */
+const containerWidthClass = computed(() =>
+  topTab.value === 'matrix' && !selectedParticipant.value ? 'max-w-[1800px]' : 'max-w-5xl'
+);
+
 // ---------- 勝敗マトリクス ----------
 /** マトリクスデータ（3区分）。未取得は null。 */
 const matrixData = ref<KinjoCupMatrix | null>(null);
@@ -506,7 +514,7 @@ const levelTabClass = (lv: 'lv12' | 'lv11' | 'lv10'): string => {
 
 /** マトリクスの 1 セルの装飾（勝ち=緑 / 負け=赤 / 引分=中立 / 対角=灰）。 */
 const matrixCellClass = (cell: MatrixCell | null, isDiag: boolean): string => {
-  const base = 'px-2 py-1.5 text-center font-mono text-xs whitespace-nowrap border border-slate-100 dark:border-slate-700';
+  const base = 'px-1.5 py-1.5 text-center font-mono text-xs whitespace-nowrap border border-slate-100 dark:border-slate-700';
   if (isDiag) return `${base} bg-slate-100 dark:bg-slate-700/40 text-slate-300 dark:text-slate-600`;
   if (!cell) return `${base} text-slate-400`;
   if (cell.w > cell.l) return `${base} bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 font-bold`;
