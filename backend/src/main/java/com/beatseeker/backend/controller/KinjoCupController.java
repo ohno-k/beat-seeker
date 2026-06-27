@@ -323,6 +323,214 @@ public class KinjoCupController {
     }
 
     /**
+     * 【メソッドの役割】 マトリクスのセル（A vs B）の内訳を返す。指定区分で両者がプレイ済みの
+     * 共通譜面ごとに EX スコアを並べ、A 視点の勝敗（win/lose/draw）を付ける。
+     *
+     * 公開エンドポイント。並びは「A が負けている譜面（スコア差が小さい順）」を上にする。
+     *
+     * @param aId     行プレイヤーの userId
+     * @param bId     列プレイヤーの userId
+     * @param bracket 'lv10' / 'lv11' / 'lv12'
+     */
+    @GetMapping("/matchup")
+    public ResponseEntity<?> matchup(@RequestParam("a") Long aId,
+                                     @RequestParam("b") Long bId,
+                                     @RequestParam("bracket") String bracket) {
+        if (!("lv10".equals(bracket) || "lv11".equals(bracket) || "lv12".equals(bracket))) {
+            return ResponseEntity.badRequest().body(Map.of("error", "bracket は lv10/lv11/lv12 のいずれか"));
+        }
+        User ua = userRepository.findById(aId).orElse(null);
+        User ub = userRepository.findById(bId).orElse(null);
+        if (ua == null || ub == null
+                || !participantRepository.existsByUser(ua) || !participantRepository.existsByUser(ub)) {
+            return ResponseEntity.status(404).body(Map.of("error", "対象は参加者として登録されていません"));
+        }
+
+        // 譜面キー → {title, difficultyName, level, scoreA, scoreB}
+        Map<String, Map<String, Object>> charts = new LinkedHashMap<>();
+        for (Map<String, Object> r : scoreRepository.findBestAnotherLeggWithDefForUsers(List.of(aId, bId))) {
+            Object lvlObj = r.get("level");
+            if (lvlObj == null) continue;
+            int level = ((Number) lvlObj).intValue();
+            String br = level <= 10 ? "lv10" : level == 11 ? "lv11" : level == 12 ? "lv12" : null;
+            if (!bracket.equals(br)) continue;
+            String title = String.valueOf(r.get("title"));
+            String diff = String.valueOf(r.get("difficultyName"));
+            int notes = (int) toLong(r.get("notes"));
+            String key = title + "|" + diff;
+            Map<String, Object> m = charts.computeIfAbsent(key, k -> {
+                Map<String, Object> mm = new LinkedHashMap<>();
+                mm.put("title", title);
+                mm.put("difficultyName", diff);
+                mm.put("level", level);
+                mm.put("notes", notes); // MAX = notes*2。グレード(MAX-/AAA+...)算出用。
+                mm.put("scoreA", null);
+                mm.put("scoreB", null);
+                return mm;
+            });
+            int score = (int) toLong(r.get("score"));
+            long uid = toLong(r.get("userId"));
+            if (uid == aId) m.put("scoreA", score);
+            else if (uid == bId) m.put("scoreB", score);
+        }
+
+        int aWins = 0, bWins = 0, draws = 0;
+        List<Map<String, Object>> chartList = new ArrayList<>();
+        for (Map<String, Object> m : charts.values()) {
+            Object sa = m.get("scoreA");
+            Object sb = m.get("scoreB");
+            if (sa == null || sb == null) continue; // 両者プレイ済みのみ
+            int scoreA = (Integer) sa;
+            int scoreB = (Integer) sb;
+            String res = scoreA > scoreB ? "win" : scoreA < scoreB ? "lose" : "draw";
+            if ("win".equals(res)) aWins++;
+            else if ("lose".equals(res)) bWins++;
+            else draws++;
+            m.put("result", res);
+            chartList.add(m);
+        }
+        // A が負けている譜面（scoreA - scoreB が小さい順）を上に
+        chartList.sort(Comparator.comparingInt(m -> ((Integer) m.get("scoreA")) - ((Integer) m.get("scoreB"))));
+
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("playerA", Map.of("userId", aId, "displayName", ua.getDisplayName() != null ? ua.getDisplayName() : ""));
+        resp.put("playerB", Map.of("userId", bId, "displayName", ub.getDisplayName() != null ? ub.getDisplayName() : ""));
+        resp.put("bracket", bracket);
+        resp.put("summary", Map.of("aWins", aWins, "bWins", bWins, "draws", draws, "total", chartList.size()));
+        resp.put("charts", chartList);
+        return ResponseEntity.ok(resp);
+    }
+
+    /**
+     * 【メソッドの役割】 参加者内での「曲別順位」を LV10以下 / LV11 / LV12 の 3 区分で返す。
+     *
+     * 各譜面について、プレイ済み参加者を EX スコア降順に並べて順位を付ける（同点は同順位の競争順位）。
+     * 列（参加者）は「平均順位の良い順」で並べ、各譜面行のセルは参加者の順位を持つ。
+     *
+     * 公開エンドポイント。
+     *
+     * @return {@code { lv10: {players, charts}, lv11: {...}, lv12: {...} }}
+     */
+    @GetMapping("/song-ranks")
+    public ResponseEntity<Map<String, Object>> songRanks() {
+        List<KinjoCupParticipant> parts = participantRepository.findAllByOrderByCreatedAtAsc();
+        List<Participant> players = parts.stream()
+                .map(p -> new Participant(p.getUser().getId(),
+                        p.getUser().getDisplayName() != null ? p.getUser().getDisplayName() : ""))
+                .toList();
+        List<Long> userIds = players.stream().map(Participant::userId).toList();
+
+        Map<String, Map<String, ChartScores>> data = new HashMap<>();
+        data.put("lv10", new LinkedHashMap<>());
+        data.put("lv11", new LinkedHashMap<>());
+        data.put("lv12", new LinkedHashMap<>());
+        if (!userIds.isEmpty()) {
+            for (Map<String, Object> r : scoreRepository.findBestAnotherLeggWithDefForUsers(userIds)) {
+                Object lvlObj = r.get("level");
+                if (lvlObj == null) continue;
+                int level = ((Number) lvlObj).intValue();
+                String bracket = level <= 10 ? "lv10" : level == 11 ? "lv11" : level == 12 ? "lv12" : null;
+                if (bracket == null) continue;
+                String title = String.valueOf(r.get("title"));
+                String diff = String.valueOf(r.get("difficultyName"));
+                String key = title + "|" + diff;
+                ChartScores cs = data.get(bracket).computeIfAbsent(key, k -> new ChartScores(title, diff, level));
+                cs.scores.put(toLong(r.get("userId")), (int) toLong(r.get("score")));
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("lv10", buildSongRanks(players, data.get("lv10")));
+        result.put("lv11", buildSongRanks(players, data.get("lv11")));
+        result.put("lv12", buildSongRanks(players, data.get("lv12")));
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 1 区分分の曲別順位を集計する。列（参加者）は平均順位の良い順、行（譜面）は曲名順。
+     * cells は sorted players の並びに揃え、未プレイは null。
+     */
+    private Map<String, Object> buildSongRanks(List<Participant> players, Map<String, ChartScores> charts) {
+        // userId → {順位合計, プレイ数, 1位回数}
+        Map<Long, long[]> agg = new HashMap<>();
+        for (Participant p : players) agg.put(p.userId(), new long[]{0, 0, 0});
+        // chartKey → (userId → {rank, score})
+        Map<String, Map<Long, int[]>> chartCells = new HashMap<>();
+
+        for (Map.Entry<String, ChartScores> e : charts.entrySet()) {
+            List<Map.Entry<Long, Integer>> entries = new ArrayList<>(e.getValue().scores.entrySet());
+            entries.sort((x, y) -> Integer.compare(y.getValue(), x.getValue())); // スコア降順
+            Map<Long, int[]> cells = new HashMap<>();
+            int rank = 0, prevScore = Integer.MIN_VALUE, idx = 0;
+            for (Map.Entry<Long, Integer> en : entries) {
+                idx++;
+                int sc = en.getValue();
+                if (sc != prevScore) { rank = idx; prevScore = sc; } // 競争順位（同点は同順位）
+                cells.put(en.getKey(), new int[]{rank, sc});
+                long[] a = agg.get(en.getKey());
+                if (a != null) { a[0] += rank; a[1]++; if (rank == 1) a[2]++; }
+            }
+            chartCells.put(e.getKey(), cells);
+        }
+
+        // 平均順位の良い順（プレイ無しは最後）。同値は 1位回数多い順 → 名前。
+        List<Participant> sorted = new ArrayList<>(players);
+        sorted.sort((x, y) -> {
+            long[] ax = agg.get(x.userId());
+            long[] ay = agg.get(y.userId());
+            double avx = ax[1] == 0 ? Double.MAX_VALUE : (double) ax[0] / ax[1];
+            double avy = ay[1] == 0 ? Double.MAX_VALUE : (double) ay[0] / ay[1];
+            if (Double.compare(avx, avy) != 0) return Double.compare(avx, avy);
+            if (ax[2] != ay[2]) return Long.compare(ay[2], ax[2]);
+            return x.displayName().compareTo(y.displayName());
+        });
+
+        List<Map<String, Object>> playerList = new ArrayList<>();
+        for (Participant p : sorted) {
+            long[] a = agg.get(p.userId());
+            Map<String, Object> pm = new LinkedHashMap<>();
+            pm.put("userId", p.userId());
+            pm.put("displayName", p.displayName());
+            pm.put("played", a[1]);
+            pm.put("firstPlaces", a[2]);
+            pm.put("avgRank", a[1] == 0 ? null : Math.round((double) a[0] / a[1] * 100.0) / 100.0);
+            playerList.add(pm);
+        }
+
+        List<Map.Entry<String, ChartScores>> chartEntries = new ArrayList<>(charts.entrySet());
+        chartEntries.sort((x, y) -> x.getValue().title.compareToIgnoreCase(y.getValue().title));
+        List<Map<String, Object>> chartList = new ArrayList<>();
+        for (Map.Entry<String, ChartScores> e : chartEntries) {
+            ChartScores cs = e.getValue();
+            Map<Long, int[]> cells = chartCells.get(e.getKey());
+            List<Map<String, Object>> cellList = new ArrayList<>();
+            for (Participant p : sorted) {
+                int[] rc = cells.get(p.userId());
+                if (rc == null) {
+                    cellList.add(null);
+                } else {
+                    Map<String, Object> cm = new LinkedHashMap<>();
+                    cm.put("rank", rc[0]);
+                    cm.put("score", rc[1]);
+                    cellList.add(cm);
+                }
+            }
+            Map<String, Object> chm = new LinkedHashMap<>();
+            chm.put("title", cs.title);
+            chm.put("difficultyName", cs.diff);
+            chm.put("level", cs.level);
+            chm.put("players", cs.scores.size()); // プレイ人数（順位の母数）
+            chm.put("cells", cellList);
+            chartList.add(chm);
+        }
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("players", playerList);
+        out.put("charts", chartList);
+        return out;
+    }
+
+    /**
      * 【メソッドの役割】 参加者を名簿に追加する（管理者のみ）。
      *
      * @param auth 認証情報（管理者限定）
@@ -471,6 +679,19 @@ public class KinjoCupController {
 
     /** 勝敗マトリクス集計用の参加者（userId と表示名のみ）。 */
     private record Participant(long userId, String displayName) {
+    }
+
+    /** 曲別順位の集計用：1 譜面のメタ情報と userId→EXスコア。 */
+    private static final class ChartScores {
+        final String title;
+        final String diff;
+        final int level;
+        final Map<Long, Integer> scores = new HashMap<>();
+        ChartScores(String title, String diff, int level) {
+            this.title = title;
+            this.diff = diff;
+            this.level = level;
+        }
     }
 
     /**

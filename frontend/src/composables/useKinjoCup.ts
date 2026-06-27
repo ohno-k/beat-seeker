@@ -43,6 +43,71 @@ export interface KinjoCupMatrix {
   lv12: MatrixBracket;
 }
 
+/** 対戦内訳の 1 譜面（A 視点の勝敗付き）。 */
+export interface MatchupChart {
+  title: string;
+  difficultyName: string;
+  level: number;
+  /** ノーツ数。MAX = notes*2。グレード(MAX-/AAA+...)算出用。 */
+  notes: number;
+  /** 行プレイヤー(A)の EX スコア。 */
+  scoreA: number;
+  /** 列プレイヤー(B)の EX スコア。 */
+  scoreB: number;
+  /** A 視点の勝敗。 */
+  result: 'win' | 'lose' | 'draw';
+}
+
+/** /api/kinjocup/matchup の応答（A vs B の内訳）。 */
+export interface KinjoCupMatchup {
+  playerA: { userId: number; displayName: string };
+  playerB: { userId: number; displayName: string };
+  bracket: string;
+  summary: { aWins: number; bWins: number; draws: number; total: number };
+  charts: MatchupChart[];
+}
+
+/** 曲別順位の 1 プレイヤー（平均順位の良い順に並ぶ）。 */
+export interface SongRankPlayer {
+  userId: number;
+  displayName: string;
+  /** プレイした譜面数。 */
+  played: number;
+  /** 1 位を取った譜面数。 */
+  firstPlaces: number;
+  /** 平均順位（プレイ譜面の順位平均）。未プレイは null。 */
+  avgRank: number | null;
+}
+
+/** 曲別順位の 1 セル（その譜面でのプレイヤーの順位とスコア）。未プレイは null。 */
+export interface SongRankCell {
+  rank: number;
+  score: number;
+}
+
+/** 曲別順位の 1 譜面（cells は players の並びに揃う）。 */
+export interface SongRankChart {
+  title: string;
+  difficultyName: string;
+  level: number;
+  /** プレイ人数（順位の母数）。 */
+  players: number;
+  cells: (SongRankCell | null)[];
+}
+
+/** 1 区分の曲別順位。 */
+export interface SongRankBracket {
+  players: SongRankPlayer[];
+  charts: SongRankChart[];
+}
+
+/** /api/kinjocup/song-ranks の応答。 */
+export interface KinjoCupSongRanks {
+  lv10: SongRankBracket;
+  lv11: SongRankBracket;
+  lv12: SongRankBracket;
+}
+
 /**
  * きんじょー杯 特設ページ（/kinjocup）に掲載する参加者 1 人分のサマリ。
  * 実力データ（総合力 / 段位 / アリーナ）はバックエンドが User から都度引いて返す。
@@ -119,6 +184,35 @@ export function useKinjoCup() {
   };
 
   /**
+   * 参加者内での曲別順位（LV10以下/LV11/LV12）を取得する（公開）。
+   */
+  const fetchSongRanks = async (): Promise<KinjoCupSongRanks> => {
+    const res = await fetch(`${API_BASE}/api/kinjocup/song-ranks`);
+    if (!res.ok) {
+      throw new Error(`曲別順位の取得に失敗しました (${res.status})`);
+    }
+    return (await res.json()) as KinjoCupSongRanks;
+  };
+
+  /**
+   * マトリクスのセル（A vs B）の対戦内訳を取得する（公開）。
+   * @param a       行プレイヤーの userId
+   * @param b       列プレイヤーの userId
+   * @param bracket 'lv10' / 'lv11' / 'lv12'
+   */
+  const fetchMatchup = async (
+    a: number,
+    b: number,
+    bracket: 'lv10' | 'lv11' | 'lv12'
+  ): Promise<KinjoCupMatchup> => {
+    const res = await fetch(`${API_BASE}/api/kinjocup/matchup?a=${a}&b=${b}&bracket=${bracket}`);
+    if (!res.ok) {
+      throw new Error(`対戦内訳の取得に失敗しました (${res.status})`);
+    }
+    return (await res.json()) as KinjoCupMatchup;
+  };
+
+  /**
    * 指定参加者のスコア一覧を取得する（特設ページ内のダッシュボード/スコア一覧用）。
    * 名簿登録者のみ取得でき、プライバシー設定に関わらずサーバが返す。
    * 戻り値は曲単位にグルーピング済みの ScoreData[]（ScoreDashboard/ScoreSummary にそのまま渡せる）。
@@ -189,5 +283,5 @@ export function useKinjoCup() {
     }
   };
 
-  return { isLoading, fetchParticipants, fetchMatrix, fetchParticipantScores, addParticipant, updateNote, removeParticipant };
+  return { isLoading, fetchParticipants, fetchMatrix, fetchMatchup, fetchSongRanks, fetchParticipantScores, addParticipant, updateNote, removeParticipant };
 }

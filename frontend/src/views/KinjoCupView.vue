@@ -111,6 +111,7 @@
       <div class="flex gap-1 mb-5 border-b border-slate-200 dark:border-slate-700">
         <button @click="topTab = 'list'" :class="topTabClass('list')">参加者一覧</button>
         <button @click="openMatrixTab" :class="topTabClass('matrix')">マトリクス</button>
+        <button @click="openSongRanksTab" :class="topTabClass('songranks')">曲別順位</button>
       </div>
 
       <!-- ===== 参加者一覧 ===== -->
@@ -281,7 +282,7 @@
       </template>
 
       <!-- ===== マトリクス ===== -->
-      <template v-else>
+      <template v-else-if="topTab === 'matrix'">
         <!-- レベルサブタブ + 更新 -->
         <div class="flex items-center gap-2 mb-4">
           <div class="flex gap-1.5">
@@ -307,7 +308,7 @@
         <template v-else-if="currentBracket && currentBracket.players.length > 0">
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-relaxed">
             総当たりの勝敗表です。各セルは「行プレイヤーの 勝–負」（共通プレイ譜面で EX スコアを比較）。
-            列見出しは対戦相手（順位・DJ名）。勝ち数の多い順に上から並べています。
+            列見出しは対戦相手（順位・DJ名）。勝ち数の多い順に上から並べています。<span class="text-indigo-500 dark:text-indigo-400">セルをクリックすると対戦内訳を表示します。</span>
           </p>
           <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
             <table class="text-sm border-collapse">
@@ -346,7 +347,8 @@
                   <td
                     v-for="(cell, ci) in matRow"
                     :key="ci"
-                    :class="matrixCellClass(cell, ri === ci)"
+                    :class="[matrixCellClass(cell, ri === ci), ri !== ci && cell ? 'cursor-pointer hover:ring-2 hover:ring-indigo-400 hover:ring-inset' : '']"
+                    @click="ri !== ci && cell ? openMatchup(ri, ci) : null"
                   >
                     <template v-if="ri === ci">—</template>
                     <template v-else-if="cell">{{ cell.w }}-{{ cell.l }}</template>
@@ -356,6 +358,87 @@
               </tbody>
             </table>
           </div>
+        </template>
+        <div v-else class="text-center py-16 text-slate-500 dark:text-slate-400">
+          対象データがありません。
+        </div>
+      </template>
+
+      <!-- ===== 曲別順位 ===== -->
+      <template v-else>
+        <!-- レベルサブタブ + 検索 + 更新 -->
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <div class="flex gap-1.5">
+            <button @click="songRankLevel = 'lv10'" :class="songLevelTabClass('lv10')">LV10以下</button>
+            <button @click="songRankLevel = 'lv11'" :class="songLevelTabClass('lv11')">LV11</button>
+            <button @click="songRankLevel = 'lv12'" :class="songLevelTabClass('lv12')">LV12</button>
+          </div>
+          <input
+            v-model="songSearch"
+            type="text"
+            placeholder="曲名で検索"
+            class="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-44"
+          />
+          <button
+            @click="loadSongRanks"
+            :disabled="songRanksLoading"
+            class="ml-auto text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline disabled:opacity-50"
+          >更新</button>
+        </div>
+
+        <!-- 状態 -->
+        <div v-if="songRanksLoading" class="flex flex-col items-center justify-center py-16">
+          <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <p class="text-slate-500 font-medium">順位を集計中...</p>
+        </div>
+        <div v-else-if="songRanksError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl border border-red-200 dark:border-red-800">
+          {{ songRanksError }}
+        </div>
+        <template v-else-if="currentSongBracket && currentSongBracket.players.length > 0">
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-relaxed">
+            参加者内での曲別順位です。セルは各譜面の EX スコア順位（<span class="text-amber-600 dark:text-amber-400 font-bold">1位=金</span> / 2位=銀 / 3位=銅、未プレイ=−）。
+            列見出し下の数字は平均順位（良い順に左から並べています）。{{ filteredSongCharts.length }}/{{ currentSongBracket.charts.length }} 譜面。
+          </p>
+          <div v-if="filteredSongCharts.length > 0" class="overflow-auto max-h-[75vh] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+            <table class="text-sm border-collapse">
+              <thead>
+                <tr class="text-slate-500 dark:text-slate-400 text-xs">
+                  <th class="sticky top-0 left-0 z-30 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-left font-semibold border border-slate-100 dark:border-slate-700 align-bottom">曲名</th>
+                  <th
+                    v-for="(col, ci) in currentSongBracket.players"
+                    :key="col.userId"
+                    :title="`${col.displayName} ／ 平均${col.avgRank ?? '-'}位 ／ 1位${col.firstPlaces}回 ／ ${col.played}譜面`"
+                    class="sticky top-0 z-20 bg-slate-50 dark:bg-slate-900 p-0 border border-slate-100 dark:border-slate-700 align-bottom"
+                  >
+                    <div class="h-32 w-9 mx-auto flex flex-col items-center justify-between py-1">
+                      <div class="flex-1 flex items-center">
+                        <span class="-rotate-90 whitespace-nowrap text-xs font-bold text-slate-600 dark:text-slate-300">
+                          <span class="text-slate-400 font-normal">{{ ci + 1 }}</span> {{ col.displayName || '名無し' }}
+                        </span>
+                      </div>
+                      <span class="text-[9px] font-mono text-indigo-600 dark:text-indigo-400" title="平均順位">{{ col.avgRank != null ? col.avgRank.toFixed(1) : '-' }}</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(c, ri) in filteredSongCharts" :key="ri" class="hover:bg-slate-50/60 dark:hover:bg-slate-700/20">
+                  <td class="sticky left-0 z-10 bg-white dark:bg-slate-800 px-3 py-1 border border-slate-100 dark:border-slate-700 min-w-[13rem] max-w-[22rem]">
+                    <span class="text-[10px] font-mono text-slate-400 mr-1">{{ diffShort(c.difficultyName) }}{{ c.level }}</span>
+                    <span class="font-bold break-words">{{ c.title }}</span>
+                    <span class="text-[10px] text-slate-400 ml-1">({{ c.players }})</span>
+                  </td>
+                  <td
+                    v-for="(cell, ci) in c.cells"
+                    :key="ci"
+                    :class="rankCellClass(cell ? cell.rank : null)"
+                    :title="cell ? `${c.title}: ${cell.score} (${cell.rank}位)` : '未プレイ'"
+                  >{{ cell ? cell.rank : '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-else class="text-center py-12 text-sm text-slate-400">「{{ songSearch }}」に一致する曲がありません。</p>
         </template>
         <div v-else class="text-center py-16 text-slate-500 dark:text-slate-400">
           対象データがありません。
@@ -424,6 +507,79 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- ============ 対戦内訳モーダル（マトリクスのセルクリック） ============ -->
+    <Teleport to="body">
+      <div
+        v-if="matchupOpen"
+        class="fixed inset-0 z-[100] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm"
+        @click.self="closeMatchup"
+      >
+        <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh] border border-slate-200 dark:border-slate-800">
+          <!-- ヘッダ -->
+          <div class="p-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-bold text-slate-800 dark:text-white">対戦内訳</h2>
+              <button @click="closeMatchup" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 -mr-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <template v-if="matchupData">
+              <div class="mt-2 flex items-center justify-center gap-3 text-sm flex-wrap">
+                <span class="font-bold text-indigo-600 dark:text-indigo-400 truncate max-w-[10rem]">{{ matchupData.playerA.displayName || '名無し' }}</span>
+                <span class="font-mono whitespace-nowrap">
+                  <span class="text-emerald-600 dark:text-emerald-400 font-black text-base">{{ matchupData.summary.aWins }}</span>
+                  <span class="text-slate-400 mx-0.5">-</span>
+                  <span class="text-red-600 dark:text-red-400 font-black text-base">{{ matchupData.summary.bWins }}</span>
+                  <span v-if="matchupData.summary.draws" class="text-slate-400 text-xs ml-1">(引分{{ matchupData.summary.draws }})</span>
+                </span>
+                <span class="font-bold text-slate-600 dark:text-slate-300 truncate max-w-[10rem]">{{ matchupData.playerB.displayName || '名無し' }}</span>
+              </div>
+              <p class="mt-1 text-center text-[11px] text-slate-400">{{ levelLabel(matchupData.bracket) }} ・ 共通 {{ matchupData.summary.total }} 譜面</p>
+            </template>
+          </div>
+
+          <!-- 本文 -->
+          <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900/40">
+            <div v-if="matchupLoading" class="flex items-center justify-center py-16 text-slate-500 text-sm">
+              <div class="w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mr-2"></div>
+              集計中...
+            </div>
+            <div v-else-if="matchupError" class="p-5 text-sm text-red-600 dark:text-red-400">{{ matchupError }}</div>
+            <div v-else-if="matchupData && matchupData.charts.length === 0" class="p-10 text-center text-sm text-slate-400">
+              共通でプレイした譜面がありません。
+            </div>
+            <table v-else-if="matchupData" class="w-full text-sm">
+              <thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 text-xs text-slate-500 dark:text-slate-400">
+                <tr>
+                  <th class="px-3 py-2 text-left font-semibold">曲名</th>
+                  <th class="px-3 py-2 text-right font-semibold whitespace-nowrap truncate max-w-[7rem]">{{ matchupData.playerA.displayName || 'A' }}</th>
+                  <th class="px-3 py-2 text-right font-semibold whitespace-nowrap truncate max-w-[7rem]">{{ matchupData.playerB.displayName || 'B' }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr v-for="(c, i) in matchupData.charts" :key="i" class="bg-white dark:bg-slate-900">
+                  <td class="px-3 py-1.5">
+                    <span class="text-[10px] font-mono text-slate-400 mr-1">{{ diffShort(c.difficultyName) }}{{ c.level }}</span>
+                    <span class="break-all">{{ c.title }}</span>
+                  </td>
+                  <td class="px-3 py-1.5 text-right font-mono whitespace-nowrap">
+                    <span :class="c.result === 'win' ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500 dark:text-slate-400'">{{ c.scoreA }}</span>
+                    <span class="text-[10px] ml-1 inline-block w-14 text-left" :class="gradeColorClass(scoreGrade(c.scoreA, c.notes * 2))">{{ gradeLabel(c.scoreA, c.notes * 2) }}</span>
+                  </td>
+                  <td class="px-3 py-1.5 text-right font-mono whitespace-nowrap">
+                    <span :class="c.result === 'lose' ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500 dark:text-slate-400'">{{ c.scoreB }}</span>
+                    <span class="text-[10px] ml-1 inline-block w-14 text-left" :class="gradeColorClass(scoreGrade(c.scoreB, c.notes * 2))">{{ gradeLabel(c.scoreB, c.notes * 2) }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -441,27 +597,28 @@
  * App.vue が `/kinjocup` パスを検知してこのビューを単独描画する（サイドバー等は描画しない）。
  */
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useKinjoCup, type KinjoCupParticipant, type KinjoCupMatrix, type MatrixCell } from '../composables/useKinjoCup';
+import { useKinjoCup, type KinjoCupParticipant, type KinjoCupMatrix, type MatrixCell, type KinjoCupMatchup, type KinjoCupSongRanks } from '../composables/useKinjoCup';
 import { useScores } from '../composables/useScores';
 import { useAdmin } from '../composables/useAdmin';
 import type { ScoreData } from '../types/ScoreData';
 import ScoreDashboard from '../components/ScoreDashboard.vue';
 import ScoreSummary from '../components/ScoreSummary.vue';
 
-const { isLoading, fetchParticipants, fetchMatrix, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
+const { isLoading, fetchParticipants, fetchMatrix, fetchMatchup, fetchSongRanks, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
 const { fetchAllUsers } = useScores();
 const { isAdmin } = useAdmin();
 
-// ---------- トップタブ（参加者一覧 / マトリクス） ----------
+// ---------- トップタブ（参加者一覧 / マトリクス / 曲別順位） ----------
 /** 表示中のトップタブ。 */
-const topTab = ref<'list' | 'matrix'>('list');
+const topTab = ref<'list' | 'matrix' | 'songranks'>('list');
 
 /**
- * マトリクス表示時はページ幅を広げて FHD で全列が見えるようにする。
+ * マトリクス・曲別順位は横長表なのでページ幅を広げて FHD で全列が見えるようにする。
  * 一覧・詳細は読みやすさ優先で従来の幅（max-w-5xl）を維持。
  */
 const containerWidthClass = computed(() =>
-  topTab.value === 'matrix' && !selectedParticipant.value ? 'max-w-[1800px]' : 'max-w-5xl'
+  (topTab.value === 'matrix' || topTab.value === 'songranks') && !selectedParticipant.value
+    ? 'max-w-[1800px]' : 'max-w-5xl'
 );
 
 // ---------- 勝敗マトリクス ----------
@@ -497,19 +654,80 @@ const openMatrixTab = () => {
 };
 
 /** トップタブのボタン装飾。 */
-const topTabClass = (tab: 'list' | 'matrix'): string => {
+const topTabClass = (tab: 'list' | 'matrix' | 'songranks'): string => {
   const base = 'px-4 py-2 text-sm font-bold -mb-px border-b-2 transition-colors';
   return topTab.value === tab
     ? `${base} border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400`
     : `${base} border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200`;
 };
 
-/** レベルサブタブのボタン装飾。 */
+/** レベルサブタブのボタン装飾（マトリクス用）。 */
 const levelTabClass = (lv: 'lv12' | 'lv11' | 'lv10'): string => {
   const base = 'px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-colors';
   return matrixLevel.value === lv
     ? `${base} bg-indigo-600 text-white`
     : `${base} bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`;
+};
+
+// ---------- 曲別順位 ----------
+/** 曲別順位データ（3区分）。 */
+const songRanksData = ref<KinjoCupSongRanks | null>(null);
+/** 取得中フラグ。 */
+const songRanksLoading = ref(false);
+/** 取得エラー。 */
+const songRanksError = ref('');
+/** 表示中のレベル区分。 */
+const songRankLevel = ref<'lv12' | 'lv11' | 'lv10'>('lv12');
+/** 曲名検索。 */
+const songSearch = ref('');
+
+/** 現在の区分の曲別順位。 */
+const currentSongBracket = computed(() => songRanksData.value ? songRanksData.value[songRankLevel.value] : null);
+
+/** 検索を適用した譜面リスト。 */
+const filteredSongCharts = computed(() => {
+  const b = currentSongBracket.value;
+  if (!b) return [];
+  const q = songSearch.value.trim().toLowerCase();
+  if (!q) return b.charts;
+  return b.charts.filter(c => c.title.toLowerCase().includes(q));
+});
+
+/** 曲別順位を取得する。 */
+const loadSongRanks = async () => {
+  songRanksLoading.value = true;
+  songRanksError.value = '';
+  try {
+    songRanksData.value = await fetchSongRanks();
+  } catch (e: any) {
+    songRanksError.value = e?.message || '曲別順位の取得に失敗しました。';
+  } finally {
+    songRanksLoading.value = false;
+  }
+};
+
+/** 曲別順位タブを開く（初回のみ取得）。 */
+const openSongRanksTab = () => {
+  topTab.value = 'songranks';
+  if (!songRanksData.value && !songRanksLoading.value) loadSongRanks();
+};
+
+/** 曲別順位レベルサブタブの装飾。 */
+const songLevelTabClass = (lv: 'lv12' | 'lv11' | 'lv10'): string => {
+  const base = 'px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-colors';
+  return songRankLevel.value === lv
+    ? `${base} bg-indigo-600 text-white`
+    : `${base} bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`;
+};
+
+/** 順位セルの装飾（1位=金 / 2位=銀 / 3位=銅 / それ以外=通常 / 未プレイ=灰）。 */
+const rankCellClass = (rank: number | null): string => {
+  const base = 'px-1.5 py-1 text-center font-mono text-xs border border-slate-100 dark:border-slate-700';
+  if (rank == null) return `${base} bg-slate-50 dark:bg-slate-800/40 text-slate-300 dark:text-slate-600`;
+  if (rank === 1) return `${base} bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-black`;
+  if (rank === 2) return `${base} bg-slate-200/70 dark:bg-slate-600/30 text-slate-700 dark:text-slate-200 font-bold`;
+  if (rank === 3) return `${base} bg-orange-100/70 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 font-bold`;
+  return `${base} text-slate-500 dark:text-slate-400`;
 };
 
 /** マトリクスの 1 セルの装飾（勝ち=緑 / 負け=赤 / 引分=中立 / 対角=灰）。 */
@@ -520,6 +738,101 @@ const matrixCellClass = (cell: MatrixCell | null, isDiag: boolean): string => {
   if (cell.w > cell.l) return `${base} bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 font-bold`;
   if (cell.w < cell.l) return `${base} bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300`;
   return `${base} text-slate-500 dark:text-slate-400`;
+};
+
+// ---------- 対戦内訳モーダル（セルクリック） ----------
+/** モーダル開閉。 */
+const matchupOpen = ref(false);
+/** 取得中フラグ。 */
+const matchupLoading = ref(false);
+/** 取得エラー。 */
+const matchupError = ref('');
+/** 対戦内訳データ。 */
+const matchupData = ref<KinjoCupMatchup | null>(null);
+
+/** マトリクスのセル（行 ri = A, 列 ci = B）をクリックして対戦内訳を開く。 */
+const openMatchup = async (ri: number, ci: number) => {
+  const bracket = currentBracket.value;
+  if (!bracket || ri === ci) return;
+  const a = bracket.players[ri];
+  const b = bracket.players[ci];
+  matchupOpen.value = true;
+  matchupData.value = null;
+  matchupError.value = '';
+  matchupLoading.value = true;
+  try {
+    matchupData.value = await fetchMatchup(a.userId, b.userId, matrixLevel.value);
+  } catch (e: any) {
+    matchupError.value = e?.message || '対戦内訳の取得に失敗しました。';
+  } finally {
+    matchupLoading.value = false;
+  }
+};
+
+/** 対戦内訳モーダルを閉じる。 */
+const closeMatchup = () => {
+  matchupOpen.value = false;
+  matchupData.value = null;
+  matchupError.value = '';
+};
+
+/** 区分コードを表示ラベルに変換。 */
+const levelLabel = (b: string): string =>
+  b === 'lv10' ? 'LV10以下' : b === 'lv11' ? 'LV11' : 'LV12';
+
+/** 難易度名を短縮ラベルに（ANOTHER→[A] / LEGGENDARIA→[L]）。 */
+const diffShort = (d: string): string =>
+  d === 'LEGGENDARIA' ? '[L]' : d === 'ANOTHER' ? '[A]' : d;
+
+/**
+ * EX スコアの beat-seeker 記法グレードを返す（MAX / MAX- / AAA+ / AAA- / AA+ / AA- / A+ / A-）。
+ * 閾値は ArenaView.vue の scoreGrade に準拠（A- バンドのみ追加）。該当外（A- 未満）は空文字。
+ */
+const scoreGrade = (score: number, maxScore: number): string => {
+  if (maxScore <= 0 || score <= 0) return '';
+  if (score >= maxScore) return 'MAX';
+  const pct = score / maxScore;
+  if (pct >= 0.9445) return 'MAX-';
+  if (pct >= 8 / 9) return 'AAA+';
+  if (pct >= 0.8334) return 'AAA-';
+  if (pct >= 7 / 9) return 'AA+';
+  if (pct >= 0.7223) return 'AA-';
+  if (pct >= 6 / 9) return 'A+';
+  if (pct >= 0.6112) return 'A-';
+  return '';
+};
+
+/** グレードラベルの色（MAX=金 / MAX-=紫 / AAA+=琥珀 / それ以外=灰）。 */
+const gradeColorClass = (grade: string): string => {
+  if (grade === 'MAX') return 'text-yellow-500 dark:text-yellow-400';
+  if (grade === 'MAX-') return 'text-purple-500 dark:text-purple-400';
+  if (grade === 'AAA+') return 'text-amber-500 dark:text-amber-400';
+  return 'text-slate-400 dark:text-slate-500';
+};
+
+/**
+ * グレード基準値からの差分（EX 点）。「+」側は基準超え分、「-」側は基準到達までの残り。
+ * ArenaView.vue の scoreGradeDelta に準拠（A- のみ追加）。
+ */
+const gradeDelta = (score: number, maxScore: number): number => {
+  const grade = scoreGrade(score, maxScore);
+  const ceil = (n: number) => Math.ceil(n);
+  if (grade === 'MAX-') return maxScore - score;             // MAX までの残り
+  if (grade === 'AAA+') return score - ceil(maxScore * 8 / 9);
+  if (grade === 'AAA-') return ceil(maxScore * 8 / 9) - score;
+  if (grade === 'AA+')  return score - ceil(maxScore * 7 / 9);
+  if (grade === 'AA-')  return ceil(maxScore * 7 / 9) - score;
+  if (grade === 'A+')   return score - ceil(maxScore * 6 / 9);
+  if (grade === 'A-')   return ceil(maxScore * 6 / 9) - score;
+  return 0;
+};
+
+/** 「グレード + 差分」の表記（例: AAA+100 / AAA-50 / MAX-30）。MAX は数値なし。 */
+const gradeLabel = (score: number, maxScore: number): string => {
+  const g = scoreGrade(score, maxScore);
+  if (!g) return '';
+  if (g === 'MAX') return 'MAX';
+  return `${g}${gradeDelta(score, maxScore)}`;
 };
 
 /** 参加者一覧（サーバから総合力降順で返る）。 */
