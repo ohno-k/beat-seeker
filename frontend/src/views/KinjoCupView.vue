@@ -105,8 +105,16 @@
         </template>
       </section>
 
-      <!-- ============ 参加者一覧 ============ -->
+      <!-- ============ 一覧 / マトリクス ============ -->
       <template v-else>
+      <!-- トップタブ -->
+      <div class="flex gap-1 mb-5 border-b border-slate-200 dark:border-slate-700">
+        <button @click="topTab = 'list'" :class="topTabClass('list')">参加者一覧</button>
+        <button @click="openMatrixTab" :class="topTabClass('matrix')">マトリクス</button>
+      </div>
+
+      <!-- ===== 参加者一覧 ===== -->
+      <template v-if="topTab === 'list'">
       <!-- ツールバー: 件数 + (管理者のみ) 追加ボタン -->
       <div class="flex items-center justify-between gap-3 mb-4">
         <p class="text-sm text-slate-500 dark:text-slate-400">
@@ -271,6 +279,83 @@
         ※ AAA数・MAX-数 は LV12（ANOTHER/LEGGENDARIA）の達成数 / 総譜面数。RATE下限 は RATE-TIER 上位100曲目のスコアレート（100曲未満は「—」）です。
       </p>
       </template>
+
+      <!-- ===== マトリクス ===== -->
+      <template v-else>
+        <!-- レベルサブタブ + 更新 -->
+        <div class="flex items-center gap-2 mb-4">
+          <div class="flex gap-1.5">
+            <button @click="matrixLevel = 'lv10'" :class="levelTabClass('lv10')">LV10以下</button>
+            <button @click="matrixLevel = 'lv11'" :class="levelTabClass('lv11')">LV11</button>
+            <button @click="matrixLevel = 'lv12'" :class="levelTabClass('lv12')">LV12</button>
+          </div>
+          <button
+            @click="loadMatrix"
+            :disabled="matrixLoading"
+            class="ml-auto text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline disabled:opacity-50"
+          >更新</button>
+        </div>
+
+        <!-- 状態 -->
+        <div v-if="matrixLoading" class="flex flex-col items-center justify-center py-16">
+          <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <p class="text-slate-500 font-medium">勝敗を集計中...</p>
+        </div>
+        <div v-else-if="matrixError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl border border-red-200 dark:border-red-800">
+          {{ matrixError }}
+        </div>
+        <template v-else-if="currentBracket && currentBracket.players.length > 0">
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-relaxed">
+            総当たりの勝敗表です。各セルは「行プレイヤーの 勝–負」（共通プレイ譜面で EX スコアを比較）。
+            列見出しの数字は対戦相手の順位。勝ち数の多い順に上から並べています。
+          </p>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+            <table class="text-sm border-collapse">
+              <thead>
+                <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs">
+                  <th class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-900/50 px-3 py-2 text-left font-semibold border border-slate-100 dark:border-slate-700">順位 / DJ名</th>
+                  <th class="px-2 py-2 text-center font-semibold border border-slate-100 dark:border-slate-700 whitespace-nowrap">成績</th>
+                  <th
+                    v-for="(col, ci) in currentBracket.players"
+                    :key="col.userId"
+                    :title="col.displayName"
+                    class="px-2 py-2 text-center font-semibold border border-slate-100 dark:border-slate-700"
+                  >{{ ci + 1 }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(matRow, ri) in currentBracket.matrix"
+                  :key="currentBracket.players[ri].userId"
+                  class="hover:bg-slate-50/60 dark:hover:bg-slate-700/20"
+                >
+                  <td class="sticky left-0 z-10 bg-white dark:bg-slate-800 px-3 py-1.5 font-bold border border-slate-100 dark:border-slate-700 whitespace-nowrap">
+                    <span class="text-slate-400 mr-1">{{ ri + 1 }}.</span>
+                    <span class="text-indigo-600 dark:text-indigo-400">{{ currentBracket.players[ri].displayName || '名無し' }}</span>
+                  </td>
+                  <td class="px-2 py-1.5 text-center font-mono text-xs border border-slate-100 dark:border-slate-700 whitespace-nowrap">
+                    <span class="font-bold text-slate-700 dark:text-slate-200">{{ currentBracket.players[ri].wins }}-{{ currentBracket.players[ri].losses }}</span>
+                    <span class="text-slate-400 ml-1">({{ currentBracket.players[ri].winRate.toFixed(1) }}%)</span>
+                  </td>
+                  <td
+                    v-for="(cell, ci) in matRow"
+                    :key="ci"
+                    :class="matrixCellClass(cell, ri === ci)"
+                  >
+                    <template v-if="ri === ci">—</template>
+                    <template v-else-if="cell">{{ cell.w }}-{{ cell.l }}</template>
+                    <template v-else>-</template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <div v-else class="text-center py-16 text-slate-500 dark:text-slate-400">
+          対象データがありません。
+        </div>
+      </template>
+      </template>
     </main>
 
     <!-- ============ 参加者追加モーダル（管理者のみ） ============ -->
@@ -350,16 +435,78 @@
  * App.vue が `/kinjocup` パスを検知してこのビューを単独描画する（サイドバー等は描画しない）。
  */
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useKinjoCup, type KinjoCupParticipant } from '../composables/useKinjoCup';
+import { useKinjoCup, type KinjoCupParticipant, type KinjoCupMatrix, type MatrixCell } from '../composables/useKinjoCup';
 import { useScores } from '../composables/useScores';
 import { useAdmin } from '../composables/useAdmin';
 import type { ScoreData } from '../types/ScoreData';
 import ScoreDashboard from '../components/ScoreDashboard.vue';
 import ScoreSummary from '../components/ScoreSummary.vue';
 
-const { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
+const { isLoading, fetchParticipants, fetchMatrix, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
 const { fetchAllUsers } = useScores();
 const { isAdmin } = useAdmin();
+
+// ---------- トップタブ（参加者一覧 / マトリクス） ----------
+/** 表示中のトップタブ。 */
+const topTab = ref<'list' | 'matrix'>('list');
+
+// ---------- 勝敗マトリクス ----------
+/** マトリクスデータ（3区分）。未取得は null。 */
+const matrixData = ref<KinjoCupMatrix | null>(null);
+/** マトリクス取得中フラグ。 */
+const matrixLoading = ref(false);
+/** マトリクス取得エラー。 */
+const matrixError = ref('');
+/** 表示中のレベル区分。 */
+const matrixLevel = ref<'lv12' | 'lv11' | 'lv10'>('lv12');
+
+/** 現在表示中の区分のマトリクス。 */
+const currentBracket = computed(() => matrixData.value ? matrixData.value[matrixLevel.value] : null);
+
+/** マトリクスを取得する。 */
+const loadMatrix = async () => {
+  matrixLoading.value = true;
+  matrixError.value = '';
+  try {
+    matrixData.value = await fetchMatrix();
+  } catch (e: any) {
+    matrixError.value = e?.message || 'マトリクスの取得に失敗しました。';
+  } finally {
+    matrixLoading.value = false;
+  }
+};
+
+/** マトリクスタブを開く（初回のみ取得）。 */
+const openMatrixTab = () => {
+  topTab.value = 'matrix';
+  if (!matrixData.value && !matrixLoading.value) loadMatrix();
+};
+
+/** トップタブのボタン装飾。 */
+const topTabClass = (tab: 'list' | 'matrix'): string => {
+  const base = 'px-4 py-2 text-sm font-bold -mb-px border-b-2 transition-colors';
+  return topTab.value === tab
+    ? `${base} border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400`
+    : `${base} border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200`;
+};
+
+/** レベルサブタブのボタン装飾。 */
+const levelTabClass = (lv: 'lv12' | 'lv11' | 'lv10'): string => {
+  const base = 'px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-colors';
+  return matrixLevel.value === lv
+    ? `${base} bg-indigo-600 text-white`
+    : `${base} bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`;
+};
+
+/** マトリクスの 1 セルの装飾（勝ち=緑 / 負け=赤 / 引分=中立 / 対角=灰）。 */
+const matrixCellClass = (cell: MatrixCell | null, isDiag: boolean): string => {
+  const base = 'px-2 py-1.5 text-center font-mono text-xs whitespace-nowrap border border-slate-100 dark:border-slate-700';
+  if (isDiag) return `${base} bg-slate-100 dark:bg-slate-700/40 text-slate-300 dark:text-slate-600`;
+  if (!cell) return `${base} text-slate-400`;
+  if (cell.w > cell.l) return `${base} bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 font-bold`;
+  if (cell.w < cell.l) return `${base} bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300`;
+  return `${base} text-slate-500 dark:text-slate-400`;
+};
 
 /** 参加者一覧（サーバから総合力降順で返る）。 */
 const participants = ref<KinjoCupParticipant[]>([]);

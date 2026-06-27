@@ -175,6 +175,154 @@ public class KinjoCupController {
     }
 
     /**
+     * 【メソッドの役割】 参加者同士の総当たり「勝敗マトリクス」を LV10以下 / LV11 / LV12 の 3 区分で返す。
+     *
+     * 勝敗判定: ANOTHER/LEGGENDARIA の譜面で、両者がプレイ済みの共通譜面ごとに EX スコアを比較し、
+     * 高い方を勝ち（同点は引き分け）。区分ごとに総当たりで集計する。
+     * 行・列の並びは「勝ち数の多い人を上（左）」に降順ソートする。
+     *
+     * 公開エンドポイント（特設ページと同様、閲覧は誰でも可）。
+     *
+     * @return {@code { lv10: {players, matrix}, lv11: {...}, lv12: {...} }}
+     */
+    @GetMapping("/matrix")
+    public ResponseEntity<Map<String, Object>> matrix() {
+        List<KinjoCupParticipant> parts = participantRepository.findAllByOrderByCreatedAtAsc();
+        List<Participant> players = parts.stream()
+                .map(p -> new Participant(p.getUser().getId(),
+                        p.getUser().getDisplayName() != null ? p.getUser().getDisplayName() : ""))
+                .toList();
+        List<Long> userIds = players.stream().map(Participant::userId).toList();
+
+        // userId → 区分('lv10'/'lv11'/'lv12') → (譜面キー → ベスト EX スコア)
+        Map<Long, Map<String, Map<String, Integer>>> byUser = new HashMap<>();
+        for (Long uid : userIds) {
+            Map<String, Map<String, Integer>> m = new HashMap<>();
+            m.put("lv10", new HashMap<>());
+            m.put("lv11", new HashMap<>());
+            m.put("lv12", new HashMap<>());
+            byUser.put(uid, m);
+        }
+        if (!userIds.isEmpty()) {
+            for (Map<String, Object> r : scoreRepository.findBestAnotherLeggWithDefForUsers(userIds)) {
+                Object lvlObj = r.get("level");
+                if (lvlObj == null) continue;
+                int level = ((Number) lvlObj).intValue();
+                String bracket = level <= 10 ? "lv10" : level == 11 ? "lv11" : level == 12 ? "lv12" : null;
+                if (bracket == null) continue;
+                long uid = toLong(r.get("userId"));
+                Map<String, Map<String, Integer>> um = byUser.get(uid);
+                if (um == null) continue;
+                String key = r.get("title") + "|" + r.get("difficultyName");
+                um.get(bracket).put(key, (int) toLong(r.get("score")));
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("lv10", buildBracket(players, byUser, "lv10"));
+        result.put("lv11", buildBracket(players, byUser, "lv11"));
+        result.put("lv12", buildBracket(players, byUser, "lv12"));
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 1 区分分の総当たり勝敗を集計し、勝ち数降順に並べた players と、その並びに揃えた matrix を返す。
+     */
+    private Map<String, Object> buildBracket(List<Participant> players,
+                                             Map<Long, Map<String, Map<String, Integer>>> byUser,
+                                             String bracket) {
+        int n = players.size();
+        // A → B → {A の勝ち, A の負け, 引き分け}
+        Map<Long, Map<Long, int[]>> rec = new HashMap<>();
+        // userId → {総勝ち, 総負け, 総引き分け}
+        Map<Long, int[]> totals = new HashMap<>();
+        for (Participant p : players) totals.put(p.userId(), new int[]{0, 0, 0});
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                Participant a = players.get(i);
+                Participant b = players.get(j);
+                Map<String, Integer> ma = byUser.get(a.userId()).get(bracket);
+                Map<String, Integer> mb = byUser.get(b.userId()).get(bracket);
+                int aWin = 0, bWin = 0, draw = 0;
+                // 小さい方を走査して共通譜面のみ比較
+                Map<String, Integer> small = ma.size() <= mb.size() ? ma : mb;
+                boolean smallIsA = small == ma;
+                Map<String, Integer> other = smallIsA ? mb : ma;
+                for (Map.Entry<String, Integer> e : small.entrySet()) {
+                    Integer os = other.get(e.getKey());
+                    if (os == null) continue;
+                    int sa = smallIsA ? e.getValue() : os;
+                    int sb = smallIsA ? os : e.getValue();
+                    if (sa > sb) aWin++;
+                    else if (sb > sa) bWin++;
+                    else draw++;
+                }
+                rec.computeIfAbsent(a.userId(), k -> new HashMap<>()).put(b.userId(), new int[]{aWin, bWin, draw});
+                rec.computeIfAbsent(b.userId(), k -> new HashMap<>()).put(a.userId(), new int[]{bWin, aWin, draw});
+                int[] ta = totals.get(a.userId());
+                ta[0] += aWin; ta[1] += bWin; ta[2] += draw;
+                int[] tb = totals.get(b.userId());
+                tb[0] += bWin; tb[1] += aWin; tb[2] += draw;
+            }
+        }
+
+        // 勝ち数降順 → 勝率降順 → 負け数昇順 → 名前 でソート
+        List<Participant> sorted = new ArrayList<>(players);
+        sorted.sort((x, y) -> {
+            int[] tx = totals.get(x.userId());
+            int[] ty = totals.get(y.userId());
+            if (ty[0] != tx[0]) return Integer.compare(ty[0], tx[0]);            // 勝ち数 多い順
+            int cr = Double.compare(winRate(ty), winRate(tx));
+            if (cr != 0) return cr;                                              // 勝率 高い順
+            if (tx[1] != ty[1]) return Integer.compare(tx[1], ty[1]);           // 負け 少ない順
+            return x.displayName().compareTo(y.displayName());
+        });
+
+        List<Map<String, Object>> playerList = new ArrayList<>();
+        for (Participant p : sorted) {
+            int[] t = totals.get(p.userId());
+            Map<String, Object> pm = new LinkedHashMap<>();
+            pm.put("userId", p.userId());
+            pm.put("displayName", p.displayName());
+            pm.put("wins", t[0]);
+            pm.put("losses", t[1]);
+            pm.put("draws", t[2]);
+            pm.put("winRate", winRate(t));
+            playerList.add(pm);
+        }
+
+        List<List<Map<String, Object>>> matrix = new ArrayList<>();
+        for (Participant rowP : sorted) {
+            List<Map<String, Object>> row = new ArrayList<>();
+            for (Participant colP : sorted) {
+                if (rowP.userId() == colP.userId()) {
+                    row.add(null); // 対角は自分自身
+                    continue;
+                }
+                int[] cell = rec.getOrDefault(rowP.userId(), Map.of()).get(colP.userId());
+                Map<String, Object> c = new LinkedHashMap<>();
+                c.put("w", cell == null ? 0 : cell[0]);
+                c.put("l", cell == null ? 0 : cell[1]);
+                c.put("d", cell == null ? 0 : cell[2]);
+                row.add(c);
+            }
+            matrix.add(row);
+        }
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("players", playerList);
+        out.put("matrix", matrix);
+        return out;
+    }
+
+    /** 勝率（%、小数第1位）。決着が無ければ 0。 */
+    private static double winRate(int[] t) {
+        int decided = t[0] + t[1];
+        return decided == 0 ? 0.0 : Math.round(t[0] * 1000.0 / decided) / 10.0;
+    }
+
+    /**
      * 【メソッドの役割】 参加者を名簿に追加する（管理者のみ）。
      *
      * @param auth 認証情報（管理者限定）
@@ -319,6 +467,10 @@ public class KinjoCupController {
 
     /** メモ更新リクエストのボディ。 */
     public record UpdateNoteRequest(String note) {
+    }
+
+    /** 勝敗マトリクス集計用の参加者（userId と表示名のみ）。 */
+    private record Participant(long userId, String displayName) {
     }
 
     /**

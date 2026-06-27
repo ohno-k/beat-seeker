@@ -6,6 +6,43 @@ import type { ScoreData } from '../types/ScoreData';
 /** バックエンド API のベース URL。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+/** 勝敗マトリクスの 1 プレイヤー（勝ち数降順で並ぶ）。 */
+export interface MatrixPlayer {
+  userId: number;
+  displayName: string;
+  /** 総勝ち数。 */
+  wins: number;
+  /** 総負け数。 */
+  losses: number;
+  /** 総引き分け数。 */
+  draws: number;
+  /** 勝率(%)（決着が無ければ 0）。 */
+  winRate: number;
+}
+
+/** 勝敗マトリクスの 1 セル（行プレイヤー視点の対戦成績）。対角は null。 */
+export interface MatrixCell {
+  /** 行プレイヤーの勝ち数。 */
+  w: number;
+  /** 行プレイヤーの負け数。 */
+  l: number;
+  /** 引き分け数。 */
+  d: number;
+}
+
+/** 1 区分（LV10以下/LV11/LV12）の勝敗マトリクス。players の並びに matrix の行・列が揃う。 */
+export interface MatrixBracket {
+  players: MatrixPlayer[];
+  matrix: (MatrixCell | null)[][];
+}
+
+/** /api/kinjocup/matrix の応答。 */
+export interface KinjoCupMatrix {
+  lv10: MatrixBracket;
+  lv11: MatrixBracket;
+  lv12: MatrixBracket;
+}
+
 /**
  * きんじょー杯 特設ページ（/kinjocup）に掲載する参加者 1 人分のサマリ。
  * 実力データ（総合力 / 段位 / アリーナ）はバックエンドが User から都度引いて返す。
@@ -68,6 +105,17 @@ export function useKinjoCup() {
     } finally {
       isLoading.value = false;
     }
+  };
+
+  /**
+   * 参加者同士の勝敗マトリクス（LV10以下/LV11/LV12）を取得する（公開）。
+   */
+  const fetchMatrix = async (): Promise<KinjoCupMatrix> => {
+    const res = await fetch(`${API_BASE}/api/kinjocup/matrix`);
+    if (!res.ok) {
+      throw new Error(`マトリクスの取得に失敗しました (${res.status})`);
+    }
+    return (await res.json()) as KinjoCupMatrix;
   };
 
   /**
@@ -141,5 +189,5 @@ export function useKinjoCup() {
     }
   };
 
-  return { isLoading, fetchParticipants, fetchParticipantScores, addParticipant, updateNote, removeParticipant };
+  return { isLoading, fetchParticipants, fetchMatrix, fetchParticipantScores, addParticipant, updateNote, removeParticipant };
 }
