@@ -195,7 +195,10 @@
           <div class="chart-card">
             <h4 class="chart-title">{{ t('dashboard.top100CountByType') }}</h4>
             <p class="text-[11px] text-slate-400 dark:text-slate-500 -mt-1 mb-1">{{ t('dashboard.top100Border') }}</p>
-            <div class="h-44"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="top100DiffBarOpts" /></div>
+            <!-- 21本×2行ラベル(☆難易度+ボーダー%)。狭幅では下段%が潰れるので横スクロール+最小幅でバー幅を確保する -->
+            <div class="overflow-x-auto">
+              <div class="h-44 min-w-[700px]"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="top100DiffBarOpts" /></div>
+            </div>
           </div>
         </div>
 
