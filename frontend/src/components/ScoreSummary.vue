@@ -265,6 +265,16 @@
                   <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
                 </div>
               </th>
+              <!-- BPI 列（きんじょー杯ページ限定。showBpi が true のときだけ表示） -->
+              <th v-if="props.showBpi" class="px-1 sm:px-4 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-violet-600 dark:text-violet-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-1/12" @click="toggleSort('bpi')">
+                <div class="flex items-center gap-0.5 sm:gap-1">
+                  BPI
+                  <span class="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" v-if="sortKey === 'bpi'">
+                    {{ sortOrder === 'asc' ? '▲' : '▼' }}
+                  </span>
+                  <span v-else class="text-slate-300 dark:text-slate-600">↕</span>
+                </div>
+              </th>
               <th class="px-1 sm:px-2 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-8 sm:w-12" @click="toggleSort('unofficialSongRank')">
                 <div class="flex items-center gap-0.5 sm:gap-1">
                   {{ t('table.colRank') }}
@@ -363,6 +373,14 @@
                 <span v-else class="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">---</span>
               </td>
 
+              <!-- BPI（きんじょー杯ページ限定。avg/wr を持たない譜面・未プレイは「—」） -->
+              <td v-if="props.showBpi" class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
+                <template v-for="bpi of [recordBpi(record)]" :key="0">
+                  <span v-if="bpi != null" class="font-bold text-[9px] sm:text-xs tabular-nums" :class="bpi >= 0 ? 'text-violet-600 dark:text-violet-400' : 'text-rose-500 dark:text-rose-400'">{{ bpi.toFixed(1) }}</span>
+                  <span v-else class="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500">—</span>
+                </template>
+              </td>
+
               <!-- 単曲ランク（必要スコアレート表対応）。アイコンのみ表示。 -->
               <td class="px-1 sm:px-2 py-1.5 sm:py-2 whitespace-nowrap w-8 sm:w-12">
                 <template v-for="rankInfo of [getSongUnofficialRank(record)]" :key="0">
@@ -418,7 +436,7 @@
               </td>
             </tr>
             <tr v-if="displayScores.length === 0">
-              <td colspan="8" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
+              <td :colspan="props.showBpi ? 9 : 8" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 w-full">
                 {{ t('table.noMatchingScores') }}
               </td>
             </tr>
@@ -1100,6 +1118,7 @@ import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getChartType, getFolderRankInfoByRate, FOLDER_RANK_DEFS, type ChartType, type RankInfo } from '../utils/beatTier';
+import { calcBpi } from '../utils/bpi';
 import { useScratchSummary } from '../composables/useScratchSummary';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
@@ -1131,6 +1150,8 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const props = defineProps<{
   scores: ScoreData[];
   viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | null;
+  /** BPI 列を表示するか。きんじょー杯ページ（/kinjocup）でのみ true を渡す。 */
+  showBpi?: boolean;
 }>();
 
 /**
@@ -1290,7 +1311,7 @@ const currentPage = ref(1);
 /** 1 ページあたりの表示件数。10/25/50/100 から選択可能。 */
 const itemsPerPage = ref(50);
 
-type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | 'songRank' | 'unofficialSongRank' | null;
+type SortKey = 'title' | 'clearType' | 'scoreRate' | 'informalRank' | 'difficultyLevel' | 'djLevel' | 'beatTierPoints' | 'songRank' | 'unofficialSongRank' | 'bpi' | null;
 type SortOrder = 'asc' | 'desc';
 
 /** 現在の並び替えキー。初期値は「非公式難易度（informalRank）」降順。 */
@@ -1332,6 +1353,41 @@ const getRankOrderValue = (info: RankInfo | null): number => {
   if (!info) return -1;
   const idx = FOLDER_RANK_DEFS.findIndex(d => d.name === info.name && (d.tier ?? null) === (info.tier ?? null));
   return idx === -1 ? -1 : (FOLDER_RANK_DEFS.length - idx);
+};
+
+/**
+ * 【computed】 BPI 計算に必要なパラメータ（avg/wr/coef/理論値）を `title|difficultyName` で引ける辞書。
+ *
+ * song_data.json（= songDataBodyRef）の ANOTHER(4)/LEGGENDARIA(10) 各譜面から構築する。
+ * 1譜面に複数回ルックアップする都合上、行ごとの線形探索を避けるため一度だけ Map 化する。
+ * BPI 列（showBpi）が立っているときだけ参照されるが、構築コストは小さいので常時用意する。
+ */
+const bpiParamDict = computed(() => {
+  const dict = new Map<string, { avg?: number; wr?: number; coef?: number; max: number }>();
+  const body = songDataBodyRef.value as any[];
+  if (Array.isArray(body)) {
+    for (const s of body) {
+      const diffName = s.difficulty === '4' ? 'ANOTHER' : s.difficulty === '10' ? 'LEGGENDARIA' : null;
+      if (!diffName) continue;
+      dict.set(`${s.title}|${diffName}`, {
+        avg: s.avg,
+        wr: s.wr,
+        coef: s.coef,
+        max: s.notes ? s.notes * 2 : 0,
+      });
+    }
+  }
+  return dict;
+});
+
+/**
+ * 【関数の役割】 1譜面レコードの BPI を返す。avg/wr を持たない譜面（多くの☆11以下など）は null。
+ * 算出ロジックは {@link calcBpi}（本家 BPIManager2 準拠）に委譲する。
+ */
+const recordBpi = (record: ScoreRecord): number | null => {
+  const p = bpiParamDict.value.get(`${record.title}|${record.difficultyName}`);
+  if (!p) return null;
+  return calcBpi(record.score, p.max || record.maxScore, p.avg, p.wr, p.coef);
 };
 
 /**
@@ -2494,7 +2550,7 @@ const toggleSort = (key: SortKey) => {
   } else {
     sortKey.value = key;
     // 列ごとの既定ソート向き（スコア/PT/クリアタイプ/段階は降順、ランキングは昇順）。
-    if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints' || key === 'clearType' || key === 'djLevel' || key === 'unofficialSongRank') {
+    if (key === 'scoreRate' || key === 'informalRank' || key === 'beatTierPoints' || key === 'clearType' || key === 'djLevel' || key === 'unofficialSongRank' || key === 'bpi') {
         sortOrder.value = 'desc';
     } else if (key === 'songRank') {
         sortOrder.value = 'asc';
@@ -2648,6 +2704,14 @@ const filteredScores = computed(() => {
       const rateA = a.scoreRate >= 0 ? a.scoreRate : -2;
       const rateB = b.scoreRate >= 0 ? b.scoreRate : -2;
       return sortOrder.value === 'asc' ? rateA - rateB : rateB - rateA;
+    });
+  } else if (sortKey.value === 'bpi') {
+    // BPI 算出不能（avg/wr 欠落・未プレイ）は常に末尾へ送るため -Infinity 扱い。
+    result.sort((a, b) => {
+      const valA = recordBpi(a) ?? -Infinity;
+      const valB = recordBpi(b) ?? -Infinity;
+      if (valA !== valB) return sortOrder.value === 'asc' ? valA - valB : valB - valA;
+      return a.title.localeCompare(b.title);
     });
   }
 

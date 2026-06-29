@@ -100,6 +100,7 @@
             v-else
             :scores="detailScores"
             :viewingMode="'public'"
+            :show-bpi="true"
             class="w-full"
           />
         </template>
