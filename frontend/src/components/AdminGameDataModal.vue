@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm" @click.self="$emit('close')">
-      <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] animate-fade-in border border-slate-200 dark:border-slate-800">
+      <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-md shadow-xl flex flex-col overflow-hidden max-h-[90vh] animate-fade-in border border-slate-200 dark:border-slate-800">
         
         <!-- Header -->
         <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
@@ -62,8 +62,8 @@
         </div>
 
         <!-- Status messages -->
-        <div v-if="errorMsg" class="mx-5 mt-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded-xl border border-red-200 dark:border-red-800 text-sm">{{ errorMsg }}</div>
-        <div v-if="successMsg" class="mx-5 mt-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded-xl border border-green-200 dark:border-green-800 text-sm">{{ successMsg }}</div>
+        <div v-if="errorMsg" class="mx-5 mt-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded-md border border-red-200 dark:border-red-800 text-sm">{{ errorMsg }}</div>
+        <div v-if="successMsg" class="mx-5 mt-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded-md border border-green-200 dark:border-green-800 text-sm">{{ successMsg }}</div>
 
         <!-- Tab content -->
         <div class="flex-1 overflow-y-auto p-5">
@@ -71,7 +71,7 @@
           <!-- Songs Tab -->
           <div v-if="activeTab === 'songs'">
             <!-- Edit existing active song -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">既存曲を編集</h3>
               <input
                 v-model="activeSearchQuery"
@@ -101,7 +101,7 @@
             </div>
 
             <!-- Add Song Form -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <div v-if="isEditingExistingSong" class="flex items-center justify-between mb-3 p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800/50">
                 <div class="text-sm text-indigo-700 dark:text-indigo-400">
                   <span class="font-bold">編集中:</span> {{ editingSongTitle }}
@@ -138,7 +138,7 @@
                   class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700"
                   :class="diff.bgClass"
                 >
-                  <span class="w-20 text-xs font-black uppercase shrink-0 text-center py-1 rounded" :class="diff.labelClass">{{ diff.label }}</span>
+                  <span class="w-20 text-xs font-bold shrink-0 text-center py-1 rounded" :class="diff.labelClass">{{ diff.label }}</span>
                   <div class="flex items-center gap-1.5 flex-1">
                     <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">ノーツ</label>
                     <input v-model.number="form[diff.notesKey]" type="number" min="0" class="w-20 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs text-slate-800 dark:text-white" placeholder="0" />
@@ -250,7 +250,7 @@
               </label>
             </div>
 
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <h4 class="text-xs font-bold text-slate-500 mb-2">楽曲のランク移動</h4>
               <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <select v-model="diffEditSongTitle" class="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white">
@@ -358,7 +358,7 @@
                   </div>
                </div>
             </div>
-            <div v-if="savedDiffChanges.length === 0 && pendingDiffChanges.length === 0" class="text-center text-sm py-8 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl">
+            <div v-if="savedDiffChanges.length === 0 && pendingDiffChanges.length === 0" class="text-center text-sm py-8 text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 dark:border-slate-700 rounded-md">
               変更はありません。<br>上のフォームから楽曲を選んでランクを移動してください。
             </div>
           </div>
@@ -369,7 +369,7 @@
     <!-- Comment tooltip -->
     <div
       v-if="isOpen && tooltipSongKey && (tooltipComments.length > 0 || tooltipLoading)"
-      class="fixed z-[200] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-3 w-80 overflow-y-auto pointer-events-none"
+      class="fixed z-[200] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-xl p-3 w-80 overflow-y-auto pointer-events-none"
       :style="{ top: tooltipPosition.top + 'px', left: tooltipPosition.left + 'px', maxHeight: tooltipPosition.maxHeight + 'px' }"
     >
       <div v-if="tooltipLoading" class="text-xs text-slate-400 text-center py-2">読み込み中...</div>

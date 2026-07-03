@@ -321,7 +321,7 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
       @click.self="close"
     >
       <div
-        class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col animate-scale-pop"
+        class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col animate-scale-pop"
       >
         <!-- 検索バー -->
         <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
@@ -355,7 +355,7 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
           </div>
           <template v-else>
             <div v-for="g in groupedItems" :key="g.group" class="py-1">
-              <div class="px-4 pt-2 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+              <div class="px-4 pt-2 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
                 {{ groupLabel(g.group) }}
               </div>
               <button
@@ -377,7 +377,7 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
                 <span v-if="item.sub" class="text-xs text-slate-400 dark:text-slate-500 truncate max-w-[40%]">{{ item.sub }}</span>
                 <span
                   v-if="item.group === 'nav' && activeTab === item.id.replace('nav:', '')"
-                  class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300"
+                  class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300"
                 >
                   ●
                 </span>

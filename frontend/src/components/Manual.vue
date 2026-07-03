@@ -61,11 +61,11 @@ onMounted(() => {
 <template>
   <div class="space-y-12 pb-20 animate-fade-in text-slate-900 dark:text-white">
     <!-- ヘッダー -->
-    <section class="bg-white dark:bg-slate-800 rounded-2xl p-8 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700">
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4 border border-blue-100 dark:border-blue-800/50">
+    <section class="bg-white dark:bg-slate-800 rounded-md p-8 sm:p-10 border border-slate-200 dark:border-slate-700">
+      <span class="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4 border border-blue-100 dark:border-blue-800/50">
         USER MANUAL
       </span>
-      <h1 class="text-3xl sm:text-4xl font-black mb-4 leading-tight">
+      <h1 class="text-3xl sm:text-4xl font-bold mb-4 leading-tight">
         beat-seeker 使い方ガイド
       </h1>
       <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -76,8 +76,8 @@ onMounted(() => {
     </section>
 
     <!-- 目次 -->
-    <nav class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-700">
-      <h2 class="text-xl font-black mb-4 flex items-center gap-3">
+    <nav class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-8 border border-slate-200 dark:border-slate-700">
+      <h2 class="text-xl font-bold mb-4 flex items-center gap-3">
         <span class="w-1.5 h-6 bg-blue-600 dark:bg-blue-500 rounded-full"></span>
         目次
       </h2>
@@ -96,8 +96,8 @@ onMounted(() => {
     </nav>
 
     <!-- 1. はじめに -->
-    <section id="getting-started" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="getting-started" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">01</span>
         はじめに — スコアを取り込む
       </h2>
@@ -122,14 +122,14 @@ onMounted(() => {
         サイドバーの「カメラで曲検索」から、ゲーム画面の写真をアップロードすると曲名を OCR で識別し、その場でスコアを記録できます。試験運用中の機能のため精度に揺らぎがあります。
       </p>
 
-      <div class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl text-sm text-amber-800 dark:text-amber-300">
+      <div class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md text-sm text-amber-800 dark:text-amber-300">
         <strong>💡 アップロードを繰り返すと自動で差分を検出します</strong>。新規追加された曲・スコアが更新された曲だけがアップロード結果に表示され、過去のアップロード履歴は <a href="#history" @click.prevent="scrollToSection('history')" class="font-bold underline">成長記録</a> に保存されます。
       </div>
     </section>
 
     <!-- 2. ダッシュボード -->
-    <section id="dashboard" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="dashboard" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">02</span>
         ダッシュボード
       </h2>
@@ -146,8 +146,8 @@ onMounted(() => {
     </section>
 
     <!-- 3. スコア一覧 -->
-    <section id="scores" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="scores" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">03</span>
         スコア一覧
       </h2>
@@ -163,8 +163,8 @@ onMounted(() => {
     </section>
 
     <!-- 4. プロフィール -->
-    <section id="profile" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="profile" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">04</span>
         プロフィール
       </h2>
@@ -181,8 +181,8 @@ onMounted(() => {
     </section>
 
     <!-- 5. ランキング -->
-    <section id="ranking" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="ranking" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">05</span>
         ランキング
       </h2>
@@ -197,8 +197,8 @@ onMounted(() => {
     </section>
 
     <!-- 6. フレンド -->
-    <section id="friends" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="friends" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">06</span>
         フレンド
       </h2>
@@ -214,8 +214,8 @@ onMounted(() => {
     </section>
 
     <!-- 7. 成長記録 -->
-    <section id="history" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="history" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">07</span>
         成長記録 (アップロード履歴)
       </h2>
@@ -230,8 +230,8 @@ onMounted(() => {
     </section>
 
     <!-- 8. ARENA -->
-    <section id="arena" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="arena" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">08</span>
         ARENA モード
       </h2>
@@ -247,8 +247,8 @@ onMounted(() => {
     </section>
 
     <!-- 9. 選曲アシスト -->
-    <section id="arcade-assist" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="arcade-assist" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">09</span>
         選曲アシスト
       </h2>
@@ -266,8 +266,8 @@ onMounted(() => {
     </section>
 
     <!-- 10. 投票所 -->
-    <section id="tier-voting" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="tier-voting" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">10</span>
         投票所 (難易度表投票)
       </h2>
@@ -284,8 +284,8 @@ onMounted(() => {
     </section>
 
     <!-- 11. ティア別平均 -->
-    <section id="song-avg" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="song-avg" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">11</span>
         ティア別平均
       </h2>
@@ -301,8 +301,8 @@ onMounted(() => {
     </section>
 
     <!-- 12. 難易度表 -->
-    <section id="diff-table" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="diff-table" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">12</span>
         難易度表
       </h2>
@@ -317,8 +317,8 @@ onMounted(() => {
     </section>
 
     <!-- 13. 譜面分析 -->
-    <section id="score-prediction" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="score-prediction" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">13</span>
         譜面分析 (スコア予測)
       </h2>
@@ -334,11 +334,11 @@ onMounted(() => {
     </section>
 
     <!-- 14. スコアペア散布図 (サポーター限定) -->
-    <section id="score-scatter" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border-2 border-amber-200 dark:border-amber-800/50 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3 flex-wrap">
+    <section id="score-scatter" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border-2 border-amber-200 dark:border-amber-800/50 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3 flex-wrap">
         <span class="text-blue-500 font-mono text-base">14</span>
         スコアペア散布図
-        <span class="ml-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+        <span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
           サポーター限定
         </span>
       </h2>
@@ -351,14 +351,14 @@ onMounted(() => {
         <li><strong>DJ LEVEL グリッド:</strong> A / AA / AAA / MAX- / MAX のグレード境界が補助線として描画されます。</li>
         <li><strong>ホバー詳細:</strong> 点にマウスを乗せると、ユーザー名と両譜面のスコア / スコアレートが表示されます。</li>
       </ul>
-      <div class="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl text-sm text-amber-800 dark:text-amber-300">
+      <div class="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md text-sm text-amber-800 dark:text-amber-300">
         この機能は <strong>Ko-fi 経由でサポートしてくださったサポーター限定</strong>です。サイドバー下部の Ko-fi ボタンから支援できます。
       </div>
     </section>
 
     <!-- 15. 譜面一覧 -->
-    <section id="chart-list" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="chart-list" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">15</span>
         譜面一覧
       </h2>
@@ -374,8 +374,8 @@ onMounted(() => {
     </section>
 
     <!-- 16. 公開共有リンク -->
-    <section id="share" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="share" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">16</span>
         公開共有リンク
       </h2>
@@ -391,8 +391,8 @@ onMounted(() => {
     </section>
 
     <!-- 17. 攻略ガイド -->
-    <section id="guide" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="guide" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">17</span>
         攻略ガイド
       </h2>
@@ -406,8 +406,8 @@ onMounted(() => {
     </section>
 
     <!-- 18. 更新履歴 -->
-    <section id="changelog" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="changelog" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">18</span>
         更新履歴
       </h2>
@@ -421,8 +421,8 @@ onMounted(() => {
     </section>
 
     <!-- 19. その他 -->
-    <section id="misc" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-black flex items-center gap-3">
+    <section id="misc" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+      <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">19</span>
         その他の便利機能
       </h2>

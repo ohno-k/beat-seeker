@@ -315,7 +315,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
   <div class="w-full">
     <!-- ページヘッダー: タイトルと説明 -->
     <div class="mb-6">
-      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">
         {{ t('nav.tierVoting') }}
       </h1>
       <p class="text-sm text-slate-500 dark:text-slate-400">
@@ -324,8 +324,8 @@ const totalVotedCount = computed(() => myVotes.value.size);
     </div>
 
     <!-- 投票基準の案内文 -->
-    <div class="mb-5 p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl">
-      <p class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">{{ t('tierVoting.criteriaTitle') }}</p>
+    <div class="mb-5 p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-md">
+      <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('tierVoting.criteriaTitle') }}</p>
       <ul class="space-y-1 text-sm text-slate-700 dark:text-slate-300">
         <li class="flex items-start gap-2">
           <span class="mt-0.5 shrink-0 text-slate-400">•</span>
@@ -352,12 +352,12 @@ const totalVotedCount = computed(() => myVotes.value.size);
     </div>
 
     <!-- 未ログイン警告: ログインしないと投票できない旨を表示 -->
-    <div v-if="!isLoggedIn" class="mb-5 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl text-sm text-amber-700 dark:text-amber-400">
+    <div v-if="!isLoggedIn" class="mb-5 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-md text-sm text-amber-700 dark:text-amber-400">
       {{ t('tierVoting.loginHint') }}
     </div>
 
     <!-- 投票済み曲数: ログイン済かつ1件以上投票があるときのみ表示 -->
-    <div v-if="isLoggedIn && totalVotedCount > 0" class="mb-5 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl text-sm text-blue-700 dark:text-blue-400">
+    <div v-if="isLoggedIn && totalVotedCount > 0" class="mb-5 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md text-sm text-blue-700 dark:text-blue-400">
       {{ t('tierVoting.votedCount', { n: totalVotedCount }) }}
     </div>
 
@@ -367,7 +367,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
         v-model="searchQuery"
         type="text"
         :placeholder="t('tierVoting.searchPlaceholder')"
-        class="w-full max-w-sm px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full max-w-sm px-4 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
 
@@ -381,7 +381,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
       <div
         v-for="rank in filteredRanks"
         :key="rank.rank"
-        class="rounded-2xl border shadow-sm overflow-hidden"
+        class="rounded-md border overflow-hidden"
         :class="isUncategorized(rank.rank)
           ? 'bg-amber-50/60 dark:bg-amber-900/10 border-amber-300 dark:border-amber-700 ring-1 ring-amber-300/60 dark:ring-amber-600/40'
           : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
@@ -394,13 +394,13 @@ const totalVotedCount = computed(() => myVotes.value.size);
             : 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'"
         >
           <span
-            class="text-base font-black tracking-tight"
+            class="text-base font-bold tracking-tight"
             :class="isUncategorized(rank.rank)
               ? 'text-amber-900 dark:text-amber-100'
               : 'text-slate-800 dark:text-white'"
           >{{ rank.rank }}</span>
           <span class="text-xs text-slate-400 dark:text-slate-500">{{ rank.songs.length }}{{ t('tierVoting.songs') }}</span>
-          <span v-if="isUncategorized(rank.rank)" class="text-[10px] px-2 py-0.5 bg-amber-200 dark:bg-amber-700/60 text-amber-800 dark:text-amber-100 rounded font-bold uppercase tracking-wide">
+          <span v-if="isUncategorized(rank.rank)" class="text-[10px] px-2 py-0.5 bg-amber-200 dark:bg-amber-700/60 text-amber-800 dark:text-amber-100 rounded font-bold">
             {{ t('tierVoting.selectTierHint') }}
           </span>
         </div>
@@ -477,7 +477,7 @@ const totalVotedCount = computed(() => myVotes.value.size);
                       ? 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700'
                       : 'bg-white text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600'"
                   >
-                    <span class="font-black tracking-tight">{{ entry.tier }}</span>
+                    <span class="font-bold tracking-tight">{{ entry.tier }}</span>
                     <span class="text-[10px] opacity-75">×{{ entry.count }}</span>
                   </span>
                   <span class="text-[10px] text-slate-400 dark:text-slate-500 ml-1 whitespace-nowrap">
@@ -504,13 +504,13 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   :title="t('tierVoting.promote')"
                   class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border"
                   :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'PROMOTE'
-                    ? 'bg-green-500 text-white border-green-500 shadow-sm'
+                    ? 'bg-green-500 text-white border-green-500'
                     : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-green-400 hover:text-green-600',
                     !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>↑</span>
-                  <span class="font-black" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
-                  <span class="font-black opacity-50" v-else>?</span>
+                  <span class="font-bold" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
+                  <span class="font-bold opacity-50" v-else>?</span>
                 </button>
                 <!-- 据え置き（STAY）ボタン -->
                 <button
@@ -519,13 +519,13 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   :title="t('tierVoting.stay')"
                   class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border"
                   :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'STAY'
-                    ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                    ? 'bg-blue-500 text-white border-blue-500'
                     : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-blue-400 hover:text-blue-600',
                     !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>→</span>
-                  <span class="font-black" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
-                  <span class="font-black opacity-50" v-else>?</span>
+                  <span class="font-bold" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
+                  <span class="font-bold opacity-50" v-else>?</span>
                 </button>
                 <!-- 降格（DEMOTE）ボタン -->
                 <button
@@ -534,13 +534,13 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   :title="t('tierVoting.demote')"
                   class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border"
                   :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'DEMOTE'
-                    ? 'bg-red-500 text-white border-red-500 shadow-sm'
+                    ? 'bg-red-500 text-white border-red-500'
                     : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-red-400 hover:text-red-600',
                     !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
                 >
                   <span>↓</span>
-                  <span class="font-black" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['DEMOTE'] ?? 0 }}</span>
-                  <span class="font-black opacity-50" v-else>?</span>
+                  <span class="font-bold" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['DEMOTE'] ?? 0 }}</span>
+                  <span class="font-bold opacity-50" v-else>?</span>
                 </button>
               </div>
             </template>

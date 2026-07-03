@@ -1,11 +1,10 @@
 <template>
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in" @click.self="close">
-      <div id="report-container" ref="reportContent" class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] animate-slide-up border border-slate-200 dark:border-slate-800">
+      <div id="report-container" ref="reportContent" class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-md shadow-xl flex flex-col overflow-hidden max-h-[90vh] animate-slide-up border border-slate-200 dark:border-slate-800">
         
         <!-- ヘッダー: グラデーションのヒーロー領域 + 閉じるボタン -->
-        <div class="relative bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 overflow-hidden shrink-0">
-          <div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+        <div class="relative bg-indigo-600 px-6 py-4 overflow-hidden shrink-0">
 
           <button id="modal-close-btn" @click="close" class="absolute top-2 right-2 p-2 group z-50">
             <div class="text-white/60 group-hover:text-white bg-white/10 group-hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition-colors">
@@ -16,13 +15,13 @@
           </button>
 
           <div class="relative z-10 flex items-center gap-3">
-            <div class="bg-white/20 p-2 rounded-lg backdrop-blur-md shrink-0">
+            <div class="bg-white/20 p-2 rounded-lg shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <h2 class="text-lg font-black text-white tracking-tight leading-tight">{{ t('report.title') }}</h2>
+              <h2 class="text-lg font-bold text-white tracking-tight leading-tight">{{ t('report.title') }}</h2>
               <p class="text-indigo-200 font-medium text-xs">{{ t('report.subtitle') }}</p>
             </div>
           </div>
@@ -33,29 +32,27 @@
           <div v-if="diffData" class="space-y-8 max-w-2xl mx-auto">
             
             <!-- ティア UP 通知（旧ティア minPoints < 新ティア minPoints のときのみ表示） -->
-            <div v-if="diffData.oldTier && diffData.newTier && diffData.oldTier.minPoints < diffData.newTier.minPoints" class="bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-yellow-900/40 dark:to-amber-800/40 border border-amber-300 dark:border-amber-700/50 p-6 rounded-2xl shadow-sm text-center transform hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden">
-              <div class="absolute inset-0 bg-yellow-200/50 dark:bg-yellow-500/10 mix-blend-overlay animate-pulse"></div>
-              <p class="text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest text-sm mb-2 relative z-10">{{ t('report.tierUp') }}</p>
+            <div v-if="diffData.oldTier && diffData.newTier && diffData.oldTier.minPoints < diffData.newTier.minPoints" class="bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700/50 p-6 rounded-md text-center relative overflow-hidden">
+              <p class="text-amber-700 dark:text-amber-400 font-bold text-sm mb-2 relative z-10">{{ t('report.tierUp') }}</p>
               <div class="flex items-center justify-center gap-4 relative z-10">
-                <span class="text-2xl font-black text-slate-500 dark:text-slate-400 line-through decoration-amber-400/50">{{ diffData.oldTier.name }}{{ diffData.oldTier.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
+                <span class="text-2xl font-bold text-slate-500 dark:text-slate-400 line-through decoration-amber-400/50">{{ diffData.oldTier.name }}{{ diffData.oldTier.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                 </svg>
-                <span class="text-3xl font-black text-amber-600 dark:text-amber-300">{{ diffData.newTier.name }}{{ diffData.newTier.tier ? ' ' + diffData.newTier.tier : '' }}</span>
+                <span class="text-3xl font-bold text-amber-600 dark:text-amber-300">{{ diffData.newTier.name }}{{ diffData.newTier.tier ? ' ' + diffData.newTier.tier : '' }}</span>
               </div>
             </div>
 
             <!-- Beat-Tier 総合ポイント変動（旧ティア → 新ティア + 増分 PT） -->
-            <div class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
-              <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
+            <div class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-md border border-slate-200 dark:border-slate-700 relative overflow-hidden">
 
-              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">{{ t('report.beatTierChange') }}</p>
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 relative z-10">{{ t('report.beatTierChange') }}</p>
               
               <!-- ティア名の比較表示（左: Previous / 右: Current） -->
               <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
                 <div class="flex flex-col items-center flex-1">
                   <span class="text-xs font-bold text-slate-400 mb-1">{{ t('report.previous') }} ({{ diffData.oldTotalBeatPt.toFixed(1) }})</span>
-                  <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldTier?.name || '---' }}{{ diffData.oldTier?.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
+                  <span class="text-lg sm:text-xl font-bold text-slate-600 dark:text-slate-300">{{ diffData.oldTier?.name || '---' }}{{ diffData.oldTier?.tier ? ' ' + diffData.oldTier.tier : '' }}</span>
                 </div>
                 
                 <div class="shrink-0 flex flex-col items-center justify-center pt-4">
@@ -66,14 +63,14 @@
 
                 <div class="flex flex-col items-center flex-1">
                   <span class="text-xs font-bold text-indigo-400 mb-1">{{ t('report.current') }} ({{ diffData.newTotalBeatPt.toFixed(1) }})</span>
-                  <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newTier?.color || 'text-slate-600'">{{ diffData.newTier?.name || '---' }}{{ diffData.newTier?.tier ? ' ' + diffData.newTier.tier : '' }}</span>
+                  <span class="text-lg sm:text-xl font-bold whitespace-nowrap" :class="diffData.newTier?.color || 'text-slate-600'">{{ diffData.newTier?.name || '---' }}{{ diffData.newTier?.tier ? ' ' + diffData.newTier.tier : '' }}</span>
                 </div>
               </div>
               
               <!-- 増分 PT（+3.5 pt のような大きな数字） -->
-              <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-xl border border-slate-100 dark:border-slate-800 relative z-10">
-                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">{{ t('report.increase') }}:</span>
-                <span class="text-4xl font-black tracking-tight" :class="diffData.totalBeatPtIncrease > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'">
+              <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-md border border-slate-100 dark:border-slate-800 relative z-10">
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 mr-2">{{ t('report.increase') }}:</span>
+                <span class="text-4xl font-bold tracking-tight" :class="diffData.totalBeatPtIncrease > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'">
                   {{ diffData.totalBeatPtIncrease > 0 ? '+' : '' }}{{ diffData.totalBeatPtIncrease.toFixed(1) }}
                 </span>
                 <span class="text-lg font-bold text-indigo-500">{{ t('common.pt') }}</span>
@@ -81,15 +78,14 @@
             </div>
 
             <!-- Rate-Tier 変動（Rate 表示が ON かつ +0.1 以上増えた場合のみ） -->
-            <div v-if="showRateTier && diffData.newTotalRatePt > 0 && (diffData.newTotalRatePt - diffData.oldTotalRatePt) >= 0.1" class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative overflow-hidden">
-              <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
+            <div v-if="showRateTier && diffData.newTotalRatePt > 0 && (diffData.newTotalRatePt - diffData.oldTotalRatePt) >= 0.1" class="flex flex-col items-center bg-white dark:bg-slate-800 p-8 rounded-md border border-slate-200 dark:border-slate-700 relative overflow-hidden">
 
-              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 relative z-10">{{ t('report.rateTierChange') }}</p>
+              <p class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 relative z-10">{{ t('report.rateTierChange') }}</p>
 
               <div class="flex items-center justify-center gap-3 sm:gap-6 w-full mb-6 relative z-10">
                 <div class="flex flex-col items-center flex-1">
                   <span class="text-xs font-bold text-slate-400 mb-1">{{ t('report.previous') }} ({{ diffData.oldTotalRatePt.toFixed(1) }})</span>
-                  <span class="text-lg sm:text-xl font-black text-slate-600 dark:text-slate-300">{{ diffData.oldRateTier?.name || '---' }}{{ diffData.oldRateTier?.tier ? ' ' + diffData.oldRateTier.tier : '' }}</span>
+                  <span class="text-lg sm:text-xl font-bold text-slate-600 dark:text-slate-300">{{ diffData.oldRateTier?.name || '---' }}{{ diffData.oldRateTier?.tier ? ' ' + diffData.oldRateTier.tier : '' }}</span>
                 </div>
                 <div class="shrink-0 flex flex-col items-center justify-center pt-4">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-400 dark:text-emerald-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -98,13 +94,13 @@
                 </div>
                 <div class="flex flex-col items-center flex-1">
                   <span class="text-xs font-bold text-emerald-400 mb-1">{{ t('report.current') }} ({{ diffData.newTotalRatePt.toFixed(1) }})</span>
-                  <span class="text-lg sm:text-xl font-black whitespace-nowrap" :class="diffData.newRateTier?.color || 'text-slate-600'">{{ diffData.newRateTier?.name || '---' }}{{ diffData.newRateTier?.tier ? ' ' + diffData.newRateTier.tier : '' }}</span>
+                  <span class="text-lg sm:text-xl font-bold whitespace-nowrap" :class="diffData.newRateTier?.color || 'text-slate-600'">{{ diffData.newRateTier?.name || '---' }}{{ diffData.newRateTier?.tier ? ' ' + diffData.newRateTier.tier : '' }}</span>
                 </div>
               </div>
 
-              <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-xl border border-slate-100 dark:border-slate-800 relative z-10">
-                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mr-2">{{ t('report.increase') }}:</span>
-                <span class="text-4xl font-black tracking-tight" :class="diffData.newTotalRatePt - diffData.oldTotalRatePt > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
+              <div class="flex items-baseline gap-2 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 rounded-md border border-slate-100 dark:border-slate-800 relative z-10">
+                <span class="text-sm font-bold text-slate-500 dark:text-slate-400 mr-2">{{ t('report.increase') }}:</span>
+                <span class="text-4xl font-bold tracking-tight" :class="diffData.newTotalRatePt - diffData.oldTotalRatePt > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'">
                   {{ diffData.newTotalRatePt - diffData.oldTotalRatePt > 0 ? '+' : '' }}{{ (diffData.newTotalRatePt - diffData.oldTotalRatePt).toFixed(1) }}
                 </span>
                 <span class="text-lg font-bold text-emerald-500">{{ t('common.pt') }}</span>
@@ -113,14 +109,14 @@
 
             <!-- フォルダアナウンス（☆11/☆12 フォルダのランクアサイン、ランクアップ、残り数を通知） -->
             <div v-if="diffData.folderAnnouncements && diffData.folderAnnouncements.length > 0" class="space-y-2">
-              <h3 class="flex items-center gap-2 text-lg font-black text-slate-800 dark:text-slate-200 mb-3 px-2">
+              <h3 class="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-3 px-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
                 </svg>
                 {{ t('report.folderNews') }}
               </h3>
               <div v-for="ann in diffData.folderAnnouncements" :key="ann.folder + ann.type"
-                class="px-4 py-3 rounded-xl border transition-colors"
+                class="px-4 py-3 rounded-md border transition-colors"
                 :class="ann.type === 'rank_assigned'
                   ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50'
                   : ann.type === 'rank_up'
@@ -129,19 +125,19 @@
               >
                 <template v-if="ann.type === 'rank_assigned'">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">☆{{ ann.folder }}</span>
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">☆{{ ann.folder }}</span>
                     <span class="text-sm font-bold text-amber-700 dark:text-amber-300">{{ t('report.folderRankAssigned', { rank: ann.newRankName }) }}</span>
                   </div>
                 </template>
                 <template v-else-if="ann.type === 'rank_up'">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-violet-600 dark:text-violet-400 uppercase tracking-wider">☆{{ ann.folder }}</span>
+                    <span class="text-xs font-bold text-violet-600 dark:text-violet-400">☆{{ ann.folder }}</span>
                     <span class="text-sm font-bold text-violet-700 dark:text-violet-300">{{ t('report.folderRankUp', { oldRank: ann.oldRankName, newRank: ann.newRankName }) }}</span>
                   </div>
                 </template>
                 <template v-else-if="ann.type === 'remaining'">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">☆{{ ann.folder }}</span>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">☆{{ ann.folder }}</span>
                     <span class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t('report.folderRemaining', { n: ann.remaining }) }}</span>
                   </div>
                 </template>
@@ -150,51 +146,51 @@
 
             <!-- 更新曲リスト（Beat-PT 降順。各行: 難易度バッジ / ランキング / LAMP UP / DJ LEVEL / 投票） -->
             <div>
-              <h3 class="flex items-center gap-2 text-lg font-black text-slate-800 dark:text-slate-200 mb-4 px-2">
+              <h3 class="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 px-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
-                {{ t('report.updatedSongs') }} <span class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2 py-0.5 rounded-full ml-1">{{ t('report.otherUpdates', { n: diffData.updatedSongs.length }) }}</span>
+                {{ t('report.updatedSongs') }} <span class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold px-2 py-0.5 rounded ml-1">{{ t('report.otherUpdates', { n: diffData.updatedSongs.length }) }}</span>
               </h3>
               
-              <div v-if="diffData.updatedSongs.length === 0" class="text-center p-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 border-dashed">
+              <div v-if="diffData.updatedSongs.length === 0" class="text-center p-8 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 border-dashed">
                 <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('report.noUpdates') }}</p>
               </div>
               
               <div v-else class="space-y-2">
-                <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+                <div v-for="song in sortedUpdatedSongs" :key="song.title + song.difficulty" class="bg-white dark:bg-slate-800 px-4 py-3 rounded-md border border-slate-200 dark:border-slate-700 transition-colors">
 
                   <!-- 行 1: 難易度バッジ / 単曲ティア / ソングランク / LAMP UP バッジ / DJ LEVEL 情報 / RATE TOP100 -->
                   <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                    <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
                       {{ song.difficulty }}
                     </span>
                     <template v-for="rankNum in [getNumericRank(song.informalRank)]" :key="'rank'">
-                      <span v-if="rankNum" class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNum }}</span>
+                      <span v-if="rankNum" class="px-1.5 py-0.5 rounded text-[9px] font-bold border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNum }}</span>
                     </template>
-                    <span v-if="song.songRank" class="px-1.5 py-0.5 rounded text-[9px] font-black border shrink-0"
+                    <span v-if="song.songRank" class="px-1.5 py-0.5 rounded text-[9px] font-bold border shrink-0"
                       :class="song.songRank === 1 ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700' : 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'"
                     >#{{ song.songRank }}<span class="font-medium">/{{ song.songRankTotal }}</span></span>
-                    <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-black rounded border border-emerald-200 dark:border-emerald-800/50">{{ t('report.lampUp') }}</span>
+                    <span v-if="song.clearTypeImproved" class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[9px] font-bold rounded border border-emerald-200 dark:border-emerald-800/50">{{ t('report.lampUp') }}</span>
                     <template v-if="song.maxScore > 0">
                       <template v-for="info in [getScoreGradeInfo(song.newScore, song.maxScore)]" :key="'grade'">
-                        <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                        <span class="text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                           {{ info.fromMax }}
                         </span>
-                        <span class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="info.gradeColor">
+                        <span class="text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="info.gradeColor">
                           {{ info.grade }}
                         </span>
-                        <span v-if="info.nextGrade" class="text-[9px] font-black tabular-nums px-1.5 py-0.5 rounded bg-slate-50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600">
+                        <span v-if="info.nextGrade" class="text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded bg-slate-50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600">
                           {{ info.nextGrade.name }}{{ info.nextGrade.gap }}
                         </span>
                       </template>
                     </template>
-                    <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">RATE TOP100</span>
+                    <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">RATE TOP100</span>
                   </div>
 
                   <!-- 行 2: タイトル + 単曲ティアアイコン + 新スコア(+増分) + 新 Beat-PT -->
                   <div class="flex items-baseline justify-between gap-2">
-                    <h4 class="font-black text-slate-800 dark:text-slate-100 text-base leading-tight" :title="song.title">{{ song.title }}</h4>
+                    <h4 class="font-bold text-slate-800 dark:text-slate-100 text-base leading-tight" :title="song.title">{{ song.title }}</h4>
                     <div class="flex items-center gap-2 shrink-0 text-right">
                       <template v-for="t in [getSongTierTransition(song)]" :key="'tier-icon'">
                         <template v-if="t.newTier">
@@ -216,7 +212,7 @@
                         </template>
                       </template>
                       <span v-if="song.scoreIncrease > 0" class="text-xs font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ song.newScore }}<span class="text-blue-500 dark:text-blue-400">(+{{ song.scoreIncrease }})</span></span>
-                      <span v-if="song.beatPtIncrease > 0" class="text-xs font-black whitespace-nowrap" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.newBeatPt.toFixed(1) }}pt</span>
+                      <span v-if="song.beatPtIncrease > 0" class="text-xs font-bold whitespace-nowrap" :class="song.isInTop100 ? 'text-amber-500 dark:text-amber-400' : 'text-indigo-400 dark:text-indigo-500'">+{{ song.newBeatPt.toFixed(1) }}pt</span>
                     </div>
                   </div>
 
@@ -224,7 +220,7 @@
                   <div v-if="song.clearTypeImproved" class="flex items-center gap-1.5 mt-0.5">
                     <span class="text-[10px] font-bold text-slate-400 line-through">{{ song.oldClearType }}</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                    <span class="text-[10px] font-black" :class="getClearTypeColor(song.newClearType)">{{ song.newClearType }}</span>
+                    <span class="text-[10px] font-bold" :class="getClearTypeColor(song.newClearType)">{{ song.newClearType }}</span>
                   </div>
 
                   <!-- 行 4: オプション投票ボタン（正規/MIRROR/RANDOM/R-RAN/S-RAN） -->
@@ -249,7 +245,7 @@
         
         <!-- フッター: X シェアボタン + 閉じるボタン -->
         <div id="modal-footer" class="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex flex-col sm:flex-row gap-3">
-          <button @click="openShareOptions" :disabled="isSharing" class="flex-1 py-3.5 sm:py-4 bg-black hover:bg-slate-800 text-white font-bold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50 text-sm sm:text-base">
+          <button @click="openShareOptions" :disabled="isSharing" class="flex-1 py-3.5 sm:py-4 bg-black hover:bg-slate-800 text-white font-bold rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-sm sm:text-base">
             <template v-if="!isSharing">
               <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
@@ -264,51 +260,51 @@
               {{ t('report.generatingImage') }}
             </template>
           </button>
-          <button @click="close" class="flex-1 py-3.5 sm:py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base">
+          <button @click="close" class="flex-1 py-3.5 sm:py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-md transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
             {{ t('report.backToDashboard') }}
           </button>
         </div>
 
         <!-- 画像出力オプション（Beat-PT 順 / Rate-PT 順の選択） -->
-        <div v-if="isShareOptionsOpen" class="absolute inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 rounded-3xl" @click.self="isShareOptionsOpen = false">
-          <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div v-if="isShareOptionsOpen" class="absolute inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 rounded-md" @click.self="isShareOptionsOpen = false">
+          <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-md shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700">
-              <h3 class="font-black text-slate-800 dark:text-slate-100 text-base">{{ t('report.outputOptions') }}</h3>
+              <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">{{ t('report.outputOptions') }}</h3>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('report.outputOptionsSub') }}</p>
             </div>
             <div class="p-4 space-y-2">
               <button
                 @click="shareSortMode = 'beat'"
-                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-md border-2 transition-all text-left"
                 :class="shareSortMode === 'beat' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
               >
                 <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareSortMode === 'beat' ? 'border-indigo-500' : 'border-slate-300 dark:border-slate-600'">
                   <div v-if="shareSortMode === 'beat'" class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
                 </div>
                 <div>
-                  <p class="font-black text-sm" :class="shareSortMode === 'beat' ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByBeatPt') }}</p>
+                  <p class="font-bold text-sm" :class="shareSortMode === 'beat' ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByBeatPt') }}</p>
                   <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ t('report.sortByBeatPtDesc') }}</p>
                 </div>
               </button>
               <button
                 @click="shareSortMode = 'rate'"
-                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-md border-2 transition-all text-left"
                 :class="shareSortMode === 'rate' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
               >
                 <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareSortMode === 'rate' ? 'border-emerald-500' : 'border-slate-300 dark:border-slate-600'">
                   <div v-if="shareSortMode === 'rate'" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
                 </div>
                 <div>
-                  <p class="font-black text-sm" :class="shareSortMode === 'rate' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByRatePt') }}</p>
+                  <p class="font-bold text-sm" :class="shareSortMode === 'rate' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByRatePt') }}</p>
                   <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ t('report.sortByRatePtDesc') }}</p>
                 </div>
               </button>
             </div>
             <div class="px-4 pb-4 flex gap-2">
-              <button @click="isShareOptionsOpen = false" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm transition-colors">
+              <button @click="isShareOptionsOpen = false" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
                 {{ t('common.cancel') }}
               </button>
-              <button @click="confirmShare" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-colors flex items-center justify-center gap-1.5">
+              <button @click="confirmShare" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
                 </svg>
@@ -326,8 +322,8 @@
       ref="shareContainer"
       class="fixed -top-[2000px] -left-[2000px] bg-slate-50 dark:bg-slate-900 w-[1080px] h-[1920px] flex flex-col z-[-1] border-none overflow-hidden pointer-events-none"
     >
-      <div class="bg-gradient-to-br from-indigo-500 via-blue-600 to-indigo-700 p-12 text-center shrink-0">
-        <h2 class="text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md leading-tight">
+      <div class="bg-indigo-600 p-12 text-center shrink-0">
+        <h2 class="text-6xl font-bold text-white tracking-tight mb-4 drop-shadow-md leading-tight">
           {{ t('report.title') }}
         </h2>
         <p class="text-indigo-100 font-medium text-2xl">
@@ -339,50 +335,48 @@
         <!-- ティアサマリー行（Rate 表示 ON なら 2 列、OFF なら 1 列中央寄せ） -->
         <div class="grid gap-8 mb-10 shrink-0" :class="showRateTier ? 'grid-cols-2' : 'grid-cols-1 max-w-sm mx-auto w-full'">
           <!-- シェア画像: Beat-Tier カード -->
-          <div class="border-2 border-indigo-100 dark:border-indigo-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
-            <div class="absolute inset-0 bg-indigo-50/50 dark:bg-indigo-900/10 mix-blend-overlay"></div>
+          <div class="border-2 border-indigo-100 dark:border-indigo-900/50 rounded-md p-8 bg-white dark:bg-slate-800 relative overflow-hidden">
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('common.beatPt') }}</p>
               <div class="flex items-baseline gap-3">
-                <span class="text-5xl font-black text-slate-800 dark:text-slate-100 leading-tight">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
+                <span class="text-5xl font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ diffData.newTotalBeatPt.toFixed(1) }}</span>
                 <span class="text-2xl font-bold text-indigo-500">+{{ diffData.totalBeatPtIncrease.toFixed(1) }}</span>
               </div>
             </div>
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-1">BEAT-TIER</p>
-              <p class="text-4xl font-black leading-tight" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
+              <p class="text-4xl font-bold leading-tight" :class="diffData.newTier?.color">{{ diffData.newTier?.name }} {{ diffData.newTier?.tier || '' }}</p>
             </div>
             <div v-if="nextRankData && nextRankData.nextRank" class="relative z-10">
               <div class="flex justify-between items-end mb-2">
                 <span class="text-base font-bold text-slate-500">NEXT</span>
-                <span class="text-xl font-black" :class="nextRankData.nextRank.color">{{ nextRankData.nextRank.name }} {{ nextRankData.nextRank.tier || '' }}</span>
+                <span class="text-xl font-bold" :class="nextRankData.nextRank.color">{{ nextRankData.nextRank.name }} {{ nextRankData.nextRank.tier || '' }}</span>
               </div>
               <div class="w-full h-4 bg-slate-100 dark:bg-slate-700/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
-                <div class="h-full bg-gradient-to-r from-indigo-500 to-blue-500" :style="{ width: `${nextRankData.progress}%` }"></div>
+                <div class="h-full bg-indigo-500" :style="{ width: `${nextRankData.progress}%` }"></div>
               </div>
             </div>
           </div>
           <!-- シェア画像: Rate-Tier カード -->
-          <div v-if="showRateTier" class="border-2 border-emerald-100 dark:border-emerald-900/50 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-xl relative overflow-hidden">
-            <div class="absolute inset-0 bg-emerald-50/50 dark:bg-emerald-900/10 mix-blend-overlay"></div>
+          <div v-if="showRateTier" class="border-2 border-emerald-100 dark:border-emerald-900/50 rounded-md p-8 bg-white dark:bg-slate-800 relative overflow-hidden">
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('common.ratePt') }}</p>
               <div class="flex items-baseline gap-3">
-                <span class="text-5xl font-black text-slate-800 dark:text-slate-100 leading-tight">{{ (diffData.newTotalRatePt ?? 0).toFixed(1) }}</span>
+                <span class="text-5xl font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ (diffData.newTotalRatePt ?? 0).toFixed(1) }}</span>
                 <span class="text-2xl font-bold text-emerald-500">{{ (diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0) > 0 ? '+' : '' }}{{ ((diffData.newTotalRatePt ?? 0) - (diffData.oldTotalRatePt ?? 0)).toFixed(1) }}</span>
               </div>
             </div>
             <div class="relative z-10 mb-6">
               <p class="text-xl font-bold text-slate-500 dark:text-slate-400 mb-1">RATE-TIER</p>
-              <p class="text-4xl font-black leading-tight" :class="diffData.newRateTier?.color">{{ diffData.newRateTier?.name }} {{ diffData.newRateTier?.tier || '' }}</p>
+              <p class="text-4xl font-bold leading-tight" :class="diffData.newRateTier?.color">{{ diffData.newRateTier?.name }} {{ diffData.newRateTier?.tier || '' }}</p>
             </div>
             <div v-if="nextRateTierData && nextRateTierData.nextRank" class="relative z-10">
               <div class="flex justify-between items-end mb-2">
                 <span class="text-base font-bold text-slate-500">NEXT</span>
-                <span class="text-xl font-black" :class="nextRateTierData.nextRank.color">{{ nextRateTierData.nextRank.name }} {{ nextRateTierData.nextRank.tier || '' }}</span>
+                <span class="text-xl font-bold" :class="nextRateTierData.nextRank.color">{{ nextRateTierData.nextRank.name }} {{ nextRateTierData.nextRank.tier || '' }}</span>
               </div>
               <div class="w-full h-4 bg-slate-100 dark:bg-slate-700/50 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500" :style="{ width: `${nextRateTierData.progress}%` }"></div>
+                <div class="h-full bg-emerald-500" :style="{ width: `${nextRateTierData.progress}%` }"></div>
               </div>
             </div>
           </div>
@@ -390,40 +384,40 @@
 
         <!-- シェア画像: 更新曲 TOP10（Beat-PT または Rate-PT 降順） -->
         <div v-if="diffData.updatedSongs.length > 0" class="flex-1 flex flex-col">
-           <h3 class="text-3xl font-black text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 shrink-0 leading-tight">
+           <h3 class="text-3xl font-bold text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 shrink-0 leading-tight">
               <span class="w-2.5 h-8 bg-emerald-500 rounded-full"></span>
               {{ t('report.top10') }}
            </h3>
            <div class="space-y-4 flex-1">
-             <div v-for="song in imageSortedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+             <div v-for="song in imageSortedSongs.slice(0, 10)" :key="song.title + song.difficulty" class="flex items-center justify-between bg-white dark:bg-slate-800 p-5 rounded-md border border-slate-200 dark:border-slate-700">
                <div class="flex-1 min-w-0 pr-4">
                  <div class="flex items-center gap-2 mb-2 flex-wrap">
-                    <span class="px-3 py-1 rounded text-sm font-black border shrink-0" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
+                    <span class="px-3 py-1 rounded text-sm font-bold border shrink-0" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
                     <template v-for="rankNumImg in [getNumericRank(song.informalRank)]" :key="'rank-img'">
-                      <span v-if="rankNumImg" class="px-2 py-1 rounded text-sm font-black border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNumImg }}</span>
+                      <span v-if="rankNumImg" class="px-2 py-1 rounded text-sm font-bold border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNumImg }}</span>
                     </template>
                     <template v-for="tierImg in [getSongTierInfo(song)]" :key="'tier-img'">
-                      <span v-if="tierImg" class="px-2 py-1 rounded text-sm font-black border shrink-0 bg-white dark:bg-slate-900/50 border-slate-300 dark:border-slate-600" :class="tierImg.color">
+                      <span v-if="tierImg" class="px-2 py-1 rounded text-sm font-bold border shrink-0 bg-white dark:bg-slate-900/50 border-slate-300 dark:border-slate-600" :class="tierImg.color">
                         {{ tierImg.name }}{{ tierImg.tier ? ' ' + tierImg.tier : '' }}
                       </span>
                     </template>
-                    <span v-if="song.songRank" class="px-2 py-0.5 rounded text-sm font-black border shrink-0"
+                    <span v-if="song.songRank" class="px-2 py-0.5 rounded text-sm font-bold border shrink-0"
                       :class="song.songRank === 1 ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-300'"
                     >#{{ song.songRank }}/{{ song.songRankTotal }}</span>
-                    <span v-if="song.clearTypeImproved" class="text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
+                    <span v-if="song.clearTypeImproved" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded border border-emerald-200 dark:border-emerald-800/50">LAMP UP!</span>
                     <template v-if="song.maxScore > 0">
                       <template v-for="info2 in [getScoreGradeInfo(song.newScore, song.maxScore)]" :key="'grade2'">
-                        <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ info2.fromMax }}</span>
-                        <span class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="info2.gradeColor">{{ info2.grade }}</span>
-                        <span v-if="info2.nextGrade" class="text-sm font-black tabular-nums px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600">{{ info2.nextGrade.name }}{{ info2.nextGrade.gap }}</span>
+                        <span class="text-sm font-bold tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ info2.fromMax }}</span>
+                        <span class="text-sm font-bold tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700" :class="info2.gradeColor">{{ info2.grade }}</span>
+                        <span v-if="info2.nextGrade" class="text-sm font-bold tabular-nums px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600">{{ info2.nextGrade.name }}{{ info2.nextGrade.gap }}</span>
                       </template>
                     </template>
-                    <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-sm font-black px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">RATE TOP100</span>
+                    <span v-if="song.isInRateTop100 && song.newRatePt > 0" class="text-sm font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">RATE TOP100</span>
                  </div>
-                 <p class="font-black text-2xl text-slate-800 dark:text-slate-100 truncate leading-snug pb-1">{{ song.title }}</p>
+                 <p class="font-bold text-2xl text-slate-800 dark:text-slate-100 truncate leading-snug pb-1">{{ song.title }}</p>
                  <div v-if="song.clearTypeImproved" class="flex items-center gap-3 mt-1.5">
                    <span class="text-sm font-bold text-slate-500 dark:text-slate-400 line-through">{{ song.oldClearType }}</span>
-                   <span class="text-sm font-black" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
+                   <span class="text-sm font-bold" :class="getClearTypeColor(song.newClearType)">→ {{ song.newClearType }}</span>
                  </div>
                </div>
                <div class="text-right flex items-center justify-end gap-4 shrink-0">
@@ -438,30 +432,30 @@
                  </template>
                  <div v-if="song.scoreIncrease > 0" class="text-right">
                    <p class="text-sm font-bold text-slate-500 mb-1">EX SCORE</p>
-                   <p class="font-black text-3xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-lg font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
+                   <p class="font-bold text-3xl text-slate-700 dark:text-slate-300">{{ song.newScore }} <span class="text-lg font-bold text-blue-500">(+{{ song.scoreIncrease }})</span></p>
                  </div>
                  <div v-if="song.beatPtIncrease > 0" class="text-right">
                    <div class="flex items-center justify-end gap-2 mb-1">
                      <p class="text-sm font-bold" :class="song.isInTop100 ? 'text-amber-500' : 'text-slate-500'">BEAT-PT</p>
-                     <span v-if="song.isInTop100 !== undefined" class="text-xs font-black px-1.5 py-0.5 rounded" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'">{{ song.isInTop100 ? 'TOP100' : '圏外' }}</span>
+                     <span v-if="song.isInTop100 !== undefined" class="text-xs font-bold px-1.5 py-0.5 rounded" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'">{{ song.isInTop100 ? 'TOP100' : '圏外' }}</span>
                    </div>
-                   <p class="font-black text-3xl" :class="song.isInTop100 ? 'text-amber-500' : 'text-indigo-400'">+{{ song.newBeatPt.toFixed(1) }} <span class="text-lg font-bold text-slate-400">(+{{ song.beatPtIncrease.toFixed(1) }})</span></p>
+                   <p class="font-bold text-3xl" :class="song.isInTop100 ? 'text-amber-500' : 'text-indigo-400'">+{{ song.newBeatPt.toFixed(1) }} <span class="text-lg font-bold text-slate-400">(+{{ song.beatPtIncrease.toFixed(1) }})</span></p>
                  </div>
                </div>
              </div>
            </div>
            <div v-if="diffData.updatedSongs.length > 10" class="text-center mt-6 shrink-0">
-             <span class="inline-block px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-full text-base font-bold text-slate-500 dark:text-slate-300">
+             <span class="inline-block px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded text-base font-bold text-slate-500 dark:text-slate-300">
                {{ t('report.otherUpdates', { n: diffData.updatedSongs.length - 10 }) }}
              </span>
            </div>
         </div>
-        <div v-else class="text-center py-12 text-slate-500 font-bold border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl text-xl shrink-0">
+        <div v-else class="text-center py-12 text-slate-500 font-bold border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md text-xl shrink-0">
           {{ t('report.noUpdates') }}
         </div>
       </div>
       
-      <div class="bg-indigo-600 p-6 text-center text-white/90 font-black text-xl tracking-widest shrink-0">
+      <div class="bg-indigo-600 p-6 text-center text-white/90 font-bold text-xl shrink-0">
         beat-seeker - IIDX Score Tracker
       </div>
     </div>

@@ -230,7 +230,7 @@ const tableData = computed(() => {
 </script>
 
 <template>
-  <div class="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mt-6 animate-fade-in flex flex-col transition-colors duration-200">
+  <div class="w-full bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden mt-6 animate-fade-in flex flex-col transition-colors duration-200">
     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50 transition-colors duration-200">
       <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 dark:text-indigo-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -242,12 +242,12 @@ const tableData = computed(() => {
             @click.stop="showInfo = !showInfo"
             :aria-label="t('table.aboutSummary')"
             :aria-expanded="showInfo"
-            class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 hover:bg-indigo-200 dark:hover:bg-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[10px] font-black flex items-center justify-center transition-colors"
+            class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 hover:bg-indigo-200 dark:hover:bg-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[10px] font-bold flex items-center justify-center transition-colors"
             :title="t('table.aboutSummary')"
           >?</button>
           <div
             v-if="showInfo"
-            class="absolute z-20 top-7 -left-16 sm:left-0 w-[280px] sm:w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
+            class="absolute z-20 top-7 -left-16 sm:left-0 w-[280px] sm:w-72 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
           >
             <div class="flex items-center justify-between mb-2">
                <span class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ t('table.aboutFolderRank') }}</span>
@@ -294,7 +294,7 @@ const tableData = computed(() => {
     <Teleport to="body">
       <div v-if="showRateTable" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showRateTable = false"></div>
-        <div class="relative z-10 bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-[95vw] max-h-[90vh] flex flex-col">
+        <div class="relative z-10 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-[95vw] max-h-[90vh] flex flex-col">
           <!-- Header -->
           <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <div>
@@ -354,7 +354,7 @@ const tableData = computed(() => {
               </td>
               <td class="py-2 px-2 sm:py-3 sm:px-4 text-center cursor-pointer">
                 <div class="flex flex-col items-center">
-                  <span class="font-black text-sm sm:text-base whitespace-nowrap" :class="data.averageRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : data.averageRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'">
+                  <span class="font-bold text-sm sm:text-base whitespace-nowrap" :class="data.averageRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : data.averageRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'">
                     {{ data.averageRate > 0 ? data.averageRate.toFixed(2) + '%' : '-' }}
                   </span>
                   <div v-if="data.averageRate > 0" class="hidden sm:block w-full max-w-[5rem] h-1 mt-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mx-auto">
@@ -392,8 +392,8 @@ const tableData = computed(() => {
               <td class="py-2 px-2 sm:py-3 sm:px-4 text-right cursor-pointer" @click.stop="toggleRank(data.rank)">
                 <div class="flex items-center justify-end gap-1 sm:gap-2">
                   <div class="flex flex-col text-right">
-                    <span class="font-black text-xs sm:text-sm whitespace-nowrap" :class="data.rankInfo.color">
-                      {{ data.totalBeatPoints.toFixed(1) }} <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase">pt</span>
+                    <span class="font-bold text-xs sm:text-sm whitespace-nowrap" :class="data.rankInfo.color">
+                      {{ data.totalBeatPoints.toFixed(1) }} <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold">pt</span>
                     </span>
                     <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold whitespace-nowrap">MAX: {{ data.maxBeatPoints.toFixed(1) }}</span>
                   </div>
@@ -425,14 +425,14 @@ const tableData = computed(() => {
             <tr v-if="expandedRanks.has(data.rank)" :id="`unofficial-rank-panel-${data.rank}`" class="bg-slate-50/80 dark:bg-slate-800/40 border-t-0 shadow-inner">
               <td colspan="6" class="px-6 py-4">
                 <!-- Summary Board -->
-                <div class="mb-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-200">
+                <div class="mb-4 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-200">
                   <div class="flex flex-col">
                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ t('table.folderBeatTier') }}</span>
                     <div class="flex items-center gap-3">
                       <RankIcon :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="lg" :class="data.playCount < data.totalCount ? 'opacity-30' : ''" />
                       <div class="flex flex-col">
-                        <span class="text-2xl font-black tracking-tight" :class="data.rankInfo.color">
-                          {{ data.totalBeatPoints.toFixed(1) }} <span class="text-sm text-slate-400 dark:text-slate-500 font-bold uppercase">pt</span>
+                        <span class="text-2xl font-bold tracking-tight" :class="data.rankInfo.color">
+                          {{ data.totalBeatPoints.toFixed(1) }} <span class="text-sm text-slate-400 dark:text-slate-500 font-bold">pt</span>
                         </span>
                         <span class="text-xs font-bold text-slate-400 dark:text-slate-500">
                           MAX: {{ data.maxBeatPoints.toFixed(1) }} pt
@@ -441,7 +441,7 @@ const tableData = computed(() => {
                     </div>
                   </div>
                   
-                  <div class="flex-1 max-w-md w-full bg-slate-50 dark:bg-slate-900/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700 flex flex-col justify-center transition-colors duration-200">
+                  <div class="flex-1 max-w-md w-full bg-slate-50 dark:bg-slate-900/50 rounded-md p-3 border border-slate-100 dark:border-slate-700 flex flex-col justify-center transition-colors duration-200">
                     <div v-if="data.nextRankInfo.nextRank" class="flex flex-col gap-2">
                       <div class="flex justify-between items-end">
                         <span class="text-xs font-bold text-slate-500 dark:text-slate-400">NEXT RANK</span>
@@ -465,10 +465,10 @@ const tableData = computed(() => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div v-for="entry in data.songsWithRank" :key="entry.song.title + entry.song.difficultyName" class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col shadow-sm transition-colors duration-200">
+                  <div v-for="entry in data.songsWithRank" :key="entry.song.title + entry.song.difficultyName" class="bg-white dark:bg-slate-800 p-3 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col transition-colors duration-200">
                     <div class="flex items-start justify-between mb-2">
                        <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-2 pr-2" :title="entry.song.title">{{ entry.song.title }}</h4>
-                       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0" :class="entry.song.difficultyColor">
+                       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0" :class="entry.song.difficultyColor">
                          {{ entry.song.difficultyName.substring(0, 3) }}
                        </span>
                     </div>
@@ -476,7 +476,7 @@ const tableData = computed(() => {
                     <div class="flex items-end justify-between mt-auto gap-2">
                       <div class="flex flex-col">
                         <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">RATE</span>
-                        <span class="font-black text-sm" :class="entry.song.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : entry.song.scoreRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
+                        <span class="font-bold text-sm" :class="entry.song.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : entry.song.scoreRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
                           {{ entry.song.scoreRate > 0 ? entry.song.scoreRate.toFixed(2) + '%' : '-' }}
                         </span>
                       </div>
@@ -484,7 +484,7 @@ const tableData = computed(() => {
                         <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">RANK</span>
                         <div v-if="entry.songRank" class="flex items-center gap-1">
                           <RankIcon :rank-name="entry.songRank.name" :tier="entry.songRank.tier" size="xs" />
-                          <span class="text-[10px] font-black whitespace-nowrap" :class="entry.songRank.color">
+                          <span class="text-[10px] font-bold whitespace-nowrap" :class="entry.songRank.color">
                             {{ entry.songRank.name }}<template v-if="entry.songRank.tier"> {{ entry.songRank.tier }}</template>
                           </span>
                         </div>

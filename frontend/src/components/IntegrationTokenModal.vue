@@ -149,7 +149,7 @@ const statusLabel = (t: IntegrationTokenInfo) => {
     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
     @click.self="emit('close')"
   >
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
+    <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
 
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
         <h3 id="integration-token-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">外部連携トークン</h3>
@@ -168,9 +168,9 @@ const statusLabel = (t: IntegrationTokenInfo) => {
         </p>
 
         <!-- 発行直後の平文トークン表示 -->
-        <div v-if="newlyIssuedPlain" class="rounded-2xl border border-amber-300 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-900/30 p-5 space-y-3">
+        <div v-if="newlyIssuedPlain" class="rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-900/30 p-5 space-y-3">
           <h4 class="text-sm font-bold text-amber-700 dark:text-amber-300">新しいトークン（このタイミングでしか表示されません）</h4>
-          <div class="bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800 p-3 break-all font-mono text-xs text-slate-800 dark:text-slate-200">
+          <div class="bg-white dark:bg-slate-900 rounded-md border border-amber-200 dark:border-amber-800 p-3 break-all font-mono text-xs text-slate-800 dark:text-slate-200">
             {{ newlyIssuedPlain }}
           </div>
           <div class="flex gap-2">
@@ -188,34 +188,34 @@ const statusLabel = (t: IntegrationTokenInfo) => {
         </div>
 
         <!-- 発行フォーム -->
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-5 bg-slate-50/60 dark:bg-slate-800/40">
+        <div class="rounded-md border border-slate-200 dark:border-slate-700 p-5 space-y-5 bg-slate-50/60 dark:bg-slate-800/40">
           <h4 class="text-base font-bold text-slate-700 dark:text-slate-200">新しいトークンを発行</h4>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">ラベル（任意）</label>
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">ラベル（任意）</label>
             <input
               v-model="nameInput"
               type="text"
               maxlength="80"
               placeholder="例: 自宅 PC の iidx-memo"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100"
+              class="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">連携先</label>
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">連携先</label>
             <input
               v-model="partnerInput"
               type="text"
               maxlength="40"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100"
+              class="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">有効期限</label>
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">有効期限</label>
             <select v-model="expiresIn"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100">
+              class="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100">
               <option v-for="opt in expiryOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
           </div>
@@ -226,7 +226,7 @@ const statusLabel = (t: IntegrationTokenInfo) => {
             type="button"
             @click="handleIssue"
             :disabled="isLoading"
-            class="w-full px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors disabled:opacity-50"
+            class="w-full px-4 py-2.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors disabled:opacity-50"
           >
             トークンを発行
           </button>
@@ -236,14 +236,14 @@ const statusLabel = (t: IntegrationTokenInfo) => {
         <div class="space-y-3">
           <h4 class="text-base font-bold text-slate-700 dark:text-slate-200">発行済みトークン</h4>
 
-          <div v-if="tokens.length === 0" class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+          <div v-if="tokens.length === 0" class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             まだ発行したトークンはありません。
           </div>
 
           <ul v-else class="space-y-3">
-            <li v-for="t in tokens" :key="t.id" class="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800/40">
+            <li v-for="t in tokens" :key="t.id" class="rounded-md border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800/40">
               <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full" :class="statusLabel(t).cls">{{ statusLabel(t).text }}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded" :class="statusLabel(t).cls">{{ statusLabel(t).text }}</span>
                 <span class="text-[10px] text-slate-400">発行: {{ formatDateTime(t.createdAt) }}</span>
               </div>
 

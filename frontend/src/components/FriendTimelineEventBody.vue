@@ -79,14 +79,14 @@ const fmtPt = (n: number) => n.toFixed(1);
         class="text-xs flex flex-wrap items-baseline gap-x-2 gap-y-0.5 bg-slate-50 dark:bg-slate-900/40 rounded-lg px-3 py-2"
       >
         <span class="font-bold text-slate-800 dark:text-slate-100 truncate max-w-[15rem]">{{ s.title }}</span>
-        <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase">{{ s.difficulty }}</span>
+        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">{{ s.difficulty }}</span>
         <span class="text-slate-600 dark:text-slate-300">
           {{ s.oldScore.toLocaleString() }}
           <span class="text-slate-400 mx-1">→</span>
           <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ s.newScore.toLocaleString() }}</span>
           <span class="text-emerald-600 dark:text-emerald-400 font-bold ml-1">(+{{ s.scoreIncrease.toLocaleString() }})</span>
         </span>
-        <span v-if="s.clearTypeImproved && s.newClearType" class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+        <span v-if="s.clearTypeImproved && s.newClearType" class="text-[10px] font-bold text-amber-600 dark:text-amber-400">
           → {{ s.newClearType }}
         </span>
         <span v-if="s.beatPtIncrease && s.beatPtIncrease > 0" class="text-[10px] font-bold text-blue-600 dark:text-blue-400">
@@ -135,7 +135,7 @@ const fmtPt = (n: number) => n.toFixed(1);
           : 'bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700'"
     >
       <span class="font-bold text-slate-800 dark:text-slate-100 truncate max-w-[15rem]">{{ asSong.title }}</span>
-      <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase">{{ asSong.difficulty }}</span>
+      <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">{{ asSong.difficulty }}</span>
       <template v-if="viewerRel === 'OVERTAKEN_BY_OTHER'">
         <span class="text-slate-600 dark:text-slate-300 ml-1">
           あなた <span class="font-bold">{{ asSong.rivalScore.toLocaleString() }}</span>

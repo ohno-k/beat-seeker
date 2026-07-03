@@ -273,8 +273,8 @@ async function fetchCommentStats() {
   <!-- 画面全体: カード型レイアウトで見出し＋表を配置 -->
   <div class="space-y-6">
     <!-- メインカード: 曲別平均スコアレート一覧 -->
-    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-      <h2 class="text-xl font-black text-slate-900 dark:text-white mb-2">曲別平均スコアレート</h2>
+    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">曲別平均スコアレート</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
         全プレイヤーの平均スコアレート（ANOTHER+LEGGENDARIA、☆11+☆12）
       </p>
@@ -292,7 +292,7 @@ async function fetchCommentStats() {
       <template v-else>
         <p class="text-sm text-slate-500 mb-4">{{ scoreRates.length }}曲</p>
 
-        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+        <div class="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700">
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
@@ -310,7 +310,7 @@ async function fetchCommentStats() {
                   @click="toggleSort('avgScoreRate')"
                 >平均レート {{ sortIcon('avgScoreRate') }}</th>
                 <th
-                  class="text-center px-3 py-2.5 font-black text-amber-600 dark:text-amber-400 w-32 cursor-pointer hover:text-amber-700 dark:hover:text-amber-300 select-none bg-amber-50/50 dark:bg-amber-900/20"
+                  class="text-center px-3 py-2.5 font-bold text-amber-600 dark:text-amber-400 w-32 cursor-pointer hover:text-amber-700 dark:hover:text-amber-300 select-none bg-amber-50/50 dark:bg-amber-900/20"
                   @click="toggleSort('maxMinusRate')"
                 >MAX- {{ sortIcon('maxMinusRate') }}</th>
                 <th

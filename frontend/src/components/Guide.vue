@@ -29,7 +29,7 @@ const currentGuide = computed(() => {
 </script>
 
 <template>
-  <article v-if="currentGuide" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 animate-fade-in text-slate-800 dark:text-slate-200">
+  <article v-if="currentGuide" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 animate-fade-in text-slate-800 dark:text-slate-200">
     <nav class="text-sm text-slate-500 dark:text-slate-400 mb-4">
       <a href="/" class="hover:underline">{{ t('guide.breadcrumbHome') }}</a>
       <span class="mx-2">›</span>
@@ -37,7 +37,7 @@ const currentGuide = computed(() => {
       <span class="mx-2">›</span>
       <span>{{ currentGuide.title }}</span>
     </nav>
-    <h1 class="text-2xl sm:text-3xl font-black mb-3 text-slate-900 dark:text-white">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-3 text-slate-900 dark:text-white">
       {{ currentGuide.title }}
     </h1>
     <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">
@@ -49,8 +49,8 @@ const currentGuide = computed(() => {
     </div>
   </article>
 
-  <section v-else class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-10 shadow-sm border border-slate-200 dark:border-slate-700 animate-fade-in text-slate-800 dark:text-slate-200">
-    <h1 class="text-2xl sm:text-3xl font-black mb-3 text-slate-900 dark:text-white">
+  <section v-else class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 animate-fade-in text-slate-800 dark:text-slate-200">
+    <h1 class="text-2xl sm:text-3xl font-bold mb-3 text-slate-900 dark:text-white">
       {{ t('guide.indexTitle') }}
     </h1>
     <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
@@ -58,7 +58,7 @@ const currentGuide = computed(() => {
     </p>
     <ul class="space-y-4">
       <li v-for="g in guides" :key="g.slug">
-        <a :href="`/guide/${g.slug}`" @click.prevent="emit('navigate-guide', g.slug)" class="block bg-slate-50 dark:bg-slate-900/40 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl p-5 border border-slate-200 dark:border-slate-700 transition-colors">
+        <a :href="`/guide/${g.slug}`" @click.prevent="emit('navigate-guide', g.slug)" class="block bg-slate-50 dark:bg-slate-900/40 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md p-5 border border-slate-200 dark:border-slate-700 transition-colors">
           <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1">{{ g.title }}</h2>
           <p class="text-sm text-slate-600 dark:text-slate-300">{{ g.summary }}</p>
           <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">{{ g.publishedAt }}</p>

@@ -33,19 +33,19 @@ onMounted(() => {
         <span v-if="!isLoading && totalUsers > 0" class="text-xs text-slate-400 dark:text-slate-500">
           {{ t('ranking.totalUserCount', { n: totalUsers }) }}
         </span>
-        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl">
+        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-md">
           <button
             @click="sortMode = 'most'"
-            class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-3 py-1 rounded-lg text-xs font-bold transition-all"
             :class="sortMode === 'most'
-              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >{{ t('ranking.sortMost') }}</button>
           <button
             @click="sortMode = 'least'"
-            class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-3 py-1 rounded-lg text-xs font-bold transition-all"
             :class="sortMode === 'least'
-              ? 'bg-white dark:bg-slate-600 text-orange-500 dark:text-orange-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-orange-500 dark:text-orange-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >{{ t('ranking.sortLeast') }}</button>
         </div>
@@ -57,11 +57,11 @@ onMounted(() => {
       <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.songRankingAggregating') }}</p>
     </div>
 
-    <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl text-center font-bold">
+    <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
       {{ error }}
     </div>
 
-    <div v-else-if="ranking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl" >
+    <div v-else-if="ranking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md" >
       <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
     </div>
 
@@ -69,12 +69,12 @@ onMounted(() => {
       <table class="w-full">
         <thead>
           <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-            <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-14">{{ t('ranking.colRank') }}</th>
-            <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colSongName') }}</th>
-            <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-24 text-center hidden sm:table-cell">{{ t('ranking.colDifficulty') }}</th>
-            <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center hidden md:table-cell">{{ t('ranking.colInformalRank') }}</th>
-            <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right hidden lg:table-cell">{{ t('ranking.colAvgBeatPt') }}</th>
-            <th class="pb-4 text-xs font-black" :class="sortMode === 'most' ? 'text-blue-500' : 'text-orange-500'" style="text-align:right; padding-right:1rem;">{{ t('ranking.colUserCount') }}</th>
+            <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-14">{{ t('ranking.colRank') }}</th>
+            <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colSongName') }}</th>
+            <th class="pb-4 text-xs font-bold text-slate-400 w-24 text-center hidden sm:table-cell">{{ t('ranking.colDifficulty') }}</th>
+            <th class="pb-4 text-xs font-bold text-slate-400 w-20 text-center hidden md:table-cell">{{ t('ranking.colInformalRank') }}</th>
+            <th class="pb-4 text-xs font-bold text-slate-400 text-right hidden lg:table-cell">{{ t('ranking.colAvgBeatPt') }}</th>
+            <th class="pb-4 text-xs font-bold" :class="sortMode === 'most' ? 'text-blue-500' : 'text-orange-500'" style="text-align:right; padding-right:1rem;">{{ t('ranking.colUserCount') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -85,7 +85,7 @@ onMounted(() => {
           >
             <td class="py-3 pl-4">
               <div
-                class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                 :class="sortMode === 'most' ? [
                   index === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                   index === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
@@ -136,11 +136,11 @@ onMounted(() => {
             </td>
             <td class="py-3 text-right pr-4">
               <div class="flex items-baseline justify-end gap-1">
-                <span class="text-lg font-black tabular-nums"
+                <span class="text-lg font-bold tabular-nums"
                   :class="sortMode === 'most' ? 'text-slate-800 dark:text-slate-100' : 'text-orange-600 dark:text-orange-400'">
                   {{ entry.userCount }}
                 </span>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ t('ranking.unitPersons') }}</span>
+                <span class="text-[10px] font-bold text-slate-400">{{ t('ranking.unitPersons') }}</span>
               </div>
             </td>
           </tr>

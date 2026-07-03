@@ -190,11 +190,11 @@ const confirm = () => {
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-fade-in" @click.self="emit('skip')">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh]">
         <!-- ヘッダ -->
         <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0">
           <div>
-            <h2 class="text-lg font-black text-slate-900 dark:text-white">{{ t('infinitas.confirmTitle') }}</h2>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('infinitas.confirmTitle') }}</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('infinitas.confirmSubtitle') }}</p>
           </div>
           <button @click="emit('skip')" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
@@ -204,12 +204,12 @@ const confirm = () => {
 
         <div class="p-6 space-y-4 overflow-y-auto">
           <!-- スナップショット -->
-          <div v-if="result.snapshot" class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+          <div v-if="result.snapshot" class="rounded-md overflow-hidden border border-slate-200 dark:border-slate-700">
             <img :src="result.snapshot" alt="captured" class="w-full" />
           </div>
 
           <!-- 整合性警告バナー（独立読み取りの不一致・妥当性 NG）。誤読の可能性が高い項目を明示する。 -->
-          <div v-if="consistencyMessages.length" class="p-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40">
+          <div v-if="consistencyMessages.length" class="p-3 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40">
             <div class="flex items-center gap-2 mb-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-2.99l-6.93-12a2 2 0 00-3.48 0l-6.93 12A2 2 0 005.07 19z" />
@@ -225,16 +225,16 @@ const confirm = () => {
           <div>
             <label class="text-xs font-bold text-slate-600 dark:text-slate-300">{{ t('infinitas.song') }}</label>
             <div class="mt-1">
-              <div v-if="selectedSong" class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 flex items-start gap-3">
+              <div v-if="selectedSong" class="p-3 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 flex items-start gap-3">
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-black text-slate-900 dark:text-white break-words">{{ selectedSong.title }}</p>
+                  <p class="text-sm font-bold text-slate-900 dark:text-white break-words">{{ selectedSong.title }}</p>
                   <p class="text-xs text-slate-600 dark:text-slate-400 truncate">{{ selectedSong.artist }}</p>
                 </div>
                 <button @click="showSongPicker = !showSongPicker" class="text-xs text-blue-600 dark:text-blue-400 hover:underline shrink-0">
                   {{ t('infinitas.changeSong') }}
                 </button>
               </div>
-              <div v-else class="p-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30">
+              <div v-else class="p-3 rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30">
                 <p class="text-sm text-red-700 dark:text-red-300 font-medium">{{ t('infinitas.songNotMatched') }}</p>
                 <!--
                   曲名 ROI の生画像。OCR で読めなくても視認で曲名がわかる。
@@ -273,7 +273,7 @@ const confirm = () => {
               </div>
 
               <!-- 曲ピッカー -->
-              <div v-if="showSongPicker" class="mt-2 p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900">
+              <div v-if="showSongPicker" class="mt-2 p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-900">
                 <input
                   v-model="songSearchQuery"
                   type="text"
@@ -382,13 +382,13 @@ const confirm = () => {
 
         <!-- フッタ -->
         <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 flex gap-3 shrink-0">
-          <button @click="emit('skip')" class="flex-1 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
+          <button @click="emit('skip')" class="flex-1 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
             {{ t('infinitas.skip') }}
           </button>
           <button
             @click="confirm"
             :disabled="!isValid"
-            class="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            class="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {{ t('infinitas.register') }}
           </button>

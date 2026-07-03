@@ -119,7 +119,7 @@ watch(() => props.token, () => {
     <button
       type="button"
       @click="toggleOpen"
-      class="fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl transition-transform hover:scale-105 bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
+      class="fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-colors bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white"
       :aria-label="isOpen ? 'チャットを閉じる' : '運営チャットを開く'"
     >
       <span v-if="!isOpen">💬</span>
@@ -135,13 +135,13 @@ watch(() => props.token, () => {
     <transition name="chat-pop">
       <div
         v-if="isOpen"
-        class="fixed bottom-20 right-4 z-40 w-[92vw] max-w-[360px] h-[70vh] max-h-[520px] flex flex-col rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+        class="fixed bottom-20 right-4 z-40 w-[92vw] max-w-[360px] h-[70vh] max-h-[520px] flex flex-col rounded-md shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
       >
         <!-- ヘッダ -->
-        <div class="px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center justify-between">
+        <div class="px-4 py-3 bg-blue-700 dark:bg-blue-600 text-white flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-lg">💬</span>
-            <p class="font-black text-sm tracking-wide">運営チャット</p>
+            <p class="font-bold text-sm">運営チャット</p>
           </div>
           <button type="button" @click="toggleOpen" class="text-white/80 hover:text-white text-lg leading-none" aria-label="閉じる">✕</button>
         </div>
@@ -164,9 +164,9 @@ watch(() => props.token, () => {
             class="flex flex-col"
             :class="m.sender === 'tl' ? 'items-end' : 'items-start'"
           >
-            <span v-if="m.sender === 'admin'" class="text-[9px] font-black tracking-wider text-indigo-500 dark:text-indigo-300 mb-0.5 px-1">運営</span>
+            <span v-if="m.sender === 'admin'" class="text-[9px] font-bold text-indigo-500 dark:text-indigo-300 mb-0.5 px-1">運営</span>
             <div
-              class="max-w-[80%] px-3 py-2 rounded-2xl text-[13px] leading-relaxed whitespace-pre-wrap break-words"
+              class="max-w-[80%] px-3 py-2 rounded-md text-[13px] leading-relaxed whitespace-pre-wrap break-words"
               :class="m.sender === 'tl'
                 ? 'bg-blue-600 text-white rounded-br-sm'
                 : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-600 rounded-bl-sm'"
@@ -183,13 +183,13 @@ watch(() => props.token, () => {
               @keydown="onKeydown"
               rows="1"
               placeholder="メッセージを入力 (Enterで送信)"
-              class="flex-1 resize-none max-h-24 px-3 py-2 text-[13px] rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+              class="flex-1 resize-none max-h-24 px-3 py-2 text-[13px] rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
             ></textarea>
             <button
               type="button"
               @click="handleSend"
               :disabled="isSending || !draft.trim()"
-              class="shrink-0 px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
+              class="shrink-0 px-3 py-2 rounded-md text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
             >送信</button>
           </div>
         </div>

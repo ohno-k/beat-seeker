@@ -58,10 +58,10 @@ function close() {
       class="fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-fade-in"
       @click.self="close"
     >
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
         <!-- ヘッダ: アップデートバッジ + 閉じる -->
         <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-700">
-          <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest bg-blue-600 text-white">
+          <span class="px-3 py-1 rounded text-[10px] font-bold bg-blue-600 text-white">
             {{ t('whatsnew.badge') }}
           </span>
           <button
@@ -78,7 +78,7 @@ function close() {
         <div class="overflow-y-auto">
           <img :src="IMAGE_SRC" alt="" class="w-full h-auto block bg-slate-100 dark:bg-slate-900" />
           <div class="p-5 sm:p-6">
-            <h2 class="text-lg sm:text-xl font-black text-slate-800 dark:text-slate-100 mb-2">
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
               {{ t('whatsnew.title') }}
             </h2>
             <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
@@ -91,7 +91,7 @@ function close() {
         <div class="p-4 border-t border-slate-200 dark:border-slate-700">
           <button
             type="button"
-            class="w-full rounded-xl px-4 py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            class="w-full rounded-md px-4 py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
             @click="close"
           >
             {{ t('whatsnew.cta') }}

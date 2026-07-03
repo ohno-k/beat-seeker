@@ -159,7 +159,7 @@ const statusLabel = (t: ShareTokenInfo) => {
     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
     @click.self="emit('close')"
   >
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
+    <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
 
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
         <h3 id="share-token-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">URL共有の管理</h3>
@@ -178,11 +178,11 @@ const statusLabel = (t: ShareTokenInfo) => {
         </p>
 
         <!-- 発行フォーム -->
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-5 bg-slate-50/60 dark:bg-slate-800/40">
+        <div class="rounded-md border border-slate-200 dark:border-slate-700 p-5 space-y-5 bg-slate-50/60 dark:bg-slate-800/40">
           <h4 class="text-base font-bold text-slate-700 dark:text-slate-200">新しい共有 URL を発行</h4>
 
           <div>
-            <span class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">公開する画面</span>
+            <span class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">公開する画面</span>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label class="flex items-center gap-2 text-sm cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors">
                 <input type="checkbox" v-model="scopeDashboard" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
@@ -207,9 +207,9 @@ const statusLabel = (t: ShareTokenInfo) => {
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-widest">有効期限</label>
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">有効期限</label>
             <select v-model="expiresIn"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100">
+              class="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100">
               <option v-for="opt in expiryOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
           </div>
@@ -220,7 +220,7 @@ const statusLabel = (t: ShareTokenInfo) => {
             type="button"
             @click="handleIssue"
             :disabled="isLoading"
-            class="w-full px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors disabled:opacity-50"
+            class="w-full px-4 py-2.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors disabled:opacity-50"
           >
             URL を発行
           </button>
@@ -230,14 +230,14 @@ const statusLabel = (t: ShareTokenInfo) => {
         <div class="space-y-3">
           <h4 class="text-base font-bold text-slate-700 dark:text-slate-200">発行済みリンク</h4>
 
-          <div v-if="tokens.length === 0" class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+          <div v-if="tokens.length === 0" class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             まだ発行したリンクはありません。
           </div>
 
           <ul v-else class="space-y-3">
-            <li v-for="t in tokens" :key="t.id" class="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800/40">
+            <li v-for="t in tokens" :key="t.id" class="rounded-md border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800/40">
               <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full" :class="statusLabel(t).cls">{{ statusLabel(t).text }}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded" :class="statusLabel(t).cls">{{ statusLabel(t).text }}</span>
                 <span class="text-[10px] text-slate-400">発行: {{ formatDateTime(t.createdAt) }}</span>
               </div>
 

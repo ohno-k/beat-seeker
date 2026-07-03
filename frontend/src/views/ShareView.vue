@@ -224,14 +224,14 @@ const errorBody = computed(() => {
   <div class="w-full max-w-6xl mx-auto px-3 py-6 flex flex-col gap-4">
 
     <!-- 共有元ユーザーのバナー -->
-    <div v-if="info" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 flex items-center gap-3 shadow-sm">
+    <div v-if="info" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-5 py-3 flex items-center gap-3">
       <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
         </svg>
       </div>
       <div class="min-w-0 flex-1">
-        <div class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">共有リンク</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400 font-bold">共有リンク</div>
         <div class="font-bold text-slate-700 dark:text-slate-200 truncate">
           {{ info.user.displayName || info.user.iidxId }} さんのデータ
         </div>
@@ -257,7 +257,7 @@ const errorBody = computed(() => {
         v-if="errorState === 'notfound' || errorState === 'unknown'"
         type="button"
         @click="loadShare"
-        class="mt-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
+        class="mt-2 px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
       >再読み込み</button>
     </div>
 
@@ -271,7 +271,7 @@ const errorBody = computed(() => {
             :key="s.key"
             type="button"
             @click="activeSection = s.key"
-            class="flex items-center px-4 py-3 border-b-2 transition-all font-bold text-sm tracking-wide whitespace-nowrap"
+            class="flex items-center px-4 py-3 border-b-2 transition-all font-bold text-sm whitespace-nowrap"
             :class="activeSection === s.key
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'"

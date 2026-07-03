@@ -1,10 +1,10 @@
 <template>
   <div class="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
     <!-- ヘッダ（大会ブランディング） -->
-    <header class="bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-lg">
+    <header class="bg-indigo-700 dark:bg-indigo-600 text-white">
       <div class="mx-auto px-4 py-8 sm:py-10 transition-[max-width] duration-200" :class="containerWidthClass">
-        <p class="text-xs sm:text-sm font-semibold tracking-widest text-white/80 uppercase">beat-seeker 特設ページ</p>
-        <h1 class="mt-1 text-3xl sm:text-4xl font-black tracking-tight">きんじょー杯</h1>
+        <p class="text-xs sm:text-sm font-semibold text-white/80">beat-seeker 特設ページ</p>
+        <h1 class="mt-1 text-3xl sm:text-4xl font-bold tracking-tight">きんじょー杯</h1>
         <p class="mt-2 text-sm sm:text-base text-white/90">参加者一覧 ／ ドラフト選考 参考データ</p>
       </div>
     </header>
@@ -24,7 +24,7 @@
 
         <!-- 参加者ヘッダ -->
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4">
-          <h2 class="text-2xl font-black text-slate-800 dark:text-white break-all">{{ selectedParticipant.displayName || '名無し' }}</h2>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white break-all">{{ selectedParticipant.displayName || '名無し' }}</h2>
           <span v-if="selectedParticipant.danRank" class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-bold rounded">{{ selectedParticipant.danRank }}</span>
           <span v-if="selectedParticipant.arenaRank" class="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs font-bold rounded">{{ selectedParticipant.arenaRank }}</span>
           <span class="font-mono font-bold text-slate-600 dark:text-slate-300 text-sm">総合力 {{ formatBeatPt(selectedParticipant.totalBeatPt) }}</span>
@@ -53,7 +53,7 @@
             </div>
           </div>
           <!-- 表示（メモあり） -->
-          <div v-else-if="selectedParticipant.note" class="group flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/50 text-sm text-slate-700 dark:text-slate-200">
+          <div v-else-if="selectedParticipant.note" class="group flex items-start gap-2 p-3 rounded-md bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/50 text-sm text-slate-700 dark:text-slate-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             <span class="whitespace-pre-wrap break-words flex-1">{{ selectedParticipant.note }}</span>
             <button @click="startEditNote(selectedParticipant)" class="shrink-0 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">編集</button>
@@ -80,7 +80,7 @@
           <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
           <p class="text-slate-500 font-medium">スコアを取得中...</p>
         </div>
-        <div v-else-if="detailError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl border border-red-200 dark:border-red-800">
+        <div v-else-if="detailError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-md border border-red-200 dark:border-red-800">
           {{ detailError }}
         </div>
         <div v-else-if="detailScores.length === 0" class="text-center py-16 text-slate-500 dark:text-slate-400">
@@ -126,7 +126,7 @@
         <button
           v-if="isAdmin"
           @click="openAddModal"
-          class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg shadow-sm transition-colors"
+          class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -142,7 +142,7 @@
       </div>
 
       <!-- エラー -->
-      <div v-else-if="loadError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl border border-red-200 dark:border-red-800">
+      <div v-else-if="loadError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-md border border-red-200 dark:border-red-800">
         {{ loadError }}
       </div>
 
@@ -153,10 +153,10 @@
       </div>
 
       <!-- 参加者テーブル -->
-      <div v-else class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+      <div v-else class="overflow-hidden rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
         <table class="w-full text-sm">
           <thead>
-            <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+            <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs">
               <th class="px-3 sm:px-4 py-3 text-center font-semibold w-12">#</th>
               <th class="px-3 sm:px-4 py-3 text-left font-semibold">DJ名</th>
               <th class="px-3 sm:px-4 py-3 text-right font-semibold">総合力</th>
@@ -303,7 +303,7 @@
           <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
           <p class="text-slate-500 font-medium">勝敗を集計中...</p>
         </div>
-        <div v-else-if="matrixError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl border border-red-200 dark:border-red-800">
+        <div v-else-if="matrixError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-md border border-red-200 dark:border-red-800">
           {{ matrixError }}
         </div>
         <template v-else-if="currentBracket && currentBracket.players.length > 0">
@@ -311,7 +311,7 @@
             総当たりの勝敗表です。各セルは「行プレイヤーの 勝–負」（共通プレイ譜面で EX スコアを比較）。
             列見出しは対戦相手（順位・DJ名）。勝ち数の多い順に上から並べています。<span class="text-indigo-500 dark:text-indigo-400">セルをクリックすると対戦内訳を表示します。</span>
           </p>
-          <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+          <div class="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
             <table class="text-sm border-collapse">
               <thead>
                 <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs">
@@ -392,7 +392,7 @@
           <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
           <p class="text-slate-500 font-medium">順位を集計中...</p>
         </div>
-        <div v-else-if="songRanksError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-xl border border-red-200 dark:border-red-800">
+        <div v-else-if="songRanksError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-md border border-red-200 dark:border-red-800">
           {{ songRanksError }}
         </div>
         <template v-else-if="currentSongBracket && currentSongBracket.players.length > 0">
@@ -400,7 +400,7 @@
             参加者内での曲別順位です。セルは各譜面の EX スコア順位（<span class="text-amber-600 dark:text-amber-400 font-bold">1位=金</span> / 2位=銀 / 3位=銅、未プレイ=−）。
             列見出し下の数字は平均順位（良い順に左から並べています）。{{ filteredSongCharts.length }}/{{ currentSongBracket.charts.length }} 譜面。
           </p>
-          <div v-if="filteredSongCharts.length > 0" class="overflow-auto max-h-[75vh] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+          <div v-if="filteredSongCharts.length > 0" class="overflow-auto max-h-[75vh] rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
             <table class="text-sm border-collapse">
               <thead>
                 <tr class="text-slate-500 dark:text-slate-400 text-xs">
@@ -455,7 +455,7 @@
         class="fixed inset-0 z-[100] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm"
         @click.self="showAddModal = false"
       >
-        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh] border border-slate-200 dark:border-slate-800">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-md shadow-xl flex flex-col overflow-hidden max-h-[85vh] border border-slate-200 dark:border-slate-800">
           <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
             <h2 class="text-lg font-bold text-slate-800 dark:text-white">参加者を追加</h2>
             <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 -mr-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -516,7 +516,7 @@
         class="fixed inset-0 z-[100] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm"
         @click.self="closeMatchup"
       >
-        <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh] border border-slate-200 dark:border-slate-800">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-md shadow-xl flex flex-col overflow-hidden max-h-[85vh] border border-slate-200 dark:border-slate-800">
           <!-- ヘッダ -->
           <div class="p-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
             <div class="flex items-center justify-between">
@@ -531,9 +531,9 @@
               <div class="mt-2 flex items-center justify-center gap-3 text-sm flex-wrap">
                 <span class="font-bold text-indigo-600 dark:text-indigo-400 truncate max-w-[10rem]">{{ matchupData.playerA.displayName || '名無し' }}</span>
                 <span class="font-mono whitespace-nowrap">
-                  <span class="text-emerald-600 dark:text-emerald-400 font-black text-base">{{ matchupData.summary.aWins }}</span>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-bold text-base">{{ matchupData.summary.aWins }}</span>
                   <span class="text-slate-400 mx-0.5">-</span>
-                  <span class="text-red-600 dark:text-red-400 font-black text-base">{{ matchupData.summary.bWins }}</span>
+                  <span class="text-red-600 dark:text-red-400 font-bold text-base">{{ matchupData.summary.bWins }}</span>
                   <span v-if="matchupData.summary.draws" class="text-slate-400 text-xs ml-1">(引分{{ matchupData.summary.draws }})</span>
                 </span>
                 <span class="font-bold text-slate-600 dark:text-slate-300 truncate max-w-[10rem]">{{ matchupData.playerB.displayName || '名無し' }}</span>
@@ -725,7 +725,7 @@ const songLevelTabClass = (lv: 'lv12' | 'lv11' | 'lv10'): string => {
 const rankCellClass = (rank: number | null): string => {
   const base = 'px-1.5 py-1 text-center font-mono text-xs border border-slate-100 dark:border-slate-700';
   if (rank == null) return `${base} bg-slate-50 dark:bg-slate-800/40 text-slate-300 dark:text-slate-600`;
-  if (rank === 1) return `${base} bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-black`;
+  if (rank === 1) return `${base} bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold`;
   if (rank === 2) return `${base} bg-slate-200/70 dark:bg-slate-600/30 text-slate-700 dark:text-slate-200 font-bold`;
   if (rank === 3) return `${base} bg-orange-100/70 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 font-bold`;
   return `${base} text-slate-500 dark:text-slate-400`;
@@ -1063,7 +1063,7 @@ const formatDate = (iso: string): string => {
 
 /** 上位 3 名に金銀銅のバッジ装飾を付ける。 */
 const rankBadgeClass = (idx: number): string => {
-  const base = 'inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black';
+  const base = 'inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold';
   if (idx === 0) return `${base} bg-amber-400 text-amber-900`;
   if (idx === 1) return `${base} bg-slate-300 text-slate-700`;
   if (idx === 2) return `${base} bg-orange-400 text-orange-900`;

@@ -296,7 +296,7 @@ export function calculatePoints(scoreRate: number, informalRank: string | undefi
  * 各ブロックは {@link generateTieredRanks} で 5 ティア（I〜V）に分割される。
  */
 export const RANKS: RankInfo[] = [
-    { name: 'Legend', minPoints: 18000, color: 'text-amber-500 font-black' },
+    { name: 'Legend', minPoints: 18000, color: 'text-amber-500 font-bold' },
 
     ...generateTieredRanks('Mythic', 17500, 18000, 'text-purple-600'),  // 500
     ...generateTieredRanks('Ancient', 17000, 17500, 'text-indigo-600'),  // 500
@@ -663,7 +663,7 @@ export function getGroupedRanks() {
  * 指数的に伸びるポイントを与える体系。
  */
 export const RATE_TIER_RANKS: RankInfo[] = [
-    { name: 'Legend', minPoints: 25600, color: 'text-amber-500 font-black' },
+    { name: 'Legend', minPoints: 25600, color: 'text-amber-500 font-bold' },
 
     ...generateTieredRanks('Mythic', 12800, 25600, 'text-purple-600'),
     ...generateTieredRanks('Ancient', 6400, 12800, 'text-indigo-600'),
@@ -898,7 +898,7 @@ function computeFolderRankNormalizedOffset(i: number): number {
  * Legend のベース rate は {@link getFolderLegendRate} で決まる。
  */
 export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; color: string }[] = [
-    { offset: 0, name: 'Legend', color: 'text-amber-500 font-black' },
+    { offset: 0, name: 'Legend', color: 'text-amber-500 font-bold' },
     ...FOLDER_RANK_BLOCKS.flatMap((block, blockIdx) =>
         Array.from({ length: TIERS_PER_RANK_BLOCK }, (_, tierWithinBlockIdx) => {
             const i = blockIdx * TIERS_PER_RANK_BLOCK + tierWithinBlockIdx + 1;

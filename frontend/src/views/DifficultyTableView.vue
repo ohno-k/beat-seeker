@@ -131,10 +131,10 @@ function handleSearch() {
 <template>
   <div class="space-y-6 pb-20 animate-fade-in">
     <!-- ヘッダー: タイトル・統計・展開／折りたたみボタン・検索ボックス -->
-    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-md p-6 border border-slate-200 dark:border-slate-700">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-black text-slate-900 dark:text-white">
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white">
             {{ t('diffTable.title') }}
           </h1>
           <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -167,7 +167,7 @@ function handleSearch() {
           @input="handleSearch"
           type="text"
           :placeholder="t('diffTable.searchPlaceholder')"
-          class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          class="w-full pl-9 pr-4 py-2.5 text-sm rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
         />
       </div>
     </div>
@@ -175,10 +175,10 @@ function handleSearch() {
     <!-- ログイン促進バナー: 未ログイン時のみ表示 -->
     <div
       v-if="!isLoggedIn"
-      class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg"
+      class="bg-blue-700 dark:bg-blue-600 rounded-md p-6 text-white"
     >
       <div class="flex flex-col sm:flex-row items-center gap-4">
-        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+        <div class="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center shrink-0">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
@@ -199,7 +199,7 @@ function handleSearch() {
       <div
         v-for="rankEntry in filteredRanks"
         :key="rankEntry.rank"
-        class="bg-white dark:bg-slate-800 rounded-2xl border shadow-sm overflow-hidden transition-colors"
+        class="bg-white dark:bg-slate-800 rounded-md border overflow-hidden transition-colors"
         :class="rankBadgeBg(rankEntry.rank)"
       >
         <!-- ランクヘッダー（クリックで展開／折りたたみトグル） -->
@@ -211,7 +211,7 @@ function handleSearch() {
         >
           <div class="flex items-center gap-3">
             <span
-              class="text-2xl font-black min-w-[3.5rem]"
+              class="text-2xl font-bold min-w-[3.5rem]"
               :class="rankColor(rankEntry.rank)"
             >
               ☆{{ rankEntry.rank }}

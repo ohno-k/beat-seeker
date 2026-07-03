@@ -155,12 +155,12 @@ const textageUrl = (s: SongDataEntry) => {
   <div class="space-y-6">
     <!-- ヘッダー: ページタイトルと説明 -->
     <div>
-      <h1 class="text-2xl font-black text-slate-900 dark:text-white">{{ t('chartList.title') }}</h1>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ t('chartList.title') }}</h1>
       <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ t('chartList.subtitle') }}</p>
     </div>
 
     <!-- フィルタ領域: 検索＋難易度＋レベル＋結果件数表示 -->
-    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4">
       <div class="flex flex-wrap gap-3 items-center">
         <!-- 検索入力: 入力のたびに1ページ目に戻す -->
         <div class="relative flex-1 min-w-[200px]">
@@ -171,7 +171,7 @@ const textageUrl = (s: SongDataEntry) => {
             v-model="searchQuery"
             type="text"
             :placeholder="t('chartList.searchPlaceholder')"
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full pl-10 pr-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             @input="currentPage = 1"
           />
         </div>
@@ -179,7 +179,7 @@ const textageUrl = (s: SongDataEntry) => {
         <!-- 難易度フィルタ: DIFF_MAP のキーをプルダウン化 -->
         <select
           v-model="selectedDifficulty"
-          class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           @change="currentPage = 1"
         >
           <option value="">{{ t('chartList.allDifficulties') }}</option>
@@ -189,7 +189,7 @@ const textageUrl = (s: SongDataEntry) => {
         <!-- レベルフィルタ: 全譜面に存在するレベル値のみ選択肢化 -->
         <select
           v-model="selectedLevel"
-          class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           @change="currentPage = 1"
         >
           <option value="">{{ t('chartList.allLevels') }}</option>
@@ -204,7 +204,7 @@ const textageUrl = (s: SongDataEntry) => {
     </div>
 
     <!-- 譜面一覧テーブル: ヘッダクリックでソート、行ホバーで色付け -->
-    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -283,7 +283,7 @@ const textageUrl = (s: SongDataEntry) => {
               <td class="px-3 py-3 text-center">
                 <span
                   :class="[getDiff(song.difficulty).color, getDiff(song.difficulty).bg]"
-                  class="inline-block px-2 py-0.5 text-[10px] font-black rounded-md uppercase tracking-wider"
+                  class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-md"
                 >
                   {{ getDiff(song.difficulty).name }}
                 </span>

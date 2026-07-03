@@ -268,8 +268,8 @@ async function fetchPrediction(textage: string) {
 // DJ LEVEL 用の色クラス（MAX-=紫、AAA=黄、AA=青、A=緑、B=暗灰、それ以下=灰）。
 // 類似譜面テーブルのスコアレート色付けで使用。
 function djLevelClass(rate: number): string {
-  if (rate >= 94.45) return 'text-purple-600 dark:text-purple-400 font-extrabold';
-  if (rate >= 88.89) return 'text-yellow-500 dark:text-yellow-400 font-extrabold';
+  if (rate >= 94.45) return 'text-purple-600 dark:text-purple-400 font-bold';
+  if (rate >= 88.89) return 'text-yellow-500 dark:text-yellow-400 font-bold';
   if (rate >= 77.78) return 'text-blue-500 dark:text-blue-400 font-bold';
   if (rate >= 66.67) return 'text-green-500 dark:text-green-400 font-bold';
   if (rate >= 55.56) return 'text-slate-700 dark:text-slate-300 font-semibold';
@@ -586,7 +586,7 @@ watch(selectedEntry, async (entry) => {
 
         <!-- URL で指定された textage が songData に見つからなかった場合のフォールバック -->
         <div v-if="unknownTextageFromUrl"
-          class="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-6 text-center">
+          class="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-6 text-center">
           <p class="text-amber-700 dark:text-amber-300 font-medium mb-1">
             {{ t('chartAnalysis.notFound') }}
           </p>
@@ -595,7 +595,7 @@ watch(selectedEntry, async (entry) => {
 
         <!-- 未選択: ユーザーに曲選択を促すプレースホルダー -->
         <div v-else-if="!selectedEntry"
-          class="h-48 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+          class="h-48 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
           {{ t('scorePrediction.selectSong') }}
         </div>
 
@@ -605,7 +605,7 @@ watch(selectedEntry, async (entry) => {
         <div v-else-if="selectedEntry" class="flex flex-col gap-4">
 
           <!-- 曲ヘッダ: 難易度バッジ + タイトル + Lv/ノーツ数/BPM/ソフラン表示 -->
-          <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+          <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
             <div class="flex flex-wrap items-start gap-3 mb-3">
               <span
                 class="px-2 py-1 rounded text-xs font-bold shrink-0"
@@ -645,11 +645,11 @@ watch(selectedEntry, async (entry) => {
               <div class="text-xs font-medium text-slate-400 dark:text-slate-500 mb-2">譜面属性</div>
               <div class="flex flex-wrap gap-1.5">
                 <span v-for="tb in tagBadges" :key="tb.tag"
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold"
+                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
                   :class="tb.colorClass"
                 >{{ tb.label }}</span>
                 <span v-for="pb in patternBadges" :key="pb.key"
-                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold"
                   :class="pb.colorClass"
                   :title="`${pb.count}回 / ${pb.pct}%`"
                 >
@@ -724,7 +724,7 @@ watch(selectedEntry, async (entry) => {
 
           <!-- 未ログイン時のログイン促し: 予測スコア・類似譜面比較はログイン必須 -->
           <div v-if="!isLoggedIn"
-            class="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-5 text-center">
+            class="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-5 text-center">
             <p class="text-sm text-amber-700 dark:text-amber-300 font-medium">
               {{ t('chartAnalysis.loginToSeeMore') }}
             </p>
@@ -732,7 +732,7 @@ watch(selectedEntry, async (entry) => {
 
           <!-- 予測ロード中: 類似譜面取得中のスピナー（曲ヘッダ配下に表示） -->
           <div v-else-if="isLoading"
-            class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 flex items-center justify-center text-slate-400 dark:text-slate-500">
+            class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 flex items-center justify-center text-slate-400 dark:text-slate-500">
             <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
@@ -742,14 +742,14 @@ watch(selectedEntry, async (entry) => {
 
           <!-- 予測エラー: バックエンドからのエラー文言を曲ヘッダ配下にインライン表示 -->
           <div v-else-if="predictionError"
-            class="rounded-xl border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-5">
+            class="rounded-md border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-5">
             <p class="text-red-600 dark:text-red-400 text-sm">{{ predictionError }}</p>
           </div>
 
           <!-- 類似譜面テーブル: 予測の根拠になった類似曲一覧。行クリックで類似度デバッグモーダル -->
           <div v-if="predictionResult?.similarSongs.length"
-            class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
-            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+            class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3">
               {{ t('scorePrediction.similarSongs') }}
               <span class="ml-1 font-normal">({{ predictionResult.similarSongs.length }}件)</span>
             </h3>
@@ -802,7 +802,7 @@ watch(selectedEntry, async (entry) => {
             <div v-if="debugResult || isDebugLoading"
               class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
               @click.self="debugResult = null">
-              <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+              <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
                 <div class="flex justify-between items-center mb-4">
                   <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">類似度計算過程</h3>
                   <button @click="debugResult = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
@@ -813,12 +813,12 @@ watch(selectedEntry, async (entry) => {
                 <div v-else-if="debugResult">
                   <!-- 上部: 比較対象2曲(A,B)の情報カード -->
                   <div class="flex gap-3 mb-4 text-sm">
-                    <div class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
+                    <div class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-md p-3">
                       <div class="text-xs text-slate-400 mb-1">対象曲 (A)</div>
                       <div class="font-bold text-slate-800 dark:text-slate-100">{{ debugResult.songA?.title }}</div>
                       <div class="text-xs text-slate-500">難易度 {{ debugResult.songA?.informalRank }}</div>
                     </div>
-                    <div class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
+                    <div class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-md p-3">
                       <div class="text-xs text-slate-400 mb-1">参照曲 (B)</div>
                       <div class="font-bold text-slate-800 dark:text-slate-100">{{ debugResult.songB?.title }}</div>
                       <div class="text-xs text-slate-500">難易度 {{ debugResult.songB?.informalRank }}</div>
@@ -826,7 +826,7 @@ watch(selectedEntry, async (entry) => {
                   </div>
                   <!-- 生データ比較テーブル: ノーツ密度・BPM・スクラッチ割合などを並べて表示 -->
                   <div class="mb-4">
-                    <div class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">生データ比較</div>
+                    <div class="text-xs font-bold text-slate-500 mb-2">生データ比較</div>
                     <table class="w-full text-xs">
                       <thead><tr class="text-slate-400"><th class="text-left pb-1">指標</th><th class="text-right pb-1">A</th><th class="text-right pb-1">B</th></tr></thead>
                       <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
@@ -883,10 +883,10 @@ watch(selectedEntry, async (entry) => {
                         'weight(cnW)': '重み (平均CN割合)',
                         contribution: 'グループ寄与度',
                       }],
-                    ] as any[])" :key="key" class="rounded-xl border border-slate-100 dark:border-slate-700 p-3">
+                    ] as any[])" :key="key" class="rounded-md border border-slate-100 dark:border-slate-700 p-3">
                       <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-bold text-slate-600 dark:text-slate-300">{{ label }}</span>
-                        <span class="text-sm font-black tabular-nums"
+                        <span class="text-sm font-bold tabular-nums"
                           :class="color === 'blue' ? 'text-blue-600 dark:text-blue-400' : color === 'orange' ? 'text-orange-600 dark:text-orange-400' : color === 'green' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400'">
                           寄与: {{ ((debugResult[key]?.contribution ?? 1) * 100).toFixed(2) }}%
                         </span>
@@ -900,9 +900,9 @@ watch(selectedEntry, async (entry) => {
                     </div>
                   </div>
                   <!-- 最終類似度: 各グループ寄与度を掛け合わせた最終値 -->
-                  <div class="mt-4 rounded-xl bg-slate-900 dark:bg-slate-950 p-4 text-center">
+                  <div class="mt-4 rounded-md bg-slate-900 dark:bg-slate-950 p-4 text-center">
                     <div class="text-xs text-slate-400 mb-1">最終類似度</div>
-                    <div class="text-3xl font-black text-white">{{ debugResult.result?.finalSimilarityPct }}</div>
+                    <div class="text-3xl font-bold text-white">{{ debugResult.result?.finalSimilarityPct }}</div>
                     <div class="text-xs text-slate-500 mt-1">
                       統合値 (G1×G2^scrW×G3^kbdW×G4^cnW): {{ debugResult.result?.combined }}
                     </div>

@@ -146,18 +146,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 
 <template>
   <div
-    class="border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-slate-800 transition-colors duration-200 mt-6"
+    class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800 transition-colors duration-200 mt-6"
   >
     <!-- ヘッダ: タイトル + 枚数 + 追加ボタン -->
     <div
       class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-2 sm:py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 transition-colors duration-200"
     >
-      <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
+      <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
         </svg>
         {{ t('resultImage.section') }}
-        <span v-if="images.length > 0" class="text-slate-400 dark:text-slate-500 font-black">{{ images.length }}</span>
+        <span v-if="images.length > 0" class="text-slate-400 dark:text-slate-500 font-bold">{{ images.length }}</span>
       </p>
       <button
         v-if="isLoggedIn"
@@ -187,7 +187,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
         <!-- エラー -->
         <div
           v-if="error"
-          class="mb-3 p-3 rounded-xl border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/40 text-xs sm:text-sm text-red-700 dark:text-red-300"
+          class="mb-3 p-3 rounded-md border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/40 text-xs sm:text-sm text-red-700 dark:text-red-300"
         >
           {{ error }}
         </div>
@@ -216,7 +216,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
               :src="img.url"
               alt="result"
               loading="lazy"
-              class="w-full h-full object-cover cursor-zoom-in transition-transform duration-200 group-hover:scale-105"
+              class="w-full h-full object-cover cursor-zoom-in transition-opacity duration-200 hover:opacity-90"
               @click="openLightbox(i)"
             />
             <button
@@ -276,7 +276,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <img
         :src="lightboxImage.url"
         alt="result"
-        class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+        class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-xl"
         @click.stop
       />
 
@@ -296,7 +296,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <!-- カウンタ -->
       <div
         v-if="images.length > 1"
-        class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/15 text-white text-xs font-bold tabular-nums"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded bg-white/15 text-white text-xs font-bold tabular-nums"
       >
         {{ (lightboxIndex ?? 0) + 1 }} / {{ images.length }}
       </div>

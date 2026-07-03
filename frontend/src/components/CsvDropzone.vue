@@ -140,17 +140,17 @@ const handleTextSubmit = async () => {
   <div class="w-full max-w-2xl mx-auto flex flex-col items-center">
     
     <!-- タブ切替（テキスト貼り付け / ファイルドロップ） -->
-    <div class="flex w-full mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl transition-colors duration-200">
+    <div class="flex w-full mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-md transition-colors duration-200">
       <button 
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="activeTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        :class="activeTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="activeTab = 'text'"
       >
         {{ t('upload.textTab') }}
       </button>
       <button 
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="activeTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        :class="activeTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="activeTab = 'file'"
       >
         {{ t('upload.fileTab') }}
@@ -163,9 +163,9 @@ const handleTextSubmit = async () => {
         <transition name="fade">
             <div 
             v-if="activeTab === 'file'"
-            class="absolute inset-0 w-full h-full p-12 border-2 border-dashed rounded-2xl transition-all duration-200 flex flex-col items-center justify-center cursor-pointer bg-white dark:bg-slate-800 shadow-sm"
+            class="absolute inset-0 w-full h-full p-12 border-2 border-dashed rounded-md transition-all duration-200 flex flex-col items-center justify-center cursor-pointer bg-white dark:bg-slate-800"
             :class="{
-                'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20 scale-[1.02] shadow-md': isDragging,
+                'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20': isDragging,
                 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700/50': !isDragging
             }"
             @dragover="handleDragOver"
@@ -187,7 +187,7 @@ const handleTextSubmit = async () => {
             </p>
             
             <button 
-                class="px-6 py-2.5 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium rounded-lg transition-colors shadow-sm"
+                class="px-6 py-2.5 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
                 @click.stop="triggerFileInput"
             >
                 {{ t('upload.select') }}
@@ -206,7 +206,7 @@ const handleTextSubmit = async () => {
         <transition name="fade">
             <div 
             v-if="activeTab === 'text'"
-            class="absolute inset-0 w-full h-full p-6 border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex flex-col transition-colors duration-200"
+            class="absolute inset-0 w-full h-full p-6 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 flex flex-col transition-colors duration-200"
             >
             <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">
                 {{ t('upload.pasteTitle') }}
@@ -222,7 +222,7 @@ const handleTextSubmit = async () => {
             ></textarea>
             
             <button 
-                class="w-full py-3 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-medium rounded-lg transition-all shadow-md flex items-center justify-center gap-2"
+                class="w-full py-3 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2"
                 :class="{'opacity-75 cursor-wait': isLoadingFromClipboard}"
                 @click="handleTextSubmit"
                 :disabled="isLoadingFromClipboard"

@@ -93,7 +93,7 @@ const pickSong = (h: Hit) => {
       class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       @click.self="emit('close')"
     >
-      <div class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-2xl shadow-xl flex flex-col max-h-[85vh] overflow-hidden">
+      <div class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-md shadow-xl flex flex-col max-h-[85vh] overflow-hidden">
         <!-- ヘッダ -->
         <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <p class="text-sm font-bold">曲を選択</p>
@@ -108,7 +108,7 @@ const pickSong = (h: Hit) => {
         <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-700 space-y-2 bg-slate-50 dark:bg-slate-900/40">
           <!-- Lv -->
           <div class="flex flex-wrap gap-1 items-center text-xs">
-            <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 w-16">Lv</span>
+            <span class="text-[10px] font-mono text-slate-400 w-16">Lv</span>
             <button
               type="button"
               @click="levelFilter = 'ALL'"

@@ -61,8 +61,8 @@ function editionLabel(version: number): string {
 <template>
   <div class="space-y-8 animate-fade-in pb-16">
     <!-- ヘッダー部（タイトル + タブ切替ボタン） -->
-    <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
-      <h2 class="text-3xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
+    <div class="bg-white dark:bg-slate-800 p-8 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
         </svg>
@@ -77,14 +77,14 @@ function editionLabel(version: number): string {
         <button
           @click="activeTab = 'changelog'"
           class="px-5 py-2.5 text-sm font-bold rounded-lg transition-all"
-          :class="activeTab === 'changelog' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
+          :class="activeTab === 'changelog' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
         >
           {{ t('changelog.tabSystem') }}
         </button>
         <button
           @click="activeTab = 'difficulty'"
           class="px-5 py-2.5 text-sm font-bold rounded-lg transition-all"
-          :class="activeTab === 'difficulty' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
+          :class="activeTab === 'difficulty' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
         >
           {{ t('changelog.tabDifficulty') }}
         </button>
@@ -93,10 +93,10 @@ function editionLabel(version: number): string {
 
     <div v-if="activeTab === 'changelog'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
       <!-- Update Entry: v1.7.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.7.0</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.7.0</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v170Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.may2026') }}</span>
@@ -104,7 +104,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.newFeatures') }}
             </h4>
@@ -116,10 +116,10 @@ function editionLabel(version: number): string {
       </div>
 
       <!-- Update Entry: v1.6.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.6.0</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.6.0</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v160Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -127,7 +127,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.newFeatures') }}
             </h4>
@@ -140,10 +140,10 @@ function editionLabel(version: number): string {
       </div>
 
       <!-- Update Entry: v1.5.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.5.0</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.5.0</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v150Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -151,7 +151,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.newFeatures') }}
             </h4>
@@ -164,10 +164,10 @@ function editionLabel(version: number): string {
       </div>
 
       <!-- Update Entry: v1.4.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.4.0</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.4.0</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v140Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -175,7 +175,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.newFeatures') }}
             </h4>
@@ -188,10 +188,10 @@ function editionLabel(version: number): string {
       </div>
 
       <!-- Update Entry: v1.3.1 (Localization Support) -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.3.1</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.3.1</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v131Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -199,7 +199,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.newFeatures') }}
             </h4>
@@ -212,10 +212,10 @@ function editionLabel(version: number): string {
       </div>
 
       <!-- Update Entry: v1.3.0 (Difficulty Revision) -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.3.0</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.3.0</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v130Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -223,7 +223,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.newFeatures') }}
             </h4>
@@ -237,10 +237,10 @@ function editionLabel(version: number): string {
       </div>
 
       <!-- Update Entry: v1.2.0 (Notification Tabs & Vote UI) -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.2.0</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.2.0</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v120Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -248,7 +248,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.newFeatures') }}
             </h4>
@@ -258,7 +258,7 @@ function editionLabel(version: number): string {
             </ul>
           </div>
           <div>
-            <h4 class="text-sm font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-amber-500 dark:text-amber-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
               {{ t('changelog.bugFixes') }}
             </h4>
@@ -271,10 +271,10 @@ function editionLabel(version: number): string {
       </div>
 
       <!-- Update Entry: v1.1.1 (Folder Rank System Redesign) -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ver 1.1.1</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.1.1</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v111Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -282,7 +282,7 @@ function editionLabel(version: number): string {
 
         <div class="p-8 space-y-6">
           <div>
-            <h4 class="text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.improvements') }}
             </h4>
@@ -301,10 +301,10 @@ function editionLabel(version: number): string {
     <!-- 難易度改訂履歴タブ（JSON からループ描画） -->
     <div v-else-if="activeTab === 'difficulty'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
 
-      <div v-for="rev in revisions" :key="rev.version" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <div v-for="rev in revisions" :key="rev.version" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{{ editionLabel(rev.version) }}</span>
+            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">{{ editionLabel(rev.version) }}</span>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.difficultyRevision') }} ({{ rev.appVersion }})</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ formatDate(rev.date) }}</span>
@@ -313,7 +313,7 @@ function editionLabel(version: number): string {
         <div class="p-8 space-y-6">
           <!-- 追加曲ブロック（その版で新規に難易度が付いた曲） -->
           <div v-if="rev.added.length > 0">
-            <h4 class="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.addedSongs') }}
             </h4>
@@ -327,7 +327,7 @@ function editionLabel(version: number): string {
 
           <!-- 変更曲ブロック（from → to で難易度が変動した曲） -->
           <div v-if="rev.changed.length > 0">
-            <h4 class="text-sm font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h4 class="text-sm font-bold text-amber-500 dark:text-amber-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1-1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
               {{ t('changelog.changedSongs') }}
             </h4>

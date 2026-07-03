@@ -51,7 +51,7 @@ const displayText = computed(() => {
 <template>
   <span
     v-if="rank"
-    :class="['inline-flex items-center font-black tabular-nums rounded border whitespace-nowrap leading-none', colorClass, sizeClass]"
+    :class="['inline-flex items-center font-bold tabular-nums rounded border whitespace-nowrap leading-none', colorClass, sizeClass]"
     :title="`非公式難易度 ${rank}`"
   >
     {{ displayText }}

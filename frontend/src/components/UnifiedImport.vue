@@ -217,15 +217,15 @@ const copyBookmarkletCode = async () => {
   <div class="space-y-4">
 
     <!-- Result messages -->
-    <div v-if="resultError" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
+    <div v-if="resultError" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-400">
       {{ resultError }}
     </div>
-    <div v-if="resultMsg" class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl text-sm text-green-700 dark:text-green-400 font-medium">
+    <div v-if="resultMsg" class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400 font-medium">
       {{ resultMsg }}
     </div>
 
     <!-- ARENA info banner -->
-    <div class="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl">
+    <div class="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-md">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -238,21 +238,21 @@ const copyBookmarkletCode = async () => {
     </div>
 
     <!-- Tab switcher -->
-    <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-md border border-slate-200 dark:border-slate-700">
       <button
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="importTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        :class="importTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="importTab = 'text'"
       >{{ t('import.tabText') }}</button>
       <button
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="importTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        :class="importTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="importTab = 'file'"
       >{{ t('import.tabFile') }}</button>
       <button
         v-if="canUseInfinitas"
         class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="importTab === 'infinitas' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        :class="importTab === 'infinitas' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="importTab = 'infinitas'"
       >{{ t('import.tabInfinitas') }}</button>
     </div>
@@ -262,7 +262,7 @@ const copyBookmarkletCode = async () => {
       <p class="text-xs text-slate-500 dark:text-slate-400" v-html="t('import.textHint', { link: `<a href='https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html?style=SP' target='_blank' rel='noopener noreferrer' class='text-blue-600 dark:text-blue-400 hover:underline font-medium'>${t('import.textHintLinkText')}</a>` })"></p>
       <textarea
         v-model="pastedText"
-        class="w-full h-24 p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-100 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
+        class="w-full h-24 p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md text-xs font-mono text-slate-800 dark:text-slate-100 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
         :placeholder="t('import.textareaPlaceholder')"
       ></textarea>
     </div>
@@ -275,7 +275,7 @@ const copyBookmarkletCode = async () => {
     <!-- File upload tab -->
     <div v-else-if="importTab === 'file'" class="space-y-2">
       <div
-        class="border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-3 cursor-pointer transition-all"
+        class="border-2 border-dashed rounded-md p-6 flex flex-col items-center gap-3 cursor-pointer transition-all"
         :class="isDragging
           ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
           : selectedFile
@@ -309,7 +309,7 @@ const copyBookmarkletCode = async () => {
       v-if="importTab !== 'infinitas'"
       @click="handleSubmit"
       :disabled="isImporting || (importTab === 'file' && !selectedFile)"
-      class="w-full py-2.5 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+      class="w-full py-2.5 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
     >
       <svg v-if="!isImporting && importTab === 'text' && !pastedText.trim()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -331,7 +331,7 @@ const copyBookmarkletCode = async () => {
   <!-- Bookmarklet help modal -->
   <Teleport to="body">
     <div v-if="showHelpModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showHelpModal = false">
-      <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
+      <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-base font-bold text-slate-800 dark:text-white">{{ t('import.helpTitle') }}</h3>
           <button @click="showHelpModal = false" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
@@ -347,12 +347,12 @@ const copyBookmarkletCode = async () => {
         <div class="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 w-fit mb-4">
           <button
             class="px-4 py-1.5 text-xs font-bold rounded-md transition-all"
-            :class="deviceTab === 'sp' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400'"
+            :class="deviceTab === 'sp' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'"
             @click="deviceTab = 'sp'"
           >{{ t('import.deviceSp') }}</button>
           <button
             class="px-4 py-1.5 text-xs font-bold rounded-md transition-all"
-            :class="deviceTab === 'pc' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm' : 'text-slate-500 dark:text-slate-400'"
+            :class="deviceTab === 'pc' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'"
             @click="deviceTab = 'pc'"
           >{{ t('import.devicePc') }}</button>
         </div>
@@ -376,7 +376,7 @@ const copyBookmarkletCode = async () => {
           </ol>
           <button
             @click="copyBookmarkletCode"
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-all"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all"
             :class="codeCopied ? 'bg-green-500 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'"
           >
             <svg v-if="!codeCopied" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -399,7 +399,7 @@ const copyBookmarkletCode = async () => {
           <div class="flex items-center gap-3 flex-wrap">
             <a
               :href="bookmarkletCode"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition-colors text-sm select-none shrink-0"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors text-sm select-none shrink-0"
               @click.prevent
               draggable="true"
             >

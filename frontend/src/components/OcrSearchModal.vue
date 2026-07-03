@@ -402,11 +402,11 @@ onBeforeUnmount(() => {
       class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-fade-in"
       @click.self="closeModal"
     >
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         <!-- ヘッダ: タイトル + 閉じるボタン -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <div>
-            <h2 class="text-lg font-black text-slate-900 dark:text-white">{{ t('ocrSearch.title') }}</h2>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('ocrSearch.title') }}</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('ocrSearch.subtitle') }}</p>
           </div>
           <button
@@ -424,7 +424,7 @@ onBeforeUnmount(() => {
         <div class="p-6 space-y-4 overflow-y-auto">
           <!-- 初期状態: カメラ起動ボタン -->
           <div v-if="status === 'idle'" class="flex flex-col items-center py-4 space-y-4">
-            <div class="w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+            <div class="w-20 h-20 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -433,7 +433,7 @@ onBeforeUnmount(() => {
             <p class="text-sm text-slate-500 dark:text-slate-400 text-center">{{ t('ocrSearch.hint') }}</p>
             <button
               @click="openCamera"
-              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
+              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-md transition-all"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -444,7 +444,7 @@ onBeforeUnmount(() => {
 
           <!-- カメラ映像 + シャッターボタン（ready/capturing/initializing 共通） -->
           <div v-else-if="status === 'initializing' || status === 'ready' || status === 'capturing'" class="space-y-3">
-            <div class="relative aspect-video bg-black rounded-xl overflow-hidden">
+            <div class="relative aspect-video bg-black rounded-md overflow-hidden">
               <video
                 ref="videoRef"
                 autoplay
@@ -465,11 +465,7 @@ onBeforeUnmount(() => {
                 ></div>
               </div>
               <!-- 状態バッジ -->
-              <div class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-2">
-                <span
-                  class="inline-block w-1.5 h-1.5 rounded-full"
-                  :class="status === 'capturing' ? 'bg-amber-400 animate-ping' : 'bg-emerald-400 animate-pulse'"
-                ></span>
+              <div class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold px-2.5 py-1 rounded flex items-center gap-2">
                 {{ status === 'initializing' ? t('ocrSearch.initializing') : (status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.ready')) }}
               </div>
             </div>
@@ -478,7 +474,7 @@ onBeforeUnmount(() => {
             <button
               @click="captureAndRecognize"
               :disabled="status !== 'ready'"
-              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-fuchsia-500/20 hover:shadow-fuchsia-500/40 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-md transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <svg v-if="status === 'capturing'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.3" />
@@ -494,7 +490,7 @@ onBeforeUnmount(() => {
             <!-- マッチ失敗メッセージ -->
             <div
               v-if="noMatchMessage"
-              class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl text-sm text-amber-700 dark:text-amber-300 font-medium"
+              class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md text-sm text-amber-700 dark:text-amber-300 font-medium"
             >
               {{ noMatchMessage }}
             </div>
@@ -520,14 +516,14 @@ onBeforeUnmount(() => {
                 v-for="(c, i) in matchCandidates"
                 :key="`${c.song.title}|${c.song.artist}|${i}`"
                 @click="pickCandidate(c)"
-                class="w-full text-left p-3 rounded-xl border transition-all hover:-translate-y-0.5"
+                class="w-full text-left p-3 rounded-md border transition-all"
                 :class="i === 0
-                  ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-emerald-200 dark:border-emerald-800 hover:shadow-md hover:shadow-emerald-500/10'
+                  ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
                   : 'bg-white dark:bg-slate-700/40 border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-slate-700'"
               >
                 <div class="flex items-start gap-3">
                   <div
-                    class="shrink-0 min-w-[3rem] h-8 flex items-center justify-center rounded-lg text-xs font-black tabular-nums"
+                    class="shrink-0 min-w-[3rem] h-8 flex items-center justify-center rounded-lg text-xs font-bold tabular-nums"
                     :class="i === 0
                       ? 'bg-emerald-500 text-white'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
@@ -535,7 +531,7 @@ onBeforeUnmount(() => {
                     {{ c.score }}%
                   </div>
                   <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-black text-slate-900 dark:text-white break-words leading-tight">{{ c.song.title }}</h4>
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white break-words leading-tight">{{ c.song.title }}</h4>
                     <p class="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">{{ c.song.artist }}</p>
                     <p v-if="c.song.genre" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ c.song.genre }}</p>
                   </div>
@@ -545,7 +541,7 @@ onBeforeUnmount(() => {
 
             <button
               @click="retry"
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-md border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
             >
               {{ t('ocrSearch.retry') }}
             </button>
@@ -553,7 +549,7 @@ onBeforeUnmount(() => {
 
           <!-- エラー -->
           <div v-else-if="status === 'error'" class="space-y-3">
-            <div class="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl">
+            <div class="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
               <div class="flex items-start gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -563,7 +559,7 @@ onBeforeUnmount(() => {
             </div>
             <button
               @click="retry"
-              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all"
+              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-md transition-all"
             >
               {{ t('ocrSearch.retry') }}
             </button>

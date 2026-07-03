@@ -139,7 +139,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="space-y-4">
     <!-- 注意書き -->
-    <div class="flex items-start gap-2.5 p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-xl">
+    <div class="flex items-start gap-2.5 p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-md">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -154,7 +154,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- ステータス -->
-    <div class="flex items-center justify-between p-3 rounded-xl border" :class="{
+    <div class="flex items-center justify-between p-3 rounded-md border" :class="{
       'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700': status === 'idle',
       'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800': status === 'initializing',
       'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800': status === 'monitoring',
@@ -179,15 +179,15 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- エラー -->
-    <div v-if="errorMessage" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-300">
+    <div v-if="errorMessage" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-300">
       {{ errorMessage }}
     </div>
 
     <!-- アップロードフィードバック -->
-    <div v-if="uploadingMessage" class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl text-sm text-green-700 dark:text-green-300 font-medium">
+    <div v-if="uploadingMessage" class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-300 font-medium">
       {{ uploadingMessage }}
     </div>
-    <div v-if="uploadErrorMessage" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-300">
+    <div v-if="uploadErrorMessage" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-300">
       {{ uploadErrorMessage }}
     </div>
 
@@ -195,7 +195,7 @@ onBeforeUnmount(() => {
       プレビュー領域。videoRef は常に同一要素を指すため、表示/非表示の切替は v-show で行う。
       v-if/v-else だと再マウントで ref が貼り替わり、start() が古い要素を掴んだまま走る不具合になる。
     -->
-    <div v-show="status !== 'idle' && status !== 'error'" class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-black">
+    <div v-show="status !== 'idle' && status !== 'error'" class="rounded-md overflow-hidden border border-slate-200 dark:border-slate-700 bg-black">
       <video ref="videoRef" autoplay muted playsinline class="w-full aspect-video object-contain" />
     </div>
 
@@ -203,14 +203,14 @@ onBeforeUnmount(() => {
     <button
       v-if="status === 'idle' || status === 'error'"
       @click="handleStart"
-      class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all"
+      class="w-full py-3 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-md transition-all"
     >
       {{ t('infinitas.start') }}
     </button>
     <button
       v-else
       @click="handleStop"
-      class="w-full py-3 bg-slate-700 dark:bg-slate-600 text-white font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-slate-500 transition-colors"
+      class="w-full py-3 bg-slate-700 dark:bg-slate-600 text-white font-bold rounded-md hover:bg-slate-800 dark:hover:bg-slate-500 transition-colors"
     >
       {{ t('infinitas.stop') }}
     </button>

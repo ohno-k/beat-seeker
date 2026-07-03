@@ -415,7 +415,7 @@ watch(() => props.rank, loadHistory);
   <Teleport to="body">
     <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="emit('close')"></div>
-      <div class="relative z-10 bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-3xl max-h-[90vh] flex flex-col">
+      <div class="relative z-10 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-3xl max-h-[90vh] flex flex-col">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">
             ☆{{ rank }} {{ t('table.growthChartTitle') }}

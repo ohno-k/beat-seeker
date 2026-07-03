@@ -2,7 +2,7 @@
   <div class="w-full space-y-6 animate-fade-in">
 
     <!-- 成長軌跡 -->
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{{ t('dashboard.title') }}</h2>
       <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">{{ t('dashboard.subtitle') }}</p>
 
@@ -11,7 +11,7 @@
         <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('dashboard.loading') }}</p>
       </div>
 
-      <div v-else-if="historyData.length === 0" class="py-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+      <div v-else-if="historyData.length === 0" class="py-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
         <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('dashboard.noData') }}<br/>{{ t('dashboard.noDataHint') }}</p>
       </div>
 
@@ -24,32 +24,32 @@
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             <div class="stat-card border-blue-100 dark:border-slate-600 bg-blue-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest mb-1">{{ t('dashboard.snapshot') }}</span>
-              <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ historyData.length }}</span>
+              <span class="text-[9px] font-bold text-blue-500 dark:text-blue-400 mb-1">{{ t('dashboard.snapshot') }}</span>
+              <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ historyData.length }}</span>
             </div>
             <div class="stat-card border-violet-100 dark:border-slate-600 bg-violet-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-violet-500 dark:text-violet-400 uppercase tracking-widest mb-1">{{ t('dashboard.latestBeatPt') }}</span>
-              <span class="text-xl font-black text-slate-700 dark:text-slate-200">{{ latestBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
+              <span class="text-[9px] font-bold text-violet-500 dark:text-violet-400 mb-1">{{ t('dashboard.latestBeatPt') }}</span>
+              <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ latestBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
             <div class="stat-card border-amber-100 dark:border-slate-600 bg-amber-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest mb-1">{{ t('dashboard.totalExScore') }}</span>
-              <span class="text-lg font-black text-slate-700 dark:text-slate-200">{{ latestTotalScore.toLocaleString() }}</span>
+              <span class="text-[9px] font-bold text-amber-500 dark:text-amber-400 mb-1">{{ t('dashboard.totalExScore') }}</span>
+              <span class="text-lg font-bold text-slate-700 dark:text-slate-200">{{ latestTotalScore.toLocaleString() }}</span>
             </div>
             <div class="stat-card border-yellow-100 dark:border-slate-600 bg-yellow-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest mb-1">{{ t('dashboard.latestAaa') }}</span>
-              <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ latestAaaCount }}</span>
+              <span class="text-[9px] font-bold text-yellow-600 dark:text-yellow-400 mb-1">{{ t('dashboard.latestAaa') }}</span>
+              <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ latestAaaCount }}</span>
             </div>
             <div class="stat-card border-emerald-100 dark:border-slate-600 bg-emerald-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest mb-1">{{ t('dashboard.latestFc') }}</span>
-              <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ latestFcCount }}</span>
+              <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 mb-1">{{ t('dashboard.latestFc') }}</span>
+              <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ latestFcCount }}</span>
             </div>
             <div class="stat-card border-purple-100 dark:border-slate-600 bg-purple-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-purple-500 dark:text-purple-400 uppercase tracking-widest mb-1">{{ t('dashboard.avgIncrease') }}</span>
-              <span class="text-xl font-black text-slate-700 dark:text-slate-200">{{ avgBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
+              <span class="text-[9px] font-bold text-purple-500 dark:text-purple-400 mb-1">{{ t('dashboard.avgIncrease') }}</span>
+              <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ avgBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
             <div class="stat-card border-indigo-100 dark:border-slate-600 bg-indigo-50/50 dark:bg-slate-700/50">
-              <span class="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1">{{ t('dashboard.maxIncrease') }}</span>
-              <span class="text-xl font-black text-slate-700 dark:text-slate-200">{{ maxBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
+              <span class="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 mb-1">{{ t('dashboard.maxIncrease') }}</span>
+              <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ maxBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
             </div>
           </div>
         </div>
@@ -87,28 +87,28 @@
     </div>
 
     <!-- スコア分析 -->
-    <div v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">{{ t('dashboard.analysis') }}</h2>
           <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('dashboard.analysisHint', { n: myScoresActive.length }) }}</p>
         </div>
         <div v-if="avgPgreatRate !== null" class="text-right">
-          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">{{ t('dashboard.avgPgreatRate') }}</span>
-          <span class="text-2xl font-black text-slate-700 dark:text-slate-200">{{ avgPgreatRate }}%</span>
+          <span class="text-[9px] font-bold text-slate-400 block">{{ t('dashboard.avgPgreatRate') }}</span>
+          <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ avgPgreatRate }}%</span>
         </div>
       </div>
 
       <!-- Level filter -->
       <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
-        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{{ t('dashboard.targetLevel') }}</span>
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('dashboard.targetLevel') }}</span>
         <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
           <button
             v-for="lvl in ['ALL', '11', '12']" :key="lvl"
             @click="selectedAnalysisLevel = lvl as 'ALL' | '11' | '12'"
             class="px-3 py-1 text-xs font-bold rounded-md transition-all"
             :class="selectedAnalysisLevel === lvl
-              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
           >{{ lvl === 'ALL' ? t('common.all') : `☆${lvl}` }}</button>
         </div>
@@ -150,7 +150,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
-                <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-black uppercase tracking-wide">
+                <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-bold">
                   <th class="pb-3 pl-2 text-left text-slate-400">{{ t('dashboard.rank') }}</th>
                   <th class="pb-3 text-center text-emerald-500">FC</th>
                   <th class="pb-3 text-center text-amber-500">EXH</th>
@@ -164,7 +164,7 @@
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
                 <tr v-for="row in informalRankStats" :key="row.rank" class="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
-                  <td class="py-2 pl-2 font-black text-slate-700 dark:text-slate-200">{{ row.rank }}</td>
+                  <td class="py-2 pl-2 font-bold text-slate-700 dark:text-slate-200">{{ row.rank }}</td>
                   <td class="py-2 text-center font-bold text-emerald-600 dark:text-emerald-400">{{ row.fc || '-' }}</td>
                   <td class="py-2 text-center font-bold text-amber-600 dark:text-amber-400">{{ row.exh || '-' }}</td>
                   <td class="py-2 text-center font-bold text-red-600 dark:text-red-400">{{ row.hard || '-' }}</td>
@@ -211,7 +211,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
-                <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-black uppercase text-slate-400">
+                <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-400">
                   <th class="pb-3 pl-2 text-left w-6">#</th>
                   <th class="pb-3 text-left">{{ t('table.colTitle') }}</th>
                   <th class="pb-3 text-center w-16">{{ t('dashboard.rank') }}</th>
@@ -230,7 +230,7 @@
                   <td class="py-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400">{{ s.informalRank || '-' }}</td>
                   <td class="py-2 text-center font-bold text-slate-600 dark:text-slate-300">{{ s.difficultyLevel }}</td>
                   <td class="py-2 text-right font-mono text-xs text-slate-600 dark:text-slate-300">{{ s.maxScore > 0 ? s.scoreRate.toFixed(2) + '%' : '-' }}</td>
-                  <td class="py-2 pr-2 text-right font-black text-violet-600 dark:text-violet-400 tabular-nums">{{ s.beatPt.toFixed(2) }}</td>
+                  <td class="py-2 pr-2 text-right font-bold text-violet-600 dark:text-violet-400 tabular-nums">{{ s.beatPt.toFixed(2) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -243,7 +243,7 @@
     <Teleport to="body">
       <div v-if="histModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="histModalOpen = false">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
+        <div class="relative bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
           <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
             <div>
               <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ histModalLabel }}</h3>
@@ -256,7 +256,7 @@
           <div class="overflow-y-auto flex-1">
             <table class="w-full text-sm">
               <thead class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
-                <tr class="text-xs font-black uppercase text-slate-400 tracking-wide">
+                <tr class="text-xs font-bold text-slate-400">
                   <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
                   <th class="pb-3 pt-3 text-center w-14">☆</th>
                   <th class="pb-3 pt-3 text-center w-14">{{ t('table.colInformal') }}</th>
@@ -298,7 +298,7 @@
     <Teleport to="body">
       <div v-if="tierModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="tierModalOpen = false">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
+        <div class="relative bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
           <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 dark:border-slate-700">
             <div class="min-w-0">
               <h3 class="font-bold text-slate-800 dark:text-slate-100 truncate">{{ tierModalLabel }}</h3>
@@ -323,7 +323,7 @@
           <div class="overflow-y-auto flex-1">
             <table class="w-full text-sm">
               <thead class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
-                <tr class="text-xs font-black uppercase text-slate-400 tracking-wide">
+                <tr class="text-xs font-bold text-slate-400">
                   <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
                   <th class="pb-3 pt-3 text-center w-14">☆</th>
                   <th class="pb-3 pt-3 text-center w-14">{{ t('table.colInformal') }}</th>
@@ -365,7 +365,7 @@
     </Teleport>
 
     <!-- URL 共有 -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -378,7 +378,7 @@
       <button
         type="button"
         @click="isShareModalOpen = true"
-        class="px-6 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all shadow-sm"
+        class="px-6 py-2.5 rounded-md font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all"
       >
         共有 URL を管理
       </button>
@@ -387,7 +387,7 @@
     <ShareTokenModal :is-open="isShareModalOpen" @close="isShareModalOpen = false" />
 
     <!-- 外部連携トークン -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
@@ -400,7 +400,7 @@
       <button
         type="button"
         @click="isIntegrationModalOpen = true"
-        class="px-6 py-2.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all shadow-sm"
+        class="px-6 py-2.5 rounded-md font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all"
       >
         連携トークンを管理
       </button>
@@ -409,7 +409,7 @@
     <IntegrationTokenModal :is-open="isIntegrationModalOpen" @close="isIntegrationModalOpen = false" />
 
     <!-- 通知設定 -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -424,7 +424,7 @@
         <button
           @click="handleEnableNotifications"
           :disabled="isSubscribing || notificationStatus === 'granted'"
-          class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 flex items-center gap-2 shadow-sm"
+          class="px-6 py-2.5 rounded-md font-bold text-sm transition-all duration-200 flex items-center gap-2"
           :class="notificationStatus === 'granted'
             ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default'
             : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95 disabled:opacity-50'"
@@ -1355,10 +1355,10 @@ const doughnutOpts = computed(() => ({
   @apply flex items-center gap-2 mb-4;
 }
 .stat-card {
-  @apply p-3 rounded-xl border flex flex-col items-center text-center transition-colors duration-200;
+  @apply p-3 rounded-md border flex flex-col items-center text-center transition-colors duration-200;
 }
 .chart-card {
-  @apply bg-slate-50 dark:bg-slate-700/20 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50;
+  @apply bg-slate-50 dark:bg-slate-700/20 p-4 rounded-md border border-slate-100 dark:border-slate-700/50;
 }
 .chart-title {
   @apply font-bold text-slate-700 dark:text-slate-200 text-sm mb-3;

@@ -128,13 +128,13 @@ function currentPos(chain: SkillChain): number {
   <div class="w-full max-w-5xl mx-auto">
     <!-- ヘッダー -->
     <div class="mb-6 flex items-center gap-3">
-      <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+      <div class="w-10 h-10 bg-indigo-600 rounded-md flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       </div>
       <div>
-        <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">SKILL TREE</h1>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">SKILL TREE</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('skillTree.subtitle') }}</p>
       </div>
       <!-- 統計 -->
@@ -149,7 +149,7 @@ function currentPos(chain: SkillChain): number {
       <p class="text-slate-500 dark:text-slate-400 font-medium">スキルツリーを生成中...</p>
     </div>
 
-    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-6 text-center">
       <p class="text-red-600 dark:text-red-400 font-medium">{{ error }}</p>
       <button @click="fetchData" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold">リトライ</button>
     </div>
@@ -160,12 +160,12 @@ function currentPos(chain: SkillChain): number {
       <section v-for="chain in multiChains" :key="chain.categoryId">
         <!-- セクションヘッダー: 到達先の譜面名 -->
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-black leading-none"
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[10px] font-bold leading-none"
                :class="chainColor(chain).badge">
             {{ chain.categoryDescription }}
           </div>
           <div class="flex-1 min-w-0">
-            <h2 class="text-base font-black text-slate-900 dark:text-white truncate">{{ chain.categoryLabel }}</h2>
+            <h2 class="text-base font-bold text-slate-900 dark:text-white truncate">{{ chain.categoryLabel }}</h2>
             <p class="text-[11px] text-slate-400 dark:text-slate-500">{{ chain.totalInCategory }} ステップ</p>
           </div>
         </div>
@@ -189,7 +189,7 @@ function currentPos(chain: SkillChain): number {
 
             <!-- ノードカード: 難易度・曲名・ノーツ数・クリアランク・NEXTバッジ。クリックで詳細展開 -->
             <div
-              class="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all cursor-pointer hover:shadow-sm text-sm"
+              class="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all cursor-pointer hover:border-slate-300 dark:hover:border-slate-500 text-sm"
               :class="[
                 prog(node.textage)?.clearRank >= 2
                   ? `bg-white dark:bg-slate-800/80 ${clearBorders[prog(node.textage)!.bestClear] || 'border-slate-200 dark:border-slate-700'} border-l-2`
@@ -199,16 +199,16 @@ function currentPos(chain: SkillChain): number {
               ]"
               @click="selectedNode = selectedNode === node.textage ? null : node.textage"
             >
-              <span class="text-[11px] font-black text-slate-400 dark:text-slate-500 w-7 flex-shrink-0">
+              <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 w-7 flex-shrink-0">
                 {{ diffLabel(node.difficulty) }}{{ node.level || '?' }}
               </span>
               <span class="font-medium text-slate-800 dark:text-slate-200 truncate flex-1 text-xs">{{ node.title }}</span>
               <span class="text-[10px] text-slate-400 dark:text-slate-500 flex-shrink-0">{{ node.notes }}n</span>
-              <span v-if="prog(node.textage)" class="text-[10px] font-black flex-shrink-0 w-12 text-right" :class="clearColors[prog(node.textage)!.bestClear]">
+              <span v-if="prog(node.textage)" class="text-[10px] font-bold flex-shrink-0 w-12 text-right" :class="clearColors[prog(node.textage)!.bestClear]">
                 {{ clearLabel(prog(node.textage)!.bestClear) }}
               </span>
               <span v-else class="text-[10px] text-slate-400 dark:text-slate-600 w-12 text-right flex-shrink-0">—</span>
-              <span v-if="idx === currentPos(chain) + 1 && isLoggedIn" class="px-1.5 py-0.5 bg-indigo-500 text-white text-[9px] font-black rounded uppercase flex-shrink-0">
+              <span v-if="idx === currentPos(chain) + 1 && isLoggedIn" class="px-1.5 py-0.5 bg-indigo-500 text-white text-[9px] font-bold rounded flex-shrink-0">
                 NEXT
               </span>
             </div>
@@ -217,9 +217,9 @@ function currentPos(chain: SkillChain): number {
 
         <!-- 展開された詳細: BPM・ノーツ・皿割合など追加情報を表示 -->
         <template v-for="node in chain.nodes" :key="'detail-' + node.textage">
-          <div v-if="selectedNode === node.textage" class="ml-6 mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+          <div v-if="selectedNode === node.textage" class="ml-6 mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-md border border-slate-200 dark:border-slate-700 text-xs">
             <div class="flex items-center gap-2 mb-2">
-              <span class="font-black text-slate-800 dark:text-white text-sm">{{ node.title }}</span>
+              <span class="font-bold text-slate-800 dark:text-white text-sm">{{ node.title }}</span>
               <span class="text-slate-400">{{ node.artist }}</span>
             </div>
             <div class="flex flex-wrap gap-2 mb-2">
@@ -257,15 +257,15 @@ function currentPos(chain: SkillChain): number {
           <div
             v-for="chain in independentCharts"
             :key="chain.categoryId"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-white/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/40 text-sm cursor-pointer hover:shadow-sm transition-all"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-white/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/40 text-sm cursor-pointer hover:border-slate-300 dark:hover:border-slate-500 transition-all"
             @click="selectedNode = selectedNode === chain.nodes[0].textage ? null : chain.nodes[0].textage"
           >
-            <span class="text-[10px] font-black px-1 py-0.5 rounded text-white" :class="levelColor(chain.nodes[0].level).badge">
+            <span class="text-[10px] font-bold px-1 py-0.5 rounded text-white" :class="levelColor(chain.nodes[0].level).badge">
               {{ diffLabel(chain.nodes[0].difficulty) }}{{ chain.nodes[0].level || '?' }}
             </span>
             <span class="font-medium text-slate-800 dark:text-slate-200 truncate flex-1 text-xs">{{ chain.nodes[0].title }}</span>
             <span class="text-[10px] text-slate-400 dark:text-slate-500 flex-shrink-0">{{ chain.nodes[0].notes }}n</span>
-            <span v-if="prog(chain.nodes[0].textage)" class="text-[10px] font-black flex-shrink-0" :class="clearColors[prog(chain.nodes[0].textage)!.bestClear]">
+            <span v-if="prog(chain.nodes[0].textage)" class="text-[10px] font-bold flex-shrink-0" :class="clearColors[prog(chain.nodes[0].textage)!.bestClear]">
               {{ clearLabel(prog(chain.nodes[0].textage)!.bestClear) }}
             </span>
           </div>
@@ -273,9 +273,9 @@ function currentPos(chain: SkillChain): number {
 
         <!-- 独立譜面クリック時の詳細展開 -->
         <template v-for="chain in independentCharts" :key="'ind-detail-' + chain.categoryId">
-          <div v-if="selectedNode === chain.nodes[0].textage" class="mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+          <div v-if="selectedNode === chain.nodes[0].textage" class="mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-md border border-slate-200 dark:border-slate-700 text-xs">
             <div class="flex items-center gap-2 mb-2">
-              <span class="font-black text-slate-800 dark:text-white text-sm">{{ chain.nodes[0].title }}</span>
+              <span class="font-bold text-slate-800 dark:text-white text-sm">{{ chain.nodes[0].title }}</span>
               <span class="text-slate-400">{{ chain.nodes[0].artist }}</span>
             </div>
             <div class="flex flex-wrap gap-2">

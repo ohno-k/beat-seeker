@@ -410,7 +410,7 @@ function contributionPct(r: RefItem): number {
 const accentClasses = computed(() => props.mode === 'strength'
   ? {
       btnBg: 'bg-emerald-600',
-      headerBg: 'from-emerald-600 to-teal-600',
+      headerBg: 'bg-emerald-600',
       ring: 'ring-emerald-500',
       activeBg: 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500',
       pillBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
@@ -418,7 +418,7 @@ const accentClasses = computed(() => props.mode === 'strength'
     }
   : {
       btnBg: 'bg-cyan-600',
-      headerBg: 'from-cyan-600 to-sky-600',
+      headerBg: 'bg-cyan-600',
       ring: 'ring-cyan-500',
       activeBg: 'bg-cyan-50 dark:bg-cyan-900/30 border-cyan-500',
       pillBg: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
@@ -432,10 +432,10 @@ const accentClasses = computed(() => props.mode === 'strength'
       class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 animate-fade-in"
       @click.self="emit('close')"
     >
-      <div class="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-none sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border border-slate-200 dark:border-slate-800">
+      <div class="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-none sm:rounded-md shadow-xl flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border border-slate-200 dark:border-slate-800">
 
         <!-- ヘッダー -->
-        <div class="relative bg-gradient-to-r px-4 sm:px-6 py-3 sm:py-4 shrink-0" :class="accentClasses.headerBg">
+        <div class="relative px-4 sm:px-6 py-3 sm:py-4 shrink-0" :class="accentClasses.headerBg">
           <button
             @click="emit('close')"
             class="absolute top-2 right-2 p-2 group z-50"
@@ -448,10 +448,10 @@ const accentClasses = computed(() => props.mode === 'strength'
             </div>
           </button>
           <div class="pr-10">
-            <p class="text-[10px] sm:text-xs font-black text-white/80 uppercase tracking-widest">{{ t('potentialDetails.title') }}</p>
-            <h2 class="text-base sm:text-lg font-black text-white tracking-tight leading-tight truncate">{{ targetTitle }}</h2>
+            <p class="text-[10px] sm:text-xs font-bold text-white/80">{{ t('potentialDetails.title') }}</p>
+            <h2 class="text-base sm:text-lg font-bold text-white tracking-tight leading-tight truncate">{{ targetTitle }}</h2>
             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-white/20 text-white">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">
                 {{ diffShort(targetDifficultyName) }} {{ targetDifficultyLevel }}
               </span>
               <span v-if="targetSupportCount != null" class="text-[10px] font-bold text-white/80">
@@ -477,10 +477,10 @@ const accentClasses = computed(() => props.mode === 'strength'
             <!-- 左カラム: 参照譜面リスト -->
             <div class="p-3 sm:p-4 md:overflow-y-auto md:max-h-[calc(92vh-120px)]">
               <div class="flex items-baseline justify-between mb-3">
-                <p class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400">
                   {{ t('potentialDetails.refsListLabel') }}
                 </p>
-                <span v-if="!isLoadingRefs" class="text-[10px] font-black text-slate-400">
+                <span v-if="!isLoadingRefs" class="text-[10px] font-bold text-slate-400">
                   {{ t('potentialDetails.refsCount', { n: visibleRefs.length }) }}
                 </span>
               </div>
@@ -508,17 +508,17 @@ const accentClasses = computed(() => props.mode === 'strength'
                   <button
                     type="button"
                     @click="pickRef(r)"
-                    class="w-full text-left p-2.5 rounded-xl border-2 transition-colors active:scale-[0.99]"
+                    class="w-full text-left p-2.5 rounded-md border-2 transition-colors active:scale-[0.99]"
                     :class="selectedRef && selectedRef.title === r.title && selectedRef.difficultyName === r.difficultyName
                       ? accentClasses.activeBg
                       : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'"
                   >
-                    <p class="font-black text-slate-900 dark:text-white text-sm leading-tight truncate">{{ r.title }}</p>
+                    <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{{ r.title }}</p>
                     <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-black" :class="diffBadgeClass(r.difficultyName)">
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="diffBadgeClass(r.difficultyName)">
                         {{ diffShort(r.difficultyName) }} {{ r.difficultyLevel }}
                       </span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-black" :class="accentClasses.pillBg">
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="accentClasses.pillBg">
                         |r| {{ Math.abs(r.r).toFixed(3) }}
                       </span>
                       <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
@@ -530,7 +530,7 @@ const accentClasses = computed(() => props.mode === 'strength'
                         {{ t('potentialDetails.actualA') }}: {{ r.actualA.toLocaleString() }}
                         <template v-if="r.notesA"> ({{ ((r.actualA / (r.notesA * 2)) * 100).toFixed(2) }}%)</template>
                       </span>
-                      <span class="text-[10px] font-black text-slate-700 dark:text-slate-200">
+                      <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">
                         {{ t('potentialDetails.contribution') }} {{ contributionPct(r).toFixed(2) }}%
                       </span>
                     </div>
@@ -545,7 +545,7 @@ const accentClasses = computed(() => props.mode === 'strength'
 
             <!-- 右カラム: 散布図 -->
             <div ref="scatterSectionRef" class="p-3 sm:p-4 md:overflow-y-auto md:max-h-[calc(92vh-120px)]">
-              <p class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">
+              <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3">
                 {{ t('potentialDetails.scatterLabel') }}
               </p>
 
@@ -555,15 +555,15 @@ const accentClasses = computed(() => props.mode === 'strength'
               </div>
 
               <template v-else>
-                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+                <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
                   <!-- メタ情報: 選択中の A と相関係数 -->
                   <div class="mb-3">
-                    <p class="font-black text-slate-900 dark:text-white text-sm leading-tight truncate">{{ selectedRef.title }}</p>
+                    <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{{ selectedRef.title }}</p>
                     <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-black" :class="diffBadgeClass(selectedRef.difficultyName)">
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="diffBadgeClass(selectedRef.difficultyName)">
                         {{ diffShort(selectedRef.difficultyName) }} {{ selectedRef.difficultyLevel }}
                       </span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-black" :class="accentClasses.pillBg">
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="accentClasses.pillBg">
                         r = {{ selectedRef.r.toFixed(3) }}
                       </span>
                       <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">

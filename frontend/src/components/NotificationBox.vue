@@ -88,9 +88,9 @@ const notificationIcon = (type: string) => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed top-16 right-2 w-80 max-w-[calc(100vw-1rem)] mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+  <div v-if="isOpen" class="fixed top-16 right-2 w-80 max-w-[calc(100vw-1rem)] mt-2 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
     <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-      <h4 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">通知</h4>
+      <h4 class="text-sm font-bold text-slate-800 dark:text-white">通知</h4>
       <div class="flex items-center gap-2">
         <button v-if="activeTab === 'app' && unreadAppCount > 0" @click="handleMarkAllRead" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 transition-colors px-2 py-0.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30">
           全て既読
@@ -112,7 +112,7 @@ const notificationIcon = (type: string) => {
       >
         <span class="relative">
           フレンド申請
-          <span v-if="pendingRequests.length > 0" class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white text-[9px] font-black rounded-full">{{ pendingRequests.length }}</span>
+          <span v-if="pendingRequests.length > 0" class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white text-[9px] font-bold rounded-full">{{ pendingRequests.length }}</span>
         </span>
         <div v-if="activeTab === 'friend'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
       </button>
@@ -123,7 +123,7 @@ const notificationIcon = (type: string) => {
       >
         <span class="relative">
           アクティビティ
-          <span v-if="unreadAppCount > 0" class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full">{{ unreadAppCount }}</span>
+          <span v-if="unreadAppCount > 0" class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full">{{ unreadAppCount }}</span>
         </span>
         <div v-if="activeTab === 'app'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
       </button>
@@ -159,7 +159,7 @@ const notificationIcon = (type: string) => {
               </div>
               <div class="flex gap-2 pl-11">
                 <button @click="handleAccept(req.id)" :disabled="isActionLoading === req.id"
-                  class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition-all shadow-sm">
+                  class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition-all">
                   承認
                 </button>
                 <button @click="handleReject(req.id)" :disabled="isActionLoading === req.id"

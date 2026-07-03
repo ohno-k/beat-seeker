@@ -132,12 +132,12 @@ const formatDate = (dateString: string) => {
 <template>
   <Teleport to="body">
     <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" @mousedown.self="emit('close')">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div class="bg-white dark:bg-slate-800 rounded-md w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
       
       <!-- ヘッダー（曲名 + 難易度バッジ + ×ボタン） -->
       <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
         <div>
-          <h2 class="text-lg font-black text-slate-800 dark:text-white flex items-center gap-2">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <span class="text-xs px-2 py-0.5 rounded font-bold"
                   :class="difficultyName === 'LEGGENDARIA' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'">
               {{ difficultyName === 'LEGGENDARIA' ? 'LEG' : 'ANO' }}
@@ -167,7 +167,7 @@ const formatDate = (dateString: string) => {
               <RankIcon v-if="comment.totalBeatPt !== undefined" :rank-name="getRankInfo(comment.totalBeatPt).name" :tier="getRankInfo(comment.totalBeatPt).tier" size="sm" disable-party />
               <span class="text-slate-400 dark:text-slate-500">{{ formatDate(comment.createdAt) }}</span>
             </div>
-            <div class="bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 px-4 py-3 rounded-2xl rounded-tl-sm w-fit max-w-[90%] whitespace-pre-wrap text-sm leading-relaxed">
+            <div class="bg-slate-100 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 px-4 py-3 rounded-md rounded-tl-sm w-fit max-w-[90%] whitespace-pre-wrap text-sm leading-relaxed">
               {{ comment.content }}
             </div>
           </div>
@@ -178,7 +178,7 @@ const formatDate = (dateString: string) => {
       <div class="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
         <div v-if="errorMsg" class="mb-2 text-xs text-red-500 dark:text-red-400 px-2">{{ errorMsg }}</div>
         
-        <div v-if="!isLoggedIn" class="text-sm text-center py-3 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-200 dark:border-amber-700/50 font-medium">
+        <div v-if="!isLoggedIn" class="text-sm text-center py-3 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-md border border-amber-200 dark:border-amber-700/50 font-medium">
           ログインするとコメントを投稿できます
         </div>
         
@@ -186,14 +186,14 @@ const formatDate = (dateString: string) => {
           <textarea
             v-model="newComment"
             placeholder="意見や議論を書き込む..."
-            class="flex-1 min-h-[44px] max-h-32 px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            class="flex-1 min-h-[44px] max-h-32 px-4 py-3 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             @keydown.enter.ctrl.prevent="submitComment"
             rows="1"
           ></textarea>
           <button
             @click="submitComment"
             :disabled="!newComment.trim() || isSubmitting"
-            class="shrink-0 h-11 px-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold rounded-xl transition-colors disabled:cursor-not-allowed flex items-center gap-2"
+            class="shrink-0 h-11 px-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold rounded-md transition-colors disabled:cursor-not-allowed flex items-center gap-2"
           >
             <span>送信</span>
           </button>

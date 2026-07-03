@@ -71,7 +71,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
 
     <div
       v-else-if="!view"
-      class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center"
+      class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-md p-6 text-center"
     >
       <p class="text-lg font-bold text-rose-700 dark:text-rose-300">対戦表が見つかりません</p>
       <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">
@@ -82,10 +82,10 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
     <div v-else class="max-w-5xl mx-auto space-y-6">
       <!-- ヘッダ -->
       <div>
-        <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">SPECTATOR</p>
+        <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">SPECTATOR</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
-          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ view.competition.name }}</h1>
-          <span class="text-[10px] font-black px-2 py-0.5 rounded bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 tracking-wider">観戦</span>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">{{ view.competition.name }}</h1>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">観戦</span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           ステータス <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
@@ -94,12 +94,12 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
 
       <!-- 対戦表 -->
       <section class="space-y-4">
-        <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">
+        <p class="text-xs font-bold text-slate-500">
           対戦表 ({{ sortedMatchups.length }} 組)
         </p>
         <p
           v-if="sortedMatchups.length === 0"
-          class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl"
+          class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
         >
           まだ公開された対戦はありません。<br />主催が対戦を設定すると表示されます。
         </p>
@@ -107,7 +107,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
         <div
           v-for="mu in sortedMatchups"
           :key="mu.matchupId"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden"
         >
           <!-- matchup ヘッダ -->
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
@@ -116,7 +116,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
               <span class="text-slate-400 font-mono text-xs">vs</span>
               <span :class="teamColorClass(mu.teamB?.teamName)">{{ mu.teamB?.teamName ?? '?' }}</span>
             </p>
-            <p class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
+            <p class="text-[10px] font-mono text-slate-400">
               {{ mu.isFinals ? 'FINALS' : '予選第 ' + mu.matchupOrder + ' 試合' }}
             </p>
           </div>
@@ -133,14 +133,14 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
                 <p class="text-[10px] font-mono text-slate-400">{{ KIND_LV[match.matchKind] }}</p>
                 <span
                   v-if="match.requiredGenre"
-                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider"
+                  class="inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded"
                   :class="genreBadgeClass(match.requiredGenre)"
                 >
                   指定 {{ match.requiredGenre }}
                 </span>
                 <span
                   v-else
-                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
+                  class="inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
                 >
                   ジャンル未指定
                 </span>
@@ -148,7 +148,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
 
               <!-- A 側 -->
               <div>
-                <p class="text-[10px] font-mono uppercase tracking-wider mb-1 font-bold" :class="teamColorClass(mu.teamA?.teamName)">
+                <p class="text-[10px] font-mono mb-1 font-bold" :class="teamColorClass(mu.teamA?.teamName)">
                   {{ mu.teamA?.teamName ?? 'A 側' }}
                 </p>
                 <p
@@ -168,7 +168,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
 
               <!-- B 側 -->
               <div>
-                <p class="text-[10px] font-mono uppercase tracking-wider mb-1 font-bold" :class="teamColorClass(mu.teamB?.teamName)">
+                <p class="text-[10px] font-mono mb-1 font-bold" :class="teamColorClass(mu.teamB?.teamName)">
                   {{ mu.teamB?.teamName ?? 'B 側' }}
                 </p>
                 <p

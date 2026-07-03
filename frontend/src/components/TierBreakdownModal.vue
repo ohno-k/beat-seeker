@@ -4,10 +4,10 @@
       <!-- ヘッダー -->
       <div class="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
         <div>
-          <h3 class="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">
+          <h3 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">
             {{ side === 'kenban' ? 'KENBAN-TIER' : 'SARA-TIER' }} 貢献度
           </h3>
-          <p class="text-[10px] font-bold mt-0.5 uppercase tracking-widest" :class="side === 'kenban' ? 'text-cyan-500 dark:text-cyan-400' : 'text-orange-500 dark:text-orange-400'">
+          <p class="text-[10px] font-bold mt-0.5" :class="side === 'kenban' ? 'text-cyan-500 dark:text-cyan-400' : 'text-orange-500 dark:text-orange-400'">
             全譜面から{{ side === 'kenban' ? '鍵盤' : '皿' }}側貢献の上位 100 譜面
           </p>
         </div>
@@ -22,34 +22,34 @@
       <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50 transition-colors duration-200 p-4 sm:p-8">
         <!-- サマリ・統計 -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">合計 pt</p>
-            <p class="text-xl sm:text-2xl font-black tabular-nums" :class="side === 'kenban' ? 'text-cyan-600 dark:text-cyan-300' : 'text-orange-600 dark:text-orange-300'">
+          <div class="bg-white dark:bg-slate-800 rounded-md p-4 border border-slate-200 dark:border-slate-700">
+            <p class="text-[10px] font-bold text-slate-400 mb-1">合計 pt</p>
+            <p class="text-xl sm:text-2xl font-bold tabular-nums" :class="side === 'kenban' ? 'text-cyan-600 dark:text-cyan-300' : 'text-orange-600 dark:text-orange-300'">
               {{ totalPoints.toFixed(1) }}
             </p>
           </div>
-          <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">対 BEAT 比</p>
-            <p class="text-xl sm:text-2xl font-black tabular-nums text-slate-700 dark:text-slate-200">
+          <div class="bg-white dark:bg-slate-800 rounded-md p-4 border border-slate-200 dark:border-slate-700">
+            <p class="text-[10px] font-bold text-slate-400 mb-1">対 BEAT 比</p>
+            <p class="text-xl sm:text-2xl font-bold tabular-nums text-slate-700 dark:text-slate-200">
               {{ (totalPoints / (beatTotalPoints || 1) * 100).toFixed(1) }}<span class="text-sm font-bold text-slate-400 ml-0.5">%</span>
             </p>
           </div>
-          <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">対象譜面</p>
-            <p class="text-xl sm:text-2xl font-black tabular-nums text-slate-700 dark:text-slate-200">
+          <div class="bg-white dark:bg-slate-800 rounded-md p-4 border border-slate-200 dark:border-slate-700">
+            <p class="text-[10px] font-bold text-slate-400 mb-1">対象譜面</p>
+            <p class="text-xl sm:text-2xl font-bold tabular-nums text-slate-700 dark:text-slate-200">
               {{ contributions.length }}<span class="text-sm font-bold text-slate-400 ml-0.5">譜面</span>
             </p>
           </div>
-          <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">平均皿率</p>
-            <p class="text-xl sm:text-2xl font-black tabular-nums text-slate-700 dark:text-slate-200">
+          <div class="bg-white dark:bg-slate-800 rounded-md p-4 border border-slate-200 dark:border-slate-700">
+            <p class="text-[10px] font-bold text-slate-400 mb-1">平均皿率</p>
+            <p class="text-xl sm:text-2xl font-bold tabular-nums text-slate-700 dark:text-slate-200">
               {{ avgScratchPct.toFixed(1) }}<span class="text-sm font-bold text-slate-400 ml-0.5">%</span>
             </p>
           </div>
         </div>
 
         <!-- 解説 -->
-        <div class="bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 mb-6 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div class="bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-md p-4 mb-6 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
           <p class="font-bold mb-1 text-slate-700 dark:text-slate-200">計算方法</p>
           <ul class="list-disc list-inside space-y-0.5">
             <li>全プレイ譜面それぞれの BEAT-PT に「{{ side === 'kenban' ? `鍵盤側重み = 1 − 皿率/${threshold}%` : `皿側重み = 皿率/${threshold}%` }}」を掛けた値が <span class="font-bold">貢献 pt</span></li>
@@ -60,11 +60,11 @@
         </div>
 
         <!-- ランクアップ候補（次に伸ばすべき譜面）-->
-        <div v-if="suggestions.length > 0" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
+        <div v-if="suggestions.length > 0" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
           <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between flex-wrap gap-2"
                :class="side === 'kenban' ? 'bg-cyan-50/50 dark:bg-cyan-900/10' : 'bg-orange-50/50 dark:bg-orange-900/10'">
             <div>
-              <p class="text-xs sm:text-sm font-black uppercase tracking-widest"
+              <p class="text-xs sm:text-sm font-bold"
                  :class="side === 'kenban' ? 'text-cyan-700 dark:text-cyan-300' : 'text-orange-700 dark:text-orange-300'">
                 次に伸ばすと {{ side === 'kenban' ? 'KENBAN' : 'SARA' }}-TIER が上がる譜面
               </p>
@@ -75,7 +75,7 @@
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-xs sm:text-sm">
-              <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-[10px] uppercase tracking-widest text-slate-400 font-bold">
+              <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-[10px] text-slate-400 font-bold">
                 <tr>
                   <th class="px-3 py-2 text-left w-8">#</th>
                   <th class="px-3 py-2 text-left">曲名</th>
@@ -121,10 +121,10 @@
 
         <!-- ソート切替 -->
         <div class="flex items-center gap-2 mb-3 flex-wrap">
-          <span class="text-[11px] font-bold uppercase tracking-widest text-slate-400">並び順:</span>
+          <span class="text-[11px] font-bold text-slate-400">並び順:</span>
           <button v-for="opt in sortOptions" :key="opt.key"
                   @click="sortKey = opt.key"
-                  :class="['px-3 py-1 text-xs font-bold rounded-full transition-colors',
+                  :class="['px-3 py-1 text-xs font-bold rounded transition-colors',
                            sortKey === opt.key
                              ? (side === 'kenban' ? 'bg-cyan-500 text-white' : 'bg-orange-500 text-white')
                              : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700']">
@@ -133,10 +133,10 @@
         </div>
 
         <!-- リスト -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-xs sm:text-sm">
-              <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-[10px] uppercase tracking-widest text-slate-400 font-bold">
+              <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-[10px] text-slate-400 font-bold">
                 <tr>
                   <th class="px-3 py-2 text-left w-10">#</th>
                   <th class="px-3 py-2 text-left">曲名</th>

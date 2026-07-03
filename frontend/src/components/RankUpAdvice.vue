@@ -2,7 +2,7 @@
   <!-- Rank up suggestion panel -->
   <div
     v-if="nextRankGap > 0"
-    class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200"
+    class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200"
   >
     <div class="flex items-center justify-between mb-1">
       <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -32,12 +32,12 @@
       <div
         v-for="(sug, i) in suggestions"
         :key="i"
-        class="flex items-center gap-2 p-2 sm:p-3 rounded-xl border transition-colors"
+        class="flex items-center gap-2 p-2 sm:p-3 rounded-md border transition-colors"
         :class="sug.crossesBorder
           ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50'
           : 'bg-slate-50/50 dark:bg-slate-700/20 border-slate-100 dark:border-slate-700/50'"
       >
-        <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
+        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5 min-w-0">
             <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.song.title }}</p>
@@ -49,7 +49,7 @@
         </div>
         <div class="text-right shrink-0">
           <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">{{ sug.targetLabel }}</p>
-          <p class="text-xs font-black text-slate-700 dark:text-slate-200">
+          <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
             {{ t('advice.scoreIncrease', { n: sug.scoreIncrease.toLocaleString() }) }}
           </p>
           <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">→ {{ sug.newScoreRate.toFixed(2) }}%</p>
@@ -61,24 +61,24 @@
     <!-- Total summary -->
     <div
       v-if="suggestions.length > 0"
-      class="mt-4 p-3 rounded-xl border-2 flex items-center justify-between"
+      class="mt-4 p-3 rounded-md border-2 flex items-center justify-between"
       :class="totalSuggestionGain >= nextRankGap
         ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700'
         : 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700'"
     >
       <div>
-        <p class="text-[10px] font-bold uppercase tracking-wider"
+        <p class="text-[10px] font-bold"
           :class="totalSuggestionGain >= nextRankGap ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'">
           {{ totalSuggestionGain >= nextRankGap ? t('common.achievable') : t('common.shortfall') }}
         </p>
-        <p class="text-lg font-black"
+        <p class="text-lg font-bold"
           :class="totalSuggestionGain >= nextRankGap ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'">
           {{ t('common.total') }} +{{ totalSuggestionGain.toFixed(1) }} pt
         </p>
       </div>
       <div class="text-right text-xs font-bold text-slate-500 dark:text-slate-400">
         <p>{{ t('advice.goal') }}</p>
-        <p class="text-sm font-black text-slate-700 dark:text-slate-200">+{{ nextRankGap.toFixed(1) }} pt</p>
+        <p class="text-sm font-bold text-slate-700 dark:text-slate-200">+{{ nextRankGap.toFixed(1) }} pt</p>
       </div>
     </div>
   </div>

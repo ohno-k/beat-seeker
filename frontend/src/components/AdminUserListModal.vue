@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[100] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm" @click.self="$emit('close')">
-      <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh] animate-fade-in border border-slate-200 dark:border-slate-800">
+      <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-md shadow-xl flex flex-col overflow-hidden max-h-[85vh] animate-fade-in border border-slate-200 dark:border-slate-800">
         
         <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -101,14 +101,14 @@
             <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
             <p class="text-slate-500 font-medium tracking-wide">ユーザー一覧を取得中...</p>
           </div>
-          <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 mb-4">
+          <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-md border border-red-200 mb-4">
             {{ error }}
           </div>
-          
-          <div v-if="recalculateError" class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 mb-4">
+
+          <div v-if="recalculateError" class="bg-red-50 text-red-700 p-4 rounded-md border border-red-200 mb-4">
             {{ recalculateError }}
           </div>
-          <div v-if="recalculateSuccess" class="bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 mb-4">
+          <div v-if="recalculateSuccess" class="bg-green-50 text-green-700 p-4 rounded-md border border-green-200 mb-4">
             {{ recalculateSuccess }}
           </div>
 
@@ -117,10 +117,10 @@
               v-for="u in users" 
               :key="u.id" 
               @click="selectUser(u)"
-              class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md transition-all group"
+              class="bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-all group"
             >
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shrink-0">
+                <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold shrink-0">
                   {{ u.displayName ? u.displayName.charAt(0).toUpperCase() : 'U' }}
                 </div>
                 <div class="flex flex-col overflow-hidden">

@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
       v-if="visible"
       type="button"
       :aria-label="t('a11y.backToTop')"
-      class="fixed bottom-20 right-4 z-40 w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-0.5 active:scale-95 transition-all"
+      class="fixed bottom-20 right-4 z-40 w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 active:scale-95 transition-all"
       @click="scrollToTop"
     >
       <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

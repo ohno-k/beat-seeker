@@ -635,24 +635,24 @@ const selectedFriend = computed(() =>
   <div class="min-h-screen bg-slate-50 dark:bg-slate-900 pb-12">
 
     <!-- スティッキーなフィルタバー: 画面上端に固定されタイトルとLv.11/12トグルを表示 -->
-    <div class="sticky top-0 z-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <div class="sticky top-0 z-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
       <div class="px-4 py-3 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
           </svg>
-          <span class="font-black text-slate-800 dark:text-white text-sm tracking-wide">{{ t('arcade.title') }}</span>
+          <span class="font-bold text-slate-800 dark:text-white text-sm">{{ t('arcade.title') }}</span>
         </div>
 
         <!-- レベル絞り込みチェックボックス -->
         <div class="flex items-center gap-3">
           <label class="flex items-center gap-1 cursor-pointer select-none">
             <input type="checkbox" v-model="showLv11" class="w-4 h-4 rounded accent-violet-500 cursor-pointer" />
-            <span class="text-xs font-black" :class="showLv11 ? 'text-violet-600 dark:text-violet-400' : 'text-slate-400'">Lv.11</span>
+            <span class="text-xs font-bold" :class="showLv11 ? 'text-violet-600 dark:text-violet-400' : 'text-slate-400'">Lv.11</span>
           </label>
           <label class="flex items-center gap-1 cursor-pointer select-none">
             <input type="checkbox" v-model="showLv12" class="w-4 h-4 rounded accent-violet-500 cursor-pointer" />
-            <span class="text-xs font-black" :class="showLv12 ? 'text-violet-600 dark:text-violet-400' : 'text-slate-400'">Lv.12</span>
+            <span class="text-xs font-bold" :class="showLv12 ? 'text-violet-600 dark:text-violet-400' : 'text-slate-400'">Lv.12</span>
           </label>
         </div>
       </div>
@@ -670,72 +670,72 @@ const selectedFriend = computed(() =>
 
         <!-- モード選択: 2x2 グリッド。同じモード再クリックで null に戻す -->
         <div>
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">{{ t('arcade.chooseGoal') }}</p>
+          <p class="text-[10px] font-bold text-slate-400 mb-3">{{ t('arcade.chooseGoal') }}</p>
           <div class="grid grid-cols-2 gap-3">
 
             <!-- BEAT-PT ボタン（紫） -->
             <button
               @click="mode = mode === 'beat-pt' ? null : 'beat-pt'"
-              class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
               :class="mode === 'beat-pt'
-                ? 'bg-violet-600 border-violet-600 text-white shadow-lg shadow-violet-200 dark:shadow-violet-900'
+                ? 'bg-violet-600 border-violet-600 text-white'
                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
             >
               <span class="text-2xl mb-1">⭐</span>
-              <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.beatPtBtn') }}</span>
+              <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.beatPtBtn') }}</span>
             </button>
 
             <!-- RATE-PT ボタン（藍） -->
             <button
               @click="mode = mode === 'rate-pt' ? null : 'rate-pt'"
-              class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
               :class="mode === 'rate-pt'
-                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900'
+                ? 'bg-indigo-600 border-indigo-600 text-white'
                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
             >
               <span class="text-2xl mb-1">📈</span>
-              <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.ratePtBtn') }}</span>
+              <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.ratePtBtn') }}</span>
             </button>
 
             <!-- Rival ボタン（赤） -->
             <button
               @click="mode = mode === 'rival' ? null : 'rival'"
-              class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
               :class="mode === 'rival'
-                ? 'bg-rose-600 border-rose-600 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900'
+                ? 'bg-rose-600 border-rose-600 text-white'
                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
             >
               <span class="text-2xl mb-1">🔥</span>
-              <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.rivalBtn') }}</span>
+              <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.rivalBtn') }}</span>
             </button>
 
             <!-- Border ボタン（琥珀） -->
             <button
               @click="mode = mode === 'border' ? null : 'border'"
-              class="flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
               :class="mode === 'border'
-                ? 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200 dark:shadow-amber-900'
+                ? 'bg-amber-500 border-amber-500 text-white'
                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
             >
               <span class="text-2xl mb-1">🎵</span>
-              <span class="text-sm font-black leading-tight whitespace-pre-line">{{ t('arcade.borderBtn') }}</span>
+              <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.borderBtn') }}</span>
             </button>
 
             <!-- 伸びしろ ボタン（青緑、全幅）。新機能アピールのため col-span-2 -->
             <button
               @click="mode = mode === 'potential' ? null : 'potential'"
-              class="col-span-2 flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              class="col-span-2 flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
               :class="mode === 'potential'
-                ? 'bg-cyan-600 border-cyan-600 text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900'
+                ? 'bg-cyan-600 border-cyan-600 text-white'
                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
             >
               <div class="flex items-center gap-2 w-full">
                 <span class="text-2xl">🌱</span>
                 <div class="flex-1">
-                  <div class="text-sm font-black">{{ t('arcade.potentialBtn') }}</div>
+                  <div class="text-sm font-bold">{{ t('arcade.potentialBtn') }}</div>
                   <div class="text-[10px] font-bold opacity-70 mt-0.5">{{ t('arcade.potentialBtnDesc') }}</div>
                 </div>
-                <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded"
                   :class="mode === 'potential' ? 'bg-white/20' : 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300'">
                   NEW
                 </span>
@@ -745,18 +745,18 @@ const selectedFriend = computed(() =>
             <!-- 得意曲 ボタン（緑、全幅）。伸びしろの対になる新機能 -->
             <button
               @click="mode = mode === 'strength' ? null : 'strength'"
-              class="col-span-2 flex flex-col items-start p-4 rounded-2xl border-2 transition-all text-left active:scale-95"
+              class="col-span-2 flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
               :class="mode === 'strength'
-                ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900'
+                ? 'bg-emerald-600 border-emerald-600 text-white'
                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
             >
               <div class="flex items-center gap-2 w-full">
                 <span class="text-2xl">💪</span>
                 <div class="flex-1">
-                  <div class="text-sm font-black">{{ t('arcade.strengthBtn') }}</div>
+                  <div class="text-sm font-bold">{{ t('arcade.strengthBtn') }}</div>
                   <div class="text-[10px] font-bold opacity-70 mt-0.5">{{ t('arcade.strengthBtnDesc') }}</div>
                 </div>
-                <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded"
                   :class="mode === 'strength' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'">
                   NEW
                 </span>
@@ -767,14 +767,14 @@ const selectedFriend = computed(() =>
         </div>
 
         <!-- 伸びしろ／得意曲モード（管理者限定）: 検証用ユーザー切替ドロップダウン -->
-        <div v-if="(mode === 'potential' || mode === 'strength') && isAdmin" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-2">
+        <div v-if="(mode === 'potential' || mode === 'strength') && isAdmin" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 space-y-2">
           <div class="flex items-baseline justify-between gap-2">
-            <p class="text-xs font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">{{ t('arcade.adminViewLabel') }}</p>
+            <p class="text-xs font-bold text-cyan-600 dark:text-cyan-400">{{ t('arcade.adminViewLabel') }}</p>
             <span class="text-[10px] font-bold text-slate-400">{{ t('arcade.adminOnly') }}</span>
           </div>
           <select
             v-model="potentialViewUserId"
-            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
           >
             <option :value="null">{{ t('arcade.viewSelf') }}</option>
             <option v-for="u in adminUsers" :key="u.id" :value="u.id">
@@ -788,9 +788,9 @@ const selectedFriend = computed(() =>
         </div>
 
         <!-- 伸びしろ／得意曲モード: 並び替え基準（スコア / レート）の切替 -->
-        <div v-if="mode === 'potential' || mode === 'strength'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
+        <div v-if="mode === 'potential' || mode === 'strength'" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4">
           <div class="flex items-center justify-between gap-3">
-            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.potentialSortLabel') }}</span>
+            <span class="text-xs font-bold text-slate-500">{{ t('arcade.potentialSortLabel') }}</span>
             <div class="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 text-xs font-bold">
               <button
                 @click="potentialSortMode = 'score'"
@@ -811,11 +811,11 @@ const selectedFriend = computed(() =>
         </div>
 
         <!-- Rival モード: フレンド選択＋並び替え切替 -->
-        <div v-if="mode === 'rival'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-          <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.selectRival') }}</p>
+        <div v-if="mode === 'rival'" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+          <p class="text-xs font-bold text-slate-500">{{ t('arcade.selectRival') }}</p>
           <select
             v-model="selectedFriendId"
-            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-400"
           >
             <option :value="null">{{ t('arcade.selectFriendPlaceholder') }}</option>
             <option v-for="f in publicFriends" :key="f.id" :value="f.id">{{ f.displayName }}</option>
@@ -846,11 +846,11 @@ const selectedFriend = computed(() =>
         </div>
 
         <!-- Border モード: 目標グレード選択（AA/AAA/MAX-） -->
-        <div v-if="mode === 'border'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-          <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.borderTarget') }}</p>
+        <div v-if="mode === 'border'" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+          <p class="text-xs font-bold text-slate-500">{{ t('arcade.borderTarget') }}</p>
           <select
             v-model="borderTarget"
-            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
+            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
           >
             <option value="aa">{{ t('arcade.borderAaOption') }}</option>
             <option value="aaa">{{ t('arcade.borderAaaOption') }}</option>
@@ -859,15 +859,15 @@ const selectedFriend = computed(() =>
         </div>
 
         <!-- BEAT-PT モード: 単曲目標 Pt 入力（未入力なら次の閾値狙いに自動切替） -->
-        <div v-if="mode === 'beat-pt'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-          <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.beatPtTargetLabel') }}</p>
+        <div v-if="mode === 'beat-pt'" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+          <p class="text-xs font-bold text-slate-500">{{ t('arcade.beatPtTargetLabel') }}</p>
           <input
             type="number"
             v-model.number="beatPtTarget"
             min="0"
             step="any"
             :placeholder="t('arcade.beatPtTargetPlaceholder')"
-            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-400"
+            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
           <p v-if="beatPtAchievedCount" class="text-xs font-bold text-slate-500">
             {{ t('arcade.achievedCount', { achieved: beatPtAchievedCount.achieved, total: beatPtAchievedCount.total }) }}
@@ -875,15 +875,15 @@ const selectedFriend = computed(() =>
         </div>
 
         <!-- RATE-PT モード: 単曲目標 Pt 入力 -->
-        <div v-if="mode === 'rate-pt'" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-          <p class="text-xs font-black text-slate-500 uppercase tracking-widest">{{ t('arcade.ratePtTargetLabel') }}</p>
+        <div v-if="mode === 'rate-pt'" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+          <p class="text-xs font-bold text-slate-500">{{ t('arcade.ratePtTargetLabel') }}</p>
           <input
             type="number"
             v-model.number="ratePtTarget"
             min="0"
             step="1"
             :placeholder="t('arcade.ratePtTargetPlaceholder')"
-            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-sm font-bold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           <p v-if="ratePtAchievedCount" class="text-xs font-bold text-slate-500">
             {{ t('arcade.achievedCount', { achieved: ratePtAchievedCount.achieved, total: ratePtAchievedCount.total }) }}
@@ -895,10 +895,10 @@ const selectedFriend = computed(() =>
           <!-- 結果ヘッダ: モード名・ソート説明・件数 -->
           <div class="flex items-center justify-between">
             <div>
-              <p class="font-black text-slate-800 dark:text-white text-sm">{{ modeLabel }}</p>
+              <p class="font-bold text-slate-800 dark:text-white text-sm">{{ modeLabel }}</p>
               <p class="text-[10px] text-slate-400 font-bold mt-0.5">{{ modeSortNote }}</p>
             </div>
-            <span class="text-xs font-black text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
+            <span class="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
               {{ t('arcade.count', { n: suggestions.length }) }}
             </span>
           </div>
@@ -941,24 +941,24 @@ const selectedFriend = computed(() =>
             <div
               v-for="(s, i) in suggestions"
               :key="s.key"
-              class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-3.5 flex items-start gap-3 shadow-sm"
+              class="bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700 p-3.5 flex items-start gap-3"
             >
               <!-- 順位番号: ソート順に 1 から振る -->
-              <div class="shrink-0 w-6 text-center text-[11px] font-black text-slate-400 dark:text-slate-500 pt-0.5">
+              <div class="shrink-0 w-6 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500 pt-0.5">
                 {{ i + 1 }}
               </div>
 
               <!-- メインコンテンツ: タイトル・バッジ・スコア情報・サブラベル -->
               <div class="flex-1 min-w-0">
                 <!-- 曲タイトル -->
-                <p class="font-black text-slate-900 dark:text-white text-sm leading-tight truncate">{{ s.title }}</p>
+                <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{{ s.title }}</p>
 
                 <!-- バッジ列: 難易度・非公式ランク・DJ LEVEL -->
                 <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                  <span class="px-1.5 py-0.5 rounded text-[10px] font-black" :class="s.difficultyColor">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="s.difficultyColor">
                     {{ s.difficultyName.slice(0, 3) }} {{ s.difficultyLevel }}
                   </span>
-                  <span v-if="s.informalRank" class="px-1.5 py-0.5 rounded text-[10px] font-black bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                  <span v-if="s.informalRank" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                     ☆{{ s.informalRank.match(/(\d+\.\d+)/)?.[1] ?? s.informalRank }}
                   </span>
                   <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-50 dark:bg-slate-700/50 text-slate-500">
@@ -1023,7 +1023,7 @@ const selectedFriend = computed(() =>
               <!-- ギャップラベル: 目標までの差分を色付きバッジで表示 -->
               <div class="shrink-0 text-right">
                 <span
-                  class="inline-block px-2.5 py-1 rounded-xl text-xs font-black whitespace-nowrap"
+                  class="inline-block px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap"
                   :class="{
                     'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300': mode === 'rival',
                     'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300': mode === 'border',

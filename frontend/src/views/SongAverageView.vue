@@ -445,18 +445,18 @@ onMounted(loadData);
 
 <template>
   <div class="w-full max-w-full space-y-6 animate-fade-in">
-    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-md border border-slate-200 dark:border-slate-700 transition-colors">
 
       <!-- ページヘッダ: タイトルアイコン + 見出し + サブタイトル -->
       <div class="flex items-center gap-4 mb-6">
-        <div class="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30">
+        <div class="p-3 rounded-md bg-indigo-100 dark:bg-indigo-900/30">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         </div>
         <div>
-          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('songAvg.title') }}</h2>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('songAvg.title') }}</h2>
           <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">{{ t('songAvg.subtitle') }}</p>
         </div>
       </div>
@@ -467,7 +467,7 @@ onMounted(loadData);
           v-model="searchQuery"
           type="text"
           :placeholder="t('songAvg.searchPlaceholder')"
-          class="w-64 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          class="w-64 px-4 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
         <label class="flex items-center gap-1.5 cursor-pointer text-sm font-bold text-slate-600 dark:text-slate-300 select-none">
           <input type="checkbox" v-model="showLv11" class="w-4 h-4 rounded accent-indigo-500" />
@@ -483,7 +483,7 @@ onMounted(loadData);
           <div class="flex items-center gap-2 flex-wrap">
             <select
               v-model="filterTier"
-              class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              class="px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
             >
               <option value="">ティアを選択</option>
               <option v-for="tier in activeTiers" :key="tier" :value="tier">{{ tier }}</option>
@@ -498,12 +498,12 @@ onMounted(loadData);
             </label>
             <button
               @click="applyFilter"
-              class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold transition-colors"
+              class="px-4 py-2 rounded-md bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold transition-colors"
             >適用</button>
             <button
               v-if="appliedFilterTier"
               @click="filterTier = ''; filterWinning = false; filterLosing = false; applyFilter()"
-              class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              class="px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >クリア</button>
           </div>
         </template>
@@ -520,7 +520,7 @@ onMounted(loadData);
         <div class="w-12 h-12 border-4 border-indigo-100 dark:border-slate-700 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin mb-4"></div>
         <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('songAvg.loading') }}</p>
       </div>
-      <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl text-center font-bold">
+      <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
         {{ error }}
       </div>
 
@@ -536,7 +536,7 @@ onMounted(loadData);
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
               {{ t('common.back') || '戻る' }}
             </button>
-            <span class="font-black text-slate-700 dark:text-slate-200" :class="tierColor(detailTier!)">
+            <span class="font-bold text-slate-700 dark:text-slate-200" :class="tierColor(detailTier!)">
               {{ detailTier }}の詳細
             </span>
           </div>
@@ -546,21 +546,21 @@ onMounted(loadData);
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-700/50">
               <th
-                class="pb-3 pl-2 pr-1 text-left text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-600 whitespace-nowrap"
+                class="pb-3 pl-2 pr-1 text-left text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600 whitespace-nowrap"
                 @click="toggleSort('level')"
               >☆ <span v-if="sortKey === 'level'">{{ sortDir === 'desc' ? '▼' : '▲' }}</span></th>
               <th
-                class="pb-3 pr-6 text-left text-xs font-black text-slate-400 uppercase tracking-widest cursor-pointer hover:text-slate-600"
+                class="pb-3 pr-6 text-left text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600"
                 @click="toggleSort('title')"
               >{{ t('songAvg.colSong') }} <span v-if="sortKey === 'title'">{{ sortDir === 'desc' ? '▼' : '▲' }}</span></th>
               
               <th
                 v-for="col in activeColumns" :key="col.type === 'broad' ? col.tier : col.tier + '-' + col.level"
-                class="pb-3 px-2 text-center text-xs font-black uppercase tracking-widest whitespace-nowrap align-top"
+                class="pb-3 px-2 text-center text-xs font-bold whitespace-nowrap align-top"
                 :class="[tierColor(col.tier)]"
               >
                 <!-- 大分類カラム -->
-                <div v-if="col.type === 'broad'" class="relative flex flex-col items-center gap-0.5 group/header rounded-xl p-1 transition-colors" :class="{'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50': true}" @click="toggleSort(col.tier)">
+                <div v-if="col.type === 'broad'" class="relative flex flex-col items-center gap-0.5 group/header rounded-md p-1 transition-colors" :class="{'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50': true}" @click="toggleSort(col.tier)">
                   <RankIcon :rank-name="col.tier" size="sm" disable-party />
                   <span class="mt-1">{{ col.tier }}</span>
                   <span v-if="sortKey === col.tier" class="text-[10px]">{{ sortDir === 'desc' ? '▼' : '▲' }}</span>
@@ -568,7 +568,7 @@ onMounted(loadData);
                   <button 
                     v-if="col.tier !== 'Legend' && col.tier !== 'Beginner'"
                     @click.stop="detailTier = col.tier"
-                    class="absolute top-0 right-0 p-1 rounded-full bg-white dark:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-600 opacity-0 group-hover/header:opacity-100 transition-opacity hover:scale-110 hover:text-indigo-500"
+                    class="absolute top-0 right-0 p-1 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 opacity-0 group-hover/header:opacity-100 transition-opacity hover:text-indigo-500"
                     title="1〜5ごとの平均スコアを見る"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
@@ -594,9 +594,9 @@ onMounted(loadData);
               <!-- 左端: ☆レベル + 難易度（ANOTHER=A/LEGGENDARIA=L）バッジ + 非公式ランク -->
               <td class="py-2 pl-2 pr-1 whitespace-nowrap">
                 <div class="flex flex-col items-start gap-0.5">
-                  <span class="text-xs font-black text-slate-500 dark:text-slate-400">☆{{ row.difficultyLevel }}</span>
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400">☆{{ row.difficultyLevel }}</span>
                   <span
-                    class="text-[9px] font-black px-1 py-0.5 rounded leading-none"
+                    class="text-[9px] font-bold px-1 py-0.5 rounded leading-none"
                     :class="row.difficultyName === 'LEGGENDARIA'
                       ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                       : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'"

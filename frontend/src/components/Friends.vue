@@ -145,14 +145,14 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
 
 <template>
   <div class="space-y-6">
-    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <div>
         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">フレンド一覧</h2>
         <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">ライバルの進捗を確認しましょう</p>
       </div>
       <button
         @click="isSearchModalOpen = true"
-        class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 font-bold"
+        class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all flex items-center gap-2 font-bold"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -161,12 +161,12 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
       </button>
     </div>
 
-    <div v-if="!isLoaded" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+    <div v-if="!isLoaded" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
       <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
       <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
     </div>
 
-    <div v-else-if="!hasAnyRival" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 border-dashed">
+    <div v-else-if="!hasAnyRival" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 border-dashed">
       <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -178,10 +178,10 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       <div v-for="friend in friends" :key="'u-' + friend.id"
-        class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all group"
+        class="bg-white dark:bg-slate-800 p-5 rounded-md border border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all group"
       >
         <div class="flex items-center gap-4 mb-4">
-          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md shrink-0">
+          <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0">
             {{ friend.displayName?.charAt(0) || 'U' }}
           </div>
           <div class="flex-1 min-w-0">
@@ -211,10 +211,10 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
         </div>
 
         <div class="space-y-3">
-          <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
+          <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-md">
             <div class="flex flex-col">
-              <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">BEAT-PT</span>
-              <span class="text-lg font-black text-blue-600 dark:text-blue-400">{{ friend.totalBeatPt.toLocaleString() }} <span class="text-xs font-normal">pt</span></span>
+              <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">BEAT-PT</span>
+              <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ friend.totalBeatPt.toLocaleString() }} <span class="text-xs font-normal">pt</span></span>
             </div>
             <div class="flex items-center gap-2">
               <RankIcon
@@ -223,8 +223,8 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
                 size="sm"
               />
               <div class="flex flex-col items-end">
-                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">TIER</span>
-                <div :class="[getRankInfo(friend.totalBeatPt).color, 'font-black text-sm']">
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">TIER</span>
+                <div :class="[getRankInfo(friend.totalBeatPt).color, 'font-bold text-sm']">
                   {{ getRankInfo(friend.totalBeatPt).name }} {{ getRankInfo(friend.totalBeatPt).tier }}
                 </div>
               </div>
@@ -235,7 +235,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
             <button
               v-if="canViewDashboard(friend)"
               @click="openComparison(friend)"
-              class="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5"
+              class="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -250,10 +250,10 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
       </div>
 
       <div v-for="rival in virtualRivals" :key="'v-' + rival.id"
-        class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-amber-200/60 dark:border-amber-800/40 hover:shadow-md transition-all group"
+        class="bg-white dark:bg-slate-800 p-5 rounded-md border border-amber-200/60 dark:border-amber-800/40 hover:border-amber-300 dark:hover:border-amber-700 transition-all group"
       >
         <div class="flex items-center gap-4 mb-4">
-          <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md shrink-0">
+          <div class="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0">
             👑
           </div>
           <div class="flex-1 min-w-0">
@@ -283,10 +283,10 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
         </div>
 
         <div class="space-y-3">
-          <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
+          <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-md">
             <div class="flex flex-col">
-              <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">BEAT-PT</span>
-              <span class="text-lg font-black text-blue-600 dark:text-blue-400">{{ rival.totalBeatPt.toLocaleString() }} <span class="text-xs font-normal">pt</span></span>
+              <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">BEAT-PT</span>
+              <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ rival.totalBeatPt.toLocaleString() }} <span class="text-xs font-normal">pt</span></span>
             </div>
             <div class="flex items-center gap-2">
               <RankIcon
@@ -295,8 +295,8 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
                 size="sm"
               />
               <div class="flex flex-col items-end">
-                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">TIER</span>
-                <div :class="[getRankInfo(rival.totalBeatPt).color, 'font-black text-sm']">
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">TIER</span>
+                <div :class="[getRankInfo(rival.totalBeatPt).color, 'font-bold text-sm']">
                   {{ getRankInfo(rival.totalBeatPt).name }} {{ getRankInfo(rival.totalBeatPt).tier }}
                 </div>
               </div>
@@ -306,7 +306,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
           <div class="flex gap-2">
             <button
               @click="openVirtualComparison(rival)"
-              class="flex-1 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5"
+              class="flex-1 py-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -314,7 +314,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
               比較する
             </button>
             <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-1 flex-1">
-              <span class="text-amber-600 dark:text-amber-400 font-black uppercase tracking-wider">TOPランカー</span>
+              <span class="text-amber-600 dark:text-amber-400 font-bold">TOPランカー</span>
             </div>
           </div>
         </div>

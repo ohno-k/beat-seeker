@@ -166,7 +166,7 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
     @click.self="emit('close')"
   >
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
+    <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
       
       <!-- タブ切替（ログイン / 新規登録 / パスワードを忘れた） -->
       <div class="flex border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
@@ -196,13 +196,13 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
       <div class="p-6 overflow-y-auto">
         <form @submit.prevent="handleSubmit" class="space-y-5">
           
-          <div v-if="errorMsg" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-xl flex items-center gap-2 transition-colors duration-200">
+          <div v-if="errorMsg" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-md flex items-center gap-2 transition-colors duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
             {{ errorMsg }}
           </div>
-          <div v-if="successMsg" class="p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm rounded-xl flex items-center gap-2">
+          <div v-if="successMsg" class="p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm rounded-md flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
@@ -215,16 +215,16 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('auth.iidxId') }}</label>
               <input type="text" :value="inputIidxId" @input="formatIidxId" placeholder="1234-5678" pattern="\d{4}-\d{4}" maxlength="9"
-                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+                class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('auth.registeredEmail') }}</label>
               <input type="email" v-model="forgotEmail" placeholder="example@email.com"
-                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+                class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
             </div>
             <div class="pt-2 flex gap-3">
-              <button type="button" @click="emit('close')" class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">{{ t('auth.cancel') }}</button>
-              <button type="submit" :disabled="isSubmitting" class="flex-[2] py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+              <button type="button" @click="emit('close')" class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md transition-colors">{{ t('auth.cancel') }}</button>
+              <button type="submit" :disabled="isSubmitting" class="flex-[2] py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-md transition-all flex items-center justify-center gap-2">
                 <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 {{ t('auth.resetSend') }}
               </button>
@@ -234,27 +234,27 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
           <div v-if="mode !== 'forgot'">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.iidxId') }}</label>
             <input type="text" :value="inputIidxId" @input="formatIidxId" required placeholder="1234-5678" pattern="\d{4}-\d{4}" maxlength="9"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+              class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
             <p v-if="mode === 'register'" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1 transition-colors duration-200">{{ t('auth.iidxIdHint') }}</p>
           </div>
 
           <div v-if="mode !== 'forgot'">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.password') }}</label>
             <input type="password" v-model="password" required placeholder="••••••••" minlength="4"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+              class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
           </div>
 
           <div v-if="mode === 'register'">
             <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.passwordConfirm') }}</label>
             <input type="password" v-model="passwordConfirm" required placeholder="••••••••" minlength="4"
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+              class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
           </div>
           
           <template v-if="mode === 'register'">
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.username') }}</label>
               <input type="text" v-model="displayName" required
-                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100"
+                class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100"
                 :placeholder="t('auth.displayName')" />
             </div>
             
@@ -262,14 +262,14 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.danRank') }}</label>
                 <select v-model="danRank" 
-                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
+                  class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
                   <option v-for="rank in danRankOptions" :key="rank.value" :value="rank.value">{{ t(rank.labelKey) }}</option>
                 </select>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.arenaRank') }}</label>
                 <select v-model="arenaRank" 
-                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
+                  class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
                   <option v-for="rank in arenaRanks" :key="rank" :value="rank">{{ rank }}</option>
                 </select>
               </div>
@@ -295,11 +295,11 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
           
           <div v-if="mode !== 'forgot'" class="pt-2 flex gap-3">
             <button type="button" @click="emit('close')"
-              class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-colors">
+              class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md transition-colors">
               {{ t('auth.cancel') }}
             </button>
             <button type="submit" :disabled="isSubmitting"
-              class="flex-[2] py-3 px-4 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-700 text-white font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-2">
+              class="flex-[2] py-3 px-4 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-blue-400 dark:disabled:bg-blue-700 text-white font-bold rounded-md transition-all flex items-center justify-center gap-2">
               <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               {{ mode === 'login' ? t('auth.loginBtn') : t('auth.registerBtn') }}
             </button>

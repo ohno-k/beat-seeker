@@ -255,7 +255,7 @@ const badgeClass = (e: TimelineEntry): string => {
 <template>
   <div class="space-y-6">
     <!-- ヘッダ + 再読込ボタン -->
-    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <div>
         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">タイムライン</h2>
         <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">自分とフレンドの活動を新しい順に表示します</p>
@@ -265,7 +265,7 @@ const badgeClass = (e: TimelineEntry): string => {
           v-if="isAdmin"
           @click="handleBackfillAll(false)"
           :disabled="isBackfilling || isLoading"
-          class="flex p-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-xl transition-all items-center gap-2 font-bold text-sm whitespace-nowrap"
+          class="flex p-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-md transition-all items-center gap-2 font-bold text-sm whitespace-nowrap"
           title="【管理者専用】全ユーザの CSV アップロード履歴から SCORE_UPDATE を再生成します"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isBackfilling }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -276,7 +276,7 @@ const badgeClass = (e: TimelineEntry): string => {
         <button
           @click="handleBackfill(false)"
           :disabled="isBackfilling || isLoading"
-          class="flex p-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-xl transition-all items-center gap-2 font-bold text-sm whitespace-nowrap"
+          class="flex p-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-md transition-all items-center gap-2 font-bold text-sm whitespace-nowrap"
           title="自分の過去の CSV アップロード履歴から SCORE_UPDATE イベントを再生成します"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isBackfilling }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -287,7 +287,7 @@ const badgeClass = (e: TimelineEntry): string => {
         <button
           @click="fetchTimeline()"
           :disabled="isLoading"
-          class="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl transition-all flex items-center gap-2 font-bold"
+          class="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-md transition-all flex items-center gap-2 font-bold"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="{ 'animate-spin': isLoading }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -298,7 +298,7 @@ const badgeClass = (e: TimelineEntry): string => {
     </div>
 
     <!-- バックフィル結果メッセージ -->
-    <div v-if="backfillMsg" class="p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-xl text-sm text-indigo-800 dark:text-indigo-300 space-y-2">
+    <div v-if="backfillMsg" class="p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-md text-sm text-indigo-800 dark:text-indigo-300 space-y-2">
       <div class="flex items-start gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -321,18 +321,18 @@ const badgeClass = (e: TimelineEntry): string => {
     </div>
 
     <!-- ローディング -->
-    <div v-if="isLoading && entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+    <div v-if="isLoading && entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
       <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
       <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
     </div>
 
     <!-- エラー -->
-    <div v-else-if="error" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-300 text-sm">
+    <div v-else-if="error" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300 text-sm">
       {{ error }}
     </div>
 
     <!-- 空状態 -->
-    <div v-else-if="entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 border-dashed">
+    <div v-else-if="entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 border-dashed">
       <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -344,7 +344,7 @@ const badgeClass = (e: TimelineEntry): string => {
         <button
           @click="handleBackfill(false)"
           :disabled="isBackfilling"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition-all font-bold text-sm disabled:opacity-50"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-all font-bold text-sm disabled:opacity-50"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isBackfilling }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -360,9 +360,9 @@ const badgeClass = (e: TimelineEntry): string => {
     <!-- イベント本体 -->
     <div v-else class="space-y-4">
       <div v-for="group in threadedEntries" :key="group.date" class="space-y-3">
-        <h3 class="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">{{ group.date }}</h3>
+        <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2">{{ group.date }}</h3>
 
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
           <article
             v-for="thread in group.threads"
             :key="thread.key"
@@ -371,8 +371,8 @@ const badgeClass = (e: TimelineEntry): string => {
             <!-- ヘッダ行: アバター + ユーザ名 + 親イベントのバッジ + 時刻 + 件数 を 1 行に統合 -->
             <div class="flex items-center gap-3 flex-wrap">
               <div
-                class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm shrink-0"
-                :class="thread.user.isMe ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-slate-400 to-slate-600'"
+                class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                :class="thread.user.isMe ? 'bg-blue-600' : 'bg-slate-500'"
               >
                 {{ thread.user.displayName.charAt(0) || '?' }}
               </div>
@@ -382,7 +382,7 @@ const badgeClass = (e: TimelineEntry): string => {
               <span v-if="thread.user.isMe" class="text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">自分</span>
               <!-- 親イベント (最新) のバッジ + 時刻 -->
               <span
-                class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded"
+                class="text-[10px] font-bold px-2 py-0.5 rounded"
                 :class="badgeClass(thread.items[0])"
               >{{ badgeLabel(thread.items[0]) }}</span>
               <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ formatRelative(thread.items[0].createdAt) }}</span>
@@ -410,7 +410,7 @@ const badgeClass = (e: TimelineEntry): string => {
                 <!-- 子のバッジ + 時刻 -->
                 <div class="flex items-center gap-2 flex-wrap">
                   <span
-                    class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded"
+                    class="text-[10px] font-bold px-2 py-0.5 rounded"
                     :class="badgeClass(child)"
                   >{{ badgeLabel(child) }}</span>
                   <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ formatRelative(child.createdAt) }}</span>

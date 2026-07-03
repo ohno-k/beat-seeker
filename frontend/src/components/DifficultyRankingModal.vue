@@ -124,7 +124,7 @@ function goToMyRank() {
   <Teleport to="body">
     <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="emit('close')"></div>
-      <div class="relative z-10 bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-3xl max-h-[90vh] flex flex-col">
+      <div class="relative z-10 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-3xl max-h-[90vh] flex flex-col">
         <!-- Header -->
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <div class="flex items-center gap-2">
@@ -141,7 +141,7 @@ function goToMyRank() {
           <button
             v-if="user"
             @click="goToMyRank"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             {{ t('ranking.findMyRank') }}
@@ -163,25 +163,25 @@ function goToMyRank() {
             <p class="text-slate-500 dark:text-slate-400 font-bold text-sm">{{ t('ranking.loading') }}</p>
           </div>
 
-          <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl text-center font-bold text-sm">
+          <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold text-sm">
             {{ error }}
           </div>
 
-          <div v-else-if="ranking.length === 0" class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+          <div v-else-if="ranking.length === 0" class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             <p class="text-slate-500 dark:text-slate-400 font-bold text-sm">{{ t('ranking.empty') }}</p>
           </div>
 
-          <div v-else-if="filteredRanking.length === 0" class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+          <div v-else-if="filteredRanking.length === 0" class="text-center py-16 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             <p class="text-slate-500 dark:text-slate-400 font-bold text-sm">{{ t('table.noFullPlayUsers') }}</p>
           </div>
 
           <table v-else-if="paginated.length > 0" class="w-full">
             <thead>
               <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                <th class="pb-3 pl-2 text-xs font-black text-slate-400 uppercase tracking-widest w-14">{{ t('ranking.colRank') }}</th>
-                <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
-                <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest w-14 text-center">{{ t('ranking.colTier') }}</th>
-                <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-2">{{ t('table.colTotalPt') }}</th>
+                <th class="pb-3 pl-2 text-xs font-bold text-slate-400 w-14">{{ t('ranking.colRank') }}</th>
+                <th class="pb-3 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
+                <th class="pb-3 text-xs font-bold text-slate-400 w-14 text-center">{{ t('ranking.colTier') }}</th>
+                <th class="pb-3 text-xs font-bold text-slate-400 text-right pr-2">{{ t('table.colTotalPt') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -196,7 +196,7 @@ function goToMyRank() {
               >
                 <td class="py-2 pl-2">
                   <div
-                    class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                    class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                     :class="[
                       ((page - 1) * PAGE_SIZE + idx) === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                       ((page - 1) * PAGE_SIZE + idx) === 1 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
@@ -215,7 +215,7 @@ function goToMyRank() {
                     </span>
                     <span v-if="(entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
                     <span v-if="user && entry.iidxId === user.iidxId"
-                      class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
+                      class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
                       {{ entry.playedCount }}/{{ props.totalCount }} {{ t('table.colPlayed') }}
                     </span>
@@ -235,11 +235,11 @@ function goToMyRank() {
                 </td>
                 <td class="py-2 text-right pr-2">
                   <div class="flex items-baseline justify-end gap-1">
-                    <span class="text-base sm:text-lg font-black tabular-nums"
+                    <span class="text-base sm:text-lg font-bold tabular-nums"
                       :class="user && entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
                       {{ entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                     </span>
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">PT</span>
+                    <span class="text-[9px] font-bold text-slate-400">PT</span>
                   </div>
                 </td>
               </tr>

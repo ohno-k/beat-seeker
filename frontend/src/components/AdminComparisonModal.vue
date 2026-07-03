@@ -251,20 +251,20 @@ const showLv12 = ref(true);
 <template>
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-start justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div class="bg-white dark:bg-slate-800 w-full max-w-5xl my-3 sm:my-12 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
+      <div class="bg-white dark:bg-slate-800 w-full max-w-5xl my-3 sm:my-12 rounded-md shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
         <!-- ヘッダー -->
         <div class="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
           <div class="min-w-0">
-            <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <h2 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               スコア比較 (管理者)
             </h2>
             <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-bold mt-1 truncate">
-              <span class="text-blue-600 dark:text-blue-400 font-black">{{ userA.displayName }}</span>
+              <span class="text-blue-600 dark:text-blue-400 font-bold">{{ userA.displayName }}</span>
               <span class="mx-1.5 text-slate-400">vs</span>
-              <span class="text-red-500 dark:text-red-400 font-black">{{ userB.displayName }}</span>
+              <span class="text-red-500 dark:text-red-400 font-bold">{{ userB.displayName }}</span>
             </p>
           </div>
           <button @click="emit('close')" class="p-2 shrink-0 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-slate-600">
@@ -281,7 +281,7 @@ const showLv12 = ref(true);
             <p class="text-slate-500 font-bold">データを集計中...</p>
           </div>
 
-          <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 p-6 rounded-2xl border border-red-100 dark:border-red-900/30 text-center">
+          <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 p-6 rounded-md border border-red-100 dark:border-red-900/30 text-center">
             <p class="text-red-600 dark:text-red-400 font-bold">{{ error }}</p>
           </div>
 
@@ -296,7 +296,7 @@ const showLv12 = ref(true);
                     v-model="showLv10Minus"
                     class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
                   />
-                  <span class="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
+                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
                   <input
@@ -304,7 +304,7 @@ const showLv12 = ref(true);
                     v-model="showLv11"
                     class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
                   />
-                  <span class="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.11</span>
+                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer select-none">
                   <input
@@ -312,7 +312,7 @@ const showLv12 = ref(true);
                     v-model="showLv12"
                     class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
                   />
-                  <span class="text-xs sm:text-sm font-black text-indigo-600 dark:text-indigo-400">Lv.12</span>
+                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
                 </label>
               </div>
               <span class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-slate-600"></span>
@@ -335,11 +335,11 @@ const showLv12 = ref(true);
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div v-for="(stats, key) in comparisonStats.summary" :key="key"
                 v-show="key === 'overall' || (key === 'lv10minus' && showLv10Minus) || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
-                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-all hover:shadow-md">
-                <h3 class="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
+                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-md border border-slate-200 dark:border-slate-800 transition-all">
+                <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3">
                   {{ key === 'overall' ? '全体' : key === 'lv10minus' ? 'レベル 10 以下' : key === 'lv11' ? 'レベル 11' : 'レベル 12' }}
                 </h3>
-                <div class="font-black text-center" :class="showBothPlayedOnly ? 'grid grid-cols-3 gap-1' : 'grid grid-cols-5 gap-1'">
+                <div class="font-bold text-center" :class="showBothPlayedOnly ? 'grid grid-cols-3 gap-1' : 'grid grid-cols-5 gap-1'">
                   <div class="flex flex-col">
                     <span class="text-xl sm:text-2xl text-blue-600 dark:text-blue-400">{{ stats.win }}</span>
                     <span class="text-[8px] text-slate-400 dark:text-slate-500">WIN (A)</span>
@@ -375,13 +375,13 @@ const showLv12 = ref(true);
 
             <!-- 非公式難易度別テーブル -->
             <div>
-              <h3 class="text-base sm:text-xl font-black text-slate-800 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
+              <h3 class="text-base sm:text-xl font-bold text-slate-800 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
                 <span class="w-1.5 h-5 sm:h-6 bg-indigo-500 rounded-full"></span>
                 非公式難易度別 勝敗 <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-bold">(クリックで詳細)</span>
               </h3>
-              <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm">
+              <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700 overflow-hidden">
                 <table class="w-full text-left border-collapse table-fixed">
-                  <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-black text-slate-500 uppercase tracking-wider">
+                  <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-bold text-slate-500">
                     <tr>
                       <th class="p-2 sm:p-4 w-14 sm:w-24">ランク</th>
                       <th class="p-2 sm:p-4 text-center">WIN (A)</th>
@@ -397,7 +397,7 @@ const showLv12 = ref(true);
                         @click="toggleRank(rank)"
                         class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer select-none"
                       >
-                        <td class="p-2 sm:p-4 font-black">
+                        <td class="p-2 sm:p-4 font-bold">
                           <div class="flex items-center gap-1 sm:gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform text-slate-400 shrink-0" :class="{ 'rotate-90': expandedRanks.has(rank) }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -405,53 +405,53 @@ const showLv12 = ref(true);
                             <span class="text-slate-800 dark:text-slate-200 whitespace-nowrap">{{ rank }}</span>
                           </div>
                         </td>
-                        <td class="p-2 sm:p-4 text-center font-black text-blue-600 dark:text-blue-400">{{ stats.win }}</td>
-                        <td v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center font-black text-blue-500/80 bg-blue-50/30 dark:bg-blue-900/5">{{ stats.aOnly }}</td>
-                        <td class="p-2 sm:p-4 text-center font-black text-slate-400">{{ stats.draw }}</td>
-                        <td v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center font-black text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ stats.bOnly }}</td>
-                        <td class="p-2 sm:p-4 text-center font-black text-red-500 dark:text-red-400">{{ stats.loss }}</td>
+                        <td class="p-2 sm:p-4 text-center font-bold text-blue-600 dark:text-blue-400">{{ stats.win }}</td>
+                        <td v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center font-bold text-blue-500/80 bg-blue-50/30 dark:bg-blue-900/5">{{ stats.aOnly }}</td>
+                        <td class="p-2 sm:p-4 text-center font-bold text-slate-400">{{ stats.draw }}</td>
+                        <td v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center font-bold text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ stats.bOnly }}</td>
+                        <td class="p-2 sm:p-4 text-center font-bold text-red-500 dark:text-red-400">{{ stats.loss }}</td>
                       </tr>
                       <tr v-if="expandedRanks.has(rank)">
                         <td :colspan="showBothPlayedOnly ? 4 : 6" class="p-0 bg-slate-50/50 dark:bg-slate-900/20">
                           <div class="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             <div v-if="stats.winSongs.length > 0" class="space-y-2">
-                              <h4 class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1">
+                              <h4 class="text-[10px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                                 <span class="w-1 h-3 bg-blue-500 rounded-full"></span>
                                 WIN ({{ stats.winSongs.length }})
                               </h4>
                               <div class="space-y-1">
                                 <div v-for="s in stats.winSongs" :key="s.title" class="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-blue-100 dark:border-blue-900/30 text-xs">
                                   <span class="font-bold truncate max-w-[60%] text-slate-700 dark:text-slate-200">{{ s.title }}</span>
-                                  <span class="font-black text-blue-600">+{{ s.diff }}</span>
+                                  <span class="font-bold text-blue-600">+{{ s.diff }}</span>
                                 </div>
                               </div>
                             </div>
                             <div v-if="stats.lossSongs.length > 0" class="space-y-2">
-                              <h4 class="text-[10px] font-black text-red-500 dark:text-red-400 uppercase tracking-widest flex items-center gap-1">
+                              <h4 class="text-[10px] font-bold text-red-500 dark:text-red-400 flex items-center gap-1">
                                 <span class="w-1 h-3 bg-red-500 rounded-full"></span>
                                 LOSS ({{ stats.lossSongs.length }})
                               </h4>
                               <div class="space-y-1">
                                 <div v-for="s in stats.lossSongs" :key="s.title" class="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-red-100 dark:border-red-900/30 text-xs">
                                   <span class="font-bold truncate max-w-[60%] text-slate-700 dark:text-slate-200">{{ s.title }}</span>
-                                  <span class="font-black text-red-500">{{ s.diff }}</span>
+                                  <span class="font-bold text-red-500">{{ s.diff }}</span>
                                 </div>
                               </div>
                             </div>
                             <div v-if="stats.drawSongs.length > 0" class="space-y-2">
-                              <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                              <h4 class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
                                 <span class="w-1 h-3 bg-slate-400 rounded-full"></span>
                                 DRAW ({{ stats.drawSongs.length }})
                               </h4>
                               <div class="space-y-1">
                                 <div v-for="s in stats.drawSongs" :key="s.title" class="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
                                   <span class="font-bold truncate max-w-[60%] text-slate-700 dark:text-slate-200">{{ s.title }}</span>
-                                  <span class="font-black text-slate-400">±0</span>
+                                  <span class="font-bold text-slate-400">±0</span>
                                 </div>
                               </div>
                             </div>
                             <div v-if="stats.aOnlySongs.length > 0" class="space-y-2">
-                              <h4 class="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1">
+                              <h4 class="text-[10px] font-bold text-blue-400 flex items-center gap-1">
                                 <span class="w-1 h-3 bg-blue-300 rounded-full"></span>
                                 A Only ({{ stats.aOnlySongs.length }})
                               </h4>
@@ -462,7 +462,7 @@ const showLv12 = ref(true);
                               </div>
                             </div>
                             <div v-if="stats.bOnlySongs.length > 0" class="space-y-2">
-                              <h4 class="text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
+                              <h4 class="text-[10px] font-bold text-red-400 flex items-center gap-1">
                                 <span class="w-1 h-3 bg-red-300 rounded-full"></span>
                                 B Only ({{ stats.bOnlySongs.length }})
                               </h4>
@@ -482,7 +482,7 @@ const showLv12 = ref(true);
             </div>
 
             <!-- 注意書き -->
-            <div class="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+            <div class="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-100 dark:border-blue-900/30">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -498,7 +498,7 @@ const showLv12 = ref(true);
 
         <!-- フッター -->
         <div class="p-3 sm:p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-right">
-          <button @click="emit('close')" class="w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 bg-slate-900 hover:bg-black text-white font-black rounded-xl sm:rounded-2xl transition-all shadow-lg active:scale-95 text-base sm:text-lg">
+          <button @click="emit('close')" class="w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-md transition-all active:scale-95 text-base sm:text-lg">
             閉じる
           </button>
         </div>

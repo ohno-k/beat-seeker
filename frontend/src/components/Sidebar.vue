@@ -264,17 +264,17 @@ watch(() => props.activeTab, (tab) => {
         <!-- Sidebar Header (Logo) -->
         <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div class="flex items-center gap-2 cursor-pointer group" @click="selectTab('dashboard')">
-            <div class="relative w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm group-hover:bg-blue-700 transition-colors overflow-hidden">
+            <div class="relative w-8 h-8 bg-blue-700 rounded-md flex items-center justify-center text-white font-bold text-xl group-hover:bg-blue-800 transition-colors overflow-hidden">
               B
-              <div 
-                class="absolute bg-red-500 text-white text-[9px] font-black py-[2px] w-[46px] text-center transform -rotate-45 shadow-sm leading-none tracking-wider"
+              <div
+                class="absolute bg-red-500 text-white text-[9px] font-bold py-[2px] w-[46px] text-center transform -rotate-45 leading-none tracking-wider"
                 style="bottom: 3px; right: -14px;"
               >
                 BETA
               </div>
             </div>
-            <span class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500 tracking-tight">
-              beat-seeker
+            <span class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              beat<span class="text-red-500">-</span>seeker
             </span>
           </div>
           <button
@@ -303,9 +303,9 @@ watch(() => props.activeTab, (tab) => {
               <div class="flex flex-col gap-4">
                 <div 
                   @click="handleAction('editProfile')"
-                  class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all group border border-transparent hover:border-slate-100 dark:hover:border-slate-600"
+                  class="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all group border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
                 >
-                  <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                  <div class="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center text-white font-bold">
                     {{ (user?.displayName || user?.iidxId || 'U').charAt(0) }}
                   </div>
                   <div class="flex-1 min-w-0">
@@ -322,7 +322,7 @@ watch(() => props.activeTab, (tab) => {
                   <button
                     v-if="isAdmin && !viewingUserId"
                     @click="selectTab('popular-songs')"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all border border-amber-100 dark:border-amber-800"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -332,7 +332,7 @@ watch(() => props.activeTab, (tab) => {
                   <button
                     v-if="isAdmin && !viewingUserId"
                     @click="handleAction('openAdmin')"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-all border border-indigo-100 dark:border-indigo-800"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -343,7 +343,7 @@ watch(() => props.activeTab, (tab) => {
                   <button
                     v-if="isAdmin && !viewingUserId"
                     @click="goAdminUserComparison"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all border border-violet-100 dark:border-violet-800"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -352,7 +352,7 @@ watch(() => props.activeTab, (tab) => {
                   </button>
                   <button
                     @click="handleAction('logout')"
-                    class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
+                    class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -366,7 +366,7 @@ watch(() => props.activeTab, (tab) => {
             <template v-else>
               <button 
                 @click="handleAction('login')"
-                class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
+                class="w-full btn-primary px-6 py-3"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -379,7 +379,7 @@ watch(() => props.activeTab, (tab) => {
             <div v-if="!viewingUserId" class="flex flex-col gap-1 mt-2">
               <button
                 @click="handleUploadClick"
-                class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all shadow-sm"
+                class="w-full btn-secondary px-6 py-3"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -394,28 +394,28 @@ watch(() => props.activeTab, (tab) => {
               v-if="isLoggedIn && !viewingUserId"
               type="button"
               @click="handleRankQuizClick"
-              class="mt-2 w-full text-left bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-100 dark:border-indigo-800/50 rounded-xl px-3 py-2.5 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all group"
+              class="mt-2 w-full text-left bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2.5 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
               :title="t('rankQuiz.tooltip')"
             >
               <div class="flex items-center gap-2 mb-1.5">
-                <svg class="h-4 w-4 text-indigo-500 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <svg class="h-4 w-4 text-blue-700 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.518-4.674z" />
                 </svg>
-                <span class="text-[11px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-wider truncate">{{ t('rankQuiz.title') }}</span>
-                <span class="ml-auto text-[10px] font-black text-indigo-600 dark:text-indigo-400 tabular-nums">Lv.{{ rankQuizProgress?.level ?? 1 }}</span>
+                <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate">{{ t('rankQuiz.title') }}</span>
+                <span class="ml-auto text-[10px] font-semibold text-slate-500 dark:text-slate-400 tabular-nums">Lv.{{ rankQuizProgress?.level ?? 1 }}</span>
               </div>
               <div class="flex items-center gap-2">
-                <div class="flex-1 h-1 bg-white/60 dark:bg-slate-900/40 rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" :style="{ width: rankQuizPct + '%' }"></div>
+                <div class="flex-1 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-600 transition-all duration-500" :style="{ width: rankQuizPct + '%' }"></div>
                 </div>
-                <span class="text-[9px] font-mono text-indigo-500 dark:text-indigo-400 tabular-nums whitespace-nowrap">{{ rankQuizProgress?.xp ?? 0 }}/{{ rankQuizProgress?.xpForNextLevel ?? 100 }}</span>
+                <span class="text-[9px] font-mono text-slate-500 dark:text-slate-400 tabular-nums whitespace-nowrap">{{ rankQuizProgress?.xp ?? 0 }}/{{ rankQuizProgress?.xpForNextLevel ?? 100 }}</span>
               </div>
-              <div class="flex items-center justify-between mt-1.5 text-[10px] font-bold">
-                <span v-if="(rankQuizProgress?.reviewPoolCount ?? 0) > 0" class="text-purple-600 dark:text-purple-400">
+              <div class="flex items-center justify-between mt-1.5 text-[10px] font-semibold">
+                <span v-if="(rankQuizProgress?.reviewPoolCount ?? 0) > 0" class="text-blue-700 dark:text-blue-400">
                   {{ t('rankQuiz.reviewBadge', { n: rankQuizProgress?.reviewPoolCount ?? 0 }) }}
                 </span>
                 <span v-else class="text-slate-400 dark:text-slate-500">{{ t('rankQuiz.startHint') }}</span>
-                <span class="text-indigo-500 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">▶</span>
+                <span class="text-slate-400 dark:text-slate-500">▶</span>
               </div>
             </button>
 
@@ -426,7 +426,7 @@ watch(() => props.activeTab, (tab) => {
             <div v-if="user?.id === 18" class="flex flex-col gap-1 mt-2">
               <button
                 @click="handleOcrSearchClick"
-                class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-fuchsia-500/20 hover:shadow-fuchsia-500/40 hover:-translate-y-0.5 transition-all"
+                class="w-full btn-primary px-6 py-3"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -444,16 +444,16 @@ watch(() => props.activeTab, (tab) => {
                 type="button"
                 @click="selectTab(item.id)"
                 :aria-current="activeTab === item.id ? 'page' : undefined"
-                class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all group"
+                class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors group"
                 :class="activeTab === item.id
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                  ? 'bg-blue-700 dark:bg-blue-600 text-white'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                 </svg>
                 {{ item.label }}
-                <span v-if="item.supporterOnly" class="ml-auto text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+                <span v-if="item.supporterOnly" class="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
                   Supporter
                 </span>
               </button>
@@ -469,16 +469,16 @@ watch(() => props.activeTab, (tab) => {
                   type="button"
                   @click="selectTab(item.id)"
                   :aria-current="activeTab === item.id ? 'page' : undefined"
-                  class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all group"
+                  class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors group"
                   :class="activeTab === item.id
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                    ? 'bg-blue-700 dark:bg-blue-600 text-white'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                   </svg>
                   {{ item.label }}
-                  <span v-if="item.supporterOnly" class="ml-auto text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+                  <span v-if="item.supporterOnly" class="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
                     Supporter
                   </span>
                 </button>
@@ -488,7 +488,7 @@ watch(() => props.activeTab, (tab) => {
               <button
                 type="button"
                 @click="toggleExtra"
-                class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-all"
+                class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform" :class="{ 'rotate-180': showExtra }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -504,7 +504,7 @@ watch(() => props.activeTab, (tab) => {
 
           <!-- Secondary Navigation -->
           <div class="space-y-4">
-            <h3 class="px-4 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+            <h3 class="px-4 section-label">
               {{ t('app.sidebar.support') }}
             </h3>
             <nav class="space-y-1" :aria-label="t('a11y.nav.secondary')">
@@ -513,7 +513,7 @@ watch(() => props.activeTab, (tab) => {
                   type="button"
                   @click="selectTab(item.id)"
                   :aria-current="activeTab === item.id ? 'page' : undefined"
-                  class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition-all"
+                  class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-colors"
                   :class="activeTab === item.id
                     ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
                     : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-white'"
@@ -529,11 +529,11 @@ watch(() => props.activeTab, (tab) => {
 
           <!-- Language Switcher -->
           <div class="space-y-4">
-            <h3 class="px-4 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+            <h3 class="px-4 section-label">
               {{ t('app.sidebar.language') }}
             </h3>
             <div class="px-2">
-              <div class="flex flex-wrap gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
+              <div class="flex flex-wrap gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-md border border-slate-200 dark:border-slate-700">
                 <button
                   v-for="lang in availableLanguages"
                   :key="lang"
@@ -541,9 +541,9 @@ watch(() => props.activeTab, (tab) => {
                   @click="setLanguage(lang)"
                   :aria-pressed="currentLang === lang"
                   :aria-label="t('a11y.lang.switch', { lang: t(`lang.${lang}`) })"
-                  class="flex-1 py-1 px-2 text-[10px] font-bold rounded-lg transition-all"
+                  class="flex-1 py-1 px-2 text-[10px] font-semibold rounded transition-colors"
                   :class="currentLang === lang
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-blue-700 dark:bg-blue-600 text-white'
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-700'"
                 >
                   {{ t(`lang.${lang}`) }}
@@ -557,9 +557,9 @@ watch(() => props.activeTab, (tab) => {
         <div class="px-4 pb-3 space-y-2">
           <button
             @click="handleKofiClick"
-            class="group flex items-center gap-3 w-full px-4 py-3 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl hover:shadow-md hover:shadow-amber-500/10 hover:-translate-y-0.5 transition-all text-left"
+            class="group flex items-center gap-3 w-full px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left"
           >
-            <div class="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div class="w-8 h-8 bg-amber-400 rounded flex items-center justify-center shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.5 3H6C4.9 3 4 3.9 4 5v11c0 1.1.9 2 2 2h1v3l3-3h8.5c1.38 0 2.5-1.12 2.5-2.5v-10C21 4.12 19.88 3 18.5 3zm-3 10.5c-1.93 0-3.5-1.57-3.5-3.5 0-.44.09-.86.23-1.25L11 8h-1V6h2.5l2.11 1.77c.32-.12.66-.27 1.39-.27 1.93 0 3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5z"/>
               </svg>
@@ -568,7 +568,7 @@ watch(() => props.activeTab, (tab) => {
               <p class="text-xs font-bold text-amber-700 dark:text-amber-400">{{ t('supporter.kofiButton') }}</p>
               <p class="text-[10px] text-amber-500 dark:text-amber-500/70 font-medium">{{ t('supporter.kofiSidebarHint') }}</p>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
           </button>
@@ -611,10 +611,10 @@ watch(() => props.activeTab, (tab) => {
           class="fixed inset-0 z-[100] flex items-center justify-center p-4"
         >
           <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showKofiModal = false"></div>
-          <div class="relative bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-sm w-full p-6 space-y-4">
+          <div class="relative bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 shadow-xl max-w-sm w-full p-6 space-y-4">
             <!-- Header -->
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+              <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-md flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -628,22 +628,22 @@ watch(() => props.activeTab, (tab) => {
             </p>
 
             <!-- Token display -->
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 text-center">
-              <p class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">{{ t('supporter.modalTokenLabel') }}</p>
-              <p class="text-lg font-mono font-black text-amber-700 dark:text-amber-300 select-all">{{ user?.supporterToken }}</p>
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md p-3 text-center">
+              <p class="text-[11px] font-semibold text-amber-700 dark:text-amber-400 mb-1">{{ t('supporter.modalTokenLabel') }}</p>
+              <p class="text-lg font-mono font-bold text-amber-700 dark:text-amber-300 select-all tabular-nums">{{ user?.supporterToken }}</p>
             </div>
 
             <!-- Buttons -->
             <div class="flex gap-2">
               <button
                 @click="showKofiModal = false"
-                class="flex-1 px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                class="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
               >
                 {{ t('supporter.modalCancel') }}
               </button>
               <button
                 @click="confirmKofiOpen"
-                class="flex-1 px-4 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl hover:shadow-lg hover:shadow-amber-500/20 transition-all"
+                class="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-amber-500 rounded-md hover:bg-amber-600 transition-colors"
               >
                 {{ t('supporter.modalConfirm') }}
               </button>

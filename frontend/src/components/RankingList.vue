@@ -688,16 +688,16 @@ watch(viewMode, async (mode) => {
 
 <template>
   <div class="w-full max-w-4xl space-y-6 animate-fade-in">
-    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-md border border-slate-200 dark:border-slate-700 transition-colors">
       <!-- Header -->
       <div class="flex items-center gap-4 mb-6">
-        <div class="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/30 transition-colors">
+        <div class="p-3 rounded-md bg-amber-100 dark:bg-amber-900/30 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
           </svg>
         </div>
         <div>
-          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('ranking.title') }}</h2>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('ranking.title') }}</h2>
           <p class="text-slate-500 dark:text-slate-400 font-medium text-sm">{{ t('ranking.subtitle') }}</p>
         </div>
       </div>
@@ -705,9 +705,9 @@ watch(viewMode, async (mode) => {
 
       <!-- BEAT-TIER × RATE-TIER 散布図 -->
       <div v-if="showRateTier && !isLoading && !error && scatterPoints.length > 0"
-        class="mb-6 p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
+        class="mb-6 p-4 sm:p-5 rounded-md bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
-          <h3 class="text-sm font-black uppercase tracking-widest text-slate-600 dark:text-slate-300">
+          <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300">
             {{ t('scatter.distributionTitle') }}
           </h3>
           <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
@@ -722,7 +722,7 @@ watch(viewMode, async (mode) => {
         <button
           v-if="user && (viewMode === 'beat' || viewMode === 'rate')"
           @click="goToMyRank"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           {{ t('ranking.findMyRank') }}
@@ -731,51 +731,51 @@ watch(viewMode, async (mode) => {
 
       <!-- Mode Toggle -->
       <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
-        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-xl w-fit">
+        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-md w-fit">
           <button
             @click="viewMode = 'beat'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
             :class="viewMode === 'beat'
-              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Beat-Tier</button>
           <button
             v-if="showRateTier"
             @click="viewMode = 'rate'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
             :class="viewMode === 'rate'
-              ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Rate-Tier</button>
           <button
             v-if="showKenbanSaraTier"
             @click="viewMode = 'kenban'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
             :class="viewMode === 'kenban'
-              ? 'bg-white dark:bg-slate-600 text-cyan-600 dark:text-cyan-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-cyan-600 dark:text-cyan-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Kenban-Tier</button>
           <button
             v-if="showKenbanSaraTier"
             @click="viewMode = 'sara'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
             :class="viewMode === 'sara'
-              ? 'bg-white dark:bg-slate-600 text-orange-600 dark:text-orange-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-orange-600 dark:text-orange-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Sara-Tier</button>
           <button
             @click="viewMode = 'average'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
             :class="viewMode === 'average'
-              ? 'bg-white dark:bg-slate-600 text-purple-600 dark:text-purple-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-purple-600 dark:text-purple-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Average</button>
           <button
             v-if="isAdmin"
             @click="viewMode = 'simulation'"
-            class="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
             :class="viewMode === 'simulation'
-              ? 'bg-white dark:bg-slate-600 text-amber-600 dark:text-amber-400 shadow-sm'
+              ? 'bg-white dark:bg-slate-600 text-amber-600 dark:text-amber-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >難易度シミュ</button>
         </div>
@@ -795,25 +795,25 @@ watch(viewMode, async (mode) => {
         <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.loading') }}</p>
       </div>
 
-      <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl text-center font-bold">
+      <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
         {{ t('ranking.error') }}
       </div>
 
       <template v-else>
         <!-- Beat-Tier ranking -->
         <div v-if="viewMode === 'beat'">
-          <div v-if="beatRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+          <div v-if="beatRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">{{ t('ranking.colRank') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'BEAT' }) }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">{{ t('ranking.colUpdatedAt') }}</th>
+                  <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-28">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 text-right">{{ t('ranking.colPoints', { type: 'BEAT' }) }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 text-right pr-4">{{ t('ranking.colUpdatedAt') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -830,7 +830,7 @@ watch(viewMode, async (mode) => {
                     @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                     <td class="py-3 pl-4">
                       <div class="flex items-center gap-2">
-                        <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                        <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                           :class="[
                             row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                             row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
@@ -856,7 +856,7 @@ watch(viewMode, async (mode) => {
                         </span>
                         <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
                         <span v-if="user && row.entry.iidxId === user.iidxId"
-                          class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
+                          class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500 text-white">{{ t('ranking.you') }}</span>
                       </div>
                     </td>
                     <td class="py-3 px-2 text-center">
@@ -866,12 +866,12 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-3 text-right">
                       <div class="flex items-baseline justify-end gap-1">
-                        <span v-if="row.entry.includesInfinitas" class="self-center text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
-                        <span class="text-xl font-black tabular-nums"
+                        <span v-if="row.entry.includesInfinitas" class="self-center text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
+                        <span class="text-xl font-bold tabular-nums"
                           :class="user && row.entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
                           {{ row.entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                         </span>
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
+                        <span class="text-[9px] font-bold text-slate-400">BEAT-PT</span>
                       </div>
                     </td>
                     <td class="py-3 text-right pr-4">
@@ -889,7 +889,7 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-2">
                       <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
                         <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
                           {{ row.versionName }} × {{ row.prefectureName }}
                         </span>
@@ -902,10 +902,10 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-2 text-right">
                       <div class="flex items-baseline justify-end gap-1">
-                        <span class="text-lg font-black tabular-nums text-slate-500 dark:text-slate-400">
+                        <span class="text-lg font-bold tabular-nums text-slate-500 dark:text-slate-400">
                           {{ row.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                         </span>
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BEAT-PT</span>
+                        <span class="text-[9px] font-bold text-slate-400">BEAT-PT</span>
                       </div>
                     </td>
                     <td class="py-2 text-right pr-4"></td>
@@ -940,18 +940,18 @@ watch(viewMode, async (mode) => {
 
         <!-- Rate-Tier ranking -->
         <div v-else-if="viewMode === 'rate'">
-          <div v-if="rateRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+          <div v-if="rateRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             <p class="text-slate-500 dark:text-slate-400 font-bold" v-html="t('ranking.emptyRate')"></p>
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-28">{{ t('ranking.colRank') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
-                  <th class="pb-4 text-xs font-black text-emerald-500 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'RATE' }) }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right pr-4">{{ t('ranking.colUpdatedAt') }}</th>
+                  <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-28">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 text-xs font-bold text-emerald-500 text-right">{{ t('ranking.colPoints', { type: 'RATE' }) }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 text-right pr-4">{{ t('ranking.colUpdatedAt') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -968,7 +968,7 @@ watch(viewMode, async (mode) => {
                     @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                     <td class="py-3 pl-4">
                       <div class="flex items-center gap-2">
-                        <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                        <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                           :class="[
                             row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                             row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
@@ -994,7 +994,7 @@ watch(viewMode, async (mode) => {
                         </span>
                         <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
                         <span v-if="user && row.entry.iidxId === user.iidxId"
-                          class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500 text-white">{{ t('ranking.you') }}</span>
+                          class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white">{{ t('ranking.you') }}</span>
                       </div>
                     </td>
                     <td class="py-3 px-2 text-center">
@@ -1004,12 +1004,12 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-3 text-right">
                       <div class="flex items-baseline justify-end gap-1">
-                        <span v-if="row.entry.includesInfinitas" class="self-center text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
-                        <span class="text-xl font-black tabular-nums"
+                        <span v-if="row.entry.includesInfinitas" class="self-center text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
+                        <span class="text-xl font-bold tabular-nums"
                           :class="user && row.entry.iidxId === user.iidxId ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'">
                           {{ row.entry.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                         </span>
-                        <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">RATE-PT</span>
+                        <span class="text-[9px] font-bold text-emerald-500">RATE-PT</span>
                       </div>
                     </td>
                     <td class="py-3 text-right pr-4">
@@ -1027,7 +1027,7 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-2">
                       <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
                         <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
                           {{ row.versionName }} × {{ row.prefectureName }}
                         </span>
@@ -1040,10 +1040,10 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-2 text-right">
                       <div class="flex items-baseline justify-end gap-1">
-                        <span class="text-lg font-black tabular-nums text-slate-500 dark:text-slate-400">
+                        <span class="text-lg font-bold tabular-nums text-slate-500 dark:text-slate-400">
                           {{ row.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                         </span>
-                        <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">RATE-PT</span>
+                        <span class="text-[9px] font-bold text-emerald-500">RATE-PT</span>
                       </div>
                     </td>
                     <td class="py-2 text-right pr-4"></td>
@@ -1077,17 +1077,17 @@ watch(viewMode, async (mode) => {
         </div>
         <!-- KENBAN-Tier ranking (暫定: rankChange / 更新日時 / TOP ランカー無し) -->
         <div v-else-if="viewMode === 'kenban'">
-          <div v-if="kenbanRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+          <div v-if="kenbanRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20">{{ t('ranking.colRank') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
-                  <th class="pb-4 pr-4 text-xs font-black text-cyan-500 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'KENBAN' }) }}</th>
+                  <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-20">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 pr-4 text-xs font-bold text-cyan-500 text-right">{{ t('ranking.colPoints', { type: 'KENBAN' }) }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -1101,7 +1101,7 @@ watch(viewMode, async (mode) => {
                   ]"
                   @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                   <td class="py-3 pl-4">
-                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                       :class="[
                         row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                         row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
@@ -1120,7 +1120,7 @@ watch(viewMode, async (mode) => {
                       </span>
                       <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
                       <span v-if="user && row.entry.iidxId === user.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-500 text-white">{{ t('ranking.you') }}</span>
+                        class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500 text-white">{{ t('ranking.you') }}</span>
                     </div>
                   </td>
                   <td class="py-3 px-2 text-center">
@@ -1129,8 +1129,8 @@ watch(viewMode, async (mode) => {
                     </div>
                   </td>
                   <td class="py-3 pr-4 text-right">
-                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
-                    <span class="font-black text-base text-cyan-600 dark:text-cyan-400 tabular-nums">{{ row.entry.totalKenbanPt.toFixed(1) }}</span>
+                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
+                    <span class="font-bold text-base text-cyan-600 dark:text-cyan-400 tabular-nums">{{ row.entry.totalKenbanPt.toFixed(1) }}</span>
                     <span class="text-xs text-slate-400 ml-0.5">pt</span>
                   </td>
                 </tr>
@@ -1153,17 +1153,17 @@ watch(viewMode, async (mode) => {
 
         <!-- SARA-Tier ranking -->
         <div v-else-if="viewMode === 'sara'">
-          <div v-if="saraRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+          <div v-if="saraRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20">{{ t('ranking.colRank') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20 text-center">{{ t('ranking.colTier') }}</th>
-                  <th class="pb-4 pr-4 text-xs font-black text-orange-500 uppercase tracking-widest text-right">{{ t('ranking.colPoints', { type: 'SARA' }) }}</th>
+                  <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-20">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 w-20 text-center">{{ t('ranking.colTier') }}</th>
+                  <th class="pb-4 pr-4 text-xs font-bold text-orange-500 text-right">{{ t('ranking.colPoints', { type: 'SARA' }) }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -1177,7 +1177,7 @@ watch(viewMode, async (mode) => {
                   ]"
                   @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                   <td class="py-3 pl-4">
-                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                       :class="[
                         row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                         row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
@@ -1196,7 +1196,7 @@ watch(viewMode, async (mode) => {
                       </span>
                       <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
                       <span v-if="user && row.entry.iidxId === user.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500 text-white">{{ t('ranking.you') }}</span>
+                        class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500 text-white">{{ t('ranking.you') }}</span>
                     </div>
                   </td>
                   <td class="py-3 px-2 text-center">
@@ -1205,8 +1205,8 @@ watch(viewMode, async (mode) => {
                     </div>
                   </td>
                   <td class="py-3 pr-4 text-right">
-                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
-                    <span class="font-black text-base text-orange-600 dark:text-orange-400 tabular-nums">{{ row.entry.totalSaraPt.toFixed(1) }}</span>
+                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
+                    <span class="font-bold text-base text-orange-600 dark:text-orange-400 tabular-nums">{{ row.entry.totalSaraPt.toFixed(1) }}</span>
                     <span class="text-xs text-slate-400 ml-0.5">pt</span>
                   </td>
                 </tr>
@@ -1229,7 +1229,7 @@ watch(viewMode, async (mode) => {
 
         <!-- AVERAGE ranking (Lv11/Lv12 ANOTHER/LEGGENDARIA) -->
         <div v-else-if="viewMode === 'average'">
-          <div v-if="averageRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+          <div v-if="averageRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
             <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
           </div>
           <div v-else class="overflow-x-auto">
@@ -1239,10 +1239,10 @@ watch(viewMode, async (mode) => {
             <table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-20">{{ t('ranking.colRank') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest">{{ t('ranking.colPlayer') }}</th>
-                  <th class="pb-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">プレイ済</th>
-                  <th class="pb-4 pr-4 text-xs font-black text-purple-500 uppercase tracking-widest text-right">平均順位</th>
+                  <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-20">{{ t('ranking.colRank') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
+                  <th class="pb-4 text-xs font-bold text-slate-400 text-right">プレイ済</th>
+                  <th class="pb-4 pr-4 text-xs font-bold text-purple-500 text-right">平均順位</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -1257,7 +1257,7 @@ watch(viewMode, async (mode) => {
                   ]"
                   @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                   <td class="py-3 pl-4">
-                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                       :class="[
                         row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
                         row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
@@ -1276,7 +1276,7 @@ watch(viewMode, async (mode) => {
                       </span>
                       <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
                       <span v-if="user && row.entry.iidxId === user.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500 text-white">{{ t('ranking.you') }}</span>
+                        class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500 text-white">{{ t('ranking.you') }}</span>
                     </div>
                   </td>
                   <td class="py-3 text-right">
@@ -1285,8 +1285,8 @@ watch(viewMode, async (mode) => {
                     </span>
                   </td>
                   <td class="py-3 pr-4 text-right">
-                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
-                    <span class="font-black text-base text-purple-600 dark:text-purple-400 tabular-nums">
+                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
+                    <span class="font-bold text-base text-purple-600 dark:text-purple-400 tabular-nums">
                       {{ row.entry.averageRank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                     </span>
                     <span class="text-xs text-slate-400 ml-0.5">位</span>
@@ -1313,35 +1313,35 @@ watch(viewMode, async (mode) => {
         <div v-if="viewMode === 'simulation' && isAdmin">
           <!-- Draft changes summary -->
           <div v-if="draftDiffChanges.length > 0" class="mb-4 space-y-2">
-            <div v-if="promotionChanges.length > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl">
+            <div v-if="promotionChanges.length > 0" class="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-md">
               <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2">▲ 昇格 ({{ promotionChanges.length }}件)</p>
               <div class="flex flex-wrap gap-1.5">
                 <span v-for="c in promotionChanges" :key="c.title"
-                  class="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-700 rounded-full text-slate-700 dark:text-slate-300">
+                  class="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-700 rounded text-slate-700 dark:text-slate-300">
                   {{ c.title.length > 20 ? c.title.slice(0, 18) + '…' : c.title }}
                   <span class="line-through text-slate-400">{{ c.oldRank }}</span>→<span class="font-bold text-emerald-600 dark:text-emerald-400">{{ c.newRank }}</span>
                 </span>
               </div>
             </div>
-            <div v-if="demotionChanges.length > 0" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl">
+            <div v-if="demotionChanges.length > 0" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-md">
               <p class="text-xs font-bold text-red-700 dark:text-red-400 mb-2">▼ 降格 ({{ demotionChanges.length }}件)</p>
               <div class="flex flex-wrap gap-1.5">
                 <span v-for="c in demotionChanges" :key="c.title"
-                  class="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-700 rounded-full text-slate-700 dark:text-slate-300">
+                  class="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-700 rounded text-slate-700 dark:text-slate-300">
                   {{ c.title.length > 20 ? c.title.slice(0, 18) + '…' : c.title }}
                   <span class="line-through text-slate-400">{{ c.oldRank }}</span>→<span class="font-bold text-red-600 dark:text-red-400">{{ c.newRank }}</span>
                 </span>
               </div>
             </div>
           </div>
-          <div v-else-if="!isSimulationLoading && !simulationError" class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 dark:text-slate-400">
+          <div v-else-if="!isSimulationLoading && !simulationError" class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-500 dark:text-slate-400">
             難易度表のドラフト変更がありません。
           </div>
 
           <!-- ティア変動サマリ（適用で BEAT-Tier が上下したユーザー数） -->
           <div v-if="!isSimulationLoading && !simulationError && tierChangeStats.total > 0"
-            class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl flex items-center gap-3 flex-wrap">
-            <span class="text-xs font-black text-amber-700 dark:text-amber-400">ティア変動 {{ tierChangeStats.total }}人</span>
+            class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md flex items-center gap-3 flex-wrap">
+            <span class="text-xs font-bold text-amber-700 dark:text-amber-400">ティア変動 {{ tierChangeStats.total }}人</span>
             <span v-if="tierChangeStats.up > 0" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">▲ 昇格 {{ tierChangeStats.up }}</span>
             <span v-if="tierChangeStats.down > 0" class="text-xs font-bold text-red-600 dark:text-red-400">▼ 降格 {{ tierChangeStats.down }}</span>
           </div>
@@ -1350,18 +1350,18 @@ watch(viewMode, async (mode) => {
             <div class="w-12 h-12 border-4 border-amber-100 dark:border-slate-700 border-t-amber-500 rounded-full animate-spin mb-4"></div>
             <p class="text-slate-500 dark:text-slate-400 font-bold">シミュレーション計算中...</p>
           </div>
-          <div v-else-if="simulationError" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl text-center font-bold">
+          <div v-else-if="simulationError" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
             {{ simulationError }}
           </div>
           <div v-else class="overflow-x-auto">
             <table class="w-full text-sm">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-3 pl-4 text-xs font-black text-slate-400 uppercase tracking-widest w-24">順位変動</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest">プレイヤー</th>
-                  <th class="pb-3 text-xs font-black text-slate-400 uppercase tracking-widest text-right">現在 BEAT-PT</th>
-                  <th class="pb-3 text-xs font-black text-amber-500 uppercase tracking-widest text-right">適用後 BEAT-PT</th>
-                  <th class="pb-3 pr-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">ティア変動</th>
+                  <th class="pb-3 pl-4 text-xs font-bold text-slate-400 w-24">順位変動</th>
+                  <th class="pb-3 text-xs font-bold text-slate-400">プレイヤー</th>
+                  <th class="pb-3 text-xs font-bold text-slate-400 text-right">現在 BEAT-PT</th>
+                  <th class="pb-3 text-xs font-bold text-amber-500 text-right">適用後 BEAT-PT</th>
+                  <th class="pb-3 pr-4 text-xs font-bold text-slate-400 text-right">ティア変動</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
@@ -1369,7 +1369,7 @@ watch(viewMode, async (mode) => {
                   class="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30">
                   <td class="py-3 pl-4">
                     <div class="flex items-center gap-2">
-                      <div class="flex items-center justify-center w-7 h-7 rounded-lg font-black text-xs"
+                      <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                         :class="row.iidxId === user?.iidxId
                           ? 'bg-blue-500 text-white'
                           : 'text-slate-400 border border-slate-100 dark:border-slate-700'">
@@ -1384,7 +1384,7 @@ watch(viewMode, async (mode) => {
                     <div class="flex items-center gap-2">
                       <span class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ row.displayName || 'Unnamed' }}</span>
                       <span v-if="row.iidxId === user?.iidxId"
-                        class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500 text-white">YOU</span>
+                        class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500 text-white">YOU</span>
                     </div>
                     <div class="text-[10px] text-slate-400 mt-0.5">{{ row.iidxId }} / 現在{{ row.currentRank }}位</div>
                   </td>
@@ -1395,7 +1395,7 @@ watch(viewMode, async (mode) => {
                   </td>
                   <td class="py-3 text-right">
                     <div class="flex flex-col items-end">
-                      <span class="text-base font-black tabular-nums text-amber-600 dark:text-amber-400">
+                      <span class="text-base font-bold tabular-nums text-amber-600 dark:text-amber-400">
                         {{ row.simulatedBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                       </span>
                       <span class="text-[10px] font-bold tabular-nums"
@@ -1408,8 +1408,8 @@ watch(viewMode, async (mode) => {
                     <!-- ティア変動: 変わった場合のみ 旧→新 を強調表示、変わらなければ現状ティアを淡色で表示 -->
                     <div v-if="row.tierChanged" class="flex items-center justify-end gap-1 flex-wrap">
                       <span class="text-[11px] font-bold text-slate-400 line-through whitespace-nowrap">{{ tierLabel(row.curTier) }}</span>
-                      <span class="text-[10px] font-black" :class="row.tierDir > 0 ? 'text-emerald-500' : 'text-red-500'">{{ row.tierDir > 0 ? '▲' : '▼' }}</span>
-                      <span class="text-xs font-black whitespace-nowrap" :class="row.tierDir > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">{{ tierLabel(row.simTier) }}</span>
+                      <span class="text-[10px] font-bold" :class="row.tierDir > 0 ? 'text-emerald-500' : 'text-red-500'">{{ row.tierDir > 0 ? '▲' : '▼' }}</span>
+                      <span class="text-xs font-bold whitespace-nowrap" :class="row.tierDir > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">{{ tierLabel(row.simTier) }}</span>
                     </div>
                     <span v-else class="text-[11px] font-medium text-slate-400 whitespace-nowrap">{{ tierLabel(row.simTier) }}</span>
                   </td>

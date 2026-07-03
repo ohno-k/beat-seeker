@@ -77,7 +77,7 @@ function close() {
 <template>
   <div
     v-if="visible"
-    class="w-full bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500 text-white rounded-2xl px-5 py-4 flex items-center justify-between gap-4 shadow-lg hover:shadow-xl transition-shadow"
+    class="w-full bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-md px-5 py-4 flex items-center justify-between gap-4 transition-colors"
   >
     <!-- 左側: ロゴ風アイコン + テキスト -->
     <button
@@ -91,7 +91,7 @@ function close() {
         </svg>
       </div>
       <div class="min-w-0">
-        <p class="text-[10px] md:text-xs opacity-80 tracking-[0.25em] font-semibold">BEAT-SEEKER WRAPPED</p>
+        <p class="text-[10px] md:text-xs opacity-80 font-semibold">BEAT-SEEKER WRAPPED</p>
         <p class="font-bold text-sm md:text-base truncate">
           {{ displayMonth }} {{ headerText }}
         </p>
@@ -102,7 +102,7 @@ function close() {
     <div class="flex items-center gap-1 md:gap-2 flex-shrink-0">
       <button
         @click="open"
-        class="hidden sm:inline-flex px-4 py-1.5 rounded-xl text-xs font-bold bg-white/20 hover:bg-white/30 transition-colors"
+        class="hidden sm:inline-flex px-4 py-1.5 rounded-md text-xs font-bold bg-white/20 hover:bg-white/30 transition-colors"
       >
         見る →
       </button>

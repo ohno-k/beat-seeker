@@ -7,3 +7,25 @@
     @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 font-sans antialiased m-0 p-0 transition-colors duration-200;
   }
 }
+
+/*
+ * デザイン共通クラス。
+ * クロームは無彩色 + blue-700 一色。面の区切りは影ではなく 1px 罫線、角丸は 6px(rounded-md)に統一。
+ */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors;
+  }
+  .card {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md;
+  }
+  .badge {
+    @apply inline-block px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-[11px] font-semibold border border-blue-100 dark:border-blue-800;
+  }
+  .section-label {
+    @apply text-[11px] font-semibold text-slate-500 dark:text-slate-400;
+  }
+}

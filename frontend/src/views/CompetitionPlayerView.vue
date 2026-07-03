@@ -252,7 +252,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
 <template>
   <div class="competition-player-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8 relative">
     <!-- 言語切替ボタン群 (右上固定) -->
-    <div class="absolute top-3 right-3 z-30 flex items-center gap-1 p-1 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm">
+    <div class="absolute top-3 right-3 z-30 flex items-center gap-1 p-1 rounded-md bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
       <button
         v-for="lang in availableLanguages"
         :key="lang"
@@ -261,7 +261,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
         :aria-pressed="currentLang === lang"
         class="px-2 py-1 text-[11px] font-bold rounded-lg transition-all"
         :class="currentLang === lang
-          ? 'bg-blue-600 text-white shadow-sm'
+          ? 'bg-blue-600 text-white'
           : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'"
       >{{ t(`lang.${lang}`) }}</button>
     </div>
@@ -274,12 +274,12 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
       class="max-w-4xl mx-auto space-y-6"
     >
       <div>
-        <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
+        <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">
           {{ individualPlayer.view.value.competition.name }}
         </p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
-          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">{{ individualPlayer.view.value.participant.displayName }}</h1>
-          <span class="text-[10px] font-black px-2 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 tracking-wider">個人戦</span>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">{{ individualPlayer.view.value.participant.displayName }}</h1>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">個人戦</span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           状態: <span class="font-bold">{{ statusLabel(individualPlayer.view.value.competition.status) }}</span>
@@ -287,23 +287,23 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
       </div>
 
       <section class="space-y-3">
-        <h2 class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">出場試合 ({{ individualPlayer.view.value.matches.length }} 試合)</h2>
+        <h2 class="text-xs font-bold text-slate-500">出場試合 ({{ individualPlayer.view.value.matches.length }} 試合)</h2>
         <p
           v-if="individualPlayer.view.value.matches.length === 0"
-          class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl"
+          class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
         >
           まだ試合表が作成されていません。
         </p>
         <div
           v-for="m in individualPlayer.view.value.matches"
           :key="m.matchId"
-          class="bg-white dark:bg-slate-800 border rounded-2xl overflow-x-auto"
+          class="bg-white dark:bg-slate-800 border rounded-md overflow-x-auto"
           :class="m.isFinals ? 'border-amber-300 dark:border-amber-700' : 'border-slate-200 dark:border-slate-700'"
         >
           <div
             class="px-4 py-2 border-b flex items-center justify-between flex-wrap gap-2"
             :class="m.isFinals
-              ? 'border-amber-200 dark:border-amber-700/60 bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-900/20 dark:to-rose-900/20'
+              ? 'border-amber-200 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/20'
               : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60'"
           >
             <p class="font-bold text-sm">
@@ -317,7 +317,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
           </div>
           <table class="w-full text-xs min-w-[600px]">
             <thead>
-              <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono uppercase text-slate-400">
+              <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono text-slate-400">
                 <th class="px-3 py-2 text-left">プレイヤー</th>
                 <th class="px-3 py-2 text-center">
                   <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[110px] mx-auto">{{ m.song1Title || '曲1' }}</span>
@@ -331,7 +331,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                 <th class="px-3 py-2 text-center">
                   <span class="block normal-case text-slate-500 dark:text-slate-300 font-bold truncate max-w-[110px] mx-auto">{{ m.song4Title || '曲4' }}</span>
                 </th>
-                <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-black">総合順位</th>
+                <th class="px-3 py-2 text-center text-slate-700 dark:text-slate-200 font-bold">総合順位</th>
               </tr>
             </thead>
             <tbody>
@@ -342,14 +342,14 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                 :class="s.isMe ? 'bg-blue-50 dark:bg-blue-900/20 font-bold' : ''"
               >
                 <td class="px-3 py-2">
-                  <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mr-1">P{{ s.slotPosition }}</span>
+                  <span class="text-[10px] font-mono text-slate-400 mr-1">P{{ s.slotPosition }}</span>
                   <span>{{ s.participantName }}</span>
                   <span v-if="s.isMe" class="ml-1 text-[10px] font-mono text-blue-600 dark:text-blue-300">(自分)</span>
                 </td>
                 <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-3 py-2 text-center">
                   <span
                     v-if="(s as any)[`rank${songIdx}`]"
-                    class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
+                    class="inline-block px-2 py-1 rounded text-xs font-bold tabular-nums"
                     :class="(s as any)[`rank${songIdx}`] === 1
                       ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                       : (s as any)[`rank${songIdx}`] === 2
@@ -365,7 +365,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                 <td class="px-3 py-2 text-center">
                   <span
                     v-if="playerOverallMatchRank(s, m.slots) !== null"
-                    class="inline-block px-2 py-1 rounded text-xs font-black uppercase tracking-wider tabular-nums"
+                    class="inline-block px-2 py-1 rounded text-xs font-bold tabular-nums"
                     :class="playerOverallMatchRank(s, m.slots) === 1
                       ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                       : playerOverallMatchRank(s, m.slots) === 2
@@ -388,7 +388,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
     <!-- ────────── 既存 team5 ビュー ────────── -->
     <div
       v-else-if="!view"
-      class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center"
+      class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-md p-6 text-center"
     >
       <p class="text-lg font-bold text-rose-700 dark:text-rose-300">{{ t('competition.player.invalidToken') }}</p>
       <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ t('competition.player.invalidTokenHint') }}</p>
@@ -397,12 +397,12 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
     <div v-else class="max-w-4xl mx-auto space-y-6">
       <!-- ヘッダ -->
       <div>
-        <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
+        <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
-          <h1 class="text-2xl sm:text-3xl font-black tracking-tight" :class="teamColorClass(view.team.teamName)">{{ view.team.teamName }}</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight" :class="teamColorClass(view.team.teamName)">{{ view.team.teamName }}</h1>
           <span class="text-slate-400">·</span>
           <p class="text-lg sm:text-2xl font-bold">{{ view.participant.displayName }}</p>
-          <span v-if="view.participant.isTl" class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlBadge') }}</span>
+          <span v-if="view.participant.isTl" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ t('competition.common.tlBadge') }}</span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
@@ -425,10 +425,10 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
 
       <!-- ===== 担当試合 ===== -->
       <section class="space-y-3">
-        <h2 class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.player.matchesHeader') }}</h2>
+        <h2 class="text-xs font-bold text-slate-500">{{ t('competition.player.matchesHeader') }}</h2>
         <p
           v-if="view.matches.length === 0"
-          class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl"
+          class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md"
         >
           {{ t('competition.player.noMatchesAssigned') }}<br />{{ t('competition.player.noMatchesAssignedHint') }}
         </p>
@@ -436,7 +436,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
         <div
           v-for="m in view.matches"
           :key="m.matchId"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden"
         >
           <!-- カードヘッダ -->
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
@@ -448,7 +448,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               <span v-if="m.opponent?.teamName" class="text-xs font-mono ml-1" :class="teamColorClass(m.opponent.teamName)">({{ m.opponent.teamName }})</span>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
-              <p class="text-[10px] font-mono text-slate-400 tracking-[0.25em] uppercase">
+              <p class="text-[10px] font-mono text-slate-400">
                 {{ kindLabel(m.matchKind) }} ·
                 {{ LEVELS_FOR_KIND[m.matchKind].length === 1
                     ? `Lv ${LEVELS_FOR_KIND[m.matchKind][0]}`
@@ -456,14 +456,14 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               </p>
               <span
                 v-if="m.requiredGenre"
-                class="text-[10px] font-black px-2 py-0.5 rounded tracking-wider"
+                class="text-[10px] font-bold px-2 py-0.5 rounded"
                 :class="genreBadgeClass(m.requiredGenre)"
               >
                 {{ t('competition.player.requiredGenrePrefix') }} {{ m.requiredGenre }}
               </span>
               <span
                 v-else
-                class="text-[10px] font-black px-2 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
+                class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
               >
                 {{ t('competition.player.genreUnspecified') }}
               </span>
@@ -474,7 +474,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
           <div class="px-4 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <!-- 自分 -->
             <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 space-y-2">
-              <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ t('competition.player.mySide') }}</p>
+              <p class="text-[10px] font-mono text-slate-400">{{ t('competition.player.mySide') }}</p>
               <div v-if="m.myPick" class="space-y-0.5">
                 <p class="font-bold truncate text-sm">{{ m.myPick.songTitle }}</p>
                 <p class="text-[10px] font-mono text-slate-400">
@@ -503,7 +503,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
 
             <!-- 相手 -->
             <div class="bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3 space-y-2">
-              <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ t('competition.player.opponentSide') }}</p>
+              <p class="text-[10px] font-mono text-slate-400">{{ t('competition.player.opponentSide') }}</p>
               <p v-if="m.opponentPick" class="font-bold truncate text-sm">{{ m.opponentPick.songTitle }}</p>
               <p v-else class="italic text-slate-400">
                 {{ m.opponentPickPublished ? t('competition.player.notSubmitted') : t('competition.player.opponentPickHidden') }}
@@ -530,8 +530,8 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
             class="px-4 py-4 space-y-4 bg-slate-100/70 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-700"
           >
             <div class="flex items-center justify-between flex-wrap gap-2">
-              <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500">
-                {{ kindLabel(m.matchKind) }} - <span class="font-black" :class="genreTextClass(m.requiredGenre)">{{ m.requiredGenre }}</span> {{ t('competition.player.fromGenre') }}
+              <p class="text-[10px] font-mono text-slate-500">
+                {{ kindLabel(m.matchKind) }} - <span class="font-bold" :class="genreTextClass(m.requiredGenre)">{{ m.requiredGenre }}</span> {{ t('competition.player.fromGenre') }}
               </p>
               <button
                 type="button"
@@ -546,7 +546,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               Lv 帯は matchKind から自動。
             -->
             <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg p-3">
-              <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">
+              <p class="text-[10px] font-mono text-slate-500 mb-2">
                 {{ t('competition.player.directIdSection') }}
               </p>
               <div class="flex items-center gap-2">
@@ -575,16 +575,16 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
 
             <!-- Step 1: Lv (vanguard のみ複数選択肢、他は自動セット済) -->
             <div v-if="availableLevels.length > 1">
-              <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">{{ t('competition.player.step1Lv') }}</p>
+              <p class="text-[10px] font-mono text-slate-500 mb-2">{{ t('competition.player.step1Lv') }}</p>
               <div class="flex gap-2">
                 <button
                   v-for="lv in availableLevels"
                   :key="lv"
                   type="button"
                   @click="selectLevel(lv)"
-                  class="px-4 py-2 rounded-lg text-sm font-black transition-colors"
+                  class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
                   :class="editingLevel === lv
-                    ? 'bg-blue-600 text-white shadow'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600'"
                 >Lv {{ lv }}</button>
               </div>
@@ -592,7 +592,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
 
             <!-- Step 2: 曲リスト -->
             <div v-if="editingLevel">
-              <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-500 mb-2">
+              <p class="text-[10px] font-mono text-slate-500 mb-2">
                 {{ availableLevels.length > 1 ? 'Step 2' : 'Step 1' }}: {{ t('competition.player.stepSelectSong') }} ({{ availableSongs.length }})
               </p>
               <div class="max-h-72 overflow-y-auto border border-slate-200 dark:border-slate-600 rounded-lg divide-y divide-slate-100 dark:divide-slate-700/60 bg-white dark:bg-slate-800">
@@ -623,11 +623,11 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
             </div>
             <span
               v-if="m.myStrategyUse?.enabled"
-              class="shrink-0 text-[11px] font-black px-2.5 py-1 rounded-lg bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white tracking-wider"
+              class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-fuchsia-600 text-white"
             >⚡ 発動予定</span>
             <span
               v-else
-              class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-500 tracking-wider"
+              class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-500"
             >発動予定なし</span>
           </div>
         </div>
@@ -640,14 +640,14 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
       class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
       @click.self="cancelSubmitConfirm"
     >
-      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-        <p class="text-xs font-mono uppercase tracking-[0.3em] text-slate-500">{{ t('competition.player.confirmTitle') }}</p>
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md max-w-md w-full p-6 space-y-4 shadow-xl">
+        <p class="text-xs font-mono text-slate-500">{{ t('competition.player.confirmTitle') }}</p>
         <p class="text-base font-bold leading-relaxed">
           {{ t('competition.player.confirmHeading', { kind: editingMatch ? kindLabel(editingMatch.matchKind) : '' }) }}<br />
           <span class="text-rose-500 text-sm">{{ t('competition.player.confirmQuestion') }}</span>
         </p>
-        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
-          <p class="text-xl font-black truncate">{{ pendingSubmitSong.title }}</p>
+        <div class="rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+          <p class="text-xl font-bold truncate">{{ pendingSubmitSong.title }}</p>
           <p class="text-xs font-mono text-slate-500 mt-1">
             <span class="text-emerald-600 dark:text-emerald-300 font-bold">#{{ pendingSubmitSong.id }}</span>
             · {{ pendingSubmitSong.version }}
@@ -665,12 +665,12 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
           <button
             type="button"
             @click="cancelSubmitConfirm"
-            class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+            class="px-4 py-2 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
           >{{ t('competition.player.confirmCancel') }}</button>
           <button
             type="button"
             @click="submitSongConfirmed"
-            class="px-5 py-2 rounded-xl text-sm font-black tracking-wider uppercase bg-blue-600 text-white hover:bg-blue-700 shadow-md"
+            class="px-5 py-2 rounded-md text-sm font-bold bg-blue-600 text-white hover:bg-blue-700"
           >{{ t('competition.player.confirmYes') }}</button>
         </div>
       </div>

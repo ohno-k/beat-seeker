@@ -293,7 +293,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-6xl animate-fade-in bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-200">
+  <div class="w-full max-w-6xl animate-fade-in bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-100 dark:border-slate-700 transition-colors duration-200">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -328,7 +328,7 @@ onMounted(() => {
       {{ t('history.empty') }}
     </div>
 
-    <div v-else class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-else class="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <table class="w-full text-left border-collapse whitespace-nowrap">
         <thead>
           <tr class="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm transition-colors duration-200">
@@ -380,17 +380,17 @@ onMounted(() => {
             </td>
 
             <!-- 種別列（更新曲数 or 難易度改訂バッジ、+ INFINITAS 取り込みなら INF バッジ） -->
-            <td class="p-4 text-center align-middle font-black">
+            <td class="p-4 text-center align-middle font-bold">
               <div class="flex items-center justify-center gap-1.5">
-                <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-base">
+                <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded text-base">
                   {{ item.updatedCount }} {{ t('history.unitSongs') }}
                 </span>
-                <span v-else class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-sm">
+                <span v-else class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded text-sm">
                   {{ t('history.revision') }}
                 </span>
                 <span
                   v-if="item._isGrouped ? item._hasInf : item.tag === 'INFINITAS'"
-                  class="px-2 py-1 bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 rounded-full text-xs font-bold"
+                  class="px-2 py-1 bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-400 rounded text-xs font-bold"
                   :title="t('history.infBadgeHint')"
                 >{{ t('history.infBadge') }}</span>
               </div>
@@ -398,7 +398,7 @@ onMounted(() => {
 
             <!-- Beat-PT 列（合計値 + 増減バッジ） -->
             <td class="p-4 text-center align-middle w-36">
-              <div class="font-black text-slate-700 dark:text-slate-200 text-lg">
+              <div class="font-bold text-slate-700 dark:text-slate-200 text-lg">
                 {{ item.totalBeatPt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
               </div>
               <div v-if="item.beatPtIncrease >= 0.1" class="text-sm font-bold text-indigo-500 dark:text-indigo-400 mt-0.5">
@@ -411,7 +411,7 @@ onMounted(() => {
 
             <!-- Rate-PT 列（有効時のみ、合計値 + 増減バッジ） -->
             <td v-if="showRateTier" class="p-4 text-center align-middle w-36">
-              <div class="font-black text-slate-700 dark:text-slate-200 text-lg">
+              <div class="font-bold text-slate-700 dark:text-slate-200 text-lg">
                 {{ item.totalRatePt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
               </div>
               <div v-if="item.ratePtIncrease >= 0.1" class="text-sm font-bold text-indigo-500 dark:text-indigo-400 mt-0.5">

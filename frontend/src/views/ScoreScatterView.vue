@@ -412,10 +412,10 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
 
 <template>
   <div class="w-full max-w-6xl mx-auto space-y-6 animate-fade-in">
-    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
+    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-md border border-slate-200 dark:border-slate-700">
       <!-- ヘッダー -->
       <div class="flex items-center gap-4 mb-6">
-        <div class="p-3 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30">
+        <div class="p-3 rounded-md bg-cyan-100 dark:bg-cyan-900/30">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <circle cx="6" cy="18" r="2" stroke-width="2"/>
             <circle cx="11" cy="9" r="2" stroke-width="2"/>
@@ -425,7 +425,7 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
           </svg>
         </div>
         <div>
-          <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ t('scatter.title') }}</h2>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('scatter.title') }}</h2>
           <p class="text-slate-500 dark:text-slate-400 text-sm">{{ t('scatter.subtitle') }}</p>
         </div>
       </div>
@@ -436,10 +436,10 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div v-for="slot in (['A','B'] as const)" :key="slot"
           v-show="slot === 'A' || selected.A"
-          class="rounded-2xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-900/40"
+          class="rounded-md border border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-900/40"
           :class="{ 'md:col-span-2': slot === 'A' && !selected.A }">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ slot === 'A' ? t('scatter.chartASlot') : t('scatter.chartBSlot') }}</span>
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ slot === 'A' ? t('scatter.chartASlot') : t('scatter.chartBSlot') }}</span>
             <span v-if="slot === 'B' && isAutoPicking"
               class="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 inline-flex items-center gap-1">
               <span class="w-3 h-3 border-2 border-cyan-200 dark:border-slate-700 border-t-cyan-500 rounded-full animate-spin"></span>
@@ -497,7 +497,7 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
 
       <!-- 結果エリア -->
       <div v-if="!selected.A || !selected.B"
-        class="h-64 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl">
+        class="h-64 flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
         {{ t('scatter.selectTwo') }}
       </div>
 
@@ -508,16 +508,16 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
       </div>
 
       <div v-else-if="errorMsg"
-        class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl text-center font-bold">
+        class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
         {{ errorMsg }}
       </div>
 
       <div v-else-if="scatterData">
         <!-- 統計サマリ: n / 相関係数 r / 回帰式 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <div class="rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
-            <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ t('scatter.nLabelAbove') }}</div>
-            <div class="text-3xl font-black text-cyan-600 dark:text-cyan-400 tabular-nums">
+          <div class="rounded-md bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
+            <div class="text-[10px] font-bold text-slate-400">{{ t('scatter.nLabelAbove') }}</div>
+            <div class="text-3xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums">
               {{ pointsRendered.toLocaleString() }}
               <span class="text-xs font-bold text-slate-400 ml-1">/ {{ scatterData.n.toLocaleString() }}</span>
             </div>
@@ -525,9 +525,9 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
               {{ t('scatter.excludedCount', { count: droppedCount }) }}
             </div>
           </div>
-          <div class="rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
-            <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ t('scatter.correlation') }}</div>
-            <div class="text-3xl font-black tabular-nums"
+          <div class="rounded-md bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
+            <div class="text-[10px] font-bold text-slate-400">{{ t('scatter.correlation') }}</div>
+            <div class="text-3xl font-bold tabular-nums"
               :class="regression ? (Math.abs(regression.r) >= 0.7 ? 'text-emerald-600 dark:text-emerald-400'
                                   : Math.abs(regression.r) >= 0.4 ? 'text-amber-600 dark:text-amber-400'
                                   : 'text-slate-500 dark:text-slate-400') : 'text-slate-400'">
@@ -537,8 +537,8 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
               r² = {{ regression ? (regression.r * regression.r).toFixed(3) : '—' }}
             </div>
           </div>
-          <div class="rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
-            <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ t('scatter.regressionEq') }}</div>
+          <div class="rounded-md bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
+            <div class="text-[10px] font-bold text-slate-400">{{ t('scatter.regressionEq') }}</div>
             <div class="text-base font-bold tabular-nums text-red-600 dark:text-red-400 mt-1">
               <template v-if="regression">
                 y = {{ regression.slope.toFixed(3) }} x
@@ -552,7 +552,7 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
         </div>
 
         <!-- 散布図 -->
-        <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 p-3 sm:p-5">
+        <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 p-3 sm:p-5">
           <div v-if="pointsRendered === 0"
             class="h-72 flex items-center justify-center text-slate-400 text-sm">
             {{ t('scatter.noPointsInA') }}

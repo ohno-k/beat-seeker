@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
       class="fixed inset-0 z-[140] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-fade-in"
       @click.self="close"
     >
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[92vh]">
         <!-- ヘッダ -->
         <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('shareImport.title') }}</p>
@@ -172,14 +172,14 @@ onBeforeUnmount(() => {
         <div v-if="savedChart" class="p-6 flex flex-col items-center text-center gap-4">
           <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-2xl">✓</div>
           <div>
-            <p class="font-black text-slate-800 dark:text-slate-100">{{ t('shareImport.saved') }}</p>
+            <p class="font-bold text-slate-800 dark:text-slate-100">{{ t('shareImport.saved') }}</p>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ savedChart }}</p>
           </div>
           <div class="flex gap-2 w-full max-w-xs">
-            <button type="button" class="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" @click="reset">
+            <button type="button" class="flex-1 rounded-md px-4 py-2.5 text-sm font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" @click="reset">
               {{ t('shareImport.another') }}
             </button>
-            <button type="button" class="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors" @click="close">
+            <button type="button" class="flex-1 rounded-md px-4 py-2.5 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors" @click="close">
               {{ t('shareImport.close') }}
             </button>
           </div>
@@ -201,7 +201,7 @@ onBeforeUnmount(() => {
             <button
               v-else
               type="button"
-              class="w-full py-6 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-colors"
+              class="w-full py-6 rounded-md border-2 border-dashed border-slate-300 dark:border-slate-600 text-sm text-slate-500 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500 transition-colors"
               @click="triggerPick"
             >
               {{ t('shareImport.pickImage') }}
@@ -210,7 +210,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- ログイン必須の案内 -->
-          <div v-if="!isLoggedIn" class="p-3 m-4 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 flex items-center justify-between gap-3">
+          <div v-if="!isLoggedIn" class="p-3 m-4 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 flex items-center justify-between gap-3">
             <p class="text-xs sm:text-sm text-amber-700 dark:text-amber-300">{{ t('shareImport.loginRequired') }}</p>
             <button type="button" class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition-colors" @click="emit('login')">
               {{ t('shareImport.login') }}
@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- エラー -->
-          <div v-if="error" class="mx-4 mt-3 p-3 rounded-xl border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/40 text-xs sm:text-sm text-red-700 dark:text-red-300">
+          <div v-if="error" class="mx-4 mt-3 p-3 rounded-md border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/40 text-xs sm:text-sm text-red-700 dark:text-red-300">
             {{ error }}
           </div>
 
