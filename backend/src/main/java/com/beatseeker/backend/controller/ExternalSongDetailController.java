@@ -50,7 +50,7 @@ import java.util.Optional;
  * エンドポイント:
  *  - {@code GET /api/external/v1/song-detail?title=...&difficulty=ANOTHER}
  *
- * レスポンス構造（user / song / score / rank / history / chartTendency）は
+ * レスポンス構造（user / song / score / rank / options / optionVotes / history / chartTendency）は
  * docs/external_api.md に明記。
  *
  * 設計方針:
@@ -186,6 +186,19 @@ public class ExternalSongDetailController {
                 options = List.of();
             }
 
+            // ── 8.5. オプション投票集計（推奨オプションの譜面別投票） ──
+            // 内部 API GET /api/votes と同じ構造（counts / totalVotes / myVotes）を返す。
+            stage = "optionVotes";
+            Map<String, Object> optionVotes;
+            try {
+                optionVotes = buildOptionVotesBlock(user, title, difficultyName);
+            } catch (Exception voteEx) {
+                // option_votes テーブル未作成等で失敗しても残りの応答は返す（options と同じ方針）。
+                log.error("song-detail: optionVotes lookup failed, falling back to null (user={} title={} diff={})",
+                        user.getIidxId(), title, difficultyName, voteEx);
+                optionVotes = null;
+            }
+
             // ── 9. 非公式難易度ランク（例: "12.2"） ──
             // difficulty_ranks + difficulty_rank_songs を JOIN して引く。
             // LEGGENDARIA は difficulty_rank_songs.song_title が "<title>[L]" 形式で格納されているため
@@ -204,6 +217,7 @@ public class ExternalSongDetailController {
             body.put("score", scoreOpt.map(this::buildScoreBlock).orElse(null));
             body.put("rank", rankOpt.map(this::buildRankBlock).orElse(null));
             body.put("options", options);
+            body.put("optionVotes", optionVotes);
             body.put("history", history);
             body.put("chartTendency", tendencyOpt.map(this::buildTendencyBlock).orElse(null));
 
@@ -481,6 +495,56 @@ public class ExternalSongDetailController {
         m.put("total", r.getTotal());
         m.put("calculatedAt", r.getCalculatedAt());
         return m;
+    }
+
+    /**
+     * 【メソッドの役割】 オプション投票（推奨オプション）の集計ブロックを組み立てる。
+     *
+     * 内部 API {@code GET /api/votes}（{@link OptionVoteController#getVotes}）と同じ構造:
+     *  - {@code counts}     : {REGULAR: N, MIRROR: N, RANDOM: N, R-RANDOM: N, S-RANDOM: N}
+     *                          の譜面別投票数（複数選択可なので合計 ≥ ユーザー数）
+     *  - {@code totalVotes} : ユニークユーザー数（複数選択しても 1 と数える）
+     *  - {@code myVotes}    : トークン所有者自身が投票している全オプションの配列
+     *
+     * DB には常に 1P 視点で保存されているため、トークン所有者の playSide が 2P なら
+     * REGULAR / MIRROR を入れ替えて「閲覧者視点」で返す（アプリ内表示と同じ扱い）。
+     */
+    private Map<String, Object> buildOptionVotesBlock(User user, String title, String difficultyName) {
+        String viewerSide = user.getPlaySide() != null ? user.getPlaySide() : "1P";
+
+        // 5 種のオプションをゼロ初期化。LinkedHashMap で表示順を固定する。
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        counts.put("REGULAR", 0);
+        counts.put("MIRROR", 0);
+        counts.put("RANDOM", 0);
+        counts.put("R-RANDOM", 0);
+        counts.put("S-RANDOM", 0);
+        for (OptionVote v : optionVoteRepository.findByTitleAndDifficultyName(title, difficultyName)) {
+            String displayed = convertToViewerPerspective(v.getOptionType(), viewerSide);
+            counts.put(displayed, counts.getOrDefault(displayed, 0) + 1);
+        }
+
+        List<String> myVotes = new ArrayList<>();
+        for (OptionVote v : optionVoteRepository.findByUserAndTitleAndDifficultyName(user, title, difficultyName)) {
+            myVotes.add(convertToViewerPerspective(v.getOptionType(), viewerSide));
+        }
+
+        long totalVotes = optionVoteRepository.countDistinctUsersByTitleAndDifficultyName(title, difficultyName);
+
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("counts", counts);
+        m.put("totalVotes", totalVotes);
+        m.put("myVotes", myVotes);
+        return m;
+    }
+
+    /** DB に保存された 1P 視点のオプション値を「閲覧者視点」に戻す。RANDOM 系は左右対称の影響を受けない。 */
+    private String convertToViewerPerspective(String storedOption, String viewerSide) {
+        if ("2P".equals(viewerSide)) {
+            if ("REGULAR".equals(storedOption)) return "MIRROR";
+            if ("MIRROR".equals(storedOption)) return "REGULAR";
+        }
+        return storedOption;
     }
 
     /**

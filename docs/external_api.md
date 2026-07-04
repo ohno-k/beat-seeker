@@ -116,8 +116,8 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
 
 ### GET /api/external/v1/song-detail
 
-トークン所有者の楽曲詳細（ユーザー情報・譜面メタ・自分のスコア・順位・履歴・
-譜面傾向サマリ）を一括で返します。
+トークン所有者の楽曲詳細（ユーザー情報・譜面メタ・自分のスコア・順位・
+オプション投票集計・履歴・譜面傾向サマリ）を一括で返します。
 
 #### クエリパラメータ
 
@@ -171,6 +171,11 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
     "calculatedAt": "2026-05-13T03:00:00"
   },
   "options": ["乱"],
+  "optionVotes": {
+    "counts": { "REGULAR": 3, "MIRROR": 1, "RANDOM": 12, "R-RANDOM": 0, "S-RANDOM": 2 },
+    "totalVotes": 15,
+    "myVotes": ["RANDOM"]
+  },
   "history": [
     { "uploadedAt": "2026-05-12T22:31:14", "score": 3402, "beatPt": 162.8, "ratePt": 95.2 },
     { "uploadedAt": "2026-04-30T19:02:01", "score": 3380, "beatPt": 161.4, "ratePt": 94.8 }
@@ -201,9 +206,27 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
 | `score` | ユーザーが未プレイの場合は `null` |
 | `rank` | 順位キャッシュ未生成（ANOTHER / LEGGENDARIA 以外は基本 `null`） |
 | `options` | sync-options で同期がなければ `[]` |
+| `optionVotes` | 投票が 0 件でも構造は返る（counts 全 0 / totalVotes 0 / myVotes `[]`）。DB 障害時のみ `null` |
 | `history` | プレイ履歴がなければ `[]` |
 | `chartTendency` | 譜面傾向プロファイル未登録の場合は `null` |
 | `song.informalRank` | 非公式難易度表（`difficulty_ranks`）未登録の譜面は `null` |
+
+### `optionVotes`（オプション投票集計）について
+
+beat-seeker のユーザーが譜面ごとに投票している「推奨オプション」の集計です
+（アプリ内の楽曲詳細画面に表示されるものと同じデータ）。
+
+| フィールド | 説明 |
+| --- | --- |
+| `counts` | オプション別の得票数。キーは `REGULAR` / `MIRROR` / `RANDOM` / `R-RANDOM` / `S-RANDOM` の 5 種固定 |
+| `totalVotes` | 投票したユニークユーザー数。1 人が複数オプションに投票しても 1 と数える（割合表示の分母に使う） |
+| `myVotes` | トークン所有者自身が投票しているオプションの配列（複数選択可）。未投票なら `[]` |
+
+補足:
+
+- 1 ユーザーが複数オプションに投票できるため、`counts` の合計は `totalVotes` 以上になり得ます。
+- 値は **トークン所有者のプレイサイド視点** に変換済みです。DB には常に 1P 視点で保存されており、
+  所有者が 2P 設定の場合は `REGULAR` と `MIRROR` を入れ替えて返します（RANDOM 系は変換対象外）。
 
 ### `level` / `difficultyLevel` / `informalRank` の違い
 
