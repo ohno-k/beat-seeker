@@ -1295,6 +1295,7 @@ export const ko = {
   'competition.player.loading': '읽는 중…',
   'competition.player.strategyQuota': 'Strategy Card 사용 가능',
   'competition.player.strategyQuotaSuffix': '(팀 합계)',
+  'competition.player.selfPickNote': '자선곡은 대회 종료까지 몇 번이든 제출・변경할 수 있습니다.',
   'competition.player.matchupUnit': 'matchup',
   'competition.player.matchesHeader': '담당 경기',
   'competition.player.noMatchesAssigned': '아직 담당 경기가 배정되지 않았습니다.',

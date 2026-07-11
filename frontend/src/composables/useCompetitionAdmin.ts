@@ -78,10 +78,8 @@ export interface CompetitionMatchupDto {
   matchupOrder: number;
   teamAId: number;
   teamBId: number;
-  /** A 側のラインアップ (TL の起用) を B 側に公開しているか。主催が任意のタイミングで切替。 */
-  lineupPublishedA: boolean;
-  /** B 側のラインアップを A 側に公開しているか。 */
-  lineupPublishedB: boolean;
+  /** 起用 (ラインアップ) が相手に公開済みか。起用クローズ日時 (deadlineAt) 到達で自動公開 (手動公開は廃止)。 */
+  lineupPublished: boolean;
   /** 決勝 matchup フラグ。コスト/StrategyCard 制限の対象外。 */
   isFinals: boolean;
   /**
@@ -600,24 +598,6 @@ export function useCompetitionAdmin() {
   };
 
   /**
-   * matchup のラインアップ公開状態を更新する。
-   * 公開されると相手チームの TL / プレイヤーが起用名を見られるようになる。
-   */
-  const publishLineup = async (
-    competitionId: number,
-    matchupId: number,
-    side: 'a' | 'b' | 'both',
-    published: boolean,
-  ): Promise<void> => {
-    const res = await fetch(
-      `${API_BASE}/api/competitions/${competitionId}/matchups/${matchupId}/lineup-publish`,
-      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ side, published }) },
-    );
-    await throwIfError(res);
-    await fetchCompetition(competitionId);
-  };
-
-  /**
    * matchup を「設定済み (実施対象)」⇄「未設定」に切り替える。
    * 設定すると選んだ順に matchupOrder が採番され、プレイヤー/TL に公開される。
    * 解除すると未設定に戻り、残りの設定済み matchup の順番が 1..k に詰め直される。
@@ -882,7 +862,6 @@ export function useCompetitionAdmin() {
     deleteParticipant,
     openCompetition,
     setMatchGenre,
-    publishLineup,
     configureMatchup,
     publishPick,
     deleteCompetition,

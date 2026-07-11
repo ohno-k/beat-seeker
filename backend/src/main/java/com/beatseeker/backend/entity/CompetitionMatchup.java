@@ -56,32 +56,15 @@ public class CompetitionMatchup {
      * 決勝 matchup ({@link #isFinals}) は生成時から true。
      *
      * <p>列名を明示しているのは {@code SpringPhysicalNamingStrategy} 由来の命名ぶれを避けるため
-     * ({@link #lineupPublishedA} のコメント参照)。
+     * (末尾大文字の前にアンダースコアが入らない Hibernate の癖に対し、DB 列名と揃える)。
      */
     @Column(name = "configured", nullable = false)
     @ColumnDefault("false")
     private Boolean configured = false;
 
-    /**
-     * チーム A 側の起用 (ラインアップ) が相手 (B) に公開されているか。
-     * 主催が任意のタイミングで true に切替可能。デフォルト false。
-     * false の間、相手チームの TL / プレイヤーには「未公開」扱いで A の起用名は伏せられる。
-     *
-     * <p>{@code @Column(name = ...)} を明示しているのは、Hibernate の
-     * {@code SpringPhysicalNamingStrategy} が末尾 1 文字の大文字前にアンダースコアを入れない
-     * ({@code lineupPublishedA → lineup_publisheda} となってしまう) ため、
-     * マイグレーション SQL 側の列名 {@code lineup_published_a} と揃える必要があるから。
-     */
-    @Column(name = "lineup_published_a", nullable = false)
-    @ColumnDefault("false")
-    private Boolean lineupPublishedA = false;
-
-    /**
-     * チーム B 側の起用が相手 (A) に公開されているか。挙動は {@link #lineupPublishedA} と対称。
-     */
-    @Column(name = "lineup_published_b", nullable = false)
-    @ColumnDefault("false")
-    private Boolean lineupPublishedB = false;
+    // 起用 (ラインアップ) の相手への公開は「起用クローズ日時 (Competition.deadlineAt) を過ぎたら自動公開」に一本化した。
+    // 旧・手動公開フラグ lineupPublishedA/B は廃止。公開判定は Competition#isLineupClosed() を参照する。
+    // (DB の lineup_published_a / lineup_published_b 列は ddl-auto=update では削除されず残るが未使用。)
 
     /**
      * 決勝 matchup フラグ。

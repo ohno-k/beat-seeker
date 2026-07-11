@@ -1373,6 +1373,7 @@ export const ja = {
   'competition.player.loading': '読み込み中…',
   'competition.player.strategyQuota': 'Strategy Card 使用枠',
   'competition.player.strategyQuotaSuffix': '(自チーム合計)',
+  'competition.player.selfPickNote': '自選曲は大会終了まで何度でも提出・変更できます',
   'competition.player.matchupUnit': 'matchup',
   'competition.player.matchesHeader': '担当試合',
   'competition.player.noMatchesAssigned': '担当試合はまだアサインされていません。',

@@ -169,13 +169,10 @@ public class CompetitionTlController {
 
             CompetitionTeam opponent = iAmA ? mu.getTeamB() : mu.getTeamA();
 
-            // 自軍の公開状態と相手の公開状態。後者は「相手起用が自分から見えるか」の判定に使う。
-            boolean myLineupPublished = iAmA
-                    ? Boolean.TRUE.equals(mu.getLineupPublishedA())
-                    : Boolean.TRUE.equals(mu.getLineupPublishedB());
-            boolean opponentLineupPublished = iAmA
-                    ? Boolean.TRUE.equals(mu.getLineupPublishedB())
-                    : Boolean.TRUE.equals(mu.getLineupPublishedA());
+            // 起用公開は廃止。起用クローズ日時 (deadlineAt) 到達で両サイド一斉に自動公開。
+            boolean lineupPublished = comp.isLineupClosed();
+            boolean myLineupPublished = lineupPublished;
+            boolean opponentLineupPublished = lineupPublished;
 
             Map<String, Object> mum = new LinkedHashMap<>();
             mum.put("matchupId", mu.getId());
@@ -375,12 +372,7 @@ public class CompetitionTlController {
         if (!comp.isLineupClosed()) {
             return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ後に発動を決定できます"));
         }
-        boolean opponentLineupPublished = iAmA
-                ? Boolean.TRUE.equals(matchup.getLineupPublishedB())
-                : Boolean.TRUE.equals(matchup.getLineupPublishedA());
-        if (!opponentLineupPublished) {
-            return ResponseEntity.badRequest().body(Map.of("message", "相手のオーダー(起用)公開後に発動を決定できます"));
-        }
+        // 起用公開は起用クローズ日時到達で自動公開されるため、上の isLineupClosed() ゲートに一本化 (旧・相手公開チェックは廃止)。
         if (mine == null || theirs == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "両者の起用が揃ってから発動を決定できます"));
         }

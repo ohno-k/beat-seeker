@@ -50,7 +50,6 @@ const {
   deleteParticipant,
   openCompetition,
   setMatchGenre,
-  publishLineup,
   configureMatchup,
   publishPick,
   setDeadline,
@@ -423,16 +422,6 @@ const genresForKind = (matchKind: 'vanguard' | 'middle' | 'captain'): Competitio
 };
 
 // ── 公開トグル ────────────────────────────────────────────
-const handlePublishLineup = async (matchupId: number, side: 'a' | 'b' | 'both', published: boolean) => {
-  if (!currentCompetition.value) return;
-  try {
-    await publishLineup(currentCompetition.value.id, matchupId, side, published);
-    toast.success(published ? 'ラインアップを公開しました' : 'ラインアップ公開を解除しました');
-  } catch (e) {
-    toast.error((e as Error).message);
-  }
-};
-
 const handlePublishPick = async (matchId: number, side: 'a' | 'b' | 'both', published: boolean) => {
   if (!currentCompetition.value) return;
   try {
@@ -1320,12 +1309,6 @@ const teamMatchupPoints = (teamId: number): number => {
   return standings.value?.rows.find(r => r.teamId === teamId)?.matchupPoints ?? 0;
 };
 
-/** matchup の両側ラインアップ公開状態を判定 (none / partial / both)。 */
-const lineupPublishStateOf = (mu: { lineupPublishedA: boolean; lineupPublishedB: boolean }): 'none' | 'partial' | 'both' => {
-  if (mu.lineupPublishedA && mu.lineupPublishedB) return 'both';
-  if (mu.lineupPublishedA || mu.lineupPublishedB) return 'partial';
-  return 'none';
-};
 
 // ── 対戦表: 設定済み / 未設定の振り分け ──────────────────
 /** 設定済み matchup (実施対象)。matchupOrder 昇順 (= 運営が設定した順)。 */
@@ -1837,7 +1820,7 @@ const statusColor = (s: string) => ({
           </div>
         </section>
 
-        <!-- 起用クローズ日時 (JST): 手動ロックの代替。設定時刻を過ぎると TL 起用編集・プレイヤー自選曲提出が締切。 -->
+        <!-- 起用クローズ日時 (JST): 手動ロックの代替。設定時刻を過ぎると TL 起用編集のみ締切 (プレイヤー自選曲提出は対象外)。 -->
         <section
           v-if="currentCompetition.status !== 'draft'"
           class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
@@ -1973,37 +1956,11 @@ const statusColor = (s: string) => ({
                   >設定解除</button>
                 </div>
               </div>
-              <!-- ラインアップ公開ボタン群 -->
-              <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono">
+              <!-- 起用公開は起用クローズ日時 (deadlineAt) 到達で自動公開。手動公開は廃止。 -->
+              <div class="text-[10px] font-mono">
                 <span class="text-slate-400">起用公開:</span>
-                <button
-                  type="button"
-                  @click="handlePublishLineup(mu.id, 'a', !mu.lineupPublishedA)"
-                  class="px-2 py-1 rounded transition-colors"
-                  :class="mu.lineupPublishedA
-                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
-                >
-                  {{ teamNameOf(mu.teamAId) }} {{ mu.lineupPublishedA ? '✓ 公開中' : '未公開' }}
-                </button>
-                <button
-                  type="button"
-                  @click="handlePublishLineup(mu.id, 'b', !mu.lineupPublishedB)"
-                  class="px-2 py-1 rounded transition-colors"
-                  :class="mu.lineupPublishedB
-                    ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
-                >
-                  {{ teamNameOf(mu.teamBId) }} {{ mu.lineupPublishedB ? '✓ 公開中' : '未公開' }}
-                </button>
-                <button
-                  type="button"
-                  @click="handlePublishLineup(mu.id, 'both', lineupPublishStateOf(mu) !== 'both')"
-                  class="px-2 py-1 rounded bg-violet-500 text-white hover:bg-violet-600 ml-auto"
-                  :title="lineupPublishStateOf(mu) === 'both' ? '両方解除' : '両方公開'"
-                >
-                  {{ lineupPublishStateOf(mu) === 'both' ? '両方解除' : '両方公開' }}
-                </button>
+                <span v-if="mu.lineupPublished" class="ml-1 font-bold text-emerald-600 dark:text-emerald-300">✓ 公開中 (起用クローズ日時経過)</span>
+                <span v-else class="ml-1 text-slate-400">起用クローズ日時を過ぎると自動公開</span>
               </div>
             </div>
 

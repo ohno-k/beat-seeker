@@ -146,10 +146,8 @@ public class CompetitionPlayerController {
             boolean opponentLocked = false;
             boolean myLocked = false;
             // 公開フラグ: 相手側の起用と自選曲がそれぞれ「自分から見える」状態か
-            CompetitionMatchup mu = m.getMatchup();
-            boolean opponentLineupPublished = iAmA
-                    ? Boolean.TRUE.equals(mu.getLineupPublishedB())
-                    : Boolean.TRUE.equals(mu.getLineupPublishedA());
+            // 起用公開は起用クローズ日時 (deadlineAt) 到達で自動公開。相手起用が見えるかは isLineupClosed() で判定。
+            boolean opponentLineupPublished = comp.isLineupClosed();
             boolean opponentPickPublished = iAmA
                     ? Boolean.TRUE.equals(m.getPickPublishedB())
                     : Boolean.TRUE.equals(m.getPickPublishedA());

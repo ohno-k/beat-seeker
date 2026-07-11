@@ -57,7 +57,10 @@ public class Competition {
     @Column(length = 16, nullable = false)
     private String status = "draft";
 
-    /** 自選曲提出の締切。null の場合は締切未設定。 */
+    /**
+     * 起用 (オーダー) クローズ日時。null の場合は締切未設定。
+     * TL の起用編集のみを締め切り、プレイヤーの自選曲提出は対象外 ({@link #isLineupClosed()} 参照)。
+     */
     private LocalDateTime deadlineAt;
 
     /** 主催ユーザー (= 大会を作成したログインユーザー)。 */

@@ -1002,7 +1002,8 @@ public class CompetitionAdminController {
      * 【メソッドの役割】 起用クローズ日時 ({@code deadlineAt}) を設定/解除する。
      *
      * <p>手動ロックの代替。設定した日時 (JST の壁時計時刻として保持) を過ぎると、
-     * TL の起用編集とプレイヤーの自選曲編集が自動的に締め切られる ({@link Competition#isLineupClosed()})。
+     * TL の起用編集のみが自動的に締め切られる ({@link Competition#isLineupClosed()})。
+     * プレイヤーの自選曲提出は締切対象外 (大会が finished になるまで提出/変更できる)。
      *
      * <p>リクエストの {@code deadlineAt} は ISO ローカル日時文字列 (例: {@code 2026-06-20T21:00})。
      * 空文字 / null を渡すと締切解除 (= 締め切らない状態に戻す)。
@@ -1223,44 +1224,9 @@ public class CompetitionAdminController {
     }
 
     // ── 起用 (ラインアップ) の公開 ─────────────────────────
-
-    /**
-     * 【メソッドの役割】 matchup のラインアップ公開フラグを更新する。
-     *
-     * <p>{@code side} = "a" / "b" / "both" を指定して片側または両側を一度に
-     * 公開/非公開に切り替える。
-     * 公開された側のチーム起用名は相手チームの TL / プレイヤーから見えるようになる。
-     */
-    @PutMapping("/{competitionId}/matchups/{matchupId}/lineup-publish")
-    @Transactional
-    public ResponseEntity<Map<String, Object>> publishLineup(
-            Authentication auth,
-            @PathVariable Long competitionId,
-            @PathVariable Long matchupId,
-            @RequestBody PublishRequest req) {
-        requireOrganizer(auth);
-        Competition comp = requireCompetition(competitionId);
-        if ("finished".equals(comp.getStatus())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
-        }
-        if (req == null || req.side() == null || req.published() == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "side と published が必要です"));
-        }
-        if (!Set.of("a", "b", "both").contains(req.side())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "side は a / b / both のいずれか"));
-        }
-
-        CompetitionMatchup mu = matchupRepository.findById(matchupId)
-                .orElseThrow(() -> new RuntimeException("Matchup not found: " + matchupId));
-        if (!mu.getCompetition().getId().equals(comp.getId())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "指定 matchup はこの大会に属していません"));
-        }
-
-        if ("a".equals(req.side()) || "both".equals(req.side())) mu.setLineupPublishedA(req.published());
-        if ("b".equals(req.side()) || "both".equals(req.side())) mu.setLineupPublishedB(req.published());
-        matchupRepository.save(mu);
-        return ResponseEntity.ok(toMatchupMap(mu));
-    }
+    // 手動公開エンドポイント (PUT .../lineup-publish) は廃止。
+    // 起用の相手への公開は「起用クローズ日時 (Competition.deadlineAt) を過ぎたら自動公開」に一本化し、
+    // 公開判定は各 Read API 側で Competition#isLineupClosed() を参照する。
 
     // ── 自選曲のロック (編集禁止フラグ) ───────────────────
 
@@ -1519,8 +1485,8 @@ public class CompetitionAdminController {
         m.put("matchupOrder", mu.getMatchupOrder());
         m.put("teamAId", mu.getTeamA() != null ? mu.getTeamA().getId() : null);
         m.put("teamBId", mu.getTeamB() != null ? mu.getTeamB().getId() : null);
-        m.put("lineupPublishedA", mu.getLineupPublishedA());
-        m.put("lineupPublishedB", mu.getLineupPublishedB());
+        // 起用公開は手動フラグを廃止し、起用クローズ日時 (deadlineAt) 到達で自動公開。
+        m.put("lineupPublished", mu.getCompetition().isLineupClosed());
         m.put("isFinals", mu.getIsFinals());
         m.put("configured", mu.getConfigured());
         return m;

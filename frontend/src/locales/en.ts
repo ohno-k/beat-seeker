@@ -1294,6 +1294,7 @@ export const en = {
   'competition.player.loading': 'Loading…',
   'competition.player.strategyQuota': 'Strategy Card quota',
   'competition.player.strategyQuotaSuffix': '(team total)',
+  'competition.player.selfPickNote': 'You can submit or change your song picks as many times as you like until the tournament ends.',
   'competition.player.matchupUnit': 'matchups',
   'competition.player.matchesHeader': 'Assigned matches',
   'competition.player.noMatchesAssigned': 'No matches assigned yet.',

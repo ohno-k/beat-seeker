@@ -406,7 +406,13 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
-          <span v-if="view.competition.deadlineAt"> · {{ t('competition.common.deadline') }} {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
+        </p>
+        <!--
+          自選曲提出はオーダー(起用)締切の対象外。締切を表示すると「自選曲も締め切られる」と誤解されるため
+          メンバー URL には締切を出さず、いつでも変更できる旨だけを案内する (canEditMatch は finished でのみ false)。
+        -->
+        <p v-if="view.competition.status !== 'finished'" class="text-xs mt-1 text-emerald-600 dark:text-emerald-300">
+          {{ t('competition.player.selfPickNote') }}
         </p>
         <!-- 自チームの StrategyCard 使用枠 (予選: 4 matchup 中 2 まで) -->
         <p class="text-xs mt-1 font-mono">

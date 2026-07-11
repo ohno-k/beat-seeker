@@ -84,8 +84,10 @@ public class CompetitionSpectatorController {
         for (CompetitionMatchup mu : matchups) {
             if (!Boolean.TRUE.equals(mu.getConfigured())) continue;
 
-            boolean lineupPublishedA = Boolean.TRUE.equals(mu.getLineupPublishedA());
-            boolean lineupPublishedB = Boolean.TRUE.equals(mu.getLineupPublishedB());
+            // 起用公開は廃止。起用クローズ日時 (deadlineAt) 到達で両サイド自動公開。
+            boolean lineupPublished = comp.isLineupClosed();
+            boolean lineupPublishedA = lineupPublished;
+            boolean lineupPublishedB = lineupPublished;
 
             Map<String, Object> mum = new LinkedHashMap<>();
             mum.put("matchupId", mu.getId());
