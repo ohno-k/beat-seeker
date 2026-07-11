@@ -84,8 +84,8 @@ public class CompetitionSpectatorController {
         for (CompetitionMatchup mu : matchups) {
             if (!Boolean.TRUE.equals(mu.getConfigured())) continue;
 
-            // 起用公開は廃止。起用クローズ日時 (deadlineAt) 到達で両サイド自動公開。
-            boolean lineupPublished = comp.isLineupClosed();
+            // 起用公開は起用公開日時 (lineupPublishAt) 到達で両サイド自動公開 (起用クローズとは独立)。
+            boolean lineupPublished = comp.isLineupPublished();
             boolean lineupPublishedA = lineupPublished;
             boolean lineupPublishedB = lineupPublished;
 

@@ -1032,6 +1032,40 @@ public class CompetitionAdminController {
         return ResponseEntity.ok(toCompetitionDetailMap(comp));
     }
 
+    /**
+     * 【メソッドの役割】 起用 (オーダー) 公開日時 ({@code lineupPublishAt}) を設定/解除する。
+     *
+     * <p>設定した日時 (JST の壁時計時刻として保持) を過ぎると、対戦相手・観戦 URL・選手 URL に
+     * 起用 (オーダー) が自動公開される ({@link Competition#isLineupPublished()})。
+     * 起用クローズ日時 ({@code deadlineAt}) とは独立に設定できる (公開だけ後ろ倒しにする等が可能)。
+     *
+     * <p>リクエストの {@code lineupPublishAt} は ISO ローカル日時文字列 (例: {@code 2026-06-20T21:00})。
+     * 空文字 / null を渡すと公開日時解除 (= 自動公開しない状態に戻す)。
+     */
+    @PutMapping("/{competitionId}/lineup-publish-at")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> setLineupPublishAt(
+            Authentication auth, @PathVariable Long competitionId,
+            @RequestBody LineupPublishAtRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if ("finished".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
+        }
+        if (req == null || req.lineupPublishAt() == null || req.lineupPublishAt().isBlank()) {
+            comp.setLineupPublishAt(null);
+        } else {
+            try {
+                comp.setLineupPublishAt(java.time.LocalDateTime.parse(req.lineupPublishAt()));
+            } catch (java.time.format.DateTimeParseException e) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "日時の形式が不正です (例: 2026-06-20T21:00)"));
+            }
+        }
+        competitionRepository.save(comp);
+        return ResponseEntity.ok(toCompetitionDetailMap(comp));
+    }
+
     // ── 状態遷移 ─────────────────────────────────────────────
 
     /**
@@ -1225,8 +1259,9 @@ public class CompetitionAdminController {
 
     // ── 起用 (ラインアップ) の公開 ─────────────────────────
     // 手動公開エンドポイント (PUT .../lineup-publish) は廃止。
-    // 起用の相手への公開は「起用クローズ日時 (Competition.deadlineAt) を過ぎたら自動公開」に一本化し、
-    // 公開判定は各 Read API 側で Competition#isLineupClosed() を参照する。
+    // 起用の相手への公開は「起用公開日時 (Competition.lineupPublishAt) を過ぎたら自動公開」で制御し
+    // (設定は setLineupPublishAt、起用クローズ日時とは独立)、公開判定は各 Read API 側で
+    // Competition#isLineupPublished() を参照する。
 
     // ── 自選曲のロック (編集禁止フラグ) ───────────────────
 
@@ -1370,6 +1405,9 @@ public class CompetitionAdminController {
         m.put("spectatorToken", c.getSpectatorToken());
         // 起用クローズ: deadlineAt を「クローズ日時」として運用。lineupClosed は現在 (JST) 時点の派生状態。
         m.put("lineupClosed", c.isLineupClosed());
+        // 起用公開: lineupPublishAt を「公開日時」として運用。lineupPublished は現在 (JST) 時点の派生状態 (クローズとは独立)。
+        m.put("lineupPublishAt", c.getLineupPublishAt());
+        m.put("lineupPublished", c.isLineupPublished());
         return m;
     }
 
@@ -1485,8 +1523,8 @@ public class CompetitionAdminController {
         m.put("matchupOrder", mu.getMatchupOrder());
         m.put("teamAId", mu.getTeamA() != null ? mu.getTeamA().getId() : null);
         m.put("teamBId", mu.getTeamB() != null ? mu.getTeamB().getId() : null);
-        // 起用公開は手動フラグを廃止し、起用クローズ日時 (deadlineAt) 到達で自動公開。
-        m.put("lineupPublished", mu.getCompetition().isLineupClosed());
+        // 起用公開は手動フラグを廃止し、起用公開日時 (lineupPublishAt) 到達で自動公開 (起用クローズとは独立)。
+        m.put("lineupPublished", mu.getCompetition().isLineupPublished());
         m.put("isFinals", mu.getIsFinals());
         m.put("configured", mu.getConfigured());
         return m;
@@ -1572,6 +1610,9 @@ public class CompetitionAdminController {
      * 空文字 / null で締切解除。
      */
     public record DeadlineRequest(String deadlineAt) {}
+
+    /** 起用 (オーダー) 公開日時設定リクエスト。{@code lineupPublishAt} = ISO ローカル日時 (JST の壁時計時刻)。 */
+    public record LineupPublishAtRequest(String lineupPublishAt) {}
 
     /**
      * 運営チャット返信リクエスト。{@code body} が本文。

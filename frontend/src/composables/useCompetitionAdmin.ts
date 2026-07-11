@@ -38,6 +38,13 @@ export interface CompetitionSummary {
    * true の間は TL の起用編集 (選手の割り当て) のみが締め切られる。自選曲提出は対象外。
    */
   lineupClosed: boolean;
+  /** 起用 (オーダー) 公開日時 (ISO ローカル日時)。null なら公開日時未設定 (自動公開しない)。 */
+  lineupPublishAt: string | null;
+  /**
+   * 起用 (オーダー) 公開済みか (サーバ側で lineupPublishAt と現在時刻(JST)から算出した派生状態)。
+   * true になると対戦相手・観戦 URL・選手 URL に起用が公開される。起用クローズとは独立。
+   */
+  lineupPublished: boolean;
 }
 
 export interface CompetitionTeamDto {
@@ -837,6 +844,20 @@ export function useCompetitionAdmin() {
     await fetchCompetition(competitionId);
   };
 
+  /**
+   * 起用 (オーダー) 公開日時 (lineupPublishAt) を設定/解除する。起用クローズ日時 (deadlineAt) とは独立。
+   * 設定した日時を過ぎると対戦相手・観戦 URL・選手 URL に起用が自動公開される。
+   * @param lineupPublishAt ISO ローカル日時文字列 (例 "2026-06-20T21:00")。null / '' で公開日時解除。
+   */
+  const setLineupPublishAt = async (competitionId: number, lineupPublishAt: string | null): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/lineup-publish-at`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ lineupPublishAt }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
   /** 観戦客向け対戦表公開トークンを発行/再発行する (team5 用)。 */
   const regenerateSpectatorToken = async (competitionId: number): Promise<string> => {
     const res = await fetch(
@@ -889,6 +910,8 @@ export function useCompetitionAdmin() {
     regenerateSpectatorToken,
     // 起用クローズ日時 (手動ロックの代替)
     setDeadline,
+    // 起用公開日時 (deadlineAt とは独立)
+    setLineupPublishAt,
     // 運営チャット
     fetchChatThreads,
     sendChatReply,

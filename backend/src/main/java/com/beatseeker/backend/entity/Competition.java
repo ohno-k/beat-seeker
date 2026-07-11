@@ -63,6 +63,13 @@ public class Competition {
      */
     private LocalDateTime deadlineAt;
 
+    /**
+     * 起用 (オーダー) 公開日時。null の場合は公開日時未設定 (= 自動公開しない)。
+     * この日時 (JST) を過ぎると、対戦相手・観戦 URL・選手 URL に起用 (オーダー) が自動公開される
+     * ({@link #isLineupPublished()} 参照)。起用クローズ日時 ({@link #deadlineAt}) とは独立に設定できる。
+     */
+    private LocalDateTime lineupPublishAt;
+
     /** 主催ユーザー (= 大会を作成したログインユーザー)。 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
@@ -106,5 +113,19 @@ public class Competition {
     public boolean isLineupClosed() {
         return deadlineAt != null
                 && !LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo")).isBefore(deadlineAt);
+    }
+
+    /**
+     * 【派生判定】 起用 (オーダー) 公開済みか。{@link #lineupPublishAt} を JST の壁時計時刻として解釈し、
+     * 現在 (JST) がそれ以降なら true。
+     *
+     * <p>true になると対戦相手・観戦 URL・選手 URL に起用が公開される。手動公開は廃止済みで、公開はこの日時のみで制御する。
+     * {@code lineupPublishAt} が null の間は常に false (公開日時未設定 = 公開しない)。
+     * 起用クローズ ({@link #isLineupClosed()}) とは独立。読み取り時に都度判定するため設定変更が即反映される。
+     */
+    @Transient
+    public boolean isLineupPublished() {
+        return lineupPublishAt != null
+                && !LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo")).isBefore(lineupPublishAt);
     }
 }

@@ -53,6 +53,7 @@ const {
   configureMatchup,
   publishPick,
   setDeadline,
+  setLineupPublishAt,
   deleteCompetition,
   regenerateParticipantToken,
   regenerateTlToken,
@@ -466,6 +467,35 @@ const handleSaveDeadline = async () => {
 const handleClearDeadline = async () => {
   deadlineInput.value = '';
   await handleSaveDeadline();
+};
+
+// ── 起用公開日時 (JST) ── 起用クローズ日時とは独立に、オーダー(起用)を相手へ公開する時刻 ──────────
+const lineupPublishInput = ref<string>('');
+
+watch(
+  () => currentCompetition.value?.lineupPublishAt,
+  (iso) => { lineupPublishInput.value = toDatetimeLocal(iso ?? null); },
+  { immediate: true },
+);
+
+const isSavingLineupPublish = ref(false);
+/** 入力中の起用公開日時を保存 (空なら公開日時解除)。 */
+const handleSaveLineupPublishAt = async () => {
+  if (!currentCompetition.value) return;
+  isSavingLineupPublish.value = true;
+  try {
+    await setLineupPublishAt(currentCompetition.value.id, lineupPublishInput.value || null);
+    toast.success(lineupPublishInput.value ? '起用公開日時を設定しました' : '起用公開日時を解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isSavingLineupPublish.value = false;
+  }
+};
+/** 起用公開日時を解除 (入力クリア + 保存)。 */
+const handleClearLineupPublishAt = async () => {
+  lineupPublishInput.value = '';
+  await handleSaveLineupPublishAt();
 };
 
 // ── 運営チャット (TL ⇄ 運営) ────────────────────────────
@@ -1871,6 +1901,57 @@ const statusColor = (s: string) => ({
           </p>
         </section>
 
+        <!-- 起用公開日時 (JST): この時刻を過ぎるとオーダー(起用)が対戦相手・観戦URL・選手URLに自動公開される。起用クローズ日時とは独立。 -->
+        <section
+          v-if="currentCompetition.status !== 'draft'"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-bold text-slate-500">
+              起用公開日時 (JST)
+            </h2>
+            <span
+              class="text-[11px] font-bold px-2 py-0.5 rounded"
+              :class="currentCompetition.lineupPublished
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                : 'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300'"
+            >
+              {{ currentCompetition.lineupPublished ? '📢 オーダー公開済み' : '🕒 公開前' }}
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            設定した日時を過ぎると、<b>オーダー (起用) が対戦相手・観戦 URL・選手 URL に自動公開</b>されます。
+            起用クローズ日時とは独立に設定できます (例: クローズ後しばらくしてから公開)。日時はあなたの端末のローカル時刻 = JST 想定で扱われます。
+          </p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <input
+              type="datetime-local"
+              v-model="lineupPublishInput"
+              :disabled="currentCompetition.status === 'finished'"
+              class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              @click="handleSaveLineupPublishAt"
+              :disabled="isSavingLineupPublish || currentCompetition.status === 'finished'"
+              class="shrink-0 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-300"
+            >保存</button>
+            <button
+              v-if="currentCompetition.lineupPublishAt"
+              type="button"
+              @click="handleClearLineupPublishAt"
+              :disabled="isSavingLineupPublish || currentCompetition.status === 'finished'"
+              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
+            >公開日時解除</button>
+          </div>
+          <p v-if="currentCompetition.lineupPublishAt" class="text-[10px] font-mono text-slate-400">
+            現在の設定: {{ new Date(currentCompetition.lineupPublishAt).toLocaleString('ja-JP') }}
+          </p>
+          <p v-else class="text-[10px] font-mono text-slate-400">
+            未設定 (自動公開しない)。日時を入れて「保存」すると有効になります。
+          </p>
+        </section>
+
         <!-- 対戦表: 全 30 試合に対する運営ジャンル指定 (open 以降のみ表示) -->
         <section
           v-if="currentCompetition.matchups && currentCompetition.matches && currentCompetition.matchups.length > 0"
@@ -1956,11 +2037,11 @@ const statusColor = (s: string) => ({
                   >設定解除</button>
                 </div>
               </div>
-              <!-- 起用公開は起用クローズ日時 (deadlineAt) 到達で自動公開。手動公開は廃止。 -->
+              <!-- 起用公開は起用公開日時 (lineupPublishAt) 到達で自動公開。手動公開は廃止。 -->
               <div class="text-[10px] font-mono">
                 <span class="text-slate-400">起用公開:</span>
-                <span v-if="mu.lineupPublished" class="ml-1 font-bold text-emerald-600 dark:text-emerald-300">✓ 公開中 (起用クローズ日時経過)</span>
-                <span v-else class="ml-1 text-slate-400">起用クローズ日時を過ぎると自動公開</span>
+                <span v-if="mu.lineupPublished" class="ml-1 font-bold text-emerald-600 dark:text-emerald-300">✓ 公開中 (起用公開日時経過)</span>
+                <span v-else class="ml-1 text-slate-400">起用公開日時を過ぎると自動公開</span>
               </div>
             </div>
 
