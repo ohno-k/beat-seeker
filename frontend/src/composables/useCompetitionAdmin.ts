@@ -622,6 +622,19 @@ export function useCompetitionAdmin() {
     await fetchCompetition(competitionId);
   };
 
+  /**
+   * matchup の左右 (A 側 / B 側) を入れ替える。teamA↔teamB と各試合の A/B 対フィールド
+   * (選手・ロック・自選曲公開・スコア・勝敗) を対称に入れ替える。自選曲/StrategyCard は参加者に自動追従。
+   */
+  const swapMatchupSides = async (competitionId: number, matchupId: number): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/matchups/${matchupId}/swap-sides`,
+      { method: 'PUT', headers: authHeaders() },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
   // 手動ロック (setMatchLock) は廃止。起用クローズは大会全体の deadlineAt (setDeadline) で自動制御する。
 
   /**
@@ -884,6 +897,7 @@ export function useCompetitionAdmin() {
     openCompetition,
     setMatchGenre,
     configureMatchup,
+    swapMatchupSides,
     publishPick,
     deleteCompetition,
     regenerateParticipantToken,

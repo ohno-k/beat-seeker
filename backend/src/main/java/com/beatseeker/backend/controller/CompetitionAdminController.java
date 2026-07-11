@@ -1257,6 +1257,74 @@ public class CompetitionAdminController {
         return ResponseEntity.ok(toMatchMap(match));
     }
 
+    /**
+     * 【メソッドの役割】 matchup の左右 (A 側 / B 側) を入れ替える。
+     *
+     * <p>「G-STAGE vs テクノワールド」を「テクノワールド vs G-STAGE」にするなど、対戦カードの左右を反転する。
+     * {@code teamA ↔ teamB} を入れ替え、その matchup に属する各試合の A/B 対フィールド
+     * (playerA/B・lockedA/B・lockedAAt/BAt・pickPublishedA/B・aSongsWon/bSongsWon・各曲 scoreA/B) も
+     * 対称に入れ替える。曲タイトル / 管理番号 / 指定ジャンルは side 非依存なので保持する。
+     *
+     * <p>自選曲 ({@link CompetitionPick}) と StrategyCard 使用 ({@link CompetitionStrategyUse}) は
+     * 参加者に紐づくため、選手の入れ替えに自動追従する (個別の付け替えは不要)。
+     */
+    @PutMapping("/{competitionId}/matchups/{matchupId}/swap-sides")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> swapMatchupSides(
+            Authentication auth, @PathVariable Long competitionId, @PathVariable Long matchupId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if ("finished".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
+        }
+        CompetitionMatchup mu = matchupRepository.findById(matchupId)
+                .orElseThrow(() -> new RuntimeException("Matchup not found: " + matchupId));
+        if (!mu.getCompetition().getId().equals(comp.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "指定 matchup はこの大会に属していません"));
+        }
+
+        // matchup: teamA ↔ teamB
+        var team = mu.getTeamA();
+        mu.setTeamA(mu.getTeamB());
+        mu.setTeamB(team);
+        matchupRepository.save(mu);
+
+        // 各試合: A/B 対フィールドを対称に入れ替え
+        for (CompetitionMatch m : matchRepository.findByMatchupOrderByIdAsc(mu)) {
+            var player = m.getPlayerA();
+            m.setPlayerA(m.getPlayerB());
+            m.setPlayerB(player);
+
+            var locked = m.getLockedA();
+            m.setLockedA(m.getLockedB());
+            m.setLockedB(locked);
+
+            var lockedAt = m.getLockedAAt();
+            m.setLockedAAt(m.getLockedBAt());
+            m.setLockedBAt(lockedAt);
+
+            var pickPub = m.getPickPublishedA();
+            m.setPickPublishedA(m.getPickPublishedB());
+            m.setPickPublishedB(pickPub);
+
+            var won = m.getASongsWon();
+            m.setASongsWon(m.getBSongsWon());
+            m.setBSongsWon(won);
+
+            var s1 = m.getSong1ScoreA();
+            m.setSong1ScoreA(m.getSong1ScoreB());
+            m.setSong1ScoreB(s1);
+
+            var s2 = m.getSong2ScoreA();
+            m.setSong2ScoreA(m.getSong2ScoreB());
+            m.setSong2ScoreB(s2);
+
+            matchRepository.save(m);
+        }
+
+        return ResponseEntity.ok(toCompetitionDetailMap(comp));
+    }
+
     // ── 起用 (ラインアップ) の公開 ─────────────────────────
     // 手動公開エンドポイント (PUT .../lineup-publish) は廃止。
     // 起用の相手への公開は「起用公開日時 (Competition.lineupPublishAt) を過ぎたら自動公開」で制御し

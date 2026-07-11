@@ -51,6 +51,7 @@ const {
   openCompetition,
   setMatchGenre,
   configureMatchup,
+  swapMatchupSides,
   publishPick,
   setDeadline,
   setLineupPublishAt,
@@ -1372,6 +1373,17 @@ const handleConfigureMatchup = async (matchupId: number, configured: boolean) =>
   }
 };
 
+/** 対戦の左右 (A 側 / B 側) を入れ替える。teamA↔teamB と各試合の A/B データを対称に入れ替える。 */
+const handleSwapMatchupSides = async (matchupId: number) => {
+  if (!currentCompetition.value) return;
+  try {
+    await swapMatchupSides(currentCompetition.value.id, matchupId);
+    toast.success('対戦の左右を入れ替えました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  }
+};
+
 // ── ステータスバッジ ──────────────────────────────────────
 const statusLabel = (s: string) => ({
   draft: '編成中',
@@ -2027,6 +2039,13 @@ const statusColor = (s: string) => ({
                   <p class="text-[10px] font-mono text-slate-400">
                     {{ mu.isFinals ? 'FINALS' : '予選第 ' + mu.matchupOrder + ' 試合' }}
                   </p>
+                  <button
+                    type="button"
+                    @click="handleSwapMatchupSides(mu.id)"
+                    :disabled="currentCompetition.status === 'finished'"
+                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/40 dark:hover:text-blue-300 disabled:opacity-50"
+                    title="対戦の左右 (A側/B側) を入れ替える"
+                  >⇄ 左右入替</button>
                   <button
                     v-if="!mu.isFinals"
                     type="button"
