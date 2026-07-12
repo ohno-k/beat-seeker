@@ -58,10 +58,12 @@ app:
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
 
 vapid:
+  # 公開鍵はブラウザに配布されるため非機密。秘密鍵は環境変数で渡す（リポジトリにコミットしない）。
+  # ※ 旧鍵は Git 履歴に残り漏洩済み。tools/generate_vapid.js で再生成し、公開鍵(と frontend 側)も差し替えること。
   public:
-    key: BK8nOI89kHqMXjG1Pz5MiOLMc7lX8zjgd-gd3KhfRfr3mD_pt_VgRBFPzPRvmPoDhz06o82fBbBmVLATrotGB0k
+    key: ${VAPID_PUBLIC_KEY:BK8nOI89kHqMXjG1Pz5MiOLMc7lX8zjgd-gd3KhfRfr3mD_pt_VgRBFPzPRvmPoDhz06o82fBbBmVLATrotGB0k}
   private:
-    key: w9dtbWdRCwDU0C3k2MCRkjUzr-mozK2qtFchFU56SYk
+    key: ${VAPID_PRIVATE_KEY:}
   subject: mailto:admin@example.com
 
 kofi:

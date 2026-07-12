@@ -97,6 +97,13 @@ verification_results.txt
 # --- Spring Boot ローカルプロファイル (機密値を含むので各自で作成、commit しない) ---
 backend/src/main/resources/application-local.yml
 
+# --- 環境変数ファイル (機密値を含むので commit しない。雛形は .env.example) ---
+.env
+.env.local
+**/.env
+!.env.example
+!**/.env.example
+
 # --- OS / IDE ---
 .DS_Store
 Thumbs.db

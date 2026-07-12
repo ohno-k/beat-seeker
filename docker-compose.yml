@@ -18,9 +18,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-d6f68314tr6s73bnbhag-a.oregon-postgres.render.com/beatseeker
-      SPRING_DATASOURCE_USERNAME: postgress
-      SPRING_DATASOURCE_PASSWORD: kAw2xymPeLH4mOZuV76hsJCR4L9kFkgM
+      # 機密値はコミットしない。未設定ならローカル db サービスを使用（本番は環境変数で上書き）。
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://db:5432/beatseeker}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
