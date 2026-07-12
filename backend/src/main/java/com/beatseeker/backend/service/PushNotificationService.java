@@ -64,6 +64,14 @@ public class PushNotificationService {
     @PostConstruct
     public void init() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
+        // VAPID 鍵が未設定（環境変数 VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY 未投入など）の場合は
+        // Push を無効化した状態で起動する。空鍵のまま PushService を生成すると起動時に例外となり
+        // アプリ全体が起動不能（＝デプロイ失敗）になるため、ここでガードする。
+        // （R2 ストレージ未設定時に他機能へ影響させない設計方針に合わせている）
+        if (publicKey == null || publicKey.isBlank() || privateKey == null || privateKey.isBlank()) {
+            System.err.println("[PushNotificationService] VAPID keys are not configured; push notifications are disabled.");
+            return;
+        }
         pushService = new PushService(publicKey, privateKey, subject);
     }
 
@@ -102,6 +110,10 @@ public class PushNotificationService {
      * @throws Exception デシリアライズ失敗、送信失敗、Push サーバーが 4xx/5xx を返した場合
      */
     public void sendNotificationWithEx(String subscriptionJson, String title, String body, String url) throws Exception {
+        if (pushService == null) {
+            // VAPID 鍵未設定で Push 無効の状態。呼び出し元で失敗として扱えるよう明示的に投げる。
+            throw new IllegalStateException("Push notifications are disabled (VAPID keys not configured).");
+        }
         Subscription subscription = objectMapper.readValue(subscriptionJson, Subscription.class);
         Map<String, String> payload = Map.of(
                 "title", title,
