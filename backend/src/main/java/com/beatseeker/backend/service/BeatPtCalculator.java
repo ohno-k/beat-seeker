@@ -26,16 +26,16 @@ import java.util.regex.Pattern;
 public class BeatPtCalculator {
 
     /**
-     * 非公式難易度値（"11.0"〜"13.0"）→ weight のマップ。
+     * 非公式難易度値（"11.0"〜"13.1"）→ weight のマップ。
      * beatTier.ts と完全に同じ値を生成する。
-     * 11.0 から 0.1 刻みで 21 段階、初期 weight 145 から
-     * 12.49 未満は +2、以上は +3 ずつ増える。
+     * 11.0 から 0.1 刻みで 22 段階、初期 weight 145 から
+     * 12.49 未満は +2、以上は +3 ずつ増える（13.1 = 193）。
      */
     public static final Map<String, Integer> WEIGHTS = new HashMap<>();
 
     static {
         int weight = 145;
-        for (int i = 0; i <= 20; i++) {
+        for (int i = 0; i <= 21; i++) {
             double rankValue = 11.0 + i * 0.1;
             String rank = String.format(Locale.US, "%.1f", rankValue);
             WEIGHTS.put(rank, weight);

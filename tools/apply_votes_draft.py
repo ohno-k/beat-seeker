@@ -212,9 +212,9 @@ print(f"\nドラフト保存完了: {inserted_ranks}ランク, {inserted_songs}�
 print(f"変動楽曲: {len(changes)}件")
 
 # 変動内容をファイルに保存
-with open('draft_changes.json', 'w', encoding='utf-8') as f:
+with open('data/draft_changes.json', 'w', encoding='utf-8') as f:
     json.dump({
         'changes': changes,
         'total': len(changes)
     }, f, ensure_ascii=False, indent=2)
-print("変動内容を draft_changes.json に保存しました")
+print("変動内容を data/draft_changes.json に保存しました")

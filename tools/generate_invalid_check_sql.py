@@ -5,7 +5,7 @@ import os
 BASE_DIR = r'c:\Users\ohno\.gemini\antigravity\scratch\beat-seeker'
 SP11_PATH = os.path.join(BASE_DIR, 'frontend', 'src', 'data', 'sp11.json')
 SP12_PATH = os.path.join(BASE_DIR, 'frontend', 'src', 'data', 'sp12.json')
-OUTPUT_SQL = 'find_invalid_scores.sql'
+OUTPUT_SQL = 'sql/find_invalid_scores.sql'
 
 # Difficulty mapping (JSON difficulty ID -> DB difficultyName)
 diff_map = {

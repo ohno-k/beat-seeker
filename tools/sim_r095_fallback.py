@@ -29,7 +29,7 @@ SUPPORT_MIN = 3
 PRIMARY_R = 0.95
 FALLBACK_R = 0.90
 GAP_COEFFICIENTS = [1.0, 1.2, 1.5]   # 比較する係数
-CACHE_FILE = "regs_cache.pkl"
+CACHE_FILE = "data/regs_cache.pkl"
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

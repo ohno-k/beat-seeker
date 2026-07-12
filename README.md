@@ -5,6 +5,12 @@ beatmania IIDX score management and skill visualization tool.
 ## Project Structure
 - `backend/`: Spring Boot 3.3.0 (Java 17)
 - `frontend/`: Vite + Vue 3 + TypeScript + Tailwind CSS
+- `tools/`: 調査・運用・検証用の単発スクリプト（旧版は `tools/legacy/`）。詳細は [SCRIPTS.md](SCRIPTS.md)
+- `scripts/`: Top-Rankers データ取得パイプライン
+- `sql/`: ワンショット実行用の SQL（マイグレーション・データ修復など）
+- `data/`: スクリプトの入出力データ（`draft_changes*.json` 等）と曲リスト（`data/songlists/`）
+- `docs/`: 設計書・運用ドキュメント・画像
+- `chart_cache/`: 譜面傾向データ（`tools/batch_analyze.py` が生成）
 
 ## How to Run
 

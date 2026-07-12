@@ -278,7 +278,7 @@ def main():
               f"{x['a_title']} ({x['a_diff']})")
 
     # 8) 全件を CSV 出力
-    csv_path = "coriver_phony_breakdown.csv"
+    csv_path = "data/coriver_phony_breakdown.csv"
     with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
         w.writerow(["rank_by_wp", "a_title", "a_diff", "actual_a", "slope", "intercept",

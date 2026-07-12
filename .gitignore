@@ -24,6 +24,9 @@ __pycache__/
 *.pyo
 *.pyd
 
+# --- Analysis cache (再生成可能。sim_r095_fallback.py が data/ に生成) ---
+regs_cache.pkl
+
 # --- TypeScript / Vite ---
 *.tsbuildinfo
 

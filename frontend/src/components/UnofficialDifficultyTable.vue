@@ -32,9 +32,9 @@ const rankingModalRank = ref<{ rank: string; totalCount: number } | null>(null);
 /** 成長グラフモーダルの対象難易度（null なら非表示）。 */
 const growthChartRank = ref<{ rank: string; songCount: number; currentTotalBeatPoints: number } | null>(null);
 
-// ☆11.0 〜 ☆13.0 までの 0.1 刻みラベル配列を生成（レート早見表の列）。
+// ☆11.0 〜 ☆13.1 までの 0.1 刻みラベル配列を生成（レート早見表の列）。
 const allFolders: string[] = [];
-for (let i = 0; i <= 20; i++) allFolders.push((11.0 + i * 0.1).toFixed(1));
+for (let i = 0; i <= 21; i++) allFolders.push((11.0 + i * 0.1).toFixed(1));
 
 /**
  * 【computed の役割】 レート早見表の行データを生成する。

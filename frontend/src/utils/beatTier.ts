@@ -100,6 +100,7 @@ const LEGEND_RATE_CONTROL: readonly { v: number; rate: number }[] = [
     { v: 12.5, rate: 98.66 }, // 旧 t^4 カーブと同値（ここで旧式と再合流）
     { v: 12.9, rate: 96.58 }, // 旧 t^4 カーブと同値（維持）
     { v: 13.0, rate: 95.30 }, // 歴代p25。旧 95.80 では歴代中央値が未到達だった
+    { v: 13.1, rate: 94.44 }, // 新設帯。難易度上昇に伴う低下トレンドを継続し MAX- ライン(94.44%)に着地
 ];
 
 /**
@@ -110,7 +111,7 @@ const LEGEND_RANK_MIN = 11.0;
 /**
  * 【Folder Legend】 Legend 判定 score rate の対応範囲上限（非公式ランク）。
  */
-const LEGEND_RANK_MAX = 13.0;
+const LEGEND_RANK_MAX = 13.1;
 
 /**
  * 【総合 BEAT-PT】 合計対象となる上位譜面数。譜面数が多いユーザー同士を公平に比較するため
@@ -159,17 +160,17 @@ export interface FolderRankInfo {
 }
 
 /**
- * 非公式ランク別の Weight テーブル。`"11.0"` から `"13.0"` までを 0.1 刻みで保持する。
+ * 非公式ランク別の Weight テーブル。`"11.0"` から `"13.1"` までを 0.1 刻みで保持する。
  *
  * 構築ルール:
- *  - 開始値: 11.0 → 145（ただし下のループは 0..20 のうち初回で 11.0 を登録するため、実際の 11.0 の値は 145）
- *  - ステップ: 11.0〜12.4 は +2、12.5〜13.0 は +3（= 高難度ほど加速する傾斜）
+ *  - 開始値: 11.0 → 145（ただし下のループは 0..21 のうち初回で 11.0 を登録するため、実際の 11.0 の値は 145）
+ *  - ステップ: 11.0〜12.4 は +2、12.5〜13.1 は +3（= 高難度ほど加速する傾斜）→ 13.1 = 193
  *
  * NOTE: マジックナンバーが集中しているため、バランス調整時はここを編集する。
  */
 export const WEIGHTS: Record<string, number> = {};
 let weight = 145;
-for (let i = 0; i <= 20; i++) {
+for (let i = 0; i <= 21; i++) {
     const rankValue = 11.0 + i * 0.1;
     const rank = rankValue.toFixed(1);
     WEIGHTS[rank] = weight;
@@ -224,7 +225,7 @@ export function getFolderLegendRate(informalRank: string | undefined): number {
     if (!informalRank) return 0;
     const match = informalRank.match(/(\d+\.\d+)/);
     const rankValue = match ? parseFloat(match[1]) : 0;
-    // 対応範囲は ☆11.0〜☆13.0 のみ
+    // 対応範囲は ☆11.0〜☆13.1 のみ
     if (rankValue < LEGEND_RANK_MIN || rankValue > LEGEND_RANK_MAX) return 0;
 
     const ctrl = LEGEND_RATE_CONTROL;

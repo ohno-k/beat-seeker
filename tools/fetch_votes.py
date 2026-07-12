@@ -66,6 +66,6 @@ result = {
     'changes': changes,
     'ranks': ranks_list
 }
-with open('votes_result.json', 'w', encoding='utf-8') as f:
+with open('data/votes_result.json', 'w', encoding='utf-8') as f:
     json.dump(result, f, ensure_ascii=False, indent=2)
-print("Done! Written to votes_result.json")
+print("Done! Written to data/votes_result.json")
