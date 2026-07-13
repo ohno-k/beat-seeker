@@ -30,75 +30,75 @@
 declare const __APP_ORIGIN__: string;
 (
 async function(){
-  var vMatch = location.pathname.match(/\/game\/2dx\/(\d+)\//);
-  var ver = vMatch ? vMatch[1] : '33';
-  var base = location.origin + '/game/2dx/' + ver;
-  var myName = '';
-  var battles = [];
-  var statusEl = document.createElement('div');
+  const vMatch = location.pathname.match(/\/game\/2dx\/(\d+)\//);
+  const ver = vMatch ? vMatch[1] : '33';
+  const base = location.origin + '/game/2dx/' + ver;
+  let myName = '';
+  const battles = [];
+  const statusEl = document.createElement('div');
   statusEl.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#0f172a;color:#fff;padding:12px;text-align:center;font:bold 14px sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.45)';
   statusEl.textContent = 'beat-seeker: 取得を開始します…';
   document.body.appendChild(statusEl);
 
   try {
-    var arenaDoc = document;
+    let arenaDoc = document;
     if (!document.querySelector('.arena-title')) {
-      var ar = await fetch(base + '/djdata/arena_mode/index.html', {credentials: 'same-origin'});
-      var ah = await ar.text();
+      const ar = await fetch(base + '/djdata/arena_mode/index.html', {credentials: 'same-origin'});
+      const ah = await ar.text();
       arenaDoc = new DOMParser().parseFromString(ah, 'text/html');
     }
-    var n = arenaDoc.querySelector('a[href*="djdata/status"] .on-name li:last-child');
+    const n = arenaDoc.querySelector('a[href*="djdata/status"] .on-name li:last-child');
     myName = n ? (n.innerText || n.textContent || '').trim() : '';
 
-    var titles = arenaDoc.querySelectorAll('.arena-title');
-    var battleDivs = arenaDoc.querySelectorAll('.arena-battle');
+    const titles = arenaDoc.querySelectorAll('.arena-title');
+    const battleDivs = arenaDoc.querySelectorAll('.arena-battle');
     titles.forEach(function(t, i) {
-      var b = battleDivs[i];
+      const b = battleDivs[i];
       if (!b) return;
 
-      var bt = t.querySelector('.battle');
-      var dt = t.querySelector('.date');
-      var battleType = bt ? (bt.innerText || bt.textContent || '').trim() : '';
-      var dateRaw = dt ? (dt.innerText || dt.textContent || '').replace(/対戦日時[\s\S]*?：/, '').trim() : '';
+      const bt = t.querySelector('.battle');
+      const dt = t.querySelector('.date');
+      const battleType = bt ? (bt.innerText || bt.textContent || '').trim() : '';
+      const dateRaw = dt ? (dt.innerText || dt.textContent || '').replace(/対戦日時[\s\S]*?：/, '').trim() : '';
 
-      var tbl = b.querySelector('table');
+      const tbl = b.querySelector('table');
       if (!tbl) return;
 
-      var rows = tbl.querySelectorAll('tr');
-      var ths = rows[0].querySelectorAll('th');
-      var songs = [];
-      for (var j = 2; j < ths.length; j++) {
-        var txt = (ths[j].innerText || ths[j].textContent || '').replace(/\u00a0/g, ' ').replace(/\n/g, ' ').trim();
-        var sm2 = txt.match(/^(.+?)\s*\/\s*(.+)$/);
-        var title = sm2 ? sm2[1].trim() : txt;
-        var diff = sm2 ? sm2[2].trim() : '';
+      const rows = tbl.querySelectorAll('tr');
+      const ths = rows[0].querySelectorAll('th');
+      const songs = [];
+      for (let j = 2; j < ths.length; j++) {
+        const txt = (ths[j].innerText || ths[j].textContent || '').replace(/\u00a0/g, ' ').replace(/\n/g, ' ').trim();
+        const sm2 = txt.match(/^(.+?)\s*\/\s*(.+)$/);
+        const title = sm2 ? sm2[1].trim() : txt;
+        const diff = sm2 ? sm2[2].trim() : '';
         songs.push({title: title, difficulty: diff});
       }
 
-      var players = [];
-      for (var k = 1; k < rows.length; k++) {
-        var tds = rows[k].querySelectorAll('td');
+      const players = [];
+      for (let k = 1; k < rows.length; k++) {
+        const tds = rows[k].querySelectorAll('td');
         if (tds.length < 3) continue;
 
-        var djName = (tds[0].innerText || tds[0].textContent || '').trim();
-        var img = tds[1].querySelector('img');
-        var cls = '';
+        const djName = (tds[0].innerText || tds[0].textContent || '').trim();
+        const img = tds[1].querySelector('img');
+        let cls = '';
         if (img) {
-          var m = img.src.match(/arena_icon\/(a\d+)\.png/);
+          const m = img.src.match(/arena_icon\/(a\d+)\.png/);
           if (m) cls = m[1].toUpperCase();
         }
 
-        var ptTxt = (tds[2].innerText || tds[2].textContent || '').replace(/\u00a0/g, ' ').trim();
-        var pmTotal = ptTxt.match(/(\d+)pt/);
-        var pmRank = ptTxt.match(/(\d+)位/);
-        var totalPt = pmTotal ? parseInt(pmTotal[1]) : 0;
-        var rank = pmRank ? parseInt(pmRank[1]) : 0;
+        const ptTxt = (tds[2].innerText || tds[2].textContent || '').replace(/\u00a0/g, ' ').trim();
+        const pmTotal = ptTxt.match(/(\d+)pt/);
+        const pmRank = ptTxt.match(/(\d+)位/);
+        const totalPt = pmTotal ? parseInt(pmTotal[1]) : 0;
+        const rank = pmRank ? parseInt(pmRank[1]) : 0;
 
-        var songScores = [];
-        for (var s = 3; s < tds.length; s++) {
-          var stxt = (tds[s].innerText || tds[s].textContent || '').replace(/\u00a0/g, ' ').trim();
-          var sm = stxt.match(/(\d+)/);
-          var spm = stxt.match(/(\d+)pt/);
+        const songScores = [];
+        for (let s = 3; s < tds.length; s++) {
+          const stxt = (tds[s].innerText || tds[s].textContent || '').replace(/\u00a0/g, ' ').trim();
+          const sm = stxt.match(/(\d+)/);
+          const spm = stxt.match(/(\d+)pt/);
           songScores.push({score: sm ? parseInt(sm[1]) : 0, pt: spm ? parseInt(spm[1]) : 0});
         }
         players.push({djName: djName, arenaClass: cls, totalPt: totalPt, rank: rank, songScores: songScores});
@@ -109,52 +109,52 @@ async function(){
     console.warn('ARENA data failed', e);
   }
 
-  var CLFLG = {'1': 'FAILED', '2': 'ASSIST CLEAR', '3': 'EASY CLEAR', '4': 'CLEAR', '5': 'HARD CLEAR', '6': 'EX HARD CLEAR', '7': 'FULLCOMBO CLEAR'};
-  var DIFFS = ['BEGINNER', 'NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA'];
-  var charts = {};
-  var chartCount = 0;
+  const CLFLG = {'1': 'FAILED', '2': 'ASSIST CLEAR', '3': 'EASY CLEAR', '4': 'CLEAR', '5': 'HARD CLEAR', '6': 'EX HARD CLEAR', '7': 'FULLCOMBO CLEAR'};
+  const DIFFS = ['BEGINNER', 'NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA'];
+  const charts = {};
+  let chartCount = 0;
 
   function parsePage(html, level) {
-    var doc = new DOMParser().parseFromString(html, 'text/html');
-    var trs = doc.querySelectorAll('.series-difficulty table tr');
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const trs = doc.querySelectorAll('.series-difficulty table tr');
     trs.forEach(function(tr) {
-      var tds = tr.querySelectorAll('td');
+      const tds = tr.querySelectorAll('td');
       if (tds.length < 5) return;
 
-      var a = tds[0].querySelector('a.music_info');
+      const a = tds[0].querySelector('a.music_info');
       if (!a) return;
-      var title = (a.innerText || a.textContent || '').trim();
+      const title = (a.innerText || a.textContent || '').trim();
 
-      var diff = (tds[1].innerText || tds[1].textContent || '').replace(/\u00a0/g, ' ').trim();
+      const diff = (tds[1].innerText || tds[1].textContent || '').replace(/\u00a0/g, ' ').trim();
       if (DIFFS.indexOf(diff) < 0) return;
 
-      var dj = '---';
-      var djImg = tds[2].querySelector('img');
+      let dj = '---';
+      const djImg = tds[2].querySelector('img');
       if (djImg) {
-        var dm = (djImg.getAttribute('src') || '').match(/score_icon\/(.+?)\.gif/);
+        const dm = (djImg.getAttribute('src') || '').match(/score_icon\/(.+?)\.gif/);
         if (dm) dj = dm[1];
       }
 
-      var sc = (tds[3].innerText || tds[3].textContent || '').replace(/\u00a0/g, ' ');
-      var ex = 0, pg = 0, gr = 0;
-      var sm = sc.match(/(\d+)\s*\(\s*(\d+)\s*\/\s*(\d+)\s*\)/);
+      const sc = (tds[3].innerText || tds[3].textContent || '').replace(/\u00a0/g, ' ');
+      let ex = 0, pg = 0, gr = 0;
+      const sm = sc.match(/(\d+)\s*\(\s*(\d+)\s*\/\s*(\d+)\s*\)/);
       if (sm) {
         ex = parseInt(sm[1]);
         pg = parseInt(sm[2]);
         gr = parseInt(sm[3]);
       } else {
-        var s1 = sc.match(/\d+/);
+        const s1 = sc.match(/\d+/);
         if (s1) ex = parseInt(s1[0]);
       }
 
-      var clear = 'NO PLAY';
-      var clImg = tds[4].querySelector('img');
+      let clear = 'NO PLAY';
+      const clImg = tds[4].querySelector('img');
       if (clImg) {
-        var cm = (clImg.getAttribute('src') || '').match(/clflg(\d)\.gif/);
+        const cm = (clImg.getAttribute('src') || '').match(/clflg(\d)\.gif/);
         if (cm) clear = CLFLG[cm[1]] || 'NO PLAY';
       }
 
-      var key = title + '||' + diff;
+      const key = title + '||' + diff;
       if (!charts[key]) {
         charts[key] = {title: title, diff: diff, level: level, ex: ex, pg: pg, gr: gr, dj: dj, clear: clear};
         chartCount++;
@@ -164,22 +164,22 @@ async function(){
   }
 
   async function scrapeLevel(lv) {
-    var offset = 0;
+    let offset = 0;
     while (true) {
-      var html;
+      let html;
       try {
         if (offset === 0) {
-          var r = await fetch(base + '/djdata/music/difficulty.html', {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: 'difficult=' + lv + '&style=0&disp=1'});
+          const r = await fetch(base + '/djdata/music/difficulty.html', {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: 'difficult=' + lv + '&style=0&disp=1'});
           html = await r.text();
         } else {
-          var r2 = await fetch(base + '/djdata/music/difficulty.html?difficult=' + lv + '&style=0&disp=1&offset=' + offset, {credentials: 'same-origin'});
+          const r2 = await fetch(base + '/djdata/music/difficulty.html?difficult=' + lv + '&style=0&disp=1&offset=' + offset, {credentials: 'same-origin'});
           html = await r2.text();
         }
       } catch (e) {
         console.warn('fetch failed lv' + lv, e);
         break;
       }
-      var hasNext = parsePage(html, lv + 1);
+      const hasNext = parsePage(html, lv + 1);
       statusEl.textContent = '難易度別スコア取得中… ' + chartCount + '譜面';
       if (hasNext && offset < 30000) {
         offset += 50;
@@ -190,21 +190,21 @@ async function(){
   }
 
   try {
-    var jobs = [];
-    for (var lv = 0; lv < 12; lv++) jobs.push(scrapeLevel(lv));
+    const jobs = [];
+    for (let lv = 0; lv < 12; lv++) jobs.push(scrapeLevel(lv));
     await Promise.all(jobs);
   } catch (e) {
     console.warn('Difficulty scrape failed', e);
   }
 
-  var songs = {};
+  const songs = {};
   Object.keys(charts).forEach(function(kk) {
-    var c = charts[kk];
+    const c = charts[kk];
     if (!songs[c.title]) songs[c.title] = {};
     songs[c.title][c.diff] = c;
   });
 
-  var headers = ['バージョン', 'タイトル', 'ジャンル', 'アーティスト', 'プレー回数'];
+  const headers = ['バージョン', 'タイトル', 'ジャンル', 'アーティスト', 'プレー回数'];
   DIFFS.forEach(function(d) {
     headers.push(d + ' 難易度', d + ' スコア', d + ' PGreat', d + ' Great', d + ' ミスカウント', d + ' クリアタイプ', d + ' DJ LEVEL');
   });
@@ -214,13 +214,13 @@ async function(){
     return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   }
 
-  var lines = [headers.map(q).join(',')];
-  var songCount = 0;
+  const lines = [headers.map(q).join(',')];
+  let songCount = 0;
   Object.keys(songs).forEach(function(t) {
-    var s = songs[t];
-    var vals = ['', t, '', '', '0'];
+    const s = songs[t];
+    const vals = ['', t, '', '', '0'];
     DIFFS.forEach(function(d) {
-      var c = s[d];
+      const c = s[d];
       if (c) {
         vals.push(c.level, c.ex, c.pg, c.gr, '', c.clear, c.dj);
       } else {
@@ -232,20 +232,20 @@ async function(){
     songCount++;
   });
 
-  var scoresCsv = chartCount > 0 ? lines.join('\r\n') : '';
-  var year = String(new Date().getFullYear());
-  var fullData = JSON.stringify({type: 'beat-seeker-combined', scoresCsv: scoresCsv, myDjName: myName, year: year, battles: battles});
+  const scoresCsv = chartCount > 0 ? lines.join('\r\n') : '';
+  const year = String(new Date().getFullYear());
+  const fullData = JSON.stringify({type: 'beat-seeker-combined', scoresCsv: scoresCsv, myDjName: myName, year: year, battles: battles});
 
-  var urlData = fullData.length > 50000 ? JSON.stringify({type: 'beat-seeker-combined', scoresCsv: '', myDjName: myName, year: year, battles: battles}) : fullData;
-  var encoded = btoa(unescape(encodeURIComponent(urlData)));
-  var url = `${__APP_ORIGIN__}?import=open#data=` + encoded;
+  const urlData = fullData.length > 50000 ? JSON.stringify({type: 'beat-seeker-combined', scoresCsv: '', myDjName: myName, year: year, battles: battles}) : fullData;
+  const encoded = btoa(unescape(encodeURIComponent(urlData)));
+  const url = `${__APP_ORIGIN__}?import=open#data=` + encoded;
 
   statusEl.innerHTML = '';
-  var info = document.createElement('div');
+  const info = document.createElement('div');
   info.textContent = '取得完了！ ARENA ' + battles.length + '件 / スコア ' + chartCount + '譜面・' + songCount + '曲';
   info.style.marginBottom = '8px';
 
-  var btn = document.createElement('button');
+  const btn = document.createElement('button');
   btn.textContent = '📋 コピーして beat-seeker を開く';
   btn.style.cssText = 'font:bold 15px sans-serif;padding:10px 20px;border:0;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer';
   btn.onclick = async function() {
