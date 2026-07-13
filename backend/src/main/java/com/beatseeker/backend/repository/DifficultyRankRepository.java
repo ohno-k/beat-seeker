@@ -90,4 +90,28 @@ public interface DifficultyRankRepository extends JpaRepository<DifficultyRank, 
            "WHERE dr.revision = :revision AND drs.songTitle = :songTitle")
     Optional<String> findRankValueBySongTitle(@Param("revision") String revision,
                                               @Param("songTitle") String songTitle);
+
+    /**
+     * 【メソッドの役割】 難易度表プロファイル（名前付きスナップショット）の revision 一覧を返す。
+     *
+     * プロファイルは {@code revision = "profile:<名前>"} という形で active/draft と同じテーブルに
+     * 保存される。ここでは "profile:" プレフィックスを持つ revision の distinct 値を昇順で返す。
+     * active/draft を参照する既存クエリは常に完全一致で絞り込むため、この命名は干渉しない。
+     *
+     * @return "profile:<名前>" 形式の revision 文字列一覧
+     */
+    @Query("SELECT DISTINCT d.revision FROM DifficultyRank d WHERE d.revision LIKE 'profile:%' ORDER BY d.revision ASC")
+    List<String> findProfileRevisions();
+
+    /**
+     * 【メソッドの役割】 指定リビジョンに属する楽曲エントリ数を返す。
+     *
+     * プロファイル一覧で「何曲入っているか」を表示するために使う軽量カウント。
+     * ランク本体ではなく配下の {@link com.beatseeker.backend.entity.DifficultyRankSong} を数える。
+     *
+     * @param revision リビジョン名（"profile:<名前>" 等）
+     * @return 該当リビジョン配下の楽曲エントリ総数
+     */
+    @Query("SELECT COUNT(s) FROM DifficultyRankSong s WHERE s.difficultyRank.revision = :revision")
+    long countSongsByRevision(@Param("revision") String revision);
 }

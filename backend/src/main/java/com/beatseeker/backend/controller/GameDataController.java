@@ -237,6 +237,84 @@ public class GameDataController {
         }
     }
 
+    // ── 難易度表プロファイル（名前付きドラフトスナップショット）──────────
+
+    /**
+     * 【メソッドの役割】 保存済みの難易度表プロファイル一覧（名前と曲数）を返す。
+     *
+     * @param auth 管理者認証
+     * @return {@code [{name, songCount}, ...]}
+     */
+    @GetMapping("/admin/game-data/difficulty-table/profiles")
+    public ResponseEntity<?> listDifficultyTableProfiles(Authentication auth) {
+        checkAdminAccess(auth);
+        return ResponseEntity.ok(gameDataService.listDifficultyTableProfiles());
+    }
+
+    /**
+     * 【メソッドの役割】 難易度表 JSON を名前付きプロファイルとして保存する（同名は上書き）。
+     *
+     * draft の PUT と同様に本文は生の難易度表 JSON（{@code {ranks:[...]}}）。プロファイル名は
+     * 日本語・記号を含みうるためクエリパラメータで受け取り URL エンコードで安全に運ぶ。
+     *
+     * @param auth      管理者認証
+     * @param name      プロファイル名（クエリパラメータ）
+     * @param tableJson 保存する難易度表 JSON（RequestBody の生文字列）
+     */
+    @PostMapping("/admin/game-data/difficulty-table/profiles")
+    public ResponseEntity<Map<String, Object>> saveDifficultyTableProfile(
+            Authentication auth,
+            @RequestParam String name,
+            @RequestBody String tableJson) {
+        checkAdminAccess(auth);
+        try {
+            gameDataService.saveDifficultyTableProfile(name, tableJson);
+            return ResponseEntity.ok(Map.of("message", "プロファイル「" + name + "」を保存しました"));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 指定プロファイルをドラフト（編集中）に読み込む。draft を丸ごと置換する。
+     * active には触れないため、読み込みだけでは本番公開されない。
+     *
+     * @param auth 管理者認証
+     * @param name 読み込むプロファイル名（クエリパラメータ）
+     * @return 読み込んだ難易度表 JSON（フロントの表示更新用）
+     */
+    @PostMapping("/admin/game-data/difficulty-table/profiles/load")
+    public ResponseEntity<String> loadDifficultyTableProfile(
+            Authentication auth,
+            @RequestParam String name) {
+        checkAdminAccess(auth);
+        try {
+            String json = gameDataService.loadDifficultyTableProfileToDraft(name);
+            return ResponseEntity.ok().header("Content-Type", "application/json").body(json);
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("{\"message\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 指定プロファイルを削除する。
+     *
+     * @param auth 管理者認証
+     * @param name 削除するプロファイル名（クエリパラメータ）
+     */
+    @DeleteMapping("/admin/game-data/difficulty-table/profiles")
+    public ResponseEntity<Map<String, Object>> deleteDifficultyTableProfile(
+            Authentication auth,
+            @RequestParam String name) {
+        checkAdminAccess(auth);
+        try {
+            gameDataService.deleteDifficultyTableProfile(name);
+            return ResponseEntity.ok(Map.of("message", "プロファイル「" + name + "」を削除しました"));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of("message", e.getMessage()));
+        }
+    }
+
     /**
      * 【メソッドの役割】 楽曲ドラフトのみを「公開データ」として適用する。
      *

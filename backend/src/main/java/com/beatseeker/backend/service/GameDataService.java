@@ -324,13 +324,30 @@ public class GameDataService {
      */
     @Transactional
     public void saveDraftDifficultyTable(String json) throws Exception {
+        replaceDifficultyTableRevision("draft", json);
+    }
+
+    /**
+     * 【メソッドの役割】 指定リビジョンの難易度表を JSON で丸ごと置換する（削除→再INSERT）。
+     *
+     * draft の保存とプロファイル（名前付きスナップショット）の保存で共通利用する。
+     * 処理の流れは saveDraftDifficultyTable が担っていた置換式そのもの:
+     *  - 手順1: 大量削除に備えて statement_timeout を 120 秒に拡張
+     *  - 手順2: 対象 revision の既存レコードを deleteAll で削除（子も cascade）
+     *  - 手順3: JSON の ranks 配列から新しいレコードを 1 件ずつ生成し、同 revision で保存
+     *
+     * @param revision 置換対象のリビジョン（"draft" / "profile:<名前>" 等）
+     * @param json     「{ranks: [{rank, songs: [...]}]}」形式の難易度表 JSON
+     * @throws Exception JSON パース失敗、あるいはフォーマット不整合時
+     */
+    private void replaceDifficultyTableRevision(String revision, String json) throws Exception {
         entityManager.createNativeQuery("SET LOCAL statement_timeout = '120s'").executeUpdate();
-        // 既存の draft を deleteAll で削除（子 DifficultyRankSong も cascade される）
-        List<DifficultyRank> existingDraft = diffRankRepo.findByRevisionOrderBySortOrderAsc("draft");
-        diffRankRepo.deleteAll(existingDraft);
+        // 既存レコードを deleteAll で削除（子 DifficultyRankSong も cascade される）
+        List<DifficultyRank> existing = diffRankRepo.findByRevisionOrderBySortOrderAsc(revision);
+        diffRankRepo.deleteAll(existing);
         diffRankRepo.flush();
 
-        // JSON をパースして新しい draft レコードを構築
+        // JSON をパースして新しいレコードを構築
         JsonNode root = objectMapper.readTree(json);
         JsonNode ranksNode = root.path("ranks");
         if (!ranksNode.isArray()) {
@@ -342,7 +359,7 @@ public class GameDataService {
             DifficultyRank rank = new DifficultyRank();
             rank.setRankValue(rn.path("rank").asText());
             rank.setSortOrder(sortOrder++);
-            rank.setRevision("draft");
+            rank.setRevision(revision);
 
             List<DifficultyRankSong> songList = new ArrayList<>();
             JsonNode songsNode = rn.path("songs");
@@ -358,6 +375,92 @@ public class GameDataService {
             }
             rank.setSongs(songList);
             diffRankRepo.save(rank);
+        }
+    }
+
+    // ── 難易度表プロファイル（名前付きドラフトスナップショット）──────────
+
+    /** プロファイル用 revision のプレフィックス。active/draft と衝突しない名前空間。 */
+    private static final String PROFILE_PREFIX = "profile:";
+
+    /**
+     * 【メソッドの役割】 プロファイル名を検証し、内部 revision 文字列（"profile:<名前>"）へ変換する。
+     * 空文字や長すぎる名前、revision に埋め込めない制御文字を弾く。
+     */
+    private String profileRevision(String name) {
+        String trimmed = name == null ? "" : name.trim();
+        if (trimmed.isEmpty()) {
+            throw new RuntimeException("プロファイル名を入力してください");
+        }
+        if (trimmed.length() > 60) {
+            throw new RuntimeException("プロファイル名は60文字以内にしてください");
+        }
+        if (trimmed.contains("\n") || trimmed.contains("\r") || trimmed.contains("\t")) {
+            throw new RuntimeException("プロファイル名に使用できない文字が含まれています");
+        }
+        return PROFILE_PREFIX + trimmed;
+    }
+
+    /**
+     * 【メソッドの役割】 保存済みプロファイル一覧（名前と曲数）を返す。
+     * 管理画面のプロファイル一覧表示に使う。
+     *
+     * @return {@code [{name, songCount}, ...]}（名前昇順）
+     */
+    public List<Map<String, Object>> listDifficultyTableProfiles() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (String rev : diffRankRepo.findProfileRevisions()) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("name", rev.substring(PROFILE_PREFIX.length()));
+            m.put("songCount", diffRankRepo.countSongsByRevision(rev));
+            result.add(m);
+        }
+        return result;
+    }
+
+    /**
+     * 【メソッドの役割】 難易度表 JSON を名前付きプロファイルとして保存する（同名は上書き）。
+     * active / draft には一切触れない（独立したスナップショット）。
+     *
+     * @param name プロファイル名
+     * @param json 「{ranks: [...]}」形式の難易度表 JSON
+     */
+    @Transactional
+    public void saveDifficultyTableProfile(String name, String json) throws Exception {
+        replaceDifficultyTableRevision(profileRevision(name), json);
+    }
+
+    /**
+     * 【メソッドの役割】 プロファイルをドラフト（編集中）に読み込む。draft を丸ごと置換する。
+     * active には触れないため、読み込んだだけでは本番公開されない（従来どおり適用は別操作）。
+     *
+     * @param name 読み込むプロファイル名
+     * @return 読み込んだ難易度表 JSON（フロントで即座に表示を更新するために返す）
+     * @throws RuntimeException 指定名のプロファイルが存在しない場合
+     */
+    @Transactional
+    public String loadDifficultyTableProfileToDraft(String name) throws Exception {
+        String rev = profileRevision(name);
+        List<DifficultyRank> profileRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc(rev);
+        if (profileRanks.isEmpty()) {
+            throw new RuntimeException("プロファイルが見つかりません: " + name);
+        }
+        String json = buildDifficultyTableJson(profileRanks);
+        replaceDifficultyTableRevision("draft", json);
+        return json;
+    }
+
+    /**
+     * 【メソッドの役割】 指定プロファイルを削除する。存在しなければ何もしない。
+     *
+     * @param name 削除するプロファイル名
+     */
+    @Transactional
+    public void deleteDifficultyTableProfile(String name) {
+        String rev = profileRevision(name);
+        List<DifficultyRank> profileRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc(rev);
+        if (!profileRanks.isEmpty()) {
+            diffRankRepo.deleteAll(profileRanks);
         }
     }
 

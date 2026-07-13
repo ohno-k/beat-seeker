@@ -238,6 +238,81 @@
               </div>
             </div>
 
+            <!-- Difficulty table profiles (named draft snapshots) -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
+              <h4 class="text-xs font-bold text-slate-500 mb-2 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                プロファイル（下書きを名前付きで保存）
+              </h4>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-snug">
+                現在の下書き（保存前の変更も含む）を名前を付けて保存します。読み込むと下書きが置き換わります。適用は従来どおり「難易度表を適用」ボタンから。
+              </p>
+              <!-- Save-as form -->
+              <div class="flex items-center gap-2 mb-3">
+                <input
+                  v-model="newProfileName"
+                  type="text"
+                  maxlength="60"
+                  placeholder="プロファイル名（例: 強G案）"
+                  @keyup.enter="handleSaveProfile()"
+                  class="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <button
+                  @click="handleSaveProfile()"
+                  :disabled="isProfileBusy || !newProfileName.trim()"
+                  class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap transition-colors"
+                >
+                  現在の内容を保存
+                </button>
+              </div>
+              <!-- Profile list -->
+              <div v-if="diffProfiles.length > 0" class="space-y-1">
+                <div
+                  v-for="p in diffProfiles"
+                  :key="p.name"
+                  class="flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 min-w-0"
+                >
+                  <div class="min-w-0 flex-1 mr-2">
+                    <div class="text-sm font-bold text-slate-800 dark:text-white truncate" :title="p.name">{{ p.name }}</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ p.songCount }} 曲</div>
+                  </div>
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button
+                      @click="handleLoadProfile(p.name)"
+                      :disabled="isProfileBusy"
+                      class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="このプロファイルを下書きに読み込む"
+                    >
+                      読み込み
+                    </button>
+                    <button
+                      @click="handleSaveProfile(p.name)"
+                      :disabled="isProfileBusy"
+                      class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="現在の内容でこのプロファイルを上書き"
+                    >
+                      上書き
+                    </button>
+                    <button
+                      @click="handleDeleteProfile(p.name)"
+                      :disabled="isProfileBusy"
+                      class="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="削除"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-xs text-slate-400 dark:text-slate-500 py-2 text-center">
+                保存されたプロファイルはありません
+              </div>
+            </div>
+
             <!-- Level filter checkboxes -->
             <div class="mb-3 flex items-center gap-4">
               <label class="flex items-center gap-1.5 cursor-pointer select-none">
@@ -569,6 +644,14 @@ const diffEditSongTitle = ref('');
 /** 移動先ランク（セレクト）。 */
 const diffEditNewRank = ref('');
 
+// ── 難易度表プロファイル（名前付きドラフトスナップショット）──
+/** 保存済みプロファイル一覧（名前と曲数）。 */
+const diffProfiles = ref<{ name: string; songCount: number }[]>([]);
+/** 新規保存フォームのプロファイル名。 */
+const newProfileName = ref('');
+/** プロファイル操作（保存/読み込み/削除）実行中フラグ。ボタンの多重押下防止。 */
+const isProfileBusy = ref(false);
+
 // レベルフィルター（song_data の公式レベルを参照）
 /** ☆12 を表示するか。 */
 const showLv12 = ref(true);
@@ -882,6 +965,9 @@ const loadData = async () => {
       originalDiffTable.value = await diffRes.json();
       pendingDiffChanges.value = [];
     }
+
+    // 難易度表プロファイル一覧。
+    await loadDiffProfiles();
   } catch (e: any) {
     console.error('Failed to load admin game data:', e);
   }
@@ -1334,6 +1420,123 @@ const handleSaveDiffTable = async () => {
     errorMsg.value = '保存エラー: ' + e.message;
   } finally {
     isSavingDiff.value = false;
+  }
+};
+
+// ── 難易度表プロファイル ───────────────────────
+/**
+ * 【関数の役割】 現在の下書き（originalDiffTable）に未保存変更（pendingDiffChanges）を
+ * 適用した「実効テーブル」を生成する。プロファイル保存時のスナップショット対象。
+ */
+const buildEffectiveDiffTable = () => {
+  const t = JSON.parse(JSON.stringify(originalDiffTable.value));
+  for (const change of pendingDiffChanges.value) {
+    for (const r of t.ranks) {
+      r.songs = r.songs.filter((s: string) => s !== change.title);
+    }
+    const target = t.ranks.find((r: any) => r.rank === change.newRank);
+    if (target) target.songs.push(change.title);
+  }
+  return t;
+};
+
+/** 【関数の役割】 保存済みプロファイル一覧を取得する。 */
+const loadDiffProfiles = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/profiles`, { headers: authHeaders() });
+    if (res.ok) diffProfiles.value = await res.json();
+  } catch (e) {
+    console.warn('Failed to load difficulty table profiles:', e);
+  }
+};
+
+/**
+ * 【関数の役割】 現在の実効テーブルを名前付きプロファイルとして保存する。
+ * 引数 overwriteName を渡すと既存プロファイルを上書きモードで保存する（一覧の「上書き」ボタン用）。
+ * 新規保存時は入力欄 newProfileName を使い、同名が存在すれば確認を挟む。
+ */
+const handleSaveProfile = async (overwriteName?: string) => {
+  const name = (overwriteName ?? newProfileName.value).trim();
+  if (!name) return;
+
+  const exists = diffProfiles.value.some(p => p.name === name);
+  if (overwriteName) {
+    if (!confirm(`プロファイル「${name}」を現在の内容で上書きしますか？`)) return;
+  } else if (exists) {
+    if (!confirm(`プロファイル「${name}」は既に存在します。上書きしますか？`)) return;
+  }
+
+  isProfileBusy.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+  try {
+    const table = buildEffectiveDiffTable();
+    const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/profiles?name=${encodeURIComponent(name)}`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(table),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Error');
+    successMsg.value = data.message;
+    if (!overwriteName) newProfileName.value = '';
+    await loadDiffProfiles();
+  } catch (e: any) {
+    errorMsg.value = 'プロファイル保存エラー: ' + e.message;
+  } finally {
+    isProfileBusy.value = false;
+  }
+};
+
+/**
+ * 【関数の役割】 プロファイルを下書きに読み込む（下書きを丸ごと置換）。
+ * 未保存の変更や現在の下書きは失われるため確認する。読み込み後は active との差分を再計算するため
+ * 「昇格/降格/配置」一覧がこのプロファイル基準で表示される。
+ */
+const handleLoadProfile = async (name: string) => {
+  if (!confirm(`プロファイル「${name}」を下書きに読み込みますか？現在の下書き（未保存の変更を含む）は置き換えられます。`)) return;
+
+  isProfileBusy.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/profiles/load?name=${encodeURIComponent(name)}`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Error');
+    originalDiffTable.value = data;
+    pendingDiffChanges.value = [];
+    hasDraftDiffTable.value = true;
+    successMsg.value = `プロファイル「${name}」を下書きに読み込みました`;
+  } catch (e: any) {
+    errorMsg.value = 'プロファイル読み込みエラー: ' + e.message;
+  } finally {
+    isProfileBusy.value = false;
+  }
+};
+
+/** 【関数の役割】 プロファイルを削除する。 */
+const handleDeleteProfile = async (name: string) => {
+  if (!confirm(`プロファイル「${name}」を削除しますか？`)) return;
+
+  isProfileBusy.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/profiles?name=${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Error');
+    successMsg.value = data.message;
+    await loadDiffProfiles();
+  } catch (e: any) {
+    errorMsg.value = 'プロファイル削除エラー: ' + e.message;
+  } finally {
+    isProfileBusy.value = false;
   }
 };
 
