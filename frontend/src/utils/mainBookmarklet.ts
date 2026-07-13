@@ -34,7 +34,13 @@ async function(){
   const ver = vMatch ? vMatch[1] : '33';
   const base = location.origin + '/game/2dx/' + ver;
   let myName = '';
-  const battles = [];
+
+  type Song = {title: string, difficulty: string};
+  type SongScore = {score:number, pt: number};
+  type Player = {djName: string, arenaClass: string, totalPt: number, rank: number, songScores: SongScore[]};
+  type Battle = {battleType: string, date: string, songs: Song[], players: Player[]};
+
+  const battles : Battle[] = [];
   const statusEl = document.createElement('div');
   statusEl.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#0f172a;color:#fff;padding:12px;text-align:center;font:bold 14px sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.45)';
   statusEl.textContent = 'beat-seeker: 取得を開始します…';
@@ -109,12 +115,24 @@ async function(){
     console.warn('ARENA data failed', e);
   }
 
-  const CLFLG = {'1': 'FAILED', '2': 'ASSIST CLEAR', '3': 'EASY CLEAR', '4': 'CLEAR', '5': 'HARD CLEAR', '6': 'EX HARD CLEAR', '7': 'FULLCOMBO CLEAR'};
+  const CLFLG: Record<string, string> = {
+    '1': 'FAILED',
+    '2': 'ASSIST CLEAR',
+    '3': 'EASY CLEAR',
+    '4': 'CLEAR',
+    '5': 'HARD CLEAR',
+    '6': 'EX HARD CLEAR',
+    '7': 'FULLCOMBO CLEAR'
+  };
+
   const DIFFS = ['BEGINNER', 'NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA'];
-  const charts = {};
+
+  type Chart = {title: string, diff: string, level: number, ex: number, pg: number, gr: number, dj: string, clear: string};
+  const charts: Record<string, Chart> = {};
+
   let chartCount = 0;
 
-  function parsePage(html, level) {
+  function parsePage(html: string, level: number) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const trs = doc.querySelectorAll('.series-difficulty table tr');
     trs.forEach(function(tr) {
@@ -163,7 +181,7 @@ async function(){
     return !!doc.querySelector('.next-prev .navi-next a');
   }
 
-  async function scrapeLevel(lv) {
+  async function scrapeLevel(lv: number) {
     let offset = 0;
     while (true) {
       let html;
@@ -197,7 +215,7 @@ async function(){
     console.warn('Difficulty scrape failed', e);
   }
 
-  const songs = {};
+  const songs: Record<string, Record<string, Chart>> = {};
   Object.keys(charts).forEach(function(kk) {
     const c = charts[kk];
     if (!songs[c.title]) songs[c.title] = {};
@@ -210,7 +228,7 @@ async function(){
   });
   headers.push('最終プレー日時');
 
-  function q(v) {
+  function q(v: unknown) {
     return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   }
 
@@ -222,7 +240,7 @@ async function(){
     DIFFS.forEach(function(d) {
       const c = s[d];
       if (c) {
-        vals.push(c.level, c.ex, c.pg, c.gr, '', c.clear, c.dj);
+        vals.push(String(c.level), String(c.ex), String(c.pg), String(c.gr), '', c.clear, c.dj);
       } else {
         vals.push('', '', '', '', '', '', '');
       }
