@@ -54,7 +54,7 @@ async function(){
       arenaDoc = new DOMParser().parseFromString(ah, 'text/html');
     }
     const n = arenaDoc.querySelector('a[href*="djdata/status"] .on-name li:last-child');
-    myName = n ? (n.innerText || n.textContent || '').trim() : '';
+    myName = n ? (n.textContent || '').trim() : '';
 
     const titles = arenaDoc.querySelectorAll('.arena-title');
     const battleDivs = arenaDoc.querySelectorAll('.arena-battle');
@@ -64,8 +64,8 @@ async function(){
 
       const bt = t.querySelector('.battle');
       const dt = t.querySelector('.date');
-      const battleType = bt ? (bt.innerText || bt.textContent || '').trim() : '';
-      const dateRaw = dt ? (dt.innerText || dt.textContent || '').replace(/対戦日時[\s\S]*?：/, '').trim() : '';
+      const battleType = bt ? (bt.textContent || '').trim() : '';
+      const dateRaw = dt ? (dt.textContent || '').replace(/対戦日時[\s\S]*?：/, '').trim() : '';
 
       const tbl = b.querySelector('table');
       if (!tbl) return;
@@ -74,7 +74,7 @@ async function(){
       const ths = rows[0].querySelectorAll('th');
       const songs = [];
       for (let j = 2; j < ths.length; j++) {
-        const txt = (ths[j].innerText || ths[j].textContent || '').replace(/\u00a0/g, ' ').replace(/\n/g, ' ').trim();
+        const txt = (ths[j].textContent || '').replace(/\u00a0/g, ' ').replace(/\n/g, ' ').trim();
         const sm2 = txt.match(/^(.+?)\s*\/\s*(.+)$/);
         const title = sm2 ? sm2[1].trim() : txt;
         const diff = sm2 ? sm2[2].trim() : '';
@@ -86,7 +86,7 @@ async function(){
         const tds = rows[k].querySelectorAll('td');
         if (tds.length < 3) continue;
 
-        const djName = (tds[0].innerText || tds[0].textContent || '').trim();
+        const djName = (tds[0].textContent || '').trim();
         const img = tds[1].querySelector('img');
         let cls = '';
         if (img) {
@@ -94,7 +94,7 @@ async function(){
           if (m) cls = m[1].toUpperCase();
         }
 
-        const ptTxt = (tds[2].innerText || tds[2].textContent || '').replace(/\u00a0/g, ' ').trim();
+        const ptTxt = (tds[2].textContent || '').replace(/\u00a0/g, ' ').trim();
         const pmTotal = ptTxt.match(/(\d+)pt/);
         const pmRank = ptTxt.match(/(\d+)位/);
         const totalPt = pmTotal ? parseInt(pmTotal[1]) : 0;
@@ -102,7 +102,7 @@ async function(){
 
         const songScores = [];
         for (let s = 3; s < tds.length; s++) {
-          const stxt = (tds[s].innerText || tds[s].textContent || '').replace(/\u00a0/g, ' ').trim();
+          const stxt = (tds[s].textContent || '').replace(/\u00a0/g, ' ').trim();
           const sm = stxt.match(/(\d+)/);
           const spm = stxt.match(/(\d+)pt/);
           songScores.push({score: sm ? parseInt(sm[1]) : 0, pt: spm ? parseInt(spm[1]) : 0});
@@ -141,9 +141,9 @@ async function(){
 
       const a = tds[0].querySelector('a.music_info');
       if (!a) return;
-      const title = (a.innerText || a.textContent || '').trim();
+      const title = (a.textContent || '').trim();
 
-      const diff = (tds[1].innerText || tds[1].textContent || '').replace(/\u00a0/g, ' ').trim();
+      const diff = (tds[1].textContent || '').replace(/\u00a0/g, ' ').trim();
       if (DIFFS.indexOf(diff) < 0) return;
 
       let dj = '---';
@@ -153,7 +153,7 @@ async function(){
         if (dm) dj = dm[1];
       }
 
-      const sc = (tds[3].innerText || tds[3].textContent || '').replace(/\u00a0/g, ' ');
+      const sc = (tds[3].textContent || '').replace(/\u00a0/g, ' ');
       let ex = 0, pg = 0, gr = 0;
       const sm = sc.match(/(\d+)\s*\(\s*(\d+)\s*\/\s*(\d+)\s*\)/);
       if (sm) {
