@@ -316,7 +316,7 @@ const props = defineProps<{
   totalPoints: number;
   viewingIidxId?: string;
   viewingDisplayName?: string;
-  viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | 'private' | null;
+  viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | 'arenaTopRanker' | 'private' | null;
   rateTierPointsOverride?: number | null;
 }>();
 

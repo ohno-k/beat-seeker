@@ -356,9 +356,11 @@ const currentGuideSlug = ref<string | null>(null);
  *  - 'topRanker': 県別・バージョン別の TOP ランカー（仮想ユーザー）を閲覧中
  *  - 'private': 非公開ユーザーの BEAT-PT/RATE-PT 総合値のみ閲覧（曲別データは持たない）
  */
-const viewingMode = ref<'admin' | 'friend' | 'public' | 'topRanker' | 'private' | null>(null);
+const viewingMode = ref<'admin' | 'friend' | 'public' | 'topRanker' | 'arenaTopRanker' | 'private' | null>(null);
 /** TOP ランカー閲覧時のエリア情報（バージョン+都道府県）。それ以外は null。 */
 const viewingTopRanker = ref<{ versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string } | null>(null);
+/** アリーナ仮想プレイヤー閲覧時の識別情報（IIDX ID）。それ以外は null。 */
+const viewingArenaRanker = ref<{ iidxId: string; djName: string; arenaClass: string } | null>(null);
 /** 現在表示中のユーザーの総 BEAT-PT（= TOP100 合計）。 */
 const totalBeatTierPoints = ref(0);
 /** 非公開ユーザー閲覧時に外部から渡される RATE-PT。通常閲覧時は null。 */
@@ -392,7 +394,7 @@ const isSidebarOpen = ref(false);
 
 const { user, isLoggedIn, logout, isLoading: authLoading, authHeaders } = useAuth();
 const { upload, saveHistoryLog } = useScoreUpload();
-const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, isFetching } = useScores();
+const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, fetchArenaTopRankerProfile, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 
 /**
@@ -808,6 +810,9 @@ const loadSavedScores = async () => {
         viewingTopRanker.value = profile;
       }
       data = scores;
+    } else if (viewingMode.value === 'arenaTopRanker' && viewingArenaRanker.value) {
+      const { scores } = await fetchArenaTopRankerProfile(viewingArenaRanker.value.iidxId);
+      data = scores;
     } else if (viewingUserId.value !== null) {
       const fetchMode =
         viewingMode.value === 'friend' ? 'friend'
@@ -851,6 +856,7 @@ const handleViewFriend = async (friend: { id: number; displayName: string; iidxI
   viewingUserIidxId.value = friend.iidxId || '';
   viewingMode.value = 'friend';
   viewingTopRanker.value = null;
+  viewingArenaRanker.value = null;
   activeTab.value = 'dashboard';
   await loadSavedScores();
 };
@@ -865,6 +871,7 @@ const handleViewPublicUser = async (u: { id: number; displayName: string; iidxId
   viewingUserIidxId.value = u.iidxId || '';
   viewingMode.value = 'public';
   viewingTopRanker.value = null;
+  viewingArenaRanker.value = null;
   activeTab.value = 'dashboard';
   fetchFriendStatus(u.id);
   await loadSavedScores();
@@ -885,8 +892,24 @@ const handleViewTopRanker = async (area: {
   viewingUserIidxId.value = '';
   viewingMode.value = 'topRanker';
   viewingTopRanker.value = { ...area };
+  viewingArenaRanker.value = null;
   activeTab.value = 'dashboard';
   refreshVirtualRivalStatus();
+  await loadSavedScores();
+};
+
+/**
+ * 【関数の役割】 アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）のダッシュボードを閲覧開始する。
+ * 県別 TOP ランカーと違い「エリア」ではなく個人（IIDX ID）なので、仮想ライバル登録は行わない。
+ */
+const handleViewArenaTopRanker = async (p: { iidxId: string; djName: string; arenaClass: string }) => {
+  viewingUserId.value = null;
+  viewingUserName.value = p.djName || p.iidxId;
+  viewingUserIidxId.value = p.iidxId || '';
+  viewingMode.value = 'arenaTopRanker';
+  viewingTopRanker.value = null;
+  viewingArenaRanker.value = { ...p };
+  activeTab.value = 'dashboard';
   await loadSavedScores();
 };
 
@@ -901,6 +924,7 @@ const handleViewPrivateUser = (u: { id: number; displayName: string; iidxId: str
   viewingUserIidxId.value = u.iidxId || '';
   viewingMode.value = 'private';
   viewingTopRanker.value = null;
+  viewingArenaRanker.value = null;
   activeTab.value = 'dashboard';
   scoreData.value = [];
   totalBeatTierPoints.value = u.totalBeatPt;
@@ -918,6 +942,7 @@ const returnToMyData = async () => {
   viewingUserIidxId.value = '';
   viewingMode.value = null;
   viewingTopRanker.value = null;
+  viewingArenaRanker.value = null;
   privateRateTierPoints.value = null;
   friendStatus.value = null;
   isFriendRequestModalOpen.value = false;
@@ -938,6 +963,7 @@ watch(isLoggedIn, (newVal) => {
     viewingUserName.value = '';
     viewingUserIidxId.value = '';
     viewingTopRanker.value = null;
+    viewingArenaRanker.value = null;
     loadSavedScores();
     fetchPendingRequests();
     fetchAppNotifications();
@@ -968,6 +994,7 @@ watch(isLoggedIn, (newVal) => {
     viewingUserName.value = '';
     viewingUserIidxId.value = '';
     viewingTopRanker.value = null;
+    viewingArenaRanker.value = null;
     scoreData.value = [];
     totalBeatTierPoints.value = 0;
   }
@@ -1795,14 +1822,14 @@ const handleUnifiedClose = async () => {
         </nav>
         <!-- ========== 閲覧中バナー: 他ユーザー/TOPランカー閲覧時に最上部へ固定表示 ========== -->
         <!-- 「自分のデータに戻る」「フレンド申請」「仮想ライバル登録」などの操作ボタンを配置 -->
-        <div v-if="viewingUserId || viewingMode === 'topRanker'" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md border border-blue-200 dark:border-blue-800 animate-fade-in shrink-0">
+        <div v-if="viewingUserId || viewingMode === 'topRanker' || viewingMode === 'arenaTopRanker'" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md border border-blue-200 dark:border-blue-800 animate-fade-in shrink-0">
           <div class="flex items-center gap-3 w-full justify-center sm:justify-start">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
             <div class="flex flex-col">
-              <span class="text-xs font-semibold text-blue-700 dark:text-blue-400 leading-none mb-1">{{ viewingMode === 'admin' ? t('app.banner.adminMode') : viewingMode === 'public' ? t('app.banner.publicMode') : viewingMode === 'topRanker' ? t('app.banner.topRankerMode') : viewingMode === 'private' ? t('app.banner.privateMode') : t('app.banner.friendMode') }}</span>
+              <span class="text-xs font-semibold text-blue-700 dark:text-blue-400 leading-none mb-1">{{ viewingMode === 'admin' ? t('app.banner.adminMode') : viewingMode === 'public' ? t('app.banner.publicMode') : viewingMode === 'topRanker' ? t('app.banner.topRankerMode') : viewingMode === 'arenaTopRanker' ? t('app.banner.arenaTopRankerMode') : viewingMode === 'private' ? t('app.banner.privateMode') : t('app.banner.friendMode') }}</span>
               <span class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">{{ viewingMode === 'topRanker' ? t('app.banner.viewingTopRanker', { name: viewingUserName }) : t('app.banner.viewingUser', { name: viewingUserName }) }}</span>
             </div>
           </div>
@@ -1939,6 +1966,7 @@ const handleUnifiedClose = async () => {
             @view-user="handleViewPublicUser"
             @view-private-user="handleViewPrivateUser"
             @view-top-ranker="handleViewTopRanker"
+            @view-arena-top-ranker="handleViewArenaTopRanker"
           />
         </template>
 

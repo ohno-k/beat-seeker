@@ -13,6 +13,7 @@
  * @emits view-user 公開ユーザーの詳細表示要求。
  * @emits view-private-user プライベートユーザー閲覧時（合計 pt を同梱）。
  * @emits view-top-ranker 都道府県 TOP ランカー（バーチャルプロフィール）閲覧要求。
+ * @emits view-arena-top-ranker アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）閲覧要求。
  */
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import RankIcon from './RankIcon.vue';
@@ -47,9 +48,19 @@ interface TopRankerEntry {
   beatPt: number;
 }
 
+/** アリーナTOP RANKER取り込みで作られた「アリーナ仮想プレイヤー」の Beat-PT ランキング行。 */
+interface ArenaTopRankerEntry {
+  iidxId: string;
+  djName: string;
+  arenaClass: string;
+  rankPos: number;
+  beatPt: number;
+}
+
 type MergedBeatRow =
   | { kind: 'user'; rank: number; entry: BeatRankingEntry }
-  | { kind: 'topRanker'; totalBeatPt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string };
+  | { kind: 'topRanker'; totalBeatPt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }
+  | { kind: 'arenaTopRanker'; totalBeatPt: number; iidxId: string; djName: string; arenaClass: string; rankPos: number };
 
 interface RateRankingEntry {
   userId: number | null;
@@ -71,9 +82,19 @@ interface RateTopRankerEntry {
   ratePt: number;
 }
 
+/** アリーナ仮想プレイヤーの Rate-PT ランキング行。 */
+interface ArenaRateTopRankerEntry {
+  iidxId: string;
+  djName: string;
+  arenaClass: string;
+  rankPos: number;
+  ratePt: number;
+}
+
 type MergedRateRow =
   | { kind: 'user'; rank: number; entry: RateRankingEntry }
-  | { kind: 'topRanker'; totalRatePt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string };
+  | { kind: 'topRanker'; totalRatePt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }
+  | { kind: 'arenaTopRanker'; totalRatePt: number; iidxId: string; djName: string; arenaClass: string; rankPos: number };
 
 /** KENBAN-TIER ランキング API のエントリ（暫定: rankChange / lastUpdatedAt なし）。 */
 interface KenbanRankingEntry {
@@ -146,6 +167,7 @@ const emit = defineEmits<{
     (e: 'view-user', payload: { id: number; displayName: string; iidxId: string }): void;
     (e: 'view-private-user', payload: { id: number; displayName: string; iidxId: string; totalBeatPt: number; totalRatePt: number }): void;
     (e: 'view-top-ranker', payload: { versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }): void;
+    (e: 'view-arena-top-ranker', payload: { iidxId: string; djName: string; arenaClass: string }): void;
 }>();
 
 // --- タッチスクロール判定（モバイルの誤タップ防止） ---
@@ -229,6 +251,16 @@ function handleTopRankerRowClick(row: { versionNum: number; versionName: string;
     });
 }
 
+/** 【関数の役割】 アリーナ仮想プレイヤー行クリック時、view-arena-top-ranker を発火する。タッチスクロール中は無視。 */
+function handleArenaTopRankerRowClick(row: { iidxId: string; djName: string; arenaClass: string }) {
+    if (isTouchScrolling) return;
+    emit('view-arena-top-ranker', {
+        iidxId: row.iidxId,
+        djName: row.djName,
+        arenaClass: row.arenaClass,
+    });
+}
+
 const { user, authHeaders } = useAuth();
 const { friends, fetchFriends } = useFriends();
 const { showRateTier } = useRateTierVisibility();
@@ -264,12 +296,18 @@ const averageRanking = ref<AverageRankingEntry[]>([]);
 const topRankers = ref<TopRankerEntry[]>([]);
 /** Rate-PT 都道府県 TOP ランカー一覧。 */
 const rateTopRankers = ref<RateTopRankerEntry[]>([]);
+/** Beat-PT アリーナ仮想プレイヤー一覧。 */
+const arenaTopRankers = ref<ArenaTopRankerEntry[]>([]);
+/** Rate-PT アリーナ仮想プレイヤー一覧。 */
+const arenaRateTopRankers = ref<ArenaRateTopRankerEntry[]>([]);
 /** 初回ロード中フラグ。 */
 const isLoading = ref(true);
 /** エラーメッセージ（i18n キー非経由の文字列）。 */
 const error = ref('');
 /** 都道府県 TOP ランカー（バーチャル）を表に混ぜて表示するか。 */
 const showTopRankers = ref(false);
+/** アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）を表に混ぜて表示するか。県別TOPとは独立トグル。 */
+const showArenaTopRankers = ref(false);
 
 // ページネーション（1 ページ 50 件）
 const PAGE_SIZE = 50;
@@ -300,7 +338,15 @@ const mergedBeatRanking = computed<MergedBeatRow[]>(() => {
         prefectureFileNum: r.prefectureFileNum,
         prefectureName: r.prefectureName,
     })) : [];
-    const all = [...userRows, ...topRows];
+    const arenaRows: MergedBeatRow[] = showArenaTopRankers.value ? arenaTopRankers.value.map(r => ({
+        kind: 'arenaTopRanker',
+        totalBeatPt: r.beatPt,
+        iidxId: r.iidxId,
+        djName: r.djName,
+        arenaClass: r.arenaClass,
+        rankPos: r.rankPos,
+    })) : [];
+    const all = [...userRows, ...topRows, ...arenaRows];
     all.sort((a, b) => {
         const aPt = a.kind === 'user' ? a.entry.totalBeatPt : a.totalBeatPt;
         const bPt = b.kind === 'user' ? b.entry.totalBeatPt : b.totalBeatPt;
@@ -324,7 +370,15 @@ const mergedRateRanking = computed<MergedRateRow[]>(() => {
         prefectureFileNum: r.prefectureFileNum,
         prefectureName: r.prefectureName,
     })) : [];
-    const all = [...userRows, ...topRows];
+    const arenaRows: MergedRateRow[] = showArenaTopRankers.value ? arenaRateTopRankers.value.map(r => ({
+        kind: 'arenaTopRanker',
+        totalRatePt: r.ratePt,
+        iidxId: r.iidxId,
+        djName: r.djName,
+        arenaClass: r.arenaClass,
+        rankPos: r.rankPos,
+    })) : [];
+    const all = [...userRows, ...topRows, ...arenaRows];
     all.sort((a, b) => {
         const aPt = a.kind === 'user' ? a.entry.totalRatePt : a.totalRatePt;
         const bPt = b.kind === 'user' ? b.entry.totalRatePt : b.totalRatePt;
@@ -388,6 +442,29 @@ const scatterPoints = computed<ScatterPoint[]>(() => {
                 isTopRanker: true,
             });
             addedTopRankers++;
+        }
+    }
+    if (showArenaTopRankers.value) {
+        const arenaRateByIidx = new Map<string, number>();
+        for (const a of arenaRateTopRankers.value) {
+            arenaRateByIidx.set(a.iidxId, a.ratePt);
+        }
+        // 仮想 TOP ランカーと同様、BEAT-PT 上位 SCATTER_TOP_RANKER_LIMIT 件のみ描画する。
+        // arenaTopRankers は backend で beatPt 降順ソート済み。
+        let addedArena = 0;
+        for (const a of arenaTopRankers.value) {
+            if (addedArena >= SCATTER_TOP_RANKER_LIMIT) break;
+            const rate = arenaRateByIidx.get(a.iidxId) ?? 0;
+            if (a.beatPt <= 0 || rate <= 0) continue;
+            points.push({
+                iidxId: `arena:${a.iidxId}`,
+                displayName: `ARENA: ${a.djName || a.iidxId}`,
+                beatPt: a.beatPt,
+                ratePt: rate,
+                isMe: false,
+                isTopRanker: true,
+            });
+            addedArena++;
         }
     }
     return points;
@@ -504,17 +581,22 @@ const tierChangeStats = computed(() => {
     return { up, down, total: up + down };
 });
 
-/** 【関数の役割】 Beat-PT ランキング本体と都道府県 TOP ランカーを並列取得し、0 pt の TOP ランカーは除外する。 */
+/** 【関数の役割】 Beat-PT ランキング本体・都道府県 TOP ランカー・アリーナ仮想プレイヤーを並列取得し、0 pt の仮想行は除外する。 */
 async function fetchBeatRanking() {
-    const [rankRes, topRes] = await Promise.all([
+    const [rankRes, topRes, arenaRes] = await Promise.all([
         fetch(`${API_BASE}/api/scores/ranking`),
         fetch(`${API_BASE}/api/scores/ranking/top-rankers`),
+        fetch(`${API_BASE}/api/scores/ranking/arena-top-rankers`),
     ]);
     if (!rankRes.ok) throw new Error('beat');
     beatRanking.value = await rankRes.json();
     if (topRes.ok) {
         const raw: TopRankerEntry[] = await topRes.json();
         topRankers.value = raw.filter(r => r.beatPt > 0);
+    }
+    if (arenaRes.ok) {
+        const raw: ArenaTopRankerEntry[] = await arenaRes.json();
+        arenaTopRankers.value = raw.filter(r => r.beatPt > 0);
     }
 }
 
@@ -539,17 +621,22 @@ async function fetchAverageRanking() {
     averageRanking.value = await res.json();
 }
 
-/** 【関数の役割】 Rate-PT ランキング本体と都道府県 TOP ランカー（Rate 版）を並列取得する。 */
+/** 【関数の役割】 Rate-PT ランキング本体・都道府県 TOP ランカー（Rate 版）・アリーナ仮想プレイヤー（Rate 版）を並列取得する。 */
 async function fetchRateRanking() {
-    const [rankRes, topRes] = await Promise.all([
+    const [rankRes, topRes, arenaRes] = await Promise.all([
         fetch(`${API_BASE}/api/scores/rate-ranking`),
         fetch(`${API_BASE}/api/scores/rate-ranking/top-rankers`),
+        fetch(`${API_BASE}/api/scores/rate-ranking/arena-top-rankers`),
     ]);
     if (!rankRes.ok) throw new Error('rate');
     rateRanking.value = await rankRes.json();
     if (topRes.ok) {
         const raw: RateTopRankerEntry[] = await topRes.json();
         rateTopRankers.value = raw.filter(r => r.ratePt > 0);
+    }
+    if (arenaRes.ok) {
+        const raw: ArenaRateTopRankerEntry[] = await arenaRes.json();
+        arenaRateTopRankers.value = raw.filter(r => r.ratePt > 0);
     }
 }
 
@@ -779,14 +866,24 @@ watch(viewMode, async (mode) => {
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >難易度シミュ</button>
         </div>
-        <label v-if="viewMode === 'beat' || viewMode === 'rate'" class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
-          <div class="relative inline-flex items-center">
-            <input type="checkbox" v-model="showTopRankers" class="sr-only peer">
-            <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-amber-500 dark:peer-checked:bg-amber-600 transition-colors"></div>
-            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
-          </div>
-          <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">TOPランカー仮想ユーザを表示</span>
-        </label>
+        <div v-if="viewMode === 'beat' || viewMode === 'rate'" class="flex flex-col sm:flex-row sm:items-center gap-2">
+          <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
+            <div class="relative inline-flex items-center">
+              <input type="checkbox" v-model="showTopRankers" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-amber-500 dark:peer-checked:bg-amber-600 transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+            </div>
+            <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">TOPランカー仮想ユーザを表示</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
+            <div class="relative inline-flex items-center">
+              <input type="checkbox" v-model="showArenaTopRankers" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-indigo-500 dark:peer-checked:bg-indigo-600 transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+            </div>
+            <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">アリーナTOPランカー仮想ユーザを表示</span>
+          </label>
+        </div>
       </div>
 
       <!-- Loading / Error / Empty -->
@@ -817,7 +914,7 @@ watch(viewMode, async (mode) => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <template v-for="(row, idx) in paginatedBeatRanking" :key="row.kind === 'user' ? `u-${row.entry.iidxId}` : `t-${row.versionName}-${row.prefectureName}`">
+                <template v-for="(row, idx) in paginatedBeatRanking" :key="row.kind === 'user' ? `u-${row.entry.iidxId}` : row.kind === 'topRanker' ? `t-${row.versionName}-${row.prefectureName}` : `a-${row.iidxId}`">
                   <tr v-if="row.kind === 'user'"
                     :id="`ranking-row-${row.entry.iidxId}`"
                     class="group transition-colors"
@@ -881,7 +978,7 @@ watch(viewMode, async (mode) => {
                       </span>
                     </td>
                   </tr>
-                  <tr v-else
+                  <tr v-else-if="row.kind === 'topRanker'"
                     class="bg-amber-50/50 dark:bg-amber-900/10 cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
                     @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleTopRankerRowClick(row)">
                     <td class="py-2 pl-4">
@@ -892,6 +989,36 @@ watch(viewMode, async (mode) => {
                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
                         <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
                           {{ row.versionName }} × {{ row.prefectureName }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-2 px-2 text-center">
+                      <div class="flex justify-center">
+                        <RankIcon :rank-name="getRankInfo(row.totalBeatPt).name" :tier="getRankInfo(row.totalBeatPt).tier" size="md" disable-party />
+                      </div>
+                    </td>
+                    <td class="py-2 text-right">
+                      <div class="flex items-baseline justify-end gap-1">
+                        <span class="text-lg font-bold tabular-nums text-slate-500 dark:text-slate-400">
+                          {{ row.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-400">BEAT-PT</span>
+                      </div>
+                    </td>
+                    <td class="py-2 text-right pr-4"></td>
+                  </tr>
+                  <tr v-else
+                    class="bg-indigo-50/50 dark:bg-indigo-900/10 cursor-pointer hover:bg-indigo-100/60 dark:hover:bg-indigo-900/20 transition-colors"
+                    @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleArenaTopRankerRowClick(row)">
+                    <td class="py-2 pl-4">
+                      <div class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-300 dark:text-slate-600 text-sm">―</div>
+                    </td>
+                    <td class="py-2">
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-200">ARENA</span>
+                        <span v-if="row.arenaClass" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ row.arenaClass }}</span>
+                        <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
+                          {{ row.djName || 'Unnamed Player' }}
                         </span>
                       </div>
                     </td>
@@ -955,7 +1082,7 @@ watch(viewMode, async (mode) => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <template v-for="row in paginatedRateRanking" :key="row.kind === 'user' ? `u-${row.entry.iidxId}` : `t-${row.versionName}-${row.prefectureName}`">
+                <template v-for="row in paginatedRateRanking" :key="row.kind === 'user' ? `u-${row.entry.iidxId}` : row.kind === 'topRanker' ? `t-${row.versionName}-${row.prefectureName}` : `a-${row.iidxId}`">
                   <tr v-if="row.kind === 'user'"
                     :id="`ranking-row-${row.entry.iidxId}`"
                     class="group transition-colors"
@@ -1019,7 +1146,7 @@ watch(viewMode, async (mode) => {
                       </span>
                     </td>
                   </tr>
-                  <tr v-else
+                  <tr v-else-if="row.kind === 'topRanker'"
                     class="bg-amber-50/50 dark:bg-amber-900/10 cursor-pointer hover:bg-amber-100/60 dark:hover:bg-amber-900/20 transition-colors"
                     @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleTopRankerRowClick(row)">
                     <td class="py-2 pl-4">
@@ -1030,6 +1157,36 @@ watch(viewMode, async (mode) => {
                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-200">TOP</span>
                         <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
                           {{ row.versionName }} × {{ row.prefectureName }}
+                        </span>
+                      </div>
+                    </td>
+                    <td class="py-2 px-2 text-center">
+                      <div class="flex justify-center">
+                        <RankIcon :rank-name="getRateTierRankInfo(row.totalRatePt).name" :tier="getRateTierRankInfo(row.totalRatePt).tier" size="md" disable-party />
+                      </div>
+                    </td>
+                    <td class="py-2 text-right">
+                      <div class="flex items-baseline justify-end gap-1">
+                        <span class="text-lg font-bold tabular-nums text-slate-500 dark:text-slate-400">
+                          {{ row.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+                        </span>
+                        <span class="text-[9px] font-bold text-emerald-500">RATE-PT</span>
+                      </div>
+                    </td>
+                    <td class="py-2 text-right pr-4"></td>
+                  </tr>
+                  <tr v-else
+                    class="bg-indigo-50/50 dark:bg-indigo-900/10 cursor-pointer hover:bg-indigo-100/60 dark:hover:bg-indigo-900/20 transition-colors"
+                    @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleArenaTopRankerRowClick(row)">
+                    <td class="py-2 pl-4">
+                      <div class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-300 dark:text-slate-600 text-sm">―</div>
+                    </td>
+                    <td class="py-2">
+                      <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-200 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-200">ARENA</span>
+                        <span v-if="row.arenaClass" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ row.arenaClass }}</span>
+                        <span class="font-bold text-sm text-slate-600 dark:text-slate-300">
+                          {{ row.djName || 'Unnamed Player' }}
                         </span>
                       </div>
                     </td>

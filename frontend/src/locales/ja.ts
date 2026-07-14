@@ -1090,6 +1090,7 @@ export const ja = {
   'app.banner.friendMode': 'フレンドのデータを閲覧中',
   'app.banner.publicMode': '公開プロフィールを閲覧中',
   'app.banner.topRankerMode': 'TOPランカー仮想プロフィールを閲覧中',
+  'app.banner.arenaTopRankerMode': 'アリーナ仮想プレイヤーを閲覧中',
   'app.banner.privateMode': '非公開ユーザーを閲覧中',
   'app.banner.viewingUser': '現在 {name} さんのデータを閲覧中',
   'app.banner.viewingTopRanker': '現在 {name} のデータを閲覧中',

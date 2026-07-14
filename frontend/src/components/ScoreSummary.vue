@@ -1149,7 +1149,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const props = defineProps<{
   scores: ScoreData[];
-  viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | null;
+  viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | 'arenaTopRanker' | null;
   /** BPI 列を表示するか。きんじょー杯ページ（/kinjocup）でのみ true を渡す。 */
   showBpi?: boolean;
 }>();

@@ -26,6 +26,7 @@ import com.beatseeker.backend.service.SongArenaAveragesCacheService;
 import com.beatseeker.backend.service.SongRankBatchService;
 import com.beatseeker.backend.service.SongRankingAggregateCacheService;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
+import com.beatseeker.backend.service.VirtualArenaRankerService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
@@ -100,6 +101,8 @@ public class ScoreController {
     private final SongDefinitionRepository songDefinitionRepository;
     /** トップランカー BEAT-PT/RATE-PT ランキングのキャッシュサービス。 */
     private final TopRankersBeatPtService topRankersBeatPtService;
+    /** アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）の BEAT-PT/RATE-PT 集計キャッシュサービス。 */
+    private final VirtualArenaRankerService virtualArenaRankerService;
     /** ティア別平均スコア（song-arena-averages）の集計結果キャッシュ。 */
     private final SongArenaAveragesCacheService songArenaAveragesCacheService;
     /** 人気曲ランキング（song-ranking-aggregate）の集計結果キャッシュ。 */
@@ -131,6 +134,7 @@ public class ScoreController {
             EmailService emailService,
             SongDefinitionRepository songDefinitionRepository,
             TopRankersBeatPtService topRankersBeatPtService,
+            VirtualArenaRankerService virtualArenaRankerService,
             SongArenaAveragesCacheService songArenaAveragesCacheService,
             SongRankingAggregateCacheService songRankingAggregateCacheService,
             com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository,
@@ -150,6 +154,7 @@ public class ScoreController {
         this.emailService = emailService;
         this.songDefinitionRepository = songDefinitionRepository;
         this.topRankersBeatPtService = topRankersBeatPtService;
+        this.virtualArenaRankerService = virtualArenaRankerService;
         this.songArenaAveragesCacheService = songArenaAveragesCacheService;
         this.songRankingAggregateCacheService = songRankingAggregateCacheService;
         this.userSongOptionRepository = userSongOptionRepository;
@@ -761,6 +766,40 @@ public class ScoreController {
             @RequestParam int prefectureFileNum) {
         var profile = topRankersBeatPtService.getAreaProfile(versionNum, prefectureFileNum);
         // キャッシュに該当エリアが無ければ 404 を返す。
+        if (profile == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(profile);
+    }
+
+    /**
+     * 【メソッドの役割】 アリーナTOP RANKER 取り込みで作られた「アリーナ仮想プレイヤー」の
+     * BEAT-PT ランキングを返す（キャッシュ）。県別TOPとは別トグルで表示される。
+     *
+     * @return {iidxId, djName, arenaClass, rankPos, beatPt} の List（BEAT-PT 降順）
+     */
+    @GetMapping("/ranking/arena-top-rankers")
+    public ResponseEntity<List<Map<String, Object>>> getArenaTopRankersBeatPt() {
+        return ResponseEntity.ok(virtualArenaRankerService.getBeatRanking());
+    }
+
+    /**
+     * 【メソッドの役割】 アリーナ仮想プレイヤーの RATE-PT ランキングを返す（キャッシュ）。
+     *
+     * @return {iidxId, djName, arenaClass, rankPos, ratePt} の List（RATE-PT 降順）
+     */
+    @GetMapping("/rate-ranking/arena-top-rankers")
+    public ResponseEntity<List<Map<String, Object>>> getArenaTopRankersRatePt() {
+        return ResponseEntity.ok(virtualArenaRankerService.getRateRanking());
+    }
+
+    /**
+     * 【メソッドの役割】 指定 IIDX ID のアリーナ仮想プレイヤーのプロフィール（scores 含む）を返す。
+     *
+     * @param iidxId 対象プレイヤーの IIDX ID
+     * @return プロフィール（{iidxId, djName, arenaClass, rankPos, beatPt, ratePt, scores[]}）。無ければ 404
+     */
+    @GetMapping("/arena-top-ranker-profile")
+    public ResponseEntity<Map<String, Object>> getArenaTopRankerProfile(@RequestParam String iidxId) {
+        Map<String, Object> profile = virtualArenaRankerService.getProfile(iidxId);
         if (profile == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(profile);
     }

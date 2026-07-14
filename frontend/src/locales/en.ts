@@ -1013,6 +1013,7 @@ export const en = {
   'app.banner.friendMode': 'Viewing Friend\'s Data',
   'app.banner.publicMode': 'Viewing Public Profile',
   'app.banner.topRankerMode': 'Viewing TOP Ranker Virtual Profile',
+  'app.banner.arenaTopRankerMode': 'Viewing Arena Virtual Player',
   'app.banner.privateMode': 'Viewing Private User',
   'app.banner.viewingUser': 'Currently viewing {name}\'s data',
   'app.banner.viewingTopRanker': 'Currently viewing {name}',

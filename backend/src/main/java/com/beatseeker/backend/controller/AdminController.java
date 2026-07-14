@@ -56,6 +56,7 @@ import java.util.Map;
  *  - GET  /api/admin/users/{userId}/history         … 指定ユーザーのスナップショット履歴
  *  - GET  /api/admin/users/{userId}/arena/matches   … 指定ユーザーの ARENA 試合履歴
  *  - POST /api/admin/recalculate-points             … 全ユーザーの BEAT-PT / RATE-PT 再計算（非同期）
+ *  - POST /api/admin/arena-top-rankers/recompute    … アリーナ仮想プレイヤー集計キャッシュの再構築（同期）
  *  - POST /api/admin/migrate-user-beat-pt           … users.total_beat_pt の一括移行
  *  - POST /api/admin/push/clear-all                 … 全ユーザーの push 購読を初期化
  *  - POST /api/admin/patch-rate-pt                  … RATE-PT = 0 の履歴ログを補正
@@ -77,6 +78,8 @@ public class AdminController {
     private final ScoreRecalculationService scoreRecalculationService;
     /** トップランカー BEAT-PT ランキングのキャッシュサービス。 */
     private final TopRankersBeatPtService topRankersBeatPtService;
+    /** アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）の集計キャッシュサービス。 */
+    private final com.beatseeker.backend.service.VirtualArenaRankerService virtualArenaRankerService;
     /** playersJson / songsJson をパースするための Jackson ObjectMapper。 */
     private final ObjectMapper objectMapper;
     /** 管理者判定のロジックを共通化した Service。 */
@@ -105,6 +108,7 @@ public class AdminController {
                            ArenaMatchRepository arenaMatchRepository,
                            ScoreRecalculationService scoreRecalculationService,
                            TopRankersBeatPtService topRankersBeatPtService,
+                           com.beatseeker.backend.service.VirtualArenaRankerService virtualArenaRankerService,
                            ObjectMapper objectMapper,
                            AdminAuthService adminAuthService,
                            UserSongOptionRepository userSongOptionRepository,
@@ -117,6 +121,7 @@ public class AdminController {
         this.arenaMatchRepository = arenaMatchRepository;
         this.scoreRecalculationService = scoreRecalculationService;
         this.topRankersBeatPtService = topRankersBeatPtService;
+        this.virtualArenaRankerService = virtualArenaRankerService;
         this.objectMapper = objectMapper;
         this.adminAuthService = adminAuthService;
         this.jdbcTemplate = jdbcTemplate;
@@ -431,11 +436,36 @@ public class AdminController {
             scoreRecalculationService.recalculateAllUsersAsync(req.songDataJson(), req.difficultyTableJson());
             // 手順2: 楽曲データ／難易度表が変化した → トップランカー BEAT-PT キャッシュも再構築。
             new Thread(() -> topRankersBeatPtService.recompute(), "top-rankers-recompute").start();
+            // 手順2b: アリーナ仮想プレイヤーの集計も同じ楽曲データ／難易度表に依存するため再構築。
+            new Thread(() -> virtualArenaRankerService.recompute(), "virtual-arena-rankers-recompute").start();
             // 手順3: クライアントには即 202 を返す（ジョブは裏で継続中）。
             return ResponseEntity.accepted().body(Map.of("message", "Recalculation started in background"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("message", "Error starting recalculation: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）の
+     * BEAT-PT / RATE-PT 集計キャッシュを **同期実行** で再構築する。
+     *
+     * スクレイプバッチ（{@code scripts/scrape-arena-top-rankers.js}）で
+     * {@code virtual_arena_rankers} を更新した後に呼び出して、ランキング表示へ即時反映させる。
+     * 同期実行し、完了後のキャッシュ状態を返す。
+     *
+     * @param auth 認証情報（管理者限定）
+     * @return 再構築後のキャッシュ状態
+     */
+    @PostMapping("/arena-top-rankers/recompute")
+    public ResponseEntity<Map<String, Object>> recomputeArenaTopRankers(Authentication auth) {
+        checkAdminAccess(auth);
+        try {
+            virtualArenaRankerService.recompute();
+            return ResponseEntity.ok(virtualArenaRankerService.getStatus());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Error recomputing arena top rankers: " + e.getMessage()));
         }
     }
 

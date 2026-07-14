@@ -1014,6 +1014,7 @@ export const ko = {
   'app.banner.friendMode': '친구 데이터 열람 중',
   'app.banner.publicMode': '공개 프로필 열람 중',
   'app.banner.topRankerMode': 'TOP 랭커 가상 프로필 열람 중',
+  'app.banner.arenaTopRankerMode': '아레나 가상 플레이어 열람 중',
   'app.banner.privateMode': '비공개 사용자 열람 중',
   'app.banner.viewingUser': '현재 {name} 님의 데이터를 열람 중입니다',
   'app.banner.viewingTopRanker': '현재 {name} 을(를) 열람 중입니다',

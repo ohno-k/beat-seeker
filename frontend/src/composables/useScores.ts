@@ -201,6 +201,64 @@ export function useScores() {
      *
      * @returns プロフィールとスコア。失敗時は `{ profile: null, scores: [] }`
      */
+    /**
+     * バックエンドの「仮想プロフィール API」が返す raw スコア配列を、
+     * ダッシュボードが扱う ScoreData[]（曲単位に集約し難易度別ベストを埋めた形）へ変換する共通ヘルパ。
+     *
+     * 県別トップランカー（pgreat/great/missCount を持たない）とアリーナ仮想プレイヤー
+     * （持つ）の両方に対応するため、pgreat/great/missCount は `?? 0` / `?? null` で吸収する。
+     */
+    const groupProfileScores = (rawScores: any[]): ScoreData[] => {
+        const grouped = new Map<string, any>();
+        const emptyDiff = (): DifficultyStats => ({
+            difficulty: null,
+            score: 0,
+            pgreat: 0,
+            great: 0,
+            missCount: null,
+            clearType: 'NO PLAY',
+            djLevel: '---',
+            options: undefined,
+            id: undefined
+        });
+
+        (rawScores ?? []).forEach((s: any) => {
+            const title = s.title;
+            if (!grouped.has(title)) {
+                grouped.set(title, {
+                    version: '0',
+                    title,
+                    genre: '',
+                    artist: '',
+                    playCount: 0,
+                    lastPlayTime: '',
+                    djName: s.djName ?? '',
+                    beginner: emptyDiff(),
+                    normal: emptyDiff(),
+                    hyper: emptyDiff(),
+                    another: emptyDiff(),
+                    leggendaria: emptyDiff(),
+                });
+            }
+            const entry = grouped.get(title);
+            const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
+            assignBestStat(entry, diffKey, {
+                id: undefined,
+                difficulty: s.difficultyLevel,
+                score: s.score,
+                pgreat: s.pgreat ?? 0,
+                great: s.great ?? 0,
+                missCount: s.missCount ?? null,
+                clearType: s.clearType ?? 'NO PLAY',
+                djLevel: s.djLevel ?? '---',
+                options: undefined,
+                djName: s.djName ?? undefined,
+                source: s.source || 'arcade',
+            } as any);
+        });
+        return Array.from(grouped.values());
+    };
+
     const fetchTopRankerProfile = async (
         versionNum: number,
         prefectureFileNum: number
@@ -212,56 +270,6 @@ export function useScores() {
             );
             if (!res.ok) return { profile: null, scores: [] };
             const data = await res.json();
-
-            const grouped = new Map<string, any>();
-            const emptyDiff = (): DifficultyStats => ({
-                difficulty: null,
-                score: 0,
-                pgreat: 0,
-                great: 0,
-                missCount: null,
-                clearType: 'NO PLAY',
-                djLevel: '---',
-                options: undefined,
-                id: undefined
-            });
-
-            // トップランカー API は pgreat/great/missCount を持たないため、その辺は 0/null で埋める
-            (data.scores ?? []).forEach((s: any) => {
-                const title = s.title;
-                if (!grouped.has(title)) {
-                    grouped.set(title, {
-                        version: '0',
-                        title,
-                        genre: '',
-                        artist: '',
-                        playCount: 0,
-                        lastPlayTime: '',
-                        djName: s.djName ?? '',
-                        beginner: emptyDiff(),
-                        normal: emptyDiff(),
-                        hyper: emptyDiff(),
-                        another: emptyDiff(),
-                        leggendaria: emptyDiff(),
-                    });
-                }
-                const entry = grouped.get(title);
-                const diffKey = s.difficultyName.toLowerCase() as keyof ScoreData;
-                assignBestStat(entry, diffKey, {
-                    id: undefined,
-                    difficulty: s.difficultyLevel,
-                    score: s.score,
-                    pgreat: 0,
-                    great: 0,
-                    missCount: null,
-                    clearType: s.clearType ?? 'NO PLAY',
-                    djLevel: s.djLevel ?? '---',
-                    options: undefined,
-                    djName: s.djName ?? undefined,
-                    source: s.source || 'arcade',
-                } as any);
-            });
-
             return {
                 profile: {
                     versionNum: data.versionNum,
@@ -269,7 +277,40 @@ export function useScores() {
                     prefectureFileNum: data.prefectureFileNum,
                     prefectureName: data.prefectureName,
                 },
-                scores: Array.from(grouped.values()),
+                scores: groupProfileScores(data.scores),
+            };
+        } finally {
+            isFetching.value = false;
+        }
+    };
+
+    /**
+     * アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）のプロフィールとスコアを IIDX ID で取得する。
+     *
+     * 公開 API なので未ログインでも叩ける（認証ヘッダなし）。
+     *
+     * @returns プロフィールとスコア。失敗時は `{ profile: null, scores: [] }`
+     */
+    const fetchArenaTopRankerProfile = async (
+        iidxId: string
+    ): Promise<{ profile: any | null; scores: ScoreData[] }> => {
+        isFetching.value = true;
+        try {
+            const res = await fetch(
+                `${API_BASE}/api/scores/arena-top-ranker-profile?iidxId=${encodeURIComponent(iidxId)}`
+            );
+            if (!res.ok) return { profile: null, scores: [] };
+            const data = await res.json();
+            return {
+                profile: {
+                    iidxId: data.iidxId,
+                    djName: data.djName,
+                    arenaClass: data.arenaClass,
+                    rankPos: data.rankPos,
+                    beatPt: data.beatPt,
+                    ratePt: data.ratePt,
+                },
+                scores: groupProfileScores(data.scores),
             };
         } finally {
             isFetching.value = false;
@@ -307,6 +348,8 @@ export function useScores() {
         fetchAllUsers,
         /** トップランカーのプロフィール + スコア取得。 */
         fetchTopRankerProfile,
+        /** アリーナ仮想プレイヤーのプロフィール + スコア取得。 */
+        fetchArenaTopRankerProfile,
         /** 公開プロフィール取得。 */
         fetchPublicProfile,
         /** フレンド関係ステータス取得。 */

@@ -66,6 +66,7 @@
 | [scripts/merge-all-top-rankers.js](scripts/merge-all-top-rankers.js) | バージョン跨ぎで「歴代ベスト」CSV を生成（`scripts/top-rankers-data/0/` に出力）。 |
 | [scripts/compress-top-rankers.js](scripts/compress-top-rankers.js) | 全 CSV を gzip 化し `backend/src/main/resources/top-rankers-data/` に配置。`manifest.json` も生成。 |
 | [scripts/backfill-rate-tier.js](scripts/backfill-rate-tier.js) | 全ユーザーの `score_history_logs` の `total_rate_pt` を再計算して DB 更新。 |
+| [scripts/scrape-arena-top-rankers.js](scripts/scrape-arena-top-rankers.js) | 管理者用。eagate のアリーナクラス TOP RANKER ランキング（上位1000人）を取り込み、プレイデータ公開プレイヤーを `virtual_arena_rankers` / `virtual_arena_ranker_scores` に保存（登録済み IIDX ID はスキップ）。`EAGATE_COOKIE` と PG 接続情報が必要。BEAT/RATE-PT はバックエンド `VirtualArenaRankerService` が集計。**eagate のページ DOM は要 HTML サンプル確定**（`PARSE_*` に TODO 明記）。 |
 | [scripts/probe.js](scripts/probe.js) | データソースの存在確認（HTTPヘッダのみ取得）。 |
 | [scripts/scrape-top-rankers-test.js](scripts/scrape-top-rankers-test.js) | スクレイピングのテスト版 |
 
