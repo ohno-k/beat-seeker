@@ -338,7 +338,7 @@ const mergedBeatRanking = computed<MergedBeatRow[]>(() => {
         prefectureFileNum: r.prefectureFileNum,
         prefectureName: r.prefectureName,
     })) : [];
-    const arenaRows: MergedBeatRow[] = showArenaTopRankers.value ? arenaTopRankers.value.map(r => ({
+    const arenaRows: MergedBeatRow[] = (showArenaTopRankers.value && isAdmin.value) ? arenaTopRankers.value.map(r => ({
         kind: 'arenaTopRanker',
         totalBeatPt: r.beatPt,
         iidxId: r.iidxId,
@@ -370,7 +370,7 @@ const mergedRateRanking = computed<MergedRateRow[]>(() => {
         prefectureFileNum: r.prefectureFileNum,
         prefectureName: r.prefectureName,
     })) : [];
-    const arenaRows: MergedRateRow[] = showArenaTopRankers.value ? arenaRateTopRankers.value.map(r => ({
+    const arenaRows: MergedRateRow[] = (showArenaTopRankers.value && isAdmin.value) ? arenaRateTopRankers.value.map(r => ({
         kind: 'arenaTopRanker',
         totalRatePt: r.ratePt,
         iidxId: r.iidxId,
@@ -444,7 +444,7 @@ const scatterPoints = computed<ScatterPoint[]>(() => {
             addedTopRankers++;
         }
     }
-    if (showArenaTopRankers.value) {
+    if (showArenaTopRankers.value && isAdmin.value) {
         const arenaRateByIidx = new Map<string, number>();
         for (const a of arenaRateTopRankers.value) {
             arenaRateByIidx.set(a.iidxId, a.ratePt);
@@ -875,7 +875,7 @@ watch(viewMode, async (mode) => {
             </div>
             <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">TOPランカー仮想ユーザを表示</span>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
+          <label v-if="isAdmin" class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
             <div class="relative inline-flex items-center">
               <input type="checkbox" v-model="showArenaTopRankers" class="sr-only peer">
               <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-indigo-500 dark:peer-checked:bg-indigo-600 transition-colors"></div>
