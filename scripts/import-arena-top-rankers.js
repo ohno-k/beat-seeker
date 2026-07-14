@@ -50,13 +50,24 @@ async function upsert(client, rec) {
         );
         const rankerId = res.rows[0].id;
         await client.query('DELETE FROM virtual_arena_ranker_scores WHERE ranker_id = $1', [rankerId]);
-        for (const s of (rec.scores || [])) {
+        // リモートDBへの往復を減らすため、スコアは複数行を1回のINSERTでまとめて投入する（最大500行/クエリ）。
+        const scores = rec.scores || [];
+        const CHUNK = 500; // 500行 × 10列 = 5000 パラメータ（Postgres上限 65535 未満）
+        for (let i = 0; i < scores.length; i += CHUNK) {
+            const batch = scores.slice(i, i + CHUNK);
+            const values = [];
+            const params = [];
+            batch.forEach((s, j) => {
+                const b = j * 10;
+                values.push(`($${b + 1},$${b + 2},$${b + 3},$${b + 4},$${b + 5},$${b + 6},$${b + 7},$${b + 8},$${b + 9},$${b + 10})`);
+                params.push(rankerId, s.title, s.difficultyName, s.difficultyLevel || null, s.score || 0,
+                    s.pgreat || null, s.great || null, null, s.clearType || 'NO PLAY', s.djLevel || null);
+            });
             await client.query(
                 `INSERT INTO virtual_arena_ranker_scores
                    (ranker_id, title, difficulty_name, difficulty_level, score, pgreat, great, miss_count, clear_type, dj_level)
-                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-                [rankerId, s.title, s.difficultyName, s.difficultyLevel || null, s.score || 0,
-                 s.pgreat || null, s.great || null, null, s.clearType || 'NO PLAY', s.djLevel || null]
+                 VALUES ${values.join(',')}`,
+                params
             );
         }
         await client.query('COMMIT');
