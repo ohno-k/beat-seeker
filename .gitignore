@@ -16,6 +16,7 @@ out/
 *.class
 *.jar
 *.war
+/frontend/public/bookmarklet.js
 
 # --- Python ---
 __pycache__/
