@@ -57,7 +57,7 @@ async function(){
     myName = n ? (n.textContent || '').trim() : '';
 
     const titles = arenaDoc.querySelectorAll('.sp-tab > .arena-title');
-    const battleDivs = arenaDoc.querySelectorAll('.sp-tab > .arena-battle');
+    const battleDivs = arenaDoc.querySelectorAll('.sp-tab > .arena-battle, #djdata-arena > div.play-tab > center');
     titles.forEach(function(t, i) {
       const b = battleDivs[i];
       if (!b) return;
