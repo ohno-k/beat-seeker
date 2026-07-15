@@ -56,8 +56,8 @@ async function(){
     const n = arenaDoc.querySelector('a[href*="djdata/status"] .on-name li:last-child');
     myName = n ? (n.textContent || '').trim() : '';
 
-    const titles = arenaDoc.querySelectorAll('.arena-title');
-    const battleDivs = arenaDoc.querySelectorAll('.arena-battle');
+    const titles = arenaDoc.querySelectorAll('.sp-tab > .arena-title');
+    const battleDivs = arenaDoc.querySelectorAll('.sp-tab > .arena-battle');
     titles.forEach(function(t, i) {
       const b = battleDivs[i];
       if (!b) return;
