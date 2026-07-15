@@ -88,6 +88,7 @@ const LOGIN_TIMEOUT = parseInt(getOpt('login-timeout', '300'), 10); // ログイ
 const OUT_FILE = getOpt('out', ''); // 指定時: DB ではなく JSONL ファイルへ 1 行=1 プレイヤーで追記（Postgres 不要・再開可能）
 const EXCLUDE_FILE = getOpt('exclude-file', ''); // 登録済み IIDX ID の一覧ファイル（1行1ID）。DB 非接続時でもスクレイプ段階で除外できる
 const DEADLINE = getOpt('deadline', ''); // "HH:MM"。この時刻になったら安全停止（eagate メンテ前に途中切断されないため。--out で再開可）
+const MIN_RANK = parseInt(getOpt('min-rank', '0'), 10) || 0; // このランク未満のプレイヤーは処理しない（再開時に処理済み範囲を丸ごと飛ばす）
 
 const TARGET_DIFFS = ['ANOTHER', 'LEGGENDARIA'];
 const CLFLG = {
@@ -544,6 +545,8 @@ async function main() {
         let idx = 0, processedSinceCheck = 0;
         for (const ranker of rankers) {
             idx++;
+            // 再開時: 指定ランク未満（処理済み範囲）は丸ごとスキップ（再検索の無駄を省く）
+            if (MIN_RANK && (ranker.rankPos || 0) < MIN_RANK) continue;
             // ハード締切に達したら安全停止（部分結果は保持、--out で再開可）
             if (deadlineMs && Date.now() >= deadlineMs) {
                 console.error(`\n[deadline] 締切時刻に到達したため安全停止します（idx=${idx}）。残りは --out 再開で続行できます。`);

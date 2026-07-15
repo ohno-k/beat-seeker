@@ -115,10 +115,14 @@ import AprilFoolsOverlay from './components/AprilFoolsOverlay.vue';
 import ToastContainer from './components/ToastContainer.vue';
 import CommandPalette from './components/CommandPalette.vue';
 import BackToTop from './components/BackToTop.vue';
+import SupportChatWidget from './components/SupportChatWidget.vue';
+import { useAdmin } from './composables/useAdmin';
 import { computed, watch, watchEffect, onMounted, onBeforeUnmount } from 'vue';
 
 const { t } = useI18n();
 const { isAprilFools } = useAprilFools();
+/** 現在のログインユーザーが管理者か (お問い合わせウィジェットの出し分け等に使用)。 */
+const { isAdmin } = useAdmin();
 
 // エイプリルフール演出: <html> に af-mode class を付け外しし、全体 CSS オーバーライドを有効化する。
 watchEffect(() => {
@@ -2360,6 +2364,9 @@ const handleUnifiedClose = async () => {
 
   <!-- ページ上部へ戻る FAB（スクロール量がしきい値超で出現） -->
   <BackToTop />
+
+  <!-- 運営お問い合わせ FAB（ログイン済み・非管理者のみ。管理者は返信する側なので出さない） -->
+  <SupportChatWidget v-if="isLoggedIn && !isAdmin" />
   </div>
 
   <!--

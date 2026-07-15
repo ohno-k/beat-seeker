@@ -410,6 +410,51 @@ public class EmailService {
     }
 
     /**
+     * 【メソッドの役割】 ユーザーから運営宛に届いた「お問い合わせチャット」の新着を運営へ通知する。
+     *
+     * <p>{@link com.beatseeker.backend.controller.SupportChatController} からユーザー送信時に呼ばれる。
+     * 管理画面の「お問い合わせ」から返信する運用を想定。
+     *
+     * @param toEmail     運営 (管理者) のメールアドレス
+     * @param userName    送信元ユーザーの表示名
+     * @param iidxId      送信元ユーザーの IIDX ID
+     * @param messageBody メッセージ本文
+     */
+    @Async
+    public void sendSupportChatNotification(String toEmail, String userName, String iidxId, String messageBody) {
+        String safeBody = escapeHtml(messageBody).replace("\n", "<br/>");
+        String html = """
+                <!DOCTYPE html>
+                <html lang="ja">
+                <body style="font-family:sans-serif;background:#f8fafc;padding:32px;">
+                  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
+                    <h2 style="color:#1e293b;margin-top:0;">お問い合わせに新着メッセージ</h2>
+                    <p style="color:#475569;margin:4px 0;">ユーザー: <strong>%s</strong></p>
+                    <p style="color:#475569;margin:4px 0;">IIDX ID: <strong>%s</strong></p>
+                    <div style="background:#f1f5f9;border-radius:8px;padding:16px 20px;margin:16px 0;color:#1e293b;font-size:14px;line-height:1.6;">%s</div>
+                    <p style="color:#94a3b8;font-size:12px;">管理者パネルの「お問い合わせ」から返信できます。</p>
+                    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+                    <p style="color:#94a3b8;font-size:11px;">beat-seeker</p>
+                  </div>
+                </body>
+                </html>
+                """.formatted(escapeHtml(userName == null ? "名無し" : userName),
+                              escapeHtml(iidxId == null ? "-" : iidxId), safeBody);
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject("[beat-seeker] お問い合わせ: " + (userName == null ? "ユーザー" : userName) + " から新着メッセージ");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            System.err.println("Failed to send support chat notification: " + e.getMessage());
+        }
+    }
+
+    /**
      * HTML メール本文に埋め込む前の XSS 対策用エスケープ。
      * ユーザー入力由来の文字列（タイトル、ユーザー名、難易度等）はすべてこれを通す。
      */

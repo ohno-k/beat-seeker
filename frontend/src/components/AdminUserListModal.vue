@@ -1,98 +1,128 @@
 <template>
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-[100] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm" @click.self="$emit('close')">
-      <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-md shadow-xl flex flex-col overflow-hidden max-h-[85vh] animate-fade-in border border-slate-200 dark:border-slate-800">
-        
-        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-          <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            プレイヤー一覧 (管理者用)
-          </h2>
-          <div class="flex items-center gap-2">
-            <!-- データ管理 -->
-            <div class="relative group">
-              <button
-                @click="showGameDataModal = true"
-                class="px-3 py-1.5 bg-teal-100 hover:bg-teal-200 text-teal-700 dark:bg-teal-900/50 dark:hover:bg-teal-800/80 dark:text-teal-300 rounded text-sm font-bold flex items-center gap-1 transition-colors"
-              >
-                データ管理
-              </button>
-              <div class="admin-tooltip">楽曲・難易度表のドラフト追加や公開を行います</div>
-            </div>
+      <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-2xl shadow-xl flex flex-col overflow-hidden max-h-[85vh] animate-fade-in border border-slate-200 dark:border-slate-800">
 
-            <!-- 全ユーザー再集計 -->
-            <div class="relative group">
-              <button
-                @click="handleRecalculateAll"
-                :disabled="isRecalculating"
-                class="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
-              >
-                <svg v-if="isRecalculating" class="animate-spin -ml-1 mr-1 h-4 w-4 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
-              </button>
-              <div class="admin-tooltip">全ユーザーのBEAT-PTとRate-PTを現在の難易度表で再計算します。難易度表更新後に実行してください</div>
-            </div>
-
-            <!-- KENBAN/SARA-PT バックフィル -->
-            <div class="relative group">
-              <button
-                @click="handleBackfillKenbanSara"
-                :disabled="isBackfillingKenbanSara"
-                class="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/50 dark:hover:bg-orange-800/80 dark:text-orange-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
-              >
-                <svg v-if="isBackfillingKenbanSara" class="animate-spin -ml-1 mr-1 h-4 w-4 text-orange-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                {{ isBackfillingKenbanSara ? `バックフィル中... (${backfillProcessed})` : 'KENBAN/SARA-PT 計算' }}
-              </button>
-              <div class="admin-tooltip">全ユーザーの KENBAN-PT / SARA-PT を再計算して users と score_history_logs に保存します。1 度実行すれば以降のアップロードで自動更新されます</div>
-            </div>
-
-            <!-- 曲別ランクキャッシュ再構築 (AVERAGE-RANKING 用) -->
-            <div class="relative group">
-              <button
-                @click="handleRecalculateSongRanks"
-                :disabled="isRecalculatingSongRanks"
-                class="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/50 dark:hover:bg-purple-800/80 dark:text-purple-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
-              >
-                <svg v-if="isRecalculatingSongRanks" class="animate-spin -ml-1 mr-1 h-4 w-4 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                {{ isRecalculatingSongRanks ? '再構築中...' : '曲別ランク再構築' }}
-              </button>
-              <div class="admin-tooltip">user_song_ranks キャッシュ（曲別の全ユーザー順位）を再構築します。AVERAGE ランキングが空になっている場合に実行してください</div>
-            </div>
-
-            <!-- 譜面プロファイルDB投入 -->
-            <div class="relative group">
-              <input ref="profileFileInput" type="file" accept=".json" class="hidden" @change="onProfileFileSelected" />
-              <button
-                @click="handleImportChartProfiles"
-                :disabled="isImportingProfiles"
-                class="px-3 py-1.5 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 dark:bg-cyan-900/50 dark:hover:bg-cyan-800/80 dark:text-cyan-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
-              >
-                <svg v-if="isImportingProfiles" class="animate-spin -ml-1 mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                {{ isImportingProfiles ? 'インポート中...' : '譜面プロファイルDB投入' }}
-              </button>
-              <div class="admin-tooltip">JSONファイルを選択して譜面プロファイルをDBに登録します。export_profiles.pyで生成したファイルを使用してください</div>
-            </div>
-
-            <!-- Push通知リセット -->
-            <div class="relative group">
-              <button
-                @click="handleClearPushAll"
-                :disabled="isClearingPush"
-                class="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800/80 dark:text-rose-300 rounded text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-50"
-              >
-                <svg v-if="isClearingPush" class="animate-spin -ml-1 mr-1 h-4 w-4 text-rose-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                {{ isClearingPush ? '処理中...' : 'Push通知リセット' }}
-              </button>
-              <div class="admin-tooltip">全ユーザーのプッシュ通知設定を削除します。VAPIDキーを変更した際に実行してください</div>
-            </div>
-
-            <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 shrink-0">
+          <!-- タイトル行: タイトル + お問い合わせ + 閉じる -->
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-            </button>
+              プレイヤー一覧 (管理者用)
+            </h2>
+            <div class="flex items-center gap-2">
+              <!-- お問い合わせ (チャットへ移動): わかりやすく目立たせる -->
+              <button
+                @click="showSupportModal = true"
+                class="relative px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 3v-3z" />
+                </svg>
+                <span class="hidden sm:inline">お問い合わせ</span>
+                <span
+                  v-if="supportUnread > 0"
+                  class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900 text-white text-[10px] font-bold flex items-center justify-center"
+                >{{ supportUnread > 99 ? '99+' : supportUnread }}</span>
+              </button>
+
+              <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 管理ツール: 6 ボタンを均一サイズ + アイコン付きで折り返し配置 -->
+          <div class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-2.5">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-0.5">データ管理ツール</p>
+            <div class="flex flex-wrap gap-2">
+              <!-- データ管理 -->
+              <div class="relative group">
+                <button
+                  @click="showGameDataModal = true"
+                  class="admin-tool-btn bg-teal-100 hover:bg-teal-200 text-teal-700 dark:bg-teal-900/50 dark:hover:bg-teal-800/80 dark:text-teal-300"
+                >
+                  <span aria-hidden="true">🗂️</span>
+                  データ管理
+                </button>
+                <div class="admin-tooltip">楽曲・難易度表のドラフト追加や公開を行います</div>
+              </div>
+
+              <!-- 全ユーザー再集計 -->
+              <div class="relative group">
+                <button
+                  @click="handleRecalculateAll"
+                  :disabled="isRecalculating"
+                  class="admin-tool-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300"
+                >
+                  <svg v-if="isRecalculating" class="animate-spin h-4 w-4 text-indigo-700 dark:text-indigo-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <span v-else aria-hidden="true">🔄</span>
+                  {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
+                </button>
+                <div class="admin-tooltip">全ユーザーのBEAT-PTとRate-PTを現在の難易度表で再計算します。難易度表更新後に実行してください</div>
+              </div>
+
+              <!-- KENBAN/SARA-PT バックフィル -->
+              <div class="relative group">
+                <button
+                  @click="handleBackfillKenbanSara"
+                  :disabled="isBackfillingKenbanSara"
+                  class="admin-tool-btn bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/50 dark:hover:bg-orange-800/80 dark:text-orange-300"
+                >
+                  <svg v-if="isBackfillingKenbanSara" class="animate-spin h-4 w-4 text-orange-700 dark:text-orange-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <span v-else aria-hidden="true">🎹</span>
+                  {{ isBackfillingKenbanSara ? `バックフィル中... (${backfillProcessed})` : 'KENBAN/SARA-PT 計算' }}
+                </button>
+                <div class="admin-tooltip">全ユーザーの KENBAN-PT / SARA-PT を再計算して users と score_history_logs に保存します。1 度実行すれば以降のアップロードで自動更新されます</div>
+              </div>
+
+              <!-- 曲別ランクキャッシュ再構築 (AVERAGE-RANKING 用) -->
+              <div class="relative group">
+                <button
+                  @click="handleRecalculateSongRanks"
+                  :disabled="isRecalculatingSongRanks"
+                  class="admin-tool-btn bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/50 dark:hover:bg-purple-800/80 dark:text-purple-300"
+                >
+                  <svg v-if="isRecalculatingSongRanks" class="animate-spin h-4 w-4 text-purple-700 dark:text-purple-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <span v-else aria-hidden="true">📊</span>
+                  {{ isRecalculatingSongRanks ? '再構築中...' : '曲別ランク再構築' }}
+                </button>
+                <div class="admin-tooltip">user_song_ranks キャッシュ（曲別の全ユーザー順位）を再構築します。AVERAGE ランキングが空になっている場合に実行してください</div>
+              </div>
+
+              <!-- 譜面プロファイルDB投入 -->
+              <div class="relative group">
+                <input ref="profileFileInput" type="file" accept=".json" class="hidden" @change="onProfileFileSelected" />
+                <button
+                  @click="handleImportChartProfiles"
+                  :disabled="isImportingProfiles"
+                  class="admin-tool-btn bg-cyan-100 hover:bg-cyan-200 text-cyan-700 dark:bg-cyan-900/50 dark:hover:bg-cyan-800/80 dark:text-cyan-300"
+                >
+                  <svg v-if="isImportingProfiles" class="animate-spin h-4 w-4 text-cyan-700 dark:text-cyan-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <span v-else aria-hidden="true">📁</span>
+                  {{ isImportingProfiles ? 'インポート中...' : '譜面プロファイルDB投入' }}
+                </button>
+                <div class="admin-tooltip">JSONファイルを選択して譜面プロファイルをDBに登録します。export_profiles.pyで生成したファイルを使用してください</div>
+              </div>
+
+              <!-- Push通知リセット -->
+              <div class="relative group">
+                <button
+                  @click="handleClearPushAll"
+                  :disabled="isClearingPush"
+                  class="admin-tool-btn bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800/80 dark:text-rose-300"
+                >
+                  <svg v-if="isClearingPush" class="animate-spin h-4 w-4 text-rose-700 dark:text-rose-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <span v-else aria-hidden="true">🔔</span>
+                  {{ isClearingPush ? '処理中...' : 'Push通知リセット' }}
+                </button>
+                <div class="admin-tooltip">全ユーザーのプッシュ通知設定を削除します。VAPIDキーを変更した際に実行してください</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -140,6 +170,11 @@
     </div>
   </Teleport>
   <AdminGameDataModal :isOpen="showGameDataModal" @close="showGameDataModal = false" />
+  <AdminSupportChatModal
+    :isOpen="showSupportModal"
+    @close="showSupportModal = false"
+    @unread-change="supportUnread = $event"
+  />
 </template>
 
 <script setup lang="ts">
@@ -161,7 +196,9 @@ import { ref, watch } from 'vue';
 import { useScores } from '../composables/useScores';
 import { useAuth } from '../composables/useAuth';
 import { useGameData } from '../composables/useGameData';
+import { useSupportChat } from '../composables/useSupportChat';
 import AdminGameDataModal from './AdminGameDataModal.vue';
+import AdminSupportChatModal from './AdminSupportChatModal.vue';
 
 const { songDataBody: songDataRef, diffTableRanks: diffTableRef } = useGameData();
 /** 再集計 API に POST する生データ（body プロパティ付きの曲データ）。 */
@@ -207,9 +244,12 @@ const loadUsers = async () => {
   }
 };
 
-// モーダル開放時にユーザー一覧を取得（初回のみ）。
+// モーダル開放時にユーザー一覧 + お問い合わせ未読数を取得。
 watch(() => props.isOpen, (newVal) => {
-  if (newVal) loadUsers();
+  if (newVal) {
+    loadUsers();
+    loadSupportUnread();
+  }
 });
 
 /** 【関数の役割】 カードクリックで親へ選択通知。 */
@@ -225,6 +265,25 @@ const recalculateError = ref('');
 const recalculateSuccess = ref('');
 /** ゲームデータ管理モーダルの表示状態。 */
 const showGameDataModal = ref(false);
+/** お問い合わせ (運営チャット) モーダルの表示状態。 */
+const showSupportModal = ref(false);
+/** お問い合わせの全スレッド合計の未読数 (ヘッダのバッジ表示用)。 */
+const supportUnread = ref(0);
+
+const { fetchThreads: fetchSupportThreads } = useSupportChat();
+
+/**
+ * 【関数の役割】 お問い合わせスレッドの未読合計を取得してバッジに反映する。
+ * モーダルを開いた時点で 1 度取得する。詳細モーダルを開くと unread-change でも同期される。
+ */
+const loadSupportUnread = async () => {
+  try {
+    const threads = await fetchSupportThreads();
+    supportUnread.value = threads.reduce((sum, t) => sum + t.unreadCount, 0);
+  } catch {
+    /* 未読バッジの取得失敗は無視 (機能本体には影響しない) */
+  }
+};
 
 /**
  * 【関数の役割】 全ユーザーの BEAT-PT / Rate-PT を最新の楽曲データ + 難易度表で再計算する。
@@ -452,11 +511,28 @@ const handleClearPushAll = async () => {
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ツールチップ */
+/* 管理ツールボタン: 全ボタン共通の均一サイズ・アイコン付きレイアウト */
+.admin-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: background-color 0.15s ease;
+}
+.admin-tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ツールチップ (ツールバーが上部にあるためボタンの下側に表示) */
 .admin-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px);
-  right: 0;
+  top: calc(100% + 8px);
+  left: 0;
   width: 220px;
   padding: 6px 10px;
   background: #1e293b;
@@ -468,7 +544,7 @@ const handleClearPushAll = async () => {
   white-space: normal;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(4px);
+  transform: translateY(-4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
   z-index: 200;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -477,10 +553,10 @@ const handleClearPushAll = async () => {
 .admin-tooltip::after {
   content: '';
   position: absolute;
-  top: 100%;
-  right: 12px;
+  bottom: 100%;
+  left: 12px;
   border: 5px solid transparent;
-  border-top-color: #1e293b;
+  border-bottom-color: #1e293b;
 }
 
 .group:hover .admin-tooltip {

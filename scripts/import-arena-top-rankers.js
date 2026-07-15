@@ -26,6 +26,7 @@ const args = process.argv.slice(2);
 const getOpt = (n, d) => { const h = args.find((a) => a.startsWith(`--${n}=`)); return h ? h.slice(n.length + 3) : d; };
 const IN_FILE = getOpt('in', '');
 const RECOMPUTE_URL = getOpt('recompute-url', '');
+const MAX_RANK = parseInt(getOpt('max-rank', '0'), 10) || 0; // 指定時: rankPos がこれ以下のレコードのみ取り込む
 
 function normalizeIidxId(raw) {
     if (!raw) return null;
@@ -89,16 +90,17 @@ async function main() {
     const reg = new Set((await client.query('SELECT iidx_id FROM users WHERE iidx_id IS NOT NULL')).rows.map((r) => r.iidx_id));
     console.log(`Connected. registered=${reg.size}`);
 
-    let imported = 0, skipped = 0, failed = 0;
+    let imported = 0, skipped = 0, failed = 0, skippedRank = 0;
     for (const line of fs.readFileSync(IN_FILE, 'utf8').split('\n')) {
         const t = line.trim(); if (!t) continue;
         let rec; try { rec = JSON.parse(t); } catch (_) { failed++; continue; }
+        if (MAX_RANK && (rec.rankPos || 0) > MAX_RANK) { skippedRank++; continue; } // rank 上限で除外
         const iidxId = normalizeIidxId(rec.iidxId);
         if (!iidxId) { failed++; continue; }
         if (reg.has(iidxId)) { skipped++; continue; }
         try { if (await upsert(client, rec)) imported++; } catch (e) { console.warn(`upsert failed ${iidxId}: ${e.message}`); failed++; }
     }
-    console.log(`Done. imported=${imported} skippedRegistered=${skipped} failed=${failed}`);
+    console.log(`Done. imported=${imported} skippedRegistered=${skipped} skippedByRank(>${MAX_RANK})=${skippedRank} failed=${failed}`);
     await client.end();
 
     if (RECOMPUTE_URL) {

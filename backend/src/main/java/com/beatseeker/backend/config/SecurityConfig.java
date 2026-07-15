@@ -157,6 +157,9 @@ public class SecurityConfig {
                                                 // 通知・管理系も要ログイン
                                                 .requestMatchers("/api/notifications/**").authenticated()
                                                 .requestMatchers("/api/admin/game-data/**").authenticated()
+                                                // お問い合わせチャット: ユーザー/運営とも要ログイン。
+                                                // 管理者エンドポイント (/api/support/admin/**) の管理者判定は Controller 側で行う。
+                                                .requestMatchers("/api/support/**").authenticated()
                                                 // スコア書き込み・自分のスコア読み出し・自分の月末振り返りは要ログイン
                                                 .requestMatchers("/api/scores/upload", "/api/scores/save-history-log",
                                                                 "/api/scores/me", "/api/scores/history",
