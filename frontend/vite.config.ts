@@ -25,7 +25,7 @@ export default defineConfig({
     },
     {
       name: 'generate-bookmarklet-js',
-      async buildStart() {
+      async load() {
         await build({
           entryPoints: ['src/utils/mainBookmarklet.ts'],
           outfile: 'public/bookmarklet.js',
