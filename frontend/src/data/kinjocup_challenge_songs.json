@@ -1,0 +1,5276 @@
+{
+  "genres": [
+    {
+      "key": "primitive",
+      "label": "Primitive",
+      "songs": [
+        {
+          "title": "CAN'T STOP FALLIN'IN LOVE",
+          "level": 8,
+          "diff": "H"
+        },
+        {
+          "title": "Jam&Marmalade",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "empathy",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "RUGGED ASH",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "era (nostalmix)",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Clione",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "era (step mix)",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Hitch Hiker2",
+          "level": 9,
+          "diff": "L"
+        },
+        {
+          "title": "route 80s",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Summer Vacation(CU mix)",
+          "level": 9,
+          "diff": "H"
+        },
+        {
+          "title": "AVE DE RAPINA",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Somebody Like You",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Monkey Dance",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "MUSIC TO YOUR HEAD",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "ATOMIC AGE",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "真夏の花・真夏の夢",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "5.1.1.",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "THE SAFARI",
+          "level": 10,
+          "diff": "H"
+        },
+        {
+          "title": "ABSOLUTE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "B4U",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "DXY!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "250bpm",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "SWEET LAB",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "sync",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "QQQ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Buffalo",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "rottel-da-sun",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "traces",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "WAR GAME",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "LOVE SHINE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ADVANCE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Distress",
+          "level": 10,
+          "diff": "H"
+        },
+        {
+          "title": "e-motion 2003  -romantic extra-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "HYPER EUROBEAT (2DX style)",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Really Love",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "fun",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "PARANOIA survivor MAX",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Daisuke",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "BABY LOVE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "DIVE ～INTO YOUR HEART～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "FEEL IT",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Narcissus At Oasis",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Feedback",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "GRADIUS -FULL SPEED-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "D.A.N.C.E.!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Don't be afraid myself",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Sphere",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "The Hope of Tomorrow",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "POODLE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "HAPPY☆ANGEL",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "alla turca con passione",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Twelfth Style",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "EDEN",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "SigSig",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "月光",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Pink Rose",
+          "level": 10,
+          "diff": "L"
+        },
+        {
+          "title": "Catch Me",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "オレはビートマニア！お前は何マニア？",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Agnus Dei",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Zenius -I- vanisher",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ALFARSHEAR 双神威に廻る夢",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Apocalypse ～dirge of swans～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "EURO-ROMANCE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "So Fabulous !!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Holic",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "R5",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ABSOLUTE",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Clione",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "CHECKING YOU OUT",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Linus",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Spica",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Blame",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "rainbow flyer",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "LAB",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Giudecca",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Halfway of promise",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "RISLIM -Remix-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "quasar",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "SWEETEST SAVAGE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "HIGH",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Lucy",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "BLOCKS",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "RESONATE 1794",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Be quiet",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "RED ZONE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "AGEHA",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Wonder Bullfighter",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Aurora",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "EDEN",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "POODLE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "CaptivAte～浄化～",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Scripted Connection⇒ N mix",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Xepher",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "合体せよ！ストロングイェーガー！！ (Ryu☆ remix)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Pollinosis",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ラクエン",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "waxing and wanding",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Broadbanded",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "D.C.fish",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Harmony and Lovely",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Ganymede",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "tripping contact(teranoid&MC Natsack Remix)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "CONTRACT",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "華蝶風雪",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "The Dirty of Loudness",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Second Heaven",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Blind Justice ～Torn souls， Hurt Faiths ～",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "KAMAITACHI",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "GOLD RUSH",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Time to Air",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Wanna Party?",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "in the Sky",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Do it!! Do it!!",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "MENTAL MELTDOWN",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "THE DEEP STRIKER",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Anisakis -somatic mutation type\"Forza\"-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Blue Rain",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "the trigger of innocence",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "STEEL NEEDLE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Digitank System",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "V",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Colors (radio edit)",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "MAX 300",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "桜",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "One More Lovely",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Rise'n Beauty",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Innocent Walls",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "雪月花",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "gigadelic",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "RED ZONE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "AA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Be quiet",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "ピアノ協奏曲第１番”蠍火”",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Scripted Connection⇒ H mix",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Little Little Princess",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "INAZUMA",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Twelfth Style",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Scripted Connection⇒ A mix",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Scripted Connection⇒ A mix",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "冥",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "waxing and wanding",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "華蝶風雪",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Ganymede",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "嘆きの樹",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "カゴノトリ～弐式～",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Concertino in Blue",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Sense 2007",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "CONTRACT",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "FIRE FIRE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "KAMAITACHI",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "VANESSA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "VANESSA",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "snow storm",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "GRID KNIGHT",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Fascination MAXX",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Blue Rain",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "four pieces of heaven",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Ristaccia",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "MENDES",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "華爛漫 -Flowers-",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Time to Air",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "STEEL NEEDLE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Anisakis -somatic mutation type\"Forza\"-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "TROOPERS",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "THE DEEP STRIKER",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "ミラージュ・レジデンス",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "ICARUS",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ICARUS",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "PARANOiA ～HADES～",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Secrets",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "thunder HOUSE NATION Remix",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "3y3s",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Colorful Cookie",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "B4U(BEMANI FOR YOU MIX)",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Marie Antoinette",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Go Beyond!!",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "不沈艦CANDY",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "BITTER CHOCOLATE STRIKER",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Kung-fu Empire",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "卑弥呼",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Y&Co. is dead or alive",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Bad Maniacs",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "DOMINION",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "G59",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Evans",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "SOLID STATE SQUAD",
+          "level": 12,
+          "diff": "A"
+        }
+      ]
+    },
+    {
+      "key": "ancient",
+      "label": "Ancient",
+      "songs": [
+        {
+          "title": "Voltage (feat. Hidemaru)",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "Spin the disc",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "RIDE ON THE LIGHT (HI GREAT MIX)",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "fly through the night",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "ASTRAL VOYAGE",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Boundary",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "pandora",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "AGEHA",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "SPEEDY CAT",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "ＵＬＴｉＭΛＴＥ",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "太陽～T・A・I・Y・O～",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "大桟橋",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Close my Eyes for Me",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "First Resolution",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Under the Sky",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "mind the gap",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "INFERNO",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Bloody Tears(IIDX EDITION)",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "snow storm",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "CaptivAte～誓い～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "PHOTONGENIC",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "クルクル☆ラブ～Opioid Peptide MIX～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "CROSSROAD ～Left Story～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "GRID KNIGHT",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "op.31 叙情",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "華爛漫 -Flowers-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Freeway Shuffle",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "NEW GENERATION -もう、お前しか見えない-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Dazzlin' Darlin",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ミラージュ・レジデンス",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Flash Back 90's",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "smooooch・∀・",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "NΦ CRIME",
+          "level": 10,
+          "diff": "L"
+        },
+        {
+          "title": "Turii ～Panta rhei～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Bahram Attack-猫叉Master Remix-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Cyber Force -DJ Yoshitaka Remix-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Jack",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "THANK YOU FOR PLAYING",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Mind Mapping",
+          "level": 10,
+          "diff": "L"
+        },
+        {
+          "title": "翼",
+          "level": 10,
+          "diff": "L"
+        },
+        {
+          "title": "凛として咲く花の如く",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Hydrogen Blueback",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Keep it-秋葉工房mix-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "She is my wife",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "水上の提督(Short mix from \"幻想水滸伝V\")",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "being torn the sky",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Sorrows",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Light Shine",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "bass 2 bass",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Do Back Burn",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "BLUST OF WIND",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "中華急行",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Wuv U",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Breaking the ground",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "DM STAR～関西 energy style～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Mermaid girl",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "passionate fate",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "XANADU OF TWO",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Everlasting Resort",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Golden Palms",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Dazzlin' Darlin-秋葉工房mix-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Phoenix",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Express Emotion",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "yellow head joe",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Infinite cave",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "LETHEBOLG ～双神威に斬り咲けり～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Star Trail",
+          "level": 10,
+          "diff": "A"
+        }
+      ]
+    },
+    {
+      "key": "middle",
+      "label": "Middle",
+      "songs": [
+        {
+          "title": "DESTINY",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "蒼い衝動",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "BAD BOY BASS!! (dj Remo-con MIX)",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "ALIEN TEMPLE",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "WISH(EUROBEAT MIX)",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "CaptivAte～裁き～",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "METALLIC MIND",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "High School Love",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "2hot2eat",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "エコ爺",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "NΦ CRIME",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "翼",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "ALL I NEED YOUR LOVE",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "neogenesis",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "まほろば",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Mind Mapping",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "thunder HOUSE NATION Remix",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Drive Me Crazy",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Fantasia",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Follow Tomorrow",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "LUV CAN SAVE U",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "突撃!ガラスのニーソ姫!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Almace",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Fly you to the star",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "朧",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "POINT ZERO",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Präludium",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Rainbow after snow",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Reflection Into the EDEN",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "8bit Princess",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "SHION",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "梅雪夜",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "アルストロメリア",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "罪と罰",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "廿",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ベィスドロップ・フリークス",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "妖隠し -あやかしかくし-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Chain of pain",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Miracle 5ympho X",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "十六夜セツナ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Beat Radiance",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "chrono diver -fragment-",
+          "level": 10,
+          "diff": "L"
+        },
+        {
+          "title": "Sweet Radar",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "取り残された美術(Arranged:HiZuMi)",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "オルタネイトβ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Musik LoverZ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Sephirot",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Tori-no-kimochi",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ギョギョっと人魚 爆婚ブライダル",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Damage Per Second",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Arcana",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Donkey Donk",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "少女アリスと箱庭幻想コンチェルト",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "NO LIMIT -オレ達に限界は無い-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Umbral",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "冬椿 ft. Kanae Asaba",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "恋はどう？モロ◎波動OK☆方程式!!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "OOO",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "The Commanders",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Surf on the Light",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ハイ*ビスカス ft. Kanae Asaba",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "HAT TRICK",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "O/D*20",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "純真可憐デザイア",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Best of Me",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Critical Crystal",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "BRAVE OUT",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Funny shuffle",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Unicorn tail",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "diagram",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Element of SPADA",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "m1dy Deluxe",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Elektrick U-Phoria",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Insane Techniques",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "牧神笛吹きて",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ALBA -黎明-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "VALLIS-NERIA",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "SCHWARZSCHILD FIELD",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ドッキン☆サマーあばんちゅーる",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Cosmic Cat",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "AFRO KNUCKLE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Realize Maze",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "打打打打打打打打打打",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "恋は白帯、サンシロー",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Sakura Mirage",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "CHRONO DIVER -NORNIR-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Night sky",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "HELL SCAPER -Last Escape Remix-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "No Tears",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Beyond The Earth",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Line 4 Ruin",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "パ→ピ→プ→Yeah!",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Chronos",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Chronos",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Scars of FAUNA",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "鬼天",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "とろぴかる倶楽部",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ベィスドロップ・フリークス",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Welcome",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Angelic Jelly",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "GOBBLE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "セロトニン",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Outbreak",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "量子の海のリントヴルム",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "chaos eater -IIDX edition-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Journey",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "ZEPHYRANTHES",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "麗 ～うらら～",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "STARLIGHT DANCEHALL",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Acid Pumper",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Daily Lunch Special",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Routing",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Uh-Oh",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "鴉",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "crew",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "冬椿 ft. Kanae Asaba",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Around the Future",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Cyber True Color",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Selfish Sweet",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Amazing Mirage",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Egret and Willow",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Beyond The Seven",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "疾風迅雷",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Last Dance",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Feel The Beat",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Feel The Beat",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "ALBA -黎明-",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "煉獄のエルフェリア",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "INSOMNIA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ATHER",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Close the World feat.a☆ru",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Close the World feat.a☆ru",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Sigmund",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Sigmund",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "海神",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "海神",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "MAD ATTACK",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Miracle 5ympho X",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Sounds Of Summer",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "紅牡丹",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Say YEEEAHH",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Cosmic Cat",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Rave*it!! Rave*it!!",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Chrono Diver -PENDULUMs-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "CHRONO DIVER -NORNIR-",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "NEO GENERATOR SEVEN",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "少年は空を辿る",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Despair of ELFERIA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "entelecheia",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "TIEFSEE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ZZ",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "#The_Relentless",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Symmetry",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Beat Radiance",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "表裏一体！？怪盗いいんちょの悩み",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "表裏一体！？怪盗いいんちょの悩み",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Adularia",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "千年ノ理",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "千年ノ理",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Reflux",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "共鳴遊戯の華",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "BLUE MIRAGE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Triple Counter",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "紫陽花 -AZISAI-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Devil's Gear",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Nightmare before oversleep",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Dynamite",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "紫陽花 -AZISAI-",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Welcome",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "M4K3 1T B0UNC3",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "STARLIGHT DANCEHALL",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "DIAMOND CROSSING",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "NZM",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "真 地獄超特急 -HELL or HELL-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "199024club -Re:BounceKiller-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "灼熱 Pt.2 Long Train Running",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "POSSESSION",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Venom",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "刃図羅",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Amazing Mirage",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "HADES",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "〆",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "BroGamer",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Mare Nectaris",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Go Ahead!!",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Super Rush",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "九尾狐夜行",
+          "level": 12,
+          "diff": "A"
+        }
+      ]
+    },
+    {
+      "key": "modern",
+      "label": "Modern",
+      "songs": [
+        {
+          "title": "EMPTY OF THE SKY",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "Pink Rose",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "four-leaf",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "花吹雪 ～ IIDX LIMITED ～",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "Special One",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "コスモス",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "たからもの",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "WISE UP!",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "かげぬい ～ Ver.BENIBOTAN ～",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Change the World",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Mermaid girl-秋葉工房 MIX-",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Miami Sunset Drive",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Journey",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "LUV CAN SAVE U",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Element of SPADA",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "In The Breeze",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Static State",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "1001 -ESCAPE-",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Wing of Hearts",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ラストセンチュリーメランコリック",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Hella Deep",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "SPEED DEMON",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "IDOL syndrome.",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "toy boxer",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Geirskögul",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "グラナダの風",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "夏の匂い。キミの残像。 ft. Kanae Asaba",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "OVER TIME",
+          "level": 10,
+          "diff": "L"
+        },
+        {
+          "title": "The Best of Both Worlds",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Do What You Want",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Fly Above (Vicissitude Remix)",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Silly Love",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "VIBRΛ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "セピアの軌跡 ft. 天宮みや(少女フラクタル)",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ラブキラ☆スプラッシュ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Infinity Mirror",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "OUTER PLANETS",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Virus Funk",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "灼熱Beach Side Bunny (Masayoshi Iimori Remix)",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Chewingood!!!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "HIGH VOLTAGE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "smooooch・∀・ (Snail's House Remix)",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Explorer feat. ぷにぷに電機",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "7 Colors",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "DENIM",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "That Feeling",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "EMOTiON TRiPPER",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "LADS",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Sugarplum",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ここからよろしく大作戦143",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "新宝島",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Midnight Drive",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ナイトフィクション",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "シル・ヴ・プレジデント",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "P.O.W.E.R.",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Harmonia",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ANEMONE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "口カラ凸ゲキ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Wonderful Escape",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "オドループ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "めでてえ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "怪物",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "HEARTACHE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Non Stop Rock",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "シンデレラ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "BroGamer",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Macuilxochitl",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "XINOBIKILL",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Beat Juggling Mix",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "SAMURAI-Scramble",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "(This Is Not) The Angels",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "nostos",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Nothing but Theory",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Battleground",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "命の標本",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "STARLIGHT JUNCTION",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "REVOLVER",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Abraxas",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Back Spin Sweeper",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Fervidex",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "THE CANNONBALLER",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "City Never Sleeps (IIDX Edition)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "UMMU",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Eine Haube ～聖地の果てにあるもの～",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "FREEDOM",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "FUTURE is Dead",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "龍王の霊廟(Mausoleum Of The Primal Dragon)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "IDOL syndrome.",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Ember Lights",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "R∞tAge",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ランカーキラーガール",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Next Tales 2 Oath (IIDX 20th Anniv \"Ring\" Theme)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ZENDEGI DANCE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ミッドナイト☆WAR",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ハードベース・フェスタ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "HEISEI",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Yum Yum Jelly",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Psycho Sheep Riddim",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Urban Constellations",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ROCK女 feat. 大山愛未， Ken",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Wolf 1061",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "CODE:0",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "IDC feat.REVERBEE (Mo'Cuts Ver)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "花冠 feat.Aikapin",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "バッドエンド・シンドローム",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "VALKYRIAS -英雄誕生-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Volcanic Dragon",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "錬成人間トリコロイダー",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Nasty Techniques",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "GHOST",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Bow shock!!",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "狂水一華",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Rising in the Sun(original mix)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Like+it!",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Into The Madness",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Override",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Queen Kaguya",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Ypsilon",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "S!ck (Nhato Remix)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "27th style",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "rough percussionythm",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Theory",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ここからよろしく大作戦143",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "GuNGNiR",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "GuNGNiR",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "津軽雪",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ECHIDNA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Snakey Kung-fu",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "TOGAKUSHI",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Steel Edge",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Umbral",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Caterpillar",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "SAMURAI-Scramble",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "SAY BAY",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "焱影",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Rampage",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "EMERALDAS",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ANCHOR",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Initiation",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "シムルグの目醒め",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "DORNWALD ～Junge～",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ChaserXX",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Nothing but Theory",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "東京神話",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Boomy and The Boost",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Papilio ulysses",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "REVOLVER",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "The Chase",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Xperanza",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "DropZ-Line-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Lethal Weapon",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "GENE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "GENE",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "お菓子の王国",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "GO OVER WITH GLARE -ROOTAGE 26-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Carry Me Away",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "CODE:0",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "A MINSTREL ～ ver. short-scape ～",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "金野火織の金色提言",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Dr. Chemical & Killing Machine",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Visterhv",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "X-DEN",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Painful Fate",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Carmina",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Unbelief",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "龍王の霊廟(Mausoleum Of The Primal Dragon)",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Double Dribble",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Level One",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Red. by Jack Trance",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ruin of opals",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "THE BRAVE MUST DIE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Primitive Vibes",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "EROICA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "LIGHTNING STRIKES",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Megalara Garuda",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "AKASHIC BREAK",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Bow shock!!",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Override",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "THE F∀UST",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ピアノ協奏曲第1番”蠍火” (BlackY Remix)",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "BEAT PRISONER",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Everlasting Message",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "TRIUMPH",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "深淵に捧ぐレクイエム",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Level 2",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Lords Of The Roundtable",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "SCREW // owo // SCREW",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "rommmo",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "世界の果てに約束の凱歌を -ReUnion-",
+          "level": 12,
+          "diff": "A"
+        }
+      ]
+    },
+    {
+      "key": "present",
+      "label": "Present",
+      "songs": [
+        {
+          "title": "scar in the earth",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "Wanna Party?",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "Fly Above",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "サヨナラ・ヘヴン",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "IXION",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "chrono diver -fragment-",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "SURVIVOR",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "獅子霞麗ノ舞",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Alpheratz",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Psycho Sheep Riddim",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "A MINSTREL ～ ver. short-scape ～",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Hurry Hurry",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Crank It",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Don't Stop The Music feat. Kanae Asaba",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "黒紅掬い",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "wanna be a \"BAD GIRL\" feat. Nana Takahashi",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "雨のちパノラマセカイ",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "GET UP AGAIN",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Summerblue",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Ariah",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "CUE CUE RESCUE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "神っぽいな",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "きゅんです。",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "月と夢の跡 ft. マナ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "昏き甲鉄のヴェルガ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "湘南ロンリーMIDNIGHT RAIN",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Sunny Day Vibes",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Shamshir",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "罪過の聖堂",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Iris",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "FLARE -炎舞- ft.Nana Takahashi",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Shapeshifter",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "TITANIUM RIDERS",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "アタシ完全絶対正義ちゃん！",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ZEROIN ON THE LIGHT",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "愛包ダンスホール",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "夏風邪デスコ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "閉塞的フレーション",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Jumper",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Aeterna",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Akatsuki",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "アイドル",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "デビルじゃないもん",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ポラリスノウタ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "可愛くてごめん",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "酔いどれ知らず",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Deep Sea Mystery",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ないないルーティン",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "流桜ノ門",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Tripping Jumping",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Good Looking",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "キスキツネ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ＰＡＳＴＥＬＩＳＭ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ギャ・ギャ・ギャ・ギャラクシー！",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Lycoris",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ビビデバ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ドリムチウ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "オッドラヴィ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "PERFECT HUMAN",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "KOTONOHA ft. Kotoha",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "オブソミート",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "弾幕信仰",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Chasing After YOU ～夢の欠片～ ft. 小林マナ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Shirdal",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Eleanor",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "FERMI PARADOX",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "無意識のフィロソフィア",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "儚き恋の華",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "OTOKOZAKA",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "POLKAMANIA",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Burning Flame",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "AMRITA -不滅ノ花-",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "apo:llioth",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Crazy Jackpot",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ABSOLUTE (kors k Remix)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Dawn Saga",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "GIGA RAID",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "of the first magnitude",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Rejection Girl",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Zenith",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "乱膳の舞姫",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Swarm Of Scarabs",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Ah Hah Yeah",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "怪物",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Xyndrome",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "オドループ",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "月とミルク",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "青の洞窟",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Ventriloquist",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ハイテックトキオ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "kors k's How to make OTOGE CORE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "オールトの雲",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Pout",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Farewell to Marrakech",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Banger Banger Banger Banger",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Divine Heaven",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ミュージック・アワー",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "シル・ヴ・プレジデント",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "Emera",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "グッバイ宣言",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Ergosphere",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Nocturnal 2097",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Souhait bleu",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Onyx",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "少年リップルズ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Ruler or Loser",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "惑星☆ロリポップ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "≡+≡",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "KING",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ちょえちょえまぎか",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Shadow World",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "3V0",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "C-C-C-N-N-N",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ZEИITH",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Seraph",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Perfect Plan",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "EXODUS SIGN",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "VOLCANIC BIGBEAT",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ラビットホール",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "めうめうぺったんたん！！ (ZAQUVA Remix)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "夢縁",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Amethyst",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Get Higher",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "POLKAMANIA",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "BLACK or WHITE?",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "∀",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "伐折羅-vajra-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Burning Flame",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "MEGAERA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "閠槞彁の願い",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "THE PEERLESS UNDER HEAVEN",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Ignis†Irae",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "LOCUS OF THE TRAVEL",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Sinus Iridum",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "BIGソムタム",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ディスコルディア",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "新宝島",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "水鏡の異界",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "魔法のかくれんぼ",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Level 3",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "バッド・スイーツ、バッド・ドリーム",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "灼熱Beach Side Bunny (かめりあ's \"Summertime D'n'B\" Remix)",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "グッバイ宣言",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "逆月",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "天邪鬼",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "hard-wired",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ハイテックトキオ",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Binary Black Hole",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "LIVE DRIVING!! feat. 花たん",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ALTERNATOR",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Fegrix",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ミュージック・アワー",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "ABSOLUTE EVIL",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Aftermath",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Triple Cross",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "烽火連天の刃",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "禊",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Don't believe the hype",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Purple Perplex",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "RAGE feat.H14 of LEONAIR",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "WHA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "雪上断火",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "n/a",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Silver Bullet",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ピアノ独奏無言歌 \"灰燼\"",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "KING",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Caldwell 99",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "儚キ戀ノ幻想譚",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "dica dica",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "RINNE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "神っぽいな",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "No Border",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Chaotoxin",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Xerulean",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "TECHNOPHOBIA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "CUE CUE RESCUE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Beyond Evolution",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Meissa",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ONE AND ONLY",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "[ ]DENTITY",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Bad Encryption",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "BIGWAVERS",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "≡+≡",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Somnidiscotheque",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "栄冠のカンパネラ",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "神のシナリオ",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Level 4",
+          "level": 12,
+          "diff": "A"
+        }
+      ]
+    },
+    {
+      "key": "recent",
+      "label": "Recent",
+      "songs": [
+        {
+          "title": "CALL",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "mnemoniq",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "OVER TIME",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "Blue Bird feat. Kanae Asaba",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "Caramel Pain",
+          "level": 8,
+          "diff": "A"
+        },
+        {
+          "title": "センチメンタル・サマー",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "真夜中のバベル",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Too Late Snow",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "リメンバーリメンバー",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "れとりば！",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "可愛くてごめん",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Digital Radiance",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "Dreamship",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "イガク",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "ロマンシングエスケープ",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "鏡像都市",
+          "level": 9,
+          "diff": "A"
+        },
+        {
+          "title": "get set mind",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Mighty Cutie",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Secret Rouge",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Slumber☆Party",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "エクスプロウル",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ゲシュタルト",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ハルイロメロディー",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "朱と碧のランページ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "消極的セツナイズム",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "進捗ダメダメです",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Arcanos",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Galaxy Collapse",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "最強頂戴girl",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "PIT A PAT",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Vibing! Shake it!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Chasing After YOU ～夢の欠片～ ft. 小林マナ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Eleanor",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "FERMI PARADOX",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Good Looking",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "KOTONOHA ft. Kotoha",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Lycoris",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ＰＡＳＴＥＬＩＳＭ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "PERFECT HUMAN",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Shirdal",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "オッドラヴィ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "オブソミート",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "キスキツネ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ギャ・ギャ・ギャ・ギャラクシー！",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ドリムチウ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "ビビデバ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "好吃来世deエレクトリック",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "AGETEKE ONDO",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "Nyan Nyan University",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "PALETTE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "SHINING☆DANCE",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "SPLASH!!!!!!!!!",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "かわいいだけじゃだめですか？",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "それが、ボクの使命～レスキュー隊長 メンキュー～",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "デラむぅのでらっくす☆どり～むぅ",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "バブリン",
+          "level": 10,
+          "diff": "A"
+        },
+        {
+          "title": "寝起きヤシの木",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Submerge Serenade",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "勇者",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "squall",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Time Distortion pt.2(IIDX Edit)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "winkle 2 winkle",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "アイドル",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "マーシャル・マキシマイザー",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "果たせぬ約束 ft. 小林マナ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Echoes of Sunfall",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "フォニイ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "DAZZLE ATTACK",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Chemical Colours",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Speculation",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Mukade",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Space In Time",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "TRIP THE DEEP",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Plea Per Phase",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "無双",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "爆ぜりゃんせ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "PopなEDEN",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "CHAOTIC SUNBIRD",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Show Me All Your Love",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "SUPER HEROINE!!",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Constellation",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "lowercase lifetime",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "きみのせかい",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Stargazing Trip ～星 探す旅～ ft. 小林マナ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ハオ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "everlastingeuphoria:",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Raspberry Potion (feat.あれたん & ぎゃるのしん☆)",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ELYSIUM",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Bang-Boo Bumble",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "えだまめカレークッキング",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "RAVE SYNDROME",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "TECHNO RUMBLE",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "MVP",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "メズマライザー",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "断罪の一花",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ゲシュタルト",
+          "level": 11,
+          "diff": "L"
+        },
+        {
+          "title": "ADAMANT",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Fiery Stallion",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "T.R.O.L.L.",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "kors k's Let's make an Image Song!",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "BattleRoyal",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "A Certified Rave Moment",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Countdown to Heaven or Hell",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Fashion Fruit",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "MOCHIMOCHI DREAMIN!!",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Vitamin",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "でんぱ どりる わんにゃー☆三",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "ベラ・ベ・カラベラ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "閃と雷管とロープ",
+          "level": 11,
+          "diff": "A"
+        },
+        {
+          "title": "Peaktime Booster",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "VØID",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "恋愛＝精度×認識力",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "The Onlyonez",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "フォニイ",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "JUSTICE/GUILTY feat. Nana Takahashi & 709sec.",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "SOLAR ECLIPSE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "glacia",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Ghost Pulse",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "残像ニ繋ガレタ追憶ノHIDEAWAY",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "frequent",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Dahlia",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "NOIXIA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "摩天楼",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Cult Invitation",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "GAME ON",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Level 5",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Glitch N Ride",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "惑星鉄道",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Drop Syndicate",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "FlyAway",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "1116",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "スパークリング☆彡ハイパーチューン！！",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Roar of Chronos",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Cross Fire",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "MARLIN",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Pinky Happy Crazy",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "アラビアン ハイパー ナイト",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Here We Go Now",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "uən",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "u gotta beat",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Without Heaven",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Bring The Fire",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Mid-Corner (Magic Maker)",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "SμG@R RU$#",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "God Mind",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "天使のカンタータ -Cantata of Angels-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Aqvion",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Satellite Burst",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Uaigh Gealai",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "スキッテイエェエエェ!!!!",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "EX-MASSIVE FIGHTER",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "destination",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "hora de verdad",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Flamingo",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "DIVINE JUDGEMENT",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Skratch Education Lv-1",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "灼熱 Lost Summer Dayz",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "From Human Blood",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Memoria Obscura",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "2 Be Continued",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "RALLY '25",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Disco Killer Music Lover",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Submerge Serenade",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ビビッド ☆+*。キラキライム",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Begin",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Space Battleship S4TO",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "ιgniЯRuina",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Lisa-RICCIA",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Lisa-RICCIA",
+          "level": 12,
+          "diff": "L"
+        },
+        {
+          "title": "Regina vespaE",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "chaplet -IIDX re:build-",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "Makin' It",
+          "level": 12,
+          "diff": "A"
+        },
+        {
+          "title": "fixer",
+          "level": 12,
+          "diff": "A"
+        }
+      ]
+    },
+    {
+      "key": "rare",
+      "label": "Rare",
+      "songs": [
+        {
+          "title": "GAMBOL",
+          "level": 2,
+          "diff": "H"
+        },
+        {
+          "title": "KEEP ON MOVIN'",
+          "level": 3,
+          "diff": "H"
+        },
+        {
+          "title": "Tangerine Stream",
+          "level": 3,
+          "diff": "H"
+        },
+        {
+          "title": "Dr.LOVE",
+          "level": 4,
+          "diff": "A"
+        },
+        {
+          "title": "I Was The One",
+          "level": 4,
+          "diff": "A"
+        },
+        {
+          "title": "SP-TRIP MACHINE(for beatmania II)",
+          "level": 4,
+          "diff": "A"
+        },
+        {
+          "title": "Don't Stop!",
+          "level": 4,
+          "diff": "A"
+        },
+        {
+          "title": "22DUNK",
+          "level": 5,
+          "diff": "A"
+        },
+        {
+          "title": "deep in you",
+          "level": 5,
+          "diff": "A"
+        },
+        {
+          "title": "FLOWERS for ALBION",
+          "level": 5,
+          "diff": "H"
+        },
+        {
+          "title": "World Wide Love",
+          "level": 5,
+          "diff": "A"
+        },
+        {
+          "title": "desolation",
+          "level": 5,
+          "diff": "A"
+        },
+        {
+          "title": "Love Again...",
+          "level": 5,
+          "diff": "A"
+        },
+        {
+          "title": "quick master (reform version)",
+          "level": 5,
+          "diff": "A"
+        },
+        {
+          "title": "Digital MinD(A/T Libra mix)",
+          "level": 6,
+          "diff": "A"
+        },
+        {
+          "title": "Electro Tuned(the SubS mix)",
+          "level": 6,
+          "diff": "A"
+        },
+        {
+          "title": "PUT YOUR FAITH IN ME(for beatmania II)",
+          "level": 6,
+          "diff": "H"
+        },
+        {
+          "title": "HIGHER",
+          "level": 6,
+          "diff": "A"
+        },
+        {
+          "title": "LOVE AGAIN TONIGHT～for Mellisa mix～",
+          "level": 6,
+          "diff": "A"
+        },
+        {
+          "title": "still my words",
+          "level": 6,
+          "diff": "H"
+        },
+        {
+          "title": "Glorious Days",
+          "level": 6,
+          "diff": "A"
+        },
+        {
+          "title": "GRADIUSIC CYBER",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": ".59",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "LEADING CYBER",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "REINCARNATION",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Skyscraper",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Burnin' The Floor",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Hitch Hiker2",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "LOVE WILL・・・",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "in my eyes",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Radical Faith",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "RISLIM",
+          "level": 7,
+          "diff": "H"
+        },
+        {
+          "title": "THE CUBE",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "BALLAD FOR YOU～想いの雨～",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Free Style",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "こっちを向いてよ",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Burning Heat! (Full Option Mix)",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Let the Snow Paint Me",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "airflow",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "I Was The One (80's EUROBEAT STYLE)",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "ライオン好き",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "DoLL",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "earth scape",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Fly Away To India",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "in motion",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "走馬灯 -The Last Song-",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "I'm Screaming LOVE",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "Eternal Tears",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "おおきなこえで",
+          "level": 7,
+          "diff": "A"
+        },
+        {
+          "title": "ちらちら・はらはら",
+          "level": 7,
+          "diff": "A"
+        }
+      ]
+    }
+  ]
+}

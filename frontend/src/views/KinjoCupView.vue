@@ -370,9 +370,9 @@
         <!-- レベルサブタブ + 検索 + 更新 -->
         <div class="flex flex-wrap items-center gap-2 mb-3">
           <div class="flex gap-1.5">
-            <button @click="songRankLevel = 'lv10'" :class="songLevelTabClass('lv10')">LV10以下</button>
-            <button @click="songRankLevel = 'lv11'" :class="songLevelTabClass('lv11')">LV11</button>
-            <button @click="songRankLevel = 'lv12'" :class="songLevelTabClass('lv12')">LV12</button>
+            <button @click="songRankLevel = 'lv10'" :disabled="!genreLevelHasCharts('lv10')" :class="songLevelTabClass('lv10')">LV10以下</button>
+            <button @click="songRankLevel = 'lv11'" :disabled="!genreLevelHasCharts('lv11')" :class="songLevelTabClass('lv11')">LV11</button>
+            <button @click="songRankLevel = 'lv12'" :disabled="!genreLevelHasCharts('lv12')" :class="songLevelTabClass('lv12')">LV12</button>
           </div>
           <input
             v-model="songSearch"
@@ -387,6 +387,16 @@
           >更新</button>
         </div>
 
+        <!-- ジャンルサブタブ（レベルと組み合わせて絞り込み） -->
+        <div class="flex flex-wrap items-center gap-1.5 mb-3">
+          <button
+            v-for="g in GENRE_TABS"
+            :key="g.key"
+            @click="songRankGenre = g.key"
+            :class="songGenreTabClass(g.key)"
+          >{{ g.label }}</button>
+        </div>
+
         <!-- 状態 -->
         <div v-if="songRanksLoading" class="flex flex-col items-center justify-center py-16">
           <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
@@ -398,7 +408,7 @@
         <template v-else-if="currentSongBracket && currentSongBracket.players.length > 0">
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-relaxed">
             参加者内での曲別順位です。セルは各譜面の EX スコア順位（<span class="text-amber-600 dark:text-amber-400 font-bold">1位=金</span> / 2位=銀 / 3位=銅、未プレイ=−）。
-            列見出し下の数字は平均順位（良い順に左から並べています）。{{ filteredSongCharts.length }}/{{ currentSongBracket.charts.length }} 譜面。
+            列見出し下の数字は平均順位（<span v-if="songRankGenre !== 'all'">選択ジャンル内で</span>良い順に左から並べています）。{{ filteredSongCharts.length }}/{{ genreCharts.length }} 譜面。
           </p>
           <div v-if="filteredSongCharts.length > 0" class="overflow-auto max-h-[75vh] rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
             <table class="text-sm border-collapse">
@@ -406,7 +416,7 @@
                 <tr class="text-slate-500 dark:text-slate-400 text-xs">
                   <th class="sticky top-0 left-0 z-30 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-left font-semibold border border-slate-100 dark:border-slate-700 align-bottom">曲名</th>
                   <th
-                    v-for="(col, ci) in currentSongBracket.players"
+                    v-for="(col, ci) in orderedSongPlayers"
                     :key="col.userId"
                     :title="`${col.displayName} ／ 平均${col.avgRank ?? '-'}位 ／ 1位${col.firstPlaces}回 ／ ${col.played}譜面`"
                     class="sticky top-0 z-20 bg-slate-50 dark:bg-slate-900 p-0 border border-slate-100 dark:border-slate-700 align-bottom"
@@ -430,16 +440,18 @@
                     <span class="text-[10px] text-slate-400 ml-1">({{ c.players }})</span>
                   </td>
                   <td
-                    v-for="(cell, ci) in c.cells"
-                    :key="ci"
-                    :class="rankCellClass(cell ? cell.rank : null)"
-                    :title="cell ? `${c.title}: ${cell.score} (${cell.rank}位)` : '未プレイ'"
-                  >{{ cell ? cell.rank : '-' }}</td>
+                    v-for="col in orderedSongPlayers"
+                    :key="col.userId"
+                    :class="rankCellClass(songCellRank(c, col.origIdx))"
+                    :title="songCellTitle(c, col.origIdx)"
+                  >{{ songCellText(c, col.origIdx) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p v-else class="text-center py-12 text-sm text-slate-400">「{{ songSearch }}」に一致する曲がありません。</p>
+          <p v-else class="text-center py-12 text-sm text-slate-400">
+            {{ songSearch ? `「${songSearch}」に一致する曲がありません。` : 'このジャンル・レベルに該当する譜面データがありません。' }}
+          </p>
         </template>
         <div v-else class="text-center py-16 text-slate-500 dark:text-slate-400">
           対象データがありません。
@@ -597,13 +609,31 @@
  *
  * App.vue が `/kinjocup` パスを検知してこのビューを単独描画する（サイドバー等は描画しない）。
  */
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useKinjoCup, type KinjoCupParticipant, type KinjoCupMatrix, type MatrixCell, type KinjoCupMatchup, type KinjoCupSongRanks } from '../composables/useKinjoCup';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useKinjoCup, type KinjoCupParticipant, type KinjoCupMatrix, type MatrixCell, type KinjoCupMatchup, type KinjoCupSongRanks, type SongRankChart } from '../composables/useKinjoCup';
 import { useScores } from '../composables/useScores';
 import { useAdmin } from '../composables/useAdmin';
 import type { ScoreData } from '../types/ScoreData';
 import ScoreDashboard from '../components/ScoreDashboard.vue';
 import ScoreSummary from '../components/ScoreSummary.vue';
+import challengeSongs from '../data/kinjocup_challenge_songs.json';
+
+/**
+ * きんじょー杯の課題曲一覧（ジャンル別）。曲別順位のジャンル絞り込みに使う。
+ * ジャンル所属は「難易度名|曲名」で突合する（レベルは本番の現行値で区分するため所属判定には使わない）。
+ * 難易度記号 H/A/L → HYPER/ANOTHER/LEGGENDARIA。
+ */
+const DIFF_NAME_MAP: Record<string, string> = { H: 'HYPER', A: 'ANOTHER', L: 'LEGGENDARIA' };
+/** ジャンルボタン一覧（先頭は「全ジャンル」）。 */
+const GENRE_TABS: { key: string; label: string }[] = [{ key: 'all', label: '全ジャンル' }];
+/** ジャンルkey → 所属譜面キー（`難易度名|曲名`）の集合。 */
+const GENRE_MEMBERSHIP: Record<string, Set<string>> = {};
+for (const g of (challengeSongs as { genres: { key: string; label: string; songs: { title: string; diff: string }[] }[] }).genres) {
+  const set = new Set<string>();
+  for (const s of g.songs) set.add(`${DIFF_NAME_MAP[s.diff]}|${s.title}`);
+  GENRE_MEMBERSHIP[g.key] = set;
+  GENRE_TABS.push({ key: g.key, label: g.label });
+}
 
 const { isLoading, fetchParticipants, fetchMatrix, fetchMatchup, fetchSongRanks, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
 const { fetchAllUsers } = useScores();
@@ -679,19 +709,81 @@ const songRanksLoading = ref(false);
 const songRanksError = ref('');
 /** 表示中のレベル区分。 */
 const songRankLevel = ref<'lv12' | 'lv11' | 'lv10'>('lv12');
+/** 表示中のジャンル（'all' なら全ジャンル）。 */
+const songRankGenre = ref<string>('all');
 /** 曲名検索。 */
 const songSearch = ref('');
 
 /** 現在の区分の曲別順位。 */
 const currentSongBracket = computed(() => songRanksData.value ? songRanksData.value[songRankLevel.value] : null);
 
-/** 検索を適用した譜面リスト。 */
-const filteredSongCharts = computed(() => {
+/** 現在のジャンルに属する譜面（検索は未適用。列の平均順位算出・レベル可否判定に使う）。 */
+const genreCharts = computed(() => {
   const b = currentSongBracket.value;
   if (!b) return [];
+  if (songRankGenre.value === 'all') return b.charts;
+  const set = GENRE_MEMBERSHIP[songRankGenre.value];
+  if (!set) return b.charts;
+  return b.charts.filter(c => set.has(`${c.difficultyName}|${c.title}`));
+});
+
+/** ジャンル＋検索を適用した表示譜面（表の行）。 */
+const filteredSongCharts = computed(() => {
   const q = songSearch.value.trim().toLowerCase();
-  if (!q) return b.charts;
-  return b.charts.filter(c => c.title.toLowerCase().includes(q));
+  const charts = genreCharts.value;
+  return q ? charts.filter(c => c.title.toLowerCase().includes(q)) : charts;
+});
+
+/**
+ * 列（参加者）を「選択中ジャンル内の平均順位」で並べ替えて返す。
+ * セル順位はサーバ集計（その譜面をプレイした全参加者内の順位）をそのまま使い、
+ * 平均順位と並び順だけを表示中ジャンルの譜面集合で再計算する（全ジャンル時はサーバ値と一致）。
+ */
+const orderedSongPlayers = computed(() => {
+  const b = currentSongBracket.value;
+  if (!b) return [] as { userId: number; displayName: string; origIdx: number; played: number; firstPlaces: number; rawAvg: number; avgRank: number | null }[];
+  const charts = genreCharts.value;
+  return b.players
+    .map((p, idx) => {
+      let sum = 0, played = 0, firsts = 0;
+      for (const c of charts) {
+        const cell = c.cells[idx];
+        if (cell) { sum += cell.rank; played++; if (cell.rank === 1) firsts++; }
+      }
+      return {
+        userId: p.userId,
+        displayName: p.displayName,
+        origIdx: idx,
+        played,
+        firstPlaces: firsts,
+        rawAvg: played ? sum / played : Infinity,       // 並べ替え用（サーバ集計と一致させるため丸めない）
+        avgRank: played ? Math.round((sum / played) * 100) / 100 : null, // 表示用（小数2桁）
+      };
+    })
+    .sort((a, z) => {
+      if (a.rawAvg !== z.rawAvg) return a.rawAvg - z.rawAvg;   // 平均順位 良い順
+      if (a.firstPlaces !== z.firstPlaces) return z.firstPlaces - a.firstPlaces; // 1位回数 多い順
+      return (a.displayName || '').localeCompare(z.displayName || '', 'ja');
+    });
+});
+
+/** 選択中ジャンルにそのレベル区分の譜面が存在するか（無ければレベルボタンを無効化する）。 */
+const genreLevelHasCharts = (lv: 'lv10' | 'lv11' | 'lv12'): boolean => {
+  const data = songRanksData.value;
+  if (!data) return true;
+  if (songRankGenre.value === 'all') return true;
+  const set = GENRE_MEMBERSHIP[songRankGenre.value];
+  if (!set) return true;
+  return data[lv].charts.some(c => set.has(`${c.difficultyName}|${c.title}`));
+};
+
+// ジャンル変更・データ取得で、現在のレベル区分にそのジャンルの譜面が無ければ選択可能な区分へ移す。
+// （例: Rare は Lv7 以下しか無いため LV11/LV12 は選べず LV10以下 へ戻す）
+watch([songRankGenre, songRanksData], () => {
+  if (songRanksData.value && !genreLevelHasCharts(songRankLevel.value)) {
+    const first = (['lv10', 'lv11', 'lv12'] as const).find(l => genreLevelHasCharts(l));
+    if (first) songRankLevel.value = first;
+  }
 });
 
 /** 曲別順位を取得する。 */
@@ -713,12 +805,37 @@ const openSongRanksTab = () => {
   if (!songRanksData.value && !songRanksLoading.value) loadSongRanks();
 };
 
-/** 曲別順位レベルサブタブの装飾。 */
+/** 曲別順位レベルサブタブの装飾（選択中ジャンルに該当譜面が無い区分は無効表示）。 */
 const songLevelTabClass = (lv: 'lv12' | 'lv11' | 'lv10'): string => {
   const base = 'px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-colors';
+  if (!genreLevelHasCharts(lv)) return `${base} bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 opacity-60 cursor-not-allowed`;
   return songRankLevel.value === lv
     ? `${base} bg-indigo-600 text-white`
     : `${base} bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`;
+};
+
+/** 曲別順位ジャンルボタンの装飾（レベルと色を分けるため emerald 系）。 */
+const songGenreTabClass = (key: string): string => {
+  const base = 'px-2.5 py-1 text-xs font-bold rounded-md transition-colors';
+  return songRankGenre.value === key
+    ? `${base} bg-emerald-600 text-white`
+    : `${base} bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`;
+};
+
+/** 譜面 c の参加者（元index origIdx）のセル順位。未プレイは null。 */
+const songCellRank = (c: SongRankChart, origIdx: number): number | null => {
+  const cell = c.cells[origIdx];
+  return cell ? cell.rank : null;
+};
+/** セルの tooltip（曲名・スコア・順位）。未プレイは「未プレイ」。 */
+const songCellTitle = (c: SongRankChart, origIdx: number): string => {
+  const cell = c.cells[origIdx];
+  return cell ? `${c.title}: ${cell.score} (${cell.rank}位)` : '未プレイ';
+};
+/** セルの表示テキスト（順位 or 「-」）。 */
+const songCellText = (c: SongRankChart, origIdx: number): string | number => {
+  const cell = c.cells[origIdx];
+  return cell ? cell.rank : '-';
 };
 
 /** 順位セルの装飾（1位=金 / 2位=銀 / 3位=銅 / それ以外=通常 / 未プレイ=灰）。 */
@@ -783,7 +900,7 @@ const levelLabel = (b: string): string =>
 
 /** 難易度名を短縮ラベルに（ANOTHER→[A] / LEGGENDARIA→[L]）。 */
 const diffShort = (d: string): string =>
-  d === 'LEGGENDARIA' ? '[L]' : d === 'ANOTHER' ? '[A]' : d;
+  d === 'LEGGENDARIA' ? '[L]' : d === 'ANOTHER' ? '[A]' : d === 'HYPER' ? '[H]' : d;
 
 /**
  * EX スコアの beat-seeker 記法グレードを返す（MAX / MAX- / AAA+ / AAA- / AA+ / AA- / A+ / A-）。

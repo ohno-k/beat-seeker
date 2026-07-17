@@ -67,6 +67,31 @@ public class KinjoCupController {
     }
 
     /**
+     * きんじょー杯「曲別順位」の課題曲に含まれる HYPER 譜面のタイトル（ホワイトリスト）。
+     * 通常の曲別順位集計は ANOTHER/LEGGENDARIA のみだが、この特設ページに限りこれらの HYPER を lv10 区分へ追加する。
+     * タイトルは本番DBのスコア表記に一致させている（不一致だと突合できず非表示になる）。フロントの
+     * kinjocup_challenge_songs.json の HYPER エントリと対応する。
+     */
+    private static final List<String> KINJO_HYPER_TITLES = List.of(
+            "CAN'T STOP FALLIN'IN LOVE", "Summer Vacation(CU mix)", "THE SAFARI", "Distress",
+            "GAMBOL", "KEEP ON MOVIN'", "Tangerine Stream", "FLOWERS for ALBION",
+            "PUT YOUR FAITH IN ME(for beatmania II)", "still my words", "RISLIM");
+
+    /** 上記 HYPER 譜面の表示レベル（セル見出し用。いずれも Lv10 以下なので lv10 区分に入る）。 */
+    private static final Map<String, Integer> KINJO_HYPER_LEVELS = Map.ofEntries(
+            Map.entry("CAN'T STOP FALLIN'IN LOVE", 8),
+            Map.entry("Summer Vacation(CU mix)", 9),
+            Map.entry("THE SAFARI", 10),
+            Map.entry("Distress", 10),
+            Map.entry("GAMBOL", 2),
+            Map.entry("KEEP ON MOVIN'", 3),
+            Map.entry("Tangerine Stream", 3),
+            Map.entry("FLOWERS for ALBION", 5),
+            Map.entry("PUT YOUR FAITH IN ME(for beatmania II)", 6),
+            Map.entry("still my words", 6),
+            Map.entry("RISLIM", 7));
+
+    /**
      * 【メソッドの役割】 参加者一覧を公開で返す。総合力(Beat-Pt)降順で並べる。
      *
      * 個人を特定し得る IIDX ID は公開ペイロードに含めない（ドラフト参考に不要なため）。
@@ -435,6 +460,14 @@ public class KinjoCupController {
                 String diff = String.valueOf(r.get("difficultyName"));
                 String key = title + "|" + diff;
                 ChartScores cs = data.get(bracket).computeIfAbsent(key, k -> new ChartScores(title, diff, level));
+                cs.scores.put(toLong(r.get("userId")), (int) toLong(r.get("score")));
+            }
+            // きんじょー杯 特設ページ限定: 課題曲の HYPER 譜面（ホワイトリスト）を lv10 区分へ追加する。
+            for (Map<String, Object> r : scoreRepository.findBestHyperForTitlesAndUsers(userIds, KINJO_HYPER_TITLES)) {
+                String title = String.valueOf(r.get("title"));
+                int level = KINJO_HYPER_LEVELS.getOrDefault(title, 0);
+                String key = title + "|HYPER";
+                ChartScores cs = data.get("lv10").computeIfAbsent(key, k -> new ChartScores(title, "HYPER", level));
                 cs.scores.put(toLong(r.get("userId")), (int) toLong(r.get("score")));
             }
         }

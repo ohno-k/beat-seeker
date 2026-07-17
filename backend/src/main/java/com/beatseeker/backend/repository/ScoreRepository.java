@@ -291,6 +291,27 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
             @Param("userIds") java.util.Collection<Long> userIds);
 
     /**
+     * 【メソッドの役割】 指定ユーザー集合について、指定タイトルの HYPER 譜面ごとベストスコアを返す。
+     *
+     * きんじょー杯「曲別順位」の課題曲には少数の HYPER 譜面（例: GAMBOL / RISLIM 等）が含まれる。
+     * 通常の集計は ANOTHER/LEGGENDARIA のみだが、この特設ページに限りホワイトリストの HYPER 譜面を
+     * 追加表示するために使う（title の IN で対象を絞るため件数は小さい）。level/notes は不要なので
+     * song_definitions とは JOIN せず、譜面別に MAX(score) だけを返す。
+     *
+     * 返却キー: userId / title / score
+     */
+    @Query(value =
+        "SELECT user_id AS \"userId\", title AS \"title\", MAX(score) AS \"score\" " +
+        "FROM scores " +
+        "WHERE difficulty_name = 'HYPER' AND score > 0 " +
+        "  AND user_id IN (:userIds) AND title IN (:titles) " +
+        "GROUP BY user_id, title",
+        nativeQuery = true)
+    List<Map<String, Object>> findBestHyperForTitlesAndUsers(
+            @Param("userIds") java.util.Collection<Long> userIds,
+            @Param("titles") java.util.Collection<String> titles);
+
+    /**
      * 【メソッドの役割】 「譜面 A をプレイしているユーザー」の ANOTHER/LEGG 全スコアを 1 クエリで返す。
      *
      * Java 側の 2 段階フェッチを 1 クエリに統合し、user_id の IN リスト送信のコストを避ける。
