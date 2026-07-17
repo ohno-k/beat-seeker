@@ -117,14 +117,14 @@
 
       <!-- ===== 参加者一覧 ===== -->
       <template v-if="topTab === 'list'">
-      <!-- ツールバー: 件数 + (管理者のみ) 追加ボタン -->
+      <!-- ツールバー: 件数 + 追加ボタン -->
       <div class="flex items-center justify-between gap-3 mb-4">
         <p class="text-sm text-slate-500 dark:text-slate-400">
           <span class="font-bold text-slate-700 dark:text-slate-200">{{ participants.length }}</span> 名の参加者
           <span class="hidden sm:inline">（総合力 Beat-Pt 降順）</span>
         </p>
         <button
-          v-if="isAdmin"
+          v-if="showAux"
           @click="openAddModal"
           class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-colors"
         >
@@ -149,7 +149,7 @@
       <!-- 空状態 -->
       <div v-else-if="participants.length === 0" class="text-center py-20">
         <p class="text-slate-500 dark:text-slate-400 font-medium">まだ参加者が登録されていません。</p>
-        <p v-if="isAdmin" class="mt-2 text-sm text-slate-400">右上の「参加者を追加」から登録してください。</p>
+        <p v-if="showAux" class="mt-2 text-sm text-slate-400">右上の「参加者を追加」から登録してください。</p>
       </div>
 
       <!-- 参加者テーブル -->
@@ -225,7 +225,7 @@
                 <span v-if="p.arenaRank" class="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs font-bold rounded">{{ p.arenaRank }}</span>
                 <span v-else class="text-slate-300 dark:text-slate-600">—</span>
               </td>
-              <!-- メモ編集（全員）・削除（管理者のみ） -->
+              <!-- メモ編集 / 削除 -->
               <td class="px-3 sm:px-4 py-3 text-center align-top">
                 <div class="flex items-center justify-center gap-1.5">
                   <button
@@ -236,7 +236,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                   </button>
                   <button
-                    v-if="isAdmin"
+                    v-if="showAux"
                     @click="handleRemove(p)"
                     :disabled="removingId === p.id"
                     class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-40"
@@ -298,8 +298,8 @@
           >更新</button>
         </div>
 
-        <!-- ジャンルサブタブ（レベルと組み合わせて絞り込み） -->
-        <div class="flex flex-wrap items-center gap-1.5 mb-4">
+        <!-- 補助コントロール -->
+        <div v-if="showAux" class="flex flex-wrap items-center gap-1.5 mb-4">
           <button
             v-for="g in GENRE_TABS"
             :key="g.key"
@@ -397,8 +397,8 @@
           >更新</button>
         </div>
 
-        <!-- ジャンルサブタブ（レベルと組み合わせて絞り込み） -->
-        <div class="flex flex-wrap items-center gap-1.5 mb-3">
+        <!-- 補助コントロール -->
+        <div v-if="showAux" class="flex flex-wrap items-center gap-1.5 mb-3">
           <button
             v-for="g in GENRE_TABS"
             :key="g.key"
@@ -470,7 +470,7 @@
       </template>
     </main>
 
-    <!-- ============ 参加者追加モーダル（管理者のみ） ============ -->
+    <!-- ============ 参加者追加モーダル ============ -->
     <Teleport to="body">
       <div
         v-if="showAddModal"
@@ -648,6 +648,8 @@ for (const g of (challengeSongs as { genres: { key: string; label: string; songs
 const { isLoading, fetchParticipants, fetchSongRanks, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
 const { fetchAllUsers } = useScores();
 const { isAdmin } = useAdmin();
+// 一部の補助コントロール（フィルタ等）の表示可否フラグ。
+const showAux = computed(() => isAdmin.value);
 
 // ---------- トップタブ（参加者一覧 / マトリクス / 曲別順位） ----------
 /** 表示中のトップタブ。 */
