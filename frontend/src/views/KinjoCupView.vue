@@ -285,30 +285,40 @@
       <!-- ===== マトリクス ===== -->
       <template v-else-if="topTab === 'matrix'">
         <!-- レベルサブタブ + 更新 -->
-        <div class="flex items-center gap-2 mb-4">
+        <div class="flex items-center gap-2 mb-3">
           <div class="flex gap-1.5">
-            <button @click="matrixLevel = 'lv10'" :class="levelTabClass('lv10')">LV10以下</button>
-            <button @click="matrixLevel = 'lv11'" :class="levelTabClass('lv11')">LV11</button>
-            <button @click="matrixLevel = 'lv12'" :class="levelTabClass('lv12')">LV12</button>
+            <button @click="matrixLevel = 'lv10'" :disabled="!matrixLevelHasCharts('lv10')" :class="levelTabClass('lv10')">LV10以下</button>
+            <button @click="matrixLevel = 'lv11'" :disabled="!matrixLevelHasCharts('lv11')" :class="levelTabClass('lv11')">LV11</button>
+            <button @click="matrixLevel = 'lv12'" :disabled="!matrixLevelHasCharts('lv12')" :class="levelTabClass('lv12')">LV12</button>
           </div>
           <button
-            @click="loadMatrix"
-            :disabled="matrixLoading"
+            @click="loadSongRanks"
+            :disabled="songRanksLoading"
             class="ml-auto text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline disabled:opacity-50"
           >更新</button>
         </div>
 
+        <!-- ジャンルサブタブ（レベルと組み合わせて絞り込み） -->
+        <div class="flex flex-wrap items-center gap-1.5 mb-4">
+          <button
+            v-for="g in GENRE_TABS"
+            :key="g.key"
+            @click="matrixGenre = g.key"
+            :class="matrixGenreTabClass(g.key)"
+          >{{ g.label }}</button>
+        </div>
+
         <!-- 状態 -->
-        <div v-if="matrixLoading" class="flex flex-col items-center justify-center py-16">
+        <div v-if="songRanksLoading" class="flex flex-col items-center justify-center py-16">
           <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
           <p class="text-slate-500 font-medium">勝敗を集計中...</p>
         </div>
-        <div v-else-if="matrixError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-md border border-red-200 dark:border-red-800">
-          {{ matrixError }}
+        <div v-else-if="songRanksError" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-4 rounded-md border border-red-200 dark:border-red-800">
+          {{ songRanksError }}
         </div>
-        <template v-else-if="currentBracket && currentBracket.players.length > 0">
+        <template v-else-if="matrixBracket && matrixBracket.players.length > 0">
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-relaxed">
-            総当たりの勝敗表です。各セルは「行プレイヤーの 勝–負」（共通プレイ譜面で EX スコアを比較）。
+            総当たりの勝敗表です。各セルは「行プレイヤーの 勝–負」（選択中のジャンル×レベルで両者がプレイした共通譜面の EX スコアを比較）。
             列見出しは対戦相手（順位・DJ名）。勝ち数の多い順に上から並べています。<span class="text-indigo-500 dark:text-indigo-400">セルをクリックすると対戦内訳を表示します。</span>
           </p>
           <div class="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
@@ -318,7 +328,7 @@
                   <th class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-900/50 px-3 py-2 text-left font-semibold border border-slate-100 dark:border-slate-700 align-bottom">順位 / DJ名</th>
                   <th class="px-2 py-2 text-center font-semibold border border-slate-100 dark:border-slate-700 whitespace-nowrap align-bottom">成績</th>
                   <th
-                    v-for="(col, ci) in currentBracket.players"
+                    v-for="(col, ci) in matrixBracket.players"
                     :key="col.userId"
                     :title="col.displayName"
                     class="p-0 border border-slate-100 dark:border-slate-700 align-bottom"
@@ -333,17 +343,17 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="(matRow, ri) in currentBracket.matrix"
-                  :key="currentBracket.players[ri].userId"
+                  v-for="(matRow, ri) in matrixBracket.matrix"
+                  :key="matrixBracket.players[ri].userId"
                   class="hover:bg-slate-50/60 dark:hover:bg-slate-700/20"
                 >
                   <td class="sticky left-0 z-10 bg-white dark:bg-slate-800 px-3 py-1.5 font-bold border border-slate-100 dark:border-slate-700 whitespace-nowrap">
                     <span class="text-slate-400 mr-1">{{ ri + 1 }}.</span>
-                    <span class="text-indigo-600 dark:text-indigo-400">{{ currentBracket.players[ri].displayName || '名無し' }}</span>
+                    <span class="text-indigo-600 dark:text-indigo-400">{{ matrixBracket.players[ri].displayName || '名無し' }}</span>
                   </td>
                   <td class="px-2 py-1.5 text-center font-mono text-xs border border-slate-100 dark:border-slate-700 whitespace-nowrap">
-                    <span class="font-bold text-slate-700 dark:text-slate-200">{{ currentBracket.players[ri].wins }}-{{ currentBracket.players[ri].losses }}</span>
-                    <span class="text-slate-400 ml-1">({{ currentBracket.players[ri].winRate.toFixed(1) }}%)</span>
+                    <span class="font-bold text-slate-700 dark:text-slate-200">{{ matrixBracket.players[ri].wins }}-{{ matrixBracket.players[ri].losses }}</span>
+                    <span class="text-slate-400 ml-1">({{ matrixBracket.players[ri].winRate.toFixed(1) }}%)</span>
                   </td>
                   <td
                     v-for="(cell, ci) in matRow"
@@ -610,7 +620,7 @@
  * App.vue が `/kinjocup` パスを検知してこのビューを単独描画する（サイドバー等は描画しない）。
  */
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
-import { useKinjoCup, type KinjoCupParticipant, type KinjoCupMatrix, type MatrixCell, type KinjoCupMatchup, type KinjoCupSongRanks, type SongRankChart } from '../composables/useKinjoCup';
+import { useKinjoCup, type KinjoCupParticipant, type MatrixCell, type KinjoCupMatchup, type MatchupChart, type KinjoCupSongRanks, type SongRankChart } from '../composables/useKinjoCup';
 import { useScores } from '../composables/useScores';
 import { useAdmin } from '../composables/useAdmin';
 import type { ScoreData } from '../types/ScoreData';
@@ -635,7 +645,7 @@ for (const g of (challengeSongs as { genres: { key: string; label: string; songs
   GENRE_TABS.push({ key: g.key, label: g.label });
 }
 
-const { isLoading, fetchParticipants, fetchMatrix, fetchMatchup, fetchSongRanks, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
+const { isLoading, fetchParticipants, fetchSongRanks, fetchParticipantScores, addParticipant, updateNote, removeParticipant } = useKinjoCup();
 const { fetchAllUsers } = useScores();
 const { isAdmin } = useAdmin();
 
@@ -652,36 +662,20 @@ const containerWidthClass = computed(() =>
     ? 'max-w-[1800px]' : 'max-w-5xl'
 );
 
-// ---------- 勝敗マトリクス ----------
-/** マトリクスデータ（3区分）。未取得は null。 */
-const matrixData = ref<KinjoCupMatrix | null>(null);
-/** マトリクス取得中フラグ。 */
-const matrixLoading = ref(false);
-/** マトリクス取得エラー。 */
-const matrixError = ref('');
+// ---------- 勝敗マトリクス（曲別順位データから算出。ジャンル×レベルで絞り込む） ----------
 /** 表示中のレベル区分。 */
 const matrixLevel = ref<'lv12' | 'lv11' | 'lv10'>('lv12');
+/** 表示中のジャンル（'all' なら全ジャンル）。 */
+const matrixGenre = ref<string>('all');
 
-/** 現在表示中の区分のマトリクス。 */
-const currentBracket = computed(() => matrixData.value ? matrixData.value[matrixLevel.value] : null);
+// マトリクスは曲別順位（songRanksData）の各譜面 EX スコアから総当たりで勝敗を算出する。
+// マトリクス専用APIは集計済みで譜面内訳を持たずジャンル絞り込みできないため、譜面別スコアを
+// 持つ曲別順位データを共通ソースにする（matrixBracket / openMatchup は下方で定義）。
 
-/** マトリクスを取得する。 */
-const loadMatrix = async () => {
-  matrixLoading.value = true;
-  matrixError.value = '';
-  try {
-    matrixData.value = await fetchMatrix();
-  } catch (e: any) {
-    matrixError.value = e?.message || 'マトリクスの取得に失敗しました。';
-  } finally {
-    matrixLoading.value = false;
-  }
-};
-
-/** マトリクスタブを開く（初回のみ取得）。 */
+/** マトリクスタブを開く（曲別順位データを初回のみ取得）。 */
 const openMatrixTab = () => {
   topTab.value = 'matrix';
-  if (!matrixData.value && !matrixLoading.value) loadMatrix();
+  if (!songRanksData.value && !songRanksLoading.value) loadSongRanks();
 };
 
 /** トップタブのボタン装飾。 */
@@ -692,11 +686,30 @@ const topTabClass = (tab: 'list' | 'matrix' | 'songranks'): string => {
     : `${base} border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200`;
 };
 
-/** レベルサブタブのボタン装飾（マトリクス用）。 */
+/** 選択中ジャンルにそのレベル区分の譜面が存在するか（マトリクス用。無ければレベル無効化）。 */
+const matrixLevelHasCharts = (lv: 'lv10' | 'lv11' | 'lv12'): boolean => {
+  const data = songRanksData.value;
+  if (!data) return true;
+  if (matrixGenre.value === 'all') return true;
+  const set = GENRE_MEMBERSHIP[matrixGenre.value];
+  if (!set) return true;
+  return data[lv].charts.some(c => set.has(`${c.difficultyName}|${c.title}`));
+};
+
+/** レベルサブタブのボタン装飾（マトリクス用。該当譜面が無い区分は無効表示）。 */
 const levelTabClass = (lv: 'lv12' | 'lv11' | 'lv10'): string => {
   const base = 'px-3 py-1.5 text-xs sm:text-sm font-bold rounded-lg transition-colors';
+  if (!matrixLevelHasCharts(lv)) return `${base} bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 opacity-60 cursor-not-allowed`;
   return matrixLevel.value === lv
     ? `${base} bg-indigo-600 text-white`
+    : `${base} bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`;
+};
+
+/** マトリクスのジャンルボタン装飾（曲別順位と同じ emerald 系）。 */
+const matrixGenreTabClass = (key: string): string => {
+  const base = 'px-2.5 py-1 text-xs font-bold rounded-md transition-colors';
+  return matrixGenre.value === key
+    ? `${base} bg-emerald-600 text-white`
     : `${base} bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`;
 };
 
@@ -785,6 +798,70 @@ watch([songRankGenre, songRanksData], () => {
     if (first) songRankLevel.value = first;
   }
 });
+// マトリクスも同様に、選択中ジャンルに該当譜面が無いレベル区分から選択可能な区分へ移す。
+watch([matrixGenre, songRanksData], () => {
+  if (songRanksData.value && !matrixLevelHasCharts(matrixLevel.value)) {
+    const first = (['lv10', 'lv11', 'lv12'] as const).find(l => matrixLevelHasCharts(l));
+    if (first) matrixLevel.value = first;
+  }
+});
+
+/**
+ * ジャンル×レベルで絞り込んだ総当たり勝敗マトリクス。曲別順位データ（各譜面の参加者別 EX スコア）から
+ * 「両者プレイ済みの譜面で高スコアの方を勝ち・同点は引分」で算出する。
+ * players は勝ち数降順（→勝率→負け数少→名前）に並び、matrix はその並びに揃う。origIdx は元データ側の index。
+ */
+const matrixBracket = computed(() => {
+  const data = songRanksData.value;
+  if (!data) return null;
+  const b = data[matrixLevel.value];
+  if (!b) return null;
+  const set = matrixGenre.value === 'all' ? null : GENRE_MEMBERSHIP[matrixGenre.value];
+  const charts = set ? b.charts.filter(c => set.has(`${c.difficultyName}|${c.title}`)) : b.charts;
+  const n = b.players.length;
+  const rec: Record<number, { w: number; l: number; d: number }>[] = Array.from({ length: n }, () => ({}));
+  const totals = Array.from({ length: n }, () => ({ wins: 0, losses: 0, draws: 0 }));
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      let aw = 0, bw = 0, dr = 0;
+      for (const c of charts) {
+        const ca = c.cells[i], cb = c.cells[j];
+        if (!ca || !cb) continue;                 // 両者プレイ済みの譜面のみ
+        if (ca.score > cb.score) aw++;
+        else if (cb.score > ca.score) bw++;
+        else dr++;
+      }
+      rec[i][j] = { w: aw, l: bw, d: dr };
+      rec[j][i] = { w: bw, l: aw, d: dr };
+      totals[i].wins += aw; totals[i].losses += bw; totals[i].draws += dr;
+      totals[j].wins += bw; totals[j].losses += aw; totals[j].draws += dr;
+    }
+  }
+  const players = b.players
+    .map((p, idx) => {
+      const t = totals[idx];
+      const decided = t.wins + t.losses;
+      return {
+        userId: p.userId,
+        displayName: p.displayName,
+        origIdx: idx,
+        wins: t.wins,
+        losses: t.losses,
+        draws: t.draws,
+        winRate: decided === 0 ? 0 : Math.round((t.wins * 1000) / decided) / 10,
+      };
+    })
+    .sort((x, z) =>
+      (z.wins - x.wins) ||
+      (z.winRate - x.winRate) ||
+      (x.losses - z.losses) ||
+      (x.displayName || '').localeCompare(z.displayName || '', 'ja')
+    );
+  const matrix = players.map(rowP =>
+    players.map(colP => (rowP.origIdx === colP.origIdx ? null : (rec[rowP.origIdx][colP.origIdx] ?? { w: 0, l: 0, d: 0 })))
+  );
+  return { players, matrix };
+});
 
 /** 曲別順位を取得する。 */
 const loadSongRanks = async () => {
@@ -868,23 +945,40 @@ const matchupError = ref('');
 /** 対戦内訳データ。 */
 const matchupData = ref<KinjoCupMatchup | null>(null);
 
-/** マトリクスのセル（行 ri = A, 列 ci = B）をクリックして対戦内訳を開く。 */
-const openMatchup = async (ri: number, ci: number) => {
-  const bracket = currentBracket.value;
-  if (!bracket || ri === ci) return;
+/**
+ * マトリクスのセル（行 ri = A, 列 ci = B）をクリックして対戦内訳を開く。
+ * マトリクスと同じ曲別順位データ（選択中ジャンル×レベル）からクライアント側で内訳を組み立てる。
+ */
+const openMatchup = (ri: number, ci: number) => {
+  const bracket = matrixBracket.value;
+  const data = songRanksData.value;
+  if (!bracket || !data || ri === ci) return;
   const a = bracket.players[ri];
   const b = bracket.players[ci];
-  matchupOpen.value = true;
-  matchupData.value = null;
-  matchupError.value = '';
-  matchupLoading.value = true;
-  try {
-    matchupData.value = await fetchMatchup(a.userId, b.userId, matrixLevel.value);
-  } catch (e: any) {
-    matchupError.value = e?.message || '対戦内訳の取得に失敗しました。';
-  } finally {
-    matchupLoading.value = false;
+  const src = data[matrixLevel.value];
+  const set = matrixGenre.value === 'all' ? null : GENRE_MEMBERSHIP[matrixGenre.value];
+  const charts = set ? src.charts.filter(c => set.has(`${c.difficultyName}|${c.title}`)) : src.charts;
+  let aWins = 0, bWins = 0, draws = 0;
+  const list: MatchupChart[] = [];
+  for (const c of charts) {
+    const ca = c.cells[a.origIdx];
+    const cb = c.cells[b.origIdx];
+    if (!ca || !cb) continue;                       // 両者プレイ済みの譜面のみ
+    const result: 'win' | 'lose' | 'draw' = ca.score > cb.score ? 'win' : ca.score < cb.score ? 'lose' : 'draw';
+    if (result === 'win') aWins++; else if (result === 'lose') bWins++; else draws++;
+    list.push({ title: c.title, difficultyName: c.difficultyName, level: c.level, notes: c.notes, scoreA: ca.score, scoreB: cb.score, result });
   }
+  list.sort((x, y) => (x.scoreA - x.scoreB) - (y.scoreA - y.scoreB)); // A が負けている譜面を上に
+  matchupData.value = {
+    playerA: { userId: a.userId, displayName: a.displayName },
+    playerB: { userId: b.userId, displayName: b.displayName },
+    bracket: matrixLevel.value,
+    summary: { aWins, bWins, draws, total: list.length },
+    charts: list,
+  };
+  matchupError.value = '';
+  matchupLoading.value = false;
+  matchupOpen.value = true;
 };
 
 /** 対戦内訳モーダルを閉じる。 */

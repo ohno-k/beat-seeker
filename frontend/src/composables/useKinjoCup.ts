@@ -90,6 +90,8 @@ export interface SongRankChart {
   title: string;
   difficultyName: string;
   level: number;
+  /** ノーツ数。MAX = notes*2（対戦内訳のグレード算出に使う）。 */
+  notes: number;
   /** プレイ人数（順位の母数）。 */
   players: number;
   cells: (SongRankCell | null)[];

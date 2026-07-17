@@ -91,6 +91,20 @@ public class KinjoCupController {
             Map.entry("still my words", 6),
             Map.entry("RISLIM", 7));
 
+    /** 上記 HYPER 譜面のノーツ数（対戦内訳のグレード算出用。song_data.json より）。 */
+    private static final Map<String, Integer> KINJO_HYPER_NOTES = Map.ofEntries(
+            Map.entry("CAN'T STOP FALLIN'IN LOVE", 632),
+            Map.entry("Summer Vacation(CU mix)", 949),
+            Map.entry("THE SAFARI", 900),
+            Map.entry("Distress", 937),
+            Map.entry("GAMBOL", 137),
+            Map.entry("KEEP ON MOVIN'", 122),
+            Map.entry("Tangerine Stream", 198),
+            Map.entry("FLOWERS for ALBION", 222),
+            Map.entry("PUT YOUR FAITH IN ME(for beatmania II)", 434),
+            Map.entry("still my words", 619),
+            Map.entry("RISLIM", 625));
+
     /**
      * 【メソッドの役割】 参加者一覧を公開で返す。総合力(Beat-Pt)降順で並べる。
      *
@@ -458,16 +472,18 @@ public class KinjoCupController {
                 if (bracket == null) continue;
                 String title = String.valueOf(r.get("title"));
                 String diff = String.valueOf(r.get("difficultyName"));
+                int notes = (int) toLong(r.get("notes"));
                 String key = title + "|" + diff;
-                ChartScores cs = data.get(bracket).computeIfAbsent(key, k -> new ChartScores(title, diff, level));
+                ChartScores cs = data.get(bracket).computeIfAbsent(key, k -> new ChartScores(title, diff, level, notes));
                 cs.scores.put(toLong(r.get("userId")), (int) toLong(r.get("score")));
             }
             // きんじょー杯 特設ページ限定: 課題曲の HYPER 譜面（ホワイトリスト）を lv10 区分へ追加する。
             for (Map<String, Object> r : scoreRepository.findBestHyperForTitlesAndUsers(userIds, KINJO_HYPER_TITLES)) {
                 String title = String.valueOf(r.get("title"));
                 int level = KINJO_HYPER_LEVELS.getOrDefault(title, 0);
+                int notes = KINJO_HYPER_NOTES.getOrDefault(title, 0);
                 String key = title + "|HYPER";
-                ChartScores cs = data.get("lv10").computeIfAbsent(key, k -> new ChartScores(title, "HYPER", level));
+                ChartScores cs = data.get("lv10").computeIfAbsent(key, k -> new ChartScores(title, "HYPER", level, notes));
                 cs.scores.put(toLong(r.get("userId")), (int) toLong(r.get("score")));
             }
         }
@@ -552,6 +568,7 @@ public class KinjoCupController {
             chm.put("title", cs.title);
             chm.put("difficultyName", cs.diff);
             chm.put("level", cs.level);
+            chm.put("notes", cs.notes); // 対戦内訳のグレード算出用（MAX = notes*2）
             chm.put("players", cs.scores.size()); // プレイ人数（順位の母数）
             chm.put("cells", cellList);
             chartList.add(chm);
@@ -719,11 +736,13 @@ public class KinjoCupController {
         final String title;
         final String diff;
         final int level;
+        final int notes;
         final Map<Long, Integer> scores = new HashMap<>();
-        ChartScores(String title, String diff, int level) {
+        ChartScores(String title, String diff, int level, int notes) {
             this.title = title;
             this.diff = diff;
             this.level = level;
+            this.notes = notes;
         }
     }
 
