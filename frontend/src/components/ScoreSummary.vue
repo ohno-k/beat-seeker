@@ -518,6 +518,12 @@
             :class="modalTab === 'rate-tier' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >Rate-Tier</button>
           <button
+            v-if="showMilestoneTab"
+            @click="handleMilestoneTabClick"
+            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
+            :class="modalTab === 'milestone' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+          >{{ t('table.milestone') }}</button>
+          <button
             v-if="isLoggedIn"
             @click="handleRivalTabClick"
             class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
@@ -812,6 +818,95 @@
               </tbody>
             </table>
           </div>
+        </div>
+
+        <!-- ===== 大台（Milestone）タブ: 100点刻みの節目ラインごとの達成人数を表示 ===== -->
+        <div v-else-if="modalTab === 'milestone'" class="w-full max-w-4xl mx-auto space-y-6">
+          <!-- サマリー: 集計人数 / 自分のスコア / MAX理論値 -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-amber-900/10 dark:bg-amber-900/20 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-amber-100 dark:border-amber-800/50">
+              <p class="text-[10px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">{{ t('table.milestoneAchievers') }}</p>
+              <p class="text-2xl sm:text-4xl font-bold text-amber-700 dark:text-amber-300 tabular-nums">{{ milestonePlayerCount }}</p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-slate-200 dark:border-slate-700">
+              <p class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ t('table.exScore') }}</p>
+              <p class="text-2xl sm:text-4xl font-bold text-slate-700 dark:text-slate-200 tabular-nums">
+                <template v-if="selectedRecord!.score > 0">{{ selectedRecord!.score.toLocaleString() }}</template>
+                <template v-else>---</template>
+              </p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-slate-200 dark:border-slate-700">
+              <p class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">MAX</p>
+              <p class="text-2xl sm:text-4xl font-bold text-slate-700 dark:text-slate-200 tabular-nums">{{ selectedRecord!.maxScore.toLocaleString() }}</p>
+            </div>
+          </div>
+
+          <!-- ローディング -->
+          <div v-if="isLoadingMilestones" class="flex flex-col items-center justify-center py-20">
+            <div class="w-10 h-10 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
+          </div>
+
+          <!-- 大台ラインテーブル（降順） -->
+          <div v-else class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800">
+            <div class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-3 border-b border-slate-200 dark:border-slate-700">
+              <p class="text-xs font-bold text-slate-600 dark:text-slate-400">{{ t('table.milestone') }}</p>
+            </div>
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-slate-100 dark:border-slate-700">
+                  <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-400">{{ t('table.exScore') }}</th>
+                  <th class="px-2 py-3 text-left text-xs font-bold text-slate-400 hidden sm:table-cell">{{ t('table.milestoneRate') }}</th>
+                  <th class="px-4 sm:px-6 py-3 text-right text-xs font-bold text-slate-400">{{ t('table.milestoneAchievers') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+                <tr
+                  v-for="row in milestoneRows"
+                  :key="row.line"
+                  class="transition-colors"
+                  :class="[
+                    row.achievedBySelf ? 'bg-emerald-50/60 dark:bg-emerald-900/10' : 'hover:bg-slate-50 dark:hover:bg-slate-700/20',
+                    row.isNextTarget ? 'ring-1 ring-inset ring-amber-400 dark:ring-amber-500/60' : ''
+                  ]"
+                >
+                  <!-- ラインスコア + スコアレート% + 自分マーカー -->
+                  <td class="px-4 sm:px-6 py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="text-emerald-500 font-bold text-base" v-if="row.achievedBySelf">✓</span>
+                      <span class="font-bold tabular-nums text-base" :class="row.achievedBySelf ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">
+                        {{ row.line.toLocaleString() }}
+                      </span>
+                      <span class="text-[11px] text-slate-400 tabular-nums">{{ row.lineRate.toFixed(2) }}%</span>
+                      <span v-if="row.isNextTarget" class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold shrink-0">
+                        {{ t('table.milestoneToGo', { n: row.toGo }) }}
+                      </span>
+                    </div>
+                  </td>
+                  <!-- 達成率のプログレスバー -->
+                  <td class="px-2 py-3 hidden sm:table-cell">
+                    <div class="flex items-center gap-2">
+                      <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                        <div class="h-full rounded-full bg-amber-500" :style="{ width: row.rate + '%' }"></div>
+                      </div>
+                      <span class="text-xs text-slate-500 dark:text-slate-400 tabular-nums w-12 text-right">{{ row.rate.toFixed(1) }}%</span>
+                    </div>
+                  </td>
+                  <!-- 達成人数 -->
+                  <td class="px-4 sm:px-6 py-3 text-right">
+                    <span class="font-bold tabular-nums text-slate-700 dark:text-slate-200">{{ row.count.toLocaleString() }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- 0人時の注記 -->
+            <div v-if="milestonesLoaded && milestonePlayerCount === 0" class="px-4 sm:px-6 py-4 text-center text-xs text-slate-400 dark:text-slate-500">
+              {{ t('table.milestoneNoPlayers') }}
+            </div>
+          </div>
+
+          <!-- 脚注: 匿名集計の注記 -->
+          <p class="text-[10px] text-slate-400 dark:text-slate-500 text-center">{{ t('table.milestoneNote') }}</p>
         </div>
 
         <!-- ===== デフォルト（Detail）タブ: 譜面情報 + 各スコアパネル + 判定内訳 + 投票 + 目標計算 + メモ ===== -->
@@ -1116,6 +1211,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
+import { computeMilestoneLines } from '../utils/milestones';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getChartType, getFolderRankInfoByRate, FOLDER_RANK_DEFS, type ChartType, type RankInfo } from '../utils/beatTier';
 import { calcBpi } from '../utils/bpi';
@@ -1656,7 +1752,7 @@ const handleRowClick = (record: ScoreRecord) => {
 /** 現在選択中の譜面レコード。null のときはモーダル非表示。 */
 const selectedRecord = ref<ScoreRecord | null>(null);
 /** 詳細モーダル内で表示中のタブ。 */
-const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking' | 'history'>('detail');
+const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking' | 'history' | 'milestone'>('detail');
 
 /** 目標 BEAT-PT スライダーの値（0〜 最大残 PT）。目標到達に必要なスコアを逆算して表示する。 */
 const targetBeatPtSlider = ref(0);
@@ -2270,6 +2366,91 @@ const handleHistoryTabClick = () => {
   }
 };
 
+// --- 大台（マイルストーン）タブ ---
+/** 譜面のユーザー毎ベストスコア（匿名・降順）。タブ初表示時に取得。 */
+const milestoneScores = ref<number[]>([]);
+/** 集計対象プレイヤー数。 */
+const milestonePlayerCount = ref(0);
+/**
+ * 取得済みフラグ。0 人の譜面では length===0 判定だとタブクリック毎に
+ * 再フェッチしてしまうため、専用フラグで初回取得を管理する。
+ */
+const milestonesLoaded = ref(false);
+/** 大台データ読込中フラグ。 */
+const isLoadingMilestones = ref(false);
+
+/** 大台タブを出す条件: A/L の Lv11-12 かつ maxScore が判明している譜面のみ。 */
+const showMilestoneTab = computed(() => {
+  const rec = selectedRecord.value;
+  return !!rec
+    && ['ANOTHER', 'LEGGENDARIA'].includes(rec.difficultyName)
+    && (rec.difficultyLevel === 11 || rec.difficultyLevel === 12)
+    && rec.maxScore > 0;
+});
+
+/**
+ * 大台タブの表示行（降順・高い方が上）。
+ * 各行に達成人数 / 達成率 / 自分の到達状況（達成済み・次目標・あと何点）を集約する。
+ */
+const milestoneRows = computed(() => {
+  const rec = selectedRecord.value;
+  if (!rec || rec.maxScore <= 0) return [];
+  const lines = computeMilestoneLines(rec.maxScore).slice().reverse(); // 高い順
+  const total = milestonePlayerCount.value;
+  const own = rec.score;
+  // 自分の「次の目標ライン」= 未達ラインのうち最小のもの（未プレイ時は対象外）。
+  const nextLine = own > 0 ? [...lines].reverse().find(l => own < l) ?? null : null;
+  return lines.map(line => {
+    const count = milestoneScores.value.filter(s => s >= line).length;
+    return {
+      line,
+      lineRate: (line / rec.maxScore) * 100,           // ラインのスコアレート%
+      count,                                            // 達成人数
+      rate: total > 0 ? (count / total) * 100 : 0,      // 達成率%
+      achievedBySelf: own > 0 && own >= line,
+      isNextTarget: nextLine === line,
+      toGo: line - own,
+    };
+  });
+});
+
+/**
+ * 【関数の役割】 選択中譜面の全ユーザーベストスコア（匿名・降順）を取得。
+ * 大台ラインごとの達成人数計算の元データになる。公開 API なので authHeaders は不要。
+ */
+const fetchMilestoneScores = async () => {
+  if (!selectedRecord.value) return;
+  isLoadingMilestones.value = true;
+  try {
+    const params = new URLSearchParams({
+      title: selectedRecord.value.title,
+      difficultyName: selectedRecord.value.difficultyName
+    });
+    const res = await fetch(`${API_BASE}/api/scores/song-milestone-scores?${params}`);
+    if (res.ok) {
+      const data = await res.json();
+      milestoneScores.value = data.scores ?? [];
+      milestonePlayerCount.value = data.playerCount ?? 0;
+      milestonesLoaded.value = true;
+    }
+  } catch {
+    // 握り潰し: 大台は補助情報
+  } finally {
+    isLoadingMilestones.value = false;
+  }
+};
+
+/**
+ * 【関数の役割】 大台タブクリック時のハンドラ。
+ * 初回のみ milestoneScores をフェッチ（milestonesLoaded で 0 人譜面の再取得も防ぐ）。
+ */
+const handleMilestoneTabClick = () => {
+  modalTab.value = 'milestone';
+  if (!milestonesLoaded.value && !isLoadingMilestones.value) {
+    fetchMilestoneScores();
+  }
+};
+
 /**
  * 【関数の役割】 バックエンドの LocalDateTime 文字列（タイムゾーンなし）を JST 扱いで整形する。
  * 既にタイムゾーンが付いていればそのまま使用、無ければ `+09:00` を付与して Date 化する。
@@ -2285,12 +2466,15 @@ const formatHistoryDate = (dateStr: string) => {
  * 投票データを再取得する。ここで rivalScores / songRanking / history を空にしておくことで、
  * 次回タブクリック時に fetch が再度走るよう仕向ける。
  */
-watch(() => selectedRecord.value?.title, () => {
+watch(() => selectedRecord.value ? `${selectedRecord.value.title}|${selectedRecord.value.difficultyName}` : null, () => {
   targetBeatPtSlider.value = 0;
   rivalScores.value = [];
   songRankingList.value = [];
   songTopRankersList.value = [];
   songHistory.value = [];
+  milestoneScores.value = [];
+  milestonePlayerCount.value = 0;
+  milestonesLoaded.value = false;
   rivalsRenderLimit.value = RIVALS_RENDER_CHUNK;
   // 新しい譜面の投票データを即時取得（タブ切替に依らずメインタブでも表示するため）。
   if (selectedRecord.value) {

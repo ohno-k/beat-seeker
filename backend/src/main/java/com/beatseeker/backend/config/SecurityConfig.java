@@ -121,6 +121,7 @@ public class SecurityConfig {
                                                                 "/api/scores/all-user-scores",
                                                                 "/api/scores/song-arena-averages",
                                                                 "/api/scores/song-avg-score-rates",
+                                                                "/api/scores/song-milestone-scores",
                                                                 "/api/scores/user-tier-totals/**",
                                                                 "/api/friends/test",
                                                                 "/api/test-root")

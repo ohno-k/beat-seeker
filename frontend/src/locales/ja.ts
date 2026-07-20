@@ -313,6 +313,12 @@ export const ja = {
   'table.colSongRank': '単曲ランク',
   'table.songRankDist': '単曲ランク分布',
   'table.songRankDistNote': '{n}人のスコアを集計（非公開ユーザー含む・匿名）',
+  'table.milestone': '大台',
+  'table.milestoneAchievers': '達成人数',
+  'table.milestoneRate': '達成率',
+  'table.milestoneToGo': 'あと{n}点',
+  'table.milestoneNoPlayers': 'まだ集計対象のスコアがありません',
+  'table.milestoneNote': '全ユーザーのベストスコアを集計（非公開ユーザー含む・匿名）',
   
   'beatTierInfo.title': 'Beat-Tier 統計システム',
   'beatTierInfo.subtitle': 'システム解説 と 対象楽曲リスト',

@@ -999,6 +999,47 @@ public class ScoreController {
     }
 
     /**
+     * 【メソッドの役割】 指定譜面の「大台」達成集計用に、全ユーザーのベストスコア一覧（匿名）を返す。
+     *
+     * 処理の流れ:
+     *  1. 譜面の全スコア行（userId / score, score > 0）を取得する。
+     *  2. ユーザー毎に max(score) でデデュープする（arcade / infinitas の 2 行を 1 人に集約）。
+     *  3. 識別情報を落としたスコア配列（降順）と人数だけを返す。
+     *
+     * 個人を特定できる情報は一切含まないため permitAll で公開する
+     * （all-user-scores / song-avg-score-rates の匿名集計と同じ方針）。
+     * 大台ライン（100 点刻み等）ごとの達成人数計算はフロント側に一元化するため、
+     * ここではカウントせず生のスコア配列を返す。
+     *
+     * @param title          曲名
+     * @param difficultyName 難易度名（ANOTHER / LEGGENDARIA）
+     * @return {@code {"playerCount": n, "scores": [3612, 3580, ...]}}（scores は降順）
+     */
+    @GetMapping("/song-milestone-scores")
+    public ResponseEntity<Map<String, Object>> getSongMilestoneScores(
+            @RequestParam String title,
+            @RequestParam String difficultyName) {
+        // 手順1: 譜面の全スコア行を取得（score > 0 はクエリ側で保証済み）。
+        List<Map<String, Object>> rows = scoreRepository.findUserScoresForChart(title, difficultyName);
+
+        // 手順2: ユーザー毎ベストスコアにデデュープ（arcade / infinitas 両方持ちを 1 人に集約）。
+        Map<Long, Integer> bestByUser = new HashMap<>();
+        for (Map<String, Object> row : rows) {
+            long userId = ((Number) row.get("userId")).longValue();
+            int score = ((Number) row.get("score")).intValue();
+            bestByUser.merge(userId, score, Math::max);
+        }
+
+        // 手順3: 匿名のスコア配列（降順）に整形して返す。
+        List<Integer> scores = new java.util.ArrayList<>(bestByUser.values());
+        scores.sort(java.util.Collections.reverseOrder());
+        Map<String, Object> body = new HashMap<>();
+        body.put("playerCount", scores.size());
+        body.put("scores", scores);
+        return ResponseEntity.ok(body);
+    }
+
+    /**
      * 【メソッドの役割】 指定曲 × 難易度の曲別ランキングを「呼び出し元が見える範囲」だけに絞って返す。
      *
      * 処理の流れ:
