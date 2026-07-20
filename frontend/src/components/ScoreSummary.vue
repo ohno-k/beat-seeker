@@ -847,8 +847,39 @@
             <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
           </div>
 
+          <template v-else>
+          <!-- AAA / MAX- 達成者の併記 -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-md border border-slate-200 dark:border-slate-700">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                  <span v-if="milestoneAaaMax.achievedAaa" class="text-emerald-500">✓ </span>AAA
+                </span>
+                <span class="text-[10px] text-slate-400 tabular-nums">88.89%〜</span>
+              </div>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-xl sm:text-2xl font-bold text-amber-700 dark:text-amber-300 tabular-nums">{{ milestoneAaaMax.aaaCount.toLocaleString() }}</span>
+                <span class="text-xs text-slate-400">{{ t('table.milestoneAchievers') }}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 tabular-nums ml-auto">{{ milestoneAaaMax.aaaRate.toFixed(1) }}%</span>
+              </div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-md border border-slate-200 dark:border-slate-700">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                  <span v-if="milestoneAaaMax.achievedMaxMinus" class="text-emerald-500">✓ </span>MAX-
+                </span>
+                <span class="text-[10px] text-slate-400 tabular-nums">94.44%〜</span>
+              </div>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-xl sm:text-2xl font-bold text-amber-700 dark:text-amber-300 tabular-nums">{{ milestoneAaaMax.maxMinusCount.toLocaleString() }}</span>
+                <span class="text-xs text-slate-400">{{ t('table.milestoneAchievers') }}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 tabular-nums ml-auto">{{ milestoneAaaMax.maxMinusRate.toFixed(1) }}%</span>
+              </div>
+            </div>
+          </div>
+
           <!-- 大台ラインテーブル（降順） -->
-          <div v-else class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800">
+          <div class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-3 border-b border-slate-200 dark:border-slate-700">
               <p class="text-xs font-bold text-slate-600 dark:text-slate-400">{{ t('table.milestone') }}</p>
             </div>
@@ -904,6 +935,7 @@
               {{ t('table.milestoneNoPlayers') }}
             </div>
           </div>
+          </template>
 
           <!-- 脚注: 匿名集計の注記 -->
           <p class="text-[10px] text-slate-400 dark:text-slate-500 text-center">{{ t('table.milestoneNote') }}</p>
@@ -2412,6 +2444,32 @@ const milestoneRows = computed(() => {
       toGo: line - own,
     };
   });
+});
+
+/**
+ * 大台タブに併記する AAA / MAX- 達成者の集計。
+ * 閾値は IIDX の定義（AAA = スコアレート 8/9 ≈ 88.89%、MAX- = 17/18 ≈ 94.44%）に従い、
+ * 整数比較でバックエンドの findSongAaaCounts / findSongMaxMinusCounts と一致させる。
+ *  - AAA:  score × 9  >= maxScore × 8   （notes × 16 と等価。maxScore = notes × 2）
+ *  - MAX-: score × 18 >= maxScore × 17  （notes × 17 と等価。分数回避のため両辺 2 倍）
+ */
+const milestoneAaaMax = computed(() => {
+  const rec = selectedRecord.value;
+  const empty = { aaaCount: 0, aaaRate: 0, maxMinusCount: 0, maxMinusRate: 0, achievedAaa: false, achievedMaxMinus: false };
+  if (!rec || rec.maxScore <= 0) return empty;
+  const max = rec.maxScore;
+  const total = milestonePlayerCount.value;
+  const own = rec.score;
+  const aaaCount = milestoneScores.value.filter(s => s * 9 >= max * 8).length;
+  const maxMinusCount = milestoneScores.value.filter(s => s * 18 >= max * 17).length;
+  return {
+    aaaCount,
+    aaaRate: total > 0 ? (aaaCount / total) * 100 : 0,
+    maxMinusCount,
+    maxMinusRate: total > 0 ? (maxMinusCount / total) * 100 : 0,
+    achievedAaa: own > 0 && own * 9 >= max * 8,
+    achievedMaxMinus: own > 0 && own * 18 >= max * 17,
+  };
 });
 
 /**
