@@ -6,8 +6,6 @@ Allow: /privacy-policy
 Allow: /contact
 Allow: /ranking
 Allow: /difficulty-table
-Allow: /guide
-Allow: /guide/
 
 # ログイン必須・個人データを含むページはクロール不要 (薄いコンテンツ扱いを避けるため)
 Disallow: /dashboard

@@ -973,18 +973,6 @@ export const ja = {
   'landing.feat5Desc': 'フレンド申請を承認すれば、お互いのスコアと地力を並べて比較できます。',
   'landing.feat6Title': 'PWA / ダークモード',
   'landing.feat6Desc': 'スマホのホームに追加してオフライン対応、画面はライト・ダーク両対応。',
-  'landing.guideTitle': '攻略ガイド',
-  'landing.guideDesc': 'beat-seeker の使い方に加えて、IIDX の上達に役立つ攻略記事を公開しています。地力上げや AAA 取り、CSV 取得方法などを丁寧に解説します。',
-  'landing.guide1Title': 'CSV ダウンロード手順',
-  'landing.guide1Desc': '公式サイトから CSV を入手して beat-seeker に取り込む流れ',
-  'landing.guide2Title': 'スクラッチ譜面攻略の基礎',
-  'landing.guide2Desc': '皿絡みパターンを安定して捌くための運指・脱力・練習法',
-  'landing.guide3Title': 'AAA を狙う練習法',
-  'landing.guide3Desc': 'クリア後の次の壁、スコア出しの考え方とコツ',
-  'landing.guide4Title': '☆12 地力上げ譜面 30 選',
-  'landing.guide4Desc': '段位別に踏むべき譜面と AAA・HARD の目安',
-  'landing.guide5Title': 'クリアタイプ完全解説',
-  'landing.guide5Desc': 'NORMAL / HARD / EX HARD / FULL COMBO の判定とゲージ',
   'landing.aboutTitle': 'beat-seeker について',
   'landing.aboutP1': 'beat-seeker は IIDX プレイヤー個人によって運営されている、ファンメイドの非公式スコア管理ツールです。営利目的ではなく、KONAMI とは一切関係ありません。',
   'landing.aboutP2': 'スコアデータはユーザー自身が公式 CSV からアップロードしたものに限定し、個人を特定しない範囲で集計・分析を行います。データの取り扱いについてはプライバシーポリシーをご確認ください。',
@@ -1014,14 +1002,6 @@ export const ja = {
   'contactPage.operatorSince': 'サービス開始日: 2026年3月5日',
   'contactPage.operatorPurpose': '運営目的: beatmania IIDX プレイヤーが自分のスコアデータをより便利に分析・共有できる無料ツールを提供すること',
   'contactPage.copyrightDisclaimer': 'beatmania IIDX は株式会社コナミアミューズメントの登録商標です。本サービスは KONAMI 公式とは一切関係のない非公式のファンメイドツールです。',
-
-  // Guide
-  'guide.indexTitle': '攻略ガイド一覧',
-  'guide.indexDesc': 'beatmania IIDX 上達のためのコツと、beat-seeker の使い方を解説する記事を公開しています。',
-  'guide.publishedAt': '公開日: {date}',
-  'guide.backToList': '← ガイド一覧へ戻る',
-  'guide.breadcrumbHome': 'ホーム',
-  'guide.breadcrumbList': '攻略ガイド',
 
   // Changelog
   'changelog.title': '更新履歴 (Changelog)',
@@ -1142,7 +1122,6 @@ export const ja = {
   'empty.title': 'まずはスコアを取り込んでみましょう',
   'empty.desc': 'CSV または公式サイトのページから、過去のプレイ履歴を取り込めます。\n取り込むと、ダッシュボードや BEAT-TIER などすべての機能が使えます。',
   'empty.uploadCta': 'スコアを取り込む',
-  'empty.guideLink': '取り込み方法を見る',
 
   // Accessibility (aria-label / sr-only)
   'a11y.nav.main': 'メインナビゲーション',

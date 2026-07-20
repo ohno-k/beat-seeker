@@ -1066,7 +1066,6 @@ export const ko = {
   'empty.title': '먼저 스코어를 가져와 보세요',
   'empty.desc': 'CSV 또는 공식 사이트 페이지에서 과거 플레이 기록을 가져올 수 있습니다.\n가져오면 대시보드, BEAT-TIER 등 모든 기능을 사용할 수 있습니다.',
   'empty.uploadCta': '스코어 가져오기',
-  'empty.guideLink': '가져오는 방법 보기',
 
   // Accessibility (aria-label / sr-only)
   'a11y.nav.main': '메인 내비게이션',

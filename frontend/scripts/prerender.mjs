@@ -9,8 +9,6 @@
  *  - /privacy-policy
  *  - /contact
  *  - /difficulty-table
- *  - /guide (ガイド一覧)
- *  - /guide/:slug (各ガイド記事)
  *
  * クローラー (Googlebot / AdSense Bot / SNS の OGP プレビュー) が JavaScript を
  * 実行しなくても、ページの本文・タイトル・説明文・正規 URL を読み取れるようにする。
@@ -27,12 +25,9 @@ const indexHtml = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
 const SITE_URL = 'https://beat-seeker.com';
 const SITE_NAME = 'beat-seeker';
 
-// 難易度表とガイド記事のデータをビルド時に読み込む
+// 難易度表のデータをビルド時に読み込む
 const diffTableJson = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../src/data/difficulty_table.json'), 'utf-8')
-);
-const guidesJson = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, '../src/data/guides.json'), 'utf-8')
 );
 
 const articleStyle = 'max-width:900px;margin:0 auto;padding:24px 16px;font-family:sans-serif;color:#1e293b;line-height:1.85;';
@@ -94,43 +89,6 @@ function buildDiffTableHtml(ranks) {
 }
 
 // ============================================================
-// ガイド記事 HTML
-// ============================================================
-function buildGuideArticleHtml(guide) {
-  return `
-<article style="${articleStyle}">
-  <nav style="font-size:0.85rem;color:#64748b;margin-bottom:12px;">
-    <a href="/" style="${linkStyle}">ホーム</a> ›
-    <a href="/guide" style="${linkStyle}">攻略ガイド</a> ›
-    <span>${guide.title}</span>
-  </nav>
-  <h1 style="font-size:1.8rem;font-weight:900;margin-bottom:8px;">${guide.title}</h1>
-  <p style="font-size:0.85rem;color:#64748b;margin-bottom:24px;">公開日: ${guide.publishedAt}</p>
-  <div style="font-size:1rem;color:#1e293b;">${guide.html}</div>
-  <p style="margin-top:32px;"><a href="/guide" style="${linkStyle}">← ガイド一覧へ戻る</a></p>
-</article>`;
-}
-
-function buildGuideIndexHtml(guides) {
-  const items = guides.map(g => `
-<li style="margin-bottom:16px;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
-  <a href="/guide/${g.slug}" style="${linkStyle}text-decoration:none;">
-    <h2 style="font-size:1.15rem;font-weight:bold;margin-bottom:6px;color:#1e293b;">${g.title}</h2>
-  </a>
-  <p style="font-size:0.9rem;color:#475569;margin-bottom:6px;">${g.summary}</p>
-  <p style="font-size:0.8rem;color:#94a3b8;">公開日: ${g.publishedAt}</p>
-</li>`).join('');
-
-  return `
-<article style="${articleStyle}">
-  <h1 style="font-size:1.8rem;font-weight:900;margin-bottom:12px;">攻略ガイド一覧</h1>
-  <p style="color:#475569;margin-bottom:24px;">beat-seeker の使い方と、beatmania IIDX 上達のコツをまとめた解説記事です。スコア管理だけでなく、地力上げ・AAA 取り・スクラッチ譜面攻略といった実戦的なノウハウも掲載しています。</p>
-  <ul style="list-style:none;padding:0;">${items}</ul>
-  <p style="margin-top:32px;"><a href="/" style="${linkStyle}">← トップへ戻る</a></p>
-</article>`;
-}
-
-// ============================================================
 // ランディング (/) HTML
 // ============================================================
 function buildLandingHtml() {
@@ -178,14 +136,6 @@ function buildLandingHtml() {
     </div>
   </section>
 
-  <section style="margin-bottom:40px;">
-    <h2 style="${h2Style}">攻略ガイド</h2>
-    <p style="color:#475569;margin-bottom:16px;">beat-seeker の使い方に加えて、IIDX の上達に役立つ攻略記事を公開しています。地力上げや AAA 取り、CSV 取得方法などを丁寧に解説します。</p>
-    <ul style="list-style:none;padding:0;">
-${guidesJson.guides.map(g => `      <li style="margin-bottom:8px;"><a href="/guide/${g.slug}" style="${linkStyle}">${g.title}</a> — <span style="color:#64748b;font-size:0.9rem;">${g.summary}</span></li>`).join('\n')}
-    </ul>
-  </section>
-
   <section style="margin-bottom:40px;background:#f8fafc;padding:24px;border-radius:16px;border:1px solid #e2e8f0;">
     <h2 style="${h2Style}">beat-seeker について</h2>
     <p style="color:#475569;margin-bottom:8px;">beat-seeker は IIDX プレイヤー個人によって運営されている、ファンメイドの非公式スコア管理ツールです。営利目的ではなく、KONAMI とは一切関係ありません。</p>
@@ -195,7 +145,6 @@ ${guidesJson.guides.map(g => `      <li style="margin-bottom:8px;"><a href="/gui
 
   <nav style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;padding-top:24px;border-top:1px solid #e2e8f0;color:#64748b;font-size:0.9rem;">
     <a href="/about" style="${linkStyle}">アプリについて</a>
-    <a href="/guide" style="${linkStyle}">攻略ガイド</a>
     <a href="/difficulty-table" style="${linkStyle}">非公式難易度表</a>
     <a href="/ranking" style="${linkStyle}">ランキング</a>
     <a href="/terms" style="${linkStyle}">利用規約</a>
@@ -313,7 +262,7 @@ const aboutBody = `
   <h2 style="font-size:1.4rem;font-weight:900;margin-top:32px;margin-bottom:16px;">よくある質問</h2>
   <dl style="line-height:1.8;">
     <dt style="font-weight:bold;margin-top:16px;">Q. CSVファイルはどこで入手できますか？</dt>
-    <dd style="margin-left:16px;color:#475569;">IIDX公式サイトのプレーデータ画面からCSVをダウンロードできます。詳しい手順は<a href="/guide/csv-import" style="${linkStyle}">CSV ダウンロードガイド</a>をご覧ください。</dd>
+    <dd style="margin-left:16px;color:#475569;">IIDX公式サイトのプレーデータ画面からCSVをダウンロードできます。</dd>
 
     <dt style="font-weight:bold;margin-top:16px;">Q. ログインしないと使えませんか？</dt>
     <dd style="margin-left:16px;color:#475569;">いいえ、ログインなしでもCSVの読み込みとダッシュボード・スコア一覧の表示は可能です。データのクラウド保存やアップロード履歴の確認にはアカウント登録後のログインが必要です。</dd>
@@ -393,7 +342,7 @@ function buildJsonLd(pageType, title, description, url) {
 const pages = {
   '': {
     title: 'beat-seeker | beatmania IIDX スコア管理・分析ツール',
-    description: 'beat-seekerは、beatmania IIDXのスコアを可視化・分析する無料 Web アプリです。公式 CSV をアップロードするだけでクリア率・AAA 率・Beat-Tier ランクを自動計算。攻略ガイドや非公式難易度表も公開しています。',
+    description: 'beat-seekerは、beatmania IIDXのスコアを可視化・分析する無料 Web アプリです。公式 CSV をアップロードするだけでクリア率・AAA 率・Beat-Tier ランクを自動計算。非公式難易度表も公開しています。',
     bodyHtml: buildLandingHtml(),
     canonical: `${SITE_URL}/`,
     jsonLd: buildJsonLd('website', 'beat-seeker', 'beatmania IIDX スコア管理・分析ツール', `${SITE_URL}/`),
@@ -426,13 +375,6 @@ const pages = {
     canonical: `${SITE_URL}/contact`,
     jsonLd: buildJsonLd('article', 'お問い合わせ', 'beat-seeker への問い合わせ手段と運営者情報', `${SITE_URL}/contact`),
   },
-  guide: {
-    title: '攻略ガイド一覧 | beat-seeker',
-    description: 'beatmania IIDX の上達に役立つ攻略ガイド一覧。CSV ダウンロード手順、スクラッチ攻略、AAA を狙う練習法、☆12 地力上げ譜面、クリアタイプ解説など。',
-    bodyHtml: buildGuideIndexHtml(guidesJson.guides),
-    canonical: `${SITE_URL}/guide`,
-    jsonLd: buildJsonLd('website', '攻略ガイド一覧', 'beatmania IIDX 上達のための攻略ガイド', `${SITE_URL}/guide`),
-  },
   'difficulty-table': {
     title: 'beatmania IIDX 非公式難易度表 | beat-seeker',
     description: `beatmania IIDXの高難度譜面（☆11〜☆13）を独自評価で細分した非公式難易度表。全${diffTableJson.ranks.reduce((a, r) => a + r.songs.length, 0)}曲を${diffTableJson.ranks.filter(r => !isNaN(parseFloat(r.rank))).length}段階に分類。スコアと組み合わせてBEAT-PTを計算できます。`,
@@ -441,17 +383,6 @@ const pages = {
     jsonLd: buildJsonLd('article', 'beatmania IIDX 非公式難易度表', '☆11〜☆13 を独自評価で細分した非公式難易度表', `${SITE_URL}/difficulty-table`),
   },
 };
-
-// ガイド記事ごとのページを追加
-guidesJson.guides.forEach((guide) => {
-  pages[`guide/${guide.slug}`] = {
-    title: `${guide.title} | beat-seeker`,
-    description: guide.description,
-    bodyHtml: buildGuideArticleHtml(guide),
-    canonical: `${SITE_URL}/guide/${guide.slug}`,
-    jsonLd: buildJsonLd('article', guide.title, guide.description, `${SITE_URL}/guide/${guide.slug}`),
-  };
-});
 
 // ============================================================
 // 各ページの HTML を生成して dist/<page>/index.html に書き出す

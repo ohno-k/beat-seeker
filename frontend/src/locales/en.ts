@@ -1065,7 +1065,6 @@ export const en = {
   'empty.title': "Let's import your first scores",
   'empty.desc': 'Import your play history from a CSV or the official site.\nOnce imported, you can use the dashboard, BEAT-TIER, and every other feature.',
   'empty.uploadCta': 'Import scores',
-  'empty.guideLink': 'See how to import',
 
   // Accessibility (aria-label / sr-only)
   'a11y.nav.main': 'Main navigation',

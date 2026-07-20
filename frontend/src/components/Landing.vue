@@ -76,37 +76,6 @@ defineEmits<{
       </div>
     </section>
 
-    <section>
-      <h2 class="text-xl md:text-2xl font-bold mb-8 pb-3 border-b border-slate-200 dark:border-slate-700">
-        {{ t('landing.guideTitle') }}
-      </h2>
-      <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-        {{ t('landing.guideDesc') }}
-      </p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a href="/guide/csv-import" class="block bg-white dark:bg-slate-800 p-5 rounded-md border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
-          <h3 class="font-bold mb-1">{{ t('landing.guide1Title') }}</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('landing.guide1Desc') }}</p>
-        </a>
-        <a href="/guide/scratch" class="block bg-white dark:bg-slate-800 p-5 rounded-md border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
-          <h3 class="font-bold mb-1">{{ t('landing.guide2Title') }}</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('landing.guide2Desc') }}</p>
-        </a>
-        <a href="/guide/aaa" class="block bg-white dark:bg-slate-800 p-5 rounded-md border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
-          <h3 class="font-bold mb-1">{{ t('landing.guide3Title') }}</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('landing.guide3Desc') }}</p>
-        </a>
-        <a href="/guide/level-up" class="block bg-white dark:bg-slate-800 p-5 rounded-md border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
-          <h3 class="font-bold mb-1">{{ t('landing.guide4Title') }}</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('landing.guide4Desc') }}</p>
-        </a>
-        <a href="/guide/clear-types" class="block bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 transition-colors md:col-span-2">
-          <h3 class="font-bold mb-1">{{ t('landing.guide5Title') }}</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('landing.guide5Desc') }}</p>
-        </a>
-      </div>
-    </section>
-
     <section class="bg-slate-50 dark:bg-slate-800/50 rounded-md p-8 border border-slate-200 dark:border-slate-700">
       <h2 class="text-lg md:text-xl font-bold mb-4">{{ t('landing.aboutTitle') }}</h2>
       <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">

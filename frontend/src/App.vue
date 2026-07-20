@@ -47,7 +47,6 @@ import Manual from './components/Manual.vue';
 import Landing from './components/Landing.vue';
 import PrivacyPolicy from './components/PrivacyPolicy.vue';
 import Contact from './components/Contact.vue';
-import Guide from './components/Guide.vue';
 import Friends from './components/Friends.vue';
 import FriendTimeline from './components/FriendTimeline.vue';
 import NotificationBox from './components/NotificationBox.vue';
@@ -315,7 +314,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'guide' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-scatter' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
 
 /**
  * 現在のタブ ID から表示用ラベル（ヘッダーのパンくず・タイトルで使う）への解決を行う computed。
@@ -350,8 +349,6 @@ const activeTabLabel = computed<string>(() => {
   };
   return labels[activeTab.value] ?? '';
 });
-/** /guide/:slug アクセス時のスラッグ。Guide コンポーネントが記事を絞り込む。 */
-const currentGuideSlug = ref<string | null>(null);
 /**
  * 閲覧モード。自分のデータを見る場合は null。
  *  - 'admin': 管理者が他ユーザーのデータを閲覧中
@@ -706,20 +703,12 @@ onMounted(() => {
     '/ranking': 'ranking',
     '/changelog': 'changelog',
     '/difficulty-table': 'diff-table',
-    '/guide': 'guide',
     '/competition-admin': 'competition-admin',
     '/admin/user-comparison': 'admin-user-comparison',
   };
   const currentPath = window.location.pathname;
   if (pathToTab[currentPath]) {
     activeTab.value = pathToTab[currentPath];
-  } else if (currentPath.startsWith('/guide/')) {
-    // /guide/:slug 形式のパスを Guide ビューに振り分け、スラッグを保持する。
-    const slug = currentPath.slice('/guide/'.length).replace(/\/$/, '');
-    if (slug) {
-      activeTab.value = 'guide';
-      currentGuideSlug.value = slug;
-    }
   } else if (currentPath.startsWith('/chart/')) {
     // /chart/:version/:slug/:diff 形式の譜面分析ディープリンク。
     // ScorePredictionView 自身が useRoute() でパラメータを読み取り曲を自動選択する。
@@ -2006,18 +1995,6 @@ const handleUnifiedClose = async () => {
           <Contact class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
-        <!-- 攻略ガイド -->
-        <template v-else-if="activeTab === 'guide'">
-          <Guide
-            class="w-full max-w-4xl mx-auto animate-fade-in"
-            :slug="currentGuideSlug"
-            @navigate-guide="(slug) => {
-              currentGuideSlug = slug;
-              window.history.pushState({}, '', `/guide/${slug}`);
-            }"
-          />
-        </template>
-
         <!-- 公開ランディング (未ログイン /) -->
         <template v-else-if="activeTab === 'landing'">
           <Landing
@@ -2218,13 +2195,6 @@ const handleUnifiedClose = async () => {
                   </svg>
                   {{ t('empty.uploadCta') }}
                 </button>
-                <button
-                  type="button"
-                  @click="activeTab = 'guide'"
-                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-md hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                >
-                  {{ t('empty.guideLink') }}
-                </button>
               </div>
             </div>
           </div>
@@ -2275,7 +2245,6 @@ const handleUnifiedClose = async () => {
             <button @click="activeTab = 'terms'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.terms') }}</button>
             <button @click="activeTab = 'privacy-policy'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('privacyPolicy.title') }}</button>
             <button @click="activeTab = 'contact'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('contactPage.title') }}</button>
-            <button @click="() => { activeTab = 'guide'; currentGuideSlug = null; }" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('guide.indexTitle') }}</button>
             <button v-if="!viewingUserId" @click="activeTab = 'ranking'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.ranking') }}</button>
           </div>
         </div>

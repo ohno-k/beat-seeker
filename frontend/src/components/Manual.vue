@@ -47,7 +47,6 @@ const sections = [
   { id: 'score-scatter', title: 'スコアペア散布図 (サポーター限定)', desc: '2 譜面間の相関を散布図で分析' },
   { id: 'chart-list', title: '譜面一覧', desc: '全譜面を検索 / ソート / textage プレビュー' },
   { id: 'share', title: '公開共有リンク', desc: '未ログインでも見られるトークン URL でスコアを共有' },
-  { id: 'guide', title: '攻略ガイド', desc: '皿対策 / AAA 狙い / 地力上げなど実戦的なコラム' },
   { id: 'changelog', title: '更新履歴', desc: 'アプリ更新と難易度表改訂の履歴' },
   { id: 'misc', title: 'その他の便利機能', desc: 'ダークモード / 言語切替 / PWA / プッシュ通知' },
 ];
@@ -107,7 +106,7 @@ onMounted(() => {
 
       <h3 class="text-lg font-bold pt-2">方法 A: 公式 CSV をアップロード</h3>
       <ol class="list-decimal pl-6 space-y-1 text-slate-700 dark:text-slate-300 leading-relaxed">
-        <li>e-amusement GATE にログインして、IIDX の「スコアダウンロード」から CSV を取得します (詳しい手順は <a href="/guide/csv-import" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">攻略ガイド「CSV ダウンロード手順」</a> を参照)。</li>
+        <li>e-amusement GATE にログインして、IIDX の「スコアダウンロード」から CSV を取得します。</li>
         <li>ダッシュボードの中央にあるドロップエリアに CSV ファイルをドラッグ＆ドロップするか、エリアをクリックしてファイルを選択します。</li>
         <li>取り込みに成功すると、アップロード結果モーダルで「新規追加 / 更新された曲」が一覧表示されます。</li>
       </ol>
@@ -390,25 +389,10 @@ onMounted(() => {
       </ul>
     </section>
 
-    <!-- 17. 攻略ガイド -->
-    <section id="guide" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">17</span>
-        攻略ガイド
-      </h2>
-      <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
-        IIDX の上達に役立つ実戦的なコラム集です。CSV の取り込み手順から、皿対策、AAA 狙い、地力上げのロードマップなどを記事単位で掲載しています。
-      </p>
-      <ul class="list-disc pl-6 space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed">
-        <li><strong>一覧:</strong> <a href="/guide" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">/guide</a> から全記事の一覧にアクセスできます。</li>
-        <li><strong>個別記事:</strong> 各記事は <code>/guide/&lt;slug&gt;</code> の安定した URL を持ち、SNS で共有できます。</li>
-      </ul>
-    </section>
-
-    <!-- 18. 更新履歴 -->
+    <!-- 17. 更新履歴 -->
     <section id="changelog" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">18</span>
+        <span class="text-blue-500 font-mono text-base">17</span>
         更新履歴
       </h2>
       <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -420,10 +404,10 @@ onMounted(() => {
       </ul>
     </section>
 
-    <!-- 19. その他 -->
+    <!-- 18. その他 -->
     <section id="misc" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">19</span>
+        <span class="text-blue-500 font-mono text-base">18</span>
         その他の便利機能
       </h2>
       <ul class="list-disc pl-6 space-y-2 text-slate-700 dark:text-slate-300 leading-relaxed">
