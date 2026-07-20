@@ -314,6 +314,7 @@ export const ja = {
   'table.songRankDist': '単曲ランク分布',
   'table.songRankDistNote': '{n}人のスコアを集計（非公開ユーザー含む・匿名）',
   'table.milestone': '大台',
+  'table.milestonePlayers': '集計人数',
   'table.milestoneAchievers': '達成人数',
   'table.milestoneRate': '達成率',
   'table.milestoneToGo': 'あと{n}点',

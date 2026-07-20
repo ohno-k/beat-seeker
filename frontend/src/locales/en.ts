@@ -404,6 +404,7 @@ export const en = {
   'table.colDate': 'Updated',
   'table.noHistoryData': 'No update history found',
   'table.milestone': 'Milestone',
+  'table.milestonePlayers': 'Players',
   'table.milestoneAchievers': 'Achievers',
   'table.milestoneRate': 'Achieve Rate',
   'table.milestoneToGo': '{n} to go',

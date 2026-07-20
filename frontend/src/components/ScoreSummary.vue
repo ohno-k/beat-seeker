@@ -825,7 +825,7 @@
           <!-- サマリー: 集計人数 / 自分のスコア / MAX理論値 -->
           <div class="grid grid-cols-3 gap-3">
             <div class="bg-amber-900/10 dark:bg-amber-900/20 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-amber-100 dark:border-amber-800/50">
-              <p class="text-[10px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">{{ t('table.milestoneAchievers') }}</p>
+              <p class="text-[10px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">{{ t('table.milestonePlayers') }}</p>
               <p class="text-2xl sm:text-4xl font-bold text-amber-700 dark:text-amber-300 tabular-nums">{{ milestonePlayerCount }}</p>
             </div>
             <div class="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-slate-200 dark:border-slate-700">

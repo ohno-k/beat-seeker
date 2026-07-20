@@ -404,6 +404,7 @@ export const ko = {
   'table.colDate': '업데이트 일시',
   'table.noHistoryData': '업데이트 기록이 없습니다',
   'table.milestone': '마일스톤',
+  'table.milestonePlayers': '집계 인원',
   'table.milestoneAchievers': '달성 인원',
   'table.milestoneRate': '달성률',
   'table.milestoneToGo': '{n}점 남음',
