@@ -29,7 +29,7 @@ public class DifficultyRank {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** ランク表記（例: "12.5"、"Uncategorized(IIDX 32)"）。 */
+    /** ランク表記（例: "12.5"、"Uncategorized"）。 */
     @Column(nullable = false)
     private String rankValue;
 

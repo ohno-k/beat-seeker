@@ -33,6 +33,7 @@
 | [slide-draft-to-active-counts.js](scripts/slide-draft-to-active-counts.js) | draft の序列を維持したまま各帯の曲数を active の定員に詰め直す（定員はスクリプト内 `CAPACITY_OVERRIDES` で上書き可）。デフォルト dry-run、`--apply` でバックアップ profile 作成後に draft を書き換え。 | 出力: `data/slide_changes.json`, `data/slide_report.md` |
 | [nudge-range-up.js](scripts/nudge-range-up.js) | draft の指定帯範囲（`--from`〜`--to`）の各帯先頭 `--n` 曲をひとつ上の帯へ繰り上げ（序列不変の境界微調整）。デフォルト dry-run、`--apply` でバックアップ profile 作成後に draft を書き換え。 | 出力: `data/nudge_changes.json`, `data/nudge_report.md` |
 | [optimize-band-sizes.js](scripts/optimize-band-sizes.js) | draft の序列固定のまま帯境界を座標降下法で最適化し、全ユーザーの BEAT-PT 変化（active→draft）のランキング加重 RMS を最小化（重み=順位^−`--rankpower`、デフォルト0.5）。BEAT-PT はシミュレーション SQL と同一ロジックをローカル再現。デフォルト dry-run、`--apply` でバックアップ profile 作成後に draft を書き換え。 | 出力: `data/optimize_band_sizes.json`, `data/optimize_band_sizes_report.md` |
+| [merge-uncategorized.js](scripts/merge-uncategorized.js) | Uncategorized 帯の1本化（2026-07-24 実施済み）。active/draft の `Uncategorized(IIDX 32)`/`(IIDX 33)` を削除（曲があれば移動してから）し、`Uncategorized(other)` を `Uncategorized` にリネーム。デフォルト dry-run、`--apply` で本適用。 | 出力: コンソールのみ |
 
 **前提**: `psycopg2` が必要、PostgreSQL 接続情報がハードコードされている（`tools/apply_votes_draft.py:14`, `tools/fetch_votes.py:4`）。`apply-notes-bonus-draft.js` は Node + `pg`（接続情報ハードコード、本番 DB 直接更新）。
 

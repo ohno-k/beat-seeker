@@ -997,7 +997,7 @@ watch(() => props.isOpen, (val) => {
 // ── 楽曲追加 ────────────────────────────────────────
 /**
  * 【関数の役割】 フォームの内容をドラフト楽曲として POST し、追加後に
- * ANOTHER / LEGGENDARIA が Lv11 or Lv12 であれば Uncategorized(other) に自動配置する。
+ * ANOTHER / LEGGENDARIA が Lv11 or Lv12 であれば Uncategorized に自動配置する。
  */
 const handleAddSong = async () => {
   if (!form.value.title) return;
@@ -1014,7 +1014,7 @@ const handleAddSong = async () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Error');
     
-    // Lv11/12 の ANOTHER/LEGGENDARIA は Uncategorized(other) に自動配置（忘れ防止）。
+    // Lv11/12 の ANOTHER/LEGGENDARIA は Uncategorized に自動配置（忘れ防止）。
     const addedSongsToDiff: string[] = [];
     if (form.value.anotherLevel === 11 || form.value.anotherLevel === 12) {
         addedSongsToDiff.push(form.value.title);
@@ -1025,7 +1025,9 @@ const handleAddSong = async () => {
     
     if (addedSongsToDiff.length > 0 && originalDiffTable.value.ranks) {
         const newTable = JSON.parse(JSON.stringify(originalDiffTable.value));
-        const uncatOther = newTable.ranks.find((r: any) => r.rank === 'Uncategorized(other)');
+        // 旧名 'Uncategorized(other)' はリネーム前の profile 復元時のフォールバック。
+        const uncatOther = newTable.ranks.find((r: any) => r.rank === 'Uncategorized')
+            || newTable.ranks.find((r: any) => r.rank === 'Uncategorized(other)');
         if (uncatOther) {
             let changed = false;
             for (const s of addedSongsToDiff) {

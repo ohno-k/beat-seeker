@@ -472,7 +472,7 @@ public class GameDataService {
      *  - 同じ (title, difficulty) の active レコードが存在すれば先に削除する
      *    （= 既存曲の編集が draft に反映されると、それが新しい active になる）
      *  - ANOTHER(4) / LEGGENDARIA(10) のうちレベル 11 / 12 の譜面は active 難易度表の
-     *    "Uncategorized(other)" にも自動追加する（管理画面で個別配置する手間を省くため）
+     *    "Uncategorized" にも自動追加する（管理画面で個別配置する手間を省くため）
      *  - 配置先は Uncategorized のみ、かつ BEAT-PT 算出ロジックは譜面メタの表面的変更で
      *    結果が大きくは変わらないため、重い再計算はスキップする（再計算は難易度表適用側に集約）
      *  - 難易度表の draft には触れない
@@ -545,8 +545,9 @@ public class GameDataService {
     }
 
     /**
-     * 【メソッドの役割】 active 難易度表の "Uncategorized(other)" ランクに楽曲を追加する。
+     * 【メソッドの役割】 active 難易度表の "Uncategorized" ランクに楽曲を追加する。
      * 既に同名エントリがある場合はスキップする。該当ランクが存在しない場合は何もしない。
+     * 旧名 "Uncategorized(other)"（リネーム前の profile 復元等で現れうる）にもフォールバックする。
      */
     private void addToActiveUncategorized(Set<String> songTitles) {
         List<DifficultyRank> activeRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("active");
@@ -556,7 +557,8 @@ public class GameDataService {
         // 再追加すると、同一タイトルが複数ランクに重複して UI 上「元の位置から消えた」ように見える)。
         Set<String> placedInAnyRank = new HashSet<>();
         for (DifficultyRank r : activeRanks) {
-            if ("Uncategorized(other)".equals(r.getRankValue())) {
+            if ("Uncategorized".equals(r.getRankValue())
+                    || (uncat == null && "Uncategorized(other)".equals(r.getRankValue()))) {
                 uncat = r;
             }
             for (DifficultyRankSong s : r.getSongs()) {

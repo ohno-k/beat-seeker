@@ -728,7 +728,7 @@ const shareOnX = async () => {
 
 /**
  * 【関数の役割】 informalRank 文字列から数値部分（例: "12.0"）だけを抽出。
- * "Uncategorized(other)" 等の非数値ランクは null を返す（バッジ表示の判定に使う）。
+ * "Uncategorized" 等の非数値ランクは null を返す（バッジ表示の判定に使う）。
  */
 const getNumericRank = (informalRank: string | undefined): string | null => {
   if (!informalRank) return null;
