@@ -1,0 +1,2584 @@
+{
+  "rule": "notes >= 1800 で+0.1、以降200ごとに+0.1、上限13.1",
+  "applied": true,
+  "backupProfile": "profile:pre-notes-bonus-20260721",
+  "total": 286,
+  "moved": 284,
+  "changes": [
+    {
+      "title": "SμG@R RU$#",
+      "notes": 2037,
+      "bonus": 0.2,
+      "old_rank": "13.1",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.3",
+      "clamped": true
+    },
+    {
+      "title": "Mare Nectaris",
+      "notes": 2094,
+      "bonus": 0.2,
+      "old_rank": "13.1",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.3",
+      "clamped": true
+    },
+    {
+      "title": "RAGE feat.H14 of LEONAIR",
+      "notes": 1886,
+      "bonus": 0.1,
+      "old_rank": "13.0",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.1",
+      "clamped": false
+    },
+    {
+      "title": "Beyond Evolution",
+      "notes": 2216,
+      "bonus": 0.3,
+      "old_rank": "13.0",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.3",
+      "clamped": true
+    },
+    {
+      "title": "Illegal Function Call[L]",
+      "notes": 2023,
+      "bonus": 0.2,
+      "old_rank": "13.0",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.2",
+      "clamped": true
+    },
+    {
+      "title": "Sinus Iridum",
+      "notes": 1803,
+      "bonus": 0.1,
+      "old_rank": "13.0",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.1",
+      "clamped": false
+    },
+    {
+      "title": "ICARUS[L]",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.9",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.1",
+      "clamped": false
+    },
+    {
+      "title": "HEROES",
+      "notes": 1831,
+      "bonus": 0.1,
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "XHRONOXAPSULΞ",
+      "notes": 2077,
+      "bonus": 0.2,
+      "old_rank": "12.9",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.1",
+      "clamped": false
+    },
+    {
+      "title": "X-DEN",
+      "notes": 2220,
+      "bonus": 0.3,
+      "old_rank": "12.9",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.2",
+      "clamped": true
+    },
+    {
+      "title": "灼熱 Pt.2 Long Train Running",
+      "notes": 1804,
+      "bonus": 0.1,
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Level 5",
+      "notes": 1937,
+      "bonus": 0.1,
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "紫陽花 -AZISAI-[L]",
+      "notes": 1815,
+      "bonus": 0.1,
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "WHA",
+      "notes": 1946,
+      "bonus": 0.1,
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "n/a",
+      "notes": 1867,
+      "bonus": 0.1,
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "THE PEERLESS UNDER HEAVEN",
+      "notes": 1818,
+      "bonus": 0.1,
+      "old_rank": "12.9",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Dans la nuit de l'eternite",
+      "notes": 1830,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "GuNGNiR[L]",
+      "notes": 2443,
+      "bonus": 0.4,
+      "old_rank": "12.8",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.2",
+      "clamped": true
+    },
+    {
+      "title": "二人ノ廃城幽踊宴",
+      "notes": 1927,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "Amor∞Fati",
+      "notes": 2171,
+      "bonus": 0.2,
+      "old_rank": "12.8",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "ディスコルディア",
+      "notes": 2073,
+      "bonus": 0.2,
+      "old_rank": "12.8",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Level 4",
+      "notes": 1883,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "冥",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.8",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Sigmund[L]",
+      "notes": 2267,
+      "bonus": 0.3,
+      "old_rank": "12.8",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.1",
+      "clamped": false
+    },
+    {
+      "title": "fixer",
+      "notes": 1861,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "CODE:0[L]",
+      "notes": 1829,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "BitRacer",
+      "notes": 1878,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "ピアノ独奏無言歌 \"灰燼\"",
+      "notes": 1977,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "天使のカンタータ -Cantata of Angels-",
+      "notes": 2205,
+      "bonus": 0.3,
+      "old_rank": "12.8",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.1",
+      "clamped": false
+    },
+    {
+      "title": "色を喪った街",
+      "notes": 2026,
+      "bonus": 0.2,
+      "old_rank": "12.8",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Smintheus",
+      "notes": 1897,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "聖人の塔[L]",
+      "notes": 2290,
+      "bonus": 0.3,
+      "old_rank": "12.8",
+      "new_rank": "13.1",
+      "unclamped_rank": "13.1",
+      "clamped": false
+    },
+    {
+      "title": "perditus†paradisus",
+      "notes": 2065,
+      "bonus": 0.2,
+      "old_rank": "12.8",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Ignis†Irae",
+      "notes": 1970,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "hard-wired",
+      "notes": 1901,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "Carmina",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.8",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "GuNGNiR",
+      "notes": 2081,
+      "bonus": 0.2,
+      "old_rank": "12.8",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Xerulean",
+      "notes": 1802,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "Level 3",
+      "notes": 1844,
+      "bonus": 0.1,
+      "old_rank": "12.8",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "SOLAR ECLIPSE",
+      "notes": 1893,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "卑弥呼",
+      "notes": 2119,
+      "bonus": 0.2,
+      "old_rank": "12.7",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "疾風迅雷[L]",
+      "notes": 1824,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "焔極OVERKILL",
+      "notes": 1901,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "華麗なる大犬円舞曲",
+      "notes": 1849,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Level One",
+      "notes": 1857,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "POLKAMANIA[L]",
+      "notes": 1960,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Sigmund",
+      "notes": 2029,
+      "bonus": 0.2,
+      "old_rank": "12.7",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "EROICA",
+      "notes": 2040,
+      "bonus": 0.2,
+      "old_rank": "12.7",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "3y3s",
+      "notes": 1871,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Dances with Snow Fairies[L]",
+      "notes": 2135,
+      "bonus": 0.2,
+      "old_rank": "12.7",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "表裏一体！？怪盗いいんちょの悩み[L]",
+      "notes": 2334,
+      "bonus": 0.3,
+      "old_rank": "12.7",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "[ ]DENTITY",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.7",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "Xlo",
+      "notes": 1988,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "God Mind",
+      "notes": 2155,
+      "bonus": 0.2,
+      "old_rank": "12.7",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "烽火連天の刃[L]",
+      "notes": 2279,
+      "bonus": 0.3,
+      "old_rank": "12.7",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Cult Invitation",
+      "notes": 1804,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Angel's Ladder",
+      "notes": 1800,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Everlasting Message",
+      "notes": 1970,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Red. by Jack Trance",
+      "notes": 1862,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "シムルグの目醒め",
+      "notes": 1822,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "君のハートにロックオン[L]",
+      "notes": 1828,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "EMERALDAS",
+      "notes": 1833,
+      "bonus": 0.1,
+      "old_rank": "12.7",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Artist",
+      "notes": 1870,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "Flamingo",
+      "notes": 1800,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "LOCUS OF THE TRAVEL",
+      "notes": 1920,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "TOMAHAWK",
+      "notes": 1830,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "バッド・スイーツ、バッド・ドリーム",
+      "notes": 1862,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason",
+      "notes": 1988,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "ChaserXX[L]",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "voltississimo",
+      "notes": 1888,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～[L]",
+      "notes": 2459,
+      "bonus": 0.4,
+      "old_rank": "12.6",
+      "new_rank": "13.0",
+      "unclamped_rank": "13.0",
+      "clamped": false
+    },
+    {
+      "title": "Lisa-RICCIA[L]",
+      "notes": 2394,
+      "bonus": 0.3,
+      "old_rank": "12.6",
+      "new_rank": "12.9",
+      "unclamped_rank": "12.9",
+      "clamped": false
+    },
+    {
+      "title": "JOMANDA",
+      "notes": 1918,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "DORNWALD ～Junge～",
+      "notes": 1903,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "EBONY & IVORY[L]",
+      "notes": 1887,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "FiZZλ_POT!0N",
+      "notes": 1800,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "LOST TECHNOLOGIE",
+      "notes": 1822,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "KAMAITACHI[L]",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "IX",
+      "notes": 2007,
+      "bonus": 0.2,
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "ιgniЯRuina",
+      "notes": 1851,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "Vulnerability",
+      "notes": 1885,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "Violet Pulse[L]",
+      "notes": 2115,
+      "bonus": 0.2,
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Zirkfied",
+      "notes": 1968,
+      "bonus": 0.1,
+      "old_rank": "12.6",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "Ambivalent Vermilia",
+      "notes": 2132,
+      "bonus": 0.2,
+      "old_rank": "12.6",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "PERFECT GREAT!!",
+      "notes": 1990,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "キャトられ恋はモ～モク",
+      "notes": 1988,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～",
+      "notes": 2075,
+      "bonus": 0.2,
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "VOX UP",
+      "notes": 1870,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Smashing Wedge",
+      "notes": 1957,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "お菓子の王国",
+      "notes": 2109,
+      "bonus": 0.2,
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "invoker[L]",
+      "notes": 1851,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "CADENZA",
+      "notes": 2357,
+      "bonus": 0.3,
+      "old_rank": "12.5",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "天空の夜明け",
+      "notes": 2072,
+      "bonus": 0.2,
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "NITROUS CANNON",
+      "notes": 1875,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "恋する☆宇宙戦争っ！！",
+      "notes": 1835,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "共鳴遊戯の華",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "Confiserie",
+      "notes": 1833,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Without Heaven",
+      "notes": 1912,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "kors k's How to make OTOGE CORE 「LONG」",
+      "notes": 1863,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Elemental Creation",
+      "notes": 2130,
+      "bonus": 0.2,
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "The Limbo[L]",
+      "notes": 2190,
+      "bonus": 0.2,
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "KAISER PHOENIX[L]",
+      "notes": 2026,
+      "bonus": 0.2,
+      "old_rank": "12.5",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "I",
+      "notes": 1901,
+      "bonus": 0.1,
+      "old_rank": "12.5",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "THE BLACK KNIGHT[L]",
+      "notes": 2325,
+      "bonus": 0.3,
+      "old_rank": "12.5",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Satellite Burst",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "お米の美味しい炊き方、そしてお米を食べることによるその効果。[L]",
+      "notes": 1907,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "Chrono Diver -PENDULUMs-",
+      "notes": 2222,
+      "bonus": 0.3,
+      "old_rank": "12.4",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "Initiation",
+      "notes": 2018,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "MAXIMUM CHEAT GIRL",
+      "notes": 1842,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "轟け！恋のビーンボール！！",
+      "notes": 1834,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "がっつり陰キャ!? 怪盗いいんちょの億劫^^;",
+      "notes": 2192,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Time to Air[L]",
+      "notes": 1888,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "NEW GENERATION -もう、お前しか見えない-[L]",
+      "notes": 1895,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "栄冠のカンパネラ",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Secrets[L]",
+      "notes": 2116,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Phoenix[L]",
+      "notes": 2027,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "煉獄のエルフェリア",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Vitrum",
+      "notes": 1848,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "嘆きの樹",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Verflucht[L]",
+      "notes": 2401,
+      "bonus": 0.4,
+      "old_rank": "12.4",
+      "new_rank": "12.8",
+      "unclamped_rank": "12.8",
+      "clamped": false
+    },
+    {
+      "title": "Uaigh Gealai",
+      "notes": 1972,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "スキッテイエェエエェ!!!!",
+      "notes": 2193,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Binary Black Hole",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.4",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "恋する☆宇宙戦争っ！！[L]",
+      "notes": 2355,
+      "bonus": 0.3,
+      "old_rank": "12.4",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "†渚の小悪魔ラヴリィ～レイディオ†(IIDX EDIT)",
+      "notes": 1835,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "innocent revolver",
+      "notes": 1990,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "HYENA[L]",
+      "notes": 1894,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "INHERITANCE[L]",
+      "notes": 1827,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "#The_Relentless[L]",
+      "notes": 2273,
+      "bonus": 0.3,
+      "old_rank": "12.4",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "-65℃",
+      "notes": 1912,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "BroGamer[L]",
+      "notes": 2383,
+      "bonus": 0.3,
+      "old_rank": "12.4",
+      "new_rank": "12.7",
+      "unclamped_rank": "12.7",
+      "clamped": false
+    },
+    {
+      "title": "Resonant",
+      "notes": 1864,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "BEAT PRISONER",
+      "notes": 1844,
+      "bonus": 0.1,
+      "old_rank": "12.4",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "2 Be Continued",
+      "notes": 1872,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Xb10r",
+      "notes": 1833,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "MENDES",
+      "notes": 1831,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "B4U(BEMANI FOR YOU MIX)[L]",
+      "notes": 2360,
+      "bonus": 0.3,
+      "old_rank": "12.3",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Override[L]",
+      "notes": 2204,
+      "bonus": 0.3,
+      "old_rank": "12.3",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "O/D*20[L]",
+      "notes": 1984,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "即席！脳直★ミュージックシステム",
+      "notes": 1838,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "ピアノ協奏曲第1番”蠍火” (BlackY Remix)",
+      "notes": 1926,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Ancient Scapes[L]",
+      "notes": 2198,
+      "bonus": 0.2,
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "蛇神[L]",
+      "notes": 1904,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲[L]",
+      "notes": 2110,
+      "bonus": 0.2,
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "Feel The Beat[L]",
+      "notes": 2225,
+      "bonus": 0.3,
+      "old_rank": "12.3",
+      "new_rank": "12.6",
+      "unclamped_rank": "12.6",
+      "clamped": false
+    },
+    {
+      "title": "Burning Flame[L]",
+      "notes": 1938,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Pinky Happy Crazy",
+      "notes": 1833,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "TOXIC VIBRATION",
+      "notes": 1933,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "THE F∀UST",
+      "notes": 1851,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "NOIXIA",
+      "notes": 2027,
+      "bonus": 0.2,
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "YAKSHA",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "Drop Syndicate",
+      "notes": 1861,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "VOLAQUAS",
+      "notes": 1982,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "The Last Apocalypse",
+      "notes": 1903,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "逆月",
+      "notes": 1920,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "THE BRAVE MUST DIE",
+      "notes": 2075,
+      "bonus": 0.2,
+      "old_rank": "12.3",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "LASER CRUSTER (IGNITE REMIX)",
+      "notes": 1824,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "ΕΛΠΙΣ[L]",
+      "notes": 1852,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "ラブコメトキドキシリアス",
+      "notes": 1902,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Arabian Rave Night[L]",
+      "notes": 1888,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "SOLID WYVERN[L]",
+      "notes": 1999,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Demon March",
+      "notes": 1875,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "GENE[L]",
+      "notes": 1822,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "From Human Blood",
+      "notes": 1850,
+      "bonus": 0.1,
+      "old_rank": "12.3",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Verflucht",
+      "notes": 1805,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Feel The Beat",
+      "notes": 1830,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "ミュージック・アワー[L]",
+      "notes": 2094,
+      "bonus": 0.2,
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "伐折羅-vajra-",
+      "notes": 1877,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "狂イ咲ケ焔ノ華",
+      "notes": 1860,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Flying Castle",
+      "notes": 1877,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Vinculum stellarum",
+      "notes": 1873,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "ALTERNATOR",
+      "notes": 1907,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Elektrick U-Phoria[L]",
+      "notes": 2050,
+      "bonus": 0.2,
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Memoria Obscura",
+      "notes": 2085,
+      "bonus": 0.2,
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Close the World feat.a☆ru[L]",
+      "notes": 1983,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "≡+≡[L]",
+      "notes": 2333,
+      "bonus": 0.3,
+      "old_rank": "12.2",
+      "new_rank": "12.5",
+      "unclamped_rank": "12.5",
+      "clamped": false
+    },
+    {
+      "title": "Triple Counter",
+      "notes": 2016,
+      "bonus": 0.2,
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Anisakis -somatic mutation type\"Forza\"-[L]",
+      "notes": 1971,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Illusionary Waterlily",
+      "notes": 1803,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "G59",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "Boomy and The Boost",
+      "notes": 1826,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "ANCHOR",
+      "notes": 1835,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Regina vespaE",
+      "notes": 1840,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Session 9 -Chronicles-",
+      "notes": 1852,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "EVANESCENT",
+      "notes": 1845,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Slipstream",
+      "notes": 1822,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Lost Souls[L]",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.2",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "u gotta beat",
+      "notes": 1806,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "suspicions",
+      "notes": 1908,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "トリカゴノ鳳凰",
+      "notes": 1932,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Dynamite",
+      "notes": 1953,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Sky High",
+      "notes": 1943,
+      "bonus": 0.1,
+      "old_rank": "12.2",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Submerge Serenade[L]",
+      "notes": 2104,
+      "bonus": 0.2,
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "海神[L]",
+      "notes": 1830,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "BLACK or WHITE?",
+      "notes": 2013,
+      "bonus": 0.2,
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "LIGHTNING STRIKES[L]",
+      "notes": 2123,
+      "bonus": 0.2,
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "ぞうしょく！？マイデンティティ",
+      "notes": 1851,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "Arkadia",
+      "notes": 1873,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "GO OVER WITH GLARE -ROOTAGE 26-",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Flashes[L]",
+      "notes": 2090,
+      "bonus": 0.2,
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "儚キ戀ノ幻想譚",
+      "notes": 1808,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "世界の果てに約束の凱歌を -ReUnion-",
+      "notes": 1983,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "千年ノ理[L]",
+      "notes": 2183,
+      "bonus": 0.2,
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "Bow shock!![L]",
+      "notes": 2176,
+      "bonus": 0.2,
+      "old_rank": "12.1",
+      "new_rank": "12.3",
+      "unclamped_rank": "12.3",
+      "clamped": false
+    },
+    {
+      "title": "EXUSIA",
+      "notes": 1964,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "ZEPHYRANTHES[L]",
+      "notes": 1982,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "ビビッド ☆+*。キラキライム",
+      "notes": 1896,
+      "bonus": 0.1,
+      "old_rank": "12.1",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.",
+      "notes": 2271,
+      "bonus": 0.3,
+      "old_rank": "12.1",
+      "new_rank": "12.4",
+      "unclamped_rank": "12.4",
+      "clamped": false
+    },
+    {
+      "title": "SOLID STATE SQUAD[L]",
+      "notes": 1868,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "Despair of ELFERIA",
+      "notes": 2096,
+      "bonus": 0.2,
+      "old_rank": "12.0",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "∀",
+      "notes": 1802,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "津軽雪",
+      "notes": 1953,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "Tiempo Loco",
+      "notes": 1884,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "V2",
+      "notes": 1810,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "We're so Happy (P*Light Remix) IIDX ver.",
+      "notes": 1896,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "refrain",
+      "notes": 1857,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "〆",
+      "notes": 1877,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "EYE OF THE HEAVEN",
+      "notes": 1824,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "No Border",
+      "notes": 1895,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "Liberation",
+      "notes": 1905,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "B4U(BEMANI FOR YOU MIX)",
+      "notes": 1810,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "抱きしめてモナムール",
+      "notes": 2110,
+      "bonus": 0.2,
+      "old_rank": "12.0",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "AKASHIC BREAK",
+      "notes": 1823,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "Catch Our Fire!",
+      "notes": 1885,
+      "bonus": 0.1,
+      "old_rank": "12.0",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "F",
+      "notes": 1813,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "CHRONO DIVER -NORNIR-[L]",
+      "notes": 2233,
+      "bonus": 0.3,
+      "old_rank": "11.9",
+      "new_rank": "12.2",
+      "unclamped_rank": "12.2",
+      "clamped": false
+    },
+    {
+      "title": "Super Duper Racers[L]",
+      "notes": 1857,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "Vermilion Carol",
+      "notes": 1837,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "INAZUMA[L]",
+      "notes": 2042,
+      "bonus": 0.2,
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "SOLID STATE SQUAD",
+      "notes": 1819,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "QUANTUM TELEPORTATION[L]",
+      "notes": 1845,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "DUAL STRIKER",
+      "notes": 1960,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "KILL EACH OTHER",
+      "notes": 1945,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "neu",
+      "notes": 1999,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "それは花火のような恋",
+      "notes": 1976,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "ALBA -黎明-[L]",
+      "notes": 1990,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "Idola",
+      "notes": 1826,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "旋律のドグマ～Miserables～",
+      "notes": 2002,
+      "bonus": 0.2,
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "X",
+      "notes": 1952,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "神謳 -RESONANCE-",
+      "notes": 2047,
+      "bonus": 0.2,
+      "old_rank": "11.9",
+      "new_rank": "12.1",
+      "unclamped_rank": "12.1",
+      "clamped": false
+    },
+    {
+      "title": "DARK LEGACY",
+      "notes": 1828,
+      "bonus": 0.1,
+      "old_rank": "11.9",
+      "new_rank": "12.0",
+      "unclamped_rank": "12.0",
+      "clamped": false
+    },
+    {
+      "title": "HARD BRAIN",
+      "notes": 1914,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "Kung-fu Empire[L]",
+      "notes": 1999,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "Aftermath",
+      "notes": 1828,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "BITTER CHOCOLATE STRIKER",
+      "notes": 1990,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "AA -rebuild-",
+      "notes": 1820,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "spiral galaxy[L]",
+      "notes": 1910,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "LIVE DRIVING!! feat. 花たん",
+      "notes": 1947,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "Little Little Princess[L]",
+      "notes": 1946,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "Stereo Beasts",
+      "notes": 1881,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "Shooting Fireball",
+      "notes": 1983,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "CoMAAAAAAA[L]",
+      "notes": 1957,
+      "bonus": 0.1,
+      "old_rank": "11.8",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "frequent",
+      "notes": 1900,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "Roar of Chronos",
+      "notes": 1991,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "SYNC-ANTHEM",
+      "notes": 1865,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "PUNISHER",
+      "notes": 1812,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "GENE",
+      "notes": 2183,
+      "bonus": 0.2,
+      "old_rank": "11.7",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "龍王の霊廟(Mausoleum Of The Primal Dragon)[L]",
+      "notes": 2023,
+      "bonus": 0.2,
+      "old_rank": "11.7",
+      "new_rank": "11.9",
+      "unclamped_rank": "11.9",
+      "clamped": false
+    },
+    {
+      "title": "表裏一体！？怪盗いいんちょの悩み",
+      "notes": 1815,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "Thunderbolt",
+      "notes": 1911,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "FUZIN RIZIN",
+      "notes": 1929,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "Ypsilon[L]",
+      "notes": 1801,
+      "bonus": 0.1,
+      "old_rank": "11.7",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "AA",
+      "notes": 1834,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "KING[L]",
+      "notes": 1983,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "Apocalypse",
+      "notes": 1814,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "Space Battleship S4TO",
+      "notes": 1900,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "Visterhv",
+      "notes": 1869,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "Nothing but Theory[L]",
+      "notes": 1890,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "Broken Sword",
+      "notes": 1887,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "Dolphin Kick",
+      "notes": 1846,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "JUSTICE/GUILTY feat. Nana Takahashi & 709sec.",
+      "notes": 1959,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "WONDER WALKER",
+      "notes": 1921,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "Rise'n Beauty[L]",
+      "notes": 2023,
+      "bonus": 0.2,
+      "old_rank": "11.6",
+      "new_rank": "11.8",
+      "unclamped_rank": "11.8",
+      "clamped": false
+    },
+    {
+      "title": "True Blue",
+      "notes": 1898,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "スパークリング☆彡ハイパーチューン！！",
+      "notes": 1843,
+      "bonus": 0.1,
+      "old_rank": "11.6",
+      "new_rank": "11.7",
+      "unclamped_rank": "11.7",
+      "clamped": false
+    },
+    {
+      "title": "thunder HOUSE NATION Remix[L]",
+      "notes": 1954,
+      "bonus": 0.1,
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "unclamped_rank": "11.6",
+      "clamped": false
+    },
+    {
+      "title": "グッバイ宣言[L]",
+      "notes": 1849,
+      "bonus": 0.1,
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "unclamped_rank": "11.6",
+      "clamped": false
+    },
+    {
+      "title": "ベンガル vs. アムール Battle",
+      "notes": 1867,
+      "bonus": 0.1,
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "unclamped_rank": "11.6",
+      "clamped": false
+    },
+    {
+      "title": "仮想空間の旅人たち[L]",
+      "notes": 1943,
+      "bonus": 0.1,
+      "old_rank": "11.5",
+      "new_rank": "11.6",
+      "unclamped_rank": "11.6",
+      "clamped": false
+    },
+    {
+      "title": "Rampage",
+      "notes": 1831,
+      "bonus": 0.1,
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "unclamped_rank": "11.5",
+      "clamped": false
+    },
+    {
+      "title": "ちょえちょえまぎか[L]",
+      "notes": 2098,
+      "bonus": 0.2,
+      "old_rank": "11.4",
+      "new_rank": "11.6",
+      "unclamped_rank": "11.6",
+      "clamped": false
+    },
+    {
+      "title": "フォニイ[L]",
+      "notes": 1975,
+      "bonus": 0.1,
+      "old_rank": "11.4",
+      "new_rank": "11.5",
+      "unclamped_rank": "11.5",
+      "clamped": false
+    },
+    {
+      "title": "waxing and wanding[L]",
+      "notes": 2000,
+      "bonus": 0.2,
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "unclamped_rank": "11.5",
+      "clamped": false
+    },
+    {
+      "title": "華蝶風雪[L]",
+      "notes": 2014,
+      "bonus": 0.2,
+      "old_rank": "11.3",
+      "new_rank": "11.5",
+      "unclamped_rank": "11.5",
+      "clamped": false
+    },
+    {
+      "title": "Beat Radiance[L]",
+      "notes": 1809,
+      "bonus": 0.1,
+      "old_rank": "11.1",
+      "new_rank": "11.2",
+      "unclamped_rank": "11.2",
+      "clamped": false
+    },
+    {
+      "title": "A MINSTREL ～ ver. short-scape ～[L]",
+      "notes": 1954,
+      "bonus": 0.1,
+      "old_rank": "11.0",
+      "new_rank": "11.1",
+      "unclamped_rank": "11.1",
+      "clamped": false
+    }
+  ],
+  "missing": []
+}

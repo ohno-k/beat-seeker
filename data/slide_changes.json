@@ -1,0 +1,2698 @@
+{
+  "rule": "序列維持のままactive定員へスライド(override: {\"13.1\":7})",
+  "applied": true,
+  "backupProfile": "profile:pre-slide-20260721",
+  "moved": 538,
+  "changes": [
+    {
+      "title": "RAGE feat.H14 of LEONAIR",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "Beyond Evolution",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "Illegal Function Call[L]",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "Sinus Iridum",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "ICARUS[L]",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "XHRONOXAPSULΞ",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "X-DEN",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "GuNGNiR[L]",
+      "old_rank": "13.1",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "Sigmund[L]",
+      "old_rank": "13.1",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "天使のカンタータ -Cantata of Angels-",
+      "old_rank": "13.1",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "聖人の塔[L]",
+      "old_rank": "13.1",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "灼熱Beach Side Bunny",
+      "old_rank": "13.0",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "SAMURAI-Scramble[L]",
+      "old_rank": "13.0",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "Inferno of Fomalhaut",
+      "old_rank": "13.0",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "RUINA",
+      "old_rank": "13.0",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "Skratch Education Lv-1",
+      "old_rank": "13.0",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "HEROES",
+      "old_rank": "13.0",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "灼熱 Pt.2 Long Train Running",
+      "old_rank": "13.0",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "Level 5",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "紫陽花 -AZISAI-[L]",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "WHA",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "n/a",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "THE PEERLESS UNDER HEAVEN",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Amor∞Fati",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "ディスコルディア",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "冥",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "色を喪った街",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "perditus†paradisus",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Carmina",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "GuNGNiR",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "表裏一体！？怪盗いいんちょの悩み[L]",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "烽火連天の刃[L]",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～[L]",
+      "old_rank": "13.0",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "GiGaGaHell",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Selfish Sweet[L]",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Miracle 5ympho X[L]",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "ICARUS",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "MAD ATTACK[L]",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Makin' It",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Dans la nuit de l'eternite",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "二人ノ廃城幽踊宴",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Level 4",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "fixer",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "CODE:0[L]",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "BitRacer",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "ピアノ独奏無言歌 \"灰燼\"",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Smintheus",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Ignis†Irae",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "hard-wired",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Xerulean",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Level 3",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "卑弥呼",
+      "old_rank": "12.9",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "Sigmund",
+      "old_rank": "12.9",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "EROICA",
+      "old_rank": "12.9",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Dances with Snow Fairies[L]",
+      "old_rank": "12.9",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "[ ]DENTITY",
+      "old_rank": "12.9",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "God Mind",
+      "old_rank": "12.9",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Lisa-RICCIA[L]",
+      "old_rank": "12.9",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Do it!! Do it!![L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Y&Co. is dead or alive",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "199024club -Re:BounceKiller-",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "カジノファイヤーことみちゃん[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "DUE TOMORROW",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Illegal Function Call",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Plan 8",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "ピアノ協奏曲第１番”蠍火”",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "The Chase",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Snake Stick",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "音楽",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Gimme a Big Beat(青龍 Remix)",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Fascination MAXX",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "DAY DREAM",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "火影",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "BLUE MIRAGE",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "SOLAR ECLIPSE",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "疾風迅雷[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "焔極OVERKILL",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "華麗なる大犬円舞曲",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Level One",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "POLKAMANIA[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "3y3s",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Xlo",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Cult Invitation",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Angel's Ladder",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Everlasting Message",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Red. by Jack Trance",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "シムルグの目醒め",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "君のハートにロックオン[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "EMERALDAS",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "ChaserXX[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "KAMAITACHI[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "IX",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Violet Pulse[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Ambivalent Vermilia",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "CADENZA",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "THE BLACK KNIGHT[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "Verflucht[L]",
+      "old_rank": "12.8",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "The Clown of 24stairs",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "ベィスドロップ・フリークス[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Watch Out Pt.2",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "VOID",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "SCREW // owo // SCREW",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Go Beyond!!",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Concertino in Blue",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "ASIAN VIRTUAL REALITIES (MELTING TOGETHER IN DAZZLING DARKNESS)",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "真 地獄超特急 -HELL or HELL-",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "金野火織の金色提言",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "子供の落書き帳",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Bounce Bounce Bounce",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Glitch N Ride",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Bad Encryption",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Level 2",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "ECHIDNA",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Macho Monky",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "ra'am",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "StrayedCatz",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Go Ahead!!",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "TITANS RETURN[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "In the Blackest Den",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Ganymede[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "GO!",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Be quiet[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "ワルツ第17番 ト短調”大犬のワルツ”",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Artist",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Flamingo",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "LOCUS OF THE TRAVEL",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "TOMAHAWK",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "バッド・スイーツ、バッド・ドリーム",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "voltississimo",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "JOMANDA",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "DORNWALD ～Junge～",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "EBONY & IVORY[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "FiZZλ_POT!0N",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "LOST TECHNOLOGIE",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "ιgniЯRuina",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Vulnerability",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Zirkfied",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "お菓子の王国",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "天空の夜明け",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "共鳴遊戯の華",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Elemental Creation",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "The Limbo[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "KAISER PHOENIX[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "Chrono Diver -PENDULUMs-",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "恋する☆宇宙戦争っ！！[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "#The_Relentless[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "BroGamer[L]",
+      "old_rank": "12.7",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "IDC feat.REVERBEE (Mo'Cuts Ver)",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "もっと！モット！ときめき feat. 松下",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "カジノファイヤーことみちゃん",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "花冠 feat.Aikapin",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Bling-Bang-Bang-Born[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "naughty girl@Queen's Palace[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "ROCK女 feat. 大山愛未， Ken",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Lords Of The Roundtable",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "HAERETICUS",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "ZED[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Blue Spring Express",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Reflux",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Catch Me[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "four pieces of heaven",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "VANESSA[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "烽火連天の刃",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "REVOLVER[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "OTENAMI Hurricane",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "少年は空を辿る",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Red. by Full Metal Jacket",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "水鏡の異界",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Purple Perplex",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "華麗なる！音戯探偵ひなビタ",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "桜",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Cross Fire",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "SISYPHUS",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "灼熱 Lost Summer Dayz",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Peaktime Booster",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Dances with Snow Fairies",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "rage against usual",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Spica",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "four pieces of heaven[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "PERFECT GREAT!!",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "キャトられ恋はモ～モク",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "VOX UP",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Smashing Wedge",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "invoker[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "NITROUS CANNON",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "恋する☆宇宙戦争っ！！",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Confiserie",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Without Heaven",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "kors k's How to make OTOGE CORE 「LONG」",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "I",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Satellite Burst",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Initiation",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "がっつり陰キャ!? 怪盗いいんちょの億劫^^;",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "栄冠のカンパネラ",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Secrets[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Phoenix[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "煉獄のエルフェリア",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "嘆きの樹",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "スキッテイエェエエェ!!!!",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Binary Black Hole",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "B4U(BEMANI FOR YOU MIX)[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Override[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Feel The Beat[L]",
+      "old_rank": "12.6",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "ベラ・ベ・カラベラ",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "PARADISE LOST",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "神っぽいな[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Almagest",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Proof of the existence",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Digitank System",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "TOKAKU=ALMiRAJ",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Routing",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "RIZING-GAMERS.",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Antigravity",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "恋愛＝精度×認識力",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Hydrogen Blueback[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "三日天下モンキー",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "時空トラベローグ",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "SAMURAI-Scramble",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "UNDO THE NIGHT",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Zenith",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "BRAINSTORM",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "アストライアの双皿",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "m1dy Deluxe",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "ORCA",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "CHECKING YOU OUT",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Devil's Gear",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "クレッシェンド",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "one or eight",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "今宵、ロマンス横丁。",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "reunion",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "The Least 100sec",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "魅惑のYUMMYスイーツ",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "MENTAL MELTDOWN",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Don't believe the hype",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "廿[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "MEGAERA",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "紫陽花 -AZISAI-",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "SCREAM SQUAD",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "FAKE TIME",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Ganymede",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "お米の美味しい炊き方、そしてお米を食べることによるその効果。[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "MAXIMUM CHEAT GIRL",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "轟け！恋のビーンボール！！",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Time to Air[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "NEW GENERATION -もう、お前しか見えない-[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Vitrum",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Uaigh Gealai",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "†渚の小悪魔ラヴリィ～レイディオ†(IIDX EDIT)",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "innocent revolver",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "HYENA[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "INHERITANCE[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "-65℃",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Resonant",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "BEAT PRISONER",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Ancient Scapes[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "NOIXIA",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "YAKSHA",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "THE BRAVE MUST DIE",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "≡+≡[L]",
+      "old_rank": "12.5",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "Just a Little Smile",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "GAME ON",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "疾風迅雷",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "最小三倍完全数",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Devilz Staircase",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "100％ minimoo-G",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "NZM",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Do it!! Do it!!",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "i-ii",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "quell～the seventh slave～",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "fffff",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Sarutobi Champion is 拙者",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Grand Chariot",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "PARANOiA ～HADES～",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "ONE AND ONLY",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Flashes",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Empire of Fury",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Godspeed",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "泰東ノ翠霞",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "STULTI",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Sol Cosine Job 2",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "GOLD RUSH 2025",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "THUNDERSTRIKE",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "SCHWARZSCHILD FIELD",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Push on Beats!～音ゲの国のeX-ストリーマー～",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "少年A",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Trill auf G",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "TECHNOPHOBIA",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "2 Be Continued",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Xb10r",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "MENDES",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "O/D*20[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "即席！脳直★ミュージックシステム",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "ピアノ協奏曲第1番”蠍火” (BlackY Remix)",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "蛇神[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Burning Flame[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Pinky Happy Crazy",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "TOXIC VIBRATION",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "THE F∀UST",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Drop Syndicate",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "VOLAQUAS",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "The Last Apocalypse",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "逆月",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "LASER CRUSTER (IGNITE REMIX)",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "ΕΛΠΙΣ[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "ラブコメトキドキシリアス",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Arabian Rave Night[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "SOLID WYVERN[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Demon March",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "GENE[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "From Human Blood",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "ミュージック・アワー[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Elektrick U-Phoria[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Memoria Obscura",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Triple Counter",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "G59",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "Lost Souls[L]",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.",
+      "old_rank": "12.4",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "gigadelic",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "KYAMISAMA ONEGAI![L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "uen",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "BLUE DRAGON(雷龍RemixIIDX)",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Twelfth Style[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "電腦都市",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "ACT0",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "CONTRACT[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "RALLY '25",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Scripted Connection⇒ H mix",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "SAY BAY",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "閠槞彁の願い",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "BattleRoyal",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Life Is A Game ft.DD\"ナカタ\"Metal",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Innocent Walls",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "New Castle Legions",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Substance",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "D",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Fegrix",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "FUTURE is Dead",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "NEMESIS",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "255",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Saturn[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "rough percussionythm",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "夏色DIARY - L.E.D.-G STYLE MIX -",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Evans",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Scripted Connection⇒ A mix[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "電光",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Verflucht",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Feel The Beat",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "伐折羅-vajra-",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "狂イ咲ケ焔ノ華",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Flying Castle",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Vinculum stellarum",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "ALTERNATOR",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Close the World feat.a☆ru[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Anisakis -somatic mutation type\"Forza\"-[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Illusionary Waterlily",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Boomy and The Boost",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "ANCHOR",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Regina vespaE",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Session 9 -Chronicles-",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "EVANESCENT",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Slipstream",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "u gotta beat",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "suspicions",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "トリカゴノ鳳凰",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Dynamite",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Sky High",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Submerge Serenade[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "BLACK or WHITE?",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "LIGHTNING STRIKES[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "GO OVER WITH GLARE -ROOTAGE 26-",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Flashes[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "千年ノ理[L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Bow shock!![L]",
+      "old_rank": "12.3",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "ラクエン",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "naughty girl@Queen's Palace",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "HyperTwist",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Super Freak",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "AIR RAID FROM THA UNDAGROUND[L]",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Ah Hah Yeah",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "TRIUMPH",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "POLKAMANIA",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "雪月花",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Monkey Business",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "電人、暁に斃れる。",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Cleopatrysm",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Critical Crystal",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "One for All",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "MAX 360",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Beyond The Earth",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Let The Track Flow",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Necroxis Girl",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "TITANS RETURN",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Welcome",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "海神",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "EXODUS SIGN",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Always We Trust In You",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Castle on the Moon",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "fallen leaves -IIDX edition-",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "海神[L]",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "ぞうしょく！？マイデンティティ",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Arkadia",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "儚キ戀ノ幻想譚",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "世界の果てに約束の凱歌を -ReUnion-",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "EXUSIA",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "ZEPHYRANTHES[L]",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "ビビッド ☆+*。キラキライム",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Despair of ELFERIA",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "抱きしめてモナムール",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "CHRONO DIVER -NORNIR-[L]",
+      "old_rank": "12.2",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "Friction[!]Function",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "COSMIC V3LOCITY",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Caldwell 99",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "ZEИITH",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Chronos[L]",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "DRUNK MONKY",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Overload Frontier",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "BroGamer",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "朝焼けから始まるボクらの小さな旅",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Painful Fate",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "VANESSA",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "FIRE FIRE",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "27th style",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "ハイテックトキオ[L]",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "STARLiGHT",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Disco Killer Music Lover",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Close the World feat.a☆ru",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Hallucination",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "SOLID STATE SQUAD[L]",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "∀",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "津軽雪",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Tiempo Loco",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "V2",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "We're so Happy (P*Light Remix) IIDX ver.",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "refrain",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "〆",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "EYE OF THE HEAVEN",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "No Border",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Liberation",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "B4U(BEMANI FOR YOU MIX)",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "AKASHIC BREAK",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "Catch Our Fire!",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "INAZUMA[L]",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "旋律のドグマ～Miserables～",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "神謳 -RESONANCE-",
+      "old_rank": "12.1",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "moon_child",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Discloze",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "摩天楼",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "yellow head joe[L]",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Rave*it!! Rave*it!!",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Chronos",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "天邪鬼",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "THE DAY OF JUBILATIONS",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Amazing Mirage",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "B.O.D.Y.",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "QUANTUM TELEPORTATION",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "ミラージュ・レジデンス[L]",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Kailua",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "禍根",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "F",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Super Duper Racers[L]",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Vermilion Carol",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "SOLID STATE SQUAD",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "QUANTUM TELEPORTATION[L]",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "DUAL STRIKER",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "KILL EACH OTHER",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "neu",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "それは花火のような恋",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "ALBA -黎明-[L]",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "Idola",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "X",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "DARK LEGACY",
+      "old_rank": "12.0",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "KHAMEN BREAK",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "深淵に捧ぐレクイエム",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Begin",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Aegis",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "DIVINE JUDGEMENT",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Buffalo[L]",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "鬼天",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "HYPE THE CORE",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "HARD BRAIN",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Kung-fu Empire[L]",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Aftermath",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "BITTER CHOCOLATE STRIKER",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "AA -rebuild-",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "spiral galaxy[L]",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "LIVE DRIVING!! feat. 花たん",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Little Little Princess[L]",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Stereo Beasts",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "Shooting Fireball",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "CoMAAAAAAA[L]",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "GENE",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "龍王の霊廟(Mausoleum Of The Primal Dragon)[L]",
+      "old_rank": "11.9",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "GRAVITON",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Bow shock!!",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Abraxas",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Crazy Jackpot",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "あるビー！ feat.ころねぽち",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Double Dribble",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "A",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "frequent",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Roar of Chronos",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "SYNC-ANTHEM",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "PUNISHER",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "表裏一体！？怪盗いいんちょの悩み",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Thunderbolt",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "FUZIN RIZIN",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Ypsilon[L]",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "Rise'n Beauty[L]",
+      "old_rank": "11.8",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "ドッキン☆サマーあばんちゅーる",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "とろぴかる倶楽部",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "Saturn",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "AA",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "KING[L]",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "Apocalypse",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "Space Battleship S4TO",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "Visterhv",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "Nothing but Theory[L]",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "Broken Sword",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "Dolphin Kick",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "JUSTICE/GUILTY feat. Nana Takahashi & 709sec.",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "WONDER WALKER",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "True Blue",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "スパークリング☆彡ハイパーチューン！！",
+      "old_rank": "11.7",
+      "new_rank": "11.6"
+    },
+    {
+      "title": "thunder HOUSE NATION Remix[L]",
+      "old_rank": "11.6",
+      "new_rank": "11.5"
+    },
+    {
+      "title": "グッバイ宣言[L]",
+      "old_rank": "11.6",
+      "new_rank": "11.5"
+    },
+    {
+      "title": "ベンガル vs. アムール Battle",
+      "old_rank": "11.6",
+      "new_rank": "11.5"
+    },
+    {
+      "title": "仮想空間の旅人たち[L]",
+      "old_rank": "11.6",
+      "new_rank": "11.5"
+    },
+    {
+      "title": "ちょえちょえまぎか[L]",
+      "old_rank": "11.6",
+      "new_rank": "11.5"
+    },
+    {
+      "title": "Rampage",
+      "old_rank": "11.5",
+      "new_rank": "11.4"
+    },
+    {
+      "title": "フォニイ[L]",
+      "old_rank": "11.5",
+      "new_rank": "11.4"
+    },
+    {
+      "title": "waxing and wanding[L]",
+      "old_rank": "11.5",
+      "new_rank": "11.4"
+    },
+    {
+      "title": "華蝶風雪[L]",
+      "old_rank": "11.5",
+      "new_rank": "11.4"
+    },
+    {
+      "title": "No Tears",
+      "old_rank": "11.2",
+      "new_rank": "11.3"
+    },
+    {
+      "title": "State Of The Art",
+      "old_rank": "11.2",
+      "new_rank": "11.3"
+    }
+  ]
+}

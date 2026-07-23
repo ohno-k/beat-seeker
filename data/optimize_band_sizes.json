@@ -1,0 +1,126 @@
+{
+  "objective": "RMS(active→draft delta) 最小化(序列固定・帯境界の座標降下法)",
+  "applied": true,
+  "backupProfile": "profile:pre-optimize-20260721",
+  "users": 928,
+  "before": {
+    "mean": 11.42233414245092,
+    "rms": 54.73654421857695
+  },
+  "after": {
+    "mean": -0.7291476886241013,
+    "rms": 34.29068405034027
+  },
+  "sizes": [
+    {
+      "rank": "13.1",
+      "before": 7,
+      "after": 3
+    },
+    {
+      "rank": "13.0",
+      "before": 9,
+      "after": 4
+    },
+    {
+      "rank": "12.9",
+      "before": 10,
+      "after": 0
+    },
+    {
+      "rank": "12.8",
+      "before": 34,
+      "after": 50
+    },
+    {
+      "rank": "12.7",
+      "before": 46,
+      "after": 46
+    },
+    {
+      "rank": "12.6",
+      "before": 64,
+      "after": 65
+    },
+    {
+      "rank": "12.5",
+      "before": 63,
+      "after": 0
+    },
+    {
+      "rank": "12.4",
+      "before": 74,
+      "after": 230
+    },
+    {
+      "rank": "12.3",
+      "before": 84,
+      "after": 0
+    },
+    {
+      "rank": "12.2",
+      "before": 88,
+      "after": 49
+    },
+    {
+      "rank": "12.1",
+      "before": 69,
+      "after": 102
+    },
+    {
+      "rank": "12.0",
+      "before": 71,
+      "after": 173
+    },
+    {
+      "rank": "11.9",
+      "before": 80,
+      "after": 0
+    },
+    {
+      "rank": "11.8",
+      "before": 86,
+      "after": 18
+    },
+    {
+      "rank": "11.7",
+      "before": 85,
+      "after": 17
+    },
+    {
+      "rank": "11.6",
+      "before": 97,
+      "after": 0
+    },
+    {
+      "rank": "11.5",
+      "before": 91,
+      "after": 222
+    },
+    {
+      "rank": "11.4",
+      "before": 79,
+      "after": 0
+    },
+    {
+      "rank": "11.3",
+      "before": 60,
+      "after": 246
+    },
+    {
+      "rank": "11.2",
+      "before": 54,
+      "after": 39
+    },
+    {
+      "rank": "11.1",
+      "before": 32,
+      "after": 25
+    },
+    {
+      "rank": "11.0",
+      "before": 17,
+      "after": 11
+    }
+  ]
+}

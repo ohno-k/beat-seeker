@@ -1,0 +1,83 @@
+{
+  "rule": "11.5〜12.9 の各帯先頭1曲をひとつ上の帯末尾へ繰り上げ",
+  "applied": true,
+  "backupProfile": "profile:pre-nudge-20260721",
+  "moved": 15,
+  "changes": [
+    {
+      "title": "Sigmund[L]",
+      "old_rank": "12.9",
+      "new_rank": "13.0"
+    },
+    {
+      "title": "Level 5",
+      "old_rank": "12.8",
+      "new_rank": "12.9"
+    },
+    {
+      "title": "Sigmund",
+      "old_rank": "12.7",
+      "new_rank": "12.8"
+    },
+    {
+      "title": "The Clown of 24stairs",
+      "old_rank": "12.6",
+      "new_rank": "12.7"
+    },
+    {
+      "title": "IDC feat.REVERBEE (Mo'Cuts Ver)",
+      "old_rank": "12.5",
+      "new_rank": "12.6"
+    },
+    {
+      "title": "ベラ・ベ・カラベラ",
+      "old_rank": "12.4",
+      "new_rank": "12.5"
+    },
+    {
+      "title": "Just a Little Smile",
+      "old_rank": "12.3",
+      "new_rank": "12.4"
+    },
+    {
+      "title": "gigadelic",
+      "old_rank": "12.2",
+      "new_rank": "12.3"
+    },
+    {
+      "title": "ラクエン",
+      "old_rank": "12.1",
+      "new_rank": "12.2"
+    },
+    {
+      "title": "Friction[!]Function",
+      "old_rank": "12.0",
+      "new_rank": "12.1"
+    },
+    {
+      "title": "覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～",
+      "old_rank": "11.9",
+      "new_rank": "12.0"
+    },
+    {
+      "title": "KHAMEN BREAK",
+      "old_rank": "11.8",
+      "new_rank": "11.9"
+    },
+    {
+      "title": "GRAVITON",
+      "old_rank": "11.7",
+      "new_rank": "11.8"
+    },
+    {
+      "title": "ドッキン☆サマーあばんちゅーる",
+      "old_rank": "11.6",
+      "new_rank": "11.7"
+    },
+    {
+      "title": "thunder HOUSE NATION Remix[L]",
+      "old_rank": "11.5",
+      "new_rank": "11.6"
+    }
+  ]
+}

@@ -23,6 +23,7 @@ import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.SongArenaAveragesCacheService;
+import com.beatseeker.backend.service.SongAvgScoreRatesCacheService;
 import com.beatseeker.backend.service.SongRankBatchService;
 import com.beatseeker.backend.service.SongRankingAggregateCacheService;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
@@ -107,6 +108,8 @@ public class ScoreController {
     private final SongArenaAveragesCacheService songArenaAveragesCacheService;
     /** 人気曲ランキング（song-ranking-aggregate）の集計結果キャッシュ。 */
     private final SongRankingAggregateCacheService songRankingAggregateCacheService;
+    /** 曲別平均スコアレート（song-avg-score-rates）の集計結果キャッシュ。 */
+    private final SongAvgScoreRatesCacheService songAvgScoreRatesCacheService;
     /** 連携アプリ（iidx-memo 等）から同期された譜面オプション。スコア応答に options を埋めるのに使う。 */
     private final com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository;
     /** タイムライン用イベント（スコア更新／フレンド・仮想ライバル抜き）を保存するリポジトリ。 */
@@ -137,6 +140,7 @@ public class ScoreController {
             VirtualArenaRankerService virtualArenaRankerService,
             SongArenaAveragesCacheService songArenaAveragesCacheService,
             SongRankingAggregateCacheService songRankingAggregateCacheService,
+            SongAvgScoreRatesCacheService songAvgScoreRatesCacheService,
             com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository,
             TimelineEventRepository timelineEventRepository,
             VirtualRivalRepository virtualRivalRepository,
@@ -157,6 +161,7 @@ public class ScoreController {
         this.virtualArenaRankerService = virtualArenaRankerService;
         this.songArenaAveragesCacheService = songArenaAveragesCacheService;
         this.songRankingAggregateCacheService = songRankingAggregateCacheService;
+        this.songAvgScoreRatesCacheService = songAvgScoreRatesCacheService;
         this.userSongOptionRepository = userSongOptionRepository;
         this.timelineEventRepository = timelineEventRepository;
         this.virtualRivalRepository = virtualRivalRepository;
@@ -901,101 +906,15 @@ public class ScoreController {
     /**
      * 【メソッドの役割】 曲単位で「平均スコアレート」「MAX- 率」「AAA 率」を返す。
      *
-     * 処理の流れ:
-     *  1. active リビジョンの SongDefinition から notes lookup（Lv11 以上の A/L のみ）を構築。
-     *  2. DB から per-song 平均スコア、MAX- 数、AAA 数をそれぞれ取得して lookup を作る。
-     *  3. 平均スコアを「notes × 2」で割って scoreRate に変換し、各種レートを整形して出力。
-     *  4. 平均スコアレート昇順でソート（詰まり気味 → 緩い順）。
+     * 集計は {@link SongAvgScoreRatesCacheService} が 30 分毎に再計算してメモリに保持し、
+     * ここではキャッシュをそのまま返すだけ（リクエスト毎の重集計クエリを排除）。
+     * 初回リフレッシュ前は空リストが返る。
      *
-     * 分離クエリ × Java 側マージ方式を採るのは、単一重量 JOIN を避けてレスポンスを短縮するため。
-     *
-     * @return 曲別集計 Map の List
+     * @return 曲別集計 Map の List（平均スコアレート昇順）
      */
     @GetMapping("/song-avg-score-rates")
     public ResponseEntity<List<Map<String, Object>>> getSongAvgScoreRates() {
-        // 手順1: 「曲名|難易度名」→ notes 数 の lookup を構築（高速・シングルテーブル）。
-        List<SongDefinition> songDefs = songDefinitionRepository.findByRevision("active");
-        Map<String, Integer> notesMap = new HashMap<>();
-        for (SongDefinition sd : songDefs) {
-            // Lv11 未満は対象外なのでスキップ。
-            if (sd.getLevel() == null || sd.getLevel() < 11) continue;
-            // 難易度コード 4 = ANOTHER、10 = LEGGENDARIA という IIDX の内部規約に従う。
-            if ("4".equals(sd.getDifficulty())) {
-                notesMap.put(sd.getTitle() + "|ANOTHER", sd.getNotes());
-            } else if ("10".equals(sd.getDifficulty())) {
-                notesMap.put(sd.getTitle() + "|LEGGENDARIA", sd.getNotes());
-            }
-        }
-
-        // 手順2: 曲単位の平均スコアを取得（単一テーブル GROUP BY で軽量）。
-        List<Map<String, Object>> songAvgs = scoreRepository.findSongAvgScores();
-
-        // 手順3: MAX-（1 点差 AAA）の曲別カウントを集計 JOIN で取得（約 1000 行）。
-        List<Map<String, Object>> maxMinusData = scoreRepository.findSongMaxMinusCounts();
-        Map<String, int[]> maxMinusStats = new HashMap<>();
-        for (Map<String, Object> row : maxMinusData) {
-            String key = row.get("title") + "|" + row.get("difficultyName");
-            int maxMinusCount = ((Number) row.get("maxMinusCount")).intValue();
-            int totalCount = ((Number) row.get("totalCount")).intValue();
-            // 値 2 要素を持つ int[] に詰めて lookup に保存する（Map<String, Stats> より軽量）。
-            maxMinusStats.put(key, new int[]{maxMinusCount, totalCount});
-        }
-
-        // 手順3b: AAA の曲別カウントも同様に集計。
-        List<Map<String, Object>> aaaData = scoreRepository.findSongAaaCounts();
-        Map<String, int[]> aaaStats = new HashMap<>();
-        for (Map<String, Object> row : aaaData) {
-            String key = row.get("title") + "|" + row.get("difficultyName");
-            int aaaCount = ((Number) row.get("aaaCount")).intValue();
-            int totalCount = ((Number) row.get("totalCount")).intValue();
-            aaaStats.put(key, new int[]{aaaCount, totalCount});
-        }
-
-        // 手順4: 平均スコアを scoreRate（%）に変換しつつ、各種レートを組み立てて返す。
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
-        for (Map<String, Object> row : songAvgs) {
-            String title = (String) row.get("title");
-            String diffName = (String) row.get("difficultyName");
-            double avgScore = ((Number) row.get("avgScore")).doubleValue();
-            int playerCount = ((Number) row.get("playerCount")).intValue();
-
-            String key = title + "|" + diffName;
-            Integer notes = notesMap.get(key);
-            // notes 情報が無い曲（SongDefinition 未登録、もしくは Lv11 未満）はスキップ。
-            if (notes == null || notes <= 0) continue;
-
-            // MAX スコアは notes × 2。% 化するために 100 倍を掛ける。
-            double avgScoreRate = avgScore * 100.0 / (notes * 2.0);
-
-            int[] stats = maxMinusStats.get(key);
-            // 10000 倍してから丸めて /100 することで小数 2 桁の % を生成する。
-            double maxMinusRate = (stats != null && stats[1] > 0)
-                ? Math.round(stats[0] * 10000.0 / stats[1]) / 100.0
-                : 0.0;
-
-            Map<String, Object> entry = new HashMap<>();
-            entry.put("title", title);
-            entry.put("difficultyName", diffName);
-            entry.put("avgScoreRate", Math.round(avgScoreRate * 100.0) / 100.0);
-            entry.put("playerCount", playerCount);
-            entry.put("maxMinusRate", maxMinusRate);
-            entry.put("maxMinusCount", stats != null ? stats[0] : 0);
-
-            int[] aStats = aaaStats.get(key);
-            double aaaRate = (aStats != null && aStats[1] > 0)
-                ? Math.round(aStats[0] * 10000.0 / aStats[1]) / 100.0
-                : 0.0;
-            entry.put("aaaRate", aaaRate);
-            entry.put("aaaCount", aStats != null ? aStats[0] : 0);
-            result.add(entry);
-        }
-
-        // 平均スコアレート昇順（= 難しい／詰まってない曲順）でソートして返す。
-        result.sort((a, b) -> Double.compare(
-            ((Number) a.get("avgScoreRate")).doubleValue(),
-            ((Number) b.get("avgScoreRate")).doubleValue()));
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(songAvgScoreRatesCacheService.get());
     }
 
     /**

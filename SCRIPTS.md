@@ -29,8 +29,12 @@
 |------------|------|--------|
 | [fetch_votes.py](tools/fetch_votes.py) | 本番 PostgreSQL から PROMOTE / DEMOTE 投票を集計取得。 | 出力: `data/votes_result.json` |
 | [apply_votes_draft.py](tools/apply_votes_draft.py) | 投票結果に基づき難易度表ドラフトを作成（PROMOTE 多数→1段階昇格など）。 | 出力: `data/draft_changes.json` |
+| [apply-notes-bonus-draft.js](scripts/apply-notes-bonus-draft.js) | 物量(ノーツ数)加点をドラフトに適用（1800以上+0.1、以降200ごと+0.1、上限13.1）。デフォルト dry-run、`--apply` でバックアップ profile 作成後に draft を書き換え（active には触れない）。 | 出力: `data/notes_bonus_changes.json`, `data/notes_bonus_report.md` |
+| [slide-draft-to-active-counts.js](scripts/slide-draft-to-active-counts.js) | draft の序列を維持したまま各帯の曲数を active の定員に詰め直す（定員はスクリプト内 `CAPACITY_OVERRIDES` で上書き可）。デフォルト dry-run、`--apply` でバックアップ profile 作成後に draft を書き換え。 | 出力: `data/slide_changes.json`, `data/slide_report.md` |
+| [nudge-range-up.js](scripts/nudge-range-up.js) | draft の指定帯範囲（`--from`〜`--to`）の各帯先頭 `--n` 曲をひとつ上の帯へ繰り上げ（序列不変の境界微調整）。デフォルト dry-run、`--apply` でバックアップ profile 作成後に draft を書き換え。 | 出力: `data/nudge_changes.json`, `data/nudge_report.md` |
+| [optimize-band-sizes.js](scripts/optimize-band-sizes.js) | draft の序列固定のまま帯境界を座標降下法で最適化し、全ユーザーの BEAT-PT 変化（active→draft）のランキング加重 RMS を最小化（重み=順位^−`--rankpower`、デフォルト0.5）。BEAT-PT はシミュレーション SQL と同一ロジックをローカル再現。デフォルト dry-run、`--apply` でバックアップ profile 作成後に draft を書き換え。 | 出力: `data/optimize_band_sizes.json`, `data/optimize_band_sizes_report.md` |
 
-**前提**: `psycopg2` が必要、PostgreSQL 接続情報がハードコードされている（`tools/apply_votes_draft.py:14`, `tools/fetch_votes.py:4`）。
+**前提**: `psycopg2` が必要、PostgreSQL 接続情報がハードコードされている（`tools/apply_votes_draft.py:14`, `tools/fetch_votes.py:4`）。`apply-notes-bonus-draft.js` は Node + `pg`（接続情報ハードコード、本番 DB 直接更新）。
 
 ### 1.3 検証系
 
