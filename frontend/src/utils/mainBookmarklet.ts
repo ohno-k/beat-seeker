@@ -56,8 +56,8 @@ async function(){
     const n = arenaDoc.querySelector('a[href*="djdata/status"] .on-name li:last-child');
     myName = n ? (n.textContent || '').trim() : '';
 
-    const titles = arenaDoc.querySelectorAll('.arena-title');
-    const battleDivs = arenaDoc.querySelectorAll('.arena-battle');
+    const titles = arenaDoc.querySelectorAll('.sp-tab > .arena-title');
+    const battleDivs = arenaDoc.querySelectorAll('.sp-tab > .arena-battle, #djdata-arena > div.play-tab > center');
     titles.forEach(function(t, i) {
       const b = battleDivs[i];
       if (!b) return;
@@ -74,11 +74,10 @@ async function(){
       const ths = rows[0].querySelectorAll('th');
       const songs = [];
       for (let j = 2; j < ths.length; j++) {
-        const txt = (ths[j].textContent || '').replace(/\u00a0/g, ' ').replace(/\n/g, ' ').trim();
-        const sm2 = txt.match(/^(.+?)\s*\/\s*(.+)$/);
-        const title = sm2 ? sm2[1].trim() : txt;
-        const diff = sm2 ? sm2[2].trim() : '';
-        songs.push({title: title, difficulty: diff});
+        songs.push({
+          title: ths[j].childNodes[0].textContent?.trim() ?? "",
+          difficulty: ths[j].childNodes[3].textContent?.trim() ?? "",
+        })
       }
 
       const players = [];
@@ -102,10 +101,10 @@ async function(){
 
         const songScores = [];
         for (let s = 3; s < tds.length; s++) {
-          const stxt = (tds[s].textContent || '').replace(/\u00a0/g, ' ').trim();
-          const sm = stxt.match(/(\d+)/);
-          const spm = stxt.match(/(\d+)pt/);
-          songScores.push({score: sm ? parseInt(sm[1]) : 0, pt: spm ? parseInt(spm[1]) : 0});
+          songScores.push({
+            score: parseInt(tds[s].childNodes[0].textContent?.trim() ?? "0"),
+            pt: parseInt(tds[s].childNodes[3].textContent?.trim() ?? "0"),
+          })
         }
         players.push({djName: djName, arenaClass: cls, totalPt: totalPt, rank: rank, songScores: songScores});
       }
