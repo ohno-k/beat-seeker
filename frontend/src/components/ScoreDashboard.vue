@@ -115,51 +115,6 @@
       </div>
     </div>
 
-    <!-- Sub Tier Cards Row: KENBAN-TIER / SARA-TIER (BEAT-TIER の一回り小さい派生指標、サポーター限定) -->
-    <div v-if="showKenbanSaraTier" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <!-- KENBAN-TIER -->
-      <button
-        type="button"
-        @click="showKenbanBreakdown = true"
-        class="bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-200 hover:border-cyan-300 dark:hover:border-cyan-600 cursor-pointer text-left w-full">
-        <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Kenban-Tier <span class="text-cyan-500 dark:text-cyan-400 ml-1">›</span></p>
-        <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="kenbanRankInfo.name" :tier="kenbanRankInfo.tier" size="sm" class="mb-1" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
-          <h3 class="text-lg sm:text-xl font-bold mb-0.5 line-clamp-1" :class="kenbanRankInfo.color">
-            {{ kenbanRankInfo.name }} {{ kenbanRankInfo.tier || '' }}
-          </h3>
-          <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500">{{ kenbanTierPoints.toFixed(1) }} pt</p>
-        </div>
-        <div class="w-full mt-3 bg-slate-100 dark:bg-slate-700 h-1 rounded-full overflow-hidden z-10">
-          <div class="h-full bg-cyan-500 dark:bg-cyan-400 rounded-full transition-all duration-1000" :style="{ width: `${kenbanNextRankInfo.progress}%` }"></div>
-        </div>
-        <p v-if="kenbanNextRankInfo.nextRank" class="text-[9px] font-bold text-slate-400 dark:text-slate-500 mt-1.5 z-10 text-center">
-          Next: {{ kenbanNextRankInfo.nextRank.name }} {{ kenbanNextRankInfo.nextRank.tier || '' }}
-        </p>
-      </button>
-
-      <!-- SARA-TIER -->
-      <button
-        type="button"
-        @click="showSaraBreakdown = true"
-        class="bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-200 hover:border-orange-300 dark:hover:border-orange-600 cursor-pointer text-left w-full">
-        <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Sara-Tier <span class="text-orange-500 dark:text-orange-400 ml-1">›</span></p>
-        <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="saraRankInfo.name" :tier="saraRankInfo.tier" size="sm" class="mb-1" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
-          <h3 class="text-lg sm:text-xl font-bold mb-0.5 line-clamp-1" :class="saraRankInfo.color">
-            {{ saraRankInfo.name }} {{ saraRankInfo.tier || '' }}
-          </h3>
-          <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500">{{ saraTierPoints.toFixed(1) }} pt</p>
-        </div>
-        <div class="w-full mt-3 bg-slate-100 dark:bg-slate-700 h-1 rounded-full overflow-hidden z-10">
-          <div class="h-full bg-orange-500 dark:bg-orange-400 rounded-full transition-all duration-1000" :style="{ width: `${saraNextRankInfo.progress}%` }"></div>
-        </div>
-        <p v-if="saraNextRankInfo.nextRank" class="text-[9px] font-bold text-slate-400 dark:text-slate-500 mt-1.5 z-10 text-center">
-          Next: {{ saraNextRankInfo.nextRank.name }} {{ saraNextRankInfo.nextRank.tier || '' }}
-        </p>
-      </button>
-    </div>
-
     <!-- Ranking + Lv12 Stats Row -->
     <div v-if="!isTopRankerView && !isPrivateView" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
         <!-- Ranking Position -->
@@ -243,24 +198,6 @@
     <!-- Info Modal -->
     <BeatTierInfoModal v-if="showInfoModal" @close="showInfoModal = false" />
     <RateTierInfoModal v-if="showRateInfoModal" @close="showRateInfoModal = false" />
-    <TierBreakdownModal
-      v-if="showKenbanBreakdown"
-      side="kenban"
-      :contributions="kenbanContributions"
-      :flat-scores="allFlattenedScores"
-      :scratch-map="scratchPctMap"
-      :total-points="kenbanTierPoints"
-      :beat-total-points="totalPoints"
-      @close="showKenbanBreakdown = false" />
-    <TierBreakdownModal
-      v-if="showSaraBreakdown"
-      side="sara"
-      :contributions="saraContributions"
-      :flat-scores="allFlattenedScores"
-      :scratch-map="scratchPctMap"
-      :total-points="saraTierPoints"
-      :beat-total-points="totalPoints"
-      @close="showSaraBreakdown = false" />
   </div>
 </template>
 
@@ -280,19 +217,16 @@
  * @prop rateTierPointsOverride TOP ランカー等、サーバ算出済み Rate-PT が優先される場合に使用する値。
  * @emits open-profile-edit メール未登録等の促しバナーからプロフィール編集を要求。
  */
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
 import {
   getRankInfo, getNextRankInfo,
   getRateTierRankInfo, getNextRateTierRankInfo,
   calculateScoreRateTierPoints,
-  calculateWeightedTotalPoints,
-  buildTopSideContributions,
 } from '../utils/beatTier';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
 import RateTierInfoModal from './RateTierInfoModal.vue';
-import TierBreakdownModal from './TierBreakdownModal.vue';
 import RankIcon from './RankIcon.vue';
 import UnofficialDifficultyTable from './UnofficialDifficultyTable.vue';
 import RankUpAdvice from './RankUpAdvice.vue';
@@ -300,11 +234,8 @@ import ActivityFeed from './ActivityFeed.vue';
 import { useAuth } from '../composables/useAuth';
 import { flattenScores } from '../utils/scoreData';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
-import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
-import { useScratchSummary } from '../composables/useScratchSummary';
 
 const { showRateTier } = useRateTierVisibility();
-const { showKenbanSaraTier } = useKenbanSaraTierVisibility();
 const { t } = useI18n();
 const { user } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
@@ -414,9 +345,6 @@ const rateTierDjPie = computed(() => {
 // Beat-Tier / Rate-Tier の情報モーダル表示フラグ。
 const showInfoModal = ref(false);
 const showRateInfoModal = ref(false);
-// KENBAN-TIER / SARA-TIER の貢献度モーダル表示フラグ。
-const showKenbanBreakdown = ref(false);
-const showSaraBreakdown = ref(false);
 
 // ---- Beat-Tier 算出 ----
 /** 【computed の役割】 現在の Beat-PT に対応するティア情報（名称、色、アイコン等）。 */
@@ -452,59 +380,6 @@ const rateTierPoints = computed(() => {
 const rateTierRankInfo = computed(() => getRateTierRankInfo(rateTierPoints.value));
 /** 【computed の役割】 Rate-Tier の次ティア情報。 */
 const rateTierNextRankInfo = computed(() => getNextRateTierRankInfo(rateTierPoints.value));
-
-// ---- KENBAN-TIER / SARA-TIER 算出 ----
-/**
- * 譜面の皿率 Map（`(title|difficultyName) → scratchPct`）。
- * 一度だけ fetch してモジュールで共有する。
- */
-const { scratchPctMap, loadScratchSummary } = useScratchSummary();
-onMounted(() => {
-  // KENBAN/SARA-Tier 表示が ON の時だけ皿率 Map をロード（カードが見えないなら不要）。
-  if (showKenbanSaraTier.value) loadScratchSummary();
-});
-// トグルが後から ON に切り替わった場合も lazy ロードする。
-watch(showKenbanSaraTier, (val) => { if (val) loadScratchSummary(); });
-
-/**
- * 【computed の役割】 KENBAN-TIER ポイント。
- * 全プレイ譜面のうち「鍵盤側貢献 pt = BEAT-PT × kenbanWeight」が上位 100 となるものを独立に集計。
- * SARA 側とは別の譜面集合になり得る（片側偏重プレイヤーでも各 TIER は伸びる）。
- */
-const kenbanTierPoints = computed(() => calculateWeightedTotalPoints(
-  allFlattenedScores.value,
-  scratchPctMap.value,
-  'kenban',
-));
-
-/** 【computed の役割】 KENBAN-TIER の現在ティア情報（BEAT-TIER と同ラダー、pt は BEAT 比 1 補正済み）。 */
-const kenbanRankInfo = computed(() => getRankInfo(kenbanTierPoints.value));
-/** 【computed の役割】 KENBAN-TIER の次ティア情報。 */
-const kenbanNextRankInfo = computed(() => getNextRankInfo(kenbanTierPoints.value));
-
-/**
- * 【computed の役割】 SARA-TIER ポイント。
- * 全プレイ譜面のうち「皿側貢献 pt = BEAT-PT × saraWeight」が上位 100 となるものを独立に集計。
- */
-const saraTierPoints = computed(() => calculateWeightedTotalPoints(
-  allFlattenedScores.value,
-  scratchPctMap.value,
-  'sara',
-));
-
-/** 【computed の役割】 SARA-TIER の現在ティア情報（BEAT-TIER と同ラダー、pt は BEAT 比 1 補正済み）。 */
-const saraRankInfo = computed(() => getRankInfo(saraTierPoints.value));
-/** 【computed の役割】 SARA-TIER の次ティア情報。 */
-const saraNextRankInfo = computed(() => getNextRankInfo(saraTierPoints.value));
-
-/** 【computed の役割】 KENBAN モーダル用の貢献上位 100 譜面リスト（貢献 pt 降順）。 */
-const kenbanContributions = computed(() => buildTopSideContributions(
-  allFlattenedScores.value, scratchPctMap.value, 'kenban',
-));
-/** 【computed の役割】 SARA モーダル用の貢献上位 100 譜面リスト（貢献 pt 降順）。 */
-const saraContributions = computed(() => buildTopSideContributions(
-  allFlattenedScores.value, scratchPctMap.value, 'sara',
-));
 
 // ---- Lv12 クイック統計（UI サマリーカードで使う軽量集計）----
 /** 【computed の役割】 Lv12 全譜面の配列。 */

@@ -56,7 +56,7 @@ async function load() {
 onMounted(load);
 watch([year, month, targetUserId], load);
 
-// ─── カード総数（RATE-TIER / KENBAN-SARA-TIER の表示設定を反映） ─────
+// ─── カード総数（RATE-TIER の表示設定を反映） ─────
 const totalCards = computed(() => {
   const d = data.value;
   if (!d) return 0;
@@ -64,8 +64,6 @@ const totalCards = computed(() => {
   let base = 8;
   // RATE-TIER 表示時のみ RATE-PT 変動と RATE-PT TOP10 を加算
   if (d.showRateTier) base += 2;
-  // KENBAN/SARA はサポーター × 表示設定 ON のとき各 1 枚
-  if (d.isSupporter && d.showKenbanSaraTier) base += 2;
   return base;
 });
 
@@ -470,38 +468,6 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
               先月より控えめでした
             </p>
           </div>
-        </section>
-
-        <!-- カード サポーター: KENBAN-PT -->
-        <section
-          v-if="data.isSupporter && data.showKenbanSaraTier"
-          class="snap-start min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900 p-8 text-center"
-        >
-          <p class="text-base md:text-lg opacity-70 mb-4">KENBAN-PT</p>
-          <div class="flex items-baseline gap-3 mb-4 flex-wrap justify-center">
-            <span class="text-2xl md:text-3xl opacity-60">{{ data.startKenbanPt.toFixed(2) }}</span>
-            <span class="text-xl opacity-60">→</span>
-            <span class="text-4xl md:text-6xl font-black">{{ data.endKenbanPt.toFixed(2) }}</span>
-          </div>
-          <p :class="['text-4xl md:text-5xl font-black', data.kenbanPtIncrease >= 0 ? 'text-emerald-300' : 'text-red-300']">
-            {{ data.kenbanPtIncrease >= 0 ? '+' : '' }}{{ data.kenbanPtIncrease.toFixed(2) }}
-          </p>
-        </section>
-
-        <!-- カード サポーター: SARA-PT -->
-        <section
-          v-if="data.isSupporter && data.showKenbanSaraTier"
-          class="snap-start min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-slate-900 to-slate-900 p-8 text-center"
-        >
-          <p class="text-base md:text-lg opacity-70 mb-4">SARA-PT</p>
-          <div class="flex items-baseline gap-3 mb-4 flex-wrap justify-center">
-            <span class="text-2xl md:text-3xl opacity-60">{{ data.startSaraPt.toFixed(2) }}</span>
-            <span class="text-xl opacity-60">→</span>
-            <span class="text-4xl md:text-6xl font-black">{{ data.endSaraPt.toFixed(2) }}</span>
-          </div>
-          <p :class="['text-4xl md:text-5xl font-black', data.saraPtIncrease >= 0 ? 'text-emerald-300' : 'text-red-300']">
-            {{ data.saraPtIncrease >= 0 ? '+' : '' }}{{ data.saraPtIncrease.toFixed(2) }}
-          </p>
         </section>
 
         <!-- カード 9: クロージング + シェア -->

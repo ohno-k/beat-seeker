@@ -7,7 +7,6 @@
  *
  * 対象:
  *  - 全ログインユーザー (および未ログイン閲覧者) が利用できる機能
- *  - サポーター限定のスコアペア散布図も「サポーター限定」と明示したうえで紹介する
  *
  * 非対象 (このページには記載しない):
  *  - 管理者専用画面 (人気曲ランキング / 管理パネル / 任意 2 ユーザー比較)
@@ -43,8 +42,6 @@ const sections = [
   { id: 'tier-voting', title: '投票所 (難易度表投票)', desc: '非公式難易度の昇格 / 据え置き / 降格に投票' },
   { id: 'song-avg', title: 'ティア別平均', desc: '各 Beat-Tier 帯での曲別の平均スコアを参照' },
   { id: 'diff-table', title: '難易度表', desc: '非公式難易度表の全ランクをアコーディオン表示' },
-  { id: 'score-prediction', title: '譜面分析 (スコア予測)', desc: '譜面の傾向と予測スコアを可視化' },
-  { id: 'score-scatter', title: 'スコアペア散布図 (サポーター限定)', desc: '2 譜面間の相関を散布図で分析' },
   { id: 'chart-list', title: '譜面一覧', desc: '全譜面を検索 / ソート / textage プレビュー' },
   { id: 'share', title: '公開共有リンク', desc: '未ログインでも見られるトークン URL でスコアを共有' },
   { id: 'changelog', title: '更新履歴', desc: 'アプリ更新と難易度表改訂の履歴' },
@@ -315,50 +312,10 @@ onMounted(() => {
       </ul>
     </section>
 
-    <!-- 13. 譜面分析 -->
-    <section id="score-prediction" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
-      <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">13</span>
-        譜面分析 (スコア予測)
-      </h2>
-      <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
-        Lv11 / Lv12 の ANOTHER / LEGGENDARIA 譜面について、過去の類似譜面のスコアから「あなたが出せそうなスコア」を予測する画面です。
-      </p>
-      <ul class="list-disc pl-6 space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed">
-        <li><strong>曲を選ぶ:</strong> 検索ボックスで譜面を指定すると、予測スコアと予測スコアレート (%) が表示されます。</li>
-        <li><strong>譜面プロファイル:</strong> 実効 BPM、皿率、同時押し率、ノーツの配置パターン (16分・24分・縦連) が可視化されます。</li>
-        <li><strong>URL での共有:</strong> 各譜面の分析結果は <code>/chart/&lt;version&gt;/&lt;slug&gt;/&lt;diff&gt;</code> という安定した URL を持ちます。SNS シェアや外部サイトからのリンクに使えます。</li>
-        <li><strong>他ユーザーの予測閲覧:</strong> フレンドや TOP ランカーを閲覧中の場合、相手の予測値も同じ画面に並べて確認できます。</li>
-      </ul>
-    </section>
-
-    <!-- 14. スコアペア散布図 (サポーター限定) -->
-    <section id="score-scatter" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border-2 border-amber-200 dark:border-amber-800/50 space-y-5">
-      <h2 class="text-2xl font-bold flex items-center gap-3 flex-wrap">
-        <span class="text-blue-500 font-mono text-base">14</span>
-        スコアペア散布図
-        <span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
-          サポーター限定
-        </span>
-      </h2>
-      <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
-        2 つの譜面を指定し、両方をプレイしている全ユーザーのスコアペアを散布図でプロットする分析画面です。譜面間の相関を可視化し、自分の位置や得意 / 苦手の偏りを確認できます。
-      </p>
-      <ul class="list-disc pl-6 space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed">
-        <li><strong>譜面 A / B の選択:</strong> 上部の検索ボックスから 2 譜面を指定します。</li>
-        <li><strong>散布図表示:</strong> X 軸 = 譜面 A のスコア、Y 軸 = 譜面 B のスコアで全ユーザーをプロット。回帰直線と相関係数も表示されます。</li>
-        <li><strong>DJ LEVEL グリッド:</strong> A / AA / AAA / MAX- / MAX のグレード境界が補助線として描画されます。</li>
-        <li><strong>ホバー詳細:</strong> 点にマウスを乗せると、ユーザー名と両譜面のスコア / スコアレートが表示されます。</li>
-      </ul>
-      <div class="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md text-sm text-amber-800 dark:text-amber-300">
-        この機能は <strong>Ko-fi 経由でサポートしてくださったサポーター限定</strong>です。サイドバー下部の Ko-fi ボタンから支援できます。
-      </div>
-    </section>
-
-    <!-- 15. 譜面一覧 -->
+    <!-- 13. 譜面一覧 -->
     <section id="chart-list" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">15</span>
+        <span class="text-blue-500 font-mono text-base">13</span>
         譜面一覧
       </h2>
       <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -372,10 +329,10 @@ onMounted(() => {
       </ul>
     </section>
 
-    <!-- 16. 公開共有リンク -->
+    <!-- 14. 公開共有リンク -->
     <section id="share" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">16</span>
+        <span class="text-blue-500 font-mono text-base">14</span>
         公開共有リンク
       </h2>
       <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -389,10 +346,10 @@ onMounted(() => {
       </ul>
     </section>
 
-    <!-- 17. 更新履歴 -->
+    <!-- 15. 更新履歴 -->
     <section id="changelog" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">17</span>
+        <span class="text-blue-500 font-mono text-base">15</span>
         更新履歴
       </h2>
       <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -404,10 +361,10 @@ onMounted(() => {
       </ul>
     </section>
 
-    <!-- 18. その他 -->
+    <!-- 16. その他 -->
     <section id="misc" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
-        <span class="text-blue-500 font-mono text-base">18</span>
+        <span class="text-blue-500 font-mono text-base">16</span>
         その他の便利機能
       </h2>
       <ul class="list-disc pl-6 space-y-2 text-slate-700 dark:text-slate-300 leading-relaxed">

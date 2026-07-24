@@ -339,12 +339,6 @@
                         title="INFINITAS で取り込んだスコア（アーケードとは別管理。両方ある場合は EX SCORE が高い方を表示）">
                     INF
                   </span>
-                  <!-- 譜面タイプ（鍵盤/バランス/皿）バッジ。KENBAN/SARA-Tier トグル ON のときだけ表示。 -->
-                  <span v-if="showKenbanSaraTier && recordChartType(record) !== 'unknown'"
-                        :class="['px-1 sm:px-1.5 py-0 rounded text-[7px] sm:text-[9px] font-bold whitespace-nowrap inline-block w-fit', chartTypeBadgeClass(recordChartType(record))]"
-                        :title="chartTypeTitle(record)">
-                    {{ chartTypeLabel(recordChartType(record)) }}
-                  </span>
                 </div>
               </td>
               <td class="px-1 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap">
@@ -1245,15 +1239,13 @@ import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import { computeMilestoneLines } from '../utils/milestones';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
-import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getChartType, getFolderRankInfoByRate, FOLDER_RANK_DEFS, type ChartType, type RankInfo } from '../utils/beatTier';
+import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getFolderRankInfoByRate, FOLDER_RANK_DEFS, type RankInfo } from '../utils/beatTier';
 import { calcBpi } from '../utils/bpi';
-import { useScratchSummary } from '../composables/useScratchSummary';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
-import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
 import { useFriends } from '../composables/useFriends';
 import { DJ_LEVELS } from '../composables/constants';
 import ResultImageSection from './ResultImageSection.vue';
@@ -2731,48 +2723,11 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
-/** 譜面タイプバッジ用に皿率 Map を共有取得。 */
-const { scratchPctMap, loadScratchSummary } = useScratchSummary();
-/** KENBAN/SARA-Tier 表示トグル（バッジ表示の可否判定に使用）。 */
-const { showKenbanSaraTier } = useKenbanSaraTierVisibility();
-
-/** 譜面タイプ（ANOTHER/LEGGENDARIA かつ scratchPct が判明している場合のみ判定、それ以外は 'unknown'）。 */
-function recordChartType(record: ScoreRecord): ChartType {
-  if (record.difficultyName !== 'ANOTHER' && record.difficultyName !== 'LEGGENDARIA') return 'unknown';
-  return getChartType(scratchPctMap.value.get(`${record.title}|${record.difficultyName}`));
-}
-
-/** 譜面タイプバッジの Tailwind クラス。 */
-function chartTypeBadgeClass(type: ChartType): string {
-  switch (type) {
-    case 'kenban':  return 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300';
-    case 'sara':    return 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300';
-    case 'balance': return 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
-    default:        return '';
-  }
-}
-function chartTypeLabel(type: ChartType): string {
-  switch (type) {
-    case 'kenban':  return '鍵盤';
-    case 'sara':    return '皿';
-    case 'balance': return 'ﾊﾞﾗﾝｽ';
-    default:        return '';
-  }
-}
-function chartTypeTitle(record: ScoreRecord): string {
-  const pct = scratchPctMap.value.get(`${record.title}|${record.difficultyName}`);
-  return pct == null ? '' : `皿率 ${pct.toFixed(1)}%`;
-}
-
-/** マウント時に外クリック監視を登録し、songRanks（クリアタイプ別集計）と皿率サマリを取得。 */
+/** マウント時に外クリック監視を登録し、songRanks（クリアタイプ別集計）を取得。 */
 onMounted(() => {
   window.addEventListener('click', handleClickOutside);
   fetchSongRanks();
-  // KENBAN/SARA-Tier トグルが ON のユーザーのみ皿率 Map を取得（バッジ表示に必要）。
-  if (showKenbanSaraTier.value) loadScratchSummary();
 });
-// トグルが後から ON に切り替わった場合も lazy ロードする。
-watch(showKenbanSaraTier, (val) => { if (val) loadScratchSummary(); });
 
 /** アンマウント時にイベントリスナ解除 + 万一残っている body のスクロール固定を解除。 */
 onUnmounted(() => {
