@@ -1,0 +1,47 @@
+# 本番 DB（Render Postgres）へローカルから接続するためのプロファイル (prod-db) の雛形。
+#
+# 使い方:
+#  1. このファイルを application-prod-db.yml にコピーする（.gitignore 済み・commit されない）
+#  2. Render ダッシュボード → beat-seeker-db → Connect →「External Database URL」を確認し、
+#     下記 <...> を実際の値に置き換える。
+#     External URL は postgres://USER:PASSWORD@HOST.oregon-postgres.render.com/DBNAME 形式なので、
+#     JDBC 形式 jdbc:postgresql://HOST:5432/DBNAME?sslmode=require に読み替えること
+#     （外部接続は SSL 必須。sslmode=require を忘れると接続に失敗する）。
+#  3. 起動: mvn spring-boot:run "-Dspring-boot.run.profiles=prod-db"
+#
+# 安全装置（重要）:
+#  - app.scheduling.enabled=false で全定期ジョブ（毎日 03:00 の user_song_ranks 全再構築、
+#    リーグの週次締め/draft 作成、キャッシュ更新）を無効化している。
+#    ローカル起動中のインスタンスが本番データを勝手に書き換えないようにするため。
+#    副作用として、キャッシュ依存の一部エンドポイント（ティア別平均等）はローカルでは空になる。
+#  - ddl-auto=none でスキーマ変更も封じている。ローカルの実験的なエンティティが
+#    本番スキーマに紛れ込むのを防ぐ（本番のスキーマ反映は Render へのデプロイに任せる）。
+#  - 接続プールは 3 本に絞ってある（Render Postgres の接続数上限を本番サービスと取り合わないため）。
+#
+# 注意: 読み取り専用ではない。ログインして操作すれば通常の API 経由の書き込み
+# （スコアアップロード、リーグ参加、管理操作など）は本番データに反映される。
+spring:
+  datasource:
+    url: jdbc:postgresql://<HOST>.oregon-postgres.render.com:5432/<DBNAME>?sslmode=require
+    driver-class-name: org.postgresql.Driver
+    username: <USER>
+    password: <PASSWORD>
+    hikari:
+      maximum-pool-size: 3
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+# 全 @Scheduled ジョブを止める（config/SchedulingConfig.java 参照）
+app:
+  scheduling:
+    enabled: false
+
+# JWT 署名鍵はローカルインスタンス専用（本番の鍵と一致させる必要はない。
+# ログインは本番 users テーブルの BCrypt ハッシュ照合なので、本番のパスワードでログインできる）。
+jwt:
+  secret: local-development-only-jwt-secret-please-change-0123456789abcdef
+  expiration-ms: 604800000
+
+# 月末振り返りシェア URL の HMAC 秘密鍵（必須プロパティのためダミーを設定）。
+WRAPPED_SHARE_SECRET: local-development-only-wrapped-share-secret-0123456789

@@ -3,7 +3,6 @@ package com.beatseeker.backend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 【クラスの役割】 beat-seeker バックエンドアプリケーションのエントリポイント。
@@ -16,15 +15,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *  - {@link SpringBootApplication} … 自動設定 / コンポーネントスキャン / 設定クラス宣言を一括有効化
  *  - {@link EnableAsync}            … {@code @Async} アノテーションによる非同期メソッド呼び出しを許可
  *                                     （重いスコア集計処理などをバックグラウンドで走らせるために使う）
- *  - {@link EnableScheduling}       … {@code @Scheduled} によるタイマー起動タスクを許可
- *                                     （定期的なキャッシュ更新などを想定）
+ *
+ * {@code @EnableScheduling} は {@code config/SchedulingConfig} に移動した
+ * （本番 DB へローカルから接続する際に定期ジョブを一括無効化できるようにするため。
+ *  {@code app.scheduling.enabled=false} で全 {@code @Scheduled} が止まる）。
  *
  * コンポーネントスキャン起点:
  *  - このクラスが配置された {@code com.beatseeker.backend} パッケージ配下が対象になる。
  */
 @SpringBootApplication
 @EnableAsync
-@EnableScheduling
 public class BackendApplication {
 
 	/**

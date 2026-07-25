@@ -32,6 +32,7 @@ const AdminUserComparisonView = () => import('../views/AdminUserComparisonView.v
 const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandingsView.vue')
 const WrappedView = () => import('../views/WrappedView.vue')
 const KinjoCupView = () => import('../views/KinjoCupView.vue')
+const LeagueView = () => import('../views/LeagueView.vue')
 
 /**
  * SPA のルートテーブル定義。
@@ -91,6 +92,8 @@ const router = createRouter({
     // きんじょー杯 特設ページ（参加者一覧・公開閲覧。追加/削除は管理者のみ）。
     // App.vue 側でパスを検知してスタンドアロン描画する。
     { path: '/kinjocup', name: 'kinjocup', component: KinjoCupView },
+    // リーグモード（週次課題曲 3 曲で昇降格を競う。要ログイン）
+    { path: '/league', name: 'league', component: LeagueView },
     // 大会管理: Competition セクションの 4 ID ホワイトリストで保護。
     // 直接アクセス・ブックマーク用エントリ。実際の権限判定はサーバ側 + View 側で行う。
     { path: '/competition-admin', name: 'competition-admin', component: CompetitionAdminView },

@@ -153,6 +153,8 @@ const primaryItems = computed(() => [
   { id: 'friends', label: t('nav.friends'), icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', requiresAuth: true, hideOnViewing: true },
   { id: 'history', label: t('nav.history'), icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', requiresAuth: true, hideOnViewing: true },
   { id: 'arena', label: t('nav.arena'), icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z', requiresAuth: true, hideOnViewing: true },
+  // リーグモード: 週次課題曲 3 曲・昇降格制（要ログイン）
+  { id: 'league', label: t('nav.league'), icon: 'M3 4h18M8 4v16m8-16v16M3 20h18M5 8l3 3-3 3m14-6l-3 3 3 3', requiresAuth: true, hideOnViewing: true },
 ]);
 
 /**

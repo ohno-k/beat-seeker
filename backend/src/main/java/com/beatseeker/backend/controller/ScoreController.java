@@ -290,11 +290,28 @@ public class ScoreController {
                 boolean rankBetter = newRank > oldRank;
                 boolean missBetter = newMiss < oldMiss;
 
+                // プレー回数は「記録更新なしのプレー」でも進むため、改善判定とは独立に保持する。
+                // リーグモードの「週内プレー必須」判定がこの値の増加を根拠にする。
+                //  - arcade: CSV が歴代プレー回数を持つので、増えていればその値を採用（再アップロードは冪等）
+                //  - infinitas: リクエストの playCount は常に 1 のため、1 アップロード = 1 プレーとして加算する
+                //    （OCR の二重認識で二重加算され得るが、playCount は有効判定にしか使わないため許容）
+                int oldPlayCount = existing.getPlayCount() != null ? existing.getPlayCount() : 0;
+
                 // IIDX 実機は「ベストスコア / ベストクリア / ベスト BP」を個別に保持するが、
                 // このアプリでは 1 レコードで集約するため、いずれかが改善していたら一括更新する。
                 if (scoreBetter || rankBetter || missBetter) {
                     isImproved = true;
                     updateScoreFields(existing, req);
+                    if ("infinitas".equals(source)) {
+                        existing.setPlayCount(oldPlayCount + 1);
+                    }
+                    scoreRepository.save(existing);
+                } else if ("infinitas".equals(source)) {
+                    existing.setPlayCount(oldPlayCount + 1);
+                    scoreRepository.save(existing);
+                } else if (req.playCount() != null && req.playCount() > oldPlayCount) {
+                    // 記録は据え置きのままプレー回数のみ更新する（score/lamp/miss/uploadedAt は触らない）
+                    existing.setPlayCount(req.playCount());
                     scoreRepository.save(existing);
                 }
             }

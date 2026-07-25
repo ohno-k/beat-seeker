@@ -115,6 +115,16 @@
       </div>
     </div>
 
+    <!-- 現在の DIVISION（自分のダッシュボード・リーグ参加中のときのみ・中央表示） -->
+    <div v-if="!isViewingOther && !isTopRankerView && !isPrivateView && isLeagueParticipant"
+         class="bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-3 transition-colors duration-200">
+      <DivisionIcon :tier="currentDivision" :size="52" class="shrink-0" />
+      <div class="text-center sm:text-left">
+        <p class="text-[10px] font-bold text-slate-400">{{ t('dashboard.currentDivision') }}</p>
+        <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ divisionLabel }}</p>
+      </div>
+    </div>
+
     <!-- Ranking + Lv12 Stats Row -->
     <div v-if="!isTopRankerView && !isPrivateView" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
         <!-- Ranking Position -->
@@ -228,16 +238,19 @@ import {
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
 import RateTierInfoModal from './RateTierInfoModal.vue';
 import RankIcon from './RankIcon.vue';
+import DivisionIcon from './DivisionIcon.vue';
 import UnofficialDifficultyTable from './UnofficialDifficultyTable.vue';
 import RankUpAdvice from './RankUpAdvice.vue';
 import ActivityFeed from './ActivityFeed.vue';
 import { useAuth } from '../composables/useAuth';
+import { useLeague } from '../composables/useLeague';
 import { flattenScores } from '../utils/scoreData';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
 const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
 const { user } = useAuth();
+const league = useLeague();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const emit = defineEmits<{ (e: 'open-profile-edit'): void }>();
@@ -415,7 +428,48 @@ onMounted(async () => {
     const res = await fetch(`${API_BASE}/api/scores/ranking`);
     if (res.ok) rankingData.value = await res.json();
   } catch {}
+  // 自分のダッシュボードのときだけ、リーグの現在 DIVISION を取得する。
+  if (!isViewingOther.value && !isTopRankerView.value && !isPrivateView.value) {
+    try {
+      const entries = await league.fetchMe();
+      const e = entries.find(x => x.ladderType === 'score');
+      // リーグに参加中（active）かつ配属済みのときだけ DIVISION を表示対象にする。
+      if (e && e.active && e.currentTier != null) myLeagueTier.value = e.currentTier;
+    } catch {}
+  }
 });
+
+/** リーグ score ラダーの現在 DIVISION（参加・配属済みのとき）。未取得/未参加は null。 */
+const myLeagueTier = ref<number | null>(null);
+
+/**
+ * 総合 BEAT-PT から初回配属 DIVISION を返す（backend の LeagueDivision.forBeatPt と同じしきい値）。
+ * リーグ未参加ユーザーへ「配属見込みの DIVISION」を表示するためのフォールバック。
+ */
+function divisionForBeatPt(pt: number): number {
+  if (pt >= 17800) return 0;
+  if (pt >= 17500) return 1;
+  if (pt >= 17100) return 2;
+  if (pt >= 16800) return 3;
+  if (pt >= 16400) return 4;
+  if (pt >= 16000) return 5;
+  if (pt >= 15500) return 6;
+  if (pt >= 15000) return 7;
+  if (pt >= 14400) return 8;
+  if (pt >= 13400) return 9;
+  return 10;
+}
+
+/** 表示する現在 DIVISION。参加済みなら実際の所属、そうでなければ BEAT-PT 見込み。 */
+const currentDivision = computed<number>(() =>
+  myLeagueTier.value != null ? myLeagueTier.value : divisionForBeatPt(props.totalPoints)
+);
+/** リーグに参加中か。DIVISION 欄はこのときだけ表示する（未参加者には出さない）。 */
+const isLeagueParticipant = computed(() => myLeagueTier.value != null);
+/** DIVISION の表示名（0=DIVISION LEGEND、1..10=DIVISION n）。 */
+const divisionLabel = computed(() =>
+  currentDivision.value === 0 ? 'DIVISION LEGEND' : `DIVISION ${currentDivision.value}`
+);
 
 /**
  * 【computed の役割】 対象ユーザーの全体順位と前回差分を返す。

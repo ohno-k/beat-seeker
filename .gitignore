@@ -97,6 +97,8 @@ verification_results.txt
 
 # --- Spring Boot ローカルプロファイル (機密値を含むので各自で作成、commit しない) ---
 backend/src/main/resources/application-local.yml
+# 本番 DB 接続プロファイル (本番 DB の接続情報を含むので絶対に commit しない)
+backend/src/main/resources/application-prod-db.yml
 
 # --- 環境変数ファイル (機密値を含むので commit しない。雛形は .env.example) ---
 .env

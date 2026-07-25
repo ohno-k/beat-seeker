@@ -207,6 +207,9 @@ public class SecurityConfig {
                                                                 "/api/kinjocup/participants/*/note")
                                                 .permitAll()
                                                 .requestMatchers("/api/kinjocup/**").authenticated()
+                                                // リーグモード: 参加・順位表・管理系すべて要ログイン。
+                                                // 管理者判定 (/api/league/admin/**) は Controller 側 (AdminAuthService) で行う。
+                                                .requestMatchers("/api/league/**").authenticated()
                                                 // 上記いずれにも該当しないリクエストは公開扱い（静的リソース等）
                                                 .anyRequest().permitAll())
                                 // 未認証で要ログインエンドポイントへアクセスされた場合は 401 を返す

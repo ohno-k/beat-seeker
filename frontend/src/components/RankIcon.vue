@@ -267,7 +267,7 @@ import { useAprilFools } from '../composables/useAprilFools';
 const props = defineProps<{
   rankName: string;
   tier?: number;
-  size?: 'xs' | 'sm' | 'md' | 'lg';
+  size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg';
   disableParty?: boolean;
   isSupporter?: boolean;
   /** 軽量モード。重い SVG フィルタ（ガウシアンぼかし/ドロップシャドウ）を全て省く。
@@ -310,6 +310,7 @@ const wanderStyle = computed(() => {
 /** props.size からアイコンの外形 Tailwind クラスを決める。 */
 const sizeClass = computed(() => {
   switch (props.size) {
+    case '2xs': return 'w-5 h-5'; // 一覧の行内に置く極小サイズ（レスポンシブ拡大なし）
     case 'xs': return 'w-6 h-6 sm:w-8 sm:h-8';
     case 'sm': return 'w-8 h-8';
     case 'md': return 'w-12 h-12';
