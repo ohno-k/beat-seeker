@@ -458,6 +458,8 @@ export const en = {
   'report.folderRankAssigned': 'All songs played! Rank: {rank}',
   'report.folderRankUp': 'Rank Up! {oldRank} → {newRank}',
   'report.folderRemaining': '{n} more songs until rank is assigned',
+  'report.league.title': 'League Mode',
+  'report.league.projected': 'Proj. PT',
 
   // Common
   'common.loading': 'Loading...',

@@ -458,6 +458,8 @@ export const ko = {
   'report.folderRankAssigned': '전곡 플레이 완료! 랭크: {rank}',
   'report.folderRankUp': '랭크 업! {oldRank} → {newRank}',
   'report.folderRemaining': '랭크 부여까지 {n}곡 남았습니다',
+  'report.league.title': '리그 모드',
+  'report.league.projected': '예상 PT',
 
   // Common
   'common.loading': '불러오는 중...',

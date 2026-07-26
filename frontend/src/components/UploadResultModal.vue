@@ -144,6 +144,51 @@
               </div>
             </div>
 
+            <!-- リーグモードの進捗（開催中の週に参加していれば表示。今回反映後の順位・有効曲・見込みPT） -->
+            <div v-if="leagueProgress"
+                 class="rounded-md border border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-950/40 dark:to-violet-950/30 p-5 mb-6">
+              <h3 class="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-3">
+                <DivisionIcon :tier="leagueProgress.tier" :size="28" class="shrink-0" />
+                {{ t('report.league.title') }}
+                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-500/20 px-2 py-0.5 rounded">
+                  {{ divisionName(leagueProgress.tier) }} / {{ t('league.groupN', { n: leagueProgress.groupIndex + 1 }) }}
+                </span>
+              </h3>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-white dark:bg-slate-800/60 rounded-md p-3 text-center">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ t('league.rank') }}</p>
+                  <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 tabular-nums leading-tight">{{ leagueProgress.rank }}<span class="text-sm text-slate-400">/{{ leagueProgress.groupSize }}</span></p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/60 rounded-md p-3 text-center">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ t('league.validSongs') }}</p>
+                  <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 tabular-nums leading-tight">{{ leagueProgress.validSongs }}<span class="text-sm text-slate-400">/3</span></p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/60 rounded-md p-3 text-center">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ t('league.leaguePoints') }}</p>
+                  <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 tabular-nums leading-tight">{{ leagueProgress.resultValue ?? 0 }}</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800/60 rounded-md p-3 text-center">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ t('report.league.projected') }}</p>
+                  <p class="text-2xl font-bold tabular-nums leading-tight"
+                     :class="leagueProgress.zone === 'promote' ? 'text-emerald-500' : leagueProgress.zone === 'relegate' ? 'text-red-500' : 'text-slate-800 dark:text-slate-100'">
+                    {{ leagueProgress.projectedPoints > 0 ? '+' : '' }}{{ leagueProgress.projectedPoints }}
+                  </p>
+                  <p v-if="leagueProgress.zone !== 'stay'" class="text-[10px] font-bold" :class="leagueProgress.zone === 'promote' ? 'text-emerald-500' : 'text-red-500'">
+                    {{ leagueProgress.zone === 'promote' ? t('league.promoteZone') : t('league.relegateZone') }}
+                  </p>
+                </div>
+              </div>
+              <div class="mt-3 flex flex-col gap-1.5">
+                <div v-for="s in leagueProgress.songs" :key="s.slot" class="flex items-center justify-between gap-3 text-sm">
+                  <span class="truncate text-slate-700 dark:text-slate-300">{{ s.title }}</span>
+                  <span class="shrink-0 text-xs font-bold px-2 py-0.5 rounded"
+                        :class="s.valid ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'">
+                    {{ s.valid ? t('league.played') : t('league.notPlayed') }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <!-- 更新曲リスト（Beat-PT 降順。各行: 難易度バッジ / ランキング / LAMP UP / DJ LEVEL / 投票） -->
             <div>
               <h3 class="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 px-2">
@@ -479,12 +524,14 @@
  *  - close: 閉じる
  *  - navigate: 他タブへのナビゲーション要求
  */
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { UploadDiffResult } from './../types/UploadDiff';
 import { getNextRankInfo, getNextRateTierRankInfo, getFolderRankInfoByRate } from '../utils/beatTier';
 import type { RankInfo } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
+import DivisionIcon from './DivisionIcon.vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
+import { useLeague } from '../composables/useLeague';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import html2canvas from 'html2canvas';
@@ -496,8 +543,62 @@ const props = defineProps<{
   diffData: UploadDiffResult | null;
 }>();
 
-const { authHeaders } = useAuth();
+const { authHeaders, user } = useAuth();
 const { showRateTier } = useRateTierVisibility();
+const league = useLeague();
+
+/** リーグモードの進捗（開催中の週に参加していれば、今回反映後の順位を保持。無ければ null）。 */
+const leagueProgress = ref<null | {
+  tier: number;
+  groupIndex: number;
+  rank: number;
+  groupSize: number;
+  validSongs: number;
+  resultValue: number | null;
+  projectedPoints: number;
+  zone: 'promote' | 'stay' | 'relegate';
+  songs: { slot: number; title: string; valid: boolean }[];
+}>(null);
+
+/** DIVISION 表示名（0=LEGEND）。 */
+const divisionName = (tier: number) => (tier === 0 ? 'DIVISION LEGEND' : `DIVISION ${tier}`);
+
+/**
+ * 【関数の役割】 開催中のリーグ週に自分が参加していれば、今回のアップロード反映後の
+ * 自分の順位・有効曲・見込み PT を取り込む。未参加・未開催・取得失敗時は何も表示しない。
+ */
+const loadLeagueProgress = async () => {
+  leagueProgress.value = null;
+  const uid = user.value?.id;
+  if (!uid) return;
+  try {
+    const cur = await league.fetchCurrent('score');
+    // 開催中(active)の週に「メンバーとして」参加していることが条件（途中参加者は翌週から）。
+    if (!cur.member || cur.week?.status !== 'active' || !cur.standings) return;
+    const myRow = cur.standings.find((r) => r.userId === uid);
+    if (!myRow) return;
+    leagueProgress.value = {
+      tier: cur.member.tier,
+      groupIndex: cur.member.groupIndex,
+      rank: myRow.rank,
+      groupSize: cur.standings.length,
+      validSongs: myRow.validSongs,
+      resultValue: myRow.resultValue,
+      projectedPoints: myRow.projectedPoints ?? 0,
+      zone: myRow.zone,
+      songs: (cur.songs || []).map((s) => ({
+        slot: s.slot,
+        title: s.title,
+        valid: !!myRow.perSong?.find((p) => p.slot === s.slot)?.valid,
+      })),
+    };
+  } catch {
+    /* 未参加・未開催・取得失敗時は表示しない */
+  }
+};
+
+// モーダルが開いた（＝アップロード完了）タイミングでリーグ状況を取り込む。
+watch(() => props.isOpen, (open) => { if (open && props.diffData) loadLeagueProgress(); }, { immediate: true });
 
 /** 次ランクまでの進捗情報（Beat-Tier）。プログレスバー表示に使う。 */
 const nextRankData = computed(() => {

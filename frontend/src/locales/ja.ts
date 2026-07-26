@@ -463,6 +463,8 @@ export const ja = {
   'report.folderRankAssigned': '全曲プレー完了！ランク：{rank}',
   'report.folderRankUp': 'ランクアップ！ {oldRank} → {newRank}',
   'report.folderRemaining': 'あと {n} 曲でランクがつきます',
+  'report.league.title': 'リーグモード',
+  'report.league.projected': '見込みPT',
 
   // Common
   'common.loading': '読み込み中...',
