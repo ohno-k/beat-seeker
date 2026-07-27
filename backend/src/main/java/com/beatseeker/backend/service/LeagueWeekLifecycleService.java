@@ -265,27 +265,14 @@ public class LeagueWeekLifecycleService {
         leagueBaselineRepository.deleteByWeek(week);
 
         // --- 少人数 DIVISION の合流（チャレンジ / ディフェンス） ---
-        // ホーム DIVISION ごとの人数を数え、MIN_STANDALONE 未満の DIVISION は最も近い成立卓
-        // （人数 >= MIN_STANDALONE の DIVISION）へ吸収する。格上の卓に入ればチャレンジ、格下ならディフェンス。
+        // ホーム DIVISION ごとの人数を数え、卓(host)と立場(role)を決める。
+        // 4 人以上は単独卓。少人数は「隣接する少人数同士を束ねて 4 人以上になれば独立卓を作る」
+        // ／束ねても 4 に満たなければ最寄りの成立卓へ吸収する。詳細は computeHostAndRole 参照。
         Map<Integer, Long> countByTier = entries.stream()
                 .collect(Collectors.groupingBy(LeagueEntry::getCurrentTier, Collectors.counting()));
-        Set<Integer> anchors = countByTier.entrySet().stream()
-                .filter(en -> en.getValue() >= MIN_STANDALONE)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toCollection(TreeSet::new));
-
         Map<Integer, Integer> hostOf = new HashMap<>();  // ホーム DIVISION → 着席する卓(host)
         Map<Integer, String> roleOf = new HashMap<>();   // ホーム DIVISION → 立場(role)
-        for (Integer t : countByTier.keySet()) {
-            if (anchors.isEmpty() || anchors.contains(t)) {
-                hostOf.put(t, t);
-                roleOf.put(t, "normal");
-            } else {
-                int host = nearestAnchor(t, anchors, countByTier);
-                hostOf.put(t, host);
-                roleOf.put(t, host < t ? "challenge" : "defense"); // 卓が格上(小さい tier) = 挑戦
-            }
-        }
+        computeHostAndRole(countByTier, hostOf, roleOf);
 
         // 卓(host)ごとにプールを作る（吸収されたメンバーも含める）。
         Map<Integer, List<LeagueEntry>> byHost = new TreeMap<>();
@@ -350,6 +337,102 @@ public class LeagueWeekLifecycleService {
         log.info("リーグ週を開始: ladder={} weekId={} 卓={} members={}",
                 ladder, week.getId(), byHost.keySet(), newMembers.size());
         return week;
+    }
+
+    /**
+     * 【メソッドの役割】 DIVISION ごとの人数から、各 DIVISION の「着席する卓(host)」と「立場(role)」を決める。
+     *
+     * <ul>
+     *   <li>4 人以上（{@link #MIN_STANDALONE}）の DIVISION はそのまま単独卓（role=normal）。</li>
+     *   <li>少人数（&lt;4）の DIVISION は、アンカー（成立卓）で区切られた「連続した少人数区間(gap)」ごとに
+     *       {@link #assignGap} で処理する。区間内で上位から人数を積み上げ、4 人に達したら
+     *       「その塊の中で人数最多の DIVISION をホストにした 1 卓」を成立させる（少人数同士を束ねる）。
+     *       束ねても 4 に満たない端数は、既存アンカーがあれば最寄りへ吸収、無ければ直前の卓へ合流。</li>
+     * </ul>
+     * 立場は host より上位(小さい tier)から来た人=ディフェンス、下位(大きい tier)から来た人=チャレンジ。
+     *
+     * @param countByTier DIVISION ごとの人数
+     * @param hostOf      （出力）ホーム DIVISION → 着席する卓(host)
+     * @param roleOf      （出力）ホーム DIVISION → 立場(normal/challenge/defense)
+     */
+    private void computeHostAndRole(Map<Integer, Long> countByTier,
+                                    Map<Integer, Integer> hostOf, Map<Integer, String> roleOf) {
+        Set<Integer> anchors = countByTier.entrySet().stream()
+                .filter(en -> en.getValue() >= MIN_STANDALONE)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(TreeSet::new));
+        List<Integer> tiers = new ArrayList<>(new TreeSet<>(countByTier.keySet())); // 昇順（上位→下位）
+
+        int i = 0;
+        while (i < tiers.size()) {
+            int t = tiers.get(i);
+            if (anchors.contains(t)) {          // 4 人以上 = 単独卓
+                hostOf.put(t, t);
+                roleOf.put(t, "normal");
+                i++;
+                continue;
+            }
+            // アンカーで区切られた「連続する少人数 DIVISION」の区間を集める
+            List<Integer> gap = new ArrayList<>();
+            while (i < tiers.size() && !anchors.contains(tiers.get(i))) {
+                gap.add(tiers.get(i));
+                i++;
+            }
+            assignGap(gap, countByTier, anchors, hostOf, roleOf);
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 連続する少人数 DIVISION（gap）を卓に割り当てる。
+     *
+     * 上位（区間の先頭）から人数を積み上げ、合計が {@link #MIN_STANDALONE} に達するごとに 1 卓を成立させる
+     * （少人数同士を束ねて卓を作る）。ホストは束ねた中で人数最多の DIVISION（同数なら下位側）。
+     * 端数（4 に満たない残り）は、既存アンカーがあれば最寄りへ吸収、無ければ直前に作った卓へ合流、
+     * それも無ければ端数だけで 1 卓にする。
+     */
+    private void assignGap(List<Integer> gap, Map<Integer, Long> count, Set<Integer> anchors,
+                           Map<Integer, Integer> hostOf, Map<Integer, String> roleOf) {
+        List<List<Integer>> tables = new ArrayList<>();
+        List<Integer> acc = new ArrayList<>();
+        long accTotal = 0;
+        for (int t : gap) {
+            acc.add(t);
+            accTotal += count.getOrDefault(t, 0L);
+            if (accTotal >= MIN_STANDALONE) {
+                tables.add(new ArrayList<>(acc));
+                acc.clear();
+                accTotal = 0;
+            }
+        }
+        if (!acc.isEmpty()) { // 4 に満たない端数
+            if (!anchors.isEmpty()) {
+                for (int u : acc) {
+                    int h = nearestAnchor(u, anchors, count);
+                    hostOf.put(u, h);
+                    roleOf.put(u, h < u ? "challenge" : "defense");
+                }
+            } else if (!tables.isEmpty()) {
+                tables.get(tables.size() - 1).addAll(acc); // 直前の卓へ合流
+            } else {
+                tables.add(new ArrayList<>(acc)); // 区間全体が 4 未満・アンカー無し → そのまま 1 卓
+            }
+        }
+        // 成立した各卓を割り当て（ホスト＝人数最多、同数なら tier が大きい＝下位側）
+        for (List<Integer> table : tables) {
+            int host = table.get(0);
+            long best = -1;
+            for (int u : table) {
+                long cn = count.getOrDefault(u, 0L);
+                if (cn > best || (cn == best && u > host)) {
+                    best = cn;
+                    host = u;
+                }
+            }
+            for (int u : table) {
+                hostOf.put(u, host);
+                roleOf.put(u, u == host ? "normal" : (host < u ? "challenge" : "defense"));
+            }
+        }
     }
 
     /**
