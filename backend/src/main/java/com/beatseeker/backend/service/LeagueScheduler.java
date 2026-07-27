@@ -2,8 +2,12 @@ package com.beatseeker.backend.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 /**
  * 【クラスの役割】 リーグモードの週次 cron 起動を担う薄いコンポーネント。
@@ -23,10 +27,19 @@ public class LeagueScheduler {
     private final LeagueWeekLifecycleService lifecycleService;
 
     /**
+     * シーズン開始日（JST）。この日以降の月曜 15:00 のみ自動編成・開始する。
+     * それより前は {@link #activateWeeks()} を何もせずスキップする（告知した開始日を守るため）。
+     * {@code app.league.season-start}（例: "2026-08-03"）で変更可。未設定時は 2026-08-03。
+     */
+    private final LocalDate seasonStart;
+
+    /**
      * 【コンストラクタ】 Spring が依存を注入する。
      */
-    public LeagueScheduler(LeagueWeekLifecycleService lifecycleService) {
+    public LeagueScheduler(LeagueWeekLifecycleService lifecycleService,
+                           @Value("${app.league.season-start:2026-08-03}") String seasonStart) {
         this.lifecycleService = lifecycleService;
+        this.seasonStart = LocalDate.parse(seasonStart);
     }
 
     /**
@@ -71,6 +84,13 @@ public class LeagueScheduler {
      */
     @Scheduled(cron = "0 0 15 * * MON", zone = "Asia/Tokyo")
     public void activateWeeks() {
+        // シーズン開始日より前は自動開始しない（告知した開始日まで待つ）。
+        // 手動トリガー（管理者の run-weekly / activateWeek）はこのゲートを通らないので随時実行可能。
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Tokyo"));
+        if (today.isBefore(seasonStart)) {
+            log.info("リーグ自動開始はシーズン開始日({})より前のためスキップ: today={}", seasonStart, today);
+            return;
+        }
         for (String ladder : LeagueService.LADDERS) {
             try {
                 lifecycleService.activateWeek(ladder);
