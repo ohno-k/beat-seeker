@@ -47,10 +47,10 @@ public class LeagueWeekLifecycleService {
      */
     static final int GROUP_CAPACITY = 8;
     /**
-     * 単独で卓を成立させる最小人数。これ未満の DIVISION は最寄りの成立卓へ吸収される
-     * （格上の卓ならチャレンジ、格下ならディフェンス）。
+     * 単独で卓を成立させる最小人数（3 人以上で卓成立）。これ未満（&lt;3）の DIVISION は
+     * 少人数同士で束ねるか、最寄りの成立卓へ吸収される（格上=チャレンジ / 格下=ディフェンス）。
      */
-    static final int MIN_STANDALONE = 4;
+    static final int MIN_STANDALONE = 3;
     /** 連続でこの週数「有効曲 0」が続いたエントリーは自動休止する。 */
     static final int AUTO_DEACTIVATE_AFTER = 3;
 
@@ -266,7 +266,7 @@ public class LeagueWeekLifecycleService {
 
         // --- 少人数 DIVISION の合流（チャレンジ / ディフェンス） ---
         // ホーム DIVISION ごとの人数を数え、卓(host)と立場(role)を決める。
-        // 4 人以上は単独卓。少人数は「隣接する少人数同士を束ねて 4 人以上になれば独立卓を作る」
+        // 3 人以上は単独卓。少人数は「隣接する少人数同士を束ねて 3 人以上になれば独立卓を作る」
         // ／束ねても 4 に満たなければ最寄りの成立卓へ吸収する。詳細は computeHostAndRole 参照。
         Map<Integer, Long> countByTier = entries.stream()
                 .collect(Collectors.groupingBy(LeagueEntry::getCurrentTier, Collectors.counting()));
@@ -343,9 +343,9 @@ public class LeagueWeekLifecycleService {
      * 【メソッドの役割】 DIVISION ごとの人数から、各 DIVISION の「着席する卓(host)」と「立場(role)」を決める。
      *
      * <ul>
-     *   <li>4 人以上（{@link #MIN_STANDALONE}）の DIVISION はそのまま単独卓（role=normal）。</li>
+     *   <li>3 人以上（{@link #MIN_STANDALONE}）の DIVISION はそのまま単独卓（role=normal）。</li>
      *   <li>少人数（&lt;4）の DIVISION は、アンカー（成立卓）で区切られた「連続した少人数区間(gap)」ごとに
-     *       {@link #assignGap} で処理する。区間内で上位から人数を積み上げ、4 人に達したら
+     *       {@link #assignGap} で処理する。区間内で上位から人数を積み上げ、3 人に達したら
      *       「その塊の中で人数最多の DIVISION をホストにした 1 卓」を成立させる（少人数同士を束ねる）。
      *       束ねても 4 に満たない端数は、既存アンカーがあれば最寄りへ吸収、無ければ直前の卓へ合流。</li>
      * </ul>
@@ -366,7 +366,7 @@ public class LeagueWeekLifecycleService {
         int i = 0;
         while (i < tiers.size()) {
             int t = tiers.get(i);
-            if (anchors.contains(t)) {          // 4 人以上 = 単独卓
+            if (anchors.contains(t)) {          // 3 人以上 = 単独卓
                 hostOf.put(t, t);
                 roleOf.put(t, "normal");
                 i++;
