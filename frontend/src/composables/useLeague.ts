@@ -150,6 +150,65 @@ export interface LeagueAdminLadder {
   activeWeek: LeagueAdminWeek | null;
 }
 
+/** 仮編成プレビューの選手セル（1 課題曲分の自己ベスト）。 */
+export interface LeaguePreviewCell {
+  slot: number;
+  /** 自己ベスト EX（未プレーは null）。 */
+  ex: number | null;
+  /** スコアレート(%)。 */
+  rate: number | null;
+  /** この選手がこの曲のライン（グループ最高 EX）を持っているか＝強調表示対象。 */
+  isLine: boolean;
+  /** アーケードでプレー済みか。 */
+  played: boolean;
+}
+
+/** 仮編成プレビューの選手行。 */
+export interface LeaguePreviewPlayer {
+  displayName: string;
+  /** ホーム DIVISION（0=LEGEND、1..10）。 */
+  homeTier: number;
+  /** 卓での立場。normal / challenge（格上へ挑戦）/ defense（格下を防衛）。 */
+  role: 'normal' | 'challenge' | 'defense';
+  /** 課題曲ごとの自己ベスト（songs と同じ slot 順）。 */
+  bests: LeaguePreviewCell[];
+}
+
+/** 仮編成プレビューの課題曲（ライン付き）。 */
+export interface LeaguePreviewSong {
+  slot: number;
+  title: string;
+  difficultyName: string;
+  level: number | null;
+  notes: number;
+  /** ライン＝グループ内のアーケード自己ベスト最高 EX。誰も未プレーなら null。 */
+  lineEx: number | null;
+  /** ラインのスコアレート(%)。 */
+  lineRate: number | null;
+}
+
+/** 仮編成プレビューの 1 グループ。 */
+export interface LeaguePreviewGroup {
+  groupIndex: number;
+  memberCount: number;
+  songs: LeaguePreviewSong[];
+  players: LeaguePreviewPlayer[];
+}
+
+/** 仮編成プレビューの 1 卓（host DIVISION）。 */
+export interface LeaguePreviewTier {
+  host: number;
+  memberCount: number;
+  groups: LeaguePreviewGroup[];
+}
+
+/** GET /api/league/admin/preview の応答（DB 非更新の仮編成）。 */
+export interface LeaguePreview {
+  ladder: LadderType;
+  entryCount: number;
+  tiers: LeaguePreviewTier[];
+}
+
 /**
  * 【Composable の役割】 リーグモード（/league）の API 呼び出しをまとめて提供する。
  *
@@ -296,6 +355,18 @@ export function useLeague() {
     if (!res.ok) await raise(res, 'draft 週の作成に失敗しました');
   };
 
+  /** 仮編成プレビューを取得する（管理者のみ・DB 非更新）。 */
+  const fetchAdminPreview = async (ladder: LadderType): Promise<LeaguePreview> => {
+    isLoading.value = true;
+    try {
+      const res = await fetch(`${API_BASE}/api/league/admin/preview?ladder=${ladder}`, { headers: authHeaders() });
+      if (!res.ok) await raise(res, '仮編成の取得に失敗しました');
+      return (await res.json()) as LeaguePreview;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     isLoading,
     fetchMe,
@@ -310,5 +381,6 @@ export function useLeague() {
     redrawTier,
     runWeekly,
     createDraft,
+    fetchAdminPreview,
   };
 }

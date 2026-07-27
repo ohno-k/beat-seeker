@@ -191,6 +191,28 @@ public class LeagueAdminController {
     }
 
     /**
+     * 【メソッドの役割】 現在の参加者で「仮編成」を組み、各グループの課題曲候補と参加者の
+     * 自己ベスト（＋ライン）を返す。<b>DB は一切更新しない</b>読み取り専用のテスト用途。
+     *
+     * 週の締切が無く事前に確定編成を用意できないため、開始前に編成・選曲・各選手の到達度を
+     * 目視確認するために使う。グループ割り・選曲はランダムなので実際の開始時とは変わり得る。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param ladder ラダー種別
+     * @return {@code {ladder, entryCount, tiers:[{host, groups:[{songs, players}]}]}}
+     */
+    @GetMapping("/preview")
+    public ResponseEntity<?> preview(Authentication auth, @RequestParam("ladder") String ladder) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        if (!leagueService.isValidLadder(ladder)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ladder は score / bp のいずれかです"));
+        }
+        return ResponseEntity.ok(lifecycleService.previewFormation(ladder));
+    }
+
+    /**
      * 【メソッドの役割】 週次処理（締め → 編成 → 開始）を手動実行する。
      *
      * 初回のリーグ開始（ブートストラップ）や、cron 失敗時の復旧、ローカルでの動作確認に使う。

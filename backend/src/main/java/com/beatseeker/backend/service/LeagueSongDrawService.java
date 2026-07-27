@@ -14,6 +14,7 @@ import com.beatseeker.backend.repository.SongDefinitionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -131,7 +132,37 @@ public class LeagueSongDrawService {
     @Transactional
     public List<LeagueSong> drawSongsForGroup(LeagueWeek week, int tier, int groupIndex, List<User> members) {
         leagueSongRepository.deleteByWeekAndTierAndGroupIndex(week, tier, groupIndex);
+        List<SongDefinition> chosen = selectSongsForGroup(tier, members, week.getStartsAt());
 
+        List<LeagueSong> drawn = new ArrayList<>();
+        for (SongDefinition sd : chosen) {
+            LeagueSong song = new LeagueSong();
+            song.setWeek(week);
+            song.setTier(tier);
+            song.setGroupIndex(groupIndex);
+            song.setSlot(drawn.size() + 1);
+            song.setTitle(sd.getTitle());
+            song.setDifficultyName(LeagueChartNotation.codeToName(sd.getDifficulty()));
+            song.setLevel(sd.getLevel());
+            song.setNotes(sd.getNotes());
+            drawn.add(song);
+        }
+        return leagueSongRepository.saveAll(drawn);
+    }
+
+    /**
+     * 【メソッドの役割】 グループの課題曲 3 曲を選定して返す（<b>永続化しない</b>）。
+     *
+     * {@link #drawSongsForGroup} の中核選定ロジックであり、管理者の「仮編成プレビュー」からも
+     * 同じ基準で選曲するために共有する。選定基準は drawSongsForGroup の Javadoc 参照
+     * （②全員未プレー ∪ ③2 人以上で拮抗、1 人のみは除外、ランダム 3 曲、直近除外、プール全体フォールバック）。
+     *
+     * @param tier           階級（プールの難易度帯を決める）
+     * @param members        そのグループの参加者
+     * @param referenceStart 「直近 N 週の出題除外」の基準となる週開始日時（プレビューでは開始予定日時）
+     * @return 選定した課題曲の {@link SongDefinition}（スロット順、通常 3 件）
+     */
+    public List<SongDefinition> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart) {
         Map<String, SongDefinition> masterIndex = buildMasterIndex();
         int[] band = rankBandTenths(tier);
         List<SongDefinition> rawPool = buildPool(masterIndex, band[0], band[1]);
@@ -144,7 +175,7 @@ public class LeagueSongDrawService {
         List<SongDefinition> pool = new ArrayList<>(poolByTitle.values());
 
         Set<String> recent = new HashSet<>(leagueSongRepository.findRecentTitlesByTier(
-                tier, week.getStartsAt().minusWeeks(EXCLUDE_WEEKS)));
+                tier, referenceStart.minusWeeks(EXCLUDE_WEEKS)));
 
         // グループ参加者の「アーケード自己ベストレート」をタイトルごとに集める。
         List<String> titles = new ArrayList<>(poolByTitle.keySet());
@@ -205,21 +236,7 @@ public class LeagueSongDrawService {
                 if (used.add(sd.getTitle())) chosen.add(sd);
             }
         }
-
-        List<LeagueSong> drawn = new ArrayList<>();
-        for (SongDefinition sd : chosen) {
-            LeagueSong song = new LeagueSong();
-            song.setWeek(week);
-            song.setTier(tier);
-            song.setGroupIndex(groupIndex);
-            song.setSlot(drawn.size() + 1);
-            song.setTitle(sd.getTitle());
-            song.setDifficultyName(LeagueChartNotation.codeToName(sd.getDifficulty()));
-            song.setLevel(sd.getLevel());
-            song.setNotes(sd.getNotes());
-            drawn.add(song);
-        }
-        return leagueSongRepository.saveAll(drawn);
+        return chosen;
     }
 
     /**

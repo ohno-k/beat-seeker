@@ -29,6 +29,7 @@ import {
   type LeagueStandingRow,
   type LeagueSongInfo,
   type LeaguePerSong,
+  type LeaguePreview,
 } from '../composables/useLeague';
 
 const { t } = useI18n();
@@ -57,6 +58,8 @@ const showInfo = ref(false);
 const adminLadders = ref<LeagueAdminLadder[]>([]);
 /** 課題曲差し替えフォームの入力値（songId → 入力中の値）。 */
 const replaceForms = ref<Record<number, { title: string; difficultyName: string }>>({});
+/** 仮編成プレビュー（管理者が生成したときのみ。DB は更新しない）。 */
+const preview = ref<LeaguePreview | null>(null);
 
 const error = ref('');
 const notice = ref('');
@@ -310,6 +313,22 @@ const handleCreateDraft = async (ladder: LadderType) => {
     busy.value = false;
   }
 };
+
+/** 仮編成プレビューを生成する（DB は更新しない）。押すたびにランダムで組み直す。 */
+const handlePreview = async (ladder: LadderType) => {
+  busy.value = true;
+  error.value = '';
+  try {
+    preview.value = await league.fetchAdminPreview(ladder);
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    busy.value = false;
+  }
+};
+
+/** レート(%)の表示（小数第2位）。null は '-'。 */
+const fmtRate = (r: number | null | undefined) => (r == null ? '-' : `${r.toFixed(2)}%`);
 
 watch(isLoggedIn, (v) => {
   if (v) {
@@ -706,6 +725,90 @@ onUnmounted(() => {
               ({{ al.activeWeek.memberCount }})
             </template>
             <template v-else>{{ t('league.admin.none') }}</template>
+          </div>
+        </div>
+
+        <!-- 仮編成プレビュー（DB 非更新のテスト用） -->
+        <div class="mt-5 border-t border-slate-200 dark:border-slate-700 pt-3">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <div class="font-semibold text-slate-700 dark:text-slate-200">{{ t('league.admin.preview.title') }}</div>
+              <p class="text-xs text-slate-400 mt-0.5 max-w-lg">{{ t('league.admin.preview.desc') }}</p>
+            </div>
+            <button class="text-xs px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50 whitespace-nowrap"
+                    :disabled="busy" @click="handlePreview(ladder)">{{ t('league.admin.preview.generate') }}</button>
+          </div>
+
+          <div v-if="preview" class="mt-3">
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+              {{ t('league.admin.preview.entryCount', { n: preview.entryCount }) }}
+              <span class="ml-2 text-slate-400">{{ t('league.admin.preview.lineHint') }}</span>
+            </div>
+            <div v-if="!preview.tiers.length" class="mt-2 text-xs text-slate-400">{{ t('league.admin.preview.empty') }}</div>
+
+            <!-- 卓（host DIVISION）ごと -->
+            <div v-for="tp in preview.tiers" :key="tp.host"
+                 class="mt-3 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                {{ divisionName(tp.host) }}
+                <span class="text-xs font-normal text-slate-400">({{ tp.memberCount }})</span>
+              </div>
+
+              <!-- グループごと -->
+              <div v-for="g in tp.groups" :key="g.groupIndex" class="mt-3">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                  {{ t('league.groupN', { n: g.groupIndex + 1 }) }} ({{ g.memberCount }})
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-xs border-collapse">
+                    <thead>
+                      <tr class="align-bottom">
+                        <th class="text-left font-semibold py-1 pr-3 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                          {{ t('league.admin.preview.player') }}
+                        </th>
+                        <th v-for="s in g.songs" :key="s.slot"
+                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]">
+                          <div class="text-slate-700 dark:text-slate-200 break-words leading-tight">{{ s.title }}</div>
+                          <div class="text-[10px] font-normal text-slate-400">
+                            {{ s.difficultyName }} <span v-if="s.level">☆{{ s.level }}</span>
+                          </div>
+                          <div class="text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                            {{ t('league.admin.preview.lineLabel') }}:
+                            <template v-if="s.lineEx != null">{{ s.lineEx }} ({{ fmtRate(s.lineRate) }})</template>
+                            <template v-else>{{ t('league.lineNone') }}</template>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(p, pi) in g.players" :key="pi"
+                          class="border-t border-slate-100 dark:border-slate-700/60">
+                        <td class="py-1 pr-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
+                          {{ p.displayName || '—' }}
+                          <span v-if="roleBadge(p.role)"
+                                class="ml-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px]"
+                                :class="roleBadge(p.role)!.cls">
+                            {{ roleBadge(p.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(p.homeTier) }}</span>
+                          </span>
+                        </td>
+                        <td v-for="cell in p.bests" :key="cell.slot"
+                            class="py-1 px-2 whitespace-nowrap tabular-nums"
+                            :class="cell.isLine
+                              ? 'bg-amber-100 dark:bg-amber-900/40 font-bold text-amber-800 dark:text-amber-200'
+                              : 'text-slate-600 dark:text-slate-300'">
+                          <template v-if="cell.played">
+                            {{ cell.ex }}
+                            <span class="text-[10px]" :class="cell.isLine ? 'text-amber-700 dark:text-amber-300' : 'text-slate-400'">({{ fmtRate(cell.rate) }})</span>
+                            <span v-if="cell.isLine" class="ml-0.5 text-[10px]">◆</span>
+                          </template>
+                          <span v-else class="text-slate-300 dark:text-slate-600">—</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

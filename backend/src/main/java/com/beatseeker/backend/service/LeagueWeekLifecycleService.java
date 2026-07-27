@@ -280,24 +280,18 @@ public class LeagueWeekLifecycleService {
         List<LeagueMember> newMembers = new ArrayList<>();
         for (Map.Entry<Integer, List<LeagueEntry>> he : byHost.entrySet()) {
             int host = he.getKey();
-            List<LeagueEntry> pool = new ArrayList<>(he.getValue());
-            Collections.shuffle(pool); // 完全ランダムなグループ割り
-            int n = pool.size();
-            // グループ数は「各グループが定員(8)以下になる最小数」= ceil(n/8)。
-            // シャッフル済みプールをラウンドロビンで配るため、グループサイズは必ず均等（差は最大 1）に
-            // なり、極端に人数の少ないグループを作らない。例: 9 人 → 2 グループ [5, 4]、17 人 → [6, 6, 5]。
-            int groupCount = (int) Math.ceil((double) n / GROUP_CAPACITY);
-            for (int i = 0; i < n; i++) {
-                int groupIndex = i % groupCount; // ラウンドロビン配分（メンバーはシャッフル済み＝ランダム）
-                LeagueEntry e = pool.get(i);
-                LeagueMember member = new LeagueMember();
-                member.setWeek(week);
-                member.setUser(e.getUser());
-                member.setTier(host);
-                member.setHomeTier(e.getCurrentTier());
-                member.setRole(roleOf.get(e.getCurrentTier()));
-                member.setGroupIndex(groupIndex);
-                newMembers.add(member);
+            List<List<LeagueEntry>> groups = splitPoolIntoGroups(he.getValue());
+            for (int gi = 0; gi < groups.size(); gi++) {
+                for (LeagueEntry e : groups.get(gi)) {
+                    LeagueMember member = new LeagueMember();
+                    member.setWeek(week);
+                    member.setUser(e.getUser());
+                    member.setTier(host);
+                    member.setHomeTier(e.getCurrentTier());
+                    member.setRole(roleOf.get(e.getCurrentTier()));
+                    member.setGroupIndex(gi);
+                    newMembers.add(member);
+                }
             }
         }
         leagueMemberRepository.saveAll(newMembers);
@@ -326,6 +320,29 @@ public class LeagueWeekLifecycleService {
         log.info("リーグ週を開始: ladder={} weekId={} 卓={} members={}",
                 ladder, week.getId(), byHost.keySet(), newMembers.size());
         return week;
+    }
+
+    /**
+     * 【メソッドの役割】 卓のプールを完全ランダムにグループへ分割する。
+     *
+     * 定員 {@link #GROUP_CAPACITY}（8）以下になる最小グループ数 = ceil(n/8) を作り、シャッフル済み
+     * プールをラウンドロビンで配る（サイズは均等・差は最大 1。例: 9 人 → [5,4]、17 人 → [6,6,5]）。
+     * 本編成（{@link #activateWeek}）と仮編成（{@link #previewFormation}）で同じアルゴリズムを使う。
+     *
+     * @param pool 卓（host）に属する参加者
+     * @return グループのリスト（インデックス = groupIndex）
+     */
+    private List<List<LeagueEntry>> splitPoolIntoGroups(List<LeagueEntry> pool) {
+        List<LeagueEntry> shuffled = new ArrayList<>(pool);
+        Collections.shuffle(shuffled);
+        int n = shuffled.size();
+        int groupCount = Math.max(1, (int) Math.ceil((double) n / GROUP_CAPACITY));
+        List<List<LeagueEntry>> groups = new ArrayList<>();
+        for (int g = 0; g < groupCount; g++) groups.add(new ArrayList<>());
+        for (int i = 0; i < n; i++) {
+            groups.get(i % groupCount).add(shuffled.get(i)); // ラウンドロビン配分
+        }
+        return groups;
     }
 
     /**
@@ -471,6 +488,179 @@ public class LeagueWeekLifecycleService {
             summary.put("memberCount", leagueMemberRepository.findByWeek(activated).size());
         }
         return summary;
+    }
+
+    /**
+     * 【メソッドの役割】 現在の active エントリーで「仮編成」を組み、各グループの課題曲候補と
+     * 参加者の自己ベスト（＋ライン）を計算して返す（<b>DB には一切書き込まない</b>）。
+     *
+     * 週の締切が無く事前に確定編成を用意できないため、管理者が「編成・選曲・各選手の到達度」を
+     * 目視確認するためのテスト用プレビュー。グループ割りと選曲はランダムなので、実際の開始時
+     * （{@link #activateWeek}）とは変わり得る（あくまで一例のスナップショット）。ライン＝グループ内の
+     * 各課題曲のアーケード自己ベスト最高値（{@code lineEx}）で、その値を持つ選手のセルを強調表示できる。
+     *
+     * @param ladder ラダー種別
+     * @return {@code {ladder, entryCount, tiers:[{host, groups:[{groupIndex, memberCount, songs:[...], players:[...]}]}]}}
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> previewFormation(String ladder) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("ladder", ladder);
+        List<LeagueEntry> entries = leagueEntryRepository.findByLadderTypeAndActiveTrue(ladder);
+        result.put("entryCount", entries.size());
+        if (entries.isEmpty()) {
+            result.put("tiers", List.of());
+            return result;
+        }
+
+        // ホーム DIVISION を確定（不正・未設定は BEAT-TIER から補完）。
+        // readOnly トランザクションだが、managed entity を汚さないようローカル map に持つ。
+        Map<Long, Integer> tierOf = new HashMap<>();
+        for (LeagueEntry e : entries) {
+            int t = LeagueDivision.isValid(e.getCurrentTier())
+                    ? e.getCurrentTier()
+                    : LeagueDivision.forBeatPt(e.getUser().getTotalBeatPt() != null ? e.getUser().getTotalBeatPt() : 0.0);
+            tierOf.put(e.getUser().getId(), t);
+        }
+
+        // 卓(host)/立場(role)の決定（本編成と同じロジック）。
+        Map<Integer, Long> countByTier = tierOf.values().stream()
+                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+        Map<Integer, Integer> hostOf = new HashMap<>();
+        Map<Integer, String> roleOf = new HashMap<>();
+        computeHostAndRole(countByTier, hostOf, roleOf);
+
+        Map<Integer, List<LeagueEntry>> byHost = new TreeMap<>();
+        for (LeagueEntry e : entries) {
+            byHost.computeIfAbsent(hostOf.get(tierOf.get(e.getUser().getId())), k -> new ArrayList<>()).add(e);
+        }
+
+        LocalDateTime refStart = upcomingStartJst();
+        List<Map<String, Object>> tiers = new ArrayList<>();
+        for (Map.Entry<Integer, List<LeagueEntry>> he : byHost.entrySet()) {
+            int host = he.getKey();
+            List<List<LeagueEntry>> groups = splitPoolIntoGroups(he.getValue());
+            List<Map<String, Object>> groupList = new ArrayList<>();
+            for (int gi = 0; gi < groups.size(); gi++) {
+                List<LeagueEntry> g = groups.get(gi);
+                List<User> users = g.stream().map(LeagueEntry::getUser).toList();
+                List<SongDefinition> songs = songDrawService.selectSongsForGroup(host, users, refStart);
+                groupList.add(buildPreviewGroup(gi, g, songs, roleOf, tierOf));
+            }
+            Map<String, Object> tm = new LinkedHashMap<>();
+            tm.put("host", host);
+            tm.put("memberCount", he.getValue().size());
+            tm.put("groups", groupList);
+            tiers.add(tm);
+        }
+        result.put("tiers", tiers);
+        return result;
+    }
+
+    /**
+     * 仮編成の 1 グループ分（課題曲メタ＋各選手の自己ベスト＋ライン）を組み立てる。
+     *
+     * ライン（{@code lineEx}）＝グループ内のアーケード自己ベスト最高 EX。各選手セルの
+     * {@code isLine} が true ＝その選手がラインを持っている（＝強調表示対象）。未プレーは {@code played=false}。
+     */
+    private Map<String, Object> buildPreviewGroup(int groupIndex, List<LeagueEntry> members,
+                                                  List<SongDefinition> songs,
+                                                  Map<Integer, String> roleOf, Map<Long, Integer> tierOf) {
+        int slots = songs.size();
+        List<String> titles = songs.stream().map(SongDefinition::getTitle).distinct().toList();
+        List<String> diffs = songs.stream()
+                .map(sd -> LeagueChartNotation.codeToName(sd.getDifficulty())).distinct().toList();
+
+        // 表示は名前順で安定させる。
+        List<LeagueEntry> sorted = new ArrayList<>(members);
+        sorted.sort(Comparator.comparing(e -> {
+            String n = e.getUser().getDisplayName();
+            return n != null ? n : "";
+        }, String.CASE_INSENSITIVE_ORDER));
+
+        int[] lineEx = new int[slots];            // 各スロットのライン（最高 EX、未プレーのみなら 0）
+        List<int[]> exRows = new ArrayList<>();    // 選手ごとのスロット別 EX（-1 = 未プレー）
+        for (LeagueEntry e : sorted) {
+            int[] exBySlot = new int[slots];
+            Arrays.fill(exBySlot, -1);
+            if (!titles.isEmpty()) {
+                Map<String, Integer> best = new HashMap<>();
+                for (Score s : scoreRepository.findByUserAndTitlesAndDifficulties(e.getUser(), titles, diffs)) {
+                    if (s.getSource() != null && !"arcade".equals(s.getSource())) continue; // アーケード限定
+                    if (s.getScore() == null || s.getScore() <= 0) continue;
+                    best.merge(s.getTitle() + "|" + s.getDifficultyName(), s.getScore(), Math::max);
+                }
+                for (int i = 0; i < slots; i++) {
+                    SongDefinition sd = songs.get(i);
+                    Integer ex = best.get(sd.getTitle() + "|" + LeagueChartNotation.codeToName(sd.getDifficulty()));
+                    if (ex != null) {
+                        exBySlot[i] = ex;
+                        if (ex > lineEx[i]) lineEx[i] = ex;
+                    }
+                }
+            }
+            exRows.add(exBySlot);
+        }
+
+        // 選手行（ライン確定後に isLine を付与）。
+        List<Map<String, Object>> players = new ArrayList<>();
+        for (int p = 0; p < sorted.size(); p++) {
+            LeagueEntry e = sorted.get(p);
+            int[] exBySlot = exRows.get(p);
+            int homeTier = tierOf.get(e.getUser().getId());
+            List<Map<String, Object>> bests = new ArrayList<>();
+            for (int i = 0; i < slots; i++) {
+                Map<String, Object> cell = new LinkedHashMap<>();
+                cell.put("slot", i + 1);
+                if (exBySlot[i] >= 0) {
+                    int ex = exBySlot[i];
+                    cell.put("ex", ex);
+                    cell.put("rate", roundRate(ex, songs.get(i).getNotes()));
+                    cell.put("isLine", lineEx[i] > 0 && ex == lineEx[i]);
+                    cell.put("played", true);
+                } else {
+                    cell.put("ex", null);
+                    cell.put("rate", null);
+                    cell.put("isLine", false);
+                    cell.put("played", false);
+                }
+                bests.add(cell);
+            }
+            Map<String, Object> pm = new LinkedHashMap<>();
+            pm.put("displayName", e.getUser().getDisplayName() != null ? e.getUser().getDisplayName() : "");
+            pm.put("homeTier", homeTier);
+            pm.put("role", roleOf.getOrDefault(homeTier, "normal"));
+            pm.put("bests", bests);
+            players.add(pm);
+        }
+
+        // 課題曲メタ（ライン付き）。
+        List<Map<String, Object>> songMeta = new ArrayList<>();
+        for (int i = 0; i < slots; i++) {
+            SongDefinition sd = songs.get(i);
+            Map<String, Object> sm = new LinkedHashMap<>();
+            sm.put("slot", i + 1);
+            sm.put("title", sd.getTitle());
+            sm.put("difficultyName", LeagueChartNotation.codeToName(sd.getDifficulty()));
+            sm.put("level", sd.getLevel());
+            sm.put("notes", sd.getNotes());
+            sm.put("lineEx", lineEx[i] > 0 ? lineEx[i] : null);
+            sm.put("lineRate", lineEx[i] > 0 ? roundRate(lineEx[i], sd.getNotes()) : null);
+            songMeta.add(sm);
+        }
+
+        Map<String, Object> gm = new LinkedHashMap<>();
+        gm.put("groupIndex", groupIndex);
+        gm.put("memberCount", members.size());
+        gm.put("songs", songMeta);
+        gm.put("players", players);
+        return gm;
+    }
+
+    /** EX からスコアレート（%・小数第 2 位）を計算する。notes は課題曲抽選時点のスナップショット。 */
+    private double roundRate(int ex, Integer notes) {
+        if (notes == null || notes <= 0) return 0.0;
+        return Math.round(ex * 100.0 / (notes * 2) * 100.0) / 100.0;
     }
 
     /**
