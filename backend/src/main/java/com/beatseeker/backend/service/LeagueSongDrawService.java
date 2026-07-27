@@ -4,10 +4,12 @@ import com.beatseeker.backend.entity.DifficultyRank;
 import com.beatseeker.backend.entity.DifficultyRankSong;
 import com.beatseeker.backend.entity.LeagueSong;
 import com.beatseeker.backend.entity.LeagueWeek;
+import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.LeagueSongRepository;
+import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,16 +41,19 @@ public class LeagueSongDrawService {
     private final SongDefinitionRepository songDefinitionRepository;
     private final DifficultyRankRepository difficultyRankRepository;
     private final LeagueSongRepository leagueSongRepository;
+    private final ScoreRepository scoreRepository;
 
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
      */
     public LeagueSongDrawService(SongDefinitionRepository songDefinitionRepository,
                                  DifficultyRankRepository difficultyRankRepository,
-                                 LeagueSongRepository leagueSongRepository) {
+                                 LeagueSongRepository leagueSongRepository,
+                                 ScoreRepository scoreRepository) {
         this.songDefinitionRepository = songDefinitionRepository;
         this.difficultyRankRepository = difficultyRankRepository;
         this.leagueSongRepository = leagueSongRepository;
+        this.scoreRepository = scoreRepository;
     }
 
     /**
@@ -106,6 +111,127 @@ public class LeagueSongDrawService {
             drawn.add(song);
         }
         return leagueSongRepository.saveAll(drawn);
+    }
+
+    /**
+     * 【メソッドの役割】 指定週・階級・グループの課題曲 3 曲を、グループ参加者の実力に合わせて抽選・保存する。
+     *
+     * 抽選の考え方（2026-07-28 実装・ユーザー確定仕様）:
+     *  - 候補 = ②（グループの全員が未プレー＝ライン無し） ∪ ③（2 人以上がプレー済みで、その人たちの
+     *    自己ベストレートの最高−最低が {@link #tightSpread} 以内＝拮抗）。1 人だけプレー済みの曲は候補外。
+     *  - 候補からランダムに 3 曲（タイトル単位・重複なし）。直近 {@link #EXCLUDE_WEEKS} 週の出題は除外。
+     *  - 候補が 3 曲に満たなければ、プール全体からランダムに補充する（フォールバック）。
+     *
+     * @param week       対象週
+     * @param tier       階級（プールの難易度帯を決める）
+     * @param groupIndex グループ番号
+     * @param members    そのグループの参加者
+     * @return 保存した課題曲 3 曲
+     */
+    @Transactional
+    public List<LeagueSong> drawSongsForGroup(LeagueWeek week, int tier, int groupIndex, List<User> members) {
+        leagueSongRepository.deleteByWeekAndTierAndGroupIndex(week, tier, groupIndex);
+
+        Map<String, SongDefinition> masterIndex = buildMasterIndex();
+        int[] band = rankBandTenths(tier);
+        List<SongDefinition> rawPool = buildPool(masterIndex, band[0], band[1]);
+        if (distinctTitleCount(rawPool) < SONGS_PER_WEEK) {
+            rawPool = buildPool(masterIndex, 0, 9999); // プールが薄い場合は難易度表全体（Lv11 以上）へ拡大
+        }
+        // タイトル単位に一意化（同一タイトルの別譜面は 1 つに）。
+        LinkedHashMap<String, SongDefinition> poolByTitle = new LinkedHashMap<>();
+        for (SongDefinition sd : rawPool) poolByTitle.putIfAbsent(sd.getTitle(), sd);
+        List<SongDefinition> pool = new ArrayList<>(poolByTitle.values());
+
+        Set<String> recent = new HashSet<>(leagueSongRepository.findRecentTitlesByTier(
+                tier, week.getStartsAt().minusWeeks(EXCLUDE_WEEKS)));
+
+        // グループ参加者の「アーケード自己ベストレート」をタイトルごとに集める。
+        List<String> titles = new ArrayList<>(poolByTitle.keySet());
+        List<String> diffs = pool.stream()
+                .map(sd -> LeagueChartNotation.codeToName(sd.getDifficulty())).distinct().toList();
+        Map<String, List<Double>> ratesByTitle = new HashMap<>();
+        for (User u : members) {
+            Map<String, Integer> bestExByTitle = new HashMap<>();
+            for (Score s : scoreRepository.findByUserAndTitlesAndDifficulties(u, titles, diffs)) {
+                if (s.getSource() != null && !"arcade".equals(s.getSource())) continue; // アーケード限定
+                if (s.getScore() == null || s.getScore() <= 0) continue;
+                SongDefinition sd = poolByTitle.get(s.getTitle());
+                if (sd == null) continue;
+                if (!LeagueChartNotation.codeToName(sd.getDifficulty()).equals(s.getDifficultyName())) continue;
+                bestExByTitle.merge(s.getTitle(), s.getScore(), Math::max);
+            }
+            for (Map.Entry<String, Integer> e : bestExByTitle.entrySet()) {
+                SongDefinition sd = poolByTitle.get(e.getKey());
+                double rate = e.getValue() * 100.0 / (sd.getNotes() * 2);
+                ratesByTitle.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).add(rate);
+            }
+        }
+
+        double thr = tightSpread(tier);
+        List<SongDefinition> candidates = new ArrayList<>();
+        for (SongDefinition sd : pool) {
+            if (recent.contains(sd.getTitle())) continue; // 直近出題は候補から除外
+            List<Double> rs = ratesByTitle.getOrDefault(sd.getTitle(), List.of());
+            boolean cand;
+            if (rs.isEmpty()) {
+                cand = true;                                 // ② 全員未プレー
+            } else if (rs.size() >= 2) {
+                cand = (Collections.max(rs) - Collections.min(rs)) <= thr; // ③ 2 人以上で拮抗
+            } else {
+                cand = false;                                // 1 人のみプレー → 除外
+            }
+            if (cand) candidates.add(sd);
+        }
+
+        // 候補からランダムに 3 曲。足りなければプール全体から補充（直近出題を優先的に避ける）。
+        Collections.shuffle(candidates);
+        List<SongDefinition> chosen = new ArrayList<>();
+        Set<String> used = new HashSet<>();
+        for (SongDefinition sd : candidates) {
+            if (chosen.size() >= SONGS_PER_WEEK) break;
+            if (used.add(sd.getTitle())) chosen.add(sd);
+        }
+        if (chosen.size() < SONGS_PER_WEEK) {
+            List<SongDefinition> fallback = new ArrayList<>(pool);
+            Collections.shuffle(fallback);
+            for (SongDefinition sd : fallback) { // まずは直近出題を避けて補充
+                if (chosen.size() >= SONGS_PER_WEEK) break;
+                if (recent.contains(sd.getTitle())) continue;
+                if (used.add(sd.getTitle())) chosen.add(sd);
+            }
+            for (SongDefinition sd : fallback) { // それでも足りなければ直近出題も許容
+                if (chosen.size() >= SONGS_PER_WEEK) break;
+                if (used.add(sd.getTitle())) chosen.add(sd);
+            }
+        }
+
+        List<LeagueSong> drawn = new ArrayList<>();
+        for (SongDefinition sd : chosen) {
+            LeagueSong song = new LeagueSong();
+            song.setWeek(week);
+            song.setTier(tier);
+            song.setGroupIndex(groupIndex);
+            song.setSlot(drawn.size() + 1);
+            song.setTitle(sd.getTitle());
+            song.setDifficultyName(LeagueChartNotation.codeToName(sd.getDifficulty()));
+            song.setLevel(sd.getLevel());
+            song.setNotes(sd.getNotes());
+            drawn.add(song);
+        }
+        return leagueSongRepository.saveAll(drawn);
+    }
+
+    /**
+     * 【メソッドの役割】 「拮抗」判定のレート差しきい値（%）を DIVISION（tier）ごとに段階的に返す。
+     *
+     * 上位ほど実力が団子なので厳しく、下位ほど広く: LEGEND(0)=0.5% 〜 DIVISION10=5.0% の線形。
+     *
+     * @param tier 階級（0=LEGEND .. 10）
+     * @return 拮抗とみなす最高−最低レート差（%）
+     */
+    private double tightSpread(int tier) {
+        return 0.5 + tier * 0.45;
     }
 
     /**

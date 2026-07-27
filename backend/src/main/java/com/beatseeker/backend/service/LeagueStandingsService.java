@@ -123,7 +123,7 @@ public class LeagueStandingsService {
      * @return {@code [{slot, lineEx, lineMiss, lineRate}]}（slot 昇順）
      */
     public List<Map<String, Object>> computeGroupSongLines(LeagueWeek week, int tier, int groupIndex) {
-        List<LeagueSong> songs = leagueSongRepository.findByWeekAndTierOrderBySlotAsc(week, tier);
+        List<LeagueSong> songs = leagueSongRepository.findByWeekAndTierAndGroupIndexOrderBySlotAsc(week, tier, groupIndex);
         if (songs.isEmpty()) {
             return List.of();
         }
@@ -200,7 +200,9 @@ public class LeagueStandingsService {
      */
     private List<Map<String, Object>> liveStandings(LeagueWeek week, int tier, List<LeagueMember> members) {
         boolean isScoreLadder = "score".equals(week.getLadderType());
-        List<LeagueSong> songs = leagueSongRepository.findByWeekAndTierOrderBySlotAsc(week, tier);
+        // 課題曲はグループ単位。members は同一グループなので先頭から groupIndex を得る（呼び出し側で非空を保証）。
+        int groupIndex = members.get(0).getGroupIndex();
+        List<LeagueSong> songs = leagueSongRepository.findByWeekAndTierAndGroupIndexOrderBySlotAsc(week, tier, groupIndex);
         Map<String, Integer> notesBySong = resolveNotes(songs);
 
         List<User> users = members.stream().map(LeagueMember::getUser).toList();

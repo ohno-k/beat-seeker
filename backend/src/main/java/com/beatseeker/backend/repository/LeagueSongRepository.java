@@ -39,6 +39,27 @@ public interface LeagueSongRepository extends JpaRepository<LeagueSong, Long> {
     List<LeagueSong> findByWeekAndTierOrderBySlotAsc(LeagueWeek week, Integer tier);
 
     /**
+     * 【メソッドの役割】 指定週・階級・グループの課題曲 3 曲をスロット順で取得する。
+     *
+     * 課題曲はグループごとに異なるため、順位計算・ライン計算・プレイヤー表示はこれを使う。
+     *
+     * @param week       対象週
+     * @param tier       階級
+     * @param groupIndex グループ番号
+     * @return 課題曲一覧（slot 昇順、通常 3 件）
+     */
+    List<LeagueSong> findByWeekAndTierAndGroupIndexOrderBySlotAsc(LeagueWeek week, Integer tier, Integer groupIndex);
+
+    /**
+     * 【メソッドの役割】 指定週・階級・グループの課題曲を削除する（再抽選・掃除用）。
+     *
+     * @param week       対象週
+     * @param tier       階級
+     * @param groupIndex グループ番号
+     */
+    void deleteByWeekAndTierAndGroupIndex(LeagueWeek week, Integer tier, Integer groupIndex);
+
+    /**
      * 【メソッドの役割】 指定階級で最近出題されたタイトルを取得する（抽選の重複回避用）。
      *
      * 直近 N 週（呼び出し側で since を計算）に同じ階級で出題済みのタイトルを、

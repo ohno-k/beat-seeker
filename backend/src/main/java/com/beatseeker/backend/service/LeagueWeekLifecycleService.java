@@ -128,15 +128,9 @@ public class LeagueWeekLifecycleService {
         week.setStatus("draft");
         week = leagueWeekRepository.save(week);
 
-        // active エントリーの現 DIVISION 構成で課題曲を先行抽選（管理者のレビュー期間を作る）
-        Map<Integer, List<User>> usersByTier = leagueEntryRepository.findByLadderTypeAndActiveTrue(ladder).stream()
-                .filter(e -> LeagueDivision.isValid(e.getCurrentTier()))
-                .collect(Collectors.groupingBy(LeagueEntry::getCurrentTier,
-                        Collectors.mapping(LeagueEntry::getUser, Collectors.toList())));
-        for (Map.Entry<Integer, List<User>> e : usersByTier.entrySet()) {
-            songDrawService.drawSongsForTier(week, e.getKey(), e.getValue());
-        }
-        log.info("リーグ draft 週を作成: ladder={} startsAt={} divisions={}", ladder, startsAt, usersByTier.keySet());
+        // 課題曲はグループごと（各グループの参加者の実力に合わせて）抽選するため、
+        // グループ確定前の draft 段階では抽選しない。編成（activateWeek）時にグループ単位で抽選する。
+        log.info("リーグ draft 週を作成: ladder={} startsAt={}", ladder, startsAt);
         return week;
     }
 
@@ -308,24 +302,19 @@ public class LeagueWeekLifecycleService {
         }
         leagueMemberRepository.saveAll(newMembers);
 
-        // --- 課題曲の過不足調整 ---
-        // draft 抽選時と編成時で DIVISION 構成が変わり得る（昇降格・新規参加による出現/消滅）。
-        Map<Integer, List<LeagueSong>> songsByTier = leagueSongRepository
-                .findByWeekOrderByTierAscSlotAsc(week).stream()
-                .collect(Collectors.groupingBy(LeagueSong::getTier));
-        Map<Integer, List<User>> usersByTier = newMembers.stream()
-                .collect(Collectors.groupingBy(LeagueMember::getTier,
-                        Collectors.mapping(LeagueMember::getUser, Collectors.toList())));
-        for (Map.Entry<Integer, List<User>> e : usersByTier.entrySet()) {
-            List<LeagueSong> songs = songsByTier.get(e.getKey());
-            if (songs == null || songs.size() < LeagueSongDrawService.SONGS_PER_WEEK) {
-                songDrawService.drawSongsForTier(week, e.getKey(), e.getValue());
-            }
+        // --- 課題曲の抽選（グループごと） ---
+        // 各グループの参加者の実力に合わせて 3 曲ずつ抽選する（drawSongsForGroup）。
+        // グループ確定後にしか選べないため、draft 段階では抽選せずここで一括抽選する。
+        Map<String, List<User>> usersByGroup = new LinkedHashMap<>();
+        Map<String, int[]> groupTierIndex = new LinkedHashMap<>(); // key -> {tier, groupIndex}
+        for (LeagueMember m : newMembers) {
+            String key = m.getTier() + "-" + m.getGroupIndex();
+            usersByGroup.computeIfAbsent(key, k -> new ArrayList<>()).add(m.getUser());
+            groupTierIndex.putIfAbsent(key, new int[]{ m.getTier(), m.getGroupIndex() });
         }
-        for (Integer songTier : songsByTier.keySet()) {
-            if (!usersByTier.containsKey(songTier)) {
-                leagueSongRepository.deleteByWeekAndTier(week, songTier);
-            }
+        for (Map.Entry<String, List<User>> e : usersByGroup.entrySet()) {
+            int[] tg = groupTierIndex.get(e.getKey());
+            songDrawService.drawSongsForGroup(week, tg[0], tg[1], e.getValue());
         }
 
         // --- active 化とベースラインスナップショット（この瞬間に課題曲が公開される） ---
@@ -489,13 +478,15 @@ public class LeagueWeekLifecycleService {
      * 同一 (譜面, source) に difficultyLevel 違いの重複行があり得るため、ベスト値に集約して 1 行にする。
      */
     private void snapshotBaselines(LeagueWeek week, List<LeagueMember> members) {
-        Map<Integer, List<LeagueSong>> songsByTier = leagueSongRepository
+        // 課題曲はグループ単位なので (tier, groupIndex) でまとめる。
+        Map<String, List<LeagueSong>> songsByGroup = leagueSongRepository
                 .findByWeekOrderByTierAscSlotAsc(week).stream()
-                .collect(Collectors.groupingBy(LeagueSong::getTier));
+                .collect(Collectors.groupingBy(ls -> ls.getTier() + "-" + ls.getGroupIndex()));
 
         List<LeagueBaseline> baselines = new ArrayList<>();
         for (LeagueMember member : members) {
-            List<LeagueSong> songs = songsByTier.getOrDefault(member.getTier(), List.of());
+            List<LeagueSong> songs = songsByGroup.getOrDefault(
+                    member.getTier() + "-" + member.getGroupIndex(), List.of());
             if (songs.isEmpty()) continue;
             List<String> titles = songs.stream().map(LeagueSong::getTitle).distinct().toList();
             List<String> diffs = songs.stream().map(LeagueSong::getDifficultyName).distinct().toList();

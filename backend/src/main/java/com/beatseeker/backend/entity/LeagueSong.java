@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 /**
  * 【エンティティの役割】 リーグの週次課題曲。1 週 × 1 階級 × 1 スロット（1..3）で 1 行。
  *
- * 現実世界の概念: 「スコアリーグ第 N 週・階級 2 の課題曲 3 曲」のうちの 1 曲。
- * 同一階級の全グループで共通の課題曲を使う（グループ間の公平性のため）。
+ * 現実世界の概念: 「スコアリーグ第 N 週・階級 2・グループ 0 の課題曲 3 曲」のうちの 1 曲。
+ * 課題曲は「週 × 階級 × グループ」単位で異なる（各グループの参加者の実力に合わせて選曲するため）。
  * マッピング先テーブル: {@code league_songs}。
  *
  * 譜面の同定はコードベースの他所と同じく title + difficultyName の文字列一致で行う
@@ -19,7 +19,8 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Table(name = "league_songs", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_league_songs_week_tier_slot", columnNames = { "week_id", "tier", "slot" })
+        @UniqueConstraint(name = "uk_league_songs_week_tier_group_slot",
+                columnNames = { "week_id", "tier", "group_index", "slot" })
 })
 @Data
 @NoArgsConstructor
@@ -38,6 +39,11 @@ public class LeagueSong {
     /** 対象階級（1 が最上位）。 */
     @Column(nullable = false)
     private Integer tier;
+
+    /** 対象グループ番号（0 始まり）。課題曲はグループごとに異なる。 */
+    @Column(name = "group_index", nullable = false)
+    @org.hibernate.annotations.ColumnDefault("0")
+    private Integer groupIndex = 0;
 
     /** 課題曲スロット番号（1..3）。表示順に使う。 */
     @Column(nullable = false)

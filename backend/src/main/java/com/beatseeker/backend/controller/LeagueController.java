@@ -183,7 +183,8 @@ public class LeagueController {
                     .orElse(null);
             result.put("member", null);
             result.put("previewTier", previewTier);
-            result.put("songs", previewTier != null ? songMaps(week, previewTier) : List.of());
+            // 課題曲はグループごとに異なるため、プレビューは代表としてグループ 0 の曲を表示する。
+            result.put("songs", previewTier != null ? songMaps(week, previewTier, 0) : List.of());
             result.put("standings", null);
         }
         return ResponseEntity.ok(result);
@@ -346,9 +347,9 @@ public class LeagueController {
         return m;
     }
 
-    /** 指定週・指定階級の課題曲をレスポンス用 Map リストに変換する。 */
-    private List<Map<String, Object>> songMaps(LeagueWeek week, Integer tier) {
-        return leagueSongRepository.findByWeekAndTierOrderBySlotAsc(week, tier).stream()
+    /** 指定週・階級・グループの課題曲をレスポンス用 Map リストに変換する。 */
+    private List<Map<String, Object>> songMaps(LeagueWeek week, Integer tier, Integer groupIndex) {
+        return leagueSongRepository.findByWeekAndTierAndGroupIndexOrderBySlotAsc(week, tier, groupIndex).stream()
                 .map(this::toSongMap)
                 .toList();
     }
@@ -365,7 +366,7 @@ public class LeagueController {
      */
     private List<Map<String, Object>> songMapsWithLines(LeagueWeek week, Integer tier, int groupIndex) {
         List<Map<String, Object>> songs = new ArrayList<>();
-        for (Map<String, Object> s : songMaps(week, tier)) {
+        for (Map<String, Object> s : songMaps(week, tier, groupIndex)) {
             songs.add(new LinkedHashMap<>(s)); // toList() は不変なので可変コピーにする
         }
         Map<Object, Map<String, Object>> lineBySlot = new HashMap<>();
@@ -415,7 +416,9 @@ public class LeagueController {
                     .toList();
             Map<String, Object> tm = new LinkedHashMap<>();
             tm.put("tier", e.getKey());
-            tm.put("songs", songMaps(week, e.getKey()));
+            // 課題曲はグループごとに異なるため、階級単位の曲リストは持たない
+            // （フロントはグループを開いて /standings から課題曲を取得する）。
+            tm.put("songs", List.of());
             tm.put("groups", groups);
             tiers.add(tm);
         }
