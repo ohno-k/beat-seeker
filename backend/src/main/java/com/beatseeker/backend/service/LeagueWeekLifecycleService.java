@@ -540,11 +540,15 @@ public class LeagueWeekLifecycleService {
         for (Map.Entry<Integer, List<LeagueEntry>> he : byHost.entrySet()) {
             int host = he.getKey();
             List<List<LeagueEntry>> groups = splitPoolIntoGroups(he.getValue());
+            // 同一階級の他グループと課題曲が重複しないよう、選んだタイトルを積み上げて除外していく
+            // （本抽選は保存済み課題曲を DB 経由で除外するが、保存しないプレビューでは明示的に渡す）。
+            Set<String> usedInTier = new HashSet<>();
             List<Map<String, Object>> groupList = new ArrayList<>();
             for (int gi = 0; gi < groups.size(); gi++) {
                 List<LeagueEntry> g = groups.get(gi);
                 List<User> users = g.stream().map(LeagueEntry::getUser).toList();
-                List<SongDefinition> songs = songDrawService.selectSongsForGroup(host, users, refStart);
+                List<SongDefinition> songs = songDrawService.selectSongsForGroup(host, users, refStart, usedInTier);
+                for (SongDefinition sd : songs) usedInTier.add(sd.getTitle());
                 groupList.add(buildPreviewGroup(gi, g, songs, roleOf, tierOf));
             }
             Map<String, Object> tm = new LinkedHashMap<>();

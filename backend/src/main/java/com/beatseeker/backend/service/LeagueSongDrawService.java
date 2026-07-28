@@ -165,6 +165,19 @@ public class LeagueSongDrawService {
      * @return 選定した課題曲の {@link SongDefinition}（スロット順、通常 3 件）
      */
     public List<SongDefinition> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart) {
+        return selectSongsForGroup(tier, members, referenceStart, java.util.Set.of());
+    }
+
+    /**
+     * {@link #selectSongsForGroup(int, List, LocalDateTime)} の拡張版。{@code alsoExclude} に渡した
+     * タイトルも出題対象から外す。本抽選（{@link #drawSongsForGroup}）は保存済みの他グループ課題曲を
+     * DB の直近出題クエリ経由で自然に除外できるが、保存しない「仮編成プレビュー」では同一階級の
+     * 他グループと課題曲が重複してしまうため、既に選んだタイトルを明示的に渡してもらって除外する。
+     *
+     * @param alsoExclude recent に追加で除外するタイトル（同一週・同一階級の他グループの出題曲など）
+     */
+    public List<SongDefinition> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart,
+                                                    Set<String> alsoExclude) {
         Map<String, SongDefinition> masterIndex = buildMasterIndex();
         int[] band = rankBandTenths(tier);
         List<SongDefinition> rawPool = buildPool(masterIndex, band[0], band[1]);
@@ -178,6 +191,7 @@ public class LeagueSongDrawService {
 
         Set<String> recent = new HashSet<>(leagueSongRepository.findRecentTitlesByTier(
                 tier, referenceStart.minusWeeks(EXCLUDE_WEEKS)));
+        recent.addAll(alsoExclude); // 同一週・同一階級で既に他グループへ出したタイトルも除外する
 
         // グループ参加者の「アーケード自己ベストレート」をタイトルごとに集める。
         List<String> titles = new ArrayList<>(poolByTitle.keySet());
