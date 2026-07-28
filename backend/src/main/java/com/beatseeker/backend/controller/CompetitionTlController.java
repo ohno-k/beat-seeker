@@ -98,7 +98,9 @@ public class CompetitionTlController {
      *       myAssigned: { participantId, displayName, pickSubmitted } | null,
      *       myLocked,
      *       opponentAssigned: { participantId, displayName } | null,
-     *       opponentLocked
+     *       opponentLocked,
+     *       opponentPickPublished,
+     *       opponentPick: { songGenre, songLevel, songStrategyId, songTitle, songDiff } | null
      *     } ]
      *   } ]
      * }
@@ -208,6 +210,17 @@ public class CompetitionTlController {
                 // 相手の起用名は「相手チーム側のラインアップ公開済」のときだけ可視
                 mm.put("opponentAssigned",
                         (theirs == null || !opponentLineupPublished) ? null : assignedOpponentMap(theirs));
+
+                // 相手の自選曲は「相手側の自選曲が公開済 (pickPublished)」のときだけ可視。
+                // StrategyCard 発動 (相手曲を同ジャンル×Lv帯でランダム化) を TL が判断するのに必要。
+                boolean opponentPickPublished = iAmA
+                        ? Boolean.TRUE.equals(match.getPickPublishedB())
+                        : Boolean.TRUE.equals(match.getPickPublishedA());
+                mm.put("opponentPickPublished", opponentPickPublished);
+                mm.put("opponentPick",
+                        (theirs == null || !opponentPickPublished) ? null
+                                : pickRepository.findByMatchAndParticipant(match, theirs)
+                                        .map(this::pickPublicMap).orElse(null));
 
                 // StrategyCard 発動: 起用ロック (closed) + 相手起用公開 + 両者アサイン済 で TL が決定可能。
                 // 決定の本体は「発動予定」フラグのみ。相手曲のランダム化抽選は Reveal 時に確定する。
@@ -577,6 +590,20 @@ public class CompetitionTlController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("participantId", p.getId());
         m.put("displayName", p.getDisplayName());
+        return m;
+    }
+
+    /**
+     * 公開用 (相手から見える) 自選曲表現。submittedAt 等メタは出さず本質情報だけ。
+     * TL が相手の自選曲を見て StrategyCard 発動を判断するのに使う。
+     */
+    private Map<String, Object> pickPublicMap(CompetitionPick p) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("songGenre", p.getSongGenre());
+        m.put("songLevel", p.getSongLevel());
+        m.put("songStrategyId", p.getSongStrategyId());
+        m.put("songTitle", p.getSongTitle());
+        m.put("songDiff", p.getSongDiff());
         return m;
     }
 

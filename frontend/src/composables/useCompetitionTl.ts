@@ -48,6 +48,15 @@ export interface TlAssignedOpponentDto {
   displayName: string;
 }
 
+/** 相手が公開した自選曲 (StrategyCard 発動判断用)。提出メタ (submittedAt 等) は含めない。 */
+export interface TlPickPublicDto {
+  songGenre: SongGenre;
+  songLevel: number;
+  songStrategyId: number;
+  songTitle: string;
+  songDiff: 'A' | 'L';
+}
+
 export interface TlMatchDto {
   matchId: number;
   matchKind: MatchKind;
@@ -57,6 +66,10 @@ export interface TlMatchDto {
   opponentLocked: boolean;
   myAssigned: TlAssignedMineDto | null;
   opponentAssigned: TlAssignedOpponentDto | null;
+  /** 相手側の自選曲が公開済か (未公開なら opponentPick は null)。 */
+  opponentPickPublished: boolean;
+  /** 相手が公開した自選曲。公開済のときのみ非 null。StrategyCard 発動判断に使う。 */
+  opponentPick: TlPickPublicDto | null;
   /** 自軍がこの試合で StrategyCard 発動予定か。 */
   myStrategyEnabled: boolean;
   /** いま発動可否を決定できるか (起用ロック + 相手起用公開 + 両者アサイン済 で true)。 */

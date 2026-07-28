@@ -321,6 +321,21 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
                 >
                   {{ match.opponentLocked ? t('competition.tl.lockedAlready') : t('competition.tl.lockBefore') }}
                 </p>
+
+                <!-- 相手の自選曲 (StrategyCard 発動判断用) -->
+                <div class="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700/40">
+                  <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{{ t('competition.tl.opponentPickLabel') }}</p>
+                  <template v-if="match.opponentPick">
+                    <p class="text-sm font-bold truncate">{{ match.opponentPick.songTitle }}</p>
+                    <p class="text-[10px] font-mono text-slate-400 truncate">
+                      {{ match.opponentPick.songGenre }} · Lv {{ match.opponentPick.songLevel }} ·
+                      {{ match.opponentPick.songDiff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
+                    </p>
+                  </template>
+                  <p v-else class="text-[10px] font-mono text-slate-400 italic">
+                    {{ match.opponentPickPublished ? t('competition.tl.opponentPickNotSubmitted') : t('competition.tl.opponentPickHidden') }}
+                  </p>
+                </div>
               </div>
             </li>
           </ul>
