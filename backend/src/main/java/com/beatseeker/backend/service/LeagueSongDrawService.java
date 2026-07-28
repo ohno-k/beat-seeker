@@ -121,6 +121,8 @@ public class LeagueSongDrawService {
      *  - 候補 = ②（グループの全員が未プレー＝ライン無し） ∪ ③（2 人以上がプレー済みで、その人たちの
      *    自己ベストレートの最高−最低が {@link #tightSpread} 以内＝拮抗）。1 人だけプレー済みの曲は候補外。
      *  - 候補からランダムに 3 曲（タイトル単位・重複なし）。直近 {@link #EXCLUDE_WEEKS} 週の出題は除外。
+     *  - ただし「ライン保持者（各曲の最高 EX の人）」がグループ内でなるべく重複しないよう選ぶ
+     *    （1 人が複数ラインを持つのを避けてラインを分散。2026-07-29 ユーザー要望）。
      *  - 候補が 3 曲に満たなければ、プール全体からランダムに補充する（フォールバック）。
      *
      * @param week       対象週
@@ -182,6 +184,8 @@ public class LeagueSongDrawService {
         List<String> diffs = pool.stream()
                 .map(sd -> LeagueChartNotation.codeToName(sd.getDifficulty())).distinct().toList();
         Map<String, List<Double>> ratesByTitle = new HashMap<>();
+        Map<String, Long> holderByTitle = new HashMap<>();      // タイトル → ライン保持者(最高 EX の人)の userId
+        Map<String, Integer> holderExByTitle = new HashMap<>(); // タイトル → その最高 EX
         for (User u : members) {
             Map<String, Integer> bestExByTitle = new HashMap<>();
             for (Score s : scoreRepository.findByUserAndTitlesAndDifficulties(u, titles, diffs)) {
@@ -193,9 +197,17 @@ public class LeagueSongDrawService {
                 bestExByTitle.merge(s.getTitle(), s.getScore(), Math::max);
             }
             for (Map.Entry<String, Integer> e : bestExByTitle.entrySet()) {
-                SongDefinition sd = poolByTitle.get(e.getKey());
-                double rate = e.getValue() * 100.0 / (sd.getNotes() * 2);
-                ratesByTitle.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).add(rate);
+                String title = e.getKey();
+                int ex = e.getValue();
+                SongDefinition sd = poolByTitle.get(title);
+                double rate = ex * 100.0 / (sd.getNotes() * 2);
+                ratesByTitle.computeIfAbsent(title, k -> new ArrayList<>()).add(rate);
+                // ライン保持者（最高 EX の人）を記録する（同点は先に記録した人を優先＝安定）。
+                Integer curEx = holderExByTitle.get(title);
+                if (curEx == null || ex > curEx) {
+                    holderExByTitle.put(title, ex);
+                    holderByTitle.put(title, u.getId());
+                }
             }
         }
 
@@ -215,14 +227,28 @@ public class LeagueSongDrawService {
             if (cand) candidates.add(sd);
         }
 
-        // 候補からランダムに 3 曲。足りなければプール全体から補充（直近出題を優先的に避ける）。
+        // 候補からランダムに 3 曲選ぶ。ただし「ライン保持者（各曲の最高 EX の人）」がグループ内で
+        // なるべく重複しないようにする（1 人が複数のラインを持つのを避け、卓の中でラインを分散させる）。
+        // ② 曲（誰も未プレー＝ラインなし）は保持者が居ないので自由に選べる。
         Collections.shuffle(candidates);
         List<SongDefinition> chosen = new ArrayList<>();
         Set<String> used = new HashSet<>();
+        Set<Long> usedHolders = new HashSet<>();
+        // パス1: ライン保持者がまだ登場していない曲（または②曲）を優先して埋める。
+        for (SongDefinition sd : candidates) {
+            if (chosen.size() >= SONGS_PER_WEEK) break;
+            if (used.contains(sd.getTitle())) continue;
+            Long holder = holderByTitle.get(sd.getTitle()); // null = ②曲（ラインなし）
+            if (holder != null && !usedHolders.add(holder)) continue; // 既出の保持者はパス1では飛ばす
+            used.add(sd.getTitle());
+            chosen.add(sd);
+        }
+        // パス2: まだ3曲に満たなければ、保持者の重複を許して候補から補充する。
         for (SongDefinition sd : candidates) {
             if (chosen.size() >= SONGS_PER_WEEK) break;
             if (used.add(sd.getTitle())) chosen.add(sd);
         }
+        // パス3: それでも足りなければプール全体から補充（直近出題を優先的に避ける）。
         if (chosen.size() < SONGS_PER_WEEK) {
             List<SongDefinition> fallback = new ArrayList<>(pool);
             Collections.shuffle(fallback);
