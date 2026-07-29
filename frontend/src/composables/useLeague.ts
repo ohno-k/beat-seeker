@@ -369,6 +369,18 @@ export function useLeague() {
     if (!res.ok) await raise(res, '編成に失敗しました');
   };
 
+  /**
+   * 誤って開始した開催中(active)の週を中止し、開始前の空 draft に戻す（管理者のみ）。
+   * 開始では昇降格 PT・DIVISION は変化しないため、順位・昇降格には影響しない。
+   */
+  const abortWeek = async (ladder: LadderType): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/league/admin/abort?ladder=${ladder}`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    if (!res.ok) await raise(res, '中止に失敗しました');
+  };
+
   /** 仮編成プレビューを取得する（管理者のみ・DB 非更新）。 */
   const fetchAdminPreview = async (ladder: LadderType): Promise<LeaguePreview> => {
     isLoading.value = true;
@@ -396,6 +408,7 @@ export function useLeague() {
     runWeekly,
     createDraft,
     formDraft,
+    abortWeek,
     fetchAdminPreview,
   };
 }

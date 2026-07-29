@@ -330,6 +330,23 @@ const handleForm = async (ladder: LadderType) => {
   }
 };
 
+/** 誤って開始した週を中止し、開始前の状態（空 draft）に戻す。昇降格 PT・DIVISION には影響しない。 */
+const handleAbort = async (ladder: LadderType) => {
+  if (!confirm(t('league.admin.confirmAbort'))) return;
+  busy.value = true;
+  error.value = '';
+  notice.value = '';
+  try {
+    await league.abortWeek(ladder);
+    notice.value = t('league.admin.abortDone');
+    await Promise.all([loadAdmin(), loadCurrent(), loadMe()]);
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    busy.value = false;
+  }
+};
+
 /** 仮編成プレビューを生成する（DB は更新しない）。押すたびにランダムで組み直す。 */
 const handlePreview = async (ladder: LadderType) => {
   busy.value = true;
@@ -704,6 +721,8 @@ onUnmounted(() => {
                       :disabled="busy" @click="handleForm(al.ladder)">{{ t('league.admin.form') }}</button>
               <button class="text-xs px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
                       :disabled="busy" @click="handleRunWeekly(al.ladder)">{{ t('league.admin.runWeekly') }}</button>
+              <button v-if="al.activeWeek" class="text-xs px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50"
+                      :disabled="busy" @click="handleAbort(al.ladder)">{{ t('league.admin.abort') }}</button>
             </div>
           </div>
 

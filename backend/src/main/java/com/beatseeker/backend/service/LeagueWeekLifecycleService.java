@@ -309,6 +309,38 @@ public class LeagueWeekLifecycleService {
     }
 
     /**
+     * 【メソッドの役割】 進行中(active)の週を「開始前」の状態に戻す（誤って開始した場合の取り消し）。
+     *
+     * 対象週の status を draft に戻し、開始時刻(snapshotAt)を消し、編成物（メンバー・課題曲・
+     * ベースライン）を削除して空の draft にする。開始(activation)では PT/DIVISION は一切変化しない
+     * ため、エントリーには触れない（＝この取り消しは順位・昇降格に影響しない）。空 draft に戻るので、
+     * 通常のスケジュール（自動編成→開始）がそのまま正しく走る。
+     *
+     * <p><b>注意:</b> 週を締めて（{@link #closeWeek}）昇降格を確定した後には使えない
+     * （締めで既に PT/DIVISION が変わっているため、この取り消しでは戻せない）。締め済みの週は
+     * closed になっていて active では無いので、この処理の対象にはならない。
+     *
+     * @param ladder ラダー種別
+     * @return 取り消した週。取り消せる active 週が無ければ null
+     */
+    @Transactional
+    public LeagueWeek abortWeek(String ladder) {
+        LeagueWeek active = leagueWeekRepository
+                .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(ladder, "active").orElse(null);
+        if (active == null) {
+            return null;
+        }
+        leagueBaselineRepository.deleteByWeek(active);
+        leagueSongRepository.deleteByWeek(active);
+        leagueMemberRepository.deleteByWeek(active);
+        active.setStatus("draft");
+        active.setSnapshotAt(null);
+        leagueWeekRepository.save(active);
+        log.info("リーグ週を中止(draft へ差し戻し): ladder={} weekId={}", ladder, active.getId());
+        return active;
+    }
+
+    /**
      * 【メソッドの役割】 現在の参加者で draft 週の卓・グループ・課題曲を確定して保存する（編成の中核）。
      *
      * {@link #formDraft}（事前確認）と {@link #activateWeek}（開始）の両方から使う共通処理。

@@ -303,6 +303,36 @@ public class LeagueAdminController {
     }
 
     /**
+     * 【メソッドの役割】 誤って開始した開催中(active)の週を取り消し、開始前の空 draft に戻す。
+     *
+     * 開始(activation)では昇降格 PT・DIVISION は変化しないため、この取り消しは順位・昇降格に
+     * 影響しない（編成物＝メンバー・課題曲・ベースラインのみ削除して draft に戻す）。空 draft に
+     * 戻るので通常のスケジュール（自動編成 → 開始）がそのまま走る。
+     *
+     * <p><b>注意:</b> 週を締めて（run-weekly / closeWeek）昇降格を確定した後は取り消せない。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param ladder ラダー種別
+     * @return 取り消した週の詳細
+     */
+    @PostMapping("/abort")
+    public ResponseEntity<?> abort(Authentication auth, @RequestParam("ladder") String ladder) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        if (!leagueService.isValidLadder(ladder)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ladder は score / bp のいずれかです"));
+        }
+        LeagueWeek week = lifecycleService.abortWeek(ladder);
+        if (week == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "中止できる開催中(active)の週がありません"));
+        }
+        return ResponseEntity.ok(Map.of(
+                "message", "開催中の週を中止し、開始前の状態に戻しました。",
+                "week", weekDetail(week)));
+    }
+
+    /**
      * 【メソッドの役割】 エントリーの所属 DIVISION を手動修正する（配属の調整用）。
      *
      * 反映は次回の週次編成から（進行中の週の配置は変わらない）。
