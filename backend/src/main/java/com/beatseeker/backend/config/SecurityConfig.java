@@ -197,6 +197,11 @@ public class SecurityConfig {
                                                 // 参加者・TL 向け API: 招待 URL に埋め込まれたトークン自体が本人確認材料。
                                                 // ログイン不要 (beat-seeker アカウントを持たない参加者を想定)。
                                                 .requestMatchers("/api/competition-access/**").permitAll()
+                                                // 隠しページ (/lounge) の対局 API: beat-seeker アカウントを持たない
+                                                // 友人と遊べるようログイン不要。入室コードと入室時に発行される
+                                                // トークンが本人確認材料で、相手の駒を伏せる視界制限は
+                                                // GunjinGameService 側で行う。
+                                                .requestMatchers("/api/lounge/**").permitAll()
                                                 // きんじょー杯 特設ページ: 参加者一覧の閲覧 (GET) は公開。
                                                 // メモ編集 (PUT .../note) は誰でも可（協同編集のためログイン不要）。
                                                 // 追加・削除 (POST/DELETE) は要ログイン + Controller 側で管理者判定。

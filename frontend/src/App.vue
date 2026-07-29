@@ -92,6 +92,9 @@ const CompetitionSpectatorView = defineAsyncComponent(() => import('./views/Comp
 // きんじょー杯 特設ページ: `/kinjocup` のスタンドアロン URL。参加者一覧を公開閲覧する。
 // 追加・削除 UI は View 内で管理者ログイン時のみ表示する。
 const KinjoCupView = defineAsyncComponent(() => import('./views/KinjoCupView.vue'));
+// 隠しページ: 軍人将棋 (`/lounge`)。サイト内から一切リンクしておらず、
+// URL と入室コードを知っている人だけが遊べる。ログイン不要のスタンドアロン。
+const LoungeView = defineAsyncComponent(() => import('./views/LoungeView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
@@ -208,6 +211,14 @@ const competitionSpectatorToken = ref<string>(
  * サイドバー等を描画しないスタンドアロン。トークンは不要（参加者は DB 名簿から取得）。
  */
 const isKinjoCupPage = ref(window.location.pathname.replace(/\/$/, '') === '/kinjocup');
+
+/**
+ * 現在 URL が `/lounge` かどうか。
+ * 友達と軍人将棋を指すための隠しページ。サイト内のどこからもリンクしておらず、
+ * URL を知っている人だけが辿り着ける（robots.txt でもクロール除外している）。
+ * ログイン不要・サイドバー等を描画しないスタンドアロン。
+ */
+const isLoungePage = ref(window.location.pathname.replace(/\/$/, '') === '/lounge');
 
 const { hasUpdate } = useAppUpdate();
 /** Service Worker による新バージョン通知を受けた際の更新ボタン。単純にページ再読込を行う。 */
@@ -1540,6 +1551,8 @@ const handleUnifiedClose = async () => {
   <CompetitionSpectatorView v-else-if="isCompetitionSpectatorPage" :token="competitionSpectatorToken" />
   <!-- きんじょー杯 特設ページ: 参加者一覧を公開閲覧。追加/削除 UI は View 内で管理者ログイン時のみ表示。 -->
   <KinjoCupView v-else-if="isKinjoCupPage" />
+  <!-- 隠しページ: 軍人将棋。ログイン不要・入室コードだけで友達と指せるスタンドアロン。 -->
+  <LoungeView v-else-if="isLoungePage" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
     <!-- ============================================================ -->
     <!-- エイプリルフール限定オーバーレイ（常時マウントだが中身は日付判定） -->

@@ -33,6 +33,7 @@ const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandings
 const WrappedView = () => import('../views/WrappedView.vue')
 const KinjoCupView = () => import('../views/KinjoCupView.vue')
 const LeagueView = () => import('../views/LeagueView.vue')
+const LoungeView = () => import('../views/LoungeView.vue')
 
 /**
  * SPA のルートテーブル定義。
@@ -94,6 +95,9 @@ const router = createRouter({
     { path: '/kinjocup', name: 'kinjocup', component: KinjoCupView },
     // リーグモード（週次課題曲 3 曲で昇降格を競う。要ログイン）
     { path: '/league', name: 'league', component: LeagueView },
+    // 隠しページ: 軍人将棋（友達との対局用）。サイト内のどこからもリンクせず、
+    // robots.txt でもクロール除外している。実体は App.vue 側でパスを検知してスタンドアロン描画する。
+    { path: '/lounge', name: 'lounge', component: LoungeView },
     // 大会管理: Competition セクションの 4 ID ホワイトリストで保護。
     // 直接アクセス・ブックマーク用エントリ。実際の権限判定はサーバ側 + View 側で行う。
     { path: '/competition-admin', name: 'competition-admin', component: CompetitionAdminView },

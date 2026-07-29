@@ -17,4 +17,7 @@ Disallow: /reset-password
 Disallow: /user/
 Disallow: /admin/
 
+# 身内向けの隠しページ (検索結果に出したくない)
+Disallow: /lounge
+
 Sitemap: https://beat-seeker.com/sitemap.xml
