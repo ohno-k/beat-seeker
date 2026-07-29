@@ -56,6 +56,12 @@ logging:
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  league:
+    # シーズン開始日（JST）。この日以降の月曜 15:00 から自動編成・開始する（それ以前の自動開始は待つ）。
+    season-start: ${LEAGUE_SEASON_START:2026-08-03}
+    # 参加受付の締切（JST・ISO 日時）。この時刻 〜 シーズン開始（月曜 15:00）の間は参加/離脱をロックし、
+    # 管理者が本番と同じ編成（グループ・課題曲）を事前確認できるようにする。締切より前と開始後は通常どおり。
+    signup-close: ${LEAGUE_SIGNUP_CLOSE:2026-08-02T23:59:00}
 
 vapid:
   # 公開鍵はブラウザに配布されるため非機密。秘密鍵は環境変数で渡す（リポジトリにコミットしない）。

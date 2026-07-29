@@ -314,6 +314,22 @@ const handleCreateDraft = async (ladder: LadderType) => {
   }
 };
 
+/** 参加締切後に draft 週を編成する（開始はしない。本番と同じ卓・グループ・課題曲を確定して確認できる）。 */
+const handleForm = async (ladder: LadderType) => {
+  busy.value = true;
+  error.value = '';
+  notice.value = '';
+  try {
+    await league.formDraft(ladder);
+    notice.value = t('league.admin.formDone');
+    await loadAdmin();
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    busy.value = false;
+  }
+};
+
 /** 仮編成プレビューを生成する（DB は更新しない）。押すたびにランダムで組み直す。 */
 const handlePreview = async (ladder: LadderType) => {
   busy.value = true;
@@ -329,6 +345,10 @@ const handlePreview = async (ladder: LadderType) => {
 
 /** レート(%)の表示（小数第2位）。null は '-'。 */
 const fmtRate = (r: number | null | undefined) => (r == null ? '-' : `${r.toFixed(2)}%`);
+
+/** draft 課題曲をグループ→スロット順に並べる（グループ別編成の確認を見やすくする）。 */
+const orderedSongs = (songs: LeagueSongInfo[]) =>
+  [...songs].sort((a, b) => ((a.groupIndex ?? -1) - (b.groupIndex ?? -1)) || (a.slot - b.slot));
 
 watch(isLoggedIn, (v) => {
   if (v) {
@@ -677,9 +697,11 @@ onUnmounted(() => {
               {{ t('league.scoreLadder') }}
               <span class="ml-2 text-xs text-slate-400">{{ t('league.admin.entryCount') }}: {{ al.activeEntryCount }}</span>
             </div>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
               <button class="text-xs px-3 py-1.5 rounded-lg bg-slate-600 hover:bg-slate-700 text-white disabled:opacity-50"
                       :disabled="busy" @click="handleCreateDraft(al.ladder)">{{ t('league.admin.createDraft') }}</button>
+              <button class="text-xs px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+                      :disabled="busy" @click="handleForm(al.ladder)">{{ t('league.admin.form') }}</button>
               <button class="text-xs px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
                       :disabled="busy" @click="handleRunWeekly(al.ladder)">{{ t('league.admin.runWeekly') }}</button>
             </div>
@@ -689,6 +711,10 @@ onUnmounted(() => {
           <div v-if="al.draftWeek" class="mt-3">
             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
               {{ t('league.admin.draftWeek') }}: {{ shortDateTime(al.draftWeek.startsAt) }}〜{{ shortDateTime(al.draftWeek.endsAt) }}
+              <span v-if="al.draftWeek.memberCount" class="ml-1 text-teal-600 dark:text-teal-400">
+                / {{ t('league.admin.formedCount', { n: al.draftWeek.memberCount }) }}
+              </span>
+              <span v-else class="ml-1 text-slate-400">/ {{ t('league.admin.notFormed') }}</span>
             </div>
             <div v-for="tierInfo in al.draftWeek.tiers" :key="tierInfo.tier" class="mt-2 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
               <div class="flex items-center justify-between">
@@ -696,7 +722,11 @@ onUnmounted(() => {
                 <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
                         :disabled="busy" @click="handleRedraw(al.draftWeek!.id, tierInfo.tier)">{{ t('league.admin.redraw') }}</button>
               </div>
-              <div v-for="song in tierInfo.songs" :key="song.id" class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+              <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id" class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                <span v-if="song.groupIndex != null"
+                      class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
+                </span>
                 <span class="text-slate-400 w-4">{{ song.slot }}.</span>
                 <input
                   v-model="replaceForm(song).title"

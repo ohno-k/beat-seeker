@@ -162,6 +162,7 @@ public class LeagueAdminController {
      * @return 再抽選後の課題曲 3 曲
      */
     @PostMapping("/weeks/{weekId}/redraw")
+    @Transactional
     public ResponseEntity<?> redraw(Authentication auth,
                                     @PathVariable Long weekId,
                                     @RequestParam("tier") Integer tier) {
@@ -176,16 +177,32 @@ public class LeagueAdminController {
             return ResponseEntity.badRequest().body(Map.of("error", "再抽選できるのは draft 週のみです"));
         }
 
-        List<User> tierMembers = List.of();
-        LeagueWeek active = leagueWeekRepository
-                .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(week.getLadderType(), "active").orElse(null);
-        if (active != null) {
-            tierMembers = leagueMemberRepository.findByWeek(active).stream()
-                    .filter(m -> m.getTier().equals(tier))
-                    .map(LeagueMember::getUser)
-                    .collect(Collectors.toList());
+        // 事前編成済み（formDraft 済み）なら、この週のメンバーをグループ単位で使って
+        // グループごとに再抽選する（課題曲はグループ単位なので tier 一括では壊れる）。
+        Map<Integer, List<User>> membersByGroup = leagueMemberRepository.findByWeek(week).stream()
+                .filter(m -> m.getTier().equals(tier))
+                .collect(Collectors.groupingBy(LeagueMember::getGroupIndex,
+                        Collectors.mapping(LeagueMember::getUser, Collectors.toList())));
+
+        List<LeagueSong> songs;
+        if (!membersByGroup.isEmpty()) {
+            songs = new ArrayList<>();
+            for (Map.Entry<Integer, List<User>> g : membersByGroup.entrySet()) {
+                songs.addAll(songDrawService.drawSongsForGroup(week, tier, g.getKey(), g.getValue()));
+            }
+        } else {
+            // 未編成の draft: 現行 active 週の同階級メンバーで tier 一括抽選（従来動作）。
+            List<User> tierMembers = List.of();
+            LeagueWeek active = leagueWeekRepository
+                    .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(week.getLadderType(), "active").orElse(null);
+            if (active != null) {
+                tierMembers = leagueMemberRepository.findByWeek(active).stream()
+                        .filter(m -> m.getTier().equals(tier))
+                        .map(LeagueMember::getUser)
+                        .collect(Collectors.toList());
+            }
+            songs = songDrawService.drawSongsForTier(week, tier, tierMembers);
         }
-        List<LeagueSong> songs = songDrawService.drawSongsForTier(week, tier, tierMembers);
         return ResponseEntity.ok(Map.of("message", "課題曲を再抽選しました",
                 "songs", songs.stream().map(this::toSongMap).toList()));
     }
@@ -254,6 +271,35 @@ public class LeagueAdminController {
             return ResponseEntity.badRequest().body(Map.of("error", "draft 週を作成できませんでした（同じ開始日時の週が既に存在します）"));
         }
         return ResponseEntity.ok(Map.of("message", "draft 週を用意しました", "week", weekDetail(week)));
+    }
+
+    /**
+     * 【メソッドの役割】 参加締切後に、現在の参加者で draft 週の編成（卓・グループ・課題曲）を確定する。
+     *
+     * 開始（activateWeek）はせず、実際に使われる編成を draft 週へ保存する。管理者は開始
+     * （月曜 15:00）までの間に overview / 順位表で確認し、必要なら課題曲を差し替え・再抽選できる。
+     * 開始処理はこの事前編成をそのまま使う（再抽選しない）。押すたびに組み直す。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param ladder ラダー種別
+     * @return 編成後の draft 週の詳細
+     */
+    @PostMapping("/form")
+    public ResponseEntity<?> form(Authentication auth, @RequestParam("ladder") String ladder) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        if (!leagueService.isValidLadder(ladder)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ladder は score / bp のいずれかです"));
+        }
+        LeagueWeek week = lifecycleService.formDraft(ladder);
+        if (week == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "編成できませんでした（draft 週が無いか、参加者が居ません）"));
+        }
+        return ResponseEntity.ok(Map.of(
+                "message", "編成しました（グループ・課題曲を確定）。開始までに確認・調整できます。",
+                "week", weekDetail(week)));
     }
 
     /**
@@ -339,6 +385,7 @@ public class LeagueAdminController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", song.getId());
         m.put("tier", song.getTier());
+        m.put("groupIndex", song.getGroupIndex());
         m.put("slot", song.getSlot());
         m.put("title", song.getTitle());
         m.put("difficultyName", song.getDifficultyName());

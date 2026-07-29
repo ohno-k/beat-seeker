@@ -25,6 +25,7 @@ public class LeagueScheduler {
     private static final Logger log = LoggerFactory.getLogger(LeagueScheduler.class);
 
     private final LeagueWeekLifecycleService lifecycleService;
+    private final LeagueService leagueService;
 
     /**
      * シーズン開始日（JST）。この日以降の月曜 15:00 のみ自動編成・開始する。
@@ -37,8 +38,10 @@ public class LeagueScheduler {
      * 【コンストラクタ】 Spring が依存を注入する。
      */
     public LeagueScheduler(LeagueWeekLifecycleService lifecycleService,
+                           LeagueService leagueService,
                            @Value("${app.league.season-start:2026-08-03}") String seasonStart) {
         this.lifecycleService = lifecycleService;
+        this.leagueService = leagueService;
         this.seasonStart = LocalDate.parse(seasonStart);
     }
 
@@ -76,11 +79,35 @@ public class LeagueScheduler {
     }
 
     /**
+     * 【メソッドの役割】 参加締切後（プレシーズン確定窓）に、未編成の draft 週を自動編成する。
+     *
+     * 参加受付の締切（{@code app.league.signup-close}）〜開始（月曜 15:00）の間だけ動く。
+     * 締切直後に本番と同じ卓・グループ・課題曲を確定しておき、管理者は開始までに確認・調整できる。
+     * 既に編成済み（管理者の手動編成・調整を含む）なら {@link LeagueWeekLifecycleService#autoFormDraft}
+     * が何もしないため、この窓で複数回起動しても上書きしない（冪等）。開始（activateWeek）は
+     * この事前編成をそのまま使う。
+     */
+    @Scheduled(cron = "0 0 0 * * MON", zone = "Asia/Tokyo")
+    public void autoFormWeeks() {
+        if (!leagueService.isRegistrationLocked()) {
+            return; // 参加締切〜開始の窓の外では自動編成しない（通常週は開始時に編成する）
+        }
+        for (String ladder : LeagueService.LADDERS) {
+            try {
+                lifecycleService.autoFormDraft(ladder);
+            } catch (Exception e) {
+                log.error("リーグ draft 週の自動編成に失敗: ladder={}", ladder, e);
+            }
+        }
+    }
+
+    /**
      * 【メソッドの役割】 月曜 15:00 JST に次週を編成して開始する。
      *
      * この時刻が参加締切（途中参加不可）であり、active 化と同時に課題曲が公開される
      * （= 開始した瞬間に課題曲がわかる）。金曜の draft 作成が何らかの理由で
      * 走っていなくても、activateWeek 内で draft をその場で作成するため単独で成立する。
+     * 事前編成（{@link #autoFormWeeks()} や管理者の手動編成）済みならそれをそのまま使う。
      */
     @Scheduled(cron = "0 0 15 * * MON", zone = "Asia/Tokyo")
     public void activateWeeks() {

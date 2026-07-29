@@ -35,6 +35,8 @@ export interface LeagueWeekInfo {
 export interface LeagueSongInfo {
   id: number;
   tier: number;
+  /** グループ番号（0 始まり）。課題曲はグループ単位なので管理者の編成確認で使う。旧データ・観戦では未設定のことがある。 */
+  groupIndex?: number | null;
   slot: number;
   title: string;
   difficultyName: string;
@@ -355,6 +357,18 @@ export function useLeague() {
     if (!res.ok) await raise(res, 'draft 週の作成に失敗しました');
   };
 
+  /**
+   * 参加締切後に draft 週の編成（卓・グループ・課題曲）を確定する（管理者のみ）。
+   * 開始（active 化）はしない。開始処理はこの事前編成をそのまま使う。押すたびに組み直す。
+   */
+  const formDraft = async (ladder: LadderType): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/league/admin/form?ladder=${ladder}`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    if (!res.ok) await raise(res, '編成に失敗しました');
+  };
+
   /** 仮編成プレビューを取得する（管理者のみ・DB 非更新）。 */
   const fetchAdminPreview = async (ladder: LadderType): Promise<LeaguePreview> => {
     isLoading.value = true;
@@ -381,6 +395,7 @@ export function useLeague() {
     redrawTier,
     runWeekly,
     createDraft,
+    formDraft,
     fetchAdminPreview,
   };
 }

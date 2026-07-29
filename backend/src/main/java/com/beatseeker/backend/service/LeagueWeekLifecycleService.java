@@ -223,10 +223,58 @@ public class LeagueWeekLifecycleService {
     }
 
     /**
+     * 【メソッドの役割】 draft 週を「開始せずに」編成だけ確定する（参加締切後の事前確認用）。
+     *
+     * この瞬間の active エントリーで卓・グループ・課題曲を確定して draft 週に保存するが、
+     * status は draft のまま・ベースラインも取らない（＝プレイヤーには未公開）。管理者は
+     * 開始（月曜 15:00）までの間に、実際に使われる編成と課題曲を overview / 順位表で確認し、
+     * 必要なら課題曲を差し替え・再抽選できる。押すたびに組み直す（{@link #formWeek} が掃除する）。
+     *
+     * <p>{@link #activateWeek} はこの事前編成があればそれをそのまま使う（再抽選しない）。
+     * 参加締切（{@code app.league.signup-close}）でロスターがロックされている前提で使う。
+     *
+     * @param ladder ラダー種別
+     * @return 編成した draft 週。参加者不在・draft 週が無いなどで編成しなかった場合は null
+     */
+    @Transactional
+    public LeagueWeek formDraft(String ladder) {
+        LeagueWeek week = createDraftWeek(ladder);
+        if (week == null || !"draft".equals(week.getStatus())) {
+            return null;
+        }
+        List<LeagueEntry> entries = leagueEntryRepository.findByLadderTypeAndActiveTrue(ladder);
+        if (entries.isEmpty()) {
+            return null;
+        }
+        formWeek(week, entries);
+        return week;
+    }
+
+    /**
+     * 【メソッドの役割】 まだ編成されていない draft 週を自動で編成する（参加締切後の cron 用）。
+     *
+     * {@link #formDraft} と違い、<b>既に編成済みなら何もしない</b>（管理者が手動で編成・調整した
+     * 結果を自動編成が上書きしないようにする）。参加締切〜開始の窓で複数回呼ばれても安全（冪等）。
+     *
+     * @param ladder ラダー種別
+     * @return 自動編成した draft 週。既編成・draft 無し・参加者 0 で編成しなかった場合は null
+     */
+    @Transactional
+    public LeagueWeek autoFormDraft(String ladder) {
+        LeagueWeek draft = leagueWeekRepository
+                .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(ladder, "draft").orElse(null);
+        if (draft != null && !leagueMemberRepository.findByWeek(draft).isEmpty()) {
+            return null; // 既に編成済み（手動編成・調整含む）→ 上書きしない
+        }
+        return formDraft(ladder);
+    }
+
+    /**
      * 【メソッドの役割】 draft 週を編成して開始する（月曜 15:00 の処理）。
      *
      * この瞬間の active エントリーが参加者として確定する（= 途中参加不可の締切）。
-     * DIVISION は固定制のため振り直しは行わず、エントリーの currentTier のまま配置する。
+     * ただし {@link #formDraft} で事前編成済みの場合はそれをそのまま使う（再抽選しない）ため、
+     * 管理者が締切後に確認・調整した編成がそのまま開始される。未編成ならその場で編成する。
      * active 化と同時に課題曲が公開され、ベースライン（週内プレー判定の基準値）を
      * スナップショットする。参加者が 0 人の場合は draft のまま何もしない。
      *
@@ -239,11 +287,39 @@ public class LeagueWeekLifecycleService {
         if (week == null || !"draft".equals(week.getStatus())) {
             return null;
         }
-        List<LeagueEntry> entries = leagueEntryRepository.findByLadderTypeAndActiveTrue(ladder);
-        if (entries.isEmpty()) {
-            return null;
+
+        // 事前編成（formDraft）済みならそれをそのまま使う。未編成ならこの場で編成する。
+        List<LeagueMember> members = leagueMemberRepository.findByWeek(week);
+        if (members.isEmpty()) {
+            List<LeagueEntry> entries = leagueEntryRepository.findByLadderTypeAndActiveTrue(ladder);
+            if (entries.isEmpty()) {
+                return null;
+            }
+            members = formWeek(week, entries);
         }
 
+        // --- active 化とベースラインスナップショット（この瞬間に課題曲が公開される） ---
+        week.setStatus("active");
+        week.setSnapshotAt(LocalDateTime.now());
+        leagueWeekRepository.save(week);
+        snapshotBaselines(week, members);
+
+        log.info("リーグ週を開始: ladder={} weekId={} members={}", ladder, week.getId(), members.size());
+        return week;
+    }
+
+    /**
+     * 【メソッドの役割】 現在の参加者で draft 週の卓・グループ・課題曲を確定して保存する（編成の中核）。
+     *
+     * {@link #formDraft}（事前確認）と {@link #activateWeek}（開始）の両方から使う共通処理。
+     * status の変更やベースライン取得は行わない（それらは activateWeek の責務）。再実行に備えて
+     * 既存のメンバー・ベースライン・課題曲を先に掃除してから組み直す（グループ数が変わっても残らない）。
+     *
+     * @param week    対象 draft 週
+     * @param entries その週の参加者（active エントリー）
+     * @return 保存した {@link LeagueMember} 一覧
+     */
+    private List<LeagueMember> formWeek(LeagueWeek week, List<LeagueEntry> entries) {
         // DIVISION の確定: 通常は join 時に設定済み。欠けている場合のみ BEAT-TIER から補完する。
         for (LeagueEntry e : entries) {
             if (!LeagueDivision.isValid(e.getCurrentTier())) {
@@ -254,9 +330,11 @@ public class LeagueWeekLifecycleService {
         leagueEntryRepository.saveAll(entries);
 
         // --- グループ分割とメンバー配置（DIVISION ごと） ---
-        // 編成やり直し（手動トリガーの再実行など）で古い配置が残らないよう先に掃除する。
+        // 編成やり直し（事前編成の押し直し・手動トリガーの再実行など）で古い配置や課題曲が
+        // 残らないよう先に掃除する（グループ数が減っても孤立した課題曲を残さない）。
         leagueMemberRepository.deleteByWeek(week);
         leagueBaselineRepository.deleteByWeek(week);
+        leagueSongRepository.deleteByWeek(week);
 
         // --- 少人数 DIVISION の合流（チャレンジ / ディフェンス） ---
         // ホーム DIVISION ごとの人数を数え、卓(host)と立場(role)を決める。
@@ -311,15 +389,9 @@ public class LeagueWeekLifecycleService {
             songDrawService.drawSongsForGroup(week, tg[0], tg[1], e.getValue());
         }
 
-        // --- active 化とベースラインスナップショット（この瞬間に課題曲が公開される） ---
-        week.setStatus("active");
-        week.setSnapshotAt(LocalDateTime.now());
-        leagueWeekRepository.save(week);
-        snapshotBaselines(week, newMembers);
-
-        log.info("リーグ週を開始: ladder={} weekId={} 卓={} members={}",
-                ladder, week.getId(), byHost.keySet(), newMembers.size());
-        return week;
+        log.info("リーグ週を編成: ladder={} weekId={} 卓={} members={}",
+                week.getLadderType(), week.getId(), byHost.keySet(), newMembers.size());
+        return newMembers;
     }
 
     /**

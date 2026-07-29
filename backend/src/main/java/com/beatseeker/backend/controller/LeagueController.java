@@ -92,6 +92,9 @@ public class LeagueController {
         if (req == null || !leagueService.isValidLadder(req.ladderType())) {
             return ResponseEntity.badRequest().body(Map.of("error", "ladderType は score / bp のいずれかです"));
         }
+        if (leagueService.isRegistrationLocked()) {
+            return ResponseEntity.badRequest().body(Map.of("error", leagueService.registrationLockMessage()));
+        }
         LeagueEntry entry = leagueService.join(user, req.ladderType());
         return ResponseEntity.ok(Map.of("message", "参加を受け付けました。次回の週次編成から反映されます。",
                 "entry", toEntryMap(entry)));
@@ -114,6 +117,9 @@ public class LeagueController {
         }
         if (req == null || !leagueService.isValidLadder(req.ladderType())) {
             return ResponseEntity.badRequest().body(Map.of("error", "ladderType は score / bp のいずれかです"));
+        }
+        if (leagueService.isRegistrationLocked()) {
+            return ResponseEntity.badRequest().body(Map.of("error", leagueService.registrationLockMessage()));
         }
         boolean left = leagueService.leave(user, req.ladderType());
         if (!left) {

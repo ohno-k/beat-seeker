@@ -82,4 +82,14 @@ public interface LeagueSongRepository extends JpaRepository<LeagueSong, Long> {
      * @param tier 階級
      */
     void deleteByWeekAndTier(LeagueWeek week, Integer tier);
+
+    /**
+     * 【メソッドの役割】 指定週の課題曲を全て削除する。
+     *
+     * 事前編成（formDraft）の組み直しで、旧編成のグループ構成が変わっても課題曲を
+     * 残さないよう、再編成前に週単位で一括削除するために使う。
+     *
+     * @param week 対象週
+     */
+    void deleteByWeek(LeagueWeek week);
 }

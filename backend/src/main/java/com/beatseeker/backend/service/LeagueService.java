@@ -3,9 +3,14 @@ package com.beatseeker.backend.service;
 import com.beatseeker.backend.entity.LeagueEntry;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.LeagueEntryRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -31,10 +36,54 @@ public class LeagueService {
     private final LeagueEntryRepository leagueEntryRepository;
 
     /**
-     * 【コンストラクタ】 Spring が依存を注入する。
+     * 参加受付の締切（JST）。この時刻 〜 シーズン開始（月曜 15:00）の間は参加/離脱をロックし、
+     * 管理者が本番と同じ編成を事前確認できるようにする。{@code app.league.signup-close} で変更可。
      */
-    public LeagueService(LeagueEntryRepository leagueEntryRepository) {
+    private final LocalDateTime signupClose;
+    /**
+     * シーズン開始日の編成・開始時刻（JST・月曜 15:00）。ロック窓の終端に使う。
+     * {@code app.league.season-start} の日付に {@link LeagueWeekLifecycleService#START_HOUR} を合わせる。
+     */
+    private final LocalDateTime seasonActivation;
+
+    /**
+     * 【コンストラクタ】 Spring が依存を注入する。
+     *
+     * @param leagueEntryRepository エントリーの永続化リポジトリ
+     * @param signupClose           参加受付の締切（ISO ローカル日時、既定 2026-08-02T23:59:00）
+     * @param seasonStart           シーズン開始日（ISO ローカル日付、既定 2026-08-03）
+     */
+    public LeagueService(LeagueEntryRepository leagueEntryRepository,
+                         @Value("${app.league.signup-close:2026-08-02T23:59:00}") String signupClose,
+                         @Value("${app.league.season-start:2026-08-03}") String seasonStart) {
         this.leagueEntryRepository = leagueEntryRepository;
+        this.signupClose = LocalDateTime.parse(signupClose);
+        this.seasonActivation = LocalDate.parse(seasonStart)
+                .atTime(LeagueWeekLifecycleService.START_HOUR, 0);
+    }
+
+    /**
+     * 【メソッドの役割】 いま参加受付がロックされているか（プレシーズン確定窓の中か）を返す。
+     *
+     * 締切（{@code signup-close}）〜シーズン開始（月曜 15:00）の間だけ true。締切より前と
+     * 開始後は false（通常どおり参加/離脱できる）。この窓の間はロスターを固定し、管理者が
+     * 本番と同じ編成（グループ・課題曲）を確認・調整できるようにする。
+     *
+     * @return ロック中なら true
+     */
+    public boolean isRegistrationLocked() {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Tokyo"));
+        return !now.isBefore(signupClose) && now.isBefore(seasonActivation);
+    }
+
+    /**
+     * 【メソッドの役割】 参加ロック中にユーザーへ返す説明メッセージを返す。
+     *
+     * @return 締切日時を含む案内文
+     */
+    public String registrationLockMessage() {
+        String when = signupClose.format(DateTimeFormatter.ofPattern("M/d HH:mm"));
+        return "リーグの参加受付は締め切りました（" + when + "）。開始後は次週分の参加を受け付けます。";
     }
 
     /**
