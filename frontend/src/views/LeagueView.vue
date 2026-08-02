@@ -26,6 +26,8 @@ import {
   type LeagueHistoryRow,
   type LeagueTierOverview,
   type LeagueAdminLadder,
+  type LeagueAdminWeek,
+  type LeagueAdminMember,
   type LeagueStandingRow,
   type LeagueSongInfo,
   type LeaguePerSong,
@@ -387,6 +389,27 @@ const fmtRate = (r: number | null | undefined) => (r == null ? '-' : `${r.toFixe
 /** draft 課題曲をグループ→スロット順に並べる（グループ別編成の確認を見やすくする）。 */
 const orderedSongs = (songs: LeagueSongInfo[]) =>
   [...songs].sort((a, b) => ((a.groupIndex ?? -1) - (b.groupIndex ?? -1)) || (a.slot - b.slot));
+
+/** draft 週の指定グループの課題曲（スロット順）。編成表の列に使う。 */
+const groupSongs = (tierInfo: LeagueAdminWeek['tiers'][number], groupIndex: number) =>
+  tierInfo.songs.filter(s => (s.groupIndex ?? 0) === groupIndex).sort((a, b) => a.slot - b.slot);
+
+/** 編成表のセル（メンバーの指定スロットの自己ベスト）。未取得なら null。 */
+const memberCell = (member: LeagueAdminMember, slot: number) =>
+  member.bests?.find(b => b.slot === slot) ?? null;
+
+/** その DIVISION（卓）の編成人数。 */
+const tierMemberCount = (tierInfo: LeagueAdminWeek['tiers'][number]) =>
+  tierInfo.groups.reduce((sum, g) => sum + g.members.length, 0);
+
+/** 課題曲の差し替えフォームを開いている (weekId, tier)。既定は畳んで編成表を見やすくする。 */
+const songEditOpen = ref<Set<string>>(new Set());
+const isSongEditOpen = (weekId: number, tier: number) => songEditOpen.value.has(`${weekId}-${tier}`);
+const toggleSongEdit = (weekId: number, tier: number) => {
+  const key = `${weekId}-${tier}`;
+  if (songEditOpen.value.has(key)) songEditOpen.value.delete(key);
+  else songEditOpen.value.add(key);
+};
 
 watch(isLoggedIn, (v) => {
   if (v) {
@@ -756,16 +779,28 @@ onUnmounted(() => {
               </span>
               <span v-else class="ml-1 text-slate-400">/ {{ t('league.admin.notFormed') }}</span>
             </div>
-            <div v-for="tierInfo in al.draftWeek.tiers" :key="tierInfo.tier" class="mt-2 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ divisionName(tierInfo.tier) }}</span>
-                <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
-                        :disabled="busy" @click="handleRedraw(al.draftWeek!.id, tierInfo.tier)">{{ t('league.admin.redraw') }}</button>
+            <div v-for="tierInfo in al.draftWeek.tiers" :key="tierInfo.tier" class="mt-3 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                  {{ divisionName(tierInfo.tier) }}
+                  <span class="text-xs font-normal text-slate-400">({{ tierMemberCount(tierInfo) }})</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          @click="toggleSongEdit(al.draftWeek!.id, tierInfo.tier)">
+                    {{ isSongEditOpen(al.draftWeek!.id, tierInfo.tier) ? t('league.admin.editSongsClose') : t('league.admin.editSongs') }}
+                  </button>
+                  <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
+                          :disabled="busy" @click="handleRedraw(al.draftWeek!.id, tierInfo.tier)">{{ t('league.admin.redraw') }}</button>
+                </div>
               </div>
-              <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id" class="mt-2">
-                <div class="flex flex-wrap items-center gap-2 text-xs">
+
+              <!-- 課題曲の差し替え（既定は畳んでおく。未編成の draft では常に出す） -->
+              <div v-if="isSongEditOpen(al.draftWeek.id, tierInfo.tier) || !tierInfo.groups.length"
+                   class="mt-2 rounded-lg bg-slate-50 dark:bg-slate-900/40 p-2 space-y-1.5">
+                <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id" class="flex flex-wrap items-center gap-2 text-xs">
                   <span v-if="song.groupIndex != null"
-                        class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                        class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
                   </span>
                   <span class="text-slate-400 w-4">{{ song.slot }}.</span>
@@ -784,35 +819,65 @@ onUnmounted(() => {
                   <button class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
                           :disabled="busy" @click="handleReplace(al.draftWeek!.id, song)">{{ t('league.admin.replace') }}</button>
                 </div>
-                <!-- そのグループのライン（開始時に凍結される見込み値）とその保持者 -->
-                <div class="mt-0.5 ml-1 text-[11px] text-slate-500 dark:text-slate-400">
-                  <span class="font-semibold text-amber-600 dark:text-amber-400">{{ t('league.admin.preview.lineLabel') }}:</span>
-                  <template v-if="song.lineEx != null">
-                    <span class="tabular-nums">{{ song.lineEx }} ({{ fmtRate(song.lineRate) }})</span>
-                    <span class="ml-2">
-                      {{ t('league.admin.preview.lineHolder') }}:
-                      <span class="text-slate-600 dark:text-slate-300">{{ song.lineHolders?.length ? song.lineHolders.join(' / ') : '-' }}</span>
-                    </span>
-                  </template>
-                  <template v-else>{{ t('league.lineNone') }}</template>
-                </div>
               </div>
 
-              <!-- グループのメンバー（誰がどのグループに入ったかの確認用） -->
-              <div v-if="tierInfo.groups && tierInfo.groups.length" class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 space-y-1">
-                <div v-for="g in tierInfo.groups" :key="g.groupIndex" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                    {{ t('league.groupN', { n: g.groupIndex + 1 }) }} ({{ g.members.length }})
-                  </span>
-                  <span v-for="mem in g.members" :key="mem.userId"
-                        class="inline-flex items-center gap-0.5 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                    {{ mem.displayName || mem.iidxId || '—' }}
-                    <span v-if="roleBadge(mem.role)"
-                          class="inline-flex items-center px-1 py-0.5 rounded text-[10px]"
-                          :class="roleBadge(mem.role)!.cls">
-                      {{ roleBadge(mem.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(mem.homeTier) }}</span>
-                    </span>
-                  </span>
+              <!-- グループごとの編成（仮編成プレビューと同じ表: 課題曲 × メンバーの自己ベスト） -->
+              <div v-for="g in tierInfo.groups" :key="g.groupIndex" class="mt-3">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                  {{ t('league.groupN', { n: g.groupIndex + 1 }) }} ({{ g.members.length }})
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-xs border-collapse">
+                    <thead>
+                      <tr class="align-bottom">
+                        <th class="text-left font-semibold py-1 pr-3 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                          {{ t('league.admin.preview.player') }}
+                        </th>
+                        <th v-for="s in groupSongs(tierInfo, g.groupIndex)" :key="s.id"
+                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]">
+                          <div class="text-slate-700 dark:text-slate-200 break-words leading-tight">{{ s.title }}</div>
+                          <div class="text-[10px] font-normal text-slate-400">
+                            {{ s.difficultyName }} <span v-if="s.level">☆{{ s.level }}</span>
+                          </div>
+                          <div class="text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                            {{ t('league.admin.preview.lineLabel') }}:
+                            <template v-if="s.lineEx != null">{{ s.lineEx }} ({{ fmtRate(s.lineRate) }})</template>
+                            <template v-else>{{ t('league.lineNone') }}</template>
+                          </div>
+                          <div v-if="s.lineHolders && s.lineHolders.length"
+                               class="text-[10px] font-normal text-slate-500 dark:text-slate-400 break-words leading-tight">
+                            {{ t('league.admin.preview.lineHolder') }}: {{ s.lineHolders.join(' / ') }}
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="mem in g.members" :key="mem.userId"
+                          class="border-t border-slate-100 dark:border-slate-700/60">
+                        <td class="py-1 pr-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
+                          {{ mem.displayName || mem.iidxId || '—' }}
+                          <span v-if="roleBadge(mem.role)"
+                                class="ml-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px]"
+                                :class="roleBadge(mem.role)!.cls">
+                            {{ roleBadge(mem.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(mem.homeTier) }}</span>
+                          </span>
+                        </td>
+                        <td v-for="s in groupSongs(tierInfo, g.groupIndex)" :key="s.id"
+                            class="py-1 px-2 whitespace-nowrap tabular-nums"
+                            :class="memberCell(mem, s.slot)?.isLine
+                              ? 'bg-amber-100 dark:bg-amber-900/40 font-bold text-amber-800 dark:text-amber-200'
+                              : 'text-slate-600 dark:text-slate-300'">
+                          <template v-if="memberCell(mem, s.slot)?.played">
+                            {{ memberCell(mem, s.slot)!.ex }}
+                            <span class="text-[10px]"
+                                  :class="memberCell(mem, s.slot)!.isLine ? 'text-amber-700 dark:text-amber-300' : 'text-slate-400'">({{ fmtRate(memberCell(mem, s.slot)!.rate) }})</span>
+                            <span v-if="memberCell(mem, s.slot)!.isLine" class="ml-0.5 text-[10px]">◆</span>
+                          </template>
+                          <span v-else class="text-slate-300 dark:text-slate-600">—</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

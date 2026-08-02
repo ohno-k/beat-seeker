@@ -1443,6 +1443,8 @@ export const ko = {
   'league.admin.replace': '교체',
   'league.admin.replaceTitle': '곡명 (마스터와 완전 일치)',
   'league.admin.redraw': '재추첨',
+  'league.admin.editSongs': '과제곡 편집',
+  'league.admin.editSongsClose': '편집 닫기',
   'league.admin.runWeekly': '주간 처리 실행',
   'league.admin.createDraft': 'draft 주 생성',
   'league.admin.form': '편성하기',

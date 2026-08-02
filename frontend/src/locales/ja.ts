@@ -1501,6 +1501,8 @@ export const ja = {
   'league.admin.replace': '差し替え',
   'league.admin.replaceTitle': '曲名（マスタと完全一致）',
   'league.admin.redraw': '再抽選',
+  'league.admin.editSongs': '課題曲を編集',
+  'league.admin.editSongsClose': '編集を閉じる',
   'league.admin.runWeekly': '週次処理を実行',
   'league.admin.createDraft': 'draft週を作成',
   'league.admin.form': '編成する',

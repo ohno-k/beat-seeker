@@ -146,6 +146,8 @@ export interface LeagueAdminMember {
   /** ホーム DIVISION（0=LEGEND、1..10）。卓(tier)と異なる場合はチャレンジ/ディフェンス。 */
   homeTier: number;
   role: 'normal' | 'challenge' | 'defense';
+  /** 課題曲ごとの自己ベスト（draft 週のみ。スロット順・仮編成プレビューと同じ形）。 */
+  bests: LeaguePreviewCell[];
 }
 
 /** 管理者 overview の週詳細。 */

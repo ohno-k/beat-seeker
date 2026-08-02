@@ -437,21 +437,21 @@ public class LeagueAdminController {
         // 卓(tier) → グループ → メンバー。誰がどのグループに入ったかを管理者が確認できるようにする。
         List<LeagueMember> members = leagueMemberRepository.findByWeek(week);
 
-        // draft 週は各グループのライン（＝開始時にベースラインとして凍結される見込み値）と
-        // その保持者を課題曲に添えて返す。active/closed 週の確定ラインはベースライン由来なので
-        // ここでは計算しない（順位表側が表示する）。
-        Map<Long, Map<String, Object>> lineBySongId = "draft".equals(week.getStatus())
-                ? computeDraftLines(songs, members)
-                : Map.of();
+        // draft 週は各グループのライン（＝開始時にベースラインとして凍結される見込み値）とその保持者、
+        // および各メンバーの課題曲別自己ベストを返す（仮編成プレビューと同じ表を出せるようにする）。
+        // active/closed 週の確定ラインはベースライン由来なのでここでは計算しない（順位表側が表示する）。
+        DraftLineData lines = "draft".equals(week.getStatus())
+                ? computeDraftLineData(songs, members)
+                : new DraftLineData(Map.of(), Map.of());
         Map<Integer, List<Map<String, Object>>> songsByTier = songs.stream()
                 .collect(Collectors.groupingBy(LeagueSong::getTier, TreeMap::new,
-                        Collectors.mapping(s -> toSongMap(s, lineBySongId.get(s.getId())), Collectors.toList())));
+                        Collectors.mapping(s -> toSongMap(s, lines.lineBySongId().get(s.getId())), Collectors.toList())));
         Map<Integer, Map<Integer, List<Map<String, Object>>>> membersByTierGroup = new TreeMap<>();
         for (LeagueMember mem : members) {
             membersByTierGroup
                     .computeIfAbsent(mem.getTier(), k -> new TreeMap<>())
                     .computeIfAbsent(mem.getGroupIndex(), k -> new ArrayList<>())
-                    .add(toMemberMap(mem));
+                    .add(toMemberMap(mem, lines.bestsByUserId().get(mem.getUser().getId())));
         }
         // 表示の安定のため各グループ内は名前順に並べる。
         for (Map<Integer, List<Map<String, Object>>> byGroup : membersByTierGroup.values()) {
@@ -484,33 +484,49 @@ public class LeagueAdminController {
         return m;
     }
 
-    /** メンバー 1 人分（誰がどの卓・グループに、どの立場で入ったか）をレスポンス用 Map に変換する。 */
-    private Map<String, Object> toMemberMap(LeagueMember member) {
+    /**
+     * メンバー 1 人分（誰がどの卓・グループに、どの立場で入ったか）をレスポンス用 Map に変換する。
+     *
+     * @param bests 課題曲別の自己ベストセル（draft 週のみ。無ければ空配列）
+     */
+    private Map<String, Object> toMemberMap(LeagueMember member, List<Map<String, Object>> bests) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("userId", member.getUser().getId());
         m.put("displayName", member.getUser().getDisplayName() != null ? member.getUser().getDisplayName() : "");
         m.put("iidxId", member.getUser().getIidxId());
         m.put("homeTier", member.getHomeTier() != null ? member.getHomeTier() : member.getTier());
         m.put("role", member.getRole() != null ? member.getRole() : "normal");
+        m.put("bests", bests != null ? bests : List.of());
         return m;
     }
 
     /**
-     * 【メソッドの役割】 draft 週の各課題曲について、グループ内の「ライン」とその保持者を求める。
+     * draft 週のライン計算結果。
+     *
+     * @param lineBySongId  課題曲 ID → {@code {lineEx, lineRate, lineHolders:[表示名]}}（ライン無しの曲は含まない）
+     * @param bestsByUserId ユーザー ID → 課題曲別の自己ベストセル（スロット順）
+     */
+    private record DraftLineData(Map<Long, Map<String, Object>> lineBySongId,
+                                 Map<Long, List<Map<String, Object>>> bestsByUserId) {
+    }
+
+    /**
+     * 【メソッドの役割】 draft 週の各グループについて「ライン・ライン保持者・各メンバーの自己ベスト」を求める。
      *
      * ライン＝そのグループのメンバーが持つアーケード自己ベストの最高 EX。開始（activateWeek）時に
      * ベースラインとして凍結される値と同じ計算（アーケード記録限定・EX &gt; 0）なので、管理者は開始前に
      * 「どの曲が誰の記録でどこまで塞がっているか」を確認できる。同値の保持者が複数居れば全員返す。
+     * 仮編成プレビューと同じ表を描けるよう、メンバーごとの課題曲別セル（EX・レート・ライン保持フラグ）も返す。
      *
      * <p>全メンバー × 全課題曲を 1 クエリで引いてから (tier, groupIndex) 単位に集計する
      * （人数分のクエリを撃たない）。
      *
      * @param songs   週の全課題曲
      * @param members 週の全メンバー
-     * @return 課題曲 ID → {@code {lineEx, lineRate, lineHolders:[表示名]}}。ラインが無い曲は含めない
+     * @return ライン情報とメンバー別セル
      */
-    private Map<Long, Map<String, Object>> computeDraftLines(List<LeagueSong> songs, List<LeagueMember> members) {
-        if (songs.isEmpty() || members.isEmpty()) return Map.of();
+    private DraftLineData computeDraftLineData(List<LeagueSong> songs, List<LeagueMember> members) {
+        if (songs.isEmpty() || members.isEmpty()) return new DraftLineData(Map.of(), Map.of());
         List<String> titles = songs.stream().map(LeagueSong::getTitle).distinct().toList();
         List<String> diffs = songs.stream().map(LeagueSong::getDifficultyName).distinct().toList();
         List<User> users = members.stream().map(LeagueMember::getUser).toList();
@@ -526,41 +542,81 @@ public class LeagueAdminController {
                     s.getScore(), Math::max);
         }
 
-        Map<String, List<LeagueMember>> byGroup = new HashMap<>();
+        // (tier|groupIndex) 単位に課題曲（スロット順）とメンバーを集める。
+        Map<String, List<LeagueSong>> songsByGroup = new LinkedHashMap<>();
+        for (LeagueSong song : songs) {
+            songsByGroup.computeIfAbsent(song.getTier() + "|" + song.getGroupIndex(), k -> new ArrayList<>()).add(song);
+        }
+        for (List<LeagueSong> list : songsByGroup.values()) {
+            list.sort(Comparator.comparing(LeagueSong::getSlot));
+        }
+        Map<String, List<LeagueMember>> membersByGroup = new LinkedHashMap<>();
         for (LeagueMember mem : members) {
-            byGroup.computeIfAbsent(mem.getTier() + "|" + mem.getGroupIndex(), k -> new ArrayList<>()).add(mem);
+            membersByGroup.computeIfAbsent(mem.getTier() + "|" + mem.getGroupIndex(), k -> new ArrayList<>()).add(mem);
         }
 
-        Map<Long, Map<String, Object>> out = new HashMap<>();
-        for (LeagueSong song : songs) {
-            List<LeagueMember> group = byGroup.get(song.getTier() + "|" + song.getGroupIndex());
-            if (group == null) continue;
-            int lineEx = 0;
-            List<String> holders = new ArrayList<>();
-            for (LeagueMember mem : group) {
-                Integer ex = bestByUserSong.get(
-                        mem.getUser().getId() + "|" + song.getTitle() + "|" + song.getDifficultyName());
-                if (ex == null) continue;
-                if (ex > lineEx) {
-                    lineEx = ex;
-                    holders.clear();
+        Map<Long, Map<String, Object>> lineBySongId = new HashMap<>();
+        Map<Long, List<Map<String, Object>>> bestsByUserId = new HashMap<>();
+        for (Map.Entry<String, List<LeagueMember>> ge : membersByGroup.entrySet()) {
+            List<LeagueSong> groupSongs = songsByGroup.getOrDefault(ge.getKey(), List.of());
+            List<LeagueMember> groupMembers = ge.getValue();
+            if (groupSongs.isEmpty()) continue;
+
+            // 1) 曲ごとのライン（最高 EX）と保持者
+            int[] lineEx = new int[groupSongs.size()];
+            for (int i = 0; i < groupSongs.size(); i++) {
+                LeagueSong song = groupSongs.get(i);
+                List<String> holders = new ArrayList<>();
+                for (LeagueMember mem : groupMembers) {
+                    Integer ex = bestByUserSong.get(
+                            mem.getUser().getId() + "|" + song.getTitle() + "|" + song.getDifficultyName());
+                    if (ex == null) continue;
+                    if (ex > lineEx[i]) {
+                        lineEx[i] = ex;
+                        holders.clear();
+                    }
+                    if (ex == lineEx[i]) holders.add(nameOf(mem.getUser()));
                 }
-                if (ex == lineEx) {
-                    String name = mem.getUser().getDisplayName();
-                    holders.add(name != null && !name.isBlank() ? name : String.valueOf(mem.getUser().getIidxId()));
-                }
+                if (lineEx[i] <= 0) continue; // 誰も未プレー = ライン無し（週内に記録を出せばそのまま有効）
+                holders.sort(String.CASE_INSENSITIVE_ORDER);
+                Map<String, Object> line = new LinkedHashMap<>();
+                line.put("lineEx", lineEx[i]);
+                line.put("lineRate", rateOf(lineEx[i], song.getNotes()));
+                line.put("lineHolders", holders);
+                lineBySongId.put(song.getId(), line);
             }
-            if (lineEx <= 0) continue; // 誰も未プレー = ライン無し（週内に記録を出せばそのまま有効）
-            holders.sort(String.CASE_INSENSITIVE_ORDER);
-            Map<String, Object> line = new LinkedHashMap<>();
-            line.put("lineEx", lineEx);
-            line.put("lineRate", song.getNotes() != null && song.getNotes() > 0
-                    ? Math.round(lineEx * 100.0 / (song.getNotes() * 2) * 100.0) / 100.0
-                    : null);
-            line.put("lineHolders", holders);
-            out.put(song.getId(), line);
+
+            // 2) メンバーごとの課題曲別セル（ライン確定後に isLine を付与）
+            for (LeagueMember mem : groupMembers) {
+                List<Map<String, Object>> cells = new ArrayList<>();
+                for (int i = 0; i < groupSongs.size(); i++) {
+                    LeagueSong song = groupSongs.get(i);
+                    Integer ex = bestByUserSong.get(
+                            mem.getUser().getId() + "|" + song.getTitle() + "|" + song.getDifficultyName());
+                    Map<String, Object> cell = new LinkedHashMap<>();
+                    cell.put("slot", song.getSlot());
+                    cell.put("ex", ex);
+                    cell.put("rate", ex != null ? rateOf(ex, song.getNotes()) : null);
+                    cell.put("isLine", ex != null && lineEx[i] > 0 && ex == lineEx[i]);
+                    cell.put("played", ex != null);
+                    cells.add(cell);
+                }
+                bestsByUserId.put(mem.getUser().getId(), cells);
+            }
         }
-        return out;
+        return new DraftLineData(lineBySongId, bestsByUserId);
+    }
+
+    /** 表示名（未設定なら IIDX ID）。 */
+    private String nameOf(User user) {
+        String name = user.getDisplayName();
+        return name != null && !name.isBlank() ? name : String.valueOf(user.getIidxId());
+    }
+
+    /** EX からスコアレート(%・小数第 2 位)。notes 不明なら null。 */
+    private Double rateOf(int ex, Integer notes) {
+        if (notes == null || notes <= 0) return null;
+        return Math.round(ex * 100.0 / (notes * 2) * 100.0) / 100.0;
     }
 
     /** 課題曲をレスポンス用 Map に変換する（ライン情報があれば併記する）。 */

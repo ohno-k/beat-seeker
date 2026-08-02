@@ -1442,6 +1442,8 @@ export const en = {
   'league.admin.replace': 'Replace',
   'league.admin.replaceTitle': 'Title (must exactly match master data)',
   'league.admin.redraw': 'Redraw',
+  'league.admin.editSongs': 'Edit songs',
+  'league.admin.editSongsClose': 'Close editor',
   'league.admin.runWeekly': 'Run weekly job',
   'league.admin.createDraft': 'Create draft week',
   'league.admin.form': 'Form groups',
