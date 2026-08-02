@@ -178,13 +178,61 @@
                   </p>
                 </div>
               </div>
-              <div class="mt-3 flex flex-col gap-1.5">
-                <div v-for="s in leagueProgress.songs" :key="s.slot" class="flex items-center justify-between gap-3 text-sm">
-                  <span class="truncate text-slate-700 dark:text-slate-300">{{ s.title }}</span>
-                  <span class="shrink-0 text-xs font-bold px-2 py-0.5 rounded"
-                        :class="s.valid ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'">
-                    {{ s.valid ? t('league.played') : t('league.notPlayed') }}
-                  </span>
+              <!-- 課題曲ごとの内訳: 自己ベスト vs ライン。今回更新された曲と、今回有効化された曲を強調する。 -->
+              <div class="mt-3 flex flex-col gap-2">
+                <div v-for="s in leagueProgress.songs" :key="s.slot"
+                     class="rounded-md border px-3 py-2.5 transition-colors"
+                     :class="s.updated
+                       ? 'border-blue-300 dark:border-blue-500/40 bg-blue-50 dark:bg-blue-950/30 ring-1 ring-blue-200 dark:ring-blue-500/20'
+                       : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60'">
+
+                  <!-- 曲名 / 難易度 / 今回更新バッジ / 有効判定バッジ -->
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-[10px] font-bold text-slate-400 tabular-nums shrink-0">{{ s.slot }}.</span>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{ s.title }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 shrink-0 whitespace-nowrap">
+                      {{ s.difficultyName }}<template v-if="s.level"> ☆{{ s.level }}</template>
+                    </span>
+                    <span v-if="s.updated"
+                          class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-600 text-white whitespace-nowrap tabular-nums">
+                      {{ t('report.league.updated') }}<template v-if="s.scoreIncrease > 0"> +{{ s.scoreIncrease }}</template>
+                    </span>
+                    <span class="ml-auto shrink-0 inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded whitespace-nowrap"
+                          :class="s.justActivated
+                            ? 'bg-emerald-500 text-white shadow-sm'
+                            : s.valid
+                              ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'">
+                      <svg v-if="s.valid" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {{ s.justActivated ? t('report.league.activated') : s.valid ? t('report.league.valid') : t('report.league.invalid') }}
+                    </span>
+                  </div>
+
+                  <!-- 自己ベスト vs ライン（+ 未達なら残り EX） -->
+                  <div class="mt-1.5 flex items-center gap-x-4 gap-y-1 flex-wrap text-xs">
+                    <span class="text-slate-500 dark:text-slate-400">
+                      {{ t('report.league.best') }}
+                      <span class="font-bold tabular-nums"
+                            :class="s.valid ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200'">
+                        {{ s.bestEx ?? '—' }}
+                      </span>
+                      <span v-if="s.rate != null" class="tabular-nums">({{ s.rate.toFixed(2) }}%)</span>
+                    </span>
+                    <span class="text-slate-500 dark:text-slate-400">
+                      {{ t('report.league.line') }}
+                      <template v-if="s.lineEx != null">
+                        <span class="font-bold tabular-nums text-amber-600 dark:text-amber-400">{{ s.lineEx }}</span>
+                        <span v-if="s.lineRate != null" class="tabular-nums">({{ s.lineRate.toFixed(2) }}%)</span>
+                      </template>
+                      <span v-else class="font-bold text-slate-400">{{ t('report.league.noLine') }}</span>
+                    </span>
+                    <span v-if="s.toLine != null && s.toLine > 0"
+                          class="ml-auto font-bold text-slate-500 dark:text-slate-400 tabular-nums whitespace-nowrap">
+                      {{ t('report.league.toLine', { n: s.toLine }) }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -525,7 +573,7 @@
  *  - navigate: 他タブへのナビゲーション要求
  */
 import { ref, computed, watch } from 'vue';
-import type { UploadDiffResult } from './../types/UploadDiff';
+import type { UploadDiffResult, UpdatedSong } from './../types/UploadDiff';
 import { getNextRankInfo, getNextRateTierRankInfo, getFolderRankInfoByRate } from '../utils/beatTier';
 import type { RankInfo } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
@@ -547,6 +595,30 @@ const { authHeaders, user } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 const league = useLeague();
 
+/** リーグ課題曲 1 曲分の内訳（自己ベストとラインの比較・今回の更新有無）。 */
+interface LeagueSongProgress {
+  slot: number;
+  title: string;
+  difficultyName: string;
+  level: number | null;
+  /** リザルトが有効か（週内プレー + ライン超え）。 */
+  valid: boolean;
+  /** 現在の自己ベスト EX とそのスコアレート(%)。未プレーは null。 */
+  bestEx: number | null;
+  rate: number | null;
+  /** グループ共通のライン（週開始時点の最高 EX）とそのレート(%)。誰も未プレーなら null。 */
+  lineEx: number | null;
+  lineRate: number | null;
+  /** 今回のアップロードでこの譜面が更新されたか。 */
+  updated: boolean;
+  /** 今回の EX 増加量（updated のときのみ 1 以上）。 */
+  scoreIncrease: number;
+  /** 今回のアップロードでラインを超えて有効化されたか。 */
+  justActivated: boolean;
+  /** ライン超えに必要な残り EX。達成済み・ライン未設定なら null。 */
+  toLine: number | null;
+}
+
 /** リーグモードの進捗（開催中の週に参加していれば、今回反映後の順位を保持。無ければ null）。 */
 const leagueProgress = ref<null | {
   tier: number;
@@ -557,7 +629,7 @@ const leagueProgress = ref<null | {
   resultValue: number | null;
   projectedPoints: number;
   zone: 'promote' | 'stay' | 'relegate';
-  songs: { slot: number; title: string; valid: boolean }[];
+  songs: LeagueSongProgress[];
 }>(null);
 
 /** DIVISION 表示名（0=LEGEND）。 */
@@ -577,6 +649,12 @@ const loadLeagueProgress = async () => {
     if (!cur.member || cur.week?.status !== 'active' || !cur.standings) return;
     const myRow = cur.standings.find((r) => r.userId === uid);
     if (!myRow) return;
+    // 今回のアップロードで更新された譜面を (曲名|難易度) で引けるようにする。
+    const updatedByChart = new Map<string, UpdatedSong>();
+    for (const u of props.diffData?.updatedSongs ?? []) {
+      updatedByChart.set(`${u.title}|${u.difficulty}`, u);
+    }
+
     leagueProgress.value = {
       tier: cur.member.tier,
       groupIndex: cur.member.groupIndex,
@@ -586,11 +664,32 @@ const loadLeagueProgress = async () => {
       resultValue: myRow.resultValue,
       projectedPoints: myRow.projectedPoints ?? 0,
       zone: myRow.zone,
-      songs: (cur.songs || []).map((s) => ({
-        slot: s.slot,
-        title: s.title,
-        valid: !!myRow.perSong?.find((p) => p.slot === s.slot)?.valid,
-      })),
+      songs: (cur.songs || []).map((s) => {
+        const ps = myRow.perSong?.find((p) => p.slot === s.slot);
+        const up = updatedByChart.get(`${s.title}|${s.difficultyName}`);
+        const valid = !!ps?.valid;
+        const bestEx = ps?.bestEx ?? null;
+        const lineEx = ps?.lineEx ?? s.lineEx ?? null;
+        // レートはノーツ数（MAX = notes * 2）から出す。自己ベスト側はサーバ計算値をそのまま使う。
+        const lineRate = lineEx != null && s.notes > 0 ? (lineEx / (s.notes * 2)) * 100 : null;
+        return {
+          slot: s.slot,
+          title: s.title,
+          difficultyName: s.difficultyName,
+          level: s.level ?? null,
+          valid,
+          bestEx,
+          rate: ps?.rate ?? null,
+          lineEx,
+          lineRate,
+          updated: !!up,
+          scoreIncrease: up?.scoreIncrease ?? 0,
+          // 今回の更新で初めてラインを超えた曲（＝このアップロードで有効化された曲）。
+          justActivated: !!up && valid && (lineEx == null || up.oldScore <= lineEx),
+          // ライン超えに必要な残り EX（ラインちょうどでは無効なので +1 必要）。
+          toLine: !valid && lineEx != null ? lineEx - (bestEx ?? 0) + 1 : null,
+        };
+      }),
     };
   } catch {
     /* 未参加・未開催・取得失敗時は表示しない */

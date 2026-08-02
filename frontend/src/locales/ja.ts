@@ -465,6 +465,14 @@ export const ja = {
   'report.folderRemaining': 'あと {n} 曲でランクがつきます',
   'report.league.title': 'リーグモード',
   'report.league.projected': '見込みPT',
+  'report.league.best': '自己ベスト',
+  'report.league.line': 'ライン',
+  'report.league.noLine': 'なし',
+  'report.league.updated': '今回更新',
+  'report.league.valid': 'リザルト有効',
+  'report.league.activated': '今回有効化！',
+  'report.league.invalid': 'ライン未達',
+  'report.league.toLine': 'あと {n}',
 
   // Common
   'common.loading': '読み込み中...',

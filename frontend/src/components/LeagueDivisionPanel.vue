@@ -87,10 +87,13 @@ const countdown = computed(() => {
 </script>
 
 <template>
-  <!-- 開催中: 最上部で目立たせる（枠・背景・バッジ・カウントダウン・導線） -->
-  <div
+  <!-- 開催中: 最上部で目立たせる（枠・背景・バッジ・カウントダウン）。パネル全体がリーグ画面への導線。 -->
+  <button
     v-if="visible && isLive"
-    class="w-full rounded-xl border-2 border-indigo-400 dark:border-indigo-500/60 bg-gradient-to-r from-indigo-50 via-white to-white dark:from-indigo-950/60 dark:via-slate-800 dark:to-slate-800 px-4 sm:px-5 py-4 shadow-sm flex items-center gap-3 sm:gap-4 transition-colors duration-200"
+    type="button"
+    @click="emit('open-league')"
+    :aria-label="`${divisionLabel} — ${t('dashboard.leagueLive.view')}`"
+    class="group w-full text-left rounded-xl border-2 border-indigo-400 dark:border-indigo-500/60 bg-gradient-to-r from-indigo-50 via-white to-white dark:from-indigo-950/60 dark:via-slate-800 dark:to-slate-800 px-4 sm:px-5 py-4 shadow-sm flex items-center gap-3 sm:gap-4 cursor-pointer transition-all duration-200 hover:border-indigo-500 hover:shadow-md dark:hover:border-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
   >
     <DivisionIcon :tier="myTier ?? 10" :size="60" class="shrink-0" />
     <div class="flex-1 min-w-0">
@@ -110,22 +113,34 @@ const countdown = computed(() => {
         {{ t('league.endsIn', { time: countdown }) }}
       </p>
     </div>
-    <button
-      type="button"
-      @click="emit('open-league')"
-      class="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold whitespace-nowrap transition-colors"
-    >{{ t('dashboard.leagueLive.view') }}</button>
-  </div>
+    <!-- 導線（見た目はボタンだが、押下可能なのはパネル全体） -->
+    <span class="shrink-0 inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-600 group-hover:bg-indigo-700 text-white text-sm font-bold whitespace-nowrap transition-colors">
+      {{ t('dashboard.leagueLive.view') }}
+      <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
+  </button>
 
-  <!-- 非開催（週の合間・次週から参加）: 従来どおりの控えめな DIVISION 表示 -->
-  <div
+  <!-- 非開催（週の合間・次週から参加）: 控えめな DIVISION 表示。こちらもリーグ画面へ飛べる。 -->
+  <button
     v-else-if="visible"
-    class="w-full bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-3 transition-colors duration-200"
+    type="button"
+    @click="emit('open-league')"
+    :aria-label="`${divisionLabel} — ${t('dashboard.leagueLive.view')}`"
+    class="group relative w-full bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-3 cursor-pointer transition-all duration-200 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
   >
     <DivisionIcon :tier="myTier ?? 10" :size="52" class="shrink-0" />
     <div class="text-center sm:text-left">
       <p class="text-[10px] font-bold text-slate-400">{{ t('dashboard.currentDivision') }}</p>
       <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 leading-tight">{{ divisionLabel }}</p>
     </div>
-  </div>
+    <!-- クリックできることを示す導線。狭い画面では矢印だけにする。 -->
+    <span class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-xs font-bold text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+      <span class="hidden sm:inline">{{ t('dashboard.leagueLive.view') }}</span>
+      <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
+  </button>
 </template>

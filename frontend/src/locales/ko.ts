@@ -460,6 +460,14 @@ export const ko = {
   'report.folderRemaining': '랭크 부여까지 {n}곡 남았습니다',
   'report.league.title': '리그 모드',
   'report.league.projected': '예상 PT',
+  'report.league.best': '자기 최고',
+  'report.league.line': '라인',
+  'report.league.noLine': '없음',
+  'report.league.updated': '이번 갱신',
+  'report.league.valid': '결과 유효',
+  'report.league.activated': '이번에 유효화!',
+  'report.league.invalid': '라인 미달',
+  'report.league.toLine': '{n} 남음',
 
   // Common
   'common.loading': '불러오는 중...',

@@ -460,6 +460,14 @@ export const en = {
   'report.folderRemaining': '{n} more songs until rank is assigned',
   'report.league.title': 'League Mode',
   'report.league.projected': 'Proj. PT',
+  'report.league.best': 'Best',
+  'report.league.line': 'Line',
+  'report.league.noLine': 'none',
+  'report.league.updated': 'Updated',
+  'report.league.valid': 'Result counts',
+  'report.league.activated': 'Now counts!',
+  'report.league.invalid': 'Below line',
+  'report.league.toLine': '{n} to go',
 
   // Common
   'common.loading': 'Loading...',
