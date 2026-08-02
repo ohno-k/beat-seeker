@@ -45,6 +45,13 @@ spring:
 
 server:
   port: ${PORT:8080}
+  # 大きめの JSON 応答を gzip する。外部連携の一括 API
+  # （GET /api/external/v1/score-summaries は非圧縮で約 470KB）の転送量対策。
+  # min-response-size 未満は圧縮しないので、通常の小さな API 応答は影響を受けない。
+  compression:
+    enabled: true
+    mime-types: application/json,text/plain,text/css,text/html,application/javascript
+    min-response-size: 2KB
 
 
 

@@ -254,6 +254,141 @@ curl -s "https://beat-seeker.com/api/external/v1/song-detail?title=灼熱Beach%2
 
 ---
 
+### GET /api/external/v1/score-summaries
+
+**曲一覧画面向け**に、トークン所有者の全譜面スコア概要（**アーケードの記録のみ**）を
+1 リクエストで返します。
+
+`song-detail` は 1 譜面 1 リクエストで履歴・譜面傾向・オプション投票まで組み立てるため、
+一覧のために全譜面を叩くと上流タイムアウトを起こします。本エンドポイントは
+**一覧に必要な項目だけ**を返す軽量版です。曲詳細画面では引き続き `song-detail` を使ってください
+（置き換えではなく用途分割）。
+
+#### クエリパラメータ
+
+| 名前 | 型 | 必須 | 説明 |
+| --- | --- | --- | --- |
+| `difficulties` | string | no | カンマ区切りの難易度名。既定値 `ANOTHER,LEGGENDARIA`。大文字小文字・前後空白・重複は正規化される |
+
+#### レスポンス（200 OK）
+
+```json
+{
+  "user": { "iidxId": "1234-5678", "djName": "DJ-OONO" },
+  "difficulties": ["ANOTHER", "LEGGENDARIA"],
+  "source": "arcade",
+  "generatedAt": "2026-08-02T23:45:36.213142",
+  "count": 2082,
+  "playedCount": 812,
+  "summaries": [
+    {
+      "textage": "30/_cmflg.html?1AC00",
+      "title": "#CMFLG",
+      "difficulty": "ANOTHER",
+      "level": 12,
+      "informalRank": "12.2",
+      "clearType": "HARD CLEAR",
+      "score": 3200,
+      "djLevel": "AA",
+      "missCount": 30,
+      "beatPt": 154.02,
+      "ratePt": 2.95,
+      "updatedAt": "2026-08-02T23:45:36.213142"
+    },
+    {
+      "textage": "26/_and_int.html?1AB00",
+      "title": "& Intelligence",
+      "difficulty": "ANOTHER",
+      "level": 11,
+      "informalRank": "11.9",
+      "clearType": null,
+      "score": null,
+      "djLevel": null,
+      "missCount": null,
+      "beatPt": null,
+      "ratePt": null,
+      "updatedAt": null
+    }
+  ]
+}
+```
+
+#### 全件スナップショット
+
+`summaries` は **指定難易度の全譜面**（`song_definitions` の active リビジョン）を含みます。
+未プレイ譜面もスコア項目 `null` で必ず 1 行返るため、連携先は差分マージ無しで
+「返ってきた配列 = その難易度の全譜面」として扱えます。
+
+配列は **曲名 → 難易度の昇順**で安定ソートされているので、前回取得ぶんとの差分比較にそのまま使えます。
+
+#### フィールド
+
+| フィールド | 出典 | null の条件 |
+| --- | --- | --- |
+| `textage` / `title` / `difficulty` / `level` | `song_definitions` | 必ず存在（`textage` はマスタ未設定時のみ `null`） |
+| `informalRank` | 非公式難易度表 | 未登録譜面は `null`。ANOTHER / LEGGENDARIA 以外は常に `null` |
+| `clearType` / `score` / `djLevel` / `missCount` / `updatedAt` | `scores`（arcade のみ） | アーケード記録が無ければ `null` |
+| `beatPt` / `ratePt` | サーバー側で都度計算 | 下記「PT の算出条件」参照 |
+
+`song-detail` の `score` ブロックにある `pgreat` / `great` / `playCount` は一覧では返しません。
+必要なら曲詳細で `song-detail` を叩いてください。
+
+#### アーケードの記録のみを返す
+
+beat-seeker は同一譜面にアーケード記録（e-amusement CSV / ブックマークレット）と
+INFINITAS 記録（画面共有 OCR）を別レコードとして並存させますが、本 API は
+**アーケードの記録だけ**を返します。レスポンス直下の `source` が `"arcade"` 固定なのはこのためで、
+全行共通の値なので行ごとには持たせていません。
+
+注意点:
+
+- **INFINITAS でしかプレーしていない譜面は「未プレイ」として返ります**（スコア項目すべて `null`）。
+- 同一譜面で INFINITAS 側の EX スコアの方が高い場合でも、返るのはアーケードの値です。
+  beat-seeker アプリ内の表示・総 BEAT-PT は「両ソースのうち高い方」を採用しているため、
+  そのようなユーザーでは当方の画面と値が食い違います。
+
+#### PT の算出条件
+
+`beatPt` / `ratePt` は DB に保存しておらず、リクエストのたびにアプリ内の集計と同じ式で計算します。
+以下の場合は `null` になります。
+
+- `clearType` が `NO PLAY` / `---`、またはアーケードのスコア行そのものが無い
+- 譜面マスタにノーツ数が無くスコアレートを算出できない
+- `ratePt`: ANOTHER / LEGGENDARIA 以外（RATE-PT の対象外difficulty）
+- `beatPt`: 公式 Lv11 以上の HYPER（BEAT-PT の集計対象外）
+
+`null` と `0` は意味が違います。**`null` は「算出対象外」、`0` は「プレー済みだが基準未満」**です
+（BEAT-PT はスコアレート 66.666% 以下、または非公式難易度が未登録なら `0`。
+RATE-PT はスコアレート 77.77% 未満なら `0`）。
+
+値は小数第 2 位で丸めています。表示用の丸めは連携先の裁量で行ってください。
+
+なお `clearType` は未プレイ判定とは独立に、スコア行があればそのまま返します
+（`"NO PLAY"` もランプの一種として表示できるようにするため）。
+
+#### ステータスコード
+
+| コード | 内容 |
+| --- | --- |
+| 200 | 正常応答（未プレイ譜面はスコア項目が `null`） |
+| 400 | `difficulties` に未知の難易度名が含まれる / 有効な難易度が 0 個 |
+| 401 | トークン不一致 / 失効 / 期限切れ |
+
+#### レスポンスサイズ
+
+`ANOTHER,LEGGENDARIA`（約 2,100 譜面）で **非圧縮 約 470KB / gzip 約 45KB** です。
+サーバー側で gzip を有効にしているので、`Accept-Encoding: gzip` を必ず付けてください。
+
+#### 例（curl）
+
+```bash
+curl -s --compressed \
+     "https://beat-seeker.com/api/external/v1/score-summaries?difficulties=ANOTHER,LEGGENDARIA" \
+     -H "Authorization: Bearer bs_live_xxxxxxxxxxxxxxxx"
+```
+
+---
+
 ## エラー応答の共通形
 
 ```json
@@ -265,7 +400,8 @@ curl -s "https://beat-seeker.com/api/external/v1/song-detail?title=灼熱Beach%2
 ## レート制限
 
 現状ハード制限は設けていません。連携アプリ側で **譜面詳細レベルのリクエストは
-ユーザー操作の都度で OK** ですが、一覧画面で全曲分を並列に叩くなどは避けてください。
+ユーザー操作の都度で OK** ですが、`song-detail` を一覧画面で全曲分ループするのは避けてください。
+一覧用途には `score-summaries`（1 リクエストで全譜面ぶん）を使ってください。
 将来必要に応じて Bucket4j 等の固定上限を導入します。
 
 ## CORS
