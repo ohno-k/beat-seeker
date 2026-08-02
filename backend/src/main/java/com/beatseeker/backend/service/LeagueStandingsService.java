@@ -27,16 +27,20 @@ import java.util.stream.Collectors;
  *
  * 昇降格はポイント制:
  *  - 週の順位に応じてポイントが増減する（{@link #deltaForRank}: 8 人なら 1 位 +4 〜 8 位 -4。
- *    人数が少ないほど幅が縮小し、奇数人数では中央順位が ±0）。
+ *    人数が少ないほど幅が縮小し、奇数人数では中央順位が ±0）。1 週の増減幅は
+ *    ±{@link #WEEKLY_DELTA_CAP} が上限。
  *  - 累積ポイントが +{@link #POINT_CAP} に到達すると昇格、-{@link #POINT_CAP} で降格
- *    （8 人グループの 1 位/最下位は一撃で ±4 なので即昇降格になる）。
+ *    （1 週の増減は最大 ±{@link #WEEKLY_DELTA_CAP} なので、昇降格には最短でも 2 週かかる）。
  *  - 有効曲 0 の週はプラス分を獲得できない（過疎グループでの放置昇格を防ぐ）。
  */
 @Service
 public class LeagueStandingsService {
 
     /** 昇降格ポイントの上限（この値に到達で昇格、負側到達で降格。保持値もこの範囲にクランプ）。 */
-    public static final int POINT_CAP = 4;
+    public static final int POINT_CAP = 8;
+
+    /** 1 週で動くポイントの上限（順位由来の増減とチャレンジ/ディフェンス補正の両方に効く）。 */
+    public static final int WEEKLY_DELTA_CAP = 4;
 
     private final LeagueMemberRepository leagueMemberRepository;
     private final LeagueSongRepository leagueSongRepository;
@@ -73,7 +77,7 @@ public class LeagueStandingsService {
      *
      * @param size グループ人数
      * @param rank 順位（1 始まり）
-     * @return ポイント増減（-POINT_CAP..+POINT_CAP にクランプ済み）
+     * @return ポイント増減（-WEEKLY_DELTA_CAP..+WEEKLY_DELTA_CAP にクランプ済み）
      */
     public static int deltaForRank(int size, int rank) {
         if (size <= 1) return 0;
@@ -84,7 +88,7 @@ public class LeagueStandingsService {
         } else {
             delta = (size + 1) / 2 - rank; // 中央順位で 0、上下対称
         }
-        return Math.max(-POINT_CAP, Math.min(POINT_CAP, delta));
+        return Math.max(-WEEKLY_DELTA_CAP, Math.min(WEEKLY_DELTA_CAP, delta));
     }
 
     /**
@@ -282,7 +286,7 @@ public class LeagueStandingsService {
             MemberStats st = stats.get(i);
             int rank = i + 1;
             String role = st.member.getRole() != null ? st.member.getRole() : "normal";
-            // チャレンジ/ディフェンスの倍率を基本デルタに適用する。
+            // チャレンジ/ディフェンスの補正（±2）を基本デルタに適用する。
             int delta = applyRole(deltas[i], role);
             // 昇降格の可否・向きはホーム DIVISION で判定する（卓がホストと違っても昇降格はホームを ±1）。
             int homeTier = st.member.getHomeTier() != null ? st.member.getHomeTier() : tier;
@@ -608,19 +612,19 @@ public class LeagueStandingsService {
      *   <li>defense（格下の卓を防衛）: 通常の増減に <b>-2</b>。</li>
      *   <li>normal: そのまま。</li>
      * </ul>
-     * 補正後は ±{@link #POINT_CAP} にクランプする（週の増減は PT レンジ内に収める）。
+     * 補正後は ±{@link #WEEKLY_DELTA_CAP} にクランプする（1 週で動く PT は週の増減幅に収める）。
      * 2 段階の昇降格は起きない（累積が ±{@link #POINT_CAP} に到達した時点で昇降格し 0 リセットされるため、
      * 補正で行き過ぎても移動は常に 1 DIVISION）。
      *
      * @param delta 基本の増減
      * @param role  立場
-     * @return 補正後の増減（±POINT_CAP にクランプ）
+     * @return 補正後の増減（±WEEKLY_DELTA_CAP にクランプ）
      */
     private int applyRole(int delta, String role) {
         int adjusted = delta;
         if ("challenge".equals(role)) adjusted = delta + 2;
         else if ("defense".equals(role)) adjusted = delta - 2;
-        return Math.max(-POINT_CAP, Math.min(POINT_CAP, adjusted));
+        return Math.max(-WEEKLY_DELTA_CAP, Math.min(WEEKLY_DELTA_CAP, adjusted));
     }
 
     /** 順位表の 1 行にユーザー情報を詰める共通処理。 */

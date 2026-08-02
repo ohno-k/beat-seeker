@@ -88,9 +88,9 @@ export interface LeagueStandingRow {
   points?: number;
   /** この週の順位によるポイント増減（有効 0 曲はプラス分 0 に丸め済み）。 */
   pointDelta?: number | null;
-  /** 週がこのまま終わった場合のポイント（±4 にクランプ。進行中の週のみ）。 */
+  /** 週がこのまま終わった場合のポイント（±8 にクランプ。進行中の週のみ）。 */
   projectedPoints?: number;
-  /** 昇降格ゾーン（ポイントが ±4 に到達する見込みかどうか）。 */
+  /** 昇降格ゾーン（ポイントが ±8 に到達する見込みかどうか）。 */
   zone: 'promote' | 'stay' | 'relegate';
   /** 卓での立場。normal / challenge（格上の卓に挑戦）/ defense（格下の卓を防衛）。 */
   role?: 'normal' | 'challenge' | 'defense';

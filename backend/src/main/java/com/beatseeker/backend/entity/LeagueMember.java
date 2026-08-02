@@ -55,7 +55,7 @@ public class LeagueMember {
 
     /**
      * 卓での立場。{@code "normal"}（自分のホーム卓）/ {@code "challenge"}（格上の卓に着席＝挑戦）
-     * / {@code "defense"}（格下の卓に着席＝防衛）。昇降格 PT の倍率に影響する。
+     * / {@code "defense"}（格下の卓に着席＝防衛）。週の昇降格 PT に ±2 の補正が入る。
      */
     @Column(length = 12, nullable = false)
     @org.hibernate.annotations.ColumnDefault("'normal'")
