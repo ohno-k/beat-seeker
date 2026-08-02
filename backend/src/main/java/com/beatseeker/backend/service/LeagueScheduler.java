@@ -1,4 +1,4 @@
-package com.beatseeker.backend.service;
+﻿package com.beatseeker.backend.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class LeagueScheduler {
     private final LeagueService leagueService;
 
     /**
-     * シーズン開始日（JST）。この日以降の月曜 15:00 のみ自動編成・開始する。
+     * シーズン開始日（JST）。この日以降の月曜 12:00 のみ自動編成・開始する。
      * それより前は {@link #activateWeeks()} を何もせずスキップする（告知した開始日を守るため）。
      * {@code app.league.season-start}（例: "2026-08-03"）で変更可。未設定時は 2026-08-03。
      */
@@ -48,7 +48,7 @@ public class LeagueScheduler {
     /**
      * 【メソッドの役割】 金曜 0:00 JST に翌週の draft 週を作成し、課題曲を先行抽選する。
      *
-     * 管理者は週開始（月曜 15:00）までの間に課題曲を差し替え・再抽選できる。
+     * 管理者は週開始（月曜 12:00）までの間に課題曲を差し替え・再抽選できる。
      */
     @Scheduled(cron = "0 0 0 * * FRI", zone = "Asia/Tokyo")
     public void createDraftWeeks() {
@@ -64,7 +64,7 @@ public class LeagueScheduler {
     /**
      * 【メソッドの役割】 日曜 21:00 JST に active 週を締める（順位凍結・昇降格確定・自動休止）。
      *
-     * 週の開催期間は「月曜 15:00 〜 日曜 21:00」。締め以降〜翌月曜 15:00 は
+     * 週の開催期間は「月曜 12:00 〜 日曜 21:00」。締め以降〜翌月曜 12:00 は
      * 集計結果の閲覧と次週準備の空白時間になる。
      */
     @Scheduled(cron = "0 0 21 * * SUN", zone = "Asia/Tokyo")
@@ -81,7 +81,7 @@ public class LeagueScheduler {
     /**
      * 【メソッドの役割】 参加締切後（プレシーズン確定窓）に、未編成の draft 週を自動編成する。
      *
-     * 参加受付の締切（{@code app.league.signup-close}）〜開始（月曜 15:00）の間だけ動く。
+     * 参加受付の締切（{@code app.league.signup-close}）〜開始（月曜 12:00）の間だけ動く。
      * 締切直後に本番と同じ卓・グループ・課題曲を確定しておき、管理者は開始までに確認・調整できる。
      * 既に編成済み（管理者の手動編成・調整を含む）なら {@link LeagueWeekLifecycleService#autoFormDraft}
      * が何もしないため、この窓で複数回起動しても上書きしない（冪等）。開始（activateWeek）は
@@ -102,14 +102,14 @@ public class LeagueScheduler {
     }
 
     /**
-     * 【メソッドの役割】 月曜 15:00 JST に次週を編成して開始する。
+     * 【メソッドの役割】 月曜 12:00 JST に次週を編成して開始する。
      *
      * この時刻が参加締切（途中参加不可）であり、active 化と同時に課題曲が公開される
      * （= 開始した瞬間に課題曲がわかる）。金曜の draft 作成が何らかの理由で
      * 走っていなくても、activateWeek 内で draft をその場で作成するため単独で成立する。
      * 事前編成（{@link #autoFormWeeks()} や管理者の手動編成）済みならそれをそのまま使う。
      */
-    @Scheduled(cron = "0 0 15 * * MON", zone = "Asia/Tokyo")
+    @Scheduled(cron = "0 0 12 * * MON", zone = "Asia/Tokyo")
     public void activateWeeks() {
         // シーズン開始日より前は自動開始しない（告知した開始日まで待つ）。
         // 手動トリガー（管理者の run-weekly / activateWeek）はこのゲートを通らないので随時実行可能。

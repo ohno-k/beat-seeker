@@ -1,4 +1,4 @@
-package com.beatseeker.backend.controller;
+﻿package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
@@ -314,7 +314,7 @@ public class LeagueAdminController {
      * 【メソッドの役割】 参加締切後に、現在の参加者で draft 週の編成（卓・グループ・課題曲）を確定する。
      *
      * 開始（activateWeek）はせず、実際に使われる編成を draft 週へ保存する。管理者は開始
-     * （月曜 15:00）までの間に overview / 順位表で確認し、必要なら課題曲を差し替え・再抽選できる。
+     * （月曜 12:00）までの間に overview / 順位表で確認し、必要なら課題曲を差し替え・再抽選できる。
      * 開始処理はこの事前編成をそのまま使う（再抽選しない）。押すたびに組み直す。
      *
      * @param auth   認証情報（管理者限定）

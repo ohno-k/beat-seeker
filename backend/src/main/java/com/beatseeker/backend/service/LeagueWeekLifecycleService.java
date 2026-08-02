@@ -1,4 +1,4 @@
-package com.beatseeker.backend.service;
+﻿package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
  * 【Service の役割】 リーグの週次ライフサイクル（締め → 昇降格 → 編成 → 開始）を担うサービス。
  *
  * 週の流れ（JST 基準）:
- *  - 週の開催期間は「月曜 15:00 〜 日曜 21:00」。日曜 21:00 〜 月曜 15:00 は集計・準備の空白時間。
+ *  - 週の開催期間は「月曜 12:00 〜 日曜 21:00」。日曜 21:00 〜 月曜 12:00 は集計・準備の空白時間。
  *  - 金曜 0:00: 翌週の draft 週を作成し、現行の DIVISION 構成で課題曲を先行抽選する
  *    （管理者が開始までの間に差し替え・再抽選できる）。
  *  - 日曜 21:00: {@link #closeWeek} が active 週を締め、順位を凍結して昇降格を確定する。
- *  - 月曜 15:00: {@link #activateWeek} が draft 週を編成して active 化し、ベースラインを
+ *  - 月曜 12:00: {@link #activateWeek} が draft 週を編成して active 化し、ベースラインを
  *    スナップショットする。課題曲はこの瞬間（= 開始と同時）にプレイヤーへ公開される。
  *    参加の締切もこの瞬間で、途中参加はできない（週の途中の join は次週から）。
  *
@@ -55,7 +55,7 @@ public class LeagueWeekLifecycleService {
     static final int AUTO_DEACTIVATE_AFTER = 3;
 
     /** 週の開始時刻（JST・月曜）。 */
-    static final int START_HOUR = 15;
+    static final int START_HOUR = 12;
     /** 週の終了時刻（JST・日曜）。 */
     static final int END_HOUR = 21;
 
@@ -95,8 +95,8 @@ public class LeagueWeekLifecycleService {
     /**
      * 【メソッドの役割】 翌週の draft 週を作成し、課題曲を先行抽選する。
      *
-     * 既に draft 週があればそれを返すだけ（冪等）。開始日時は最新週の翌週の月曜 15:00 を
-     * 基本とし、長期間止まっていた場合は直近の月曜 15:00 まで飛ばす（欠けた週は開催しない）。
+     * 既に draft 週があればそれを返すだけ（冪等）。開始日時は最新週の翌週の月曜 12:00 を
+     * 基本とし、長期間止まっていた場合は直近の月曜 12:00 まで飛ばす（欠けた週は開催しない）。
      * 課題曲は「active エントリーの現在の DIVISION 構成」で抽選する（開始時と構成が
      * 変わり得る分は activate 時に過不足調整される）。
      *
@@ -108,6 +108,18 @@ public class LeagueWeekLifecycleService {
         LeagueWeek existingDraft = leagueWeekRepository
                 .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(ladder, "draft").orElse(null);
         if (existingDraft != null) {
+            // 開始時刻の設定（{@link #START_HOUR}）を変更した場合、まだ始まっていない draft 週の
+            // 開始時刻を追従させる（日付は変えない）。作成済みの draft が古い時刻のまま残って
+            // 「表示は 15:00 開始なのに 12:00 に始まる」といったズレが出ないようにする。
+            if (existingDraft.getStartsAt() != null && existingDraft.getStartsAt().getHour() != START_HOUR) {
+                LocalDateTime fixed = existingDraft.getStartsAt().withHour(START_HOUR).withMinute(0)
+                        .withSecond(0).withNano(0);
+                log.info("draft 週の開始時刻を設定に合わせて修正: ladder={} weekId={} {} -> {}",
+                        ladder, existingDraft.getId(), existingDraft.getStartsAt(), fixed);
+                existingDraft.setStartsAt(fixed);
+                existingDraft.setEndsAt(endOfWeek(fixed));
+                existingDraft = leagueWeekRepository.save(existingDraft);
+            }
             return existingDraft;
         }
 
@@ -230,7 +242,7 @@ public class LeagueWeekLifecycleService {
      *
      * この瞬間の active エントリーで卓・グループ・課題曲を確定して draft 週に保存するが、
      * status は draft のまま・ベースラインも取らない（＝プレイヤーには未公開）。管理者は
-     * 開始（月曜 15:00）までの間に、実際に使われる編成と課題曲を overview / 順位表で確認し、
+     * 開始（月曜 12:00）までの間に、実際に使われる編成と課題曲を overview / 順位表で確認し、
      * 必要なら課題曲を差し替え・再抽選できる。押すたびに組み直す（{@link #formWeek} が掃除する）。
      *
      * <p>{@link #activateWeek} はこの事前編成があればそれをそのまま使う（再抽選しない）。
@@ -273,7 +285,7 @@ public class LeagueWeekLifecycleService {
     }
 
     /**
-     * 【メソッドの役割】 draft 週を編成して開始する（月曜 15:00 の処理）。
+     * 【メソッドの役割】 draft 週を編成して開始する（月曜 12:00 の処理）。
      *
      * この瞬間の active エントリーが参加者として確定する（= 途中参加不可の締切）。
      * ただし {@link #formDraft} で事前編成済みの場合はそれをそのまま使う（再抽選しない）ため、
@@ -580,7 +592,7 @@ public class LeagueWeekLifecycleService {
     /**
      * 【メソッドの役割】 締めと開始をまとめて実行する（初回ブートストラップ・手動復旧・テスト用）。
      *
-     * 通常運用では cron が {@link #closeWeek}（日曜 21:00）と {@link #activateWeek}（月曜 15:00）を
+     * 通常運用では cron が {@link #closeWeek}（日曜 21:00）と {@link #activateWeek}（月曜 12:00）を
      * 個別に呼ぶが、管理者の手動トリガーは両方まとめて進められた方が扱いやすい。
      *
      * @param ladder ラダー種別
@@ -1026,10 +1038,10 @@ public class LeagueWeekLifecycleService {
     }
 
     /**
-     * 次に開始すべき週の「月曜 15:00 JST」を返す。
+     * 次に開始すべき週の「月曜 12:00 JST」を返す。
      *
-     * - 月曜 15:00 前（同日早朝を含む）: 今日を含む週の月曜 15:00（= まだ始まっていない今週分）
-     * - それ以降（開催中〜日曜 21:00 後の空白時間）: 翌週の月曜 15:00
+     * - 月曜 12:00 前（同日早朝を含む）: 今日を含む週の月曜 12:00（= まだ始まっていない今週分）
+     * - それ以降（開催中〜日曜 21:00 後の空白時間）: 翌週の月曜 12:00
      */
     private LocalDateTime upcomingStartJst() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Tokyo"));

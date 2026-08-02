@@ -1,4 +1,4 @@
-package com.beatseeker.backend.service;
+﻿package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.LeagueEntry;
 import com.beatseeker.backend.entity.User;
@@ -36,12 +36,12 @@ public class LeagueService {
     private final LeagueEntryRepository leagueEntryRepository;
 
     /**
-     * 参加受付の締切（JST）。この時刻 〜 シーズン開始（月曜 15:00）の間は参加/離脱をロックし、
+     * 参加受付の締切（JST）。この時刻 〜 シーズン開始（月曜 12:00）の間は参加/離脱をロックし、
      * 管理者が本番と同じ編成を事前確認できるようにする。{@code app.league.signup-close} で変更可。
      */
     private final LocalDateTime signupClose;
     /**
-     * シーズン開始日の編成・開始時刻（JST・月曜 15:00）。ロック窓の終端に使う。
+     * シーズン開始日の編成・開始時刻（JST・月曜 12:00）。ロック窓の終端に使う。
      * {@code app.league.season-start} の日付に {@link LeagueWeekLifecycleService#START_HOUR} を合わせる。
      */
     private final LocalDateTime seasonActivation;
@@ -65,7 +65,7 @@ public class LeagueService {
     /**
      * 【メソッドの役割】 いま参加受付がロックされているか（プレシーズン確定窓の中か）を返す。
      *
-     * 締切（{@code signup-close}）〜シーズン開始（月曜 15:00）の間だけ true。締切より前と
+     * 締切（{@code signup-close}）〜シーズン開始（月曜 12:00）の間だけ true。締切より前と
      * 開始後は false（通常どおり参加/離脱できる）。この窓の間はロスターを固定し、管理者が
      * 本番と同じ編成（グループ・課題曲）を確認・調整できるようにする。
      *
@@ -101,7 +101,7 @@ public class LeagueService {
      *
      * 初回参加時は BEAT-TIER（総合 BEAT-PT）を参照して DIVISION を即時配属する
      * （{@link LeagueDivision#forBeatPt}）。復帰の場合は以前の DIVISION を維持する。
-     * 反映は次回の週開始（月曜 15:00 JST）から。途中参加は不可で、進行中の週には追加されない。
+     * 反映は次回の週開始（月曜 12:00 JST）から。途中参加は不可で、進行中の週には追加されない。
      *
      * @param user       参加ユーザー
      * @param ladderType ラダー種別（呼び出し前に {@link #isValidLadder} で検証済みであること）

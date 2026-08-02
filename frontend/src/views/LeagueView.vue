@@ -100,7 +100,7 @@ const shortDate = (iso: string) => {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 };
 
-/** 日時を「7/21 15:00」のような形式で表示する（週の開始/終了は時刻が重要）。 */
+/** 日時を「7/21 12:00」のような形式で表示する（週の開始/終了は時刻が重要）。 */
 const shortDateTime = (iso: string) => {
   const d = new Date(iso);
   const hm = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
