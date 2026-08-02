@@ -67,6 +67,7 @@ public class LeagueWeekLifecycleService {
     private final ScoreRepository scoreRepository;
     private final LeagueStandingsService standingsService;
     private final LeagueSongDrawService songDrawService;
+    private final SongDefinitionRepository songDefinitionRepository;
 
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
@@ -78,7 +79,8 @@ public class LeagueWeekLifecycleService {
                                       LeagueBaselineRepository leagueBaselineRepository,
                                       ScoreRepository scoreRepository,
                                       LeagueStandingsService standingsService,
-                                      LeagueSongDrawService songDrawService) {
+                                      LeagueSongDrawService songDrawService,
+                                      SongDefinitionRepository songDefinitionRepository) {
         this.leagueEntryRepository = leagueEntryRepository;
         this.leagueWeekRepository = leagueWeekRepository;
         this.leagueMemberRepository = leagueMemberRepository;
@@ -87,6 +89,7 @@ public class LeagueWeekLifecycleService {
         this.scoreRepository = scoreRepository;
         this.standingsService = standingsService;
         this.songDrawService = songDrawService;
+        this.songDefinitionRepository = songDefinitionRepository;
     }
 
     /**
@@ -367,6 +370,9 @@ public class LeagueWeekLifecycleService {
         leagueMemberRepository.deleteByWeek(week);
         leagueBaselineRepository.deleteByWeek(week);
         leagueSongRepository.deleteByWeek(week);
+        // 削除を先に DB へ流す。Hibernate は flush 時に INSERT を DELETE より先に実行するため、
+        // 同じ参加者を入れ直す組み直しでユニーク制約 (week_id, user_id) に衝突してしまう。
+        leagueMemberRepository.flush();
 
         // --- 少人数 DIVISION の合流（チャレンジ / ディフェンス） ---
         // ホーム DIVISION ごとの人数を数え、卓(host)と立場(role)を決める。
@@ -735,6 +741,8 @@ public class LeagueWeekLifecycleService {
                 bests.add(cell);
             }
             Map<String, Object> pm = new LinkedHashMap<>();
+            // userId は「このプレビューをそのまま draft へ適用する」（applyPreview）ときの同定に使う。
+            pm.put("userId", e.getUser().getId());
             pm.put("displayName", e.getUser().getDisplayName() != null ? e.getUser().getDisplayName() : "");
             pm.put("homeTier", homeTier);
             pm.put("role", roleOf.getOrDefault(homeTier, "normal"));
@@ -763,6 +771,184 @@ public class LeagueWeekLifecycleService {
         gm.put("songs", songMeta);
         gm.put("players", players);
         return gm;
+    }
+
+    // ---------------------------------------------------------------------
+    // 仮編成プレビューの適用（プレビューで見た編成をそのまま draft 週に保存する）
+    // ---------------------------------------------------------------------
+
+    /** 適用リクエストの課題曲指定（タイトル＋難易度名）。level / notes は active マスタから取り直す。 */
+    public record PreviewSongRef(String title, String difficultyName) {}
+
+    /** 適用リクエストの 1 グループ（メンバーの userId と課題曲）。 */
+    public record PreviewGroupRef(Integer groupIndex, List<Long> userIds, List<PreviewSongRef> songs) {}
+
+    /** 適用リクエストの 1 卓（host DIVISION とそのグループ）。 */
+    public record PreviewTierRef(Integer host, List<PreviewGroupRef> groups) {}
+
+    /**
+     * 【メソッドの役割】 管理者が確認した仮編成（{@link #previewFormation} の結果）を draft 週へ適用する。
+     *
+     * プレビューは DB を更新しないため、そのまま採用したい場合にこのメソッドで確定させる。
+     * 既存の編成物（メンバー・課題曲・ベースライン）は削除して、渡された編成で置き換える。
+     *
+     * <p>プレビュー生成後に参加者が増減していると編成が実態とずれるため、
+     * <b>渡された参加者集合が現在の active エントリーと完全一致しない場合は適用しない</b>
+     * （少人数 DIVISION の合流結果が変わっている場合も同様）。この場合はプレビューを
+     * 作り直してから適用する。ホーム DIVISION・立場（チャレンジ / ディフェンス）は
+     * クライアントの値を信用せず、現在のエントリーから再計算する。
+     *
+     * @param ladder ラダー種別
+     * @param tiers  適用する編成（卓 → グループ → メンバー・課題曲）
+     * @return 適用した draft 週
+     * @throws IllegalArgumentException 編成データが不正（曲が引けない・グループ重複など）
+     * @throws IllegalStateException    draft 週が無い・参加者が居ない・プレビューが古い
+     */
+    @Transactional
+    public LeagueWeek applyPreview(String ladder, List<PreviewTierRef> tiers) {
+        if (tiers == null || tiers.isEmpty()) {
+            throw new IllegalArgumentException("適用する編成データがありません");
+        }
+        LeagueWeek week = createDraftWeek(ladder);
+        if (week == null || !"draft".equals(week.getStatus())) {
+            throw new IllegalStateException("編成を適用できる draft 週がありません");
+        }
+        List<LeagueEntry> entries = leagueEntryRepository.findByLadderTypeAndActiveTrue(ladder);
+        if (entries.isEmpty()) {
+            throw new IllegalStateException("参加者が居ません");
+        }
+
+        // ホーム DIVISION の確定（formWeek と同じ補完）。
+        for (LeagueEntry e : entries) {
+            if (!LeagueDivision.isValid(e.getCurrentTier())) {
+                e.setCurrentTier(LeagueDivision.forBeatPt(
+                        e.getUser().getTotalBeatPt() != null ? e.getUser().getTotalBeatPt() : 0.0));
+            }
+        }
+        leagueEntryRepository.saveAll(entries);
+        Map<Long, LeagueEntry> entryByUserId = new LinkedHashMap<>();
+        for (LeagueEntry e : entries) {
+            entryByUserId.put(e.getUser().getId(), e);
+        }
+
+        // --- 検証 1: プレビューの参加者が現在の参加者と完全一致するか（生成後の増減を検出） ---
+        List<Long> postedIds = new ArrayList<>();
+        for (PreviewTierRef t : tiers) {
+            for (PreviewGroupRef g : (t.groups() != null ? t.groups() : List.<PreviewGroupRef>of())) {
+                if (g.userIds() != null) postedIds.addAll(g.userIds());
+            }
+        }
+        Set<Long> postedSet = new HashSet<>(postedIds);
+        if (postedSet.size() != postedIds.size()) {
+            throw new IllegalStateException("同じ参加者が複数のグループに含まれています。プレビューを作り直してください。");
+        }
+        Set<Long> missing = new HashSet<>(entryByUserId.keySet());
+        missing.removeAll(postedSet);
+        Set<Long> unknown = new HashSet<>(postedSet);
+        unknown.removeAll(entryByUserId.keySet());
+        if (!missing.isEmpty() || !unknown.isEmpty()) {
+            throw new IllegalStateException(String.format(
+                    "プレビューが現在の参加者と一致しません（参加者 %d 人 / プレビューに含まれない %d 人 / 参加していない %d 人）。"
+                            + "プレビューを作り直してから適用してください。",
+                    entryByUserId.size(), missing.size(), unknown.size()));
+        }
+
+        // --- 検証 2: 卓(host)と立場(role)は現在のエントリーから再計算し、プレビューと矛盾しないか確認 ---
+        Map<Integer, Long> countByTier = entries.stream()
+                .collect(Collectors.groupingBy(LeagueEntry::getCurrentTier, Collectors.counting()));
+        Map<Integer, Integer> hostOf = new HashMap<>();
+        Map<Integer, String> roleOf = new HashMap<>();
+        computeHostAndRole(countByTier, hostOf, roleOf);
+
+        // --- 組み立て（検証がすべて通ってから保存する） ---
+        List<LeagueMember> newMembers = new ArrayList<>();
+        List<LeagueSong> newSongs = new ArrayList<>();
+        Set<String> seenGroups = new HashSet<>();
+        for (PreviewTierRef t : tiers) {
+            Integer host = t.host();
+            if (!LeagueDivision.isValid(host)) {
+                throw new IllegalArgumentException("卓の DIVISION が不正です: " + host);
+            }
+            for (PreviewGroupRef g : (t.groups() != null ? t.groups() : List.<PreviewGroupRef>of())) {
+                Integer groupIndex = g.groupIndex();
+                if (groupIndex == null || groupIndex < 0) {
+                    throw new IllegalArgumentException("グループ番号が不正です: " + groupIndex);
+                }
+                if (!seenGroups.add(host + "-" + groupIndex)) {
+                    throw new IllegalArgumentException(
+                            "同じグループが重複しています: DIVISION " + host + " グループ " + (groupIndex + 1));
+                }
+                List<Long> userIds = g.userIds() != null ? g.userIds() : List.of();
+                if (userIds.isEmpty()) {
+                    throw new IllegalArgumentException("メンバーが 0 人のグループがあります");
+                }
+                for (Long userId : userIds) {
+                    LeagueEntry e = entryByUserId.get(userId);
+                    int homeTier = e.getCurrentTier();
+                    if (!Objects.equals(hostOf.get(homeTier), host)) {
+                        throw new IllegalStateException(
+                                "少人数 DIVISION の合流結果がプレビューと変わっています。プレビューを作り直してから適用してください。");
+                    }
+                    LeagueMember m = new LeagueMember();
+                    m.setWeek(week);
+                    m.setUser(e.getUser());
+                    m.setTier(host);
+                    m.setHomeTier(homeTier);
+                    m.setRole(roleOf.get(homeTier));
+                    m.setGroupIndex(groupIndex);
+                    newMembers.add(m);
+                }
+                List<PreviewSongRef> songs = g.songs() != null ? g.songs() : List.of();
+                if (songs.isEmpty()) {
+                    throw new IllegalArgumentException("課題曲が空のグループがあります");
+                }
+                int slot = 1;
+                for (PreviewSongRef s : songs) {
+                    newSongs.add(resolveSong(week, host, groupIndex, slot++, s));
+                }
+            }
+        }
+
+        // --- 既存の編成物を掃除して置き換える（formWeek と同じ順序・同じ理由で flush する） ---
+        leagueMemberRepository.deleteByWeek(week);
+        leagueBaselineRepository.deleteByWeek(week);
+        leagueSongRepository.deleteByWeek(week);
+        leagueMemberRepository.flush();
+        leagueMemberRepository.saveAll(newMembers);
+        leagueSongRepository.saveAll(newSongs);
+
+        log.info("仮編成を draft へ適用: ladder={} weekId={} members={} songs={}",
+                ladder, week.getId(), newMembers.size(), newSongs.size());
+        return week;
+    }
+
+    /** プレビューの課題曲指定を active マスタで解決し、保存用の {@link LeagueSong} を組み立てる。 */
+    private LeagueSong resolveSong(LeagueWeek week, int tier, int groupIndex, int slot, PreviewSongRef ref) {
+        if (ref == null || ref.title() == null || ref.title().isBlank()) {
+            throw new IllegalArgumentException("課題曲のタイトルが空です");
+        }
+        String code = LeagueChartNotation.nameToCode(ref.difficultyName());
+        if (code == null) {
+            throw new IllegalArgumentException("課題曲の難易度が不正です: " + ref.difficultyName());
+        }
+        SongDefinition def = songDefinitionRepository
+                .findAllByTitleAndDifficultyAndRevision(ref.title().trim(), code, "active").stream()
+                .filter(sd -> sd.getNotes() != null && sd.getNotes() > 0)
+                .findFirst().orElse(null);
+        if (def == null) {
+            throw new IllegalArgumentException(
+                    "課題曲が active マスタに見つからないか、ノーツ数が未登録です: " + ref.title() + " " + ref.difficultyName());
+        }
+        LeagueSong song = new LeagueSong();
+        song.setWeek(week);
+        song.setTier(tier);
+        song.setGroupIndex(groupIndex);
+        song.setSlot(slot);
+        song.setTitle(def.getTitle());
+        song.setDifficultyName(LeagueChartNotation.codeToName(def.getDifficulty()));
+        song.setLevel(def.getLevel());
+        song.setNotes(def.getNotes());
+        return song;
     }
 
     /** EX からスコアレート（%・小数第 2 位）を計算する。notes は課題曲抽選時点のスナップショット。 */

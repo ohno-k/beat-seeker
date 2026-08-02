@@ -1460,6 +1460,10 @@ export const en = {
   'league.admin.preview.player': 'Player',
   'league.admin.preview.lineLabel': 'Line',
   'league.admin.preview.lineHint': '◆ = player who holds the line in that group (highlighted).',
+  'league.admin.preview.apply': 'Apply this preview to the draft',
+  'league.admin.preview.applyHint': 'Applying saves this exact formation (groups and songs) to the draft week, replacing the existing one.',
+  'league.admin.preview.confirmApply': 'Apply this preview to the draft week? The current formation (groups and songs) will be replaced.',
+  'league.admin.preview.applyDone': 'Applied the preview formation to the draft.',
   'league.info': 'How it works',
   'league.infoModal.title': 'About League Mode',
   'league.infoModal.close': 'Close',
@@ -1488,12 +1492,7 @@ export const en = {
   'league.infoModal.joined': 'Joined',
   'league.infoModal.loginToJoin': 'Log in to join.',
 
-  // Dashboard league preseason announcement
-  'dashboard.leaguePreseason.badge': 'PRESEASON',
-  'dashboard.leaguePreseason.title': 'League Mode preseason starts Mon, Aug 3',
-  'dashboard.leaguePreseason.body': 'Compete with players of similar skill over 3 weekly songs in this promotion / relegation mode. Sign-ups close Sun, Aug 2 at 23:59. Sign up now.',
-  'dashboard.leaguePreseason.join': 'Join',
-  'dashboard.leaguePreseason.rules': 'View rules',
-  'dashboard.leaguePreseason.joined': 'Joined',
-  'dashboard.leaguePreseason.cancelNote': 'If not enough players sign up, the event may be cancelled.',
+  // Dashboard top DIVISION panel (highlighted while a week is running)
+  'dashboard.leagueLive.badge': 'LIVE',
+  'dashboard.leagueLive.view': 'View league',
 };

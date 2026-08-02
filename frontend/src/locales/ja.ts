@@ -1519,6 +1519,10 @@ export const ja = {
   'league.admin.preview.player': '選手',
   'league.admin.preview.lineLabel': 'ライン',
   'league.admin.preview.lineHint': '◆＝そのグループでラインを持つ選手（強調表示）。',
+  'league.admin.preview.apply': 'このプレビューをドラフトに適用',
+  'league.admin.preview.applyHint': '「適用」を押すと、この編成（グループ・課題曲）がそのまま draft 週に保存されます。既存の編成は置き換えられます。',
+  'league.admin.preview.confirmApply': 'このプレビューの編成を draft 週に適用します。現在の編成（グループ・課題曲）は置き換えられます。よろしいですか？',
+  'league.admin.preview.applyDone': 'プレビューの編成を draft に適用しました。',
   'league.info': 'ルール説明',
   'league.infoModal.title': 'リーグモードとは',
   'league.infoModal.close': '閉じる',
@@ -1547,12 +1551,7 @@ export const ja = {
   'league.infoModal.joined': '参加登録済み',
   'league.infoModal.loginToJoin': '参加するにはログインが必要です。',
 
-  // ダッシュボード上部のリーグ・プレシーズン告知
-  'dashboard.leaguePreseason.badge': 'PRESEASON',
-  'dashboard.leaguePreseason.title': 'リーグモード プレシーズン、8/3（月）開始',
-  'dashboard.leaguePreseason.body': '同じ実力帯のプレイヤーと、週替わりの課題曲3曲で競う昇格・降格モード。参加受付は 8/2（日）23:59 まで。今のうちに参加登録しておきましょう。',
-  'dashboard.leaguePreseason.join': '参加する',
-  'dashboard.leaguePreseason.rules': 'ルールを見る',
-  'dashboard.leaguePreseason.joined': '参加登録済み',
-  'dashboard.leaguePreseason.cancelNote': '募集人数に満たない場合は開催を中止することがあります。',
+  // ダッシュボード最上部の DIVISION パネル（開催中の強調表示）
+  'dashboard.leagueLive.badge': '開催中',
+  'dashboard.leagueLive.view': 'リーグを見る',
 };

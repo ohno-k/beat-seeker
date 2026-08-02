@@ -1461,6 +1461,10 @@ export const ko = {
   'league.admin.preview.player': '선수',
   'league.admin.preview.lineLabel': '라인',
   'league.admin.preview.lineHint': '◆ = 해당 그룹에서 라인을 가진 선수(강조 표시).',
+  'league.admin.preview.apply': '이 미리보기를 드래프트에 적용',
+  'league.admin.preview.applyHint': '적용하면 이 편성(그룹·과제곡)이 그대로 draft 주차에 저장되며 기존 편성은 대체됩니다.',
+  'league.admin.preview.confirmApply': '이 미리보기의 편성을 draft 주차에 적용합니다. 현재 편성(그룹·과제곡)은 대체됩니다. 계속할까요?',
+  'league.admin.preview.applyDone': '미리보기 편성을 draft에 적용했습니다.',
   'league.info': '규칙 설명',
   'league.infoModal.title': '리그 모드란',
   'league.infoModal.close': '닫기',
@@ -1489,12 +1493,7 @@ export const ko = {
   'league.infoModal.joined': '참가 등록 완료',
   'league.infoModal.loginToJoin': '참가하려면 로그인이 필요합니다.',
 
-  // 대시보드 상단 리그 프리시즌 공지
-  'dashboard.leaguePreseason.badge': 'PRESEASON',
-  'dashboard.leaguePreseason.title': '리그 모드 프리시즌, 8/3(월) 시작',
-  'dashboard.leaguePreseason.body': '비슷한 실력의 플레이어와 매주 바뀌는 과제곡 3곡으로 겨루는 승격·강등 모드. 참가 접수는 8/2(일) 23:59까지. 지금 미리 참가 등록하세요.',
-  'dashboard.leaguePreseason.join': '참가하기',
-  'dashboard.leaguePreseason.rules': '규칙 보기',
-  'dashboard.leaguePreseason.joined': '참가 등록 완료',
-  'dashboard.leaguePreseason.cancelNote': '모집 인원에 미치지 못할 경우 개최를 중지할 수 있습니다.',
+  // 대시보드 최상단 DIVISION 패널(개최 중 강조 표시)
+  'dashboard.leagueLive.badge': '개최 중',
+  'dashboard.leagueLive.view': '리그 보기',
 };

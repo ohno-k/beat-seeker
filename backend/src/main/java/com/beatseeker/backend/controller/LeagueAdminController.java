@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
  *  - POST /api/league/admin/weeks/{weekId}/redraw          … 指定階級の課題曲を再抽選（draft のみ）
  *  - POST /api/league/admin/run-weekly                     … 週次処理の手動実行
  *  - POST /api/league/admin/create-draft                   … draft 週の手動作成
+ *  - GET  /api/league/admin/preview                        … 仮編成プレビュー（DB 非更新）
+ *  - POST /api/league/admin/preview/apply                  … 仮編成プレビューを draft へ適用
  *  - PUT  /api/league/admin/entries/{entryId}/tier         … エントリー階級の手動修正
  */
 @RestController
@@ -315,6 +317,41 @@ public class LeagueAdminController {
      * @param ladder ラダー種別
      * @return 取り消した週の詳細
      */
+    /**
+     * 【メソッドの役割】 仮編成プレビュー（GET /preview）で確認した編成を、そのまま draft 週へ適用する。
+     *
+     * プレビューは DB を更新しないため、内容を見て採用したい場合にこれで確定させる。既存の編成物
+     * （メンバー・課題曲・ベースライン）は削除して置き換える。プレビュー生成後に参加者が増減して
+     * いた場合は適用せず 400 を返す（プレビューを作り直してから適用する）。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param ladder ラダー種別
+     * @param req    プレビューの卓・グループ・メンバー(userId)・課題曲
+     * @return 適用後の draft 週の詳細
+     */
+    @PostMapping("/preview/apply")
+    public ResponseEntity<?> applyPreview(Authentication auth,
+                                          @RequestParam("ladder") String ladder,
+                                          @RequestBody ApplyPreviewRequest req) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        if (!leagueService.isValidLadder(ladder)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ladder は score / bp のいずれかです"));
+        }
+        if (req == null || req.tiers() == null || req.tiers().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "適用する編成データがありません"));
+        }
+        try {
+            LeagueWeek week = lifecycleService.applyPreview(ladder, req.tiers());
+            return ResponseEntity.ok(Map.of(
+                    "message", "プレビューの編成を draft に適用しました（グループ・課題曲を確定）。",
+                    "week", weekDetail(week)));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/abort")
     public ResponseEntity<?> abort(Authentication auth, @RequestParam("ladder") String ladder) {
         if (requireAdmin(auth) == null) {
@@ -397,16 +434,54 @@ public class LeagueAdminController {
                 .findByWeekOrderByTierAscSlotAsc(week).stream()
                 .collect(Collectors.groupingBy(LeagueSong::getTier, TreeMap::new,
                         Collectors.mapping(this::toSongMap, Collectors.toList())));
-        List<Map<String, Object>> tiers = songsByTier.entrySet().stream()
-                .map(e -> {
+        // 卓(tier) → グループ → メンバー。誰がどのグループに入ったかを管理者が確認できるようにする。
+        List<LeagueMember> members = leagueMemberRepository.findByWeek(week);
+        Map<Integer, Map<Integer, List<Map<String, Object>>>> membersByTierGroup = new TreeMap<>();
+        for (LeagueMember mem : members) {
+            membersByTierGroup
+                    .computeIfAbsent(mem.getTier(), k -> new TreeMap<>())
+                    .computeIfAbsent(mem.getGroupIndex(), k -> new ArrayList<>())
+                    .add(toMemberMap(mem));
+        }
+        // 表示の安定のため各グループ内は名前順に並べる。
+        for (Map<Integer, List<Map<String, Object>>> byGroup : membersByTierGroup.values()) {
+            for (List<Map<String, Object>> list : byGroup.values()) {
+                list.sort(Comparator.comparing(x -> String.valueOf(x.get("displayName")), String.CASE_INSENSITIVE_ORDER));
+            }
+        }
+
+        // 課題曲もメンバーも無い階級が落ちないよう、両方のキーを合わせて階級一覧を作る。
+        Set<Integer> tierKeys = new TreeSet<>(songsByTier.keySet());
+        tierKeys.addAll(membersByTierGroup.keySet());
+        List<Map<String, Object>> tiers = tierKeys.stream()
+                .map(tier -> {
                     Map<String, Object> tm = new LinkedHashMap<String, Object>();
-                    tm.put("tier", e.getKey());
-                    tm.put("songs", e.getValue());
+                    tm.put("tier", tier);
+                    tm.put("songs", songsByTier.getOrDefault(tier, List.of()));
+                    tm.put("groups", membersByTierGroup.getOrDefault(tier, Map.of()).entrySet().stream()
+                            .map(g -> {
+                                Map<String, Object> gm = new LinkedHashMap<String, Object>();
+                                gm.put("groupIndex", g.getKey());
+                                gm.put("members", g.getValue());
+                                return gm;
+                            })
+                            .toList());
                     return tm;
                 })
                 .toList();
         m.put("tiers", tiers);
-        m.put("memberCount", leagueMemberRepository.findByWeek(week).size());
+        m.put("memberCount", members.size());
+        return m;
+    }
+
+    /** メンバー 1 人分（誰がどの卓・グループに、どの立場で入ったか）をレスポンス用 Map に変換する。 */
+    private Map<String, Object> toMemberMap(LeagueMember member) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("userId", member.getUser().getId());
+        m.put("displayName", member.getUser().getDisplayName() != null ? member.getUser().getDisplayName() : "");
+        m.put("iidxId", member.getUser().getIidxId());
+        m.put("homeTier", member.getHomeTier() != null ? member.getHomeTier() : member.getTier());
+        m.put("role", member.getRole() != null ? member.getRole() : "normal");
         return m;
     }
 
@@ -430,5 +505,9 @@ public class LeagueAdminController {
 
     /** 階級手動修正リクエストのボディ。 */
     public record UpdateTierRequest(Integer tier) {
+    }
+
+    /** 仮編成プレビュー適用リクエストのボディ（GET /preview の応答をそのまま送り返す形）。 */
+    public record ApplyPreviewRequest(List<LeagueWeekLifecycleService.PreviewTierRef> tiers) {
     }
 }

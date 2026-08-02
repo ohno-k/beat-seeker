@@ -30,7 +30,7 @@ import { BOOKMARKLET_CODE } from './utils/bookmarklet';
 import ScoreSummary from './components/ScoreSummary.vue';
 import ScoreDashboard from './components/ScoreDashboard.vue';
 import WrappedBanner from './components/WrappedBanner.vue';
-import LeagueInfoModal from './components/LeagueInfoModal.vue';
+import LeagueDivisionPanel from './components/LeagueDivisionPanel.vue';
 import ProfileDashboard from './components/ProfileDashboard.vue';
 import LoginModal from './components/LoginModal.vue';
 import ProfileEditModal from './components/ProfileEditModal.vue';
@@ -120,7 +120,6 @@ import CommandPalette from './components/CommandPalette.vue';
 import BackToTop from './components/BackToTop.vue';
 import SupportChatWidget from './components/SupportChatWidget.vue';
 import { useAdmin } from './composables/useAdmin';
-import { useLeague } from './composables/useLeague';
 import { computed, watch, watchEffect, onMounted, onBeforeUnmount } from 'vue';
 
 const { t } = useI18n();
@@ -408,24 +407,6 @@ const isSidebarOpen = ref(false);
 const { user, isLoggedIn, logout, isLoading: authLoading, authHeaders } = useAuth();
 const { upload, saveHistoryLog } = useScoreUpload();
 
-// --- リーグ プレシーズン告知（ダッシュボード最上部バナー + ルール説明モーダル） ---
-const league = useLeague();
-/** ルール説明 + 参加モーダルの表示状態。 */
-const showLeaguePreseasonModal = ref(false);
-/** スコアリーグに参加登録済みか（バナーの「参加する / ルールを見る」出し分け用）。 */
-const leaguePreseasonJoined = ref(false);
-/** 参加状態を取得してバナー表示を更新する（ログイン時のみ）。 */
-const refreshLeagueJoined = async () => {
-  if (!isLoggedIn.value) { leaguePreseasonJoined.value = false; return; }
-  try {
-    const entries = await league.fetchMe();
-    leaguePreseasonJoined.value = entries.some((e) => e.ladderType === 'score' && e.active);
-  } catch {
-    /* 取得失敗時はバナーを未参加表示のままにする */
-  }
-};
-// ログイン状態が確定/変化したタイミングで参加状態を取り込む。
-watch(isLoggedIn, () => { refreshLeagueJoined(); }, { immediate: true });
 const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, fetchArenaTopRankerProfile, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 
@@ -2169,38 +2150,10 @@ const handleUnifiedClose = async () => {
           <div v-else-if="scoreData.length > 0 || viewingMode === 'private'" class="w-full flex flex-col items-center animate-fade-in">
             <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center gap-4">
-              <!-- リーグモード プレシーズン告知: 自分のダッシュボード・ログイン時のみ、最上部に表示 -->
-              <div
-                v-if="!viewingUserId && isLoggedIn"
-                class="w-full rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-5 py-4"
-              >
-                <div class="flex items-center gap-3">
-                  <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 21h8m-4-4v4m7-17H5v3a7 7 0 0014 0V4zM5 7H3a2 2 0 002 2m14-2h2a2 2 0 01-2 2" />
-                    </svg>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                      <span class="text-[10px] font-bold tracking-wider text-indigo-600 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-500/20 px-1.5 py-0.5 rounded">{{ t('dashboard.leaguePreseason.badge') }}</span>
-                      <span v-if="leaguePreseasonJoined" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                        {{ t('dashboard.leaguePreseason.joined') }}
-                      </span>
-                    </div>
-                    <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm leading-snug mt-0.5">{{ t('dashboard.leaguePreseason.title') }}</h3>
-                  </div>
-                  <button
-                    @click="showLeaguePreseasonModal = true"
-                    class="flex-shrink-0 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold whitespace-nowrap transition-colors"
-                  >{{ leaguePreseasonJoined ? t('dashboard.leaguePreseason.rules') : t('dashboard.leaguePreseason.join') }}</button>
-                </div>
-                <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">{{ t('dashboard.leaguePreseason.body') }}</p>
-              </div>
-              <LeagueInfoModal
-                v-if="showLeaguePreseasonModal"
-                @close="showLeaguePreseasonModal = false"
-                @joined="leaguePreseasonJoined = true"
+              <!-- 現在の DIVISION: 自分のダッシュボード・ログイン時のみ最上部に表示（開催中は強調） -->
+              <LeagueDivisionPanel
+                v-if="!viewingUserId && !viewingMode && isLoggedIn"
+                @open-league="activeTab = 'league'"
               />
 
               <!-- 月末振り返りバナー: 自分のダッシュボード閲覧時かつ表示ウィンドウ内のみ -->

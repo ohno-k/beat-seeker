@@ -133,6 +133,16 @@ export interface LeagueHistoryRow {
   resultValue: number | null;
 }
 
+/** 管理者 overview のメンバー行（誰がどのグループに、どの立場で入ったか）。 */
+export interface LeagueAdminMember {
+  userId: number;
+  displayName: string;
+  iidxId: string | null;
+  /** ホーム DIVISION（0=LEGEND、1..10）。卓(tier)と異なる場合はチャレンジ/ディフェンス。 */
+  homeTier: number;
+  role: 'normal' | 'challenge' | 'defense';
+}
+
 /** 管理者 overview の週詳細。 */
 export interface LeagueAdminWeek {
   id: number;
@@ -140,7 +150,12 @@ export interface LeagueAdminWeek {
   startsAt: string;
   endsAt: string;
   status: string;
-  tiers: { tier: number; songs: LeagueSongInfo[] }[];
+  tiers: {
+    tier: number;
+    songs: LeagueSongInfo[];
+    /** 卓内のグループ構成（未編成の週は空配列）。 */
+    groups: { groupIndex: number; members: LeagueAdminMember[] }[];
+  }[];
   memberCount: number;
 }
 
@@ -167,6 +182,8 @@ export interface LeaguePreviewCell {
 
 /** 仮編成プレビューの選手行。 */
 export interface LeaguePreviewPlayer {
+  /** ユーザー ID。プレビューを draft へ適用するときの同定に使う。 */
+  userId: number;
   displayName: string;
   /** ホーム DIVISION（0=LEGEND、1..10）。 */
   homeTier: number;
@@ -393,6 +410,31 @@ export function useLeague() {
     }
   };
 
+  /**
+   * 仮編成プレビューをそのまま draft 週へ適用する（管理者のみ）。
+   *
+   * 既存の編成（メンバー・課題曲）は削除して置き換える。プレビュー生成後に参加者が
+   * 増減している場合はサーバ側で拒否されるので、その場合は作り直してから適用する。
+   */
+  const applyPreview = async (ladder: LadderType, preview: LeaguePreview): Promise<void> => {
+    const body = {
+      tiers: preview.tiers.map((t) => ({
+        host: t.host,
+        groups: t.groups.map((g) => ({
+          groupIndex: g.groupIndex,
+          userIds: g.players.map((p) => p.userId),
+          songs: g.songs.map((s) => ({ title: s.title, difficultyName: s.difficultyName })),
+        })),
+      })),
+    };
+    const res = await fetch(`${API_BASE}/api/league/admin/preview/apply?ladder=${ladder}`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) await raise(res, '編成の適用に失敗しました');
+  };
+
   return {
     isLoading,
     fetchMe,
@@ -410,5 +452,6 @@ export function useLeague() {
     formDraft,
     abortWeek,
     fetchAdminPreview,
+    applyPreview,
   };
 }

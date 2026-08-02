@@ -360,6 +360,27 @@ const handlePreview = async (ladder: LadderType) => {
   }
 };
 
+/**
+ * 表示中の仮編成プレビューをそのまま draft 週へ適用する（既存の編成を置き換える）。
+ * 生成後に参加者が増減している場合はサーバ側で拒否されるので、その時は作り直してから押す。
+ */
+const handleApplyPreview = async (ladder: LadderType) => {
+  if (!preview.value) return;
+  if (!confirm(t('league.admin.preview.confirmApply'))) return;
+  busy.value = true;
+  error.value = '';
+  notice.value = '';
+  try {
+    await league.applyPreview(ladder, preview.value);
+    notice.value = t('league.admin.preview.applyDone');
+    await loadAdmin();
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    busy.value = false;
+  }
+};
+
 /** レート(%)の表示（小数第2位）。null は '-'。 */
 const fmtRate = (r: number | null | undefined) => (r == null ? '-' : `${r.toFixed(2)}%`);
 
@@ -762,6 +783,24 @@ onUnmounted(() => {
                 <button class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
                         :disabled="busy" @click="handleReplace(al.draftWeek!.id, song)">{{ t('league.admin.replace') }}</button>
               </div>
+
+              <!-- グループのメンバー（誰がどのグループに入ったかの確認用） -->
+              <div v-if="tierInfo.groups && tierInfo.groups.length" class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/60 space-y-1">
+                <div v-for="g in tierInfo.groups" :key="g.groupIndex" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    {{ t('league.groupN', { n: g.groupIndex + 1 }) }} ({{ g.members.length }})
+                  </span>
+                  <span v-for="mem in g.members" :key="mem.userId"
+                        class="inline-flex items-center gap-0.5 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                    {{ mem.displayName || mem.iidxId || '—' }}
+                    <span v-if="roleBadge(mem.role)"
+                          class="inline-flex items-center px-1 py-0.5 rounded text-[10px]"
+                          :class="roleBadge(mem.role)!.cls">
+                      {{ roleBadge(mem.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(mem.homeTier) }}</span>
+                    </span>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
           <div v-else class="mt-2 text-xs text-slate-400">{{ t('league.admin.draftWeek') }}: {{ t('league.admin.none') }}</div>
@@ -784,8 +823,13 @@ onUnmounted(() => {
               <div class="font-semibold text-slate-700 dark:text-slate-200">{{ t('league.admin.preview.title') }}</div>
               <p class="text-xs text-slate-400 mt-0.5 max-w-lg">{{ t('league.admin.preview.desc') }}</p>
             </div>
-            <button class="text-xs px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50 whitespace-nowrap"
-                    :disabled="busy" @click="handlePreview(ladder)">{{ t('league.admin.preview.generate') }}</button>
+            <div class="flex flex-wrap gap-2">
+              <button class="text-xs px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50 whitespace-nowrap"
+                      :disabled="busy" @click="handlePreview(ladder)">{{ t('league.admin.preview.generate') }}</button>
+              <button v-if="preview && preview.tiers.length"
+                      class="text-xs px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50 whitespace-nowrap"
+                      :disabled="busy" @click="handleApplyPreview(ladder)">{{ t('league.admin.preview.apply') }}</button>
+            </div>
           </div>
 
           <div v-if="preview" class="mt-3">
@@ -793,6 +837,7 @@ onUnmounted(() => {
               {{ t('league.admin.preview.entryCount', { n: preview.entryCount }) }}
               <span class="ml-2 text-slate-400">{{ t('league.admin.preview.lineHint') }}</span>
             </div>
+            <p class="mt-1 text-[11px] text-slate-400">{{ t('league.admin.preview.applyHint') }}</p>
             <div v-if="!preview.tiers.length" class="mt-2 text-xs text-slate-400">{{ t('league.admin.preview.empty') }}</div>
 
             <!-- 卓（host DIVISION）ごと -->
