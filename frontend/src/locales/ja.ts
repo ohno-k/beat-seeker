@@ -1518,6 +1518,7 @@ export const ja = {
   'league.admin.preview.empty': '参加者がいません。',
   'league.admin.preview.player': '選手',
   'league.admin.preview.lineLabel': 'ライン',
+  'league.admin.preview.lineHolder': 'ライン保持者',
   'league.admin.preview.lineHint': '◆＝そのグループでラインを持つ選手（強調表示）。',
   'league.admin.preview.apply': 'このプレビューをドラフトに適用',
   'league.admin.preview.applyHint': '「適用」を押すと、この編成（グループ・課題曲）がそのまま draft 週に保存されます。既存の編成は置き換えられます。',

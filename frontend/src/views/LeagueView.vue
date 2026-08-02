@@ -762,26 +762,40 @@ onUnmounted(() => {
                 <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
                         :disabled="busy" @click="handleRedraw(al.draftWeek!.id, tierInfo.tier)">{{ t('league.admin.redraw') }}</button>
               </div>
-              <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id" class="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <span v-if="song.groupIndex != null"
-                      class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                  {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
-                </span>
-                <span class="text-slate-400 w-4">{{ song.slot }}.</span>
-                <input
-                  v-model="replaceForm(song).title"
-                  class="flex-1 min-w-40 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                  :placeholder="t('league.admin.replaceTitle')"
-                />
-                <select
-                  v-model="replaceForm(song).difficultyName"
-                  class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                >
-                  <option v-for="d in ['NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA']" :key="d" :value="d">{{ d }}</option>
-                </select>
-                <span class="text-slate-400">☆{{ song.level ?? '-' }}</span>
-                <button class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
-                        :disabled="busy" @click="handleReplace(al.draftWeek!.id, song)">{{ t('league.admin.replace') }}</button>
+              <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id" class="mt-2">
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <span v-if="song.groupIndex != null"
+                        class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
+                  </span>
+                  <span class="text-slate-400 w-4">{{ song.slot }}.</span>
+                  <input
+                    v-model="replaceForm(song).title"
+                    class="flex-1 min-w-40 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                    :placeholder="t('league.admin.replaceTitle')"
+                  />
+                  <select
+                    v-model="replaceForm(song).difficultyName"
+                    class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                  >
+                    <option v-for="d in ['NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA']" :key="d" :value="d">{{ d }}</option>
+                  </select>
+                  <span class="text-slate-400">☆{{ song.level ?? '-' }}</span>
+                  <button class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+                          :disabled="busy" @click="handleReplace(al.draftWeek!.id, song)">{{ t('league.admin.replace') }}</button>
+                </div>
+                <!-- そのグループのライン（開始時に凍結される見込み値）とその保持者 -->
+                <div class="mt-0.5 ml-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <span class="font-semibold text-amber-600 dark:text-amber-400">{{ t('league.admin.preview.lineLabel') }}:</span>
+                  <template v-if="song.lineEx != null">
+                    <span class="tabular-nums">{{ song.lineEx }} ({{ fmtRate(song.lineRate) }})</span>
+                    <span class="ml-2">
+                      {{ t('league.admin.preview.lineHolder') }}:
+                      <span class="text-slate-600 dark:text-slate-300">{{ song.lineHolders?.length ? song.lineHolders.join(' / ') : '-' }}</span>
+                    </span>
+                  </template>
+                  <template v-else>{{ t('league.lineNone') }}</template>
+                </div>
               </div>
 
               <!-- グループのメンバー（誰がどのグループに入ったかの確認用） -->
@@ -870,6 +884,10 @@ onUnmounted(() => {
                             {{ t('league.admin.preview.lineLabel') }}:
                             <template v-if="s.lineEx != null">{{ s.lineEx }} ({{ fmtRate(s.lineRate) }})</template>
                             <template v-else>{{ t('league.lineNone') }}</template>
+                          </div>
+                          <div v-if="s.lineHolders && s.lineHolders.length"
+                               class="text-[10px] font-normal text-slate-500 dark:text-slate-400 break-words leading-tight">
+                            {{ t('league.admin.preview.lineHolder') }}: {{ s.lineHolders.join(' / ') }}
                           </div>
                         </th>
                       </tr>

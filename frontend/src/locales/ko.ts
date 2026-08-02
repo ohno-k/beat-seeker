@@ -1460,6 +1460,7 @@ export const ko = {
   'league.admin.preview.empty': '참가자가 없습니다.',
   'league.admin.preview.player': '선수',
   'league.admin.preview.lineLabel': '라인',
+  'league.admin.preview.lineHolder': '라인 보유자',
   'league.admin.preview.lineHint': '◆ = 해당 그룹에서 라인을 가진 선수(강조 표시).',
   'league.admin.preview.apply': '이 미리보기를 드래프트에 적용',
   'league.admin.preview.applyHint': '적용하면 이 편성(그룹·과제곡)이 그대로 draft 주차에 저장되며 기존 편성은 대체됩니다.',

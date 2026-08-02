@@ -1459,6 +1459,7 @@ export const en = {
   'league.admin.preview.empty': 'No entrants.',
   'league.admin.preview.player': 'Player',
   'league.admin.preview.lineLabel': 'Line',
+  'league.admin.preview.lineHolder': 'Line holder',
   'league.admin.preview.lineHint': '◆ = player who holds the line in that group (highlighted).',
   'league.admin.preview.apply': 'Apply this preview to the draft',
   'league.admin.preview.applyHint': 'Applying saves this exact formation (groups and songs) to the draft week, replacing the existing one.',

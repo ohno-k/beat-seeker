@@ -150,6 +150,21 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Score> findByUserAndTitlesAndDifficulties(@Param("user") User user, @Param("titles") List<String> titles, @Param("difficulties") List<String> difficulties);
 
     /**
+     * 【メソッドの役割】 複数ユーザー × 複数曲 × 複数難易度 の IN 検索でスコアをまとめて取得する。
+     *
+     * {@link #findByUserAndTitlesAndDifficulties} のユーザー複数版。リーグ管理画面で
+     * 「週の全メンバー × 課題曲」のラインを 1 クエリで計算するために使う（人数分の
+     * クエリを撃たないため）。
+     *
+     * @param users 対象ユーザーのリスト
+     * @param titles 曲名リスト
+     * @param difficulties 難易度名リスト
+     * @return 該当スコア一覧
+     */
+    @Query("SELECT s FROM Score s WHERE s.user IN :users AND s.title IN :titles AND s.difficultyName IN :difficulties")
+    List<Score> findByUsersAndTitlesAndDifficulties(@Param("users") List<User> users, @Param("titles") List<String> titles, @Param("difficulties") List<String> difficulties);
+
+    /**
      * 【メソッドの役割】 全ユーザーの ANOTHER / LEGGENDARIA スコアを軽量に取得する。
      *
      * ネイティブ SQL。user 情報は含めずコンパクトに返す。集計バッチ処理で使用。

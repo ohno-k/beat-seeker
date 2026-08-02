@@ -762,6 +762,16 @@ public class LeagueWeekLifecycleService {
             sm.put("notes", sd.getNotes());
             sm.put("lineEx", lineEx[i] > 0 ? lineEx[i] : null);
             sm.put("lineRate", lineEx[i] > 0 ? roundRate(lineEx[i], sd.getNotes()) : null);
+            // ライン保持者（同値が複数居れば全員）。誰がラインを持っているかを一覧で確認できるようにする。
+            List<String> holders = new ArrayList<>();
+            if (lineEx[i] > 0) {
+                for (int p = 0; p < sorted.size(); p++) {
+                    if (exRows.get(p)[i] != lineEx[i]) continue;
+                    String name = sorted.get(p).getUser().getDisplayName();
+                    holders.add(name != null && !name.isBlank() ? name : String.valueOf(sorted.get(p).getUser().getIidxId()));
+                }
+            }
+            sm.put("lineHolders", holders);
             songMeta.add(sm);
         }
 

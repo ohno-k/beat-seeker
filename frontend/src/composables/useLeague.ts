@@ -49,6 +49,11 @@ export interface LeagueSongInfo {
   lineMiss?: number | null;
   /** ラインのスコアレート(%)。lineEx から算出済み。 */
   lineRate?: number | null;
+  /**
+   * ライン保持者の表示名（同値が複数居れば全員）。管理者 overview の draft 週でのみ返る
+   * （プレイヤー向けの順位表ではラインは匿名の共通閾値なので含めない）。
+   */
+  lineHolders?: string[];
 }
 
 /** 順位表 1 行の課題曲内訳。 */
@@ -204,6 +209,8 @@ export interface LeaguePreviewSong {
   lineEx: number | null;
   /** ラインのスコアレート(%)。 */
   lineRate: number | null;
+  /** ライン保持者の表示名（同値が複数居れば全員。誰も未プレーなら空）。 */
+  lineHolders: string[];
 }
 
 /** 仮編成プレビューの 1 グループ。 */
