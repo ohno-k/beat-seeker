@@ -32,6 +32,7 @@ import {
   type LeagueSongInfo,
   type LeaguePerSong,
   type LeaguePreview,
+  type LeaguePoolSong,
 } from '../composables/useLeague';
 
 const { t } = useI18n();
@@ -58,8 +59,6 @@ const showHistory = ref(false);
 const showInfo = ref(false);
 /** 管理者 overview（管理者のみ取得）。 */
 const adminLadders = ref<LeagueAdminLadder[]>([]);
-/** 課題曲差し替えフォームの入力値（songId → 入力中の値）。 */
-const replaceForms = ref<Record<number, { title: string; difficultyName: string }>>({});
 /** 仮編成プレビュー（管理者が生成したときのみ。DB は更新しない）。 */
 const preview = ref<LeaguePreview | null>(null);
 
@@ -199,6 +198,14 @@ const loadAdmin = async () => {
   } catch {
     adminLadders.value = [];
   }
+  // 差し替え UI を表示する DIVISION（編集を開いている / 未編成）の選曲プールを先読みする。
+  for (const al of adminLadders.value) {
+    const draft = al.draftWeek;
+    if (!draft) continue;
+    for (const tierInfo of draft.tiers) {
+      if (!tierInfo.groups.length || isSongEditOpen(draft.id, tierInfo.tier)) ensureSongPool(tierInfo.tier);
+    }
+  }
 };
 
 /** 参加する。 */
@@ -249,26 +256,56 @@ const openGroup = async (tier: number, groupIndex: number) => {
 // -------------------------------------------------------------------
 
 /** 課題曲差し替えフォームの入力値を取得（無ければ現曲で初期化）。 */
-const replaceForm = (song: LeagueSongInfo) => {
-  if (!replaceForms.value[song.id]) {
-    replaceForms.value[song.id] = { title: song.title, difficultyName: song.difficultyName };
-  }
-  return replaceForms.value[song.id];
-};
+/** DIVISION ごとの選曲プール（差し替えドロップダウンの選択肢）。開いたときに一度だけ取得する。 */
+const songPools = ref<Record<number, LeaguePoolSong[]>>({});
 
-/** 課題曲を差し替える（draft 週のみ）。 */
-const handleReplace = async (weekId: number, song: LeagueSongInfo) => {
-  const form = replaceForms.value[song.id];
-  if (!form || !form.title.trim()) return;
-  busy.value = true;
-  error.value = '';
+/** 選曲プールを取得する（取得済み・取得中なら何もしない）。 */
+const ensureSongPool = async (tier: number) => {
+  if (songPools.value[tier] || poolLoading.has(tier)) return;
+  poolLoading.add(tier);
   try {
-    await league.replaceSong(weekId, song.id, form.title.trim(), form.difficultyName);
-    delete replaceForms.value[song.id];
-    await loadAdmin();
+    songPools.value[tier] = await league.fetchSongPool(tier);
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
   } finally {
+    poolLoading.delete(tier);
+  }
+};
+const poolLoading = new Set<number>();
+
+/**
+ * 差し替えドロップダウンの選択肢。プールに加え、現在の課題曲がプール外（帯の外の曲へ
+ * 差し替え済みなど）の場合は先頭に足して、選択状態が空にならないようにする。
+ */
+const songOptions = (tier: number, song: LeagueSongInfo): LeaguePoolSong[] => {
+  const pool = songPools.value[tier] ?? [];
+  const inPool = pool.some(p => p.title === song.title && p.difficultyName === song.difficultyName);
+  if (inPool) return pool;
+  return [{ title: song.title, difficultyName: song.difficultyName, level: song.level, notes: song.notes }, ...pool];
+};
+
+/** 現在の課題曲が選択肢の何番目か（select の value）。 */
+const currentOptionIndex = (tier: number, song: LeagueSongInfo) =>
+  songOptions(tier, song).findIndex(o => o.title === song.title && o.difficultyName === song.difficultyName);
+
+/**
+ * 選曲プールから課題曲を選んで即時に差し替える（draft 週のみ）。
+ * 差し替え後に overview を取り直すので、そのグループのライン・ライン保持者・各メンバーの
+ * 自己ベストがその場で更新される。
+ */
+const handlePickSong = async (weekId: number, tier: number, song: LeagueSongInfo, ev: Event) => {
+  const index = Number((ev.target as HTMLSelectElement).value);
+  const picked = songOptions(tier, song)[index];
+  if (!picked || (picked.title === song.title && picked.difficultyName === song.difficultyName)) return;
+  busy.value = true;
+  error.value = '';
+  try {
+    await league.replaceSong(weekId, song.id, picked.title, picked.difficultyName);
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    // 成功時は新しいライン・保持者を、失敗時は元の選択状態を描き直す。
+    await loadAdmin();
     busy.value = false;
   }
 };
@@ -407,8 +444,12 @@ const songEditOpen = ref<Set<string>>(new Set());
 const isSongEditOpen = (weekId: number, tier: number) => songEditOpen.value.has(`${weekId}-${tier}`);
 const toggleSongEdit = (weekId: number, tier: number) => {
   const key = `${weekId}-${tier}`;
-  if (songEditOpen.value.has(key)) songEditOpen.value.delete(key);
-  else songEditOpen.value.add(key);
+  if (songEditOpen.value.has(key)) {
+    songEditOpen.value.delete(key);
+  } else {
+    songEditOpen.value.add(key);
+    ensureSongPool(tier); // 開いたタイミングで選曲プールを取りに行く
+  }
 };
 
 watch(isLoggedIn, (v) => {
@@ -795,29 +836,31 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <!-- 課題曲の差し替え（既定は畳んでおく。未編成の draft では常に出す） -->
+              <!-- 課題曲の差し替え（既定は畳んでおく。未編成の draft では常に出す）。
+                   選曲プールから選ぶと即時に差し替わり、ライン・保持者・自己ベスト表が更新される。 -->
               <div v-if="isSongEditOpen(al.draftWeek.id, tierInfo.tier) || !tierInfo.groups.length"
                    class="mt-2 rounded-lg bg-slate-50 dark:bg-slate-900/40 p-2 space-y-1.5">
+                <div class="text-[11px] text-slate-400">
+                  {{ songPools[tierInfo.tier]
+                    ? t('league.admin.poolCount', { n: songPools[tierInfo.tier].length })
+                    : t('league.admin.poolLoading') }}
+                </div>
                 <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id" class="flex flex-wrap items-center gap-2 text-xs">
                   <span v-if="song.groupIndex != null"
                         class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
                   </span>
                   <span class="text-slate-400 w-4">{{ song.slot }}.</span>
-                  <input
-                    v-model="replaceForm(song).title"
-                    class="flex-1 min-w-40 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                    :placeholder="t('league.admin.replaceTitle')"
-                  />
                   <select
-                    v-model="replaceForm(song).difficultyName"
-                    class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                    class="flex-1 min-w-40 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 disabled:opacity-50"
+                    :disabled="busy || !songPools[tierInfo.tier]"
+                    :value="String(currentOptionIndex(tierInfo.tier, song))"
+                    @change="handlePickSong(al.draftWeek!.id, tierInfo.tier, song, $event)"
                   >
-                    <option v-for="d in ['NORMAL', 'HYPER', 'ANOTHER', 'LEGGENDARIA']" :key="d" :value="d">{{ d }}</option>
+                    <option v-for="(opt, i) in songOptions(tierInfo.tier, song)" :key="`${opt.title}|${opt.difficultyName}`" :value="String(i)">
+                      {{ opt.title }} [{{ opt.difficultyName }}{{ opt.level ? ` ☆${opt.level}` : '' }}]
+                    </option>
                   </select>
-                  <span class="text-slate-400">☆{{ song.level ?? '-' }}</span>
-                  <button class="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
-                          :disabled="busy" @click="handleReplace(al.draftWeek!.id, song)">{{ t('league.admin.replace') }}</button>
                 </div>
               </div>
 

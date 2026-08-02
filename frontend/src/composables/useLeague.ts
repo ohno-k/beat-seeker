@@ -174,6 +174,14 @@ export interface LeagueAdminLadder {
   activeWeek: LeagueAdminWeek | null;
 }
 
+/** 選曲プールの 1 譜面（管理者の課題曲差し替え候補）。 */
+export interface LeaguePoolSong {
+  title: string;
+  difficultyName: string;
+  level: number | null;
+  notes: number;
+}
+
 /** 仮編成プレビューの選手セル（1 課題曲分の自己ベスト）。 */
 export interface LeaguePreviewCell {
   slot: number;
@@ -407,6 +415,16 @@ export function useLeague() {
     if (!res.ok) await raise(res, '中止に失敗しました');
   };
 
+  /**
+   * 指定 DIVISION の選曲プール（その階級で出題され得る譜面）を取得する（管理者のみ）。
+   * 課題曲差し替えのドロップダウンの選択肢に使う。
+   */
+  const fetchSongPool = async (tier: number): Promise<LeaguePoolSong[]> => {
+    const res = await fetch(`${API_BASE}/api/league/admin/song-pool?tier=${tier}`, { headers: authHeaders() });
+    if (!res.ok) await raise(res, '選曲プールの取得に失敗しました');
+    return ((await res.json()).songs ?? []) as LeaguePoolSong[];
+  };
+
   /** 仮編成プレビューを取得する（管理者のみ・DB 非更新）。 */
   const fetchAdminPreview = async (ladder: LadderType): Promise<LeaguePreview> => {
     isLoading.value = true;
@@ -461,6 +479,7 @@ export function useLeague() {
     formDraft,
     abortWeek,
     fetchAdminPreview,
+    fetchSongPool,
     applyPreview,
   };
 }

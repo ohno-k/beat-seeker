@@ -156,6 +156,38 @@ public class LeagueAdminController {
     }
 
     /**
+     * 【メソッドの役割】 指定 DIVISION の選曲プール（その階級で出題され得る譜面）を返す。
+     *
+     * 管理者が課題曲を差し替えるときの選択肢に使う。実際の抽選で掛かる絞り込み（直近出題の除外・
+     * グループ内の拮抗判定）はかけず、その階級の難易度帯に入る譜面をタイトル順で全件返す。
+     *
+     * @param auth 認証情報（管理者限定）
+     * @param tier 階級（0=LEGEND .. 10）
+     * @return {@code {tier, songs:[{title, difficultyName, level, notes}]}}
+     */
+    @GetMapping("/song-pool")
+    public ResponseEntity<?> songPool(Authentication auth, @RequestParam("tier") Integer tier) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        if (!LeagueDivision.isValid(tier)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "tier は 0 (DIVISION LEGEND) 〜 10 で指定してください"));
+        }
+        List<Map<String, Object>> songs = songDrawService.poolForTier(tier).stream()
+                .map(sd -> {
+                    Map<String, Object> m = new LinkedHashMap<String, Object>();
+                    m.put("title", sd.getTitle());
+                    m.put("difficultyName", LeagueChartNotation.codeToName(sd.getDifficulty()));
+                    m.put("level", sd.getLevel());
+                    m.put("notes", sd.getNotes());
+                    return m;
+                })
+                .sorted(Comparator.comparing(x -> String.valueOf(x.get("title")), String.CASE_INSENSITIVE_ORDER))
+                .toList();
+        return ResponseEntity.ok(Map.of("tier", tier, "songs", songs));
+    }
+
+    /**
      * 【メソッドの役割】 draft 週の指定階級の課題曲 3 曲を再抽選する。
      *
      * レベル帯の算出には現行 active 週の同階級メンバーを使う（draft 週にはまだ

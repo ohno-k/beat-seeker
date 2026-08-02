@@ -280,6 +280,29 @@ public class LeagueSongDrawService {
     }
 
     /**
+     * 【メソッドの役割】 指定 DIVISION の選曲プール（抽選候補の母集団）を返す。
+     *
+     * 管理者が課題曲を差し替えるとき「その DIVISION で出題され得る曲」から選べるようにするために使う。
+     * {@link #selectSongsForGroup} と同じ難易度帯・同じフォールバック（プールが薄い場合は難易度表全体）で
+     * 作り、タイトル単位に一意化する。実際の抽選で掛かる絞り込み（直近出題の除外・グループの拮抗判定）は
+     * かけない（管理者が任意に選べるようにするため）。
+     *
+     * @param tier 階級（0=LEGEND .. 10）
+     * @return プールの譜面（難易度表のランク順 → 登録順、タイトル重複なし）
+     */
+    public List<SongDefinition> poolForTier(int tier) {
+        Map<String, SongDefinition> masterIndex = buildMasterIndex();
+        int[] band = rankBandTenths(tier);
+        List<SongDefinition> rawPool = buildPool(masterIndex, band[0], band[1]);
+        if (distinctTitleCount(rawPool) < SONGS_PER_WEEK) {
+            rawPool = buildPool(masterIndex, 0, 9999); // プールが薄い場合は難易度表全体（Lv11 以上）へ拡大
+        }
+        LinkedHashMap<String, SongDefinition> byTitle = new LinkedHashMap<>();
+        for (SongDefinition sd : rawPool) byTitle.putIfAbsent(sd.getTitle(), sd);
+        return new ArrayList<>(byTitle.values());
+    }
+
+    /**
      * 【メソッドの役割】 「拮抗」判定のレート差しきい値（%）を DIVISION（tier）ごとに段階的に返す。
      *
      * 上位ほど実力が団子なので厳しく、下位ほど広く: LEGEND(0)=0.5% 〜 DIVISION10=5.0% の線形。
