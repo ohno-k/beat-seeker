@@ -636,7 +636,11 @@ onUnmounted(() => {
                   <th class="py-2 pr-2 text-center">{{ t('league.validSongs') }}</th>
                   <th class="py-2 pr-2 text-right">{{ t('league.leaguePoints') }}</th>
                   <th class="py-2 pr-2 text-center">{{ t('league.points') }}</th>
-                  <th class="py-2 pr-1 text-center" v-for="s in current.songs" :key="s.id">{{ s.slot }}</th>
+                  <th class="py-2 pr-1 text-center whitespace-nowrap" v-for="s in current.songs" :key="s.id"
+                      :title="`${s.slot}. ${s.title}`">
+                    {{ s.slot }}
+                    <span class="font-normal text-[10px] text-slate-300 dark:text-slate-600">{{ t('league.songPoints') }}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -664,14 +668,24 @@ onUnmounted(() => {
                     {{ fmtPt(row.points) }}
                     <span class="text-xs text-slate-400 dark:text-slate-500">({{ fmtPt(row.pointDelta) }})</span>
                   </td>
-                  <td v-for="ps in row.perSong" :key="ps.slot" class="py-2 px-1 text-center text-xs tabular-nums"
-                      :class="ps.rank != null ? 'text-slate-700 dark:text-slate-200 font-semibold' : 'text-slate-300 dark:text-slate-600'">
-                    {{ ps.rank != null ? t('league.songRank', { n: ps.rank }) : '–' }}
+                  <!-- 曲別セル: 自己ベスト EX（主役）＋ 着順とその曲の着順ポイント。
+                       ライン超え（有効）は緑、未達はグレー。全員ぶん表示して点差が分かるようにする。 -->
+                  <td v-for="ps in row.perSong" :key="ps.slot" class="py-2 px-1 text-center text-xs tabular-nums whitespace-nowrap">
+                    <div v-if="ps.bestEx != null"
+                         :class="ps.valid ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'">
+                      {{ ps.bestEx }}
+                    </div>
+                    <div v-else class="text-slate-300 dark:text-slate-600">–</div>
+                    <div class="text-[10px] leading-tight text-slate-400 dark:text-slate-500">
+                      <span v-if="ps.rank != null">{{ t('league.songRank', { n: ps.rank }) }} </span>
+                      <span v-if="ps.points != null">{{ fmtPts(ps.points) }}{{ t('league.songPoints') }}</span>
+                    </div>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p class="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">{{ t('league.songPointsHint') }}</p>
         </div>
 
         <!-- 他グループ（観戦） -->

@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
  * 過去週の成績履歴の取得を提供する。
  *
  * 認可方針: 全エンドポイントで要ログイン（SecurityConfig で /api/league/** を
- * authenticated に設定）。順位表は参加者の displayName を同じくログイン済みの
- * 閲覧者へ公開する（リーグはオプトイン参加のため、参加 = 掲載同意とみなす。
- * 参加 UI にもその旨を明記する）。
+ * authenticated に設定）。順位表は参加者の displayName と<b>その週の課題曲 3 曲の
+ * 自己ベスト（EX・スコアレート）</b>を、同じくログイン済みの閲覧者へ公開する
+ * （リーグはオプトイン参加のため、参加 = 掲載同意とみなす。参加 UI とルール説明にも
+ * その旨を明記する）。公開範囲は課題曲 3 曲に限られ、プロフィールの公開設定
+ * （privacy_level）が非公開でも、リーグに参加している限りこの 3 曲は表示される。
  *
  * 主なエンドポイント:
  *  - GET  /api/league/me         … 自分の両ラダーのエントリー状態
@@ -167,9 +169,11 @@ public class LeagueController {
 
         LeagueMember member = leagueMemberRepository.findByWeekAndUser(week, user).orElse(null);
         if (member != null) {
+            // 課題曲の EX スコアはグループ全員ぶんそのまま返す（対戦相手との点差が分からないという
+            // 参加者からの指摘を受けた仕様変更）。公開範囲は「その週の課題曲 3 曲の自己ベスト」に限られ、
+            // それ以外のスコアはこの API では一切返さない。
             List<Map<String, Object>> standings =
                     standingsService.computeGroupStandings(week, member.getTier(), member.getGroupIndex());
-            stripOtherScores(standings, user.getId());
             Map<String, Object> memberInfo = new LinkedHashMap<>();
             memberInfo.put("tier", member.getTier());              // 着席した卓（ホスト）の DIVISION
             memberInfo.put("groupIndex", member.getGroupIndex());
@@ -213,49 +217,13 @@ public class LeagueController {
         if (week == null) {
             return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
         }
+        // 観戦（他グループ閲覧）でも課題曲のスコアは同じ条件で見せる（自分のグループと同じ扱い）。
         List<Map<String, Object>> standings = standingsService.computeGroupStandings(week, tier, groupIndex);
-        // 観戦（他グループ閲覧）でも、自分以外の個人スコアは出さない。閲覧者が居ればその行だけ残す。
-        User viewer = getUser(auth);
-        stripOtherScores(standings, viewer != null ? viewer.getId() : null);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("week", toWeekMap(week));
         result.put("songs", songMapsWithLines(week, tier, groupIndex));
         result.put("standings", standings);
         return ResponseEntity.ok(result);
-    }
-
-    /**
-     * 【メソッドの役割】 順位表から「自分以外のメンバーの個人スコア」を除去する（プライバシー保護）。
-     *
-     * 各曲の生スコア（bestEx / rate / bestMiss）とライン値（lineEx / lineMiss）は本人以外には返さない。
-     * 表示に必要な着順（rank）・有効フラグ（valid）・得点（points）・曲情報は残す。
-     * これにより、スコア非公開ユーザーの記録が順位表経由で他人に露出するのを防ぐ。
-     *
-     * @param standings 順位表（各行の perSong を破壊的に編集する）
-     * @param viewerId  閲覧者のユーザー ID（この ID の行はスコアを残す。null なら全員分を除去）
-     */
-    @SuppressWarnings("unchecked")
-    private void stripOtherScores(List<Map<String, Object>> standings, Long viewerId) {
-        if (standings == null) return;
-        for (Map<String, Object> row : standings) {
-            Object uid = row.get("userId");
-            boolean isViewer = viewerId != null && uid instanceof Number
-                    && ((Number) uid).longValue() == viewerId;
-            if (isViewer) continue;
-            Object perSong = row.get("perSong");
-            if (perSong instanceof List<?> list) {
-                for (Object o : list) {
-                    if (o instanceof Map<?, ?> ps) {
-                        Map<String, Object> m = (Map<String, Object>) ps;
-                        m.remove("bestEx");
-                        m.remove("rate");
-                        m.remove("bestMiss");
-                        m.remove("lineEx");
-                        m.remove("lineMiss");
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -362,8 +330,7 @@ public class LeagueController {
 
     /**
      * 【メソッドの役割】 課題曲一覧に、指定グループの「ライン」（週開始時点の最高記録）を slot 単位で
-     * 合成して返す。観戦（他グループ閲覧）でもライン値を表示できるようにするため、ライン（匿名の
-     * グループ共通閾値）は個人スコア除去（{@link #stripOtherScores}）の対象外としてここで付与する。
+     * 合成して返す。観戦（他グループ閲覧）でもライン（グループ共通の閾値）を表示できるようにする。
      *
      * @param week       対象週
      * @param tier       階級
