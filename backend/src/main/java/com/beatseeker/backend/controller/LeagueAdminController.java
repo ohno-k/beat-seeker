@@ -1,4 +1,4 @@
-﻿package com.beatseeker.backend.controller;
+package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;

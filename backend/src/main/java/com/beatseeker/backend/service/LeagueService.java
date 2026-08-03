@@ -1,4 +1,4 @@
-﻿package com.beatseeker.backend.service;
+package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.LeagueEntry;
 import com.beatseeker.backend.entity.User;

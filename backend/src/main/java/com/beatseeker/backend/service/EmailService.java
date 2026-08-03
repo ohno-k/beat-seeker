@@ -455,6 +455,106 @@ public class EmailService {
     }
 
     /**
+     * 【メソッドの役割】 リーグ参加者が今週の課題曲を更新したことを管理者へ非同期通知する。
+     *
+     * <p>{@link LeagueUpdateNotificationService} から呼ばれる。課題曲ごとに
+     * 旧 EX → 新 EX・スコアレート・ライン・有効判定を並べ、ラインを今回超えた曲は強調する。
+     * 送信失敗は stderr ログのみで、スコア保存処理はブロックしない。
+     *
+     * @param toEmail  宛先メールアドレス（管理者）
+     * @param userName 更新したユーザーの表示名
+     * @param iidxId   更新したユーザーの IIDX ID
+     * @param division 所属 DIVISION の表示名（例 "DIVISION 4"）
+     * @param group    グループの表示名（例 "グループ2"）
+     * @param songs    更新された課題曲の行
+     *                 （{@code title / difficulty / level / oldScore / newScore / increase / rate /
+     *                 lineEx / lineRate / status / toLine}）
+     */
+    @Async
+    public void sendLeagueSongUpdateNotification(String toEmail, String userName, String iidxId,
+            String division, String group, List<Map<String, Object>> songs) {
+
+        StringBuilder rows = new StringBuilder();
+        for (Map<String, Object> s : songs) {
+            String title = String.valueOf(s.getOrDefault("title", ""));
+            String difficulty = String.valueOf(s.getOrDefault("difficulty", ""));
+            Object level = s.get("level");
+            int oldScore = ((Number) s.getOrDefault("oldScore", 0)).intValue();
+            int newScore = ((Number) s.getOrDefault("newScore", 0)).intValue();
+            int increase = ((Number) s.getOrDefault("increase", 0)).intValue();
+            Object rate = s.get("rate");
+            Object lineEx = s.get("lineEx");
+            Object lineRate = s.get("lineRate");
+            String status = String.valueOf(s.getOrDefault("status", "below"));
+            Object toLine = s.get("toLine");
+
+            String statusCell = switch (status) {
+                case "activated" -> "<span style='background:#10b981;color:#fff;padding:2px 8px;border-radius:4px;font-weight:bold;'>今回有効化</span>";
+                case "valid" -> "<span style='background:#d1fae5;color:#047857;padding:2px 8px;border-radius:4px;font-weight:bold;'>有効</span>";
+                default -> "<span style='color:#64748b;'>ライン未達"
+                        + (toLine != null ? "（あと " + toLine + "）" : "") + "</span>";
+            };
+            String lineCell = lineEx != null
+                    ? String.format("%,d", ((Number) lineEx).intValue())
+                            + (lineRate != null ? " <span style='color:#94a3b8;'>(" + lineRate + "%)</span>" : "")
+                    : "<span style='color:#94a3b8;'>なし</span>";
+
+            rows.append("<tr style='border-bottom:1px solid #e2e8f0;'>")
+                .append("<td style='padding:8px 10px;font-size:13px;max-width:260px;word-break:break-all;'>")
+                .append(escapeHtml(title))
+                .append("<div style='font-size:11px;color:#94a3b8;'>").append(escapeHtml(difficulty))
+                .append(level != null ? " ☆" + level : "").append("</div></td>")
+                .append("<td style='padding:8px 10px;font-size:13px;text-align:right;'>")
+                .append(String.format("%,d", newScore))
+                .append(rate != null ? " <span style='color:#94a3b8;'>(" + rate + "%)</span>" : "")
+                .append("<div style='font-size:11px;color:#94a3b8;'>旧 ").append(String.format("%,d", oldScore))
+                .append(" <span style='color:#7c3aed;font-weight:bold;'>+").append(increase).append("</span></div></td>")
+                .append("<td style='padding:8px 10px;font-size:13px;text-align:right;color:#b45309;'>").append(lineCell).append("</td>")
+                .append("<td style='padding:8px 10px;font-size:12px;'>").append(statusCell).append("</td>")
+                .append("</tr>");
+        }
+
+        String html = """
+                <!DOCTYPE html>
+                <html lang="ja">
+                <body style="font-family:sans-serif;background:#f8fafc;padding:32px;">
+                  <div style="max-width:720px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0;">
+                    <h2 style="color:#1e293b;margin-top:0;">%sさんがリーグの課題曲を更新しました</h2>
+                    <p style="color:#475569;margin:4px 0;">IIDX ID: <strong>%s</strong></p>
+                    <p style="color:#475569;margin:4px 0;">%s / %s</p>
+                    <table style="width:100%%;border-collapse:collapse;margin-top:16px;font-size:13px;">
+                      <thead>
+                        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                          <th style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">課題曲</th>
+                          <th style="padding:8px 10px;text-align:right;font-size:11px;color:#64748b;font-weight:700;">スコア</th>
+                          <th style="padding:8px 10px;text-align:right;font-size:11px;color:#64748b;font-weight:700;">ライン</th>
+                          <th style="padding:8px 10px;text-align:left;font-size:11px;color:#64748b;font-weight:700;">判定</th>
+                        </tr>
+                      </thead>
+                      <tbody>%s</tbody>
+                    </table>
+                    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
+                    <p style="color:#94a3b8;font-size:11px;">beat-seeker</p>
+                  </div>
+                </body>
+                </html>
+                """.formatted(escapeHtml(userName), escapeHtml(iidxId),
+                              escapeHtml(division), escapeHtml(group), rows.toString());
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject("[beat-seeker] " + userName + "さんがリーグ課題曲を更新しました");
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            System.err.println("Failed to send league song update notification: " + e.getMessage());
+        }
+    }
+
+    /**
      * HTML メール本文に埋め込む前の XSS 対策用エスケープ。
      * ユーザー入力由来の文字列（タイトル、ユーザー名、難易度等）はすべてこれを通す。
      */

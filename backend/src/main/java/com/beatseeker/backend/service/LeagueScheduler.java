@@ -1,4 +1,4 @@
-﻿package com.beatseeker.backend.service;
+package com.beatseeker.backend.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

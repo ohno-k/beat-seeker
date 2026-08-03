@@ -122,6 +122,9 @@ public class ScoreController {
     /** 管理者判定のロジックを共通化した Service（id / iidxId どちらでも判定可能）。 */
     private final com.beatseeker.backend.service.AdminAuthService adminAuthService;
 
+    /** リーグの課題曲が更新されたときに管理者へメール通知するサービス。 */
+    private final com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService;
+
     /**
      * 【コンストラクタ】 Spring DI で全依存を受け取る。
      */
@@ -144,7 +147,8 @@ public class ScoreController {
             com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository,
             TimelineEventRepository timelineEventRepository,
             VirtualRivalRepository virtualRivalRepository,
-            com.beatseeker.backend.service.AdminAuthService adminAuthService) {
+            com.beatseeker.backend.service.AdminAuthService adminAuthService,
+            com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService) {
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -166,6 +170,7 @@ public class ScoreController {
         this.timelineEventRepository = timelineEventRepository;
         this.virtualRivalRepository = virtualRivalRepository;
         this.adminAuthService = adminAuthService;
+        this.leagueUpdateNotificationService = leagueUpdateNotificationService;
     }
 
     /**
@@ -338,6 +343,14 @@ public class ScoreController {
         if (!updatedSongs.isEmpty()) {
             updateLastUploadTime(user);
             notifyFriendsOfScoreBeat(user, updatedSongs);
+
+            // 開催中のリーグの課題曲が含まれていれば管理者へメール通知する。
+            // 通知の失敗でスコア保存を巻き戻さない（メール送信自体も @Async）。
+            try {
+                leagueUpdateNotificationService.notifyLeagueSongUpdate(user, updatedSongs);
+            } catch (Exception e) {
+                System.err.println("Failed to notify league song update: " + e.getMessage());
+            }
 
             // INFINITAS 由来の更新があれば、その日 1 レコードの成長記録（tag=INFINITAS）へ集約する。
             // 画面取り込みは 1 曲ずつ届くため、同日内は既存ログに曲を追記・各 PT を再計算する upsert。
