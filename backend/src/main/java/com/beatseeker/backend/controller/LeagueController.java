@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
  * 過去週の成績履歴の取得を提供する。
  *
  * 認可方針: 全エンドポイントで要ログイン（SecurityConfig で /api/league/** を
- * authenticated に設定）。順位表は参加者の displayName と<b>その週の課題曲 3 曲の
- * 自己ベスト（EX・スコアレート）</b>を、同じくログイン済みの閲覧者へ公開する
- * （リーグはオプトイン参加のため、参加 = 掲載同意とみなす。参加 UI とルール説明にも
- * その旨を明記する）。公開範囲は課題曲 3 曲に限られ、プロフィールの公開設定
- * （privacy_level）が非公開でも、リーグに参加している限りこの 3 曲は表示される。
+ * authenticated に設定）。順位表は参加者の displayName と<b>その週に有効になったリザルト
+ * （ラインを超えて着順に乗った記録）の EX・スコアレート</b>を、同じくログイン済みの閲覧者へ
+ * 公開する（リーグはオプトイン参加のため、参加 = 掲載同意とみなす。参加 UI とルール説明にも
+ * その旨を明記する）。未達の自己ベスト（週内に更新していない過去の記録）は本人以外には
+ * 返さない（{@link #stripUnvalidatedScores}）。
  *
  * 主なエンドポイント:
  *  - GET  /api/league/me         … 自分の両ラダーのエントリー状態
@@ -169,11 +169,11 @@ public class LeagueController {
 
         LeagueMember member = leagueMemberRepository.findByWeekAndUser(week, user).orElse(null);
         if (member != null) {
-            // 課題曲の EX スコアはグループ全員ぶんそのまま返す（対戦相手との点差が分からないという
-            // 参加者からの指摘を受けた仕様変更）。公開範囲は「その週の課題曲 3 曲の自己ベスト」に限られ、
-            // それ以外のスコアはこの API では一切返さない。
+            // 有効になったリザルト（ラインを超えて着順に乗った記録）は EX を全員ぶん公開する。
+            // 未達の自己ベストは競技結果ではないので本人以外には返さない（stripUnvalidatedScores）。
             List<Map<String, Object>> standings =
                     standingsService.computeGroupStandings(week, member.getTier(), member.getGroupIndex());
+            stripUnvalidatedScores(standings, user.getId());
             Map<String, Object> memberInfo = new LinkedHashMap<>();
             memberInfo.put("tier", member.getTier());              // 着席した卓（ホスト）の DIVISION
             memberInfo.put("groupIndex", member.getGroupIndex());
@@ -217,8 +217,10 @@ public class LeagueController {
         if (week == null) {
             return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
         }
-        // 観戦（他グループ閲覧）でも課題曲のスコアは同じ条件で見せる（自分のグループと同じ扱い）。
+        // 観戦（他グループ閲覧）でも同じ条件: 有効なリザルトの EX は見せ、未達の自己ベストは伏せる。
         List<Map<String, Object>> standings = standingsService.computeGroupStandings(week, tier, groupIndex);
+        User viewer = getUser(auth);
+        stripUnvalidatedScores(standings, viewer != null ? viewer.getId() : null);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("week", toWeekMap(week));
         result.put("songs", songMapsWithLines(week, tier, groupIndex));
@@ -326,6 +328,38 @@ public class LeagueController {
         return leagueSongRepository.findByWeekAndTierAndGroupIndexOrderBySlotAsc(week, tier, groupIndex).stream()
                 .map(this::toSongMap)
                 .toList();
+    }
+
+    /**
+     * 【メソッドの役割】 順位表から「自分以外のメンバーの未有効スコア」を除去する。
+     *
+     * リーグで公開するのは「その週にラインを超えて有効になったリザルト」だけ。有効な曲の
+     * {@code bestEx / rate} は競技結果としてそのまま返し、未達の記録（＝週内に更新していない
+     * ただの自己ベスト）は本人以外には返さない。ライン（グループ共通の閾値）は課題曲側で
+     * 公開している情報なので触らない。
+     *
+     * @param standings 順位表（各行の perSong を破壊的に編集する）
+     * @param viewerId  閲覧者のユーザー ID（この行は自分の記録なので残す。null なら全員に適用）
+     */
+    @SuppressWarnings("unchecked")
+    private void stripUnvalidatedScores(List<Map<String, Object>> standings, Long viewerId) {
+        if (standings == null) return;
+        for (Map<String, Object> row : standings) {
+            Object uid = row.get("userId");
+            boolean isViewer = viewerId != null && uid instanceof Number
+                    && ((Number) uid).longValue() == viewerId;
+            if (isViewer) continue;
+            Object perSong = row.get("perSong");
+            if (!(perSong instanceof List<?> list)) continue;
+            for (Object o : list) {
+                if (!(o instanceof Map<?, ?> ps)) continue;
+                Map<String, Object> m = (Map<String, Object>) ps;
+                if (Boolean.TRUE.equals(m.get("valid"))) continue; // 有効なリザルトは公開する
+                m.remove("bestEx");
+                m.remove("rate");
+                m.remove("bestMiss");
+            }
+        }
     }
 
     /**

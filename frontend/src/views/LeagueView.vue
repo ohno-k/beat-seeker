@@ -668,11 +668,11 @@ onUnmounted(() => {
                     {{ fmtPt(row.points) }}
                     <span class="text-xs text-slate-400 dark:text-slate-500">({{ fmtPt(row.pointDelta) }})</span>
                   </td>
-                  <!-- 曲別セル: 自己ベスト EX（主役）＋ 着順とその曲の着順ポイント。
-                       ライン超え（有効）は緑、未達はグレー。全員ぶん表示して点差が分かるようにする。 -->
+                  <!-- 曲別セル: 有効になったリザルトの EX ＋ 着順とその曲の着順ポイント。
+                       未達（ライン超え前）の自己ベストは競技結果ではないので出さない。 -->
                   <td v-for="ps in row.perSong" :key="ps.slot" class="py-2 px-1 text-center text-xs tabular-nums whitespace-nowrap">
-                    <div v-if="ps.bestEx != null"
-                         :class="ps.valid ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'">
+                    <div v-if="ps.valid && ps.bestEx != null && ps.bestEx > 0"
+                         class="font-semibold text-emerald-600 dark:text-emerald-400">
                       {{ ps.bestEx }}
                     </div>
                     <div v-else class="text-slate-300 dark:text-slate-600">–</div>
