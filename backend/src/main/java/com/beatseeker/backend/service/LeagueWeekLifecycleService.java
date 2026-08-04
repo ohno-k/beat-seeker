@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -386,37 +387,32 @@ public class LeagueWeekLifecycleService {
         // 同じ参加者を入れ直す組み直しでユニーク制約 (week_id, user_id) に衝突してしまう。
         leagueMemberRepository.flush();
 
-        // --- 少人数 DIVISION の合流（チャレンジ / ディフェンス） ---
-        // ホーム DIVISION ごとの人数を数え、卓(host)と立場(role)を決める。
-        // 3 人以上は単独卓。少人数は「隣接する少人数同士を束ねて 3 人以上になれば独立卓を作る」
-        // ／束ねても 4 に満たなければ最寄りの成立卓へ吸収する。詳細は computeHostAndRole 参照。
-        Map<Integer, Long> countByTier = entries.stream()
-                .collect(Collectors.groupingBy(LeagueEntry::getCurrentTier, Collectors.counting()));
-        Map<Integer, Integer> hostOf = new HashMap<>();  // ホーム DIVISION → 着席する卓(host)
-        Map<Integer, String> roleOf = new HashMap<>();   // ホーム DIVISION → 立場(role)
-        computeHostAndRole(countByTier, hostOf, roleOf);
+        // --- 卓の割り当て（少人数 DIVISION の補充・合流） ---
+        // 3 人以上は単独卓。足りない DIVISION は隣接 DIVISION から BEAT-PT 順に人を借りて成立させ、
+        // それでも足りなければ従来どおり束ね / 吸収する。詳細は assignSeats を参照。
+        List<Seat> seats = assignSeats(entries, e -> e.getCurrentTier());
 
-        // 卓(host)ごとにプールを作る（吸収されたメンバーも含める）。
-        Map<Integer, List<LeagueEntry>> byHost = new TreeMap<>();
-        for (LeagueEntry e : entries) {
-            byHost.computeIfAbsent(hostOf.get(e.getCurrentTier()), k -> new ArrayList<>()).add(e);
+        // 卓(host)ごとにプールを作る（補充・吸収されたメンバーも含める）。
+        Map<Integer, List<Seat>> byHost = new TreeMap<>();
+        for (Seat s : seats) {
+            byHost.computeIfAbsent(s.host(), k -> new ArrayList<>()).add(s);
         }
 
         // --- グループ分割とメンバー配置（卓ごと） ---
         // グループ分けは実力（BEAT-PT）を一切考慮しない完全ランダム。BEAT-PT を参照するのは
-        // 初回の DIVISION 配属だけで、同一 DIVISION（卓）内のどのグループに入るかは毎週シャッフルで決める。
+        // 初回の DIVISION 配属と、少人数卓へ派遣する人の選抜だけ。
         List<LeagueMember> newMembers = new ArrayList<>();
-        for (Map.Entry<Integer, List<LeagueEntry>> he : byHost.entrySet()) {
+        for (Map.Entry<Integer, List<Seat>> he : byHost.entrySet()) {
             int host = he.getKey();
-            List<List<LeagueEntry>> groups = splitPoolIntoGroups(he.getValue());
+            List<List<Seat>> groups = splitPoolIntoGroups(he.getValue());
             for (int gi = 0; gi < groups.size(); gi++) {
-                for (LeagueEntry e : groups.get(gi)) {
+                for (Seat s : groups.get(gi)) {
                     LeagueMember member = new LeagueMember();
                     member.setWeek(week);
-                    member.setUser(e.getUser());
+                    member.setUser(s.entry().getUser());
                     member.setTier(host);
-                    member.setHomeTier(e.getCurrentTier());
-                    member.setRole(roleOf.get(e.getCurrentTier()));
+                    member.setHomeTier(s.homeTier());
+                    member.setRole(s.role());
                     member.setGroupIndex(gi);
                     newMembers.add(member);
                 }
@@ -444,6 +440,128 @@ public class LeagueWeekLifecycleService {
         return newMembers;
     }
 
+    /** 卓割り当ての 1 人分（誰が・どの卓に・どの立場で座るか）。 */
+    record Seat(LeagueEntry entry, int homeTier, int host, String role) {}
+
+    /**
+     * 【メソッドの役割】 参加者を卓へ割り当てる（少人数 DIVISION は隣から補充して成立させる）。
+     *
+     * <ol>
+     *   <li>{@link #MIN_STANDALONE} 人以上いる DIVISION はそのまま単独卓（role=normal）。</li>
+     *   <li>人数が足りない DIVISION は、近い DIVISION から人を借りて {@link #MIN_STANDALONE} 人に満たす。
+     *       <b>格下からは BEAT-PT 上位の人を引き上げ（チャレンジ）</b>、
+     *       <b>格上からは BEAT-PT 下位の人を降ろす（ディフェンス）</b>。
+     *       貸す側は貸した後も {@link #MIN_STANDALONE} 人を下回らない範囲でしか出さない。</li>
+     *   <li>補充しても成立しない DIVISION は従来どおり {@link #computeHostAndRole} に任せる
+     *       （少人数同士を束ねる / 最寄りの成立卓へ吸収）。</li>
+     * </ol>
+     *
+     * 上位（LEGEND 側）から先に補充するため、人数の少ない LEGEND 卓は「格下の最上位を引き上げて」
+     * 成立する。LEGEND の人がまるごと DIVISION 1 に降りてきて卓を荒らすことがなくなる。
+     *
+     * @param entries    その週の参加者
+     * @param homeTierOf ホーム DIVISION の取得（本編成はエントリーの値、プレビューは補完済みの値を渡す）
+     * @return 参加者ごとの座席
+     */
+    List<Seat> assignSeats(List<LeagueEntry> entries, ToIntFunction<LeagueEntry> homeTierOf) {
+        // ホーム DIVISION ごとに BEAT-PT 降順（先頭が最上位・末尾が最下位）で並べる。
+        Map<Integer, List<LeagueEntry>> byTier = new TreeMap<>();
+        for (LeagueEntry e : entries) {
+            byTier.computeIfAbsent(homeTierOf.applyAsInt(e), k -> new ArrayList<>()).add(e);
+        }
+        for (List<LeagueEntry> pool : byTier.values()) {
+            pool.sort(Comparator.comparingDouble(this::beatPtOf).reversed());
+        }
+
+        Map<Integer, Integer> lentFromTop = new HashMap<>();    // DIVISION → 上位から貸した人数
+        Map<Integer, Integer> lentFromBottom = new HashMap<>(); // DIVISION → 下位から貸した人数
+        Map<Long, Seat> borrowed = new LinkedHashMap<>();       // userId → 補充で他卓に座る人
+
+        for (Integer tier : new ArrayList<>(byTier.keySet())) {
+            int own = byTier.get(tier).size()
+                    - lentFromTop.getOrDefault(tier, 0) - lentFromBottom.getOrDefault(tier, 0);
+            if (own >= MIN_STANDALONE) continue; // 単独で成立している
+            int need = MIN_STANDALONE - own;
+
+            List<Seat> picked = new ArrayList<>();
+            for (int d = 1; d <= LeagueDivision.LOWEST && picked.size() < need; d++) {
+                // 近い DIVISION から順に。まず格下（引き上げ＝チャレンジ）、次に格上（降ろす＝ディフェンス）。
+                lend(byTier, lentFromTop, lentFromBottom, tier + d, tier, picked, need - picked.size());
+                lend(byTier, lentFromTop, lentFromBottom, tier - d, tier, picked, need - picked.size());
+            }
+            if (picked.size() < need) {
+                // 成立させられない → 借りを取り消して従来ロジック（束ね / 吸収）へ委ねる。
+                for (Seat s : picked) {
+                    Map<Integer, Integer> ledger = "challenge".equals(s.role()) ? lentFromTop : lentFromBottom;
+                    ledger.merge(s.homeTier(), -1, Integer::sum);
+                }
+                continue;
+            }
+            for (Seat s : picked) borrowed.put(s.entry().getUser().getId(), s);
+        }
+
+        // 補充後の人数で従来ロジックを回す（補充で成立した卓は 3 人以上になるので単独卓として扱われる）。
+        Map<Integer, Long> effective = new TreeMap<>();
+        for (Map.Entry<Integer, List<LeagueEntry>> en : byTier.entrySet()) {
+            int tier = en.getKey();
+            long remain = en.getValue().size()
+                    - lentFromTop.getOrDefault(tier, 0) - lentFromBottom.getOrDefault(tier, 0);
+            if (remain > 0) effective.put(tier, remain);
+        }
+        for (Seat s : borrowed.values()) effective.merge(s.host(), 1L, Long::sum);
+
+        Map<Integer, Integer> hostOf = new HashMap<>();
+        Map<Integer, String> roleOf = new HashMap<>();
+        computeHostAndRole(effective, hostOf, roleOf);
+
+        List<Seat> seats = new ArrayList<>();
+        for (LeagueEntry e : entries) {
+            Seat lentSeat = borrowed.get(e.getUser().getId());
+            if (lentSeat != null) {
+                seats.add(lentSeat);
+                continue;
+            }
+            int home = homeTierOf.applyAsInt(e);
+            Integer host = hostOf.get(home);
+            seats.add(new Seat(e, home, host != null ? host : home, roleOf.getOrDefault(home, "normal")));
+        }
+        return seats;
+    }
+
+    /**
+     * 【メソッドの役割】 {@code donorTier} から {@code targetTier} の卓へ人を貸し出す（{@link #assignSeats} の補助）。
+     *
+     * 格下（tier 番号が大きい）から借りるときは BEAT-PT 上位（リストの先頭）＝チャレンジ、
+     * 格上から借りるときは BEAT-PT 下位（リストの末尾）＝ディフェンスを選ぶ。
+     * 貸した後も {@link #MIN_STANDALONE} 人を確保できる範囲でしか貸さない。
+     */
+    private void lend(Map<Integer, List<LeagueEntry>> byTier,
+                      Map<Integer, Integer> lentFromTop, Map<Integer, Integer> lentFromBottom,
+                      int donorTier, int targetTier, List<Seat> out, int want) {
+        if (want <= 0) return;
+        List<LeagueEntry> pool = byTier.get(donorTier);
+        if (pool == null) return;
+        int top = lentFromTop.getOrDefault(donorTier, 0);
+        int bottom = lentFromBottom.getOrDefault(donorTier, 0);
+        int canLend = (pool.size() - top - bottom) - MIN_STANDALONE;
+        if (canLend <= 0) return;
+
+        boolean fromBelow = donorTier > targetTier; // 格下から引き上げる
+        int take = Math.min(want, canLend);
+        for (int i = 0; i < take; i++) {
+            LeagueEntry e = fromBelow ? pool.get(top + i) : pool.get(pool.size() - 1 - (bottom + i));
+            out.add(new Seat(e, donorTier, targetTier, fromBelow ? "challenge" : "defense"));
+        }
+        if (fromBelow) lentFromTop.merge(donorTier, take, Integer::sum);
+        else lentFromBottom.merge(donorTier, take, Integer::sum);
+    }
+
+    /** 総合 BEAT-PT（未設定は 0）。派遣する人を選ぶ並び順に使う。 */
+    private double beatPtOf(LeagueEntry e) {
+        Double pt = e.getUser().getTotalBeatPt();
+        return pt != null ? pt : 0.0;
+    }
+
     /**
      * 【メソッドの役割】 卓のプールを完全ランダムにグループへ分割する。
      *
@@ -454,12 +572,12 @@ public class LeagueWeekLifecycleService {
      * @param pool 卓（host）に属する参加者
      * @return グループのリスト（インデックス = groupIndex）
      */
-    private List<List<LeagueEntry>> splitPoolIntoGroups(List<LeagueEntry> pool) {
-        List<LeagueEntry> shuffled = new ArrayList<>(pool);
+    private <T> List<List<T>> splitPoolIntoGroups(List<T> pool) {
+        List<T> shuffled = new ArrayList<>(pool);
         Collections.shuffle(shuffled);
         int n = shuffled.size();
         int groupCount = Math.max(1, (int) Math.ceil((double) n / GROUP_CAPACITY));
-        List<List<LeagueEntry>> groups = new ArrayList<>();
+        List<List<T>> groups = new ArrayList<>();
         for (int g = 0; g < groupCount; g++) groups.add(new ArrayList<>());
         for (int i = 0; i < n; i++) {
             groups.get(i % groupCount).add(shuffled.get(i)); // ラウンドロビン配分
@@ -469,6 +587,9 @@ public class LeagueWeekLifecycleService {
 
     /**
      * 【メソッドの役割】 DIVISION ごとの人数から、各 DIVISION の「着席する卓(host)」と「立場(role)」を決める。
+     *
+     * <p>{@link #assignSeats} の<b>フォールバック</b>。まず隣接 DIVISION からの補充で卓を成立させ、
+     * それでも人数が足りない DIVISION だけがここに来る（渡される人数は補充後の実効人数）。
      *
      * <ul>
      *   <li>3 人以上（{@link #MIN_STANDALONE}）の DIVISION はそのまま単独卓（role=normal）。</li>
@@ -646,32 +767,27 @@ public class LeagueWeekLifecycleService {
         }
 
         // 卓(host)/立場(role)の決定（本編成と同じロジック）。
-        Map<Integer, Long> countByTier = tierOf.values().stream()
-                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
-        Map<Integer, Integer> hostOf = new HashMap<>();
-        Map<Integer, String> roleOf = new HashMap<>();
-        computeHostAndRole(countByTier, hostOf, roleOf);
-
-        Map<Integer, List<LeagueEntry>> byHost = new TreeMap<>();
-        for (LeagueEntry e : entries) {
-            byHost.computeIfAbsent(hostOf.get(tierOf.get(e.getUser().getId())), k -> new ArrayList<>()).add(e);
+        List<Seat> seats = assignSeats(entries, e -> tierOf.get(e.getUser().getId()));
+        Map<Integer, List<Seat>> byHost = new TreeMap<>();
+        for (Seat s : seats) {
+            byHost.computeIfAbsent(s.host(), k -> new ArrayList<>()).add(s);
         }
 
         LocalDateTime refStart = upcomingStartJst();
         List<Map<String, Object>> tiers = new ArrayList<>();
-        for (Map.Entry<Integer, List<LeagueEntry>> he : byHost.entrySet()) {
+        for (Map.Entry<Integer, List<Seat>> he : byHost.entrySet()) {
             int host = he.getKey();
-            List<List<LeagueEntry>> groups = splitPoolIntoGroups(he.getValue());
+            List<List<Seat>> groups = splitPoolIntoGroups(he.getValue());
             // 同一階級の他グループと課題曲が重複しないよう、選んだタイトルを積み上げて除外していく
             // （本抽選は保存済み課題曲を DB 経由で除外するが、保存しないプレビューでは明示的に渡す）。
             Set<String> usedInTier = new HashSet<>();
             List<Map<String, Object>> groupList = new ArrayList<>();
             for (int gi = 0; gi < groups.size(); gi++) {
-                List<LeagueEntry> g = groups.get(gi);
-                List<User> users = g.stream().map(LeagueEntry::getUser).toList();
+                List<Seat> g = groups.get(gi);
+                List<User> users = g.stream().map(s -> s.entry().getUser()).toList();
                 List<SongDefinition> songs = songDrawService.selectSongsForGroup(host, users, refStart, usedInTier);
                 for (SongDefinition sd : songs) usedInTier.add(sd.getTitle());
-                groupList.add(buildPreviewGroup(gi, g, songs, roleOf, tierOf));
+                groupList.add(buildPreviewGroup(gi, g, songs));
             }
             Map<String, Object> tm = new LinkedHashMap<>();
             tm.put("host", host);
@@ -689,24 +805,24 @@ public class LeagueWeekLifecycleService {
      * ライン（{@code lineEx}）＝グループ内のアーケード自己ベスト最高 EX。各選手セルの
      * {@code isLine} が true ＝その選手がラインを持っている（＝強調表示対象）。未プレーは {@code played=false}。
      */
-    private Map<String, Object> buildPreviewGroup(int groupIndex, List<LeagueEntry> members,
-                                                  List<SongDefinition> songs,
-                                                  Map<Integer, String> roleOf, Map<Long, Integer> tierOf) {
+    private Map<String, Object> buildPreviewGroup(int groupIndex, List<Seat> members,
+                                                  List<SongDefinition> songs) {
         int slots = songs.size();
         List<String> titles = songs.stream().map(SongDefinition::getTitle).distinct().toList();
         List<String> diffs = songs.stream()
                 .map(sd -> LeagueChartNotation.codeToName(sd.getDifficulty())).distinct().toList();
 
         // 表示は名前順で安定させる。
-        List<LeagueEntry> sorted = new ArrayList<>(members);
-        sorted.sort(Comparator.comparing(e -> {
-            String n = e.getUser().getDisplayName();
+        List<Seat> sorted = new ArrayList<>(members);
+        sorted.sort(Comparator.comparing(s -> {
+            String n = s.entry().getUser().getDisplayName();
             return n != null ? n : "";
         }, String.CASE_INSENSITIVE_ORDER));
 
         int[] lineEx = new int[slots];            // 各スロットのライン（最高 EX、未プレーのみなら 0）
         List<int[]> exRows = new ArrayList<>();    // 選手ごとのスロット別 EX（-1 = 未プレー）
-        for (LeagueEntry e : sorted) {
+        for (Seat seat : sorted) {
+            LeagueEntry e = seat.entry();
             int[] exBySlot = new int[slots];
             Arrays.fill(exBySlot, -1);
             if (!titles.isEmpty()) {
@@ -731,9 +847,10 @@ public class LeagueWeekLifecycleService {
         // 選手行（ライン確定後に isLine を付与）。
         List<Map<String, Object>> players = new ArrayList<>();
         for (int p = 0; p < sorted.size(); p++) {
-            LeagueEntry e = sorted.get(p);
+            Seat seat = sorted.get(p);
+            LeagueEntry e = seat.entry();
             int[] exBySlot = exRows.get(p);
-            int homeTier = tierOf.get(e.getUser().getId());
+            int homeTier = seat.homeTier();
             List<Map<String, Object>> bests = new ArrayList<>();
             for (int i = 0; i < slots; i++) {
                 Map<String, Object> cell = new LinkedHashMap<>();
@@ -757,7 +874,7 @@ public class LeagueWeekLifecycleService {
             pm.put("userId", e.getUser().getId());
             pm.put("displayName", e.getUser().getDisplayName() != null ? e.getUser().getDisplayName() : "");
             pm.put("homeTier", homeTier);
-            pm.put("role", roleOf.getOrDefault(homeTier, "normal"));
+            pm.put("role", seat.role() != null ? seat.role() : "normal");
             pm.put("bests", bests);
             players.add(pm);
         }
@@ -779,8 +896,9 @@ public class LeagueWeekLifecycleService {
             if (lineEx[i] > 0) {
                 for (int p = 0; p < sorted.size(); p++) {
                     if (exRows.get(p)[i] != lineEx[i]) continue;
-                    String name = sorted.get(p).getUser().getDisplayName();
-                    holders.add(name != null && !name.isBlank() ? name : String.valueOf(sorted.get(p).getUser().getIidxId()));
+                    User holder = sorted.get(p).entry().getUser();
+                    String name = holder.getDisplayName();
+                    holders.add(name != null && !name.isBlank() ? name : String.valueOf(holder.getIidxId()));
                 }
             }
             sm.put("lineHolders", holders);
