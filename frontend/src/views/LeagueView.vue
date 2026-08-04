@@ -74,6 +74,13 @@ let timer: ReturnType<typeof setInterval> | null = null;
 const myEntry = computed(() => entries.value.find(e => e.ladderType === ladder) ?? null);
 /** 参加中（active なエントリーがある）か。 */
 const isJoined = computed(() => myEntry.value?.active === true);
+/**
+ * 参加登録は済んでいるが、開催中の週の編成には入っていない状態（＝次週から参戦）。
+ * この状態で今週の課題曲を出すと「もう参加している」と誤解されるため、表示を切り替える。
+ */
+const isPendingNextWeek = computed(() =>
+  isJoined.value && !!current.value?.week && !current.value?.member
+);
 /** 順位表の自分の行（ハイライト用）。 */
 const myRow = computed(() =>
   current.value?.standings?.find(r => r.userId === user.value?.id) ?? null
@@ -523,8 +530,9 @@ onUnmounted(() => {
                     class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold tabular-nums">
                 {{ t('league.points') }} {{ fmtPt(myEntry.points) }}
               </span>
-              <span v-else-if="isJoined"
-                    class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+              <!-- 参加登録済みだが今週の編成には入っていない（次週から参戦）。 -->
+              <span v-if="isPendingNextWeek"
+                    class="text-xs px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-semibold">
                 {{ t('league.pendingPlacement') }}
               </span>
             </div>
@@ -559,6 +567,10 @@ onUnmounted(() => {
               <span v-if="current.member" class="ml-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                 {{ divisionName(current.member.tier) }} / {{ t('league.groupN', { n: current.member.groupIndex + 1 }) }}
               </span>
+              <span v-else-if="isPendingNextWeek"
+                    class="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">
+                {{ t('league.notInThisWeek') }}
+              </span>
             </h2>
             <span v-if="countdown" class="text-xs font-semibold text-amber-600 dark:text-amber-400">
               {{ t('league.endsIn', { time: countdown }) }}
@@ -575,6 +587,14 @@ onUnmounted(() => {
               : t('league.defenseNote', { home: divisionName(current.member.homeTier), table: divisionName(current.member.tier) }) }}
           </div>
 
+          <!-- 次週から参戦: 今週の課題曲は自分の対象ではないので出さない（参加中との誤解を防ぐ）。 -->
+          <div v-if="isPendingNextWeek"
+               class="mt-4 rounded-lg border border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3">
+            <p class="text-sm font-semibold text-amber-700 dark:text-amber-300">{{ t('league.pendingTitle') }}</p>
+            <p class="mt-1 text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/90">{{ t('league.pendingNote') }}</p>
+          </div>
+
+          <template v-else>
           <h3 class="mt-4 text-sm font-semibold text-slate-600 dark:text-slate-300">
             <template v-if="current.member">{{ t('league.songs') }}</template>
             <template v-else>
@@ -612,6 +632,7 @@ onUnmounted(() => {
             </div>
           </div>
           <p v-if="current.member" class="mt-3 text-xs text-slate-400 dark:text-slate-500">{{ t('league.playRequired') }}</p>
+          </template>
         </div>
 
         <!-- 自分のグループの順位表 -->
