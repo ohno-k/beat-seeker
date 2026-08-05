@@ -72,6 +72,11 @@ export interface TlMatchDto {
   opponentPick: TlPickPublicDto | null;
   /** 自軍がこの試合で StrategyCard 発動予定か。 */
   myStrategyEnabled: boolean;
+  /**
+   * TL が「発動する / 発動しない」を選択済みか。false = 未決定 (まだどちらのボタンも押していない)。
+   * myStrategyEnabled は決定済みかどうかを表さないので、未決定と「発動しない」の判別にはこちらを使う。
+   */
+  myStrategyDecided: boolean;
   /** いま発動可否を決定できるか (起用ロック + 相手起用公開 + 両者アサイン済 で true)。 */
   strategyDecidable: boolean;
 }
@@ -154,7 +159,8 @@ export function useCompetitionTl() {
   const unassign = (token: string, matchId: number) => assign(token, matchId, null);
 
   /**
-   * StrategyCard 発動予定を ON/OFF する (起用ロック&相手起用公開後にのみ可)。
+   * StrategyCard の意思決定を記録する (起用ロック&相手起用公開後にのみ可)。
+   * enabled = true で「発動する」、false で「発動しない」。どちらも決定済み扱いになる。
    * サーバ側で上限・ゲートを検証。成功後は再 fetch で同期する。
    */
   const setStrategy = async (token: string, matchId: number, enabled: boolean): Promise<void> => {

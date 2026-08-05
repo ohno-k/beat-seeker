@@ -100,7 +100,8 @@ public class CompetitionTlController {
      *       opponentAssigned: { participantId, displayName } | null,
      *       opponentLocked,
      *       opponentPickPublished,
-     *       opponentPick: { songGenre, songLevel, songStrategyId, songTitle, songDiff } | null
+     *       opponentPick: { songGenre, songLevel, songStrategyId, songTitle, songDiff } | null,
+     *       strategyDecidable, myStrategyDecided, myStrategyEnabled
      *     } ]
      *   } ]
      * }
@@ -226,11 +227,15 @@ public class CompetitionTlController {
                 // 決定の本体は「発動予定」フラグのみ。相手曲のランダム化抽選は Reveal 時に確定する。
                 boolean strategyDecidable = closed && opponentLineupPublished
                         && mine != null && theirs != null && !compFinished;
-                boolean myStrategyEnabled = mine != null
-                        && strategyUseRepository.findByMatchAndUsedByParticipant(match, mine)
-                                .map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false);
+                // TL は「発動する」「発動しない」を明示的に選ぶ。レコードが無い = まだどちらも押していない
+                // (未決定) なので、myStrategyDecided で「意思決定済みか」を「発動予定か」と分けて返す。
+                Optional<CompetitionStrategyUse> myStrategyUse = mine == null
+                        ? Optional.empty()
+                        : strategyUseRepository.findByMatchAndUsedByParticipant(match, mine);
                 mm.put("strategyDecidable", strategyDecidable);
-                mm.put("myStrategyEnabled", myStrategyEnabled);
+                mm.put("myStrategyDecided", myStrategyUse.isPresent());
+                mm.put("myStrategyEnabled",
+                        myStrategyUse.map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false));
                 matchMaps.add(mm);
             }
             mum.put("matches", matchMaps);
@@ -344,14 +349,18 @@ public class CompetitionTlController {
     // ── StrategyCard 発動の決定 (TL が起用ロック&公開後に判断) ──────────
 
     /**
-     * 【メソッドの役割】 自チーム側プレイヤーの StrategyCard 発動予定を ON/OFF する。
+     * 【メソッドの役割】 自チーム側プレイヤーの StrategyCard 意思決定 (発動する / 発動しない) を記録する。
      *
-     * <p>発動可能条件 (起用フェーズ完了後): 起用クローズ済み + 相手のオーダー(起用)公開済み + 両者アサイン済み。
+     * <p>TL は 2 つのボタンで明示的にどちらかを選ぶ。{@code enabled = false} でも意思決定レコードは作られる
+     * ため、「レコード無し = 未決定」「{@code enabled = false} = 発動しないと決定済み」を区別できる。
+     * 決定後も大会が {@code finished} になるまでは何度でも選び直せる。
+     *
+     * <p>決定可能条件 (起用フェーズ完了後): 起用クローズ済み + 相手のオーダー(起用)公開済み + 両者アサイン済み。
      * 予選は 1 チーム最大 {@value #STRATEGY_MATCHUP_LIMIT_PER_TEAM} matchup まで (決勝は無制限)。
      *
      * <p>ここでは「発動予定」フラグ ({@code enabled}) を更新するだけ。相手の自選曲をランダム化する抽選は
      * Reveal データ生成時 (運営側) に確定するため、本エンドポイントでは抽選しない。
-     * OFF に戻した場合は確定済み抽選結果をクリアする。
+     * 「発動しない」に切り替えた場合は確定済み抽選結果をクリアする。
      */
     @PutMapping("/{token}/match/{matchId}/strategy")
     @Transactional
@@ -426,7 +435,7 @@ public class CompetitionTlController {
                     fresh.setUsedByParticipant(mine);
                     return fresh;
                 });
-        // OFF に戻したら確定済み抽選結果をクリア (Reveal で再抽選される)。
+        // 「発動しない」を選んだら確定済み抽選結果をクリア (再度 ON なら Reveal で引き直される)。
         if (!willEnable) {
             su.setResultSongStrategyId(null);
             su.setResultSongTitle(null);
@@ -439,7 +448,10 @@ public class CompetitionTlController {
         su.setDecidedAt(java.time.LocalDateTime.now());
         strategyUseRepository.save(su);
 
-        return ResponseEntity.ok(Map.of("matchId", match.getId(), "myStrategyEnabled", willEnable));
+        return ResponseEntity.ok(Map.of(
+                "matchId", match.getId(),
+                "myStrategyDecided", true,
+                "myStrategyEnabled", willEnable));
     }
 
     // ── 運営チャット ─────────────────────────────────────────
@@ -621,7 +633,8 @@ public class CompetitionTlController {
     public record ChatRequest(String body) {}
 
     /**
-     * StrategyCard 発動予定の ON/OFF リクエスト。{@code enabled} = true で発動予定。
+     * StrategyCard の意思決定リクエスト。{@code enabled} = true で「発動する」、
+     * false で「発動しない」。どちらもレコードを作るので未決定とは区別される。
      */
     public record StrategyRequest(Boolean enabled) {}
 }

@@ -1605,6 +1605,15 @@ public class CompetitionAdminController {
                 .map(su -> Boolean.TRUE.equals(su.getEnabled())).orElse(false);
     }
 
+    /**
+     * 指定試合で当該プレイヤーの TL が StrategyCard の意思決定 (発動する / 発動しない) を済ませたか。
+     * 意思決定レコードの有無で判定する。player が null なら false。
+     */
+    private boolean isStrategyDecidedFor(CompetitionMatch match, CompetitionParticipant player) {
+        if (player == null) return false;
+        return strategyUseRepository.findByMatchAndUsedByParticipant(match, player).isPresent();
+    }
+
     private Map<String, Object> toMatchMap(CompetitionMatch match) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", match.getId());
@@ -1620,8 +1629,11 @@ public class CompetitionAdminController {
         m.put("pickPublishedA", match.getPickPublishedA());
         m.put("pickPublishedB", match.getPickPublishedB());
         // StrategyCard 発動予定 (TL が決定)。A 側/B 側それぞれの起用プレイヤーが発動予定か。
+        // strategyDecidedX = TL が「発動する / 発動しない」を選択済みか (false なら未決定)。
         m.put("strategyUsedA", isStrategyEnabledFor(match, match.getPlayerA()));
         m.put("strategyUsedB", isStrategyEnabledFor(match, match.getPlayerB()));
+        m.put("strategyDecidedA", isStrategyDecidedFor(match, match.getPlayerA()));
+        m.put("strategyDecidedB", isStrategyDecidedFor(match, match.getPlayerB()));
         m.put("aSongsWon", match.getASongsWon());
         m.put("bSongsWon", match.getBSongsWon());
         m.put("resultRecordedAt", match.getResultRecordedAt());

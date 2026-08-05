@@ -1350,6 +1350,10 @@ export const ko = {
   'competition.player.strategyDisabled': '사용 안 함',
   'competition.player.strategyLimitReached': '※ 예선 {limit} matchup 한도에 도달',
   'competition.player.strategyWaitOpponent': 'Strategy Card: 상대 선곡 공개 후 판단 가능',
+  // TL 의사결정 상태 (선수는 열람만 가능)
+  'competition.player.strategyUndecided': 'TL 미결정',
+  'competition.player.strategyDecidedUse': '⚡ 발동 예정',
+  'competition.player.strategyDecidedSkip': '✓ 발동 안 함',
   // 확인 다이얼로그
   'competition.player.confirmTitle': '제출 확인',
   'competition.player.confirmHeading': '다음 곡을 {kind} 용으로 제출합니다.',
@@ -1387,6 +1391,17 @@ export const ko = {
   'competition.tl.lockedAlready': '🔒 잠금',
   'competition.tl.costInsufficient': '※ 코스트 부족',
   'competition.tl.usedInOtherMatch': '※ 다른 경기에 기용 중',
+  // Strategy Card 의사결정 (발동 / 발동 안 함을 명시적으로 선택)
+  'competition.tl.strategyLabel': '스트래티지',
+  'competition.tl.strategyUse': '⚡ 발동',
+  'competition.tl.strategySkip': '발동 안 함',
+  'competition.tl.strategyUndecided': '⚠ 미결정',
+  'competition.tl.strategyDecidedUse': '⚡ 발동 예정',
+  'competition.tl.strategyDecidedSkip': '✓ 발동 안 함 (결정 완료)',
+  'competition.tl.strategyNotYet': '기용 잠금 & 상대 오더 공개 후 결정 가능',
+  'competition.tl.strategyUndecidedCount': '⚠ 스트래티지 미결정 {n} 경기',
+  'competition.tl.strategyToastUse': '스트래티지를 발동 예정으로 설정했습니다',
+  'competition.tl.strategyToastSkip': '스트래티지를 발동하지 않기로 결정했습니다',
 
   // League（리그 모드）
   'nav.league': '리그',

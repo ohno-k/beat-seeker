@@ -48,7 +48,12 @@ public class CompetitionStrategyUse {
     @JoinColumn(name = "used_by_participant_id", nullable = false)
     private CompetitionParticipant usedByParticipant;
 
-    /** カードを切るか。false で保存しておくこともできる (未決定→明示的に「切らない」に切替可)。 */
+    /**
+     * カードを切るか。TL が「発動する」を選ぶと true、「発動しない」を選ぶと false で保存される。
+     *
+     * <p>このレコード自体が「TL が意思決定を行った」証跡なので、レコード無し = 未決定、
+     * {@code enabled = false} = 明示的に「発動しない」と決定済み、として区別する。
+     */
     @Column(nullable = false)
     private Boolean enabled = false;
 

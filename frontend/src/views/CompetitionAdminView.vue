@@ -610,6 +610,26 @@ const pickLabel = (matchId: number, side: 'a' | 'b'): string => {
   return `${p.songTitle} [${p.songGenre}☆${p.songLevel}${p.songDiff}]`;
 };
 
+/**
+ * 指定試合・サイドの StrategyCard 意思決定状態。TL 画面の 2 ボタン (発動する / 発動しない) と対応する。
+ *
+ * - {@code use} / {@code skip}: TL が決定済み
+ * - {@code undecided}: TL が決定できる状態 (起用クローズ + 起用公開 + 両者アサイン済) なのに未決定
+ * - {@code pending}: そもそもまだ決定できないフェーズ (バッジを出さない)
+ */
+const strategyStatusOf = (
+  match: CompetitionMatchDto,
+  side: 'a' | 'b',
+): 'use' | 'skip' | 'undecided' | 'pending' => {
+  const decided = side === 'a' ? match.strategyDecidedA : match.strategyDecidedB;
+  if (decided) return (side === 'a' ? match.strategyUsedA : match.strategyUsedB) ? 'use' : 'skip';
+  const comp = currentCompetition.value;
+  const decidable = !!comp && comp.status !== 'finished'
+    && comp.lineupClosed && comp.lineupPublished
+    && match.playerAId !== null && match.playerBId !== null;
+  return decidable ? 'undecided' : 'pending';
+};
+
 /** REVEAL を再生できるか: 両プレイヤーがアサイン済み + 両側に自選曲提出済み。 */
 const canReveal = (matchId: number): boolean => {
   const rm = revealMatchOf(matchId);
@@ -2092,11 +2112,19 @@ const statusColor = (s: string) => ({
                       :class="pickForSide(match.id, 'a') ? 'text-violet-600 dark:text-violet-300 font-bold' : 'text-slate-400 italic'"
                       :title="pickLabel(match.id, 'a')"
                     >🎵 {{ pickLabel(match.id, 'a') }}</p>
-                    <!-- StrategyCard 発動予定 (TL が決定) -->
+                    <!-- StrategyCard の意思決定状況 (TL が「発動する / 発動しない」を選択) -->
                     <span
-                      v-if="match.strategyUsedA"
+                      v-if="strategyStatusOf(match, 'a') === 'use'"
                       class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-fuchsia-600 text-white"
                     >⚡ 発動予定</span>
+                    <span
+                      v-else-if="strategyStatusOf(match, 'a') === 'skip'"
+                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500"
+                    >✓ 発動しない</span>
+                    <span
+                      v-else-if="strategyStatusOf(match, 'a') === 'undecided'"
+                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                    >⚠ 未決定</span>
                   </div>
 
                   <!-- B 側プレイヤー (起用は公開状態に関係なく管理者には常に表示) -->
@@ -2111,11 +2139,19 @@ const statusColor = (s: string) => ({
                       :class="pickForSide(match.id, 'b') ? 'text-violet-600 dark:text-violet-300 font-bold' : 'text-slate-400 italic'"
                       :title="pickLabel(match.id, 'b')"
                     >🎵 {{ pickLabel(match.id, 'b') }}</p>
-                    <!-- StrategyCard 発動予定 (TL が決定) -->
+                    <!-- StrategyCard の意思決定状況 (TL が「発動する / 発動しない」を選択) -->
                     <span
-                      v-if="match.strategyUsedB"
+                      v-if="strategyStatusOf(match, 'b') === 'use'"
                       class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-fuchsia-600 text-white"
                     >⚡ 発動予定</span>
+                    <span
+                      v-else-if="strategyStatusOf(match, 'b') === 'skip'"
+                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500"
+                    >✓ 発動しない</span>
+                    <span
+                      v-else-if="strategyStatusOf(match, 'b') === 'undecided'"
+                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                    >⚠ 未決定</span>
                   </div>
 
                   <!-- ジャンル指定セレクタ -->

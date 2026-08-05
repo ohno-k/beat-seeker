@@ -119,6 +119,10 @@ export interface CompetitionMatchDto {
   strategyUsedA: boolean;
   /** B 側プレイヤーが StrategyCard 発動予定か (TL が決定)。 */
   strategyUsedB: boolean;
+  /** A 側 TL が「発動する / 発動しない」を選択済みか。false = 未決定。 */
+  strategyDecidedA: boolean;
+  /** B 側 TL が「発動する / 発動しない」を選択済みか。false = 未決定。 */
+  strategyDecidedB: boolean;
   /** 試合結果: A 側勝ち曲数 (0/1/2)。null = 未記録。スコアから自動派生。 */
   aSongsWon: number | null;
   /** 試合結果: B 側勝ち曲数 (0/1/2)。null = 未記録。 */

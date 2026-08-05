@@ -1408,6 +1408,10 @@ export const ja = {
   'competition.player.strategyDisabled': '使用しない',
   'competition.player.strategyLimitReached': '※ 予選 {limit} matchup 上限に達しています',
   'competition.player.strategyWaitOpponent': 'Strategy Card: 相手の自選曲が公開されてから判断できます',
+  // TL の意思決定状況 (選手は閲覧のみ)
+  'competition.player.strategyUndecided': 'TL 未決定',
+  'competition.player.strategyDecidedUse': '⚡ 発動予定',
+  'competition.player.strategyDecidedSkip': '✓ 発動しない',
   // 確認ダイアログ
   'competition.player.confirmTitle': '提出確認',
   'competition.player.confirmHeading': '下記の曲を{kind}用に提出します。',
@@ -1445,6 +1449,17 @@ export const ja = {
   'competition.tl.lockedAlready': '🔒 ロック済',
   'competition.tl.costInsufficient': '※コスト不足',
   'competition.tl.usedInOtherMatch': '※他試合で起用中',
+  // StrategyCard の意思決定 (発動する / 発動しない を明示的に選ぶ)
+  'competition.tl.strategyLabel': 'ストラテジー',
+  'competition.tl.strategyUse': '⚡ 発動する',
+  'competition.tl.strategySkip': '発動しない',
+  'competition.tl.strategyUndecided': '⚠ 未決定',
+  'competition.tl.strategyDecidedUse': '⚡ 発動予定',
+  'competition.tl.strategyDecidedSkip': '✓ 発動しない (決定済)',
+  'competition.tl.strategyNotYet': '起用ロック&相手オーダー公開後に決定可',
+  'competition.tl.strategyUndecidedCount': '⚠ ストラテジー未決定 {n} 戦',
+  'competition.tl.strategyToastUse': 'ストラテジー発動予定にしました',
+  'competition.tl.strategyToastSkip': 'ストラテジーを発動しないと決定しました',
 
   // League（リーグモード）
   'nav.league': 'リーグ',

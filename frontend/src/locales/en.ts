@@ -1349,6 +1349,10 @@ export const en = {
   'competition.player.strategyDisabled': 'Don\'t use',
   'competition.player.strategyLimitReached': '※ Reached the {limit}-matchup limit for prelims',
   'competition.player.strategyWaitOpponent': 'Strategy Card: available once the opponent\'s pick is published',
+  // TL's decision status (players can only view it)
+  'competition.player.strategyUndecided': 'TL undecided',
+  'competition.player.strategyDecidedUse': '⚡ Will activate',
+  'competition.player.strategyDecidedSkip': '✓ Will not activate',
   // Confirmation dialog
   'competition.player.confirmTitle': 'Confirm submission',
   'competition.player.confirmHeading': 'Submitting the song below for {kind}.',
@@ -1386,6 +1390,17 @@ export const en = {
   'competition.tl.lockedAlready': '🔒 Locked',
   'competition.tl.costInsufficient': '※ insufficient cost',
   'competition.tl.usedInOtherMatch': '※ already used in another match',
+  // Strategy Card decision (explicitly choose activate / don't activate)
+  'competition.tl.strategyLabel': 'STRATEGY',
+  'competition.tl.strategyUse': '⚡ Activate',
+  'competition.tl.strategySkip': 'Don\'t activate',
+  'competition.tl.strategyUndecided': '⚠ Undecided',
+  'competition.tl.strategyDecidedUse': '⚡ Will activate',
+  'competition.tl.strategyDecidedSkip': '✓ Will not activate (decided)',
+  'competition.tl.strategyNotYet': 'Decidable after lineup lock & opponent order reveal',
+  'competition.tl.strategyUndecidedCount': '⚠ {n} strategy decision(s) pending',
+  'competition.tl.strategyToastUse': 'Set to activate the Strategy Card',
+  'competition.tl.strategyToastSkip': 'Decided not to activate the Strategy Card',
 
   // League mode
   'nav.league': 'League',

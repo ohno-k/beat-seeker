@@ -28,11 +28,14 @@ const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 
-/** StrategyCard 発動予定の ON/OFF。サーバ反映後に再 fetch で同期。 */
+/**
+ * StrategyCard の意思決定 (発動する / 発動しない) を記録する。
+ * 「発動しない」も明示的な決定として保存され、未決定と区別される。サーバ反映後に再 fetch で同期。
+ */
 const handleSetStrategy = async (match: TlMatchDto, enabled: boolean) => {
   try {
     await setStrategy(props.token, match.matchId, enabled);
-    toast.success(enabled ? 'ストラテジー発動予定にしました' : '発動予定を解除しました');
+    toast.success(enabled ? t('competition.tl.strategyToastUse') : t('competition.tl.strategyToastSkip'));
   } catch (e) {
     toast.error((e as Error).message);
   }
@@ -109,6 +112,13 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
   if (!view.value) return [];
   return [...view.value.matchups].sort((a, b) => a.matchupOrder - b.matchupOrder);
 });
+
+/** いま決定できるのに TL がまだどちらのボタンも押していない試合数 (決定漏れの確認用)。 */
+const undecidedStrategyCount = computed<number>(() =>
+  sortedMatchups.value
+    .flatMap(mu => mu.matches)
+    .filter(m => m.strategyDecidable && !m.myStrategyDecided).length,
+);
 </script>
 
 <template>
@@ -166,6 +176,11 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
             <span class="text-[10px] font-black px-2 py-0.5 rounded bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 tracking-wider">
               ⚡ ストラテジー {{ view.strategyUsedMatchupCount }} / {{ view.strategyLimit }} 組
             </span>
+            <!-- 決定できる状態なのに未決定の試合が残っていれば警告表示 (意思決定漏れの防止) -->
+            <span
+              v-if="undecidedStrategyCount > 0"
+              class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider"
+            >{{ t('competition.tl.strategyUndecidedCount', { n: undecidedStrategyCount }) }}</span>
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -285,22 +300,44 @@ const sortedMatchups = computed<TlMatchupDto[]>(() => {
                   </span>
                 </div>
 
-                <!-- StrategyCard 発動 (起用ロック&相手のオーダー公開後に TL が決定) -->
+                <!--
+                  StrategyCard の意思決定 (起用ロック&相手のオーダー公開後に TL が決定)。
+                  「発動する」「発動しない」の 2 ボタンで明示的に選ばせ、どちらも押していない状態を
+                  「未決定」として区別表示する (意思決定が済んだことを確認できるようにするため)。
+                -->
                 <div class="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700/40">
-                  <div v-if="match.strategyDecidable" class="flex items-center justify-between gap-2">
-                    <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">ストラテジー</span>
-                    <button
-                      type="button"
-                      @click="handleSetStrategy(match, !match.myStrategyEnabled)"
-                      class="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all"
-                      :class="match.myStrategyEnabled
-                        ? 'bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white shadow'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
-                    >{{ match.myStrategyEnabled ? '⚡ 発動予定' : '発動しない' }}</button>
-                  </div>
+                  <template v-if="match.strategyDecidable">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ t('competition.tl.strategyLabel') }}</span>
+                      <div class="flex items-center gap-1">
+                        <button
+                          type="button"
+                          @click="handleSetStrategy(match, true)"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all"
+                          :class="match.myStrategyDecided && match.myStrategyEnabled
+                            ? 'bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white shadow'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-fuchsia-100 hover:text-fuchsia-700 dark:hover:bg-fuchsia-900/40 dark:hover:text-fuchsia-300'"
+                        >{{ t('competition.tl.strategyUse') }}</button>
+                        <button
+                          type="button"
+                          @click="handleSetStrategy(match, false)"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all"
+                          :class="match.myStrategyDecided && !match.myStrategyEnabled
+                            ? 'bg-slate-600 text-white shadow dark:bg-slate-500'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                        >{{ t('competition.tl.strategySkip') }}</button>
+                      </div>
+                    </div>
+                    <p class="mt-1 text-[10px] font-mono text-right">
+                      <span v-if="!match.myStrategyDecided" class="text-amber-600 dark:text-amber-300 font-black">{{ t('competition.tl.strategyUndecided') }}</span>
+                      <span v-else-if="match.myStrategyEnabled" class="text-fuchsia-500 dark:text-fuchsia-300 font-black">{{ t('competition.tl.strategyDecidedUse') }}</span>
+                      <span v-else class="text-slate-500 dark:text-slate-400 font-bold">{{ t('competition.tl.strategyDecidedSkip') }}</span>
+                    </p>
+                  </template>
                   <p v-else class="text-[10px] font-mono">
-                    <span v-if="match.myStrategyEnabled" class="text-fuchsia-500 dark:text-fuchsia-300 font-black">⚡ 発動予定</span>
-                    <span v-else class="text-slate-400 italic">起用ロック&相手オーダー公開後に発動可</span>
+                    <span v-if="match.myStrategyDecided && match.myStrategyEnabled" class="text-fuchsia-500 dark:text-fuchsia-300 font-black">{{ t('competition.tl.strategyDecidedUse') }}</span>
+                    <span v-else-if="match.myStrategyDecided" class="text-slate-500 dark:text-slate-400 font-bold">{{ t('competition.tl.strategyDecidedSkip') }}</span>
+                    <span v-else class="text-slate-400 italic">{{ t('competition.tl.strategyNotYet') }}</span>
                   </p>
                 </div>
               </div>

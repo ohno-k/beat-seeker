@@ -627,14 +627,19 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               <p class="text-xs font-bold">{{ t('competition.player.strategyCard') }}</p>
               <p class="text-[10px] text-slate-400">発動可否はチームリーダー(TL)が決定します。</p>
             </div>
+            <!-- 3 状態: TL 未決定 / 発動する / 発動しない (myStrategyUse が null なら未決定) -->
             <span
-              v-if="m.myStrategyUse?.enabled"
+              v-if="!m.myStrategyUse"
+              class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+            >{{ t('competition.player.strategyUndecided') }}</span>
+            <span
+              v-else-if="m.myStrategyUse.enabled"
               class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-fuchsia-600 text-white"
-            >⚡ 発動予定</span>
+            >{{ t('competition.player.strategyDecidedUse') }}</span>
             <span
               v-else
               class="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-500"
-            >発動予定なし</span>
+            >{{ t('competition.player.strategyDecidedSkip') }}</span>
           </div>
         </div>
       </section>
