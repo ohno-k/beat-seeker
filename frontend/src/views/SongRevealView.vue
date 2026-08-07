@@ -32,7 +32,7 @@ import {
 import strategySongs from '../data/strategy_card_songs.json';
 import { useToast } from '../composables/useToast';
 import { useSe } from '../composables/useSe';
-import { KIND_LABEL_JA, LEVELS_FOR_KIND, type MatchKind } from '../composables/competitionMatchKinds';
+import { KIND_LABEL_JA, LEVELS_FOR_KIND } from '../composables/competitionMatchKinds';
 
 const { songDataBody, fetchGameData } = useGameData();
 const { competitions, fetchCompetitions, fetchRevealData } = useCompetitionAdmin();
@@ -137,43 +137,47 @@ const resolveSongData = (pick: CompetitionRevealPick): SongDataEntry | null => {
 };
 
 /**
- * StrategyCard 発動時のランダムプール。matchKind の Lv 帯 × 相手 pick のジャンル。
- * frontend に持っている strategy_card_songs.json を使ってクライアント側で抽選する。
+ * StrategyCard 抽選プール (strategy_card_songs.json)。
+ * ここでの用途はスピンアニメのルーレットに流すダミー行の生成のみで、
+ * 「実際に当たる曲」の抽選には使わない ({@link applyStrategyIfNeeded} 参照)。
  */
 type StrategyPoolSong = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
 const strategyPool = strategySongs as Record<CompetitionSongGenre, Record<string, StrategyPoolSong[]>>;
 
-/** matchKind と相手の pick から、ランダム化用プール (genre × Lv帯) を集める。 */
-const buildSpinPool = (matchKind: MatchKind, opponentPick: CompetitionRevealPick): StrategyPoolSong[] => {
-  const pool: StrategyPoolSong[] = [];
-  for (const lv of LEVELS_FOR_KIND[matchKind]) {
-    const arr = strategyPool[opponentPick.songGenre]?.[String(lv)];
-    if (arr) pool.push(...arr);
-  }
-  return pool;
-};
-
-/** 「相手の pick が strategy で置き換わるべきか」を判定して、置換後の pick を返す (or 元の pick)。 */
+/**
+ * 「相手の pick が strategy で置き換わるべきか」を判定して、置換後の pick を返す (or 元の pick)。
+ *
+ * 抽選そのものはサーバ側 (reveal データ生成時の遅延抽選) で 1 度だけ確定され、
+ * {@code playerAStrategyResult} / {@code playerBStrategyResult} として降ってくる。
+ * ここでクライアント抽選をやり直すと、
+ *  - REVEAL で発表した曲と管理画面のスコア記録 (= サーバの抽選結果) が食い違う
+ *  - リロードや再取り込みのたびに当選曲が変わる
+ * ため、必ずサーバが確定した値を使う。
+ *
+ * 「相手が発動 → 自分の曲がランダム化」なので、side='a' の置換曲は B 側の StrategyUse に
+ * 保存された {@code playerBStrategyResult}、side='b' は {@code playerAStrategyResult}。
+ */
 const applyStrategyIfNeeded = (
   match: CompetitionRevealMatch,
   side: 'a' | 'b',
 ): CompetitionRevealPick | null => {
-  // side の自分の pick を返す関数。相手が strategy を使った場合、自分の pick がランダム化される。
   const myPick = side === 'a' ? match.playerAPick : match.playerBPick;
   const opponentUsedStrategy = side === 'a' ? match.playerBStrategyUsed : match.playerAStrategyUsed;
+  const drawn = side === 'a' ? match.playerBStrategyResult : match.playerAStrategyResult;
   if (!myPick) return null;
   if (!opponentUsedStrategy) return myPick;
-
-  // 相手が strategy を使ったので、自分の pick (= myPick のジャンル) を Lv 帯内でランダム化する
-  const pool = buildSpinPool(match.matchKind, myPick);
-  if (pool.length === 0) return myPick;
-  const random = pool[Math.floor(Math.random() * pool.length)];
+  if (!drawn) {
+    // サーバが抽選を保留した状態 (相手の自選曲未提出 / プール空)。
+    // ここで独自抽選すると記録と食い違うので、置換せず自選曲のまま扱う。
+    console.warn(`[SongReveal] match ${match.matchId} (${side}): strategy 発動だが抽選結果が未確定のため自選曲を表示します`);
+    return myPick;
+  }
   return {
-    songGenre: myPick.songGenre,
-    songLevel: random.level,
-    songStrategyId: random.id,
-    songTitle: random.title,
-    songDiff: random.diff,
+    songGenre: drawn.songGenre,
+    songLevel: drawn.songLevel,
+    songStrategyId: drawn.songStrategyId,
+    songTitle: drawn.songTitle,
+    songDiff: drawn.songDiff,
   };
 };
 
@@ -316,7 +320,8 @@ const strategyDeclaredByRight = ref(false);
  *    step 0〜2 は original (= プレイヤーの自選曲) を表示。
  *    step 3 スピン着地後に affected 側のみ effective に置換される。
  *  - effectiveLeft / effectiveRight: ストラテジー発動で抽選された曲 (発動無しなら original と同じ)。
- *    StrategyCardView と同じプール (strategy_card_songs) からクライアント抽選。
+ *    抽選はサーバ側で確定済みの値 (playerXStrategyResult) をそのまま使うため、
+ *    リロードしても当選曲は変わらず、管理画面のスコア記録とも一致する。
  */
 const effectiveLeftSong = ref<SongDataEntry | null>(null);
 const effectiveRightSong = ref<SongDataEntry | null>(null);
@@ -1324,7 +1329,7 @@ const toggleFullscreen = async () => {
           <p class="text-xs sm:text-sm font-mono uppercase tracking-[0.6em] text-amber-300 strategy-flicker">
             ⚡ Strategy Card Declared ⚡
           </p>
-          <h2 class="text-5xl sm:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 via-amber-200 to-fuchsia-300 drop-shadow-[0_0_30px_rgba(252,211,77,0.8)] strategy-pop">
+          <h2 class="text-5xl sm:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 via-amber-200 to-fuchsia-300 drop-shadow-[0_0_12px_rgba(252,211,77,0.5)] strategy-pop">
             STRATEGY CARD
           </h2>
           <div class="space-y-2 strategy-fade-in" style="animation-delay: 0.6s">
@@ -1431,7 +1436,7 @@ const toggleFullscreen = async () => {
 .player-banner p {
   animation: playerBannerKf 0.8s cubic-bezier(0.16, 0.74, 0.22, 1) forwards;
   border-bottom: 3px solid currentColor;
-  text-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+  text-shadow: 0 0 7px rgba(255, 255, 255, 0.3);
 }
 .player-banner-left p  { color: #67e8f9; } /* cyan-300 */
 .player-banner-right p { color: #fcd34d; } /* amber-300 */
@@ -1503,12 +1508,13 @@ const toggleFullscreen = async () => {
   60%  { opacity: 1; transform: translateY(8px)   scale(1.05) rotateX(0deg);  }
   100% { opacity: 1; transform: translateY(0)     scale(1)    rotateX(0deg);  }
 }
+/* グローは「白の近接 1 枚 + シアンの中距離 1 枚」まで。大半径 (旧 60px) の層は
+   配信のビットレートでは輪郭を溶かすだけで効果が乗らないので落とす。 */
 .title-cascade {
   color: #fff;
   text-shadow:
-    0 0 18px rgba(255, 255, 255, 0.8),
-    0 0 36px rgba(56, 189, 248, 0.7),
-    0 0 60px rgba(56, 189, 248, 0.5);
+    0 0 8px rgba(255, 255, 255, 0.4),
+    0 0 20px rgba(56, 189, 248, 0.3);
 }
 /* 英字語 ("ALL", "TURN-") は token 単位でまとめ、内部での折り返しを禁止する。
    CJK / 空白は 1 文字ずつ別 token になるので、トークン境界で自然に改行できる。 */
@@ -1530,7 +1536,7 @@ const toggleFullscreen = async () => {
 }
 .artist-fade {
   animation: artistFadeKf 0.9s cubic-bezier(0.16, 0.74, 0.22, 1) forwards;
-  text-shadow: 0 0 12px rgba(125, 211, 252, 0.6);
+  text-shadow: 0 0 6px rgba(125, 211, 252, 0.35);
 }
 
 @keyframes diffSlamKf {
@@ -1543,9 +1549,12 @@ const toggleFullscreen = async () => {
   animation: diffSlamKf 0.9s cubic-bezier(0.22, 0.95, 0.28, 1.15) forwards;
 }
 
+/* 配信のビットレートだと大半径のグローは輪郭を溶かしてしまうため、
+   半径・重ね枚数とも控えめにする (旧: 12+30px ⇔ 24+60px の 2 枚重ね)。
+   脈動は残しつつ、文字のエッジが常に立つ範囲に収める。 */
 @keyframes diffGlowKf {
-  0%, 100% { filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 30px currentColor); }
-  50%      { filter: drop-shadow(0 0 24px currentColor) drop-shadow(0 0 60px currentColor); }
+  0%, 100% { filter: drop-shadow(0 0 5px currentColor); }
+  50%      { filter: drop-shadow(0 0 10px currentColor); }
 }
 .diff-text {
   animation: diffGlowKf 2.2s ease-in-out infinite;
@@ -1556,7 +1565,7 @@ const toggleFullscreen = async () => {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px rgba(251, 146, 60, 0.7);
+  text-shadow: 0 0 10px rgba(251, 146, 60, 0.35);
 }
 /* LEGGENDARIA 公式ロゴ準拠: 明ピンク → ホットピンク → 濃マゼンタの縦グラデ + 細めの黒アウトライン。
    text-shadow を 4 方向で重ねる方式は文字内部のピンクが見えなくなりがちなので、
@@ -1598,11 +1607,13 @@ const toggleFullscreen = async () => {
   animation: strategyPopKf 0.9s cubic-bezier(0.16, 1, 0.3, 1.2) forwards;
 }
 
+/* 小さめの等幅テキストに大半径グローを乗せると配信では真っ先に潰れるので、
+   点滅の明暗差 (opacity) で「明滅感」を出し、グロー半径自体は小さく保つ。 */
 @keyframes strategyFlickerKf {
-  0%, 100% { opacity: 1; text-shadow: 0 0 20px rgba(252, 211, 77, 0.9), 0 0 40px rgba(252, 211, 77, 0.5); }
-  45%      { opacity: 0.6; text-shadow: 0 0 8px rgba(252, 211, 77, 0.4); }
-  50%      { opacity: 1;   text-shadow: 0 0 32px rgba(252, 211, 77, 1.0), 0 0 60px rgba(252, 211, 77, 0.7); }
-  55%      { opacity: 0.6; text-shadow: 0 0 8px rgba(252, 211, 77, 0.4); }
+  0%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(252, 211, 77, 0.5), 0 0 16px rgba(252, 211, 77, 0.3); }
+  45%      { opacity: 0.6; text-shadow: 0 0 4px rgba(252, 211, 77, 0.25); }
+  50%      { opacity: 1;   text-shadow: 0 0 12px rgba(252, 211, 77, 0.6), 0 0 22px rgba(252, 211, 77, 0.4); }
+  55%      { opacity: 0.6; text-shadow: 0 0 4px rgba(252, 211, 77, 0.25); }
 }
 .strategy-flicker {
   animation: strategyFlickerKf 1.6s ease-in-out infinite;
