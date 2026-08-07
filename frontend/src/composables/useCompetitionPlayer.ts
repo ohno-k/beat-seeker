@@ -13,7 +13,9 @@ import { API_BASE } from './constants';
  *  - エンドポイントも `/picks/{matchKind}` → `/picks/match/{matchId}` に変更。
  */
 
-export type MatchKind = 'vanguard' | 'middle' | 'captain';
+// 戦種別 (予選 3 戦 / 決勝 7 戦) の定義は competitionMatchKinds に集約。
+export type { MatchKind } from './competitionMatchKinds';
+import type { MatchKind } from './competitionMatchKinds';
 export type SongDiff = 'A' | 'L';
 export type SongGenre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
 

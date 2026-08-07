@@ -15,11 +15,11 @@
 import { onMounted, watch, computed } from 'vue';
 import {
   useCompetitionSpectator,
-  type MatchKind,
   type SpectatorMatchDto,
 } from '../composables/useCompetitionSpectator';
 import { useToast } from '../composables/useToast';
 import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
+import { KIND_LABEL_JA, kindLevelLabel } from '../composables/competitionMatchKinds';
 
 const props = defineProps<{ token: string }>();
 
@@ -29,16 +29,8 @@ const toast = useToast();
 onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
 
-const KIND_LABEL: Record<MatchKind, string> = {
-  vanguard: '先鋒戦',
-  middle: '中堅戦',
-  captain: '大将戦',
-};
-const KIND_LV: Record<MatchKind, string> = {
-  vanguard: 'Lv 8-10',
-  middle: 'Lv 11',
-  captain: 'Lv 12',
-};
+// 戦種別のラベル / Lv 帯 (予選 3 戦 / 決勝 7 戦) は competitionMatchKinds に集約。
+const KIND_LABEL = KIND_LABEL_JA;
 
 const STATUS_LABEL: Record<string, string> = {
   draft: '編成中',
@@ -130,7 +122,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
               <!-- 戦種別 + 指定ジャンル -->
               <div>
                 <p class="font-bold text-sm">{{ KIND_LABEL[match.matchKind] }}</p>
-                <p class="text-[10px] font-mono text-slate-400">{{ KIND_LV[match.matchKind] }}</p>
+                <p class="text-[10px] font-mono text-slate-400">{{ kindLevelLabel(match.matchKind) }}</p>
                 <span
                   v-if="match.requiredGenre"
                   class="inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded"

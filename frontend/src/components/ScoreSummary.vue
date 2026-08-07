@@ -200,19 +200,43 @@
       </button>
     </div>
 
-    <!-- ===== モードタブ（BEAT-TIER / RATE-TIER 切替。showRateTier が true のときのみ表示） ===== -->
-    <div v-if="showRateTier" class="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-md w-fit border border-slate-200 dark:border-slate-700">
-      <button
-        @click="viewMode = 'beat'"
-        class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-        :class="viewMode === 'beat' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-      >BEAT-TIER</button>
-      <button
-        @click="viewMode = 'rate'"
-        class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-        :class="viewMode === 'rate' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-      >RATE-TIER</button>
+    <!-- ===== モードタブ（BEAT-TIER / RATE-TIER）＋「歴代ベストを反映」トグル ===== -->
+    <div v-if="showRateTier || (canUsePastMode && hasPastImports)" class="flex flex-wrap items-center gap-3">
+      <div v-if="showRateTier" class="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-md w-fit border border-slate-200 dark:border-slate-700">
+        <button
+          @click="viewMode = 'beat'"
+          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+          :class="viewMode === 'beat' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        >BEAT-TIER</button>
+        <button
+          @click="viewMode = 'rate'"
+          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+          :class="viewMode === 'rate' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        >RATE-TIER</button>
+      </div>
+
+      <!-- 過去作のスコアが現行を上回っている譜面を、そのスコアで上書き表示するトグル -->
+      <label
+        v-if="canUsePastMode && hasPastImports"
+        class="flex items-center gap-2 cursor-pointer group whitespace-nowrap"
+        :title="t('past.toggleHint')"
+      >
+        <div class="relative inline-flex items-center">
+          <input type="checkbox" :checked="showAllTime" @change="toggleAllTime" class="sr-only peer">
+          <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+        </div>
+        <span
+          class="text-xs sm:text-sm font-bold transition-colors"
+          :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'"
+        >{{ t('past.toggle') }}</span>
+        <span v-if="isLoadingPast" class="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
+      </label>
     </div>
+
+    <!-- 歴代反映中である旨の注意書き。集計値と表示値がずれる理由を明示する -->
+    <p v-if="showAllTime" class="text-xs text-amber-600 dark:text-amber-400">
+      {{ t('past.toggleActiveNote') }}
+    </p>
 
     <!-- ===== データテーブル（displayScores を描画。ヘッダ列クリックで toggleSort） ===== -->
     <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
@@ -359,6 +383,13 @@
                   </div>
                   <div class="flex items-center gap-0.5 sm:gap-1">
                      <span class="font-bold text-slate-800 dark:text-slate-200 text-[9px] sm:text-xs">{{ record.score }}</span>
+                     <!-- 歴代反映で過去作のスコアに置き換わった行は、どの作品のスコアかを示す -->
+                     <span
+                       v-if="record.allTimeVersion"
+                       class="px-1 py-0.5 text-[8px] sm:text-[9px] font-bold rounded border leading-none"
+                       :class="versionBadgeClass(record.allTimeVersion)"
+                       :title="versionName(record.allTimeVersion)"
+                     >{{ versionShort(record.allTimeVersion) }}</span>
                   </div>
                 </div>
               </td>
@@ -532,6 +563,13 @@
             class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
             :class="modalTab === 'history' ? 'border-violet-500 text-violet-600 dark:text-violet-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >{{ t('table.history') }}</button>
+          <!-- 歴代タブ: 過去作を含めたスコア推移。本人のスコア閲覧時のみ -->
+          <button
+            v-if="canUsePastMode"
+            @click="handlePastTabClick"
+            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
+            :class="modalTab === 'past' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+          >{{ t('past.tab') }}</button>
         </div>
       </div>
       
@@ -815,6 +853,94 @@
         </div>
 
         <!-- ===== 大台（Milestone）タブ: 100点刻みの節目ラインごとの達成人数を表示 ===== -->
+        <!-- ===== 歴代タブ: 作品ごとのスコア推移と歴代ベスト ===== -->
+        <div v-else-if="modalTab === 'past'" class="w-full max-w-3xl mx-auto space-y-6">
+          <div v-if="isLoadingPast" class="text-center py-12 text-slate-400 dark:text-slate-500">
+            {{ t('common.loading') }}
+          </div>
+          <template v-else-if="selectedChartHistory && selectedChartHistory.entries.length > 0">
+            <!-- 歴代ベストスコアと、その上下の到達度（AAA+/MAX- 等）を併記する -->
+            <div class="bg-amber-50 dark:bg-amber-900/20 p-4 sm:p-6 rounded-md border border-amber-100 dark:border-amber-800/50">
+              <p class="text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">{{ t('past.bestScore') }}</p>
+              <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <p class="text-3xl sm:text-4xl font-bold text-amber-700 dark:text-amber-300 tabular-nums">
+                  {{ selectedChartHistory.bestScore.score.toLocaleString() }}
+                </p>
+                <template v-for="label of [bestScoreGradeLabel]" :key="0">
+                  <div v-if="label" class="flex items-baseline gap-2 font-bold tabular-nums">
+                    <span class="text-base sm:text-lg text-amber-700 dark:text-amber-300">{{ label.primary }}</span>
+                    <span class="text-sm text-slate-500 dark:text-slate-400">{{ label.secondary }}</span>
+                  </div>
+                </template>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <span v-if="selectedChartHistory.bestScore.scoreRate !== null">
+                  {{ selectedChartHistory.bestScore.scoreRate.toFixed(2) }}% ·
+                </span>
+                {{ selectedChartHistory.bestScore.version }} {{ versionName(selectedChartHistory.bestScore.version) }}
+              </p>
+            </div>
+
+            <!-- 作品別の内訳 -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th class="py-2 pr-2 font-medium">{{ t('past.colVersion') }}</th>
+                    <th class="py-2 px-2 font-medium text-right">{{ t('past.colEx') }}</th>
+                    <th class="py-2 px-2 font-medium text-right">{{ t('table.colRate') }}</th>
+                    <th class="py-2 px-2 font-medium">{{ t('past.colLamp') }}</th>
+                    <th class="py-2 px-2 font-medium text-right">{{ t('past.colBp') }}</th>
+                    <th class="py-2 pl-2 font-medium text-right max-sm:hidden">{{ t('table.colOfficial') }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                  <tr
+                    v-for="entry in [...selectedChartHistory.entries].reverse()"
+                    :key="entry.version"
+                    :class="entry.isCurrent ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''"
+                  >
+                    <td class="py-2 pr-2">
+                      <div class="flex items-center gap-1.5">
+                        <span
+                          class="px-1.5 py-0.5 text-[10px] font-bold rounded border"
+                          :class="versionBadgeClass(entry.version)"
+                        >{{ entry.version }}</span>
+                        <span class="text-slate-700 dark:text-slate-200">{{ versionShort(entry.version) }}</span>
+                      </div>
+                    </td>
+                    <td class="py-2 px-2 text-right tabular-nums font-medium text-slate-800 dark:text-slate-100">
+                      {{ entry.score.toLocaleString() }}
+                      <span v-if="entry.version === selectedChartHistory.bestScore.version" class="text-amber-500">★</span>
+                    </td>
+                    <td class="py-2 px-2 text-right tabular-nums text-slate-600 dark:text-slate-300">
+                      {{ entry.scoreRate !== null ? entry.scoreRate.toFixed(2) + '%' : '—' }}
+                    </td>
+                    <td class="py-2 px-2 text-slate-600 dark:text-slate-300">
+                      {{ entry.clearType }}
+                    </td>
+                    <td class="py-2 px-2 text-right tabular-nums text-slate-600 dark:text-slate-300">
+                      {{ entry.missCount !== null ? entry.missCount : '—' }}
+                    </td>
+                    <td class="py-2 pl-2 text-right tabular-nums text-slate-600 dark:text-slate-300 max-sm:hidden">
+                      {{ entry.difficultyLevel ?? '—' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- ★が作品間で変わっている譜面はその旨を明示する（現行基準の表示との齟齬を防ぐ） -->
+            <p v-if="hasLevelChanged" class="text-xs text-amber-600 dark:text-amber-400">
+              {{ t('past.levelChanged') }}
+            </p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('past.rateNote') }}</p>
+          </template>
+          <div v-else class="text-center py-12 text-slate-400 dark:text-slate-500">
+            {{ t('past.noData') }}
+          </div>
+        </div>
+
         <div v-else-if="modalTab === 'milestone'" class="w-full max-w-4xl mx-auto space-y-6">
           <!-- サマリー: 集計人数 / 自分のスコア / MAX理論値 -->
           <div class="grid grid-cols-3 gap-3">
@@ -1248,6 +1374,10 @@ import { useAdmin } from '../composables/useAdmin';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useFriends } from '../composables/useFriends';
 import { DJ_LEVELS } from '../composables/constants';
+import { usePastScores } from '../composables/usePastScores';
+import type { ChartHistory } from '../composables/usePastScores';
+import { chartKey } from '../composables/usePastScores';
+import { versionShort, versionName, versionBadgeClass } from '../utils/iidxVersions';
 import ResultImageSection from './ResultImageSection.vue';
 import RankIcon from './RankIcon.vue';
 import InformalRankBadge from './InformalRankBadge.vue';
@@ -1287,6 +1417,24 @@ const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
 /** 現在のモード。'beat' は BEAT-TIER、'rate' は RATE-TIER 表示。 */
 const viewMode = ref<'beat' | 'rate'>('beat');
+
+/**
+ * 歴代スコアを扱えるか。
+ * 過去作スコアはログインユーザー本人のデータなので、他ユーザー閲覧中は出さない。
+ * 「歴代ベストを反映」トグルと、曲詳細モーダルの歴代タブの表示可否に使う。
+ */
+const canUsePastMode = computed(() => isLoggedIn.value && isOwnData.value);
+
+/**
+ * 「歴代ベストを反映」トグルの状態。
+ * ON にすると、過去作のスコアが現行作を上回っている譜面をそのスコアで上書きして表示する。
+ *
+ * 重要: このトグルは表示だけを切り替える。親へ emit する総 BEAT-PT
+ * （{@link totalBeatTierPoints}）は常に現行作のみで算出する。
+ * この値は App.vue 経由で履歴ログとしてサーバーに保存され得るため、
+ * 歴代ベースの値が混入すると成長記録とランキングが壊れる。
+ */
+const showAllTime = ref(false);
 
 /** 譜面別ランキングマップ。キーは `title|difficultyName`。自分が全ユーザー中何位かを格納する。 */
 const songRankMap = ref<Map<string, { rank: number; total: number }>>(new Map());
@@ -1655,9 +1803,10 @@ watch(totalBeatTierPoints, (newVal) => {
 /**
  * 【computed】 BEAT-TIER の TOP100 譜面キー集合。ハイライト表示用に Set 化。
  * キーは `title|difficultyName` 形式。
+ * 表示用なので「歴代ベストを反映」の状態に追従する（{@link viewRecords} を参照）。
  */
 const top100Keys = computed(() => {
-    const sorted = [...allRecords.value].sort((a, b) => b.beatTierPoints - a.beatTierPoints);
+    const sorted = [...viewRecords.value].sort((a, b) => b.beatTierPoints - a.beatTierPoints);
     return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
 });
 
@@ -1671,9 +1820,26 @@ const rateAllRecords = computed<ScoreRecord[]>(() =>
     )
 );
 
+/**
+ * 【computed】 実際に表示に使うレコード（BEAT-TIER 用）。
+ * 「歴代ベストを反映」が ON のときだけ過去作のベストを重ねる。
+ *
+ * {@link allRecords}（現行作のみ）とは意図的に分けてある。
+ * 親へ emit する総 BEAT-PT は {@link allRecords} 側から算出し続ける必要があるため
+ * （履歴ログとしてサーバー保存されるので、歴代ベースの値を混ぜてはいけない）。
+ */
+const viewRecords = computed<ScoreRecord[]>(() =>
+    showAllTime.value ? applyAllTimeBest(allRecords.value) : allRecords.value
+);
+
+/** 【computed】 実際に表示に使うレコード（RATE-TIER 用）。 */
+const rateViewRecords = computed<ScoreRecord[]>(() =>
+    showAllTime.value ? applyAllTimeBest(rateAllRecords.value) : rateAllRecords.value
+);
+
 /** 【computed】 RATE-TIER の TOP100 キー集合。RATE-PT 降順で上位 100 譜面を取り出す。 */
 const rateTop100Keys = computed(() => {
-    const sorted = [...rateAllRecords.value]
+    const sorted = [...rateViewRecords.value]
         .filter(r => r.scoreRate > 0)
         .sort((a, b) => calculateScoreRateTierPoints(b.scoreRate) - calculateScoreRateTierPoints(a.scoreRate));
     return new Set(sorted.slice(0, 100).map(r => `${r.title}|${r.difficultyName}`));
@@ -1684,7 +1850,7 @@ const rateTop100Keys = computed(() => {
  * 超えた場合、個別 RATE-PT 512 の曲をより強調表示する（合計 51200 を超えるオーバーフロー状態の明示）。
  */
 const hasPerfectRateOverflow = computed(() =>
-    rateAllRecords.value.filter(r => r.scoreRate >= 100).length > 100
+    rateViewRecords.value.filter(r => r.scoreRate >= 100).length > 100
 );
 
 /**
@@ -1692,7 +1858,7 @@ const hasPerfectRateOverflow = computed(() =>
  * 100 譜面未満しかプレイしていない場合は 0 を返す。
  */
 const top100Threshold = computed(() => {
-    const sorted = [...allRecords.value]
+    const sorted = [...viewRecords.value]
         .filter(r => r.beatTierPoints > 0)
         .sort((a, b) => b.beatTierPoints - a.beatTierPoints);
     return sorted.length >= 100 ? sorted[99].beatTierPoints : 0;
@@ -1713,7 +1879,7 @@ const top100ScoreNeededMap = computed(() => {
     const map = new Map<string, number>();
     if (top100Threshold.value === 0) return map;
 
-    for (const record of allRecords.value) {
+    for (const record of viewRecords.value) {
         const key = `${record.title}|${record.difficultyName}`;
         if (top100Keys.value.has(key)) continue; // 既に TOP100 入りしている譜面はスキップ
         if (!record.informalRank || record.maxScore <= 0) continue; // 計算不能なデータはスキップ
@@ -1776,7 +1942,7 @@ const handleRowClick = (record: ScoreRecord) => {
 /** 現在選択中の譜面レコード。null のときはモーダル非表示。 */
 const selectedRecord = ref<ScoreRecord | null>(null);
 /** 詳細モーダル内で表示中のタブ。 */
-const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking' | 'history' | 'milestone'>('detail');
+const modalTab = ref<'detail' | 'rate-tier' | 'rivals' | 'ranking' | 'history' | 'milestone' | 'past'>('detail');
 
 /** 目標 BEAT-PT スライダーの値（0〜 最大残 PT）。目標到達に必要なスコアを逆算して表示する。 */
 const targetBeatPtSlider = ref(0);
@@ -2390,6 +2556,80 @@ const handleHistoryTabClick = () => {
   }
 };
 
+// --- 歴代タブ（過去作を含めたスコア推移） ---
+const {
+  fetchPastBest,
+  fetchSummary: fetchPastSummary,
+  buildChartHistories,
+  applyAllTimeBest,
+  hasPastImports,
+  isLoading: isLoadingPast,
+} = usePastScores();
+
+/**
+ * 【関数の役割】 「歴代ベストを反映」トグルの切り替え。
+ * ON にする瞬間だけ過去作スコア（数千件になり得る）を取得する。取得済みならキャッシュを使う。
+ */
+const toggleAllTime = async () => {
+  if (showAllTime.value) {
+    showAllTime.value = false;
+    return;
+  }
+  try {
+    await fetchPastBest();
+    showAllTime.value = true;
+  } catch {
+    // 取得に失敗したらトグルは OFF のままにする（表示が崩れるより据え置きの方が安全）
+  }
+};
+
+// トグルを出すかどうかの判定にだけ使う軽量なサマリを先に取っておく。
+onMounted(() => {
+  if (!canUsePastMode.value) return;
+  fetchPastSummary().catch(() => { /* 握り潰し: トグルが出ないだけ */ });
+});
+
+/** 現行作のフラットなスコア。歴代の突き合わせと再計算コスト削減のため 1 度だけ算出する。 */
+const allFlatRecords = computed<ScoreRecord[]>(() => flattenScores(props.scores));
+
+/**
+ * 【computed】 譜面キー → 歴代推移。
+ * 過去スコアは遅延取得のため、取得前は現行作ぶんだけを含む Map になる。
+ */
+const chartHistories = computed(() => buildChartHistories(allFlatRecords.value));
+
+/** 【computed】 モーダルで選択中の譜面の歴代推移。 */
+const selectedChartHistory = computed<ChartHistory | null>(() => {
+  if (!selectedRecord.value) return null;
+  return chartHistories.value.get(
+    chartKey(selectedRecord.value.title, selectedRecord.value.difficultyName)
+  ) ?? null;
+});
+
+/**
+ * 【computed】 選択中の譜面で、作品間に★の変動があるか。
+ * 一覧の★は現行作基準で表示しているため、変動がある譜面ではその旨を注記する。
+ */
+const hasLevelChanged = computed(() => {
+  const h = selectedChartHistory.value;
+  if (!h) return false;
+  const levels = h.entries.map(e => e.difficultyLevel).filter(l => l != null);
+  return new Set(levels).size > 1;
+});
+
+/**
+ * 【関数の役割】 歴代タブクリック時のハンドラ。
+ * 過去スコアは数千件になり得るため、このタブを開いたときに初めて取得する（以降はキャッシュ）。
+ */
+const handlePastTabClick = async () => {
+  modalTab.value = 'past';
+  try {
+    await fetchPastBest();
+  } catch {
+    // 握り潰し: 歴代は補助情報なのでモーダル自体は維持する
+  }
+};
+
 // --- 大台（マイルストーン）タブ ---
 /** 譜面のユーザー毎ベストスコア（匿名・降順）。タブ初表示時に取得。 */
 const milestoneScores = ref<number[]>([]);
@@ -2772,7 +3012,7 @@ const toggleSort = (key: SortKey) => {
  *         - songRank:    未知は 999999 扱いで末尾送り。
  */
 const filteredScores = computed(() => {
-  let result = viewMode.value === 'rate' ? [...rateAllRecords.value] : [...allRecords.value];
+  let result = viewMode.value === 'rate' ? [...rateViewRecords.value] : [...viewRecords.value];
 
   if (hideZeroScore.value) {
     result = result.filter(r => r.score > 0);
@@ -2974,30 +3214,45 @@ const getClearTypeBgColor = (clearType: string) => {
 };
 
 /**
- * 【関数の役割】 テーブル上でスコアの「近さ」を示す 2 段ラベルを作る。
+ * 【関数の役割】 スコアの「近さ」を示す 2 段ラベルを作る（素の値を受け取る版）。
  *
  * 判定基準:
  *  - scoreRate >= 94.45% (MAX に近い)  → primary: MAX-残差 / secondary: AAA+差分
  *  - scoreRate >= 88.89% (AAA 以上)    → primary: AAA+差分 / secondary: MAX-残差
  *  - それ以下                          → primary: AAA-不足 / secondary: AA±差分
  * スコア未プレイ（<= 0）や maxScore 不明の場合は null を返し、テンプレは何も表示しない。
+ *
+ * ScoreRecord を持たない箇所（歴代タブの歴代ベストスコアなど）からも使えるよう、
+ * レコードではなく素の数値を受け取る形にしてある。
  */
-const getScoreGradeLabel = (record: ScoreRecord) => {
-  if (record.maxScore <= 0 || record.scoreRate < 0 || record.score <= 0) return null;
-  const maxScore = record.maxScore;
-  const score = record.score;
+const scoreGradeLabel = (score: number, maxScore: number, scoreRate: number) => {
+  if (maxScore <= 0 || scoreRate < 0 || score <= 0) return null;
   // AAA/AA の閾値は 8/9, 7/9 で切り上げ（IIDX 公式仕様）。
   const aaaThreshold = Math.ceil(maxScore * 8 / 9);
   const aaThreshold = Math.ceil(maxScore * 7 / 9);
-  if (record.scoreRate >= 94.45) {
+  if (scoreRate >= 94.45) {
     return { primary: `MAX-${maxScore - score}`, secondary: `AAA+${score - aaaThreshold}` };
-  } else if (record.scoreRate >= 88.89) {
+  } else if (scoreRate >= 88.89) {
     return { primary: `AAA+${score - aaaThreshold}`, secondary: `MAX-${maxScore - score}` };
   } else {
     const aaDiff = score - aaThreshold;
     return { primary: `AAA-${aaaThreshold - score}`, secondary: aaDiff >= 0 ? `AA+${aaDiff}` : `AA-${-aaDiff}` };
   }
 };
+
+/** 【関数の役割】 テーブル行用のラッパー。{@link scoreGradeLabel} にレコードの値を渡す。 */
+const getScoreGradeLabel = (record: ScoreRecord) =>
+  scoreGradeLabel(record.score, record.maxScore, record.scoreRate);
+
+/**
+ * 【computed】 歴代タブの「歴代ベストスコア」に併記する到達度ラベル（AAA+xxx / MAX-xxx）。
+ * レートは歴代タブの表と同じく現行作のノーツ数基準で算出したものを使う。
+ */
+const bestScoreGradeLabel = computed(() => {
+  const h = selectedChartHistory.value;
+  if (!h) return null;
+  return scoreGradeLabel(h.bestScore.score, h.maxScore, h.bestScore.scoreRate ?? -1);
+});
 
 /** DJ LEVEL（AAA/AA/A/...）の文字色。ダークモードで明度を上げる。 */
 const getDjLevelColor = (djLevel: string) => {

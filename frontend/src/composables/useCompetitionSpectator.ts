@@ -10,7 +10,9 @@ import { API_BASE } from './constants';
  * 起用公開済みのラインアップ・指定ジャンル・記録済みの結果だけを返す。
  */
 
-export type MatchKind = 'vanguard' | 'middle' | 'captain';
+// 戦種別 (予選 3 戦 / 決勝 7 戦) の定義は competitionMatchKinds に集約。
+export type { MatchKind } from './competitionMatchKinds';
+import type { MatchKind } from './competitionMatchKinds';
 export type SongGenre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
 
 export interface SpectatorCompetitionDto {
@@ -59,7 +61,7 @@ export interface SpectatorMatchupDto {
   lineupPublishedA: boolean;
   /** B 側のラインアップが主催により公開されているか。 */
   lineupPublishedB: boolean;
-  /** vanguard → middle → captain の固定順で 3 件返る。 */
+  /** 先鋒 → … → 大将 の固定順。予選は 3 件、決勝は 7 件返る。 */
   matches: SpectatorMatchDto[];
 }
 

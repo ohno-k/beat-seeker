@@ -98,7 +98,11 @@ const LoungeView = defineAsyncComponent(() => import('./views/LoungeView.vue'));
 // OCR モーダルは tesseract.js (大きな wasm) を含むため遅延ロード。
 const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearchModal.vue'));
 import type { SongDataEntry } from './composables/useGameData';
-import { parseScoreCsv } from './utils/csvParser';
+import { parseScoreCsv, detectCsvVersion, getCsvLastPlayTime } from './utils/csvParser';
+import type { VersionDetectionResult } from './utils/csvParser';
+import { CURRENT_VERSION, versionName } from './utils/iidxVersions';
+import { usePastScores } from './composables/usePastScores';
+import ImportVersionConfirmModal from './components/ImportVersionConfirmModal.vue';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores, getSongMaxScore } from './utils/scoreData';
 import type { UploadDiffResult, UpdatedSong, FolderAnnouncement } from './types/UploadDiff';
@@ -1110,11 +1114,127 @@ const computeFolderAnnouncements = (
   return announcements;
 };
 
+// ── CSV 取り込み時の作品バージョン自動判定 ────────────────────────
+const { uploadPastScores, fetchSummary: fetchPastSummary, summary: pastSummary } = usePastScores();
+
+/** バージョン確認ダイアログの表示フラグ。 */
+const importConfirmOpen = ref(false);
+/** 自動判定の結果。ダイアログはこれを見て成功/失敗の表示を切り替える。 */
+const importDetection = ref<VersionDetectionResult | null>(null);
+/** ダイアログ表示中に保持しておくパース済みスコア（確定後に取り込む）。 */
+const importPendingData = ref<ScoreData[]>([]);
+/** ダイアログに出す曲数。 */
+const importSongCount = ref(0);
+/** ダイアログに出す最終プレー日時。 */
+const importLastPlayTime = ref('');
+/** 同じ作品の既存取り込み譜面数。未取込 or 現行作なら null。 */
+const importExistingCount = ref<number | null>(null);
+/** 過去作の取り込み実行中フラグ。 */
+const importSubmitting = ref(false);
+/** ダイアログの応答を待つ Promise の resolve。confirm/cancel から呼ぶ。 */
+let importConfirmResolve: ((proceed: boolean) => void) | null = null;
+
+/**
+ * 【関数の役割】 CSV の作品バージョンを自動判定し、必要な場合だけ確認ダイアログの応答を待つ。
+ *
+ * 確認ダイアログを出すのは次の 2 ケースのみ:
+ *  - 過去作（30〜32）と判定された … 別テーブルへ保存する特殊な操作なので明示的な同意を取る
+ *  - 判定に失敗した               … 理由を提示して取り込みを中止する
+ * 現行作と判定できた場合は確認を挟まず、そのまま従来どおりの取り込みに進む
+ * （取り込み後に差分モーダルが出るので、結果はそちらで確認できる）。
+ *
+ * 戻り値が true のときだけ、呼び出し元は「現行作としての取り込み」を続行してよい。
+ * 過去作と判定された場合はこの関数の中で取り込みまで完結させ、false を返す
+ * （現行作の差分計算・BEAT-PT 再計算パスに乗せてはいけないため）。
+ *
+ * @param newData パース済みスコア
+ * @returns 現行作として処理を続行してよければ true
+ */
+const confirmImportVersion = async (newData: ScoreData[]): Promise<boolean> => {
+  const detection = detectCsvVersion(newData);
+
+  // 現行作は確認不要。そのまま通常の取り込みへ。
+  if (detection.ok && detection.version === CURRENT_VERSION) {
+    return true;
+  }
+
+  // ここから先は「過去作」か「判定失敗」のみ。
+  // 過去作はサーバー保存が前提なので、未ログインでは取り込めない。
+  if (detection.ok && !isLoggedIn.value) {
+    errorMsg.value = t('past.error.loginRequired');
+    return false;
+  }
+
+  importDetection.value = detection;
+  importPendingData.value = newData;
+  importSongCount.value = newData.length;
+  importLastPlayTime.value = getCsvLastPlayTime(newData);
+  importExistingCount.value = null;
+
+  // 「既に何譜面取り込み済みか」をダイアログに出す（マージ先が分かるように）。
+  if (detection.ok) {
+    try {
+      await fetchPastSummary();
+      const entry = pastSummary.value.find(s => s.version === detection.version);
+      importExistingCount.value = entry ? entry.chartCount : null;
+    } catch {
+      // サマリ取得の失敗で取り込み自体を止める必要はない（表示が 1 行減るだけ）。
+    }
+  }
+
+  importConfirmOpen.value = true;
+  return new Promise<boolean>(resolve => { importConfirmResolve = resolve; });
+};
+
+/**
+ * 【関数の役割】 確認ダイアログで「取り込む」が押されたときのハンドラ。
+ *
+ * このダイアログは過去作と判定されたときにしか開かない（現行作は確認なしで通す）ため、
+ * ここでは `past_scores` への取り込みだけを行い、常に false を返して
+ * 現行作の差分計算パスには進ませない。
+ */
+const handleImportConfirm = async () => {
+  const detection = importDetection.value;
+  if (!detection || !detection.ok) return;
+
+  importSubmitting.value = true;
+  try {
+    const result = await uploadPastScores(detection.version, importPendingData.value);
+    importConfirmOpen.value = false;
+    pastImportResult.value = result;
+  } catch (err: any) {
+    console.error('Past score import failed', err);
+    errorMsg.value = err?.message || t('past.error.importFailed');
+    importConfirmOpen.value = false;
+  } finally {
+    importSubmitting.value = false;
+    importPendingData.value = [];
+    // 過去作は現行作の差分計算パスに乗せないので、必ず false を返す。
+    importConfirmResolve?.(false);
+    importConfirmResolve = null;
+  }
+};
+
+/** 【関数の役割】 確認ダイアログのキャンセル／判定失敗時の閉じるハンドラ。 */
+const handleImportCancel = () => {
+  importConfirmOpen.value = false;
+  importPendingData.value = [];
+  importConfirmResolve?.(false);
+  importConfirmResolve = null;
+};
+
+/** 過去作取り込みの結果。トースト的な結果表示に使う（null で非表示）。 */
+const pastImportResult = ref<{ version: number; versionName: string; inserted: number; updated: number; totalCount: number } | null>(null);
+
 /**
  * 【関数の役割】 ドロップされた CSV ファイルを読み取り、解析→差分計算→サーバー保存→差分モーダル表示までを一括で行う。
  *
  * 処理の流れ（大ブロック）:
- *  手順1: CSV をパースし曲単位の配列に変換。
+ *  手順1: CSV をパースし曲単位の配列に変換。作品バージョンを自動判定する。
+ *         現行作ならそのまま手順2へ（確認ダイアログは出さない）。
+ *         過去作（30〜32）と判定された場合は確認ダイアログを挟んだうえで
+ *         confirmImportVersion 内で取り込みまで完結し、
+ *         以降の現行作向け処理（差分計算・BEAT-PT 再計算・履歴ログ）には進まない。
  *  手順2: 現在のスコア（旧）と新スコアを flatten し、タイトル+難易度で突き合わせ。
  *  手順3: TOP100 判定（BEAT-PT 上位 / RATE-PT 上位）用の Set を構築。
  *  手順4: 譜面ごとにスコア・ランプが向上したら updatedSongs に積む。
@@ -1124,13 +1244,23 @@ const computeFolderAnnouncements = (
  *  手順6: 未ログイン（ゲストモード）ならクライアント計算のみで差分モーダルを表示。
  *  手順7: 完了後はアップロードエリアを閉じ、ダッシュボードに遷移する。
  */
-const handleFileDropped = async (file: File) => {
+const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
   errorMsg.value = '';
   isParsing.value = true;
-  
+
   try {
     const newData = await parseScoreCsv(file);
     console.log(`Successfully parsed ${newData.length} songs.`);
+
+    // 作品バージョンの自動判定ゲート。
+    // ブックマークレット由来の CSV は「バージョン」列が空欄で判定できないため対象外にし、
+    // 現行作として扱う（ブックマークレットは常に現行作のページ上から実行されるため）。
+    if (origin !== 'bookmarklet') {
+      isParsing.value = false; // ダイアログの応答待ちの間はローディング表示を解除する
+      const proceed = await confirmImportVersion(newData);
+      if (!proceed) return;
+      isParsing.value = true;
+    }
 
     // 差分計算: 現在表示中の scoreData（旧）と今回アップロードした newData（新）を突き合わせる。
     const oldFlat = flattenScores(scoreData.value);
@@ -1479,6 +1609,14 @@ const showUploadArea = ref(false);
 
 /** UnifiedImport で選ばれたがまだ送信していないファイル。モーダルを閉じる瞬間にアップロードする用。 */
 const pendingScoreFile = ref<File | null>(null);
+/** 上記ファイルの出所。'bookmarklet' なら作品バージョンの自動判定をスキップして現行作として扱う。 */
+const pendingScoreOrigin = ref<'bookmarklet' | undefined>(undefined);
+
+/** 【関数の役割】 UnifiedImport から受け取った CSV を、出所とセットで保留する。 */
+const handleUnifiedScoreFile = (file: File, origin?: 'bookmarklet') => {
+  pendingScoreFile.value = file;
+  pendingScoreOrigin.value = origin;
+};
 
 /**
  * 【関数の役割】 サイドバーの「アップロード/リセット」ボタン押下時のハンドラ。
@@ -1506,9 +1644,11 @@ const handleUnifiedClose = async () => {
   showUploadArea.value = false;
   errorMsg.value = '';
   const fileToProcess = pendingScoreFile.value;
+  const originToProcess = pendingScoreOrigin.value;
   pendingScoreFile.value = null;
+  pendingScoreOrigin.value = undefined;
   if (fileToProcess) {
-    await handleFileDropped(fileToProcess);
+    await handleFileDropped(fileToProcess, originToProcess);
   } else {
     await loadSavedScores();
   }
@@ -1592,6 +1732,49 @@ const handleUnifiedClose = async () => {
       @close="isAdminModalOpen = false"
       @select="handleSelectUser"
     />
+
+    <!-- CSV の作品バージョン自動判定の確認ダイアログ（過去作 CSV 対応） -->
+    <ImportVersionConfirmModal
+      :is-open="importConfirmOpen"
+      :detection="importDetection"
+      :song-count="importSongCount"
+      :last-play-time="importLastPlayTime"
+      :existing-count="importExistingCount"
+      :is-submitting="importSubmitting"
+      @confirm="handleImportConfirm"
+      @cancel="handleImportCancel"
+    />
+
+    <!-- 過去作スコアの取り込み結果。現行作の差分モーダルとは別系統の簡易表示 -->
+    <div
+      v-if="pastImportResult"
+      class="fixed inset-0 z-[120] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm"
+      @click.self="pastImportResult = null"
+    >
+      <div class="card w-full max-w-sm p-6">
+        <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-3">
+          {{ t('past.result.title', { name: versionName(pastImportResult.version) }) }}
+        </h3>
+        <dl class="text-sm space-y-1.5 mb-4">
+          <div class="flex justify-between">
+            <dt class="text-slate-500 dark:text-slate-400">{{ t('past.result.inserted') }}</dt>
+            <dd class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ pastImportResult.inserted.toLocaleString() }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-slate-500 dark:text-slate-400">{{ t('past.result.updated') }}</dt>
+            <dd class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ pastImportResult.updated.toLocaleString() }}</dd>
+          </div>
+          <div class="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-1.5">
+            <dt class="text-slate-500 dark:text-slate-400">{{ t('past.result.total') }}</dt>
+            <dd class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ pastImportResult.totalCount.toLocaleString() }}</dd>
+          </div>
+        </dl>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">{{ t('past.notRanked') }}</p>
+        <div class="flex justify-end">
+          <button class="btn-primary" @click="pastImportResult = null">{{ t('common.close') }}</button>
+        </div>
+      </div>
+    </div>
 
     <!-- アップデート告知モーダル（ログイン後・未読の告知があれば1回だけ表示） -->
     <WhatsNewModal />
@@ -1915,7 +2098,7 @@ const handleUnifiedClose = async () => {
               </svg>
             </button>
           </div>
-          <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @score-file="pendingScoreFile = $event" @close="handleUnifiedClose" />
+          <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @score-file="handleUnifiedScoreFile" @close="handleUnifiedClose" />
         </div>
       </div>
 

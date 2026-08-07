@@ -1307,6 +1307,11 @@ export const ko = {
   'competition.matchKind.vanguard': '선봉전',
   'competition.matchKind.middle': '중견전',
   'competition.matchKind.captain': '대장전',
+  // 결승 전용 전형 (결승은 선봉→차봉→오장→중견→삼장→부장→대장 7 경기)
+  'competition.matchKind.second': '차봉전',
+  'competition.matchKind.fifth': '오장전',
+  'competition.matchKind.third': '삼장전',
+  'competition.matchKind.vice': '부장전',
   // Player URL 화면
   'competition.player.invalidToken': '초대 URL 이 유효하지 않습니다',
   'competition.player.invalidTokenHint': 'URL 을 다시 확인하거나 주최자에게 문의해 주세요.',
@@ -1402,6 +1407,12 @@ export const ko = {
   'competition.tl.strategyUndecidedCount': '⚠ 스트래티지 미결정 {n} 경기',
   'competition.tl.strategyToastUse': '스트래티지를 발동 예정으로 설정했습니다',
   'competition.tl.strategyToastSkip': '스트래티지를 발동하지 않기로 결정했습니다',
+  // 결승 (7 경기) 기용 규칙
+  'competition.tl.finalsBadge': '결승',
+  'competition.tl.finalsRuleNote': '결승은 7 경기 (선봉/차봉/오장/중견/삼장/부장/대장). 1 인 최대 {n} 경기・연속 출전 금지・4 명 전원 출전. 코스트 소비 없음.',
+  'competition.tl.finalsUnusedMembers': '미출전: {names}',
+  'competition.tl.finalsNoConsecutive': '※ 연속 출전 불가',
+  'competition.tl.finalsMaxReached': '※ 결승은 1 인 {n} 경기까지',
 
   // League（리그 모드）
   'nav.league': '리그',
@@ -1527,4 +1538,64 @@ export const ko = {
   // 대시보드 최상단 DIVISION 패널(개최 중 강조 표시)
   'dashboard.leagueLive.badge': '개최 중',
   'dashboard.leagueLive.view': '리그 보기',
+
+  // ── 과거 작품 스코어(역대 자기 베스트) ──────────────────────
+  // 스코어 목록의 역대 모드 / 곡 상세의 역대 탭
+  'past.tab': '역대',
+  'past.notRanked': '과거 작품 스코어는 랭킹·BEAT-PT에 반영되지 않습니다.',
+  'past.toggle': '역대 베스트 반영',
+  'past.toggleHint': '과거 작품의 스코어가 이번 작품을 넘는 채보를 그 스코어로 바꿔서 표시합니다.',
+  'past.toggleActiveNote': '역대 베스트를 반영 중입니다. 랭킹·성장 기록에는 반영되지 않습니다.',
+  'past.tierBadge': '역대',
+  'past.tierNote': '역대 베스트로 재계산한 PT와 티어입니다(랭킹에는 반영되지 않습니다).',
+  'past.bestScore': '역대 베스트 스코어',
+  'past.colVersion': '작품',
+  'past.colEx': 'EX',
+  'past.colLamp': '램프',
+  'past.colBp': 'BP',
+  'past.noData': '이 채보의 과거 작품 데이터가 없습니다.',
+  'past.levelChanged': '※ 이 채보는 작품에 따라 ★가 변동됩니다. 목록의 ★는 현행 작품 기준입니다.',
+  'past.rateNote': '※ 스코어 레이트는 현행 작품의 노트 수를 기준으로 계산합니다.',
+
+  // 가져오기 확인 대화상자
+  'past.confirm.title': '가져오기 확인',
+  'past.confirm.messagePast': '이 작품의 스코어로 가져옵니다. 계속하시겠습니까?',
+  'past.confirm.songCount': '대상 곡 수',
+  'past.confirm.lastPlay': '마지막 플레이',
+  'past.confirm.existing': '기존 데이터',
+  'past.confirm.existingMerge': '{count} 채보에 병합',
+  'past.confirm.cancel': '취소',
+  'past.confirm.submit': '가져오기',
+  'past.confirm.submitting': '가져오는 중...',
+
+  // 가져오기를 거부한 이유
+  'past.error.title': '가져올 수 없습니다',
+  'past.error.noLabels': 'CSV의 「버전」 열에서 작품을 판별할 수 없습니다. 공식 다운로드 CSV를 그대로 사용해 주세요.',
+  'past.error.unknownLabel': '인식할 수 없는 작품명이 포함되어 있습니다({labels}). 앱이 아직 지원하지 않는 신작일 수 있습니다.',
+  'past.error.incomplete': 'CSV가 불완전합니다. {missing}의 곡을 찾을 수 없습니다. 공식 다운로드 CSV를 그대로 사용해 주세요.',
+  'past.error.tooOld': '{detected}로 판별되었습니다. 지원 범위는 {min} 이후입니다.',
+  'past.error.close': '닫기',
+  'past.error.loginRequired': '과거 작품 스코어를 가져오려면 로그인이 필요합니다.',
+  'past.error.importFailed': '과거 작품 스코어 가져오기에 실패했습니다.',
+
+  // 가져오기 결과
+  'past.result.title': '{name}을(를) 가져왔습니다',
+  'past.result.inserted': '신규',
+  'past.result.updated': '갱신',
+  'past.result.total': '등록 합계',
+
+  // 과거 데이터 관리(프로필 내)
+  'past.manager.title': '과거 작품 스코어',
+  'past.manager.hint': 'CSV를 가져오면 작품이 자동 판별되어 여기에 추가됩니다.',
+  'past.manager.colVersion': '작품',
+  'past.manager.colCount': '채보 수',
+  'past.manager.colImported': '가져온 날짜',
+  'past.manager.current': '현행',
+  'past.manager.currentNote': '일반 스코어',
+  'past.manager.notImported': '미가져옴',
+  'past.manager.delete': '삭제',
+  'past.manager.deleting': '삭제 중...',
+  'past.manager.deleteConfirm': '{name}의 과거 스코어를 삭제합니다. 계속하시겠습니까?',
+  'past.manager.deleteFailed': '삭제에 실패했습니다.',
+  'past.manager.loadFailed': '가져오기 상태를 불러오지 못했습니다.',
 };

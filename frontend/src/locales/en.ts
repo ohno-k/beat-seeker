@@ -1306,6 +1306,11 @@ export const en = {
   'competition.matchKind.vanguard': 'Vanguard',
   'competition.matchKind.middle': 'Middle',
   'competition.matchKind.captain': 'Captain',
+  // Finals-only slots (finals run 7 matches: vanguard → second → fifth → middle → third → vice → captain)
+  'competition.matchKind.second': 'Second',
+  'competition.matchKind.fifth': 'Fifth',
+  'competition.matchKind.third': 'Third',
+  'competition.matchKind.vice': 'Vice-captain',
   // Player URL screen
   'competition.player.invalidToken': 'Invalid invite URL',
   'competition.player.invalidTokenHint': 'Please check the URL or contact the organizer.',
@@ -1401,6 +1406,12 @@ export const en = {
   'competition.tl.strategyUndecidedCount': '⚠ {n} strategy decision(s) pending',
   'competition.tl.strategyToastUse': 'Set to activate the Strategy Card',
   'competition.tl.strategyToastSkip': 'Decided not to activate the Strategy Card',
+  // Finals (7 matches) lineup rules
+  'competition.tl.finalsBadge': 'FINALS',
+  'competition.tl.finalsRuleNote': 'Finals run 7 matches (vanguard/second/fifth/middle/third/vice/captain). Max {n} matches per player, no back-to-back matches, all 4 members must play. No cost is consumed.',
+  'competition.tl.finalsUnusedMembers': 'Not playing yet: {names}',
+  'competition.tl.finalsNoConsecutive': '※ no back-to-back matches',
+  'competition.tl.finalsMaxReached': '※ max {n} matches per player in finals',
 
   // League mode
   'nav.league': 'League',
@@ -1526,4 +1537,64 @@ export const en = {
   // Dashboard top DIVISION panel (highlighted while a week is running)
   'dashboard.leagueLive.badge': 'LIVE',
   'dashboard.leagueLive.view': 'View league',
+
+  // ── Past-version scores (all-time personal best) ────────────
+  // "All-time" mode in the score list / "All-time" tab in the song detail modal
+  'past.tab': 'All-time',
+  'past.notRanked': 'Past-version scores are excluded from rankings and BEAT-PT.',
+  'past.toggle': 'Apply all-time best',
+  'past.toggleHint': 'Charts where a past version\'s score beats your current one are shown with that score instead.',
+  'past.toggleActiveNote': 'Showing all-time bests. Rankings and growth history are unaffected.',
+  'past.tierBadge': 'All-time',
+  'past.tierNote': 'PT and tier recalculated from all-time bests (not reflected in rankings).',
+  'past.bestScore': 'All-time best score',
+  'past.colVersion': 'Version',
+  'past.colEx': 'EX',
+  'past.colLamp': 'Lamp',
+  'past.colBp': 'BP',
+  'past.noData': 'No past-version data for this chart.',
+  'past.levelChanged': 'Note: this chart\'s level differs between versions. The list shows the current level.',
+  'past.rateNote': 'Note: score rate is calculated from the current version\'s note count.',
+
+  // Import confirmation dialog
+  'past.confirm.title': 'Confirm import',
+  'past.confirm.messagePast': 'This will be imported as scores for this version. Continue?',
+  'past.confirm.songCount': 'Songs',
+  'past.confirm.lastPlay': 'Last played',
+  'past.confirm.existing': 'Existing data',
+  'past.confirm.existingMerge': 'merge into {count} charts',
+  'past.confirm.cancel': 'Cancel',
+  'past.confirm.submit': 'Import',
+  'past.confirm.submitting': 'Importing...',
+
+  // Reasons an import was rejected
+  'past.error.title': 'Cannot import',
+  'past.error.noLabels': 'Could not determine the version from the CSV\'s version column. Please use the official downloaded CSV as-is.',
+  'past.error.unknownLabel': 'The CSV contains unrecognized version names ({labels}). It may be from a version this app does not support yet.',
+  'past.error.incomplete': 'The CSV is incomplete: no songs found for {missing}. Please use the official downloaded CSV as-is.',
+  'past.error.tooOld': 'Detected {detected}. Only {min} and later are supported.',
+  'past.error.close': 'Close',
+  'past.error.loginRequired': 'Log in to import past-version scores.',
+  'past.error.importFailed': 'Failed to import past-version scores.',
+
+  // Import result
+  'past.result.title': 'Imported {name}',
+  'past.result.inserted': 'Added',
+  'past.result.updated': 'Updated',
+  'past.result.total': 'Total stored',
+
+  // Past-data management (in profile)
+  'past.manager.title': 'Past-version scores',
+  'past.manager.hint': 'Importing a CSV auto-detects its version and adds it here.',
+  'past.manager.colVersion': 'Version',
+  'past.manager.colCount': 'Charts',
+  'past.manager.colImported': 'Imported',
+  'past.manager.current': 'Current',
+  'past.manager.currentNote': 'regular scores',
+  'past.manager.notImported': 'Not imported',
+  'past.manager.delete': 'Delete',
+  'past.manager.deleting': 'Deleting...',
+  'past.manager.deleteConfirm': 'Delete all past scores for {name}?',
+  'past.manager.deleteFailed': 'Failed to delete.',
+  'past.manager.loadFailed': 'Failed to load import status.',
 };

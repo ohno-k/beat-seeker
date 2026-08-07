@@ -9,7 +9,9 @@ import { API_BASE } from './constants';
  * 認可は CompetitionTlController 側で「token → team」解決時にチェックされる。
  */
 
-export type MatchKind = 'vanguard' | 'middle' | 'captain';
+// 戦種別 (予選 3 戦 / 決勝 7 戦) の定義は competitionMatchKinds に集約。
+export type { MatchKind } from './competitionMatchKinds';
+import type { MatchKind } from './competitionMatchKinds';
 export type SongGenre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
 
 export interface TlTeamDto {
@@ -85,13 +87,15 @@ export interface TlMatchDto {
 export interface TlMatchupDto {
   matchupId: number;
   matchupOrder: number;
+  /** 決勝 matchup か。決勝は 7 戦構成でコスト対象外、起用ルールも異なる (1 人 2 戦まで・連続出場禁止)。 */
+  isFinals: boolean;
   mySide: 'a' | 'b';
   /** 自軍のラインアップが主催により公開されているか。 */
   myLineupPublished: boolean;
   /** 相手チームのラインアップが主催により公開されているか。未公開なら opponentAssigned は null。 */
   opponentLineupPublished: boolean;
   opponentTeam: { id: number | null; teamName: string | null };
-  /** vanguard → middle → captain の固定順で 3 件返る。 */
+  /** 先鋒 → … → 大将 の固定順。予選は 3 件、決勝は 7 件返る。 */
   matches: TlMatchDto[];
 }
 
@@ -108,6 +112,8 @@ export interface TlViewDto {
   strategyLimit: number;
   /** 自チームが現在 StrategyCard 発動予定にしている予選 matchup 数。 */
   strategyUsedMatchupCount: number;
+  /** 決勝 (7 戦) で 1 人を起用できる最大戦数。連続出場は別途禁止。 */
+  finalsMaxMatchesPerPlayer: number;
 }
 
 /** 運営チャット 1 メッセージ。sender = 'tl' (自分) / 'admin' (運営)。 */

@@ -17,6 +17,7 @@ import { useCompetitionTl, type MatchKind, type TlMatchDto, type TlMatchupDto } 
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
 import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
+import { kindLevelLabel, isAdjacentKind } from '../composables/competitionMatchKinds';
 import CompetitionChatWidget from '../components/CompetitionChatWidget.vue';
 
 const props = defineProps<{ token: string }>();
@@ -43,11 +44,6 @@ const handleSetStrategy = async (match: TlMatchDto, enabled: boolean) => {
 
 /** 戦種別ラベルは i18n 経由。 */
 const kindLabel = (kind: MatchKind) => t(`competition.matchKind.${kind}`);
-const KIND_LV: Record<MatchKind, string> = {
-  vanguard: 'Lv 8-10',
-  middle: 'Lv 11',
-  captain: 'Lv 12',
-};
 
 const statusLabel = (s: string) => {
   if (['draft', 'open', 'locked', 'finished'].includes(s)) {
@@ -73,20 +69,6 @@ const handleAssign = async (match: TlMatchDto, raw: string) => {
 };
 
 /**
- * matchup 1 件の中で、現在その matchup の他 slot に割り当て済みの participantId 集合。
- * <option> を disabled 表示してダブルアサインを UI 側でも誘導しないようにする
- * (サーバ側の検証は別途あるので二重防御)。
- */
-const usedInMatchup = (matchup: TlMatchupDto, exceptMatchId: number): Set<number> => {
-  const set = new Set<number>();
-  for (const m of matchup.matches) {
-    if (m.matchId === exceptMatchId) continue;
-    if (m.myAssigned?.participantId) set.add(m.myAssigned.participantId);
-  }
-  return set;
-};
-
-/**
  * 当該プレイヤーをこの戦に新規アサインしようとしたとき、コスト不足になるか。
  * 既にこの slot にアサイン済みなら自分自身の分は除外して判定する。
  * 決勝 matchup ではコスト無制限のため常に false。
@@ -105,6 +87,45 @@ const wouldExceedCostFor = (
     ? member.spentCost - costForThisKind
     : member.spentCost;
   return spentExceptThis + costForThisKind > view.value.initialCost;
+};
+
+/**
+ * この slot に当該メンバーを選べない理由 (選べるなら null)。<option> の disabled と注記に使う。
+ *
+ * 予選 (3 戦): 1 人 1 戦まで + 予選コスト制限。
+ * 決勝 (7 戦): コスト対象外。1 人 {@code finalsMaxMatchesPerPlayer} 戦まで + 連続する戦への起用は禁止。
+ * (7 枠 ÷ 2 戦 = 最低 4 人必要なので、全枠を埋めれば 4 人全員が自動的に出場する)
+ * サーバ側 (CompetitionTlController#assign) でも同じ検証をしているので UI 制御は二重防御。
+ */
+const assignBlockReason = (
+  matchup: TlMatchupDto,
+  match: TlMatchDto,
+  participantId: number,
+): string | null => {
+  if (!view.value) return null;
+  const others = matchup.matches.filter(
+    m => m.matchId !== match.matchId && m.myAssigned?.participantId === participantId,
+  );
+  if (!matchup.isFinals) {
+    if (others.length > 0) return t('competition.tl.usedInOtherMatch');
+    return wouldExceedCostFor(participantId, match) ? t('competition.tl.costInsufficient') : null;
+  }
+  if (others.some(m => isAdjacentKind(m.matchKind, match.matchKind))) {
+    return t('competition.tl.finalsNoConsecutive');
+  }
+  if (others.length >= view.value.finalsMaxMatchesPerPlayer) {
+    return t('competition.tl.finalsMaxReached', { n: view.value.finalsMaxMatchesPerPlayer });
+  }
+  return null;
+};
+
+/** 決勝 matchup で、まだ 1 戦も起用されていないメンバー名 (全員出場のチェック用)。 */
+const finalsUnusedMembers = (matchup: TlMatchupDto): string[] => {
+  if (!view.value || !matchup.isFinals) return [];
+  const used = new Set(
+    matchup.matches.map(m => m.myAssigned?.participantId).filter((id): id is number => !!id),
+  );
+  return view.value.members.filter(m => !used.has(m.id)).map(m => m.displayName);
 };
 
 /** 4 matchup の表示順 (matchupOrder の昇順を保証)。 */
@@ -224,6 +245,10 @@ const undecidedStrategyCount = computed<number>(() =>
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm">
               {{ t('competition.player.vs') }} <span :class="teamColorClass(mu.opponentTeam.teamName)">{{ mu.opponentTeam.teamName ?? '?' }}</span>
+              <span
+                v-if="mu.isFinals"
+                class="ml-2 text-[10px] font-black px-2 py-0.5 rounded bg-amber-500 text-white tracking-wider"
+              >🏆 {{ t('competition.tl.finalsBadge') }}</span>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
               <span
@@ -240,12 +265,23 @@ const undecidedStrategyCount = computed<number>(() =>
             </div>
           </div>
 
+          <!-- 決勝の起用ルール (1 人 2 戦まで・連続出場禁止・4 人全員出場) の案内 -->
+          <div
+            v-if="mu.isFinals"
+            class="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700/60 text-[10px] font-mono text-amber-700 dark:text-amber-300 space-y-0.5"
+          >
+            <p>{{ t('competition.tl.finalsRuleNote', { n: view.finalsMaxMatchesPerPlayer }) }}</p>
+            <p v-if="finalsUnusedMembers(mu).length > 0">
+              {{ t('competition.tl.finalsUnusedMembers', { names: finalsUnusedMembers(mu).join(', ') }) }}
+            </p>
+          </div>
+
           <ul class="divide-y divide-slate-100 dark:divide-slate-700/60">
             <li v-for="match in mu.matches" :key="match.matchId" class="px-4 py-3 grid grid-cols-1 sm:grid-cols-[140px_1fr_1fr] gap-3 items-center">
               <!-- 戦表記 + 運営指定ジャンルバッジ -->
               <div>
                 <p class="font-bold text-sm">{{ kindLabel(match.matchKind) }}</p>
-                <p class="text-[10px] font-mono text-slate-400">{{ KIND_LV[match.matchKind] }}</p>
+                <p class="text-[10px] font-mono text-slate-400">{{ kindLevelLabel(match.matchKind) }}</p>
                 <span
                   v-if="match.requiredGenre"
                   class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider"
@@ -272,16 +308,16 @@ const undecidedStrategyCount = computed<number>(() =>
                     class="flex-1 px-3 py-1.5 rounded-lg text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="">未割当</option>
+                    <!-- 選べない理由 (予選: 他試合で起用中/コスト不足、決勝: 2 戦上限/連続出場) は共通判定 -->
                     <option
                       v-for="m in view.members"
                       :key="m.id"
                       :value="m.id"
-                      :disabled="usedInMatchup(mu, match.matchId).has(m.id) || wouldExceedCostFor(m.id, match)"
+                      :disabled="!!assignBlockReason(mu, match, m.id)"
                     >
                       {{ m.displayName }}{{ m.isTl ? ' (TL)' : '' }}
-                      (残{{ m.remainingCost }})
-                      <template v-if="usedInMatchup(mu, match.matchId).has(m.id)"> ※他試合で起用中</template>
-                      <template v-else-if="wouldExceedCostFor(m.id, match)"> ※コスト不足</template>
+                      <template v-if="!mu.isFinals"> (残{{ m.remainingCost }})</template>
+                      <template v-if="assignBlockReason(mu, match, m.id)"> {{ assignBlockReason(mu, match, m.id) }}</template>
                     </option>
                   </select>
                 </div>

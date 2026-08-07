@@ -1365,6 +1365,11 @@ export const ja = {
   'competition.matchKind.vanguard': '先鋒戦',
   'competition.matchKind.middle': '中堅戦',
   'competition.matchKind.captain': '大将戦',
+  // 決勝のみで使う戦種別 (決勝は 先鋒→次鋒→五将→中堅→三将→副将→大将 の 7 戦)
+  'competition.matchKind.second': '次鋒戦',
+  'competition.matchKind.fifth': '五将戦',
+  'competition.matchKind.third': '三将戦',
+  'competition.matchKind.vice': '副将戦',
   // Player URL 画面
   'competition.player.invalidToken': '招待 URL が無効です',
   'competition.player.invalidTokenHint': 'URL を再確認するか、主催者にお問い合わせください。',
@@ -1460,6 +1465,12 @@ export const ja = {
   'competition.tl.strategyUndecidedCount': '⚠ ストラテジー未決定 {n} 戦',
   'competition.tl.strategyToastUse': 'ストラテジー発動予定にしました',
   'competition.tl.strategyToastSkip': 'ストラテジーを発動しないと決定しました',
+  // 決勝 (7 戦) の起用ルール
+  'competition.tl.finalsBadge': '決勝',
+  'competition.tl.finalsRuleNote': '決勝は 7 戦 (先鋒/次鋒/五将/中堅/三将/副将/大将)。1 人最大 {n} 戦・連続出場禁止・4 人全員出場。コスト消費はありません。',
+  'competition.tl.finalsUnusedMembers': '未出場: {names}',
+  'competition.tl.finalsNoConsecutive': '※連続出場は不可',
+  'competition.tl.finalsMaxReached': '※決勝は 1 人 {n} 戦まで',
 
   // League（リーグモード）
   'nav.league': 'リーグ',
@@ -1585,4 +1596,64 @@ export const ja = {
   // ダッシュボード最上部の DIVISION パネル（開催中の強調表示）
   'dashboard.leagueLive.badge': '開催中',
   'dashboard.leagueLive.view': 'リーグを見る',
+
+  // ── 過去作スコア（歴代自己ベスト） ──────────────────────────
+  // スコア一覧の歴代モード / 曲詳細の歴代タブ
+  'past.tab': '歴代',
+  'past.notRanked': '過去作スコアはランキング・BEAT-PT には反映されません。',
+  'past.toggle': '歴代ベストを反映',
+  'past.toggleHint': '過去作のスコアが今作を上回っている譜面を、そのスコアに置き換えて表示します。',
+  'past.toggleActiveNote': '歴代ベストを反映中です。ランキング・成長記録には反映されません。',
+  'past.tierBadge': '歴代',
+  'past.tierNote': '歴代ベストで再計算した PT とティアです（ランキングには反映されません）。',
+  'past.bestScore': '歴代ベストスコア',
+  'past.colVersion': '作品',
+  'past.colEx': 'EX',
+  'past.colLamp': 'ランプ',
+  'past.colBp': 'BP',
+  'past.noData': 'この譜面の過去作データがありません。',
+  'past.levelChanged': '※ この譜面は作品によって★が変動しています。一覧の★は現行作基準です。',
+  'past.rateNote': '※ スコアレートは現行作のノーツ数を基準に算出しています。',
+
+  // 取り込み確認ダイアログ
+  'past.confirm.title': '取り込み確認',
+  'past.confirm.messagePast': 'この作品のスコアとして取り込みます。よろしいですか？',
+  'past.confirm.songCount': '対象曲数',
+  'past.confirm.lastPlay': '最終プレー',
+  'past.confirm.existing': '既存データ',
+  'past.confirm.existingMerge': '{count} 譜面にマージ',
+  'past.confirm.cancel': 'キャンセル',
+  'past.confirm.submit': '取り込む',
+  'past.confirm.submitting': '取り込み中...',
+
+  // 取り込みを弾いたときの理由表示
+  'past.error.title': '取り込めません',
+  'past.error.noLabels': 'CSV の「バージョン」列から作品を判定できませんでした。公式のダウンロード CSV をそのままお使いください。',
+  'past.error.unknownLabel': '認識できない作品名が含まれています（{labels}）。アプリが未対応の新作の可能性があります。',
+  'past.error.incomplete': 'CSV が不完全です。{missing} の楽曲が見つかりません。公式のダウンロード CSV をそのままお使いください。',
+  'past.error.tooOld': '{detected} と判定されました。対応しているのは {min} 以降です。',
+  'past.error.close': '閉じる',
+  'past.error.loginRequired': '過去作スコアの取り込みにはログインが必要です。',
+  'past.error.importFailed': '過去作スコアの取り込みに失敗しました。',
+
+  // 取り込み結果
+  'past.result.title': '{name} を取り込みました',
+  'past.result.inserted': '新規',
+  'past.result.updated': '更新',
+  'past.result.total': '登録済み合計',
+
+  // 過去データ管理（プロフィール内）
+  'past.manager.title': '過去作スコア',
+  'past.manager.hint': 'CSV を取り込むと作品が自動判定され、ここに追加されます。',
+  'past.manager.colVersion': '作品',
+  'past.manager.colCount': '譜面数',
+  'past.manager.colImported': '取込日',
+  'past.manager.current': '現行',
+  'past.manager.currentNote': '通常スコア',
+  'past.manager.notImported': '未取込',
+  'past.manager.delete': '削除',
+  'past.manager.deleting': '削除中...',
+  'past.manager.deleteConfirm': '{name} の過去スコアを削除します。よろしいですか？',
+  'past.manager.deleteFailed': '削除に失敗しました。',
+  'past.manager.loadFailed': '取り込み状況の取得に失敗しました。',
 };

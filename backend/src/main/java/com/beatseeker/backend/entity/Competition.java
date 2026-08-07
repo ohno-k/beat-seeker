@@ -70,6 +70,23 @@ public class Competition {
      */
     private LocalDateTime lineupPublishAt;
 
+    /**
+     * 決勝の起用 (オーダー) クローズ日時。null の場合は締切未設定 = 決勝の起用はまだ締め切らない。
+     *
+     * <p>予選用の {@link #deadlineAt} とは別に持つ。決勝は予選 10 試合の結果が出てから生成されるため、
+     * 生成時点では予選のクローズ日時をとっくに過ぎており、共通の締切を使うと決勝の起用を一度も
+     * 編集できなくなってしまう ({@link #isFinalsLineupClosed()} 参照)。
+     */
+    private LocalDateTime finalsDeadlineAt;
+
+    /**
+     * 決勝の起用 (オーダー) 公開日時。null の場合は公開日時未設定 = 決勝の起用は非公開のまま。
+     *
+     * <p>予選用の {@link #lineupPublishAt} とは別に持つ。決勝生成直後は非公開で TL が起用を組み、
+     * 運営がこの日時を設定して初めて相手 TL / 観戦 URL / 選手 URL に公開される。
+     */
+    private LocalDateTime finalsLineupPublishAt;
+
     /** 主催ユーザー (= 大会を作成したログインユーザー)。 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
@@ -127,5 +144,40 @@ public class Competition {
     public boolean isLineupPublished() {
         return lineupPublishAt != null
                 && !LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo")).isBefore(lineupPublishAt);
+    }
+
+    /**
+     * 【派生判定】 決勝の起用がクローズ済みか。{@link #finalsDeadlineAt} を JST の壁時計時刻として解釈する。
+     *
+     * <p>{@code finalsDeadlineAt} が null の間は常に false = 決勝の起用はいつでも編集できる。
+     * 決勝生成直後は未設定なので、TL はそのまま決勝の起用表を組める。
+     */
+    @Transient
+    public boolean isFinalsLineupClosed() {
+        return finalsDeadlineAt != null
+                && !LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo")).isBefore(finalsDeadlineAt);
+    }
+
+    /**
+     * 【派生判定】 決勝の起用が公開済みか。{@link #finalsLineupPublishAt} を JST の壁時計時刻として解釈する。
+     *
+     * <p>{@code finalsLineupPublishAt} が null の間は常に false = 決勝の起用は非公開のまま。
+     */
+    @Transient
+    public boolean isFinalsLineupPublished() {
+        return finalsLineupPublishAt != null
+                && !LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo")).isBefore(finalsLineupPublishAt);
+    }
+
+    /** 【派生判定】 指定 matchup (決勝かどうか) に対応する起用クローズ状態。 */
+    @Transient
+    public boolean isLineupClosedFor(boolean isFinals) {
+        return isFinals ? isFinalsLineupClosed() : isLineupClosed();
+    }
+
+    /** 【派生判定】 指定 matchup (決勝かどうか) に対応する起用公開状態。 */
+    @Transient
+    public boolean isLineupPublishedFor(boolean isFinals) {
+        return isFinals ? isFinalsLineupPublished() : isLineupPublished();
     }
 }

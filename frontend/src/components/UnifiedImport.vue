@@ -22,7 +22,13 @@ const { user } = useAuth();
 const props = defineProps<{ bookmarkletCode: string }>();
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'score-file', file: File): void;
+  /**
+   * スコア CSV を親へ引き渡す。
+   * `origin` が 'bookmarklet' の場合、その CSV はブックマークレットが生成したもので
+   * 「バージョン」列が空欄になる。親は作品バージョンの自動判定をスキップし、現行作として扱う
+   * （ブックマークレットは常に現行作のページ上から実行されるため）。
+   */
+  (e: 'score-file', file: File, origin?: 'bookmarklet'): void;
 }>();
 
 /**
@@ -109,7 +115,9 @@ const processText = async (text: string) => {
       // JSON ルート: scoresCsv と battles を別々に処理する。
       if (parsed.scoresCsv) {
         try {
-          emit('score-file', makeCsvFile(parsed.scoresCsv));
+          // ブックマークレット出力の CSV は「バージョン」列が空欄なので自動判定できない。
+          // origin を伝えて親側の判定をスキップさせる。
+          emit('score-file', makeCsvFile(parsed.scoresCsv), 'bookmarklet');
           scoresReady = true;
         } catch (e) {
           console.warn('Score file preparation failed:', e);

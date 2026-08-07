@@ -17,9 +17,9 @@ import java.util.List;
 public interface CompetitionMatchRepository extends JpaRepository<CompetitionMatch, Long> {
 
     /**
-     * 【メソッドの役割】 1 つの matchup に紐づく 3 試合 (先鋒/中堅/大将) を取得する。
+     * 【メソッドの役割】 1 つの matchup に紐づく試合を取得する (予選 3 戦 / 決勝 7 戦)。
      * 戦の順序は {@code matchKind} 文字列のアルファベット順では意味のある順にならないため、
-     * 呼び出し側で {@code vanguard → middle → captain} の固定順に並べ替える運用とする。
+     * 呼び出し側で {@code CompetitionMatchKinds#order} による 先鋒 → … → 大将 の順に並べ替える運用とする。
      */
     List<CompetitionMatch> findByMatchupOrderByIdAsc(CompetitionMatchup matchup);
 

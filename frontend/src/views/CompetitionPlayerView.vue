@@ -29,6 +29,7 @@ import { API_BASE } from '../composables/constants';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
 import { teamColorClass, genreBadgeClass, genreTextClass } from '../composables/competitionColors';
+import { LEVELS_FOR_KIND, kindLevelLabel } from '../composables/competitionMatchKinds';
 
 const props = defineProps<{ token: string }>();
 
@@ -74,11 +75,7 @@ watch(() => props.token, loadView);
 type Song = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
 const songs = strategySongs as Record<SongGenre, Record<string, Song[]>>;
 
-const LEVELS_FOR_KIND: Record<MatchKind, number[]> = {
-  vanguard: [8, 9, 10],
-  middle: [11],
-  captain: [12],
-};
+// 戦種別ごとの Lv 帯 (予選 3 戦 / 決勝 7 戦) は competitionMatchKinds に集約。
 /** 戦種別ラベルは i18n 経由で解決する (テンプレート/ハンドラ両方から呼べるよう関数化)。 */
 const kindLabel = (kind: MatchKind) => t(`competition.matchKind.${kind}`);
 
@@ -455,10 +452,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
             </p>
             <div class="flex items-center gap-2 flex-wrap">
               <p class="text-[10px] font-mono text-slate-400">
-                {{ kindLabel(m.matchKind) }} ·
-                {{ LEVELS_FOR_KIND[m.matchKind].length === 1
-                    ? `Lv ${LEVELS_FOR_KIND[m.matchKind][0]}`
-                    : `Lv ${LEVELS_FOR_KIND[m.matchKind].join('/')}` }}
+                {{ kindLabel(m.matchKind) }} · {{ kindLevelLabel(m.matchKind) }}
               </p>
               <span
                 v-if="m.requiredGenre"

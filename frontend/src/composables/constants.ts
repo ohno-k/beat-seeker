@@ -75,3 +75,21 @@ export const DIFFICULTIES: ReadonlyArray<'NORMAL' | 'HYPER' | 'ANOTHER' | 'LEGGE
 export const DJ_LEVELS: ReadonlyArray<'AAA' | 'AA' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F'> = [
   'AAA', 'AA', 'A', 'B', 'C', 'D', 'E', 'F',
 ] as const;
+
+/**
+ * クリアランプの強弱を数値化したテーブル。大きいほど上位ランプ。
+ *
+ * 「ランプが上がったか」の判定や並び替えの順序比較に使う。
+ * バックエンドの `ScoreController.getClearTypeRank` / `LeagueChartNotation.clearTypeRank` と同一の値域。
+ */
+export const CLEAR_TYPE_RANK: Record<string, number> = {
+  'FULLCOMBO CLEAR': 7,
+  'EX HARD CLEAR': 6,
+  'HARD CLEAR': 5,
+  'CLEAR': 4,
+  'EASY CLEAR': 3,
+  'ASSIST CLEAR': 2,
+  'FAILED': 1,
+  'NO PLAY': 0,
+  '---': 0,
+};

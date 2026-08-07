@@ -18,6 +18,22 @@
       </button>
     </div>
 
+    <!-- 歴代ベスト反映トグル。過去作を取り込み済みの本人にだけ出す -->
+    <div v-if="canUseAllTime && hasPastImports" class="flex flex-wrap items-center gap-3">
+      <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap" :title="t('past.toggleHint')">
+        <div class="relative inline-flex items-center">
+          <input type="checkbox" :checked="showAllTime" @change="toggleAllTime" class="sr-only peer">
+          <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+        </div>
+        <span
+          class="text-xs sm:text-sm font-bold transition-colors"
+          :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'"
+        >{{ t('past.toggle') }}</span>
+        <span v-if="isLoadingPast" class="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
+      </label>
+      <span v-if="showAllTime" class="text-xs text-amber-600 dark:text-amber-400">{{ t('past.tierNote') }}</span>
+    </div>
+
     <!-- Tier Cards Row -->
     <div class="grid grid-cols-1 gap-6" :class="{ 'sm:grid-cols-2': showRateTier }">
       <!-- Beat-Tier (Lv11/12) -->
@@ -33,13 +49,13 @@
             </svg>
           </button>
         </div>
-        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Beat-Tier</p>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Beat-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
         <div class="flex flex-col items-center z-10 text-center">
           <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rankInfo.color">
             {{ rankInfo.name }} {{ rankInfo.tier || '' }}
           </h3>
-          <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500">{{ totalPoints.toFixed(1) }} pt</p>
+          <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500">{{ displayBeatPt.toFixed(1) }} pt</p>
         </div>
         <!-- Progress Bar -->
         <div class="w-full mt-4 bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden z-10">
@@ -50,7 +66,7 @@
         </div>
         <p v-if="nextRankInfo.nextRank" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-2 z-10 text-center">
           Next: {{ nextRankInfo.nextRank.name }} {{ nextRankInfo.nextRank.tier || '' }}<br/>
-          {{ t('dashboard.remaining') }} ({{ nextRankInfo.nextRank.minPoints - totalPoints > 0 ? (nextRankInfo.nextRank.minPoints - totalPoints).toFixed(1) : 0 }} pt)
+          {{ t('dashboard.remaining') }} ({{ nextRankInfo.nextRank.minPoints - displayBeatPt > 0 ? (nextRankInfo.nextRank.minPoints - displayBeatPt).toFixed(1) : 0 }} pt)
         </p>
         <!-- DJ Name pie (topRanker only) -->
         <div v-if="isTopRankerView && beatTierDjPie.length > 0" class="w-full mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 z-10 flex flex-col sm:flex-row items-center gap-4">
@@ -80,13 +96,13 @@
             </svg>
           </button>
         </div>
-        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Rate-Tier</p>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Rate-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
         <div class="flex flex-col items-center z-10 text-center">
           <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rateTierRankInfo.color">
             {{ rateTierRankInfo.name }} {{ rateTierRankInfo.tier || '' }}
           </h3>
-          <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500">{{ rateTierPoints.toFixed(1) }} pt</p>
+          <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500">{{ displayRatePt.toFixed(1) }} pt</p>
         </div>
         <!-- Progress Bar -->
         <div class="w-full mt-4 bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden z-10">
@@ -97,7 +113,7 @@
         </div>
         <p v-if="rateTierNextRankInfo.nextRank" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-2 z-10 text-center">
           Next: {{ rateTierNextRankInfo.nextRank.name }} {{ rateTierNextRankInfo.nextRank.tier || '' }}<br/>
-          {{ t('dashboard.remaining') }} ({{ rateTierNextRankInfo.nextRank.minPoints - rateTierPoints > 0 ? (rateTierNextRankInfo.nextRank.minPoints - rateTierPoints).toFixed(1) : 0 }} pt)
+          {{ t('dashboard.remaining') }} ({{ rateTierNextRankInfo.nextRank.minPoints - displayRatePt > 0 ? (rateTierNextRankInfo.nextRank.minPoints - displayRatePt).toFixed(1) : 0 }} pt)
         </p>
         <!-- DJ Name pie (topRanker only) -->
         <div v-if="isTopRankerView && rateTierDjPie.length > 0" class="w-full mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 z-10 flex flex-col sm:flex-row items-center gap-4">
@@ -225,8 +241,9 @@ import type { ScoreData } from '../types/ScoreData';
 import {
   getRankInfo, getNextRankInfo,
   getRateTierRankInfo, getNextRateTierRankInfo,
-  calculateScoreRateTierPoints,
+  calculateScoreRateTierPoints, calculateTotalPoints,
 } from '../utils/beatTier';
+import { usePastScores } from '../composables/usePastScores';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
 import RateTierInfoModal from './RateTierInfoModal.vue';
 import RankIcon from './RankIcon.vue';
@@ -348,14 +365,72 @@ const rateTierDjPie = computed(() => {
 const showInfoModal = ref(false);
 const showRateInfoModal = ref(false);
 
-// ---- Beat-Tier 算出 ----
-/** 【computed の役割】 現在の Beat-PT に対応するティア情報（名称、色、アイコン等）。 */
-const rankInfo = computed(() => getRankInfo(props.totalPoints));
-/** 【computed の役割】 次のティアまでの差分情報（必要 pt、ティア名）。 */
-const nextRankInfo = computed(() => getNextRankInfo(props.totalPoints));
+// ---- 歴代ベスト（過去作反映）----
+const {
+  fetchPastBest,
+  fetchSummary: fetchPastSummary,
+  applyAllTimeBest,
+  hasPastImports,
+  isLoading: isLoadingPast,
+} = usePastScores();
+
+/**
+ * 「歴代ベストを反映」トグルの状態。
+ * ON にすると Beat-Tier / Rate-Tier のカードが、過去作を含めた歴代ベストで再計算した
+ * PT とティアを表示する。
+ *
+ * 重要: これは表示だけの切り替えで、サーバーに保存される値には一切影響しない。
+ * 履歴ログ（成長記録）とランキングは現行作のスコアだけで算出され続ける。
+ */
+const showAllTime = ref(false);
+
+/** 歴代ベストを扱えるか。過去作は本人のデータなので、他ユーザー閲覧中は出さない。 */
+const canUseAllTime = computed(() => !!user.value && !isViewingOther.value && !props.viewingMode);
+
+/**
+ * 【関数の役割】 トグルの切り替え。ON にする瞬間だけ過去作スコアを取得する
+ * （数千件になり得るので、必要になるまで取りに行かない）。
+ */
+const toggleAllTime = async () => {
+  if (showAllTime.value) {
+    showAllTime.value = false;
+    return;
+  }
+  try {
+    await fetchPastBest();
+    showAllTime.value = true;
+  } catch {
+    // 取得失敗時は OFF のまま据え置く
+  }
+};
+
+// トグルの表示可否判定にだけ使う軽量なサマリを先に取得しておく。
+onMounted(() => {
+  if (!canUseAllTime.value) return;
+  fetchPastSummary().catch(() => { /* 握り潰し: トグルが出ないだけ */ });
+});
 
 /** 【computed の役割】 階層化スコアをフラット配列に変換（曲 × 難易度 1 レコード）。 */
 const allFlattenedScores = computed(() => flattenScores(props.scores));
+
+/** 【computed の役割】 過去作のベストを重ねたレコード。歴代 PT の算出元。 */
+const allTimeRecords = computed(() => applyAllTimeBest(allFlattenedScores.value));
+
+/**
+ * 【computed の役割】 歴代ベースの Beat-PT。
+ * App.vue が現行作について行っているのと同じ計算（上位 100 譜面の合計）を、
+ * 歴代ベストで上書きしたレコードに対して適用する。
+ */
+const allTimeBeatPt = computed(() => calculateTotalPoints(allTimeRecords.value));
+
+/** 【computed の役割】 実際にカードへ表示する Beat-PT。トグルに応じて切り替える。 */
+const displayBeatPt = computed(() => (showAllTime.value ? allTimeBeatPt.value : props.totalPoints));
+
+// ---- Beat-Tier 算出 ----
+/** 【computed の役割】 表示中の Beat-PT に対応するティア情報（名称、色、アイコン等）。 */
+const rankInfo = computed(() => getRankInfo(displayBeatPt.value));
+/** 【computed の役割】 次のティアまでの差分情報（必要 pt、ティア名）。 */
+const nextRankInfo = computed(() => getNextRankInfo(displayBeatPt.value));
 
 /**
  * 【computed の役割】 Rate-Tier ポイント算出。
@@ -364,9 +439,8 @@ const allFlattenedScores = computed(() => flattenScores(props.scores));
  *     （バックエンド ScoreRecalculationService と一致する挙動）
  *   - rateTierPointsOverride（TOP ランカー等の既計算値）が与えられていればそれを優先
  */
-const rateTierPoints = computed(() => {
-  if (props.rateTierPointsOverride != null) return props.rateTierPointsOverride;
-  const eligible = allFlattenedScores.value
+const calcRateTierPoints = (records: ReturnType<typeof flattenScores>): number => {
+  const eligible = records
     .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0);
   const pts = eligible
     .map(s => calculateScoreRateTierPoints(s.scoreRate))
@@ -377,11 +451,23 @@ const rateTierPoints = computed(() => {
   const perfectRateCount = eligible.filter(s => s.scoreRate >= 100.0).length;
   if (perfectRateCount > 100) sum += (perfectRateCount - 100);
   return Math.round(sum * 10) / 10;
+};
+
+const rateTierPoints = computed(() => {
+  if (props.rateTierPointsOverride != null) return props.rateTierPointsOverride;
+  return calcRateTierPoints(allFlattenedScores.value);
 });
+
+/** 【computed の役割】 歴代ベースの Rate-PT。現行と同じ計算式を歴代ベストのレコードに適用する。 */
+const allTimeRatePt = computed(() => calcRateTierPoints(allTimeRecords.value));
+
+/** 【computed の役割】 実際にカードへ表示する Rate-PT。トグルに応じて切り替える。 */
+const displayRatePt = computed(() => (showAllTime.value ? allTimeRatePt.value : rateTierPoints.value));
+
 /** 【computed の役割】 Rate-Tier の現在ティア情報。 */
-const rateTierRankInfo = computed(() => getRateTierRankInfo(rateTierPoints.value));
+const rateTierRankInfo = computed(() => getRateTierRankInfo(displayRatePt.value));
 /** 【computed の役割】 Rate-Tier の次ティア情報。 */
-const rateTierNextRankInfo = computed(() => getNextRateTierRankInfo(rateTierPoints.value));
+const rateTierNextRankInfo = computed(() => getNextRateTierRankInfo(displayRatePt.value));
 
 // ---- Lv12 クイック統計（UI サマリーカードで使う軽量集計）----
 /** 【computed の役割】 Lv12 全譜面の配列。 */

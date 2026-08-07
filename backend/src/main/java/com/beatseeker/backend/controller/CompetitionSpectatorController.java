@@ -9,6 +9,7 @@ import com.beatseeker.backend.repository.CompetitionMatchRepository;
 import com.beatseeker.backend.repository.CompetitionMatchupRepository;
 import com.beatseeker.backend.repository.CompetitionRepository;
 import com.beatseeker.backend.repository.CompetitionTeamRepository;
+import com.beatseeker.backend.service.CompetitionMatchKinds;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -84,8 +85,10 @@ public class CompetitionSpectatorController {
         for (CompetitionMatchup mu : matchups) {
             if (!Boolean.TRUE.equals(mu.getConfigured())) continue;
 
-            // 起用公開は起用公開日時 (lineupPublishAt) 到達で両サイド自動公開 (起用クローズとは独立)。
-            boolean lineupPublished = comp.isLineupPublished();
+            // 起用公開は起用公開日時 到達で両サイド自動公開 (起用クローズとは独立)。
+            // 決勝は決勝用の公開日時 (finalsLineupPublishAt) で判定する。未設定の間は観戦 URL にも起用を出さない。
+            boolean lineupPublished =
+                    comp.isLineupPublishedFor(Boolean.TRUE.equals(mu.getIsFinals()));
             boolean lineupPublishedA = lineupPublished;
             boolean lineupPublishedB = lineupPublished;
 
@@ -115,13 +118,9 @@ public class CompetitionSpectatorController {
 
     // ── 内部ヘルパ ───────────────────────────────────────────
 
+    /** 戦種別の表示順 (先鋒 → … → 大将)。予選 3 戦 / 決勝 7 戦のどちらも同じ比較で並ぶ。 */
     private static int matchKindOrder(String kind) {
-        return switch (kind) {
-            case "vanguard" -> 0;
-            case "middle" -> 1;
-            case "captain" -> 2;
-            default -> 99;
-        };
+        return CompetitionMatchKinds.order(kind);
     }
 
     private Map<String, Object> competitionMap(Competition c) {

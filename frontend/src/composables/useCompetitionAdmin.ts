@@ -45,6 +45,17 @@ export interface CompetitionSummary {
    * true になると対戦相手・観戦 URL・選手 URL に起用が公開される。起用クローズとは独立。
    */
   lineupPublished: boolean;
+  /**
+   * 決勝の起用クローズ日時 (ISO ローカル日時)。null なら未設定 = 決勝の起用はいつでも編集できる。
+   * 決勝は予選終了後に生成されるため、予選の deadlineAt とは別スケジュールで持つ。
+   */
+  finalsDeadlineAt: string | null;
+  /** 決勝の起用がクローズ済みか (finalsDeadlineAt からの派生状態)。 */
+  finalsLineupClosed: boolean;
+  /** 決勝の起用公開日時 (ISO ローカル日時)。null なら未設定 = 決勝の起用は非公開のまま。 */
+  finalsLineupPublishAt: string | null;
+  /** 決勝の起用が公開済みか (finalsLineupPublishAt からの派生状態)。 */
+  finalsLineupPublished: boolean;
 }
 
 export interface CompetitionTeamDto {
@@ -99,10 +110,14 @@ export interface CompetitionMatchupDto {
 
 export type CompetitionSongGenre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
 
+// 戦種別 (予選 3 戦 / 決勝 7 戦) の定義は competitionMatchKinds に集約。
+export type { MatchKind } from './competitionMatchKinds';
+import type { MatchKind } from './competitionMatchKinds';
+
 export interface CompetitionMatchDto {
   id: number;
   matchupId: number;
-  matchKind: 'vanguard' | 'middle' | 'captain';
+  matchKind: MatchKind;
   /** 運営が試合に指定したジャンル。null なら未指定 (= プレイヤー側に提出 UI を出さない)。 */
   requiredGenre: CompetitionSongGenre | null;
   playerAId: number | null;
@@ -178,7 +193,7 @@ export interface CompetitionStrategyResult {
 
 export interface CompetitionRevealMatch {
   matchId: number;
-  matchKind: 'vanguard' | 'middle' | 'captain';
+  matchKind: MatchKind;
   requiredGenre: CompetitionSongGenre | null;
   matchupOrder: number;
   teamAName: string | null;
@@ -875,6 +890,35 @@ export function useCompetitionAdmin() {
     await fetchCompetition(competitionId);
   };
 
+  /**
+   * 決勝の起用クローズ日時 (finalsDeadlineAt) を設定/解除する。予選の deadlineAt とは独立。
+   * null / '' の間は決勝の起用をいつでも編集できる (決勝生成直後の既定状態)。
+   */
+  const setFinalsDeadline = async (competitionId: number, finalsDeadlineAt: string | null): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/finals-deadline`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ finalsDeadlineAt }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
+  /**
+   * 決勝の起用公開日時 (finalsLineupPublishAt) を設定/解除する。
+   * null / '' の間は決勝の起用が相手 TL・観戦 URL・選手 URL に一切公開されない。
+   */
+  const setFinalsLineupPublishAt = async (
+    competitionId: number,
+    finalsLineupPublishAt: string | null,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/finals-lineup-publish-at`,
+      { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ finalsLineupPublishAt }) },
+    );
+    await throwIfError(res);
+    await fetchCompetition(competitionId);
+  };
+
   /** 観戦客向け対戦表公開トークンを発行/再発行する (team5 用)。 */
   const regenerateSpectatorToken = async (competitionId: number): Promise<string> => {
     const res = await fetch(
@@ -930,6 +974,9 @@ export function useCompetitionAdmin() {
     setDeadline,
     // 起用公開日時 (deadlineAt とは独立)
     setLineupPublishAt,
+    // 決勝の起用クローズ日時 / 起用公開日時 (予選とは別スケジュール)
+    setFinalsDeadline,
+    setFinalsLineupPublishAt,
     // 運営チャット
     fetchChatThreads,
     sendChatReply,

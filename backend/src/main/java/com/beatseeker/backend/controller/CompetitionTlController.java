@@ -3,6 +3,7 @@ package com.beatseeker.backend.controller;
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.AdminAuthService;
+import com.beatseeker.backend.service.CompetitionMatchKinds;
 import com.beatseeker.backend.service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,14 @@ public class CompetitionTlController {
     );
     /** 1 チームが予選で StrategyCard を使える matchup 数の上限 (決勝は対象外)。 */
     public static final int STRATEGY_MATCHUP_LIMIT_PER_TEAM = 2;
+
+    /**
+     * 決勝 (7 戦) で 1 人の選手を起用できる最大戦数。
+     *
+     * <p>1 チーム 4 人で 7 枠を埋めるため複数起用が前提。上限 2 戦かつ連続出場禁止で運用する。
+     * 7 枠 ÷ 2 戦 = 最低 4 人必要なので、全枠が埋まった時点で 4 人全員の出場が保証される。
+     */
+    public static final int FINALS_MAX_MATCHES_PER_PLAYER = 2;
 
     private final CompetitionTeamRepository teamRepository;
     private final CompetitionParticipantRepository participantRepository;
@@ -156,6 +165,8 @@ public class CompetitionTlController {
         }
         root.put("strategyLimit", STRATEGY_MATCHUP_LIMIT_PER_TEAM);
         root.put("strategyUsedMatchupCount", myEnabledPrelimMatchupIds.size());
+        // 決勝 (7 戦) の起用ルール: 1 人最大 2 戦・連続出場禁止。フロントの選択肢制御に使う。
+        root.put("finalsMaxMatchesPerPlayer", FINALS_MAX_MATCHES_PER_PLAYER);
 
         boolean compFinished = "finished".equals(comp.getStatus());
 
@@ -171,15 +182,18 @@ public class CompetitionTlController {
             if (!iAmA && !iAmB) continue;
 
             CompetitionTeam opponent = iAmA ? mu.getTeamB() : mu.getTeamA();
+            boolean isFinals = Boolean.TRUE.equals(mu.getIsFinals());
 
-            // 起用公開は起用公開日時 (lineupPublishAt) 到達で両サイド一斉に自動公開 (起用クローズとは独立)。
-            boolean lineupPublished = comp.isLineupPublished();
+            // 起用公開は起用公開日時 到達で両サイド一斉に自動公開 (起用クローズとは独立)。
+            // 決勝は予選と別スケジュール (finalsLineupPublishAt)。未設定の間は非公開のまま。
+            boolean lineupPublished = comp.isLineupPublishedFor(isFinals);
             boolean myLineupPublished = lineupPublished;
             boolean opponentLineupPublished = lineupPublished;
 
             Map<String, Object> mum = new LinkedHashMap<>();
             mum.put("matchupId", mu.getId());
             mum.put("matchupOrder", mu.getMatchupOrder());
+            mum.put("isFinals", isFinals);
             mum.put("mySide", iAmA ? "a" : "b");
             mum.put("myLineupPublished", myLineupPublished);
             mum.put("opponentLineupPublished", opponentLineupPublished);
@@ -188,13 +202,14 @@ public class CompetitionTlController {
             oppTeam.put("teamName", opponent != null ? opponent.getTeamName() : null);
             mum.put("opponentTeam", oppTeam);
 
-            // この matchup の 3 試合を取得し vanguard→middle→captain 順に並べる
+            // この matchup の試合を取得し先鋒 → … → 大将 の順に並べる (予選 3 戦 / 決勝 7 戦)。
             List<CompetitionMatch> matches = matchRepository.findByMatchupOrderByIdAsc(mu);
             matches.sort(Comparator.comparingInt(m -> matchKindOrder(m.getMatchKind())));
 
             List<Map<String, Object>> matchMaps = new ArrayList<>();
-            // 手動ロックは廃止。起用クローズ日時 (comp.deadlineAt) を過ぎたら両サイド一斉にロック扱い。
-            boolean closed = comp.isLineupClosed();
+            // 手動ロックは廃止。起用クローズ日時を過ぎたら両サイド一斉にロック扱い。
+            // 決勝は決勝用のクローズ日時 (finalsDeadlineAt) で判定する (未設定の間は編集可)。
+            boolean closed = comp.isLineupClosedFor(isFinals);
             for (CompetitionMatch match : matches) {
                 CompetitionParticipant mine = iAmA ? match.getPlayerA() : match.getPlayerB();
                 CompetitionParticipant theirs = iAmA ? match.getPlayerB() : match.getPlayerA();
@@ -272,9 +287,12 @@ public class CompetitionTlController {
         if (!iAmA && !iAmB) {
             return ResponseEntity.badRequest().body(Map.of("message", "この試合は自チームの担当ではありません"));
         }
+        boolean isFinals = Boolean.TRUE.equals(matchup.getIsFinals());
         // 手動ロック廃止: 起用クローズ日時を過ぎていたら編成変更不可。
-        if (comp.isLineupClosed()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ日時を過ぎたため編成変更できません"));
+        // 決勝は決勝用のクローズ日時 (finalsDeadlineAt) を見る。予選の締切とは独立。
+        if (comp.isLineupClosedFor(isFinals)) {
+            return ResponseEntity.badRequest().body(Map.of("message",
+                    (isFinals ? "決勝の" : "") + "起用クローズ日時を過ぎたため編成変更できません"));
         }
 
         if (req == null || req.participantId() == null) {
@@ -290,21 +308,39 @@ public class CompetitionTlController {
             return ResponseEntity.badRequest().body(Map.of("message", "自チームのメンバーではありません"));
         }
 
-        // 同一 matchup 内で同じ participant を別 slot にアサインしていないかチェック
+        // 同一 matchup 内での重複起用チェック。予選と決勝でルールが異なる。
+        //  予選 (3 戦): 1 人 1 戦まで。すでに別 slot にいるなら弾く。
+        //  決勝 (7 戦): 4 人で 7 枠を埋めるため 1 人 2 戦まで。ただし連続する戦への起用は禁止。
+        //               (7 枠 ÷ 1 人 2 戦上限 = 最低 4 人必要なので、全枠が埋まれば 4 人全員が自動的に出場する)
         List<CompetitionMatch> sibling = matchRepository.findByMatchupOrderByIdAsc(matchup);
+        int alreadyAssignedCount = 0;
         for (CompetitionMatch s : sibling) {
             if (s.getId().equals(match.getId())) continue;
             CompetitionParticipant mineInSibling = iAmA ? s.getPlayerA() : s.getPlayerB();
-            if (mineInSibling != null && mineInSibling.getId().equals(assignee.getId())) {
+            if (mineInSibling == null || !mineInSibling.getId().equals(assignee.getId())) continue;
+
+            if (!isFinals) {
                 return ResponseEntity.badRequest().body(Map.of("message",
                         assignee.getDisplayName() + " はすでに " + matchKindLabel(s.getMatchKind())
                                 + " にアサイン済みです。先に外してください"));
             }
+            alreadyAssignedCount++;
+            if (CompetitionMatchKinds.isAdjacent(match.getMatchKind(), s.getMatchKind())) {
+                return ResponseEntity.badRequest().body(Map.of("message",
+                        assignee.getDisplayName() + " は隣の " + matchKindLabel(s.getMatchKind())
+                                + " に起用済みです (決勝は連続出場禁止)"));
+            }
+        }
+        if (isFinals && alreadyAssignedCount >= FINALS_MAX_MATCHES_PER_PLAYER) {
+            return ResponseEntity.badRequest().body(Map.of("message",
+                    assignee.getDisplayName() + " はすでに決勝で "
+                            + FINALS_MAX_MATCHES_PER_PLAYER + " 戦に起用済みです (1 人 "
+                            + FINALS_MAX_MATCHES_PER_PLAYER + " 戦まで)"));
         }
 
         // 予選コスト制限のチェック (決勝 matchup は対象外)。
         // 既に他の予選試合で消費したコスト + 今回の戦コストが INITIAL_COST を超えないこと。
-        if (!Boolean.TRUE.equals(matchup.getIsFinals())) {
+        if (!isFinals) {
             int costForThisKind = COST_PER_KIND.getOrDefault(match.getMatchKind(), 0);
             int spentExceptThis = 0;
             List<CompetitionMatch> allMatches = matchRepository.findAllByCompetition(comp);
@@ -390,12 +426,13 @@ public class CompetitionTlController {
         final CompetitionParticipant mine = iAmA ? match.getPlayerA() : match.getPlayerB();
         CompetitionParticipant theirs = iAmA ? match.getPlayerB() : match.getPlayerA();
 
-        // 発動可能ゲート
-        if (!comp.isLineupClosed()) {
+        // 発動可能ゲート (決勝 matchup は決勝用のクローズ日時 / 公開日時で判定する)
+        boolean isFinalsMatchup = Boolean.TRUE.equals(matchup.getIsFinals());
+        if (!comp.isLineupClosedFor(isFinalsMatchup)) {
             return ResponseEntity.badRequest().body(Map.of("message", "起用クローズ後に発動を決定できます"));
         }
-        // 相手のオーダー(起用)が公開日時 (lineupPublishAt) を過ぎて公開されてから発動を決定できる (起用クローズとは独立)。
-        if (!comp.isLineupPublished()) {
+        // 相手のオーダー(起用)が公開日時を過ぎて公開されてから発動を決定できる (起用クローズとは独立)。
+        if (!comp.isLineupPublishedFor(isFinalsMatchup)) {
             return ResponseEntity.badRequest().body(Map.of("message", "相手のオーダー(起用)公開後に発動を決定できます"));
         }
         if (mine == null || theirs == null) {
@@ -519,22 +556,14 @@ public class CompetitionTlController {
 
     // ── 内部ヘルパ ───────────────────────────────────────────
 
+    /** 戦種別の表示順 (先鋒 → … → 大将)。予選 3 戦 / 決勝 7 戦のどちらも同じ比較で並ぶ。 */
     private static int matchKindOrder(String kind) {
-        return switch (kind) {
-            case "vanguard" -> 0;
-            case "middle" -> 1;
-            case "captain" -> 2;
-            default -> 99;
-        };
+        return CompetitionMatchKinds.order(kind);
     }
 
+    /** 戦種別の日本語ラベル (「先鋒戦」等)。 */
     private static String matchKindLabel(String kind) {
-        return switch (kind) {
-            case "vanguard" -> "先鋒戦";
-            case "middle" -> "中堅戦";
-            case "captain" -> "大将戦";
-            default -> kind;
-        };
+        return CompetitionMatchKinds.label(kind);
     }
 
     // ── レスポンス整形 ───────────────────────────────────────

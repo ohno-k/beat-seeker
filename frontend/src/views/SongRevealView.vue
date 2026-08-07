@@ -32,6 +32,7 @@ import {
 import strategySongs from '../data/strategy_card_songs.json';
 import { useToast } from '../composables/useToast';
 import { useSe } from '../composables/useSe';
+import { KIND_LABEL_JA, LEVELS_FOR_KIND, type MatchKind } from '../composables/competitionMatchKinds';
 
 const { songDataBody, fetchGameData } = useGameData();
 const { competitions, fetchCompetitions, fetchRevealData } = useCompetitionAdmin();
@@ -135,14 +136,9 @@ const resolveSongData = (pick: CompetitionRevealPick): SongDataEntry | null => {
  */
 type StrategyPoolSong = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
 const strategyPool = strategySongs as Record<CompetitionSongGenre, Record<string, StrategyPoolSong[]>>;
-const LEVELS_FOR_KIND: Record<'vanguard' | 'middle' | 'captain', number[]> = {
-  vanguard: [8, 9, 10],
-  middle: [11],
-  captain: [12],
-};
 
 /** matchKind と相手の pick から、ランダム化用プール (genre × Lv帯) を集める。 */
-const buildSpinPool = (matchKind: 'vanguard' | 'middle' | 'captain', opponentPick: CompetitionRevealPick): StrategyPoolSong[] => {
+const buildSpinPool = (matchKind: MatchKind, opponentPick: CompetitionRevealPick): StrategyPoolSong[] => {
   const pool: StrategyPoolSong[] = [];
   for (const lv of LEVELS_FOR_KIND[matchKind]) {
     const arr = strategyPool[opponentPick.songGenre]?.[String(lv)];
@@ -236,11 +232,7 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
   closeImportModal();
 };
 
-const KIND_LABEL: Record<'vanguard' | 'middle' | 'captain', string> = {
-  vanguard: '先鋒戦',
-  middle: '中堅戦',
-  captain: '大将戦',
-};
+const KIND_LABEL = KIND_LABEL_JA;
 
 /**
  * URL に {@code ?competitionId=X&matchId=Y} があれば、その試合を自動取り込み + REVEAL フェーズへ遷移。

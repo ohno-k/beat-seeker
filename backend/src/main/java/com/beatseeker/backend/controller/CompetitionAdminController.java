@@ -2,6 +2,7 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
+import com.beatseeker.backend.service.CompetitionMatchKinds;
 import com.beatseeker.backend.service.OrganizerAuthService;
 import com.beatseeker.backend.service.StrategyPoolService;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +36,11 @@ import java.util.*;
 @RequestMapping("/api/competitions")
 public class CompetitionAdminController {
 
-    /** 戦種別。先鋒 → 中堅 → 大将 の順で 1 matchup ぶんの 3 試合を生成する。 */
-    private static final List<String> MATCH_KINDS = List.of("vanguard", "middle", "captain");
+    /** 予選の戦種別。先鋒 → 中堅 → 大将 の順で 1 matchup ぶんの 3 試合を生成する。 */
+    private static final List<String> MATCH_KINDS = CompetitionMatchKinds.PRELIM;
+
+    /** 決勝の戦種別。先鋒 → 次鋒 → 五将 → 中堅 → 三将 → 副将 → 大将 の 7 試合。 */
+    private static final List<String> FINALS_MATCH_KINDS = CompetitionMatchKinds.FINALS;
 
     /** 1 大会あたり 5 チーム固定。 */
     private static final int TEAMS_PER_COMPETITION = 5;
@@ -48,12 +52,8 @@ public class CompetitionAdminController {
     private static final Set<String> ALLOWED_GENRES =
             Set.of("NOTES", "PEAK", "CHORD", "CHARGE", "SCRATCH", "SOF-LAN", "INSANE");
 
-    /** 戦種別ごとの 1 曲あたり獲得ポイント (予選: 先鋒2 / 中堅3 / 大将4)。 */
-    private static final Map<String, Integer> POINTS_PER_SONG_BY_KIND = Map.of(
-            "vanguard", 2,
-            "middle", 3,
-            "captain", 4
-    );
+    // 戦種別ごとの 1 曲あたり獲得ポイント (予選: 先鋒2 / 中堅3 / 大将4、決勝: 先鋒4/次鋒4/五将5/中堅5/三将6/副将6/大将7)
+    // は CompetitionMatchKinds#pointsPerSong に集約している。
 
     /** matchup 勝利時のチーム勝ち点。 */
     private static final int MATCHUP_WIN_PT = 3;
@@ -443,14 +443,9 @@ public class CompetitionAdminController {
         return ResponseEntity.ok(root);
     }
 
-    /** matchKind の並び順 (vanguard → middle → captain)。 */
+    /** matchKind の並び順 (先鋒 → … → 大将)。予選 3 戦 / 決勝 7 戦のどちらも同じ比較で並ぶ。 */
     private static int matchKindRank(String kind) {
-        return switch (kind) {
-            case "vanguard" -> 0;
-            case "middle" -> 1;
-            case "captain" -> 2;
-            default -> 99;
-        };
+        return CompetitionMatchKinds.order(kind);
     }
 
     /**
@@ -636,7 +631,8 @@ public class CompetitionAdminController {
                 Integer aw = m.getASongsWon();
                 Integer bw = m.getBSongsWon();
                 if (aw == null || bw == null) { allRecorded = false; continue; }
-                int kindPt = POINTS_PER_SONG_BY_KIND.getOrDefault(m.getMatchKind(), 0);
+                // 予選順位の集計なので予選のポイント表を使う (決勝 matchup はループ冒頭で除外済み)。
+                int kindPt = CompetitionMatchKinds.pointsPerSong(m.getMatchKind(), false);
                 matchupAPts += aw * kindPt;
                 matchupBPts += bw * kindPt;
             }
@@ -729,7 +725,12 @@ public class CompetitionAdminController {
      * 【メソッドの役割】 予選 10 試合全結果記録後に、上位 2 チームで決勝 matchup を 1 件生成する。
      *
      * <p>決勝 matchup は {@code isFinals=true} としてマークされ、コスト計算・StrategyCard 2-of-4 制限の対象外。
+     * 試合は決勝構成の 7 戦 (先鋒 → 次鋒 → 五将 → 中堅 → 三将 → 副将 → 大将) を生成する。
      * 既に決勝が生成済みの場合は 400。
+     *
+     * <p>決勝のスケジュール ({@code finalsDeadlineAt} / {@code finalsLineupPublishAt}) は未設定のままなので、
+     * 生成直後は「進出 2 チームの TL が決勝の起用表を編集でき、起用内容は相手・観戦・選手に非公開」の状態になる。
+     * 起用を締め切る / 公開するタイミングは運営が別途この 2 つの日時を設定して制御する。
      */
     @PostMapping("/{competitionId}/generate-finals")
     @Transactional
@@ -776,7 +777,8 @@ public class CompetitionAdminController {
         finalsMu.setConfigured(true);
         finalsMu = matchupRepository.save(finalsMu);
 
-        for (String kind : MATCH_KINDS) {
+        // 決勝は 7 戦 (先鋒 → 次鋒 → 五将 → 中堅 → 三将 → 副将 → 大将)。予選の 3 戦とは構成が違う。
+        for (String kind : FINALS_MATCH_KINDS) {
             CompetitionMatch m = new CompetitionMatch();
             m.setMatchup(finalsMu);
             m.setMatchKind(kind);
@@ -1066,6 +1068,70 @@ public class CompetitionAdminController {
         return ResponseEntity.ok(toCompetitionDetailMap(comp));
     }
 
+    /**
+     * 【メソッドの役割】 決勝の起用クローズ日時 ({@code finalsDeadlineAt}) を設定/解除する。
+     *
+     * <p>予選の {@code deadlineAt} とは独立。決勝は予選終了後に生成されるため、予選の締切をそのまま
+     * 使うと生成直後から編集不可になってしまう。未設定 (null) の間は決勝の起用をいつでも編集できる。
+     *
+     * <p>リクエストの {@code finalsDeadlineAt} は ISO ローカル日時文字列 (例: {@code 2026-06-27T21:00})。
+     * 空文字 / null を渡すと締切解除。
+     */
+    @PutMapping("/{competitionId}/finals-deadline")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> setFinalsDeadline(
+            Authentication auth, @PathVariable Long competitionId,
+            @RequestBody FinalsDeadlineRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if ("finished".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
+        }
+        if (req == null || req.finalsDeadlineAt() == null || req.finalsDeadlineAt().isBlank()) {
+            comp.setFinalsDeadlineAt(null);
+        } else {
+            try {
+                comp.setFinalsDeadlineAt(java.time.LocalDateTime.parse(req.finalsDeadlineAt()));
+            } catch (java.time.format.DateTimeParseException e) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "日時の形式が不正です (例: 2026-06-27T21:00)"));
+            }
+        }
+        competitionRepository.save(comp);
+        return ResponseEntity.ok(toCompetitionDetailMap(comp));
+    }
+
+    /**
+     * 【メソッドの役割】 決勝の起用公開日時 ({@code finalsLineupPublishAt}) を設定/解除する。
+     *
+     * <p>未設定 (null) の間は決勝の起用は相手 TL・観戦 URL・選手 URL に一切公開されない
+     * (決勝生成 → TL が非公開のまま起用 → 選手が自選曲提出、という運用のため)。
+     * 設定した日時 (JST) を過ぎると決勝の起用が公開され、決勝の StrategyCard 発動判断も可能になる。
+     */
+    @PutMapping("/{competitionId}/finals-lineup-publish-at")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> setFinalsLineupPublishAt(
+            Authentication auth, @PathVariable Long competitionId,
+            @RequestBody FinalsLineupPublishAtRequest req) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if ("finished".equals(comp.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "終了済の大会では変更できません"));
+        }
+        if (req == null || req.finalsLineupPublishAt() == null || req.finalsLineupPublishAt().isBlank()) {
+            comp.setFinalsLineupPublishAt(null);
+        } else {
+            try {
+                comp.setFinalsLineupPublishAt(java.time.LocalDateTime.parse(req.finalsLineupPublishAt()));
+            } catch (java.time.format.DateTimeParseException e) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "日時の形式が不正です (例: 2026-06-27T21:00)"));
+            }
+        }
+        competitionRepository.save(comp);
+        return ResponseEntity.ok(toCompetitionDetailMap(comp));
+    }
+
     // ── 状態遷移 ─────────────────────────────────────────────
 
     /**
@@ -1247,9 +1313,12 @@ public class CompetitionAdminController {
             if (!ALLOWED_GENRES.contains(genre)) {
                 return ResponseEntity.badRequest().body(Map.of("message", "未知のジャンル: " + genre));
             }
-            if ("INSANE".equals(genre) && !"captain".equals(match.getMatchKind())) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("message", "INSANE は大将戦 (captain) にのみ指定できます"));
+            // INSANE プールは Lv12 しか無いので、Lv12 の戦 (予選: 大将 / 決勝: 三将・副将・大将) のみ指定可。
+            if ("INSANE".equals(genre)
+                    && !CompetitionMatchKinds.levels(match.getMatchKind()).equals(List.of(12))) {
+                return ResponseEntity.badRequest().body(Map.of("message",
+                        "INSANE は Lv12 の戦にのみ指定できます ("
+                                + CompetitionMatchKinds.label(match.getMatchKind()) + " は対象外)"));
             }
         }
         match.setRequiredGenre(genre);
@@ -1476,6 +1545,11 @@ public class CompetitionAdminController {
         // 起用公開: lineupPublishAt を「公開日時」として運用。lineupPublished は現在 (JST) 時点の派生状態 (クローズとは独立)。
         m.put("lineupPublishAt", c.getLineupPublishAt());
         m.put("lineupPublished", c.isLineupPublished());
+        // 決勝は予選と別スケジュール。未設定 (null) の間は「起用編集可 & 起用非公開」。
+        m.put("finalsDeadlineAt", c.getFinalsDeadlineAt());
+        m.put("finalsLineupClosed", c.isFinalsLineupClosed());
+        m.put("finalsLineupPublishAt", c.getFinalsLineupPublishAt());
+        m.put("finalsLineupPublished", c.isFinalsLineupPublished());
         return m;
     }
 
@@ -1591,8 +1665,10 @@ public class CompetitionAdminController {
         m.put("matchupOrder", mu.getMatchupOrder());
         m.put("teamAId", mu.getTeamA() != null ? mu.getTeamA().getId() : null);
         m.put("teamBId", mu.getTeamB() != null ? mu.getTeamB().getId() : null);
-        // 起用公開は手動フラグを廃止し、起用公開日時 (lineupPublishAt) 到達で自動公開 (起用クローズとは独立)。
-        m.put("lineupPublished", mu.getCompetition().isLineupPublished());
+        // 起用公開は手動フラグを廃止し、起用公開日時到達で自動公開 (起用クローズとは独立)。
+        // 決勝 matchup は決勝用の公開日時 (finalsLineupPublishAt) で判定する。
+        m.put("lineupPublished",
+                mu.getCompetition().isLineupPublishedFor(Boolean.TRUE.equals(mu.getIsFinals())));
         m.put("isFinals", mu.getIsFinals());
         m.put("configured", mu.getConfigured());
         return m;
@@ -1693,6 +1769,12 @@ public class CompetitionAdminController {
 
     /** 起用 (オーダー) 公開日時設定リクエスト。{@code lineupPublishAt} = ISO ローカル日時 (JST の壁時計時刻)。 */
     public record LineupPublishAtRequest(String lineupPublishAt) {}
+
+    /** 決勝の起用クローズ日時設定リクエスト。空文字 / null で締切解除 (= 決勝の起用を締め切らない)。 */
+    public record FinalsDeadlineRequest(String finalsDeadlineAt) {}
+
+    /** 決勝の起用公開日時設定リクエスト。空文字 / null で公開解除 (= 決勝の起用を非公開のままにする)。 */
+    public record FinalsLineupPublishAtRequest(String finalsLineupPublishAt) {}
 
     /**
      * 運営チャット返信リクエスト。{@code body} が本文。

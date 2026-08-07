@@ -2,6 +2,7 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
+import com.beatseeker.backend.service.CompetitionMatchKinds;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -310,14 +311,12 @@ public class CompetitionPlayerController {
 
     // ── 内部ヘルパ ───────────────────────────────────────────
 
-    /** matchKind ごとの Lv 制約。vanguard: 8-10 / middle: 11 / captain: 12 */
+    /**
+     * matchKind ごとの Lv 制約。
+     * 予選: 先鋒 8-10 / 中堅 11 / 大将 12。決勝: 先鋒 8-10 / 次鋒 10 / 五将・中堅 11 / 三将・副将・大将 12。
+     */
     private boolean isLevelInRange(int level, String matchKind) {
-        return switch (matchKind) {
-            case "vanguard" -> level >= 8 && level <= 10;
-            case "middle" -> level == 11;
-            case "captain" -> level == 12;
-            default -> false;
-        };
+        return CompetitionMatchKinds.isLevelInRange(level, matchKind);
     }
 
     // ── 個人戦プレイヤー Read-only ビュー ──────────────────

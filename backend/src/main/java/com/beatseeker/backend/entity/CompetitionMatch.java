@@ -35,8 +35,10 @@ public class CompetitionMatch {
     private CompetitionMatchup matchup;
 
     /**
-     * 戦種別。{@code vanguard} (先鋒戦 Lv8-10) / {@code middle} (中堅戦 Lv11) / {@code captain} (大将戦 Lv12)。
-     * StrategyCard 発動時の Lv 帯制約に使う。
+     * 戦種別。予選 3 戦は {@code vanguard} (先鋒 Lv8-10) / {@code middle} (中堅 Lv11) / {@code captain} (大将 Lv12)。
+     * 決勝 7 戦はこれに {@code second} (次鋒 Lv10) / {@code fifth} (五将 Lv11) / {@code third} (三将 Lv12) /
+     * {@code vice} (副将 Lv12) を加えた 先鋒 → 次鋒 → 五将 → 中堅 → 三将 → 副将 → 大将。
+     * ラベル・Lv 帯・表示順・獲得ポイントの定義は {@code CompetitionMatchKinds} に集約している。
      */
     @Column(length = 16, nullable = false)
     private String matchKind;

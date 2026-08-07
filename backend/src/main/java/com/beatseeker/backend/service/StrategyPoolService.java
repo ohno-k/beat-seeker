@@ -18,18 +18,13 @@ import java.util.*;
  * ジャンル: NOTES / PEAK / CHORD / CHARGE / SCRATCH / SOF-LAN / INSANE
  * Lv: "8" 〜 "12"
  *
- * <p>抽選は matchKind の Lv 帯 (先鋒=8-10, 中堅=11, 大将=12) 全体から
+ * <p>抽選は matchKind の Lv 帯 (先鋒=8-10, 次鋒=10, 五将/中堅=11, 三将/副将/大将=12) 全体から
  * ジャンル指定で 1 曲ランダムに返す。StrategyCardView の {@code buildSpinPool} と同じ仕様。
  */
 @Component
 public class StrategyPoolService {
 
-    /** 戦種別 → Lv 帯 (StrategyCardView と同じ定義)。 */
-    private static final Map<String, List<Integer>> LEVELS_FOR_KIND = Map.of(
-            "vanguard", List.of(8, 9, 10),
-            "middle", List.of(11),
-            "captain", List.of(12)
-    );
+    // 戦種別 → Lv 帯は CompetitionMatchKinds に集約 (予選 3 戦 / 決勝 7 戦の両方を含む)。
 
     /** JSON エントリ 1 件分。strategy_card_songs.json のスキーマに対応。 */
     public static class PoolSong {
@@ -71,15 +66,15 @@ public class StrategyPoolService {
      * 【メソッドの役割】 指定ジャンル × matchKind の Lv 帯から 1 曲ランダム抽選する。
      *
      * @param genre     'NOTES' / 'PEAK' / ... / 'INSANE'
-     * @param matchKind 'vanguard' / 'middle' / 'captain'
+     * @param matchKind 'vanguard' / 'second' / 'fifth' / 'middle' / 'third' / 'vice' / 'captain'
      * @return ランダムに選ばれた曲。プールが空 / 未知の genre or matchKind なら null
      */
     public PoolSong drawRandom(String genre, String matchKind) {
         if (genre == null || matchKind == null) return null;
         Map<String, List<PoolSong>> byLevel = pool.get(genre);
         if (byLevel == null) return null;
-        List<Integer> levels = LEVELS_FOR_KIND.get(matchKind);
-        if (levels == null) return null;
+        List<Integer> levels = CompetitionMatchKinds.levels(matchKind);
+        if (levels.isEmpty()) return null;
         List<PoolSong> candidates = new ArrayList<>();
         for (Integer lv : levels) {
             List<PoolSong> arr = byLevel.get(String.valueOf(lv));

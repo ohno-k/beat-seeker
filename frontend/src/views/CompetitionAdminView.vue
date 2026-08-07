@@ -33,6 +33,13 @@ import {
 } from '../composables/useCompetitionAdmin';
 import { useToast } from '../composables/useToast';
 import { teamColorClass, genreSelectClass } from '../composables/competitionColors';
+import {
+  KIND_LABEL_JA,
+  kindLevelLabel,
+  kindOrder,
+  isLevel12Only,
+  type MatchKind,
+} from '../composables/competitionMatchKinds';
 import SongPickerModal from '../components/SongPickerModal.vue';
 
 const { user } = useAuth();
@@ -55,6 +62,8 @@ const {
   publishPick,
   setDeadline,
   setLineupPublishAt,
+  setFinalsDeadline,
+  setFinalsLineupPublishAt,
   deleteCompetition,
   regenerateParticipantToken,
   regenerateTlToken,
@@ -83,11 +92,8 @@ const {
 
 /** 試合に指定可能なジャンル (Strategy Card プールと同じ 7 種)。 */
 const ALL_GENRES: CompetitionSongGenre[] = ['NOTES', 'PEAK', 'CHORD', 'CHARGE', 'SCRATCH', 'SOF-LAN', 'INSANE'];
-const KIND_LABEL: Record<'vanguard' | 'middle' | 'captain', string> = {
-  vanguard: '先鋒戦',
-  middle: '中堅戦',
-  captain: '大将戦',
-};
+// 戦種別のラベル / Lv 帯 (予選 3 戦 / 決勝 7 戦) は competitionMatchKinds に集約。
+const KIND_LABEL = KIND_LABEL_JA;
 
 /** Competition セクション (Strategy Card / Song Reveal / 自選曲送信) と同じ 4 ID。 */
 const ORGANIZER_IDS = [18, 19, 23, 210];
@@ -389,13 +395,12 @@ const participantNameOf = (participantId: number | null): string => {
   return currentCompetition.value.participants.find(p => p.id === participantId)?.displayName ?? '?';
 };
 
-/** matchup ID に紐づく 3 試合 (vanguard → middle → captain) を返す。 */
+/** matchup ID に紐づく試合を先鋒 → … → 大将 の順で返す (予選 3 戦 / 決勝 7 戦)。 */
 const matchesForMatchup = (matchupId: number): CompetitionMatchDto[] => {
   if (!currentCompetition.value?.matches) return [];
-  const KIND_ORDER: Record<string, number> = { vanguard: 0, middle: 1, captain: 2 };
   return currentCompetition.value.matches
     .filter(m => m.matchupId === matchupId)
-    .sort((a, b) => KIND_ORDER[a.matchKind] - KIND_ORDER[b.matchKind]);
+    .sort((a, b) => kindOrder(a.matchKind) - kindOrder(b.matchKind));
 };
 
 /**
@@ -418,9 +423,12 @@ const handleGenreChange = async (match: CompetitionMatchDto, raw: string) => {
   }
 };
 
-/** matchKind 制約に応じてセレクタに出すジャンル候補。INSANE は captain のみ。 */
-const genresForKind = (matchKind: 'vanguard' | 'middle' | 'captain'): CompetitionSongGenre[] => {
-  return ALL_GENRES.filter(g => !(g === 'INSANE' && matchKind !== 'captain'));
+/**
+ * matchKind 制約に応じてセレクタに出すジャンル候補。
+ * INSANE はプールに Lv12 しか無いので、Lv12 の戦 (予選: 大将 / 決勝: 三将・副将・大将) のみ。
+ */
+const genresForKind = (matchKind: MatchKind): CompetitionSongGenre[] => {
+  return ALL_GENRES.filter(g => !(g === 'INSANE' && !isLevel12Only(matchKind)));
 };
 
 // ── 公開トグル ────────────────────────────────────────────
@@ -498,6 +506,67 @@ const handleClearLineupPublishAt = async () => {
   lineupPublishInput.value = '';
   await handleSaveLineupPublishAt();
 };
+
+// ── 決勝のスケジュール (JST) ─────────────────────────────
+// 決勝は予選終了後に生成されるため、予選のクローズ日時 / 公開日時をそのまま使うと
+// 生成直後から編集不可 & 即公開になってしまう。決勝専用の 2 日時で制御する。
+// どちらも未設定の間は「決勝の起用は編集可 & 非公開」= 決勝生成直後の既定状態。
+const finalsDeadlineInput = ref<string>('');
+const finalsPublishInput = ref<string>('');
+
+watch(
+  () => currentCompetition.value?.finalsDeadlineAt,
+  (iso) => { finalsDeadlineInput.value = toDatetimeLocal(iso ?? null); },
+  { immediate: true },
+);
+watch(
+  () => currentCompetition.value?.finalsLineupPublishAt,
+  (iso) => { finalsPublishInput.value = toDatetimeLocal(iso ?? null); },
+  { immediate: true },
+);
+
+const isSavingFinalsDeadline = ref(false);
+/** 決勝の起用クローズ日時を保存 (空なら締切解除 = 決勝の起用を締め切らない)。 */
+const handleSaveFinalsDeadline = async () => {
+  if (!currentCompetition.value) return;
+  isSavingFinalsDeadline.value = true;
+  try {
+    await setFinalsDeadline(currentCompetition.value.id, finalsDeadlineInput.value || null);
+    toast.success(finalsDeadlineInput.value ? '決勝の起用クローズ日時を設定しました' : '決勝のクローズ日時を解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isSavingFinalsDeadline.value = false;
+  }
+};
+const handleClearFinalsDeadline = async () => {
+  finalsDeadlineInput.value = '';
+  await handleSaveFinalsDeadline();
+};
+
+const isSavingFinalsPublish = ref(false);
+/** 決勝の起用公開日時を保存 (空なら公開解除 = 決勝の起用を非公開のままにする)。 */
+const handleSaveFinalsPublishAt = async () => {
+  if (!currentCompetition.value) return;
+  isSavingFinalsPublish.value = true;
+  try {
+    await setFinalsLineupPublishAt(currentCompetition.value.id, finalsPublishInput.value || null);
+    toast.success(finalsPublishInput.value ? '決勝の起用公開日時を設定しました' : '決勝の起用公開日時を解除しました');
+  } catch (e) {
+    toast.error((e as Error).message);
+  } finally {
+    isSavingFinalsPublish.value = false;
+  }
+};
+const handleClearFinalsPublishAt = async () => {
+  finalsPublishInput.value = '';
+  await handleSaveFinalsPublishAt();
+};
+
+/** 決勝 matchup が生成済みか (決勝スケジュール UI の表示条件)。 */
+const finalsGenerated = computed<boolean>(() =>
+  (currentCompetition.value?.matchups ?? []).some(mu => mu.isFinals),
+);
 
 // ── 運営チャット (TL ⇄ 運営) ────────────────────────────
 const chatThreads = ref<ChatThreadDto[]>([]);
@@ -1984,6 +2053,101 @@ const statusColor = (s: string) => ({
           </p>
         </section>
 
+        <!--
+          決勝のスケジュール (JST)。決勝は予選終了後に生成されるため、予選のクローズ/公開日時とは別枠。
+          どちらも未設定の間は「決勝の起用は編集可 & 非公開」= 決勝生成直後の状態。
+        -->
+        <section
+          v-if="finalsGenerated"
+          class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-md p-4 space-y-4"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-bold text-amber-600 dark:text-amber-300">🏆 決勝のスケジュール (JST)</h2>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span
+                class="text-[11px] font-bold px-2 py-0.5 rounded"
+                :class="currentCompetition.finalsLineupClosed
+                  ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
+                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'"
+              >
+                {{ currentCompetition.finalsLineupClosed ? '🔒 決勝の起用クローズ済み' : '✏ 決勝の起用受付中' }}
+              </span>
+              <span
+                class="text-[11px] font-bold px-2 py-0.5 rounded"
+                :class="currentCompetition.finalsLineupPublished
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                  : 'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300'"
+              >
+                {{ currentCompetition.finalsLineupPublished ? '📢 決勝のオーダー公開済み' : '🕒 決勝のオーダー非公開' }}
+              </span>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            決勝 (7 戦) は予選とは別スケジュールです。<b>両方とも未設定の間は「進出 2 チームの TL が決勝の起用を編集でき、
+            起用内容は相手・観戦 URL・選手 URL に非公開」</b>の状態になります。選手の自選曲提出は締切対象外です。
+          </p>
+
+          <div class="space-y-2">
+            <p class="text-[11px] font-bold text-slate-500">決勝の起用クローズ日時</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <input
+                type="datetime-local"
+                v-model="finalsDeadlineInput"
+                :disabled="currentCompetition.status === 'finished'"
+                class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+              />
+              <button
+                type="button"
+                @click="handleSaveFinalsDeadline"
+                :disabled="isSavingFinalsDeadline || currentCompetition.status === 'finished'"
+                class="shrink-0 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-300"
+              >保存</button>
+              <button
+                v-if="currentCompetition.finalsDeadlineAt"
+                type="button"
+                @click="handleClearFinalsDeadline"
+                :disabled="isSavingFinalsDeadline || currentCompetition.status === 'finished'"
+                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
+              >締切解除</button>
+            </div>
+            <p class="text-[10px] font-mono text-slate-400">
+              {{ currentCompetition.finalsDeadlineAt
+                ? '現在の設定: ' + new Date(currentCompetition.finalsDeadlineAt).toLocaleString('ja-JP')
+                : '未設定 (決勝の起用を締め切らない)' }}
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <p class="text-[11px] font-bold text-slate-500">決勝の起用公開日時</p>
+            <div class="flex items-center gap-2 flex-wrap">
+              <input
+                type="datetime-local"
+                v-model="finalsPublishInput"
+                :disabled="currentCompetition.status === 'finished'"
+                class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+              />
+              <button
+                type="button"
+                @click="handleSaveFinalsPublishAt"
+                :disabled="isSavingFinalsPublish || currentCompetition.status === 'finished'"
+                class="shrink-0 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-300"
+              >保存</button>
+              <button
+                v-if="currentCompetition.finalsLineupPublishAt"
+                type="button"
+                @click="handleClearFinalsPublishAt"
+                :disabled="isSavingFinalsPublish || currentCompetition.status === 'finished'"
+                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
+              >公開日時解除</button>
+            </div>
+            <p class="text-[10px] font-mono text-slate-400">
+              {{ currentCompetition.finalsLineupPublishAt
+                ? '現在の設定: ' + new Date(currentCompetition.finalsLineupPublishAt).toLocaleString('ja-JP')
+                : '未設定 (決勝の起用は非公開のまま)' }}
+            </p>
+          </div>
+        </section>
+
         <!-- 対戦表: 全 30 試合に対する運営ジャンル指定 (open 以降のみ表示) -->
         <section
           v-if="currentCompetition.matchups && currentCompetition.matches && currentCompetition.matchups.length > 0"
@@ -2095,9 +2259,7 @@ const statusColor = (s: string) => ({
                   <!-- 戦表記 -->
                   <div>
                     <p class="font-bold text-sm">{{ KIND_LABEL[match.matchKind] }}</p>
-                    <p class="text-[10px] font-mono text-slate-400">
-                      Lv {{ match.matchKind === 'vanguard' ? '8-10' : match.matchKind === 'middle' ? '11' : '12' }}
-                    </p>
+                    <p class="text-[10px] font-mono text-slate-400">{{ kindLevelLabel(match.matchKind) }}</p>
                   </div>
 
                   <!-- A 側プレイヤー (起用は公開状態に関係なく管理者には常に表示) -->

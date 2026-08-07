@@ -451,6 +451,9 @@
       </div>
     </div>
 
+    <!-- 過去作スコアの取り込み状況（本人のみ）。取り込み自体は通常の CSV 取り込み UI が行う -->
+    <PastScoreManager v-if="!props.viewingUserId && !props.shareToken" />
+
   </div>
 </template>
 
@@ -481,6 +484,7 @@ import { calculatePoints, WEIGHTS, getFolderRankInfoByRate, getFolderRankThresho
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import ShareTokenModal from './ShareTokenModal.vue';
 import IntegrationTokenModal from './IntegrationTokenModal.vue';
+import PastScoreManager from './PastScoreManager.vue';
 
 const props = defineProps<{
   viewingUserId?: number | null;

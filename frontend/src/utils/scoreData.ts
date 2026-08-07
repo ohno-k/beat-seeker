@@ -51,6 +51,12 @@ export interface ScoreRecord {
     djName?: string;
     /** スコア取得元。"arcade" / "infinitas"。表示の INF タグ判定に使う。 */
     source?: string;
+    /**
+     * 「歴代ベストを反映」表示時、この行の EX スコアが過去作由来である場合にその作品番号が入る。
+     * 現行作のスコアがそのまま使われている行では undefined。
+     * 付与は `usePastScores().applyAllTimeBest()` が行う（表示用途のみ）。
+     */
+    allTimeVersion?: number;
 }
 
 /** ScoreData プロパティ名として存在する 5 難易度のキー列挙。forEach の対象に使う。 */
@@ -91,20 +97,34 @@ const diffLabelToCode: Record<string, string> = {
     BEGINNER: '1', NORMAL: '2', HYPER: '3', ANOTHER: '4', LEGGENDARIA: '10'
 };
 
+/** {@link buildSongDict} のキャッシュ本体と、その生成元になった配列への参照。 */
+let songDictCache: Map<string, any> | null = null;
+let songDictSource: unknown = null;
+
 /**
  * 【内部ヘルパー】 リアクティブな曲データから `"タイトル_難易度コード"` をキーとする Map を構築する。
  *
- * flattenScores 内で頻繁にルックアップする都合、毎回構築するコストは小さくないものの、
- * 呼び出し頻度自体は限定的なのでキャッシュは持たない方針。
+ * 曲マスタは 6,000 件超あるため、構築は 1 回 6,000 回超の Map.set になる。
+ * {@link getSongMaxScore} は 1 譜面ごとに本関数を呼ぶので、譜面数ぶんループする箇所
+ * （歴代データの組み立て、CSV 取り込み後の差分整形、ARENA の表描画など）では
+ * 「譜面数 × 曲マスタ件数」= 2,000 万回規模の処理になり、数秒スレッドを止めていた。
+ *
+ * そのため元配列の参照が変わっていない限り構築結果を使い回す。
+ * `songDataBody` は useGameData 側で常に新しい配列を代入して更新され（in-place 変更はしない）、
+ * 参照が変われば必ず作り直されるので、キャッシュが古くなることはない。
  */
 function buildSongDict(): Map<string, any> {
-    const dict = new Map<string, any>();
     const body = songDataBody.value;
+    if (songDictCache && songDictSource === body) return songDictCache;
+
+    const dict = new Map<string, any>();
     if (body && Array.isArray(body)) {
         body.forEach((s: any) => {
             dict.set(`${s.title}_${s.difficulty}`, s);
         });
     }
+    songDictCache = dict;
+    songDictSource = body;
     return dict;
 }
 
