@@ -10,6 +10,7 @@ import com.beatseeker.backend.repository.CompetitionMatchupRepository;
 import com.beatseeker.backend.repository.CompetitionRepository;
 import com.beatseeker.backend.repository.CompetitionTeamRepository;
 import com.beatseeker.backend.service.CompetitionMatchKinds;
+import com.beatseeker.backend.service.CompetitionPlayedSongService;
 import com.beatseeker.backend.service.CompetitionTeamStandingsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,17 +53,20 @@ public class CompetitionSpectatorController {
     private final CompetitionMatchupRepository matchupRepository;
     private final CompetitionMatchRepository matchRepository;
     private final CompetitionTeamStandingsService teamStandingsService;
+    private final CompetitionPlayedSongService playedSongService;
 
     public CompetitionSpectatorController(CompetitionRepository competitionRepository,
                                           CompetitionTeamRepository teamRepository,
                                           CompetitionMatchupRepository matchupRepository,
                                           CompetitionMatchRepository matchRepository,
-                                          CompetitionTeamStandingsService teamStandingsService) {
+                                          CompetitionTeamStandingsService teamStandingsService,
+                                          CompetitionPlayedSongService playedSongService) {
         this.competitionRepository = competitionRepository;
         this.teamRepository = teamRepository;
         this.matchupRepository = matchupRepository;
         this.matchRepository = matchRepository;
         this.teamStandingsService = teamStandingsService;
+        this.playedSongService = playedSongService;
     }
 
     /**
@@ -171,10 +175,14 @@ public class CompetitionSpectatorController {
             m.put("aSongsWon", match.getASongsWon());
             m.put("bSongsWon", match.getBSongsWon());
             m.put("resultRecordedAt", match.getResultRecordedAt());
-            m.put("song1Title", match.getSong1Title());
+            // 曲名は記録値をそのまま出さず「抽選曲 → 自選曲 → 記録値」で解決し直す。
+            // 結果を先に記録して後から StrategyCard の抽選が確定した場合、記録値は自選曲のまま古くなるため
+            // (曲名は運営の手入力ではなく常にこの規則で決まる)。既に結果公開済みの試合だけなので伏せ情報は増えない。
+            CompetitionPlayedSongService.PlayedSongs played = playedSongService.resolve(match);
+            m.put("song1Title", played.song1().title());
             m.put("song1ScoreA", match.getSong1ScoreA());
             m.put("song1ScoreB", match.getSong1ScoreB());
-            m.put("song2Title", match.getSong2Title());
+            m.put("song2Title", played.song2().title());
             m.put("song2ScoreA", match.getSong2ScoreA());
             m.put("song2ScoreB", match.getSong2ScoreB());
         }

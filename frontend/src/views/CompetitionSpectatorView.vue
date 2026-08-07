@@ -13,22 +13,49 @@
  *
  * 未公開の起用や未記録の結果はサーバ側で伏せられて返ってくるため、ここでは「未公開 / 未記録」表示に倒す。
  */
-import { onMounted, watch, computed } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import {
   useCompetitionSpectator,
   type SpectatorMatchDto,
 } from '../composables/useCompetitionSpectator';
 import { useToast } from '../composables/useToast';
 import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
-import { KIND_LABEL_JA, kindLevelLabel } from '../composables/competitionMatchKinds';
+import { KIND_LABEL_JA, kindLevelLabel, pointsPerSong } from '../composables/competitionMatchKinds';
 
 const props = defineProps<{ token: string }>();
 
 const { view, isLoading, fetchView } = useCompetitionSpectator();
 const toast = useToast();
 
-onMounted(() => fetchView(props.token).catch(e => toast.error((e as Error).message)));
-watch(() => props.token, () => fetchView(props.token).catch(e => toast.error((e as Error).message)));
+/** 最後に取得できた時刻。自動更新はしないので「いつ時点の情報か」を出す。 */
+const lastUpdatedAt = ref<Date | null>(null);
+
+/** 対戦表を取り直す。成功したら true (更新 FAB のトースト出し分けに使う)。 */
+const load = async (): Promise<boolean> => {
+  try {
+    await fetchView(props.token);
+    lastUpdatedAt.value = new Date();
+    return true;
+  } catch (e) {
+    toast.error((e as Error).message);
+    return false;
+  }
+};
+
+onMounted(load);
+watch(() => props.token, load);
+
+/** 更新 FAB。多重タップは isLoading で弾く。 */
+const handleRefresh = async () => {
+  if (isLoading.value) return;
+  if (await load()) toast.success('最新の状態に更新しました');
+};
+
+/** 最終更新の表示 (JST の時刻のみ)。未取得なら null。 */
+const lastUpdatedLabel = computed<string | null>(() => {
+  if (!lastUpdatedAt.value) return null;
+  return lastUpdatedAt.value.toLocaleTimeString('ja-JP', { hour12: false });
+});
 
 // 戦種別のラベル / Lv 帯 (予選 3 戦 / 決勝 7 戦) は competitionMatchKinds に集約。
 const KIND_LABEL = KIND_LABEL_JA;
@@ -96,6 +123,56 @@ const matrixCellClass = (rowTeamId: number, colTeamId: number): string => {
 const teamMatchupPoints = (teamId: number): number =>
   view.value?.standings?.rows.find(r => r.teamId === teamId)?.matchupPoints ?? 0;
 
+// ── matchup の総合結果 (先鋒〜大将の全戦合計) ────────────
+/**
+ * 1 matchup ぶんの総合成績 (運営画面の総合バンドと同じ規則)。
+ *
+ * 集計ルールは backend の {@code CompetitionTeamStandingsService} と同じ:
+ * 勝ち曲数 × 戦ポイント (予選 先鋒2/中堅3/大将4) の合計が多い側が matchup 勝ち。
+ * サーバは未記録の結果を伏せて返すため、ここで合算しても staged reveal は壊れない
+ * (未記録の戦は加算されず、途中経過として表示される)。
+ */
+interface MatchupTotal {
+  /** A 側 / B 側の戦ポイント合計 (matchup の勝敗はこれで決まる)。 */
+  aPoints: number;
+  bPoints: number;
+  /** A 側 / B 側の勝ち曲数合計 (参考表示)。 */
+  aSongs: number;
+  bSongs: number;
+  /** 結果記録済みの戦数 / この matchup の総戦数。 */
+  recorded: number;
+  total: number;
+  /** 確定した勝敗。全戦が記録済みになるまでは null (= 途中経過)。 */
+  winner: 'a' | 'b' | 'draw' | null;
+}
+
+/** matchup ID → 総合成績。 */
+const matchupTotals = computed<Record<number, MatchupTotal>>(() => {
+  const out: Record<number, MatchupTotal> = {};
+  for (const mu of view.value?.matchups ?? []) {
+    let aPoints = 0, bPoints = 0, aSongs = 0, bSongs = 0, recorded = 0;
+    for (const m of mu.matches) {
+      if (!m.resultRecorded) continue;
+      recorded++;
+      const a = m.aSongsWon ?? 0;
+      const b = m.bSongsWon ?? 0;
+      const pt = pointsPerSong(m.matchKind, mu.isFinals);
+      aPoints += a * pt;
+      bPoints += b * pt;
+      aSongs += a;
+      bSongs += b;
+    }
+    const allRecorded = mu.matches.length > 0 && recorded === mu.matches.length;
+    out[mu.matchupId] = {
+      aPoints, bPoints, aSongs, bSongs,
+      recorded,
+      total: mu.matches.length,
+      winner: !allRecorded ? null : aPoints > bPoints ? 'a' : bPoints > aPoints ? 'b' : 'draw',
+    };
+  }
+  return out;
+});
+
 /** 試合の勝者側 ('a' | 'b' | 'draw' | null)。null は結果未記録。 */
 const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
   if (!m.resultRecorded) return null;
@@ -131,6 +208,9 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           ステータス <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
+          <span v-if="lastUpdatedLabel" class="text-slate-400 dark:text-slate-500 ml-2">
+            · 最終更新 {{ lastUpdatedLabel }}
+          </span>
         </p>
       </div>
 
@@ -272,6 +352,46 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
           :key="mu.matchupId"
           class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden"
         >
+          <!--
+            総合 (先鋒〜大将の全戦合計)。戦ポイント = 勝ち曲数 × 戦の配点 (予選 先鋒2/中堅3/大将4)
+            で、多い側がこの matchup の勝ち。運営画面の同じバンドと表示を揃えている。
+          -->
+          <div class="px-4 py-2 flex items-center gap-x-3 gap-y-1 flex-wrap bg-slate-100 dark:bg-slate-900">
+            <span class="text-[10px] font-bold text-slate-400 shrink-0">
+              総合 ({{ matchupTotals[mu.matchupId]?.total ?? 0 }} 戦合計)
+            </span>
+            <template v-if="(matchupTotals[mu.matchupId]?.recorded ?? 0) > 0">
+              <span class="font-mono font-bold text-lg tabular-nums leading-none">
+                <span :class="matchupTotals[mu.matchupId].aPoints >= matchupTotals[mu.matchupId].bPoints
+                  ? teamColorClass(mu.teamA?.teamName) : 'text-slate-400'">{{ matchupTotals[mu.matchupId].aPoints }}</span>
+                <span class="text-slate-400 mx-1">-</span>
+                <span :class="matchupTotals[mu.matchupId].bPoints >= matchupTotals[mu.matchupId].aPoints
+                  ? teamColorClass(mu.teamB?.teamName) : 'text-slate-400'">{{ matchupTotals[mu.matchupId].bPoints }}</span>
+                <span class="text-[10px] font-normal text-slate-400 ml-1">pt</span>
+              </span>
+              <!-- 勝敗は全戦記録済みで確定。途中は「途中経過」バッジに留める。 -->
+              <span
+                v-if="matchupTotals[mu.matchupId].winner === 'a' || matchupTotals[mu.matchupId].winner === 'b'"
+                class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+              >○ {{ (matchupTotals[mu.matchupId].winner === 'a' ? mu.teamA?.teamName : mu.teamB?.teamName) ?? '?' }} 勝ち</span>
+              <span
+                v-else-if="matchupTotals[mu.matchupId].winner === 'draw'"
+                class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+              >△ 引分</span>
+              <span
+                v-else
+                class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+              >途中経過</span>
+              <span class="text-[10px] font-mono text-slate-400">
+                曲数 {{ matchupTotals[mu.matchupId].aSongs }} - {{ matchupTotals[mu.matchupId].bSongs }}
+                ・ {{ matchupTotals[mu.matchupId].recorded }}/{{ matchupTotals[mu.matchupId].total }} 戦記録済み
+              </span>
+            </template>
+            <span v-else class="text-[11px] text-slate-400 italic">
+              未記録 (各戦の結果が記録されると合計が出ます)
+            </span>
+          </div>
+
           <!-- matchup ヘッダ -->
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm flex items-center gap-2 flex-wrap">
@@ -385,5 +505,35 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
         beat-seeker · 観戦用対戦表 (読み取り専用)
       </p>
     </div>
+
+    <!--
+      更新 FAB: 自動更新はしないので手動で取り直す。スマホ観戦前提で右下に固定追従させ、
+      iOS のホームバーに被らないよう safe-area ぶん底を空ける。読み込み失敗時 (view なし) も
+      再試行できるよう v-if の外に置く。
+    -->
+    <button
+      type="button"
+      aria-label="対戦表を更新"
+      :disabled="isLoading"
+      @click="handleRefresh"
+      class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))] flex items-center gap-1.5 pl-4 pr-5 py-3 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-60 text-white text-sm font-bold transition-all"
+    >
+      <svg
+        aria-hidden="true"
+        class="h-5 w-5"
+        :class="isLoading ? 'animate-spin' : ''"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        />
+      </svg>
+      {{ isLoading ? '更新中' : '更新' }}
+    </button>
   </div>
 </template>
