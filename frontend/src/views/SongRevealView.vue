@@ -590,10 +590,22 @@ const titleTokensOf = (s: SongDataEntry | null): TitleToken[] => {
  */
 const TITLE_LINE_HEIGHT = 1.25;
 const ARTIST_LINE_HEIGHT = 1.3;
+/** 難易度バッジは従来 text-8xl (line-height: 1) だったのでそれに合わせる。 */
+const DIFF_LINE_HEIGHT = 1;
+/** 2 行を許す場合の上限行数。まずは 1 行に収めるのを優先する (下記 fitPreferOneLine 参照)。 */
 const TITLE_MAX_LINES = 2;
 const ARTIST_MAX_LINES = 2;
 const TITLE_MIN_PX = 24;
 const ARTIST_MIN_PX = 12;
+const DIFF_MIN_PX = 24;
+/**
+ * 1 行フィットの結果が「上限 × この比率」を下回ったときだけ 2 行を許す。
+ * CJK は 1 文字ずつが折り返し可能トークンなので、2 行を無条件に許すと
+ * 「センチメンタル・サ / マー」のような不格好な位置で切れてしまう。
+ */
+const ONE_LINE_MIN_RATIO = 0.5;
+/** 半面の端に文字が触れないようにする安全率。この幅で折り返し / はみ出しを判定する。 */
+const WIDTH_SAFETY = 0.94;
 /** .artist-fade は letter-spacing: 0.1em で着地するので、測定もその値で行う。 */
 const ARTIST_REST_LETTER_SPACING = '0.1em';
 
@@ -601,11 +613,15 @@ const titleFontPxLeft = ref(64);
 const titleFontPxRight = ref(64);
 const artistFontPxLeft = ref(24);
 const artistFontPxRight = ref(24);
+const diffFontPxLeft = ref(64);
+const diffFontPxRight = ref(64);
 
 const titleElLeft = ref<HTMLElement | null>(null);
 const titleElRight = ref<HTMLElement | null>(null);
 const artistElLeft = ref<HTMLElement | null>(null);
 const artistElRight = ref<HTMLElement | null>(null);
+const diffElLeft = ref<HTMLElement | null>(null);
+const diffElRight = ref<HTMLElement | null>(null);
 
 /** ビューポート幅ごとの上限 px。従来の「最大バケット」と同じ値を踏襲する。 */
 const breakpointMax = (base: number, sm: number, md: number, lg: number): number => {
@@ -626,13 +642,26 @@ const breakpointMax = (base: number, sm: number, md: number, lg: number): number
  */
 const fitFontSize = (
   el: HTMLElement | null,
-  opts: { lineHeight: number; maxLines: number; minPx: number; maxPx: number; letterSpacing?: string },
+  opts: {
+    lineHeight: number; maxLines: number; minPx: number; maxPx: number;
+    letterSpacing?: string;
+    /**
+     * 幅の基準 + プローブの置き場所。省略時は el 自身の幅 / el の親。
+     * 難易度バッジのように shrink-to-fit な inline-block の中にいる要素は、
+     * el.clientWidth が「折り返し済みの幅」になってしまうため、外側の
+     * カラム要素を明示的に渡して本来使える幅で測る。
+     */
+    boxEl?: HTMLElement | null;
+  },
   fallback: number,
 ): number => {
-  const parent = el?.parentElement;
-  if (!el || !parent) return fallback;
-  const width = el.clientWidth;
-  if (width === 0) return fallback; // スピン中は v-show で display:none
+  const host = opts.boxEl ?? el?.parentElement;
+  if (!el || !host) return fallback;
+  const rawWidth = (opts.boxEl ?? el).clientWidth;
+  if (rawWidth === 0) return fallback; // スピン中は v-show で display:none
+  // 実際の描画幅より内側で判定することで、左右の端に文字が張り付くのを防ぐ。
+  // (italic + skew-x の張り出しぶんの逃げも兼ねる)
+  const width = Math.floor(rawWidth * WIDTH_SAFETY);
 
   const probe = el.cloneNode(true) as HTMLElement;
   probe.style.position = 'absolute';
@@ -644,13 +673,14 @@ const fitFontSize = (
   probe.style.maxWidth = 'none';
   probe.style.lineHeight = String(opts.lineHeight);
   probe.style.animation = 'none';
+  probe.style.transform = 'none'; // skew / scale を外して純粋なレイアウト幅で測る
   if (opts.letterSpacing) probe.style.letterSpacing = opts.letterSpacing;
   for (const c of Array.from(probe.querySelectorAll<HTMLElement>('.cascade-char'))) {
     c.style.animation = 'none';
     c.style.opacity = '1';
     c.style.transform = 'none';
   }
-  parent.appendChild(probe);
+  host.appendChild(probe);
   try {
     // scrollWidth: nowrap の英単語トークンがはみ出していないか
     // rect.height : 折り返して maxLines を超えていないか
@@ -687,26 +717,58 @@ const titleMaxPx = (el: HTMLElement | null): number => {
 };
 /** アーティスト名の上限 px。20/24/30/36 = 従来の text-xl / 2xl / 3xl / 4xl。 */
 const artistMaxPx = (): number => breakpointMax(20, 24, 30, 36);
+/** 難易度バッジの上限 px。36/60/72/96 = 従来の text-4xl / 6xl / 7xl / 8xl。 */
+const diffMaxPx = (): number => breakpointMax(36, 60, 72, 96);
+
+/**
+ * 「1 行に収まる最大サイズ」を最優先で採用する。
+ * それが上限の ONE_LINE_MIN_RATIO を下回る (= 長すぎて極端に小さくなる) ときだけ、
+ * 2 行を許してサイズを取り戻す。
+ *
+ * ラテン文字は 1 文字あたりの幅が全角の約半分なので、1 行に詰めようとすると
+ * 自然と全角タイトルより大きいフォントサイズが選ばれる。ラテンは字面の高さ
+ * (cap height) が em box の約 7 割、CJK はほぼ 10 割なので、この差がちょうど
+ * 打ち消し合って左右の「見た目の大きさ」が揃う。
+ */
+const fitPreferOneLine = (
+  el: HTMLElement | null,
+  base: { lineHeight: number; minPx: number; maxPx: number; letterSpacing?: string },
+  maxLines: number,
+  fallback: number,
+): number => {
+  const onePx = fitFontSize(el, { ...base, maxLines: 1 }, fallback);
+  if (onePx >= base.maxPx * ONE_LINE_MIN_RATIO) return onePx;
+  return fitFontSize(el, { ...base, maxLines }, fallback);
+};
 
 /** 左右 4 要素をまとめて測り直す。DOM 反映後 (flush: 'post') に呼ぶこと。 */
 const refitAll = () => {
-  const titleOpts = (el: HTMLElement | null) => ({
+  const titleBase = (el: HTMLElement | null) => ({
     lineHeight: TITLE_LINE_HEIGHT,
-    maxLines: TITLE_MAX_LINES,
     minPx: TITLE_MIN_PX,
     maxPx: titleMaxPx(el),
   });
-  const artistOpts = {
+  const artistBase = {
     lineHeight: ARTIST_LINE_HEIGHT,
-    maxLines: ARTIST_MAX_LINES,
     minPx: ARTIST_MIN_PX,
     maxPx: artistMaxPx(),
     letterSpacing: ARTIST_REST_LETTER_SPACING,
   };
-  titleFontPxLeft.value = fitFontSize(titleElLeft.value, titleOpts(titleElLeft.value), titleFontPxLeft.value);
-  titleFontPxRight.value = fitFontSize(titleElRight.value, titleOpts(titleElRight.value), titleFontPxRight.value);
-  artistFontPxLeft.value = fitFontSize(artistElLeft.value, artistOpts, artistFontPxLeft.value);
-  artistFontPxRight.value = fitFontSize(artistElRight.value, artistOpts, artistFontPxRight.value);
+  // 難易度バッジ ("LEGGENDARIA 12" など) は常に 1 行。inline-block の中にいるので
+  // 幅の基準は外側の曲情報カラム (.diff-slam の親) を使う。
+  const diffOpts = (el: HTMLElement | null) => ({
+    lineHeight: DIFF_LINE_HEIGHT,
+    maxLines: 1,
+    minPx: DIFF_MIN_PX,
+    maxPx: diffMaxPx(),
+    boxEl: el?.parentElement?.parentElement ?? null,
+  });
+  titleFontPxLeft.value = fitPreferOneLine(titleElLeft.value, titleBase(titleElLeft.value), TITLE_MAX_LINES, titleFontPxLeft.value);
+  titleFontPxRight.value = fitPreferOneLine(titleElRight.value, titleBase(titleElRight.value), TITLE_MAX_LINES, titleFontPxRight.value);
+  artistFontPxLeft.value = fitPreferOneLine(artistElLeft.value, artistBase, ARTIST_MAX_LINES, artistFontPxLeft.value);
+  artistFontPxRight.value = fitPreferOneLine(artistElRight.value, artistBase, ARTIST_MAX_LINES, artistFontPxRight.value);
+  diffFontPxLeft.value = fitFontSize(diffElLeft.value, diffOpts(diffElLeft.value), diffFontPxLeft.value);
+  diffFontPxRight.value = fitFontSize(diffElRight.value, diffOpts(diffElRight.value), diffFontPxRight.value);
 };
 
 // 曲の差し替え (Strategy 着地含む) / 各段階の出現 / スピン終了のたびに測り直す。
@@ -716,6 +778,7 @@ watch(
     spinningLeft, spinningRight,
     () => leftStage.value.title, () => rightStage.value.title,
     () => leftStage.value.artist, () => rightStage.value.artist,
+    () => leftStage.value.diffBadge, () => rightStage.value.diffBadge,
   ],
   () => refitAll(),
   { flush: 'post' },
@@ -1141,8 +1204,10 @@ const toggleFullscreen = async () => {
           </p>
           <div v-if="leftStage.diffBadge" class="diff-slam inline-block">
             <p
-              class="diff-text text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-widest italic skew-x-[-8deg]"
+              ref="diffElLeft"
+              class="diff-text font-black tracking-widest italic skew-x-[-8deg]"
               :class="selectedLeft?.difficulty === '10' ? 'diff-leggendaria' : 'diff-another'"
+              :style="{ fontSize: `${diffFontPxLeft}px`, lineHeight: `${DIFF_LINE_HEIGHT}` }"
             >
               {{ diffName(selectedLeft?.difficulty || '') }} {{ selectedLeft?.level }}
             </p>
@@ -1235,8 +1300,10 @@ const toggleFullscreen = async () => {
           </p>
           <div v-if="rightStage.diffBadge" class="diff-slam inline-block">
             <p
-              class="diff-text text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-widest italic skew-x-[-8deg]"
+              ref="diffElRight"
+              class="diff-text font-black tracking-widest italic skew-x-[-8deg]"
               :class="selectedRight?.difficulty === '10' ? 'diff-leggendaria' : 'diff-another'"
+              :style="{ fontSize: `${diffFontPxRight}px`, lineHeight: `${DIFF_LINE_HEIGHT}` }"
             >
               {{ diffName(selectedRight?.difficulty || '') }} {{ selectedRight?.level }}
             </p>

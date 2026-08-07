@@ -717,11 +717,44 @@ const handleOpenReveal = (matchId: number) => {
   window.open(url, '_blank');
 };
 
-/** 手動で reveal データを再取得 (プレイヤー提出状況を最新化したいとき)。 */
-const handleRefreshRevealData = async () => {
-  if (!currentCompetition.value) return;
-  await refreshRevealData(currentCompetition.value.id);
-  toast.success('提出状況を再読込しました');
+/** 全体再読込の実行中フラグ (連打防止 + ボタンのラベル切替)。 */
+const isRefreshingAll = ref(false);
+
+/**
+ * 手動で「表示中の大会に関するサーバ状態すべて」を取り直す。
+ *
+ * 大会中は提出状況だけでなく、TL のアサイン / StrategyCard 発動 / 他端末で入力された結果 /
+ * 運営チャットも並行して動くため、1 ボタンでまとめて最新化する。
+ *
+ * 1. 大会詳細 (アサイン・ジャンル・結果・締切・公開日時) — これだけは失敗を toast する
+ * 2. フォーマット別の付随データ
+ *    - team5: 提出状況 (reveal) / 順位表 / 運営チャット
+ *    - individual4: 個人戦順位表
+ *
+ * 付随データの取得はそれぞれの refresh 側でエラーを処理済み (reveal は toast、他はサイレント)
+ * なので、ここでは並列に投げて 1 つ失敗しても残りを反映させる。
+ */
+const handleRefreshAll = async () => {
+  if (!currentCompetition.value || isRefreshingAll.value) return;
+  const id = currentCompetition.value.id;
+  isRefreshingAll.value = true;
+  try {
+    await fetchCompetition(id);
+    if (currentCompetition.value?.format === 'individual4') {
+      await refreshIndividualStandings();
+    } else {
+      await Promise.all([
+        refreshRevealData(id),
+        refreshStandings(),
+        loadChatThreads(),
+      ]);
+    }
+    toast.success('最新の状況に更新しました');
+  } catch (e) {
+    toast.error('大会情報の再読込に失敗しました: ' + (e as Error).message);
+  } finally {
+    isRefreshingAll.value = false;
+  }
 };
 
 // ── 試合結果記録 (R-4: スコアベース) ───────────────────
@@ -2221,10 +2254,11 @@ const statusColor = (s: string) => ({
             </h2>
             <button
               type="button"
-              @click="handleRefreshRevealData"
-              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
-              title="プレイヤーの提出状況を最新化します"
-            >🔄 提出状況を再読込</button>
+              @click="handleRefreshAll"
+              :disabled="isRefreshingAll"
+              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 disabled:opacity-50"
+              title="提出状況・アサイン・ジャンル・試合結果・順位表・運営チャットをまとめて最新化します"
+            >{{ isRefreshingAll ? '更新中…' : '🔄 最新の状況に更新' }}</button>
           </div>
           <p class="text-[11px] text-slate-500 leading-relaxed">
             下の「未設定の組み合わせ」から実施する対戦を 1 つずつ選んで設定します。設定した順に第 1・第 2 … 試合として並び、<b>設定済みの対戦だけがプレイヤー / TL に公開</b>されます。<br />
@@ -2504,7 +2538,7 @@ const statusColor = (s: string) => ({
                       class="mt-2 text-amber-600 dark:text-amber-300"
                     >
                       ⚠ 自選曲 / 抽選曲を取得できない枠があります (提出状況の読込失敗、または自選曲未提出)。
-                      <button type="button" @click="handleRefreshRevealData" class="underline hover:no-underline">🔄 提出状況を再読込</button>
+                      <button type="button" @click="handleRefreshAll" :disabled="isRefreshingAll" class="underline hover:no-underline disabled:opacity-50">🔄 最新の状況に更新</button>
                     </p>
                     <!-- 勝敗プレビュー -->
                     <div class="mt-2 flex items-center gap-2 flex-wrap">
