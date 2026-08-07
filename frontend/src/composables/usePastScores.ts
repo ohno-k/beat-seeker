@@ -108,6 +108,24 @@ export function chartKey(title: string, difficultyName: string): string {
     return `${title}_${difficultyName}`;
 }
 
+/** ある譜面についての、過去作を通じた最良値。 */
+export interface PastBest {
+    /** 歴代ベストスコア（EX）。 */
+    score: number;
+    /** 上記スコアを出したときの DJ LEVEL。 */
+    djLevel: string;
+    /** 上記スコアを出したときの PGREAT 数。 */
+    pgreat: number;
+    /** 上記スコアを出したときの GREAT 数。 */
+    great: number;
+    /** ベストスコアを出した作品のバージョン番号。 */
+    version: number;
+    /** 全作品を通じた最良クリアランプ（ベストスコアの作品とは限らない）。 */
+    clearType: string;
+    /** 全作品を通じた最小 BP。未計測なら null。 */
+    missCount: number | null;
+}
+
 export function usePastScores() {
     const { authHeaders } = useAuth();
 
@@ -322,37 +340,14 @@ export function usePastScores() {
     };
 
     /**
-     * 【関数の役割】 スコアレコード配列に過去作のベストを重ね、「歴代ベスト」版の配列を返す。
+     * 【関数の役割】 取得済みの過去作スコアを譜面単位の最良値に畳んで返す。
      *
-     * 各譜面について、過去作のスコアが現行作を上回っていればそちらで上書きする。
      * IIDX 実機と同じく「ベストスコア / ベストランプ / ベスト BP」は独立に扱うため、
-     * それぞれ全作品を通じた最良値を採用する（既存の {@link Score} 側の
-     * ベストレコードマージと同じ考え方）。EX スコアが過去作由来になった行は
-     * `allTimeVersion` にその作品番号が入り、UI 側でバッジ表示できる。
+     * それぞれ全作品を通じた最良値を採る。`version` は *ベストスコアを出した作品* を指す。
      *
-     * スコアレートと BEAT-PT は上書き後のスコアで再計算する。
-     * 現行の曲マスタに無い譜面（削除曲）は `maxScore` が 0 でレートを出せないため、
-     * この変換の対象にならない（＝歴代 PT にも寄与しない）。
-     *
-     * 注意: この関数の結果を、サーバーへ保存される値（履歴ログの BEAT-PT など）に
-     * 流し込んではいけない。あくまで表示用の重ね合わせである。
-     *
-     * @param records 現行作ベースのレコード（`flattenScores()` の結果など）
-     * @returns 歴代ベストを反映した新しい配列（入力は変更しない）
+     * @returns 譜面キー（title_difficultyName）→ 過去作の最良値
      */
-    const applyAllTimeBest = (records: ScoreRecord[]): ScoreRecord[] => {
-        if (pastRows.value.length === 0) return records;
-
-        // 過去作ぶんを譜面単位の最良値に畳んでおく（スコア/ランプ/BP は個別に最良を取る）。
-        interface PastBest {
-            score: number;
-            djLevel: string;
-            pgreat: number;
-            great: number;
-            version: number;
-            clearType: string;
-            missCount: number | null;
-        }
+    const pastBestByChart = (): Map<string, PastBest> => {
         const bestByChart = new Map<string, PastBest>();
 
         pastRows.value.forEach(row => {
@@ -383,6 +378,33 @@ export function usePastScores() {
             if (CLEAR_TYPE_RANK[clearType] > CLEAR_TYPE_RANK[prev.clearType]) prev.clearType = clearType;
             if (row.m != null && (prev.missCount === null || row.m < prev.missCount)) prev.missCount = row.m;
         });
+
+        return bestByChart;
+    };
+
+    /**
+     * 【関数の役割】 スコアレコード配列に過去作のベストを重ね、「歴代ベスト」版の配列を返す。
+     *
+     * 各譜面について、過去作のスコアが現行作を上回っていればそちらで上書きする。
+     * IIDX 実機と同じく「ベストスコア / ベストランプ / ベスト BP」は独立に扱うため、
+     * それぞれ全作品を通じた最良値を採用する（既存の {@link Score} 側の
+     * ベストレコードマージと同じ考え方）。EX スコアが過去作由来になった行は
+     * `allTimeVersion` にその作品番号が入り、UI 側でバッジ表示できる。
+     *
+     * スコアレートと BEAT-PT は上書き後のスコアで再計算する。
+     * 現行の曲マスタに無い譜面（削除曲）は `maxScore` が 0 でレートを出せないため、
+     * この変換の対象にならない（＝歴代 PT にも寄与しない）。
+     *
+     * 注意: この関数の結果を、サーバーへ保存される値（履歴ログの BEAT-PT など）に
+     * 流し込んではいけない。あくまで表示用の重ね合わせである。
+     *
+     * @param records 現行作ベースのレコード（`flattenScores()` の結果など）
+     * @returns 歴代ベストを反映した新しい配列（入力は変更しない）
+     */
+    const applyAllTimeBest = (records: ScoreRecord[]): ScoreRecord[] => {
+        if (pastRows.value.length === 0) return records;
+
+        const bestByChart = pastBestByChart();
 
         return records.map(rec => {
             const past = bestByChart.get(chartKey(rec.title, rec.difficultyName));
@@ -427,6 +449,7 @@ export function usePastScores() {
          */
         hasPastImports: computed(() => summary.value.some(s => s.chartCount > 0)),
         applyAllTimeBest,
+        pastBestByChart,
         /** `/api/scores/past/best` の生データ。通常は {@link buildChartHistories} 経由で使う。 */
         pastRows,
         /** 過去スコアを取得済みか。 */

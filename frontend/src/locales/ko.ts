@@ -445,6 +445,8 @@ export const ko = {
   'report.otherUpdates': '...외 {n}건의 업데이트',
   'report.newRecord': 'beat-seeker에서 신기록을 달성했습니다!',
   'report.lampUp': 'LAMP UP!',
+  'report.allTimeBest': '역대 자기 베스트 갱신!',
+  'report.allTimeBestHint': '{version}의 베스트를 넘었습니다',
   'report.inTop100': 'TOP100',
   'report.outOfRange': '권외',
   'report.outputOptions': '이미지 출력 옵션',

@@ -445,6 +445,8 @@ export const en = {
   'report.otherUpdates': '... and {n} other updates',
   'report.newRecord': 'New records achieved on beat-seeker!',
   'report.lampUp': 'LAMP UP!',
+  'report.allTimeBest': 'All-time best!',
+  'report.allTimeBestHint': 'Beat your best from {version}',
   'report.inTop100': 'TOP100',
   'report.outOfRange': 'Out of Range',
   'report.outputOptions': 'Image Output Options',

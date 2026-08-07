@@ -101,7 +101,7 @@ import type { SongDataEntry } from './composables/useGameData';
 import { parseScoreCsv, detectCsvVersion, getCsvLastPlayTime } from './utils/csvParser';
 import type { VersionDetectionResult } from './utils/csvParser';
 import { CURRENT_VERSION, versionName } from './utils/iidxVersions';
-import { usePastScores } from './composables/usePastScores';
+import { usePastScores, chartKey } from './composables/usePastScores';
 import ImportVersionConfirmModal from './components/ImportVersionConfirmModal.vue';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores, getSongMaxScore } from './utils/scoreData';
@@ -1115,7 +1115,13 @@ const computeFolderAnnouncements = (
 };
 
 // ── CSV 取り込み時の作品バージョン自動判定 ────────────────────────
-const { uploadPastScores, fetchSummary: fetchPastSummary, summary: pastSummary } = usePastScores();
+const {
+  uploadPastScores,
+  fetchSummary: fetchPastSummary,
+  summary: pastSummary,
+  fetchPastBest,
+  pastBestByChart,
+} = usePastScores();
 
 /** バージョン確認ダイアログの表示フラグ。 */
 const importConfirmOpen = ref(false);
@@ -1467,17 +1473,38 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
           }
         } catch { /* 握り潰し: タイムアウトやネットワーク断でも順位情報なしでレポートを続行 */ }
 
+        // 過去作 CSV を取り込み済みなら、歴代自己ベストを塗り替えた譜面を判定する。
+        // 判定条件は「これまでのベストが過去作のものだった（pastBest > 旧スコア）」かつ
+        // 「今回それを超えた（新スコア > pastBest）」の両方。
+        // 元から現行作がベストだった譜面の単なる自己ベスト更新では立てない。
+        const pastBestScores = new Map<string, { score: number; version: number }>();
+        try {
+          await fetchPastSummary();
+          if (pastSummary.value.some(s => s.chartCount > 0)) {
+            await fetchPastBest();
+            pastBestByChart().forEach((best, key) => {
+              pastBestScores.set(key, { score: best.score, version: best.version });
+            });
+          }
+        } catch {
+          // 握り潰し: 歴代判定はレポートの付加情報なので、失敗しても取り込み自体は完了させる
+        }
+
         // レポート対象をフィルタ（スコア or ランプが上がっただけ）、並べ替え、順位等を合成。
         const reportSongs = enrichedUpdates
           .filter(s => s.scoreIncrease > 0 || s.clearTypeImproved)
           .map(s => {
             const rankEntry = songRankMap.get(`${s.title}_${s.difficulty}`);
+            const past = pastBestScores.get(chartKey(s.title, s.difficulty));
+            const allTimeBestUpdated = !!past && past.score > s.oldScore && s.newScore > past.score;
             return {
               ...s,
               isInTop100: top100Set.has(`${s.title}_${s.difficulty}`),
               isInRateTop100: rateTop100Set.has(`${s.title}_${s.difficulty}`),
               songRank: rankEntry?.rank,
               songRankTotal: rankEntry?.total,
+              allTimeBestUpdated,
+              allTimeBeatenVersion: allTimeBestUpdated ? past.version : undefined,
             };
           })
           .sort((a, b) => b.beatPtIncrease - a.beatPtIncrease || b.scoreIncrease - a.scoreIncrease);

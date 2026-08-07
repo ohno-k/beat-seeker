@@ -450,6 +450,8 @@ export const ja = {
   'report.otherUpdates': '...他 {n} 件の更新',
   'report.newRecord': 'beat-seeker で新記録を達成しました！',
   'report.lampUp': 'LAMP UP!',
+  'report.allTimeBest': '歴代自己ベスト更新！',
+  'report.allTimeBestHint': '{version} のベストを超えました',
   'report.inTop100': 'TOP100',
   'report.outOfRange': '圏外',
   'report.outputOptions': '画像出力オプション',
