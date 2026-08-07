@@ -38,6 +38,7 @@ import {
   kindLevelLabel,
   kindOrder,
   isLevel12Only,
+  pointsPerSong,
   type MatchKind,
 } from '../composables/competitionMatchKinds';
 import SongPickerModal from '../components/SongPickerModal.vue';
@@ -402,6 +403,57 @@ const matchesForMatchup = (matchupId: number): CompetitionMatchDto[] => {
     .filter(m => m.matchupId === matchupId)
     .sort((a, b) => kindOrder(a.matchKind) - kindOrder(b.matchKind));
 };
+
+// ── matchup の総合結果 (先鋒〜大将の全戦合計) ────────────
+/**
+ * 1 matchup ぶんの総合成績。予選 3 戦 / 決勝 7 戦を合算したもの。
+ *
+ * 集計ルールは backend の {@code CompetitionTeamStandingsService} と同じ:
+ * 勝ち曲数 × 戦ポイント (予選 先鋒2/中堅3/大将4) の合計が多い側が matchup 勝ち。
+ * 未記録の戦は加算しないので、途中でも「ここまでの合計」として読める。
+ */
+interface MatchupTotal {
+  /** A 側 / B 側の戦ポイント合計 (matchup の勝敗はこれで決まる)。 */
+  aPoints: number;
+  bPoints: number;
+  /** A 側 / B 側の勝ち曲数合計 (参考表示)。 */
+  aSongs: number;
+  bSongs: number;
+  /** 結果記録済みの戦数 / この matchup の総戦数。 */
+  recorded: number;
+  total: number;
+  /** 全戦が記録済みか (勝敗が確定するのはこのときだけ)。 */
+  allRecorded: boolean;
+  /** 確定した勝敗。全戦記録済みになるまでは null (= 途中経過)。 */
+  winner: 'a' | 'b' | 'draw' | null;
+}
+
+/** matchup ID → 総合成績。試合結果を記録すると即座に再計算される。 */
+const matchupTotals = computed<Record<number, MatchupTotal>>(() => {
+  const out: Record<number, MatchupTotal> = {};
+  for (const mu of currentCompetition.value?.matchups ?? []) {
+    const matches = matchesForMatchup(mu.id);
+    let aPoints = 0, bPoints = 0, aSongs = 0, bSongs = 0, recorded = 0;
+    for (const m of matches) {
+      if (m.aSongsWon === null || m.bSongsWon === null) continue;
+      recorded++;
+      const pt = pointsPerSong(m.matchKind, mu.isFinals);
+      aPoints += m.aSongsWon * pt;
+      bPoints += m.bSongsWon * pt;
+      aSongs += m.aSongsWon;
+      bSongs += m.bSongsWon;
+    }
+    const allRecorded = matches.length > 0 && recorded === matches.length;
+    out[mu.id] = {
+      aPoints, bPoints, aSongs, bSongs,
+      recorded,
+      total: matches.length,
+      allRecorded,
+      winner: !allRecorded ? null : aPoints > bPoints ? 'a' : bPoints > aPoints ? 'b' : 'draw',
+    };
+  }
+  return out;
+});
 
 /**
  * ジャンルセレクタの change ハンドラ。
@@ -2304,6 +2356,48 @@ const statusColor = (s: string) => ({
             :key="mu.id"
             class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden"
           >
+            <!--
+              総合 (先鋒〜大将の全戦合計)。戦ポイント = 勝ち曲数 × 戦の配点 (予選 先鋒2/中堅3/大将4)
+              で、多い側がこの matchup の勝ち。順位表に載る前に運営がこの場で確認できるよう最上部に出す。
+            -->
+            <div
+              class="px-4 py-2 flex items-center gap-x-3 gap-y-1 flex-wrap bg-slate-100 dark:bg-slate-900"
+            >
+              <span class="text-[10px] font-bold text-slate-400 shrink-0">
+                総合 ({{ matchupTotals[mu.id]?.total ?? 0 }} 戦合計)
+              </span>
+              <template v-if="(matchupTotals[mu.id]?.recorded ?? 0) > 0">
+                <span class="font-mono font-bold text-lg tabular-nums leading-none">
+                  <span :class="matchupTotals[mu.id].aPoints >= matchupTotals[mu.id].bPoints
+                    ? teamColorClassById(mu.teamAId) : 'text-slate-400'">{{ matchupTotals[mu.id].aPoints }}</span>
+                  <span class="text-slate-400 mx-1">-</span>
+                  <span :class="matchupTotals[mu.id].bPoints >= matchupTotals[mu.id].aPoints
+                    ? teamColorClassById(mu.teamBId) : 'text-slate-400'">{{ matchupTotals[mu.id].bPoints }}</span>
+                  <span class="text-[10px] font-normal text-slate-400 ml-1">pt</span>
+                </span>
+                <!-- 勝敗は全戦記録済みで確定。途中は「途中経過」バッジに留める。 -->
+                <span
+                  v-if="matchupTotals[mu.id].winner === 'a' || matchupTotals[mu.id].winner === 'b'"
+                  class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                >○ {{ teamNameOf(matchupTotals[mu.id].winner === 'a' ? mu.teamAId : mu.teamBId) }} 勝ち</span>
+                <span
+                  v-else-if="matchupTotals[mu.id].winner === 'draw'"
+                  class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                >△ 引分</span>
+                <span
+                  v-else
+                  class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                >途中経過</span>
+                <span class="text-[10px] font-mono text-slate-400">
+                  曲数 {{ matchupTotals[mu.id].aSongs }} - {{ matchupTotals[mu.id].bSongs }}
+                  ・ {{ matchupTotals[mu.id].recorded }}/{{ matchupTotals[mu.id].total }} 戦記録済み
+                </span>
+              </template>
+              <span v-else class="text-[11px] text-slate-400 italic">
+                未記録 (各戦の結果を記録すると合計が出ます)
+              </span>
+            </div>
+
             <!-- matchup ヘッダ + ラインアップ公開トグル -->
             <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 space-y-2">
               <div class="flex items-center justify-between flex-wrap gap-2">

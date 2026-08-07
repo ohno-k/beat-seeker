@@ -57,6 +57,32 @@ export const kindLevelLabel = (kind: MatchKind): string => {
   return `Lv ${levels[0]}-${levels[levels.length - 1]}`;
 };
 
+/** 予選の 1 曲あたり獲得ポイント (backend CompetitionMatchKinds.PRELIM_POINTS と対)。 */
+export const PRELIM_POINTS_PER_SONG: Partial<Record<MatchKind, number>> = {
+  vanguard: 2,
+  middle: 3,
+  captain: 4,
+};
+
+/** 決勝の 1 曲あたり獲得ポイント (backend CompetitionMatchKinds.FINALS_POINTS と対)。 */
+export const FINALS_POINTS_PER_SONG: Record<MatchKind, number> = {
+  vanguard: 4,
+  second: 4,
+  fifth: 5,
+  middle: 5,
+  third: 6,
+  vice: 6,
+  captain: 7,
+};
+
+/**
+ * 1 曲勝つごとにチームへ入る戦ポイント。予選と決勝でポイント表が異なる。
+ * 順位集計の本体は backend の CompetitionTeamStandingsService なので、
+ * フロントでは「その matchup の総合結果を即時表示する」用途だけに使う。
+ */
+export const pointsPerSong = (kind: MatchKind, isFinals: boolean): number =>
+  (isFinals ? FINALS_POINTS_PER_SONG[kind] : PRELIM_POINTS_PER_SONG[kind]) ?? 0;
+
 /** 表示順のインデックス (先鋒 0 〜 大将 6)。未知の kind は末尾に寄せる。 */
 export const kindOrder = (kind: MatchKind): number => {
   const idx = FINALS_MATCH_KINDS.indexOf(kind);
