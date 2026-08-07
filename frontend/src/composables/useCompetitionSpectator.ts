@@ -13,6 +13,13 @@ import { API_BASE } from './constants';
 // 戦種別 (予選 3 戦 / 決勝 7 戦) の定義は competitionMatchKinds に集約。
 export type { MatchKind } from './competitionMatchKinds';
 import type { MatchKind } from './competitionMatchKinds';
+// 順位表 / 途中経過はサーバ側で運営 API と同じ集計を使うため、型もそのまま再利用する。
+import type {
+  CompetitionStandingsDto,
+  CompetitionStandingsRow,
+  CompetitionMatchupBreakdown,
+} from './useCompetitionAdmin';
+export type { CompetitionStandingsDto, CompetitionStandingsRow, CompetitionMatchupBreakdown };
 export type SongGenre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
 
 export interface SpectatorCompetitionDto {
@@ -70,6 +77,11 @@ export interface SpectatorViewDto {
   teams: SpectatorTeamDto[];
   /** 設定済み matchup を matchupOrder 昇順で。未設定は含まれない。 */
   matchups: SpectatorMatchupDto[];
+  /**
+   * 順位表 + 途中経過マトリクス。運営画面と同じ集計結果 (結果記録済みの試合のみが対象)。
+   * 決勝生成の可否 (allPrelimRecorded / finalsExists) も含まれるが、観戦側では操作しない。
+   */
+  standings: CompetitionStandingsDto;
 }
 
 async function throwIfError(res: Response): Promise<void> {

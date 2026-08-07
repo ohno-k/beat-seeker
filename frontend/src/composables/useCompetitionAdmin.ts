@@ -229,6 +229,13 @@ export interface CompetitionStandingsRow {
   wins: number;
   draws: number;
   losses: number;
+  /**
+   * StrategyCard を発動した予選 matchup 数。
+   * 発動を決めただけでは増えず、その試合の結果が記録された時点でカウントされる。
+   */
+  strategyUsedMatchupCount: number;
+  /** 予選で発動できる matchup 数の上限 (= 表示の分母)。 */
+  strategyLimit: number;
 }
 
 /**
@@ -260,6 +267,8 @@ export interface CompetitionStandingsDto {
   finalsExists: boolean;
   /** マトリクス用 breakdown (10 matchup ぶん)。 */
   matchupBreakdown: CompetitionMatchupBreakdown[];
+  /** 予選で 1 チームが StrategyCard を発動できる matchup 数の上限。 */
+  strategyLimit: number;
 }
 
 export interface CompetitionDetail extends CompetitionSummary {

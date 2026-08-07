@@ -726,67 +726,108 @@ const handleRefreshRevealData = async () => {
 
 // ── 試合結果記録 (R-4: スコアベース) ───────────────────
 /**
- * 試合の結果入力。matchId 単位で開閉し、両曲ぶんの管理番号 / スコア を受け付ける。
+ * 試合の結果入力。matchId 単位で開閉し、両曲ぶんのスコアだけを受け付ける。
  * 両スコアが揃った曲だけ判定対象。サーバ側で aSongsWon / bSongsWon を自動算出する。
+ *
+ * 管理番号 / 曲名は運営が手で触るものではない (自選曲、もしくは StrategyCard 発動時の抽選曲で
+ * 一意に決まる) ため入力欄を持たず、{@link autoSongsOf} の導出結果をそのまま保存する。
  */
 const resultEditingMatchId = ref<number | null>(null);
-const resultDraft = ref<MatchResultPayload>({
-  song1StrategyId: null, song1Title: null,
+/** スコアのみのドラフト。曲情報は保存時に自動導出したものを合成する。 */
+type MatchScoreDraft = Pick<
+  MatchResultPayload,
+  'song1ScoreA' | 'song1ScoreB' | 'song2ScoreA' | 'song2ScoreB'
+>;
+const resultDraft = ref<MatchScoreDraft>({
   song1ScoreA: null, song1ScoreB: null,
-  song2StrategyId: null, song2Title: null,
   song2ScoreA: null, song2ScoreB: null,
 });
 
 /**
- * 結果記録モーダルを開く。既に記録済の値があればそれを優先、なければ以下のロジックで自動入力する:
+ * 演奏曲 1 枠ぶんの自動決定結果。
+ * {@code source} は「どこから決まった曲か」の表示用ラベル判定に使う。
+ */
+interface AutoSong {
+  strategyId: number | null;
+  title: string | null;
+  /** strategy = StrategyCard 抽選曲 / pick = 自選曲 / recorded = 導出不能で記録済み値を維持 / none = 未決定 */
+  source: 'strategy' | 'pick' | 'recorded' | 'none';
+}
+
+/**
+ * 「実際に演奏される曲」を試合から自動導出する。
  *
  * 1 戦 = 2 曲制を「song1 = A 側が演奏する曲 / song2 = B 側が演奏する曲」と定義し、
  *  - 通常 (strategy 未発動): song1 = A の自選曲、song2 = B の自選曲
- *  - B 側が strategy 申告 → A 側の曲がランダム化: song1 = revealMatch.playerBStrategyResult
- *  - A 側が strategy 申告 → B 側の曲がランダム化: song2 = revealMatch.playerAStrategyResult
+ *  - B 側が strategy 発動 → A 側の曲がランダム化: song1 = revealMatch.playerBStrategyResult
+ *  - A 側が strategy 発動 → B 側の曲がランダム化: song2 = revealMatch.playerAStrategyResult
  *
- * これによりスコア欄を開いた瞬間に管理番号 / 曲名がプリセットされる。
+ * 抽選結果は reveal データ生成時にサーバで確定するため、reveal を取り直せばここも自動で
+ * 抽選曲へ切り替わる。reveal データが無い / 自選曲未提出で導出できない枠だけ、既に記録済みの
+ * 値へフォールバックして既存記録を消さないようにする。
  */
-const beginResultEdit = (match: CompetitionMatchDto) => {
-  resultEditingMatchId.value = match.id;
+const autoSongsOf = (match: CompetitionMatchDto): { song1: AutoSong; song2: AutoSong } => {
   const rm = revealMatchOf(match.id);
+  const resolve = (
+    strategyResult: { songStrategyId: number; songTitle: string } | null | undefined,
+    ownPick: { songStrategyId: number; songTitle: string } | null | undefined,
+    recordedId: number | null,
+    recordedTitle: string | null,
+  ): AutoSong => {
+    if (strategyResult) {
+      return { strategyId: strategyResult.songStrategyId, title: strategyResult.songTitle, source: 'strategy' };
+    }
+    if (ownPick) {
+      return { strategyId: ownPick.songStrategyId, title: ownPick.songTitle, source: 'pick' };
+    }
+    if (recordedId !== null || recordedTitle !== null) {
+      return { strategyId: recordedId, title: recordedTitle, source: 'recorded' };
+    }
+    return { strategyId: null, title: null, source: 'none' };
+  };
+  return {
+    song1: resolve(rm?.playerBStrategyResult, rm?.playerAPick, match.song1StrategyId, match.song1Title),
+    song2: resolve(rm?.playerAStrategyResult, rm?.playerBPick, match.song2StrategyId, match.song2Title),
+  };
+};
 
-  // song1 = A 側が演奏する曲
-  // B が strategy 申告 → playerBStrategyResult が A 側の演奏曲
-  // 申告無し → A の自選曲
-  let defaultSong1Id: number | null = null;
-  let defaultSong1Title: string | null = null;
-  if (rm?.playerBStrategyResult) {
-    defaultSong1Id = rm.playerBStrategyResult.songStrategyId;
-    defaultSong1Title = rm.playerBStrategyResult.songTitle;
-  } else if (rm?.playerAPick) {
-    defaultSong1Id = rm.playerAPick.songStrategyId;
-    defaultSong1Title = rm.playerAPick.songTitle;
-  }
+/**
+ * 編集中の試合の自動導出曲。reveal データ (= strategy 抽選結果) の更新に追従するので、
+ * 編集パネルを開いたまま 🔄 再読込しても表示が最新の演奏曲へ切り替わる。
+ */
+const editingAutoSongs = computed<{ song1: AutoSong; song2: AutoSong } | null>(() => {
+  const id = resultEditingMatchId.value;
+  if (id === null) return null;
+  const m = currentCompetition.value?.matches?.find(x => x.id === id);
+  return m ? autoSongsOf(m) : null;
+});
 
-  // song2 = B 側が演奏する曲
-  // A が strategy 申告 → playerAStrategyResult が B 側の演奏曲
-  let defaultSong2Id: number | null = null;
-  let defaultSong2Title: string | null = null;
-  if (rm?.playerAStrategyResult) {
-    defaultSong2Id = rm.playerAStrategyResult.songStrategyId;
-    defaultSong2Title = rm.playerAStrategyResult.songTitle;
-  } else if (rm?.playerBPick) {
-    defaultSong2Id = rm.playerBPick.songStrategyId;
-    defaultSong2Title = rm.playerBPick.songTitle;
-  }
+/** 導出元のバッジ表記。 */
+const autoSongSourceLabel = (source: AutoSong['source']): string => {
+  if (source === 'strategy') return '⚡ 抽選曲';
+  if (source === 'pick') return '自選曲';
+  if (source === 'recorded') return '記録値';
+  return '未決定';
+};
 
+/**
+ * 結果記録パネルを開く。
+ *
+ * StrategyCard の抽選はサーバ側の遅延抽選 (reveal データ生成時に確定) なので、大会を開いた
+ * 時点の reveal データは「TL が発動を決める前」の可能性がある。開くたびに取り直すことで、
+ * 発動後に差し替わった曲が自動で反映される。
+ */
+const beginResultEdit = async (match: CompetitionMatchDto) => {
+  resultEditingMatchId.value = match.id;
   resultDraft.value = {
-    // 既存記録があればそれを尊重、無ければ自動入力で埋める。
-    song1StrategyId: match.song1StrategyId ?? defaultSong1Id,
-    song1Title: match.song1Title ?? defaultSong1Title,
     song1ScoreA: match.song1ScoreA,
     song1ScoreB: match.song1ScoreB,
-    song2StrategyId: match.song2StrategyId ?? defaultSong2Id,
-    song2Title: match.song2Title ?? defaultSong2Title,
     song2ScoreA: match.song2ScoreA,
     song2ScoreB: match.song2ScoreB,
   };
+  if (currentCompetition.value) {
+    await refreshRevealData(currentCompetition.value.id);
+  }
 };
 const cancelResultEdit = () => {
   resultEditingMatchId.value = null;
@@ -802,8 +843,20 @@ const handleSaveResult = async (matchId: number) => {
     toast.error('スコアは 0 以上の整数で入力してください');
     return;
   }
+  // 曲情報は入力欄ではなく自動導出結果を保存する (strategy 発動後は抽選曲で上書きされる)。
+  const auto = editingAutoSongs.value;
+  const payload: MatchResultPayload = {
+    song1StrategyId: auto?.song1.strategyId ?? null,
+    song1Title: auto?.song1.title ?? null,
+    song1ScoreA: resultDraft.value.song1ScoreA,
+    song1ScoreB: resultDraft.value.song1ScoreB,
+    song2StrategyId: auto?.song2.strategyId ?? null,
+    song2Title: auto?.song2.title ?? null,
+    song2ScoreA: resultDraft.value.song2ScoreA,
+    song2ScoreB: resultDraft.value.song2ScoreB,
+  };
   try {
-    await setMatchResult(currentCompetition.value.id, matchId, resultDraft.value);
+    await setMatchResult(currentCompetition.value.id, matchId, payload);
     await refreshStandings();
     toast.success('結果を記録しました');
     cancelResultEdit();
@@ -1834,6 +1887,7 @@ const statusColor = (s: string) => ({
                 <th class="text-right py-1 px-2">負</th>
                 <th class="text-right py-1 px-2">戦pt</th>
                 <th class="text-right py-1 px-2 font-bold text-slate-700 dark:text-slate-200">勝点</th>
+                <th class="text-right py-1 px-2">ストラテジー</th>
               </tr>
             </thead>
             <tbody>
@@ -1854,6 +1908,14 @@ const statusColor = (s: string) => ({
                 <td class="py-1.5 px-2 text-right tabular-nums text-rose-500 dark:text-rose-400">{{ row.losses }}</td>
                 <td class="py-1.5 px-2 text-right tabular-nums">{{ row.songPoints }}</td>
                 <td class="py-1.5 px-2 text-right tabular-nums font-bold">{{ row.matchupPoints }}</td>
+                <!-- ストラテジー使用回数: 発動した試合の結果が記録された時点でカウントされる (matchup 単位)。 -->
+                <td class="py-1.5 px-2 text-right tabular-nums">
+                  <span
+                    :class="row.strategyUsedMatchupCount >= row.strategyLimit
+                      ? 'text-rose-500 dark:text-rose-400 font-bold'
+                      : 'text-slate-500 dark:text-slate-400'"
+                  >⚡ {{ row.strategyUsedMatchupCount }} / {{ row.strategyLimit }}</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -2359,24 +2421,31 @@ const statusColor = (s: string) => ({
                   </template>
                   <!-- 編集モード: 2 曲 × (管理番号 + A スコア + B スコア) -->
                   <template v-else>
-                    <p class="text-slate-400 mb-2">スコア記録 (曲名 = A/B 自選曲もしくは Strategy 抽選曲を自動入力)</p>
+                    <p class="text-slate-400 mb-2">
+                      スコア記録 (曲 = A/B 自選曲もしくは Strategy 抽選曲から自動決定・編集不可)
+                      <span class="text-slate-500">— 発動状況は開くたびに再取得。開いたまま反映したい場合は上部の 🔄 で再読込。</span>
+                    </p>
                     <div class="space-y-2">
                       <!-- Song 1 (A 側演奏曲) -->
-                      <div class="grid grid-cols-[60px_60px_1fr_70px_70px] gap-2 items-center">
+                      <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
                         <span class="text-slate-500">1 曲目<br /><span class="text-[9px] text-slate-600">A 演奏</span></span>
-                        <input
-                          v-model.number="resultDraft.song1StrategyId"
-                          type="number"
-                          min="0"
-                          placeholder="#"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
-                        />
-                        <input
-                          v-model="resultDraft.song1Title"
-                          type="text"
-                          placeholder="曲名"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs truncate"
-                        />
+                        <div
+                          class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/70 border border-dashed border-slate-300 dark:border-slate-600 text-xs flex items-center gap-1.5 min-w-0"
+                          :title="`#${editingAutoSongs?.song1.strategyId ?? '—'} ${editingAutoSongs?.song1.title ?? '未決定'}`"
+                        >
+                          <span class="tabular-nums text-slate-500 shrink-0">#{{ editingAutoSongs?.song1.strategyId ?? '—' }}</span>
+                          <span class="font-bold truncate" :class="editingAutoSongs?.song1.title ? '' : 'italic text-slate-400 font-normal'">
+                            {{ editingAutoSongs?.song1.title ?? '未決定' }}
+                          </span>
+                          <span
+                            class="ml-auto shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
+                            :class="editingAutoSongs?.song1.source === 'strategy'
+                              ? 'bg-fuchsia-600 text-white'
+                              : editingAutoSongs?.song1.source === 'pick'
+                                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                                : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400'"
+                          >{{ autoSongSourceLabel(editingAutoSongs?.song1.source ?? 'none') }}</span>
+                        </div>
                         <input
                           v-model.number="resultDraft.song1ScoreA"
                           type="number"
@@ -2393,21 +2462,25 @@ const statusColor = (s: string) => ({
                         />
                       </div>
                       <!-- Song 2 (B 側演奏曲) -->
-                      <div class="grid grid-cols-[60px_60px_1fr_70px_70px] gap-2 items-center">
+                      <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
                         <span class="text-slate-500">2 曲目<br /><span class="text-[9px] text-slate-600">B 演奏</span></span>
-                        <input
-                          v-model.number="resultDraft.song2StrategyId"
-                          type="number"
-                          min="0"
-                          placeholder="#"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
-                        />
-                        <input
-                          v-model="resultDraft.song2Title"
-                          type="text"
-                          placeholder="曲名"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs truncate"
-                        />
+                        <div
+                          class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/70 border border-dashed border-slate-300 dark:border-slate-600 text-xs flex items-center gap-1.5 min-w-0"
+                          :title="`#${editingAutoSongs?.song2.strategyId ?? '—'} ${editingAutoSongs?.song2.title ?? '未決定'}`"
+                        >
+                          <span class="tabular-nums text-slate-500 shrink-0">#{{ editingAutoSongs?.song2.strategyId ?? '—' }}</span>
+                          <span class="font-bold truncate" :class="editingAutoSongs?.song2.title ? '' : 'italic text-slate-400 font-normal'">
+                            {{ editingAutoSongs?.song2.title ?? '未決定' }}
+                          </span>
+                          <span
+                            class="ml-auto shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
+                            :class="editingAutoSongs?.song2.source === 'strategy'
+                              ? 'bg-fuchsia-600 text-white'
+                              : editingAutoSongs?.song2.source === 'pick'
+                                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                                : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400'"
+                          >{{ autoSongSourceLabel(editingAutoSongs?.song2.source ?? 'none') }}</span>
+                        </div>
                         <input
                           v-model.number="resultDraft.song2ScoreA"
                           type="number"
@@ -2424,6 +2497,15 @@ const statusColor = (s: string) => ({
                         />
                       </div>
                     </div>
+                    <!-- 自動決定できなかった枠の注意書き (提出状況未取得 / 自選曲未提出) -->
+                    <p
+                      v-if="editingAutoSongs && (editingAutoSongs.song1.source === 'recorded' || editingAutoSongs.song1.source === 'none'
+                        || editingAutoSongs.song2.source === 'recorded' || editingAutoSongs.song2.source === 'none')"
+                      class="mt-2 text-amber-600 dark:text-amber-300"
+                    >
+                      ⚠ 自選曲 / 抽選曲を取得できない枠があります (提出状況の読込失敗、または自選曲未提出)。
+                      <button type="button" @click="handleRefreshRevealData" class="underline hover:no-underline">🔄 提出状況を再読込</button>
+                    </p>
                     <!-- 勝敗プレビュー -->
                     <div class="mt-2 flex items-center gap-2 flex-wrap">
                       <span class="text-slate-400">判定:</span>

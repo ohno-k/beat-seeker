@@ -3,6 +3,7 @@ package com.beatseeker.backend.controller;
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.CompetitionMatchKinds;
+import com.beatseeker.backend.service.CompetitionTeamStandingsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +53,8 @@ public class CompetitionPlayerController {
      * 各チームは予選 4 matchup のうち、card.enabled = true の matchup を最大この数まで持てる。
      * 決勝 matchup ({@code isFinals = true}) はカウント対象外。
      */
-    private static final int STRATEGY_MATCHUP_LIMIT_PER_TEAM = 2;
+    private static final int STRATEGY_MATCHUP_LIMIT_PER_TEAM =
+            CompetitionTeamStandingsService.STRATEGY_MATCHUP_LIMIT_PER_TEAM;
 
     private final CompetitionParticipantRepository participantRepository;
     private final CompetitionPickRepository pickRepository;

@@ -20,7 +20,7 @@
  *
  * データソース: `song_data.json` を ANOTHER (4) / LEGGENDARIA (10) のみフィルタ。
  */
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useGameData, type SongDataEntry } from '../composables/useGameData';
 import {
   useCompetitionAdmin,
@@ -42,6 +42,11 @@ const se = useSe();
 onMounted(async () => {
   if (songDataBody.value.length === 0) await fetchGameData();
   document.addEventListener('fullscreenchange', onFullscreenChange);
+  // リサイズ / フルスクリーン切替で半面の幅が変わるため測り直す。
+  window.addEventListener('resize', refitAll);
+  // Web フォント適用前に測ると幅がずれるので、ロード完了後にもう一度。
+  // (FontFaceSet 非対応環境でも以降の初期化を止めないよう握り潰す)
+  document.fonts?.ready.then(() => refitAll()).catch(() => { /* noop */ });
   se.preload();
   // URL パラメータからの自動取り込み (CompetitionAdminView から新規タブで開かれた場合の経路)
   await autoLoadFromUrlParams();
@@ -49,6 +54,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   document.removeEventListener('fullscreenchange', onFullscreenChange);
+  window.removeEventListener('resize', refitAll);
   for (const id of stageTimers) clearTimeout(id);
 });
 
@@ -570,36 +576,161 @@ const titleTokensOf = (s: SongDataEntry | null): TitleToken[] => {
   return tokens;
 };
 
+// ── タイトル / アーティストの実測フィット ────────────────────
 /**
- * タイトル長に応じて段階的にフォントサイズを縮小。
- * 半画面 (w-1/2) 内に最大 2 行程度で収まるよう調整。
- * デフォルト (短い): text-9xl 相当。最大長 (40+): text-4xl 相当。
+ * 以前は「文字数」でフォントサイズのバケットを切り替えていたが、全角 (CJK) と
+ * 半角 (ラテン) では 1 文字あたりの描画幅が約 2 倍違うため、英字タイトル側だけが
+ * 不当に小さくなっていた。
+ *   例: "Rainbow after snow" (18 文字) → lg:text-7xl = 72px
+ *       "センチメンタル・サマー" (11 文字) → lg:text-8xl = 96px
+ *   実際の描画幅は前者 ≒ 650px / 後者 ≒ 1050px で、判定が逆転していた。
+ *
+ * ここでは実際の描画幅と行数を測り、半面に収まる最大サイズを二分探索で求める。
+ * 左右で同じアルゴリズム・同じ箱を使うので、文字種によらず見た目の大きさが揃う。
  */
-const titleSizeClass = (s: SongDataEntry | null): string => {
-  if (!s) return 'text-6xl sm:text-7xl md:text-8xl lg:text-9xl';
-  const len = Array.from(s.title).length;
-  if (len <= 10) return 'text-6xl sm:text-7xl md:text-8xl lg:text-9xl';
-  if (len <= 16) return 'text-5xl sm:text-6xl md:text-7xl lg:text-8xl';
-  if (len <= 22) return 'text-4xl sm:text-5xl md:text-6xl lg:text-7xl';
-  if (len <= 30) return 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl';
-  return 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl';
+const TITLE_LINE_HEIGHT = 1.25;
+const ARTIST_LINE_HEIGHT = 1.3;
+const TITLE_MAX_LINES = 2;
+const ARTIST_MAX_LINES = 2;
+const TITLE_MIN_PX = 24;
+const ARTIST_MIN_PX = 12;
+/** .artist-fade は letter-spacing: 0.1em で着地するので、測定もその値で行う。 */
+const ARTIST_REST_LETTER_SPACING = '0.1em';
+
+const titleFontPxLeft = ref(64);
+const titleFontPxRight = ref(64);
+const artistFontPxLeft = ref(24);
+const artistFontPxRight = ref(24);
+
+const titleElLeft = ref<HTMLElement | null>(null);
+const titleElRight = ref<HTMLElement | null>(null);
+const artistElLeft = ref<HTMLElement | null>(null);
+const artistElRight = ref<HTMLElement | null>(null);
+
+/** ビューポート幅ごとの上限 px。従来の「最大バケット」と同じ値を踏襲する。 */
+const breakpointMax = (base: number, sm: number, md: number, lg: number): number => {
+  const w = window.innerWidth;
+  if (w >= 1024) return lg;
+  if (w >= 768) return md;
+  if (w >= 640) return sm;
+  return base;
 };
 
-/** アーティスト長に応じたサイズ。タイトルよりは軽めに段階分け。 */
-const artistSizeClass = (s: SongDataEntry | null): string => {
-  if (!s) return 'text-xl sm:text-2xl md:text-3xl lg:text-4xl';
-  const len = Array.from(s.artist || '').length;
-  if (len <= 20) return 'text-xl sm:text-2xl md:text-3xl lg:text-4xl';
-  if (len <= 32) return 'text-lg sm:text-xl md:text-2xl lg:text-3xl';
-  return 'text-base sm:text-lg md:text-xl lg:text-2xl';
+/**
+ * el が「幅 <= 親幅」かつ「行数 <= maxLines」に収まる最大フォントサイズ (px) を二分探索する。
+ *
+ * 測定は el のクローン (不可視 + アニメーション停止) に対して行う。
+ * cascade / fade アニメーション中の transform・opacity・letter-spacing が
+ * 測定値を汚すのを避けるため、着地後の静止状態を再現したプローブで測る。
+ * 測れない場合 (未マウント / v-show で非表示) は fallback をそのまま返す。
+ */
+const fitFontSize = (
+  el: HTMLElement | null,
+  opts: { lineHeight: number; maxLines: number; minPx: number; maxPx: number; letterSpacing?: string },
+  fallback: number,
+): number => {
+  const parent = el?.parentElement;
+  if (!el || !parent) return fallback;
+  const width = el.clientWidth;
+  if (width === 0) return fallback; // スピン中は v-show で display:none
+
+  const probe = el.cloneNode(true) as HTMLElement;
+  probe.style.position = 'absolute';
+  probe.style.visibility = 'hidden';
+  probe.style.pointerEvents = 'none';
+  probe.style.left = '0';
+  probe.style.top = '0';
+  probe.style.width = `${width}px`;
+  probe.style.maxWidth = 'none';
+  probe.style.lineHeight = String(opts.lineHeight);
+  probe.style.animation = 'none';
+  if (opts.letterSpacing) probe.style.letterSpacing = opts.letterSpacing;
+  for (const c of Array.from(probe.querySelectorAll<HTMLElement>('.cascade-char'))) {
+    c.style.animation = 'none';
+    c.style.opacity = '1';
+    c.style.transform = 'none';
+  }
+  parent.appendChild(probe);
+  try {
+    // scrollWidth: nowrap の英単語トークンがはみ出していないか
+    // rect.height : 折り返して maxLines を超えていないか
+    const fits = (px: number): boolean => {
+      probe.style.fontSize = `${px}px`;
+      const h = probe.getBoundingClientRect().height;
+      return probe.scrollWidth <= width + 1 && h <= px * opts.lineHeight * opts.maxLines + 2;
+    };
+    if (fits(opts.maxPx)) return opts.maxPx;
+    let lo = opts.minPx;
+    let hi = opts.maxPx;
+    while (hi - lo > 1) {
+      const mid = Math.floor((lo + hi) / 2);
+      if (fits(mid)) lo = mid;
+      else hi = mid;
+    }
+    return lo;
+  } finally {
+    probe.remove();
+  }
 };
+
+/**
+ * タイトルの上限 px。幅だけでなく半面の高さでも抑えて、
+ * アーティスト名 / 難易度バッジやプレイヤー名バナーの領域を潰さないようにする。
+ */
+const titleMaxPx = (el: HTMLElement | null): number => {
+  const half = el?.closest('.reveal-half') as HTMLElement | null;
+  const h = half?.clientHeight || window.innerHeight;
+  // 60/72/96/128 = 従来の text-6xl / 7xl / 8xl / 9xl。
+  // 0.14 は TITLE_MAX_LINES 行ぶんで半面の約 35% に収まる比率。1080p / 一般的な
+  // デスクトップ (高さ 900px 以上) では上限側が効き、縦の狭い窓でだけ効いてくる。
+  return Math.min(breakpointMax(60, 72, 96, 128), Math.round(h * 0.14));
+};
+/** アーティスト名の上限 px。20/24/30/36 = 従来の text-xl / 2xl / 3xl / 4xl。 */
+const artistMaxPx = (): number => breakpointMax(20, 24, 30, 36);
+
+/** 左右 4 要素をまとめて測り直す。DOM 反映後 (flush: 'post') に呼ぶこと。 */
+const refitAll = () => {
+  const titleOpts = (el: HTMLElement | null) => ({
+    lineHeight: TITLE_LINE_HEIGHT,
+    maxLines: TITLE_MAX_LINES,
+    minPx: TITLE_MIN_PX,
+    maxPx: titleMaxPx(el),
+  });
+  const artistOpts = {
+    lineHeight: ARTIST_LINE_HEIGHT,
+    maxLines: ARTIST_MAX_LINES,
+    minPx: ARTIST_MIN_PX,
+    maxPx: artistMaxPx(),
+    letterSpacing: ARTIST_REST_LETTER_SPACING,
+  };
+  titleFontPxLeft.value = fitFontSize(titleElLeft.value, titleOpts(titleElLeft.value), titleFontPxLeft.value);
+  titleFontPxRight.value = fitFontSize(titleElRight.value, titleOpts(titleElRight.value), titleFontPxRight.value);
+  artistFontPxLeft.value = fitFontSize(artistElLeft.value, artistOpts, artistFontPxLeft.value);
+  artistFontPxRight.value = fitFontSize(artistElRight.value, artistOpts, artistFontPxRight.value);
+};
+
+// 曲の差し替え (Strategy 着地含む) / 各段階の出現 / スピン終了のたびに測り直す。
+watch(
+  [
+    selectedLeft, selectedRight,
+    spinningLeft, spinningRight,
+    () => leftStage.value.title, () => rightStage.value.title,
+    () => leftStage.value.artist, () => rightStage.value.artist,
+  ],
+  () => refitAll(),
+  { flush: 'post' },
+);
 
 const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
 
 // ── フルスクリーン (Strategy Card と同パターン) ──────────────
 const containerEl = ref<HTMLElement | null>(null);
 const isFullscreen = ref(false);
-const onFullscreenChange = () => { isFullscreen.value = !!document.fullscreenElement; };
+const onFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement;
+  // 半面のサイズが変わるのでフィットし直す (レイアウト確定後)。
+  void nextTick(refitAll);
+};
 const toggleFullscreen = async () => {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
@@ -983,8 +1114,9 @@ const toggleFullscreen = async () => {
         <div v-show="!spinningLeft" class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="leftStage.title"
-            class="title-cascade font-black tracking-tight leading-tight"
-            :class="titleSizeClass(selectedLeft)"
+            ref="titleElLeft"
+            class="title-cascade font-black tracking-tight"
+            :style="{ fontSize: `${titleFontPxLeft}px`, lineHeight: `${TITLE_LINE_HEIGHT}` }"
           >
             <span
               v-for="(tok, ti) in titleTokensOf(selectedLeft)"
@@ -1001,8 +1133,9 @@ const toggleFullscreen = async () => {
           </p>
           <p
             v-if="leftStage.artist"
+            ref="artistElLeft"
             class="artist-fade font-bold tracking-wider text-cyan-100"
-            :class="artistSizeClass(selectedLeft)"
+            :style="{ fontSize: `${artistFontPxLeft}px`, lineHeight: `${ARTIST_LINE_HEIGHT}` }"
           >
             {{ selectedLeft?.artist }}
           </p>
@@ -1075,8 +1208,9 @@ const toggleFullscreen = async () => {
         <div v-show="!spinningRight" class="relative z-10 text-center w-full max-w-4xl space-y-6 sm:space-y-10 md:space-y-12 px-2">
           <p
             v-if="rightStage.title"
-            class="title-cascade font-black tracking-tight leading-tight"
-            :class="titleSizeClass(selectedRight)"
+            ref="titleElRight"
+            class="title-cascade font-black tracking-tight"
+            :style="{ fontSize: `${titleFontPxRight}px`, lineHeight: `${TITLE_LINE_HEIGHT}` }"
           >
             <span
               v-for="(tok, ti) in titleTokensOf(selectedRight)"
@@ -1093,8 +1227,9 @@ const toggleFullscreen = async () => {
           </p>
           <p
             v-if="rightStage.artist"
+            ref="artistElRight"
             class="artist-fade font-bold tracking-wider text-cyan-100"
-            :class="artistSizeClass(selectedRight)"
+            :style="{ fontSize: `${artistFontPxRight}px`, lineHeight: `${ARTIST_LINE_HEIGHT}` }"
           >
             {{ selectedRight?.artist }}
           </p>

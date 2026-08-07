@@ -3,6 +3,7 @@ package com.beatseeker.backend.controller;
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.CompetitionMatchKinds;
+import com.beatseeker.backend.service.CompetitionTeamStandingsService;
 import com.beatseeker.backend.service.OrganizerAuthService;
 import com.beatseeker.backend.service.StrategyPoolService;
 import org.springframework.http.ResponseEntity;
@@ -55,12 +56,10 @@ public class CompetitionAdminController {
     // 戦種別ごとの 1 曲あたり獲得ポイント (予選: 先鋒2 / 中堅3 / 大将4、決勝: 先鋒4/次鋒4/五将5/中堅5/三将6/副将6/大将7)
     // は CompetitionMatchKinds#pointsPerSong に集約している。
 
-    /** matchup 勝利時のチーム勝ち点。 */
-    private static final int MATCHUP_WIN_PT = 3;
-    /** matchup 引き分け時のチーム勝ち点。 */
-    private static final int MATCHUP_DRAW_PT = 1;
+    // matchup 勝ち点 (勝ち 3 / 引分 1) と予選 matchup 数 (= C(5,2)) は、観戦 URL と共用する
+    // CompetitionTeamStandingsService に集約している。
     /** 予選 matchup 数 (= C(5,2))。これらすべての結果が記録されたら決勝生成可能。 */
-    private static final int PRELIM_MATCHUP_COUNT = 10;
+    private static final int PRELIM_MATCHUP_COUNT = CompetitionTeamStandingsService.PRELIM_MATCHUP_COUNT;
 
     private final CompetitionRepository competitionRepository;
     private final CompetitionTeamRepository teamRepository;
@@ -75,6 +74,7 @@ public class CompetitionAdminController {
     private final OrganizerAuthService organizerAuthService;
     private final CompetitionChatMessageRepository chatMessageRepository;
     private final StrategyPoolService strategyPoolService;
+    private final CompetitionTeamStandingsService teamStandingsService;
 
     public CompetitionAdminController(CompetitionRepository competitionRepository,
                                       CompetitionTeamRepository teamRepository,
@@ -88,7 +88,8 @@ public class CompetitionAdminController {
                                       UserRepository userRepository,
                                       OrganizerAuthService organizerAuthService,
                                       CompetitionChatMessageRepository chatMessageRepository,
-                                      StrategyPoolService strategyPoolService) {
+                                      StrategyPoolService strategyPoolService,
+                                      CompetitionTeamStandingsService teamStandingsService) {
         this.competitionRepository = competitionRepository;
         this.teamRepository = teamRepository;
         this.participantRepository = participantRepository;
@@ -102,6 +103,7 @@ public class CompetitionAdminController {
         this.organizerAuthService = organizerAuthService;
         this.chatMessageRepository = chatMessageRepository;
         this.strategyPoolService = strategyPoolService;
+        this.teamStandingsService = teamStandingsService;
     }
 
     /** サポートする大会フォーマット文字列。 */
@@ -585,140 +587,17 @@ public class CompetitionAdminController {
     }
 
     /**
-     * 【メソッドの役割】 大会のチーム順位表を計算して返す。
+     * 【メソッドの役割】 大会のチーム順位表 (+ 途中経過マトリクス) を計算して返す。
      *
-     * <p>計算方法 (予選 matchup のみ対象、決勝は除外):
-     * <ul>
-     *   <li>1 戦 (= 1 match) ごと: 勝った曲数 × 戦ポイント (先鋒2/中堅3/大将4) を勝った側のチームに加算</li>
-     *   <li>1 matchup ごと: 3 戦の勝ち数 (戦の勝者カウント) を比較し、より多い側が matchup 勝利</li>
-     *   <li>matchup 勝利 = +3pt / 引分 = +1pt / 敗北 = 0pt</li>
-     *   <li>合計 = 戦ポイント合計 + matchup 勝ち点合計</li>
-     * </ul>
+     * <p>集計ロジックは観戦 URL ({@code CompetitionSpectatorController}) と共用するため
+     * {@link CompetitionTeamStandingsService} に集約している。ここは認証と大会解決だけを担う。
      */
     @GetMapping("/{competitionId}/standings")
     public ResponseEntity<Map<String, Object>> getStandings(
             Authentication auth, @PathVariable Long competitionId) {
         requireOrganizer(auth);
         Competition comp = requireCompetition(competitionId);
-
-        List<CompetitionTeam> teams = teamRepository.findByCompetitionOrderByTeamOrderAsc(comp);
-        // 各チームの集計値
-        Map<Long, Integer> songPts = new LinkedHashMap<>();
-        Map<Long, Integer> matchupPts = new LinkedHashMap<>();
-        Map<Long, Integer> wins = new LinkedHashMap<>();
-        Map<Long, Integer> draws = new LinkedHashMap<>();
-        Map<Long, Integer> losses = new LinkedHashMap<>();
-        for (CompetitionTeam t : teams) {
-            songPts.put(t.getId(), 0);
-            matchupPts.put(t.getId(), 0);
-            wins.put(t.getId(), 0);
-            draws.put(t.getId(), 0);
-            losses.put(t.getId(), 0);
-        }
-
-        List<CompetitionMatchup> matchups = matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp);
-        int prelimRecordedCount = 0;
-        // matchupBreakdown: マトリクス表示用に、各 matchup での両側総合ポイントを返す。
-        // recorded=false の場合も entry は含めるが、ポイントは集計しない (画面で「?」表示にする)。
-        List<Map<String, Object>> matchupBreakdown = new ArrayList<>();
-        for (CompetitionMatchup mu : matchups) {
-            if (Boolean.TRUE.equals(mu.getIsFinals())) continue; // 決勝は予選順位の集計対象外
-            List<CompetitionMatch> matches = matchRepository.findByMatchupOrderByIdAsc(mu);
-            // matchup 内の戦ポイント累計 (= この matchup で A 側 / B 側が獲得した曲ポイント合計)
-            int matchupAPts = 0, matchupBPts = 0;
-            boolean allRecorded = !matches.isEmpty();
-            for (CompetitionMatch m : matches) {
-                Integer aw = m.getASongsWon();
-                Integer bw = m.getBSongsWon();
-                if (aw == null || bw == null) { allRecorded = false; continue; }
-                // 予選順位の集計なので予選のポイント表を使う (決勝 matchup はループ冒頭で除外済み)。
-                int kindPt = CompetitionMatchKinds.pointsPerSong(m.getMatchKind(), false);
-                matchupAPts += aw * kindPt;
-                matchupBPts += bw * kindPt;
-            }
-
-            // matchup 勝者判定: 戦ポイント合計の大小で W/D/L (運営スペック)
-            Long aId = mu.getTeamA().getId();
-            Long bId = mu.getTeamB().getId();
-            int aMatchupPt = 0, bMatchupPt = 0;
-            if (allRecorded) {
-                if (matchupAPts > matchupBPts) aMatchupPt = MATCHUP_WIN_PT;
-                else if (matchupBPts > matchupAPts) bMatchupPt = MATCHUP_WIN_PT;
-                else { aMatchupPt = MATCHUP_DRAW_PT; bMatchupPt = MATCHUP_DRAW_PT; }
-            }
-
-            // breakdown 用 entry (フロントが 5x5 マトリクスにピボット)
-            Map<String, Object> entry = new LinkedHashMap<>();
-            entry.put("matchupId", mu.getId());
-            entry.put("teamAId", aId);
-            entry.put("teamBId", bId);
-            entry.put("aSongPoints", matchupAPts);
-            entry.put("bSongPoints", matchupBPts);
-            entry.put("aMatchupPoints", aMatchupPt);
-            entry.put("bMatchupPoints", bMatchupPt);
-            entry.put("aTotalPoints", matchupAPts + aMatchupPt);
-            entry.put("bTotalPoints", matchupBPts + bMatchupPt);
-            entry.put("recorded", allRecorded);
-            matchupBreakdown.add(entry);
-
-            if (!allRecorded) continue;
-            prelimRecordedCount++;
-
-            // standings に集計
-            songPts.merge(aId, matchupAPts, Integer::sum);
-            songPts.merge(bId, matchupBPts, Integer::sum);
-            matchupPts.merge(aId, aMatchupPt, Integer::sum);
-            matchupPts.merge(bId, bMatchupPt, Integer::sum);
-            if (aMatchupPt > bMatchupPt) {
-                wins.merge(aId, 1, Integer::sum);
-                losses.merge(bId, 1, Integer::sum);
-            } else if (bMatchupPt > aMatchupPt) {
-                wins.merge(bId, 1, Integer::sum);
-                losses.merge(aId, 1, Integer::sum);
-            } else {
-                draws.merge(aId, 1, Integer::sum);
-                draws.merge(bId, 1, Integer::sum);
-            }
-        }
-
-        // 順位 = total 降順、tie-break は songPts 降順 → matchupPts 降順 → teamOrder 昇順
-        List<Map<String, Object>> rows = new ArrayList<>();
-        for (CompetitionTeam t : teams) {
-            int sp = songPts.get(t.getId());
-            int mp = matchupPts.get(t.getId());
-            Map<String, Object> r = new LinkedHashMap<>();
-            r.put("teamId", t.getId());
-            r.put("teamName", t.getTeamName());
-            r.put("teamOrder", t.getTeamOrder());
-            r.put("songPoints", sp);
-            r.put("matchupPoints", mp);
-            r.put("totalPoints", sp + mp);
-            r.put("wins", wins.get(t.getId()));
-            r.put("draws", draws.get(t.getId()));
-            r.put("losses", losses.get(t.getId()));
-            rows.add(r);
-        }
-        rows.sort((x, y) -> {
-            int byTotal = Integer.compare((Integer) y.get("totalPoints"), (Integer) x.get("totalPoints"));
-            if (byTotal != 0) return byTotal;
-            int bySong = Integer.compare((Integer) y.get("songPoints"), (Integer) x.get("songPoints"));
-            if (bySong != 0) return bySong;
-            int byMu = Integer.compare((Integer) y.get("matchupPoints"), (Integer) x.get("matchupPoints"));
-            if (byMu != 0) return byMu;
-            return Integer.compare((Integer) x.get("teamOrder"), (Integer) y.get("teamOrder"));
-        });
-        for (int i = 0; i < rows.size(); i++) rows.get(i).put("rank", i + 1);
-
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("rows", rows);
-        root.put("prelimMatchupCount", PRELIM_MATCHUP_COUNT);
-        root.put("prelimRecordedCount", prelimRecordedCount);
-        root.put("allPrelimRecorded", prelimRecordedCount >= PRELIM_MATCHUP_COUNT);
-        // 決勝 matchup が既に存在するか
-        root.put("finalsExists", matchups.stream().anyMatch(mu -> Boolean.TRUE.equals(mu.getIsFinals())));
-        // 5x5 マトリクス表示用の matchup ごと総合ポイント (recorded=false の matchup も含む)
-        root.put("matchupBreakdown", matchupBreakdown);
-        return ResponseEntity.ok(root);
+        return ResponseEntity.ok(teamStandingsService.compute(comp));
     }
 
     /**

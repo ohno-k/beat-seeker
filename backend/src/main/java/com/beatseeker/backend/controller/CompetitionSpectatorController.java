@@ -10,6 +10,7 @@ import com.beatseeker.backend.repository.CompetitionMatchupRepository;
 import com.beatseeker.backend.repository.CompetitionRepository;
 import com.beatseeker.backend.repository.CompetitionTeamRepository;
 import com.beatseeker.backend.service.CompetitionMatchKinds;
+import com.beatseeker.backend.service.CompetitionTeamStandingsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ import java.util.Map;
  *   <li>起用 (アサインされたプレイヤー名) は、その側のラインアップが公開済みのときだけ可視</li>
  *   <li>指定ジャンルは常に可視 (運営が公開しているメタ情報)</li>
  *   <li>結果 (勝ち曲数・各曲タイトル・各曲スコア) は記録済みのときだけ可視</li>
+ *   <li>順位表 / 途中経過マトリクスは記録済み結果だけの集計なので常に可視</li>
  * </ul>
  * 招待トークン / TL トークン / 個人情報は一切含めない。
  *
@@ -49,15 +51,18 @@ public class CompetitionSpectatorController {
     private final CompetitionTeamRepository teamRepository;
     private final CompetitionMatchupRepository matchupRepository;
     private final CompetitionMatchRepository matchRepository;
+    private final CompetitionTeamStandingsService teamStandingsService;
 
     public CompetitionSpectatorController(CompetitionRepository competitionRepository,
                                           CompetitionTeamRepository teamRepository,
                                           CompetitionMatchupRepository matchupRepository,
-                                          CompetitionMatchRepository matchRepository) {
+                                          CompetitionMatchRepository matchRepository,
+                                          CompetitionTeamStandingsService teamStandingsService) {
         this.competitionRepository = competitionRepository;
         this.teamRepository = teamRepository;
         this.matchupRepository = matchupRepository;
         this.matchRepository = matchRepository;
+        this.teamStandingsService = teamStandingsService;
     }
 
     /**
@@ -113,6 +118,11 @@ public class CompetitionSpectatorController {
             matchupMaps.add(mum);
         }
         root.put("matchups", matchupMaps);
+
+        // 順位表 + 途中経過マトリクス。運営画面と同じ集計 (CompetitionTeamStandingsService) をそのまま流用する。
+        // 集計対象は結果記録済みの試合だけなので、staged reveal は壊れない
+        // (未記録の試合は breakdown 上「?」のままで、起用も StrategyCard の発動予定も含まれない)。
+        root.put("standings", teamStandingsService.compute(comp));
         return ResponseEntity.ok(root);
     }
 

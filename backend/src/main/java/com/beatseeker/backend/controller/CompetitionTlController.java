@@ -4,6 +4,7 @@ import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.CompetitionMatchKinds;
+import com.beatseeker.backend.service.CompetitionTeamStandingsService;
 import com.beatseeker.backend.service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,8 +47,9 @@ public class CompetitionTlController {
             "middle", 20,
             "captain", 30
     );
-    /** 1 チームが予選で StrategyCard を使える matchup 数の上限 (決勝は対象外)。 */
-    public static final int STRATEGY_MATCHUP_LIMIT_PER_TEAM = 2;
+    /** 1 チームが予選で StrategyCard を使える matchup 数の上限 (決勝は対象外)。順位表の分母と同じ値。 */
+    public static final int STRATEGY_MATCHUP_LIMIT_PER_TEAM =
+            CompetitionTeamStandingsService.STRATEGY_MATCHUP_LIMIT_PER_TEAM;
 
     /**
      * 決勝 (7 戦) で 1 人の選手を起用できる最大戦数。
