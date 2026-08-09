@@ -305,13 +305,14 @@ public class LeagueSongDrawService {
     /**
      * 【メソッドの役割】 「拮抗」判定のレート差しきい値（%）を DIVISION（tier）ごとに段階的に返す。
      *
-     * 上位ほど実力が団子なので厳しく、下位ほど広く: LEGEND(0)=0.5% 〜 DIVISION10=5.0% の線形。
+     * 上位ほど実力が団子なので厳しく、下位ほど広く: LEGEND(0)=0.25% 〜 DIVISION10=2.5% の線形。
+     * （2026-08-10 ユーザー要望で従来の半分に引き締め。旧: 0.5% 〜 5.0%）
      *
      * @param tier 階級（0=LEGEND .. 10）
      * @return 拮抗とみなす最高−最低レート差（%）
      */
     private double tightSpread(int tier) {
-        return 0.5 + tier * 0.45;
+        return 0.25 + tier * 0.225;
     }
 
     /**
