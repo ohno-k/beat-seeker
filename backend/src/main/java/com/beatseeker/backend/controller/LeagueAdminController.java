@@ -45,6 +45,10 @@ public class LeagueAdminController {
     private final LeagueEntryRepository leagueEntryRepository;
     private final SongDefinitionRepository songDefinitionRepository;
     private final ScoreRepository scoreRepository;
+    /** 締め済み週の曲別確定結果（後追い凍結の重複チェックに使う）。 */
+    private final LeagueMemberSongRepository leagueMemberSongRepository;
+    /** 順位表の計算（後追い凍結で保存する値を求めるために使う）。 */
+    private final LeagueStandingsService standingsService;
 
     public LeagueAdminController(UserRepository userRepository,
                                  AdminAuthService adminAuthService,
@@ -56,7 +60,11 @@ public class LeagueAdminController {
                                  LeagueMemberRepository leagueMemberRepository,
                                  LeagueEntryRepository leagueEntryRepository,
                                  SongDefinitionRepository songDefinitionRepository,
-                                 ScoreRepository scoreRepository) {
+                                 ScoreRepository scoreRepository,
+                                 LeagueMemberSongRepository leagueMemberSongRepository,
+                                 LeagueStandingsService standingsService) {
+        this.leagueMemberSongRepository = leagueMemberSongRepository;
+        this.standingsService = standingsService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
         this.leagueService = leagueService;
@@ -402,6 +410,63 @@ public class LeagueAdminController {
         return ResponseEntity.ok(Map.of(
                 "message", "開催中の週を中止し、開始前の状態に戻しました。",
                 "week", weekDetail(week)));
+    }
+
+    /**
+     * 【メソッドの役割】 締め済み週の曲別内訳を後追いで凍結する（凍結機能より前に締まった週の救済）。
+     *
+     * 週の締め（{@code closeWeek}）は曲別内訳を {@code league_member_songs} へ保存するが、
+     * その機能より前に締まった週（プレシーズン）には保存が無く、表示のたびに現在の scores から
+     * 再計算している。再計算はアップロードのたびに結果が動くため、いま計算できる値を 1 度だけ
+     * 保存して固定するための管理者操作。
+     *
+     * <p>既に凍結済みのグループは<b>触らない</b>（再実行しても上書きしない）。締めからの経過が
+     * 長いほど再計算値は当時からズレるため、救済は早いほど正確。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param weekId 対象週 ID（締め済みであること）
+     * @return 凍結したグループ数・メンバー数・スキップしたグループ数
+     */
+    @PostMapping("/weeks/{weekId}/freeze-songs")
+    public ResponseEntity<?> freezeSongs(Authentication auth, @PathVariable Long weekId) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        LeagueWeek week = leagueWeekRepository.findById(weekId).orElse(null);
+        if (week == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
+        }
+        if (!"closed".equals(week.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "凍結できるのは締め済み(closed)の週のみです"));
+        }
+
+        List<LeagueMember> members = leagueMemberRepository.findByWeek(week);
+        // (tier, groupIndex) ごとに、その週の順位表を求めて曲別内訳を保存する。
+        Map<String, List<LeagueMember>> byGroup = members.stream()
+                .collect(Collectors.groupingBy(m -> m.getTier() + ":" + m.getGroupIndex(),
+                        TreeMap::new, Collectors.toList()));
+        int frozenGroups = 0;
+        int frozenMembers = 0;
+        int skippedGroups = 0;
+        for (Map.Entry<String, List<LeagueMember>> g : byGroup.entrySet()) {
+            List<LeagueMember> groupMembers = g.getValue();
+            if (!leagueMemberSongRepository.findByMemberIn(groupMembers).isEmpty()) {
+                skippedGroups++; // 既に凍結済み → 再計算値で上書きしない
+                continue;
+            }
+            String[] parts = g.getKey().split(":");
+            List<Map<String, Object>> standings = standingsService.computeGroupStandings(
+                    week, Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+            standingsService.freezePerSong(groupMembers, standings);
+            frozenGroups++;
+            frozenMembers += groupMembers.size();
+        }
+        return ResponseEntity.ok(Map.of(
+                "message", "曲別内訳を凍結しました。",
+                "weekId", weekId,
+                "frozenGroups", frozenGroups,
+                "frozenMembers", frozenMembers,
+                "skippedGroups", skippedGroups));
     }
 
     /**

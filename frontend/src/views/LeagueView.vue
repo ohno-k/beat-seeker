@@ -16,6 +16,7 @@ import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import LeagueInfoModal from '../components/LeagueInfoModal.vue';
+import LeaguePointGauge from '../components/LeaguePointGauge.vue';
 import LeagueStandingsTable from '../components/LeagueStandingsTable.vue';
 import RankIcon from '../components/RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
@@ -568,16 +569,19 @@ onUnmounted(() => {
                     class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-semibold">
                 {{ divisionName(myEntry.currentTier) }}
               </span>
-              <span v-if="isJoined && myEntry"
-                    class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold tabular-nums">
-                {{ t('league.points') }} {{ fmtPt(myEntry.points) }}
-              </span>
               <!-- 参加登録済みだが今週の編成には入っていない（次週から参戦）。 -->
               <span v-if="isPendingNextWeek"
                     class="text-xs px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-semibold">
                 {{ t('league.pendingPlacement') }}
               </span>
             </div>
+            <!-- 昇降格 PT のインジケーター（あとどれくらいで昇格/降格かを可視化）。 -->
+            <LeaguePointGauge
+              v-if="isJoined && myEntry"
+              class="mt-2"
+              :points="myEntry.points"
+              :tier="myEntry.currentTier"
+            />
             <p v-if="!isJoined" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ t('league.joinNote') }}</p>
             <p v-if="!isJoined" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ t('league.privacyNote') }}</p>
           </div>
