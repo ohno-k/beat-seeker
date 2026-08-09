@@ -126,6 +126,28 @@ export function versionBadgeClass(num: number | null | undefined): string {
     }
 }
 
+/**
+ * バージョン番号 → グラフ用の塗り色（16 進）。
+ *
+ * バッジ（{@link versionBadgeClass}）と同系統の色相を保ちつつ、
+ * ライト／ダーク両方の背景で「明度帯・彩度下限・P/D/T 色覚での隣接分離・
+ * 背景コントラスト 3:1」を満たす 1 セットに揃えてある（検証済み）。
+ * RESIDENT だけバッジのグレーではなくティールを充てているのは、
+ * 円グラフでは無彩色が「その他・非強調」の意味を持ってしまうため。
+ */
+export const VERSION_CHART_COLOR: Record<number, string> = {
+    33: '#3b82f6',
+    32: '#db2777',
+    31: '#d97706',
+    30: '#0d9488',
+};
+
+/** バージョン番号 → グラフ用の塗り色。未定義の作品はスレートにフォールバックする。 */
+export function versionChartColor(num: number | null | undefined): string {
+    if (num == null) return '#64748b';
+    return VERSION_CHART_COLOR[num] ?? '#64748b';
+}
+
 /** 過去作テーブルへの保存を許可するバージョンか（現行作は対象外）。 */
 export function isSupportedPastVersion(num: number | null | undefined): boolean {
     return num != null && num >= MIN_PAST_VERSION && num <= MAX_PAST_VERSION;

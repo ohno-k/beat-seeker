@@ -90,7 +90,10 @@
     <div v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">{{ t('dashboard.analysis') }}</h2>
+          <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">
+            {{ t('dashboard.analysis') }}
+            <span v-if="showAllTime" class="ml-1.5 align-middle px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span>
+          </h2>
           <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('dashboard.analysisHint', { n: myScoresActive.length }) }}</p>
         </div>
         <div v-if="avgPgreatRate !== null" class="text-right">
@@ -99,19 +102,43 @@
         </div>
       </div>
 
-      <!-- Level filter -->
-      <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
-        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('dashboard.targetLevel') }}</span>
-        <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
-          <button
-            v-for="lvl in ['ALL', '11', '12']" :key="lvl"
-            @click="selectedAnalysisLevel = lvl as 'ALL' | '11' | '12'"
-            class="px-3 py-1 text-xs font-bold rounded-md transition-all"
-            :class="selectedAnalysisLevel === lvl
-              ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
-          >{{ lvl === 'ALL' ? t('common.all') : `☆${lvl}` }}</button>
+      <!-- Level filter ＋「歴代ベストを反映」トグル -->
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('dashboard.targetLevel') }}</span>
+          <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+            <button
+              v-for="lvl in ['ALL', '11', '12']" :key="lvl"
+              @click="selectedAnalysisLevel = lvl as 'ALL' | '11' | '12'"
+              class="px-3 py-1 text-xs font-bold rounded-md transition-all"
+              :class="selectedAnalysisLevel === lvl
+                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
+            >{{ lvl === 'ALL' ? t('common.all') : `☆${lvl}` }}</button>
+          </div>
         </div>
+
+        <!-- 過去作のスコアが現行を上回っている譜面を、そのスコアで集計し直すトグル -->
+        <label
+          v-if="canUseAllTime && hasPastImports"
+          class="flex items-center gap-2 cursor-pointer group whitespace-nowrap"
+          :title="t('past.toggleHint')"
+        >
+          <div class="relative inline-flex items-center">
+            <input type="checkbox" :checked="showAllTime" @change="toggleAllTime" class="sr-only peer">
+            <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+          </div>
+          <span
+            class="text-xs font-bold transition-colors"
+            :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'"
+          >{{ t('past.toggle') }}</span>
+          <span v-if="isLoadingPast" class="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
+        </label>
+
+        <!-- 集計値と「成長軌跡」がずれる理由を明示する -->
+        <p v-if="showAllTime" class="text-[11px] text-amber-600 dark:text-amber-400 basis-full">
+          {{ t('past.analysisNote') }}
+        </p>
       </div>
 
       <div class="space-y-8">
@@ -224,7 +251,16 @@
                 <tr v-for="(s, i) in beatPtTop10" :key="`${s.title}_${s.difficultyName}`" class="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
                   <td class="py-2 pl-2 text-slate-400 font-bold text-xs">{{ i + 1 }}</td>
                   <td class="py-2">
-                    <div class="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[200px] sm:max-w-xs">{{ s.title }}</div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[200px] sm:max-w-xs">{{ s.title }}</span>
+                      <!-- この行の EX が過去作由来なら、どの作品のスコアかをバッジで示す -->
+                      <span
+                        v-if="s.allTimeVersion"
+                        class="shrink-0 px-1 py-0.5 text-[9px] font-bold rounded border"
+                        :class="versionBadgeClass(s.allTimeVersion)"
+                        :title="versionName(s.allTimeVersion)"
+                      >{{ versionShort(s.allTimeVersion) }}</span>
+                    </div>
                     <div class="text-xs text-slate-400">{{ s.difficultyName }}</div>
                   </td>
                   <td class="py-2 text-center text-xs font-bold text-slate-500 dark:text-slate-400">{{ s.informalRank || '-' }}</td>
@@ -482,6 +518,9 @@ import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
 import { calculatePoints, WEIGHTS, getFolderRankInfoByRate, getFolderRankThresholdRate } from '../utils/beatTier';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
+import { usePastScores, chartKey } from '../composables/usePastScores';
+import { CLEAR_TYPE_RANK } from '../composables/constants';
+import { versionBadgeClass, versionName, versionShort } from '../utils/iidxVersions';
 import ShareTokenModal from './ShareTokenModal.vue';
 import IntegrationTokenModal from './IntegrationTokenModal.vue';
 import PastScoreManager from './PastScoreManager.vue';
@@ -772,6 +811,50 @@ const clearChartData = computed(() => {
 // Level filter for score analysis section
 const selectedAnalysisLevel = ref<'ALL' | '11' | '12'>('ALL');
 
+// ── 歴代ベスト（過去作反映）────────────────────────────────────
+const {
+  fetchPastBest,
+  fetchSummary: fetchPastSummary,
+  pastBestByChart,
+  hasPastImports,
+  isLoading: isLoadingPast,
+} = usePastScores();
+
+/**
+ * 「歴代ベストを反映」トグルの状態。ON にするとスコア分析セクションの各グラフ・表が、
+ * 過去作を含めた歴代ベストで再集計される。
+ *
+ * 重要: これは表示だけの切り替えで、サーバーに保存される値には一切影響しない。
+ * 上の「成長軌跡」は保存済みスナップショット（現行作のみ）なので対象外。
+ */
+const showAllTime = ref(false);
+
+/** 歴代ベストを扱えるか。過去作は本人のデータなので、他ユーザー閲覧・共有 URL 閲覧では出さない。 */
+const canUseAllTime = computed(() => !props.viewingUserId && !props.shareToken);
+
+/**
+ * 【関数の役割】 トグルの切り替え。ON にする瞬間だけ過去作スコアを取得する
+ * （数千件になり得るので、必要になるまで取りに行かない）。
+ */
+const toggleAllTime = async () => {
+  if (showAllTime.value) {
+    showAllTime.value = false;
+    return;
+  }
+  try {
+    await fetchPastBest();
+    showAllTime.value = true;
+  } catch {
+    // 取得失敗時は OFF のまま据え置く
+  }
+};
+
+// トグルの表示可否判定にだけ使う軽量なサマリを先に取得しておく。
+onMounted(() => {
+  if (!canUseAllTime.value) return;
+  fetchPastSummary().catch(() => { /* 握り潰し: トグルが出ないだけ */ });
+});
+
 /**
  * 同一(曲名, 難易度)に複数 source（arcade / infinitas）の行が並走する場合、
  * EX スコアが高い行だけを残す（best-per-chart 集約）。
@@ -794,9 +877,50 @@ const myScoresBest = computed(() => {
   return Array.from(best.values());
 });
 
+/**
+ * 【computed の役割】 スコア分析セクションが実際に使うレコード。
+ * 「歴代ベストを反映」が ON のときだけ、過去作のベストを重ねた配列に差し替える。
+ *
+ * `usePastScores().applyAllTimeBest` は `flattenScores()` 済みの {@link ScoreRecord}
+ * （scoreRate / maxScore / beatTierPoints を持つ形）を前提にしているが、ここで扱うのは
+ * `/api/scores/me` の生レコードで、レートや BEAT-PT は後段の `myScoresEnriched` が
+ * 付け直す。そのため上書きするのは実測値（EX / ランプ / BP / PGREAT / GREAT）だけにして、
+ * 派生値の再計算は既存の流れに任せる。
+ *
+ * 実機と同じく「ベストスコア / ベストランプ / ベスト BP」は独立に最良値を採る
+ * （applyAllTimeBest と同じ規則）。
+ */
+const myScoresBestDisplay = computed(() => {
+  if (!showAllTime.value) return myScoresBest.value;
+  const bestByChart = pastBestByChart();
+  if (bestByChart.size === 0) return myScoresBest.value;
+
+  return myScoresBest.value.map(s => {
+    const past = bestByChart.get(chartKey(s.title, s.difficultyName));
+    if (!past) return s;
+
+    const scoreWins = past.score > (s.score ?? 0);
+    const clearWins = CLEAR_TYPE_RANK[past.clearType] > CLEAR_TYPE_RANK[s.clearType];
+    const missWins = past.missCount != null && (s.missCount == null || past.missCount < s.missCount);
+    if (!scoreWins && !clearWins && !missWins) return s;
+
+    const merged = { ...s };
+    if (scoreWins) {
+      merged.score = past.score;
+      merged.djLevel = past.djLevel;
+      merged.pgreat = past.pgreat;
+      merged.great = past.great;
+      merged.allTimeVersion = past.version;
+    }
+    if (clearWins) merged.clearType = past.clearType;
+    if (missWins) merged.missCount = past.missCount;
+    return merged;
+  });
+});
+
 // All Lv11/12 ANOTHER/LEGGENDARIA entries (including score=0, for clear status table)
 const myAnotherLegg = computed(() =>
-  myScoresBest.value.filter(s => {
+  myScoresBestDisplay.value.filter(s => {
     if (s.difficultyName !== 'ANOTHER' && s.difficultyName !== 'LEGGENDARIA') return false;
     if (s.difficultyLevel !== 11 && s.difficultyLevel !== 12) return false;
     if (selectedAnalysisLevel.value !== 'ALL' && s.difficultyLevel !== parseInt(selectedAnalysisLevel.value)) return false;

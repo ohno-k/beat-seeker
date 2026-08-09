@@ -1548,6 +1548,7 @@ export const ko = {
   'past.toggle': '역대 베스트 반영',
   'past.toggleHint': '과거 작품의 스코어가 이번 작품을 넘는 채보를 그 스코어로 바꿔서 표시합니다.',
   'past.toggleActiveNote': '역대 베스트를 반영 중입니다. 랭킹·성장 기록에는 반영되지 않습니다.',
+  'past.analysisNote': '역대 베스트로 다시 집계한 스코어 분석입니다. 위의 성장 궤적(저장된 기록)과 랭킹에는 반영되지 않습니다.',
   'past.tierBadge': '역대',
   'past.tierNote': '역대 베스트로 재계산한 PT와 티어입니다(랭킹에는 반영되지 않습니다).',
   'past.bestScore': '역대 베스트 스코어',
@@ -1600,4 +1601,8 @@ export const ko = {
   'past.manager.deleteConfirm': '{name}의 과거 스코어를 삭제합니다. 계속하시겠습니까?',
   'past.manager.deleteFailed': '삭제에 실패했습니다.',
   'past.manager.loadFailed': '가져오기 상태를 불러오지 못했습니다.',
+  'past.manager.pieTitle': '역대 베스트의 작품 내역',
+  'past.manager.pieHint': '보면별 역대 베스트 스코어가 어느 작품에서 나온 것인지의 내역입니다.',
+  'past.manager.pieTotal': '보면',
+  'past.manager.pieSummary': '{n} 보면은 과거 작품 스코어가 역대 베스트 그대로입니다(현행 작품에서 미갱신).',
 };

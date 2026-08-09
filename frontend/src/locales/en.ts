@@ -1547,6 +1547,7 @@ export const en = {
   'past.toggle': 'Apply all-time best',
   'past.toggleHint': 'Charts where a past version\'s score beats your current one are shown with that score instead.',
   'past.toggleActiveNote': 'Showing all-time bests. Rankings and growth history are unaffected.',
+  'past.analysisNote': 'Score analysis recalculated with all-time bests. The growth history above (saved snapshots) and rankings are unaffected.',
   'past.tierBadge': 'All-time',
   'past.tierNote': 'PT and tier recalculated from all-time bests (not reflected in rankings).',
   'past.bestScore': 'All-time best score',
@@ -1599,4 +1600,8 @@ export const en = {
   'past.manager.deleteConfirm': 'Delete all past scores for {name}?',
   'past.manager.deleteFailed': 'Failed to delete.',
   'past.manager.loadFailed': 'Failed to load import status.',
+  'past.manager.pieTitle': 'All-time bests by version',
+  'past.manager.pieHint': 'Which version each chart\'s all-time best score was set in.',
+  'past.manager.pieTotal': 'charts',
+  'past.manager.pieSummary': '{n} charts still have a past-version score as their all-time best (not beaten in the current version).',
 };

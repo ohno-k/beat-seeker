@@ -1606,6 +1606,7 @@ export const ja = {
   'past.toggle': '歴代ベストを反映',
   'past.toggleHint': '過去作のスコアが今作を上回っている譜面を、そのスコアに置き換えて表示します。',
   'past.toggleActiveNote': '歴代ベストを反映中です。ランキング・成長記録には反映されません。',
+  'past.analysisNote': '歴代ベストで再集計したスコア分析です。上の成長軌跡（保存済みの記録）とランキングには反映されません。',
   'past.tierBadge': '歴代',
   'past.tierNote': '歴代ベストで再計算した PT とティアです（ランキングには反映されません）。',
   'past.bestScore': '歴代ベストスコア',
@@ -1658,4 +1659,8 @@ export const ja = {
   'past.manager.deleteConfirm': '{name} の過去スコアを削除します。よろしいですか？',
   'past.manager.deleteFailed': '削除に失敗しました。',
   'past.manager.loadFailed': '取り込み状況の取得に失敗しました。',
+  'past.manager.pieTitle': '歴代ベストの作品内訳',
+  'past.manager.pieHint': '譜面ごとの歴代ベストスコアが、どの作品で出たものかの内訳です。',
+  'past.manager.pieTotal': '譜面',
+  'past.manager.pieSummary': '{n} 譜面は過去作のスコアが歴代ベストのままです（現行作で未更新）。',
 };

@@ -16,12 +16,22 @@ import { usePastScores } from '../composables/usePastScores';
 import { flattenScores } from '../utils/scoreData';
 import type { ScoreData } from '../types/ScoreData';
 import {
+  CURRENT_VERSION,
   SUPPORTED_VERSIONS,
   versionBadgeClass,
+  versionChartColor,
+  versionName,
 } from '../utils/iidxVersions';
 
 const { t } = useI18n();
-const { summary, fetchSummary, deletePastVersion } = usePastScores();
+const {
+  summary,
+  fetchSummary,
+  deletePastVersion,
+  fetchPastBest,
+  buildChartHistories,
+  pastRows,
+} = usePastScores();
 
 const props = defineProps<{
   /** 現行作の登録譜面数。省略時は provide された scoreData から算出する。 */
@@ -68,6 +78,67 @@ const formatDate = (iso: string | null): string => {
   return iso.slice(0, 10);
 };
 
+// ── 歴代ベストの作品内訳（円グラフ）──────────────────────────────
+/** 円グラフ用に `/past/best` を取得中かどうか。 */
+const isPieLoading = ref(false);
+
+/** 現行作のフラットなスコア。歴代ベスト判定の一方の入力。 */
+const currentRecords = computed(() => flattenScores(injectedScores?.value ?? []));
+
+/**
+ * 【computed の役割】 「各譜面の歴代ベストスコアがどの作品のものか」を作品別に数える。
+ *
+ * {@link buildChartHistories} は同点なら新しい作品を勝たせるので、
+ * 現行作が過去作に並んでいる譜面は現行作としてカウントされる。
+ * つまり過去作のスライスは「まだ当時の自分を超えられていない譜面」の数になる。
+ *
+ * 過去作を 1 作も取り込んでいない（= `pastRows` が空）場合は、
+ * 全譜面が現行作の 1 色になって情報量が無いので描画しない。
+ */
+const versionPie = computed(() => {
+  if (pastRows.value.length === 0) return null;
+
+  const counts = new Map<number, number>();
+  buildChartHistories(currentRecords.value).forEach(h => {
+    // 未プレー（ランプだけ残っている等でスコア 0）の譜面は作品を語れないので除外する。
+    if (h.bestScore.score <= 0) return;
+    counts.set(h.bestScore.version, (counts.get(h.bestScore.version) ?? 0) + 1);
+  });
+
+  const total = Array.from(counts.values()).reduce((a, b) => a + b, 0);
+  if (total === 0) return null;
+
+  // 新しい作品から時計回りに並べる（テーブルの行順と揃える）。
+  const items = SUPPORTED_VERSIONS
+    .map(v => ({ version: v.num, name: versionName(v.num), count: counts.get(v.num) ?? 0 }))
+    .filter(e => e.count > 0);
+
+  // pathLength=100 の円に沿ってドーナツを描くので、長さはすべて % で扱える。
+  // スライス間には背景色の隙間を 1 つぶん入れて境界を立たせる（単一スライスのときは不要）。
+  const GAP = items.length > 1 ? 0.8 : 0;
+  let offset = 0;
+  const slices = items.map(e => {
+    const pct = (e.count / total) * 100;
+    const slice = {
+      ...e,
+      pct,
+      color: versionChartColor(e.version),
+      /** 実描画長。GAP を引いても消えないよう下限を設ける。 */
+      dash: Math.max(0.4, pct - GAP),
+      offset,
+    };
+    offset += pct;
+    return slice;
+  });
+
+  return {
+    total,
+    slices,
+    /** 歴代ベストが過去作のままの譜面数（= 現行作でまだ超えていない譜面）。 */
+    pastWins: slices.filter(s => s.version !== CURRENT_VERSION).reduce((a, s) => a + s.count, 0),
+  };
+});
+
 const load = async () => {
   isLoading.value = true;
   errorMsg.value = '';
@@ -77,6 +148,17 @@ const load = async () => {
     errorMsg.value = e?.message || t('past.manager.loadFailed');
   } finally {
     isLoading.value = false;
+  }
+
+  // 円グラフ用の全件データは重い（数千件）ので、過去作を取り込み済みのときだけ後追いで取る。
+  if (!summary.value.some(s => s.chartCount > 0)) return;
+  isPieLoading.value = true;
+  try {
+    await fetchPastBest();
+  } catch {
+    // 取得失敗時は円グラフが出ないだけ。テーブルの表示は妨げない。
+  } finally {
+    isPieLoading.value = false;
   }
 };
 
@@ -156,6 +238,61 @@ onMounted(load);
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- 歴代ベストの作品内訳。過去作を取り込むまでは 1 色にしかならないので出さない -->
+    <div v-if="isPieLoading || versionPie" class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+      <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200">{{ t('past.manager.pieTitle') }}</h4>
+      <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{{ t('past.manager.pieHint') }}</p>
+
+      <div v-if="isPieLoading" class="text-xs text-slate-500 dark:text-slate-400 py-6 text-center">
+        {{ t('common.loading') }}
+      </div>
+
+      <div v-else-if="versionPie" class="mt-3 flex flex-col sm:flex-row items-center gap-5">
+        <!-- ドーナツ本体。pathLength=100 にして dasharray を % として扱う -->
+        <div class="relative shrink-0">
+          <svg viewBox="0 0 100 100" class="w-28 h-28" role="img" :aria-label="t('past.manager.pieTitle')">
+            <g transform="rotate(-90 50 50)">
+              <circle
+                v-for="s in versionPie.slices"
+                :key="s.version"
+                cx="50" cy="50" r="40" fill="none"
+                pathLength="100"
+                stroke-width="15"
+                :stroke="s.color"
+                :stroke-dasharray="`${s.dash} ${100 - s.dash}`"
+                :stroke-dashoffset="-s.offset"
+              >
+                <title>{{ s.version }} {{ s.name }}: {{ s.count.toLocaleString() }} ({{ s.pct.toFixed(1) }}%)</title>
+              </circle>
+            </g>
+          </svg>
+          <!-- 中央に総譜面数。ドーナツの穴を凡例の合計値として使う -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span class="text-lg font-bold text-slate-800 dark:text-slate-100 tabular-nums leading-none">{{ versionPie.total.toLocaleString() }}</span>
+            <span class="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">{{ t('past.manager.pieTotal') }}</span>
+          </div>
+        </div>
+
+        <!-- 凡例。色だけに頼らないよう作品名・譜面数・比率を並べる -->
+        <div class="w-full min-w-0">
+          <ul class="space-y-1.5">
+            <li v-for="s in versionPie.slices" :key="s.version" class="flex items-center gap-2 text-xs">
+              <span class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: s.color }"></span>
+              <span class="text-slate-700 dark:text-slate-200 truncate">
+                {{ s.version }} {{ s.name }}
+                <span v-if="s.version === CURRENT_VERSION" class="text-slate-400 dark:text-slate-500">({{ t('past.manager.current') }})</span>
+              </span>
+              <span class="ml-auto shrink-0 tabular-nums text-slate-600 dark:text-slate-300">{{ s.count.toLocaleString() }}</span>
+              <span class="shrink-0 w-12 text-right tabular-nums text-slate-400 dark:text-slate-500">{{ s.pct.toFixed(1) }}%</span>
+            </li>
+          </ul>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2.5">
+            {{ t('past.manager.pieSummary', { n: versionPie.pastWins.toLocaleString() }) }}
+          </p>
+        </div>
+      </div>
     </div>
 
     <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">{{ t('past.notRanked') }}</p>
