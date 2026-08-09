@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(docker-compose up --build -d backend)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx vue-tsc *)"
     ]
   }
 }

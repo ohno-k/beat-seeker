@@ -42,6 +42,12 @@ public class LeagueStandingsService {
     /** 1 週で動くポイントの上限（順位由来の増減とチャレンジ/ディフェンス補正の両方に効く）。 */
     public static final int WEEKLY_DELTA_CAP = 4;
 
+    /**
+     * チャレンジ（格上の卓）/ ディフェンス（格下の卓）の PT 補正幅。
+     * challenge は +{@code ROLE_BONUS}、defense は -{@code ROLE_BONUS}（{@link #applyRole}）。
+     */
+    public static final int ROLE_BONUS = 2;
+
     private final LeagueMemberRepository leagueMemberRepository;
     private final LeagueSongRepository leagueSongRepository;
     private final LeagueBaselineRepository leagueBaselineRepository;
@@ -286,8 +292,13 @@ public class LeagueStandingsService {
             MemberStats st = stats.get(i);
             int rank = i + 1;
             String role = st.member.getRole() != null ? st.member.getRole() : "normal";
-            // チャレンジ/ディフェンスの補正（±2）を基本デルタに適用する。
+            // チャレンジ/ディフェンスの補正（±ROLE_BONUS）を基本デルタに適用する。
             int delta = applyRole(deltas[i], role);
+            // 有効 0 曲はプラスを獲得できない（放置昇格の防止）。基本デルタ側でも同じ判定をしているが、
+            // チャレンジ補正はその後に効くため、ここでも押さえる（1 曲もライン超えせず +2 されるのを防ぐ）。
+            if (st.validCount == 0 && delta > 0) {
+                delta = 0;
+            }
             // 昇降格の可否・向きはホーム DIVISION で判定する（卓がホストと違っても昇降格はホームを ±1）。
             int homeTier = st.member.getHomeTier() != null ? st.member.getHomeTier() : tier;
             int points = pointsByUserId.getOrDefault(st.member.getUser().getId(), 0);
@@ -608,22 +619,39 @@ public class LeagueStandingsService {
      * 【メソッドの役割】 立場（チャレンジ/ディフェンス）に応じて昇降格 PT の増減を補正する。
      *
      * <ul>
-     *   <li>challenge（格上の卓に挑戦）: 通常の増減に <b>+2</b>。</li>
-     *   <li>defense（格下の卓を防衛）: 通常の増減に <b>-2</b>。</li>
+     *   <li>challenge（格上の卓に挑戦）: 通常の増減に <b>+{@link #ROLE_BONUS}</b>。</li>
+     *   <li>defense（格下の卓を防衛）: 通常の増減に <b>-{@link #ROLE_BONUS}</b>。</li>
      *   <li>normal: そのまま。</li>
      * </ul>
-     * 補正後は ±{@link #WEEKLY_DELTA_CAP} にクランプする（1 週で動く PT は週の増減幅に収める）。
+     *
+     * <p><b>符号は反転させない（0 で止める）。</b> 補正はあくまで「同じ結果なら格上への挑戦を優遇する」
+     * ものなので、負け越した人がプラスになったり、勝った人がマイナスになったりしてはいけない。
+     * 例: 3 人グループの着順デルタは +1 / 0 / -1 なので、
+     * <ul>
+     *   <li>チャレンジで最下位（-1）: -1+2 = +1 ではなく <b>0（増減なし）</b></li>
+     *   <li>ディフェンスで 1 位（+1）: +1-2 = -1 ではなく <b>0（増減なし）</b></li>
+     * </ul>
+     * 元から負け側（例 8 人の 8 位 = -4）はチャレンジでも -2 のままマイナスで残る。
+     *
+     * <p>補正後は ±{@link #WEEKLY_DELTA_CAP} にクランプする（1 週で動く PT は週の増減幅に収める）。
      * 2 段階の昇降格は起きない（累積が ±{@link #POINT_CAP} に到達した時点で昇降格し 0 リセットされるため、
      * 補正で行き過ぎても移動は常に 1 DIVISION）。
      *
-     * @param delta 基本の増減
+     * @param delta 基本の増減（順位由来）
      * @param role  立場
      * @return 補正後の増減（±WEEKLY_DELTA_CAP にクランプ）
      */
-    private int applyRole(int delta, String role) {
+    static int applyRole(int delta, String role) {
         int adjusted = delta;
-        if ("challenge".equals(role)) adjusted = delta + 2;
-        else if ("defense".equals(role)) adjusted = delta - 2;
+        if ("challenge".equals(role)) {
+            adjusted = delta + ROLE_BONUS;
+            // 負け側（順位デルタがマイナス）をプラスに反転させない: 0 で止める
+            if (delta < 0) adjusted = Math.min(adjusted, 0);
+        } else if ("defense".equals(role)) {
+            adjusted = delta - ROLE_BONUS;
+            // 勝ち側（順位デルタがプラス）をマイナスに反転させない: 0 で止める
+            if (delta > 0) adjusted = Math.max(adjusted, 0);
+        }
         return Math.max(-WEEKLY_DELTA_CAP, Math.min(WEEKLY_DELTA_CAP, adjusted));
     }
 
