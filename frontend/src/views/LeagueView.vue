@@ -16,6 +16,7 @@ import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import LeagueInfoModal from '../components/LeagueInfoModal.vue';
+import LeagueStandingsTable from '../components/LeagueStandingsTable.vue';
 import RankIcon from '../components/RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 import {
@@ -55,6 +56,13 @@ const overviewTiers = ref<LeagueTierOverview[]>([]);
 const otherStandings = ref<{ tier: number; groupIndex: number; songs: LeagueSongInfo[]; standings: LeagueStandingRow[] } | null>(null);
 /** 過去成績アコーディオンの開閉。 */
 const showHistory = ref(false);
+/** 過去成績で展開中の週 ID（1 行ずつ開く）。閉じているときは null。 */
+const openHistoryWeekId = ref<number | null>(null);
+/** 展開中の週の順位表（開催中の週と同じ形）。 */
+const historyDetail = ref<{ songs: LeagueSongInfo[]; standings: LeagueStandingRow[] } | null>(null);
+/** 展開中の週の読み込み状態・エラー。 */
+const historyDetailLoading = ref(false);
+const historyDetailError = ref('');
 /** ルール説明モーダルの開閉。 */
 const showInfo = ref(false);
 /** 管理者 overview（管理者のみ取得）。 */
@@ -262,6 +270,33 @@ const openGroup = async (tier: number, groupIndex: number) => {
     otherStandings.value = { tier, groupIndex, songs: res.songs, standings: res.standings };
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
+  }
+};
+
+/**
+ * 過去成績の 1 行を開閉する。開いたときにその週・自分のグループの順位表を取得し、
+ * 開催中の週と同じ表（課題曲ごとの内訳付き）を折り畳みの中に出す。
+ * 同じ行をもう一度押すと閉じる。行は同時に 1 つだけ開く。
+ */
+const toggleHistoryDetail = async (h: LeagueHistoryRow) => {
+  if (openHistoryWeekId.value === h.weekId) {
+    openHistoryWeekId.value = null;
+    return;
+  }
+  openHistoryWeekId.value = h.weekId;
+  historyDetail.value = null;
+  historyDetailError.value = '';
+  historyDetailLoading.value = true;
+  try {
+    const res = await league.fetchStandings(h.weekId, h.tier, h.groupIndex);
+    // 取得中に別の行へ切り替えられていたら破棄する（応答の追い越し対策）。
+    if (openHistoryWeekId.value !== h.weekId) return;
+    historyDetail.value = { songs: res.songs, standings: res.standings };
+  } catch (e) {
+    if (openHistoryWeekId.value !== h.weekId) return;
+    historyDetailError.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    historyDetailLoading.value = false;
   }
 };
 
@@ -658,63 +693,8 @@ onUnmounted(() => {
               </span>
             </div>
           </div>
-          <div class="mt-3 overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
-                  <th class="py-2 pr-2 w-10">{{ t('league.rank') }}</th>
-                  <th class="py-2 pr-2">{{ t('league.player') }}</th>
-                  <th class="py-2 pr-2 text-center">{{ t('league.validSongs') }}</th>
-                  <th class="py-2 pr-2 text-right">{{ t('league.leaguePoints') }}</th>
-                  <th class="py-2 pr-2 text-center">{{ t('league.points') }}</th>
-                  <th class="py-2 pr-1 text-center whitespace-nowrap" v-for="s in current.songs" :key="s.id"
-                      :title="`${s.slot}. ${s.title}`">
-                    {{ s.slot }}
-                    <span class="font-normal text-[10px] text-slate-300 dark:text-slate-600">{{ t('league.songPoints') }}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="row in current.standings"
-                  :key="row.userId"
-                  class="border-b border-slate-100 dark:border-slate-700/50"
-                  :class="[zoneClass(row), row.userId === user?.id ? 'font-semibold' : '']"
-                >
-                  <td class="py-2 pr-2">{{ row.rank }}</td>
-                  <td class="py-2 pr-2 break-words">
-                    <span class="inline-flex items-center gap-1.5 align-middle">
-                      <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party />
-                      <span>{{ row.displayName }}</span>
-                      <span v-if="roleBadge(row.role)"
-                            class="inline-flex items-center gap-0.5 px-1.5 py-px rounded text-[10px] font-bold leading-none"
-                            :class="roleBadge(row.role)!.cls"
-                            :title="roleBadge(row.role)!.label + (row.homeTier != null ? ' / ' + divisionName(row.homeTier) : '')">{{ roleBadge(row.role)!.label }}<span v-if="row.homeTier != null" class="font-semibold opacity-80">{{ divisionShort(row.homeTier) }}</span></span>
-                      <span v-if="row.userId === user?.id" class="text-[10px] text-indigo-500 dark:text-indigo-400">YOU</span>
-                    </span>
-                  </td>
-                  <td class="py-2 pr-2 text-center">{{ row.validSongs }}/3</td>
-                  <td class="py-2 pr-2 text-right tabular-nums">{{ formatResult(row.resultValue) }}</td>
-                  <td class="py-2 pr-2 text-center tabular-nums whitespace-nowrap">
-                    {{ fmtPt(row.points) }}
-                    <span class="text-xs text-slate-400 dark:text-slate-500">({{ fmtPt(row.pointDelta) }})</span>
-                  </td>
-                  <!-- 曲別セル: 有効になったリザルトの EX ＋ 着順とその曲の着順ポイント。
-                       未達（ライン超え前）の自己ベストは競技結果ではないので出さない。 -->
-                  <td v-for="ps in row.perSong" :key="ps.slot" class="py-2 px-1 text-center text-xs tabular-nums whitespace-nowrap">
-                    <div v-if="ps.valid && ps.bestEx != null && ps.bestEx > 0"
-                         class="font-semibold text-emerald-600 dark:text-emerald-400">
-                      {{ ps.bestEx }}
-                    </div>
-                    <div v-else class="text-slate-300 dark:text-slate-600">–</div>
-                    <div class="text-[10px] leading-tight text-slate-400 dark:text-slate-500">
-                      <span v-if="ps.rank != null">{{ t('league.songRank', { n: ps.rank }) }} </span>
-                      <span v-if="ps.points != null">{{ fmtPts(ps.points) }}{{ t('league.songPoints') }}</span>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="mt-3">
+            <LeagueStandingsTable :songs="current.songs" :standings="current.standings" :my-user-id="user?.id" />
           </div>
           <p class="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">{{ t('league.songPointsHint') }}</p>
         </div>
@@ -809,10 +789,13 @@ onUnmounted(() => {
                 <th class="py-2 pr-2 text-right">{{ t('league.leaguePoints') }}</th>
                 <th class="py-2 pr-2 text-center">{{ t('league.points') }}</th>
                 <th class="py-2 pr-2 text-center">{{ t('league.movementLabel') }}</th>
+                <th class="py-2 pr-2 w-8"></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="h in history" :key="h.weekId" class="border-b border-slate-100 dark:border-slate-700/50">
+              <template v-for="h in history" :key="h.weekId">
+              <tr class="border-b border-slate-100 dark:border-slate-700/50 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30"
+                  @click="toggleHistoryDetail(h)">
                 <td class="py-2 pr-2 font-semibold whitespace-nowrap">{{ weekLabel(h.weekNo) }}</td>
                 <td class="py-2 pr-2">{{ shortDate(h.startsAt) }}〜{{ shortDate(h.endsAt) }}</td>
                 <td class="py-2 pr-2">{{ divisionName(h.tier) }}</td>
@@ -831,7 +814,29 @@ onUnmounted(() => {
                   >{{ t(`league.movement.${h.movement}`) }}</span>
                   <span v-else>-</span>
                 </td>
+                <td class="py-2 pr-2 text-center text-slate-400">{{ openHistoryWeekId === h.weekId ? '▲' : '▼' }}</td>
               </tr>
+              <!-- 折り畳み: その週の自分のグループの順位表（開催中の週と同じ表）。 -->
+              <tr v-if="openHistoryWeekId === h.weekId" class="border-b border-slate-100 dark:border-slate-700/50">
+                <td colspan="8" class="py-3 px-1 bg-slate-50 dark:bg-slate-900/30">
+                  <p v-if="historyDetailError" class="text-sm text-rose-500">{{ historyDetailError }}</p>
+                  <p v-else-if="historyDetailLoading" class="text-sm text-slate-400 dark:text-slate-500">{{ t('common.loading') }}</p>
+                  <template v-else-if="historyDetail">
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                      {{ divisionName(h.tier) }} / {{ t('league.groupN', { n: h.groupIndex + 1 }) }}
+                    </div>
+                    <!-- 課題曲の一覧（曲別セルの列がどの曲か分かるように） -->
+                    <ul class="mb-2 text-xs text-slate-500 dark:text-slate-400 space-y-0.5">
+                      <li v-for="s in historyDetail.songs" :key="s.id">
+                        {{ s.slot }}. {{ s.title }}
+                        <span class="text-slate-400 dark:text-slate-500">［{{ s.difficultyName }}］</span>
+                      </li>
+                    </ul>
+                    <LeagueStandingsTable :songs="historyDetail.songs" :standings="historyDetail.standings" :my-user-id="user?.id" />
+                  </template>
+                </td>
+              </tr>
+              </template>
             </tbody>
           </table>
         </div>

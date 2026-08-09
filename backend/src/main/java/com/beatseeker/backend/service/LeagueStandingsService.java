@@ -2,7 +2,10 @@ package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +39,8 @@ import java.util.stream.Collectors;
 @Service
 public class LeagueStandingsService {
 
+    private static final Logger log = LoggerFactory.getLogger(LeagueStandingsService.class);
+
     /** 昇降格ポイントの上限（この値に到達で昇格、負側到達で降格。保持値もこの範囲にクランプ）。 */
     public static final int POINT_CAP = 8;
 
@@ -54,6 +59,8 @@ public class LeagueStandingsService {
     private final LeagueEntryRepository leagueEntryRepository;
     private final ScoreRepository scoreRepository;
     private final SongDefinitionRepository songDefinitionRepository;
+    /** 締め済み週の曲別確定結果（過去週の順位表を不変にするための凍結値）。 */
+    private final LeagueMemberSongRepository leagueMemberSongRepository;
 
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
@@ -63,7 +70,9 @@ public class LeagueStandingsService {
                                   LeagueBaselineRepository leagueBaselineRepository,
                                   LeagueEntryRepository leagueEntryRepository,
                                   ScoreRepository scoreRepository,
-                                  SongDefinitionRepository songDefinitionRepository) {
+                                  SongDefinitionRepository songDefinitionRepository,
+                                  LeagueMemberSongRepository leagueMemberSongRepository) {
+        this.leagueMemberSongRepository = leagueMemberSongRepository;
         this.leagueMemberRepository = leagueMemberRepository;
         this.leagueSongRepository = leagueSongRepository;
         this.leagueBaselineRepository = leagueBaselineRepository;
@@ -115,7 +124,7 @@ public class LeagueStandingsService {
             return List.of();
         }
         if ("closed".equals(week.getStatus())) {
-            return frozenStandings(members);
+            return frozenStandings(week, tier, members);
         }
         return liveStandings(week, tier, members);
     }
@@ -176,9 +185,23 @@ public class LeagueStandingsService {
 
     /**
      * 締め済み週の順位表を {@link LeagueMember} の凍結値から復元する。
-     * 課題曲ごとの内訳は凍結していないため perSong は空リストになる。
+     *
+     * 課題曲ごとの内訳は締め時に {@link LeagueMemberSong} へ凍結してあるのでそれを復元する
+     * （進行中の週と同じ形の表を過去週でも出せる）。この機能より前に締まった週には凍結行が
+     * 無いため、その場合に限り現在の scores から内訳だけを再計算して補う
+     * （順位・得点・PT は凍結値のまま。再計算なので締め後のアップロードで内訳が動き得る）。
+     *
+     * @param week    対象週（締め済み）
+     * @param tier    階級
+     * @param members 対象グループのメンバー
+     * @return 順位表（順位昇順）
      */
-    private List<Map<String, Object>> frozenStandings(List<LeagueMember> members) {
+    private List<Map<String, Object>> frozenStandings(LeagueWeek week, int tier, List<LeagueMember> members) {
+        Map<Long, List<Map<String, Object>>> perSongByUser = frozenPerSong(members);
+        if (perSongByUser.isEmpty()) {
+            perSongByUser = recomputePerSong(week, tier, members);
+        }
+        Map<Long, List<Map<String, Object>>> perSong = perSongByUser;
         return members.stream()
                 .sorted(Comparator.comparing(m -> m.getFinalRank() != null ? m.getFinalRank() : Integer.MAX_VALUE))
                 .map(m -> {
@@ -191,10 +214,129 @@ public class LeagueStandingsService {
                     row.put("zone", m.getMovement() != null ? m.getMovement() : "stay");
                     row.put("role", m.getRole() != null ? m.getRole() : "normal");
                     row.put("homeTier", m.getHomeTier() != null ? m.getHomeTier() : m.getTier());
-                    row.put("perSong", List.of());
+                    row.put("perSong", perSong.getOrDefault(m.getUser().getId(), List.of()));
                     return row;
                 })
                 .toList();
+    }
+
+    /**
+     * 締め時に凍結した曲別結果を userId → perSong の形に復元する。凍結行が無ければ空 Map。
+     */
+    private Map<Long, List<Map<String, Object>>> frozenPerSong(List<LeagueMember> members) {
+        List<LeagueMemberSong> rows = leagueMemberSongRepository.findByMemberIn(members);
+        if (rows.isEmpty()) {
+            return Map.of();
+        }
+        // 課題曲のタイトルは league_songs 側にあるので、スロット順に突き合わせて表示名を補う。
+        Map<Integer, LeagueSong> songBySlot = new HashMap<>();
+        LeagueMember any = members.get(0);
+        for (LeagueSong s : leagueSongRepository.findByWeekAndTierAndGroupIndexOrderBySlotAsc(
+                any.getWeek(), any.getTier(), any.getGroupIndex())) {
+            songBySlot.put(s.getSlot(), s);
+        }
+
+        Map<Long, List<Map<String, Object>>> out = new HashMap<>();
+        for (LeagueMemberSong r : rows) {
+            Map<String, Object> ps = new LinkedHashMap<>();
+            LeagueSong song = songBySlot.get(r.getSlot());
+            ps.put("slot", r.getSlot());
+            ps.put("title", song != null ? song.getTitle() : null);
+            ps.put("difficultyName", song != null ? song.getDifficultyName() : null);
+            ps.put("valid", Boolean.TRUE.equals(r.getValid()));
+            ps.put("bestEx", r.getBestEx());
+            ps.put("rate", r.getRate());
+            ps.put("bestMiss", r.getBestMiss());
+            ps.put("lineEx", r.getLineEx());
+            ps.put("lineMiss", r.getLineMiss());
+            ps.put("points", r.getSongPoints());
+            ps.put("rank", r.getSongRank());
+            out.computeIfAbsent(r.getMember().getUser().getId(), k -> new ArrayList<>()).add(ps);
+        }
+        out.values().forEach(list -> list.sort(Comparator.comparingInt(p -> (Integer) p.get("slot"))));
+        return out;
+    }
+
+    /**
+     * 凍結行が無い旧い締め済み週のために、曲別内訳だけを現在の scores から再計算する。
+     * 順位・得点・PT には使わない（それらは凍結値が正）。
+     */
+    private Map<Long, List<Map<String, Object>>> recomputePerSong(LeagueWeek week, int tier,
+                                                                 List<LeagueMember> members) {
+        Map<Long, List<Map<String, Object>>> out = new HashMap<>();
+        List<Map<String, Object>> live;
+        try {
+            live = liveStandings(week, tier, members);
+        } catch (RuntimeException e) {
+            // 課題曲やベースラインが消えている等で再計算できない場合は内訳なしで表示する
+            // （順位・得点・PT は凍結値があるので順位表自体は成立する）。
+            log.warn("締め済み週の曲別内訳の再計算に失敗: weekId={} tier={} - {}",
+                    week.getId(), tier, e.toString());
+            return out;
+        }
+        for (Map<String, Object> row : live) {
+            Object userId = row.get("userId");
+            Object perSong = row.get("perSong");
+            if (userId instanceof Long id && perSong instanceof List<?> list) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> typed = (List<Map<String, Object>>) list;
+                out.put(id, typed);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * 【メソッドの役割】 週の締め時に、その時点の曲別結果を {@link LeagueMemberSong} へ凍結する。
+     *
+     * 進行中の週の順位表（{@link #liveStandings} が返す行）の {@code perSong} をそのまま保存する。
+     * 締めの再実行に備えて、対象メンバーの既存行を削除してから入れ直す（冪等）。
+     *
+     * @param members   対象グループのメンバー
+     * @param standings そのグループの確定順位表（{@link #computeGroupStandings} の結果）
+     */
+    @Transactional
+    public void freezePerSong(List<LeagueMember> members, List<Map<String, Object>> standings) {
+        if (members.isEmpty()) {
+            return;
+        }
+        Map<Long, LeagueMember> byUserId = members.stream()
+                .collect(Collectors.toMap(m -> m.getUser().getId(), m -> m, (a, b) -> a));
+        leagueMemberSongRepository.deleteByMemberIn(members);
+
+        List<LeagueMemberSong> rows = new ArrayList<>();
+        for (Map<String, Object> row : standings) {
+            LeagueMember member = byUserId.get((Long) row.get("userId"));
+            if (member == null || !(row.get("perSong") instanceof List<?> perSong)) {
+                continue;
+            }
+            for (Object o : perSong) {
+                if (!(o instanceof Map<?, ?> ps)) continue;
+                LeagueMemberSong entity = new LeagueMemberSong();
+                entity.setMember(member);
+                entity.setSlot(asInt(ps.get("slot")));
+                entity.setValid(Boolean.TRUE.equals(ps.get("valid")));
+                entity.setBestEx(asInt(ps.get("bestEx")));
+                entity.setRate(asDouble(ps.get("rate")));
+                entity.setBestMiss(asInt(ps.get("bestMiss")));
+                entity.setLineEx(asInt(ps.get("lineEx")));
+                entity.setLineMiss(asInt(ps.get("lineMiss")));
+                entity.setSongRank(asInt(ps.get("rank")));
+                entity.setSongPoints(asDouble(ps.get("points")));
+                rows.add(entity);
+            }
+        }
+        leagueMemberSongRepository.saveAll(rows);
+    }
+
+    /** Number → Integer（null 安全）。 */
+    private static Integer asInt(Object o) {
+        return o instanceof Number n ? n.intValue() : null;
+    }
+
+    /** Number → Double（null 安全）。 */
+    private static Double asDouble(Object o) {
+        return o instanceof Number n ? n.doubleValue() : null;
     }
 
     // ---------------------------------------------------------------------

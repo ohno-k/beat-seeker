@@ -227,6 +227,7 @@ public class LeagueWeekLifecycleService {
             int tier = Integer.parseInt(parts[0]);
             int groupIndex = Integer.parseInt(parts[1]);
             List<Map<String, Object>> standings = standingsService.computeGroupStandings(active, tier, groupIndex);
+            List<LeagueMember> groupMembers = new ArrayList<>();
             for (Map<String, Object> row : standings) {
                 LeagueMember member = byUserId.get((Long) row.get("userId"));
                 if (member == null) continue;
@@ -235,7 +236,10 @@ public class LeagueWeekLifecycleService {
                 member.setResultValue((Double) row.get("resultValue"));
                 member.setMovement((String) row.get("zone"));
                 member.setPointDelta((Integer) row.get("pointDelta"));
+                groupMembers.add(member);
             }
+            // 曲別の内訳もここで凍結する（締め後は scores が更新され続けるため再計算では復元できない）。
+            standingsService.freezePerSong(groupMembers, standings);
         }
         leagueMemberRepository.saveAll(members);
 
