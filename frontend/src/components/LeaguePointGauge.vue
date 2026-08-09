@@ -40,6 +40,13 @@ const toRelegate = computed(() => Math.max(0, props.cap + value.value));
 /** 符号付きの PT 表示（+2 / -3 / 0）。 */
 const label = computed(() => (value.value > 0 ? `+${value.value}` : `${value.value}`));
 
+/** PT 数値の色。バーの配色（昇格側=緑・降格側=赤）と揃える。 */
+const valueClass = computed(() => {
+  if (value.value > 0) return 'text-emerald-600 dark:text-emerald-400';
+  if (value.value < 0) return 'text-rose-600 dark:text-rose-400';
+  return 'text-slate-700 dark:text-slate-200';
+});
+
 /**
  * 降格側の目盛（左から -cap ... -1 の順）。i は 1..cap。
  * i 番目の目盛が表す PT は -(cap - i + 1)。現在値がそこまで達していれば点灯。
@@ -52,20 +59,24 @@ const posOn = (i: number) => value.value >= i;
 
 <template>
   <div class="w-full sm:w-80">
-    <div class="flex items-center justify-between text-[10px] font-semibold leading-none">
-      <span :class="isBottom ? 'text-slate-400 dark:text-slate-600' : 'text-rose-600 dark:text-rose-400'">
+    <!-- 3 等分グリッドで、左右のラベル幅に依らず PT を必ず中央に置く。 -->
+    <div class="grid grid-cols-3 items-center text-[10px] font-semibold leading-none">
+      <span class="justify-self-start whitespace-nowrap"
+            :class="isBottom ? 'text-slate-400 dark:text-slate-600' : 'text-rose-600 dark:text-rose-400'">
         ▼ {{ t('league.gauge.relegate') }}
       </span>
-      <span class="text-xs font-bold tabular-nums text-slate-700 dark:text-slate-200">
-        {{ t('league.points') }} {{ label }}
+      <span class="justify-self-center flex items-baseline gap-1">
+        <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400">{{ t('league.points') }}</span>
+        <span class="text-3xl font-extrabold leading-none tabular-nums" :class="valueClass">{{ label }}</span>
       </span>
-      <span :class="isTop ? 'text-slate-400 dark:text-slate-600' : 'text-emerald-600 dark:text-emerald-400'">
+      <span class="justify-self-end whitespace-nowrap"
+            :class="isTop ? 'text-slate-400 dark:text-slate-600' : 'text-emerald-600 dark:text-emerald-400'">
         {{ t('league.gauge.promote') }} ▲
       </span>
     </div>
 
     <!-- 目盛バー: 中央が 0、左が降格側、右が昇格側。1 目盛 = 1 PT。 -->
-    <div class="mt-1 flex items-center gap-px" :aria-label="`${t('league.points')} ${label}`">
+    <div class="mt-2 flex items-center gap-px" :aria-label="`${t('league.points')} ${label}`">
       <span
         v-for="i in cap"
         :key="`neg-${i}`"
@@ -85,12 +96,13 @@ const posOn = (i: number) => value.value >= i;
       ></span>
     </div>
 
+    <!-- 注記もバー/ヘッダーと同じ左右の並び（左=降格・右=昇格）にする。 -->
     <p class="mt-1 text-[10px] leading-tight text-slate-500 dark:text-slate-400">
-      <template v-if="isTop">{{ t('league.gauge.topDivision') }}</template>
-      <template v-else>{{ t('league.gauge.toPromote', { n: toPromote }) }}</template>
-      <span class="mx-1 text-slate-300 dark:text-slate-600">/</span>
       <template v-if="isBottom">{{ t('league.gauge.bottomDivision') }}</template>
       <template v-else>{{ t('league.gauge.toRelegate', { n: toRelegate }) }}</template>
+      <span class="mx-1 text-slate-300 dark:text-slate-600">/</span>
+      <template v-if="isTop">{{ t('league.gauge.topDivision') }}</template>
+      <template v-else>{{ t('league.gauge.toPromote', { n: toPromote }) }}</template>
     </p>
   </div>
 </template>
