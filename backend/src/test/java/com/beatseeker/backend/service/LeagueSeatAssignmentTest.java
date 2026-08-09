@@ -30,7 +30,7 @@ class LeagueSeatAssignmentTest {
 
     /** 依存を使わないロジックだけを試すためのインスタンス。 */
     private final LeagueWeekLifecycleService service =
-            new LeagueWeekLifecycleService(null, null, null, null, null, null, null, null, null);
+            new LeagueWeekLifecycleService(null, null, null, null, null, null, null, null, null, "2026-08-10");
 
     private long nextUserId = 1;
 

@@ -24,6 +24,8 @@ export interface LeagueEntry {
 export interface LeagueWeekInfo {
   id: number;
   ladderType: LadderType;
+  /** 開催回の通し番号（#1, #2, ...）。プレシーズンなど番号なしの週は null。 */
+  weekNo?: number | null;
   /** 週の開始日時（JST、ISO 形式文字列）。 */
   startsAt: string;
   /** 週の終了日時（JST、ISO 形式文字列）。 */
@@ -126,6 +128,8 @@ export interface LeagueTierOverview {
 /** GET /api/league/history の 1 行（自分の過去週成績）。 */
 export interface LeagueHistoryRow {
   weekId: number;
+  /** 開催回の通し番号（#1, #2, ...）。プレシーズンは null。 */
+  weekNo?: number | null;
   startsAt: string;
   endsAt: string;
   tier: number;
@@ -154,6 +158,8 @@ export interface LeagueAdminMember {
 export interface LeagueAdminWeek {
   id: number;
   ladderType: LadderType;
+  /** 開催回の通し番号（#1, #2, ...）。プレシーズンは null。 */
+  weekNo?: number | null;
   startsAt: string;
   endsAt: string;
   status: string;

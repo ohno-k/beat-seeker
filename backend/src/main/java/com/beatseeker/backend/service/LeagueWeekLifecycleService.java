@@ -4,6 +4,7 @@ import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +25,15 @@ import java.util.stream.Collectors;
  *  - 金曜 0:00: 翌週の draft 週を作成し、現行の DIVISION 構成で課題曲を先行抽選する
  *    （管理者が開始までの間に差し替え・再抽選できる）。
  *  - 日曜 21:00: {@link #closeWeek} が active 週を締め、順位を凍結して昇降格を確定する。
- *  - 月曜 12:00: {@link #activateWeek} が draft 週を編成して active 化し、ベースラインを
- *    スナップショットする。課題曲はこの瞬間（= 開始と同時）にプレイヤーへ公開される。
- *    参加の締切もこの瞬間で、途中参加はできない（週の途中の join は次週から）。
+ *  - 月曜 0:00: 参加受付を締め切り（{@link LeagueService#isRegistrationLocked()}）、
+ *    {@link #autoFormDraft} が本番と同じ卓・グループ・課題曲を先に確定する。開始までの
+ *    12 時間は管理者の確認・調整期間（プレイヤーには未公開のまま）。
+ *  - 月曜 12:00: {@link #activateWeek} が draft 週を（事前編成があればそれを使って）active 化し、
+ *    ベースラインをスナップショットする。課題曲はこの瞬間（= 開始と同時）にプレイヤーへ公開される。
+ *    途中参加はできず、締切後の join は次の開催回から反映される。
+ *
+ * 開催回の呼称: 2026-08-03 週はプレシーズン（番号なし）、2026-08-10 週から #1, #2, ... と
+ * 連番で採番する（{@link #assignWeekNo}・{@code app.league.week-one-start}）。
  *
  * DIVISION は固定 11 階級（{@link LeagueDivision}: LEGEND=0, 1..10）。階級の併合・
  * 振り直しは行わず、昇降格はこの範囲内での ±1 移動のみ。初回配属は join 時に
@@ -71,6 +78,13 @@ public class LeagueWeekLifecycleService {
     private final SongDefinitionRepository songDefinitionRepository;
 
     /**
+     * 開催回 #1 の開始日（JST）。この日以降に始まる週へ通し番号（#1, #2, ...）を採番する。
+     * これより前に始まった週（プレシーズン = 2026-08-03 週）は番号なし（null）のまま扱い、
+     * 画面では「プレシーズン」と表示する。{@code app.league.week-one-start} で変更可。
+     */
+    private final LocalDate weekOneStart;
+
+    /**
      * 【コンストラクタ】 Spring が依存を注入する。
      */
     public LeagueWeekLifecycleService(LeagueEntryRepository leagueEntryRepository,
@@ -81,7 +95,9 @@ public class LeagueWeekLifecycleService {
                                       ScoreRepository scoreRepository,
                                       LeagueStandingsService standingsService,
                                       LeagueSongDrawService songDrawService,
-                                      SongDefinitionRepository songDefinitionRepository) {
+                                      SongDefinitionRepository songDefinitionRepository,
+                                      @Value("${app.league.week-one-start:2026-08-10}") String weekOneStart) {
+        this.weekOneStart = LocalDate.parse(weekOneStart);
         this.leagueEntryRepository = leagueEntryRepository;
         this.leagueWeekRepository = leagueWeekRepository;
         this.leagueMemberRepository = leagueMemberRepository;
@@ -121,6 +137,10 @@ public class LeagueWeekLifecycleService {
                 existingDraft.setEndsAt(endOfWeek(fixed));
                 existingDraft = leagueWeekRepository.save(existingDraft);
             }
+            // 番号未採番の draft（このリリース以前に作られた週）にもここで番号を振る。
+            if (assignWeekNo(existingDraft)) {
+                existingDraft = leagueWeekRepository.save(existingDraft);
+            }
             return existingDraft;
         }
 
@@ -142,12 +162,36 @@ public class LeagueWeekLifecycleService {
         week.setStartsAt(startsAt);
         week.setEndsAt(endOfWeek(startsAt));
         week.setStatus("draft");
+        assignWeekNo(week);
         week = leagueWeekRepository.save(week);
 
         // 課題曲はグループごと（各グループの参加者の実力に合わせて）抽選するため、
         // グループ確定前の draft 段階では抽選しない。編成（activateWeek）時にグループ単位で抽選する。
-        log.info("リーグ draft 週を作成: ladder={} startsAt={}", ladder, startsAt);
+        log.info("リーグ draft 週を作成: ladder={} startsAt={} weekNo={}", ladder, startsAt, week.getWeekNo());
         return week;
+    }
+
+    /**
+     * 【メソッドの役割】 週へ開催回の通し番号（#1, #2, ...）を採番する。
+     *
+     * 採番するのは「{@link #weekOneStart}（既定 2026-08-10）以降に始まる、まだ番号の無い週」だけ。
+     * それより前に始まった週（プレシーズン）は番号なし（null）のままにして、画面では
+     * 「プレシーズン」と表示させる。番号は日付から計算せず「既存の最大 + 1」で連番にするので、
+     * 障害等で 1 週飛んでも番号は飛ばない（#3 の次は必ず #4）。
+     *
+     * @param week 対象の週（永続化前でも可）
+     * @return 採番したら true、対象外・採番済みで何もしなければ false
+     */
+    boolean assignWeekNo(LeagueWeek week) {
+        if (week.getWeekNo() != null || week.getStartsAt() == null) {
+            return false;
+        }
+        if (week.getStartsAt().toLocalDate().isBefore(weekOneStart)) {
+            return false; // プレシーズン（#1 より前の週）は番号なし
+        }
+        int next = leagueWeekRepository.findMaxWeekNo(week.getLadderType()).orElse(0) + 1;
+        week.setWeekNo(next);
+        return true;
     }
 
     /**

@@ -79,10 +79,11 @@ public class LeagueScheduler {
     }
 
     /**
-     * 【メソッドの役割】 参加締切後（プレシーズン確定窓）に、未編成の draft 週を自動編成する。
+     * 【メソッドの役割】 月曜 0:00 JST（参加締切）に、未編成の draft 週を自動編成する。
      *
-     * 参加受付の締切（{@code app.league.signup-close}）〜開始（月曜 12:00）の間だけ動く。
-     * 締切直後に本番と同じ卓・グループ・課題曲を確定しておき、管理者は開始までに確認・調整できる。
+     * 毎週の参加締切（月曜 0:00）〜開始（月曜 12:00）の間はロスターがロックされる
+     * （{@link LeagueService#isRegistrationLocked()}）。締切直後に本番と同じ卓・グループ・
+     * 課題曲を確定しておき、管理者は開始までの 12 時間で確認・調整できる。
      * 既に編成済み（管理者の手動編成・調整を含む）なら {@link LeagueWeekLifecycleService#autoFormDraft}
      * が何もしないため、この窓で複数回起動しても上書きしない（冪等）。開始（activateWeek）は
      * この事前編成をそのまま使う。
@@ -90,7 +91,7 @@ public class LeagueScheduler {
     @Scheduled(cron = "0 0 0 * * MON", zone = "Asia/Tokyo")
     public void autoFormWeeks() {
         if (!leagueService.isRegistrationLocked()) {
-            return; // 参加締切〜開始の窓の外では自動編成しない（通常週は開始時に編成する）
+            return; // 締切〜開始の窓の外（＝時刻ズレ等）では自動編成しない
         }
         for (String ladder : LeagueService.LADDERS) {
             try {

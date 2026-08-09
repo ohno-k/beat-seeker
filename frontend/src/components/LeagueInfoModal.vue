@@ -142,14 +142,14 @@ const divisionMapping = [
           </section>
         </div>
 
-        <!-- フッター（参加導線 + プレシーズン/中止の注記） -->
+        <!-- フッター（参加導線 + 参加締切の注記） -->
         <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700/50 space-y-3">
-          <!-- プレシーズン開始日と、人数不足時の開催中止の注記 -->
+          <!-- いつから参戦できるか（毎週 月曜 0:00 締切 → 12:00 開始）の注記 -->
           <p class="flex items-start gap-2 text-xs leading-relaxed text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
             <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
-            <span>{{ t('league.infoModal.preseasonNote') }}</span>
+            <span>{{ t('league.infoModal.signupNote') }}</span>
           </p>
 
           <div class="flex items-center justify-end gap-2 flex-wrap">

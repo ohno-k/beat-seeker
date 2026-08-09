@@ -114,6 +114,13 @@ const shortDateTime = (iso: string) => {
   return `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
 };
 
+/**
+ * 開催回の表示名。通し番号があれば「#3」、無ければ「プレシーズン」。
+ * 番号は 2026-08-10 週の #1 から連番で振られ、それ以前の週は番号なし。
+ */
+const weekLabel = (weekNo: number | null | undefined) =>
+  weekNo == null ? t('league.preseason') : t('league.weekNo', { n: weekNo });
+
 /** DIVISION の表示名（tier 0 = DIVISION LEGEND、1..10 = DIVISION n）。 */
 const divisionName = (tier: number | null | undefined) => {
   if (tier == null) return '';
@@ -563,6 +570,9 @@ onUnmounted(() => {
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 class="font-bold text-slate-800 dark:text-slate-100">
+              <span class="mr-2 inline-block align-middle text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white dark:bg-indigo-500">
+                {{ weekLabel(current.week.weekNo) }}
+              </span>
               {{ t('league.weekOf', { start: shortDateTime(current.week.startsAt), end: shortDateTime(current.week.endsAt) }) }}
               <span v-if="current.member" class="ml-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                 {{ divisionName(current.member.tier) }} / {{ t('league.groupN', { n: current.member.groupIndex + 1 }) }}
@@ -792,6 +802,7 @@ onUnmounted(() => {
           <table v-else class="w-full text-sm">
             <thead>
               <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                <th class="py-2 pr-2">{{ t('league.roundLabel') }}</th>
                 <th class="py-2 pr-2">{{ t('league.week') }}</th>
                 <th class="py-2 pr-2">{{ t('league.tier') }}</th>
                 <th class="py-2 pr-2 text-center">{{ t('league.rank') }}</th>
@@ -802,6 +813,7 @@ onUnmounted(() => {
             </thead>
             <tbody>
               <tr v-for="h in history" :key="h.weekId" class="border-b border-slate-100 dark:border-slate-700/50">
+                <td class="py-2 pr-2 font-semibold whitespace-nowrap">{{ weekLabel(h.weekNo) }}</td>
                 <td class="py-2 pr-2">{{ shortDate(h.startsAt) }}〜{{ shortDate(h.endsAt) }}</td>
                 <td class="py-2 pr-2">{{ divisionName(h.tier) }}</td>
                 <td class="py-2 pr-2 text-center">{{ h.finalRank ?? '-' }}</td>
@@ -849,7 +861,8 @@ onUnmounted(() => {
           <!-- draft 週の課題曲編集 -->
           <div v-if="al.draftWeek" class="mt-3">
             <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              {{ t('league.admin.draftWeek') }}: {{ shortDateTime(al.draftWeek.startsAt) }}〜{{ shortDateTime(al.draftWeek.endsAt) }}
+              {{ t('league.admin.draftWeek') }}: {{ weekLabel(al.draftWeek.weekNo) }}
+              {{ shortDateTime(al.draftWeek.startsAt) }}〜{{ shortDateTime(al.draftWeek.endsAt) }}
               <span v-if="al.draftWeek.memberCount" class="ml-1 text-teal-600 dark:text-teal-400">
                 / {{ t('league.admin.formedCount', { n: al.draftWeek.memberCount }) }}
               </span>
@@ -966,6 +979,7 @@ onUnmounted(() => {
           <div class="mt-2 text-xs text-slate-400">
             {{ t('league.admin.activeWeek') }}:
             <template v-if="al.activeWeek">
+              {{ weekLabel(al.activeWeek.weekNo) }}
               {{ shortDateTime(al.activeWeek.startsAt) }}〜{{ shortDateTime(al.activeWeek.endsAt) }}
               ({{ al.activeWeek.memberCount }})
             </template>

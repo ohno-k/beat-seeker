@@ -274,6 +274,7 @@ public class LeagueController {
                 .map(m -> {
                     Map<String, Object> row = new LinkedHashMap<>();
                     row.put("weekId", m.getWeek().getId());
+                    row.put("weekNo", m.getWeek().getWeekNo());
                     row.put("startsAt", m.getWeek().getStartsAt());
                     row.put("endsAt", m.getWeek().getEndsAt());
                     row.put("tier", m.getTier());
@@ -317,6 +318,8 @@ public class LeagueController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", week.getId());
         m.put("ladderType", week.getLadderType());
+        // 開催回の通し番号（#1, #2, ...）。プレシーズンは null（画面では「プレシーズン」表示）。
+        m.put("weekNo", week.getWeekNo());
         m.put("startsAt", week.getStartsAt());
         m.put("endsAt", week.getEndsAt());
         m.put("status", week.getStatus());

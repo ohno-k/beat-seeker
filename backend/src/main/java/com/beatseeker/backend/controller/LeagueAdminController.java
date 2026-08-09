@@ -462,6 +462,7 @@ public class LeagueAdminController {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", week.getId());
         m.put("ladderType", week.getLadderType());
+        m.put("weekNo", week.getWeekNo());
         m.put("startsAt", week.getStartsAt());
         m.put("endsAt", week.getEndsAt());
         m.put("status", week.getStatus());

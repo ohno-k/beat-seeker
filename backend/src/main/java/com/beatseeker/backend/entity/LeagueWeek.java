@@ -43,6 +43,17 @@ public class LeagueWeek {
     @Column(name = "ladder_type", length = 8, nullable = false)
     private String ladderType;
 
+    /**
+     * 開催回の通し番号（#1, #2, ...）。プレイヤーへは「#3」のように表示する。
+     *
+     * null は「番号を振らない週」＝プレシーズン（2026-08-03 週）。
+     * {@code app.league.week-one-start}（既定 2026-08-10）以降に始まる週へ、
+     * {@link com.beatseeker.backend.service.LeagueWeekLifecycleService} が
+     * draft 作成時に「既存の最大番号 + 1」を採番する（欠週があっても番号は連番のまま）。
+     */
+    @Column(name = "week_no")
+    private Integer weekNo;
+
     /** 週の開始日時（JST 壁時計、月曜 0:00）。 */
     @Column(name = "starts_at", nullable = false)
     private LocalDateTime startsAt;

@@ -2,6 +2,8 @@ package com.beatseeker.backend.repository;
 
 import com.beatseeker.backend.entity.LeagueWeek;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,4 +62,16 @@ public interface LeagueWeekRepository extends JpaRepository<LeagueWeek, Long> {
      * @return 週一覧（開始日時降順）
      */
     List<LeagueWeek> findByLadderTypeAndStatusOrderByStartsAtDesc(String ladderType, String status);
+
+    /**
+     * 【メソッドの役割】 指定ラダーで採番済みの最大の開催回番号を取得する。
+     *
+     * 次週の番号（最大 + 1）の採番に使う。まだ 1 週も採番していなければ empty
+     * （＝プレシーズンしか無い状態）。
+     *
+     * @param ladderType ラダー種別
+     * @return 最大の {@code weekNo}。採番済みの週が無ければ empty
+     */
+    @Query("select max(w.weekNo) from LeagueWeek w where w.ladderType = :ladderType")
+    Optional<Integer> findMaxWeekNo(@Param("ladderType") String ladderType);
 }
