@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *  - 人数の足りない LEGEND 卓が、格下（DIVISION 1）の BEAT-PT 上位を引き上げて成立すること
  *    （＝ LEGEND の人が DIVISION 1 に降りてこないこと）
  *  - 派遣されるのは「格下からは BEAT-PT 上位」「格上からは BEAT-PT 下位」であること
- *  - 貸した側が {@code MIN_STANDALONE}（3 人）を割らないこと
+ *  - 貸した側が {@code MIN_STANDALONE}（4 人）を割らないこと
  *  - 補充できない場合は従来どおり束ね / 吸収にフォールバックすること
  *
  * DB もリポジトリも触らないロジックなので、依存はすべて null で組み立てる。
@@ -71,24 +71,24 @@ class LeagueSeatAssignmentTest {
 
         List<Seat> seats = assign(entries);
 
-        // LEGEND 卓が 3 人で成立している（1 人 + 引き上げ 2 人）
-        assertEquals(3L, countByHost(seats).get(0), "LEGEND 卓が成立していない");
+        // LEGEND 卓が 4 人で成立している（1 人 + 引き上げ 3 人）
+        assertEquals(4L, countByHost(seats).get(0), "LEGEND 卓が成立していない");
 
-        // 引き上げられたのは DIVISION 1 の BEAT-PT 上位 2 人で、立場はチャレンジ
+        // 引き上げられたのは DIVISION 1 の BEAT-PT 上位 3 人で、立場はチャレンジ
         List<Seat> pulledUp = seats.stream()
                 .filter(s -> s.host() == 0 && s.homeTier() == 1).toList();
-        assertEquals(2, pulledUp.size());
+        assertEquals(3, pulledUp.size());
         assertTrue(pulledUp.stream().allMatch(s -> "challenge".equals(s.role())), "立場がチャレンジでない");
         List<Double> pts = pulledUp.stream()
                 .map(s -> s.entry().getUser().getTotalBeatPt()).sorted().toList();
-        assertEquals(List.of(17490.0, 17500.0), pts, "BEAT-PT 上位が選ばれていない");
+        assertEquals(List.of(17480.0, 17490.0, 17500.0), pts, "BEAT-PT 上位が選ばれていない");
 
         // LEGEND の本人は自分の卓に残る（DIVISION 1 に降りない）
         assertTrue(seats.stream().anyMatch(s -> s.homeTier() == 0 && s.host() == 0 && "normal".equals(s.role())),
                 "LEGEND の参加者が自分の卓に居ない");
 
-        // 貸した DIVISION 1 は 6 人残って単独卓を維持
-        assertEquals(6L, countByHost(seats).get(1));
+        // 貸した DIVISION 1 は 5 人残って単独卓を維持（MIN_STANDALONE を割らない）
+        assertEquals(5L, countByHost(seats).get(1));
     }
 
     @Test
@@ -100,27 +100,29 @@ class LeagueSeatAssignmentTest {
 
         List<Seat> seats = assign(entries);
 
-        assertEquals(3L, countByHost(seats).get(6), "DIVISION 6 の卓が成立していない");
+        assertEquals(4L, countByHost(seats).get(6), "DIVISION 6 の卓が成立していない");
         List<Seat> sentDown = seats.stream()
                 .filter(s -> s.host() == 6 && s.homeTier() == 5).toList();
-        assertEquals(1, sentDown.size());
-        assertEquals("defense", sentDown.get(0).role(), "立場がディフェンスでない");
-        // 降ろされるのは DIVISION 5 の BEAT-PT 最下位（16000 - 70）
-        assertEquals(15930.0, sentDown.get(0).entry().getUser().getTotalBeatPt());
+        assertEquals(2, sentDown.size());
+        assertTrue(sentDown.stream().allMatch(s -> "defense".equals(s.role())), "立場がディフェンスでない");
+        // 降ろされるのは DIVISION 5 の BEAT-PT 下位 2 人（16000 - 70 / -60）
+        List<Double> sentPts = sentDown.stream()
+                .map(s -> s.entry().getUser().getTotalBeatPt()).sorted().toList();
+        assertEquals(List.of(15930.0, 15940.0), sentPts, "BEAT-PT 下位が選ばれていない");
     }
 
     @Test
     void doesNotBreakTheDonorBelowMinimum() {
         List<LeagueEntry> entries = new ArrayList<>();
         add(entries, 3, 1, 16800);  // 1 人
-        add(entries, 4, 3, 16400);  // ちょうど 3 人 → 貸せない
+        add(entries, 4, 4, 16400);  // ちょうど MIN_STANDALONE（4 人）→ 貸すと自分が割れるので貸せない
 
         List<Seat> seats = assign(entries);
 
-        // 誰も貸せないので補充は成立せず、従来どおり束ねて 1 卓になる（4 人）
+        // 誰も貸せないので補充は成立せず、従来どおり束ねて 1 卓になる（5 人）
         Map<Integer, Long> byHost = countByHost(seats);
         assertEquals(1, byHost.size(), "卓が 1 つに束ねられていない: " + byHost);
-        assertEquals(4L, byHost.values().iterator().next());
+        assertEquals(5L, byHost.values().iterator().next());
     }
 
     @Test
@@ -154,6 +156,6 @@ class LeagueSeatAssignmentTest {
 
         assertEquals(entries.size(), seats.size(), "全員が座れていない");
         byHost.forEach((host, list) ->
-                assertTrue(list.size() >= 3, "3 人未満の卓が残っている: host=" + host));
+                assertTrue(list.size() >= 4, "4 人未満の卓が残っている: host=" + host));
     }
 }

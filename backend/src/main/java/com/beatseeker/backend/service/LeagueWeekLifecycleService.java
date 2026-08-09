@@ -55,10 +55,14 @@ public class LeagueWeekLifecycleService {
      */
     static final int GROUP_CAPACITY = 8;
     /**
-     * 単独で卓を成立させる最小人数（3 人以上で卓成立）。これ未満（&lt;3）の DIVISION は
-     * 少人数同士で束ねるか、最寄りの成立卓へ吸収される（格上=チャレンジ / 格下=ディフェンス）。
+     * 単独で卓（＝グループ）を成立させる最小人数（4 人以上で卓成立）。これ未満（&lt;4）の DIVISION は
+     * 近い DIVISION から人を借りて成立させ、それも無理なら少人数同士で束ねるか、
+     * 最寄りの成立卓へ吸収される（格上=チャレンジ / 格下=ディフェンス）。
+     *
+     * <p>卓の人数が {@link #GROUP_CAPACITY} 以下ならその卓がそのまま 1 グループになるため、
+     * この値がそのまま「グループの最小人数」になる。
      */
-    static final int MIN_STANDALONE = 3;
+    static final int MIN_STANDALONE = 4;
     /** 連続でこの週数「有効曲 0」が続いたエントリーは自動休止する。 */
     static final int AUTO_DEACTIVATE_AFTER = 3;
 
@@ -640,9 +644,9 @@ public class LeagueWeekLifecycleService {
      * それでも人数が足りない DIVISION だけがここに来る（渡される人数は補充後の実効人数）。
      *
      * <ul>
-     *   <li>3 人以上（{@link #MIN_STANDALONE}）の DIVISION はそのまま単独卓（role=normal）。</li>
+     *   <li>4 人以上（{@link #MIN_STANDALONE}）の DIVISION はそのまま単独卓（role=normal）。</li>
      *   <li>少人数（&lt;4）の DIVISION は、アンカー（成立卓）で区切られた「連続した少人数区間(gap)」ごとに
-     *       {@link #assignGap} で処理する。区間内で上位から人数を積み上げ、3 人に達したら
+     *       {@link #assignGap} で処理する。区間内で上位から人数を積み上げ、4 人に達したら
      *       「その塊の中で人数最多の DIVISION をホストにした 1 卓」を成立させる（少人数同士を束ねる）。
      *       束ねても 4 に満たない端数は、既存アンカーがあれば最寄りへ吸収、無ければ直前の卓へ合流。</li>
      * </ul>
