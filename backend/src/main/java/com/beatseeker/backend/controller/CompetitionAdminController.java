@@ -1259,13 +1259,25 @@ public class CompetitionAdminController {
             m.setASongsWon(m.getBSongsWon());
             m.setBSongsWon(won);
 
-            var s1 = m.getSong1ScoreA();
-            m.setSong1ScoreA(m.getSong1ScoreB());
-            m.setSong1ScoreB(s1);
+            // 演奏曲の枠は side 非依存ではない。CompetitionPlayedSongService と同じ規約で
+            // 「song1 = A 側が演奏する曲 / song2 = B 側が演奏する曲」と定義されているため、
+            // 左右を入れ替えたら song1 枠 ⇄ song2 枠ごと入れ替える必要がある。
+            // スコアは曲に紐づくので、枠を入れ替えたうえで各枠内の A/B も入れ替える
+            // (新 song1ScoreA = 旧 song2ScoreB = 「新 A 側選手が新 song1 で出したスコア」)。
+            var song1Id = m.getSong1StrategyId();
+            var song1Title = m.getSong1Title();
+            var song1A = m.getSong1ScoreA();
+            var song1B = m.getSong1ScoreB();
 
-            var s2 = m.getSong2ScoreA();
-            m.setSong2ScoreA(m.getSong2ScoreB());
-            m.setSong2ScoreB(s2);
+            m.setSong1StrategyId(m.getSong2StrategyId());
+            m.setSong1Title(m.getSong2Title());
+            m.setSong1ScoreA(m.getSong2ScoreB());
+            m.setSong1ScoreB(m.getSong2ScoreA());
+
+            m.setSong2StrategyId(song1Id);
+            m.setSong2Title(song1Title);
+            m.setSong2ScoreA(song1B);
+            m.setSong2ScoreB(song1A);
 
             matchRepository.save(m);
         }
