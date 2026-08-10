@@ -1605,6 +1605,7 @@ const handleSwapMatchupSides = async (matchupId: number) => {
   if (!currentCompetition.value) return;
   try {
     await swapMatchupSides(currentCompetition.value.id, matchupId);
+    await refreshRevealData(currentCompetition.value.id);
     toast.success('対戦の左右を入れ替えました');
   } catch (e) {
     toast.error((e as Error).message);
