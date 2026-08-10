@@ -41,8 +41,7 @@ const se = useSe();
 
 onMounted(async () => {
   if (songDataBody.value.length === 0) await fetchGameData();
-  document.addEventListener('fullscreenchange', onFullscreenChange);
-  // リサイズ / フルスクリーン切替で半面の幅が変わるため測り直す。
+  // リサイズで半面の幅が変わるため測り直す。
   window.addEventListener('resize', refitAll);
   // Web フォント適用前に測ると幅がずれるので、ロード完了後にもう一度。
   // (FontFaceSet 非対応環境でも以降の初期化を止めないよう握り潰す)
@@ -53,7 +52,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  document.removeEventListener('fullscreenchange', onFullscreenChange);
   window.removeEventListener('resize', refitAll);
   for (const id of stageTimers) clearTimeout(id);
 });
@@ -542,7 +540,7 @@ const reset = () => {
 
 /**
  * REVEAL フェーズ中の「画面どこでもクリック」ハンドラ。
- * Reset / Fullscreen ボタンは @click.stop で伝搬を止めているのでここまで来ない。
+ * Reset ボタンは @click.stop で伝搬を止めているのでここまで来ない。
  */
 const onStageClick = () => {
   if (phase.value !== 'reveal') return;
@@ -791,28 +789,10 @@ watch(
 
 const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
 
-// ── フルスクリーン (Strategy Card と同パターン) ──────────────
-const containerEl = ref<HTMLElement | null>(null);
-const isFullscreen = ref(false);
-const onFullscreenChange = () => {
-  isFullscreen.value = !!document.fullscreenElement;
-  // 半面のサイズが変わるのでフィットし直す (レイアウト確定後)。
-  void nextTick(refitAll);
-};
-const toggleFullscreen = async () => {
-  try {
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else if (containerEl.value) await containerEl.value.requestFullscreen();
-  } catch { /* noop */ }
-};
 </script>
 
 <template>
-  <div
-    ref="containerEl"
-    class="song-reveal-view min-h-screen w-full bg-slate-950 text-white relative overflow-hidden"
-    :class="{ 'is-fullscreen': isFullscreen }"
-  >
+  <div class="song-reveal-view min-h-screen w-full bg-slate-950 text-white relative overflow-hidden">
     <!-- 共通の背景 -->
     <div class="absolute inset-0 pointer-events-none">
       <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950"></div>
@@ -820,11 +800,11 @@ const toggleFullscreen = async () => {
       <div class="absolute inset-0 neon-streaks opacity-30"></div>
     </div>
 
-    <!-- SE 音量 / ミュート + フルスクリーン切替 (REVEAL フェーズ中のクリックには反応させない) -->
+    <!-- SE ミュート切替 (REVEAL フェーズ中のクリックには反応させない) -->
     <div class="absolute top-4 right-4 z-50 flex items-center gap-2">
       <div
         @click.stop
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 backdrop-blur shadow-lg"
+        class="flex items-center px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 backdrop-blur shadow-lg"
       >
         <button
           type="button"
@@ -840,29 +820,7 @@ const toggleFullscreen = async () => {
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9zM17 9l4 4m0-4l-4 4" />
           </svg>
         </button>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          :value="Math.round(se.volume.value * 100)"
-          @input="se.setVolume((Number(($event.target as HTMLInputElement).value) || 0) / 100)"
-          class="w-20 accent-cyan-400"
-          aria-label="SE 音量"
-        />
       </div>
-      <button
-        type="button"
-        @click.stop="toggleFullscreen"
-        class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
-        :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
-      >
-        <svg v-if="!isFullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" />
-        </svg>
-      </button>
     </div>
 
     <!-- ========== Phase: SELECT ========== -->
@@ -1112,7 +1070,7 @@ const toggleFullscreen = async () => {
 
     <!-- ========== Phase: REVEAL (左右分割) ==========
          画面のどこでもクリックで次の 1 曲ぶんのアニメを進行させる。
-         内部の Reset / Fullscreen ボタンは @click.stop で伝搬を止めている。 -->
+         内部の Reset ボタンは @click.stop で伝搬を止めている。 -->
     <div v-else class="relative z-10 min-h-screen flex cursor-pointer select-none" @click="onStageClick">
       <!-- 中央仕切り -->
       <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent pointer-events-none z-30"></div>
@@ -1196,7 +1154,7 @@ const toggleFullscreen = async () => {
                 :key="ch.index"
                 class="cascade-char inline-block"
                 :style="{ animationDelay: `${ch.index * 70}ms` }"
-              >{{ ch.text === ' ' ? ' ' : ch.text }}</span>
+              >{{ ch.text === ' ' ? ' ' : ch.text }}</span>
             </span>
           </p>
           <p
@@ -1292,7 +1250,7 @@ const toggleFullscreen = async () => {
                 :key="ch.index"
                 class="cascade-char inline-block"
                 :style="{ animationDelay: `${ch.index * 70}ms` }"
-              >{{ ch.text === ' ' ? ' ' : ch.text }}</span>
+              >{{ ch.text === ' ' ? ' ' : ch.text }}</span>
             </span>
           </p>
           <p
@@ -1382,13 +1340,6 @@ const toggleFullscreen = async () => {
       rgba(56, 189, 248, 0.15) 80px, rgba(56, 189, 248, 0.15) 82px,
       transparent 82px, transparent 200px);
   animation: neonSweep 12s linear infinite;
-}
-
-.song-reveal-view.is-fullscreen,
-.song-reveal-view:fullscreen {
-  width: 100vw;
-  min-height: 100vh;
-  overflow-y: auto;
 }
 
 .custom-scrollbar::-webkit-scrollbar { width: 8px; }
