@@ -131,6 +131,19 @@ public class CompetitionMatch {
     @Column(name = "song1_score_b")
     private Integer song1ScoreB;
 
+    /**
+     * 1 曲目を運営が手動指定したか。
+     *
+     * <p>通常 {@code song1_*} は「自選曲 / StrategyCard 抽選曲」から自動導出された値のスナップショットで、
+     * 表示側は常に導出し直す ({@code CompetitionPlayedSongService} 参照)。しかし現地で曲が差し替わった等の
+     * 理由で運営が結果記録 UI から曲を選び直した場合は、自動導出で上書きされては困る。
+     * このフラグが true の枠は導出より記録値を優先し、🔄 再読込や StrategyCard の抽選確定でも変わらない。
+     *
+     * <p>既存行への追加を安全に行うため nullable。null は false (= 自動導出) と同義に扱う。
+     */
+    @Column(name = "song1_manual")
+    private Boolean song1Manual = false;
+
     /** 2 曲目の管理番号。 */
     @Column(name = "song2_strategy_id")
     private Integer song2StrategyId;
@@ -146,4 +159,8 @@ public class CompetitionMatch {
     /** 2 曲目 B 側スコア。 */
     @Column(name = "song2_score_b")
     private Integer song2ScoreB;
+
+    /** 2 曲目を運営が手動指定したか。詳細は {@link #song1Manual}。 */
+    @Column(name = "song2_manual")
+    private Boolean song2Manual = false;
 }

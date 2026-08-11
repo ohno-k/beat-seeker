@@ -42,6 +42,7 @@ import {
   type MatchKind,
 } from '../composables/competitionMatchKinds';
 import SongPickerModal from '../components/SongPickerModal.vue';
+import SongSelect from '../components/SongSelect.vue';
 
 const { user } = useAuth();
 const toast = useToast();
@@ -811,14 +812,16 @@ const handleRefreshAll = async () => {
 
 // ── 試合結果記録 (R-4: スコアベース) ───────────────────
 /**
- * 試合の結果入力。matchId 単位で開閉し、両曲ぶんのスコアだけを受け付ける。
+ * 試合の結果入力。matchId 単位で開閉し、両曲ぶんのスコアを受け付ける。
  * 両スコアが揃った曲だけ判定対象。サーバ側で aSongsWon / bSongsWon を自動算出する。
  *
- * 管理番号 / 曲名は運営が手で触るものではない (自選曲、もしくは StrategyCard 発動時の抽選曲で
- * 一意に決まる) ため入力欄を持たず、{@link autoSongsOf} の導出結果をそのまま保存する。
+ * 曲は通常「自選曲、もしくは StrategyCard 発動時の抽選曲」から一意に導出される
+ * ({@link autoSongsOf}) が、現地で曲が差し替わった場合などのために、管理番号つき全曲から
+ * 選び直せるプルダウンも用意している。選び直した枠は {@code manualOverride} に載り、
+ * 以降は自動導出で上書きされない (サーバにも {@code songXManual} として保存する)。
  */
 const resultEditingMatchId = ref<number | null>(null);
-/** スコアのみのドラフト。曲情報は保存時に自動導出したものを合成する。 */
+/** スコアのみのドラフト。曲情報は保存時に導出結果 / 手動指定から合成する。 */
 type MatchScoreDraft = Pick<
   MatchResultPayload,
   'song1ScoreA' | 'song1ScoreB' | 'song2ScoreA' | 'song2ScoreB'
@@ -829,14 +832,33 @@ const resultDraft = ref<MatchScoreDraft>({
 });
 
 /**
+ * 編集中パネルでの曲の手動指定。枠ごとに null (= 自動導出のまま) か、選ばれた曲を持つ。
+ * パネルを開くたびに、その試合の保存済み手動指定 (songXManual) から復元する。
+ */
+type ManualSong = { strategyId: number; title: string };
+const manualOverride = ref<{ song1: ManualSong | null; song2: ManualSong | null }>({
+  song1: null, song2: null,
+});
+
+/**
+ * サーバに保存済みの手動指定を復元する。
+ * フラグが立っていても管理番号が無い枠は手動指定として扱わない (曲を特定できないため)。
+ */
+const savedManualSong = (manual: boolean, id: number | null, title: string | null): ManualSong | null =>
+  manual && id !== null ? { strategyId: id, title: title ?? '' } : null;
+
+/**
  * 演奏曲 1 枠ぶんの自動決定結果。
  * {@code source} は「どこから決まった曲か」の表示用ラベル判定に使う。
  */
 interface AutoSong {
   strategyId: number | null;
   title: string | null;
-  /** strategy = StrategyCard 抽選曲 / pick = 自選曲 / recorded = 導出不能で記録済み値を維持 / none = 未決定 */
-  source: 'strategy' | 'pick' | 'recorded' | 'none';
+  /**
+   * manual = 運営がプルダウンで手動指定 / strategy = StrategyCard 抽選曲 / pick = 自選曲 /
+   * recorded = 導出不能で記録済み値を維持 / none = 未決定
+   */
+  source: 'manual' | 'strategy' | 'pick' | 'recorded' | 'none';
   /**
    * 相殺で自選曲に戻った枠か (source === 'pick' のときのみ true になり得る)。
    * 「発動が無くて自選曲」と「両者発動 → 相殺で自選曲」を運営が見分けられるようにするための表示用フラグ。
@@ -854,6 +876,9 @@ interface AutoSong {
  *  - 両者が strategy 発動 → 相殺。抽選は行われず、両枠とも自選曲に戻る
  *    (サーバが strategyCanceled = true とともに playerXStrategyResult を null で返す)
  *
+ * 運営がプルダウンで曲を選び直した枠 (manual) だけは、上のどれよりも優先する。現地で曲が
+ * 差し替わった場合の記録が 🔄 再読込や StrategyCard の抽選確定で巻き戻ってしまわないようにするため。
+ *
  * 抽選結果は reveal データ生成時にサーバで確定するため、reveal を取り直せばここも自動で
  * 抽選曲へ切り替わる。reveal データが無い / 自選曲未提出で導出できない枠だけ、既に記録済みの
  * 値へフォールバックして既存記録を消さないようにする。
@@ -862,11 +887,16 @@ const autoSongsOf = (match: CompetitionMatchDto): { song1: AutoSong; song2: Auto
   const rm = revealMatchOf(match.id);
   const canceled = rm?.strategyCanceled === true;
   const resolve = (
+    manual: ManualSong | null,
     strategyResult: { songStrategyId: number; songTitle: string } | null | undefined,
     ownPick: { songStrategyId: number; songTitle: string } | null | undefined,
     recordedId: number | null,
     recordedTitle: string | null,
   ): AutoSong => {
+    // 手動指定は運営の明示的な意思なので、自選曲でも抽選曲でも上書きしない。
+    if (manual) {
+      return { strategyId: manual.strategyId, title: manual.title, source: 'manual', canceled: false };
+    }
     // 相殺時はサーバが strategyResult を null で返すが、古い reveal データを掴んでいても
     // 自選曲が選ばれるようここでも明示的に抽選曲を無視する。
     if (strategyResult && !canceled) {
@@ -880,9 +910,17 @@ const autoSongsOf = (match: CompetitionMatchDto): { song1: AutoSong; song2: Auto
     }
     return { strategyId: null, title: null, source: 'none', canceled: false };
   };
+  // 手動指定は、編集中の試合ならドラフト (manualOverride) を、それ以外は保存済みフラグを見る。
+  const editing = resultEditingMatchId.value === match.id;
+  const manual1 = editing
+    ? manualOverride.value.song1
+    : savedManualSong(match.song1Manual, match.song1StrategyId, match.song1Title);
+  const manual2 = editing
+    ? manualOverride.value.song2
+    : savedManualSong(match.song2Manual, match.song2StrategyId, match.song2Title);
   return {
-    song1: resolve(rm?.playerBStrategyResult, rm?.playerAPick, match.song1StrategyId, match.song1Title),
-    song2: resolve(rm?.playerAStrategyResult, rm?.playerBPick, match.song2StrategyId, match.song2Title),
+    song1: resolve(manual1, rm?.playerBStrategyResult, rm?.playerAPick, match.song1StrategyId, match.song1Title),
+    song2: resolve(manual2, rm?.playerAStrategyResult, rm?.playerBPick, match.song2StrategyId, match.song2Title),
   };
 };
 
@@ -900,6 +938,7 @@ const editingAutoSongs = computed<{ song1: AutoSong; song2: AutoSong } | null>((
 /** 導出元のバッジ表記。相殺で自選曲に戻った枠は通常の自選曲と区別できるようにする。 */
 const autoSongSourceLabel = (song: AutoSong | null | undefined): string => {
   if (!song) return '未決定';
+  if (song.source === 'manual') return '✎ 手動指定';
   if (song.source === 'strategy') return '⚡ 抽選曲';
   if (song.source === 'pick') return song.canceled ? '自選曲（⚡相殺）' : '自選曲';
   if (song.source === 'recorded') return '記録値';
@@ -908,6 +947,7 @@ const autoSongSourceLabel = (song: AutoSong | null | undefined): string => {
 
 /** 導出元バッジの配色。相殺は「発動はあったが打ち消された」ことが伝わるよう琥珀系にする。 */
 const autoSongSourceClass = (song: AutoSong | null | undefined): string => {
+  if (song?.source === 'manual') return 'bg-sky-600 text-white';
   if (song?.source === 'strategy') return 'bg-fuchsia-600 text-white';
   if (song?.source === 'pick') {
     return song.canceled
@@ -915,6 +955,19 @@ const autoSongSourceClass = (song: AutoSong | null | undefined): string => {
       : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300';
   }
   return 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400';
+};
+
+/** プルダウンで曲を選んだ。以降その枠は自動導出で上書きされない。 */
+const handleSongSelected = (slot: 1 | 2, song: { strategyId: number; title: string }) => {
+  const picked: ManualSong = { strategyId: song.strategyId, title: song.title };
+  if (slot === 1) manualOverride.value.song1 = picked;
+  else manualOverride.value.song2 = picked;
+};
+
+/** 手動指定を解除して自動導出 (自選曲 / 抽選曲) に戻す。 */
+const clearSongOverride = (slot: 1 | 2) => {
+  if (slot === 1) manualOverride.value.song1 = null;
+  else manualOverride.value.song2 = null;
 };
 
 /**
@@ -932,12 +985,18 @@ const beginResultEdit = async (match: CompetitionMatchDto) => {
     song2ScoreA: match.song2ScoreA,
     song2ScoreB: match.song2ScoreB,
   };
+  // 保存済みの手動指定を復元する。これをしないと開き直した瞬間に自動導出へ巻き戻ってしまう。
+  manualOverride.value = {
+    song1: savedManualSong(match.song1Manual, match.song1StrategyId, match.song1Title),
+    song2: savedManualSong(match.song2Manual, match.song2StrategyId, match.song2Title),
+  };
   if (currentCompetition.value) {
     await refreshRevealData(currentCompetition.value.id);
   }
 };
 const cancelResultEdit = () => {
   resultEditingMatchId.value = null;
+  manualOverride.value = { song1: null, song2: null };
 };
 const handleSaveResult = async (matchId: number) => {
   if (!currentCompetition.value) return;
@@ -950,7 +1009,8 @@ const handleSaveResult = async (matchId: number) => {
     toast.error('スコアは 0 以上の整数で入力してください');
     return;
   }
-  // 曲情報は入力欄ではなく自動導出結果を保存する (strategy 発動後は抽選曲で上書きされる)。
+  // 曲情報は導出結果 (手動指定があればそれ) を保存する。
+  // songXManual を一緒に送ることで、サーバ側でも以降 自動導出で上書きされなくなる。
   const auto = editingAutoSongs.value;
   const payload: MatchResultPayload = {
     song1StrategyId: auto?.song1.strategyId ?? null,
@@ -961,6 +1021,8 @@ const handleSaveResult = async (matchId: number) => {
     song2Title: auto?.song2.title ?? null,
     song2ScoreA: resultDraft.value.song2ScoreA,
     song2ScoreB: resultDraft.value.song2ScoreB,
+    song1Manual: manualOverride.value.song1 !== null,
+    song2Manual: manualOverride.value.song2 !== null,
   };
   try {
     await setMatchResult(currentCompetition.value.id, matchId, payload);
@@ -2573,26 +2635,20 @@ const statusColor = (s: string) => ({
                   <!-- 編集モード: 2 曲 × (管理番号 + A スコア + B スコア) -->
                   <template v-else>
                     <p class="text-slate-400 mb-2">
-                      スコア記録 (曲 = A/B 自選曲もしくは Strategy 抽選曲から自動決定・編集不可)
+                      スコア記録 (曲 = A/B 自選曲もしくは Strategy 抽選曲から自動決定。曲欄のクリックで管理番号つき全曲から変更可)
                       <span class="text-slate-500">— 発動状況は開くたびに再取得。開いたまま反映したい場合は上部の 🔄 で再読込。</span>
                     </p>
                     <div class="space-y-2">
                       <!-- Song 1 (A 側演奏曲) -->
                       <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
                         <span class="text-slate-500">1 曲目<br /><span class="text-[9px] text-slate-600">A 演奏</span></span>
-                        <div
-                          class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/70 border border-dashed border-slate-300 dark:border-slate-600 text-xs flex items-center gap-1.5 min-w-0"
-                          :title="`#${editingAutoSongs?.song1.strategyId ?? '—'} ${editingAutoSongs?.song1.title ?? '未決定'}`"
-                        >
-                          <span class="tabular-nums text-slate-500 shrink-0">#{{ editingAutoSongs?.song1.strategyId ?? '—' }}</span>
-                          <span class="font-bold truncate" :class="editingAutoSongs?.song1.title ? '' : 'italic text-slate-400 font-normal'">
-                            {{ editingAutoSongs?.song1.title ?? '未決定' }}
-                          </span>
-                          <span
-                            class="ml-auto shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
-                            :class="autoSongSourceClass(editingAutoSongs?.song1)"
-                          >{{ autoSongSourceLabel(editingAutoSongs?.song1) }}</span>
-                        </div>
+                        <SongSelect
+                          :strategy-id="editingAutoSongs?.song1.strategyId ?? null"
+                          :title="editingAutoSongs?.song1.title ?? null"
+                          :badge-label="autoSongSourceLabel(editingAutoSongs?.song1)"
+                          :badge-class="autoSongSourceClass(editingAutoSongs?.song1)"
+                          @select="(s) => handleSongSelected(1, s)"
+                        />
                         <input
                           v-model.number="resultDraft.song1ScoreA"
                           type="number"
@@ -2611,19 +2667,13 @@ const statusColor = (s: string) => ({
                       <!-- Song 2 (B 側演奏曲) -->
                       <div class="grid grid-cols-[60px_1fr_70px_70px] gap-2 items-center">
                         <span class="text-slate-500">2 曲目<br /><span class="text-[9px] text-slate-600">B 演奏</span></span>
-                        <div
-                          class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800/70 border border-dashed border-slate-300 dark:border-slate-600 text-xs flex items-center gap-1.5 min-w-0"
-                          :title="`#${editingAutoSongs?.song2.strategyId ?? '—'} ${editingAutoSongs?.song2.title ?? '未決定'}`"
-                        >
-                          <span class="tabular-nums text-slate-500 shrink-0">#{{ editingAutoSongs?.song2.strategyId ?? '—' }}</span>
-                          <span class="font-bold truncate" :class="editingAutoSongs?.song2.title ? '' : 'italic text-slate-400 font-normal'">
-                            {{ editingAutoSongs?.song2.title ?? '未決定' }}
-                          </span>
-                          <span
-                            class="ml-auto shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
-                            :class="autoSongSourceClass(editingAutoSongs?.song2)"
-                          >{{ autoSongSourceLabel(editingAutoSongs?.song2) }}</span>
-                        </div>
+                        <SongSelect
+                          :strategy-id="editingAutoSongs?.song2.strategyId ?? null"
+                          :title="editingAutoSongs?.song2.title ?? null"
+                          :badge-label="autoSongSourceLabel(editingAutoSongs?.song2)"
+                          :badge-class="autoSongSourceClass(editingAutoSongs?.song2)"
+                          @select="(s) => handleSongSelected(2, s)"
+                        />
                         <input
                           v-model.number="resultDraft.song2ScoreA"
                           type="number"
@@ -2640,6 +2690,25 @@ const statusColor = (s: string) => ({
                         />
                       </div>
                     </div>
+                    <!--
+                      手動指定した枠を自動導出 (自選曲 / Strategy 抽選曲) に戻すための解除ボタン。
+                      手動指定中は 🔄 再読込や抽選確定でも曲が変わらないので、戻す手段を明示しておく。
+                    -->
+                    <p v-if="manualOverride.song1 || manualOverride.song2" class="mt-2 flex items-center gap-2 flex-wrap text-sky-700 dark:text-sky-300">
+                      <span>✎ 手動指定中の枠があります (自動導出より優先されます)</span>
+                      <button
+                        v-if="manualOverride.song1"
+                        type="button"
+                        @click="clearSongOverride(1)"
+                        class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                      >1 曲目を自動に戻す</button>
+                      <button
+                        v-if="manualOverride.song2"
+                        type="button"
+                        @click="clearSongOverride(2)"
+                        class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                      >2 曲目を自動に戻す</button>
+                    </p>
                     <!-- 自動決定できなかった枠の注意書き (提出状況未取得 / 自選曲未提出) -->
                     <p
                       v-if="editingAutoSongs && (editingAutoSongs.song1.source === 'recorded' || editingAutoSongs.song1.source === 'none'

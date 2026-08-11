@@ -546,6 +546,10 @@ public class CompetitionAdminController {
         match.setSong2Title(req.song2Title());
         match.setSong2ScoreA(req.song2ScoreA());
         match.setSong2ScoreB(req.song2ScoreB());
+        // 手動指定フラグ。true の枠は以降 自選曲 / StrategyCard 抽選曲での自動導出を行わず記録値を使う。
+        // 未指定 (null) は「自動導出のまま」= false として保存する。
+        match.setSong1Manual(Boolean.TRUE.equals(req.song1Manual()));
+        match.setSong2Manual(Boolean.TRUE.equals(req.song2Manual()));
 
         // スコアから勝ち曲数を導出。両スコアが揃っている曲だけ判定対象。
         // 同スコア (引分) の曲は、両者が勝ったものとして両側に +1 する (運営仕様)。
@@ -1282,16 +1286,20 @@ public class CompetitionAdminController {
             var song1Title = m.getSong1Title();
             var song1A = m.getSong1ScoreA();
             var song1B = m.getSong1ScoreB();
+            // 手動指定フラグは曲に紐づくので、song1 枠 ⇄ song2 枠の入れ替えに追従させる。
+            var song1Manual = m.getSong1Manual();
 
             m.setSong1StrategyId(m.getSong2StrategyId());
             m.setSong1Title(m.getSong2Title());
             m.setSong1ScoreA(m.getSong2ScoreB());
             m.setSong1ScoreB(m.getSong2ScoreA());
+            m.setSong1Manual(m.getSong2Manual());
 
             m.setSong2StrategyId(song1Id);
             m.setSong2Title(song1Title);
             m.setSong2ScoreA(song1B);
             m.setSong2ScoreB(song1A);
+            m.setSong2Manual(song1Manual);
 
             matchRepository.save(m);
         }
@@ -1627,6 +1635,9 @@ public class CompetitionAdminController {
         m.put("song2Title", match.getSong2Title());
         m.put("song2ScoreA", match.getSong2ScoreA());
         m.put("song2ScoreB", match.getSong2ScoreB());
+        // 手動指定フラグ。true の枠は結果記録 UI が自動導出せず記録値をそのまま出す。
+        m.put("song1Manual", Boolean.TRUE.equals(match.getSong1Manual()));
+        m.put("song2Manual", Boolean.TRUE.equals(match.getSong2Manual()));
         return m;
     }
 
@@ -1701,6 +1712,10 @@ public class CompetitionAdminController {
             Integer song2StrategyId,
             String song2Title,
             Integer song2ScoreA,
-            Integer song2ScoreB
+            Integer song2ScoreB,
+            /** 1 曲目を運営が手動指定したか (null = false = 自動導出)。 */
+            Boolean song1Manual,
+            /** 2 曲目を運営が手動指定したか。 */
+            Boolean song2Manual
     ) {}
 }

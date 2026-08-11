@@ -153,6 +153,13 @@ export interface CompetitionMatchDto {
   song2Title: string | null;
   song2ScoreA: number | null;
   song2ScoreB: number | null;
+  /**
+   * 1 曲目を運営が手動指定したか。true の枠は自選曲 / StrategyCard 抽選曲による自動導出を行わず、
+   * 記録済みの song1StrategyId / song1Title をそのまま使う。
+   */
+  song1Manual: boolean;
+  /** 2 曲目を運営が手動指定したか。 */
+  song2Manual: boolean;
 }
 
 /** 試合結果スコア入力 payload (両曲ぶん)。 */
@@ -165,6 +172,10 @@ export interface MatchResultPayload {
   song2Title: string | null;
   song2ScoreA: number | null;
   song2ScoreB: number | null;
+  /** 1 曲目を手動指定した枠として保存するか。 */
+  song1Manual: boolean;
+  /** 2 曲目を手動指定した枠として保存するか。 */
+  song2Manual: boolean;
 }
 
 // ── Song Reveal 連携用 DTO ─────────────────────────────

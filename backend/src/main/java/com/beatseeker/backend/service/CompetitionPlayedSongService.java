@@ -16,7 +16,8 @@ import java.util.Optional;
  * <p>1 戦 = 2 曲制を {@code song1 = A 側が演奏する曲} / {@code song2 = B 側が演奏する曲} と定義し、
  * 次の優先順で決める (運営画面の結果記録 UI が使う導出ロジックと同じ規則):
  * <ol>
- *   <li>両者が StrategyCard を発動していれば<b>相殺</b>となり、双方とも自選曲 (下記 2.)</li>
+ *   <li>運営が結果記録 UI で<b>手動指定</b>した曲 ({@code songXManual} が true の枠)</li>
+ *   <li>両者が StrategyCard を発動していれば<b>相殺</b>となり、双方とも自選曲 (下記 4.)</li>
  *   <li>相手が StrategyCard を発動していれば、その抽選曲 (発動 = 相手の曲をランダム化)</li>
  *   <li>発動が無ければ本人の自選曲</li>
  *   <li>どちらも引けなければ {@code competition_matches} に記録済みの曲 (フォールバック)</li>
@@ -71,8 +72,10 @@ public class CompetitionPlayedSongService {
         CompetitionStrategyUse suB = canceled ? null : drawnOf(rawB);
 
         return new PlayedSongs(
-                resolveSide(suB, pickOf(match, pa), match.getSong1StrategyId(), match.getSong1Title()),
-                resolveSide(suA, pickOf(match, pb), match.getSong2StrategyId(), match.getSong2Title()));
+                resolveSide(Boolean.TRUE.equals(match.getSong1Manual()), suB, pickOf(match, pa),
+                        match.getSong1StrategyId(), match.getSong1Title()),
+                resolveSide(Boolean.TRUE.equals(match.getSong2Manual()), suA, pickOf(match, pb),
+                        match.getSong2StrategyId(), match.getSong2Title()));
     }
 
     /**
@@ -104,15 +107,20 @@ public class CompetitionPlayedSongService {
     }
 
     /**
-     * 【メソッドの役割】 演奏曲 1 枠を「抽選曲 → 自選曲 → 記録値」の優先順で解決する。
+     * 【メソッドの役割】 演奏曲 1 枠を「手動指定 → 抽選曲 → 自選曲 → 記録値」の優先順で解決する。
      *
+     * @param manual           運営が結果記録 UI で曲を手動指定した枠か。true なら記録値をそのまま返す
      * @param opponentStrategy 相手が発動した抽選済み StrategyCard (無ければ null)
      * @param ownPick          本人の自選曲 (未提出なら null)
      * @param recordedId       記録済みの管理番号 (フォールバック)
      * @param recordedTitle    記録済みの曲名 (フォールバック)
      */
-    private PlayedSong resolveSide(CompetitionStrategyUse opponentStrategy, CompetitionPick ownPick,
+    private PlayedSong resolveSide(boolean manual, CompetitionStrategyUse opponentStrategy, CompetitionPick ownPick,
                                    Integer recordedId, String recordedTitle) {
+        // 手動指定は運営の明示的な意思なので、自選曲でも抽選曲でも上書きしない。
+        if (manual) {
+            return new PlayedSong(recordedId, recordedTitle);
+        }
         if (opponentStrategy != null) {
             return new PlayedSong(opponentStrategy.getResultSongStrategyId(), opponentStrategy.getResultSongTitle());
         }
