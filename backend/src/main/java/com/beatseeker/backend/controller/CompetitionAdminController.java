@@ -350,10 +350,14 @@ public class CompetitionAdminController {
      *   matchupOrder, teamAName, teamBName,
      *   playerAName, playerAPick: { songGenre, songLevel, songTitle, songDiff } | null,
      *   playerBName, playerBPick: { songGenre, songLevel, songTitle, songDiff } | null,
-     *   playerAStrategyUsed, playerBStrategyUsed
+     *   playerAStrategyUsed, playerBStrategyUsed, strategyCanceled
      * }
      * </pre>
      * <p>未アサインの slot は playerXName が null。フロントは「両側 null」の試合は表示しない想定。
+     *
+     * <p>{@code strategyCanceled} = 両者が発動して<b>相殺</b>した試合。相殺時は抽選を行わず
+     * {@code playerXStrategyResult} も null で返すので、演出も結果記録も自選曲のまま進む。
+     * ({@link com.beatseeker.backend.service.CompetitionPlayedSongService#isStrategyCanceled} と同じ判定)
      */
     @GetMapping("/{competitionId}/reveal")
     @Transactional
@@ -402,19 +406,29 @@ public class CompetitionAdminController {
             CompetitionStrategyUse suB = pb == null ? null
                     : strategyUseRepository.findByMatchAndUsedByParticipant(m, pb).orElse(null);
 
+            boolean usedA = suA != null && Boolean.TRUE.equals(suA.getEnabled());
+            boolean usedB = suB != null && Boolean.TRUE.equals(suB.getEnabled());
+            // 相殺: 両者が発動すると双方の StrategyCard は打ち消し合い、両者とも自選曲を演奏する。
+            // 抽選も行わない (相殺が解除された場合は次回の Reveal データ生成時に改めて抽選される)。
+            boolean strategyCanceled = usedA && usedB;
+
             // 遅延抽選 (materialize at reveal): TL が「発動予定」にした StrategyCard の抽選を、
             // Reveal データ生成時にここで確定する。発動側 (suA=A) は相手 (B) の自選曲ジャンルでプール抽選し、
             // 相手 (B) が演奏する曲を置き換える。enabled かつ未抽選で相手の自選曲がある場合のみ 1 回引いて保存。
-            maybeDrawStrategy(suA, m, pb);
-            maybeDrawStrategy(suB, m, pa);
-            e.put("playerAStrategyUsed", suA != null && Boolean.TRUE.equals(suA.getEnabled()));
-            e.put("playerBStrategyUsed", suB != null && Boolean.TRUE.equals(suB.getEnabled()));
+            if (!strategyCanceled) {
+                maybeDrawStrategy(suA, m, pb);
+                maybeDrawStrategy(suB, m, pa);
+            }
+            e.put("playerAStrategyUsed", usedA);
+            e.put("playerBStrategyUsed", usedB);
+            e.put("strategyCanceled", strategyCanceled);
 
             // R-4 自動入力連携: A 側が strategy 申告 → B 側の played song は suA に保存された抽選結果。
             // B 側が strategy 申告 → A 側の played song は suB に保存された抽選結果。
             // 自分の strategy 申告は「相手の曲をランダム化」なので、result_song_* は ON 側の suX に格納。
             // フロントは strategyResultForSide(a/b) で受け取り、結果記録 UI の自動入力に使う。
-            if (suA != null && Boolean.TRUE.equals(suA.getEnabled()) && suA.getResultSongStrategyId() != null) {
+            // 相殺時は抽選結果を伏せて null で返す (相殺前に抽選済みのレコードが残っていても曲は置き換えない)。
+            if (!strategyCanceled && usedA && suA.getResultSongStrategyId() != null) {
                 Map<String, Object> rs = new LinkedHashMap<>();
                 rs.put("songStrategyId", suA.getResultSongStrategyId());
                 rs.put("songTitle", suA.getResultSongTitle());
@@ -426,7 +440,7 @@ public class CompetitionAdminController {
             } else {
                 e.put("playerAStrategyResult", null);
             }
-            if (suB != null && Boolean.TRUE.equals(suB.getEnabled()) && suB.getResultSongStrategyId() != null) {
+            if (!strategyCanceled && usedB && suB.getResultSongStrategyId() != null) {
                 Map<String, Object> rs = new LinkedHashMap<>();
                 rs.put("songStrategyId", suB.getResultSongStrategyId());
                 rs.put("songTitle", suB.getResultSongTitle());

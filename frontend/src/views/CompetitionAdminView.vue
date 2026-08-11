@@ -837,6 +837,11 @@ interface AutoSong {
   title: string | null;
   /** strategy = StrategyCard 抽選曲 / pick = 自選曲 / recorded = 導出不能で記録済み値を維持 / none = 未決定 */
   source: 'strategy' | 'pick' | 'recorded' | 'none';
+  /**
+   * 相殺で自選曲に戻った枠か (source === 'pick' のときのみ true になり得る)。
+   * 「発動が無くて自選曲」と「両者発動 → 相殺で自選曲」を運営が見分けられるようにするための表示用フラグ。
+   */
+  canceled: boolean;
 }
 
 /**
@@ -846,6 +851,8 @@ interface AutoSong {
  *  - 通常 (strategy 未発動): song1 = A の自選曲、song2 = B の自選曲
  *  - B 側が strategy 発動 → A 側の曲がランダム化: song1 = revealMatch.playerBStrategyResult
  *  - A 側が strategy 発動 → B 側の曲がランダム化: song2 = revealMatch.playerAStrategyResult
+ *  - 両者が strategy 発動 → 相殺。抽選は行われず、両枠とも自選曲に戻る
+ *    (サーバが strategyCanceled = true とともに playerXStrategyResult を null で返す)
  *
  * 抽選結果は reveal データ生成時にサーバで確定するため、reveal を取り直せばここも自動で
  * 抽選曲へ切り替わる。reveal データが無い / 自選曲未提出で導出できない枠だけ、既に記録済みの
@@ -853,22 +860,25 @@ interface AutoSong {
  */
 const autoSongsOf = (match: CompetitionMatchDto): { song1: AutoSong; song2: AutoSong } => {
   const rm = revealMatchOf(match.id);
+  const canceled = rm?.strategyCanceled === true;
   const resolve = (
     strategyResult: { songStrategyId: number; songTitle: string } | null | undefined,
     ownPick: { songStrategyId: number; songTitle: string } | null | undefined,
     recordedId: number | null,
     recordedTitle: string | null,
   ): AutoSong => {
-    if (strategyResult) {
-      return { strategyId: strategyResult.songStrategyId, title: strategyResult.songTitle, source: 'strategy' };
+    // 相殺時はサーバが strategyResult を null で返すが、古い reveal データを掴んでいても
+    // 自選曲が選ばれるようここでも明示的に抽選曲を無視する。
+    if (strategyResult && !canceled) {
+      return { strategyId: strategyResult.songStrategyId, title: strategyResult.songTitle, source: 'strategy', canceled: false };
     }
     if (ownPick) {
-      return { strategyId: ownPick.songStrategyId, title: ownPick.songTitle, source: 'pick' };
+      return { strategyId: ownPick.songStrategyId, title: ownPick.songTitle, source: 'pick', canceled };
     }
     if (recordedId !== null || recordedTitle !== null) {
-      return { strategyId: recordedId, title: recordedTitle, source: 'recorded' };
+      return { strategyId: recordedId, title: recordedTitle, source: 'recorded', canceled: false };
     }
-    return { strategyId: null, title: null, source: 'none' };
+    return { strategyId: null, title: null, source: 'none', canceled: false };
   };
   return {
     song1: resolve(rm?.playerBStrategyResult, rm?.playerAPick, match.song1StrategyId, match.song1Title),
@@ -887,12 +897,24 @@ const editingAutoSongs = computed<{ song1: AutoSong; song2: AutoSong } | null>((
   return m ? autoSongsOf(m) : null;
 });
 
-/** 導出元のバッジ表記。 */
-const autoSongSourceLabel = (source: AutoSong['source']): string => {
-  if (source === 'strategy') return '⚡ 抽選曲';
-  if (source === 'pick') return '自選曲';
-  if (source === 'recorded') return '記録値';
+/** 導出元のバッジ表記。相殺で自選曲に戻った枠は通常の自選曲と区別できるようにする。 */
+const autoSongSourceLabel = (song: AutoSong | null | undefined): string => {
+  if (!song) return '未決定';
+  if (song.source === 'strategy') return '⚡ 抽選曲';
+  if (song.source === 'pick') return song.canceled ? '自選曲（⚡相殺）' : '自選曲';
+  if (song.source === 'recorded') return '記録値';
   return '未決定';
+};
+
+/** 導出元バッジの配色。相殺は「発動はあったが打ち消された」ことが伝わるよう琥珀系にする。 */
+const autoSongSourceClass = (song: AutoSong | null | undefined): string => {
+  if (song?.source === 'strategy') return 'bg-fuchsia-600 text-white';
+  if (song?.source === 'pick') {
+    return song.canceled
+      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+      : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300';
+  }
+  return 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400';
 };
 
 /**
@@ -2568,12 +2590,8 @@ const statusColor = (s: string) => ({
                           </span>
                           <span
                             class="ml-auto shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
-                            :class="editingAutoSongs?.song1.source === 'strategy'
-                              ? 'bg-fuchsia-600 text-white'
-                              : editingAutoSongs?.song1.source === 'pick'
-                                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
-                                : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400'"
-                          >{{ autoSongSourceLabel(editingAutoSongs?.song1.source ?? 'none') }}</span>
+                            :class="autoSongSourceClass(editingAutoSongs?.song1)"
+                          >{{ autoSongSourceLabel(editingAutoSongs?.song1) }}</span>
                         </div>
                         <input
                           v-model.number="resultDraft.song1ScoreA"
@@ -2603,12 +2621,8 @@ const statusColor = (s: string) => ({
                           </span>
                           <span
                             class="ml-auto shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
-                            :class="editingAutoSongs?.song2.source === 'strategy'
-                              ? 'bg-fuchsia-600 text-white'
-                              : editingAutoSongs?.song2.source === 'pick'
-                                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
-                                : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400'"
-                          >{{ autoSongSourceLabel(editingAutoSongs?.song2.source ?? 'none') }}</span>
+                            :class="autoSongSourceClass(editingAutoSongs?.song2)"
+                          >{{ autoSongSourceLabel(editingAutoSongs?.song2) }}</span>
                         </div>
                         <input
                           v-model.number="resultDraft.song2ScoreA"

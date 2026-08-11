@@ -8,12 +8,15 @@ import com.beatseeker.backend.repository.CompetitionPickRepository;
 import com.beatseeker.backend.repository.CompetitionStrategyUseRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * 【Service の役割】 1 戦で「実際に演奏された 2 曲」を解決する単一実装。
  *
  * <p>1 戦 = 2 曲制を {@code song1 = A 側が演奏する曲} / {@code song2 = B 側が演奏する曲} と定義し、
  * 次の優先順で決める (運営画面の結果記録 UI が使う導出ロジックと同じ規則):
  * <ol>
+ *   <li>両者が StrategyCard を発動していれば<b>相殺</b>となり、双方とも自選曲 (下記 2.)</li>
  *   <li>相手が StrategyCard を発動していれば、その抽選曲 (発動 = 相手の曲をランダム化)</li>
  *   <li>発動が無ければ本人の自選曲</li>
  *   <li>どちらも引けなければ {@code competition_matches} に記録済みの曲 (フォールバック)</li>
@@ -56,13 +59,48 @@ public class CompetitionPlayedSongService {
         CompetitionParticipant pa = match.getPlayerA();
         CompetitionParticipant pb = match.getPlayerB();
 
+        Optional<CompetitionStrategyUse> rawA = strategyUseOf(match, pa);
+        Optional<CompetitionStrategyUse> rawB = strategyUseOf(match, pb);
+
+        // 相殺: 両者が発動していれば双方の StrategyCard は打ち消し合い、両者とも自選曲を演奏する。
+        // 判定は「抽選済みか」ではなく enabled で行う (片側の抽選が保留中でも発動の事実で相殺は成立する)。
+        boolean canceled = isEnabled(rawA) && isEnabled(rawB);
+
         // 発動側に抽選結果が入る: A が発動 → B の曲が置き換わる (= song2)、B が発動 → song1。
-        CompetitionStrategyUse suA = drawnStrategyOf(match, pa);
-        CompetitionStrategyUse suB = drawnStrategyOf(match, pb);
+        CompetitionStrategyUse suA = canceled ? null : drawnOf(rawA);
+        CompetitionStrategyUse suB = canceled ? null : drawnOf(rawB);
 
         return new PlayedSongs(
                 resolveSide(suB, pickOf(match, pa), match.getSong1StrategyId(), match.getSong1Title()),
                 resolveSide(suA, pickOf(match, pb), match.getSong2StrategyId(), match.getSong2Title()));
+    }
+
+    /**
+     * 【メソッドの役割】 その試合の StrategyCard が相殺状態か (= A/B 双方が発動している) を返す。
+     *
+     * <p>相殺した試合では両者とも自選曲を演奏する。抽選済みかどうかは見ず {@code enabled} だけで判定するので、
+     * 片側の抽選が保留 (相手の自選曲未提出など) でも「両者が発動した」時点で相殺が成立する。
+     *
+     * <p>相殺は<b>曲の解決結果</b>だけを打ち消す。StrategyCard の使用回数
+     * ({@code strategyUsedMatchupCount}) は発動した事実に基づくので、相殺しても消費されたままになる。
+     *
+     * @param match 対象の試合
+     * @return 両者が発動していれば true
+     */
+    public boolean isStrategyCanceled(CompetitionMatch match) {
+        return isEnabled(strategyUseOf(match, match.getPlayerA()))
+                && isEnabled(strategyUseOf(match, match.getPlayerB()));
+    }
+
+    /** 【メソッドの役割】 その参加者の StrategyCard 意思決定レコードを引く (未決定なら empty)。 */
+    private Optional<CompetitionStrategyUse> strategyUseOf(CompetitionMatch match, CompetitionParticipant participant) {
+        if (participant == null) return Optional.empty();
+        return strategyUseRepository.findByMatchAndUsedByParticipant(match, participant);
+    }
+
+    /** 【メソッドの役割】 発動予定になっているか (抽選済みかは問わない)。 */
+    private boolean isEnabled(Optional<CompetitionStrategyUse> su) {
+        return su.map(x -> Boolean.TRUE.equals(x.getEnabled())).orElse(false);
     }
 
     /**
@@ -85,15 +123,13 @@ public class CompetitionPlayedSongService {
     }
 
     /**
-     * 【メソッドの役割】 その参加者が発動し、かつ抽選まで済んでいる StrategyCard を返す。
+     * 【メソッドの役割】 発動済みかつ抽選まで済んでいる StrategyCard を返す。
      *
      * <p>「発動予定にしただけで抽選前」(= Reveal 未生成) の場合は null を返し、自選曲へフォールバックさせる。
      */
-    private CompetitionStrategyUse drawnStrategyOf(CompetitionMatch match, CompetitionParticipant participant) {
-        if (participant == null) return null;
-        return strategyUseRepository.findByMatchAndUsedByParticipant(match, participant)
-                .filter(su -> Boolean.TRUE.equals(su.getEnabled()))
-                .filter(su -> su.getResultSongStrategyId() != null)
+    private CompetitionStrategyUse drawnOf(Optional<CompetitionStrategyUse> su) {
+        return su.filter(x -> Boolean.TRUE.equals(x.getEnabled()))
+                .filter(x -> x.getResultSongStrategyId() != null)
                 .orElse(null);
     }
 

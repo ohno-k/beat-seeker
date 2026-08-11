@@ -154,6 +154,8 @@ const strategyPool = strategySongs as Record<CompetitionSongGenre, Record<string
  *
  * 「相手が発動 → 自分の曲がランダム化」なので、side='a' の置換曲は B 側の StrategyUse に
  * 保存された {@code playerBStrategyResult}、side='b' は {@code playerAStrategyResult}。
+ *
+ * 両者が発動した試合は<b>相殺</b>となり、どちらの曲も置き換わらず自選曲のまま演奏される。
  */
 const applyStrategyIfNeeded = (
   match: CompetitionRevealMatch,
@@ -163,6 +165,8 @@ const applyStrategyIfNeeded = (
   const opponentUsedStrategy = side === 'a' ? match.playerBStrategyUsed : match.playerAStrategyUsed;
   const drawn = side === 'a' ? match.playerBStrategyResult : match.playerAStrategyResult;
   if (!myPick) return null;
+  // 相殺: 両者発動なので双方の StrategyCard が打ち消し合い、自選曲がそのまま演奏される。
+  if (match.strategyCanceled) return myPick;
   if (!opponentUsedStrategy) return myPick;
   if (!drawn) {
     // サーバが抽選を保留した状態 (相手の自選曲未提出 / プール空)。
@@ -229,6 +233,8 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
   // Strategy 申告フラグを反映。左 = playerA、右 = playerB の申告。
   strategyDeclaredByLeft.value = match.playerAStrategyUsed;
   strategyDeclaredByRight.value = match.playerBStrategyUsed;
+  // 相殺 (両者発動)。⚡ 演出までは通常どおり進み、スピンの代わりに「相殺」表示で締める。
+  strategyCanceled.value = match.strategyCanceled;
 
   // スピン用プールの絞り込みコンテキスト (ジャンル × matchKind の Lv 帯) を保存
   const levels = LEVELS_FOR_KIND[match.matchKind];
@@ -311,6 +317,11 @@ const rightStage = ref({ burst: false, title: false, artist: false, diffBadge: f
 // right = playerB (申告すると A/left 側の選曲がランダム化)
 const strategyDeclaredByLeft = ref(false);
 const strategyDeclaredByRight = ref(false);
+/**
+ * 相殺 (両者が Strategy Card を発動)。サーバの {@code strategyCanceled} をそのまま持つ。
+ * true のときは双方の曲が置き換わらないので、スピンを回さず「相殺」表示で演出を締める。
+ */
+const strategyCanceled = ref(false);
 
 /**
  * 「abandoned (original) pick」と「actual played (effective) pick」を別々に保持する。
@@ -328,9 +339,11 @@ const effectiveRightSong = ref<SongDataEntry | null>(null);
  * 「affected 側」= 相手が Strategy Card を申告した側。スピンアニメの対象。
  * affectingLeft = 右 (B) が申告 → 左 (A) の曲がランダム化される
  * affectingRight = 左 (A) が申告 → 右 (B) の曲がランダム化される
+ *
+ * 相殺時はどちらの曲も置き換わらないので、両方 false = スピン対象なし になる。
  */
-const affectingLeft = computed(() => strategyDeclaredByRight.value);
-const affectingRight = computed(() => strategyDeclaredByLeft.value);
+const affectingLeft = computed(() => !strategyCanceled.value && strategyDeclaredByRight.value);
+const affectingRight = computed(() => !strategyCanceled.value && strategyDeclaredByLeft.value);
 
 /**
  * スピン用プール構築コンテキスト。各 affected 側ごとに「自分の pick のジャンル」と
@@ -354,6 +367,12 @@ const spinBurstLeft = ref(false);
 const spinBurstRight = ref(false);
 /** step 3 前半: 「⚡ STRATEGY CARD ⚡」全画面演出表示中 (約 1.8 秒)。 */
 const strategyOverlayActive = ref(false);
+/**
+ * step 3 後半 (相殺時のみ): 「相殺 / CANCELED」全画面演出表示中。
+ * 通常はここでスピンが回るが、相殺の試合は抽選が無いのでこのオーバーレイが代わりを務める。
+ * クリックで閉じると、左右に出たままの自選曲がそのまま最終結果になる。
+ */
+const strategyCancelOverlayActive = ref(false);
 let spinTimers: number[] = [];
 
 let stageTimers: number[] = [];
@@ -418,7 +437,20 @@ const onReveal = () => {
       strategyOverlayActive.value = false;
       // 低域ドゥンでオーバーレイから抽選へバトンタッチ
       se.play('whoosh3');
-      startStrategySpins();
+      if (strategyCanceled.value) {
+        // 相殺: 抽選が発生しないのでスピンは回さず、「相殺」オーバーレイに切り替える。
+        // 画面の左右には既に自選曲が出たままなので、次のクリックでこれを消せば結果表示に戻る。
+        strategyCancelOverlayActive.value = true;
+        se.play('impact');
+      } else {
+        startStrategySpins();
+      }
+      return;
+    }
+    // 相殺オーバーレイ表示中のクリック → オーバーレイを畳んで自選曲 (= 実際の演奏曲) を見せる。
+    if (strategyCancelOverlayActive.value) {
+      strategyCancelOverlayActive.value = false;
+      se.play('ui');
     }
     return;
   }
@@ -525,6 +557,7 @@ const reset = () => {
   rightStage.value = { burst: false, title: false, artist: false, diffBadge: false };
   strategyDeclaredByLeft.value = false;
   strategyDeclaredByRight.value = false;
+  strategyCanceled.value = false;
   effectiveLeftSong.value = null;
   effectiveRightSong.value = null;
   spinningLeft.value = false;
@@ -536,6 +569,7 @@ const reset = () => {
   spinContextLeft.value = null;
   spinContextRight.value = null;
   strategyOverlayActive.value = false;
+  strategyCancelOverlayActive.value = false;
 };
 
 /**
@@ -1060,6 +1094,7 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
                 <span v-else class="text-rose-400">B: 未提出</span>
                 <span v-if="m.playerAStrategyUsed" class="text-fuchsia-300">⚡ A 発動</span>
                 <span v-if="m.playerBStrategyUsed" class="text-fuchsia-300">⚡ B 発動</span>
+                <span v-if="m.strategyCanceled" class="text-rose-300">相殺 (自選曲のまま)</span>
               </div>
             </li>
           </ul>
@@ -1300,6 +1335,40 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
               <span class="text-amber-300">{{ rightPlayer }}</span>
               <span class="text-slate-300 mx-2">の申告</span>
               <span class="text-rose-300 text-base">→ {{ leftPlayer }} の選曲がランダム化</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!--
+        相殺演出オーバーレイ。両者が Strategy Card を発動した試合では抽選そのものが発生しないため、
+        スピンの代わりにこれを出して「双方無効 = 自選曲のまま」を宣言する。
+        クリックで閉じると、左右に表示されたままの自選曲がそのまま最終結果になる。
+      -->
+      <div
+        v-if="strategyCancelOverlayActive"
+        class="absolute inset-0 z-50 flex items-center justify-center pointer-events-none strategy-overlay-fade"
+      >
+        <div class="absolute inset-0 bg-black/90"></div>
+        <div class="relative text-center px-8 py-10 space-y-6 max-w-3xl">
+          <p class="text-xs sm:text-sm font-mono uppercase tracking-[0.6em] text-slate-300 strategy-flicker-cancel">
+            ⚡ Both Declared ⚡
+          </p>
+          <h2 class="text-5xl sm:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-200 via-rose-300 to-slate-200 drop-shadow-[0_0_12px_rgba(248,113,113,0.5)] strategy-pop">
+            相 殺
+          </h2>
+          <p class="text-base sm:text-xl font-mono uppercase tracking-[0.35em] text-rose-300 strategy-fade-in" style="animation-delay: 0.4s">
+            CANCELED
+          </p>
+          <div class="space-y-2 strategy-fade-in" style="animation-delay: 0.8s">
+            <p class="text-2xl sm:text-3xl font-black">
+              <span class="text-cyan-300">{{ leftPlayer }}</span>
+              <span class="text-slate-300 mx-2">と</span>
+              <span class="text-amber-300">{{ rightPlayer }}</span>
+              <span class="text-slate-300 ml-2">の申告が打ち消し合った</span>
+            </p>
+            <p class="text-lg sm:text-2xl font-black text-emerald-300">
+              両者とも自選曲のまま演奏
             </p>
           </div>
         </div>
@@ -1568,6 +1637,18 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
 }
 .strategy-flicker {
   animation: strategyFlickerKf 1.6s ease-in-out infinite;
+}
+
+/* 相殺オーバーレイ用。明滅の作りは strategy-flicker と同じで、グローだけ琥珀 → 淡い赤に振る
+   (「発動が打ち消された」side なので、発動側の琥珀とは別色にして混同を避ける)。 */
+@keyframes strategyFlickerCancelKf {
+  0%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(248, 113, 113, 0.45), 0 0 16px rgba(248, 113, 113, 0.25); }
+  45%      { opacity: 0.6; text-shadow: 0 0 4px rgba(248, 113, 113, 0.2); }
+  50%      { opacity: 1;   text-shadow: 0 0 12px rgba(248, 113, 113, 0.55), 0 0 22px rgba(248, 113, 113, 0.35); }
+  55%      { opacity: 0.6; text-shadow: 0 0 4px rgba(248, 113, 113, 0.2); }
+}
+.strategy-flicker-cancel {
+  animation: strategyFlickerCancelKf 1.6s ease-in-out infinite;
 }
 
 @keyframes strategyFadeInKf {

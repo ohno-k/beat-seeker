@@ -204,9 +204,14 @@ export interface CompetitionRevealMatch {
   playerBPick: CompetitionRevealPick | null;
   playerAStrategyUsed: boolean;
   playerBStrategyUsed: boolean;
-  /** A 側申告時の抽選結果 = B 側が演奏する曲。 */
+  /**
+   * 相殺フラグ。A/B 双方が発動した試合は StrategyCard が打ち消し合い、両者とも自選曲を演奏する。
+   * true の間はサーバが抽選を行わないため playerXStrategyResult も常に null で返る。
+   */
+  strategyCanceled: boolean;
+  /** A 側申告時の抽選結果 = B 側が演奏する曲。相殺時は null。 */
   playerAStrategyResult: CompetitionStrategyResult | null;
-  /** B 側申告時の抽選結果 = A 側が演奏する曲。 */
+  /** B 側申告時の抽選結果 = A 側が演奏する曲。相殺時は null。 */
   playerBStrategyResult: CompetitionStrategyResult | null;
 }
 
