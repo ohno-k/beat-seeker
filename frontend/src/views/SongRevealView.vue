@@ -1437,9 +1437,6 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
               <span class="text-slate-300 mx-2">vs</span>
               <span class="text-amber-300">{{ rightPlayer }}</span>
             </p>
-            <p class="text-lg sm:text-2xl font-black text-emerald-300">
-              両者とも自選曲のまま演奏
-            </p>
           </div>
         </div>
       </div>
