@@ -395,6 +395,12 @@ const strategyOverlayActive = ref(false);
  * クリックで閉じると、左右に出たままの自選曲がそのまま最終結果になる。
  */
 const strategyCancelOverlayActive = ref(false);
+/**
+ * step 3 (ストラテジー非発動時のみ): 「READY!!」全画面演出表示中。
+ * どちらも Strategy Card を申告していない試合は ⚡ 演出も抽選も無いので、
+ * 相殺と同じ流れ (クリックでオーバーレイ → クリックで閉じて自選曲が最終結果) で締める。
+ */
+const strategyReadyOverlayActive = ref(false);
 let spinTimers: number[] = [];
 
 let stageTimers: number[] = [];
@@ -443,12 +449,17 @@ const onReveal = () => {
     return;
   }
   if (revealStep.value === 2) {
-    // クリック → Strategy 申告があれば演出オーバーレイ表示 (step 3 へ)。無ければ何もしない。
+    // クリック → Strategy 申告があれば ⚡ 演出オーバーレイ表示 (step 3 へ)。
+    revealStep.value = 3;
     if (strategyDeclaredByLeft.value || strategyDeclaredByRight.value) {
-      revealStep.value = 3;
       strategyOverlayActive.value = true;
       // 長尺ホワーシュでオーバーレイ突入を盛り上げる
       se.play('whoosh');
+    } else {
+      // 申告無し: ⚡ 演出も抽選も発生しないので、相殺と同じ要領で「READY!!」を出して締める。
+      strategyReadyOverlayActive.value = true;
+      se.play('whoosh3');
+      se.play('impact');
     }
     return;
   }
@@ -472,6 +483,12 @@ const onReveal = () => {
     // 相殺オーバーレイ表示中のクリック → オーバーレイを畳んで自選曲 (= 実際の演奏曲) を見せる。
     if (strategyCancelOverlayActive.value) {
       strategyCancelOverlayActive.value = false;
+      se.play('ui');
+      return;
+    }
+    // READY!! オーバーレイ表示中のクリック → 同様に畳んで自選曲を見せる。
+    if (strategyReadyOverlayActive.value) {
+      strategyReadyOverlayActive.value = false;
       se.play('ui');
     }
     return;
@@ -592,6 +609,7 @@ const reset = () => {
   spinContextRight.value = null;
   strategyOverlayActive.value = false;
   strategyCancelOverlayActive.value = false;
+  strategyReadyOverlayActive.value = false;
 };
 
 /**
@@ -1388,6 +1406,36 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
               <span class="text-slate-300 mx-2">と</span>
               <span class="text-amber-300">{{ rightPlayer }}</span>
               <span class="text-slate-300 ml-2">の申告が打ち消し合った</span>
+            </p>
+            <p class="text-lg sm:text-2xl font-black text-emerald-300">
+              両者とも自選曲のまま演奏
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!--
+        READY 演出オーバーレイ。どちらも Strategy Card を申告していない試合は ⚡ 演出も抽選も無いので、
+        相殺と同じ流れでこれを出して「自選曲のまま演奏開始」を宣言する。
+        クリックで閉じると、左右に表示されたままの自選曲がそのまま最終結果になる。
+      -->
+      <div
+        v-if="strategyReadyOverlayActive"
+        class="absolute inset-0 z-50 flex items-center justify-center pointer-events-none strategy-overlay-fade"
+      >
+        <div class="absolute inset-0 bg-black/90"></div>
+        <div class="relative text-center px-8 py-10 space-y-6 max-w-3xl">
+          <p class="text-xs sm:text-sm font-mono uppercase tracking-[0.6em] text-slate-300 strategy-flicker-cancel">
+            ⚡ No Strategy ⚡
+          </p>
+          <h2 class="text-5xl sm:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 via-cyan-200 to-emerald-200 drop-shadow-[0_0_12px_rgba(52,211,153,0.5)] strategy-pop">
+            READY!!
+          </h2>
+          <div class="space-y-2 strategy-fade-in" style="animation-delay: 0.8s">
+            <p class="text-2xl sm:text-3xl font-black">
+              <span class="text-cyan-300">{{ leftPlayer }}</span>
+              <span class="text-slate-300 mx-2">vs</span>
+              <span class="text-amber-300">{{ rightPlayer }}</span>
             </p>
             <p class="text-lg sm:text-2xl font-black text-emerald-300">
               両者とも自選曲のまま演奏

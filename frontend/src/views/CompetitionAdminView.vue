@@ -3617,33 +3617,39 @@ const statusColor = (s: string) => ({
       更新 FAB: 観戦ページと同じく右下に固定追従させる。運営は大会詳細を開いている間つねに
       押せる必要があるので個々のセクションではなくルート直下に置き、iOS のホームバーに
       被らないよう safe-area ぶん底を空ける。
+
+      body へ Teleport しているのは、App.vue 側でこの View を包む .animate-fade-in が
+      `animation: fadeIn ... forwards` で transform を残し続け、包含ブロックになってしまうため。
+      そのままだと fixed がビューポートではなく管理画面ブロック基準になり追従しない。
     -->
-    <button
-      v-if="isOrganizer && currentCompetition"
-      type="button"
-      aria-label="最新の状況に更新"
-      :disabled="isRefreshingAll"
-      @click="handleRefreshAll"
-      title="提出状況・アサイン・ジャンル・試合結果・順位表・運営チャットをまとめて最新化します"
-      class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))] flex items-center gap-1.5 pl-4 pr-5 py-3 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-60 text-white text-sm font-bold transition-all"
-    >
-      <svg
-        aria-hidden="true"
-        class="h-5 w-5"
-        :class="isRefreshingAll ? 'animate-spin' : ''"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
+    <Teleport to="body">
+      <button
+        v-if="isOrganizer && currentCompetition"
+        type="button"
+        aria-label="最新の状況に更新"
+        :disabled="isRefreshingAll"
+        @click="handleRefreshAll"
+        title="提出状況・アサイン・ジャンル・試合結果・順位表・運営チャットをまとめて最新化します"
+        class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))] flex items-center gap-1.5 pl-4 pr-5 py-3 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-60 text-white text-sm font-bold transition-all"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-        />
-      </svg>
-      {{ isRefreshingAll ? '更新中' : '更新' }}
-    </button>
+        <svg
+          aria-hidden="true"
+          class="h-5 w-5"
+          :class="isRefreshingAll ? 'animate-spin' : ''"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        {{ isRefreshingAll ? '更新中' : '更新' }}
+      </button>
+    </Teleport>
 
     <!-- 楽曲選択モーダル (個人戦の試合結果編集中のみアクティブ) -->
     <SongPickerModal
