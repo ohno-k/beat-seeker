@@ -33,6 +33,7 @@ import strategySongs from '../data/strategy_card_songs.json';
 import { useToast } from '../composables/useToast';
 import { useSe } from '../composables/useSe';
 import { KIND_LABEL_JA, LEVELS_FOR_KIND } from '../composables/competitionMatchKinds';
+import { buildChartIndex, resolveChartByTitle } from '../utils/songTitleMatch';
 
 const { songDataBody, fetchGameData } = useGameData();
 const { competitions, fetchCompetitions, fetchRevealData } = useCompetitionAdmin();
@@ -126,12 +127,38 @@ const handleSelectImportCompetition = async (compId: number) => {
 };
 
 /**
- * 競技 pick (タイトル + 難易度) を SongDataEntry に逆引きする。
- * difficulty: 'A' → '4' / 'L' → '10' でマッチング。見つからなければ null。
+ * 表記ゆれ吸収用の索引。song_data が読み込まれた / 差し替わったタイミングで作り直す。
+ * 全譜面をなめるので、pick 1 件ごとに作らず computed で共有する。
  */
-const resolveSongData = (pick: CompetitionRevealPick): SongDataEntry | null => {
+const chartIndex = computed(() => buildChartIndex(songDataBody.value));
+
+/**
+ * 競技 pick (タイトル + 難易度) を SongDataEntry に逆引きする。
+ * difficulty: 'A' → '4' / 'L' → '10' でマッチング。
+ *
+ * 楽曲プール (strategy_card_songs.json) と song_data はデータの出自が別で、
+ * 同じ曲でもタイトルの表記が食い違うものが 40 件強ある (Pārvatī / Parvati、ACTØ / ACT0 など)。
+ * 完全一致だけで引くと該当曲なし扱いになって REVEAL が再生できなくなるため、
+ * {@link resolveChartByTitle} で表記ゆれを吸収してから引く。
+ *
+ * それでも見つからない曲 (song_data 自体に無い曲 / LEGGENDARIA 譜面が未収録の曲) は、
+ * pick が持っているタイトル・Lv・難易度だけで表示用エントリを組み立てて演出を続行する。
+ * アーティスト名は出せないが、選曲発表そのものが止まるよりは望ましい。
+ */
+const resolveSongData = (pick: CompetitionRevealPick): SongDataEntry => {
   const targetDiff = pick.songDiff === 'L' ? '10' : '4';
-  return songDataBody.value.find(s => s.title === pick.songTitle && s.difficulty === targetDiff) ?? null;
+  const hit = resolveChartByTitle(songDataBody.value, chartIndex.value, pick.songTitle, targetDiff);
+  if (hit) return hit;
+  console.warn(`[SongReveal] SongData に「${pick.songTitle}」(${pick.songDiff}) が見つかりません。pick の情報だけで表示します`);
+  return {
+    title: pick.songTitle,
+    artist: '',
+    genre: '',
+    notes: 0,
+    bpm: '',
+    difficulty: targetDiff,
+    level: pick.songLevel,
+  };
 };
 
 /**
@@ -217,11 +244,6 @@ const handleApplyMatchToReveal = (match: CompetitionRevealMatch) => {
   }
   const songEffectiveA = resolveSongData(effectiveA);
   const songEffectiveB = resolveSongData(effectiveB);
-
-  if (!songOriginalA || !songOriginalB || !songEffectiveA || !songEffectiveB) {
-    notify('SongData に該当曲が見つかりません');
-    return;
-  }
 
   leftPlayer.value = match.playerAName;
   rightPlayer.value = match.playerBName;

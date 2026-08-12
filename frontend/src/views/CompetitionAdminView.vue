@@ -463,9 +463,10 @@ const matchupTotals = computed<Record<number, MatchupTotal>>(() => {
 const handleGenreChange = async (match: CompetitionMatchDto, raw: string) => {
   if (!currentCompetition.value) return;
   const genre = raw === '' ? null : (raw as CompetitionSongGenre);
-  // INSANE × 非 captain の組み合わせはサーバが拒否するが、UI 側でも先回りで止める
-  if (genre === 'INSANE' && match.matchKind !== 'captain') {
-    toast.error('INSANE は大将戦のみ指定できます');
+  // INSANE プールは Lv12 しか無いので、Lv12 の戦以外はサーバが拒否する。UI 側でも先回りで止める。
+  // (判定を 'captain' 決め打ちにすると、同じ Lv12 の決勝の三将戦・副将戦まで弾いてしまう)
+  if (genre === 'INSANE' && !isLevel12Only(match.matchKind)) {
+    toast.error('INSANE は Lv12 の戦にのみ指定できます');
     return;
   }
   try {
@@ -2389,13 +2390,6 @@ const statusColor = (s: string) => ({
             <h2 class="text-sm font-bold text-slate-500">
               対戦表 (設定済み {{ configuredMatchups.length }} / 全 {{ currentCompetition.matchups.length }} 組)
             </h2>
-            <button
-              type="button"
-              @click="handleRefreshAll"
-              :disabled="isRefreshingAll"
-              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 disabled:opacity-50"
-              title="提出状況・アサイン・ジャンル・試合結果・順位表・運営チャットをまとめて最新化します"
-            >{{ isRefreshingAll ? '更新中…' : '🔄 最新の状況に更新' }}</button>
           </div>
           <p class="text-[11px] text-slate-500 leading-relaxed">
             下の「未設定の組み合わせ」から実施する対戦を 1 つずつ選んで設定します。設定した順に第 1・第 2 … 試合として並び、<b>設定済みの対戦だけがプレイヤー / TL に公開</b>されます。<br />
@@ -3618,6 +3612,38 @@ const statusColor = (s: string) => ({
         <!-- ────────── /individual4 専用セクション群 ────────── -->
       </div>
     </template>
+
+    <!--
+      更新 FAB: 観戦ページと同じく右下に固定追従させる。運営は大会詳細を開いている間つねに
+      押せる必要があるので個々のセクションではなくルート直下に置き、iOS のホームバーに
+      被らないよう safe-area ぶん底を空ける。
+    -->
+    <button
+      v-if="isOrganizer && currentCompetition"
+      type="button"
+      aria-label="最新の状況に更新"
+      :disabled="isRefreshingAll"
+      @click="handleRefreshAll"
+      title="提出状況・アサイン・ジャンル・試合結果・順位表・運営チャットをまとめて最新化します"
+      class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))] flex items-center gap-1.5 pl-4 pr-5 py-3 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-60 text-white text-sm font-bold transition-all"
+    >
+      <svg
+        aria-hidden="true"
+        class="h-5 w-5"
+        :class="isRefreshingAll ? 'animate-spin' : ''"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        />
+      </svg>
+      {{ isRefreshingAll ? '更新中' : '更新' }}
+    </button>
 
     <!-- 楽曲選択モーダル (個人戦の試合結果編集中のみアクティブ) -->
     <SongPickerModal

@@ -103,8 +103,12 @@ const startEditing = (m: PlayerMatchDto) => {
     return;
   }
   editingMatchId.value = m.matchId;
-  // Lv が一意の戦 (middle / captain) は自動セット
-  editingLevel.value = m.matchKind === 'middle' ? 11 : m.matchKind === 'captain' ? 12 : null;
+  // Lv 帯が 1 つしかない戦 (次鋒 10 / 五将・中堅 11 / 三将・副将・大将 12) は選ばせる意味が
+  // 無いので自動セットする。ここを戦種別の直書きにしていると、決勝でしか出てこない戦
+  // (次鋒・五将・三将・副将) が漏れて Lv 未選択のまま曲リストが出ない (= 選べる曲が無い) 状態になる。
+  // Lv 帯が複数ある先鋒だけ null にして Step 1 の Lv 選択 UI を出す。
+  const levels = levelsForMatch(m);
+  editingLevel.value = levels.length === 1 ? levels[0] : null;
   directIdInput.value = '';
 };
 const cancelEditing = () => {
@@ -115,12 +119,16 @@ const cancelEditing = () => {
 
 const hasGenreLevel = (genre: SongGenre, level: number): boolean => !!songs[genre]?.[String(level)]?.length;
 
+/** その試合の (戦種別 × 指定ジャンル) で実際に曲がある Lv 群。ジャンル未指定なら空。 */
+const levelsForMatch = (m: PlayerMatchDto): number[] => {
+  if (!m.requiredGenre) return [];
+  return LEVELS_FOR_KIND[m.matchKind].filter(lv => hasGenreLevel(m.requiredGenre!, lv));
+};
+
 /** 編集中の (戦 × ジャンル) で実際に曲がある Lv 群。 */
-const availableLevels = computed<number[]>(() => {
-  if (!editingMatch.value || !editingMatch.value.requiredGenre) return [];
-  return LEVELS_FOR_KIND[editingMatch.value.matchKind]
-    .filter(lv => hasGenreLevel(editingMatch.value!.requiredGenre!, lv));
-});
+const availableLevels = computed<number[]>(() =>
+  editingMatch.value ? levelsForMatch(editingMatch.value) : [],
+);
 
 const availableSongs = computed<Song[]>(() => {
   if (!editingMatch.value || !editingMatch.value.requiredGenre || editingLevel.value === null) return [];
