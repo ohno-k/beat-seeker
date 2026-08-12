@@ -1101,6 +1101,206 @@ const handleGenerateFinals = async () => {
   }
 };
 
+// ── 個人成績 (選手ごとの曲単位成績) ───────────────────────
+/**
+ * 選手 1 人が演奏した曲 1 曲ぶんの記録。1 戦 = 2 曲制なので、起用された 1 戦につき 2 行できる。
+ *
+ * 「1 戦で演奏される 2 曲」は song1 = A 側が持ち込んだ曲 / song2 = B 側が持ち込んだ曲という
+ * 定義だが、両者が両曲を叩くので、どちらの選手にも 2 曲ぶんの行を作る。
+ */
+interface PersonalSongRow {
+  matchId: number;
+  /** 所属 matchup の表示順 (決勝は matchupOrder を持たないので isFinals で区別する)。 */
+  matchupOrder: number;
+  isFinals: boolean;
+  kind: MatchKind;
+  /** 1 = A 側持ち込みの曲 / 2 = B 側持ち込みの曲。 */
+  slot: 1 | 2;
+  /** 曲名 ({@link autoSongsOf} の導出結果。未決定なら null)。 */
+  title: string | null;
+  /** この選手のスコア / 対戦相手のスコア。どちらか欠けていれば未記録扱い。 */
+  ownScore: number | null;
+  oppScore: number | null;
+  opponentName: string;
+  opponentTeamName: string;
+  /** 勝敗。null = 未記録 (スコアが揃っていない)。 */
+  result: 'win' | 'draw' | 'lose' | null;
+  /** この曲で獲得した戦ポイント (勝ち / 引分なら戦ptが入る)。 */
+  points: number;
+}
+
+/** 選手 1 人ぶんの集計行。{@link PersonalSongRow} を畳んだもの。 */
+interface PersonalStatsRow {
+  participantId: number;
+  displayName: string;
+  teamName: string;
+  isTl: boolean;
+  /** 順位 (獲得pt 降順。同 pt・同勝ち数は同順位)。 */
+  rank: number;
+  /** 曲単位の勝 / 分 / 敗 (記録済みの曲のみ)。 */
+  wins: number;
+  draws: number;
+  losses: number;
+  /** 獲得pt 合計 (勝った曲 + 引分の曲 × その戦の 1 曲あたりpt)。 */
+  points: number;
+  /** 記録済みの曲数 / 起用された戦数。 */
+  recordedSongs: number;
+  assignedMatches: number;
+  songs: PersonalSongRow[];
+}
+
+/**
+ * 選手ごとの曲単位成績を集計する。
+ *
+ * 勝敗とptの規則はサーバの結果記録 (setMatchResult) / 順位表
+ * (CompetitionTeamStandingsService) と揃えている:
+ *  - スコアが両側揃っている曲だけ集計対象 (片方欠けている曲は未記録)
+ *  - 同スコアの曲は「両者の勝ち」として扱い、双方に戦ptが入る
+ *  - 獲得pt = 勝った曲数 × その戦の 1 曲あたりpt (予選 先鋒2/中堅3/大将4、決勝は別表)
+ *
+ * つまり 1 チームの全選手の獲得ptを足すと、そのチームの戦pt (予選ぶん) と一致する。
+ */
+const personalStats = computed<PersonalStatsRow[]>(() => {
+  const comp = currentCompetition.value;
+  if (!comp || comp.format === 'individual4') return [];
+
+  const rows = new Map<number, PersonalStatsRow>();
+  for (const p of comp.participants) {
+    rows.set(p.id, {
+      participantId: p.id,
+      displayName: p.displayName,
+      teamName: teamNameOf(p.teamId),
+      isTl: p.isTl,
+      rank: 0,
+      wins: 0, draws: 0, losses: 0, points: 0,
+      recordedSongs: 0, assignedMatches: 0,
+      songs: [],
+    });
+  }
+
+  for (const m of comp.matches ?? []) {
+    const mu = comp.matchups?.find(x => x.id === m.matchupId);
+    if (!mu) continue;
+    // 曲名は結果記録 UI と同じ導出 (手動指定 → 抽選曲 → 自選曲 → 記録値) を使う。
+    const auto = autoSongsOf(m);
+    const pt = pointsPerSong(m.matchKind, mu.isFinals);
+    const slots = [
+      { slot: 1 as const, title: auto.song1.title, scoreA: m.song1ScoreA, scoreB: m.song1ScoreB },
+      { slot: 2 as const, title: auto.song2.title, scoreA: m.song2ScoreA, scoreB: m.song2ScoreB },
+    ];
+    for (const side of ['a', 'b'] as const) {
+      const participantId = side === 'a' ? m.playerAId : m.playerBId;
+      if (participantId === null) continue;
+      const row = rows.get(participantId);
+      if (!row) continue; // 参加者が削除済みなど (通常は起こらない)
+      row.assignedMatches++;
+      const opponentId = side === 'a' ? m.playerBId : m.playerAId;
+      const opponentTeamId = side === 'a' ? mu.teamBId : mu.teamAId;
+      for (const s of slots) {
+        const ownScore = side === 'a' ? s.scoreA : s.scoreB;
+        const oppScore = side === 'a' ? s.scoreB : s.scoreA;
+        let result: PersonalSongRow['result'] = null;
+        let earned = 0;
+        if (ownScore !== null && oppScore !== null) {
+          result = ownScore > oppScore ? 'win' : ownScore < oppScore ? 'lose' : 'draw';
+          row.recordedSongs++;
+          if (result === 'win') row.wins++;
+          else if (result === 'draw') row.draws++;
+          else row.losses++;
+          // 引分は両者の勝ち扱いなので pt が入る (サーバの aSongsWon / bSongsWon と同じ)。
+          if (result !== 'lose') earned = pt;
+          row.points += earned;
+        }
+        row.songs.push({
+          matchId: m.id,
+          matchupOrder: mu.matchupOrder,
+          isFinals: mu.isFinals,
+          kind: m.matchKind,
+          slot: s.slot,
+          title: s.title,
+          ownScore,
+          oppScore,
+          opponentName: participantNameOf(opponentId),
+          opponentTeamName: teamNameOf(opponentTeamId),
+          result,
+          points: earned,
+        });
+      }
+    }
+  }
+
+  const out = [...rows.values()];
+  // 詳細は 予選 → 決勝、matchup 順 → 先鋒〜大将 → 曲順 に並べる。
+  for (const r of out) {
+    r.songs.sort((x, y) =>
+      Number(x.isFinals) - Number(y.isFinals)
+      || x.matchupOrder - y.matchupOrder
+      || kindOrder(x.kind) - kindOrder(y.kind)
+      || x.slot - y.slot);
+  }
+  // 並び: 獲得pt 降順 → 勝ち曲数 降順 → 表示名。順位は pt + 勝ち数が同じなら同順位にする。
+  out.sort((x, y) =>
+    y.points - x.points
+    || y.wins - x.wins
+    || x.displayName.localeCompare(y.displayName, 'ja'));
+  let rank = 0;
+  let prevKey = '';
+  out.forEach((r, i) => {
+    const key = `${r.points}/${r.wins}`;
+    if (key !== prevKey) {
+      rank = i + 1;
+      prevKey = key;
+    }
+    r.rank = rank;
+  });
+  return out;
+});
+
+/** 個人成績セクションの見出しに出す「記録済み曲数」(選手視点の重複を除いた実曲数)。 */
+const personalRecordedSongCount = computed<number>(() => {
+  let n = 0;
+  for (const m of currentCompetition.value?.matches ?? []) {
+    if (m.song1ScoreA !== null && m.song1ScoreB !== null) n++;
+    if (m.song2ScoreA !== null && m.song2ScoreB !== null) n++;
+  }
+  return n;
+});
+
+/** 詳細 (曲ごとのスコア) を開いている選手の ID。複数人ぶん同時に開ける。 */
+const expandedPersonalIds = ref<number[]>([]);
+const isPersonalExpanded = (participantId: number): boolean =>
+  expandedPersonalIds.value.includes(participantId);
+const togglePersonalDetail = (participantId: number) => {
+  expandedPersonalIds.value = isPersonalExpanded(participantId)
+    ? expandedPersonalIds.value.filter(id => id !== participantId)
+    : [...expandedPersonalIds.value, participantId];
+};
+/** 全員ぶん開いているか (「すべて開く / 閉じる」ボタンのラベル判定)。 */
+const allPersonalExpanded = computed<boolean>(() =>
+  personalStats.value.length > 0
+  && personalStats.value.every(r => isPersonalExpanded(r.participantId)));
+const toggleAllPersonalDetails = () => {
+  expandedPersonalIds.value = allPersonalExpanded.value
+    ? []
+    : personalStats.value.map(r => r.participantId);
+};
+
+/** 曲行の勝敗ラベル (未記録は「-」)。 */
+const personalResultLabel = (result: PersonalSongRow['result']): string => {
+  if (result === 'win') return '○';
+  if (result === 'lose') return '×';
+  if (result === 'draw') return '△';
+  return '-';
+};
+
+/** 曲行の勝敗の配色。順位表のマトリクスと同じ配色ルールに揃えている。 */
+const personalResultClass = (result: PersonalSongRow['result']): string => {
+  if (result === 'win') return 'text-emerald-600 dark:text-emerald-300';
+  if (result === 'lose') return 'text-rose-500 dark:text-rose-400';
+  if (result === 'draw') return 'text-amber-600 dark:text-amber-300';
+  return 'text-slate-400';
+};
+
 // ── 個人戦 (individual4) ───────────────────────────────────
 
 /** 個人戦の参加者追加フォームの入力値。 */
@@ -2179,6 +2379,134 @@ const statusColor = (s: string) => ({
                     {{ teamMatchupPoints(rowTeam.id) }}
                   </td>
                 </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!--
+          個人成績: 選手ごとに「曲単位の勝敗」と「獲得pt」を集計。行を開くと 1 曲ずつの詳細スコアが出る。
+          集計は結果記録済みのスコアからクライアント側で導出するので、結果を保存すれば即座に反映される。
+        -->
+        <section
+          v-if="currentCompetition.status !== 'draft' && personalStats.length > 0"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-sm font-bold text-slate-500">
+              個人成績 ({{ personalRecordedSongCount }} 曲 記録済)
+            </h2>
+            <button
+              type="button"
+              @click="toggleAllPersonalDetails"
+              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+            >{{ allPersonalExpanded ? '▲ すべて閉じる' : '▼ すべて開く' }}</button>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            曲単位の勝敗と獲得pt (予選 + 決勝の合計)。1 戦 = 2 曲制で<b>両者が両曲を叩く</b>ため、1 戦につき 2 曲ぶん記録されます。
+            同スコアの曲は両者の勝ちとして扱い双方にptが入ります (順位表と同じ規則)。
+            獲得pt = 勝った曲数 × その戦の 1 曲あたりpt (予選: 先鋒2 / 中堅3 / 大将4)。
+            選手行をクリックすると 1 曲ごとの詳細スコアを開けます。
+          </p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                  <th class="text-left py-1 px-2">順位</th>
+                  <th class="text-left py-1 px-2">選手</th>
+                  <th class="text-left py-1 px-2">チーム</th>
+                  <th class="text-right py-1 px-2">勝</th>
+                  <th class="text-right py-1 px-2">分</th>
+                  <th class="text-right py-1 px-2">負</th>
+                  <th class="text-right py-1 px-2 font-bold text-slate-700 dark:text-slate-200">獲得pt</th>
+                  <th class="text-right py-1 px-2">起用</th>
+                  <th class="py-1 px-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="row in personalStats" :key="row.participantId">
+                  <tr
+                    class="border-b border-slate-100 dark:border-slate-700/60 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/40"
+                    @click="togglePersonalDetail(row.participantId)"
+                  >
+                    <td class="py-1.5 px-2 tabular-nums text-slate-500">{{ row.rank }}</td>
+                    <td class="py-1.5 px-2 font-bold truncate">
+                      {{ row.displayName }}
+                      <span v-if="row.isTl" class="ml-1 text-[10px] font-bold text-amber-600 dark:text-amber-300">TL</span>
+                    </td>
+                    <td class="py-1.5 px-2 truncate text-xs" :class="teamColorClass(row.teamName)">{{ row.teamName }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums text-emerald-600 dark:text-emerald-300">{{ row.wins }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums text-slate-500">{{ row.draws }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums text-rose-500 dark:text-rose-400">{{ row.losses }}</td>
+                    <td class="py-1.5 px-2 text-right tabular-nums font-bold text-base">{{ row.points }}</td>
+                    <!-- 起用: 起用された戦数と、そのうち何曲ぶんスコアが記録済みか (1 戦 = 2 曲)。 -->
+                    <td class="py-1.5 px-2 text-right tabular-nums text-[11px] text-slate-500 whitespace-nowrap">
+                      {{ row.assignedMatches }} 戦
+                      <span class="text-slate-400">({{ row.recordedSongs }}/{{ row.assignedMatches * 2 }} 曲)</span>
+                    </td>
+                    <td class="py-1.5 px-2 text-right text-slate-400 text-[10px]">
+                      {{ isPersonalExpanded(row.participantId) ? '▲' : '▼' }}
+                    </td>
+                  </tr>
+                  <!-- 折り畳み: 1 曲ごとの詳細スコア。未記録の曲も「-」で並べて残り試合が分かるようにする。 -->
+                  <tr v-if="isPersonalExpanded(row.participantId)" class="border-b border-slate-100 dark:border-slate-700/60">
+                    <td colspan="9" class="py-2 px-2 bg-slate-50 dark:bg-slate-900/40">
+                      <p v-if="row.songs.length === 0" class="text-[11px] text-slate-500 px-2 py-1">
+                        まだ起用されていません。
+                      </p>
+                      <table v-else class="w-full text-xs">
+                        <thead>
+                          <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                            <th class="text-left py-1 px-2">試合</th>
+                            <th class="text-left py-1 px-2">戦</th>
+                            <th class="text-left py-1 px-2">曲</th>
+                            <th class="text-right py-1 px-2">自分</th>
+                            <th class="text-right py-1 px-2">相手</th>
+                            <th class="text-left py-1 px-2">対戦相手</th>
+                            <th class="text-center py-1 px-2">勝敗</th>
+                            <th class="text-right py-1 px-2">pt</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="song in row.songs"
+                            :key="`${song.matchId}-${song.slot}`"
+                            class="border-b border-slate-100/70 dark:border-slate-700/40"
+                          >
+                            <!-- 「未設定」= matchupOrder 未採番の matchup。起用だけ入っている場合に出る。 -->
+                            <td class="py-1 px-2 whitespace-nowrap text-slate-500">
+                              <span v-if="song.isFinals" class="text-amber-600 dark:text-amber-300 font-bold">🏆 決勝</span>
+                              <span v-else-if="song.matchupOrder > 0">第{{ song.matchupOrder }}試合</span>
+                              <span v-else class="text-slate-400">未設定</span>
+                            </td>
+                            <td class="py-1 px-2 whitespace-nowrap text-slate-500">{{ KIND_LABEL[song.kind] }}</td>
+                            <td class="py-1 px-2 max-w-[220px] truncate" :title="song.title ?? ''">
+                              <span v-if="song.title">{{ song.title }}</span>
+                              <span v-else class="text-slate-400">未決定</span>
+                              <span class="ml-1 text-[10px] text-slate-400">({{ song.slot }}曲目)</span>
+                            </td>
+                            <td class="py-1 px-2 text-right tabular-nums font-bold">
+                              {{ song.ownScore ?? '-' }}
+                            </td>
+                            <td class="py-1 px-2 text-right tabular-nums text-slate-500">
+                              {{ song.oppScore ?? '-' }}
+                            </td>
+                            <td class="py-1 px-2 truncate">
+                              {{ song.opponentName }}
+                              <span class="ml-1 text-[10px]" :class="teamColorClass(song.opponentTeamName)">{{ song.opponentTeamName }}</span>
+                            </td>
+                            <td class="py-1 px-2 text-center font-bold" :class="personalResultClass(song.result)">
+                              {{ personalResultLabel(song.result) }}
+                            </td>
+                            <td class="py-1 px-2 text-right tabular-nums" :class="song.points > 0 ? 'font-bold' : 'text-slate-400'">
+                              {{ song.points > 0 ? `+${song.points}` : '-' }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
