@@ -20,6 +20,7 @@ import java.util.*;
  *
  * <p>抽選は matchKind の Lv 帯 (先鋒=8-10, 次鋒=10, 五将/中堅=11, 三将/副将/大将=12) 全体から
  * ジャンル指定で 1 曲ランダムに返す。StrategyCardView の {@code buildSpinPool} と同じ仕様。
+ * ただし置き換え対象の自選曲は候補から除外する ({@code excludeSongStrategyId})。
  */
 @Component
 public class StrategyPoolService {
@@ -63,13 +64,20 @@ public class StrategyPoolService {
     }
 
     /**
-     * 【メソッドの役割】 指定ジャンル × matchKind の Lv 帯から 1 曲ランダム抽選する。
+     * 【メソッドの役割】 指定ジャンル × matchKind の Lv 帯から、指定曲を除いて 1 曲ランダム抽選する。
      *
-     * @param genre     'NOTES' / 'PEAK' / ... / 'INSANE'
-     * @param matchKind 'vanguard' / 'second' / 'fifth' / 'middle' / 'third' / 'vice' / 'captain'
+     * <p>StrategyCard は「相手の自選曲をランダムな別曲に差し替える」カードなので、
+     * 元々の自選曲 (= 置き換え対象の曲) を引いてしまうと発動しなかったのと同じになる。
+     * そのため {@code excludeSongStrategyId} に一致する曲は候補から外して抽選する。
+     * 除外した結果候補が 0 件になる場合 (Lv 帯にその 1 曲しか存在しない) のみ、
+     * 抽選不能を避けるため除外前の候補から引く。
+     *
+     * @param genre                 'NOTES' / 'PEAK' / ... / 'INSANE'
+     * @param matchKind             'vanguard' / 'second' / 'fifth' / 'middle' / 'third' / 'vice' / 'captain'
+     * @param excludeSongStrategyId 候補から除外する曲の管理番号 (元々の自選曲)。null なら除外なし
      * @return ランダムに選ばれた曲。プールが空 / 未知の genre or matchKind なら null
      */
-    public PoolSong drawRandom(String genre, String matchKind) {
+    public PoolSong drawRandom(String genre, String matchKind, Integer excludeSongStrategyId) {
         if (genre == null || matchKind == null) return null;
         Map<String, List<PoolSong>> byLevel = pool.get(genre);
         if (byLevel == null) return null;
@@ -81,6 +89,13 @@ public class StrategyPoolService {
             if (arr != null) candidates.addAll(arr);
         }
         if (candidates.isEmpty()) return null;
+        if (excludeSongStrategyId != null) {
+            List<PoolSong> filtered = new ArrayList<>(candidates.size());
+            for (PoolSong s : candidates) {
+                if (s.id != excludeSongStrategyId) filtered.add(s);
+            }
+            if (!filtered.isEmpty()) candidates = filtered;
+        }
         return candidates.get(random.nextInt(candidates.size()));
     }
 }

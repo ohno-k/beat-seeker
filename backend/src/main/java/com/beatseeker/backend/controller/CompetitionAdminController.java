@@ -469,6 +469,8 @@ public class CompetitionAdminController {
      * の自選曲がある場合に、その曲のジャンル × 戦の Lv 帯でプールから 1 曲引いて {@code su} に保存する。
      * 既に抽選済み (resultSong がある) の場合は何もしない (再抽選しない)。
      *
+     * <p>抽選候補からは元々の自選曲そのものを除外する (引いてしまうと発動しなかったのと同じになるため)。
+     *
      * @param su     発動側の StrategyUse (= 相手曲を置き換える側)。null/未発動なら何もしない。
      * @param match  対象試合 (Lv 帯の決定に matchKind を使う)。
      * @param victim ランダム化される側のプレイヤー (= su の使用者の相手)。
@@ -479,7 +481,8 @@ public class CompetitionAdminController {
         if (victim == null) return;
         CompetitionPick victimPick = pickRepository.findByMatchAndParticipant(match, victim).orElse(null);
         if (victimPick == null) return; // 相手の自選曲が未提出なら抽選保留
-        StrategyPoolService.PoolSong drawn = strategyPoolService.drawRandom(victimPick.getSongGenre(), match.getMatchKind());
+        StrategyPoolService.PoolSong drawn = strategyPoolService.drawRandom(
+                victimPick.getSongGenre(), match.getMatchKind(), victimPick.getSongStrategyId());
         if (drawn == null) return;
         su.setResultSongStrategyId(drawn.id);
         su.setResultSongTitle(drawn.title);
