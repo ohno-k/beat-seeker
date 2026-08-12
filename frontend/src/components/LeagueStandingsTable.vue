@@ -8,6 +8,7 @@
  * 曲別セルは「その週にラインを超えて有効になったリザルト」の EX と、その曲の着順・
  * 着順ポイントだけを出す（未達の自己ベストは競技結果ではないのでサーバー側で除去済み）。
  */
+import { computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
@@ -63,6 +64,15 @@ const roleBadge = (role: string | null | undefined) => {
   return null;
 };
 
+/**
+ * 有効曲数の分母（無効化された課題曲を除いた曲数）。
+ * 管理者が解禁不可能な曲を無効化した週は 3 曲ではなくなるため、曲リストから数える。
+ */
+const scoredSongCount = computed(() => {
+  const enabled = props.songs.filter(s => !s.disabled).length;
+  return props.songs.length ? enabled : 3;
+});
+
 /** 行の帯色（昇格圏 = 緑 / 降格圏 = 赤）。 */
 const zoneClass = (row: LeagueStandingRow) => {
   if (!props.showZone) return '';
@@ -83,9 +93,10 @@ const zoneClass = (row: LeagueStandingRow) => {
           <th class="py-2 pr-2 text-right">{{ t('league.leaguePoints') }}</th>
           <th class="py-2 pr-2 text-center">{{ t('league.points') }}</th>
           <th class="py-2 pr-1 text-center whitespace-nowrap" v-for="s in songs" :key="s.id"
-              :title="`${s.slot}. ${s.title}`">
-            {{ s.slot }}
-            <span class="font-normal text-[10px] text-slate-300 dark:text-slate-600">{{ t('league.songPoints') }}</span>
+              :title="s.disabled ? `${s.slot}. ${s.title}（${t('league.songDisabled')}）` : `${s.slot}. ${s.title}`">
+            <span :class="s.disabled ? 'line-through' : ''">{{ s.slot }}</span>
+            <span v-if="s.disabled" class="font-normal text-[10px] text-rose-500 dark:text-rose-400">{{ t('league.songDisabledShort') }}</span>
+            <span v-else class="font-normal text-[10px] text-slate-300 dark:text-slate-600">{{ t('league.songPoints') }}</span>
           </th>
         </tr>
       </thead>
@@ -108,7 +119,7 @@ const zoneClass = (row: LeagueStandingRow) => {
               <span v-if="row.userId === myUserId" class="text-[10px] text-indigo-500 dark:text-indigo-400">YOU</span>
             </span>
           </td>
-          <td class="py-2 pr-2 text-center">{{ row.validSongs }}/3</td>
+          <td class="py-2 pr-2 text-center">{{ row.validSongs }}/{{ scoredSongCount }}</td>
           <td class="py-2 pr-2 text-right tabular-nums">{{ fmtPts(row.resultValue) }}</td>
           <td class="py-2 pr-2 text-center tabular-nums whitespace-nowrap">
             <template v-if="row.points != null">
@@ -120,15 +131,22 @@ const zoneClass = (row: LeagueStandingRow) => {
           </td>
           <!-- 曲別セル: 有効になったリザルトの EX ＋ 着順とその曲の着順ポイント。 -->
           <td v-for="ps in row.perSong" :key="ps.slot" class="py-2 px-1 text-center text-xs tabular-nums whitespace-nowrap">
-            <div v-if="ps.valid && ps.bestEx != null && ps.bestEx > 0"
-                 class="font-semibold text-emerald-600 dark:text-emerald-400">
-              {{ ps.bestEx }}
-            </div>
-            <div v-else class="text-slate-300 dark:text-slate-600">–</div>
-            <div class="text-[10px] leading-tight text-slate-400 dark:text-slate-500">
-              <span v-if="ps.rank != null">{{ t('league.songRank', { n: ps.rank }) }} </span>
-              <span v-if="ps.points != null">{{ fmtPts(ps.points) }}{{ t('league.songPoints') }}</span>
-            </div>
+            <!-- 無効化された課題曲は集計対象外なので、記録も着順も出さない。 -->
+            <template v-if="ps.disabled">
+              <div class="text-slate-300 dark:text-slate-600">–</div>
+              <div class="text-[10px] leading-tight text-rose-400 dark:text-rose-500">{{ t('league.songDisabledShort') }}</div>
+            </template>
+            <template v-else>
+              <div v-if="ps.valid && ps.bestEx != null && ps.bestEx > 0"
+                   class="font-semibold text-emerald-600 dark:text-emerald-400">
+                {{ ps.bestEx }}
+              </div>
+              <div v-else class="text-slate-300 dark:text-slate-600">–</div>
+              <div class="text-[10px] leading-tight text-slate-400 dark:text-slate-500">
+                <span v-if="ps.rank != null">{{ t('league.songRank', { n: ps.rank }) }} </span>
+                <span v-if="ps.points != null">{{ fmtPts(ps.points) }}{{ t('league.songPoints') }}</span>
+              </div>
+            </template>
           </td>
         </tr>
       </tbody>

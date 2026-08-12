@@ -67,4 +67,20 @@ public class LeagueSong {
      */
     @Column(nullable = false)
     private Integer notes;
+
+    /**
+     * 無効化フラグ。true の課題曲は集計から外れる（有効曲に数えず、着順ポイントも配らない）。
+     *
+     * 現在解禁できない譜面が抽選で入ってしまった場合など、開催中でも差し替えられない
+     * （＝ラインが既に凍結済みの）状況で管理者が「この曲は無かったこと」にするために使う。
+     * 曲自体は残すので、順位表・課題曲一覧では「無効」表示のまま列が残る。
+     */
+    @Column(nullable = false)
+    @org.hibernate.annotations.ColumnDefault("false")
+    private Boolean disabled = false;
+
+    /** 無効化されているか（null は false 扱い）。 */
+    public boolean isDisabled() {
+        return Boolean.TRUE.equals(disabled);
+    }
 }

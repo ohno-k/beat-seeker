@@ -404,6 +404,8 @@ public class LeagueController {
         m.put("difficultyName", song.getDifficultyName());
         m.put("level", song.getLevel());
         m.put("notes", song.getNotes());
+        // 管理者が無効化した曲（解禁不可能な選曲など）。集計対象外だが列は残すのでフラグを返す。
+        m.put("disabled", song.isDisabled());
         return m;
     }
 

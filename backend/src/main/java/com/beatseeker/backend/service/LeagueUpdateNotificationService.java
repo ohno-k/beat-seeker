@@ -84,8 +84,11 @@ public class LeagueUpdateNotificationService {
         LeagueMember member = leagueMemberRepository.findByWeekAndUser(week, user).orElse(null);
         if (member == null) return; // 今週の参加者ではない
 
+        // 無効化された課題曲（管理者が集計対象から外した曲）は通知しない。
         List<LeagueSong> songs = leagueSongRepository
-                .findByWeekAndTierAndGroupIndexOrderBySlotAsc(week, member.getTier(), member.getGroupIndex());
+                .findByWeekAndTierAndGroupIndexOrderBySlotAsc(week, member.getTier(), member.getGroupIndex()).stream()
+                .filter(s -> !s.isDisabled())
+                .toList();
         if (songs.isEmpty()) return;
 
         // 今回の更新を (曲名|難易度) で引けるようにする。リーグはアーケード記録のみ見るので他ソースは除外。

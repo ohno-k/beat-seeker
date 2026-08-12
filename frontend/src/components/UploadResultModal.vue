@@ -161,7 +161,7 @@
                 </div>
                 <div class="bg-white dark:bg-slate-800/60 rounded-md p-3 text-center">
                   <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ t('league.validSongs') }}</p>
-                  <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 tabular-nums leading-tight">{{ leagueProgress.validSongs }}<span class="text-sm text-slate-400">/3</span></p>
+                  <p class="text-2xl font-bold text-slate-800 dark:text-slate-100 tabular-nums leading-tight">{{ leagueProgress.validSongs }}<span class="text-sm text-slate-400">/{{ leagueProgress.songCount }}</span></p>
                 </div>
                 <div class="bg-white dark:bg-slate-800/60 rounded-md p-3 text-center">
                   <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ t('league.leaguePoints') }}</p>
@@ -651,6 +651,8 @@ const leagueProgress = ref<null | {
   rank: number;
   groupSize: number;
   validSongs: number;
+  /** 集計対象の課題曲数（管理者が無効化した曲を除いた数。通常は 3）。 */
+  songCount: number;
   resultValue: number | null;
   projectedPoints: number;
   zone: 'promote' | 'stay' | 'relegate';
@@ -680,16 +682,21 @@ const loadLeagueProgress = async () => {
       updatedByChart.set(`${u.title}|${u.difficulty}`, u);
     }
 
+    // 管理者が無効化した課題曲（解禁不可能な選曲など）は集計対象外なので、この報告からも外す。
+    const allSongs = cur.songs || [];
+    const scoredSongs = allSongs.filter((s) => !s.disabled);
+
     leagueProgress.value = {
       tier: cur.member.tier,
       groupIndex: cur.member.groupIndex,
       rank: myRow.rank,
       groupSize: cur.standings.length,
       validSongs: myRow.validSongs,
+      songCount: allSongs.length ? scoredSongs.length : 3,
       resultValue: myRow.resultValue,
       projectedPoints: myRow.projectedPoints ?? 0,
       zone: myRow.zone,
-      songs: (cur.songs || []).map((s) => {
+      songs: scoredSongs.map((s) => {
         const ps = myRow.perSong?.find((p) => p.slot === s.slot);
         const up = updatedByChart.get(`${s.title}|${s.difficultyName}`);
         const valid = !!ps?.valid;

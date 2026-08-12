@@ -24,6 +24,10 @@ import java.util.stream.Collectors;
  * 集計対象はアーケードの記録（source = "arcade"、CSV / ブックマークレット経由）のみ。
  * INFINITAS（source = "infinitas"）の記録はライン算出・有効判定・採用値のすべてから除外する。
  *
+ * 管理者が無効化した課題曲（{@code LeagueSong.disabled}）は勝負の対象外として扱う。誰も有効化できず
+ * （{@code valid = false}）、着順ポイントも配らない（ライン保持者の +1 も無し）ので、そのグループは
+ * 残りの曲だけで競うことになる。解禁できない譜面が抽選で入った場合の救済。
+ *
  * 「週内プレー」の判定（メンバー × 課題曲、arcade 行）:
  *  - ベースライン行あり: プレー回数増加 or EX スコア更新 or ミスカウント改善 or ランプ改善
  *  - ベースライン行なし: Score.uploadedAt >= week.snapshotAt（週内に初記録が現れた）
@@ -251,6 +255,8 @@ public class LeagueStandingsService {
             ps.put("lineMiss", r.getLineMiss());
             ps.put("points", r.getSongPoints());
             ps.put("rank", r.getSongRank());
+            // 無効化フラグは league_songs 側に残っているので、締め済み週でも「無効」表示を復元できる。
+            ps.put("disabled", song != null && song.isDisabled());
             out.computeIfAbsent(r.getMember().getUser().getId(), k -> new ArrayList<>()).add(ps);
         }
         out.values().forEach(list -> list.sort(Comparator.comparingInt(p -> (Integer) p.get("slot"))));
@@ -559,7 +565,9 @@ public class LeagueStandingsService {
             boolean beatLine = isScoreLadder
                     ? (bestEx != null && (lineEx == null || bestEx > lineEx))
                     : (bestMiss != null && (lineMiss == null || bestMiss < lineMiss));
-            boolean valid = playedThisWeek && beatLine;
+            // 管理者が無効化した曲（解禁不可能な選曲など）は誰も有効化できない扱いにする。
+            // 着順ポイントも配らない（assignSongPoints 側でスキップする）。
+            boolean valid = !song.isDisabled() && playedThisWeek && beatLine;
 
             Integer notes = notesBySong.get(key);
             Double rate = null;
@@ -589,6 +597,7 @@ public class LeagueStandingsService {
             songRow.put("bestMiss", bestMiss);
             songRow.put("lineEx", lineEx);
             songRow.put("lineMiss", lineMiss);
+            songRow.put("disabled", song.isDisabled());
             perSong.add(songRow);
         }
 
@@ -662,6 +671,17 @@ public class LeagueStandingsService {
         if (n == 0) return;
         for (LeagueSong song : songs) {
             int slot = song.getSlot();
+            // 無効化された曲は勝負の対象外。着順もポイントも付けない（ライン保持者の +1 も無し）。
+            if (song.isDisabled()) {
+                for (MemberStats st : stats) {
+                    Map<String, Object> ps = findSlot(st.perSong, slot);
+                    if (ps != null) {
+                        ps.put("points", null);
+                        ps.put("rank", null);
+                    }
+                }
+                continue;
+            }
             String key = songKey(song.getTitle(), song.getDifficultyName());
             // ソートキー: 有効ならレート、未有効は -∞（最下位で同着）
             double[] rateKey = new double[n];

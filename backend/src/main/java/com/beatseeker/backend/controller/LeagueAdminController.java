@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
  * 主なエンドポイント:
  *  - GET  /api/league/admin/overview                      … 両ラダーの draft/active 週の状況
  *  - POST /api/league/admin/weeks/{weekId}/songs/{songId}/replace … 課題曲の差し替え（draft のみ）
+ *  - POST /api/league/admin/weeks/{weekId}/songs/{songId}/disabled … 課題曲の無効化 / 復帰（draft・active）
  *  - POST /api/league/admin/weeks/{weekId}/redraw          … 指定階級の課題曲を再抽選（draft のみ）
  *  - POST /api/league/admin/run-weekly                     … 週次処理の手動実行
  *  - POST /api/league/admin/create-draft                   … draft 週の手動作成
@@ -161,6 +162,53 @@ public class LeagueAdminController {
         song.setNotes(def.getNotes());
         leagueSongRepository.save(song);
         return ResponseEntity.ok(Map.of("message", "課題曲を差し替えました", "song", toSongMap(song)));
+    }
+
+    /**
+     * 【メソッドの役割】 課題曲 1 曲の有効 / 無効を切り替える（draft・開催中(active) の両方で可）。
+     *
+     * 現在解禁できない譜面が抽選で入ってしまった場合の救済。無効にした曲は
+     * {@link LeagueStandingsService} の集計から外れる（有効曲に数えず、着順ポイントも配らない）。
+     * 曲の行自体は残すので、順位表・課題曲一覧には「無効」表示の列として残る。
+     *
+     * <p>開催中でも切り替えられるのが差し替え（{@link #replaceSong}）との違い。開始時にラインを
+     * 凍結済みの週では別の曲へ差し替えるとラインが無いまま走ることになるため、走り出した後の
+     * 救済手段はこちらになる。締め済み(closed)の週は結果が凍結されているので変更できない。
+     *
+     * @param auth     認証情報（管理者限定）
+     * @param weekId   対象週 ID（draft / active）
+     * @param songId   対象の課題曲 ID
+     * @param req      {@code {"disabled": true}}
+     * @return 更新後の課題曲
+     */
+    @PostMapping("/weeks/{weekId}/songs/{songId}/disabled")
+    @Transactional
+    public ResponseEntity<?> setSongDisabled(Authentication auth,
+                                             @PathVariable Long weekId,
+                                             @PathVariable Long songId,
+                                             @RequestBody SetSongDisabledRequest req) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        LeagueWeek week = leagueWeekRepository.findById(weekId).orElse(null);
+        if (week == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
+        }
+        if ("closed".equals(week.getStatus())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "締め済み(closed)の週の課題曲は変更できません"));
+        }
+        LeagueSong song = leagueSongRepository.findById(songId).orElse(null);
+        if (song == null || !song.getWeek().getId().equals(weekId)) {
+            return ResponseEntity.status(404).body(Map.of("error", "指定した課題曲が見つかりません"));
+        }
+        if (req == null || req.disabled() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "disabled は必須です"));
+        }
+        song.setDisabled(req.disabled());
+        leagueSongRepository.save(song);
+        return ResponseEntity.ok(Map.of(
+                "message", req.disabled() ? "課題曲を無効化しました（集計から外れます）" : "課題曲を有効に戻しました",
+                "song", toSongMap(song)));
     }
 
     /**
@@ -735,11 +783,16 @@ public class LeagueAdminController {
         m.put("difficultyName", song.getDifficultyName());
         m.put("level", song.getLevel());
         m.put("notes", song.getNotes());
+        m.put("disabled", song.isDisabled());
         return m;
     }
 
     /** 課題曲差し替えリクエストのボディ。 */
     public record ReplaceSongRequest(String title, String difficultyName) {
+    }
+
+    /** 課題曲の有効 / 無効切り替えリクエストのボディ。 */
+    public record SetSongDisabledRequest(Boolean disabled) {
     }
 
     /** 階級手動修正リクエストのボディ。 */

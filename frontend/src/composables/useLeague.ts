@@ -45,6 +45,11 @@ export interface LeagueSongInfo {
   level: number | null;
   /** ノーツ数（MAX = notes*2）。 */
   notes: number;
+  /**
+   * 管理者が無効化した曲か（解禁不可能な選曲など）。true の曲は集計対象外で、
+   * 有効曲にも着順ポイントにも数えない（曲の枠自体は「無効」表示で残る）。
+   */
+  disabled?: boolean;
   /** このグループの「ライン」= 週開始時点の最高 EX（匿名のグループ共通閾値）。誰も未プレーなら null。 */
   lineEx?: number | null;
   /** このグループの「ライン」= 週開始時点の最小 BP。null なら未設定。 */
@@ -79,6 +84,8 @@ export interface LeaguePerSong {
   points?: number | null;
   /** この曲の着順（有効化した人だけ、1始まり・同着は同順位）。未有効/未達成は null。 */
   rank?: number | null;
+  /** 管理者が無効化した曲か（true なら集計対象外。valid は常に false、着順・ポイントも無し）。 */
+  disabled?: boolean;
 }
 
 /** グループ順位表の 1 行。 */
@@ -368,6 +375,26 @@ export function useLeague() {
     return (await res.json()).song as LeagueSongInfo;
   };
 
+  /**
+   * 課題曲 1 曲の有効 / 無効を切り替える（管理者のみ）。
+   *
+   * 差し替えと違い開催中(active)の週でも使える。無効にした曲は集計から外れる
+   * （有効曲に数えず、着順ポイントも配らない）。締め済みの週は変更できない。
+   */
+  const setSongDisabled = async (
+    weekId: number,
+    songId: number,
+    disabled: boolean
+  ): Promise<LeagueSongInfo> => {
+    const res = await fetch(`${API_BASE}/api/league/admin/weeks/${weekId}/songs/${songId}/disabled`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ disabled }),
+    });
+    if (!res.ok) await raise(res, '課題曲の無効化に失敗しました');
+    return (await res.json()).song as LeagueSongInfo;
+  };
+
   /** draft 週の指定階級の課題曲を再抽選する（管理者のみ）。 */
   const redrawTier = async (weekId: number, tier: number): Promise<LeagueSongInfo[]> => {
     const res = await fetch(`${API_BASE}/api/league/admin/weeks/${weekId}/redraw?tier=${tier}`, {
@@ -479,6 +506,7 @@ export function useLeague() {
     fetchHistory,
     fetchAdminOverview,
     replaceSong,
+    setSongDisabled,
     redrawTier,
     runWeekly,
     createDraft,

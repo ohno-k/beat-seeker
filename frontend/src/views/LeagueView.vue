@@ -180,6 +180,13 @@ const divisionShort = (tier: number | null | undefined) => {
   return tier === 0 ? 'LEGEND' : `D${tier}`;
 };
 
+/**
+ * 有効曲数の分母（無効化された課題曲を除いた曲数）。
+ * 管理者が解禁不可能な曲を無効化した週は 3 曲ではなくなるため、曲リストから数える。
+ */
+const scoredSongCount = (songs: LeagueSongInfo[]) =>
+  songs.length ? songs.filter(s => !s.disabled).length : 3;
+
 /** 成績値（着順ポイントの3曲合計＝得点）の表示。null は "-"。 */
 const formatResult = (value: number | null) => fmtPts(value);
 
@@ -356,6 +363,30 @@ const handlePickSong = async (weekId: number, tier: number, song: LeagueSongInfo
   } finally {
     // 成功時は新しいライン・保持者を、失敗時は元の選択状態を描き直す。
     await loadAdmin();
+    busy.value = false;
+  }
+};
+
+/**
+ * 課題曲 1 曲の有効 / 無効を切り替える（draft・開催中どちらでも可）。
+ *
+ * 解禁できない譜面が抽選で入ってしまったときの救済。無効にした曲は集計から外れ、
+ * そのグループは残りの曲だけで競う（開催中は差し替えるとラインが無くなるため、無効化で対応する）。
+ */
+const handleToggleSongDisabled = async (weekId: number, song: LeagueSongInfo) => {
+  const next = !song.disabled;
+  if (next && !confirm(t('league.admin.confirmDisableSong', { title: song.title }))) return;
+  busy.value = true;
+  error.value = '';
+  notice.value = '';
+  try {
+    await league.setSongDisabled(weekId, song.id, next);
+    notice.value = next ? t('league.admin.disabledSongDone') : t('league.admin.enabledSongDone');
+    // 順位表（有効曲数・着順ポイント）も変わるので、管理表と自分の週表示の両方を取り直す。
+    await Promise.all([loadAdmin(), loadCurrent()]);
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e);
+  } finally {
     busy.value = false;
   }
 };
@@ -656,12 +687,21 @@ onUnmounted(() => {
               v-for="song in current.songs"
               :key="song.id"
               class="rounded-lg border border-slate-200 dark:border-slate-700 p-3"
+              :class="song.disabled ? 'bg-slate-50 dark:bg-slate-900/40' : ''"
             >
               <div class="text-xs text-slate-400 dark:text-slate-500">
                 {{ song.difficultyName }} <span v-if="song.level">☆{{ song.level }}</span>
               </div>
-              <div class="mt-0.5 font-semibold text-sm text-slate-800 dark:text-slate-100 break-words">{{ song.title }}</div>
-              <template v-if="myRow">
+              <div class="mt-0.5 font-semibold text-sm break-words"
+                   :class="song.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'">{{ song.title }}</div>
+              <!-- 無効化された曲（解禁不可能な選曲など）は集計対象外。ラインや達成状況は出さない。 -->
+              <div v-if="song.disabled" class="mt-2 text-xs">
+                <span class="px-1.5 py-0.5 rounded font-semibold bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300">
+                  {{ t('league.songDisabled') }}
+                </span>
+                <p class="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{{ t('league.songDisabledNote') }}</p>
+              </div>
+              <template v-else-if="myRow">
                 <div v-for="ps in myRow.perSong.filter(p => p.slot === song.slot)" :key="ps.slot" class="mt-2 text-xs space-y-1">
                   <div class="text-amber-600 dark:text-amber-400 font-semibold">{{ lineLabel(ps, song) }}</div>
                   <div>
@@ -732,8 +772,10 @@ onUnmounted(() => {
                 <div class="text-[10px] text-slate-400 dark:text-slate-500">
                   {{ song.difficultyName }} <span v-if="song.level">☆{{ song.level }}</span>
                 </div>
-                <div class="text-xs font-semibold text-slate-800 dark:text-slate-100 break-words">{{ song.title }}</div>
-                <div class="mt-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">{{ songLineLabel(song) }}</div>
+                <div class="text-xs font-semibold break-words"
+                     :class="song.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'">{{ song.title }}</div>
+                <div v-if="song.disabled" class="mt-0.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400">{{ t('league.songDisabled') }}</div>
+                <div v-else class="mt-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">{{ songLineLabel(song) }}</div>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -761,7 +803,7 @@ onUnmounted(() => {
                               :title="roleBadge(row.role)!.label + (row.homeTier != null ? ' / ' + divisionName(row.homeTier) : '')">{{ roleBadge(row.role)!.label }}<span v-if="row.homeTier != null" class="font-semibold opacity-80">{{ divisionShort(row.homeTier) }}</span></span>
                       </span>
                     </td>
-                    <td class="py-1.5 pr-2 text-center">{{ row.validSongs }}/3</td>
+                    <td class="py-1.5 pr-2 text-center">{{ row.validSongs }}/{{ scoredSongCount(otherStandings.songs) }}</td>
                     <td class="py-1.5 pr-2 text-right tabular-nums">{{ formatResult(row.resultValue) }}</td>
                     <td class="py-1.5 pr-2 text-center tabular-nums whitespace-nowrap">
                       {{ fmtPt(row.points) }}
@@ -832,8 +874,11 @@ onUnmounted(() => {
                     <!-- 課題曲の一覧（曲別セルの列がどの曲か分かるように） -->
                     <ul class="mb-2 text-xs text-slate-500 dark:text-slate-400 space-y-0.5">
                       <li v-for="s in historyDetail.songs" :key="s.id">
-                        {{ s.slot }}. {{ s.title }}
-                        <span class="text-slate-400 dark:text-slate-500">［{{ s.difficultyName }}］</span>
+                        <span :class="s.disabled ? 'line-through text-slate-400 dark:text-slate-500' : ''">
+                          {{ s.slot }}. {{ s.title }}
+                          <span class="text-slate-400 dark:text-slate-500">［{{ s.difficultyName }}］</span>
+                        </span>
+                        <span v-if="s.disabled" class="ml-1 text-rose-600 dark:text-rose-400 font-semibold">{{ t('league.songDisabled') }}</span>
                       </li>
                     </ul>
                     <LeagueStandingsTable :songs="historyDetail.songs" :standings="historyDetail.standings" :my-user-id="user?.id" />
@@ -910,6 +955,7 @@ onUnmounted(() => {
                   <span class="text-slate-400 w-4">{{ song.slot }}.</span>
                   <select
                     class="flex-1 min-w-40 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 disabled:opacity-50"
+                    :class="song.disabled ? 'opacity-60' : ''"
                     :disabled="busy || !songPools[tierInfo.tier]"
                     :value="String(currentOptionIndex(tierInfo.tier, song))"
                     @change="handlePickSong(al.draftWeek!.id, tierInfo.tier, song, $event)"
@@ -918,6 +964,18 @@ onUnmounted(() => {
                       {{ opt.title }} [{{ opt.difficultyName }}{{ opt.level ? ` ☆${opt.level}` : '' }}]
                     </option>
                   </select>
+                  <span v-if="song.disabled"
+                        class="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-semibold whitespace-nowrap">
+                    {{ t('league.songDisabled') }}
+                  </span>
+                  <button class="text-[11px] px-2 py-1 rounded border whitespace-nowrap disabled:opacity-50"
+                          :class="song.disabled
+                            ? 'border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                            : 'border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30'"
+                          :disabled="busy"
+                          @click="handleToggleSongDisabled(al.draftWeek!.id, song)">
+                    {{ song.disabled ? t('league.admin.enableSong') : t('league.admin.disableSong') }}
+                  </button>
                 </div>
               </div>
 
@@ -935,7 +993,9 @@ onUnmounted(() => {
                         </th>
                         <th v-for="s in groupSongs(tierInfo, g.groupIndex)" :key="s.id"
                             class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]">
-                          <div class="text-slate-700 dark:text-slate-200 break-words leading-tight">{{ s.title }}</div>
+                          <div class="break-words leading-tight"
+                               :class="s.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'">{{ s.title }}</div>
+                          <div v-if="s.disabled" class="text-[10px] font-semibold text-rose-600 dark:text-rose-400">{{ t('league.songDisabled') }}</div>
                           <div class="text-[10px] font-normal text-slate-400">
                             {{ s.difficultyName }} <span v-if="s.level">☆{{ s.level }}</span>
                           </div>
@@ -993,6 +1053,42 @@ onUnmounted(() => {
               ({{ al.activeWeek.memberCount }})
             </template>
             <template v-else>{{ t('league.admin.none') }}</template>
+          </div>
+
+          <!-- 開催中の週の課題曲: グループごとに無効化を切り替える。
+               開始後はラインが凍結済みで差し替えができないため、解禁不可能な曲はここで集計から外す。 -->
+          <div v-if="al.activeWeek && al.activeWeek.tiers.length" class="mt-2">
+            <p class="text-[11px] text-slate-400 max-w-2xl leading-relaxed">{{ t('league.admin.disableHint') }}</p>
+            <div v-for="tierInfo in al.activeWeek.tiers" :key="tierInfo.tier"
+                 class="mt-2 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+              <div class="text-xs font-bold text-slate-700 dark:text-slate-200">{{ divisionName(tierInfo.tier) }}</div>
+              <div v-if="!tierInfo.songs.length" class="mt-1 text-[11px] text-slate-400">{{ t('league.admin.none') }}</div>
+              <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id"
+                   class="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                <span v-if="song.groupIndex != null"
+                      class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
+                </span>
+                <span class="text-slate-400 w-4">{{ song.slot }}.</span>
+                <span class="flex-1 min-w-40 break-words"
+                      :class="song.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'">
+                  {{ song.title }}
+                  <span class="text-slate-400">[{{ song.difficultyName }}{{ song.level ? ` ☆${song.level}` : '' }}]</span>
+                </span>
+                <span v-if="song.disabled"
+                      class="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-semibold whitespace-nowrap">
+                  {{ t('league.songDisabled') }}
+                </span>
+                <button class="text-[11px] px-2 py-1 rounded border whitespace-nowrap disabled:opacity-50"
+                        :class="song.disabled
+                          ? 'border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                          : 'border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30'"
+                        :disabled="busy"
+                        @click="handleToggleSongDisabled(al.activeWeek!.id, song)">
+                  {{ song.disabled ? t('league.admin.enableSong') : t('league.admin.disableSong') }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
