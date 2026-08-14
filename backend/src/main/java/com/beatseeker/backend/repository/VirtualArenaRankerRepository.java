@@ -41,4 +41,18 @@ public interface VirtualArenaRankerRepository extends JpaRepository<VirtualArena
      */
     @EntityGraph(attributePaths = { "scores" })
     List<VirtualArenaRanker> findAllBy();
+
+    /**
+     * 【メソッドの役割】 IIDX ID で 1 件を scores 込みで取得する。
+     *
+     * プロフィール表示（{@code VirtualArenaRankerService.getProfile}）が要求時に
+     * 1 人分だけ読むための入口。全員分のプロフィールを常駐キャッシュすると
+     * スコア行ごとの Map がヒープを大量に占めるため、都度この経路で組み立てる。
+     * トランザクション外から呼ばれるので EntityGraph で scores を確実に初期化しておく。
+     *
+     * @param iidxId IIDX ID（"1234-5678" 形式）
+     * @return 該当プレイヤー（scores 初期化済み。無ければ空）
+     */
+    @EntityGraph(attributePaths = { "scores" })
+    Optional<VirtualArenaRanker> findWithScoresByIidxId(String iidxId);
 }

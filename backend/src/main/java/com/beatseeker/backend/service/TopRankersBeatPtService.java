@@ -38,6 +38,17 @@ import java.util.zip.GZIPInputStream;
  *  - BEAT-PT / RATE-PT の公式は {@link ScoreRecalculationService} と同一（重複定義）
  *  - 個人ユーザーのスコアではなく「地域のトップスコア群」を入力として集計する点が異なる
  *  - キャッシュは volatile の不変コレクションで、書き換え時は参照全体を差し替える
+ *
+ * メモリ方針（重要）:
+ *  同梱 CSV は 750 ファイル・展開 102MB・スコアセル約 314 万件ある。
+ *  素直にオブジェクト化すると 500MB 超を常駐させることになり、2GB のインスタンスでは
+ *  再計算時の新旧二重保持で OOM する。そのため以下の 3 点で常駐量を抑えている:
+ *   1. 地域プロファイル（{@link AreaProfile}）は常駐させず、{@link #getAreaProfile} が
+ *      要求された 1 地域の CSV だけを読み直す（{@link #areaProfileLru} で直近分を再利用）
+ *   2. 曲別ランカー列は {@link SongScoreColumn} のプリミティブ配列で保持し、
+ *      参照時に {@link SongScoreEntry} へ復元する
+ *   3. 曲名 / DJ 名はパース時に {@link #intern} で共有する
+ *  いずれも API が返す内容は変えない（件数・並び順・フィールド値とも従来どおり）。
  */
 @Service
 public class TopRankersBeatPtService {
@@ -51,6 +62,12 @@ public class TopRankersBeatPtService {
     private static final int MAX_INIT_ATTEMPTS = 5;
     /** 初期化リトライの基本待機時間（attempt 番号に比例した待機） */
     private static final long INIT_RETRY_BASE_DELAY_MS = 15_000L;
+
+    /**
+     * {@link #areaProfileLru} の保持件数。
+     * 1 地域あたり数千行なので、8 件でも数 MB に収まる。
+     */
+    private static final int AREA_PROFILE_LRU_SIZE = 8;
 
     /*
      * CSV のカラム順:
@@ -79,10 +96,46 @@ public class TopRankersBeatPtService {
     private volatile List<Map<String, Object>> cached = Collections.emptyList();
     /** RATE-PT のバージョン×都道府県ランキングキャッシュ（RATE-PT 降順）*/
     private volatile List<Map<String, Object>> cachedRate = Collections.emptyList();
-    /** key: title + "\0" + diffName → スコア降順の SongScoreEntry リスト */
-    private volatile Map<String, List<SongScoreEntry>> cachedSongScores = Collections.emptyMap();
-    /** key: versionNum + "\0" + prefectureFileNum → その地域の全スコア行 */
-    private volatile Map<String, AreaProfile> cachedAreaProfiles = Collections.emptyMap();
+    /**
+     * key: title + "\0" + diffName → スコア降順のランカー列（列指向）。
+     *
+     * メモリ対策: 全 CSV 合計で約 314 万エントリになるため、{@link SongScoreEntry}
+     * （オブジェクト 40B + List スロット 4B）を保持すると 140MB 超になる。
+     * プリミティブ配列に寝かせて 1 エントリ 12B に圧縮し、参照時に
+     * {@link #getSongTopRankers} が {@link SongScoreEntry} へ復元する。
+     * 返す内容は従来と完全に同一（並び順・件数とも）。
+     */
+    private volatile Map<String, SongScoreColumn> cachedSongScores = Collections.emptyMap();
+    /**
+     * key: versionNum + "\0" + prefectureFileNum → 地域メタ（CSV パス込み）。
+     *
+     * メモリ対策: 以前はここに全 750 地域分の {@link AreaScoreRow}（約 314 万件）を
+     * 常駐させていた。{@link #getAreaProfile} は 1 リクエストで 1 地域しか参照しないため、
+     * メタ情報だけを持ち、実データは要求時に該当 CSV を読み直して組み立てる
+     * （{@link #areaProfileLru} で直近分のみ再利用）。
+     */
+    private volatile Map<String, AreaMeta> areaMetaByKey = Collections.emptyMap();
+
+    /**
+     * {@link #getAreaProfile} 用の小容量 LRU キャッシュ。
+     * 同一エリアの連続参照（スコアアップロード時の仮想ライバル判定など）で
+     * CSV の再パースが繰り返されるのを防ぐ。上限は {@link #AREA_PROFILE_LRU_SIZE} 件。
+     */
+    private final Map<String, AreaProfile> areaProfileLru = Collections.synchronizedMap(
+            new LinkedHashMap<>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, AreaProfile> eldest) {
+                    return size() > AREA_PROFILE_LRU_SIZE;
+                }
+            });
+
+    /** {@link #getAreaProfile} の結果を再利用する maxScore / level マップ（再計算時に差し替え）。 */
+    private volatile Map<String, Integer> cachedMaxScoreMap = Collections.emptyMap();
+    /** {@link #getAreaProfile} の結果を再利用する level マップ（再計算時に差し替え）。 */
+    private volatile Map<String, Integer> cachedLevelMap = Collections.emptyMap();
+    /** {@link #getAreaProfile} 用の informalRank マップ（再計算時に差し替え）。 */
+    private volatile Map<String, String> cachedInformalRankMap = Collections.emptyMap();
+
 
     /** 初期化の進行状態 */
     public enum InitState { PENDING, RUNNING, SUCCESS, FAILED }
@@ -97,6 +150,12 @@ public class TopRankersBeatPtService {
     private volatile long lastRecomputeDurationMs = -1L;
     /** 最終再計算が完了したエポックミリ秒 */
     private volatile long lastRecomputeFinishedAt = -1L;
+    /**
+     * 直近の再計算で CSV の読み込みに成功した地域数。
+     * {@link #areaMetaByKey} は manifest 全行を持つ（失敗地域の名前解決にも使うため）ので、
+     * 管理画面が部分ロードを検知できるようこちらを別に持つ。
+     */
+    private volatile int loadedAreaCount = 0;
 
     /** 曲・難易度単位のランカーエントリ（どのバージョン・都道府県の誰が何点か） */
     public record SongScoreEntry(int versionNum, String versionName,
@@ -111,6 +170,109 @@ public class TopRankersBeatPtService {
     public record AreaProfile(int versionNum, String versionName,
                                int prefectureFileNum, String prefectureName,
                                List<AreaScoreRow> scores) {}
+
+    /** manifest 1 行分のメタ情報（実データは持たず、必要時に resourcePath から読み直す）。 */
+    private record AreaMeta(int versionNum, String versionName,
+                            int prefectureFileNum, String prefectureName,
+                            String resourcePath) {}
+
+    /**
+     * 1 曲 1 難易度分のランカー列を、スコア降順で列指向に保持する不変オブジェクト。
+     *
+     * versionNum（0〜32）と prefectureFileNum（0〜47）はいずれも短い整数なので
+     * {@code short} に格納する（{@link SongScoreColumnBuilder#add} で範囲を検証済み）。
+     */
+    private record SongScoreColumn(int[] scores, short[] versionNums,
+                                   short[] prefFileNums, String[] djNames) {
+
+        /** 保持しているエントリ数。 */
+        int size() {
+            return scores.length;
+        }
+
+        /**
+         * 列を {@link SongScoreEntry} のリストへ復元する。
+         *
+         * バージョン名・都道府県名は列側には持たず、{@code areaMetaByKey} から引き直す。
+         * 引くキーは必ず (versionNum, prefectureFileNum) の組にすること。
+         * prefectureFileNum は名前と 1:1 ではなく、海外エリアで番号を再利用している
+         * （51 = タイ/米国、53 = シンガポール/海外、57 = オーストラリア/海外）ため、
+         * 番号だけで引くと別バージョンの名前を拾ってしまう。
+         */
+        List<SongScoreEntry> toEntries(Map<String, AreaMeta> areaMetaByKey) {
+            List<SongScoreEntry> out = new ArrayList<>(scores.length);
+            for (int i = 0; i < scores.length; i++) {
+                int v = versionNums[i];
+                int p = prefFileNums[i];
+                AreaMeta meta = areaMetaByKey.get(v + "\0" + p);
+                out.add(new SongScoreEntry(v, meta == null ? "" : meta.versionName(),
+                        p, meta == null ? "" : meta.prefectureName(),
+                        djNames[i], scores[i]));
+            }
+            return out;
+        }
+    }
+
+    /**
+     * {@link SongScoreColumn} を段階的に組み立てるビルダー。
+     *
+     * 中間表現にも {@link SongScoreEntry} を作らないことで、再計算中のピークメモリを抑える。
+     * {@link #build()} 時にスコア降順へ並べ替える。同スコアは追加順を保つため、
+     * 従来の {@code List.sort}（安定ソート）と同じ並びになる。
+     */
+    private static final class SongScoreColumnBuilder {
+        private int[] scores = new int[4];
+        private short[] versionNums = new short[4];
+        private short[] prefFileNums = new short[4];
+        private String[] djNames = new String[4];
+        private int size = 0;
+
+        void add(int score, int versionNum, int prefFileNum, String djName) {
+            if (versionNum < Short.MIN_VALUE || versionNum > Short.MAX_VALUE
+                    || prefFileNum < Short.MIN_VALUE || prefFileNum > Short.MAX_VALUE) {
+                // manifest が想定外の値になった場合は取り込まない（列の型を壊さないための防御）。
+                log.warn("SongScoreColumnBuilder: out-of-range area id (version={}, pref={}); entry skipped",
+                        versionNum, prefFileNum);
+                return;
+            }
+            if (size == scores.length) {
+                int cap = size * 2;
+                scores = Arrays.copyOf(scores, cap);
+                versionNums = Arrays.copyOf(versionNums, cap);
+                prefFileNums = Arrays.copyOf(prefFileNums, cap);
+                djNames = Arrays.copyOf(djNames, cap);
+            }
+            scores[size] = score;
+            versionNums[size] = (short) versionNum;
+            prefFileNums[size] = (short) prefFileNum;
+            djNames[size] = djName;
+            size++;
+        }
+
+        SongScoreColumn build() {
+            // (スコアの降順キー, 追加順index) を 1 本の long に詰めてプリミティブソートする。
+            // 上位 32bit = Integer.MAX_VALUE - score（昇順に並べると score の降順になる）、
+            // 下位 32bit = 追加順 index（同スコア時に追加順を保つ）。
+            long[] order = new long[size];
+            for (int i = 0; i < size; i++) {
+                order[i] = ((long) (Integer.MAX_VALUE - scores[i]) << 32) | i;
+            }
+            Arrays.sort(order);
+
+            int[] outScores = new int[size];
+            short[] outVersions = new short[size];
+            short[] outPrefs = new short[size];
+            String[] outDjNames = new String[size];
+            for (int i = 0; i < size; i++) {
+                int src = (int) order[i];
+                outScores[i] = scores[src];
+                outVersions[i] = versionNums[src];
+                outPrefs[i] = prefFileNums[src];
+                outDjNames[i] = djNames[src];
+            }
+            return new SongScoreColumn(outScores, outVersions, outPrefs, outDjNames);
+        }
+    }
 
     /**
      * 【コンストラクタ】 Spring が Repository 群と ObjectMapper、BEAT-PT 計算ユーティリティを注入する。
@@ -193,7 +355,7 @@ public class TopRankersBeatPtService {
         status.put("lastError", lastError);
         status.put("cachedRows", cached.size());
         status.put("cachedSongKeys", cachedSongScores.size());
-        status.put("cachedAreas", cachedAreaProfiles.size());
+        status.put("cachedAreas", loadedAreaCount);
         status.put("lastRecomputeDurationMs", lastRecomputeDurationMs);
         status.put("lastRecomputeFinishedAt", lastRecomputeFinishedAt);
         return status;
@@ -215,12 +377,42 @@ public class TopRankersBeatPtService {
      */
     public List<SongScoreEntry> getSongTopRankers(String title, String diffName) {
         if (title == null || diffName == null) return Collections.emptyList();
-        return cachedSongScores.getOrDefault(title + "\0" + diffName, Collections.emptyList());
+        SongScoreColumn col = cachedSongScores.get(title + "\0" + diffName);
+        if (col == null) return Collections.emptyList();
+        return col.toEntries(areaMetaByKey);
     }
 
-    /** 指定バージョン×都道府県の仮想プロファイルを返す。未知の場合は null。 */
+    /**
+     * 指定バージョン×都道府県の仮想プロファイルを返す。未知の場合は null。
+     *
+     * メモリ対策のため全地域を常駐させず、要求された 1 地域の CSV だけをその場で読み直す。
+     * 直近 {@link #AREA_PROFILE_LRU_SIZE} 件は {@link #areaProfileLru} で再利用する。
+     * 返す内容は従来（全件常駐時）と同一。
+     */
     public AreaProfile getAreaProfile(int versionNum, int prefectureFileNum) {
-        return cachedAreaProfiles.get(versionNum + "\0" + prefectureFileNum);
+        String key = versionNum + "\0" + prefectureFileNum;
+        AreaProfile hit = areaProfileLru.get(key);
+        if (hit != null) return hit;
+
+        AreaMeta meta = areaMetaByKey.get(key);
+        if (meta == null) return null;
+
+        List<AreaScoreRow> areaRows = new ArrayList<>();
+        try {
+            computePtsForCsv(meta.resourcePath(), cachedMaxScoreMap, cachedLevelMap, cachedInformalRankMap,
+                    meta.versionNum(), meta.versionName(), meta.prefectureFileNum(), meta.prefectureName(),
+                    null, areaRows, null);
+        } catch (Exception e) {
+            log.error("TopRankersBeatPtService: failed to load area profile {} ({}: {})",
+                    meta.resourcePath(), e.getClass().getSimpleName(), e.getMessage(), e);
+            return null;
+        }
+
+        AreaProfile profile = new AreaProfile(meta.versionNum(), meta.versionName(),
+                meta.prefectureFileNum(), meta.prefectureName(),
+                Collections.unmodifiableList(areaRows));
+        areaProfileLru.put(key, profile);
+        return profile;
     }
 
     /**
@@ -282,8 +474,22 @@ public class TopRankersBeatPtService {
 
         List<Map<String, Object>> beatResults = new ArrayList<>(manifest.size());
         List<Map<String, Object>> rateResults = new ArrayList<>(manifest.size());
-        Map<String, List<SongScoreEntry>> songScoresBuilder = new HashMap<>();
-        Map<String, AreaProfile> areaProfilesBuilder = new HashMap<>();
+        Map<String, SongScoreColumnBuilder> songScoresBuilder = new HashMap<>();
+        // manifest 全行分を先に登録する。曲別ランカーのバージョン名/都道府県名はここから引くため、
+        // CSV 読み込みに失敗した地域の行が songScoresBuilder に部分的に入っていても名前が解決できる。
+        Map<String, AreaMeta> areaMetaBuilder = new HashMap<>(manifest.size() * 2);
+        for (Map<String, Object> entry : manifest) {
+            Number v = (Number) entry.get("versionNum");
+            Number p = (Number) entry.get("prefectureFileNum");
+            if (v == null || p == null) continue;
+            areaMetaBuilder.put(v.intValue() + "\0" + p.intValue(),
+                    new AreaMeta(v.intValue(), (String) entry.get("versionName"),
+                            p.intValue(), (String) entry.get("prefectureName"),
+                            (String) entry.get("resourcePath")));
+        }
+        // 全 CSV を通した文字列プール。title / djName は 750 ファイルにまたがって
+        // 大量に重複するため、共有しないと同じ内容の String が数百万個できてしまう。
+        Map<String, String> stringPool = new HashMap<>();
         int csvFailureCount = 0;
         String firstCsvFailurePath = null;
         Exception firstCsvFailureCause = null;
@@ -294,12 +500,12 @@ public class TopRankersBeatPtService {
             String prefectureName = (String) entry.get("prefectureName");
             String resourcePath = (String) entry.get("resourcePath");
 
-            List<AreaScoreRow> areaRows = new ArrayList<>();
             double[] pts;
             try {
+                // areaRows は渡さない（地域プロファイルは getAreaProfile で都度読み直す）。
                 pts = computePtsForCsv(resourcePath, maxScoreMap, levelMap, informalRankMap,
                         versionNum.intValue(), versionName, prefFileNum.intValue(), prefectureName,
-                        songScoresBuilder, areaRows);
+                        songScoresBuilder, null, stringPool);
             } catch (Exception e) {
                 csvFailureCount++;
                 if (firstCsvFailurePath == null) {
@@ -310,11 +516,6 @@ public class TopRankersBeatPtService {
                 }
                 continue;
             }
-            areaProfilesBuilder.put(versionNum.intValue() + "\0" + prefFileNum.intValue(),
-                    new AreaProfile(versionNum.intValue(), versionName,
-                            prefFileNum.intValue(), prefectureName,
-                            Collections.unmodifiableList(areaRows)));
-
             Map<String, Object> beatRow = new LinkedHashMap<>();
             beatRow.put("versionNum", versionNum.intValue());
             beatRow.put("versionName", versionName);
@@ -339,23 +540,34 @@ public class TopRankersBeatPtService {
                 ((Number) b.get("ratePt")).doubleValue(),
                 ((Number) a.get("ratePt")).doubleValue()));
 
-        // 手順5: 曲・難易度単位のスコアリストをスコア降順でソートし、不変化して確定
-        Map<String, List<SongScoreEntry>> finalized = new HashMap<>(songScoresBuilder.size() * 2);
-        for (Map.Entry<String, List<SongScoreEntry>> e : songScoresBuilder.entrySet()) {
-            List<SongScoreEntry> list = e.getValue();
-            list.sort((a, b) -> Integer.compare(b.score(), a.score()));
-            finalized.put(e.getKey(), Collections.unmodifiableList(list));
+        // 手順5: 曲・難易度単位のスコア列をスコア降順に確定（ビルダーは順次捨てて GC 対象にする）
+        Map<String, SongScoreColumn> finalized = new HashMap<>(songScoresBuilder.size() * 2);
+        long totalEntries = 0;
+        for (Iterator<Map.Entry<String, SongScoreColumnBuilder>> it = songScoresBuilder.entrySet().iterator();
+             it.hasNext(); ) {
+            Map.Entry<String, SongScoreColumnBuilder> e = it.next();
+            SongScoreColumn col = e.getValue().build();
+            totalEntries += col.size();
+            finalized.put(e.getKey(), col);
+            it.remove(); // 変換済みのビルダーは即座に解放（新旧の二重保持を避ける）
         }
 
         cached = Collections.unmodifiableList(beatResults);
         cachedRate = Collections.unmodifiableList(rateResults);
         cachedSongScores = Collections.unmodifiableMap(finalized);
-        cachedAreaProfiles = Collections.unmodifiableMap(areaProfilesBuilder);
+        areaMetaByKey = Collections.unmodifiableMap(areaMetaBuilder);
+        cachedMaxScoreMap = Collections.unmodifiableMap(maxScoreMap);
+        cachedLevelMap = Collections.unmodifiableMap(levelMap);
+        cachedInformalRankMap = Collections.unmodifiableMap(informalRankMap);
+        loadedAreaCount = beatResults.size();
+        // 曲定義や難易度表が変わると scoreRate / level が変わるため、遅延生成済みの
+        // 地域プロファイルは作り直す必要がある。
+        areaProfileLru.clear();
         long t1 = System.currentTimeMillis();
         lastRecomputeDurationMs = t1 - t0;
         lastRecomputeFinishedAt = t1;
-        log.info("TopRankersBeatPtService: computed {} rows, {} song-diff keys, {} areas in {} ms (csvFailures={}, firstFailurePath={})",
-                beatResults.size(), finalized.size(), areaProfilesBuilder.size(),
+        log.info("TopRankersBeatPtService: computed {} rows, {} song-diff keys ({} entries), {} areas in {} ms (csvFailures={}, firstFailurePath={})",
+                beatResults.size(), finalized.size(), totalEntries, loadedAreaCount,
                 lastRecomputeDurationMs, csvFailureCount, firstCsvFailurePath);
         if (csvFailureCount > 0) {
             log.warn("TopRankersBeatPtService: {} CSV(s) failed to read (first: {}); cache may be partial",
@@ -396,8 +608,9 @@ public class TopRankersBeatPtService {
                                       Map<String, String> informalRankMap,
                                       int versionNum, String versionName,
                                       int prefFileNum, String prefectureName,
-                                      Map<String, List<SongScoreEntry>> songScoresBuilder,
-                                      List<AreaScoreRow> areaRows) throws Exception {
+                                      Map<String, SongScoreColumnBuilder> songScoresBuilder,
+                                      List<AreaScoreRow> areaRows,
+                                      Map<String, String> stringPool) throws Exception {
         List<Double> beatPts = new ArrayList<>();
         List<Double> ratePts = new ArrayList<>();
         int perfectRateCount = 0;
@@ -410,7 +623,7 @@ public class TopRankersBeatPtService {
                 String[] cols = splitCsv(line);
                 // 期待: 少なくとも 2 + 5*3 = 17 カラム（バージョン+タイトル+5難易度×(EX/DJName/都道府県)）
                 if (cols.length < 2 + 5 * 3) continue;
-                String title = cols[1];
+                String title = intern(cols[1], stringPool);
                 for (int d = 0; d < DIFF_NAMES.length; d++) {
                     String scoreStr = cols[2 + d * 3];
                     if (scoreStr == null || scoreStr.isEmpty()) continue;
@@ -431,16 +644,20 @@ public class TopRankersBeatPtService {
 
                     // 曲単位トップランカーインデックスへ追加（曲詳細ランキングタブで使用）
                     String djName = cols[3 + d * 3];
-                    songScoresBuilder
-                            .computeIfAbsent(title + "\0" + diffName, k -> new ArrayList<>())
-                            .add(new SongScoreEntry(versionNum, versionName, prefFileNum, prefectureName,
-                                    djName == null ? "" : djName, score));
+                    djName = djName == null ? "" : intern(djName, stringPool);
+                    if (songScoresBuilder != null) {
+                        songScoresBuilder
+                                .computeIfAbsent(title + "\0" + diffName, k -> new SongScoreColumnBuilder())
+                                .add(score, versionNum, prefFileNum, djName);
+                    }
 
                     // 地域プロファイル用の行を追加（TOP ランカー仮想プロファイル表示）
-                    Integer level = levelMap.get(keyCode);
-                    String djLevel = calcDjLevel(scoreRate);
-                    areaRows.add(new AreaScoreRow(title, diffName, level == null ? 0 : level,
-                            score, djName == null ? "" : djName, scoreRate, djLevel, "NO PLAY"));
+                    if (areaRows != null) {
+                        Integer level = levelMap.get(keyCode);
+                        String djLevel = calcDjLevel(scoreRate);
+                        areaRows.add(new AreaScoreRow(title, diffName, level == null ? 0 : level,
+                                score, djName, scoreRate, djLevel, "NO PLAY"));
+                    }
 
                     // BEAT-PT: HYPER でレベル 11 以上の譜面は対象外（ScoreRecalculationService と同条件）
                     boolean beatEligible = !("HYPER".equals(diffName)
@@ -468,6 +685,21 @@ public class TopRankersBeatPtService {
         for (int i = 0; i < Math.min(100, ratePts.size()); i++) rateTotal += ratePts.get(i);
         if (perfectRateCount > 100) rateTotal += (perfectRateCount - 100);
         return new double[]{beatTotal, rateTotal};
+    }
+
+    /**
+     * 【メソッドの役割】 同内容の String インスタンスを 1 つに寄せる（プール未指定なら素通し）。
+     *
+     * 曲名は 750 ファイルすべてに、DJ 名も多数のバージョン/都道府県に重複して現れる。
+     * CSV パースは行ごとに新しい String を作るため、共有しないと同一内容の
+     * インスタンスが数百万個できてヒープを圧迫する。
+     * {@code String.intern()} ではなくローカル Map を使うのは、
+     * 再計算のたびに JVM の文字列テーブルを汚さないため。
+     */
+    private static String intern(String s, Map<String, String> pool) {
+        if (s == null || pool == null) return s;
+        String hit = pool.putIfAbsent(s, s);
+        return hit != null ? hit : s;
     }
 
     /**

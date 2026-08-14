@@ -55,11 +55,14 @@ server:
 
 
 
-# CORS: allow frontend dev server
+# ログレベル。
+# 本番 (Render) は INFO。web / security を DEBUG にすると全リクエストごとに
+# 大量のログ文字列を生成することになり、GC 負荷が無視できない。
+# ローカル開発で詳細ログが要る場合は application-local.yml 側で DEBUG に上書きする。
 logging:
   level:
-    org.springframework.web: DEBUG
-    org.springframework.security: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:5173}

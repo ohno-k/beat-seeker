@@ -114,6 +114,18 @@
 
 	<build>
 		<plugins>
+			<!--
+				TopRankersBeatPtServiceMemoryTest は同梱の全 CSV（750 ファイル / 約 212 万エントリ）を
+				リファクタリング前のデータ構造で組み直して突き合わせるため、既定ヒープでは足りない。
+				実行環境によらず安定させるためテスト JVM のヒープを明示する。
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Xmx2g -Dfile.encoding=UTF-8</argLine>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

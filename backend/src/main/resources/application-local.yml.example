@@ -28,5 +28,13 @@ spring:
     username: <RENDER_DB_USER>
     password: <RENDER_DB_PASSWORD>
 
+# ローカルでは Spring の web / security の詳細ログを出す。
+# application.yml 側は本番 (Render) のメモリ/GC 負荷を避けるため INFO を既定にしてあるので、
+# リクエストの詳細を追いたい場合はこのプロファイルで DEBUG に上書きする。
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+
 # 必要に応じてここで他の設定も上書きできる (mail / kofi 等)。
 # 何も書かなければ application.yml の値がそのまま使われる。
