@@ -89,6 +89,9 @@ const CompetitionTlView = defineAsyncComponent(() => import('./views/Competition
 // 観戦客向け対戦表: `/competition/spectator/{token}` で直接アクセス。
 // ログイン不要・読み取り専用。公開済みのラインアップ・指定ジャンル・結果だけを一覧表示する。
 const CompetitionSpectatorView = defineAsyncComponent(() => import('./views/CompetitionSpectatorView.vue'));
+// 大会サマリー: `/competition/summary/{competitionId}` で直接アクセス。
+// 運営画面の「サマリー」ボタンから別タブで開く、試合別 / 選手別の全結果一覧 (団体戦専用・要主催権限)。
+const CompetitionSummaryView = defineAsyncComponent(() => import('./views/CompetitionSummaryView.vue'));
 // きんじょー杯 特設ページ: `/kinjocup` のスタンドアロン URL。参加者一覧を公開閲覧する。
 // 追加・削除 UI は View 内で管理者ログイン時のみ表示する。
 const KinjoCupView = defineAsyncComponent(() => import('./views/KinjoCupView.vue'));
@@ -207,6 +210,22 @@ const competitionSpectatorToken = ref<string>(
     ? (window.location.pathname.replace(/^\/competition\/spectator\//, '').replace(/\/.*$/, '') || '')
     : ''
 );
+
+/**
+ * 現在 URL が `/competition/summary/{competitionId}` かどうかと、抽出した大会 ID。
+ *
+ * 運営が大会後の振り返りに使う「試合別 / 選手別の全結果一覧」ページ。他の大会系スタンドアロンと違い
+ * トークンではなく大会 ID で引くため、閲覧には主催アカウントのログイン (Bearer トークン) が必要。
+ * 権限判定はサーバ側 (`/api/competitions/{id}/summary`) で行い、失敗時は View がエラーを表示する。
+ * ID が数値でない URL はスタンドアロン扱いせず通常 UI に落とす。
+ */
+const competitionSummaryId = ref<number | null>(
+  (() => {
+    const m = window.location.pathname.match(/^\/competition\/summary\/(\d+)\/?$/);
+    return m ? Number(m[1]) : null;
+  })()
+);
+const isCompetitionSummaryPage = computed(() => competitionSummaryId.value !== null);
 
 /**
  * 現在 URL が `/kinjocup` かどうか。
@@ -1697,6 +1716,8 @@ const handleUnifiedClose = async () => {
   <CompetitionTlView v-else-if="isCompetitionTlPage" :token="competitionTlToken" />
   <!-- 観戦客向け対戦表ページ: token を抽出して読み取り専用 View を表示。ログイン不要のスタンドアロン。 -->
   <CompetitionSpectatorView v-else-if="isCompetitionSpectatorPage" :token="competitionSpectatorToken" />
+  <!-- 大会サマリーページ: 試合別 / 選手別の全結果一覧。要主催ログイン (判定はサーバ側)。 -->
+  <CompetitionSummaryView v-else-if="isCompetitionSummaryPage" :competition-id="competitionSummaryId!" />
   <!-- きんじょー杯 特設ページ: 参加者一覧を公開閲覧。追加/削除 UI は View 内で管理者ログイン時のみ表示。 -->
   <KinjoCupView v-else-if="isKinjoCupPage" />
   <!-- 隠しページ: 軍人将棋。ログイン不要・入室コードだけで友達と指せるスタンドアロン。 -->

@@ -1088,6 +1088,15 @@ const refreshStandings = async () => {
   }
 };
 
+/**
+ * 大会サマリー (試合別 / 選手別の全結果一覧) を別タブで開く。団体戦専用。
+ * ページ側が `/api/competitions/{id}/summary` を叩き直すので、ここでは URL を開くだけ。
+ */
+const openSummary = () => {
+  if (!currentCompetition.value) return;
+  window.open(`/competition/summary/${currentCompetition.value.id}`, '_blank', 'noopener');
+};
+
 const handleGenerateFinals = async () => {
   if (!currentCompetition.value) return;
   if (!confirm('予選 TOP2 チームで決勝 matchup を生成しますか?')) return;
@@ -2045,11 +2054,22 @@ const statusColor = (s: string) => ({
             ▶ Open に遷移 ({{ individualParticipantCount }} / 12 or 16)
           </button>
 
+          <!-- サマリーボタン (団体戦 + open 以降のみ)。試合別 / 選手別の全結果一覧を別タブで開く。 -->
+          <button
+            v-if="currentCompetition.format !== 'individual4' && currentCompetition.status !== 'draft'"
+            type="button"
+            @click="openSummary"
+            class="ml-auto px-3 py-2 rounded-md text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+            title="試合別 / 選手別のスコア・勝敗をまとめたページを別タブで開きます"
+          >
+            📊 サマリー
+          </button>
+
           <!-- 削除ボタン (常時表示。2 段階確認付き) -->
           <button
             type="button"
             @click="handleDeleteCompetition(currentCompetition.id, currentCompetition.name)"
-            :class="currentCompetition.status === 'draft' ? '' : 'ml-auto'"
+            :class="(currentCompetition.status !== 'draft' && currentCompetition.format === 'individual4') ? 'ml-auto' : ''"
             class="px-3 py-2 rounded-md text-xs font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
           >
             🗑 大会を削除

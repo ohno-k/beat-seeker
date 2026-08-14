@@ -4,6 +4,7 @@ import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.CompetitionMatchKinds;
 import com.beatseeker.backend.service.CompetitionTeamStandingsService;
+import com.beatseeker.backend.service.CompetitionTeamSummaryService;
 import com.beatseeker.backend.service.OrganizerAuthService;
 import com.beatseeker.backend.service.StrategyPoolService;
 import org.springframework.http.ResponseEntity;
@@ -75,6 +76,7 @@ public class CompetitionAdminController {
     private final CompetitionChatMessageRepository chatMessageRepository;
     private final StrategyPoolService strategyPoolService;
     private final CompetitionTeamStandingsService teamStandingsService;
+    private final CompetitionTeamSummaryService teamSummaryService;
 
     public CompetitionAdminController(CompetitionRepository competitionRepository,
                                       CompetitionTeamRepository teamRepository,
@@ -89,7 +91,8 @@ public class CompetitionAdminController {
                                       OrganizerAuthService organizerAuthService,
                                       CompetitionChatMessageRepository chatMessageRepository,
                                       StrategyPoolService strategyPoolService,
-                                      CompetitionTeamStandingsService teamStandingsService) {
+                                      CompetitionTeamStandingsService teamStandingsService,
+                                      CompetitionTeamSummaryService teamSummaryService) {
         this.competitionRepository = competitionRepository;
         this.teamRepository = teamRepository;
         this.participantRepository = participantRepository;
@@ -104,6 +107,7 @@ public class CompetitionAdminController {
         this.chatMessageRepository = chatMessageRepository;
         this.strategyPoolService = strategyPoolService;
         this.teamStandingsService = teamStandingsService;
+        this.teamSummaryService = teamSummaryService;
     }
 
     /** サポートする大会フォーマット文字列。 */
@@ -619,6 +623,27 @@ public class CompetitionAdminController {
         requireOrganizer(auth);
         Competition comp = requireCompetition(competitionId);
         return ResponseEntity.ok(teamStandingsService.compute(comp));
+    }
+
+    /**
+     * 【メソッドの役割】 大会サマリー (試合別 + 選手別の全結果一覧) を返す。団体戦 (team5) 専用。
+     *
+     * <p>順位表が「チームの勝ち点」だけを見せるのに対し、こちらは大会後の振り返り用に
+     * 1 曲単位のスコアと勝敗まで展開する。組み立ては {@link CompetitionTeamSummaryService} に集約し、
+     * ここは認証・フォーマット判定・大会解決だけを担う。
+     *
+     * <p>個人戦 (individual4) は試合の構造が異なる ({@code CompetitionIndividualMatch} 系) ため
+     * 現状は対象外とし、400 を返す。
+     */
+    @GetMapping("/{competitionId}/summary")
+    public ResponseEntity<Map<String, Object>> getSummary(
+            Authentication auth, @PathVariable Long competitionId) {
+        requireOrganizer(auth);
+        Competition comp = requireCompetition(competitionId);
+        if (!"team5".equals(comp.getFormat())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "サマリーは団体戦 (team5) 専用です"));
+        }
+        return ResponseEntity.ok(teamSummaryService.compute(comp));
     }
 
     /**

@@ -287,6 +287,137 @@ export interface CompetitionStandingsDto {
   strategyLimit: number;
 }
 
+// ── 大会サマリー (試合別 / 選手別) ──────────────────────
+// backend の CompetitionTeamSummaryService が返す形と 1:1。団体戦 (team5) 専用。
+// 順位表が「チームの勝ち点」だけを返すのに対し、こちらは 1 曲単位のスコアと勝敗まで展開する。
+
+/** 勝敗コード (試合別ビュー)。A = A 側の勝ち / B = B 側の勝ち / D = 引分。 */
+export type SummaryResult = 'A' | 'B' | 'D';
+
+/** 勝敗コード (選手別ビュー。本人視点)。 */
+export type SummaryOutcome = 'win' | 'lose' | 'draw';
+
+/** 試合別ビューでの 1 曲。スコア未入力の曲は score が null で winner も null。 */
+export interface CompetitionSummarySong {
+  /** 1 = A 側の曲 / 2 = B 側の曲。 */
+  index: number;
+  title: string | null;
+  scoreA: number | null;
+  scoreB: number | null;
+  winner: SummaryResult | null;
+}
+
+/** 選手別ビューでの 1 曲 (本人視点にスコアを読み替えたもの)。 */
+export interface CompetitionSummaryOwnSong {
+  index: number;
+  title: string | null;
+  /** その曲が本人の自選枠か (A 側なら 1 曲目 / B 側なら 2 曲目)。 */
+  ownPick: boolean;
+  ownScore: number | null;
+  opponentScore: number | null;
+  outcome: SummaryOutcome | null;
+}
+
+/** 試合別ビューの 1 試合 (先鋒戦 / 中堅戦 …)。 */
+export interface CompetitionSummaryMatch {
+  matchId: number;
+  matchKind: string;
+  matchKindLabel: string;
+  requiredGenre: string | null;
+  /** その戦で 1 曲勝つごとにチームへ入る戦ポイント (予選/決勝で異なる)。 */
+  pointsPerSong: number;
+  playerAId: number | null;
+  playerAName: string | null;
+  playerBId: number | null;
+  playerBName: string | null;
+  recorded: boolean;
+  resultRecordedAt: string | null;
+  songs: CompetitionSummarySong[];
+  /** 獲得曲数。引分の曲は両者が取ったものとして両側に +1 される (結果記録の運営仕様)。 */
+  aSongsWon: number;
+  bSongsWon: number;
+  /** 純粋な曲勝ち数 (引分を含まない)。 */
+  aSongWins: number;
+  bSongWins: number;
+  songDraws: number;
+  aPoints: number;
+  bPoints: number;
+  result: SummaryResult | null;
+}
+
+/** 試合別ビューの 1 matchup (チーム vs チーム)。 */
+export interface CompetitionSummaryMatchup {
+  matchupId: number;
+  matchupOrder: number;
+  isFinals: boolean;
+  configured: boolean;
+  teamAId: number | null;
+  teamAName: string | null;
+  teamBId: number | null;
+  teamBName: string | null;
+  aPoints: number;
+  bPoints: number;
+  aMatchWins: number;
+  bMatchWins: number;
+  matchDraws: number;
+  /** matchup 内の全試合が記録済か。false の間は result が null。 */
+  recorded: boolean;
+  result: SummaryResult | null;
+  matches: CompetitionSummaryMatch[];
+}
+
+/** 選手別ビューでの 1 出場試合 (本人視点)。 */
+export interface CompetitionSummaryPlayerMatch {
+  matchId: number;
+  matchupId: number;
+  matchupOrder: number;
+  isFinals: boolean;
+  matchKind: string;
+  matchKindLabel: string;
+  requiredGenre: string | null;
+  side: 'A' | 'B';
+  opponentId: number | null;
+  opponentName: string | null;
+  opponentTeamName: string | null;
+  songs: CompetitionSummaryOwnSong[];
+  songsWon: number;
+  opponentSongsWon: number;
+  songWins: number;
+  songLosses: number;
+  songDraws: number;
+  points: number;
+  opponentPoints: number;
+  result: SummaryOutcome;
+}
+
+/** 選手別ビューの 1 選手 (通算成績 + 出場試合)。結果記録済みの試合だけが入る。 */
+export interface CompetitionSummaryPlayer {
+  participantId: number;
+  displayName: string;
+  isTl: boolean;
+  teamId: number | null;
+  teamName: string | null;
+  teamOrder: number | null;
+  matchCount: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  songWins: number;
+  songLosses: number;
+  songDraws: number;
+  /** 本人が稼いだ戦ポイント / 相手に与えた戦ポイント。 */
+  pointsFor: number;
+  pointsAgainst: number;
+  matches: CompetitionSummaryPlayerMatch[];
+}
+
+export interface CompetitionSummaryDto {
+  competition: { id: number; name: string; status: string; format: string };
+  teams: CompetitionTeamDto[];
+  matchups: CompetitionSummaryMatchup[];
+  players: CompetitionSummaryPlayer[];
+}
+
 export interface CompetitionDetail extends CompetitionSummary {
   teams: CompetitionTeamDto[];
   participants: CompetitionParticipantDto[];
@@ -569,6 +700,19 @@ export function useCompetitionAdmin() {
     );
     await throwIfError(res);
     return (await res.json()) as CompetitionStandingsDto;
+  };
+
+  /**
+   * 大会サマリー (試合別 + 選手別の全結果) を取得する。団体戦 (team5) 専用。
+   * サマリー画面 `/competition/summary/{id}` がこれ 1 本で描画に必要なデータを揃える。
+   */
+  const fetchSummary = async (competitionId: number): Promise<CompetitionSummaryDto> => {
+    const res = await fetch(
+      `${API_BASE}/api/competitions/${competitionId}/summary`,
+      { headers: authHeaders() },
+    );
+    await throwIfError(res);
+    return (await res.json()) as CompetitionSummaryDto;
   };
 
   /** 予選全試合記録後、TOP2 で決勝 matchup を生成。 */
@@ -979,6 +1123,7 @@ export function useCompetitionAdmin() {
     setMatchResult,
     clearMatchResult,
     fetchStandings,
+    fetchSummary,
     generateFinals,
     // 個人戦 (individual4) 用
     addIndividualParticipant,

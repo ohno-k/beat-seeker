@@ -28,6 +28,7 @@ const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
 const ChartListView = () => import('../views/ChartListView.vue')
 const ShareView = () => import('../views/ShareView.vue')
 const CompetitionAdminView = () => import('../views/CompetitionAdminView.vue')
+const CompetitionSummaryView = () => import('../views/CompetitionSummaryView.vue')
 const AdminUserComparisonView = () => import('../views/AdminUserComparisonView.vue')
 const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandingsView.vue')
 const WrappedView = () => import('../views/WrappedView.vue')
@@ -101,6 +102,9 @@ const router = createRouter({
     // 大会管理: Competition セクションの 4 ID ホワイトリストで保護。
     // 直接アクセス・ブックマーク用エントリ。実際の権限判定はサーバ側 + View 側で行う。
     { path: '/competition-admin', name: 'competition-admin', component: CompetitionAdminView },
+    // 大会サマリー (団体戦): 試合別 / 選手別の全結果一覧。運営画面のボタンから別タブで開く。
+    // 要主催権限 (サーバ側で判定)。実体は App.vue 側でパスを検知してスタンドアロン描画する。
+    { path: '/competition/summary/:competitionId', name: 'competition-summary', component: CompetitionSummaryView },
     // OBS ブラウザソース用の個人戦順位表 (公開トークン経由・認証不要・透過背景)。
     { path: '/obs/individual/:token', name: 'obs-individual-standings', component: ObsIndividualStandingsView },
     // 管理者用: 任意の 2 ユーザー間のスコア勝敗比較。
