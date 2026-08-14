@@ -8,6 +8,7 @@ import com.beatseeker.backend.repository.CompetitionPickRepository;
 import com.beatseeker.backend.repository.CompetitionStrategyUseRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -35,18 +36,16 @@ public class CompetitionPlayedSongService {
     /**
      * 演奏曲 1 枠 (管理番号 + タイトル)。どちらも解決できなければ null が入る。
      *
-     * <p>{@code original*} は「相手の StrategyCard で差し替えられる前の自選曲」。差し替えが起きた枠でのみ
-     * 埋まり、それ以外 (自選曲そのまま / 手動指定 / 相殺) では null になる。サマリー画面が
-     * 「元の自選曲を取り消し線で見せる」ために使う。
+     * <p>{@code replacedByStrategy} は「相手の StrategyCard 発動でこの枠がランダム化されたか」。
+     * {@code original*} はその発動前の自選曲で、サマリー画面が取り消し線で見せるのに使う。
+     *
+     * <p>この 2 つは連動しない: 発動はあったが元の自選曲を特定できない
+     * (提出が取り消された / 抽選が元と同じ曲を引いた) 場合、{@code replacedByStrategy} は true のまま
+     * {@code original*} だけ null になる。画面は前者で ⚡ を、後者で取り消し線を出し分ける。
      */
     public record PlayedSong(Integer strategyId, String title,
-                             Integer originalStrategyId, String originalTitle) {
-
-        /** 相手の StrategyCard で自選曲が抽選曲に差し替えられた枠か。 */
-        public boolean replacedByStrategy() {
-            return originalTitle != null;
-        }
-    }
+                             Integer originalStrategyId, String originalTitle,
+                             boolean replacedByStrategy) {}
 
     /** 1 戦ぶんの演奏曲 (song1 = A 側が演奏した曲 / song2 = B 側が演奏した曲)。 */
     public record PlayedSongs(PlayedSong song1, PlayedSong song2) {}
@@ -84,10 +83,16 @@ public class CompetitionPlayedSongService {
         CompetitionStrategyUse suA = canceled ? null : drawnOf(rawA);
         CompetitionStrategyUse suB = canceled ? null : drawnOf(rawB);
 
+        // 「発動があったか」は抽選済みかとは別に見る。サーバの遅延抽選が確定する前に運営が結果を
+        // 記録した試合では、抽選曲が手入力 (song*Manual) で入り resultSong* が空のままになる。
+        // 差し替えの表示までサーバ抽選に依存させると、そういう試合で由来が失われるため enabled で判定する。
+        boolean aActivated = !canceled && isEnabled(rawA); // B の枠 (song2) を飛ばした発動
+        boolean bActivated = !canceled && isEnabled(rawB); // A の枠 (song1) を飛ばした発動
+
         return new PlayedSongs(
-                resolveSide(Boolean.TRUE.equals(match.getSong1Manual()), suB, pickOf(match, pa),
+                resolveSide(Boolean.TRUE.equals(match.getSong1Manual()), suB, bActivated, pickOf(match, pa),
                         match.getSong1StrategyId(), match.getSong1Title()),
-                resolveSide(Boolean.TRUE.equals(match.getSong2Manual()), suA, pickOf(match, pb),
+                resolveSide(Boolean.TRUE.equals(match.getSong2Manual()), suA, aActivated, pickOf(match, pb),
                         match.getSong2StrategyId(), match.getSong2Title()));
     }
 
@@ -120,34 +125,68 @@ public class CompetitionPlayedSongService {
     }
 
     /**
-     * 【メソッドの役割】 演奏曲 1 枠を「手動指定 → 抽選曲 → 自選曲 → 記録値」の優先順で解決する。
+     * 【メソッドの役割】 演奏曲 1 枠を「手動指定 → 抽選曲 → 自選曲 → 記録値」の優先順で解決し、
+     * あわせて「StrategyCard で差し替えられた枠か / 差し替え前の自選曲は何か」を判定する。
      *
-     * @param manual           運営が結果記録 UI で曲を手動指定した枠か。true なら記録値をそのまま返す
-     * @param opponentStrategy 相手が発動した抽選済み StrategyCard (無ければ null)
-     * @param ownPick          本人の自選曲 (未提出なら null)
-     * @param recordedId       記録済みの管理番号 (フォールバック)
-     * @param recordedTitle    記録済みの曲名 (フォールバック)
+     * <p>差し替えの判定は<b>演奏曲の決まり方とは独立</b>に行い、{@code opponentActivated}
+     * (相手が発動したか) だけを見る。理由は 2 つ:
+     * <ul>
+     *   <li>運営が結果記録 UI で曲を選び直した枠 ({@code manual}) でも、
+     *       「相手の発動で自選曲が飛ばされた」事実は変わらない</li>
+     *   <li>サーバの遅延抽選が確定する前に結果を記録した試合では、抽選曲が手入力で入り
+     *       {@code opponentStrategy} (抽選済みレコード) が null のままになる。
+     *       抽選済みかどうかを条件にすると、そういう試合で差し替えの記録が失われる</li>
+     * </ul>
+     *
+     * <p>実際に演奏された曲が自選曲と同じ場合は差し替え無しとして扱う。発動はしたが置き換えが
+     * まだ確定していない (= 自選曲のまま) 状態を「差し替え済み」と表示しないため。
+     * 自選曲を特定できない枠 (提出取り消し・起用差し替え後) は、差し替えありとしつつ
+     * {@code original*} だけ null にする。
+     *
+     * @param manual            運営が結果記録 UI で曲を手動指定した枠か。true なら演奏曲は記録値
+     * @param opponentStrategy  相手が発動した<b>抽選済み</b> StrategyCard (未抽選・相殺なら null)
+     * @param opponentActivated 相手が発動したか (抽選済みかは問わない。相殺時は false)
+     * @param ownPick           本人の自選曲 (未提出なら null)
+     * @param recordedId        記録済みの管理番号 (フォールバック)
+     * @param recordedTitle     記録済みの曲名 (フォールバック)
      */
-    private PlayedSong resolveSide(boolean manual, CompetitionStrategyUse opponentStrategy, CompetitionPick ownPick,
+    private PlayedSong resolveSide(boolean manual, CompetitionStrategyUse opponentStrategy,
+                                   boolean opponentActivated, CompetitionPick ownPick,
                                    Integer recordedId, String recordedTitle) {
-        // 手動指定は運営の明示的な意思なので、自選曲でも抽選曲でも上書きしない。
-        // 差し替え前の曲も出さない (運営が現地で曲を差し替えた枠であって StrategyCard の結果ではないため)。
+        // ── 1. 実際に演奏された曲 ───────────────────────────
+        Integer playedId;
+        String playedTitle;
         if (manual) {
-            return new PlayedSong(recordedId, recordedTitle, null, null);
+            // 手動指定は運営の明示的な意思なので、自選曲でも抽選曲でも上書きしない。
+            playedId = recordedId;
+            playedTitle = recordedTitle;
+        } else if (opponentStrategy != null) {
+            playedId = opponentStrategy.getResultSongStrategyId();
+            playedTitle = opponentStrategy.getResultSongTitle();
+        } else if (ownPick != null) {
+            playedId = ownPick.getSongStrategyId();
+            playedTitle = ownPick.getSongTitle();
+        } else {
+            playedId = recordedId;
+            playedTitle = recordedTitle;
         }
-        if (opponentStrategy != null) {
-            // 相手の StrategyCard で自選曲が抽選曲に置き換わった枠。元の自選曲も添えて返す。
-            // 抽選は自選曲が提出済みのときしか走らない (maybeDrawStrategy) ので ownPick は基本埋まっているが、
-            // 提出取り消し等で欠けても落ちないよう null 安全にしておく。
-            return new PlayedSong(
-                    opponentStrategy.getResultSongStrategyId(), opponentStrategy.getResultSongTitle(),
-                    ownPick != null ? ownPick.getSongStrategyId() : null,
-                    ownPick != null ? ownPick.getSongTitle() : null);
+
+        // ── 2. 差し替えの有無と、差し替え前の自選曲 ──────────
+        if (!opponentActivated) {
+            return new PlayedSong(playedId, playedTitle, null, null, false);
         }
-        if (ownPick != null) {
-            return new PlayedSong(ownPick.getSongStrategyId(), ownPick.getSongTitle(), null, null);
+        if (ownPick == null) {
+            // 発動はあったが自選曲を特定できない枠 (提出取り消し・起用差し替え後など)。
+            // 何と差し替わったかは出せないので、発動があったことだけ伝える。
+            return new PlayedSong(playedId, playedTitle, null, null, true);
         }
-        return new PlayedSong(recordedId, recordedTitle, null, null);
+        if (Objects.equals(ownPick.getSongTitle(), playedTitle)) {
+            // 演奏曲が自選曲のまま = 置き換えがまだ確定していない (or 抽選が同名の曲を引いた)。
+            // 差し替え済みとして見せると誤解を招くので、発動フラグごと伏せる。
+            return new PlayedSong(playedId, playedTitle, null, null, false);
+        }
+        return new PlayedSong(playedId, playedTitle,
+                ownPick.getSongStrategyId(), ownPick.getSongTitle(), true);
     }
 
     /**

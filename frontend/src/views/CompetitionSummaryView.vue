@@ -391,9 +391,9 @@ const handlePrint = () => window.print();
                         実際に演奏された抽選曲を ⚡ 付きで下に出す。
                       -->
                       <div
-                        v-if="song.replacedByStrategy"
+                        v-if="song.originalTitle"
                         class="truncate max-w-[240px] mx-auto text-[10px] text-slate-400 line-through"
-                        :title="`ストラテジー発動前の自選曲: ${song.originalTitle ?? ''}`"
+                        :title="`ストラテジー発動前の自選曲: ${song.originalTitle}`"
                       >{{ song.originalTitle }}</div>
                       <div class="truncate max-w-[240px] mx-auto" :title="song.title ?? ''">
                         <span class="text-[9px] font-mono text-slate-400 mr-1">{{ song.index }}</span>
@@ -503,9 +503,9 @@ const handlePrint = () => window.print();
                       <td class="py-1.5 px-2">
                         <!-- ストラテジーで差し替えられた枠は元の自選曲を取り消し線で併記する。 -->
                         <div
-                          v-if="song.replacedByStrategy"
+                          v-if="song.originalTitle"
                           class="truncate max-w-[200px] text-[10px] text-slate-400 line-through"
-                          :title="`ストラテジー発動前の自選曲: ${song.originalTitle ?? ''}`"
+                          :title="`ストラテジー発動前の自選曲: ${song.originalTitle}`"
                         >{{ song.originalTitle }}</div>
                         <span
                           v-if="song.replacedByStrategy"

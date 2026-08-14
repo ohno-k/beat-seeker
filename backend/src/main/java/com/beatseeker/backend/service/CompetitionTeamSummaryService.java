@@ -396,15 +396,18 @@ public class CompetitionTeamSummaryService {
         return new SongLine(index,
                 reveal ? song.title() : null,
                 reveal ? song.originalTitle() : null,
+                reveal && song.replacedByStrategy(),
                 scoreA, scoreB);
     }
 
     /**
      * 1 曲ぶんのスコア行 (A/B の生スコア)。
      *
-     * @param originalTitle 相手の StrategyCard で差し替えられる前の自選曲。差し替えが無い枠では null
+     * @param originalTitle      差し替えられる前の自選曲。差し替えが無い / 特定できない枠では null
+     * @param replacedByStrategy 相手の StrategyCard 発動でこの枠がランダム化されたか
      */
-    private record SongLine(int index, String title, String originalTitle, Integer scoreA, Integer scoreB) {
+    private record SongLine(int index, String title, String originalTitle, boolean replacedByStrategy,
+                            Integer scoreA, Integer scoreB) {
 
         /** 両側のスコアが揃っているか (揃っていない曲は勝敗判定の対象外)。 */
         private boolean hasScores() {
@@ -424,7 +427,7 @@ public class CompetitionTeamSummaryService {
             m.put("title", title);
             // 差し替え前の自選曲。画面では取り消し線付きで実際の演奏曲と並べて出す。
             m.put("originalTitle", originalTitle);
-            m.put("replacedByStrategy", originalTitle != null);
+            m.put("replacedByStrategy", replacedByStrategy);
             m.put("scoreA", scoreA);
             m.put("scoreB", scoreB);
             m.put("winner", winner());
@@ -445,7 +448,7 @@ public class CompetitionTeamSummaryService {
             m.put("index", index);
             m.put("title", title);
             m.put("originalTitle", originalTitle);
-            m.put("replacedByStrategy", originalTitle != null);
+            m.put("replacedByStrategy", replacedByStrategy);
             // 自選曲かどうか: song1 = A 側の曲 / song2 = B 側の曲。
             m.put("ownPick", isSideA ? index == 1 : index == 2);
             m.put("ownScore", own);
