@@ -83,4 +83,21 @@ public class Score {
     /** このスコアがアップロード（更新）された日時。 */
     @Column(nullable = false)
     private LocalDateTime uploadedAt = LocalDateTime.now();
+
+    /**
+     * 譜面の最終プレー日時（JST の壁時計時刻）。eagate の公式 CSV の「最終プレー日時」列に由来する。
+     *
+     * <p>{@link #uploadedAt} とは別物であることに注意。uploadedAt は「サーバー時計で記録が
+     * 書き換わった時刻」なので、プレーしても自己ベストが伸びなければ進まない。こちらは
+     * 記録の更新有無に関係なく「実際に遊んだ時刻」として進む。
+     *
+     * <p>粒度の注意: 公式 CSV は 1 曲 1 行で、この列も曲単位（同じ曲の全譜面が同じ値）。
+     * したがって厳密には「この譜面を最後に遊んだ時刻」ではなく「この曲を最後に遊んだ時刻」。
+     *
+     * <p>列を持たない取り込み経路（ブックマークレット CSV は空欄・INFINITAS は非対応）では
+     * null のままになる。利用側は null を「不明」として扱うこと。
+     * リーグモードの活動判定（課題曲をリーグ期間中に遊んだか）がこの値を根拠にする。
+     */
+    @Column(name = "last_played_at")
+    private LocalDateTime lastPlayedAt;
 }

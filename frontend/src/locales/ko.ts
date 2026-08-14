@@ -1543,7 +1543,7 @@ export const ko = {
   'league.infoModal.mappingLowest': 'Advanced 2 이하 (Beginner 포함)',
   'league.infoModal.divisionGroups': '같은 DIVISION 안에서 최대 8명 그룹으로 나뉩니다. 그룹 편성은 실력과 무관하게 매주 무작위입니다 (BEAT-TIER를 참조하는 것은 첫 DIVISION 배정뿐입니다).',
   'league.infoModal.division2': '주간 순위에 따라 승강 포인트(PT)가 증감합니다. 8명 그룹이면 1위 +4 ~ 8위 -4 (인원이 적으면 폭도 축소되고, 홀수 인원이면 중앙 순위는 ±0).',
-  'league.infoModal.division3': 'PT가 +4에 도달하면 승격, -4에 도달하면 강등됩니다 (8명 그룹의 1위/8위는 한 번에 즉시 승강). DIVISION이 바뀌면 PT는 0으로 리셋됩니다. 유효곡 0인 주에는 플러스 PT를 얻을 수 없으며, 3주 연속 유효곡 0이면 엔트리가 자동 휴면됩니다 (언제든 복귀 가능, DIVISION과 PT 유지).',
+  'league.infoModal.division3': 'PT가 +4에 도달하면 승격, -4에 도달하면 강등됩니다 (8명 그룹의 1위/8위는 한 번에 즉시 승강). DIVISION이 바뀌면 PT는 0으로 리셋됩니다. 유효곡 0인 주에는 플러스 PT를 얻을 수 없습니다. 또한 3주 연속으로 과제곡을 한 곡도 플레이하지 않으면 (과제곡의 마지막 플레이 일시가 개최 기간 내에 없으면) 엔트리가 자동 휴면됩니다. 점수가 오르지 않아도 기간 중에 과제곡을 플레이했다면 활동한 것으로 간주합니다 (언제든 복귀 가능, DIVISION과 PT 유지).',
   'league.infoModal.challengeDefense': '참가자가 적은 DIVISION은 가장 가까운 성립 DIVISION의 테이블에 합류합니다. 상위 테이블에 들어가면 「챌린지」(그 주의 증감 PT에 +2), 하위 테이블에 들어가면 「디펜스」(그 주의 증감 PT에 -2)가 됩니다. 이 보정으로 승패가 뒤집히지는 않습니다(하위권 챌린지가 플러스가 되거나 상위권 디펜스가 마이너스가 되지 않고, 그 경우 증감 없음이 됩니다).',
   'league.infoModal.rulesTitle': '집계 규칙',
   'league.infoModal.rules1': '각 과제곡에는 「라인」= 그룹 내에서 그 곡을 플레이한 적 있는 사람의 주 시작 시점 최고 기록(스코어는 최대 EX, BP는 최소 BP)이 설정됩니다. 주중에 라인을 넘는 기록(스코어는 라인+1점 이상, BP는 라인 미만)을 내고 업로드(CSV / 북마클릿)한 곡만 집계 대상입니다. 아케이드 기록만 대상이며 INFINITAS 기록은 라인·집계에 포함되지 않습니다.',

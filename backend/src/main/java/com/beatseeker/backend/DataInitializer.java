@@ -1,6 +1,7 @@
 package com.beatseeker.backend;
 
 import com.beatseeker.backend.service.GameDataService;
+import com.beatseeker.backend.service.LeagueWeekLifecycleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
  * 主な責務:
  *  - 既存ユーザーの未設定カラム（language, showRateTier 等）にデフォルト値を埋める
  *  - 旧/新ユニーク制約の付け替え（INFINITAS の source 列対応）
+ *  - 仕様変更に伴う一度きりのデータ是正（{@link #runOnce}。適用済みは applied_migrations で記録）
  *  - 曲データ / 難易度表のマスターデータを JSON リソースから投入（未シード時のみ）
  *
  * 【例外方針 — 厳守】 初期化に失敗してもアプリ本体は必ず起動させる。
@@ -151,6 +153,20 @@ public class DataInitializer implements ApplicationRunner {
                     "END IF; END $$;"
             ).executeUpdate());
 
+        // 手順4.5: リーグの活動判定の仕様変更に伴う、旧ルールで積み上がった自動休止カウンタの是正。
+        //          一度きりの是正なので runOnce で実行済みマークを付ける（詳細は各メソッドの javadoc）。
+        runOnce("league-reset-inactive-weeks-for-lastplay-rule", () ->
+            entityManager.createNativeQuery(
+                    "UPDATE league_entries SET " +
+                    // 旧ルールで自動休止された人（自動休止の痕跡 = 規定週数まで積み上がった状態で active=false）
+                    // だけを参加中に戻す。自主離脱（LeagueService.leave）は inactive_weeks を触らないので
+                    // 通常この条件には該当せず、離脱の意思を勝手に取り消してしまうことはない。
+                    "  active = CASE WHEN active = FALSE AND inactive_weeks >= "
+                            + LeagueWeekLifecycleService.AUTO_DEACTIVATE_AFTER + " THEN TRUE ELSE active END, " +
+                    "  inactive_weeks = 0 " +
+                    "WHERE inactive_weeks > 0"
+            ).executeUpdate());
+
         // 手順5: 曲データと難易度表を JSON から投入する（テーブルが空の場合のみ実効）。
         //        gameDataService 側が自前で @Transactional を張るため、ここでは txTemplate を使わない。
         try {
@@ -177,6 +193,46 @@ public class DataInitializer implements ApplicationRunner {
         } catch (Exception e) {
             // 起動を止めないため、失敗は警告ログのみ（次回起動で冪等に再試行される）。
             logger.warn("DataInitializer step '{}' skipped (continuing startup): {}", name, e.getMessage());
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 1 つの初期化ステップを「DB 全体を通して 1 度だけ」実行する。
+     *
+     * {@link #runStep} の各ステップは何度実行しても同じ結果になる（未設定カラムの穴埋め・制約の
+     * 付け替え）ため毎回走らせて問題ないが、<b>データの一度きりの是正</b>はそうはいかない。
+     * 例えばリーグの不参加カウンタのリセットを毎起動で走らせると、カウンタが永遠に 0 に戻され続けて
+     * 自動休止そのものが機能しなくなる。そこで {@code applied_migrations} テーブルに実行済みの名前を
+     * 記録し、INSERT が通った（＝この DB で初回）ときだけ本体を実行する。
+     *
+     * <p>名前の INSERT と本体を同一トランザクションで行うので、本体が失敗すればマークも残らず、
+     * 次回起動でやり直される。複数インスタンスが同時に起動しても、主キー衝突で片方だけが通る。
+     *
+     * @param name 是正処理の識別名（一度決めたら変更しないこと。変えると再実行される）
+     * @param work 実行する処理
+     */
+    private void runOnce(String name, Runnable work) {
+        try {
+            txTemplate.executeWithoutResult(status -> {
+                entityManager.createNativeQuery(
+                        "CREATE TABLE IF NOT EXISTS applied_migrations (" +
+                        "  name VARCHAR(200) PRIMARY KEY," +
+                        "  applied_at TIMESTAMP NOT NULL DEFAULT now())"
+                ).executeUpdate();
+                int inserted = entityManager.createNativeQuery(
+                                "INSERT INTO applied_migrations (name) VALUES (:name) ON CONFLICT (name) DO NOTHING")
+                        .setParameter("name", name)
+                        .executeUpdate();
+                if (inserted == 0) {
+                    return; // この DB では適用済み
+                }
+                work.run();
+                logger.info("DataInitializer one-shot migration '{}' applied", name);
+            });
+        } catch (Exception e) {
+            // 起動を止めないため警告のみ。マークも一緒にロールバックされるので次回起動で再試行される。
+            logger.warn("DataInitializer one-shot migration '{}' skipped (continuing startup): {}",
+                    name, e.getMessage());
         }
     }
 

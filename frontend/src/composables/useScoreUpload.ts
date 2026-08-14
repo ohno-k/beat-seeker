@@ -44,6 +44,11 @@ function flattenToUploadRecords(scores: ScoreData[], source: 'arcade' | 'infinit
                 great: stats.great,
                 missCount: stats.missCount,
                 playCount: song.playCount,
+                // 公式 CSV の「最終プレー日時」（曲単位）。記録が伸びなくても進む唯一の値で、
+                // リーグモードの活動判定（課題曲をリーグ期間中に遊んだか）がこれを根拠にする。
+                // ブックマークレット CSV は空欄、INFINITAS は別書式のため、サーバー側で
+                // 公式 CSV 書式（"YYYY-MM-DD HH:mm"）以外は無視される。
+                lastPlayTime: song.lastPlayTime,
                 source,
             });
         });

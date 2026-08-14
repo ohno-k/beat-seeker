@@ -35,6 +35,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -302,6 +303,17 @@ public class ScoreController {
                 //    （OCR の二重認識で二重加算され得るが、playCount は有効判定にしか使わないため許容）
                 int oldPlayCount = existing.getPlayCount() != null ? existing.getPlayCount() : 0;
 
+                // 最終プレー日時（CSV 由来）は「記録が伸びなかったプレー」でも進むため、改善判定とは
+                // 独立に前進させる。リーグモードの活動判定がこの値だけを根拠にするので、記録更新が
+                // 無い週でも必ず保存されるようにここで判定して save 条件に加える。
+                // 古い値・不明（null）で上書きしないよう単調増加させる（部分的な再アップロード対策）。
+                LocalDateTime newLastPlayed = req.parsedLastPlayTime();
+                boolean lastPlayedAdvanced = newLastPlayed != null
+                        && (existing.getLastPlayedAt() == null || newLastPlayed.isAfter(existing.getLastPlayedAt()));
+                if (lastPlayedAdvanced) {
+                    existing.setLastPlayedAt(newLastPlayed);
+                }
+
                 // IIDX 実機は「ベストスコア / ベストクリア / ベスト BP」を個別に保持するが、
                 // このアプリでは 1 レコードで集約するため、いずれかが改善していたら一括更新する。
                 if (scoreBetter || rankBetter || missBetter) {
@@ -314,9 +326,12 @@ public class ScoreController {
                 } else if ("infinitas".equals(source)) {
                     existing.setPlayCount(oldPlayCount + 1);
                     scoreRepository.save(existing);
-                } else if (req.playCount() != null && req.playCount() > oldPlayCount) {
-                    // 記録は据え置きのままプレー回数のみ更新する（score/lamp/miss/uploadedAt は触らない）
-                    existing.setPlayCount(req.playCount());
+                } else if ((req.playCount() != null && req.playCount() > oldPlayCount) || lastPlayedAdvanced) {
+                    // 記録は据え置きのままプレー回数・最終プレー日時だけ更新する
+                    // （score/lamp/miss/uploadedAt は触らない）
+                    if (req.playCount() != null && req.playCount() > oldPlayCount) {
+                        existing.setPlayCount(req.playCount());
+                    }
                     scoreRepository.save(existing);
                 }
             }
@@ -590,6 +605,12 @@ public class ScoreController {
         score.setMissCount(req.missCount());
         score.setPlayCount(req.playCount());
         score.setUploadedAt(java.time.LocalDateTime.now());
+        // 最終プレー日時は「不明（null）や古い値で上書きしない」単調増加。列を持たない取り込み経路
+        // （ブックマークレット CSV・INFINITAS）のアップロードで、公式 CSV 由来の値を消さないため。
+        LocalDateTime lastPlayed = req.parsedLastPlayTime();
+        if (lastPlayed != null && (score.getLastPlayedAt() == null || lastPlayed.isAfter(score.getLastPlayedAt()))) {
+            score.setLastPlayedAt(lastPlayed);
+        }
     }
 
     /**
@@ -1493,6 +1514,11 @@ public class ScoreController {
             Integer missCount,
             Integer playCount,
             /**
+             * 公式 CSV の「最終プレー日時」列（JST 壁時計、{@code "2025-09-17 08:27"} 形式）。
+             * 旧クライアント・ブックマークレット CSV では未指定/空欄で届く。
+             */
+            String lastPlayTime,
+            /**
              * スコア取得元。{@code "arcade"}（既定）または {@code "infinitas"}。
              * 旧クライアントは送ってこないので null フォールバックを {@link #effectiveSource()} で吸収する。
              */
@@ -1507,6 +1533,29 @@ public class ScoreController {
             String s = source.toLowerCase();
             if ("infinitas".equals(s) || "arcade".equals(s)) return s;
             return "arcade";
+        }
+
+        /**
+         * {@link #lastPlayTime} を {@link LocalDateTime} に変換する。解釈できない値はすべて null。
+         *
+         * <p>受け付けるのは公式 CSV の書式（{@code "yyyy-MM-dd HH:mm"} / 秒あり）だけに限定する。
+         * この値は JST の壁時計時刻としてそのまま保存し、リーグの週（同じく JST 壁時計の
+         * startsAt/endsAt）と直接比較するため、絶対時刻表現（INFINITAS 経路が送る
+         * ISO-8601 の UTC 文字列など）を混ぜると 9 時間ズレた判定になる。
+         * 判定を誤るくらいなら「不明（null）」に倒す。
+         *
+         * @return パースできた日時。空欄・別書式・不正値は null
+         */
+        public LocalDateTime parsedLastPlayTime() {
+            if (lastPlayTime == null) return null;
+            String v = lastPlayTime.trim();
+            // "yyyy-MM-dd HH:mm" は 16 文字、秒まで付く場合は 19 文字。それ以外は非対応書式とみなす。
+            if (v.length() != 16 && v.length() != 19) return null;
+            try {
+                return LocalDateTime.parse(v.replace(' ', 'T'));
+            } catch (java.time.format.DateTimeParseException e) {
+                return null;
+            }
         }
     }
 }

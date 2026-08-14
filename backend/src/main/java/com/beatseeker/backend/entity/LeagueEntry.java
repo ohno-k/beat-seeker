@@ -65,8 +65,12 @@ public class LeagueEntry {
     private Boolean active = true;
 
     /**
-     * 連続不参加週数。週次締めで「有効曲 0 曲」だった場合にインクリメントされ、
-     * 1 曲でも有効ならリセットされる。規定回数（3 週）に達すると active=false に自動休止される。
+     * 連続不参加週数。週次締めで「その週リーグの活動が無かった」場合にインクリメントされ、
+     * 活動があればリセットされる。規定回数（3 週）に達すると active=false に自動休止される。
+     *
+     * <p>活動の判定は「課題曲の最終プレー日時が週の開催期間内にあるか」（記録が伸びたか・
+     * ライン超えで有効化できたかは問わない）。詳細は
+     * {@code LeagueWeekLifecycleService.playedDuringWeek}。
      */
     @Column(name = "inactive_weeks", nullable = false)
     @ColumnDefault("0")

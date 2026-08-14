@@ -63,8 +63,8 @@ public class LeagueWeekLifecycleService {
      * この値がそのまま「グループの最小人数」になる。
      */
     static final int MIN_STANDALONE = 4;
-    /** 連続でこの週数「有効曲 0」が続いたエントリーは自動休止する。 */
-    static final int AUTO_DEACTIVATE_AFTER = 3;
+    /** 連続でこの週数「リーグの活動なし」が続いたエントリーは自動休止する（{@link #playedDuringWeek}）。 */
+    public static final int AUTO_DEACTIVATE_AFTER = 3;
 
     /** 週の開始時刻（JST・月曜）。 */
     static final int START_HOUR = 12;
@@ -205,7 +205,7 @@ public class LeagueWeekLifecycleService {
      * ポイント増減を {@link LeagueEntry} に反映する。累積 ±{@code POINT_CAP} 到達で
      * 昇降格し、DIVISION が変わったらポイントは 0 にリセット。移動先が無い場合
      * （LEGEND のプラス超過・DIVISION 10 のマイナス超過）は範囲内にクランプして保持する。
-     * 有効 0 曲の連続週数を数えて自動休止も行う。
+     * 「リーグの活動なし」（{@link #playedDuringWeek}）の連続週数を数えて自動休止も行う。
      *
      * @param ladder ラダー種別
      * @return 締めた週。active 週が無ければ null
@@ -247,6 +247,9 @@ public class LeagueWeekLifecycleService {
         }
         leagueMemberRepository.saveAll(members);
 
+        // 「今週リーグの活動をした人」を先に一括判定しておく（メンバーごとにクエリを撃たないため）。
+        Set<Long> playedUserIds = playedDuringWeek(active, members);
+
         // ポイント増減・昇降格・自動休止をエントリーへ反映する
         for (LeagueMember member : members) {
             LeagueEntry entry = leagueEntryRepository
@@ -272,14 +275,19 @@ public class LeagueWeekLifecycleService {
                         Math.min(LeagueStandingsService.POINT_CAP, oldPoints + delta)));
             }
 
-            if (member.getValidSongs() != null && member.getValidSongs() == 0) {
+            // 活動判定は「課題曲をリーグ期間中にプレーしたか」。ライン超え（有効化）は要らない。
+            // 有効曲 1 曲以上は「確実にプレーしている」ため、最終プレー日時が取れないスコア
+            // （ブックマークレット CSV 由来など）への保険として OR で残す。
+            boolean activeThisWeek = playedUserIds.contains(member.getUser().getId())
+                    || (member.getValidSongs() != null && member.getValidSongs() > 0);
+            if (activeThisWeek) {
+                entry.setInactiveWeeks(0);
+            } else {
                 int inactive = (entry.getInactiveWeeks() != null ? entry.getInactiveWeeks() : 0) + 1;
                 entry.setInactiveWeeks(inactive);
                 if (inactive >= AUTO_DEACTIVATE_AFTER) {
                     entry.setActive(false);
                 }
-            } else {
-                entry.setInactiveWeeks(0);
             }
             leagueEntryRepository.save(entry);
         }
@@ -288,6 +296,89 @@ public class LeagueWeekLifecycleService {
         leagueWeekRepository.save(active);
         log.info("リーグ週を締め: ladder={} weekId={} members={}", ladder, active.getId(), members.size());
         return active;
+    }
+
+    /**
+     * 【メソッドの役割】 「その週リーグの活動をした」メンバーの userId 集合を返す。
+     *
+     * 判定は <b>自分のグループの課題曲の最終プレー日時が週の開催期間内にあるか</b>
+     * （{@link #withinWeek}）だけで、記録が伸びたか・ライン（週開始時点のグループ最高記録）を
+     * 超えたかは問わない。順位に絡めなかった週でも「遊んでいれば活動している」と扱うための判定で、
+     * 自動休止（{@link #AUTO_DEACTIVATE_AFTER}）のカウントにのみ使う（順位・PT には影響しない）。
+     *
+     * <p>最終プレー日時（{@link Score#getLastPlayedAt()}）は eagate の公式 CSV の列に由来するため、
+     * その列を持たない取り込み経路（ブックマークレット CSV は空欄）や、この機能より前から
+     * 存在するスコア行では null になる。null は「不明」であって「遊んでいない」ではないので、
+     * 呼び出し側は「有効曲 1 曲以上」を保険の条件として OR で併用すること。
+     *
+     * <p>粒度の注意: 公式 CSV の最終プレー日時は曲単位（同じ曲の全譜面が同じ値）なので、
+     * 課題曲と同じ曲の別譜面を遊んだ場合も「活動あり」になる。リーグへの参加意思の判定としては
+     * 十分なので、そのまま許容する。
+     *
+     * @param week    対象週（締め対象）
+     * @param members その週の全メンバー
+     * @return 活動が確認できたメンバーの userId 集合
+     */
+    private Set<Long> playedDuringWeek(LeagueWeek week, List<LeagueMember> members) {
+        if (members.isEmpty()) {
+            return Set.of();
+        }
+        List<LeagueSong> songs = leagueSongRepository.findByWeekOrderByTierAscSlotAsc(week);
+        if (songs.isEmpty()) {
+            return Set.of();
+        }
+
+        // 課題曲はグループごとに違うので、(tier|groupIndex) → 譜面キー集合 を作って自分の卓の曲だけ見る。
+        Map<String, Set<String>> chartsByGroup = new HashMap<>();
+        for (LeagueSong s : songs) {
+            chartsByGroup.computeIfAbsent(s.getTier() + "|" + s.getGroupIndex(), k -> new HashSet<>())
+                    .add(chartKey(s.getTitle(), s.getDifficultyName()));
+        }
+        Map<Long, Set<String>> chartsByUser = new HashMap<>();
+        for (LeagueMember m : members) {
+            chartsByUser.put(m.getUser().getId(),
+                    chartsByGroup.getOrDefault(m.getTier() + "|" + m.getGroupIndex(), Set.of()));
+        }
+
+        List<String> titles = songs.stream().map(LeagueSong::getTitle).distinct().toList();
+        List<String> diffs = songs.stream().map(LeagueSong::getDifficultyName).distinct().toList();
+        List<User> users = members.stream().map(LeagueMember::getUser).toList();
+
+        Set<Long> played = new HashSet<>();
+        for (Score s : scoreRepository.findByUsersAndTitlesAndDifficulties(users, titles, diffs)) {
+            // リーグはアーケード記録限定（null source は arcade 扱い）。
+            if (s.getSource() != null && !"arcade".equals(s.getSource())) continue;
+            if (!withinWeek(s.getLastPlayedAt(), week)) continue;
+            Long userId = s.getUser().getId();
+            // title IN × difficulty IN の直積なので他グループの課題曲の行も返る。自分の卓の譜面に絞る。
+            if (!chartsByUser.getOrDefault(userId, Set.of())
+                    .contains(chartKey(s.getTitle(), s.getDifficultyName()))) continue;
+            played.add(userId);
+        }
+        return played;
+    }
+
+    /**
+     * 【メソッドの役割】 最終プレー日時が週の開催期間（月曜 12:00 〜 日曜 21:00）に入っているか判定する。
+     *
+     * 両端を含む。比較する 2 値はどちらも JST の壁時計時刻（CSV の「最終プレー日時」と
+     * {@link LeagueWeek#getStartsAt()}）なので、そのまま突き合わせられる
+     * （サーバー時計の {@code uploadedAt} / {@code snapshotAt} と混ぜてはいけない）。
+     *
+     * @param lastPlayedAt 最終プレー日時。null（不明）は false
+     * @param week         対象週
+     * @return 期間内なら true
+     */
+    static boolean withinWeek(LocalDateTime lastPlayedAt, LeagueWeek week) {
+        if (lastPlayedAt == null || week.getStartsAt() == null || week.getEndsAt() == null) {
+            return false;
+        }
+        return !lastPlayedAt.isBefore(week.getStartsAt()) && !lastPlayedAt.isAfter(week.getEndsAt());
+    }
+
+    /** 譜面の識別キー（曲名 + 難易度名）。 */
+    private static String chartKey(String title, String difficultyName) {
+        return title + "|" + difficultyName;
     }
 
     /**
