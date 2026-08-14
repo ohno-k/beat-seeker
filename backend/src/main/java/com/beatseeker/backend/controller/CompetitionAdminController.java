@@ -634,6 +634,10 @@ public class CompetitionAdminController {
      *
      * <p>個人戦 (individual4) は試合の構造が異なる ({@code CompetitionIndividualMatch} 系) ため
      * 現状は対象外とし、400 を返す。
+     *
+     * <p>同じサマリーは認証不要の公開 URL ({@code CompetitionPublicSummaryController}) からも読める。
+     * 違いはマスクの有無だけで、こちらは主催向けなので未設定 matchup も未公開の起用も含めて全部返す
+     * ({@code publicView=false})。
      */
     @GetMapping("/{competitionId}/summary")
     public ResponseEntity<Map<String, Object>> getSummary(
@@ -643,7 +647,7 @@ public class CompetitionAdminController {
         if (!"team5".equals(comp.getFormat())) {
             return ResponseEntity.badRequest().body(Map.of("message", "サマリーは団体戦 (team5) 専用です"));
         }
-        return ResponseEntity.ok(teamSummaryService.compute(comp));
+        return ResponseEntity.ok(teamSummaryService.compute(comp, false));
     }
 
     /**

@@ -212,6 +212,16 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
             · 最終更新 {{ lastUpdatedLabel }}
           </span>
         </p>
+        <!--
+          サマリーページ (試合別 / 選手別の全結果一覧) への導線。
+          ログイン不要で誰でも読め、伏せ方はこの観戦ページと同じ規則になっている。
+        -->
+        <a
+          :href="`/competition/summary/${view.competition.id}`"
+          target="_blank"
+          rel="noopener"
+          class="inline-block mt-3 px-3 py-1.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+        >📊 サマリー (試合別 / 選手別)</a>
       </div>
 
       <!-- 順位表 (運営画面と同じ集計。再計算 / 決勝生成の操作は持たない) -->

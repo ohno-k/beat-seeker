@@ -326,6 +326,8 @@ export interface CompetitionSummaryMatch {
   requiredGenre: string | null;
   /** その戦で 1 曲勝つごとにチームへ入る戦ポイント (予選/決勝で異なる)。 */
   pointsPerSong: number;
+  /** 起用 (選手名) が公開済みか。false の場合 playerA/B は null でマスクされている。 */
+  lineupPublished: boolean;
   playerAId: number | null;
   playerAName: string | null;
   playerBId: number | null;
@@ -413,6 +415,12 @@ export interface CompetitionSummaryPlayer {
 
 export interface CompetitionSummaryDto {
   competition: { id: number; name: string; status: string; format: string };
+  /**
+   * 認証不要の公開 API から取得したか。
+   * true の場合は観戦 URL と同じマスクが掛かっている (未設定 matchup は含まれず、
+   * 起用公開日時を過ぎていない試合の選手名は null、その試合は選手別にも積まれない)。
+   */
+  publicView: boolean;
   teams: CompetitionTeamDto[];
   matchups: CompetitionSummaryMatchup[];
   players: CompetitionSummaryPlayer[];
@@ -705,12 +713,22 @@ export function useCompetitionAdmin() {
   /**
    * 大会サマリー (試合別 + 選手別の全結果) を取得する。団体戦 (team5) 専用。
    * サマリー画面 `/competition/summary/{id}` がこれ 1 本で描画に必要なデータを揃える。
+   *
+   * サマリーは誰でも閲覧できるので、認証不要の公開 API を基本線とする。ただし主催が開いた場合は
+   * 未設定 matchup や未公開の起用まで見たいので、ログイン中なら先に主催 API を試し、
+   * 権限が無ければ (401/403/404) 公開 API に落とす。返る形は同じで、公開側は
+   * `publicView: true` とマスク済みのデータになる。
    */
   const fetchSummary = async (competitionId: number): Promise<CompetitionSummaryDto> => {
-    const res = await fetch(
-      `${API_BASE}/api/competitions/${competitionId}/summary`,
-      { headers: authHeaders() },
-    );
+    if (localStorage.getItem(TOKEN_KEY)) {
+      const res = await fetch(
+        `${API_BASE}/api/competitions/${competitionId}/summary`,
+        { headers: authHeaders() },
+      );
+      if (res.ok) return (await res.json()) as CompetitionSummaryDto;
+      // 主催以外のログインユーザーはここに来る。公開版で読み直す。
+    }
+    const res = await fetch(`${API_BASE}/api/competition-access/summary/${competitionId}`);
     await throwIfError(res);
     return (await res.json()) as CompetitionSummaryDto;
   };

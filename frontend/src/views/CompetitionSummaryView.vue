@@ -9,9 +9,14 @@
  *  - 試合別: matchup ごとに 先鋒 / 中堅 / 大将 … の各試合を並べ、2 曲のスコアと曲ごと・試合ごとの勝敗を出す
  *  - 選手別: 参加者ごとに通算成績 (勝分敗・曲勝敗・戦pt) と、出場した全試合のスコア・勝敗を出す
  *
- * データは 1 本の API (`GET /api/competitions/{id}/summary`) で取得する。集計は
- * backend の CompetitionTeamSummaryService 側で完結しており、ここは表示だけを担う。
- * 認証は運営 (Competition ホワイトリスト) の Bearer トークン: 未ログイン / 権限なしはエラー表示になる。
+ * データは 1 本の API で取得する。集計は backend の CompetitionTeamSummaryService 側で完結しており、
+ * ここは表示だけを担う。
+ *
+ * 閲覧は誰でも可 (ログイン不要)。取得は useCompetitionAdmin#fetchSummary が
+ * 「主催 API → 失敗したら公開 API」の順で試すので、
+ *  - 主催が開いた場合: 未設定 matchup も未公開の起用も含めた全量
+ *  - それ以外: 観戦 URL と同じマスク済み (publicView=true)
+ * になる。マスクの規則はサーバ側が持ち、この View はフラグを見て注記を出すだけ。
  */
 import { computed, onMounted, ref } from 'vue';
 import {
@@ -98,6 +103,18 @@ const resultColor = (r: SummaryResult | null, side: 'A' | 'B'): string => {
 /** スコアの表示 (未入力は「-」)。 */
 const scoreLabel = (v: number | null): string => (v === null || v === undefined ? '-' : String(v));
 
+/**
+ * 選手名が無いときの代替ラベル。
+ * 「まだ誰も割り当てられていない」のか「割り当て済みだがまだ公開されていない」のかを区別する
+ * (公開 URL では起用公開日時まで選手名がサーバ側で伏せられる)。
+ */
+const unassignedLabel = (m: CompetitionSummaryMatch): string =>
+  m.lineupPublished ? '未アサイン' : '起用未公開';
+
+/** マスクが掛かった試合が 1 件でもあるか (公開閲覧時の注記を出す条件)。 */
+const hasMaskedLineup = computed(() =>
+  (summary.value?.matchups ?? []).some(mu => mu.matches.some(m => !m.lineupPublished)));
+
 // ── 選手別 ────────────────────────────────────────────────
 
 /**
@@ -158,7 +175,7 @@ const handlePrint = () => window.print();
       <p class="text-lg font-bold text-rose-700 dark:text-rose-300">サマリーを表示できません</p>
       <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ errorMessage }}</p>
       <p class="text-[11px] text-rose-500 dark:text-rose-400 mt-3">
-        主催アカウントでログインした状態で開いてください。
+        URL の大会 ID が間違っているか、団体戦以外の大会の可能性があります。
       </p>
       <button
         type="button"
@@ -178,6 +195,16 @@ const handlePrint = () => window.print();
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
             記録済 {{ recordedMatchCount }} / {{ totalMatchCount }} 戦
+          </p>
+          <!--
+            公開閲覧では観戦 URL と同じ伏せ方をする。まだ起用が公開されていない試合があるときだけ
+            「なぜ選手名が出ていないのか」を断っておく (運営が開いた場合は publicView=false で出ない)。
+          -->
+          <p
+            v-if="summary.publicView && hasMaskedLineup"
+            class="text-[11px] text-slate-400 dark:text-slate-500 mt-1"
+          >
+            起用が公開されていない試合の選手名は伏せています。
           </p>
         </div>
         <div class="flex items-center gap-2 print:hidden">
@@ -289,11 +316,11 @@ const handlePrint = () => window.print();
                       <span v-else class="text-slate-400">-</span>
                     </td>
                     <td class="py-1 px-2 text-right text-[10px] font-bold truncate" :class="teamColorClass(mu.teamAName)">
-                      {{ m.playerAName ?? '未アサイン' }}
+                      {{ m.playerAName ?? unassignedLabel(m) }}
                     </td>
                     <td class="py-1 px-2"></td>
                     <td class="py-1 px-2 text-left text-[10px] font-bold truncate" :class="teamColorClass(mu.teamBName)">
-                      {{ m.playerBName ?? '未アサイン' }}
+                      {{ m.playerBName ?? unassignedLabel(m) }}
                     </td>
                     <td class="py-1 px-2"></td>
                     <!-- 試合の勝敗 + 獲得曲数 -->

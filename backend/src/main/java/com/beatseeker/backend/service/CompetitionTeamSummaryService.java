@@ -72,10 +72,23 @@ public class CompetitionTeamSummaryService {
     /**
      * 【メソッドの役割】 大会 1 件のサマリー (試合別 + 選手別) を組み立てる。
      *
-     * @param comp 対象大会 (team5 前提)
+     * <p>{@code publicView} は「ログイン不要の公開 URL 用に伏せ情報を落とすか」のスイッチ。
+     * 公開ページ ({@code CompetitionPublicSummaryController}) はサマリーを誰でも読めるようにするが、
+     * 観戦 URL ({@code CompetitionSpectatorController}) が守っている staged reveal を壊してはいけないので、
+     * 同じ規則でマスクする:
+     * <ul>
+     *   <li>運営が「設定済み」にしていない matchup は返さない</li>
+     *   <li>起用 (選手名) は、その matchup のラインアップ公開日時を過ぎているときだけ返す</li>
+     *   <li>結果は記録済みのときだけ返す (これは publicView に関わらず共通)</li>
+     *   <li>選手別セクションは「起用公開済み かつ 結果記録済み」の試合だけを積む</li>
+     * </ul>
+     * 運営画面から開いた場合は {@code publicView=false} で全部見える。
+     *
+     * @param comp       対象大会 (team5 前提)
+     * @param publicView 公開 URL 用にマスクするなら true
      * @return {@code competition} / {@code teams} / {@code matchups} / {@code players} を含むレスポンス Map
      */
-    public Map<String, Object> compute(Competition comp) {
+    public Map<String, Object> compute(Competition comp, boolean publicView) {
         // 選手別の集計を貯める箱。matchups を舐めながら同時に埋めていく
         // (試合別と選手別は同じ試合データの別ピボットなので、走査は 1 回で済む)。
         Map<Long, PlayerAgg> playerAggs = new LinkedHashMap<>();
@@ -88,11 +101,18 @@ public class CompetitionTeamSummaryService {
 
         List<Map<String, Object>> matchupMaps = new ArrayList<>();
         for (CompetitionMatchup mu : matchupRepository.findByCompetitionOrderByMatchupOrderAsc(comp)) {
-            matchupMaps.add(buildMatchup(mu, playerAggs));
+            // 未設定 matchup は運営がまだ実施対象にしていない枠。公開 URL には出さない。
+            if (publicView && !Boolean.TRUE.equals(mu.getConfigured())) continue;
+            // 起用の公開は日時到達で自動 (予選と決勝で別日時)。観戦 URL と同じ判定を使う。
+            boolean lineupPublished = !publicView
+                    || comp.isLineupPublishedFor(Boolean.TRUE.equals(mu.getIsFinals()));
+            matchupMaps.add(buildMatchup(mu, playerAggs, lineupPublished));
         }
 
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("competition", competitionMap(comp));
+        // 公開ページ側で「未公開の起用は伏せています」と断るためのフラグ。
+        root.put("publicView", publicView);
         List<Map<String, Object>> teamMaps = new ArrayList<>();
         for (CompetitionTeam t : teams) teamMaps.add(teamMap(t));
         root.put("teams", teamMaps);
@@ -112,8 +132,11 @@ public class CompetitionTeamSummaryService {
      * <p>matchup の勝敗は順位表と同じ「戦ポイント合計の大小」で決める
      * ({@link CompetitionTeamStandingsService} と同じ規則)。未記録の試合が 1 つでもあれば
      * {@code recorded=false} とし、勝敗は null で返して画面側に「集計中」を出させる。
+     *
+     * @param lineupPublished 起用 (選手名) を出してよいか。false なら選手名を伏せ、選手別にも積まない
      */
-    private Map<String, Object> buildMatchup(CompetitionMatchup mu, Map<Long, PlayerAgg> playerAggs) {
+    private Map<String, Object> buildMatchup(CompetitionMatchup mu, Map<Long, PlayerAgg> playerAggs,
+                                             boolean lineupPublished) {
         boolean isFinals = Boolean.TRUE.equals(mu.getIsFinals());
         List<CompetitionMatch> matches = matchRepository.findByMatchupOrderByIdAsc(mu);
         matches.sort(Comparator.comparingInt(m -> CompetitionMatchKinds.order(m.getMatchKind())));
@@ -124,7 +147,7 @@ public class CompetitionTeamSummaryService {
 
         List<Map<String, Object>> matchMaps = new ArrayList<>();
         for (CompetitionMatch m : matches) {
-            MatchResult r = buildMatch(m, mu, isFinals, playerAggs);
+            MatchResult r = buildMatch(m, mu, isFinals, playerAggs, lineupPublished);
             matchMaps.add(r.map());
             if (!r.recorded()) {
                 allRecorded = false;
@@ -164,13 +187,14 @@ public class CompetitionTeamSummaryService {
     /**
      * 【メソッドの役割】 1 試合ぶんの試合別エントリを組み立て、両サイドの選手別集計へも反映する。
      *
-     * @param m          対象試合
-     * @param mu         所属 matchup (相手チーム名の解決に使う)
-     * @param isFinals   決勝の試合か (戦ポイント表が予選と異なる)
-     * @param playerAggs 選手別集計の箱 (この試合ぶんを追記する)
+     * @param m               対象試合
+     * @param mu              所属 matchup (相手チーム名の解決に使う)
+     * @param isFinals        決勝の試合か (戦ポイント表が予選と異なる)
+     * @param playerAggs      選手別集計の箱 (この試合ぶんを追記する)
+     * @param lineupPublished 起用 (選手名) を出してよいか
      */
     private MatchResult buildMatch(CompetitionMatch m, CompetitionMatchup mu, boolean isFinals,
-                                   Map<Long, PlayerAgg> playerAggs) {
+                                   Map<Long, PlayerAgg> playerAggs, boolean lineupPublished) {
         int pointsPerSong = CompetitionMatchKinds.pointsPerSong(m.getMatchKind(), isFinals);
         CompetitionPlayedSongService.PlayedSongs played = playedSongService.resolve(m);
 
@@ -206,10 +230,12 @@ public class CompetitionTeamSummaryService {
         map.put("matchKindLabel", CompetitionMatchKinds.label(m.getMatchKind()));
         map.put("requiredGenre", m.getRequiredGenre());
         map.put("pointsPerSong", pointsPerSong);
-        map.put("playerAId", pa != null ? pa.getId() : null);
-        map.put("playerAName", pa != null ? pa.getDisplayName() : null);
-        map.put("playerBId", pb != null ? pb.getId() : null);
-        map.put("playerBName", pb != null ? pb.getDisplayName() : null);
+        // 起用が未公開の間は選手名も ID も出さない (公開 URL 用のマスク。運営画面では常に公開扱い)。
+        map.put("playerAId", (lineupPublished && pa != null) ? pa.getId() : null);
+        map.put("playerAName", (lineupPublished && pa != null) ? pa.getDisplayName() : null);
+        map.put("playerBId", (lineupPublished && pb != null) ? pb.getId() : null);
+        map.put("playerBName", (lineupPublished && pb != null) ? pb.getDisplayName() : null);
+        map.put("lineupPublished", lineupPublished);
         map.put("recorded", recorded);
         map.put("resultRecordedAt", m.getResultRecordedAt());
         map.put("songs", songMaps);
@@ -223,8 +249,9 @@ public class CompetitionTeamSummaryService {
         map.put("result", result);
 
         // 選手別ピボット: 両サイドの参加者に「自分視点」のエントリを 1 件ずつ足す。
-        // 未記録の試合も起用が入っていれば出場予定として積み (recorded=false)、通算成績には数えない。
-        if (recorded) {
+        // 積むのは結果記録済みの試合だけ。さらに公開 URL では起用が公開済みの試合に限る
+        // (未公開の起用を選手別から逆算できてしまうと試合別のマスクが意味を失うため)。
+        if (recorded && lineupPublished) {
             addPlayerEntry(playerAggs, pa, m, mu, isFinals, true, songs, aSongsWon, bSongsWon, aPoints, bPoints, result);
             addPlayerEntry(playerAggs, pb, m, mu, isFinals, false, songs, bSongsWon, aSongsWon, bPoints, aPoints, result);
         }
