@@ -106,7 +106,7 @@ public class CompetitionTeamSummaryService {
             // 起用の公開は日時到達で自動 (予選と決勝で別日時)。観戦 URL と同じ判定を使う。
             boolean lineupPublished = !publicView
                     || comp.isLineupPublishedFor(Boolean.TRUE.equals(mu.getIsFinals()));
-            matchupMaps.add(buildMatchup(mu, playerAggs, lineupPublished));
+            matchupMaps.add(buildMatchup(mu, playerAggs, lineupPublished, publicView));
         }
 
         Map<String, Object> root = new LinkedHashMap<>();
@@ -134,9 +134,10 @@ public class CompetitionTeamSummaryService {
      * {@code recorded=false} とし、勝敗は null で返して画面側に「集計中」を出させる。
      *
      * @param lineupPublished 起用 (選手名) を出してよいか。false なら選手名を伏せ、選手別にも積まない
+     * @param publicView      公開 URL 用のマスクを掛けるか (未記録の試合の曲名を伏せる判定に使う)
      */
     private Map<String, Object> buildMatchup(CompetitionMatchup mu, Map<Long, PlayerAgg> playerAggs,
-                                             boolean lineupPublished) {
+                                             boolean lineupPublished, boolean publicView) {
         boolean isFinals = Boolean.TRUE.equals(mu.getIsFinals());
         List<CompetitionMatch> matches = matchRepository.findByMatchupOrderByIdAsc(mu);
         matches.sort(Comparator.comparingInt(m -> CompetitionMatchKinds.order(m.getMatchKind())));
@@ -147,7 +148,7 @@ public class CompetitionTeamSummaryService {
 
         List<Map<String, Object>> matchMaps = new ArrayList<>();
         for (CompetitionMatch m : matches) {
-            MatchResult r = buildMatch(m, mu, isFinals, playerAggs, lineupPublished);
+            MatchResult r = buildMatch(m, mu, isFinals, playerAggs, lineupPublished, publicView);
             matchMaps.add(r.map());
             if (!r.recorded()) {
                 allRecorded = false;
@@ -194,19 +195,25 @@ public class CompetitionTeamSummaryService {
      * @param lineupPublished 起用 (選手名) を出してよいか
      */
     private MatchResult buildMatch(CompetitionMatch m, CompetitionMatchup mu, boolean isFinals,
-                                   Map<Long, PlayerAgg> playerAggs, boolean lineupPublished) {
+                                   Map<Long, PlayerAgg> playerAggs, boolean lineupPublished, boolean publicView) {
         int pointsPerSong = CompetitionMatchKinds.pointsPerSong(m.getMatchKind(), isFinals);
         CompetitionPlayedSongService.PlayedSongs played = playedSongService.resolve(m);
+        boolean recorded = m.getResultRecordedAt() != null;
+
+        // 曲名を出してよいか。まだ結果が記録されていない試合の曲は、公開 URL では伏せる:
+        // 未記録の枠の曲名は「これから演奏される自選曲」そのものなので、出すと Song Reveal を先取りしてしまう
+        // (観戦 URL も結果記録済みの試合しか曲名を返さない)。運営画面では常に見せる。
+        boolean revealSongs = !publicView || recorded;
 
         // 1 戦 = 2 曲。song1 = A 側の自選 (or 抽選) 曲、song2 = B 側の曲。両者が両方を演奏する。
+        // originalTitle は相手の StrategyCard で差し替えられた枠にだけ入る (= 差し替え前の自選曲)。
         List<SongLine> songs = List.of(
-                new SongLine(1, played.song1().title(), m.getSong1ScoreA(), m.getSong1ScoreB()),
-                new SongLine(2, played.song2().title(), m.getSong2ScoreA(), m.getSong2ScoreB()));
+                songLine(1, played.song1(), revealSongs, m.getSong1ScoreA(), m.getSong1ScoreB()),
+                songLine(2, played.song2(), revealSongs, m.getSong2ScoreA(), m.getSong2ScoreB()));
 
         // 獲得曲数は「引分も両者の勝ち」で数える (結果記録の運営仕様と同じ)。
         int aSongsWon = 0, bSongsWon = 0;
         int aSongWins = 0, bSongWins = 0, songDraws = 0;
-        boolean recorded = m.getResultRecordedAt() != null;
         List<Map<String, Object>> songMaps = new ArrayList<>();
         for (SongLine s : songs) {
             songMaps.add(s.toMap());
@@ -379,8 +386,25 @@ public class CompetitionTeamSummaryService {
 
     // ── 内部ヘルパ ───────────────────────────────────────────
 
-    /** 1 曲ぶんのスコア行 (A/B の生スコア)。 */
-    private record SongLine(int index, String title, Integer scoreA, Integer scoreB) {
+    /**
+     * 【メソッドの役割】 解決済みの演奏曲 1 枠を {@link SongLine} に変換する。
+     *
+     * @param reveal 曲名を出してよいか。false なら実際の曲も差し替え前の曲も伏せる
+     */
+    private static SongLine songLine(int index, CompetitionPlayedSongService.PlayedSong song,
+                                     boolean reveal, Integer scoreA, Integer scoreB) {
+        return new SongLine(index,
+                reveal ? song.title() : null,
+                reveal ? song.originalTitle() : null,
+                scoreA, scoreB);
+    }
+
+    /**
+     * 1 曲ぶんのスコア行 (A/B の生スコア)。
+     *
+     * @param originalTitle 相手の StrategyCard で差し替えられる前の自選曲。差し替えが無い枠では null
+     */
+    private record SongLine(int index, String title, String originalTitle, Integer scoreA, Integer scoreB) {
 
         /** 両側のスコアが揃っているか (揃っていない曲は勝敗判定の対象外)。 */
         private boolean hasScores() {
@@ -398,6 +422,9 @@ public class CompetitionTeamSummaryService {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("index", index);
             m.put("title", title);
+            // 差し替え前の自選曲。画面では取り消し線付きで実際の演奏曲と並べて出す。
+            m.put("originalTitle", originalTitle);
+            m.put("replacedByStrategy", originalTitle != null);
             m.put("scoreA", scoreA);
             m.put("scoreB", scoreB);
             m.put("winner", winner());
@@ -417,6 +444,8 @@ public class CompetitionTeamSummaryService {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("index", index);
             m.put("title", title);
+            m.put("originalTitle", originalTitle);
+            m.put("replacedByStrategy", originalTitle != null);
             // 自選曲かどうか: song1 = A 側の曲 / song2 = B 側の曲。
             m.put("ownPick", isSideA ? index == 1 : index == 2);
             m.put("ownScore", own);

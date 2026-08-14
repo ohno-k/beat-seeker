@@ -301,7 +301,15 @@ export type SummaryOutcome = 'win' | 'lose' | 'draw';
 export interface CompetitionSummarySong {
   /** 1 = A 側の曲 / 2 = B 側の曲。 */
   index: number;
+  /** 実際に演奏された曲。公開閲覧で未記録の試合は null (曲名を伏せる)。 */
   title: string | null;
+  /**
+   * 相手のストラテジーで差し替えられる前の自選曲。差し替えが無い枠では null。
+   * 画面では取り消し線付きで実際の演奏曲と並べる。
+   */
+  originalTitle: string | null;
+  /** この枠が相手のストラテジーで差し替えられたか。 */
+  replacedByStrategy: boolean;
   scoreA: number | null;
   scoreB: number | null;
   winner: SummaryResult | null;
@@ -311,6 +319,9 @@ export interface CompetitionSummarySong {
 export interface CompetitionSummaryOwnSong {
   index: number;
   title: string | null;
+  /** 差し替えられる前の自選曲 (差し替えが無ければ null)。 */
+  originalTitle: string | null;
+  replacedByStrategy: boolean;
   /** その曲が本人の自選枠か (A 側なら 1 曲目 / B 側なら 2 曲目)。 */
   ownPick: boolean;
   ownScore: number | null;

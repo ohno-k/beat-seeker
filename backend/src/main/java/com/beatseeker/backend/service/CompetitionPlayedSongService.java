@@ -32,8 +32,21 @@ import java.util.Optional;
 @Service
 public class CompetitionPlayedSongService {
 
-    /** 演奏曲 1 枠 (管理番号 + タイトル)。どちらも解決できなければ null が入る。 */
-    public record PlayedSong(Integer strategyId, String title) {}
+    /**
+     * 演奏曲 1 枠 (管理番号 + タイトル)。どちらも解決できなければ null が入る。
+     *
+     * <p>{@code original*} は「相手の StrategyCard で差し替えられる前の自選曲」。差し替えが起きた枠でのみ
+     * 埋まり、それ以外 (自選曲そのまま / 手動指定 / 相殺) では null になる。サマリー画面が
+     * 「元の自選曲を取り消し線で見せる」ために使う。
+     */
+    public record PlayedSong(Integer strategyId, String title,
+                             Integer originalStrategyId, String originalTitle) {
+
+        /** 相手の StrategyCard で自選曲が抽選曲に差し替えられた枠か。 */
+        public boolean replacedByStrategy() {
+            return originalTitle != null;
+        }
+    }
 
     /** 1 戦ぶんの演奏曲 (song1 = A 側が演奏した曲 / song2 = B 側が演奏した曲)。 */
     public record PlayedSongs(PlayedSong song1, PlayedSong song2) {}
@@ -118,16 +131,23 @@ public class CompetitionPlayedSongService {
     private PlayedSong resolveSide(boolean manual, CompetitionStrategyUse opponentStrategy, CompetitionPick ownPick,
                                    Integer recordedId, String recordedTitle) {
         // 手動指定は運営の明示的な意思なので、自選曲でも抽選曲でも上書きしない。
+        // 差し替え前の曲も出さない (運営が現地で曲を差し替えた枠であって StrategyCard の結果ではないため)。
         if (manual) {
-            return new PlayedSong(recordedId, recordedTitle);
+            return new PlayedSong(recordedId, recordedTitle, null, null);
         }
         if (opponentStrategy != null) {
-            return new PlayedSong(opponentStrategy.getResultSongStrategyId(), opponentStrategy.getResultSongTitle());
+            // 相手の StrategyCard で自選曲が抽選曲に置き換わった枠。元の自選曲も添えて返す。
+            // 抽選は自選曲が提出済みのときしか走らない (maybeDrawStrategy) ので ownPick は基本埋まっているが、
+            // 提出取り消し等で欠けても落ちないよう null 安全にしておく。
+            return new PlayedSong(
+                    opponentStrategy.getResultSongStrategyId(), opponentStrategy.getResultSongTitle(),
+                    ownPick != null ? ownPick.getSongStrategyId() : null,
+                    ownPick != null ? ownPick.getSongTitle() : null);
         }
         if (ownPick != null) {
-            return new PlayedSong(ownPick.getSongStrategyId(), ownPick.getSongTitle());
+            return new PlayedSong(ownPick.getSongStrategyId(), ownPick.getSongTitle(), null, null);
         }
-        return new PlayedSong(recordedId, recordedTitle);
+        return new PlayedSong(recordedId, recordedTitle, null, null);
     }
 
     /**

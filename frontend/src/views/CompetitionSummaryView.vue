@@ -25,6 +25,7 @@ import {
   type CompetitionSummaryMatch,
   type CompetitionSummaryMatchup,
   type CompetitionSummaryPlayer,
+  type CompetitionSummarySong,
   type SummaryOutcome,
   type SummaryResult,
 } from '../composables/useCompetitionAdmin';
@@ -102,6 +103,33 @@ const resultColor = (r: SummaryResult | null, side: 'A' | 'B'): string => {
 
 /** スコアの表示 (未入力は「-」)。 */
 const scoreLabel = (v: number | null): string => (v === null || v === undefined ? '-' : String(v));
+
+/**
+ * その曲を取った選手の名前。試合別の「曲の勝者」列に出す。
+ *
+ * ○/× だと A/B どちら側の視点かを追う必要があるので、勝った選手名をそのまま出す。
+ * 引分は「引分」、スコア未入力は「-」。起用が未公開 / 未アサインで選手名が引けない場合は
+ * チーム名に落とす (どちらが取ったかだけは分かるようにする)。
+ */
+const songWinnerLabel = (
+  mu: CompetitionSummaryMatchup,
+  m: CompetitionSummaryMatch,
+  song: CompetitionSummarySong,
+): string => {
+  if (!song.winner) return '-';
+  if (song.winner === 'D') return '引分';
+  const isA = song.winner === 'A';
+  return (isA ? m.playerAName : m.playerBName)
+    ?? (isA ? mu.teamAName : mu.teamBName)
+    ?? (isA ? 'A 側' : 'B 側');
+};
+
+/** 「曲の勝者」列の文字色。勝った側のチームカラーに合わせる。 */
+const songWinnerClass = (mu: CompetitionSummaryMatchup, song: CompetitionSummarySong): string => {
+  if (!song.winner) return 'text-slate-400';
+  if (song.winner === 'D') return 'text-slate-500 dark:text-slate-400';
+  return teamColorClass(song.winner === 'A' ? mu.teamAName : mu.teamBName);
+};
 
 /**
  * 選手名が無いときの代替ラベル。
@@ -291,7 +319,7 @@ const handlePrint = () => window.print();
                   <th class="text-right py-1 px-2">{{ mu.teamAName ?? 'A' }}</th>
                   <th class="text-center py-1 px-2">曲</th>
                   <th class="text-left py-1 px-2">{{ mu.teamBName ?? 'B' }}</th>
-                  <th class="text-center py-1 px-2">曲勝敗</th>
+                  <th class="text-center py-1 px-2">曲の勝者</th>
                   <th class="text-center py-1 px-2">戦績</th>
                   <th class="text-right py-1 px-2">戦pt</th>
                 </tr>
@@ -358,17 +386,32 @@ const handlePrint = () => window.print();
                       :class="song.winner === 'A' ? 'font-bold text-emerald-600 dark:text-emerald-300' : ''"
                     >{{ scoreLabel(song.scoreA) }}</td>
                     <td class="py-1.5 px-2 text-center">
+                      <!--
+                        ストラテジーで差し替えられた枠は、元の自選曲を取り消し線で上に置き、
+                        実際に演奏された抽選曲を ⚡ 付きで下に出す。
+                      -->
+                      <div
+                        v-if="song.replacedByStrategy"
+                        class="truncate max-w-[240px] mx-auto text-[10px] text-slate-400 line-through"
+                        :title="`ストラテジー発動前の自選曲: ${song.originalTitle ?? ''}`"
+                      >{{ song.originalTitle }}</div>
                       <div class="truncate max-w-[240px] mx-auto" :title="song.title ?? ''">
                         <span class="text-[9px] font-mono text-slate-400 mr-1">{{ song.index }}</span>
-                        {{ song.title ?? '(未設定)' }}
+                        <span
+                          v-if="song.replacedByStrategy"
+                          class="text-[9px] font-bold px-1 py-0.5 rounded mr-1 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                          title="相手のストラテジーで差し替えられた曲"
+                        >⚡</span>
+                        {{ song.title ?? '(未公開)' }}
                       </div>
                     </td>
                     <td
                       class="py-1.5 px-2 text-left tabular-nums font-mono whitespace-nowrap"
                       :class="song.winner === 'B' ? 'font-bold text-emerald-600 dark:text-emerald-300' : ''"
                     >{{ scoreLabel(song.scoreB) }}</td>
-                    <td class="py-1.5 px-2 text-center font-bold" :class="resultColor(song.winner, 'A')">
-                      {{ song.winner ? resultLabel(song.winner, 'A') : '-' }}
+                    <!-- その曲を取ったのが誰かは ○/× より名前で出したほうが読める (○ が A/B どちら側かを追わずに済む)。 -->
+                    <td class="py-1.5 px-2 text-center font-bold truncate" :class="songWinnerClass(mu, song)">
+                      {{ songWinnerLabel(mu, m, song) }}
                     </td>
                   </tr>
                 </template>
@@ -458,8 +501,19 @@ const handlePrint = () => window.print();
                         <div class="text-[10px]" :class="teamColorClass(pm.opponentTeamName)">{{ pm.opponentTeamName }}</div>
                       </td>
                       <td class="py-1.5 px-2">
+                        <!-- ストラテジーで差し替えられた枠は元の自選曲を取り消し線で併記する。 -->
+                        <div
+                          v-if="song.replacedByStrategy"
+                          class="truncate max-w-[200px] text-[10px] text-slate-400 line-through"
+                          :title="`ストラテジー発動前の自選曲: ${song.originalTitle ?? ''}`"
+                        >{{ song.originalTitle }}</div>
+                        <span
+                          v-if="song.replacedByStrategy"
+                          class="mr-1 text-[9px] font-bold px-1 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 align-middle"
+                          title="相手のストラテジーで差し替えられた曲"
+                        >⚡</span>
                         <span class="truncate max-w-[200px] inline-block align-middle" :title="song.title ?? ''">
-                          {{ song.title ?? '(未設定)' }}
+                          {{ song.title ?? '(未公開)' }}
                         </span>
                         <!--
                           自枠 = 本人の選曲枠。ストラテジー発動を受けた試合ではこの枠が抽選曲に
@@ -507,6 +561,8 @@ const handlePrint = () => window.print();
         ○ = 勝ち / × = 負け / △ = 引分。同スコアの曲は運営仕様により両者が取った扱いになるため、獲得曲数
         (例 2-1) の合計は 2 を超えることがあります。戦ポイントは「獲得曲数 × その戦の 1 曲あたり pt」
         (予選 先鋒2 / 中堅3 / 大将4、決勝 先鋒4 / 次鋒4 / 五将5 / 中堅5 / 三将6 / 副将6 / 大将7)。
+        <span class="line-through">取り消し線</span> = 相手のストラテジー発動で差し替えられた元の自選曲、
+        ⚡ = 実際に演奏された抽選曲。両者が発動して相殺した試合は差し替えが起きないため、どちらも表示されません。
       </p>
     </div>
   </div>
