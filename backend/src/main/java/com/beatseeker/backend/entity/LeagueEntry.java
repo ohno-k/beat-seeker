@@ -51,9 +51,12 @@ public class LeagueEntry {
     private Integer currentTier;
 
     /**
-     * 昇降格ポイント（-4..+4）。週の順位に応じて増減し、+4 到達で昇格・-4 到達で降格する。
-     * 初回配属時と DIVISION 変動後（昇降格・管理者修正）は 0 にリセットされる。
-     * LEGEND の +4 超過・DIVISION 10 の -4 超過は移動先が無いためクランプして保持する。
+     * 昇降格ポイント（-8..+8）。週の順位に応じて増減し、+8 到達で昇格・-8 到達で降格する。
+     * 初回配属時と管理者による DIVISION 手動修正では 0 にリセットされる。
+     * 昇降格した場合は 0 ではなく移動先での立ち位置を反映した値から再スタートする
+     * （昇格後は -4 = 新 DIVISION では下位スタート、降格後は +4 = 元の DIVISION へ戻りやすい上位スタート。
+     * {@code LeagueStandingsService.pointsAfterMovement}）。
+     * LEGEND の +8 超過・DIVISION 10 の -8 超過は移動先が無いためクランプして保持する。
      */
     @Column(nullable = false)
     @ColumnDefault("0")

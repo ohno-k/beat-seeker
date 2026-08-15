@@ -38,6 +38,9 @@ import java.util.stream.Collectors;
  *    ±{@link #WEEKLY_DELTA_CAP} が上限。
  *  - 累積ポイントが +{@link #POINT_CAP} に到達すると昇格、-{@link #POINT_CAP} で降格
  *    （1 週の増減は最大 ±{@link #WEEKLY_DELTA_CAP} なので、昇降格には最短でも 2 週かかる）。
+ *  - 昇降格した直後は 0 ではなく「移動先での立ち位置」を反映した PT から始める:
+ *    昇格後は -{@link #POST_MOVE_POINTS}（新 DIVISION では下位スタート）、
+ *    降格後は +{@link #POST_MOVE_POINTS}（旧 DIVISION へ戻りやすい上位スタート）。
  *  - 有効曲 0 の週はプラス分を獲得できない（過疎グループでの放置昇格を防ぐ）。
  */
 @Service
@@ -50,6 +53,16 @@ public class LeagueStandingsService {
 
     /** 1 週で動くポイントの上限（順位由来の増減とチャレンジ/ディフェンス補正の両方に効く）。 */
     public static final int WEEKLY_DELTA_CAP = 4;
+
+    /**
+     * 昇降格した直後の開始ポイント（絶対値）。昇格後は -{@code POST_MOVE_POINTS}、
+     * 降格後は +{@code POST_MOVE_POINTS} から始まる（{@link #pointsAfterMovement}）。
+     *
+     * <p>移動先での立ち位置を PT に反映するための下駄。昇格した人は新しい DIVISION では
+     * 下位スタート（連続昇格しにくく、力不足ならすぐ戻る）、降格した人は上位スタート
+     * （元の DIVISION へ復帰しやすい）になる。
+     */
+    public static final int POST_MOVE_POINTS = 4;
 
     /**
      * チャレンジ（格上の卓）/ ディフェンス（格下の卓）の PT 補正幅。
@@ -796,8 +809,8 @@ public class LeagueStandingsService {
      * 元から負け側（例 8 人の 8 位 = -4）はチャレンジでも -2 のままマイナスで残る。
      *
      * <p>補正後は ±{@link #WEEKLY_DELTA_CAP} にクランプする（1 週で動く PT は週の増減幅に収める）。
-     * 2 段階の昇降格は起きない（累積が ±{@link #POINT_CAP} に到達した時点で昇降格し 0 リセットされるため、
-     * 補正で行き過ぎても移動は常に 1 DIVISION）。
+     * 2 段階の昇降格は起きない（累積が ±{@link #POINT_CAP} に到達した時点で昇降格し PT が
+     * {@link #pointsAfterMovement} で入れ直されるため、補正で行き過ぎても移動は常に 1 DIVISION）。
      *
      * @param delta 基本の増減（順位由来）
      * @param role  立場
@@ -815,6 +828,34 @@ public class LeagueStandingsService {
             if (delta > 0) adjusted = Math.max(adjusted, 0);
         }
         return Math.max(-WEEKLY_DELTA_CAP, Math.min(WEEKLY_DELTA_CAP, adjusted));
+    }
+
+    /**
+     * 【メソッドの役割】 週の締め後に {@link com.beatseeker.backend.entity.LeagueEntry} へ保存する
+     * 昇降格ポイントを返す。
+     *
+     * <ul>
+     *   <li>昇格（{@code "promote"}）: -{@link #POST_MOVE_POINTS} から再スタート。
+     *       昇格先では下位スタートになるので、連続昇格はしにくく、力不足ならすぐ元の DIVISION に戻る。</li>
+     *   <li>降格（{@code "relegate"}）: +{@link #POST_MOVE_POINTS} から再スタート。
+     *       降格先では上位スタートになるので、元の DIVISION へ復帰しやすい。</li>
+     *   <li>移動なし: 累積に今週の増減を足し、±{@link #POINT_CAP} にクランプして保持する
+     *       （LEGEND のプラス超過・DIVISION 10 のマイナス超過はここで頭打ちになる）。</li>
+     * </ul>
+     *
+     * @param movement  週の結果（{@code "promote"} / {@code "relegate"} / それ以外は移動なし）
+     * @param oldPoints 週開始時点の累積ポイント
+     * @param delta     今週の増減
+     * @return 保存すべき新しい累積ポイント
+     */
+    static int pointsAfterMovement(String movement, int oldPoints, int delta) {
+        if ("promote".equals(movement)) {
+            return -POST_MOVE_POINTS;
+        }
+        if ("relegate".equals(movement)) {
+            return POST_MOVE_POINTS;
+        }
+        return Math.max(-POINT_CAP, Math.min(POINT_CAP, oldPoints + delta));
     }
 
     /** 順位表の 1 行にユーザー情報を詰める共通処理。 */

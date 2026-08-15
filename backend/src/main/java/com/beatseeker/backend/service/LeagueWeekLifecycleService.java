@@ -203,7 +203,9 @@ public class LeagueWeekLifecycleService {
      *
      * 全グループの順位を確定して {@link LeagueMember} に凍結し、順位に応じた
      * ポイント増減を {@link LeagueEntry} に反映する。累積 ±{@code POINT_CAP} 到達で
-     * 昇降格し、DIVISION が変わったらポイントは 0 にリセット。移動先が無い場合
+     * 昇降格し、DIVISION が変わったらポイントは移動先での立ち位置に合わせて入れ直す
+     * （昇格後は -{@code POST_MOVE_POINTS}・降格後は +{@code POST_MOVE_POINTS}。
+     * {@link LeagueStandingsService#pointsAfterMovement}）。移動先が無い場合
      * （LEGEND のプラス超過・DIVISION 10 のマイナス超過）は範囲内にクランプして保持する。
      * 「リーグの活動なし」（{@link #playedDuringWeek}）の連続週数を数えて自動休止も行う。
      *
@@ -263,17 +265,15 @@ public class LeagueWeekLifecycleService {
             int oldPoints = entry.getPoints() != null ? entry.getPoints() : 0;
             if ("promote".equals(member.getMovement())) {
                 entry.setCurrentTier(Math.max(LeagueDivision.LEGEND, homeTier - 1));
-                entry.setPoints(0); // DIVISION が変わったらポイントはリセット
             } else if ("relegate".equals(member.getMovement())) {
                 entry.setCurrentTier(Math.min(LeagueDivision.LOWEST, homeTier + 1));
-                entry.setPoints(0);
             } else {
                 entry.setCurrentTier(homeTier);
-                // 移動なし: 累積を ±POINT_CAP にクランプして保持
-                // （LEGEND のプラス超過・DIVISION 10 のマイナス超過はここで頭打ちになる）
-                entry.setPoints(Math.max(-LeagueStandingsService.POINT_CAP,
-                        Math.min(LeagueStandingsService.POINT_CAP, oldPoints + delta)));
             }
+            // 昇格後は -POST_MOVE_POINTS（新 DIVISION では下位スタート）、降格後は
+            // +POST_MOVE_POINTS（元の DIVISION へ戻りやすい上位スタート）。移動が無ければ累積を保持。
+            entry.setPoints(LeagueStandingsService.pointsAfterMovement(
+                    member.getMovement(), oldPoints, delta));
 
             // 活動判定は「課題曲をリーグ期間中にプレーしたか」。ライン超え（有効化）は要らない。
             // 有効曲 1 曲以上は「確実にプレーしている」ため、最終プレー日時が取れないスコア
