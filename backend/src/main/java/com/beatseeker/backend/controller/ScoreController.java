@@ -356,8 +356,19 @@ public class ScoreController {
 
         // 1 曲でも更新された場合に限り、最終アップロード日時の更新とフレンド通知を行う。
         if (!updatedSongs.isEmpty()) {
-            updateLastUploadTime(user);
-            notifyFriendsOfScoreBeat(user, updatedSongs);
+            // 付随処理（最終アップロード日時・フレンドの追い抜き通知）の失敗で
+            // スコア保存そのものを巻き戻さない。このメソッドは @Transactional なので、
+            // ここで例外が抜けると upsert 済みのスコアまで丸ごとロールバックされ、
+            // 「アップロードしたのに 1 曲も保存されていない」状態になる。
+            // 注: DB 制約違反などトランザクションを rollback-only にする種類の失敗は、
+            // ここで握り潰しても最終的にはロールバックされる。あくまで Push 送信失敗などの
+            // 非 DB 例外がスコア保存を道連れにしないための防御。
+            try {
+                updateLastUploadTime(user);
+                notifyFriendsOfScoreBeat(user, updatedSongs);
+            } catch (Exception e) {
+                System.err.println("Failed to run post-upload notifications: " + e.getMessage());
+            }
 
             // 開催中のリーグの課題曲が含まれていれば管理者へメール通知する。
             // 通知の失敗でスコア保存を巻き戻さない（メール送信自体も @Async）。

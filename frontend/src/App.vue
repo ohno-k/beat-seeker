@@ -1571,43 +1571,64 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
         }
       } catch (err) {
         console.error("Auto upload failed", err);
-        errorMsg.value = t('app.error.uploadFailed');
-        // フォールバック: サーバー通信に失敗してもクライアント側差分でモーダル表示を諦めない。
-        // 稀に「サーバーには保存されたがレスポンス取得だけ失敗」という状況があり得るため、
-        // そのケースでユーザー体験を損なわないよう history log 保存も念のため試行する。
-        const guestNewTotalRatePt = calcFlatRatePt(newFlat);
-        diffResult.value = {
-            oldTotalBeatPt,
-            newTotalBeatPt,
-            totalBeatPtIncrease: Math.max(0, newTotalBeatPt - oldTotalBeatPt),
-            oldTier,
-            newTier,
-            updatedSongs,
-            oldTotalRatePt,
-            newTotalRatePt: guestNewTotalRatePt,
-            oldRateTier: getRateTierRankInfo(oldTotalRatePt),
-            newRateTier: getRateTierRankInfo(guestNewTotalRatePt),
-            folderAnnouncements: computeFolderAnnouncements(oldFlat, newFlat),
-        };
-        if (updatedSongs.length > 0 || (oldFlat.length === 0 && newFlat.length > 0)) {
+
+        // 送信に失敗したときは、DB を読み直して「本当に保存されなかったのか」を確かめる。
+        // 稀に「サーバーには保存されたがレスポンス取得だけ失敗」という状況があり得るので、
+        // 実際に保存されていた場合だけ従来どおりレポートと成長記録を残す。
+        //
+        // 保存されていないのに成長記録を書いてしまうと、scores には存在しない更新が
+        // score_history_logs と users.totalBeatPt にだけ残り、スコア一覧・ランキング・
+        // リーグが「更新履歴には出ているのに反映されない」状態になる（2026-08-15 の実障害）。
+        let persisted = false;
+        try {
+            await loadSavedScores();
+            const savedScoreByChart = new Map<string, number>(
+                flattenScores(scoreData.value)
+                    .map(s => [`${s.title}_${s.difficultyName}`, s.score] as [string, number])
+            );
+            // 今回の更新分がすべて DB 側に載っていれば「保存は通っていた」と判断する。
+            persisted = updatedSongs.length > 0 && updatedSongs.every(
+                u => (savedScoreByChart.get(`${u.title}_${u.difficulty}`) ?? -1) >= u.newScore
+            );
+        } catch (reloadErr) {
+            console.error("Failed to re-read saved scores after upload failure", reloadErr);
+        }
+
+        if (!persisted) {
+            // 本当に保存されていない: 成長記録も残さず、再アップロードを促すだけにする。
+            errorMsg.value = t('app.error.uploadNotSaved');
+        } else {
+            errorMsg.value = t('app.error.uploadFailed');
+            const guestNewTotalRatePt = calcFlatRatePt(newFlat);
+            diffResult.value = {
+                oldTotalBeatPt,
+                newTotalBeatPt,
+                totalBeatPtIncrease: Math.max(0, newTotalBeatPt - oldTotalBeatPt),
+                oldTier,
+                newTier,
+                updatedSongs,
+                oldTotalRatePt,
+                newTotalRatePt: guestNewTotalRatePt,
+                oldRateTier: getRateTierRankInfo(oldTotalRatePt),
+                newRateTier: getRateTierRankInfo(guestNewTotalRatePt),
+                folderAnnouncements: computeFolderAnnouncements(oldFlat, newFlat),
+            };
             isDiffModalOpen.value = true;
-            if (updatedSongs.length > 0 || newTotalBeatPt > 0) {
-                try {
-                    const newTierLabel = newTier.name + (newTier.tier ? ' ' + newTier.tier : '');
-                    const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
-                    await saveHistoryLog(
-                        newTotalBeatPt,
-                        Math.max(0, newTotalBeatPt - oldTotalBeatPt),
-                        updatedSongs.length,
-                        JSON.stringify(updatedSongs),
-                        newTierLabel,
-                        oldTierLabel,
-                        guestNewTotalRatePt
-                    );
-                    console.log("History log saved (fallback).");
-                } catch (histErr) {
-                    console.error("History log fallback save failed:", histErr);
-                }
+            try {
+                const newTierLabel = newTier.name + (newTier.tier ? ' ' + newTier.tier : '');
+                const oldTierLabel = oldTier.name + (oldTier.tier ? ' ' + oldTier.tier : '');
+                await saveHistoryLog(
+                    newTotalBeatPt,
+                    Math.max(0, newTotalBeatPt - oldTotalBeatPt),
+                    updatedSongs.length,
+                    JSON.stringify(updatedSongs),
+                    newTierLabel,
+                    oldTierLabel,
+                    guestNewTotalRatePt
+                );
+                console.log("History log saved (fallback).");
+            } catch (histErr) {
+                console.error("History log fallback save failed:", histErr);
             }
         }
       }

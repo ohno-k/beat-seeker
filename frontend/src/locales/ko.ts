@@ -1029,6 +1029,7 @@ export const ko = {
   'app.error.noUpdate': '업데이트된 점수가 없습니다 (이미 최신 점수가 저장되어 있습니다).',
   'app.error.historySaveFailed': '성장 기록 저장에 실패했습니다. 페이지를 새로고침한 후 다시 시도해주세요.',
   'app.error.uploadFailed': '점수 저장에 실패했습니다. 가져오기 전과의 비교를 표시합니다.',
+  'app.error.uploadNotSaved': '점수 저장에 실패했습니다. 이번 기록은 서버에 저장되지 않았습니다 (성장 기록도 남기지 않았습니다). 잠시 후 다시 업로드해 주세요.',
   'app.error.parseFailed': 'CSV 분석에 실패했습니다.',
   'app.banner.adminMode': '관리자 모드',
   'app.banner.friendMode': '친구 데이터 열람 중',

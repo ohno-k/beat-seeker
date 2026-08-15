@@ -1028,6 +1028,7 @@ export const en = {
   'app.error.noUpdate': 'No score updates found (latest scores already saved).',
   'app.error.historySaveFailed': 'Failed to save growth record. Please reload and try again.',
   'app.error.uploadFailed': 'Failed to save scores. Showing comparison before import.',
+  'app.error.uploadNotSaved': 'Failed to save scores. Nothing from this import was saved on the server (no growth record was created either). Please wait a moment and upload again.',
   'app.error.parseFailed': 'Failed to parse CSV.',
   'app.banner.adminMode': 'Admin Mode',
   'app.banner.friendMode': 'Viewing Friend\'s Data',
