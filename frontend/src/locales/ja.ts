@@ -290,6 +290,8 @@ export const ja = {
   'table.colDifficulty': '難易度',
   'table.unofficialSummary': '非公式難易度表サマリー',
   'table.aboutSummary': 'このサマリーについて',
+  'table.filterLevelLabel': '表示レベル',
+  'table.filterAll': 'すべて',
   'table.aboutFolderRank': 'フォルダランクについて',
   'table.folderRankExplanation': '各フォルダの全楽曲の合計BEAT-PTをもとに、フォルダランクを算出します。',
   'table.legendCriteria': '■ LEGENDラインの基準',

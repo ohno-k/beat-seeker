@@ -313,6 +313,8 @@ export const ko = {
   'table.colDifficulty': '난이도',
   'table.unofficialSummary': '비공식 난이도표 요약',
   'table.aboutSummary': '이 요약에 대하여',
+  'table.filterLevelLabel': '표시 레벨',
+  'table.filterAll': '전체',
   'table.aboutFolderRank': '폴더 랭크에 대하여',
   'table.folderRankExplanation': '각 폴더에 있는 모든 곡의 합계 BEAT-PT를 바탕으로 폴더 랭크를 산출합니다.',
   'table.legendCriteria': '■ LEGEND 라인 기준',

@@ -3,6 +3,7 @@
  * 【コンポーネントの役割】 非公式難易度表（☆11.0〜☆13.0）を折返し可能な行で一覧表示する。
  * - 難易度表に定義された全曲を、ユーザーのプレイ済みスコア / 未プレイのプレースホルダに分けて集約
  * - 各難易度ランクごとに平均スコアレート・獲得 Beat-PT を集計し、フォルダランク（A/AA/AAA 等）を算出
+ * - 表示レベル（すべて / ☆11 / ☆12）で行を絞り込み可能
  * - 展開/折りたたみで曲一覧を表示、情報モーダルとレート早見表モーダルを内包
  *
  * @prop scores プレイ済みスコアレコード配列。
@@ -31,6 +32,17 @@ const showRateTable = ref(false);
 const rankingModalRank = ref<{ rank: string; totalCount: number } | null>(null);
 /** 成長グラフモーダルの対象難易度（null なら非表示）。 */
 const growthChartRank = ref<{ rank: string; songCount: number; currentTotalBeatPoints: number } | null>(null);
+
+/** 表示レベル絞り込み。'all' は全ランク、'11'/'12' はその整数部のランクのみ。 */
+type LevelFilter = 'all' | '11' | '12';
+/** 現在選択中の表示レベル。 */
+const levelFilter = ref<LevelFilter>('all');
+/** 表示レベル切替ボタンの定義（ラベルは ☆ 付きで言語非依存）。 */
+const levelFilterOptions = computed<{ value: LevelFilter; label: string }[]>(() => [
+  { value: 'all', label: t('table.filterAll') },
+  { value: '11', label: '☆11' },
+  { value: '12', label: '☆12' },
+]);
 
 // ☆11.0 〜 ☆13.1 までの 0.1 刻みラベル配列を生成（レート早見表の列）。
 const allFolders: string[] = [];
@@ -227,6 +239,16 @@ const tableData = computed(() => {
     };
   });
 });
+
+/**
+ * 【computed の役割】 表示レベル絞り込みを適用した行データ。
+ * 'all' 以外はランクの整数部（☆11.x → 11）が一致する行だけを残す。
+ */
+const visibleTableData = computed(() => {
+  if (levelFilter.value === 'all') return tableData.value;
+  const target = Number(levelFilter.value);
+  return tableData.value.filter(d => Math.floor(parseFloat(d.rank)) === target);
+});
 </script>
 
 <template>
@@ -269,6 +291,24 @@ const tableData = computed(() => {
           </div>
         </div>
       </h3>
+      <!-- 表示レベル絞り込み（すべて / ☆11 / ☆12） -->
+      <div
+        role="group"
+        :aria-label="t('table.filterLevelLabel')"
+        class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700/50 self-start sm:self-auto shrink-0"
+      >
+        <button
+          v-for="opt in levelFilterOptions"
+          :key="opt.value"
+          type="button"
+          @click="levelFilter = opt.value"
+          :aria-pressed="levelFilter === opt.value"
+          class="px-3 py-1 text-xs font-bold rounded-md whitespace-nowrap transition-colors"
+          :class="levelFilter === opt.value
+            ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        >{{ opt.label }}</button>
+      </div>
     </div>
     <!-- Click-outside backdrop for info tooltip -->
     <div v-if="showInfo" class="fixed inset-0 z-10" @click="showInfo = false"></div>
@@ -336,7 +376,7 @@ const tableData = computed(() => {
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-xs sm:text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
-          <template v-for="data in tableData" :key="data.rank">
+          <template v-for="data in visibleTableData" :key="data.rank">
             <tr
               @click="toggleRank(data.rank)"
               @keydown.enter.prevent="toggleRank(data.rank)"
@@ -501,7 +541,7 @@ const tableData = computed(() => {
             </tr>
           </template>
           
-          <tr v-if="tableData.length === 0">
+          <tr v-if="visibleTableData.length === 0">
             <td colspan="6" class="py-12 text-center text-slate-500 dark:text-slate-400">
               {{ t('table.noUnofficialData') }}
             </td>

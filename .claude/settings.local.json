@@ -3,7 +3,9 @@
     "allow": [
       "Bash(docker-compose up --build -d backend)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npx vue-tsc *)"
+      "Bash(npx vue-tsc *)",
+      "Bash(curl -s --max-time 20 https://beat-seeker.com/)",
+      "Bash(curl -sSI --max-time 20 https://beat-seeker.com)"
     ]
   }
 }
