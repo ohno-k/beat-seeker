@@ -68,6 +68,8 @@ const historyDetailError = ref('');
 const showInfo = ref(false);
 /** 管理者 overview（管理者のみ取得）。 */
 const adminLadders = ref<LeagueAdminLadder[]>([]);
+/** 管理者 overview の取得に失敗した理由（取得できないと編成ブロックが空になるので理由を出す）。 */
+const adminError = ref('');
 /** 仮編成プレビュー（管理者が生成したときのみ。DB は更新しない）。 */
 const preview = ref<LeaguePreview | null>(null);
 
@@ -225,8 +227,11 @@ const loadAdmin = async () => {
   if (!isAdmin.value) return;
   try {
     adminLadders.value = await league.fetchAdminOverview();
-  } catch {
+    adminError.value = '';
+  } catch (e) {
+    // 握り潰すと編成ブロックが黙って消えて原因が分からなくなるので、理由を管理者に見せる。
     adminLadders.value = [];
+    adminError.value = e instanceof Error ? e.message : String(e);
   }
   // 差し替え UI を表示する DIVISION（編集を開いている / 未編成）の選曲プールを先読みする。
   for (const al of adminLadders.value) {
@@ -920,6 +925,14 @@ onUnmounted(() => {
       <!-- 管理者セクション -->
       <div v-if="isAdmin" class="bg-white dark:bg-slate-800 rounded-xl shadow p-5 border-2 border-amber-300 dark:border-amber-700">
         <h3 class="font-bold text-amber-700 dark:text-amber-400">{{ t('league.admin.title') }}</h3>
+        <!-- overview が取れないと編成ブロックが丸ごと消えるので、原因（サーバのエラー文）を出す。 -->
+        <div v-if="adminError"
+             class="mt-2 rounded-lg border border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/20 px-3 py-2">
+          <p class="text-xs font-semibold text-rose-700 dark:text-rose-300">{{ t('league.admin.overviewError') }}</p>
+          <p class="mt-1 text-[11px] break-words text-rose-600 dark:text-rose-400">{{ adminError }}</p>
+          <button class="mt-1.5 text-[11px] px-2 py-1 rounded border border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 disabled:opacity-50"
+                  :disabled="busy" @click="loadAdmin()">{{ t('league.admin.retry') }}</button>
+        </div>
         <div v-for="al in adminLadders" :key="al.ladder" class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="font-semibold text-slate-700 dark:text-slate-200">

@@ -1561,6 +1561,8 @@ export const ja = {
   'league.admin.poolLoading': '選曲プールを読み込み中…',
   'league.admin.disableSong': '無効化',
   'league.admin.enableSong': '有効に戻す',
+  'league.admin.overviewError': '管理情報（編成・課題曲）を取得できませんでした。',
+  'league.admin.retry': '再取得',
   'league.admin.songFallback': '補填',
   'league.admin.songFallbackFull': 'フォールバック補填',
   'league.admin.songFallbackHint': '色付きの曲は、通常の選曲基準（グループ全員が未プレー、または 2 人以上がプレー済みで拮抗）を満たす候補が足りず、プール全体からの補填で埋まった枠です。集計上は通常の課題曲と同じ扱いなので、そのままでも問題ありません（気になる場合は差し替えてください）。',

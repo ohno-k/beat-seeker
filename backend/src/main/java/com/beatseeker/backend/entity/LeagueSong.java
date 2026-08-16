@@ -86,8 +86,13 @@ public class LeagueSong {
      * 3 曲に足りず、プール全体からの補填で埋めた曲。集計上の扱いは通常の課題曲と全く同じで、
      * 「選曲基準を満たしていない枠」を管理者が一目で見つけて差し替えられるようにするための印。
      * 管理者が手で差し替えた曲は意図した選曲なので false に戻す。
+     *
+     * <p>この列だけは <b>NOT NULL を付けない</b>。既存行のあるテーブルへ NOT NULL 列を足す ALTER は
+     * 失敗することがあり、失敗すると列が無いまま新コードが SELECT して league_songs 全体が
+     * 500 になる（2026-08-17 に本番の管理画面が真っ白になった原因）。null は false 扱いにするので、
+     * 追加が「必ず通る」形（nullable + default false）にしておく。
      */
-    @Column(nullable = false)
+    @Column
     @org.hibernate.annotations.ColumnDefault("false")
     private Boolean fallback = false;
 

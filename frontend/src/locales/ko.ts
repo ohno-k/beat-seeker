@@ -1503,6 +1503,8 @@ export const ko = {
   'league.admin.poolLoading': '선곡 풀을 불러오는 중…',
   'league.admin.disableSong': '무효화',
   'league.admin.enableSong': '다시 유효화',
+  'league.admin.overviewError': '관리 정보(편성·과제곡)를 불러오지 못했습니다.',
+  'league.admin.retry': '다시 가져오기',
   'league.admin.songFallback': '보충',
   'league.admin.songFallbackFull': '폴백 보충',
   'league.admin.songFallbackHint': '색이 칠해진 곡은 통상적인 선곡 기준(그룹 전원이 미플레이, 또는 2명 이상이 플레이했고 기록이 접전)을 만족하는 후보가 부족하여 풀 전체에서 보충한 자리입니다. 집계상으로는 일반 과제곡과 완전히 동일하게 다루므로 그대로 두어도 문제없습니다(신경 쓰인다면 교체하세요).',

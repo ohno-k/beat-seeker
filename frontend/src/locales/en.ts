@@ -1502,6 +1502,8 @@ export const en = {
   'league.admin.poolLoading': 'Loading song pool…',
   'league.admin.disableSong': 'Disable',
   'league.admin.enableSong': 'Re-enable',
+  'league.admin.overviewError': 'Could not load the admin data (formation and songs).',
+  'league.admin.retry': 'Retry',
   'league.admin.songFallback': 'Filler',
   'league.admin.songFallbackFull': 'Fallback filler',
   'league.admin.songFallbackHint': 'Highlighted songs were filled in from the whole pool because there were not enough candidates meeting the normal criteria (nobody in the group has played it, or two or more have played it and their scores are close). They are scored exactly like any other song, so leaving them is fine — swap them out if you would rather not use them.',
