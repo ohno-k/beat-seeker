@@ -79,8 +79,25 @@ public class LeagueSong {
     @org.hibernate.annotations.ColumnDefault("false")
     private Boolean disabled = false;
 
+    /**
+     * 抽選のフォールバックで埋まった枠か。
+     *
+     * true = 通常の選曲基準（グループ全員が未プレー、または 2 人以上がプレー済みで拮抗）を満たす候補が
+     * 3 曲に足りず、プール全体からの補填で埋めた曲。集計上の扱いは通常の課題曲と全く同じで、
+     * 「選曲基準を満たしていない枠」を管理者が一目で見つけて差し替えられるようにするための印。
+     * 管理者が手で差し替えた曲は意図した選曲なので false に戻す。
+     */
+    @Column(nullable = false)
+    @org.hibernate.annotations.ColumnDefault("false")
+    private Boolean fallback = false;
+
     /** 無効化されているか（null は false 扱い）。 */
     public boolean isDisabled() {
         return Boolean.TRUE.equals(disabled);
+    }
+
+    /** フォールバック補填で選ばれた曲か（null は false 扱い）。 */
+    public boolean isFallback() {
+        return Boolean.TRUE.equals(fallback);
     }
 }

@@ -50,6 +50,12 @@ export interface LeagueSongInfo {
    * 有効曲にも着順ポイントにも数えない（曲の枠自体は「無効」表示で残る）。
    */
   disabled?: boolean;
+  /**
+   * 抽選のフォールバックで埋まった枠か（管理者 overview のみ）。true = 通常の選曲基準
+   * （全員未プレー / 2 人以上で拮抗）を満たす候補が足りず、プール全体から補填した曲。
+   * 集計上は通常曲と同じ扱いで、差し替え候補として色分け表示するための印。
+   */
+  fallback?: boolean;
   /** このグループの「ライン」= 週開始時点の最高 EX（匿名のグループ共通閾値）。誰も未プレーなら null。 */
   lineEx?: number | null;
   /** このグループの「ライン」= 週開始時点の最小 BP。null なら未設定。 */
@@ -234,6 +240,8 @@ export interface LeaguePreviewSong {
   lineRate: number | null;
   /** ライン保持者の表示名（同値が複数居れば全員。誰も未プレーなら空）。 */
   lineHolders: string[];
+  /** 選曲基準を満たす候補が足りず、フォールバック補填で埋まった枠か（色分け表示用）。 */
+  fallback?: boolean;
 }
 
 /** 仮編成プレビューの 1 グループ。 */
@@ -483,7 +491,12 @@ export function useLeague() {
         groups: t.groups.map((g) => ({
           groupIndex: g.groupIndex,
           userIds: g.players.map((p) => p.userId),
-          songs: g.songs.map((s) => ({ title: s.title, difficultyName: s.difficultyName })),
+          // fallback はプレビューで付いた「補填枠」の印。適用後の draft でも色分けできるよう持ち越す。
+          songs: g.songs.map((s) => ({
+            title: s.title,
+            difficultyName: s.difficultyName,
+            fallback: s.fallback ?? false,
+          })),
         })),
       })),
     };

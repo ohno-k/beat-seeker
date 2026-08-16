@@ -39,6 +39,14 @@ public class LeagueSongDrawService {
     /** 抽選対象の公式最小レベル（「公式 Lv11 から」）。 */
     static final int OFFICIAL_MIN_LEVEL = 11;
 
+    /**
+     * 抽選で選ばれた 1 曲。{@code fallback} = 通常の選曲基準を満たす候補が足りず、
+     * プール全体からの補填（またはプールそのものの拡大）で埋めた枠であることを表す。
+     * 集計上は通常曲と同じ扱いで、管理者が差し替え候補を見つけるための印。
+     */
+    public record DrawnSong(SongDefinition song, boolean fallback) {
+    }
+
     private final SongDefinitionRepository songDefinitionRepository;
     private final DifficultyRankRepository difficultyRankRepository;
     private final LeagueSongRepository leagueSongRepository;
@@ -77,6 +85,9 @@ public class LeagueSongDrawService {
 
         int[] band = rankBandTenths(tier);
         List<SongDefinition> pool = buildPool(masterIndex, band[0], band[1]);
+        // 「その DIVISION の帯に入っていた曲」。緩和で帯の外から拾った曲を後で見分けるために控えておく。
+        Set<String> bandTitles = new HashSet<>();
+        for (SongDefinition sd : pool) bandTitles.add(sd.getTitle());
 
         // 直近の出題曲を除外（同 DIVISION・両ラダー横断）。足りなければ段階的に緩和する。
         Set<String> recentTitles = new HashSet<>(leagueSongRepository.findRecentTitlesByTier(
@@ -109,6 +120,8 @@ public class LeagueSongDrawService {
             song.setDifficultyName(LeagueChartNotation.codeToName(sd.getDifficulty()));
             song.setLevel(sd.getLevel());
             song.setNotes(sd.getNotes());
+            // 緩和で拾った曲（直近出題の再出題／帯の外）はフォールバック扱いで印を付ける。
+            song.setFallback(recentTitles.contains(sd.getTitle()) || !bandTitles.contains(sd.getTitle()));
             drawn.add(song);
         }
         return leagueSongRepository.saveAll(drawn);
@@ -124,6 +137,7 @@ public class LeagueSongDrawService {
      *  - ただし「ライン保持者（各曲の最高 EX の人）」がグループ内でなるべく重複しないよう選ぶ
      *    （1 人が複数ラインを持つのを避けてラインを分散。2026-07-29 ユーザー要望）。
      *  - 候補が 3 曲に満たなければ、プール全体からランダムに補充する（フォールバック）。
+     *    補填した枠は {@link LeagueSong#getFallback()} = true で保存し、管理者画面で色分け表示する。
      *
      * @param week       対象週
      * @param tier       階級（プールの難易度帯を決める）
@@ -134,10 +148,11 @@ public class LeagueSongDrawService {
     @Transactional
     public List<LeagueSong> drawSongsForGroup(LeagueWeek week, int tier, int groupIndex, List<User> members) {
         leagueSongRepository.deleteByWeekAndTierAndGroupIndex(week, tier, groupIndex);
-        List<SongDefinition> chosen = selectSongsForGroup(tier, members, week.getStartsAt());
+        List<DrawnSong> chosen = selectSongsForGroup(tier, members, week.getStartsAt());
 
         List<LeagueSong> drawn = new ArrayList<>();
-        for (SongDefinition sd : chosen) {
+        for (DrawnSong pick : chosen) {
+            SongDefinition sd = pick.song();
             LeagueSong song = new LeagueSong();
             song.setWeek(week);
             song.setTier(tier);
@@ -147,6 +162,7 @@ public class LeagueSongDrawService {
             song.setDifficultyName(LeagueChartNotation.codeToName(sd.getDifficulty()));
             song.setLevel(sd.getLevel());
             song.setNotes(sd.getNotes());
+            song.setFallback(pick.fallback());
             drawn.add(song);
         }
         return leagueSongRepository.saveAll(drawn);
@@ -162,9 +178,9 @@ public class LeagueSongDrawService {
      * @param tier           階級（プールの難易度帯を決める）
      * @param members        そのグループの参加者
      * @param referenceStart 「直近 N 週の出題除外」の基準となる週開始日時（プレビューでは開始予定日時）
-     * @return 選定した課題曲の {@link SongDefinition}（スロット順、通常 3 件）
+     * @return 選定した課題曲（スロット順、通常 3 件）。フォールバック補填の枠には印が付く
      */
-    public List<SongDefinition> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart) {
+    public List<DrawnSong> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart) {
         return selectSongsForGroup(tier, members, referenceStart, java.util.Set.of());
     }
 
@@ -176,13 +192,17 @@ public class LeagueSongDrawService {
      *
      * @param alsoExclude recent に追加で除外するタイトル（同一週・同一階級の他グループの出題曲など）
      */
-    public List<SongDefinition> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart,
-                                                    Set<String> alsoExclude) {
+    public List<DrawnSong> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart,
+                                               Set<String> alsoExclude) {
         Map<String, SongDefinition> masterIndex = buildMasterIndex();
         int[] band = rankBandTenths(tier);
         List<SongDefinition> rawPool = buildPool(masterIndex, band[0], band[1]);
+        // 帯のプールが薄くて難易度表全体へ広げた場合は、その階級の想定難易度から外れるので
+        // 選ばれた曲すべてをフォールバック扱いにする。
+        boolean poolWidened = false;
         if (distinctTitleCount(rawPool) < SONGS_PER_WEEK) {
             rawPool = buildPool(masterIndex, 0, 9999); // プールが薄い場合は難易度表全体（Lv11 以上）へ拡大
+            poolWidened = true;
         }
         // タイトル単位に一意化（同一タイトルの別譜面は 1 つに）。
         LinkedHashMap<String, SongDefinition> poolByTitle = new LinkedHashMap<>();
@@ -245,7 +265,7 @@ public class LeagueSongDrawService {
         // なるべく重複しないようにする（1 人が複数のラインを持つのを避け、卓の中でラインを分散させる）。
         // ② 曲（誰も未プレー＝ラインなし）は保持者が居ないので自由に選べる。
         Collections.shuffle(candidates);
-        List<SongDefinition> chosen = new ArrayList<>();
+        List<DrawnSong> chosen = new ArrayList<>();
         Set<String> used = new HashSet<>();
         Set<Long> usedHolders = new HashSet<>();
         // パス1: ライン保持者がまだ登場していない曲（または②曲）を優先して埋める。
@@ -255,25 +275,27 @@ public class LeagueSongDrawService {
             Long holder = holderByTitle.get(sd.getTitle()); // null = ②曲（ラインなし）
             if (holder != null && !usedHolders.add(holder)) continue; // 既出の保持者はパス1では飛ばす
             used.add(sd.getTitle());
-            chosen.add(sd);
+            chosen.add(new DrawnSong(sd, poolWidened));
         }
         // パス2: まだ3曲に満たなければ、保持者の重複を許して候補から補充する。
+        // （選曲基準②③は満たしているのでフォールバック扱いにはしない）
         for (SongDefinition sd : candidates) {
             if (chosen.size() >= SONGS_PER_WEEK) break;
-            if (used.add(sd.getTitle())) chosen.add(sd);
+            if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, poolWidened));
         }
         // パス3: それでも足りなければプール全体から補充（直近出題を優先的に避ける）。
+        // ここで埋めた枠は選曲基準を満たしていないので、フォールバックの印を付けて管理者に見せる。
         if (chosen.size() < SONGS_PER_WEEK) {
             List<SongDefinition> fallback = new ArrayList<>(pool);
             Collections.shuffle(fallback);
             for (SongDefinition sd : fallback) { // まずは直近出題を避けて補充
                 if (chosen.size() >= SONGS_PER_WEEK) break;
                 if (recent.contains(sd.getTitle())) continue;
-                if (used.add(sd.getTitle())) chosen.add(sd);
+                if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, true));
             }
             for (SongDefinition sd : fallback) { // それでも足りなければ直近出題も許容
                 if (chosen.size() >= SONGS_PER_WEEK) break;
-                if (used.add(sd.getTitle())) chosen.add(sd);
+                if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, true));
             }
         }
         return chosen;

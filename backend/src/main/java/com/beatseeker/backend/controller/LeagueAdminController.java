@@ -160,6 +160,7 @@ public class LeagueAdminController {
         song.setDifficultyName(LeagueChartNotation.codeToName(def.getDifficulty()));
         song.setLevel(def.getLevel());
         song.setNotes(def.getNotes());
+        song.setFallback(false); // 管理者が選び直した曲は意図した選曲なのでフォールバックの印を外す
         leagueSongRepository.save(song);
         return ResponseEntity.ok(Map.of("message", "課題曲を差し替えました", "song", toSongMap(song)));
     }
@@ -784,6 +785,8 @@ public class LeagueAdminController {
         m.put("level", song.getLevel());
         m.put("notes", song.getNotes());
         m.put("disabled", song.isDisabled());
+        // 抽選の選曲基準を満たす候補が足りず、フォールバック補填で埋まった枠か（管理者画面で色分けする）。
+        m.put("fallback", song.isFallback());
         return m;
     }
 

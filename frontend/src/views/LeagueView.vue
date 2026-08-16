@@ -520,6 +520,32 @@ const memberCell = (member: LeagueAdminMember, slot: number) =>
 const tierMemberCount = (tierInfo: LeagueAdminWeek['tiers'][number]) =>
   tierInfo.groups.reduce((sum, g) => sum + g.members.length, 0);
 
+/** 抽選のフォールバック補填で埋まった曲が含まれるか（説明文を出すかの判定に使う）。 */
+const hasFallbackSong = (songs: { fallback?: boolean }[]) => songs.some(s => s.fallback);
+
+/** その週の課題曲にフォールバック補填の枠があるか。 */
+const weekHasFallback = (week: LeagueAdminWeek | null | undefined) =>
+  !!week && week.tiers.some(ti => hasFallbackSong(ti.songs));
+
+/** 仮編成プレビューにフォールバック補填の枠があるか。 */
+const previewHasFallback = computed(() =>
+  !!preview.value && preview.value.tiers.some(tp => tp.groups.some(g => hasFallbackSong(g.songs))));
+
+/** 課題曲の無効化パネルを開いている週 ID。既定は畳んでおく（管理画面が縦に長くなりすぎるため）。 */
+const disablePanelOpen = ref<Set<number>>(new Set());
+const isDisablePanelOpen = (weekId: number) => disablePanelOpen.value.has(weekId);
+const toggleDisablePanel = (weekId: number) => {
+  if (disablePanelOpen.value.has(weekId)) {
+    disablePanelOpen.value.delete(weekId);
+  } else {
+    disablePanelOpen.value.add(weekId);
+  }
+};
+
+/** その週で無効化されている課題曲の数（畳んでいても件数だけは見えるようにする）。 */
+const disabledSongCount = (week: LeagueAdminWeek) =>
+  week.tiers.reduce((sum, ti) => sum + ti.songs.filter(s => s.disabled).length, 0);
+
 /** 課題曲の差し替えフォームを開いている (weekId, tier)。既定は畳んで編成表を見やすくする。 */
 const songEditOpen = ref<Set<string>>(new Set());
 const isSongEditOpen = (weekId: number, tier: number) => songEditOpen.value.has(`${weekId}-${tier}`);
@@ -922,6 +948,11 @@ onUnmounted(() => {
               </span>
               <span v-else class="ml-1 text-slate-400">/ {{ t('league.admin.notFormed') }}</span>
             </div>
+            <!-- 抽選の選曲基準を満たせず補填で埋まった枠がある場合だけ、色分けの意味を説明する。 -->
+            <p v-if="weekHasFallback(al.draftWeek)"
+               class="mt-1 max-w-2xl text-[11px] leading-relaxed text-violet-600 dark:text-violet-400">
+              {{ t('league.admin.songFallbackHint') }}
+            </p>
             <div v-for="tierInfo in al.draftWeek.tiers" :key="tierInfo.tier" class="mt-3 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
@@ -947,7 +978,9 @@ onUnmounted(() => {
                     ? t('league.admin.poolCount', { n: songPools[tierInfo.tier].length })
                     : t('league.admin.poolLoading') }}
                 </div>
-                <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id" class="flex flex-wrap items-center gap-2 text-xs">
+                <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id"
+                     class="flex flex-wrap items-center gap-2 text-xs rounded px-1 py-0.5"
+                     :class="song.fallback ? 'bg-violet-100 dark:bg-violet-900/30' : ''">
                   <span v-if="song.groupIndex != null"
                         class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
@@ -964,6 +997,11 @@ onUnmounted(() => {
                       {{ opt.title }} [{{ opt.difficultyName }}{{ opt.level ? ` ☆${opt.level}` : '' }}]
                     </option>
                   </select>
+                  <span v-if="song.fallback"
+                        class="text-[10px] px-1.5 py-0.5 rounded bg-violet-200 dark:bg-violet-900/60 text-violet-800 dark:text-violet-200 font-semibold whitespace-nowrap"
+                        :title="t('league.admin.songFallbackHint')">
+                    {{ t('league.admin.songFallback') }}
+                  </span>
                   <span v-if="song.disabled"
                         class="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-semibold whitespace-nowrap">
                     {{ t('league.songDisabled') }}
@@ -992,9 +1030,11 @@ onUnmounted(() => {
                           {{ t('league.admin.preview.player') }}
                         </th>
                         <th v-for="s in groupSongs(tierInfo, g.groupIndex)" :key="s.id"
-                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]">
+                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]"
+                            :class="s.fallback ? 'bg-violet-100 dark:bg-violet-900/30' : ''">
                           <div class="break-words leading-tight"
                                :class="s.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'">{{ s.title }}</div>
+                          <div v-if="s.fallback" class="text-[10px] font-semibold text-violet-600 dark:text-violet-400">{{ t('league.admin.songFallbackFull') }}</div>
                           <div v-if="s.disabled" class="text-[10px] font-semibold text-rose-600 dark:text-rose-400">{{ t('league.songDisabled') }}</div>
                           <div class="text-[10px] font-normal text-slate-400">
                             {{ s.difficultyName }} <span v-if="s.level">☆{{ s.level }}</span>
@@ -1058,13 +1098,29 @@ onUnmounted(() => {
           <!-- 開催中の週の課題曲: グループごとに無効化を切り替える。
                開始後はラインが凍結済みで差し替えができないため、解禁不可能な曲はここで集計から外す。 -->
           <div v-if="al.activeWeek && al.activeWeek.tiers.length" class="mt-2">
-            <p class="text-[11px] text-slate-400 max-w-2xl leading-relaxed">{{ t('league.admin.disableHint') }}</p>
+            <!-- 全 DIVISION × 全課題曲を並べると縦に長いので、既定は畳んでおく。 -->
+            <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    @click="toggleDisablePanel(al.activeWeek.id)">
+              {{ isDisablePanelOpen(al.activeWeek.id)
+                ? t('league.admin.closeDisablePanel')
+                : t('league.admin.openDisablePanel') }}
+              <span v-if="disabledSongCount(al.activeWeek)" class="ml-1 text-rose-600 dark:text-rose-400 font-semibold">
+                ({{ disabledSongCount(al.activeWeek) }})
+              </span>
+            </button>
+            <template v-if="isDisablePanelOpen(al.activeWeek.id)">
+            <p class="mt-2 text-[11px] text-slate-400 max-w-2xl leading-relaxed">{{ t('league.admin.disableHint') }}</p>
+            <p v-if="weekHasFallback(al.activeWeek)"
+               class="mt-1 max-w-2xl text-[11px] leading-relaxed text-violet-600 dark:text-violet-400">
+              {{ t('league.admin.songFallbackHint') }}
+            </p>
             <div v-for="tierInfo in al.activeWeek.tiers" :key="tierInfo.tier"
                  class="mt-2 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
               <div class="text-xs font-bold text-slate-700 dark:text-slate-200">{{ divisionName(tierInfo.tier) }}</div>
               <div v-if="!tierInfo.songs.length" class="mt-1 text-[11px] text-slate-400">{{ t('league.admin.none') }}</div>
               <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id"
-                   class="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                   class="mt-1 flex flex-wrap items-center gap-2 text-xs rounded px-1 py-0.5"
+                   :class="song.fallback ? 'bg-violet-100 dark:bg-violet-900/30' : ''">
                 <span v-if="song.groupIndex != null"
                       class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                   {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
@@ -1074,6 +1130,11 @@ onUnmounted(() => {
                       :class="song.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'">
                   {{ song.title }}
                   <span class="text-slate-400">[{{ song.difficultyName }}{{ song.level ? ` ☆${song.level}` : '' }}]</span>
+                </span>
+                <span v-if="song.fallback"
+                      class="text-[10px] px-1.5 py-0.5 rounded bg-violet-200 dark:bg-violet-900/60 text-violet-800 dark:text-violet-200 font-semibold whitespace-nowrap"
+                      :title="t('league.admin.songFallbackHint')">
+                  {{ t('league.admin.songFallback') }}
                 </span>
                 <span v-if="song.disabled"
                       class="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-semibold whitespace-nowrap">
@@ -1089,6 +1150,7 @@ onUnmounted(() => {
                 </button>
               </div>
             </div>
+            </template>
           </div>
         </div>
 
@@ -1114,6 +1176,9 @@ onUnmounted(() => {
               <span class="ml-2 text-slate-400">{{ t('league.admin.preview.lineHint') }}</span>
             </div>
             <p class="mt-1 text-[11px] text-slate-400">{{ t('league.admin.preview.applyHint') }}</p>
+            <p v-if="previewHasFallback" class="mt-1 max-w-2xl text-[11px] leading-relaxed text-violet-600 dark:text-violet-400">
+              {{ t('league.admin.songFallbackHint') }}
+            </p>
             <div v-if="!preview.tiers.length" class="mt-2 text-xs text-slate-400">{{ t('league.admin.preview.empty') }}</div>
 
             <!-- 卓（host DIVISION）ごと -->
@@ -1137,8 +1202,10 @@ onUnmounted(() => {
                           {{ t('league.admin.preview.player') }}
                         </th>
                         <th v-for="s in g.songs" :key="s.slot"
-                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]">
+                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]"
+                            :class="s.fallback ? 'bg-violet-100 dark:bg-violet-900/30' : ''">
                           <div class="text-slate-700 dark:text-slate-200 break-words leading-tight">{{ s.title }}</div>
+                          <div v-if="s.fallback" class="text-[10px] font-semibold text-violet-600 dark:text-violet-400">{{ t('league.admin.songFallbackFull') }}</div>
                           <div class="text-[10px] font-normal text-slate-400">
                             {{ s.difficultyName }} <span v-if="s.level">☆{{ s.level }}</span>
                           </div>

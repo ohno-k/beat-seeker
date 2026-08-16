@@ -928,8 +928,9 @@ public class LeagueWeekLifecycleService {
             for (int gi = 0; gi < groups.size(); gi++) {
                 List<Seat> g = groups.get(gi);
                 List<User> users = g.stream().map(s -> s.entry().getUser()).toList();
-                List<SongDefinition> songs = songDrawService.selectSongsForGroup(host, users, refStart, usedInTier);
-                for (SongDefinition sd : songs) usedInTier.add(sd.getTitle());
+                List<LeagueSongDrawService.DrawnSong> songs =
+                        songDrawService.selectSongsForGroup(host, users, refStart, usedInTier);
+                for (LeagueSongDrawService.DrawnSong ds : songs) usedInTier.add(ds.song().getTitle());
                 groupList.add(buildPreviewGroup(gi, g, songs));
             }
             Map<String, Object> tm = new LinkedHashMap<>();
@@ -949,7 +950,8 @@ public class LeagueWeekLifecycleService {
      * {@code isLine} が true ＝その選手がラインを持っている（＝強調表示対象）。未プレーは {@code played=false}。
      */
     private Map<String, Object> buildPreviewGroup(int groupIndex, List<Seat> members,
-                                                  List<SongDefinition> songs) {
+                                                  List<LeagueSongDrawService.DrawnSong> picks) {
+        List<SongDefinition> songs = picks.stream().map(LeagueSongDrawService.DrawnSong::song).toList();
         int slots = songs.size();
         List<String> titles = songs.stream().map(SongDefinition::getTitle).distinct().toList();
         List<String> diffs = songs.stream()
@@ -1034,6 +1036,8 @@ public class LeagueWeekLifecycleService {
             sm.put("notes", sd.getNotes());
             sm.put("lineEx", lineEx[i] > 0 ? lineEx[i] : null);
             sm.put("lineRate", lineEx[i] > 0 ? roundRate(lineEx[i], sd.getNotes()) : null);
+            // 選曲基準を満たす候補が足りずフォールバックで埋めた枠か（管理者画面で色分けする）。
+            sm.put("fallback", picks.get(i).fallback());
             // ライン保持者（同値が複数居れば全員）。誰がラインを持っているかを一覧で確認できるようにする。
             List<String> holders = new ArrayList<>();
             if (lineEx[i] > 0) {
@@ -1060,8 +1064,11 @@ public class LeagueWeekLifecycleService {
     // 仮編成プレビューの適用（プレビューで見た編成をそのまま draft 週に保存する）
     // ---------------------------------------------------------------------
 
-    /** 適用リクエストの課題曲指定（タイトル＋難易度名）。level / notes は active マスタから取り直す。 */
-    public record PreviewSongRef(String title, String difficultyName) {}
+    /**
+     * 適用リクエストの課題曲指定（タイトル＋難易度名）。level / notes は active マスタから取り直す。
+     * {@code fallback} はプレビュー時に付いたフォールバックの印をそのまま持ち越すためのもの（省略時 false）。
+     */
+    public record PreviewSongRef(String title, String difficultyName, Boolean fallback) {}
 
     /** 適用リクエストの 1 グループ（メンバーの userId と課題曲）。 */
     public record PreviewGroupRef(Integer groupIndex, List<Long> userIds, List<PreviewSongRef> songs) {}
@@ -1231,6 +1238,7 @@ public class LeagueWeekLifecycleService {
         song.setDifficultyName(LeagueChartNotation.codeToName(def.getDifficulty()));
         song.setLevel(def.getLevel());
         song.setNotes(def.getNotes());
+        song.setFallback(Boolean.TRUE.equals(ref.fallback()));
         return song;
     }
 
