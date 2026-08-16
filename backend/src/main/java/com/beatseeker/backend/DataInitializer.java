@@ -153,6 +153,16 @@ public class DataInitializer implements ApplicationRunner {
                     "END IF; END $$;"
             ).executeUpdate());
 
+        // 手順4.4: league_songs.fallback 列を明示的に足す（冪等）。
+        //          ddl-auto=update による自動追加が失敗すると（既存行のあるテーブルへ NOT NULL 列を
+        //          足そうとした場合など）、新コードが SELECT する列が無いまま league_songs 系の
+        //          クエリが全滅し、リーグ画面・管理画面が 500 になる（2026-08-17 に本番で発生）。
+        //          エンティティ側も nullable + default false にしてあるので、ここで張り直せば復旧する。
+        runStep("add league_songs.fallback column", () ->
+            entityManager.createNativeQuery(
+                    "ALTER TABLE league_songs ADD COLUMN IF NOT EXISTS fallback BOOLEAN DEFAULT FALSE"
+            ).executeUpdate());
+
         // 手順4.5: リーグの活動判定の仕様変更に伴う、旧ルールで積み上がった自動休止カウンタの是正。
         //          一度きりの是正なので runOnce で実行済みマークを付ける（詳細は各メソッドの javadoc）。
         runOnce("league-reset-inactive-weeks-for-lastplay-rule", () ->
