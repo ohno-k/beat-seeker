@@ -314,7 +314,7 @@ export const en = {
   'table.colDifficulty': 'Difficulty',
   'table.unofficialSummary': 'Unofficial Table Summary',
   'table.aboutSummary': 'About this summary',
-  'table.filterLevelLabel': 'Level filter',
+  'table.filterLevelLabel': 'Official level',
   'table.filterAll': 'All',
   'table.aboutFolderRank': 'About Folder Rank',
   'table.folderRankExplanation': 'Folder ranks are calculated based on the total BEAT-PT of all songs in each folder.',

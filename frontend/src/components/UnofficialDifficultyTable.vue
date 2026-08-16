@@ -3,7 +3,7 @@
  * 【コンポーネントの役割】 非公式難易度表（☆11.0〜☆13.0）を折返し可能な行で一覧表示する。
  * - 難易度表に定義された全曲を、ユーザーのプレイ済みスコア / 未プレイのプレースホルダに分けて集約
  * - 各難易度ランクごとに平均スコアレート・獲得 Beat-PT を集計し、フォルダランク（A/AA/AAA 等）を算出
- * - 表示レベル（すべて / ☆11 / ☆12）で行を絞り込み可能
+ * - 公式難易度（すべて / ☆11 / ☆12）で対象曲を絞り込み、集計もその範囲で再計算
  * - 展開/折りたたみで曲一覧を表示、情報モーダルとレート早見表モーダルを内包
  *
  * @prop scores プレイ済みスコアレコード配列。
@@ -33,11 +33,11 @@ const rankingModalRank = ref<{ rank: string; totalCount: number } | null>(null);
 /** 成長グラフモーダルの対象難易度（null なら非表示）。 */
 const growthChartRank = ref<{ rank: string; songCount: number; currentTotalBeatPoints: number } | null>(null);
 
-/** 表示レベル絞り込み。'all' は全ランク、'11'/'12' はその整数部のランクのみ。 */
+/** 公式難易度（☆11 / ☆12）での絞り込み。'all' は絞り込みなし。 */
 type LevelFilter = 'all' | '11' | '12';
-/** 現在選択中の表示レベル。 */
+/** 現在選択中の公式難易度フィルタ。 */
 const levelFilter = ref<LevelFilter>('all');
-/** 表示レベル切替ボタンの定義（ラベルは ☆ 付きで言語非依存）。 */
+/** フィルタ切替ボタンの定義（☆11 / ☆12 のラベルは言語非依存）。 */
 const levelFilterOptions = computed<{ value: LevelFilter; label: string }[]>(() => [
   { value: 'all', label: t('table.filterAll') },
   { value: '11', label: '☆11' },
@@ -82,12 +82,15 @@ const toggleRank = (rank: string) => {
 
 // 曲定義 (songData) を "title_difficultyCode" キーで検索可能にするルックアップ。
 // ANOTHER=4 / LEGGENDARIA=10 という難易度コードで引くため事前 Map 化する。
-const songDict = new Map<string, any>();
-if (songDataBodyRef.value && Array.isArray(songDataBodyRef.value)) {
-  songDataBodyRef.value.forEach((s: any) => {
-    songDict.set(`${s.title}_${s.difficulty}`, s);
-  });
-}
+// API から最新の楽曲データが届いた後も引けるよう computed（リアクティブ）にしている。
+const songDict = computed(() => {
+  const dict = new Map<string, any>();
+  const body = songDataBodyRef.value;
+  if (Array.isArray(body)) {
+    body.forEach((s: any) => dict.set(`${s.title}_${s.difficulty}`, s));
+  }
+  return dict;
+});
 
 /**
  * 【computed の役割】 非公式ランク別に曲をグループ化する。
@@ -126,7 +129,7 @@ const groupedByRank = computed(() => {
         groups[rank].push(scoreMap.get(scoreKey)!);
       } else {
         // 未プレイ: 曲定義から notes（ノーツ数 × 2 = 満点）を引いてプレースホルダ生成。
-        const def = songDict.get(`${baseTitle}_${diffCode}`);
+        const def = songDict.value.get(`${baseTitle}_${diffCode}`);
         if (!def) return; // 定義が無ければスキップ（uncategorized）
         const maxScore = def.notes * 2;
         groups[rank].push({
@@ -160,11 +163,48 @@ const groupedByRank = computed(() => {
   return groups;
 });
 
-/** 【computed の役割】 非公式ランクごとの曲数を集計（難易度表定義の総数、プレイ有無不問）。 */
-const rankSongCounts = computed(() => {
+/**
+ * 【関数の役割】 難易度表の曲名表記（末尾 [L] は LEGGENDARIA）から公式難易度レベルを引く。
+ * @returns 楽曲データに定義が無ければ null
+ */
+const officialLevelOfTableSong = (songTitle: string): number | null => {
+  const isLeggendaria = songTitle.endsWith('[L]');
+  const baseTitle = isLeggendaria ? songTitle.slice(0, -3) : songTitle;
+  const diffCode = String(getDifficultyCode(isLeggendaria ? 'LEGGENDARIA' : 'ANOTHER'));
+  const def = songDict.value.get(`${baseTitle}_${diffCode}`);
+  return typeof def?.level === 'number' ? def.level : null;
+};
+
+/**
+ * 【関数の役割】 スコアレコードの公式難易度レベルを引く。
+ * 楽曲データ（songDict）を優先し、無ければレコード自身の値にフォールバックする。
+ */
+const officialLevelOfRecord = (s: ScoreRecord): number | null => {
+  const diffCode = String(getDifficultyCode(s.difficultyName));
+  const def = songDict.value.get(`${s.title}_${diffCode}`);
+  if (typeof def?.level === 'number') return def.level;
+  return typeof s.difficultyLevel === 'number' ? s.difficultyLevel : null;
+};
+
+/** 【関数の役割】 現在の公式難易度フィルタに合致するか判定（'all' は常に true）。 */
+const matchesLevelFilter = (level: number | null): boolean =>
+  levelFilter.value === 'all' || level === Number(levelFilter.value);
+
+/** 【computed の役割】 非公式ランクごとの曲数（難易度表定義の総数、プレイ有無不問・フィルタ非適用）。 */
+const rankSongCountsAll = computed(() => {
   const counts: Record<string, number> = {};
   (diffTableRanksRef.value || []).forEach((r: any) => {
     counts[r.rank] = r.songs.length;
+  });
+  return counts;
+});
+
+/** 【computed の役割】 公式難易度フィルタ適用後の、非公式ランクごとの曲数。 */
+const rankSongCounts = computed(() => {
+  if (levelFilter.value === 'all') return rankSongCountsAll.value;
+  const counts: Record<string, number> = {};
+  (diffTableRanksRef.value || []).forEach((r: any) => {
+    counts[r.rank] = r.songs.filter((title: string) => matchesLevelFilter(officialLevelOfTableSong(title))).length;
   });
   return counts;
 });
@@ -173,6 +213,8 @@ const rankSongCounts = computed(() => {
  * 【computed の役割】 ランクごとの集計行データ（平均レート、合計 pt、フォルダランク等）を構築。
  * ランク順は数値降順（☆12.9 → ☆11.0）。各ランク内の曲もスコアレート降順に並べる。
  * 「MAX 基準 pt」は legendPtPerSong × totalCount。レート算出は プレイ済み曲のみを対象とする。
+ * 公式難易度フィルタが有効な場合は、対象曲を絞った上で全ての集計をやり直す
+ * （モーダル用の full* だけはフォルダ全体の値を保持）。
  */
 const tableData = computed(() => {
   const ranks = Object.keys(groupedByRank.value);
@@ -180,8 +222,12 @@ const tableData = computed(() => {
   // "12.x" 文字列を数値として比較し、降順ソート。
   ranks.sort((a, b) => parseFloat(b) - parseFloat(a));
 
-  return ranks.map(rank => {
-    const songs = groupedByRank.value[rank];
+  const rows = ranks.map(rank => {
+    const allSongs = groupedByRank.value[rank];
+    // 表示・集計対象は公式難易度フィルタを通過した曲のみ（'all' なら全曲）。
+    const songs = levelFilter.value === 'all'
+      ? [...allSongs]
+      : allSongs.filter(s => matchesLevelFilter(officialLevelOfRecord(s)));
     let totalScore = 0;
     let totalMaxScore = 0;
     let totalBeatPoints = 0;
@@ -235,19 +281,17 @@ const tableData = computed(() => {
       totalCount,
       rankInfo,
       nextRankInfo,
-      playedRankInfo
+      playedRankInfo,
+      // フォルダランキング / 成長グラフはフォルダ全体（フィルタ非適用）が対象なので、
+      // モーダルへ渡す値だけは絞り込み前の集計を保持しておく。
+      fullTotalCount: rankSongCountsAll.value[rank] || allSongs.length,
+      fullPlayCount: allSongs.filter(s => s.score > 0).length,
+      fullTotalBeatPoints: allSongs.reduce((acc, s) => acc + s.beatTierPoints, 0),
     };
   });
-});
 
-/**
- * 【computed の役割】 表示レベル絞り込みを適用した行データ。
- * 'all' 以外はランクの整数部（☆11.x → 11）が一致する行だけを残す。
- */
-const visibleTableData = computed(() => {
-  if (levelFilter.value === 'all') return tableData.value;
-  const target = Number(levelFilter.value);
-  return tableData.value.filter(d => Math.floor(parseFloat(d.rank)) === target);
+  // フィルタ時、該当曲が 1 曲も無いランク行は表示しない。
+  return levelFilter.value === 'all' ? rows : rows.filter(r => r.totalCount > 0 || r.songs.length > 0);
 });
 </script>
 
@@ -291,23 +335,26 @@ const visibleTableData = computed(() => {
           </div>
         </div>
       </h3>
-      <!-- 表示レベル絞り込み（すべて / ☆11 / ☆12） -->
-      <div
-        role="group"
-        :aria-label="t('table.filterLevelLabel')"
-        class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700/50 self-start sm:self-auto shrink-0"
-      >
-        <button
-          v-for="opt in levelFilterOptions"
-          :key="opt.value"
-          type="button"
-          @click="levelFilter = opt.value"
-          :aria-pressed="levelFilter === opt.value"
-          class="px-3 py-1 text-xs font-bold rounded-md whitespace-nowrap transition-colors"
-          :class="levelFilter === opt.value
-            ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
-            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >{{ opt.label }}</button>
+      <!-- 公式難易度での絞り込み（すべて / ☆11 / ☆12） -->
+      <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('table.filterLevelLabel') }}</span>
+        <div
+          role="group"
+          :aria-label="t('table.filterLevelLabel')"
+          class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700/50"
+        >
+          <button
+            v-for="opt in levelFilterOptions"
+            :key="opt.value"
+            type="button"
+            @click="levelFilter = opt.value"
+            :aria-pressed="levelFilter === opt.value"
+            class="px-3 py-1 text-xs font-bold rounded-md whitespace-nowrap transition-colors"
+            :class="levelFilter === opt.value
+              ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+          >{{ opt.label }}</button>
+        </div>
       </div>
     </div>
     <!-- Click-outside backdrop for info tooltip -->
@@ -376,7 +423,7 @@ const visibleTableData = computed(() => {
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-xs sm:text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
-          <template v-for="data in visibleTableData" :key="data.rank">
+          <template v-for="data in tableData" :key="data.rank">
             <tr
               @click="toggleRank(data.rank)"
               @keydown.enter.prevent="toggleRank(data.rank)"
@@ -406,7 +453,7 @@ const visibleTableData = computed(() => {
                 <div class="inline-flex items-center gap-1">
                   <button
                     type="button"
-                    @click.stop="rankingModalRank = { rank: data.rank, totalCount: data.totalCount }"
+                    @click.stop="rankingModalRank = { rank: data.rank, totalCount: data.fullTotalCount }"
                     :title="t('table.viewDifficultyRanking')"
                     :aria-label="t('table.viewDifficultyRanking')"
                     class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 transition-colors"
@@ -416,9 +463,9 @@ const visibleTableData = computed(() => {
                     </svg>
                   </button>
                   <button
-                    v-if="data.playCount >= data.totalCount && data.totalCount > 0"
+                    v-if="data.fullPlayCount >= data.fullTotalCount && data.fullTotalCount > 0"
                     type="button"
-                    @click.stop="growthChartRank = { rank: data.rank, songCount: data.totalCount, currentTotalBeatPoints: data.totalBeatPoints }"
+                    @click.stop="growthChartRank = { rank: data.rank, songCount: data.fullTotalCount, currentTotalBeatPoints: data.fullTotalBeatPoints }"
                     :title="t('table.viewGrowthChart')"
                     :aria-label="t('table.viewGrowthChart')"
                     class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 transition-colors"
@@ -541,7 +588,7 @@ const visibleTableData = computed(() => {
             </tr>
           </template>
           
-          <tr v-if="visibleTableData.length === 0">
+          <tr v-if="tableData.length === 0">
             <td colspan="6" class="py-12 text-center text-slate-500 dark:text-slate-400">
               {{ t('table.noUnofficialData') }}
             </td>
