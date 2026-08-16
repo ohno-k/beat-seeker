@@ -701,8 +701,11 @@ public class LeagueAdminController {
      * 「どの曲が誰の記録でどこまで塞がっているか」を確認できる。同値の保持者が複数居れば全員返す。
      * 仮編成プレビューと同じ表を描けるよう、メンバーごとの課題曲別セル（EX・レート・ライン保持フラグ）も返す。
      *
-     * <p>全メンバー × 全課題曲を 1 クエリで引いてから (tier, groupIndex) 単位に集計する
-     * （人数分のクエリを撃たない）。
+     * <p>スコアの取得は <b>グループ単位</b>（メンバー 8 人前後 × 課題曲 3 曲）に分けて行う。
+     * 週の全メンバー × 全課題曲を 1 クエリ（{@code user_id IN (...) AND title IN (...)}）で引くと、
+     * 参加者が増えたときに本番の scores で statement timeout に掛かって管理画面が 500 になる
+     * （2026-08-17 に発生）。グループ単位なら (user_id, title, ...) のユニークインデックスに
+     * 素直に乗るので、クエリ本数が増えても全体としてはずっと軽い。
      *
      * @param songs   週の全課題曲
      * @param members 週の全メンバー
@@ -710,20 +713,6 @@ public class LeagueAdminController {
      */
     private DraftLineData computeDraftLineData(List<LeagueSong> songs, List<LeagueMember> members) {
         if (songs.isEmpty() || members.isEmpty()) return new DraftLineData(Map.of(), Map.of());
-        List<String> titles = songs.stream().map(LeagueSong::getTitle).distinct().toList();
-        List<String> diffs = songs.stream().map(LeagueSong::getDifficultyName).distinct().toList();
-        List<User> users = members.stream().map(LeagueMember::getUser).toList();
-
-        // (userId|title|difficultyName) → アーケード自己ベスト EX
-        Map<String, Integer> bestByUserSong = new HashMap<>();
-        for (Score s : scoreRepository.findByUsersAndTitlesAndDifficulties(users, titles, diffs)) {
-            // source 未設定の古い行はアーケード扱い（仮編成プレビュー・順位計算と同じ判定）
-            if (s.getSource() != null && !"arcade".equals(s.getSource())) continue;
-            if (s.getScore() == null || s.getScore() <= 0) continue;
-            bestByUserSong.merge(
-                    s.getUser().getId() + "|" + s.getTitle() + "|" + s.getDifficultyName(),
-                    s.getScore(), Math::max);
-        }
 
         // (tier|groupIndex) 単位に課題曲（スロット順）とメンバーを集める。
         Map<String, List<LeagueSong>> songsByGroup = new LinkedHashMap<>();
@@ -744,6 +733,9 @@ public class LeagueAdminController {
             List<LeagueSong> groupSongs = songsByGroup.getOrDefault(ge.getKey(), List.of());
             List<LeagueMember> groupMembers = ge.getValue();
             if (groupSongs.isEmpty()) continue;
+
+            // (userId|title|difficultyName) → アーケード自己ベスト EX（このグループの分だけ）
+            Map<String, Integer> bestByUserSong = loadGroupBestEx(groupMembers, groupSongs);
 
             // 1) 曲ごとのライン（最高 EX）と保持者
             int[] lineEx = new int[groupSongs.size()];
@@ -788,6 +780,33 @@ public class LeagueAdminController {
             }
         }
         return new DraftLineData(lineBySongId, bestsByUserId);
+    }
+
+    /**
+     * 【メソッドの役割】 1 グループ分（メンバー × そのグループの課題曲）のアーケード自己ベストを引く。
+     *
+     * 週全体をまとめて引かずグループ単位に分けるのが肝で、{@code user_id IN (8 人) AND title IN (3 曲)}
+     * なら scores のユニークインデックス (user_id, title, difficulty_name, ...) に乗る。
+     * 週全体の巨大 IN にすると本番規模で statement timeout する。
+     *
+     * @param groupMembers そのグループの参加者
+     * @param groupSongs   そのグループの課題曲
+     * @return {@code userId|title|difficultyName} → 自己ベスト EX（アーケード・EX &gt; 0 のみ）
+     */
+    private Map<String, Integer> loadGroupBestEx(List<LeagueMember> groupMembers, List<LeagueSong> groupSongs) {
+        List<User> users = groupMembers.stream().map(LeagueMember::getUser).toList();
+        List<String> titles = groupSongs.stream().map(LeagueSong::getTitle).distinct().toList();
+        List<String> diffs = groupSongs.stream().map(LeagueSong::getDifficultyName).distinct().toList();
+        Map<String, Integer> bestByUserSong = new HashMap<>();
+        for (Score s : scoreRepository.findByUsersAndTitlesAndDifficulties(users, titles, diffs)) {
+            // source 未設定の古い行はアーケード扱い（仮編成プレビュー・順位計算と同じ判定）
+            if (s.getSource() != null && !"arcade".equals(s.getSource())) continue;
+            if (s.getScore() == null || s.getScore() <= 0) continue;
+            bestByUserSong.merge(
+                    s.getUser().getId() + "|" + s.getTitle() + "|" + s.getDifficultyName(),
+                    s.getScore(), Math::max);
+        }
+        return bestByUserSong;
     }
 
     /** 表示名（未設定なら IIDX ID）。 */

@@ -328,32 +328,37 @@ public class LeagueWeekLifecycleService {
             return Set.of();
         }
 
-        // 課題曲はグループごとに違うので、(tier|groupIndex) → 譜面キー集合 を作って自分の卓の曲だけ見る。
-        Map<String, Set<String>> chartsByGroup = new HashMap<>();
+        // 課題曲はグループごとに違うので、(tier|groupIndex) 単位に課題曲とメンバーを束ねる。
+        Map<String, List<LeagueSong>> songsByGroup = new HashMap<>();
         for (LeagueSong s : songs) {
-            chartsByGroup.computeIfAbsent(s.getTier() + "|" + s.getGroupIndex(), k -> new HashSet<>())
-                    .add(chartKey(s.getTitle(), s.getDifficultyName()));
+            songsByGroup.computeIfAbsent(s.getTier() + "|" + s.getGroupIndex(), k -> new ArrayList<>()).add(s);
         }
-        Map<Long, Set<String>> chartsByUser = new HashMap<>();
+        Map<String, List<LeagueMember>> membersByGroup = new HashMap<>();
         for (LeagueMember m : members) {
-            chartsByUser.put(m.getUser().getId(),
-                    chartsByGroup.getOrDefault(m.getTier() + "|" + m.getGroupIndex(), Set.of()));
+            membersByGroup.computeIfAbsent(m.getTier() + "|" + m.getGroupIndex(), k -> new ArrayList<>()).add(m);
         }
 
-        List<String> titles = songs.stream().map(LeagueSong::getTitle).distinct().toList();
-        List<String> diffs = songs.stream().map(LeagueSong::getDifficultyName).distinct().toList();
-        List<User> users = members.stream().map(LeagueMember::getUser).toList();
-
+        // スコアはグループ単位（メンバー 8 人前後 × 課題曲 3 曲）で引く。週の全メンバー × 全課題曲を
+        // 1 クエリにすると user_id IN / title IN が巨大になり、本番規模では statement timeout する。
         Set<Long> played = new HashSet<>();
-        for (Score s : scoreRepository.findByUsersAndTitlesAndDifficulties(users, titles, diffs)) {
-            // リーグはアーケード記録限定（null source は arcade 扱い）。
-            if (s.getSource() != null && !"arcade".equals(s.getSource())) continue;
-            if (!withinWeek(s.getLastPlayedAt(), week)) continue;
-            Long userId = s.getUser().getId();
-            // title IN × difficulty IN の直積なので他グループの課題曲の行も返る。自分の卓の譜面に絞る。
-            if (!chartsByUser.getOrDefault(userId, Set.of())
-                    .contains(chartKey(s.getTitle(), s.getDifficultyName()))) continue;
-            played.add(userId);
+        for (Map.Entry<String, List<LeagueMember>> ge : membersByGroup.entrySet()) {
+            List<LeagueSong> groupSongs = songsByGroup.getOrDefault(ge.getKey(), List.of());
+            if (groupSongs.isEmpty()) continue;
+            Set<String> groupCharts = groupSongs.stream()
+                    .map(s -> chartKey(s.getTitle(), s.getDifficultyName()))
+                    .collect(java.util.stream.Collectors.toSet());
+            List<String> titles = groupSongs.stream().map(LeagueSong::getTitle).distinct().toList();
+            List<String> diffs = groupSongs.stream().map(LeagueSong::getDifficultyName).distinct().toList();
+            List<User> users = ge.getValue().stream().map(LeagueMember::getUser).toList();
+
+            for (Score s : scoreRepository.findByUsersAndTitlesAndDifficulties(users, titles, diffs)) {
+                // リーグはアーケード記録限定（null source は arcade 扱い）。
+                if (s.getSource() != null && !"arcade".equals(s.getSource())) continue;
+                if (!withinWeek(s.getLastPlayedAt(), week)) continue;
+                // title IN × difficulty IN の直積なので、グループ内でも別譜面の行が返る。課題曲に絞る。
+                if (!groupCharts.contains(chartKey(s.getTitle(), s.getDifficultyName()))) continue;
+                played.add(s.getUser().getId());
+            }
         }
         return played;
     }

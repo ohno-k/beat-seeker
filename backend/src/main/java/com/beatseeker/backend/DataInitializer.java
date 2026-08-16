@@ -153,11 +153,9 @@ public class DataInitializer implements ApplicationRunner {
                     "END IF; END $$;"
             ).executeUpdate());
 
-        // 手順4.4: league_songs.fallback 列を明示的に足す（冪等）。
-        //          ddl-auto=update による自動追加が失敗すると（既存行のあるテーブルへ NOT NULL 列を
-        //          足そうとした場合など）、新コードが SELECT する列が無いまま league_songs 系の
-        //          クエリが全滅し、リーグ画面・管理画面が 500 になる（2026-08-17 に本番で発生）。
-        //          エンティティ側も nullable + default false にしてあるので、ここで張り直せば復旧する。
+        // 手順4.4: league_songs.fallback 列を明示的に足す（冪等）。通常は ddl-auto=update が
+        //          追加するが、既存行のあるテーブルへの列追加は環境によって失敗し得る。
+        //          列が無いと league_songs を読む全クエリが落ちてリーグ画面が止まるため、保険で張る。
         runStep("add league_songs.fallback column", () ->
             entityManager.createNativeQuery(
                     "ALTER TABLE league_songs ADD COLUMN IF NOT EXISTS fallback BOOLEAN DEFAULT FALSE"
