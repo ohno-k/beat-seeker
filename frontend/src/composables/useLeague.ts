@@ -201,6 +201,16 @@ export interface LeaguePoolSong {
   notes: number;
 }
 
+/** 課題曲差し替えの選択肢（と、それが抽選基準で絞り込まれたものかどうか）。 */
+export interface LeagueSongPool {
+  /**
+   * true = 抽選と同じ選曲基準（②全員未プレー ∪ ③2 人以上で拮抗、直近出題除外）を通した候補。
+   * false = 絞り込み前の階級プール（週・グループ未指定、または未編成でメンバーが居ない場合）。
+   */
+  filtered: boolean;
+  songs: LeaguePoolSong[];
+}
+
 /** 仮編成プレビューの選手セル（1 課題曲分の自己ベスト）。 */
 export interface LeaguePreviewCell {
   slot: number;
@@ -457,13 +467,24 @@ export function useLeague() {
   };
 
   /**
-   * 指定 DIVISION の選曲プール（その階級で出題され得る譜面）を取得する（管理者のみ）。
-   * 課題曲差し替えのドロップダウンの選択肢に使う。
+   * 課題曲差し替えの選択肢を取得する（管理者のみ）。
+   *
+   * weekId / groupIndex を渡すと、抽選と同じ選曲基準（②全員未プレー ∪ ③2 人以上で拮抗、
+   * 直近 8 週の出題は除外）を通した候補が返る（filtered=true）。未編成などで判定できない
+   * 場合は絞り込み前の階級プールが返る（filtered=false）。
    */
-  const fetchSongPool = async (tier: number): Promise<LeaguePoolSong[]> => {
-    const res = await fetch(`${API_BASE}/api/league/admin/song-pool?tier=${tier}`, { headers: authHeaders() });
+  const fetchSongPool = async (
+    tier: number,
+    weekId?: number,
+    groupIndex?: number
+  ): Promise<LeagueSongPool> => {
+    const params = new URLSearchParams({ tier: String(tier) });
+    if (weekId != null) params.set('weekId', String(weekId));
+    if (groupIndex != null) params.set('groupIndex', String(groupIndex));
+    const res = await fetch(`${API_BASE}/api/league/admin/song-pool?${params}`, { headers: authHeaders() });
     if (!res.ok) await raise(res, '選曲プールの取得に失敗しました');
-    return ((await res.json()).songs ?? []) as LeaguePoolSong[];
+    const body = await res.json();
+    return { filtered: !!body.filtered, songs: (body.songs ?? []) as LeaguePoolSong[] };
   };
 
   /** 仮編成プレビューを取得する（管理者のみ・DB 非更新）。 */

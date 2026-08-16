@@ -194,6 +194,88 @@ public class LeagueSongDrawService {
      */
     public List<DrawnSong> selectSongsForGroup(int tier, List<User> members, LocalDateTime referenceStart,
                                                Set<String> alsoExclude) {
+        GroupPool gp = buildGroupPool(tier, members, referenceStart, alsoExclude);
+        List<SongDefinition> pool = gp.pool();
+        List<SongDefinition> candidates = new ArrayList<>(gp.candidates());
+        Map<String, Long> holderByTitle = gp.holderByTitle();
+        Set<String> recent = gp.recent();
+        boolean poolWidened = gp.poolWidened();
+
+        // 候補からランダムに 3 曲選ぶ。ただし「ライン保持者（各曲の最高 EX の人）」がグループ内で
+        // なるべく重複しないようにする（1 人が複数のラインを持つのを避け、卓の中でラインを分散させる）。
+        // ② 曲（誰も未プレー＝ラインなし）は保持者が居ないので自由に選べる。
+        Collections.shuffle(candidates);
+        List<DrawnSong> chosen = new ArrayList<>();
+        Set<String> used = new HashSet<>();
+        Set<Long> usedHolders = new HashSet<>();
+        // パス1: ライン保持者がまだ登場していない曲（または②曲）を優先して埋める。
+        for (SongDefinition sd : candidates) {
+            if (chosen.size() >= SONGS_PER_WEEK) break;
+            if (used.contains(sd.getTitle())) continue;
+            Long holder = holderByTitle.get(sd.getTitle()); // null = ②曲（ラインなし）
+            if (holder != null && !usedHolders.add(holder)) continue; // 既出の保持者はパス1では飛ばす
+            used.add(sd.getTitle());
+            chosen.add(new DrawnSong(sd, poolWidened));
+        }
+        // パス2: まだ3曲に満たなければ、保持者の重複を許して候補から補充する。
+        // （選曲基準②③は満たしているのでフォールバック扱いにはしない）
+        for (SongDefinition sd : candidates) {
+            if (chosen.size() >= SONGS_PER_WEEK) break;
+            if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, poolWidened));
+        }
+        // パス3: それでも足りなければプール全体から補充（直近出題を優先的に避ける）。
+        // ここで埋めた枠は選曲基準を満たしていないので、フォールバックの印を付けて管理者に見せる。
+        if (chosen.size() < SONGS_PER_WEEK) {
+            List<SongDefinition> fallback = new ArrayList<>(pool);
+            Collections.shuffle(fallback);
+            for (SongDefinition sd : fallback) { // まずは直近出題を避けて補充
+                if (chosen.size() >= SONGS_PER_WEEK) break;
+                if (recent.contains(sd.getTitle())) continue;
+                if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, true));
+            }
+            for (SongDefinition sd : fallback) { // それでも足りなければ直近出題も許容
+                if (chosen.size() >= SONGS_PER_WEEK) break;
+                if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, true));
+            }
+        }
+        return chosen;
+    }
+
+    /**
+     * 【メソッドの役割】 グループの「選曲候補」（抽選でそのまま出題され得る曲）を返す。
+     *
+     * {@link #selectSongsForGroup} が 3 曲を引く母集団そのもの＝②全員未プレー ∪ ③2 人以上で拮抗、
+     * かつ直近 {@link #EXCLUDE_WEEKS} 週の出題を除いたもの。管理者が課題曲を差し替えるときの
+     * 選択肢に使う（抽選と同じ基準の曲だけを出す）。
+     *
+     * @param tier           階級（プールの難易度帯を決める）
+     * @param members        そのグループの参加者
+     * @param referenceStart 「直近 N 週の出題除外」の基準となる週開始日時
+     * @return 候補の譜面（難易度表のランク順、タイトル重複なし）
+     */
+    public List<SongDefinition> candidatesForGroup(int tier, List<User> members, LocalDateTime referenceStart) {
+        return buildGroupPool(tier, members, referenceStart, Set.of()).candidates();
+    }
+
+    /**
+     * グループ単位の抽選に必要な母集団一式。
+     *
+     * @param pool          その階級の母集団（タイトル単位で一意）
+     * @param candidates    選曲基準（②/③）と直近出題除外を通した候補
+     * @param holderByTitle タイトル → ライン保持者（最高 EX の人）の userId。ラインなしの曲は含まない
+     * @param recent        直近出題などで除外したタイトル
+     * @param poolWidened   帯のプールが薄く難易度表全体へ広げたか（全曲フォールバック扱いになる）
+     */
+    private record GroupPool(List<SongDefinition> pool, List<SongDefinition> candidates,
+                             Map<String, Long> holderByTitle, Set<String> recent, boolean poolWidened) {
+    }
+
+    /**
+     * グループの母集団と選曲候補を組み立てる（{@link #selectSongsForGroup} と
+     * {@link #candidatesForGroup} が同じ基準を共有するための共通処理）。
+     */
+    private GroupPool buildGroupPool(int tier, List<User> members, LocalDateTime referenceStart,
+                                     Set<String> alsoExclude) {
         Map<String, SongDefinition> masterIndex = buildMasterIndex();
         int[] band = rankBandTenths(tier);
         List<SongDefinition> rawPool = buildPool(masterIndex, band[0], band[1]);
@@ -261,44 +343,7 @@ public class LeagueSongDrawService {
             if (cand) candidates.add(sd);
         }
 
-        // 候補からランダムに 3 曲選ぶ。ただし「ライン保持者（各曲の最高 EX の人）」がグループ内で
-        // なるべく重複しないようにする（1 人が複数のラインを持つのを避け、卓の中でラインを分散させる）。
-        // ② 曲（誰も未プレー＝ラインなし）は保持者が居ないので自由に選べる。
-        Collections.shuffle(candidates);
-        List<DrawnSong> chosen = new ArrayList<>();
-        Set<String> used = new HashSet<>();
-        Set<Long> usedHolders = new HashSet<>();
-        // パス1: ライン保持者がまだ登場していない曲（または②曲）を優先して埋める。
-        for (SongDefinition sd : candidates) {
-            if (chosen.size() >= SONGS_PER_WEEK) break;
-            if (used.contains(sd.getTitle())) continue;
-            Long holder = holderByTitle.get(sd.getTitle()); // null = ②曲（ラインなし）
-            if (holder != null && !usedHolders.add(holder)) continue; // 既出の保持者はパス1では飛ばす
-            used.add(sd.getTitle());
-            chosen.add(new DrawnSong(sd, poolWidened));
-        }
-        // パス2: まだ3曲に満たなければ、保持者の重複を許して候補から補充する。
-        // （選曲基準②③は満たしているのでフォールバック扱いにはしない）
-        for (SongDefinition sd : candidates) {
-            if (chosen.size() >= SONGS_PER_WEEK) break;
-            if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, poolWidened));
-        }
-        // パス3: それでも足りなければプール全体から補充（直近出題を優先的に避ける）。
-        // ここで埋めた枠は選曲基準を満たしていないので、フォールバックの印を付けて管理者に見せる。
-        if (chosen.size() < SONGS_PER_WEEK) {
-            List<SongDefinition> fallback = new ArrayList<>(pool);
-            Collections.shuffle(fallback);
-            for (SongDefinition sd : fallback) { // まずは直近出題を避けて補充
-                if (chosen.size() >= SONGS_PER_WEEK) break;
-                if (recent.contains(sd.getTitle())) continue;
-                if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, true));
-            }
-            for (SongDefinition sd : fallback) { // それでも足りなければ直近出題も許容
-                if (chosen.size() >= SONGS_PER_WEEK) break;
-                if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, true));
-            }
-        }
-        return chosen;
+        return new GroupPool(pool, candidates, holderByTitle, recent, poolWidened);
     }
 
     /**

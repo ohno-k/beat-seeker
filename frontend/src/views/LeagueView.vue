@@ -35,6 +35,7 @@ import {
   type LeaguePerSong,
   type LeaguePreview,
   type LeaguePoolSong,
+  type LeagueSongPool,
 } from '../composables/useLeague';
 
 const { t } = useI18n();
@@ -238,7 +239,10 @@ const loadAdmin = async () => {
     const draft = al.draftWeek;
     if (!draft) continue;
     for (const tierInfo of draft.tiers) {
-      if (!tierInfo.groups.length || isSongEditOpen(draft.id, tierInfo.tier)) ensureSongPool(tierInfo.tier);
+      if (!tierInfo.groups.length || isSongEditOpen(draft.id, tierInfo.tier)) {
+        // 候補はグループごとに異なる（拮抗判定がそのグループの参加者に依存する）。
+        for (const gi of songGroupIndexes(tierInfo)) ensureSongPool(draft.id, tierInfo.tier, gi);
+      }
     }
   }
 };
@@ -317,38 +321,54 @@ const toggleHistoryDetail = async (h: LeagueHistoryRow) => {
 // 管理者操作
 // -------------------------------------------------------------------
 
-/** 課題曲差し替えフォームの入力値を取得（無ければ現曲で初期化）。 */
-/** DIVISION ごとの選曲プール（差し替えドロップダウンの選択肢）。開いたときに一度だけ取得する。 */
-const songPools = ref<Record<number, LeaguePoolSong[]>>({});
+/**
+ * 差し替えドロップダウンの選択肢（グループ単位）。抽選と同じ選曲基準（拮抗判定・直近出題除外）を
+ * 通した候補なので、週 × 階級 × グループごとに内容が変わる。キーは `${weekId}-${tier}-${groupIndex}`。
+ */
+const songPools = ref<Record<string, LeagueSongPool>>({});
 
-/** 選曲プールを取得する（取得済み・取得中なら何もしない）。 */
-const ensureSongPool = async (tier: number) => {
-  if (songPools.value[tier] || poolLoading.has(tier)) return;
-  poolLoading.add(tier);
+/** 選曲プールのキャッシュキー（候補はグループごとに異なる）。 */
+const poolKey = (weekId: number, tier: number, groupIndex: number) => `${weekId}-${tier}-${groupIndex}`;
+
+/** 選曲候補を取得する（取得済み・取得中なら何もしない）。 */
+const ensureSongPool = async (weekId: number, tier: number, groupIndex: number) => {
+  const key = poolKey(weekId, tier, groupIndex);
+  if (songPools.value[key] || poolLoading.has(key)) return;
+  poolLoading.add(key);
   try {
-    songPools.value[tier] = await league.fetchSongPool(tier);
+    songPools.value[key] = await league.fetchSongPool(tier, weekId, groupIndex);
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
   } finally {
-    poolLoading.delete(tier);
+    poolLoading.delete(key);
   }
 };
-const poolLoading = new Set<number>();
+const poolLoading = new Set<string>();
+
+/** その課題曲の枠に対応する選曲候補（未取得なら null）。 */
+const poolFor = (weekId: number, tier: number, song: LeagueSongInfo): LeagueSongPool | null =>
+  songPools.value[poolKey(weekId, tier, song.groupIndex ?? 0)] ?? null;
+
+/** draft 週のその階級に存在するグループ番号（課題曲から拾う。未編成なら [0]）。 */
+const songGroupIndexes = (tierInfo: LeagueAdminWeek['tiers'][number]): number[] => {
+  const set = new Set<number>(tierInfo.songs.map(s => s.groupIndex ?? 0));
+  return set.size ? [...set].sort((a, b) => a - b) : [0];
+};
 
 /**
- * 差し替えドロップダウンの選択肢。プールに加え、現在の課題曲がプール外（帯の外の曲へ
- * 差し替え済みなど）の場合は先頭に足して、選択状態が空にならないようにする。
+ * 差し替えドロップダウンの選択肢。候補に加え、現在の課題曲が候補外（基準を満たさない曲が
+ * 抽選で入った・手で差し替え済みなど）の場合は先頭に足して、選択状態が空にならないようにする。
  */
-const songOptions = (tier: number, song: LeagueSongInfo): LeaguePoolSong[] => {
-  const pool = songPools.value[tier] ?? [];
+const songOptions = (weekId: number, tier: number, song: LeagueSongInfo): LeaguePoolSong[] => {
+  const pool = poolFor(weekId, tier, song)?.songs ?? [];
   const inPool = pool.some(p => p.title === song.title && p.difficultyName === song.difficultyName);
   if (inPool) return pool;
   return [{ title: song.title, difficultyName: song.difficultyName, level: song.level, notes: song.notes }, ...pool];
 };
 
 /** 現在の課題曲が選択肢の何番目か（select の value）。 */
-const currentOptionIndex = (tier: number, song: LeagueSongInfo) =>
-  songOptions(tier, song).findIndex(o => o.title === song.title && o.difficultyName === song.difficultyName);
+const currentOptionIndex = (weekId: number, tier: number, song: LeagueSongInfo) =>
+  songOptions(weekId, tier, song).findIndex(o => o.title === song.title && o.difficultyName === song.difficultyName);
 
 /**
  * 選曲プールから課題曲を選んで即時に差し替える（draft 週のみ）。
@@ -357,7 +377,7 @@ const currentOptionIndex = (tier: number, song: LeagueSongInfo) =>
  */
 const handlePickSong = async (weekId: number, tier: number, song: LeagueSongInfo, ev: Event) => {
   const index = Number((ev.target as HTMLSelectElement).value);
-  const picked = songOptions(tier, song)[index];
+  const picked = songOptions(weekId, tier, song)[index];
   if (!picked || (picked.title === song.title && picked.difficultyName === song.difficultyName)) return;
   busy.value = true;
   error.value = '';
@@ -366,6 +386,8 @@ const handlePickSong = async (weekId: number, tier: number, song: LeagueSongInfo
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
   } finally {
+    // 候補は「この週・階級で既に出したタイトル」を除外して作るので、差し替えたら作り直す。
+    delete songPools.value[poolKey(weekId, tier, song.groupIndex ?? 0)];
     // 成功時は新しいライン・保持者を、失敗時は元の選択状態を描き直す。
     await loadAdmin();
     busy.value = false;
@@ -554,13 +576,14 @@ const disabledSongCount = (week: LeagueAdminWeek) =>
 /** 課題曲の差し替えフォームを開いている (weekId, tier)。既定は畳んで編成表を見やすくする。 */
 const songEditOpen = ref<Set<string>>(new Set());
 const isSongEditOpen = (weekId: number, tier: number) => songEditOpen.value.has(`${weekId}-${tier}`);
-const toggleSongEdit = (weekId: number, tier: number) => {
+const toggleSongEdit = (weekId: number, tier: number, groupIndexes: number[]) => {
   const key = `${weekId}-${tier}`;
   if (songEditOpen.value.has(key)) {
     songEditOpen.value.delete(key);
   } else {
     songEditOpen.value.add(key);
-    ensureSongPool(tier); // 開いたタイミングで選曲プールを取りに行く
+    // 開いたタイミングで各グループの選曲候補を取りに行く。
+    for (const gi of groupIndexes) ensureSongPool(weekId, tier, gi);
   }
 };
 
@@ -974,7 +997,7 @@ onUnmounted(() => {
                 </div>
                 <div class="flex flex-wrap gap-2">
                   <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-                          @click="toggleSongEdit(al.draftWeek!.id, tierInfo.tier)">
+                          @click="toggleSongEdit(al.draftWeek!.id, tierInfo.tier, songGroupIndexes(tierInfo))">
                     {{ isSongEditOpen(al.draftWeek!.id, tierInfo.tier) ? t('league.admin.editSongsClose') : t('league.admin.editSongs') }}
                   </button>
                   <button class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50"
@@ -986,10 +1009,15 @@ onUnmounted(() => {
                    選曲プールから選ぶと即時に差し替わり、ライン・保持者・自己ベスト表が更新される。 -->
               <div v-if="isSongEditOpen(al.draftWeek.id, tierInfo.tier) || !tierInfo.groups.length"
                    class="mt-2 rounded-lg bg-slate-50 dark:bg-slate-900/40 p-2 space-y-1.5">
-                <div class="text-[11px] text-slate-400">
-                  {{ songPools[tierInfo.tier]
-                    ? t('league.admin.poolCount', { n: songPools[tierInfo.tier].length })
-                    : t('league.admin.poolLoading') }}
+                <!-- 候補数はグループごとに出す（拮抗判定がそのグループの参加者に依存するため）。 -->
+                <div v-for="gi in songGroupIndexes(tierInfo)" :key="`pool-${gi}`" class="text-[11px] text-slate-400">
+                  <template v-if="songPools[poolKey(al.draftWeek.id, tierInfo.tier, gi)]">
+                    <span class="text-slate-500 dark:text-slate-400">{{ t('league.groupN', { n: gi + 1 }) }}:</span>
+                    {{ songPools[poolKey(al.draftWeek.id, tierInfo.tier, gi)].filtered
+                      ? t('league.admin.candidateCount', { n: songPools[poolKey(al.draftWeek.id, tierInfo.tier, gi)].songs.length })
+                      : t('league.admin.poolCount', { n: songPools[poolKey(al.draftWeek.id, tierInfo.tier, gi)].songs.length }) }}
+                  </template>
+                  <template v-else>{{ t('league.admin.poolLoading') }}</template>
                 </div>
                 <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id"
                      class="flex flex-wrap items-center gap-2 text-xs rounded px-1 py-0.5"
@@ -1002,11 +1030,11 @@ onUnmounted(() => {
                   <select
                     class="flex-1 min-w-40 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 disabled:opacity-50"
                     :class="song.disabled ? 'opacity-60' : ''"
-                    :disabled="busy || !songPools[tierInfo.tier]"
-                    :value="String(currentOptionIndex(tierInfo.tier, song))"
+                    :disabled="busy || !poolFor(al.draftWeek.id, tierInfo.tier, song)"
+                    :value="String(currentOptionIndex(al.draftWeek.id, tierInfo.tier, song))"
                     @change="handlePickSong(al.draftWeek!.id, tierInfo.tier, song, $event)"
                   >
-                    <option v-for="(opt, i) in songOptions(tierInfo.tier, song)" :key="`${opt.title}|${opt.difficultyName}`" :value="String(i)">
+                    <option v-for="(opt, i) in songOptions(al.draftWeek.id, tierInfo.tier, song)" :key="`${opt.title}|${opt.difficultyName}`" :value="String(i)">
                       {{ opt.title }} [{{ opt.difficultyName }}{{ opt.level ? ` ☆${opt.level}` : '' }}]
                     </option>
                   </select>

@@ -213,24 +213,54 @@ public class LeagueAdminController {
     }
 
     /**
-     * 【メソッドの役割】 指定 DIVISION の選曲プール（その階級で出題され得る譜面）を返す。
+     * 【メソッドの役割】 課題曲差し替えの選択肢（その枠に出題され得る譜面）を返す。
      *
-     * 管理者が課題曲を差し替えるときの選択肢に使う。実際の抽選で掛かる絞り込み（直近出題の除外・
-     * グループ内の拮抗判定）はかけず、その階級の難易度帯に入る譜面をタイトル順で全件返す。
+     * {@code weekId} と {@code groupIndex} を渡すと、抽選と同じ絞り込み（②グループ全員が未プレー
+     * ∪ ③2 人以上がプレー済みで拮抗、かつ直近 8 週の出題を除外）を通した候補だけを返す
+     * （{@code filtered=true}）。差し替えでも抽選と同じ基準の曲が選ばれるようにするため。
+     * 週やグループを指定しない場合・そのグループにメンバーが居ない場合は、絞り込み前の
+     * 階級プール（難易度帯のみ）を返す（{@code filtered=false}）。
      *
-     * @param auth 認証情報（管理者限定）
-     * @param tier 階級（0=LEGEND .. 10）
-     * @return {@code {tier, songs:[{title, difficultyName, level, notes}]}}
+     * @param auth       認証情報（管理者限定）
+     * @param tier       階級（0=LEGEND .. 10）
+     * @param weekId     対象週 ID（省略可。グループの拮抗判定・直近出題除外に使う）
+     * @param groupIndex グループ番号（省略可）
+     * @return {@code {tier, groupIndex, filtered, songs:[{title, difficultyName, level, notes}]}}
      */
     @GetMapping("/song-pool")
-    public ResponseEntity<?> songPool(Authentication auth, @RequestParam("tier") Integer tier) {
+    public ResponseEntity<?> songPool(Authentication auth,
+                                      @RequestParam("tier") Integer tier,
+                                      @RequestParam(value = "weekId", required = false) Long weekId,
+                                      @RequestParam(value = "groupIndex", required = false) Integer groupIndex) {
         if (requireAdmin(auth) == null) {
             return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
         }
         if (!LeagueDivision.isValid(tier)) {
             return ResponseEntity.badRequest().body(Map.of("error", "tier は 0 (DIVISION LEGEND) 〜 10 で指定してください"));
         }
-        List<Map<String, Object>> songs = songDrawService.poolForTier(tier).stream()
+
+        // 週・グループが分かるなら、抽選と同じ選曲基準を通した候補を返す。
+        List<SongDefinition> pool = null;
+        if (weekId != null && groupIndex != null) {
+            LeagueWeek week = leagueWeekRepository.findById(weekId).orElse(null);
+            if (week == null) {
+                return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
+            }
+            List<User> members = leagueMemberRepository.findByWeek(week).stream()
+                    .filter(m -> tier.equals(m.getTier()) && groupIndex.equals(m.getGroupIndex()))
+                    .map(LeagueMember::getUser)
+                    .toList();
+            // 未編成（メンバーが居ない）なら拮抗判定のしようがないので、絞り込み前のプールに落とす。
+            if (!members.isEmpty()) {
+                pool = songDrawService.candidatesForGroup(tier, members, week.getStartsAt());
+            }
+        }
+        boolean filtered = pool != null;
+        if (pool == null) {
+            pool = songDrawService.poolForTier(tier);
+        }
+
+        List<Map<String, Object>> songs = pool.stream()
                 .map(sd -> {
                     Map<String, Object> m = new LinkedHashMap<String, Object>();
                     m.put("title", sd.getTitle());
@@ -241,7 +271,13 @@ public class LeagueAdminController {
                 })
                 .sorted(Comparator.comparing(x -> String.valueOf(x.get("title")), String.CASE_INSENSITIVE_ORDER))
                 .toList();
-        return ResponseEntity.ok(Map.of("tier", tier, "songs", songs));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("tier", tier);
+        body.put("groupIndex", groupIndex);
+        // true = 抽選と同じ選曲基準を通した候補、false = 絞り込み前の階級プール（未編成など）。
+        body.put("filtered", filtered);
+        body.put("songs", songs);
+        return ResponseEntity.ok(body);
     }
 
     /**
