@@ -6,7 +6,9 @@
  * - 公式難易度（すべて / ☆11 / ☆12）で対象曲を絞り込み、集計もその範囲で再計算
  * - 展開/折りたたみで曲一覧を表示、情報モーダルとレート早見表モーダルを内包
  *
- * @prop scores プレイ済みスコアレコード配列。
+ * @prop scores        表示・集計対象のスコアレコード配列。「歴代ベストを反映」トグル ON のときは
+ *                     歴代ベスト適用済みのレコードが渡ってくる。
+ * @prop historyScores 成長記録モーダル用の現行作スコア（省略時は scores を流用）。
  */
 import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
@@ -19,6 +21,7 @@ import RankGrowthChartModal from './RankGrowthChartModal.vue';
 
 const props = defineProps<{
   scores: ScoreRecord[];
+  historyScores?: ScoreRecord[];
 }>();
 
 const { t } = useI18n();
@@ -190,6 +193,25 @@ const officialLevelOfRecord = (s: ScoreRecord): number | null => {
 const matchesLevelFilter = (level: number | null): boolean =>
   levelFilter.value === 'all' || level === Number(levelFilter.value);
 
+/**
+ * 【computed の役割】 モーダル用の「現行作」ランク別集計（プレイ済数・合計 Beat-PT）。
+ *
+ * 成長記録（履歴ログ）とフォルダランキングはサーバ側の現行作データで作られるため、
+ * 歴代ベストを反映した表示値ではなく、常に現行作のレコードから集計した値を渡す。
+ */
+const currentRankStats = computed(() => {
+  const src = props.historyScores ?? props.scores;
+  const stats: Record<string, { playCount: number; totalBeatPoints: number }> = {};
+  src.forEach(s => {
+    const rank = s.informalRank;
+    if (!rank || rank.includes('Uncategorized')) return;
+    const entry = stats[rank] ?? (stats[rank] = { playCount: 0, totalBeatPoints: 0 });
+    entry.totalBeatPoints += s.beatTierPoints;
+    if (s.score > 0) entry.playCount += 1;
+  });
+  return stats;
+});
+
 /** 【computed の役割】 非公式ランクごとの曲数（難易度表定義の総数、プレイ有無不問・フィルタ非適用）。 */
 const rankSongCountsAll = computed(() => {
   const counts: Record<string, number> = {};
@@ -282,11 +304,11 @@ const tableData = computed(() => {
       rankInfo,
       nextRankInfo,
       playedRankInfo,
-      // フォルダランキング / 成長グラフはフォルダ全体（フィルタ非適用）が対象なので、
-      // モーダルへ渡す値だけは絞り込み前の集計を保持しておく。
+      // フォルダランキング / 成長グラフはフォルダ全体（フィルタ非適用）かつ現行作が対象なので、
+      // モーダルへ渡す値だけは絞り込み前・歴代反映前の集計を保持しておく。
       fullTotalCount: rankSongCountsAll.value[rank] || allSongs.length,
-      fullPlayCount: allSongs.filter(s => s.score > 0).length,
-      fullTotalBeatPoints: allSongs.reduce((acc, s) => acc + s.beatTierPoints, 0),
+      fullPlayCount: currentRankStats.value[rank]?.playCount ?? 0,
+      fullTotalBeatPoints: currentRankStats.value[rank]?.totalBeatPoints ?? 0,
     };
   });
 

@@ -204,8 +204,8 @@
       </div>
     </div>
 
-    <!-- Unofficial Difficulty Table -->
-    <UnofficialDifficultyTable v-if="!isPrivateView" :scores="allFlattenedScores" />
+    <!-- Unofficial Difficulty Table（歴代トグル ON なら歴代ベストで集計。成長記録だけは現行作基準） -->
+    <UnofficialDifficultyTable v-if="!isPrivateView" :scores="displayScores" :history-scores="allFlattenedScores" />
 
     <!-- Rank Up Advice -->
     <RankUpAdvice v-if="!isPrivateView" :flat-scores="allFlattenedScores" :total-points="props.totalPoints" />
@@ -415,6 +415,12 @@ const allFlattenedScores = computed(() => flattenScores(props.scores));
 
 /** 【computed の役割】 過去作のベストを重ねたレコード。歴代 PT の算出元。 */
 const allTimeRecords = computed(() => applyAllTimeBest(allFlattenedScores.value));
+
+/**
+ * 【computed の役割】 一覧系コンポーネントへ渡す表示用レコード。
+ * 「歴代ベストを反映」トグル ON のときは歴代ベストで上書きしたレコードを使う。
+ */
+const displayScores = computed(() => (showAllTime.value ? allTimeRecords.value : allFlattenedScores.value));
 
 /**
  * 【computed の役割】 歴代ベースの Beat-PT。
