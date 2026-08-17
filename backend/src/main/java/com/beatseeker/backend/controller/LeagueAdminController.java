@@ -116,9 +116,19 @@ public class LeagueAdminController {
      *
      * <p>人数は週 × 卓 × グループを 1 クエリでまとめて集計する（週ごとにメンバーを引くと N+1 になるため）。
      *
+     * <p>{@code validMemberCount} は「有効曲が 1 曲以上あるメンバー」＝実際にリーグを走った人数。
+     * 週の状態で求め方が変わる:
+     * <ul>
+     *   <li>closed … 締め時に凍結した {@code validSongs} を 1 クエリで数える</li>
+     *   <li>active … 凍結値がまだ無いのでグループごとに順位表をライブ計算して数える
+     *       （参加者の画面と同じ判定にするため。active は高々 1 週なので範囲は限定的）</li>
+     *   <li>draft … 開始前でベースライン・スナップショット時刻が未確定＝有効判定が成立しないので
+     *       計算せず {@code null}（画面では「-」）を返す</li>
+     * </ul>
+     *
      * @param auth   認証情報（管理者限定）
      * @param ladder ラダー種別
-     * @return {@code {weeks:[{id, weekNo, startsAt, endsAt, status, memberCount,
+     * @return {@code {weeks:[{id, weekNo, startsAt, endsAt, status, memberCount, validMemberCount,
      *         tiers:[{tier, groups:[{groupIndex, memberCount}]}]}]}}
      */
     @GetMapping("/history")
@@ -146,6 +156,12 @@ public class LeagueAdminController {
             memberCountByWeek.merge(weekId, count, Long::sum);
         }
 
+        // 締め済み週の「有効曲 1 曲以上」人数は凍結値から 1 クエリで揃う。
+        Map<Long, Long> frozenValidByWeek = new HashMap<>();
+        for (Object[] row : leagueMemberRepository.countValidMembersByWeek(ladder)) {
+            frozenValidByWeek.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+        }
+
         List<Map<String, Object>> weeks = new ArrayList<>();
         for (LeagueWeek week : leagueWeekRepository.findByLadderTypeOrderByStartsAtDesc(ladder)) {
             Map<String, Object> wm = new LinkedHashMap<>();
@@ -156,6 +172,7 @@ public class LeagueAdminController {
             wm.put("endsAt", week.getEndsAt());
             wm.put("status", week.getStatus());
             wm.put("memberCount", memberCountByWeek.getOrDefault(week.getId(), 0L));
+            wm.put("validMemberCount", validMemberCount(week, countsByWeek.get(week.getId()), frozenValidByWeek));
 
             List<Map<String, Object>> tiers = new ArrayList<>();
             for (Map.Entry<Integer, Map<Integer, Long>> te
@@ -937,6 +954,49 @@ public class LeagueAdminController {
     private Double rateOf(int ex, Integer notes) {
         if (notes == null || notes <= 0) return null;
         return Math.round(ex * 100.0 / (notes * 2) * 100.0) / 100.0;
+    }
+
+    /**
+     * 【メソッドの役割】 その週で「有効曲が 1 曲以上あるメンバー」の人数を求める。
+     *
+     * <p>週の状態で取り方が変わる:
+     * <ul>
+     *   <li>closed … 締め時に凍結した {@code validSongs} の集計（引数の {@code frozenValidByWeek}）を使う</li>
+     *   <li>active … 凍結値がまだ無いので、グループごとに順位表をライブ計算して
+     *       {@code validSongs >= 1} の行を数える。参加者が見ている順位表と同じ判定を使うため、
+     *       画面の内訳と必ず一致する</li>
+     *   <li>draft … 開始前でベースラインもスナップショット時刻も未確定＝有効判定が成立しないため、
+     *       計算せず null（画面では「-」）を返す</li>
+     * </ul>
+     *
+     * @param week          対象週
+     * @param tierGroups    その週の 卓 → グループ → 人数（active のライブ計算で走査対象を得るのに使う）
+     * @param frozenValid   週ID → 凍結済みの「有効 1 曲以上」人数（締め済み週ぶん）
+     * @return 人数。draft 週は null
+     */
+    private Long validMemberCount(LeagueWeek week,
+                                  Map<Integer, Map<Integer, Long>> tierGroups,
+                                  Map<Long, Long> frozenValid) {
+        if ("draft".equals(week.getStatus())) {
+            return null;
+        }
+        if (!"active".equals(week.getStatus())) {
+            return frozenValid.getOrDefault(week.getId(), 0L);
+        }
+        // 開催中の週: グループ単位でライブ計算する（active は高々 1 週）。
+        if (tierGroups == null || tierGroups.isEmpty()) {
+            return 0L;
+        }
+        long count = 0;
+        for (Map.Entry<Integer, Map<Integer, Long>> te : tierGroups.entrySet()) {
+            for (Integer groupIndex : te.getValue().keySet()) {
+                for (Map<String, Object> row : standingsService.computeGroupStandings(week, te.getKey(), groupIndex)) {
+                    Object v = row.get("validSongs");
+                    if (v instanceof Number n && n.intValue() >= 1) count++;
+                }
+            }
+        }
+        return count;
     }
 
     /**

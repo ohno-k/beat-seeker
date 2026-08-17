@@ -90,4 +90,20 @@ public interface LeagueMemberRepository extends JpaRepository<LeagueMember, Long
            "GROUP BY m.week.id, m.tier, m.groupIndex " +
            "ORDER BY m.week.id DESC, m.tier ASC, m.groupIndex ASC")
     List<Object[]> countByWeekTierGroup(@Param("ladder") String ladder);
+
+    /**
+     * 【メソッドの役割】 締め済み週について「有効曲が 1 曲以上あるメンバー」の人数を週ごとに数える。
+     *
+     * 管理者の全リーグ履歴で「実際にリーグを走った人が何人いたか」を出すために使う。
+     * {@code validSongs} は週の締め時にだけ書き込まれる凍結値なので、この 1 クエリで
+     * すべての締め済み週ぶんが揃う（進行中・編成前の週は {@code validSongs} が null のため
+     * 比較が成立せず、結果に現れない。それらは呼び出し側でライブ計算する）。
+     *
+     * @param ladder ラダー種別
+     * @return {@code [週ID, 有効曲1曲以上の人数]} の配列一覧
+     */
+    @Query("SELECT m.week.id, COUNT(m) FROM LeagueMember m " +
+           "WHERE m.week.ladderType = :ladder AND m.validSongs >= 1 " +
+           "GROUP BY m.week.id")
+    List<Object[]> countValidMembersByWeek(@Param("ladder") String ladder);
 }

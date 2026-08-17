@@ -1570,6 +1570,8 @@ export const ja = {
   'league.admin.history.empty': 'まだ開催回がありません。',
   'league.admin.history.status': '状態',
   'league.admin.history.members': '参加',
+  'league.admin.history.scorers': '有効あり',
+  'league.admin.history.scorersHint': '有効曲が1曲以上あるユーザの人数（＝実際にリーグを走った人数）と、参加者に占める割合。開催中の週はその時点の集計、編成前の週は開始前のため「-」。',
   'league.admin.history.divisions': 'DIVISION数',
   'league.admin.history.status_draft': '編成前',
   'league.admin.history.status_active': '開催中',

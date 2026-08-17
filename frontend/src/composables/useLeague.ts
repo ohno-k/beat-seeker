@@ -172,6 +172,11 @@ export interface LeagueAdminHistoryWeek {
   status: 'draft' | 'active' | 'closed';
   /** その週の総参加人数。 */
   memberCount: number;
+  /**
+   * 有効曲が 1 曲以上あるメンバーの人数（＝実際にリーグを走った人数）。
+   * 締め済み週は凍結値、開催中の週はライブ計算。編成前（draft）は開始前で判定が成立しないため null。
+   */
+  validMemberCount: number | null;
   /** DIVISION ごとのグループ構成（人数のみ）。未編成の週は空配列。 */
   tiers: { tier: number; groups: { groupIndex: number; memberCount: number }[] }[];
 }

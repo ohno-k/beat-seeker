@@ -1512,6 +1512,8 @@ export const ko = {
   'league.admin.history.empty': '아직 개최 회차가 없습니다.',
   'league.admin.history.status': '상태',
   'league.admin.history.members': '참가',
+  'league.admin.history.scorers': '유효 있음',
+  'league.admin.history.scorersHint': '유효 곡이 1곡 이상인 사용자 수(＝실제로 리그를 진행한 인원)와 참가자 대비 비율. 진행 중인 주는 현재 시점 집계이며, 편성 전인 주는 시작 전이므로 "-"로 표시됩니다.',
   'league.admin.history.divisions': 'DIVISION 수',
   'league.admin.history.status_draft': '편성 전',
   'league.admin.history.status_active': '진행 중',
