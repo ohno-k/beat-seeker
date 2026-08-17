@@ -2,6 +2,7 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
+import com.beatseeker.backend.service.LeagueDivision;
 import com.beatseeker.backend.service.LeagueService;
 import com.beatseeker.backend.service.LeagueStandingsService;
 import org.springframework.http.ResponseEntity;
@@ -43,19 +44,22 @@ public class LeagueController {
     private final LeagueWeekRepository leagueWeekRepository;
     private final LeagueMemberRepository leagueMemberRepository;
     private final LeagueSongRepository leagueSongRepository;
+    private final LeagueEntryRepository leagueEntryRepository;
 
     public LeagueController(UserRepository userRepository,
                             LeagueService leagueService,
                             LeagueStandingsService standingsService,
                             LeagueWeekRepository leagueWeekRepository,
                             LeagueMemberRepository leagueMemberRepository,
-                            LeagueSongRepository leagueSongRepository) {
+                            LeagueSongRepository leagueSongRepository,
+                            LeagueEntryRepository leagueEntryRepository) {
         this.userRepository = userRepository;
         this.leagueService = leagueService;
         this.standingsService = standingsService;
         this.leagueWeekRepository = leagueWeekRepository;
         this.leagueMemberRepository = leagueMemberRepository;
         this.leagueSongRepository = leagueSongRepository;
+        this.leagueEntryRepository = leagueEntryRepository;
     }
 
     /**
@@ -290,9 +294,85 @@ public class LeagueController {
         return ResponseEntity.ok(history);
     }
 
+    /**
+     * 【メソッドの役割】 DIVISION 別のランキング（参加者を昇降格ポイントの降順に並べたもの）を返す。
+     *
+     * 進行中の週の順位表とは別物で、こちらは「その DIVISION の中で今どの位置に居るか」を
+     * 通しで見るためのもの。ポイントは週次締めで増減し、+8 で昇格・-8 で降格する値
+     * （{@link LeagueEntry#getPoints()}）なので、降順＝昇格に近い順になる。
+     *
+     * 掲載対象は参加中（active）かつ DIVISION 配属済みのエントリーのみ。休止中・未配属は含めない。
+     * 同ポイントは総合 BEAT-PT の高い順、さらに同値なら表示名順で並べ、順位は同着を許す
+     * （1, 1, 3 形式）。
+     *
+     * @param ladder ラダー種別
+     * @return {@code {ladder, divisions:[{tier, memberCount, entries:[{rank, userId, displayName, points, totalBeatPt}]}]}}
+     */
+    @GetMapping("/rankings")
+    public ResponseEntity<?> rankings(@RequestParam("ladder") String ladder) {
+        if (!leagueService.isValidLadder(ladder)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ladder は score / bp のいずれかです"));
+        }
+
+        // DIVISION ごとにエントリーを束ねる（未配属＝currentTier が null の人は次回編成待ちなので除く）。
+        Map<Integer, List<LeagueEntry>> byTier = new TreeMap<>();
+        for (LeagueEntry e : leagueEntryRepository.findActiveWithUser(ladder)) {
+            Integer tier = e.getCurrentTier();
+            if (tier == null || !LeagueDivision.isValid(tier)) continue;
+            byTier.computeIfAbsent(tier, k -> new ArrayList<>()).add(e);
+        }
+
+        List<Map<String, Object>> divisions = new ArrayList<>();
+        for (Map.Entry<Integer, List<LeagueEntry>> te : byTier.entrySet()) {
+            List<LeagueEntry> sorted = new ArrayList<>(te.getValue());
+            sorted.sort(Comparator
+                    .comparingInt((LeagueEntry e) -> e.getPoints() != null ? e.getPoints() : 0).reversed()
+                    .thenComparing(Comparator.comparingDouble(
+                            (LeagueEntry e) -> e.getUser().getTotalBeatPt() != null
+                                    ? e.getUser().getTotalBeatPt() : 0.0).reversed())
+                    .thenComparing(e -> nameOf(e.getUser()), String.CASE_INSENSITIVE_ORDER));
+
+            List<Map<String, Object>> rows = new ArrayList<>();
+            Integer prevPoints = null;
+            int rank = 0;
+            for (int i = 0; i < sorted.size(); i++) {
+                LeagueEntry e = sorted.get(i);
+                int points = e.getPoints() != null ? e.getPoints() : 0;
+                // 同ポイントは同着（次の順位は人数分飛ぶ = 1, 1, 3）。
+                if (prevPoints == null || points != prevPoints) rank = i + 1;
+                prevPoints = points;
+
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("rank", rank);
+                row.put("userId", e.getUser().getId());
+                row.put("displayName", nameOf(e.getUser()));
+                row.put("points", points);
+                row.put("totalBeatPt", e.getUser().getTotalBeatPt());
+                rows.add(row);
+            }
+
+            Map<String, Object> div = new LinkedHashMap<>();
+            div.put("tier", te.getKey());
+            div.put("memberCount", rows.size());
+            div.put("entries", rows);
+            divisions.add(div);
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("ladder", ladder);
+        result.put("divisions", divisions);
+        return ResponseEntity.ok(result);
+    }
+
     // ---------------------------------------------------------------------
     // 内部ヘルパー
     // ---------------------------------------------------------------------
+
+    /** 表示名（未設定なら IIDX ID）。 */
+    private String nameOf(User user) {
+        String name = user.getDisplayName();
+        return name != null && !name.isBlank() ? name : String.valueOf(user.getIidxId());
+    }
 
     /** 認証情報からユーザーを解決する。未認証・不在なら null。 */
     private User getUser(Authentication auth) {

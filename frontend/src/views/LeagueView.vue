@@ -16,6 +16,7 @@ import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import LeagueInfoModal from '../components/LeagueInfoModal.vue';
+import LeagueRankingModal from '../components/LeagueRankingModal.vue';
 import LeaguePointGauge from '../components/LeaguePointGauge.vue';
 import LeagueStandingsTable from '../components/LeagueStandingsTable.vue';
 import RankIcon from '../components/RankIcon.vue';
@@ -67,6 +68,8 @@ const historyDetailLoading = ref(false);
 const historyDetailError = ref('');
 /** ルール説明モーダルの開閉。 */
 const showInfo = ref(false);
+/** DIVISION 別ランキングモーダルの開閉。 */
+const showRanking = ref(false);
 /** 管理者 overview（管理者のみ取得）。 */
 const adminLadders = ref<LeagueAdminLadder[]>([]);
 /** 管理者 overview の取得に失敗した理由（取得できないと編成ブロックが空になるので理由を出す）。 */
@@ -622,6 +625,17 @@ onUnmounted(() => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {{ t('league.info') }}
+        </button>
+        <!-- DIVISION 別ランキング（各 DIVISION を昇降格 PT の降順で一覧する）。 -->
+        <button
+          v-if="isLoggedIn"
+          class="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
+          @click="showRanking = true"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V3H8v8M4 21h16M6 21v-6h12v6M9 7h6" />
+          </svg>
+          {{ t('league.rankingModal.open') }}
         </button>
       </div>
       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t('league.subtitle') }}</p>
@@ -1298,5 +1312,8 @@ onUnmounted(() => {
 
     <!-- ルール説明モーダル -->
     <LeagueInfoModal v-if="showInfo" @close="showInfo = false" />
+
+    <!-- DIVISION 別ランキングモーダル -->
+    <LeagueRankingModal v-if="showRanking" :ladder="ladder" :my-user-id="user?.id" @close="showRanking = false" />
   </div>
 </template>

@@ -201,6 +201,25 @@ export interface LeaguePoolSong {
   notes: number;
 }
 
+/** DIVISION 別ランキングの 1 行（参加者と昇降格ポイント）。 */
+export interface LeagueRankingEntry {
+  /** DIVISION 内の順位（同ポイントは同着。1, 1, 3 形式）。 */
+  rank: number;
+  userId: number;
+  displayName: string;
+  /** 昇降格ポイント（-8..+8）。+8 で昇格、-8 で降格。 */
+  points: number;
+  /** 総合 BEAT-PT（同ポイント時の並び順＆ティアアイコン表示用）。 */
+  totalBeatPt: number | null;
+}
+
+/** DIVISION 別ランキングの 1 DIVISION 分。 */
+export interface LeagueRankingDivision {
+  tier: number;
+  memberCount: number;
+  entries: LeagueRankingEntry[];
+}
+
 /** 課題曲差し替えの選択肢（と、それが抽選基準で絞り込まれたものかどうか）。 */
 export interface LeagueSongPool {
   /**
@@ -357,6 +376,16 @@ export function useLeague() {
     const res = await fetch(`${API_BASE}/api/league/overview?ladder=${ladder}`, { headers: authHeaders() });
     if (!res.ok) await raise(res, 'リーグ構成の取得に失敗しました');
     return await res.json();
+  };
+
+  /**
+   * DIVISION 別ランキング（各 DIVISION の参加者を昇降格ポイントの降順に並べたもの）を取得する。
+   * 進行中の週の順位表とは別で、DIVISION 内の通しの立ち位置を見るためのもの。
+   */
+  const fetchRankings = async (ladder: LadderType): Promise<LeagueRankingDivision[]> => {
+    const res = await fetch(`${API_BASE}/api/league/rankings?ladder=${ladder}`, { headers: authHeaders() });
+    if (!res.ok) await raise(res, 'ランキングの取得に失敗しました');
+    return ((await res.json()).divisions ?? []) as LeagueRankingDivision[];
   };
 
   /** 自分の過去週成績を取得する。 */
@@ -537,6 +566,7 @@ export function useLeague() {
     fetchCurrent,
     fetchStandings,
     fetchOverview,
+    fetchRankings,
     fetchHistory,
     fetchAdminOverview,
     replaceSong,

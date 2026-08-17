@@ -3,6 +3,8 @@ package com.beatseeker.backend.repository;
 import com.beatseeker.backend.entity.LeagueEntry;
 import com.beatseeker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +38,19 @@ public interface LeagueEntryRepository extends JpaRepository<LeagueEntry, Long> 
      * @return 参加中エントリー一覧
      */
     List<LeagueEntry> findByLadderTypeAndActiveTrue(String ladderType);
+
+    /**
+     * 【メソッドの役割】 指定ラダーの参加中エントリーを、ユーザーごと JOIN FETCH して全件取得する。
+     *
+     * DIVISION 別ランキング（表示名と昇降格ポイントを一覧する）のように、全エントリーの
+     * {@code user} を必ず触る用途で使う。{@link #findByLadderTypeAndActiveTrue} は user が
+     * LAZY なので人数分の追加クエリ（N+1）になってしまう。
+     *
+     * @param ladderType ラダー種別
+     * @return 参加中エントリー一覧（user 取得済み）
+     */
+    @Query("SELECT e FROM LeagueEntry e JOIN FETCH e.user WHERE e.ladderType = :ladderType AND e.active = true")
+    List<LeagueEntry> findActiveWithUser(@Param("ladderType") String ladderType);
 
     /**
      * 【メソッドの役割】 指定ユーザーの全ラダー分のエントリーを取得する。
