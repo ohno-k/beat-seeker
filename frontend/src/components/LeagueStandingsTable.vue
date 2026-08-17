@@ -94,9 +94,9 @@ const zoneClass = (row: LeagueStandingRow) => {
           <th class="py-2 pr-2 text-center">{{ t('league.points') }}</th>
           <th class="py-2 pr-1 text-center whitespace-nowrap" v-for="s in songs" :key="s.id"
               :title="s.disabled ? `${s.slot}. ${s.title}（${t('league.songDisabled')}）` : `${s.slot}. ${s.title}`">
-            <span :class="s.disabled ? 'line-through' : ''">{{ s.slot }}</span>
+            <!-- 列見出しは課題曲の順番（1曲目/2曲目/3曲目）。中身は EX と着順ポイント。 -->
+            <span :class="s.disabled ? 'line-through' : ''">{{ t('league.songNth', { n: s.slot }) }}</span>
             <span v-if="s.disabled" class="font-normal text-[10px] text-rose-500 dark:text-rose-400">{{ t('league.songDisabledShort') }}</span>
-            <span v-else class="font-normal text-[10px] text-slate-300 dark:text-slate-600">{{ t('league.songPoints') }}</span>
           </th>
         </tr>
       </thead>

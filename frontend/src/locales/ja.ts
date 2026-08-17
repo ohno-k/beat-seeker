@@ -1532,6 +1532,7 @@ export const ja = {
   'league.avgRate': '平均レート',
   'league.leaguePoints': '得点',
   'league.songPoints': 'pt',
+  'league.songNth': '{n}曲目',
   'league.songPointsHint': '曲別の列は上段が有効になったリザルトの EX スコア（ラインを超えた記録のみ表示。未達は「–」）、下段が着順とその曲の着順ポイント（1位＝グループ人数、最下位＝1、同着は平均）。3曲の合計が「得点」です。誰もラインを超えていない曲は、ライン保持者だけ +1 になります。',
   'league.played': 'ライン達成',
   'league.notPlayed': '未達成',

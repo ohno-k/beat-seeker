@@ -1474,6 +1474,7 @@ export const ko = {
   'league.avgRate': '평균 레이트',
   'league.leaguePoints': '득점',
   'league.songPoints': 'pt',
+  'league.songNth': '{n}번째 곡',
   'league.songPointsHint': '곡별 열은 위가 유효해진 결과의 EX 스코어(라인을 넘은 기록만 표시, 미달은 "–"), 아래가 착순과 그 곡의 순위 포인트입니다(1위 = 그룹 인원수, 최하위 = 1, 동착은 평균). 3곡 합계가 "득점"입니다. 아무도 라인을 넘지 못한 곡은 라인 보유자만 +1이 됩니다.',
   'league.played': '라인 달성',
   'league.notPlayed': '미달성',
