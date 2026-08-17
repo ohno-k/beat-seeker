@@ -64,6 +64,18 @@ public interface LeagueWeekRepository extends JpaRepository<LeagueWeek, Long> {
     List<LeagueWeek> findByLadderTypeAndStatusOrderByStartsAtDesc(String ladderType, String status);
 
     /**
+     * 【メソッドの役割】 指定ラダーの全週をステータス不問で新しい順に取得する。
+     *
+     * 管理者の全リーグ履歴（GET /api/league/admin/history）に使う。プレイヤー向けの履歴が
+     * 「自分が参加した closed 週」だけなのに対し、こちらは draft / active / closed を
+     * すべて並べて運営が開催の経緯を追えるようにする。
+     *
+     * @param ladderType ラダー種別
+     * @return 週一覧（開始日時降順）
+     */
+    List<LeagueWeek> findByLadderTypeOrderByStartsAtDesc(String ladderType);
+
+    /**
      * 【メソッドの役割】 指定ラダーで採番済みの最大の開催回番号を取得する。
      *
      * 次週の番号（最大 + 1）の採番に使う。まだ 1 週も採番していなければ empty

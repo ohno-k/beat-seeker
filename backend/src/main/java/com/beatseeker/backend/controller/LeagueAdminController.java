@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
  *
  * 主なエンドポイント:
  *  - GET  /api/league/admin/overview                      … 両ラダーの draft/active 週の状況
+ *  - GET  /api/league/admin/history                       … 全週の一覧（DIVISION / グループ構成つき）
+ *  - GET  /api/league/admin/standings                     … 任意グループの順位表（スコアを伏せない）
  *  - POST /api/league/admin/weeks/{weekId}/songs/{songId}/replace … 課題曲の差し替え（draft のみ）
  *  - POST /api/league/admin/weeks/{weekId}/songs/{songId}/disabled … 課題曲の無効化 / 復帰（draft・active）
  *  - POST /api/league/admin/weeks/{weekId}/redraw          … 指定階級の課題曲を再抽選（draft のみ）
@@ -102,6 +104,122 @@ public class LeagueAdminController {
             ladders.add(m);
         }
         return ResponseEntity.ok(Map.of("ladders", ladders));
+    }
+
+    /**
+     * 【メソッドの役割】 指定ラダーの全週を新しい順に返す（管理者の全リーグ履歴）。
+     *
+     * <p>プレイヤー向けの {@code GET /api/league/history} が「自分が参加した closed 週」だけなのに対し、
+     * こちらは <b>draft / active / closed のすべての週</b>を、各週の DIVISION・グループ構成つきで返す。
+     * 運営が「過去にどの回でどの卓がどう組まれていたか」を一覧から辿れるようにするための入り口で、
+     * 各グループの中身は {@code GET /api/league/admin/standings} で開く。
+     *
+     * <p>人数は週 × 卓 × グループを 1 クエリでまとめて集計する（週ごとにメンバーを引くと N+1 になるため）。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param ladder ラダー種別
+     * @return {@code {weeks:[{id, weekNo, startsAt, endsAt, status, memberCount,
+     *         tiers:[{tier, groups:[{groupIndex, memberCount}]}]}]}}
+     */
+    @GetMapping("/history")
+    public ResponseEntity<?> history(Authentication auth, @RequestParam("ladder") String ladder) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        if (!leagueService.isValidLadder(ladder)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ladder が不正です"));
+        }
+
+        // 週ID → 卓 → グループ → 人数。1 クエリぶんの集計結果をそのまま組み替える。
+        Map<Long, Map<Integer, Map<Integer, Long>>> countsByWeek = new HashMap<>();
+        Map<Long, Long> memberCountByWeek = new HashMap<>();
+        for (Object[] row : leagueMemberRepository.countByWeekTierGroup(ladder)) {
+            Long weekId = ((Number) row[0]).longValue();
+            Integer tier = row[1] != null ? ((Number) row[1]).intValue() : null;
+            Integer groupIndex = row[2] != null ? ((Number) row[2]).intValue() : null;
+            long count = ((Number) row[3]).longValue();
+            if (tier == null || groupIndex == null) continue; // 未配属は履歴の構成に出さない
+            countsByWeek
+                    .computeIfAbsent(weekId, k -> new TreeMap<>())
+                    .computeIfAbsent(tier, k -> new TreeMap<>())
+                    .put(groupIndex, count);
+            memberCountByWeek.merge(weekId, count, Long::sum);
+        }
+
+        List<Map<String, Object>> weeks = new ArrayList<>();
+        for (LeagueWeek week : leagueWeekRepository.findByLadderTypeOrderByStartsAtDesc(ladder)) {
+            Map<String, Object> wm = new LinkedHashMap<>();
+            wm.put("id", week.getId());
+            wm.put("ladderType", week.getLadderType());
+            wm.put("weekNo", week.getWeekNo());
+            wm.put("startsAt", week.getStartsAt());
+            wm.put("endsAt", week.getEndsAt());
+            wm.put("status", week.getStatus());
+            wm.put("memberCount", memberCountByWeek.getOrDefault(week.getId(), 0L));
+
+            List<Map<String, Object>> tiers = new ArrayList<>();
+            for (Map.Entry<Integer, Map<Integer, Long>> te
+                    : countsByWeek.getOrDefault(week.getId(), Map.of()).entrySet()) {
+                List<Map<String, Object>> groups = te.getValue().entrySet().stream()
+                        .map(g -> {
+                            Map<String, Object> gm = new LinkedHashMap<String, Object>();
+                            gm.put("groupIndex", g.getKey());
+                            gm.put("memberCount", g.getValue());
+                            return gm;
+                        })
+                        .toList();
+                Map<String, Object> tm = new LinkedHashMap<>();
+                tm.put("tier", te.getKey());
+                tm.put("groups", groups);
+                tiers.add(tm);
+            }
+            wm.put("tiers", tiers);
+            weeks.add(wm);
+        }
+        return ResponseEntity.ok(Map.of("weeks", weeks));
+    }
+
+    /**
+     * 【メソッドの役割】 任意の週・DIVISION・グループの順位表を、スコアを伏せずに返す。
+     *
+     * <p>プレイヤー向けの {@code GET /api/league/standings} は、他人の「未達の自己ベスト」
+     * （＝週内にラインを超えず着順に乗らなかった記録）を落として返す。運営は成績照会・不正調査の
+     * ために当事者と同じ情報を見る必要があるので、こちらは<b>除去せずそのまま返す</b>。
+     * それ以外の計算（着順・ポイント・ライン）はプレイヤー向けとまったく同じ経路
+     * （{@link LeagueStandingsService}）を通すので、表示のズレは起きない。
+     *
+     * @param auth       認証情報（管理者限定）
+     * @param weekId     週 ID（draft / active / closed いずれも可）
+     * @param tier       DIVISION
+     * @param groupIndex グループ番号（0 始まり）
+     * @return {@code {week, songs, standings}}。週が無ければ 404
+     */
+    @GetMapping("/standings")
+    public ResponseEntity<?> standings(Authentication auth,
+                                       @RequestParam("weekId") Long weekId,
+                                       @RequestParam("tier") Integer tier,
+                                       @RequestParam("groupIndex") Integer groupIndex) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        LeagueWeek week = leagueWeekRepository.findById(weekId).orElse(null);
+        if (week == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> wm = new LinkedHashMap<>();
+        wm.put("id", week.getId());
+        wm.put("ladderType", week.getLadderType());
+        wm.put("weekNo", week.getWeekNo());
+        wm.put("startsAt", week.getStartsAt());
+        wm.put("endsAt", week.getEndsAt());
+        wm.put("status", week.getStatus());
+        result.put("week", wm);
+        result.put("songs", songMapsWithLines(week, tier, groupIndex));
+        // stripUnvalidatedScores（プレイヤー向けの秘匿処理）は通さない＝当事者と同じ内訳が見える。
+        result.put("standings", standingsService.computeGroupStandings(week, tier, groupIndex));
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -819,6 +937,38 @@ public class LeagueAdminController {
     private Double rateOf(int ex, Integer notes) {
         if (notes == null || notes <= 0) return null;
         return Math.round(ex * 100.0 / (notes * 2) * 100.0) / 100.0;
+    }
+
+    /**
+     * 【メソッドの役割】 指定グループの課題曲に、そのグループの「ライン」を slot 単位で合成して返す。
+     *
+     * <p>プレイヤー向け {@code GET /api/league/standings}（{@code LeagueController.songMapsWithLines}）
+     * と同じ組み立ての管理者版。順位表と並べて見たときに曲の並び・ラインが一致するよう、
+     * ラインの計算は同じ {@link LeagueStandingsService} を通す。
+     *
+     * @param week       対象週
+     * @param tier       DIVISION
+     * @param groupIndex グループ番号
+     * @return 課題曲マップのリスト（各要素に lineEx / lineMiss / lineRate を追加）
+     */
+    private List<Map<String, Object>> songMapsWithLines(LeagueWeek week, Integer tier, Integer groupIndex) {
+        Map<Object, Map<String, Object>> lineBySlot = new HashMap<>();
+        for (Map<String, Object> l : standingsService.computeGroupSongLines(week, tier, groupIndex)) {
+            lineBySlot.put(l.get("slot"), l);
+        }
+        List<Map<String, Object>> songs = new ArrayList<>();
+        for (LeagueSong s : leagueSongRepository
+                .findByWeekAndTierAndGroupIndexOrderBySlotAsc(week, tier, groupIndex)) {
+            Map<String, Object> m = toSongMap(s);
+            Map<String, Object> l = lineBySlot.get(m.get("slot"));
+            if (l != null) {
+                m.put("lineEx", l.get("lineEx"));
+                m.put("lineMiss", l.get("lineMiss"));
+                m.put("lineRate", l.get("lineRate"));
+            }
+            songs.add(m);
+        }
+        return songs;
     }
 
     /** 課題曲をレスポンス用 Map に変換する（ライン情報があれば併記する）。 */

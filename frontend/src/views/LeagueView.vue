@@ -29,6 +29,7 @@ import {
   type LeagueHistoryRow,
   type LeagueTierOverview,
   type LeagueAdminLadder,
+  type LeagueAdminHistoryWeek,
   type LeagueAdminWeek,
   type LeagueAdminMember,
   type LeagueStandingRow,
@@ -76,6 +77,22 @@ const adminLadders = ref<LeagueAdminLadder[]>([]);
 const adminError = ref('');
 /** 仮編成プレビュー（管理者が生成したときのみ。DB は更新しない）。 */
 const preview = ref<LeaguePreview | null>(null);
+/** 全リーグ履歴（全週の一覧。管理者のみ、アコーディオンを開いたときに取得）。 */
+const adminHistory = ref<LeagueAdminHistoryWeek[]>([]);
+/** 全リーグ履歴アコーディオンの開閉。 */
+const showAdminHistory = ref(false);
+/** 全リーグ履歴の読み込み状態・エラー。 */
+const adminHistoryLoading = ref(false);
+const adminHistoryError = ref('');
+/** 全リーグ履歴で展開中の週 ID（1 週ずつ開く）。閉じているときは null。 */
+const openAdminWeekId = ref<number | null>(null);
+/** 展開中の週で開いているグループ。週を閉じる / 切り替えると null に戻す。 */
+const openAdminGroup = ref<{ tier: number; groupIndex: number } | null>(null);
+/** 開いているグループの順位表（管理者用: 各スコアを伏せない）。 */
+const adminGroupDetail = ref<{ songs: LeagueSongInfo[]; standings: LeagueStandingRow[] } | null>(null);
+/** グループ順位表の読み込み状態・エラー。 */
+const adminGroupLoading = ref(false);
+const adminGroupError = ref('');
 
 const error = ref('');
 const notice = ref('');
@@ -318,6 +335,85 @@ const toggleHistoryDetail = async (h: LeagueHistoryRow) => {
   } finally {
     historyDetailLoading.value = false;
   }
+};
+
+// -------------------------------------------------------------------
+// 管理者: 全リーグ履歴（すべての開催回を横断して閲覧する）
+// -------------------------------------------------------------------
+
+/**
+ * 全リーグ履歴（全週の一覧）を読み込む。
+ *
+ * 自分の過去成績（{@link loadCurrent} の history）が「自分が参加した closed 週」だけなのに対し、
+ * こちらは draft / active / closed のすべての週を返す。アコーディオンを開いたときに読むので、
+ * 管理者以外・閉じたままの場合は取得しない。
+ */
+const loadAdminHistory = async () => {
+  if (!isAdmin.value) return;
+  adminHistoryLoading.value = true;
+  adminHistoryError.value = '';
+  try {
+    adminHistory.value = await league.fetchAdminHistory(ladder);
+  } catch (e) {
+    adminHistory.value = [];
+    adminHistoryError.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    adminHistoryLoading.value = false;
+  }
+};
+
+/** 全リーグ履歴アコーディオンを開閉する。初回に開いたときだけ取得する。 */
+const toggleAdminHistory = async () => {
+  showAdminHistory.value = !showAdminHistory.value;
+  if (showAdminHistory.value && !adminHistory.value.length && !adminHistoryLoading.value) {
+    await loadAdminHistory();
+  }
+};
+
+/** 週の行を開閉する。週を切り替えたら、開いていたグループの順位表は閉じる。 */
+const toggleAdminWeek = (weekId: number) => {
+  openAdminWeekId.value = openAdminWeekId.value === weekId ? null : weekId;
+  openAdminGroup.value = null;
+  adminGroupDetail.value = null;
+  adminGroupError.value = '';
+};
+
+/**
+ * 展開中の週の 1 グループを開き、そのグループの順位表を取得する。
+ * 同じグループをもう一度押すと閉じる。グループは同時に 1 つだけ開く。
+ *
+ * 取得は管理者用エンドポイントなので、当事者と同じく各曲の EX・スコアレート・BP まで見える
+ * （プレイヤー向けの観戦では他人の未達スコアは伏せられる）。
+ */
+const openAdminGroupStandings = async (weekId: number, tier: number, groupIndex: number) => {
+  const same = openAdminGroup.value?.tier === tier && openAdminGroup.value?.groupIndex === groupIndex;
+  if (same) {
+    openAdminGroup.value = null;
+    adminGroupDetail.value = null;
+    return;
+  }
+  openAdminGroup.value = { tier, groupIndex };
+  adminGroupDetail.value = null;
+  adminGroupError.value = '';
+  adminGroupLoading.value = true;
+  try {
+    const res = await league.fetchAdminStandings(weekId, tier, groupIndex);
+    // 取得中に別のグループへ切り替えられていたら破棄する（応答の追い越し対策）。
+    if (openAdminGroup.value?.tier !== tier || openAdminGroup.value?.groupIndex !== groupIndex) return;
+    adminGroupDetail.value = { songs: res.songs, standings: res.standings };
+  } catch (e) {
+    if (openAdminGroup.value?.tier !== tier || openAdminGroup.value?.groupIndex !== groupIndex) return;
+    adminGroupError.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    adminGroupLoading.value = false;
+  }
+};
+
+/** 週のステータスに応じたバッジのクラス（開催中 = 緑 / 編成前 = 灰 / 締め済み = 青）。 */
+const weekStatusClass = (status: string) => {
+  if (status === 'active') return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300';
+  if (status === 'draft') return 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
+  return 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300';
 };
 
 // -------------------------------------------------------------------
@@ -970,6 +1066,112 @@ onUnmounted(() => {
           <button class="mt-1.5 text-[11px] px-2 py-1 rounded border border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 disabled:opacity-50"
                   :disabled="busy" @click="loadAdmin()">{{ t('league.admin.retry') }}</button>
         </div>
+
+        <!-- 全リーグ履歴: すべての開催回を横断して、任意のグループの順位表を開く -->
+        <div class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-3">
+          <button class="w-full flex items-center justify-between text-left" @click="toggleAdminHistory()">
+            <span class="font-semibold text-slate-700 dark:text-slate-200">{{ t('league.admin.history.title') }}</span>
+            <span class="text-slate-400">{{ showAdminHistory ? '▲' : '▼' }}</span>
+          </button>
+          <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{{ t('league.admin.history.desc') }}</p>
+
+          <div v-if="showAdminHistory" class="mt-3">
+            <div v-if="adminHistoryError"
+                 class="rounded-lg border border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-900/20 px-3 py-2">
+              <p class="text-[11px] break-words text-rose-600 dark:text-rose-400">{{ adminHistoryError }}</p>
+              <button class="mt-1.5 text-[11px] px-2 py-1 rounded border border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
+                      @click="loadAdminHistory()">{{ t('league.admin.retry') }}</button>
+            </div>
+            <p v-else-if="adminHistoryLoading" class="text-sm text-slate-400 dark:text-slate-500">{{ t('common.loading') }}</p>
+            <p v-else-if="!adminHistory.length" class="text-sm text-slate-400 dark:text-slate-500">{{ t('league.admin.history.empty') }}</p>
+
+            <div v-else class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
+                    <th class="py-2 pr-2">{{ t('league.roundLabel') }}</th>
+                    <th class="py-2 pr-2">{{ t('league.week') }}</th>
+                    <th class="py-2 pr-2">{{ t('league.admin.history.status') }}</th>
+                    <th class="py-2 pr-2 text-center">{{ t('league.admin.history.members') }}</th>
+                    <th class="py-2 pr-2 text-center">{{ t('league.admin.history.divisions') }}</th>
+                    <th class="py-2 pr-2 w-8"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="w in adminHistory" :key="w.id">
+                    <tr class="border-b border-slate-100 dark:border-slate-700/50 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30"
+                        @click="toggleAdminWeek(w.id)">
+                      <td class="py-2 pr-2 font-semibold whitespace-nowrap">{{ weekLabel(w.weekNo) }}</td>
+                      <td class="py-2 pr-2 whitespace-nowrap">{{ shortDate(w.startsAt) }}〜{{ shortDate(w.endsAt) }}</td>
+                      <td class="py-2 pr-2">
+                        <span class="text-xs px-2 py-0.5 rounded-full font-semibold" :class="weekStatusClass(w.status)">
+                          {{ t(`league.admin.history.status_${w.status}`) }}
+                        </span>
+                      </td>
+                      <td class="py-2 pr-2 text-center tabular-nums">{{ w.memberCount }}</td>
+                      <td class="py-2 pr-2 text-center tabular-nums">{{ w.tiers.length }}</td>
+                      <td class="py-2 pr-2 text-center text-slate-400">{{ openAdminWeekId === w.id ? '▲' : '▼' }}</td>
+                    </tr>
+
+                    <!-- 折り畳み: その週の DIVISION / グループ一覧と、選んだグループの順位表 -->
+                    <tr v-if="openAdminWeekId === w.id" class="border-b border-slate-100 dark:border-slate-700/50">
+                      <td colspan="6" class="py-3 px-1 bg-slate-50 dark:bg-slate-900/30">
+                        <p v-if="!w.tiers.length" class="text-sm text-slate-400 dark:text-slate-500">
+                          {{ t('league.admin.notFormed') }}
+                        </p>
+                        <template v-else>
+                          <div v-for="tr in w.tiers" :key="tr.tier" class="mb-2 flex flex-wrap items-center gap-1.5">
+                            <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 w-32 shrink-0">
+                              {{ divisionName(tr.tier) }}
+                            </span>
+                            <button v-for="g in tr.groups" :key="g.groupIndex"
+                                    class="text-xs px-2 py-1 rounded border transition-colors"
+                                    :class="openAdminGroup?.tier === tr.tier && openAdminGroup?.groupIndex === g.groupIndex
+                                      ? 'bg-amber-500 border-amber-500 text-white'
+                                      : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                                    @click="openAdminGroupStandings(w.id, tr.tier, g.groupIndex)">
+                              {{ t('league.groupN', { n: g.groupIndex + 1 }) }}
+                              <span class="opacity-70">({{ g.memberCount }})</span>
+                            </button>
+                          </div>
+
+                          <!-- 選んだグループの順位表（各スコアは当事者と同じ内訳が見える） -->
+                          <div v-if="openAdminGroup" class="mt-3 border-t border-slate-200 dark:border-slate-700 pt-3">
+                            <p v-if="adminGroupError" class="text-sm text-rose-500">{{ adminGroupError }}</p>
+                            <p v-else-if="adminGroupLoading" class="text-sm text-slate-400 dark:text-slate-500">{{ t('common.loading') }}</p>
+                            <template v-else-if="adminGroupDetail">
+                              <div class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                                {{ divisionName(openAdminGroup.tier) }} / {{ t('league.groupN', { n: openAdminGroup.groupIndex + 1 }) }}
+                              </div>
+                              <ul class="mb-2 text-xs text-slate-500 dark:text-slate-400 space-y-0.5">
+                                <li v-for="s in adminGroupDetail.songs" :key="s.id">
+                                  <span :class="s.disabled ? 'line-through text-slate-400 dark:text-slate-500' : ''">
+                                    {{ s.slot }}. {{ s.title }}
+                                    <span class="text-slate-400 dark:text-slate-500">［{{ s.difficultyName }}］</span>
+                                  </span>
+                                  <span class="ml-1 text-slate-400 dark:text-slate-500">{{ songLineLabel(s) }}</span>
+                                  <span v-if="s.disabled" class="ml-1 text-rose-600 dark:text-rose-400 font-semibold">{{ t('league.songDisabled') }}</span>
+                                </li>
+                              </ul>
+                              <p v-if="!adminGroupDetail.standings.length" class="text-sm text-slate-400 dark:text-slate-500">
+                                {{ t('league.admin.history.noMembers') }}
+                              </p>
+                              <LeagueStandingsTable v-else
+                                                    :songs="adminGroupDetail.songs"
+                                                    :standings="adminGroupDetail.standings"
+                                                    :my-user-id="user?.id" />
+                            </template>
+                          </div>
+                        </template>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <div v-for="al in adminLadders" :key="al.ladder" class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="font-semibold text-slate-700 dark:text-slate-200">

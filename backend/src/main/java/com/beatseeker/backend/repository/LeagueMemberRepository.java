@@ -74,4 +74,20 @@ public interface LeagueMemberRepository extends JpaRepository<LeagueMember, Long
            "WHERE m.user = :user AND w.ladderType = :ladder AND w.status = 'closed' " +
            "ORDER BY w.startsAt DESC")
     List<LeagueMember> findClosedHistory(@Param("user") User user, @Param("ladder") String ladder);
+
+    /**
+     * 【メソッドの役割】 指定ラダーの全週について、週 × 卓 × グループ単位の人数を一括集計する。
+     *
+     * 管理者の全リーグ履歴（GET /api/league/admin/history）で、各週の DIVISION / グループ構成を
+     * 組み立てるために使う。週ごとに {@link #findByWeek} を回すと週数ぶんクエリが増える（N+1）ので、
+     * 1 クエリでまとめて数える。
+     *
+     * @param ladder ラダー種別
+     * @return {@code [週ID, tier, groupIndex, 人数]} の配列一覧（週ID 降順 → tier 昇順 → グループ昇順）
+     */
+    @Query("SELECT m.week.id, m.tier, m.groupIndex, COUNT(m) FROM LeagueMember m " +
+           "WHERE m.week.ladderType = :ladder " +
+           "GROUP BY m.week.id, m.tier, m.groupIndex " +
+           "ORDER BY m.week.id DESC, m.tier ASC, m.groupIndex ASC")
+    List<Object[]> countByWeekTierGroup(@Param("ladder") String ladder);
 }

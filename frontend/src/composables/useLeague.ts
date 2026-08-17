@@ -155,6 +155,27 @@ export interface LeagueHistoryRow {
   resultValue: number | null;
 }
 
+/**
+ * GET /api/league/admin/history の 1 週分（管理者の全リーグ履歴）。
+ *
+ * 自分の履歴（{@link LeagueHistoryRow}）が「自分が参加した closed 週の成績」なのに対し、
+ * こちらは開催そのものの一覧。draft / active / closed をすべて含み、各週の DIVISION・
+ * グループ構成だけを持つ（中身の順位表は開いたときに別途取得する）。
+ */
+export interface LeagueAdminHistoryWeek {
+  id: number;
+  ladderType: LadderType;
+  /** 開催回の通し番号（#1, #2, ...）。プレシーズンは null。 */
+  weekNo?: number | null;
+  startsAt: string;
+  endsAt: string;
+  status: 'draft' | 'active' | 'closed';
+  /** その週の総参加人数。 */
+  memberCount: number;
+  /** DIVISION ごとのグループ構成（人数のみ）。未編成の週は空配列。 */
+  tiers: { tier: number; groups: { groupIndex: number; memberCount: number }[] }[];
+}
+
 /** 管理者 overview のメンバー行（誰がどのグループに、どの立場で入ったか）。 */
 export interface LeagueAdminMember {
   userId: number;
@@ -406,6 +427,37 @@ export function useLeague() {
     return ((await res.json()).ladders ?? []) as LeagueAdminLadder[];
   };
 
+  /**
+   * 全週の一覧（DIVISION / グループ構成つき）を新しい順に取得する（管理者のみ）。
+   * 自分が参加していない週・開催中/編成前の週も含む。
+   */
+  const fetchAdminHistory = async (ladder: LadderType): Promise<LeagueAdminHistoryWeek[]> => {
+    const res = await fetch(`${API_BASE}/api/league/admin/history?ladder=${ladder}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) await raise(res, 'リーグ履歴の取得に失敗しました');
+    return ((await res.json()).weeks ?? []) as LeagueAdminHistoryWeek[];
+  };
+
+  /**
+   * 任意グループの順位表を取得する（管理者のみ）。
+   *
+   * プレイヤー向けの {@link fetchStandings} は他人の未達スコアが伏せられるが、こちらは
+   * 当事者と同じ内訳（各曲の EX・スコアレート・BP）がそのまま返る。
+   */
+  const fetchAdminStandings = async (
+    weekId: number,
+    tier: number,
+    groupIndex: number
+  ): Promise<{ week: LeagueWeekInfo; songs: LeagueSongInfo[]; standings: LeagueStandingRow[] }> => {
+    const res = await fetch(
+      `${API_BASE}/api/league/admin/standings?weekId=${weekId}&tier=${tier}&groupIndex=${groupIndex}`,
+      { headers: authHeaders() }
+    );
+    if (!res.ok) await raise(res, '順位表の取得に失敗しました');
+    return await res.json();
+  };
+
   /** draft 週の課題曲 1 曲を差し替える（管理者のみ）。 */
   const replaceSong = async (
     weekId: number,
@@ -569,6 +621,8 @@ export function useLeague() {
     fetchRankings,
     fetchHistory,
     fetchAdminOverview,
+    fetchAdminHistory,
+    fetchAdminStandings,
     replaceSong,
     setSongDisabled,
     redrawTier,
