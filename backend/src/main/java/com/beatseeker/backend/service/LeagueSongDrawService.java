@@ -4,13 +4,16 @@ import com.beatseeker.backend.entity.DifficultyRank;
 import com.beatseeker.backend.entity.DifficultyRankSong;
 import com.beatseeker.backend.entity.LeagueSong;
 import com.beatseeker.backend.entity.LeagueWeek;
+import com.beatseeker.backend.entity.PastScore;
 import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.LeagueSongRepository;
+import com.beatseeker.backend.repository.PastScoreRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +54,20 @@ public class LeagueSongDrawService {
     private final DifficultyRankRepository difficultyRankRepository;
     private final LeagueSongRepository leagueSongRepository;
     private final ScoreRepository scoreRepository;
+    private final PastScoreRepository pastScoreRepository;
+
+    /**
+     * 自己ベストに過去作スコア（歴代）を含めるか。
+     *
+     * 新作稼働直後は現行作のスコアが空になるため、現行作だけを見ると全曲が「全員未プレー」扱いになり、
+     * 実力に合わせた選曲ができなくなる。歴代を参照すれば稼働直後でも従来どおり拮抗した曲を選べる。
+     * <b>既定は false（＝現行作のみ）で、これまでの挙動と完全に同じ。</b>
+     * 世代切り替えに合わせて {@code app.league.self-best-includes-past=true} で有効化する。
+     *
+     * なお「リザルト有効ライン」（週開始時点のスコア＝{@code LeagueBaseline}）はこの設定に関わらず
+     * 常に現行作のみを見る。週内にプレーしたかの判定に過去作を混ぜてはならないため。
+     */
+    private final boolean selfBestIncludesPast;
 
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
@@ -58,11 +75,15 @@ public class LeagueSongDrawService {
     public LeagueSongDrawService(SongDefinitionRepository songDefinitionRepository,
                                  DifficultyRankRepository difficultyRankRepository,
                                  LeagueSongRepository leagueSongRepository,
-                                 ScoreRepository scoreRepository) {
+                                 ScoreRepository scoreRepository,
+                                 PastScoreRepository pastScoreRepository,
+                                 @Value("${app.league.self-best-includes-past:false}") boolean selfBestIncludesPast) {
         this.songDefinitionRepository = songDefinitionRepository;
         this.difficultyRankRepository = difficultyRankRepository;
         this.leagueSongRepository = leagueSongRepository;
         this.scoreRepository = scoreRepository;
+        this.pastScoreRepository = pastScoreRepository;
+        this.selfBestIncludesPast = selfBestIncludesPast;
     }
 
     /**
@@ -296,6 +317,7 @@ public class LeagueSongDrawService {
         recent.addAll(alsoExclude); // 同一週・同一階級で既に他グループへ出したタイトルも除外する
 
         // グループ参加者の「アーケード自己ベストレート」をタイトルごとに集める。
+        // selfBestIncludesPast が有効なら過去作（歴代）のスコアも突き合わせ、作品をまたいだ最高 EX を採る。
         List<String> titles = new ArrayList<>(poolByTitle.keySet());
         List<String> diffs = pool.stream()
                 .map(sd -> LeagueChartNotation.codeToName(sd.getDifficulty())).distinct().toList();
@@ -311,6 +333,16 @@ public class LeagueSongDrawService {
                 if (sd == null) continue;
                 if (!LeagueChartNotation.codeToName(sd.getDifficulty()).equals(s.getDifficultyName())) continue;
                 bestExByTitle.merge(s.getTitle(), s.getScore(), Math::max);
+            }
+            if (selfBestIncludesPast) {
+                // 過去作スコアは CSV 取り込み由来でアーケード記録のみ（source 列を持たない）。
+                for (PastScore p : pastScoreRepository.findByUserAndTitlesAndDifficulties(u, titles, diffs)) {
+                    if (p.getScore() == null || p.getScore() <= 0) continue;
+                    SongDefinition sd = poolByTitle.get(p.getTitle());
+                    if (sd == null) continue;
+                    if (!LeagueChartNotation.codeToName(sd.getDifficulty()).equals(p.getDifficultyName())) continue;
+                    bestExByTitle.merge(p.getTitle(), p.getScore(), Math::max);
+                }
             }
             for (Map.Entry<String, Integer> e : bestExByTitle.entrySet()) {
                 String title = e.getKey();

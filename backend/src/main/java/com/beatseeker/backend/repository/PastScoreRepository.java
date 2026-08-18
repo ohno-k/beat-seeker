@@ -24,6 +24,26 @@ public interface PastScoreRepository extends JpaRepository<PastScore, Long> {
     List<PastScore> findByUserAndVersion(User user, Integer version);
 
     /**
+     * 【メソッドの役割】 ユーザー × 複数曲 × 複数難易度 の IN 検索で過去作スコアを取得する。
+     *
+     * {@code ScoreRepository#findByUserAndTitlesAndDifficulties} の過去作版。
+     * リーグの課題曲選定で「歴代自己ベスト」を組み立てる際に、現行作のスコアと突き合わせる。
+     * 作品をまたいで同じ譜面が複数行返るため、呼び出し側で EX の最大値に集約すること。
+     *
+     * 未プレー（score = 0）は最初から除外する。
+     *
+     * @param user         対象ユーザー
+     * @param titles       曲名リスト
+     * @param difficulties 難易度名リスト
+     * @return 該当スコア一覧（作品バージョンは問わない）
+     */
+    @Query("SELECT p FROM PastScore p WHERE p.user = :user AND p.title IN :titles " +
+           "AND p.difficultyName IN :difficulties AND p.score > 0")
+    List<PastScore> findByUserAndTitlesAndDifficulties(@Param("user") User user,
+                                                       @Param("titles") List<String> titles,
+                                                       @Param("difficulties") List<String> difficulties);
+
+    /**
      * 指定ユーザーの過去作スコアを全件取得する（作品昇順 → 曲名昇順）。
      * 歴代ベスト表示用の一括取得に使う。
      */

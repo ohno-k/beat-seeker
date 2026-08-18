@@ -3,6 +3,7 @@ package com.beatseeker.backend.service;
 import com.beatseeker.backend.entity.LeagueEntry;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.LeagueEntryRepository;
+import com.beatseeker.backend.repository.VersionPtSnapshotRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,13 +34,19 @@ public class LeagueService {
     /** エントリーの永続化リポジトリ。 */
     private final LeagueEntryRepository leagueEntryRepository;
 
+    /** 過去作の最終 PT アーカイブ。初回参加時の階級判定で「歴代最高」を参照するために使う。 */
+    private final VersionPtSnapshotRepository versionPtSnapshotRepository;
+
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
      *
-     * @param leagueEntryRepository エントリーの永続化リポジトリ
+     * @param leagueEntryRepository       エントリーの永続化リポジトリ
+     * @param versionPtSnapshotRepository 過去作の最終 PT アーカイブ
      */
-    public LeagueService(LeagueEntryRepository leagueEntryRepository) {
+    public LeagueService(LeagueEntryRepository leagueEntryRepository,
+                         VersionPtSnapshotRepository versionPtSnapshotRepository) {
         this.leagueEntryRepository = leagueEntryRepository;
+        this.versionPtSnapshotRepository = versionPtSnapshotRepository;
     }
 
     /**
@@ -85,6 +92,12 @@ public class LeagueService {
      * （{@link LeagueDivision#forBeatPt}）。復帰の場合は以前の DIVISION を維持する。
      * 反映は次回の週開始（月曜 12:00 JST）から。途中参加は不可で、進行中の週には追加されない。
      *
+     * 参照する BEAT-PT は<b>現行作と過去作アーカイブの高いほう（＝歴代最高）</b>。
+     * 新作稼働直後は現行作の BEAT-PT が 0 に戻るため、現行作だけを見ると経験者まで
+     * 最下位階級から始まってしまう。それを避けるための措置。
+     * アーカイブが 1 件も無い間（＝初回の世代切り替え前）は現行作の値がそのまま使われるので、
+     * 挙動はこれまでと変わらない。
+     *
      * @param user       参加ユーザー
      * @param ladderType ラダー種別（呼び出し前に {@link #isValidLadder} で検証済みであること）
      * @return 作成または更新されたエントリー
@@ -97,11 +110,31 @@ public class LeagueService {
             entry.setUser(user);
             entry.setLadderType(ladderType);
             // 初回参加: BEAT-TIER に応じた DIVISION へ配属（参加した瞬間に確定・表示できる）
-            entry.setCurrentTier(LeagueDivision.forBeatPt(user.getTotalBeatPt()));
+            entry.setCurrentTier(LeagueDivision.forBeatPt(allTimeBeatPt(user)));
         }
         entry.setActive(true);
         entry.setInactiveWeeks(0);
         return leagueEntryRepository.save(entry);
+    }
+
+    /**
+     * 【メソッドの役割】 初回参加の階級判定に使う「歴代最高 BEAT-PT」を返す。
+     *
+     * 現行作の {@code users.total_beat_pt} と、過去作アーカイブ
+     * （{@code version_pt_snapshots}）の最大値のうち高いほうを採る。
+     *
+     * なぜ現行作だけでは駄目なのか: 新作稼働時に BEAT-PT は 0 へリセットされる。
+     * 稼働直後にリーグへ参加すると、前作で上位だった人まで最下位階級に配属されてしまい、
+     * 初週の対戦が成立しない。前作の実力を初期配置の手がかりとして使う。
+     *
+     * @param user 対象ユーザー
+     * @return 歴代最高 BEAT-PT（いずれも記録が無ければ 0.0）
+     */
+    private double allTimeBeatPt(User user) {
+        double current = user.getTotalBeatPt() != null ? user.getTotalBeatPt() : 0.0;
+        if (user.getId() == null) return current;
+        Double archived = versionPtSnapshotRepository.findMaxBeatPtByUserId(user.getId());
+        return archived != null ? Math.max(current, archived) : current;
     }
 
     /**
