@@ -16,8 +16,15 @@ import java.util.stream.Collectors;
  * ({@code /api/competitions/**}) も同じ ID 集合に限定する。
  *
  * <p>判定値は {@code application.yml} の {@code competition.organizer-ids}
- * (カンマ区切り CSV、デフォルト {@code "18,19,23,210"}) から注入する。
+ * (カンマ区切り CSV、デフォルト {@code "18,19,23,35"}) から注入する。
  * 設定上書きしなければフロント側の現行ガード ID と一致する。
+ *
+ * <p>ID を増減させるときはフロント側の 2 箇所も揃えること。ここだけ変えるとサイドバーに
+ * 導線が出ず、逆にフロントだけ変えると画面は出るが API が 403 になる。
+ * <ul>
+ *   <li>{@code frontend/src/App.vue} … {@code canAccessCompetition}（ヘッダー導線の表示判定）</li>
+ *   <li>{@code frontend/src/views/CompetitionAdminView.vue} … {@code ORGANIZER_IDS}（画面側のガード）</li>
+ * </ul>
  */
 @Component
 public class OrganizerAuthService {
@@ -31,7 +38,7 @@ public class OrganizerAuthService {
      * @param csvIds カンマ区切りのユーザー ID 群。空白は自動 trim、空エントリは除外。
      */
     public OrganizerAuthService(
-            @Value("${competition.organizer-ids:18,19,23,210}") String csvIds) {
+            @Value("${competition.organizer-ids:18,19,23,35}") String csvIds) {
         this.organizerUserIds = Arrays.stream(csvIds.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())

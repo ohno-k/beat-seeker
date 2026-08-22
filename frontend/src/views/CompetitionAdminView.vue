@@ -97,8 +97,12 @@ const ALL_GENRES: CompetitionSongGenre[] = ['NOTES', 'PEAK', 'CHORD', 'CHARGE', 
 // 戦種別のラベル / Lv 帯 (予選 3 戦 / 決勝 7 戦) は competitionMatchKinds に集約。
 const KIND_LABEL = KIND_LABEL_JA;
 
-/** Competition セクション (Strategy Card / Song Reveal / 自選曲送信) と同じ 4 ID。 */
-const ORGANIZER_IDS = [18, 19, 23, 210];
+/**
+ * Competition セクション (Strategy Card / Song Reveal / 自選曲送信) と同じ 4 ID。
+ * 変更時は App.vue の canAccessCompetition と
+ * backend の OrganizerAuthService (competition.organizer-ids) も揃えること。
+ */
+const ORGANIZER_IDS = [18, 19, 23, 35];
 const isOrganizer = computed(() => !!user.value && ORGANIZER_IDS.includes(user.value.id));
 
 // ── 一覧/詳細モード切替 ───────────────────────────────────

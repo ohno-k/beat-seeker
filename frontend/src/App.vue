@@ -435,12 +435,13 @@ const { isDarkMode, toggleDarkMode } = useDarkMode();
 
 /**
  * 【computed の役割】 Competition セクション (大会管理 / Strategy Card / Song Reveal) を
- * ヘッダーに表示してよいかの判定。サイドバー側の canAccessCompetition と同じ 4 ID。
+ * ヘッダーに表示してよいかの判定。CompetitionAdminView の ORGANIZER_IDS と同じ 4 ID。
  * 他人ダッシュボード閲覧中 (viewingUserId) は隠す。
+ * 変更時は backend の OrganizerAuthService (competition.organizer-ids) も揃えること。
  */
 const canAccessCompetition = computed(() => {
   const id = user.value?.id;
-  return (id === 18 || id === 19 || id === 23 || id === 210) && !viewingUserId.value;
+  return (id === 18 || id === 19 || id === 23 || id === 35) && !viewingUserId.value;
 });
 
 /** ヘッダー「beat-seeker for competition」ドロップダウンの開閉。 */
