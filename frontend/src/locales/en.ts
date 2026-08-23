@@ -1623,7 +1623,6 @@ export const en = {
   'past.error.title': 'Cannot import',
   'past.error.noLabels': 'Could not determine the version from the CSV\'s version column. Please use the official downloaded CSV as-is.',
   'past.error.unknownLabel': 'The CSV contains unrecognized version names ({labels}). It may be from a version this app does not support yet.',
-  'past.error.incomplete': 'The CSV is incomplete: no songs found for {missing}. Please use the official downloaded CSV as-is.',
   'past.error.tooOld': 'Detected {detected}. Only {min} and later are supported.',
   'past.error.close': 'Close',
   'past.error.loginRequired': 'Log in to import past-version scores.',

@@ -63,11 +63,6 @@ const errorMessage = computed(() => {
       return t('past.error.noLabels');
     case 'unknownLabel':
       return t('past.error.unknownLabel', { labels: d.unknownLabels.join(', ') });
-    case 'incomplete':
-      // 欠けている作品は多数になり得るので先頭 3 件だけ挙げる。
-      return t('past.error.incomplete', {
-        missing: d.missing.slice(0, 3).map(v => `${v} ${versionName(v)}`).join(', '),
-      });
     case 'tooOld':
       return t('past.error.tooOld', {
         detected: `${d.version} ${versionName(d.version)}`,

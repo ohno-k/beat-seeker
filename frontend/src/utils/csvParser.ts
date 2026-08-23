@@ -24,14 +24,12 @@ import { LABEL_TO_VERSION, MIN_PAST_VERSION } from './iidxVersions';
  * 判定に失敗した場合は `reason` で理由を区別し、UI 側でそれぞれ別の文言を出す。
  *  - `noLabels`      … 「バージョン」列に既知の作品名が 1 つも無い（列が空のブックマークレット CSV など）
  *  - `unknownLabel`  … 未知の作品名が含まれる。アプリが未対応の新作の可能性が高い
- *  - `incomplete`    … 1 作目〜検知作品までの間に、楽曲が 1 曲も無い作品がある（不完全な CSV）
  *  - `tooOld`        … 検知できたが対応範囲（30 RESIDENT 以降）より古い
  */
 export type VersionDetectionResult =
     | { ok: true; version: number }
     | { ok: false; reason: 'noLabels' }
     | { ok: false; reason: 'unknownLabel'; unknownLabels: string[] }
-    | { ok: false; reason: 'incomplete'; version: number; missing: number[] }
     | { ok: false; reason: 'tooOld'; version: number };
 
 /** SP の内部難易度コード。song_data では 1=BEGINNER, 2=NORMAL, 3=HYPER, 4=ANOTHER, 10=LEGGENDARIA。 */
@@ -140,16 +138,21 @@ export const parseScoreCsv = (file: File): Promise<ScoreData[]> => {
  * 【関数の役割】 パース済み CSV から、それがどの作品のスコアかを自動判定する。
  *
  * 判定原理は {@link file://../utils/iidxVersions.ts} の冒頭コメントを参照。要点は
- * 「バージョン」列が *楽曲の初出作品名* であり、公式 CSV は未プレー曲も含む全収録曲を
- * 出力するため、出現する初出作品の最大値がその CSV を出力した作品と一致する、という点。
+ * 「バージョン」列が *楽曲の初出作品名* であり、31 EPOLIS の曲が 30 RESIDENT の CSV に
+ * 載ることは原理的にあり得ないため、出現する初出作品の最大値がその CSV を出力した作品の
+ * 下限になる、という点。
  *
  * 判定順（安全側に倒す設計）:
  *  1. 既知ラベルが 1 つも無ければ `noLabels`（ブックマークレット CSV はここに該当する）
  *  2. 未知のラベルが 1 つでもあれば `unknownLabel`。
  *     未知ラベルを黙って無視すると、未対応の新作 CSV を現行作として取り込んでしまい、
  *     ランキングや BEAT-PT が古い/新しいデータで汚染される。最も避けたい事故なのでここで止める。
- *  3. 1 作目〜検知作品の間に楽曲が 1 曲も無い作品があれば `incomplete`（絞り込み済み CSV 等）
- *  4. 対応範囲より古ければ `tooOld`
+ *  3. 対応範囲より古ければ `tooOld`
+ *
+ * ■ 「欠けている作品がある CSV」を弾いてはいけない
+ * 公式 CSV に載るのは *プレーした曲だけ* なので、その作品の曲を 1 曲もプレーしていなければ
+ * その作品名は「バージョン」列に一度も現れない。ライトユーザーほど歯抜けになるのが正常で、
+ * 「1 作目〜検知作品の間に空の作品があれば不完全な CSV」と見なす判定は誤検知にしかならない。
  *
  * @param scores {@link parseScoreCsv} の返り値
  * @returns 判定結果。成功時は `{ ok: true, version }`
@@ -179,17 +182,9 @@ export function detectCsvVersion(scores: ScoreData[]): VersionDetectionResult {
         return { ok: false, reason: 'noLabels' };
     }
 
+    // 出現した作品の最大値を採用する。歯抜け（1 曲もプレーしていない作品）は
+    // 正常な CSV でも普通に起きるため、欠けていること自体は判定材料にしない。
     const detected = Math.max(...present);
-
-    // 1 作目から検知作品までのうち、1 曲も含まれていない作品を洗い出す。
-    // どの作品も数十曲以上を残しているため、欠けている＝完全な公式 CSV ではない と判断できる。
-    const missing: number[] = [];
-    for (let v = 1; v <= detected; v++) {
-        if (!present.has(v)) missing.push(v);
-    }
-    if (missing.length > 0) {
-        return { ok: false, reason: 'incomplete', version: detected, missing };
-    }
 
     if (detected < MIN_PAST_VERSION) {
         return { ok: false, reason: 'tooOld', version: detected };

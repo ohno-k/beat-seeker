@@ -1682,7 +1682,6 @@ export const ja = {
   'past.error.title': '取り込めません',
   'past.error.noLabels': 'CSV の「バージョン」列から作品を判定できませんでした。公式のダウンロード CSV をそのままお使いください。',
   'past.error.unknownLabel': '認識できない作品名が含まれています（{labels}）。アプリが未対応の新作の可能性があります。',
-  'past.error.incomplete': 'CSV が不完全です。{missing} の楽曲が見つかりません。公式のダウンロード CSV をそのままお使いください。',
   'past.error.tooOld': '{detected} と判定されました。対応しているのは {min} 以降です。',
   'past.error.close': '閉じる',
   'past.error.loginRequired': '過去作スコアの取り込みにはログインが必要です。',

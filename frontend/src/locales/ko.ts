@@ -1624,7 +1624,6 @@ export const ko = {
   'past.error.title': '가져올 수 없습니다',
   'past.error.noLabels': 'CSV의 「버전」 열에서 작품을 판별할 수 없습니다. 공식 다운로드 CSV를 그대로 사용해 주세요.',
   'past.error.unknownLabel': '인식할 수 없는 작품명이 포함되어 있습니다({labels}). 앱이 아직 지원하지 않는 신작일 수 있습니다.',
-  'past.error.incomplete': 'CSV가 불완전합니다. {missing}의 곡을 찾을 수 없습니다. 공식 다운로드 CSV를 그대로 사용해 주세요.',
   'past.error.tooOld': '{detected}로 판별되었습니다. 지원 범위는 {min} 이후입니다.',
   'past.error.close': '닫기',
   'past.error.loginRequired': '과거 작품 스코어를 가져오려면 로그인이 필요합니다.',

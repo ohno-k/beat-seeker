@@ -5,7 +5,12 @@
       "Bash(npx tsc --noEmit)",
       "Bash(npx vue-tsc *)",
       "Bash(curl -s --max-time 20 https://beat-seeker.com/)",
-      "Bash(curl -sSI --max-time 20 https://beat-seeker.com)"
+      "Bash(curl -sSI --max-time 20 https://beat-seeker.com)",
+      "Bash(JAVA_HOME=/c/Users/oonok/dev-tools/jdk-17.0.19+10 PATH=/c/Users/oonok/dev-tools/jdk-17.0.19+10/bin:__TRACKED_VAR__ /c/Users/oonok/dev-tools/apache-maven-3.9.9/bin/mvn -q -o compile -DskipTests)",
+      "Bash(echo \"BACKEND_EXIT=$?\")",
+      "Bash(PATH=/c/Users/oonok/dev-tools/node-v24.18.0-win-x64:__TRACKED_VAR__ npx vite build)",
+      "Bash(echo \"BUILD_EXIT=$?\")",
+      "Bash(git checkout *)"
     ]
   }
 }
