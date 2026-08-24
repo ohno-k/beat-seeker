@@ -32,6 +32,11 @@ import java.util.stream.Collectors;
  *  - ベースライン行あり: プレー回数増加 or EX スコア更新 or ミスカウント改善 or ランプ改善
  *  - ベースライン行なし: Score.uploadedAt >= week.snapshotAt（週内に初記録が現れた）
  *
+ * 曲別の着順ポイントは「有効化した人 &gt; 遊んだが届かなかった人 &gt; 遊んでいない人」の 3 段で配る。
+ * 最下段（不参加）は 0 pt 固定で山分けに参加しないため、その分だけ参加した未到達者の取り分が
+ * 上の順位帯へ繰り上がる（{@link #distributeSongPoints}）。参加の判定は公式 CSV の最終プレー日時
+ * （記録が伸びなくても進む）を主に見るので、当該列を持たない取り込み経路では不参加へ倒れる。
+ *
  * 昇降格はポイント制:
  *  - 週の順位に応じてポイントが増減する（{@link #deltaForRank}: 8 人なら 1 位 +4 〜 8 位 -4。
  *    人数が少ないほど幅が縮小し、奇数人数では中央順位が ±0）。1 週の増減幅は
@@ -261,6 +266,9 @@ public class LeagueStandingsService {
             ps.put("title", song != null ? song.getTitle() : null);
             ps.put("difficultyName", song != null ? song.getDifficultyName() : null);
             ps.put("valid", Boolean.TRUE.equals(r.getValid()));
+            // この列より前に締まった週は null（不明）。有効化できた人は必ず遊んでいるので valid で代替する。
+            ps.put("participated", r.getParticipated() != null
+                    ? r.getParticipated() : Boolean.TRUE.equals(r.getValid()));
             ps.put("bestEx", r.getBestEx());
             ps.put("rate", r.getRate());
             ps.put("bestMiss", r.getBestMiss());
@@ -335,6 +343,7 @@ public class LeagueStandingsService {
                 entity.setMember(member);
                 entity.setSlot(asInt(ps.get("slot")));
                 entity.setValid(Boolean.TRUE.equals(ps.get("valid")));
+                entity.setParticipated(Boolean.TRUE.equals(ps.get("participated")));
                 entity.setBestEx(asInt(ps.get("bestEx")));
                 entity.setRate(asDouble(ps.get("rate")));
                 entity.setBestMiss(asInt(ps.get("bestMiss")));
@@ -549,12 +558,16 @@ public class LeagueStandingsService {
             boolean playedThisWeek = false;
             Integer bestEx = null;
             Integer bestMiss = null;
+            java.time.LocalDateTime lastPlayedAt = null;
 
             for (String source : List.of("arcade")) {
                 List<Score> rows = rowsBySongSource.get(key + "|" + source);
                 if (rows == null || rows.isEmpty()) continue;
                 SourceBest cur = aggregate(rows);
 
+                if (cur.lastPlayedAt != null && (lastPlayedAt == null || cur.lastPlayedAt.isAfter(lastPlayedAt))) {
+                    lastPlayedAt = cur.lastPlayedAt;
+                }
                 if (cur.score != null && (bestEx == null || cur.score > bestEx)) bestEx = cur.score;
                 if (cur.miss != null && (bestMiss == null || cur.miss < bestMiss)) bestMiss = cur.miss;
 
@@ -582,6 +595,15 @@ public class LeagueStandingsService {
             // 着順ポイントも配らない（assignSongPoints 側でスキップする）。
             boolean valid = !song.isDisabled() && playedThisWeek && beatLine;
 
+            // 「参加」= 週内にこの課題曲を遊んだ形跡があるか（ライン到達は問わない）。
+            // 着順ポイントの配分で「遊んだが未到達」と「そもそも遊んでいない」を分けるために使う。
+            //  - 公式 CSV: 最終プレー日時が開催期間内（記録が伸びなくても進む唯一の値）
+            //  - それ以外: 記録・プレー回数の前進（playedThisWeek）を保険にする
+            // 最終プレー日時を持たない取り込み経路（ブックマークレット CSV は当該列が空欄）では
+            // 「記録が伸びなかったプレー」を観測できないため不参加へ倒れる。判定不能を参加扱いにすると
+            // 遊ばずに山分けを受け取れてしまうため、活動判定（自動休止）とは違って保険は張らない。
+            boolean participated = playedThisWeek || LeagueWeekLifecycleService.withinWeek(lastPlayedAt, week);
+
             Integer notes = notesBySong.get(key);
             Double rate = null;
             if (bestEx != null && notes != null && notes > 0) {
@@ -605,6 +627,7 @@ public class LeagueStandingsService {
             songRow.put("title", song.getTitle());
             songRow.put("difficultyName", song.getDifficultyName());
             songRow.put("valid", valid);
+            songRow.put("participated", participated);
             songRow.put("bestEx", bestEx);
             songRow.put("rate", rate);
             songRow.put("bestMiss", bestMiss);
@@ -660,6 +683,10 @@ public class LeagueStandingsService {
             if (s.getUploadedAt() != null && (best.uploadedAt == null || s.getUploadedAt().isAfter(best.uploadedAt))) {
                 best.uploadedAt = s.getUploadedAt();
             }
+            if (s.getLastPlayedAt() != null
+                    && (best.lastPlayedAt == null || s.getLastPlayedAt().isAfter(best.lastPlayedAt))) {
+                best.lastPlayedAt = s.getLastPlayedAt();
+            }
         }
         return best;
     }
@@ -675,8 +702,12 @@ public class LeagueStandingsService {
      * <p>これにより「常に同じ曲の中でしか比較しない」ため、曲ごとの難易度差が順位に影響しない
      * （課題曲 A,B が有効な人と A,C が有効な人を平均レートで比べる不公平を解消する）。
      *
+     * <p>未有効者は「遊んだが届かなかった人」と「そもそも遊んでいない人」に分かれる。
+     * 詳細は {@link #distributeSongPoints}。
+     *
      * <p>特例: その曲を誰も有効化できなかった（有効ラインを越えた人が 0 人）場合は、
      * 全員 0 pt とし、ライン設定者（グループ内の週開始時点最高記録＝ラインの保持者）にのみ +1 pt を与える。
+     * <b>この特例では参加者の山分けは行わない</b>（遊んだかどうかに関わらず全員 0 pt）。
      */
     private void assignSongPoints(List<MemberStats> stats, List<LeagueSong> songs,
                                   Map<String, LeagueBaseline> baselineIndex, Map<String, Integer> lineExBySong) {
@@ -696,14 +727,18 @@ public class LeagueStandingsService {
                 continue;
             }
             String key = songKey(song.getTitle(), song.getDifficultyName());
-            // ソートキー: 有効ならレート、未有効は -∞（最下位で同着）
+            // ソートキーは 2 段構え: 段（有効 > 参加 > 不参加）→ 同じ段の中はレート降順。
+            // 有効者以外はレートを持たない（-∞）ので、参加者どうし・不参加者どうしはそれぞれ同着になる。
             double[] rateKey = new double[n];
+            int[] band = new int[n];
             int validatorCount = 0;
             for (int i = 0; i < n; i++) {
                 Map<String, Object> ps = findSlot(stats.get(i).perSong, slot);
                 boolean valid = ps != null && Boolean.TRUE.equals(ps.get("valid"));
+                boolean participated = ps != null && Boolean.TRUE.equals(ps.get("participated"));
                 Object r = ps != null ? ps.get("rate") : null;
                 rateKey[i] = valid && r != null ? ((Number) r).doubleValue() : Double.NEGATIVE_INFINITY;
+                band[i] = valid ? BAND_VALID : (participated ? BAND_PLAYED : BAND_ABSENT);
                 if (valid) validatorCount++;
             }
 
@@ -723,24 +758,14 @@ public class LeagueStandingsService {
                     pts[i] = holder ? 1.0 : 0.0;
                 }
             } else {
-                // 通常: レート降順で 1 位 = n pt 〜 最下位 1 pt。同着（同レート・未有効の集団）は該当順位の平均。
-                Integer[] order = new Integer[n];
-                for (int i = 0; i < n; i++) order[i] = i;
-                Arrays.sort(order, (a, b) -> Double.compare(rateKey[b], rateKey[a]));
-                int p = 0;
-                while (p < n) {
-                    int q = p;
-                    double sum = 0;
-                    while (q < n && rateKey[order[q]] == rateKey[order[p]]) { sum += (n - q); q++; }
-                    double avg = sum / (q - p);
-                    for (int k = p; k < q; k++) pts[order[k]] = avg;
-                    p = q;
-                }
+                pts = distributeSongPoints(band, rateKey);
                 // 着順（有効化した人だけ）。同レートは同着（競争順位: 1,1,3...）。
+                Integer[] order = sortedOrder(band, rateKey);
                 int r = 0, idx = 0;
                 double prev = Double.NaN;
                 for (int k = 0; k < n; k++) {
-                    if (rateKey[order[k]] == Double.NEGATIVE_INFINITY) break; // 以降は未有効
+                    if (band[order[k]] != BAND_VALID) break; // 以降は未有効（参加・不参加）
+                    if (rateKey[order[k]] == Double.NEGATIVE_INFINITY) break; // レート不明（ノーツ数が引けない譜面）
                     idx++;
                     if (rateKey[order[k]] != prev) { r = idx; prev = rateKey[order[k]]; }
                     rank[order[k]] = r;
@@ -755,6 +780,66 @@ public class LeagueStandingsService {
                 }
             }
         }
+    }
+
+    /** 着順ポイント配分の段（{@link #distributeSongPoints}）。有効化した人。 */
+    static final int BAND_VALID = 2;
+    /** 着順ポイント配分の段。遊んだがラインへ届かなかった人。 */
+    static final int BAND_PLAYED = 1;
+    /** 着順ポイント配分の段。週内にその課題曲を遊んだ形跡が無い人。 */
+    static final int BAND_ABSENT = 0;
+
+    /**
+     * 【メソッドの役割】 1 曲分の着順ポイントを配分する（純粋計算）。
+     *
+     * 並びは「段 → 同じ段の中はレート降順」の 2 段階:
+     * <ol>
+     *   <li>{@link #BAND_VALID} 有効化した人（レート降順で 1 位から）</li>
+     *   <li>{@link #BAND_PLAYED} 遊んだがラインへ届かなかった人（全員同着）</li>
+     *   <li>{@link #BAND_ABSENT} 週内に遊んだ形跡が無い人（全員同着）</li>
+     * </ol>
+     *
+     * 生ポイントは 1 位 = n pt 〜 最下位 1 pt で、同着集団は自分たちが占める順位帯の平均を等分する。
+     * ただし {@link #BAND_ABSENT} は<b>順位帯を占めるだけで受け取らず一律 0 pt</b>とし、その分の
+     * 生ポイントは誰にも配られずに消える。遊ばなかった人を山分けから外すことで、参加した未到達者の
+     * 取り分が上の順位帯へ繰り上がる。
+     *
+     * <p>例（8 人・有効 2 人・参加未到達 3 人・不参加 3 人）: 有効者が 8 pt / 7 pt、
+     * 参加未到達の 3 人が 3〜5 位の帯を山分けして (6+5+4)/3 = 5 pt ずつ、不参加の 3 人が 0 pt。
+     * 6〜8 位ぶんの 6 pt は配られない。
+     *
+     * @param band    メンバーごとの段
+     * @param rateKey メンバーごとのレート（有効化していない人は -∞）
+     * @return メンバーごとの着順ポイント（添字は band / rateKey と対応）
+     */
+    static double[] distributeSongPoints(int[] band, double[] rateKey) {
+        int n = band.length;
+        double[] pts = new double[n];
+        Integer[] order = sortedOrder(band, rateKey);
+        int p = 0;
+        while (p < n) {
+            int q = p;
+            double sum = 0;
+            // 同着（同じ段かつ同レート）が続く限り、その順位帯の生ポイントを足し込む。
+            while (q < n && band[order[q]] == band[order[p]] && rateKey[order[q]] == rateKey[order[p]]) {
+                sum += (n - q);
+                q++;
+            }
+            double avg = band[order[p]] == BAND_ABSENT ? 0.0 : sum / (q - p);
+            for (int k = p; k < q; k++) pts[order[k]] = avg;
+            p = q;
+        }
+        return pts;
+    }
+
+    /** 「段の降順 → レートの降順」でメンバー添字を並べる。 */
+    private static Integer[] sortedOrder(int[] band, double[] rateKey) {
+        Integer[] order = new Integer[band.length];
+        for (int i = 0; i < order.length; i++) order[i] = i;
+        Arrays.sort(order, (a, b) -> band[b] != band[a]
+                ? Integer.compare(band[b], band[a])
+                : Double.compare(rateKey[b], rateKey[a]));
+        return order;
     }
 
     /** perSong リストから指定スロットの Map を取り出す（無ければ null）。 */
@@ -885,6 +970,8 @@ public class LeagueStandingsService {
         Integer playCount;
         String clearType;
         java.time.LocalDateTime uploadedAt;
+        /** 公式 CSV 由来の最終プレー日時（JST 壁時計）。記録が伸びなくても進む。 */
+        java.time.LocalDateTime lastPlayedAt;
     }
 
     /** 1 メンバー分の集計結果（ソート・ゾーン付与前の中間表現）。 */

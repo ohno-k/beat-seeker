@@ -43,6 +43,15 @@ public class LeagueMemberSong {
     @Column(nullable = false)
     private Boolean valid = false;
 
+    /**
+     * その週にこの課題曲を遊んだか（ライン到達は問わない）。着順ポイントの配分で
+     * 「参加したが未到達」と「そもそも遊んでいない（0 pt）」を分けるために凍結する。
+     *
+     * この列より前に締まった週の行は null（＝不明）になる。読み出し側は
+     * {@code valid} で代替する（有効化できた人は必ず遊んでいるため）。
+     */
+    private Boolean participated;
+
     /** 自己ベスト EX スコア（記録なしは null）。 */
     @Column(name = "best_ex")
     private Integer bestEx;
