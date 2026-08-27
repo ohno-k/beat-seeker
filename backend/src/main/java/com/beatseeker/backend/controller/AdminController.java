@@ -912,6 +912,8 @@ public class AdminController {
                 m.put("userId", id);
                 m.put("displayName", opponent.getDisplayName() != null ? opponent.getDisplayName() : "");
                 m.put("iidxId", opponent.getIidxId() != null ? opponent.getIidxId() : "");
+                // 一覧の名前の横に BEAT-Tier アイコンを出すために必要。
+                m.put("totalBeatPt", opponent.getTotalBeatPt() != null ? opponent.getTotalBeatPt() : 0.0);
                 m.put("levels", new HashMap<String, Object>());
                 return m;
             });
@@ -936,6 +938,7 @@ public class AdminController {
         body.put("userId", userId);
         body.put("displayName", targetUser.getDisplayName() != null ? targetUser.getDisplayName() : "");
         body.put("iidxId", targetUser.getIidxId() != null ? targetUser.getIidxId() : "");
+        body.put("totalBeatPt", targetUser.getTotalBeatPt() != null ? targetUser.getTotalBeatPt() : 0.0);
         body.put("computedAt", computedAt != null ? computedAt.toString() : null);
         body.put("opponents", new ArrayList<>(byOpponent.values()));
         return ResponseEntity.ok(body);
