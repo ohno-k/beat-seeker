@@ -177,6 +177,12 @@ export interface LeagueAdminHistoryWeek {
    * 締め済み週は凍結値、開催中の週はライブ計算。編成前（draft）は開始前で判定が成立しないため null。
    */
   validMemberCount: number | null;
+  /**
+   * 課題曲を 1 曲以上プレーしたメンバーの人数（ラインに届かなくても遊んでいれば数える）。
+   * 有効ありは必ずここにも含まれるので、常に validMemberCount 以上になる。
+   * 締め済み週は凍結値、開催中の週はライブ計算。編成前（draft）は開始前で判定が成立しないため null。
+   */
+  playedMemberCount: number | null;
   /** DIVISION ごとのグループ構成（人数のみ）。未編成の週は空配列。 */
   tiers: { tier: number; groups: { groupIndex: number; memberCount: number }[] }[];
 }
