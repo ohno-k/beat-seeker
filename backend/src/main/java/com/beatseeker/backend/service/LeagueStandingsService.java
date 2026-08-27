@@ -32,10 +32,11 @@ import java.util.stream.Collectors;
  *  - ベースライン行あり: プレー回数増加 or EX スコア更新 or ミスカウント改善 or ランプ改善
  *  - ベースライン行なし: Score.uploadedAt >= week.snapshotAt（週内に初記録が現れた）
  *
- * 曲別の着順ポイントは「有効化した人 &gt; 遊んだが届かなかった人 &gt; 遊んでいない人」の 3 段で配る。
- * 最下段（不参加）は 0 pt 固定で山分けに参加しないため、その分だけ参加した未到達者の取り分が
- * 上の順位帯へ繰り上がる（{@link #distributeSongPoints}）。参加の判定は公式 CSV の最終プレー日時
- * （記録が伸びなくても進む）を主に見るので、当該列を持たない取り込み経路では不参加へ倒れる。
+ * 曲別の着順ポイントは「有効化した人 &gt; 有効ラインに届かなかった人」の 2 段で配る。
+ * 未到達者は遊んだかどうかに関わらず<b>まず全員で山分け</b>し、そのあと週内に遊んだ形跡が無い人
+ * （不参加）だけを 0 pt に落とす（{@link #distributeSongPoints}）。つまり不参加者が居ても
+ * 参加した未到達者の取り分は増えず、消えた 0 pt ぶんは誰にも配られない。参加の判定は公式 CSV の
+ * 最終プレー日時（記録が伸びなくても進む）を主に見るので、当該列を持たない取り込み経路では不参加へ倒れる。
  *
  * 昇降格はポイント制:
  *  - 週の順位に応じてポイントが増減する（{@link #deltaForRank}: 8 人なら 1 位 +4 〜 8 位 -4。
@@ -728,7 +729,8 @@ public class LeagueStandingsService {
             }
             String key = songKey(song.getTitle(), song.getDifficultyName());
             // ソートキーは 2 段構え: 段（有効 > 参加 > 不参加）→ 同じ段の中はレート降順。
-            // 有効者以外はレートを持たない（-∞）ので、参加者どうし・不参加者どうしはそれぞれ同着になる。
+            // 有効者以外はレートを持たない（-∞）ので、未有効者（参加・不参加）は全員が同着として
+            // まとめて山分けされ、そのあと不参加者だけが 0 pt に落ちる。
             double[] rateKey = new double[n];
             int[] band = new int[n];
             int validatorCount = 0;
@@ -795,18 +797,19 @@ public class LeagueStandingsService {
      * 並びは「段 → 同じ段の中はレート降順」の 2 段階:
      * <ol>
      *   <li>{@link #BAND_VALID} 有効化した人（レート降順で 1 位から）</li>
-     *   <li>{@link #BAND_PLAYED} 遊んだがラインへ届かなかった人（全員同着）</li>
-     *   <li>{@link #BAND_ABSENT} 週内に遊んだ形跡が無い人（全員同着）</li>
+     *   <li>{@link #BAND_PLAYED} 遊んだがラインへ届かなかった人</li>
+     *   <li>{@link #BAND_ABSENT} 週内に遊んだ形跡が無い人</li>
      * </ol>
      *
      * 生ポイントは 1 位 = n pt 〜 最下位 1 pt で、同着集団は自分たちが占める順位帯の平均を等分する。
-     * ただし {@link #BAND_ABSENT} は<b>順位帯を占めるだけで受け取らず一律 0 pt</b>とし、その分の
-     * 生ポイントは誰にも配られずに消える。遊ばなかった人を山分けから外すことで、参加した未到達者の
-     * 取り分が上の順位帯へ繰り上がる。
+     * <b>有効ラインに届かなかった人（{@link #BAND_PLAYED} と {@link #BAND_ABSENT}）は 1 つの同着集団</b>
+     * として扱い、まず全員でその順位帯を山分けする。そのあと {@link #BAND_ABSENT}（不参加）だけを
+     * 一律 0 pt に落とし、落ちたぶんの生ポイントは誰にも配られずに消える
+     * （参加した未到達者の取り分は不参加者の人数に左右されない）。
      *
      * <p>例（8 人・有効 2 人・参加未到達 3 人・不参加 3 人）: 有効者が 8 pt / 7 pt、
-     * 参加未到達の 3 人が 3〜5 位の帯を山分けして (6+5+4)/3 = 5 pt ずつ、不参加の 3 人が 0 pt。
-     * 6〜8 位ぶんの 6 pt は配られない。
+     * 未到達の 6 人が 3〜8 位の帯を山分けして (6+5+4+3+2+1)/6 = 3.5 pt ずつ。
+     * そのうち不参加の 3 人は 0 pt になり、参加した 3 人だけが 3.5 pt を受け取る。
      *
      * @param band    メンバーごとの段
      * @param rateKey メンバーごとのレート（有効化していない人は -∞）
@@ -820,16 +823,36 @@ public class LeagueStandingsService {
         while (p < n) {
             int q = p;
             double sum = 0;
-            // 同着（同じ段かつ同レート）が続く限り、その順位帯の生ポイントを足し込む。
-            while (q < n && band[order[q]] == band[order[p]] && rateKey[order[q]] == rateKey[order[p]]) {
+            // 同着集団が続く限り、その順位帯の生ポイントを足し込む。
+            // 未有効（参加・不参加）は 1 つの同着集団としてまとめて山分けする。
+            while (q < n && sameTieGroup(band, rateKey, order[q], order[p])) {
                 sum += (n - q);
                 q++;
             }
-            double avg = band[order[p]] == BAND_ABSENT ? 0.0 : sum / (q - p);
-            for (int k = p; k < q; k++) pts[order[k]] = avg;
+            double avg = sum / (q - p);
+            // 山分けの後で不参加者だけを 0 pt に落とす（その分は誰にも配られずに消える）。
+            for (int k = p; k < q; k++) pts[order[k]] = band[order[k]] == BAND_ABSENT ? 0.0 : avg;
             p = q;
         }
         return pts;
+    }
+
+    /**
+     * 同着集団（生ポイントを山分けする単位）が同じかを返す。
+     *
+     * <ul>
+     *   <li>有効化した人どうし: レートが等しければ同着。</li>
+     *   <li>未有効（{@link #BAND_PLAYED} / {@link #BAND_ABSENT}）どうし: 常に同着。
+     *       遊んだかどうかに関わらずまずは全員で山分けし、不参加者の取り分を後から 0 pt にする。</li>
+     *   <li>有効と未有効: 別集団。</li>
+     * </ul>
+     */
+    private static boolean sameTieGroup(int[] band, double[] rateKey, int a, int b) {
+        boolean validA = band[a] == BAND_VALID;
+        boolean validB = band[b] == BAND_VALID;
+        if (validA != validB) return false;
+        if (!validA) return true; // 未有効は参加・不参加をまとめて 1 つの同着集団
+        return rateKey[a] == rateKey[b];
     }
 
     /** 「段の降順 → レートの降順」でメンバー添字を並べる。 */
