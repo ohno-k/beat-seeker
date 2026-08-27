@@ -93,4 +93,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     @Query("UPDATE User u SET u.pushSubscription = NULL")
     void clearAllPushSubscriptions();
+
+    /**
+     * 【メソッドの役割】 全ユーザーの ID だけを ID 昇順で返す。
+     *
+     * ユーザー間スコア比較の総当たりバッチのように「誰がいるか」しか要らない処理向け。
+     * User エンティティを全件ロードすると使わない列まで抱え込むので、ID だけを引く。
+     *
+     * @return 全ユーザー ID（昇順）
+     */
+    @Query("SELECT u.id FROM User u ORDER BY u.id")
+    List<Long> findAllUserIds();
 }

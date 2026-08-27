@@ -157,6 +157,47 @@ export function useScores() {
     };
 
     /**
+     * 管理画面用: 1 ユーザー vs 全ユーザーの EX-SCORE 勝敗集計を取得する。
+     *
+     * 集計はサーバー側の日次バッチ（UserComparisonStatsService）が作ったもの。
+     * 今日ぶんがまだ無ければサーバーがその場で集計してから返すので、初回は少し待たされる。
+     *
+     * レスポンス: `{ userId, displayName, iidxId, computedAt, opponents: [...] }`
+     * opponents の各要素は `levels` にレベル帯別（LV10MINUS / LV11 / LV12）の勝敗を持つ。
+     */
+    const fetchUserComparison = async (userId: number): Promise<any> => {
+        isFetching.value = true;
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/users/${userId}/comparison`, {
+                headers: authHeaders()
+            });
+
+            if (!res.ok) {
+                throw new Error(`Fetch failed: ${res.status}`);
+            }
+            return await res.json();
+        } finally {
+            isFetching.value = false;
+        }
+    };
+
+    /**
+     * 管理画面用: ユーザー間スコア比較の集計を全ユーザーぶん作り直す。
+     *
+     * 日次バッチを待たずに最新スコアを反映させたい時だけ使う。同期実行なので数十秒かかり得る。
+     */
+    const recalculateUserComparison = async (): Promise<any> => {
+        const res = await fetch(`${API_BASE}/api/admin/user-comparison/recalculate`, {
+            method: 'POST',
+            headers: authHeaders()
+        });
+        if (!res.ok) {
+            throw new Error(`Recalculate failed: ${res.status}`);
+        }
+        return await res.json();
+    };
+
+    /**
      * 他ユーザーのスコア一覧を取得する（閲覧権限は mode で切り分け）。
      *
      * @param userId 対象ユーザーの ID
@@ -346,6 +387,10 @@ export function useScores() {
         fetchUserScores,
         /** 管理画面用: 全ユーザー一覧。 */
         fetchAllUsers,
+        /** 管理画面用: 1 ユーザー vs 全ユーザーの勝敗集計。 */
+        fetchUserComparison,
+        /** 管理画面用: 上記集計の再構築。 */
+        recalculateUserComparison,
         /** トップランカーのプロフィール + スコア取得。 */
         fetchTopRankerProfile,
         /** アリーナ仮想プレイヤーのプロフィール + スコア取得。 */
