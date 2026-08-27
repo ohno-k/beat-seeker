@@ -1713,4 +1713,18 @@ export const ja = {
   'past.manager.pieHint': '譜面ごとの歴代ベストスコアが、どの作品で出たものかの内訳です。',
   'past.manager.pieTotal': '譜面',
   'past.manager.pieSummary': '{n} 譜面は過去作のスコアが歴代ベストのままです（現行作で未更新）。',
+
+  // ── 作品別スコア一覧ページ（過去作スコアの作品ラベルから遷移）──────────
+  'past.manager.openList': 'この作品のスコア一覧を開く',
+  'past.list.back': '過去作スコアへ戻る',
+  'past.list.subtitle': '{name} で記録したスコアの一覧です。',
+  'past.list.empty': 'この作品のスコアはまだ取り込まれていません。',
+  'past.list.bestCount': '歴代ベスト {n} 譜面 / この作品 {total} 譜面',
+  'past.list.bestCountHint': '歴代ベストがこの作品のスコアである譜面の数です。同点の場合は新しい作品を歴代ベストとして数えます。',
+  'past.list.onlyBest': '自己歴代スコアのみ表示',
+  'past.list.onlyBestHint': '歴代ベストがこの作品のスコアである譜面だけに絞り込みます。',
+  'past.list.searchPlaceholder': '曲名で検索...',
+  'past.list.colAllTime': '歴代ベスト',
+  'past.list.bestBadge': '歴代',
+  'past.list.noneAllTime': '歴代ベストがこの作品の譜面はありません。',
 };

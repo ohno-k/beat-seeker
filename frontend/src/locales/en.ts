@@ -1654,4 +1654,18 @@ export const en = {
   'past.manager.pieHint': 'Which version each chart\'s all-time best score was set in.',
   'past.manager.pieTotal': 'charts',
   'past.manager.pieSummary': '{n} charts still have a past-version score as their all-time best (not beaten in the current version).',
+
+  // Per-version score list page (opened from a version label in the past-score manager)
+  'past.manager.openList': 'Open the score list for this version',
+  'past.list.back': 'Back to past-version scores',
+  'past.list.subtitle': 'Scores you set in {name}.',
+  'past.list.empty': 'No scores have been imported for this version yet.',
+  'past.list.bestCount': '{n} all-time bests / {total} charts in this version',
+  'past.list.bestCountHint': 'How many charts have their all-time best score in this version. On a tie the newer version counts as the all-time best.',
+  'past.list.onlyBest': 'All-time bests only',
+  'past.list.onlyBestHint': 'Show only charts whose all-time best score was set in this version.',
+  'past.list.searchPlaceholder': 'Search by title...',
+  'past.list.colAllTime': 'All-time best',
+  'past.list.bestBadge': 'Best',
+  'past.list.noneAllTime': 'No chart has its all-time best in this version.',
 };

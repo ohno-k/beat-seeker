@@ -1655,4 +1655,18 @@ export const ko = {
   'past.manager.pieHint': '보면별 역대 베스트 스코어가 어느 작품에서 나온 것인지의 내역입니다.',
   'past.manager.pieTotal': '보면',
   'past.manager.pieSummary': '{n} 보면은 과거 작품 스코어가 역대 베스트 그대로입니다(현행 작품에서 미갱신).',
+
+  // ── 작품별 스코어 목록 페이지(과거 작품 스코어의 작품 라벨에서 이동) ──────────
+  'past.manager.openList': '이 작품의 스코어 목록 열기',
+  'past.list.back': '과거 작품 스코어로 돌아가기',
+  'past.list.subtitle': '{name}에서 기록한 스코어 목록입니다.',
+  'past.list.empty': '이 작품의 스코어는 아직 가져오지 않았습니다.',
+  'past.list.bestCount': '역대 베스트 {n} 보면 / 이 작품 {total} 보면',
+  'past.list.bestCountHint': '역대 베스트가 이 작품의 스코어인 보면 수입니다. 동점인 경우 더 새로운 작품을 역대 베스트로 셉니다.',
+  'past.list.onlyBest': '자기 역대 스코어만 표시',
+  'past.list.onlyBestHint': '역대 베스트가 이 작품의 스코어인 보면만 표시합니다.',
+  'past.list.searchPlaceholder': '곡명으로 검색...',
+  'past.list.colAllTime': '역대 베스트',
+  'past.list.bestBadge': '역대',
+  'past.list.noneAllTime': '역대 베스트가 이 작품인 보면이 없습니다.',
 };
