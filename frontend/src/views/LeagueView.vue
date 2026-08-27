@@ -1096,6 +1096,9 @@ onUnmounted(() => {
                     <th class="py-2 pr-2 text-center" :title="t('league.admin.history.scorersHint')">
                       {{ t('league.admin.history.scorers') }}
                     </th>
+                    <th class="py-2 pr-2 text-center" :title="t('league.admin.history.playersHint')">
+                      {{ t('league.admin.history.players') }}
+                    </th>
                     <th class="py-2 pr-2 text-center">{{ t('league.admin.history.divisions') }}</th>
                     <th class="py-2 pr-2 w-8"></th>
                   </tr>
@@ -1121,13 +1124,23 @@ onUnmounted(() => {
                         </template>
                         <span v-else class="text-slate-400 dark:text-slate-500">-</span>
                       </td>
+                      <!-- プレーあり: ラインに届かなくても課題曲を遊んだ人数（有効ありを含む）。 -->
+                      <td class="py-2 pr-2 text-center tabular-nums">
+                        <template v-if="w.playedMemberCount != null">
+                          {{ w.playedMemberCount }}
+                          <span v-if="w.memberCount > 0" class="ml-1 text-xs text-slate-400 dark:text-slate-500">
+                            ({{ Math.round((w.playedMemberCount / w.memberCount) * 100) }}%)
+                          </span>
+                        </template>
+                        <span v-else class="text-slate-400 dark:text-slate-500">-</span>
+                      </td>
                       <td class="py-2 pr-2 text-center tabular-nums">{{ w.tiers.length }}</td>
                       <td class="py-2 pr-2 text-center text-slate-400">{{ openAdminWeekId === w.id ? '▲' : '▼' }}</td>
                     </tr>
 
                     <!-- 折り畳み: その週の DIVISION / グループ一覧と、選んだグループの順位表 -->
                     <tr v-if="openAdminWeekId === w.id" class="border-b border-slate-100 dark:border-slate-700/50">
-                      <td colspan="7" class="py-3 px-1 bg-slate-50 dark:bg-slate-900/30">
+                      <td colspan="8" class="py-3 px-1 bg-slate-50 dark:bg-slate-900/30">
                         <p v-if="!w.tiers.length" class="text-sm text-slate-400 dark:text-slate-500">
                           {{ t('league.admin.notFormed') }}
                         </p>

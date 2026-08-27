@@ -1571,6 +1571,8 @@ export const ja = {
   'league.admin.history.status': '状態',
   'league.admin.history.members': '参加',
   'league.admin.history.scorers': '有効あり',
+  'league.admin.history.players': 'プレーあり',
+  'league.admin.history.playersHint': '課題曲を1曲以上プレーした人数と、参加者全体に占める割合。ラインに届かなくても遊んでいれば数えます（「有効あり」の人は必ず含まれます）。開催中の週は現時点の集計、編成前（draft）の週は開始前なので「-」です。',
   'league.admin.history.scorersHint': '有効曲が1曲以上あるユーザの人数（＝実際にリーグを走った人数）と、参加者に占める割合。開催中の週はその時点の集計、編成前の週は開始前のため「-」。',
   'league.admin.history.divisions': 'DIVISION数',
   'league.admin.history.status_draft': '編成前',

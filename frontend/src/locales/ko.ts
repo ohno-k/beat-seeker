@@ -1513,6 +1513,8 @@ export const ko = {
   'league.admin.history.status': '상태',
   'league.admin.history.members': '참가',
   'league.admin.history.scorers': '유효 있음',
+  'league.admin.history.players': '플레이 있음',
+  'league.admin.history.playersHint': '과제곡을 1곡 이상 플레이한 인원과 전체 참가자 대비 비율입니다. 라인을 넘지 못해도 플레이했다면 집계합니다(「유효 있음」인 사람은 반드시 포함됩니다). 진행 중인 주는 현재 시점 집계이며, 편성 전(draft) 주는 시작 전이므로 「-」입니다.',
   'league.admin.history.scorersHint': '유효 곡이 1곡 이상인 사용자 수(＝실제로 리그를 진행한 인원)와 참가자 대비 비율. 진행 중인 주는 현재 시점 집계이며, 편성 전인 주는 시작 전이므로 "-"로 표시됩니다.',
   'league.admin.history.divisions': 'DIVISION 수',
   'league.admin.history.status_draft': '편성 전',

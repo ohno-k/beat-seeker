@@ -1512,6 +1512,8 @@ export const en = {
   'league.admin.history.status': 'Status',
   'league.admin.history.members': 'Players',
   'league.admin.history.scorers': 'Scored',
+  'league.admin.history.players': 'Played',
+  'league.admin.history.playersHint': 'Number of players who played at least one of the week\'s songs, and their share of all entrants. Playing counts even if the line was never beaten (everyone under "Scored" is included here too). Active weeks are counted as of now; draft weeks show "-" because they have not started.',
   'league.admin.history.scorersHint': 'Number of players with at least one valid song (i.e. who actually played the league), and their share of all entrants. Active weeks are counted as of now; draft weeks show "-" because they have not started.',
   'league.admin.history.divisions': 'DIVISIONs',
   'league.admin.history.status_draft': 'Draft',
