@@ -1116,4 +1116,31 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "WHERE u.id = apu.user_id",
         nativeQuery = true)
     void updateAllAverageRanks();
+
+    /**
+     * 【メソッドの役割】 ユーザー間スコア比較バッチ用に、全ユーザーのプレイ済み ANOTHER / LEGGENDARIA
+     * ベストスコアを一括で吐き出す。
+     *
+     * 突き合わせに必要な最小限の列（誰が・どの譜面で・レベルいくつの・何点）だけを返す。
+     * 同一譜面に arcade / infinitas の複数 source 行が並走し得るため、
+     * フロントの {@code groupFlatScores} と同じく EX-SCORE の最大値を採用する。
+     * スコア 0（＝未プレイ）は勝敗集計の対象外なので SQL 側で落としている。
+     *
+     * 返却キー: userId / title / difficultyName / difficultyLevel / score
+     *
+     * @return ユーザー×譜面のベストスコア行リスト
+     */
+    @Query(value =
+        "SELECT s.user_id AS \"userId\", " +
+        "       s.title AS \"title\", " +
+        "       s.difficulty_name AS \"difficultyName\", " +
+        "       MAX(s.difficulty_level) AS \"difficultyLevel\", " +
+        "       MAX(s.score) AS \"score\" " +
+        "FROM scores s " +
+        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND s.difficulty_level IS NOT NULL " +
+        "  AND s.score > 0 " +
+        "GROUP BY s.user_id, s.title, s.difficulty_name",
+        nativeQuery = true)
+    List<Map<String, Object>> findAllUserBestScoresForComparison();
 }
