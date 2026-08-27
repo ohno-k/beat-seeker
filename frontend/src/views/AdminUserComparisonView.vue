@@ -25,6 +25,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useAdmin } from '../composables/useAdmin';
 import { useScores } from '../composables/useScores';
 import AdminComparisonModal, { type AdminUserSummary } from '../components/AdminComparisonModal.vue';
+import RankIcon from '../components/RankIcon.vue';
+import { getRankInfo } from '../utils/beatTier';
 
 const { isAdmin } = useAdmin();
 const { fetchAllUsers, fetchUserComparison, recalculateUserComparison } = useScores();
@@ -65,6 +67,8 @@ interface OpponentStat {
   userId: number;
   displayName: string;
   iidxId: string;
+  /** 総合 BEAT-PT。名前の横に出す BEAT-Tier アイコンの決定に使う。 */
+  totalBeatPt: number;
   levels: Record<string, LevelCounts>;
 }
 
@@ -73,6 +77,7 @@ interface ComparisonRow extends LevelCounts {
   userId: number;
   displayName: string;
   iidxId: string;
+  totalBeatPt: number;
   /** 両者プレイ済みの曲数 (win + loss + draw)。勝率の母数。 */
   decided: number;
   /** 勝率 (%)。母数 0 のときは null。 */
@@ -114,6 +119,7 @@ const rows = computed<ComparisonRow[]>(() => {
       userId: o.userId,
       displayName: o.displayName,
       iidxId: o.iidxId,
+      totalBeatPt: o.totalBeatPt ?? 0,
       ...sum,
       decided,
       winRate: decided > 0 ? (sum.win / decided) * 100 : null,
@@ -142,6 +148,9 @@ const totals = computed(() => {
   const decided = acc.win + acc.loss + acc.draw;
   return { ...acc, decided, winRate: decided > 0 ? (acc.win / decided) * 100 : null };
 });
+
+/** BEAT-PT から BEAT-Tier（アイコンの称号名と段階）を引く。 */
+const beatTier = (pt: number | null | undefined) => getRankInfo(pt ?? 0);
 
 /** 勝率を「64.3%」形式に整形する。母数 0 は "-"。 */
 const formatRate = (rate: number | null) => rate == null ? '-' : `${rate.toFixed(1)}%`;
@@ -399,10 +408,22 @@ onMounted(async () => {
                     class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer select-none"
                   >
                     <td class="p-2 sm:p-4 text-center font-bold text-slate-400">{{ idx + 1 }}</td>
+                    <!-- 列幅を変えないため、アイコンは shrink-0・名前側は min-w-0 で
+                         はみ出したときに列を押し広げずに省略されるようにする。 -->
                     <td class="p-2 sm:p-4 font-bold">
-                      <div class="flex flex-col">
-                        <span class="text-slate-800 dark:text-slate-200">{{ row.displayName }}</span>
-                        <span class="text-[10px] text-slate-400">{{ row.iidxId }}</span>
+                      <div class="flex items-center gap-2">
+                        <RankIcon
+                          :rank-name="beatTier(row.totalBeatPt).name"
+                          :tier="beatTier(row.totalBeatPt).tier"
+                          size="2xs"
+                          lite
+                          disable-party
+                          :title="`${beatTier(row.totalBeatPt).name} ${beatTier(row.totalBeatPt).tier}`"
+                        />
+                        <div class="flex flex-col min-w-0">
+                          <span class="text-slate-800 dark:text-slate-200 truncate">{{ row.displayName }}</span>
+                          <span class="text-[10px] text-slate-400 truncate">{{ row.iidxId }}</span>
+                        </div>
                       </div>
                     </td>
                     <td class="p-2 sm:p-4 text-center font-bold">
