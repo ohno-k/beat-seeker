@@ -64,6 +64,8 @@ const SongAverageView = defineAsyncComponent(() => import('./views/SongAverageVi
 const DifficultyTableView = defineAsyncComponent(() => import('./views/DifficultyTableView.vue'));
 const SkillTreeView = defineAsyncComponent(() => import('./views/SkillTreeView.vue'));
 const ChartListView = defineAsyncComponent(() => import('./views/ChartListView.vue'));
+// 作品別スコア一覧: プロフィールの「過去作スコア」で作品ラベルを押したときだけ開く。
+const PastVersionScoresView = defineAsyncComponent(() => import('./views/PastVersionScoresView.vue'));
 // リーグモード: 週次課題曲 3 曲・昇降格制の対戦タブ（要ログイン）。
 const LeagueView = defineAsyncComponent(() => import('./views/LeagueView.vue'));
 const RankComparisonView = defineAsyncComponent(() => import('./views/RankComparisonView.vue'));
@@ -103,7 +105,7 @@ const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearch
 import type { SongDataEntry } from './composables/useGameData';
 import { parseScoreCsv, detectCsvVersion, getCsvLastPlayTime } from './utils/csvParser';
 import type { VersionDetectionResult } from './utils/csvParser';
-import { CURRENT_VERSION, versionName } from './utils/iidxVersions';
+import { CURRENT_VERSION, MIN_PAST_VERSION, versionName } from './utils/iidxVersions';
 import { usePastScores, chartKey } from './composables/usePastScores';
 import ImportVersionConfirmModal from './components/ImportVersionConfirmModal.vue';
 import type { ScoreData } from './types/ScoreData';
@@ -349,7 +351,34 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'past-version-scores'>('dashboard')
+
+/**
+ * 作品別スコア一覧（activeTab = 'past-version-scores'）で表示中の作品バージョン番号。
+ * プロフィールの過去作スコアで作品ラベルを押したときに設定される。
+ */
+const pastVersionScoresVersion = ref<number>(CURRENT_VERSION);
+
+/**
+ * 【関数の役割】 作品別スコア一覧ページを開く。
+ *
+ * リロードやブックマークでも同じページに戻れるよう URL も `/past-scores/{version}` に書き換える。
+ * pushState ではなく replaceState を使うのは、他タブ（/admin/user-comparison 等）と同じ方針で、
+ * 履歴を積まずにブラウザバックの意味を壊さないため。
+ */
+const openPastVersionScores = (version: number) => {
+  pastVersionScoresVersion.value = version;
+  activeTab.value = 'past-version-scores';
+  window.history.replaceState({}, '', `/past-scores/${version}`);
+  window.scrollTo({ top: 0 });
+};
+
+/** 【関数の役割】 作品別スコア一覧からプロフィール（過去作スコア）へ戻る。 */
+const closePastVersionScores = () => {
+  activeTab.value = 'profile';
+  window.history.replaceState({}, '', '/profile');
+  window.scrollTo({ top: 0 });
+};
 
 /**
  * 現在のタブ ID から表示用ラベル（ヘッダーのパンくず・タイトルで使う）への解決を行う computed。
@@ -380,6 +409,7 @@ const activeTabLabel = computed<string>(() => {
     about: t('nav.about'),
     manual: t('nav.manual'),
     'admin-user-comparison': 'ユーザー間スコア比較',
+    'past-version-scores': `${pastVersionScoresVersion.value} ${versionName(pastVersionScoresVersion.value)}`,
   };
   return labels[activeTab.value] ?? '';
 });
@@ -707,10 +737,23 @@ onMounted(() => {
     '/league': 'league',
     '/competition-admin': 'competition-admin',
     '/admin/user-comparison': 'admin-user-comparison',
+    // 作品別スコア一覧から戻ったときに書き戻す URL。リロードでもプロフィールに着地させる。
+    '/profile': 'profile',
   };
   const currentPath = window.location.pathname;
   if (pathToTab[currentPath]) {
     activeTab.value = pathToTab[currentPath];
+  } else if (currentPath.startsWith('/past-scores/')) {
+    // /past-scores/:version 形式の作品別スコア一覧。
+    // 対応外の番号（未対応の新作・タイプミス）はプロフィールに落として空ページを見せない。
+    const version = Number(currentPath.slice('/past-scores/'.length));
+    if (Number.isInteger(version) && version >= MIN_PAST_VERSION && version <= CURRENT_VERSION) {
+      pastVersionScoresVersion.value = version;
+      activeTab.value = 'past-version-scores';
+    } else {
+      activeTab.value = 'profile';
+      window.history.replaceState({}, document.title, '/profile');
+    }
   } else if (currentPath.startsWith('/share/')) {
     // /share/:token 形式の URL 共有ページ。ShareView がトークンを読み取って描画する。
     activeTab.value = 'share';
@@ -2293,6 +2336,16 @@ const handleUnifiedClose = async () => {
           <ProfileDashboard
             class="w-full max-w-6xl"
             :viewing-user-id="viewingUserId"
+            @open-past-version="openPastVersionScores"
+          />
+        </template>
+
+        <!-- 作品別スコア一覧: プロフィールの過去作スコアから作品ラベルで遷移する -->
+        <template v-else-if="activeTab === 'past-version-scores'">
+          <PastVersionScoresView
+            class="w-full max-w-6xl mx-auto animate-fade-in"
+            :version="pastVersionScoresVersion"
+            @back="closePastVersionScores"
           />
         </template>
 

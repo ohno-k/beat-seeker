@@ -38,6 +38,14 @@ const props = defineProps<{
   currentChartCount?: number;
 }>();
 
+const emit = defineEmits<{
+  /**
+   * 作品ラベルがクリックされた。親（ProfileDashboard → App.vue）が
+   * その作品のスコア一覧ページへ遷移させる。
+   */
+  (e: 'open-version', version: number): void;
+}>();
+
 /** App.vue が provide している現行作スコア。現行作の譜面数表示にだけ使う。 */
 const injectedScores = inject<Ref<ScoreData[]> | null>('scoreData', null);
 
@@ -69,8 +77,18 @@ const rows = computed(() => SUPPORTED_VERSIONS.map(v => {
     lastPlayedAt: entry?.lastPlayedAt ?? null,
     /** 削除できるのは過去作のうち取り込み済みのものだけ。現行作は通常スコアなので対象外。 */
     canDelete: !v.current && !!entry && entry.chartCount > 0,
+    /**
+     * スコア一覧ページを開けるか。
+     * 現行作はスコアを取り込み済みなら、過去作は取り込み済みなら開ける（未取込は行き先が空になるので開かせない）。
+     */
+    canOpen: v.current ? (currentChartCount.value ?? 0) > 0 : !!entry && entry.chartCount > 0,
   };
 }));
+
+/** 【関数の役割】 作品ラベルのクリック。その作品のスコア一覧ページへの遷移を親に依頼する。 */
+const openVersion = (version: number) => {
+  emit('open-version', version);
+};
 
 /** ISO 日時文字列を "YYYY-MM-DD" に丸める（時刻までは管理画面に不要）。 */
 const formatDate = (iso: string | null): string => {
@@ -205,17 +223,36 @@ onMounted(load);
         <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
           <tr v-for="row in rows" :key="row.num">
             <td class="py-2 pr-2">
-              <div class="flex items-center gap-2">
+              <!-- 取り込み済みの作品ラベルは、その作品のスコア一覧ページへの導線を兼ねる -->
+              <component
+                :is="row.canOpen ? 'button' : 'div'"
+                class="flex items-center gap-2 text-left"
+                :class="row.canOpen ? 'group cursor-pointer' : ''"
+                :title="row.canOpen ? t('past.manager.openList') : undefined"
+                @click="row.canOpen && openVersion(row.num)"
+              >
                 <span
                   class="px-1.5 py-0.5 text-[10px] font-bold rounded border"
                   :class="versionBadgeClass(row.num)"
                 >{{ row.num }}</span>
-                <span class="text-slate-800 dark:text-slate-100">{{ row.name }}</span>
+                <span
+                  class="text-slate-800 dark:text-slate-100"
+                  :class="row.canOpen ? 'group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:underline transition-colors' : ''"
+                >{{ row.name }}</span>
                 <span
                   v-if="row.current"
                   class="px-1.5 py-0.5 text-[10px] rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                 >{{ t('past.manager.current') }}</span>
-              </div>
+                <!-- クリックできる行であることの手がかり（ホバーで青くなる） -->
+                <svg
+                  v-if="row.canOpen"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-3 w-3 text-slate-300 dark:text-slate-600 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
+              </component>
             </td>
             <td class="py-2 px-2 text-right tabular-nums text-slate-800 dark:text-slate-100">
               <span v-if="row.chartCount !== null">{{ row.chartCount.toLocaleString() }}</span>
@@ -278,14 +315,21 @@ onMounted(load);
         <!-- 凡例。色だけに頼らないよう作品名・譜面数・比率を並べる -->
         <div class="w-full min-w-0">
           <ul class="space-y-1.5">
-            <li v-for="s in versionPie.slices" :key="s.version" class="flex items-center gap-2 text-xs">
-              <span class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: s.color }"></span>
-              <span class="text-slate-700 dark:text-slate-200 truncate">
-                {{ s.version }} {{ s.name }}
-                <span v-if="s.version === CURRENT_VERSION" class="text-slate-400 dark:text-slate-500">({{ t('past.manager.current') }})</span>
-              </span>
-              <span class="ml-auto shrink-0 tabular-nums text-slate-600 dark:text-slate-300">{{ s.count.toLocaleString() }}</span>
-              <span class="shrink-0 w-12 text-right tabular-nums text-slate-400 dark:text-slate-500">{{ s.pct.toFixed(1) }}%</span>
+            <li v-for="s in versionPie.slices" :key="s.version">
+              <!-- 凡例もテーブルの作品ラベルと同じくスコア一覧ページへの導線にする -->
+              <button
+                class="group w-full flex items-center gap-2 text-xs text-left rounded px-1 -mx-1 py-0.5 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
+                :title="t('past.manager.openList')"
+                @click="openVersion(s.version)"
+              >
+                <span class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: s.color }"></span>
+                <span class="text-slate-700 dark:text-slate-200 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:underline transition-colors">
+                  {{ s.version }} {{ s.name }}
+                  <span v-if="s.version === CURRENT_VERSION" class="text-slate-400 dark:text-slate-500">({{ t('past.manager.current') }})</span>
+                </span>
+                <span class="ml-auto shrink-0 tabular-nums text-slate-600 dark:text-slate-300">{{ s.count.toLocaleString() }}</span>
+                <span class="shrink-0 w-12 text-right tabular-nums text-slate-400 dark:text-slate-500">{{ s.pct.toFixed(1) }}%</span>
+              </button>
             </li>
           </ul>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2.5">
