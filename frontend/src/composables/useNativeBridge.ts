@@ -4,9 +4,9 @@
  * 背景: ブラウザのクロスオリジン制約により、beat-seeker のページから eagate のスコアページを
  * ユーザーのログイン Cookie 付きで取得することはできない。そのため Web ではブックマークレット
  * （eagate 上で自前のコードを走らせる）を使っている。
- * Android アプリ版では、アプリが非表示 WebView で eagate を開いて同じ収集スクリプト
- * （`/native-scraper.js`）を注入し、結果をこのページへ返す。ユーザー操作は
- * 「アプリ内のボタンを 1 回押す」だけになる。
+ * Android アプリ版では、アプリが非表示 WebView で eagate を開いて収集スクリプト
+ * （`/native-scraper.js`）を注入し、公式のスコアデータ CSV を取得して結果をこのページへ返す。
+ * ユーザー操作は「アプリ内のボタンを 1 回押す」だけになる。
  *
  * 【アプリ側から注入されるもの】
  * `window.BeatSeekerNative`（`addJavascriptInterface`。beat-seeker オリジンの WebView にのみ注入）

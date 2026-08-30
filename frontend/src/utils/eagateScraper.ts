@@ -14,21 +14,29 @@
  * 収集内容:
  *  1. URL から IIDX のバージョン番号（例: 33）を推定
  *  2. ARENA モードの対戦データページを取得し、DOM からバトル情報をパース
- *  3. 「楽曲データ/難易度別」(djdata/music/difficulty.html) を LEVEL 1〜12 まで順に
- *     スクレイピング（各レベルは offset を 50 ずつ進めて全ページ巡回）し、
- *     公式 CSV と同じカラム構成の CSV 文字列を組み立てる。
- *       - 1 行＝1 曲（曲名・各難易度のスコア・PGreat/Great・クリアランプ・DJ LEVEL）
- *       - クリアランプ画像 clflg1〜7 を FAILED〜FULLCOMBO CLEAR に変換
- *       - 難易度ページに無い項目（ミスカウント / ジャンル / アーティスト /
- *         バージョン / プレー回数 / 最終プレー日時）は空欄（公式CSVの該当列に合わせる）
- *       - 同一曲の複数譜面は 1 行に集約し、parseScoreCsv がそのまま読める形にする
+ *  3. スコアを取得する。取得方法は 2 通りあり、{@link ScrapeOptions.scoreSource} で選ぶ:
  *
- * なぜ CSV ダウンロードでなく難易度別スクレイピングか:
- *  - スコアは毎作リセットされるがクリアランプは永続するため、難易度別ページなら
- *    「スコア0・ランプあり」の譜面も含めてレベル順に網羅取得できる。
+ *     - `'official'` … 公式の「スコアデータ CSV ダウンロード」を 1 リクエストで取得する。
+ *         公式フォームと同じ `POST djdata/score_download.html` に `style=SP` を送る。
+ *         ミスカウント / ジャンル / アーティスト / バージョン / プレー回数 / 最終プレー日時が
+ *         すべて埋まった、正真正銘の公式 CSV が得られる。リクエストは 1 回で済むため高速。
+ *
+ *     - `'difficulty'` … 「楽曲データ/難易度別」(djdata/music/difficulty.html) を LEVEL 1〜12 まで
+ *         順にスクレイピング（各レベルは offset を 50 ずつ進めて全ページ巡回）し、
+ *         公式 CSV と同じカラム構成の CSV 文字列を自前で組み立てる。
+ *           - 1 行＝1 曲（曲名・各難易度のスコア・PGreat/Great・クリアランプ・DJ LEVEL）
+ *           - クリアランプ画像 clflg1〜7 を FAILED〜FULLCOMBO CLEAR に変換
+ *           - 難易度ページに無い項目（ミスカウント / ジャンル / アーティスト /
+ *             バージョン / プレー回数 / 最終プレー日時）は空欄になる
+ *           - 同一曲の複数譜面は 1 行に集約し、parseScoreCsv がそのまま読める形にする
+ *
+ *     使い分け: スコアは毎作リセットされるがクリアランプは永続するため、難易度別ページなら
+ *     「スコア0・ランプあり」の譜面も拾える。一方、公式 CSV は上記の欠落列が埋まり、
+ *     とりわけ「最終プレー日時」はリーグモードの活動判定が根拠にしている。
  *
  * 注意:
  *  - 難易度ページは Shift_JIS 表記だが、eagate は実体 UTF-8 のため fetch().text() で読める。
+ *    公式 CSV も同様に fetch().text() でそのまま読める前提。
  */
 
 /** ARENA 対戦の 1 曲分の情報。 */
@@ -52,22 +60,44 @@ export type Battle = {
 };
 
 /**
+ * 【型】 スコアの取得方式。
+ *  - `'official'`   … 公式のスコアデータ CSV ダウンロードをそのまま取得する
+ *  - `'difficulty'` … 難易度別ページを巡回して公式 CSV 相当を組み立てる
+ */
+export type ScoreSource = 'official' | 'difficulty';
+
+/** 【型】 {@link scrapeEagate} のオプション。 */
+export type ScrapeOptions = {
+  /** スコアの取得方式。既定は `'official'`（公式 CSV）。 */
+  scoreSource?: ScoreSource;
+};
+
+/**
  * 【型】 スクレイプ結果。`type` を含めた形がそのまま beat-seeker 側の取り込み入力
  * （`App.vue` の `processBookmarkletData` / `UnifiedImport` の `processText`）になる。
  */
 export type ScrapeResult = {
   type: 'beat-seeker-combined';
-  /** 公式 CSV 相当の文字列。1 譜面も取得できなかった場合は空文字。 */
+  /** 公式 CSV（もしくはそれ相当）の文字列。取得できなかった場合は空文字。 */
   scoresCsv: string;
+  /**
+   * `scoresCsv` の出どころ。取り込み側はこれを見て「バージョン」列を信用してよいか判断する。
+   *  - `'official'`   … 公式 CSV。バージョン列が埋まっているので作品バージョンの自動判定が効く
+   *  - `'difficulty'` … 難易度別ページ由来。バージョン列が空欄なので自動判定はスキップさせる
+   */
+  scoresCsvSource: ScoreSource;
   /** ログイン中ユーザーの DJ NAME（ARENA ページから取得。取れなければ空文字）。 */
   myDjName: string;
   /** 取得年（西暦 4 桁）。ARENA の対戦日時に年が含まれないため補完に使う。 */
   year: string;
   /** ARENA 対戦履歴。 */
   battles: Battle[];
-  /** 取得できた譜面数（進捗・完了表示用）。 */
+  /**
+   * 取得できた譜面数（進捗・完了表示用）。
+   * `'difficulty'` 方式でのみ数えられる。`'official'` 方式では 0（CSV を解析しないため）。
+   */
   chartCount: number;
-  /** 取得できた曲数（＝CSV の行数。進捗・完了表示用）。 */
+  /** 取得できた曲数（＝CSV のデータ行数。進捗・完了表示用）。 */
   songCount: number;
 };
 
@@ -195,6 +225,78 @@ async function scrapeArena(base: string): Promise<{ battles: Battle[]; myDjName:
 }
 
 /**
+ * 【関数の役割】 公式の「スコアデータ CSV ダウンロード」を取得する。
+ *
+ * 公式ページのフォームと同じ `POST djdata/score_download.html` に `style=SP` を送ると、
+ * CSV 本文がそのままレスポンスとして返る。難易度別ページの巡回（レベルごとにページング）と違い
+ * リクエストは 1 回で済み、ミスカウントや最終プレー日時など難易度別ページには無い列も埋まる。
+ *
+ * 未ログインの場合はログインページの HTML が返るため、ヘッダ行の有無で妥当性を判定し、
+ * CSV でなければ空文字を返す（呼び出し側が未ログインとして扱えるようにする）。
+ *
+ * @returns 取得した CSV 本文。失敗・未ログイン時は空文字。
+ */
+async function fetchOfficialCsv(base: string, report: ProgressReporter): Promise<string> {
+  report('公式CSVを取得中…');
+  try {
+    const res = await fetch(base + '/djdata/score_download.html', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'style=SP',
+    });
+    const text = await res.text();
+    // 公式 CSV のヘッダ行は「バージョン,タイトル,…」で始まる。
+    // 未ログイン時はログインページの HTML が返るので、それを弾く。
+    if (!/^[^\r\n]*タイトル/.test(text)) {
+      console.warn('official CSV: unexpected response (not logged in?)');
+      return '';
+    }
+    return text.trim();
+  } catch (e) {
+    console.warn('official CSV fetch failed', e);
+    return '';
+  }
+}
+
+/**
+ * 【関数の役割】 CSV のデータ行数（ヘッダを除く）を数える。
+ *
+ * 曲名やジャンルにカンマや改行が含まれうるため、単純な行分割ではなくクォート状態を見ながら
+ * レコード区切りを数える。進捗・完了表示に使うだけなので、値の中身までは解析しない。
+ */
+function countCsvRows(csv: string): number {
+  if (!csv) return 0;
+  let rows = 0;
+  let inQuotes = false;
+  let sawContent = false;
+  for (let i = 0; i < csv.length; i++) {
+    const c = csv[i];
+    if (c === '"') {
+      // 連続する "" はエスケープされたダブルクォートなので状態を変えない。
+      if (inQuotes && csv[i + 1] === '"') {
+        i++;
+        continue;
+      }
+      inQuotes = !inQuotes;
+      sawContent = true;
+    } else if (!inQuotes && (c === '\n' || c === '\r')) {
+      if (sawContent) {
+        rows++;
+        sawContent = false;
+      }
+      // CRLF はまとめて 1 区切りとして扱う。
+      if (c === '\r' && csv[i + 1] === '\n') i++;
+    } else {
+      sawContent = true;
+    }
+  }
+  if (sawContent) rows++;
+  // 先頭のヘッダ行はデータ行に数えない。
+  return Math.max(0, rows - 1);
+}
+
+/**
  * 【関数の役割】 CSV の 1 セルをダブルクォートで囲み、内部の `"` をエスケープする。
  */
 function q(v: unknown): string {
@@ -256,16 +358,41 @@ function buildCsv(charts: Record<string, Chart>): { csv: string; songCount: numb
  * 処理の流れ:
  *  手順1: URL からバージョンを推定し djdata のベース URL を決める。
  *  手順2: ARENA 対戦履歴と DJ NAME を収集（失敗しても続行）。
- *  手順3: LEVEL 1〜12 を並列にスクレイプし、譜面辞書へ集約。
- *  手順4: 譜面辞書から公式 CSV 相当の文字列を組み立てて返す。
+ *  手順3: スコアを取得する。
+ *         - `'official'`   … 公式 CSV を 1 リクエストで取得してそのまま使う。
+ *         - `'difficulty'` … LEVEL 1〜12 を並列にスクレイプし、譜面辞書から CSV を組み立てる。
  *
  * @param onProgress 進捗メッセージの通知先（省略可）。
+ * @param options    取得方式の指定（省略時は公式 CSV）。
  */
-export async function scrapeEagate(onProgress?: ProgressReporter): Promise<ScrapeResult> {
+export async function scrapeEagate(
+  onProgress?: ProgressReporter,
+  options?: ScrapeOptions
+): Promise<ScrapeResult> {
   const report: ProgressReporter = onProgress ?? (() => {});
+  const scoreSource: ScoreSource = options?.scoreSource ?? 'official';
   const base = resolveBase();
 
   const { battles, myDjName } = await scrapeArena(base);
+
+  const commonResult = {
+    type: 'beat-seeker-combined' as const,
+    myDjName,
+    year: String(new Date().getFullYear()),
+    battles,
+  };
+
+  if (scoreSource === 'official') {
+    const csv = await fetchOfficialCsv(base, report);
+    return {
+      ...commonResult,
+      scoresCsv: csv,
+      scoresCsvSource: 'official',
+      // 公式 CSV は解析せずそのまま渡すため、譜面数は数えない。
+      chartCount: 0,
+      songCount: countCsvRows(csv),
+    };
+  }
 
   const charts: Record<string, Chart> = {};
   let chartCount = 0;
@@ -378,11 +505,9 @@ export async function scrapeEagate(onProgress?: ProgressReporter): Promise<Scrap
   const { csv, songCount } = buildCsv(charts);
 
   return {
-    type: 'beat-seeker-combined',
+    ...commonResult,
     scoresCsv: chartCount > 0 ? csv : '',
-    myDjName,
-    year: String(new Date().getFullYear()),
-    battles,
+    scoresCsvSource: 'difficulty',
     chartCount,
     songCount,
   };

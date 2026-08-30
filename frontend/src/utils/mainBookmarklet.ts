@@ -27,9 +27,14 @@ declare const __APP_ORIGIN__: string;
   statusEl.textContent = 'beat-seeker: 取得を開始します…';
   document.body.appendChild(statusEl);
 
-  const result = await scrapeEagate((message) => {
-    statusEl.textContent = message;
-  });
+  // ブックマークレットは従来どおり難易度別ページの巡回で取得する。
+  // スコアは毎作リセットされるがクリアランプは永続するため、「スコア0・ランプあり」の譜面も拾える。
+  const result = await scrapeEagate(
+    (message) => {
+      statusEl.textContent = message;
+    },
+    { scoreSource: 'difficulty' }
+  );
 
   const { chartCount, songCount, ...payload } = result;
   const fullData = JSON.stringify(payload);
