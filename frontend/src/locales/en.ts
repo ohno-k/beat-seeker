@@ -28,6 +28,7 @@ export const en = {
   'nav.history': 'Progress History',
   'nav.arena': 'ARENA Mode',
   'nav.changelog': 'Changelog',
+  'nav.pastRanking': 'Past Version Rankings',
   'nav.about': 'About',
   'nav.manual': 'User Guide',
   'nav.terms': 'Terms of Service',
@@ -561,6 +562,18 @@ export const en = {
   'ranking.overWeekAgo': 'Over a week ago',
   'ranking.findMyRank': 'Find My Rank',
 
+  // Past version rankings (PT archive that accumulates per version)
+  'pastRanking.title': 'Past Version Rankings',
+  'pastRanking.desc': 'Final standings for each version, saved right before points were reset for the new version. Pick a version to compare.',
+  'pastRanking.loading': 'Loading...',
+  'pastRanking.error': 'Failed to load',
+  'pastRanking.empty': 'No past version rankings have been saved yet. They are saved before the reset when a new version launches.',
+  'pastRanking.players': '{count} players',
+  'pastRanking.capturedAt': 'as of {date}',
+  'pastRanking.rank': 'Rank',
+  'pastRanking.player': 'Player',
+  'pastRanking.tier': 'TIER',
+
   // Profile
   'profile.title': 'Profile',
   'profile.edit': 'Edit',
@@ -591,8 +604,8 @@ export const en = {
   'profile.showArcadeScoresHint': 'Turn off to hide scores imported from e-amusement CSV / bookmarklet',
   'profile.showInfinitasScores': 'Show INFINITAS scores',
   'profile.showInfinitasScoresHint': 'Turn off to hide scores captured via INFINITAS screen monitor',
-  'profile.showSupporterBorder': 'Show Supporter Gold Border',
-  'profile.showSupporterBorderHint': 'Turn off to hide the gold border on your tier rank icon',
+  'profile.showSupporterBorder': 'Show Supporter Gloss',
+  'profile.showSupporterBorderHint': 'Turn off to hide the gloss sweeping across your tier icon. The outer border shows your previous-version tier and is not affected by this setting',
   'profile.saveChanges': 'Save Changes',
   'profile.saving': 'Saving...',
   'profile.updateSuccess': 'Profile updated!',

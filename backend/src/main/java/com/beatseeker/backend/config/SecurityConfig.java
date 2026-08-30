@@ -126,6 +126,9 @@ public class SecurityConfig {
                                                                 "/api/friends/test",
                                                                 "/api/test-root")
                                                 .permitAll()
+                                                // 過去作ランキング（アーカイブの参照）も現行作のランキングと同じく公開。
+                                                // 末尾の anyRequest().permitAll() に頼らず明示しておく。
+                                                .requestMatchers("/api/past-rankings/**").permitAll()
                                                 // パスワード忘れ・リセットはログイン前に叩かれるので公開
                                                 .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                                                 // 共有トークンの管理（発行・一覧・失効）は要ログイン

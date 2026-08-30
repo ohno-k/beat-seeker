@@ -26,6 +26,7 @@ import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { diffTable as diffTableRanks } from '../composables/useGameData';
+import { usePastTiers } from '../composables/usePastTiers';
 
 /** Beat-PT ランキング API が返すユーザー 1 人分のエントリ。 */
 interface BeatRankingEntry {
@@ -36,6 +37,8 @@ interface BeatRankingEntry {
   totalBeatPt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
+  /** サポーター表示の対象か（アイコンの光沢用）。サーバ側で表示設定との AND を取った値。 */
+  isSupporter?: boolean;
   /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
   includesInfinitas?: boolean;
 }
@@ -70,6 +73,8 @@ interface RateRankingEntry {
   totalRatePt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
+  /** サポーター表示の対象か（アイコンの光沢用）。サーバ側で表示設定との AND を取った値。 */
+  isSupporter?: boolean;
   /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
   includesInfinitas?: boolean;
 }
@@ -275,6 +280,8 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 /** 【computed の役割】 管理者判定。simulation モード表示制御に使用。判定ロジックは useAdmin に集約。 */
 const { isAdmin } = useAdmin();
+// 前作ティア（アイコンの外枠に使う）。取得できなくても外枠が付かないだけなので描画は妨げない。
+const { pastTierOf, ensureLoaded: ensurePastTiers } = usePastTiers();
 
 /** 現在のビューモード（beat / rate / kenban / sara / average / simulation）。 */
 const viewMode = ref<'beat' | 'rate' | 'kenban' | 'sara' | 'average' | 'simulation'>('beat');
@@ -714,7 +721,8 @@ async function fetchSimulationData() {
 // 散布図（BEAT × RATE）を表示するために、RATE 表示が有効ならマウント時に Rate も並行取得する。
 onMounted(async () => {
     try {
-        const tasks: Promise<unknown>[] = [fetchBeatRanking()];
+        // 前作ティアはアイコンの外枠にしか使わないので、失敗しても順位表の表示は続ける。
+        const tasks: Promise<unknown>[] = [fetchBeatRanking(), ensurePastTiers()];
         if (showRateTier.value) {
             tasks.push(fetchRateRanking().catch(e => console.error(e)));
         }
@@ -958,7 +966,7 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-3 px-2 text-center">
                       <div class="flex justify-center">
-                        <RankIcon :rank-name="getRankInfo(row.entry.totalBeatPt).name" :tier="getRankInfo(row.entry.totalBeatPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                        <RankIcon :rank-name="getRankInfo(row.entry.totalBeatPt).name" :tier="getRankInfo(row.entry.totalBeatPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" :past-rank-name="pastTierOf(row.entry.userId)?.name" :past-tier="pastTierOf(row.entry.userId)?.tier" />
                       </div>
                     </td>
                     <td class="py-3 text-right">
@@ -1126,7 +1134,7 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-3 px-2 text-center">
                       <div class="flex justify-center">
-                        <RankIcon :rank-name="getRateTierRankInfo(row.entry.totalRatePt).name" :tier="getRateTierRankInfo(row.entry.totalRatePt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                        <RankIcon :rank-name="getRateTierRankInfo(row.entry.totalRatePt).name" :tier="getRateTierRankInfo(row.entry.totalRatePt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" :past-rank-name="pastTierOf(row.entry.userId)?.name" :past-tier="pastTierOf(row.entry.userId)?.tier" />
                       </div>
                     </td>
                     <td class="py-3 text-right">
@@ -1282,7 +1290,7 @@ watch(viewMode, async (mode) => {
                   </td>
                   <td class="py-3 px-2 text-center">
                     <div class="flex justify-center">
-                      <RankIcon :rank-name="getRankInfo(row.entry.totalKenbanPt).name" :tier="getRankInfo(row.entry.totalKenbanPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                      <RankIcon :rank-name="getRankInfo(row.entry.totalKenbanPt).name" :tier="getRankInfo(row.entry.totalKenbanPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" :past-rank-name="pastTierOf(row.entry.userId)?.name" :past-tier="pastTierOf(row.entry.userId)?.tier" />
                     </div>
                   </td>
                   <td class="py-3 pr-4 text-right">
@@ -1358,7 +1366,7 @@ watch(viewMode, async (mode) => {
                   </td>
                   <td class="py-3 px-2 text-center">
                     <div class="flex justify-center">
-                      <RankIcon :rank-name="getRankInfo(row.entry.totalSaraPt).name" :tier="getRankInfo(row.entry.totalSaraPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                      <RankIcon :rank-name="getRankInfo(row.entry.totalSaraPt).name" :tier="getRankInfo(row.entry.totalSaraPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" :past-rank-name="pastTierOf(row.entry.userId)?.name" :past-tier="pastTierOf(row.entry.userId)?.tier" />
                     </div>
                   </td>
                   <td class="py-3 pr-4 text-right">

@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -17,39 +18,56 @@ import java.util.Map;
  * <b>機械的に実行してよい部分</b>をここに実装する。起動そのものは
  * {@link VersionTransitionScheduler} が担当する。
  *
- * ここに実装してある手順（いずれも追記のみ・非破壊）:
- *  1. {@link #captureSnapshot} … 前作の最終 PT を {@code version_pt_snapshots} へ焼き付ける
- *  2. {@link #copyScoresToPastScores} … {@code scores} を {@code past_scores} へ複製する
+ * 手順:
+ *  1. {@link #captureSnapshot} … 前作の最終 PT を {@code version_pt_snapshots} へ焼き付ける（追記のみ）
+ *  2. {@link #copyScoresToPastScores} … {@code scores} を {@code past_scores} へ複製する（追記のみ）
  *  3. {@link #applyDifficultyDraft} … 難易度表 draft を active へ適用する
- *
- * <b>ここに実装していない手順（意図的）</b>:
- *  4. スコアの初期化（{@code scores} の削除と各種派生データのリセット）。
- *     これは取り返しがつかず、かつ {@code users.total_beat_pt} / {@code user_song_ranks} /
- *     各種キャッシュなど波及先が広い。設計を確定させるまでは自動実行させない。
- *     {@link VersionTransitionScheduler} は手順 3 まで終えたらそこで止まり、
- *     残りが手作業であることをログに残す。
+ *  4. {@link #resetCurrentScores} … {@code scores} と派生データを初期化する（<b>唯一の破壊的手順</b>）
  *
  * 実行順序の不変条件: <b>1 → 2 → 4</b> の順を必ず守る。1 を撮る前に 4 を行うと前作の順位が
- *   永久に失われる。{@link VersionTransitionScheduler} 側でも前段の成否を見て順序を守る。
+ *   永久に失われる。{@link #resetCurrentScores} 自身も 1 と 2 の結果が DB に無ければ例外で止まり、
+ *   {@link VersionTransitionScheduler} 側でも前段の成否を見て順序を守る。
  *
- * 冪等性: 1 と 2 は既存行があれば何もしない（{@code ON CONFLICT DO NOTHING}）ため、
- *   二重に走っても壊れない。
+ * 冪等性: 1 と 2 は既存行があれば何もしない（{@code ON CONFLICT DO NOTHING}）ため、二重に走っても壊れない。
+ *   <b>4 だけは冪等ではない</b>（呼ぶたびに履歴のリセット行が増える）。二重実行の防止は
+ *   {@link VersionTransitionScheduler} の {@code system_task_runs} が担う。
+ *
+ * 手順 4 の既定: スケジューラ側では {@code app.version-transition.reset-scores} を明示的に
+ *   true にしない限り実行されない。取り返しがつかない操作を、稼働日を設定しただけで走らせないため。
  */
 @Service
 public class VersionTransitionService {
 
     private static final Logger log = LoggerFactory.getLogger(VersionTransitionService.class);
 
+    /**
+     * スコア初期化のあとに履歴へ差し込む「世代リセット行」のタグ。
+     *
+     * 通常のアップロード（タグ null）とも INFINITAS 取り込み（タグ {@code "INFINITAS"}）とも
+     * 別の値にしてある。同日 1 レコードへ集約する upsert はタグ一致で既存行を引き当てるため、
+     * 別タグにしておけば初日のアップロードがこの行を上書きせず、両方が残る。
+     */
+    static final String RESET_LOG_TAG = "VERSION-RESET";
+
     private final JdbcTemplate jdbcTemplate;
     private final VersionPtSnapshotRepository snapshotRepository;
     private final GameDataService gameDataService;
+    private final SongRankingAggregateCacheService songRankingAggregateCache;
+    private final SongArenaAveragesCacheService songArenaAveragesCache;
+    private final SongAvgScoreRatesCacheService songAvgScoreRatesCache;
 
     public VersionTransitionService(JdbcTemplate jdbcTemplate,
                                     VersionPtSnapshotRepository snapshotRepository,
-                                    GameDataService gameDataService) {
+                                    GameDataService gameDataService,
+                                    SongRankingAggregateCacheService songRankingAggregateCache,
+                                    SongArenaAveragesCacheService songArenaAveragesCache,
+                                    SongAvgScoreRatesCacheService songAvgScoreRatesCache) {
         this.jdbcTemplate = jdbcTemplate;
         this.snapshotRepository = snapshotRepository;
         this.gameDataService = gameDataService;
+        this.songRankingAggregateCache = songRankingAggregateCache;
+        this.songArenaAveragesCache = songArenaAveragesCache;
+        this.songAvgScoreRatesCache = songAvgScoreRatesCache;
     }
 
     /**
@@ -191,10 +209,131 @@ public class VersionTransitionService {
     }
 
     /**
+     * 【メソッドの役割】 現行作のスコアと、そこから派生したデータを一斉に初期化する。
+     *
+     * 新作初日に BEAT-PT / RATE-PT を 0 から積み直すための手順。<b>ここだけが破壊的</b>で、
+     * 実行すると {@code scores} は空になる。前作の記録は先に {@link #captureSnapshot}（順位）と
+     * {@link #copyScoresToPastScores}（譜面ごとのスコア）で退避されている前提であり、
+     * その 2 つが済んでいなければ何もせず例外を投げる。
+     *
+     * ■ 何を初期化するか
+     * <pre>
+     *   scores                 全削除。現行作のスコアそのもの
+     *   user_song_ranks        全削除。scores から作られる譜面ごとの順位キャッシュ
+     *   user_comparison_stats  全削除。scores から作られるユーザー間の比較集計
+     *   users                  total_beat_pt / total_kenban_pt / total_sara_pt を 0、
+     *                          total_average_rank / total_average_rank_played / last_uploaded_at を NULL、
+     *                          ranking_includes_infinitas を false
+     *   score_history_logs     <b>消さずに、全員へ 0 の「世代リセット行」を 1 行ずつ追加する</b>
+     * </pre>
+     *
+     * ■ なぜ履歴を消さずにリセット行を足すのか
+     * ランキングは {@code score_history_logs} の<b>ユーザーごと最新行</b>を見る
+     * （{@link com.beatseeker.backend.repository.ScoreHistoryLogRepository#getGlobalRanking()}）。
+     * したがって履歴を放置すると、{@code scores} を空にしても順位表には前作の PT が出たままになる。
+     * かといって履歴を消すと成長記録のグラフから前作の推移が丸ごと失われる。
+     * そこで「全項目 0 の行を今の時刻で 1 行足す」ことにした。最新行が 0 になるので順位表は
+     * 0 から始まり、過去の推移はそのまま残る。グラフ上は初日で 0 へ落ちる形になるが、
+     * これは実際に起きたこと（世代交代によるリセット）そのものなので正しい見え方になる。
+     *
+     * ■ 冪等性
+     * 上の 3 つと違い、この手順は<b>冪等ではない</b>（呼ぶたびにリセット行が増える）。
+     * 二重実行の防止は {@link VersionTransitionScheduler} の {@code system_task_runs} に委ねる。
+     *
+     * 注意: 楽曲単位の集計キャッシュ（曲別ランキング・平均スコアレート・アリーナ平均）は
+     * このメソッドでは触らない。トランザクションが確定してから
+     * {@link #refreshSongCaches()} を呼ぶこと。
+     *
+     * @param fromVersion 退避済みかを確認する移行元バージョン（例: 33）
+     * @param dryRun      true なら DB を変更せず、消える予定の行数だけを返す
+     * @return 対象になった（dry-run 時はなる予定の）行数の内訳
+     * @throws IllegalStateException 前作の退避（スナップショット / 過去作スコア）が済んでいない場合
+     */
+    @Transactional
+    public Map<String, Object> resetCurrentScores(int fromVersion, boolean dryRun) {
+        long snapshots = snapshotRepository.countByVersion(fromVersion);
+        Long pastScores = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM past_scores WHERE version = ?", Long.class, fromVersion);
+        long pastScoreRows = pastScores == null ? 0L : pastScores;
+
+        // 退避が済んでいるかの確認。dry-run では何も壊さないので、止めずに警告だけ出す
+        // （dry-run 中は手順 1・2 も書き込みを行わないため、ここで例外にすると件数を確かめられない）。
+        if (snapshots == 0 || pastScoreRows == 0) {
+            String reason = "version=" + fromVersion + " の退避が未完了（スナップショット " + snapshots +
+                    " 件 / past_scores " + pastScoreRows + " 行）";
+            if (!dryRun) {
+                throw new IllegalStateException(reason + "。初期化すると前作の記録が永久に失われるため中断する");
+            }
+            log.warn("[世代切替] スコア初期化 dry-run: {}。本番実行はこの状態では中断される", reason);
+        }
+
+        Long scoreRows = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM scores", Long.class);
+        Long rankRows = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user_song_ranks", Long.class);
+        Long statRows = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user_comparison_stats", Long.class);
+        Long historyUsers = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM (SELECT DISTINCT user_id FROM score_history_logs) t", Long.class);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("scoreRows", scoreRows == null ? 0L : scoreRows);
+        result.put("userSongRankRows", rankRows == null ? 0L : rankRows);
+        result.put("userComparisonStatRows", statRows == null ? 0L : statRows);
+        result.put("resetLogRows", historyUsers == null ? 0L : historyUsers);
+
+        if (dryRun) {
+            log.info("[世代切替] スコア初期化 dry-run: scores {} 行 / user_song_ranks {} 行 / " +
+                            "user_comparison_stats {} 行を削除し、{} 人へリセット行を追加する予定",
+                    result.get("scoreRows"), result.get("userSongRankRows"),
+                    result.get("userComparisonStatRows"), result.get("resetLogRows"));
+            return result;
+        }
+
+        // 履歴のリセット行を先に入れる。scores を消す前でも後でも値は 0 固定なので結果は変わらないが、
+        // 「順位表が前作の PT を出したまま」の時間を最小にするため先頭に置く。
+        jdbcTemplate.update(
+                "INSERT INTO score_history_logs " +
+                "  (user_id, uploaded_at, tag, total_score, fc_count, exh_count, h_count, clear_count, easy_count, " +
+                "   aaa_count, aa_count, a_count, total_beat_pt, beat_pt_increase, updated_count, " +
+                "   total_precision_pt, total_rate_pt, total_kenban_pt, total_sara_pt) " +
+                "SELECT DISTINCT user_id, now(), ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 " +
+                "FROM score_history_logs",
+                RESET_LOG_TAG);
+
+        jdbcTemplate.update("DELETE FROM scores");
+        jdbcTemplate.update("DELETE FROM user_song_ranks");
+        jdbcTemplate.update("DELETE FROM user_comparison_stats");
+        jdbcTemplate.update(
+                "UPDATE users SET total_beat_pt = 0, total_kenban_pt = 0, total_sara_pt = 0, " +
+                "       total_average_rank = NULL, total_average_rank_played = NULL, " +
+                "       last_uploaded_at = NULL, ranking_includes_infinitas = false");
+
+        log.warn("[世代切替] スコア初期化完了: scores {} 行 / user_song_ranks {} 行 / user_comparison_stats {} 行を削除し、" +
+                        "{} 人へリセット行を追加した",
+                result.get("scoreRows"), result.get("userSongRankRows"),
+                result.get("userComparisonStatRows"), result.get("resetLogRows"));
+        return result;
+    }
+
+    /**
+     * 【メソッドの役割】 楽曲単位の集計キャッシュを作り直す。
+     *
+     * {@link #resetCurrentScores} は {@code scores} を空にするが、曲別ランキング・平均スコアレート・
+     * アリーナ平均はメモリ上のキャッシュを返すため、作り直さないと消えたはずのスコアが表示され続ける。
+     *
+     * <b>トランザクションの外から呼ぶこと。</b> キャッシュは DB を読み直して自分を組み立てるので、
+     * 初期化がコミットされる前に呼ぶと古い内容で温め直してしまう。
+     */
+    public void refreshSongCaches() {
+        songRankingAggregateCache.refresh();
+        songAvgScoreRatesCache.refresh();
+        songArenaAveragesCache.refresh();
+        log.info("[世代切替] 楽曲集計キャッシュを作り直した（曲別ランキング / 平均スコアレート / アリーナ平均）");
+    }
+
+    /**
      * 【メソッドの役割】 現状を数値で返す。管理画面と dry-run ログの共通データ源。
      *
      * @param version 対象の作品バージョン
-     * @return スナップショット件数・過去作スコア件数・現行スコア件数など
+     * @return スナップショット件数・過去作スコア件数・現行スコア件数・派生データの残量など
      */
     public Map<String, Object> describe(int version) {
         Long snapshots = snapshotRepository.countByVersion(version);
@@ -203,13 +342,22 @@ public class VersionTransitionService {
         Long scores = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM scores", Long.class);
         Long users = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM (SELECT DISTINCT user_id FROM score_history_logs) t", Long.class);
-        return Map.of(
-                "version", version,
-                "snapshotRows", snapshots == null ? 0 : snapshots,
-                "pastScoreRows", pastScores == null ? 0 : pastScores,
-                "currentScoreRows", scores == null ? 0 : scores,
-                "usersWithHistory", users == null ? 0 : users,
-                "hasDraftDifficultyTable", gameDataService.hasDraftDifficultyTable()
-        );
+        // 初期化（手順 4）が効いたかを管理画面から確かめられるよう、派生データの残量も返す。
+        Long songRanks = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user_song_ranks", Long.class);
+        Long comparisonStats = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user_comparison_stats", Long.class);
+        Long resetLogs = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM score_history_logs WHERE tag = ?", Long.class, RESET_LOG_TAG);
+
+        Map<String, Object> counts = new LinkedHashMap<>();
+        counts.put("version", version);
+        counts.put("snapshotRows", snapshots == null ? 0L : snapshots);
+        counts.put("pastScoreRows", pastScores == null ? 0L : pastScores);
+        counts.put("currentScoreRows", scores == null ? 0L : scores);
+        counts.put("usersWithHistory", users == null ? 0L : users);
+        counts.put("userSongRankRows", songRanks == null ? 0L : songRanks);
+        counts.put("userComparisonStatRows", comparisonStats == null ? 0L : comparisonStats);
+        counts.put("resetLogRows", resetLogs == null ? 0L : resetLogs);
+        counts.put("hasDraftDifficultyTable", gameDataService.hasDraftDifficultyTable());
+        return counts;
     }
 }

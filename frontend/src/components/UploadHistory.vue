@@ -24,6 +24,7 @@ import UploadResultModal from './UploadResultModal.vue';
 import RankIcon from './RankIcon.vue';
 import type { UploadDiffResult } from '../types/UploadDiff';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { usePastTiers } from '../composables/usePastTiers';
 
 const { user, isLoggedIn, authHeaders } = useAuth();
 const { showRateTier } = useRateTierVisibility();
@@ -286,9 +287,15 @@ const formatDate = (dateStr: string) => {
   });
 };
 
+// ティアアイコンの外枠（前作の到達点）に使う前作ティア。ここは常に自分の履歴を表示する画面。
+const { pastTierOf, ensureLoaded: ensurePastTiers } = usePastTiers();
+/** ログイン中ユーザーの前作ティア。記録が無ければ null で、その場合アイコンに外枠は付かない。 */
+const pastTier = computed(() => pastTierOf(user.value?.id));
+
 // マウント時に初回取得。
 onMounted(() => {
   fetchHistory();
+  ensurePastTiers();
 });
 </script>
 
@@ -356,6 +363,8 @@ onMounted(() => {
                   size="md"
                   class="shrink-0 drop-shadow-sm"
                   :is-supporter="user?.isSupporter && user?.showSupporterBorder"
+                  :past-rank-name="pastTier?.name"
+                  :past-tier="pastTier?.tier"
                 />
                 <RankIcon
                   v-if="showRateTier"
@@ -364,6 +373,8 @@ onMounted(() => {
                   size="md"
                   class="shrink-0 drop-shadow-sm"
                   :is-supporter="user?.isSupporter && user?.showSupporterBorder"
+                  :past-rank-name="pastTier?.name"
+                  :past-tier="pastTier?.tier"
                 />
               </div>
             </td>

@@ -15,6 +15,7 @@ import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { getFolderRankInfoByRate } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
+import { usePastTiers } from '../composables/usePastTiers';
 
 const props = defineProps<{
   rank: string;
@@ -92,7 +93,13 @@ async function fetchRanking() {
   }
 }
 
-onMounted(fetchRanking);
+// ティアアイコンの外枠（前作の到達点）に使う前作ティア。
+const { pastTierOf, ensureLoaded: ensurePastTiers } = usePastTiers();
+
+onMounted(() => {
+  fetchRanking();
+  ensurePastTiers();
+});
 watch(() => props.rank, () => {
   page.value = 1;
   fetchRanking();
@@ -229,6 +236,8 @@ function goToMyRank() {
                       size="sm"
                       disable-party
                       :is-supporter="entry.isSupporter"
+                      :past-rank-name="pastTierOf(entry.userId)?.name"
+                      :past-tier="pastTierOf(entry.userId)?.tier"
                       :class="entry.playedCount < props.totalCount ? 'opacity-30' : ''"
                     />
                   </div>

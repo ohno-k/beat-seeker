@@ -18,6 +18,7 @@ import DashboardView from '../views/DashboardView.vue'
 
 const ScoresView = () => import('../views/ScoresView.vue')
 const RankingView = () => import('../views/RankingView.vue')
+const PastRankingView = () => import('../views/PastRankingView.vue')
 const HistoryView = () => import('../views/HistoryView.vue')
 const ProfileView = () => import('../views/ProfileView.vue')
 const FriendsView = () => import('../views/FriendsView.vue')
@@ -58,6 +59,8 @@ const router = createRouter({
     { path: '/scores', name: 'scores', component: ScoresView },
     // ランキング
     { path: '/ranking', name: 'ranking', component: RankingView },
+    // 過去作ランキング（作品ごとに保存した最終 PT のアーカイブ）
+    { path: '/past-ranking', name: 'past-ranking', component: PastRankingView },
     // タイムライン (自分 + フレンドのアップロード活動)。
     // 実体は DashboardView を流用し、App.vue 側で activeTab='timeline' を表示する設計。
     { path: '/timeline', name: 'timeline', component: DashboardView },

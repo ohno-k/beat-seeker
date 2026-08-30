@@ -51,8 +51,9 @@ public class VersionTransitionAdminController {
      *
      * 返す内容:
      *  - counts … スナップショット件数 / 過去作スコア件数 / 現行スコア件数 / 履歴を持つユーザー数 /
+     *             派生データ（譜面順位・比較集計）の残量 / 世代リセット行の数 /
      *             未適用の難易度表 draft の有無
-     *  - runs   … 各手順（snapshot / copy-scores / apply-difficulty）の実行記録
+     *  - runs   … 各手順（snapshot / copy-scores / apply-difficulty / reset-scores）の実行記録
      *
      * @param auth    管理者認証
      * @param version 対象の作品バージョン（既定 33）

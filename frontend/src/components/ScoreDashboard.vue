@@ -51,7 +51,7 @@
         </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Beat-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
         <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
+          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" :past-rank-name="pastTier?.name" :past-tier="pastTier?.tier" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rankInfo.color">
             {{ rankInfo.name }} {{ rankInfo.tier || '' }}
           </h3>
@@ -98,7 +98,7 @@
         </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Rate-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
         <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
+          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" :past-rank-name="pastTier?.name" :past-tier="pastTier?.tier" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rateTierRankInfo.color">
             {{ rateTierRankInfo.name }} {{ rateTierRankInfo.tier || '' }}
           </h3>
@@ -253,6 +253,7 @@ import ActivityFeed from './ActivityFeed.vue';
 import { useAuth } from '../composables/useAuth';
 import { flattenScores } from '../utils/scoreData';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { usePastTiers } from '../composables/usePastTiers';
 
 const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
@@ -409,6 +410,18 @@ onMounted(() => {
   if (!canUseAllTime.value) return;
   fetchPastSummary().catch(() => { /* 握り潰し: トグルが出ないだけ */ });
 });
+
+// ティアアイコンの外枠（前作の到達点）に使う前作ティア。
+const { pastTierOfIidxId, ensureLoaded: ensurePastTiers } = usePastTiers();
+onMounted(() => { ensurePastTiers(); });
+
+/**
+ * 【computed の役割】 このダッシュボードが映している人の前作ティア。
+ *
+ * 他ユーザーを閲覧中はその人の、自分の画面なら自分の記録を引く。前作の記録が無ければ null で、
+ * その場合アイコンに外枠は付かない。
+ */
+const pastTier = computed(() => pastTierOfIidxId(props.viewingIidxId || user.value?.iidxId));
 
 /** 【computed の役割】 階層化スコアをフラット配列に変換（曲 × 難易度 1 レコード）。 */
 const allFlattenedScores = computed(() => flattenScores(props.scores));

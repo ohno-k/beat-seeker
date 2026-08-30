@@ -38,6 +38,7 @@ import UploadHistory from './components/UploadHistory.vue';
 import Changelog from './components/Changelog.vue';
 import UploadResultModal from './components/UploadResultModal.vue';
 import RankingList from './components/RankingList.vue';
+import PastRanking from './components/PastRanking.vue';
 import AdminUserListModal from './components/AdminUserListModal.vue';
 import SongRankingList from './components/SongRankingList.vue';
 import Sidebar from './components/Sidebar.vue';
@@ -351,7 +352,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'past-version-scores'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'past-ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'past-version-scores'>('dashboard')
 
 /**
  * 作品別スコア一覧（activeTab = 'past-version-scores'）で表示中の作品バージョン番号。
@@ -732,6 +733,7 @@ onMounted(() => {
     '/privacy-policy': 'privacy-policy',
     '/contact': 'contact',
     '/ranking': 'ranking',
+    '/past-ranking': 'past-ranking',
     '/changelog': 'changelog',
     '/difficulty-table': 'diff-table',
     '/league': 'league',
@@ -2233,6 +2235,12 @@ const handleUnifiedClose = async () => {
             @view-top-ranker="handleViewTopRanker"
             @view-arena-top-ranker="handleViewArenaTopRanker"
           />
+        </template>
+
+        <!-- 過去作ランキング: 作品ごとに保存した最終 PT のアーカイブ。
+             現行作の集計とは独立していて、他ユーザーへの導線も持たない読み取り専用ページ。 -->
+        <template v-else-if="activeTab === 'past-ranking'">
+          <PastRanking class="w-full max-w-5xl mx-auto animate-fade-in" />
         </template>
 
         <!-- 管理者専用: 人気曲ランキング（BEAT-PT TOP100 集計） -->

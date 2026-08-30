@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -46,12 +47,19 @@ import java.util.Optional;
  *       スナップショット対象がこの人数に満たなければ中断する（取り違え・空撃ち防止）。
  *   app.version-transition.apply-difficulty  APP_VERSION_TRANSITION_APPLY_DIFFICULTY
  *       既定 false。難易度表 draft の自動適用は明示的に有効化したときだけ行う。
+ *   app.version-transition.reset-scores APP_VERSION_TRANSITION_RESET_SCORES
+ *       既定 false。スコアの初期化（唯一の破壊的手順）は明示的に有効化したときだけ行う。
  * </pre>
  *
+ * ■ スコア初期化の扱い
+ * 手順 4（{@code scores} の削除と派生データのリセット）は取り返しがつかないため、
+ * <b>稼働日を設定しただけでは走らない</b>。{@code reset-scores} を true にして初めて対象になり、
+ * さらに前作の退避（スナップショットと過去作スコアの複製）が DB に無ければ
+ * {@link VersionTransitionService#resetCurrentScores} 自身が例外で止める。二重の歯止めにしてある。
+ *
  * ■ 自動化しない手順
- * スコアの初期化（{@code scores} の削除と派生データのリセット）は<b>行わない</b>。
- * 取り返しがつかず波及先も広いため、手順 3 まで終えた時点で「残りは手作業」とログに残して止まる。
- * 詳細は {@link VersionTransitionService} のクラスコメントを参照。
+ * フロントエンドの {@code CURRENT_VERSION} はビルド時定数なので、タイマーからは変えられない
+ * （再デプロイが必要）。beta 表記の削除も同様にデプロイ側の作業になる。
  */
 @Component
 @ConditionalOnProperty(name = "app.version-transition.launch-at")
@@ -70,6 +78,7 @@ public class VersionTransitionScheduler {
     private final int toVersion;
     private final int minUsers;
     private final boolean applyDifficulty;
+    private final boolean resetScores;
 
     /** 「無効です」というログを起動後 1 回だけ出すためのフラグ。毎分ログを汚さないため。 */
     private boolean disabledLogged = false;
@@ -84,7 +93,8 @@ public class VersionTransitionScheduler {
             @Value("${app.version-transition.from-version:33}") int fromVersion,
             @Value("${app.version-transition.to-version:34}") int toVersion,
             @Value("${app.version-transition.min-users:100}") int minUsers,
-            @Value("${app.version-transition.apply-difficulty:false}") boolean applyDifficulty) {
+            @Value("${app.version-transition.apply-difficulty:false}") boolean applyDifficulty,
+            @Value("${app.version-transition.reset-scores:false}") boolean resetScores) {
         this.transitionService = transitionService;
         this.taskRunRepository = taskRunRepository;
         this.dryRun = dryRun;
@@ -92,6 +102,7 @@ public class VersionTransitionScheduler {
         this.toVersion = toVersion;
         this.minUsers = minUsers;
         this.applyDifficulty = applyDifficulty;
+        this.resetScores = resetScores;
 
         LocalDateTime parsed = null;
         if (launchAtRaw != null && !launchAtRaw.isBlank()) {
@@ -104,8 +115,8 @@ public class VersionTransitionScheduler {
         }
         this.launchAt = parsed;
         if (parsed != null) {
-            log.info("[世代切替] 有効: {} JST に {}→{} の切り替えを実行予定（dryRun={}, 難易度表の自動適用={}）",
-                    parsed, fromVersion, toVersion, dryRun, applyDifficulty);
+            log.info("[世代切替] 有効: {} JST に {}→{} の切り替えを実行予定（dryRun={}, 難易度表の自動適用={}, スコア初期化={}）",
+                    parsed, fromVersion, toVersion, dryRun, applyDifficulty, resetScores);
         }
     }
 
@@ -152,10 +163,27 @@ public class VersionTransitionScheduler {
             if (!applied) return;
         }
 
+        // 手順 4: スコアの初期化。唯一の破壊的手順なので、明示的に有効化したときだけ実行する。
+        // 前段（手順 1・2）が済んでいなければ resetCurrentScores 自身が例外を投げて止まる。
+        if (resetScores) {
+            boolean reset = runOnce("reset-scores", () -> {
+                Map<String, Object> counts = transitionService.resetCurrentScores(fromVersion, dryRun);
+                // キャッシュの温め直しはトランザクション確定後でなければ意味がないため、
+                // resetCurrentScores から戻ってきたここで呼ぶ（dry-run 時は DB が変わらないので不要）。
+                if (!dryRun) {
+                    transitionService.refreshSongCaches();
+                }
+                return "scores " + counts.get("scoreRows") + " 行 / 譜面順位 " + counts.get("userSongRankRows") +
+                        " 行 / 比較集計 " + counts.get("userComparisonStatRows") + " 行 / リセット行 " +
+                        counts.get("resetLogRows") + " 人";
+            });
+            if (!reset) return;
+        }
+
         if (!completionLogged) {
             log.warn("[世代切替] 自動実行できる手順は完了。残りは手作業: " +
-                    "(a) スコアの初期化（scores の削除と users.total_beat_pt 等のリセット）" +
-                    "(b) フロントエンドの CURRENT_VERSION を {} へ更新して再デプロイ (c) beta 表記の削除",
+                    (resetScores ? "" : "スコアの初期化（reset-scores が無効のため未実行） / ") +
+                    "フロントエンドの CURRENT_VERSION を {} へ更新して再デプロイ / beta 表記の削除",
                     toVersion);
             completionLogged = true;
         }

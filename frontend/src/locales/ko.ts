@@ -28,6 +28,7 @@ export const ko = {
   'nav.history': '성장 기록',
   'nav.arena': 'ARENA 모드',
   'nav.changelog': '업데이트 내역',
+  'nav.pastRanking': '전작 랭킹',
   'nav.about': '이 사이트에 대해',
   'nav.manual': '사용 방법 가이드',
   'nav.terms': '이용 약관',
@@ -561,6 +562,18 @@ export const ko = {
   'ranking.noRateDisplay': '표시할 데이터가 없습니다.\n점수를 업로드하면 RATE-TIER가 집계됩니다.',
   'ranking.findMyRank': '내 순위 확인',
 
+  // 전작 랭킹 (작품마다 쌓이는 PT 아카이브)
+  'pastRanking.title': '전작 랭킹',
+  'pastRanking.desc': '신작 가동으로 포인트가 초기화되기 직전에 저장한, 작품별 최종 순위입니다. 작품을 골라 비교할 수 있습니다.',
+  'pastRanking.loading': '불러오는 중...',
+  'pastRanking.error': '불러오지 못했습니다',
+  'pastRanking.empty': '아직 저장된 전작 랭킹이 없습니다. 신작 가동 시 초기화 직전에 저장됩니다.',
+  'pastRanking.players': '{count}명',
+  'pastRanking.capturedAt': '{date} 기준',
+  'pastRanking.rank': '순위',
+  'pastRanking.player': '플레이어',
+  'pastRanking.tier': 'TIER',
+
   // Profile
   'profile.title': '프로필',
   'profile.edit': '편집',
@@ -591,8 +604,8 @@ export const ko = {
   'profile.showArcadeScoresHint': '끄면 e-amusement CSV / 북마클릿으로 취득한 스코어가 숨겨집니다',
   'profile.showInfinitasScores': 'INFINITAS 스코어 표시',
   'profile.showInfinitasScoresHint': '끄면 INFINITAS 화면 모니터로 취득한 스코어가 숨겨집니다',
-  'profile.showSupporterBorder': '서포터 골드 테두리 표시',
-  'profile.showSupporterBorderHint': '끄면 티어 랭크 아이콘의 골드 테두리가 숨겨집니다',
+  'profile.showSupporterBorder': '서포터 광택 표시',
+  'profile.showSupporterBorderHint': '끄면 티어 아이콘을 비스듬히 가로지르는 광택이 숨겨집니다. 바깥 테두리는 전작 티어를 나타내며 이 설정의 영향을 받지 않습니다',
   'profile.saveChanges': '변경 사항 저장',
   'profile.saving': '저장 중...',
   'profile.updateSuccess': '프로필을 업데이트했습니다!',

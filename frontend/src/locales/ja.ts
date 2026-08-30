@@ -30,6 +30,7 @@ export const ja = {
   'nav.history': '成長記録',
   'nav.arena': 'ARENAモード',
   'nav.changelog': '更新履歴',
+  'nav.pastRanking': '過去作ランキング',
   'nav.about': 'このサイトについて',
   'nav.manual': '使い方ガイド',
   'nav.terms': '利用規約',
@@ -566,6 +567,18 @@ export const ja = {
   'ranking.overWeekAgo': '一週間以上前',
   'ranking.findMyRank': '自分の順位を確認',
 
+  // 過去作ランキング（作品ごとに積み上がる PT アーカイブ）
+  'pastRanking.title': '過去作ランキング',
+  'pastRanking.desc': '新作稼働でポイントがリセットされる直前に保存した、作品ごとの最終順位です。作品を選んで見比べられます。',
+  'pastRanking.loading': '読み込み中...',
+  'pastRanking.error': '読み込みに失敗しました',
+  'pastRanking.empty': 'まだ保存された過去作のランキングはありません。新作稼働時のリセット前に保存されます。',
+  'pastRanking.players': '{count} 人',
+  'pastRanking.capturedAt': '{date} 時点',
+  'pastRanking.rank': '順位',
+  'pastRanking.player': 'プレイヤー',
+  'pastRanking.tier': 'TIER',
+
   // Profile
   'profile.title': 'プロフィール',
   'profile.edit': '編集',
@@ -596,8 +609,8 @@ export const ja = {
   'profile.showArcadeScoresHint': 'オフにすると e-amusement の CSV / ブックマークレットで取り込んだスコアが非表示になります',
   'profile.showInfinitasScores': 'INFINITAS スコアを表示する',
   'profile.showInfinitasScoresHint': 'オフにすると INFINITAS 画面取得で取り込んだスコアが非表示になります',
-  'profile.showSupporterBorder': 'サポーターゴールド枠を表示',
-  'profile.showSupporterBorderHint': 'オフにするとティアランクのゴールド枠が非表示になります',
+  'profile.showSupporterBorder': 'サポーターの光沢を表示',
+  'profile.showSupporterBorderHint': 'オフにするとティアアイコンの光沢（斜めに走る反射）が非表示になります。外枠は前作のティアを示すもので、この設定では変わりません',
   'profile.saveChanges': '変更を保存する',
   'profile.saving': '保存中...',
   'profile.updateSuccess': 'プロフィールを更新しました！',

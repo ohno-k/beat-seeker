@@ -99,25 +99,32 @@
           <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
         </filter>
 
-        <!-- Supporter Gold Border Gradient -->
-        <linearGradient :id="`supporter-grad-${uid}`" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
-          <stop offset="0%" stop-color="#fde68a" />
-          <stop offset="25%" stop-color="#fbbf24" />
-          <stop offset="50%" stop-color="#f59e0b" />
-          <stop offset="75%" stop-color="#fbbf24" />
-          <stop offset="100%" stop-color="#fde68a" />
+        <!-- 外枠グラデーション: 前作ティアの配色。サポーターかどうかとは無関係 -->
+        <linearGradient v-if="hasPastBorder" :id="`past-grad-${uid}`" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
+          <stop offset="0%" :stop-color="pastColors.highlight" />
+          <stop offset="25%" :stop-color="pastColors.stroke" />
+          <stop offset="50%" :stop-color="pastColors.primary" />
+          <stop offset="75%" :stop-color="pastColors.stroke" />
+          <stop offset="100%" :stop-color="pastColors.highlight" />
         </linearGradient>
 
-        <!-- Supporter Static Outer Glow -->
-        <filter :id="`supporter-glow-${uid}`" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="3.5" result="blur" />
-          <feFlood flood-color="#f59e0b" flood-opacity="0.5" result="color" />
+        <!-- 外枠の発光: サブティアが上がるほどぼかしを広く・濃くする -->
+        <filter v-if="hasPastBorder" :id="`past-glow-${uid}`" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur in="SourceAlpha" :stdDeviation="pastGlowBlur" result="blur" />
+          <feFlood :flood-color="pastColors.primary" :flood-opacity="pastGlowOpacity" result="color" />
           <feComposite in="color" in2="blur" operator="in" result="shadow" />
           <feMerge>
             <feMergeNode in="shadow" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+
+        <!-- サポーターの光沢: アイコン表面を斜めに横切る反射の帯 -->
+        <linearGradient v-if="isSupporter" :id="`gloss-grad-${uid}`" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="white" stop-opacity="0" />
+          <stop offset="50%" stop-color="white" stop-opacity="0.55" />
+          <stop offset="100%" stop-color="white" stop-opacity="0" />
+        </linearGradient>
 
         <!-- Drop shadow for tier segments -->
         <filter :id="`segment-shadow-${uid}`" x="-20%" y="-20%" width="140%" height="140%">
@@ -144,26 +151,26 @@
         class="animate-pulse"
       />
 
-      <!-- Supporter Gold Outer Border -->
-      <g v-if="isSupporter">
-        <!-- Soft gold glow behind border -->
+      <!-- 外枠: 前作の到達点。前作の BEAT-TIER があれば誰にでも付く（サポーターかどうかは無関係） -->
+      <g v-if="hasPastBorder">
+        <!-- 外周のにじみ。サブティアが高いほど強く光る -->
         <path
           v-if="!lite"
           :d="shapePath"
           fill="none"
-          stroke="#fbbf24"
+          :stroke="pastColors.primary"
           stroke-width="10"
           stroke-linejoin="round"
-          stroke-opacity="0.35"
-          :filter="`url(#supporter-glow-${uid})`"
+          :stroke-opacity="pastRingOpacity"
+          :filter="`url(#past-glow-${uid})`"
           transform="scale(1.08)"
           style="transform-origin: 50% 50%"
         />
-        <!-- Gold border ring -->
+        <!-- 外枠のリング本体 -->
         <path
           :d="shapePath"
           fill="none"
-          :stroke="`url(#supporter-grad-${uid})`"
+          :stroke="`url(#past-grad-${uid})`"
           stroke-width="5"
           stroke-linejoin="round"
           transform="scale(1.07)"
@@ -205,6 +212,16 @@
           :d="shapePath" 
           :fill="`url(#bottom-glow-${uid})`"
         />
+
+        <!-- サポーターの光沢。アイコン本体の表面を斜めに横切る反射で、
+             ティアや前作の記録に関係なくサポーターであれば全員に付く -->
+        <g v-if="isSupporter" class="gloss-anim">
+          <rect
+            x="-40" y="-30" width="26" height="160"
+            :fill="`url(#gloss-grad-${uid})`"
+            transform="rotate(18 50 50)"
+          />
+        </g>
       </g>
       
       <!-- Max Tier (5) Diamond Emblem -->
@@ -251,15 +268,27 @@
  * 機能:
  *  - ランク名ごとに形状（盾/円/三角...）とメタリック配色を決定
  *  - tier（1〜5）で内部セグメント数やダイヤ紋を変える
- *  - Supporter 判定で金縁を追加
+ *  - 前作ティアがあれば、その色で光る外枠を追加
+ *  - Supporter 判定でアイコン表面に光沢（斜めに走る反射）を追加
  *  - エイプリルフール期間中はパステル配色 + 手足アニメ + 画面上を徘徊する演出
+ *
+ * ■ 外枠と光沢は別のものを示す（新作稼働に合わせた仕様変更）
+ * 以前は外枠がサポーター限定の金一色だったが、次の 2 つに分けた。
+ *  - <b>外枠 ＝ 前作の到達点</b>。前作の BEAT-TIER があれば誰にでも付き、サポーターかどうかは関係ない。
+ *    サブティアが上がるほど強く光る。前作の記録が無い人（新規の方）には付かない。
+ *  - <b>光沢 ＝ サポーターであること</b>。ティアや前作の記録に関係なく、サポーターであれば全員に付く。
+ * したがって「外枠だけ」「光沢だけ」「両方」「どちらも無し」の 4 通りがあり得る。
+ * 新作初日は BEAT-PT がリセットされるためアイコン本体は全員 Beginner から始まるが、
+ * 外枠には前作の到達点が残る。
  *
  * props:
  *  - rankName: 'Beginner'〜'Legend' の称号名（必須）
  *  - tier: ランク内の更なる段階（1〜5、未指定時はセグメント非表示）
  *  - size: 'xs' | 'sm' | 'md' | 'lg'（未指定時はデフォルトの中サイズ）
  *  - disableParty: true にするとエイプリルフール演出を無効化
- *  - isSupporter: サポーター会員なら金縁付与
+ *  - isSupporter: サポーター会員なら光沢を付与
+ *  - pastRankName / pastTier: 前作のティアとサブティア（外枠の色と光量）。
+ *    値は {@link ../composables/usePastTiers} から供給する
  */
 import { computed } from 'vue';
 import { useAprilFools } from '../composables/useAprilFools';
@@ -270,6 +299,12 @@ const props = defineProps<{
   size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg';
   disableParty?: boolean;
   isSupporter?: boolean;
+  /** 前作（アーカイブ済みで最も新しい作品）のティア名。指定すると外枠がその色で光る。
+   *  未指定＝前作の記録が無い（新規の方）なので外枠は付かない。 */
+  pastRankName?: string;
+  /** 前作のサブティア（1〜5）。大きいほど外枠が強く光る。
+   *  Beginner / Legend はサブティアを持たないので undefined になり、それぞれ最弱・最強で固定される。 */
+  pastTier?: number;
   /** 軽量モード。重い SVG フィルタ（ガウシアンぼかし/ドロップシャドウ）を全て省く。
    *  ランキング一覧など多数同時描画する箇所で指定し、モバイルのメモリ超過クラッシュを防ぐ。 */
   lite?: boolean;
@@ -322,9 +357,46 @@ const sizeClass = computed(() => {
 /** Legend ランクは特別なオーラ/シマーを出すため、判定用の computed を用意。 */
 const isLegend = computed(() => props.rankName === 'Legend');
 
-/** 【通常時の配色パレット】 ランク名→メタリック/宝石調の primary/highlight/secondary/stroke を返す。 */
-const colors = computed(() => {
-  const name = props.rankName.toLowerCase();
+/** 外枠を描くか。前作のティア名が渡されているかどうかだけで決まる（サポーター判定とは無関係）。 */
+const hasPastBorder = computed(() => !!props.pastRankName);
+
+/** 外枠の配色。アイコン本体と同じ表から前作ティアの色を引く。 */
+const pastColors = computed(() => rankPalette(props.pastRankName ?? ''));
+
+/**
+ * 外枠の発光の強さ（1〜5）。
+ *
+ * サブティアがあるのは Novice I 〜 Mythic V の 10 ティアだけで、最下位の Beginner と
+ * 最上位の Legend はサブティアを持たない。そのため props.pastTier が undefined になるが、
+ * 「サブティア不明だから最弱」では Legend が Mythic V より暗くなってしまう。
+ * ランクの位置づけに合わせて Beginner は最弱・Legend は最強に固定する。
+ */
+const pastGlowStrength = computed(() => {
+  if (props.pastRankName === 'Legend') return 5;
+  if (props.pastRankName === 'Beginner') return 1;
+  const tier = props.pastTier ?? 1;
+  return Math.min(5, Math.max(1, tier));
+});
+
+/** 外枠のにじみ幅。強さ 1→2.7 ... 強さ 5→5.5 と広がる。 */
+const pastGlowBlur = computed(() => 2.0 + pastGlowStrength.value * 0.7);
+
+/** 外枠のにじみの濃さ。強さ 1→0.40 ... 強さ 5→0.80。 */
+const pastGlowOpacity = computed(() => 0.30 + pastGlowStrength.value * 0.10);
+
+/** 外周リングの不透明度。にじみと合わせて段階的に濃くする。 */
+const pastRingOpacity = computed(() => 0.20 + pastGlowStrength.value * 0.05);
+
+/**
+ * 【関数の役割】 ランク名からメタリック/宝石調の配色（primary/highlight/secondary/stroke）を引く。
+ *
+ * アイコン本体だけでなく<b>外枠（前作ティアの発光）にも同じ表を使う</b>ため、
+ * computed ではなくモジュールスコープの関数にしてある。同じティアなら本体でも外枠でも同じ色になる。
+ *
+ * @param rankName ランク名（大小混在を許容）
+ */
+function rankPalette(rankName: string) {
+  const name = rankName.toLowerCase();
   // Premium metallic/jewel palettes
   if (name === 'beginner') return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
   if (name === 'novice') return { primary: '#5c7c99', highlight: '#e2e8f0', secondary: '#2e455e', stroke: '#94a3b8' };
@@ -339,7 +411,10 @@ const colors = computed(() => {
   if (name === 'mythic') return { primary: '#9333ea', highlight: '#fae8ff', secondary: '#3b0764', stroke: '#d8b4fe' };
   if (name === 'legend') return { primary: '#fbbf24', highlight: '#ffffff', secondary: '#92400e', stroke: '#fef08a' }; // Radiant Gold
   return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
-});
+}
+
+/** 【通常時の配色パレット】 アイコン本体の配色。 */
+const colors = computed(() => rankPalette(props.rankName));
 
 // 【エイプリルフール時の配色】 通常時とは別にパステルレインボー調のパレットを用意。
 const aprilColors = computed(() => {
@@ -448,6 +523,24 @@ const getSegmentPath = (n: number) => {
 </script>
 
 <style scoped>
+/* ── サポーターの光沢 ──
+   アイコン本体の表面を斜めに横切る反射。クリップパスの内側に置いてあるので形状からはみ出さない。
+   x 方向の移動だけで表現しているため、フィルタを使う演出と違って一覧に多数並べても負荷にならない。 */
+@keyframes rank-gloss-sweep {
+  0%        { transform: translateX(-20px); }
+  55%, 100% { transform: translateX(150px); }
+}
+.gloss-anim {
+  animation: rank-gloss-sweep 3.4s ease-in-out infinite;
+}
+/* 視差効果を減らす設定の環境では、動かさずに反射だけを見せる。 */
+@media (prefers-reduced-motion: reduce) {
+  .gloss-anim {
+    animation: none;
+    transform: translateX(52px);
+  }
+}
+
 @keyframes shimmer {
   0% { transform: translateX(-100%) skewX(-20deg); }
   50% { opacity: 0.5; }
