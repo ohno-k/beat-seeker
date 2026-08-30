@@ -42,6 +42,13 @@ object Eagate {
         return path.startsWith("/gate/p/login") || path.startsWith("/gate/p/common/login")
     }
 
-    private fun hostOf(url: String?): String? =
-        try { Uri.parse(url ?: return null).host } catch (e: Exception) { null }
+    /** 【関数の役割】 URL からホスト名を取り出す。null や不正な URL は null を返す。 */
+    private fun hostOf(url: String?): String? {
+        if (url == null) return null
+        return try {
+            Uri.parse(url).host
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
