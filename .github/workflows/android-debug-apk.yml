@@ -1,0 +1,49 @@
+# Android デバッグ APK をビルドして成果物としてアップロードするワークフロー。
+#
+# 目的: 手元に Android SDK が無くても実機で試せるようにする。
+# 実行後、Actions の該当ランの「Artifacts」から APK をダウンロードして端末に入れる。
+#
+# 手動実行（workflow_dispatch）では、アプリが参照する beat-seeker の URL を指定できる。
+# 未指定なら本番（https://beat-seeker.com）を見る。
+name: Android debug APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: 'アプリが表示する beat-seeker の URL（収集スクリプトもここから取得する）'
+        required: false
+        default: 'https://beat-seeker.com'
+  push:
+    branches:
+      - 'claude/csv-one-tap-import-**'
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-debug-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # GitHub ホストランナーには Android SDK が入っているため、SDK の導入は不要。
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug -PappUrl="${{ inputs.app_url || 'https://beat-seeker.com' }}" --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: beat-seeker-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

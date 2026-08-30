@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  beat-seeker 本体を表示する WebView と、eagate 収集用の非表示 WebView を入れる器。
+  収集用 WebView は 1x1 で画面外相当のサイズにする（View 階層に付けないと
+  一部端末で JS タイマーが動かないことがあるため、GONE ではなく極小サイズで置く）。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <WebView
+        android:id="@+id/webMain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/hiddenContainer"
+        android:layout_width="1px"
+        android:layout_height="1px"
+        android:alpha="0" />
+</FrameLayout>

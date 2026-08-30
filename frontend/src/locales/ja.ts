@@ -890,6 +890,13 @@ export const ja = {
   'about.faqQ4': 'Q. スコアデータは安全ですか？',
   'about.faqA4': 'はい。運営者は取得したデータを個人の利益となるような利用は一切いたしません。詳しくは利用規約をご確認ください。',
 
+  // UnifiedImport（Android アプリ内でのみ表示される 1 タップ取り込み）
+  'import.nativeHint': 'アプリ版では、ボタンを押すだけでIIDX公式サイトからスコアとARENAデータを取得して登録できます。',
+  'import.nativeImport': '1タップで取り込む',
+  'import.nativeLoggingIn': 'IIDX公式サイトへログインしてください…',
+  'import.nativeNeedLogin': 'ログインがキャンセルされました。取り込みにはIIDX公式サイトへのログインが必要です。',
+  'import.nativeFail': '取り込みに失敗しました。通信状況を確認してもう一度お試しください。',
+
   // UnifiedImport
   'import.arenaHint': 'ブックマークレットを使用すると、ARENAモードでの戦績も記録できます。',
   'import.bookmarkletHelp': 'ブックマークレットの使い方',

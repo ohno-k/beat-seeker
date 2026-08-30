@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  debug ビルド専用の上書き。ローカルの Vite 開発サーバ（http://<PCのIP>:5173）を
+  `-PappUrl=` で指定して検証できるよう、平文 HTTP を許可する。
+  release ビルドには適用されないため、本番は HTTPS のみのまま。
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="true" />
+</manifest>
