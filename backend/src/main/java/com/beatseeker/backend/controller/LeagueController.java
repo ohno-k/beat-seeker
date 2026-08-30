@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  *  - GET  /api/league/standings  … 任意グループの順位表（観戦・過去週）
  *  - GET  /api/league/overview   … 進行中の週の階級/グループ構成
  *  - GET  /api/league/history    … 自分の過去週成績
+ *  - GET  /api/league/news       … 直近の締め済み週の昇降格ニュース（全ユーザー）
  */
 @RestController
 @RequestMapping("/api/league")
@@ -45,6 +46,12 @@ public class LeagueController {
     private final LeagueMemberRepository leagueMemberRepository;
     private final LeagueSongRepository leagueSongRepository;
     private final LeagueEntryRepository leagueEntryRepository;
+
+    /** 昇降格ニュースで既定でさかのぼる週数。 */
+    private static final int NEWS_DEFAULT_WEEKS = 4;
+
+    /** 昇降格ニュースでさかのぼれる週数の上限（1 リクエストが際限なく重くならないための上限）。 */
+    private static final int NEWS_MAX_WEEKS = 12;
 
     public LeagueController(UserRepository userRepository,
                             LeagueService leagueService,
@@ -295,6 +302,88 @@ public class LeagueController {
     }
 
     /**
+     * 【メソッドの役割】 直近の締め済み週で昇格・降格した人を、全ユーザー分まとめて返す（昇降格ニュース）。
+     *
+     * 自分の履歴（{@link #history}）が本人ぶんだけなのに対し、こちらは「先週このリーグで誰が上がって
+     * 誰が落ちたか」を全員ぶん並べる読み物。{@link LeagueMember#getMovement()} は週次締めでしか
+     * 書き込まれないので、締め済みの週だけが対象になる。
+     *
+     * 移動元は「ホーム DIVISION」（{@code homeTier}。チャレンジ/ディフェンスで他卓に着席していても
+     * 昇降格するのは常に自分のホーム）で、移動先は昇格なら -1・降格なら +1（範囲外へは出ない）。
+     * 並び順は週の新しい順 → 昇格が先 → 移動先 DIVISION の上位順 → 表示名順。
+     * 誰も動かなかった週と、DIVISION の端で丸められて実際には動いていない行は載せない。
+     *
+     * @param ladder ラダー種別
+     * @param weeks  さかのぼる週数（1..{@code NEWS_MAX_WEEKS}。既定 {@code NEWS_DEFAULT_WEEKS}）
+     * @return {@code {ladder, weeks:[{weekId, weekNo, startsAt, endsAt,
+     *         items:[{userId, displayName, totalBeatPt, movement, fromTier, toTier}]}]}}
+     */
+    @GetMapping("/news")
+    public ResponseEntity<?> news(@RequestParam("ladder") String ladder,
+                                  @RequestParam(value = "weeks", required = false) Integer weeks) {
+        if (!leagueService.isValidLadder(ladder)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ladder は score / bp のいずれかです"));
+        }
+        int limit = weeks != null ? Math.max(1, Math.min(NEWS_MAX_WEEKS, weeks)) : NEWS_DEFAULT_WEEKS;
+
+        // 締め済みの週を新しい順に limit 週だけ見る（昇降格は締め時にしか確定しないため）。
+        List<LeagueWeek> targetWeeks = leagueWeekRepository
+                .findByLadderTypeAndStatusOrderByStartsAtDesc(ladder, "closed").stream()
+                .limit(limit)
+                .toList();
+
+        List<Map<String, Object>> weekList = new ArrayList<>();
+        if (!targetWeeks.isEmpty()) {
+            // 週ごとに昇降格した人を束ねる（週の並びは targetWeeks のまま = 新しい順）。
+            Map<Long, List<LeagueMember>> byWeekId = new HashMap<>();
+            List<Long> weekIds = targetWeeks.stream().map(LeagueWeek::getId).toList();
+            for (LeagueMember m : leagueMemberRepository.findMovementsByWeekIds(weekIds)) {
+                byWeekId.computeIfAbsent(m.getWeek().getId(), k -> new ArrayList<>()).add(m);
+            }
+            for (LeagueWeek week : targetWeeks) {
+                // 移動先が移動元と同じ行（DIVISION の端で丸められた防御的なケース）は
+                // 「DIVISION 10 → DIVISION 10」と出るだけで意味が無いので落とす。
+                List<LeagueMember> movedMembers = byWeekId.getOrDefault(week.getId(), List.of()).stream()
+                        .filter(m -> newsToTier(m) != newsFromTier(m))
+                        .toList();
+                if (movedMembers.isEmpty()) continue;  // 誰も動かなかった週は載せない
+
+                List<LeagueMember> sorted = new ArrayList<>(movedMembers);
+                sorted.sort(Comparator
+                        // 昇格を先に（"promote" < "relegate" だが、意図を明示するため専用キーで並べる）
+                        .comparingInt((LeagueMember m) -> "promote".equals(m.getMovement()) ? 0 : 1)
+                        .thenComparingInt(m -> newsToTier(m))
+                        .thenComparing(m -> nameOf(m.getUser()), String.CASE_INSENSITIVE_ORDER));
+
+                List<Map<String, Object>> items = new ArrayList<>();
+                for (LeagueMember m : sorted) {
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("userId", m.getUser().getId());
+                    item.put("displayName", nameOf(m.getUser()));
+                    item.put("totalBeatPt", m.getUser().getTotalBeatPt());
+                    item.put("movement", m.getMovement());
+                    item.put("fromTier", newsFromTier(m));
+                    item.put("toTier", newsToTier(m));
+                    items.add(item);
+                }
+
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("weekId", week.getId());
+                row.put("weekNo", week.getWeekNo());
+                row.put("startsAt", week.getStartsAt());
+                row.put("endsAt", week.getEndsAt());
+                row.put("items", items);
+                weekList.add(row);
+            }
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("ladder", ladder);
+        result.put("weeks", weekList);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
      * 【メソッドの役割】 DIVISION 別のランキング（参加者を昇降格ポイントの降順に並べたもの）を返す。
      *
      * 進行中の週の順位表とは別物で、こちらは「その DIVISION の中で今どの位置に居るか」を
@@ -367,6 +456,29 @@ public class LeagueController {
     // ---------------------------------------------------------------------
     // 内部ヘルパー
     // ---------------------------------------------------------------------
+
+    /**
+     * 昇降格ニュースの移動元 DIVISION。昇降格するのは常にホーム DIVISION なので、
+     * {@code homeTier}（チャレンジ/ディフェンス時のみ卓の tier と異なる）を使う。
+     */
+    private int newsFromTier(LeagueMember member) {
+        return member.getHomeTier() != null ? member.getHomeTier() : member.getTier();
+    }
+
+    /**
+     * 昇降格ニュースの移動先 DIVISION。昇格は 1 つ上・降格は 1 つ下で、
+     * 週次締め（LeagueWeekLifecycleService）と同じく DIVISION の範囲内にクランプする。
+     */
+    private int newsToTier(LeagueMember member) {
+        int from = newsFromTier(member);
+        if ("promote".equals(member.getMovement())) {
+            return Math.max(LeagueDivision.LEGEND, from - 1);
+        }
+        if ("relegate".equals(member.getMovement())) {
+            return Math.min(LeagueDivision.LOWEST, from + 1);
+        }
+        return from;
+    }
 
     /** 表示名（未設定なら IIDX ID）。 */
     private String nameOf(User user) {

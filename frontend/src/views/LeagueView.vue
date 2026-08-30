@@ -8,6 +8,7 @@
  *    （昇格圏 = 緑 / 降格圏 = 赤 の帯表示。行の perSong で曲別の有効状況も見せる）
  *  - 他グループの順位表（観戦）
  *  - 自分の過去週成績（アコーディオン）
+ *  - 昇降格ニュース（全ユーザーの昇格/降格を直近の締め済み週から新しい順に）
  *  - 管理者セクション（useAdmin.isAdmin のときのみ表示。サーバ側でも管理者判定される）:
  *    draft 週の課題曲差し替え・再抽選、週次処理の手動実行
  */
@@ -27,6 +28,7 @@ import {
   type LeagueCurrent,
   type LeagueEntry,
   type LeagueHistoryRow,
+  type LeagueNewsWeek,
   type LeagueTierOverview,
   type LeagueAdminLadder,
   type LeagueAdminHistoryWeek,
@@ -67,6 +69,14 @@ const historyDetail = ref<{ songs: LeagueSongInfo[]; standings: LeagueStandingRo
 /** 展開中の週の読み込み状態・エラー。 */
 const historyDetailLoading = ref(false);
 const historyDetailError = ref('');
+/** 昇降格ニュース（全ユーザー分。直近の締め済み週から新しい順）。 */
+const news = ref<LeagueNewsWeek[]>([]);
+/** 昇降格ニュースの読み込み状態・エラー。 */
+const newsLoading = ref(false);
+const newsError = ref('');
+/** 昇降格ニュースの開閉（既定は開いた状態＝読み物として目に入るようにする）。 */
+const showNews = ref(true);
+
 /** ルール説明モーダルの開閉。 */
 const showInfo = ref(false);
 /** DIVISION 別ランキングモーダルの開閉。 */
@@ -231,6 +241,20 @@ const loadCurrent = async () => {
     history.value = await league.fetchHistory(ladder);
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
+  }
+};
+
+/** 昇降格ニュース（全ユーザー分）を読み込む。 */
+const loadNews = async () => {
+  newsLoading.value = true;
+  newsError.value = '';
+  try {
+    news.value = await league.fetchNews(ladder);
+  } catch (e) {
+    news.value = [];
+    newsError.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    newsLoading.value = false;
   }
 };
 
@@ -690,6 +714,7 @@ watch(isLoggedIn, (v) => {
   if (v) {
     loadMe();
     loadCurrent();
+    loadNews();
     loadAdmin();
   }
 });
@@ -699,6 +724,7 @@ onMounted(() => {
   if (isLoggedIn.value) {
     loadMe();
     loadCurrent();
+    loadNews();
     loadAdmin();
   }
 });
@@ -1052,6 +1078,59 @@ onUnmounted(() => {
               </template>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- 昇降格ニュース（全ユーザー。締め済みの週だけが対象なので、開催中の週はまだ出ない） -->
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
+        <button class="w-full flex items-center justify-between text-left" @click="showNews = !showNews">
+          <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ t('league.news.title') }}</h3>
+          <span class="text-slate-400">{{ showNews ? '▲' : '▼' }}</span>
+        </button>
+        <div v-if="showNews" class="mt-3">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">{{ t('league.news.desc') }}</p>
+          <p v-if="newsError" class="text-sm text-rose-500">{{ newsError }}</p>
+          <p v-else-if="newsLoading" class="text-sm text-slate-400 dark:text-slate-500">{{ t('common.loading') }}</p>
+          <p v-else-if="!news.length" class="text-sm text-slate-400 dark:text-slate-500">{{ t('league.news.empty') }}</p>
+          <div v-else class="space-y-4">
+            <div v-for="w in news" :key="w.weekId">
+              <div class="flex items-baseline gap-2 pb-1 mb-2 border-b border-slate-200 dark:border-slate-700">
+                <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ weekLabel(w.weekNo) }}</span>
+                <span class="text-xs text-slate-400 dark:text-slate-500">{{ shortDate(w.startsAt) }}〜{{ shortDate(w.endsAt) }}</span>
+                <span class="text-xs text-slate-400 dark:text-slate-500 ml-auto">{{ t('league.news.count', { n: w.items.length }) }}</span>
+              </div>
+              <ul class="space-y-1">
+                <li
+                  v-for="item in w.items"
+                  :key="`${w.weekId}-${item.userId}`"
+                  class="flex items-center gap-2 text-sm py-1 px-2 rounded"
+                  :class="[
+                    item.movement === 'promote'
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20'
+                      : 'bg-rose-50 dark:bg-rose-900/20',
+                    item.userId === user?.id ? 'font-semibold' : '',
+                  ]"
+                >
+                  <span
+                    class="text-xs px-2 py-0.5 rounded-full font-semibold shrink-0"
+                    :class="item.movement === 'promote'
+                      ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                      : 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'"
+                  >{{ t(`league.movement.${item.movement}`) }}</span>
+                  <RankIcon :rank-name="beatTier(item.totalBeatPt).name" :tier="beatTier(item.totalBeatPt).tier" size="2xs" lite disable-party />
+                  <span class="truncate text-slate-700 dark:text-slate-200">{{ item.displayName }}</span>
+                  <span v-if="item.userId === user?.id" class="text-[10px] text-indigo-500 dark:text-indigo-400 shrink-0">YOU</span>
+                  <span class="ml-auto text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0">
+                    {{ divisionName(item.fromTier) }}
+                    <span class="mx-0.5" :class="item.movement === 'promote'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'">→</span>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ divisionName(item.toTier) }}</span>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
