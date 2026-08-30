@@ -252,6 +252,30 @@ export interface LeagueRankingDivision {
   entries: LeagueRankingEntry[];
 }
 
+/** 昇降格ニュースの 1 件（誰がどの DIVISION からどこへ動いたか）。 */
+export interface LeagueNewsItem {
+  userId: number;
+  displayName: string;
+  /** 総合 BEAT-PT（ティアアイコン表示用）。 */
+  totalBeatPt: number | null;
+  movement: 'promote' | 'relegate';
+  /** 移動元 DIVISION（＝その週のホーム DIVISION）。 */
+  fromTier: number;
+  /** 移動先 DIVISION（昇格なら fromTier - 1、降格なら fromTier + 1）。 */
+  toTier: number;
+}
+
+/** 昇降格ニュースの 1 週分（GET /api/league/news）。誰も動かなかった週は含まれない。 */
+export interface LeagueNewsWeek {
+  weekId: number;
+  /** 開催回の通し番号（#1, #2, ...）。プレシーズンは null。 */
+  weekNo?: number | null;
+  startsAt: string;
+  endsAt: string;
+  /** 昇格が先、続いて降格。同じ movement 内は移動先 DIVISION の上位順。 */
+  items: LeagueNewsItem[];
+}
+
 /** 課題曲差し替えの選択肢（と、それが抽選基準で絞り込まれたものかどうか）。 */
 export interface LeagueSongPool {
   /**
@@ -425,6 +449,17 @@ export function useLeague() {
     const res = await fetch(`${API_BASE}/api/league/history?ladder=${ladder}`, { headers: authHeaders() });
     if (!res.ok) await raise(res, '履歴の取得に失敗しました');
     return (await res.json()) as LeagueHistoryRow[];
+  };
+
+  /**
+   * 昇降格ニュース（直近の締め済み週で昇格・降格した人を全ユーザー分）を取得する。
+   * 自分の履歴と違って全員ぶんで、誰も動かなかった週はそもそも返ってこない。
+   */
+  const fetchNews = async (ladder: LadderType, weeks?: number): Promise<LeagueNewsWeek[]> => {
+    const query = weeks != null ? `&weeks=${weeks}` : '';
+    const res = await fetch(`${API_BASE}/api/league/news?ladder=${ladder}${query}`, { headers: authHeaders() });
+    if (!res.ok) await raise(res, '昇降格ニュースの取得に失敗しました');
+    return ((await res.json()).weeks ?? []) as LeagueNewsWeek[];
   };
 
   // -------------------------------------------------------------------
@@ -631,6 +666,7 @@ export function useLeague() {
     fetchOverview,
     fetchRankings,
     fetchHistory,
+    fetchNews,
     fetchAdminOverview,
     fetchAdminHistory,
     fetchAdminStandings,
