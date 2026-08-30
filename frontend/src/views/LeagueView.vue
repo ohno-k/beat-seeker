@@ -76,6 +76,12 @@ const newsLoading = ref(false);
 const newsError = ref('');
 /** 昇降格ニュースの開閉（既定は開いた状態＝読み物として目に入るようにする）。 */
 const showNews = ref(true);
+/**
+ * 昇降格ニュースで中身を開いている開催回の weekId。
+ * 週ごとに独立して折りたためる（過去成績と違い、複数の回を同時に開ける）。
+ * 既定は最新の回だけ開く＝古い回は見出しの人数だけで一覧できるようにする。
+ */
+const openNewsWeekIds = ref<number[]>([]);
 
 /** ルール説明モーダルの開閉。 */
 const showInfo = ref(false);
@@ -162,6 +168,22 @@ const shortDateTime = (iso: string) => {
  */
 const weekLabel = (weekNo: number | null | undefined) =>
   weekNo == null ? t('league.preseason') : t('league.weekNo', { n: weekNo });
+
+/** 昇降格ニュースで、その開催回の中身を開いているか。 */
+const isNewsWeekOpen = (weekId: number) => openNewsWeekIds.value.includes(weekId);
+
+/** 昇降格ニュースの開催回を開閉する（他の回の状態はそのまま）。 */
+const toggleNewsWeek = (weekId: number) => {
+  openNewsWeekIds.value = isNewsWeekOpen(weekId)
+    ? openNewsWeekIds.value.filter(id => id !== weekId)
+    : [...openNewsWeekIds.value, weekId];
+};
+
+/** その開催回の昇格・降格の人数（見出しに出す内訳）。 */
+const newsCounts = (w: LeagueNewsWeek) => ({
+  promote: w.items.filter(i => i.movement === 'promote').length,
+  relegate: w.items.filter(i => i.movement === 'relegate').length,
+});
 
 /** DIVISION の表示名（tier 0 = DIVISION LEGEND、1..10 = DIVISION n）。 */
 const divisionName = (tier: number | null | undefined) => {
@@ -250,8 +272,11 @@ const loadNews = async () => {
   newsError.value = '';
   try {
     news.value = await league.fetchNews(ladder);
+    // 既定では最新の回だけ開く（古い回は見出しの人数だけ見えていれば十分なので畳んでおく）。
+    openNewsWeekIds.value = news.value.length ? [news.value[0].weekId] : [];
   } catch (e) {
     news.value = [];
+    openNewsWeekIds.value = [];
     newsError.value = e instanceof Error ? e.message : String(e);
   } finally {
     newsLoading.value = false;
@@ -1094,12 +1119,23 @@ onUnmounted(() => {
           <p v-else-if="!news.length" class="text-sm text-slate-400 dark:text-slate-500">{{ t('league.news.empty') }}</p>
           <div v-else class="space-y-4">
             <div v-for="w in news" :key="w.weekId">
-              <div class="flex items-baseline gap-2 pb-1 mb-2 border-b border-slate-200 dark:border-slate-700">
+              <button
+                class="w-full flex items-baseline flex-wrap gap-x-2 gap-y-1 text-left pb-1 border-b border-slate-200 dark:border-slate-700"
+                @click="toggleNewsWeek(w.weekId)"
+              >
                 <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ weekLabel(w.weekNo) }}</span>
                 <span class="text-xs text-slate-400 dark:text-slate-500">{{ shortDate(w.startsAt) }}〜{{ shortDate(w.endsAt) }}</span>
-                <span class="text-xs text-slate-400 dark:text-slate-500 ml-auto">{{ t('league.news.count', { n: w.items.length }) }}</span>
-              </div>
-              <ul class="space-y-1">
+                <span v-if="newsCounts(w).promote"
+                      class="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                  {{ t('league.news.promoted', { n: newsCounts(w).promote }) }}
+                </span>
+                <span v-if="newsCounts(w).relegate"
+                      class="text-[11px] px-1.5 py-0.5 rounded-full font-semibold bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300">
+                  {{ t('league.news.relegated', { n: newsCounts(w).relegate }) }}
+                </span>
+                <span class="ml-auto text-xs text-slate-400 dark:text-slate-500">{{ isNewsWeekOpen(w.weekId) ? '▲' : '▼' }}</span>
+              </button>
+              <ul v-if="isNewsWeekOpen(w.weekId)" class="space-y-1 mt-2">
                 <li
                   v-for="item in w.items"
                   :key="`${w.weekId}-${item.userId}`"
