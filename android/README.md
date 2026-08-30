@@ -160,7 +160,9 @@ Google Play には出していないため、**APK の直リンクをサイト�
 
 サイト側は `frontend/src/composables/useNativeBridge.ts` の `canInstallApp`
 （＝ UA が Android かつ `BeatSeekerNative` 未注入 ＝ アプリ未導入のブラウザ）で判定し、
-取り込みモーダル（`UnifiedImport.vue`）にダウンロードリンクを出します。
+取り込みモーダル（`UnifiedImport.vue`）と新規登録直後のオンボーディング
+（`OnboardingModal.vue` の Step 2。Android では PWA インストールの代わりに APK を出す）に
+ダウンロードリンクを出します。
 配布 URL は `VITE_ANDROID_APK_URL` で差し替え可能（空文字にすると導線ごと非表示）。
 
 デバッグ署名の APK のため、端末側で「提供元不明のアプリのインストール」を許可する必要があります。

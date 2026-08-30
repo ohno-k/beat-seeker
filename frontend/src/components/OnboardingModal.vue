@@ -4,7 +4,9 @@
  *
  * 機能:
  *  - Step 1: スコアを取り込む（最重要。アプリの価値体験はここから始まる）
- *  - Step 2: PWA インストール（`beforeinstallprompt` を受け取った場合のみボタン活性化）
+ *  - Step 2: アプリのインストール。Android のブラウザでは PWA ではなく APK の直リンクを出す
+ *            （アプリ版だけがブックマークレット不要の 1 タップ取り込みを使えるため）。
+ *            それ以外は PWA インストール（`beforeinstallprompt` を受け取った場合のみボタン活性化）
  *  - Step 3: プッシュ通知の許可を要求し、結果でバッジ切替
  *  - iOS は beforeinstallprompt 非対応なので、ホーム画面追加の手順案内を表示
  *
@@ -18,6 +20,7 @@
 import { ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
 import { useModalEscape } from '../composables/useModalEscape';
+import { useNativeBridge } from '../composables/useNativeBridge';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -34,6 +37,13 @@ useModalEscape(() => props.isOpen, () => emit('close'));
 
 // プッシュ通知購読をサーバに登録するための関数を取得。
 const { requestNotificationPermission } = useFriends();
+
+/**
+ * Android のブラウザ（アプリ未導入）かどうかと、APK の配布 URL。
+ * true のとき Step 2 を PWA インストールから APK ダウンロードへ差し替える。
+ * アプリ内 WebView や Android 以外の端末では false のまま（＝従来どおり PWA 案内）。
+ */
+const { canInstallApp, apkDownloadUrl } = useNativeBridge();
 
 /** 通知許可リクエストを処理中かどうか。 */
 const isSubscribing = ref(false);
@@ -136,7 +146,11 @@ const handleEnableNotifications = async () => {
           </div>
         </div>
 
-        <!-- ステップ 2: PWA としてホーム画面にインストール -->
+        <!--
+          ステップ 2: アプリのインストール。
+          Android のブラウザでは PWA ではなく APK の直リンクを出す（1 タップ取り込みが使えるのはアプリ版だけのため）。
+          それ以外の端末では従来どおり PWA インストール／iOS 向けのホーム画面追加案内を出す。
+        -->
         <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-md flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
@@ -145,12 +159,43 @@ const handleEnableNotifications = async () => {
               </svg>
             </div>
             <div class="flex-1">
-              <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1 italic">2. アプリとしてインストール</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+              <h3 class="font-bold text-slate-800 dark:text-slate-100 mb-1 italic">
+                {{ canInstallApp ? '2. Androidアプリを入れる' : '2. アプリとしてインストール' }}
+              </h3>
+              <p v-if="canInstallApp" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                アプリ版なら、ブックマークレットの登録なしでボタン1つ押すだけでスコアを取り込めます。
+                ホーム画面から起動してフルスクリーンで使えるのも同じです。
+              </p>
+              <p v-else class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
                 ホーム画面に追加すると、Webブラウザの枠がなくなり、フルスクリーンで快適にスコア管理ができます。
               </p>
-              
-              <div v-if="deferredPrompt">
+
+              <!-- Android ブラウザ: APK の直リンク（PWA インストールは副導線として残す） -->
+              <div v-if="canInstallApp" class="space-y-2">
+                <a
+                  :href="apkDownloadUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+                  </svg>
+                  Androidアプリ (APK) をダウンロード
+                </a>
+                <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
+                  ※ Google Play 未公開のため、ダウンロード後に「提供元不明のアプリ（不明なアプリのインストール）」を許可する必要があります。
+                </p>
+                <button
+                  v-if="deferredPrompt"
+                  @click="handleInstall"
+                  class="w-full py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-colors"
+                >
+                  アプリを入れずにホーム画面へ追加する（PWA）
+                </button>
+              </div>
+
+              <div v-else-if="deferredPrompt">
                 <button @click="handleInstall" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-bold text-sm transition-all active:scale-95">
                   インストールする
                 </button>
