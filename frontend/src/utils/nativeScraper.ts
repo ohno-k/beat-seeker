@@ -63,20 +63,22 @@ function post(message: Record<string, unknown>): void {
   window.__beatSeekerScraping = true;
 
   try {
-    const result = await scrapeEagate((message) => post({ kind: 'progress', message }));
+    // アプリの「1タップ取り込み」は公式のスコアデータ CSV をそのまま取得する。
+    // 難易度別ページの巡回と違い 1 リクエストで済み、ミスカウントや最終プレー日時など
+    // 難易度別ページには無い列も埋まった、正真正銘の公式 CSV が得られる。
+    const result = await scrapeEagate((message) => post({ kind: 'progress', message }), {
+      scoreSource: 'official',
+    });
 
     // 未ログイン時、eagate は djdata をログインページへリダイレクトするため
-    // 譜面も ARENA も 0 件になる。これを未ログインの推定条件とする。
-    if (result.chartCount === 0 && result.battles.length === 0) {
+    // CSV も ARENA も取れない。これを未ログインの推定条件とする。
+    if (!result.scoresCsv && result.battles.length === 0) {
       post({ kind: 'needLogin' });
       return;
     }
 
     const { chartCount, songCount, ...payload } = result;
-    post({
-      kind: 'progress',
-      message: '取得完了 スコア ' + chartCount + '譜面・' + songCount + '曲',
-    });
+    post({ kind: 'progress', message: '取得完了 スコア ' + songCount + '曲' });
 
     const json = JSON.stringify(payload);
     const total = Math.max(1, Math.ceil(json.length / CHUNK_SIZE));

@@ -2,7 +2,7 @@
 /**
  * 【コンポーネントの役割】 CSV スコア + ARENA バトル履歴をまとめて取り込む統合インポート UI。
  * - Android アプリ内で開かれている場合は、最上部に「1タップ取り込み」ボタンを出す
- *   （アプリが非表示 WebView で eagate から収集 → 同じ処理へ流す。ブックマークレット不要）
+ *   （アプリが非表示 WebView で eagate の公式 CSV を取得 → 同じ処理へ流す。ブックマークレット不要）
  * - タブ切替で「テキスト貼り付け」／「ファイルアップロード」の 2 経路
  * - テキスト貼り付け経路は JSON（ブックマークレット出力）/ CSV 生文字列の両対応
  *     - JSON の場合: scoresCsv → 親へ emit、battles → /api/arena/import に POST
@@ -119,9 +119,15 @@ const processText = async (text: string) => {
       // JSON ルート: scoresCsv と battles を別々に処理する。
       if (parsed.scoresCsv) {
         try {
-          // ブックマークレット出力の CSV は「バージョン」列が空欄なので自動判定できない。
-          // origin を伝えて親側の判定をスキップさせる。
-          emit('score-file', makeCsvFile(parsed.scoresCsv), 'bookmarklet');
+          // CSV の出どころで作品バージョンの自動判定の可否が変わる。
+          //  - 'official'（アプリの1タップ取り込み）… 公式CSVなので「バージョン」列が埋まっており、
+          //    通常どおり自動判定させる（origin を渡さない）。
+          //  - 'difficulty'（ブックマークレット）… 難易度別ページ由来で「バージョン」列が空欄のため、
+          //    origin を伝えて親側の判定をスキップさせる。
+          // scoresCsvSource が無い古い出力（更新前のブックマークレットや、以前コピーした
+          // クリップボードの内容）は従来どおり 'bookmarklet' 扱いにして挙動を変えない。
+          const isOfficialCsv = parsed.scoresCsvSource === 'official';
+          emit('score-file', makeCsvFile(parsed.scoresCsv), isOfficialCsv ? undefined : 'bookmarklet');
           scoresReady = true;
         } catch (e) {
           console.warn('Score file preparation failed:', e);
