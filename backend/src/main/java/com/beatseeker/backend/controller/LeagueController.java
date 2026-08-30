@@ -390,12 +390,14 @@ public class LeagueController {
      * 通しで見るためのもの。ポイントは週次締めで増減し、+8 で昇格・-8 で降格する値
      * （{@link LeagueEntry#getPoints()}）なので、降順＝昇格に近い順になる。
      *
-     * 掲載対象は参加中（active）かつ DIVISION 配属済みのエントリーのみ。休止中・未配属は含めない。
+     * 掲載対象は DIVISION 配属済みのエントリー。離脱（休止）中の人も {@code active=false} を付けて
+     * 同じ並びに含め、画面側で薄く表示する（未配属＝次回編成待ちは DIVISION が決まっていないので含めない）。
      * 同ポイントは総合 BEAT-PT の高い順、さらに同値なら表示名順で並べ、順位は同着を許す
-     * （1, 1, 3 形式）。
+     * （1, 1, 3 形式）。順位は参加中の人だけで数え、離脱中の人は {@code rank=null}（競っていないため）。
      *
      * @param ladder ラダー種別
-     * @return {@code {ladder, divisions:[{tier, memberCount, entries:[{rank, userId, displayName, points, totalBeatPt}]}]}}
+     * @return {@code {ladder, divisions:[{tier, memberCount, inactiveCount,
+     *         entries:[{rank, userId, displayName, points, totalBeatPt, active}]}]}}
      */
     @GetMapping("/rankings")
     public ResponseEntity<?> rankings(@RequestParam("ladder") String ladder) {
@@ -404,8 +406,9 @@ public class LeagueController {
         }
 
         // DIVISION ごとにエントリーを束ねる（未配属＝currentTier が null の人は次回編成待ちなので除く）。
+        // 離脱中（active=false）の人も DIVISION と PT は保持されたままなので、薄く並べるために含める。
         Map<Integer, List<LeagueEntry>> byTier = new TreeMap<>();
-        for (LeagueEntry e : leagueEntryRepository.findActiveWithUser(ladder)) {
+        for (LeagueEntry e : leagueEntryRepository.findAllWithUser(ladder)) {
             Integer tier = e.getCurrentTier();
             if (tier == null || !LeagueDivision.isValid(tier)) continue;
             byTier.computeIfAbsent(tier, k -> new ArrayList<>()).add(e);
@@ -424,25 +427,39 @@ public class LeagueController {
             List<Map<String, Object>> rows = new ArrayList<>();
             Integer prevPoints = null;
             int rank = 0;
-            for (int i = 0; i < sorted.size(); i++) {
-                LeagueEntry e = sorted.get(i);
+            int activeCount = 0;
+            int inactiveCount = 0;
+            for (LeagueEntry e : sorted) {
                 int points = e.getPoints() != null ? e.getPoints() : 0;
-                // 同ポイントは同着（次の順位は人数分飛ぶ = 1, 1, 3）。
-                if (prevPoints == null || points != prevPoints) rank = i + 1;
-                prevPoints = points;
+                boolean active = !Boolean.FALSE.equals(e.getActive());
+
+                Integer rowRank = null;
+                if (active) {
+                    // 順位は参加中の人だけで数える（離脱中は競っていないので順位を消費しない）。
+                    // 同ポイントは同着（次の順位は人数分飛ぶ = 1, 1, 3）。
+                    if (prevPoints == null || points != prevPoints) rank = activeCount + 1;
+                    prevPoints = points;
+                    activeCount++;
+                    rowRank = rank;
+                } else {
+                    inactiveCount++;
+                }
 
                 Map<String, Object> row = new LinkedHashMap<>();
-                row.put("rank", rank);
+                row.put("rank", rowRank);
                 row.put("userId", e.getUser().getId());
                 row.put("displayName", nameOf(e.getUser()));
                 row.put("points", points);
                 row.put("totalBeatPt", e.getUser().getTotalBeatPt());
+                row.put("active", active);
                 rows.add(row);
             }
 
             Map<String, Object> div = new LinkedHashMap<>();
             div.put("tier", te.getKey());
-            div.put("memberCount", rows.size());
+            // memberCount は従来どおり参加中の人数（見出しの「n人」）。離脱中は別枠で数える。
+            div.put("memberCount", activeCount);
+            div.put("inactiveCount", inactiveCount);
             div.put("entries", rows);
             divisions.add(div);
         }

@@ -53,6 +53,18 @@ public interface LeagueEntryRepository extends JpaRepository<LeagueEntry, Long> 
     List<LeagueEntry> findActiveWithUser(@Param("ladderType") String ladderType);
 
     /**
+     * 【メソッドの役割】 指定ラダーの全エントリーを、参加中・離脱中を問わずユーザーごと JOIN FETCH して取得する。
+     *
+     * DIVISION 別ランキングで離脱（休止）中の人も薄く並べるために使う。参加中だけで良い用途は
+     * {@link #findActiveWithUser} を使うこと。
+     *
+     * @param ladderType ラダー種別
+     * @return 全エントリー一覧（user 取得済み。active=false も含む）
+     */
+    @Query("SELECT e FROM LeagueEntry e JOIN FETCH e.user WHERE e.ladderType = :ladderType")
+    List<LeagueEntry> findAllWithUser(@Param("ladderType") String ladderType);
+
+    /**
      * 【メソッドの役割】 指定ユーザーの全ラダー分のエントリーを取得する。
      *
      * マイページ相当（GET /api/league/me）で両ラダーの参加状態をまとめて返すのに使う。
