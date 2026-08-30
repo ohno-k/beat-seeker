@@ -235,20 +235,28 @@ export interface LeaguePoolSong {
 
 /** DIVISION 別ランキングの 1 行（参加者と昇降格ポイント）。 */
 export interface LeagueRankingEntry {
-  /** DIVISION 内の順位（同ポイントは同着。1, 1, 3 形式）。 */
-  rank: number;
+  /**
+   * DIVISION 内の順位（同ポイントは同着。1, 1, 3 形式）。
+   * 離脱中（active=false）の人は競っていないので順位を持たない（null）。
+   */
+  rank: number | null;
   userId: number;
   displayName: string;
   /** 昇降格ポイント（-8..+8）。+8 で昇格、-8 で降格。 */
   points: number;
   /** 総合 BEAT-PT（同ポイント時の並び順＆ティアアイコン表示用）。 */
   totalBeatPt: number | null;
+  /** 参加中なら true。false は離脱（休止）中で、DIVISION と PT は保持されている。 */
+  active: boolean;
 }
 
 /** DIVISION 別ランキングの 1 DIVISION 分。 */
 export interface LeagueRankingDivision {
   tier: number;
+  /** 参加中の人数（離脱中は含まない）。 */
   memberCount: number;
+  /** 離脱（休止）中の人数。 */
+  inactiveCount: number;
   entries: LeagueRankingEntry[];
 }
 
