@@ -3,6 +3,8 @@
  * 【コンポーネントの役割】 CSV スコア + ARENA バトル履歴をまとめて取り込む統合インポート UI。
  * - Android アプリ内で開かれている場合は、最上部に「1タップ取り込み」ボタンを出す
  *   （アプリが非表示 WebView で eagate の公式 CSV を取得 → 同じ処理へ流す。ブックマークレット不要）
+ * - Android のブラウザ（アプリ未導入）で開かれている場合は、代わりに APK の直リンクを出す
+ *   （スマホのブックマークレット登録が最も脱落しやすい導線のため、ここで乗り換えを案内する）
  * - タブ切替で「テキスト貼り付け」／「ファイルアップロード」の 2 経路
  * - テキスト貼り付け経路は JSON（ブックマークレット出力）/ CSV 生文字列の両対応
  *     - JSON の場合: scoresCsv → 親へ emit、battles → /api/arena/import に POST
@@ -21,7 +23,7 @@ import InfinitasMonitor from './InfinitasMonitor.vue';
 
 const { t } = useI18n();
 const { user } = useAuth();
-const { isNativeApp, message: nativeMessage, startNativeImport } = useNativeBridge();
+const { isNativeApp, canInstallApp, apkDownloadUrl, message: nativeMessage, startNativeImport } = useNativeBridge();
 
 const props = defineProps<{ bookmarkletCode: string }>();
 const emit = defineEmits<{
@@ -286,6 +288,28 @@ const copyBookmarkletCode = async () => {
         </svg>
         {{ isImporting ? (nativeMessage || t('import.importing')) : t('import.nativeImport') }}
       </button>
+    </div>
+
+    <!--
+      Android ブラウザのみ: アプリ（APK）の直リンク。
+      スマホでのブックマークレット登録は手順が煩雑で脱落しやすいため、
+      アプリを入れれば 1 タップで済むことをここで案内する。
+      アプリ内 (isNativeApp) と Android 以外の端末では canInstallApp が false になり表示されない。
+    -->
+    <div v-if="canInstallApp" class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-md space-y-2">
+      <p class="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">{{ t('import.androidAppHint') }}</p>
+      <a
+        :href="apkDownloadUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-md transition-all flex items-center justify-center gap-2 text-sm"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+        </svg>
+        {{ t('import.androidAppDownload') }}
+      </a>
+      <p class="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 leading-relaxed">{{ t('import.androidAppNote') }}</p>
     </div>
 
     <!-- ARENA info banner -->

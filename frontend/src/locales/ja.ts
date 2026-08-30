@@ -898,6 +898,10 @@ export const ja = {
   'import.nativeLoggingIn': 'IIDX公式サイトへログインしてください…',
   'import.nativeNeedLogin': 'ログインがキャンセルされました。取り込みにはIIDX公式サイトへのログインが必要です。',
   'import.nativeFail': '取り込みに失敗しました。通信状況を確認してもう一度お試しください。',
+  // Android のブラウザ（アプリ未導入）でのみ表示する APK 直リンク導線。
+  'import.androidAppHint': 'Android をお使いの方へ: アプリ版なら、ブックマークレットの登録なしでボタン1つ押すだけで取り込みが完了します。',
+  'import.androidAppDownload': 'Androidアプリ (APK) をダウンロード',
+  'import.androidAppNote': '※ Google Play 未公開のため、ダウンロード後に「提供元不明のアプリ（不明なアプリのインストール）」を許可する必要があります。',
 
   // UnifiedImport
   'import.arenaHint': 'ブックマークレットを使用すると、ARENAモードでの戦績も記録できます。',

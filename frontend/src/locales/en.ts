@@ -889,6 +889,10 @@ export const en = {
   'import.nativeLoggingIn': 'Please sign in to the official IIDX site…',
   'import.nativeNeedLogin': 'Sign-in was cancelled. Importing requires signing in to the official IIDX site.',
   'import.nativeFail': 'Import failed. Check your connection and try again.',
+  // Shown only in an Android browser (app not installed): direct APK download.
+  'import.androidAppHint': 'On Android? The app imports your scores with a single button press — no bookmarklet setup required.',
+  'import.androidAppDownload': 'Download the Android app (APK)',
+  'import.androidAppNote': 'Not distributed on Google Play, so you must allow installing apps from unknown sources after downloading.',
 
   // UnifiedImport
   'import.arenaHint': 'Use the bookmarklet to also record ARENA mode results.',

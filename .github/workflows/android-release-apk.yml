@@ -1,0 +1,62 @@
+# Android APK をビルドして GitHub Releases の固定タグへ公開するワークフロー。
+#
+# 目的: サイト側（UnifiedImport の Android 向けバナー）から「ログイン不要の直リンク」で
+#       APK を配れるようにする。Actions の Artifacts は GitHub ログインが必要で直リンクにできない。
+#
+# 公開先は固定タグ `android-latest` の 1 リリースだけを使い回し、同名のアセットを毎回
+# 上書きする。こうすることで配布 URL が変わらず、フロントの既定値
+# （useNativeBridge.ts の APK_DOWNLOAD_URL）を更新せずに最新版を配れる。
+#
+#   https://github.com/<owner>/<repo>/releases/download/android-latest/beat-seeker.apk
+#
+# 署名について: Google Play へは出さないサイドロード配布のため、デバッグ署名の APK を配る。
+# リリース署名鍵を用意した場合は assembleRelease に切り替えること（鍵は Secrets へ）。
+name: Android release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: 'アプリが表示する beat-seeker の URL（収集スクリプトもここから取得する）'
+        required: false
+        default: 'https://beat-seeker.com'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleDebug -PappUrl="${{ inputs.app_url || 'https://beat-seeker.com' }}" --no-daemon
+
+      # 配布 URL を固定するため、アセット名は常に beat-seeker.apk にそろえる。
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/*.apk beat-seeker.apk
+
+      # リリースが無ければ作成し、あればアセットだけ差し替える（--clobber で同名を上書き）。
+      - name: Publish to android-latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          if ! gh release view android-latest >/dev/null 2>&1; then
+            gh release create android-latest \
+              --title "Android アプリ (最新)" \
+              --notes "beat-seeker Android アプリの最新ビルド。サイトの Android 向けダウンロードリンクはこのリリースを指しています。" \
+              --latest=false
+          fi
+          gh release upload android-latest beat-seeker.apk --clobber

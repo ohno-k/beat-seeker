@@ -148,3 +148,19 @@ DevTools で覗けます。`adb logcat` と併せて見るのが手っ取り早�
 - `WorkManager` による定期バックグラウンド同期（タップ 0 での自動取り込み）。
 - アイコンは `frontend/public/icon-512.png` から機械的に縮小したもの。
   必要なら Android Studio の Image Asset で adaptive icon を作り直してください。
+
+## 配布とインストール導線
+
+Google Play には出していないため、**APK の直リンクをサイト側から配る**方式をとっています。
+
+| 経路 | 用途 |
+| --- | --- |
+| `.github/workflows/android-release-apk.yml` | 固定タグ `android-latest` のリリースへ `beat-seeker.apk` を上書き公開（手動実行）。配布 URL が変わらないので、更新はワークフローを再実行するだけ |
+| `.github/workflows/android-debug-apk.yml` | Actions の Artifacts へ APK を置く開発者向け（ダウンロードに GitHub ログインが必要なため配布には使えない） |
+
+サイト側は `frontend/src/composables/useNativeBridge.ts` の `canInstallApp`
+（＝ UA が Android かつ `BeatSeekerNative` 未注入 ＝ アプリ未導入のブラウザ）で判定し、
+取り込みモーダル（`UnifiedImport.vue`）にダウンロードリンクを出します。
+配布 URL は `VITE_ANDROID_APK_URL` で差し替え可能（空文字にすると導線ごと非表示）。
+
+デバッグ署名の APK のため、端末側で「提供元不明のアプリのインストール」を許可する必要があります。

@@ -67,6 +67,26 @@ export type NativeImportStatus = 'idle' | 'running' | 'error';
  */
 const EAGATE_ENTRY_URL = `https://p.eagate.573.jp/game/2dx/${CURRENT_VERSION}/djdata/index.html`;
 
+/**
+ * APK の配布 URL。ビルド時に `VITE_ANDROID_APK_URL` で差し替えられる。
+ *
+ * 既定値は GitHub Releases の固定タグ `android-latest` を指す。ワークフロー
+ * （`.github/workflows/android-release-apk.yml`）が同名アセットを毎回上書きするため、
+ * この URL を変えないまま常に最新の APK を配れる。
+ * 空文字を設定すると Android 端末でもインストール案内自体を出さない（配布を止めたいとき用）。
+ */
+const APK_DOWNLOAD_URL = (
+  import.meta.env.VITE_ANDROID_APK_URL
+  ?? 'https://github.com/ohno-k/beat-seeker/releases/download/android-latest/beat-seeker.apk'
+).trim();
+
+/**
+ * 端末が Android かどうか。UA は実行中に変わらないため一度だけ判定する。
+ * アプリ内 WebView の UA にも "Android" は含まれるため、「アプリ未導入の Android ユーザー」
+ * を出すには {@link BeatSeekerNative} の有無（= isNativeApp）と併用する必要がある。
+ */
+const IS_ANDROID_DEVICE = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+
 /** 現在の進行状態（同時に 2 つ走らせない）。 */
 const status = ref<NativeImportStatus>('idle');
 /** 進捗メッセージ（アプリから逐次送られてくる）。 */
@@ -154,5 +174,25 @@ export function useNativeBridge() {
     });
   };
 
-  return { isNativeApp, status, message, startNativeImport };
+  /**
+   * Android 端末のブラウザ（＝アプリ未導入）で開かれているか。
+   * アプリ内 WebView では `BeatSeekerNative` が注入されるため false になる。
+   */
+  const isAndroidBrowser = computed(() => IS_ANDROID_DEVICE && !isNativeApp.value);
+
+  /**
+   * APK のダウンロード導線を出してよいか。
+   * Android のブラウザで、かつ配布 URL が設定されている場合のみ true。
+   */
+  const canInstallApp = computed(() => isAndroidBrowser.value && !!APK_DOWNLOAD_URL);
+
+  return {
+    isNativeApp,
+    isAndroidBrowser,
+    canInstallApp,
+    apkDownloadUrl: APK_DOWNLOAD_URL,
+    status,
+    message,
+    startNativeImport,
+  };
 }
