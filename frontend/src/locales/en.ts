@@ -129,6 +129,7 @@ export const en = {
   'nav.logout': 'Logout',
   'nav.loginRegister': 'Login / Register',
   'nav.uploadCsv': 'Upload CSV',
+  'nav.appCsvImport': 'Import CSV',
 
   // Auth / Login Modal
   'auth.login': 'Login',

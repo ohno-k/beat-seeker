@@ -131,6 +131,8 @@ export const ja = {
   'nav.logout': 'ログアウト',
   'nav.loginRegister': 'ログイン / 新規登録',
   'nav.uploadCsv': 'CSVをアップロード',
+  // アプリ版 (Android WebView) 限定でヘッダーに出す取り込みボタンのラベル。
+  'nav.appCsvImport': 'CSV取り込み',
 
   // Auth / Login Modal
   'auth.login': 'ログイン',
