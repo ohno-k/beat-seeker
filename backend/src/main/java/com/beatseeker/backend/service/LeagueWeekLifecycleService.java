@@ -63,6 +63,16 @@ public class LeagueWeekLifecycleService {
      * この値がそのまま「グループの最小人数」になる。
      */
     static final int MIN_STANDALONE = 4;
+    /**
+     * 少人数 DIVISION の卓を補充するとき、<b>1 つの卓が同じ方向から借りられる上限人数</b>。
+     * 「格下から引き上げる（チャレンジ）」で最大 2 人、「格上から降ろす（ディフェンス）」で最大 2 人まで。
+     *
+     * <p>これを超える補充をすると、卓の顔ぶれが本来の DIVISION とかけ離れて（例: LEGEND 卓の 4 人中
+     * 3 人が格下からの引き上げ）、貸した側の DIVISION の卓も薄くなる。上限に収まらず
+     * {@link #MIN_STANDALONE} 人に届かない DIVISION は、無理に自分の卓を建てず
+     * {@link #computeHostAndRole} のフォールバック（少人数同士で束ねる / 最寄りの成立卓へ合流）に回す。
+     */
+    static final int MAX_BORROW_PER_DIRECTION = 2;
     /** 連続でこの週数「リーグの活動なし」が続いたエントリーは自動休止する（{@link #playedDuringWeek}）。 */
     public static final int AUTO_DEACTIVATE_AFTER = 3;
 
@@ -599,13 +609,16 @@ public class LeagueWeekLifecycleService {
      *   <li>人数が足りない DIVISION は、近い DIVISION から人を借りて {@link #MIN_STANDALONE} 人に満たす。
      *       <b>格下からは BEAT-PT 上位の人を引き上げ（チャレンジ）</b>、
      *       <b>格上からは BEAT-PT 下位の人を降ろす（ディフェンス）</b>。
+     *       ただし借りられるのは<b>それぞれの方向につき最大 {@link #MAX_BORROW_PER_DIRECTION} 人</b>まで。
      *       貸す側は貸した後も {@link #MIN_STANDALONE} 人を下回らない範囲でしか出さない。</li>
-     *   <li>補充しても成立しない DIVISION は従来どおり {@link #computeHostAndRole} に任せる
-     *       （少人数同士を束ねる / 最寄りの成立卓へ吸収）。</li>
+     *   <li>その上限内で成立しない DIVISION は自分の卓を建てず、{@link #computeHostAndRole} に任せる
+     *       （少人数同士を束ねる / 最寄りの成立卓へ合流）。</li>
      * </ol>
      *
      * 上位（LEGEND 側）から先に補充するため、人数の少ない LEGEND 卓は「格下の最上位を引き上げて」
-     * 成立する。LEGEND の人がまるごと DIVISION 1 に降りてきて卓を荒らすことがなくなる。
+     * 成立する。ただし引き上げは 2 人までなので、例えば LEGEND が 1 人しか居ない週は
+     * （1 + 2 = 3 &lt; 4 で）卓が建たず、その 1 人が DIVISION 1 の卓へディフェンスとして合流する。
+     * 「4 人卓のうち 3 人が格下からの引き上げ」といった、実質 DIVISION 1 の卓にならないようにするため。
      *
      * @param entries    その週の参加者
      * @param homeTierOf ホーム DIVISION の取得（本編成はエントリーの値、プレビューは補完済みの値を渡す）
@@ -632,10 +645,15 @@ public class LeagueWeekLifecycleService {
             int need = MIN_STANDALONE - own;
 
             List<Seat> picked = new ArrayList<>();
+            int fromBelow = 0; // 格下から引き上げた人数（チャレンジ）
+            int fromAbove = 0; // 格上から降ろした人数（ディフェンス）
             for (int d = 1; d <= LeagueDivision.LOWEST && picked.size() < need; d++) {
                 // 近い DIVISION から順に。まず格下（引き上げ＝チャレンジ）、次に格上（降ろす＝ディフェンス）。
-                lend(byTier, lentFromTop, lentFromBottom, tier + d, tier, picked, need - picked.size());
-                lend(byTier, lentFromTop, lentFromBottom, tier - d, tier, picked, need - picked.size());
+                // どちらの方向も MAX_BORROW_PER_DIRECTION 人までしか借りない。
+                fromBelow += lend(byTier, lentFromTop, lentFromBottom, tier + d, tier, picked,
+                        Math.min(need - picked.size(), MAX_BORROW_PER_DIRECTION - fromBelow));
+                fromAbove += lend(byTier, lentFromTop, lentFromBottom, tier - d, tier, picked,
+                        Math.min(need - picked.size(), MAX_BORROW_PER_DIRECTION - fromAbove));
             }
             if (picked.size() < need) {
                 // 成立させられない → 借りを取り消して従来ロジック（束ね / 吸収）へ委ねる。
@@ -682,17 +700,20 @@ public class LeagueWeekLifecycleService {
      * 格下（tier 番号が大きい）から借りるときは BEAT-PT 上位（リストの先頭）＝チャレンジ、
      * 格上から借りるときは BEAT-PT 下位（リストの末尾）＝ディフェンスを選ぶ。
      * 貸した後も {@link #MIN_STANDALONE} 人を確保できる範囲でしか貸さない。
+     *
+     * @param want 借りたい人数（呼び出し側で {@link #MAX_BORROW_PER_DIRECTION} を加味した残り枠）
+     * @return 実際に貸し出した人数
      */
-    private void lend(Map<Integer, List<LeagueEntry>> byTier,
-                      Map<Integer, Integer> lentFromTop, Map<Integer, Integer> lentFromBottom,
-                      int donorTier, int targetTier, List<Seat> out, int want) {
-        if (want <= 0) return;
+    private int lend(Map<Integer, List<LeagueEntry>> byTier,
+                     Map<Integer, Integer> lentFromTop, Map<Integer, Integer> lentFromBottom,
+                     int donorTier, int targetTier, List<Seat> out, int want) {
+        if (want <= 0) return 0;
         List<LeagueEntry> pool = byTier.get(donorTier);
-        if (pool == null) return;
+        if (pool == null) return 0;
         int top = lentFromTop.getOrDefault(donorTier, 0);
         int bottom = lentFromBottom.getOrDefault(donorTier, 0);
         int canLend = (pool.size() - top - bottom) - MIN_STANDALONE;
-        if (canLend <= 0) return;
+        if (canLend <= 0) return 0;
 
         boolean fromBelow = donorTier > targetTier; // 格下から引き上げる
         int take = Math.min(want, canLend);
@@ -702,6 +723,7 @@ public class LeagueWeekLifecycleService {
         }
         if (fromBelow) lentFromTop.merge(donorTier, take, Integer::sum);
         else lentFromBottom.merge(donorTier, take, Integer::sum);
+        return take;
     }
 
     /** 総合 BEAT-PT（未設定は 0）。派遣する人を選ぶ並び順に使う。 */
