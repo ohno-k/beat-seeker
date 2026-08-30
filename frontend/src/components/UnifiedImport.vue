@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /**
  * 【コンポーネントの役割】 CSV スコア + ARENA バトル履歴をまとめて取り込む統合インポート UI。
+ * - Android アプリ内で開かれている場合は、最上部に「1タップ取り込み」ボタンを出す
+ *   （アプリが非表示 WebView で eagate から収集 → 同じ処理へ流す。ブックマークレット不要）
  * - タブ切替で「テキスト貼り付け」／「ファイルアップロード」の 2 経路
  * - テキスト貼り付け経路は JSON（ブックマークレット出力）/ CSV 生文字列の両対応
  *     - JSON の場合: scoresCsv → 親へ emit、battles → /api/arena/import に POST
@@ -14,10 +16,12 @@
 import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
+import { useNativeBridge } from '../composables/useNativeBridge';
 import InfinitasMonitor from './InfinitasMonitor.vue';
 
 const { t } = useI18n();
 const { user } = useAuth();
+const { isNativeApp, message: nativeMessage, startNativeImport } = useNativeBridge();
 
 const props = defineProps<{ bookmarkletCode: string }>();
 const emit = defineEmits<{
@@ -190,6 +194,33 @@ const handleSubmit = async () => {
 };
 
 /**
+ * 【関数の役割】 Android アプリの「1タップ取り込み」ボタンのハンドラ。
+ *
+ * アプリが非表示 WebView で eagate からスコア CSV と ARENA データを収集し、
+ * ブックマークレットと同一形式の JSON を返す。あとは貼り付け経路と同じ processText に流すだけで、
+ * CSV パース〜サーバ登録までの既存パイプラインがそのまま動く。
+ *
+ * eagate 未ログインの場合はアプリがログイン画面を出し、ログイン成功後に自動で再実行するため
+ * ここでは待たされるだけで何もしない。ログインをキャンセルした場合だけエラーとして案内する。
+ */
+const handleNativeImport = async () => {
+  isImporting.value = true;
+  resultMsg.value = '';
+  resultError.value = '';
+  try {
+    const json = await startNativeImport();
+    // processText 側でも isImporting を制御するため、ここでは先に降ろしておく。
+    isImporting.value = false;
+    await processText(json);
+  } catch (e: any) {
+    isImporting.value = false;
+    resultError.value = e?.message === 'login cancelled'
+      ? t('import.nativeNeedLogin')
+      : t('import.nativeFail');
+  }
+};
+
+/**
  * 【関数の役割】 ドロップまたは選択されたファイルを検証して selectedFile にセットする。
  * 拡張子 .csv もしくは MIME type text/csv / application/vnd.ms-excel を受け付ける。
  */
@@ -230,6 +261,25 @@ const copyBookmarkletCode = async () => {
     </div>
     <div v-if="resultMsg" class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400 font-medium">
       {{ resultMsg }}
+    </div>
+
+    <!-- Android アプリ内のみ: ブックマークレット不要の 1 タップ取り込み -->
+    <div v-if="isNativeApp" class="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-md space-y-2">
+      <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">{{ t('import.nativeHint') }}</p>
+      <button
+        @click="handleNativeImport"
+        :disabled="isImporting"
+        class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+      >
+        <svg v-if="!isImporting" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        {{ isImporting ? (nativeMessage || t('import.importing')) : t('import.nativeImport') }}
+      </button>
     </div>
 
     <!-- ARENA info banner -->

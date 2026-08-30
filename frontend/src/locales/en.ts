@@ -882,6 +882,13 @@ export const en = {
   'about.faqQ4': 'Q. Is my score data safe?',
   'about.faqA4': 'Yes. We do not use your data for any personal gain. Please check the Terms of Service for more details.',
 
+  // UnifiedImport (one-tap import, shown only inside the Android app)
+  'import.nativeHint': 'In the app, one button press fetches your scores and ARENA data from the official IIDX site and registers them.',
+  'import.nativeImport': 'Import with one tap',
+  'import.nativeLoggingIn': 'Please sign in to the official IIDX site…',
+  'import.nativeNeedLogin': 'Sign-in was cancelled. Importing requires signing in to the official IIDX site.',
+  'import.nativeFail': 'Import failed. Check your connection and try again.',
+
   // UnifiedImport
   'import.arenaHint': 'Use the bookmarklet to also record ARENA mode results.',
   'import.bookmarkletHelp': 'How to use the bookmarklet',

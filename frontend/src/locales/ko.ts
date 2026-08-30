@@ -883,6 +883,13 @@ export const ko = {
   'about.faqQ4': 'Q. 내 스코어 데이터는 안전한가요?',
   'about.faqA4': '네. 운영자는 취득한 데이터를 개인의 이익을 위해 이용하지 않습니다. 자세한 내용은 이용약관을 확인해 주세요.',
 
+  // UnifiedImport (앱 내에서만 표시되는 원탭 가져오기)
+  'import.nativeHint': '앱에서는 버튼을 한 번 누르면 IIDX 공식 사이트에서 스코어와 ARENA 데이터를 가져와 등록합니다.',
+  'import.nativeImport': '원탭으로 가져오기',
+  'import.nativeLoggingIn': 'IIDX 공식 사이트에 로그인해 주세요…',
+  'import.nativeNeedLogin': '로그인이 취소되었습니다. 가져오기에는 IIDX 공식 사이트 로그인이 필요합니다.',
+  'import.nativeFail': '가져오기에 실패했습니다. 통신 상태를 확인한 뒤 다시 시도해 주세요.',
+
   // UnifiedImport
   'import.arenaHint': '북마클릿을 사용하면 ARENA 모드의 전적도 기록할 수 있습니다.',
   'import.bookmarkletHelp': '북마클릿 사용법',

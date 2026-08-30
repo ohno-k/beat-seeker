@@ -17,6 +17,14 @@ out/
 *.jar
 *.war
 /frontend/public/bookmarklet.js
+/frontend/public/native-scraper.js
+
+# --- Android (android/) ---
+/android/.gradle/
+/android/local.properties
+/android/captures/
+/android/.idea/
+/android/**/build/
 
 # --- Python ---
 __pycache__/
