@@ -129,6 +129,7 @@ export const ko = {
   'nav.logout': '로그아웃',
   'nav.loginRegister': '로그인 / 회원가입',
   'nav.uploadCsv': 'CSV 업로드',
+  'nav.appCsvImport': 'CSV 가져오기',
 
   // Auth / Login Modal
   'auth.login': '로그인',

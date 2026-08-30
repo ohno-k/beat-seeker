@@ -119,6 +119,7 @@ import { useScoreUpload } from './composables/useScoreUpload';
 import { useAppUpdate } from './composables/useAppUpdate';
 import { useScores } from './composables/useScores';
 import { useDarkMode } from './composables/useDarkMode';
+import { useNativeBridge } from './composables/useNativeBridge';
 import { useFriends } from './composables/useFriends';
 import { useI18n } from './composables/useI18n';
 import { useGameData } from './composables/useGameData';
@@ -464,8 +465,14 @@ const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, fetchArenaTopRank
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 
 /**
+ * Android アプリ (WebView ラッパー) 内で表示されているか。
+ * true のときだけヘッダーに「CSV取り込み」ボタンを出す (アプリ版限定導線)。
+ */
+const { isNativeApp } = useNativeBridge();
+
+/**
  * 【computed の役割】 Competition セクション (大会管理 / Strategy Card / Song Reveal) を
- * ヘッダーに表示してよいかの判定。CompetitionAdminView の ORGANIZER_IDS と同じ 4 ID。
+ * サイドバー最下部に表示してよいかの判定。CompetitionAdminView の ORGANIZER_IDS と同じ 4 ID。
  * 他人ダッシュボード閲覧中 (viewingUserId) は隠す。
  * 変更時は backend の OrganizerAuthService (competition.organizer-ids) も揃えること。
  */
@@ -474,14 +481,10 @@ const canAccessCompetition = computed(() => {
   return (id === 18 || id === 19 || id === 23 || id === 35) && !viewingUserId.value;
 });
 
-/** ヘッダー「beat-seeker for competition」ドロップダウンの開閉。 */
-const isCompetitionMenuOpen = ref(false);
-
-/** ドロップダウンから大会管理タブへ遷移。 */
+/** サイドバーの Competition セクションから大会管理タブへ遷移。 */
 const goCompetitionAdmin = () => {
   activeTab.value = 'competition-admin';
   window.history.replaceState({}, '', '/competition-admin');
-  isCompetitionMenuOpen.value = false;
 };
 const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission, sendFriendRequest, fetchVirtualRivalStatus, addVirtualRival, removeVirtualRival } = useFriends();
 
@@ -1810,6 +1813,8 @@ const handleUnifiedClose = async () => {
       @upload="resetData"
       @open-ocr-search="isOcrSearchModalOpen = true"
       @open-rank-quiz="isRankQuizOpen = true"
+      :can-access-competition="canAccessCompetition"
+      @open-competition-admin="goCompetitionAdmin"
     />
 
     <!-- カメラ OCR 曲検索モーダル: 一致時は譜面一覧タブに切替して検索語を引き継ぐ -->
@@ -1952,82 +1957,25 @@ const handleUnifiedClose = async () => {
             </nav>
           </div>
           
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 sm:gap-4">
             <!--
-              beat-seeker for competition: 大会主催 4 ID 限定の機能群。
-              クリックで大会管理 / Strategy Card / Song Reveal の 3 リンクをドロップダウン表示する。
-              ダークモード切替の左隣に常時表示 (権限のあるユーザーのみ)。
+              アプリ版限定「CSV取り込み」: Android アプリ (WebView) 内でのみ表示するクイック導線。
+              アプリでは 1 タップ取り込みが使えるため、サイドバーを開かなくても
+              ヘッダーからそのまま取り込みモーダルを開けるようにしている。
+              ブラウザでは isNativeApp が false になり、この導線は出ない (従来どおりサイドバーから)。
             -->
-            <div v-if="canAccessCompetition" class="relative">
-              <button
-                type="button"
-                @click="isCompetitionMenuOpen = !isCompetitionMenuOpen"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                :class="isCompetitionMenuOpen ? 'border-blue-500 dark:border-blue-500' : ''"
-                title="beat-seeker for competition"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span class="hidden sm:inline whitespace-nowrap">beat-seeker for competition</span>
-                <span class="sm:hidden">Competition</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <!-- ドロップダウン本体: 外側クリックで閉じる用のオーバーレイ + 浮動メニュー -->
-              <template v-if="isCompetitionMenuOpen">
-                <div class="fixed inset-0 z-40" @click="isCompetitionMenuOpen = false"></div>
-                <div class="absolute right-0 mt-2 w-72 z-50 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl overflow-hidden">
-                  <div class="px-4 py-2 section-label border-b border-slate-100 dark:border-slate-700/60">
-                    Competition Tools
-                  </div>
-                  <!-- 大会管理 (内部タブ) -->
-                  <button
-                    type="button"
-                    @click="goCompetitionAdmin"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p>大会管理</p>
-                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">5チーム×4人 総当たり編成</p>
-                    </div>
-                  </button>
-                  <!-- Strategy Card (スタンドアロン URL) -->
-                  <a
-                    href="/strategy-card"
-                    @click="isCompetitionMenuOpen = false"
-                    class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p>Strategy Card</p>
-                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">課題曲ランダム抽選 (OBS用)</p>
-                    </div>
-                  </a>
-                  <!-- Song Reveal (スタンドアロン URL) -->
-                  <a
-                    href="/song-reveal"
-                    @click="isCompetitionMenuOpen = false"
-                    class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p>Song Reveal</p>
-                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">選曲発表演出 (OBS用)</p>
-                    </div>
-                  </a>
-                </div>
-              </template>
-            </div>
+            <button
+              v-if="isNativeApp && isLoggedIn"
+              type="button"
+              @click="showUploadArea = true"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shrink-0"
+              :title="t('nav.appCsvImport')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span class="whitespace-nowrap">{{ t('nav.appCsvImport') }}</span>
+            </button>
 
             <!-- Dark Mode Toggle -->
             <button @click="toggleDarkMode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none">
