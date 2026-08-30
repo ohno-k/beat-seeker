@@ -860,7 +860,7 @@ export const ko = {
   'compare.close': '닫기',
 
   // About
-  'about.heroBadge': 'Beta 버전 공개 중',
+  'about.heroBadge': '정식 서비스 공개 중',
   'about.heroTitle': 'beat-seeker 란?',
   'about.heroP1': 'beat-seeker는 beatmania IIDX의 스코어 데이터를 시각화 및 분석하기 위한 무료 웹 애플리케이션입니다.',
   'about.heroP2': '공식 사이트에서 다운로드한 CSV 파일을 업로드하는 것만으로, 당신의 플레이 데이터를 아름다운 그래프와 랭크로 확인할 수 있습니다.',

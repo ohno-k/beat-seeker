@@ -1,6 +1,6 @@
 # 次回作 IIDX 34 ZINRAI 移行計画（構想メモ）
 
-作成: 2026-08-19 / 更新: 2026-08-19（Q&A反映）/ ステータス: **構想（未実装）**
+作成: 2026-08-19 / 更新: 2026-08-30（先行実装を反映）/ ステータス: **稼働前の実装は完了。残りは稼働日の運用作業**
 対象: IIDX 34 **ZINRAI** 初日 — **現在の予測は 2026-09-16**（KONAMI の稼働告知で確定させること）
 
 > **朗報**: 過去作スコアの基盤は既に完成している（`past_scores` テーブル、「歴代」タブ、作品バッジ、
@@ -37,11 +37,18 @@
 - **BEAT-PT / RATE-PT を初期化**する。
 - `scores` を空にすれば **自動的に初期化される**（集計は現行作のみを見るため）。
 - ⚠ **§4 のスナップショット保存が完了してから**実行すること。
+- **2026-08-30 実装済み**: [VersionTransitionService#resetCurrentScores](../backend/src/main/java/com/beatseeker/backend/service/VersionTransitionService.java)。
+  詳細は §9。既定では動かず、`APP_VERSION_TRANSITION_RESET_SCORES=true` にして初めて対象になる。
 
 ## 3. beta 版の終了
 
 - **ZINRAI 初日をもって beta 版扱いを終了**し、正式サービスとする。
 - **変更は beta 表記の削除だけ**。機能開放・課金・利用規約の変更は**含まない**。
+- **2026-08-30 実装済み**: ロゴタイルの「BETA」リボン（`Sidebar.vue` とモバイルヘッダの 2 か所）を削除し、
+  About のヒーローバッジ `about.heroBadge` を 3 言語とも「正式サービス 公開中」相当へ変更した。
+- ⚠ **未対応（意図的）**: 利用規約の免責事項 `terms.disclaimerItem1` に残る
+  「基本ベータ版として提供されます」の一文。**利用規約の変更は含まない**という方針に触れるため、
+  文面を変えるかどうかは別途判断すること。
 
 ## 4. 過去作ランキングのアーカイブ
 
@@ -49,6 +56,15 @@
 - **一世代限りではなく、34 → 35 と積み上がるアーカイブとして設計する**
   → スナップショットに **作品バージョンID** を持たせ、作品を選んでランキングを見られる形にする。
 - **ティア／サブティアも一緒に保存する**（§5 で前作ティアの色が必要になるため）。
+
+**2026-08-30 実装済み（閲覧 UI）**。
+
+- [PastRankingController.java](../backend/src/main/java/com/beatseeker/backend/controller/PastRankingController.java)
+  — `GET /api/past-rankings/versions` / `/{version}` / `/previous-tiers`。未ログインでも閲覧可。
+- [PastRanking.vue](../frontend/src/components/PastRanking.vue) と `/past-ranking` ルート、
+  サイドバーの「もっと見る」に導線。作品セレクタと BEAT / RATE の切替を持つ。
+- 表示名と IIDX ID は**撮影時点の値**、公開範囲とサポーター表示は**現在の設定**に従う。
+- アーカイブが 0 件の現在は「まだ保存された過去作のランキングはありません」と出るだけ。
 
 > ⚠ **実行順序**: 「4. 保存」→「1. 移送」→「2. 初期化」。初期化してからでは復元できない。
 
@@ -70,10 +86,21 @@
 
 → 組み合わせは「外枠のみ」「光沢のみ」「両方」「どちらも無し」の 4 通り。
 
-実装箇所: `frontend/src/components/RankIcon.vue` の `isSupporter` ブロック（147-170 行付近）
-— 金グラデーション `supporter-grad-*` と外周グロー `supporter-glow-*` を置き換え、
-**発動条件を `isSupporter` から「前作ティアの有無」へ付け替える**。光沢は別途 `isSupporter` で足す。
-必要な入力（前作ティア・サブティア）は §4 のスナップショットから供給する。
+**2026-08-30 実装済み**。
+
+- [RankIcon.vue](../frontend/src/components/RankIcon.vue): 金グラデーション `supporter-grad-*` と
+  外周グロー `supporter-glow-*` を前作ティア色の `past-grad-*` / `past-glow-*` へ置き換え、
+  発動条件を `isSupporter` から `pastRankName` の有無へ付け替えた。光沢は `isSupporter` で別途付く。
+  サブティア 1→5 でぼかし幅と濃さが段階的に上がる。Beginner は最弱・Legend は最強で固定
+  （どちらもサブティアを持たないため）。
+- [usePastTiers.ts](../frontend/src/composables/usePastTiers.ts): 前作ティアの供給元。
+  `GET /api/past-rankings/previous-tiers` を 1 回だけ叩き、userId / iidxId の両方で引ける。
+  サーバは **PT だけを返し、ティアの導出は `beatTier.ts` に一本化**している（閾値調整で表示がずれないため）。
+- 反映済みの画面: ランキング一覧・ダッシュボード・アップロード履歴・難易度別ランキング。
+- **アーカイブが 1 件も無い間は誰にも外枠が付かない**ので、スナップショット前にデプロイしても
+  「サポーターの金枠が光沢に変わる」以外の見た目の変化は起きない。
+- ⚠ ユーザー設定 `users.show_supporter_border`（プロフィールのトグル）は**カラム名はそのまま**で、
+  意味だけ「金枠の表示」から「光沢の表示」へ移した。表示文言は 3 言語とも更新済み。
 
 ## 6. INFINITAS スコア読み込みの廃止
 
@@ -95,6 +122,12 @@
   ZINRAI のラベルを入れないと 34 の CSV が全て弾かれる。
 - ラベルは**公式 CSV の「バージョン」列の実表記**に合わせる（大文字小文字が不規則。
   例: `tricoro` / `copula` は小文字始まり、`Sparkle Shower` は全大文字ではない）。稼働後に実物で確認すること。
+- **2026-08-30 実装済み**: 2 箇所とも 34 へ切り替え、`VERSION_SHORT` に `34: 'ZI'`、
+  `SUPPORTED_VERSIONS` に 34 を追加した。33 は 34 にプライマリカラー（blue）を譲って
+  バッジ・グラフ色とも violet へ移した。
+- ⚠ `34: 'ZINRAI'` は**稼働前に置いた暫定値**。稼働後に公式 CSV の実表記で必ず確認すること
+  （表記が違うと 34 の CSV が全て弾かれる）。
+- ⚠ このコミットは**マージした瞬間に現行作が 34 になる**。稼働日まではマージしないこと。
 
 ## 8. 難易度の大幅改定と、新規譜面の自動配置
 
@@ -174,20 +207,38 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
 | [VersionTransitionService.java](../backend/src/main/java/com/beatseeker/backend/service/VersionTransitionService.java) | 各手順の実装。いずれも**追記のみ・非破壊** |
 | [VersionTransitionScheduler.java](../backend/src/main/java/com/beatseeker/backend/service/VersionTransitionScheduler.java) | 稼働日を待つポーリングタイマー |
 | [VersionTransitionAdminController.java](../backend/src/main/java/com/beatseeker/backend/controller/VersionTransitionAdminController.java) | 管理者向けの状況確認 API（`GET /api/admin/version-transition/status`） |
+| [PastRankingController.java](../backend/src/main/java/com/beatseeker/backend/controller/PastRankingController.java) | 過去作ランキングの公開 API（2026-08-30 追加） |
 
-`VersionPtSnapshotRepository` / `SystemTaskRunRepository` も追加。既存ファイルの変更は無し。
+`VersionPtSnapshotRepository` / `SystemTaskRunRepository` も追加。
 
 ### 自動化する手順
 
 1. **スナップショット** — `score_history_logs` のユーザーごと最新行から最終 PT を `version_pt_snapshots` へ焼き付ける。順位も付与（現行ランキングと同じ RANK() 方式、RATE-PT は `> 0` のみ採番）
 2. **スコアの複製** — `scores` → `past_scores`（version=33）。譜面ごとの最高スコアのみ、未プレー除外。**元データは消さない**
 3. **難易度表の適用** — 既存の `GameDataService.applyDraftDifficultyTable()` に委譲（既定では無効）
+4. **スコアの初期化**（2026-08-30 追加・既定では無効） — `scores` / `user_song_ranks` /
+   `user_comparison_stats` を削除し、`users` の PT 系カラムをリセットする。**唯一の破壊的手順**
+
+### 手順 4（スコアの初期化）の設計
+
+- **履歴は消さず、全項目 0 の「世代リセット行」を全員に 1 行ずつ足す**（`score_history_logs.tag = 'VERSION-RESET'`）。
+  ランキングは**ユーザーごと最新行**を見るため、履歴を放置すると `scores` を空にしても順位表に前作の PT が
+  出たままになる。かといって履歴を消すと成長記録から前作の推移が丸ごと失われる。0 の行を足せば
+  順位表は 0 から始まり、過去の推移はそのまま残る。
+- タグを分けてあるので、初日のアップロード（タグ null）がこの行を上書きしない。
+- `users.last_uploaded_at` は NULL に戻す（「まだ ZINRAI のスコアを上げていない」が正）。
+- 楽曲集計キャッシュ 3 種（曲別ランキング / 平均スコアレート / アリーナ平均）は
+  トランザクション確定後に `refreshSongCaches()` で作り直す。
+- **歯止めが 2 段**: `APP_VERSION_TRANSITION_RESET_SCORES=true` にしない限り対象にならず、
+  さらに前作の退避（スナップショットと `past_scores`）が DB に無ければ例外で中断する。
+- **この手順だけ冪等ではない**（呼ぶたびにリセット行が増える）。二重実行の防止は `system_task_runs` に委ねる。
+- ⚠ リーグの進行中の週に実行すると、その週の基準スコアと実データが食い違う。
+  **週の切れ目に合わせる**か、実行後にその週を締めること。
 
 ### 自動化しない手順
 
-**スコアの初期化（`scores` の削除と派生データのリセット）は実装していない。** 取り返しがつかず、`users.total_beat_pt` / `user_song_ranks` / 各種キャッシュなど波及先が広いため、設計を確定させるまで自動実行させない。手順 3 まで終えると「残りは手作業」とログに出して停止する。
-
-フロントエンドの `CURRENT_VERSION` はビルド時定数のため、これもタイマーでは変えられない（再デプロイが必要）。完全自動化するにはバージョンを API 経由で受け取る改修が要る。
+フロントエンドの `CURRENT_VERSION` はビルド時定数のため、タイマーでは変えられない（再デプロイが必要）。
+beta 表記の削除も同じくデプロイ側の作業になる。完全自動化するにはバージョンを API 経由で受け取る改修が要る。
 
 ### 設定（環境変数）
 
@@ -199,6 +250,7 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
 | `APP_VERSION_TRANSITION_TO_VERSION` | `34` | 移行先 |
 | `APP_VERSION_TRANSITION_MIN_USERS` | `100` | スナップショット対象がこの人数未満なら中断 |
 | `APP_VERSION_TRANSITION_APPLY_DIFFICULTY` | `false` | 難易度表 draft の自動適用 |
+| `APP_VERSION_TRANSITION_RESET_SCORES` | `false` | スコアの初期化（破壊的。明示的に有効化したときだけ実行） |
 
 **稼働日は cron 式ではなく環境変数**なので、日付がずれても再デプロイ不要（Render の環境変数変更＋再起動のみ）。
 
@@ -252,17 +304,24 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
 - [x] **MAX-率による全曲再判定の draft を作成**（2026-08-19 実施、案A/案B を profile に保存、draft = 案B）
 - [ ] ユーザーが目視確認 → 案A/案B の決定（§8.1）
 
-### 稼働日が近づいたら
+### 稼働前に実装しておくもの（コード側）
 
-- [ ] ZINRAI 稼働日の確定（予測 2026-09-16）／公式 CSV の「バージョン」列の実表記を確認
-- [x] **PT スナップショットの保存機構**（§9 実装済み・作品バージョンID付き・積み上げ式）
-- [x] `scores`(33) → `past_scores`(version=33) の複製機構（§9 実装済み）
+- [x] **PT スナップショットの保存機構**（§9・作品バージョンID付き・積み上げ式）
+- [x] `scores`(33) → `past_scores`(version=33) の複製機構（§9）
+- [x] **スコアの初期化**（§9 手順 4。既定は無効・前段の退避が無ければ中断）
+- [x] **過去作ランキング閲覧 UI**（§4。`/past-ranking`）
+- [x] **ティアアイコンの外枠を前作ティア色の発光へ**（§5。サブティアで光量可変）
+- [x] バージョン定数を 34 に切り替え（§7。フロント／バックエンドの 2 箇所）
+- [x] beta 表記の削除（§3。利用規約の免責事項は意図的に未対応）
+- [ ] INFINITAS スコア読み込みの廃止（初日の対象外。廃止時期は別途告知）
+- [ ] 新規譜面の 200 プレイごと自動再判定バッチ（§8.2。実力解禁譜面は除外・手動配置）
+
+### 稼働日の運用作業
+
+- [ ] ZINRAI 稼働日の確定（予測 2026-09-16）／公式 CSV の「バージョン」列の実表記を確認し、
+      `VERSION_LABELS[34]` の暫定値 `'ZINRAI'` を実物に合わせる
 - [ ] `APP_VERSION_TRANSITION_LAUNCH_AT` を設定 → dry-run で件数確認 → 本番実行に切替
-- [ ] 過去作ランキング閲覧 UI（保存したデータを見せる画面はまだ無い）
-- [ ] **スコアの初期化**（`scores` の削除と `users.total_beat_pt` / `user_song_ranks` / キャッシュのリセット）— 未実装・要設計
-- [ ] バージョン定数を 34 に切り替え（フロント／バックエンドの 2 箇所）
-- [ ] beta 表記の削除
-- [ ] サポーターアイコンの外枠を前作ティア色の発光へ（サブティアで光量可変・前作で固定）
-- [ ] INFINITAS スコア読み込みの廃止
+- [ ] `APP_VERSION_TRANSITION_RESET_SCORES=true`（スコア初期化を有効化。dry-run で件数を見てから）
+- [ ] `APP_LEAGUE_SELF_BEST_INCLUDES_PAST=true`（リーグの課題曲選定に過去作を含める）
+- [ ] バージョン 34 のブランチをマージして再デプロイ（マージした瞬間に現行作が 34 になる）
 - [ ] 難易度表の改定を適用 → 更新履歴に第 N 版を追加
-- [ ] 新規譜面の 200 プレイごと自動再判定バッチ（実力解禁譜面は除外・手動配置）

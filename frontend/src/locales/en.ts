@@ -859,7 +859,7 @@ export const en = {
   'compare.close': 'Close',
 
   // About
-  'about.heroBadge': 'Beta Version Live',
+  'about.heroBadge': 'Now Live',
   'about.heroTitle': 'What is beat-seeker?',
   'about.heroP1': 'beat-seeker is a free web application for visualizing and analyzing beatmania IIDX score data.',
   'about.heroP2': 'Just upload the CSV file downloaded from the official site, and you can check your play data with beautiful graphs and ranks.',

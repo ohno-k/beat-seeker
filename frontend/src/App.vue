@@ -1924,12 +1924,6 @@ const handleUnifiedClose = async () => {
             <div class="flex lg:hidden items-center gap-2 cursor-pointer group" @click="activeTab = 'dashboard'">
               <div class="relative w-8 h-8 bg-blue-700 rounded-md flex items-center justify-center text-white font-bold text-xl group-hover:bg-blue-800 transition-colors overflow-hidden">
                 B
-                <div
-                  class="absolute bg-red-500 text-white text-[9px] font-bold py-[2px] w-[46px] text-center transform -rotate-45 leading-none tracking-wider"
-                  style="bottom: 3px; right: -14px;"
-                >
-                  BETA
-                </div>
               </div>
             </div>
             

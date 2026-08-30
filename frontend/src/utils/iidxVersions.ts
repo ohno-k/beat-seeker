@@ -20,21 +20,22 @@
  *    実際には新曲を 1 曲も踏まないユーザーはまれなので、確認ダイアログ（過去作の取り込みは
  *    必ずユーザーの同意を取る）でカバーする方針にしている。
  *
- * ■ ラベル表が「全 33 作ぶん」必要な理由
- * 対応作品（30〜33）の 4 つだけを持つと、未対応の新作（34 以降）が出たときに
- * 未知のラベルを黙って無視して「最大値 = 33」と誤判定し、新作のスコアを現行作に
+ * ■ ラベル表が「1st&substream から現行作まで全作ぶん」必要な理由
+ * 対応作品（30〜34）の 5 つだけを持つと、未対応の新作（35 以降）が出たときに
+ * 未知のラベルを黙って無視して「最大値 = 34」と誤判定し、新作のスコアを現行作に
  * 混ぜてしまう。表を閉じた集合にしておけば「未知のラベル ＝ 未対応の新作」と断定でき、
  * 安全側（取り込み拒否）に倒せる。
  *
- * 表記は実際の公式 CSV（33 Sparkle Shower）から抽出した確定値。
+ * 33 までの表記は実際の公式 CSV（33 Sparkle Shower）から抽出した確定値。
  * 大文字小文字が不規則（"tricoro" / "copula" は小文字始まり、"Sparkle Shower" は
  * 全大文字ではない）なので、突き合わせは trim + 小文字化して行う。
+ * 34 ZINRAI だけは稼働前に置いた暫定値なので、実物の CSV で確認すること。
  *
  * バックエンド側の対応表は {@code backend/.../service/IidxVersions.java}。
  */
 
 /** 現行作のバージョン番号。現行作のスコアは通常の `scores` テーブルで管理される。 */
-export const CURRENT_VERSION = 33;
+export const CURRENT_VERSION = 34;
 
 /** 過去作として取り込みを受け付ける下限バージョン。 */
 export const MIN_PAST_VERSION = 30;
@@ -80,6 +81,10 @@ export const VERSION_LABELS: Record<number, string> = {
     31: 'EPOLIS',
     32: 'Pinky Crush',
     33: 'Sparkle Shower',
+    // 34 ZINRAI のラベルは公式 CSV の実表記を稼働後に確認して確定させること。
+    // この表は閉じた集合で、未知のラベル＝未対応の新作として取り込みを拒否する設計のため、
+    // 表記が違っていると 34 の CSV が全て弾かれる。
+    34: 'ZINRAI',
 };
 
 /** ラベル（小文字化・trim 済み） → バージョン番号 の逆引き。判定処理の実体。 */
@@ -95,13 +100,14 @@ export const VERSION_SHORT: Record<number, string> = {
     31: 'EP',
     32: 'PC',
     33: 'SS',
+    34: 'ZI',
 };
 
 /**
  * 取り込み対象として UI に提示する作品の一覧（新しい順）。
  * `current` が true の作品は通常のスコア取り込み経路（`/api/scores/upload`）に回る。
  */
-export const SUPPORTED_VERSIONS = [33, 32, 31, 30].map(num => ({
+export const SUPPORTED_VERSIONS = [34, 33, 32, 31, 30].map(num => ({
     num,
     name: VERSION_LABELS[num],
     short: VERSION_SHORT[num],
@@ -126,7 +132,9 @@ export function versionShort(num: number | null | undefined): string {
  */
 export function versionBadgeClass(num: number | null | undefined): string {
     switch (num) {
-        case 33: return 'text-blue-700 bg-blue-100 border-blue-300 dark:text-blue-300 dark:bg-blue-900/40 dark:border-blue-700';
+        case 34: return 'text-blue-700 bg-blue-100 border-blue-300 dark:text-blue-300 dark:bg-blue-900/40 dark:border-blue-700';
+        // 33 は 34 稼働に伴い過去作へ移ったため、プライマリカラー（blue）を 34 に譲って violet に変えた。
+        case 33: return 'text-violet-700 bg-violet-100 border-violet-300 dark:text-violet-300 dark:bg-violet-900/40 dark:border-violet-700';
         case 32: return 'text-pink-700 bg-pink-100 border-pink-300 dark:text-pink-300 dark:bg-pink-900/40 dark:border-pink-700';
         case 31: return 'text-amber-700 bg-amber-100 border-amber-300 dark:text-amber-300 dark:bg-amber-900/40 dark:border-amber-700';
         case 30: return 'text-slate-700 bg-slate-100 border-slate-300 dark:text-slate-300 dark:bg-slate-700/60 dark:border-slate-600';
@@ -144,7 +152,10 @@ export function versionBadgeClass(num: number | null | undefined): string {
  * 円グラフでは無彩色が「その他・非強調」の意味を持ってしまうため。
  */
 export const VERSION_CHART_COLOR: Record<number, string> = {
-    33: '#3b82f6',
+    34: '#3b82f6',
+    // 33 はバッジと同じく violet へ移した。blue（34）・pink（32）・amber（31）・teal（30）と
+    // 色相が十分離れており、ライト／ダークどちらの背景でも既存 4 色と同じ明度帯に収まる。
+    33: '#7c3aed',
     32: '#db2777',
     31: '#d97706',
     30: '#0d9488',

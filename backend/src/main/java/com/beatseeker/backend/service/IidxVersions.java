@@ -23,7 +23,7 @@ import java.util.Map;
 public final class IidxVersions {
 
     /** 現行作のバージョン番号。現行作のスコアは {@code scores} テーブル側で管理する。 */
-    public static final int CURRENT = 33;
+    public static final int CURRENT = 34;
 
     /** 過去作として取り込みを受け付ける下限バージョン。 */
     public static final int MIN_PAST = 30;
@@ -40,6 +40,7 @@ public final class IidxVersions {
         m.put(31, "EPOLIS");
         m.put(32, "Pinky Crush");
         m.put(33, "Sparkle Shower");
+        m.put(34, "ZINRAI");
         NAMES = Collections.unmodifiableMap(m);
     }
 
