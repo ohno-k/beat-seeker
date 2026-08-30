@@ -59,35 +59,85 @@ CSV パース〜サーバ登録の既存パイプラインが動きます。**�
 - `MainActivity` の WebView は beat-seeker 以外へ遷移させない（外部リンクは端末のブラウザへ逃がす）。
 - KONAMI ID の認証情報はログイン用 WebView（＝eagate 自身）にしか渡らない。アプリは保持も送信もしない。
 
-## ビルド
+## 実機で試す
 
-Gradle Wrapper（バイナリ）はリポジトリに含めていません。初回は以下のどちらかで生成してください。
+### 前提: 先にフロントを反映すること
+
+アプリは beat-seeker のページを表示し、収集スクリプト `/native-scraper.js` も **beat-seeker から実行時に取得** します。
+どちらも今回の変更で初めて入るものなので、**フロントを先にデプロイしないとアプリ側は動きません**
+（ボタンが出ない／`script download failed` になる）。順番は次のどちらかです。
+
+- 本番へ反映してから試す … `https://beat-seeker.com` に今回のフロントをデプロイ → APK はデフォルト設定のままでよい
+- ローカルで試す … PC で `cd frontend && npm run dev -- --host` を起動し、後述の `-PappUrl` で PC の LAN IP を指定する
+
+### 方法1: GitHub Actions で APK を作る（Android SDK 不要・いちばん簡単）
+
+1. GitHub の **Actions** タブ → **Android debug APK** → **Run workflow**
+2. `app_url` は本番で試すなら空のまま。別環境を見せたい場合だけ URL を入れる
+3. 完了後、そのランの **Artifacts** から `beat-seeker-debug-apk` をダウンロードして展開
+
+`android/` 配下を触ってこのブランチに push したときにも自動で走ります。
+
+### 方法2: 手元でビルドする
+
+Android Studio で `android/` を開いて Run するのが最短です。コマンドラインの場合:
 
 ```bash
 cd android
-gradle wrapper --gradle-version 8.7   # ローカルに Gradle がある場合
-# あるいは Android Studio で android/ を開く（Wrapper は自動生成される）
+./gradlew assembleDebug
+# → app/build/outputs/apk/debug/app-debug.apk
 ```
 
-その後:
+Android SDK の場所を `android/local.properties` に書いてください（Android Studio で開けば自動生成されます）。
+
+```properties
+sdk.dir=/Users/you/Library/Android/sdk
+```
+
+ローカルの開発サーバに向ける場合（PC の LAN IP を指定。`localhost` は端末自身を指すので不可）:
 
 ```bash
-./gradlew assembleDebug
-./gradlew installDebug
+./gradlew assembleDebug -PappUrl=http://192.168.1.10:5173
 ```
 
-`local.properties` に Android SDK のパスが必要です（Android Studio で開けば自動生成されます）。
+debug ビルドは平文 HTTP を許可し、applicationId に `.debug` が付くので**本番版と同じ端末に並べて入れられます**。
 
-### ローカル開発時
+### 端末へのインストール
 
-`app/build.gradle.kts` の `APP_URL` / `SCRAPER_SCRIPT_URL` を開発サーバに向けてください。
-`http://` を使う場合は cleartext 通信の許可（`android:usesCleartextTraffic` またはネットワークセキュリティ設定）が別途必要です。
+USB デバッグを有効にした端末を繋いで:
+
+```bash
+cd android
+./gradlew installDebug          # ビルドとインストールを一度に
+# あるいは既にある APK を入れる
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+USB を使わない場合は APK をそのまま端末へ転送し、ファイルマネージャから開いてください。
+初回は「提供元不明のアプリのインストール」の許可を求められます。
+
+### 動作確認の手順
+
+1. アプリを起動し、beat-seeker にログインする
+2. 取り込みモーダルを開くと、最上部に青い **「1タップで取り込む」** が出る（出なければフロントが未反映）
+3. 押す → 初回は eagate のログイン画面が出るのでログイン → そのまま収集が始まり、完了までボタン内に進捗が出る
+4. 2 回目以降は Cookie が残っているのでログイン画面は出ない
+
+### うまく動かないときの調べ方
+
+PC の Chrome で `chrome://inspect` を開くと、端末の WebView（beat-seeker 側・eagate 側の両方）を
+DevTools で覗けます。`adb logcat` と併せて見るのが手っ取り早いです。よくある原因:
+
+- ボタンが出ない … 表示しているフロントに今回の変更が入っていない
+- `script download failed` … `/native-scraper.js` が配信されていない（フロントのビルドで生成される）
+- ログイン画面が出続ける … `Eagate.isLoginUrl` のパス判定が実際のリダイレクト先と合っていない
 
 ## 未着手 / 今後
 
 - **実機での動作確認は未実施**。特に eagate の未ログイン時リダイレクト先パス（`Eagate.isLoginUrl`）は
   実際の挙動に合わせて調整が必要になる可能性があります。
 - リリース署名設定（`signingConfigs`）、Play Console への登録。
+  現状ビルドできるのは debug APK だけです。
 - `WorkManager` による定期バックグラウンド同期（タップ 0 での自動取り込み）。
 - アイコンは `frontend/public/icon-512.png` から機械的に縮小したもの。
   必要なら Android Studio の Image Asset で adaptive icon を作り直してください。
