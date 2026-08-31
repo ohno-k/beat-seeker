@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  *  - POST /api/league/admin/weeks/{weekId}/songs/{songId}/replace … 課題曲の差し替え（draft のみ）
  *  - POST /api/league/admin/weeks/{weekId}/songs/{songId}/disabled … 課題曲の無効化 / 復帰（draft・active）
  *  - POST /api/league/admin/weeks/{weekId}/redraw          … 指定階級の課題曲を再抽選（draft のみ）
+ *  - POST /api/league/admin/weeks/{weekId}/members/swap    … 編成メンバー 2 人の座席入れ替え（draft のみ）
  *  - POST /api/league/admin/run-weekly                     … 週次処理の手動実行
  *  - POST /api/league/admin/create-draft                   … draft 週の手動作成
  *  - GET  /api/league/admin/preview                        … 仮編成プレビュー（DB 非更新）
@@ -484,6 +485,49 @@ public class LeagueAdminController {
         }
         return ResponseEntity.ok(Map.of("message", "課題曲を再抽選しました",
                 "songs", songs.stream().map(this::toSongMap).toList()));
+    }
+
+    /**
+     * 【メソッドの役割】 編成中(draft)の週で、2 人のメンバーの座席（卓 DIVISION とグループ）を入れ替える。
+     *
+     * 自動編成のグループ分けはランダムなので、開始前に管理者が偏りを手直しするための操作。
+     * 片方を選び、もう片方を選ぶとその 2 人だけが入れ替わる（グループの人数は変わらない）。
+     * ホーム DIVISION は本人のものが付いて回り、立場（チャレンジ / ディフェンス）は移った先の
+     * 卓との関係で計算し直される。開始(active)後はグループを変更できない。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param weekId 対象週 ID（draft であること）
+     * @param req    入れ替える 2 人のユーザー ID
+     * @return 入れ替え後の週の詳細（編成表をそのまま描き直せる形）
+     */
+    // 検証エラーを 400 で返すため、ここではトランザクションを開かない（開くとサービス側の
+    // 例外で rollback-only が付き、コミット時に 500 になってしまう）。更新の原子性は
+    // LeagueWeekLifecycleService#swapMembers 側の @Transactional が担保する。
+    @PostMapping("/weeks/{weekId}/members/swap")
+    public ResponseEntity<?> swapMembers(Authentication auth,
+                                         @PathVariable Long weekId,
+                                         @RequestBody SwapMembersRequest req) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        LeagueWeek week = leagueWeekRepository.findById(weekId).orElse(null);
+        if (week == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
+        }
+        if (req == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "入れ替える 2 人を指定してください"));
+        }
+        try {
+            List<LeagueMember> swapped = lifecycleService.swapMembers(week, req.userIdA(), req.userIdB());
+            String names = swapped.stream().map(m -> m.getUser().getDisplayName() != null
+                    && !m.getUser().getDisplayName().isBlank()
+                    ? m.getUser().getDisplayName() : m.getUser().getIidxId()).collect(Collectors.joining(" ⇄ "));
+            return ResponseEntity.ok(Map.of(
+                    "message", "編成を入れ替えました（" + names + "）。",
+                    "week", weekDetail(week)));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**
@@ -1112,6 +1156,10 @@ public class LeagueAdminController {
 
     /** 階級手動修正リクエストのボディ。 */
     public record UpdateTierRequest(Integer tier) {
+    }
+
+    /** 編成メンバー入れ替えリクエストのボディ（入れ替える 2 人のユーザー ID）。 */
+    public record SwapMembersRequest(Long userIdA, Long userIdB) {
     }
 
     /** 仮編成プレビュー適用リクエストのボディ（GET /preview の応答をそのまま送り返す形）。 */

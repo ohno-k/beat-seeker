@@ -558,6 +558,28 @@ export function useLeague() {
     return (await res.json()).songs as LeagueSongInfo[];
   };
 
+  /**
+   * 編成中(draft)の週で、2 人のメンバーの座席（DIVISION の卓とグループ）を入れ替える（管理者のみ）。
+   *
+   * 入れ替わるのは座席だけで、ホーム DIVISION は本人に付いて回る（卓をまたぐとチャレンジ /
+   * ディフェンス扱いになる）。開始(active)後はグループを変更できない。
+   *
+   * @returns 入れ替え後の週（編成表を描き直すのに使う）
+   */
+  const swapMembers = async (
+    weekId: number,
+    userIdA: number,
+    userIdB: number
+  ): Promise<LeagueAdminWeek> => {
+    const res = await fetch(`${API_BASE}/api/league/admin/weeks/${weekId}/members/swap`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ userIdA, userIdB }),
+    });
+    if (!res.ok) await raise(res, 'メンバーの入れ替えに失敗しました');
+    return (await res.json()).week as LeagueAdminWeek;
+  };
+
   /** 週次処理（締め → 編成 → 開始）を手動実行する（管理者のみ）。 */
   const runWeekly = async (ladder: LadderType): Promise<Record<string, unknown>> => {
     const res = await fetch(`${API_BASE}/api/league/admin/run-weekly?ladder=${ladder}`, {
@@ -681,6 +703,7 @@ export function useLeague() {
     replaceSong,
     setSongDisabled,
     redrawTier,
+    swapMembers,
     runWeekly,
     createDraft,
     formDraft,

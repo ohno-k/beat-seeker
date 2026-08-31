@@ -515,6 +515,106 @@ public class LeagueWeekLifecycleService {
     }
 
     /**
+     * 【メソッドの役割】 編成中(draft)の週で、2 人のメンバーの座席（卓 DIVISION とグループ）を入れ替える。
+     *
+     * 自動編成のグループ分けは完全ランダムなので、「知り合い同士が同じグループに固まった」
+     * 「実力が偏った」といった偏りを開始前に管理者が手直しするための操作。片方を選び、もう片方を
+     * 選ぶと、その 2 人の座席だけが入れ替わる（他のメンバーは動かない＝グループ人数も変わらない）。
+     *
+     * <p>入れ替えるのは座席（{@code tier} / {@code groupIndex}）だけで、ホーム DIVISION
+     * （{@code homeTier}）は本人のものが付いて回る。立場（normal / challenge / defense）は
+     * 新しい座席とホーム DIVISION の関係から計算し直す（{@link #roleFor}）ので、例えば
+     * DIVISION 2 の人を DIVISION 1 の卓へ移すとチャレンジ扱いになる。
+     *
+     * <p>課題曲はグループ単位で既に確定しているため触らない（移った先のグループの曲で戦う）。
+     * ベースラインは開始時に取るので draft には無く、掃除も不要。ライン（各グループの最高 EX）は
+     * メンバー構成から都度計算しているので、入れ替え後の overview にそのまま反映される。
+     *
+     * <p><b>開始(active)後は使えない</b>。開始時点のベースラインで週内プレー判定をしており、
+     * 途中でグループを変えると課題曲もラインも変わって成績の前提が崩れるため。
+     *
+     * @param week    対象の週（draft であること）
+     * @param userIdA 入れ替える 1 人目のユーザー ID
+     * @param userIdB 入れ替える 2 人目のユーザー ID
+     * @return 入れ替え後の 2 人のメンバー（[A, B] の順）
+     * @throws IllegalStateException    draft 以外の週を指定した場合
+     * @throws IllegalArgumentException 同一人物・週に居ないユーザー・同じグループ同士を指定した場合
+     */
+    @Transactional
+    public List<LeagueMember> swapMembers(LeagueWeek week, Long userIdA, Long userIdB) {
+        if (week == null) {
+            throw new IllegalArgumentException("対象の週がありません");
+        }
+        if (!"draft".equals(week.getStatus())) {
+            throw new IllegalStateException("入れ替えできるのは編成中(draft)の週のみです（開始後はグループを変更できません）");
+        }
+        if (userIdA == null || userIdB == null) {
+            throw new IllegalArgumentException("入れ替える 2 人を指定してください");
+        }
+        if (userIdA.equals(userIdB)) {
+            throw new IllegalArgumentException("同じユーザー同士は入れ替えられません");
+        }
+
+        List<LeagueMember> members = leagueMemberRepository.findByWeek(week);
+        LeagueMember a = findMember(members, userIdA);
+        LeagueMember b = findMember(members, userIdB);
+        if (a == null || b == null) {
+            throw new IllegalArgumentException("入れ替える相手がこの週の編成に居ません（編成し直された可能性があります）");
+        }
+        if (Objects.equals(a.getTier(), b.getTier()) && Objects.equals(a.getGroupIndex(), b.getGroupIndex())) {
+            throw new IllegalArgumentException("同じグループ内の 2 人は入れ替えても編成が変わりません");
+        }
+
+        swapSeats(a, b);
+        leagueMemberRepository.saveAll(List.of(a, b));
+        log.info("リーグ編成のメンバーを入れ替え: weekId={} {}(D{}/G{}) <-> {}(D{}/G{})",
+                week.getId(), userIdA, a.getTier(), a.getGroupIndex(),
+                userIdB, b.getTier(), b.getGroupIndex());
+        return List.of(a, b);
+    }
+
+    /** 週のメンバー一覧から userId の 1 人を探す（週 × ユーザーは一意）。居なければ null。 */
+    private LeagueMember findMember(List<LeagueMember> members, Long userId) {
+        return members.stream()
+                .filter(m -> m.getUser() != null && Objects.equals(m.getUser().getId(), userId))
+                .findFirst().orElse(null);
+    }
+
+    /**
+     * 2 人の座席（卓 DIVISION・グループ）を入れ替え、新しい座席に合わせて立場を計算し直す。
+     * ホーム DIVISION は本人のものを保つ。DB には触らないので単体テストから直接呼べる。
+     */
+    static void swapSeats(LeagueMember a, LeagueMember b) {
+        // ホーム DIVISION は座席を動かす前に確定させる（未設定の古いデータは今の座席が基準になるため）。
+        int homeA = homeTierOf(a);
+        int homeB = homeTierOf(b);
+        int tierA = a.getTier();
+        int groupA = a.getGroupIndex();
+        a.setTier(b.getTier());
+        a.setGroupIndex(b.getGroupIndex());
+        b.setTier(tierA);
+        b.setGroupIndex(groupA);
+        a.setHomeTier(homeA);
+        b.setHomeTier(homeB);
+        a.setRole(roleFor(homeA, a.getTier()));
+        b.setRole(roleFor(homeB, b.getTier()));
+    }
+
+    /** ホーム DIVISION（未設定の古いデータは座席の DIVISION とみなす）。 */
+    private static int homeTierOf(LeagueMember m) {
+        return m.getHomeTier() != null ? m.getHomeTier() : m.getTier();
+    }
+
+    /**
+     * ホーム DIVISION と着席した卓から立場を決める。
+     * 格上の卓（tier 番号が小さい）に座れば挑戦＝challenge、格下の卓なら防衛＝defense。
+     */
+    static String roleFor(int homeTier, int seatTier) {
+        if (homeTier == seatTier) return "normal";
+        return seatTier < homeTier ? "challenge" : "defense";
+    }
+
+    /**
      * 【メソッドの役割】 現在の参加者で draft 週の卓・グループ・課題曲を確定して保存する（編成の中核）。
      *
      * {@link #formDraft}（事前確認）と {@link #activateWeek}（開始）の両方から使う共通処理。
