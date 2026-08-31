@@ -128,6 +128,10 @@ function buildSongDict(): Map<string, any> {
     return dict;
 }
 
+/** {@link buildInformalDict} のキャッシュ本体と、その生成元になった配列への参照。 */
+let informalDictCache: Map<string, string> | null = null;
+let informalDictSource: unknown = null;
+
 /**
  * 【内部ヘルパー】 難易度表（非公式 rank を載せたテーブル）から
  * `"タイトル_難易度ラベル"` をキーにした Map を構築する。
@@ -135,10 +139,17 @@ function buildSongDict(): Map<string, any> {
  * ルール:
  *  - 曲タイトル末尾に `[L]` が付いていれば LEGGENDARIA の非公式 rank。
  *  - それ以外は ANOTHER の非公式 rank として登録する。
+ *
+ * {@link buildSongDict} と同じ理由でキャッシュする。難易度表は 2,000 曲規模あり、
+ * `flattenScores` は 1 画面で 4〜5 回呼ばれる（ScoreDashboard / ScoreSummary / App.vue）ため、
+ * 毎回作り直すとそのぶんまるごと無駄になる。`diffTableRanks` は useGameData 側で常に
+ * 新しい配列を代入して更新される（in-place 変更をしない）ので、参照比較で十分。
  */
 function buildInformalDict(): Map<string, string> {
-    const dict = new Map<string, string>();
     const ranks = diffTableRanks.value;
+    if (informalDictCache && informalDictSource === ranks) return informalDictCache;
+
+    const dict = new Map<string, string>();
     if (ranks && Array.isArray(ranks)) {
         ranks.forEach((r: any) => {
             r.songs.forEach((songTitle: string) => {
@@ -153,6 +164,8 @@ function buildInformalDict(): Map<string, string> {
             });
         });
     }
+    informalDictCache = dict;
+    informalDictSource = ranks;
     return dict;
 }
 

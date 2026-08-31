@@ -47,6 +47,17 @@ const user = ref<AuthUser | null>(null);
  * 初期値は `true`（起動直後は /api/auth/me を叩いて解決待ち）。
  */
 const isLoading = ref(true);
+/**
+ * 起動時の `/api/auth/me` 復元が「すでに走ったか」を示すフラグ。
+ *
+ * `isLoading` だけでは重複を防げない: {@link fetchCurrentUser} は await より先に
+ * `isLoading = true` を立てるものの、解決するのは `finally`（= await のあと）なので、
+ * 1 本目が飛行中の間は `isLoading === true && user === null` が成立し続ける。
+ * useAuth() はほぼ全コンポーネントの setup から呼ばれるため、その条件でガードすると
+ * 「初回描画にマウントされたコンポーネントの数だけ /api/auth/me を叩く」ことになる。
+ * （ダッシュボード 1 表示で 19 回叩いていた）
+ */
+let authRestoreStarted = false;
 
 /** localStorage から JWT を取り出す。 */
 function getToken(): string | null {
@@ -144,9 +155,10 @@ async function fetchCurrentUser(): Promise<void> {
  * ```
  */
 export function useAuth() {
-    // 初回呼び出し時（user が未取得でまだロード中）にだけ fetch する。
-    // 複数コンポーネントから並行で呼ばれても、isLoading ガードで 1 回に抑制。
-    if (isLoading.value && user.value === null) {
+    // 起動時の認証復元は 1 回だけ。複数コンポーネントの setup から並行で呼ばれても、
+    // authRestoreStarted で 2 本目以降を弾く（login / logout 側は明示的に再取得する）。
+    if (!authRestoreStarted && isLoading.value && user.value === null) {
+        authRestoreStarted = true;
         fetchCurrentUser();
     }
 
