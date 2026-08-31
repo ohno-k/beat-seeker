@@ -18,6 +18,9 @@
  *
  *     - `'official'` … 公式の「スコアデータ CSV ダウンロード」を 1 リクエストで取得する。
  *         公式フォームと同じ `POST djdata/score_download.html` に `style=SP` を送る。
+ *         レスポンスは CSV ファイルではなくページの HTML で、CSV 本文は
+ *         `<textarea id="score_data">` に HTML エスケープされて埋め込まれて返るため、
+ *         DOMParser で取り出してから使う（詳細は fetchOfficialCsv を参照）。
  *         ミスカウント / ジャンル / アーティスト / バージョン / プレー回数 / 最終プレー日時が
  *         すべて埋まった、正真正銘の公式 CSV が得られる。リクエストは 1 回で済むため高速。
  *
@@ -36,7 +39,7 @@
  *
  * 注意:
  *  - 難易度ページは Shift_JIS 表記だが、eagate は実体 UTF-8 のため fetch().text() で読める。
- *    公式 CSV も同様に fetch().text() でそのまま読める前提。
+ *    公式 CSV ページも同様に fetch().text() で読める前提。
  */
 
 /** ARENA 対戦の 1 曲分の情報。 */
@@ -225,14 +228,55 @@ async function scrapeArena(base: string): Promise<{ battles: Battle[]; myDjName:
 }
 
 /**
+ * 【関数の役割】 公式ページのレスポンスが「スコアデータ CSV 本文」かどうかを先頭行で判定する。
+ *
+ * 公式 CSV のヘッダ行は「バージョン,タイトル,ジャンル,…」で始まる。未ログイン時のログインページや
+ * IIDX タワー CSV を誤って取り込まないよう、この 2 語が先頭行に揃っていることを条件にする。
+ */
+function looksLikeScoreCsv(text: string): boolean {
+  const firstLine = text.slice(0, 1024).split(/\r\n|\r|\n/)[0];
+  return firstLine.indexOf('バージョン') >= 0 && firstLine.indexOf('タイトル') >= 0;
+}
+
+/**
+ * 【関数の役割】 スコアデータ CSV ダウンロードページの HTML から CSV 本文を取り出す。
+ *
+ * 公式ページは POST の結果を「ファイル」ではなく HTML として返し、CSV 本文は
+ * `<textarea id="score_data">` の中に HTML エスケープされた状態で埋め込まれている
+ * （行区切りは `&#13;`、曲名やアーティストの `&` は `&amp;`）。
+ * DOMParser で解析して textContent を読むことで、これらの実体参照はまとめてデコードされる。
+ *
+ * @returns textarea の中身。見つからなければ空文字。
+ */
+function extractScoreCsvFromHtml(html: string): string {
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const ta = doc.querySelector('textarea#score_data');
+    return ta ? ta.textContent || '' : '';
+  } catch (e) {
+    console.warn('official CSV: failed to parse response HTML', e);
+    return '';
+  }
+}
+
+/**
  * 【関数の役割】 公式の「スコアデータ CSV ダウンロード」を取得する。
  *
- * 公式ページのフォームと同じ `POST djdata/score_download.html` に `style=SP` を送ると、
- * CSV 本文がそのままレスポンスとして返る。難易度別ページの巡回（レベルごとにページング）と違い
- * リクエストは 1 回で済み、ミスカウントや最終プレー日時など難易度別ページには無い列も埋まる。
+ * 公式ページのフォームと同じ `POST djdata/score_download.html` に `style=SP` を送る。
+ * 難易度別ページの巡回（レベルごとにページング）と違いリクエストは 1 回で済み、
+ * ミスカウントや最終プレー日時など難易度別ページには無い列も埋まる。
  *
- * 未ログインの場合はログインページの HTML が返るため、ヘッダ行の有無で妥当性を判定し、
- * CSV でなければ空文字を返す（呼び出し側が未ログインとして扱えるようにする）。
+ * ただしレスポンスは CSV ファイルそのものではなく **ページの HTML** で、CSV 本文は
+ * `<textarea id="score_data">` に埋め込まれて返る（画面上の「ダウンロード」ボタンは、
+ * その textarea の中身から Blob を作って保存する JS）。そのため
+ * {@link extractScoreCsvFromHtml} で取り出してから使う。
+ * textarea が見つからない場合は、本文がそのまま CSV であればそれを使う
+ * （将来 CSV が直接返るようになった場合の保険）。
+ *
+ * 行区切りは CR（`&#13;`）のみで返るため、papaparse や後段の処理が扱いやすいよう LF に正規化する。
+ *
+ * 未ログインの場合はログインページが返り textarea が存在しないため、ヘッダ行の有無で
+ * 妥当性を判定し、CSV でなければ空文字を返す（呼び出し側が未ログインとして扱えるようにする）。
  *
  * @returns 取得した CSV 本文。失敗・未ログイン時は空文字。
  */
@@ -245,14 +289,21 @@ async function fetchOfficialCsv(base: string, report: ProgressReporter): Promise
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'style=SP',
     });
-    const text = await res.text();
-    // 公式 CSV のヘッダ行は「バージョン,タイトル,…」で始まる。
-    // 未ログイン時はログインページの HTML が返るので、それを弾く。
-    if (!/^[^\r\n]*タイトル/.test(text)) {
+    const body = await res.text();
+    const raw = extractScoreCsvFromHtml(body) || (looksLikeScoreCsv(body) ? body : '');
+    const csv = raw
+      // 公式 textarea には稀に壊れた行区切り（`&#13#13;` `&#1#13;` など）が混ざっており、
+      // DOMParser でもデコードされずに文字列として残る。放置すると 2 曲分が 1 行に繋がり、
+      // 後ろの曲が丸ごと欠落するため、CR 実体参照の壊れた形もまとめて区切りとして扱う。
+      .replace(/&#(?:\d*#)*13;/g, '\n')
+      // CR / CRLF を LF に揃える。公式 textarea は CR 区切りで返る。
+      .replace(/\r\n?/g, '\n')
+      .trim();
+    if (!looksLikeScoreCsv(csv)) {
       console.warn('official CSV: unexpected response (not logged in?)');
       return '';
     }
-    return text.trim();
+    return csv;
   } catch (e) {
     console.warn('official CSV fetch failed', e);
     return '';
