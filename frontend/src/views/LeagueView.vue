@@ -10,7 +10,8 @@
  *  - 自分の過去週成績（アコーディオン）
  *  - 昇降格ニュース（全ユーザーの昇格/降格を直近の締め済み週から新しい順に）
  *  - 管理者セクション（useAdmin.isAdmin のときのみ表示。サーバ側でも管理者判定される）:
- *    draft 週の課題曲差し替え・再抽選、週次処理の手動実行
+ *    draft 週の課題曲差し替え・再抽選、編成メンバーの入れ替え（名前を 2 人選ぶと座席が交換される）、
+ *    週次処理の手動実行
  */
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from '../composables/useI18n';
@@ -295,6 +296,8 @@ const loadMe = async () => {
 /** 管理者 overview を読み込む（管理者のみ）。 */
 const loadAdmin = async () => {
   if (!isAdmin.value) return;
+  // 編成が組み直された可能性があるので、入れ替え待ちの選択は毎回解除する。
+  swapPick.value = null;
   try {
     adminLadders.value = await league.fetchAdminOverview();
     adminError.value = '';
@@ -720,6 +723,76 @@ const toggleDisablePanel = (weekId: number) => {
 /** その週で無効化されている課題曲の数（畳んでいても件数だけは見えるようにする）。 */
 const disabledSongCount = (week: LeagueAdminWeek) =>
   week.tiers.reduce((sum, ti) => sum + ti.songs.filter(s => s.disabled).length, 0);
+
+/**
+ * 入れ替えのために選択している 1 人目（編成表で名前を押した人）。2 人目を押すと座席が入れ替わる。
+ * 表を描き直す（loadAdmin）たびに解除する。
+ */
+const swapPick = ref<{
+  weekId: number;
+  userId: number;
+  tier: number;
+  groupIndex: number;
+  name: string;
+} | null>(null);
+
+/** 編成表のメンバー 1 人分の表示名（未設定なら IIDX ID）。 */
+const memberName = (mem: LeagueAdminMember) => mem.displayName || mem.iidxId || '—';
+
+/** そのメンバーが入れ替え待ちとして選択中か。 */
+const isSwapPicked = (weekId: number, mem: LeagueAdminMember) =>
+  swapPick.value?.weekId === weekId && swapPick.value?.userId === mem.userId;
+
+/**
+ * 編成表で選手名を押したときの処理（1 人目は選択、2 人目で入れ替え）。
+ *
+ * - 未選択 → その人を選択する
+ * - 同じ人をもう一度 → 選択を解除する
+ * - 同じグループの別の人 → 入れ替えても編成が変わらないので、選択をその人に移す
+ * - 別グループの人 → 座席（卓・グループ）を入れ替える。別 DIVISION の卓へ移す場合は
+ *   チャレンジ / ディフェンス扱いになるため確認する
+ */
+const handlePickMemberForSwap = async (
+  weekId: number,
+  tier: number,
+  groupIndex: number,
+  mem: LeagueAdminMember
+) => {
+  if (busy.value) return;
+  const picked = { weekId, userId: mem.userId, tier, groupIndex, name: memberName(mem) };
+  const first = swapPick.value;
+  if (!first || first.weekId !== weekId) {
+    swapPick.value = picked;
+    return;
+  }
+  if (first.userId === mem.userId) {
+    swapPick.value = null;
+    return;
+  }
+  if (first.tier === tier && first.groupIndex === groupIndex) {
+    swapPick.value = picked; // 同じグループ内は入れ替えても変わらない → 選び直し扱い
+    return;
+  }
+  if (first.tier !== tier && !confirm(t('league.admin.swapConfirmCrossTier', {
+    a: first.name, da: divisionName(first.tier), b: picked.name, db: divisionName(tier),
+  }))) {
+    return;
+  }
+  busy.value = true;
+  error.value = '';
+  notice.value = '';
+  try {
+    await league.swapMembers(weekId, first.userId, mem.userId);
+    notice.value = t('league.admin.swapDone', { a: first.name, b: picked.name });
+    swapPick.value = null;
+    // ライン（グループ最高 EX）と各メンバーの自己ベスト表が変わるので取り直す。
+    await loadAdmin();
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    busy.value = false;
+  }
+};
 
 /** 課題曲の差し替えフォームを開いている (weekId, tier)。既定は畳んで編成表を見やすくする。 */
 const songEditOpen = ref<Set<string>>(new Set());
@@ -1345,6 +1418,20 @@ onUnmounted(() => {
                class="mt-1 max-w-2xl text-[11px] leading-relaxed text-violet-600 dark:text-violet-400">
               {{ t('league.admin.songFallbackHint') }}
             </p>
+            <!-- メンバーの入れ替え: 編成表で選手名を 2 人押すと、その 2 人のグループ（卓）が入れ替わる。 -->
+            <template v-if="al.draftWeek.memberCount">
+              <p v-if="!swapPick" class="mt-1 max-w-2xl text-[11px] leading-relaxed text-slate-400">
+                {{ t('league.admin.swapHint') }}
+              </p>
+              <div v-else
+                   class="mt-1 flex flex-wrap items-center gap-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1.5">
+                <span class="text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">
+                  {{ t('league.admin.swapSelected', { name: swapPick.name }) }}
+                </span>
+                <button class="text-[11px] px-2 py-0.5 rounded border border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
+                        @click="swapPick = null">{{ t('league.admin.swapCancel') }}</button>
+              </div>
+            </template>
             <div v-for="tierInfo in al.draftWeek.tiers" :key="tierInfo.tier" class="mt-3 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
@@ -1451,13 +1538,24 @@ onUnmounted(() => {
                     <tbody>
                       <tr v-for="mem in g.members" :key="mem.userId"
                           class="border-t border-slate-100 dark:border-slate-700/60">
-                        <td class="py-1 pr-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
-                          {{ mem.displayName || mem.iidxId || '—' }}
-                          <span v-if="roleBadge(mem.role)"
-                                class="ml-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px]"
-                                :class="roleBadge(mem.role)!.cls">
-                            {{ roleBadge(mem.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(mem.homeTier) }}</span>
-                          </span>
+                        <td class="py-1 pr-3 whitespace-nowrap">
+                          <!-- 押すと入れ替えの選択。2 人目を押した時点でその 2 人の座席が入れ替わる。 -->
+                          <button
+                            class="inline-flex items-center gap-1 -mx-1 px-1.5 py-0.5 rounded border transition-colors disabled:opacity-50"
+                            :class="isSwapPicked(al.draftWeek!.id, mem)
+                              ? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-200 font-semibold'
+                              : 'border-transparent text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                            :disabled="busy"
+                            :title="t('league.admin.swapHint')"
+                            @click="handlePickMemberForSwap(al.draftWeek!.id, tierInfo.tier, g.groupIndex, mem)"
+                          >
+                            {{ memberName(mem) }}
+                            <span v-if="roleBadge(mem.role)"
+                                  class="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px]"
+                                  :class="roleBadge(mem.role)!.cls">
+                              {{ roleBadge(mem.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(mem.homeTier) }}</span>
+                            </span>
+                          </button>
                         </td>
                         <td v-for="s in groupSongs(tierInfo, g.groupIndex)" :key="s.id"
                             class="py-1 px-2 whitespace-nowrap tabular-nums"
