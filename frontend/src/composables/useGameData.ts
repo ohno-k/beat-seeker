@@ -81,9 +81,11 @@ const isLoading = ref(false);
 /** 取得失敗時のエラーメッセージ。 */
 const loadError = ref('');
 
-// ── フォールバック: 初期表示 / オフライン用に静的 JSON を同梱 ──
-import songDataFallback from '../data/song_data.json';
-import diffTableFallback from '../data/difficulty_table.json';
+// ── フォールバック: オフライン / API 障害時にだけ使う静的 JSON ──
+// 静的 import にすると song_data.json (6,000 譜面 / 約 1.6 MB) がエントリ chunk に
+// そのまま埋め込まれ、API から同じデータを取り直すぶんと合わせて曲マスタを二重に
+// ダウンロード・パースすることになる（初回描画のメインスレッド占有の最大要因だった）。
+// そのため動的 import にして、API が失敗したときだけ取りに行く。
 
 /**
  * 【内部関数】 公式 LV 10 以下の ANOTHER/LEGGENDARIA 譜面を集めて、
@@ -137,22 +139,46 @@ function buildOfficialLowLevelRanks(
   return result;
 }
 
-/** 静的 JSON をリアクティブ状態へ反映する。API 取得成功前の初期表示を担う。 */
-function applyFallback() {
-  if (songDataFallback && Array.isArray(songDataFallback.body)) {
-    songDataBody.value = songDataFallback.body as SongDataEntry[];
-  }
-  if (diffTableFallback && Array.isArray(diffTableFallback.ranks)) {
-    const base = diffTableFallback.ranks as DifficultyRankEntry[];
-    diffTableRanks.value = base;
-    // 難易度表 UI 専用の追加カテゴリは別 ref に格納し、informalRank 用途から隔離する。
-    extraOfficialLevelRanks.value = buildOfficialLowLevelRanks(songDataBody.value, base);
+/**
+ * 同梱の静的 JSON をリアクティブ状態へ反映する。API 取得が失敗したときの保険。
+ *
+ * 動的 import なので、API が正常なかぎりこのチャンクはネットワークに出て行かない。
+ * 既に API 由来のデータが入っている項目は上書きしない（部分成功を潰さないため）。
+ */
+async function applyFallback(): Promise<void> {
+  try {
+    const [songMod, diffMod] = await Promise.all([
+      import('../data/song_data.json'),
+      import('../data/difficulty_table.json'),
+    ]);
+    const songFallback = (songMod.default ?? songMod) as unknown as SongDataRoot;
+    const diffFallback = (diffMod.default ?? diffMod) as unknown as DifficultyTableRoot;
+
+    if (songDataBody.value.length === 0 && Array.isArray(songFallback?.body)) {
+      songDataBody.value = songFallback.body as SongDataEntry[];
+    }
+    if (diffTableRanks.value.length === 0 && Array.isArray(diffFallback?.ranks)) {
+      const base = diffFallback.ranks as DifficultyRankEntry[];
+      diffTableRanks.value = base;
+      // 難易度表 UI 専用の追加カテゴリは別 ref に格納し、informalRank 用途から隔離する。
+      extraOfficialLevelRanks.value = buildOfficialLowLevelRanks(songDataBody.value, base);
+    }
+  } catch {
+    // フォールバックすら読めない（完全オフライン等）。空のまま UI を継続させる。
   }
 }
 
-// モジュール読み込み時点でフォールバックを即適用しておくことで、
-// API 取得を待たずにコンポーネントがデータを表示できる。
-applyFallback();
+/**
+ * 曲マスタ・難易度表が「API かフォールバックのどちらかで埋まった」ことを表す Promise。
+ *
+ * これらのマスタが無いと score rate も BEAT-PT も 0 になるため、
+ * 一度きりの計算をする箇所（App.vue の loadSavedScores / ShareView 等）は必ずこれを待つ。
+ * 描画自体は待たない: ref はリアクティブなので、データ到着後に computed が再計算される。
+ */
+let resolveGameDataReady: () => void;
+export const gameDataReady: Promise<void> = new Promise<void>((resolve) => {
+  resolveGameDataReady = resolve;
+});
 
 export function useGameData() {
   /** 楽曲データと難易度表を並列で取得し、成功分だけリアクティブ状態を上書きする。 */
@@ -187,12 +213,16 @@ export function useGameData() {
 
       isLoaded.value = true;
     } catch (e: any) {
-      // API 失敗時はフォールバックを使い続ける（オフライン可用性）
+      // API 失敗（ネットワーク断・サーバ障害）。
       console.warn('Failed to fetch game data from API, using fallback:', e.message);
       loadError.value = e.message;
-      // フォールバックを保持
     } finally {
       isLoading.value = false;
+      // 片方でも空のままなら同梱 JSON で埋める（オフライン可用性）。
+      if (songDataBody.value.length === 0 || diffTableRanks.value.length === 0) {
+        await applyFallback();
+      }
+      resolveGameDataReady();
     }
   };
 

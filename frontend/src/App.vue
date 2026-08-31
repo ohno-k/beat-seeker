@@ -122,7 +122,7 @@ import { useDarkMode } from './composables/useDarkMode';
 import { useNativeBridge } from './composables/useNativeBridge';
 import { useFriends } from './composables/useFriends';
 import { useI18n } from './composables/useI18n';
-import { useGameData } from './composables/useGameData';
+import { useGameData, gameDataReady } from './composables/useGameData';
 import { useAprilFools } from './composables/useAprilFools';
 import AprilFoolsOverlay from './components/AprilFoolsOverlay.vue';
 import ToastContainer from './components/ToastContainer.vue';
@@ -256,11 +256,32 @@ const reloadPage = () => window.location.reload();
  *    `openSongByTitle` が false を返す。その場合は何も開かない（仕様）。
  */
 const scoreSummaryRef = ref<InstanceType<typeof ScoreSummary> | null>(null);
+
+/**
+ * ScoreSummary を一度でもマウントしたか。
+ *
+ * ScoreSummary は 6,000 譜面ぶんの集計 computed を複数抱える最も重いコンポーネントで、
+ * かつタブ切替は v-show（マウント状態を維持）で行っている。素直に書くと
+ * 「ダッシュボードを見ているだけなのに ScoreSummary の初期化が走る」ことになり、
+ * 初回描画のメインスレッド占有時間がまるごと乗ってしまう。
+ * そのため、スコア一覧タブが初めて要求されるまでマウント自体を遅らせる。
+ * 一度マウントしたら以降は v-show のまま（= 表示状態・ページ番号を保持する）。
+ */
+const isScoreSummaryMounted = ref(false);
+
+/**
+ * 【関数の役割】 スコア一覧タブへ移動し、ScoreSummary がマウントされるのを待つ。
+ * 遅延マウントしているため、詳細モーダルを開く前に必ずこれを通す。
+ */
+const openScoreTable = async () => {
+  activeTab.value = 'table';
+  isScoreSummaryMounted.value = true;
+  await nextTick();
+};
+
 const handleOcrMatched = async (song: SongDataEntry) => {
   isOcrSearchModalOpen.value = false;
-  activeTab.value = 'table';
-  // v-show で常にマウントされているはずだが、初回描画タイミングを保険で待つ
-  await nextTick();
+  await openScoreTable();
   scoreSummaryRef.value?.openSongByTitle(song.title);
 };
 
@@ -305,8 +326,7 @@ const handleCmdkSelectTab = (tabId: string) => {
 
 /** 【関数の役割】 パレットから曲選択時のハンドラ。スコア一覧タブへ移動して詳細モーダルを開く。 */
 const handleCmdkSelectSong = async (title: string) => {
-  activeTab.value = 'table';
-  await nextTick();
+  await openScoreTable();
   scoreSummaryRef.value?.openSongByTitle(title);
 };
 
@@ -353,6 +373,12 @@ const errorMsg = ref('');
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
 const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'past-version-scores'>('dashboard')
+
+// 【watch】 スコア一覧タブが要求されたら ScoreSummary を遅延マウントする。
+// （サイドバー / コマンドパレット等どの経路でタブが変わっても拾えるようここで一元化する）
+watch(activeTab, (tab) => {
+  if (tab === 'table') isScoreSummaryMounted.value = true;
+}, { immediate: true });
 
 /**
  * 作品別スコア一覧（activeTab = 'past-version-scores'）で表示中の作品バージョン番号。
@@ -835,6 +861,10 @@ const loadSavedScores = async () => {
   // フェッチ前に必ずクリアする
   scoreData.value = [];
   totalBeatTierPoints.value = 0;
+
+  // BEAT-PT は曲マスタ（満点 = notes × 2）と難易度表が無いと 0 になってしまう。
+  // 曲マスタはバンドル同梱をやめて API 取得に一本化したので、ここで到着を待つ。
+  await gameDataReady;
 
   try {
     let data;
@@ -2424,8 +2454,12 @@ const handleUnifiedClose = async () => {
               />
             </div>
 
-            <!-- スコア一覧タブ: ScoreSummary が BEAT-TIER / RATE-TIER モード切替と詳細モーダルを担当 -->
+            <!-- スコア一覧タブ: ScoreSummary が BEAT-TIER / RATE-TIER モード切替と詳細モーダルを担当。
+                 最も重いコンポーネントなので、スコア一覧が初めて要求されるまでマウントしない
+                 （= ダッシュボードしか見ないユーザーは初期化コストを払わない）。
+                 一度マウントしたあとは v-show でタブ状態を保持する。 -->
             <ScoreSummary
+              v-if="isScoreSummaryMounted"
               ref="scoreSummaryRef"
               v-show="activeTab === 'table'"
               :scores="scoreData"
