@@ -50,10 +50,25 @@
   <div id="app"></div>
   <script type="module" src="/src/main.ts"></script>
   <script>
+    // Service Worker 登録。
+    //
+    // 本来は load 後に登録して初期表示のリソース取得と競合させないようにしているが、
+    // head の広告 / 解析タグ (adsbygoogle.js, gtag.js) は <script async> なので load の発火条件に含まれる。
+    // DNS レベルの広告ブロッカー (Pi-hole / AdGuard DNS 等) はこれらを「拒否」ではなく
+    // 「応答を返さない」形で潰すことがあり、その場合 load が永久に発火せず SW が登録されない
+    // （プッシュ通知と共有ターゲットが黙って死ぬ）。保険のタイマーで必ず登録まで到達させる。
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
+      var swRegistered = false;
+      var registerSw = function () {
+        if (swRegistered) return;
+        swRegistered = true;
+        navigator.serviceWorker.register('/sw.js').catch(function () { /* 失敗してもアプリ本体は動く */ });
+      };
+      if (document.readyState === 'complete') registerSw();
+      else {
+        window.addEventListener('load', registerSw, { once: true });
+        setTimeout(registerSw, 5000);
+      }
     }
   </script>
 </body>
