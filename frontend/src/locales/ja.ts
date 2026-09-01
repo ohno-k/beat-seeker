@@ -1545,6 +1545,7 @@ export const ja = {
   'league.songPointsHint': '曲別の列は上段が有効になったリザルトの EX スコア（ラインを超えた記録のみ表示。未達は「–」）、下段が着順とその曲の着順ポイント（1位＝グループ人数、最下位＝1、同着は平均）。3曲の合計が「得点」です。誰もラインを超えていない曲は、ライン保持者だけ +1 になります。得点が同じ場合は有効曲数が多いほうが上位、どちらも同じなら同着（同じ順位）です。',
   'league.played': 'ライン達成',
   'league.notPlayed': '未達成',
+  'league.belowLineBest': 'ライン未達の自己ベスト（サーバーに保存されている現在の EX）。着順ポイントには乗りません。',
   'league.points': 'PT',
   'league.promoteZone': '昇格圏',
   'league.relegateZone': '降格圏',

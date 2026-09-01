@@ -6,7 +6,9 @@
  * 表示に必要な値はすべて props で受け取り、データ取得は行わない。
  *
  * 曲別セルは「その週にラインを超えて有効になったリザルト」の EX と、その曲の着順・
- * 着順ポイントだけを出す（未達の自己ベストは競技結果ではないのでサーバー側で除去済み）。
+ * 着順ポイントを出す。未達の自己ベストは競技結果ではないので他人ぶんはサーバー側で
+ * 除去されるが、自分の行と管理者ビューでは値が返るのでその場合だけ薄字で併記する
+ * （サーバーが今どの EX を持っているかを画面から確認できるようにするため）。
  */
 import { computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
@@ -139,6 +141,14 @@ const zoneClass = (row: LeagueStandingRow) => {
             <template v-else>
               <div v-if="ps.valid && ps.bestEx != null && ps.bestEx > 0"
                    class="font-semibold text-emerald-600 dark:text-emerald-400">
+                {{ ps.bestEx }}
+              </div>
+              <!-- 未達でも EX が返ってきている行（自分の行・管理者ビュー）では、その値を薄く出す。
+                   「アップロードしたのに反映されない」の切り分けに、サーバーが今どの EX を
+                   持っているかが見えている必要があるため。他人の未達スコアはサーバー側で
+                   除去済み（bestEx が無い）ので、ここは従来どおり "–" のままになる。 -->
+              <div v-else-if="ps.bestEx != null && ps.bestEx > 0"
+                   class="text-slate-400 dark:text-slate-500" :title="t('league.belowLineBest')">
                 {{ ps.bestEx }}
               </div>
               <div v-else class="text-slate-300 dark:text-slate-600">–</div>

@@ -1485,6 +1485,7 @@ export const en = {
   'league.songPointsHint': 'In each song column the top number is the EX of a result that counts (only records above the line are shown; otherwise "–"), and below it the placement and placement points for that song (1st = group size, last = 1, ties share the average). The three add up to "Points". If nobody has beaten the line on a song, only the line holder gets +1. Members with the same points are ordered by validated songs; if those match too, they are tied and share the same rank.',
   'league.played': 'Line cleared',
   'league.notPlayed': 'Not cleared',
+  'league.belowLineBest': 'Personal best below the line (the EX currently stored on the server). It does not score points.',
   'league.points': 'PT',
   'league.promoteZone': 'Promotion zone',
   'league.relegateZone': 'Relegation zone',

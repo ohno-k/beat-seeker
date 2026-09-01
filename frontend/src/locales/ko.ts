@@ -1486,6 +1486,7 @@ export const ko = {
   'league.songPointsHint': '곡별 열은 위가 유효해진 결과의 EX 스코어(라인을 넘은 기록만 표시, 미달은 "–"), 아래가 착순과 그 곡의 순위 포인트입니다(1위 = 그룹 인원수, 최하위 = 1, 동착은 평균). 3곡 합계가 "득점"입니다. 아무도 라인을 넘지 못한 곡은 라인 보유자만 +1이 됩니다. 득점이 같으면 유효곡 수가 많은 쪽이 상위이며, 둘 다 같으면 동착(같은 순위)입니다.',
   'league.played': '라인 달성',
   'league.notPlayed': '미달성',
+  'league.belowLineBest': '라인 미달 개인 최고 기록(서버에 저장된 현재 EX). 순위 포인트에는 반영되지 않습니다.',
   'league.points': 'PT',
   'league.promoteZone': '승격권',
   'league.relegateZone': '강등권',
