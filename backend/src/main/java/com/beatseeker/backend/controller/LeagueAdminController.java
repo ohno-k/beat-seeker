@@ -51,6 +51,8 @@ public class LeagueAdminController {
     private final ScoreRepository scoreRepository;
     /** 締め済み週の曲別確定結果（後追い凍結の重複チェックに使う）。 */
     private final LeagueMemberSongRepository leagueMemberSongRepository;
+    /** 週開始時点のベースライン（有効判定の診断で「何と比較しているか」を見せるために使う）。 */
+    private final LeagueBaselineRepository leagueBaselineRepository;
     /** 順位表の計算（後追い凍結で保存する値を求めるために使う）。 */
     private final LeagueStandingsService standingsService;
 
@@ -66,8 +68,10 @@ public class LeagueAdminController {
                                  SongDefinitionRepository songDefinitionRepository,
                                  ScoreRepository scoreRepository,
                                  LeagueMemberSongRepository leagueMemberSongRepository,
+                                 LeagueBaselineRepository leagueBaselineRepository,
                                  LeagueStandingsService standingsService) {
         this.leagueMemberSongRepository = leagueMemberSongRepository;
+        this.leagueBaselineRepository = leagueBaselineRepository;
         this.standingsService = standingsService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
@@ -252,6 +256,212 @@ public class LeagueAdminController {
         // stripUnvalidatedScores（プレイヤー向けの秘匿処理）は通さない＝当事者と同じ内訳が見える。
         result.put("standings", standingsService.computeGroupStandings(week, tier, groupIndex));
         return ResponseEntity.ok(result);
+    }
+
+
+    /**
+     * 【メソッドの役割】 「課題曲を更新したのに順位表へ反映されない」の原因を 1 リクエストで切り分ける。
+     *
+     * <p>リーグの有効判定が見ているのは {@code scores} のうち<b>ごく狭い範囲</b>だけで、スコア一覧や
+     * ユーザー比較の画面より条件が厳しい。ズレるのはたいてい次の 3 点なので、その 3 点を
+     * 目に見える形で並べて返す:
+     * <ol>
+     *   <li>{@code source} が {@code arcade}（または未設定）の行だけを見る。INFINITAS の記録は
+     *       スコア一覧では「高いほう」が表示されるが、リーグは完全に無視する。</li>
+     *   <li>{@code title} / {@code difficultyName} が課題曲（＝難易度表マスタ由来）と
+     *       <b>完全一致</b>する行だけを見る。取り込み経路が違うと全角空白・NBSP・実体参照の
+     *       扱いで別タイトルの行が増え、リーグからは「更新されていない」ように見える。</li>
+     *   <li>ラインは週開始時点のベースライン（{@code league_baselines}）で固定。今の自己ベストが
+     *       ラインを<b>超えて</b>いなければ有効化されない（同点は不可）。</li>
+     * </ol>
+     *
+     * <p>順位表そのものは {@link LeagueStandingsService} の結果をそのまま使うので、ここに出る
+     * {@code bestEx} / {@code lineEx} / {@code valid} は実際の集計値と必ず一致する。
+     * その値の根拠として、同じ譜面に対する {@code scores} の行を
+     * 「集計対象（{@code countedRows}）」と「集計対象外（{@code ignoredRows}）」に分けて返す。
+     * {@code ignoredRows} に新しい記録が入っていれば、原因は集計ではなく取り込み側にある。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param weekId 週 ID
+     * @param userId 対象ユーザーの ID（{@code iidxId} でも可）
+     * @param iidxId 対象ユーザーの IIDX ID（{@code userId} を省略した場合に使う）
+     * @return {@code {week, user, member, songs: [...]}}。週・ユーザー・メンバーが無ければ 404
+     */
+    @GetMapping("/diagnose")
+    public ResponseEntity<?> diagnose(Authentication auth,
+                                      @RequestParam("weekId") Long weekId,
+                                      @RequestParam(value = "userId", required = false) Long userId,
+                                      @RequestParam(value = "iidxId", required = false) String iidxId) {
+        if (requireAdmin(auth) == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "管理者のみアクセスできます"));
+        }
+        LeagueWeek week = leagueWeekRepository.findById(weekId).orElse(null);
+        if (week == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
+        }
+        User user = userId != null
+                ? userRepository.findById(userId).orElse(null)
+                : (iidxId != null ? userRepository.findByIidxId(iidxId).orElse(null) : null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "ユーザーが見つかりません（userId か iidxId を指定してください）"));
+        }
+        LeagueMember member = leagueMemberRepository.findByWeekAndUser(week, user).orElse(null);
+        if (member == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "このユーザーはその週のメンバーではありません"));
+        }
+
+        // 順位表はプレイヤー向けとまったく同じ経路で計算する（診断値と実際の集計値をズラさないため）。
+        Map<String, Object> myRow = standingsService
+                .computeGroupStandings(week, member.getTier(), member.getGroupIndex()).stream()
+                .filter(r -> user.getId().equals(r.get("userId")))
+                .findFirst().orElse(Map.of());
+        Map<Integer, Map<String, Object>> perSongBySlot = new HashMap<>();
+        if (myRow.get("perSong") instanceof List<?> list) {
+            for (Object o : list) {
+                if (o instanceof Map<?, ?> ps && ps.get("slot") instanceof Number slot) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> typed = (Map<String, Object>) ps;
+                    perSongBySlot.put(slot.intValue(), typed);
+                }
+            }
+        }
+
+        // ベースライン（週開始時点の比較基準）を (title|difficultyName|source) で引けるようにする。
+        Map<String, LeagueBaseline> baselines = leagueBaselineRepository
+                .findByWeekAndUserIn(week, List.of(user)).stream()
+                .collect(Collectors.toMap(
+                        b -> b.getTitle() + "|" + b.getDifficultyName() + "|" + b.getSource(),
+                        b -> b, (a, b) -> a));
+
+        // 本人の全スコア行。タイトル揺れを見つけるため、正規化キーで課題曲と突き合わせる。
+        List<Score> allScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
+
+        List<Map<String, Object>> songs = new ArrayList<>();
+        for (LeagueSong song : leagueSongRepository.findByWeekAndTierAndGroupIndexOrderBySlotAsc(
+                week, member.getTier(), member.getGroupIndex())) {
+            Map<String, Object> ps = perSongBySlot.getOrDefault(song.getSlot(), Map.of());
+            Integer bestEx = asInt(ps.get("bestEx"));
+            Integer lineEx = asInt(ps.get("lineEx"));
+            boolean valid = Boolean.TRUE.equals(ps.get("valid"));
+
+            List<Map<String, Object>> counted = new ArrayList<>();
+            List<Map<String, Object>> ignored = new ArrayList<>();
+            String wanted = normalizeTitle(song.getTitle());
+            for (Score s : allScores) {
+                boolean sameChartExact = song.getTitle().equals(s.getTitle())
+                        && song.getDifficultyName().equals(s.getDifficultyName());
+                boolean sameChartLoose = wanted.equals(normalizeTitle(s.getTitle()))
+                        && song.getDifficultyName().equalsIgnoreCase(trimmed(s.getDifficultyName()));
+                if (!sameChartExact && !sameChartLoose) continue;
+                boolean arcade = s.getSource() == null || "arcade".equals(s.getSource());
+                (sameChartExact && arcade ? counted : ignored).add(scoreRow(s, song));
+            }
+
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("slot", song.getSlot());
+            m.put("title", song.getTitle());
+            m.put("difficultyName", song.getDifficultyName());
+            m.put("disabled", song.isDisabled());
+            m.put("lineEx", lineEx);
+            m.put("bestEx", bestEx);
+            m.put("valid", valid);
+            m.put("baseline", baselineRow(baselines.get(
+                    song.getTitle() + "|" + song.getDifficultyName() + "|arcade")));
+            m.put("countedRows", counted);
+            m.put("ignoredRows", ignored);
+            m.put("reason", reasonOf(song, bestEx, lineEx, valid, ignored));
+            songs.add(m);
+        }
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> wm = new LinkedHashMap<>();
+        wm.put("id", week.getId());
+        wm.put("weekNo", week.getWeekNo());
+        wm.put("status", week.getStatus());
+        wm.put("startsAt", week.getStartsAt());
+        wm.put("endsAt", week.getEndsAt());
+        wm.put("snapshotAt", week.getSnapshotAt());
+        result.put("week", wm);
+        result.put("user", Map.of("id", user.getId(),
+                "displayName", user.getDisplayName() != null ? user.getDisplayName() : "",
+                "iidxId", user.getIidxId() != null ? user.getIidxId() : ""));
+        result.put("member", Map.of("tier", member.getTier(), "groupIndex", member.getGroupIndex(),
+                "validSongs", myRow.getOrDefault("validSongs", 0)));
+        result.put("songs", songs);
+        return ResponseEntity.ok(result);
+    }
+
+    /** 診断用: スコア 1 行を、タイトルの見えない差分まで分かる形で書き出す。 */
+    private Map<String, Object> scoreRow(Score s, LeagueSong song) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("score", s.getScore());
+        m.put("missCount", s.getMissCount());
+        m.put("playCount", s.getPlayCount());
+        m.put("clearType", s.getClearType());
+        m.put("source", s.getSource() != null ? s.getSource() : "arcade(null)");
+        m.put("difficultyLevel", s.getDifficultyLevel());
+        m.put("uploadedAt", s.getUploadedAt());
+        m.put("lastPlayedAt", s.getLastPlayedAt());
+        m.put("difficultyName", s.getDifficultyName());
+        // 完全一致しないタイトルは、空白や不可視文字の違いが分かるようコードポイントで見せる。
+        m.put("title", s.getTitle());
+        if (!song.getTitle().equals(s.getTitle())) {
+            m.put("titleCodePoints", codePointsOf(s.getTitle()));
+            m.put("songTitleCodePoints", codePointsOf(song.getTitle()));
+        }
+        return m;
+    }
+
+    /** 診断用: ベースライン 1 行（週開始時点の比較基準）。無ければ null。 */
+    private Map<String, Object> baselineRow(LeagueBaseline b) {
+        if (b == null) return null;
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("baseScore", b.getBaseScore());
+        m.put("baseMiss", b.getBaseMiss());
+        m.put("basePlayCount", b.getBasePlayCount());
+        m.put("baseClearType", b.getBaseClearType());
+        return m;
+    }
+
+    /** 診断用: 有効化されていない理由を日本語で 1 文にする。 */
+    private String reasonOf(LeagueSong song, Integer bestEx, Integer lineEx, boolean valid,
+                            List<Map<String, Object>> ignored) {
+        if (song.isDisabled()) return "課題曲が無効化されている（集計対象外）";
+        if (valid) return "有効（ラインを超えた週内の記録あり）";
+        if (bestEx == null) {
+            return "集計対象の arcade 記録が 1 行も見つからない"
+                    + (ignored.isEmpty() ? "（この譜面をまだプレーしていない）"
+                                         : "。ignoredRows に近いタイトル / 別 source の行があるので、取り込み経路の不一致が原因");
+        }
+        if (lineEx != null && bestEx <= lineEx) {
+            String tail = ignored.stream().anyMatch(r -> r.get("score") instanceof Number n && n.intValue() > lineEx)
+                    ? "。ただし ignoredRows にライン超えの行があるので、集計対象外の行に新しい記録が入っている"
+                    : "";
+            return "自己ベスト " + bestEx + " がライン " + lineEx + " を超えていない（同点は不可）" + tail;
+        }
+        return "ラインは超えているが週内プレーを検出できない（ベースラインから記録・プレー回数が前進していない）";
+    }
+
+    /** タイトル比較用の正規化（前後空白・NBSP・全角空白・連続空白の違いを吸収する）。 */
+    private static String normalizeTitle(String title) {
+        if (title == null) return "";
+        return title.replace(' ', ' ').replace('　', ' ')
+                .replaceAll("\\s+", " ").trim().toLowerCase(Locale.ROOT);
+    }
+
+    /** null 安全な trim。 */
+    private static String trimmed(String v) {
+        return v == null ? "" : v.trim();
+    }
+
+    /** 文字列をコードポイント列にする（見えない差分の可視化用）。 */
+    private static List<Integer> codePointsOf(String v) {
+        return v == null ? List.of() : v.codePoints().boxed().toList();
+    }
+
+    /** Number → Integer（null 安全）。 */
+    private static Integer asInt(Object o) {
+        return o instanceof Number n ? n.intValue() : null;
     }
 
     /**

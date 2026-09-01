@@ -1534,6 +1534,8 @@ export const ko = {
   'league.admin.history.status_draft': '편성 전',
   'league.admin.history.status_active': '진행 중',
   'league.admin.history.status_closed': '마감',
+  'league.admin.diagnose': '유효 판정 진단',
+  'league.admin.diagnoseHint': '리그는 scores 중 source=arcade 이면서 과제곡과 곡명·난이도가 완전히 일치하는 행만 봅니다. 이름을 누르면 순위표와 동일한 집계값(bestEx / lineEx / valid)과 근거가 된 행(countedRows), 집계 대상 외 행(ignoredRows)이 표시됩니다. ignoredRows 에 더 새로운 기록이 있으면 원인은 집계가 아니라 가져오기 쪽입니다.',
   'league.admin.history.noMembers': '이 그룹에는 참가자가 없습니다.',
   'league.admin.songFallback': '보충',
   'league.admin.songFallbackFull': '폴백 보충',

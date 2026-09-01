@@ -1593,6 +1593,8 @@ export const ja = {
   'league.admin.history.status_draft': '編成前',
   'league.admin.history.status_active': '開催中',
   'league.admin.history.status_closed': '締め済み',
+  'league.admin.diagnose': '有効判定の診断',
+  'league.admin.diagnoseHint': 'リーグは scores のうち「source=arcade かつ課題曲とタイトル・難易度が完全一致する行」だけを見ます。名前を押すと、順位表と同じ集計値（bestEx / lineEx / valid）と、その根拠になった行（countedRows）・集計対象外の行（ignoredRows）が出ます。ignoredRows に新しい記録があれば、原因は集計ではなく取り込み側です。',
   'league.admin.history.noMembers': 'このグループには参加者がいません。',
   'league.admin.songFallback': '補填',
   'league.admin.songFallbackFull': 'フォールバック補填',

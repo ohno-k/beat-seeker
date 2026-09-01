@@ -512,6 +512,22 @@ export function useLeague() {
     return await res.json();
   };
 
+  /**
+   * 1 人分の有効判定の内訳を取得する（管理者のみ）。
+   *
+   * 「課題曲を更新したのに順位表が動かない」の切り分け用。順位表と同じ集計値（bestEx / lineEx /
+   * valid）に加えて、その根拠になった scores の行を「集計対象」と「集計対象外（別 source・
+   * タイトル揺れ）」に分けて返す。
+   */
+  const fetchDiagnosis = async (weekId: number, userId: number): Promise<unknown> => {
+    const res = await fetch(
+      `${API_BASE}/api/league/admin/diagnose?weekId=${weekId}&userId=${userId}`,
+      { headers: authHeaders() }
+    );
+    if (!res.ok) await raise(res, '診断の取得に失敗しました');
+    return await res.json();
+  };
+
   /** draft 週の課題曲 1 曲を差し替える（管理者のみ）。 */
   const replaceSong = async (
     weekId: number,
@@ -693,6 +709,7 @@ export function useLeague() {
     leave,
     fetchCurrent,
     fetchStandings,
+    fetchDiagnosis,
     fetchOverview,
     fetchRankings,
     fetchHistory,

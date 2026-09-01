@@ -1533,6 +1533,8 @@ export const en = {
   'league.admin.history.status_draft': 'Draft',
   'league.admin.history.status_active': 'Active',
   'league.admin.history.status_closed': 'Closed',
+  'league.admin.diagnose': 'Validity diagnosis',
+  'league.admin.diagnoseHint': 'The league only reads scores whose source is arcade and whose title and difficulty match the assigned chart exactly. Pick a name to see the same values the standings use (bestEx / lineEx / valid) plus the rows behind them (countedRows) and the rows it ignores (ignoredRows). A newer record in ignoredRows means the problem is in the import, not the aggregation.',
   'league.admin.history.noMembers': 'No players in this group.',
   'league.admin.songFallback': 'Filler',
   'league.admin.songFallbackFull': 'Fallback filler',

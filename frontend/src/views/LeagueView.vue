@@ -461,6 +461,39 @@ const openAdminGroupStandings = async (weekId: number, tier: number, groupIndex:
   }
 };
 
+/** 有効判定の診断結果（管理者のみ）。開いているメンバーの userId と JSON を持つ。 */
+const diagnosis = ref<{ userId: number; displayName: string; json: string } | null>(null);
+/** 診断の取得中フラグ。 */
+const diagnosisLoading = ref(false);
+
+/**
+ * 【関数の役割】 グループ順位表の 1 人について「なぜ有効化されていないか」を取得して開く。
+ *
+ * リーグは scores のうち「source=arcade かつ課題曲とタイトル・難易度が完全一致する行」しか
+ * 見ないため、スコア一覧では新記録が見えているのに順位表が動かないことがある。診断 API は
+ * 順位表と同じ集計値に加えて、根拠になった行と集計対象外の行を返すので、原因が集計側か
+ * 取り込み側かをその場で切り分けられる。同じ人をもう一度押すと閉じる。
+ */
+const openDiagnosis = async (weekId: number, row: LeagueStandingRow) => {
+  if (diagnosis.value?.userId === row.userId) {
+    diagnosis.value = null;
+    return;
+  }
+  diagnosisLoading.value = true;
+  try {
+    const res = await league.fetchDiagnosis(weekId, row.userId);
+    diagnosis.value = { userId: row.userId, displayName: row.displayName, json: JSON.stringify(res, null, 2) };
+  } catch (e) {
+    diagnosis.value = {
+      userId: row.userId,
+      displayName: row.displayName,
+      json: e instanceof Error ? e.message : String(e),
+    };
+  } finally {
+    diagnosisLoading.value = false;
+  }
+};
+
 /** 週のステータスに応じたバッジのクラス（開催中 = 緑 / 編成前 = 灰 / 締め済み = 青）。 */
 const weekStatusClass = (status: string) => {
   if (status === 'active') return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300';
@@ -1373,6 +1406,27 @@ onUnmounted(() => {
                                                     :songs="adminGroupDetail.songs"
                                                     :standings="adminGroupDetail.standings"
                                                     :my-user-id="user?.id" />
+                              <!-- 有効判定の内訳（「更新したのに反映されない」の切り分け用）。
+                                   順位表と同じ集計値に加えて、根拠になった scores の行と、
+                                   集計対象外になっている行（別 source・タイトル揺れ）を出す。 -->
+                              <div v-if="adminGroupDetail.standings.length" class="mt-3">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                  <span class="text-xs text-slate-500 dark:text-slate-400">{{ t('league.admin.diagnose') }}:</span>
+                                  <button v-for="row in adminGroupDetail.standings" :key="'diag-' + row.userId"
+                                          class="text-xs px-2 py-1 rounded border transition-colors"
+                                          :class="diagnosis?.userId === row.userId
+                                            ? 'bg-amber-500 border-amber-500 text-white'
+                                            : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                                          :disabled="diagnosisLoading"
+                                          @click="openDiagnosis(w.id, row)">
+                                    {{ row.displayName }}
+                                  </button>
+                                </div>
+                                <p class="mt-1 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">
+                                  {{ t('league.admin.diagnoseHint') }}
+                                </p>
+                                <pre v-if="diagnosis" class="mt-2 max-h-96 overflow-auto rounded bg-slate-900 text-slate-100 text-[11px] leading-snug p-3">{{ diagnosis.json }}</pre>
+                              </div>
                             </template>
                           </div>
                         </template>
