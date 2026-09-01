@@ -38,7 +38,15 @@
 
 **前提**: `psycopg2` が必要、PostgreSQL 接続情報がハードコードされている（`tools/apply_votes_draft.py:14`, `tools/fetch_votes.py:4`）。`apply-notes-bonus-draft.js` は Node + `pg`（接続情報ハードコード、本番 DB 直接更新）。
 
-### 1.3 検証系
+### 1.3 レポート・可視化
+
+| スクリプト | 用途 | 入出力 |
+|------------|------|--------|
+| [build-growth-chart.js](scripts/build-growth-chart.js) | ユーザー増加と CSV 読み込み回数の推移グラフを PNG 出力。週次（JST 月曜始まり）で「累計ユーザー数 / 新規登録 / CSV 読み込み」の 3 段。スケールが 2 桁違うため 2 軸で重ねず軸を分ける。集計途中の最終週はグラフから除外（合計値には含む）、公開初週の突出は棒を破断させて実数を添える。`--out=` で出力先変更可。 | 出力: `docs/user_growth_YYYY-MM.png` |
+
+**前提**: Node + `pg`（`scripts/node_modules`）+ `puppeteer`（リポジトリ直下の `node_modules`）。puppeteer 同梱のブラウザは未取得のため、ローカルの Chrome / Edge を使う（見つからない場合は `CHROME_PATH` で指定）。
+
+### 1.4 検証系
 
 | スクリプト | 用途 |
 |------------|------|
@@ -46,13 +54,13 @@
 | [verify_notes.py](tools/verify_notes.py) | `chart_cache/profiles/` と `song_data.json` を突き合わせ、ノーツ数の検証結果を出力。 |
 | [generate_invalid_check_sql.py](tools/generate_invalid_check_sql.py) | `sp11.json`/`sp12.json` からスコア率100%超過の検出 SQL (`sql/find_invalid_scores.sql`) を自動生成。※`BASE_DIR`(L5) が旧環境の絶対パスでハードコードされているため、実行前に修正が必要。 |
 
-### 1.4 初期セットアップ（通常は一度きり）
+### 1.5 初期セットアップ（通常は一度きり）
 
 | スクリプト | 用途 |
 |------------|------|
 | [generate_vapid.js](tools/generate_vapid.js) | Web Push 用の VAPID 鍵ペアを生成し `vapid_keys.txt` に書き出す。**鍵は `backend/application.yml` に設定済みのはずなので通常は再生成不要。** |
 
-### 1.5 SQL（ワンショット実行）
+### 1.6 SQL（ワンショット実行）
 
 | ファイル | 用途 |
 |----------|------|
