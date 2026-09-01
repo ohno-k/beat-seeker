@@ -106,4 +106,19 @@ public interface LeagueMemberRepository extends JpaRepository<LeagueMember, Long
            "WHERE m.week.ladderType = :ladder AND m.validSongs >= 1 " +
            "GROUP BY m.week.id")
     List<Object[]> countValidMembersByWeek(@Param("ladder") String ladder);
+
+    /**
+     * 【メソッドの役割】 指定週の中で昇格・降格が確定したメンバーを全ユーザー分取得する。
+     *
+     * 昇降格ニュース（GET /api/league/news）に使う。{@code movement} は週次締めで凍結される
+     * 値なので、締め済みの週だけが対象になる（進行中・編成前の週は null で拾われない）。
+     * 表示名と週の情報をそのまま使うため、ユーザーと週を JOIN FETCH して N+1 を避ける。
+     *
+     * @param weekIds 対象週の ID（締め済みの新しい数週間ぶんを想定）
+     * @return 昇格・降格したメンバー一覧（週の開始日時降順）
+     */
+    @Query("SELECT m FROM LeagueMember m JOIN FETCH m.user JOIN FETCH m.week w " +
+           "WHERE w.id IN :weekIds AND m.movement IN ('promote', 'relegate') " +
+           "ORDER BY w.startsAt DESC")
+    List<LeagueMember> findMovementsByWeekIds(@Param("weekIds") List<Long> weekIds);
 }

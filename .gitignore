@@ -17,6 +17,16 @@ out/
 *.jar
 *.war
 /frontend/public/bookmarklet.js
+/frontend/public/native-scraper.js
+
+# --- Android (android/) ---
+/android/.gradle/
+/android/local.properties
+/android/captures/
+/android/.idea/
+/android/**/build/
+# Gradle Wrapper は上の `*.jar` に巻き込まれるが、`./gradlew` を動かすのに必要なので明示的に含める
+!/android/gradle/wrapper/gradle-wrapper.jar
 
 # --- Python ---
 __pycache__/

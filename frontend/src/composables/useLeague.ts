@@ -177,6 +177,12 @@ export interface LeagueAdminHistoryWeek {
    * 締め済み週は凍結値、開催中の週はライブ計算。編成前（draft）は開始前で判定が成立しないため null。
    */
   validMemberCount: number | null;
+  /**
+   * 課題曲を 1 曲以上プレーしたメンバーの人数（ラインに届かなくても遊んでいれば数える）。
+   * 有効ありは必ずここにも含まれるので、常に validMemberCount 以上になる。
+   * 締め済み週は凍結値、開催中の週はライブ計算。編成前（draft）は開始前で判定が成立しないため null。
+   */
+  playedMemberCount: number | null;
   /** DIVISION ごとのグループ構成（人数のみ）。未編成の週は空配列。 */
   tiers: { tier: number; groups: { groupIndex: number; memberCount: number }[] }[];
 }
@@ -229,21 +235,53 @@ export interface LeaguePoolSong {
 
 /** DIVISION 別ランキングの 1 行（参加者と昇降格ポイント）。 */
 export interface LeagueRankingEntry {
-  /** DIVISION 内の順位（同ポイントは同着。1, 1, 3 形式）。 */
-  rank: number;
+  /**
+   * DIVISION 内の順位（同ポイントは同着。1, 1, 3 形式）。
+   * 離脱中（active=false）の人は競っていないので順位を持たない（null）。
+   */
+  rank: number | null;
   userId: number;
   displayName: string;
   /** 昇降格ポイント（-8..+8）。+8 で昇格、-8 で降格。 */
   points: number;
   /** 総合 BEAT-PT（同ポイント時の並び順＆ティアアイコン表示用）。 */
   totalBeatPt: number | null;
+  /** 参加中なら true。false は離脱（休止）中で、DIVISION と PT は保持されている。 */
+  active: boolean;
 }
 
 /** DIVISION 別ランキングの 1 DIVISION 分。 */
 export interface LeagueRankingDivision {
   tier: number;
+  /** 参加中の人数（離脱中は含まない）。 */
   memberCount: number;
+  /** 離脱（休止）中の人数。 */
+  inactiveCount: number;
   entries: LeagueRankingEntry[];
+}
+
+/** 昇降格ニュースの 1 件（誰がどの DIVISION からどこへ動いたか）。 */
+export interface LeagueNewsItem {
+  userId: number;
+  displayName: string;
+  /** 総合 BEAT-PT（ティアアイコン表示用）。 */
+  totalBeatPt: number | null;
+  movement: 'promote' | 'relegate';
+  /** 移動元 DIVISION（＝その週のホーム DIVISION）。 */
+  fromTier: number;
+  /** 移動先 DIVISION（昇格なら fromTier - 1、降格なら fromTier + 1）。 */
+  toTier: number;
+}
+
+/** 昇降格ニュースの 1 週分（GET /api/league/news）。誰も動かなかった週は含まれない。 */
+export interface LeagueNewsWeek {
+  weekId: number;
+  /** 開催回の通し番号（#1, #2, ...）。プレシーズンは null。 */
+  weekNo?: number | null;
+  startsAt: string;
+  endsAt: string;
+  /** 昇格が先、続いて降格。同じ movement 内は移動先 DIVISION の上位順。 */
+  items: LeagueNewsItem[];
 }
 
 /** 課題曲差し替えの選択肢（と、それが抽選基準で絞り込まれたものかどうか）。 */
@@ -421,6 +459,17 @@ export function useLeague() {
     return (await res.json()) as LeagueHistoryRow[];
   };
 
+  /**
+   * 昇降格ニュース（直近の締め済み週で昇格・降格した人を全ユーザー分）を取得する。
+   * 自分の履歴と違って全員ぶんで、誰も動かなかった週はそもそも返ってこない。
+   */
+  const fetchNews = async (ladder: LadderType, weeks?: number): Promise<LeagueNewsWeek[]> => {
+    const query = weeks != null ? `&weeks=${weeks}` : '';
+    const res = await fetch(`${API_BASE}/api/league/news?ladder=${ladder}${query}`, { headers: authHeaders() });
+    if (!res.ok) await raise(res, '昇降格ニュースの取得に失敗しました');
+    return ((await res.json()).weeks ?? []) as LeagueNewsWeek[];
+  };
+
   // -------------------------------------------------------------------
   // 管理者用（サーバ側で管理者判定。非管理者は 403）
   // -------------------------------------------------------------------
@@ -507,6 +556,28 @@ export function useLeague() {
     });
     if (!res.ok) await raise(res, '再抽選に失敗しました');
     return (await res.json()).songs as LeagueSongInfo[];
+  };
+
+  /**
+   * 編成中(draft)の週で、2 人のメンバーの座席（DIVISION の卓とグループ）を入れ替える（管理者のみ）。
+   *
+   * 入れ替わるのは座席だけで、ホーム DIVISION は本人に付いて回る（卓をまたぐとチャレンジ /
+   * ディフェンス扱いになる）。開始(active)後はグループを変更できない。
+   *
+   * @returns 入れ替え後の週（編成表を描き直すのに使う）
+   */
+  const swapMembers = async (
+    weekId: number,
+    userIdA: number,
+    userIdB: number
+  ): Promise<LeagueAdminWeek> => {
+    const res = await fetch(`${API_BASE}/api/league/admin/weeks/${weekId}/members/swap`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ userIdA, userIdB }),
+    });
+    if (!res.ok) await raise(res, 'メンバーの入れ替えに失敗しました');
+    return (await res.json()).week as LeagueAdminWeek;
   };
 
   /** 週次処理（締め → 編成 → 開始）を手動実行する（管理者のみ）。 */
@@ -625,12 +696,14 @@ export function useLeague() {
     fetchOverview,
     fetchRankings,
     fetchHistory,
+    fetchNews,
     fetchAdminOverview,
     fetchAdminHistory,
     fetchAdminStandings,
     replaceSong,
     setSongDisabled,
     redrawTier,
+    swapMembers,
     runWeekly,
     createDraft,
     formDraft,

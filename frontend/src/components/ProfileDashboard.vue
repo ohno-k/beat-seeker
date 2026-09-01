@@ -487,8 +487,12 @@
       </div>
     </div>
 
-    <!-- 過去作スコアの取り込み状況（本人のみ）。取り込み自体は通常の CSV 取り込み UI が行う -->
-    <PastScoreManager v-if="!props.viewingUserId && !props.shareToken" />
+    <!-- 過去作スコアの取り込み状況（本人のみ）。取り込み自体は通常の CSV 取り込み UI が行う。
+         作品ラベルのクリックは、その作品のスコア一覧ページへの遷移として App.vue へ中継する -->
+    <PastScoreManager
+      v-if="!props.viewingUserId && !props.shareToken"
+      @open-version="emit('open-past-version', $event)"
+    />
 
   </div>
 </template>
@@ -529,6 +533,14 @@ const props = defineProps<{
   viewingUserId?: number | null;
   /** 共有 URL 経由の閲覧時に渡される。指定時は /api/share/{token}/... から取得する。 */
   shareToken?: string | null;
+}>();
+
+const emit = defineEmits<{
+  /**
+   * 過去作スコアの作品ラベルがクリックされた。
+   * App.vue がその作品のスコア一覧ページへ遷移させる。
+   */
+  (e: 'open-past-version', version: number): void;
 }>();
 
 const { isDarkMode } = useDarkMode();

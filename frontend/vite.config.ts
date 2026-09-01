@@ -24,8 +24,11 @@ export default defineConfig({
       },
     },
     {
-      name: 'generate-bookmarklet-js',
+      // eagate 上で実行するスクリプトを 2 種類生成する。収集処理の中核（src/utils/eagateScraper.ts）は
+      // 両者で共通で、エントリだけが「ブックマークレット」「Android アプリの WebView」で分かれる。
+      name: 'generate-eagate-scripts',
       async load() {
+        // ブックマークレット本体（/bookmarklet.js）
         await build({
           entryPoints: ['src/utils/mainBookmarklet.ts'],
           outfile: 'public/bookmarklet.js',
@@ -35,6 +38,15 @@ export default defineConfig({
           define: {
             __APP_ORIGIN__: JSON.stringify(origin),
           },
+        })
+        // Android アプリが実行時に読み込んで注入するスクリプト（/native-scraper.js）。
+        // アプリに同梱せず配信することで、eagate の HTML 変更にアプリ再リリース無しで追従する。
+        await build({
+          entryPoints: ['src/utils/nativeScraper.ts'],
+          outfile: 'public/native-scraper.js',
+          bundle: true,
+          format: 'iife',
+          minify: true,
         })
       },
     },

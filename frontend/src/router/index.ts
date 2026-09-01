@@ -26,6 +26,7 @@ const TermsView = () => import('../views/TermsView.vue')
 const AboutView = () => import('../views/AboutView.vue')
 const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
 const ChartListView = () => import('../views/ChartListView.vue')
+const PastVersionScoresView = () => import('../views/PastVersionScoresView.vue')
 const ShareView = () => import('../views/ShareView.vue')
 const CompetitionAdminView = () => import('../views/CompetitionAdminView.vue')
 const CompetitionSummaryView = () => import('../views/CompetitionSummaryView.vue')
@@ -82,6 +83,9 @@ const router = createRouter({
     { path: '/difficulty-table', name: 'difficulty-table', component: AboutView },
     // 譜面リスト
     { path: '/chart-list', name: 'chart-list', component: ChartListView },
+    // 作品別スコア一覧（プロフィールの過去作スコアから遷移）。
+    // 実体は App.vue 側でパスを検知して activeTab='past-version-scores' として描画する。
+    { path: '/past-scores/:version', name: 'past-version-scores', component: PastVersionScoresView },
     // 他ユーザーのスコアを共有リンクで閲覧するルート
     // DashboardView / ScoresView を使い回し、URL パラメータ :userId で表示対象を切り替える
     { path: '/user/:userId', name: 'user-dashboard', component: DashboardView },

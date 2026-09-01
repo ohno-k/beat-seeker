@@ -63,6 +63,16 @@ public class LeagueWeekLifecycleService {
      * この値がそのまま「グループの最小人数」になる。
      */
     static final int MIN_STANDALONE = 4;
+    /**
+     * 少人数 DIVISION の卓を補充するとき、<b>1 つの卓が同じ方向から借りられる上限人数</b>。
+     * 「格下から引き上げる（チャレンジ）」で最大 2 人、「格上から降ろす（ディフェンス）」で最大 2 人まで。
+     *
+     * <p>これを超える補充をすると、卓の顔ぶれが本来の DIVISION とかけ離れて（例: LEGEND 卓の 4 人中
+     * 3 人が格下からの引き上げ）、貸した側の DIVISION の卓も薄くなる。上限に収まらず
+     * {@link #MIN_STANDALONE} 人に届かない DIVISION は、無理に自分の卓を建てず
+     * {@link #computeHostAndRole} のフォールバック（少人数同士で束ねる / 最寄りの成立卓へ合流）に回す。
+     */
+    static final int MAX_BORROW_PER_DIRECTION = 2;
     /** 連続でこの週数「リーグの活動なし」が続いたエントリーは自動休止する（{@link #playedDuringWeek}）。 */
     public static final int AUTO_DEACTIVATE_AFTER = 3;
 
@@ -505,6 +515,106 @@ public class LeagueWeekLifecycleService {
     }
 
     /**
+     * 【メソッドの役割】 編成中(draft)の週で、2 人のメンバーの座席（卓 DIVISION とグループ）を入れ替える。
+     *
+     * 自動編成のグループ分けは完全ランダムなので、「知り合い同士が同じグループに固まった」
+     * 「実力が偏った」といった偏りを開始前に管理者が手直しするための操作。片方を選び、もう片方を
+     * 選ぶと、その 2 人の座席だけが入れ替わる（他のメンバーは動かない＝グループ人数も変わらない）。
+     *
+     * <p>入れ替えるのは座席（{@code tier} / {@code groupIndex}）だけで、ホーム DIVISION
+     * （{@code homeTier}）は本人のものが付いて回る。立場（normal / challenge / defense）は
+     * 新しい座席とホーム DIVISION の関係から計算し直す（{@link #roleFor}）ので、例えば
+     * DIVISION 2 の人を DIVISION 1 の卓へ移すとチャレンジ扱いになる。
+     *
+     * <p>課題曲はグループ単位で既に確定しているため触らない（移った先のグループの曲で戦う）。
+     * ベースラインは開始時に取るので draft には無く、掃除も不要。ライン（各グループの最高 EX）は
+     * メンバー構成から都度計算しているので、入れ替え後の overview にそのまま反映される。
+     *
+     * <p><b>開始(active)後は使えない</b>。開始時点のベースラインで週内プレー判定をしており、
+     * 途中でグループを変えると課題曲もラインも変わって成績の前提が崩れるため。
+     *
+     * @param week    対象の週（draft であること）
+     * @param userIdA 入れ替える 1 人目のユーザー ID
+     * @param userIdB 入れ替える 2 人目のユーザー ID
+     * @return 入れ替え後の 2 人のメンバー（[A, B] の順）
+     * @throws IllegalStateException    draft 以外の週を指定した場合
+     * @throws IllegalArgumentException 同一人物・週に居ないユーザー・同じグループ同士を指定した場合
+     */
+    @Transactional
+    public List<LeagueMember> swapMembers(LeagueWeek week, Long userIdA, Long userIdB) {
+        if (week == null) {
+            throw new IllegalArgumentException("対象の週がありません");
+        }
+        if (!"draft".equals(week.getStatus())) {
+            throw new IllegalStateException("入れ替えできるのは編成中(draft)の週のみです（開始後はグループを変更できません）");
+        }
+        if (userIdA == null || userIdB == null) {
+            throw new IllegalArgumentException("入れ替える 2 人を指定してください");
+        }
+        if (userIdA.equals(userIdB)) {
+            throw new IllegalArgumentException("同じユーザー同士は入れ替えられません");
+        }
+
+        List<LeagueMember> members = leagueMemberRepository.findByWeek(week);
+        LeagueMember a = findMember(members, userIdA);
+        LeagueMember b = findMember(members, userIdB);
+        if (a == null || b == null) {
+            throw new IllegalArgumentException("入れ替える相手がこの週の編成に居ません（編成し直された可能性があります）");
+        }
+        if (Objects.equals(a.getTier(), b.getTier()) && Objects.equals(a.getGroupIndex(), b.getGroupIndex())) {
+            throw new IllegalArgumentException("同じグループ内の 2 人は入れ替えても編成が変わりません");
+        }
+
+        swapSeats(a, b);
+        leagueMemberRepository.saveAll(List.of(a, b));
+        log.info("リーグ編成のメンバーを入れ替え: weekId={} {}(D{}/G{}) <-> {}(D{}/G{})",
+                week.getId(), userIdA, a.getTier(), a.getGroupIndex(),
+                userIdB, b.getTier(), b.getGroupIndex());
+        return List.of(a, b);
+    }
+
+    /** 週のメンバー一覧から userId の 1 人を探す（週 × ユーザーは一意）。居なければ null。 */
+    private LeagueMember findMember(List<LeagueMember> members, Long userId) {
+        return members.stream()
+                .filter(m -> m.getUser() != null && Objects.equals(m.getUser().getId(), userId))
+                .findFirst().orElse(null);
+    }
+
+    /**
+     * 2 人の座席（卓 DIVISION・グループ）を入れ替え、新しい座席に合わせて立場を計算し直す。
+     * ホーム DIVISION は本人のものを保つ。DB には触らないので単体テストから直接呼べる。
+     */
+    static void swapSeats(LeagueMember a, LeagueMember b) {
+        // ホーム DIVISION は座席を動かす前に確定させる（未設定の古いデータは今の座席が基準になるため）。
+        int homeA = homeTierOf(a);
+        int homeB = homeTierOf(b);
+        int tierA = a.getTier();
+        int groupA = a.getGroupIndex();
+        a.setTier(b.getTier());
+        a.setGroupIndex(b.getGroupIndex());
+        b.setTier(tierA);
+        b.setGroupIndex(groupA);
+        a.setHomeTier(homeA);
+        b.setHomeTier(homeB);
+        a.setRole(roleFor(homeA, a.getTier()));
+        b.setRole(roleFor(homeB, b.getTier()));
+    }
+
+    /** ホーム DIVISION（未設定の古いデータは座席の DIVISION とみなす）。 */
+    private static int homeTierOf(LeagueMember m) {
+        return m.getHomeTier() != null ? m.getHomeTier() : m.getTier();
+    }
+
+    /**
+     * ホーム DIVISION と着席した卓から立場を決める。
+     * 格上の卓（tier 番号が小さい）に座れば挑戦＝challenge、格下の卓なら防衛＝defense。
+     */
+    static String roleFor(int homeTier, int seatTier) {
+        if (homeTier == seatTier) return "normal";
+        return seatTier < homeTier ? "challenge" : "defense";
+    }
+
+    /**
      * 【メソッドの役割】 現在の参加者で draft 週の卓・グループ・課題曲を確定して保存する（編成の中核）。
      *
      * {@link #formDraft}（事前確認）と {@link #activateWeek}（開始）の両方から使う共通処理。
@@ -599,13 +709,16 @@ public class LeagueWeekLifecycleService {
      *   <li>人数が足りない DIVISION は、近い DIVISION から人を借りて {@link #MIN_STANDALONE} 人に満たす。
      *       <b>格下からは BEAT-PT 上位の人を引き上げ（チャレンジ）</b>、
      *       <b>格上からは BEAT-PT 下位の人を降ろす（ディフェンス）</b>。
+     *       ただし借りられるのは<b>それぞれの方向につき最大 {@link #MAX_BORROW_PER_DIRECTION} 人</b>まで。
      *       貸す側は貸した後も {@link #MIN_STANDALONE} 人を下回らない範囲でしか出さない。</li>
-     *   <li>補充しても成立しない DIVISION は従来どおり {@link #computeHostAndRole} に任せる
-     *       （少人数同士を束ねる / 最寄りの成立卓へ吸収）。</li>
+     *   <li>その上限内で成立しない DIVISION は自分の卓を建てず、{@link #computeHostAndRole} に任せる
+     *       （少人数同士を束ねる / 最寄りの成立卓へ合流）。</li>
      * </ol>
      *
      * 上位（LEGEND 側）から先に補充するため、人数の少ない LEGEND 卓は「格下の最上位を引き上げて」
-     * 成立する。LEGEND の人がまるごと DIVISION 1 に降りてきて卓を荒らすことがなくなる。
+     * 成立する。ただし引き上げは 2 人までなので、例えば LEGEND が 1 人しか居ない週は
+     * （1 + 2 = 3 &lt; 4 で）卓が建たず、その 1 人が DIVISION 1 の卓へディフェンスとして合流する。
+     * 「4 人卓のうち 3 人が格下からの引き上げ」といった、実質 DIVISION 1 の卓にならないようにするため。
      *
      * @param entries    その週の参加者
      * @param homeTierOf ホーム DIVISION の取得（本編成はエントリーの値、プレビューは補完済みの値を渡す）
@@ -632,10 +745,15 @@ public class LeagueWeekLifecycleService {
             int need = MIN_STANDALONE - own;
 
             List<Seat> picked = new ArrayList<>();
+            int fromBelow = 0; // 格下から引き上げた人数（チャレンジ）
+            int fromAbove = 0; // 格上から降ろした人数（ディフェンス）
             for (int d = 1; d <= LeagueDivision.LOWEST && picked.size() < need; d++) {
                 // 近い DIVISION から順に。まず格下（引き上げ＝チャレンジ）、次に格上（降ろす＝ディフェンス）。
-                lend(byTier, lentFromTop, lentFromBottom, tier + d, tier, picked, need - picked.size());
-                lend(byTier, lentFromTop, lentFromBottom, tier - d, tier, picked, need - picked.size());
+                // どちらの方向も MAX_BORROW_PER_DIRECTION 人までしか借りない。
+                fromBelow += lend(byTier, lentFromTop, lentFromBottom, tier + d, tier, picked,
+                        Math.min(need - picked.size(), MAX_BORROW_PER_DIRECTION - fromBelow));
+                fromAbove += lend(byTier, lentFromTop, lentFromBottom, tier - d, tier, picked,
+                        Math.min(need - picked.size(), MAX_BORROW_PER_DIRECTION - fromAbove));
             }
             if (picked.size() < need) {
                 // 成立させられない → 借りを取り消して従来ロジック（束ね / 吸収）へ委ねる。
@@ -682,17 +800,20 @@ public class LeagueWeekLifecycleService {
      * 格下（tier 番号が大きい）から借りるときは BEAT-PT 上位（リストの先頭）＝チャレンジ、
      * 格上から借りるときは BEAT-PT 下位（リストの末尾）＝ディフェンスを選ぶ。
      * 貸した後も {@link #MIN_STANDALONE} 人を確保できる範囲でしか貸さない。
+     *
+     * @param want 借りたい人数（呼び出し側で {@link #MAX_BORROW_PER_DIRECTION} を加味した残り枠）
+     * @return 実際に貸し出した人数
      */
-    private void lend(Map<Integer, List<LeagueEntry>> byTier,
-                      Map<Integer, Integer> lentFromTop, Map<Integer, Integer> lentFromBottom,
-                      int donorTier, int targetTier, List<Seat> out, int want) {
-        if (want <= 0) return;
+    private int lend(Map<Integer, List<LeagueEntry>> byTier,
+                     Map<Integer, Integer> lentFromTop, Map<Integer, Integer> lentFromBottom,
+                     int donorTier, int targetTier, List<Seat> out, int want) {
+        if (want <= 0) return 0;
         List<LeagueEntry> pool = byTier.get(donorTier);
-        if (pool == null) return;
+        if (pool == null) return 0;
         int top = lentFromTop.getOrDefault(donorTier, 0);
         int bottom = lentFromBottom.getOrDefault(donorTier, 0);
         int canLend = (pool.size() - top - bottom) - MIN_STANDALONE;
-        if (canLend <= 0) return;
+        if (canLend <= 0) return 0;
 
         boolean fromBelow = donorTier > targetTier; // 格下から引き上げる
         int take = Math.min(want, canLend);
@@ -702,6 +823,7 @@ public class LeagueWeekLifecycleService {
         }
         if (fromBelow) lentFromTop.merge(donorTier, take, Integer::sum);
         else lentFromBottom.merge(donorTier, take, Integer::sum);
+        return take;
     }
 
     /** 総合 BEAT-PT（未設定は 0）。派遣する人を選ぶ並び順に使う。 */

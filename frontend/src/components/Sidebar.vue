@@ -65,6 +65,12 @@ const props = defineProps<{
   viewingUserId: number | null;
   viewingMode: 'admin' | 'friend' | null;
   authLoading: boolean;
+  /**
+   * 大会主催アカウント (Competition セクションの 4 ID) かどうか。
+   * true のときだけサイドバー最下部に「beat-seeker for competition」を出す。
+   * 判定は App.vue の canAccessCompetition に集約している。
+   */
+  canAccessCompetition?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -77,6 +83,7 @@ const emit = defineEmits<{
   (e: 'upload'): void;
   (e: 'openOcrSearch'): void;
   (e: 'openRankQuiz'): void;
+  (e: 'openCompetitionAdmin'): void;
 }>();
 
 // 非公式難易度クイズ: ログイン直後に進捗をプリフェッチして Lv/XP をサイドバーに即表示する。
@@ -124,6 +131,20 @@ const handleUploadClick = () => {
 /** 【関数の役割】 カメラ OCR 曲検索ボタン押下時、親に OCR モーダル起動を通知してサイドバーを閉じる。 */
 const handleOcrSearchClick = () => {
   emit('openOcrSearch');
+  closeSidebar();
+};
+
+/**
+ * 「beat-seeker for competition」の開閉状態。
+ * 大会系は普段使わない機能なので、サイドバー最下部に 1 行だけ置いて既定は畳んでおく。
+ */
+const showCompetitionMenu = ref(false);
+/** 【関数の役割】 Competition セクションの開閉トグル。 */
+const toggleCompetitionMenu = () => { showCompetitionMenu.value = !showCompetitionMenu.value; };
+
+/** 【関数の役割】 大会管理タブへの遷移を親に通知してサイドバーを閉じる。 */
+const handleCompetitionAdminClick = () => {
+  emit('openCompetitionAdmin');
   closeSidebar();
 };
 
@@ -580,6 +601,71 @@ watch(() => props.activeTab, (tab) => {
               {{ t('supporter.tokenHint') }}
               <span class="font-mono font-bold text-amber-600 dark:text-amber-400 select-all">{{ user.supporterToken }}</span>
             </p>
+          </div>
+        </div>
+
+        <!--
+          beat-seeker for competition: 大会主催 4 ID 限定の機能群。
+          以前はヘッダー右上に常時表示していたが、日常的に使う導線ではないため
+          サイドバー最下部へ移設し、既定は畳んだ 1 行だけにしている。
+        -->
+        <div v-if="canAccessCompetition" class="px-4 pb-3">
+          <button
+            type="button"
+            @click="toggleCompetitionMenu"
+            :aria-expanded="showCompetitionMenu"
+            class="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span class="truncate">beat-seeker for competition</span>
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-3 w-3 ml-auto shrink-0 transition-transform" :class="{ 'rotate-180': showCompetitionMenu }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- 展開時のみ 3 リンクを表示。大会管理は内部タブ、他の 2 つはスタンドアロン URL。 -->
+          <div v-if="showCompetitionMenu" class="mt-1 space-y-1">
+            <button
+              type="button"
+              @click="handleCompetitionAdminClick"
+              class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <div class="flex-1 min-w-0">
+                <p>大会管理</p>
+                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">5チーム×4人 総当たり編成</p>
+              </div>
+            </button>
+            <a
+              href="/strategy-card"
+              @click="closeSidebar"
+              class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              <div class="flex-1 min-w-0">
+                <p>Strategy Card</p>
+                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">課題曲ランダム抽選 (OBS用)</p>
+              </div>
+            </a>
+            <a
+              href="/song-reveal"
+              @click="closeSidebar"
+              class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
+              </svg>
+              <div class="flex-1 min-w-0">
+                <p>Song Reveal</p>
+                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">選曲発表演出 (OBS用)</p>
+              </div>
+            </a>
           </div>
         </div>
 

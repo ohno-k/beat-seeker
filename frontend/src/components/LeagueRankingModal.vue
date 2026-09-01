@@ -7,7 +7,8 @@
  * 「今週そのグループで何位か」なのに対し、こちらは「DIVISION の中で昇格にどれだけ近いか」を
  * 通しで見るためのもの（PT は週次締めで増減し、+8 で昇格・-8 で降格）。
  *
- * 掲載されるのは参加中かつ DIVISION 配属済みの人のみ（休止中・次回配属待ちは含まない）。
+ * 掲載されるのは DIVISION 配属済みの人（次回配属待ちは含まない）。離脱（休止）中の人も
+ * 同じ並びに薄く表示し、順位は付けない（競っていないため）。
  */
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
@@ -61,6 +62,12 @@ const ptClass = (p: number) => {
 
 /** 総合 BEAT-PT から Beat-Tier ランク情報（ティアアイコン用）。 */
 const beatTier = (pt: number | null) => getRankInfo(pt ?? 0);
+
+/**
+ * 離脱（休止）中の行を薄くするクラス。
+ * 並び順は参加中と同じ（PT 降順）ままで、見た目だけ落として「今は競っていない」ことを示す。
+ */
+const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
 </script>
 
 <template>
@@ -106,6 +113,9 @@ const beatTier = (pt: number | null) => getRankInfo(pt ?? 0);
               {{ divisionName(div.tier) }}
               <span class="text-xs font-normal text-slate-400 dark:text-slate-500">
                 {{ t('league.rankingModal.members', { n: div.memberCount }) }}
+                <template v-if="div.inactiveCount">
+                  / {{ t('league.rankingModal.inactiveMembers', { n: div.inactiveCount }) }}
+                </template>
               </span>
             </h4>
             <div class="overflow-x-auto">
@@ -122,9 +132,14 @@ const beatTier = (pt: number | null) => getRankInfo(pt ?? 0);
                     v-for="row in div.entries"
                     :key="row.userId"
                     class="border-b border-slate-100 dark:border-slate-700/50"
-                    :class="row.userId === myUserId ? 'bg-indigo-50 dark:bg-indigo-900/30 font-semibold' : ''"
+                    :class="[
+                      row.userId === myUserId ? 'bg-indigo-50 dark:bg-indigo-900/30 font-semibold' : '',
+                      rowClass(row.active),
+                    ]"
                   >
-                    <td class="py-1.5 pr-2 tabular-nums text-slate-600 dark:text-slate-300">{{ row.rank }}</td>
+                    <td class="py-1.5 pr-2 tabular-nums text-slate-600 dark:text-slate-300">
+                      {{ row.rank ?? '–' }}
+                    </td>
                     <td class="py-1.5 pr-2 break-words text-slate-700 dark:text-slate-200">
                       <span class="inline-flex items-center gap-1.5 align-middle">
                         <RankIcon
@@ -135,6 +150,11 @@ const beatTier = (pt: number | null) => getRankInfo(pt ?? 0);
                           disable-party
                         />
                         <span>{{ row.displayName }}</span>
+                        <span
+                          v-if="!row.active"
+                          class="shrink-0 rounded px-1 py-px text-[10px] font-normal leading-tight border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400"
+                          :title="t('league.rankingModal.inactiveTitle')"
+                        >{{ t('league.rankingModal.inactive') }}</span>
                       </span>
                     </td>
                     <td class="py-1.5 pl-2 text-right tabular-nums font-semibold" :class="ptClass(row.points)">

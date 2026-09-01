@@ -22,6 +22,7 @@ import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 import { API_BASE } from '../composables/constants';
 import { flattenScores } from '../utils/scoreData';
 import { calculateTotalPoints } from '../utils/beatTier';
+import { gameDataReady } from '../composables/useGameData';
 
 const route = useRoute();
 /**
@@ -156,6 +157,8 @@ async function loadShare() {
                 const flat = await scoresRes.json();
                 scoreData.value = groupScores(flat);
                 if (scoreData.value.length > 0) {
+                    // 曲マスタ（満点 = notes × 2）が無いと BEAT-PT が 0 になるので到着を待つ。
+                    await gameDataReady;
                     totalBeatTierPoints.value = calculateTotalPoints(flattenScores(scoreData.value));
                 }
             }

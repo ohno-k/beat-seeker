@@ -64,6 +64,8 @@ const SongAverageView = defineAsyncComponent(() => import('./views/SongAverageVi
 const DifficultyTableView = defineAsyncComponent(() => import('./views/DifficultyTableView.vue'));
 const SkillTreeView = defineAsyncComponent(() => import('./views/SkillTreeView.vue'));
 const ChartListView = defineAsyncComponent(() => import('./views/ChartListView.vue'));
+// 作品別スコア一覧: プロフィールの「過去作スコア」で作品ラベルを押したときだけ開く。
+const PastVersionScoresView = defineAsyncComponent(() => import('./views/PastVersionScoresView.vue'));
 // リーグモード: 週次課題曲 3 曲・昇降格制の対戦タブ（要ログイン）。
 const LeagueView = defineAsyncComponent(() => import('./views/LeagueView.vue'));
 const RankComparisonView = defineAsyncComponent(() => import('./views/RankComparisonView.vue'));
@@ -103,7 +105,7 @@ const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearch
 import type { SongDataEntry } from './composables/useGameData';
 import { parseScoreCsv, detectCsvVersion, getCsvLastPlayTime } from './utils/csvParser';
 import type { VersionDetectionResult } from './utils/csvParser';
-import { CURRENT_VERSION, versionName } from './utils/iidxVersions';
+import { CURRENT_VERSION, MIN_PAST_VERSION, versionName } from './utils/iidxVersions';
 import { usePastScores, chartKey } from './composables/usePastScores';
 import ImportVersionConfirmModal from './components/ImportVersionConfirmModal.vue';
 import type { ScoreData } from './types/ScoreData';
@@ -117,9 +119,10 @@ import { useScoreUpload } from './composables/useScoreUpload';
 import { useAppUpdate } from './composables/useAppUpdate';
 import { useScores } from './composables/useScores';
 import { useDarkMode } from './composables/useDarkMode';
+import { useNativeBridge } from './composables/useNativeBridge';
 import { useFriends } from './composables/useFriends';
 import { useI18n } from './composables/useI18n';
-import { useGameData } from './composables/useGameData';
+import { useGameData, gameDataReady } from './composables/useGameData';
 import { useAprilFools } from './composables/useAprilFools';
 import AprilFoolsOverlay from './components/AprilFoolsOverlay.vue';
 import ToastContainer from './components/ToastContainer.vue';
@@ -253,11 +256,32 @@ const reloadPage = () => window.location.reload();
  *    `openSongByTitle` が false を返す。その場合は何も開かない（仕様）。
  */
 const scoreSummaryRef = ref<InstanceType<typeof ScoreSummary> | null>(null);
+
+/**
+ * ScoreSummary を一度でもマウントしたか。
+ *
+ * ScoreSummary は 6,000 譜面ぶんの集計 computed を複数抱える最も重いコンポーネントで、
+ * かつタブ切替は v-show（マウント状態を維持）で行っている。素直に書くと
+ * 「ダッシュボードを見ているだけなのに ScoreSummary の初期化が走る」ことになり、
+ * 初回描画のメインスレッド占有時間がまるごと乗ってしまう。
+ * そのため、スコア一覧タブが初めて要求されるまでマウント自体を遅らせる。
+ * 一度マウントしたら以降は v-show のまま（= 表示状態・ページ番号を保持する）。
+ */
+const isScoreSummaryMounted = ref(false);
+
+/**
+ * 【関数の役割】 スコア一覧タブへ移動し、ScoreSummary がマウントされるのを待つ。
+ * 遅延マウントしているため、詳細モーダルを開く前に必ずこれを通す。
+ */
+const openScoreTable = async () => {
+  activeTab.value = 'table';
+  isScoreSummaryMounted.value = true;
+  await nextTick();
+};
+
 const handleOcrMatched = async (song: SongDataEntry) => {
   isOcrSearchModalOpen.value = false;
-  activeTab.value = 'table';
-  // v-show で常にマウントされているはずだが、初回描画タイミングを保険で待つ
-  await nextTick();
+  await openScoreTable();
   scoreSummaryRef.value?.openSongByTitle(song.title);
 };
 
@@ -302,8 +326,7 @@ const handleCmdkSelectTab = (tabId: string) => {
 
 /** 【関数の役割】 パレットから曲選択時のハンドラ。スコア一覧タブへ移動して詳細モーダルを開く。 */
 const handleCmdkSelectSong = async (title: string) => {
-  activeTab.value = 'table';
-  await nextTick();
+  await openScoreTable();
   scoreSummaryRef.value?.openSongByTitle(title);
 };
 
@@ -349,7 +372,40 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'past-version-scores'>('dashboard')
+
+// 【watch】 スコア一覧タブが要求されたら ScoreSummary を遅延マウントする。
+// （サイドバー / コマンドパレット等どの経路でタブが変わっても拾えるようここで一元化する）
+watch(activeTab, (tab) => {
+  if (tab === 'table') isScoreSummaryMounted.value = true;
+}, { immediate: true });
+
+/**
+ * 作品別スコア一覧（activeTab = 'past-version-scores'）で表示中の作品バージョン番号。
+ * プロフィールの過去作スコアで作品ラベルを押したときに設定される。
+ */
+const pastVersionScoresVersion = ref<number>(CURRENT_VERSION);
+
+/**
+ * 【関数の役割】 作品別スコア一覧ページを開く。
+ *
+ * リロードやブックマークでも同じページに戻れるよう URL も `/past-scores/{version}` に書き換える。
+ * pushState ではなく replaceState を使うのは、他タブ（/admin/user-comparison 等）と同じ方針で、
+ * 履歴を積まずにブラウザバックの意味を壊さないため。
+ */
+const openPastVersionScores = (version: number) => {
+  pastVersionScoresVersion.value = version;
+  activeTab.value = 'past-version-scores';
+  window.history.replaceState({}, '', `/past-scores/${version}`);
+  window.scrollTo({ top: 0 });
+};
+
+/** 【関数の役割】 作品別スコア一覧からプロフィール（過去作スコア）へ戻る。 */
+const closePastVersionScores = () => {
+  activeTab.value = 'profile';
+  window.history.replaceState({}, '', '/profile');
+  window.scrollTo({ top: 0 });
+};
 
 /**
  * 現在のタブ ID から表示用ラベル（ヘッダーのパンくず・タイトルで使う）への解決を行う computed。
@@ -380,6 +436,7 @@ const activeTabLabel = computed<string>(() => {
     about: t('nav.about'),
     manual: t('nav.manual'),
     'admin-user-comparison': 'ユーザー間スコア比較',
+    'past-version-scores': `${pastVersionScoresVersion.value} ${versionName(pastVersionScoresVersion.value)}`,
   };
   return labels[activeTab.value] ?? '';
 });
@@ -434,8 +491,14 @@ const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, fetchArenaTopRank
 const { isDarkMode, toggleDarkMode } = useDarkMode();
 
 /**
+ * Android アプリ (WebView ラッパー) 内で表示されているか。
+ * true のときだけヘッダーに「CSV取り込み」ボタンを出す (アプリ版限定導線)。
+ */
+const { isNativeApp } = useNativeBridge();
+
+/**
  * 【computed の役割】 Competition セクション (大会管理 / Strategy Card / Song Reveal) を
- * ヘッダーに表示してよいかの判定。CompetitionAdminView の ORGANIZER_IDS と同じ 4 ID。
+ * サイドバー最下部に表示してよいかの判定。CompetitionAdminView の ORGANIZER_IDS と同じ 4 ID。
  * 他人ダッシュボード閲覧中 (viewingUserId) は隠す。
  * 変更時は backend の OrganizerAuthService (competition.organizer-ids) も揃えること。
  */
@@ -444,14 +507,10 @@ const canAccessCompetition = computed(() => {
   return (id === 18 || id === 19 || id === 23 || id === 35) && !viewingUserId.value;
 });
 
-/** ヘッダー「beat-seeker for competition」ドロップダウンの開閉。 */
-const isCompetitionMenuOpen = ref(false);
-
-/** ドロップダウンから大会管理タブへ遷移。 */
+/** サイドバーの Competition セクションから大会管理タブへ遷移。 */
 const goCompetitionAdmin = () => {
   activeTab.value = 'competition-admin';
   window.history.replaceState({}, '', '/competition-admin');
-  isCompetitionMenuOpen.value = false;
 };
 const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission, sendFriendRequest, fetchVirtualRivalStatus, addVirtualRival, removeVirtualRival } = useFriends();
 
@@ -707,10 +766,23 @@ onMounted(() => {
     '/league': 'league',
     '/competition-admin': 'competition-admin',
     '/admin/user-comparison': 'admin-user-comparison',
+    // 作品別スコア一覧から戻ったときに書き戻す URL。リロードでもプロフィールに着地させる。
+    '/profile': 'profile',
   };
   const currentPath = window.location.pathname;
   if (pathToTab[currentPath]) {
     activeTab.value = pathToTab[currentPath];
+  } else if (currentPath.startsWith('/past-scores/')) {
+    // /past-scores/:version 形式の作品別スコア一覧。
+    // 対応外の番号（未対応の新作・タイプミス）はプロフィールに落として空ページを見せない。
+    const version = Number(currentPath.slice('/past-scores/'.length));
+    if (Number.isInteger(version) && version >= MIN_PAST_VERSION && version <= CURRENT_VERSION) {
+      pastVersionScoresVersion.value = version;
+      activeTab.value = 'past-version-scores';
+    } else {
+      activeTab.value = 'profile';
+      window.history.replaceState({}, document.title, '/profile');
+    }
   } else if (currentPath.startsWith('/share/')) {
     // /share/:token 形式の URL 共有ページ。ShareView がトークンを読み取って描画する。
     activeTab.value = 'share';
@@ -789,6 +861,10 @@ const loadSavedScores = async () => {
   // フェッチ前に必ずクリアする
   scoreData.value = [];
   totalBeatTierPoints.value = 0;
+
+  // BEAT-PT は曲マスタ（満点 = notes × 2）と難易度表が無いと 0 になってしまう。
+  // 曲マスタはバンドル同梱をやめて API 取得に一本化したので、ここで到着を待つ。
+  await gameDataReady;
 
   try {
     let data;
@@ -1767,6 +1843,8 @@ const handleUnifiedClose = async () => {
       @upload="resetData"
       @open-ocr-search="isOcrSearchModalOpen = true"
       @open-rank-quiz="isRankQuizOpen = true"
+      :can-access-competition="canAccessCompetition"
+      @open-competition-admin="goCompetitionAdmin"
     />
 
     <!-- カメラ OCR 曲検索モーダル: 一致時は譜面一覧タブに切替して検索語を引き継ぐ -->
@@ -1909,82 +1987,25 @@ const handleUnifiedClose = async () => {
             </nav>
           </div>
           
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 sm:gap-4">
             <!--
-              beat-seeker for competition: 大会主催 4 ID 限定の機能群。
-              クリックで大会管理 / Strategy Card / Song Reveal の 3 リンクをドロップダウン表示する。
-              ダークモード切替の左隣に常時表示 (権限のあるユーザーのみ)。
+              アプリ版限定「CSV取り込み」: Android アプリ (WebView) 内でのみ表示するクイック導線。
+              アプリでは 1 タップ取り込みが使えるため、サイドバーを開かなくても
+              ヘッダーからそのまま取り込みモーダルを開けるようにしている。
+              ブラウザでは isNativeApp が false になり、この導線は出ない (従来どおりサイドバーから)。
             -->
-            <div v-if="canAccessCompetition" class="relative">
-              <button
-                type="button"
-                @click="isCompetitionMenuOpen = !isCompetitionMenuOpen"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                :class="isCompetitionMenuOpen ? 'border-blue-500 dark:border-blue-500' : ''"
-                title="beat-seeker for competition"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span class="hidden sm:inline whitespace-nowrap">beat-seeker for competition</span>
-                <span class="sm:hidden">Competition</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <!-- ドロップダウン本体: 外側クリックで閉じる用のオーバーレイ + 浮動メニュー -->
-              <template v-if="isCompetitionMenuOpen">
-                <div class="fixed inset-0 z-40" @click="isCompetitionMenuOpen = false"></div>
-                <div class="absolute right-0 mt-2 w-72 z-50 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl overflow-hidden">
-                  <div class="px-4 py-2 section-label border-b border-slate-100 dark:border-slate-700/60">
-                    Competition Tools
-                  </div>
-                  <!-- 大会管理 (内部タブ) -->
-                  <button
-                    type="button"
-                    @click="goCompetitionAdmin"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p>大会管理</p>
-                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">5チーム×4人 総当たり編成</p>
-                    </div>
-                  </button>
-                  <!-- Strategy Card (スタンドアロン URL) -->
-                  <a
-                    href="/strategy-card"
-                    @click="isCompetitionMenuOpen = false"
-                    class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p>Strategy Card</p>
-                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">課題曲ランダム抽選 (OBS用)</p>
-                    </div>
-                  </a>
-                  <!-- Song Reveal (スタンドアロン URL) -->
-                  <a
-                    href="/song-reveal"
-                    @click="isCompetitionMenuOpen = false"
-                    class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
-                    </svg>
-                    <div class="flex-1 min-w-0">
-                      <p>Song Reveal</p>
-                      <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">選曲発表演出 (OBS用)</p>
-                    </div>
-                  </a>
-                </div>
-              </template>
-            </div>
+            <button
+              v-if="isNativeApp && isLoggedIn"
+              type="button"
+              @click="showUploadArea = true"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shrink-0"
+              :title="t('nav.appCsvImport')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span class="whitespace-nowrap">{{ t('nav.appCsvImport') }}</span>
+            </button>
 
             <!-- Dark Mode Toggle -->
             <button @click="toggleDarkMode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none">
@@ -2293,6 +2314,16 @@ const handleUnifiedClose = async () => {
           <ProfileDashboard
             class="w-full max-w-6xl"
             :viewing-user-id="viewingUserId"
+            @open-past-version="openPastVersionScores"
+          />
+        </template>
+
+        <!-- 作品別スコア一覧: プロフィールの過去作スコアから作品ラベルで遷移する -->
+        <template v-else-if="activeTab === 'past-version-scores'">
+          <PastVersionScoresView
+            class="w-full max-w-6xl mx-auto animate-fade-in"
+            :version="pastVersionScoresVersion"
+            @back="closePastVersionScores"
           />
         </template>
 
@@ -2423,8 +2454,12 @@ const handleUnifiedClose = async () => {
               />
             </div>
 
-            <!-- スコア一覧タブ: ScoreSummary が BEAT-TIER / RATE-TIER モード切替と詳細モーダルを担当 -->
+            <!-- スコア一覧タブ: ScoreSummary が BEAT-TIER / RATE-TIER モード切替と詳細モーダルを担当。
+                 最も重いコンポーネントなので、スコア一覧が初めて要求されるまでマウントしない
+                 （= ダッシュボードしか見ないユーザーは初期化コストを払わない）。
+                 一度マウントしたあとは v-show でタブ状態を保持する。 -->
             <ScoreSummary
+              v-if="isScoreSummaryMounted"
               ref="scoreSummaryRef"
               v-show="activeTab === 'table'"
               :scores="scoreData"

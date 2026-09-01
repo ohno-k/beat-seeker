@@ -61,6 +61,8 @@ import java.util.Map;
  *  - POST /api/admin/push/clear-all                 … 全ユーザーの push 購読を初期化
  *  - POST /api/admin/patch-rate-pt                  … RATE-PT = 0 の履歴ログを補正
  *  - POST /api/admin/patch-history-rate-pt          … diffJson 内の newRatePt = 0/null を補正
+ *  - GET  /api/admin/users/{id}/comparison          … 1 ユーザー vs 全ユーザーの勝敗（日次バッチの集計結果）
+ *  - POST /api/admin/user-comparison/recalculate    … 上記集計の全ユーザー再構築
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -90,6 +92,8 @@ public class AdminController {
     private final JdbcTemplate jdbcTemplate;
     /** SET LOCAL を効かせるための明示的トランザクション境界（診断用途）。 */
     private final TransactionTemplate transactionTemplate;
+    /** ユーザー間スコア比較の日次バッチ／その場集計。 */
+    private final com.beatseeker.backend.service.UserComparisonStatsService userComparisonStatsService;
 
     /**
      * JPA が注入する永続化コンテキスト。
@@ -113,7 +117,9 @@ public class AdminController {
                            AdminAuthService adminAuthService,
                            UserSongOptionRepository userSongOptionRepository,
                            JdbcTemplate jdbcTemplate,
-                           TransactionTemplate transactionTemplate) {
+                           TransactionTemplate transactionTemplate,
+                           com.beatseeker.backend.service.UserComparisonStatsService userComparisonStatsService) {
+        this.userComparisonStatsService = userComparisonStatsService;
         this.userSongOptionRepository = userSongOptionRepository;
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
@@ -849,6 +855,112 @@ public class AdminController {
             int patched = scoreRecalculationService.patchZeroRatePtInDiffJson(songMaxScores);
             return ResponseEntity.ok(Map.of(
                     "message", patched + " 件のスナップショットの diffJson を補正しました"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 1 ユーザーを主体に、全ユーザーとの EX-SCORE 勝敗を返す。
+     *
+     * 管理画面「ユーザー間スコア比較」用。以前は 2 ユーザーを選んで突き合わせていたが、
+     * 「1 人選んだら全員との勝敗が勝率降順で出る」形に変えたため、
+     * リクエスト毎の総当たりをやめて日次バッチの集計結果
+     * （{@link com.beatseeker.backend.service.UserComparisonStatsService}）を配る。
+     *
+     * 今日ぶんの集計がまだ無ければ、その場でこのユーザー 1 人ぶんだけ集計してから返す
+     * （初回アクセスやバッチ未実行でも空表を返さない）。
+     *
+     * レベル帯（LV10MINUS / LV11 / LV12）別に数えた行をそのまま返し、
+     * 画面のレベルトグルに応じてフロント側で足し合わせる。
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param userId 主体となるユーザーの DB 主キー
+     * @return 相手ユーザーごとのレベル帯別勝敗
+     * @throws RuntimeException 対象ユーザーが存在しない場合
+     */
+    @GetMapping("/users/{userId}/comparison")
+    public ResponseEntity<Map<String, Object>> getUserComparison(
+            Authentication auth,
+            @PathVariable Long userId) {
+
+        checkAdminAccess(auth);
+
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        List<com.beatseeker.backend.entity.UserComparisonStat> stats =
+                userComparisonStatsService.ensureStatsForUser(userId);
+
+        // 相手 ID → 表示名／IIDX ID を引くための lookup。ユーザー数ぶんの 1 クエリで済ませる。
+        Map<Long, User> userById = new HashMap<>();
+        for (User u : userRepository.findAll()) {
+            userById.put(u.getId(), u);
+        }
+
+        // 相手ごとに 1 件へ畳み、その中でレベル帯別の内訳を持たせる。
+        Map<Long, Map<String, Object>> byOpponent = new java.util.LinkedHashMap<>();
+        java.time.LocalDateTime computedAt = null;
+        for (com.beatseeker.backend.entity.UserComparisonStat stat : stats) {
+            User opponent = userById.get(stat.getOpponentId());
+            // 集計後に退会した相手の行は表示できないので落とす。
+            if (opponent == null) continue;
+
+            Map<String, Object> entry = byOpponent.computeIfAbsent(stat.getOpponentId(), id -> {
+                Map<String, Object> m = new HashMap<>();
+                m.put("userId", id);
+                m.put("displayName", opponent.getDisplayName() != null ? opponent.getDisplayName() : "");
+                m.put("iidxId", opponent.getIidxId() != null ? opponent.getIidxId() : "");
+                // 一覧の名前の横に BEAT-Tier アイコンを出すために必要。
+                m.put("totalBeatPt", opponent.getTotalBeatPt() != null ? opponent.getTotalBeatPt() : 0.0);
+                m.put("levels", new HashMap<String, Object>());
+                return m;
+            });
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> levels = (Map<String, Object>) entry.get("levels");
+            Map<String, Object> counts = new HashMap<>();
+            counts.put("win", stat.getWin());
+            counts.put("loss", stat.getLoss());
+            counts.put("draw", stat.getDraw());
+            counts.put("onlySelf", stat.getOnlySelf());
+            counts.put("onlyOpponent", stat.getOnlyOpponent());
+            levels.put(stat.getLevelCategory().name(), counts);
+
+            // 表示用の「集計時刻」は最新の行に合わせる。
+            if (computedAt == null || stat.getComputedAt().isAfter(computedAt)) {
+                computedAt = stat.getComputedAt();
+            }
+        }
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("userId", userId);
+        body.put("displayName", targetUser.getDisplayName() != null ? targetUser.getDisplayName() : "");
+        body.put("iidxId", targetUser.getIidxId() != null ? targetUser.getIidxId() : "");
+        body.put("totalBeatPt", targetUser.getTotalBeatPt() != null ? targetUser.getTotalBeatPt() : 0.0);
+        body.put("computedAt", computedAt != null ? computedAt.toString() : null);
+        body.put("opponents", new ArrayList<>(byOpponent.values()));
+        return ResponseEntity.ok(body);
+    }
+
+    /**
+     * 【メソッドの役割】 ユーザー間スコア比較の集計を全ユーザーぶん作り直す。
+     *
+     * 日次バッチを待たずに最新スコアを反映させたい時の手動トリガー。
+     * 同期実行なのでユーザー数が多いと数十秒かかり得る。
+     *
+     * @param auth 認証情報（管理者限定）
+     * @return 書き込んだ行数を含むメッセージ
+     */
+    @PostMapping("/user-comparison/recalculate")
+    public ResponseEntity<Map<String, Object>> recalculateUserComparison(Authentication auth) {
+        checkAdminAccess(auth);
+        try {
+            int rows = userComparisonStatsService.refreshAll();
+            return ResponseEntity.ok(Map.of(
+                    "message", "ユーザー間スコア比較の集計を再構築しました (" + rows + " 行)",
+                    "rows", rows));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("message", "Error: " + e.getMessage()));
