@@ -61,12 +61,20 @@ public class BeatPtCalculator {
     };
 
     /**
+     * 非公式難易度文字列から最初の小数を取り出すパターン。
+     * {@link #getWeight(String)} は 1 リクエストで数万回呼ばれる（コスパ埋めレコメンドの
+     * 数値積分など）ため、呼び出しごとの {@code Pattern.compile} を避けて定数化する。
+     * Pattern はイミュータブルでスレッドセーフ。
+     */
+    private static final Pattern INFORMAL_RANK_PATTERN = Pattern.compile("(\\d+\\.\\d+)");
+
+    /**
      * 非公式難易度文字列（"12.3" / "12.3 TOP" のような付随テキスト）から weight を引く。
      * 正規表現で最初の小数を取り出し、WEIGHTS マップを検索する。
      */
     public int getWeight(String informalRank) {
         if (informalRank == null || informalRank.isEmpty()) return 0;
-        Matcher m = Pattern.compile("(\\d+\\.\\d+)").matcher(informalRank);
+        Matcher m = INFORMAL_RANK_PATTERN.matcher(informalRank);
         String key = m.find() ? m.group(1) : informalRank;
         return WEIGHTS.getOrDefault(key, 0);
     }

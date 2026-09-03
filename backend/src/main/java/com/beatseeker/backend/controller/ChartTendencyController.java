@@ -7,6 +7,7 @@ import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.ChartTendencyService;
+import com.beatseeker.backend.service.FillRecommendationService;
 import com.beatseeker.backend.service.PairRegressionService;
 import com.beatseeker.backend.service.SkillTreeService;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,8 @@ import java.util.Optional;
  *  - GET  /api/analysis/score-prediction           … ログインユーザーの予測スコア
  *  - GET  /api/analysis/score-prediction/all       … 全譜面の予測スコア（BEAT-TIER 算出用）
  *  - GET  /api/analysis/skill-tree                 … スキルツリー生成
+ *  - GET  /api/analysis/growth-potential           … 伸びしろランキング
+ *  - GET  /api/analysis/fill-recommendation        … コスパ埋めレコメンド（期待 BEAT-PT 降順）
  */
 @RestController
 public class ChartTendencyController {
@@ -64,6 +67,8 @@ public class ChartTendencyController {
     private final PairRegressionService pairRegressionService;
     /** 履歴ログリポジトリ（KENBAN/SARA ランキングを DB から直接引く用）。 */
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
+    /** コスパ埋めレコメンド（期待 BEAT-PT の算出）。 */
+    private final FillRecommendationService fillRecommendationService;
 
     /**
      * 【コンストラクタ】 Spring DI によりサービス・リポジトリを注入する。
@@ -74,7 +79,8 @@ public class ChartTendencyController {
                                    AdminAuthService adminAuthService,
                                    ScoreRepository scoreRepository,
                                    PairRegressionService pairRegressionService,
-                                   ScoreHistoryLogRepository scoreHistoryLogRepository) {
+                                   ScoreHistoryLogRepository scoreHistoryLogRepository,
+                                   FillRecommendationService fillRecommendationService) {
         this.service = service;
         this.skillTreeService = skillTreeService;
         this.userRepository = userRepository;
@@ -82,6 +88,7 @@ public class ChartTendencyController {
         this.scoreRepository = scoreRepository;
         this.pairRegressionService = pairRegressionService;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
+        this.fillRecommendationService = fillRecommendationService;
     }
 
     // ── 管理者エンドポイント ─────────────────────────────────────
@@ -594,6 +601,57 @@ public class ChartTendencyController {
         Map<String, Object> result = new HashMap<>();
         result.put("items", items);
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 【メソッドの役割】 ログインユーザーの「コスパ埋めレコメンド」を返す。
+     *
+     * 「次に何を埋めれば総合 BEAT-PT が一番伸びるか」を、未プレイ譜面も含めた全譜面について
+     * 期待獲得 pt = E[max(0, pt(S) − baseline)]（S = 推定能力から見た到達スコアの分布）で
+     * 評価し、降順に並べて返す。詳細は {@link FillRecommendationService} を参照。
+     *
+     * 伸びしろランキング（/growth-potential）との違い:
+     *  - 候補が未プレイ譜面まで広がる（＝「埋め」の提案ができる）
+     *  - 「スコアがいくつ伸びるか」ではなく「総合 BEAT-PT がいくつ増えるか」で並ぶ
+     *  - 予測を点ではなく分布として扱い、達成確率つきで返す
+     *
+     * GET /api/analysis/fill-recommendation
+     *
+     * @return {@code {top100Threshold, totalBeatPt, scoredChartCount, referenceChartCount, items: [...]}}
+     */
+    @GetMapping("/api/analysis/fill-recommendation")
+    public ResponseEntity<Map<String, Object>> fillRecommendation(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        String iidxId = (String) auth.getPrincipal();
+        User user = userRepository.findByIidxId(iidxId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId()));
+    }
+
+    /**
+     * 【メソッドの役割】 管理者向け: 指定ユーザーのコスパ埋めレコメンドを返す（推薦精度の検証用）。
+     *
+     * GET /api/admin/fill-recommendation?userId=...
+     *
+     * @param auth   認証情報（管理者限定）
+     * @param userId 対象ユーザーの DB 主キー
+     * @return {@link #fillRecommendation} と同形。ユーザー不在なら 404
+     */
+    @GetMapping("/api/admin/fill-recommendation")
+    public ResponseEntity<Map<String, Object>> fillRecommendationForUser(
+            Authentication auth,
+            @RequestParam long userId) {
+
+        checkAdmin(auth);
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+        return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId()));
     }
 
     /**

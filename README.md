@@ -48,6 +48,7 @@ npm run dev
 ## Repository Docs
 
 - [docs/完全設計書.md](docs/%E5%AE%8C%E5%85%A8%E8%A8%AD%E8%A8%88%E6%9B%B8.md) — 機能・構造・API仕様のワンドキュメント
+- [docs/コスパ埋めレコメンド.md](docs/%E3%82%B3%E3%82%B9%E3%83%91%E5%9F%8B%E3%82%81%E3%83%AC%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%89.md) — ランクアップアドバイス（期待 BEAT-PT による埋め推薦）の算出式
 - [SCRIPTS.md](SCRIPTS.md) — プロジェクトルート直下のスクリプト説明
 - [backend/SCRIPTS.md](backend/SCRIPTS.md) — backend のビルド・テスト用バッチ説明
 - [frontend/SCRIPTS.md](frontend/SCRIPTS.md) — frontend のデータ整備スクリプト説明
