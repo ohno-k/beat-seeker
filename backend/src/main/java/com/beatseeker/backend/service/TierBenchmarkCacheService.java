@@ -157,6 +157,31 @@ public class TierBenchmarkCacheService {
         return lastRefreshedAt > 0;
     }
 
+    /**
+     * 【メソッドの役割】 まだ集計されていなければ、その場で集計する。
+     *
+     * 定期実行（日次）だけに頼ると、次の 2 つの場合に登竜門枠が空のままになる。
+     *  - 起動直後の 3 分間
+     *  - {@code app.scheduling.enabled=false} のとき（本番 DB にローカル接続する prod-db プロファイル）
+     * 後者は検証で常用する経路なので、放っておくと毎回手動リフレッシュが要る。
+     * {@link PairRegressionService#ensureBuilt()} と同じ考え方で、最初に必要になった時点で作る。
+     *
+     * <p>初回は数十秒かかる。呼び出し側（メニュー生成）はもともと重い処理なので、
+     * ここで待たせても体感は変わらない。
+     *
+     * <p>{@link Transactional} が付いているのは、この中で自己呼び出しする {@link #refresh()} が
+     * プロキシを通らず、そのままではトランザクションが張られないため。トランザクションが無いと
+     * {@code SET LOCAL statement_timeout} が効かず（PostgreSQL では単独の SET LOCAL は無効）、
+     * 40 秒前後かかる集計が接続既定の 30 秒で打ち切られる。
+     * 外側（メニュー生成）から proxy 経由で呼ばれることでここに境界ができ、
+     * 内側の SET LOCAL がその境界に効く。
+     */
+    @Transactional
+    public void ensureBuilt() {
+        if (lastRefreshedAt > 0) return;
+        refresh();
+    }
+
     /** 【メソッドの役割】 最終更新時刻（epoch ms）。0 なら未計算。 */
     public long getLastRefreshedAt() {
         return lastRefreshedAt;

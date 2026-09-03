@@ -56,6 +56,12 @@ interface MenuResponse {
   currentTierMinPoints: number;
   totalBeatPt: number;
   weeklyPlays: number;
+  weeklyPlaysMin: number;
+  weeklyPlaysMax: number;
+  /** 1 クレジットあたりの曲数（IIDX は 4 曲）。設定はこの単位で刻む。 */
+  playsPerCredit: number;
+  /** 提示した曲の想定プレイ回数の合計。設定した週プレイ数との対比を出す。 */
+  plannedPlays: number;
   regenerateLeft: number;
   nextTier: { name: string; minPoints: number; gap: number } | null;
   weakAxes: string[];
@@ -103,6 +109,7 @@ const loadAll = async () => {
     ]);
     if (!menuRes.ok) throw new Error(`メニュー取得に失敗しました (HTTP ${menuRes.status})`);
     menu.value = await menuRes.json();
+    weeklyPlaysInput.value = menu.value!.weeklyPlays;
     radar.value = radarRes.ok ? (await radarRes.json()).axes ?? [] : [];
     const reviewData = reviewRes.ok ? await reviewRes.json() : null;
     review.value = reviewData?.weekStart ? reviewData : null;
@@ -111,6 +118,40 @@ const loadAll = async () => {
     menu.value = null;
   } finally {
     isLoading.value = false;
+  }
+};
+
+/** 週プレイ数の入力値。メニュー取得のたびにサーバーの値へ揃える。 */
+const weeklyPlaysInput = ref<number>(20);
+const isSavingSettings = ref(false);
+
+/** 曲数をクレジット数に直す。端数が出たら小数第 1 位まで見せる。 */
+const creditsOf = (plays: number, perCredit: number) => {
+  if (!perCredit) return '';
+  const credits = plays / perCredit;
+  return Number.isInteger(credits) ? String(credits) : credits.toFixed(1);
+};
+
+/**
+ * 週プレイ数を保存する。サーバー側で保存と同時にメニューを組み直して返すので、
+ * 曲数が即座に変わる。「組み直す」の回数は消費しない。
+ */
+const saveWeeklyPlays = async () => {
+  if (isSavingSettings.value) return;
+  isSavingSettings.value = true;
+  loadError.value = '';
+  try {
+    const base = withUser('/api/training/settings');
+    const url = `${base}${base.includes('?') ? '&' : '?'}weeklyPlays=${weeklyPlaysInput.value}`;
+    const res = await fetch(url, { method: 'PUT', headers: authHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
+    menu.value = data;
+    weeklyPlaysInput.value = data.weeklyPlays;
+  } catch (e: any) {
+    loadError.value = e?.message ?? '通信エラー';
+  } finally {
+    isSavingSettings.value = false;
   }
 };
 
@@ -127,6 +168,7 @@ const regenerate = async () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
     menu.value = data;
+    weeklyPlaysInput.value = data.weeklyPlays;
   } catch (e: any) {
     loadError.value = e?.message ?? '通信エラー';
   } finally {
@@ -136,6 +178,17 @@ const regenerate = async () => {
 
 onMounted(() => {
   if (isAdmin.value) loadAll();
+});
+
+/**
+ * 設定した曲数に対して、実際の献立が明らかに少ないか。
+ * 達成確率の帯に入る譜面や登竜門譜面には限りがあるので、設定を上げ続けても
+ * どこかで頭打ちになる。その状態を画面で断っておく。
+ */
+const isSaturated = computed(() => {
+  const m = menu.value;
+  if (!m) return false;
+  return m.plannedPlays < m.weeklyPlays * 0.8;
 });
 
 /** 役割ごとに項目を仕分ける。 */
@@ -278,15 +331,16 @@ const weakAxisNote = computed(() => {
         <div>
           <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">練習メニュー</h1>
           <p v-if="menu" class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {{ menu.weekStart }}（月）0:00 〜 {{ menu.weekEnd }}（日）23:59 · 週 {{ menu.weeklyPlays }} プレイ想定
+            {{ menu.weekStart }}（月）0:00 〜 {{ menu.weekEnd }}（日）23:59 ·
+            {{ menu.items.length }} 曲 / 想定 {{ menu.plannedPlays }} 曲ぶん（{{ creditsOf(menu.plannedPlays, menu.playsPerCredit) }} クレジット）
           </p>
           <p v-else class="text-xs text-slate-500 dark:text-slate-400 mt-1">検証中の管理者向け機能です。</p>
         </div>
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center flex-wrap">
           <input
             v-model="viewUserId"
             placeholder="userId（空で自分）"
-            class="w-40 px-3 py-2 text-xs rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            class="w-32 px-3 py-2 text-xs rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           />
           <button class="btn-secondary" :disabled="isLoading" @click="loadAll">
             {{ isLoading ? '読み込み中…' : '読み込む' }}
@@ -299,6 +353,59 @@ const weakAxisNote = computed(() => {
             {{ isRegenerating ? '組み直し中…' : `組み直す（残り ${menu?.regenerateLeft ?? 0}）` }}
           </button>
         </div>
+      </div>
+
+      <!-- 週プレイ数の設定。提示する曲数がこの値に比例して増減する。 -->
+      <div v-if="menu" class="card px-4 py-3 flex items-center gap-4 flex-wrap">
+        <div class="min-w-0">
+          <p class="section-label">週のプレイ曲数</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+            この数に合わせて計測・課題・埋めの曲数が増減します
+          </p>
+        </div>
+        <div class="flex items-center gap-3 flex-1 min-w-[260px]">
+          <input
+            v-model.number="weeklyPlaysInput"
+            type="range"
+            :min="menu.weeklyPlaysMin"
+            :max="menu.weeklyPlaysMax"
+            :step="menu.playsPerCredit"
+            class="flex-1 accent-blue-700 dark:accent-blue-500"
+            :disabled="isSavingSettings"
+            @change="saveWeeklyPlays"
+          />
+          <input
+            v-model.number="weeklyPlaysInput"
+            type="number"
+            :min="menu.weeklyPlaysMin"
+            :max="menu.weeklyPlaysMax"
+            :step="menu.playsPerCredit"
+            class="w-20 px-2 py-1.5 text-sm font-bold tabular-nums text-right rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            :disabled="isSavingSettings"
+            @change="saveWeeklyPlays"
+          />
+          <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+            曲 / 週
+            <span class="block text-[10px] text-slate-400 dark:text-slate-500 tabular-nums">
+              {{ creditsOf(weeklyPlaysInput, menu.playsPerCredit) }} クレジット
+            </span>
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 tabular-nums whitespace-nowrap">
+          <template v-if="isSavingSettings">組み直しています…</template>
+          <template v-else>
+            現在 <b class="text-slate-700 dark:text-slate-200">{{ menu.items.length }} 曲</b> ·
+            想定 <b class="text-slate-700 dark:text-slate-200">{{ menu.plannedPlays }}</b> 曲ぶん
+          </template>
+        </p>
+        <!-- 候補が尽きて枠を埋めきれない場合の断り書き。設定を上げても曲数が増えない理由を出す。 -->
+        <p
+          v-if="!isSavingSettings && isSaturated"
+          class="w-full text-[11px] text-amber-700 dark:text-amber-400 border-t border-slate-100 dark:border-slate-700/50 pt-2"
+        >
+          条件に合う譜面が尽きたため {{ menu.items.length }} 曲で打ち切っています。
+          設定をこれ以上上げても曲数は増えません。
+        </p>
       </div>
 
       <div v-if="loadError" class="card p-4 text-sm text-rose-600 dark:text-rose-400">

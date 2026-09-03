@@ -109,6 +109,62 @@ class PracticeMenuLogicTest {
     }
 
     @Test
+    void 枠の大きさは週プレイ数に比例する() {
+        // 基準（週 20 プレイ）は 計測 2 / 課題 6 / 埋め 4。
+        assertThat(PracticeMenuService.slotsFor(20)).containsExactly(2, 6, 4);
+
+        // 倍にすれば倍。半分にすれば半分。
+        assertThat(PracticeMenuService.slotsFor(40)).containsExactly(4, 12, 8);
+        assertThat(PracticeMenuService.slotsFor(10)).containsExactly(1, 3, 2);
+
+        // 想定プレイ回数の合計（計測 1 回 / 課題 2 回 / 埋め 1 回）が、
+        // 設定した週プレイ数を大きく超えない。
+        for (int plays : new int[]{4, 8, 12, 20, 40, 100, 200, 400}) {
+            int[] s = PracticeMenuService.slotsFor(plays);
+            int totalPlays = s[0] * 1 + s[1] * 2 + s[2] * 1;
+            assertThat(totalPlays)
+                    .as("週 %d 曲のときの想定曲数", plays)
+                    .isLessThanOrEqualTo(plays + 2);
+        }
+    }
+
+    @Test
+    void 週プレイ数はクレジット単位の範囲に丸められる() {
+        // 1 クレジット 4 曲。下限 1 クレジット、上限 100 クレジット。
+        assertThat(PracticeMenuService.PLAYS_PER_CREDIT).isEqualTo(4);
+        assertThat(PracticeMenuService.MIN_WEEKLY_PLAYS).isEqualTo(4);
+        assertThat(PracticeMenuService.MAX_WEEKLY_PLAYS).isEqualTo(400);
+
+        assertThat(PracticeMenuService.clampWeeklyPlays(null))
+                .isEqualTo(PracticeMenuService.DEFAULT_WEEKLY_PLAYS);
+        assertThat(PracticeMenuService.clampWeeklyPlays(0))
+                .isEqualTo(PracticeMenuService.MIN_WEEKLY_PLAYS);
+        assertThat(PracticeMenuService.clampWeeklyPlays(-30))
+                .isEqualTo(PracticeMenuService.MIN_WEEKLY_PLAYS);
+        assertThat(PracticeMenuService.clampWeeklyPlays(9999))
+                .isEqualTo(PracticeMenuService.MAX_WEEKLY_PLAYS);
+        assertThat(PracticeMenuService.clampWeeklyPlays(400)).isEqualTo(400);
+        assertThat(PracticeMenuService.clampWeeklyPlays(32)).isEqualTo(32);
+    }
+
+    @Test
+    void 下限の一クレジットでも三つの枠が全て残る() {
+        // 週 4 曲（1 クレジット）でも「計測はしないが課題だけ出る」片寄りにならない。
+        int[] s = PracticeMenuService.slotsFor(PracticeMenuService.MIN_WEEKLY_PLAYS);
+        assertThat(s[0]).isEqualTo(1);
+        assertThat(s[1]).isEqualTo(1);
+        assertThat(s[2]).isEqualTo(1);
+        // 想定曲数はちょうど 1 クレジット（計測 1 + 課題 2 + 埋め 1）。
+        assertThat(s[0] + s[1] * 2 + s[2]).isEqualTo(PracticeMenuService.PLAYS_PER_CREDIT);
+    }
+
+    @Test
+    void 上限の百クレジットでは枠が二十倍になる() {
+        int[] s = PracticeMenuService.slotsFor(PracticeMenuService.MAX_WEEKLY_PLAYS);
+        assertThat(s).containsExactly(40, 120, 80);
+    }
+
+    @Test
     void 傾向軸は八本で和音ではなく同時押しと呼ぶ() {
         assertThat(TendencyAxisService.AXES).hasSize(8);
         // 元の列名は chordPct（和音）だが、プレイヤーが使う語に合わせて表示名は「同時押し」で統一する。

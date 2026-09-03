@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,6 +35,7 @@ import java.util.Map;
  *   GET  /api/training/radar             … 8 軸の弱点レーダー
  *   GET  /api/training/review            … 直前に締めた週の振り返り
  *   GET  /api/training/ladder            … 全ティアの到達 pt と登竜門譜面
+ *   PUT  /api/training/settings          … 週あたりの想定プレイ数（提示する曲数が変わる）
  *   POST /api/admin/training/benchmark/refresh … ティア別ベンチマークの再集計（同期）
  * </pre>
  *
@@ -181,6 +183,30 @@ public class PracticeMenuController {
         result.put("benchmarkUpdatedAt", tierBenchmarkCacheService.getLastRefreshedAt());
         result.put("tiers", tiers);
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 【メソッドの役割】 週あたりの想定プレイ数を設定し、その場でメニューを組み直す。
+     *
+     * 提示する曲数はこの値に比例して増減する（週 20 プレイで 計測 2 / 課題 6 / 埋め 4）。
+     * 設定変更による組み直しは「組み直す」の回数を消費しない。
+     *
+     * PUT /api/training/settings?weeklyPlays=30[&userId=...]
+     *
+     * @return 組み直し後のメニュー（{@link #menu} と同形）
+     */
+    @PutMapping("/api/training/settings")
+    public ResponseEntity<Map<String, Object>> updateSettings(
+            Authentication auth,
+            @RequestParam Integer weeklyPlays,
+            @RequestParam(required = false) Long userId) {
+
+        User target = resolveTarget(auth, userId);
+        if (target == null) return forbidden();
+        if (weeklyPlays == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "weeklyPlays を指定してください"));
+        }
+        return ResponseEntity.ok(practiceMenuService.updateWeeklyPlays(target, weeklyPlays));
     }
 
     /**

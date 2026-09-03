@@ -228,6 +228,11 @@ public class DataInitializer implements ApplicationRunner {
                     "CREATE INDEX IF NOT EXISTS idx_practice_menu_items_menu " +
                     "ON practice_menu_items (menu_id)"
             ).executeUpdate();
+            entityManager.createNativeQuery(
+                    "CREATE TABLE IF NOT EXISTS user_training_settings (" +
+                    "  user_id BIGINT PRIMARY KEY REFERENCES users(id)," +
+                    "  weekly_plays INTEGER NOT NULL DEFAULT 20)"
+            ).executeUpdate();
         });
 
         // 手順5: 曲データと難易度表を JSON から投入する（テーブルが空の場合のみ実効）。

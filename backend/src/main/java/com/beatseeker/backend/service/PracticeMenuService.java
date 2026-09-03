@@ -3,8 +3,10 @@ package com.beatseeker.backend.service;
 import com.beatseeker.backend.entity.PracticeMenu;
 import com.beatseeker.backend.entity.PracticeMenuItem;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.entity.UserTrainingSettings;
 import com.beatseeker.backend.repository.PracticeMenuRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
+import com.beatseeker.backend.repository.UserTrainingSettingsRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,13 +70,23 @@ public class PracticeMenuService {
     /** BEAT-PT 合計の対象譜面数。{@code beatTier.ts} の TOP_CHART_LIMIT と同値。 */
     private static final int TOP_CHART_LIMIT = 100;
 
-    /** 既定の週プレイ数。枠はこの数を前提に決めてある。 */
-    private static final int DEFAULT_WEEKLY_PLAYS = 20;
+    /** 既定の週プレイ数。枠の基準サイズはこの数を前提に決めてある。 */
+    public static final int DEFAULT_WEEKLY_PLAYS = 20;
 
-    /** 枠の既定サイズ。 */
-    private static final int SLOT_MEASURE = 2;
-    private static final int SLOT_TASK = 6;
-    private static final int SLOT_FILL = 4;
+    /** 1 クレジットの曲数。IIDX は 1 クレジット 4 曲が基本なので、設定はこの単位で刻む。 */
+    public static final int PLAYS_PER_CREDIT = 4;
+
+    /**
+     * 週プレイ数として受け付ける範囲。
+     * 下限は 1 クレジット（4 曲）、上限は 100 クレジット（400 曲）。
+     */
+    public static final int MIN_WEEKLY_PLAYS = PLAYS_PER_CREDIT;
+    public static final int MAX_WEEKLY_PLAYS = PLAYS_PER_CREDIT * 100;
+
+    /** 枠の基準サイズ（週 {@value #DEFAULT_WEEKLY_PLAYS} プレイのとき）。 */
+    private static final int BASE_SLOT_MEASURE = 2;
+    private static final int BASE_SLOT_TASK = 6;
+    private static final int BASE_SLOT_FILL = 4;
 
     /** 想定プレイ回数。課題曲だけ 2 回、他は 1 回。 */
     private static final int PLAYS_MEASURE = 1;
@@ -101,8 +113,17 @@ public class PracticeMenuService {
     /** 1 つの軸から採る課題曲の上限。1 軸に偏らせない。 */
     private static final int MAX_TASK_PER_AXIS = 3;
 
-    /** 課題曲に使う弱点軸の数。 */
+    /** 課題曲に使う弱点軸の数（基準の枠のとき）。画面に「弱点軸」として出すのもこの本数。 */
     private static final int WEAK_AXES_USED = 2;
+
+    /**
+     * 1 つの軸から供給できる課題曲の目安。課題枠がこれより多いときは弱点軸を増やす。
+     *
+     * 実測では、週 40 プレイ（課題 12 曲）を弱点 2 軸だけで埋めようとすると 9 曲までしか
+     * 埋まらなかった。軸に属する譜面のうち達成確率 40〜70% の帯に入るものが尽きるため。
+     * 枠が広いときは 3 番目・4 番目に沈んでいる軸まで手を広げる。
+     */
+    private static final int TASK_PER_AXIS_TARGET = 3;
 
     /** 直近この週数に出した譜面は再提示しない。 */
     private static final int BAN_WEEKS = 2;
@@ -112,6 +133,38 @@ public class PracticeMenuService {
 
     /** 「組み直す」の週あたり上限回数。 */
     private static final int MAX_REGENERATE = 3;
+
+    /**
+     * 週プレイ数に応じた枠の大きさ。
+     *
+     * 週 {@value #DEFAULT_WEEKLY_PLAYS} プレイの基準サイズ（計測 2 / 課題 6 / 埋め 4）を
+     * {@code weeklyPlays / 20} 倍する。想定回数が課題曲だけ 2 回なので、
+     * 基準では 2×1 + 6×2 + 4×1 = 18 回ぶんとなり、週 20 プレイにほぼ収まる。
+     *
+     * どの枠も最低 1 曲は残す。少ないプレイ数のときに枠が丸ごと消えると
+     * 「計測はしないが課題だけ出る」といった片寄った献立になってしまうため。
+     *
+     * @param weeklyPlays ユーザー設定の週プレイ数
+     * @return {@code [計測, 課題, 埋め]} の曲数
+     */
+    static int[] slotsFor(int weeklyPlays) {
+        double ratio = weeklyPlays / (double) DEFAULT_WEEKLY_PLAYS;
+        return new int[]{
+                Math.max(1, (int) Math.round(BASE_SLOT_MEASURE * ratio)),
+                Math.max(1, (int) Math.round(BASE_SLOT_TASK * ratio)),
+                Math.max(1, (int) Math.round(BASE_SLOT_FILL * ratio)),
+        };
+    }
+
+    /**
+     * 週プレイ数を受け付け可能な範囲に丸める。
+     * 範囲外は端に寄せるだけで、クレジット単位への丸めはしない
+     * （4 の倍数でない値を送られても、その曲数として素直に扱う）。
+     */
+    static int clampWeeklyPlays(Integer weeklyPlays) {
+        if (weeklyPlays == null) return DEFAULT_WEEKLY_PLAYS;
+        return Math.max(MIN_WEEKLY_PLAYS, Math.min(MAX_WEEKLY_PLAYS, weeklyPlays));
+    }
 
     /**
      * logit 空間の予測標準偏差のクランプ。
@@ -139,6 +192,7 @@ public class PracticeMenuService {
     private final BeatPtCalculator beatPtCalculator;
     private final TierBenchmarkCacheService tierBenchmarkCacheService;
     private final TendencyAxisService tendencyAxisService;
+    private final UserTrainingSettingsRepository settingsRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public PracticeMenuService(PracticeMenuRepository menuRepository,
@@ -148,7 +202,9 @@ public class PracticeMenuService {
                                ScoreRecalculationService scoreRecalculationService,
                                BeatPtCalculator beatPtCalculator,
                                TierBenchmarkCacheService tierBenchmarkCacheService,
-                               TendencyAxisService tendencyAxisService) {
+                               TendencyAxisService tendencyAxisService,
+                               UserTrainingSettingsRepository settingsRepository) {
+        this.settingsRepository = settingsRepository;
         this.menuRepository = menuRepository;
         this.scoreRepository = scoreRepository;
         this.pairRegressionService = pairRegressionService;
@@ -293,6 +349,51 @@ public class PracticeMenuService {
         return result;
     }
 
+    /**
+     * 【メソッドの役割】 週プレイ数の設定を更新し、その場でメニューを組み直して返す。
+     *
+     * 枠の大きさが変わるので、設定だけ保存して古い曲数のメニューを残すと
+     * 「設定したのに変わらない」状態になる。保存と同時に組み直す。
+     *
+     * <p>この組み直しは {@code regenerateCount} を増やさない。曲の引き直し（＝運の再抽選）ではなく
+     * 献立の量を変える操作なので、「組み直す」の回数制限とは別物として扱う。
+     *
+     * @param weeklyPlays 週あたりの想定プレイ数。範囲外は丸める
+     * @return 組み直し後のメニュー
+     */
+    @Transactional
+    public Map<String, Object> updateWeeklyPlays(User user, Integer weeklyPlays) {
+        int value = clampWeeklyPlays(weeklyPlays);
+        UserTrainingSettings settings = settingsRepository.findById(user.getId())
+                .orElseGet(() -> {
+                    UserTrainingSettings s = new UserTrainingSettings();
+                    s.setUserId(user.getId());
+                    return s;
+                });
+        settings.setWeeklyPlays(value);
+        settingsRepository.save(settings);
+
+        LocalDate weekStart = currentWeekStart();
+        PracticeMenu existing = menuRepository.findWithItems(user, weekStart).orElse(null);
+        UserState state = loadUserState(user);
+        // 組み直し回数は据え置く。設定変更でリセット扱いにならないよう、増やしてから戻すのではなく
+        // buildAndSave に渡す前後で保持する。
+        int keepRegenerateCount = existing == null ? 0 : existing.getRegenerateCount();
+        PracticeMenu menu = buildAndSave(user, weekStart, state, existing);
+        if (menu.getRegenerateCount() != keepRegenerateCount) {
+            menu.setRegenerateCount(keepRegenerateCount);
+            menu = menuRepository.save(menu);
+        }
+        return toResponse(menu, state);
+    }
+
+    /** 設定行が無いユーザーは既定値。範囲外の値が入っていても丸めて使う。 */
+    private int weeklyPlaysOf(User user) {
+        return settingsRepository.findById(user.getId())
+                .map(s -> clampWeeklyPlays(s.getWeeklyPlays()))
+                .orElse(DEFAULT_WEEKLY_PLAYS);
+    }
+
     /** 【メソッドの役割】 その日が属する週の月曜日（JST）を返す。 */
     public static LocalDate currentWeekStart() {
         return LocalDate.now(JST).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
@@ -339,9 +440,11 @@ public class PracticeMenuService {
         Set<String> usedTitles = new HashSet<>();
         List<PracticeMenuItem> result = new ArrayList<>();
 
-        result.addAll(pickMeasure(state, history, used, usedTitles, menu));
-        result.addAll(pickTask(state, history, used, usedTitles, menu));
-        result.addAll(pickFill(state, history, used, usedTitles, menu));
+        // 枠の大きさはユーザーの週プレイ数で伸縮する。
+        int[] slots = slotsFor(state.weeklyPlays);
+        result.addAll(pickMeasure(state, history, used, usedTitles, menu, slots[0]));
+        result.addAll(pickTask(state, history, used, usedTitles, menu, slots[1]));
+        result.addAll(pickFill(state, history, used, usedTitles, menu, slots[2]));
         return result;
     }
 
@@ -350,12 +453,12 @@ public class PracticeMenuService {
      */
     private List<PracticeMenuItem> pickMeasure(UserState state, History history,
                                                Set<String> used, Set<String> usedTitles,
-                                               PracticeMenu menu) {
+                                               PracticeMenu menu, int slotCount) {
         List<PracticeMenuItem> picked = new ArrayList<>();
         if (state.currentTier == null) return picked;
 
         for (TierBenchmarkCacheService.Gate gate : tierBenchmarkCacheService.getGates(state.currentTier)) {
-            if (picked.size() >= SLOT_MEASURE) break;
+            if (picked.size() >= slotCount) break;
             String key = gate.title() + "\0" + gate.difficultyName();
             if (used.contains(key) || usedTitles.contains(gate.title())) continue;
             if (history.banned.contains(key)) continue;
@@ -398,12 +501,12 @@ public class PracticeMenuService {
      */
     private List<PracticeMenuItem> pickTask(UserState state, History history,
                                             Set<String> used, Set<String> usedTitles,
-                                            PracticeMenu menu) {
+                                            PracticeMenu menu, int slotCount) {
         List<PracticeMenuItem> picked = new ArrayList<>();
 
         // 1) 前週の「前進」を持ち越す（3 週まで）。
         for (Map.Entry<String, Integer> carried : history.carried.entrySet()) {
-            if (picked.size() >= SLOT_TASK) break;
+            if (picked.size() >= slotCount) break;
             String key = carried.getKey();
             if (used.contains(key)) continue;
             String[] parts = key.split("\0", 2);
@@ -429,8 +532,19 @@ public class PracticeMenuService {
         }
 
         // 2) 弱点軸から補充する。軸ごとに上限を設けて偏りを防ぐ。
-        for (String axis : state.weakAxes) {
-            if (picked.size() >= SLOT_TASK) break;
+        // 枠が広いときは使う軸の数を増やす。1 軸から採れる譜面（達成確率 40〜70% の帯）は
+        // 限りがあるので、軸を増やさないと枠が埋まらない。
+        int wantAxes = Math.max(WEAK_AXES_USED,
+                (int) Math.ceil(slotCount / (double) TASK_PER_AXIS_TARGET));
+        List<String> axes = state.weakAxes.subList(0, Math.min(wantAxes, state.weakAxes.size()));
+
+        // 1 軸あたりの上限は「実際に使える軸の数」で割る。軸は最大 8 本しか無いので、
+        // 欲しい軸数で割ると枠が広いときに上限が小さいままになり、枠を埋めきれない。
+        int maxPerAxis = axes.isEmpty() ? 0
+                : Math.max(MAX_TASK_PER_AXIS, (int) Math.ceil(slotCount / (double) axes.size()));
+
+        for (String axis : axes) {
+            if (picked.size() >= slotCount) break;
             int fromThisAxis = 0;
 
             List<Candidate> candidates = new ArrayList<>();
@@ -449,7 +563,7 @@ public class PracticeMenuService {
             candidates.sort(Comparator.comparingDouble((Candidate c) -> c.expectedGain).reversed());
 
             for (Candidate c : candidates) {
-                if (picked.size() >= SLOT_TASK || fromThisAxis >= MAX_TASK_PER_AXIS) break;
+                if (picked.size() >= slotCount || fromThisAxis >= maxPerAxis) break;
                 if (usedTitles.contains(c.title)) continue;
 
                 PracticeMenuItem item = newItem(menu, c.title, c.difficultyName, state);
@@ -479,7 +593,7 @@ public class PracticeMenuService {
      */
     private List<PracticeMenuItem> pickFill(UserState state, History history,
                                             Set<String> used, Set<String> usedTitles,
-                                            PracticeMenu menu) {
+                                            PracticeMenu menu, int slotCount) {
         List<Candidate> candidates = new ArrayList<>();
         for (Map.Entry<String, Prediction> e : state.predictions.entrySet()) {
             String key = e.getKey();
@@ -497,7 +611,7 @@ public class PracticeMenuService {
 
         List<PracticeMenuItem> picked = new ArrayList<>();
         for (Candidate c : candidates) {
-            if (picked.size() >= SLOT_FILL) break;
+            if (picked.size() >= slotCount) break;
             if (usedTitles.contains(c.title)) continue;
 
             PracticeMenuItem item = newItem(menu, c.title, c.difficultyName, state);
@@ -642,6 +756,8 @@ public class PracticeMenuService {
         String currentTier;
         BeatTierScale.Tier nextTier;
         int referenceCount;
+        /** ユーザー設定の週プレイ数。枠の大きさをこれで伸縮する。 */
+        int weeklyPlays = DEFAULT_WEEKLY_PLAYS;
 
         int bestScore(String key) {
             return lifetimeBest.getOrDefault(key, 0);
@@ -667,8 +783,12 @@ public class PracticeMenuService {
      */
     private UserState loadUserState(User user) {
         pairRegressionService.ensureBuilt();
+        // 登竜門譜面はティア別ベンチマークが要る。定期実行が止まっている環境（prod-db）でも
+        // 計測枠が空にならないよう、必要になった時点で作らせる。
+        tierBenchmarkCacheService.ensureBuilt();
 
         UserState state = new UserState();
+        state.weeklyPlays = weeklyPlaysOf(user);
         state.informalRanks = scoreRecalculationService.loadInformalRanks();
         state.communityMax = pairRegressionService.getCommunityMaxByKey();
         Map<String, Integer> notesByKey = pairRegressionService.getNotesByKey();
@@ -760,9 +880,10 @@ public class PracticeMenuService {
             predictedRates.put(key, PairRegressionService.logitToScoreRate(e.getValue().mu) * 100.0);
         }
         state.axisScores = tendencyAxisService.computeAxisScores(actualRates, predictedRates);
+        // 判定できた軸を「沈んでいる順」に全部持つ。何本を課題曲に使うかは枠の大きさで決まる
+        // （pickTask 側）ので、ここでは切り詰めない。
         state.weakAxes = state.axisScores.values().stream()
                 .sorted(Comparator.comparingDouble(TendencyAxisService.AxisScore::residual))
-                .limit(WEAK_AXES_USED)
                 .map(TendencyAxisService.AxisScore::axis)
                 .toList();
 
@@ -1000,7 +1121,14 @@ public class PracticeMenuService {
                 .filter(t -> t.name().equals(state.currentTier))
                 .findFirst().map(BeatTierScale.Tier::minPoints).orElse(0.0));
         result.put("totalBeatPt", state.totalBeatPt);
-        result.put("weeklyPlays", DEFAULT_WEEKLY_PLAYS);
+        result.put("weeklyPlays", state.weeklyPlays);
+        result.put("weeklyPlaysMin", MIN_WEEKLY_PLAYS);
+        result.put("weeklyPlaysMax", MAX_WEEKLY_PLAYS);
+        result.put("playsPerCredit", PLAYS_PER_CREDIT);
+        // 想定プレイ回数の合計。設定した週プレイ数に対してどれくらいの量かを画面で示す。
+        int plannedPlays = menu.getItems().stream()
+                .mapToInt(i -> i.getPlannedPlays() == null ? 0 : i.getPlannedPlays()).sum();
+        result.put("plannedPlays", plannedPlays);
         result.put("regenerateLeft", Math.max(0, MAX_REGENERATE - menu.getRegenerateCount()));
         if (state.nextTier != null) {
             Map<String, Object> next = new LinkedHashMap<>();
@@ -1011,7 +1139,9 @@ public class PracticeMenuService {
         } else {
             result.put("nextTier", null);
         }
-        result.put("weakAxes", state.weakAxes);
+        // 画面のサマリーに出す「弱点軸」は上位 2 本まで。実際に課題曲を採った軸は
+        // 各項目の axis ラベルで分かるので、ここを枠の大きさで伸ばすと読みにくくなる。
+        result.put("weakAxes", state.weakAxes.subList(0, Math.min(WEAK_AXES_USED, state.weakAxes.size())));
         result.put("referenceChartCount", state.referenceCount);
         result.put("benchmarkReady", tierBenchmarkCacheService.isReady());
         result.put("summary", summary);
