@@ -1121,6 +1121,27 @@ public class PracticeMenuService {
                 .filter(t -> t.name().equals(state.currentTier))
                 .findFirst().map(BeatTierScale.Tier::minPoints).orElse(0.0));
         result.put("totalBeatPt", state.totalBeatPt);
+
+        // 副ティア（Master III → Master IV）。名前付きティアの昇格は遠いので、
+        // 手前の目標としてこちらも出す。
+        BeatTierScale.SubTier currentSub = BeatTierScale.subTierOf(state.totalBeatPt);
+        Map<String, Object> currentSubMap = new LinkedHashMap<>();
+        currentSubMap.put("label", currentSub.label());
+        currentSubMap.put("level", currentSub.level());
+        currentSubMap.put("minPoints", currentSub.minPoints());
+        result.put("currentSubTier", currentSubMap);
+
+        BeatTierScale.SubTier nextSub = BeatTierScale.nextSubTierOf(state.totalBeatPt);
+        if (nextSub != null) {
+            Map<String, Object> nextSubMap = new LinkedHashMap<>();
+            nextSubMap.put("label", nextSub.label());
+            nextSubMap.put("level", nextSub.level());
+            nextSubMap.put("minPoints", nextSub.minPoints());
+            nextSubMap.put("gap", Math.max(0, nextSub.minPoints() - state.totalBeatPt));
+            result.put("nextSubTier", nextSubMap);
+        } else {
+            result.put("nextSubTier", null);
+        }
         result.put("weeklyPlays", state.weeklyPlays);
         result.put("weeklyPlaysMin", MIN_WEEKLY_PLAYS);
         result.put("weeklyPlaysMax", MAX_WEEKLY_PLAYS);

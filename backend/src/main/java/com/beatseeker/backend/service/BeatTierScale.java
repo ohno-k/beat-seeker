@@ -95,4 +95,89 @@ public final class BeatTierScale {
         if (idx < 0 || idx >= TIERS.size()) return null;
         return TIERS.get(idx);
     }
+
+    // ── 副ティア（Master I 〜 Master V のような 5 分割） ──────────────────
+
+    /** 1 つの名前付きティアを 5 分割した副ティアの数。{@code beatTier.ts} の分割数と同じ。 */
+    public static final int SUB_TIER_COUNT = 5;
+
+    /** 副ティアのローマ数字表記。{@code beatTier.ts} の表示に合わせる。 */
+    private static final String[] ROMAN = {"I", "II", "III", "IV", "V"};
+
+    /**
+     * 副ティア 1 つぶん。
+     *
+     * @param tierName  名前付きティア名（例 "Master"）
+     * @param level     1〜5
+     * @param label     表示名（例 "Master III"）
+     * @param minPoints この副ティアに入る下限 pt
+     */
+    public record SubTier(String tierName, int level, String label, double minPoints) {}
+
+    /**
+     * 【メソッドの役割】 総 BEAT-PT から副ティアを求める。
+     *
+     * 名前付きティアの幅（Master なら 500、Expert なら 1000、Novice なら 2000）を
+     * 5 等分し、下から何番目かを 1〜5 で返す。
+     * {@code beatTier.ts} の {@code generateTieredRanks} および
+     * {@code ScoreRepository.findChartTierBenchmarks()} の tier_level 算出と同じ刻み。
+     *
+     * <p>Legend（上限なし）と Beginner（0 pt 始まり）は分割しないので level 0 を返す。
+     *
+     * @return 副ティア。分割しないティアでは level = 0、label はティア名のみ
+     */
+    public static SubTier subTierOf(double totalBeatPt) {
+        String name = tierOf(totalBeatPt);
+        Tier tier = byName(name);
+        Tier upper = upperOf(name);
+        // Legend は上が無く、Beginner は下限 0 で幅が定義できないため分割しない。
+        if (tier == null || upper == null || "Beginner".equals(name)) {
+            return new SubTier(name, 0, name, tier == null ? 0 : tier.minPoints());
+        }
+        double step = (upper.minPoints() - tier.minPoints()) / SUB_TIER_COUNT;
+        int level = (int) Math.floor((totalBeatPt - tier.minPoints()) / step) + 1;
+        level = Math.max(1, Math.min(SUB_TIER_COUNT, level));
+        return new SubTier(name, level, name + " " + ROMAN[level - 1],
+                tier.minPoints() + (level - 1) * step);
+    }
+
+    /**
+     * 【メソッドの役割】 現在の pt から見た「次の副ティア」を返す。
+     *
+     * 同じティア内の次の段（Master III → Master IV）があればそれ、
+     * 5 段目まで来ていれば次のティアの 1 段目（Master V → Ancient I）を返す。
+     *
+     * @return 次の副ティア。Legend に到達していれば null
+     */
+    public static SubTier nextSubTierOf(double totalBeatPt) {
+        SubTier current = subTierOf(totalBeatPt);
+        Tier tier = byName(current.tierName());
+        Tier upper = upperOf(current.tierName());
+        if (tier == null || upper == null) return null; // Legend
+
+        if (current.level() > 0 && current.level() < SUB_TIER_COUNT) {
+            double step = (upper.minPoints() - tier.minPoints()) / SUB_TIER_COUNT;
+            int nextLevel = current.level() + 1;
+            return new SubTier(current.tierName(), nextLevel,
+                    current.tierName() + " " + ROMAN[nextLevel - 1],
+                    tier.minPoints() + (nextLevel - 1) * step);
+        }
+        // このティアの最上段（または分割しない Beginner）にいるので、次はひとつ上のティアの 1 段目。
+        return subTierOf(upper.minPoints());
+    }
+
+    /** 名前からティアを引く。未知の名前は null。 */
+    public static Tier byName(String tierName) {
+        for (Tier t : TIERS) {
+            if (t.name().equals(tierName)) return t;
+        }
+        return null;
+    }
+
+    /** ひとつ上のティアを返す。最上位（Legend）なら null。 */
+    private static Tier upperOf(String tierName) {
+        int ord = ordinalOf(tierName);
+        if (ord < 0) return null;
+        return byOrdinal(ord + 1);
+    }
 }

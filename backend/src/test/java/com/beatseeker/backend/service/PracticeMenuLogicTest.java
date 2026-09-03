@@ -78,6 +78,50 @@ class PracticeMenuLogicTest {
     }
 
     @Test
+    void 副ティアはティアの幅を五等分して決まる() {
+        // Master は 16500〜17000 の 500 pt 幅なので 1 段 100 pt。
+        // 16730 pt は 16700〜16800 の段 = Master III。
+        BeatTierScale.SubTier master3 = BeatTierScale.subTierOf(16730);
+        assertThat(master3.tierName()).isEqualTo("Master");
+        assertThat(master3.level()).isEqualTo(3);
+        assertThat(master3.label()).isEqualTo("Master III");
+        assertThat(master3.minPoints()).isEqualTo(16700);
+
+        // 各ティアの下限ちょうどは I、上限直前は V。
+        assertThat(BeatTierScale.subTierOf(16500).label()).isEqualTo("Master I");
+        assertThat(BeatTierScale.subTierOf(16999).label()).isEqualTo("Master V");
+
+        // ティアごとに幅が違う。Expert は 1000 pt 幅なので 1 段 200 pt。
+        assertThat(BeatTierScale.subTierOf(14000).label()).isEqualTo("Expert I");
+        assertThat(BeatTierScale.subTierOf(14200).label()).isEqualTo("Expert II");
+        // Novice は 2000 pt 幅なので 1 段 400 pt。
+        assertThat(BeatTierScale.subTierOf(10800).label()).isEqualTo("Novice III");
+
+        // 上限なしの Legend と、下限 0 の Beginner は分割しない。
+        assertThat(BeatTierScale.subTierOf(18500).level()).isZero();
+        assertThat(BeatTierScale.subTierOf(18500).label()).isEqualTo("Legend");
+        assertThat(BeatTierScale.subTierOf(500).level()).isZero();
+    }
+
+    @Test
+    void 次の副ティアは同じティア内の次段かひとつ上のティアの一段目() {
+        // Master III の次は Master IV（+100 pt 先）。
+        BeatTierScale.SubTier next = BeatTierScale.nextSubTierOf(16730);
+        assertThat(next).isNotNull();
+        assertThat(next.label()).isEqualTo("Master IV");
+        assertThat(next.minPoints()).isEqualTo(16800);
+
+        // 最上段まで来ていれば、次はひとつ上のティアの 1 段目。
+        assertThat(BeatTierScale.nextSubTierOf(16999).label()).isEqualTo("Ancient I");
+
+        // Beginner（分割なし）からは Novice I へ。
+        assertThat(BeatTierScale.nextSubTierOf(500).label()).isEqualTo("Novice I");
+
+        // Legend に到達していれば「次」は無い。
+        assertThat(BeatTierScale.nextSubTierOf(18500)).isNull();
+    }
+
+    @Test
     void 週の始まりは常に月曜になる() {
         LocalDate weekStart = PracticeMenuService.currentWeekStart();
         assertThat(weekStart.getDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);

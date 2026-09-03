@@ -54,6 +54,9 @@ interface MenuResponse {
   status: string;
   currentTier: string;
   currentTierMinPoints: number;
+  /** 副ティア（Master III など）。Legend / Beginner は level 0。 */
+  currentSubTier: { label: string; level: number; minPoints: number } | null;
+  nextSubTier: { label: string; level: number; minPoints: number; gap: number } | null;
   totalBeatPt: number;
   weeklyPlays: number;
   weeklyPlaysMin: number;
@@ -203,17 +206,19 @@ const tierColor = computed(() => {
 });
 
 /**
- * 現ティア内の進捗（％）。
- * ティアの幅は 500 / 1000 / 2000 pt とまちまちなので、下限と次ティア下限の
- * 両方をサーバーから受け取って実際の幅で割る。
+ * 副ティア内の進捗（％）。
+ *
+ * 名前付きティアの幅（Master なら 500 pt）でバーを引くと、1 週ぶんの伸びでは
+ * ほとんど動かない。5 分割した副ティア（Master III → Master IV は 100 pt）で
+ * 引くと週単位の変化が見える。
  */
-const tierProgress = computed(() => {
+const subTierProgress = computed(() => {
   const m = menu.value;
-  if (!m?.nextTier) return 100;
-  const span = m.nextTier.minPoints - m.currentTierMinPoints;
-  if (span <= 0) return 100;
-  const done = m.totalBeatPt - m.currentTierMinPoints;
-  return Math.max(0, Math.min(100, (done / span) * 100));
+  if (!m) return 0;
+  const from = m.currentSubTier?.minPoints;
+  const to = m.nextSubTier?.minPoints;
+  if (from == null || to == null || to <= from) return 100;
+  return Math.max(0, Math.min(100, ((m.totalBeatPt - from) / (to - from)) * 100));
 });
 
 /** 達成率の色分け。既存のランクアップ・アドバイスと同じ基準に揃える。 */
@@ -261,18 +266,38 @@ const remainingOf = (item: MenuItem) => {
 
 const fmt = (n: number | null | undefined) => (n == null ? '-' : n.toLocaleString());
 
-/** レーダーの多角形パスを組む。値はレート % をそのまま半径に写す。 */
 const RADAR_CENTER = 110;
 const RADAR_MAX_R = 80;
-/** レーダーの内外レンジ。この幅で 0〜100% を切り取って差を見やすくする。 */
-const RADAR_MIN_RATE = 60;
-const RADAR_MAX_RATE = 100;
+
+/**
+ * レーダーの目盛り範囲。
+ *
+ * 固定で 60〜100% にしていたが、実際のスコアレートは 92〜96% の狭い帯に収まるため
+ * 全部の頂点が外周に張り付き、正八角形にしか見えなかった。
+ * 描く値の実際の範囲に合わせて内外を決め、軸ごとの差が形に出るようにする。
+ * 差が小さすぎるときに誇張しすぎないよう、最低 2 ポイントの幅は確保する。
+ */
+const radarDomain = computed(() => {
+  const values: number[] = [];
+  radar.value.forEach(a => {
+    if (!a.available) return;
+    if (a.actualRate != null) values.push(a.actualRate);
+    if (a.predictedRate != null) values.push(a.predictedRate);
+  });
+  if (values.length === 0) return { min: 90, max: 100 };
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  const span = Math.max(hi - lo, 2);
+  const pad = span * 0.4;
+  return { min: Math.max(0, lo - pad), max: Math.min(100, hi + pad) };
+});
 
 const radarPoint = (index: number, rate: number) => {
   const total = radar.value.length || 8;
   const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
-  const clamped = Math.max(RADAR_MIN_RATE, Math.min(RADAR_MAX_RATE, rate));
-  const r = ((clamped - RADAR_MIN_RATE) / (RADAR_MAX_RATE - RADAR_MIN_RATE)) * RADAR_MAX_R;
+  const { min, max } = radarDomain.value;
+  const clamped = Math.max(min, Math.min(max, rate));
+  const r = max > min ? ((clamped - min) / (max - min)) * RADAR_MAX_R : RADAR_MAX_R;
   return [RADAR_CENTER + r * Math.cos(angle), RADAR_CENTER + r * Math.sin(angle)];
 };
 
@@ -294,16 +319,20 @@ const polygonOf = (key: 'actualRate' | 'predictedRate') => {
   return pts.join(' ');
 };
 
-/** グリッドの環。60% / 80% / 100% の 3 本。 */
+/**
+ * グリッドの環。目盛り範囲の内側・中間・外側の 3 本。
+ * それぞれが実際のスコアレートを指すので、値をラベルとして添える。
+ */
 const gridRings = computed(() => {
   const total = radar.value.length || 8;
-  return [70, 85, 100].map(rate => {
+  const { min, max } = radarDomain.value;
+  return [min, (min + max) / 2, max].map(rate => {
     const pts: string[] = [];
     for (let i = 0; i < total; i++) {
       const [x, y] = radarPoint(i, rate);
       pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
     }
-    return { rate, points: pts.join(' ') };
+    return { rate, points: pts.join(' '), label: rate.toFixed(1) };
   });
 });
 
@@ -432,19 +461,25 @@ const weakAxisNote = computed(() => {
           <div class="p-4">
             <p class="section-label">現在</p>
             <p class="text-2xl font-bold tabular-nums leading-tight mt-0.5">
-              <span :class="tierColor">{{ menu.currentTier }}</span>
+              <span :class="tierColor">{{ menu.currentSubTier?.label ?? menu.currentTier }}</span>
               <span class="text-slate-700 dark:text-slate-200 ml-2">{{ menu.totalBeatPt.toFixed(0) }}</span>
               <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 ml-1">pt</span>
             </p>
+            <!-- バーは副ティア内の進み具合。名前付きティアの幅だと動きが見えないため。 -->
             <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden my-2">
-              <div class="h-full bg-blue-700 dark:bg-blue-500" :style="{ width: tierProgress + '%' }"></div>
+              <div class="h-full bg-blue-700 dark:bg-blue-500" :style="{ width: subTierProgress + '%' }"></div>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
+            <p class="text-xs text-slate-500 dark:text-slate-400 tabular-nums leading-relaxed">
+              <template v-if="menu.nextSubTier">
+                {{ menu.nextSubTier.label }} まで
+                <b class="text-slate-700 dark:text-slate-200">{{ menu.nextSubTier.gap.toFixed(1) }} pt</b>
+              </template>
               <template v-if="menu.nextTier">
+                <span class="text-slate-300 dark:text-slate-600 mx-1">·</span>
                 {{ menu.nextTier.name }} まで
                 <b class="text-slate-700 dark:text-slate-200">{{ menu.nextTier.gap.toFixed(1) }} pt</b>
               </template>
-              <template v-else>最上位ティアに到達しています</template>
+              <template v-if="!menu.nextSubTier && !menu.nextTier">最上位ティアに到達しています</template>
             </p>
           </div>
           <div class="p-4">
@@ -503,48 +538,55 @@ const weakAxisNote = computed(() => {
                     <template v-if="group.items.length"> · 各 {{ group.items[0].plannedPlays }} 回</template>
                   </span>
                 </h3>
-                <span class="text-[11px] text-slate-400 dark:text-slate-500 text-right hidden sm:block">{{ group.hint }}</span>
+                <span class="text-[11px] text-slate-400 dark:text-slate-500 text-right max-sm:hidden">{{ group.hint }}</span>
               </div>
 
               <p v-if="!group.items.length" class="px-4 py-6 text-center text-xs text-slate-400 dark:text-slate-500">
                 条件に合う譜面がありませんでした。
               </p>
 
+              <!--
+                レイアウトは flex + 固定幅で組む。以前は grid の任意値
+                （grid-cols-[1.5rem_minmax(0,1fr)_...]）を使っていたが、曲名の列が潰れて
+                タイトルが見えなくなったため、素の幅指定に置き換えてある。
+              -->
               <div
                 v-for="(item, idx) in group.items"
                 :key="`${item.title}|${item.difficultyName}`"
-                class="grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[1.5rem_minmax(0,1fr)_7rem_9rem_4rem_4.5rem] gap-x-3 gap-y-1 items-center px-4 py-2.5 border-t border-slate-100 dark:border-slate-700/50 first-of-type:border-t-0"
+                class="flex items-center gap-3 px-4 py-2.5 border-t border-slate-100 dark:border-slate-700/50 first-of-type:border-t-0"
               >
-                <span class="hidden sm:block text-[10px] font-bold text-slate-400 dark:text-slate-500 text-right tabular-nums">
+                <span class="max-sm:hidden w-5 shrink-0 text-[10px] font-bold text-slate-400 dark:text-slate-500 text-right tabular-nums">
                   {{ idx + 1 }}
                 </span>
 
-                <div class="min-w-0">
-                  <div class="flex items-center gap-1.5 min-w-0">
-                    <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ item.title }}</p>
-                    <InformalRankBadge :rank="item.informalRank" size="xs" class="shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-baseline gap-1.5 min-w-0">
+                    <span class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate min-w-0">
+                      {{ item.title }}
+                    </span>
+                    <InformalRankBadge :rank="item.informalRank" size="xs" class="shrink-0 self-center" />
                     <span
                       v-if="item.unplayed"
-                      class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-blue-600 text-white"
+                      class="shrink-0 self-center text-[9px] font-bold px-1 py-px rounded bg-blue-600 text-white"
                     >埋め</span>
                     <span
                       v-if="item.axis"
-                      class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                      class="shrink-0 self-center text-[9px] font-bold px-1 py-px rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
                     >{{ item.axis }}</span>
                   </div>
-                  <p class="text-[10px] text-slate-500 dark:text-slate-400">
+                  <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                     {{ item.difficultyName }}
                     <template v-if="item.carriedWeeks > 0"> · 持ち越し {{ item.carriedWeeks }} 週目</template>
                     <template v-else-if="item.expectedGain"> · 期待 +{{ item.expectedGain.toFixed(1) }} pt</template>
                   </p>
                 </div>
 
-                <div class="hidden sm:block text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
+                <div class="max-sm:hidden w-16 shrink-0 text-[11px] text-slate-500 dark:text-slate-400 tabular-nums text-right">
                   <span class="block text-[10px]">現在</span>
                   <b class="text-xs text-slate-800 dark:text-slate-200">{{ fmt(currentScoreOf(item)) }}</b>
                 </div>
 
-                <div class="hidden sm:block tabular-nums">
+                <div class="max-sm:hidden w-24 shrink-0 tabular-nums text-right">
                   <span class="block text-[10px] font-bold text-blue-700 dark:text-blue-400">
                     目標 {{ item.targetLabel }}
                   </span>
@@ -555,7 +597,7 @@ const weakAxisNote = computed(() => {
                   </span>
                 </div>
 
-                <div class="hidden sm:block text-right">
+                <div class="max-sm:hidden w-12 shrink-0 text-right">
                   <p class="text-xs font-bold tabular-nums" :class="probabilityClass(item.achieveProbability)">
                     <template v-if="item.achieveProbability != null">
                       {{ Math.round(item.achieveProbability * 100) }}%
@@ -565,14 +607,14 @@ const weakAxisNote = computed(() => {
                   <p class="text-[9px] font-semibold text-slate-400 dark:text-slate-500">達成率</p>
                 </div>
 
-                <div class="text-right">
+                <div class="w-20 shrink-0 text-right">
                   <span
                     class="inline-block text-[10px] font-bold rounded-full px-2 py-0.5 border whitespace-nowrap"
                     :class="statusClass(item.status)"
                   >{{ statusLabel(item) }}</span>
                   <!-- スマホでは目標を状態の下にまとめる -->
-                  <p class="sm:hidden text-[10px] text-slate-500 dark:text-slate-400 tabular-nums mt-0.5">
-                    {{ fmt(currentScoreOf(item)) }} → {{ item.targetLabel }} {{ fmt(item.targetValue) }}
+                  <p class="sm:hidden text-[10px] text-slate-500 dark:text-slate-400 tabular-nums mt-0.5 whitespace-nowrap">
+                    {{ fmt(currentScoreOf(item)) }} → {{ fmt(item.targetValue) }}
                   </p>
                 </div>
               </div>
@@ -601,10 +643,19 @@ const weakAxisNote = computed(() => {
                     v-for="(a, i) in radar"
                     :key="`spoke-${a.axis}`"
                     :x1="RADAR_CENTER" :y1="RADAR_CENTER"
-                    :x2="radarPoint(i, RADAR_MAX_RATE)[0]" :y2="radarPoint(i, RADAR_MAX_RATE)[1]"
+                    :x2="radarPoint(i, radarDomain.max)[0]" :y2="radarPoint(i, radarDomain.max)[1]"
                     class="stroke-slate-100 dark:stroke-slate-700/60"
                     stroke-width="1"
                   />
+                  <!-- 目盛りの値。この環がスコアレートの何 % を指すかを示す。 -->
+                  <text
+                    v-for="ring in gridRings"
+                    :key="`ring-label-${ring.rate}`"
+                    :x="RADAR_CENTER + 3"
+                    :y="radarPoint(0, ring.rate)[1] + 3"
+                    class="fill-slate-400 dark:fill-slate-500"
+                    font-size="8"
+                  >{{ ring.label }}%</text>
                   <polygon
                     :points="polygonOf('predictedRate')"
                     fill="none"
@@ -629,9 +680,12 @@ const weakAxisNote = computed(() => {
                   >{{ a.axis }}</text>
                 </svg>
                 <div class="flex gap-3 text-[10px] text-slate-500 dark:text-slate-400 mt-2 flex-wrap justify-center">
-                  <span><i class="inline-block w-2.5 h-[3px] rounded-sm bg-blue-600 dark:bg-blue-400 align-middle mr-1"></i>実測</span>
-                  <span><i class="inline-block w-2.5 h-[3px] rounded-sm bg-slate-400 dark:bg-slate-500 align-middle mr-1"></i>同実力帯の予測</span>
+                  <span><i class="inline-block w-2.5 h-1 rounded-sm bg-blue-600 dark:bg-blue-400 align-middle mr-1"></i>実測</span>
+                  <span><i class="inline-block w-2.5 h-1 rounded-sm bg-slate-400 dark:bg-slate-500 align-middle mr-1"></i>同実力帯の予測</span>
                 </div>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-1 tabular-nums">
+                  目盛り {{ radarDomain.min.toFixed(1) }}% 〜 {{ radarDomain.max.toFixed(1) }}%（スコアレート）
+                </p>
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
                   <template v-if="weakAxisNote">
                     予測より沈んでいる軸: <b class="text-slate-700 dark:text-slate-200">{{ weakAxisNote }}</b>。
