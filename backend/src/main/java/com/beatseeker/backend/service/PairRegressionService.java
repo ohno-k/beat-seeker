@@ -39,14 +39,14 @@ public class PairRegressionService {
      */
     private static final double MIN_R = 0.90;
     /** 1段目（HIGH精度）の最小相関係数。 */
-    private static final double PRIMARY_R = 0.95;
+    public static final double PRIMARY_R = 0.95;
     /** 2段目（LOW精度フォールバック）の最小相関係数。 */
-    private static final double FALLBACK_R = 0.90;
+    public static final double FALLBACK_R = 0.90;
     /** 表示する gap (= predicted - actual) に掛ける補正係数。
      *  低相関ペア除外で予測が控えめになる傾向を補正し、現行ベースに近い体感の伸びしろを提示する。 */
     private static final double GAP_COEFFICIENT = 1.2;
     /** 加重平均に必要な最小サポート数（少なすぎる予測は不安定なので捨てる）。 */
-    private static final int SUPPORT_MIN = 3;
+    public static final int SUPPORT_MIN = 3;
     /**
      * 重み関数で使う底点。|r| からこの値を引いた残差に対して {@link #WEIGHT_EXP} 乗を適用する。
      * 0.85 に設定すると、|r| ∈ [0.90, 1.00] のレンジで残差が 0.05〜0.15 となり、
@@ -66,7 +66,7 @@ public class PairRegressionService {
      */
     private static final double LOGIT_RATE_CLAMP = 1e-4;
     /** A グレード閾値（scoreRate %）。 */
-    private static final double A_GRADE_RATE = 0.6667;
+    public static final double A_GRADE_RATE = 0.6667;
 
     private final ScoreRepository scoreRepository;
 
@@ -90,6 +90,12 @@ public class PairRegressionService {
         public double intercept;
         /** ピアソン相関係数。 */
         public double r;
+        /**
+         * 目的変数 B（logit 空間）の標本標準偏差。
+         * 残差の標準偏差は sdY × √(1 − r²) で求まるため、
+         * 「予測がどれくらいブレるか」を知りたい呼び出し側（コスパ埋めレコメンド）が使う。
+         */
+        public double sdY;
     }
 
     public PairRegressionService(ScoreRepository scoreRepository) {
@@ -106,11 +112,37 @@ public class PairRegressionService {
     }
 
     /**
+     * 【メソッドの役割】 譜面 A から予測できる全譜面 B の回帰をまとめて返す（未構築なら同期構築）。
+     *
+     * {@link #getRegression(String, String)} を B 側全走査で呼ぶと
+     * 「候補譜面数 × 参照譜面数」回の Map 検索になるが、キャッシュは
+     * chartA → (chartB → Reg) の疎な入れ子なので、A 側から引けば
+     * 「実際に相関のあるペアの数」だけで済む。コスパ埋めレコメンドのように
+     * 未プレイを含む全譜面を候補にする用途ではこちらを使う。
+     *
+     * @param chartA 参照譜面のキー（title + "\0" + difficultyName）
+     * @return chartB → Reg の Map。該当なしなら null
+     */
+    public Map<String, Reg> getRegressionsFrom(String chartA) {
+        ensureBuilt();
+        return cache.get(chartA);
+    }
+
+    /**
      * 【メソッドの役割】 全譜面の (title, difficultyName, notes) を返す。
      */
     public Map<String, Integer> getNotesByKey() {
         ensureBuilt();
         return notesByKey;
+    }
+
+    /**
+     * 【メソッドの役割】 譜面キー → コミュニティ実測最高スコアの Map を返す。
+     * 予測スコアのクランプ上限（誰も達成していないスコアは提示しない）に使う。
+     */
+    public Map<String, Integer> getCommunityMaxByKey() {
+        ensureBuilt();
+        return communityMaxByKey;
     }
 
     /**
@@ -492,7 +524,7 @@ public class PairRegressionService {
      * @param r 相関係数（負値もあり得るので abs を取る）
      * @return 加重平均で使う重み w（≥ 0）
      */
-    private static double computeWeight(double r) {
+    public static double computeWeight(double r) {
         double absR = Math.abs(r);
         // フィルタ済みなので来ない想定だが、念のため底点未満は 0 に潰す。
         if (absR <= WEIGHT_BASE) return 0;
@@ -511,7 +543,7 @@ public class PairRegressionService {
      * @param rate 0〜1 のスコアレート（fraction、% ではない）
      * @return logit 変換後の値（クランプにより ±9.21 程度に収まる）
      */
-    private static double scoreRateToLogit(double rate) {
+    public static double scoreRateToLogit(double rate) {
         double clamped = Math.max(LOGIT_RATE_CLAMP, Math.min(1.0 - LOGIT_RATE_CLAMP, rate));
         return Math.log(clamped / (1.0 - clamped));
     }
@@ -522,7 +554,7 @@ public class PairRegressionService {
      * @param logit logit 空間の値
      * @return 0〜1 のスコアレート
      */
-    private static double logitToScoreRate(double logit) {
+    public static double logitToScoreRate(double logit) {
         return 1.0 / (1.0 + Math.exp(-logit));
     }
 
@@ -530,7 +562,7 @@ public class PairRegressionService {
      * 【メソッドの役割】 EX スコアと notes から logit 空間の値を計算する。
      * 内部的には rate = score / (notes×2) を取って logit へ。
      */
-    private static double scoreToLogit(int score, int notes) {
+    public static double scoreToLogit(int score, int notes) {
         if (notes <= 0) return 0;
         return scoreRateToLogit(score / (notes * 2.0));
     }
@@ -567,6 +599,7 @@ public class PairRegressionService {
             reg.slope = slope;
             reg.intercept = intercept;
             reg.r = r;
+            reg.sdY = Math.sqrt(syy / n);
             return reg;
         }
     }

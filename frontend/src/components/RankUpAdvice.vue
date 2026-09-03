@@ -16,14 +16,14 @@
       {{ t('advice.remaining', { n: nextRankGap.toFixed(1) }) }}
     </p>
     <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-4">
-      {{ t('advice.basedOnPotential') }}
+      {{ t('advice.basedOnExpectedValue') }}
     </p>
 
-    <div v-if="isGrowthLoading" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+    <div v-if="isLoading" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
       {{ t('advice.computingPotential') }}
     </div>
-    <div v-else-if="growthError" class="text-center py-6 text-rose-500 text-xs">
-      {{ t('advice.potentialError', { msg: growthError }) }}
+    <div v-else-if="loadError" class="text-center py-6 text-rose-500 text-xs">
+      {{ t('advice.potentialError', { msg: loadError }) }}
     </div>
     <div v-else-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
       {{ t('advice.noSuggestions') }}
@@ -31,29 +31,42 @@
     <div v-else class="space-y-2">
       <div
         v-for="(sug, i) in suggestions"
-        :key="i"
+        :key="`${sug.title}|${sug.difficultyName}`"
         class="flex items-center gap-2 p-2 sm:p-3 rounded-md border transition-colors"
-        :class="sug.crossesBorder
+        :class="sug.unplayed
           ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50'
           : 'bg-slate-50/50 dark:bg-slate-700/20 border-slate-100 dark:border-slate-700/50'"
       >
         <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5 min-w-0">
-            <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.song.title }}</p>
-            <InformalRankBadge :rank="sug.song.informalRank" size="xs" class="shrink-0" />
+            <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.title }}</p>
+            <InformalRankBadge :rank="sug.informalRank" size="xs" class="shrink-0" />
+            <span
+              v-if="sug.unplayed"
+              class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-blue-500 text-white"
+            >{{ t('advice.unplayedTag') }}</span>
           </div>
           <p class="text-[10px] text-slate-500 dark:text-slate-400">
-            {{ sug.song.difficultyName }} / {{ t('common.current') }} {{ sug.song.beatTierPoints.toFixed(1) }} pt
+            {{ sug.difficultyName }} /
+            <template v-if="sug.unplayed">{{ t('advice.notPlayedYet') }}</template>
+            <template v-else>{{ t('common.current') }} {{ sug.currentBeatPt.toFixed(1) }} pt</template>
           </p>
         </div>
-        <div class="text-right shrink-0">
-          <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">{{ sug.targetLabel }}</p>
-          <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
-            {{ t('advice.scoreIncrease', { n: sug.scoreIncrease.toLocaleString() }) }}
+        <div class="text-right shrink-0" :title="t('advice.supportHint', { n: sug.supportCount, acc: sug.accuracy })">
+          <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">
+            {{ t('advice.targetBorder', { label: sug.targetLabel }) }}
           </p>
-          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">→ {{ sug.newScoreRate.toFixed(2) }}%</p>
-          <p class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">+{{ sug.ptGain.toFixed(1) }} pt</p>
+          <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
+            {{ t('advice.targetScore', { n: sug.targetScore.toLocaleString() }) }}
+          </p>
+          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">→ {{ sug.targetRate.toFixed(2) }}%</p>
+          <p class="text-[10px] font-bold" :class="probabilityClass(sug.achieveProbability)">
+            {{ t('advice.achieveProbability', { p: Math.round(sug.achieveProbability * 100) }) }}
+          </p>
+          <p class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+            {{ t('advice.expectedGain', { n: sug.expectedGain.toFixed(1) }) }}
+          </p>
         </div>
       </div>
     </div>
@@ -62,18 +75,18 @@
     <div
       v-if="suggestions.length > 0"
       class="mt-4 p-3 rounded-md border-2 flex items-center justify-between"
-      :class="totalSuggestionGain >= nextRankGap
+      :class="totalExpectedGain >= nextRankGap
         ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700'
         : 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700'"
     >
       <div>
         <p class="text-[10px] font-bold"
-          :class="totalSuggestionGain >= nextRankGap ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'">
-          {{ totalSuggestionGain >= nextRankGap ? t('common.achievable') : t('common.shortfall') }}
+          :class="totalExpectedGain >= nextRankGap ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'">
+          {{ totalExpectedGain >= nextRankGap ? t('common.achievable') : t('common.shortfall') }}
         </p>
         <p class="text-lg font-bold"
-          :class="totalSuggestionGain >= nextRankGap ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'">
-          {{ t('common.total') }} +{{ totalSuggestionGain.toFixed(1) }} pt
+          :class="totalExpectedGain >= nextRankGap ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'">
+          {{ t('advice.expectedTotal') }} +{{ totalExpectedGain.toFixed(1) }} pt
         </p>
       </div>
       <div class="text-right text-xs font-bold text-slate-500 dark:text-slate-400">
@@ -86,27 +99,26 @@
 
 <script setup lang="ts">
 /**
- * 【コンポーネントの役割】 次のティアまで残 pt を埋めるのに効率の良い楽曲を推薦するパネル。
- * - props.flatScores（全譜面スコア）と totalPoints（現在の Beat-PT 合計）から、
- *   次ランクまでの差分 nextRankGap を算出する
- * - 各譜面ごとにスコア加算（AA/AAA/MAX- の達成ボーダー越えを優先）を試算して ptGain を計算
- * - 効率（ptGain / scoreIncrease）の高い順に、上限 19 曲または gap を超えるまで選出
- * - TOP100 外の譜面は threshold（100 位のスコア）を基準に「TOP100 に入った後の増分」で評価
+ * 【コンポーネントの役割】 次のティアまでの残り pt を、期待値の高い順に「どれを埋めれば埋まるか」で提示するパネル。
  *
- * 【アルゴリズム概要】
- *   1. sortedScored: beatTierPoints > 0 の曲を降順ソート（TOP100 判定用）
- *   2. getScoreCap: 自分の中の順位に応じて score 加算上限を 10〜50 pts で制限（上位曲は伸ばしづらい補正）
- *   3. buildCandidates: 各曲で最も近いボーダー（AA/AAA/MAX-）を優先的に狙い、無ければ +cap
- *   4. pickBestSuggestions: 効率降順で貪欲法、gap を埋めきるまで採用
+ * バックエンドの `/api/analysis/fill-recommendation`（コスパ埋めレコメンド）が
+ * 全譜面（未プレイ含む）について
+ *   期待獲得 pt = E[ max(0, BEAT-PT(到達スコア) − 押し出しライン) ]
+ * を算出済みなので、本コンポーネントは「残り pt を埋めるまで上から採用する」だけを担う。
  *
- * @prop flatScores フラットなスコアレコード配列。
- * @prop totalPoints 現在の Beat-PT 合計。次ランクの gap 計算に使用。
+ * 【旧実装との違い】
+ * 以前は「伸びしろ API の予測スコア = 確実に出せる上限」と決め打ちし、フロント側で
+ * ボーダー探索と TOP100 判定をやっていた。そのため
+ *  - 自分がすでに A 以上で出している譜面しか提案できず、「埋め」の提案ができない
+ *  - 予測が外れる確率を無視するので、実際には取れない譜面が上位に来る
+ * という 2 点が弱かった。判定はすべてバックエンドの期待値計算に寄せている。
+ *
+ * @prop totalPoints 現在の Beat-PT 合計。次ランクまでの gap 計算に使用。
  */
 import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
-import type { ScoreRecord } from '../utils/scoreData';
-import { calculatePoints, getNextRankInfo } from '../utils/beatTier';
+import { getNextRankInfo } from '../utils/beatTier';
 import InformalRankBadge from './InformalRankBadge.vue';
 
 const { t } = useI18n();
@@ -114,67 +126,79 @@ const { authHeaders } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const props = defineProps<{
-  flatScores: ScoreRecord[];
   totalPoints: number;
 }>();
 
-// ── 伸びしろ API: 「現実的に出せるはずのスコア」を譜面ごとに供給 ────────
-interface GrowthPotentialItem {
+/** 提案の上限件数。これ以上並べても「次の 1 曲」を選ぶ役には立たない。 */
+const MAX_SUGGESTIONS = 19;
+
+/** `/api/analysis/fill-recommendation` の items 1 件ぶん。 */
+interface FillRecommendationItem {
   title: string;
   difficultyName: string;
+  informalRank: string;
+  difficultyLevel: number;
+  /** 未プレイ譜面（＝純粋な「埋め」候補）なら true。 */
+  unplayed: boolean;
   currentScore: number;
+  currentRate: number;
+  currentBeatPt: number;
+  inTop100: boolean;
+  maxScore: number;
   predictedScore: number;
-  gap: number;
+  predictedRate: number;
+  /** 予測のばらつき（スコアレート % 換算の 1σ）。 */
+  sigmaRate: number;
+  /** 損益分岐スコア。ここを超えて初めて総合 BEAT-PT が増える。 */
+  breakEvenScore: number;
+  /** P(損益分岐スコア以上を出せる | 推定能力)。 */
+  achieveProbability: number;
+  targetScore: number;
+  targetRate: number;
+  /** 'AA' / 'AAA' / 'MAX-'。狙えるボーダーが無ければ空文字。 */
+  targetLabel: string;
+  targetProbability: number;
+  targetGain: number;
+  /** 期待獲得 pt。この降順で返ってくる。 */
+  expectedGain: number;
+  supportCount: number;
+  accuracy: 'HIGH' | 'LOW';
 }
-/** key = "title|difficultyName" -> 伸びしろ gap (正の整数)。
- *  ランクアップアドバイスでは、各譜面の score 上限値として使う。 */
-const growthGapMap = ref<Map<string, number>>(new Map());
-const isGrowthLoading = ref(false);
-const growthError = ref('');
 
-/** バックエンドの伸びしろAPIを叩いて map に変換。初回はキャッシュ構築で数秒かかることがある。 */
-async function fetchGrowthPotential() {
-  isGrowthLoading.value = true;
-  growthError.value = '';
+const items = ref<FillRecommendationItem[]>([]);
+const isLoading = ref(false);
+const loadError = ref('');
+
+/** 取得中に再取得を要求されたら、完了後に 1 回だけ追いかけるためのフラグ。 */
+let pendingRefetch = false;
+
+/**
+ * コスパ埋めレコメンドを取得する。初回はペア回帰キャッシュ構築で数秒かかることがある。
+ * ダッシュボード表示直後は合計 pt が数回入れ替わるため、取得中の要求は 1 回にまとめる。
+ */
+async function fetchRecommendation() {
+  if (isLoading.value) {
+    pendingRefetch = true;
+    return;
+  }
+  isLoading.value = true;
+  loadError.value = '';
   try {
-    const res = await fetch(`${API_BASE}/api/analysis/growth-potential`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE}/api/analysis/fill-recommendation`, { headers: authHeaders() });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json() as { items: GrowthPotentialItem[] };
-    const m = new Map<string, number>();
-    for (const it of data.items ?? []) {
-      const g = Math.floor(it.gap);
-      if (g > 0) m.set(`${it.title}|${it.difficultyName}`, g);
-    }
-    growthGapMap.value = m;
+    const data = await res.json() as { items: FillRecommendationItem[] };
+    items.value = data.items ?? [];
   } catch (e: any) {
-    growthError.value = e?.message ?? 'fetch failed';
-    growthGapMap.value = new Map();
+    loadError.value = e?.message ?? 'fetch failed';
+    items.value = [];
   } finally {
-    isGrowthLoading.value = false;
+    isLoading.value = false;
+  }
+  if (pendingRefetch) {
+    pendingRefetch = false;
+    await fetchRecommendation();
   }
 }
-
-// ── Top-100 状態 ────────────────────────────────────────────────────────
-
-/** 【computed の役割】 自分の Beat-PT TOP 順にソートした譜面リスト（0 pt の譜面は除外）。 */
-const sortedScored = computed(() =>
-  props.flatScores
-    .filter(s => s.beatTierPoints > 0)
-    .sort((a, b) => b.beatTierPoints - a.beatTierPoints)
-);
-
-/** 【computed の役割】 TOP100 圏内の最低 pt（100 位の pt）。未達の曲が TOP100 に入るために超えるべきライン。 */
-const threshold = computed(() => {
-  const s = sortedScored.value;
-  return s.length >= 100 ? s[99].beatTierPoints : 0;
-});
-
-/** 【computed の役割】 TOP100 圏内の譜面キーセット（"title|difficultyName"）。候補評価時の判定に使用。 */
-const top100Set = computed(() =>
-  new Set(sortedScored.value.slice(0, 100).map(s => `${s.title}|${s.difficultyName}`))
-);
-
-// ── ランクアップまでの差分 ──────────────────────────────────────────────
 
 /** 【computed の役割】 次ランクの必要 pt と現在 pt の差。既に最高位なら 0 を返す。 */
 const nextRankGap = computed(() => {
@@ -183,147 +207,47 @@ const nextRankGap = computed(() => {
   return Math.max(0, nextRank.minPoints - props.totalPoints);
 });
 
-// ── スコア向上の目標ボーダー（AA / AAA / MAX- を超えるとボーナス pt が付く） ─
-// ボーナス判定が確実に含まれるよう、実境界値よりわずかに上の rate を使う。
-const IMPROVEMENT_THRESHOLDS = [
-  { rate: 66.67, label: t('advice.thresholdBorder') },
-  { rate: 77.78, label: t('advice.thresholdAa') },
-  { rate: 88.89, label: t('advice.thresholdAaa') },
-  { rate: 94.45, label: t('advice.thresholdMax') },
-];
-
-/** 提案 1 件の構造（曲、目標ラベル、増加量、予想 Beat-PT 増分）。 */
-interface Suggestion {
-  song: ScoreRecord;
-  targetLabel: string;   // 越える最大のボーダー名（なければ空文字）
-  crossesBorder: boolean;
-  scoreIncrease: number; // 加算するスコア量（≤ 50）
-  newScoreRate: number;  // 加算後のスコアレート %
-  ptGain: number;        // 実質 Beat-PT 増分
-}
-
 /**
- * 【関数の役割】 曲ごとの score 加算上限 (cap) を、伸びしろAPIの予測 gap から取得する。
- * 伸びしろAPIに含まれない譜面（Lv11/12 ANOTHER/LEGG 以外、または support 不足）は 0 を返し、
- * 呼び出し側で skip させる。
+ * 【computed の役割】 期待値の高い順に、残り pt を満たすまで採用した提案リスト。
+ *
+ * items はバックエンドで期待値降順に並んでいるので、上から足していくだけでよい。
+ * 厳密には 1 曲埋めるたびに 100 位ラインが上がって後続の期待値は少し下がるが、
+ * 「次に触る 1 曲」を決めるための目安なので、ここでは独立に足し合わせている。
  */
-function getScoreCap(song: ScoreRecord): number {
-  return growthGapMap.value.get(`${song.title}|${song.difficultyName}`) ?? 0;
-}
-
-/**
- * 【関数の役割】 全譜面を走査して、Beat-PT を稼げる候補 Suggestion 配列を組み立てる。
- * - 既に満点 or 非公式ランク無 → スキップ
- * - 伸びしろAPIに予測がない譜面 → スキップ（=「他者傾向から押せる根拠がない」ため除外）
- * - cap (= 伸びしろ gap) 以内で届く一番高いボーダー（AA → AAA → MAX-）を目標に採用
- * - TOP100 圏外の場合は threshold (100 位) を基準に純増分を計算
- * - 0.05 pt 未満の候補は UI 上 "+0.0 pt" と表示されるため除外
- */
-function buildCandidates(): Suggestion[] {
-  const candidates: Suggestion[] = [];
-  const th = threshold.value;
-
-  for (const song of props.flatScores) {
-    if (song.maxScore <= 0 || !song.informalRank || song.scoreRate < 0) continue;
-    if (song.score >= song.maxScore) continue;
-
-    const cap = getScoreCap(song);
-    if (cap <= 0) continue; // 伸びしろ予測なし or gap=0 → スキップ
-
-    // 最も近いボーダーを探索。届かなければ +cap で据え置き。
-    let scoreIncrease = cap;
-    let targetLabel = '';
-    let crossesBorder = false;
-
-    for (const thr of IMPROVEMENT_THRESHOLDS) {
-      if (song.scoreRate >= thr.rate - 0.01) continue;
-      const needed = Math.ceil(song.maxScore * thr.rate / 100) - song.score;
-      if (needed > 0 && needed <= cap) {
-        scoreIncrease = needed;
-        targetLabel = thr.label;
-        crossesBorder = true;
-        break;
-      }
-    }
-
-    const newScore = Math.min(song.score + scoreIncrease, song.maxScore);
-    const actualIncrease = newScore - song.score;
-    if (actualIncrease <= 0) continue;
-
-    const newScoreRate = (newScore / song.maxScore) * 100;
-    const newBeatPT = calculatePoints(newScoreRate, song.informalRank);
-    const rawGain = newBeatPT - song.beatTierPoints;
-    if (rawGain <= 0) continue;
-
-    const inTop100 = top100Set.value.has(`${song.title}|${song.difficultyName}`);
-    let netGain: number;
-    if (inTop100) {
-      // TOP100 内は rawGain がそのまま合計 pt に反映される。
-      netGain = rawGain;
-    } else if (th > 0) {
-      // TOP100 外は「100 位 pt を押し出した分」だけが純増分になる。
-      netGain = newBeatPT - th;
-    } else {
-      netGain = rawGain;
-    }
-
-    if (netGain < 0.05) continue; // 表示上 0.0 pt になる候補は捨てる
-
-    candidates.push({ song, targetLabel, crossesBorder, scoreIncrease: actualIncrease, newScoreRate, ptGain: netGain });
-  }
-
-  return candidates;
-}
-
-/**
- * 【関数の役割】 候補群から効率順に採用し、gap が埋まるまで 19 曲以内で選ぶ貪欲選択。
- * 同効率ならボーダー越え（AA/AAA/MAX-）の候補を優先、それも同じなら ptGain の大きい方。
- */
-function pickBestSuggestions(): Suggestion[] {
+const suggestions = computed(() => {
   const gap = nextRankGap.value;
   if (gap <= 0) return [];
 
-  const candidates = buildCandidates();
-  if (candidates.length === 0) return [];
-
-  // 効率（ptGain / scoreIncrease）で降順、タイなら crossesBorder を優先、さらに ptGain 降順。
-  const sorted = [...candidates].sort((a, b) => {
-    const effA = a.ptGain / a.scoreIncrease;
-    const effB = b.ptGain / b.scoreIncrease;
-    if (Math.abs(effA - effB) > 0.001) return effB - effA;
-    if (a.crossesBorder !== b.crossesBorder) return a.crossesBorder ? -1 : 1;
-    return b.ptGain - a.ptGain;
-  });
-
-  // 効率の高い曲から順に、gap を超えるまで採用（最大 19 曲）。
-  const result: Suggestion[] = [];
+  const picked: FillRecommendationItem[] = [];
   let accumulated = 0;
-
-  for (const c of sorted) {
-    if (result.length >= 19) break;
+  for (const item of items.value) {
+    if (picked.length >= MAX_SUGGESTIONS) break;
     if (accumulated >= gap) break;
-    result.push(c);
-    accumulated += c.ptGain;
+    picked.push(item);
+    accumulated += item.expectedGain;
   }
+  return picked;
+});
 
-  return result;
+/** 【computed の役割】 採用した提案の期待獲得 pt 合計。gap と比較して「達成可能 / 不足」を出す。 */
+const totalExpectedGain = computed(() =>
+  suggestions.value.reduce((acc, s) => acc + s.expectedGain, 0)
+);
+
+/** 達成確率の色分け。高い＝取りやすい（緑）、低い＝一発狙い（琥珀）。 */
+function probabilityClass(p: number): string {
+  if (p >= 0.7) return 'text-emerald-600 dark:text-emerald-400';
+  if (p >= 0.4) return 'text-slate-500 dark:text-slate-400';
+  return 'text-amber-600 dark:text-amber-400';
 }
 
-/** 表示用の提案リスト（onMounted + watch で最新化）。 */
-const suggestions = ref<Suggestion[]>([]);
+/** 最高ランクに到達済み（残り pt が無い）ならパネル自体を出さないので、取得もしない。 */
+function fetchIfNeeded() {
+  if (nextRankGap.value <= 0) return;
+  fetchRecommendation();
+}
 
-// 初回マウント時に 伸びしろ取得 → 候補算出。
-onMounted(async () => {
-  await fetchGrowthPotential();
-  suggestions.value = pickBestSuggestions();
-});
-// props.flatScores / totalPoints / 伸びしろ map が変化するたびに再算出。
-watch(() => [props.flatScores, props.totalPoints, growthGapMap.value], () => {
-  suggestions.value = pickBestSuggestions();
-}, { deep: false });
-
-/** 【computed の役割】 採用候補の ptGain 合計。gap と比較して「達成可能 / 不足」を表示するのに使用。 */
-const totalSuggestionGain = computed(() =>
-  suggestions.value.reduce((acc, s) => acc + s.ptGain, 0)
-);
+onMounted(fetchIfNeeded);
+// スコアを取り込み直すと合計 pt が変わる。そのタイミングで推薦も取り直す。
+watch(() => props.totalPoints, fetchIfNeeded);
 </script>

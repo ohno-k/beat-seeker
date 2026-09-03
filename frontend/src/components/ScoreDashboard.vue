@@ -208,7 +208,7 @@
     <UnofficialDifficultyTable v-if="!isPrivateView" :scores="displayScores" :history-scores="allFlattenedScores" />
 
     <!-- Rank Up Advice -->
-    <RankUpAdvice v-if="!isPrivateView" :flat-scores="allFlattenedScores" :total-points="props.totalPoints" />
+    <RankUpAdvice v-if="!isPrivateView" :total-points="props.totalPoints" />
 
     <!-- Activity Feed (全体ニュース) -->
     <ActivityFeed v-if="!isPrivateView" />
