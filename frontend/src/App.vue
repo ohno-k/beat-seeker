@@ -82,6 +82,8 @@ const WrappedView = defineAsyncComponent(() => import('./views/WrappedView.vue')
 const CompetitionAdminView = defineAsyncComponent(() => import('./views/CompetitionAdminView.vue'));
 // 管理者用 2 ユーザー比較画面: URL `/admin/user-comparison` での直接アクセス専用 (サイドバー導線なし)。
 const AdminUserComparisonView = defineAsyncComponent(() => import('./views/AdminUserComparisonView.vue'));
+// 練習メニュー (週次カリキュラム): 検証段階のため管理者限定。URL `/training`。
+const PracticeMenuView = defineAsyncComponent(() => import('./views/PracticeMenuView.vue'));
 // 大会参加者画面 (招待 URL 専用): `/competition/player/{token}` で直接アクセス。
 // ログイン不要・サイドバーなしのスタンドアロン描画。
 const CompetitionPlayerView = defineAsyncComponent(() => import('./views/CompetitionPlayerView.vue'));
@@ -372,7 +374,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'past-version-scores'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores'>('dashboard')
 
 // 【watch】 スコア一覧タブが要求されたら ScoreSummary を遅延マウントする。
 // （サイドバー / コマンドパレット等どの経路でタブが変わっても拾えるようここで一元化する）
@@ -436,6 +438,7 @@ const activeTabLabel = computed<string>(() => {
     about: t('nav.about'),
     manual: t('nav.manual'),
     'admin-user-comparison': 'ユーザー間スコア比較',
+    training: '練習メニュー',
     'past-version-scores': `${pastVersionScoresVersion.value} ${versionName(pastVersionScoresVersion.value)}`,
   };
   return labels[activeTab.value] ?? '';
@@ -766,6 +769,7 @@ onMounted(() => {
     '/league': 'league',
     '/competition-admin': 'competition-admin',
     '/admin/user-comparison': 'admin-user-comparison',
+    '/training': 'training',
     // 作品別スコア一覧から戻ったときに書き戻す URL。リロードでもプロフィールに着地させる。
     '/profile': 'profile',
   };
@@ -2228,6 +2232,11 @@ const handleUnifiedClose = async () => {
              サイドバー導線なし。URL `/admin/user-comparison` 直叩き専用。 -->
         <template v-else-if="activeTab === 'admin-user-comparison'">
           <AdminUserComparisonView class="w-full animate-fade-in" />
+        </template>
+
+        <!-- 練習メニュー: 週次カリキュラム。検証段階のため管理者のみ (サーバー側でも 403)。 -->
+        <template v-else-if="activeTab === 'training'">
+          <PracticeMenuView class="w-full animate-fade-in" />
         </template>
 
         <!-- 利用規約 -->

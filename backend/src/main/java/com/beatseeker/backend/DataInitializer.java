@@ -175,6 +175,61 @@ public class DataInitializer implements ApplicationRunner {
                     "WHERE inactive_weeks > 0"
             ).executeUpdate());
 
+        // 手順4.6: 練習メニューのテーブルを明示的に作る（冪等）。
+        //          通常は ddl-auto=update が PracticeMenu / PracticeMenuItem から生成するが、
+        //          本番 DB にローカルから接続する prod-db プロファイルは ddl-auto=none のため
+        //          自動生成されず、練習メニューの API が全て落ちる。検証はこの経路で行うので
+        //          CREATE TABLE IF NOT EXISTS を張っておく。
+        //          列定義は両エンティティの @Column と一致させること。
+        runStep("create practice menu tables", () -> {
+            entityManager.createNativeQuery(
+                    "CREATE TABLE IF NOT EXISTS practice_menus (" +
+                    "  id BIGSERIAL PRIMARY KEY," +
+                    "  user_id BIGINT NOT NULL REFERENCES users(id)," +
+                    "  week_start DATE NOT NULL," +
+                    "  target_tier VARCHAR(16)," +
+                    "  from_tier VARCHAR(16)," +
+                    "  from_total_beat_pt DOUBLE PRECISION," +
+                    "  generated_at TIMESTAMP NOT NULL DEFAULT now()," +
+                    "  regenerate_count INTEGER NOT NULL DEFAULT 0," +
+                    "  status VARCHAR(8) NOT NULL DEFAULT 'OPEN'," +
+                    "  summary_json TEXT," +
+                    "  CONSTRAINT uk_practice_menus_user_week UNIQUE (user_id, week_start))"
+            ).executeUpdate();
+            entityManager.createNativeQuery(
+                    "CREATE INDEX IF NOT EXISTS idx_practice_menus_user_week " +
+                    "ON practice_menus (user_id, week_start)"
+            ).executeUpdate();
+            entityManager.createNativeQuery(
+                    "CREATE TABLE IF NOT EXISTS practice_menu_items (" +
+                    "  id BIGSERIAL PRIMARY KEY," +
+                    "  menu_id BIGINT NOT NULL REFERENCES practice_menus(id)," +
+                    "  title VARCHAR(255) NOT NULL," +
+                    "  difficulty_name VARCHAR(16) NOT NULL," +
+                    "  informal_rank VARCHAR(16)," +
+                    "  role VARCHAR(8) NOT NULL," +
+                    "  axis VARCHAR(16)," +
+                    "  target_type VARCHAR(8) NOT NULL," +
+                    "  target_label VARCHAR(32)," +
+                    "  target_value INTEGER," +
+                    "  baseline_score INTEGER," +
+                    "  baseline_clear VARCHAR(24)," +
+                    "  achieve_probability DOUBLE PRECISION," +
+                    "  expected_gain DOUBLE PRECISION," +
+                    "  planned_plays INTEGER," +
+                    "  status VARCHAR(12) NOT NULL DEFAULT 'PENDING'," +
+                    "  result_score INTEGER," +
+                    "  result_clear VARCHAR(24)," +
+                    "  carried_weeks INTEGER NOT NULL DEFAULT 0," +
+                    "  sort_order INTEGER NOT NULL DEFAULT 0," +
+                    "  CONSTRAINT uk_practice_menu_items_chart UNIQUE (menu_id, title, difficulty_name))"
+            ).executeUpdate();
+            entityManager.createNativeQuery(
+                    "CREATE INDEX IF NOT EXISTS idx_practice_menu_items_menu " +
+                    "ON practice_menu_items (menu_id)"
+            ).executeUpdate();
+        });
+
         // 手順5: 曲データと難易度表を JSON から投入する（テーブルが空の場合のみ実効）。
         //        gameDataService 側が自前で @Transactional を張るため、ここでは txTemplate を使わない。
         try {

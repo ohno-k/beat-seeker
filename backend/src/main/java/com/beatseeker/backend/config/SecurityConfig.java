@@ -215,6 +215,10 @@ public class SecurityConfig {
                                                 // リーグモード: 参加・順位表・管理系すべて要ログイン。
                                                 // 管理者判定 (/api/league/admin/**) は Controller 側 (AdminAuthService) で行う。
                                                 .requestMatchers("/api/league/**").authenticated()
+                                                // 練習メニュー: 週次カリキュラムの生成・採点。現在は検証段階のため
+                                                // 管理者のみが使える (判定は PracticeMenuController 側の AdminAuthService)。
+                                                // ここではログインだけを必須にする。
+                                                .requestMatchers("/api/training/**").authenticated()
                                                 // 上記いずれにも該当しないリクエストは公開扱い（静的リソース等）
                                                 .anyRequest().permitAll())
                                 // 未認証で要ログインエンドポイントへアクセスされた場合は 401 を返す

@@ -400,6 +400,118 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findUserAnotherLeggScores(@Param("userId") Long userId);
 
     /**
+     * 【メソッドの役割】 指定ユーザーの <b>歴代</b> ANOTHER / LEGGENDARIA スコアを返す。
+     *
+     * 練習メニュー専用。{@link #findUserAnotherLeggScores} が現行作（{@code scores}）だけを
+     * 見るのに対し、こちらは過去作（{@code past_scores}、IIDX 30〜32）も UNION して
+     * 「その譜面で自分が今まで出した最高スコア」を返す。
+     *
+     * <h3>なぜ練習メニューだけ過去作を混ぜるのか</h3>
+     * BEAT-PT・ランキング・リーグは「現行作の実績」を競うものなので過去作を混ぜてはならない
+     * （{@link com.beatseeker.backend.entity.PastScore} の不変条件）。
+     * 一方、練習メニューが答えたいのは「この人はこの譜面をどこまで出せるか」という<b>実力</b>で、
+     * 前作で AAA を出している譜面を「未プレイだから埋めましょう」と勧めるのは明確に誤りになる。
+     * そのため能力推定と baseline に限って歴代ベストを使う。
+     *
+     * <h3>INFINITAS を除く理由</h3>
+     * {@code source = 'infinitas'} は画面認識由来でプレー回数を持たず、アーケードとは
+     * 判定・オプションの前提も違う。ユーザー指示により練習メニューの対象外とする。
+     *
+     * 返却キー: title / difficultyName / score / clearType / playCount / fromPast(boolean)
+     * 同じ譜面が現行と過去で 2 行返ることがあるので、呼び出し側で EX の最大値に集約すること。
+     *
+     * @param userId 対象ユーザー ID
+     * @return 歴代スコア行（現行 + 過去作）
+     */
+    @Query(value =
+        "SELECT s.title AS \"title\", " +
+        "       s.difficulty_name AS \"difficultyName\", " +
+        "       s.score AS \"score\", " +
+        "       s.clear_type AS \"clearType\", " +
+        "       s.play_count AS \"playCount\", " +
+        "       false AS \"fromPast\" " +
+        "FROM scores s " +
+        "WHERE s.user_id = :userId " +
+        "  AND s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND s.score > 0 " +
+        "  AND COALESCE(s.source, 'arcade') <> 'infinitas' " +
+        "UNION ALL " +
+        "SELECT p.title AS \"title\", " +
+        "       p.difficulty_name AS \"difficultyName\", " +
+        "       p.score AS \"score\", " +
+        "       p.clear_type AS \"clearType\", " +
+        "       p.play_count AS \"playCount\", " +
+        "       true AS \"fromPast\" " +
+        "FROM past_scores p " +
+        "WHERE p.user_id = :userId " +
+        "  AND p.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND p.score > 0",
+        nativeQuery = true)
+    List<Map<String, Object>> findUserLifetimeAnotherLeggScores(@Param("userId") Long userId);
+
+    /**
+     * 【メソッドの役割】 練習メニューの「登竜門譜面」判定に使う、譜面 × ティアのボーダー到達率を返す。
+     *
+     * ネイティブ SQL。{@link #findRawSongScoresWithBeatTier()} と同じ CASE 式で
+     * {@code users.total_beat_pt} から名前付きティアを求め、譜面 × ティアごとに
+     *  - 人数
+     *  - AA（77.77%）/ AAA（88.88%）/ MAX-（94.44%）到達数
+     *  - HARD CLEAR 以上の人数
+     * を数える。判別力 D（隣接ティアの到達率の差）はこの結果から Java 側で計算する。
+     *
+     * ボーダー判定は整数演算で行う（浮動小数の丸めでボーダー 1 点差が揺れるのを避ける）。
+     *  - AA   : score / (notes*2) &gt; 0.7777  ⇔  score * 10000 &gt; notes * 15554
+     *  - AAA  : score / (notes*2) &gt; 0.8888  ⇔  score * 10000 &gt; notes * 17776
+     *  - MAX- : score / (notes*2) &gt; 0.9444  ⇔  score * 10000 &gt; notes * 18888
+     *
+     * 対象は ☆11 / ☆12 の ANOTHER・LEGGENDARIA のみ（ユーザー指示により ☆10 以下は含めない）。
+     * INFINITAS 由来のスコアは除外する。
+     *
+     * 返却キー: title / difficultyName / beatTier / userCount / aaCount / aaaCount /
+     *           maxMinusCount / hardCount / avgScore / avgRate
+     *
+     * @return 譜面 × ティアの集計行
+     */
+    @Query(value =
+        "SELECT s.title AS \"title\", " +
+        "       s.difficulty_name AS \"difficultyName\", " +
+        "       CASE" +
+        "         WHEN u.total_beat_pt >= 18000 THEN 'Legend'" +
+        "         WHEN u.total_beat_pt >= 17500 THEN 'Mythic'" +
+        "         WHEN u.total_beat_pt >= 17000 THEN 'Ancient'" +
+        "         WHEN u.total_beat_pt >= 16500 THEN 'Master'" +
+        "         WHEN u.total_beat_pt >= 16000 THEN 'Elite'" +
+        "         WHEN u.total_beat_pt >= 15500 THEN 'Commander'" +
+        "         WHEN u.total_beat_pt >= 15000 THEN 'Veteran'" +
+        "         WHEN u.total_beat_pt >= 14000 THEN 'Expert'" +
+        "         WHEN u.total_beat_pt >= 13000 THEN 'Advanced'" +
+        "         WHEN u.total_beat_pt >= 12000 THEN 'Intermediate'" +
+        "         WHEN u.total_beat_pt >= 10000 THEN 'Novice'" +
+        "         ELSE 'Beginner'" +
+        "       END AS \"beatTier\", " +
+        "       COUNT(*) AS \"userCount\", " +
+        "       SUM(CASE WHEN s.score * 10000 > sd.notes * 15554 THEN 1 ELSE 0 END) AS \"aaCount\", " +
+        "       SUM(CASE WHEN s.score * 10000 > sd.notes * 17776 THEN 1 ELSE 0 END) AS \"aaaCount\", " +
+        "       SUM(CASE WHEN s.score * 10000 > sd.notes * 18888 THEN 1 ELSE 0 END) AS \"maxMinusCount\", " +
+        "       SUM(CASE WHEN s.clear_type IN ('HARD CLEAR', 'EX HARD CLEAR', 'FULLCOMBO CLEAR') THEN 1 ELSE 0 END) AS \"hardCount\", " +
+        "       ROUND(AVG(s.score)) AS \"avgScore\", " +
+        "       AVG(s.score * 50.0 / sd.notes) AS \"avgRate\" " +
+        "FROM scores s " +
+        "JOIN users u ON s.user_id = u.id AND u.total_beat_pt > 0 " +
+        "JOIN song_definitions sd" +
+        "  ON sd.title = s.title" +
+        "  AND sd.revision = 'active'" +
+        "  AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10'))" +
+        "  AND sd.notes > 0 " +
+        "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+        "  AND s.difficulty_level IN (11, 12) " +
+        "  AND s.score > 0 " +
+        "  AND COALESCE(s.source, 'arcade') <> 'infinitas' " +
+        "GROUP BY s.title, s.difficulty_name, 3",
+        nativeQuery = true)
+    List<Map<String, Object>> findChartTierBenchmarks();
+
+    /**
      * 【メソッドの役割】 指定曲×譜面の「スコアランキング」を、プライバシー設定を考慮して返す。
      *
      * ネイティブ SQL。ポイント:

@@ -10,7 +10,11 @@
       "Bash(echo \"BACKEND_EXIT=$?\")",
       "Bash(PATH=/c/Users/oonok/dev-tools/node-v24.18.0-win-x64:__TRACKED_VAR__ npx vite build)",
       "Bash(echo \"BUILD_EXIT=$?\")",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(node diag-league.js out1.json)",
+      "Bash(node diag2.js out2.json)",
+      "Bash(node -e ' *)",
+      "Bash(node diag3.js out3.json)"
     ]
   }
 }

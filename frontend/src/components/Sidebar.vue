@@ -122,6 +122,17 @@ const goAdminUserComparison = () => {
   closeSidebar();
 };
 
+/**
+ * 【関数の役割】 練習メニュー（週次カリキュラム）へ遷移する。
+ * 検証段階のため管理者にのみ表示する。URL `/training` を持つので
+ * ユーザー間スコア比較と同じく replaceState で URL も揃える。
+ */
+const goPracticeMenu = () => {
+  window.history.replaceState({}, '', '/training');
+  emit('update:activeTab', 'training');
+  closeSidebar();
+};
+
 /** 【関数の役割】 アップロードボタン押下時、親にスコア取り込みを通知して閉じる。 */
 const handleUploadClick = () => {
   emit('upload');
@@ -369,6 +380,16 @@ watch(() => props.activeTab, (tab) => {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     ユーザー間スコア比較
+                  </button>
+                  <button
+                    v-if="isAdmin && !viewingUserId"
+                    @click="goPracticeMenu"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    練習メニュー
                   </button>
                   <button
                     @click="handleAction('logout')"
