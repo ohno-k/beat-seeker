@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>beat-seeker — 案B「JOURNAL」ダッシュボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Chakra+Petch:wght@500;600;700&family=Noto+Serif+JP:wght@600;700&family=IBM+Plex+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f4ef; --sf:#fffefa; --ink:#15171c; --ink2:#4b4f58; --mute:#7a7e88; --rule:#dcd9cf; --rule2:#eceae2;
+  --red:#c8102e; --tier:#be123c; --tierbg:#fbe9ec; --rate:#0f766e; --ratebg:#e3f3f0;
+  --serif:'Noto Serif JP',serif; --sans:'IBM Plex Sans JP','Noto Sans JP',sans-serif; --mono:'JetBrains Mono',monospace;
+  --lamp-fc:linear-gradient(90deg,#7dd3fc,#c4b5fd,#f9a8d4); --lamp-exh:#eab308; --lamp-hard:#dc2626; --lamp-clear:#0ea5e9; --lamp-easy:#16a34a; --lamp-assist:#9333ea; --lamp-failed:#9ca3af; --lamp-np:#e5e7eb;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.serif{font-family:var(--serif)}
+.mute{color:var(--mute)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+
+/* masthead */
+.mast{border-bottom:1px solid var(--ink);background:var(--paper);position:sticky;top:0;z-index:5}
+.mast .wrap{display:flex;align-items:center;height:64px;gap:24px}
+.word{font-family:var(--serif);font-weight:700;font-size:24px;letter-spacing:-.01em;display:flex;align-items:center;gap:2px}
+.word i{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin:0 4px}
+.nav{display:flex;gap:18px;height:100%;align-items:stretch}
+.nav a{display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.nav a.on{color:var(--ink);font-weight:700;border-bottom-color:var(--red)}
+.mast .sp{flex:1}
+.search{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;width:190px;flex:none;white-space:nowrap;overflow:hidden;border:1px solid var(--rule);border-radius:4px;background:var(--sf);color:var(--mute);font-size:12px}
+.search kbd{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--mute)}
+.btn{height:34px;padding:0 14px;border-radius:4px;border:1px solid var(--ink);background:var(--ink);color:#fff;font-weight:600;font-size:12.5px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:14px}
+.status{border-bottom:1px solid var(--rule)}
+.status .wrap{height:36px;display:flex;align-items:center;gap:22px;font-family:var(--mono);font-size:11.5px;color:var(--mute)}
+.status b{color:var(--ink);font-weight:600}
+.status .sp{flex:1}
+.status .live{display:inline-flex;align-items:center;gap:6px}
+.status .live:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--rate)}
+
+/* lede */
+.lede{padding:44px 0 36px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end;border-bottom:1px solid var(--ink)}
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:flex;gap:14px}
+.kicker b{color:var(--red);font-weight:600}
+.lede h1{font-family:var(--serif);font-weight:700;font-size:76px;line-height:1;margin:10px 0 14px;letter-spacing:-.02em;display:flex;align-items:baseline;gap:18px}
+.lede h1 small{font-size:34px;color:var(--tier);font-weight:600}
+.lede .pt{font-family:var(--mono);font-size:26px;display:flex;align-items:baseline;gap:12px}
+.lede .pt .u{font-size:13px;color:var(--mute)}
+.lede .pt .d{font-size:14px;color:var(--rate);font-weight:600}
+.prog{margin-top:22px;max-width:640px}
+.prog .line{height:2px;background:var(--rule);position:relative}
+.prog .line i{position:absolute;left:0;top:0;bottom:0;width:86.5%;background:var(--ink)}
+.prog .line b{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--red);left:calc(86.5% - 5px)}
+.prog .meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--mute);margin-top:8px}
+.prog .meta b{color:var(--ink);font-weight:600}
+.emblem{width:150px;height:150px}
+.emb-cap{font-family:var(--mono);font-size:11px;color:var(--mute);text-align:center;margin-top:8px;letter-spacing:.06em}
+
+/* stat row */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--rule)}
+.stats>div{padding:20px 22px 20px 0;border-right:1px solid var(--rule)}
+.stats>div+div{padding-left:22px}
+.stats>div:last-child{border-right:0}
+.stats .k{font-size:11.5px;color:var(--mute);font-weight:500;display:flex;justify-content:space-between}
+.stats .v{font-family:var(--mono);font-size:30px;line-height:1.1;margin-top:6px;font-weight:500;letter-spacing:-.02em}
+.stats .v small{font-size:14px;color:var(--mute);margin-left:2px}
+.stats .s{font-size:11.5px;color:var(--mute);margin-top:6px}
+.stats .s b{color:var(--rate);font-family:var(--mono);font-weight:600}
+.stats .tierpill{display:inline-flex;align-items:center;gap:8px}
+.stats .tierpill i{width:12px;height:12px;background:var(--rate);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+
+/* sections */
+.sec{padding:34px 0 8px}
+.sec-h{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--ink);padding-bottom:10px;margin-bottom:18px}
+.sec-h .no{font-family:var(--mono);font-size:12px;color:var(--red);font-weight:600}
+.sec-h h2{font-family:var(--serif);font-weight:700;font-size:20px;margin:0;letter-spacing:-.01em}
+.sec-h .sp{flex:1}
+.sec-h .more{font-size:12px;color:var(--mute);font-weight:500}
+.sec-h .more:after{content:" →"}
+.cols{display:grid;grid-template-columns:1.6fr 1fr;gap:48px}
+.chart{width:100%;height:220px;display:block}
+.legend{display:flex;gap:18px;font-family:var(--mono);font-size:11px;color:var(--mute);margin-top:10px}
+.legend i{width:14px;height:2px;display:inline-block;vertical-align:middle;margin-right:6px}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--mute) 0 3px,transparent 3px 6px)}
+
+.lamprows{display:grid;gap:9px}
+.lamprows div{display:grid;grid-template-columns:96px 1fr 34px 46px;align-items:center;gap:12px;font-size:12.5px}
+.lamprows .bar{height:12px;background:var(--rule2);position:relative}
+.lamprows .bar i{position:absolute;left:0;top:0;bottom:0}
+.lamprows .n{font-family:var(--mono);text-align:right;font-weight:500}
+.lamprows .p{font-family:var(--mono);text-align:right;color:var(--mute);font-size:11px}
+.lamprows .l{display:flex;align-items:center;gap:8px;color:var(--ink2)}
+.lamprows .l i{width:8px;height:8px;flex:none}
+
+.adv{width:100%;border-collapse:collapse}
+.adv td{padding:12px 0;border-bottom:1px solid var(--rule);vertical-align:middle;font-size:13.5px}
+.adv tr:first-child td{padding-top:0}
+.adv .lv{font-family:var(--mono);color:var(--mute);width:48px;font-size:12.5px}
+.adv .t{font-weight:600}
+.adv .t .diff{font-family:var(--mono);font-size:10px;color:#fff;background:var(--red);padding:1px 4px;margin-left:6px;vertical-align:1px}
+.adv .t .diffL{background:#6d28d9}
+.adv .s{font-size:12px;color:var(--mute);margin-top:2px}
+.adv .s i{width:8px;height:8px;display:inline-block;margin-right:6px;vertical-align:-1px}
+.adv .g{font-family:var(--mono);text-align:right;font-weight:600;color:var(--ink);font-size:16px;width:90px}
+.adv .g small{display:block;font-size:10px;color:var(--mute);font-weight:500;letter-spacing:.04em}
+.adv .pr{width:64px;text-align:right;font-family:var(--mono);color:var(--mute);font-size:12px}
+
+table.rec{width:100%;border-collapse:collapse}
+.rec th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:left;padding:0 12px 10px 0;border-bottom:1px solid var(--ink);font-weight:500}
+.rec td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule);font-size:13.5px;vertical-align:middle}
+.rec td.t{font-weight:600;display:flex;align-items:center;gap:10px}
+.rec .lamp{width:10px;height:10px;flex:none}
+.rec .tag{font-family:var(--mono);font-size:10px;color:#fff;background:var(--red);padding:1px 4px}
+.rec .r{text-align:right}
+.rec .dl{font-family:var(--mono);font-size:11px;font-weight:600;border:1px solid var(--ink);padding:0 5px;margin-left:6px}
+.rec .dl.aa{border-color:var(--rule);color:var(--mute)}
+.rec .delta{color:var(--rate);font-family:var(--mono);font-weight:600;font-size:12px}
+.rec .dt{font-family:var(--mono);color:var(--mute);font-size:12px}
+.foot{padding:40px 0 60px;font-family:var(--mono);font-size:11px;color:var(--mute);border-top:1px solid var(--rule);margin-top:40px;display:flex;justify-content:space-between}
+
+.tabbar{display:none}
+@media (max-width:760px){
+  .wrap{padding:0 18px}
+  .mast .wrap{height:54px;gap:12px}
+  .word{font-size:20px}
+  .nav,.search,.btn span{display:none}
+  .btn{padding:0 10px;height:32px}
+  .status .wrap{height:auto;padding:8px 18px;gap:12px;font-size:10.5px;flex-wrap:wrap}
+  .status .sp,.status .hide{display:none}
+  .lede{grid-template-columns:1fr;gap:18px;padding:26px 0 22px}
+  .lede h1{font-size:46px;gap:12px}.lede h1 small{font-size:22px}
+  .lede .pt{font-size:20px}
+  .emblem{width:84px;height:84px}
+  .emb{display:flex;align-items:center;gap:14px}
+  .emb-cap{text-align:left;margin:0}
+  .stats{grid-template-columns:1fr 1fr}
+  .stats>div{padding:14px 12px 14px 0;border-bottom:1px solid var(--rule)}
+  .stats>div+div{padding-left:14px}
+  .stats>div:nth-child(2n){border-right:0}
+  .stats>div:nth-child(1){grid-column:1/-1;border-right:0;padding-right:0}
+  .stats .v{font-size:24px}
+  .cols{grid-template-columns:1fr;gap:26px}
+  .sec{padding:24px 0 4px}
+  .rec th:nth-child(4),.rec td:nth-child(4){display:none}
+  .adv .pr{display:none}
+  body{padding-bottom:70px}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;height:62px;background:var(--paper);border-top:1px solid var(--ink);padding:6px 6px 8px;z-index:10}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--mute)}
+  .tabbar a svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .tabbar a.on{color:var(--ink)}
+  .tabbar a.on svg{stroke:var(--red)}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="hex" viewBox="0 0 100 100"><path d="M50 4 L90 27 L90 73 L50 96 L10 73 L10 27 Z"/></symbol>
+</defs></svg>
+
+<header class="mast"><div class="wrap">
+  <div class="word">beat<i></i>seeker</div>
+  <nav class="nav">
+    <a class="on">ダッシュボード</a><a>スコア一覧</a><a>タイムライン</a><a>ランキング</a><a>フレンド</a><a>成長記録</a><a>ARENA</a><a>リーグ</a><a>その他 ▾</a>
+  </nav>
+  <div class="sp"></div>
+  <div class="search">検索 / コマンド<kbd>⌘K</kbd></div>
+  <a class="btn"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 20h16"/></svg><span>CSV を取り込む</span></a>
+  <div class="avatar">N</div>
+</div></header>
+<div class="status"><div class="wrap">
+  <span><b>Nagi</b> · IIDX ID 1234-5678</span>
+  <span class="hide">最終取り込み <b>2026.09.04 22:13</b></span>
+  <span class="live">今週 3 曲更新</span>
+  <span class="sp"></span>
+  <span class="hide">全体順位 <b>#142</b> / 1,893 · ▲6</span>
+  <span>v2.0 · 32 RESIDENT</span>
+</div></div>
+
+<main class="wrap">
+  <!-- lede -->
+  <section class="lede">
+    <div>
+      <div class="kicker"><span>Beat-Tier</span><span>Lv11 / 12 上位 100 曲</span><b>今週 +41.8 pt</b></div>
+      <h1>Master <small>III</small></h1>
+      <div class="pt mono">16,732.4 <span class="u">pt</span><span class="d">▲ 41.8</span></div>
+      <div class="prog">
+        <div class="line"><i></i><b></b></div>
+        <div class="meta"><span>Master III · <b>16,700</b></span><span>Master IV まで <b>67.6 pt</b> · 16,800</span></div>
+      </div>
+    </div>
+    <div class="emb">
+      <svg class="emblem" viewBox="0 0 100 100"><use href="#hex" fill="var(--tierbg)" stroke="var(--tier)" stroke-width="2"/><use href="#hex" fill="var(--tier)" transform="translate(20 20) scale(.6)"/><text x="50" y="60" text-anchor="middle" font-family="Noto Serif JP" font-weight="700" font-size="28" fill="#fff">III</text></svg>
+      <div class="emb-cap">MASTER · TIER III / V</div>
+    </div>
+  </section>
+
+  <!-- stats -->
+  <section class="stats">
+    <div><div class="k">Rate-Tier <span class="mono">24,180.5</span></div><div class="v tierpill"><i></i>Elite II</div><div class="s">全 ANOTHER / LEGG · Next 24,320</div></div>
+    <div><div class="k">Lv12 クリア率</div><div class="v">71.2<small>%</small></div><div class="s"><b>+0.7</b> 先月比 · 215 / 302 曲</div></div>
+    <div><div class="k">Lv12 AAA 率</div><div class="v">38.4<small>%</small></div><div class="s"><b>+1.3</b> 先月比 · 116 曲</div></div>
+    <div><div class="k">Lv12 MAX- 率</div><div class="v">12.6<small>%</small></div><div class="s"><b>+0.3</b> 先月比 · 38 曲</div></div>
+    <div><div class="k">全体順位</div><div class="v">#142<small>/ 1,893</small></div><div class="s"><b>▲ 6</b> 前回比 · 141 位 RIN* と 6.5 pt 差</div></div>
+  </section>
+
+  <!-- 01 trend / 02 lamps -->
+  <div class="cols">
+    <section class="sec">
+      <div class="sec-h"><span class="no">01</span><h2>総 BEAT-PT の推移</h2><span class="sp"></span><a class="more">成長記録</a></div>
+      <svg class="chart" id="trend" viewBox="0 0 720 220" preserveAspectRatio="none"></svg>
+      <div class="legend"><span><i style="background:var(--ink)"></i>総 BEAT-PT（取り込みごと）</span><span><i class="dash"></i>Master III ボーダー 16,700</span></div>
+    </section>
+    <section class="sec">
+      <div class="sec-h"><span class="no">02</span><h2>Lv12 クリアランプ</h2><span class="sp"></span><a class="more">曲一覧</a></div>
+      <div class="lamprows">
+        <div><span class="l"><i style="background:var(--lamp-fc)"></i>FULLCOMBO</span><span class="bar"><i style="width:47%;background:var(--ink)"></i></span><span class="n">41</span><span class="p">13.6%</span></div>
+        <div><span class="l"><i style="background:var(--lamp-exh)"></i>EX HARD</span><span class="bar"><i style="width:100%;background:var(--ink)"></i></span><span class="n">88</span><span class="p">29.1%</span></div>
+        <div><span class="l"><i style="background:var(--lamp-hard)"></i>HARD</span><span class="bar"><i style="width:98%;background:var(--ink)"></i></span><span class="n">86</span><span class="p">28.5%</span></div>
+        <div><span class="l"><i style="background:var(--lamp-clear)"></i>CLEAR</span><span class="bar"><i style="width:36%;background:var(--ink)"></i></span><span class="n">32</span><span class="p">10.6%</span></div>
+        <div><span class="l"><i style="background:var(--lamp-easy)"></i>EASY</span><span class="bar"><i style="width:16%;background:var(--ink)"></i></span><span class="n">14</span><span class="p">4.6%</span></div>
+        <div><span class="l"><i style="background:var(--lamp-assist)"></i>ASSIST</span><span class="bar"><i style="width:6%;background:var(--ink)"></i></span><span class="n">5</span><span class="p">1.7%</span></div>
+        <div><span class="l"><i style="background:var(--lamp-failed)"></i>FAILED</span><span class="bar"><i style="width:24%;background:var(--mute)"></i></span><span class="n">21</span><span class="p">7.0%</span></div>
+        <div><span class="l"><i style="background:var(--lamp-np);outline:1px solid var(--rule)"></i>NO PLAY</span><span class="bar"><i style="width:17%;background:var(--rule)"></i></span><span class="n">15</span><span class="p">5.0%</span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 03 advice / 04 recent -->
+  <div class="cols" style="grid-template-columns:1fr 1.25fr">
+    <section class="sec">
+      <div class="sec-h"><span class="no">03</span><h2>ランクアップ・アドバイス</h2><span class="sp"></span><span class="more" style="color:var(--red)">目標 Master IV · あと 67.6 pt</span></div>
+      <table class="adv">
+        <tr><td class="lv">12.4</td><td><div class="t">Almagest<span class="diff">A</span></div><div class="s"><i style="background:var(--lamp-exh)"></i>EXH · 2,927 (AAA) → 目標 3,010</div></td><td class="pr">62%</td><td class="g">+14.2<small>EXPECTED PT</small></td></tr>
+        <tr><td class="lv">12.6</td><td><div class="t">卑弥呼<span class="diff">A</span></div><div class="s"><i style="background:var(--lamp-hard)"></i>HARD · 3,716 (AA) → 目標 AAA 3,754</div></td><td class="pr">48%</td><td class="g">+11.9<small>EXPECTED PT</small></td></tr>
+        <tr><td class="lv">12.7</td><td><div class="t">Verflucht<span class="diff diffL">L</span></div><div class="s"><i style="background:var(--lamp-np);outline:1px solid var(--rule)"></i>未プレイ（埋め） → 目標 AA 3,200</div></td><td class="pr">71%</td><td class="g">+10.4<small>EXPECTED PT</small></td></tr>
+        <tr><td class="lv">12.3</td><td><div class="t">灼熱Beach Side Bunny<span class="diff">A</span></div><div class="s"><i style="background:var(--lamp-hard)"></i>HARD · 2,913 (AA) → 目標 AAA 2,946</div></td><td class="pr">55%</td><td class="g">+8.7<small>EXPECTED PT</small></td></tr>
+      </table>
+    </section>
+    <section class="sec">
+      <div class="sec-h"><span class="no">04</span><h2>直近の更新</h2><span class="mono mute" style="font-size:12px">2026.09.04 · 12 曲</span><span class="sp"></span><a class="more">タイムライン</a></div>
+      <table class="rec">
+        <thead><tr><th>Title</th><th>Lv</th><th class="r">Score</th><th>Lamp</th><th class="r">Rate</th></tr></thead>
+        <tbody>
+          <tr><td class="t"><i class="lamp" style="background:var(--lamp-hard)"></i>冥 <span class="tag">A</span></td><td class="dt">12.8</td><td class="r mono">3,497 <span class="delta">+41</span><span class="dl aa">AA</span></td><td class="dt">HARD</td><td class="r mono">87.2%</td></tr>
+          <tr><td class="t"><i class="lamp" style="background:var(--lamp-exh)"></i>嘆きの樹 <span class="tag">A</span></td><td class="dt">12.6</td><td class="r mono">3,742 <span class="delta">+12</span><span class="dl">AAA</span></td><td class="dt">EX HARD</td><td class="r mono">92.1%</td></tr>
+          <tr><td class="t"><i class="lamp" style="background:var(--lamp-fc)"></i>MENDES <span class="tag">A</span></td><td class="dt">12.4</td><td class="r mono">3,512 <span class="delta">+3</span><span class="dl">AAA</span></td><td class="dt">FULLCOMBO</td><td class="r mono">94.6%</td></tr>
+          <tr><td class="t"><i class="lamp" style="background:var(--lamp-exh)"></i>DIAVOLO <span class="tag">A</span></td><td class="dt">13.0</td><td class="r mono">2,986 <span class="delta">+63</span><span class="dl aa">AA</span></td><td class="dt">EX HARD</td><td class="r mono">84.0%</td></tr>
+          <tr><td class="t"><i class="lamp" style="background:var(--lamp-exh)"></i>Innocent Walls <span class="tag">A</span></td><td class="dt">12.3</td><td class="r mono">2,769 <span class="delta">+18</span><span class="dl">AAA</span></td><td class="dt">EX HARD</td><td class="r mono">91.9%</td></tr>
+          <tr><td class="t"><i class="lamp" style="background:var(--lamp-fc)"></i>gigadelic <span class="tag">A</span></td><td class="dt">12.2</td><td class="r mono">2,369 <span class="delta">+7</span><span class="dl">AAA</span></td><td class="dt">FULLCOMBO</td><td class="r mono">93.3%</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <footer class="foot"><span>beat-seeker — beatmania IIDX score journal</span><span>非公式ファンメイドツール · KONAMI とは無関係です</span></footer>
+</main>
+
+<nav class="tabbar">
+  <a class="on"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10"/></svg>ホーム</a>
+  <a><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>スコア</a>
+  <a><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 20h16"/></svg>取り込み</a>
+  <a><svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V10M12 20V4M18 20v-7"/></svg>順位</a>
+  <a><svg viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>その他</a>
+</nav>
+
+<script>
+(function(){
+  const data=[15980,16010,16095,16090,16180,16240,16310,16290,16410,16480,16520,16575,16610,16690,16732];
+  const w=720,h=220,pl=48,pr=14,pt=14,pb=28,min=15900,max=16800;
+  const x=i=>pl+(i/(data.length-1))*(w-pl-pr), y=v=>pt+(1-(v-min)/(max-min))*(h-pt-pb);
+  let s='';
+  for(let v=16000;v<=16800;v+=200){s+=`<line x1="${pl}" x2="${w-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#e6e3da"/><text x="${pl-10}" y="${y(v)+4}" text-anchor="end" font-family="JetBrains Mono" font-size="10.5" fill="#7a7e88">${v.toLocaleString()}</text>`;}
+  s+=`<line x1="${pl}" x2="${w-pr}" y1="${y(16700)}" y2="${y(16700)}" stroke="#7a7e88" stroke-dasharray="3 4"/>`;
+  const pts=data.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  s+=`<polyline points="${pts}" fill="none" stroke="#15171c" stroke-width="2" stroke-linejoin="round"/>`;
+  data.forEach((v,i)=>{ s+=`<circle cx="${x(i)}" cy="${y(v)}" r="${i===data.length-1?5:2.5}" fill="${i===data.length-1?'#c8102e':'#15171c'}"/>`;});
+  s+=`<text x="${x(data.length-1)-10}" y="${y(16732)-12}" text-anchor="end" font-family="JetBrains Mono" font-size="11" font-weight="600" fill="#c8102e">16,732.4</text>`;
+  const months=['3月','4月','5月','6月','7月','8月','9月'];
+  months.forEach((m,i)=>{s+=`<text x="${x(Math.round(i*(data.length-1)/6))}" y="${h-8}" text-anchor="middle" font-family="IBM Plex Sans JP" font-size="10.5" fill="#7a7e88">${m}</text>`;});
+  document.getElementById('trend').innerHTML=s;
+})();
+</script>
+</body>
+</html>
