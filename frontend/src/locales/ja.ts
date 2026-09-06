@@ -249,7 +249,7 @@ export const ja = {
   'advice.rankUpMsg': '達成すると {rank} に昇格します',
   'advice.recommendedSongs': 'おすすめの練習曲',
   'advice.noSuggestions': '伸ばせる曲がありません',
-  'advice.basedOnExpectedValue': '※ 未プレイ譜面も候補に入れ、推定能力からの「取れる確率」を掛けた期待 BEAT-PT の高い順に並べています',
+  'advice.basedOnExpectedValue': '※ 未プレイ譜面も候補に入れ、推定能力からの「達成率」が高い順に、次のランクに届くまで並べています',
   'advice.computingPotential': '伸びしろを計算中…（初回は数秒〜十数秒）',
   'advice.potentialError': '伸びしろの取得に失敗しました: {msg}',
   'advice.unplayedTag': '埋め',
@@ -260,6 +260,12 @@ export const ja = {
   'advice.expectedGain': '期待 +{n} pt',
   'advice.expectedTotal': '期待値合計',
   'advice.supportHint': '{n} 譜面から推定（精度 {acc}）',
+  'advice.showMore': 'さらに表示（あと {n} 件）',
+  'advice.roughTag': '概算',
+  'advice.accuracyHigh': '高',
+  'advice.accuracyLow': '中',
+  'advice.accuracyBase': '概算（実力 + 譜面平均）',
+  'advice.accuracyRank': '概算（同ランク平均）',
 
   // Score Summary / Table
   'table.title': 'スコアリスト',

@@ -67,6 +67,11 @@ public class PairRegressionService {
     private static final double LOGIT_RATE_CLAMP = 1e-4;
     /** A グレード閾値（scoreRate %）。 */
     public static final double A_GRADE_RATE = 0.6667;
+    /**
+     * 加法モデルの交互平均の反復回数。
+     * θ と δ を交互に取り直すだけの単純な反復で、数回で十分収束する（スコア数万行で数十 ms）。
+     */
+    static final int ADDITIVE_ITERATIONS = 8;
 
     private final ScoreRepository scoreRepository;
 
@@ -77,10 +82,32 @@ public class PairRegressionService {
     /** chartKey -> 全ユーザー (A以上) の actual スコア最大値。
      *  予測スコアのクランプ上限に使い、誰も達成していない非現実的な予測 (例: 理論値貼り付き) を防ぐ。 */
     private volatile Map<String, Integer> communityMaxByKey = Collections.emptyMap();
+    /**
+     * chartKey -> 加法モデルの譜面効果 δ。
+     * ペア回帰の参照が足りない譜面（不人気曲・新曲）でも予測を切らさないための事前分布として
+     * コスパ埋めレコメンドが使う。詳細は {@link AdditiveModel}。
+     */
+    private volatile Map<String, ChartEffect> chartEffectByKey = Collections.emptyMap();
+    /** 加法モデルの残差標準偏差（logit 空間、全スコアでプール）。譜面ごとの sd の縮約先。 */
+    private volatile double pooledResidSd = 0.5;
     /** 構築済みフラグ。 */
     private volatile boolean built = false;
     /** 再構築の同時実行を防ぐロック。 */
     private final Object buildLock = new Object();
+
+    /**
+     * 加法モデル {@code logit(score) ≈ θ_user + δ_chart} の譜面側パラメータ。
+     *
+     * @see AdditiveModel
+     */
+    public static class ChartEffect {
+        /** 譜面効果 δ（logit 空間）。大きいほど「同じ実力でスコアが出やすい」譜面。 */
+        public double delta;
+        /** δ の推定に使ったユーザー数（A 以上のスコアを持つ人数）。 */
+        public int n;
+        /** この譜面の残差標準偏差（logit 空間）。n が小さいときは NaN になり得るので pooled で縮約して使う。 */
+        public double residSd;
+    }
 
     /** 単一ペアの線形回帰結果。 */
     public static class Reg {
@@ -143,6 +170,24 @@ public class PairRegressionService {
     public Map<String, Integer> getCommunityMaxByKey() {
         ensureBuilt();
         return communityMaxByKey;
+    }
+
+    /**
+     * 【メソッドの役割】 譜面キー → 加法モデルの譜面効果 δ の Map を返す。
+     * ペア回帰が無い譜面の予測（コスパ埋めレコメンドのフォールバック）に使う。
+     */
+    public Map<String, ChartEffect> getChartEffects() {
+        ensureBuilt();
+        return chartEffectByKey;
+    }
+
+    /**
+     * 【メソッドの役割】 加法モデルの残差標準偏差（logit 空間、全体プール）を返す。
+     * 譜面ごとの残差 sd はサンプルが少ないと不安定なので、呼び出し側はこの値へ縮約して使う。
+     */
+    public double getPooledResidSd() {
+        ensureBuilt();
+        return pooledResidSd;
     }
 
     /**
@@ -221,18 +266,47 @@ public class PairRegressionService {
         userScoresBuilder = null; // GC 促進
         log.info("PairRegressionService: {} users, {} charts in scope", userScores.size(), numCharts);
 
-        // 4) 譜面 A ごとに per-A 累積→回帰計算→フィルタ→キャッシュ格納
-        // 各 A の処理が終わった時点で Acc[] は GC 対象になるため、ピークメモリ << 全ペア
-        Map<String, Map<String, Reg>> newCache = new HashMap<>();
-        long keptPairs = 0;
-        Acc[] accsBuf = new Acc[numCharts]; // 再利用する固定サイズバッファ
-
         // notes を idx でひける配列にしておく（タイトループ内の Map.get を避けるため）
         int[] notesByIdx = new int[numCharts];
         for (int i = 0; i < numCharts; i++) {
             Integer n = notesMap.get(chartKeys[i]);
             notesByIdx[i] = n == null ? 0 : n;
         }
+
+        // 3.5) 加法モデル（θ_user + δ_chart）を同じデータで推定する。
+        //      ペア回帰は「両方プレイ済み 30 人以上」が要るので不人気曲・新曲が丸ごと抜けるが、
+        //      δ は「その譜面をプレイした人」だけで立つので、ほぼ全譜面に予測の足場ができる。
+        java.util.List<int[]> fitIdx = new java.util.ArrayList<>(userScores.size());
+        java.util.List<double[]> fitLogit = new java.util.ArrayList<>(userScores.size());
+        for (long[] uScores : userScores.values()) {
+            int[] idx = new int[uScores.length];
+            double[] lg = new double[uScores.length];
+            for (int i = 0; i < uScores.length; i++) {
+                int cIdx = (int) (uScores[i] >>> 32);
+                idx[i] = cIdx;
+                lg[i] = scoreToLogit((int) uScores[i], notesByIdx[cIdx]);
+            }
+            fitIdx.add(idx);
+            fitLogit.add(lg);
+        }
+        AdditiveModel.Result fit = AdditiveModel.fit(fitIdx, fitLogit, numCharts, ADDITIVE_ITERATIONS);
+        Map<String, ChartEffect> newEffects = new HashMap<>();
+        for (int c = 0; c < numCharts; c++) {
+            if (fit.n[c] <= 0) continue;
+            ChartEffect ce = new ChartEffect();
+            ce.delta = fit.delta[c];
+            ce.n = fit.n[c];
+            ce.residSd = fit.residSd[c];
+            newEffects.put(chartKeys[c], ce);
+        }
+        fitIdx = null;
+        fitLogit = null;
+
+        // 4) 譜面 A ごとに per-A 累積→回帰計算→フィルタ→キャッシュ格納
+        // 各 A の処理が終わった時点で Acc[] は GC 対象になるため、ピークメモリ << 全ペア
+        Map<String, Map<String, Reg>> newCache = new HashMap<>();
+        long keptPairs = 0;
+        Acc[] accsBuf = new Acc[numCharts]; // 再利用する固定サイズバッファ
 
         for (int aIdx = 0; aIdx < numCharts; aIdx++) {
             java.util.List<Long> users = chartUsers[aIdx];
@@ -291,10 +365,12 @@ public class PairRegressionService {
         cache = newCache;
         notesByKey = notesMap;
         communityMaxByKey = communityMaxMap;
+        chartEffectByKey = newEffects;
+        pooledResidSd = fit.pooledSd;
         built = true;
         long elapsed = System.currentTimeMillis() - t0;
-        log.info("PairRegressionService rebuilt in {} ms ({} chartA, {} kept pairs after filter)",
-                elapsed, newCache.size(), keptPairs);
+        log.info("PairRegressionService rebuilt in {} ms ({} chartA, {} kept pairs after filter, {} chart effects, pooled sd {})",
+                elapsed, newCache.size(), keptPairs, newEffects.size(), String.format("%.3f", fit.pooledSd));
     }
 
     /**
@@ -565,6 +641,126 @@ public class PairRegressionService {
     public static double scoreToLogit(int score, int notes) {
         if (notes <= 0) return 0;
         return scoreRateToLogit(score / (notes * 2.0));
+    }
+
+    /**
+     * 【クラスの役割】 加法モデル {@code logit(score_uc) = θ_u + δ_c + ε} の推定。
+     *
+     * <h3>なぜ要るか</h3>
+     * ペア回帰は「A と B の両方を A 以上でプレイした人が 30 人以上」というペアしか使えない。
+     * 不人気曲や稼働直後の新曲はこの条件をほぼ満たせず、コスパ埋めレコメンドの候補から
+     * 丸ごと抜けて「提案が枯渇する」原因になる。
+     * 加法モデルは譜面ごとに「その譜面をプレイした人」だけで δ が立つので、
+     * 1 人でもプレイしていれば足場ができ、誰もいなければ同ランクの平均 δ に落とせる。
+     *
+     * <h3>推定</h3>
+     * 交互平均（θ を固定して δ を平均、δ を固定して θ を平均）を数回回すだけ。
+     * 最小二乗解の座標降下に相当し、スコア数万行でも数十 ms で収束する。
+     * θ と δ には定数の分だけ不定性があるが、予測に使うのは θ_u + δ_c の和なので問題ない。
+     *
+     * <h3>限界</h3>
+     * δ は「その譜面を選んでプレイした人」から推定するので、難曲ほど強い人に偏る（選択バイアス）。
+     * ペア回帰と同じ性質で、フォールバックとしては許容する。σ は譜面ごとの残差 sd を
+     * プール値へ縮約して使う（呼び出し側の責務）。
+     */
+    static final class AdditiveModel {
+
+        /** 推定結果。配列は譜面 idx で引く。 */
+        static final class Result {
+            /** 譜面効果 δ_c。プレイヤーがいない譜面は 0。 */
+            final double[] delta;
+            /** 譜面ごとの推定に使ったユーザー数。 */
+            final int[] n;
+            /** 譜面ごとの残差標準偏差。n &lt; 2 なら NaN。 */
+            final double[] residSd;
+            /** 全体プールの残差標準偏差。 */
+            final double pooledSd;
+            /** ユーザーごとの実力 θ_u（入力リストと同じ順）。テストと検証用。 */
+            final double[] theta;
+
+            Result(double[] delta, int[] n, double[] residSd, double pooledSd, double[] theta) {
+                this.delta = delta;
+                this.n = n;
+                this.residSd = residSd;
+                this.pooledSd = pooledSd;
+                this.theta = theta;
+            }
+        }
+
+        private AdditiveModel() {}
+
+        /**
+         * 【メソッドの役割】 交互平均で θ と δ を推定する。
+         *
+         * @param userChartIdx ユーザーごとのプレイ譜面 idx 配列
+         * @param userLogit    同じ並びの logit(score)
+         * @param numCharts    譜面数（idx の上限）
+         * @param iterations   反復回数
+         * @return 推定結果
+         */
+        static Result fit(List<int[]> userChartIdx, List<double[]> userLogit, int numCharts, int iterations) {
+            int numUsers = userChartIdx.size();
+            double[] theta = new double[numUsers];
+            double[] delta = new double[numCharts];
+            int[] n = new int[numCharts];
+
+            // 初期値: θ_u = ユーザーの平均 logit、δ_c = 0
+            for (int u = 0; u < numUsers; u++) {
+                double[] lg = userLogit.get(u);
+                if (lg.length == 0) continue;
+                double s = 0;
+                for (double v : lg) s += v;
+                theta[u] = s / lg.length;
+            }
+
+            double[] sumC = new double[numCharts];
+            for (int it = 0; it < iterations; it++) {
+                // δ_c = mean_u (logit − θ_u)
+                java.util.Arrays.fill(sumC, 0.0);
+                java.util.Arrays.fill(n, 0);
+                for (int u = 0; u < numUsers; u++) {
+                    int[] idx = userChartIdx.get(u);
+                    double[] lg = userLogit.get(u);
+                    for (int i = 0; i < idx.length; i++) {
+                        sumC[idx[i]] += lg[i] - theta[u];
+                        n[idx[i]]++;
+                    }
+                }
+                for (int c = 0; c < numCharts; c++) {
+                    delta[c] = n[c] > 0 ? sumC[c] / n[c] : 0.0;
+                }
+                // θ_u = mean_c (logit − δ_c)
+                for (int u = 0; u < numUsers; u++) {
+                    int[] idx = userChartIdx.get(u);
+                    double[] lg = userLogit.get(u);
+                    if (idx.length == 0) continue;
+                    double s = 0;
+                    for (int i = 0; i < idx.length; i++) s += lg[i] - delta[idx[i]];
+                    theta[u] = s / idx.length;
+                }
+            }
+
+            // 残差 sd（譜面ごと + 全体プール）
+            double[] sq = new double[numCharts];
+            double totalSq = 0;
+            long total = 0;
+            for (int u = 0; u < numUsers; u++) {
+                int[] idx = userChartIdx.get(u);
+                double[] lg = userLogit.get(u);
+                for (int i = 0; i < idx.length; i++) {
+                    double e = lg[i] - theta[u] - delta[idx[i]];
+                    sq[idx[i]] += e * e;
+                    totalSq += e * e;
+                    total++;
+                }
+            }
+            double[] residSd = new double[numCharts];
+            for (int c = 0; c < numCharts; c++) {
+                residSd[c] = n[c] >= 2 ? Math.sqrt(sq[c] / n[c]) : Double.NaN;
+            }
+            double pooled = total > 0 ? Math.sqrt(totalSq / total) : 0.0;
+            return new Result(delta, n, residSd, pooled, theta);
+        }
     }
 
     /** 単一 (A, B) ペアの累積和。compute() で回帰係数に変換する。 */

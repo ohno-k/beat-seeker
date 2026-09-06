@@ -135,6 +135,108 @@ class FillRecommendationMathTest {
         assertThat(capped).isLessThanOrEqualTo(calc.calculatePoints(95.0, RANK) + 1e-9);
     }
 
+    // ── 並び替えと打ち切り ──────────────────────────────────────────────
+
+    private static java.util.Map<String, Object> item(String title, double prob, double gain) {
+        java.util.Map<String, Object> m = new java.util.HashMap<>();
+        m.put("title", title);
+        m.put("achieveProbability", prob);
+        m.put("expectedGain", gain);
+        return m;
+    }
+
+    @Test
+    void 達成率降順で並び同率なら期待値の大きい順になる() {
+        java.util.List<java.util.Map<String, Object>> items = new java.util.ArrayList<>(java.util.List.of(
+                item("low-prob-big-gain", 0.30, 9.0),
+                item("high-prob-small", 0.95, 0.5),
+                item("high-prob-big", 0.95, 2.0),
+                // 0.951 と 0.949 は表示上どちらも 95% なので同率扱い → 期待値順
+                item("high-prob-mid", 0.951, 1.0)));
+
+        FillRecommendationService.sortByAchievability(items);
+
+        assertThat(items).extracting(m -> (String) m.get("title"))
+                .containsExactly("high-prob-big", "high-prob-mid", "high-prob-small", "low-prob-big-gain");
+    }
+
+    @Test
+    void 差分を満たした時点で打ち切られる() {
+        java.util.List<java.util.Map<String, Object>> items = java.util.List.of(
+                item("a", 0.9, 3.0), item("b", 0.8, 3.0), item("c", 0.7, 3.0), item("d", 0.6, 3.0));
+
+        // 3 + 3 = 6 < 7、3 + 3 + 3 = 9 ≧ 7 → 3 件目まで採用
+        assertThat(FillRecommendationService.cutAtGap(items, 7.0, 300)).hasSize(3);
+        // ちょうど届くケース
+        assertThat(FillRecommendationService.cutAtGap(items, 6.0, 300)).hasSize(2);
+    }
+
+    @Test
+    void 差分に届かなければ全件返し差分が無ければ上限で切る() {
+        java.util.List<java.util.Map<String, Object>> items = java.util.List.of(
+                item("a", 0.9, 1.0), item("b", 0.8, 1.0), item("c", 0.7, 1.0));
+
+        // 合計 3 pt しか無いのに 100 pt 要る → 枯渇。手持ちは全部返す（フロントが「不足」を出す）。
+        assertThat(FillRecommendationService.cutAtGap(items, 100.0, 300)).hasSize(3);
+        // 最高位などで差分が 0 → 件数上限で切る
+        assertThat(FillRecommendationService.cutAtGap(items, 0.0, 2)).hasSize(2);
+    }
+
+    // ── フォールバック予測（加法モデル） ─────────────────────────────────
+
+    private static PairRegressionService.ChartEffect effect(double delta, int n, double sd) {
+        PairRegressionService.ChartEffect ce = new PairRegressionService.ChartEffect();
+        ce.delta = delta;
+        ce.n = n;
+        ce.residSd = sd;
+        return ce;
+    }
+
+    @Test
+    void 譜面効果があればBASEで予測し無ければ同ランク平均に落ちる() {
+        java.util.Map<String, PairRegressionService.ChartEffect> effects = java.util.Map.of(
+                "popular\0ANOTHER", effect(0.3, 40, 0.2),
+                "rare\0ANOTHER", effect(0.9, 2, Double.NaN)); // 2 人しか居ない → δ を信用しない
+        java.util.Map<String, String> ranks = java.util.Map.of(
+                "popular_ANOTHER", RANK, "rare_ANOTHER", RANK, "brandnew_ANOTHER", RANK);
+        java.util.Map<String, FillRecommendationService.RankEffect> rankEffects =
+                FillRecommendationService.buildRankEffects(ranks, effects);
+        double ability = 2.0;
+
+        FillRecommendationService.Stat base = FillRecommendationService.fallbackStat(
+                "popular\0ANOTHER", RANK, ability, 0.0, effects, rankEffects, 0.5);
+        FillRecommendationService.Stat rank = FillRecommendationService.fallbackStat(
+                "brandnew\0ANOTHER", RANK, ability, 0.0, effects, rankEffects, 0.5);
+        FillRecommendationService.Stat rare = FillRecommendationService.fallbackStat(
+                "rare\0ANOTHER", RANK, ability, 0.0, effects, rankEffects, 0.5);
+
+        assertThat(base.accuracy).isEqualTo(FillRecommendationService.ACC_BASE);
+        assertThat(base.mu).isCloseTo(2.3, within(1e-9));
+        assertThat(base.support).isEqualTo(40);
+
+        // 同ランク平均は n ≧ 5 の popular だけから作られる（rare は除外）→ mean δ = 0.3
+        assertThat(rank.accuracy).isEqualTo(FillRecommendationService.ACC_RANK);
+        assertThat(rank.mu).isCloseTo(2.3, within(1e-9));
+        assertThat(rare.accuracy).isEqualTo(FillRecommendationService.ACC_RANK);
+
+        // 情報が少ない段ほど σ が大きい（達成率順で自然に後ろへ回るための前提）
+        assertThat(rank.sigma).isGreaterThan(base.sigma);
+    }
+
+    @Test
+    void 実力が推定できなければフォールバック予測は出さない() {
+        java.util.Map<String, PairRegressionService.ChartEffect> effects = java.util.Map.of(
+                "popular\0ANOTHER", effect(0.3, 40, 0.2));
+        java.util.Map<String, FillRecommendationService.RankEffect> rankEffects =
+                FillRecommendationService.buildRankEffects(java.util.Map.of("popular_ANOTHER", RANK), effects);
+
+        assertThat(FillRecommendationService.fallbackStat(
+                "popular\0ANOTHER", RANK, null, 0.0, effects, rankEffects, 0.5)).isNull();
+        // 難易度表に無いランクにも落とせない
+        assertThat(FillRecommendationService.fallbackStat(
+                "x\0ANOTHER", "99.9", 2.0, 0.0, effects, rankEffects, 0.5)).isNull();
+    }
+
     @Test
     void 達成確率は損益分岐点が上がるほど下がる() {
         double mu = logitOfRate(90.0);

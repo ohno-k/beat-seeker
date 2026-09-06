@@ -244,7 +244,7 @@ export const ko = {
   'advice.rankUpMsg': '달성 시 {rank} (으)로 승격합니다',
   'advice.recommendedSongs': '추천 연습곡',
   'advice.noSuggestions': '점수를 더 올릴 수 있는 곡이 없습니다',
-  'advice.basedOnExpectedValue': '※ 미플레이 보면도 후보에 넣고, 추정 실력 기반의 달성 확률을 곱한 기대 BEAT-PT가 높은 순으로 정렬합니다',
+  'advice.basedOnExpectedValue': '※ 미플레이 보면도 후보에 넣고, 추정 실력 기반의 달성률이 높은 순으로 다음 랭크에 닿을 때까지 나열합니다',
   'advice.computingPotential': '성장 여지를 계산 중… (첫 실행은 수 초~십수 초)',
   'advice.potentialError': '성장 여지 가져오기에 실패했습니다: {msg}',
   'advice.unplayedTag': '신규',
@@ -255,6 +255,12 @@ export const ko = {
   'advice.expectedGain': '기대 +{n} pt',
   'advice.expectedTotal': '기대값 합계',
   'advice.supportHint': '{n}개 보면에서 추정 (정확도 {acc})',
+  'advice.showMore': '더 보기 (남은 {n}개)',
+  'advice.roughTag': '대략',
+  'advice.accuracyHigh': '높음',
+  'advice.accuracyLow': '중간',
+  'advice.accuracyBase': '대략 (실력 + 보면 평균)',
+  'advice.accuracyRank': '대략 (동일 랭크 평균)',
 
   // Score Summary / Table
   'table.title': '스코어 리스트',

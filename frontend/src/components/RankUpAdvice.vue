@@ -30,14 +30,14 @@
     </div>
     <div v-else class="space-y-2">
       <div
-        v-for="(sug, i) in suggestions"
+        v-for="(sug, i) in visibleSuggestions"
         :key="`${sug.title}|${sug.difficultyName}`"
         class="flex items-center gap-2 p-2 sm:p-3 rounded-md border transition-colors"
         :class="sug.unplayed
           ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50'
           : 'bg-slate-50/50 dark:bg-slate-700/20 border-slate-100 dark:border-slate-700/50'"
       >
-        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
+        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0 w-5 text-right">{{ i + 1 }}</span>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5 min-w-0">
             <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.title }}</p>
@@ -46,6 +46,12 @@
               v-if="sug.unplayed"
               class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-blue-500 text-white"
             >{{ t('advice.unplayedTag') }}</span>
+            <!-- ペア回帰の参照が無く、加法モデルで概算した候補。σ が大きいので達成率も控えめに出ている -->
+            <span
+              v-if="isRough(sug.accuracy)"
+              class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
+              :title="accuracyLabel(sug.accuracy)"
+            >{{ t('advice.roughTag') }}</span>
           </div>
           <p class="text-[10px] text-slate-500 dark:text-slate-400">
             {{ sug.difficultyName }} /
@@ -53,7 +59,7 @@
             <template v-else>{{ t('common.current') }} {{ sug.currentBeatPt.toFixed(1) }} pt</template>
           </p>
         </div>
-        <div class="text-right shrink-0" :title="t('advice.supportHint', { n: sug.supportCount, acc: sug.accuracy })">
+        <div class="text-right shrink-0" :title="t('advice.supportHint', { n: sug.supportCount, acc: accuracyLabel(sug.accuracy) })">
           <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">
             {{ t('advice.targetBorder', { label: sug.targetLabel }) }}
           </p>
@@ -69,6 +75,16 @@
           </p>
         </div>
       </div>
+
+      <!-- 10 件ずつ追加表示。候補は次ランクに届くまで並んでいるので、下まで開けば必要な曲がすべて見える -->
+      <button
+        v-if="hiddenCount > 0"
+        type="button"
+        @click="showMore"
+        class="w-full py-2 text-xs font-semibold rounded-md border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+      >
+        {{ t('advice.showMore', { n: hiddenCount }) }}
+      </button>
     </div>
 
     <!-- Total summary -->
@@ -99,12 +115,18 @@
 
 <script setup lang="ts">
 /**
- * 【コンポーネントの役割】 次のティアまでの残り pt を、期待値の高い順に「どれを埋めれば埋まるか」で提示するパネル。
+ * 【コンポーネントの役割】 次のティアまでの残り pt を、達成率の高い順に「どれを埋めれば埋まるか」で提示するパネル。
  *
  * バックエンドの `/api/analysis/fill-recommendation`（コスパ埋めレコメンド）が
  * 全譜面（未プレイ含む）について
  *   期待獲得 pt = E[ max(0, BEAT-PT(到達スコア) − 押し出しライン) ]
- * を算出済みなので、本コンポーネントは「残り pt を埋めるまで上から採用する」だけを担う。
+ * と達成率を算出し、達成率降順に「残り pt を満たすまで」を返してくる。
+ * 本コンポーネントは残り pt（gap）を渡して結果を 10 件ずつ表示するだけを担う。
+ *
+ * 【枯渇対策】
+ * バックエンドはペア回帰の参照が無い譜面も加法モデル（実力 + 譜面効果）で予測するので、
+ * 難易度表に載っている譜面は原則すべて候補になる。概算の候補は `accuracy` が BASE / RANK で返り、
+ * 「概算」バッジを付けて区別する。
  *
  * 【旧実装との違い】
  * 以前は「伸びしろ API の予測スコア = 確実に出せる上限」と決め打ちし、フロント側で
@@ -129,8 +151,29 @@ const props = defineProps<{
   totalPoints: number;
 }>();
 
-/** 提案の上限件数。これ以上並べても「次の 1 曲」を選ぶ役には立たない。 */
-const MAX_SUGGESTIONS = 19;
+/** 一度に見せる件数。「さらに表示」を押すたびにこの数だけ増える。 */
+const PAGE_SIZE = 10;
+/** 現在表示している件数。取得し直したら先頭の 1 ページに戻す。 */
+const visibleCount = ref(PAGE_SIZE);
+
+/** 予測の出どころ。HIGH / LOW はペア回帰、BASE / RANK は加法モデルによる概算。 */
+type Accuracy = 'HIGH' | 'LOW' | 'BASE' | 'RANK';
+
+/** 概算系（ペア回帰の参照が無い）かどうか。バッジ表示の判定に使う。 */
+function isRough(acc: Accuracy): boolean {
+  return acc === 'BASE' || acc === 'RANK';
+}
+
+/** ツールチップ用の精度ラベル。 */
+function accuracyLabel(acc: Accuracy): string {
+  switch (acc) {
+    case 'HIGH': return t('advice.accuracyHigh');
+    case 'LOW': return t('advice.accuracyLow');
+    case 'BASE': return t('advice.accuracyBase');
+    case 'RANK': return t('advice.accuracyRank');
+    default: return String(acc);
+  }
+}
 
 /** `/api/analysis/fill-recommendation` の items 1 件ぶん。 */
 interface FillRecommendationItem {
@@ -162,7 +205,7 @@ interface FillRecommendationItem {
   /** 期待獲得 pt。この降順で返ってくる。 */
   expectedGain: number;
   supportCount: number;
-  accuracy: 'HIGH' | 'LOW';
+  accuracy: Accuracy;
 }
 
 const items = ref<FillRecommendationItem[]>([]);
@@ -175,6 +218,9 @@ let pendingRefetch = false;
 /**
  * コスパ埋めレコメンドを取得する。初回はペア回帰キャッシュ構築で数秒かかることがある。
  * ダッシュボード表示直後は合計 pt が数回入れ替わるため、取得中の要求は 1 回にまとめる。
+ *
+ * 次ランクまでの残り pt（gap）を渡すと、バックエンドは達成率降順にその差分を満たすまで返す。
+ * フロントの BEAT-PT 計算と同じ値を渡すので、表示している「あと n pt」と候補の範囲が一致する。
  */
 async function fetchRecommendation() {
   if (isLoading.value) {
@@ -184,10 +230,12 @@ async function fetchRecommendation() {
   isLoading.value = true;
   loadError.value = '';
   try {
-    const res = await fetch(`${API_BASE}/api/analysis/fill-recommendation`, { headers: authHeaders() });
+    const params = new URLSearchParams({ gap: nextRankGap.value.toFixed(2) });
+    const res = await fetch(`${API_BASE}/api/analysis/fill-recommendation?${params}`, { headers: authHeaders() });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json() as { items: FillRecommendationItem[] };
     items.value = data.items ?? [];
+    visibleCount.value = PAGE_SIZE;
   } catch (e: any) {
     loadError.value = e?.message ?? 'fetch failed';
     items.value = [];
@@ -208,11 +256,13 @@ const nextRankGap = computed(() => {
 });
 
 /**
- * 【computed の役割】 期待値の高い順に、残り pt を満たすまで採用した提案リスト。
+ * 【computed の役割】 達成率の高い順に、残り pt を満たすまで採用した提案リスト。
  *
- * items はバックエンドで期待値降順に並んでいるので、上から足していくだけでよい。
+ * items はバックエンドで達成率降順に並び、gap を満たした所で打ち切られて返ってくる。
+ * ここでは同じ規則（上から足して gap に届いたら止める）を保険として重ね、
+ * 表示中の gap とバックエンドの打ち切り位置がずれても「届いた所まで」に揃える。
  * 厳密には 1 曲埋めるたびに 100 位ラインが上がって後続の期待値は少し下がるが、
- * 「次に触る 1 曲」を決めるための目安なので、ここでは独立に足し合わせている。
+ * 「次に触る曲」を決めるための目安なので、ここでは独立に足し合わせている。
  */
 const suggestions = computed(() => {
   const gap = nextRankGap.value;
@@ -221,13 +271,23 @@ const suggestions = computed(() => {
   const picked: FillRecommendationItem[] = [];
   let accumulated = 0;
   for (const item of items.value) {
-    if (picked.length >= MAX_SUGGESTIONS) break;
     if (accumulated >= gap) break;
     picked.push(item);
     accumulated += item.expectedGain;
   }
   return picked;
 });
+
+/** 【computed の役割】 いま画面に出している分（先頭から visibleCount 件）。 */
+const visibleSuggestions = computed(() => suggestions.value.slice(0, visibleCount.value));
+
+/** 【computed の役割】 「さらに表示」で開ける残り件数。0 ならボタンを出さない。 */
+const hiddenCount = computed(() => Math.max(0, suggestions.value.length - visibleCount.value));
+
+/** 【関数の役割】 表示件数を 1 ページ分増やす。 */
+function showMore() {
+  visibleCount.value += PAGE_SIZE;
+}
 
 /** 【computed の役割】 採用した提案の期待獲得 pt 合計。gap と比較して「達成可能 / 不足」を出す。 */
 const totalExpectedGain = computed(() =>

@@ -45,6 +45,16 @@ import java.util.Map;
  * 損益分岐スコア s* は pt(s*) = baseline となるスコアで、二分探索で求める。
  * P(S ≥ s*) が「この譜面を触る価値がそもそもあるか」の確率 = achieveProbability。
  *
+ * <h3>並びと打ち切り</h3>
+ * 候補は達成率（P(S ≥ s*)）の降順に並べ、期待獲得 pt を先頭から足して
+ * 「次ランクまでの差分」を満たした所で打ち切る。差分はフロントが表示している値を受け取る。
+ *
+ * <h3>枯渇対策</h3>
+ * ペア回帰の参照が足りない譜面には、同じスコアから推定した加法モデル
+ * {@code logit = θ_u + δ_c}（{@link PairRegressionService.AdditiveModel}）で予測を付ける
+ * （accuracy = BASE）。δ_c すら立たない新曲は同ランクの平均 δ に落とす（RANK）。
+ * 難易度表に載っている譜面は原則すべて候補になる。
+ *
  * <h3>能力推定（S の分布）</h3>
  * {@link PairRegressionService} の譜面ペア回帰（logit 空間）をそのまま流用する。
  * 参照譜面 A ごとの予測 ŷ_A = slope·logit(A) + intercept を重み w(r) で加重平均して μ とし、
@@ -91,8 +101,33 @@ public class FillRecommendationService {
     /** 期待獲得 pt がこの値未満の候補は返さない（UI 上 "+0.0 pt" になるため）。 */
     private static final double MIN_EXPECTED_GAIN = 0.05;
 
-    /** 返却件数の上限。フロントは上位から貪欲に選ぶだけなので、これで十分足りる。 */
-    private static final int MAX_ITEMS = 200;
+    /**
+     * 次ランクまでの差分が分からない（すでに最高位など）ときの返却件数上限。
+     * 差分が分かるときは「達成率降順に足して差分を満たすまで」で切るので上限は掛けない。
+     */
+    static final int MAX_ITEMS_WITHOUT_GAP = 300;
+
+    /**
+     * 加法モデルの譜面効果 δ を単独で信用する最小ユーザー数。
+     * これ未満の譜面は同ランクの平均 δ（RANK フォールバック）に落とす。
+     */
+    static final int MIN_CHART_EFFECT_N = 5;
+    /** 譜面ごとの残差 sd をプール値へ縮約する仮想サンプル数。 */
+    private static final int CHART_SD_SHRINK_N = 10;
+    /**
+     * ユーザー実力 θ_u を推定するのに必要な参照譜面数。
+     * 1 譜面でも推定する（始めたばかりのユーザーにも候補を出すため）。参照が少ないぶんは
+     * θ_u の分散をプール残差² / n で下支えして σ に反映する。
+     */
+    private static final int MIN_USER_ABILITY_REFS = 1;
+
+    /** 予測の出どころ。達成率と一緒に UI へ返し、フロントは概算系にバッジを付ける。 */
+    static final String ACC_HIGH = "HIGH";
+    static final String ACC_LOW = "LOW";
+    /** 加法モデル（θ_u + δ_c）。ペア回帰の参照が足りない譜面向け。 */
+    static final String ACC_BASE = "BASE";
+    /** 同ランク平均 δ。δ すら立たない新曲・不人気曲向け。 */
+    static final String ACC_RANK = "RANK";
 
     /** 曲マスタ・難易度表のメモリ保持時間（ms）。マスタは日次更新なので 10 分で十分。 */
     private static final long MASTER_CACHE_TTL_MS = 10 * 60 * 1000L;
@@ -111,8 +146,23 @@ public class FillRecommendationService {
     private volatile Map<String, Integer> cachedMaxScores = Collections.emptyMap();
     /** 難易度表（title_diffName → 非公式ランク文字列）のキャッシュ。 */
     private volatile Map<String, String> cachedInformalRanks = Collections.emptyMap();
-    /** 上記 2 つを読み込んだ時刻（epoch ms）。0 なら未読み込み。 */
+    /**
+     * 非公式ランク → 同ランク譜面の平均 δ（RANK フォールバック用）。
+     * 難易度表と加法モデルの両方から作るので、マスタと同じタイミングで読み直す。
+     */
+    private volatile Map<String, RankEffect> cachedRankEffects = Collections.emptyMap();
+    /** 上記を読み込んだ時刻（epoch ms）。0 なら未読み込み。 */
     private volatile long masterLoadedAt = 0L;
+
+    /** 同ランク譜面の δ の集計。δ の平均と、譜面ごとのばらつき（分散）を持つ。 */
+    static final class RankEffect {
+        /** n_c で重み付けした δ の平均。 */
+        double meanDelta;
+        /** 同ランク内の δ のばらつき（分散）。「どの譜面かが分からない」ぶんの不確実性。 */
+        double betweenVar;
+        /** 集計に入った譜面数。 */
+        int chartCount;
+    }
 
     public FillRecommendationService(PairRegressionService pairRegressionService,
                                      ScoreRecalculationService scoreRecalculationService,
@@ -125,23 +175,49 @@ public class FillRecommendationService {
     }
 
     /**
-     * 【メソッドの役割】 指定ユーザーのコスパ埋めレコメンドを期待値降順で返す。
+     * 【メソッドの役割】 指定ユーザーのコスパ埋めレコメンドを返す（次ランクまでの差分はサーバー側で算出）。
      *
-     * @param userId 対象ユーザー ID
-     * @return {@code {top100Threshold, totalBeatPt, scoredChartCount, referenceChartCount, items:[...]}}。
+     * @see #computeFillRecommendation(Long, Double)
+     */
+    public Map<String, Object> computeFillRecommendation(Long userId) {
+        return computeFillRecommendation(userId, null);
+    }
+
+    /**
+     * 【メソッドの役割】 指定ユーザーのコスパ埋めレコメンドを「達成率の高い順」に、
+     * 期待獲得 pt の累積が次ランクまでの差分を満たすまで返す。
+     *
+     * <h3>候補が枯渇しないための 4 段構え</h3>
+     * <ol>
+     *   <li>HIGH … ペア回帰（|r| ≧ 0.95）の参照 3 譜面以上</li>
+     *   <li>LOW … ペア回帰（|r| ≧ 0.90）の参照 3 譜面以上</li>
+     *   <li>BASE … 加法モデル θ_u + δ_c（その譜面を 5 人以上がプレイ済み）</li>
+     *   <li>RANK … θ_u + 同ランク平均 δ（新曲・不人気曲。難易度表に載っていれば必ず出る）</li>
+     * </ol>
+     * 下の段ほど σ が大きくなるので、達成率順に並べると自然に後ろへ回る。
+     *
+     * @param userId      対象ユーザー ID
+     * @param gapOverride 次ランクまでの差分 pt。フロントが表示している値をそのまま渡す。
+     *                    null ならサーバー側の副ティア境界（{@link BeatTierScale#nextSubTierOf}）から求める。
+     * @return {@code {top100Threshold, totalBeatPt, scoredChartCount, referenceChartCount,
+     *          nextTierGap, nextTierLabel, cumulativeExpectedGain, gapCovered,
+     *          candidateCount, tierCounts, items:[...]}}。
      *         items の各要素は
      *         {@code {title, difficultyName, informalRank, difficultyLevel, unplayed, currentScore,
      *          currentRate, currentBeatPt, maxScore, predictedScore, predictedRate, sigmaRate,
      *          breakEvenScore, achieveProbability, targetScore, targetRate, targetLabel,
      *          targetProbability, targetGain, expectedGain, supportCount, accuracy}}
      */
-    public Map<String, Object> computeFillRecommendation(Long userId) {
+    public Map<String, Object> computeFillRecommendation(Long userId, Double gapOverride) {
         long t0 = System.currentTimeMillis();
         pairRegressionService.ensureBuilt();
         loadMastersIfStale();
 
         Map<String, Integer> notesByKey = pairRegressionService.getNotesByKey();
         Map<String, Integer> communityMaxByKey = pairRegressionService.getCommunityMaxByKey();
+        Map<String, PairRegressionService.ChartEffect> chartEffects = pairRegressionService.getChartEffects();
+        double pooledSd = pairRegressionService.getPooledResidSd();
+        Map<String, RankEffect> rankEffects = cachedRankEffects;
         Map<String, String> informalRanks = cachedInformalRanks;
         Map<String, Integer> maxScores = cachedMaxScores;
 
@@ -181,6 +257,29 @@ public class FillRecommendationService {
             return emptyResult(threshold, totalBeatPt, myPoints.size(), 0);
         }
 
+        // 2.5) 加法モデルのユーザー実力 θ_u を、参照譜面の (logit − δ_c) の平均で推定する。
+        //      δ_c が 5 人以上で立っている譜面だけを使う（自分 1 人の残差で δ が決まる譜面は循環参照になる）。
+        //      キャッシュ側の θ は構築時点のものなので使わず、今のスコアから毎回引き直す。
+        double abilitySum = 0, abilitySq = 0;
+        int abilityN = 0;
+        for (Map.Entry<String, Integer> e : refCharts.entrySet()) {
+            PairRegressionService.ChartEffect ce = chartEffects.get(e.getKey());
+            if (ce == null || ce.n < MIN_CHART_EFFECT_N) continue;
+            double v = PairRegressionService.scoreToLogit(myScores.get(e.getKey()), e.getValue()) - ce.delta;
+            abilitySum += v;
+            abilitySq += v * v;
+            abilityN++;
+        }
+        Double ability = null;
+        double abilityVar = 0;
+        if (abilityN >= MIN_USER_ABILITY_REFS) {
+            ability = abilitySum / abilityN;
+            // θ_u の標準誤差² = 参照間のばらつき / n。参照が多いほど θ は安定する。
+            // 参照が 1〜2 譜面だと標本分散が 0 に潰れるので、プール残差² / n を下限にする。
+            double between = Math.max(0.0, abilitySq / abilityN - ability * ability);
+            abilityVar = Math.max(between, pooledSd * pooledSd) / abilityN;
+        }
+
         // 3) 参照譜面 A 側から回帰キャッシュを引いて、候補譜面 B ごとに予測を積み上げる。
         //    B 側から全譜面ぶん引くと「候補数 × 参照数」の空振りが出るので、A 側から回す。
         Map<String, Pred> preds = new HashMap<>();
@@ -210,12 +309,14 @@ public class FillRecommendationService {
         }
 
         // 4) 候補ごとに期待獲得 pt を計算する。
+        //    候補は「難易度表に載っている Lv11+ の ANOTHER / LEGGENDARIA 全譜面」。
+        //    ペア回帰の参照が無い譜面も加法モデル → 同ランク平均の順に落として必ず予測を付ける。
         List<Map<String, Object>> items = new ArrayList<>();
-        for (Map.Entry<String, Pred> e : preds.entrySet()) {
-            String key = e.getKey();
-            Pred pred = e.getValue();
-
-            Integer notes = notesByKey.get(key);
+        Map<String, Integer> tierCounts = new HashMap<>();
+        int noPrediction = 0;
+        for (Map.Entry<String, Integer> chart : notesByKey.entrySet()) {
+            String key = chart.getKey();
+            Integer notes = chart.getValue();
             if (notes == null || notes <= 0) continue;
             int maxScore = notes * 2;
 
@@ -228,8 +329,17 @@ public class FillRecommendationService {
             // 難易度表に載っていない譜面はそもそも BEAT-PT が付かないので候補にならない。
             if (informalRank == null || beatPtCalculator.getWeight(informalRank) == 0) continue;
 
-            Stat stat = pred.resolve();
-            if (stat == null) continue; // サポート不足
+            Pred pred = preds.get(key);
+            Stat stat = pred == null ? null : pred.resolve();
+            if (stat == null) {
+                stat = fallbackStat(key, informalRank, ability, abilityVar,
+                        chartEffects, rankEffects, pooledSd);
+            }
+            if (stat == null) { // θ_u が立たない、または難易度表のランクに δ が無い
+                noPrediction++;
+                continue;
+            }
+            tierCounts.merge(stat.accuracy, 1, Integer::sum);
 
             int currentScore = myScores.getOrDefault(key, 0);
             boolean unplayed = !myScores.containsKey(key);
@@ -288,21 +398,165 @@ public class FillRecommendationService {
             items.add(item);
         }
 
-        // 5) 期待値降順。「次に何を埋めると一番伸びるか」の答えがそのまま先頭に来る。
-        items.sort((a, b) -> Double.compare(
-                ((Number) b.get("expectedGain")).doubleValue(),
-                ((Number) a.get("expectedGain")).doubleValue()));
-        if (items.size() > MAX_ITEMS) items = new ArrayList<>(items.subList(0, MAX_ITEMS));
+        // 5) 達成率降順（同率なら期待値降順）。「確実に取れるものから順に」が先頭に来る。
+        int candidateCount = items.size();
+        sortByAchievability(items);
+
+        // 6) 次ランクまでの差分を満たすまで採用する。差分が分からなければ件数上限で切る。
+        double gap;
+        String nextTierLabel = null;
+        if (gapOverride != null) {
+            gap = gapOverride;
+        } else {
+            BeatTierScale.SubTier next = BeatTierScale.nextSubTierOf(totalBeatPt);
+            gap = next == null ? 0.0 : next.minPoints() - totalBeatPt;
+            nextTierLabel = next == null ? null : next.label();
+        }
+        items = cutAtGap(items, gap, MAX_ITEMS_WITHOUT_GAP);
+        double cumulative = 0;
+        for (Map<String, Object> it : items) cumulative += ((Number) it.get("expectedGain")).doubleValue();
 
         Map<String, Object> result = new HashMap<>();
         result.put("top100Threshold", threshold);
         result.put("totalBeatPt", totalBeatPt);
         result.put("scoredChartCount", myPoints.size());
         result.put("referenceChartCount", refCharts.size());
+        result.put("nextTierGap", gap);
+        result.put("nextTierLabel", nextTierLabel);
+        result.put("cumulativeExpectedGain", cumulative);
+        result.put("gapCovered", gap > 0 && cumulative >= gap);
+        result.put("candidateCount", candidateCount);
+        result.put("noPredictionCount", noPrediction);
+        result.put("tierCounts", tierCounts);
         result.put("items", items);
-        log.debug("computeFillRecommendation(user={}) -> {} items in {} ms",
-                userId, items.size(), System.currentTimeMillis() - t0);
+        log.debug("computeFillRecommendation(user={}) -> {} items of {} candidates (tiers {}, noPrediction {}), gap {} covered={} in {} ms",
+                userId, items.size(), candidateCount, tierCounts, noPrediction,
+                String.format("%.1f", gap), cumulative >= gap, System.currentTimeMillis() - t0);
         return result;
+    }
+
+    // ── 並び替えと打ち切り ──────────────────────────────────────────────
+
+    /**
+     * 【メソッドの役割】 達成率の高い順に並べる。
+     *
+     * 達成率は表示上 1% 刻みなので、同じ表示になるものは期待獲得 pt の大きい順にする。
+     * 生の確率で比べると 0.999 と 0.998 の差でノイズ順になり、見た目と並びが合わなくなる。
+     */
+    static void sortByAchievability(List<Map<String, Object>> items) {
+        items.sort((a, b) -> {
+            long pa = Math.round(((Number) a.get("achieveProbability")).doubleValue() * 100);
+            long pb = Math.round(((Number) b.get("achieveProbability")).doubleValue() * 100);
+            if (pa != pb) return Long.compare(pb, pa);
+            return Double.compare(
+                    ((Number) b.get("expectedGain")).doubleValue(),
+                    ((Number) a.get("expectedGain")).doubleValue());
+        });
+    }
+
+    /**
+     * 【メソッドの役割】 期待獲得 pt を先頭から足していき、差分を満たした時点で打ち切る。
+     *
+     * 差分に届く候補が足りなければ全件返す（フロントは「不足」と表示する）。
+     * 差分が 0 以下（最高位など）なら {@code maxWithoutGap} 件で切る。
+     *
+     * @param items 達成率降順に並んだ候補
+     * @param gap   次ランクまでの差分 pt
+     * @return 採用した候補（先頭から連続）
+     */
+    static List<Map<String, Object>> cutAtGap(List<Map<String, Object>> items, double gap, int maxWithoutGap) {
+        if (gap <= 0) {
+            return items.size() > maxWithoutGap ? new ArrayList<>(items.subList(0, maxWithoutGap)) : items;
+        }
+        double acc = 0;
+        for (int i = 0; i < items.size(); i++) {
+            acc += ((Number) items.get(i).get("expectedGain")).doubleValue();
+            if (acc >= gap) {
+                return new ArrayList<>(items.subList(0, i + 1));
+            }
+        }
+        return items;
+    }
+
+    // ── フォールバック予測（加法モデル） ─────────────────────────────────
+
+    /**
+     * 【メソッドの役割】 ペア回帰の参照が足りない譜面の予測を加法モデルで作る。
+     *
+     * <ul>
+     *   <li>BASE: μ = θ_u + δ_c、σ² = s_c² + s_c²/n_c + Var(θ_u)。s_c は譜面残差 sd をプール値へ縮約したもの。</li>
+     *   <li>RANK: μ = θ_u + mean δ(同ランク)、σ² = s_pool² + Var_rank(δ) + Var(θ_u)。</li>
+     * </ul>
+     *
+     * @param key          譜面キー
+     * @param informalRank 非公式ランク
+     * @param ability      θ_u。null なら予測できない
+     * @param abilityVar   θ_u の標準誤差²
+     * @return 予測。作れなければ null
+     */
+    static Stat fallbackStat(String key, String informalRank, Double ability, double abilityVar,
+                             Map<String, PairRegressionService.ChartEffect> chartEffects,
+                             Map<String, RankEffect> rankEffects, double pooledSd) {
+        if (ability == null) return null;
+
+        PairRegressionService.ChartEffect ce = chartEffects.get(key);
+        if (ce != null && ce.n >= MIN_CHART_EFFECT_N) {
+            double sdC = Double.isNaN(ce.residSd) ? pooledSd : ce.residSd;
+            double shrunkVar = (ce.n * sdC * sdC + CHART_SD_SHRINK_N * pooledSd * pooledSd)
+                    / (ce.n + CHART_SD_SHRINK_N);
+            double sigma = Math.sqrt(shrunkVar + shrunkVar / ce.n + abilityVar);
+            return makeStat(ability + ce.delta, sigma, ce.n, ACC_BASE);
+        }
+
+        RankEffect re = rankEffects.get(informalRank);
+        if (re == null || re.chartCount <= 0) return null;
+        double sigma = Math.sqrt(pooledSd * pooledSd + re.betweenVar + abilityVar);
+        return makeStat(ability + re.meanDelta, sigma, re.chartCount, ACC_RANK);
+    }
+
+    /** σ をクランプして {@link Stat} を組み立てる。 */
+    private static Stat makeStat(double mu, double sigma, int support, String accuracy) {
+        Stat s = new Stat();
+        s.mu = mu;
+        s.sigma = Math.max(MIN_SIGMA_LOGIT, Math.min(MAX_SIGMA_LOGIT, sigma));
+        s.support = support;
+        s.accuracy = accuracy;
+        return s;
+    }
+
+    /**
+     * 【メソッドの役割】 非公式ランクごとに同ランク譜面の δ を集計する（RANK フォールバック用）。
+     *
+     * n_c ≧ {@link #MIN_CHART_EFFECT_N} の譜面だけを n_c 重みで平均し、
+     * 同ランク内の δ の分散も持つ。分散は「そのランクのどの譜面かが分からない」不確実性として σ に足す。
+     */
+    static Map<String, RankEffect> buildRankEffects(Map<String, String> informalRanks,
+                                                    Map<String, PairRegressionService.ChartEffect> chartEffects) {
+        Map<String, double[]> acc = new HashMap<>(); // rank → [Σw, Σwδ, Σwδ², count]
+        for (Map.Entry<String, PairRegressionService.ChartEffect> e : chartEffects.entrySet()) {
+            PairRegressionService.ChartEffect ce = e.getValue();
+            if (ce.n < MIN_CHART_EFFECT_N) continue;
+            String[] parts = e.getKey().split("\0", 2);
+            if (parts.length < 2) continue;
+            String rank = informalRanks.get(parts[0] + "_" + parts[1]);
+            if (rank == null) continue;
+            double[] a = acc.computeIfAbsent(rank, k -> new double[4]);
+            a[0] += ce.n;
+            a[1] += ce.n * ce.delta;
+            a[2] += ce.n * ce.delta * ce.delta;
+            a[3] += 1;
+        }
+        Map<String, RankEffect> out = new HashMap<>();
+        for (Map.Entry<String, double[]> e : acc.entrySet()) {
+            double[] a = e.getValue();
+            if (a[0] <= 0) continue;
+            RankEffect re = new RankEffect();
+            re.meanDelta = a[1] / a[0];
+            re.betweenVar = Math.max(0.0, a[2] / a[0] - re.meanDelta * re.meanDelta);
+            re.chartCount = (int) a[3];
+            out.put(e.getKey(), re);
+        }
+        return out;
     }
 
     // ── 期待値まわりの計算 ────────────────────────────────────────────────
@@ -453,7 +707,7 @@ public class FillRecommendationService {
     // ── 予測の積み上げ ───────────────────────────────────────────────────
 
     /** 確定した予測（μ, σ, サポート数, 精度ラベル）。 */
-    private static class Stat {
+    static final class Stat {
         double mu;
         double sigma;
         int support;
@@ -529,6 +783,8 @@ public class FillRecommendationService {
             if (masterLoadedAt > 0 && System.currentTimeMillis() - masterLoadedAt < MASTER_CACHE_TTL_MS) return;
             cachedMaxScores = scoreRecalculationService.loadSongMaxScores();
             cachedInformalRanks = scoreRecalculationService.loadInformalRanks();
+            // 同ランク平均 δ は難易度表 × 加法モデルの積なので、マスタと同じ周期で作り直す。
+            cachedRankEffects = buildRankEffects(cachedInformalRanks, pairRegressionService.getChartEffects());
             masterLoadedAt = System.currentTimeMillis();
         }
     }

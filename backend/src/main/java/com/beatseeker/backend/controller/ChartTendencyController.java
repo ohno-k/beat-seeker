@@ -620,7 +620,9 @@ public class ChartTendencyController {
      * @return {@code {top100Threshold, totalBeatPt, scoredChartCount, referenceChartCount, items: [...]}}
      */
     @GetMapping("/api/analysis/fill-recommendation")
-    public ResponseEntity<Map<String, Object>> fillRecommendation(Authentication auth) {
+    public ResponseEntity<Map<String, Object>> fillRecommendation(
+            Authentication auth,
+            @RequestParam(required = false) Double gap) {
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
         }
@@ -629,7 +631,9 @@ public class ChartTendencyController {
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
-        return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId()));
+        // gap: フロントが表示している「次ランクまでの残り pt」。渡されればそれを満たすまで候補を返す。
+        // 省略時はサーバー側の副ティア境界から算出する（フロントの BEAT-PT 計算と一致しない場合の保険）。
+        return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId(), gap));
     }
 
     /**
@@ -644,14 +648,15 @@ public class ChartTendencyController {
     @GetMapping("/api/admin/fill-recommendation")
     public ResponseEntity<Map<String, Object>> fillRecommendationForUser(
             Authentication auth,
-            @RequestParam long userId) {
+            @RequestParam long userId,
+            @RequestParam(required = false) Double gap) {
 
         checkAdmin(auth);
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
-        return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId()));
+        return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId(), gap));
     }
 
     /**

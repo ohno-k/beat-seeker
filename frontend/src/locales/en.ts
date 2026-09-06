@@ -245,7 +245,7 @@ export const en = {
   'advice.rankUpMsg': 'Reach this to promote to {rank}',
   'advice.recommendedSongs': 'Recommended practice',
   'advice.noSuggestions': 'No songs to improve',
-  'advice.basedOnExpectedValue': '* Unplayed charts included. Ranked by expected BEAT-PT = gain x probability of reaching it, from your estimated ability',
+  'advice.basedOnExpectedValue': '* Unplayed charts included. Sorted by chance of success from your estimated ability, listed until the next rank is within reach',
   'advice.computingPotential': 'Computing growth potential… (first run takes a few seconds)',
   'advice.potentialError': 'Failed to load growth potential: {msg}',
   'advice.unplayedTag': 'NEW',
@@ -256,6 +256,12 @@ export const en = {
   'advice.expectedGain': 'Exp. +{n} pt',
   'advice.expectedTotal': 'Expected total',
   'advice.supportHint': 'Estimated from {n} charts (accuracy {acc})',
+  'advice.showMore': 'Show more ({n} left)',
+  'advice.roughTag': 'Rough',
+  'advice.accuracyHigh': 'High',
+  'advice.accuracyLow': 'Medium',
+  'advice.accuracyBase': 'Rough (ability + chart average)',
+  'advice.accuracyRank': 'Rough (same-rank average)',
 
   // Score Summary / Table
   'table.title': 'Score List',
