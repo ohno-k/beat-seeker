@@ -26,6 +26,7 @@ import com.beatseeker.backend.service.SongArenaAveragesCacheService;
 import com.beatseeker.backend.service.SongAvgScoreRatesCacheService;
 import com.beatseeker.backend.service.SongRankBatchService;
 import com.beatseeker.backend.service.SongRankingAggregateCacheService;
+import com.beatseeker.backend.service.SongTitleAliases;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
 import com.beatseeker.backend.service.VirtualArenaRankerService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -250,7 +251,10 @@ public class ScoreController {
         List<Map<String, Object>> updatedSongs = new java.util.ArrayList<>();
         int skippedInfinitasOnly = 0;
 
-        for (ScoreUploadRequest req : requests) {
+        for (ScoreUploadRequest rawReq : requests) {
+            // 作品によって表記が変わった曲名（31 EPOLIS の "VØID" と現行の "VOID" など）は
+            // 曲マスタの表記に寄せてから突き合わせ・保存する（SongTitleAliases）。
+            ScoreUploadRequest req = rawReq.withTitle(SongTitleAliases.canonical(rawReq.title()));
             String source = req.effectiveSource();
 
             // INFINITAS 由来のレコードについては、arcade マスタに存在しない曲を保存対象から除外する。
@@ -1544,6 +1548,16 @@ public class ScoreController {
             String s = source.toLowerCase();
             if ("infinitas".equals(s) || "arcade".equals(s)) return s;
             return "arcade";
+        }
+
+        /**
+         * 【メソッドの役割】 タイトルだけ差し替えたコピーを返す（曲名の表記ゆれ正規化用）。
+         * 差し替え後の値が同じなら自身をそのまま返す。
+         */
+        ScoreUploadRequest withTitle(String newTitle) {
+            if (newTitle == null || newTitle.equals(title)) return this;
+            return new ScoreUploadRequest(newTitle, artist, genre, difficultyName, difficultyLevel,
+                    score, clearType, djLevel, pgreat, great, missCount, playCount, lastPlayTime, source);
         }
 
         /**

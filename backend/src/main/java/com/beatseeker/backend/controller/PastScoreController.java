@@ -6,6 +6,7 @@ import com.beatseeker.backend.repository.PastScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.LeagueChartNotation;
+import com.beatseeker.backend.service.SongTitleAliases;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,10 @@ public class PastScoreController {
      *   全置換にしないのは、同一作品の古い CSV を後から取り込んだときに
      *   データが静かに減るのを防ぐため（順序非依存にする）。取り込みミスは作品単位 DELETE で復旧する。
      *
+     * 曲名の正規化: 作品によって表記が変わった曲名（31 EPOLIS の "VØID" と現行の "VOID" など）は
+     *   {@link SongTitleAliases} で現行表記に寄せてから保存する。過去作スコアは現行スコアと
+     *   曲名 + 難易度名で突き合わせるため、ここで揃えないと同一譜面が歴代ベストから漏れる。
+     *
      * @param auth 認証情報
      * @param req  バージョン番号と譜面単位レコードの配列
      * @return 取り込み件数・新規件数・更新件数を含む Map
@@ -100,12 +105,15 @@ public class PastScoreController {
         int inserted = 0;
         int updated = 0;
 
-        for (PastScoreRecord r : records) {
+        for (PastScoreRecord raw : records) {
             // タイトル・難易度名が欠けた行は識別できないのでスキップする。
-            if (r.title() == null || r.title().isBlank()
-                    || r.difficultyName() == null || r.difficultyName().isBlank()) {
+            if (raw.title() == null || raw.title().isBlank()
+                    || raw.difficultyName() == null || raw.difficultyName().isBlank()) {
                 continue;
             }
+
+            // 作品によって表記が変わった曲名は現行表記に寄せてから突き合わせ・保存する。
+            PastScoreRecord r = raw.withTitle(SongTitleAliases.canonical(raw.title()));
 
             String key = chartKey(r.title(), r.difficultyName());
             PastScore existing = existingMap.get(key);
@@ -311,5 +319,15 @@ public class PastScoreController {
             Integer playCount,
             /** CSV の「最終プレー日時」列（例: "2025-09-17 08:27"）。無加工で保持する。 */
             String lastPlayedAt) {
+
+        /**
+         * 【メソッドの役割】 タイトルだけ差し替えたコピーを返す（曲名の表記ゆれ正規化用）。
+         * 差し替え後の値が同じなら自身をそのまま返す。
+         */
+        PastScoreRecord withTitle(String newTitle) {
+            if (newTitle == null || newTitle.equals(title)) return this;
+            return new PastScoreRecord(newTitle, artist, genre, difficultyName, difficultyLevel,
+                    score, clearType, djLevel, pgreat, great, missCount, playCount, lastPlayedAt);
+        }
     }
 }

@@ -6,6 +6,7 @@ import type { ScoreRecord } from '../utils/scoreData';
 import { getSongMaxScore } from '../utils/scoreData';
 import { calculatePoints } from '../utils/beatTier';
 import { CURRENT_VERSION } from '../utils/iidxVersions';
+import { canonicalSongTitle } from '../utils/songTitleAliases';
 
 /**
  * 【Composable の役割】 過去作（IIDX 30 RESIDENT 〜 32 Pinky Crush）のスコアを
@@ -153,7 +154,11 @@ export function usePastScores() {
                 }
                 throw new Error(`Failed to fetch past scores: ${res.status}`);
             }
-            pastRows.value = await res.json();
+            // 曲名は現行表記に寄せてから保持する（31 EPOLIS の "VØID" → "VOID" など）。
+            // サーバ側でも取り込み時・起動時に是正しているが、是正前の行が残っていても
+            // 現行スコアと同一譜面として突き合わせられるよう表示側でも揃える。
+            const rows: PastScoreRow[] = await res.json();
+            pastRows.value = rows.map(r => ({ ...r, t: canonicalSongTitle(r.t) }));
             isLoaded.value = true;
         } finally {
             isLoading.value = false;

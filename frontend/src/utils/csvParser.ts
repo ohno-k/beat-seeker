@@ -17,6 +17,7 @@ import Papa from 'papaparse';
 import type { ScoreData, DifficultyStats } from '../types/ScoreData';
 import { songData } from '../composables/useGameData';
 import { LABEL_TO_VERSION, MIN_PAST_VERSION } from './iidxVersions';
+import { canonicalSongTitle } from './songTitleAliases';
 
 /**
  * 【型】 CSV から作品バージョンを自動判定した結果。
@@ -92,12 +93,14 @@ export const parseScoreCsv = (file: File): Promise<ScoreData[]> => {
             complete: (results: Papa.ParseResult<any>) => {
                 try {
                     // 手順1: 生の行配列を ScoreData[] に詰め替える。
+                    //        曲名は作品によって表記が変わることがある（31 EPOLIS の "VØID" と現行の "VOID" など）ので、
+                    //        現行作・過去作どちらの CSV でもここで現行表記に寄せ、以降の突き合わせを曲名一致で済ませる。
                     const parsedData: ScoreData[] = results.data
                         // 末尾の空行や壊れた行（タイトル列が空）を除外する
                         .filter((row: any) => row['タイトル'])
                         .map((row: any) => ({
                             version: row['バージョン'] || '',
-                            title: row['タイトル'] || '',
+                            title: canonicalSongTitle(row['タイトル'] || ''),
                             genre: row['ジャンル'] || '',
                             artist: row['アーティスト'] || '',
                             playCount: parseInt(row['プレー回数'], 10) || 0,

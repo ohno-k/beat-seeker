@@ -1,7 +1,10 @@
 package com.beatseeker.backend;
 
+import com.beatseeker.backend.entity.PastScore;
 import com.beatseeker.backend.service.GameDataService;
+import com.beatseeker.backend.service.LeagueChartNotation;
 import com.beatseeker.backend.service.LeagueWeekLifecycleService;
+import com.beatseeker.backend.service.SongTitleAliases;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -14,6 +17,8 @@ import jakarta.persistence.EntityManager;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 【クラスの役割】 アプリケーション起動直後に 1 度だけ実行される初期化処理。
@@ -26,6 +31,7 @@ import java.nio.charset.StandardCharsets;
  *  - 既存ユーザーの未設定カラム（language, showRateTier 等）にデフォルト値を埋める
  *  - 旧/新ユニーク制約の付け替え（INFINITAS の source 列対応）
  *  - 仕様変更に伴う一度きりのデータ是正（{@link #runOnce}。適用済みは applied_migrations で記録）
+ *  - 過去作スコアの曲名を現行表記へ寄せる（{@link #canonicalizePastScoreTitles}。冪等）
  *  - 曲データ / 難易度表のマスターデータを JSON リソースから投入（未シード時のみ）
  *
  * 【例外方針 — 厳守】 初期化に失敗してもアプリ本体は必ず起動させる。
@@ -235,6 +241,12 @@ public class DataInitializer implements ApplicationRunner {
             ).executeUpdate();
         });
 
+        // 手順4.7: 過去作スコアの曲名を現行表記へ寄せる（例: 31 EPOLIS 期の CSV "VØID" → "VOID"）。
+        //          表記が違うと現行スコアと同一譜面として突き合わせられず、歴代ベスト・練習メニュー・
+        //          リーグの歴代参照から漏れる。対応表（SongTitleAliases）は今後増え得るので、
+        //          runOnce ではなく毎起動の冪等ステップにする（是正済みなら該当行 0 件で即終了する）。
+        runStep("canonicalize past_scores titles", this::canonicalizePastScoreTitles);
+
         // 手順5: 曲データと難易度表を JSON から投入する（テーブルが空の場合のみ実効）。
         //        gameDataService 側が自前で @Transactional を張るため、ここでは txTemplate を使わない。
         try {
@@ -301,6 +313,97 @@ public class DataInitializer implements ApplicationRunner {
             // 起動を止めないため警告のみ。マークも一緒にロールバックされるので次回起動で再試行される。
             logger.warn("DataInitializer one-shot migration '{}' skipped (continuing startup): {}",
                     name, e.getMessage());
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 {@link SongTitleAliases} に載っている過去表記の {@code past_scores} 行を現行表記へ改名する。
+     *
+     * 同じユーザー・作品・難易度に現行表記の行が既にある場合（表記が変わる前後の CSV を両方取り込んだ等）は、
+     * そのまま改名するとユニーク制約 (user_id, version, title, difficultyName) に衝突する。
+     * その場合は {@link #mergeBestInto} で過去表記側の良い値を現行表記側へ取り込んでから過去表記側を削除する。
+     *
+     * 対象行が無ければ対応表 1 件につき SELECT 1 回で終わるため、毎起動で走らせても負荷は無視できる。
+     */
+    private void canonicalizePastScoreTitles() {
+        for (Map.Entry<String, String> alias : SongTitleAliases.all().entrySet()) {
+            String legacy = alias.getKey();
+            String canonical = alias.getValue();
+
+            List<PastScore> legacyRows = entityManager.createQuery(
+                            "SELECT p FROM PastScore p WHERE p.title = :title", PastScore.class)
+                    .setParameter("title", legacy)
+                    .getResultList();
+            if (legacyRows.isEmpty()) continue;
+
+            int renamed = 0;
+            int merged = 0;
+            for (PastScore legacyRow : legacyRows) {
+                PastScore counterpart = entityManager.createQuery(
+                                "SELECT p FROM PastScore p WHERE p.user = :user AND p.version = :version " +
+                                "AND p.title = :title AND p.difficultyName = :difficultyName", PastScore.class)
+                        .setParameter("user", legacyRow.getUser())
+                        .setParameter("version", legacyRow.getVersion())
+                        .setParameter("title", canonical)
+                        .setParameter("difficultyName", legacyRow.getDifficultyName())
+                        .getResultStream()
+                        .findFirst()
+                        .orElse(null);
+
+                if (counterpart == null) {
+                    legacyRow.setTitle(canonical);
+                    renamed++;
+                } else {
+                    mergeBestInto(counterpart, legacyRow);
+                    entityManager.remove(legacyRow);
+                    merged++;
+                }
+            }
+            logger.info("past_scores title '{}' -> '{}': renamed {} rows, merged {} rows into existing rows",
+                    legacy, canonical, renamed, merged);
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 過去表記側（source）の記録のうち良いものを現行表記側（target）へ取り込む。
+     *
+     * IIDX 実機のベスト記録と同じく、スコア・クリアランプ・ミスカウントは互いに独立して比較する。
+     * スコアが上回る場合は DJ LEVEL / PGREAT / GREAT も「そのスコアを出したときの値」に揃える。
+     * プレー回数と最終プレー日時は同一作品内の累積値なので大きいほうを採る。
+     *
+     * @param target 残す行（現行表記）。この行を書き換える
+     * @param source 消す行（過去表記）。読み取りのみ
+     */
+    static void mergeBestInto(PastScore target, PastScore source) {
+        int targetScore = target.getScore() != null ? target.getScore() : 0;
+        int sourceScore = source.getScore() != null ? source.getScore() : 0;
+        if (sourceScore > targetScore) {
+            target.setScore(sourceScore);
+            target.setDjLevel(source.getDjLevel());
+            target.setPgreat(source.getPgreat());
+            target.setGreat(source.getGreat());
+        }
+
+        if (LeagueChartNotation.clearTypeRank(source.getClearType())
+                > LeagueChartNotation.clearTypeRank(target.getClearType())) {
+            target.setClearType(source.getClearType());
+        }
+
+        if (source.getMissCount() != null
+                && (target.getMissCount() == null || source.getMissCount() < target.getMissCount())) {
+            target.setMissCount(source.getMissCount());
+        }
+
+        if (source.getPlayCount() != null
+                && (target.getPlayCount() == null || source.getPlayCount() > target.getPlayCount())) {
+            target.setPlayCount(source.getPlayCount());
+        }
+
+        // "YYYY-MM-DD HH:mm" 書式は辞書順 = 時系列順なので文字列比較で新しいほうを選べる。
+        if (source.getLastPlayedAt() != null
+                && (target.getLastPlayedAt() == null
+                        || source.getLastPlayedAt().compareTo(target.getLastPlayedAt()) > 0)) {
+            target.setLastPlayedAt(source.getLastPlayedAt());
         }
     }
 
