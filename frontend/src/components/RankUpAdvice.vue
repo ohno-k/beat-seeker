@@ -15,6 +15,10 @@
     <p class="text-xs text-slate-400 dark:text-slate-500 mb-1">
       {{ t('advice.remaining', { n: nextRankGap.toFixed(1) }) }}
     </p>
+    <!-- 管理者が他ユーザーを閲覧中: 誰の候補かを明示する -->
+    <p v-if="viewingUserId != null" class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 mb-1">
+      {{ t('advice.viewingUser', { name: viewingDisplayName || `#${viewingUserId}` }) }}
+    </p>
     <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-4">
       {{ t('advice.basedOnExpectedValue') }}
     </p>
@@ -135,7 +139,13 @@
  *  - 予測が外れる確率を無視するので、実際には取れない譜面が上位に来る
  * という 2 点が弱かった。判定はすべてバックエンドの期待値計算に寄せている。
  *
+ * 【管理者閲覧】
+ * viewingUserId が渡されたときは、その相手の推薦を管理者用 API（/api/admin/fill-recommendation）から引く。
+ * totalPoints は親（ScoreDashboard）が閲覧対象のスコアから計算した値なので、gap も相手のものになる。
+ *
  * @prop totalPoints 現在の Beat-PT 合計。次ランクまでの gap 計算に使用。
+ * @prop viewingUserId 管理者が閲覧中の相手のユーザー ID。null / 未指定なら自分。
+ * @prop viewingDisplayName 見出しに出す相手の表示名。
  */
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from '../composables/useI18n';
@@ -149,6 +159,8 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 const props = defineProps<{
   totalPoints: number;
+  viewingUserId?: number | null;
+  viewingDisplayName?: string;
 }>();
 
 /** 一度に見せる件数。「さらに表示」を押すたびにこの数だけ増える。 */
@@ -244,7 +256,11 @@ async function fetchRecommendation() {
   let waitingForBuild = false;
   try {
     const params = new URLSearchParams({ gap: nextRankGap.value.toFixed(2) });
-    const res = await fetch(`${API_BASE}/api/analysis/fill-recommendation?${params}`, { headers: authHeaders() });
+    // 管理者が他ユーザーを閲覧中なら相手の推薦を管理者用 API から引く。自分のときは通常 API。
+    const url = props.viewingUserId != null
+      ? `${API_BASE}/api/admin/fill-recommendation?userId=${props.viewingUserId}&${params}`
+      : `${API_BASE}/api/analysis/fill-recommendation?${params}`;
+    const res = await fetch(url, { headers: authHeaders() });
     if (res.status === 503 && buildingRetries < MAX_BUILDING_RETRIES) {
       buildingRetries++;
       const body = await res.json().catch(() => ({} as { retryAfterSec?: number }));
@@ -341,4 +357,12 @@ function fetchIfNeeded() {
 onMounted(fetchIfNeeded);
 // スコアを取り込み直すと合計 pt が変わる。そのタイミングで推薦も取り直す。
 watch(() => props.totalPoints, fetchIfNeeded);
+// 管理者が閲覧相手を切り替えた（または自分に戻った）ときは、前の相手の候補を消して取り直す。
+// totalPoints も同時に変わるのが普通だが、同じ合計 pt の相手に切り替えた場合に備えてこちらでも拾う。
+watch(() => props.viewingUserId, () => {
+  items.value = [];
+  loadError.value = '';
+  buildingRetries = 0;
+  fetchIfNeeded();
+});
 </script>

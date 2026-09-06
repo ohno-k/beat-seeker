@@ -256,6 +256,7 @@ export const ko = {
   'advice.expectedTotal': '기대값 합계',
   'advice.supportHint': '{n}개 보면에서 추정 (정확도 {acc})',
   'advice.showMore': '더 보기 (남은 {n}개)',
+  'advice.viewingUser': '{name} 님의 후보 (관리자 열람)',
   'advice.roughTag': '대략',
   'advice.accuracyHigh': '높음',
   'advice.accuracyLow': '중간',

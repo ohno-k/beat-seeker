@@ -208,7 +208,15 @@
     <UnofficialDifficultyTable v-if="!isPrivateView" :scores="displayScores" :history-scores="allFlattenedScores" />
 
     <!-- Rank Up Advice -->
-    <RankUpAdvice v-if="!isPrivateView" :total-points="props.totalPoints" />
+    <!-- ランクアップアドバイス: 自分のダッシュボードと、管理者が他ユーザーを閲覧しているときだけ出す。
+         管理者閲覧では相手のユーザー ID を渡し、相手の推薦を管理者用 API から引く。
+         フレンド閲覧などは相手の推薦を引く API が無く、自分の推薦を相手の残り pt と並べても意味が無いので出さない。 -->
+    <RankUpAdvice
+      v-if="!isPrivateView && (!viewingMode || viewingMode === 'admin')"
+      :total-points="props.totalPoints"
+      :viewing-user-id="viewingMode === 'admin' ? (viewingUserId ?? null) : null"
+      :viewing-display-name="viewingMode === 'admin' ? viewingDisplayName : undefined"
+    />
 
     <!-- Activity Feed (全体ニュース) -->
     <ActivityFeed v-if="!isPrivateView" />
@@ -264,6 +272,8 @@ const emit = defineEmits<{ (e: 'open-profile-edit'): void }>();
 const props = defineProps<{
   scores: ScoreData[];
   totalPoints: number;
+  /** 閲覧対象ユーザーの DB 主キー。管理者閲覧時にランクアップアドバイスを相手のものに切り替えるために使う。 */
+  viewingUserId?: number | null;
   viewingIidxId?: string;
   viewingDisplayName?: string;
   viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | 'arenaTopRanker' | 'private' | null;

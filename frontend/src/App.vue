@@ -2499,6 +2499,7 @@ const handleUnifiedClose = async () => {
               <ScoreDashboard
                 :scores="scoreData"
                 :totalPoints="totalBeatTierPoints"
+                :viewing-user-id="viewingUserId"
                 :viewing-iidx-id="viewingUserIidxId"
                 :viewing-display-name="viewingUserName"
                 :viewing-mode="viewingMode"

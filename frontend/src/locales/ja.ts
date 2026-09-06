@@ -261,6 +261,7 @@ export const ja = {
   'advice.expectedTotal': '期待値合計',
   'advice.supportHint': '{n} 譜面から推定（精度 {acc}）',
   'advice.showMore': 'さらに表示（あと {n} 件）',
+  'advice.viewingUser': '{name} さんの候補（管理者閲覧）',
   'advice.roughTag': '概算',
   'advice.accuracyHigh': '高',
   'advice.accuracyLow': '中',

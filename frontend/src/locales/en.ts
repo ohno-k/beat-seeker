@@ -257,6 +257,7 @@ export const en = {
   'advice.expectedTotal': 'Expected total',
   'advice.supportHint': 'Estimated from {n} charts (accuracy {acc})',
   'advice.showMore': 'Show more ({n} left)',
+  'advice.viewingUser': 'Suggestions for {name} (admin view)',
   'advice.roughTag': 'Rough',
   'advice.accuracyHigh': 'High',
   'advice.accuracyLow': 'Medium',
