@@ -15,7 +15,7 @@
  *  - `utils/beatTier` — Tier ポイント計算。
  *  - `utils/scoreData.flattenScores` — ScoreData（曲ごと）を ScoreRecord（譜面ごと）にフラット化。
  */
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useScores } from '../composables/useScores';
 import { useFriends } from '../composables/useFriends';
 import { useAuth, API_BASE } from '../composables/useAuth';
@@ -249,10 +249,19 @@ onMounted(async () => {
   fetchFriends();
 });
 
+/** バックエンドがキャッシュ構築中（503）のときの再試行タイマー。アンマウント時に止める。 */
+let potentialRetryTimer: ReturnType<typeof setTimeout> | null = null;
+/** 503 での再試行回数。15 秒 × 12 = 約 3 分を超えたらエラー表示にする。 */
+let potentialBuildingRetries = 0;
+const MAX_POTENTIAL_BUILDING_RETRIES = 12;
+
 /**
- * 【関数】 伸びしろデータを取得する。初回はバックエンドのキャッシュ構築（数秒）が走る。
+ * 【関数】 伸びしろデータを取得する。
  * potentialViewUserId が null なら自分（/api/analysis/growth-potential）、
  * それ以外なら管理者向け（/api/admin/growth-potential?userId=X）を叩く。
+ *
+ * バックエンドのペア回帰キャッシュは起動直後や日次再構築の間は未完成で、その間 API は
+ * 503 + retryAfterSec を返す。その場合はローディング表示のまま待って取り直す。
  * @param force 既存データを破棄して再取得するかどうか
  */
 async function fetchPotential(force = false) {
@@ -260,20 +269,38 @@ async function fetchPotential(force = false) {
   isPotentialLoading.value = true;
   potentialError.value = '';
   potentialItems.value = [];
+  let waitingForBuild = false;
   try {
     const url = potentialViewUserId.value == null
       ? `${API_BASE}/api/analysis/growth-potential`
       : `${API_BASE}/api/admin/growth-potential?userId=${potentialViewUserId.value}`;
     const res = await fetch(url, { headers: authHeaders() });
+    if (res.status === 503 && potentialBuildingRetries < MAX_POTENTIAL_BUILDING_RETRIES) {
+      potentialBuildingRetries++;
+      const body = await res.json().catch(() => ({} as { retryAfterSec?: number }));
+      const waitMs = Number(body?.retryAfterSec ?? 15) * 1000;
+      waitingForBuild = true;
+      potentialRetryTimer = setTimeout(() => {
+        potentialRetryTimer = null;
+        isPotentialLoading.value = false;
+        fetchPotential(true);
+      }, waitMs);
+      return;
+    }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json() as { items: GrowthPotentialItem[] };
     potentialItems.value = data.items ?? [];
+    potentialBuildingRetries = 0;
   } catch (e: any) {
     potentialError.value = e?.message ?? '通信エラー';
   } finally {
-    isPotentialLoading.value = false;
+    if (!waitingForBuild) isPotentialLoading.value = false;
   }
 }
+
+onBeforeUnmount(() => {
+  if (potentialRetryTimer) clearTimeout(potentialRetryTimer);
+});
 
 /**
  * 【関数】 管理者用ユーザー一覧を取得（初回のみ）。検証ドロップダウンのソース。

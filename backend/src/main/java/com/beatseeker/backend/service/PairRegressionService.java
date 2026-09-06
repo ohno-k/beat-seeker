@@ -3,13 +3,23 @@ package com.beatseeker.backend.service;
 import com.beatseeker.backend.repository.ScoreRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 【Service の役割】 譜面ペア (A, B) の単純線形回帰（B を A から予測する係数）を
@@ -18,18 +28,48 @@ import java.util.Map;
  * 用途:
  *  - 「伸びしろランキング」: ユーザーがプレイ済みの全譜面 B について、同じく
  *    プレイ済みの他譜面 A 達から予測スコアを算出 → (予測 − 実) を伸びしろとして提示する。
+ *  - 「コスパ埋めレコメンド」（{@link FillRecommendationService}）と練習メニューの能力推定。
  *
  * 設計:
  *  - 対象は ANOTHER / LEGGENDARIA 譜面のみ（rate-tier 集計と同スコープ）
  *  - 集計対象スコアは A 以上 (score_rate >= 66.67%) のみ。捨てスコア相当を排除。
- *  - サンプル数 < 30 / |r| < 0.4 のペアは破棄（ノイズ除去）
- *  - 初回参照時に {@link #ensureBuilt()} で全件構築（数秒）→ 以降はオンメモリ参照
- *  - スコア更新による無効化は現状未対応（実験機能のため。将来は再構築コマンドを追加）
+ *  - サンプル数 < 30 / |r| < 0.90 のペアは破棄（ノイズ除去）
+ *
+ * <h3>構築のタイミング（日次バッチ方式）</h3>
+ *  - 起動完了（{@link ApplicationReadyEvent}）直後にバックグラウンドで構築する。
+ *  - 毎日 04:30 JST に再構築して、前日までのアップロードを取り込む（{@link #rebuildDaily()}）。
+ *  - 管理者は {@code POST /api/admin/pair-regression/rebuild} で随時再構築できる。
+ *  - 構築中／未構築のときは API 側が 503 + Retry-After を返し、リクエストスレッドでは構築しない
+ *    （{@link #isReady()} / {@link #rebuildAsync(String)}）。{@link #ensureBuilt()} は
+ *    バッチ的な呼び出し元（練習メニュー等）向けの同期フォールバックとして残す。
+ *
+ * <h3>構築クエリの負荷対策</h3>
+ * 全スコア取得は 264 万行の scores を全表走査して 70 万行を返す重いクエリで、
+ * Hibernate の {@code List<Map>} 展開だと一時的に 250MB 前後を消費し、小さいヒープでは
+ * GC で受信が遅れて接続既定の 30 秒 statement_timeout に掛かる（2026-09 本番障害）。
+ *  - JDBC カーソル（fetchSize）でストリーミング受信し、行をそのまま packed long[] へ詰める。
+ *  - 構築トランザクション内だけ {@code SET LOCAL statement_timeout = '120s'} に緩める
+ *    （{@link SongAvgScoreRatesCacheService} と同じ手口。他のリクエストには影響しない）。
  */
 @Service
 public class PairRegressionService {
 
     private static final Logger log = LoggerFactory.getLogger(PairRegressionService.class);
+
+    /**
+     * 構築用の全スコア取得 SQL。{@link ScoreRepository#findAllAnotherLeggScores()} と同じ条件。
+     * 列順 (user_id, title, difficulty_name, score) は {@link #rebuild()} の RowCallbackHandler が前提にしている。
+     */
+    static final String REBUILD_SCORES_SQL =
+            "SELECT s.user_id, s.title, s.difficulty_name, s.score " +
+            "FROM scores s " +
+            "WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') " +
+            "  AND s.difficulty_level >= 11 " +
+            "  AND s.score >= 400";
+    /** カーソル読みの 1 回あたり行数。PostgreSQL は autocommit=false のときだけ有効。 */
+    private static final int STREAM_FETCH_SIZE = 5000;
+    /** 構築トランザクションに限って許す statement_timeout。接続既定（30 秒）より長く、無制限ではない。 */
+    private static final String BUILD_STATEMENT_TIMEOUT = "120s";
 
     /** 集計に必要な最小サンプル数（両譜面プレイ済みユーザー数）。 */
     private static final int MIN_N = 30;
@@ -74,6 +114,23 @@ public class PairRegressionService {
     static final int ADDITIVE_ITERATIONS = 8;
 
     private final ScoreRepository scoreRepository;
+    /** 構築用のストリーミング読みに使う DataSource（共有 JdbcTemplate の fetchSize を汚さないよう自前で組む）。 */
+    private final DataSource dataSource;
+    /** 構築を 1 トランザクションで包み、SET LOCAL statement_timeout を効かせるためのテンプレート。 */
+    private final TransactionTemplate txTemplate;
+
+    /** バックグラウンド構築の多重起動を防ぐフラグ（{@link #rebuildAsync(String)}）。 */
+    private final AtomicBoolean asyncBuildRunning = new AtomicBoolean(false);
+    /** 直近の構築完了時刻（epoch ms）。0 なら未構築。 */
+    private volatile long lastBuiltAtMs = 0L;
+    /** 直近の構築に掛かった時間（ms）。 */
+    private volatile long lastBuildMs = 0L;
+    /** 直近の構築で読んだスコア行数。 */
+    private volatile long lastRowCount = 0L;
+    /** 直近の構築失敗の要約。成功すれば null に戻る。 */
+    private volatile String lastError = null;
+    /** 直近の構築のきっかけ（startup / daily / admin / request）。 */
+    private volatile String lastReason = null;
 
     /** chartA(=title\0difficultyName) -> chartB -> Reg（B を A から予測する回帰）。volatile でロック無し公開。 */
     private volatile Map<String, Map<String, Reg>> cache = Collections.emptyMap();
@@ -125,8 +182,94 @@ public class PairRegressionService {
         public double sdY;
     }
 
-    public PairRegressionService(ScoreRepository scoreRepository) {
+    public PairRegressionService(ScoreRepository scoreRepository,
+                                 DataSource dataSource,
+                                 PlatformTransactionManager transactionManager) {
         this.scoreRepository = scoreRepository;
+        this.dataSource = dataSource;
+        this.txTemplate = new TransactionTemplate(transactionManager);
+        this.txTemplate.setReadOnly(true);
+    }
+
+    // ── 構築のトリガー（起動時 / 日次 / 管理者 / リクエスト） ─────────────────
+
+    /**
+     * 【メソッドの役割】 起動完了直後にバックグラウンドで構築を始める。
+     * DataInitializer（ApplicationRunner）はこのイベントより前に完了しているので、DDL とのロック競合は無い。
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void buildOnStartup() {
+        rebuildAsync("startup");
+    }
+
+    /**
+     * 【メソッドの役割】 毎日 04:30 JST に再構築して、前日までのアップロードをキャッシュに取り込む。
+     * 03:00 の曲別順位バッチ（{@link SongRankBatchService}）と重ならない時刻にしてある。
+     * {@code app.scheduling.enabled=false}（prod-db プロファイル）では動かない。
+     */
+    @Scheduled(cron = "0 30 4 * * *", zone = "Asia/Tokyo")
+    public void rebuildDaily() {
+        rebuildAsync("daily");
+    }
+
+    /**
+     * 【メソッドの役割】 別スレッドで再構築を始める。既に走っていれば何もしない。
+     *
+     * リクエストスレッドを 30 秒以上塞がないための入口。構築中も前回のキャッシュはそのまま配信され、
+     * 完了した時点で差し替わる。
+     *
+     * @param reason ログ用のきっかけ（startup / daily / admin / request）
+     * @return 新しく開始したら true。既に構築中なら false
+     */
+    public boolean rebuildAsync(String reason) {
+        if (!asyncBuildRunning.compareAndSet(false, true)) {
+            return false;
+        }
+        Thread t = new Thread(() -> {
+            try {
+                lastReason = reason;
+                rebuild();
+            } catch (Exception e) {
+                lastError = e.getClass().getSimpleName() + ": " + e.getMessage();
+                log.error("PairRegressionService async rebuild ({}) failed (keeping previous cache, built={})", reason, built, e);
+            } finally {
+                asyncBuildRunning.set(false);
+            }
+        }, "pair-regression-rebuild");
+        t.setDaemon(true);
+        t.start();
+        log.info("PairRegressionService rebuild started in background (reason={})", reason);
+        return true;
+    }
+
+    /** 【メソッドの役割】 キャッシュが一度でも構築済みか（API が 503 を返すかどうかの判定）。 */
+    public boolean isReady() {
+        return built;
+    }
+
+    /** 【メソッドの役割】 バックグラウンド構築が走っているか。 */
+    public boolean isBuilding() {
+        return asyncBuildRunning.get();
+    }
+
+    /**
+     * 【メソッドの役割】 管理画面・監視用の状態サマリ。
+     *
+     * @return {@code {ready, building, lastBuiltAt(ms), lastBuildMs, lastRowCount, lastReason, lastError, chartCount, pairChartCount}}
+     */
+    public Map<String, Object> status() {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ready", built);
+        m.put("building", asyncBuildRunning.get());
+        m.put("lastBuiltAt", lastBuiltAtMs);
+        m.put("lastBuildMs", lastBuildMs);
+        m.put("lastRowCount", lastRowCount);
+        m.put("lastReason", lastReason);
+        m.put("lastError", lastError);
+        m.put("chartCount", notesByKey.size());
+        m.put("pairChartCount", cache.size());
+        m.put("chartEffectCount", chartEffectByKey.size());
+        return m;
     }
 
     /**
@@ -192,6 +335,10 @@ public class PairRegressionService {
 
     /**
      * 【メソッドの役割】 構築済みでなければ同期構築。多重呼び出しは内部ロックで安全。
+     *
+     * リクエストスレッドからは呼ばず（API は {@link #isReady()} を見て 503 を返す）、
+     * 練習メニュー生成のようなバッチ的な呼び出し元の保険として残している。
+     * バックグラウンド構築が走っている最中に呼ばれた場合はロックで完了を待つ。
      */
     public void ensureBuilt() {
         if (built) return;
@@ -203,10 +350,69 @@ public class PairRegressionService {
 
     /**
      * 【メソッドの役割】 キャッシュ全体を再構築する。
-     * 再構築コスト: 全 ANOTHER/LEGG スコア取得 + ユーザーごと譜面ペア生成 + 集計。
-     * 数秒オーダー。
+     * 再構築コスト: 全 ANOTHER/LEGG スコアのストリーミング取得 + ユーザーごと譜面ペア生成 + 集計。
+     * 本番（264 万行の scores）で数十秒オーダー。同時に 2 本走らないよう {@link #buildLock} で直列化する。
+     * 構築中も旧キャッシュはそのまま配信され、末尾でフィールドを差し替えた時点で新キャッシュに切り替わる。
      */
     public void rebuild() {
+        synchronized (buildLock) {
+            doRebuild();
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 構築用トランザクションの statement_timeout を緩める。
+     *
+     * 接続既定の 30 秒（Hikari の connection-init-sql）は他の API を守るためのもので、
+     * 70 万行を返すこのクエリには短すぎる。{@code SET LOCAL} はトランザクション終了で元に戻る。
+     * H2（ローカル）には無い構文なので PostgreSQL のときだけ発行する。
+     */
+    private void relaxStatementTimeout(JdbcTemplate jdbc) {
+        String product = jdbc.execute((ConnectionCallback<String>) c -> c.getMetaData().getDatabaseProductName());
+        if (product != null && product.toLowerCase().contains("postgres")) {
+            jdbc.execute("SET LOCAL statement_timeout = '" + BUILD_STATEMENT_TIMEOUT + "'");
+        }
+    }
+
+    /** ユーザーごとの packed スコアを溜める可変長 long 配列（ボックス化を避ける）。 */
+    static final class LongList {
+        private long[] a = new long[32];
+        private int n = 0;
+
+        void add(long v) {
+            if (n == a.length) a = java.util.Arrays.copyOf(a, n * 2);
+            a[n++] = v;
+        }
+
+        long[] toArray() {
+            return java.util.Arrays.copyOf(a, n);
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 同じ譜面の重複行（source 違い等）を最大スコア 1 本に潰す。
+     *
+     * packed = (chartIdx &lt;&lt; 32) | score なので、昇順ソートすると同じ譜面の行が並び、
+     * 最後の要素がその譜面の最大スコアになる。結果は chartIdx 昇順。
+     *
+     * @param packed ユーザー 1 人ぶんの packed スコア（順不同）
+     * @return 重複を除いた packed 配列
+     */
+    static long[] dedupeMaxByChart(long[] packed) {
+        if (packed.length <= 1) return packed;
+        java.util.Arrays.sort(packed);
+        int w = 0;
+        for (int i = 0; i < packed.length; i++) {
+            if (w > 0 && (packed[w - 1] >>> 32) == (packed[i] >>> 32)) {
+                packed[w - 1] = packed[i]; // 同じ譜面 → 大きい方（ソート済みなので後ろ）で上書き
+            } else {
+                packed[w++] = packed[i];
+            }
+        }
+        return w == packed.length ? packed : java.util.Arrays.copyOf(packed, w);
+    }
+
+    private void doRebuild() {
         long t0 = System.currentTimeMillis();
 
         // 1) ノーツ数マップ
@@ -226,45 +432,53 @@ public class PairRegressionService {
         }
         int numCharts = chartKeys.length;
 
-        // 3) 全 ANOTHER/LEGG スコアを取得し、A 以上のみ user 別に
+        // 3) 全 ANOTHER/LEGG スコアをカーソルでストリーミング受信し、A 以上のみ user 別に
         // long[] へパック格納する。packed = (chartIdx << 32) | (score & 0xFFFFFFFFL)
-        // String/Integer のボックス化を避けてヒープ消費を抑える。
+        // 行を List<Map> に展開しないので、70 万行でも一時メモリは packed 配列ぶん（数 MB）で済む。
         // 同時に各譜面の community max（A以上の中での最大値 = そのまま実測最高）を集計。
-        Map<Long, java.util.List<long[]>> userScoresBuilder = new HashMap<>();
+        Map<Long, LongList> userScoresBuilder = new HashMap<>();
         Map<String, Integer> communityMaxMap = new HashMap<>();
-        for (Map<String, Object> row : scoreRepository.findAllAnotherLeggScores()) {
-            String key = row.get("title") + "\0" + row.get("difficultyName");
-            Integer chartIdx = chartIdxMap.get(key);
-            if (chartIdx == null) continue;
-            Integer notes = notesMap.get(key);
-            if (notes == null) continue;
-            int score = ((Number) row.get("score")).intValue();
-            if (score < notes * 2.0 * A_GRADE_RATE) continue;
-            long userId = ((Number) row.get("userId")).longValue();
-            long packed = ((long) chartIdx << 32) | (score & 0xFFFFFFFFL);
-            userScoresBuilder.computeIfAbsent(userId, k -> new java.util.ArrayList<>()).add(new long[]{packed});
-            Integer prevMax = communityMaxMap.get(key);
-            if (prevMax == null || score > prevMax) communityMaxMap.put(key, score);
-        }
+        final long[] rowCounter = {0L, 0L}; // [受信行数, 採用行数]
+        txTemplate.execute(status -> {
+            JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+            jdbc.setFetchSize(STREAM_FETCH_SIZE);
+            relaxStatementTimeout(jdbc);
+            jdbc.query(REBUILD_SCORES_SQL, rs -> {
+                rowCounter[0]++;
+                String key = rs.getString(2) + "\0" + rs.getString(3);
+                Integer chartIdx = chartIdxMap.get(key);
+                if (chartIdx == null) return;
+                Integer notes = notesMap.get(key);
+                if (notes == null) return;
+                int score = rs.getInt(4);
+                if (score < notes * 2.0 * A_GRADE_RATE) return;
+                long userId = rs.getLong(1);
+                long packed = ((long) chartIdx << 32) | (score & 0xFFFFFFFFL);
+                userScoresBuilder.computeIfAbsent(userId, k -> new LongList()).add(packed);
+                Integer prevMax = communityMaxMap.get(key);
+                if (prevMax == null || score > prevMax) communityMaxMap.put(key, score);
+                rowCounter[1]++;
+            });
+            return null;
+        });
 
-        // List<long[]> → 単一 long[] に圧縮
+        // LongList → 単一 long[] に圧縮。同じ譜面の重複行（source 違い）は最大スコアに潰す。
         Map<Long, long[]> userScores = new HashMap<>(userScoresBuilder.size() * 2);
         // 同時に「譜面 idx → 演奏したユーザー集合」インデックスも作る（per-A 処理の高速化用）
         @SuppressWarnings("unchecked")
         java.util.List<Long>[] chartUsers = new java.util.List[numCharts];
-        for (Map.Entry<Long, java.util.List<long[]>> e : userScoresBuilder.entrySet()) {
-            java.util.List<long[]> list = e.getValue();
-            long[] arr = new long[list.size()];
-            for (int i = 0; i < arr.length; i++) {
-                arr[i] = list.get(i)[0];
-                int idx = (int) (arr[i] >>> 32);
+        for (Map.Entry<Long, LongList> e : userScoresBuilder.entrySet()) {
+            long[] arr = dedupeMaxByChart(e.getValue().toArray());
+            for (long packed : arr) {
+                int idx = (int) (packed >>> 32);
                 if (chartUsers[idx] == null) chartUsers[idx] = new java.util.ArrayList<>();
                 chartUsers[idx].add(e.getKey());
             }
             userScores.put(e.getKey(), arr);
         }
-        userScoresBuilder = null; // GC 促進
-        log.info("PairRegressionService: {} users, {} charts in scope", userScores.size(), numCharts);
+        userScoresBuilder.clear(); // 以降は userScores だけを使う（GC 促進）
+        log.info("PairRegressionService: {} users, {} charts in scope ({} rows received, {} A+ rows kept, {} ms)",
+                userScores.size(), numCharts, rowCounter[0], rowCounter[1], System.currentTimeMillis() - t0);
 
         // notes を idx でひける配列にしておく（タイトループ内の Map.get を避けるため）
         int[] notesByIdx = new int[numCharts];
@@ -369,6 +583,10 @@ public class PairRegressionService {
         pooledResidSd = fit.pooledSd;
         built = true;
         long elapsed = System.currentTimeMillis() - t0;
+        lastBuiltAtMs = System.currentTimeMillis();
+        lastBuildMs = elapsed;
+        lastRowCount = rowCounter[0];
+        lastError = null;
         log.info("PairRegressionService rebuilt in {} ms ({} chartA, {} kept pairs after filter, {} chart effects, pooled sd {})",
                 elapsed, newCache.size(), keptPairs, newEffects.size(), String.format("%.3f", fit.pooledSd));
     }

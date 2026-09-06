@@ -137,7 +137,7 @@
  *
  * @prop totalPoints 現在の Beat-PT 合計。次ランクまでの gap 計算に使用。
  */
-import { computed, ref, watch, onMounted } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { getNextRankInfo } from '../utils/beatTier';
@@ -215,12 +215,24 @@ const loadError = ref('');
 /** 取得中に再取得を要求されたら、完了後に 1 回だけ追いかけるためのフラグ。 */
 let pendingRefetch = false;
 
+/** バックエンドがキャッシュ構築中（503）のときの再試行タイマー。アンマウント時に止める。 */
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+/** 503 での再試行回数。上限を超えたらエラー表示に切り替える。 */
+let buildingRetries = 0;
+/** 503 再試行の上限。15 秒 × 12 = 約 3 分。本番の構築は数十秒なので通常 1〜3 回で抜ける。 */
+const MAX_BUILDING_RETRIES = 12;
+/** 503 の応答に retryAfterSec が無いときの待ち秒数。 */
+const DEFAULT_RETRY_AFTER_SEC = 15;
+
 /**
- * コスパ埋めレコメンドを取得する。初回はペア回帰キャッシュ構築で数秒かかることがある。
+ * コスパ埋めレコメンドを取得する。
  * ダッシュボード表示直後は合計 pt が数回入れ替わるため、取得中の要求は 1 回にまとめる。
  *
  * 次ランクまでの残り pt（gap）を渡すと、バックエンドは達成率降順にその差分を満たすまで返す。
  * フロントの BEAT-PT 計算と同じ値を渡すので、表示している「あと n pt」と候補の範囲が一致する。
+ *
+ * バックエンドのペア回帰キャッシュは起動直後や日次再構築の間は未完成で、その間 API は
+ * 503 + retryAfterSec を返す。その場合は「計算中」の表示のまま待って取り直す。
  */
 async function fetchRecommendation() {
   if (isLoading.value) {
@@ -229,24 +241,43 @@ async function fetchRecommendation() {
   }
   isLoading.value = true;
   loadError.value = '';
+  let waitingForBuild = false;
   try {
     const params = new URLSearchParams({ gap: nextRankGap.value.toFixed(2) });
     const res = await fetch(`${API_BASE}/api/analysis/fill-recommendation?${params}`, { headers: authHeaders() });
+    if (res.status === 503 && buildingRetries < MAX_BUILDING_RETRIES) {
+      buildingRetries++;
+      const body = await res.json().catch(() => ({} as { retryAfterSec?: number }));
+      const waitMs = Number(body?.retryAfterSec ?? DEFAULT_RETRY_AFTER_SEC) * 1000;
+      waitingForBuild = true;
+      retryTimer = setTimeout(() => {
+        retryTimer = null;
+        isLoading.value = false; // 再入ガードを外してから取り直す
+        fetchRecommendation();
+      }, waitMs);
+      return;
+    }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json() as { items: FillRecommendationItem[] };
     items.value = data.items ?? [];
     visibleCount.value = PAGE_SIZE;
+    buildingRetries = 0;
   } catch (e: any) {
     loadError.value = e?.message ?? 'fetch failed';
     items.value = [];
   } finally {
-    isLoading.value = false;
+    // 構築待ちの間は「計算中」を出し続けるので isLoading を立てたままにする。
+    if (!waitingForBuild) isLoading.value = false;
   }
-  if (pendingRefetch) {
+  if (!waitingForBuild && pendingRefetch) {
     pendingRefetch = false;
     await fetchRecommendation();
   }
 }
+
+onBeforeUnmount(() => {
+  if (retryTimer) clearTimeout(retryTimer);
+});
 
 /** 【computed の役割】 次ランクの必要 pt と現在 pt の差。既に最高位なら 0 を返す。 */
 const nextRankGap = computed(() => {

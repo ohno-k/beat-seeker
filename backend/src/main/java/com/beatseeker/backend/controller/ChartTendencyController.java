@@ -572,10 +572,60 @@ public class ChartTendencyController {
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
+        if (!pairRegressionService.isReady()) return cacheBuildingResponse();
         List<Map<String, Object>> items = pairRegressionService.computeGrowthPotential(user.getId());
         Map<String, Object> result = new HashMap<>();
         result.put("items", items);
         return ResponseEntity.ok(result);
+    }
+
+    /** 未構築のキャッシュを待たせる際の Retry-After 秒数。本番の構築は数十秒なので 15 秒刻みで十分。 */
+    private static final int CACHE_RETRY_AFTER_SEC = 15;
+
+    /**
+     * 【メソッドの役割】 ペア回帰キャッシュが未構築のときに返す 503 レスポンス。
+     *
+     * リクエストスレッドで数十秒の構築を始めると接続既定の statement_timeout（30 秒）に掛かって
+     * 500 になる（2026-09 本番障害）ため、構築はバックグラウンドに任せ、フロントには
+     * {@code Retry-After} で再試行を促す。起動直後の構築が失敗していた場合に備えて、ここでも
+     * バックグラウンド構築を（走っていなければ）起こしておく。
+     */
+    private ResponseEntity<Map<String, Object>> cacheBuildingResponse() {
+        pairRegressionService.rebuildAsync("request");
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", "building");
+        body.put("retryAfterSec", CACHE_RETRY_AFTER_SEC);
+        return ResponseEntity.status(503)
+                .header("Retry-After", String.valueOf(CACHE_RETRY_AFTER_SEC))
+                .body(body);
+    }
+
+    /**
+     * 【メソッドの役割】 管理者向け: ペア回帰キャッシュの状態を返す。
+     *
+     * GET /api/admin/pair-regression/status
+     */
+    @GetMapping("/api/admin/pair-regression/status")
+    public ResponseEntity<Map<String, Object>> pairRegressionStatus(Authentication auth) {
+        checkAdmin(auth);
+        return ResponseEntity.ok(pairRegressionService.status());
+    }
+
+    /**
+     * 【メソッドの役割】 管理者向け: ペア回帰キャッシュをバックグラウンドで再構築する。
+     * 日次（04:30 JST）を待たずに最新スコアを取り込みたいときに使う。
+     *
+     * POST /api/admin/pair-regression/rebuild
+     *
+     * @return {@code {started: bool, ...status}}。既に構築中なら started=false
+     */
+    @PostMapping("/api/admin/pair-regression/rebuild")
+    public ResponseEntity<Map<String, Object>> pairRegressionRebuild(Authentication auth) {
+        checkAdmin(auth);
+        boolean started = pairRegressionService.rebuildAsync("admin");
+        Map<String, Object> body = new HashMap<>(pairRegressionService.status());
+        body.put("started", started);
+        return ResponseEntity.ok(body);
     }
 
     /**
@@ -597,6 +647,7 @@ public class ChartTendencyController {
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
+        if (!pairRegressionService.isReady()) return cacheBuildingResponse();
         List<Map<String, Object>> items = pairRegressionService.computeGrowthPotential(user.getId());
         Map<String, Object> result = new HashMap<>();
         result.put("items", items);
@@ -633,6 +684,7 @@ public class ChartTendencyController {
         }
         // gap: フロントが表示している「次ランクまでの残り pt」。渡されればそれを満たすまで候補を返す。
         // 省略時はサーバー側の副ティア境界から算出する（フロントの BEAT-PT 計算と一致しない場合の保険）。
+        if (!pairRegressionService.isReady()) return cacheBuildingResponse();
         return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId(), gap));
     }
 
@@ -656,6 +708,7 @@ public class ChartTendencyController {
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
+        if (!pairRegressionService.isReady()) return cacheBuildingResponse();
         return ResponseEntity.ok(fillRecommendationService.computeFillRecommendation(user.getId(), gap));
     }
 
@@ -681,6 +734,7 @@ public class ChartTendencyController {
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
+        if (!pairRegressionService.isReady()) return cacheBuildingResponse();
         List<Map<String, Object>> refs = pairRegressionService.computePotentialRefs(
                 user.getId(), title, difficultyName);
         return ResponseEntity.ok(Map.of("refs", refs));
@@ -703,6 +757,7 @@ public class ChartTendencyController {
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
+        if (!pairRegressionService.isReady()) return cacheBuildingResponse();
         List<Map<String, Object>> refs = pairRegressionService.computePotentialRefs(
                 user.getId(), title, difficultyName);
         return ResponseEntity.ok(Map.of("refs", refs));
