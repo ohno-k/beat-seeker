@@ -58,6 +58,8 @@ const NAV_DEFS: ReadonlyArray<{ id: string; labelKey: string; iconPath: string }
   { id: 'song-avg', labelKey: 'nav.songAvg', iconPath: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
   { id: 'diff-table', labelKey: 'nav.diffTable', iconPath: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
   { id: 'rank-comparison', labelKey: 'nav.rankComparison', iconPath: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3' },
+  { id: 'score-prediction', labelKey: 'nav.scorePrediction', iconPath: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+  { id: 'score-scatter', labelKey: 'nav.scoreScatter', iconPath: 'M3 3v18h18M7 17l4-8 3 5 5-9' },
   { id: 'changelog', labelKey: 'nav.changelog', iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
   { id: 'about', labelKey: 'nav.about', iconPath: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
 ];

@@ -201,6 +201,11 @@ const extraItems = computed(() => [
   { id: 'song-avg', label: t('nav.songAvg'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
   { id: 'diff-table', label: t('nav.diffTable'), icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
   { id: 'rank-comparison', label: t('nav.rankComparison'), icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3', allowedUserIds: [18, 23, 24] },
+  // 譜面分析（スコア予測）: サポーター限定。非サポーターにも項目自体は見せ、
+  // 開くと SupporterLock（Ko-fi 導線）を表示する。
+  { id: 'score-prediction', label: t('nav.scorePrediction'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
+  // スコアペア散布図: サポーター限定（最下部）
+  { id: 'score-scatter', label: t('nav.scoreScatter'), icon: 'M3 3v18h18M7 17l4-8 3 5 5-9', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
 ]);
 
 /** 「もっと見る」を押した状態。展開すると extraItems がインライン表示される。 */
@@ -230,17 +235,21 @@ const { isAdmin } = useAdmin();
 /**
  * 【内部ヘルパー】 ユーザー状態に応じてナビゲーション項目を絞り込む。
  * - requiresAuth: 未ログインなら除外
- * - hideOnViewing: 他ユーザー閲覧モード中は除外（ただし history は admin モードでは許可）
+ * - hideOnViewing: 他ユーザー閲覧モード中は除外（ただし score-prediction / history は admin モードでは許可）
  * - allowedUserIds: 指定 ID のユーザーのみ表示
+ *
+ * supporterOnly はここでは絞り込まない（意図的）。
+ * 非サポーターにも項目を見せて「Supporter」バッジ + ロック画面で課金導線に繋げる設計のため、
+ * 実際の出し分けは App.vue 側の `user?.isSupporter` 判定で行う。
  */
 type NavItem = { id: string; label: string; icon: string; requiresAuth?: boolean; hideOnViewing?: boolean; allowedUserIds?: number[]; supporterOnly?: boolean };
 const applyVisibilityFilter = (items: NavItem[]): NavItem[] => {
   return items.filter(item => {
     if (item.requiresAuth && !props.isLoggedIn) return false;
     if (item.hideOnViewing && props.viewingUserId) {
-      // admin モード閲覧中は history を例外的に許可
+      // admin モード閲覧中は score-prediction / history を例外的に許可
       // （管理者がユーザー挙動・成長記録を確認するため。/api/admin/users/{id}/history を参照）
-      if (item.id === 'history' && props.viewingMode === 'admin') return true;
+      if ((item.id === 'score-prediction' || item.id === 'history') && props.viewingMode === 'admin') return true;
       return false;
     }
     if (item.allowedUserIds && (!props.user || !item.allowedUserIds.includes(props.user.id))) return false;

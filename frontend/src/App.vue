@@ -54,6 +54,8 @@ import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
 import WhatsNewModal from './components/WhatsNewModal.vue';
 import ShareImportModal from './components/ShareImportModal.vue';
+// サポーター限定タブ（譜面分析 / スコアペア散布図）を非サポーターが開いたときのロック画面。
+import SupporterLock from './components/SupporterLock.vue';
 import { defineAsyncComponent } from 'vue';
 // 重いサブビュー / モーダルは遅延ロード。各タブが選択された時に初めて該当チャンクがフェッチされる。
 // chart.js / html2canvas / tesseract.js などの大きな依存をユーザーが触るタイミングまで遅らせる効果がある。
@@ -62,6 +64,10 @@ const TierVotingView = defineAsyncComponent(() => import('./views/TierVotingView
 const ArcadeAssistView = defineAsyncComponent(() => import('./views/ArcadeView.vue'));
 const SongAverageView = defineAsyncComponent(() => import('./views/SongAverageView.vue'));
 const DifficultyTableView = defineAsyncComponent(() => import('./views/DifficultyTableView.vue'));
+// 譜面分析（スコア予測）/ スコアペア散布図: どちらもサポーター限定タブ。
+// 非サポーターには SupporterLock を出すので、本体チャンクはサポーターだけがフェッチする。
+const ScorePredictionView = defineAsyncComponent(() => import('./views/ScorePredictionView.vue'));
+const ScoreScatterView = defineAsyncComponent(() => import('./views/ScoreScatterView.vue'));
 const SkillTreeView = defineAsyncComponent(() => import('./views/SkillTreeView.vue'));
 const ChartListView = defineAsyncComponent(() => import('./views/ChartListView.vue'));
 // 作品別スコア一覧: プロフィールの「過去作スコア」で作品ラベルを押したときだけ開く。
@@ -295,25 +301,28 @@ const isCmdkOpen = ref(false);
 /**
  * 【computed の役割】 コマンドパレットに渡す利用可能タブ ID 一覧。
  *
- * Sidebar.vue の filteredNavItems と同じ条件（requiresAuth / hideOnViewing / history の admin 例外）
+ * Sidebar.vue の filteredNavItems と同じ条件（requiresAuth / hideOnViewing / score-prediction・history の admin 例外）
  * を再現する。サイドバーで隠れているタブはコマンドパレットからも開けないようにして UI の一貫性を保つ。
+ *
+ * supporterOnly なタブ（score-prediction / score-scatter）はサイドバー同様ここでも除外しない。
+ * 非サポーターが開くとロック画面（SupporterLock）に着地して課金導線になる。
  */
 const availableCmdkTabIds = computed<string[]>(() => {
   const ALL = [
     'dashboard', 'table', 'profile', 'ranking', 'friends', 'history', 'arena',
     'arcade-assist', 'tier-voting', 'song-avg', 'diff-table', 'rank-comparison',
-    'changelog', 'about',
+    'score-prediction', 'score-scatter', 'changelog', 'about',
   ];
   // Sidebar.vue navigationItems と同じ判定
-  const REQUIRES_AUTH = new Set(['profile', 'friends', 'history', 'arena', 'arcade-assist']);
-  const HIDE_ON_VIEWING = new Set(['friends', 'history', 'arena', 'arcade-assist']);
+  const REQUIRES_AUTH = new Set(['profile', 'friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
+  const HIDE_ON_VIEWING = new Set(['friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
   const RANK_COMPARISON_ALLOWED_IDS = [18, 23, 24];
 
   return ALL.filter((id) => {
     if (REQUIRES_AUTH.has(id) && !isLoggedIn.value) return false;
     if (HIDE_ON_VIEWING.has(id) && viewingUserId.value) {
-      // admin モード閲覧中は history を例外的に許可（Sidebar.vue と同じ判定）
-      if (id === 'history' && viewingMode.value === 'admin') return true;
+      // admin モード閲覧中は score-prediction / history を例外的に許可（Sidebar.vue と同じ判定）
+      if ((id === 'score-prediction' || id === 'history') && viewingMode.value === 'admin') return true;
       return false;
     }
     if (id === 'rank-comparison' && (!user.value || !RANK_COMPARISON_ALLOWED_IDS.includes(user.value.id))) return false;
@@ -374,7 +383,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'score-scatter' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores'>('dashboard')
 
 // 【watch】 スコア一覧タブが要求されたら ScoreSummary を遅延マウントする。
 // （サイドバー / コマンドパレット等どの経路でタブが変わっても拾えるようここで一元化する）
@@ -430,6 +439,8 @@ const activeTabLabel = computed<string>(() => {
     'song-avg': t('nav.songAvg'),
     'diff-table': t('nav.diffTable'),
     'rank-comparison': t('nav.rankComparison'),
+    'score-prediction': t('nav.scorePrediction'),
+    'score-scatter': t('nav.scoreScatter'),
     'popular-songs': t('nav.popularSongs'),
     'skill-tree': t('nav.skillTree'),
     'chart-list': t('nav.chartList'),
@@ -770,6 +781,9 @@ onMounted(() => {
     '/competition-admin': 'competition-admin',
     '/admin/user-comparison': 'admin-user-comparison',
     '/training': 'training',
+    // サポーター限定の分析タブ（直接アクセス・ブックマーク用）。
+    '/score-prediction': 'score-prediction',
+    '/score-scatter': 'score-scatter',
     // 作品別スコア一覧から戻ったときに書き戻す URL。リロードでもプロフィールに着地させる。
     '/profile': 'profile',
   };
@@ -787,6 +801,11 @@ onMounted(() => {
       activeTab.value = 'profile';
       window.history.replaceState({}, document.title, '/profile');
     }
+  } else if (currentPath.startsWith('/chart/')) {
+    // /chart/:version/:slug/:diff 形式の譜面分析ディープリンク。
+    // ScorePredictionView 自身が useRoute() でパラメータを読み取り曲を自動選択する。
+    // サポーター限定タブなので、非サポーターはロック画面に着地する。
+    activeTab.value = 'score-prediction';
   } else if (currentPath.startsWith('/share/')) {
     // /share/:token 形式の URL 共有ページ。ShareView がトークンを読み取って描画する。
     activeTab.value = 'share';
@@ -2316,6 +2335,32 @@ const handleUnifiedClose = async () => {
         <!-- ランク比較（特定ユーザーのみ表示） -->
         <template v-else-if="activeTab === 'rank-comparison'">
           <RankComparisonView class="w-full max-w-6xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- 譜面分析（スコア予測）: サポーター限定。非サポーターには課金誘導カードを表示。
+             admin 閲覧モード中だけは管理者が他ユーザーの傾向を確認できるよう素通しする。 -->
+        <template v-else-if="activeTab === 'score-prediction'">
+          <SupporterLock
+            v-if="!user?.isSupporter && viewingMode !== 'admin'"
+            :user="user"
+            :feature-name="t('nav.scorePrediction')"
+          />
+          <ScorePredictionView
+            v-else
+            class="w-full max-w-6xl mx-auto animate-fade-in"
+            :viewing-user-id="viewingUserId"
+            :viewing-mode="viewingMode === 'admin' || viewingMode === 'friend' ? viewingMode : null"
+          />
+        </template>
+
+        <!-- スコアペア散布図: サポーター限定。非サポーターには課金誘導カードを表示 -->
+        <template v-else-if="activeTab === 'score-scatter'">
+          <SupporterLock
+            v-if="!user?.isSupporter"
+            :user="user"
+            :feature-name="t('nav.scoreScatter')"
+          />
+          <ScoreScatterView v-else />
         </template>
 
         <!-- プロフィール: 統計ダッシュボード（グラフ多数） -->

@@ -26,6 +26,8 @@ const TermsView = () => import('../views/TermsView.vue')
 const AboutView = () => import('../views/AboutView.vue')
 const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
 const ChartListView = () => import('../views/ChartListView.vue')
+const ScorePredictionView = () => import('../views/ScorePredictionView.vue')
+const ScoreScatterView = () => import('../views/ScoreScatterView.vue')
 const PastVersionScoresView = () => import('../views/PastVersionScoresView.vue')
 const ShareView = () => import('../views/ShareView.vue')
 const CompetitionAdminView = () => import('../views/CompetitionAdminView.vue')
@@ -84,6 +86,16 @@ const router = createRouter({
     { path: '/difficulty-table', name: 'difficulty-table', component: AboutView },
     // 譜面リスト
     { path: '/chart-list', name: 'chart-list', component: ChartListView },
+    // 譜面分析（スコア予測）: サポーター限定。実体は App.vue 側で activeTab='score-prediction' として描画し、
+    // 非サポーターには SupporterLock（Ko-fi 導線）を出す。
+    { path: '/score-prediction', name: 'score-prediction', component: ScorePredictionView },
+    // スコアペア散布図: サポーター限定。同上（activeTab='score-scatter'）。
+    { path: '/score-scatter', name: 'score-scatter', component: ScoreScatterView },
+    // 譜面分析（スコア予測）の譜面別ディープリンク。サポーター限定機能。
+    // textage の譜面ID `<version>/<slug>.html?<diffCode>` を 3 つのパスセグメントに分解して保持。
+    // 例: textage `30/_cmflg.html?1AC00` → URL `/chart/30/_cmflg/1AC00`
+    // 外部サイトからのリンクや SNS 共有用の安定した URL として使う。
+    { path: '/chart/:version/:slug/:diff', name: 'chart-analysis', component: ScorePredictionView },
     // 作品別スコア一覧（プロフィールの過去作スコアから遷移）。
     // 実体は App.vue 側でパスを検知して activeTab='past-version-scores' として描画する。
     { path: '/past-scores/:version', name: 'past-version-scores', component: PastVersionScoresView },
