@@ -272,6 +272,8 @@ export const en = {
   'table.source': 'Source',
   'table.source.infinitas': 'INFINITAS',
   'table.source.arcade': 'Arcade',
+  'table.bestVersion': 'Best version',
+  'table.bestVersionHint': 'Filter by the version in which your all-time best score was set. Choosing the current version keeps only charts whose best is from this version.',
   'table.individualRate': 'Individual Rate',
   'table.optionVote': 'Option Voting',
   'table.voteCount': '{n} votes',
@@ -1086,6 +1088,7 @@ export const en = {
   'filter.clearAll': 'Clear all',
   'filter.searchTag': 'Search: {q}',
   'filter.hideZeroTag': 'Hide 0 score',
+  'filter.bestVersionTag': 'All-time best: {name}',
   'filter.removeChip': 'Remove {label}',
 
   // Empty state (no scores uploaded yet)

@@ -271,6 +271,8 @@ export const ko = {
   'table.source': '출처',
   'table.source.infinitas': 'INFINITAS',
   'table.source.arcade': '아케이드',
+  'table.bestVersion': '역대 베스트 작품',
+  'table.bestVersionHint': '역대 자기 베스트 스코어를 기록한 작품으로 필터링합니다. 현행작을 선택하면 이번 작품의 스코어가 역대 베스트인 보면만 남습니다.',
   'table.individualRate': '단일 곡 스코어 레이트',
   'table.optionVote': '추천 옵션 투표',
   'table.voteCount': '{n}건의 투표',
@@ -1087,6 +1089,7 @@ export const ko = {
   'filter.clearAll': '모두 지우기',
   'filter.searchTag': '검색: {q}',
   'filter.hideZeroTag': '0점 숨김',
+  'filter.bestVersionTag': '역대 베스트: {name}',
   'filter.removeChip': '{label} 해제',
 
   // Empty state (스코어 미업로드 시 안내)

@@ -2,7 +2,7 @@
   <!--
     ============================================================
     ScoreSummary.vue ルートテンプレート
-      - ヘッダ: タイトル + 件数表示 + フィルタ群（ゼロ非表示/レベル/難易度/DJ LEVEL/クリアタイプ/検索）
+      - ヘッダ: タイトル + 件数表示 + フィルタ群（ゼロ非表示/レベル/難易度/DJ LEVEL/クリアタイプ/取得元/歴代ベスト作品/検索）
       - モードタブ（BEAT-TIER / RATE-TIER）
       - データテーブル（displayScores を v-for）
       - ページネーション
@@ -146,6 +146,35 @@
                   class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
                 >
                 <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ t(`table.source.${src}`) }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 歴代ベスト作品フィルタ（歴代自己ベストスコアを出した作品で絞り込む）。過去作を取り込み済みの本人閲覧時のみ表示。 -->
+          <div v-if="canFilterBestVersion" class="relative w-full md:w-44">
+            <button
+              @click.stop="toggleDropdown('bestVersion')"
+              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
+              :title="t('table.bestVersionHint')"
+            >
+              <span class="truncate">{{ t('table.bestVersion') }}{{ filterBestVersion.length > 0 ? ` (${filterBestVersion.length})` : '' }}</span>
+              <!-- 選択直後は過去作スコアを遅延取得するので、その間だけスピナーを出す -->
+              <span v-if="isLoadingPast && filterBestVersion.length > 0" class="w-3 h-3 shrink-0 ml-1 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
+              <svg v-else class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div v-if="openDropdown === 'bestVersion'" class="absolute z-20 mt-1 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
+              <label v-for="v in bestVersionOptions" :key="v.num" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  :checked="isSelected(filterBestVersion, String(v.num))"
+                  @change="toggleFilterValue(filterBestVersion, String(v.num))"
+                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+                >
+                <span class="ml-3 px-1 py-0.5 text-[9px] font-bold rounded border leading-none shrink-0" :class="versionBadgeClass(v.num)">{{ v.num }}</span>
+                <span class="ml-2 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate">{{ v.name }}</span>
+                <span v-if="v.current" class="ml-1 text-[10px] text-slate-400 dark:text-slate-500 shrink-0">{{ t('past.manager.current') }}</span>
               </label>
             </div>
           </div>
@@ -1377,7 +1406,7 @@ import { DJ_LEVELS } from '../composables/constants';
 import { usePastScores } from '../composables/usePastScores';
 import type { ChartHistory } from '../composables/usePastScores';
 import { chartKey } from '../composables/usePastScores';
-import { versionShort, versionName, versionBadgeClass } from '../utils/iidxVersions';
+import { versionShort, versionName, versionBadgeClass, CURRENT_VERSION, SUPPORTED_VERSIONS } from '../utils/iidxVersions';
 import ResultImageSection from './ResultImageSection.vue';
 import RankIcon from './RankIcon.vue';
 import InformalRankBadge from './InformalRankBadge.vue';
@@ -1471,6 +1500,11 @@ const filterDjLevel = ref<string[]>([]);
 const filterClearType = ref<string[]>([]);
 /** 取得元フィルタ（'infinitas' / 'arcade'）。空配列は「全て」。 */
 const filterSource = ref<string[]>([]);
+/**
+ * 歴代ベスト作品フィルタ（'33' / '32' など作品番号の文字列）。空配列は「全て」。
+ * 「歴代自己ベストスコアをどの作品で出したか」で絞り込む。判定は {@link allTimeBestVersionByKey}。
+ */
+const filterBestVersion = ref<string[]>([]);
 /** 0 点譜面を非表示にするトグル。未プレイ曲を隠したい場合に使う。 */
 const hideZeroScore = ref(false);
 
@@ -1553,6 +1587,13 @@ const appliedFilterChips = computed<Array<{ id: string; label: string; remove: (
       remove: () => { filterSource.value = filterSource.value.filter(x => x !== src); },
     });
   });
+  filterBestVersion.value.forEach((v) => {
+    chips.push({
+      id: `bestVersion:${v}`,
+      label: t('filter.bestVersionTag', { name: versionName(Number(v)) }),
+      remove: () => { filterBestVersion.value = filterBestVersion.value.filter(x => x !== v); },
+    });
+  });
   if (hideZeroScore.value) {
     chips.push({
       id: 'hideZero',
@@ -1571,6 +1612,7 @@ const clearAllFilters = () => {
   filterDjLevel.value = [];
   filterClearType.value = [];
   filterSource.value = [];
+  filterBestVersion.value = [];
   hideZeroScore.value = false;
 };
 
@@ -2562,7 +2604,9 @@ const {
   fetchSummary: fetchPastSummary,
   buildChartHistories,
   applyAllTimeBest,
+  pastBestByChart,
   hasPastImports,
+  summary: pastSummary,
   isLoading: isLoadingPast,
 } = usePastScores();
 
@@ -2597,6 +2641,58 @@ const allFlatRecords = computed<ScoreRecord[]>(() => flattenScores(props.scores)
  * 過去スコアは遅延取得のため、取得前は現行作ぶんだけを含む Map になる。
  */
 const chartHistories = computed(() => buildChartHistories(allFlatRecords.value));
+
+// --- 歴代ベスト作品フィルタ ---
+
+/**
+ * 歴代ベスト作品フィルタを出すか。
+ * 過去作スコアは本人のデータなので他ユーザー閲覧中は出さない。
+ * 過去作を 1 作も取り込んでいなければ全譜面が現行作になり絞り込む意味が無いので、これも出さない。
+ */
+const canFilterBestVersion = computed(() => canUsePastMode.value && hasPastImports.value);
+
+/**
+ * 歴代ベスト作品フィルタの選択肢（新しい順）。
+ * 現行作は常に出し、過去作は取り込み済みのものだけを出す（未取込の作品を選んでも 0 件にしかならないため）。
+ */
+const bestVersionOptions = computed(() =>
+  SUPPORTED_VERSIONS.filter(v =>
+    v.current || pastSummary.value.some(s => s.version === v.num && s.chartCount > 0)
+  )
+);
+
+/**
+ * 【computed】 譜面キー → 歴代自己ベストスコアを出した作品番号。
+ *
+ * 判定は {@link applyAllTimeBest} と同じく「過去作のスコアが現行作を *上回る* ときだけ過去作」
+ * （同点は現行作扱い）。これにより「歴代ベストを反映」ON 時に行へ付く作品バッジと、
+ * このフィルタの結果が必ず一致する。
+ * 現行作のみの {@link allFlatRecords} から作るので、歴代反映トグルの ON/OFF には依存しない。
+ * 過去スコア取得前は全譜面が現行作になる（フィルタ選択時に遅延取得する）。
+ */
+const allTimeBestVersionByKey = computed<Map<string, number>>(() => {
+  const bestByChart = pastBestByChart();
+  const map = new Map<string, number>();
+  allFlatRecords.value.forEach(rec => {
+    const key = chartKey(rec.title, rec.difficultyName);
+    const past = bestByChart.get(key);
+    map.set(key, past && past.score > rec.score ? past.version : CURRENT_VERSION);
+  });
+  return map;
+});
+
+/**
+ * フィルタで作品が選ばれた瞬間に過去作スコア（数千件になり得る）を取得する。
+ * 取得済みならキャッシュが使われて何も起きない。現行作だけを選んだ場合も、
+ * 「過去作に抜かれていない譜面」を判定するために過去作スコアが要る。
+ */
+watch(filterBestVersion, (val) => {
+  if (val.length === 0) return;
+  fetchPastBest().catch(() => { /* 握り潰し: 取得できなければ全譜面が現行作扱いになるだけ */ });
+}, { deep: true });
+
+/** フィルタを出せない状態（ログアウト・他ユーザー閲覧など）になったら選択を破棄し、隠れたフィルタが効き続けないようにする。 */
+watch(canFilterBestVersion, (ok) => { if (!ok) filterBestVersion.value = []; });
 
 /** 【computed】 モーダルで選択中の譜面の歴代推移。 */
 const selectedChartHistory = computed<ChartHistory | null>(() => {
@@ -2946,7 +3042,7 @@ watch(isLoggedIn, (val) => { if (val) fetchSongRanks(); });
 
 /** フィルタ/ソート/件数のどれかが変わったらページ番号を 1 に戻す（UX 改善）。 */
 watch(
-  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, filterSource, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
+  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, filterSource, filterBestVersion, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
   () => {
     currentPage.value = 1;
   },
@@ -3002,7 +3098,7 @@ const toggleSort = (key: SortKey) => {
  *
  * 処理フロー:
  *  手順1: モード（通常 / rate）に応じたベースリストを複製。
- *  手順2: hideZeroScore / difficulty / level / djLevel / clearType のフィルタを順次適用。
+ *  手順2: hideZeroScore / difficulty / level / djLevel / clearType / source / bestVersion のフィルタを順次適用。
  *  手順3: 検索ワードで title / artist / genre / clearType の部分一致フィルタ。
  *  手順4: sortKey ごとに専用のソート比較関数を適用。
  *         - informalRank: 末尾の数値（例 "12.5"）を抽出して比較、次点で difficultyLevel → title。
@@ -3036,6 +3132,13 @@ const filteredScores = computed(() => {
 
   if (filterSource.value.length > 0) {
     result = result.filter(r => r.source != null && filterSource.value.includes(r.source));
+  }
+
+  // 歴代ベスト作品: 譜面キーで引く（歴代反映で score が置き換わった行でも判定が揺れないよう、行の score は見ない）
+  if (filterBestVersion.value.length > 0) {
+    result = result.filter(r => filterBestVersion.value.includes(
+      String(allTimeBestVersionByKey.value.get(chartKey(r.title, r.difficultyName)) ?? CURRENT_VERSION)
+    ));
   }
 
   const query = searchQuery.value.toLowerCase().trim();

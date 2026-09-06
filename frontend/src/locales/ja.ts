@@ -276,6 +276,8 @@ export const ja = {
   'table.source': '取得元',
   'table.source.infinitas': 'INFINITAS',
   'table.source.arcade': 'アーケード',
+  'table.bestVersion': '歴代ベスト作品',
+  'table.bestVersionHint': '歴代自己ベストスコアを出した作品で絞り込みます。現行作を選ぶと、今作のスコアが歴代ベストの譜面だけになります。',
   'table.individualRate': '単曲スコアレート',
   'table.optionVote': 'おすすめオプション投票',
   'table.voteCount': '{n} 件の投票',
@@ -1144,6 +1146,7 @@ export const ja = {
   'filter.clearAll': '全クリア',
   'filter.searchTag': '検索: {q}',
   'filter.hideZeroTag': '0点を非表示',
+  'filter.bestVersionTag': '歴代ベスト: {name}',
   'filter.removeChip': '{label} を解除',
 
   // Empty state (スコア未アップロード時のガイド)
