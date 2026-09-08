@@ -462,6 +462,8 @@ export const ko = {
   'report.lampUp': 'LAMP UP!',
   'report.allTimeBest': '역대 자기 베스트 갱신!',
   'report.allTimeBestHint': '{version}의 베스트를 넘었습니다',
+  'report.allTimeBestExtended': '역대 베스트 갱신',
+  'report.allTimeBestExtendedHint': '이번 작품에서 세운 역대 자기 베스트를 더 갱신했습니다',
   'report.inTop100': 'TOP100',
   'report.outOfRange': '권외',
   'report.outputOptions': '이미지 출력 옵션',

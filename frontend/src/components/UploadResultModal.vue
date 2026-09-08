@@ -257,7 +257,9 @@
                   class="px-4 py-3 rounded-md border transition-colors"
                   :class="song.allTimeBestUpdated
                     ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 ring-1 ring-amber-300 dark:ring-amber-700'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
+                    : song.allTimeBestExtended
+                      ? 'bg-amber-50/40 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/60'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
                 >
 
                   <!-- 行 1: 歴代更新 / 難易度バッジ / 単曲ティア / ソングランク / LAMP UP バッジ / DJ LEVEL 情報 / RATE TOP100 -->
@@ -268,6 +270,12 @@
                       class="px-1.5 py-0.5 rounded text-[9px] font-bold border shrink-0 bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700"
                       :title="song.allTimeBeatenVersion ? t('report.allTimeBestHint', { version: `${song.allTimeBeatenVersion} ${versionName(song.allTimeBeatenVersion)}` }) : ''"
                     >★ {{ t('report.allTimeBest') }}</span>
+                    <!-- 元々現行作が歴代ベストだった譜面をさらに伸ばしたとき（上より控えめ） -->
+                    <span
+                      v-else-if="song.allTimeBestExtended"
+                      class="px-1.5 py-0.5 rounded text-[9px] font-bold border shrink-0 bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400/90 dark:border-amber-800/60"
+                      :title="t('report.allTimeBestExtendedHint')"
+                    >☆ {{ t('report.allTimeBestExtended') }}</span>
                     <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border shrink-0" :class="getDifficultyColorClass(song.difficulty)">
                       {{ song.difficulty }}
                     </span>
@@ -501,7 +509,9 @@
                class="flex items-center justify-between p-5 rounded-md border"
                :class="song.allTimeBestUpdated
                  ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700'
-                 : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
+                 : song.allTimeBestExtended
+                   ? 'bg-amber-50/40 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/60'
+                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
              >
                <div class="flex-1 min-w-0 pr-4">
                  <div class="flex items-center gap-2 mb-2 flex-wrap">
@@ -509,6 +519,10 @@
                       v-if="song.allTimeBestUpdated"
                       class="px-2 py-1 rounded text-sm font-bold border shrink-0 bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700"
                     >★ {{ t('report.allTimeBest') }}</span>
+                    <span
+                      v-else-if="song.allTimeBestExtended"
+                      class="px-2 py-1 rounded text-sm font-bold border shrink-0 bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400/90 dark:border-amber-800/60"
+                    >☆ {{ t('report.allTimeBestExtended') }}</span>
                     <span class="px-3 py-1 rounded text-sm font-bold border shrink-0" :class="getDifficultyColorClass(song.difficulty)">{{ song.difficulty }}</span>
                     <template v-for="rankNumImg in [getNumericRank(song.informalRank)]" :key="'rank-img'">
                       <span v-if="rankNumImg" class="px-2 py-1 rounded text-sm font-bold border shrink-0 bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">☆{{ rankNumImg }}</span>

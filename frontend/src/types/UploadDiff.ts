@@ -41,6 +41,15 @@ export interface UpdatedSong {
     allTimeBestUpdated?: boolean;
     /** 上記が true のとき、それまで歴代ベストを保持していた作品のバージョン番号。 */
     allTimeBeatenVersion?: number;
+    /**
+     * 元々現行作のスコアが歴代自己ベストだった譜面を、今回さらに更新したか。
+     *
+     * 「過去作にもスコアがあり、既に現行作がそれ以上（同値含む）だった」かつ
+     * 「今回 EX スコアが伸びた」場合に true になる。{@link allTimeBestUpdated} とは排他で、
+     * こちらは *歴代ベストを維持したまま伸ばした* 弱い達成として、控えめに強調表示する。
+     * 過去作にスコアが無い譜面（新曲・過去作未プレー）や、過去作 CSV 未取り込みのユーザーでは立たない。
+     */
+    allTimeBestExtended?: boolean;
 }
 
 export interface UploadDiffResult {
