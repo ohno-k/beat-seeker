@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 /** バックエンド API のベース URL。 */
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-/** ラダー種別。現在はスコアリーグ（3曲平均スコアレート）のみ（BP リーグは廃止）。 */
+/** ラダー種別。スコアリーグ（課題曲3曲の着順ポイント制）のみ。 */
 export type LadderType = 'score';
 
 /** 自分のリーグ参加エントリー（1 ラダー分）。 */
@@ -12,7 +12,7 @@ export interface LeagueEntry {
   ladderType: LadderType;
   /** 現在の所属 DIVISION（0=LEGEND、1..10）。 */
   currentTier: number | null;
-  /** 昇降格ポイント（-4..+4）。+4 到達で昇格、-4 到達で降格。DIVISION 変動後は 0。 */
+  /** 昇降格ポイント（-8..+8）。+8 到達で昇格、-8 到達で降格。昇格後は -4、降格後は +4 から再スタート。 */
   points: number;
   /** 参加中か（false = 休止中）。 */
   active: boolean;
@@ -58,7 +58,7 @@ export interface LeagueSongInfo {
   fallback?: boolean;
   /** このグループの「ライン」= 週開始時点の最高 EX（匿名のグループ共通閾値）。誰も未プレーなら null。 */
   lineEx?: number | null;
-  /** このグループの「ライン」= 週開始時点の最小 BP。null なら未設定。 */
+  /** 週開始時点の最小ミス数（旧 BP リーグ由来の互換フィールド。スコアリーグでは使わない）。 */
   lineMiss?: number | null;
   /** ラインのスコアレート(%)。lineEx から算出済み。 */
   lineRate?: number | null;
@@ -84,7 +84,7 @@ export interface LeaguePerSong {
   bestMiss: number | null;
   /** ライン（グループ内の週開始時点の最高 EX）。誰も未プレーなら null。 */
   lineEx: number | null;
-  /** ライン（グループ内の週開始時点の最小 BP）。誰も未プレー/BP 無しなら null。 */
+  /** 週開始時点の最小ミス数（旧 BP リーグ由来の互換フィールド。スコアリーグでは使わない）。 */
   lineMiss: number | null;
   /** この曲で得た着順ポイント（1位=グループ人数、最下位=1。同着は平均）。 */
   points?: number | null;
@@ -497,7 +497,7 @@ export function useLeague() {
    * 任意グループの順位表を取得する（管理者のみ）。
    *
    * プレイヤー向けの {@link fetchStandings} は他人の未達スコアが伏せられるが、こちらは
-   * 当事者と同じ内訳（各曲の EX・スコアレート・BP）がそのまま返る。
+   * 当事者と同じ内訳（各曲の EX・スコアレート）がそのまま返る。
    */
   const fetchAdminStandings = async (
     weekId: number,

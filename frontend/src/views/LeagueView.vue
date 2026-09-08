@@ -434,7 +434,7 @@ const toggleAdminWeek = (weekId: number) => {
  * 展開中の週の 1 グループを開き、そのグループの順位表を取得する。
  * 同じグループをもう一度押すと閉じる。グループは同時に 1 つだけ開く。
  *
- * 取得は管理者用エンドポイントなので、当事者と同じく各曲の EX・スコアレート・BP まで見える
+ * 取得は管理者用エンドポイントなので、当事者と同じく各曲の EX・スコアレートまで見える
  * （プレイヤー向けの観戦では他人の未達スコアは伏せられる）。
  */
 const openAdminGroupStandings = async (weekId: number, tier: number, groupIndex: number) => {
