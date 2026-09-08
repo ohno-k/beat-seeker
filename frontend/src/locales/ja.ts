@@ -468,6 +468,8 @@ export const ja = {
   'report.lampUp': 'LAMP UP!',
   'report.allTimeBest': '歴代自己ベスト更新！',
   'report.allTimeBestHint': '{version} のベストを超えました',
+  'report.allTimeBestExtended': '歴代ベスト更新',
+  'report.allTimeBestExtendedHint': '今作で出した歴代自己ベストをさらに更新しました',
   'report.inTop100': 'TOP100',
   'report.outOfRange': '圏外',
   'report.outputOptions': '画像出力オプション',

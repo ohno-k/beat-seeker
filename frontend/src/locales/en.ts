@@ -462,6 +462,8 @@ export const en = {
   'report.lampUp': 'LAMP UP!',
   'report.allTimeBest': 'All-time best!',
   'report.allTimeBestHint': 'Beat your best from {version}',
+  'report.allTimeBestExtended': 'All-time best',
+  'report.allTimeBestExtendedHint': 'Improved on the all-time best you already set this version',
   'report.inTop100': 'TOP100',
   'report.outOfRange': 'Out of Range',
   'report.outputOptions': 'Image Output Options',

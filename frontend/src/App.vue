@@ -1595,7 +1595,8 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
         // 過去作 CSV を取り込み済みなら、歴代自己ベストを塗り替えた譜面を判定する。
         // 判定条件は「これまでのベストが過去作のものだった（pastBest > 旧スコア）」かつ
         // 「今回それを超えた（新スコア > pastBest）」の両方。
-        // 元から現行作がベストだった譜面の単なる自己ベスト更新では立てない。
+        // 元から現行作がベストだった譜面（旧スコア >= pastBest）の自己ベスト更新は、
+        // 別フラグ allTimeBestExtended として弱く区別する（過去作にスコアがある譜面のみ）。
         const pastBestScores = new Map<string, { score: number; version: number }>();
         try {
           await fetchPastSummary();
@@ -1616,6 +1617,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
             const rankEntry = songRankMap.get(`${s.title}_${s.difficulty}`);
             const past = pastBestScores.get(chartKey(s.title, s.difficulty));
             const allTimeBestUpdated = !!past && past.score > s.oldScore && s.newScore > past.score;
+            const allTimeBestExtended = !!past && !allTimeBestUpdated && past.score <= s.oldScore && s.scoreIncrease > 0;
             return {
               ...s,
               isInTop100: top100Set.has(`${s.title}_${s.difficulty}`),
@@ -1624,6 +1626,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
               songRankTotal: rankEntry?.total,
               allTimeBestUpdated,
               allTimeBeatenVersion: allTimeBestUpdated ? past.version : undefined,
+              allTimeBestExtended,
             };
           })
           .sort((a, b) => b.beatPtIncrease - a.beatPtIncrease || b.scoreIncrease - a.scoreIncrease);
