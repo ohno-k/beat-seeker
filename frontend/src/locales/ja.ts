@@ -267,6 +267,11 @@ export const ja = {
   'advice.accuracyLow': '中',
   'advice.accuracyBase': '概算（実力 + 譜面平均）',
   'advice.accuracyRank': '概算（同ランク平均）',
+  'advice.attemptedShow': '挑戦済み {n} 件を表示',
+  'advice.attemptedHide': '挑戦済みを隠す',
+  'advice.attemptedTag': '挑戦済み',
+  'advice.attemptedHint': '直近 {days} 日に更新したものの目標に届かなかった譜面です。候補から外し、残りの曲で計算しています',
+  'advice.attemptedProgress': '{from} → {to}（{date} 更新）',
 
   // Score Summary / Table
   'table.title': 'スコアリスト',

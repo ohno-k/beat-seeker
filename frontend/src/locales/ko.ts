@@ -262,6 +262,11 @@ export const ko = {
   'advice.accuracyLow': '중간',
   'advice.accuracyBase': '대략 (실력 + 보면 평균)',
   'advice.accuracyRank': '대략 (동일 랭크 평균)',
+  'advice.attemptedShow': '도전한 보면 {n}개 보기',
+  'advice.attemptedHide': '도전한 보면 숨기기',
+  'advice.attemptedTag': '도전함',
+  'advice.attemptedHint': '최근 {days}일 안에 갱신했지만 목표에 닿지 못한 보면입니다. 후보에서 제외하고 나머지 곡으로 계산합니다',
+  'advice.attemptedProgress': '{from} → {to} ({date} 갱신)',
 
   // Score Summary / Table
   'table.title': '스코어 리스트',

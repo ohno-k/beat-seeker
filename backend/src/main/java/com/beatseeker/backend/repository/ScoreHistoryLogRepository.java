@@ -389,4 +389,29 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
      */
     Optional<ScoreHistoryLog> findFirstByUserAndTagAndUploadedAtGreaterThanEqualAndUploadedAtLessThanOrderByUploadedAtDesc(
             User user, String tag, LocalDateTime startDate, LocalDateTime endDate);
+
+    /**
+     * 【メソッドの役割】 指定ユーザー ID の履歴のうち {@code uploadedAt >= since} を昇順で返す。
+     *
+     * 派生クエリ: {@code WHERE user_id = ? AND uploaded_at >= ? ORDER BY uploaded_at ASC}。
+     * コスパ埋めレコメンドが「直近数日でスコア更新した譜面（挑戦済み）」を diffJson から拾うのに使う。
+     * User エンティティを引かずに済むよう ID で引く。
+     *
+     * @param userId 対象ユーザーの DB 主キー
+     * @param since  期間開始（含む）
+     * @return uploadedAt 昇順の履歴リスト（0 件なら空）
+     */
+    List<ScoreHistoryLog> findByUser_IdAndUploadedAtGreaterThanEqualOrderByUploadedAtAsc(Long userId, LocalDateTime since);
+
+    /**
+     * 【メソッドの役割】 指定ユーザー ID に {@code uploadedAt < before} の履歴が 1 件でもあるか。
+     *
+     * 「期間内の最初の履歴がアカウント初回の一括取り込みかどうか」の判定に使う。
+     * 初回取り込みは全譜面が差分として並ぶので、挑戦済み判定から外す必要がある。
+     *
+     * @param userId 対象ユーザーの DB 主キー
+     * @param before 比較境界
+     * @return より前の履歴があれば true
+     */
+    boolean existsByUser_IdAndUploadedAtLessThan(Long userId, LocalDateTime before);
 }

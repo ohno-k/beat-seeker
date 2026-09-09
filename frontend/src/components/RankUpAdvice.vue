@@ -114,6 +114,54 @@
         <p class="text-sm font-bold text-slate-700 dark:text-slate-200">+{{ nextRankGap.toFixed(1) }} pt</p>
       </div>
     </div>
+
+    <!-- 挑戦済み: 直近に更新したが目標未達で候補から外した譜面。折りたたみで見返せる -->
+    <div v-if="!isLoading && !loadError && attemptedItems.length > 0" class="mt-3">
+      <button
+        type="button"
+        @click="showAttempted = !showAttempted"
+        class="w-full py-2 text-xs font-semibold rounded-md border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+      >
+        {{ showAttempted ? t('advice.attemptedHide') : t('advice.attemptedShow', { n: attemptedItems.length }) }}
+      </button>
+      <div v-if="showAttempted" class="mt-2 space-y-2">
+        <p class="text-[10px] text-slate-400 dark:text-slate-500">
+          {{ t('advice.attemptedHint', { days: attemptCooldownDays }) }}
+        </p>
+        <div
+          v-for="sug in attemptedItems"
+          :key="`attempted|${sug.title}|${sug.difficultyName}`"
+          class="flex items-center gap-2 p-2 sm:p-3 rounded-md border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-700/20 opacity-80"
+        >
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <p class="font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm truncate">{{ sug.title }}</p>
+              <InformalRankBadge :rank="sug.informalRank" size="xs" class="shrink-0" />
+              <span class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-amber-500 text-white">{{ t('advice.attemptedTag') }}</span>
+            </div>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400">
+              {{ sug.difficultyName }} /
+              {{ t('advice.attemptedProgress', {
+                from: sug.attemptOldScore.toLocaleString(),
+                to: sug.attemptNewScore.toLocaleString(),
+                date: formatAttemptDate(sug.lastAttemptAt),
+              }) }}
+            </p>
+          </div>
+          <div class="text-right shrink-0">
+            <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">
+              {{ t('advice.targetBorder', { label: sug.targetLabel }) }}
+            </p>
+            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">
+              {{ t('advice.targetScore', { n: sug.targetScore.toLocaleString() }) }}
+            </p>
+            <p class="text-[10px] font-bold" :class="probabilityClass(sug.achieveProbability)">
+              {{ t('advice.achieveProbability', { p: Math.round(sug.achieveProbability * 100) }) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -131,6 +179,10 @@
  * バックエンドはペア回帰の参照が無い譜面も加法モデル（実力 + 譜面効果）で予測するので、
  * 難易度表に載っている譜面は原則すべて候補になる。概算の候補は `accuracy` が BASE / RANK で返り、
  * 「概算」バッジを付けて区別する。
+ *
+ * 【挑戦済みの除外】
+ * 直近数日に自己ベストを更新したのに目標へ届かなかった譜面は、バックエンドが候補から外して
+ * `attemptedItems` に分けて返す（残りの候補で残り pt を埋め直す）。ここでは折りたたみで見返せるようにする。
  *
  * 【旧実装との違い】
  * 以前は「伸びしろ API の予測スコア = 確実に出せる上限」と決め打ちし、フロント側で
@@ -220,7 +272,23 @@ interface FillRecommendationItem {
   accuracy: Accuracy;
 }
 
+/** 挑戦済み（直近に更新したが目標未達）の 1 件。items と同じ形に更新前後のスコアと日時が付く。 */
+interface AttemptedItem extends FillRecommendationItem {
+  /** 冷却期間内で最初に更新したときの更新前スコア。 */
+  attemptOldScore: number;
+  /** 冷却期間内で最後に更新したときの更新後スコア。 */
+  attemptNewScore: number;
+  /** 最後に更新したアップロードの日時（サーバーの LocalDateTime 文字列）。 */
+  lastAttemptAt: string;
+}
+
 const items = ref<FillRecommendationItem[]>([]);
+/** 候補から外した挑戦済み譜面。直近の更新が新しい順。 */
+const attemptedItems = ref<AttemptedItem[]>([]);
+/** 挑戦済み判定の冷却期間（日）。バックエンドの値をそのまま説明文に出す。 */
+const attemptCooldownDays = ref(7);
+/** 挑戦済みセクションを開いているか。既定は閉じる（主役は候補リスト）。 */
+const showAttempted = ref(false);
 const isLoading = ref(false);
 const loadError = ref('');
 
@@ -274,13 +342,20 @@ async function fetchRecommendation() {
       return;
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json() as { items: FillRecommendationItem[] };
+    const data = await res.json() as {
+      items: FillRecommendationItem[];
+      attemptedItems?: AttemptedItem[];
+      attemptCooldownDays?: number;
+    };
     items.value = data.items ?? [];
+    attemptedItems.value = data.attemptedItems ?? [];
+    if (typeof data.attemptCooldownDays === 'number') attemptCooldownDays.value = data.attemptCooldownDays;
     visibleCount.value = PAGE_SIZE;
     buildingRetries = 0;
   } catch (e: any) {
     loadError.value = e?.message ?? 'fetch failed';
     items.value = [];
+    attemptedItems.value = [];
   } finally {
     // 構築待ちの間は「計算中」を出し続けるので isLoading を立てたままにする。
     if (!waitingForBuild) isLoading.value = false;
@@ -348,6 +423,15 @@ function probabilityClass(p: number): string {
   return 'text-amber-600 dark:text-amber-400';
 }
 
+/**
+ * 【関数の役割】 挑戦済みの更新日時を端末ロケールの日付にする。
+ * サーバーの LocalDateTime はタイムゾーン無しの UTC 文字列なので、他の履歴表示と同じく 'Z' を補って解釈する。
+ */
+function formatAttemptDate(iso: string): string {
+  const d = new Date(iso.endsWith('Z') ? iso : `${iso}Z`);
+  return Number.isFinite(d.getTime()) ? d.toLocaleDateString() : '';
+}
+
 /** 最高ランクに到達済み（残り pt が無い）ならパネル自体を出さないので、取得もしない。 */
 function fetchIfNeeded() {
   if (nextRankGap.value <= 0) return;
@@ -361,6 +445,8 @@ watch(() => props.totalPoints, fetchIfNeeded);
 // totalPoints も同時に変わるのが普通だが、同じ合計 pt の相手に切り替えた場合に備えてこちらでも拾う。
 watch(() => props.viewingUserId, () => {
   items.value = [];
+  attemptedItems.value = [];
+  showAttempted.value = false;
   loadError.value = '';
   buildingRetries = 0;
   fetchIfNeeded();

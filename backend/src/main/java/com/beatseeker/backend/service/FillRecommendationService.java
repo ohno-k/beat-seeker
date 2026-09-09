@@ -1,10 +1,15 @@
 package com.beatseeker.backend.service;
 
+import com.beatseeker.backend.entity.ScoreHistoryLog;
+import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,6 +59,13 @@ import java.util.Map;
  * {@code logit = θ_u + δ_c}（{@link PairRegressionService.AdditiveModel}）で予測を付ける
  * （accuracy = BASE）。δ_c すら立たない新曲は同ランクの平均 δ に落とす（RANK）。
  * 難易度表に載っている譜面は原則すべて候補になる。
+ *
+ * <h3>挑戦済みの除外</h3>
+ * 直近 {@link #ATTEMPT_COOLDOWN_DAYS} 日の更新履歴（{@link ScoreHistoryLog#getDiffJson()}）で
+ * スコアを更新したのに目標に届かなかった譜面は、候補から外して {@code attemptedItems} に分けて返す。
+ * 「挑戦したが取れなかった」譜面を出し続けても次の一手にならないので、残りの候補で差分を埋め直す。
+ * 目標に届いた譜面は外さず、次の目標（例: AAA の次は MAX-）で通常どおり再評価する。
+ * 判定は状態を持たず、リクエストのたびに履歴から引き直す。
  *
  * <h3>能力推定（S の分布）</h3>
  * {@link PairRegressionService} の譜面ペア回帰（logit 空間）をそのまま流用する。
@@ -132,6 +144,18 @@ public class FillRecommendationService {
     /** 曲マスタ・難易度表のメモリ保持時間（ms）。マスタは日次更新なので 10 分で十分。 */
     private static final long MASTER_CACHE_TTL_MS = 10 * 60 * 1000L;
 
+    /**
+     * 挑戦済み判定の冷却期間（日）。この期間内にスコア更新したのに目標未達の譜面は候補から外す。
+     * 練習メニューの週サイクルに合わせて 7 日。過ぎれば再び候補に戻る。
+     */
+    static final int ATTEMPT_COOLDOWN_DAYS = 7;
+    /**
+     * 1 回のアップロードでこの件数を超えて更新されていたら「一括取り込み」とみなし、挑戦済み判定から外す。
+     * 次回作移行直後の再取り込みや長期離脱後の再開では数百譜面が一度に「更新」になるが、
+     * それは挑戦の結果ではない。通常のプレーセッションは多くても数十件。
+     */
+    static final int BULK_UPLOAD_UPDATED_COUNT = 100;
+
     /** BEAT-PT のボーナス段差。UI に「AA 狙い」「AAA 狙い」と出すための目標候補でもある。 */
     private static final double[] BORDER_RATES = {77.77, 88.88, 94.44};
     /** {@link #BORDER_RATES} と同じ並びのラベル。 */
@@ -141,6 +165,10 @@ public class FillRecommendationService {
     private final ScoreRecalculationService scoreRecalculationService;
     private final ScoreRepository scoreRepository;
     private final BeatPtCalculator beatPtCalculator;
+    /** 更新履歴（挑戦済み判定用）。テストでは null を許容し、その場合は挑戦済み無しとして扱う。 */
+    private final ScoreHistoryLogRepository historyLogRepository;
+    /** diffJson の解釈用。テストでは null を許容する。 */
+    private final ObjectMapper objectMapper;
 
     /** 曲マスタ（title_difficultyCode → maxScore）のキャッシュ。 */
     private volatile Map<String, Integer> cachedMaxScores = Collections.emptyMap();
@@ -167,11 +195,15 @@ public class FillRecommendationService {
     public FillRecommendationService(PairRegressionService pairRegressionService,
                                      ScoreRecalculationService scoreRecalculationService,
                                      ScoreRepository scoreRepository,
-                                     BeatPtCalculator beatPtCalculator) {
+                                     BeatPtCalculator beatPtCalculator,
+                                     ScoreHistoryLogRepository historyLogRepository,
+                                     ObjectMapper objectMapper) {
         this.pairRegressionService = pairRegressionService;
         this.scoreRecalculationService = scoreRecalculationService;
         this.scoreRepository = scoreRepository;
         this.beatPtCalculator = beatPtCalculator;
+        this.historyLogRepository = historyLogRepository;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -201,12 +233,15 @@ public class FillRecommendationService {
      *                    null ならサーバー側の副ティア境界（{@link BeatTierScale#nextSubTierOf}）から求める。
      * @return {@code {top100Threshold, totalBeatPt, scoredChartCount, referenceChartCount,
      *          nextTierGap, nextTierLabel, cumulativeExpectedGain, gapCovered,
-     *          candidateCount, tierCounts, items:[...]}}。
+     *          candidateCount, tierCounts, items:[...],
+     *          attemptedItems:[...], attemptedCount, attemptCooldownDays}}。
      *         items の各要素は
      *         {@code {title, difficultyName, informalRank, difficultyLevel, unplayed, currentScore,
      *          currentRate, currentBeatPt, maxScore, predictedScore, predictedRate, sigmaRate,
      *          breakEvenScore, achieveProbability, targetScore, targetRate, targetLabel,
-     *          targetProbability, targetGain, expectedGain, supportCount, accuracy}}
+     *          targetProbability, targetGain, expectedGain, supportCount, accuracy}}。
+     *         attemptedItems は同じ形に {@code attemptOldScore, attemptNewScore, lastAttemptAt} を足したもので、
+     *         直近の更新が新しい順。
      */
     public Map<String, Object> computeFillRecommendation(Long userId, Double gapOverride) {
         long t0 = System.currentTimeMillis();
@@ -308,10 +343,15 @@ public class FillRecommendationService {
             }
         }
 
+        // 3.5) 直近の更新履歴から「挑戦済み（スコア更新あり）」の譜面を集める。
+        //      候補ループで目標未達のものを除外し、attemptedItems に分けて返す。
+        Map<String, Attempt> attempts = loadRecentAttempts(userId);
+
         // 4) 候補ごとに期待獲得 pt を計算する。
         //    候補は「難易度表に載っている Lv11+ の ANOTHER / LEGGENDARIA 全譜面」。
         //    ペア回帰の参照が無い譜面も加法モデル → 同ランク平均の順に落として必ず予測を付ける。
         List<Map<String, Object>> items = new ArrayList<>();
+        List<Map<String, Object>> attemptedItems = new ArrayList<>();
         Map<String, Integer> tierCounts = new HashMap<>();
         int noPrediction = 0;
         for (Map.Entry<String, Integer> chart : notesByKey.entrySet()) {
@@ -395,12 +435,27 @@ public class FillRecommendationService {
             item.put("expectedGain", expectedGain);
             item.put("supportCount", stat.support);
             item.put("accuracy", stat.accuracy);
+
+            // 直近に更新したのに目標へ届かなかった譜面は候補から外す。
+            // 目標がボーダー（AA / AAA / MAX-）ならそのスコア、無ければ予測中央値を「届いたか」の基準にする。
+            // 中央値目標で target.score = 現在 + 1 になるケース（中央値を既に超えている）を未達と誤判定しないため。
+            double goalScore = target.label.isEmpty() ? predictedScore : target.score;
+            Attempt attempt = attempts.get(key);
+            if (isUnreachedAttempt(attempt, currentScore, goalScore)) {
+                item.put("attemptOldScore", attempt.oldScore);
+                item.put("attemptNewScore", attempt.newScore);
+                item.put("lastAttemptAt", attempt.lastAt.toString());
+                attemptedItems.add(item);
+                continue;
+            }
             items.add(item);
         }
 
         // 5) 達成率降順（同率なら期待値降順）。「確実に取れるものから順に」が先頭に来る。
         int candidateCount = items.size();
         sortByAchievability(items);
+        // 挑戦済みは「直近に更新した順」。ユーザーが見返す用途なので時系列が自然。
+        attemptedItems.sort((a, b) -> ((String) b.get("lastAttemptAt")).compareTo((String) a.get("lastAttemptAt")));
 
         // 6) 次ランクまでの差分を満たすまで採用する。差分が分からなければ件数上限で切る。
         double gap;
@@ -429,10 +484,125 @@ public class FillRecommendationService {
         result.put("noPredictionCount", noPrediction);
         result.put("tierCounts", tierCounts);
         result.put("items", items);
-        log.debug("computeFillRecommendation(user={}) -> {} items of {} candidates (tiers {}, noPrediction {}), gap {} covered={} in {} ms",
-                userId, items.size(), candidateCount, tierCounts, noPrediction,
+        result.put("attemptedItems", attemptedItems);
+        result.put("attemptedCount", attemptedItems.size());
+        result.put("attemptCooldownDays", ATTEMPT_COOLDOWN_DAYS);
+        log.debug("computeFillRecommendation(user={}) -> {} items of {} candidates (tiers {}, noPrediction {}, attempted {}), gap {} covered={} in {} ms",
+                userId, items.size(), candidateCount, tierCounts, noPrediction, attemptedItems.size(),
                 String.format("%.1f", gap), cumulative >= gap, System.currentTimeMillis() - t0);
         return result;
+    }
+
+    // ── 挑戦済み（直近に更新したが目標未達）の判定 ───────────────────────
+
+    /** 直近の冷却期間内に自己ベストを更新した譜面 1 件ぶんの記録。 */
+    static final class Attempt {
+        /** 期間内で最初に更新したときの更新前スコア。 */
+        int oldScore = Integer.MAX_VALUE;
+        /** 期間内で最後に更新したときの更新後スコア。 */
+        int newScore = 0;
+        /** 最後に更新したアップロードの日時。 */
+        LocalDateTime lastAt;
+    }
+
+    /**
+     * 【メソッドの役割】 直近 {@link #ATTEMPT_COOLDOWN_DAYS} 日の更新履歴から挑戦済み譜面を集める。
+     *
+     * リポジトリ未注入（テスト）や履歴の読み取り失敗時は空を返し、除外を行わない。
+     * 除外は「あると嬉しい」機能なので、失敗してもレコメンド本体を止めない。
+     */
+    private Map<String, Attempt> loadRecentAttempts(Long userId) {
+        if (historyLogRepository == null || objectMapper == null) return Collections.emptyMap();
+        try {
+            LocalDateTime since = LocalDateTime.now().minusDays(ATTEMPT_COOLDOWN_DAYS);
+            List<ScoreHistoryLog> logs =
+                    historyLogRepository.findByUser_IdAndUploadedAtGreaterThanEqualOrderByUploadedAtAsc(userId, since);
+            if (logs.isEmpty()) return Collections.emptyMap();
+            boolean hasOlder = historyLogRepository.existsByUser_IdAndUploadedAtLessThan(userId, since);
+            return collectAttempts(logs, !hasOlder, objectMapper);
+        } catch (RuntimeException e) {
+            log.warn("loadRecentAttempts(user={}) failed; skipping attempted-chart exclusion", userId, e);
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 更新履歴の diffJson を読んで、譜面キー → {@link Attempt} を作る。
+     *
+     * diffJson はフロントが送る更新曲の配列で、各要素に
+     * {@code title, difficulty(またはdifficultyName), oldScore, newScore, scoreIncrease} が入る。
+     * ランプだけ改善した要素（scoreIncrease = 0）は「スコアを更新した」とは見なさない。
+     *
+     * 一括取り込みの誤判定を避けるため、次の履歴は読み飛ばす。
+     * <ul>
+     *   <li>アカウント初回の履歴（{@code skipFirst}）… 全譜面が oldScore = 0 の差分として並ぶ</li>
+     *   <li>updatedCount が {@link #BULK_UPLOAD_UPDATED_COUNT} を超える履歴 … 再取り込みや長期離脱後の再開</li>
+     * </ul>
+     *
+     * @param logsAsc   uploadedAt 昇順の履歴
+     * @param skipFirst 先頭の履歴がアカウント初回なら true
+     * @return 譜面キー（title\0difficultyName）→ 挑戦記録。無ければ空
+     */
+    static Map<String, Attempt> collectAttempts(List<ScoreHistoryLog> logsAsc, boolean skipFirst,
+                                                ObjectMapper objectMapper) {
+        Map<String, Attempt> out = new HashMap<>();
+        boolean first = true;
+        for (ScoreHistoryLog hl : logsAsc) {
+            boolean isFirst = first;
+            first = false;
+            if (isFirst && skipFirst) continue;
+            if (hl.getUpdatedCount() != null && hl.getUpdatedCount() > BULK_UPLOAD_UPDATED_COUNT) continue;
+            String json = hl.getDiffJson();
+            if (json == null || json.isBlank() || "[]".equals(json)) continue;
+
+            JsonNode root;
+            try {
+                root = objectMapper.readTree(json);
+            } catch (Exception e) {
+                continue; // 壊れた diffJson は無視（他の履歴に影響させない）
+            }
+            if (root == null || !root.isArray()) continue;
+
+            for (JsonNode d : root) {
+                String title = d.path("title").asText(null);
+                String diff = d.hasNonNull("difficulty") ? d.get("difficulty").asText()
+                        : d.path("difficultyName").asText(null);
+                if (title == null || diff == null) continue;
+                int oldScore = d.path("oldScore").asInt(0);
+                int newScore = d.path("newScore").asInt(0);
+                int increase = d.has("scoreIncrease") ? d.path("scoreIncrease").asInt(0) : newScore - oldScore;
+                if (increase <= 0 || newScore <= 0) continue;
+
+                Attempt a = out.computeIfAbsent(title + "\0" + diff, k -> new Attempt());
+                a.oldScore = Math.min(a.oldScore, oldScore);
+                a.newScore = Math.max(a.newScore, newScore);
+                if (a.lastAt == null || (hl.getUploadedAt() != null && hl.getUploadedAt().isAfter(a.lastAt))) {
+                    a.lastAt = hl.getUploadedAt();
+                }
+            }
+        }
+        // 日時が取れなかった記録は並び替えできないので落とす（実際には uploadedAt は NOT NULL）。
+        out.values().removeIf(a -> a.lastAt == null);
+        return out;
+    }
+
+    /**
+     * 【メソッドの役割】 「直近に更新したが目標未達」なら true。
+     *
+     * <ul>
+     *   <li>挑戦記録が無ければ false（通常の候補）</li>
+     *   <li>現在スコアが記録の更新後スコアに満たなければ false … scores に保存されていない幽霊履歴なので信用しない</li>
+     *   <li>現在スコアが目標以上なら false … 届いたので次の目標で通常どおり評価する</li>
+     * </ul>
+     *
+     * @param attempt      挑戦記録（null 可）
+     * @param currentScore 現在の自己ベスト
+     * @param goalScore    届いたかの基準。ボーダー目標ならそのスコア、無ければ予測中央値
+     */
+    static boolean isUnreachedAttempt(Attempt attempt, int currentScore, double goalScore) {
+        if (attempt == null) return false;
+        if (currentScore < attempt.newScore) return false;
+        return currentScore < goalScore;
     }
 
     // ── 並び替えと打ち切り ──────────────────────────────────────────────

@@ -26,7 +26,7 @@ class FillRecommendationMathTest {
     private final BeatPtCalculator calc = new BeatPtCalculator();
     /** 計算メソッドしか触らないので、リポジトリ類は注入しない。 */
     private final FillRecommendationService service =
-            new FillRecommendationService(null, null, null, calc);
+            new FillRecommendationService(null, null, null, calc, null, null);
 
     /** スコアレート(%) を logit へ。テスト側でも同じ変換を使って μ を組み立てる。 */
     private static double logitOfRate(double ratePct) {
@@ -250,5 +250,89 @@ class FillRecommendationMathTest {
         assertThat(even).isGreaterThan(hard);
         // 予測中央値ちょうどの達成確率は 50% になる。
         assertThat(even).isCloseTo(0.5, within(0.02));
+    }
+
+    // ── 挑戦済み（直近に更新したが目標未達）の判定 ───────────────────────
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper JSON =
+            new com.fasterxml.jackson.databind.ObjectMapper();
+
+    private static com.beatseeker.backend.entity.ScoreHistoryLog historyLog(
+            java.time.LocalDateTime at, int updatedCount, String diffJson) {
+        com.beatseeker.backend.entity.ScoreHistoryLog hl = new com.beatseeker.backend.entity.ScoreHistoryLog();
+        hl.setUploadedAt(at);
+        hl.setUpdatedCount(updatedCount);
+        hl.setDiffJson(diffJson);
+        return hl;
+    }
+
+    private static final java.time.LocalDateTime T0 = java.time.LocalDateTime.of(2026, 9, 8, 21, 0);
+
+    @Test
+    void 更新履歴からスコアが伸びた譜面だけを挑戦済みとして拾う() {
+        // フロントの diffJson と同じ形。ランプだけ改善した要素（scoreIncrease 0）は挑戦済みにしない。
+        String diff = "[{\"title\":\"A\",\"difficulty\":\"ANOTHER\",\"oldScore\":1700,\"newScore\":1750,\"scoreIncrease\":50},"
+                + "{\"title\":\"L\",\"difficulty\":\"ANOTHER\",\"oldScore\":1800,\"newScore\":1800,\"scoreIncrease\":0,\"clearTypeImproved\":true}]";
+        java.util.List<com.beatseeker.backend.entity.ScoreHistoryLog> logs = java.util.List.of(
+                historyLog(T0, 2, diff),
+                historyLog(T0.plusDays(1), 1, "{broken"));   // 壊れた JSON は読み飛ばす
+
+        java.util.Map<String, FillRecommendationService.Attempt> attempts =
+                FillRecommendationService.collectAttempts(logs, false, JSON);
+
+        assertThat(attempts).containsOnlyKeys("A\0ANOTHER");
+        FillRecommendationService.Attempt a = attempts.get("A\0ANOTHER");
+        assertThat(a.oldScore).isEqualTo(1700);
+        assertThat(a.newScore).isEqualTo(1750);
+        assertThat(a.lastAt).isEqualTo(T0);
+    }
+
+    @Test
+    void 同じ譜面を複数回更新したら最初の更新前と最後の更新後を残す() {
+        java.util.List<com.beatseeker.backend.entity.ScoreHistoryLog> logs = java.util.List.of(
+                historyLog(T0, 1, "[{\"title\":\"A\",\"difficulty\":\"ANOTHER\",\"oldScore\":1700,\"newScore\":1720,\"scoreIncrease\":20}]"),
+                historyLog(T0.plusDays(2), 1, "[{\"title\":\"A\",\"difficulty\":\"ANOTHER\",\"oldScore\":1720,\"newScore\":1760,\"scoreIncrease\":40}]"));
+
+        FillRecommendationService.Attempt a =
+                FillRecommendationService.collectAttempts(logs, false, JSON).get("A\0ANOTHER");
+
+        assertThat(a.oldScore).isEqualTo(1700);
+        assertThat(a.newScore).isEqualTo(1760);
+        assertThat(a.lastAt).isEqualTo(T0.plusDays(2));
+    }
+
+    @Test
+    void アカウント初回の履歴と一括取り込みは挑戦済みに数えない() {
+        String one = "[{\"title\":\"%s\",\"difficulty\":\"ANOTHER\",\"oldScore\":0,\"newScore\":1500,\"scoreIncrease\":1500}]";
+        java.util.List<com.beatseeker.backend.entity.ScoreHistoryLog> logs = java.util.List.of(
+                historyLog(T0, 1, String.format(one, "first")),                         // 初回取り込み（件数は少ない）
+                historyLog(T0.plusDays(1), FillRecommendationService.BULK_UPLOAD_UPDATED_COUNT + 1,
+                        String.format(one, "bulk")),                                     // 再取り込み
+                historyLog(T0.plusDays(2), 1, String.format(one, "played")));           // 通常のプレー
+
+        java.util.Map<String, FillRecommendationService.Attempt> attempts =
+                FillRecommendationService.collectAttempts(logs, true, JSON);
+
+        // 初回は skipFirst、再取り込みは件数超過でそれぞれ弾かれ、通常のプレーだけ残る
+        assertThat(attempts).containsOnlyKeys("played\0ANOTHER");
+        // 先頭がアカウント初回でなければ（それより前に履歴がある）、先頭の履歴も通常どおり数える
+        assertThat(FillRecommendationService.collectAttempts(logs, false, JSON))
+                .containsOnlyKeys("first\0ANOTHER", "played\0ANOTHER");
+    }
+
+    @Test
+    void 挑戦済みでも目標に届いていれば除外しない() {
+        FillRecommendationService.Attempt a = new FillRecommendationService.Attempt();
+        a.oldScore = 1700;
+        a.newScore = 1800;
+
+        // 記録が無ければ通常の候補
+        assertThat(FillRecommendationService.isUnreachedAttempt(null, 1800, 1900)).isFalse();
+        // 更新したが目標（1900）に届いていない → 除外
+        assertThat(FillRecommendationService.isUnreachedAttempt(a, 1800, 1900)).isTrue();
+        // 目標に届いた → 次の目標で通常どおり評価する
+        assertThat(FillRecommendationService.isUnreachedAttempt(a, 1900, 1900)).isFalse();
+        // scores に反映されていない幽霊履歴（現在スコアが記録の更新後より低い）は信用しない
+        assertThat(FillRecommendationService.isUnreachedAttempt(a, 1750, 1900)).isFalse();
     }
 }

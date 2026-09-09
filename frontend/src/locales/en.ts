@@ -263,6 +263,11 @@ export const en = {
   'advice.accuracyLow': 'Medium',
   'advice.accuracyBase': 'Rough (ability + chart average)',
   'advice.accuracyRank': 'Rough (same-rank average)',
+  'advice.attemptedShow': 'Show {n} attempted',
+  'advice.attemptedHide': 'Hide attempted',
+  'advice.attemptedTag': 'Attempted',
+  'advice.attemptedHint': 'Charts you improved in the last {days} days without reaching the target. They are left out and the rest is recalculated',
+  'advice.attemptedProgress': '{from} → {to} (updated {date})',
 
   // Score Summary / Table
   'table.title': 'Score List',
