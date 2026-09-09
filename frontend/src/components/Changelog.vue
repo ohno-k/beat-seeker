@@ -4,13 +4,17 @@
  *
  * 機能:
  *  - `activeTab` でタブ切替（アプリ更新 / 難易度改訂）
- *  - 難易度改訂は `data/difficulty_revisions.json` を読み込み、追加曲・変更曲を一覧化
+ *  - 難易度改訂はサーバの記録（`GET /api/game-data/difficulty-revisions`。管理者が「難易度表を適用」
+ *    するたびに自動追記される）を表示し、追加曲・変更曲・除外曲を一覧化。
+ *    API に届かないときは同梱の `data/difficulty_revisions.json`（第1〜4版）にフォールバック
+ *  - 曲数が多い版（全曲改定など）はブロックごとに折りたたみ、「残りN件を表示」で展開
  *  - 日付表記と「第N版」のラベルを言語ごとに整形
  *
  * props/emits: なし。
  */
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import { API_BASE } from '../composables/constants';
 import difficultyRevisions from '../data/difficulty_revisions.json';
 
 // 翻訳関数と現在言語。`currentLang` は日付の整形ロジックに使用。
@@ -18,18 +22,56 @@ const { t, currentLang } = useI18n();
 /** 現在表示中のタブ。'changelog'（更新履歴）か 'difficulty'（難易度改訂）。 */
 const activeTab = ref<'changelog' | 'difficulty'>('changelog');
 
-/** 難易度改訂 1 回分を表す型（JSON のスキーマ）。 */
+/** 難易度改訂 1 回分を表す型（サーバ応答と同梱 JSON の共通スキーマ）。 */
 interface RevisionEntry {
   version: number;
   label: string;
-  appVersion: string;
+  /** 併記するアプリのバージョン（例 "Ver 1.8.0"）。適用ボタンによる自動記録では null。 */
+  appVersion: string | null;
+  /** "YYYY-MM" */
   date: string;
   added: { title: string; rank: string }[];
   changed: { title: string; from: string; to: string }[];
+  /** 表から除外された曲（rank = 除外前の帯）。サーバの記録にだけ含まれる。 */
+  removed?: { title: string; rank: string }[];
 }
 
-// JSON を型付きで扱う。`as` キャストは静的データの明示的な型付け用途。
-const revisions = difficultyRevisions as RevisionEntry[];
+/**
+ * 表示する改訂一覧。初期値は同梱 JSON（手書きの第1〜4版）で、マウント後にサーバの記録へ差し替える。
+ * サーバには同じ第1〜4版が起動時にシードされているので、通常は同じ内容に第5版以降が続く形になる。
+ */
+const revisions = ref<RevisionEntry[]>(difficultyRevisions as RevisionEntry[]);
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/game-data/difficulty-revisions`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) revisions.value = data as RevisionEntry[];
+  } catch {
+    // API 不達（オフライン等）。同梱 JSON をそのまま表示する
+  }
+});
+
+/** 1 ブロックに最初から並べる曲数の上限。全曲改定（数百曲）でページが伸びすぎないようにする。 */
+const PREVIEW_LIMIT = 40;
+/** 「残りを表示」を押したブロックのキー（"版数:種別"）。 */
+const expanded = ref<Set<string>>(new Set());
+const blockKey = (rev: RevisionEntry, kind: string) => `${rev.version}:${kind}`;
+
+/** ブロックに実際に描画する曲。展開済みなら全件、そうでなければ先頭 PREVIEW_LIMIT 件。 */
+function visibleItems<T>(rev: RevisionEntry, kind: string, items: T[]): T[] {
+  return expanded.value.has(blockKey(rev, kind)) ? items : items.slice(0, PREVIEW_LIMIT);
+}
+
+/** 折りたたまれて見えていない曲数。0 なら「残りを表示」ボタンを出さない。 */
+function hiddenCount(rev: RevisionEntry, kind: string, items: unknown[]): number {
+  return expanded.value.has(blockKey(rev, kind)) ? 0 : Math.max(0, items.length - PREVIEW_LIMIT);
+}
+
+function expand(rev: RevisionEntry, kind: string): void {
+  expanded.value = new Set([...expanded.value, blockKey(rev, kind)]);
+}
 
 /**
  * 【関数の役割】 "YYYY-MM" 形式の日付を言語に応じた表現へ整形する。
@@ -305,7 +347,7 @@ function editionLabel(version: number): string {
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">{{ editionLabel(rev.version) }}</span>
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.difficultyRevision') }} ({{ rev.appVersion }})</h3>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.difficultyRevision') }}<template v-if="rev.appVersion"> ({{ rev.appVersion }})</template></h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ formatDate(rev.date) }}</span>
         </div>
@@ -316,13 +358,21 @@ function editionLabel(version: number): string {
             <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
               {{ t('changelog.addedSongs') }}
+              <span class="text-xs font-medium text-slate-400">({{ rev.added.length }})</span>
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-700 dark:text-slate-300 ml-2 font-medium">
-              <div v-for="(song, i) in rev.added" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
+              <div v-for="(song, i) in visibleItems(rev, 'added', rev.added)" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
                 <span>{{ song.title }}</span>
                 <span class="font-bold text-blue-600 dark:text-blue-400">{{ song.rank }}</span>
               </div>
             </div>
+            <button
+              v-if="hiddenCount(rev, 'added', rev.added) > 0"
+              @click="expand(rev, 'added')"
+              class="mt-3 ml-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              {{ t('changelog.showAll', { n: hiddenCount(rev, 'added', rev.added) }) }}
+            </button>
           </div>
 
           <!-- 変更曲ブロック（from → to で難易度が変動した曲） -->
@@ -330,9 +380,10 @@ function editionLabel(version: number): string {
             <h4 class="text-sm font-bold text-amber-500 dark:text-amber-400 mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1-1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
               {{ t('changelog.changedSongs') }}
+              <span class="text-xs font-medium text-slate-400">({{ rev.changed.length }})</span>
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-700 dark:text-slate-300 ml-2 font-medium">
-              <div v-for="(song, i) in rev.changed" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
+              <div v-for="(song, i) in visibleItems(rev, 'changed', rev.changed)" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
                 <span>{{ song.title }}</span>
                 <div class="flex items-center gap-2">
                   <span class="text-slate-400 line-through">{{ song.from }}</span>
@@ -341,6 +392,35 @@ function editionLabel(version: number): string {
                 </div>
               </div>
             </div>
+            <button
+              v-if="hiddenCount(rev, 'changed', rev.changed) > 0"
+              @click="expand(rev, 'changed')"
+              class="mt-3 ml-2 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
+            >
+              {{ t('changelog.showAll', { n: hiddenCount(rev, 'changed', rev.changed) }) }}
+            </button>
+          </div>
+
+          <!-- 除外曲ブロック（数値帯から Uncategorized に戻った／表から消えた曲。rank は除外前の帯） -->
+          <div v-if="rev.removed && rev.removed.length > 0">
+            <h4 class="text-sm font-bold text-rose-500 dark:text-rose-400 mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
+              {{ t('changelog.removedSongs') }}
+              <span class="text-xs font-medium text-slate-400">({{ rev.removed.length }})</span>
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-slate-700 dark:text-slate-300 ml-2 font-medium">
+              <div v-for="(song, i) in visibleItems(rev, 'removed', rev.removed)" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700/50 pb-1">
+                <span>{{ song.title }}</span>
+                <span class="text-slate-400 line-through">{{ song.rank }}</span>
+              </div>
+            </div>
+            <button
+              v-if="hiddenCount(rev, 'removed', rev.removed) > 0"
+              @click="expand(rev, 'removed')"
+              class="mt-3 ml-2 text-xs font-bold text-rose-500 dark:text-rose-400 hover:underline"
+            >
+              {{ t('changelog.showAll', { n: hiddenCount(rev, 'removed', rev.removed) }) }}
+            </button>
           </div>
         </div>
       </div>

@@ -994,6 +994,8 @@ export const ko = {
   'changelog.improvements': '개선 및 변경 사항',
   'changelog.addedSongs': '신규 추가',
   'changelog.changedSongs': '기존 변경',
+  'changelog.removedSongs': '표에서 제외',
+  'changelog.showAll': '나머지 {n}곡 표시',
   'changelog.dateInitial': '초기',
   'changelog.may2026': '2026년 5월',
   'changelog.v170Title': '잘하는 보면 랭킹 추가',

@@ -143,6 +143,13 @@
 - **200 の単位は既存の MAX-率の分母と同じ** = `score > 0` の全プレイ行（`COUNT(*)`、ユーザー重複を排除しない）。
 - **実力解禁譜面は自動配置の対象外**（上位層しかプレイせずサンプルが偏るため）→ **手動で配置する**。
 
+**2026-09-09 実施: active の Uncategorized 21 曲を draft へ配置**（[scripts/place-uncategorized-draft.js](../scripts/place-uncategorized-draft.js)、レポート [data/uncat_place_report.md](../data/uncat_place_report.md)）
+
+- 配置条件 = **プレイ人数 n > 200**（n は MAX-率の分母）。対象 22 曲のうち `Any%`（データ無し）以外の 21 曲がすべて n ≥ 234 で該当。
+- ベース帯 = draft 既存曲（active の数値帯と同じ 1,294 曲）との **MAX-率順位が指す帯へ相乗り**（§8.1 ルール 3 と同じ。既存曲は動かさない）。
+- 物量加点は §8.1 ルール 4 をそのまま適用（+0.1〜+0.4 が 7 曲。super double play sessions は 12.6+0.3 → 12.8 で頭打ち）。
+- 適用前の draft は `profile:pre-uncat-place-20260909` に保存。**この時点の draft は「active ＋ Uncategorized 曲の相乗り」であり、§8.1 案B（全曲 MAX-率順の再判定）ではない**（13.1 は空）。案B は `profile:ZINRAI-planB` に残っている。
+
 ### MAX-率の定義（取り違え注意）
 
 「曲別平均スコアレート」ページの **MAX- 列** = **MAX-（スコア率 ≥ 94.44%、判定式 `score*9 >= notes*17`）を達成したプレイヤーの割合**
@@ -157,7 +164,9 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
   タイブレークに **avgScoreRate 昇順**を併用する（＝ページの並び順と同じ）。
 - MAX-率順への全面作り直しは **BEAT-PT を上位者から下位者へ再分配する**（2026-07-07 検証済み）。
   ただし **ZINRAI では BEAT-PT 自体が初期化される**ため、今回はこの制約を気にせず素直に採用できる。
-- 適用後は更新履歴に「第 N 版」を追加する（`difficulty_revisions.json`、曲名は本番 API と照合）。
+- 更新履歴の「第 N 版」は**適用時に自動記録される**（2026-09-09 実装。`GameDataService.applyDraftDifficultyTable()` が
+  適用前 active と draft の差分を `difficulty_revisions` テーブルへ追記し、`GET /api/game-data/difficulty-revisions` で配信。
+  手書き JSON への追記は不要）。全曲再判定のように数百曲が動く版でも、ページ側は 40 曲で折りたたまれる。
 
 ---
 

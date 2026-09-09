@@ -2,6 +2,7 @@ package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.DifficultyRank;
 import com.beatseeker.backend.entity.DifficultyRankSong;
+import com.beatseeker.backend.entity.DifficultyRevision;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
@@ -30,6 +31,7 @@ import java.util.*;
  *  - {@link SongDefinitionRepository}: 曲定義テーブル
  *  - {@link DifficultyRankRepository}: 非公式難易度テーブル
  *  - {@link ScoreRecalculationService}: applyDraft 後の BEAT-PT 再計算
+ *  - {@link DifficultyRevisionService}: 難易度表の適用時に更新履歴（第N版）を自動記録
  *  - {@link ObjectMapper}: 既存 JSON の解釈と配信用 JSON の生成
  *
  * 主要ロジックの概観:
@@ -46,6 +48,8 @@ public class GameDataService {
     private final DifficultyRankRepository diffRankRepo;
     /** applyDraft 後に全ユーザーの BEAT-PT を再計算させる Service */
     private final ScoreRecalculationService recalcService;
+    /** 難易度表の適用時に、公開中の表との差分を更新履歴（第N版）として自動記録する Service */
+    private final DifficultyRevisionService revisionService;
     /** JSON 読み書き用 Jackson マッパー */
     private final ObjectMapper objectMapper;
 
@@ -59,10 +63,12 @@ public class GameDataService {
     public GameDataService(SongDefinitionRepository songDefRepo,
                            DifficultyRankRepository diffRankRepo,
                            ScoreRecalculationService recalcService,
+                           DifficultyRevisionService revisionService,
                            ObjectMapper objectMapper) {
         this.songDefRepo = songDefRepo;
         this.diffRankRepo = diffRankRepo;
         this.recalcService = recalcService;
+        this.revisionService = revisionService;
         this.objectMapper = objectMapper;
     }
 
@@ -590,13 +596,21 @@ public class GameDataService {
      * 【メソッドの役割】 draft の難易度表のみを active に昇格し、全ユーザーの BEAT-PT を再計算する。
      * 楽曲の draft には触れない（別エンドポイントで独立に適用する）。
      *
+     * 昇格と同時に、公開中の表（適用前 active）と draft の差分を更新履歴ページの「第N版」として
+     * {@link DifficultyRevisionService} に自動記録する。差分が無ければ版は増えない。
+     * 記録は同じトランザクション内で行うので、昇格が失敗すれば記録も残らない。
+     *
+     * @return 更新履歴に記録した版。差分が無い（または draft が無い）場合は空
      * @throws Exception JSON 生成や再計算キックに失敗した場合
      */
     @Transactional
-    public void applyDraftDifficultyTable() throws Exception {
+    public Optional<DifficultyRevision> applyDraftDifficultyTable() throws Exception {
+        Optional<DifficultyRevision> recorded = Optional.empty();
         List<DifficultyRank> draftRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("draft");
         if (!draftRanks.isEmpty()) {
             List<DifficultyRank> activeRanks = diffRankRepo.findByRevisionOrderBySortOrderAsc("active");
+            // 差分は active を消す前に確定させる（消した後では「適用前」が取れない）。
+            recorded = revisionService.record(activeRanks, draftRanks);
             diffRankRepo.deleteAll(activeRanks);
             diffRankRepo.flush();
             for (DifficultyRank dr : draftRanks) {
@@ -608,6 +622,7 @@ public class GameDataService {
         String songDataJson = getActiveSongDataJson();
         String diffTableJson = getActiveDifficultyTableJson();
         recalcService.recalculateAllUsersAsync(songDataJson, diffTableJson);
+        return recorded;
     }
 
     // ── JSON からのシード（起動時）────────────────────────

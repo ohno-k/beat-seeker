@@ -1,6 +1,7 @@
 package com.beatseeker.backend;
 
 import com.beatseeker.backend.entity.PastScore;
+import com.beatseeker.backend.service.DifficultyRevisionService;
 import com.beatseeker.backend.service.GameDataService;
 import com.beatseeker.backend.service.LeagueChartNotation;
 import com.beatseeker.backend.service.LeagueWeekLifecycleService;
@@ -58,6 +59,9 @@ public class DataInitializer implements ApplicationRunner {
     /** 曲データ・難易度表の投入処理を担うサービス層。 */
     private final GameDataService gameDataService;
 
+    /** 難易度表の改訂履歴（更新履歴の「第N版」）。手書きの第1〜4版をシードするために使う。 */
+    private final DifficultyRevisionService difficultyRevisionService;
+
     /**
      * ステップ単位で独立トランザクションを張るためのテンプレート。
      * run() に {@code @Transactional} を付ける旧方式だと、汚染トランザクションの commit が
@@ -68,15 +72,18 @@ public class DataInitializer implements ApplicationRunner {
     /**
      * 【コンストラクタ】 Spring の DI コンテナから依存オブジェクトを注入する。
      *
-     * @param entityManager   JPA の EntityManager
-     * @param gameDataService 曲・難易度表シード用サービス
-     * @param txManager       トランザクション境界をステップ毎に張るためのマネージャ
+     * @param entityManager             JPA の EntityManager
+     * @param gameDataService           曲・難易度表シード用サービス
+     * @param difficultyRevisionService 難易度改訂履歴シード用サービス
+     * @param txManager                 トランザクション境界をステップ毎に張るためのマネージャ
      */
     public DataInitializer(EntityManager entityManager,
                            GameDataService gameDataService,
+                           DifficultyRevisionService difficultyRevisionService,
                            PlatformTransactionManager txManager) {
         this.entityManager = entityManager;
         this.gameDataService = gameDataService;
+        this.difficultyRevisionService = difficultyRevisionService;
         this.txTemplate = new TransactionTemplate(txManager);
     }
 
@@ -252,6 +259,8 @@ public class DataInitializer implements ApplicationRunner {
         try {
             seedFromResource("data/song_data.json", "song");
             seedFromResource("data/difficulty_table.json", "difficulty");
+            // 更新履歴ページの難易度改訂（手書きの第1〜4版）。第5版以降は「難易度表を適用」で自動追記される。
+            seedFromResource("data/difficulty_revisions.json", "revision");
         } catch (Exception e) {
             logger.error("Warning: Could not seed game data from JSON: {}", e.getMessage(), e);
         }
@@ -413,7 +422,8 @@ public class DataInitializer implements ApplicationRunner {
      * リソースが見つからない場合はスキップし、読み込みや投入中に例外が出ても警告のみ。
      *
      * @param resourcePath クラスパスリソースのパス（例: {@code data/song_data.json}）
-     * @param type         投入対象の種別。{@code "song"} なら曲データ、それ以外は難易度表として扱う
+     * @param type         投入対象の種別。{@code "song"} なら曲データ、{@code "revision"} なら難易度改訂履歴、
+     *                     それ以外は難易度表として扱う
      * @throws Exception 外側の呼び出し元には実質伝播しない（内部で catch 済み）
      */
     private void seedFromResource(String resourcePath, String type) throws Exception {
@@ -432,6 +442,9 @@ public class DataInitializer implements ApplicationRunner {
                 if ("song".equals(type)) {
                     // 曲データの投入
                     gameDataService.seedSongData(json);
+                } else if ("revision".equals(type)) {
+                    // 難易度改訂履歴（更新履歴の「第N版」）の投入
+                    difficultyRevisionService.seed(json);
                 } else {
                     // それ以外（= 難易度表）の投入
                     gameDataService.seedDifficultyTable(json);

@@ -406,7 +406,7 @@ onMounted(() => {
       </p>
       <ul class="list-disc pl-6 space-y-1.5 text-slate-700 dark:text-slate-300 leading-relaxed">
         <li><strong>アプリ更新タブ:</strong> 機能追加・改善・バグ修正をバージョン単位で時系列表示します。</li>
-        <li><strong>難易度改訂タブ:</strong> <code>data/difficulty_revisions.json</code> から、非公式難易度表の追加曲・ランク変更を版数ごとに表示します。</li>
+        <li><strong>難易度改訂タブ:</strong> 管理者が難易度表を適用するたびに自動記録される改訂履歴（新規追加・既存変更・表から除外）を版数ごとに表示します。</li>
       </ul>
     </section>
 

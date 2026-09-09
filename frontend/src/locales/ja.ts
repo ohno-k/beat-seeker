@@ -1051,6 +1051,8 @@ export const ja = {
   'changelog.improvements': '改善・変更 (Improvements & Changes)',
   'changelog.addedSongs': '新規追加',
   'changelog.changedSongs': '既存変更',
+  'changelog.removedSongs': '表から除外',
+  'changelog.showAll': '残り{n}件を表示',
   'changelog.dateInitial': '初期',
   'changelog.may2026': '2026年5月',
   'changelog.v170Title': '得意曲ランキング追加',

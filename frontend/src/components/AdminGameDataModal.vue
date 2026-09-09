@@ -1576,9 +1576,11 @@ const handleApplyDraftSongs = async () => {
 /**
  * 【関数の役割】 難易度表ドラフトのみを公開して全ユーザーの PT 再計算を走らせる。
  * 重い処理なのでバックエンド側は非同期（202 Accepted）で受け付ける。
+ * 適用と同時に、公開中の表との差分がサーバ側で更新履歴ページの「第N版」として自動記録される
+ * （記録した版と内訳はレスポンスの message に含まれる）。
  */
 const handleApplyDraftDiffTable = async () => {
-  if (!confirm('難易度表ドラフトを適用しますか？全ユーザーのポイント再計算が実行されます。')) return;
+  if (!confirm('難易度表ドラフトを適用しますか？全ユーザーのポイント再計算が実行されます。\n公開中の表との差分（新規追加・既存変更・表から除外）は、更新履歴ページの難易度改訂タブに「第N版」として自動記録されます。')) return;
 
   isApplyingDiff.value = true;
   errorMsg.value = '';

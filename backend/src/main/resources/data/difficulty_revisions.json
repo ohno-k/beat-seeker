@@ -1,0 +1,180 @@
+[
+  {
+    "version": 1,
+    "label": "v1",
+    "appVersion": "Ver 1.4.0",
+    "date": "2026-04",
+    "added": [
+      {
+        "title": "Butterfly Twist",
+        "rank": "11.2"
+      },
+      {
+        "title": "Time to Empress[L]",
+        "rank": "11.6"
+      },
+      {
+        "title": "華麗なる！音戯探偵ひなビタ",
+        "rank": "12.1"
+      },
+      {
+        "title": "Nemophira",
+        "rank": "12.0"
+      },
+      {
+        "title": "タンポポ",
+        "rank": "11.1"
+      },
+      {
+        "title": "AmorocoFati",
+        "rank": "12.7"
+      },
+      {
+        "title": "PERFECT GREAT!!",
+        "rank": "12.6"
+      },
+      {
+        "title": "UNDO THE NIGHT",
+        "rank": "12.5"
+      },
+      {
+        "title": "HEROES",
+        "rank": "12.8"
+      },
+      {
+        "title": "ちょえちょえまぎか[L]",
+        "rank": "11.7"
+      },
+      {
+        "title": "オーバーライド",
+        "rank": "11.0"
+      },
+      {
+        "title": "ラブコメトキドキシリアス",
+        "rank": "12.5"
+      },
+      {
+        "title": "ベンガル vs. アムール Battle",
+        "rank": "12.0"
+      }
+    ],
+    "changed": [
+      {
+        "title": "BRAINSTORM",
+        "from": "12.6",
+        "to": "12.4"
+      }
+    ]
+  },
+  {
+    "version": 2,
+    "label": "v2",
+    "appVersion": "Ver 1.6.0",
+    "date": "2026-04",
+    "added": [
+      {
+        "title": "RUINA",
+        "rank": "12.9"
+      },
+      {
+        "title": "ZED[L]",
+        "rank": "12.7"
+      },
+      {
+        "title": "pique",
+        "rank": "11.4"
+      }
+    ],
+    "changed": []
+  },
+  {
+    "version": 3,
+    "label": "v3",
+    "appVersion": "Ver 1.7.0",
+    "date": "2026-06",
+    "added": [
+      {
+        "title": "THE BLACK KNIGHT[L]",
+        "rank": "12.7"
+      },
+      {
+        "title": "Funky Quirky",
+        "rank": "11.6"
+      },
+      {
+        "title": "Dusk Endir",
+        "rank": "12.4"
+      },
+      {
+        "title": "OMEGA",
+        "rank": "12.7"
+      },
+      {
+        "title": "Τeλοs",
+        "rank": "11.8"
+      },
+      {
+        "title": "BitRacer",
+        "rank": "12.8"
+      },
+      {
+        "title": "GENE[L]",
+        "rank": "12.5"
+      }
+    ],
+    "changed": []
+  },
+  {
+    "version": 4,
+    "label": "v4",
+    "appVersion": "Ver 1.8.0",
+    "date": "2026-07",
+    "added": [
+      {
+        "title": "THUNDERSTRIKE",
+        "rank": "12.4"
+      },
+      {
+        "title": "メテオラ-meteor-",
+        "rank": "11.4"
+      },
+      {
+        "title": "Mighty Beat Monsterz",
+        "rank": "12.0"
+      },
+      {
+        "title": "blue anthem",
+        "rank": "11.9"
+      },
+      {
+        "title": "ESPRIT ONE",
+        "rank": "11.3"
+      },
+      {
+        "title": "Rise'n Beauty[L]",
+        "rank": "12.0"
+      },
+      {
+        "title": "三日天下モンキー",
+        "rank": "12.5"
+      },
+      {
+        "title": "Gimme a Big Beat(青龍 Remix)",
+        "rank": "12.6"
+      },
+      {
+        "title": "Second Heaven(Mamonis Remix)",
+        "rank": "11.5"
+      },
+      {
+        "title": "Kick The Rainbow",
+        "rank": "11.5"
+      },
+      {
+        "title": "[E]",
+        "rank": "11.4"
+      }
+    ],
+    "changed": []
+  }
+]

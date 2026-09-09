@@ -993,6 +993,8 @@ export const en = {
   'changelog.improvements': 'Improvements & Changes',
   'changelog.addedSongs': 'Newly Added',
   'changelog.changedSongs': 'Changed',
+  'changelog.removedSongs': 'Removed from Table',
+  'changelog.showAll': 'Show {n} more',
   'changelog.dateInitial': 'Initial',
   'changelog.may2026': 'May 2026',
   'changelog.v170Title': 'Strength Ranking added',

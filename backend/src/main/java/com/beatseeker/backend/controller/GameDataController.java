@@ -1,9 +1,11 @@
 package com.beatseeker.backend.controller;
 
+import com.beatseeker.backend.entity.DifficultyRevision;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
+import com.beatseeker.backend.service.DifficultyRevisionService;
 import com.beatseeker.backend.service.GameDataService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 【クラスの役割】 ゲーム基礎データ（楽曲メタデータ・難易度表）の公開／管理 API を束ねるコントローラ。
@@ -39,16 +42,20 @@ public class GameDataController {
     private final UserRepository userRepository;
     /** 管理者判定のロジックを共通化した Service。 */
     private final AdminAuthService adminAuthService;
+    /** 難易度表の改訂履歴（更新履歴ページの「第N版」）を配信する Service。 */
+    private final DifficultyRevisionService difficultyRevisionService;
 
     /**
      * 【コンストラクタ】 Spring が Service/Repository を DI で注入する。
      */
     public GameDataController(GameDataService gameDataService,
                               UserRepository userRepository,
-                              AdminAuthService adminAuthService) {
+                              AdminAuthService adminAuthService,
+                              DifficultyRevisionService difficultyRevisionService) {
         this.gameDataService = gameDataService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
+        this.difficultyRevisionService = difficultyRevisionService;
     }
 
     // ── 公開エンドポイント ──────────────────────────────
@@ -86,6 +93,19 @@ public class GameDataController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("{\"error\":\"" + e.getMessage() + "\"}");
         }
+    }
+
+    /**
+     * 【メソッドの役割】 難易度表の改訂履歴（更新履歴ページの「第N版」）を古い順に返す。
+     *
+     * 「難易度表を適用」のたびに公開中の表との差分が自動記録される。
+     * 形はフロント同梱の {@code difficulty_revisions.json} と互換で、{@code removed}（表から除外）を足してある。
+     *
+     * @return {@code [{version, label, appVersion, date:"YYYY-MM", appliedAt, added, changed, removed}, …]}
+     */
+    @GetMapping("/game-data/difficulty-revisions")
+    public ResponseEntity<List<Map<String, Object>>> getDifficultyRevisions() {
+        return ResponseEntity.ok(difficultyRevisionService.listForPublic());
     }
 
     // ── 管理者エンドポイント ─────────────────────────────
@@ -337,17 +357,39 @@ public class GameDataController {
     /**
      * 【メソッドの役割】 難易度表ドラフトのみを「公開データ」として適用する。
      *
+     * 適用と同時に、公開中の表との差分が更新履歴ページの「第N版」として自動記録される
+     * （差分が無ければ記録しない）。記録した版の内訳はレスポンスの {@code revision} に載せる。
+     *
      * Service 側で重い処理（全ユーザースコアのポイント再計算）をバックグラウンド実行するため、
      * レスポンスは 202 Accepted（受け付け完了、処理は非同期）で返す。
      *
      * @param auth 管理者認証
+     * @return {@code {message, revision?: {edition, added, changed, removed}}}
      */
     @PostMapping("/admin/game-data/apply/difficulty")
     public ResponseEntity<Map<String, Object>> applyDraftDifficultyTable(Authentication auth) {
         checkAdminAccess(auth);
         try {
-            gameDataService.applyDraftDifficultyTable();
-            return ResponseEntity.accepted().body(Map.of("message", "難易度表ドラフトを適用しました。バックグラウンドでポイント再計算を開始します。"));
+            Optional<DifficultyRevision> recorded = gameDataService.applyDraftDifficultyTable();
+
+            Map<String, Object> body = new HashMap<>();
+            StringBuilder message = new StringBuilder("難易度表ドラフトを適用しました。");
+            if (recorded.isPresent()) {
+                DifficultyRevision rev = recorded.get();
+                message.append(String.format("更新履歴に第%d版を記録しました（新規追加 %d / 既存変更 %d / 表から除外 %d）。",
+                        rev.getEdition(), rev.getAddedCount(), rev.getChangedCount(), rev.getRemovedCount()));
+                Map<String, Object> summary = new HashMap<>();
+                summary.put("edition", rev.getEdition());
+                summary.put("added", rev.getAddedCount());
+                summary.put("changed", rev.getChangedCount());
+                summary.put("removed", rev.getRemovedCount());
+                body.put("revision", summary);
+            } else {
+                message.append("公開中の表との差分が無いため、更新履歴には記録していません。");
+            }
+            message.append("バックグラウンドでポイント再計算を開始します。");
+            body.put("message", message.toString());
+            return ResponseEntity.accepted().body(body);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", "適用エラー: " + e.getMessage()));
         }
