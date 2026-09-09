@@ -267,6 +267,7 @@ export const ko = {
   'advice.attemptedTag': '도전함',
   'advice.attemptedHint': '최근 {days}일 안에 갱신했지만 목표에 닿지 못한 보면입니다. 후보에서 제외하고 나머지 곡으로 계산합니다',
   'advice.attemptedProgress': '{from} → {to} ({date} 갱신)',
+  'advice.pointsToGo': '{n}점 남음',
 
   // Score Summary / Table
   'table.title': '스코어 리스트',

@@ -272,6 +272,7 @@ export const ja = {
   'advice.attemptedTag': '挑戦済み',
   'advice.attemptedHint': '直近 {days} 日に更新したものの目標に届かなかった譜面です。候補から外し、残りの曲で計算しています',
   'advice.attemptedProgress': '{from} → {to}（{date} 更新）',
+  'advice.pointsToGo': 'あと {n} 点',
 
   // Score Summary / Table
   'table.title': 'スコアリスト',

@@ -268,6 +268,7 @@ export const en = {
   'advice.attemptedTag': 'Attempted',
   'advice.attemptedHint': 'Charts you improved in the last {days} days without reaching the target. They are left out and the rest is recalculated',
   'advice.attemptedProgress': '{from} → {to} (updated {date})',
+  'advice.pointsToGo': '{n} pts to go',
 
   // Score Summary / Table
   'table.title': 'Score List',

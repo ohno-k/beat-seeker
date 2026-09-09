@@ -33,18 +33,19 @@
       {{ t('advice.noSuggestions') }}
     </div>
     <div v-else class="space-y-2">
+      <!-- 1 行 = 2 段。左: 曲名 + 難易度・現在地・達成率・期待値、右: 目標（AAA+15 / MAX-30 記法）とあと何点 -->
       <div
         v-for="(sug, i) in visibleSuggestions"
         :key="`${sug.title}|${sug.difficultyName}`"
-        class="flex items-center gap-2 p-2 sm:p-3 rounded-md border transition-colors"
+        class="flex items-center gap-2 px-2 py-1.5 rounded-md border transition-colors"
         :class="sug.unplayed
           ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50'
           : 'bg-slate-50/50 dark:bg-slate-700/20 border-slate-100 dark:border-slate-700/50'"
       >
-        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0 w-5 text-right">{{ i + 1 }}</span>
+        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 shrink-0 w-4 text-right">{{ i + 1 }}</span>
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1.5 min-w-0">
-            <p class="font-bold text-slate-800 dark:text-slate-200 text-xs sm:text-sm truncate">{{ sug.title }}</p>
+          <div class="flex items-center gap-1 min-w-0">
+            <p class="font-bold text-slate-800 dark:text-slate-200 text-xs truncate">{{ sug.title }}</p>
             <InformalRankBadge :rank="sug.informalRank" size="xs" class="shrink-0" />
             <span
               v-if="sug.unplayed"
@@ -57,25 +58,23 @@
               :title="accuracyLabel(sug.accuracy)"
             >{{ t('advice.roughTag') }}</span>
           </div>
-          <p class="text-[10px] text-slate-500 dark:text-slate-400">
-            {{ sug.difficultyName }} /
-            <template v-if="sug.unplayed">{{ t('advice.notPlayedYet') }}</template>
-            <template v-else>{{ t('common.current') }} {{ sug.currentBeatPt.toFixed(1) }} pt</template>
+          <p class="text-[10px] leading-tight text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-x-1.5">
+            <span>{{ diffShort(sug.difficultyName) }}</span>
+            <span v-if="sug.unplayed">{{ t('advice.notPlayedYet') }}</span>
+            <span v-else :title="currentTooltip(sug)">{{ t('common.current') }} {{ gradeOrScore(sug.currentScore, sug.maxScore) }}</span>
+            <span class="font-bold" :class="probabilityClass(sug.achieveProbability)">
+              {{ t('advice.achieveProbability', { p: Math.round(sug.achieveProbability * 100) }) }}
+            </span>
+            <span class="font-bold text-emerald-600 dark:text-emerald-400">
+              {{ t('advice.expectedGain', { n: sug.expectedGain.toFixed(1) }) }}
+            </span>
           </p>
         </div>
-        <div class="text-right shrink-0" :title="t('advice.supportHint', { n: sug.supportCount, acc: accuracyLabel(sug.accuracy) })">
-          <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">
-            {{ t('advice.targetBorder', { label: sug.targetLabel }) }}
-          </p>
-          <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
-            {{ t('advice.targetScore', { n: sug.targetScore.toLocaleString() }) }}
-          </p>
-          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">→ {{ sug.targetRate.toFixed(2) }}%</p>
-          <p class="text-[10px] font-bold" :class="probabilityClass(sug.achieveProbability)">
-            {{ t('advice.achieveProbability', { p: Math.round(sug.achieveProbability * 100) }) }}
-          </p>
-          <p class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-            {{ t('advice.expectedGain', { n: sug.expectedGain.toFixed(1) }) }}
+        <div class="text-right shrink-0 leading-tight" :title="targetTooltip(sug)">
+          <p class="text-sm font-bold" :class="targetColorClass(sug)">{{ gradeOrScore(sug.targetScore, sug.maxScore) }}</p>
+          <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <template v-if="sug.unplayed">{{ sug.targetScore.toLocaleString() }}</template>
+            <template v-else>{{ t('advice.pointsToGo', { n: pointsToGo(sug).toLocaleString() }) }}</template>
           </p>
         </div>
       </div>
@@ -131,32 +130,32 @@
         <div
           v-for="sug in attemptedItems"
           :key="`attempted|${sug.title}|${sug.difficultyName}`"
-          class="flex items-center gap-2 p-2 sm:p-3 rounded-md border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-700/20 opacity-80"
+          class="flex items-center gap-2 px-2 py-1.5 rounded-md border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-700/20 opacity-80"
         >
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <p class="font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm truncate">{{ sug.title }}</p>
+            <div class="flex items-center gap-1 min-w-0">
+              <p class="font-bold text-slate-700 dark:text-slate-300 text-xs truncate">{{ sug.title }}</p>
               <InformalRankBadge :rank="sug.informalRank" size="xs" class="shrink-0" />
               <span class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-amber-500 text-white">{{ t('advice.attemptedTag') }}</span>
             </div>
-            <p class="text-[10px] text-slate-500 dark:text-slate-400">
-              {{ sug.difficultyName }} /
-              {{ t('advice.attemptedProgress', {
-                from: sug.attemptOldScore.toLocaleString(),
-                to: sug.attemptNewScore.toLocaleString(),
-                date: formatAttemptDate(sug.lastAttemptAt),
-              }) }}
+            <p class="text-[10px] leading-tight text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-x-1.5">
+              <span>{{ diffShort(sug.difficultyName) }}</span>
+              <span>
+                {{ t('advice.attemptedProgress', {
+                  from: sug.attemptOldScore.toLocaleString(),
+                  to: sug.attemptNewScore.toLocaleString(),
+                  date: formatAttemptDate(sug.lastAttemptAt),
+                }) }}
+              </span>
+              <span class="font-bold" :class="probabilityClass(sug.achieveProbability)">
+                {{ t('advice.achieveProbability', { p: Math.round(sug.achieveProbability * 100) }) }}
+              </span>
             </p>
           </div>
-          <div class="text-right shrink-0">
-            <p v-if="sug.targetLabel" class="text-[10px] font-bold text-blue-500 dark:text-blue-400">
-              {{ t('advice.targetBorder', { label: sug.targetLabel }) }}
-            </p>
-            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">
-              {{ t('advice.targetScore', { n: sug.targetScore.toLocaleString() }) }}
-            </p>
-            <p class="text-[10px] font-bold" :class="probabilityClass(sug.achieveProbability)">
-              {{ t('advice.achieveProbability', { p: Math.round(sug.achieveProbability * 100) }) }}
+          <div class="text-right shrink-0 leading-tight" :title="targetTooltip(sug)">
+            <p class="text-sm font-bold" :class="targetColorClass(sug)">{{ gradeOrScore(sug.targetScore, sug.maxScore) }}</p>
+            <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+              {{ t('advice.pointsToGo', { n: pointsToGo(sug).toLocaleString() }) }}
             </p>
           </div>
         </div>
@@ -203,6 +202,7 @@ import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { getNextRankInfo } from '../utils/beatTier';
+import { scoreGrade, gradeLabel, gradeColorClass } from '../utils/scoreGrade';
 import InformalRankBadge from './InformalRankBadge.vue';
 
 const { t } = useI18n();
@@ -421,6 +421,40 @@ function probabilityClass(p: number): string {
   if (p >= 0.7) return 'text-emerald-600 dark:text-emerald-400';
   if (p >= 0.4) return 'text-slate-500 dark:text-slate-400';
   return 'text-amber-600 dark:text-amber-400';
+}
+
+/** 難易度名の短縮表記。行を詰めるため 1 行目のバッジ類と並べても収まる長さにする。 */
+function diffShort(name: string): string {
+  return name === 'LEGGENDARIA' ? 'LEG' : name === 'ANOTHER' ? 'ANO' : name;
+}
+
+/**
+ * 【関数の役割】 スコアを beat-seeker 記法（AAA+15 / MAX-30 など）にする。
+ * A- 未満などで表記できないスコアは素の値に落とす。
+ */
+function gradeOrScore(score: number, maxScore: number): string {
+  return gradeLabel(score, maxScore) || score.toLocaleString();
+}
+
+/** 目標スコアの記法ラベル色。MAX-=紫 / AAA+=琥珀、それ以外は通常の文字色。 */
+function targetColorClass(sug: FillRecommendationItem): string {
+  return gradeColorClass(scoreGrade(sug.targetScore, sug.maxScore), 'text-slate-700 dark:text-slate-200');
+}
+
+/** 【関数の役割】 目標まであと何点伸ばせばよいか（現在スコアとの差、負にはしない）。 */
+function pointsToGo(sug: FillRecommendationItem): number {
+  return Math.max(0, sug.targetScore - sug.currentScore);
+}
+
+/** 目標側のツールチップ: 素のスコアとレート、推定の根拠。記法だけでは分からない情報をここに逃がす。 */
+function targetTooltip(sug: FillRecommendationItem): string {
+  return `${t('advice.targetScore', { n: sug.targetScore.toLocaleString() })} (${sug.targetRate.toFixed(2)}%) / `
+    + t('advice.supportHint', { n: sug.supportCount, acc: accuracyLabel(sug.accuracy) });
+}
+
+/** 現在地側のツールチップ: 素のスコアとレート、現在の BEAT-PT。 */
+function currentTooltip(sug: FillRecommendationItem): string {
+  return `${sug.currentScore.toLocaleString()} (${sug.currentRate.toFixed(2)}%) / ${sug.currentBeatPt.toFixed(1)} pt`;
 }
 
 /**
