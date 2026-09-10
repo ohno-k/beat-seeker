@@ -588,7 +588,7 @@ public class PracticeMenuService {
     /**
      * 【メソッドの役割】 埋め枠。期待獲得 BEAT-PT の大きい順。
      *
-     * 期待値の定義と数値積分は {@link FillRecommendationService} のものをそのまま使うが、
+     * 期待値の定義（達成率 × 達成時の増分）は {@link FillRecommendationService} のものをそのまま使うが、
      * 候補の現在スコア・未プレイ判定は歴代スコア基準で置き換えてある。
      */
     private List<PracticeMenuItem> pickFill(UserState state, History history,
@@ -712,9 +712,9 @@ public class PracticeMenuService {
         c.target = target;
         c.targetLabel = label;
         c.probability = probabilityOf(target, maxScore, pred);
-        // 期待値の数値積分は既存のコスパ埋めレコメンドの実装をそのまま使う。
-        c.expectedGain = fillRecommendationService.expectedGain(
-                pred.mu, pred.sigma, maxScore, scoreCap, current, informalRank, baseline);
+        // 期待値 = 目標の達成率 × 達成時の増分。コスパ埋めレコメンドと同じ定義で、目標・達成率・期待値が同じ事象を指す。
+        c.expectedGain = c.probability
+                * fillRecommendationService.goalGain(target, maxScore, informalRank, baseline);
         return c;
     }
 
@@ -723,9 +723,9 @@ public class PracticeMenuService {
         return fillRecommendationService.tailProbability(score, maxScore, pred.mu, pred.sigma);
     }
 
-    /** ボーダーレート（%）を「超える」のに必要な最小スコア。段差は超えて初めて付くので +1。 */
+    /** ボーダーレート（%）を「超える」のに必要な最小スコア。コスパ埋めレコメンドと同じ定義。 */
     private static int borderScore(int maxScore, double borderRate) {
-        return (int) Math.ceil(maxScore * borderRate / 100.0) + 1;
+        return FillRecommendationService.borderScore(maxScore, borderRate);
     }
 
     // ── ユーザー状態の読み込み ──────────────────────────────────────────

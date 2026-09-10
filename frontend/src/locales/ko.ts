@@ -253,6 +253,7 @@ export const ko = {
   'advice.targetScore': '목표 {n}점',
   'advice.achieveProbability': '달성률 {p}%',
   'advice.expectedGain': '기대 +{n} pt',
+  'advice.gainOnReach': '달성 시 +{n} pt',
   'advice.expectedTotal': '기대값 합계',
   'advice.supportHint': '{n}개 보면에서 추정 (정확도 {acc})',
   'advice.showMore': '더 보기 (남은 {n}개)',

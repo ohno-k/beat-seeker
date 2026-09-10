@@ -11,8 +11,8 @@ import static org.assertj.core.api.Assertions.within;
  * DB や回帰キャッシュに依存しない純粋な計算部分だけを対象にする:
  *  - 損益分岐スコア（pt(s) が baseline を超える最小スコア）の二分探索
  *  - 標準正規 CDF の近似精度
- *  - 期待獲得 pt が「確実に取れるケース」で決定論的な増分に一致すること
- *  - 期待獲得 pt が達成確率に対して単調に増えること
+ *  - 目標が「達成率 × 達成時の増分」の最大点として選ばれ、期待獲得 pt がその積に一致すること
+ *  - 予測どおりに出せている譜面で「あと 1 点」を目標にしないこと（表示の矛盾の再発防止）
  *
  * 「埋め」の肝である「TOP100 の 100 位を押し出して初めて合計 BEAT-PT が増える」という
  * baseline の扱いも、損益分岐スコアの形で確認する。
@@ -75,64 +75,145 @@ class FillRecommendationMathTest {
         assertThat(breakEven).isGreaterThan(MAX_SCORE);
     }
 
-    @Test
-    void ばらつきが無ければ期待値は決定論的な増分に一致する() {
-        // σ を極小にすると分布が μ の 1 点に潰れるので、期待値 = pt(予測スコア) − baseline。
-        double targetRate = 92.0;
-        double mu = logitOfRate(targetRate);
-        double baseline = 150.0;
+    // ── 目標の選び方と期待値 ─────────────────────────────────────────────
 
-        double expected = service.expectedGain(mu, 1e-6, MAX_SCORE, MAX_SCORE, 0, RANK, baseline);
-        double deterministic = calc.calculatePoints(targetRate, RANK) - baseline;
+    private static FillRecommendationService.Stat stat(double mu, double sigma) {
+        FillRecommendationService.Stat st = new FillRecommendationService.Stat();
+        st.mu = mu;
+        st.sigma = sigma;
+        return st;
+    }
 
-        assertThat(expected).isCloseTo(deterministic, within(0.01));
+    /** 候補と同じ式 P(S ≥ s) × (pt(s) − baseline) をテスト側で独立に評価する。 */
+    private double valueAt(int score, FillRecommendationService.Stat st, double baseline) {
+        return service.tailProbability(score, MAX_SCORE, st.mu, st.sigma)
+                * service.goalGain(score, MAX_SCORE, RANK, baseline);
     }
 
     @Test
-    void 届かない譜面の期待値はゼロになる() {
-        // 予測が損益分岐点のはるか下なら、埋めても合計 BEAT-PT は動かない。
-        double mu = logitOfRate(70.0);
+    void 期待値は目標の達成率と達成時増分の積でその最大点が目標になる() {
+        // 未プレイ譜面。100 位ラインが 150 pt、予測は 90% ± 少し。
+        double baseline = 150.0;
+        FillRecommendationService.Stat st = stat(logitOfRate(90.0), 0.2);
+        int breakEven = service.breakEvenScore(MAX_SCORE, RANK, baseline, 0);
+
+        FillRecommendationService.Target t =
+                service.pickTarget(st, MAX_SCORE, MAX_SCORE, 0, RANK, baseline, breakEven);
+
+        // 表示する 3 つの数字（達成率・達成時増分・期待値）が同じ目標を指す。
+        assertThat(t.expectedGain).isCloseTo(t.probability * t.gain, within(1e-9));
+        assertThat(t.probability).isCloseTo(service.tailProbability(t.score, MAX_SCORE, st.mu, st.sigma), within(1e-12));
+        assertThat(t.gain).isCloseTo(service.goalGain(t.score, MAX_SCORE, RANK, baseline), within(1e-12));
+        // 目標は損益分岐点以上・上限以下。
+        assertThat(t.score).isBetween(breakEven, MAX_SCORE);
+        // 損益分岐点・予測中央値・上限のどこを狙うより見返りが大きい（最大点を選んでいる）。
+        assertThat(t.expectedGain).isGreaterThanOrEqualTo(valueAt(breakEven, st, baseline));
+        assertThat(t.expectedGain).isGreaterThanOrEqualTo(valueAt((int) (MAX_SCORE * 0.90), st, baseline));
+        assertThat(t.expectedGain).isGreaterThanOrEqualTo(valueAt(MAX_SCORE, st, baseline));
+    }
+
+    @Test
+    void 予測どおりに出せている譜面では一点先を目標にせず期待値も控えめになる() {
+        // 現在スコアが予測中央値ちょうど（TOP100 圏内なので baseline = 現在 pt）。
+        // 旧実装はここで「目標 = 現在 + 1 点」「期待値 = 上側の裾の積分」となり、
+        // 「あと 1 点で +0.7 pt」のような矛盾した表示になっていた。
+        int current = (int) (MAX_SCORE * 0.96);
+        double baseline = calc.calculatePoints(current * 100.0 / MAX_SCORE, RANK);
+        FillRecommendationService.Stat st = stat(logitOfRate(96.0), 0.3);
+        int breakEven = service.breakEvenScore(MAX_SCORE, RANK, baseline, current);
+        assertThat(breakEven).isEqualTo(current + 1);
+
+        FillRecommendationService.Target t =
+                service.pickTarget(st, MAX_SCORE, MAX_SCORE, current, RANK, baseline, breakEven);
+
+        // 1 点先は増分がほぼ 0 なので目標にならず、伸びる可能性に見合った先の点が目標になる。
+        assertThat(t.score).isGreaterThan(current + 1);
+        // 中央値より上を狙うので達成率は 50% 未満、期待値は「達成率 × 増分」の範囲に収まる。
+        assertThat(t.probability).isLessThan(0.5);
+        assertThat(t.expectedGain).isCloseTo(t.probability * t.gain, within(1e-9));
+        assertThat(t.expectedGain).isLessThan(t.gain);
+        // 分布全体の期待値 E[max(0, pt(S) − baseline)]（旧定義）より小さい。
+        assertThat(t.expectedGain).isLessThan(fullExpectedGain(st, current, baseline));
+    }
+
+    /** 旧定義の期待値（分布全体の積分）。新定義がこれを超えないことの確認用。 */
+    private double fullExpectedGain(FillRecommendationService.Stat st, int current, double baseline) {
+        double sum = 0, wsum = 0;
+        for (int i = 0; i <= 400; i++) {
+            double z = -4 + i * 0.02;
+            double w = Math.exp(-0.5 * z * z);
+            double score = Math.max(current, PairRegressionService.logitToScoreRate(st.mu + st.sigma * z) * MAX_SCORE);
+            sum += w * Math.max(0.0, calc.calculatePoints(score * 100.0 / MAX_SCORE, RANK) - baseline);
+            wsum += w;
+        }
+        return sum / wsum;
+    }
+
+    @Test
+    void ボーダーが射程内ならボーダーちょうどが目標になりラベルが付く() {
+        // 現在 88.5%（AAA 未満）、予測中央値 89.2% でわずかに AAA を超える。
+        // AAA の段差（weight × 1%）を跨ぐので、ボーダー直上が「達成率 × 増分」の最大点になる。
+        int current = (int) (MAX_SCORE * 0.885);
+        double baseline = calc.calculatePoints(current * 100.0 / MAX_SCORE, RANK);
+        FillRecommendationService.Stat st = stat(logitOfRate(89.2), 0.06);
+        int breakEven = service.breakEvenScore(MAX_SCORE, RANK, baseline, current);
+
+        FillRecommendationService.Target t =
+                service.pickTarget(st, MAX_SCORE, MAX_SCORE, current, RANK, baseline, breakEven);
+
+        assertThat(t.label).isEqualTo("AAA");
+        assertThat(t.score).isEqualTo(FillRecommendationService.borderScore(MAX_SCORE, 88.88));
+        assertThat(t.score * 100.0 / MAX_SCORE).isGreaterThan(88.88);
+        // 段差ぶんは必ず増分に乗る。
+        assertThat(t.gain).isGreaterThan(calc.getWeight(RANK) * 0.01);
+    }
+
+    @Test
+    void 届かない譜面は目標が立たないか期待値がほぼゼロになる() {
+        // 損益分岐点がコミュニティ最高を超えている → 狙える点が無い。
+        assertThat(service.pickTarget(stat(logitOfRate(90.0), 0.2), MAX_SCORE, (int) (MAX_SCORE * 0.9),
+                0, RANK, 150.0, (int) (MAX_SCORE * 0.95))).isNull();
+
+        // 予測が損益分岐点のはるか下なら、達成率がほぼ 0 なので期待値もほぼ 0。
         double baseline = calc.calculatePoints(95.0, RANK);
-
-        double expected = service.expectedGain(mu, 0.1, MAX_SCORE, MAX_SCORE, 0, RANK, baseline);
-
-        assertThat(expected).isCloseTo(0.0, within(1e-6));
+        int breakEven = service.breakEvenScore(MAX_SCORE, RANK, baseline, 0);
+        FillRecommendationService.Target t = service.pickTarget(
+                stat(logitOfRate(70.0), 0.1), MAX_SCORE, MAX_SCORE, 0, RANK, baseline, breakEven);
+        assertThat(t == null || t.expectedGain < 1e-6).isTrue();
     }
 
     @Test
     void 能力が高いほど同じ譜面の期待値が大きくなる() {
         double baseline = calc.calculatePoints(88.0, RANK);
-        double weak = service.expectedGain(logitOfRate(88.5), 0.15, MAX_SCORE, MAX_SCORE, 0, RANK, baseline);
-        double strong = service.expectedGain(logitOfRate(93.0), 0.15, MAX_SCORE, MAX_SCORE, 0, RANK, baseline);
+        int breakEven = service.breakEvenScore(MAX_SCORE, RANK, baseline, 0);
+        FillRecommendationService.Target weak = service.pickTarget(
+                stat(logitOfRate(88.5), 0.15), MAX_SCORE, MAX_SCORE, 0, RANK, baseline, breakEven);
+        FillRecommendationService.Target strong = service.pickTarget(
+                stat(logitOfRate(93.0), 0.15), MAX_SCORE, MAX_SCORE, 0, RANK, baseline, breakEven);
 
-        assertThat(strong).isGreaterThan(weak);
-        assertThat(weak).isGreaterThan(0.0);
+        assertThat(strong.expectedGain).isGreaterThan(weak.expectedGain);
+        assertThat(weak.expectedGain).isGreaterThan(0.0);
     }
 
     @Test
-    void 自己ベストを下回る引きは増分ゼロとして扱われる() {
-        // 現在スコアより下の目が出ても自己ベストは更新されないので、期待値は非負のまま。
-        // ばらつきを大きくしても「マイナスの期待値」にはならないことを確認する。
-        int currentScore = 1800; // 90.0%
-        double currentPt = calc.calculatePoints(90.0, RANK);
-        double mu = logitOfRate(89.0); // 予測は現在より下
-
-        double expected = service.expectedGain(mu, 0.4, MAX_SCORE, MAX_SCORE, currentScore, RANK, currentPt);
-
-        assertThat(expected).isGreaterThanOrEqualTo(0.0);
-    }
-
-    @Test
-    void コミュニティ最高スコアで期待値が頭打ちになる() {
-        // 誰も 95% を超えていない譜面では、予測が上振れしても 95% ぶんの pt までしか期待できない。
-        double mu = logitOfRate(99.0);
+    void 目標はコミュニティ最高スコアで頭打ちになる() {
+        // 誰も 95% を超えていない譜面では、予測が上振れしても 95% より上を目標にしない。
         int communityMax = (int) (MAX_SCORE * 0.95);
+        FillRecommendationService.Stat st = stat(logitOfRate(99.0), 0.2);
+        int breakEven = service.breakEvenScore(MAX_SCORE, RANK, 0.0, 0);
 
-        double capped = service.expectedGain(mu, 0.2, MAX_SCORE, communityMax, 0, RANK, 0.0);
-        double uncapped = service.expectedGain(mu, 0.2, MAX_SCORE, MAX_SCORE, 0, RANK, 0.0);
+        FillRecommendationService.Target t =
+                service.pickTarget(st, MAX_SCORE, communityMax, 0, RANK, 0.0, breakEven);
 
-        assertThat(capped).isLessThan(uncapped);
-        assertThat(capped).isLessThanOrEqualTo(calc.calculatePoints(95.0, RANK) + 1e-9);
+        assertThat(t.score).isLessThanOrEqualTo(communityMax);
+        assertThat(t.gain).isLessThanOrEqualTo(calc.calculatePoints(95.0, RANK) + 1e-9);
+    }
+
+    @Test
+    void 達成時の増分は自己ベスト未満や損益分岐点未満でゼロになる() {
+        double baseline = calc.calculatePoints(90.0, RANK);
+        assertThat(service.goalGain((int) (MAX_SCORE * 0.89), MAX_SCORE, RANK, baseline)).isEqualTo(0.0);
+        assertThat(service.goalGain((int) (MAX_SCORE * 0.91), MAX_SCORE, RANK, baseline)).isGreaterThan(0.0);
     }
 
     // ── 並び替えと打ち切り ──────────────────────────────────────────────
