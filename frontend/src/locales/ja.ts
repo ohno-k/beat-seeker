@@ -258,6 +258,7 @@ export const ja = {
   'advice.targetScore': '目標 {n}点',
   'advice.achieveProbability': '達成率 {p}%',
   'advice.expectedGain': '期待 +{n} pt',
+  'advice.gainOnReach': '達成時 +{n} pt',
   'advice.expectedTotal': '期待値合計',
   'advice.supportHint': '{n} 譜面から推定（精度 {acc}）',
   'advice.showMore': 'さらに表示（あと {n} 件）',

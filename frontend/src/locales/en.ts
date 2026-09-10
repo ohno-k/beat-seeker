@@ -254,6 +254,7 @@ export const en = {
   'advice.targetScore': 'Target {n}',
   'advice.achieveProbability': '{p}% chance',
   'advice.expectedGain': 'Exp. +{n} pt',
+  'advice.gainOnReach': 'On reach +{n} pt',
   'advice.expectedTotal': 'Expected total',
   'advice.supportHint': 'Estimated from {n} charts (accuracy {acc})',
   'advice.showMore': 'Show more ({n} left)',

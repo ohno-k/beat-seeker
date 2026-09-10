@@ -170,8 +170,11 @@
  *
  * バックエンドの `/api/analysis/fill-recommendation`（コスパ埋めレコメンド）が
  * 全譜面（未プレイ含む）について
- *   期待獲得 pt = E[ max(0, BEAT-PT(到達スコア) − 押し出しライン) ]
- * と達成率を算出し、達成率降順に「残り pt を満たすまで」を返してくる。
+ *   目標スコア = P(目標に届く) × (BEAT-PT(目標) − 押し出しライン) が最大になるスコア
+ *   達成率 = P(目標に届く)、期待獲得 pt = 達成率 × 達成時の増分
+ * を算出し、達成率降順に「残り pt を満たすまで」を返してくる。
+ * 1 行に出す「達成率」「期待 +x pt」「目標 / あと n 点」はすべて同じ目標を指す
+ * （以前は期待値だけ分布全体の積分だったため「あと 1 点」に「期待 +0.7 pt」が並ぶことがあった）。
  * 本コンポーネントは残り pt（gap）を渡して結果を 10 件ずつ表示するだけを担う。
  *
  * 【枯渇対策】
@@ -258,15 +261,20 @@ interface FillRecommendationItem {
   sigmaRate: number;
   /** 損益分岐スコア。ここを超えて初めて総合 BEAT-PT が増える。 */
   breakEvenScore: number;
-  /** P(損益分岐スコア以上を出せる | 推定能力)。 */
+  /** P(損益分岐スコア以上を出せる | 推定能力)。「そもそも合計に効く可能性」。表示には使わない。 */
+  breakEvenProbability: number;
+  /** 目標スコアに届く確率 P(S ≥ targetScore)。「達成率」として表示する。 */
   achieveProbability: number;
+  /** 目標スコア。P(届く) × 達成時の増分 が最大になる点。 */
   targetScore: number;
   targetRate: number;
-  /** 'AA' / 'AAA' / 'MAX-'。狙えるボーダーが無ければ空文字。 */
+  /** 'AA' / 'AAA' / 'MAX-'。目標がボーダーちょうどでなければ空文字。 */
   targetLabel: string;
+  /** achieveProbability と同値（互換用）。 */
   targetProbability: number;
+  /** 目標に届いたときの総合 BEAT-PT の増分。 */
   targetGain: number;
-  /** 期待獲得 pt。この降順で返ってくる。 */
+  /** 期待獲得 pt = achieveProbability × targetGain。 */
   expectedGain: number;
   supportCount: number;
   accuracy: Accuracy;
@@ -446,9 +454,13 @@ function pointsToGo(sug: FillRecommendationItem): number {
   return Math.max(0, sug.targetScore - sug.currentScore);
 }
 
-/** 目標側のツールチップ: 素のスコアとレート、推定の根拠。記法だけでは分からない情報をここに逃がす。 */
+/**
+ * 目標側のツールチップ: 素のスコアとレート、達成時の増分、推定の根拠。記法だけでは分からない情報をここに逃がす。
+ * 「期待 +x pt」は達成率 × 達成時の増分なので、達成時の増分を併記すると 2 つの数字の関係が分かる。
+ */
 function targetTooltip(sug: FillRecommendationItem): string {
   return `${t('advice.targetScore', { n: sug.targetScore.toLocaleString() })} (${sug.targetRate.toFixed(2)}%) / `
+    + `${t('advice.gainOnReach', { n: sug.targetGain.toFixed(1) })} / `
     + t('advice.supportHint', { n: sug.supportCount, acc: accuracyLabel(sug.accuracy) });
 }
 
