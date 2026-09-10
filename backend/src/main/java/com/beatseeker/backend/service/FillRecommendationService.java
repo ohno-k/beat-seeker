@@ -431,6 +431,11 @@ public class FillRecommendationService {
             item.put("predictedScore", predictedScore);
             item.put("predictedRate", predictedScore * 100.0 / maxScore);
             item.put("sigmaRate", sigmaAsRatePct(stat.mu, stat.sigma));
+            // 根拠モーダル用: フロントが同じ分布（logit 空間の正規分布）と損益分岐・目標の選び方を図示するのに使う。
+            item.put("muLogit", stat.mu);
+            item.put("sigmaLogit", stat.sigma);
+            item.put("baselinePt", baseline);
+            item.put("scoreCap", scoreCap);
             item.put("breakEvenScore", breakEven);
             item.put("breakEvenProbability", breakEvenProb);
             item.put("achieveProbability", target.probability);
