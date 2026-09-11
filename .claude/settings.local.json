@@ -14,7 +14,8 @@
       "Bash(node diag-league.js out1.json)",
       "Bash(node diag2.js out2.json)",
       "Bash(node -e ' *)",
-      "Bash(node diag3.js out3.json)"
+      "Bash(node diag3.js out3.json)",
+      "Bash(echo \"EXIT=$?\")"
     ]
   }
 }
