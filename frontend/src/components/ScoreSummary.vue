@@ -507,34 +507,52 @@
       
       <!--
         ===== TIER CARD（縄跳びカード方式の単曲ティア早見表） =====
-        行 = 譜面（displayScores と同じフィルタ・ソート・ページング）、列 = 単曲ティア 51 種（Novice 1 → Legend）。
-        セルにはそのティア到達に必要な EX スコアを表示し、達成済みはブロック色で塗りつぶす。
-        次に狙うマス（未達成の最下位）は琥珀色で強調。ヘッダ（上）と曲名列（左）は sticky で固定する。
+        行 = 譜面（filteredScores と同じフィルタ・ソート。ページングは行わず全曲を描画）、列 = 単曲ティア 51 種（Novice 1 → Legend）。
+        セルにはそのティア到達に必要なスコアを EX SCORE / Around（AAA+n・MAX-n）/ 必要な点数（あと何点）のいずれかで表示し、
+        達成済みはブロック色で塗りつぶす。次に狙うマス（未達成の最下位）は琥珀色で強調。ヘッダ（上）と曲名列（左）は sticky で固定する。
+        全曲 × 51 列 = 数万セルになるため、セルの文字列・クラス・ツールチップは tierCardRows 側で事前計算し、
+        行は v-memo で「行オブジェクトが同一なら再パッチしない」ようにしている。
       -->
       <div v-else>
-        <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center gap-3">
           <div class="min-w-0">
             <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">{{ t('tierCard.title') }}</h3>
             <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('tierCard.desc') }}</p>
           </div>
-          <!-- 並び替え（列ヘッダが無いのでセレクタで指定。向きは隣のボタンで反転） -->
-          <div class="sm:ml-auto flex items-center gap-2 shrink-0">
-            <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('tierCard.sort') }}</span>
-            <select
-              :value="sortKey"
-              @change="onCardSortChange"
-              class="text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors cursor-pointer"
-            >
-              <option value="informalRank">{{ t('tierCard.sortInformal') }}</option>
-              <option value="title">{{ t('tierCard.sortTitle') }}</option>
-              <option value="unofficialSongRank">{{ t('tierCard.sortTier') }}</option>
-              <option value="scoreRate">{{ t('tierCard.sortRate') }}</option>
-            </select>
-            <button
-              type="button"
-              @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
-              class="px-2 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            >{{ sortOrder === 'asc' ? '▲' : '▼' }}</button>
+          <div class="lg:ml-auto flex flex-wrap items-center gap-x-4 gap-y-2 shrink-0">
+            <!-- セル表示モード（EX SCORE / Around / 必要な点数） -->
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('tierCard.display') }}</span>
+              <div class="flex gap-0.5 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                <button
+                  v-for="opt in TIER_CARD_DISPLAY_OPTIONS"
+                  :key="opt.value"
+                  type="button"
+                  @click="tierCardDisplay = opt.value"
+                  class="px-2 py-1 rounded-md text-xs font-bold transition-colors whitespace-nowrap"
+                  :class="tierCardDisplay === opt.value ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                >{{ t(opt.labelKey) }}</button>
+              </div>
+            </div>
+            <!-- 並び替え（列ヘッダが無いのでセレクタで指定。向きは隣のボタンで反転） -->
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('tierCard.sort') }}</span>
+              <select
+                :value="sortKey"
+                @change="onCardSortChange"
+                class="text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors cursor-pointer"
+              >
+                <option value="informalRank">{{ t('tierCard.sortInformal') }}</option>
+                <option value="title">{{ t('tierCard.sortTitle') }}</option>
+                <option value="unofficialSongRank">{{ t('tierCard.sortTier') }}</option>
+                <option value="scoreRate">{{ t('tierCard.sortRate') }}</option>
+              </select>
+              <button
+                type="button"
+                @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+                class="px-2 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >{{ sortOrder === 'asc' ? '▲' : '▼' }}</button>
+            </div>
           </div>
         </div>
         <!-- 凡例 -->
@@ -576,7 +594,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-slate-700 dark:text-slate-200">
-              <tr v-for="row in tierCardRows" :key="row.key" class="group hover:bg-blue-50/40 dark:hover:bg-slate-700/30 transition-colors">
+              <tr v-for="row in tierCardRows" :key="row.key" v-memo="[row]" class="group hover:bg-blue-50/40 dark:hover:bg-slate-700/30 transition-colors">
                 <!-- 曲名列（sticky）。クリックで通常表示と同じ詳細モーダルを開く -->
                 <td
                   class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-blue-50 dark:group-hover:bg-slate-700 py-1 px-2 border-r border-slate-200 dark:border-slate-700 cursor-pointer max-w-[150px] sm:max-w-[230px] transition-colors"
@@ -602,15 +620,15 @@
                     </div>
                   </div>
                 </td>
-                <!-- ティア列。required が null のマスはその難易度帯に存在しないティア -->
+                <!-- ティア列。文字列・クラス・ツールチップは事前計算済み（「-」はその難易度帯に存在しないティア） -->
                 <template v-if="row.cells">
                   <td
                     v-for="(cell, i) in row.cells"
                     :key="TIER_CARD_COLUMNS[i].key"
                     class="py-1 px-1 text-center tabular-nums"
-                    :class="[tierCardCellClass(cell, TIER_CARD_COLUMNS[i]), TIER_CARD_COLUMNS[i].isBlockStart ? 'border-l border-slate-200 dark:border-slate-700' : '']"
-                    :title="tierCardCellTitle(cell, TIER_CARD_COLUMNS[i])"
-                  >{{ cell.required ?? '-' }}</td>
+                    :class="cell.cls"
+                    :title="cell.title"
+                  >{{ cell.text }}</td>
                 </template>
                 <td v-else :colspan="TIER_CARD_COLUMNS.length" class="py-1 px-3 text-left italic text-slate-400 dark:text-slate-500">{{ t('tierCard.noTier') }}</td>
               </tr>
@@ -624,8 +642,8 @@
         </div>
       </div>
 
-      <!-- ===== ページネーション（件数表示 + 1 ページあたり件数セレクタ + 前後ボタン） ===== -->
-      <div v-if="filteredScores.length > 0" class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors duration-200">
+      <!-- ===== ページネーション（件数表示 + 1 ページあたり件数セレクタ + 前後ボタン）。TIER CARD は全曲描画なので出さない ===== -->
+      <div v-if="filteredScores.length > 0 && viewMode !== 'card'" class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors duration-200">
         <div class="flex flex-col sm:flex-row items-center gap-4">
           <div class="text-sm text-slate-500 dark:text-slate-400">
             {{ t('table.displayCount', { start: (currentPage - 1) * itemsPerPage + 1, end: Math.min(currentPage * itemsPerPage, filteredScores.length), total: filteredScores.length }) }}
@@ -1524,6 +1542,7 @@ import { computeMilestoneLines } from '../utils/milestones';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getFolderRankInfoByRate, getFolderLegendRate, getFolderRankOffsetMax, SCORE_RATE_TIER_C_MIN, FOLDER_RANK_DEFS, type RankInfo } from '../utils/beatTier';
 import { calcBpi } from '../utils/bpi';
+import { gradeLabel } from '../utils/scoreGrade';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
@@ -1571,7 +1590,7 @@ const isOwnData = computed(() => !props.viewingMode);
 // emit の定義は totalBeatTierPoints の定義直後にまとめる（参照順の都合）
 
 const { showRateTier } = useRateTierVisibility();
-const { t } = useI18n();
+const { t, currentLang } = useI18n();
 /** 現在のモード。'beat' は BEAT-TIER、'rate' は RATE-TIER、'card' は TIER CARD（縄跳びカード方式の単曲ティア早見表）。 */
 const viewMode = ref<'beat' | 'rate' | 'card'>('beat');
 
@@ -3479,16 +3498,30 @@ const TIER_CARD_FILL_CLASS: Record<string, string> = {
   Legend: 'bg-amber-400 text-amber-950',
 };
 
-/** TIER CARD の 1 マス。`required` が null のマスはその難易度帯に存在しないティア（C 帯以下）。 */
+/**
+ * TIER CARD のセル表示モード。
+ *  - 'score' : そのティアに必要な EX スコア（例: 3450）
+ *  - 'around': EX スコアの beat-seeker 記法（例: AAA+120 / MAX-30）。{@link gradeLabel} を使う
+ *  - 'gap'   : 現在スコアからあと何点必要か（例: +150）。達成済みは ✓
+ */
+type TierCardDisplay = 'score' | 'around' | 'gap';
+const tierCardDisplay = ref<TierCardDisplay>('score');
+/** 表示モード切替ボタンの定義（テンプレートの v-for 用）。 */
+const TIER_CARD_DISPLAY_OPTIONS: { value: TierCardDisplay; labelKey: string }[] = [
+  { value: 'score', labelKey: 'tierCard.displayScore' },
+  { value: 'around', labelKey: 'tierCard.displayAround' },
+  { value: 'gap', labelKey: 'tierCard.displayGap' },
+];
+
+/**
+ * TIER CARD の 1 マス。
+ * 全曲 × 51 列（数万セル）を描画するため、テンプレート側で関数を呼ばずに済むよう
+ * 表示文字列・クラス・ツールチップまで {@link buildTierCardRow} で事前計算しておく。
+ */
 interface TierCardCell {
-  /** そのティア到達に必要な EX スコア（整数）。 */
-  required: number | null;
-  /** 現在スコアで到達済みか。 */
-  achieved: boolean;
-  /** 未達成マスのうち最下位（= 次に狙う目標）か。 */
-  isNext: boolean;
-  /** 必要スコアと現在スコアの差（未達成時のみ意味を持つ）。 */
-  gap: number;
+  text: string;
+  cls: string;
+  title: string;
 }
 
 /** TIER CARD の 1 行。 */
@@ -3501,15 +3534,26 @@ interface TierCardRow {
   cells: TierCardCell[] | null;
 }
 
+/** セルの見た目クラス（存在しないティア / 次の目標 / 未達成 / ブロック先頭の左罫線）。 */
+const TIER_CARD_CELL_CLS = {
+  none: 'text-slate-300 dark:text-slate-600',
+  next: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold ring-1 ring-inset ring-amber-400 dark:ring-amber-600',
+  plain: 'text-slate-500 dark:text-slate-400',
+  blockStart: 'border-l border-slate-200 dark:border-slate-700',
+} as const;
+
 /**
- * 【computed の役割】 表示中ページの各譜面について、51 ティアぶんの必要 EX スコアと達成状況を組み立てる。
+ * 【関数の役割】 1 譜面ぶんの TIER CARD 行を組み立てる。
  *
  * 必要スコアの算出は {@link getFolderRankInfoByRate} と同じ閾値式
  * `legendRate − offset × offsetScale` を使い、score rate → EX スコアへは
  * `ceil(maxScore × rate / 100)` で変換する（浮動小数の丸め誤差を吸収するため微小な epsilon を引く）。
  * 達成判定は `score >= required` で行い、表示している必要スコアとマスの塗りつぶしが必ず一致するようにする。
+ *
+ * @param record  対象譜面
+ * @param display セル表示モード
  */
-const tierCardRows = computed<TierCardRow[]>(() => displayScores.value.map((record): TierCardRow => {
+const buildTierCardRow = (record: ScoreRecord, display: TierCardDisplay): TierCardRow => {
   const key = `${record.title}|${record.difficultyName}`;
   const legendRate = getFolderLegendRate(record.informalRank);
   if (legendRate <= 0 || record.maxScore <= 0) {
@@ -3522,10 +3566,11 @@ const tierCardRows = computed<TierCardRow[]>(() => displayScores.value.map((reco
   let topAchieved: TierCardColumn | null = null;
 
   for (const col of TIER_CARD_COLUMNS) {
+    const border = col.isBlockStart ? ` ${TIER_CARD_CELL_CLS.blockStart}` : '';
     const rate = legendRate - col.offset * offsetScale;
     // C 帯（66.666%）以下に落ちるティアはその難易度帯には存在しない
     if (rate <= SCORE_RATE_TIER_C_MIN) {
-      cells.push({ required: null, achieved: false, isNext: false, gap: 0 });
+      cells.push({ text: '-', cls: TIER_CARD_CELL_CLS.none + border, title: t('tierCard.cellUnreachable', { tier: col.label }) });
       continue;
     }
     const required = Math.ceil(record.maxScore * rate / 100 - 1e-7);
@@ -3533,29 +3578,56 @@ const tierCardRows = computed<TierCardRow[]>(() => displayScores.value.map((reco
     if (achieved) topAchieved = col;
     const isNext = !achieved && !nextMarked;
     if (isNext) nextMarked = true;
-    cells.push({ required, achieved, isNext, gap: required - record.score });
+    const gap = required - record.score;
+    // Around 記法は A- 未満だと空文字になる（C 帯カットにより実際にはほぼ起きない）ので素の数値に落とす
+    const around = gradeLabel(required, record.maxScore) || String(required);
+
+    let text: string;
+    if (display === 'around') text = around;
+    else if (display === 'gap') text = achieved ? '✓' : `+${gap}`;
+    else text = String(required);
+
+    let cls: string;
+    if (achieved) cls = `${TIER_CARD_FILL_CLASS[col.name] ?? 'bg-slate-500 text-white'} font-bold`;
+    else if (isNext) cls = TIER_CARD_CELL_CLS.next;
+    else cls = TIER_CARD_CELL_CLS.plain;
+
+    const title = achieved
+      ? t('tierCard.cellAchieved', { tier: col.label, score: required, around })
+      : t('tierCard.cellNeed', { tier: col.label, score: required, around, gap });
+
+    cells.push({ text, cls: cls + border, title });
   }
 
   const current = topAchieved
     ? { name: topAchieved.name, tier: topAchieved.tier }
     : (record.score > 0 ? { name: 'Beginner' } : null);
   return { key, record, current, cells };
-}));
-
-/** マスの見た目クラス。達成=ブロック色で塗りつぶし、次の目標=琥珀色、存在しないティア=薄灰。 */
-const tierCardCellClass = (cell: TierCardCell, col: TierCardColumn): string => {
-  if (cell.required == null) return 'text-slate-300 dark:text-slate-600';
-  if (cell.achieved) return `${TIER_CARD_FILL_CLASS[col.name] ?? 'bg-slate-500 text-white'} font-bold`;
-  if (cell.isNext) return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold ring-1 ring-inset ring-amber-400 dark:ring-amber-600';
-  return 'text-slate-500 dark:text-slate-400';
 };
 
-/** マスのツールチップ文言（ティア名 + 必要スコア + あと何点）。 */
-const tierCardCellTitle = (cell: TierCardCell, col: TierCardColumn): string => {
-  if (cell.required == null) return t('tierCard.cellUnreachable', { tier: col.label });
-  if (cell.achieved) return t('tierCard.cellAchieved', { tier: col.label, score: cell.required });
-  return t('tierCard.cellNeed', { tier: col.label, score: cell.required, gap: cell.gap });
-};
+/**
+ * 行キャッシュ。譜面レコード → { 表示モード|言語 のスタンプ, 行 }。
+ * フィルタ・並び替えで filteredScores が組み替わっても、レコードオブジェクト自体は
+ * allRecords が作り直されるまで同一なので、同じ行オブジェクトを返してテンプレートの
+ * v-memo を効かせる（数万セルの再パッチを避ける）。
+ */
+const tierCardRowCache = new WeakMap<ScoreRecord, { stamp: string; row: TierCardRow }>();
+
+/**
+ * 【computed の役割】 フィルタ・並び替え適用後の全譜面（ページングなし）について TIER CARD の行を返す。
+ * 表示モード・言語が変わるとスタンプが変わり、全行が作り直される。
+ */
+const tierCardRows = computed<TierCardRow[]>(() => {
+  const display = tierCardDisplay.value;
+  const stamp = `${display}|${currentLang.value}`;
+  return filteredScores.value.map((record) => {
+    const hit = tierCardRowCache.get(record);
+    if (hit && hit.stamp === stamp) return hit.row;
+    const row = buildTierCardRow(record, display);
+    tierCardRowCache.set(record, { stamp, row });
+    return row;
+  });
+});
 
 /** TIER CARD のソートセレクタ変更ハンドラ。列ヘッダクリックと同じ既定の向き（{@link toggleSort}）を適用する。 */
 const onCardSortChange = (e: Event) => {

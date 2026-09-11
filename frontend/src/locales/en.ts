@@ -727,7 +727,11 @@ export const en = {
   // Tier Card (TIER CARD tab on the score list: per-song tier checklist grid)
   'tierCard.tab': 'TIER CARD',
   'tierCard.title': 'Per-Song Tier Card',
-  'tierCard.desc': 'A quick reference of the EX score required to reach each tier, chart by chart. Achieved cells are filled in and the next goal is highlighted in amber.',
+  'tierCard.desc': 'A quick reference of the score required to reach each tier, chart by chart. Achieved cells are filled in and the next goal is highlighted in amber. Values can be shown as EX SCORE, Around (AAA+n / MAX-n), or points needed.',
+  'tierCard.display': 'Show',
+  'tierCard.displayScore': 'EX SCORE',
+  'tierCard.displayAround': 'Around',
+  'tierCard.displayGap': 'Points needed',
   'tierCard.sort': 'Sort',
   'tierCard.sortInformal': 'Informal difficulty',
   'tierCard.sortTitle': 'Title',
@@ -737,8 +741,8 @@ export const en = {
   'tierCard.legendNext': 'Next goal',
   'tierCard.legendDash': '"-" = tier not defined for this difficulty band',
   'tierCard.noTier': 'No informal difficulty assigned, so per-song tiers are not available',
-  'tierCard.cellAchieved': '{tier}: achieved ({score} pts)',
-  'tierCard.cellNeed': '{tier}: {score} pts ({gap} more)',
+  'tierCard.cellAchieved': '{tier}: achieved ({score} pts, {around})',
+  'tierCard.cellNeed': '{tier}: {score} pts ({around}), {gap} more',
   'tierCard.cellUnreachable': '{tier}: not defined for this difficulty band',
 
   // Arena Mode

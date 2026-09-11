@@ -727,7 +727,11 @@ export const ko = {
   // Tier Card (점수 목록의 TIER CARD 탭: 단일 곡 티어 체크리스트)
   'tierCard.tab': 'TIER CARD',
   'tierCard.title': '단일 곡 티어 카드',
-  'tierCard.desc': '각 티어에 도달하기 위해 필요한 EX 스코어를 채보별로 정리한 표입니다. 달성한 칸은 채워지고, 다음 목표는 호박색으로 표시됩니다.',
+  'tierCard.desc': '각 티어에 도달하기 위해 필요한 스코어를 채보별로 정리한 표입니다. 달성한 칸은 채워지고, 다음 목표는 호박색으로 표시됩니다. 표시는 EX SCORE · Around(AAA+n / MAX-n) · 필요 점수 중에서 선택할 수 있습니다.',
+  'tierCard.display': '표시',
+  'tierCard.displayScore': 'EX SCORE',
+  'tierCard.displayAround': 'Around',
+  'tierCard.displayGap': '필요 점수',
   'tierCard.sort': '정렬',
   'tierCard.sortInformal': '비공식 난이도',
   'tierCard.sortTitle': '곡 제목',
@@ -737,8 +741,8 @@ export const ko = {
   'tierCard.legendNext': '다음 목표',
   'tierCard.legendDash': '"-"는 해당 난이도대에 설정되지 않는 티어',
   'tierCard.noTier': '비공식 난이도가 미설정이라 단일 곡 티어 대상이 아닙니다',
-  'tierCard.cellAchieved': '{tier}: {score}점으로 달성',
-  'tierCard.cellNeed': '{tier}: {score}점 ({gap}점 더 필요)',
+  'tierCard.cellAchieved': '{tier}: {score}점({around})으로 달성',
+  'tierCard.cellNeed': '{tier}: {score}점({around}), {gap}점 더 필요',
   'tierCard.cellUnreachable': '{tier}: 해당 난이도대에는 설정되지 않습니다',
 
   // Arena Mode

@@ -733,7 +733,11 @@ export const ja = {
   // Tier Card（スコア一覧の TIER CARD タブ: 縄跳びカード方式の単曲ティア早見表）
   'tierCard.tab': 'TIER CARD',
   'tierCard.title': '単曲ティアカード',
-  'tierCard.desc': '各ティアに到達するために必要な EX スコアを譜面ごとに並べた早見表です。達成済みのマスは塗りつぶされ、次の目標は琥珀色で示します。',
+  'tierCard.desc': '各ティアに到達するために必要なスコアを譜面ごとに並べた早見表です。達成済みのマスは塗りつぶされ、次の目標は琥珀色で示します。表示は EX SCORE・Around（AAA+○○ / MAX-○○）・必要な点数（あと何点）から選べます。',
+  'tierCard.display': '表示',
+  'tierCard.displayScore': 'EX SCORE',
+  'tierCard.displayAround': 'Around',
+  'tierCard.displayGap': '必要な点数',
   'tierCard.sort': '並び替え',
   'tierCard.sortInformal': '非公式難易度',
   'tierCard.sortTitle': '曲名',
@@ -743,8 +747,8 @@ export const ja = {
   'tierCard.legendNext': '次の目標',
   'tierCard.legendDash': '「-」はその難易度帯には設定されないティア',
   'tierCard.noTier': '非公式難易度が未設定のため単曲ティアの対象外です',
-  'tierCard.cellAchieved': '{tier}: {score} 点で達成済み',
-  'tierCard.cellNeed': '{tier}: {score} 点（あと {gap} 点）',
+  'tierCard.cellAchieved': '{tier}: {score} 点（{around}）で達成済み',
+  'tierCard.cellNeed': '{tier}: {score} 点（{around}）・あと {gap} 点',
   'tierCard.cellUnreachable': '{tier}: この難易度帯には設定されません',
 
   // Arena Mode
