@@ -25,9 +25,11 @@
  *   node scripts/rebuild-draft-maxminus-zinrai.js                    # dry-run (DB読み取りのみ)
  *   node scripts/rebuild-draft-maxminus-zinrai.js --apply            # 2案をprofileに保存 + draft を B で更新
  *   node scripts/rebuild-draft-maxminus-zinrai.js --apply --plan=A   # draft を A で更新
+ *   node scripts/rebuild-draft-maxminus-zinrai.js --apply --backup=<name>  # 上書き前の draft を保存する profile 名(既定 pre-zinrai-rebuild-YYYYMMDD)
  *
  * 出力: data/zinrai_rebuild_report.md, data/zinrai_rebuild_changes.json
  * 注意: 本番DB(Render)に直接接続する。active には一切触れない。
+ *       --apply は上書き前の draft を profile にバックアップしてから書き換える(profile:ZINRAI-planA/B は無条件で上書き)。
  */
 
 const { Client } = require('pg');
@@ -54,7 +56,10 @@ const PROFILE_A = 'profile:ZINRAI-planA';
 const PROFILE_B = 'profile:ZINRAI-planB';
 
 const APPLY = process.argv.includes('--apply');
-const PLAN_ARG = (process.argv.find(a => a.startsWith('--plan=')) || '--plan=B').split('=')[1].toUpperCase();
+const argOf = (name, def) => (process.argv.find(a => a.startsWith(`--${name}=`)) || `--${name}=${def}`).split('=').slice(1).join('=');
+const PLAN_ARG = argOf('plan', 'B').toUpperCase();
+const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+const BACKUP_PROFILE = `profile:${argOf('backup', `pre-zinrai-rebuild-${today}`)}`;
 
 const isNumericRank = r => /^\d+\.\d$/.test(r);
 const tenthsOf = r => Math.round(parseFloat(r) * 10);
@@ -93,15 +98,16 @@ WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA')
   AND sd.level >= 11
 GROUP BY s.title, s.difficulty_name`;
 
-const ACTIVE_SQL = `
+/** revision を指定して帯と曲を読む(active = 定員の基準、draft = バックアップ用)。 */
+const REVISION_SQL = `
 SELECT r.rank_value AS rank, r.sort_order AS "sortOrder", s.song_title AS title, s.sort_order AS "songOrder"
 FROM difficulty_ranks r
 LEFT JOIN difficulty_rank_songs s ON s.difficulty_rank_id = r.id
-WHERE r.revision = 'active'
+WHERE r.revision = $1
 ORDER BY r.sort_order, s.sort_order`;
 
 /** 帯構成(空帯を含む)と、曲→現行帯 を組み立てる。 */
-function buildActive(rows) {
+function buildRevision(rows) {
     const ranks = new Map(); // rank -> {sortOrder, songs[]}
     const currentRank = new Map();
     for (const row of rows) {
@@ -136,7 +142,7 @@ async function main() {
     console.log(`接続OK (${APPLY ? `APPLY モード / draft = 案${PLAN_ARG}` : 'dry-run モード'})`);
 
     const mmRows = (await client.query(MAXMINUS_SQL)).rows;
-    const { ranks: activeRanks, currentRank } = buildActive((await client.query(ACTIVE_SQL)).rows);
+    const { ranks: activeRanks, currentRank } = buildRevision((await client.query(REVISION_SQL, ['active'])).rows);
 
     // ── MAX-率 / 平均スコアレート ──
     const stat = new Map();
@@ -318,13 +324,18 @@ async function main() {
         console.log(`  ${revision}: ${ranks.length}帯 / ${n}曲`);
     }
 
+    // 上書き前の draft をバックアップ(帯・曲順ともそのまま)
+    const { ranks: draftRanks } = buildRevision((await client.query(REVISION_SQL, ['draft'])).rows);
+    const currentDraft = [...draftRanks.entries()].map(([rank, v]) => ({ rank, sort: v.sortOrder, songs: v.songs }));
+
     await client.query('BEGIN');
     try {
+        if (currentDraft.length > 0) await writeRevision(BACKUP_PROFILE, currentDraft);
         await writeRevision(PROFILE_A, ranksA);
         await writeRevision(PROFILE_B, ranksB);
         await writeRevision('draft', PLAN_ARG === 'A' ? ranksA : ranksB);
         await client.query('COMMIT');
-        console.log(`\n保存完了。draft = 案${PLAN_ARG}。管理画面のプロファイル読込で ${PROFILE_A} / ${PROFILE_B} を切り替えられます。`);
+        console.log(`\n保存完了。draft = 案${PLAN_ARG}。上書き前の draft は ${BACKUP_PROFILE} に保存済み。管理画面のプロファイル読込で ${PROFILE_A} / ${PROFILE_B} を切り替えられます。`);
     } catch (e) {
         await client.query('ROLLBACK');
         throw e;

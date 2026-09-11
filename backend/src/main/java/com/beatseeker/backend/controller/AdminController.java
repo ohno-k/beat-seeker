@@ -269,8 +269,12 @@ public class AdminController {
     /**
      * 【メソッドの役割】 難易度別シミュレーション集計を重量クエリで実行する。
      *
-     * 処理時間が長いため、statement_timeout を 120 秒に一時引き上げてからクエリを実行する。
+     * 処理時間が長いため、statement_timeout を 300 秒に一時引き上げてからクエリを実行する。
      * {@code @Transactional(readOnly = true)} により SET LOCAL がこのトランザクション内に閉じる。
+     *
+     * 2026-09-11 の本番実測（scores 267 万行）で集計 SQL は約 150 秒掛かり、従来の 120 秒では
+     * PostgreSQL に打ち切られて 500 になっていた。300 秒は応急処置であり、データ増でまた超える。
+     * 恒久対策は PairRegressionService と同様に JVM 側でスコアをキャッシュして集計する方式。
      *
      * @param auth 認証情報（管理者限定）
      * @return 難易度シミュレーションの集計結果
@@ -279,8 +283,8 @@ public class AdminController {
     @Transactional(readOnly = true)
     public ResponseEntity<List<Map<String, Object>>> getSimulationAggregate(Authentication auth) {
         checkAdminAccess(auth);
-        // 手順1: 本トランザクションに限り statement_timeout を 120 秒に延長する（重量クエリ対策）。
-        entityManager.createNativeQuery("SET LOCAL statement_timeout = '120s'").executeUpdate();
+        // 手順1: 本トランザクションに限り statement_timeout を 300 秒に延長する（重量クエリ対策）。
+        entityManager.createNativeQuery("SET LOCAL statement_timeout = '300s'").executeUpdate();
         // 手順2: リポジトリ経由で集計クエリを実行する。
         return ResponseEntity.ok(scoreRepository.calculateDifficultySimulation());
     }
