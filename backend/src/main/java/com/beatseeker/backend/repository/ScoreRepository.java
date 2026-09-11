@@ -483,6 +483,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "         WHEN u.total_beat_pt >= 16000 THEN 'Elite'" +
         "         WHEN u.total_beat_pt >= 15500 THEN 'Commander'" +
         "         WHEN u.total_beat_pt >= 15000 THEN 'Veteran'" +
+        "         WHEN u.total_beat_pt >= 14500 THEN 'Ace'" +
         "         WHEN u.total_beat_pt >= 14000 THEN 'Expert'" +
         "         WHEN u.total_beat_pt >= 13000 THEN 'Advanced'" +
         "         WHEN u.total_beat_pt >= 12000 THEN 'Intermediate'" +
@@ -698,6 +699,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "      WHEN u.total_beat_pt >= 16000 THEN 'Elite'" +
         "      WHEN u.total_beat_pt >= 15500 THEN 'Commander'" +
         "      WHEN u.total_beat_pt >= 15000 THEN 'Veteran'" +
+        "      WHEN u.total_beat_pt >= 14500 THEN 'Ace'" +
         "      WHEN u.total_beat_pt >= 14000 THEN 'Expert'" +
         "      WHEN u.total_beat_pt >= 13000 THEN 'Advanced'" +
         "      WHEN u.total_beat_pt >= 12000 THEN 'Intermediate'" +
@@ -712,7 +714,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "      WHEN u.total_beat_pt >= 16000 THEN FLOOR((u.total_beat_pt - 16000)/100) + 1" +
         "      WHEN u.total_beat_pt >= 15500 THEN FLOOR((u.total_beat_pt - 15500)/100) + 1" +
         "      WHEN u.total_beat_pt >= 15000 THEN FLOOR((u.total_beat_pt - 15000)/100) + 1" +
-        "      WHEN u.total_beat_pt >= 14000 THEN FLOOR((u.total_beat_pt - 14000)/200) + 1" +
+        "      WHEN u.total_beat_pt >= 14500 THEN FLOOR((u.total_beat_pt - 14500)/100) + 1" +
+        "      WHEN u.total_beat_pt >= 14000 THEN FLOOR((u.total_beat_pt - 14000)/100) + 1" +
         "      WHEN u.total_beat_pt >= 13000 THEN FLOOR((u.total_beat_pt - 13000)/200) + 1" +
         "      WHEN u.total_beat_pt >= 12000 THEN FLOOR((u.total_beat_pt - 12000)/200) + 1" +
         "      WHEN u.total_beat_pt >= 10000 THEN FLOOR((u.total_beat_pt - 10000)/400) + 1" +

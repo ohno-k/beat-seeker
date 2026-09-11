@@ -86,8 +86,8 @@ const divisions: { tier: number; beatTier: string | null; lo: number; hi: number
   { tier: 5, beatTier: 'Elite 4 〜 Elite 1', lo: 117, hi: 120 },
   { tier: 6, beatTier: 'Commander 5 〜 Commander 1', lo: 116, hi: 119 },
   { tier: 7, beatTier: 'Veteran 5 〜 Veteran 1', lo: 115, hi: 118 },
-  { tier: 8, beatTier: 'Expert 5 〜 Expert 3', lo: 113, hi: 116 },
-  { tier: 9, beatTier: 'Expert 2 〜 Advanced 3', lo: 111, hi: 114 },
+  { tier: 8, beatTier: 'Ace 5 〜 Expert 5', lo: 113, hi: 116 },
+  { tier: 9, beatTier: 'Expert 4 〜 Advanced 3', lo: 111, hi: 114 },
   { tier: 10, beatTier: null, lo: 110, hi: 112 }, // beatTier は mappingLowest キーで表示
 ];
 

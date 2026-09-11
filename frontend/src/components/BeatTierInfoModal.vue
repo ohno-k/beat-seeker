@@ -228,7 +228,7 @@ const songSearch = ref('');
 /** ランク名ごとに tier でまとめた配列。階段表示用。 */
 const groupedRanks = computed(() => getGroupedRanks());
 /** Beginner と Legend 以外のランク名（中間層）。表示順を一覧で固定。 */
-const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Commander', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
+const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Commander', 'Veteran', 'Ace', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
 
 /**
  * 【関数の役割】 ランク名と tier から該当ランク情報を取得する。

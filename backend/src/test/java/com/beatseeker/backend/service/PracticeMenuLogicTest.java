@@ -31,7 +31,9 @@ class PracticeMenuLogicTest {
         assertThat(BeatTierScale.tierOf(12000)).isEqualTo("Intermediate");
         assertThat(BeatTierScale.tierOf(13000)).isEqualTo("Advanced");
         assertThat(BeatTierScale.tierOf(14000)).isEqualTo("Expert");
-        assertThat(BeatTierScale.tierOf(14999.9)).isEqualTo("Expert");
+        assertThat(BeatTierScale.tierOf(14499.9)).isEqualTo("Expert");
+        assertThat(BeatTierScale.tierOf(14500)).isEqualTo("Ace");
+        assertThat(BeatTierScale.tierOf(14999.9)).isEqualTo("Ace");
         assertThat(BeatTierScale.tierOf(15000)).isEqualTo("Veteran");
         assertThat(BeatTierScale.tierOf(15500)).isEqualTo("Commander");
         assertThat(BeatTierScale.tierOf(16000)).isEqualTo("Elite");
@@ -44,11 +46,14 @@ class PracticeMenuLogicTest {
 
     @Test
     void 次のティアは現在ptより上で一番近い境界になる() {
-        // Expert のまん中にいるなら、次は Veteran（15000）。Expert IV のような副ティアは見ない。
-        BeatTierScale.Tier next = BeatTierScale.nextTierOf(14412.3);
+        // Ace のまん中にいるなら、次は Veteran（15000）。Ace IV のような副ティアは見ない。
+        BeatTierScale.Tier next = BeatTierScale.nextTierOf(14812.3);
         assertThat(next).isNotNull();
         assertThat(next.name()).isEqualTo("Veteran");
         assertThat(next.minPoints()).isEqualTo(15000);
+
+        // Expert（14000〜14499）の次は Ace（14500）。
+        assertThat(BeatTierScale.nextTierOf(14412.3).name()).isEqualTo("Ace");
 
         // 境界ちょうどに立っている場合、そのティアは「到達済み」なので次は 1 つ上。
         assertThat(BeatTierScale.nextTierOf(15000).name()).isEqualTo("Commander");
@@ -64,7 +69,8 @@ class PracticeMenuLogicTest {
     void 並び順は下位から上位へ連番になる() {
         assertThat(BeatTierScale.ordinalOf("Beginner")).isZero();
         assertThat(BeatTierScale.ordinalOf("Legend")).isEqualTo(BeatTierScale.TIERS.size() - 1);
-        assertThat(BeatTierScale.ordinalOf("Expert")).isLessThan(BeatTierScale.ordinalOf("Veteran"));
+        assertThat(BeatTierScale.ordinalOf("Expert")).isLessThan(BeatTierScale.ordinalOf("Ace"));
+        assertThat(BeatTierScale.ordinalOf("Ace")).isLessThan(BeatTierScale.ordinalOf("Veteran"));
         assertThat(BeatTierScale.ordinalOf("知らないティア")).isEqualTo(-1);
 
         // ordinal → Tier の往復で元に戻る。登竜門譜面の「隣のティア」判定がこの往復に乗っている。
@@ -91,9 +97,12 @@ class PracticeMenuLogicTest {
         assertThat(BeatTierScale.subTierOf(16500).label()).isEqualTo("Master I");
         assertThat(BeatTierScale.subTierOf(16999).label()).isEqualTo("Master V");
 
-        // ティアごとに幅が違う。Expert は 1000 pt 幅なので 1 段 200 pt。
+        // Expert / Ace は 14000〜15000 を 500 pt ずつ分けた幅なので 1 段 100 pt。
         assertThat(BeatTierScale.subTierOf(14000).label()).isEqualTo("Expert I");
-        assertThat(BeatTierScale.subTierOf(14200).label()).isEqualTo("Expert II");
+        assertThat(BeatTierScale.subTierOf(14499).label()).isEqualTo("Expert V");
+        assertThat(BeatTierScale.subTierOf(14500).label()).isEqualTo("Ace I");
+        // ティアごとに幅が違う。Advanced は 1000 pt 幅なので 1 段 200 pt。
+        assertThat(BeatTierScale.subTierOf(13200).label()).isEqualTo("Advanced II");
         // Novice は 2000 pt 幅なので 1 段 400 pt。
         assertThat(BeatTierScale.subTierOf(10800).label()).isEqualTo("Novice III");
 

@@ -6,7 +6,7 @@
  *     （AA / AAA / MAX- 超過時にはそれぞれ weight × 1% のボーナス）
  *     Weight の基準値: 11.0 → 150, 11.1 → 152, …, 12.4 → 178, 12.5 → 182, …, 13.0 → 202
  *  2. 総合 BEAT-PT = 上位 100 譜面分の合計
- *  3. ランク（段位相当） = 総合 BEAT-PT を 52 段階 + Beginner に分類
+ *  3. ランク（段位相当） = 総合 BEAT-PT を 56 段階 + Beginner に分類
  *     - Novice 1（= 入門）= 10,000pt
  *     - Legend（最上位）= 18,000pt（理論値 ~18,464pt に近い）
  *     - Expert 以上は現行の理論最大を超える領域
@@ -288,7 +288,7 @@ export function calculatePoints(scoreRate: number, informalRank: string | undefi
 }
 
 /**
- * BEAT-Tier の全ランク定義（52 段階 + Beginner）。
+ * BEAT-Tier の全ランク定義（56 段階 + Beginner）。
  *
  * - Novice 1（Novice の一番下）= 10,000pt が「この段位システムの入門ライン」。
  * - Legend = 18,000pt（理論上の最大値 ~18,464pt に迫る領域）。
@@ -305,7 +305,8 @@ export const RANKS: RankInfo[] = [
     ...generateTieredRanks('Elite', 16000, 16500, 'text-orange-600'),    // 500
     ...generateTieredRanks('Commander', 15500, 16000, 'text-yellow-700'), // 500
     ...generateTieredRanks('Veteran', 15000, 15500, 'text-emerald-600'), // 500
-    ...generateTieredRanks('Expert', 14000, 15000, 'text-teal-600'),    // 1000
+    ...generateTieredRanks('Ace', 14500, 15000, 'text-green-600'),       // 500（旧 Expert 上半分）
+    ...generateTieredRanks('Expert', 14000, 14500, 'text-teal-600'),     // 500
     ...generateTieredRanks('Advanced', 13000, 14000, 'text-cyan-600'),    // 1000
     ...generateTieredRanks('Intermediate', 12000, 13000, 'text-blue-600'),    // 1500
     ...generateTieredRanks('Novice', 10000, 12000, 'text-slate-600'),   // 2000
@@ -330,6 +331,7 @@ export const getFolderColorClass = (rankName: string): string => {
         case 'elite': return 'bg-orange-50 border-orange-200 text-orange-700';
         case 'commander': return 'bg-yellow-50 border-yellow-200 text-yellow-700';
         case 'veteran': return 'bg-emerald-50 border-emerald-200 text-emerald-700';
+        case 'ace': return 'bg-green-50 border-green-200 text-green-700';
         case 'expert': return 'bg-teal-50 border-teal-200 text-teal-700';
         case 'advanced': return 'bg-cyan-50 border-cyan-200 text-cyan-700';
         case 'intermediate': return 'bg-blue-50 border-blue-200 text-blue-700';

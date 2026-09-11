@@ -48,6 +48,7 @@ const TIER_RGB: Record<string, string> = {
   Elite: '249,115,22',
   Commander: '234,179,8',
   Veteran: '16,185,129',
+  Ace: '34,197,94',
   Expert: '20,184,166',
   Advanced: '6,182,212',
   Intermediate: '59,130,246',

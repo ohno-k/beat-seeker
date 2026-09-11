@@ -26,7 +26,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 // BEAT-Tier の順序（上位が先頭）。列の並びや「有効 Tier」判定に使用。
 const TIER_ORDER = [
   'Legend', 'Mythic', 'Ancient', 'Master', 'Elite',
-  'Commander', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice', 'Beginner',
+  'Commander', 'Veteran', 'Ace', 'Expert', 'Advanced', 'Intermediate', 'Novice', 'Beginner',
 ] as const;
 type BeatTierName = typeof TIER_ORDER[number];
 
@@ -389,7 +389,7 @@ function comparisonClass(avgScore: number, rowTitle: string, rowDiff: string): s
 function tierColor(tier: BeatTierName): string {
   const map: Record<BeatTierName, number> = {
     Legend: 18000, Mythic: 17500, Ancient: 17000, Master: 16500,
-    Elite: 16000, Commander: 15500, Veteran: 15000, Expert: 14000,
+    Elite: 16000, Commander: 15500, Veteran: 15000, Ace: 14500, Expert: 14000,
     Advanced: 13000, Intermediate: 12000, Novice: 10000, Beginner: 0,
   };
   return getRankInfo(map[tier]).color.replace(' font-black', '').replace(' font-bold', '');

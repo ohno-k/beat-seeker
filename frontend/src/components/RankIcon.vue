@@ -331,6 +331,7 @@ const colors = computed(() => {
   if (name === 'intermediate') return { primary: '#0284c7', highlight: '#e0f2fe', secondary: '#082f49', stroke: '#7dd3fc' };
   if (name === 'advanced') return { primary: '#0d9488', highlight: '#ccfbf1', secondary: '#134e4a', stroke: '#5eead4' };
   if (name === 'expert') return { primary: '#059669', highlight: '#d1fae5', secondary: '#064e3b', stroke: '#6ee7b7' };
+  if (name === 'ace') return { primary: '#16a34a', highlight: '#dcfce7', secondary: '#14532d', stroke: '#86efac' };
   if (name === 'veteran') return { primary: '#65a30d', highlight: '#ecfccb', secondary: '#365314', stroke: '#bef264' };
   if (name === 'commander') return { primary: '#eab308', highlight: '#fefce8', secondary: '#713f12', stroke: '#fef08a' };
   if (name === 'elite') return { primary: '#f97316', highlight: '#fff7ed', secondary: '#9a3412', stroke: '#fed7aa' };
@@ -349,6 +350,7 @@ const aprilColors = computed(() => {
   if (name === 'intermediate') return { primary: '#67e8f9', highlight: '#a5f3fc', secondary: '#22d3ee' };
   if (name === 'advanced') return { primary: '#86efac', highlight: '#bbf7d0', secondary: '#4ade80' };
   if (name === 'expert') return { primary: '#fcd34d', highlight: '#fde68a', secondary: '#f59e0b' };
+  if (name === 'ace') return { primary: '#fdba74', highlight: '#fed7aa', secondary: '#fb923c' };
   if (name === 'veteran') return { primary: '#fb923c', highlight: '#fdba74', secondary: '#f97316' };
   if (name === 'commander') return { primary: '#f87171', highlight: '#fca5a5', secondary: '#ef4444' };
   if (name === 'elite') return { primary: '#e879f9', highlight: '#f0abfc', secondary: '#d946ef' };
@@ -376,13 +378,14 @@ const rankIntensity = computed(() => {
     'intermediate': 3,
     'advanced': 4,
     'expert': 5,
-    'veteran': 6,
-    'commander': 7,
-    'elite': 8,
-    'master': 9,
-    'ancient': 10,
-    'mythic': 11,
-    'legend': 12,
+    'ace': 6,
+    'veteran': 7,
+    'commander': 8,
+    'elite': 9,
+    'master': 10,
+    'ancient': 11,
+    'mythic': 12,
+    'legend': 13,
   };
   return intensityMap[name] || 1;
 });
@@ -392,9 +395,9 @@ const danceClass = computed(() => {
   const intensity = rankIntensity.value;
   if (intensity <= 2) return 'af-dance-sway';
   if (intensity <= 4) return 'af-dance-wave';
-  if (intensity <= 6) return 'af-dance-groove';
-  if (intensity <= 8) return 'af-dance-disco';
-  if (intensity <= 10) return 'af-dance-breakdance';
+  if (intensity <= 7) return 'af-dance-groove';
+  if (intensity <= 9) return 'af-dance-disco';
+  if (intensity <= 11) return 'af-dance-breakdance';
   return 'af-dance-rave';
 });
 
@@ -422,6 +425,7 @@ const shapePath = computed(() => {
   if (name === 'intermediate') return "M50 15 L85 80 L15 80 Z"; // triangle
   if (name === 'advanced') return "M50 15 L85 50 L50 85 L15 50 Z"; // diamond
   if (name === 'expert') return "M50 15 L85 40 L70 85 L30 85 L15 40 Z"; // pentagon
+  if (name === 'ace') return "M20 14 L80 14 L80 52 L50 88 L20 52 Z"; // heater shield (flat-top pentagon)
   if (name === 'veteran') return "M50 15 L80 30 L80 70 L50 85 L20 70 L20 30 Z"; // hexagon
   if (name === 'commander') return "M50 10 L78 25 L88 55 L68 82 L32 82 L12 55 L22 25 Z"; // heptagon
   if (name === 'elite') return "M50 10 L78 22 L90 50 L78 78 L50 90 L22 78 L10 50 L22 22 Z"; // octagon
@@ -516,7 +520,7 @@ const getSegmentPath = (n: number) => {
 .af-dance-wave.af-left-leg { animation: af-wave-leg var(--af-speed, 1.1s) ease-in-out infinite; animation-delay: var(--af-delay, 0s); transform-origin: 35px 88px; }
 .af-dance-wave.af-right-leg { animation: af-wave-leg var(--af-speed, 1.1s) ease-in-out infinite reverse; animation-delay: var(--af-delay, 0s); transform-origin: 65px 88px; }
 
-/* 3. GROOVE - Expert/Veteran: funky moves */
+/* 3. GROOVE - Expert/Ace/Veteran: funky moves */
 @keyframes af-groove-arm-left {
   0%, 100% { transform: rotate(0deg) translateY(0); }
   25% { transform: rotate(-45deg) translateY(-5px); }

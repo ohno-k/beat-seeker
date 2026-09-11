@@ -37,6 +37,7 @@ public final class BeatTierScale {
             new Tier("Elite", 16000),
             new Tier("Commander", 15500),
             new Tier("Veteran", 15000),
+            new Tier("Ace", 14500),
             new Tier("Expert", 14000),
             new Tier("Advanced", 13000),
             new Tier("Intermediate", 12000),
@@ -79,7 +80,7 @@ public final class BeatTierScale {
     }
 
     /**
-     * 【メソッドの役割】 ティア名の並び順（Beginner = 0、Legend = 11）を返す。
+     * 【メソッドの役割】 ティア名の並び順（Beginner = 0、Legend = 12）を返す。
      * 隣接ティアの判定に使う。未知の名前は -1。
      */
     public static int ordinalOf(String tierName) {
@@ -117,7 +118,7 @@ public final class BeatTierScale {
     /**
      * 【メソッドの役割】 総 BEAT-PT から副ティアを求める。
      *
-     * 名前付きティアの幅（Master なら 500、Expert なら 1000、Novice なら 2000）を
+     * 名前付きティアの幅（Master なら 500、Advanced なら 1000、Novice なら 2000）を
      * 5 等分し、下から何番目かを 1〜5 で返す。
      * {@code beatTier.ts} の {@code generateTieredRanks} および
      * {@code ScoreRepository.findChartTierBenchmarks()} の tier_level 算出と同じ刻み。

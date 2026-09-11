@@ -20,8 +20,8 @@ package com.beatseeker.backend.service;
  *   DIVISION 5      ← Elite 4 〜 Elite 1        (>= 16000pt)  候補 ~58 人
  *   DIVISION 6      ← Commander 5 〜 1          (>= 15500pt)  候補 ~69 人
  *   DIVISION 7      ← Veteran 5 〜 1            (>= 15000pt)  候補 ~56 人
- *   DIVISION 8      ← Expert 5 〜 Expert 3      (>= 14400pt)  候補 ~72 人
- *   DIVISION 9      ← Expert 2 〜 Advanced 3    (>= 13400pt)  候補 ~66 人
+ *   DIVISION 8      ← Ace 5 〜 Expert 5         (>= 14400pt)  候補 ~72 人
+ *   DIVISION 9      ← Expert 4 〜 Advanced 3    (>= 13400pt)  候補 ~66 人
  *   DIVISION 10     ← Advanced 2 以下（Beginner 含む） (< 13400pt)
  * </pre>
  *
@@ -68,8 +68,8 @@ public final class LeagueDivision {
         if (pt >= 16000) return 5;   // Elite 4 〜 Elite 1
         if (pt >= 15500) return 6;   // Commander 5 〜 1
         if (pt >= 15000) return 7;   // Veteran 5 〜 1
-        if (pt >= 14400) return 8;   // Expert 5 〜 Expert 3
-        if (pt >= 13400) return 9;   // Expert 2 〜 Advanced 3
+        if (pt >= 14400) return 8;   // Ace 5 〜 Expert 5
+        if (pt >= 13400) return 9;   // Expert 4 〜 Advanced 3
         return LOWEST;               // Advanced 2 以下（Beginner 含む）
     }
 }
