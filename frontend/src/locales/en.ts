@@ -724,6 +724,23 @@ export const en = {
   'scores.targetFinalScore': 'Target: {score} / {max} ({rate}%)',
   'scores.noOptions': 'Not set. Configure in iidx-memo to sync.',
 
+  // Tier Card (TIER CARD tab on the score list: per-song tier checklist grid)
+  'tierCard.tab': 'TIER CARD',
+  'tierCard.title': 'Per-Song Tier Card',
+  'tierCard.desc': 'A quick reference of the EX score required to reach each tier, chart by chart. Achieved cells are filled in and the next goal is highlighted in amber.',
+  'tierCard.sort': 'Sort',
+  'tierCard.sortInformal': 'Informal difficulty',
+  'tierCard.sortTitle': 'Title',
+  'tierCard.sortTier': 'Current tier',
+  'tierCard.sortRate': 'Score rate',
+  'tierCard.legendAchieved': 'Achieved',
+  'tierCard.legendNext': 'Next goal',
+  'tierCard.legendDash': '"-" = tier not defined for this difficulty band',
+  'tierCard.noTier': 'No informal difficulty assigned, so per-song tiers are not available',
+  'tierCard.cellAchieved': '{tier}: achieved ({score} pts)',
+  'tierCard.cellNeed': '{tier}: {score} pts ({gap} more)',
+  'tierCard.cellUnreachable': '{tier}: not defined for this difficulty band',
+
   // Arena Mode
   'arena.title': 'ARENA Mode Records',
   'arena.subtitle': 'Manage battle data obtained with the bookmarklet.',

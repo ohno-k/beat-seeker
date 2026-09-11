@@ -3,8 +3,8 @@
     ============================================================
     ScoreSummary.vue ルートテンプレート
       - ヘッダ: タイトル + 件数表示 + フィルタ群（ゼロ非表示/レベル/難易度/DJ LEVEL/クリアタイプ/取得元/歴代ベスト作品/検索）
-      - モードタブ（BEAT-TIER / RATE-TIER）
-      - データテーブル（displayScores を v-for）
+      - モードタブ（BEAT-TIER / RATE-TIER / TIER CARD）
+      - データテーブル（displayScores を v-for）／TIER CARD モード時は単曲ティア早見表（tierCardRows）
       - ページネーション
       - 詳細モーダル（selectedRecord !== null の間だけ v-if 表示）
     ============================================================
@@ -229,19 +229,26 @@
       </button>
     </div>
 
-    <!-- ===== モードタブ（BEAT-TIER / RATE-TIER）＋「歴代ベストを反映」トグル ===== -->
-    <div v-if="showRateTier || (canUsePastMode && hasPastImports)" class="flex flex-wrap items-center gap-3">
-      <div v-if="showRateTier" class="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-md w-fit border border-slate-200 dark:border-slate-700">
+    <!-- ===== モードタブ（BEAT-TIER / RATE-TIER / TIER CARD）＋「歴代ベストを反映」トグル ===== -->
+    <!-- RATE-TIER タブだけは機能フラグ（showRateTier）で出し分ける。BEAT-TIER と TIER CARD は常時表示。 -->
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-md w-fit border border-slate-200 dark:border-slate-700">
         <button
           @click="viewMode = 'beat'"
           class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
           :class="viewMode === 'beat' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         >BEAT-TIER</button>
         <button
+          v-if="showRateTier"
           @click="viewMode = 'rate'"
           class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
           :class="viewMode === 'rate' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         >RATE-TIER</button>
+        <button
+          @click="viewMode = 'card'"
+          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+          :class="viewMode === 'card' ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+        >{{ t('tierCard.tab') }}</button>
       </div>
 
       <!-- 過去作のスコアが現行を上回っている譜面を、そのスコアで上書き表示するトグル -->
@@ -267,9 +274,9 @@
       {{ t('past.toggleActiveNote') }}
     </p>
 
-    <!-- ===== データテーブル（displayScores を描画。ヘッダ列クリックで toggleSort） ===== -->
+    <!-- ===== データテーブル（displayScores を描画。ヘッダ列クリックで toggleSort）。TIER CARD モード時は下のカード表に置き換わる ===== -->
     <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
-      <div class="overflow-x-auto">
+      <div v-if="viewMode !== 'card'" class="overflow-x-auto">
         <table class="w-full text-left text-[10px] sm:text-sm text-slate-600 dark:text-slate-300">
           <thead class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold h-10 sm:h-12">
             <tr>
@@ -498,6 +505,125 @@
         </table>
       </div>
       
+      <!--
+        ===== TIER CARD（縄跳びカード方式の単曲ティア早見表） =====
+        行 = 譜面（displayScores と同じフィルタ・ソート・ページング）、列 = 単曲ティア 51 種（Novice 1 → Legend）。
+        セルにはそのティア到達に必要な EX スコアを表示し、達成済みはブロック色で塗りつぶす。
+        次に狙うマス（未達成の最下位）は琥珀色で強調。ヘッダ（上）と曲名列（左）は sticky で固定する。
+      -->
+      <div v-else>
+        <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="min-w-0">
+            <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">{{ t('tierCard.title') }}</h3>
+            <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('tierCard.desc') }}</p>
+          </div>
+          <!-- 並び替え（列ヘッダが無いのでセレクタで指定。向きは隣のボタンで反転） -->
+          <div class="sm:ml-auto flex items-center gap-2 shrink-0">
+            <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('tierCard.sort') }}</span>
+            <select
+              :value="sortKey"
+              @change="onCardSortChange"
+              class="text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors cursor-pointer"
+            >
+              <option value="informalRank">{{ t('tierCard.sortInformal') }}</option>
+              <option value="title">{{ t('tierCard.sortTitle') }}</option>
+              <option value="unofficialSongRank">{{ t('tierCard.sortTier') }}</option>
+              <option value="scoreRate">{{ t('tierCard.sortRate') }}</option>
+            </select>
+            <button
+              type="button"
+              @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+              class="px-2 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            >{{ sortOrder === 'asc' ? '▲' : '▼' }}</button>
+          </div>
+        </div>
+        <!-- 凡例 -->
+        <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">
+          <span class="inline-flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-sm bg-emerald-600"></span>{{ t('tierCard.legendAchieved') }}</span>
+          <span class="inline-flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-sm bg-amber-100 dark:bg-amber-900/40 ring-1 ring-inset ring-amber-400 dark:ring-amber-600"></span>{{ t('tierCard.legendNext') }}</span>
+          <span>{{ t('tierCard.legendDash') }}</span>
+        </div>
+        <div class="overflow-auto max-h-[75vh]">
+          <table class="border-collapse text-[10px] sm:text-xs whitespace-nowrap">
+            <thead class="sticky top-0 z-20">
+              <!-- 上段: ブロック名（Novice〜Mythic は 5 列結合、Legend は 1 列） -->
+              <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
+                <th scope="col" rowspan="2" class="sticky left-0 z-30 bg-slate-100 dark:bg-slate-900 py-1.5 px-2 text-left font-bold min-w-[150px] sm:min-w-[230px] border-r border-slate-200 dark:border-slate-700 align-bottom">{{ t('table.colTitle') }}</th>
+                <th
+                  v-for="block in TIER_CARD_BLOCKS"
+                  :key="block.name"
+                  scope="colgroup"
+                  :colspan="block.span"
+                  class="py-1 px-1 text-center font-bold border-l border-slate-200 dark:border-slate-700"
+                  :class="block.color"
+                >{{ block.name }}</th>
+              </tr>
+              <!-- 下段: ティアアイコン + サブティア番号（Legend は L） -->
+              <tr class="bg-slate-100 dark:bg-slate-900">
+                <th
+                  v-for="col in TIER_CARD_COLUMNS"
+                  :key="col.key"
+                  scope="col"
+                  class="py-1 px-1 text-center font-bold min-w-[44px] sm:min-w-[52px]"
+                  :class="col.isBlockStart ? 'border-l border-slate-200 dark:border-slate-700' : ''"
+                  :title="col.label"
+                >
+                  <div class="flex flex-col items-center gap-0.5">
+                    <RankIcon :rank-name="col.name" :tier="col.tier" size="2xs" lite disable-party />
+                    <span class="text-[9px] leading-none" :class="col.color">{{ col.tier ?? 'L' }}</span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-slate-700 dark:text-slate-200">
+              <tr v-for="row in tierCardRows" :key="row.key" class="group hover:bg-blue-50/40 dark:hover:bg-slate-700/30 transition-colors">
+                <!-- 曲名列（sticky）。クリックで通常表示と同じ詳細モーダルを開く -->
+                <td
+                  class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-blue-50 dark:group-hover:bg-slate-700 py-1 px-2 border-r border-slate-200 dark:border-slate-700 cursor-pointer max-w-[150px] sm:max-w-[230px] transition-colors"
+                  :title="row.record.title"
+                  @click="openDetailModal(row.record)"
+                >
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="shrink-0 w-5 h-5 inline-flex items-center justify-center">
+                      <RankIcon v-if="row.current" :rank-name="row.current.name" :tier="row.current.tier" size="2xs" lite disable-party />
+                      <span v-else class="text-slate-300 dark:text-slate-600">-</span>
+                    </span>
+                    <div class="flex flex-col min-w-0 gap-0.5">
+                      <span class="truncate font-medium text-slate-800 dark:text-slate-200">{{ row.record.title }}</span>
+                      <div class="flex items-center gap-1 text-[9px] leading-none">
+                        <span :class="['px-1 py-px rounded font-bold whitespace-nowrap', row.record.difficultyColor]">{{ row.record.difficultyName.charAt(0) }}{{ row.record.difficultyLevel || '' }}</span>
+                        <InformalRankBadge :rank="row.record.informalRank" size="xs" />
+                        <span
+                          class="font-bold tabular-nums"
+                          :class="row.record.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : row.record.scoreRate >= 88.89 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'"
+                        >{{ row.record.score > 0 ? row.record.score : '---' }}</span>
+                        <span v-if="row.record.score > 0" class="text-slate-400 dark:text-slate-500 tabular-nums">({{ row.record.scoreRate.toFixed(2) }}%)</span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <!-- ティア列。required が null のマスはその難易度帯に存在しないティア -->
+                <template v-if="row.cells">
+                  <td
+                    v-for="(cell, i) in row.cells"
+                    :key="TIER_CARD_COLUMNS[i].key"
+                    class="py-1 px-1 text-center tabular-nums"
+                    :class="[tierCardCellClass(cell, TIER_CARD_COLUMNS[i]), TIER_CARD_COLUMNS[i].isBlockStart ? 'border-l border-slate-200 dark:border-slate-700' : '']"
+                    :title="tierCardCellTitle(cell, TIER_CARD_COLUMNS[i])"
+                  >{{ cell.required ?? '-' }}</td>
+                </template>
+                <td v-else :colspan="TIER_CARD_COLUMNS.length" class="py-1 px-3 text-left italic text-slate-400 dark:text-slate-500">{{ t('tierCard.noTier') }}</td>
+              </tr>
+              <tr v-if="tierCardRows.length === 0">
+                <td :colspan="TIER_CARD_COLUMNS.length + 1" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                  {{ t('table.noMatchingScores') }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- ===== ページネーション（件数表示 + 1 ページあたり件数セレクタ + 前後ボタン） ===== -->
       <div v-if="filteredScores.length > 0" class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors duration-200">
         <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -1359,10 +1485,12 @@
  *
  * 画面全体構造:
  *  - 上段フィルタ: レベル / 難易度 / DJ LEVEL / クリアランプ / 検索語 / 0 点非表示
- *  - モード切替: BEAT-TIER モードと RATE-TIER モードのタブ（RATE 機能は composable で制御）
+ *  - モード切替: BEAT-TIER / RATE-TIER / TIER CARD のタブ（RATE 機能は composable で制御）
  *  - データテーブル: 曲・譜面・スコアレート・BEAT-PT（または RATE-PT）を一覧表示
  *      - BEAT-TIER: TOP100 ハイライト＋「あと何点で TOP100 に入れるか」を表示
  *      - RATE-TIER: RATE-PT の TOP100 ハイライト＋パーフェクト超過時の強調
+ *      - TIER CARD: 縄跳びカード方式。行=譜面、列=単曲ティア 51 種（Novice 1 → Legend）、
+ *        セル=そのティアに必要な EX スコア。達成済みマスをブロック色で塗りつぶす
  *  - ページネーション: 10/25/50/100 件切替
  *  - 詳細モーダル（フルスクリーン Teleport）:
  *      - 詳細タブ: ランプ/AAA/PGREAT/GREAT/MISS 等の細かいステータス
@@ -1394,7 +1522,7 @@ import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import { computeMilestoneLines } from '../utils/milestones';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
-import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getFolderRankInfoByRate, FOLDER_RANK_DEFS, type RankInfo } from '../utils/beatTier';
+import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getFolderRankInfoByRate, getFolderLegendRate, getFolderRankOffsetMax, SCORE_RATE_TIER_C_MIN, FOLDER_RANK_DEFS, type RankInfo } from '../utils/beatTier';
 import { calcBpi } from '../utils/bpi';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
@@ -1444,8 +1572,8 @@ const isOwnData = computed(() => !props.viewingMode);
 
 const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
-/** 現在のモード。'beat' は BEAT-TIER、'rate' は RATE-TIER 表示。 */
-const viewMode = ref<'beat' | 'rate'>('beat');
+/** 現在のモード。'beat' は BEAT-TIER、'rate' は RATE-TIER、'card' は TIER CARD（縄跳びカード方式の単曲ティア早見表）。 */
+const viewMode = ref<'beat' | 'rate' | 'card'>('beat');
 
 /**
  * 歴代スコアを扱えるか。
@@ -3262,10 +3390,11 @@ const filteredScores = computed(() => {
  * 【watch の役割】 モード（通常/rate）切替時にページ番号・レベルフィルタ・ソートを初期化。
  * モードが変わると表示レコードの種類が変わるため、ユーザー期待に合わせてリセットする。
  */
-watch(viewMode, () => {
+watch(viewMode, (mode) => {
   currentPage.value = 1;
   filterLevel.value = [];
-  sortKey.value = 'beatTierPoints';
+  // TIER CARD は列ヘッダのソートが無いので、難易度表と同じ「非公式難易度の降順」を既定にする。
+  sortKey.value = mode === 'card' ? 'informalRank' : 'beatTierPoints';
   sortOrder.value = 'desc';
 });
 
@@ -3287,6 +3416,151 @@ const prevPage = () => {
 /** ページネーション: 次ページへ移動。最終ページでは何もしない。 */
 const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+// ===== TIER CARD（縄跳びカード方式の単曲ティア早見表） =====
+
+/** TIER CARD の 1 列（= 単曲ティア 1 種）の定義。 */
+interface TierCardColumn {
+  key: string;
+  name: string;
+  tier?: number;
+  /** 表示ラベル（例: 'Master 3' / 'Legend'）。ツールチップに使う。 */
+  label: string;
+  /** 正規化 offset [0, 1]（{@link FOLDER_RANK_DEFS} 由来。0 = Legend）。 */
+  offset: number;
+  /** 文字色クラス（FOLDER_RANK_DEFS の color）。 */
+  color: string;
+  /** ブロック先頭列なら true（左罫線を引いてブロックの切れ目を見せる）。 */
+  isBlockStart: boolean;
+}
+
+/**
+ * TIER CARD の列定義（51 列）。
+ * {@link FOLDER_RANK_DEFS}（Legend → Novice 1 の降順）を反転し、
+ * Novice 1 → Novice 5 → Intermediate 1 → … → Mythic 5 → Legend の昇順に並べる。
+ */
+const TIER_CARD_COLUMNS: TierCardColumn[] = [...FOLDER_RANK_DEFS].reverse().map((def, idx, arr) => ({
+  key: def.tier ? `${def.name}-${def.tier}` : def.name,
+  name: def.name,
+  tier: def.tier,
+  label: def.tier ? `${def.name} ${def.tier}` : def.name,
+  offset: def.offset,
+  color: def.color,
+  isBlockStart: idx > 0 && arr[idx - 1].name !== def.name,
+}));
+
+/** TIER CARD の上段ヘッダ（ブロック名 + colspan）。列定義から連続する同名ブロックをまとめる。 */
+const TIER_CARD_BLOCKS = TIER_CARD_COLUMNS.reduce<{ name: string; span: number; color: string }[]>((acc, col) => {
+  const last = acc[acc.length - 1];
+  if (last && last.name === col.name) {
+    last.span++;
+  } else {
+    acc.push({ name: col.name, span: 1, color: col.color });
+  }
+  return acc;
+}, []);
+
+/**
+ * 達成済みマスの塗りつぶし色。RankIcon のブロック配色（primary）に合わせた Tailwind 標準色。
+ * 明るい色（Commander / Legend）だけ文字を濃色にしてコントラストを確保する。
+ */
+const TIER_CARD_FILL_CLASS: Record<string, string> = {
+  Novice: 'bg-slate-500 text-white',
+  Intermediate: 'bg-sky-600 text-white',
+  Advanced: 'bg-teal-600 text-white',
+  Expert: 'bg-emerald-600 text-white',
+  Veteran: 'bg-lime-600 text-white',
+  Commander: 'bg-yellow-500 text-yellow-950',
+  Elite: 'bg-orange-500 text-white',
+  Master: 'bg-rose-700 text-white',
+  Ancient: 'bg-indigo-700 text-white',
+  Mythic: 'bg-purple-600 text-white',
+  Legend: 'bg-amber-400 text-amber-950',
+};
+
+/** TIER CARD の 1 マス。`required` が null のマスはその難易度帯に存在しないティア（C 帯以下）。 */
+interface TierCardCell {
+  /** そのティア到達に必要な EX スコア（整数）。 */
+  required: number | null;
+  /** 現在スコアで到達済みか。 */
+  achieved: boolean;
+  /** 未達成マスのうち最下位（= 次に狙う目標）か。 */
+  isNext: boolean;
+  /** 必要スコアと現在スコアの差（未達成時のみ意味を持つ）。 */
+  gap: number;
+}
+
+/** TIER CARD の 1 行。 */
+interface TierCardRow {
+  key: string;
+  record: ScoreRecord;
+  /** 行の現在ティア。達成済み最上位マスから決める。プレイ済みで Novice 1 未満なら Beginner、未プレイ・対象外は null。 */
+  current: { name: string; tier?: number } | null;
+  /** ティア列のマス配列。非公式難易度が無い等で算出不能なら null（1 セル結合で対象外と表示）。 */
+  cells: TierCardCell[] | null;
+}
+
+/**
+ * 【computed の役割】 表示中ページの各譜面について、51 ティアぶんの必要 EX スコアと達成状況を組み立てる。
+ *
+ * 必要スコアの算出は {@link getFolderRankInfoByRate} と同じ閾値式
+ * `legendRate − offset × offsetScale` を使い、score rate → EX スコアへは
+ * `ceil(maxScore × rate / 100)` で変換する（浮動小数の丸め誤差を吸収するため微小な epsilon を引く）。
+ * 達成判定は `score >= required` で行い、表示している必要スコアとマスの塗りつぶしが必ず一致するようにする。
+ */
+const tierCardRows = computed<TierCardRow[]>(() => displayScores.value.map((record): TierCardRow => {
+  const key = `${record.title}|${record.difficultyName}`;
+  const legendRate = getFolderLegendRate(record.informalRank);
+  if (legendRate <= 0 || record.maxScore <= 0) {
+    return { key, record, current: null, cells: null };
+  }
+
+  const offsetScale = getFolderRankOffsetMax(record.informalRank);
+  const cells: TierCardCell[] = [];
+  let nextMarked = false;
+  let topAchieved: TierCardColumn | null = null;
+
+  for (const col of TIER_CARD_COLUMNS) {
+    const rate = legendRate - col.offset * offsetScale;
+    // C 帯（66.666%）以下に落ちるティアはその難易度帯には存在しない
+    if (rate <= SCORE_RATE_TIER_C_MIN) {
+      cells.push({ required: null, achieved: false, isNext: false, gap: 0 });
+      continue;
+    }
+    const required = Math.ceil(record.maxScore * rate / 100 - 1e-7);
+    const achieved = record.score >= required;
+    if (achieved) topAchieved = col;
+    const isNext = !achieved && !nextMarked;
+    if (isNext) nextMarked = true;
+    cells.push({ required, achieved, isNext, gap: required - record.score });
+  }
+
+  const current = topAchieved
+    ? { name: topAchieved.name, tier: topAchieved.tier }
+    : (record.score > 0 ? { name: 'Beginner' } : null);
+  return { key, record, current, cells };
+}));
+
+/** マスの見た目クラス。達成=ブロック色で塗りつぶし、次の目標=琥珀色、存在しないティア=薄灰。 */
+const tierCardCellClass = (cell: TierCardCell, col: TierCardColumn): string => {
+  if (cell.required == null) return 'text-slate-300 dark:text-slate-600';
+  if (cell.achieved) return `${TIER_CARD_FILL_CLASS[col.name] ?? 'bg-slate-500 text-white'} font-bold`;
+  if (cell.isNext) return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold ring-1 ring-inset ring-amber-400 dark:ring-amber-600';
+  return 'text-slate-500 dark:text-slate-400';
+};
+
+/** マスのツールチップ文言（ティア名 + 必要スコア + あと何点）。 */
+const tierCardCellTitle = (cell: TierCardCell, col: TierCardColumn): string => {
+  if (cell.required == null) return t('tierCard.cellUnreachable', { tier: col.label });
+  if (cell.achieved) return t('tierCard.cellAchieved', { tier: col.label, score: cell.required });
+  return t('tierCard.cellNeed', { tier: col.label, score: cell.required, gap: cell.gap });
+};
+
+/** TIER CARD のソートセレクタ変更ハンドラ。列ヘッダクリックと同じ既定の向き（{@link toggleSort}）を適用する。 */
+const onCardSortChange = (e: Event) => {
+  const key = (e.target as HTMLSelectElement).value as SortKey;
+  if (key !== sortKey.value) toggleSort(key);
 };
 
 // --- 色ユーティリティ ---

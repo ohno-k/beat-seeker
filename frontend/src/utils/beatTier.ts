@@ -63,7 +63,7 @@ const MAX_POINTS_MULTIPLIER = 1.03;
  * 【BEAT-PT 計算】 DJ LEVEL C の下限 score rate（%）。2/3 ≒ 66.666% に相当。
  * これ以下では BEAT-PT が付かない（= 捨てスコア扱い）。
  */
-const SCORE_RATE_TIER_C_MIN = 66.666;
+export const SCORE_RATE_TIER_C_MIN = 66.666;
 
 /**
  * 【BEAT-PT 計算】 AA 到達 score rate（%）。超えると +1% ボーナス。

@@ -9,7 +9,7 @@
   "avgScoreRate": 73.18,
   "notes": 2037,
   "plays": 725,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Thor's Hammer",
@@ -69,7 +69,7 @@
   "avgScoreRate": 73.28,
   "notes": 2094,
   "plays": 750,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "惑星鉄道",
@@ -117,7 +117,7 @@
   "avgScoreRate": 72.03,
   "notes": 2216,
   "plays": 708,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "RAGE feat.H14 of LEONAIR",
@@ -129,7 +129,7 @@
   "avgScoreRate": 78.21,
   "notes": 1886,
   "plays": 698,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Skratch Education Lv-1",
@@ -138,7 +138,7 @@
   "planA": "13.0",
   "planB": "13.0",
   "maxMinusRate": 0.48,
-  "avgScoreRate": 70.33,
+  "avgScoreRate": 70.34,
   "notes": 1572,
   "plays": 631,
   "notesSteps": 0
@@ -146,9 +146,9 @@
  {
   "title": "Inferno of Fomalhaut",
   "current": "12.8",
-  "base": "12.9",
-  "planA": "12.9",
-  "planB": "12.9",
+  "base": "13.0",
+  "planA": "13.0",
+  "planB": "13.0",
   "maxMinusRate": 0.55,
   "avgScoreRate": 74.07,
   "notes": 1701,
@@ -158,9 +158,9 @@
  {
   "title": "RUINA",
   "current": "12.9",
-  "base": "12.9",
-  "planA": "12.9",
-  "planB": "12.9",
+  "base": "13.0",
+  "planA": "13.0",
+  "planB": "13.0",
   "maxMinusRate": 0.57,
   "avgScoreRate": 80.13,
   "notes": 1533,
@@ -177,7 +177,7 @@
   "avgScoreRate": 73.2,
   "notes": 2023,
   "plays": 658,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Sinus Iridum",
@@ -189,7 +189,7 @@
   "avgScoreRate": 71.06,
   "notes": 1803,
   "plays": 582,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ICARUS[L]",
@@ -201,7 +201,7 @@
   "avgScoreRate": 74.32,
   "notes": 2000,
   "plays": 554,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "XHRONOXAPSULΞ",
@@ -213,7 +213,7 @@
   "avgScoreRate": 75.48,
   "notes": 2077,
   "plays": 652,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "X-DEN",
@@ -225,7 +225,7 @@
   "avgScoreRate": 71.9,
   "notes": 2220,
   "plays": 615,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "灼熱 Pt.2 Long Train Running",
@@ -237,7 +237,7 @@
   "avgScoreRate": 74.09,
   "notes": 1804,
   "plays": 685,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Level 5",
@@ -249,7 +249,7 @@
   "avgScoreRate": 74.17,
   "notes": 1937,
   "plays": 684,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "紫陽花 -AZISAI-[L]",
@@ -261,38 +261,38 @@
   "avgScoreRate": 74.56,
   "notes": 1815,
   "plays": 568,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "HEROES",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.06,
   "avgScoreRate": 79.72,
   "notes": 1831,
   "plays": 658,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "サタデーナイト☆ギャロップ",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.2,
   "avgScoreRate": 79.02,
   "notes": 2179,
   "plays": 334,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Selfish Sweet[L]",
   "current": "12.4",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.25,
   "avgScoreRate": 83.34,
   "notes": 1395,
@@ -302,21 +302,21 @@
  {
   "title": "WHA",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.32,
   "avgScoreRate": 74.81,
   "notes": 1946,
   "plays": 604,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "27th style[L]",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.41,
   "avgScoreRate": 77.51,
   "notes": 1765,
@@ -326,9 +326,9 @@
  {
   "title": "GiGaGaHell",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.57,
   "avgScoreRate": 77.58,
   "notes": 1687,
@@ -338,9 +338,9 @@
  {
   "title": "MAD ATTACK[L]",
   "current": "12.6",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.66,
   "avgScoreRate": 77.36,
   "notes": 1396,
@@ -350,9 +350,9 @@
  {
   "title": "199024club -Re:BounceKiller-",
   "current": "12.7",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.68,
   "avgScoreRate": 80.26,
   "notes": 1260,
@@ -362,21 +362,21 @@
  {
   "title": "n/a",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.68,
   "avgScoreRate": 77.05,
   "notes": 1867,
   "plays": 594,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Makin' It",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.7,
   "avgScoreRate": 75.55,
   "notes": 1471,
@@ -386,9 +386,9 @@
  {
   "title": "カジノファイヤーことみちゃん[L]",
   "current": "12.8",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.71,
   "avgScoreRate": 73.55,
   "notes": 1777,
@@ -398,9 +398,9 @@
  {
   "title": "Miracle 5ympho X[L]",
   "current": "12.6",
-  "base": "12.8",
-  "planA": "12.8",
-  "planB": "12.8",
+  "base": "12.9",
+  "planA": "12.9",
+  "planB": "12.9",
   "maxMinusRate": 1.73,
   "avgScoreRate": 76.45,
   "notes": 1551,
@@ -417,7 +417,7 @@
   "avgScoreRate": 80.64,
   "notes": 1830,
   "plays": 576,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "THE PEERLESS UNDER HEAVEN",
@@ -429,7 +429,7 @@
   "avgScoreRate": 78.06,
   "notes": 1818,
   "plays": 683,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "二人ノ廃城幽踊宴",
@@ -441,7 +441,7 @@
   "avgScoreRate": 76.28,
   "notes": 1927,
   "plays": 451,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "BitRacer",
@@ -453,7 +453,7 @@
   "avgScoreRate": 80.73,
   "notes": 1878,
   "plays": 506,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Do it!! Do it!![L]",
@@ -513,7 +513,7 @@
   "avgScoreRate": 79.68,
   "notes": 2171,
   "plays": 628,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "ディスコルディア",
@@ -525,7 +525,7 @@
   "avgScoreRate": 76.93,
   "notes": 2073,
   "plays": 673,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Level 4",
@@ -537,7 +537,7 @@
   "avgScoreRate": 77.01,
   "notes": 1883,
   "plays": 668,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "冥",
@@ -549,7 +549,7 @@
   "avgScoreRate": 75.37,
   "notes": 2000,
   "plays": 857,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Sigmund[L]",
@@ -561,7 +561,7 @@
   "avgScoreRate": 79.34,
   "notes": 2267,
   "plays": 594,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "Y&Co. is dead or alive",
@@ -585,7 +585,7 @@
   "avgScoreRate": 71.63,
   "notes": 1977,
   "plays": 571,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Snake Stick",
@@ -621,7 +621,7 @@
   "avgScoreRate": 78.18,
   "notes": 1829,
   "plays": 460,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "天使のカンタータ -Cantata of Angels-",
@@ -633,7 +633,7 @@
   "avgScoreRate": 77.6,
   "notes": 2205,
   "plays": 706,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "The Chase",
@@ -657,7 +657,7 @@
   "avgScoreRate": 75.84,
   "notes": 2443,
   "plays": 658,
-  "notesSteps": 4
+  "notesSteps": 0
  },
  {
   "title": "ピアノ協奏曲第１番”蠍火”",
@@ -681,7 +681,7 @@
   "avgScoreRate": 82.26,
   "notes": 1897,
   "plays": 357,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "fixer",
@@ -693,7 +693,7 @@
   "avgScoreRate": 77.07,
   "notes": 1861,
   "plays": 582,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Ignis†Irae",
@@ -705,14 +705,14 @@
   "avgScoreRate": 79.74,
   "notes": 1970,
   "plays": 813,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "音楽",
   "current": "12.8",
-  "base": "12.7",
-  "planA": "12.7",
-  "planB": "12.7",
+  "base": "12.8",
+  "planA": "12.8",
+  "planB": "12.8",
   "maxMinusRate": 2.62,
   "avgScoreRate": 78.13,
   "notes": 1487,
@@ -722,69 +722,69 @@
  {
   "title": "perditus†paradisus",
   "current": "12.8",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 2.72,
   "avgScoreRate": 78.33,
   "notes": 2065,
   "plays": 736,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "聖人の塔[L]",
   "current": "12.8",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 2.73,
   "avgScoreRate": 77.43,
   "notes": 2290,
   "plays": 587,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "色を喪った街",
   "current": "12.6",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 2.73,
   "avgScoreRate": 79.44,
   "notes": 2026,
   "plays": 768,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "SOLAR ECLIPSE",
   "current": "12.7",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 2.78,
   "avgScoreRate": 76.97,
   "notes": 1893,
   "plays": 720,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Xerulean",
   "current": "12.7",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 2.84,
   "avgScoreRate": 77.86,
   "notes": 1802,
   "plays": 634,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Illegal Function Call",
   "current": "12.7",
-  "base": "12.7",
-  "planA": "12.7",
-  "planB": "12.7",
+  "base": "12.8",
+  "planA": "12.8",
+  "planB": "12.8",
   "maxMinusRate": 2.85,
   "avgScoreRate": 79.27,
   "notes": 1398,
@@ -794,9 +794,9 @@
  {
   "title": "DAY DREAM",
   "current": "12.7",
-  "base": "12.7",
-  "planA": "12.7",
-  "planB": "12.7",
+  "base": "12.8",
+  "planA": "12.8",
+  "planB": "12.8",
   "maxMinusRate": 2.91,
   "avgScoreRate": 77.28,
   "notes": 1075,
@@ -806,33 +806,33 @@
  {
   "title": "Carmina",
   "current": "12.7",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 2.93,
   "avgScoreRate": 78.45,
   "notes": 2000,
   "plays": 683,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "hard-wired",
   "current": "12.8",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 2.95,
   "avgScoreRate": 80.37,
   "notes": 1901,
   "plays": 677,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "火影",
   "current": "12.6",
-  "base": "12.7",
-  "planA": "12.7",
-  "planB": "12.7",
+  "base": "12.8",
+  "planA": "12.8",
+  "planB": "12.8",
   "maxMinusRate": 3.04,
   "avgScoreRate": 81.71,
   "notes": 1437,
@@ -842,45 +842,45 @@
  {
   "title": "Level One",
   "current": "12.6",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 3.05,
   "avgScoreRate": 77.3,
   "notes": 1857,
   "plays": 689,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "疾風迅雷[L]",
   "current": "12.8",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 3.06,
   "avgScoreRate": 80.18,
   "notes": 1824,
   "plays": 589,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "焔極OVERKILL",
   "current": "12.6",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 3.08,
   "avgScoreRate": 82.01,
   "notes": 1901,
   "plays": 649,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "東京神話",
   "current": "12.8",
-  "base": "12.7",
-  "planA": "12.7",
-  "planB": "12.7",
+  "base": "12.8",
+  "planA": "12.8",
+  "planB": "12.8",
   "maxMinusRate": 3.19,
   "avgScoreRate": 81.22,
   "notes": 1505,
@@ -890,50 +890,50 @@
  {
   "title": "GuNGNiR",
   "current": "12.7",
-  "base": "12.7",
+  "base": "12.8",
   "planA": "12.8",
-  "planB": "12.7",
+  "planB": "12.8",
   "maxMinusRate": 3.22,
   "avgScoreRate": 78.14,
   "notes": 2081,
   "plays": 745,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "華麗なる大犬円舞曲",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.27,
   "avgScoreRate": 81.35,
   "notes": 1849,
   "plays": 490,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Level 3",
   "current": "12.6",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.3,
   "avgScoreRate": 80.32,
   "notes": 1844,
   "plays": 727,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "POLKAMANIA[L]",
   "current": "12.6",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.32,
   "avgScoreRate": 81.51,
   "notes": 1960,
   "plays": 783,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "The Clown of 24stairs",
@@ -975,25 +975,25 @@
   "title": "卑弥呼",
   "current": "12.8",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.5,
   "avgScoreRate": 77.79,
   "notes": 2119,
   "plays": 801,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Sigmund",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.56,
   "avgScoreRate": 78.7,
   "notes": 2029,
   "plays": 703,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Watch Out Pt.2",
@@ -1011,37 +1011,37 @@
   "title": "Dances with Snow Fairies[L]",
   "current": "12.8",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.63,
   "avgScoreRate": 78.12,
   "notes": 2135,
   "plays": 689,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "EROICA",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.72,
   "avgScoreRate": 82.99,
   "notes": 2040,
   "plays": 807,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "3y3s",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 3.98,
   "avgScoreRate": 75.4,
   "notes": 1871,
   "plays": 753,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ASIAN VIRTUAL REALITIES (MELTING TOGETHER IN DAZZLING DARKNESS)",
@@ -1083,25 +1083,25 @@
   "title": "表裏一体！？怪盗いいんちょの悩み[L]",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 4.22,
   "avgScoreRate": 80.11,
   "notes": 2334,
   "plays": 663,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "Xlo",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 4.27,
   "avgScoreRate": 81.69,
   "notes": 1988,
   "plays": 585,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "真 地獄超特急 -HELL or HELL-",
@@ -1132,7 +1132,7 @@
   "current": "12.7",
   "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 4.45,
   "avgScoreRate": 77.25,
   "notes": 1712,
@@ -1143,44 +1143,44 @@
   "title": "烽火連天の刃[L]",
   "current": "12.8",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 4.52,
   "avgScoreRate": 79.26,
   "notes": 2279,
   "plays": 642,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "God Mind",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 4.64,
   "avgScoreRate": 79.85,
   "notes": 2155,
   "plays": 689,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "[ ]DENTITY",
   "current": "12.7",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 4.66,
   "avgScoreRate": 82.8,
   "notes": 2000,
   "plays": 644,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "金野火織の金色提言",
   "current": "12.7",
   "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 4.69,
   "avgScoreRate": 80.03,
   "notes": 1630,
@@ -1191,32 +1191,32 @@
   "title": "Cult Invitation",
   "current": "12.5",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 4.79,
   "avgScoreRate": 80.78,
   "notes": 1804,
   "plays": 731,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Red. by Jack Trance",
   "current": "12.5",
   "base": "12.7",
-  "planA": "12.8",
+  "planA": "12.7",
   "planB": "12.7",
   "maxMinusRate": 4.96,
   "avgScoreRate": 78.31,
   "notes": 1862,
   "plays": 706,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Level 2",
   "current": "12.4",
   "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.04,
   "avgScoreRate": 81.39,
   "notes": 1488,
@@ -1228,7 +1228,7 @@
   "current": "12.6",
   "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.08,
   "avgScoreRate": 80.71,
   "notes": 1311,
@@ -1240,7 +1240,7 @@
   "current": "12.6",
   "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.11,
   "avgScoreRate": 82.7,
   "notes": 1356,
@@ -1252,7 +1252,7 @@
   "current": "12.7",
   "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.22,
   "avgScoreRate": 79.7,
   "notes": 1395,
@@ -1264,7 +1264,7 @@
   "current": "12.7",
   "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.22,
   "avgScoreRate": 80.64,
   "notes": 1377,
@@ -1274,9 +1274,9 @@
  {
   "title": "Be quiet[L]",
   "current": "12.4",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.27,
   "avgScoreRate": 79.16,
   "notes": 1463,
@@ -1286,9 +1286,9 @@
  {
   "title": "Bad Encryption",
   "current": "12.7",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.36,
   "avgScoreRate": 79.43,
   "notes": 1633,
@@ -1298,9 +1298,9 @@
  {
   "title": "ワルツ第17番 ト短調”大犬のワルツ”",
   "current": "12.6",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.38,
   "avgScoreRate": 80.52,
   "notes": 1684,
@@ -1310,9 +1310,9 @@
  {
   "title": "Macho Monky",
   "current": "12.7",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.39,
   "avgScoreRate": 81.73,
   "notes": 1588,
@@ -1322,9 +1322,9 @@
  {
   "title": "ECHIDNA",
   "current": "12.5",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.4,
   "avgScoreRate": 81.43,
   "notes": 1775,
@@ -1334,9 +1334,9 @@
  {
   "title": "In the Blackest Den",
   "current": "12.6",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.44,
   "avgScoreRate": 84.03,
   "notes": 1372,
@@ -1346,9 +1346,9 @@
  {
   "title": "GO!",
   "current": "12.5",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.46,
   "avgScoreRate": 82.5,
   "notes": 1618,
@@ -1358,33 +1358,33 @@
  {
   "title": "Angel's Ladder",
   "current": "12.6",
-  "base": "12.6",
+  "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.48,
   "avgScoreRate": 81.98,
   "notes": 1800,
   "plays": 584,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Everlasting Message",
   "current": "12.7",
-  "base": "12.6",
+  "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.65,
   "avgScoreRate": 80.4,
   "notes": 1970,
   "plays": 708,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Bounce Bounce Bounce",
   "current": "12.6",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.65,
   "avgScoreRate": 83.14,
   "notes": 1293,
@@ -1394,9 +1394,9 @@
  {
   "title": "ra'am",
   "current": "12.6",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.75,
   "avgScoreRate": 80.28,
   "notes": 1461,
@@ -1406,9 +1406,9 @@
  {
   "title": "StrayedCatz",
   "current": "12.5",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.83,
   "avgScoreRate": 80.3,
   "notes": 1490,
@@ -1418,9 +1418,9 @@
  {
   "title": "Go Ahead!!",
   "current": "12.5",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.84,
   "avgScoreRate": 79.31,
   "notes": 1413,
@@ -1430,9 +1430,9 @@
  {
   "title": "Caldwell 99[L]",
   "current": "12.5",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.87,
   "avgScoreRate": 81.1,
   "notes": 1743,
@@ -1442,9 +1442,9 @@
  {
   "title": "Glitch N Ride",
   "current": "12.7",
-  "base": "12.6",
-  "planA": "12.6",
-  "planB": "12.6",
+  "base": "12.7",
+  "planA": "12.7",
+  "planB": "12.7",
   "maxMinusRate": 5.9,
   "avgScoreRate": 79.2,
   "notes": 1389,
@@ -1454,62 +1454,62 @@
  {
   "title": "シムルグの目醒め",
   "current": "12.6",
-  "base": "12.6",
+  "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.94,
   "avgScoreRate": 81.25,
   "notes": 1822,
   "plays": 707,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "TOMAHAWK",
   "current": "12.5",
-  "base": "12.6",
+  "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 5.95,
   "avgScoreRate": 83,
   "notes": 1830,
   "plays": 605,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "君のハートにロックオン[L]",
   "current": "12.8",
-  "base": "12.6",
+  "base": "12.7",
   "planA": "12.7",
-  "planB": "12.6",
+  "planB": "12.7",
   "maxMinusRate": 6.01,
   "avgScoreRate": 80.33,
   "notes": 1828,
   "plays": 599,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "EMERALDAS",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 6.28,
   "avgScoreRate": 80.03,
   "notes": 1833,
   "plays": 749,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Flamingo",
   "current": "12.3",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 6.32,
   "avgScoreRate": 81.86,
   "notes": 1800,
   "plays": 601,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ruin of opals",
@@ -1527,13 +1527,13 @@
   "title": "LOCUS OF THE TRAVEL",
   "current": "12.7",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 6.52,
   "avgScoreRate": 80.19,
   "notes": 1920,
   "plays": 629,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Unbelief",
@@ -1551,13 +1551,13 @@
   "title": "バッド・スイーツ、バッド・ドリーム",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 6.76,
   "avgScoreRate": 81.39,
   "notes": 1862,
   "plays": 680,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "OMEGA",
@@ -1611,25 +1611,25 @@
   "title": "ChaserXX[L]",
   "current": "12.8",
   "base": "12.6",
-  "planA": "12.8",
-  "planB": "12.7",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 6.89,
   "avgScoreRate": 82.09,
   "notes": 2000,
   "plays": 653,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Artist",
   "current": "12.7",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 6.91,
   "avgScoreRate": 81.76,
   "notes": 1870,
   "plays": 622,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "IDC feat.REVERBEE (Mo'Cuts Ver)",
@@ -1647,13 +1647,13 @@
   "title": "EBONY & IVORY[L]",
   "current": "12.7",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 7.12,
   "avgScoreRate": 79.81,
   "notes": 1887,
   "plays": 534,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "魔法のかくれんぼ",
@@ -1671,37 +1671,37 @@
   "title": "LOST TECHNOLOGIE",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 7.21,
   "avgScoreRate": 82.38,
   "notes": 1822,
   "plays": 513,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "DORNWALD ～Junge～",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 7.25,
   "avgScoreRate": 82.4,
   "notes": 1903,
   "plays": 731,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "⁽⁽ଘ( ˙꒳˙ )ଓ⁾⁾ beyond reason",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 7.25,
   "avgScoreRate": 81.53,
   "notes": 1988,
   "plays": 841,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "灼熱Beach Side Bunny (かめりあ's \"Summertime D'n'B\" Remix)",
@@ -1743,13 +1743,13 @@
   "title": "JOMANDA",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 7.32,
   "avgScoreRate": 79.14,
   "notes": 1918,
   "plays": 615,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "naughty girl@Queen's Palace[L]",
@@ -1779,13 +1779,13 @@
   "title": "voltississimo",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.7",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 7.41,
   "avgScoreRate": 82.48,
   "notes": 1888,
   "plays": 607,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "REVOLVER[L]",
@@ -1815,13 +1815,13 @@
   "title": "super double play sessions",
   "current": "12.7",
   "base": "12.6",
-  "planA": "12.8",
-  "planB": "12.7",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 7.55,
   "avgScoreRate": 80.99,
   "notes": 2225,
   "plays": 331,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "ROCK女 feat. 大山愛未， Ken",
@@ -1839,13 +1839,13 @@
   "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～[L]",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.8",
-  "planB": "12.7",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 7.65,
   "avgScoreRate": 77.1,
   "notes": 2459,
   "plays": 667,
-  "notesSteps": 4
+  "notesSteps": 0
  },
  {
   "title": "The Rebellion of Sequencer",
@@ -1900,7 +1900,7 @@
   "current": "12.4",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 7.8,
   "avgScoreRate": 79.28,
   "notes": 1567,
@@ -1912,7 +1912,7 @@
   "current": "12.5",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 7.85,
   "avgScoreRate": 81.1,
   "notes": 1586,
@@ -1924,7 +1924,7 @@
   "current": "11.5",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 7.88,
   "avgScoreRate": 84.5,
   "notes": 1106,
@@ -1936,7 +1936,7 @@
   "current": "12.6",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 7.89,
   "avgScoreRate": 81.23,
   "notes": 1578,
@@ -1947,32 +1947,32 @@
   "title": "KAMAITACHI[L]",
   "current": "12.5",
   "base": "12.6",
-  "planA": "12.8",
-  "planB": "12.7",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 7.91,
   "avgScoreRate": 80.36,
   "notes": 2000,
   "plays": 683,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Lisa-RICCIA[L]",
   "current": "12.6",
   "base": "12.6",
-  "planA": "12.8",
-  "planB": "12.7",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 7.93,
   "avgScoreRate": 82.09,
   "notes": 2394,
   "plays": 744,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "灼熱 Lost Summer Dayz",
   "current": "12.2",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.02,
   "avgScoreRate": 82.36,
   "notes": 1453,
@@ -1984,7 +1984,7 @@
   "current": "12.5",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.05,
   "avgScoreRate": 76.88,
   "notes": 1518,
@@ -1996,7 +1996,7 @@
   "current": "12.6",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.07,
   "avgScoreRate": 81.63,
   "notes": 1123,
@@ -2008,7 +2008,7 @@
   "current": "12.6",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.08,
   "avgScoreRate": 82.18,
   "notes": 1589,
@@ -2020,7 +2020,7 @@
   "current": "12.5",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.29,
   "avgScoreRate": 84.01,
   "notes": 1728,
@@ -2032,7 +2032,7 @@
   "current": "12.5",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.3,
   "avgScoreRate": 80.95,
   "notes": 1661,
@@ -2044,7 +2044,7 @@
   "current": "12.4",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.3,
   "avgScoreRate": 82.84,
   "notes": 1399,
@@ -2056,7 +2056,7 @@
   "current": "12.4",
   "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.31,
   "avgScoreRate": 81.97,
   "notes": 1643,
@@ -2066,9 +2066,9 @@
  {
   "title": "烽火連天の刃",
   "current": "12.5",
-  "base": "12.5",
-  "planA": "12.5",
-  "planB": "12.5",
+  "base": "12.6",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 8.39,
   "avgScoreRate": 82.94,
   "notes": 1771,
@@ -2078,9 +2078,9 @@
  {
   "title": "ZED[L]",
   "current": "12.7",
-  "base": "12.5",
-  "planA": "12.5",
-  "planB": "12.5",
+  "base": "12.6",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 8.59,
   "avgScoreRate": 84.8,
   "notes": 1778,
@@ -2090,9 +2090,9 @@
  {
   "title": "少年は空を辿る",
   "current": "12.4",
-  "base": "12.5",
-  "planA": "12.5",
-  "planB": "12.5",
+  "base": "12.6",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 8.62,
   "avgScoreRate": 82.05,
   "notes": 1729,
@@ -2102,9 +2102,9 @@
  {
   "title": "OTENAMI Hurricane",
   "current": "12.5",
-  "base": "12.5",
-  "planA": "12.5",
-  "planB": "12.5",
+  "base": "12.6",
+  "planA": "12.6",
+  "planB": "12.6",
   "maxMinusRate": 8.64,
   "avgScoreRate": 83.67,
   "notes": 1643,
@@ -2114,50 +2114,50 @@
  {
   "title": "IX",
   "current": "12.6",
-  "base": "12.5",
-  "planA": "12.7",
+  "base": "12.6",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 8.66,
   "avgScoreRate": 81.61,
   "notes": 2007,
   "plays": 658,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "FiZZλ_POT!0N",
   "current": "12.6",
-  "base": "12.5",
+  "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.68,
   "avgScoreRate": 81.15,
   "notes": 1800,
   "plays": 737,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ιgniЯRuina",
   "current": "12.5",
-  "base": "12.5",
+  "base": "12.6",
   "planA": "12.6",
-  "planB": "12.5",
+  "planB": "12.6",
   "maxMinusRate": 8.84,
   "avgScoreRate": 83.86,
   "notes": 1851,
   "plays": 826,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Violet Pulse[L]",
   "current": "12.6",
-  "base": "12.5",
-  "planA": "12.7",
+  "base": "12.6",
+  "planA": "12.6",
   "planB": "12.6",
   "maxMinusRate": 8.86,
   "avgScoreRate": 80.4,
   "notes": 2115,
   "plays": 677,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Cross Fire",
@@ -2211,25 +2211,25 @@
   "title": "Vulnerability",
   "current": "12.7",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 9.08,
   "avgScoreRate": 82.49,
   "notes": 1885,
   "plays": 672,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Ambivalent Vermilia",
   "current": "12.6",
   "base": "12.5",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 9.09,
   "avgScoreRate": 80.61,
   "notes": 2132,
   "plays": 649,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Zenith",
@@ -2259,13 +2259,13 @@
   "title": "キャトられ恋はモ～モク",
   "current": "12.6",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 9.49,
   "avgScoreRate": 81.07,
   "notes": 1988,
   "plays": 643,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "24h Endurance Race",
@@ -2331,13 +2331,13 @@
   "title": "CADENZA",
   "current": "12.7",
   "base": "12.5",
-  "planA": "12.8",
-  "planB": "12.7",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 9.61,
   "avgScoreRate": 80.3,
   "notes": 2357,
   "plays": 791,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "恋愛＝精度×認識力",
@@ -2355,13 +2355,13 @@
   "title": "VOX UP",
   "current": "12.6",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 9.64,
   "avgScoreRate": 80.17,
   "notes": 1870,
   "plays": 581,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Out of Control",
@@ -2379,37 +2379,37 @@
   "title": "invoker[L]",
   "current": "12.5",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 9.68,
   "avgScoreRate": 85.05,
   "notes": 1851,
   "plays": 465,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "DEATH†ZIGOQ ～怒りの高速爆走野郎～",
   "current": "12.2",
   "base": "12.5",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 9.68,
   "avgScoreRate": 79.91,
   "notes": 2075,
   "plays": 661,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Zirkfied",
   "current": "12.3",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 9.71,
   "avgScoreRate": 82.42,
   "notes": 1968,
   "plays": 680,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Quakes",
@@ -2428,7 +2428,7 @@
   "current": "12.6",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 9.82,
   "avgScoreRate": 84.06,
   "notes": 1538,
@@ -2440,7 +2440,7 @@
   "current": "12.5",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 9.84,
   "avgScoreRate": 81.94,
   "notes": 1591,
@@ -2452,7 +2452,7 @@
   "current": "12.2",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 9.85,
   "avgScoreRate": 84.28,
   "notes": 1601,
@@ -2464,7 +2464,7 @@
   "current": "12.4",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 9.89,
   "avgScoreRate": 82.23,
   "notes": 1167,
@@ -2472,23 +2472,11 @@
   "notesSteps": 0
  },
  {
-  "title": "2 Beasts Unchained",
-  "current": "12.5",
-  "base": "12.5",
-  "planA": "12.5",
-  "planB": "12.4",
-  "maxMinusRate": 9.91,
-  "avgScoreRate": 81.87,
-  "notes": 1780,
-  "plays": 565,
-  "notesSteps": 0
- },
- {
   "title": "ベラ・ベ・カラベラ",
   "current": "12.4",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 9.93,
   "avgScoreRate": 83.12,
   "notes": 1436,
@@ -2500,7 +2488,7 @@
   "current": "12.6",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 9.95,
   "avgScoreRate": 81.11,
   "notes": 1629,
@@ -2511,32 +2499,32 @@
   "title": "天空の夜明け",
   "current": "12.5",
   "base": "12.5",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 9.95,
   "avgScoreRate": 80.72,
   "notes": 2072,
   "plays": 794,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Smashing Wedge",
   "current": "12.4",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 9.99,
   "avgScoreRate": 81.88,
   "notes": 1957,
   "plays": 671,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "CHECKING YOU OUT",
   "current": "12.2",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.02,
   "avgScoreRate": 84.19,
   "notes": 700,
@@ -2548,7 +2536,7 @@
   "current": "11.8",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.05,
   "avgScoreRate": 85.39,
   "notes": 1096,
@@ -2556,47 +2544,59 @@
   "notesSteps": 0
  },
  {
+  "title": "2 Beasts Unchained",
+  "current": "12.5",
+  "base": "12.5",
+  "planA": "12.5",
+  "planB": "12.5",
+  "maxMinusRate": 10.07,
+  "avgScoreRate": 81.9,
+  "notes": 1780,
+  "plays": 566,
+  "notesSteps": 0
+ },
+ {
   "title": "kors k's How to make OTOGE CORE 「LONG」",
   "current": "12.5",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 10.11,
   "avgScoreRate": 82.84,
   "notes": 1863,
   "plays": 623,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "NITROUS CANNON",
   "current": "12.5",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 10.15,
   "avgScoreRate": 82.31,
   "notes": 1875,
   "plays": 581,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "お菓子の王国",
   "current": "12.6",
   "base": "12.5",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 10.21,
   "avgScoreRate": 83.73,
   "notes": 2109,
   "plays": 813,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Proof of the existence",
   "current": "12.5",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.24,
   "avgScoreRate": 83.48,
   "notes": 1675,
@@ -2608,7 +2608,7 @@
   "current": "12.4",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.25,
   "avgScoreRate": 82.38,
   "notes": 1638,
@@ -2620,7 +2620,7 @@
   "current": "12.2",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.29,
   "avgScoreRate": 82.49,
   "notes": 1177,
@@ -2632,7 +2632,7 @@
   "current": "12.5",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.31,
   "avgScoreRate": 86.27,
   "notes": 934,
@@ -2644,7 +2644,7 @@
   "current": "12.5",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.34,
   "avgScoreRate": 81.84,
   "notes": 1718,
@@ -2656,7 +2656,7 @@
   "current": "12.3",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.38,
   "avgScoreRate": 80.81,
   "notes": 1666,
@@ -2668,7 +2668,7 @@
   "current": "12.6",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.46,
   "avgScoreRate": 84.93,
   "notes": 1759,
@@ -2680,7 +2680,7 @@
   "current": "12.1",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.62,
   "avgScoreRate": 84.92,
   "notes": 1477,
@@ -2692,7 +2692,7 @@
   "current": "12.4",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.7,
   "avgScoreRate": 82.18,
   "notes": 1505,
@@ -2704,7 +2704,7 @@
   "current": "12.6",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.75,
   "avgScoreRate": 83.4,
   "notes": 1795,
@@ -2715,20 +2715,20 @@
   "title": "PERFECT GREAT!!",
   "current": "12.6",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 10.75,
   "avgScoreRate": 84.62,
   "notes": 1990,
   "plays": 651,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Hydrogen Blueback[L]",
   "current": "12.2",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.83,
   "avgScoreRate": 82.14,
   "notes": 1241,
@@ -2739,20 +2739,20 @@
   "title": "Confiserie",
   "current": "12.6",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 10.83,
   "avgScoreRate": 81.97,
   "notes": 1833,
   "plays": 757,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "SAMURAI-Scramble",
   "current": "12.2",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.87,
   "avgScoreRate": 82.26,
   "notes": 1232,
@@ -2763,20 +2763,20 @@
   "title": "恋する☆宇宙戦争っ！！",
   "current": "12.2",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 10.88,
   "avgScoreRate": 82.19,
   "notes": 1835,
   "plays": 588,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "1116",
   "current": "12.6",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.96,
   "avgScoreRate": 83.1,
   "notes": 1581,
@@ -2788,7 +2788,7 @@
   "current": "12.3",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 10.98,
   "avgScoreRate": 82.27,
   "notes": 1443,
@@ -2799,20 +2799,20 @@
   "title": "Without Heaven",
   "current": "12.6",
   "base": "12.5",
-  "planA": "12.6",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 11,
   "avgScoreRate": 83.94,
   "notes": 1912,
   "plays": 591,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "魅惑のYUMMYスイーツ",
   "current": "12.3",
   "base": "12.5",
   "planA": "12.5",
-  "planB": "12.4",
+  "planB": "12.5",
   "maxMinusRate": 11.02,
   "avgScoreRate": 82.67,
   "notes": 1586,
@@ -2823,20 +2823,20 @@
   "title": "Elemental Creation",
   "current": "12.4",
   "base": "12.5",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 11.02,
   "avgScoreRate": 81.98,
   "notes": 2130,
   "plays": 753,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "廿[L]",
   "current": "12.6",
-  "base": "12.4",
-  "planA": "12.4",
-  "planB": "12.4",
+  "base": "12.5",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 11.04,
   "avgScoreRate": 84,
   "notes": 1731,
@@ -2846,9 +2846,9 @@
  {
   "title": "紫陽花 -AZISAI-",
   "current": "12.4",
-  "base": "12.4",
-  "planA": "12.4",
-  "planB": "12.4",
+  "base": "12.5",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 11.04,
   "avgScoreRate": 83.37,
   "notes": 1490,
@@ -2858,9 +2858,9 @@
  {
   "title": "BRAINSTORM",
   "current": "12.4",
-  "base": "12.4",
-  "planA": "12.4",
-  "planB": "12.4",
+  "base": "12.5",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 11.07,
   "avgScoreRate": 84.9,
   "notes": 1449,
@@ -2870,9 +2870,9 @@
  {
   "title": "クレッシェンド",
   "current": "12.5",
-  "base": "12.4",
-  "planA": "12.4",
-  "planB": "12.4",
+  "base": "12.5",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 11.11,
   "avgScoreRate": 82.95,
   "notes": 1742,
@@ -2882,9 +2882,9 @@
  {
   "title": "Sense 2007",
   "current": "12.0",
-  "base": "12.4",
-  "planA": "12.4",
-  "planB": "12.4",
+  "base": "12.5",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 11.11,
   "avgScoreRate": 83.54,
   "notes": 1517,
@@ -2894,9 +2894,9 @@
  {
   "title": "アストライアの双皿",
   "current": "12.3",
-  "base": "12.4",
-  "planA": "12.4",
-  "planB": "12.4",
+  "base": "12.5",
+  "planA": "12.5",
+  "planB": "12.5",
   "maxMinusRate": 11.15,
   "avgScoreRate": 83.73,
   "notes": 1632,
@@ -2906,14 +2906,14 @@
  {
   "title": "共鳴遊戯の華",
   "current": "12.5",
-  "base": "12.4",
-  "planA": "12.6",
+  "base": "12.5",
+  "planA": "12.5",
   "planB": "12.5",
   "maxMinusRate": 11.23,
   "avgScoreRate": 81.16,
   "notes": 2000,
   "plays": 650,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "reunion",
@@ -2943,13 +2943,13 @@
   "title": "寝起きヤシの木[L]",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 11.36,
   "avgScoreRate": 85.45,
   "notes": 1829,
   "plays": 440,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "INSOMNIA",
@@ -2991,13 +2991,13 @@
   "title": "The Limbo[L]",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 11.52,
   "avgScoreRate": 82.61,
   "notes": 2190,
   "plays": 677,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "UNDO THE NIGHT",
@@ -3046,18 +3046,6 @@
   "notes": 1231,
   "plays": 573,
   "notesSteps": 0
- },
- {
-  "title": "お米の美味しい炊き方、そしてお米を食べることによるその効果。[L]",
-  "current": "12.6",
-  "base": "12.4",
-  "planA": "12.5",
-  "planB": "12.4",
-  "maxMinusRate": 11.71,
-  "avgScoreRate": 80.66,
-  "notes": 1907,
-  "plays": 598,
-  "notesSteps": 1
  },
  {
   "title": "SCREAM SQUAD",
@@ -3111,13 +3099,25 @@
   "title": "Satellite Burst",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 11.85,
   "avgScoreRate": 82.36,
   "notes": 2000,
   "plays": 616,
-  "notesSteps": 2
+  "notesSteps": 0
+ },
+ {
+  "title": "お米の美味しい炊き方、そしてお米を食べることによるその効果。[L]",
+  "current": "12.6",
+  "base": "12.4",
+  "planA": "12.4",
+  "planB": "12.4",
+  "maxMinusRate": 11.85,
+  "avgScoreRate": 80.68,
+  "notes": 1907,
+  "plays": 599,
+  "notesSteps": 0
  },
  {
   "title": "雪上断火",
@@ -3135,13 +3135,13 @@
   "title": "轟け！恋のビーンボール！！",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 11.88,
   "avgScoreRate": 82.33,
   "notes": 1834,
   "plays": 589,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "DropZ-Line-",
@@ -3159,49 +3159,49 @@
   "title": "KAISER PHOENIX[L]",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 11.9,
   "avgScoreRate": 80.39,
   "notes": 2026,
   "plays": 647,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Iridescent Memories",
   "current": "12.6",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 11.9,
   "avgScoreRate": 83.88,
   "notes": 2033,
   "plays": 336,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "I",
   "current": "12.2",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 11.99,
   "avgScoreRate": 82.14,
   "notes": 1901,
   "plays": 609,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Chrono Diver -PENDULUMs-",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 12.02,
   "avgScoreRate": 80.98,
   "notes": 2222,
   "plays": 815,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "Wonder Bullfighter",
@@ -3231,13 +3231,13 @@
   "title": "NEW GENERATION -もう、お前しか見えない-[L]",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 12.04,
   "avgScoreRate": 82.01,
   "notes": 1895,
   "plays": 457,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Caterpillar",
@@ -3255,25 +3255,25 @@
   "title": "Secrets[L]",
   "current": "12.2",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 12.23,
   "avgScoreRate": 82.27,
   "notes": 2116,
   "plays": 695,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Vitrum",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 12.24,
   "avgScoreRate": 83.6,
   "notes": 1848,
   "plays": 531,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Ganymede",
@@ -3303,13 +3303,13 @@
   "title": "MAXIMUM CHEAT GIRL",
   "current": "12.3",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 12.32,
   "avgScoreRate": 83.67,
   "notes": 1842,
   "plays": 568,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Beat Juggling Mix",
@@ -3327,37 +3327,37 @@
   "title": "栄冠のカンパネラ",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 12.39,
   "avgScoreRate": 81.91,
   "notes": 2000,
   "plays": 783,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Time to Air[L]",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 12.52,
   "avgScoreRate": 85.62,
   "notes": 1888,
   "plays": 695,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Binary Black Hole",
   "current": "12.3",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 12.57,
   "avgScoreRate": 83.4,
   "notes": 2000,
   "plays": 676,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "ONIGOROSHI",
@@ -3399,13 +3399,13 @@
   "title": "がっつり陰キャ!? 怪盗いいんちょの億劫^^;",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 12.79,
   "avgScoreRate": 81.3,
   "notes": 2192,
   "plays": 696,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Papilio ulysses",
@@ -3423,25 +3423,25 @@
   "title": "煉獄のエルフェリア",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 12.86,
   "avgScoreRate": 81.62,
   "notes": 2000,
   "plays": 739,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Initiation",
   "current": "12.2",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 12.87,
   "avgScoreRate": 80.86,
   "notes": 2018,
   "plays": 886,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "断罪のミメシス",
@@ -3471,13 +3471,13 @@
   "title": "innocent revolver",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 12.97,
   "avgScoreRate": 83.01,
   "notes": 1990,
   "plays": 532,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Devilz Staircase",
@@ -3495,13 +3495,13 @@
   "title": "嘆きの樹",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 13.04,
   "avgScoreRate": 84.41,
   "notes": 2000,
   "plays": 767,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Monopole.",
@@ -3532,7 +3532,7 @@
   "current": "12.4",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.09,
   "avgScoreRate": 83.21,
   "notes": 1646,
@@ -3543,20 +3543,20 @@
   "title": "スキッテイエェエエェ!!!!",
   "current": "12.3",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 13.1,
   "avgScoreRate": 82.1,
   "notes": 2193,
   "plays": 809,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Grand Chariot",
   "current": "12.4",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.21,
   "avgScoreRate": 82.74,
   "notes": 1775,
@@ -3568,7 +3568,7 @@
   "current": "12.3",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.23,
   "avgScoreRate": 81,
   "notes": 1416,
@@ -3580,7 +3580,7 @@
   "current": "12.0",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.31,
   "avgScoreRate": 79.43,
   "notes": 987,
@@ -3591,20 +3591,20 @@
   "title": "Verflucht[L]",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.8",
-  "planB": "12.7",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 13.34,
   "avgScoreRate": 78.89,
   "notes": 2401,
   "plays": 742,
-  "notesSteps": 4
+  "notesSteps": 0
  },
  {
   "title": "GAME ON",
   "current": "11.9",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.37,
   "avgScoreRate": 85.78,
   "notes": 1386,
@@ -3616,7 +3616,7 @@
   "current": "11.5",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.38,
   "avgScoreRate": 84.05,
   "notes": 1499,
@@ -3627,32 +3627,32 @@
   "title": "恋する☆宇宙戦争っ！！[L]",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 13.38,
   "avgScoreRate": 81.39,
   "notes": 2355,
   "plays": 680,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "Phoenix[L]",
   "current": "12.4",
   "base": "12.4",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 13.43,
   "avgScoreRate": 81.27,
   "notes": 2027,
   "plays": 700,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "T.R.O.L.L.",
   "current": "12.6",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.49,
   "avgScoreRate": 81.99,
   "notes": 1329,
@@ -3664,7 +3664,7 @@
   "current": "12.4",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.51,
   "avgScoreRate": 82.88,
   "notes": 1783,
@@ -3676,7 +3676,7 @@
   "current": "12.2",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.52,
   "avgScoreRate": 84.19,
   "notes": 1639,
@@ -3687,20 +3687,20 @@
   "title": "#The_Relentless[L]",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.7",
-  "planB": "12.6",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 13.55,
   "avgScoreRate": 82.7,
   "notes": 2273,
   "plays": 620,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "泰東ノ翠霞",
   "current": "12.3",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.58,
   "avgScoreRate": 83.79,
   "notes": 914,
@@ -3708,35 +3708,23 @@
   "notesSteps": 0
  },
  {
-  "title": "PARANOiA ～HADES～",
-  "current": "12.3",
-  "base": "12.4",
-  "planA": "12.4",
-  "planB": "12.3",
-  "maxMinusRate": 13.63,
-  "avgScoreRate": 82.59,
-  "notes": 1395,
-  "plays": 587,
-  "notesSteps": 0
- },
- {
   "title": "Uaigh Gealai",
   "current": "12.5",
   "base": "12.4",
-  "planA": "12.5",
+  "planA": "12.4",
   "planB": "12.4",
   "maxMinusRate": 13.71,
   "avgScoreRate": 82.75,
   "notes": 1972,
   "plays": 591,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "THUNDERSTRIKE",
   "current": "12.4",
   "base": "12.4",
   "planA": "12.4",
-  "planB": "12.3",
+  "planB": "12.4",
   "maxMinusRate": 13.71,
   "avgScoreRate": 85.28,
   "notes": 1790,
@@ -3746,14 +3734,26 @@
  {
   "title": "THE BLACK KNIGHT[L]",
   "current": "12.7",
-  "base": "12.3",
-  "planA": "12.6",
-  "planB": "12.5",
+  "base": "12.4",
+  "planA": "12.4",
+  "planB": "12.4",
   "maxMinusRate": 13.71,
   "avgScoreRate": 85.77,
   "notes": 2325,
   "plays": 350,
-  "notesSteps": 3
+  "notesSteps": 0
+ },
+ {
+  "title": "PARANOiA ～HADES～",
+  "current": "12.3",
+  "base": "12.4",
+  "planA": "12.4",
+  "planB": "12.4",
+  "maxMinusRate": 13.8,
+  "avgScoreRate": 82.66,
+  "notes": 1395,
+  "plays": 587,
+  "notesSteps": 0
  },
  {
   "title": "TRANOID[L]",
@@ -3771,13 +3771,13 @@
   "title": "Ancient Scapes[L]",
   "current": "12.6",
   "base": "12.3",
-  "planA": "12.5",
-  "planB": "12.4",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 13.9,
   "avgScoreRate": 82.61,
   "notes": 2198,
   "plays": 590,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Godspeed",
@@ -3831,13 +3831,13 @@
   "title": "HYENA[L]",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 14.15,
   "avgScoreRate": 81.96,
   "notes": 1894,
   "plays": 537,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Flashes",
@@ -3903,13 +3903,13 @@
   "title": "†渚の小悪魔ラヴリィ～レイディオ†(IIDX EDIT)",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 14.31,
   "avgScoreRate": 82.69,
   "notes": 1835,
   "plays": 720,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "アラビアン ハイパー ナイト",
@@ -3939,37 +3939,37 @@
   "title": "MENDES",
   "current": "12.2",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 14.52,
   "avgScoreRate": 81.32,
   "notes": 1831,
   "plays": 799,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "B4U(BEMANI FOR YOU MIX)[L]",
   "current": "12.5",
   "base": "12.3",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 14.52,
   "avgScoreRate": 81.49,
   "notes": 2360,
   "plays": 723,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "BroGamer[L]",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 14.54,
   "avgScoreRate": 84.78,
   "notes": 2383,
   "plays": 743,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "Beastie Starter",
@@ -4047,13 +4047,13 @@
   "title": "Resonant",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 14.75,
   "avgScoreRate": 82.67,
   "notes": 1864,
   "plays": 651,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "禊",
@@ -4071,13 +4071,13 @@
   "title": "-65℃",
   "current": "12.2",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 14.81,
   "avgScoreRate": 84.47,
   "notes": 1912,
   "plays": 648,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Parvati",
@@ -4095,25 +4095,25 @@
   "title": "Override[L]",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 14.86,
   "avgScoreRate": 84.16,
   "notes": 2204,
   "plays": 740,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "O/D*20[L]",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 14.89,
   "avgScoreRate": 84.33,
   "notes": 1984,
   "plays": 618,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "TECHNOPHOBIA",
@@ -4131,25 +4131,25 @@
   "title": "Xb10r",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 14.98,
   "avgScoreRate": 83.57,
   "notes": 1833,
   "plays": 594,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲[L]",
   "current": "12.5",
   "base": "12.3",
-  "planA": "12.5",
-  "planB": "12.4",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 15.06,
   "avgScoreRate": 83.51,
   "notes": 2110,
   "plays": 644,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "SCHWARZSCHILD FIELD",
@@ -4167,13 +4167,13 @@
   "title": "蛇神[L]",
   "current": "12.2",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.11,
   "avgScoreRate": 84.18,
   "notes": 1904,
   "plays": 642,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Sarutobi Champion is 拙者",
@@ -4191,13 +4191,13 @@
   "title": "2 Be Continued",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.15,
   "avgScoreRate": 84.22,
   "notes": 1872,
   "plays": 858,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "バンブーソード・ガール",
@@ -4224,64 +4224,52 @@
   "notesSteps": 0
  },
  {
-  "title": "TOXIC VIBRATION",
-  "current": "12.3",
-  "base": "12.3",
-  "planA": "12.4",
-  "planB": "12.3",
-  "maxMinusRate": 15.34,
-  "avgScoreRate": 83.66,
-  "notes": 1933,
-  "plays": 704,
-  "notesSteps": 1
- },
- {
   "title": "INHERITANCE[L]",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.36,
   "avgScoreRate": 85.01,
   "notes": 1827,
   "plays": 677,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "BEAT PRISONER",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.38,
   "avgScoreRate": 84.1,
   "notes": 1844,
   "plays": 936,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ピアノ協奏曲第1番”蠍火” (BlackY Remix)",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.41,
   "avgScoreRate": 85.88,
   "notes": 1926,
   "plays": 623,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Feel The Beat[L]",
   "current": "12.5",
   "base": "12.3",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 15.43,
   "avgScoreRate": 79.48,
   "notes": 2225,
   "plays": 726,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "CODE:0",
@@ -4308,16 +4296,28 @@
   "notesSteps": 0
  },
  {
+  "title": "TOXIC VIBRATION",
+  "current": "12.3",
+  "base": "12.3",
+  "planA": "12.3",
+  "planB": "12.3",
+  "maxMinusRate": 15.46,
+  "avgScoreRate": 83.68,
+  "notes": 1933,
+  "plays": 705,
+  "notesSteps": 0
+ },
+ {
   "title": "即席！脳直★ミュージックシステム",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.49,
   "avgScoreRate": 83.16,
   "notes": 1838,
   "plays": 607,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Innocent Walls",
@@ -4347,13 +4347,13 @@
   "title": "Drop Syndicate",
   "current": "12.2",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.59,
   "avgScoreRate": 83.57,
   "notes": 1861,
   "plays": 603,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "1st Samurai",
@@ -4419,37 +4419,37 @@
   "title": "Burning Flame[L]",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.74,
   "avgScoreRate": 82.78,
   "notes": 1938,
   "plays": 591,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "THE F∀UST",
   "current": "12.5",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.75,
   "avgScoreRate": 83.35,
   "notes": 1851,
   "plays": 635,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "VOLAQUAS",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 15.78,
   "avgScoreRate": 84.42,
   "notes": 1982,
   "plays": 640,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Colors (radio edit)",
@@ -4515,37 +4515,37 @@
   "title": "Pinky Happy Crazy",
   "current": "12.5",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 16.13,
   "avgScoreRate": 86.23,
   "notes": 1833,
   "plays": 595,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "YAKSHA",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.5",
-  "planB": "12.4",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 16.16,
   "avgScoreRate": 83.73,
   "notes": 2000,
   "plays": 588,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "逆月",
   "current": "12.2",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 16.19,
   "avgScoreRate": 83.72,
   "notes": 1920,
   "plays": 766,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "DIAMOND CROSSING",
@@ -4563,13 +4563,13 @@
   "title": "ΕΛΠΙΣ[L]",
   "current": "12.4",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 16.25,
   "avgScoreRate": 83.5,
   "notes": 1852,
   "plays": 566,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "閠槞彁の願い",
@@ -4599,20 +4599,20 @@
   "title": "ラブコメトキドキシリアス",
   "current": "12.5",
   "base": "12.3",
-  "planA": "12.4",
+  "planA": "12.3",
   "planB": "12.3",
   "maxMinusRate": 16.39,
   "avgScoreRate": 86.06,
   "notes": 1902,
   "plays": 659,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Invitation from Mr.C",
   "current": "12.3",
   "base": "12.3",
   "planA": "12.3",
-  "planB": "12.2",
+  "planB": "12.3",
   "maxMinusRate": 16.4,
   "avgScoreRate": 82.29,
   "notes": 1405,
@@ -4624,7 +4624,7 @@
   "current": "11.9",
   "base": "12.3",
   "planA": "12.3",
-  "planB": "12.2",
+  "planB": "12.3",
   "maxMinusRate": 16.45,
   "avgScoreRate": 85.26,
   "notes": 1295,
@@ -4636,7 +4636,7 @@
   "current": "12.4",
   "base": "12.3",
   "planA": "12.3",
-  "planB": "12.2",
+  "planB": "12.3",
   "maxMinusRate": 16.49,
   "avgScoreRate": 85.2,
   "notes": 1684,
@@ -4647,19 +4647,19 @@
   "title": "NOIXIA",
   "current": "12.3",
   "base": "12.3",
-  "planA": "12.5",
-  "planB": "12.4",
+  "planA": "12.3",
+  "planB": "12.3",
   "maxMinusRate": 16.51,
   "avgScoreRate": 85.48,
   "notes": 2027,
   "plays": 733,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "New Castle Legions",
   "current": "12.4",
-  "base": "12.3",
-  "planA": "12.3",
+  "base": "12.2",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 16.56,
   "avgScoreRate": 83.89,
@@ -4670,32 +4670,32 @@
  {
   "title": "THE BRAVE MUST DIE",
   "current": "12.1",
-  "base": "12.3",
-  "planA": "12.5",
-  "planB": "12.4",
+  "base": "12.2",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 16.59,
   "avgScoreRate": 85.32,
   "notes": 2075,
   "plays": 868,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Arabian Rave Night[L]",
   "current": "12.4",
-  "base": "12.3",
-  "planA": "12.4",
-  "planB": "12.3",
+  "base": "12.2",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 16.64,
   "avgScoreRate": 83.97,
   "notes": 1888,
   "plays": 559,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Saturn[L]",
   "current": "12.2",
-  "base": "12.3",
-  "planA": "12.3",
+  "base": "12.2",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 16.64,
   "avgScoreRate": 83.27,
@@ -4706,8 +4706,8 @@
  {
   "title": "255",
   "current": "12.4",
-  "base": "12.3",
-  "planA": "12.3",
+  "base": "12.2",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 16.64,
   "avgScoreRate": 82.31,
@@ -4718,8 +4718,8 @@
  {
   "title": "Red Determination",
   "current": "12.2",
-  "base": "12.3",
-  "planA": "12.3",
+  "base": "12.2",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 16.67,
   "avgScoreRate": 82.66,
@@ -4730,20 +4730,20 @@
  {
   "title": "LASER CRUSTER (IGNITE REMIX)",
   "current": "12.3",
-  "base": "12.3",
-  "planA": "12.4",
-  "planB": "12.3",
+  "base": "12.2",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 16.67,
   "avgScoreRate": 83.37,
   "notes": 1824,
   "plays": 522,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "STEEL NEEDLE[L]",
   "current": "12.4",
-  "base": "12.3",
-  "planA": "12.3",
+  "base": "12.2",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 16.69,
   "avgScoreRate": 79.66,
@@ -4815,13 +4815,13 @@
   "title": "SOLID WYVERN[L]",
   "current": "12.4",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 16.85,
   "avgScoreRate": 84.28,
   "notes": 1999,
   "plays": 641,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Substance",
@@ -4899,13 +4899,13 @@
   "title": "GENE[L]",
   "current": "12.5",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 16.96,
   "avgScoreRate": 84.93,
   "notes": 1822,
   "plays": 448,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "FANTASTIC THREE",
@@ -4923,13 +4923,13 @@
   "title": "The Last Apocalypse",
   "current": "12.2",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 17.01,
   "avgScoreRate": 84.16,
   "notes": 1903,
   "plays": 582,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "電光",
@@ -4968,18 +4968,6 @@
   "notesSteps": 0
  },
  {
-  "title": "THANK YOU FOR PLAYING[L]",
-  "current": "12.4",
-  "base": "12.2",
-  "planA": "12.2",
-  "planB": "12.2",
-  "maxMinusRate": 17.26,
-  "avgScoreRate": 83.19,
-  "notes": 1534,
-  "plays": 475,
-  "notesSteps": 0
- },
- {
   "title": "夏色DIARY - L.E.D.-G STYLE MIX -",
   "current": "12.3",
   "base": "12.2",
@@ -4995,13 +4983,13 @@
   "title": "Feel The Beat",
   "current": "12.1",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 17.33,
   "avgScoreRate": 83.05,
   "notes": 1830,
   "plays": 658,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Battle Train -IIDX Edition-",
@@ -5025,6 +5013,18 @@
   "avgScoreRate": 84.74,
   "notes": 1151,
   "plays": 420,
+  "notesSteps": 0
+ },
+ {
+  "title": "THANK YOU FOR PLAYING[L]",
+  "current": "12.4",
+  "base": "12.2",
+  "planA": "12.2",
+  "planB": "12.2",
+  "maxMinusRate": 17.44,
+  "avgScoreRate": 83.22,
+  "notes": 1534,
+  "plays": 476,
   "notesSteps": 0
  },
  {
@@ -5067,13 +5067,13 @@
   "title": "From Human Blood",
   "current": "12.4",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 17.57,
   "avgScoreRate": 85,
   "notes": 1850,
   "plays": 848,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Little Star",
@@ -5091,13 +5091,13 @@
   "title": "Demon March",
   "current": "12.4",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 17.63,
   "avgScoreRate": 84.01,
   "notes": 1875,
   "plays": 675,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "gigadelic",
@@ -5115,13 +5115,13 @@
   "title": "Verflucht",
   "current": "12.2",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 17.65,
   "avgScoreRate": 81.25,
   "notes": 1805,
   "plays": 827,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "One More Lovely",
@@ -5175,13 +5175,13 @@
   "title": "ミュージック・アワー[L]",
   "current": "12.2",
   "base": "12.2",
-  "planA": "12.4",
-  "planB": "12.3",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 17.9,
   "avgScoreRate": 86.81,
   "notes": 2094,
   "plays": 620,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "BLAZING_LAZER",
@@ -5247,13 +5247,13 @@
   "title": "EVANESCENT",
   "current": "12.3",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 18.11,
   "avgScoreRate": 84.49,
   "notes": 1845,
   "plays": 541,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Monkey Business",
@@ -5271,13 +5271,13 @@
   "title": "Close the World feat.a☆ru[L]",
   "current": "12.3",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 18.17,
   "avgScoreRate": 82.05,
   "notes": 1983,
   "plays": 600,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ChaserXX",
@@ -5403,25 +5403,25 @@
   "title": "suspicions",
   "current": "12.2",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 18.43,
   "avgScoreRate": 85.11,
   "notes": 1908,
   "plays": 635,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Triple Counter",
   "current": "12.1",
   "base": "12.2",
-  "planA": "12.4",
-  "planB": "12.3",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 18.43,
   "avgScoreRate": 84.96,
   "notes": 2016,
   "plays": 624,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Ah Hah Yeah",
@@ -5439,13 +5439,13 @@
   "title": "Anisakis -somatic mutation type\"Forza\"-[L]",
   "current": "12.3",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 18.46,
   "avgScoreRate": 83.34,
   "notes": 1971,
   "plays": 661,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Lethal Weapon",
@@ -5487,13 +5487,13 @@
   "title": "伐折羅-vajra-",
   "current": "12.2",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 18.59,
   "avgScoreRate": 84.78,
   "notes": 1877,
   "plays": 651,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "eRAseRmOToRpHAntOM",
@@ -5523,25 +5523,25 @@
   "title": "Illusionary Waterlily",
   "current": "12.2",
   "base": "12.2",
-  "planA": "12.3",
+  "planA": "12.2",
   "planB": "12.2",
   "maxMinusRate": 18.84,
   "avgScoreRate": 83.02,
   "notes": 1803,
   "plays": 552,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Raison d'etre～交差する宿命～[L]",
   "current": "12.6",
   "base": "12.2",
-  "planA": "12.6",
-  "planB": "12.5",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 18.88,
   "avgScoreRate": 84.49,
   "notes": 2436,
   "plays": 286,
-  "notesSteps": 4
+  "notesSteps": 0
  },
  {
   "title": "Be a Hero!",
@@ -5571,25 +5571,25 @@
   "title": "Memoria Obscura",
   "current": "12.4",
   "base": "12.2",
-  "planA": "12.4",
-  "planB": "12.3",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 19.01,
   "avgScoreRate": 83.09,
   "notes": 2085,
   "plays": 826,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "G59",
   "current": "12.3",
   "base": "12.2",
-  "planA": "12.4",
-  "planB": "12.3",
+  "planA": "12.2",
+  "planB": "12.2",
   "maxMinusRate": 19.05,
   "avgScoreRate": 84.3,
   "notes": 2000,
   "plays": 656,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "雪月花",
@@ -5618,21 +5618,21 @@
  {
   "title": "Elektrick U-Phoria[L]",
   "current": "12.2",
-  "base": "12.2",
-  "planA": "12.4",
-  "planB": "12.3",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.21,
   "avgScoreRate": 83.43,
   "notes": 2050,
   "plays": 630,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Beyond The Earth",
   "current": "12.1",
-  "base": "12.2",
-  "planA": "12.2",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.26,
   "avgScoreRate": 85.94,
   "notes": 1646,
@@ -5642,56 +5642,56 @@
  {
   "title": "Flying Castle",
   "current": "12.3",
-  "base": "12.2",
-  "planA": "12.3",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.27,
   "avgScoreRate": 85.46,
   "notes": 1877,
   "plays": 628,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "狂イ咲ケ焔ノ華",
   "current": "12.0",
-  "base": "12.2",
-  "planA": "12.3",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.28,
   "avgScoreRate": 86.11,
   "notes": 1860,
   "plays": 638,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ALTERNATOR",
   "current": "12.2",
-  "base": "12.2",
-  "planA": "12.3",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.35,
   "avgScoreRate": 86.47,
   "notes": 1907,
   "plays": 775,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ANCHOR",
   "current": "12.2",
-  "base": "12.2",
-  "planA": "12.3",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.36,
   "avgScoreRate": 84.95,
   "notes": 1835,
   "plays": 723,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Scripted Connection⇒ N mix[L]",
   "current": "11.7",
-  "base": "12.2",
-  "planA": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.37,
   "avgScoreRate": 86,
@@ -5702,32 +5702,32 @@
  {
   "title": "Regina vespaE",
   "current": "12.4",
-  "base": "12.2",
-  "planA": "12.3",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.37,
   "avgScoreRate": 86.2,
   "notes": 1840,
   "plays": 831,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Vinculum stellarum",
   "current": "12.3",
-  "base": "12.2",
-  "planA": "12.3",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.39,
   "avgScoreRate": 84.78,
   "notes": 1873,
   "plays": 593,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Dusk Endir",
   "current": "12.4",
-  "base": "12.2",
-  "planA": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.43,
   "avgScoreRate": 87.64,
@@ -5738,8 +5738,8 @@
  {
   "title": "HAPPY★RUSH",
   "current": "12.1",
-  "base": "12.2",
-  "planA": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.44,
   "avgScoreRate": 84.38,
@@ -5750,8 +5750,8 @@
  {
   "title": "Seven Times Four",
   "current": "11.9",
-  "base": "12.2",
-  "planA": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.44,
   "avgScoreRate": 84.58,
@@ -5762,8 +5762,8 @@
  {
   "title": "Farewell to Marrakech",
   "current": "12.2",
-  "base": "12.2",
-  "planA": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.46,
   "avgScoreRate": 87.48,
@@ -5774,32 +5774,32 @@
  {
   "title": "≡+≡[L]",
   "current": "12.4",
-  "base": "12.2",
-  "planA": "12.5",
-  "planB": "12.4",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.47,
   "avgScoreRate": 84.28,
   "notes": 2333,
   "plays": 791,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "トリカゴノ鳳凰",
   "current": "12.0",
-  "base": "12.2",
-  "planA": "12.3",
-  "planB": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.5,
   "avgScoreRate": 84.58,
   "notes": 1932,
   "plays": 600,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "TITANS RETURN",
   "current": "11.8",
-  "base": "12.2",
-  "planA": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.51,
   "avgScoreRate": 85.45,
@@ -5810,8 +5810,8 @@
  {
   "title": "Welcome",
   "current": "11.9",
-  "base": "12.2",
-  "planA": "12.2",
+  "base": "12.1",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.53,
   "avgScoreRate": 84.7,
@@ -5835,13 +5835,13 @@
   "title": "Boomy and The Boost",
   "current": "12.0",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.54,
   "avgScoreRate": 86.45,
   "notes": 1826,
   "plays": 701,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "AIR RAID FROM THA UNDAGROUND[L]",
@@ -5943,13 +5943,13 @@
   "title": "Lost Souls[L]",
   "current": "12.1",
   "base": "12.1",
-  "planA": "12.3",
-  "planB": "12.2",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 19.83,
   "avgScoreRate": 83.95,
   "notes": 2000,
   "plays": 726,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Critical Crystal",
@@ -5967,13 +5967,13 @@
   "title": "Sky High",
   "current": "12.1",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.89,
   "avgScoreRate": 84.06,
   "notes": 1943,
   "plays": 724,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "電人、暁に斃れる。",
@@ -6015,13 +6015,13 @@
   "title": "Session 9 -Chronicles-",
   "current": "12.3",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.92,
   "avgScoreRate": 82.74,
   "notes": 1852,
   "plays": 487,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ATHER[L]",
@@ -6051,25 +6051,25 @@
   "title": "Slipstream",
   "current": "12.3",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.93,
   "avgScoreRate": 84.38,
   "notes": 1822,
   "plays": 587,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "u gotta beat",
   "current": "12.1",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 19.97,
   "avgScoreRate": 84.28,
   "notes": 1806,
   "plays": 616,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "squall",
@@ -6099,25 +6099,25 @@
   "title": "ぞうしょく！？マイデンティティ",
   "current": "12.3",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 20.17,
   "avgScoreRate": 85.12,
   "notes": 1851,
   "plays": 600,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Submerge Serenade[L]",
   "current": "12.1",
   "base": "12.1",
-  "planA": "12.3",
-  "planB": "12.2",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 20.19,
   "avgScoreRate": 87.09,
   "notes": 2104,
   "plays": 515,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "TRIUMPH",
@@ -6183,13 +6183,13 @@
   "title": "海神[L]",
   "current": "12.3",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 20.34,
   "avgScoreRate": 86.25,
   "notes": 1830,
   "plays": 595,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Smalt #28598F",
@@ -6315,13 +6315,13 @@
   "title": "Dynamite",
   "current": "11.9",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 20.66,
   "avgScoreRate": 83.97,
   "notes": 1953,
   "plays": 789,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "PLEASE DON'T GO",
@@ -6339,13 +6339,13 @@
   "title": "儚キ戀ノ幻想譚",
   "current": "11.9",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 20.72,
   "avgScoreRate": 85.75,
   "notes": 1808,
   "plays": 753,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "REVOLVER",
@@ -6387,13 +6387,13 @@
   "title": "GO OVER WITH GLARE -ROOTAGE 26-",
   "current": "12.3",
   "base": "12.1",
-  "planA": "12.3",
-  "planB": "12.2",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 20.83,
   "avgScoreRate": 86.98,
   "notes": 2000,
   "plays": 677,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "One for All",
@@ -6423,25 +6423,25 @@
   "title": "LIGHTNING STRIKES[L]",
   "current": "12.2",
   "base": "12.1",
-  "planA": "12.3",
-  "planB": "12.2",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 20.87,
   "avgScoreRate": 84.12,
   "notes": 2123,
   "plays": 733,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "世界の果てに約束の凱歌を -ReUnion-",
   "current": "12.2",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 20.88,
   "avgScoreRate": 85.52,
   "notes": 1983,
   "plays": 637,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Close the World feat.a☆ru",
@@ -6471,13 +6471,13 @@
   "title": "Flashes[L]",
   "current": "12.4",
   "base": "12.1",
-  "planA": "12.3",
-  "planB": "12.2",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 21.22,
   "avgScoreRate": 83.73,
   "notes": 2090,
   "plays": 806,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Ancient Scapes",
@@ -6495,13 +6495,13 @@
   "title": "BLACK or WHITE?",
   "current": "12.3",
   "base": "12.1",
-  "planA": "12.3",
-  "planB": "12.2",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 21.27,
   "avgScoreRate": 85.52,
   "notes": 2013,
   "plays": 743,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "encounter",
@@ -6543,37 +6543,37 @@
   "title": "EYE OF THE HEAVEN",
   "current": "12.4",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 21.38,
   "avgScoreRate": 86.3,
   "notes": 1824,
   "plays": 463,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Arkadia",
   "current": "12.0",
   "base": "12.1",
-  "planA": "12.2",
+  "planA": "12.1",
   "planB": "12.1",
   "maxMinusRate": 21.39,
   "avgScoreRate": 83.75,
   "notes": 1873,
   "plays": 664,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "PLASMA SOUL NIGHT feat. Nana Takahashi / 709sec.",
   "current": "12.2",
   "base": "12.1",
-  "planA": "12.4",
-  "planB": "12.3",
+  "planA": "12.1",
+  "planB": "12.1",
   "maxMinusRate": 21.48,
   "avgScoreRate": 85.13,
   "notes": 2271,
   "plays": 759,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "Angelic Jelly",
@@ -6592,7 +6592,7 @@
   "current": "12.1",
   "base": "12.1",
   "planA": "12.1",
-  "planB": "12.0",
+  "planB": "12.1",
   "maxMinusRate": 21.57,
   "avgScoreRate": 85.98,
   "notes": 1701,
@@ -6604,7 +6604,7 @@
   "current": "12.0",
   "base": "12.1",
   "planA": "12.1",
-  "planB": "12.0",
+  "planB": "12.1",
   "maxMinusRate": 21.58,
   "avgScoreRate": 85.45,
   "notes": 1325,
@@ -6614,8 +6614,8 @@
  {
   "title": "ABSOLUTE[L]",
   "current": "12.0",
-  "base": "12.1",
-  "planA": "12.1",
+  "base": "12.0",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 21.59,
   "avgScoreRate": 86.4,
@@ -6626,8 +6626,8 @@
  {
   "title": "Discloze",
   "current": "12.1",
-  "base": "12.1",
-  "planA": "12.1",
+  "base": "12.0",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 21.65,
   "avgScoreRate": 86.15,
@@ -6638,8 +6638,8 @@
  {
   "title": "#CMFLG",
   "current": "12.2",
-  "base": "12.1",
-  "planA": "12.1",
+  "base": "12.0",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 21.68,
   "avgScoreRate": 85.34,
@@ -6650,26 +6650,26 @@
  {
   "title": "ZEPHYRANTHES[L]",
   "current": "12.2",
-  "base": "12.1",
-  "planA": "12.2",
-  "planB": "12.1",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 21.76,
   "avgScoreRate": 84.29,
   "notes": 1982,
   "plays": 524,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "千年ノ理[L]",
   "current": "12.1",
   "base": "12.0",
-  "planA": "12.2",
-  "planB": "12.1",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 21.76,
   "avgScoreRate": 85.46,
   "notes": 2183,
   "plays": 717,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Painful Fate",
@@ -6723,25 +6723,25 @@
   "title": "EXUSIA",
   "current": "12.0",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 21.94,
   "avgScoreRate": 85.2,
   "notes": 1964,
   "plays": 720,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "SOLID STATE SQUAD[L]",
   "current": "12.1",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 21.96,
   "avgScoreRate": 86.18,
   "notes": 1868,
   "plays": 551,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Caldwell 99",
@@ -6807,13 +6807,13 @@
   "title": "Bow shock!![L]",
   "current": "12.1",
   "base": "12.0",
-  "planA": "12.2",
-  "planB": "12.1",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 22.08,
   "avgScoreRate": 85.09,
   "notes": 2176,
   "plays": 711,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "kors k's How to make OTOGE CORE",
@@ -6831,13 +6831,13 @@
   "title": "∀",
   "current": "12.2",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.11,
   "avgScoreRate": 86.31,
   "notes": 1802,
   "plays": 701,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Gravigazer",
@@ -6855,13 +6855,13 @@
   "title": "We're so Happy (P*Light Remix) IIDX ver.",
   "current": "12.1",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.17,
   "avgScoreRate": 85.9,
   "notes": 1896,
   "plays": 591,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Arabian Rave Night",
@@ -6939,13 +6939,13 @@
   "title": "refrain",
   "current": "12.2",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.42,
   "avgScoreRate": 86.13,
   "notes": 1857,
   "plays": 620,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "stoic",
@@ -6963,13 +6963,13 @@
   "title": "No Border",
   "current": "12.3",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.48,
   "avgScoreRate": 86.72,
   "notes": 1895,
   "plays": 636,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Rosa azuL",
@@ -7056,25 +7056,13 @@
   "notesSteps": 0
  },
  {
-  "title": "朝焼けから始まるボクらの小さな旅",
-  "current": "12.1",
-  "base": "12.0",
-  "planA": "12.0",
-  "planB": "12.0",
-  "maxMinusRate": 22.64,
-  "avgScoreRate": 86.62,
-  "notes": 1298,
-  "plays": 318,
-  "notesSteps": 0
- },
- {
   "title": "摩天楼",
   "current": "12.2",
   "base": "12.0",
   "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.64,
-  "avgScoreRate": 86.85,
+  "avgScoreRate": 86.86,
   "notes": 1309,
   "plays": 605,
   "notesSteps": 0
@@ -7167,13 +7155,13 @@
   "title": "〆",
   "current": "12.0",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.83,
   "avgScoreRate": 85.92,
   "notes": 1877,
   "plays": 679,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "覚悟せよ！エンタンメ～ン ～より身の切り売り自暴自棄版～",
@@ -7215,13 +7203,13 @@
   "title": "Despair of ELFERIA",
   "current": "11.9",
   "base": "12.0",
-  "planA": "12.2",
-  "planB": "12.1",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 22.85,
   "avgScoreRate": 87.5,
   "notes": 2096,
   "plays": 757,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Violet Rose",
@@ -7248,16 +7236,28 @@
   "notesSteps": 0
  },
  {
+  "title": "朝焼けから始まるボクらの小さな旅",
+  "current": "12.1",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
+  "maxMinusRate": 22.88,
+  "avgScoreRate": 86.66,
+  "notes": 1298,
+  "plays": 319,
+  "notesSteps": 0
+ },
+ {
   "title": "津軽雪",
   "current": "11.9",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.91,
   "avgScoreRate": 85.05,
   "notes": 1953,
   "plays": 729,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "天邪鬼",
@@ -7275,13 +7275,13 @@
   "title": "V2",
   "current": "11.8",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 22.99,
   "avgScoreRate": 84.47,
   "notes": 1810,
   "plays": 709,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Giudecca",
@@ -7311,25 +7311,25 @@
   "title": "Tiempo Loco",
   "current": "12.0",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 23.06,
   "avgScoreRate": 86.4,
   "notes": 1884,
   "plays": 720,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Dolphin Kick",
   "current": "12.1",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 23.08,
   "avgScoreRate": 87,
   "notes": 1846,
   "plays": 429,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "New Decade IIDX Edition",
@@ -7347,13 +7347,13 @@
   "title": "抱きしめてモナムール",
   "current": "12.0",
   "base": "12.0",
-  "planA": "12.2",
-  "planB": "12.1",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 23.3,
   "avgScoreRate": 85.3,
   "notes": 2110,
   "plays": 618,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "ファイナルレター",
@@ -7407,25 +7407,25 @@
   "title": "Vermilion Carol",
   "current": "12.0",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 23.54,
   "avgScoreRate": 85.7,
   "notes": 1837,
   "plays": 599,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "ビビッド ☆+*。キラキライム",
   "current": "12.0",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 23.62,
   "avgScoreRate": 86.57,
   "notes": 1896,
   "plays": 885,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "QUANTUM TELEPORTATION",
@@ -7456,7 +7456,7 @@
   "current": "12.0",
   "base": "12.0",
   "planA": "12.0",
-  "planB": "11.9",
+  "planB": "12.0",
   "maxMinusRate": 23.73,
   "avgScoreRate": 86.65,
   "notes": 1707,
@@ -7467,20 +7467,20 @@
   "title": "Catch Our Fire!",
   "current": "11.9",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 23.8,
   "avgScoreRate": 85.25,
   "notes": 1885,
   "plays": 521,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "yellow head joe[L]",
   "current": "12.0",
   "base": "12.0",
   "planA": "12.0",
-  "planB": "11.9",
+  "planB": "12.0",
   "maxMinusRate": 23.81,
   "avgScoreRate": 85.81,
   "notes": 1596,
@@ -7491,20 +7491,20 @@
   "title": "Liberation",
   "current": "11.9",
   "base": "12.0",
-  "planA": "12.1",
+  "planA": "12.0",
   "planB": "12.0",
   "maxMinusRate": 23.82,
   "avgScoreRate": 84.72,
   "notes": 1905,
   "plays": 592,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "L.F.O",
   "current": "12.0",
   "base": "12.0",
   "planA": "12.0",
-  "planB": "11.9",
+  "planB": "12.0",
   "maxMinusRate": 23.92,
   "avgScoreRate": 86.24,
   "notes": 1687,
@@ -7514,9 +7514,9 @@
  {
   "title": "Ｘ↑Ｘ↓",
   "current": "11.8",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 23.93,
   "avgScoreRate": 86.13,
   "notes": 1485,
@@ -7526,9 +7526,9 @@
  {
   "title": "Kailua",
   "current": "11.7",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 23.96,
   "avgScoreRate": 87.37,
   "notes": 1125,
@@ -7538,9 +7538,9 @@
  {
   "title": "& Intelligence",
   "current": "11.9",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 23.97,
   "avgScoreRate": 85.62,
   "notes": 1623,
@@ -7550,9 +7550,9 @@
  {
   "title": "君のハートにロックオン",
   "current": "11.8",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 24.01,
   "avgScoreRate": 84.55,
   "notes": 1363,
@@ -7562,9 +7562,9 @@
  {
   "title": "moon_child",
   "current": "11.8",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 24.04,
   "avgScoreRate": 87.57,
   "notes": 1300,
@@ -7574,9 +7574,9 @@
  {
   "title": "禍根",
   "current": "12.2",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 24.05,
   "avgScoreRate": 86.77,
   "notes": 1336,
@@ -7586,9 +7586,9 @@
  {
   "title": "Ember Lights[L]",
   "current": "12.3",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 24.06,
   "avgScoreRate": 86.74,
   "notes": 1582,
@@ -7598,9 +7598,9 @@
  {
   "title": "ΕΛΠΙΣ",
   "current": "12.0",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 24.1,
   "avgScoreRate": 85.29,
   "notes": 1600,
@@ -7610,33 +7610,33 @@
  {
   "title": "SOLID STATE SQUAD",
   "current": "11.9",
-  "base": "11.9",
+  "base": "12.0",
   "planA": "12.0",
-  "planB": "11.9",
+  "planB": "12.0",
   "maxMinusRate": 24.16,
   "avgScoreRate": 86.01,
   "notes": 1819,
   "plays": 654,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "F",
   "current": "11.8",
-  "base": "11.9",
+  "base": "12.0",
   "planA": "12.0",
-  "planB": "11.9",
+  "planB": "12.0",
   "maxMinusRate": 24.19,
   "avgScoreRate": 84.69,
   "notes": 1813,
   "plays": 740,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "THE DAY OF JUBILATIONS",
   "current": "12.0",
-  "base": "11.9",
-  "planA": "11.9",
-  "planB": "11.9",
+  "base": "12.0",
+  "planA": "12.0",
+  "planB": "12.0",
   "maxMinusRate": 24.21,
   "avgScoreRate": 85.42,
   "notes": 1757,
@@ -7647,25 +7647,25 @@
   "title": "B4U(BEMANI FOR YOU MIX)",
   "current": "11.8",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 24.25,
   "avgScoreRate": 84.69,
   "notes": 1810,
   "plays": 466,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "neu",
   "current": "12.1",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 24.29,
   "avgScoreRate": 87.2,
   "notes": 1999,
   "plays": 601,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Usual Days-remix",
@@ -7791,13 +7791,13 @@
   "title": "QUANTUM TELEPORTATION[L]",
   "current": "11.9",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 24.82,
   "avgScoreRate": 85.92,
   "notes": 1845,
   "plays": 552,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "diagram",
@@ -7839,13 +7839,13 @@
   "title": "CHRONO DIVER -NORNIR-[L]",
   "current": "12.1",
   "base": "11.9",
-  "planA": "12.2",
-  "planB": "12.1",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 25.14,
   "avgScoreRate": 86.13,
   "notes": 2233,
   "plays": 704,
-  "notesSteps": 3
+  "notesSteps": 0
  },
  {
   "title": "#MAGiCVLGiRL_TRVP_B3VTZ",
@@ -7854,7 +7854,7 @@
   "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.15,
-  "avgScoreRate": 88.51,
+  "avgScoreRate": 88.52,
   "notes": 1753,
   "plays": 656,
   "notesSteps": 0
@@ -7887,13 +7887,13 @@
   "title": "AKASHIC BREAK",
   "current": "12.2",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.25,
   "avgScoreRate": 86.77,
   "notes": 1823,
   "plays": 602,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "V",
@@ -7935,13 +7935,13 @@
   "title": "それは花火のような恋",
   "current": "11.9",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.34,
   "avgScoreRate": 86.7,
   "notes": 1976,
   "plays": 667,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Mukade",
@@ -7971,13 +7971,13 @@
   "title": "DUAL STRIKER",
   "current": "11.9",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.45,
   "avgScoreRate": 86.14,
   "notes": 1960,
   "plays": 727,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "GHOST",
@@ -8031,25 +8031,25 @@
   "title": "KILL EACH OTHER",
   "current": "11.9",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.54,
   "avgScoreRate": 86.14,
   "notes": 1945,
   "plays": 689,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "INAZUMA[L]",
   "current": "12.2",
   "base": "11.9",
-  "planA": "12.1",
-  "planB": "12.0",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 25.55,
   "avgScoreRate": 84.68,
   "notes": 2042,
   "plays": 685,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Bring The Fire",
@@ -8163,13 +8163,13 @@
   "title": "Super Duper Racers[L]",
   "current": "12.1",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.71,
   "avgScoreRate": 87.4,
   "notes": 1857,
   "plays": 739,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Playing With Fire",
@@ -8199,13 +8199,13 @@
   "title": "旋律のドグマ～Miserables～",
   "current": "11.8",
   "base": "11.9",
-  "planA": "12.1",
-  "planB": "12.0",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 25.79,
   "avgScoreRate": 85.74,
   "notes": 2002,
   "plays": 605,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Sword of Vengeance",
@@ -8283,13 +8283,13 @@
   "title": "ALBA -黎明-[L]",
   "current": "12.3",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.92,
   "avgScoreRate": 85.75,
   "notes": 1990,
   "plays": 652,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "THE DEEP STRIKER",
@@ -8319,25 +8319,25 @@
   "title": "DARK LEGACY",
   "current": "11.9",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 25.99,
   "avgScoreRate": 87.29,
   "notes": 1828,
   "plays": 681,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "X",
   "current": "11.8",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 26.06,
   "avgScoreRate": 83.99,
   "notes": 1952,
   "plays": 683,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "INORI",
@@ -8427,13 +8427,13 @@
   "title": "Idola",
   "current": "11.8",
   "base": "11.9",
-  "planA": "12.0",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 26.46,
   "avgScoreRate": 87.04,
   "notes": 1826,
   "plays": 756,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Rave*it!! Rave*it!!",
@@ -8464,7 +8464,7 @@
   "current": "11.5",
   "base": "11.9",
   "planA": "11.9",
-  "planB": "11.8",
+  "planB": "11.9",
   "maxMinusRate": 26.52,
   "avgScoreRate": 85.93,
   "notes": 1280,
@@ -8474,9 +8474,9 @@
  {
   "title": "The Onlyonez",
   "current": "11.9",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.54,
   "avgScoreRate": 87.62,
   "notes": 1587,
@@ -8486,9 +8486,9 @@
  {
   "title": "爆ぜりゃんせ",
   "current": "12.0",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.55,
   "avgScoreRate": 87.73,
   "notes": 1521,
@@ -8498,9 +8498,9 @@
  {
   "title": "ALL MY TURN -このターンに、オレの全てを賭ける-",
   "current": "11.7",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.65,
   "avgScoreRate": 85.39,
   "notes": 1314,
@@ -8510,21 +8510,21 @@
  {
   "title": "神謳 -RESONANCE-",
   "current": "12.0",
-  "base": "11.8",
-  "planA": "12.0",
+  "base": "11.9",
+  "planA": "11.9",
   "planB": "11.9",
   "maxMinusRate": 26.67,
   "avgScoreRate": 86.63,
   "notes": 2047,
   "plays": 660,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "ZETA～素数の世界と超越者～",
   "current": "11.6",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.68,
   "avgScoreRate": 86.99,
   "notes": 1583,
@@ -8534,9 +8534,9 @@
  {
   "title": "GLORIOUS HAMMER",
   "current": "11.9",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.76,
   "avgScoreRate": 85.34,
   "notes": 1587,
@@ -8546,9 +8546,9 @@
  {
   "title": "rommmo",
   "current": "12.1",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.76,
   "avgScoreRate": 87.03,
   "notes": 1762,
@@ -8558,9 +8558,9 @@
  {
   "title": "DIVINE JUDGEMENT",
   "current": "11.8",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.79,
   "avgScoreRate": 86.71,
   "notes": 1416,
@@ -8570,9 +8570,9 @@
  {
   "title": "GAIA",
   "current": "11.8",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.88,
   "avgScoreRate": 86.27,
   "notes": 1676,
@@ -8582,9 +8582,9 @@
  {
   "title": "Echoes of Sunfall",
   "current": "11.9",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.93,
   "avgScoreRate": 85.68,
   "notes": 1518,
@@ -8594,9 +8594,9 @@
  {
   "title": "鬼天",
   "current": "11.8",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.93,
   "avgScoreRate": 86.31,
   "notes": 1265,
@@ -8606,9 +8606,9 @@
  {
   "title": "STELLAR WIND",
   "current": "12.2",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.95,
   "avgScoreRate": 85.73,
   "notes": 1370,
@@ -8618,9 +8618,9 @@
  {
   "title": "SpaceLand☆TOYBOX",
   "current": "11.9",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.95,
   "avgScoreRate": 87.35,
   "notes": 1501,
@@ -8630,9 +8630,9 @@
  {
   "title": "Into The Madness",
   "current": "11.7",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.95,
   "avgScoreRate": 87.82,
   "notes": 1286,
@@ -8642,9 +8642,9 @@
  {
   "title": "《ORDERBREAKER》",
   "current": "12.0",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.96,
   "avgScoreRate": 86.84,
   "notes": 1257,
@@ -8654,9 +8654,9 @@
  {
   "title": "追想快晴テーマパーク",
   "current": "12.1",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.98,
   "avgScoreRate": 87.23,
   "notes": 1589,
@@ -8666,9 +8666,9 @@
  {
   "title": "Kung-fu Empire",
   "current": "11.7",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 26.99,
   "avgScoreRate": 85.42,
   "notes": 1657,
@@ -8678,9 +8678,9 @@
  {
   "title": "創世ノート",
   "current": "11.7",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 27.01,
   "avgScoreRate": 85.75,
   "notes": 1512,
@@ -8690,9 +8690,9 @@
  {
   "title": "FINALLY BLAZE",
   "current": "11.6",
-  "base": "11.8",
-  "planA": "11.8",
-  "planB": "11.8",
+  "base": "11.9",
+  "planA": "11.9",
+  "planB": "11.9",
   "maxMinusRate": 27.05,
   "avgScoreRate": 87.42,
   "notes": 1424,
@@ -8715,13 +8715,13 @@
   "title": "Aftermath",
   "current": "11.9",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 27.24,
   "avgScoreRate": 87.75,
   "notes": 1828,
   "plays": 547,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "HYENA",
@@ -8943,13 +8943,13 @@
   "title": "Kung-fu Empire[L]",
   "current": "12.0",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 27.72,
   "avgScoreRate": 87.45,
   "notes": 1999,
   "plays": 570,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "invoker",
@@ -9039,13 +9039,13 @@
   "title": "BITTER CHOCOLATE STRIKER",
   "current": "11.9",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 27.88,
   "avgScoreRate": 85.66,
   "notes": 1990,
   "plays": 789,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "On the FM",
@@ -9078,7 +9078,7 @@
   "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 27.99,
-  "avgScoreRate": 87.48,
+  "avgScoreRate": 87.49,
   "notes": 1373,
   "plays": 518,
   "notesSteps": 0
@@ -9123,13 +9123,13 @@
   "title": "HARD BRAIN",
   "current": "11.9",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 28.1,
   "avgScoreRate": 87.64,
   "notes": 1914,
   "plays": 669,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "GOLDEN CROSS",
@@ -9162,7 +9162,7 @@
   "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 28.13,
-  "avgScoreRate": 87.53,
+  "avgScoreRate": 87.54,
   "notes": 1667,
   "plays": 640,
   "notesSteps": 0
@@ -9171,13 +9171,13 @@
   "title": "Stereo Beasts",
   "current": "11.9",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 28.14,
   "avgScoreRate": 87.39,
   "notes": 1881,
   "plays": 622,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Sirius",
@@ -9303,13 +9303,13 @@
   "title": "frequent",
   "current": "11.8",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 28.64,
   "avgScoreRate": 87.73,
   "notes": 1900,
   "plays": 646,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Back Spin Sweeper",
@@ -9339,13 +9339,13 @@
   "title": "Shooting Fireball",
   "current": "11.8",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 28.73,
   "avgScoreRate": 86.78,
   "notes": 1983,
   "plays": 703,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "garden[L]",
@@ -9363,13 +9363,13 @@
   "title": "Little Little Princess[L]",
   "current": "12.0",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 28.75,
   "avgScoreRate": 89.84,
   "notes": 1946,
   "plays": 560,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "パラドキシカル・タイムリープトライアル(Short Ver.)",
@@ -9411,13 +9411,13 @@
   "title": "LIVE DRIVING!! feat. 花たん",
   "current": "11.7",
   "base": "11.8",
-  "planA": "11.9",
+  "planA": "11.8",
   "planB": "11.8",
   "maxMinusRate": 28.84,
   "avgScoreRate": 87.82,
   "notes": 1947,
   "plays": 645,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Symmetry",
@@ -9484,7 +9484,7 @@
   "current": "11.7",
   "base": "11.8",
   "planA": "11.8",
-  "planB": "11.7",
+  "planB": "11.8",
   "maxMinusRate": 28.92,
   "avgScoreRate": 87.44,
   "notes": 1260,
@@ -9496,7 +9496,7 @@
   "current": "11.7",
   "base": "11.8",
   "planA": "11.8",
-  "planB": "11.7",
+  "planB": "11.8",
   "maxMinusRate": 28.92,
   "avgScoreRate": 86.39,
   "notes": 1613,
@@ -9506,9 +9506,9 @@
  {
   "title": "RED ZONE",
   "current": "11.3",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 28.93,
   "avgScoreRate": 86.8,
   "notes": 1184,
@@ -9518,9 +9518,9 @@
  {
   "title": "NNRT",
   "current": "11.8",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 28.93,
   "avgScoreRate": 87.84,
   "notes": 1780,
@@ -9530,9 +9530,9 @@
  {
   "title": "Cyber True Color",
   "current": "12.0",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 28.94,
   "avgScoreRate": 88.36,
   "notes": 1207,
@@ -9540,23 +9540,11 @@
   "notesSteps": 0
  },
  {
-  "title": "SYNC-ANTHEM",
-  "current": "11.9",
-  "base": "11.7",
-  "planA": "11.8",
-  "planB": "11.7",
-  "maxMinusRate": 28.95,
-  "avgScoreRate": 87.9,
-  "notes": 1865,
-  "plays": 608,
-  "notesSteps": 1
- },
- {
   "title": "ZED",
   "current": "11.6",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 28.97,
   "avgScoreRate": 88.7,
   "notes": 1405,
@@ -9566,9 +9554,9 @@
  {
   "title": "THE CANNONBALLER",
   "current": "11.7",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.04,
   "avgScoreRate": 87,
   "notes": 1748,
@@ -9576,11 +9564,23 @@
   "notesSteps": 0
  },
  {
+  "title": "SYNC-ANTHEM",
+  "current": "11.9",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
+  "maxMinusRate": 29.06,
+  "avgScoreRate": 87.92,
+  "notes": 1865,
+  "plays": 609,
+  "notesSteps": 0
+ },
+ {
   "title": "This Is Club Musik feat. 大久保紅葉",
   "current": "11.9",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.07,
   "avgScoreRate": 86.74,
   "notes": 1343,
@@ -9590,9 +9590,9 @@
  {
   "title": "Digitized Ocean",
   "current": "11.7",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.09,
   "avgScoreRate": 88.58,
   "notes": 1784,
@@ -9602,9 +9602,9 @@
  {
   "title": "天空脳番長危機十六連打",
   "current": "11.6",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.11,
   "avgScoreRate": 87.09,
   "notes": 1323,
@@ -9614,9 +9614,9 @@
  {
   "title": "Night sky",
   "current": "11.8",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.12,
   "avgScoreRate": 87.16,
   "notes": 1491,
@@ -9626,9 +9626,9 @@
  {
   "title": "IDOL syndrome.[L]",
   "current": "11.8",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.13,
   "avgScoreRate": 88.06,
   "notes": 1533,
@@ -9638,9 +9638,9 @@
  {
   "title": "KHAMEN BREAK",
   "current": "12.1",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.18,
   "avgScoreRate": 86.03,
   "notes": 1281,
@@ -9650,9 +9650,9 @@
  {
   "title": "VEGA",
   "current": "11.7",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.21,
   "avgScoreRate": 86.65,
   "notes": 1584,
@@ -9662,21 +9662,21 @@
  {
   "title": "spiral galaxy[L]",
   "current": "11.7",
-  "base": "11.7",
+  "base": "11.8",
   "planA": "11.8",
-  "planB": "11.7",
+  "planB": "11.8",
   "maxMinusRate": 29.24,
   "avgScoreRate": 87.01,
   "notes": 1910,
   "plays": 602,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Xepher",
   "current": "11.6",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.27,
   "avgScoreRate": 86.67,
   "notes": 1520,
@@ -9686,9 +9686,9 @@
  {
   "title": "爆ゼニ☆がってんワーカー",
   "current": "11.9",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.28,
   "avgScoreRate": 85.7,
   "notes": 1391,
@@ -9698,9 +9698,9 @@
  {
   "title": "ABSOLUTE (kors k Remix)",
   "current": "11.8",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.3,
   "avgScoreRate": 87.1,
   "notes": 1336,
@@ -9710,9 +9710,9 @@
  {
   "title": "You'll say \"Now!\"",
   "current": "11.7",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.31,
   "avgScoreRate": 86.09,
   "notes": 1276,
@@ -9722,9 +9722,9 @@
  {
   "title": "Urban Constellations",
   "current": "11.7",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
+  "base": "11.8",
+  "planA": "11.8",
+  "planB": "11.8",
   "maxMinusRate": 29.32,
   "avgScoreRate": 87.57,
   "notes": 1167,
@@ -9735,13 +9735,13 @@
   "title": "AA -rebuild-",
   "current": "11.8",
   "base": "11.7",
-  "planA": "11.8",
+  "planA": "11.7",
   "planB": "11.7",
   "maxMinusRate": 29.36,
   "avgScoreRate": 85.14,
   "notes": 1820,
   "plays": 688,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Venom",
@@ -9795,13 +9795,13 @@
   "title": "PUNISHER",
   "current": "11.9",
   "base": "11.7",
-  "planA": "11.8",
+  "planA": "11.7",
   "planB": "11.7",
   "maxMinusRate": 29.58,
   "avgScoreRate": 86.33,
   "notes": 1812,
   "plays": 568,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Perfect Plan",
@@ -9831,13 +9831,13 @@
   "title": "Roar of Chronos",
   "current": "11.7",
   "base": "11.7",
-  "planA": "11.8",
+  "planA": "11.7",
   "planB": "11.7",
   "maxMinusRate": 29.81,
   "avgScoreRate": 86.73,
   "notes": 1991,
   "plays": 718,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "眠りの国のステラ",
@@ -9867,13 +9867,13 @@
   "title": "龍王の霊廟(Mausoleum Of The Primal Dragon)[L]",
   "current": "11.7",
   "base": "11.7",
-  "planA": "11.9",
-  "planB": "11.8",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 29.95,
   "avgScoreRate": 87.4,
   "notes": 2023,
   "plays": 591,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Aublia",
@@ -9927,13 +9927,13 @@
   "title": "CoMAAAAAAA[L]",
   "current": "12.1",
   "base": "11.7",
-  "planA": "11.8",
+  "planA": "11.7",
   "planB": "11.7",
   "maxMinusRate": 30.1,
   "avgScoreRate": 89.44,
   "notes": 1957,
   "plays": 628,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Uh-Oh",
@@ -9951,13 +9951,13 @@
   "title": "表裏一体！？怪盗いいんちょの悩み",
   "current": "11.7",
   "base": "11.7",
-  "planA": "11.8",
+  "planA": "11.7",
   "planB": "11.7",
   "maxMinusRate": 30.14,
   "avgScoreRate": 86.69,
   "notes": 1815,
   "plays": 647,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "TYPE MARS(G-Style Mix)",
@@ -10152,18 +10152,6 @@
   "notesSteps": 0
  },
  {
-  "title": "Megalara Garuda",
-  "current": "11.8",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
-  "maxMinusRate": 30.65,
-  "avgScoreRate": 86.64,
-  "notes": 1543,
-  "plays": 682,
-  "notesSteps": 0
- },
- {
   "title": "Blue Rain",
   "current": "11.4",
   "base": "11.7",
@@ -10224,16 +10212,28 @@
   "notesSteps": 0
  },
  {
+  "title": "Megalara Garuda",
+  "current": "11.8",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
+  "maxMinusRate": 30.75,
+  "avgScoreRate": 86.66,
+  "notes": 1543,
+  "plays": 683,
+  "notesSteps": 0
+ },
+ {
   "title": "FUZIN RIZIN",
   "current": "11.8",
   "base": "11.7",
-  "planA": "11.8",
+  "planA": "11.7",
   "planB": "11.7",
   "maxMinusRate": 30.83,
   "avgScoreRate": 87.83,
   "notes": 1929,
   "plays": 626,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Aqvion",
@@ -10455,13 +10455,13 @@
   "title": "GENE",
   "current": "11.7",
   "base": "11.7",
-  "planA": "11.9",
-  "planB": "11.8",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.33,
   "avgScoreRate": 86.67,
   "notes": 2183,
   "plays": 798,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "10000 MILES AWAY",
@@ -10500,18 +10500,6 @@
   "notesSteps": 0
  },
  {
-  "title": "Wolf 1061",
-  "current": "11.7",
-  "base": "11.7",
-  "planA": "11.7",
-  "planB": "11.7",
-  "maxMinusRate": 31.43,
-  "avgScoreRate": 86.45,
-  "notes": 1584,
-  "plays": 509,
-  "notesSteps": 0
- },
- {
   "title": "Saturn",
   "current": "11.7",
   "base": "11.7",
@@ -10540,7 +10528,7 @@
   "current": "11.8",
   "base": "11.7",
   "planA": "11.7",
-  "planB": "11.6",
+  "planB": "11.7",
   "maxMinusRate": 31.54,
   "avgScoreRate": 88.64,
   "notes": 1500,
@@ -10550,9 +10538,9 @@
  {
   "title": "THE FALLEN",
   "current": "11.8",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.56,
   "avgScoreRate": 87.25,
   "notes": 1377,
@@ -10560,23 +10548,35 @@
   "notesSteps": 0
  },
  {
+  "title": "Wolf 1061",
+  "current": "11.7",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
+  "maxMinusRate": 31.57,
+  "avgScoreRate": 86.47,
+  "notes": 1584,
+  "plays": 510,
+  "notesSteps": 0
+ },
+ {
   "title": "Apocalypse",
   "current": "11.7",
-  "base": "11.6",
+  "base": "11.7",
   "planA": "11.7",
-  "planB": "11.6",
+  "planB": "11.7",
   "maxMinusRate": 31.59,
   "avgScoreRate": 88.59,
   "notes": 1814,
   "plays": 706,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Meteor☆Shower",
   "current": "11.6",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.64,
   "avgScoreRate": 89.21,
   "notes": 1493,
@@ -10586,9 +10586,9 @@
  {
   "title": "Sakura Mirage",
   "current": "11.6",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.71,
   "avgScoreRate": 87.61,
   "notes": 1190,
@@ -10598,9 +10598,9 @@
  {
   "title": "新宝島[L]",
   "current": "12.2",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.71,
   "avgScoreRate": 87.27,
   "notes": 1790,
@@ -10610,9 +10610,9 @@
  {
   "title": "Broken",
   "current": "11.5",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.77,
   "avgScoreRate": 86.02,
   "notes": 1598,
@@ -10622,9 +10622,9 @@
  {
   "title": "GALGALIM",
   "current": "11.7",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.84,
   "avgScoreRate": 86.67,
   "notes": 1208,
@@ -10634,9 +10634,9 @@
  {
   "title": "シュレーディンガーの猫",
   "current": "11.7",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 31.86,
   "avgScoreRate": 87.7,
   "notes": 1717,
@@ -10646,21 +10646,21 @@
  {
   "title": "Thunderbolt",
   "current": "11.7",
-  "base": "11.6",
+  "base": "11.7",
   "planA": "11.7",
-  "planB": "11.6",
+  "planB": "11.7",
   "maxMinusRate": 31.94,
   "avgScoreRate": 86.89,
   "notes": 1911,
   "plays": 645,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "CONCEPTUAL",
   "current": "12.0",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 32.01,
   "avgScoreRate": 87.25,
   "notes": 1391,
@@ -10670,9 +10670,9 @@
  {
   "title": "CaptivAte～浄化～[L]",
   "current": "11.9",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 32.01,
   "avgScoreRate": 88.37,
   "notes": 1738,
@@ -10682,21 +10682,21 @@
  {
   "title": "Ypsilon[L]",
   "current": "11.9",
-  "base": "11.6",
+  "base": "11.7",
   "planA": "11.7",
-  "planB": "11.6",
+  "planB": "11.7",
   "maxMinusRate": 32.08,
   "avgScoreRate": 87.65,
   "notes": 1801,
   "plays": 583,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "KAMAITACHI",
   "current": "11.4",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 32.11,
   "avgScoreRate": 87.34,
   "notes": 1368,
@@ -10706,9 +10706,9 @@
  {
   "title": "TROOPERS",
   "current": "11.7",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 32.13,
   "avgScoreRate": 87.79,
   "notes": 1496,
@@ -10718,9 +10718,9 @@
  {
   "title": "Rising in the Sun(original mix)",
   "current": "11.5",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 32.17,
   "avgScoreRate": 89.03,
   "notes": 1202,
@@ -10730,9 +10730,9 @@
  {
   "title": "INAZUMA",
   "current": "11.3",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 32.18,
   "avgScoreRate": 87.24,
   "notes": 1368,
@@ -10742,9 +10742,9 @@
  {
   "title": "Night! Night! Night!",
   "current": "11.5",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
+  "base": "11.7",
+  "planA": "11.7",
+  "planB": "11.7",
   "maxMinusRate": 32.25,
   "avgScoreRate": 87.34,
   "notes": 1540,
@@ -10815,13 +10815,13 @@
   "title": "Rise'n Beauty[L]",
   "current": "12.0",
   "base": "11.6",
-  "planA": "11.8",
-  "planB": "11.7",
+  "planA": "11.6",
+  "planB": "11.6",
   "maxMinusRate": 32.51,
   "avgScoreRate": 89.75,
   "notes": 2023,
   "plays": 406,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "THE BLACK KNIGHT",
@@ -10947,13 +10947,13 @@
   "title": "Space Battleship S4TO",
   "current": "12.0",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 32.79,
   "avgScoreRate": 88.76,
   "notes": 1900,
   "plays": 857,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "R∞tAge",
@@ -10971,13 +10971,13 @@
   "title": "AA",
   "current": "11.7",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 32.83,
   "avgScoreRate": 86.77,
   "notes": 1834,
   "plays": 923,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "BLOCKS",
@@ -11124,18 +11124,6 @@
   "notesSteps": 0
  },
  {
-  "title": "Viridian",
-  "current": "11.6",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
-  "maxMinusRate": 33.33,
-  "avgScoreRate": 87.32,
-  "notes": 1700,
-  "plays": 612,
-  "notesSteps": 0
- },
- {
   "title": "Meissa",
   "current": "11.5",
   "base": "11.6",
@@ -11172,6 +11160,18 @@
   "notesSteps": 0
  },
  {
+  "title": "Viridian",
+  "current": "11.6",
+  "base": "11.6",
+  "planA": "11.6",
+  "planB": "11.6",
+  "maxMinusRate": 33.44,
+  "avgScoreRate": 87.34,
+  "notes": 1700,
+  "plays": 613,
+  "notesSteps": 0
+ },
+ {
   "title": "ZZ",
   "current": "11.5",
   "base": "11.6",
@@ -11187,13 +11187,13 @@
   "title": "Visterhv",
   "current": "11.6",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 33.47,
   "avgScoreRate": 87.97,
   "notes": 1869,
   "plays": 732,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Sounds Of Summer",
@@ -11244,28 +11244,16 @@
   "notesSteps": 0
  },
  {
-  "title": "oratio",
-  "current": "11.8",
-  "base": "11.6",
-  "planA": "11.6",
-  "planB": "11.6",
-  "maxMinusRate": 33.56,
-  "avgScoreRate": 87.91,
-  "notes": 1493,
-  "plays": 596,
-  "notesSteps": 0
- },
- {
   "title": "KING[L]",
   "current": "11.6",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 33.57,
   "avgScoreRate": 88.56,
   "notes": 1983,
   "plays": 715,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "snow storm[L]",
@@ -11313,6 +11301,18 @@
   "avgScoreRate": 87.51,
   "notes": 1480,
   "plays": 339,
+  "notesSteps": 0
+ },
+ {
+  "title": "oratio",
+  "current": "11.8",
+  "base": "11.6",
+  "planA": "11.6",
+  "planB": "11.6",
+  "maxMinusRate": 33.67,
+  "avgScoreRate": 87.93,
+  "notes": 1493,
+  "plays": 597,
   "notesSteps": 0
  },
  {
@@ -11415,13 +11415,13 @@
   "title": "Broken Sword",
   "current": "11.8",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 33.77,
   "avgScoreRate": 87.67,
   "notes": 1887,
   "plays": 761,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "忍恋花",
@@ -11475,13 +11475,13 @@
   "title": "スパークリング☆彡ハイパーチューン！！",
   "current": "11.3",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 33.89,
   "avgScoreRate": 88.06,
   "notes": 1843,
   "plays": 720,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "SABER WING",
@@ -11523,13 +11523,13 @@
   "title": "JUSTICE/GUILTY feat. Nana Takahashi & 709sec.",
   "current": "11.6",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 33.98,
   "avgScoreRate": 88.58,
   "notes": 1959,
   "plays": 665,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Unicorn tail",
@@ -11607,13 +11607,13 @@
   "title": "WONDER WALKER",
   "current": "11.8",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 34.22,
   "avgScoreRate": 87.21,
   "notes": 1921,
   "plays": 678,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Bang Bang Dance",
@@ -11703,20 +11703,20 @@
   "title": "True Blue",
   "current": "11.6",
   "base": "11.6",
-  "planA": "11.7",
+  "planA": "11.6",
   "planB": "11.6",
   "maxMinusRate": 34.6,
   "avgScoreRate": 86.94,
   "notes": 1898,
   "plays": 711,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Ristaccia",
   "current": "11.4",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.6",
+  "planA": "11.6",
+  "planB": "11.6",
   "maxMinusRate": 34.65,
   "avgScoreRate": 88.01,
   "notes": 1386,
@@ -11726,9 +11726,9 @@
  {
   "title": "RISLIM -Remix-",
   "current": "11.9",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.6",
+  "planA": "11.6",
+  "planB": "11.6",
   "maxMinusRate": 34.69,
   "avgScoreRate": 89,
   "notes": 959,
@@ -11907,13 +11907,13 @@
   "title": "Nothing but Theory[L]",
   "current": "12.1",
   "base": "11.5",
-  "planA": "11.6",
+  "planA": "11.5",
   "planB": "11.5",
   "maxMinusRate": 35.04,
   "avgScoreRate": 88.33,
   "notes": 1890,
   "plays": 682,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Raison d'etre～交差する宿命～",
@@ -12111,13 +12111,13 @@
   "title": "ベンガル vs. アムール Battle",
   "current": "12.0",
   "base": "11.5",
-  "planA": "11.6",
+  "planA": "11.5",
   "planB": "11.5",
   "maxMinusRate": 35.85,
   "avgScoreRate": 89.06,
   "notes": 1867,
   "plays": 675,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Tail Lights",
@@ -12327,13 +12327,13 @@
   "title": "グッバイ宣言[L]",
   "current": "12.1",
   "base": "11.5",
-  "planA": "11.6",
+  "planA": "11.5",
   "planB": "11.5",
   "maxMinusRate": 36.58,
   "avgScoreRate": 89.4,
   "notes": 1849,
   "plays": 730,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "打打打打打打打打打打",
@@ -12375,13 +12375,13 @@
   "title": "thunder HOUSE NATION Remix[L]",
   "current": "11.5",
   "base": "11.5",
-  "planA": "11.6",
+  "planA": "11.5",
   "planB": "11.5",
   "maxMinusRate": 36.64,
   "avgScoreRate": 87.21,
   "notes": 1954,
   "plays": 767,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "smile",
@@ -12615,13 +12615,13 @@
   "title": "仮想空間の旅人たち[L]",
   "current": "11.5",
   "base": "11.5",
-  "planA": "11.6",
+  "planA": "11.5",
   "planB": "11.5",
   "maxMinusRate": 37.2,
   "avgScoreRate": 89.27,
   "notes": 1943,
   "plays": 656,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Fiery Stallion",
@@ -12650,9 +12650,9 @@
  {
   "title": "CODE:2",
   "current": "11.5",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.21,
   "avgScoreRate": 89.11,
   "notes": 1491,
@@ -12662,9 +12662,9 @@
  {
   "title": "かわいいだけじゃだめですか？[L]",
   "current": "11.5",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.31,
   "avgScoreRate": 89.36,
   "notes": 1777,
@@ -12674,9 +12674,9 @@
  {
   "title": "Amethyst",
   "current": "11.4",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.33,
   "avgScoreRate": 89.1,
   "notes": 1322,
@@ -12686,9 +12686,9 @@
  {
   "title": "SOUND OF GIALLARHORN",
   "current": "11.5",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.43,
   "avgScoreRate": 88.72,
   "notes": 1668,
@@ -12698,9 +12698,9 @@
  {
   "title": "Nasty Techniques",
   "current": "11.5",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.53,
   "avgScoreRate": 89.92,
   "notes": 1338,
@@ -12710,9 +12710,9 @@
  {
   "title": "Lovely Howdy Cowboy!!",
   "current": "11.5",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.59,
   "avgScoreRate": 90.01,
   "notes": 1405,
@@ -12722,9 +12722,9 @@
  {
   "title": "Rave Patroller",
   "current": "11.6",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.7,
   "avgScoreRate": 89.48,
   "notes": 1705,
@@ -12734,9 +12734,9 @@
  {
   "title": "FREEDOM",
   "current": "11.4",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.75,
   "avgScoreRate": 88.7,
   "notes": 1481,
@@ -12746,9 +12746,9 @@
  {
   "title": "Lawes's Parotia",
   "current": "11.3",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.87,
   "avgScoreRate": 88.22,
   "notes": 1294,
@@ -12758,9 +12758,9 @@
  {
   "title": "Exhaust Hype",
   "current": "11.5",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.91,
   "avgScoreRate": 88.56,
   "notes": 1426,
@@ -12770,9 +12770,9 @@
  {
   "title": "Valgus",
   "current": "11.6",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.93,
   "avgScoreRate": 89.04,
   "notes": 1206,
@@ -12782,9 +12782,9 @@
  {
   "title": "華爛漫 -Flowers-[L]",
   "current": "11.4",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.94,
   "avgScoreRate": 88.12,
   "notes": 1597,
@@ -12794,9 +12794,9 @@
  {
   "title": "Super Rush",
   "current": "11.6",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 37.95,
   "avgScoreRate": 90.13,
   "notes": 1791,
@@ -12806,9 +12806,9 @@
  {
   "title": "everlastingeuphoria:",
   "current": "11.4",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 38.01,
   "avgScoreRate": 88.4,
   "notes": 1243,
@@ -12818,9 +12818,9 @@
  {
   "title": "うさ☆かめ 大戦争！",
   "current": "11.6",
-  "base": "11.5",
-  "planA": "11.5",
-  "planB": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 38.01,
   "avgScoreRate": 88.68,
   "notes": 1276,
@@ -12830,8 +12830,8 @@
  {
   "title": "ハードベース・フェスタ",
   "current": "11.5",
-  "base": "11.5",
-  "planA": "11.5",
+  "base": "11.4",
+  "planA": "11.4",
   "planB": "11.4",
   "maxMinusRate": 38.01,
   "avgScoreRate": 89.03,
@@ -12963,13 +12963,13 @@
   "title": "Rampage",
   "current": "11.4",
   "base": "11.4",
-  "planA": "11.5",
+  "planA": "11.4",
   "planB": "11.4",
   "maxMinusRate": 38.5,
   "avgScoreRate": 90.15,
   "notes": 1831,
   "plays": 735,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "DREAM OF SPACE UFO ABDUCTION",
@@ -13467,13 +13467,13 @@
   "title": "ちょえちょえまぎか[L]",
   "current": "11.7",
   "base": "11.4",
-  "planA": "11.6",
-  "planB": "11.5",
+  "planA": "11.4",
+  "planB": "11.4",
   "maxMinusRate": 40.12,
   "avgScoreRate": 90.64,
   "notes": 2098,
   "plays": 491,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Queen Kaguya",
@@ -13490,9 +13490,9 @@
  {
   "title": "Ritual of Anubis",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.18,
   "avgScoreRate": 90.04,
   "notes": 1422,
@@ -13502,9 +13502,9 @@
  {
   "title": "MIRACLE MEETS",
   "current": "11.2",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.22,
   "avgScoreRate": 90.86,
   "notes": 1128,
@@ -13514,9 +13514,9 @@
  {
   "title": "Stylus",
   "current": "11.3",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.23,
   "avgScoreRate": 88.85,
   "notes": 1440,
@@ -13526,9 +13526,9 @@
  {
   "title": "Bahram Attack-猫叉Master Remix-[L]",
   "current": "11.3",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.23,
   "avgScoreRate": 89.95,
   "notes": 1640,
@@ -13538,9 +13538,9 @@
  {
   "title": "COSMIC CYBER",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.25,
   "avgScoreRate": 87.31,
   "notes": 1469,
@@ -13550,9 +13550,9 @@
  {
   "title": "Swarm Of Scarabs",
   "current": "11.6",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.29,
   "avgScoreRate": 89.23,
   "notes": 1212,
@@ -13562,9 +13562,9 @@
  {
   "title": "寝起きヤシの木",
   "current": "11.2",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.34,
   "avgScoreRate": 90.54,
   "notes": 1411,
@@ -13574,9 +13574,9 @@
  {
   "title": "Realize Maze",
   "current": "11.2",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.35,
   "avgScoreRate": 90.09,
   "notes": 1503,
@@ -13586,9 +13586,9 @@
  {
   "title": "麗 ～うらら～",
   "current": "11.3",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.38,
   "avgScoreRate": 89.51,
   "notes": 1329,
@@ -13598,9 +13598,9 @@
  {
   "title": "Get Higher",
   "current": "11.4",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.43,
   "avgScoreRate": 89.01,
   "notes": 1171,
@@ -13610,9 +13610,9 @@
  {
   "title": "Vulkan",
   "current": "11.3",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.44,
   "avgScoreRate": 90.73,
   "notes": 1518,
@@ -13622,9 +13622,9 @@
  {
   "title": "ウツシミウツシ",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.45,
   "avgScoreRate": 89.03,
   "notes": 1595,
@@ -13634,9 +13634,9 @@
  {
   "title": "Alpheratz[L]",
   "current": "11.4",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.45,
   "avgScoreRate": 90.79,
   "notes": 1470,
@@ -13646,9 +13646,9 @@
  {
   "title": "超青少年ノ為ノ超多幸ナ超古典的超舞曲",
   "current": "11.2",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.53,
   "avgScoreRate": 88.67,
   "notes": 1350,
@@ -13658,9 +13658,9 @@
  {
   "title": "EXTREME MACH COLLIDER",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.63,
   "avgScoreRate": 88.42,
   "notes": 1305,
@@ -13670,9 +13670,9 @@
  {
   "title": "Kick The Rainbow",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.63,
   "avgScoreRate": 91.02,
   "notes": 1495,
@@ -13682,9 +13682,9 @@
  {
   "title": "Jungle Eater",
   "current": "11.6",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.72,
   "avgScoreRate": 88.61,
   "notes": 1517,
@@ -13694,9 +13694,9 @@
  {
   "title": "glacia",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.78,
   "avgScoreRate": 89.59,
   "notes": 1492,
@@ -13706,9 +13706,9 @@
  {
   "title": "MINT",
   "current": "11.3",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.82,
   "avgScoreRate": 88.57,
   "notes": 1158,
@@ -13718,9 +13718,9 @@
  {
   "title": "Overslept",
   "current": "11.6",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.83,
   "avgScoreRate": 89.28,
   "notes": 1300,
@@ -13730,9 +13730,9 @@
  {
   "title": "UNITE THE HEART",
   "current": "11.4",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.88,
   "avgScoreRate": 89.61,
   "notes": 1676,
@@ -13742,9 +13742,9 @@
  {
   "title": "STRAIGHT TO THE STARS",
   "current": "11.3",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.91,
   "avgScoreRate": 89,
   "notes": 1506,
@@ -13754,9 +13754,9 @@
  {
   "title": "ランカーキラーガール",
   "current": "11.4",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.92,
   "avgScoreRate": 89.87,
   "notes": 1479,
@@ -13766,9 +13766,9 @@
  {
   "title": "BIGソムタム",
   "current": "11.4",
-  "base": "11.4",
-  "planA": "11.4",
-  "planB": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 40.93,
   "avgScoreRate": 90.25,
   "notes": 1688,
@@ -13778,8 +13778,8 @@
  {
   "title": "DESIRE",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
   "planB": "11.3",
   "maxMinusRate": 40.94,
   "avgScoreRate": 88.89,
@@ -13790,8 +13790,8 @@
  {
   "title": "lowercase lifetime",
   "current": "11.5",
-  "base": "11.4",
-  "planA": "11.4",
+  "base": "11.3",
+  "planA": "11.3",
   "planB": "11.3",
   "maxMinusRate": 40.94,
   "avgScoreRate": 90.14,
@@ -13911,25 +13911,25 @@
   "title": "waxing and wanding[L]",
   "current": "11.5",
   "base": "11.3",
-  "planA": "11.5",
-  "planB": "11.4",
+  "planA": "11.3",
+  "planB": "11.3",
   "maxMinusRate": 41.33,
   "avgScoreRate": 90.24,
   "notes": 2000,
   "plays": 721,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "フォニイ[L]",
   "current": "12.0",
   "base": "11.3",
-  "planA": "11.4",
+  "planA": "11.3",
   "planB": "11.3",
   "maxMinusRate": 41.36,
   "avgScoreRate": 89.18,
   "notes": 1975,
   "plays": 793,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "THE LAST STRIKER",
@@ -14222,9 +14222,9 @@
  {
   "title": "Outbreak",
   "current": "11.4",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 42.71,
   "avgScoreRate": 89.97,
   "notes": 1523,
@@ -14234,9 +14234,9 @@
  {
   "title": "Nothing but Theory",
   "current": "11.2",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 42.74,
   "avgScoreRate": 89.51,
   "notes": 1438,
@@ -14246,9 +14246,9 @@
  {
   "title": "BREAK OVER",
   "current": "11.8",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 42.75,
   "avgScoreRate": 90.62,
   "notes": 1210,
@@ -14258,9 +14258,9 @@
  {
   "title": "405nm (Ryu☆mix)",
   "current": "11.3",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 42.83,
   "avgScoreRate": 90.53,
   "notes": 1301,
@@ -14270,9 +14270,9 @@
  {
   "title": "Like+it!",
   "current": "11.4",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 42.86,
   "avgScoreRate": 89.43,
   "notes": 1197,
@@ -14282,9 +14282,9 @@
  {
   "title": "POODLE[L]",
   "current": "11.3",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 42.89,
   "avgScoreRate": 89.59,
   "notes": 1707,
@@ -14294,9 +14294,9 @@
  {
   "title": "Raspberry Potion (feat.あれたん & ぎゃるのしん☆)",
   "current": "11.5",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.01,
   "avgScoreRate": 90.01,
   "notes": 1267,
@@ -14306,9 +14306,9 @@
  {
   "title": "Programmed World",
   "current": "11.3",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.14,
   "avgScoreRate": 90.17,
   "notes": 1161,
@@ -14318,9 +14318,9 @@
  {
   "title": "S!ck (Nhato Remix)",
   "current": "11.5",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.2,
   "avgScoreRate": 89.66,
   "notes": 1279,
@@ -14330,9 +14330,9 @@
  {
   "title": "State Of The Art",
   "current": "11.4",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.26,
   "avgScoreRate": 89.89,
   "notes": 1570,
@@ -14342,9 +14342,9 @@
  {
   "title": "X-ray binary",
   "current": "11.2",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.4,
   "avgScoreRate": 90.04,
   "notes": 1417,
@@ -14354,9 +14354,9 @@
  {
   "title": "Moving on",
   "current": "11.2",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.51,
   "avgScoreRate": 89.61,
   "notes": 1501,
@@ -14366,9 +14366,9 @@
  {
   "title": "Volcanic Dragon",
   "current": "11.3",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.54,
   "avgScoreRate": 89.87,
   "notes": 1495,
@@ -14378,9 +14378,9 @@
  {
   "title": "Harmony and Lovely",
   "current": "11.2",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.57,
   "avgScoreRate": 89.92,
   "notes": 1127,
@@ -14390,9 +14390,9 @@
  {
   "title": "Funky Quirky",
   "current": "11.6",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.64,
   "avgScoreRate": 91.55,
   "notes": 1323,
@@ -14402,9 +14402,9 @@
  {
   "title": "quasar",
   "current": "11.1",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.66,
   "avgScoreRate": 90.96,
   "notes": 1161,
@@ -14414,9 +14414,9 @@
  {
   "title": "Battleground",
   "current": "11.4",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.84,
   "avgScoreRate": 90.42,
   "notes": 1361,
@@ -14426,9 +14426,9 @@
  {
   "title": "閃と雷管とロープ",
   "current": "11.3",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.89,
   "avgScoreRate": 91.29,
   "notes": 1294,
@@ -14438,21 +14438,21 @@
  {
   "title": "華蝶風雪[L]",
   "current": "11.6",
-  "base": "11.3",
-  "planA": "11.5",
-  "planB": "11.4",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.9,
   "avgScoreRate": 90.7,
   "notes": 2014,
   "plays": 729,
-  "notesSteps": 2
+  "notesSteps": 0
  },
  {
   "title": "Journey[L]",
   "current": "11.3",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.91,
   "avgScoreRate": 90.86,
   "notes": 1585,
@@ -14462,9 +14462,9 @@
  {
   "title": "ぷろぐれっしぶ時空少女！うらしまたろ子ちゃん！",
   "current": "11.4",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 43.93,
   "avgScoreRate": 90.63,
   "notes": 1285,
@@ -14474,9 +14474,9 @@
  {
   "title": "GIGA RAID",
   "current": "11.3",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 44.03,
   "avgScoreRate": 90.27,
   "notes": 1222,
@@ -14486,9 +14486,9 @@
  {
   "title": "Ignited Night",
   "current": "11.2",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 44.09,
   "avgScoreRate": 90.38,
   "notes": 1211,
@@ -14498,9 +14498,9 @@
  {
   "title": "イガク[L]",
   "current": "11.2",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 44.14,
   "avgScoreRate": 91.43,
   "notes": 1546,
@@ -14510,9 +14510,9 @@
  {
   "title": "DAZZLE ATTACK",
   "current": "11.2",
-  "base": "11.3",
-  "planA": "11.3",
-  "planB": "11.3",
+  "base": "11.2",
+  "planA": "11.2",
+  "planB": "11.2",
   "maxMinusRate": 44.23,
   "avgScoreRate": 91.23,
   "notes": 1435,
@@ -14846,9 +14846,9 @@
  {
   "title": "Ventriloquist",
   "current": "11.3",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 46.77,
   "avgScoreRate": 90.7,
   "notes": 1232,
@@ -14858,9 +14858,9 @@
  {
   "title": "ミッドナイト☆WAR",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 46.82,
   "avgScoreRate": 90.99,
   "notes": 1261,
@@ -14870,9 +14870,9 @@
  {
   "title": "SHELTER OF THE MIND",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 46.85,
   "avgScoreRate": 90.31,
   "notes": 1538,
@@ -14882,9 +14882,9 @@
  {
   "title": "Cookie Bouquets",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.01,
   "avgScoreRate": 90.49,
   "notes": 1714,
@@ -14894,9 +14894,9 @@
  {
   "title": "ゲシュタルト[L]",
   "current": "11.3",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.07,
   "avgScoreRate": 91.08,
   "notes": 1677,
@@ -14906,9 +14906,9 @@
  {
   "title": "Hat Surprise",
   "current": "11.3",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.07,
   "avgScoreRate": 88.76,
   "notes": 1234,
@@ -14918,9 +14918,9 @@
  {
   "title": "Rock Da House",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.19,
   "avgScoreRate": 90.83,
   "notes": 1128,
@@ -14930,9 +14930,9 @@
  {
   "title": "無双",
   "current": "11.3",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.39,
   "avgScoreRate": 92.19,
   "notes": 1677,
@@ -14942,9 +14942,9 @@
  {
   "title": "OOO[L]",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.41,
   "avgScoreRate": 92.32,
   "notes": 1336,
@@ -14954,9 +14954,9 @@
  {
   "title": "Wonder Girl feat. Kanae Asaba",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.56,
   "avgScoreRate": 90.75,
   "notes": 1414,
@@ -14966,9 +14966,9 @@
  {
   "title": "IN BETWEEN",
   "current": "11.5",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.66,
   "avgScoreRate": 91.59,
   "notes": 1201,
@@ -14978,9 +14978,9 @@
  {
   "title": "City Never Sleeps (IIDX Edition)",
   "current": "11.3",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.84,
   "avgScoreRate": 91.38,
   "notes": 1344,
@@ -14990,9 +14990,9 @@
  {
   "title": "ROTTERDAM SHOGUN",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.88,
   "avgScoreRate": 91.22,
   "notes": 1299,
@@ -15002,9 +15002,9 @@
  {
   "title": "月とミルク",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.95,
   "avgScoreRate": 91.56,
   "notes": 1400,
@@ -15014,9 +15014,9 @@
  {
   "title": "GRID KNIGHT[L]",
   "current": "11.3",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 47.99,
   "avgScoreRate": 89.64,
   "notes": 1744,
@@ -15026,9 +15026,9 @@
  {
   "title": "Plea Per Phase",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 48.2,
   "avgScoreRate": 91.3,
   "notes": 1395,
@@ -15038,9 +15038,9 @@
  {
   "title": "Pout",
   "current": "11.3",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 48.27,
   "avgScoreRate": 91.53,
   "notes": 1317,
@@ -15050,9 +15050,9 @@
  {
   "title": "Lucy",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 48.47,
   "avgScoreRate": 91.92,
   "notes": 1167,
@@ -15062,9 +15062,9 @@
  {
   "title": "勇者",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 48.89,
   "avgScoreRate": 91.88,
   "notes": 1245,
@@ -15074,9 +15074,9 @@
  {
   "title": "Butterfly Twist",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 48.94,
   "avgScoreRate": 91.69,
   "notes": 1373,
@@ -15086,9 +15086,9 @@
  {
   "title": "Secret of Love",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 48.98,
   "avgScoreRate": 91.43,
   "notes": 1019,
@@ -15098,9 +15098,9 @@
  {
   "title": "≡+≡",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49,
   "avgScoreRate": 91.63,
   "notes": 1520,
@@ -15110,9 +15110,9 @@
  {
   "title": "Shadow World",
   "current": "11.0",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.19,
   "avgScoreRate": 92.25,
   "notes": 1369,
@@ -15122,9 +15122,9 @@
  {
   "title": "XANADU OF TWO[L]",
   "current": "11.4",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.34,
   "avgScoreRate": 91.55,
   "notes": 1729,
@@ -15134,9 +15134,9 @@
  {
   "title": "じぇりー じゅえる ジャングル",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.36,
   "avgScoreRate": 91.77,
   "notes": 1658,
@@ -15146,9 +15146,9 @@
  {
   "title": "チェイスチェイスジョーカーズのうた (オニスタイルリミックス)",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.6,
   "avgScoreRate": 91.34,
   "notes": 1427,
@@ -15158,9 +15158,9 @@
  {
   "title": "ミッドナイト堕天使",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.63,
   "avgScoreRate": 90.81,
   "notes": 1398,
@@ -15170,9 +15170,9 @@
  {
   "title": "Empire State Glory",
   "current": "11.2",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.63,
   "avgScoreRate": 90.96,
   "notes": 1329,
@@ -15182,9 +15182,9 @@
  {
   "title": "DEEP ROAR",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.71,
   "avgScoreRate": 91.28,
   "notes": 1387,
@@ -15194,9 +15194,9 @@
  {
   "title": "ここからよろしく大作戦143[L]",
   "current": "11.1",
-  "base": "11.2",
-  "planA": "11.2",
-  "planB": "11.2",
+  "base": "11.1",
+  "planA": "11.1",
+  "planB": "11.1",
   "maxMinusRate": 49.71,
   "avgScoreRate": 92.23,
   "notes": 1598,
@@ -15255,13 +15255,13 @@
   "title": "Beat Radiance[L]",
   "current": "11.3",
   "base": "11.1",
-  "planA": "11.2",
+  "planA": "11.1",
   "planB": "11.1",
   "maxMinusRate": 50.72,
   "avgScoreRate": 92.16,
   "notes": 1809,
   "plays": 759,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "VALKYRIAS -英雄誕生-",
@@ -15360,23 +15360,11 @@
   "notesSteps": 0
  },
  {
-  "title": "D.C.fish",
-  "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
-  "maxMinusRate": 52.08,
-  "avgScoreRate": 91.56,
-  "notes": 1178,
-  "plays": 505,
-  "notesSteps": 0
- },
- {
   "title": "Ruler or Loser",
   "current": "11.2",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.14,
   "avgScoreRate": 91.34,
   "notes": 1339,
@@ -15384,11 +15372,23 @@
   "notesSteps": 0
  },
  {
+  "title": "D.C.fish",
+  "current": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
+  "maxMinusRate": 52.17,
+  "avgScoreRate": 91.57,
+  "notes": 1178,
+  "plays": 506,
+  "notesSteps": 0
+ },
+ {
   "title": "ラビットホール",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.18,
   "avgScoreRate": 92.06,
   "notes": 1471,
@@ -15398,9 +15398,9 @@
  {
   "title": "SnapSkipSpark",
   "current": "11.2",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.3,
   "avgScoreRate": 92.24,
   "notes": 1466,
@@ -15410,9 +15410,9 @@
  {
   "title": "恋は白帯、サンシロー[L]",
   "current": "11.0",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.32,
   "avgScoreRate": 92.8,
   "notes": 1395,
@@ -15422,9 +15422,9 @@
  {
   "title": "Be A Star",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.39,
   "avgScoreRate": 92.3,
   "notes": 1413,
@@ -15434,9 +15434,9 @@
  {
   "title": "でんぱ どりる わんにゃー☆三",
   "current": "11.2",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.4,
   "avgScoreRate": 92.41,
   "notes": 1679,
@@ -15446,9 +15446,9 @@
  {
   "title": "たからもの[L]",
   "current": "11.0",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.52,
   "avgScoreRate": 92.41,
   "notes": 1786,
@@ -15458,9 +15458,9 @@
  {
   "title": "フォニイ",
   "current": "11.0",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.6,
   "avgScoreRate": 92.2,
   "notes": 1454,
@@ -15470,9 +15470,9 @@
  {
   "title": "EDEN[L]",
   "current": "11.0",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.73,
   "avgScoreRate": 92.16,
   "notes": 1637,
@@ -15482,9 +15482,9 @@
  {
   "title": "ESPRIT ONE",
   "current": "11.3",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.73,
   "avgScoreRate": 92.4,
   "notes": 1476,
@@ -15494,9 +15494,9 @@
  {
   "title": "パ→ピ→プ→Yeah!",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 52.93,
   "avgScoreRate": 91.59,
   "notes": 1280,
@@ -15506,9 +15506,9 @@
  {
   "title": "少年リップルズ",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 53.78,
   "avgScoreRate": 92.48,
   "notes": 1242,
@@ -15518,9 +15518,9 @@
  {
   "title": "DAWN -THE NEXT ENDEAVOUR-",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 54.04,
   "avgScoreRate": 92.84,
   "notes": 1577,
@@ -15530,9 +15530,9 @@
  {
   "title": "Fervidex",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 55.48,
   "avgScoreRate": 92.96,
   "notes": 1361,
@@ -15542,9 +15542,9 @@
  {
   "title": "タンポポ",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 55.57,
   "avgScoreRate": 92.64,
   "notes": 1346,
@@ -15554,21 +15554,21 @@
  {
   "title": "A MINSTREL ～ ver. short-scape ～[L]",
   "current": "11.2",
-  "base": "11.1",
-  "planA": "11.2",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 55.75,
   "avgScoreRate": 92.08,
   "notes": 1954,
   "plays": 782,
-  "notesSteps": 1
+  "notesSteps": 0
  },
  {
   "title": "Blind Justice ～Torn souls， Hurt Faiths ～",
   "current": "11.0",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 55.84,
   "avgScoreRate": 92.65,
   "notes": 1245,
@@ -15578,9 +15578,9 @@
  {
   "title": "HIGH[L]",
   "current": "11.1",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 56.49,
   "avgScoreRate": 93.02,
   "notes": 1443,
@@ -15590,9 +15590,9 @@
  {
   "title": "Element of SPADA[L]",
   "current": "11.0",
-  "base": "11.1",
-  "planA": "11.1",
-  "planB": "11.1",
+  "base": "11.0",
+  "planA": "11.0",
+  "planB": "11.0",
   "maxMinusRate": 56.59,
   "avgScoreRate": 92.44,
   "notes": 1560,
@@ -15737,10 +15737,10 @@
   "base": "11.0",
   "planA": "11.0",
   "planB": "11.0",
-  "maxMinusRate": 65.74,
-  "avgScoreRate": 93.95,
+  "maxMinusRate": 65.8,
+  "avgScoreRate": 93.96,
   "notes": 1190,
-  "plays": 578,
+  "plays": 579,
   "notesSteps": 0
  },
  {

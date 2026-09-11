@@ -730,6 +730,23 @@ export const ja = {
   'scores.targetFinalScore': '目標スコア: {score} / {max} ({rate}%)',
   'scores.noOptions': '未設定。iidx-memo で設定すると同期されます。',
 
+  // Tier Card（スコア一覧の TIER CARD タブ: 縄跳びカード方式の単曲ティア早見表）
+  'tierCard.tab': 'TIER CARD',
+  'tierCard.title': '単曲ティアカード',
+  'tierCard.desc': '各ティアに到達するために必要な EX スコアを譜面ごとに並べた早見表です。達成済みのマスは塗りつぶされ、次の目標は琥珀色で示します。',
+  'tierCard.sort': '並び替え',
+  'tierCard.sortInformal': '非公式難易度',
+  'tierCard.sortTitle': '曲名',
+  'tierCard.sortTier': '現在のティア',
+  'tierCard.sortRate': 'スコアレート',
+  'tierCard.legendAchieved': '達成済み',
+  'tierCard.legendNext': '次の目標',
+  'tierCard.legendDash': '「-」はその難易度帯には設定されないティア',
+  'tierCard.noTier': '非公式難易度が未設定のため単曲ティアの対象外です',
+  'tierCard.cellAchieved': '{tier}: {score} 点で達成済み',
+  'tierCard.cellNeed': '{tier}: {score} 点（あと {gap} 点）',
+  'tierCard.cellUnreachable': '{tier}: この難易度帯には設定されません',
+
   // Arena Mode
   'arena.title': 'ARENAモード戦績',
   'arena.subtitle': 'ブックマークレットで取得した対戦データを管理します。',

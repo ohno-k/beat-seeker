@@ -26,6 +26,11 @@
  *   node scripts/rebuild-draft-maxminus-zinrai.js --apply            # 2案をprofileに保存 + draft を B で更新
  *   node scripts/rebuild-draft-maxminus-zinrai.js --apply --plan=A   # draft を A で更新
  *   node scripts/rebuild-draft-maxminus-zinrai.js --apply --backup=<name>  # 上書き前の draft を保存する profile 名(既定 pre-zinrai-rebuild-YYYYMMDD)
+ *   node scripts/rebuild-draft-maxminus-zinrai.js --quota=13.0:10,12.9:20  # 帯別定員の上書き(帯:曲数)。指定しない帯は active の曲数。
+ *       増減分は「指定した最下帯のすぐ下の帯」が吸収する(例では 12.8 が 37 → 25)。吸収先も明示したければ 12.8:30,12.7:42 のように続けて指定する。
+ *       (2026-09-11 ユーザー指示「13.0 を 10 曲くらい、12.9 を 20 曲くらいに」で追加)
+ *   node scripts/rebuild-draft-maxminus-zinrai.js --no-notes-bonus         # 物量(ノーツ数)加点を行わない。帯は MAX-率順(同率は平均スコアレート順)と定員だけで決まる。
+ *       加点が無いので案A = 案B = ベース配置になる(2026-09-11 ユーザー指示「物量加点をなくしてみて」で追加)。
  *
  * 出力: data/zinrai_rebuild_report.md, data/zinrai_rebuild_changes.json
  * 注意: 本番DB(Render)に直接接続する。active には一切触れない。
@@ -60,6 +65,10 @@ const argOf = (name, def) => (process.argv.find(a => a.startsWith(`--${name}=`))
 const PLAN_ARG = argOf('plan', 'B').toUpperCase();
 const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 const BACKUP_PROFILE = `profile:${argOf('backup', `pre-zinrai-rebuild-${today}`)}`;
+/** 帯別定員の上書き指定("13.0:10,12.9:20" 形式)。空なら active の曲数をそのまま定員にする。 */
+const QUOTA_ARG = argOf('quota', '');
+/** 物量(ノーツ数)加点を無効にする(--no-notes-bonus)。notesSteps() が常に 0 を返す。 */
+const NO_NOTES_BONUS = process.argv.includes('--no-notes-bonus');
 
 const isNumericRank = r => /^\d+\.\d$/.test(r);
 const tenthsOf = r => Math.round(parseFloat(r) * 10);
@@ -69,6 +78,7 @@ const keyOf = (title, diffName) => (diffName === 'LEGGENDARIA' ? `${title}[L]` :
 
 /** ノーツ数 → 帯の加点ステップ(0.1 単位)。1800 未満は補正なし。 */
 function notesSteps(notes) {
+    if (NO_NOTES_BONUS) return 0;
     if (notes == null || notes < BONUS_BASE) return 0;
     return Math.floor((notes - BONUS_BASE) / BONUS_STEP) + 1;
 }
@@ -125,6 +135,45 @@ function buildRevision(rows) {
  * Uncategorized から新しく入る曲は現在の帯へ相乗りする(定員を食わないので帯が 1 曲増える)。
  * 定員を使い切った後の曲は最下帯が受け止める。
  */
+/**
+ * --quota の指定で定員を上書きする。数値帯の合計曲数は変えないため、増減分は
+ * 「指定した帯のうち最下帯のすぐ下にある、指定されていない帯」が吸収する。
+ * 例: --quota=13.0:10,12.9:20 → 13.0 が +2、12.9 が +10、12.8 が -12。
+ *
+ * @returns レポート用の説明文(上書き無しなら null)
+ */
+function applyQuotaOverrides(quota, arg) {
+    if (!arg) return null;
+    const overrides = new Map();
+    for (const kv of arg.split(',').map(s => s.trim()).filter(Boolean)) {
+        const [rank, n] = kv.split(':');
+        if (!isNumericRank(rank) || !Number.isInteger(Number(n)) || Number(n) < 0) throw new Error(`--quota の書式が不正です: "${kv}"(例: 13.0:10,12.9:20)`);
+        overrides.set(tenthsOf(rank), Number(n));
+    }
+    const missing = [...overrides.keys()].filter(t => !quota.some(q => q.tenths === t));
+    if (missing.length) throw new Error(`--quota に定員の無い帯が含まれています: ${missing.map(rankOfTenths).join(', ')}`);
+    let delta = 0, lowest = Infinity;
+    const parts = [];
+    for (const q of quota) {
+        if (!overrides.has(q.tenths)) continue;
+        const n = overrides.get(q.tenths);
+        parts.push(`${q.rank} ${q.count} → ${n}`);
+        delta += n - q.count;
+        lowest = Math.min(lowest, q.tenths);
+        q.count = n;
+    }
+    let note = `定員上書き: ${parts.join(', ')}`;
+    if (delta !== 0) {
+        const absorber = quota.find(q => q.tenths < lowest && !overrides.has(q.tenths));
+        if (!absorber) throw new Error('--quota の増減分を吸収する帯がありません(最下帯まで指定されています)');
+        if (absorber.count - delta < 0) throw new Error(`--quota の増減分 ${delta} を ${absorber.rank}(${absorber.count} 曲)で吸収できません`);
+        note += `。増減 ${delta > 0 ? '+' : ''}${delta} 曲は ${absorber.rank} が吸収(${absorber.count} → ${absorber.count - delta})`;
+        absorber.count -= delta;
+    }
+    console.log(note);
+    return note;
+}
+
 function packByQuota(seq, quota) {
     const placed = new Map();
     let qi = 0, used = 0;
@@ -139,7 +188,7 @@ function packByQuota(seq, quota) {
 async function main() {
     const client = new Client(DB_CONFIG);
     await client.connect();
-    console.log(`接続OK (${APPLY ? `APPLY モード / draft = 案${PLAN_ARG}` : 'dry-run モード'})`);
+    console.log(`接続OK (${APPLY ? `APPLY モード / draft = 案${PLAN_ARG}` : 'dry-run モード'}${NO_NOTES_BONUS ? ' / 物量加点なし' : ''})`);
 
     const mmRows = (await client.query(MAXMINUS_SQL)).rows;
     const { ranks: activeRanks, currentRank } = buildRevision((await client.query(REVISION_SQL, ['active'])).rows);
@@ -174,6 +223,7 @@ async function main() {
         .map(([rank, v]) => ({ rank, tenths: tenthsOf(rank), count: v.songs.length }))
         .sort((a, b) => b.tenths - a.tenths)
         .filter(q => q.tenths <= tenthsOf(TOP_RANK) - 1);
+    const quotaNote = applyQuotaOverrides(quota, QUOTA_ARG);
 
     const manualSet = new Set(MANUAL_TOP);
     const missing = MANUAL_TOP.filter(t => !songs.some(s => s.key === t));
@@ -273,7 +323,11 @@ async function main() {
     md.push(`- Uncategorized からの新規参入 ${newcomers.length} 曲 = 定員を消費せず相乗り（その帯が増える）`);
     md.push(`  - 着地先: ${[...newcomers.reduce((m, s) => m.set(rankOfTenths(planB.get(s.key)), (m.get(rankOfTenths(planB.get(s.key))) || 0) + 1), new Map())]
         .sort((a, b) => parseFloat(b[0]) - parseFloat(a[0])).map(([r, n]) => `${r}×${n}`).join(' / ')}`);
-    md.push(`- 物量加点: ${songs.filter(s => notesSteps(s.notes) > 0).length} 曲（1800 以上 +0.1、以降 200 ごと +0.1、到達上限 12.8）`, '');
+    md.push(NO_NOTES_BONUS
+        ? '- 物量加点: 無効（`--no-notes-bonus`。帯は MAX-率順と定員だけで決定）'
+        : `- 物量加点: ${songs.filter(s => notesSteps(s.notes) > 0).length} 曲（1800 以上 +0.1、以降 200 ごと +0.1、到達上限 12.8）`);
+    if (quotaNote) md.push(`- ${quotaNote}（\`--quota=${QUOTA_ARG}\`）`);
+    md.push('');
     md.push('## 帯別曲数', '', '| 帯 | 現行 | 案A | 案B |', '| --- | ---: | ---: | ---: |');
     const cntA = new Map(ranksA.map(r => [r.rank, r.songs.length]));
     const cntB = new Map(ranksB.map(r => [r.rank, r.songs.length]));

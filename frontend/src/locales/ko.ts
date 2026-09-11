@@ -724,6 +724,23 @@ export const ko = {
   'scores.targetFinalScore': '목표 스코어: {score} / {max} ({rate}%)',
   'scores.noOptions': '미설정. iidx-memo에서 설정하면 동기화됩니다.',
 
+  // Tier Card (점수 목록의 TIER CARD 탭: 단일 곡 티어 체크리스트)
+  'tierCard.tab': 'TIER CARD',
+  'tierCard.title': '단일 곡 티어 카드',
+  'tierCard.desc': '각 티어에 도달하기 위해 필요한 EX 스코어를 채보별로 정리한 표입니다. 달성한 칸은 채워지고, 다음 목표는 호박색으로 표시됩니다.',
+  'tierCard.sort': '정렬',
+  'tierCard.sortInformal': '비공식 난이도',
+  'tierCard.sortTitle': '곡 제목',
+  'tierCard.sortTier': '현재 티어',
+  'tierCard.sortRate': '스코어 레이트',
+  'tierCard.legendAchieved': '달성',
+  'tierCard.legendNext': '다음 목표',
+  'tierCard.legendDash': '"-"는 해당 난이도대에 설정되지 않는 티어',
+  'tierCard.noTier': '비공식 난이도가 미설정이라 단일 곡 티어 대상이 아닙니다',
+  'tierCard.cellAchieved': '{tier}: {score}점으로 달성',
+  'tierCard.cellNeed': '{tier}: {score}점 ({gap}점 더 필요)',
+  'tierCard.cellUnreachable': '{tier}: 해당 난이도대에는 설정되지 않습니다',
+
   // Arena Mode
   'arena.title': 'ARENA 모드 전적',
   'arena.subtitle': '북마클릿으로 가져온 대전 데이터를 관리합니다.',
