@@ -31,24 +31,32 @@ import java.util.Map;
  * 「取れるか分からないもの」として確率分布のまま扱い、期待値で順位づけする。
  *
  * <h3>計算式</h3>
- * 依頼された定式化は
- * <pre>  ∂BEAT-PT/∂スコア × P(達成 | 推定能力)  </pre>
- * だが、これはスコア軸で積分すると期待獲得 pt そのものになる（部分積分）。
+ * 各譜面について「目標スコア s を 1 つ決めて狙う」ことを前提に、
  * <pre>
- *   E[ΔBEAT-PT] = ∫_{s*}^{∞} (∂BEAT-PT/∂s) · P(S ≥ s) ds
- *               = E[ max(0, pt(S) − baseline) ]
+ *   v(s) = P(S ≥ s | 推定能力) × ( pt(s) − baseline )
  * </pre>
- * ここで S は「推定能力から見た、その譜面で最終的に出せるスコア」の確率変数、
- * s* は損益分岐スコア（後述）。本実装は右辺（期待値そのもの）を数値積分で求める。
- * 微分の離散近似を経由しないので、AA / AAA / MAX- のボーナス段差
- * （BEAT-PT が不連続に跳ねる点）も取りこぼさない。
+ * を最大にする s を目標（targetScore）とし、そのときの P(S ≥ s) を達成率（achieveProbability）、
+ * pt(s) − baseline を達成時の増分（targetGain）、v(s) を期待獲得 pt（expectedGain）として返す。
+ * S は「推定能力から見た、その譜面で最終的に出せるスコア」の確率変数、
+ * pt(s) は単曲 BEAT-PT、baseline は後述の押し出しライン。
+ *
+ * 以前は期待獲得 pt を分布全体の期待値 E[max(0, pt(S) − baseline)] で出し、目標は
+ * 「予測中央値までに届くボーダー、無ければ中央値」と別々に決めていた。すると分布の上側の裾
+ * （大きく伸びる薄い可能性）が期待値に丸ごと乗る一方で目標は中央値止まりになり、
+ * 現在スコアが中央値付近の譜面では「目標 あと 1 点」に「期待 +0.7 pt」が並ぶ矛盾した表示になっていた。
+ * 目標・達成率・期待値を同じ事象（目標に届く）で揃えたのが本実装で、
+ * pt が単調増加なので v(s) ≤ E[max(0, pt(S) − baseline)] が常に成り立ち、期待値は以前より控えめになる。
+ *
+ * 候補 s は損益分岐スコア s*（後述）以上・コミュニティ最高以下の範囲で、分布を ±{@link #SIGMA_SPAN}σ で
+ * 刻んだ各点と AA / AAA / MAX- のボーダー（ボーナス段差で pt が跳ねる点）を評価する（{@link #pickTarget}）。
  *
  * <h3>baseline（＝何と比べた増分か）</h3>
  * BEAT-PT は上位 100 譜面の合計なので、増分は TOP100 の出入りで決まる。
  *  - すでに TOP100 圏内の譜面 … baseline = その譜面の現在 pt（純粋な上積み）
  *  - TOP100 圏外／未プレイの譜面 … baseline = 100 位の pt（そこを超えて初めて合計に効く）
  * 損益分岐スコア s* は pt(s*) = baseline となるスコアで、二分探索で求める。
- * P(S ≥ s*) が「この譜面を触る価値がそもそもあるか」の確率 = achieveProbability。
+ * P(S ≥ s*) は「この譜面を触る価値がそもそもあるか」の確率で、breakEvenProbability として返す
+ * （達成率 achieveProbability は目標に対する確率で、これとは別）。
  *
  * <h3>並びと打ち切り</h3>
  * 候補は達成率（P(S ≥ s*)）の降順に並べ、期待獲得 pt を先頭から足して
@@ -105,9 +113,9 @@ public class FillRecommendationService {
      */
     private static final double MAX_SIGMA_LOGIT = 1.2;
 
-    /** 数値積分のグリッド幅（標準正規の ±SIGMA_SPAN σ を刻む）。 */
+    /** 目標候補グリッドの幅（標準正規の ±SIGMA_SPAN σ を刻む）。 */
     private static final double SIGMA_SPAN = 3.5;
-    /** 数値積分のグリッド分割数（奇数にして中央 = μ を必ず含める）。 */
+    /** 目標候補グリッドの分割数（奇数にして中央 = 予測中央値を必ず含める）。 */
     private static final int QUAD_NODES = 41;
 
     /** 期待獲得 pt がこの値未満の候補は返さない（UI 上 "+0.0 pt" になるため）。 */
@@ -238,8 +246,10 @@ public class FillRecommendationService {
      *         items の各要素は
      *         {@code {title, difficultyName, informalRank, difficultyLevel, unplayed, currentScore,
      *          currentRate, currentBeatPt, maxScore, predictedScore, predictedRate, sigmaRate,
-     *          breakEvenScore, achieveProbability, targetScore, targetRate, targetLabel,
-     *          targetProbability, targetGain, expectedGain, supportCount, accuracy}}。
+     *          breakEvenScore, breakEvenProbability, achieveProbability, targetScore, targetRate,
+     *          targetLabel, targetProbability, targetGain, expectedGain, supportCount, accuracy}}。
+     *         achieveProbability（= targetProbability）は目標 targetScore に届く確率、
+     *         expectedGain = achieveProbability × targetGain。
      *         attemptedItems は同じ形に {@code attemptOldScore, attemptNewScore, lastAttemptAt} を足したもので、
      *         直近の更新が新しい順。
      */
@@ -398,18 +408,14 @@ public class FillRecommendationService {
             int breakEven = breakEvenScore(maxScore, informalRank, baseline, currentScore);
             if (breakEven > scoreCap) continue; // 到達可能域では合計に効かない
 
-            double achieveProb = tailProbability(breakEven, maxScore, stat.mu, stat.sigma);
+            // 目標: P(S ≥ s) × (pt(s) − baseline) が最大になるスコア。達成率と期待獲得 pt はこの目標に対する値。
+            Target target = pickTarget(stat, maxScore, scoreCap, currentScore, informalRank, baseline, breakEven);
+            if (target == null || target.expectedGain < MIN_EXPECTED_GAIN) continue;
 
-            // 期待獲得 pt = E[max(0, pt(S) − baseline)]。S は logit 空間の正規分布。
-            double expectedGain = expectedGain(stat.mu, stat.sigma, maxScore, scoreCap,
-                    currentScore, informalRank, baseline);
-            if (expectedGain < MIN_EXPECTED_GAIN) continue;
-
+            // 「そもそも合計に効く可能性」。目標の達成率とは別に診断用に返す。
+            double breakEvenProb = tailProbability(breakEven, maxScore, stat.mu, stat.sigma);
             double predictedScore = Math.min(scoreCap,
                     PairRegressionService.logitToScoreRate(stat.mu) * maxScore);
-            // 提示用の目標: 予測の中央値までに届くボーダーがあればそれ、無ければ中央値そのもの。
-            Target target = pickTarget(stat, maxScore, scoreCap, currentScore, informalRank,
-                    baseline, predictedScore);
 
             Map<String, Object> item = new HashMap<>();
             item.put("title", title);
@@ -425,20 +431,27 @@ public class FillRecommendationService {
             item.put("predictedScore", predictedScore);
             item.put("predictedRate", predictedScore * 100.0 / maxScore);
             item.put("sigmaRate", sigmaAsRatePct(stat.mu, stat.sigma));
+            // 根拠モーダル用: フロントが同じ分布（logit 空間の正規分布）と損益分岐・目標の選び方を図示するのに使う。
+            item.put("muLogit", stat.mu);
+            item.put("sigmaLogit", stat.sigma);
+            item.put("baselinePt", baseline);
+            item.put("scoreCap", scoreCap);
             item.put("breakEvenScore", breakEven);
-            item.put("achieveProbability", achieveProb);
+            item.put("breakEvenProbability", breakEvenProb);
+            item.put("achieveProbability", target.probability);
             item.put("targetScore", target.score);
             item.put("targetRate", target.score * 100.0 / maxScore);
             item.put("targetLabel", target.label);
             item.put("targetProbability", target.probability);
             item.put("targetGain", target.gain);
-            item.put("expectedGain", expectedGain);
+            item.put("expectedGain", target.expectedGain);
             item.put("supportCount", stat.support);
             item.put("accuracy", stat.accuracy);
 
             // 直近に更新したのに目標へ届かなかった譜面は候補から外す。
             // 目標がボーダー（AA / AAA / MAX-）ならそのスコア、無ければ予測中央値を「届いたか」の基準にする。
-            // 中央値目標で target.score = 現在 + 1 になるケース（中央値を既に超えている）を未達と誤判定しないため。
+            // 目標は常に現在スコアより上に立つので、目標そのものを基準にすると直近に更新した譜面が
+            // すべて未達扱いになる。中央値を既に超えている（実力どおり出せている）譜面は未達と見なさない。
             double goalScore = target.label.isEmpty() ? predictedScore : target.score;
             Attempt attempt = attempts.get(key);
             if (isUnreachedAttempt(attempt, currentScore, goalScore)) {
@@ -732,42 +745,20 @@ public class FillRecommendationService {
     // ── 期待値まわりの計算 ────────────────────────────────────────────────
 
     /**
-     * 【メソッドの役割】 期待獲得 BEAT-PT を数値積分で求める。
+     * 【メソッドの役割】 目標スコアに届いたときの合計 BEAT-PT の増分 = max(0, pt(目標) − baseline)。
      *
-     * S を logit 空間の正規分布 N(μ, σ²) とみなし、
-     * {@code E[max(0, pt(clamp(S)) − baseline)]} を ±{@link #SIGMA_SPAN}σ の
-     * 等間隔グリッドで台形近似する（重みは標準正規密度、総和で正規化）。
+     * 期待獲得 pt はこれに達成率 P(S ≥ 目標) を掛けたもの。
+     * 目標・達成率・増分・期待値が同じ事象を指すように、期待値は分布全体を積分せずこの形で出す。
      *
-     * BEAT-PT は AA / AAA / MAX- で段差を持つ不連続関数なので、
-     * 「∂BEAT-PT/∂スコアを 1 点で微分して確率を掛ける」形ではボーナス段差を
-     * 取りこぼす。分布を刻んで pt をそのまま評価するこの形なら段差も拾える。
-     *
-     * @param mu           logit 空間の予測平均
-     * @param sigma        logit 空間の予測標準偏差
+     * @param targetScore  目標スコア
      * @param maxScore     理論値スコア（notes × 2）
-     * @param scoreCap     現実的な上限（コミュニティ実測最高）
-     * @param currentScore 現在スコア（これを下回る結果は「更新なし」＝増分 0）
      * @param informalRank 非公式難易度（weight 決定用）
      * @param baseline     この pt を超えたぶんだけが合計 BEAT-PT の増分になる
-     * @return 期待獲得 pt（≥ 0）
+     * @return 達成時の増分 pt（≥ 0）
      */
-    double expectedGain(double mu, double sigma, int maxScore, int scoreCap,
-                        int currentScore, String informalRank, double baseline) {
-        double sum = 0;
-        double weightSum = 0;
-        double step = 2.0 * SIGMA_SPAN / (QUAD_NODES - 1);
-        for (int i = 0; i < QUAD_NODES; i++) {
-            double z = -SIGMA_SPAN + i * step;
-            double density = Math.exp(-0.5 * z * z);
-            double rate = PairRegressionService.logitToScoreRate(mu + sigma * z);
-            double score = rate * maxScore;
-            // 現在スコアを下回る「引き」は自己ベストを更新しないので増分 0。上はコミュニティ最高で頭打ち。
-            score = Math.max(currentScore, Math.min(scoreCap, score));
-            double pt = beatPtCalculator.calculatePoints(score * 100.0 / maxScore, informalRank);
-            sum += density * Math.max(0.0, pt - baseline);
-            weightSum += density;
-        }
-        return weightSum > 0 ? sum / weightSum : 0.0;
+    double goalGain(int targetScore, int maxScore, String informalRank, double baseline) {
+        double pt = beatPtCalculator.calculatePoints(targetScore * 100.0 / maxScore, informalRank);
+        return Math.max(0.0, pt - baseline);
     }
 
     /**
@@ -809,42 +800,83 @@ public class FillRecommendationService {
         return 1.0 - normalCdf(z);
     }
 
-    /** 提示用の目標スコアとその達成確率・獲得 pt。 */
-    private static class Target {
+    /** 目標スコアと、その達成確率・達成時の増分・期待獲得 pt（= 確率 × 増分）。 */
+    static final class Target {
         int score;
+        /** 'AA' / 'AAA' / 'MAX-'。目標がボーダーちょうどでなければ空文字。 */
         String label = "";
         double probability;
         double gain;
+        double expectedGain;
     }
 
     /**
-     * 【メソッドの役割】 UI に出す「狙い目」を決める。
+     * 【メソッドの役割】 目標スコアを「達成率 × 達成時の増分」が最大になる点として決める。
      *
-     * 予測中央値までに届く AA / AAA / MAX- のボーダーがあれば、その中で一番上のものを目標にする
-     * （ボーナス段差を跨ぐので体感の伸びが大きく、達成の手応えも分かりやすい）。
-     * 届くボーダーが無ければ予測中央値そのものを目標にする。
+     * 候補は、損益分岐スコア（と現在スコア + 1）からコミュニティ最高までの範囲にある
+     * <ul>
+     *   <li>分布を ±{@link #SIGMA_SPAN}σ で等間隔に刻んだ各点のスコア</li>
+     *   <li>AA / AAA / MAX- のボーダー（ボーナス段差で pt が跳ねるので、段差の直上が最適になりやすい）</li>
+     *   <li>範囲の両端（損益分岐スコア、コミュニティ最高）</li>
+     * </ul>
+     * で、同点なら低い（届きやすい）方を採る。目標がボーダーちょうどなら label を付ける。
+     *
+     * 現在スコアが予測中央値付近の譜面では、中央値より上の「伸びる薄い可能性」に賭ける目標になるので
+     * 達成率は 50% を下回り、期待値もそれに見合って小さくなる（「あと 1 点で +0.7 pt」にはならない）。
+     *
+     * @return 目標。狙える点が無ければ（損益分岐スコアがコミュニティ最高を超えている）null
      */
-    private Target pickTarget(Stat stat, int maxScore, int scoreCap, int currentScore,
-                              String informalRank, double baseline, double predictedScore) {
-        Target best = new Target();
-        best.score = (int) Math.round(Math.max(currentScore + 1, Math.min(scoreCap, predictedScore)));
+    Target pickTarget(Stat stat, int maxScore, int scoreCap, int currentScore,
+                      String informalRank, double baseline, int breakEven) {
+        int lo = Math.max(currentScore + 1, breakEven);
+        if (lo > scoreCap) return null;
 
-        double currentRate = currentScore * 100.0 / maxScore;
-        for (int i = BORDER_RATES.length - 1; i >= 0; i--) {
-            double borderRate = BORDER_RATES[i];
-            if (currentRate > borderRate) continue; // すでに超えている
-            int need = (int) Math.ceil(maxScore * borderRate / 100.0) + 1; // 段差は「超えたら」付くので +1
-            if (need > scoreCap) continue;
-            if (need > predictedScore) continue; // 中央値で届かないボーダーは「狙い目」と呼ばない
-            best.score = need;
-            best.label = BORDER_LABELS[i];
-            break;
+        java.util.TreeSet<Integer> candidates = new java.util.TreeSet<>();
+        candidates.add(lo);
+        candidates.add(scoreCap);
+        double step = 2.0 * SIGMA_SPAN / (QUAD_NODES - 1);
+        for (int i = 0; i < QUAD_NODES; i++) {
+            double z = -SIGMA_SPAN + i * step;
+            int score = (int) Math.round(PairRegressionService.logitToScoreRate(stat.mu + stat.sigma * z) * maxScore);
+            if (score >= lo && score <= scoreCap) candidates.add(score);
+        }
+        Map<Integer, String> borderLabels = new HashMap<>();
+        for (int i = 0; i < BORDER_RATES.length; i++) {
+            int need = borderScore(maxScore, BORDER_RATES[i]);
+            if (need >= lo && need <= scoreCap) {
+                candidates.add(need);
+                borderLabels.put(need, BORDER_LABELS[i]);
+            }
         }
 
-        best.probability = tailProbability(best.score, maxScore, stat.mu, stat.sigma);
-        double pt = beatPtCalculator.calculatePoints(best.score * 100.0 / maxScore, informalRank);
-        best.gain = Math.max(0.0, pt - baseline);
+        Target best = null;
+        for (int score : candidates) {
+            double gain = goalGain(score, maxScore, informalRank, baseline);
+            if (gain <= 0) continue;
+            double probability = tailProbability(score, maxScore, stat.mu, stat.sigma);
+            double expected = probability * gain;
+            if (best != null && expected <= best.expectedGain) continue; // 同点は低い方（先に来る方）を残す
+            best = new Target();
+            best.score = score;
+            best.label = borderLabels.getOrDefault(score, "");
+            best.probability = probability;
+            best.gain = gain;
+            best.expectedGain = expected;
+        }
         return best;
+    }
+
+    /**
+     * 【メソッドの役割】 ボーダーレート（%）を「超える」のに必要な最小スコア。
+     *
+     * 段差は超えて初めて付く（{@link BeatPtCalculator#calculatePoints} は {@code scoreRate > border}）ので、
+     * maxScore × border / 100 を超える最小の整数を返す。以前は ceil + 1 で、端数があるときに 1 点多かった。
+     * 浮動小数の丸めで境界ちょうどが下に落ちても、最後に実際のレート比較で補正する。
+     */
+    static int borderScore(int maxScore, double borderRate) {
+        int need = (int) Math.floor(maxScore * borderRate / 100.0) + 1;
+        while (need * 100.0 / maxScore <= borderRate) need++;
+        return need;
     }
 
     /**

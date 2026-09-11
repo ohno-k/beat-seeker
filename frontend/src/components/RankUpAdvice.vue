@@ -77,6 +77,18 @@
             <template v-else>{{ t('advice.pointsToGo', { n: pointsToGo(sug).toLocaleString() }) }}</template>
           </p>
         </div>
+        <!-- 根拠モーダル。行はアイコンだけにして、式・分布図・手順はモーダル側で見せる -->
+        <button
+          type="button"
+          @click="openReason(sug)"
+          class="shrink-0 -mr-0.5 p-1 rounded-full text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+          :aria-label="t('adviceReason.openButtonAria')"
+          :title="t('adviceReason.openButtonAria')"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
       </div>
 
       <!-- 10 件ずつ追加表示。候補は次ランクに届くまで並んでいるので、下まで開けば必要な曲がすべて見える -->
@@ -158,9 +170,28 @@
               {{ t('advice.pointsToGo', { n: pointsToGo(sug).toLocaleString() }) }}
             </p>
           </div>
+          <button
+            type="button"
+            @click="openReason(sug)"
+            class="shrink-0 -mr-0.5 p-1 rounded-full text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            :aria-label="t('adviceReason.openButtonAria')"
+            :title="t('adviceReason.openButtonAria')"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
+
+    <!-- 伸びしろの根拠モーダル（行のアイコンから開く） -->
+    <RankUpAdviceReasonModal
+      v-if="reasonItem"
+      :item="reasonItem"
+      :view-user-id="viewingUserId ?? null"
+      @close="reasonItem = null"
+    />
   </div>
 </template>
 
@@ -170,8 +201,11 @@
  *
  * バックエンドの `/api/analysis/fill-recommendation`（コスパ埋めレコメンド）が
  * 全譜面（未プレイ含む）について
- *   期待獲得 pt = E[ max(0, BEAT-PT(到達スコア) − 押し出しライン) ]
- * と達成率を算出し、達成率降順に「残り pt を満たすまで」を返してくる。
+ *   目標スコア = P(目標に届く) × (BEAT-PT(目標) − 押し出しライン) が最大になるスコア
+ *   達成率 = P(目標に届く)、期待獲得 pt = 達成率 × 達成時の増分
+ * を算出し、達成率降順に「残り pt を満たすまで」を返してくる。
+ * 1 行に出す「達成率」「期待 +x pt」「目標 / あと n 点」はすべて同じ目標を指す
+ * （以前は期待値だけ分布全体の積分だったため「あと 1 点」に「期待 +0.7 pt」が並ぶことがあった）。
  * 本コンポーネントは残り pt（gap）を渡して結果を 10 件ずつ表示するだけを担う。
  *
  * 【枯渇対策】
@@ -190,6 +224,10 @@
  *  - 予測が外れる確率を無視するので、実際には取れない譜面が上位に来る
  * という 2 点が弱かった。判定はすべてバックエンドの期待値計算に寄せている。
  *
+ * 【根拠モーダル】
+ * 各行の末尾のアイコンから RankUpAdviceReasonModal を開く。式の分解・分布図・目標の決め方・参照譜面は
+ * すべてモーダル側に寄せ、行は 2 段のまま増やさない。
+ *
  * 【管理者閲覧】
  * viewingUserId が渡されたときは、その相手の推薦を管理者用 API（/api/admin/fill-recommendation）から引く。
  * totalPoints は親（ScoreDashboard）が閲覧対象のスコアから計算した値なので、gap も相手のものになる。
@@ -204,6 +242,9 @@ import { useAuth } from '../composables/useAuth';
 import { getNextRankInfo } from '../utils/beatTier';
 import { scoreGrade, gradeLabel, gradeColorClass } from '../utils/scoreGrade';
 import InformalRankBadge from './InformalRankBadge.vue';
+import RankUpAdviceReasonModal from './RankUpAdviceReasonModal.vue';
+import type { AttemptedItem, FillAccuracy, FillRecommendationItem } from '../types/fillRecommendation';
+import { isRoughAccuracy } from '../types/fillRecommendation';
 
 const { t } = useI18n();
 const { authHeaders } = useAuth();
@@ -220,13 +261,11 @@ const PAGE_SIZE = 10;
 /** 現在表示している件数。取得し直したら先頭の 1 ページに戻す。 */
 const visibleCount = ref(PAGE_SIZE);
 
-/** 予測の出どころ。HIGH / LOW はペア回帰、BASE / RANK は加法モデルによる概算。 */
-type Accuracy = 'HIGH' | 'LOW' | 'BASE' | 'RANK';
+/** 予測の出どころ。型は types/fillRecommendation.ts で共有。 */
+type Accuracy = FillAccuracy;
 
 /** 概算系（ペア回帰の参照が無い）かどうか。バッジ表示の判定に使う。 */
-function isRough(acc: Accuracy): boolean {
-  return acc === 'BASE' || acc === 'RANK';
-}
+const isRough = isRoughAccuracy;
 
 /** ツールチップ用の精度ラベル。 */
 function accuracyLabel(acc: Accuracy): string {
@@ -239,47 +278,12 @@ function accuracyLabel(acc: Accuracy): string {
   }
 }
 
-/** `/api/analysis/fill-recommendation` の items 1 件ぶん。 */
-interface FillRecommendationItem {
-  title: string;
-  difficultyName: string;
-  informalRank: string;
-  difficultyLevel: number;
-  /** 未プレイ譜面（＝純粋な「埋め」候補）なら true。 */
-  unplayed: boolean;
-  currentScore: number;
-  currentRate: number;
-  currentBeatPt: number;
-  inTop100: boolean;
-  maxScore: number;
-  predictedScore: number;
-  predictedRate: number;
-  /** 予測のばらつき（スコアレート % 換算の 1σ）。 */
-  sigmaRate: number;
-  /** 損益分岐スコア。ここを超えて初めて総合 BEAT-PT が増える。 */
-  breakEvenScore: number;
-  /** P(損益分岐スコア以上を出せる | 推定能力)。 */
-  achieveProbability: number;
-  targetScore: number;
-  targetRate: number;
-  /** 'AA' / 'AAA' / 'MAX-'。狙えるボーダーが無ければ空文字。 */
-  targetLabel: string;
-  targetProbability: number;
-  targetGain: number;
-  /** 期待獲得 pt。この降順で返ってくる。 */
-  expectedGain: number;
-  supportCount: number;
-  accuracy: Accuracy;
-}
+/** 根拠モーダルで開いている候補。null なら閉じている。 */
+const reasonItem = ref<FillRecommendationItem | null>(null);
 
-/** 挑戦済み（直近に更新したが目標未達）の 1 件。items と同じ形に更新前後のスコアと日時が付く。 */
-interface AttemptedItem extends FillRecommendationItem {
-  /** 冷却期間内で最初に更新したときの更新前スコア。 */
-  attemptOldScore: number;
-  /** 冷却期間内で最後に更新したときの更新後スコア。 */
-  attemptNewScore: number;
-  /** 最後に更新したアップロードの日時（サーバーの LocalDateTime 文字列）。 */
-  lastAttemptAt: string;
+/** 【関数の役割】 行のアイコンから根拠モーダルを開く。挑戦済みの行も同じ形なのでそのまま渡せる。 */
+function openReason(item: FillRecommendationItem) {
+  reasonItem.value = item;
 }
 
 const items = ref<FillRecommendationItem[]>([]);
@@ -446,9 +450,13 @@ function pointsToGo(sug: FillRecommendationItem): number {
   return Math.max(0, sug.targetScore - sug.currentScore);
 }
 
-/** 目標側のツールチップ: 素のスコアとレート、推定の根拠。記法だけでは分からない情報をここに逃がす。 */
+/**
+ * 目標側のツールチップ: 素のスコアとレート、達成時の増分、推定の根拠。記法だけでは分からない情報をここに逃がす。
+ * 「期待 +x pt」は達成率 × 達成時の増分なので、達成時の増分を併記すると 2 つの数字の関係が分かる。
+ */
 function targetTooltip(sug: FillRecommendationItem): string {
   return `${t('advice.targetScore', { n: sug.targetScore.toLocaleString() })} (${sug.targetRate.toFixed(2)}%) / `
+    + `${t('advice.gainOnReach', { n: sug.targetGain.toFixed(1) })} / `
     + t('advice.supportHint', { n: sug.supportCount, acc: accuracyLabel(sug.accuracy) });
 }
 
@@ -480,6 +488,7 @@ watch(() => props.totalPoints, fetchIfNeeded);
 watch(() => props.viewingUserId, () => {
   items.value = [];
   attemptedItems.value = [];
+  reasonItem.value = null;
   showAttempted.value = false;
   loadError.value = '';
   buildingRetries = 0;
