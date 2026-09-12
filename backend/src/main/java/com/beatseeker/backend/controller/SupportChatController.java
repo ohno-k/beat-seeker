@@ -8,12 +8,14 @@ import com.beatseeker.backend.repository.SupportChatMessageRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.EmailService;
+import com.beatseeker.backend.util.JstTime;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -174,8 +176,15 @@ public class SupportChatController {
             userById.putIfAbsent(u.getId(), u);
         }
 
+        // 最終メッセージが新しい順 (最近やり取りしたスレッドを上に)。
+        // レスポンスの lastMessageAt は表示用文字列に整形するため、並べ替えは整形前の LocalDateTime で行う。
+        List<Map.Entry<Long, List<SupportChatMessage>>> conversations = new ArrayList<>(byUser.entrySet());
+        conversations.sort(Comparator.comparing(
+                (Map.Entry<Long, List<SupportChatMessage>> e) -> e.getValue().get(e.getValue().size() - 1).getCreatedAt(),
+                Comparator.nullsFirst(Comparator.<LocalDateTime>naturalOrder())).reversed());
+
         List<Map<String, Object>> threads = new ArrayList<>();
-        for (Map.Entry<Long, List<SupportChatMessage>> e : byUser.entrySet()) {
+        for (Map.Entry<Long, List<SupportChatMessage>> e : conversations) {
             List<SupportChatMessage> msgs = e.getValue();
             User u = userById.get(e.getKey());
             int unread = 0;
@@ -193,19 +202,10 @@ public class SupportChatController {
             thread.put("messageCount", msgs.size());
             thread.put("unreadCount", unread);
             thread.put("lastMessageBody", last.getBody());
-            thread.put("lastMessageAt", last.getCreatedAt());
+            thread.put("lastMessageAt", JstTime.toIsoString(last.getCreatedAt()));
             thread.put("lastSender", last.getSender());
             threads.add(thread);
         }
-
-        // 最終メッセージが新しい順 (最近やり取りしたスレッドを上に)。
-        threads.sort((a, b) -> {
-            Comparable<Object> at = asComparable(a.get("lastMessageAt"));
-            Object bt = b.get("lastMessageAt");
-            if (at == null) return bt == null ? 0 : 1;
-            if (bt == null) return -1;
-            return bt.equals(at) ? 0 : -at.compareTo(bt);
-        });
         return ResponseEntity.ok(threads);
     }
 
@@ -312,19 +312,18 @@ public class SupportChatController {
         return body.length() > MAX_BODY_LENGTH ? body.substring(0, MAX_BODY_LENGTH) : body;
     }
 
-    /** チャットメッセージ 1 件を表示用 Map に整形。 */
+    /**
+     * チャットメッセージ 1 件を表示用 Map に整形。
+     * {@code createdAt} はサーバー TZ 依存の {@link LocalDateTime} ではなく、JST オフセット付き ISO 文字列
+     * ({@code 2026-09-12T15:30:00+09:00}) で返す。フロントはこれを {@code new Date()} でそのまま解釈できる。
+     */
     private static Map<String, Object> chatMap(SupportChatMessage m) {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", m.getId());
         map.put("sender", m.getSender());
         map.put("body", m.getBody());
-        map.put("createdAt", m.getCreatedAt());
+        map.put("createdAt", JstTime.toIsoString(m.getCreatedAt()));
         return map;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Comparable<Object> asComparable(Object o) {
-        return o instanceof Comparable ? (Comparable<Object>) o : null;
     }
 
     /** お問い合わせ / 返信の送信リクエスト。{@code body} が本文。 */

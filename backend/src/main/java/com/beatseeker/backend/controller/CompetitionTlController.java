@@ -6,6 +6,7 @@ import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.CompetitionMatchKinds;
 import com.beatseeker.backend.service.CompetitionTeamStandingsService;
 import com.beatseeker.backend.service.EmailService;
+import com.beatseeker.backend.util.JstTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -578,13 +579,17 @@ public class CompetitionTlController {
         return m;
     }
 
-    /** チャットメッセージ 1 件を表示用 Map に整形 (id / sender / body / createdAt)。 */
+    /**
+     * チャットメッセージ 1 件を表示用 Map に整形 (id / sender / body / createdAt)。
+     * {@code createdAt} はサーバー TZ 依存の LocalDateTime ではなく JST オフセット付き ISO 文字列
+     * ({@code 2026-09-12T15:30:00+09:00}) で返す。{@code CompetitionAdminController} の運営側チャットも共用。
+     */
     static Map<String, Object> chatMap(CompetitionChatMessage m) {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", m.getId());
         map.put("sender", m.getSender());
         map.put("body", m.getBody());
-        map.put("createdAt", m.getCreatedAt());
+        map.put("createdAt", JstTime.toIsoString(m.getCreatedAt()));
         return map;
     }
 

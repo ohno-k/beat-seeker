@@ -1045,6 +1045,7 @@ const returnToMyData = async () => {
 // 目的:
 //  - ログイン成功時: 閲覧対象を自分に戻し、自分のスコア・申請・通知を一括取得。
 //    保留していたブックマークレットデータがあればこのタイミングで取り込み。
+//    公開ランディングからのログインはダッシュボードへ移す。
 //    Google OAuth リダイレクト直後は URL をクリーンにしてダッシュボードに飛ばす。
 //  - ログアウト時: すべてのユーザー情報をクリアし、グラフやテーブルをゲスト状態に戻す。
 watch(isLoggedIn, (newVal) => {
@@ -1058,6 +1059,15 @@ watch(isLoggedIn, (newVal) => {
     fetchPendingRequests();
     fetchAppNotifications();
     requestNotificationPermission();
+
+    // 公開ランディング（未ログインの /）からログインモーダル経由でログインした場合は
+    // ダッシュボードへ切り替える。PC はサイドバーが常時見えているので気付きにくいが、
+    // スマホではランディングに留まったまま見えてしまう。
+    // onMounted のログイン済み判定と同じく URL も /dashboard に揃え、リロードしても戻れるようにする。
+    if (activeTab.value === 'landing') {
+      activeTab.value = 'dashboard';
+      window.history.replaceState({}, document.title, '/dashboard');
+    }
 
     if (pendingImportOpen.value) {
       pendingImportOpen.value = false;
