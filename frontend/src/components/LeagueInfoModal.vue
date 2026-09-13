@@ -10,7 +10,7 @@
  * 文言はすべて i18n（league.infoModal.*）で ja/en/ko に対応する。
  * リーグはスコアリーグのみ（BP リーグは廃止済み）なので、BP に関する記述は置かない。
  */
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { useLeague } from '../composables/useLeague';
@@ -28,13 +28,23 @@ const joined = ref(false);
 const joining = ref(false);
 /** 参加失敗時のエラーメッセージ。 */
 const joinError = ref('');
+/** 参加できない理由コード（API の joinBlockedReason）。参加できるときは null。 */
+const joinBlockedReason = ref<string | null>(null);
+/** 参加できない理由の表示文。参加できるときは空文字。 */
+const joinBlockedText = computed(() => {
+  if (!joinBlockedReason.value) return '';
+  return joinBlockedReason.value === 'noPastScores'
+    ? t('league.joinBlocked.noPastScores')
+    : t('league.joinBlocked.generic');
+});
 
-// モーダルを開いた時点の参加状態を取得（ログイン時のみ）。取得失敗しても説明表示は続ける。
+// モーダルを開いた時点の参加状態と参加可否を取得（ログイン時のみ）。取得失敗しても説明表示は続ける。
 onMounted(async () => {
   if (!isLoggedIn.value) return;
   try {
-    const entries = await league.fetchMe();
-    joined.value = entries.some((e) => e.ladderType === 'score' && e.active);
+    const status = await league.fetchMeStatus();
+    joined.value = status.entries.some((e) => e.ladderType === 'score' && e.active);
+    joinBlockedReason.value = status.joinBlockedReason;
   } catch {
     /* 参加状態が取れなくても無視（ボタンは押せる状態のまま） */
   }
@@ -560,6 +570,8 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
           <div class="flex items-center justify-end gap-2 flex-wrap">
             <span v-if="joinError" class="text-xs text-red-500 mr-auto">{{ joinError }}</span>
             <span v-else-if="!isLoggedIn" class="text-xs text-slate-400 dark:text-slate-500 mr-auto">{{ t('league.infoModal.loginToJoin') }}</span>
+            <!-- 参加できない理由（一時措置: 過去作スコアが無い等）。未参加でボタンが無効なときだけ出す。 -->
+            <span v-else-if="!joined && joinBlockedText" class="text-xs text-red-500 mr-auto">{{ joinBlockedText }}</span>
 
             <button
               class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-semibold transition-colors"
@@ -580,7 +592,7 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
             <!-- 未参加: 参加ボタン -->
             <button
               v-else
-              :disabled="!isLoggedIn || joining"
+              :disabled="!isLoggedIn || joining || !!joinBlockedText"
               class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               @click="doJoin"
             >

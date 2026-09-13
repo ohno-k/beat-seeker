@@ -84,7 +84,11 @@ public class LeagueController {
         List<Map<String, Object>> entries = leagueService.myEntries(user).stream()
                 .map(this::toEntryMap)
                 .toList();
-        return ResponseEntity.ok(Map.of("entries", entries));
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("entries", entries);
+        // 参加できない理由（無ければ null）。フロントは参加ボタンを無効化して理由を表示する。
+        result.put("joinBlockedReason", leagueService.joinBlockedReason(user));
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -107,6 +111,13 @@ public class LeagueController {
         }
         if (leagueService.isRegistrationLocked()) {
             return ResponseEntity.badRequest().body(Map.of("error", leagueService.registrationLockMessage()));
+        }
+        // 一時措置: 過去作スコアが無いユーザーは参加できない（LeagueService.joinBlockedReason）。
+        String blockedReason = leagueService.joinBlockedReason(user);
+        if (blockedReason != null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", leagueService.joinBlockedMessage(blockedReason),
+                    "reason", blockedReason));
         }
         LeagueEntry entry = leagueService.join(user, req.ladderType());
         return ResponseEntity.ok(Map.of("message", "参加を受け付けました。次回の週次編成から反映されます。",
@@ -166,11 +177,18 @@ public class LeagueController {
                 .filter(e -> ladder.equals(e.getLadderType()))
                 .findFirst().orElse(null);
         result.put("entry", entry != null ? toEntryMap(entry) : null);
+        // 参加できない理由（無ければ null）。参加カードのボタン無効化と理由表示に使う。
+        result.put("joinBlockedReason", leagueService.joinBlockedReason(user));
 
         LeagueWeek week = leagueWeekRepository
                 .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(ladder, "active").orElse(null);
         if (week == null) {
             result.put("week", null);
+            // 開催中の週が無い間（締め後〜次回開始、休止週）も「次はいつ始まるか」を出せるよう、
+            // 準備中の draft 週（＝次回の開催回）を添える。draft が無ければ null。
+            LeagueWeek next = leagueWeekRepository
+                    .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(ladder, "draft").orElse(null);
+            result.put("nextWeek", next != null ? toWeekMap(next) : null);
             result.put("member", null);
             result.put("songs", List.of());
             result.put("standings", null);

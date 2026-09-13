@@ -130,6 +130,15 @@ const isJoined = computed(() => myEntry.value?.active === true);
 const isPendingNextWeek = computed(() =>
   isJoined.value && !!current.value?.week && !current.value?.member
 );
+/**
+ * 参加できない理由の表示文。参加できるときは空文字。
+ * 理由コードは API（/current の joinBlockedReason）が返す。現状は「過去作スコアが無い」のみ。
+ */
+const joinBlockedText = computed(() => {
+  const reason = current.value?.joinBlockedReason ?? null;
+  if (!reason) return '';
+  return reason === 'noPastScores' ? t('league.joinBlocked.noPastScores') : t('league.joinBlocked.generic');
+});
 /** 順位表の自分の行（ハイライト用）。 */
 const myRow = computed(() =>
   current.value?.standings?.find(r => r.userId === user.value?.id) ?? null
@@ -903,11 +912,13 @@ onUnmounted(() => {
             />
             <p v-if="!isJoined" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ t('league.joinNote') }}</p>
             <p v-if="!isJoined" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ t('league.privacyNote') }}</p>
+            <!-- 参加できない理由（一時措置: 過去作スコアが無い等）。API が理由を返したときだけ出す。 -->
+            <p v-if="!isJoined && joinBlockedText" class="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400">{{ joinBlockedText }}</p>
           </div>
           <button
             v-if="!isJoined"
-            class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold disabled:opacity-50"
-            :disabled="busy"
+            class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="busy || !!joinBlockedText"
             @click="handleJoin"
           >{{ t('league.join') }}</button>
           <button
@@ -919,9 +930,13 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- 開催中の週 -->
+      <!-- 開催中の週が無い（締め後〜次回開始の間・休止週）。次回の開催回が準備済みなら開始予定を出す。 -->
       <div v-if="!current?.week" class="bg-white dark:bg-slate-800 rounded-xl shadow p-6 text-center text-slate-500 dark:text-slate-400 text-sm">
-        {{ t('league.noWeek') }}
+        <p>{{ t('league.noWeek') }}</p>
+        <p v-if="current?.nextWeek" class="mt-2 font-semibold text-indigo-600 dark:text-indigo-400">
+          {{ t('league.nextWeekNotice', { label: weekLabel(current.nextWeek.weekNo), start: shortDateTime(current.nextWeek.startsAt) }) }}
+        </p>
+        <p v-else class="mt-2">{{ t('league.noWeekHint') }}</p>
       </div>
       <template v-else>
         <!-- 週ヘッダー + 課題曲 -->

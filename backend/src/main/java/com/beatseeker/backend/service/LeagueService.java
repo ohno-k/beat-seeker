@@ -3,7 +3,9 @@ package com.beatseeker.backend.service;
 import com.beatseeker.backend.entity.LeagueEntry;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.LeagueEntryRepository;
+import com.beatseeker.backend.repository.PastScoreRepository;
 import com.beatseeker.backend.repository.VersionPtSnapshotRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,16 +39,74 @@ public class LeagueService {
     /** 過去作の最終 PT アーカイブ。初回参加時の階級判定で「歴代最高」を参照するために使う。 */
     private final VersionPtSnapshotRepository versionPtSnapshotRepository;
 
+    /** 過去作スコア。参加ゲート（{@link #joinBlockedReason}）で「前作までの記録があるか」を見るために使う。 */
+    private final PastScoreRepository pastScoreRepository;
+
+    /**
+     * 【一時措置】過去作スコア（{@code past_scores}）が 1 件も無いユーザーの参加を受け付けないか。
+     *
+     * 新作稼働直後はリーグの有効ライン（週開始時点の自己ベスト）を過去作の記録から取る
+     * （{@code app.league.baseline-includes-past}）。過去作の記録が無い人はラインの基準を持てず、
+     * 同じグループの他の人と条件が揃わないため、その間は新規参加を止める。
+     * {@code app.league.require-past-scores-to-join}（既定 false）。
+     * 過去作アーカイブ（{@code version_pt_snapshots}）が空の間＝世代切り替え前は
+     * 「前作の記録が無い」を判定できないので、この設定に関わらずゲートしない。
+     */
+    private final boolean requirePastScoresToJoin;
+
+    /** {@link #joinBlockedReason} が返す理由コード: 過去作スコアが無い。フロントの i18n キーと対応させる。 */
+    public static final String JOIN_BLOCKED_NO_PAST_SCORES = "noPastScores";
+
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
      *
      * @param leagueEntryRepository       エントリーの永続化リポジトリ
      * @param versionPtSnapshotRepository 過去作の最終 PT アーカイブ
+     * @param pastScoreRepository         過去作スコア
+     * @param requirePastScoresToJoin     過去作スコアが無いユーザーの参加を止めるか（一時措置）
      */
     public LeagueService(LeagueEntryRepository leagueEntryRepository,
-                         VersionPtSnapshotRepository versionPtSnapshotRepository) {
+                         VersionPtSnapshotRepository versionPtSnapshotRepository,
+                         PastScoreRepository pastScoreRepository,
+                         @Value("${app.league.require-past-scores-to-join:false}") boolean requirePastScoresToJoin) {
         this.leagueEntryRepository = leagueEntryRepository;
         this.versionPtSnapshotRepository = versionPtSnapshotRepository;
+        this.pastScoreRepository = pastScoreRepository;
+        this.requirePastScoresToJoin = requirePastScoresToJoin;
+    }
+
+    /**
+     * 【メソッドの役割】 このユーザーがいま参加（復帰を含む）できない理由コードを返す。
+     *
+     * 参加できるなら null。理由は現状 {@link #JOIN_BLOCKED_NO_PAST_SCORES} のみ
+     * （{@link #requirePastScoresToJoin} が有効で、過去作アーカイブが存在し、本人に過去作スコアが無い）。
+     * 参加受付のロック（{@link #isRegistrationLocked}）は時間帯の都合であって本人の状態ではないので、
+     * ここには含めない。
+     *
+     * @param user 対象ユーザー
+     * @return 理由コード。参加できるなら null
+     */
+    public String joinBlockedReason(User user) {
+        if (!requirePastScoresToJoin || user == null || user.getId() == null) {
+            return null;
+        }
+        if (versionPtSnapshotRepository.count() == 0) {
+            return null; // 世代切り替え前（アーカイブ無し）は「前作の記録が無い」を判定できない
+        }
+        return pastScoreRepository.existsByUser(user) ? null : JOIN_BLOCKED_NO_PAST_SCORES;
+    }
+
+    /**
+     * 【メソッドの役割】 参加をブロックしたときにユーザーへ返す説明メッセージを返す。
+     *
+     * @param reason {@link #joinBlockedReason} の理由コード
+     * @return 案内文
+     */
+    public String joinBlockedMessage(String reason) {
+        if (JOIN_BLOCKED_NO_PAST_SCORES.equals(reason)) {
+            return "前作までのスコア（歴代スコア）が登録されていないため、現在はリーグに参加できません。";
+        }
+        return "現在はリーグに参加できません。";
     }
 
     /**

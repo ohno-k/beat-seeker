@@ -125,6 +125,9 @@ public class VersionTransitionService {
      *    歴代ベストの用途に照らして最高スコアを採る。
      *  - <b>未プレー（score = 0）は移さない。</b> 公式 CSV は全収録曲を含むため、
      *    そのまま入れると未プレー行でテーブルが膨らむ。
+     *  - <b>INFINITAS の記録（source = "infinitas"）は移さない。</b> {@code past_scores} は source 列を
+     *    持たず、リーグの有効ライン（{@code app.league.baseline-includes-past}）や課題曲選定など
+     *    「アーケード記録のみ」の用途から参照されるため、混ぜると INFINITAS のベストがラインになってしまう。
      *  - {@code past_scores.last_played_at} は文字列カラム（"YYYY-MM-DD HH24:MI" 書式）なので
      *    {@code to_char} で変換する。{@code scores} 側は timestamp 型。
      *
@@ -140,7 +143,7 @@ public class VersionTransitionService {
                 "       s.score, s.clear_type, s.dj_level, s.pgreat, s.great, s.miss_count, s.play_count, " +
                 "       to_char(s.last_played_at, 'YYYY-MM-DD HH24:MI') AS last_played_at " +
                 "FROM scores s " +
-                "WHERE s.score > 0 " +
+                "WHERE s.score > 0 AND (s.source IS NULL OR s.source = 'arcade') " +
                 "ORDER BY s.user_id, s.title, s.difficulty_name, s.score DESC";
 
         if (dryRun) {

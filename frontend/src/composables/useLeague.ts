@@ -120,10 +120,20 @@ export interface LeagueStandingRow {
   perSong: LeaguePerSong[];
 }
 
+/** 参加できない理由コード（GET /api/league/me・/current の joinBlockedReason）。参加できるときは null。 */
+export type LeagueJoinBlockedReason = 'noPastScores' | string;
+
 /** GET /api/league/current の応答。 */
 export interface LeagueCurrent {
   entry: LeagueEntry | null;
   week: LeagueWeekInfo | null;
+  /**
+   * 開催中の週が無いときだけ: 準備中の次回の開催回（draft 週）。休止中や締め後〜次回開始の間に
+   * 「次はいつ始まるか」を出すために使う。draft が無ければ null。
+   */
+  nextWeek?: LeagueWeekInfo | null;
+  /** 参加できない理由コード。参加できるときは null。参加ボタンの無効化と理由表示に使う。 */
+  joinBlockedReason?: LeagueJoinBlockedReason | null;
   member: { tier: number; groupIndex: number; homeTier?: number; role?: 'normal' | 'challenge' | 'defense' } | null;
   /** 未参加時のみ: プレビュー表示している DIVISION（自分の BEAT-TIER 相当に最も近い開催中 DIVISION）。 */
   previewTier?: number | null;
@@ -378,13 +388,19 @@ export function useLeague() {
     throw new Error(body?.error || `${fallback} (${res.status})`);
   };
 
-  /** 自分の両ラダーのエントリー状態を取得する。 */
-  const fetchMe = async (): Promise<LeagueEntry[]> => {
+  /** 自分のエントリー状態と参加可否（参加できない理由コード）をまとめて取得する。 */
+  const fetchMeStatus = async (): Promise<{ entries: LeagueEntry[]; joinBlockedReason: LeagueJoinBlockedReason | null }> => {
     const res = await fetch(`${API_BASE}/api/league/me`, { headers: authHeaders() });
     if (!res.ok) await raise(res, '参加状態の取得に失敗しました');
     const body = await res.json();
-    return (body.entries ?? []) as LeagueEntry[];
+    return {
+      entries: (body.entries ?? []) as LeagueEntry[],
+      joinBlockedReason: (body.joinBlockedReason ?? null) as LeagueJoinBlockedReason | null,
+    };
   };
+
+  /** 自分の両ラダーのエントリー状態を取得する。 */
+  const fetchMe = async (): Promise<LeagueEntry[]> => (await fetchMeStatus()).entries;
 
   /** 指定ラダーへ参加（または休止から復帰）する。反映は次回編成から。 */
   const join = async (ladderType: LadderType): Promise<LeagueEntry> => {
@@ -689,6 +705,7 @@ export function useLeague() {
   return {
     isLoading,
     fetchMe,
+    fetchMeStatus,
     join,
     leave,
     fetchCurrent,

@@ -20,6 +20,11 @@ import lombok.NoArgsConstructor;
  *
  * リーグはアーケード記録（CSV / ブックマークレット）限定のため、スナップショット対象は
  * source = "arcade" の行のみ（INFINITAS の記録はライン・集計に一切関与しない）。
+ *
+ * 世代切り替えの一時措置（{@code app.league.baseline-includes-past}）が有効な間は、
+ * 過去作スコア（{@code past_scores}）の自己ベストも source = "arcade" の行へ合算する
+ * （EX は最大・ミスは最小・ランプは最良。プレー回数は作品ごとに数え直されるため混ぜない）。
+ * この場合、現行作に記録が無くても過去作に記録があれば行が作られる。
  */
 @Entity
 @Table(name = "league_baselines", uniqueConstraints = {

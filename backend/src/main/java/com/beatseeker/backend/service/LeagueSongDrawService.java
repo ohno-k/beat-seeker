@@ -64,8 +64,10 @@ public class LeagueSongDrawService {
      * <b>既定は false（＝現行作のみ）で、これまでの挙動と完全に同じ。</b>
      * 世代切り替えに合わせて {@code app.league.self-best-includes-past=true} で有効化する。
      *
-     * なお「リザルト有効ライン」（週開始時点のスコア＝{@code LeagueBaseline}）はこの設定に関わらず
-     * 常に現行作のみを見る。週内にプレーしたかの判定に過去作を混ぜてはならないため。
+     * なお「リザルト有効ライン」（週開始時点のスコア＝{@code LeagueBaseline}）は別の設定
+     * {@code app.league.baseline-includes-past}（{@code LeagueWeekLifecycleService#snapshotBaselines}）で
+     * 過去作を含めるかを決める。プレビューのライン表示と実際のラインを一致させるため、
+     * 世代切り替え時は両方を同じ値にすること。
      */
     private final boolean selfBestIncludesPast;
 

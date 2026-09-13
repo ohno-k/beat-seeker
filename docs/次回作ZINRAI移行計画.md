@@ -253,22 +253,35 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
 | 用途 | 参照するデータ | 状態 |
 | --- | --- | --- |
 | **新規参加時の DIVISION 配属** | 歴代最高 BEAT-PT（現行作と過去作アーカイブの高いほう） | 実装済み・常時有効 |
-| **課題曲選定の自己ベスト** | 歴代自己ベスト（現行作＋過去作の最高 EX） | 実装済み・**フラグで無効** |
-| **リザルト有効ライン**（週開始時点のスコア） | **現行作のみ** | 変更不要（元から現行作のみ） |
+| **課題曲選定の自己ベスト** | 歴代自己ベスト（現行作＋過去作の最高 EX） | 実装済み・`application.yml` で **有効**（一時措置） |
+| **リザルト有効ライン**（週開始時点のスコア） | 歴代自己ベスト（現行作＋過去作の最高 EX。プレー回数は現行作のみ） | 2026-09-13 実装・`application.yml` で **有効**（一時措置） |
+| **新規参加の受付** | 過去作スコアが 1 件も無い人は参加不可 | 2026-09-13 実装・`application.yml` で **有効**（一時措置） |
 
 - 新規参加: [LeagueService.java](../backend/src/main/java/com/beatseeker/backend/service/LeagueService.java) に `allTimeBeatPt()` を追加。
   `users.total_beat_pt` と `version_pt_snapshots` の最大値の高いほうを使う。
   **アーカイブが 1 件も無い現在は現行作の値がそのまま使われるので挙動は変わらない。**
 - 課題曲選定: [LeagueSongDrawService.java](../backend/src/main/java/com/beatseeker/backend/service/LeagueSongDrawService.java) で
   `past_scores` も突き合わせて作品をまたいだ最高 EX を採る。
-  **`app.league.self-best-includes-past`（既定 `false`）で無効**。現在は現行作のみを見るので挙動は変わらない。
-  世代切り替えに合わせて `APP_LEAGUE_SELF_BEST_INCLUDES_PAST=true` にする。
-- リザルト有効ライン: `LeagueWeekLifecycleService#snapshotBaselines` は元から `scores`（アーケードのみ）を読む。
-  **週内にプレーしたかの判定に過去作を混ぜてはならない**ため、フラグの影響も受けない。
+  `app.league.self-best-includes-past`（`application.yml` で `true`、env `LEAGUE_SELF_BEST_INCLUDES_PAST`）。
+- リザルト有効ライン: `LeagueWeekLifecycleService#snapshotBaselines` が `scores`（アーケードのみ）に加えて
+  `past_scores` の自己ベストを同じ arcade 行へ合算する（EX 最大・ミス最小・ランプ最良。プレー回数は作品ごとに
+  リセットされるため現行作のみ）。`app.league.baseline-includes-past`（`application.yml` で `true`、
+  env `LEAGUE_BASELINE_INCLUDES_PAST`）。**プレビューのライン表示と一致させるため self-best-includes-past と同じ値にする。**
+  テスト: `LeagueBaselinePastMergeTest`。
+- 新規参加の受付: `LeagueService#joinBlockedReason` が「過去作スコアが 1 件も無い」ユーザーの join を 400 で拒む
+  （理由コード `noPastScores`。`GET /api/league/me`・`/current` の `joinBlockedReason` でフロントがボタンを無効化して理由を表示）。
+  `app.league.require-past-scores-to-join`（`application.yml` で `true`、env `LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN`）。
+  **過去作アーカイブ（`version_pt_snapshots`）が空の間＝世代切り替え前はゲートしない**（「前作の記録が無い」を判定できないため）。
+  既に参加中のエントリーには適用しない（join 時のみ）。
+- `copyScoresToPastScores` は **INFINITAS（source = "infinitas"）の行を複製しない**（2026-09-13 変更）。
+  `past_scores` は source 列を持たず、上記のライン・選曲から「アーケード記録」として参照されるため。
 
-なぜ分けるのか: 稼働直後は現行作のスコアが空なので、実力参照まで現行作に限ると
+なぜこうするのか: 稼働直後は現行作のスコアが空なので、実力参照まで現行作に限ると
 「全員最下位 DIVISION」「全曲が全員未プレー扱いで選曲が実力に合わない」という状態になる。
-一方、結果判定に過去作を混ぜると週内にプレーしていない記録が有効になってしまう。
+有効ラインも現行作だけを見ると全曲「ライン無し」になり、週内に出した記録が何でも有効になってしまうため、
+**しばらくの間は歴代ベスト超えを有効条件にする**（2026-09-13 ユーザー決定・一回限りの措置）。
+過去作の記録が無い人はラインの基準を持てず同じグループで条件が揃わないので、その間の新規参加も止める。
+落ち着いたら 3 つのフラグを `false` に戻して現行作のみの運用へ戻す。
 
 ### 使い方の手順
 

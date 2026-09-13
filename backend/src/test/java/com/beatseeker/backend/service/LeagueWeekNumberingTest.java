@@ -27,8 +27,8 @@ class LeagueWeekNumberingTest {
     private final LeagueWeekRepository weekRepository = mock(LeagueWeekRepository.class);
 
     private final LeagueWeekLifecycleService service =
-            new LeagueWeekLifecycleService(null, weekRepository, null, null, null, null, null, null, null,
-                    "2026-08-10");
+            new LeagueWeekLifecycleService(null, weekRepository, null, null, null, null, null, null, null, null,
+                    "2026-08-10", false);
 
     /** 開始日時だけを持つ週を作る。 */
     private LeagueWeek week(String startsAt, Integer weekNo) {

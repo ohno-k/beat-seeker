@@ -53,6 +53,12 @@ public interface PastScoreRepository extends JpaRepository<PastScore, Long> {
     long countByUserAndVersion(User user, Integer version);
 
     /**
+     * 指定ユーザーに過去作スコアが 1 件でもあるか。
+     * リーグの参加ゲート（{@code app.league.require-past-scores-to-join}）の判定に使う。
+     */
+    boolean existsByUser(User user);
+
+    /**
      * 指定ユーザー・指定作品のレコードを全削除する。
      * 取り込みミスのリカバリ手段。テーブルが分かれているため既存集計への影響はない。
      */

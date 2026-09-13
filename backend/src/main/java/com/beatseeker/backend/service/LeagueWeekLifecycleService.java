@@ -90,6 +90,8 @@ public class LeagueWeekLifecycleService {
     private final LeagueStandingsService standingsService;
     private final LeagueSongDrawService songDrawService;
     private final SongDefinitionRepository songDefinitionRepository;
+    /** 過去作スコア。{@link #baselineIncludesPast} が有効なときだけベースラインの合算に使う。 */
+    private final PastScoreRepository pastScoreRepository;
 
     /**
      * 開催回 #1 の開始日（JST）。この日以降に始まる週へ通し番号（#1, #2, ...）を採番する。
@@ -97,6 +99,18 @@ public class LeagueWeekLifecycleService {
      * 画面では「プレシーズン」と表示する。{@code app.league.week-one-start} で変更可。
      */
     private final LocalDate weekOneStart;
+
+    /**
+     * 【一時措置】有効ライン（週開始時点の自己ベスト＝{@link LeagueBaseline}）に過去作スコア
+     * （{@code past_scores}）を含めるか。{@code app.league.baseline-includes-past}（既定 false）。
+     *
+     * 新作稼働直後は現行作（{@code scores}）の記録がほぼ空で、全曲が「ライン無し」になり
+     * 週内に出した記録が何でも有効になってしまう。その間は歴代ベストを基準にして
+     * 「歴代ベスト超え」を有効条件にする。落ち着いたら false に戻す（現行作のみに戻る）。
+     * 課題曲選定側の {@code app.league.self-best-includes-past} と同じ値にすること
+     * （プレビューのライン表示と実際のラインを一致させるため）。
+     */
+    private final boolean baselineIncludesPast;
 
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
@@ -110,7 +124,9 @@ public class LeagueWeekLifecycleService {
                                       LeagueStandingsService standingsService,
                                       LeagueSongDrawService songDrawService,
                                       SongDefinitionRepository songDefinitionRepository,
-                                      @Value("${app.league.week-one-start:2026-08-10}") String weekOneStart) {
+                                      PastScoreRepository pastScoreRepository,
+                                      @Value("${app.league.week-one-start:2026-08-10}") String weekOneStart,
+                                      @Value("${app.league.baseline-includes-past:false}") boolean baselineIncludesPast) {
         this.weekOneStart = LocalDate.parse(weekOneStart);
         this.leagueEntryRepository = leagueEntryRepository;
         this.leagueWeekRepository = leagueWeekRepository;
@@ -121,6 +137,8 @@ public class LeagueWeekLifecycleService {
         this.standingsService = standingsService;
         this.songDrawService = songDrawService;
         this.songDefinitionRepository = songDefinitionRepository;
+        this.pastScoreRepository = pastScoreRepository;
+        this.baselineIncludesPast = baselineIncludesPast;
     }
 
     /**
@@ -1378,8 +1396,15 @@ public class LeagueWeekLifecycleService {
     /**
      * 全メンバーの課題曲の現在スコアを {@link LeagueBaseline} として保存する。
      * 同一 (譜面, source) に difficultyLevel 違いの重複行があり得るため、ベスト値に集約して 1 行にする。
+     *
+     * <p>{@link #baselineIncludesPast} が有効なら過去作スコア（{@code past_scores}）の自己ベストも
+     * source = "arcade" の行へ合算する（EX は最大・ミスは最小・ランプは最良）。プレー回数は
+     * 作品ごとに 0 から数え直される値なので過去作の分は混ぜない（現行作に行が無ければ null のまま
+     * ＝ {@code LeagueStandingsService#improvedFromBaseline} がプレー回数比較をスキップする）。
+     * 現行作に記録が無くても過去作に記録があれば行を作るので、その人の「週内プレー」判定は
+     * 「新規行の出現」ではなく「ベースラインからの前進（EX 更新など）」で行われる。
      */
-    private void snapshotBaselines(LeagueWeek week, List<LeagueMember> members) {
+    void snapshotBaselines(LeagueWeek week, List<LeagueMember> members) {
         // 課題曲はグループ単位なので (tier, groupIndex) でまとめる。
         Map<String, List<LeagueSong>> songsByGroup = leagueSongRepository
                 .findByWeekOrderByTierAscSlotAsc(week).stream()
@@ -1398,39 +1423,64 @@ public class LeagueWeekLifecycleService {
             // リーグはアーケード記録限定のため、INFINITAS 行はスナップショットしない。
             Map<String, LeagueBaseline> merged = new LinkedHashMap<>();
             for (Score s : scoreRepository.findByUserAndTitlesAndDifficulties(member.getUser(), titles, diffs)) {
-                boolean isTargetChart = songs.stream().anyMatch(ls ->
-                        ls.getTitle().equals(s.getTitle()) && ls.getDifficultyName().equals(s.getDifficultyName()));
-                if (!isTargetChart) continue;
+                if (!isTargetChart(songs, s.getTitle(), s.getDifficultyName())) continue;
                 String source = s.getSource() != null ? s.getSource() : "arcade";
                 if (!"arcade".equals(source)) continue;
-                String key = s.getTitle() + "|" + s.getDifficultyName() + "|" + source;
-                LeagueBaseline b = merged.get(key);
-                if (b == null) {
-                    b = new LeagueBaseline();
-                    b.setWeek(week);
-                    b.setUser(member.getUser());
-                    b.setTitle(s.getTitle());
-                    b.setDifficultyName(s.getDifficultyName());
-                    b.setSource(source);
-                    merged.put(key, b);
-                }
-                if (s.getScore() != null && (b.getBaseScore() == null || s.getScore() > b.getBaseScore())) {
-                    b.setBaseScore(s.getScore());
-                }
-                if (s.getMissCount() != null && (b.getBaseMiss() == null || s.getMissCount() < b.getBaseMiss())) {
-                    b.setBaseMiss(s.getMissCount());
-                }
+                LeagueBaseline b = baselineFor(merged, week, member.getUser(), s.getTitle(), s.getDifficultyName(), source);
+                mergeBest(b, s.getScore(), s.getMissCount(), s.getClearType());
                 if (s.getPlayCount() != null && (b.getBasePlayCount() == null || s.getPlayCount() > b.getBasePlayCount())) {
                     b.setBasePlayCount(s.getPlayCount());
                 }
-                if (LeagueChartNotation.clearTypeRank(s.getClearType())
-                        > LeagueChartNotation.clearTypeRank(b.getBaseClearType())) {
-                    b.setBaseClearType(s.getClearType());
+            }
+            // 一時措置: 過去作（歴代）の自己ベストもラインの基準に含める（クラス冒頭の baselineIncludesPast 参照）。
+            // past_scores は CSV 取り込み由来のアーケード記録のみ（source 列を持たない）なので arcade 行へ合算する。
+            if (baselineIncludesPast) {
+                for (PastScore p : pastScoreRepository.findByUserAndTitlesAndDifficulties(member.getUser(), titles, diffs)) {
+                    if (!isTargetChart(songs, p.getTitle(), p.getDifficultyName())) continue;
+                    LeagueBaseline b = baselineFor(merged, week, member.getUser(), p.getTitle(), p.getDifficultyName(), "arcade");
+                    mergeBest(b, p.getScore(), p.getMissCount(), p.getClearType());
+                    // プレー回数は作品ごとにリセットされる値なので過去作の分は混ぜない
                 }
             }
             baselines.addAll(merged.values());
         }
         leagueBaselineRepository.saveAll(baselines);
+    }
+
+    /** その週の課題曲に (title, difficultyName) が含まれるか。title IN × diff IN の直積で返る余分な行を落とす。 */
+    private static boolean isTargetChart(List<LeagueSong> songs, String title, String difficultyName) {
+        return songs.stream().anyMatch(ls ->
+                ls.getTitle().equals(title) && ls.getDifficultyName().equals(difficultyName));
+    }
+
+    /** (title|diff|source) のベースライン行を取得（無ければ作成して登録）する。 */
+    private static LeagueBaseline baselineFor(Map<String, LeagueBaseline> merged, LeagueWeek week, User user,
+                                              String title, String difficultyName, String source) {
+        String key = title + "|" + difficultyName + "|" + source;
+        LeagueBaseline b = merged.get(key);
+        if (b == null) {
+            b = new LeagueBaseline();
+            b.setWeek(week);
+            b.setUser(user);
+            b.setTitle(title);
+            b.setDifficultyName(difficultyName);
+            b.setSource(source);
+            merged.put(key, b);
+        }
+        return b;
+    }
+
+    /** ベースライン行へ 1 レコード分のベスト値を合算する（EX は最大・ミスは最小・ランプは最良）。 */
+    private static void mergeBest(LeagueBaseline b, Integer score, Integer missCount, String clearType) {
+        if (score != null && (b.getBaseScore() == null || score > b.getBaseScore())) {
+            b.setBaseScore(score);
+        }
+        if (missCount != null && (b.getBaseMiss() == null || missCount < b.getBaseMiss())) {
+            b.setBaseMiss(missCount);
+        }
+        if (LeagueChartNotation.clearTypeRank(clearType) > LeagueChartNotation.clearTypeRank(b.getBaseClearType())) {
+            b.setBaseClearType(clearType);
+        }
     }
 
     /**

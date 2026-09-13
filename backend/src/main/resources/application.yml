@@ -75,6 +75,18 @@ app:
     week-one-start: ${LEAGUE_WEEK_ONE_START:2026-08-10}
     # 参加受付は毎週「月曜 0:00 〜 開始(12:00)」の間だけロックする（LeagueService.isRegistrationLocked）。
     # この 12 時間で自動事前編成 → 管理者確認 → 開始、の順に進む。設定値は持たない（曜日・時刻固定）。
+    #
+    # ── ZINRAI 世代切り替えの一時措置（2026-09-21 の #6 から「しばらくの間」。終わったら false に戻す）──
+    # 課題曲選定の自己ベストに過去作（past_scores）を含める。稼働直後は現行作のスコアが空で
+    # 全曲「全員未プレー」扱いになり、実力に合った選曲ができないため（LeagueSongDrawService）。
+    self-best-includes-past: ${LEAGUE_SELF_BEST_INCLUDES_PAST:true}
+    # 有効ライン（週開始時点の自己ベスト）にも過去作（past_scores）を含める。稼働直後は現行作の
+    # 記録が無く全曲ライン無しになるため、歴代ベスト超えを有効条件にする（LeagueWeekLifecycleService）。
+    # プレビューと実ラインを一致させるため self-best-includes-past と同じ値にすること。
+    baseline-includes-past: ${LEAGUE_BASELINE_INCLUDES_PAST:true}
+    # 過去作スコアが 1 件も無いユーザーの新規参加を受け付けない（ラインの基準を持てないため）。
+    # 過去作アーカイブ（version_pt_snapshots）が空の間＝世代切り替え前は判定せず、誰でも参加できる。
+    require-past-scores-to-join: ${LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN:true}
 
 vapid:
   # 公開鍵はブラウザに配布されるため非機密。秘密鍵は環境変数で渡す（リポジトリにコミットしない）。

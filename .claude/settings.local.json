@@ -15,7 +15,8 @@
       "Bash(node diag2.js out2.json)",
       "Bash(node -e ' *)",
       "Bash(node diag3.js out3.json)",
-      "Bash(echo \"EXIT=$?\")"
+      "Bash(echo \"EXIT=$?\")",
+      "PowerShell(Set-Location \"$HOME\\\\beat-seeker\"; git status --short)"
     ]
   }
 }
