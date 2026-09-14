@@ -48,7 +48,8 @@ public class LeagueService {
      * 新作稼働直後はリーグの有効ライン（週開始時点の自己ベスト）を過去作の記録から取る
      * （{@code app.league.baseline-includes-past}）。過去作の記録が無い人はラインの基準を持てず、
      * 同じグループの他の人と条件が揃わないため、その間は新規参加を止める。
-     * {@code app.league.require-past-scores-to-join}（既定 false）。
+     * {@code app.league.require-past-scores-to-join}（既定 false。2026-09-13 に true で導入し、
+     * 2026-09-14 に解除して false に戻した。仕組みは残してあるので必要なら再び true にできる）。
      * 過去作アーカイブ（{@code version_pt_snapshots}）が空の間＝世代切り替え前は
      * 「前作の記録が無い」を判定できないので、この設定に関わらずゲートしない。
      */

@@ -255,7 +255,7 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
 | **新規参加時の DIVISION 配属** | 歴代最高 BEAT-PT（現行作と過去作アーカイブの高いほう） | 実装済み・常時有効 |
 | **課題曲選定の自己ベスト** | 歴代自己ベスト（現行作＋過去作の最高 EX） | 実装済み・`application.yml` で **有効**（一時措置） |
 | **リザルト有効ライン**（週開始時点のスコア） | 歴代自己ベスト（現行作＋過去作の最高 EX。プレー回数は現行作のみ） | 2026-09-13 実装・`application.yml` で **有効**（一時措置） |
-| **新規参加の受付** | 過去作スコアが 1 件も無い人は参加不可 | 2026-09-13 実装・`application.yml` で **有効**（一時措置） |
+| **新規参加の受付** | 過去作スコアが 1 件も無い人は参加不可 | 2026-09-13 実装・2026-09-14 に **解除**（`application.yml` で `false`。誰でも参加可） |
 
 - 新規参加: [LeagueService.java](../backend/src/main/java/com/beatseeker/backend/service/LeagueService.java) に `allTimeBeatPt()` を追加。
   `users.total_beat_pt` と `version_pt_snapshots` の最大値の高いほうを使う。
@@ -270,7 +270,7 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
   テスト: `LeagueBaselinePastMergeTest`。
 - 新規参加の受付: `LeagueService#joinBlockedReason` が「過去作スコアが 1 件も無い」ユーザーの join を 400 で拒む
   （理由コード `noPastScores`。`GET /api/league/me`・`/current` の `joinBlockedReason` でフロントがボタンを無効化して理由を表示）。
-  `app.league.require-past-scores-to-join`（`application.yml` で `true`、env `LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN`）。
+  `app.league.require-past-scores-to-join`（`application.yml` で `false`＝**解除済み（2026-09-14）**、env `LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN` で `true` にすれば再び止められる）。
   **過去作アーカイブ（`version_pt_snapshots`）が空の間＝世代切り替え前はゲートしない**（「前作の記録が無い」を判定できないため）。
   既に参加中のエントリーには適用しない（join 時のみ）。
 - `copyScoresToPastScores` は **INFINITAS（source = "infinitas"）の行を複製しない**（2026-09-13 変更）。
@@ -280,8 +280,9 @@ SQL: `ScoreRepository.findSongMaxMinusCounts`。
 「全員最下位 DIVISION」「全曲が全員未プレー扱いで選曲が実力に合わない」という状態になる。
 有効ラインも現行作だけを見ると全曲「ライン無し」になり、週内に出した記録が何でも有効になってしまうため、
 **しばらくの間は歴代ベスト超えを有効条件にする**（2026-09-13 ユーザー決定・一回限りの措置）。
-過去作の記録が無い人はラインの基準を持てず同じグループで条件が揃わないので、その間の新規参加も止める。
-落ち着いたら 3 つのフラグを `false` に戻して現行作のみの運用へ戻す。
+過去作の記録が無い人はラインの基準を持てず同じグループで条件が揃わないので、その間の新規参加も止める
+（→ 2026-09-14 に解除。過去作スコアが無い人はラインが「無し」のまま参加する）。
+落ち着いたら残り 2 つのフラグ（self-best / baseline）も `false` に戻して現行作のみの運用へ戻す。
 
 ### 使い方の手順
 

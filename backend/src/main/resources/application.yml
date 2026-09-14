@@ -86,7 +86,8 @@ app:
     baseline-includes-past: ${LEAGUE_BASELINE_INCLUDES_PAST:true}
     # 過去作スコアが 1 件も無いユーザーの新規参加を受け付けない（ラインの基準を持てないため）。
     # 過去作アーカイブ（version_pt_snapshots）が空の間＝世代切り替え前は判定せず、誰でも参加できる。
-    require-past-scores-to-join: ${LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN:true}
+    # 2026-09-14 に解除（false）: 新規参加は誰でも受け付ける。再び止める場合は true にする。
+    require-past-scores-to-join: ${LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN:false}
 
 vapid:
   # 公開鍵はブラウザに配布されるため非機密。秘密鍵は環境変数で渡す（リポジトリにコミットしない）。
