@@ -13,7 +13,7 @@
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
-import { getFolderRankInfoByRate } from '../utils/beatTier';
+import { getFolderRankInfoByRate, previousTierFrame } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
 
 const props = defineProps<{
@@ -38,6 +38,8 @@ interface RankingEntry {
   playedCount: number;
   isSupporter?: boolean;
   lastUpdatedAt?: string | null;
+  /** 前作の最終 BEAT-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
+  previousBeatPt?: number | null;
 }
 
 const ranking = ref<RankingEntry[]>([]);
@@ -83,6 +85,7 @@ async function fetchRanking() {
       playedCount: Number(r.playedCount ?? 0),
       isSupporter: !!r.isSupporter,
       lastUpdatedAt: r.lastUpdatedAt ?? null,
+      previousBeatPt: r.previousBeatPt ?? null,
     }));
   } catch (e) {
     console.error(e);
@@ -229,6 +232,7 @@ function goToMyRank() {
                       size="sm"
                       disable-party
                       :is-supporter="entry.isSupporter"
+                      v-bind="previousTierFrame(entry.previousBeatPt, 'beat')"
                       :class="entry.playedCount < props.totalCount ? 'opacity-30' : ''"
                     />
                   </div>

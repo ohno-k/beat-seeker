@@ -47,15 +47,19 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     /** パスワードリセットメール等の送信を担う Service。 */
     private final EmailService emailService;
+    /** 前作の最終 PT（ティアアイコンの外枠用）。 */
+    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
     /**
      * 【コンストラクタ】 Spring が DI で各依存を注入する。
      */
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, EmailService emailService) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, EmailService emailService,
+                          com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.emailService = emailService;
+        this.previousVersionPtService = previousVersionPtService;
     }
 
     /**
@@ -187,7 +191,8 @@ public class AuthController {
             responseBody.put("showArcadeScores", user.getShowArcadeScores() != null ? user.getShowArcadeScores() : true);
             responseBody.put("showInfinitasScores", user.getShowInfinitasScores() != null ? user.getShowInfinitasScores() : true);
             responseBody.put("isSupporter", user.getIsSupporter() != null ? user.getIsSupporter() : false);
-            responseBody.put("showSupporterBorder", user.getShowSupporterBorder() != null ? user.getShowSupporterBorder() : true);
+            // 前作の最終 BEAT-PT / RATE-PT（ティアアイコンの外枠の色と光量に使う。前作の記録が無ければ null）
+            previousVersionPtService.putPrevious(responseBody, user.getId());
             // サポータートークンが未発行なら、Ko-fi webhook が参照できるよう自動で付与する
             if (user.getSupporterToken() == null || user.getSupporterToken().isEmpty()) {
                 // "BS-" + UUID 先頭 8 桁（大文字）の短いトークン
@@ -265,8 +270,6 @@ public class AuthController {
             boolean isSupporter = Boolean.TRUE.equals(user.getIsSupporter());
             user.setShowKenbanSaraTier(isSupporter && request.showKenbanSaraTier());
         }
-        if (request.showSupporterBorder() != null)
-            user.setShowSupporterBorder(request.showSupporterBorder());
         // アーケード／INFINITAS スコアの表示トグル。両方とも単純な PATCH 的更新。
         // 「両方 false」のような極端な設定もユーザー責任で許容する（UI からはほぼ起きない）。
         if (request.showArcadeScores() != null)

@@ -55,7 +55,9 @@ interface ShareInfo {
         arenaRank: string;
         playSide: string;
         isSupporter: boolean;
-        showSupporterBorder: boolean;
+        /** 前作の最終 BEAT-PT / RATE-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
+        previousBeatPt: number | null;
+        previousRatePt: number | null;
         showRateTier: boolean;
         totalBeatPt: number;
     };
@@ -292,6 +294,9 @@ const errorBody = computed(() => {
         :viewing-iidx-id="info.user.iidxId"
         :viewing-display-name="info.user.displayName"
         viewing-mode="public"
+        :previous-beat-pt="info.user.previousBeatPt"
+        :previous-rate-pt="info.user.previousRatePt"
+        :viewing-is-supporter="info.user.isSupporter"
         class="w-full"
       />
 

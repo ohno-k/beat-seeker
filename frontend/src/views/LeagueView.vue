@@ -22,7 +22,7 @@ import LeagueRankingModal from '../components/LeagueRankingModal.vue';
 import LeaguePointGauge from '../components/LeaguePointGauge.vue';
 import LeagueStandingsTable from '../components/LeagueStandingsTable.vue';
 import RankIcon from '../components/RankIcon.vue';
-import { getRankInfo } from '../utils/beatTier';
+import { getRankInfo, previousTierFrame } from '../utils/beatTier';
 import {
   useLeague,
   type LadderType,
@@ -1098,7 +1098,7 @@ onUnmounted(() => {
                     <td class="py-1.5 pr-2">{{ row.rank }}</td>
                     <td class="py-1.5 pr-2 break-words">
                       <span class="inline-flex items-center gap-1.5 align-middle">
-                        <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party />
+                        <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party v-bind="previousTierFrame(row.previousBeatPt, 'beat')" />
                         <span>{{ row.displayName }}</span>
                         <span v-if="roleBadge(row.role)"
                               class="inline-flex items-center gap-0.5 px-1.5 py-px rounded text-[10px] font-bold leading-none"
@@ -1241,7 +1241,7 @@ onUnmounted(() => {
                       ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
                       : 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'"
                   >{{ t(`league.movement.${item.movement}`) }}</span>
-                  <RankIcon :rank-name="beatTier(item.totalBeatPt).name" :tier="beatTier(item.totalBeatPt).tier" size="2xs" lite disable-party />
+                  <RankIcon :rank-name="beatTier(item.totalBeatPt).name" :tier="beatTier(item.totalBeatPt).tier" size="2xs" lite disable-party v-bind="previousTierFrame(item.previousBeatPt, 'beat')" />
                   <span class="truncate text-slate-700 dark:text-slate-200">{{ item.displayName }}</span>
                   <span v-if="item.userId === user?.id" class="text-[10px] text-indigo-500 dark:text-indigo-400 shrink-0">YOU</span>
                   <span class="ml-auto text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0">

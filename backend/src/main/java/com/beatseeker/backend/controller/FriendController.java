@@ -12,6 +12,7 @@ import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.VirtualRivalRepository;
+import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
 import org.springframework.http.ResponseEntity;
@@ -80,6 +81,8 @@ public class FriendController {
     private final PushNotificationService pushNotificationService;
     /** バーチャルライバルの BEAT-PT / RATE-PT をキャッシュから引くサービス。 */
     private final TopRankersBeatPtService topRankersBeatPtService;
+    /** 前作の最終 PT（ティアアイコンの外枠用）。 */
+    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
     /**
      * 【コンストラクタ】 Spring DI で依存を受け取る。
@@ -91,7 +94,8 @@ public class FriendController {
             ScoreRepository scoreRepository,
             VirtualRivalRepository virtualRivalRepository,
             PushNotificationService pushNotificationService,
-            TopRankersBeatPtService topRankersBeatPtService) {
+            TopRankersBeatPtService topRankersBeatPtService,
+            com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
         this.userRepository = userRepository;
         this.friendRequestRepository = friendRequestRepository;
         this.friendshipRepository = friendshipRepository;
@@ -100,6 +104,7 @@ public class FriendController {
         this.virtualRivalRepository = virtualRivalRepository;
         this.pushNotificationService = pushNotificationService;
         this.topRankersBeatPtService = topRankersBeatPtService;
+        this.previousVersionPtService = previousVersionPtService;
     }
 
     /**
@@ -137,6 +142,8 @@ public class FriendController {
             map.put("lastUploadedAt", friend.getLastUploadedAt());
             // privacyLevel が null の旧ユーザーは 0（公開）として扱う。
             map.put("privacyLevel", friend.getPrivacyLevel() != null ? friend.getPrivacyLevel() : 0);
+            // 前作の最終 PT（ティアアイコンの外枠用）
+            previousVersionPtService.putPrevious(map, friend.getId());
 
             // 履歴を昇順で取得し、末尾（= 最新スナップショット）の BEAT-PT を添える。
             // 注意: ランキング用の高速パスではなく、N+1 に近いクエリなのでフレンド数が多いと遅くなる。
@@ -197,6 +204,7 @@ public class FriendController {
             map.put("displayName", u.getDisplayName());
             map.put("iidxId", u.getIidxId());
             map.put("lastUploadedAt", u.getLastUploadedAt());
+            previousVersionPtService.putPrevious(map, u.getId());
 
             // ヒットユーザーの最新 BEAT-PT を履歴から引く。未登録なら 0。
             List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(u);
@@ -517,7 +525,9 @@ public class FriendController {
             return ResponseEntity.status(403).build();
         }
 
-        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(friend);
+        // 成長記録は現行作の分だけ返す（前作の履歴を混ぜるとグラフが世代境界で崖になるため）。
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserAndVersionOrderByUploadedAtAsc(
+                friend, IidxVersions.current(), IidxVersions.PREVIOUS);
         List<Map<String, Object>> history = logs.stream().map(log -> {
             Map<String, Object> m = new HashMap<>();
             m.put("snapshotId", log.getId().toString());

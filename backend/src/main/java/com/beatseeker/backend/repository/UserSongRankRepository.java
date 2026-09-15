@@ -88,7 +88,7 @@ public interface UserSongRankRepository extends JpaRepository<UserSongRank, Long
             "                   OR (sd.difficulty = '10' AND usr.difficulty_name = 'LEGGENDARIA')) " +
             "             ) " +
             "       ) t) AS \"totalSongs\", " +
-            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\" " +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\" " +
             "FROM users u " +
             "WHERE u.total_average_rank IS NOT NULL " +
             "ORDER BY u.total_average_rank ASC", nativeQuery = true)

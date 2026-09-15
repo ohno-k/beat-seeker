@@ -85,12 +85,12 @@ public class PastScoreController {
         if (req == null || req.version() == null) {
             return badRequest("バージョンが指定されていません");
         }
-        if (req.version() == IidxVersions.CURRENT) {
+        if (req.version() == IidxVersions.current()) {
             return badRequest("現行作のスコアは通常の取り込みを使用してください");
         }
         if (!IidxVersions.isSupportedPast(req.version())) {
             return badRequest("対応していないバージョンです（対応範囲: "
-                    + IidxVersions.MIN_PAST + "〜" + IidxVersions.MAX_PAST + "）");
+                    + IidxVersions.MIN_PAST + "〜" + IidxVersions.maxPast() + "）");
         }
         List<PastScoreRecord> records = req.records() != null ? req.records() : List.of();
 

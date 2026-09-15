@@ -3,6 +3,7 @@ package com.beatseeker.backend;
 import com.beatseeker.backend.entity.PastScore;
 import com.beatseeker.backend.service.DifficultyRevisionService;
 import com.beatseeker.backend.service.GameDataService;
+import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.LeagueChartNotation;
 import com.beatseeker.backend.service.LeagueWeekLifecycleService;
 import com.beatseeker.backend.service.SongTitleAliases;
@@ -247,6 +248,15 @@ public class DataInitializer implements ApplicationRunner {
                     "  weekly_plays INTEGER NOT NULL DEFAULT 20)"
             ).executeUpdate();
         });
+
+        // 手順4.8: score_history_logs.version のバックフィル。
+        //          列は 2026-09-15（ZINRAI 世代切り替えの前日）に追加した。それ以前の行はすべて
+        //          33 Sparkle Shower 期の記録なので、null の行を 33 で埋める（冪等。切替後に増える行は
+        //          保存時に IidxVersions.current() が入るので null にはならない）。
+        runStep("backfill score_history_logs.version", () ->
+            entityManager.createNativeQuery(
+                    "UPDATE score_history_logs SET version = " + IidxVersions.PREVIOUS + " WHERE version IS NULL")
+                    .executeUpdate());
 
         // 手順4.7: 過去作スコアの曲名を現行表記へ寄せる（例: 31 EPOLIS 期の CSV "VØID" → "VOID"）。
         //          表記が違うと現行スコアと同一譜面として突き合わせられず、歴代ベスト・練習メニュー・

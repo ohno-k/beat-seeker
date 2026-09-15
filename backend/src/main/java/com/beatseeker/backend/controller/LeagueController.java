@@ -46,6 +46,8 @@ public class LeagueController {
     private final LeagueMemberRepository leagueMemberRepository;
     private final LeagueSongRepository leagueSongRepository;
     private final LeagueEntryRepository leagueEntryRepository;
+    /** 前作の最終 PT（ティアアイコンの外枠用）。 */
+    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
     /** 昇降格ニュースで既定でさかのぼる週数。 */
     private static final int NEWS_DEFAULT_WEEKS = 4;
@@ -59,7 +61,9 @@ public class LeagueController {
                             LeagueWeekRepository leagueWeekRepository,
                             LeagueMemberRepository leagueMemberRepository,
                             LeagueSongRepository leagueSongRepository,
-                            LeagueEntryRepository leagueEntryRepository) {
+                            LeagueEntryRepository leagueEntryRepository,
+                            com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
+        this.previousVersionPtService = previousVersionPtService;
         this.userRepository = userRepository;
         this.leagueService = leagueService;
         this.standingsService = standingsService;
@@ -379,6 +383,7 @@ public class LeagueController {
                     item.put("userId", m.getUser().getId());
                     item.put("displayName", nameOf(m.getUser()));
                     item.put("totalBeatPt", m.getUser().getTotalBeatPt());
+                    previousVersionPtService.putPrevious(item, m.getUser().getId());
                     item.put("movement", m.getMovement());
                     item.put("fromTier", newsFromTier(m));
                     item.put("toTier", newsToTier(m));
@@ -469,6 +474,7 @@ public class LeagueController {
                 row.put("displayName", nameOf(e.getUser()));
                 row.put("points", points);
                 row.put("totalBeatPt", e.getUser().getTotalBeatPt());
+                previousVersionPtService.putPrevious(row, e.getUser().getId());
                 row.put("active", active);
                 rows.add(row);
             }

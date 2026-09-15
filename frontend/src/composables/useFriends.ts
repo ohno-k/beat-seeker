@@ -16,6 +16,10 @@ export interface Friend {
     privacyLevel?: number;
     isFriend?: boolean;
     hasSentRequest?: boolean;
+    /** 前作の最終 BEAT-PT（ティアアイコンの外枠用）。記録が無ければ null。 */
+    previousBeatPt?: number | null;
+    /** 前作の最終 RATE-PT。 */
+    previousRatePt?: number | null;
 }
 
 /**

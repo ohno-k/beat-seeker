@@ -45,6 +45,14 @@ public class ScoreHistoryLog {
     @Column(length = 20)
     private String tag;
 
+    /**
+     * この記録が属する作品バージョン（33 = Sparkle Shower, 34 = ZINRAI ...）。
+     * 保存時に {@link com.beatseeker.backend.service.IidxVersions#current()} を入れる。
+     * 成長記録ページの作品切り替えに使う。世代切り替え前の行は null で入っており、
+     * 起動時のバックフィル（DataInitializer）と取得クエリの COALESCE で 33 として扱う。
+     */
+    private Integer version;
+
     /** 累計 EX スコア（全曲合計）。 */
     private Long totalScore = 0L;
 

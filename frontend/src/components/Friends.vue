@@ -18,7 +18,7 @@ import type { Friend, VirtualRival } from '../composables/useFriends';
 import FriendSearchModal from './FriendSearchModal.vue';
 import FriendComparisonModal from './FriendComparisonModal.vue';
 import RankIcon from './RankIcon.vue';
-import { getRankInfo } from '../utils/beatTier';
+import { getRankInfo, previousTierFrame } from '../utils/beatTier';
 
 const emit = defineEmits<{
   'view-user': [user: { id: number; displayName: string; iidxId: string }],
@@ -221,6 +221,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
                 :rank-name="getRankInfo(friend.totalBeatPt).name"
                 :tier="getRankInfo(friend.totalBeatPt).tier"
                 size="sm"
+                v-bind="previousTierFrame(friend.previousBeatPt, 'beat')"
               />
               <div class="flex flex-col items-end">
                 <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">TIER</span>

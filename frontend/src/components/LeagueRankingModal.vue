@@ -13,7 +13,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useLeague, type LadderType, type LeagueRankingDivision } from '../composables/useLeague';
-import { getRankInfo } from '../utils/beatTier';
+import { getRankInfo, previousTierFrame } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
 
 const props = withDefaults(defineProps<{
@@ -148,6 +148,7 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
                           size="2xs"
                           lite
                           disable-party
+                          v-bind="previousTierFrame(row.previousBeatPt, 'beat')"
                         />
                         <span>{{ row.displayName }}</span>
                         <span

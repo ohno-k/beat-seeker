@@ -100,6 +100,8 @@ export interface LeagueStandingRow {
   userId: number;
   displayName: string;
   totalBeatPt: number;
+  /** 前作の最終 BEAT-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
+  previousBeatPt?: number | null;
   /** 有効曲数（0..3）。 */
   validSongs: number;
   /** 着順ポイントの3曲合計（＝得点。順位の主指標）。 */
@@ -256,6 +258,8 @@ export interface LeagueRankingEntry {
   points: number;
   /** 総合 BEAT-PT（同ポイント時の並び順＆ティアアイコン表示用）。 */
   totalBeatPt: number | null;
+  /** 前作の最終 BEAT-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
+  previousBeatPt?: number | null;
   /** 参加中なら true。false は離脱（休止）中で、DIVISION と PT は保持されている。 */
   active: boolean;
 }
@@ -276,6 +280,8 @@ export interface LeagueNewsItem {
   displayName: string;
   /** 総合 BEAT-PT（ティアアイコン表示用）。 */
   totalBeatPt: number | null;
+  /** 前作の最終 BEAT-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
+  previousBeatPt?: number | null;
   movement: 'promote' | 'relegate';
   /** 移動元 DIVISION（＝その週のホーム DIVISION）。 */
   fromTier: number;

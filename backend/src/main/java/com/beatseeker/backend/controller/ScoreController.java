@@ -20,6 +20,7 @@ import com.beatseeker.backend.repository.UserSongRankRepository;
 import com.beatseeker.backend.repository.VirtualRivalRepository;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.service.EmailService;
+import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.PushNotificationService;
 import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.SongArenaAveragesCacheService;
@@ -127,6 +128,9 @@ public class ScoreController {
     /** リーグの課題曲が更新されたときに管理者へメール通知するサービス。 */
     private final com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService;
 
+    /** 前作の最終 PT（ランキング行のティアアイコンの外枠用）。 */
+    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
+
     /**
      * 【コンストラクタ】 Spring DI で全依存を受け取る。
      */
@@ -150,7 +154,9 @@ public class ScoreController {
             TimelineEventRepository timelineEventRepository,
             VirtualRivalRepository virtualRivalRepository,
             com.beatseeker.backend.service.AdminAuthService adminAuthService,
-            com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService) {
+            com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService,
+            com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
+        this.previousVersionPtService = previousVersionPtService;
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -465,6 +471,8 @@ public class ScoreController {
         ScoreHistoryLog log = new ScoreHistoryLog();
         log.setUser(user);
         log.setUploadedAt(java.time.LocalDateTime.now());
+        // 作品バージョン（成長記録の作品切り替え用）。切替日時を過ぎると自動的に次作の番号になる。
+        log.setVersion(IidxVersions.current());
         log.setTotalBeatPt(req.totalBeatPt());
         log.setBeatPtIncrease(req.beatPtIncrease());
         log.setUpdatedCount(req.updatedCount());
@@ -705,15 +713,22 @@ public class ScoreController {
      *
      * BEAT-PT 推移グラフ、クリア種別件数推移、差分 JSON のドリルダウン等に利用される。
      *
-     * @param auth 認証情報
+     * 作品バージョンで絞る（成長記録ページの作品セレクト）。省略時は現行作。
+     * 世代切り替え前の行（version が null）は 33 Sparkle Shower として扱う。
+     *
+     * @param auth    認証情報
+     * @param version 作品バージョン（省略時は現行作）
      * @return スナップショット Map の List（uploadedAt 昇順）
      */
     @GetMapping("/history")
     public ResponseEntity<List<Map<String, Object>>> getHistory(
-            Authentication auth) {
+            Authentication auth,
+            @RequestParam(required = false) Integer version) {
 
         User user = getUser(auth);
-        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
+        int targetVersion = version != null ? version : IidxVersions.current();
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserAndVersionOrderByUploadedAtAsc(
+                user, targetVersion, IidxVersions.PREVIOUS);
 
         List<Map<String, Object>> history = new java.util.ArrayList<>();
 
@@ -756,9 +771,14 @@ public class ScoreController {
      * @return BEAT-PT 降順のランキング行 List
      */
     @GetMapping("/ranking")
-    public ResponseEntity<List<Map<String, Object>>> getGlobalRanking() {
+    public ResponseEntity<List<Map<String, Object>>> getGlobalRanking(@RequestParam(required = false) Integer version) {
+        // 過去作（例: 33）を指定されたら、世代切り替え時のスナップショットから終了時点のランキングを返す。
+        if (version != null && version != IidxVersions.current()) {
+            return ResponseEntity.ok(previousVersionPtService.archivedRanking(version, "totalBeatPt"));
+        }
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getGlobalRanking();
-        return ResponseEntity.ok(ranking);
+        // 前作の最終 PT を添える（ティアアイコンの外枠 = 前作ティアの色）
+        return ResponseEntity.ok(previousVersionPtService.decorate(ranking, "userId"));
     }
 
     /**
@@ -791,7 +811,7 @@ public class ScoreController {
      */
     @GetMapping("/ranking/by-rank")
     public ResponseEntity<List<Map<String, Object>>> getRankingByInformalRank(@RequestParam String rank) {
-        return ResponseEntity.ok(scoreRepository.findRankingByInformalRank(rank));
+        return ResponseEntity.ok(previousVersionPtService.decorate(scoreRepository.findRankingByInformalRank(rank), "userId"));
     }
 
     /**
@@ -888,9 +908,12 @@ public class ScoreController {
      * 【メソッドの役割】 RATE-PT に基づくランキング（ティア込み）を返す。
      */
     @GetMapping("/rate-ranking")
-    public ResponseEntity<List<Map<String, Object>>> getRateRanking() {
+    public ResponseEntity<List<Map<String, Object>>> getRateRanking(@RequestParam(required = false) Integer version) {
+        if (version != null && version != IidxVersions.current()) {
+            return ResponseEntity.ok(previousVersionPtService.archivedRanking(version, "totalRatePt"));
+        }
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getRateTierRanking();
-        return ResponseEntity.ok(ranking);
+        return ResponseEntity.ok(previousVersionPtService.decorate(ranking, "userId"));
     }
 
     /**
@@ -903,7 +926,7 @@ public class ScoreController {
      */
     @GetMapping("/average-ranking")
     public ResponseEntity<List<Map<String, Object>>> getAverageRanking() {
-        return ResponseEntity.ok(userSongRankRepository.getAverageRanking());
+        return ResponseEntity.ok(previousVersionPtService.decorate(userSongRankRepository.getAverageRanking(), "userId"));
     }
 
     /**

@@ -18,7 +18,8 @@
 import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import RankIcon from './RankIcon.vue';
 import RankingScatterChart, { type ScatterPoint } from './RankingScatterChart.vue';
-import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
+import { getRankInfo, getRateTierRankInfo, previousTierFrame } from '../utils/beatTier';
+import { CURRENT_VERSION, HISTORY_VERSIONS, versionName } from '../utils/iidxVersions';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { useFriends } from '../composables/useFriends';
@@ -38,6 +39,9 @@ interface BeatRankingEntry {
   lastUpdatedAt: string | null;
   /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
   includesInfinitas?: boolean;
+  isSupporter?: boolean;
+  /** 前作の最終 BEAT-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
+  previousBeatPt?: number | null;
 }
 
 interface TopRankerEntry {
@@ -72,6 +76,9 @@ interface RateRankingEntry {
   lastUpdatedAt: string | null;
   /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
   includesInfinitas?: boolean;
+  isSupporter?: boolean;
+  /** 前作の最終 RATE-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
+  previousRatePt?: number | null;
 }
 
 interface RateTopRankerEntry {
@@ -306,6 +313,20 @@ const isLoading = ref(true);
 const error = ref('');
 /** 都道府県 TOP ランカー（バーチャル）を表に混ぜて表示するか。 */
 const showTopRankers = ref(false);
+
+/**
+ * 表示する作品バージョン。初期表示は現行作（切替後は ZINRAI）。
+ * 前作（Sparkle Shower）を選ぶと、世代切り替え時のスナップショット＝終了時点のランキングを表示する。
+ * 前作の表示中は都道府県 TOP ランカー／アリーナ仮想プレイヤーの行は混ぜない（アーカイブに含まれないため）。
+ * 対象は BEAT / RATE / KENBAN / SARA。AVERAGE とシミュレーションはアーカイブが無いので現行作のまま。
+ */
+const selectedVersion = ref<number>(CURRENT_VERSION);
+/** セレクトに出す作品（新しい順）。1 作品しか無ければセレクト自体を出さない。 */
+const versionOptions = HISTORY_VERSIONS;
+/** 前作（アーカイブ）を表示中か。 */
+const isPastVersion = computed(() => selectedVersion.value !== CURRENT_VERSION);
+/** API に付けるクエリ（現行作なら空）。 */
+const versionQuery = computed(() => (isPastVersion.value ? `?version=${selectedVersion.value}` : ''));
 /** アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）を表に混ぜて表示するか。県別TOPとは独立トグル。 */
 const showArenaTopRankers = ref(false);
 
@@ -583,33 +604,39 @@ const tierChangeStats = computed(() => {
 
 /** 【関数の役割】 Beat-PT ランキング本体・都道府県 TOP ランカー・アリーナ仮想プレイヤーを並列取得し、0 pt の仮想行は除外する。 */
 async function fetchBeatRanking() {
+    // 前作の表示中は仮想プレイヤー（TOP ランカー／アリーナ）を取得しない（アーカイブに無いため）。
+    const past = isPastVersion.value;
     const [rankRes, topRes, arenaRes] = await Promise.all([
-        fetch(`${API_BASE}/api/scores/ranking`),
-        fetch(`${API_BASE}/api/scores/ranking/top-rankers`),
-        fetch(`${API_BASE}/api/scores/ranking/arena-top-rankers`),
+        fetch(`${API_BASE}/api/scores/ranking${versionQuery.value}`),
+        past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/ranking/top-rankers`),
+        past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/ranking/arena-top-rankers`),
     ]);
     if (!rankRes.ok) throw new Error('beat');
     beatRanking.value = await rankRes.json();
-    if (topRes.ok) {
+    if (topRes && topRes.ok) {
         const raw: TopRankerEntry[] = await topRes.json();
         topRankers.value = raw.filter(r => r.beatPt > 0);
+    } else if (past) {
+        topRankers.value = [];
     }
-    if (arenaRes.ok) {
+    if (arenaRes && arenaRes.ok) {
         const raw: ArenaTopRankerEntry[] = await arenaRes.json();
         arenaTopRankers.value = raw.filter(r => r.beatPt > 0);
+    } else if (past) {
+        arenaTopRankers.value = [];
     }
 }
 
 /** 【関数の役割】 KENBAN-TIER ランキングを取得する（暫定オンザフライ API）。 */
 async function fetchKenbanRanking() {
-    const res = await fetch(`${API_BASE}/api/scores/kenban-ranking`);
+    const res = await fetch(`${API_BASE}/api/scores/kenban-ranking${versionQuery.value}`);
     if (!res.ok) throw new Error('kenban');
     kenbanRanking.value = await res.json();
 }
 
 /** 【関数の役割】 SARA-TIER ランキングを取得する（暫定オンザフライ API）。 */
 async function fetchSaraRanking() {
-    const res = await fetch(`${API_BASE}/api/scores/sara-ranking`);
+    const res = await fetch(`${API_BASE}/api/scores/sara-ranking${versionQuery.value}`);
     if (!res.ok) throw new Error('sara');
     saraRanking.value = await res.json();
 }
@@ -623,20 +650,25 @@ async function fetchAverageRanking() {
 
 /** 【関数の役割】 Rate-PT ランキング本体・都道府県 TOP ランカー（Rate 版）・アリーナ仮想プレイヤー（Rate 版）を並列取得する。 */
 async function fetchRateRanking() {
+    const past = isPastVersion.value;
     const [rankRes, topRes, arenaRes] = await Promise.all([
-        fetch(`${API_BASE}/api/scores/rate-ranking`),
-        fetch(`${API_BASE}/api/scores/rate-ranking/top-rankers`),
-        fetch(`${API_BASE}/api/scores/rate-ranking/arena-top-rankers`),
+        fetch(`${API_BASE}/api/scores/rate-ranking${versionQuery.value}`),
+        past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/rate-ranking/top-rankers`),
+        past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/rate-ranking/arena-top-rankers`),
     ]);
     if (!rankRes.ok) throw new Error('rate');
     rateRanking.value = await rankRes.json();
-    if (topRes.ok) {
+    if (topRes && topRes.ok) {
         const raw: RateTopRankerEntry[] = await topRes.json();
         rateTopRankers.value = raw.filter(r => r.ratePt > 0);
+    } else if (past) {
+        rateTopRankers.value = [];
     }
-    if (arenaRes.ok) {
+    if (arenaRes && arenaRes.ok) {
         const raw: ArenaRateTopRankerEntry[] = await arenaRes.json();
         arenaRateTopRankers.value = raw.filter(r => r.ratePt > 0);
+    } else if (past) {
+        arenaRateTopRankers.value = [];
     }
 }
 
@@ -771,6 +803,37 @@ watch(viewMode, async (mode) => {
         finally { isLoading.value = false; }
     }
 });
+
+// 作品を切り替えたら BEAT/RATE/KENBAN/SARA のキャッシュを捨てて取り直す。
+// BEAT は常に（散布図と初期表示のため）、他は表示中のモードだけ取り直し、残りは次に開いたとき lazy に取る。
+watch(selectedVersion, async () => {
+    beatRanking.value = [];
+    rateRanking.value = [];
+    kenbanRanking.value = [];
+    saraRanking.value = [];
+    topRankers.value = [];
+    arenaTopRankers.value = [];
+    rateTopRankers.value = [];
+    arenaRateTopRankers.value = [];
+    beatPage.value = 1;
+    ratePage.value = 1;
+    kenbanPage.value = 1;
+    saraPage.value = 1;
+    isLoading.value = true;
+    error.value = '';
+    try {
+        const tasks: Promise<unknown>[] = [fetchBeatRanking()];
+        if (showRateTier.value || viewMode.value === 'rate') tasks.push(fetchRateRanking());
+        if (viewMode.value === 'kenban') tasks.push(fetchKenbanRanking());
+        if (viewMode.value === 'sara') tasks.push(fetchSaraRanking());
+        await Promise.all(tasks);
+    } catch (e) {
+        console.error(e);
+        error.value = t('ranking.error');
+    } finally {
+        isLoading.value = false;
+    }
+});
 </script>
 
 <template>
@@ -814,6 +877,27 @@ watch(viewMode, async (mode) => {
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           {{ t('ranking.findMyRank') }}
         </button>
+      </div>
+
+      <!-- 作品セレクト（前作の終了時点のランキング）。前作のアーカイブがある期間だけ出す -->
+      <div v-if="versionOptions.length > 1" class="flex items-center justify-end gap-3 mb-3 flex-wrap">
+        <span v-if="isPastVersion" class="text-[11px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-300 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-700">
+          {{ t('ranking.archiveBadge', { name: versionName(selectedVersion) }) }}
+        </span>
+        <span v-if="isPastVersion && (viewMode === 'average' || viewMode === 'simulation')" class="text-[11px] text-amber-600 dark:text-amber-400">
+          {{ t('ranking.archiveNote') }}
+        </span>
+        <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400" :title="t('ranking.versionSelectHint')">
+          <span>{{ t('ranking.versionSelect') }}</span>
+          <select
+            v-model.number="selectedVersion"
+            class="px-2 py-1.5 text-xs font-semibold border rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            <option v-for="v in versionOptions" :key="v.num" :value="v.num">
+              {{ v.num }} {{ versionName(v.num) }}
+            </option>
+          </select>
+        </label>
       </div>
 
       <!-- Mode Toggle -->
@@ -958,7 +1042,7 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-3 px-2 text-center">
                       <div class="flex justify-center">
-                        <RankIcon :rank-name="getRankInfo(row.entry.totalBeatPt).name" :tier="getRankInfo(row.entry.totalBeatPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                        <RankIcon :rank-name="getRankInfo(row.entry.totalBeatPt).name" :tier="getRankInfo(row.entry.totalBeatPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" v-bind="previousTierFrame(row.entry.previousBeatPt, 'beat')" />
                       </div>
                     </td>
                     <td class="py-3 text-right">
@@ -1126,7 +1210,7 @@ watch(viewMode, async (mode) => {
                     </td>
                     <td class="py-3 px-2 text-center">
                       <div class="flex justify-center">
-                        <RankIcon :rank-name="getRateTierRankInfo(row.entry.totalRatePt).name" :tier="getRateTierRankInfo(row.entry.totalRatePt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
+                        <RankIcon :rank-name="getRateTierRankInfo(row.entry.totalRatePt).name" :tier="getRateTierRankInfo(row.entry.totalRatePt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" v-bind="previousTierFrame(row.entry.previousRatePt, 'rate')" />
                       </div>
                     </td>
                     <td class="py-3 text-right">

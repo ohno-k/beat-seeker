@@ -36,16 +36,20 @@ public class ShareViewController {
     private final ScoreRepository scoreRepository;
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     private final UserSongOptionRepository userSongOptionRepository;
+    /** 前作の最終 PT（ティアアイコンの外枠用）。 */
+    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ShareViewController(ShareTokenRepository shareTokenRepository,
                                ScoreRepository scoreRepository,
                                ScoreHistoryLogRepository scoreHistoryLogRepository,
-                               UserSongOptionRepository userSongOptionRepository) {
+                               UserSongOptionRepository userSongOptionRepository,
+                               com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
         this.shareTokenRepository = shareTokenRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.userSongOptionRepository = userSongOptionRepository;
+        this.previousVersionPtService = previousVersionPtService;
     }
 
     /**
@@ -76,7 +80,7 @@ public class ShareViewController {
         user.put("arenaRank", u.getArenaRank() != null ? u.getArenaRank() : "");
         user.put("playSide", u.getPlaySide() != null ? u.getPlaySide() : "1P");
         user.put("isSupporter", u.getIsSupporter() != null ? u.getIsSupporter() : false);
-        user.put("showSupporterBorder", u.getShowSupporterBorder() != null ? u.getShowSupporterBorder() : true);
+        previousVersionPtService.putPrevious(user, u.getId());
         user.put("showRateTier", u.getShowRateTier() != null ? u.getShowRateTier() : true);
         user.put("totalBeatPt", u.getTotalBeatPt() != null ? u.getTotalBeatPt() : 0.0);
         body.put("user", user);
@@ -167,7 +171,11 @@ public class ShareViewController {
             return ResponseEntity.status(403).build();
         }
 
-        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(st.getUser());
+        // 成長記録は現行作の分だけ返す（前作の履歴を混ぜるとグラフが世代境界で崖になるため）。
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserAndVersionOrderByUploadedAtAsc(
+                st.getUser(),
+                com.beatseeker.backend.service.IidxVersions.current(),
+                com.beatseeker.backend.service.IidxVersions.PREVIOUS);
         List<Map<String, Object>> result = logs.stream().map(log -> {
             Map<String, Object> m = new HashMap<>();
             m.put("snapshotId", log.getId().toString());

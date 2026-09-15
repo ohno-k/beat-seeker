@@ -135,11 +135,11 @@ type Chart = {
 
 /**
  * 【関数の役割】 現在の URL から IIDX のバージョン番号を推定し、djdata のベース URL を組み立てる。
- * バージョンが読み取れない場合は現行作（33）にフォールバックする。
+ * バージョンが読み取れない場合は現行作（34 ZINRAI）にフォールバックする。
  */
 function resolveBase(): string {
   const vMatch = location.pathname.match(/\/game\/2dx\/(\d+)\//);
-  const ver = vMatch ? vMatch[1] : '33';
+  const ver = vMatch ? vMatch[1] : '34';
   return location.origin + '/game/2dx/' + ver;
 }
 

@@ -706,6 +706,25 @@ export function getRateTierRankInfo(totalPoints: number): RankInfo {
 }
 
 /**
+ * ティアアイコンの「前作ティアの外枠」に渡す props（RankIcon の frameRankName / frameTier）。
+ *
+ * 外枠は前作（世代切り替え時のスナップショット）の最終 PT から導いたティアの色で光り、
+ * サブティア 1〜5 で光量が変わる。今作でティアが上がっても前作のまま固定。
+ * 前作の記録が無い（null / 0）人は外枠なし（空オブジェクトを返すので v-bind してもプロパティが付かない）。
+ *
+ * @param previousPt 前作の最終 BEAT-PT または RATE-PT（API の previousBeatPt / previousRatePt）
+ * @param kind       'beat'（BEAT-TIER 尺度）か 'rate'（RATE-TIER 尺度）
+ */
+export function previousTierFrame(
+    previousPt: number | null | undefined,
+    kind: 'beat' | 'rate' = 'beat',
+): { frameRankName?: string; frameTier?: number } {
+    if (previousPt == null || !(previousPt > 0)) return {};
+    const info = kind === 'rate' ? getRateTierRankInfo(previousPt) : getRankInfo(previousPt);
+    return { frameRankName: info.name, frameTier: info.tier };
+}
+
+/**
  * 【関数の役割】 Rate-Tier 版の getNextRankInfo。
  * ロジックは BEAT-Tier 側と同一で、対象テーブルを {@link RATE_TIER_RANKS} に差し替えただけ。
  */

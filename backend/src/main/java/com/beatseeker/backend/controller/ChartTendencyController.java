@@ -69,6 +69,8 @@ public class ChartTendencyController {
     private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     /** コスパ埋めレコメンド（期待 BEAT-PT の算出）。 */
     private final FillRecommendationService fillRecommendationService;
+    /** 前作の最終 PT（ランキング行のティアアイコンの外枠用）。 */
+    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
     /**
      * 【コンストラクタ】 Spring DI によりサービス・リポジトリを注入する。
@@ -80,7 +82,9 @@ public class ChartTendencyController {
                                    ScoreRepository scoreRepository,
                                    PairRegressionService pairRegressionService,
                                    ScoreHistoryLogRepository scoreHistoryLogRepository,
-                                   FillRecommendationService fillRecommendationService) {
+                                   FillRecommendationService fillRecommendationService,
+                                   com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
+        this.previousVersionPtService = previousVersionPtService;
         this.service = service;
         this.skillTreeService = skillTreeService;
         this.userRepository = userRepository;
@@ -293,8 +297,12 @@ public class ChartTendencyController {
      * GET /api/scores/kenban-ranking
      */
     @GetMapping("/api/scores/kenban-ranking")
-    public ResponseEntity<List<Map<String, Object>>> getKenbanRanking() {
-        return ResponseEntity.ok(scoreHistoryLogRepository.getKenbanTierRanking());
+    public ResponseEntity<List<Map<String, Object>>> getKenbanRanking(@RequestParam(required = false) Integer version) {
+        // 過去作を指定されたら世代切り替え時のスナップショットから終了時点のランキングを返す。
+        if (version != null && version != com.beatseeker.backend.service.IidxVersions.current()) {
+            return ResponseEntity.ok(previousVersionPtService.archivedRanking(version, "totalKenbanPt"));
+        }
+        return ResponseEntity.ok(previousVersionPtService.decorate(scoreHistoryLogRepository.getKenbanTierRanking(), "userId"));
     }
 
     /**
@@ -304,8 +312,11 @@ public class ChartTendencyController {
      * GET /api/scores/sara-ranking
      */
     @GetMapping("/api/scores/sara-ranking")
-    public ResponseEntity<List<Map<String, Object>>> getSaraRanking() {
-        return ResponseEntity.ok(scoreHistoryLogRepository.getSaraTierRanking());
+    public ResponseEntity<List<Map<String, Object>>> getSaraRanking(@RequestParam(required = false) Integer version) {
+        if (version != null && version != com.beatseeker.backend.service.IidxVersions.current()) {
+            return ResponseEntity.ok(previousVersionPtService.archivedRanking(version, "totalSaraPt"));
+        }
+        return ResponseEntity.ok(previousVersionPtService.decorate(scoreHistoryLogRepository.getSaraTierRanking(), "userId"));
     }
 
     /**

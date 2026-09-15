@@ -99,25 +99,27 @@
           <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
         </filter>
 
-        <!-- Supporter Gold Border Gradient -->
-        <linearGradient :id="`supporter-grad-${uid}`" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
-          <stop offset="0%" stop-color="#fde68a" />
-          <stop offset="25%" stop-color="#fbbf24" />
-          <stop offset="50%" stop-color="#f59e0b" />
-          <stop offset="75%" stop-color="#fbbf24" />
-          <stop offset="100%" stop-color="#fde68a" />
+        <!-- 前作ティア外枠のグラデーション（前作ティアの配色をそのまま使う） -->
+        <linearGradient v-if="frameColors" :id="`frame-grad-${uid}`" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
+          <stop offset="0%" :stop-color="frameColors.highlight" />
+          <stop offset="30%" :stop-color="frameColors.primary" />
+          <stop offset="70%" :stop-color="frameColors.primary" />
+          <stop offset="100%" :stop-color="frameColors.secondary" />
         </linearGradient>
 
-        <!-- Supporter Static Outer Glow -->
-        <filter :id="`supporter-glow-${uid}`" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="3.5" result="blur" />
-          <feFlood flood-color="#f59e0b" flood-opacity="0.5" result="color" />
-          <feComposite in="color" in2="blur" operator="in" result="shadow" />
-          <feMerge>
-            <feMergeNode in="shadow" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+        <!-- 前作ティア外枠のグロー（ぼかし量はサブティアで可変。lite では使わない） -->
+        <filter v-if="frameColors && !lite" :id="`frame-glow-${uid}`" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur in="SourceGraphic" :stdDeviation="frameBlur" />
         </filter>
+
+        <!-- サポーターの光沢（本体の表面を斜めに横切る反射） -->
+        <linearGradient v-if="isSupporter" :id="`gloss-grad-${uid}`" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="white" stop-opacity="0" />
+          <stop offset="40%" stop-color="white" stop-opacity="0.5" />
+          <stop offset="50%" stop-color="white" stop-opacity="0.75" />
+          <stop offset="60%" stop-color="white" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="white" stop-opacity="0" />
+        </linearGradient>
 
         <!-- Drop shadow for tier segments -->
         <filter :id="`segment-shadow-${uid}`" x="-20%" y="-20%" width="140%" height="140%">
@@ -144,26 +146,25 @@
         class="animate-pulse"
       />
 
-      <!-- Supporter Gold Outer Border -->
-      <g v-if="isSupporter">
-        <!-- Soft gold glow behind border -->
+      <!-- 前作ティアの外枠（前作の記録がある人は全員。色＝前作ティア、光量＝サブティア 1〜5） -->
+      <g v-if="frameColors">
+        <!-- 光。lite ではフィルタを使わず半透明の太いストロークだけで表現する（一覧で多数描画しても軽い） -->
         <path
-          v-if="!lite"
           :d="shapePath"
           fill="none"
-          stroke="#fbbf24"
-          stroke-width="10"
+          :stroke="frameColors.primary"
+          :stroke-width="frameGlowWidth"
           stroke-linejoin="round"
-          stroke-opacity="0.35"
-          :filter="`url(#supporter-glow-${uid})`"
-          transform="scale(1.08)"
+          :stroke-opacity="lite ? frameGlowOpacity * 0.5 : frameGlowOpacity"
+          :filter="lite ? undefined : `url(#frame-glow-${uid})`"
+          transform="scale(1.09)"
           style="transform-origin: 50% 50%"
         />
-        <!-- Gold border ring -->
+        <!-- 枠線 -->
         <path
           :d="shapePath"
           fill="none"
-          :stroke="`url(#supporter-grad-${uid})`"
+          :stroke="`url(#frame-grad-${uid})`"
           stroke-width="5"
           stroke-linejoin="round"
           transform="scale(1.07)"
@@ -201,12 +202,21 @@
         />
 
         <!-- Bottom Bounce Light -->
-        <path 
-          :d="shapePath" 
+        <path
+          :d="shapePath"
           :fill="`url(#bottom-glow-${uid})`"
         />
       </g>
-      
+
+      <!-- サポーターの光沢: 本体の表面を斜めに横切る反射（本体の形でクリップ。フィルタ無しなので軽い） -->
+      <g v-if="isSupporter" :clip-path="`url(#shape-clip-${uid})`">
+        <path
+          d="M-5 92 L52 -8 L78 -8 L21 92 Z"
+          :fill="`url(#gloss-grad-${uid})`"
+          :class="lite ? '' : 'animate-gloss'"
+        />
+      </g>
+
       <!-- Max Tier (5) Diamond Emblem -->
       <g v-if="tier === 5" class="tier-segments" :filter="lite ? undefined : `url(#segment-shadow-${uid})`">
         <!-- Top Left Facet (Lightest) -->
@@ -251,7 +261,10 @@
  * 機能:
  *  - ランク名ごとに形状（盾/円/三角...）とメタリック配色を決定
  *  - tier（1〜5）で内部セグメント数やダイヤ紋を変える
- *  - Supporter 判定で金縁を追加
+ *  - 前作ティアの外枠（frameRankName / frameTier）: 前作（世代切り替え時のスナップショット）のティアの色で
+ *    枠を光らせる。光量はサブティア 1〜5 で強くなる。前作の記録がある人は全員に付き、今作でティアが
+ *    上がっても前作のまま固定（2026-08-19 決定・2026-09-15 実装。旧サポーター金縁を置き換えた）
+ *  - サポーターの光沢（isSupporter）: 本体の表面を斜めに横切る反射。ティアや前作の記録に関係なく付く
  *  - エイプリルフール期間中はパステル配色 + 手足アニメ + 画面上を徘徊する演出
  *
  * props:
@@ -259,7 +272,9 @@
  *  - tier: ランク内の更なる段階（1〜5、未指定時はセグメント非表示）
  *  - size: 'xs' | 'sm' | 'md' | 'lg'（未指定時はデフォルトの中サイズ）
  *  - disableParty: true にするとエイプリルフール演出を無効化
- *  - isSupporter: サポーター会員なら金縁付与
+ *  - isSupporter: サポーター会員なら光沢を付ける
+ *  - frameRankName / frameTier: 前作ティアの外枠（utils/beatTier の previousTierFrame() で作る）。未指定なら枠なし
+ *  - lite: 重いフィルタを省く。外枠のグローもフィルタ無しの半透明ストロークになる
  */
 import { computed } from 'vue';
 import { useAprilFools } from '../composables/useAprilFools';
@@ -270,6 +285,10 @@ const props = defineProps<{
   size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg';
   disableParty?: boolean;
   isSupporter?: boolean;
+  /** 前作ティアの外枠の色に使うランク名。未指定なら外枠なし。 */
+  frameRankName?: string | null;
+  /** 前作のサブティア（1〜5）。光量を決める。Legend など未指定なら最強扱い。 */
+  frameTier?: number | null;
   /** 軽量モード。重い SVG フィルタ（ガウシアンぼかし/ドロップシャドウ）を全て省く。
    *  ランキング一覧など多数同時描画する箇所で指定し、モバイルのメモリ超過クラッシュを防ぐ。 */
   lite?: boolean;
@@ -323,8 +342,30 @@ const sizeClass = computed(() => {
 const isLegend = computed(() => props.rankName === 'Legend');
 
 /** 【通常時の配色パレット】 ランク名→メタリック/宝石調の primary/highlight/secondary/stroke を返す。 */
-const colors = computed(() => {
-  const name = props.rankName.toLowerCase();
+const colors = computed(() => paletteFor(props.rankName));
+
+/** 前作ティア外枠の配色（本体と同じパレット表を前作のランク名で引く）。外枠なしなら null。 */
+const frameColors = computed(() => (props.frameRankName ? paletteFor(props.frameRankName) : null));
+
+/**
+ * 外枠の光量段階（1〜5）。前作のサブティアをそのまま使い、サブティアを持たない Legend は最強、
+ * Beginner/Novice のようにサブティア無しの下位ランクは最弱にする。
+ */
+const frameLevel = computed(() => {
+  if (!props.frameRankName) return 0;
+  if (props.frameTier && props.frameTier >= 1) return Math.min(5, Math.floor(props.frameTier));
+  return props.frameRankName.toLowerCase() === 'legend' ? 5 : 1;
+});
+/** 光の不透明度: 段階 1 で 0.29、段階 5 で 0.73。 */
+const frameGlowOpacity = computed(() => 0.18 + 0.11 * frameLevel.value);
+/** 光のストローク幅: 段階 1 で 7、段階 5 で 15。 */
+const frameGlowWidth = computed(() => 5 + 2 * frameLevel.value);
+/** 光のぼかし量（lite 以外）: 段階 1 で 2.7、段階 5 で 5.5。 */
+const frameBlur = computed(() => 2 + 0.7 * frameLevel.value);
+
+/** ランク名 → メタリック/宝石調パレット。本体と前作ティア外枠で共用する。 */
+function paletteFor(rankName: string) {
+  const name = rankName.toLowerCase();
   // Premium metallic/jewel palettes
   if (name === 'beginner') return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
   if (name === 'novice') return { primary: '#5c7c99', highlight: '#e2e8f0', secondary: '#2e455e', stroke: '#94a3b8' };
@@ -339,7 +380,7 @@ const colors = computed(() => {
   if (name === 'mythic') return { primary: '#9333ea', highlight: '#fae8ff', secondary: '#3b0764', stroke: '#d8b4fe' };
   if (name === 'legend') return { primary: '#fbbf24', highlight: '#ffffff', secondary: '#92400e', stroke: '#fef08a' }; // Radiant Gold
   return { primary: '#64748b', highlight: '#f8fafc', secondary: '#334155', stroke: '#e2e8f0' };
-});
+}
 
 // 【エイプリルフール時の配色】 通常時とは別にパステルレインボー調のパレットを用意。
 const aprilColors = computed(() => {
@@ -456,6 +497,16 @@ const getSegmentPath = (n: number) => {
 
 .animate-shimmer {
   animation: shimmer 3s infinite linear;
+}
+
+/* サポーターの光沢: 反射の帯がゆっくり左右に流れる（lite では静止） */
+@keyframes gloss-sweep {
+  0%, 100% { transform: translateX(-18%); }
+  50% { transform: translateX(18%); }
+}
+
+.animate-gloss {
+  animation: gloss-sweep 6s ease-in-out infinite;
 }
 
 

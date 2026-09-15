@@ -5,8 +5,10 @@
  * 作品バージョンはユーザーに選ばせず、CSV の「バージョン」列から自動判定する
  * （判定原理は `utils/iidxVersions.ts` の冒頭コメントを参照）。
  *
- * 表示するのは次の 2 ケースのみ:
- *  - 過去作（30〜32）と判定された … 通常とは別テーブルへ保存する特殊な操作なので同意を取る
+ * 表示するのは次の 3 ケース:
+ *  - 過去作（30〜前作）と判定された … 通常とは別テーブルへ保存する特殊な操作なので同意を取る
+ *  - 前作と判定されたが新作稼働直後（`ambiguous`） … 新作で新曲を 1 曲も踏んでいない人の
+ *    新作 CSV は前作と区別が付かないため、「前作の CSV」「新作の CSV」のどちらとして取り込むかを選ばせる
  *  - 判定に失敗した               … 理由を提示して取り込みを中止する
  * 現行作と判定された CSV は確認を挟まずそのまま取り込まれるため、ここには渡ってこない。
  *
@@ -14,13 +16,14 @@
  * 現行作として取り込むと、未対応の新作スコアが現行スコアに混ざりランキングや
  * BEAT-PT が汚染される。元に戻せない事故なので、ここで確実に止める。
  *
- * @emits confirm 取り込み実行。親が判定済みバージョンで取り込み処理を行う。
- * @emits cancel  取り込み中止。
+ * @emits confirm         取り込み実行。親が判定済みバージョン（過去作）で取り込み処理を行う。
+ * @emits confirm-current 現行作の CSV として取り込む（`ambiguous` のときだけ）。親は通常の取り込みへ進む。
+ * @emits cancel          取り込み中止。
  */
 import { computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { VersionDetectionResult } from '../utils/csvParser';
-import { versionName, versionBadgeClass, MIN_PAST_VERSION } from '../utils/iidxVersions';
+import { versionName, versionBadgeClass, MIN_PAST_VERSION, CURRENT_VERSION } from '../utils/iidxVersions';
 
 const { t } = useI18n();
 
@@ -37,10 +40,13 @@ const props = defineProps<{
   existingCount: number | null;
   /** 取り込み処理中フラグ（ボタンの二度押し防止）。 */
   isSubmitting?: boolean;
+  /** 前作／現行作のどちらとして取り込むかをユーザーに選ばせるモード（新作稼働直後のみ）。 */
+  ambiguous?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'confirm'): void;
+  (e: 'confirm-current'): void;
   (e: 'cancel'): void;
 }>();
 
@@ -49,6 +55,12 @@ const isOk = computed(() => props.detection?.ok === true);
 
 /** 判定されたバージョン番号（成功時のみ）。 */
 const detectedVersion = computed(() => (props.detection?.ok ? props.detection.version : null));
+
+/** 「どちらの作品か」を選ばせる文言に使う置換値。 */
+const ambiguousParams = computed(() => ({
+  previous: versionName(detectedVersion.value),
+  current: versionName(CURRENT_VERSION),
+}));
 
 /**
  * 判定失敗時に表示する本文。理由ごとに文言を切り替える。
@@ -85,7 +97,7 @@ const errorMessage = computed(() => {
       <!-- 判定成功: 取り込み内容の確認 -->
       <template v-if="isOk">
         <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-4">
-          {{ t('past.confirm.title') }}
+          {{ ambiguous ? t('past.confirm.ambiguousTitle') : t('past.confirm.title') }}
         </h3>
 
         <!-- 判定された作品を主役として大きく見せる -->
@@ -100,7 +112,7 @@ const errorMessage = computed(() => {
         </div>
 
         <p class="text-sm text-slate-600 dark:text-slate-300 mb-4">
-          {{ t('past.confirm.messagePast') }}
+          {{ ambiguous ? t('past.confirm.ambiguousMessage', ambiguousParams) : t('past.confirm.messagePast') }}
         </p>
 
         <!-- 取り込み内容の内訳 -->
@@ -121,18 +133,44 @@ const errorMessage = computed(() => {
           </div>
         </dl>
 
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">
-          {{ t('past.notRanked') }}
-        </p>
+        <!-- 前作／現行作を選ばせるモード: 2 つの取り込み先を縦に並べる -->
+        <template v-if="ambiguous">
+          <div class="flex flex-col gap-2 mb-3">
+            <button class="btn-primary w-full" :disabled="isSubmitting" @click="emit('confirm-current')">
+              {{ t('past.confirm.asCurrent', ambiguousParams) }}
+            </button>
+            <button class="btn-secondary w-full" :disabled="isSubmitting" @click="emit('confirm')">
+              {{ isSubmitting ? t('past.confirm.submitting') : t('past.confirm.asPast', ambiguousParams) }}
+            </button>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
+            {{ t('past.confirm.asCurrentNote') }}
+          </p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            {{ t('past.notRanked') }}
+          </p>
+          <div class="flex justify-end">
+            <button class="btn-secondary" :disabled="isSubmitting" @click="emit('cancel')">
+              {{ t('past.confirm.cancel') }}
+            </button>
+          </div>
+        </template>
 
-        <div class="flex justify-end gap-2">
-          <button class="btn-secondary" :disabled="isSubmitting" @click="emit('cancel')">
-            {{ t('past.confirm.cancel') }}
-          </button>
-          <button class="btn-primary" :disabled="isSubmitting" @click="emit('confirm')">
-            {{ isSubmitting ? t('past.confirm.submitting') : t('past.confirm.submit') }}
-          </button>
-        </div>
+        <!-- 通常の過去作取り込み -->
+        <template v-else>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">
+            {{ t('past.notRanked') }}
+          </p>
+
+          <div class="flex justify-end gap-2">
+            <button class="btn-secondary" :disabled="isSubmitting" @click="emit('cancel')">
+              {{ t('past.confirm.cancel') }}
+            </button>
+            <button class="btn-primary" :disabled="isSubmitting" @click="emit('confirm')">
+              {{ isSubmitting ? t('past.confirm.submitting') : t('past.confirm.submit') }}
+            </button>
+          </div>
+        </template>
       </template>
 
       <!-- 判定失敗: 理由の提示のみ。取り込みボタンは出さない -->

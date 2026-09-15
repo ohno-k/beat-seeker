@@ -12,7 +12,8 @@ export { API_BASE };
  *
  *  - `iidxId`: IIDX 本体のプレイヤー ID（5 桁 + ハイフン + 4 桁）
  *  - `privacyLevel`: 他ユーザーへの公開範囲（数値）
- *  - `isSupporter` / `showSupporterBorder` / `supporterToken`: サポーター機能関連
+ *  - `isSupporter` / `supporterToken`: サポーター機能関連（サポーター特典はティアアイコンの光沢）
+ *  - `previousBeatPt` / `previousRatePt`: 前作の最終 PT（ティアアイコンの外枠の色・光量）。記録が無ければ null
  */
 export interface AuthUser {
     id: number;
@@ -26,7 +27,8 @@ export interface AuthUser {
     showRateTier: boolean;
     showKenbanSaraTier: boolean;
     isSupporter: boolean;
-    showSupporterBorder: boolean;
+    previousBeatPt: number | null;
+    previousRatePt: number | null;
     supporterToken: string;
     lastUploadedAt: string | null;
     email: string;

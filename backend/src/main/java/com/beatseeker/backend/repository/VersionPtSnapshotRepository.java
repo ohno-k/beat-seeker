@@ -25,6 +25,35 @@ public interface VersionPtSnapshotRepository extends JpaRepository<VersionPtSnap
     List<Integer> findArchivedVersions();
 
     /**
+     * 【メソッドの役割】 過去作の最終ランキング行（現行ランキング API と同じキー名）を返す。
+     *
+     * 表示名・IIDX ID・プライバシー・サポーターは現在の users を優先する（表示名変更や公開設定の
+     * 変更が過去作の順位表にも反映されるのが利用者の期待に沿う）。退会済みでスナップショットだけ
+     * 残っている場合は撮影時の値にフォールバックする。
+     * 返却キー: userId / displayName / iidxId / privacyLevel / totalBeatPt / totalRatePt / totalKenbanPt /
+     *           totalSaraPt / beatRank / rateRank / lastUpdatedAt / isSupporter / includesInfinitas
+     */
+    @Query(value =
+            "SELECT s.user_id AS \"userId\", " +
+            "       COALESCE(u.display_name, s.display_name) AS \"displayName\", " +
+            "       COALESCE(u.iidx_id, s.iidx_id) AS \"iidxId\", " +
+            "       COALESCE(u.privacy_level, s.privacy_level, 1) AS \"privacyLevel\", " +
+            "       s.total_beat_pt AS \"totalBeatPt\", " +
+            "       s.total_rate_pt AS \"totalRatePt\", " +
+            "       s.total_kenban_pt AS \"totalKenbanPt\", " +
+            "       s.total_sara_pt AS \"totalSaraPt\", " +
+            "       s.beat_rank AS \"beatRank\", " +
+            "       s.rate_rank AS \"rateRank\", " +
+            "       s.last_uploaded_at AS \"lastUpdatedAt\", " +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\", " +
+            "       false AS \"includesInfinitas\" " +
+            "FROM version_pt_snapshots s " +
+            "LEFT JOIN users u ON u.id = s.user_id " +
+            "WHERE s.version = :version " +
+            "ORDER BY s.total_beat_pt DESC", nativeQuery = true)
+    List<java.util.Map<String, Object>> findArchivedRankingRows(@Param("version") int version);
+
+    /**
      * 指定ユーザーの「歴代最高 BEAT-PT」。アーカイブが 1 件も無ければ null。
      *
      * リーグの初回参加時に、現行作の BEAT-PT と突き合わせて高いほうで DIVISION を決めるために使う

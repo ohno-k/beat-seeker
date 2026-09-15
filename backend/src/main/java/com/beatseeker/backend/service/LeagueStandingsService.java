@@ -90,6 +90,8 @@ public class LeagueStandingsService {
     private final SongDefinitionRepository songDefinitionRepository;
     /** 締め済み週の曲別確定結果（過去週の順位表を不変にするための凍結値）。 */
     private final LeagueMemberSongRepository leagueMemberSongRepository;
+    /** 前作の最終 PT（順位表のティアアイコンの外枠用）。 */
+    private final PreviousVersionPtService previousVersionPtService;
 
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
@@ -100,7 +102,9 @@ public class LeagueStandingsService {
                                   LeagueEntryRepository leagueEntryRepository,
                                   ScoreRepository scoreRepository,
                                   SongDefinitionRepository songDefinitionRepository,
-                                  LeagueMemberSongRepository leagueMemberSongRepository) {
+                                  LeagueMemberSongRepository leagueMemberSongRepository,
+                                  PreviousVersionPtService previousVersionPtService) {
+        this.previousVersionPtService = previousVersionPtService;
         this.leagueMemberSongRepository = leagueMemberSongRepository;
         this.leagueMemberRepository = leagueMemberRepository;
         this.leagueSongRepository = leagueSongRepository;
@@ -1012,6 +1016,8 @@ public class LeagueStandingsService {
         row.put("userId", user.getId());
         row.put("displayName", displayName(user));
         row.put("totalBeatPt", user.getTotalBeatPt() != null ? user.getTotalBeatPt() : 0.0);
+        // 前作の最終 PT（ティアアイコンの外枠の色・光量）
+        previousVersionPtService.putPrevious(row, user.getId());
     }
 
     /** 表示名（null は空文字）。 */

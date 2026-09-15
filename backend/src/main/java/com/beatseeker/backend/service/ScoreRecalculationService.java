@@ -567,6 +567,7 @@ public class ScoreRecalculationService {
         ScoreHistoryLog newLog = new ScoreHistoryLog();
         newLog.setUser(user);
         newLog.setUploadedAt(LocalDateTime.now());
+        newLog.setVersion(IidxVersions.current());
         newLog.setTotalScore(totalScore);
         newLog.setFcCount(fcCount);
         newLog.setExhCount(exhCount);

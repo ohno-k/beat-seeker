@@ -88,6 +88,23 @@ app:
     # 過去作アーカイブ（version_pt_snapshots）が空の間＝世代切り替え前は判定せず、誰でも参加できる。
     # 2026-09-14 に解除（false）: 新規参加は誰でも受け付ける。再び止める場合は true にする。
     require-past-scores-to-join: ${LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN:false}
+  # ── 世代切り替え（IIDX 33 Sparkle Shower → 34 ZINRAI）──
+  # launch-at を過ぎると (1) IidxVersions.current() が 34 を返し始め、(2) VersionTransitionScheduler が
+  # スナップショット → past_scores 複製 → スコア初期化 を 1 度だけ自動実行する（1 分ポーリング）。
+  # 手順と当日の確認項目は docs/ZINRAI移行当日スケジュール.md。
+  version-transition:
+    # 切替日時（JST、書式 2026-09-16T07:00）。空にすると自動実行は無効（現行作の切替日時はコード既定値）。
+    launch-at: ${APP_VERSION_TRANSITION_LAUNCH_AT:2026-09-16T07:00}
+    # true なら件数をログに出すだけで DB を変更しない（実行記録も残さない）。止めたいときは env で true にする。
+    dry-run: ${APP_VERSION_TRANSITION_DRY_RUN:false}
+    from-version: 33
+    to-version: 34
+    # スナップショット対象がこの人数に満たなければ中断（取り違え・空撃ち防止）。
+    min-users: ${APP_VERSION_TRANSITION_MIN_USERS:100}
+    # 手順 3: scores / user_song_ranks の全削除・users の PT リセット・全員へ 0PT 履歴行。
+    reset-scores: ${APP_VERSION_TRANSITION_RESET_SCORES:true}
+    # 難易度表 draft の自動適用。ZINRAI では管理画面から手動適用するので false。
+    apply-difficulty: ${APP_VERSION_TRANSITION_APPLY_DIFFICULTY:false}
 
 vapid:
   # 公開鍵はブラウザに配布されるため非機密。秘密鍵は環境変数で渡す（リポジトリにコミットしない）。

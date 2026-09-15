@@ -588,6 +588,10 @@ export const ko = {
   'ranking.beatTierRanking': 'BEAT-TIER 랭킹',
   'ranking.rateTierRanking': 'RATE-TIER 랭킹',
   'ranking.subtitle': '전체 플레이어 집계 결과',
+  'ranking.versionSelect': '작품',
+  'ranking.versionSelectHint': '전작 종료 시점의 랭킹을 볼 수 있습니다',
+  'ranking.archiveBadge': '{name} 종료 시점',
+  'ranking.archiveNote': '이 집계는 전작 아카이브가 없어 현재 작품을 표시합니다',
   'ranking.aggregating': '랭킹 집계 중...',
   'ranking.noData': '표시할 데이터가 없습니다.',
   'ranking.colRank': '순위',
@@ -654,8 +658,6 @@ export const ko = {
   'profile.showArcadeScoresHint': '끄면 e-amusement CSV / 북마클릿으로 취득한 스코어가 숨겨집니다',
   'profile.showInfinitasScores': 'INFINITAS 스코어 표시',
   'profile.showInfinitasScoresHint': '끄면 INFINITAS 화면 모니터로 취득한 스코어가 숨겨집니다',
-  'profile.showSupporterBorder': '서포터 골드 테두리 표시',
-  'profile.showSupporterBorderHint': '끄면 티어 랭크 아이콘의 골드 테두리가 숨겨집니다',
   'profile.saveChanges': '변경 사항 저장',
   'profile.saving': '저장 중...',
   'profile.updateSuccess': '프로필을 업데이트했습니다!',
@@ -825,6 +827,8 @@ export const ko = {
   'history.difficultyRevision': '난이도 개정',
   'history.infBadge': 'INF',
   'history.infBadgeHint': 'INFINITAS 화면 캡처로 기록 (그날의 기록을 하나로 통합)',
+  'history.versionSelect': '작품',
+  'history.versionSelectHint': '표시할 작품을 전환합니다 (이전 작품의 성장 기록도 볼 수 있습니다)',
 
   // Onboarding
   'onboarding.welcome': '등록해 주셔서 감사합니다!',
@@ -931,7 +935,7 @@ export const ko = {
   'compare.close': '닫기',
 
   // About
-  'about.heroBadge': 'Beta 버전 공개 중',
+  'about.heroBadge': '정식 버전 공개 중',
   'about.heroTitle': 'beat-seeker 란?',
   'about.heroP1': 'beat-seeker는 beatmania IIDX의 스코어 데이터를 시각화 및 분석하기 위한 무료 웹 애플리케이션입니다.',
   'about.heroP2': '공식 사이트에서 다운로드한 CSV 파일을 업로드하는 것만으로, 당신의 플레이 데이터를 아름다운 그래프와 랭크로 확인할 수 있습니다.',
@@ -1041,7 +1045,7 @@ export const ko = {
   'terms.ipItem2': '곡명·아티스트명 등 게임에 관한 정보는 Konami Amusement Co., Ltd. 및 각 권리자에게 귀속됩니다. 본 서비스는 KONAMI 공식과 전혀 관계없는 비공식 팬메이드 도구입니다.',
   'terms.ipItem3': '사용자가 본 서비스에 등록·게시한 내용(스코어 데이터·리절트 이미지·채팅 등)의 권리는 사용자에게 귀속되지만, 운영자는 본 서비스의 제공·개선·통계 작성에 필요한 범위에서 이를 무상으로 이용할 수 있습니다.',
   'terms.disclaimerTitle': '면책 사항 (Disclaimer)',
-  'terms.disclaimerItem1': '본 서비스는 있는 그대로(As-Is) 제공되며, 기본적으로 베타 버전으로 제공됩니다. 기능의 완전성, 정확성, 유용성에 대해 어떠한 보증도 하지 않습니다.',
+  'terms.disclaimerItem1': '본 서비스는 있는 그대로(As-Is) 제공됩니다. 기능의 완전성, 정확성, 유용성에 대해 어떠한 보증도 하지 않습니다.',
   'terms.disclaimerItem2': '본 서비스의 이용 또는 데이터 손실로 인해 사용자에게 발생한 모든 손해에 대해 운영자는 일절 책임을 지지 않습니다.',
   'terms.disclaimerItem3': '운영자의 판단에 따라 사전 예고 없이 본 서비스의 사양 변경, 기능 추가 또는 서비스 제공을 일시적 또는 영구적으로 중단할 수 있습니다.',
   'terms.disclaimerItem4': '업로드된 데이터는 시스템상 저장되지만, 완전한 백업을 보장하지는 않습니다. 중요한 데이터는 사용자 본인이 직접(공식 CSV 등) 관리 및 보관해 주시기 바랍니다.',
@@ -1838,6 +1842,11 @@ export const ko = {
   'past.confirm.cancel': '취소',
   'past.confirm.submit': '가져오기',
   'past.confirm.submitting': '가져오는 중...',
+  'past.confirm.ambiguousTitle': '어느 작품의 CSV입니까?',
+  'past.confirm.ambiguousMessage': '이 CSV에는 {previous}까지의 곡만 포함되어 있습니다. {current}에서 신곡을 아직 플레이하지 않았다면 {current}의 CSV도 이렇게 판정됩니다. 어느 작품의 스코어로 가져올지 선택하세요.',
+  'past.confirm.asPast': '{previous} CSV (과거 스코어로)',
+  'past.confirm.asCurrent': '{current} CSV (현재 스코어로)',
+  'past.confirm.asCurrentNote': '현재 스코어로 가져오면 랭킹·BEAT-PT에 반영됩니다.',
 
   // 가져오기를 거부한 이유
   'past.error.title': '가져올 수 없습니다',

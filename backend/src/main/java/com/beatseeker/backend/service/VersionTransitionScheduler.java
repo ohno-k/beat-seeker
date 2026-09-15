@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
 
 /**
- * 【クラスの役割】 新作稼働日を待って、世代切り替えの安全な手順を自動実行するタイマー。
+ * 【クラスの役割】 新作稼働日を待って、世代切り替えの手順を自動実行するタイマー。
  *
- * <b>既定では存在しない。</b> {@code app.version-transition.launch-at} が設定されていない限り
- * {@link ConditionalOnProperty} によりこの Bean 自体が生成されないため、通常の運用では
- * タイマーは 1 つも増えず、利用者から見える挙動も一切変わらない。
+ * {@code app.version-transition.launch-at} が空なら {@link ConditionalOnProperty} により
+ * この Bean 自体が生成されない（application.yml の既定は ZINRAI 稼働日）。
  *
  * ■ なぜ cron ではなくポーリングなのか
  * 新作稼働は「一度きり」の処理で、狙った時刻に取りこぼすと困る。Render のインスタンスは
@@ -28,30 +28,30 @@ import java.util.Optional;
  * 発火の瞬間に落ちていても、次に起きたときに追いつける（キャッチアップ）。
  * 二重実行は {@link SystemTaskRun} の記録で防ぐ。
  *
- * ■ 稼働日を環境変数にしてある理由
- * IIDX の稼働日は KONAMI の告知が出るまで確定しない。cron 式に直書きすると日付が動くたびに
- * 再デプロイが必要になるため、{@link LeagueScheduler} の {@code app.league.season-start} と
- * 同じく設定値で外に出している。日付がずれても環境変数の変更と再起動だけで追随できる。
+ * ■ 現行作の判定と同じ日時を使う
+ * {@link IidxVersions#current()} も同じ {@code launch-at} を見て 33 → 34 に切り替わる
+ * （{@link VersionSwitchConfigurer}）。フロントエンドも同じ日時をコードに持つ。
  *
  * ■ 設定（環境変数名は Spring の relaxed binding に従う）
  * <pre>
- *   app.version-transition.launch-at    APP_VERSION_TRANSITION_LAUNCH_AT
- *       起動日時（JST, 例 "2026-09-16T05:00"）。未設定＝この機能ごと無効。
- *   app.version-transition.dry-run      APP_VERSION_TRANSITION_DRY_RUN
- *       既定 true。件数をログに出すだけで DB を変更しない。実行済み記録も残さないので
+ *   app.version-transition.launch-at        APP_VERSION_TRANSITION_LAUNCH_AT
+ *       起動日時（JST, 例 "2026-09-16T07:00"）。空＝この機能ごと無効。
+ *   app.version-transition.dry-run          APP_VERSION_TRANSITION_DRY_RUN
+ *       true なら件数をログに出すだけで DB を変更しない。実行済み記録も残さないので
  *       false に切り替えれば改めて本番実行される。
- *   app.version-transition.from-version APP_VERSION_TRANSITION_FROM_VERSION   既定 33
- *   app.version-transition.to-version   APP_VERSION_TRANSITION_TO_VERSION     既定 34
- *   app.version-transition.min-users    APP_VERSION_TRANSITION_MIN_USERS      既定 100
+ *   app.version-transition.from-version     APP_VERSION_TRANSITION_FROM_VERSION   既定 33
+ *   app.version-transition.to-version       APP_VERSION_TRANSITION_TO_VERSION     既定 34
+ *   app.version-transition.min-users        APP_VERSION_TRANSITION_MIN_USERS      既定 100
  *       スナップショット対象がこの人数に満たなければ中断する（取り違え・空撃ち防止）。
- *   app.version-transition.apply-difficulty  APP_VERSION_TRANSITION_APPLY_DIFFICULTY
- *       既定 false。難易度表 draft の自動適用は明示的に有効化したときだけ行う。
+ *   app.version-transition.reset-scores     APP_VERSION_TRANSITION_RESET_SCORES   既定 false（yml で true）
+ *       手順 3（スコア初期化）を行う。
+ *   app.version-transition.apply-difficulty APP_VERSION_TRANSITION_APPLY_DIFFICULTY 既定 false
+ *       難易度表 draft の自動適用。ZINRAI では管理画面から手動で行う。
  * </pre>
  *
- * ■ 自動化しない手順
- * スコアの初期化（{@code scores} の削除と派生データのリセット）は<b>行わない</b>。
- * 取り返しがつかず波及先も広いため、手順 3 まで終えた時点で「残りは手作業」とログに残して止まる。
- * 詳細は {@link VersionTransitionService} のクラスコメントを参照。
+ * ■ 手順と順序
+ * snapshot → copy-scores → reset → (apply-difficulty)。前段が SUCCESS でなければ次へ進まない。
+ * reset の後は曲統計のメモリキャッシュを作り直す（空のスコアで即座に計算し直す）。
  */
 @Component
 @ConditionalOnProperty(name = "app.version-transition.launch-at")
@@ -62,6 +62,7 @@ public class VersionTransitionScheduler {
 
     private final VersionTransitionService transitionService;
     private final SystemTaskRunRepository taskRunRepository;
+    private final List<Runnable> cacheRefreshers;
 
     /** 切り替えを実行する日時（JST）。パースに失敗した場合は null にして機能を止める。 */
     private final LocalDateTime launchAt;
@@ -69,28 +70,42 @@ public class VersionTransitionScheduler {
     private final int fromVersion;
     private final int toVersion;
     private final int minUsers;
+    private final boolean resetScores;
     private final boolean applyDifficulty;
 
     /** 「無効です」というログを起動後 1 回だけ出すためのフラグ。毎分ログを汚さないため。 */
     private boolean disabledLogged = false;
     /** 全手順を終えた後の案内ログを 1 回だけ出すためのフラグ。 */
     private boolean completionLogged = false;
+    /** 全手順が完了したら true。以降のポーリングでは DB を見に行かない（再起動すれば改めて確認する）。 */
+    private volatile boolean allDone = false;
 
     public VersionTransitionScheduler(
             VersionTransitionService transitionService,
             SystemTaskRunRepository taskRunRepository,
+            SongArenaAveragesCacheService songArenaAveragesCacheService,
+            SongAvgScoreRatesCacheService songAvgScoreRatesCacheService,
+            SongRankingAggregateCacheService songRankingAggregateCacheService,
+            TierBenchmarkCacheService tierBenchmarkCacheService,
             @Value("${app.version-transition.launch-at:}") String launchAtRaw,
             @Value("${app.version-transition.dry-run:true}") boolean dryRun,
             @Value("${app.version-transition.from-version:33}") int fromVersion,
             @Value("${app.version-transition.to-version:34}") int toVersion,
             @Value("${app.version-transition.min-users:100}") int minUsers,
+            @Value("${app.version-transition.reset-scores:false}") boolean resetScores,
             @Value("${app.version-transition.apply-difficulty:false}") boolean applyDifficulty) {
         this.transitionService = transitionService;
         this.taskRunRepository = taskRunRepository;
+        this.cacheRefreshers = List.of(
+                songArenaAveragesCacheService::refresh,
+                songAvgScoreRatesCacheService::refresh,
+                songRankingAggregateCacheService::refresh,
+                tierBenchmarkCacheService::refresh);
         this.dryRun = dryRun;
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
         this.minUsers = minUsers;
+        this.resetScores = resetScores;
         this.applyDifficulty = applyDifficulty;
 
         LocalDateTime parsed = null;
@@ -98,14 +113,14 @@ public class VersionTransitionScheduler {
             try {
                 parsed = LocalDateTime.parse(launchAtRaw.trim());
             } catch (DateTimeParseException e) {
-                log.error("[世代切替] app.version-transition.launch-at を解釈できないため無効化する: value={}（期待する書式: 2026-09-16T05:00）",
+                log.error("[世代切替] app.version-transition.launch-at を解釈できないため無効化する: value={}（期待する書式: 2026-09-16T07:00）",
                         launchAtRaw, e);
             }
         }
         this.launchAt = parsed;
         if (parsed != null) {
-            log.info("[世代切替] 有効: {} JST に {}→{} の切り替えを実行予定（dryRun={}, 難易度表の自動適用={}）",
-                    parsed, fromVersion, toVersion, dryRun, applyDifficulty);
+            log.info("[世代切替] 有効: {} JST に {}→{} の切り替えを実行予定（dryRun={}, 初期化={}, 難易度表の自動適用={}）",
+                    parsed, fromVersion, toVersion, dryRun, resetScores, applyDifficulty);
         }
     }
 
@@ -122,6 +137,9 @@ public class VersionTransitionScheduler {
                 log.info("[世代切替] launch-at が未設定のため何もしない");
                 disabledLogged = true;
             }
+            return;
+        }
+        if (allDone) {
             return;
         }
         if (LocalDateTime.now(JST).isBefore(launchAt)) {
@@ -145,7 +163,33 @@ public class VersionTransitionScheduler {
                 "複製 " + transitionService.copyScoresToPastScores(fromVersion, dryRun) + " 行");
         if (!copyDone) return;
 
-        // 手順 3: 難易度表 draft の適用。既定では無効で、明示的に有効化したときだけ行う。
+        // 手順 3: スコア初期化（破壊的）。1・2 が SUCCESS のときだけここに来る。
+        // さらに「past_scores に複製対象と同じだけ行がある」ことを数えて確かめてから消す。
+        // 複製が揃っていなければ SKIPPED で止まり（次のポーリングで再確認）、scores は残る。
+        if (resetScores) {
+            boolean resetDone = runOnce("reset", () -> {
+                if (!dryRun) {
+                    int expected = transitionService.copyScoresToPastScores(fromVersion, true);
+                    long copied = transitionService.countPastScores(fromVersion);
+                    long snapshots = transitionService.countSnapshots(fromVersion);
+                    if (copied < Math.floor(expected * 0.99)) {
+                        throw new PreconditionFailedException(
+                                "past_scores(" + fromVersion + ") が " + copied + " 行で、複製対象 " + expected + " 行に満たないため初期化しない");
+                    }
+                    if (snapshots < minUsers) {
+                        throw new PreconditionFailedException(
+                                "version_pt_snapshots(" + fromVersion + ") が " + snapshots + " 件で下限 " + minUsers + " 件に満たないため初期化しない");
+                    }
+                }
+                return transitionService.resetCurrentVersionData(fromVersion, toVersion, dryRun);
+            });
+            if (!resetDone) return;
+            if (!dryRun) {
+                refreshCaches();
+            }
+        }
+
+        // 手順 4: 難易度表 draft の適用。既定では無効で、明示的に有効化したときだけ行う。
         if (applyDifficulty) {
             boolean applied = runOnce("apply-difficulty", () ->
                     transitionService.applyDifficultyDraft(dryRun) ? "draft を適用" : "適用対象の draft 無し");
@@ -153,12 +197,32 @@ public class VersionTransitionScheduler {
         }
 
         if (!completionLogged) {
-            log.warn("[世代切替] 自動実行できる手順は完了。残りは手作業: " +
-                    "(a) スコアの初期化（scores の削除と users.total_beat_pt 等のリセット）" +
-                    "(b) フロントエンドの CURRENT_VERSION を {} へ更新して再デプロイ (c) beta 表記の削除",
-                    toVersion);
+            log.warn("[世代切替] 自動実行できる手順は完了（{}→{}）。残りは手作業: " +
+                    "(a) 管理画面「難易度表を適用」 (b) 公式 CSV の「バージョン」列の表記確認 (c) 動作確認",
+                    fromVersion, toVersion);
             completionLogged = true;
         }
+        if (!dryRun) {
+            allDone = true;
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 曲統計のメモリキャッシュを作り直す。
+     *
+     * 初期化直後は各キャッシュが前作のスコアで計算した値を持っているため、次の定期更新まで
+     * 前作の統計（曲別平均レート・ARENA 平均・ティア基準）が画面に残る。ここで即座に再計算する。
+     * 失敗しても本体の手順は完了扱い（次の定期更新で追いつく）。
+     */
+    private void refreshCaches() {
+        for (Runnable r : cacheRefreshers) {
+            try {
+                r.run();
+            } catch (Exception e) {
+                log.warn("[世代切替] キャッシュ再構築に失敗（定期更新で追いつく）: {}", e.getMessage());
+            }
+        }
+        log.info("[世代切替] 曲統計キャッシュを再構築した");
     }
 
     /**

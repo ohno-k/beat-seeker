@@ -12,6 +12,7 @@ import com.beatseeker.backend.repository.UserSongOptionRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.beatseeker.backend.service.AdminAuthService;
+import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
 import jakarta.persistence.EntityManager;
@@ -302,14 +303,18 @@ public class AdminController {
     @GetMapping("/users/{userId}/history")
     public ResponseEntity<List<Map<String, Object>>> getUserHistory(
             Authentication auth,
-            @PathVariable Long userId) {
+            @PathVariable Long userId,
+            @RequestParam(required = false) Integer version) {
 
         checkAdminAccess(auth);
 
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Target user not found"));
 
-        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(targetUser);
+        // 作品バージョンで絞る（省略時は現行作）。/api/scores/history と同じ規則。
+        int targetVersion = version != null ? version : IidxVersions.current();
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserAndVersionOrderByUploadedAtAsc(
+                targetUser, targetVersion, IidxVersions.PREVIOUS);
 
         List<Map<String, Object>> history = new ArrayList<>();
 

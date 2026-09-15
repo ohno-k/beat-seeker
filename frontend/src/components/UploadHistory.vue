@@ -12,12 +12,13 @@
  * props:
  *  - viewingUserId: 管理者が他ユーザーの履歴を閲覧する際の対象 ID
  */
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
-import { getRankInfo, getRateTierRankInfo } from '../utils/beatTier';
+import { getRankInfo, getRateTierRankInfo, previousTierFrame } from '../utils/beatTier';
 import { diffTable as diffTableRef } from '../composables/useGameData';
 import { getSongMaxScore } from '../utils/scoreData';
+import { CURRENT_VERSION, HISTORY_VERSIONS, versionName } from '../utils/iidxVersions';
 
 const { t, currentLang } = useI18n();
 import UploadResultModal from './UploadResultModal.vue';
@@ -41,6 +42,15 @@ const isLoading = ref(false);
 const errorMsg = ref('');
 /** 「日付でまとめる」トグル。true なら同日分を 1 行に統合表示。 */
 const groupByDay = ref(false);
+
+/**
+ * 表示する作品バージョン。初期表示は現行作（切替後は ZINRAI）。
+ * 前作（Sparkle Shower）を選ぶと、世代切り替え前に積んだ成長記録が見られる。
+ * 共有 URL 経由（shareToken）は現行作固定なのでセレクトを出さない。
+ */
+const selectedVersion = ref<number>(CURRENT_VERSION);
+/** セレクトに出す作品（新しい順）。1 作品しか無ければセレクト自体を出さない。 */
+const versionOptions = HISTORY_VERSIONS;
 
 /** モーダルに渡す差分結果。行クリックで設定される。 */
 const selectedDiff = ref<UploadDiffResult | null>(null);
@@ -206,11 +216,13 @@ const fetchHistory = async () => {
 
   try {
     const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
+    // 作品で絞る（共有 URL は現行作固定）。省略時のサーバ既定も現行作。
+    const versionQuery = `?version=${selectedVersion.value}`;
     const endpoint = props.shareToken
         ? `${API_BASE}/api/share/${encodeURIComponent(props.shareToken)}/history`
         : props.viewingUserId
-        ? `${API_BASE}/api/admin/users/${props.viewingUserId}/history`
-        : `${API_BASE}/api/scores/history`;
+        ? `${API_BASE}/api/admin/users/${props.viewingUserId}/history${versionQuery}`
+        : `${API_BASE}/api/scores/history${versionQuery}`;
 
     const res = await fetch(endpoint, {
         headers: props.shareToken ? {} : authHeaders()
@@ -286,8 +298,11 @@ const formatDate = (dateStr: string) => {
   });
 };
 
-// マウント時に初回取得。
+// マウント時に初回取得。作品を切り替えたら取り直す。
 onMounted(() => {
+  fetchHistory();
+});
+watch(selectedVersion, () => {
   fetchHistory();
 });
 </script>
@@ -302,6 +317,22 @@ onMounted(() => {
         {{ t('history.title') }}
       </h2>
       <div class="flex items-center gap-2">
+        <!-- 作品セレクト（前作の成長記録も見られる）。共有 URL では出さない -->
+        <label
+          v-if="!props.shareToken && versionOptions.length > 1"
+          class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"
+          :title="t('history.versionSelectHint')"
+        >
+          <span class="max-sm:hidden">{{ t('history.versionSelect') }}</span>
+          <select
+            v-model.number="selectedVersion"
+            class="px-2 py-1.5 text-xs font-semibold border rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            <option v-for="v in versionOptions" :key="v.num" :value="v.num">
+              {{ v.num }} {{ versionName(v.num) }}
+            </option>
+          </select>
+        </label>
         <button
           @click="groupByDay = !groupByDay"
           :class="groupByDay ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-600' : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'"
@@ -355,7 +386,8 @@ onMounted(() => {
                   :tier="item.tierInfo?.tier"
                   size="md"
                   class="shrink-0 drop-shadow-sm"
-                  :is-supporter="user?.isSupporter && user?.showSupporterBorder"
+                  :is-supporter="!props.viewingUserId && !props.shareToken && !!user?.isSupporter"
+                  v-bind="!props.viewingUserId && !props.shareToken ? previousTierFrame(user?.previousBeatPt, 'beat') : {}"
                 />
                 <RankIcon
                   v-if="showRateTier"
@@ -363,7 +395,8 @@ onMounted(() => {
                   :tier="item.rateTierInfo?.tier"
                   size="md"
                   class="shrink-0 drop-shadow-sm"
-                  :is-supporter="user?.isSupporter && user?.showSupporterBorder"
+                  :is-supporter="!props.viewingUserId && !props.shareToken && !!user?.isSupporter"
+                  v-bind="!props.viewingUserId && !props.shareToken ? previousTierFrame(user?.previousRatePt, 'rate') : {}"
                 />
               </div>
             </td>

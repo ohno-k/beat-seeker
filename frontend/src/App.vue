@@ -113,7 +113,7 @@ const OcrSearchModal = defineAsyncComponent(() => import('./components/OcrSearch
 import type { SongDataEntry } from './composables/useGameData';
 import { parseScoreCsv, detectCsvVersion, getCsvLastPlayTime } from './utils/csvParser';
 import type { VersionDetectionResult } from './utils/csvParser';
-import { CURRENT_VERSION, MIN_PAST_VERSION, versionName } from './utils/iidxVersions';
+import { CURRENT_VERSION, MIN_PAST_VERSION, PREVIOUS_VERSION, isInVersionSwitchGrace, versionName } from './utils/iidxVersions';
 import { usePastScores, chartKey } from './composables/usePastScores';
 import ImportVersionConfirmModal from './components/ImportVersionConfirmModal.vue';
 import type { ScoreData } from './types/ScoreData';
@@ -1266,6 +1266,11 @@ const importLastPlayTime = ref('');
 const importExistingCount = ref<number | null>(null);
 /** 過去作の取り込み実行中フラグ。 */
 const importSubmitting = ref(false);
+/**
+ * 「前作の CSV か現行作の CSV か」をユーザーに選ばせるモード。
+ * 新作稼働から一定期間（isInVersionSwitchGrace）、前作と判定された CSV に対してだけ true。
+ */
+const importAmbiguous = ref(false);
 /** ダイアログの応答を待つ Promise の resolve。confirm/cancel から呼ぶ。 */
 let importConfirmResolve: ((proceed: boolean) => void) | null = null;
 
@@ -1290,6 +1295,20 @@ const confirmImportVersion = async (newData: ScoreData[]): Promise<boolean> => {
 
   // 現行作は確認不要。そのまま通常の取り込みへ。
   if (detection.ok && detection.version === CURRENT_VERSION) {
+    return true;
+  }
+
+  // 新作稼働直後の救済: 新作で新曲を 1 曲もプレーしていない人の CSV は「前作」と判定される
+  // （判定は CSV に現れる初出作品の最大値なので）。稼働から一定期間は、前作と判定された CSV を
+  // 「前作の CSV（歴代へ）」「新作の CSV（現行へ）」のどちらとして扱うかユーザーに選ばせる。
+  const ambiguous = detection.ok
+    && detection.version === PREVIOUS_VERSION
+    && CURRENT_VERSION !== PREVIOUS_VERSION
+    && isInVersionSwitchGrace();
+  importAmbiguous.value = ambiguous;
+
+  // 未ログイン（ゲスト）は過去作を保存できないので、選ばせる意味がない。現行作として扱う。
+  if (ambiguous && !isLoggedIn.value) {
     return true;
   }
 
@@ -1350,10 +1369,25 @@ const handleImportConfirm = async () => {
   }
 };
 
+/**
+ * 【関数の役割】 「現行作の CSV として取り込む」が押されたときのハンドラ（ambiguous モードのみ）。
+ *
+ * 過去作テーブルには何も書かず、呼び出し元（handleFileDropped）に true を返して
+ * 通常の取り込み（差分計算・BEAT-PT 再計算・履歴ログ）へ進ませる。
+ */
+const handleImportAsCurrent = () => {
+  importConfirmOpen.value = false;
+  importPendingData.value = [];
+  importAmbiguous.value = false;
+  importConfirmResolve?.(true);
+  importConfirmResolve = null;
+};
+
 /** 【関数の役割】 確認ダイアログのキャンセル／判定失敗時の閉じるハンドラ。 */
 const handleImportCancel = () => {
   importConfirmOpen.value = false;
   importPendingData.value = [];
+  importAmbiguous.value = false;
   importConfirmResolve?.(false);
   importConfirmResolve = null;
 };
@@ -1925,7 +1959,9 @@ const handleUnifiedClose = async () => {
       :last-play-time="importLastPlayTime"
       :existing-count="importExistingCount"
       :is-submitting="importSubmitting"
+      :ambiguous="importAmbiguous"
       @confirm="handleImportConfirm"
+      @confirm-current="handleImportAsCurrent"
       @cancel="handleImportCancel"
     />
 
@@ -1993,12 +2029,6 @@ const handleUnifiedClose = async () => {
             <div class="flex lg:hidden items-center gap-2 cursor-pointer group" @click="activeTab = 'dashboard'">
               <div class="relative w-8 h-8 bg-blue-700 rounded-md flex items-center justify-center text-white font-bold text-xl group-hover:bg-blue-800 transition-colors overflow-hidden">
                 B
-                <div
-                  class="absolute bg-red-500 text-white text-[9px] font-bold py-[2px] w-[46px] text-center transform -rotate-45 leading-none tracking-wider"
-                  style="bottom: 3px; right: -14px;"
-                >
-                  BETA
-                </div>
               </div>
             </div>
             

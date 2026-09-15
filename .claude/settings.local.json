@@ -16,7 +16,9 @@
       "Bash(node -e ' *)",
       "Bash(node diag3.js out3.json)",
       "Bash(echo \"EXIT=$?\")",
-      "PowerShell(Set-Location \"$HOME\\\\beat-seeker\"; git status --short)"
+      "PowerShell(Set-Location \"$HOME\\\\beat-seeker\"; git status --short)",
+      "PowerShell(Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\frontend; npx vue-tsc --noEmit -p tsconfig.app.json 2>&1 | Select-Object -Last 60; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell($env:JAVA_HOME='C:\\\\Users\\\\oonok\\\\dev-tools\\\\jdk-17.0.19+10'; $env:Path=\"$env:JAVA_HOME\\\\bin;$env:Path\"; Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\backend; & 'C:\\\\Users\\\\oonok\\\\dev-tools\\\\apache-maven-3.9.9\\\\bin\\\\mvn.cmd' -q -DskipTests compile 2>&1 | Select-Object -Last 30; \"EXIT=$LASTEXITCODE\")"
     ]
   }
 }

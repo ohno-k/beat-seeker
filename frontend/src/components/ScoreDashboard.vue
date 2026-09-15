@@ -51,7 +51,7 @@
         </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Beat-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
         <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
+          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" :is-supporter="iconGloss" v-bind="beatFrame" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rankInfo.color">
             {{ rankInfo.name }} {{ rankInfo.tier || '' }}
           </h3>
@@ -98,7 +98,7 @@
         </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Rate-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
         <div class="flex flex-col items-center z-10 text-center">
-          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" :is-supporter="user?.isSupporter && user?.showSupporterBorder" />
+          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" :is-supporter="iconGloss" v-bind="rateFrame" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rateTierRankInfo.color">
             {{ rateTierRankInfo.name }} {{ rateTierRankInfo.tier || '' }}
           </h3>
@@ -250,6 +250,7 @@ import {
   getRankInfo, getNextRankInfo,
   getRateTierRankInfo, getNextRateTierRankInfo,
   calculateScoreRateTierPoints, calculateTotalPoints,
+  previousTierFrame,
 } from '../utils/beatTier';
 import { usePastScores } from '../composables/usePastScores';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
@@ -278,10 +279,24 @@ const props = defineProps<{
   viewingDisplayName?: string;
   viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | 'arenaTopRanker' | 'private' | null;
   rateTierPointsOverride?: number | null;
+  /** 閲覧対象ユーザーの前作 BEAT-PT / RATE-PT（ティアアイコンの外枠用）。他人閲覧時のみ使う。 */
+  previousBeatPt?: number | null;
+  previousRatePt?: number | null;
+  /** 閲覧対象ユーザーがサポーターか（ティアアイコンの光沢用）。他人閲覧時のみ使う。 */
+  viewingIsSupporter?: boolean | null;
 }>();
 
 /** 【computed の役割】 他ユーザーを閲覧中かどうか（viewingIidxId が存在する）。 */
 const isViewingOther = computed(() => !!props.viewingIidxId);
+
+/** 【computed の役割】 BEAT-TIER アイコンの外枠（前作ティア）。自分なら /me の値、他人閲覧なら props。 */
+const beatFrame = computed(() =>
+  previousTierFrame(isViewingOther.value ? props.previousBeatPt : user.value?.previousBeatPt, 'beat'));
+/** 【computed の役割】 RATE-TIER アイコンの外枠（前作 RATE-TIER）。 */
+const rateFrame = computed(() =>
+  previousTierFrame(isViewingOther.value ? props.previousRatePt : user.value?.previousRatePt, 'rate'));
+/** 【computed の役割】 アイコンの光沢（サポーター特典）。閲覧対象本人の属性を見る。 */
+const iconGloss = computed(() => (isViewingOther.value ? !!props.viewingIsSupporter : !!user.value?.isSupporter));
 /** 【computed の役割】 都道府県 TOP ランカー（バーチャル）の閲覧中かどうか。 */
 const isTopRankerView = computed(() => props.viewingMode === 'topRanker');
 /** 【computed の役割】 プライベート設定ユーザーの閲覧中かどうか（詳細非表示モード）。 */

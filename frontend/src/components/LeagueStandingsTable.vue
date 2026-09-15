@@ -11,7 +11,7 @@
 import { computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import RankIcon from './RankIcon.vue';
-import { getRankInfo } from '../utils/beatTier';
+import { getRankInfo, previousTierFrame } from '../utils/beatTier';
 import type { LeagueSongInfo, LeagueStandingRow } from '../composables/useLeague';
 
 const props = withDefaults(defineProps<{
@@ -110,7 +110,7 @@ const zoneClass = (row: LeagueStandingRow) => {
           <td class="py-2 pr-2">{{ row.rank }}</td>
           <td class="py-2 pr-2 break-words">
             <span class="inline-flex items-center gap-1.5 align-middle">
-              <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party />
+              <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party v-bind="previousTierFrame(row.previousBeatPt, 'beat')" />
               <span>{{ row.displayName }}</span>
               <span v-if="roleBadge(row.role)"
                     class="inline-flex items-center gap-0.5 px-1.5 py-px rounded text-[10px] font-bold leading-none"

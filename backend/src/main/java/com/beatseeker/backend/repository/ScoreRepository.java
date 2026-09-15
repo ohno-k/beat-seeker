@@ -1096,7 +1096,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
         "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
         "       ll.uploaded_at AS \"lastUpdatedAt\", " +
-        "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\", " +
+        "       COALESCE(u.is_supporter, false) AS \"isSupporter\", " +
         "       ROUND(ut.total_pt::numeric, 1) AS \"totalBeatPt\", " +
         "       ut.total_score AS \"totalScore\", " +
         "       ut.total_max_score AS \"totalMaxScore\", " +

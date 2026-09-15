@@ -4,6 +4,7 @@ import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,22 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
     List<ScoreHistoryLog> findByUserOrderByUploadedAtAsc(User user);
 
     /**
+     * 【メソッドの役割】 指定ユーザーの履歴を作品バージョンで絞って古い順に取得する。
+     *
+     * 成長記録ページの作品切り替え用。世代切り替え前に保存された行は {@code version} が null なので、
+     * {@code legacyVersion}（= 33 Sparkle Shower）として扱う（COALESCE）。
+     *
+     * @param user          対象ユーザー
+     * @param version       取得したい作品バージョン
+     * @param legacyVersion version が null の行をどの作品として扱うか
+     * @return 古い順の履歴リスト（0 件なら空）
+     */
+    @Query("SELECT l FROM ScoreHistoryLog l WHERE l.user = :user AND COALESCE(l.version, :legacyVersion) = :version ORDER BY l.uploadedAt ASC")
+    List<ScoreHistoryLog> findByUserAndVersionOrderByUploadedAtAsc(@Param("user") User user,
+                                                                   @Param("version") int version,
+                                                                   @Param("legacyVersion") int legacyVersion);
+
+    /**
      * 【メソッドの役割】 指定ユーザーの最新履歴（1 件）を取得する。
      *
      * 派生クエリメソッド: {@code ORDER BY uploaded_at DESC LIMIT 1}。
@@ -62,6 +79,12 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
      * 返却キー: userId / displayName / iidxId / privacyLevel / totalBeatPt / lastUpdatedAt /
      *           isSupporter / rankChange
      *
+     * ■ 「> 0」の条件は最新行を選んだ<b>後</b>に掛ける（2026-09-15 変更）
+     * 世代切り替え（新作稼働）時に全ユーザーへ「0 pt の履歴行」を 1 本入れてランキングを初期化する。
+     * 条件を DISTINCT ON の内側に置くと「最新の非ゼロ行」＝前作の最終値を拾ってしまい初期化にならない。
+     * 各ランキング（precision / rate / kenban / sara）も同じ理由で外側に置いている。
+     * 最新行が 0 pt のユーザー（＝新作でまだ 1 度もアップロードしていない）はランキングに出ない。
+     *
      * @return ランキング配列（0 件でも空リスト）
      */
     @Query(value =
@@ -73,6 +96,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "        FROM score_history_logs " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS latest " +
+            "    WHERE total_beat_pt > 0 " +
             "), " +
             "previous_ranks AS ( " +
             "    SELECT user_id, " +
@@ -83,12 +107,13 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "        WHERE uploaded_at < CURRENT_DATE " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS prev_latest " +
+            "    WHERE total_beat_pt > 0 " +
             ") " +
             "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
             "       cr.total_beat_pt AS \"totalBeatPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
-            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
             "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
@@ -117,9 +142,9 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_precision_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_precision_pt > 0 " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS latest " +
+            "    WHERE total_precision_pt > 0 " +
             "), " +
             "previous_ranks AS ( " +
             "    SELECT user_id, " +
@@ -127,13 +152,14 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_precision_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_precision_pt > 0 AND uploaded_at < CURRENT_DATE " +
+            "        WHERE uploaded_at < CURRENT_DATE " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS prev_latest " +
+            "    WHERE total_precision_pt > 0 " +
             ") " +
             "SELECT u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       cr.total_precision_pt AS \"totalPrecisionPt\", " +
-            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -158,9 +184,9 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_rate_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_rate_pt > 0 " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS latest " +
+            "    WHERE total_rate_pt > 0 " +
             "), " +
             "previous_ranks AS ( " +
             "    SELECT user_id, " +
@@ -168,15 +194,16 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_rate_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_rate_pt > 0 AND uploaded_at < CURRENT_DATE " +
+            "        WHERE uploaded_at < CURRENT_DATE " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS prev_latest " +
+            "    WHERE total_rate_pt > 0 " +
             ") " +
             "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
             "       cr.total_rate_pt AS \"totalRatePt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
-            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
             "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
@@ -199,9 +226,9 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_kenban_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_kenban_pt > 0 " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS latest " +
+            "    WHERE total_kenban_pt > 0 " +
             "), " +
             "previous_ranks AS ( " +
             "    SELECT user_id, " +
@@ -209,15 +236,16 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_kenban_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_kenban_pt > 0 AND uploaded_at < CURRENT_DATE " +
+            "        WHERE uploaded_at < CURRENT_DATE " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS prev_latest " +
+            "    WHERE total_kenban_pt > 0 " +
             ") " +
             "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
             "       cr.total_kenban_pt AS \"totalKenbanPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
-            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
             "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
@@ -238,9 +266,9 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_sara_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_sara_pt > 0 " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS latest " +
+            "    WHERE total_sara_pt > 0 " +
             "), " +
             "previous_ranks AS ( " +
             "    SELECT user_id, " +
@@ -248,15 +276,16 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    FROM ( " +
             "        SELECT DISTINCT ON (user_id) user_id, total_sara_pt, uploaded_at " +
             "        FROM score_history_logs " +
-            "        WHERE total_sara_pt > 0 AND uploaded_at < CURRENT_DATE " +
+            "        WHERE uploaded_at < CURRENT_DATE " +
             "        ORDER BY user_id, uploaded_at DESC " +
             "    ) AS prev_latest " +
+            "    WHERE total_sara_pt > 0 " +
             ") " +
             "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
             "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
             "       cr.total_sara_pt AS \"totalSaraPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
-            "       COALESCE(u.is_supporter, false) AND COALESCE(u.show_supporter_border, true) AS \"isSupporter\"," +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
             "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
@@ -287,7 +316,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "    ORDER BY user_id, uploaded_at DESC " +
             ") cr " +
             "JOIN users u ON cr.user_id = u.id " +
-            "WHERE u.arena_rank IS NOT NULL AND u.arena_rank <> '' " +
+            "WHERE u.arena_rank IS NOT NULL AND u.arena_rank <> '' AND cr.total_beat_pt > 0 " +
             "GROUP BY u.arena_rank " +
             "ORDER BY AVG(cr.total_beat_pt) DESC", nativeQuery = true)
     List<Map<String, Object>> getArenaRankAverageBeatPt();
@@ -309,11 +338,10 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "FROM ( " +
             "    SELECT DISTINCT ON (user_id) user_id, total_rate_pt " +
             "    FROM score_history_logs " +
-            "    WHERE total_rate_pt > 0 " +
             "    ORDER BY user_id, uploaded_at DESC " +
             ") cr " +
             "JOIN users u ON cr.user_id = u.id " +
-            "WHERE u.arena_rank IS NOT NULL AND u.arena_rank <> '' " +
+            "WHERE u.arena_rank IS NOT NULL AND u.arena_rank <> '' AND cr.total_rate_pt > 0 " +
             "GROUP BY u.arena_rank " +
             "ORDER BY AVG(cr.total_rate_pt) DESC", nativeQuery = true)
     List<Map<String, Object>> getArenaRankAverageRatePt();

@@ -96,9 +96,9 @@ public class User {
     @ColumnDefault("false")
     private Boolean isSupporter = false;
 
-    /** サポーター特典のアイコン枠を表示するかどうか（isSupporter が true のときのみ意味を持つ）。 */
-    @ColumnDefault("true")
-    private Boolean showSupporterBorder = true;
+    // 旧「サポーター枠を表示する」フラグ（show_supporter_border 列）は 2026-09-15 に廃止。
+    // 外枠は前作ティア（version_pt_snapshots）で全員に付き、サポーター特典は光沢だけになったため。
+    // DB の列は残っているが参照しない。
 
     /** サポーター認証用トークン。外部決済システムから渡される一意な識別子。 */
     @Column(unique = true, length = 12)

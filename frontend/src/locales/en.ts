@@ -588,6 +588,10 @@ export const en = {
   'ranking.beatTierRanking': 'BEAT-TIER Ranking',
   'ranking.rateTierRanking': 'RATE-TIER Ranking',
   'ranking.subtitle': 'Global aggregate results',
+  'ranking.versionSelect': 'Version',
+  'ranking.versionSelectHint': 'View the final ranking of the previous version',
+  'ranking.archiveBadge': '{name} final',
+  'ranking.archiveNote': 'No archive for this ranking; showing the current version',
   'ranking.aggregating': 'Aggregating ranking...',
   'ranking.noData': 'No data available.',
   'ranking.noRateDisplay': 'No data to display.\nUpload scores to calculate RATE-TIER.',
@@ -654,8 +658,6 @@ export const en = {
   'profile.showArcadeScoresHint': 'Turn off to hide scores imported from e-amusement CSV / bookmarklet',
   'profile.showInfinitasScores': 'Show INFINITAS scores',
   'profile.showInfinitasScoresHint': 'Turn off to hide scores captured via INFINITAS screen monitor',
-  'profile.showSupporterBorder': 'Show Supporter Gold Border',
-  'profile.showSupporterBorderHint': 'Turn off to hide the gold border on your tier rank icon',
   'profile.saveChanges': 'Save Changes',
   'profile.saving': 'Saving...',
   'profile.updateSuccess': 'Profile updated!',
@@ -825,6 +827,8 @@ export const en = {
   'history.difficultyRevision': 'Difficulty Revision',
   'history.infBadge': 'INF',
   'history.infBadgeHint': 'Recorded via INFINITAS screen capture (the day\'s imports merged into one record)',
+  'history.versionSelect': 'Version',
+  'history.versionSelectHint': 'Switch the game version (previous versions\' history is also available)',
 
   // Onboarding
   'onboarding.welcome': 'Welcome to beat-seeker!',
@@ -930,7 +934,7 @@ export const en = {
   'compare.close': 'Close',
 
   // About
-  'about.heroBadge': 'Beta Version Live',
+  'about.heroBadge': 'Now Live',
   'about.heroTitle': 'What is beat-seeker?',
   'about.heroP1': 'beat-seeker is a free web application for visualizing and analyzing beatmania IIDX score data.',
   'about.heroP2': 'Just upload the CSV file downloaded from the official site, and you can check your play data with beautiful graphs and ranks.',
@@ -1040,7 +1044,7 @@ export const en = {
   'terms.ipItem2': 'Game-related information such as song titles and artist names belongs to Konami Amusement Co., Ltd. and the respective rights holders. This service is an unofficial fan-made tool with no affiliation with KONAMI.',
   'terms.ipItem3': 'The rights to content you register or post on this service (score data, result images, chat, etc.) remain yours, but you grant the operator a free license to use it to the extent necessary to provide and improve the service and to compile statistics.',
   'terms.disclaimerTitle': 'Disclaimer',
-  'terms.disclaimerItem1': 'This service is provided "as-is" and primarily as a beta version. No guarantees are made regarding its completeness, accuracy, or usefulness.',
+  'terms.disclaimerItem1': 'This service is provided "as-is". No guarantees are made regarding its completeness, accuracy, or usefulness.',
   'terms.disclaimerItem2': 'The operator accepts no responsibility for any damage caused to users by the use of this service or loss of data.',
   'terms.disclaimerItem3': 'The operator may change specifications, add features, or temporarily/permanently stop the service without prior notice.',
   'terms.disclaimerItem4': 'While uploaded data is saved, full backups are not guaranteed. Please manage and store important data yourself (official CSV, etc.).',
@@ -1837,6 +1841,11 @@ export const en = {
   'past.confirm.cancel': 'Cancel',
   'past.confirm.submit': 'Import',
   'past.confirm.submitting': 'Importing...',
+  'past.confirm.ambiguousTitle': 'Which version is this CSV from?',
+  'past.confirm.ambiguousMessage': 'This CSV only contains songs up to {previous}. A {current} CSV looks the same until you play a new song. Choose which version these scores belong to.',
+  'past.confirm.asPast': '{previous} CSV (past scores)',
+  'past.confirm.asCurrent': '{current} CSV (current scores)',
+  'past.confirm.asCurrentNote': 'Importing as current scores updates rankings and BEAT-PT.',
 
   // Reasons an import was rejected
   'past.error.title': 'Cannot import',

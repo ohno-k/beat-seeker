@@ -31,6 +31,12 @@
  *       (2026-09-11 ユーザー指示「13.0 を 10 曲くらい、12.9 を 20 曲くらいに」で追加)
  *   node scripts/rebuild-draft-maxminus-zinrai.js --no-notes-bonus         # 物量(ノーツ数)加点を行わない。帯は MAX-率順(同率は平均スコアレート順)と定員だけで決まる。
  *       加点が無いので案A = 案B = ベース配置になる(2026-09-11 ユーザー指示「物量加点をなくしてみて」で追加)。
+ *   node scripts/rebuild-draft-maxminus-zinrai.js --uniform=0.2             # 帯サイズを active の ±20% 以内に抑えつつ、各帯の MAX-率の幅が
+ *       できるだけ均一になる帯サイズを DP で求め、それを定員にする(2026-09-15 ユーザー指示
+ *       「帯を大きく変えないように、かつ MAX-率のレンジができるだけ一定になるように」で追加)。--quota とは併用不可。
+ *       帯境界 = その帯の最後の曲の MAX-率、幅 = 隣の境界との差。最下帯(11.0)は上に開いているので幅の評価から外す。
+ *       目標幅 = 定員どおり(active サイズのまま)に置いたときの 11.1 の上限 ÷ 20。
+ *       物量加点はこのベース配置の上に「定義どおり」(1800 以上 +0.1、200 ごと +0.1、上限 12.8、減点なし)に掛かる。
  *
  * 出力: data/zinrai_rebuild_report.md, data/zinrai_rebuild_changes.json
  * 注意: 本番DB(Render)に直接接続する。active には一切触れない。
@@ -69,6 +75,12 @@ const BACKUP_PROFILE = `profile:${argOf('backup', `pre-zinrai-rebuild-${today}`)
 const QUOTA_ARG = argOf('quota', '');
 /** 物量(ノーツ数)加点を無効にする(--no-notes-bonus)。notesSteps() が常に 0 を返す。 */
 const NO_NOTES_BONUS = process.argv.includes('--no-notes-bonus');
+/** 帯サイズの許容変動率(--uniform=0.2 → active の ±20% 以内)。空なら従来どおり active サイズを定員にする。 */
+const UNIFORM_ARG = argOf('uniform', '');
+const UNIFORM_TOL = UNIFORM_ARG === '' ? null : Number(UNIFORM_ARG);
+if (UNIFORM_TOL != null && !(UNIFORM_TOL >= 0 && UNIFORM_TOL < 1)) throw new Error(`--uniform は 0 以上 1 未満の割合で指定してください: "${UNIFORM_ARG}"`);
+if (UNIFORM_TOL != null && QUOTA_ARG) throw new Error('--uniform と --quota は併用できません');
+const PROFILE_BASE = 'profile:ZINRAI-base';
 
 const isNumericRank = r => /^\d+\.\d$/.test(r);
 const tenthsOf = r => Math.round(parseFloat(r) * 10);
@@ -185,6 +197,80 @@ function packByQuota(seq, quota) {
     return placed;
 }
 
+/**
+ * --uniform: 「各帯のサイズは active の ±tol 以内」という制約の中で、帯ごとの MAX-率の幅が
+ * できるだけ均一になる帯サイズを動的計画法で求める。
+ *
+ *  - 帯境界 = その帯の最後の曲(MAX-率が最も高い曲)の MAX-率。幅 = 隣の境界との差(13.0 は 0 から)。
+ *  - 最下帯(11.0)は上に開いているので幅の評価から外し、サイズ制約だけを課す。
+ *  - 目標幅 T = 定員どおり(active サイズのまま)に置いたときの 11.1 の上限 ÷ 閉じた帯の数(20)。
+ *    評価は Σ(幅 − T)²。上位帯はサイズ上限のせいで T に届かないので許容上限まで太り、
+ *    裾の帯(11.1/11.2)は幅を縮めるために許容下限まで細る、という動きになる。
+ *
+ * @param seq   MAX-率昇順に並んだ曲列(13.1 の手動曲を除く)
+ * @param quota 13.0 → 11.0 の順の定員(count = active のサイズ、手動曲を除く)
+ * @param tol   許容変動率(0.2 = ±20%)
+ * @returns { sizes, thresholds, widths, T, lo, hi }
+ */
+function uniformSizes(seq, quota, tol) {
+    const N = seq.length, K = quota.length;
+    const rates = seq.map(s => s.maxMinusRate);
+    const lo = quota.map(q => Math.max(1, Math.floor(q.count * (1 - tol))));
+    const hi = quota.map((q, k) => Math.max(lo[k], Math.ceil(q.count * (1 + tol))));
+    if (lo.reduce((a, b) => a + b, 0) > N || hi.reduce((a, b) => a + b, 0) < N) {
+        throw new Error(`--uniform=${tol}: サイズ制約(合計 ${lo.reduce((a, b) => a + b, 0)}〜${hi.reduce((a, b) => a + b, 0)})が曲数 ${N} と両立しません`);
+    }
+
+    let pos = 0;
+    for (let k = 0; k < K - 1; k++) pos += quota[k].count;
+    const spanB = rates[Math.min(pos, N) - 1];
+    const T = spanB / (K - 1);
+
+    const INF = Infinity;
+    const best = Array.from({ length: K + 1 }, () => new Float64Array(N + 1).fill(INF));
+    const prev = Array.from({ length: K + 1 }, () => new Int32Array(N + 1).fill(-1));
+    best[0][0] = 0;
+    for (let k = 0; k < K; k++) {
+        const last = k === K - 1;
+        for (let i = 0; i <= N; i++) {
+            if (best[k][i] === INF) continue;
+            const from = i > 0 ? rates[i - 1] : 0;
+            for (let n = lo[k]; n <= hi[k]; n++) {
+                const j = i + n;
+                if (j > N) break;
+                if (last && j !== N) continue;
+                const cost = last ? 0 : (rates[j - 1] - from - T) ** 2;
+                const c = best[k][i] + cost;
+                if (c < best[k + 1][j]) { best[k + 1][j] = c; prev[k + 1][j] = i; }
+            }
+        }
+    }
+    if (best[K][N] === INF) throw new Error(`--uniform=${tol}: 帯サイズ制約を満たす配置がありません`);
+
+    const sizes = new Array(K);
+    let j = N;
+    for (let k = K; k >= 1; k--) { const i = prev[k][j]; sizes[k - 1] = j - i; j = i; }
+
+    const thresholds = [], widths = [];
+    let p = 0, from = 0;
+    for (let k = 0; k < K; k++) {
+        p += sizes[k];
+        const thr = rates[p - 1];
+        thresholds.push(thr);
+        widths.push(thr - from);
+        from = thr;
+    }
+    return { sizes, thresholds, widths, T, lo, hi };
+}
+
+/** 幅の統計(閉じた帯 = 最下帯を除く)。 */
+function widthStats(widths) {
+    const w = widths.slice(0, -1);
+    const mean = w.reduce((a, b) => a + b, 0) / w.length;
+    const sd = Math.sqrt(w.reduce((a, b) => a + (b - mean) ** 2, 0) / w.length);
+    return { min: Math.min(...w), max: Math.max(...w), mean, sd };
+}
+
 async function main() {
     const client = new Client(DB_CONFIG);
     await client.connect();
@@ -217,19 +303,44 @@ async function main() {
     songs.sort((a, b) => (a.maxMinusRate - b.maxMinusRate) || (a.avgScoreRate - b.avgScoreRate));
     console.log(`対象 ${songs.length}曲 / MAX-率データ無し ${noData.length}曲(Uncategorized へ残置)`);
 
-    // ── 定員(13.0以下、active の帯別曲数) ──
-    const quota = [...activeRanks.entries()]
-        .filter(([rank]) => isNumericRank(rank))
-        .map(([rank, v]) => ({ rank, tenths: tenthsOf(rank), count: v.songs.length }))
-        .sort((a, b) => b.tenths - a.tenths)
-        .filter(q => q.tenths <= tenthsOf(TOP_RANK) - 1);
-    const quotaNote = applyQuotaOverrides(quota, QUOTA_ARG);
-
     const manualSet = new Set(MANUAL_TOP);
     const missing = MANUAL_TOP.filter(t => !songs.some(s => s.key === t));
     if (missing.length) throw new Error(`13.1 手動指定の曲が見つからない: ${missing.join(', ')}`);
     const topSongs = songs.filter(s => manualSet.has(s.key));
     const restSongs = songs.filter(s => !manualSet.has(s.key));
+
+    // ── 定員(13.0以下、active の帯別曲数) ──
+    // --uniform のときは 13.1 の手動曲を active のサイズから除く(手動曲は定員を消費しないため、
+    // 除かないと合計が曲数と合わず最下帯にしわ寄せが出る)。従来モードは互換のため素のサイズ。
+    const quota = [...activeRanks.entries()]
+        .filter(([rank]) => isNumericRank(rank))
+        .map(([rank, v]) => ({
+            rank, tenths: tenthsOf(rank),
+            count: UNIFORM_TOL != null ? v.songs.filter(t => !manualSet.has(t)).length : v.songs.length,
+        }))
+        .sort((a, b) => b.tenths - a.tenths)
+        .filter(q => q.tenths <= tenthsOf(TOP_RANK) - 1);
+    let quotaNote = applyQuotaOverrides(quota, QUOTA_ARG);
+
+    let uniform = null;
+    if (UNIFORM_TOL != null) {
+        // 比較用に ±10/20/30% も計算して並べる(採用は --uniform の値)。
+        const activeSizes = quota.map(q => q.count);
+        console.log(`\n【--uniform 比較】 目標幅 T は active サイズどおりに置いたときの 11.1 上限 ÷ 20`);
+        for (const tol of [...new Set([0.1, 0.2, 0.3, UNIFORM_TOL])].sort()) {
+            const u = uniformSizes(restSongs, quota, tol);
+            const st = widthStats(u.widths);
+            const moved = u.sizes.reduce((a, n, k) => a + Math.abs(n - activeSizes[k]), 0);
+            console.log(`  ±${Math.round(tol * 100)}%: 幅 ${st.min.toFixed(2)}〜${st.max.toFixed(2)}(σ ${st.sd.toFixed(2)}, T ${u.T.toFixed(2)}) / サイズ変動 Σ|Δ| = ${moved} / ` +
+                quota.map((q, k) => `${q.rank}:${u.sizes[k]}`).join(' '));
+        }
+        uniform = uniformSizes(restSongs, quota, UNIFORM_TOL);
+        quota.forEach((q, k) => { q.count = uniform.sizes[k]; });
+        quotaNote = `帯サイズ: active の ±${Math.round(UNIFORM_TOL * 100)}% 以内で MAX-率の幅を均一化（\`--uniform=${UNIFORM_TOL}\`、目標幅 ${uniform.T.toFixed(2)}pt）: ` +
+            quota.map((q, k) => `${q.rank} ${activeSizes[k]}→${q.count}`).filter((_, k) => activeSizes[k] !== quota[k].count).join(', ');
+        console.log(quotaNote);
+    }
+
     const base = packByQuota(restSongs, quota);
     for (const s of topSongs) base.set(s.key, tenthsOf(TOP_RANK));
     const newcomers = songs.filter(s => !s.existing);
@@ -277,6 +388,29 @@ async function main() {
 
     const ranksA = buildRanks(planA);
     const ranksB = buildRanks(planB);
+    const ranksBase = buildRanks(base);
+
+    /**
+     * 帯ごとの MAX-率レンジ(上限 = その帯で最も MAX-率が高い曲、幅 = 上の帯の上限との差)。
+     * 加点や詰め直しで動いた曲を含めると見かけ上バラバラになるので、比較はベース配置で行う。
+     */
+    function rangeRows(plan) {
+        const upper = new Map();
+        for (const s of songs) {
+            const t = plan.get(s.key);
+            if (t === tenthsOf(TOP_RANK)) continue;
+            upper.set(t, Math.max(upper.get(t) ?? -Infinity, s.maxMinusRate));
+        }
+        const rows = [];
+        let from = 0;
+        for (const q of quota) {
+            const u = upper.get(q.tenths);
+            rows.push({ rank: q.rank, upper: u, width: u == null ? null : u - from });
+            if (u != null) from = u;
+        }
+        return rows;
+    }
+    const rangeBase = rangeRows(base);
 
     const sizeLine = rs => rs.filter(r => r.songs.length || isNumericRank(r.rank))
         .map(r => `${r.rank}:${r.songs.length}`).join('  ');
@@ -326,13 +460,23 @@ async function main() {
     md.push(NO_NOTES_BONUS
         ? '- 物量加点: 無効（`--no-notes-bonus`。帯は MAX-率順と定員だけで決定）'
         : `- 物量加点: ${songs.filter(s => notesSteps(s.notes) > 0).length} 曲（1800 以上 +0.1、以降 200 ごと +0.1、到達上限 12.8）`);
-    if (quotaNote) md.push(`- ${quotaNote}（\`--quota=${QUOTA_ARG}\`）`);
+    if (quotaNote) md.push(QUOTA_ARG ? `- ${quotaNote}（\`--quota=${QUOTA_ARG}\`）` : `- ${quotaNote}`);
     md.push('');
-    md.push('## 帯別曲数', '', '| 帯 | 現行 | 案A | 案B |', '| --- | ---: | ---: | ---: |');
+    md.push('## 帯別曲数と MAX-率レンジ（レンジはベース配置＝加点前・詰め直し前）', '',
+        '| 帯 | 現行 | ベース | 案A | 案B | MAX-率上限 | 幅 |', '| --- | ---: | ---: | ---: | ---: | ---: | ---: |');
     const cntA = new Map(ranksA.map(r => [r.rank, r.songs.length]));
     const cntB = new Map(ranksB.map(r => [r.rank, r.songs.length]));
+    const cntBase = new Map(ranksBase.map(r => [r.rank, r.songs.length]));
+    const rangeByRank = new Map(rangeBase.map(r => [r.rank, r]));
     for (const [rank, v] of [...activeRanks.entries()].sort((a, b) => a[1].sortOrder - b[1].sortOrder)) {
-        md.push(`| ${rank} | ${v.songs.length} | ${cntA.get(rank) ?? 0} | ${cntB.get(rank) ?? 0} |`);
+        const rg = rangeByRank.get(rank);
+        const upper = rg && rg.upper != null ? `${rg.upper.toFixed(2)}%` : '';
+        const width = rg && rg.width != null ? (rank === quota[quota.length - 1].rank ? '(開)' : rg.width.toFixed(2)) : '';
+        md.push(`| ${rank} | ${v.songs.length} | ${cntBase.get(rank) ?? 0} | ${cntA.get(rank) ?? 0} | ${cntB.get(rank) ?? 0} | ${upper} | ${width} |`);
+    }
+    if (uniform) {
+        const st = widthStats(uniform.widths);
+        md.push('', `幅（13.0〜11.1）: ${st.min.toFixed(2)}〜${st.max.toFixed(2)}、平均 ${st.mean.toFixed(2)}、σ ${st.sd.toFixed(2)}（目標 ${uniform.T.toFixed(2)}）`);
     }
     md.push('', '## 移動量', '', `- 案A: 昇格 ${mvA.up} / 降格 ${mvA.down} / 据置 ${mvA.same}（最大 +${mvA.maxUp} / ${mvA.maxDown}）`);
     md.push(`- 案B: 昇格 ${mvB.up} / 降格 ${mvB.down} / 据置 ${mvB.same}（最大 +${mvB.maxUp} / ${mvB.maxDown}）`, '');
@@ -387,9 +531,10 @@ async function main() {
         if (currentDraft.length > 0) await writeRevision(BACKUP_PROFILE, currentDraft);
         await writeRevision(PROFILE_A, ranksA);
         await writeRevision(PROFILE_B, ranksB);
+        await writeRevision(PROFILE_BASE, ranksBase);
         await writeRevision('draft', PLAN_ARG === 'A' ? ranksA : ranksB);
         await client.query('COMMIT');
-        console.log(`\n保存完了。draft = 案${PLAN_ARG}。上書き前の draft は ${BACKUP_PROFILE} に保存済み。管理画面のプロファイル読込で ${PROFILE_A} / ${PROFILE_B} を切り替えられます。`);
+        console.log(`\n保存完了。draft = 案${PLAN_ARG}。上書き前の draft は ${BACKUP_PROFILE} に保存済み。管理画面のプロファイル読込で ${PROFILE_A} / ${PROFILE_B} / ${PROFILE_BASE}(加点前) を切り替えられます。`);
     } catch (e) {
         await client.query('ROLLBACK');
         throw e;

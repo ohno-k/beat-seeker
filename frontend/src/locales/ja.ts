@@ -594,6 +594,10 @@ export const ja = {
   'ranking.beatTierRanking': 'BEAT-TIER ランキング',
   'ranking.rateTierRanking': 'RATE-TIER ランキング',
   'ranking.subtitle': '全プレイヤーの集計結果',
+  'ranking.versionSelect': '作品',
+  'ranking.versionSelectHint': '前作の終了時点のランキングを見られます',
+  'ranking.archiveBadge': '{name} 終了時点',
+  'ranking.archiveNote': 'この集計は前作のアーカイブが無いため現行作を表示しています',
   'ranking.aggregating': 'ランキングを集計中...',
   'ranking.noData': '表示できるデータがありません。',
   'ranking.noRateDisplay': '表示できるデータがありません。\nスコアをアップロードするとRATE-TIERが集計されます。',
@@ -660,8 +664,6 @@ export const ja = {
   'profile.showArcadeScoresHint': 'オフにすると e-amusement の CSV / ブックマークレットで取り込んだスコアが非表示になります',
   'profile.showInfinitasScores': 'INFINITAS スコアを表示する',
   'profile.showInfinitasScoresHint': 'オフにすると INFINITAS 画面取得で取り込んだスコアが非表示になります',
-  'profile.showSupporterBorder': 'サポーターゴールド枠を表示',
-  'profile.showSupporterBorderHint': 'オフにするとティアランクのゴールド枠が非表示になります',
   'profile.saveChanges': '変更を保存する',
   'profile.saving': '保存中...',
   'profile.updateSuccess': 'プロフィールを更新しました！',
@@ -834,6 +836,8 @@ export const ja = {
   'history.difficultyRevision': '難易度改訂',
   'history.infBadge': 'INF',
   'history.infBadgeHint': 'INFINITAS 画面取り込みによる記録（その日の分をまとめて1レコード）',
+  'history.versionSelect': '作品',
+  'history.versionSelectHint': '表示する作品を切り替えます（前作の成長記録も見られます）',
 
   // Onboarding
   'onboarding.welcome': '登録ありがとうございます！',
@@ -939,7 +943,7 @@ export const ja = {
   'compare.close': '閉じる',
 
   // About
-  'about.heroBadge': 'Beta版 公開中',
+  'about.heroBadge': '正式版 公開中',
   'about.heroTitle': 'beat-seeker とは？',
   'about.heroP1': 'beat-seekerは、beatmania IIDX のスコアデータを可視化・分析するための無料Webアプリケーションです。',
   'about.heroP2': '公式サイトからダウンロードしたCSVファイルをアップロードするだけで、あなたのプレイデータを美しいグラフやランクで確認できます。',
@@ -1049,7 +1053,7 @@ export const ja = {
   'terms.ipItem2': '楽曲名・アーティスト名等のゲームに関する情報は、株式会社コナミアミューズメントほか各権利者に帰属します。本サービスは KONAMI 公式とは一切関係のない非公式のファンメイドツールです。',
   'terms.ipItem3': 'ユーザーが本サービスに登録・投稿した内容（スコアデータ・リザルト画像・チャット等）の権利はユーザーに帰属しますが、運営者は本サービスの提供・改善・統計の作成に必要な範囲で、これを無償で利用できるものとします。',
   'terms.disclaimerTitle': '免責事項 (Disclaimer)',
-  'terms.disclaimerItem1': '本サービスは現状有姿（As-Is）で、基本ベータ版として提供されます。機能の完全性、正確性、有用性について、いかなる保証もいたしません。',
+  'terms.disclaimerItem1': '本サービスは現状有姿（As-Is）で提供されます。機能の完全性、正確性、有用性について、いかなる保証もいたしません。',
   'terms.disclaimerItem2': '本サービスの利用やデータの損失によってユーザーに生じたあらゆる損害について、運営者は一切の責任を負いません。',
   'terms.disclaimerItem3': '運営者の判断により、事前の予告なく本サービスの仕様変更、機能追加、またはサービスの提供を一時的または恒久的に停止する場合があります。',
   'terms.disclaimerItem4': 'アップロードされたデータはシステム上保存されますが、完全なバックアップを保証するものではありません。大切なデータはユーザーご自身（公式のCSV等）で管理・保管をお願いいたします。',
@@ -1872,6 +1876,11 @@ export const ja = {
   'past.confirm.cancel': 'キャンセル',
   'past.confirm.submit': '取り込む',
   'past.confirm.submitting': '取り込み中...',
+  'past.confirm.ambiguousTitle': 'どの作品の CSV ですか？',
+  'past.confirm.ambiguousMessage': 'この CSV には {previous} までの曲しか含まれていません。{current} で新曲をまだプレーしていない場合、{current} の CSV でもこの判定になります。どちらの作品のスコアとして取り込むか選んでください。',
+  'past.confirm.asPast': '{previous} の CSV（歴代スコアへ）',
+  'past.confirm.asCurrent': '{current} の CSV（現行スコアへ）',
+  'past.confirm.asCurrentNote': '現行スコアとして取り込むとランキング・BEAT-PT に反映されます。',
 
   // 取り込みを弾いたときの理由表示
   'past.error.title': '取り込めません',

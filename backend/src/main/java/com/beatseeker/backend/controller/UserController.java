@@ -51,6 +51,8 @@ public class UserController {
     private final UserSongOptionRepository userSongOptionRepository;
     /** options_json の文字列リスト復元用。 */
     private final ObjectMapper objectMapper = new ObjectMapper();
+    /** 前作の最終 PT（ティアアイコンの外枠用）。 */
+    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
     /**
      * 【コンストラクタ】 Spring が DI で各 Repository を注入する。
@@ -60,13 +62,15 @@ public class UserController {
                           ScoreHistoryLogRepository scoreHistoryLogRepository,
                           FriendshipRepository friendshipRepository,
                           FriendRequestRepository friendRequestRepository,
-                          UserSongOptionRepository userSongOptionRepository) {
+                          UserSongOptionRepository userSongOptionRepository,
+                          com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.friendshipRepository = friendshipRepository;
         this.friendRequestRepository = friendRequestRepository;
         this.userSongOptionRepository = userSongOptionRepository;
+        this.previousVersionPtService = previousVersionPtService;
     }
 
     /**
@@ -100,7 +104,7 @@ public class UserController {
         body.put("privacyLevel", privacyLevel);
         body.put("showRateTier", user.getShowRateTier() != null ? user.getShowRateTier() : true);
         body.put("isSupporter", user.getIsSupporter() != null ? user.getIsSupporter() : false);
-        body.put("showSupporterBorder", user.getShowSupporterBorder() != null ? user.getShowSupporterBorder() : true);
+        previousVersionPtService.putPrevious(body, user.getId());
         body.put("lastUploadedAt", user.getLastUploadedAt());
         body.put("totalBeatPt", user.getTotalBeatPt() != null ? user.getTotalBeatPt() : 0.0);
         return ResponseEntity.ok(body);
@@ -187,7 +191,11 @@ public class UserController {
             return ResponseEntity.status(403).build();
         }
 
-        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
+        // 成長記録は現行作の分だけ返す（前作の履歴を混ぜるとグラフが世代境界で崖になるため）。
+        List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserAndVersionOrderByUploadedAtAsc(
+                user,
+                com.beatseeker.backend.service.IidxVersions.current(),
+                com.beatseeker.backend.service.IidxVersions.PREVIOUS);
         List<Map<String, Object>> history = logs.stream().map(log -> {
             Map<String, Object> m = new HashMap<>();
             // 履歴グラフはフロントで snapshotId をキーに扱うため文字列化
