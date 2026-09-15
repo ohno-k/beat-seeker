@@ -3,7 +3,7 @@ import { useAuth } from './useAuth';
 import { API_BASE, CLEAR_TYPE_RANK } from './constants';
 import type { ScoreData } from '../types/ScoreData';
 import type { ScoreRecord } from '../utils/scoreData';
-import { getSongMaxScore } from '../utils/scoreData';
+import { getSongMaxScore, buildScoreRecord } from '../utils/scoreData';
 import { calculatePoints } from '../utils/beatTier';
 import { CURRENT_VERSION } from '../utils/iidxVersions';
 import { canonicalSongTitle } from '../utils/songTitleAliases';
@@ -111,6 +111,12 @@ export function chartKey(title: string, difficultyName: string): string {
 
 /** ある譜面についての、過去作を通じた最良値。 */
 export interface PastBest {
+    /** 曲名（現行表記）。 */
+    title: string;
+    /** 難易度名（"ANOTHER" など）。 */
+    difficultyName: string;
+    /** ベストスコアを出した作品での公式レベル。不明なら null。 */
+    difficultyLevel: number | null;
     /** 歴代ベストスコア（EX）。 */
     score: number;
     /** 上記スコアを出したときの DJ LEVEL。 */
@@ -363,6 +369,9 @@ export function usePastScores() {
 
             if (!prev) {
                 bestByChart.set(key, {
+                    title: row.t,
+                    difficultyName: row.d,
+                    difficultyLevel: row.l,
                     score,
                     djLevel: row.j || '---',
                     pgreat: row.p ?? 0,
@@ -375,6 +384,7 @@ export function usePastScores() {
             }
             if (score > prev.score) {
                 prev.score = score;
+                prev.difficultyLevel = row.l;
                 prev.djLevel = row.j || '---';
                 prev.pgreat = row.p ?? 0;
                 prev.great = row.g ?? 0;
@@ -400,6 +410,11 @@ export function usePastScores() {
      * 現行の曲マスタに無い譜面（削除曲）は `maxScore` が 0 でレートを出せないため、
      * この変換の対象にならない（＝歴代 PT にも寄与しない）。
      *
+     * 現行作にスコアが無い譜面（新作稼働直後や今作で未プレーの曲）は、過去作のベストから
+     * 行を合成して末尾に足す（2026-09-16 追加）。これが無いと、現行作が 0 件のときに
+     * 「歴代ベストを反映」を ON にしても何も載らず 0 pt のままになる。
+     * 合成できるのは現行の曲マスタにある譜面だけ（削除曲はレートを出せないので対象外）。
+     *
      * 注意: この関数の結果を、サーバーへ保存される値（履歴ログの BEAT-PT など）に
      * 流し込んではいけない。あくまで表示用の重ね合わせである。
      *
@@ -410,9 +425,12 @@ export function usePastScores() {
         if (pastRows.value.length === 0) return records;
 
         const bestByChart = pastBestByChart();
+        const seen = new Set<string>();
 
-        return records.map(rec => {
-            const past = bestByChart.get(chartKey(rec.title, rec.difficultyName));
+        const merged = records.map(rec => {
+            const key = chartKey(rec.title, rec.difficultyName);
+            seen.add(key);
+            const past = bestByChart.get(key);
             if (!past) return rec;
 
             const scoreWins = past.score > rec.score;
@@ -444,6 +462,26 @@ export function usePastScores() {
 
             return merged;
         });
+
+        // 現行作に無い譜面は過去作のベストから行を合成する（現行の曲マスタにある譜面のみ）。
+        const synthesized: ScoreRecord[] = [];
+        bestByChart.forEach((past, key) => {
+            if (seen.has(key) || past.score <= 0) return;
+            const rec = buildScoreRecord({
+                title: past.title,
+                difficultyName: past.difficultyName,
+                difficultyLevel: past.difficultyLevel,
+                score: past.score,
+                clearType: past.clearType,
+                djLevel: past.djLevel,
+                pgreat: past.pgreat,
+                great: past.great,
+                missCount: past.missCount,
+            }, { allTimeVersion: past.version });
+            if (rec) synthesized.push(rec);
+        });
+
+        return synthesized.length > 0 ? merged.concat(synthesized) : merged;
     };
 
     return {

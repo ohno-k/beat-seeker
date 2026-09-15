@@ -907,8 +907,11 @@ const myScoresBestDisplay = computed(() => {
   const bestByChart = pastBestByChart();
   if (bestByChart.size === 0) return myScoresBest.value;
 
-  return myScoresBest.value.map(s => {
-    const past = bestByChart.get(chartKey(s.title, s.difficultyName));
+  const seen = new Set<string>();
+  const merged = myScoresBest.value.map(s => {
+    const key = chartKey(s.title, s.difficultyName);
+    seen.add(key);
+    const past = bestByChart.get(key);
     if (!past) return s;
 
     const scoreWins = past.score > (s.score ?? 0);
@@ -928,6 +931,25 @@ const myScoresBestDisplay = computed(() => {
     if (missWins) merged.missCount = past.missCount;
     return merged;
   });
+
+  // 現行作に無い譜面（新作稼働直後や今作で未プレー）は過去作のベストから生レコードを合成する。
+  // 派生値（レート・BEAT-PT）は後段の myScoresEnriched が現行の曲マスタで付け直す。
+  bestByChart.forEach((past, key) => {
+    if (seen.has(key) || past.score <= 0) return;
+    merged.push({
+      title: past.title,
+      difficultyName: past.difficultyName,
+      difficultyLevel: past.difficultyLevel,
+      score: past.score,
+      clearType: past.clearType,
+      djLevel: past.djLevel,
+      pgreat: past.pgreat,
+      great: past.great,
+      missCount: past.missCount,
+      allTimeVersion: past.version,
+    });
+  });
+  return merged;
 });
 
 // All Lv11/12 ANOTHER/LEGGENDARIA entries (including score=0, for clear status table)

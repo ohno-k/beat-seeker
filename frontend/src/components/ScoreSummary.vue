@@ -2025,9 +2025,12 @@ const viewRecords = computed<ScoreRecord[]>(() =>
     showAllTime.value ? applyAllTimeBest(allRecords.value) : allRecords.value
 );
 
-/** 【computed】 実際に表示に使うレコード（RATE-TIER 用）。 */
+/** 【computed】 実際に表示に使うレコード（RATE-TIER 用）。
+ *  歴代ベストの反映で過去作にしか無い譜面が足されるので、ANOTHER / LEGGENDARIA に絞り直す。 */
 const rateViewRecords = computed<ScoreRecord[]>(() =>
-    showAllTime.value ? applyAllTimeBest(rateAllRecords.value) : rateAllRecords.value
+    showAllTime.value
+        ? applyAllTimeBest(rateAllRecords.value).filter(r => ['ANOTHER', 'LEGGENDARIA'].includes(r.difficultyName))
+        : rateAllRecords.value
 );
 
 /** 【computed】 RATE-TIER の TOP100 キー集合。RATE-PT 降順で上位 100 譜面を取り出す。 */

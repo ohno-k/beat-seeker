@@ -278,3 +278,70 @@ export function flattenScores(scores: ScoreData[]): ScoreRecord[] {
 
     return records;
 }
+
+/** 大文字難易度ラベル → ScoreData のプロパティ名（diffColors のキー）。 */
+const diffLabelToKey: Record<string, string> = {
+    BEGINNER: 'beginner', NORMAL: 'normal', HYPER: 'hyper', ANOTHER: 'another', LEGGENDARIA: 'leggendaria'
+};
+
+/** {@link buildScoreRecord} に渡す、1 譜面ぶんの実測値。 */
+export interface ScoreRecordInput {
+    title: string;
+    difficultyName: string;
+    /** 譜面の公式レベル。null なら現行の曲マスタの値で補う。 */
+    difficultyLevel: number | null;
+    score: number;
+    clearType: string;
+    djLevel: string;
+    pgreat: number;
+    great: number;
+    missCount: number | null;
+}
+
+/**
+ * 【関数の役割】 実測値 1 譜面ぶんから、{@link flattenScores} と同じ規則で派生値
+ * （最大スコア・スコアレート・非公式ランク・BEAT-PT）を付けた {@link ScoreRecord} を作る。
+ *
+ * 現行作のスコアが無い譜面（新作稼働直後や未プレー曲）に過去作のベストを「歴代ベストを反映」で
+ * 載せるために使う。現行の曲マスタに無い譜面（削除曲など）はレートも PT も出せないので null を返す。
+ *
+ * @param input 実測値
+ * @param extra 追加で上書きしたい項目（`allTimeVersion` など）
+ * @returns 派生値付きのレコード。曲マスタに無い譜面は null
+ */
+export function buildScoreRecord(input: ScoreRecordInput, extra: Partial<ScoreRecord> = {}): ScoreRecord | null {
+    const code = diffLabelToCode[input.difficultyName];
+    if (!code) return null;
+    const definition = buildSongDict().get(`${input.title}_${code}`);
+    if (!definition) return null;
+
+    const maxScore = definition.notes ? definition.notes * 2 : 0;
+    const scoreRate = maxScore > 0 ? (input.score / maxScore) * 100 : -1;
+    const difficultyLevel = input.difficultyLevel ?? (definition.level != null ? Number(definition.level) : null);
+    const isHyperNonTarget = input.difficultyName === 'HYPER' && (difficultyLevel ?? 0) >= 11;
+    const informalRank = buildInformalDict().get(`${input.title}_${input.difficultyName}`) || undefined;
+    const beatTierPoints = isHyperNonTarget ? 0 : calculatePoints(scoreRate, informalRank);
+
+    return {
+        title: input.title,
+        artist: definition.artist ?? '',
+        genre: definition.genre ?? '',
+        difficultyName: input.difficultyName,
+        difficultyColor: diffColors[diffLabelToKey[input.difficultyName]] ?? '',
+        difficultyLevel,
+        clearType: input.clearType,
+        score: input.score,
+        scoreRate,
+        maxScore,
+        informalRank,
+        djLevel: input.djLevel,
+        pgreat: input.pgreat,
+        great: input.great,
+        missCount: input.missCount,
+        playCount: 0,
+        lastPlayTime: '',
+        beatTierPoints,
+        maxBeatTierPoints: getMaxPoints(informalRank),
+        ...extra,
+    };
+}
