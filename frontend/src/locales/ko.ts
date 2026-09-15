@@ -476,6 +476,7 @@ export const ko = {
   'table.milestoneNote': '모든 유저의 베스트 스코어 집계 (비공개 유저 포함, 익명)',
   'table.notPlayedShort': '미플레이',
   'table.privateShort': '비공개',
+  'table.adminSeeAll': '관리자: 공개 설정과 관계없이 전원 표시 중',
   'table.lastPlayTime': '최근 플레이',
   'table.pgreat': 'PGREAT',
   'table.great': 'GREAT',

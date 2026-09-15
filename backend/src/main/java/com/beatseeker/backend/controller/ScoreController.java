@@ -1071,9 +1071,10 @@ public class ScoreController {
                 .map(f -> f.getFriend().getId())
                 .toList();
         if (friendIds.isEmpty()) friendIds = List.of(-1L);
-        // 手順2: 可視性フィルタ付きクエリに委譲。
+        // 手順2: 可視性フィルタ付きクエリに委譲。管理者は公開設定に関係なく全員を見られる（運用確認用）。
+        boolean seeAll = adminAuthService.isAdminByIidxId(me.getIidxId());
         List<Map<String, Object>> ranking = scoreRepository.findSongRanking(
-                title, difficultyName, me.getId(), friendIds);
+                title, difficultyName, me.getId(), friendIds, seeAll);
         return ResponseEntity.ok(ranking);
     }
 

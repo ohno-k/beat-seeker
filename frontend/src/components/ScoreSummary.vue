@@ -820,6 +820,10 @@
               <input type="checkbox" v-model="showVirtualUsers" class="w-4 h-4 rounded accent-amber-500" />
               TOPランカー仮想ユーザーを表示
             </label>
+            <!-- 管理者は公開設定に関係なく全員を表示（運用確認用） -->
+            <span v-if="isAdmin" class="text-[11px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-300 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-700">
+              {{ t('table.adminSeeAll') }}
+            </span>
           </div>
 
           <!-- ===== 単曲ランク分布: スコアのある全実ユーザー（非公開含む・匿名集計）の単曲ランクをヒストグラム表示 ===== -->
@@ -916,9 +920,9 @@
                       </div>
                     </template>
                   </td>
-                  <!-- 単曲ランクアイコン（その譜面のスコアレートから算出。スコア非公開行は非表示） -->
+                  <!-- 単曲ランクアイコン（その譜面のスコアレートから算出。スコア非公開行は非表示。管理者はマスクしない） -->
                   <td class="py-3 px-2 text-center">
-                    <template v-if="row.kind === 'user' && !row.isSelf && (row.privacyLevel ?? 1) === 2 && !row.isFriend">
+                    <template v-if="row.kind === 'user' && !row.isSelf && (row.privacyLevel ?? 1) === 2 && !row.isFriend && !isAdmin">
                       <span class="text-slate-300 dark:text-slate-600 text-xs">-</span>
                     </template>
                     <template v-else>
@@ -933,9 +937,9 @@
                       <span v-else class="text-slate-300 dark:text-slate-600 text-xs">-</span>
                     </template>
                   </td>
-                  <!-- スコア -->
+                  <!-- スコア（非公開行はマスク。管理者はマスクしない） -->
                   <td class="py-3 text-right">
-                    <template v-if="row.kind === 'user' && !row.isSelf && (row.privacyLevel ?? 1) === 2 && !row.isFriend">
+                    <template v-if="row.kind === 'user' && !row.isSelf && (row.privacyLevel ?? 1) === 2 && !row.isFriend && !isAdmin">
                       <span class="text-slate-400 dark:text-slate-500 text-sm font-bold">{{ t('table.privateShort') }}</span>
                     </template>
                     <template v-else-if="row.score != null">
@@ -2606,10 +2610,12 @@ const rankingList = computed<RankingRow[]>(() => {
   // 手順6: 表示フィルタ。自分は常に表示、仮想ユーザーは showVirtualUsers チェック時または
   //        登録済み仮想ライバル（フレンド扱い）のみ表示、実フレンドはプライバシー 2（完全非公開）以外、
   //        公開ユーザーは showPublicUsers チェック時のみ表示。
+  //        管理者は公開設定に関係なく実ユーザー全員を表示する（API 側も管理者には全員をマスクなしで返す）。
 
   const display = all.filter(r => {
     if (r.isSelf) return true;
     if (r.kind === 'virtual') return showVirtualUsers.value || !!r.isFriend;
+    if (isAdmin.value) return true;
     if (r.isFriend && (r.privacyLevel ?? 1) !== 2) return true;
     if (showPublicUsers.value && (r.privacyLevel ?? 1) === 0) return true;
     return false;

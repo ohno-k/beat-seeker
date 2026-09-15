@@ -115,6 +115,8 @@ FAILED が出た場合は `system_task_runs` の該当行を消せば次のポ�
 
 07:00 のスナップショットまでは `previousBeatPt` が全員 null なので外枠は出ない。スナップショット後は 5 分以内（再起動なら即時）に全員へ付く。
 
+| 管理者 | スコア詳細モーダルのランキングタブで、管理者は公開設定に関係なく全員を名前・スコア付きで見られる（`/api/scores/song-ranking` の `seeAll`＝管理者判定、フロントは表示フィルタとマスクを管理者だけ外す。バッジ「管理者: 公開設定に関係なく全員を表示中」） |
+
 | 前作ランキング | ランキングページに作品セレクト（初期 ZINRAI、Sparkle Shower を選ぶと終了時点のランキング）。`/api/scores/ranking?version=33`・`/rate-ranking`・`/kenban-ranking`・`/sara-ranking` が `version_pt_snapshots` から現行と同じ行の形で返す（`PreviousVersionPtService#archivedRanking`。表示名・公開設定・サポーターは現在の users を優先、前日比は 0、仮想 TOP ランカーは混ぜない）。AVERAGE・シミュレーションはアーカイブが無いので現行作のまま（注記を表示） |
 
 ---

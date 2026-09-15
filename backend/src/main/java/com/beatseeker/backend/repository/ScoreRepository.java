@@ -530,6 +530,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      * @param difficultyName 難易度名
      * @param myUserId 閲覧者自身の user.id
      * @param friendIds 閲覧者のフレンド ID 一覧
+     * @param seeAll true なら公開設定に関係なく全員を可視にする（管理者用。2026-09-16 追加）
      * @return ランキング行のリスト
      */
     @Query(value =
@@ -537,7 +538,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  SELECT s.score, s.clear_type, s.dj_level, s.pgreat, s.great, s.miss_count, " +
         "         u.id as uid, u.iidx_id, u.display_name, COALESCE(u.privacy_level, 1) as pl, " +
         "         latest.total_beat_pt, " +
-        "         (COALESCE(u.privacy_level, 1) = 0 " +
+        "         (:seeAll = true " +
+        "          OR COALESCE(u.privacy_level, 1) = 0 " +
         "          OR u.id = :myUserId " +
         "          OR (COALESCE(u.privacy_level, 1) = 1 AND u.id IN (:friendIds))) as vis " +
         "  FROM scores s " +
@@ -568,7 +570,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
             @Param("title") String title,
             @Param("difficultyName") String difficultyName,
             @Param("myUserId") Long myUserId,
-            @Param("friendIds") List<Long> friendIds);
+            @Param("friendIds") List<Long> friendIds,
+            @Param("seeAll") boolean seeAll);
 
     /**
      * 【メソッドの役割】 管理者ユーザーの曲別順位を一覧化する（基準値確認用）。

@@ -482,6 +482,7 @@ export const ja = {
   'table.noHistoryData': '更新履歴がありません',
   'table.notPlayedShort': '未プレイ',
   'table.privateShort': '非公開',
+  'table.adminSeeAll': '管理者: 公開設定に関係なく全員を表示中',
   'table.lastPlayTime': '最終プレイ',
   'table.pgreat': 'PGREAT',
   'table.great': 'GREAT',

@@ -476,6 +476,7 @@ export const en = {
   'table.milestoneNote': "Aggregated from all users' best scores (incl. private users, anonymous)",
   'table.notPlayedShort': 'Not Played',
   'table.privateShort': 'Private',
+  'table.adminSeeAll': 'Admin: showing everyone regardless of privacy settings',
   'table.lastPlayTime': 'Last Play',
   'table.pgreat': 'PGREAT',
   'table.great': 'GREAT',
