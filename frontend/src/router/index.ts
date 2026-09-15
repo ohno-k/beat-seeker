@@ -36,7 +36,6 @@ const AdminUserComparisonView = () => import('../views/AdminUserComparisonView.v
 const PracticeMenuView = () => import('../views/PracticeMenuView.vue')
 const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandingsView.vue')
 const WrappedView = () => import('../views/WrappedView.vue')
-const KinjoCupView = () => import('../views/KinjoCupView.vue')
 const LeagueView = () => import('../views/LeagueView.vue')
 const LoungeView = () => import('../views/LoungeView.vue')
 
@@ -108,9 +107,6 @@ const router = createRouter({
     { path: '/user/:userId/wrapped/:year/:month', name: 'user-wrapped', component: WrappedView },
     // ログイン不要の URL 共有ページ（発行されたトークンで閲覧）
     { path: '/share/:token', name: 'share-view', component: ShareView },
-    // きんじょー杯 特設ページ（参加者一覧・公開閲覧。追加/削除は管理者のみ）。
-    // App.vue 側でパスを検知してスタンドアロン描画する。
-    { path: '/kinjocup', name: 'kinjocup', component: KinjoCupView },
     // リーグモード（週次課題曲 3 曲で昇降格を競う。要ログイン）
     { path: '/league', name: 'league', component: LeagueView },
     // 隠しページ: 軍人将棋（友達との対局用）。サイト内のどこからもリンクせず、

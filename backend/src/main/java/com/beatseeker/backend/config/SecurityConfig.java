@@ -202,16 +202,6 @@ public class SecurityConfig {
                                                 // トークンが本人確認材料で、相手の駒を伏せる視界制限は
                                                 // GunjinGameService 側で行う。
                                                 .requestMatchers("/api/lounge/**").permitAll()
-                                                // きんじょー杯 特設ページ: 参加者一覧の閲覧 (GET) は公開。
-                                                // メモ編集 (PUT .../note) は誰でも可（協同編集のためログイン不要）。
-                                                // 追加・削除 (POST/DELETE) は要ログイン + Controller 側で管理者判定。
-                                                .requestMatchers(org.springframework.http.HttpMethod.GET,
-                                                                "/api/kinjocup/**")
-                                                .permitAll()
-                                                .requestMatchers(org.springframework.http.HttpMethod.PUT,
-                                                                "/api/kinjocup/participants/*/note")
-                                                .permitAll()
-                                                .requestMatchers("/api/kinjocup/**").authenticated()
                                                 // リーグモード: 参加・順位表・管理系すべて要ログイン。
                                                 // 管理者判定 (/api/league/admin/**) は Controller 側 (AdminAuthService) で行う。
                                                 .requestMatchers("/api/league/**").authenticated()

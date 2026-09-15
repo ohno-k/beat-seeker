@@ -1580,7 +1580,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 const props = defineProps<{
   scores: ScoreData[];
   viewingMode?: 'admin' | 'friend' | 'public' | 'topRanker' | 'arenaTopRanker' | null;
-  /** BPI 列を表示するか。きんじょー杯ページ（/kinjocup）でのみ true を渡す。 */
+  /** BPI 列を表示するか。旧きんじょー杯ページ用のオプション（ページは 2026-09-16 に廃止。現在は未使用）。 */
   showBpi?: boolean;
 }>();
 

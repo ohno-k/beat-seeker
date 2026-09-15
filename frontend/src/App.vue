@@ -102,9 +102,6 @@ const CompetitionSpectatorView = defineAsyncComponent(() => import('./views/Comp
 // 大会サマリー: `/competition/summary/{competitionId}` で直接アクセス。
 // 運営画面の「サマリー」ボタンから別タブで開く、試合別 / 選手別の全結果一覧 (団体戦専用・要主催権限)。
 const CompetitionSummaryView = defineAsyncComponent(() => import('./views/CompetitionSummaryView.vue'));
-// きんじょー杯 特設ページ: `/kinjocup` のスタンドアロン URL。参加者一覧を公開閲覧する。
-// 追加・削除 UI は View 内で管理者ログイン時のみ表示する。
-const KinjoCupView = defineAsyncComponent(() => import('./views/KinjoCupView.vue'));
 // 隠しページ: 軍人将棋 (`/lounge`)。サイト内から一切リンクしておらず、
 // URL と入室コードを知っている人だけが遊べる。ログイン不要のスタンドアロン。
 const LoungeView = defineAsyncComponent(() => import('./views/LoungeView.vue'));
@@ -238,12 +235,6 @@ const competitionSummaryId = ref<number | null>(
 );
 const isCompetitionSummaryPage = computed(() => competitionSummaryId.value !== null);
 
-/**
- * 現在 URL が `/kinjocup` かどうか。
- * きんじょー杯の特設ページ。参加者一覧を公開閲覧でき、管理者ログイン時のみ追加/削除 UI が出る。
- * サイドバー等を描画しないスタンドアロン。トークンは不要（参加者は DB 名簿から取得）。
- */
-const isKinjoCupPage = ref(window.location.pathname.replace(/\/$/, '') === '/kinjocup');
 
 /**
  * 現在 URL が `/lounge` かどうか。
@@ -1886,8 +1877,6 @@ const handleUnifiedClose = async () => {
   <CompetitionSpectatorView v-else-if="isCompetitionSpectatorPage" :token="competitionSpectatorToken" />
   <!-- 大会サマリーページ: 試合別 / 選手別の全結果一覧。要主催ログイン (判定はサーバ側)。 -->
   <CompetitionSummaryView v-else-if="isCompetitionSummaryPage" :competition-id="competitionSummaryId!" />
-  <!-- きんじょー杯 特設ページ: 参加者一覧を公開閲覧。追加/削除 UI は View 内で管理者ログイン時のみ表示。 -->
-  <KinjoCupView v-else-if="isKinjoCupPage" />
   <!-- 隠しページ: 軍人将棋。ログイン不要・入室コードだけで友達と指せるスタンドアロン。 -->
   <LoungeView v-else-if="isLoungePage" />
   <div v-else class="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 flex flex-row overflow-hidden" :class="{ 'af-mode': isAprilFools }">
