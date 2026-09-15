@@ -38,13 +38,16 @@
       </g>
     </svg>
 
-    <!-- 本体の SVG アイコン（ランクごとに形状とグラデが変わる） -->
-    <svg 
-      viewBox="0 0 100 100" 
-      fill="none" 
+    <!-- 本体の SVG アイコン（ランクごとに形状とグラデが変わる）
+         overflow: visible は前作ティア外枠のグローのため。SVG は既定で viewBox の外を描かないので、
+         枠線の外側へ広がる光が正方形に切り取られて見えてしまう。 -->
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       class="w-full h-full"
       :class="[lite ? '' : 'filter drop-shadow-xl', { 'af-bounce': isAprilFoolsActive }]"
+      style="overflow: visible"
     >
       <defs>
         <!-- Shape Clip for internal shading -->
@@ -107,8 +110,9 @@
           <stop offset="100%" :stop-color="frameColors.secondary" />
         </linearGradient>
 
-        <!-- 前作ティア外枠のグロー（ぼかし量はサブティアで可変。lite では使わない） -->
-        <filter v-if="frameColors && !lite" :id="`frame-glow-${uid}`" x="-40%" y="-40%" width="180%" height="180%">
+        <!-- 前作ティア外枠のグロー（ぼかし量はサブティアで可変。lite では使わない）
+             フィルタ領域は広めに取り、ぼかしの裾がここで四角く切れないようにする -->
+        <filter v-if="frameColors && !lite" :id="`frame-glow-${uid}`" x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur in="SourceGraphic" :stdDeviation="frameBlur" />
         </filter>
 
