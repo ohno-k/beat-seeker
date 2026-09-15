@@ -2448,8 +2448,9 @@ const handleUnifiedClose = async () => {
 
         <!-- デフォルト（dashboard / table）: ヒーロー → CSV ドロップ → スコア結果 の 3 段構え -->
         <template v-else>
-          <!-- ヒーローセクション: スコア未登録時のみ表示する導入文 -->
-          <div v-if="!scoreData.length && viewingMode !== 'private'" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
+          <!-- ヒーローセクション: 未ログインでスコア未登録のときだけ表示する導入文。
+               ログイン済みならスコアが 0 件でもダッシュボードを出す（新作稼働直後は全員 0 件のため）。 -->
+          <div v-if="!scoreData.length && viewingMode !== 'private' && !isLoggedIn" class="text-center mb-12 max-w-2xl mx-auto animate-fade-in">
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight sm:text-4xl mb-4">
               {{ t('app.hero.title') }}
             </h1>
@@ -2483,8 +2484,8 @@ const handleUnifiedClose = async () => {
             </div>
           </div>
 
-          <!-- エンプティ状態: CSV ドロップエリアを中央に表示（非公開ユーザー閲覧時は出さない） -->
-          <div v-else-if="!scoreData.length && viewingMode !== 'private'" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
+          <!-- エンプティ状態（未ログインのみ）: CSV ドロップエリアを中央に表示（非公開ユーザー閲覧時は出さない） -->
+          <div v-else-if="!scoreData.length && viewingMode !== 'private' && !isLoggedIn" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
             <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
             <!-- エラーメッセージバナー -->
             <div
@@ -2498,37 +2499,36 @@ const handleUnifiedClose = async () => {
             </div>
           </div>
 
-          <!-- エンプティステート: ログイン済みでまだスコアが 1 件もない時の案内 -->
-          <!-- dashboard / table タブのときだけ出し、ranking や about など他のタブは邪魔しない -->
-          <div
-            v-if="isLoggedIn && !viewingUserId && scoreData.length === 0 && (activeTab === 'dashboard' || activeTab === 'table')"
-            class="w-full max-w-2xl mx-auto animate-fade-in"
-          >
-            <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-8 sm:p-12 text-center">
-              <div class="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/40 rounded-md flex items-center justify-center mb-6 text-blue-700 dark:text-blue-400">
-                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <!-- スコア結果表示: dashboard / table タブを v-show で切り替える（マウント状態を維持）。
+               ログイン済みならスコアが 0 件でもダッシュボードを表示する（新作稼働直後は全員 0 件のため）。
+               取り込みの案内は上部の帯に縮めて出す。 -->
+          <div v-else-if="scoreData.length > 0 || viewingMode === 'private' || isLoggedIn" class="w-full flex flex-col items-center animate-fade-in">
+            <!-- 取り込み案内: 自分のダッシュボード／一覧で、まだ現行作のスコアが 1 件もないとき -->
+            <div
+              v-if="isLoggedIn && !viewingUserId && scoreData.length === 0 && (activeTab === 'dashboard' || activeTab === 'table')"
+              class="w-full max-w-6xl mb-4 p-4 sm:p-5 bg-white dark:bg-slate-800 rounded-md border border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row items-center gap-4 animate-fade-in"
+            >
+              <div class="w-11 h-11 shrink-0 bg-blue-100 dark:bg-blue-900/40 rounded-md flex items-center justify-center text-blue-700 dark:text-blue-400">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">{{ t('empty.title') }}</h2>
-              <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line mb-8">{{ t('empty.desc') }}</p>
-              <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button
-                  type="button"
-                  @click="showUploadArea = true"
-                  class="w-full sm:w-auto btn-primary px-6 py-3"
-                >
-                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  {{ t('empty.uploadCta') }}
-                </button>
+              <div class="flex-1 min-w-0 text-center sm:text-left">
+                <p class="font-bold text-slate-900 dark:text-white">{{ t('empty.title') }}</p>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{{ t('empty.desc') }}</p>
               </div>
+              <button
+                type="button"
+                @click="showUploadArea = true"
+                class="w-full sm:w-auto btn-primary px-5 py-2.5 shrink-0"
+              >
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                {{ t('empty.uploadCta') }}
+              </button>
             </div>
-          </div>
 
-          <!-- スコア結果表示: dashboard / table タブを v-show で切り替える（マウント状態を維持） -->
-          <div v-else-if="scoreData.length > 0 || viewingMode === 'private'" class="w-full flex flex-col items-center animate-fade-in">
             <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center gap-4">
               <!-- 現在の DIVISION: 自分のダッシュボード・ログイン時のみ最上部に表示（開催中は強調） -->
