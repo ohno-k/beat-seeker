@@ -89,6 +89,12 @@ export type ScrapeResult = {
    *  - `'difficulty'` … 難易度別ページ由来。バージョン列が空欄なので自動判定はスキップさせる
    */
   scoresCsvSource: ScoreSource;
+  /**
+   * 実行したページの作品番号（URL の /game/2dx/NN/ から読む。例: 34）。読めなければ null。
+   * 前作のページで実行した取り込みをサーバー側（StaleUploadGuard）で弾くため、各レコードの
+   * `sourceVersion` として送る。
+   */
+  pageVersion: number | null;
   /** ログイン中ユーザーの DJ NAME（ARENA ページから取得。取れなければ空文字）。 */
   myDjName: string;
   /** 取得年（西暦 4 桁）。ARENA の対戦日時に年が含まれないため補完に使う。 */
@@ -134,13 +140,23 @@ type Chart = {
 };
 
 /**
+ * 【関数の役割】 現在の URL（/game/2dx/NN/…）から IIDX の作品番号を読む。読めなければ null。
+ * 前作のページで実行していないかの判定（エントリ側とサーバー側）に使う。
+ */
+export function detectPageVersion(): number | null {
+  const vMatch = location.pathname.match(/\/game\/2dx\/(\d+)\//);
+  if (!vMatch) return null;
+  const n = parseInt(vMatch[1], 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
  * 【関数の役割】 現在の URL から IIDX のバージョン番号を推定し、djdata のベース URL を組み立てる。
  * バージョンが読み取れない場合は現行作（34 ZINRAI）にフォールバックする。
  */
 function resolveBase(): string {
-  const vMatch = location.pathname.match(/\/game\/2dx\/(\d+)\//);
-  const ver = vMatch ? vMatch[1] : '34';
-  return location.origin + '/game/2dx/' + ver;
+  const ver = detectPageVersion();
+  return location.origin + '/game/2dx/' + (ver ?? 34);
 }
 
 /**
@@ -428,6 +444,8 @@ export async function scrapeEagate(
 
   const commonResult = {
     type: 'beat-seeker-combined' as const,
+    // 実行ページの作品番号。前作ページで取った結果をサーバーが見分けるための材料。
+    pageVersion: detectPageVersion(),
     myDjName,
     year: String(new Date().getFullYear()),
     battles,

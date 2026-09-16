@@ -32,6 +32,7 @@ import com.beatseeker.backend.service.TopRankersBeatPtService;
 import com.beatseeker.backend.service.VirtualArenaRankerService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,6 +104,14 @@ public class ScoreController {
     private final EmailService emailService;
     /** 曲の正規定義（title, difficulty, level, notes 等）リポジトリ。 */
     private final SongDefinitionRepository songDefinitionRepository;
+
+    /**
+     * 前作データ判定（{@link StaleUploadGuard}）で「前作のデータ」と断定するのに必要な、
+     * 切替前の最終プレー日時でスコアのある譜面数の下限。
+     * application.yml の {@code app.version-transition.stale-upload-min-scored}（既定 5）。
+     */
+    @Value("${app.version-transition.stale-upload-min-scored:5}")
+    private int staleUploadMinScored = StaleUploadGuard.DEFAULT_MIN_STALE_SCORED;
     /** トップランカー BEAT-PT/RATE-PT ランキングのキャッシュサービス。 */
     private final TopRankersBeatPtService topRankersBeatPtService;
     /** アリーナ仮想プレイヤー（アリーナTOP RANKER取り込み）の BEAT-PT/RATE-PT 集計キャッシュサービス。 */
@@ -233,6 +242,22 @@ public class ScoreController {
             @RequestBody List<ScoreUploadRequest> requests) {
 
         User user = getUser(auth);
+
+        // 手順00: 前作のデータを現行作として取り込むのを止める（詳細は StaleUploadGuard）。
+        //   前作のページで実行したブックマークレット、切替前にダウンロードした CSV のどちらも 400 で返す。
+        //   upsert は「ベスト更新のみ」なので、一度通すと新作の低い記録が全部無視されてしまう。
+        java.util.Optional<StaleUploadGuard.Verdict> stale = StaleUploadGuard.check(
+                requests, IidxVersions.current(), IidxVersions.switchAt(), staleUploadMinScored);
+        if (stale.isPresent()) {
+            StaleUploadGuard.Verdict v = stale.get();
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", v.message());
+            body.put("code", v.code());
+            body.put("staleScoredCount", v.staleScored());
+            body.put("freshCount", v.fresh());
+            if (v.sourceVersion() != null) body.put("sourceVersion", v.sourceVersion());
+            return ResponseEntity.badRequest().body(body);
+        }
 
         // 手順0: INFINITAS のみ収録された曲は arcade マスタに存在しない。受け入れ可否を判定するため、
         // active リビジョンの SongDefinition を (title|difficultyName) でセット化しておく。
@@ -1561,7 +1586,13 @@ public class ScoreController {
              * スコア取得元。{@code "arcade"}（既定）または {@code "infinitas"}。
              * 旧クライアントは送ってこないので null フォールバックを {@link #effectiveSource()} で吸収する。
              */
-            String source) {
+            String source,
+            /**
+             * ブックマークレットが実行されたページの作品番号（URL の /game/2dx/NN/ から読む。例: 34）。
+             * 前作のページで実行した取り込みを {@link StaleUploadGuard} が弾くための材料。
+             * CSV ファイルの直接取り込みや旧クライアントでは null。
+             */
+            Integer sourceVersion) {
         /**
          * null/空白を "arcade" にフォールバックして返す。旧フロントとの互換維持と、
          * 不正値（任意の文字列）が来た場合の安全策を兼ねる。
@@ -1581,7 +1612,7 @@ public class ScoreController {
         ScoreUploadRequest withTitle(String newTitle) {
             if (newTitle == null || newTitle.equals(title)) return this;
             return new ScoreUploadRequest(newTitle, artist, genre, difficultyName, difficultyLevel,
-                    score, clearType, djLevel, pgreat, great, missCount, playCount, lastPlayTime, source);
+                    score, clearType, djLevel, pgreat, great, missCount, playCount, lastPlayTime, source, sourceVersion);
         }
 
         /**

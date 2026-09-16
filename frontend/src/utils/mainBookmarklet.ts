@@ -6,7 +6,8 @@
  *
  * このファイルはあくまで「エントリ」で、実際の収集処理は `eagateScraper.ts` の
  * {@link scrapeEagate} が担う（Android アプリ用エントリ `nativeScraper.ts` と共通）。
- * ここでの責務は 3 つ:
+ * ここでの責務は 4 つ:
+ *  0. 前作のページで実行していないか確認する（前作のスコアを現行作として取り込む事故の防止）
  *  1. 画面上部に進捗バーを出し、{@link scrapeEagate} の進捗を表示する
  *  2. 取得結果を JSON 化し、Base64 で URL fragment に載せる
  *  3. 完了後にボタンを表示。クリックでクリップボードへ全文コピー → beat-seeker へ遷移
@@ -16,8 +17,10 @@
  *  - データが 50000 文字を超える場合は CSV を URL から外し、クリップボード経由で受け渡す。
  *    全曲取得ではほぼ必ずこの経路になるため、遷移先ではクリップボードからの取り込み操作が要る。
  *    Android アプリ経由（`nativeScraper.ts`）ではこの制約自体が無くなる。
+ *  - ブックマーク自体は `/bookmarklet.js` を読み込むだけなので、このファイルの変更はデプロイで全員に届く。
  */
-import { scrapeEagate } from './eagateScraper';
+import { scrapeEagate, detectPageVersion } from './eagateScraper';
+import { CURRENT_VERSION, versionName } from './iidxVersions';
 
 declare const __APP_ORIGIN__: string;
 (async function () {
@@ -27,14 +30,33 @@ declare const __APP_ORIGIN__: string;
   statusEl.textContent = 'beat-seeker: 取得を開始します…';
   document.body.appendChild(statusEl);
 
-  // ブックマークレットは従来どおり難易度別ページの巡回で取得する。
-  // スコアは毎作リセットされるがクリアランプは永続するため、「スコア0・ランプあり」の譜面も拾える。
-  const result = await scrapeEagate(
-    (message) => {
-      statusEl.textContent = message;
-    },
-    { scoreSource: 'difficulty' }
-  );
+  // 手順0: 前作のページ（/game/2dx/33/ など）で実行すると前作のスコアが現行作として取り込まれてしまう
+  //        （2026-09-16 の ZINRAI 稼働初日に実例）。サーバーでも弾くが、取得前にここで案内して止める。
+  const pageVersion = detectPageVersion();
+  if (pageVersion != null && pageVersion < CURRENT_VERSION) {
+    statusEl.style.background = '#991b1b';
+    statusEl.textContent =
+      'beat-seeker: このページは前作（' + versionName(pageVersion) + '）です。' +
+      versionName(CURRENT_VERSION) + ' の e-amusement ページ（/game/2dx/' + CURRENT_VERSION + '/）を開いてから実行してください。' +
+      '前作の記録は beat-seeker の「過去データ取り込み」で登録できます。';
+    return;
+  }
+
+  let result;
+  try {
+    // ブックマークレットは従来どおり難易度別ページの巡回で取得する。
+    // スコアは毎作リセットされるがクリアランプは永続するため、「スコア0・ランプあり」の譜面も拾える。
+    result = await scrapeEagate(
+      (message) => {
+        statusEl.textContent = message;
+      },
+      { scoreSource: 'difficulty' }
+    );
+  } catch (e) {
+    statusEl.style.background = '#991b1b';
+    statusEl.textContent = 'beat-seeker: 取得に失敗しました（' + (e instanceof Error ? e.message : String(e)) + '）';
+    return;
+  }
 
   const { chartCount, songCount, ...payload } = result;
   const fullData = JSON.stringify(payload);

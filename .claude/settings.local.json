@@ -29,7 +29,10 @@
       "Bash(ls ~/.m2/repository/org/postgresql/postgresql/ 2>/dev/null; ls /c/Users/oonok/beat-seeker/backend/src/main/resources/application-prod-db.yml && grep -nE \"url|username|scheduling|ddl-auto|statement_timeout|connection-init-sql\" /c/Users/oonok/beat-seeker/backend/src/main/resources/application-prod-db.yml | sed -E 's/\\(password|username|user\\):.*/\\\\1: <redacted>/; s#postgresql://[^ ]*#postgresql://<redacted>#')",
       "Read(//c/Users/oonok/.m2/repository/org/postgresql/postgresql/**)",
       "Bash(export MSYS_NO_PATHCONV=1)",
-      "Bash(\"C:/Users/oonok/dev-tools/jdk-17.0.19+10/bin/java.exe\" -Dfile.encoding=UTF-8 -cp \"C:/Users/oonok/.m2/repository/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar\" KinalyCheck.java \"C:/Users/oonok/beat-seeker/backend/src/main/resources/application-prod-db.yml\" KINALY)"
+      "Bash(\"C:/Users/oonok/dev-tools/jdk-17.0.19+10/bin/java.exe\" -Dfile.encoding=UTF-8 -cp \"C:/Users/oonok/.m2/repository/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar\" KinalyCheck.java \"C:/Users/oonok/beat-seeker/backend/src/main/resources/application-prod-db.yml\" KINALY)",
+      "Bash(sed -n '/=== 0\\\\./,/=== 4\\\\./p;/=== 5\\\\./,/=== 6\\\\./p;/=== 9\\\\./,$p' kinaly_report.txt)",
+      "Bash(\"C:/Users/oonok/dev-tools/jdk-17.0.19+10/bin/java.exe\" -Dfile.encoding=UTF-8 -cp \"C:/Users/oonok/.m2/repository/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar\" KinalyCheck.java \"C:/Users/oonok/beat-seeker/backend/src/main/resources/application-prod-db.yml\" \"藤島慈\")",
+      "Bash(\"C:/Users/oonok/dev-tools/jdk-17.0.19+10/bin/java.exe\" -Dfile.encoding=UTF-8 -cp \"C:/Users/oonok/.m2/repository/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar\" MoveStaleUpload.java \"C:/Users/oonok/beat-seeker/backend/src/main/resources/application-prod-db.yml\" apply 1333 \"藤島慈\" 20628 17495 2502 1472 false fixKinaly)"
     ]
   }
 }

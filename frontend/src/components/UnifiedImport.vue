@@ -29,10 +29,11 @@ const emit = defineEmits<{
   /**
    * スコア CSV を親へ引き渡す。
    * `origin` が 'bookmarklet' の場合、その CSV はブックマークレットが生成したもので
-   * 「バージョン」列が空欄になる。親は作品バージョンの自動判定をスキップし、現行作として扱う
-   * （ブックマークレットは常に現行作のページ上から実行されるため）。
+   * 「バージョン」列が空欄になる。親は作品バージョンの自動判定をスキップし、現行作として扱う。
+   * `pageVersion` はブックマークレットを実行したページの作品番号（読めなければ null）。親はこれを
+   * 送信レコードの `sourceVersion` に載せ、前作のページで取った結果をサーバーに弾かせる。
    */
-  (e: 'score-file', file: File, origin?: 'bookmarklet'): void;
+  (e: 'score-file', file: File, origin?: 'bookmarklet', pageVersion?: number | null): void;
 }>();
 
 /**
@@ -127,7 +128,8 @@ const processText = async (text: string) => {
           // scoresCsvSource が無い古い出力（更新前のブックマークレットや、以前コピーした
           // クリップボードの内容）は従来どおり 'bookmarklet' 扱いにして挙動を変えない。
           const isOfficialCsv = parsed.scoresCsvSource === 'official';
-          emit('score-file', makeCsvFile(parsed.scoresCsv), isOfficialCsv ? undefined : 'bookmarklet');
+          const pageVersion = typeof parsed.pageVersion === 'number' ? parsed.pageVersion : null;
+          emit('score-file', makeCsvFile(parsed.scoresCsv), isOfficialCsv ? undefined : 'bookmarklet', pageVersion);
           scoresReady = true;
         } catch (e) {
           console.warn('Score file preparation failed:', e);

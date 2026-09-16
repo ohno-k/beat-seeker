@@ -105,6 +105,10 @@ app:
     reset-scores: ${APP_VERSION_TRANSITION_RESET_SCORES:true}
     # 難易度表 draft の自動適用。ZINRAI では管理画面から手動適用するので false。
     apply-difficulty: ${APP_VERSION_TRANSITION_APPLY_DIFFICULTY:false}
+    # 前作データ判定（controller/StaleUploadGuard）: 切替前の最終プレー日時でスコアのある譜面がこの数以上、
+    # かつ切替以降にプレーした譜面が 0 件なら、現行作の取り込み（POST /api/scores/upload）を 400 で拒否する。
+    # 稼働初日に前作の CSV / 前作ページのブックマークレットで 3 件の汚染が起きたための防止策。
+    stale-upload-min-scored: ${APP_VERSION_TRANSITION_STALE_UPLOAD_MIN_SCORED:5}
   # ── bemaniwiki 新曲リストの自動取り込み（WikiSongSyncService）──
   # 「beatmania IIDX 34 ZINRAI/新曲リスト」を定期的に取得し、SP の B/N/H/A/L のレベル・ノーツ数と
   # GENRE/TITLE/ARTIST/BPM を公開中（active）の楽曲マスタへ直接反映する（draft は経由しない）。

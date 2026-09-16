@@ -691,11 +691,15 @@ const processBookmarkletData = async (jsonText: string) => {
     }
 
     // スコア CSV: 先頭に BOM を付けて Excel 等で正しく UTF-8 と認識される File に変換し、通常ドロップと同じ処理に流す。
+    // 難易度別ページ由来（バージョン列が空欄）は作品判定をスキップさせ、実行ページの作品番号を
+    // サーバーの前作データ判定に渡す（UnifiedImport 経由と同じ扱い）。
     if (parsed.scoresCsv) {
       const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
       const blob = new Blob([bom, parsed.scoresCsv], { type: 'text/csv;charset=utf-8;' });
       const file = new File([blob], 'scores.csv', { type: 'text/csv' });
-      await handleFileDropped(file);
+      const origin = parsed.scoresCsvSource === 'official' ? undefined : 'bookmarklet';
+      const pageVersion = typeof parsed.pageVersion === 'number' ? parsed.pageVersion : null;
+      await handleFileDropped(file, origin, pageVersion);
     }
   } catch (e) {
     console.warn('Failed to process bookmarklet data:', e);
@@ -1404,7 +1408,7 @@ const pastImportResult = ref<{ version: number; versionName: string; inserted: n
  *  手順6: 未ログイン（ゲストモード）ならクライアント計算のみで差分モーダルを表示。
  *  手順7: 完了後はアップロードエリアを閉じ、ダッシュボードに遷移する。
  */
-const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
+const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion: number | null = null) => {
   errorMsg.value = '';
   isParsing.value = true;
 
@@ -1528,7 +1532,21 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet') => {
       // ログイン時の正規ルート: DB との差分をバックエンドから受け取り、これを正解として採用する。
       isParsing.value = true; // ローディング表示を維持したまま次の処理へ
       try {
-        const result = await upload(newData);
+        let result;
+        try {
+          // ブックマークレット由来ならページの作品番号（pageVersion）を添える。サーバーはこれと
+          // 最終プレー日時から「前作のデータ」を判定し、該当すれば 400（rejected）で返す。
+          result = await upload(newData, 'arcade', pageVersion);
+        } catch (uploadErr: any) {
+          if (uploadErr?.rejected) {
+            // サーバーが内容を理由に拒否（前作の CSV / 前作ページのブックマークレット）。
+            // 何も保存されていないので、理由をそのまま見せて取り込みを終える。
+            errorMsg.value = uploadErr.message;
+            showUploadArea.value = false;
+            return;
+          }
+          throw uploadErr;
+        }
         console.log("Scores persisted to database.");
         
         // バックエンド差分を UploadDiffResult 形式に変換し、BEAT-PT を補って返す。
@@ -1816,11 +1834,14 @@ const showUploadArea = ref(false);
 const pendingScoreFile = ref<File | null>(null);
 /** 上記ファイルの出所。'bookmarklet' なら作品バージョンの自動判定をスキップして現行作として扱う。 */
 const pendingScoreOrigin = ref<'bookmarklet' | undefined>(undefined);
+/** ブックマークレットを実行したページの作品番号。サーバーの前作データ判定（sourceVersion）に渡す。 */
+const pendingScorePageVersion = ref<number | null>(null);
 
-/** 【関数の役割】 UnifiedImport から受け取った CSV を、出所とセットで保留する。 */
-const handleUnifiedScoreFile = (file: File, origin?: 'bookmarklet') => {
+/** 【関数の役割】 UnifiedImport から受け取った CSV を、出所・ページ作品番号とセットで保留する。 */
+const handleUnifiedScoreFile = (file: File, origin?: 'bookmarklet', pageVersion?: number | null) => {
   pendingScoreFile.value = file;
   pendingScoreOrigin.value = origin;
+  pendingScorePageVersion.value = pageVersion ?? null;
 };
 
 /**
@@ -1850,10 +1871,12 @@ const handleUnifiedClose = async () => {
   errorMsg.value = '';
   const fileToProcess = pendingScoreFile.value;
   const originToProcess = pendingScoreOrigin.value;
+  const pageVersionToProcess = pendingScorePageVersion.value;
   pendingScoreFile.value = null;
   pendingScoreOrigin.value = undefined;
+  pendingScorePageVersion.value = null;
   if (fileToProcess) {
-    await handleFileDropped(fileToProcess, originToProcess);
+    await handleFileDropped(fileToProcess, originToProcess, pageVersionToProcess);
   } else {
     await loadSavedScores();
   }

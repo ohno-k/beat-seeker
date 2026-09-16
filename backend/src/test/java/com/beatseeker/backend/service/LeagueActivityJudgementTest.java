@@ -80,6 +80,6 @@ class LeagueActivityJudgementTest {
     /** 最終プレー日時だけを差し替えたアップロードリクエストを作る。 */
     private ScoreUploadRequest request(String lastPlayTime) {
         return new ScoreUploadRequest("Test Song", "artist", "genre", "ANOTHER", 12,
-                1500, "CLEAR", "AA", 500, 500, 30, 10, lastPlayTime, "arcade");
+                1500, "CLEAR", "AA", 500, 500, 30, 10, lastPlayTime, "arcade", null);
     }
 }

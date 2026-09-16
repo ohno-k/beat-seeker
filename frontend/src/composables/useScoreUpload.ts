@@ -5,14 +5,22 @@ import { useAuth } from './useAuth';
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 /**
+ * `upload()` が投げるエラー。`rejected` が true のときはサーバーが内容を理由に拒否しており
+ * （前作データの判定など）、何も保存されていないことが確定している。`message` は利用者向けの文言。
+ */
+export type UploadError = Error & { status?: number; code?: string; rejected?: boolean };
+
+/**
  * 【内部関数】 UI 側では「曲単位（1 行に beginner〜leggendaria が同居）」でスコアを保持しているが、
  * API 側は「譜面単位（難易度ごとに 1 レコード）」を要求する。ここでフラット化変換を行う。
  *
  * 'NO PLAY' や '---' のような未プレイ譜面はサーバへ送らない（サーバ側負荷削減）。
  *
  * @param source スコア取得元（"arcade" / "infinitas"）。各レコードに付与してサーバへ送る。
+ * @param sourceVersion ブックマークレットを実行したページの作品番号（例: 34）。CSV ファイル取り込みでは null。
+ *                      前作のページで取った結果をサーバー（StaleUploadGuard）が弾くための材料。
  */
-function flattenToUploadRecords(scores: ScoreData[], source: 'arcade' | 'infinitas') {
+function flattenToUploadRecords(scores: ScoreData[], source: 'arcade' | 'infinitas', sourceVersion: number | null) {
     const difficulties = ['beginner', 'normal', 'hyper', 'another', 'leggendaria'] as const;
     // UI 側のキー（小文字） → API 側のラベル（大文字）への変換表
     const difficultyLabels: Record<string, string> = {
@@ -50,6 +58,7 @@ function flattenToUploadRecords(scores: ScoreData[], source: 'arcade' | 'infinit
                 // 公式 CSV 書式（"YYYY-MM-DD HH:mm"）以外は無視される。
                 lastPlayTime: song.lastPlayTime,
                 source,
+                ...(sourceVersion != null ? { sourceVersion } : {}),
             });
         });
     });
@@ -79,17 +88,21 @@ export function useScoreUpload() {
      *
      * 注意:
      *  - 60 秒で AbortController により強制中断（大量データで DB 処理が長引くため）
-     *  - 非 2xx 応答は例外として投げる（呼び出し側で UI エラーハンドリング）
+     *  - 非 2xx 応答は例外として投げる（呼び出し側で UI エラーハンドリング）。
+     *    サーバーが内容を理由に拒否した場合（前作データの判定など: 400 + code）は、その文言を
+     *    message に、`rejected = true` を付けて投げる。呼び出し側は「保存されていない」と確定して扱える。
      *
      * @param scores 曲単位のスコア配列
      * @param source スコアの取得元。既定は "arcade"。INFINITAS 画面取得時は "infinitas" を渡す
+     * @param sourceVersion ブックマークレットを実行したページの作品番号。CSV ファイル取り込みでは null
      * @returns 更新件数・更新譜面一覧・サーバメッセージ
      */
     const upload = async (
         scores: ScoreData[],
         source: 'arcade' | 'infinitas' = 'arcade',
+        sourceVersion: number | null = null,
     ): Promise<{ updatedCount: number; updatedSongs: any[]; message: string; skippedInfinitasOnly?: number }> => {
-        const records = flattenToUploadRecords(scores, source);
+        const records = flattenToUploadRecords(scores, source, sourceVersion);
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000);
         try {
@@ -101,7 +114,20 @@ export function useScoreUpload() {
             });
 
             if (!res.ok) {
-                throw new Error(`Upload failed: ${res.status}`);
+                let message = `Upload failed: ${res.status}`;
+                let code: string | undefined;
+                try {
+                    const body = await res.json();
+                    if (body?.message) message = String(body.message);
+                    if (body?.code) code = String(body.code);
+                } catch {
+                    // JSON でない応答（ゲートウェイのエラーページ等）はステータスだけ伝える
+                }
+                const err = new Error(message) as UploadError;
+                err.status = res.status;
+                err.code = code;
+                err.rejected = res.status === 400 && !!code;
+                throw err;
             }
 
             return res.json();
