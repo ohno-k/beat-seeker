@@ -998,6 +998,7 @@ export const ja = {
   'import.textareaPlaceholder': 'CSVデータまたはブックマークレットのJSONデータを貼り付け...',
   'import.dropPlaceholder': 'CSVファイルをドロップ',
   'import.clickToSelect': 'またはクリックしてファイルを選択',
+  'import.pastCsvHint': '過去作（Sparkle Shower 以前）の CSV もここから読み込めます。作品は自動で判定され、過去作のスコアは歴代記録として保存されます（現行作のスコアには混ざりません）。',
   'import.clickToChange': 'クリックしてファイルを変更',
   'import.importing': '取り込み中...',
   'import.loadFromClipboard': 'クリップボードから取り込む',

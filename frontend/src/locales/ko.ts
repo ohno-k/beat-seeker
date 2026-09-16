@@ -990,6 +990,7 @@ export const ko = {
   'import.textareaPlaceholder': 'CSV 데이터 또는 북마클릿 JSON 데이터를 붙여넣기...',
   'import.dropPlaceholder': 'CSV 파일을 드롭',
   'import.clickToSelect': '또는 클릭하여 파일 선택',
+  'import.pastCsvHint': '이전 작품(Sparkle Shower 이전)의 CSV도 여기에서 불러올 수 있습니다. 작품은 자동으로 판정되며, 이전 작품의 스코어는 역대 기록으로 저장됩니다(현행 작품의 스코어에는 섞이지 않습니다).',
   'import.clickToChange': '클릭하여 파일 변경',
   'import.importing': '가져오는 중...',
   'import.loadFromClipboard': '클립보드에서 가져오기',

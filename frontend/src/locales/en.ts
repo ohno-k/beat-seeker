@@ -989,6 +989,7 @@ export const en = {
   'import.textareaPlaceholder': 'Paste CSV data or bookmarklet JSON data...',
   'import.dropPlaceholder': 'Drop CSV file',
   'import.clickToSelect': 'Or click to select a file',
+  'import.pastCsvHint': 'CSVs from previous versions (Sparkle Shower and earlier) can be loaded here too. The version is detected automatically, and past-version scores are saved as all-time records (they are never mixed into the current version).',
   'import.clickToChange': 'Click to change file',
   'import.importing': 'Importing...',
   'import.loadFromClipboard': 'Import from Clipboard',

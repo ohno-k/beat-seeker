@@ -326,6 +326,8 @@ const copyBookmarkletCode = async () => {
     <!-- Text paste tab -->
     <div v-if="importTab === 'text'" class="space-y-2">
       <p class="text-xs text-slate-500 dark:text-slate-400" v-html="t('import.textHint', { link: `<a href='https://p.eagate.573.jp/game/2dx/34/djdata/score_download.html?style=SP' target='_blank' rel='noopener noreferrer' class='text-blue-600 dark:text-blue-400 hover:underline font-medium'>${t('import.textHintLinkText')}</a>` })"></p>
+      <!-- 過去作の CSV も同じ入口で受け付ける（作品は自動判定し、過去作は歴代記録へ保存される） -->
+      <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.pastCsvHint') }}</p>
       <textarea
         v-model="pastedText"
         class="w-full h-24 p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md text-xs font-mono text-slate-800 dark:text-slate-100 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
@@ -368,6 +370,8 @@ const copyBookmarkletCode = async () => {
         </div>
         <input type="file" ref="fileInput" accept=".csv,text/csv" class="hidden" @change="e => { const f = (e.target as HTMLInputElement).files?.[0]; if (f) stageFile(f); }" />
       </div>
+      <!-- 過去作の CSV も同じ入口で受け付ける（作品は自動判定し、過去作は歴代記録へ保存される） -->
+      <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.pastCsvHint') }}</p>
     </div>
 
     <!-- Unified submit button（INFINITAS タブでは非表示。InfinitasMonitor が独自のコントロールを持つため） -->
