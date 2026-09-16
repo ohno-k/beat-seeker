@@ -105,6 +105,20 @@ app:
     reset-scores: ${APP_VERSION_TRANSITION_RESET_SCORES:true}
     # 難易度表 draft の自動適用。ZINRAI では管理画面から手動適用するので false。
     apply-difficulty: ${APP_VERSION_TRANSITION_APPLY_DIFFICULTY:false}
+  # ── bemaniwiki 新曲リストの自動取り込み（WikiSongSyncService）──
+  # 「beatmania IIDX 34 ZINRAI/新曲リスト」を定期的に取得し、SP の B/N/H/A/L のレベル・ノーツ数と
+  # GENRE/TITLE/ARTIST/BPM を公開中（active）の楽曲マスタへ直接反映する（draft は経由しない）。
+  # 未解禁（灰色表記）・レベルやノーツ数が未記載・"?" 付き・配信前セクションの譜面は保留し、埋まり次第取り込む。
+  # 管理画面「ゲームデータ管理 → 楽曲追加」の「bemaniwiki 新曲同期」から手動実行・差分確認・履歴確認ができる。
+  wiki-song-sync:
+    # 定期実行の有効/無効（app.scheduling.enabled=false のときも止まる）。
+    enabled: ${WIKI_SONG_SYNC_ENABLED:true}
+    # 実行時刻（JST の Spring cron: 秒 分 時 日 月 曜日）。既定は 0:20 / 6:20 / 12:20 / 18:20 の 1 日 4 回。
+    cron: "${WIKI_SONG_SYNC_CRON:0 20 0,6,12,18 * * *}"
+    # 取得するページ。次回作に切り替えるときはここを差し替える。
+    url: "${WIKI_SONG_SYNC_URL:https://bemaniwiki.com/?beatmania+IIDX+34+ZINRAI/%E6%96%B0%E6%9B%B2%E3%83%AA%E3%82%B9%E3%83%88}"
+    # false にすると定期実行は差分の記録だけで DB を変更しない（手動実行はこの設定に関係なく反映する）。
+    auto-apply: ${WIKI_SONG_SYNC_AUTO_APPLY:true}
 
 vapid:
   # 公開鍵はブラウザに配布されるため非機密。秘密鍵は環境変数で渡す（リポジトリにコミットしない）。

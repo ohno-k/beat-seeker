@@ -550,6 +550,106 @@ public class GameDataService {
         // BEAT-PT 再計算は意図的にスキップ。
     }
 
+    // ── bemaniwiki 新曲リストからの取り込み ──────────────────
+
+    /**
+     * bemaniwiki から取り込む 1 譜面分の変更。{@link WikiSongSyncService} が突き合わせて作る。
+     *
+     * @param title      曲名（既存マスタに寄せた後の表記）
+     * @param difficulty 難易度コード（1/2/3/4/10）
+     * @param kind       {@link #ADD}（未登録の譜面を新規作成）/ {@link #UPDATE}（登録済み譜面の値を更新）
+     * @param level      レベル。UPDATE で変更しない項目は null
+     * @param notes      ノーツ数。同上
+     * @param genre      ジャンル。同上
+     * @param artist     アーティスト。同上
+     * @param bpm        BPM 表記。同上
+     */
+    public record WikiChartChange(String title, String difficulty, String kind, Integer level, Integer notes,
+                                  String genre, String artist, String bpm) {
+        public static final String ADD = "ADD";
+        public static final String UPDATE = "UPDATE";
+    }
+
+    /**
+     * 【メソッドの役割】 bemaniwiki 由来の変更を active リビジョンへ直接書き込む。
+     *
+     * draft を経由しないのは、管理者が管理画面で編集途中の draft を「楽曲を適用」で巻き込まないため。
+     * 書き込み後、Lv11/12 の ANOTHER/LEGGENDARIA を新規に追加した（またはレベルがそこへ変わった）曲は
+     * {@link #applyDraftSongs()} と同じく active 難易度表の Uncategorized に入れる。
+     *
+     * 処理の流れ:
+     *  - 手順1: (title, difficulty) の active 行を探す。重複行があれば ID 最大を残して他を削除
+     *  - 手順2: ADD なら新規行、UPDATE なら null でない項目だけ上書き
+     *  - 手順3: ANOTHER/LEGGENDARIA は difficultyLevel（レベル文字列）と dpLevel も揃える
+     *  - 手順4: Uncategorized 追加候補をまとめて {@link #addToActiveUncategorized} へ
+     *
+     * BEAT-PT の再計算はしない（新曲は Uncategorized なので配点に影響しない。既存曲のノーツ数訂正は
+     * 次回の難易度表適用時の全体再計算で反映される）。
+     *
+     * @param changes 変更一覧
+     * @return Uncategorized への追加を試みた曲名（LEGGENDARIA は "title[L]"）。既に表にある曲は含まれない
+     */
+    @Transactional
+    public Set<String> applyWikiChartChanges(List<WikiChartChange> changes) {
+        Set<String> uncatTargets = new LinkedHashSet<>();
+        Set<String> alreadyPlaced = new HashSet<>();
+        for (DifficultyRank r : diffRankRepo.findByRevisionOrderBySortOrderAsc("active")) {
+            for (DifficultyRankSong s : r.getSongs()) alreadyPlaced.add(s.getSongTitle());
+        }
+
+        for (WikiChartChange c : changes) {
+            List<SongDefinition> existing =
+                    songDefRepo.findAllByTitleAndDifficultyAndRevision(c.title(), c.difficulty(), "active");
+            boolean isAnotherOrLegg = "4".equals(c.difficulty()) || "10".equals(c.difficulty());
+            SongDefinition sd;
+            Integer oldLevel;
+            if (existing.isEmpty()) {
+                sd = new SongDefinition();
+                sd.setTitle(c.title());
+                sd.setDifficulty(c.difficulty());
+                sd.setRevision("active");
+                if (isAnotherOrLegg) sd.setDpLevel("0");
+                oldLevel = null;
+            } else {
+                existing.sort((a, b) -> Long.compare(b.getId(), a.getId()));
+                sd = existing.get(0);
+                for (int i = 1; i < existing.size(); i++) songDefRepo.delete(existing.get(i));
+                oldLevel = sd.getLevel();
+            }
+
+            if (c.level() != null) {
+                sd.setLevel(c.level());
+                // difficultyLevel は ANOTHER/LEGGENDARIA のレベル文字列（管理画面の追加と同じ）。
+                // 既に別の値（小数の譜面定数など）が入っている場合は触らない。
+                if (isAnotherOrLegg) {
+                    String current = sd.getDifficultyLevel();
+                    if (current == null || current.isBlank() || current.equals(String.valueOf(oldLevel))) {
+                        sd.setDifficultyLevel(String.valueOf(c.level()));
+                    }
+                }
+            }
+            if (c.notes() != null) sd.setNotes(c.notes());
+            if (c.genre() != null) sd.setGenre(c.genre());
+            if (c.artist() != null) sd.setArtist(c.artist());
+            if (c.bpm() != null) sd.setBpm(c.bpm());
+            songDefRepo.save(sd);
+
+            Integer lv = sd.getLevel();
+            boolean levelNowEligible = lv != null && (lv == 11 || lv == 12);
+            boolean levelChanged = !Objects.equals(oldLevel, lv);
+            if (isAnotherOrLegg && levelNowEligible && levelChanged) {
+                String tableTitle = "10".equals(c.difficulty()) ? c.title() + "[L]" : c.title();
+                if (!alreadyPlaced.contains(tableTitle)) uncatTargets.add(tableTitle);
+            }
+        }
+        songDefRepo.flush();
+
+        if (!uncatTargets.isEmpty()) {
+            addToActiveUncategorized(uncatTargets);
+        }
+        return uncatTargets;
+    }
+
     /**
      * 【メソッドの役割】 active 難易度表の "Uncategorized" ランクに楽曲を追加する。
      * 既に同名エントリがある場合はスキップする。該当ランクが存在しない場合は何もしない。

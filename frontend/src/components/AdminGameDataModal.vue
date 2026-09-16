@@ -70,6 +70,54 @@
 
           <!-- Songs Tab -->
           <div v-if="activeTab === 'songs'">
+            <!-- bemaniwiki 新曲同期 -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">bemaniwiki 新曲同期</h3>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="handleWikiSync(true)"
+                    :disabled="isWikiSyncing"
+                    class="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                  >差分を確認</button>
+                  <button
+                    @click="handleWikiSync(false)"
+                    :disabled="isWikiSyncing"
+                    class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap"
+                  >
+                    <svg v-if="isWikiSyncing" class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    {{ isWikiSyncing ? '同期中...' : '今すぐ同期' }}
+                  </button>
+                </div>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                ZINRAI 新曲リストの SP レベル・ノーツ数・GENRE/ARTIST/BPM を公開中の楽曲へ直接反映します（ドラフトは経由しません）。
+                Lv11/12 の ANOTHER/LEGGENDARIA は難易度表の Uncategorized に入ります。自動実行は毎日 0:20 / 6:20 / 12:20 / 18:20。
+                未解禁（灰色表記）・未記載の譜面は wiki が埋まり次第、次回以降に取り込みます。
+              </p>
+              <div v-if="wikiSyncResult" class="text-xs space-y-1 mb-2">
+                <div class="font-bold" :class="wikiSyncResult.status === 'SUCCESS' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'">
+                  {{ wikiSyncResult.message }}
+                </div>
+                <details v-for="sec in wikiSyncSections" :key="sec.key" class="text-slate-600 dark:text-slate-300">
+                  <summary class="cursor-pointer select-none">{{ sec.label }} {{ sec.items.length }}件</summary>
+                  <ul class="mt-1 ml-4 list-disc space-y-0.5 max-h-40 overflow-y-auto">
+                    <li v-for="(item, i) in sec.items" :key="i" class="break-all">{{ item }}</li>
+                  </ul>
+                </details>
+              </div>
+              <div v-if="wikiSyncRuns.length > 0" class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                <div class="font-bold">最近の実行</div>
+                <div v-for="r in wikiSyncRuns.slice(0, 5)" :key="r.id" class="flex flex-wrap gap-x-2">
+                  <span>{{ formatWikiRunTime(r.startedAt) }}</span>
+                  <span>{{ r.trigger === 'scheduled' ? '定期' : '手動' }}{{ r.dryRun ? '(確認のみ)' : '' }}</span>
+                  <span :class="r.status === 'FAILED' ? 'text-red-500' : r.status === 'SUCCESS' ? 'text-emerald-600 dark:text-emerald-400' : ''">{{ wikiRunStatusLabel(r) }}</span>
+                  <span v-if="r.status !== 'FAILED'">追加 {{ r.addedCount }} / 更新 {{ r.updatedCount }} / 保留 {{ r.heldCount }}{{ r.pageChanged === false ? ' / ページ変更なし' : '' }}</span>
+                  <span v-else class="break-all">{{ r.errorMessage }}</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Edit existing active song -->
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">既存曲を編集</h3>
@@ -508,6 +556,28 @@ const hasDraftDiffTable = ref(false);
 const draftSongs = ref<any[]>([]);
 /** 現在公開中の active 楽曲（既存曲編集の検索対象）。 */
 const activeSongs = ref<any[]>([]);
+
+// ── bemaniwiki 新曲同期 ───────────────────────────────
+/** 同期の実行中フラグ（差分確認・本実行の両方）。 */
+const isWikiSyncing = ref(false);
+/** 直近の同期結果（POST /wiki-sync のレスポンスそのまま）。モーダル再オープンで消える。 */
+const wikiSyncResult = ref<any | null>(null);
+/** 同期の実行履歴（新しい順）。 */
+const wikiSyncRuns = ref<any[]>([]);
+
+/** 【computed の役割】 同期結果の内訳を折りたたみ表示用に並べる（空の区分は出さない）。 */
+const wikiSyncSections = computed(() => {
+  const r = wikiSyncResult.value;
+  if (!r) return [];
+  return [
+    { key: 'added', label: '追加', items: (r.added ?? []) as string[] },
+    { key: 'updated', label: '更新', items: (r.updated ?? []) as string[] },
+    { key: 'uncategorizedAdded', label: 'Uncategorized に追加', items: (r.uncategorizedAdded ?? []) as string[] },
+    { key: 'held', label: '保留', items: (r.held ?? []) as string[] },
+    { key: 'skippedSongs', label: '配信前', items: (r.skippedSongs ?? []) as string[] },
+    { key: 'warnings', label: '警告', items: (r.warnings ?? []) as string[] },
+  ].filter(sec => sec.items.length > 0);
+});
 
 // ── 既存曲編集モード ─────────────────────────────────
 /** フォームが「既存曲編集」モードに入っているか。 */
@@ -959,6 +1029,9 @@ const loadData = async () => {
       activeSongs.value = await activeSongsRes.json();
     }
 
+    // bemaniwiki 新曲同期の実行履歴。
+    await loadWikiSyncRuns();
+
     // 難易度表のドラフト取得。未保存変更はリセット。
     const diffRes = await fetch(`${API_BASE}/api/admin/game-data/difficulty-table/draft`, { headers: authHeaders() });
     if (diffRes.ok) {
@@ -1066,6 +1139,64 @@ const handleAddSong = async () => {
   } finally {
     isSubmitting.value = false;
   }
+};
+
+// ── bemaniwiki 新曲同期 ───────────────────────────────
+/** 【関数の役割】 同期の実行履歴（新しい順・最大 20 件）を取得する。失敗しても致命的ではないので警告のみ。 */
+const loadWikiSyncRuns = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/game-data/songs/wiki-sync/runs`, { headers: authHeaders() });
+    if (res.ok) wikiSyncRuns.value = await res.json();
+  } catch (e) {
+    console.warn('Failed to load wiki sync runs:', e);
+  }
+};
+
+/**
+ * 【関数の役割】 bemaniwiki 新曲リストの同期をその場で実行する（定期実行と同じ処理）。
+ *
+ * dryRun=true なら差分の確認だけで DB は変わらない。本実行のあとは active 楽曲一覧と履歴を再取得する。
+ * 反映先は draft ではなく公開中の楽曲なので、「楽曲を適用」を押す必要は無い。
+ */
+const handleWikiSync = async (dryRun: boolean) => {
+  isWikiSyncing.value = true;
+  errorMsg.value = '';
+  successMsg.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/game-data/songs/wiki-sync`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ dryRun }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Error');
+    wikiSyncResult.value = data;
+    if (!dryRun) {
+      successMsg.value = data.message;
+      const activeSongsRes = await fetch(`${API_BASE}/api/admin/game-data/songs/active`, { headers: authHeaders() });
+      if (activeSongsRes.ok) activeSongs.value = await activeSongsRes.json();
+    }
+  } catch (e: any) {
+    errorMsg.value = 'bemaniwiki 同期エラー: ' + e.message;
+  } finally {
+    isWikiSyncing.value = false;
+    await loadWikiSyncRuns();
+  }
+};
+
+/** 【関数の役割】 実行履歴の日時（JST オフセット付き ISO）を "9/16 06:20" 形式にする。 */
+const formatWikiRunTime = (iso: string | null) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
+/** 【関数の役割】 実行結果ステータスの表示ラベル。 */
+const wikiRunStatusLabel = (r: any) => {
+  if (r.status === 'FAILED') return '失敗';
+  if (r.status === 'SUCCESS') return r.dryRun ? '差分あり' : '反映あり';
+  return '変更なし';
 };
 
 // ── 既存曲編集 ────────────────────────────────

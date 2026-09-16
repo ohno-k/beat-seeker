@@ -22,7 +22,10 @@
       "PowerShell(Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\frontend; npx vue-tsc --noEmit -p tsconfig.app.json 2>&1 | Select-String -Pattern 'ScoreSummary|RankingList|locales' ; \"EXIT=$LASTEXITCODE\")",
       "PowerShell(Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\frontend; npx vite build 2>&1 | Select-Object -Last 3; \"EXIT=$LASTEXITCODE\")",
       "PowerShell(Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\frontend; npx vue-tsc --noEmit -p tsconfig.app.json 2>&1 | Select-String -Pattern 'usePastScores|scoreData\\\\.ts|ProfileDashboard|ScoreDashboard|ScoreSummary\\\\.vue\\\\\\(\\(20|2[0-9][0-9][0-9]\\)' ; \"EXIT=$LASTEXITCODE\")",
-      "PowerShell(Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\frontend; npx vite build 2>&1 | Select-Object -Last 2; \"EXIT=$LASTEXITCODE\")"
+      "PowerShell(Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\frontend; npx vite build 2>&1 | Select-Object -Last 2; \"EXIT=$LASTEXITCODE\")",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Users\\\\oonok\\\\dev-tools\\\\jdk-17.0.19+10\"; Set-Location \"C:\\\\Users\\\\oonok\\\\beat-seeker\\\\backend\"; & \"C:\\\\Users\\\\oonok\\\\dev-tools\\\\apache-maven-3.9.9\\\\bin\\\\mvn.cmd\" -q \"-Dtest=BemaniwikiSongListParserTest,SongTitleAliasesTest,DifficultyTableDiffTest\" \"-Dsurefire.failIfNoSpecifiedTests=false\" test 2>&1 | Select-Object -Last 40; \"exit=$LASTEXITCODE\")",
+      "Bash(cd \"/c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2d4bbdaa-075e-4d63-983e-75d8cdc833d5/scratchpad\" && grep -nE \"WARN|ERROR|wiki|Wiki|wiki_song_sync_runs\" backend.log | grep -viE \"DEBUG|o.s.security|CGLIB|spring.jpa.open-in-view\" | tail -25; echo \"--- err file ---\"; tail -5 backend.err)",
+      "Read(//c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2d4bbdaa-075e-4d63-983e-75d8cdc833d5/scratchpad/**)"
     ]
   }
 }

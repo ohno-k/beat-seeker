@@ -332,6 +332,44 @@ public class EmailService {
     }
 
     /**
+     * 【メソッドの役割】 任意の件名・HTML 本文の運営向け通知メールを非同期送信する。
+     *
+     * bemaniwiki 新曲同期（{@code WikiSongSyncService}）が「追加・更新した譜面の内訳」を管理者へ知らせる用途。
+     * テンプレートは使わず、呼び出し側でエスケープ済みの HTML 断片を受け取って共通の枠に載せる。
+     * 送信失敗は stderr にログ出力のみで、処理はブロックしない。
+     *
+     * @param toEmail  宛先メールアドレス（管理者）
+     * @param subject  件名（"[beat-seeker] " は付けない。そのまま使う）
+     * @param bodyHtml 本文（HTML 断片。呼び出し側でエスケープ済みであること）
+     */
+    @Async
+    public void sendAdminNotification(String toEmail, String subject, String bodyHtml) {
+        String html = """
+                <!DOCTYPE html>
+                <html lang="ja">
+                <body style="font-family: sans-serif; background: #f8fafc; padding: 32px;">
+                  <div style="max-width: 640px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 32px; border: 1px solid #e2e8f0;">
+                    %s
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+                    <p style="color: #94a3b8; font-size: 11px;">beat-seeker</p>
+                  </div>
+                </body>
+                </html>
+                """.formatted(bodyHtml);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setFrom(fromAddress);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(html, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            System.err.println("Failed to send admin notification: " + e.getMessage());
+        }
+    }
+
+    /**
      * 【メソッドの役割】 リザルト画像の保存通知メールを管理者向けに非同期送信する。
      *
      * スコア更新通知（{@link #sendScoreUpdateNotification}）と同様に、管理者以外のユーザーが

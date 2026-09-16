@@ -7,6 +7,7 @@ import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.DifficultyRevisionService;
 import com.beatseeker.backend.service.GameDataService;
+import com.beatseeker.backend.service.WikiSongSyncService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,8 @@ public class GameDataController {
     private final AdminAuthService adminAuthService;
     /** 難易度表の改訂履歴（更新履歴ページの「第N版」）を配信する Service。 */
     private final DifficultyRevisionService difficultyRevisionService;
+    /** bemaniwiki 新曲リストの取り込み（定期実行の手動トリガと履歴表示）。 */
+    private final WikiSongSyncService wikiSongSyncService;
 
     /**
      * 【コンストラクタ】 Spring が Service/Repository を DI で注入する。
@@ -51,11 +54,13 @@ public class GameDataController {
     public GameDataController(GameDataService gameDataService,
                               UserRepository userRepository,
                               AdminAuthService adminAuthService,
-                              DifficultyRevisionService difficultyRevisionService) {
+                              DifficultyRevisionService difficultyRevisionService,
+                              WikiSongSyncService wikiSongSyncService) {
         this.gameDataService = gameDataService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
         this.difficultyRevisionService = difficultyRevisionService;
+        this.wikiSongSyncService = wikiSongSyncService;
     }
 
     // ── 公開エンドポイント ──────────────────────────────
@@ -393,6 +398,41 @@ public class GameDataController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", "適用エラー: " + e.getMessage()));
         }
+    }
+
+    /**
+     * 【メソッドの役割】 bemaniwiki の新曲リストをその場で取り込む（定期実行と同じ処理を手動で走らせる）。
+     *
+     * リクエスト body に {@code {"dryRun": true}} を付けると差分の確認だけで DB は変更しない。
+     * 取得〜反映は数秒で終わるので同期的に実行し、内訳（追加・更新・保留・警告）をそのまま返す。
+     *
+     * @param auth 管理者認証
+     * @param body 省略可。{@code dryRun}（既定 false）
+     * @return {@link WikiSongSyncService.SyncResult}。実行中なら 409、失敗なら 500
+     */
+    @PostMapping("/admin/game-data/songs/wiki-sync")
+    public ResponseEntity<?> runWikiSongSync(Authentication auth,
+                                             @RequestBody(required = false) Map<String, Object> body) {
+        checkAdminAccess(auth);
+        boolean dryRun = body != null && Boolean.TRUE.equals(body.get("dryRun"));
+        try {
+            return ResponseEntity.ok(wikiSongSyncService.sync(WikiSongSyncService.TRIGGER_MANUAL, dryRun));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "同期エラー: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 bemaniwiki 新曲同期の直近の実行記録（新しい順・最大 20 件）を返す。
+     *
+     * @param auth 管理者認証
+     */
+    @GetMapping("/admin/game-data/songs/wiki-sync/runs")
+    public ResponseEntity<List<Map<String, Object>>> getWikiSongSyncRuns(Authentication auth) {
+        checkAdminAccess(auth);
+        return ResponseEntity.ok(wikiSongSyncService.recentRuns());
     }
 
     /**
