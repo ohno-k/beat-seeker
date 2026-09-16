@@ -212,7 +212,7 @@ const handleTextSubmit = async () => {
                 {{ t('upload.pasteTitle') }}
             </h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">
-                <a href="https://p.eagate.573.jp/game/2dx/33/djdata/score_download.html?style=SP" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ t('upload.officialSiteLinkText') }}</a>{{ t('upload.officialSiteManualHint') }}
+                <a href="https://p.eagate.573.jp/game/2dx/34/djdata/score_download.html?style=SP" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ t('upload.officialSiteLinkText') }}</a>{{ t('upload.officialSiteManualHint') }}
             </p>
             
             <textarea

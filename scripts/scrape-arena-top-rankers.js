@@ -6,17 +6,17 @@
  * beat-seeker の専用テーブルに保存する。
  *
  * 確定済みフロー（ユーザー提供）:
- *   1. ランキング: https://p.eagate.573.jp/game/2dx/33/ranking/arena/top_ranking.html （SP、複数ページ）
+ *   1. ランキング: https://p.eagate.573.jp/game/2dx/34/ranking/arena/top_ranking.html （SP、複数ページ）
  *        - 各行の「DJ NAME」セル下段に IIDX ID（例 "2056-8937"）
  *        - アリーナクラスは行内アイコン画像（例 A1）
- *   2. 公開判定: https://p.eagate.573.jp/game/2dx/33/rival/rival_search.html
+ *   2. 公開判定: https://p.eagate.573.jp/game/2dx/34/rival/rival_search.html
  *        - 「IIDXIDから探す」フォームに IIDX ID（ハイフンなし）を入力して検索
  *        - ヒット → 公開 / ヒットなし・「非公開」表示 → スキップ
  *        - 検索結果のリンクから rival クエリ（rival=...）を取得
  *   2b. プレイヤーページ: rival_status.html?rival=<TOKEN>（検索結果の DJ NAME リンク）を開く。
  *        - error.html へ飛ぶ or 「非公開」表示 → 非公開としてスキップ
  *        - 先にこのページを開くことで難易度ページの一時エラー(err=4)を回避できる
- *   3. スコア取得: https://p.eagate.573.jp/game/2dx/33/djdata/music/difficulty_rival.html?rival=<TOKEN>
+ *   3. スコア取得: https://p.eagate.573.jp/game/2dx/34/djdata/music/difficulty_rival.html?rival=<TOKEN>
  *        - ANOTHER / LEGGENDARIA のベストを取得（difficult=0..11 を走査して union）
  *        - difficult はレベル厳密フィルタではないため、RATE-PT(全レベル上位100)の正確性のため
  *          既定は 1-12（difficult 0..11）を全走査する
@@ -61,7 +61,7 @@ const { Client } = require('pg');
 const puppeteer = require('puppeteer');
 
 // ─── 設定 ───────────────────────────────────────────────────────────────
-const VERSION = process.env.VERSION || '33';
+const VERSION = process.env.VERSION || '34';
 const BASE = `https://p.eagate.573.jp/game/2dx/${VERSION}`;
 const RANKING_URL = `${BASE}/ranking/arena/top_ranking.html`;
 const RIVAL_SEARCH_URL = `${BASE}/rival/rival_search.html`;
