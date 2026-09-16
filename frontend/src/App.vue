@@ -111,7 +111,7 @@ import type { SongDataEntry } from './composables/useGameData';
 import { parseScoreCsv, detectCsvVersion, getCsvLastPlayTime } from './utils/csvParser';
 import type { VersionDetectionResult } from './utils/csvParser';
 import { CURRENT_VERSION, MIN_PAST_VERSION, PREVIOUS_VERSION, isInVersionSwitchGrace, versionName } from './utils/iidxVersions';
-import { usePastScores, chartKey } from './composables/usePastScores';
+import { usePastScores, chartKey, type PastImportResult } from './composables/usePastScores';
 import ImportVersionConfirmModal from './components/ImportVersionConfirmModal.vue';
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores, getSongMaxScore } from './utils/scoreData';
@@ -1388,7 +1388,13 @@ const handleImportCancel = () => {
 };
 
 /** 過去作取り込みの結果。トースト的な結果表示に使う（null で非表示）。 */
-const pastImportResult = ref<{ version: number; versionName: string; inserted: number; updated: number; totalCount: number } | null>(null);
+const pastImportResult = ref<PastImportResult | null>(null);
+
+/** 過去作ランキングへの反映結果の表示用: 「before → after」（新規作成なら after だけ）。 */
+const formatArchivedPt = (before: number, after: number, created: boolean): string => {
+  const fmt = (v: number) => v.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return created || Math.abs(after - before) < 0.05 ? fmt(after) : `${fmt(before)} → ${fmt(after)}`;
+};
 
 /**
  * 【関数の役割】 ドロップされた CSV ファイルを読み取り、解析→差分計算→サーバー保存→差分モーダル表示までを一括で行う。
@@ -2000,8 +2006,21 @@ const handleUnifiedClose = async () => {
             <dt class="text-slate-500 dark:text-slate-400">{{ t('past.result.total') }}</dt>
             <dd class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ pastImportResult.totalCount.toLocaleString() }}</dd>
           </div>
+          <!-- 前作（ランキングのアーカイブがある作品）の取り込みでは、前作ランキングの本人の値がどう動いたかを示す -->
+          <template v-if="pastImportResult.archivedPt">
+            <div class="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-1.5">
+              <dt class="text-slate-500 dark:text-slate-400">{{ t('past.result.archivedBeat', { name: versionName(pastImportResult.archivedPt.version) }) }}</dt>
+              <dd class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ formatArchivedPt(pastImportResult.archivedPt.beforeBeatPt, pastImportResult.archivedPt.afterBeatPt, pastImportResult.archivedPt.created) }}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-slate-500 dark:text-slate-400">{{ t('past.result.archivedRate', { name: versionName(pastImportResult.archivedPt.version) }) }}</dt>
+              <dd class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ formatArchivedPt(pastImportResult.archivedPt.beforeRatePt, pastImportResult.archivedPt.afterRatePt, pastImportResult.archivedPt.created) }}</dd>
+            </div>
+          </template>
         </dl>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">{{ t('past.notRanked') }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+          {{ pastImportResult.archivedPt ? t('past.result.archivedNote', { name: versionName(pastImportResult.archivedPt.version) }) : t('past.notRanked') }}
+        </p>
         <div class="flex justify-end">
           <button class="btn-primary" @click="pastImportResult = null">{{ t('common.close') }}</button>
         </div>

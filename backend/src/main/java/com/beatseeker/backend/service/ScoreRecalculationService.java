@@ -123,8 +123,20 @@ public class ScoreRecalculationService {
      * "[L]" サフィックスは LEGGENDARIA として展開する。
      */
     public Map<String, String> loadInformalRanks() {
+        return loadInformalRanks("active");
+    }
+
+    /**
+     * 【メソッドの役割】 指定 revision の難易度表から `(title_diffName) → 非公式ランク文字列` の Map を構築する。
+     *
+     * 過去作ランキングの再計算（{@link ArchivedVersionPtService}）が、世代切替時に凍結した表
+     * （{@code archive:<version>}）で計算するために使う。
+     *
+     * @param revision "active" / "draft" / "archive:33" など
+     */
+    public Map<String, String> loadInformalRanks(String revision) {
         Map<String, String> informalRanks = new HashMap<>();
-        for (DifficultyRank rank : difficultyRankRepository.findByRevisionOrderBySortOrderAsc("active")) {
+        for (DifficultyRank rank : difficultyRankRepository.findByRevisionOrderBySortOrderAsc(revision)) {
             String rankText = rank.getRankValue();
             for (DifficultyRankSong song : rank.getSongs()) {
                 String songTitle = song.getSongTitle() == null ? "" : song.getSongTitle().trim();
@@ -221,6 +233,78 @@ public class ScoreRecalculationService {
         double kenbanPt = Math.round(kenSum * KENBAN_PT_MULTIPLIER * 10.0) / 10.0;
         double saraPt   = Math.round(sarSum * SARA_PT_MULTIPLIER   * 10.0) / 10.0;
         return new double[]{kenbanPt, saraPt};
+    }
+
+    /**
+     * 【メソッドの役割】 スコア集合から BEAT / RATE / KENBAN / SARA の 4 指標を一度に計算する（履歴には書かない）。
+     *
+     * 集計規則は {@link #processUserRecalculation} と同一:
+     *  - (曲, 難易度) ごとに EX SCORE が高い行だけを採用（arcade / infinitas の二重計上防止）
+     *  - BEAT: HYPER レベル 11 以上は対象外。上位 100 譜面の合計
+     *  - RATE: ANOTHER / LEGGENDARIA のみ。上位 100 譜面の合計 ＋ 100% 超過 100 件以降の +1pt
+     *  - KENBAN / SARA: {@link #calculateKenbanSaraPtFromActiveData}
+     *  - いずれも 0.1 桁で丸める
+     *
+     * 過去作ランキングの再計算（{@link ArchivedVersionPtService}）が、凍結した難易度表を渡して呼ぶ。
+     *
+     * @param scores        対象スコア（永続化されていない一時オブジェクトでもよい）
+     * @param songMaxScores title_difficultyCode → 理論値（notes×2）
+     * @param informalRanks title_diffName → 非公式ランク文字列
+     * @param scratchMap    title_diffName → 皿率(%)
+     * @return {@code [BEAT-PT, RATE-PT, KENBAN-PT, SARA-PT]}
+     */
+    public double[] calculatePtTotals(List<Score> scores, Map<String, Integer> songMaxScores,
+                                      Map<String, String> informalRanks, Map<String, Double> scratchMap) {
+        Map<String, Score> bestByChart = new LinkedHashMap<>();
+        for (Score s : scores) {
+            String key = s.getTitle() + " " + s.getDifficultyName();
+            Score cur = bestByChart.get(key);
+            int sv = s.getScore() != null ? s.getScore() : 0;
+            int cv = (cur != null && cur.getScore() != null) ? cur.getScore() : -1;
+            if (cur == null || sv > cv) bestByChart.put(key, s);
+        }
+        List<Score> deduped = new ArrayList<>(bestByChart.values());
+
+        List<Double> beatPts = new ArrayList<>();
+        List<Double> ratePts = new ArrayList<>();
+        int perfectRateCount = 0;
+        for (Score score : deduped) {
+            if ("---".equals(score.getClearType()) || "NO PLAY".equals(score.getClearType())) continue;
+            String diffName = normalizeDiffName(score.getDifficultyName());
+            String code = getDifficultyCode(diffName);
+            if (code == null) continue;
+            Integer maxScore = songMaxScores.get(score.getTitle() + "_" + code);
+            if (maxScore == null || maxScore == 0) continue;
+            double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
+            String informalRankString = informalRanks.get(score.getTitle() + "_" + diffName);
+
+            boolean isHyperNonTarget = "HYPER".equals(diffName) && score.getDifficultyLevel() != null && score.getDifficultyLevel() >= 11;
+            if (!isHyperNonTarget) {
+                double pt = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
+                if (pt > 0) beatPts.add(pt);
+            }
+            boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
+            if (isRateEligible && scoreRate > 0) {
+                double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
+                if (rPt > 0) ratePts.add(rPt);
+                if (scoreRate >= 100.0) perfectRateCount++;
+            }
+        }
+        beatPts.sort(Collections.reverseOrder());
+        double beatAcc = 0;
+        for (int i = 0; i < Math.min(100, beatPts.size()); i++) beatAcc += beatPts.get(i);
+        ratePts.sort(Collections.reverseOrder());
+        double rateAcc = 0;
+        for (int i = 0; i < Math.min(100, ratePts.size()); i++) rateAcc += ratePts.get(i);
+        if (perfectRateCount > 100) rateAcc += (perfectRateCount - 100);
+
+        double[] kenbanSara = calculateKenbanSaraPtFromActiveData(deduped, songMaxScores, informalRanks, scratchMap);
+        return new double[] {
+                Math.round(beatAcc * 10.0) / 10.0,
+                Math.round(rateAcc * 10.0) / 10.0,
+                kenbanSara[0],
+                kenbanSara[1]
+        };
     }
 
     public double calculateBeatPtFromActiveData(List<Score> scores) {

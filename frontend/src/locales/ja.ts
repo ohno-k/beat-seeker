@@ -1898,6 +1898,9 @@ export const ja = {
   'past.result.inserted': '新規',
   'past.result.updated': '更新',
   'past.result.total': '登録済み合計',
+  'past.result.archivedBeat': '{name} ランキング BEAT-PT',
+  'past.result.archivedRate': '{name} ランキング RATE-PT',
+  'past.result.archivedNote': '{name} の終了時点ランキング（BEAT / RATE / KENBAN / SARA）とティアアイコンの外枠に反映しました。値が上回ったときだけ更新されます。',
 
   // 過去データ管理（プロフィール内）
   'past.manager.title': '過去作スコア',

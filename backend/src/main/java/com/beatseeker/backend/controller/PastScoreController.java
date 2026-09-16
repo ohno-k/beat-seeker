@@ -4,9 +4,12 @@ import com.beatseeker.backend.entity.PastScore;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.PastScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.service.ArchivedVersionPtService;
 import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.LeagueChartNotation;
 import com.beatseeker.backend.service.SongTitleAliases;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +28,14 @@ import java.util.Map;
  * スコア CSV を取り込み、「歴代自己ベスト」を振り返れるようにするための機能。
  *
  * 設計上の不変条件:
- *  - 本コントローラが読み書きするのは {@code past_scores} テーブルのみで、{@code scores} には一切触れない。
- *  - よってランキング・BEAT-PT・RATE-PT・曲別順位・リーグ・大会・Tier 投票の集計値には影響しない。
- *  - 現行作（{@link IidxVersions#CURRENT}）の取り込みは従来通り {@link ScoreController#uploadScores}
+ *  - 本コントローラが読み書きするのは {@code past_scores} テーブル（と、下記の過去作ランキングの本人行）のみで、
+ *    {@code scores} には一切触れない。
+ *  - よって現行作のランキング・BEAT-PT・RATE-PT・曲別順位・リーグ・大会・Tier 投票の集計値には影響しない。
+ *  - 例外は<b>過去作ランキング</b>（{@code version_pt_snapshots}）: アーカイブのある作品（33 以降）の CSV を
+ *    取り込んだときは、その人の前作 PT を past_scores から計算し直して本人の行だけを更新する
+ *    （{@link ArchivedVersionPtService}。指標が上回ったときのみ）。世代切替のスナップショット後に
+ *    前作の最終 CSV を入れる人が居るため、前作ランキングがその分を映せるようにしている。
+ *  - 現行作（{@link IidxVersions#current()}）の取り込みは従来通り {@link ScoreController#uploadScores}
  *    が担当する。ここに現行作を渡した場合は 400 で弾き、「どちらのテーブルが正か」の曖昧さを作らない。
  *
  * バージョンの判定はフロントエンドが CSV の「バージョン」列（＝楽曲の初出作品名）から行う。
@@ -46,15 +54,21 @@ import java.util.Map;
 @RequestMapping("/api/scores/past")
 public class PastScoreController {
 
+    private static final Logger log = LoggerFactory.getLogger(PastScoreController.class);
+
     /** 過去作スコアのリポジトリ。 */
     private final PastScoreRepository pastScoreRepository;
     /** ユーザーリポジトリ。iidxId から User を解決するのに使う。 */
     private final UserRepository userRepository;
+    /** 過去作ランキング（version_pt_snapshots）の本人行を past_scores から計算し直すサービス。 */
+    private final ArchivedVersionPtService archivedVersionPtService;
 
     public PastScoreController(PastScoreRepository pastScoreRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            ArchivedVersionPtService archivedVersionPtService) {
         this.pastScoreRepository = pastScoreRepository;
         this.userRepository = userRepository;
+        this.archivedVersionPtService = archivedVersionPtService;
     }
 
     /**
@@ -151,6 +165,25 @@ public class PastScoreController {
         response.put("updated", updated);
         response.put("totalCount", pastScoreRepository.countByUserAndVersion(user, req.version()));
         response.put("message", IidxVersions.nameOf(req.version()) + " のスコアを取り込みました");
+
+        // 手順2: ランキングのアーカイブがある作品（33 Sparkle Shower 以降）なら、その人の前作 PT を
+        //        取り込み後の past_scores 全体から計算し直し、過去作ランキングの本人行へ反映する。
+        //        失敗しても取り込み自体は成功として返す（管理用の一括更新で後から追いつける）。
+        if ((inserted + updated) > 0 && archivedVersionPtService.isArchived(req.version())) {
+            try {
+                ArchivedVersionPtService.Context ctx = archivedVersionPtService.loadContext(req.version());
+                archivedVersionPtService.refreshUser(user, existingMap.values(), ctx, false).ifPresent(r -> {
+                    if (r.changed()) archivedVersionPtService.finalizeVersion(req.version());
+                    Map<String, Object> archived = r.toMap();
+                    archived.put("version", req.version());
+                    archived.put("versionName", IidxVersions.nameOf(req.version()));
+                    response.put("archivedPt", archived);
+                });
+            } catch (Exception e) {
+                log.warn("[前作PT] version={} user={} の過去作ランキング更新に失敗（取り込みは成功）: {}",
+                        req.version(), user.getId(), e.toString());
+            }
+        }
         return ResponseEntity.ok(response);
     }
 

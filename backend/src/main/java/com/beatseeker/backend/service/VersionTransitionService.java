@@ -1,5 +1,8 @@
 package com.beatseeker.backend.service;
 
+import com.beatseeker.backend.entity.DifficultyRank;
+import com.beatseeker.backend.entity.DifficultyRankSong;
+import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.VersionPtSnapshotRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +24,7 @@ import java.util.Map;
  *
  * ここに実装してある手順:
  *  1. {@link #captureSnapshot} … 前作の最終 PT を {@code version_pt_snapshots} へ焼き付ける（追記のみ）
+ *  1b. {@link #freezeDifficultyTable} … 公開中の難易度表を前作の「終了時点の表」として凍結する（追記のみ）
  *  2. {@link #copyScoresToPastScores} … {@code scores} を {@code past_scores} へ複製する（追記のみ）
  *  3. {@link #resetCurrentVersionData} … 現行作のスコアと派生値を初期化する（<b>破壊的</b>。1・2 の後にだけ呼ぶ）
  *  4. {@link #applyDifficultyDraft} … 難易度表 draft を active へ適用する
@@ -48,13 +53,16 @@ public class VersionTransitionService {
     private final JdbcTemplate jdbcTemplate;
     private final VersionPtSnapshotRepository snapshotRepository;
     private final GameDataService gameDataService;
+    private final DifficultyRankRepository difficultyRankRepository;
 
     public VersionTransitionService(JdbcTemplate jdbcTemplate,
                                     VersionPtSnapshotRepository snapshotRepository,
-                                    GameDataService gameDataService) {
+                                    GameDataService gameDataService,
+                                    DifficultyRankRepository difficultyRankRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.snapshotRepository = snapshotRepository;
         this.gameDataService = gameDataService;
+        this.difficultyRankRepository = difficultyRankRepository;
     }
 
     /**
@@ -124,6 +132,56 @@ public class VersionTransitionService {
         log.info("[世代切替] スナップショット完了: version={} 新規 {} 件 / 累計 {} 件（対象 {} 人）",
                 version, inserted, total, expected);
         return inserted;
+    }
+
+    /**
+     * 【メソッドの役割】 公開中（active）の難易度表を、前作の「終了時点の表」として凍結する。
+     *
+     * revision {@code archive:<version>}（{@link ArchivedVersionPtService#archiveRevision}）へ帯と曲を複製する。
+     * 追記のみで、既に同じ revision があれば何もしない（冪等）。
+     *
+     * なぜ要るか: 新作初日には難易度表の大改訂を適用するが、前作ランキング（スナップショット）は
+     * 旧表で計算した値でできている。切り替え後に前作の CSV を取り込んだ人の値を計算し直すとき、
+     * 現行の表を使うと物差しが変わってしまう。スナップショットと同じ瞬間の表を残しておけば、
+     * 追加取り込みの無い人はスナップショットと同じ値が再現できる（{@link ArchivedVersionPtService}）。
+     *
+     * {@code archive:} 接頭辞は管理画面のプロファイル一覧（{@code profile:} 接頭辞）に出ないので、
+     * 画面操作で誤って消される心配がない。
+     *
+     * @param version 凍結する作品バージョン（例: 33。＝この表で集計されていた作品）
+     * @param dryRun  true なら DB を変更せず、複製する帯数だけを返す
+     * @return 複製した（dry-run 時は複製する予定の）帯数。既に凍結済みなら 0
+     */
+    @Transactional
+    public int freezeDifficultyTable(int version, boolean dryRun) {
+        String revision = ArchivedVersionPtService.archiveRevision(version);
+        if (difficultyRankRepository.countByRevision(revision) > 0) {
+            log.info("[世代切替] 難易度表の凍結: {} は既にあるため何もしない", revision);
+            return 0;
+        }
+        List<DifficultyRank> active = difficultyRankRepository.findByRevisionOrderBySortOrderAsc("active");
+        if (dryRun) {
+            log.info("[世代切替] 難易度表の凍結 dry-run: active {} 帯を {} へ複製する予定", active.size(), revision);
+            return active.size();
+        }
+        int songs = 0;
+        for (DifficultyRank src : active) {
+            DifficultyRank copy = new DifficultyRank();
+            copy.setRankValue(src.getRankValue());
+            copy.setSortOrder(src.getSortOrder());
+            copy.setRevision(revision);
+            for (DifficultyRankSong s : src.getSongs()) {
+                DifficultyRankSong cs = new DifficultyRankSong();
+                cs.setDifficultyRank(copy);
+                cs.setSongTitle(s.getSongTitle());
+                cs.setSortOrder(s.getSortOrder());
+                copy.getSongs().add(cs);
+                songs++;
+            }
+            difficultyRankRepository.save(copy);
+        }
+        log.info("[世代切替] 難易度表の凍結完了: active {} 帯 / {} 曲を {} へ複製", active.size(), songs, revision);
+        return active.size();
     }
 
     /**

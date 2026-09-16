@@ -23,8 +23,9 @@ import java.util.Map;
  * 探すことになるが存在しないので、全員 null（外枠なし）になる。切り替えの瞬間に 33 のスナップショットへ
  * 自動的に切り替わる。
  *
- * スナップショットは切り替え後は不変なので、メモリに 5 分キャッシュする（ランキング API は
- * 頻繁に呼ばれるが、行ごとに DB を引く必要はない）。
+ * スナップショットはほぼ不変（切り替え後に前作の CSV を取り込んだ人の行だけ
+ * {@link ArchivedVersionPtService} が上書きする）なので、メモリに 5 分キャッシュする（ランキング API は
+ * 頻繁に呼ばれるが、行ごとに DB を引く必要はない）。上書きした側は {@link #invalidate()} で捨てる。
  */
 @Service
 public class PreviousVersionPtService {
@@ -63,6 +64,11 @@ public class PreviousVersionPtService {
             cachedAt = now;
         }
         return cache;
+    }
+
+    /** 【メソッドの役割】 キャッシュを捨てる（スナップショットを書き換えた直後に呼ぶ）。次の参照で読み直す。 */
+    public void invalidate() {
+        cachedAt = 0L;
     }
 
     /** 【メソッドの役割】 1 ユーザーぶんを 1 つの Map に書き込む（自分の /me、公開プロフィールなど）。 */

@@ -1863,6 +1863,9 @@ export const en = {
   'past.result.inserted': 'Added',
   'past.result.updated': 'Updated',
   'past.result.total': 'Total stored',
+  'past.result.archivedBeat': '{name} ranking BEAT-PT',
+  'past.result.archivedRate': '{name} ranking RATE-PT',
+  'past.result.archivedNote': 'Applied to the {name} final ranking (BEAT / RATE / KENBAN / SARA) and your tier icon frame. Values only move up.',
 
   // Past-data management (in profile)
   'past.manager.title': 'Past-version scores',

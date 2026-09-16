@@ -74,6 +74,39 @@ export interface ChartHistory {
     maxScore: number;
 }
 
+/**
+ * 過去作取り込みの応答に付く「過去作ランキングへの反映結果」。
+ * ランキングのアーカイブがある作品（33 Sparkle Shower 以降）の CSV を取り込んだときだけ付く。
+ * 値は [before → after] で、指標が上回ったときだけ更新される（下がる方向には書かない）。
+ */
+export interface PastImportArchivedPt {
+    version: number;
+    versionName: string;
+    /** 前作ランキングに行が無かったので新規作成した（切替後に登録した人）。 */
+    created: boolean;
+    /** いずれかの指標を更新した。 */
+    changed: boolean;
+    beforeBeatPt: number;
+    afterBeatPt: number;
+    beforeRatePt: number;
+    afterRatePt: number;
+    beforeKenbanPt: number;
+    afterKenbanPt: number;
+    beforeSaraPt: number;
+    afterSaraPt: number;
+}
+
+/** 過去作取り込み API の応答。 */
+export interface PastImportResult {
+    version: number;
+    versionName: string;
+    inserted: number;
+    updated: number;
+    totalCount: number;
+    message: string;
+    archivedPt?: PastImportArchivedPt;
+}
+
 /** 作品別の取り込み状況（過去データ管理 UI 用）。 */
 export interface PastVersionSummary {
     version: number;
@@ -196,7 +229,7 @@ export function usePastScores() {
     const uploadPastScores = async (
         version: number,
         scores: ScoreData[],
-    ): Promise<{ version: number; versionName: string; inserted: number; updated: number; totalCount: number; message: string }> => {
+    ): Promise<PastImportResult> => {
         const records: object[] = [];
         scores.forEach(song => {
             (Object.keys(DIFFICULTY_LABELS) as Array<keyof typeof DIFFICULTY_LABELS>).forEach(diff => {

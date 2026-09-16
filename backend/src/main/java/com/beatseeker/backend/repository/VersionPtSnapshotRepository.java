@@ -20,6 +20,9 @@ public interface VersionPtSnapshotRepository extends JpaRepository<VersionPtSnap
     /** 指定バージョンを BEAT-PT の高い順に返す。 */
     List<VersionPtSnapshot> findByVersionOrderByTotalBeatPtDesc(Integer version);
 
+    /** 指定バージョン・指定ユーザーの 1 行（一意制約 (version, user_id) により高々 1 件）。 */
+    java.util.Optional<VersionPtSnapshot> findByVersionAndUserId(Integer version, Long userId);
+
     /** アーカイブが存在する作品バージョンの一覧（新しい順）。 */
     @Query("SELECT DISTINCT s.version FROM VersionPtSnapshot s ORDER BY s.version DESC")
     List<Integer> findArchivedVersions();

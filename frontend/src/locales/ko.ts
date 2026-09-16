@@ -1864,6 +1864,9 @@ export const ko = {
   'past.result.inserted': '신규',
   'past.result.updated': '갱신',
   'past.result.total': '등록 합계',
+  'past.result.archivedBeat': '{name} 랭킹 BEAT-PT',
+  'past.result.archivedRate': '{name} 랭킹 RATE-PT',
+  'past.result.archivedNote': '{name} 종료 시점 랭킹(BEAT / RATE / KENBAN / SARA)과 티어 아이콘 테두리에 반영했습니다. 값이 올라갈 때만 갱신됩니다.',
 
   // 과거 데이터 관리(프로필 내)
   'past.manager.title': '과거 작품 스코어',

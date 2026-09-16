@@ -50,7 +50,9 @@ import java.util.Optional;
  * </pre>
  *
  * ■ 手順と順序
- * snapshot → copy-scores → reset → (apply-difficulty)。前段が SUCCESS でなければ次へ進まない。
+ * snapshot → freeze-difficulty → copy-scores → reset → (apply-difficulty)。前段が SUCCESS でなければ次へ進まない。
+ * freeze-difficulty は公開中の難易度表を {@code archive:<前作>} として凍結する（前作ランキングの再計算用。
+ * 既にあれば何もしない）。
  * reset の後は曲統計のメモリキャッシュを作り直す（空のスコアで即座に計算し直す）。
  */
 @Component
@@ -157,6 +159,15 @@ public class VersionTransitionScheduler {
             return "対象 " + expected + " 人 / 書き込み " + n + " 件";
         });
         if (!snapshotDone) return;
+
+        // 手順 1b: 公開中の難易度表を前作の「終了時点の表」として凍結する（追記のみ・既にあれば何もしない）。
+        //   スナップショットと同じ瞬間の表を残し、切り替え後に前作の CSV を取り込んだ人の前作 PT を
+        //   同じ物差しで計算し直せるようにする（ArchivedVersionPtService）。
+        boolean freezeDone = runOnce("freeze-difficulty", () -> {
+            int n = transitionService.freezeDifficultyTable(fromVersion, dryRun);
+            return n == 0 ? "凍結済み（既存）" : n + " 帯を archive:" + fromVersion + " へ凍結";
+        });
+        if (!freezeDone) return;
 
         // 手順 2: 現行スコアを過去作へ複製する（元データは消さない）。
         boolean copyDone = runOnce("copy-scores", () ->
