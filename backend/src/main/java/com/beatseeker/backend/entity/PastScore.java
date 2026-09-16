@@ -21,6 +21,12 @@ import java.time.LocalDateTime;
  *
  * 不変条件: 本エンティティはランキング・BEAT-PT・RATE-PT・曲別順位・リーグ・大会・Tier 投票の
  *   いかなる計算にも参加しない。参照は「本人の過去スコア表示」用途に限る。
+ *   例外（「実力」を測る用途で歴代ベストを使うもの。競争系の集計ではない）:
+ *    - 練習メニュー（{@code ScoreRepository#findUserLifetimeAnotherLeggScores}）
+ *    - ティア別平均スコア / 曲別平均スコアレート（2026-09-16〜。
+ *      {@code ScoreRepository#findLifetimeSongScoresWithBeatTier} /
+ *      {@code ScoreRepository#findLifetimeSongAvgStats}。統計ページ用の匿名集計）
+ *    - リーグの有効ライン・課題曲選定（{@code app.league.baseline-includes-past}）
  *
  * 一意性制約: (user_id, version, title, difficultyName) の 4 項目。
  *   {@link Score} と異なり difficultyLevel（★）をキーに含めない。★は作品間で変動するため、

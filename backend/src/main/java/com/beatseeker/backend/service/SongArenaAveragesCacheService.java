@@ -21,8 +21,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *    song_definitions を全件 JOIN する重集計で、データ増加に伴い PostgreSQL の
  *    {@code statement_timeout = 30s}（{@code application.yml} の HikariCP 接続初期化 SQL）
  *    を超えて 500 を返すようになっていた。
- *  - 結果はユーザーの total_beat_pt とベストスコアにのみ依存し、リアルタイム性は不要のため
+ *  - 結果はユーザーのベストスコアにのみ依存し、リアルタイム性は不要のため
  *    定期リフレッシュ + in-memory 配信で十分。
+ *
+ * 集計基準（2026-09-16 変更）:
+ *  - 現行作だけを見る {@link ScoreRepository#findRawSongScoresWithBeatTier()} ではなく、
+ *    <b>歴代ベスト</b>（現行 scores ＋ 過去作 past_scores の MAX）を起点にする
+ *    {@link ScoreRepository#findLifetimeSongScoresWithBeatTier()} を使う。
+ *  - ティアも {@code users.total_beat_pt}（現行作の値）ではなく、歴代ベストから計算し直した
+ *    BEAT-PT で決める。ZINRAI 移行直後は現行作の scores / total_beat_pt が空に近く、
+ *    旧基準ではページがほぼ空になるため。
  *
  * 動作:
  *  - 起動 1 分後に初回ロード、その後 {@link #REFRESH_INTERVAL_MS}（30 分）毎に再計算
@@ -100,7 +108,7 @@ public class SongArenaAveragesCacheService {
             // メモリ逼迫 SIGTERM 再起動）を悪化させる。現状の所要(約50秒)に十分余裕を持たせた
             // 有限上限にして、想定外に長引いたら PostgreSQL 側でクリーンに中断させる。
             jdbcTemplate.execute("SET LOCAL statement_timeout = '180s'");
-            List<Map<String, Object>> next = scoreRepository.findRawSongScoresWithBeatTier();
+            List<Map<String, Object>> next = scoreRepository.findLifetimeSongScoresWithBeatTier();
             this.cache = next;
             log.info("Refreshed song-arena-averages cache: {} rows in {} ms",
                     next.size(), System.currentTimeMillis() - start);

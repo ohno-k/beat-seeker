@@ -276,7 +276,7 @@ async function fetchCommentStats() {
     <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
       <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">曲別平均スコアレート</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
-        全プレイヤーの平均スコアレート（ANOTHER+LEGGENDARIA、☆11+☆12）
+        全プレイヤーの平均スコアレート（ANOTHER+LEGGENDARIA、☆11+☆12）。各プレイヤーの自己歴代ベスト（現行作＋過去作）を1票として集計
       </p>
 
       <!-- ローディング中: 青スピナー -->

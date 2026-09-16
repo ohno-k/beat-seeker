@@ -60,6 +60,51 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      */
     String SCORE_RATE_FORMULA = "(s.score * 100.0 / NULLIF(sd.notes * 2.0, 0))";
 
+    /**
+     * <b>歴代スコア基準</b>の集計（ティア別平均 / 曲別平均スコアレート）で共通の CTE 群。
+     * {@code WITH} の直後に差し込む想定。定義される CTE:
+     *  - {@code weight_map} / {@code song_ranks}: active 難易度表のランク → BEAT-PT 重み
+     *  - {@code charts}: active の ☆11/☆12 ANOTHER・LEGGENDARIA 譜面。{@code chart_id}（song_definitions.id）を
+     *    整数キーとして持ち、notes / 現行レベル / 重み（表に無ければ NULL）を添える
+     *  - {@code lifetime_best}: 現行 {@code scores} ∪ 過去作 {@code past_scores} を charts に結合し、
+     *    user × chart_id で MAX(score) を取った「自己歴代ベスト」
+     *
+     * 設計メモ（2026-09-16 本番計測）: 約 107 万行の UNION を曲名テキストで GROUP BY すると 38 秒、
+     * 先に charts と JOIN して整数 chart_id で GROUP BY すると 24 秒。以降の集計も chart_id で行い、
+     * 曲名は最後に 1,328 行へ戻してから付ける。past_scores 側は ★ が作品ごとに変わるため、
+     * レベル絞り込みは {@code song_definitions.level}（現行レベル）で行う。
+     */
+    String LIFETIME_BEST_CTES =
+        WEIGHT_MAP_VALUES + ", " +
+        "song_ranks AS ( " +
+        "  SELECT drs.song_title AS mapped_title, wm.wt AS weight " +
+        "  FROM difficulty_ranks dr " +
+        "  JOIN difficulty_rank_songs drs ON dr.id = drs.difficulty_rank_id " +
+        "  JOIN weight_map wm ON wm.rv = SUBSTRING(dr.rank_value FROM '^\\d+\\.\\d+') " +
+        "  WHERE dr.revision = 'active' " +
+        "), " +
+        "charts AS ( " +
+        "  SELECT sd.id AS chart_id, sd.title, " +
+        "         CASE WHEN sd.difficulty = '4' THEN 'ANOTHER' ELSE 'LEGGENDARIA' END AS difficulty_name, " +
+        "         sd.level, sd.notes, " +
+        "         (SELECT MAX(sr.weight) FROM song_ranks sr " +
+        "           WHERE sr.mapped_title = CASE WHEN sd.difficulty = '10' THEN sd.title || ' [L]' ELSE sd.title END) AS weight " +
+        "  FROM song_definitions sd " +
+        "  WHERE sd.revision = 'active' AND sd.difficulty IN ('4', '10') AND sd.level IN (11, 12) AND sd.notes > 0 " +
+        "), " +
+        "lifetime_best AS ( " +
+        "  SELECT x.user_id, c.chart_id, MAX(x.score) AS score " +
+        "  FROM ( " +
+        "    SELECT user_id, title, difficulty_name, score FROM scores " +
+        "     WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        "    UNION ALL " +
+        "    SELECT user_id, title, difficulty_name, score FROM past_scores " +
+        "     WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        "  ) x " +
+        "  JOIN charts c ON c.title = x.title AND c.difficulty_name = x.difficulty_name " +
+        "  GROUP BY x.user_id, c.chart_id " +
+        ")";
+
     // 注: beat_pt の boost CASE 式も 2 クエリで類似しているが、
     //     findAllSongRankingAggregates は列 "score_rate" を、
     //     calculateDifficultySimulation は列 "b.score_rate" を参照しており、
@@ -752,6 +797,157 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "ORDER BY title, difficulty_name",
         nativeQuery = true)
     List<Map<String, Object>> findRawSongScoresWithBeatTier();
+
+    /**
+     * 【メソッドの役割】 <b>歴代スコア基準</b>の「BeatTier 別の曲×難易度ごとの平均スコア」を集計する。
+     *
+     * {@link #findRawSongScoresWithBeatTier()} の歴代版。2026-09-16 の ZINRAI 移行で
+     * {@code scores} と {@code users.total_beat_pt} が初期化され、現行作だけを見る旧クエリでは
+     * 稼働直後の数週間ほぼ空になる。ティア別平均は「どの実力帯の人がこの譜面でどれだけ出すか」を
+     * 知るためのものなので、ユーザー指示により<b>歴代ベスト</b>（現行 {@code scores} ＋ 過去作
+     * {@code past_scores} を UNION し、user × 曲 × 難易度で MAX(score)）を起点にする。
+     *
+     * ティアの決め方も歴代基準に揃える。{@code users.total_beat_pt} は現行作の値なので使わず、
+     * 歴代ベストから BEAT-PT を計算し直して（active 難易度表の重み × 上位 100 譜面合計、
+     * {@link #findAllSongRankingAggregates()} と同じ算式）、その合計でティアを求める。
+     *
+     * CTE 概要（共通部は {@link #LIFETIME_BEST_CTES}）:
+     *  - {@code charts} / {@code lifetime_best}: ☆11/☆12 A/L 譜面（整数 chart_id）と user × chart_id の歴代ベスト
+     *  - {@code rated} / {@code beat_pts} / {@code ranked} / {@code user_pt}: 歴代 BEAT-PT（上位 100 合計）。
+     *    スコア率と BEAT-PT は float8 で計算する（numeric の POWER は 70 万行で数十秒かかる）
+     *  - {@code agg_scores}: 歴代 BEAT-PT からティア・小ランクを CASE 式で算出し、chart_id × ティアで平均・人数
+     *  - 最終 SELECT で chart_id を曲名・難易度名・現行レベルに戻し、json_agg で 1 譜面 1 行にする
+     *
+     * 旧クエリとの違い:
+     *  - レベル絞り込み（☆11/☆12）は {@code scores.difficulty_level} ではなく active の
+     *    {@code song_definitions.level}（現行レベル）で行う。過去作の ★ は作品ごとに変動するため。
+     *  - 足切り（スコア率 ≥ 66.66%）・ANOTHER/LEGGENDARIA 限定・返却形は旧クエリと同じ。
+     *
+     * 本番計測（2026-09-16、past_scores 約 118 万行）: 約 63 秒。
+     * {@code SongArenaAveragesCacheService} の {@code SET LOCAL statement_timeout = '180s'} 内に収まる。
+     *
+     * 返却キー: title / difficultyName / difficultyLevel / tierData（JSON 文字列）
+     *
+     * @return 曲ごとの tier 別集計（歴代ベスト基準）
+     */
+    @Query(value =
+        "WITH " + LIFETIME_BEST_CTES + ", " +
+        "rated AS (" +
+        "  SELECT b.user_id, c.weight\\:\\:float8 AS weight," +
+        "         (b.score\\:\\:float8 * 50.0 / c.notes\\:\\:float8) AS score_rate" +
+        "  FROM lifetime_best b" +
+        "  JOIN charts c ON c.chart_id = b.chart_id" +
+        "  WHERE c.weight IS NOT NULL" +
+        "), " +
+        "beat_pts AS (" +
+        "  SELECT user_id," +
+        "    (POWER(score_rate / 100.0, 1.3) * weight) + " +
+        "    (weight * CASE" +
+        "      WHEN score_rate > 94.44 THEN 0.03" +
+        "      WHEN score_rate > 88.88 THEN 0.02" +
+        "      WHEN score_rate > 77.77 THEN 0.01" +
+        "      ELSE 0.0 END) AS beat_pt" +
+        "  FROM rated" +
+        "  WHERE score_rate > 66.666" +
+        "), " +
+        "ranked AS (" +
+        "  SELECT user_id, beat_pt, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY beat_pt DESC) AS rn" +
+        "  FROM beat_pts" +
+        "), " +
+        "user_pt AS (" +
+        "  SELECT user_id, SUM(beat_pt) AS total_beat_pt FROM ranked WHERE rn <= 100 GROUP BY user_id" +
+        "), " +
+        "agg_scores AS (" +
+        "  SELECT b.chart_id," +
+        "    CASE" +
+        "      WHEN up.total_beat_pt >= 18000 THEN 'Legend'" +
+        "      WHEN up.total_beat_pt >= 17500 THEN 'Mythic'" +
+        "      WHEN up.total_beat_pt >= 17000 THEN 'Ancient'" +
+        "      WHEN up.total_beat_pt >= 16500 THEN 'Master'" +
+        "      WHEN up.total_beat_pt >= 16000 THEN 'Elite'" +
+        "      WHEN up.total_beat_pt >= 15500 THEN 'Commander'" +
+        "      WHEN up.total_beat_pt >= 15000 THEN 'Veteran'" +
+        "      WHEN up.total_beat_pt >= 14000 THEN 'Expert'" +
+        "      WHEN up.total_beat_pt >= 13000 THEN 'Advanced'" +
+        "      WHEN up.total_beat_pt >= 12000 THEN 'Intermediate'" +
+        "      WHEN up.total_beat_pt >= 10000 THEN 'Novice'" +
+        "      ELSE 'Beginner'" +
+        "    END AS beat_tier," +
+        "    CASE" +
+        "      WHEN up.total_beat_pt >= 18000 THEN 0" +
+        "      WHEN up.total_beat_pt >= 17500 THEN FLOOR((up.total_beat_pt - 17500)/100) + 1" +
+        "      WHEN up.total_beat_pt >= 17000 THEN FLOOR((up.total_beat_pt - 17000)/100) + 1" +
+        "      WHEN up.total_beat_pt >= 16500 THEN FLOOR((up.total_beat_pt - 16500)/100) + 1" +
+        "      WHEN up.total_beat_pt >= 16000 THEN FLOOR((up.total_beat_pt - 16000)/100) + 1" +
+        "      WHEN up.total_beat_pt >= 15500 THEN FLOOR((up.total_beat_pt - 15500)/100) + 1" +
+        "      WHEN up.total_beat_pt >= 15000 THEN FLOOR((up.total_beat_pt - 15000)/100) + 1" +
+        "      WHEN up.total_beat_pt >= 14000 THEN FLOOR((up.total_beat_pt - 14000)/200) + 1" +
+        "      WHEN up.total_beat_pt >= 13000 THEN FLOOR((up.total_beat_pt - 13000)/200) + 1" +
+        "      WHEN up.total_beat_pt >= 12000 THEN FLOOR((up.total_beat_pt - 12000)/200) + 1" +
+        "      WHEN up.total_beat_pt >= 10000 THEN FLOOR((up.total_beat_pt - 10000)/400) + 1" +
+        "      ELSE 0" +
+        "    END AS tier_level," +
+        "    ROUND(AVG(b.score)) AS avg_score," +
+        "    COUNT(*) AS user_count" +
+        "  FROM lifetime_best b" +
+        "  JOIN user_pt up ON up.user_id = b.user_id AND up.total_beat_pt > 0" +
+        "  JOIN charts c ON c.chart_id = b.chart_id" +
+        // 足切り (score*3 >= notes*4) はスコア率 66.66...% に相当（旧クエリと同じ）。
+        "  WHERE (b.score * 3) >= (c.notes * 4)" +
+        "  GROUP BY b.chart_id, beat_tier, tier_level" +
+        ") " +
+        "SELECT c.title AS \"title\", c.difficulty_name AS \"difficultyName\", c.level AS \"difficultyLevel\"," +
+        "  json_agg(" +
+        "    json_build_object(" +
+        "      'beatTier', a.beat_tier," +
+        "      'tierLevel', a.tier_level," +
+        "      'avgScore', a.avg_score," +
+        "      'userCount', a.user_count" +
+        "    )" +
+        "  )\\:\\:text AS \"tierData\" " +
+        "FROM agg_scores a " +
+        "JOIN charts c ON c.chart_id = a.chart_id " +
+        "GROUP BY c.title, c.difficulty_name, c.level " +
+        "ORDER BY c.title, c.difficulty_name",
+        nativeQuery = true)
+    List<Map<String, Object>> findLifetimeSongScoresWithBeatTier();
+
+    /**
+     * 【メソッドの役割】 <b>歴代スコア基準</b>で、☆11/☆12 の ANOTHER/LEGGENDARIA について
+     * 曲×譜面ごとの「平均スコア・人数・MAX- 達成数・AAA 達成数・notes」を 1 本で集計する。
+     *
+     * {@link #findSongAvgScores()} / {@link #findSongMaxMinusCounts()} / {@link #findSongAaaCounts()}
+     * （いずれも現行 {@code scores} のみ）を置き換える歴代版。各ユーザーについて
+     * 現行 {@code scores} ＋ 過去作 {@code past_scores} を UNION し、曲 × 難易度ごとの
+     * <b>自己歴代ベスト</b>（MAX(score)）を 1 行にしてから集計するので、1 人 1 譜面 1 票になる。
+     *
+     * 判定式は旧クエリと同じ整数演算:
+     *  - MAX- : {@code score * 9 >= notes * 17}（スコア率 ≥ 17/18 ≒ 94.44%）
+     *  - AAA  : {@code score * 9 >= notes * 16}（スコア率 ≥ 8/9 ≒ 88.88%）
+     *
+     * レベル絞り込みは active の {@code song_definitions.level}（現行レベル）で行う
+     * （共通 CTE {@link #LIFETIME_BEST_CTES} の {@code charts} が担う）。
+     *
+     * 本番計測（2026-09-16、past_scores 約 118 万行）: 約 24 秒。
+     *
+     * 返却キー: title / difficultyName / avgScore / playerCount / maxMinusCount / aaaCount / notes
+     *
+     * @return 集計リスト（曲名・難易度順）
+     */
+    @Query(value =
+        "WITH " + LIFETIME_BEST_CTES + " " +
+        "SELECT c.title AS \"title\", c.difficulty_name AS \"difficultyName\", " +
+        "  ROUND(AVG(b.score)\\:\\:numeric, 1) AS \"avgScore\", " +
+        "  COUNT(*) AS \"playerCount\", " +
+        "  COUNT(CASE WHEN b.score * 9 >= c.notes * 17 THEN 1 END) AS \"maxMinusCount\", " +
+        "  COUNT(CASE WHEN b.score * 9 >= c.notes * 16 THEN 1 END) AS \"aaaCount\", " +
+        "  MAX(c.notes) AS \"notes\" " +
+        "FROM lifetime_best b " +
+        "JOIN charts c ON c.chart_id = b.chart_id " +
+        "GROUP BY c.chart_id, c.title, c.difficulty_name " +
+        "ORDER BY c.title, c.difficulty_name", nativeQuery = true)
+    List<Map<String, Object>> findLifetimeSongAvgStats();
+
     /**
      * 【メソッドの役割】 非公式難易度表（active）に基づく曲×譜面ごとの beat_pt 集計。
      *

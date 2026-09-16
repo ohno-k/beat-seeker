@@ -1335,7 +1335,7 @@ export const ja = {
 
   // Song Average by Arena Class
   'songAvg.title': 'ティア別平均スコア',
-  'songAvg.subtitle': 'BEAT-TIERごとのLv11・12曲の平均スコアレートと自分のスコアを比較',
+  'songAvg.subtitle': 'BEAT-TIERごとのLv11・12曲の平均スコアレートと自分のスコアを比較（歴代ベスト基準。ティアも歴代スコアから算出したBEAT-PTで判定）',
   'songAvg.searchPlaceholder': '曲名で検索...',
   'songAvg.allLevels': '全レベル',
   'songAvg.loading': 'データ読み込み中...',
@@ -1386,7 +1386,7 @@ export const ja = {
 
   // Rank Comparison
   'rankComparison.title': 'スコアレート比較分析',
-  'rankComparison.description': '難易度表のランク付けと、全プレイヤーの平均スコアレートに基づく予測ランクを比較します。スコアレート66.67%以上のプレイデータを使用。',
+  'rankComparison.description': '難易度表のランク付けと、全プレイヤーの平均スコアレートに基づく予測ランクを比較します。各プレイヤーの自己歴代ベスト（現行作＋過去作）を1票として集計。スコアレート66.67%以上のプレイデータを使用。',
   'rankComparison.totalSongs': '対象曲数',
   'rankComparison.match': '一致',
   'rankComparison.overrated': '過大評価',

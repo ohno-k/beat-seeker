@@ -1303,7 +1303,7 @@ export const ko = {
 
   // Song Average by Arena Class
   'songAvg.title': '티어별 평균 점수',
-  'songAvg.subtitle': 'BEAT-TIER별 Lv11·12 곡의 평균 스코어 레이트와 자신의 점수 비교',
+  'songAvg.subtitle': 'BEAT-TIER별 Lv11·12 곡의 평균 스코어 레이트와 자신의 점수 비교 (역대 베스트 기준. 티어도 역대 점수로 재계산한 BEAT-PT로 판정)',
   'songAvg.searchPlaceholder': '곡 제목으로 검색...',
   'songAvg.allLevels': '전체 레벨',
   'songAvg.loading': '데이터 로딩 중...',
@@ -1353,7 +1353,7 @@ export const ko = {
 
   // Rank Comparison
   'rankComparison.title': '스코어 레이트 비교 분석',
-  'rankComparison.description': '난이도표 랭크와 전체 플레이어 평균 스코어 레이트 기반 예측 랭크를 비교합니다. 스코어 레이트 66.67% 이상 플레이 데이터를 사용.',
+  'rankComparison.description': '난이도표 랭크와 전체 플레이어 평균 스코어 레이트 기반 예측 랭크를 비교합니다. 각 플레이어의 역대 베스트(현행작+과거작)를 1표로 집계. 스코어 레이트 66.67% 이상 플레이 데이터를 사용.',
   'rankComparison.totalSongs': '대상 곡수',
   'rankComparison.match': '일치',
   'rankComparison.overrated': '과대평가',

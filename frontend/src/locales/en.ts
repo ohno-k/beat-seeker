@@ -1302,7 +1302,7 @@ export const en = {
 
   // Song Average by Arena Class
   'songAvg.title': 'Average Score by Tier',
-  'songAvg.subtitle': 'Compare average score rates for Lv11/12 songs by BEAT-TIER with your own scores',
+  'songAvg.subtitle': 'Compare average score rates for Lv11/12 songs by BEAT-TIER with your own scores (based on lifetime bests; tiers use BEAT-PT recomputed from lifetime scores)',
   'songAvg.searchPlaceholder': 'Search by song title...',
   'songAvg.allLevels': 'All Levels',
   'songAvg.loading': 'Loading data...',
@@ -1352,7 +1352,7 @@ export const en = {
 
   // Rank Comparison
   'rankComparison.title': 'Score Rate Comparison Analysis',
-  'rankComparison.description': 'Compare difficulty table ranks with predicted ranks based on average player score rates. Uses play data with score rate >= 66.67%.',
+  'rankComparison.description': 'Compare difficulty table ranks with predicted ranks based on average player score rates. Each player counts once with their lifetime best (current + past versions). Uses play data with score rate >= 66.67%.',
   'rankComparison.totalSongs': 'Total Songs',
   'rankComparison.match': 'Match',
   'rankComparison.overrated': 'Overrated',
