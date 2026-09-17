@@ -278,8 +278,8 @@
                           >☆ {{ t('report.allTimeBestExtended') }}</span>
                           <span v-if="song.songRank" class="tabular-nums" :class="song.songRank === 1 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'">#{{ song.songRank }}<span class="font-medium">/{{ song.songRankTotal }}</span></span>
                           <span v-if="song.isInRateTop100 && song.newRatePt > 0 && showRateTier" class="max-sm:hidden text-emerald-600 dark:text-emerald-400 whitespace-nowrap">RATE TOP100</span>
-                          <!-- スマホは DJ LEVEL 列を畳むので補足行に出す -->
-                          <span v-if="song.maxScore > 0" class="sm:hidden tabular-nums" :class="gradeColorClass(song)">{{ getScoreGradeInfo(song.newScore, song.maxScore).grade }}</span>
+                          <!-- スマホは DJ LEVEL 列を畳むので補足行に 1 つだけ出す。近い方のボーダー基準（MAX-12 / AAA-30 / AA+50）。 -->
+                          <span v-if="song.maxScore > 0" class="sm:hidden tabular-nums" :class="gradeColorClass(song)">{{ getScoreGradeInfo(song.newScore, song.maxScore).nearest }}</span>
                           <span v-for="v in votedLabels(song)" :key="v" class="text-blue-700 dark:text-blue-400 whitespace-nowrap">✔ {{ v }}</span>
                         </div>
                       </div>
@@ -481,12 +481,55 @@
               <button @click="isShareOptionsOpen = false" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
                 {{ t('common.cancel') }}
               </button>
-              <button @click="confirmShare" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5">
+              <!-- 画像は先回りで生成しておき、click 時は共有だけ行う（ユーザー操作の有効期間内に navigator.share / window.open を呼ぶため） -->
+              <button @click="confirmShare" :disabled="isGeneratingShare || isSharing" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
+                <template v-if="isGeneratingShare || isSharing">
+                  <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  {{ t('report.generatingImage') }}
+                </template>
+                <template v-else-if="shareGenError">
+                  {{ t('report.regenerateImage') }}
+                </template>
+                <template v-else>
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
+                  </svg>
+                  {{ t('report.generateAndShare') }}
+                </template>
+              </button>
+            </div>
+            <p v-if="shareGenError" class="px-4 pb-3 text-xs font-bold text-red-600 dark:text-red-400 shrink-0">{{ t('report.generateError') }}</p>
+          </div>
+        </div>
+
+        <!--
+          Web Share が使えない環境（PC ブラウザ等）向けの案内。画像はコピー済み / ダウンロード済みで、
+          X の投稿画面は window.open で開いている。ポップアップブロック等で開かなかった場合のために
+          通常のリンク（ユーザーの click で開くのでブロックされない）も置く。
+        -->
+        <div v-if="shareFallback" class="absolute inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-3" @click.self="shareFallback = null">
+          <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-md shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+            <div class="px-5 py-4">
+              <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">{{ t('report.postReadyTitle') }}</h3>
+              <p class="text-sm text-slate-700 dark:text-slate-200 mt-2">{{ t(shareFallback === 'copied' ? 'report.fallbackCopied' : 'report.fallbackDownloaded') }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">{{ t('report.fallbackHint') }}</p>
+            </div>
+            <div class="px-4 py-3 border-t border-slate-100 dark:border-slate-700 flex gap-2 shrink-0">
+              <button @click="shareFallback = null" class="py-2.5 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
+                {{ t('common.close') }}
+              </button>
+              <button @click="downloadShareImage" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
+                {{ t('report.saveImage') }}
+              </button>
+              <a :href="xIntentUrl" target="_blank" rel="noopener" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
                 </svg>
-                {{ t('report.generateAndShare') }}
-              </button>
+                {{ t('report.openX') }}
+              </a>
             </div>
           </div>
         </div>
@@ -509,8 +552,12 @@
  *  - ティア（昇格は金枠）/ 集計タイル / フォルダアナウンス / リーグ進捗 / 更新曲リストを表示
  *  - 更新曲は 1 曲 1 行の表形式。並び替え・絞り込み・段階表示に対応し、行を開くと内訳と
  *    「正規 / MIRROR / RANDOM / R-RAN / S-RAN」のオプション投票が出る
- *  - X (Twitter) 共有用の画像（UploadReportShareImage）を html2canvas でオフスクリーン生成
- *  - Web Share API でファイル共有、不可ならクリップボードコピー + ツイート画面オープン（iOS 対応）
+ *  - X (Twitter) 共有用の画像（UploadReportShareImage）を html2canvas でオフスクリーン生成。
+ *    オプション画面を開いている間に先回りで生成し、ポストボタンの click 中に共有処理だけを走らせる
+ *    （生成を待ってから navigator.share / window.open を呼ぶとユーザー操作の有効期間が切れて
+ *    ブロックされ、X に飛ばない）
+ *  - Web Share API でファイル共有（共有シートから X アプリを選ぶと画像付きの投稿画面が開く）、
+ *    不可ならクリップボードコピー or ダウンロード + X の投稿画面（x.com/intent/post）を開く
  *
  * props:
  *  - isOpen: モーダル開閉
@@ -989,34 +1036,38 @@ const measurePreview = async () => {
 };
 watch([isShareOptionsOpen, shareSortMode, showDjName], () => { if (isShareOptionsOpen.value) measurePreview(); });
 
-/** 【関数の役割】 シェアオプションを開く。一覧を RATE-PT 順で見ていたら画像もそれに合わせる。 */
-const openShareOptions = () => {
-  shareSortMode.value = listSort.value === 'rate' && showRateTier.value ? 'rate' : 'beat';
-  isShareOptionsOpen.value = true;
-};
-
-/** 【関数の役割】 シェアオプションを閉じて本体の共有処理を走らせる。 */
-const confirmShare = () => {
-  isShareOptionsOpen.value = false;
-  shareOnX();
-};
+/** 投稿本文。Web Share の text と intent URL の text で共通。 */
+const shareText = computed(() => `${t('report.shareText')}\nhttps://beat-seeker.com \n#BeatSeeker`);
+/**
+ * X の投稿画面 URL（本文プリセット）。twitter.com/intent/tweet の現行版。
+ * スマホでは X アプリが入っていれば x.com のリンクはアプリ側（投稿画面）で開く。
+ */
+const xIntentUrl = computed(() => `https://x.com/intent/post?text=${encodeURIComponent(shareText.value)}`);
 
 /**
- * 【関数の役割】 X 向けの PNG を生成し、共有可能な経路で送り出す。
- * 優先順位:
- *  1. Web Share API（navigator.share）でファイルごと共有
- *  2. Clipboard.write で PNG をコピーしてから twitter.com/intent/tweet を開く
- *  3. 上記が失敗したら自動ダウンロード + ツイート画面オープン
- * iOS Safari での user-gesture チェーンを切らさないため、toBlob は Promise 化して await する。
+ * 先回りで生成した共有画像（PNG）。オプション画面を開いている間に作っておき、ポストボタンの click では
+ * 共有処理だけを行う。html2canvas はスマホだと数秒かかり、その後に navigator.share / window.open を
+ * 呼ぶとユーザー操作の有効期間（transient activation）が切れてブロックされるため。
  */
-const shareOnX = async () => {
-  const target = captureImage.value?.el;
-  if (!target || isSharing.value) return;
-  isSharing.value = true;
+const shareBlob = ref<Blob | null>(null);
+const isGeneratingShare = ref(false);
+const shareGenError = ref(false);
+/** 生成の世代番号。オプション変更で進めて、古い生成結果は捨てる。 */
+let shareGenSeq = 0;
+let shareGenTimer: ReturnType<typeof setTimeout> | null = null;
+/** 共有後の案内パネル（Web Share を使わなかったとき）。画像をどう渡したかで文言を変える。 */
+const shareFallback = ref<'copied' | 'downloaded' | null>(null);
 
-  const textParam = encodeURIComponent(`${t('report.shareText')}\nhttps://beat-seeker.com \n#BeatSeeker`);
-
+/** 【関数の役割】 オフスクリーンの UploadReportShareImage を html2canvas で PNG 化して shareBlob に入れる。 */
+const generateShareImage = async () => {
+  const seq = ++shareGenSeq;
+  shareBlob.value = null;
+  shareGenError.value = false;
+  isGeneratingShare.value = true;
   try {
+    await nextTick();
+    const target = captureImage.value?.el;
+    if (!target) return;
     const canvas = await withHtml2canvasTextFix(() => html2canvas(target, {
       // X は長辺 2048px に縮小するので、1080×1440 の 1.5 倍（1620×2160）で頭打ち。2 倍は容量が増えるだけ。
       scale: SHARE_SCALE,
@@ -1029,56 +1080,113 @@ const shareOnX = async () => {
       // 背後のダッシュボードや更新曲リストまで複製させない（複製だけで数秒かかる）。
       ignoreElements: ignoreOutside(target),
     }));
-
-    // iOS Safari での user-gesture を切らさないためにコールバックではなく await で Blob 化する。
+    if (seq !== shareGenSeq) return; // 生成中にオプションが変わった → この結果は捨てる
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (seq !== shareGenSeq) return;
     if (!blob) throw new Error('Blob is null');
+    shareBlob.value = blob;
+  } catch (error) {
+    console.error('Share image generation failed:', error);
+    if (seq === shareGenSeq) shareGenError.value = true;
+  } finally {
+    if (seq === shareGenSeq) isGeneratingShare.value = false;
+  }
+};
 
+/** 【関数の役割】 生成済み画像を無効化し、少し待ってから作り直す（連続のオプション変更で何度も走らせない）。 */
+const scheduleShareImage = () => {
+  shareGenSeq++;
+  shareBlob.value = null;
+  shareGenError.value = false;
+  isGeneratingShare.value = true;
+  if (shareGenTimer) clearTimeout(shareGenTimer);
+  shareGenTimer = setTimeout(() => { shareGenTimer = null; generateShareImage(); }, 300);
+};
+
+/** 【関数の役割】 生成済み画像を破棄する（モーダルを閉じたとき等）。進行中の生成結果も捨てる。 */
+const discardShareImage = () => {
+  shareGenSeq++;
+  if (shareGenTimer) { clearTimeout(shareGenTimer); shareGenTimer = null; }
+  shareBlob.value = null;
+  shareGenError.value = false;
+  isGeneratingShare.value = false;
+};
+
+// 画像の内容（並び順・DJ NAME・差分データ等）が変わったら作り直す。オプション画面を閉じている間は開いたときに作る。
+watch(shareImageProps, () => { if (isShareOptionsOpen.value) scheduleShareImage(); else discardShareImage(); });
+watch(isShareOptionsOpen, (open) => { if (open && !shareBlob.value) scheduleShareImage(); });
+
+/** 【関数の役割】 シェアオプションを開く。一覧を RATE-PT 順で見ていたら画像もそれに合わせる。 */
+const openShareOptions = () => {
+  shareSortMode.value = listSort.value === 'rate' && showRateTier.value ? 'rate' : 'beat';
+  isShareOptionsOpen.value = true;
+};
+
+/** 【関数の役割】 PNG をファイルとして保存させる。 */
+const downloadBlob = (blob: Blob) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'beat-seeker-report.png';
+  a.click();
+  // 即時に revoke するとブラウザによってはダウンロードが始まらないので少し待つ。
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+const downloadShareImage = () => { if (shareBlob.value) downloadBlob(shareBlob.value); };
+
+/**
+ * 【関数の役割】 Web Share が使えない環境向け。画像をクリップボードへ（不可ならダウンロード）入れてから
+ * X の投稿画面を開く。画像は生成済みなので click からの経過は短く、window.open はポップアップ扱いされない。
+ * 万一ブロックされても案内パネルのリンクから開ける。
+ */
+const postViaIntent = async (blob: Blob) => {
+  let copied = false;
+  try {
+    // 先にクリップボードへ。window.open で別タブにフォーカスが移ると書き込めなくなるため順番を守る。
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    copied = true;
+  } catch (e) {
+    console.warn('Clipboard copy failed, downloading instead:', e);
+    downloadBlob(blob);
+  }
+  isShareOptionsOpen.value = false;
+  shareFallback.value = copied ? 'copied' : 'downloaded';
+  window.open(xIntentUrl.value, '_blank');
+};
+
+/**
+ * 【関数の役割】 ポストボタン。生成済みの画像を共有可能な経路で送り出す。
+ * 優先順位:
+ *  1. Web Share API（スマホ）: OS の共有シートから X アプリを選ぶと画像付きの投稿画面が開く
+ *  2. クリップボードコピー（不可ならダウンロード）+ X の投稿画面を開く（PC ブラウザ等）
+ * 生成失敗後に押されたら作り直すだけ（共有はもう一度押してもらう）。
+ */
+const confirmShare = async () => {
+  const blob = shareBlob.value;
+  if (!blob) {
+    if (!isGeneratingShare.value) scheduleShareImage();
+    return;
+  }
+  if (isSharing.value) return;
+  isSharing.value = true;
+  try {
     const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
-
-    // まず Web Share API を試す（iOS Safari / Android / 最新デスクトップ Chrome）。
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({
-          title: 'beat-seeker Report',
-          text: `${t('report.shareText')}\nhttps://beat-seeker.com \n#BeatSeeker`,
-          files: [file]
-        });
-        isSharing.value = false;
+        await navigator.share({ title: 'beat-seeker Report', text: shareText.value, files: [file] });
+        isShareOptionsOpen.value = false;
         return;
       } catch (e) {
-        if ((e as Error).name === 'AbortError') {
-          isSharing.value = false;
-          return;
-        }
-        // AbortError 以外はクリップボード経路にフォールバック。
+        // ユーザーが共有シートを閉じただけならオプション画面に戻す。
+        if ((e as Error).name === 'AbortError') return;
+        console.error('Web Share failed, falling back to intent URL:', e);
       }
     }
-
-    // フォールバック: Clipboard API で画像コピー → Twitter 投稿画面を開く。
-    try {
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]);
-      alert(t('report.copySuccess'));
-      window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
-    } catch (e) {
-      console.error('Clipboard copy failed:', e);
-      const downloadUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = 'beat-seeker-report.png';
-      a.click();
-      URL.revokeObjectURL(downloadUrl);
-      alert(t('report.copyError'));
-      window.open(`https://twitter.com/intent/tweet?text=${textParam}`, '_blank');
-    }
-  } catch (error) {
-    console.error('Share failed:', error);
-    alert(t('report.generateError'));
+    await postViaIntent(blob);
+  } finally {
+    isSharing.value = false;
   }
-
-  isSharing.value = false;
 };
 
 // モーダルが開いた（＝アップロード完了）タイミングでリーグ状況を取り込み、一覧の状態を初期化する。
@@ -1090,6 +1198,8 @@ watch(() => props.isOpen, (open) => {
   visibleCount.value = PAGE_SIZE;
   expandedKey.value = null;
   isShareOptionsOpen.value = false;
+  shareFallback.value = null;
+  discardShareImage();
   loadLeagueProgress();
 }, { immediate: true });
 
