@@ -65,7 +65,7 @@ WebView には Web Share API（`navigator.share`）が無く、クリップボ�
 `shareImageBegin()` → `shareImageChunk(部分)`×N → `shareImageEnd(本文)` の順にアプリへ渡し、
 アプリが `cacheDir/share/` に書き出して FileProvider の `content://` URI を付けた `ACTION_SEND` を投げます。
 X アプリ（`com.twitter.android`）が入っていればその投稿画面を **画像添付・本文入り** で直接開き、
-無ければ端末の共有シートを出します。Web 側（`useNativeBridge.ts` の `shareImageNatively`）は
+無ければ端末の共有シートを出します。Web 側（`useNativeBridge.ts` の `shareImageViaApp`）は
 アプリにこの API が無い（0.1.x）場合はブラウザ向けの経路（ダウンロード + X の投稿画面）に落ちます。
 
 ## セキュリティ上の約束事（変更時は必ず維持すること）

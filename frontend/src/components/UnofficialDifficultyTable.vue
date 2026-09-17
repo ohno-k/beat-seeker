@@ -6,6 +6,10 @@
  * - 公式難易度（すべて / ☆11 / ☆12）で対象曲を絞り込み、集計もその範囲で再計算
  * - 展開/折りたたみで曲一覧を表示、情報モーダルとレート早見表モーダルを内包
  *
+ * レイアウトは一覧性優先。フォルダ行にランク名と「次のランクまで」を出して開かなくても比較でき、
+ * 開いた中は 1 曲 1 行（横幅があれば 2 段組）＋単曲ランク分布。列の出し分けは画面幅ではなく
+ * このコンポーネント自身の幅で決める（<style> のコンテナクエリ）。
+ *
  * @prop scores        表示・集計対象のスコアレコード配列。「歴代ベストを反映」トグル ON のときは
  *                     歴代ベスト適用済みのレコードが渡ってくる。
  * @prop historyScores 成長記録モーダル用の現行作スコア（省略時は scores を流用）。
@@ -13,7 +17,9 @@
 import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
+import type { RankInfo } from '../utils/beatTier';
 import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, getFolderRankOffsetMax, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
+import { getScoreGradeInfo, tierLabel } from '../utils/uploadReport';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import DifficultyRankingModal from './DifficultyRankingModal.vue';
@@ -46,6 +52,64 @@ const levelFilterOptions = computed<{ value: LevelFilter; label: string }[]>(() 
   { value: '11', label: '☆11' },
   { value: '12', label: '☆12' },
 ]);
+
+/** 開いたフォルダ内の曲の並び順（全フォルダ共通）。未プレイ曲はどの順でも末尾。 */
+type SongSort = 'rateDesc' | 'rateAsc' | 'title';
+const songSort = ref<SongSort>('rateDesc');
+const songSortOptions = computed<{ value: SongSort; label: string }[]>(() => [
+  { value: 'rateDesc', label: t('table.sortRateDesc') },
+  { value: 'rateAsc', label: t('table.sortRateAsc') },
+  { value: 'title', label: t('table.sortTitle') },
+]);
+
+/**
+ * ランク名 → 文字色 / 帯の色。beatTier 側の color はライト専用でダーク背景に沈むため、
+ * ここでダーク用を足した組を持つ。並びは上位 → 下位で、単曲ランク分布の表示順にも使う。
+ */
+const TIER_STYLE: Record<string, { text: string; bar: string }> = {
+  Legend: { text: 'text-amber-500 dark:text-amber-400', bar: 'bg-amber-400' },
+  Mythic: { text: 'text-purple-600 dark:text-purple-400', bar: 'bg-purple-500' },
+  Ancient: { text: 'text-indigo-600 dark:text-indigo-400', bar: 'bg-indigo-500' },
+  Master: { text: 'text-red-600 dark:text-red-400', bar: 'bg-red-500' },
+  Elite: { text: 'text-orange-600 dark:text-orange-400', bar: 'bg-orange-500' },
+  Commander: { text: 'text-yellow-700 dark:text-yellow-500', bar: 'bg-yellow-500' },
+  Veteran: { text: 'text-emerald-600 dark:text-emerald-400', bar: 'bg-emerald-500' },
+  Expert: { text: 'text-teal-600 dark:text-teal-400', bar: 'bg-teal-500' },
+  Advanced: { text: 'text-cyan-600 dark:text-cyan-400', bar: 'bg-cyan-500' },
+  Intermediate: { text: 'text-blue-600 dark:text-blue-400', bar: 'bg-blue-500' },
+  Novice: { text: 'text-slate-600 dark:text-slate-300', bar: 'bg-slate-500' },
+  Beginner: { text: 'text-slate-400 dark:text-slate-500', bar: 'bg-slate-400' },
+};
+const TIER_ORDER = Object.keys(TIER_STYLE);
+const tierText = (name: string) => (TIER_STYLE[name] ?? TIER_STYLE.Beginner).text;
+const tierBar = (name: string) => (TIER_STYLE[name] ?? TIER_STYLE.Beginner).bar;
+
+/** スコアレートの文字色（MAX- 帯 = 紫 / AAA 帯 = 金）。それ未満は呼び出し側の基準色。 */
+const rateColorClass = (rate: number, base: string) =>
+  rate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : rate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : base;
+
+/** 開いたフォルダ内の 1 曲 1 行ぶんの表示データ。 */
+interface SongRow {
+  key: string;
+  song: ScoreRecord;
+  /** 単曲ごとのランク（必要スコアレート表に対応）。未プレイは null。 */
+  songRank: RankInfo | null;
+  isLeggendaria: boolean;
+  /** 行ホバーで出す補足（EX スコア / MAX-n / DJ LEVEL）。 */
+  tooltip: string;
+  /** この行の直前に「フォルダ平均」の区切りを入れるか（レート順のときだけ立つ）。 */
+  avgBefore: boolean;
+}
+
+/** 単曲ランク分布の 1 区分。 */
+interface TierSegment {
+  name: string;
+  label: string;
+  count: number;
+  pct: number;
+  bar: string;
+  text: string;
+}
 
 // ☆11.0 〜 ☆13.1 までの 0.1 刻みラベル配列を生成（レート早見表の列）。
 const allFolders: string[] = [];
@@ -255,8 +319,13 @@ const tableData = computed(() => {
     let totalBeatPoints = 0;
     let maxBeatPoints = 0;
 
-    // スコアレート降順（未プレイ曲は scoreRate=-1 なので末尾にまとまる）。
-    songs.sort((a, b) => b.scoreRate - a.scoreRate);
+    // 並び替え。未プレイ曲（scoreRate=-1）はどの順でも末尾にまとめる。
+    const played = (s: ScoreRecord) => s.scoreRate > 0;
+    songs.sort((a, b) => {
+      if (played(a) !== played(b)) return played(a) ? -1 : 1;
+      if (songSort.value === 'title') return a.title.localeCompare(b.title, 'ja');
+      return songSort.value === 'rateAsc' ? a.scoreRate - b.scoreRate : b.scoreRate - a.scoreRate;
+    });
 
     songs.forEach(s => {
       // Beat-PT は未プレイ曲でも 0 として累積（全 playthrough の合計値）。
@@ -284,16 +353,52 @@ const tableData = computed(() => {
     // レートベースのランクは既にプレイ済み曲の平均レートで算出されるため playedRankInfo は同値
     const playedRankInfo = rankInfo;
 
-    // 単曲ごとのランク（必要スコアレート表に対応）。未プレイは null。
-    const songsWithRank = songs.map(s => ({
-      song: s,
-      songRank: s.scoreRate > 0 ? getFolderRankInfoByRate(s.scoreRate, rank) : null,
+    // 1 曲 1 行の表示データ。レート順のときは、平均をまたぐ位置に「フォルダ平均」の区切りを 1 本入れる
+    // （区切りより下 = フォルダランクを下げている曲、が一目で分かる）。
+    const songRows: SongRow[] = songs.map((s, i) => {
+      const prev = songs[i - 1];
+      const grade = played(s) ? getScoreGradeInfo(s.score, s.maxScore) : null;
+      return {
+        key: `${s.title}_${s.difficultyName}`,
+        song: s,
+        songRank: played(s) ? getFolderRankInfoByRate(s.scoreRate, rank) : null,
+        isLeggendaria: s.difficultyName === 'LEGGENDARIA',
+        tooltip: `${s.title} [${s.difficultyName}]`
+          + (grade?.grade ? `\nEX ${s.score} / ${s.maxScore}  (${grade.fromMax} ・ ${grade.grade})` : ''),
+        avgBefore: songSort.value !== 'title' && !!prev && played(prev) && played(s)
+          && (prev.scoreRate >= averageRate) !== (s.scoreRate >= averageRate),
+      };
+    });
+
+    // 単曲ランク分布（ブロック単位。Ancient 4 と Ancient 3 は同じ Ancient に数える）。末尾に未プレイ。
+    const tierCounts = new Map<string, number>();
+    songRows.forEach(r => {
+      if (r.songRank) tierCounts.set(r.songRank.name, (tierCounts.get(r.songRank.name) ?? 0) + 1);
+    });
+    const tierDist: TierSegment[] = TIER_ORDER.filter(name => tierCounts.has(name)).map(name => ({
+      name,
+      label: name,
+      count: tierCounts.get(name)!,
+      pct: (tierCounts.get(name)! / songs.length) * 100,
+      bar: tierBar(name),
+      text: tierText(name),
     }));
+    if (songs.length > playCount) {
+      tierDist.push({
+        name: 'unplayed',
+        label: t('table.notPlayed'),
+        count: songs.length - playCount,
+        pct: ((songs.length - playCount) / songs.length) * 100,
+        bar: 'bg-slate-200 dark:bg-slate-700',
+        text: 'text-slate-400 dark:text-slate-500',
+      });
+    }
 
     return {
       rank,
       songs,
-      songsWithRank,
+      songRows,
+      tierDist,
       totalScore,
       totalMaxScore,
       totalBeatPoints,
@@ -315,11 +420,26 @@ const tableData = computed(() => {
   // フィルタ時、該当曲が 1 曲も無いランク行は表示しない。
   return levelFilter.value === 'all' ? rows : rows.filter(r => r.totalCount > 0 || r.songs.length > 0);
 });
+
+type FolderRow = (typeof tableData.value)[number];
+
+/** 【関数の役割】 フォルダランキングのモーダルを開く。 */
+const openRanking = (data: FolderRow) => {
+  rankingModalRank.value = { rank: data.rank, totalCount: data.fullTotalCount };
+};
+
+/** 成長記録は現行作でフォルダ全曲プレイ済みのときだけ開ける。 */
+const canOpenGrowth = (data: FolderRow) => data.fullPlayCount >= data.fullTotalCount && data.fullTotalCount > 0;
+
+/** 【関数の役割】 成長記録のモーダルを開く。 */
+const openGrowth = (data: FolderRow) => {
+  growthChartRank.value = { rank: data.rank, songCount: data.fullTotalCount, currentTotalBeatPoints: data.fullTotalBeatPoints };
+};
 </script>
 
 <template>
   <div class="w-full bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden mt-6 animate-fade-in flex flex-col transition-colors duration-200">
-    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50 transition-colors duration-200">
+    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex max-sm:flex-col sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50 transition-colors duration-200">
       <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 dark:text-indigo-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
           <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
@@ -432,191 +552,200 @@ const tableData = computed(() => {
       </div>
     </Teleport>
     
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 text-[10px] sm:text-sm border-b border-slate-200 dark:border-slate-700 transition-colors duration-200">
-            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold w-auto sm:w-24">{{ t('table.colDifficulty') }}</th>
-            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-32">{{ t('table.colAvgRate') }}</th>
-            <th scope="col" class="py-2 px-1 sm:py-3 sm:px-2 font-bold text-center w-auto sm:w-24"><span class="sr-only">{{ t('table.colRanking') }}</span></th>
-            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-right w-auto sm:w-48">{{ t('table.colTotalPt') }}</th>
-            <th scope="col" class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-center w-auto sm:w-24">{{ t('table.colPlayed') }}</th>
-            <th scope="col" class="py-2 px-1 sm:py-3 sm:px-4 w-auto sm:w-12 text-center"><span class="sr-only">{{ t('diffTable.expandAll') }}</span></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-xs sm:text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
-          <template v-for="data in tableData" :key="data.rank">
-            <tr
-              @click="toggleRank(data.rank)"
-              @keydown.enter.prevent="toggleRank(data.rank)"
-              @keydown.space.prevent="toggleRank(data.rank)"
-              role="button"
-              tabindex="0"
-              :aria-expanded="expandedRanks.has(data.rank)"
-              :aria-controls="`unofficial-rank-panel-${data.rank}`"
-              class="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group"
-              :class="{ 'bg-slate-50 dark:bg-slate-800/80': expandedRanks.has(data.rank) }"
+    <!-- フォルダ一覧。段組みと列の出し分けはこの要素の幅で決まる（<style> のコンテナクエリ）。 -->
+    <div class="udt-list text-slate-700 dark:text-slate-200">
+      <!-- 列見出し（1 行表示になる幅のときだけ） -->
+      <div class="folder-grid folder-head bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-500 dark:text-slate-400 transition-colors duration-200">
+        <span class="a-level">{{ t('table.colDifficulty') }}</span>
+        <span class="a-rate text-right">{{ t('table.colAvgRate') }}</span>
+        <span class="a-rank">{{ t('table.colFolderRank') }}</span>
+        <span class="a-next">{{ t('table.colNextRank') }}</span>
+        <span class="a-pt text-right">{{ t('table.colTotalPtShort') }}</span>
+        <span class="a-played">{{ t('table.colPlayed') }}</span>
+      </div>
+
+      <div
+        v-for="data in tableData"
+        :key="data.rank"
+        class="border-b border-b-slate-100 dark:border-b-slate-700/50 last:border-b-0 transition-colors duration-200"
+      >
+        <!-- フォルダ行: 開かなくてもランク名・次のランクまでの残りが比較できる -->
+        <div
+          @click="toggleRank(data.rank)"
+          @keydown.enter.prevent="toggleRank(data.rank)"
+          @keydown.space.prevent="toggleRank(data.rank)"
+          role="button"
+          tabindex="0"
+          :aria-expanded="expandedRanks.has(data.rank)"
+          :aria-controls="`unofficial-rank-panel-${data.rank}`"
+          class="folder-grid cursor-pointer group transition-colors hover:bg-blue-50/60 dark:hover:bg-slate-700/50 focus-visible:outline-none focus-visible:bg-blue-50 dark:focus-visible:bg-slate-700/60"
+          :class="{ 'bg-slate-50 dark:bg-slate-800/80': expandedRanks.has(data.rank) }"
+        >
+          <div class="a-level font-bold text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tabular-nums">
+            <span class="inline-block w-2 h-2 rounded-full mr-1.5" :class="parseFloat(data.rank) >= 12.5 ? 'bg-purple-500 dark:bg-purple-400' : 'bg-blue-500 dark:bg-blue-400'"></span>{{ data.rank }}
+          </div>
+
+          <div class="a-rate text-right font-bold text-sm tabular-nums whitespace-nowrap" :class="data.averageRate > 0 ? rateColorClass(data.averageRate, 'text-emerald-600 dark:text-emerald-400') : 'text-slate-400 dark:text-slate-500'">
+            {{ data.averageRate > 0 ? data.averageRate.toFixed(2) + '%' : '-' }}
+          </div>
+
+          <!-- 全曲プレイ前は「プレイ済みの曲だけで出した暫定ランク」なので薄く出す -->
+          <div
+            class="a-rank flex items-center gap-1.5 min-w-0"
+            :title="data.playCount > 0 && data.playCount < data.totalCount ? t('table.paleIconExplanation') : undefined"
+          >
+            <RankIcon class="shrink-0" :class="{ 'opacity-30': data.playCount < data.totalCount }" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
+            <span
+              v-if="data.playCount > 0"
+              class="truncate text-xs font-bold"
+              :class="[tierText(data.rankInfo.name), { 'opacity-60': data.playCount < data.totalCount }]"
+            >{{ tierLabel(data.rankInfo) }}</span>
+            <span v-else class="text-xs font-bold text-slate-400 dark:text-slate-500">-</span>
+          </div>
+
+          <!-- 現在ランク →（進捗）→ 次のランク。バーの右端が次のランクの必要レート -->
+          <div class="a-next flex items-center gap-2 min-w-0">
+            <template v-if="data.nextRankInfo.nextRank">
+              <div class="flex-1 min-w-0 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500" :class="tierBar(data.rankInfo.name)" :style="{ width: `${data.nextRankInfo.progress}%` }"></div>
+              </div>
+              <span class="next-gap shrink-0 text-right text-[11px] font-bold tabular-nums whitespace-nowrap text-slate-500 dark:text-slate-400">
+                {{ t('table.toNextRank', { n: (data.nextRankInfo.nextRank.minRate - data.averageRate).toFixed(2) }) }}
+              </span>
+              <span class="next-name truncate text-[11px] font-bold" :class="tierText(data.nextRankInfo.nextRank.name)">→ {{ tierLabel(data.nextRankInfo.nextRank) }}</span>
+            </template>
+            <span v-else-if="data.playCount > 0" class="text-[11px] font-bold text-amber-500 dark:text-amber-400 whitespace-nowrap">★ {{ t('table.highestTier') }}</span>
+          </div>
+
+          <div class="a-pt text-right tabular-nums whitespace-nowrap">
+            <span class="text-sm font-bold" :class="tierText(data.rankInfo.name)">{{ data.totalBeatPoints.toFixed(1) }}</span>
+            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500"> / {{ data.maxBeatPoints.toFixed(1) }}</span>
+          </div>
+
+          <div
+            class="a-played text-xs font-bold tabular-nums whitespace-nowrap"
+            :class="data.totalCount > 0 && data.playCount >= data.totalCount ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'"
+          >
+            {{ data.playCount }}<span class="font-normal text-slate-400 dark:text-slate-500">/{{ data.totalCount }}</span>
+          </div>
+
+          <!-- ランキング / 成長記録（横幅があるときは行内、狭いときは開いた中のボタン） -->
+          <div class="a-actions items-center justify-end gap-1">
+            <button
+              type="button"
+              @click.stop="openRanking(data)"
+              :title="t('table.viewDifficultyRanking')"
+              :aria-label="t('table.viewDifficultyRanking')"
+              class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 transition-colors"
             >
-              <td class="py-2 px-2 sm:py-3 sm:px-4 font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">
-                <span class="inline-block w-2 h-2 rounded-full mr-1 sm:mr-2" :class="parseFloat(data.rank) >= 12.5 ? 'bg-purple-500 dark:bg-purple-400' : 'bg-blue-500 dark:bg-blue-400'"></span>
-                {{ data.rank }}
-              </td>
-              <td class="py-2 px-2 sm:py-3 sm:px-4 text-center cursor-pointer">
-                <div class="flex flex-col items-center">
-                  <span class="font-bold text-sm sm:text-base whitespace-nowrap" :class="data.averageRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : data.averageRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'">
-                    {{ data.averageRate > 0 ? data.averageRate.toFixed(2) + '%' : '-' }}
-                  </span>
-                  <div v-if="data.averageRate > 0" class="hidden sm:block w-full max-w-[5rem] h-1 mt-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mx-auto">
-                    <div class="h-full bg-indigo-500 dark:bg-indigo-400" :style="{ width: `${data.averageRate}%` }"></div>
-                  </div>
-                </div>
-              </td>
-              <td class="py-2 px-1 sm:py-3 sm:px-2 text-center">
-                <div class="inline-flex items-center gap-1">
-                  <button
-                    type="button"
-                    @click.stop="rankingModalRank = { rank: data.rank, totalCount: data.fullTotalCount }"
-                    :title="t('table.viewDifficultyRanking')"
-                    :aria-label="t('table.viewDifficultyRanking')"
-                    class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
-                  </button>
-                  <button
-                    v-if="data.fullPlayCount >= data.fullTotalCount && data.fullTotalCount > 0"
-                    type="button"
-                    @click.stop="growthChartRank = { rank: data.rank, songCount: data.fullTotalCount, currentTotalBeatPoints: data.fullTotalBeatPoints }"
-                    :title="t('table.viewGrowthChart')"
-                    :aria-label="t('table.viewGrowthChart')"
-                    class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l5-5 4 4 7-7M14 9h6v6" />
-                    </svg>
-                  </button>
-                </div>
-              </td>
-              <td class="py-2 px-2 sm:py-3 sm:px-4 text-right cursor-pointer" @click.stop="toggleRank(data.rank)">
-                <div class="flex items-center justify-end gap-1 sm:gap-2">
-                  <div class="flex flex-col text-right">
-                    <span class="font-bold text-xs sm:text-sm whitespace-nowrap" :class="data.rankInfo.color">
-                      {{ data.totalBeatPoints.toFixed(1) }} <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold">pt</span>
-                    </span>
-                    <span class="text-[8px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold whitespace-nowrap">MAX: {{ data.maxBeatPoints.toFixed(1) }}</span>
-                  </div>
-                  <div class="flex items-center gap-0.5">
-                    <template v-if="data.playCount >= data.totalCount">
-                      <RankIcon class="block sm:hidden shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
-                      <RankIcon class="hidden sm:block shrink-0" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
-                    </template>
-                    <template v-else>
-                      <RankIcon class="block sm:hidden shrink-0 opacity-30" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="xs" />
-                      <RankIcon class="hidden sm:block shrink-0 opacity-30" :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="sm" />
-                    </template>
-                  </div>
-                </div>
-              </td>
-              <td class="py-2 px-2 sm:py-3 sm:px-4 text-center font-bold text-slate-600 dark:text-slate-300">
-                <div class="flex flex-col sm:block whitespace-nowrap">
-                  <span>{{ data.playCount }}</span>
-                  <span class="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 font-normal sm:ml-1">/ {{ data.totalCount }}</span>
-                </div>
-              </td>
-              <td class="py-2 px-1 sm:py-3 sm:px-4 text-center text-slate-400 dark:text-slate-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 transform transition-transform duration-200 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 mx-auto" :class="{ 'rotate-180 text-indigo-500 dark:text-indigo-400': expandedRanks.has(data.rank) }" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </td>
-            </tr>
-            <!-- Expanded Details Row -->
-            <tr v-if="expandedRanks.has(data.rank)" :id="`unofficial-rank-panel-${data.rank}`" class="bg-slate-50/80 dark:bg-slate-800/40 border-t-0 shadow-inner">
-              <td colspan="6" class="px-6 py-4">
-                <!-- Summary Board -->
-                <div class="mb-4 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors duration-200">
-                  <div class="flex flex-col">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ t('table.folderBeatTier') }}</span>
-                    <div class="flex items-center gap-3">
-                      <RankIcon :rank-name="data.rankInfo.name" :tier="data.rankInfo.tier" size="lg" :class="data.playCount < data.totalCount ? 'opacity-30' : ''" />
-                      <div class="flex flex-col">
-                        <span class="text-2xl font-bold tracking-tight" :class="data.rankInfo.color">
-                          {{ data.totalBeatPoints.toFixed(1) }} <span class="text-sm text-slate-400 dark:text-slate-500 font-bold">pt</span>
-                        </span>
-                        <span class="text-xs font-bold text-slate-400 dark:text-slate-500">
-                          MAX: {{ data.maxBeatPoints.toFixed(1) }} pt
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="flex-1 max-w-md w-full bg-slate-50 dark:bg-slate-900/50 rounded-md p-3 border border-slate-100 dark:border-slate-700 flex flex-col justify-center transition-colors duration-200">
-                    <div v-if="data.nextRankInfo.nextRank" class="flex flex-col gap-2">
-                      <div class="flex justify-between items-end">
-                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">NEXT RANK</span>
-                        <div class="flex items-center gap-1.5">
-                          <span class="text-sm font-bold" :class="data.nextRankInfo.nextRank.color">
-                            {{ data.nextRankInfo.nextRank.name }} {{ data.nextRankInfo.nextRank.tier || '' }}
-                          </span>
-                          <span class="text-xs font-bold text-slate-400 dark:text-slate-500">
-                            (あと{{ (data.nextRankInfo.nextRank.minRate - data.averageRate).toFixed(2) }}%)
-                          </span>
-                        </div>
-                      </div>
-                      <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-500 dark:bg-indigo-400 rounded-full transition-all duration-500" :style="{ width: `${data.nextRankInfo.progress}%` }"></div>
-                      </div>
-                    </div>
-                    <div v-else class="flex items-center justify-center py-2">
-                      <span class="text-sm font-bold text-amber-500 dark:text-amber-400 animate-pulse">✨ HIGHEST TIER ACHIEVED ✨</span>
-                    </div>
-                  </div>
-                </div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </button>
+            <button
+              v-if="canOpenGrowth(data)"
+              type="button"
+              @click.stop="openGrowth(data)"
+              :title="t('table.viewGrowthChart')"
+              :aria-label="t('table.viewGrowthChart')"
+              class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-700 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l5-5 4 4 7-7M14 9h6v6" />
+              </svg>
+            </button>
+          </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div v-for="entry in data.songsWithRank" :key="entry.song.title + entry.song.difficultyName" class="bg-white dark:bg-slate-800 p-3 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col transition-colors duration-200">
-                    <div class="flex items-start justify-between mb-2">
-                       <h4 class="font-bold text-slate-800 dark:text-slate-200 text-xs line-clamp-2 pr-2" :title="entry.song.title">{{ entry.song.title }}</h4>
-                       <span class="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0" :class="entry.song.difficultyColor">
-                         {{ entry.song.difficultyName.substring(0, 3) }}
-                       </span>
-                    </div>
+          <svg xmlns="http://www.w3.org/2000/svg" class="a-chev h-4 w-4 text-slate-400 dark:text-slate-500 transform transition-transform duration-200 group-hover:text-blue-600 dark:group-hover:text-blue-400" :class="{ 'rotate-180 text-blue-600 dark:text-blue-400': expandedRanks.has(data.rank) }" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </div>
 
-                    <div class="flex items-end justify-between mt-auto gap-2">
-                      <div class="flex flex-col">
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">RATE</span>
-                        <span class="font-bold text-sm" :class="entry.song.scoreRate >= 94.45 ? 'text-purple-600 dark:text-purple-400' : entry.song.scoreRate >= 88.88 ? 'text-amber-500 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
-                          {{ entry.song.scoreRate > 0 ? entry.song.scoreRate.toFixed(2) + '%' : '-' }}
-                        </span>
-                      </div>
-                      <div class="flex flex-col items-center">
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">RANK</span>
-                        <div v-if="entry.songRank" class="flex items-center gap-1">
-                          <RankIcon :rank-name="entry.songRank.name" :tier="entry.songRank.tier" size="xs" />
-                          <span class="text-[10px] font-bold whitespace-nowrap" :class="entry.songRank.color">
-                            {{ entry.songRank.name }}<template v-if="entry.songRank.tier"> {{ entry.songRank.tier }}</template>
-                          </span>
-                        </div>
-                        <span v-else class="text-sm font-bold text-slate-400 dark:text-slate-500">-</span>
-                      </div>
-                      <div class="flex flex-col text-right">
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">PT</span>
-                        <span class="font-mono text-sm text-slate-700 dark:text-slate-300 font-bold">{{ entry.song.beatTierPoints > 0 ? entry.song.beatTierPoints.toFixed(1) : '-' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </template>
-          
-          <tr v-if="tableData.length === 0">
-            <td colspan="6" class="py-12 text-center text-slate-500 dark:text-slate-400">
-              {{ t('table.noUnofficialData') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <!-- 開いた中: 単曲ランク分布 + 1 曲 1 行の一覧 -->
+        <div
+          v-if="expandedRanks.has(data.rank)"
+          :id="`unofficial-rank-panel-${data.rank}`"
+          class="folder-panel bg-slate-50/80 dark:bg-slate-900/30 border-t border-t-slate-100 dark:border-t-slate-700/50 transition-colors duration-200"
+        >
+          <div class="flex flex-wrap items-end gap-x-4 gap-y-2.5">
+            <div v-if="data.tierDist.length > 0" class="min-w-0 flex-1 basis-72">
+              <p class="section-label">{{ t('table.songRankDist') }}</p>
+              <div class="mt-1 flex h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700">
+                <div v-for="seg in data.tierDist" :key="seg.name" :class="seg.bar" :style="{ width: `${seg.pct}%` }" :title="`${seg.label} ${seg.count}`"></div>
+              </div>
+              <ul class="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-bold leading-4">
+                <li v-for="seg in data.tierDist" :key="seg.name" class="inline-flex items-center gap-1 whitespace-nowrap">
+                  <span class="w-2 h-2 rounded-sm shrink-0" :class="seg.bar"></span>
+                  <span :class="seg.text">{{ seg.label }}</span>
+                  <span class="tabular-nums text-slate-600 dark:text-slate-300">{{ seg.count }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="panel-actions items-center gap-2">
+                <button type="button" @click="openRanking(data)" class="panel-btn text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50">
+                  {{ t('table.difficultyRankingTitle') }}
+                </button>
+                <button v-if="canOpenGrowth(data)" type="button" @click="openGrowth(data)" class="panel-btn text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50">
+                  {{ t('table.growthChartTitle') }}
+                </button>
+              </div>
+              <div role="group" :aria-label="t('report.sortLabel')" class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700/50">
+                <button
+                  v-for="opt in songSortOptions"
+                  :key="opt.value"
+                  type="button"
+                  @click="songSort = opt.value"
+                  :aria-pressed="songSort === opt.value"
+                  class="px-2.5 py-1 text-[11px] font-bold rounded-md whitespace-nowrap transition-colors"
+                  :class="songSort === opt.value
+                    ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                >{{ opt.label }}</button>
+              </div>
+            </div>
+          </div>
+
+          <ul class="song-list card mt-2.5 overflow-hidden transition-colors duration-200">
+            <template v-for="(entry, i) in data.songRows" :key="entry.key">
+              <li v-if="entry.avgBefore" class="avg-divider text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-900/20 border-b border-b-slate-100 dark:border-b-slate-700/60">
+                <span class="h-px flex-1 bg-blue-200 dark:bg-blue-800"></span>
+                <span class="tabular-nums whitespace-nowrap">{{ t('table.folderAverage', { rate: data.averageRate.toFixed(2) }) }}</span>
+                <span class="h-px flex-1 bg-blue-200 dark:bg-blue-800"></span>
+              </li>
+              <li
+                class="song-row border-b-slate-100 dark:border-b-slate-700/60"
+                :class="entry.isLeggendaria ? 'border-l-purple-500' : 'border-l-red-500'"
+                :title="entry.tooltip"
+              >
+                <span class="s-idx text-right text-[10px] font-bold tabular-nums text-slate-400 dark:text-slate-500">{{ i + 1 }}</span>
+                <span class="s-title flex items-baseline gap-1 min-w-0" :class="{ 'opacity-50': !entry.songRank }">
+                  <span class="truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ entry.song.title }}</span>
+                  <span v-if="entry.isLeggendaria" class="shrink-0 text-[10px] font-bold text-purple-600 dark:text-purple-400">[L]</span>
+                </span>
+                <span class="s-rate text-right text-[13px] font-bold tabular-nums whitespace-nowrap" :class="entry.songRank ? rateColorClass(entry.song.scoreRate, 'text-slate-700 dark:text-slate-300') : 'text-slate-400 dark:text-slate-500'">
+                  {{ entry.songRank ? entry.song.scoreRate.toFixed(2) + '%' : '-' }}
+                </span>
+                <span class="s-tier flex items-center gap-1 min-w-0">
+                  <template v-if="entry.songRank">
+                    <RankIcon :rank-name="entry.songRank.name" :tier="entry.songRank.tier" size="2xs" lite />
+                    <span class="truncate text-[11px] font-bold" :class="tierText(entry.songRank.name)">{{ tierLabel(entry.songRank) }}</span>
+                  </template>
+                  <span v-else class="text-[11px] font-bold text-slate-400 dark:text-slate-500">{{ t('table.notPlayed') }}</span>
+                </span>
+                <span class="s-pt text-right text-xs font-bold font-mono tabular-nums text-slate-700 dark:text-slate-300">
+                  {{ entry.song.beatTierPoints > 0 ? entry.song.beatTierPoints.toFixed(1) : '-' }}
+                </span>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+
+      <p v-if="tableData.length === 0" class="py-12 px-4 text-center text-sm text-slate-500 dark:text-slate-400">
+        {{ t('table.noUnofficialData') }}
+      </p>
     </div>
   </div>
 </template>
@@ -629,5 +758,123 @@ const tableData = computed(() => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/*
+ * 列の出し分けは画面幅ではなくこの一覧自身の幅で決める（サイドバーの有無で使える幅が変わるため）。
+ * Tailwind の sm: 系を使わないのは、後から読み込まれる output.css に同じプロパティの素クラスが
+ * あると負けるため。scoped の属性セレクタ付きなら確実に勝てる。
+ *
+ *   〜679px : フォルダ行 2 段 / 曲 2 段
+ *   680px〜 : フォルダ行 1 行（次のランク名と行内ボタンは省略）/ 曲 1 行
+ *   920px〜 : 全列表示 / 曲は 2 段組
+ */
+.udt-list {
+  container-type: inline-size;
+}
+
+/* ── フォルダ行。DOM は共通で、grid-area の割り当てだけを幅で差し替える ── */
+.folder-grid {
+  display: grid;
+  align-items: center;
+  column-gap: 0.5rem;
+  row-gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto 1rem;
+  grid-template-areas:
+    "level  rank rate chev"
+    "played next pt   chev";
+}
+.a-level { grid-area: level; }
+.a-rate { grid-area: rate; }
+.a-rank { grid-area: rank; }
+.a-next { grid-area: next; }
+.a-pt { grid-area: pt; }
+.a-played { grid-area: played; }
+.a-actions { grid-area: actions; }
+.a-chev { grid-area: chev; }
+
+.folder-head,
+.a-actions,
+.next-name {
+  display: none;
+}
+.next-gap { width: 4.5rem; }
+.panel-actions { display: flex; }
+.folder-panel { padding: 0.75rem; }
+
+.panel-btn {
+  padding: 0.25rem 0.625rem;
+  border-width: 1px;
+  border-radius: 0.375rem;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+/* ── 曲の行。狭いときは曲名を 1 段目いっぱいに取り、数値を 2 段目に揃える ── */
+.song-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.5rem;
+  padding: 0.375rem 0.625rem 0.375rem 0.5rem;
+  border-left-width: 3px;
+  border-bottom-width: 1px;
+  break-inside: avoid;
+  grid-template-columns: minmax(0, 1fr) 3.75rem 3.25rem;
+  grid-template-areas:
+    "title title title"
+    "tier  rate  pt";
+}
+.s-idx { grid-area: idx; display: none; }
+.s-title { grid-area: title; }
+.s-rate { grid-area: rate; }
+/* 未プレイ行はアイコンが無いぶん低くなるので、アイコンの高さで揃える */
+.s-tier { grid-area: tier; min-height: 1.25rem; }
+.s-pt { grid-area: pt; }
+
+.avg-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.125rem 0.625rem;
+  break-inside: avoid;
+}
+
+@container (min-width: 680px) {
+  .folder-grid {
+    column-gap: 0.625rem;
+    padding: 0.5rem 1rem;
+    grid-template-columns: 3.25rem 4.25rem 8.5rem minmax(0, 1fr) 7.5rem 3.5rem 1rem;
+    grid-template-areas: "level rate rank next pt played chev";
+  }
+  .folder-head { display: grid; }
+  .a-played { text-align: right; }
+  .folder-panel { padding: 0.75rem 1rem 1rem; }
+
+  .song-row {
+    grid-template-columns: 1.25rem minmax(0, 1fr) 3.75rem 6.75rem 3.25rem;
+    grid-template-areas: "idx title rate tier pt";
+  }
+  .s-idx { display: block; }
+}
+
+@container (min-width: 920px) {
+  .folder-grid {
+    column-gap: 0.75rem;
+    grid-template-columns: 3.5rem 4.5rem 9.5rem minmax(0, 1fr) 7.5rem 3.75rem 4rem 1rem;
+    grid-template-areas: "level rate rank next pt played actions chev";
+  }
+  .a-actions { display: flex; }
+  .next-name { display: block; width: 6.5rem; }
+  .panel-actions { display: none; }
+
+  .song-list {
+    columns: 2;
+    column-gap: 0;
+    column-rule: 1px solid rgb(226 232 240);
+  }
+  .dark .song-list { column-rule-color: rgb(51 65 85); }
 }
 </style>

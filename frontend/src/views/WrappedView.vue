@@ -22,6 +22,7 @@ import { useRoute, useRouter } from 'vue-router';
 import html2canvas from 'html2canvas';
 import { useAuth } from '../composables/useAuth';
 import { useMonthlyWrapped } from '../composables/useMonthlyWrapped';
+import { canShareImageNatively } from '../utils/shareToX';
 
 const route = useRoute();
 const router = useRouter();
@@ -164,12 +165,12 @@ async function handleShare() {
   const fileName = `beat-seeker-wrapped-${year.value}-${String(month.value).padStart(2, '0')}.png`;
   const file = new File([blob], fileName, { type: 'image/png' });
 
-  // モバイル等の Web Share API（files 対応）はネイティブ共有シートで X アプリが選べる。
+  // スマホ / タブレットの Web Share API（files 対応）はネイティブ共有シートで X アプリが選べる。
   // この場合は画像が直接添付された状態で X が起動するため、デスクトップのフォールバックは不要。
-  const nav = navigator as any;
-  if (nav.canShare && nav.canShare({ files: [file] })) {
+  // PC も canShare は true を返すが、開くのは X の並ばない OS の共有ダイアログなので端末種別で判定する。
+  if (canShareImageNatively(file)) {
     try {
-      await nav.share({ files: [file], text: shareText.value, url: sharePublicUrl.value });
+      await navigator.share({ files: [file], text: shareText.value, url: sharePublicUrl.value });
       return;
     } catch {
       // ユーザーがキャンセル等。デスクトップ向けフォールバックへ進む。

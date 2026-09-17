@@ -174,7 +174,7 @@ export function useNativeBridge() {
   };
 
   /** アプリが共有画像 API を持っているか（0.2.0 以降。古いアプリでは false になり、UI 側はブラウザ向け経路に落ちる）。 */
-  const canShareImageNatively = computed(() => {
+  const canShareViaApp = computed(() => {
     const n = typeof window !== 'undefined' ? window.BeatSeekerNative : undefined;
     return !!n
       && typeof n.shareImageBegin === 'function'
@@ -187,7 +187,7 @@ export function useNativeBridge() {
    * X アプリが無い端末では端末の共有シートが出る。
    * @throws アプリ側が失敗を返した場合（呼び出し側はブラウザ向けの経路へ切り替える）。
    */
-  const shareImageNatively = async (blob: Blob, text: string): Promise<void> => {
+  const shareImageViaApp = async (blob: Blob, text: string): Promise<void> => {
     const n = window.BeatSeekerNative;
     if (!n?.shareImageBegin || !n.shareImageChunk || !n.shareImageEnd) {
       throw new Error('native share unavailable');
@@ -201,5 +201,5 @@ export function useNativeBridge() {
     if (result !== 'ok') throw new Error(result || 'native share failed');
   };
 
-  return { isNativeApp, status, message, startNativeImport, canShareImageNatively, shareImageNatively };
+  return { isNativeApp, status, message, startNativeImport, canShareViaApp, shareImageViaApp };
 }
