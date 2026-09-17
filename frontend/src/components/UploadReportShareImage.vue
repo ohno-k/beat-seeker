@@ -68,13 +68,13 @@
       </div>
     </div>
 
-    <!-- 更新曲 TOP10 -->
+    <!-- 更新曲（最大 10 曲。並び順の上位か、自由選択で選んだ曲） -->
     <template v-if="rows.length > 0">
-      <div class="sr-list-head sr-grid">
-        <p class="sr-list-title">UPDATED CHARTS<span class="sr-list-count">TOP {{ rows.length }} / {{ totalSongs }}</span><span class="sr-list-sort">{{ sortMode === 'rate' ? t('report.sort.rate') : t('report.sort.beat') }}</span></p>
+      <div class="sr-list-head sr-grid" :class="{ 'sr-grid--tier': column === 'tier' }">
+        <p class="sr-list-title">UPDATED CHARTS<span class="sr-list-count">{{ picked ? 'PICK' : 'TOP' }} {{ rows.length }} / {{ totalSongs }}</span><span class="sr-list-sort">{{ listLabel }}</span></p>
         <p class="sr-col-cap">EX SCORE</p>
         <p class="sr-col-cap">DJ LEVEL</p>
-        <p class="sr-col-cap">{{ sortMode === 'rate' ? 'RATE-PT' : 'BEAT-PT' }}</p>
+        <p class="sr-col-cap">{{ COLUMN_CAPTION[column] }}</p>
       </div>
 
       <div class="sr-rows">
@@ -82,7 +82,7 @@
           v-for="r in rows"
           :key="r.key"
           class="sr-row sr-grid"
-          :class="{ 'sr-row--gold': r.song.allTimeBestUpdated, 'sr-row--softgold': r.song.allTimeBestExtended }"
+          :class="{ 'sr-grid--tier': column === 'tier', 'sr-row--gold': r.song.allTimeBestUpdated, 'sr-row--softgold': r.song.allTimeBestExtended }"
         >
           <div class="sr-title-cell">
             <div class="sr-diff" :style="{ backgroundColor: r.diffColor }">{{ r.diffLetter }}</div>
@@ -115,13 +115,13 @@
             <p class="sr-num-sub sr-muted">{{ r.grade.fromMax }}</p>
           </div>
           <div class="sr-num">
-            <p class="sr-num-main" :style="{ color: r.ptColor }">{{ r.ptMain }}</p>
-            <p class="sr-num-sub" :style="{ color: r.ptColor }">{{ r.ptSub }}</p>
+            <p :class="column === 'tier' ? 'sr-num-tier' : 'sr-num-main'" :style="{ color: r.ptColor }">{{ r.ptMain }}</p>
+            <p class="sr-num-sub" :style="{ color: column === 'tier' ? '#94a3b8' : r.ptColor }">{{ r.ptSub }}</p>
           </div>
         </div>
       </div>
     </template>
-    <div v-else class="sr-empty">{{ t('report.noUpdates') }}</div>
+    <div v-else class="sr-empty">{{ picked ? t('report.pick.needOne') : t('report.noUpdates') }}</div>
 
     <!-- フッター -->
     <div class="sr-foot">
@@ -153,7 +153,11 @@
  *
  * props:
  *  - diffData: 差分情報
- *  - sortMode: 'beat' なら BEAT-PT、'rate' なら RATE-PT の降順で TOP10 を選ぶ（PT 列の中身も切り替わる）
+ *  - songs: 載せる更新曲（表示順のまま、最大 SHARE_MAX_SONGS 曲）。どの曲を選ぶかは親が決める
+ *    （並び順の上位 10 曲、または自由選択で選んだ曲）
+ *  - column: 右端の列に出す指標（'beat' = BEAT-PT / 'rate' = RATE-PT / 'tier' = 単曲ティア名 + スコアレート）
+ *  - listLabel: 見出しに添える選び方の名前（「BEAT-PT順」「自由選択」など）
+ *  - picked: 自由選択で選んだ曲か（見出しが TOP n ではなく PICK n になる）
  *  - showRateTier: RATE-TIER パネルを出すか
  *  - ownerName: 右上に入れる DJ NAME（null なら出さない）
  *  - dateLabel / versionLabel: 右上の日付・作品名
@@ -172,9 +176,11 @@ import {
   getScoreGradeInfo,
   getSongTierInfo,
   pickStatTiles,
+  SHARE_MAX_SONGS,
+  songKey,
   tierLabel,
 } from '../utils/uploadReport';
-import type { ScoreGradeInfo, StatKey } from '../utils/uploadReport';
+import type { ScoreGradeInfo, ShareColumn, StatKey } from '../utils/uploadReport';
 import RankIcon from './RankIcon.vue';
 import { useI18n } from '../composables/useI18n';
 
@@ -182,7 +188,10 @@ const { t } = useI18n();
 
 const props = defineProps<{
   diffData: UploadDiffResult;
-  sortMode: 'beat' | 'rate';
+  songs: UpdatedSong[];
+  column: ShareColumn;
+  listLabel: string;
+  picked?: boolean;
   showRateTier: boolean;
   ownerName?: string | null;
   dateLabel: string;
@@ -192,8 +201,8 @@ const props = defineProps<{
   rateFrame?: { frameRankName?: string; frameTier?: number };
 }>();
 
-/** 画像に載せる更新曲の上限。 */
-const MAX_ROWS = 10;
+/** 右端の列の見出し。 */
+const COLUMN_CAPTION: Record<ShareColumn, string> = { beat: 'BEAT-PT', rate: 'RATE-PT', tier: 'SONG TIER' };
 /** 曲名のフォントサイズ（px）。幅に収まらなければ MIN まで縮め、それでも溢れたら「…」で切る。 */
 const TITLE_SIZE_MAX = 26;
 const TITLE_SIZE_MIN = 20;
@@ -330,11 +339,8 @@ const statTiles = computed(() => pickStatTiles(computeReportStats(props.diffData
 
 const totalSongs = computed(() => props.diffData.updatedSongs.length);
 
-const sortedSongs = computed<UpdatedSong[]>(() => {
-  const songs = [...props.diffData.updatedSongs];
-  if (props.sortMode === 'rate') return songs.sort((a, b) => b.newRatePt - a.newRatePt);
-  return songs.sort((a, b) => b.newBeatPt - a.newBeatPt);
-});
+/** 載せる曲。親が上限を守って渡してくるが、レイアウト（3:4）が崩れないよう念のためここでも切る。 */
+const shownSongs = computed<UpdatedSong[]>(() => props.songs.slice(0, SHARE_MAX_SONGS));
 
 /** 曲名の収まり（キー → 表示テキストとフォントサイズ）。fitTitles が埋める。 */
 const fitted = ref<Record<string, { text: string; size: number }>>({});
@@ -359,17 +365,32 @@ interface Row {
   ptColor: string;
 }
 
-const rowKey = (s: UpdatedSong) => `${s.title} ${s.difficulty}`;
-
-const rows = computed<Row[]>(() => sortedSongs.value.slice(0, MAX_ROWS).map((song) => {
-  const key = rowKey(song);
-  const fit = fitted.value[key];
-  const diff = DIFF_STYLE[song.difficulty?.toUpperCase()] ?? { letter: '?', color: '#475569' };
-  const grade = getScoreGradeInfo(song.newScore, song.maxScore);
-  const isRate = props.sortMode === 'rate';
+/** 右端の列（BEAT-PT / RATE-PT は値と増分、単曲ティアはティア名とスコアレート）。 */
+const lastColumn = (song: UpdatedSong, tier: RankInfo | null): Pick<Row, 'ptMain' | 'ptSub' | 'ptColor'> => {
+  if (props.column === 'tier') {
+    return {
+      ptMain: tier ? tierLabel(tier) : '—',
+      ptSub: song.scoreRate && song.scoreRate > 0 ? `${song.scoreRate.toFixed(2)}%` : '',
+      ptColor: tier ? tierColor(tier) : '#64748b',
+    };
+  }
+  const isRate = props.column === 'rate';
   const inTop = isRate ? !!song.isInRateTop100 : !!song.isInTop100;
   const ptNew = isRate ? song.newRatePt : song.newBeatPt;
   const ptInc = isRate ? song.ratePtIncrease : song.beatPtIncrease;
+  return {
+    ptMain: (ptNew ?? 0).toFixed(1),
+    ptSub: ptInc > 0 ? `+${ptInc.toFixed(1)}` : '',
+    ptColor: inTop ? (isRate ? RATE_ACCENT : '#fbbf24') : '#cbd5e1',
+  };
+};
+
+const rows = computed<Row[]>(() => shownSongs.value.map((song) => {
+  const key = songKey(song);
+  const fit = fitted.value[key];
+  const diff = DIFF_STYLE[song.difficulty?.toUpperCase()] ?? { letter: '?', color: '#475569' };
+  const grade = getScoreGradeInfo(song.newScore, song.maxScore);
+  const tier = getSongTierInfo(song);
   return {
     key,
     song,
@@ -382,13 +403,11 @@ const rows = computed<Row[]>(() => sortedSongs.value.slice(0, MAX_ROWS).map((son
     // ランプ変化と歴代ベストが両方出る行は横幅が足りなくなるので、優先度の低い単曲順位を落とす。
     showRank: !!song.songRank && !(song.clearTypeImproved && (song.allTimeBestUpdated || song.allTimeBestExtended)),
     allTimeGain: song.allTimeBeatenScore ? Math.max(0, song.newScore - song.allTimeBeatenScore) : 0,
-    tier: getSongTierInfo(song),
+    tier,
     scoreSub: song.oldScore > 0 ? (song.scoreIncrease > 0 ? `+${song.scoreIncrease}` : '±0') : t('report.newPlay'),
     grade,
     gradeColor: GRADE_COLORS[grade.gradeName] ?? '#94a3b8',
-    ptMain: (ptNew ?? 0).toFixed(1),
-    ptSub: ptInc > 0 ? `+${ptInc.toFixed(1)}` : '',
-    ptColor: inTop ? (isRate ? RATE_ACCENT : '#fbbf24') : '#cbd5e1',
+    ...lastColumn(song, tier),
   };
 }));
 
@@ -416,7 +435,7 @@ const fitTitles = async () => {
   };
 
   const result: Record<string, { text: string; size: number }> = {};
-  for (const song of sortedSongs.value.slice(0, MAX_ROWS)) {
+  for (const song of shownSongs.value) {
     const full = displayTitle(song);
     let size = TITLE_SIZE_MAX;
     while (size > TITLE_SIZE_MIN && widthOf(full, size) > maxWidth) size -= 1;
@@ -433,7 +452,7 @@ const fitTitles = async () => {
       }
       text = chars.slice(0, lo).join('').trimEnd() + '…';
     }
-    result[rowKey(song)] = { text, size };
+    result[songKey(song)] = { text, size };
   }
   probe.textContent = '';
   fitted.value = result;
@@ -446,7 +465,8 @@ const scaleOf = (el: HTMLElement) => {
 };
 
 onMounted(fitTitles);
-watch(() => [props.diffData, props.sortMode], fitTitles);
+// 曲の入れ替えに加えて、右端の列が単曲ティアになると曲名の列幅が変わるので測り直す。
+watch(() => [props.diffData, props.songs, props.column], fitTitles);
 
 /** 親が html2canvas に渡したり高さを測ったりするためのルート要素。 */
 defineExpose({ el: root });
@@ -548,6 +568,8 @@ defineExpose({ el: root });
   box-sizing: border-box;
   padding: 0 18px 0 14px;
 }
+/* 右端が単曲ティアのときはティア名（"Commander 4" など）が入るので列を広げる。曲名の列は fitTitles が測り直す。 */
+.sr-grid--tier { grid-template-columns: minmax(0, 1fr) 104px 124px 150px; }
 .sr-list-head { margin-top: 26px; height: 30px; }
 .sr-list-title { font-size: 15px; height: 30px; line-height: 30px; font-weight: 800; letter-spacing: 4px; color: #e2e8f0; }
 .sr-list-count { margin-left: 16px; letter-spacing: 1px; color: #94a3b8; }
@@ -584,6 +606,7 @@ defineExpose({ el: root });
 .sr-num { text-align: right; min-width: 0; }
 .sr-num-main { font-size: 25px; height: 30px; line-height: 30px; font-weight: 800; color: #f1f5f9; }
 .sr-num-grade { font-size: 21px; height: 30px; line-height: 30px; font-weight: 800; }
+.sr-num-tier { font-size: 20px; height: 30px; line-height: 30px; font-weight: 800; letter-spacing: -0.3px; }
 .sr-num-sub { font-size: 14px; height: 20px; line-height: 20px; font-weight: 700; }
 
 .sr-empty {

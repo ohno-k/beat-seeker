@@ -2,7 +2,7 @@
  * プレイ成果レポート（UploadResultModal）と、その X 共有画像（UploadReportShareImage）で共用する
  * 表示用ロジック。どちらも同じ {@link UpdatedSong} を別レイアウトで描くため、判定はここに寄せる。
  */
-import { getFolderRankInfoByRate } from './beatTier';
+import { getFolderLegendRate, getFolderRankInfoByRate, getFolderRankOffsetMax } from './beatTier';
 import type { RankInfo } from './beatTier';
 import type { UpdatedSong, UploadDiffResult } from '../types/UploadDiff';
 
@@ -191,6 +191,57 @@ export function pickStatTiles(stats: ReportStats, count = 4): { key: StatKey; va
 export function formatStatValue(key: StatKey, value: number): string {
   return key === 'exGain' ? `+${value.toLocaleString('en-US')}` : String(value);
 }
+
+/** 更新曲 1 行を一意に指すキー（曲名 + 難易度）。共有画像の行キーと、自由選択の選択状態で共用する。 */
+export function songKey(song: Pick<UpdatedSong, 'title' | 'difficulty'>): string {
+  return `${song.title} ${song.difficulty}`;
+}
+
+/** 更新曲の並び順。レポートの一覧・共有画像・自由選択の候補リストで共用する。 */
+export type SongSort = 'beat' | 'rate' | 'tier' | 'gain' | 'level';
+
+/**
+ * 【関数の役割】 単曲ティアの並び替え用の値（小さいほど上位）。
+ *
+ * 単曲ティアは「Legend 基準レートからどれだけ離れているか」を譜面の非公式難易度ごとの幅で正規化した値に
+ * しきい値を当てて決まる（{@link getFolderRankInfoByRate}）。その正規化した値そのものを返すので、
+ * 並べるとティア順になり、同じティアの中では次のティアに近い曲が先に来る。
+ * 単曲ティアが付かない譜面（難易度表の対象外・Beginner 帯）は末尾に回す。
+ */
+export function songTierSortValue(song: { scoreRate?: number; informalRank?: string }): number {
+  if (!getSongTierInfo(song)) return Number.POSITIVE_INFINITY;
+  const rank = getNumericRank(song.informalRank) ?? undefined;
+  const scale = getFolderRankOffsetMax(rank);
+  return scale > 0 ? (getFolderLegendRate(rank) - (song.scoreRate ?? 0)) / scale : Number.POSITIVE_INFINITY;
+}
+
+/** 【関数の役割】 更新曲を指定の順に並べた新しい配列を返す（入力は変更しない）。同順位は BEAT-PT の高い順。 */
+export function sortUpdatedSongs(songs: UpdatedSong[], sort: SongSort): UpdatedSong[] {
+  const byBeat = (a: UpdatedSong, b: UpdatedSong) => b.newBeatPt - a.newBeatPt;
+  const level = (s: UpdatedSong) => Number(getNumericRank(s.informalRank) ?? 0);
+  const list = [...songs];
+  switch (sort) {
+    case 'rate': return list.sort((a, b) => b.newRatePt - a.newRatePt);
+    case 'gain': return list.sort((a, b) => b.scoreIncrease - a.scoreIncrease || byBeat(a, b));
+    case 'level': return list.sort((a, b) => level(b) - level(a) || byBeat(a, b));
+    case 'tier': {
+      // Infinity 同士の引き算は NaN になるので、値は先に求めて比較で並べる。
+      const value = new Map(list.map(s => [s, songTierSortValue(s)]));
+      return list.sort((a, b) => {
+        const va = value.get(a)!;
+        const vb = value.get(b)!;
+        return va === vb ? byBeat(a, b) : va < vb ? -1 : 1;
+      });
+    }
+    default: return list.sort(byBeat);
+  }
+}
+
+/** 共有画像に載せる更新曲の上限。 */
+export const SHARE_MAX_SONGS = 10;
+
+/** 共有画像の右端の列に出す指標（BEAT-PT / RATE-PT / 単曲ティア）。 */
+export type ShareColumn = 'beat' | 'rate' | 'tier';
 
 /** 共有画像内の曲タイトル。LEGGENDARIA は [L] を付けて ANOTHER と区別する（IIDX コミュニティの慣習表記）。 */
 export function displayTitle(song: Pick<UpdatedSong, 'title' | 'difficulty'>): string {

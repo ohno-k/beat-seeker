@@ -444,33 +444,132 @@
                 </div>
               </div>
               <div class="flex-1 min-w-0 space-y-2">
-                <button
-                  @click="shareSortMode = 'beat'"
-                  class="w-full flex items-center gap-3 px-4 py-3 rounded-md border-2 transition-all text-left"
-                  :class="shareSortMode === 'beat' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
-                >
-                  <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareSortMode === 'beat' ? 'border-blue-600' : 'border-slate-300 dark:border-slate-600'">
-                    <div v-if="shareSortMode === 'beat'" class="w-2.5 h-2.5 rounded-full bg-blue-600"></div>
+                <!-- 載せる曲の選び方（並び順の上位 10 曲 / 自由選択） -->
+                <div role="radiogroup" :aria-label="t('report.outputOptionsSub')" class="grid grid-cols-2 gap-2">
+                  <button
+                    v-for="opt in shareModeOptions"
+                    :key="opt.value"
+                    type="button"
+                    role="radio"
+                    :aria-checked="shareMode === opt.value"
+                    @click="selectShareMode(opt.value)"
+                    class="min-w-0 flex items-start gap-2 p-2.5 rounded-md border-2 transition-all text-left"
+                    :class="shareMode === opt.value ? SHARE_TONE[opt.tone].box : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
+                  >
+                    <span class="mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareMode === opt.value ? SHARE_TONE[opt.tone].ring : 'border-slate-300 dark:border-slate-600'">
+                      <span v-if="shareMode === opt.value" class="w-2 h-2 rounded-full" :class="SHARE_TONE[opt.tone].dot"></span>
+                    </span>
+                    <span class="min-w-0">
+                      <span class="block font-bold text-[13px] leading-5" :class="shareMode === opt.value ? SHARE_TONE[opt.tone].text : 'text-slate-700 dark:text-slate-200'">{{ opt.label }}</span>
+                      <span class="block text-[11px] leading-4 text-slate-500 dark:text-slate-400">{{ opt.desc }}</span>
+                    </span>
+                  </button>
+                </div>
+
+                <!-- 自由選択: 更新曲の中から最大 10 曲。選んだ順がそのまま画像の並び順になる -->
+                <div v-if="shareMode === 'custom'" class="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div class="flex items-center justify-between gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-700">
+                    <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
+                      {{ t('report.pick.selected') }}
+                      <span class="ml-1 tabular-nums" :class="isPickFull ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'">{{ customSongs.length }}/{{ SHARE_MAX_SONGS }}</span>
+                    </p>
+                    <button
+                      type="button"
+                      @click="customKeys = []"
+                      :disabled="customSongs.length === 0"
+                      class="text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-40 disabled:hover:text-slate-500 transition-colors"
+                    >{{ t('report.pick.clear') }}</button>
                   </div>
-                  <div>
-                    <p class="font-bold text-sm" :class="shareSortMode === 'beat' ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByBeatPt') }}</p>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ t('report.sortByBeatPtDesc') }}</p>
+
+                  <!-- 選んだ曲（番号 = 画像での並び順。押すと外れる） -->
+                  <ul v-if="customSongs.length > 0" class="flex flex-wrap gap-1 px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+                    <li v-for="(song, i) in customSongs" :key="songKey(song)" class="min-w-0 max-w-full">
+                      <button
+                        type="button"
+                        @click="togglePick(song)"
+                        :title="t('report.pick.remove')"
+                        class="max-w-full inline-flex items-center gap-1 pl-1.5 pr-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 hover:bg-red-50 dark:hover:bg-red-900/30 text-[11px] font-bold text-slate-700 dark:text-slate-200 transition-colors"
+                      >
+                        <span class="tabular-nums text-slate-400 dark:text-slate-500">{{ i + 1 }}</span>
+                        <span class="truncate">{{ displayTitle(song) }}</span>
+                        <span class="text-slate-400 dark:text-slate-500" aria-hidden="true">×</span>
+                      </button>
+                    </li>
+                  </ul>
+                  <p v-else class="px-3 py-2 text-[11px] font-bold text-amber-600 dark:text-amber-400 border-b border-slate-200 dark:border-slate-700">{{ t('report.pick.needOne') }}</p>
+
+                  <!-- 画像の右端の列 -->
+                  <div class="flex items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+                    <span class="shrink-0 text-[11px] font-bold text-slate-500 dark:text-slate-400">{{ t('report.pick.column') }}</span>
+                    <div role="group" :aria-label="t('report.pick.column')" class="flex items-center gap-1 p-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50">
+                      <button
+                        v-for="col in customColumnOptions"
+                        :key="col.value"
+                        type="button"
+                        @click="customColumn = col.value"
+                        :aria-pressed="shareColumn === col.value"
+                        class="px-2 py-0.5 text-[11px] font-bold rounded whitespace-nowrap transition-colors"
+                        :class="shareColumn === col.value
+                          ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                      >{{ col.label }}</button>
+                    </div>
                   </div>
-                </button>
-                <button
-                  v-if="showRateTier"
-                  @click="shareSortMode = 'rate'"
-                  class="w-full flex items-center gap-3 px-4 py-3 rounded-md border-2 transition-all text-left"
-                  :class="shareSortMode === 'rate' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
-                >
-                  <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareSortMode === 'rate' ? 'border-emerald-500' : 'border-slate-300 dark:border-slate-600'">
-                    <div v-if="shareSortMode === 'rate'" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+
+                  <!-- 候補の絞り込み・並び順 -->
+                  <div class="flex items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-700">
+                    <input
+                      v-model="pickQuery"
+                      type="search"
+                      :placeholder="t('report.pick.search')"
+                      :aria-label="t('report.pick.search')"
+                      class="flex-1 min-w-0 px-2 py-1 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+                    />
+                    <select
+                      v-model="pickSort"
+                      :aria-label="t('report.sortLabel')"
+                      class="shrink-0 px-1.5 py-1 text-xs font-bold rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                    >
+                      <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
                   </div>
-                  <div>
-                    <p class="font-bold text-sm" :class="shareSortMode === 'rate' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ t('report.sortByRatePt') }}</p>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ t('report.sortByRatePtDesc') }}</p>
-                  </div>
-                </button>
+
+                  <!-- 候補（更新曲）。上限に達したら未選択の行は選べない -->
+                  <ul class="pick-list divide-y divide-slate-100 dark:divide-slate-700/60">
+                    <li v-for="song in pickVisible" :key="songKey(song)">
+                      <label
+                        class="flex items-center gap-2 px-3 py-1.5 select-none transition-colors"
+                        :class="!isPicked(song) && isPickFull ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40'"
+                      >
+                        <input
+                          type="checkbox"
+                          class="w-4 h-4 shrink-0 accent-blue-700"
+                          :checked="isPicked(song)"
+                          :disabled="!isPicked(song) && isPickFull"
+                          @change="togglePick(song)"
+                        />
+                        <span class="w-1 self-stretch rounded-full shrink-0" :class="getDifficultyBarClass(song.difficulty)"></span>
+                        <span class="min-w-0 flex-1">
+                          <span class="block truncate text-xs font-bold text-slate-900 dark:text-slate-100">{{ displayTitle(song) }}</span>
+                          <span class="block truncate text-[10px] font-bold leading-4 text-slate-500 dark:text-slate-400">
+                            <template v-if="getNumericRank(song.informalRank)">☆{{ getNumericRank(song.informalRank) }} ・ </template>EX {{ song.newScore }}<template v-if="song.oldScore > 0 && song.scoreIncrease > 0"> (+{{ song.scoreIncrease }})</template>
+                          </span>
+                        </span>
+                        <span v-if="isPicked(song)" class="shrink-0 w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold tabular-nums flex items-center justify-center">{{ pickOrder(song) }}</span>
+                        <span class="shrink-0 text-xs font-bold tabular-nums text-slate-700 dark:text-slate-300">{{ pickMetric(song) }}</span>
+                      </label>
+                    </li>
+                    <li v-if="pickCandidates.length === 0" class="px-3 py-4 text-center text-xs text-slate-500 dark:text-slate-400">{{ t('report.pick.empty') }}</li>
+                  </ul>
+                  <button
+                    v-if="pickCandidates.length > pickVisible.length"
+                    type="button"
+                    @click="pickVisibleCount += PAGE_SIZE"
+                    class="w-full py-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 border-t border-slate-200 dark:border-slate-700 transition-colors"
+                  >{{ t('report.showMore', { n: pickCandidates.length - pickVisible.length }) }}</button>
+                  <p v-if="isPickFull" class="px-3 py-1.5 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700">{{ t('report.pick.full', { max: SHARE_MAX_SONGS }) }}</p>
+                </div>
+
                 <label v-if="canShowOwner" class="flex items-center gap-3 px-4 py-3 rounded-md border border-slate-200 dark:border-slate-700 cursor-pointer select-none">
                   <input type="checkbox" v-model="showDjName" class="w-4 h-4 accent-blue-700" />
                   <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('report.showDjName') }}</span>
@@ -492,7 +591,7 @@
                 {{ t('report.saveImage') }}
               </button>
               <!-- 画像は先回りで生成しておき、click 時は共有だけ行う（ユーザー操作の有効期間内に navigator.share / window.open を呼ぶため） -->
-              <button @click="confirmShare" :disabled="isGeneratingShare || isSharing" class="flex-1 min-w-0 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
+              <button @click="confirmShare" :disabled="isGeneratingShare || isSharing || !hasShareSongs" class="flex-1 min-w-0 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
                 <template v-if="isGeneratingShare || isSharing">
                   <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -587,15 +686,20 @@ import type { RankInfo } from '../utils/beatTier';
 import {
   clearTypeShort,
   computeReportStats,
+  displayTitle,
   formatStatValue,
   getNumericRank,
   getScoreGradeInfo,
+  getSongTierInfo,
   getSongTierTransition,
   isNewAaa,
   pickStatTiles,
+  SHARE_MAX_SONGS,
+  songKey,
+  sortUpdatedSongs,
   tierLabel,
 } from '../utils/uploadReport';
-import type { StatKey } from '../utils/uploadReport';
+import type { ShareColumn, SongSort, StatKey } from '../utils/uploadReport';
 import RankIcon from './RankIcon.vue';
 import DivisionIcon from './DivisionIcon.vue';
 import UploadReportShareImage from './UploadReportShareImage.vue';
@@ -821,7 +925,7 @@ const statTiles = computed(() => pickStatTiles(reportStats.value).map(({ key, va
 
 // ─── 更新曲リスト（並び替え / 絞り込み / 段階表示 / 行の展開） ───────────
 
-type ListSort = 'beat' | 'rate' | 'gain' | 'level';
+type ListSort = SongSort;
 type ListFilter = 'all' | 'allTimeBest' | 'newAaa' | 'lampUp' | 'top100';
 
 /** 1 度に描画する行数。新作の初回取り込みでは 1000 行を超えるので段階表示にする。 */
@@ -836,7 +940,11 @@ const expandedKey = ref<string | null>(null);
 const sortOptions = computed(() => {
   const opts: { value: ListSort; label: string }[] = [{ value: 'beat', label: t('report.sort.beat') }];
   if (showRateTier.value) opts.push({ value: 'rate', label: t('report.sort.rate') });
-  opts.push({ value: 'gain', label: t('report.sort.gain') }, { value: 'level', label: t('report.sort.level') });
+  opts.push(
+    { value: 'tier', label: t('report.sort.tier') },
+    { value: 'gain', label: t('report.sort.gain') },
+    { value: 'level', label: t('report.sort.level') },
+  );
   return opts;
 });
 
@@ -864,17 +972,9 @@ const filterChips = computed(() => {
   return chips.filter(c => c.value === 'all' || c.count > 0);
 });
 
-const levelOf = (s: UpdatedSong) => Number(getNumericRank(s.informalRank) ?? 0);
-
 const filteredSongs = computed(() => {
   if (!props.diffData) return [];
-  const songs = props.diffData.updatedSongs.filter(FILTERS[listFilter.value]);
-  switch (listSort.value) {
-    case 'rate': return songs.sort((a, b) => b.newRatePt - a.newRatePt);
-    case 'gain': return songs.sort((a, b) => b.scoreIncrease - a.scoreIncrease || b.newBeatPt - a.newBeatPt);
-    case 'level': return songs.sort((a, b) => levelOf(b) - levelOf(a) || b.newBeatPt - a.newBeatPt);
-    default: return songs.sort((a, b) => b.newBeatPt - a.newBeatPt);
-  }
+  return sortUpdatedSongs(props.diffData.updatedSongs.filter(FILTERS[listFilter.value]), listSort.value);
 });
 
 const visibleSongs = computed(() => filteredSongs.value.slice(0, visibleCount.value));
@@ -1005,8 +1105,20 @@ const previewHeight = ref(1440);
 const isSharing = ref(false);
 /** シェアオプション（並び順など）の開閉。 */
 const isShareOptionsOpen = ref(false);
-/** シェア画像の楽曲ソート軸。'beat' なら Beat-PT、'rate' なら Rate-PT で降順。 */
-const shareSortMode = ref<'beat' | 'rate'>('beat');
+/**
+ * 共有画像に載せる曲の選び方。'beat' / 'rate' / 'tier' はその順の上位 10 曲、
+ * 'custom' は更新曲の中からユーザーが選んだ曲（最大 10 曲、選んだ順）。
+ */
+type ShareMode = 'beat' | 'rate' | 'tier' | 'custom';
+const shareMode = ref<ShareMode>('beat');
+/** 自由選択で選んだ曲のキー（{@link songKey}）。配列の順がそのまま画像の並び順になる。 */
+const customKeys = ref<string[]>([]);
+/** 自由選択のとき画像の右端の列に出す指標（並び順モードではその並び順の指標で固定）。 */
+const customColumn = ref<ShareColumn>('beat');
+/** 自由選択の候補リスト: 曲名の絞り込み・並び順・描画件数（初回取り込みは 1000 行を超えるので段階表示）。 */
+const pickQuery = ref('');
+const pickSort = ref<SongSort>('beat');
+const pickVisibleCount = ref(PAGE_SIZE);
 /** 画像に DJ NAME を入れるか（端末ごとに記憶）。 */
 const showDjName = ref(localStorage.getItem(SHOW_NAME_KEY) !== '0');
 watch(showDjName, (v) => localStorage.setItem(SHOW_NAME_KEY, v ? '1' : '0'));
@@ -1029,9 +1141,114 @@ const versionLabel = computed(() => {
   return `IIDX ${v} ${versionName(v)}`;
 });
 
+/** 選び方の選択肢。RATE-PT 順は Rate-Tier を表示しているユーザーにだけ出す。 */
+const shareModeOptions = computed(() => {
+  const opts: { value: ShareMode; label: string; desc: string; tone: 'blue' | 'emerald' | 'amber' | 'slate' }[] = [
+    { value: 'beat', label: t('report.sortByBeatPt'), desc: t('report.sortByBeatPtDesc'), tone: 'blue' },
+  ];
+  if (showRateTier.value) opts.push({ value: 'rate', label: t('report.sortByRatePt'), desc: t('report.sortByRatePtDesc'), tone: 'emerald' });
+  opts.push(
+    { value: 'tier', label: t('report.sortBySongTier'), desc: t('report.sortBySongTierDesc'), tone: 'amber' },
+    { value: 'custom', label: t('report.pickCustom'), desc: t('report.pickCustomDesc', { max: SHARE_MAX_SONGS }), tone: 'slate' },
+  );
+  return opts;
+});
+
+/** 選択中の選択肢の枠・丸・文字の色（選び方ごとに色を変えて、どれを選んでいるか一目で分かるようにする）。 */
+const SHARE_TONE: Record<string, { box: string; ring: string; dot: string; text: string }> = {
+  blue: { box: 'border-blue-600 bg-blue-50 dark:bg-blue-900/30', ring: 'border-blue-600', dot: 'bg-blue-600', text: 'text-blue-700 dark:text-blue-300' },
+  emerald: { box: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30', ring: 'border-emerald-500', dot: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-300' },
+  amber: { box: 'border-amber-500 bg-amber-50 dark:bg-amber-900/30', ring: 'border-amber-500', dot: 'bg-amber-500', text: 'text-amber-700 dark:text-amber-300' },
+  slate: { box: 'border-slate-700 bg-slate-100 dark:border-slate-300 dark:bg-slate-700/60', ring: 'border-slate-700 dark:border-slate-300', dot: 'bg-slate-700 dark:bg-slate-300', text: 'text-slate-900 dark:text-slate-100' },
+};
+
+/** 更新曲をキーで引く表（自由選択のキー → 曲）。 */
+const songByKey = computed(() => new Map((props.diffData?.updatedSongs ?? []).map(s => [songKey(s), s] as const)));
+
+/** 自由選択で選んだ曲（選んだ順）。 */
+const customSongs = computed(() => customKeys.value.map(k => songByKey.value.get(k)).filter((s): s is UpdatedSong => !!s));
+
+/** 共有画像に載せる曲（最大 SHARE_MAX_SONGS 曲、表示順）。 */
+const shareSongs = computed<UpdatedSong[]>(() => {
+  if (!props.diffData) return [];
+  if (shareMode.value === 'custom') return customSongs.value;
+  return sortUpdatedSongs(props.diffData.updatedSongs, shareMode.value).slice(0, SHARE_MAX_SONGS);
+});
+
+/** 自由選択の右端の列の選択肢。 */
+const customColumnOptions = computed(() => {
+  const opts: { value: ShareColumn; label: string }[] = [{ value: 'beat', label: 'BEAT-PT' }];
+  if (showRateTier.value) opts.push({ value: 'rate', label: 'RATE-PT' });
+  opts.push({ value: 'tier', label: t('report.songTier') });
+  return opts;
+});
+
+/** 画像の右端の列。並び順モードはその指標、自由選択はユーザーの選択（RATE-PT は表示 ON のときだけ）。 */
+const shareColumn = computed<ShareColumn>(() => {
+  if (shareMode.value !== 'custom') return shareMode.value;
+  return customColumn.value === 'rate' && !showRateTier.value ? 'beat' : customColumn.value;
+});
+
+const SHARE_MODE_LABEL_KEY: Record<ShareMode, string> = {
+  beat: 'report.sort.beat',
+  rate: 'report.sort.rate',
+  tier: 'report.sort.tier',
+  custom: 'report.pickCustom',
+};
+
+/** 自由選択で 1 曲も選んでいない間は画像を作らない（空のリストを共有させない）。 */
+const hasShareSongs = computed(() => shareMode.value !== 'custom' || customSongs.value.length > 0);
+
+// ── 自由選択の候補リスト（並び順の選択肢は一覧と同じ sortOptions を使う） ──
+
+/** 候補（曲名で絞り込み → 並び替え）。 */
+const pickCandidates = computed(() => {
+  if (!props.diffData) return [];
+  const q = pickQuery.value.trim().toLowerCase();
+  const songs = q ? props.diffData.updatedSongs.filter(s => s.title.toLowerCase().includes(q)) : props.diffData.updatedSongs;
+  return sortUpdatedSongs(songs, pickSort.value);
+});
+const pickVisible = computed(() => pickCandidates.value.slice(0, pickVisibleCount.value));
+watch([pickQuery, pickSort], () => { pickVisibleCount.value = PAGE_SIZE; });
+
+const isPicked = (song: UpdatedSong) => customKeys.value.includes(songKey(song));
+/** 選んだ順の番号（1 始まり）。画像もこの順に並ぶ。 */
+const pickOrder = (song: UpdatedSong) => customKeys.value.indexOf(songKey(song)) + 1;
+const isPickFull = computed(() => customKeys.value.length >= SHARE_MAX_SONGS);
+
+/** 【関数の役割】 候補の選択を切り替える。上限に達している間は追加しない。 */
+const togglePick = (song: UpdatedSong) => {
+  const key = songKey(song);
+  if (customKeys.value.includes(key)) customKeys.value = customKeys.value.filter(k => k !== key);
+  else if (!isPickFull.value) customKeys.value = [...customKeys.value, key];
+};
+
+/** 候補リストの右端に出す値（並び順に合わせた指標）。 */
+const pickMetric = (song: UpdatedSong) => {
+  if (pickSort.value === 'rate') return song.newRatePt.toFixed(1);
+  if (pickSort.value === 'tier') return tierLabel(getSongTierInfo(song));
+  if (pickSort.value === 'gain') return song.oldScore > 0 ? `+${song.scoreIncrease}` : t('report.newPlay');
+  return song.newBeatPt.toFixed(1);
+};
+
+/**
+ * 【関数の役割】 選び方を切り替える。自由選択へ初めて入るときは、直前に表示していた上位 10 曲を
+ * 選択済みにしておく（空の画像から始めさせない。「上位から 2〜3 曲だけ入れ替える」使い方もしやすい）。
+ */
+const selectShareMode = (mode: ShareMode) => {
+  if (mode === 'custom' && customKeys.value.length === 0) {
+    customKeys.value = shareSongs.value.map(songKey);
+    if (shareMode.value !== 'custom') customColumn.value = shareMode.value;
+  }
+  shareMode.value = mode;
+};
+
 const shareImageProps = computed(() => ({
   diffData: props.diffData as UploadDiffResult,
-  sortMode: shareSortMode.value,
+  songs: shareSongs.value,
+  column: shareColumn.value,
+  listLabel: t(SHARE_MODE_LABEL_KEY[shareMode.value]),
+  picked: shareMode.value === 'custom',
   showRateTier: showRateTier.value,
   ownerName: canShowOwner.value && showDjName.value ? user.value?.displayName ?? null : null,
   dateLabel: dateLabel.value,
@@ -1046,7 +1263,8 @@ const measurePreview = async () => {
   const el = previewImage.value?.el;
   if (el?.offsetHeight) previewHeight.value = el.offsetHeight;
 };
-watch([isShareOptionsOpen, shareSortMode, showDjName], () => { if (isShareOptionsOpen.value) measurePreview(); });
+// 曲数や右端の列が変わると画像の高さも変わるので、画像の内容が変わるたびに測り直す。
+watch([isShareOptionsOpen, shareImageProps], () => { if (isShareOptionsOpen.value) measurePreview(); });
 
 const SHARE_FILE_NAME = 'beat-seeker-report.png';
 /** 投稿本文。Web Share の text と intent URL の text で共通。 */
@@ -1110,6 +1328,8 @@ const generateShareImage = async () => {
 
 /** 【関数の役割】 生成済み画像を無効化し、少し待ってから作り直す（連続のオプション変更で何度も走らせない）。 */
 const scheduleShareImage = () => {
+  // 自由選択で 1 曲も選んでいない間は作らない（選ばれた時点で shareImageProps が変わって作り直される）。
+  if (!hasShareSongs.value) { discardShareImage(); return; }
   shareGenSeq++;
   shareBlob.value = null;
   shareGenError.value = false;
@@ -1131,9 +1351,14 @@ const discardShareImage = () => {
 watch(shareImageProps, () => { if (isShareOptionsOpen.value) scheduleShareImage(); else discardShareImage(); });
 watch(isShareOptionsOpen, (open) => { if (open && !shareBlob.value) scheduleShareImage(); });
 
-/** 【関数の役割】 シェアオプションを開く。一覧を RATE-PT 順で見ていたら画像もそれに合わせる。 */
+/**
+ * 【関数の役割】 シェアオプションを開く。一覧を RATE-PT 順・単曲ティア順で見ていたら画像もそれに合わせる。
+ * 自由選択で曲を選んである間は、開き直してもその選択を保つ。
+ */
 const openShareOptions = () => {
-  shareSortMode.value = listSort.value === 'rate' && showRateTier.value ? 'rate' : 'beat';
+  if (!(shareMode.value === 'custom' && customKeys.value.length > 0)) {
+    shareMode.value = listSort.value === 'rate' && showRateTier.value ? 'rate' : listSort.value === 'tier' ? 'tier' : 'beat';
+  }
   isShareOptionsOpen.value = true;
 };
 
@@ -1216,6 +1441,12 @@ watch(() => props.isOpen, (open) => {
   expandedKey.value = null;
   isShareOptionsOpen.value = false;
   shareFallback.value = null;
+  // 共有画像の選び方も初期化する（別のレポートの選択を持ち越さない）。
+  shareMode.value = 'beat';
+  customKeys.value = [];
+  customColumn.value = 'beat';
+  pickQuery.value = '';
+  pickSort.value = 'beat';
   discardShareImage();
   loadLeagueProgress();
 }, { immediate: true });
@@ -1279,5 +1510,12 @@ const getClearTypeColor = (type: string) => {
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 自由選択の候補リスト。初回取り込みでは数百行になるので、オプション画面全体ではなくここだけをスクロールさせる。 */
+.pick-list {
+  max-height: 15rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 </style>

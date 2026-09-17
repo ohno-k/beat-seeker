@@ -53,7 +53,11 @@
       "Read(//c/Users/oonok/**)",
       "Bash(ls \"C:/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/\" 2>/dev/null | head; ls /c/Users/oonok/beat-seeker/node_modules | grep -i puppeteer)",
       "Read(//c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/**)",
-      "Bash(node share-flow.mjs pc)"
+      "Bash(node share-flow.mjs pc)",
+      "Bash(git ls-tree *)",
+      "Bash(sort -k4 -rn)",
+      "Bash(awk '{size=$4; $1=$2=$3=$4=\"\"; printf \"%6.1f MB %s\\\\n\", size/1048576, $0}')",
+      "Bash(awk '{s+=$4} END {printf \"%.0f MB in %d files\\\\n\", s/1048576, NR}')"
     ]
   }
 }
