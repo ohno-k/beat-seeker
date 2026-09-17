@@ -18,6 +18,12 @@ export interface ScoreGradeInfo {
   gradeName: GradeName | '';
   /** 一つ上の区分までの不足 EX（"AAA-" + gap の形で表示する）。AAA 到達済みなら null。 */
   nextGrade: { name: string; gap: number } | null;
+  /**
+   * 近い方のボーダー基準の表記（ゲーム内の DJ LEVEL 表示と同じ考え方）。
+   * 現在区分の下限より上のボーダー（AAA なら MAX、それ以外なら一つ上の区分）の方が近ければ
+   * "MAX-12" / "AAA-30" のように、そうでなければ "AA+50" のように返す。1 行しか出せない狭い画面用。
+   */
+  nearest: string;
 }
 
 const GRADE_STEPS: { name: GradeName; ninths: number }[] = [
@@ -37,7 +43,7 @@ const gradeThreshold = (maxScore: number, ninths: number) => Math.ceil((maxScore
  * 【関数の役割】 スコアを DJ LEVEL に変換し、MAX からの距離 / 現在グレード / 次グレードまでの距離を返す。
  */
 export function getScoreGradeInfo(newScore: number, maxScore: number): ScoreGradeInfo {
-  if (!maxScore || maxScore <= 0) return { fromMax: '', grade: '', gradeName: '', nextGrade: null };
+  if (!maxScore || maxScore <= 0) return { fromMax: '', grade: '', gradeName: '', nextGrade: null, nearest: '' };
   const fromMaxN = maxScore - newScore;
   const fromMax = fromMaxN === 0 ? 'MAX' : `MAX-${fromMaxN}`;
 
@@ -48,11 +54,17 @@ export function getScoreGradeInfo(newScore: number, maxScore: number): ScoreGrad
       const above = newScore - thresh;
       const upper = i > 0 ? GRADE_STEPS[i - 1] : null;
       const nextGrade = upper ? { name: upper.name + '-', gap: gradeThreshold(maxScore, upper.ninths) - newScore } : null;
-      return { fromMax, grade: above === 0 ? g.name : `${g.name}+${above}`, gradeName: g.name, nextGrade };
+      const grade = above === 0 ? g.name : `${g.name}+${above}`;
+      // 上のボーダー（AAA なら MAX、それ以外なら一つ上の区分）までの距離。同距離なら現在区分の表記を優先。
+      const upperGap = nextGrade ? nextGrade.gap : fromMaxN;
+      const upperLabel = nextGrade ? `${nextGrade.name}${nextGrade.gap}` : fromMax;
+      const nearest = upperGap < above ? upperLabel : grade;
+      return { fromMax, grade, gradeName: g.name, nextGrade, nearest };
     }
   }
-  // E 未満の場合は次ターゲットを E に設定して F として返す。
-  return { fromMax, grade: 'F', gradeName: 'F', nextGrade: { name: 'E-', gap: gradeThreshold(maxScore, 2) - newScore } };
+  // E 未満の場合は次ターゲットを E に設定して F として返す。F に下限は無いので nearest は常に E までの距離。
+  const nextGrade = { name: 'E-', gap: gradeThreshold(maxScore, 2) - newScore };
+  return { fromMax, grade: 'F', gradeName: 'F', nextGrade, nearest: `${nextGrade.name}${nextGrade.gap}` };
 }
 
 /** 今回の更新で新たに AAA に乗った譜面か（旧スコアは AAA 未満、新スコアは AAA 以上）。 */
