@@ -482,7 +482,7 @@
               「投稿画面で貼り付ける」操作はここで知らせる。
             -->
             <p class="px-4 pt-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 shrink-0">
-              {{ t(usesShareSheet ? 'report.shareHintMobile' : 'report.shareHintPc') }}
+              {{ t(canShareViaApp ? 'report.shareHintApp' : usesShareSheet ? 'report.shareHintMobile' : 'report.shareHintPc') }}
             </p>
             <div class="px-4 py-3 flex gap-2 shrink-0">
               <button @click="isShareOptionsOpen = false" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-xs sm:text-sm transition-colors">
@@ -566,9 +566,11 @@
  *    オプション画面を開いている間に先回りで生成し、ポストボタンの click 中に共有処理だけを走らせる
  *    （生成を待ってから navigator.share / window.open を呼ぶとユーザー操作の有効期間が切れて
  *    ブロックされ、X に飛ばない）
- *  - 共有の経路は端末で分ける（utils/shareToX）。スマホ / タブレットは Web Share API でファイル共有
- *    （共有シートから X アプリを選ぶと画像 + 定型文入りの投稿画面が開く）、PC はクリップボードコピー
- *    （不可ならダウンロード）+ ブラウザで定型文入りの X 投稿画面（x.com/intent/post）を開く
+ *  - 共有の経路は端末で分ける（utils/shareToX）。Android アプリ（WebView。navigator.share が無い）では
+ *    ネイティブの共有インテントで X アプリの投稿画面を画像 + 定型文入りで直接開く（useNativeBridge）。
+ *    スマホ / タブレットのブラウザは Web Share API でファイル共有（共有シートから X アプリを選ぶと
+ *    画像 + 定型文入りの投稿画面が開く）、PC はクリップボードコピー（不可ならダウンロード）+ ブラウザで
+ *    定型文入りの X 投稿画面（x.com/intent/post）を開く
  *
  * props:
  *  - isOpen: モーダル開閉
@@ -602,13 +604,15 @@ import UploadReportShareImage from './UploadReportShareImage.vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useLeague } from '../composables/useLeague';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useNativeBridge } from '../composables/useNativeBridge';
 import { useI18n } from '../composables/useI18n';
 import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
 import { ignoreOutside, withHtml2canvasTextFix } from '../utils/html2canvasHelpers';
-import { canShareImageNatively, copyImageToClipboard, downloadBlob, isIosDevice, xIntentUrl } from '../utils/shareToX';
+import { canShareImageNatively, copyImageToClipboard, downloadBlob, isIosDevice, isMobileDevice, xIntentUrl } from '../utils/shareToX';
 import html2canvas from 'html2canvas';
 
 const { t } = useI18n();
+const { isNativeApp, canShareViaApp, shareImageViaApp } = useNativeBridge();
 
 const props = defineProps<{
   isOpen: boolean;
@@ -1161,19 +1165,27 @@ const saveShareImage = async () => {
  * 【関数の役割】 PC ブラウザ（と Web Share が使えないスマホ）向け。画像をクリップボードへ（不可ならダウンロード）
  * 入れてから X の投稿画面を開く。画像は生成済みなので click からの経過は短く、window.open はポップアップ扱いされない。
  * 万一ブロックされても案内パネルのリンクから開ける。
+ * スマホの X アプリはクリップボードの画像を貼り付けられないので、スマホではコピーを試さずダウンロードにする。
  */
 const postViaIntent = async (blob: Blob) => {
   // 先にクリップボードへ。window.open で別タブにフォーカスが移ると書き込めなくなるため順番を守る。
-  const copied = await copyImageToClipboard(blob);
+  const copied = isMobileDevice() ? false : await copyImageToClipboard(blob);
   if (!copied) downloadBlob(blob, SHARE_FILE_NAME);
   isShareOptionsOpen.value = false;
   shareFallback.value = copied ? 'copied' : 'downloaded';
-  window.open(intentUrl.value, '_blank');
+  if (isNativeApp.value) {
+    // WebView は window.open を開けない。同一 WebView への遷移として投げると、アプリ側が
+    // 外部 URL を X アプリ / 端末のブラウザへ逃がしてくれる（ページ自体は遷移しない）。
+    window.location.assign(intentUrl.value);
+  } else {
+    window.open(intentUrl.value, '_blank');
+  }
 };
 
 /**
  * 【関数の役割】 ポストボタン。生成済みの画像を端末に合った経路で送り出す。
- *  - スマホ / タブレット: Web Share API。OS の共有シートから X アプリを選ぶと画像 + 定型文入りの投稿画面が開く
+ *  - Android アプリ: ネイティブの共有インテントで X アプリの投稿画面を画像 + 定型文入りで直接開く
+ *  - スマホ / タブレットのブラウザ: Web Share API。OS の共有シートから X アプリを選ぶと画像 + 定型文入りの投稿画面が開く
  *  - PC: クリップボードコピー（不可ならダウンロード）+ ブラウザで定型文入りの投稿画面を開く
  *    （X の投稿画面 URL には画像を添付する手段が無いので、貼り付けだけはユーザーにやってもらう）
  * 生成失敗後に押されたら作り直すだけ（共有はもう一度押してもらう）。
@@ -1187,6 +1199,15 @@ const confirmShare = async () => {
   if (isSharing.value) return;
   isSharing.value = true;
   try {
+    if (canShareViaApp.value) {
+      try {
+        await shareImageViaApp(blob, shareText.value);
+        isShareOptionsOpen.value = false;
+        return;
+      } catch (e) {
+        console.error('Native app share failed, falling back:', e);
+      }
+    }
     const file = new File([blob], SHARE_FILE_NAME, { type: 'image/png' });
     if (canShareImageNatively(file)) {
       try {

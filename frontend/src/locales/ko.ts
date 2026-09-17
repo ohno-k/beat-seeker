@@ -530,6 +530,7 @@ export const ko = {
   'report.sortByRatePtDesc': 'RATE-PT가 높은 곡을 상위 표시',
   'report.generateAndShare': 'X에 포스트',
   'report.regenerateImage': '이미지 다시 생성',
+  'report.shareHintApp': '"X에 포스트"를 누르면 이미지와 문구가 들어간 X 앱의 게시 화면이 열립니다.',
   'report.shareHintMobile': '"X에 포스트"를 누르고 공유 메뉴에서 X를 선택하면 이미지와 문구가 들어간 게시 화면이 열립니다.',
   'report.shareHintPc': '"X에 포스트"를 누르면 이미지를 복사하고 문구가 입력된 X 게시 화면을 엽니다. 게시 화면에서 붙여넣기(Ctrl+V / Mac은 Cmd+V)를 하면 이미지가 들어갑니다.',
   'report.postReadyTitle': '이미지가 준비되었습니다',

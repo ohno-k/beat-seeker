@@ -14,6 +14,11 @@
  *      … 収集を開始する。開く eagate のページ URL は「作品バージョンを知っている」Web 側が渡す。
  *        こうすることで、新作稼働時にアプリを再リリースせず {@link CURRENT_VERSION} の更新だけで追従できる。
  *  - `version(): string` … アプリのバージョン名（任意）。
+ *  - `shareImageBegin()` / `shareImageChunk(base64Part)` / `shareImageEnd(text): string`（アプリ 0.2.0 以降）
+ *      … プレイ成果レポートの共有画像（PNG）を Base64 で分割して渡し、最後に本文付きで共有する。
+ *        WebView には navigator.share が無く、クリップボードに入れた画像は X アプリに貼れないため、
+ *        アプリ側が共有インテントで X の投稿画面を「画像添付・本文入り」で直接開く。
+ *        `shareImageEnd` は成功なら "ok"、失敗ならその理由を返す。
  *
  * 【このページ側が公開するもの】
  * `window.__beatSeekerNative`（アプリが `evaluateJavascript` で呼ぶ）
@@ -40,6 +45,9 @@ import { useI18n } from './useI18n';
 type BeatSeekerNative = {
   startImport: (eagateUrl: string) => void;
   version?: () => string;
+  shareImageBegin?: () => void;
+  shareImageChunk?: (base64Part: string) => void;
+  shareImageEnd?: (text: string) => string;
 };
 
 /** このページがアプリへ公開するコールバック群。 */
@@ -66,6 +74,17 @@ export type NativeImportStatus = 'idle' | 'running' | 'error';
  * 必ずバージョン番号を含む URL にする。
  */
 const EAGATE_ENTRY_URL = `https://p.eagate.573.jp/game/2dx/${CURRENT_VERSION}/djdata/index.html`;
+
+/** 共有画像をアプリへ渡すときの 1 回あたりの Base64 文字数。数 MB を 1 回で渡すのを避ける。 */
+const SHARE_CHUNK_SIZE = 256 * 1024;
+
+/** 【関数の役割】 Blob を Base64 文字列（data URL のヘッダ無し）にする。 */
+const blobToBase64 = (blob: Blob): Promise<string> => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+  reader.onerror = () => reject(reader.error ?? new Error('failed to read blob'));
+  reader.readAsDataURL(blob);
+});
 
 /** 現在の進行状態（同時に 2 つ走らせない）。 */
 const status = ref<NativeImportStatus>('idle');
@@ -154,5 +173,33 @@ export function useNativeBridge() {
     });
   };
 
-  return { isNativeApp, status, message, startNativeImport };
+  /** アプリが共有画像 API を持っているか（0.2.0 以降。古いアプリでは false になり、UI 側はブラウザ向け経路に落ちる）。 */
+  const canShareViaApp = computed(() => {
+    const n = typeof window !== 'undefined' ? window.BeatSeekerNative : undefined;
+    return !!n
+      && typeof n.shareImageBegin === 'function'
+      && typeof n.shareImageChunk === 'function'
+      && typeof n.shareImageEnd === 'function';
+  });
+
+  /**
+   * 【関数の役割】 PNG と本文をアプリへ渡し、X アプリの投稿画面（画像添付・本文入り）を開いてもらう。
+   * X アプリが無い端末では端末の共有シートが出る。
+   * @throws アプリ側が失敗を返した場合（呼び出し側はブラウザ向けの経路へ切り替える）。
+   */
+  const shareImageViaApp = async (blob: Blob, text: string): Promise<void> => {
+    const n = window.BeatSeekerNative;
+    if (!n?.shareImageBegin || !n.shareImageChunk || !n.shareImageEnd) {
+      throw new Error('native share unavailable');
+    }
+    const base64 = await blobToBase64(blob);
+    n.shareImageBegin();
+    for (let i = 0; i < base64.length; i += SHARE_CHUNK_SIZE) {
+      n.shareImageChunk(base64.slice(i, i + SHARE_CHUNK_SIZE));
+    }
+    const result = n.shareImageEnd(text);
+    if (result !== 'ok') throw new Error(result || 'native share failed');
+  };
+
+  return { isNativeApp, status, message, startNativeImport, canShareViaApp, shareImageViaApp };
 }

@@ -28,5 +28,17 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/eagate_login_title"
             android:exported="false" />
+
+        <!-- プレイ成果レポートの共有画像（cacheDir/share/）を X 等の他アプリへ content:// URI で渡すための FileProvider。
+             公開範囲は res/xml/file_paths.xml の share/ のみ。 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>

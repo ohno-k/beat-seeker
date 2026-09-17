@@ -530,6 +530,7 @@ export const en = {
   'report.sortByRatePtDesc': 'Show songs with higher RATE-PT first',
   'report.generateAndShare': 'Post to X',
   'report.regenerateImage': 'Regenerate image',
+  'report.shareHintApp': 'Tap \"Post to X\" to open the X app compose screen with the image and text already filled in.',
   'report.shareHintMobile': 'Tap "Post to X" and choose X in the share menu to open a post with the image and text already filled in.',
   'report.shareHintPc': '"Post to X" copies the image and opens the X post screen with the text filled in. Paste there (Ctrl+V / Cmd+V on Mac) to add the image.',
   'report.postReadyTitle': 'Your image is ready',

@@ -2,10 +2,13 @@ package com.beatseeker.app
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
@@ -14,8 +17,10 @@ import android.webkit.WebViewClient
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.beatseeker.app.databinding.ActivityMainBinding
 import org.json.JSONObject
+import java.io.File
 
 /**
  * 【クラスの役割】 beat-seeker（PWA）を WebView で表示し、そこへ「1タップ取り込み」機能を注入する
@@ -25,6 +30,10 @@ import org.json.JSONObject
  * beat-seeker のページからは eagate をユーザーの Cookie 付きで取得できないため、Web 版では
  * ブックマークレット（登録が煩雑）が必要になる。アプリなら非表示 WebView で eagate を開けるので、
  * ユーザーは画面内のボタンを 1 回押すだけで取り込みまで完了する。
+ *
+ * もう一つ、WebView には Web Share API（navigator.share）が無いため、プレイ成果レポートの
+ * 「画像付きで X にポスト」もここで肩代わりする。ページから PNG を受け取り、共有インテントで
+ * X アプリの投稿画面を画像添付・本文入りの状態で直接開く（{@link NativeApi#shareImageEnd}）。
  *
  * 画面構成:
  *  - `webMain`         … beat-seeker 本体。ここにだけ `BeatSeekerNative` を注入する。
@@ -137,6 +146,80 @@ class MainActivity : AppCompatActivity() {
         /** 【メソッドの役割】 アプリのバージョン名を返す（Web 側の表示・不具合切り分け用）。 */
         @JavascriptInterface
         fun version(): String = BuildConfig.VERSION_NAME
+
+        // ── 共有画像（プレイ成果レポートの「画像付きで X にポスト」）──
+        // WebView には navigator.share が無く、クリップボードに入れた画像は X アプリに貼れないため、
+        // ページから PNG を受け取ってネイティブの共有インテントで X の投稿画面を開く。
+        // 数 MB の Base64 を 1 回で渡すのは避け、begin / chunk / end の 3 段階で分割受信する
+        // （JavascriptInterface は WebView の JS スレッドから順に呼ばれるので排他は不要）。
+
+        /** 受信中の PNG（Base64 断片の連結）。 */
+        private val shareImageBuf = StringBuilder()
+
+        /** 【メソッドの役割】 共有画像の受信を始める（前回の残りを捨てる）。 */
+        @JavascriptInterface
+        fun shareImageBegin() {
+            shareImageBuf.setLength(0)
+        }
+
+        /** 【メソッドの役割】 共有画像の Base64 断片を受け取る。 */
+        @JavascriptInterface
+        fun shareImageChunk(base64Part: String) {
+            shareImageBuf.append(base64Part)
+        }
+
+        /**
+         * 【メソッドの役割】 受信した PNG を共有する。X アプリが入っていれば投稿画面を画像添付・本文入りで
+         * 直接開き、無ければ端末の共有シートを出す。
+         * @param text 投稿本文（Web 側の共有テキストと同じ）。
+         * @return "ok"。失敗時はその理由（Web 側はこれを見てブラウザ向けの経路へ切り替える）。
+         */
+        @JavascriptInterface
+        fun shareImageEnd(text: String): String {
+            val base64 = shareImageBuf.toString()
+            shareImageBuf.setLength(0)
+            if (base64.isEmpty()) return "empty image"
+            return try {
+                val bytes = Base64.decode(base64, Base64.DEFAULT)
+                // 共有先が読み終わる前に消えないよう cache に置く（次回の共有で上書きする）。
+                val dir = File(cacheDir, SHARE_DIR).apply { mkdirs() }
+                val file = File(dir, SHARE_FILE_NAME)
+                file.writeBytes(bytes)
+                val uri = FileProvider.getUriForFile(
+                    this@MainActivity,
+                    "${BuildConfig.APPLICATION_ID}.fileprovider",
+                    file,
+                )
+                main.post { startImageShare(uri, text) }
+                "ok"
+            } catch (e: Exception) {
+                e.message ?: "share failed"
+            }
+        }
+    }
+
+    /**
+     * 【関数の役割】 画像 + 本文の共有インテントを投げる。X アプリがあればその投稿画面を直接開き、
+     * 無ければ共有シート（ユーザーが送り先を選ぶ）。
+     */
+    private fun startImageShare(uri: Uri, text: String) {
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TEXT, text)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent(send).setPackage(X_PACKAGE))
+            return
+        } catch (e: ActivityNotFoundException) {
+            // X アプリ未インストール → 共有シートへ。
+        }
+        try {
+            startActivity(Intent.createChooser(send, null))
+        } catch (e: ActivityNotFoundException) {
+            // 共有先が 1 つも無い端末。何もしない。
+        }
     }
 
     /** 【クラスの役割】 収集結果を beat-seeker のページへ橋渡しする。 */
@@ -182,5 +265,12 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         /** ページへ 1 回で渡す最大文字数。 */
         const val CHUNK_SIZE = 64 * 1024
+
+        /** X（旧 Twitter）アプリのパッケージ名。共有インテントの直接の送り先。 */
+        const val X_PACKAGE = "com.twitter.android"
+
+        /** 共有画像を置く cacheDir 配下のディレクトリ（res/xml/file_paths.xml と対）。 */
+        const val SHARE_DIR = "share"
+        const val SHARE_FILE_NAME = "beat-seeker-report.png"
     }
 }

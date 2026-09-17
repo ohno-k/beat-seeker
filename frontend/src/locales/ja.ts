@@ -535,6 +535,7 @@ export const ja = {
   'report.sortByRatePtDesc': 'RATE-PT の高い曲を上位表示',
   'report.generateAndShare': 'Xにポスト',
   'report.regenerateImage': '画像を再生成',
+  'report.shareHintApp': '「Xにポスト」を押すと、X アプリの投稿画面が画像と定型文が入った状態で開きます。',
   'report.shareHintMobile': '「Xにポスト」を押して共有メニューから X を選ぶと、画像と定型文が入った投稿画面が開きます。',
   'report.shareHintPc': '「Xにポスト」を押すと画像をコピーして X の投稿画面（定型文入り）を開きます。投稿画面で貼り付け（Ctrl+V / Mac は Cmd+V）をすると画像が入ります。',
   'report.postReadyTitle': '画像の準備ができました',
