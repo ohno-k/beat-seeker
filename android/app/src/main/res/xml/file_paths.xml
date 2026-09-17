@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider で他アプリ（X 等）に読ませてよい領域。共有画像（cacheDir/share/）だけを公開する。 -->
+<paths>
+    <cache-path name="share" path="share/" />
+</paths>

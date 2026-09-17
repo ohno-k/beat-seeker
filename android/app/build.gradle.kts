@@ -22,8 +22,8 @@ android {
         applicationId = "com.beatseeker.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         // 表示する beat-seeker の URL と、eagate に注入する収集スクリプトの URL。
         // スクリプトはアプリに同梱せず実行時に取得する。eagate の HTML 構造が変わっても

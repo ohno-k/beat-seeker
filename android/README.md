@@ -16,7 +16,7 @@ beat-seeker（PWA）を WebView で表示し、そこに **「ボタン 1 回で
 
 | ファイル | 役割 |
 | --- | --- |
-| `MainActivity.kt` | beat-seeker を表示する WebView。`BeatSeekerNative` をこのページにだけ注入する |
+| `MainActivity.kt` | beat-seeker を表示する WebView。`BeatSeekerNative` をこのページにだけ注入する。プレイ成果レポートの「画像付きで X にポスト」もここで肩代わりする（後述） |
 | `EagateScraper.kt` | 非表示 WebView で eagate を開き、収集スクリプトを注入して結果を受け取る |
 | `EagateLoginActivity.kt` | eagate 未ログイン時だけ表示するログイン画面 |
 | `Eagate.kt` | オリジン判定（どこにネイティブ API を出してよいか／どこにスクリプトを注入してよいか） |
@@ -57,6 +57,16 @@ Web 側は `onNeedLogin` では待機を解除せず、ユーザーから見る�
 結果 JSON はブックマークレットがクリップボードに入れるものと**同一形式**です。
 そのため Web 側は既存の取り込み処理（`UnifiedImport.vue` の `processText`）へそのまま流すだけで、
 CSV パース〜サーバ登録の既存パイプラインが動きます。**バックエンドの変更は不要です。**
+
+## 画像付きで X にポスト（0.2.0 以降）
+
+WebView には Web Share API（`navigator.share`）が無く、クリップボードに入れた画像は X アプリに貼り付けられません。
+そのためプレイ成果レポートの「画像付きで X にポスト」は、ページが PNG を Base64 で
+`shareImageBegin()` → `shareImageChunk(部分)`×N → `shareImageEnd(本文)` の順にアプリへ渡し、
+アプリが `cacheDir/share/` に書き出して FileProvider の `content://` URI を付けた `ACTION_SEND` を投げます。
+X アプリ（`com.twitter.android`）が入っていればその投稿画面を **画像添付・本文入り** で直接開き、
+無ければ端末の共有シートを出します。Web 側（`useNativeBridge.ts` の `shareImageNatively`）は
+アプリにこの API が無い（0.1.x）場合はブラウザ向けの経路（ダウンロード + X の投稿画面）に落ちます。
 
 ## セキュリティ上の約束事（変更時は必ず維持すること）
 

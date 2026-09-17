@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - 'claude/csv-one-tap-import-**'
+      - 'claude/play-report-score-x-post-**'
     paths:
       - 'android/**'
       - '.github/workflows/android-debug-apk.yml'

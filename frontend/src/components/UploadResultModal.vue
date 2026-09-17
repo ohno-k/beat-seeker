@@ -556,8 +556,10 @@
  *    オプション画面を開いている間に先回りで生成し、ポストボタンの click 中に共有処理だけを走らせる
  *    （生成を待ってから navigator.share / window.open を呼ぶとユーザー操作の有効期間が切れて
  *    ブロックされ、X に飛ばない）
- *  - Web Share API でファイル共有（共有シートから X アプリを選ぶと画像付きの投稿画面が開く）、
- *    不可ならクリップボードコピー or ダウンロード + X の投稿画面（x.com/intent/post）を開く
+ *  - 共有経路は 3 段階。Android アプリ（WebView。navigator.share が無い）ではネイティブの共有インテントで
+ *    X アプリの投稿画面を画像添付・本文入りで開く → Web Share API（共有シートから X アプリを選ぶと
+ *    画像付きの投稿画面が開く）→ それも無ければ画像をクリップボード（PC）/ ダウンロード（スマホ）に
+ *    渡してから X の投稿画面（x.com/intent/post）を開く
  *
  * props:
  *  - isOpen: モーダル開閉
@@ -591,12 +593,14 @@ import UploadReportShareImage from './UploadReportShareImage.vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useLeague } from '../composables/useLeague';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useNativeBridge } from '../composables/useNativeBridge';
 import { useI18n } from '../composables/useI18n';
 import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
 import { ignoreOutside, withHtml2canvasTextFix } from '../utils/html2canvasHelpers';
 import html2canvas from 'html2canvas';
 
 const { t } = useI18n();
+const { isNativeApp, canShareImageNatively, shareImageNatively } = useNativeBridge();
 
 const props = defineProps<{
   isOpen: boolean;
@@ -1136,30 +1140,45 @@ const downloadBlob = (blob: Blob) => {
 const downloadShareImage = () => { if (shareBlob.value) downloadBlob(shareBlob.value); };
 
 /**
- * 【関数の役割】 Web Share が使えない環境向け。画像をクリップボードへ（不可ならダウンロード）入れてから
- * X の投稿画面を開く。画像は生成済みなので click からの経過は短く、window.open はポップアップ扱いされない。
- * 万一ブロックされても案内パネルのリンクから開ける。
+ * スマホのブラウザか。スマホの X アプリはクリップボードの画像を貼り付けられないので、
+ * クリップボードではなくダウンロード（写真として添付してもらう）に切り替える。
+ */
+const isMobileBrowser = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+/**
+ * 【関数の役割】 ネイティブ共有も Web Share も使えない環境向け。画像をクリップボード（PC）/ ダウンロード
+ * （スマホ）に渡してから X の投稿画面を開く。画像は生成済みなので click からの経過は短く、window.open は
+ * ポップアップ扱いされない。万一ブロックされても案内パネルのリンクから開ける。
  */
 const postViaIntent = async (blob: Blob) => {
   let copied = false;
-  try {
-    // 先にクリップボードへ。window.open で別タブにフォーカスが移ると書き込めなくなるため順番を守る。
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    copied = true;
-  } catch (e) {
-    console.warn('Clipboard copy failed, downloading instead:', e);
-    downloadBlob(blob);
+  if (!isMobileBrowser) {
+    try {
+      // 先にクリップボードへ。window.open で別タブにフォーカスが移ると書き込めなくなるため順番を守る。
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      copied = true;
+    } catch (e) {
+      console.warn('Clipboard copy failed, downloading instead:', e);
+    }
   }
+  if (!copied) downloadBlob(blob);
   isShareOptionsOpen.value = false;
   shareFallback.value = copied ? 'copied' : 'downloaded';
-  window.open(xIntentUrl.value, '_blank');
+  if (isNativeApp.value) {
+    // WebView は window.open を開けない。同一 WebView への遷移として投げると、アプリ側が
+    // 外部 URL を X アプリ / 端末のブラウザへ逃がしてくれる（ページ自体は遷移しない）。
+    window.location.assign(xIntentUrl.value);
+  } else {
+    window.open(xIntentUrl.value, '_blank');
+  }
 };
 
 /**
  * 【関数の役割】 ポストボタン。生成済みの画像を共有可能な経路で送り出す。
  * 優先順位:
- *  1. Web Share API（スマホ）: OS の共有シートから X アプリを選ぶと画像付きの投稿画面が開く
- *  2. クリップボードコピー（不可ならダウンロード）+ X の投稿画面を開く（PC ブラウザ等）
+ *  1. Android アプリのネイティブ共有: X アプリの投稿画面を画像添付・本文入りで直接開く
+ *  2. Web Share API（スマホのブラウザ）: OS の共有シートから X アプリを選ぶと画像付きの投稿画面が開く
+ *  3. クリップボード（PC）/ ダウンロード（スマホ）+ X の投稿画面を開く
  * 生成失敗後に押されたら作り直すだけ（共有はもう一度押してもらう）。
  */
 const confirmShare = async () => {
@@ -1171,6 +1190,15 @@ const confirmShare = async () => {
   if (isSharing.value) return;
   isSharing.value = true;
   try {
+    if (canShareImageNatively.value) {
+      try {
+        await shareImageNatively(blob, shareText.value);
+        isShareOptionsOpen.value = false;
+        return;
+      } catch (e) {
+        console.error('Native share failed, falling back:', e);
+      }
+    }
     const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
