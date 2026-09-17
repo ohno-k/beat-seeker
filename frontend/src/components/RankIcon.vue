@@ -42,7 +42,7 @@
          overflow: visible は前作ティア外枠のグローのため。SVG は既定で viewBox の外を描かないので、
          枠線の外側へ広がる光が正方形に切り取られて見えてしまう。 -->
     <svg
-      viewBox="0 0 100 100"
+      :viewBox="bleed ? '-14 -14 128 128' : '0 0 100 100'"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       class="w-full h-full"
@@ -279,6 +279,7 @@
  *  - isSupporter: サポーター会員なら光沢を付ける
  *  - frameRankName / frameTier: 前作ティアの外枠（utils/beatTier の previousTierFrame() で作る）。未指定なら枠なし
  *  - lite: 重いフィルタを省く。外枠のグローもフィルタ無しの半透明ストロークになる
+ *  - bleed: viewBox の外周に余白を取る（html2canvas で画像化する箇所用。本体は枠の約 78% に縮む）
  */
 import { computed } from 'vue';
 import { useAprilFools } from '../composables/useAprilFools';
@@ -296,6 +297,9 @@ const props = defineProps<{
   /** 軽量モード。重い SVG フィルタ（ガウシアンぼかし/ドロップシャドウ）を全て省く。
    *  ランキング一覧など多数同時描画する箇所で指定し、モバイルのメモリ超過クラッシュを防ぐ。 */
   lite?: boolean;
+  /** viewBox の外周に余白を取る。html2canvas は SVG を画像として描くため、viewBox の外（外枠やグローの裾）が
+   *  四角く切れる。共有画像のように画像化する箇所で指定する。本体は枠の約 78% に縮むので枠側を大きめに取ること。 */
+  bleed?: boolean;
 }>();
 
 /** SVG 内の `id` 衝突を防ぐためのユニーク ID（グラデ・フィルタ用）。 */

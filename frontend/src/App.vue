@@ -1685,6 +1685,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
               songRankTotal: rankEntry?.total,
               allTimeBestUpdated,
               allTimeBeatenVersion: allTimeBestUpdated ? past.version : undefined,
+              allTimeBeatenScore: allTimeBestUpdated ? past.score : undefined,
               allTimeBestExtended,
             };
           })

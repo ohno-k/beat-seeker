@@ -54,6 +54,8 @@ const versionOptions = HISTORY_VERSIONS;
 
 /** モーダルに渡す差分結果。行クリックで設定される。 */
 const selectedDiff = ref<UploadDiffResult | null>(null);
+/** モーダルに渡す取り込み日時（共有画像の日付に使う）。 */
+const selectedDate = ref<string | null>(null);
 /** 差分モーダルの開閉。 */
 const isModalOpen = ref(false);
 
@@ -195,6 +197,7 @@ const openDiffModal = (item: any) => {
       oldRateTier: getRateTierRankInfo(Math.max(0, item.totalRatePt - item.ratePtIncrease)),
       newRateTier: getRateTierRankInfo(item.totalRatePt)
     };
+    selectedDate.value = item.date ?? null;
     isModalOpen.value = true;
   } catch (err) {
     console.error('Failed to parse diffJson', err);
@@ -463,6 +466,9 @@ watch(selectedVersion, () => {
     <UploadResultModal
       :is-open="isModalOpen"
       :diff-data="selectedDiff"
+      :report-date="selectedDate"
+      :report-version="selectedVersion"
+      :hide-owner="!!props.viewingUserId || !!props.shareToken"
       @close="isModalOpen = false"
     />
   </div>
