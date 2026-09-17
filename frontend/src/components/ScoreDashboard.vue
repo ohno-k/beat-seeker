@@ -205,7 +205,13 @@
     </div>
 
     <!-- Unofficial Difficulty Table（歴代トグル ON なら歴代ベストで集計。成長記録だけは現行作基準） -->
-    <UnofficialDifficultyTable v-if="!isPrivateView" :scores="displayScores" :history-scores="allFlattenedScores" />
+    <UnofficialDifficultyTable
+      v-if="!isPrivateView"
+      :scores="displayScores"
+      :history-scores="allFlattenedScores"
+      :beaten-past-best="beatenPastBest"
+      @folder-open="tableFolderOpened = true"
+    />
 
     <!-- Rank Up Advice -->
     <!-- ランクアップアドバイス: 自分のダッシュボードと、管理者が他ユーザーを閲覧しているときだけ出す。
@@ -243,7 +249,7 @@
  * @prop rateTierPointsOverride TOP ランカー等、サーバ算出済み Rate-PT が優先される場合に使用する値。
  * @emits open-profile-edit メール未登録等の促しバナーからプロフィール編集を要求。
  */
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreData } from '../types/ScoreData';
 import {
@@ -252,7 +258,8 @@ import {
   calculateScoreRateTierPoints, calculateTotalPoints,
   previousTierFrame,
 } from '../utils/beatTier';
-import { usePastScores } from '../composables/usePastScores';
+import { usePastScores, chartKey } from '../composables/usePastScores';
+import type { PastBest } from '../composables/usePastScores';
 import BeatTierInfoModal from './BeatTierInfoModal.vue';
 import RateTierInfoModal from './RateTierInfoModal.vue';
 import RankIcon from './RankIcon.vue';
@@ -395,7 +402,9 @@ const {
   fetchPastBest,
   fetchSummary: fetchPastSummary,
   applyAllTimeBest,
+  pastBestByChart,
   hasPastImports,
+  isLoaded: isPastLoaded,
   isLoading: isLoadingPast,
 } = usePastScores();
 
@@ -437,6 +446,36 @@ onMounted(() => {
 
 /** 【computed の役割】 階層化スコアをフラット配列に変換（曲 × 難易度 1 レコード）。 */
 const allFlattenedScores = computed(() => flattenScores(props.scores));
+
+/**
+ * 非公式難易度表のフォルダが一度でも開かれたか。
+ * 表の中の「今作で歴代自己ベスト」強調には過去作スコア（数千件になり得る）が要るが、
+ * 強調が見えるのは開いたフォルダの中だけなので、開かれるまで取りに行かない。
+ * サマリ取得より先に開かれることもあるので、条件が揃った時点で取得する。
+ */
+const tableFolderOpened = ref(false);
+watch([tableFolderOpened, hasPastImports, canUseAllTime], ([opened, hasPast, canUse]) => {
+  if (opened && hasPast && canUse) fetchPastBest().catch(() => { /* 握り潰し: 強調が出ないだけ */ });
+});
+
+/**
+ * 【computed の役割】 譜面キー → 今作のスコアが並んだ／超えた過去作ベスト（非公式難易度表の行強調用）。
+ *
+ * 同点を今作扱いにするのは {@link applyAllTimeBest} と同じ規則。比べる過去作スコアが無い譜面は
+ * 「超えた」わけではないので入れない。現行作のレコードから作るので歴代反映トグルには依存しない。
+ * 過去作は本人のデータなので、他ユーザー閲覧中・未取得の間は null（強調なし）。
+ */
+const beatenPastBest = computed<Map<string, PastBest> | null>(() => {
+  if (!canUseAllTime.value || !isPastLoaded.value) return null;
+  const bestByChart = pastBestByChart();
+  const map = new Map<string, PastBest>();
+  allFlattenedScores.value.forEach(rec => {
+    const key = chartKey(rec.title, rec.difficultyName);
+    const past = bestByChart.get(key);
+    if (past && past.score > 0 && rec.score >= past.score) map.set(key, past);
+  });
+  return map;
+});
 
 /** 【computed の役割】 過去作のベストを重ねたレコード。歴代 PT の算出元。 */
 const allTimeRecords = computed(() => applyAllTimeBest(allFlattenedScores.value));
