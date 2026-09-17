@@ -16,6 +16,6 @@ public interface WikiSongSyncRunRepository extends JpaRepository<WikiSongSyncRun
     /** 直近 20 件（新しい順）。管理画面の履歴表示用。 */
     List<WikiSongSyncRun> findTop20ByOrderByIdDesc();
 
-    /** ページのハッシュが記録されている直近の実行（前回からページが変わったかの比較元）。 */
-    Optional<WikiSongSyncRun> findFirstByPageHashIsNotNullOrderByIdDesc();
+    /** 同じ取得元（new / old）でページのハッシュが記録されている直近の実行（前回からページが変わったかの比較元）。 */
+    Optional<WikiSongSyncRun> findFirstBySourceAndPageHashIsNotNullOrderByIdDesc(String source);
 }

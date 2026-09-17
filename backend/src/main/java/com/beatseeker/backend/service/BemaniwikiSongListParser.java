@@ -3,6 +3,7 @@ package com.beatseeker.backend.service;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,6 +38,15 @@ import java.util.regex.Pattern;
  *    通常表記に戻るまで取り込まない。
  *  - 表の中の「デフォルト曲」「2026/09/16配信(稼働初期)」「後日登場予定」のような 1 セルだけの行は区切り
  *    （セクション）。日付があればその日以降に配信済み、日付が無く「予定」「後日」を含めば未配信として扱う。
+ *
+ *  - GENRE / TITLE / ARTIST のセルが複数行で、2 行目以降が難易度マーカー（"[N]" "[SPA]" など）で始まる場合、それは
+ *    「譜面ごとに曲名・アーティスト表記が違う」という注記（例: crew、DENIM、Evans）。曲としての値は 1 行目だけを使う。
+ *    マーカーで始まらない改行は単なるレイアウト上の折り返しなので、空白でつないで 1 つの値として読む。
+ *
+ * 旧曲は同じ構成の表が 2 ページに分かれている（「旧曲リスト」= レベル表、「旧曲総ノーツ数リスト」= 総ノーツ数表）。
+ * その場合は {@link #parseNotesPage(String)} でノーツ数を先に読み、{@link #parse(String, NotesPage)} に渡して結合する
+ * （どちらも 2MB 前後あるので、DOM を同時に 2 つ持たないよう 1 ページずつ処理する）。
+ * 旧曲リストの区切り行は作品名（"beatmania IIDX 17 SIRIUS"）で、日付も「予定」も無いので配信済みとして扱われる。
  *
  * 依存: Jsoup（HTML 解析）のみ。Spring や DB には依存しない（ユニットテストで固定 HTML を食わせて検証する）。
  *
@@ -74,6 +85,10 @@ public final class BemaniwikiSongListParser {
     private static final Pattern TEXT_COLOR = Pattern.compile("(?<![-\\w])color\\s*:\\s*([^;\"]+)", Pattern.CASE_INSENSITIVE);
     /** 全角・半角の "?"（未確定マーク）。 */
     private static final Pattern UNCERTAIN_SUFFIX = Pattern.compile("[?？]\\s*$");
+    /** 行頭の難易度マーカー（"[N]" "[SPA]" "[DPH]" など。連続可）。GENRE/TITLE/ARTIST の譜面別注記の行を見分ける。 */
+    private static final Pattern LEADING_DIFFICULTY_MARKERS = Pattern.compile("^(?:\\s*\\[(?:SP|DP)?[BNHAL]\\])+\\s*");
+    /** セル内の改行（br）を行として読むための目印（本文には現れない制御文字）。 */
+    private static final String LINE_BREAK_MARK = "\u0001";
 
     /**
      * 表の区切り行。配信日が分かればその日以降に配信済み、日付が無い「後日登場予定」などは未配信。
@@ -142,6 +157,14 @@ public final class BemaniwikiSongListParser {
      */
     public record Result(List<Song> songs, String contentHash, List<String> warnings) {}
 
+    /**
+     * 総ノーツ数表だけを読んだ結果。レベル表と別ページに分かれている旧曲で使う。
+     *
+     * @param notesByTitle TITLE → {難易度コード → ノーツ数}。"-" や空欄の難易度は含まない
+     * @param warnings     読み取り時の警告（列数が合わない行、TITLE の重複）
+     */
+    public record NotesPage(Map<String, Map<String, Integer>> notesByTitle, List<String> warnings) {}
+
     /** 【メソッドの役割】 難易度コードを表示名にする（ログ・通知用）。 */
     public static String difficultyName(String code) {
         return switch (code) {
@@ -185,33 +208,68 @@ public final class BemaniwikiSongListParser {
      * @throws IllegalStateException 楽曲リスト表が見つからない（ページ構成が変わった）場合
      */
     public Result parse(String html) {
+        return parse(html, null);
+    }
+
+    /**
+     * 【メソッドの役割】 総ノーツ数表だけが載ったページ（「旧曲総ノーツ数リスト」）を読む。
+     *
+     * @param html ページの HTML
+     * @return TITLE → 難易度別ノーツ数
+     * @throws IllegalStateException 総ノーツ数表が見つからない（ページ構成が変わった）場合
+     */
+    public NotesPage parseNotesPage(String html) {
         Document doc = Jsoup.parse(html);
-        Elements tables = doc.select("div#body table");
-        if (tables.isEmpty()) tables = doc.select("table");
+        for (Element t : bodyTables(doc)) {
+            Map<String, Integer> idx = headerIndex(t);
+            if (isNotesTable(idx)) {
+                List<String> warnings = new ArrayList<>();
+                Map<String, Map<String, Integer>> notes = parseNotesTable(t, idx, warnings);
+                return new NotesPage(Collections.unmodifiableMap(notes), Collections.unmodifiableList(warnings));
+            }
+        }
+        throw new IllegalStateException("総ノーツ数表（TITLE/NOTE(SP)）が見つかりません。ページ構成が変わった可能性があります");
+    }
+
+    /**
+     * 【メソッドの役割】 楽曲リスト表を解析し、ノーツ数を結合して曲一覧を返す。
+     *
+     * @param html          楽曲リスト表が載ったページの HTML
+     * @param externalNotes 別ページから読んだ総ノーツ数表（{@link #parseNotesPage}）。null なら同じページ内の表を探す
+     * @return 解析結果
+     * @throws IllegalStateException 楽曲リスト表が見つからない（ページ構成が変わった）場合
+     */
+    public Result parse(String html, NotesPage externalNotes) {
+        Document doc = Jsoup.parse(html);
 
         Element levelTable = null;
         Map<String, Integer> levelIdx = null;
         Element notesTable = null;
         Map<String, Integer> notesIdx = null;
-        for (Element t : tables) {
+        for (Element t : bodyTables(doc)) {
             Map<String, Integer> idx = headerIndex(t);
             if (levelTable == null && idx.containsKey("TITLE") && idx.containsKey("GENRE") && idx.containsKey("SP:A")) {
                 levelTable = t;
                 levelIdx = idx;
-            } else if (notesTable == null && idx.containsKey("TITLE") && idx.containsKey("NOTE(SP):A")) {
+            } else if (notesTable == null && isNotesTable(idx)) {
                 notesTable = t;
                 notesIdx = idx;
             }
         }
-        if (levelTable == null) {
+        if (levelTable == null || levelIdx == null) {
             throw new IllegalStateException("楽曲リスト表（SP/DP/GENRE/TITLE/ARTIST）が見つかりません。ページ構成が変わった可能性があります");
         }
 
         List<String> warnings = new ArrayList<>();
         Map<String, Map<String, Integer>> notesByTitle;
-        if (notesTable == null) {
+        boolean hasNotesSource = true;
+        if (externalNotes != null) {
+            notesByTitle = externalNotes.notesByTitle();
+            warnings.addAll(externalNotes.warnings());
+        } else if (notesTable == null) {
             warnings.add("総ノーツ数の表が見つかりません。ノーツ数は未記載として扱います");
             notesByTitle = Map.of();
+            hasNotesSource = false;
         } else {
             notesByTitle = parseNotesTable(notesTable, notesIdx, warnings);
         }
@@ -222,19 +280,22 @@ public final class BemaniwikiSongListParser {
         Map<String, Integer> seenTitles = new LinkedHashMap<>();
         Section current = null;
         int columnCount = levelIdx.size();
+        RowGrid grid = new RowGrid(columnCount);
         List<Element> rows = levelTable.select("tr");
         for (int r = headerRowCount(rows); r < rows.size(); r++) {
-            List<Element> cells = cells(rows.get(r));
-            if (cells.isEmpty()) continue;
-            if (isSectionRow(cells, columnCount)) {
-                current = parseSection(cellText(cells.get(0)));
+            List<Element> raw = cells(rows.get(r));
+            if (raw.isEmpty()) continue;
+            if (isSectionRow(raw, columnCount)) {
+                current = parseSection(cellText(raw.get(0)));
+                grid.reset();
                 continue;
             }
+            List<Element> cells = grid.place(raw);
             if (cells.size() < columnCount) {
-                warnings.add("列数が想定と異なる行をスキップ: " + cellText(cells.get(0)));
+                warnings.add("列数が想定と異なる行をスキップ: " + cellText(raw.get(0)));
                 continue;
             }
-            String title = cellText(cells.get(levelIdx.get("TITLE")));
+            String title = mainLineText(cells.get(levelIdx.get("TITLE")));
             if (title.isEmpty()) {
                 warnings.add("TITLE が空の行をスキップ（" + (r + 1) + " 行目）");
                 continue;
@@ -242,8 +303,8 @@ public final class BemaniwikiSongListParser {
             if (seenTitles.merge(title, 1, Integer::sum) > 1) {
                 warnings.add("同じ TITLE が複数行あります: " + title);
             }
-            String genre = blankToNull(cellText(cells.get(levelIdx.get("GENRE"))));
-            String artist = levelIdx.containsKey("ARTIST") ? blankToNull(cellText(cells.get(levelIdx.get("ARTIST")))) : null;
+            String genre = blankToNull(mainLineText(cells.get(levelIdx.get("GENRE"))));
+            String artist = levelIdx.containsKey("ARTIST") ? blankToNull(mainLineText(cells.get(levelIdx.get("ARTIST")))) : null;
             String bpm = levelIdx.containsKey("BPM") ? blankToNull(cellText(cells.get(levelIdx.get("BPM")))) : null;
 
             Map<String, Integer> notes = notesByTitle.get(title);
@@ -252,7 +313,7 @@ public final class BemaniwikiSongListParser {
                 if (alt != null) {
                     notes = notesByTitle.get(alt);
                     warnings.add("ノーツ表とは TITLE の表記が異なります: 楽曲リスト『" + title + "』 / ノーツ表『" + alt + "』");
-                } else if (notesTable != null) {
+                } else if (hasNotesSource) {
                     warnings.add("ノーツ表に見当たらない曲: " + title);
                 }
             }
@@ -274,6 +335,17 @@ public final class BemaniwikiSongListParser {
     }
 
     // ── 表の見出し ─────────────────────────────────────
+
+    /** ページ本文（div#body）内の table。本文の枠が見つからないページでは全 table。 */
+    private Elements bodyTables(Document doc) {
+        Elements tables = doc.select("div#body table");
+        return tables.isEmpty() ? doc.select("table") : tables;
+    }
+
+    /** 見出しが総ノーツ数表（TITLE と NOTE(SP) の A 列）のものか。 */
+    private static boolean isNotesTable(Map<String, Integer> idx) {
+        return idx.containsKey("TITLE") && idx.containsKey("NOTE(SP):A");
+    }
 
     /**
      * 【メソッドの役割】 見出し 2 行を「列名 → 列番号」に平坦化する。
@@ -328,15 +400,21 @@ public final class BemaniwikiSongListParser {
     private Map<String, Map<String, Integer>> parseNotesTable(Element table, Map<String, Integer> idx, List<String> warnings) {
         Map<String, Map<String, Integer>> result = new LinkedHashMap<>();
         int columnCount = idx.size();
+        RowGrid grid = new RowGrid(columnCount);
         List<Element> rows = table.select("tr");
         for (int r = headerRowCount(rows); r < rows.size(); r++) {
-            List<Element> cells = cells(rows.get(r));
-            if (cells.isEmpty() || isSectionRow(cells, columnCount)) continue;
-            if (cells.size() < columnCount) {
-                warnings.add("ノーツ表: 列数が想定と異なる行をスキップ: " + cellText(cells.get(0)));
+            List<Element> raw = cells(rows.get(r));
+            if (raw.isEmpty()) continue;
+            if (isSectionRow(raw, columnCount)) {
+                grid.reset();
                 continue;
             }
-            String title = cellText(cells.get(idx.get("TITLE")));
+            List<Element> cells = grid.place(raw);
+            if (cells.size() < columnCount) {
+                warnings.add("ノーツ表: 列数が想定と異なる行をスキップ: " + cellText(raw.get(0)));
+                continue;
+            }
+            String title = mainLineText(cells.get(idx.get("TITLE")));
             if (title.isEmpty()) continue;
             Map<String, Integer> perDiff = new LinkedHashMap<>();
             for (Map.Entry<String, String> col : SP_COLUMNS.entrySet()) {
@@ -435,8 +513,89 @@ public final class BemaniwikiSongListParser {
         return copy.text().replaceAll("\\s+", " ").trim();
     }
 
+    /**
+     * 【メソッドの役割】 GENRE / TITLE / ARTIST セルから「曲としての値」を読む。
+     *
+     * 旧曲には、譜面ごとに表記が違う曲の注記が同じセルに改行で並ぶものがある:
+     *   TITLE  "DENIM" ⏎ "[N][H]DENIM" ⏎ "[A]DENIM (ELECTRO MIX)"   → "DENIM"
+     *   GENRE  "[N]ANTHEM" ⏎ "[SPH]WITHOUT YOU TONIGHT" ⏎ …          → "ANTHEM"（1 行目から注記なら、その行のマーカーを外す）
+     * 難易度マーカーで始まる行が出たところで打ち切る。マーカーで始まらない改行
+     * （"ryo (supercell) /" ⏎ "かぐや(cv.…)"）は折り返しなので空白でつなぐ。1 行だけのセルは {@link #cellText} と同じ。
+     */
+    private String mainLineText(Element cell) {
+        if (cell.selectFirst("br") == null) return cellText(cell);
+        Element copy = cell.clone();
+        copy.select("a.note_super, .note_super").remove();
+        for (Element br : copy.select("br")) br.replaceWith(new TextNode(LINE_BREAK_MARK));
+        String[] lines = copy.text().split(LINE_BREAK_MARK);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].replaceAll("\\s+", " ").trim();
+            Matcher m = LEADING_DIFFICULTY_MARKERS.matcher(line);
+            if (m.find()) {
+                if (i == 0) sb.append(line.substring(m.end()).trim());
+                break;
+            }
+            if (line.isEmpty()) continue;
+            if (sb.length() > 0) sb.append(' ');
+            sb.append(line);
+        }
+        return sb.toString().trim();
+    }
+
     private static String blankToNull(String s) {
         return (s == null || s.isBlank()) ? null : s;
+    }
+
+    /**
+     * 行のセルを「列番号 → セル」に並べ直す（rowspan / colspan の展開）。
+     *
+     * 旧曲総ノーツ数リストでは、ムービーを共有する 2 曲の MOVIE / LAYER セルが rowspan=2 でまとめられ、
+     * 下の行は td が 2 つ少ない（例: "Timepiece phase II" と "Timepiece phase II (CN Ver.)"）。
+     * 上の行から続いているセルはその列の値として引き継ぎ、colspan のセルはまたがる列すべてに置く。
+     * 見出し行を読み飛ばした後の行から使い、区切り行のたびに {@link #reset()} する。
+     */
+    private static final class RowGrid {
+        private final Element[] carried;
+        private final int[] remainingRows;
+
+        RowGrid(int columnCount) {
+            this.carried = new Element[columnCount];
+            this.remainingRows = new int[columnCount];
+        }
+
+        void reset() {
+            Arrays.fill(carried, null);
+            Arrays.fill(remainingRows, 0);
+        }
+
+        /** @return 列番号順のセル。行の td が足りなければ列数より短い（呼び出し側でスキップする） */
+        List<Element> place(List<Element> raw) {
+            int columnCount = carried.length;
+            List<Element> out = new ArrayList<>(columnCount);
+            int next = 0;
+            int col = 0;
+            while (col < columnCount) {
+                if (remainingRows[col] > 0) {
+                    out.add(carried[col]);
+                    remainingRows[col]--;
+                    col++;
+                    continue;
+                }
+                if (next >= raw.size()) break;
+                Element cell = raw.get(next++);
+                int colspan = Math.max(1, intAttr(cell, "colspan", 1));
+                int rowspan = Math.max(1, intAttr(cell, "rowspan", 1));
+                for (int k = 0; k < colspan && col < columnCount; k++, col++) {
+                    out.add(cell);
+                    if (rowspan > 1) {
+                        carried[col] = cell;
+                        remainingRows[col] = rowspan - 1;
+                    }
+                }
+            }
+            return out;
+        }
     }
 
     private List<Element> cells(Element tr) {
@@ -478,7 +637,9 @@ public final class BemaniwikiSongListParser {
             }
         }
         boolean scheduled = date == null && (label.contains("予定") || label.contains("後日") || label.contains("未定"));
-        return new Section(label, date, scheduled);
+        // 旧曲リストの区切り行に付くページ内リンクの記号（"beatmania IIDX 17 SIRIUS ▲ ▼ △"）は表示に不要
+        String display = label.replaceAll("[▲▼△]", "").replaceAll("\\s+", " ").trim();
+        return new Section(display, date, scheduled);
     }
 
     // ── ハッシュ ─────────────────────────────────────────

@@ -401,22 +401,28 @@ public class GameDataController {
     }
 
     /**
-     * 【メソッドの役割】 bemaniwiki の新曲リストをその場で取り込む（定期実行と同じ処理を手動で走らせる）。
+     * 【メソッドの役割】 bemaniwiki の新曲リスト / 旧曲リストをその場で取り込む（定期実行と同じ処理を手動で走らせる）。
      *
      * リクエスト body に {@code {"dryRun": true}} を付けると差分の確認だけで DB は変更しない。
-     * 取得〜反映は数秒で終わるので同期的に実行し、内訳（追加・更新・保留・警告）をそのまま返す。
+     * {@code "source": "old"} で旧曲リスト（+ 旧曲総ノーツ数リスト）、省略または {@code "new"} で新曲リスト。
+     * 取得〜反映は数秒（旧曲は 2 ページ取得するので 10 秒前後）で終わるので同期的に実行し、
+     * 内訳（追加・更新・保留・警告）をそのまま返す。手動実行には旧曲リストの自動反映の上限はかからない。
      *
      * @param auth 管理者認証
-     * @param body 省略可。{@code dryRun}（既定 false）
-     * @return {@link WikiSongSyncService.SyncResult}。実行中なら 409、失敗なら 500
+     * @param body 省略可。{@code dryRun}（既定 false）、{@code source}（既定 new）
+     * @return {@link WikiSongSyncService.SyncResult}。source が不正なら 400、実行中なら 409、失敗なら 500
      */
     @PostMapping("/admin/game-data/songs/wiki-sync")
     public ResponseEntity<?> runWikiSongSync(Authentication auth,
                                              @RequestBody(required = false) Map<String, Object> body) {
         checkAdminAccess(auth);
         boolean dryRun = body != null && Boolean.TRUE.equals(body.get("dryRun"));
+        Object sourceParam = body != null ? body.get("source") : null;
+        String source = sourceParam != null ? String.valueOf(sourceParam) : WikiSongSyncService.SOURCE_NEW;
         try {
-            return ResponseEntity.ok(wikiSongSyncService.sync(WikiSongSyncService.TRIGGER_MANUAL, dryRun));
+            return ResponseEntity.ok(wikiSongSyncService.sync(source, WikiSongSyncService.TRIGGER_MANUAL, dryRun));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).body(Map.of("message", e.getMessage()));
         } catch (Exception e) {

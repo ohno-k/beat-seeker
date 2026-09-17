@@ -121,8 +121,20 @@ app:
     cron: "${WIKI_SONG_SYNC_CRON:0 20 0,6,12,18 * * *}"
     # 取得するページ。次回作に切り替えるときはここを差し替える。
     url: "${WIKI_SONG_SYNC_URL:https://bemaniwiki.com/?beatmania+IIDX+34+ZINRAI/%E6%96%B0%E6%9B%B2%E3%83%AA%E3%82%B9%E3%83%88}"
-    # false にすると定期実行は差分の記録だけで DB を変更しない（手動実行はこの設定に関係なく反映する）。
+    # false にすると定期実行は差分の記録だけで DB を変更しない（手動実行はこの設定に関係なく反映する）。新曲・旧曲で共通。
     auto-apply: ${WIKI_SONG_SYNC_AUTO_APPLY:true}
+    # ── 旧曲リスト（レベル表）+ 旧曲総ノーツ数リスト（総ノーツ数表）──
+    # レベル変更・ノーツ数の訂正・旧曲への譜面追加（LEGGENDARIA など）・復活曲を取り込む。ルールは新曲リストと同じ。
+    # 2 ページで 4MB 強あり変更も少ないので、既定は 1 日 1 回（5:40）。
+    old-songs:
+      enabled: ${WIKI_OLD_SONG_SYNC_ENABLED:true}
+      cron: "${WIKI_OLD_SONG_SYNC_CRON:0 40 5 * * *}"
+      # 次回作に切り替えるときは 2 つとも差し替える。
+      list-url: "${WIKI_OLD_SONG_SYNC_LIST_URL:https://bemaniwiki.com/?beatmania+IIDX+34+ZINRAI/%E6%97%A7%E6%9B%B2%E3%83%AA%E3%82%B9%E3%83%88}"
+      notes-url: "${WIKI_OLD_SONG_SYNC_NOTES_URL:https://bemaniwiki.com/?beatmania+IIDX+34+ZINRAI/%E6%97%A7%E6%9B%B2%E7%B7%8F%E3%83%8E%E3%83%BC%E3%83%84%E6%95%B0%E3%83%AA%E3%82%B9%E3%83%88}"
+      # 定期実行 1 回で変更のかかる曲数がこれを超えたら反映を見送り、NEEDS_REVIEW として記録・通知する
+      # （表構成の変化などで全曲を書き換えてしまう事故の歯止め。0 で無制限）。手動の「今すぐ同期」は制限なし。
+      max-auto-songs: ${WIKI_OLD_SONG_SYNC_MAX_AUTO_SONGS:30}
 
 vapid:
   # 公開鍵はブラウザに配布されるため非機密。秘密鍵は環境変数で渡す（リポジトリにコミットしない）。

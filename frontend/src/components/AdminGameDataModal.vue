@@ -70,10 +70,24 @@
 
           <!-- Songs Tab -->
           <div v-if="activeTab === 'songs'">
-            <!-- bemaniwiki 新曲同期 -->
+            <!-- bemaniwiki 楽曲同期（新曲リスト / 旧曲リスト） -->
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">bemaniwiki 新曲同期</h3>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">bemaniwiki 楽曲同期</h3>
+                  <div class="inline-flex rounded-lg border border-slate-300 dark:border-slate-600 overflow-hidden text-xs font-bold">
+                    <button
+                      v-for="opt in wikiSyncSourceOptions"
+                      :key="opt.value"
+                      @click="wikiSyncSource = opt.value"
+                      :disabled="isWikiSyncing"
+                      class="px-2.5 py-1 transition-colors disabled:cursor-not-allowed"
+                      :class="wikiSyncSource === opt.value
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'"
+                    >{{ opt.label }}</button>
+                  </div>
+                </div>
                 <div class="flex items-center gap-2">
                   <button
                     @click="handleWikiSync(true)"
@@ -90,14 +104,19 @@
                   </button>
                 </div>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+              <p v-if="wikiSyncSource === 'new'" class="text-xs text-slate-500 dark:text-slate-400 mb-2">
                 ZINRAI 新曲リストの SP レベル・ノーツ数・GENRE/ARTIST/BPM を公開中の楽曲へ直接反映します（ドラフトは経由しません）。
                 Lv11/12 の ANOTHER/LEGGENDARIA は難易度表の Uncategorized に入ります。自動実行は毎日 0:20 / 6:20 / 12:20 / 18:20。
                 未解禁（灰色表記）・未記載の譜面は wiki が埋まり次第、次回以降に取り込みます。
               </p>
-              <div v-if="wikiSyncResult" class="text-xs space-y-1 mb-2">
-                <div class="font-bold" :class="wikiSyncResult.status === 'SUCCESS' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'">
-                  {{ wikiSyncResult.message }}
+              <p v-else class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                ZINRAI 旧曲リスト + 旧曲総ノーツ数リストから、レベル変更・ノーツ数の訂正・旧曲への譜面追加・復活曲を公開中の楽曲へ直接反映します。
+                公式 CSV と表記が違う曲名（ÆTHER → ATHER など）は ARTIST・GENRE・ノーツ数で既存曲に読み替え、二重登録しません。
+                自動実行は毎日 5:40。自動実行で変更が 30 曲を超えたときは反映を見送るので、ここで差分を確認して手動で同期してください（取得に 10 秒ほどかかります）。
+              </p>
+              <div v-if="wikiSyncResultShown" class="text-xs space-y-1 mb-2">
+                <div class="font-bold" :class="wikiSyncResultShown.status === 'SUCCESS' ? 'text-emerald-700 dark:text-emerald-400' : wikiSyncResultShown.status === 'NEEDS_REVIEW' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
+                  {{ wikiSyncResultShown.message }}
                 </div>
                 <details v-for="sec in wikiSyncSections" :key="sec.key" class="text-slate-600 dark:text-slate-300">
                   <summary class="cursor-pointer select-none">{{ sec.label }} {{ sec.items.length }}件</summary>
@@ -106,12 +125,12 @@
                   </ul>
                 </details>
               </div>
-              <div v-if="wikiSyncRuns.length > 0" class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                <div class="font-bold">最近の実行</div>
-                <div v-for="r in wikiSyncRuns.slice(0, 5)" :key="r.id" class="flex flex-wrap gap-x-2">
+              <div v-if="wikiSyncRunsShown.length > 0" class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+                <div class="font-bold">最近の実行（{{ wikiSyncSource === 'old' ? '旧曲リスト' : '新曲リスト' }}）</div>
+                <div v-for="r in wikiSyncRunsShown" :key="r.id" class="flex flex-wrap gap-x-2">
                   <span>{{ formatWikiRunTime(r.startedAt) }}</span>
                   <span>{{ r.trigger === 'scheduled' ? '定期' : '手動' }}{{ r.dryRun ? '(確認のみ)' : '' }}</span>
-                  <span :class="r.status === 'FAILED' ? 'text-red-500' : r.status === 'SUCCESS' ? 'text-emerald-600 dark:text-emerald-400' : ''">{{ wikiRunStatusLabel(r) }}</span>
+                  <span :class="r.status === 'FAILED' ? 'text-red-500' : r.status === 'NEEDS_REVIEW' ? 'text-amber-600 dark:text-amber-400' : r.status === 'SUCCESS' ? 'text-emerald-600 dark:text-emerald-400' : ''">{{ wikiRunStatusLabel(r) }}</span>
                   <span v-if="r.status !== 'FAILED'">追加 {{ r.addedCount }} / 更新 {{ r.updatedCount }} / 保留 {{ r.heldCount }}{{ r.pageChanged === false ? ' / ページ変更なし' : '' }}</span>
                   <span v-else class="break-all">{{ r.errorMessage }}</span>
                 </div>
@@ -557,17 +576,35 @@ const draftSongs = ref<any[]>([]);
 /** 現在公開中の active 楽曲（既存曲編集の検索対象）。 */
 const activeSongs = ref<any[]>([]);
 
-// ── bemaniwiki 新曲同期 ───────────────────────────────
+// ── bemaniwiki 楽曲同期（新曲リスト / 旧曲リスト）──────────
+/** 取得元。new = 新曲リスト、old = 旧曲リスト + 旧曲総ノーツ数リスト（バックエンドの WikiSongSyncService.SOURCE_*）。 */
+type WikiSyncSource = 'new' | 'old';
+const wikiSyncSourceOptions: { value: WikiSyncSource; label: string }[] = [
+  { value: 'new', label: '新曲リスト' },
+  { value: 'old', label: '旧曲リスト' },
+];
+/** パネルで操作・表示する取得元。 */
+const wikiSyncSource = ref<WikiSyncSource>('new');
 /** 同期の実行中フラグ（差分確認・本実行の両方）。 */
 const isWikiSyncing = ref(false);
 /** 直近の同期結果（POST /wiki-sync のレスポンスそのまま）。モーダル再オープンで消える。 */
 const wikiSyncResult = ref<any | null>(null);
-/** 同期の実行履歴（新しい順）。 */
+/** 同期の実行履歴（新しい順。新曲・旧曲の両方を含む）。 */
 const wikiSyncRuns = ref<any[]>([]);
+
+/** 【computed の役割】 選択中の取得元の同期結果だけを表示する（取得元を切り替えたら別リストの結果は隠す）。 */
+const wikiSyncResultShown = computed(() => {
+  const r = wikiSyncResult.value;
+  return r && (r.source ?? 'new') === wikiSyncSource.value ? r : null;
+});
+
+/** 【computed の役割】 選択中の取得元の実行履歴（直近 5 件）。source 列が無い頃の記録は新曲リスト。 */
+const wikiSyncRunsShown = computed(() =>
+  wikiSyncRuns.value.filter(r => (r.source ?? 'new') === wikiSyncSource.value).slice(0, 5));
 
 /** 【computed の役割】 同期結果の内訳を折りたたみ表示用に並べる（空の区分は出さない）。 */
 const wikiSyncSections = computed(() => {
-  const r = wikiSyncResult.value;
+  const r = wikiSyncResultShown.value;
   if (!r) return [];
   return [
     { key: 'added', label: '追加', items: (r.added ?? []) as string[] },
@@ -576,6 +613,7 @@ const wikiSyncSections = computed(() => {
     { key: 'held', label: '保留', items: (r.held ?? []) as string[] },
     { key: 'skippedSongs', label: '配信前', items: (r.skippedSongs ?? []) as string[] },
     { key: 'warnings', label: '警告', items: (r.warnings ?? []) as string[] },
+    { key: 'titleMatches', label: '曲名の読み替え（wiki → 登録済み）', items: (r.titleMatches ?? []) as string[] },
   ].filter(sec => sec.items.length > 0);
 });
 
@@ -1153,10 +1191,11 @@ const loadWikiSyncRuns = async () => {
 };
 
 /**
- * 【関数の役割】 bemaniwiki 新曲リストの同期をその場で実行する（定期実行と同じ処理）。
+ * 【関数の役割】 bemaniwiki の新曲リスト / 旧曲リスト（選択中の取得元）の同期をその場で実行する（定期実行と同じ処理）。
  *
  * dryRun=true なら差分の確認だけで DB は変わらない。本実行のあとは active 楽曲一覧と履歴を再取得する。
  * 反映先は draft ではなく公開中の楽曲なので、「楽曲を適用」を押す必要は無い。
+ * 手動実行には旧曲リストの自動反映の上限（30 曲）はかからない。
  */
 const handleWikiSync = async (dryRun: boolean) => {
   isWikiSyncing.value = true;
@@ -1166,7 +1205,7 @@ const handleWikiSync = async (dryRun: boolean) => {
     const res = await fetch(`${API_BASE}/api/admin/game-data/songs/wiki-sync`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ dryRun }),
+      body: JSON.stringify({ dryRun, source: wikiSyncSource.value }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Error');
@@ -1195,6 +1234,7 @@ const formatWikiRunTime = (iso: string | null) => {
 /** 【関数の役割】 実行結果ステータスの表示ラベル。 */
 const wikiRunStatusLabel = (r: any) => {
   if (r.status === 'FAILED') return '失敗';
+  if (r.status === 'NEEDS_REVIEW') return '要確認（未反映）';
   if (r.status === 'SUCCESS') return r.dryRun ? '差分あり' : '反映あり';
   return '変更なし';
 };

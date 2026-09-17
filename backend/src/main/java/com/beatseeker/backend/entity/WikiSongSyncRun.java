@@ -37,11 +37,22 @@ public class WikiSongSyncRun {
     @Column(name = "trigger_kind", nullable = false, length = 20)
     private String triggerKind;
 
+    /**
+     * 取得元: new（新曲リスト）/ old（旧曲リスト + 旧曲総ノーツ数リスト）。
+     * 列は 2026-09-17 に追加。ddl-auto=update の ALTER で既存行にも値が入るよう、DB 側の既定値を 'new' にしてある
+     * （それ以前の記録はすべて新曲リストのもの）。
+     */
+    @Column(length = 10, columnDefinition = "varchar(10) default 'new'")
+    private String source = "new";
+
     /** true なら差分の確認だけで DB は変更していない。 */
     @Column(nullable = false)
     private boolean dryRun = false;
 
-    /** 結果: SUCCESS（変更あり）/ NO_CHANGE（変更なし）/ FAILED（取得・解析・保存の失敗）。 */
+    /**
+     * 結果: SUCCESS（変更あり）/ NO_CHANGE（変更なし）/ NEEDS_REVIEW（定期実行で変更が多すぎたため未反映。
+     * 管理画面で内容を確認して手動で同期する）/ FAILED（取得・解析・保存の失敗）。
+     */
     @Column(nullable = false, length = 20)
     private String status;
 
