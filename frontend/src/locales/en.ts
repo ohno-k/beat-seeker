@@ -530,6 +530,8 @@ export const en = {
   'report.sortByRatePtDesc': 'Show songs with higher RATE-PT first',
   'report.generateAndShare': 'Post to X',
   'report.regenerateImage': 'Regenerate image',
+  'report.shareHintMobile': 'Tap "Post to X" and choose X in the share menu to open a post with the image and text already filled in.',
+  'report.shareHintPc': '"Post to X" copies the image and opens the X post screen with the text filled in. Paste there (Ctrl+V / Cmd+V on Mac) to add the image.',
   'report.postReadyTitle': 'Your image is ready',
   'report.fallbackCopied': 'Image copied to clipboard. Paste it (Ctrl+V / Cmd+V) into the X post screen.',
   'report.fallbackDownloaded': 'Image downloaded. Attach the downloaded image in the X post screen.',

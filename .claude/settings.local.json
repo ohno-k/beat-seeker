@@ -50,7 +50,10 @@
       "Bash(node mkfixture.mjs)",
       "PowerShell($env:JAVA_HOME='C:\\\\Users\\\\oonok\\\\dev-tools\\\\jdk-17.0.19+10'; & 'C:\\\\Users\\\\oonok\\\\dev-tools\\\\apache-maven-3.9.9\\\\bin\\\\mvn.cmd' -q -o test \"-Dtest=BemaniwikiSongListParserTest,BemaniwikiOldSongListParserTest,WikiSongSyncPlanTest\" \"-Dsurefire.failIfNoSpecifiedTests=false\" 2>&1 | Select-Object -Last 60)",
       "Bash(grep -n \"^\\\\.[a-zA-Z\\\\\\\\:-]* *{\" src/output.css)",
-      "Read(//c/Users/oonok/**)"
+      "Read(//c/Users/oonok/**)",
+      "Bash(ls \"C:/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/\" 2>/dev/null | head; ls /c/Users/oonok/beat-seeker/node_modules | grep -i puppeteer)",
+      "Read(//c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/**)",
+      "Bash(node share-flow.mjs pc)"
     ]
   }
 }

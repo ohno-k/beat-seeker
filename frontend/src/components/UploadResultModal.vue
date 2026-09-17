@@ -477,12 +477,22 @@
                 </label>
               </div>
             </div>
-            <div class="px-4 py-3 border-t border-slate-100 dark:border-slate-700 flex gap-2 shrink-0">
-              <button @click="isShareOptionsOpen = false" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
+            <!--
+              押す前に経路を伝えておく。PC は X のタブへ移ると後の案内パネルが目に入らないので、
+              「投稿画面で貼り付ける」操作はここで知らせる。
+            -->
+            <p class="px-4 pt-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-700 shrink-0">
+              {{ t(usesShareSheet ? 'report.shareHintMobile' : 'report.shareHintPc') }}
+            </p>
+            <div class="px-4 py-3 flex gap-2 shrink-0">
+              <button @click="isShareOptionsOpen = false" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-xs sm:text-sm transition-colors">
                 {{ t('common.cancel') }}
               </button>
+              <button @click="saveShareImage" :disabled="!shareBlob" class="flex-1 min-w-0 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-xs sm:text-sm transition-colors disabled:opacity-60">
+                {{ t('report.saveImage') }}
+              </button>
               <!-- 画像は先回りで生成しておき、click 時は共有だけ行う（ユーザー操作の有効期間内に navigator.share / window.open を呼ぶため） -->
-              <button @click="confirmShare" :disabled="isGeneratingShare || isSharing" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
+              <button @click="confirmShare" :disabled="isGeneratingShare || isSharing" class="flex-1 min-w-0 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
                 <template v-if="isGeneratingShare || isSharing">
                   <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -506,7 +516,7 @@
         </div>
 
         <!--
-          Web Share が使えない環境（PC ブラウザ等）向けの案内。画像はコピー済み / ダウンロード済みで、
+          PC ブラウザ（と Web Share が使えないスマホ）向けの案内。画像はコピー済み / ダウンロード済みで、
           X の投稿画面は window.open で開いている。ポップアップブロック等で開かなかった場合のために
           通常のリンク（ユーザーの click で開くのでブロックされない）も置く。
         -->
@@ -521,10 +531,10 @@
               <button @click="shareFallback = null" class="py-2.5 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
                 {{ t('common.close') }}
               </button>
-              <button @click="downloadShareImage" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
+              <button @click="saveShareImage" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
                 {{ t('report.saveImage') }}
               </button>
-              <a :href="xIntentUrl" target="_blank" rel="noopener" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5">
+              <a :href="intentUrl" target="_blank" rel="noopener" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
                 </svg>
@@ -556,8 +566,9 @@
  *    オプション画面を開いている間に先回りで生成し、ポストボタンの click 中に共有処理だけを走らせる
  *    （生成を待ってから navigator.share / window.open を呼ぶとユーザー操作の有効期間が切れて
  *    ブロックされ、X に飛ばない）
- *  - Web Share API でファイル共有（共有シートから X アプリを選ぶと画像付きの投稿画面が開く）、
- *    不可ならクリップボードコピー or ダウンロード + X の投稿画面（x.com/intent/post）を開く
+ *  - 共有の経路は端末で分ける（utils/shareToX）。スマホ / タブレットは Web Share API でファイル共有
+ *    （共有シートから X アプリを選ぶと画像 + 定型文入りの投稿画面が開く）、PC はクリップボードコピー
+ *    （不可ならダウンロード）+ ブラウザで定型文入りの X 投稿画面（x.com/intent/post）を開く
  *
  * props:
  *  - isOpen: モーダル開閉
@@ -594,6 +605,7 @@ import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
 import { ignoreOutside, withHtml2canvasTextFix } from '../utils/html2canvasHelpers';
+import { canShareImageNatively, copyImageToClipboard, downloadBlob, isIosDevice, xIntentUrl } from '../utils/shareToX';
 import html2canvas from 'html2canvas';
 
 const { t } = useI18n();
@@ -1036,13 +1048,16 @@ const measurePreview = async () => {
 };
 watch([isShareOptionsOpen, shareSortMode, showDjName], () => { if (isShareOptionsOpen.value) measurePreview(); });
 
+const SHARE_FILE_NAME = 'beat-seeker-report.png';
 /** 投稿本文。Web Share の text と intent URL の text で共通。 */
 const shareText = computed(() => `${t('report.shareText')}\nhttps://beat-seeker.com \n#BeatSeeker`);
+/** X の投稿画面 URL（本文プリセット）。 */
+const intentUrl = computed(() => xIntentUrl(shareText.value));
 /**
- * X の投稿画面 URL（本文プリセット）。twitter.com/intent/tweet の現行版。
- * スマホでは X アプリが入っていれば x.com のリンクはアプリ側（投稿画面）で開く。
+ * 共有シート（Web Share）経由で X アプリへ画像を渡す端末か。スマホ / タブレットだけ true。
+ * PC は canShare が true でも X が並ばない OS の共有ダイアログが開くだけなので使わない。
  */
-const xIntentUrl = computed(() => `https://x.com/intent/post?text=${encodeURIComponent(shareText.value)}`);
+const usesShareSheet = canShareImageNatively();
 
 /**
  * 先回りで生成した共有画像（PNG）。オプション画面を開いている間に作っておき、ポストボタンの click では
@@ -1122,44 +1137,45 @@ const openShareOptions = () => {
   isShareOptionsOpen.value = true;
 };
 
-/** 【関数の役割】 PNG をファイルとして保存させる。 */
-const downloadBlob = (blob: Blob) => {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'beat-seeker-report.png';
-  a.click();
-  // 即時に revoke するとブラウザによってはダウンロードが始まらないので少し待つ。
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+/**
+ * 【関数の役割】 「画像を保存」ボタン。iPhone / iPad は共有シートの「画像を保存」で写真アプリに入れられるので
+ * そちらを開く（ダウンロードだと「ファイル」アプリ行きになる）。それ以外はファイルとしてダウンロード。
+ */
+const saveShareImage = async () => {
+  const blob = shareBlob.value;
+  if (!blob) return;
+  const file = new File([blob], SHARE_FILE_NAME, { type: 'image/png' });
+  if (isIosDevice() && canShareImageNatively(file)) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return;
+      console.error('Web Share failed, downloading instead:', e);
+    }
+  }
+  downloadBlob(blob, SHARE_FILE_NAME);
 };
 
-const downloadShareImage = () => { if (shareBlob.value) downloadBlob(shareBlob.value); };
-
 /**
- * 【関数の役割】 Web Share が使えない環境向け。画像をクリップボードへ（不可ならダウンロード）入れてから
- * X の投稿画面を開く。画像は生成済みなので click からの経過は短く、window.open はポップアップ扱いされない。
+ * 【関数の役割】 PC ブラウザ（と Web Share が使えないスマホ）向け。画像をクリップボードへ（不可ならダウンロード）
+ * 入れてから X の投稿画面を開く。画像は生成済みなので click からの経過は短く、window.open はポップアップ扱いされない。
  * 万一ブロックされても案内パネルのリンクから開ける。
  */
 const postViaIntent = async (blob: Blob) => {
-  let copied = false;
-  try {
-    // 先にクリップボードへ。window.open で別タブにフォーカスが移ると書き込めなくなるため順番を守る。
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    copied = true;
-  } catch (e) {
-    console.warn('Clipboard copy failed, downloading instead:', e);
-    downloadBlob(blob);
-  }
+  // 先にクリップボードへ。window.open で別タブにフォーカスが移ると書き込めなくなるため順番を守る。
+  const copied = await copyImageToClipboard(blob);
+  if (!copied) downloadBlob(blob, SHARE_FILE_NAME);
   isShareOptionsOpen.value = false;
   shareFallback.value = copied ? 'copied' : 'downloaded';
-  window.open(xIntentUrl.value, '_blank');
+  window.open(intentUrl.value, '_blank');
 };
 
 /**
- * 【関数の役割】 ポストボタン。生成済みの画像を共有可能な経路で送り出す。
- * 優先順位:
- *  1. Web Share API（スマホ）: OS の共有シートから X アプリを選ぶと画像付きの投稿画面が開く
- *  2. クリップボードコピー（不可ならダウンロード）+ X の投稿画面を開く（PC ブラウザ等）
+ * 【関数の役割】 ポストボタン。生成済みの画像を端末に合った経路で送り出す。
+ *  - スマホ / タブレット: Web Share API。OS の共有シートから X アプリを選ぶと画像 + 定型文入りの投稿画面が開く
+ *  - PC: クリップボードコピー（不可ならダウンロード）+ ブラウザで定型文入りの投稿画面を開く
+ *    （X の投稿画面 URL には画像を添付する手段が無いので、貼り付けだけはユーザーにやってもらう）
  * 生成失敗後に押されたら作り直すだけ（共有はもう一度押してもらう）。
  */
 const confirmShare = async () => {
@@ -1171,10 +1187,11 @@ const confirmShare = async () => {
   if (isSharing.value) return;
   isSharing.value = true;
   try {
-    const file = new File([blob], 'beat-seeker-report.png', { type: 'image/png' });
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    const file = new File([blob], SHARE_FILE_NAME, { type: 'image/png' });
+    if (canShareImageNatively(file)) {
       try {
-        await navigator.share({ title: 'beat-seeker Report', text: shareText.value, files: [file] });
+        // title は渡さない（共有先によっては本文の前に件名として差し込まれ、定型文が崩れる）。
+        await navigator.share({ text: shareText.value, files: [file] });
         isShareOptionsOpen.value = false;
         return;
       } catch (e) {
