@@ -1204,8 +1204,9 @@ public class ChartTendencyService {
         for (DifficultyRank rank : difficultyRankRepo.findByRevisionOrderBySortOrderAsc("active")) {
             for (DifficultyRankSong song : rank.getSongs()) {
                 String t = song.getSongTitle();
-                if (t.endsWith(" [L]")) {
-                    map.put(t.substring(0, t.length() - 4) + "\t10", rank.getRankValue());
+                // ランク表の LEGGENDARIA は「タイトル + "[L]"」（スペース無し）で格納されている
+                if (t.endsWith("[L]")) {
+                    map.put(t.substring(0, t.length() - 3) + "\t10", rank.getRankValue());
                 } else {
                     map.put(t + "\t4", rank.getRankValue());
                 }

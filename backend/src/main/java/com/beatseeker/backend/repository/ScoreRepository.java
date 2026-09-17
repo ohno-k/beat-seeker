@@ -87,8 +87,10 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  SELECT sd.id AS chart_id, sd.title, " +
         "         CASE WHEN sd.difficulty = '4' THEN 'ANOTHER' ELSE 'LEGGENDARIA' END AS difficulty_name, " +
         "         sd.level, sd.notes, " +
+        // 注意: difficulty_rank_songs.song_title の LEGGENDARIA は「タイトル + '[L]'」（スペース無し）。
+        //       スペースを入れると LEGGENDARIA が全て weight NULL になり、歴代 BEAT-PT が過小になる。
         "         (SELECT MAX(sr.weight) FROM song_ranks sr " +
-        "           WHERE sr.mapped_title = CASE WHEN sd.difficulty = '10' THEN sd.title || ' [L]' ELSE sd.title END) AS weight " +
+        "           WHERE sr.mapped_title = CASE WHEN sd.difficulty = '10' THEN sd.title || '[L]' ELSE sd.title END) AS weight " +
         "  FROM song_definitions sd " +
         "  WHERE sd.revision = 'active' AND sd.difficulty IN ('4', '10') AND sd.level IN (11, 12) AND sd.notes > 0 " +
         "), " +
@@ -956,7 +958,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      *  - {@code song_ranks}: difficulty_ranks（revision='active'）と曲を結合し重みを付与
      *  - {@code scored_data}: scores と song_definitions を JOIN し
      *    {@code score_rate = score * 100 / (notes * 2)} を算出。
-     *    LEGGENDARIA は title に {@code ' [L]'} を付与してランク表のキーと合わせる
+     *    LEGGENDARIA は title に {@code '[L]'}（スペース無し）を付与してランク表のキーと合わせる
      *  - {@code valid_scores}: score_rate > 66.666% に絞り、beat_pt を算式
      *      {@code POWER(rate/100, 1.3) * weight + weight * boost}
      *    （boost は rate 帯に応じた加算）で計算
@@ -991,7 +993,8 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "        GROUP BY user_id, title, difficulty_name) s " +
         "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
         "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
-        "  JOIN song_ranks sr ON sr.mapped_title = (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || ' [L]' ELSE s.title END) " +
+        // 注意: ランク表の LEGGENDARIA は「タイトル + '[L]'」（スペース無し）。スペースを入れると LEGGENDARIA が全て JOIN から落ちる。
+        "  JOIN song_ranks sr ON sr.mapped_title = (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || '[L]' ELSE s.title END) " +
         "  WHERE s.difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND s.score > 0 " +
         "), " +
         "valid_scores AS ( " +
