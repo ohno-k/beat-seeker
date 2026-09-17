@@ -402,6 +402,7 @@ export const en = {
   'table.toNextRank': '{n}% to go',
   'table.highestTier': 'Highest tier reached',
   'table.folderAverage': 'Folder avg {rate}%',
+  'table.allTimeLegend': 'All-time best (score from a past version): {n}',
   'table.sortRateDesc': 'Rate: high',
   'table.sortRateAsc': 'Rate: low',
   'table.sortTitle': 'Title',

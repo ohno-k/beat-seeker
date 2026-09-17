@@ -401,6 +401,7 @@ export const ko = {
   'table.toNextRank': '{n}% 남음',
   'table.highestTier': '최고 랭크 달성',
   'table.folderAverage': '폴더 평균 {rate}%',
+  'table.allTimeLegend': '역대 베스트(과거작 스코어) {n}곡',
   'table.sortRateDesc': '레이트 높은 순',
   'table.sortRateAsc': '레이트 낮은 순',
   'table.sortTitle': '곡명 순',

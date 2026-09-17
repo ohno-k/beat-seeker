@@ -20,6 +20,7 @@ import type { ScoreRecord } from '../utils/scoreData';
 import type { RankInfo } from '../utils/beatTier';
 import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, getFolderRankOffsetMax, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
 import { getScoreGradeInfo, tierLabel } from '../utils/uploadReport';
+import { versionBadgeClass, versionName, versionShort } from '../utils/iidxVersions';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import DifficultyRankingModal from './DifficultyRankingModal.vue';
@@ -95,7 +96,12 @@ interface SongRow {
   /** 単曲ごとのランク（必要スコアレート表に対応）。未プレイは null。 */
   songRank: RankInfo | null;
   isLeggendaria: boolean;
-  /** 行ホバーで出す補足（EX スコア / MAX-n / DJ LEVEL）。 */
+  /**
+   * 「歴代ベストを反映」で過去作のスコアに置き換わった行なら、その作品番号（強調表示と作品バッジに使う）。
+   * 現行作のスコアがそのまま出ている行は null。
+   */
+  allTimeVersion: number | null;
+  /** 行ホバーで出す補足（EX スコア / MAX-n / DJ LEVEL / 歴代ベストの作品）。 */
   tooltip: string;
   /** この行の直前に「フォルダ平均」の区切りを入れるか（レート順のときだけ立つ）。 */
   avgBefore: boolean;
@@ -358,13 +364,16 @@ const tableData = computed(() => {
     const songRows: SongRow[] = songs.map((s, i) => {
       const prev = songs[i - 1];
       const grade = played(s) ? getScoreGradeInfo(s.score, s.maxScore) : null;
+      const allTimeVersion = played(s) ? (s.allTimeVersion ?? null) : null;
       return {
         key: `${s.title}_${s.difficultyName}`,
         song: s,
         songRank: played(s) ? getFolderRankInfoByRate(s.scoreRate, rank) : null,
         isLeggendaria: s.difficultyName === 'LEGGENDARIA',
+        allTimeVersion,
         tooltip: `${s.title} [${s.difficultyName}]`
-          + (grade?.grade ? `\nEX ${s.score} / ${s.maxScore}  (${grade.fromMax} ・ ${grade.grade})` : ''),
+          + (grade?.grade ? `\nEX ${s.score} / ${s.maxScore}  (${grade.fromMax} ・ ${grade.grade})` : '')
+          + (allTimeVersion ? `\n${t('filter.bestVersionTag', { name: `${allTimeVersion} ${versionName(allTimeVersion)}` })}` : ''),
         avgBefore: songSort.value !== 'title' && !!prev && played(prev) && played(s)
           && (prev.scoreRate >= averageRate) !== (s.scoreRate >= averageRate),
       };
@@ -398,6 +407,8 @@ const tableData = computed(() => {
       rank,
       songs,
       songRows,
+      // 過去作のスコアで置き換わっている曲数（0 なら強調表示の凡例を出さない）。
+      allTimeCount: songRows.filter(r => r.allTimeVersion !== null).length,
       tierDist,
       totalScore,
       totalMaxScore,
@@ -707,6 +718,12 @@ const openGrowth = (data: FolderRow) => {
             </div>
           </div>
 
+          <!-- 「歴代ベストを反映」中だけ出る凡例。色付きの行 = 過去作のスコアが使われている曲 -->
+          <p v-if="data.allTimeCount > 0" class="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold leading-4 text-amber-700 dark:text-amber-400">
+            <span class="all-time-swatch shrink-0"></span>
+            <span>{{ t('table.allTimeLegend', { n: data.allTimeCount }) }}</span>
+          </p>
+
           <ul class="song-list card mt-2.5 overflow-hidden transition-colors duration-200">
             <template v-for="(entry, i) in data.songRows" :key="entry.key">
               <li v-if="entry.avgBefore" class="avg-divider text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-900/20 border-b border-b-slate-100 dark:border-b-slate-700/60">
@@ -716,13 +733,19 @@ const openGrowth = (data: FolderRow) => {
               </li>
               <li
                 class="song-row border-b-slate-100 dark:border-b-slate-700/60"
-                :class="entry.isLeggendaria ? 'border-l-purple-500' : 'border-l-red-500'"
+                :class="[entry.isLeggendaria ? 'border-l-purple-500' : 'border-l-red-500', { 'is-all-time': entry.allTimeVersion !== null }]"
                 :title="entry.tooltip"
               >
                 <span class="s-idx text-right text-[10px] font-bold tabular-nums text-slate-400 dark:text-slate-500">{{ i + 1 }}</span>
                 <span class="s-title flex items-baseline gap-1 min-w-0" :class="{ 'opacity-50': !entry.songRank }">
                   <span class="truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ entry.song.title }}</span>
                   <span v-if="entry.isLeggendaria" class="shrink-0 text-[10px] font-bold text-purple-600 dark:text-purple-400">[L]</span>
+                  <!-- 歴代反映で過去作のスコアに置き換わった行は、どの作品のスコアかを示す（スコア一覧と同じバッジ） -->
+                  <span
+                    v-if="entry.allTimeVersion !== null"
+                    class="shrink-0 px-1 py-0.5 text-[9px] font-bold rounded border leading-none"
+                    :class="versionBadgeClass(entry.allTimeVersion)"
+                  >{{ versionShort(entry.allTimeVersion) }}</span>
                 </span>
                 <span class="s-rate text-right text-[13px] font-bold tabular-nums whitespace-nowrap" :class="entry.songRank ? rateColorClass(entry.song.scoreRate, 'text-slate-700 dark:text-slate-300') : 'text-slate-400 dark:text-slate-500'">
                   {{ entry.songRank ? entry.song.scoreRate.toFixed(2) + '%' : '-' }}
@@ -833,6 +856,26 @@ const openGrowth = (data: FolderRow) => {
 /* 未プレイ行はアイコンが無いぶん低くなるので、アイコンの高さで揃える */
 .s-tier { grid-area: tier; min-height: 1.25rem; }
 .s-pt { grid-area: pt; }
+
+/*
+ * 「歴代ベストを反映」で過去作のスコアに置き換わった行。レート・ランクの文字色は意味を持っているので触らず、
+ * 行の背景だけをトグルと同じ琥珀系で淡く塗る（凡例の見本も同じ色）。
+ */
+.song-row.is-all-time,
+.all-time-swatch {
+  background-color: rgb(254 243 199 / 0.6);
+}
+.dark .song-row.is-all-time,
+.dark .all-time-swatch {
+  background-color: rgb(180 83 9 / 0.2);
+}
+.all-time-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.125rem;
+  border: 1px solid rgb(252 211 77);
+}
+.dark .all-time-swatch { border-color: rgb(180 83 9); }
 
 .avg-divider {
   display: flex;

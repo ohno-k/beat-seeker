@@ -379,6 +379,7 @@ export const ja = {
   'table.toNextRank': 'あと{n}%',
   'table.highestTier': '最高ランク到達',
   'table.folderAverage': 'フォルダ平均 {rate}%',
+  'table.allTimeLegend': '歴代ベスト（過去作のスコア）{n}曲',
   'table.sortRateDesc': 'レート高い順',
   'table.sortRateAsc': 'レート低い順',
   'table.sortTitle': '曲名順',
