@@ -404,6 +404,7 @@ export const en = {
   'table.folderAverage': 'Folder avg {rate}%',
   'table.allTimeLegend': '★ All-time best set in this version: {n}',
   'table.allTimeBestRow': 'All-time best (past best: {version} {score})',
+  'table.allTimeBestRowFirst': 'All-time best (no score in past versions)',
   'table.sortRateDesc': 'Rate: high',
   'table.sortRateAsc': 'Rate: low',
   'table.sortTitle': 'Title',

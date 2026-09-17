@@ -13,9 +13,10 @@
  * @prop scores        表示・集計対象のスコアレコード配列。「歴代ベストを反映」トグル ON のときは
  *                     歴代ベスト適用済みのレコードが渡ってくる。
  * @prop historyScores 成長記録モーダル用の現行作スコア（省略時は scores を流用）。
- * @prop beatenPastBest 譜面キー → 今作のスコアが並んだ／超えた過去作ベスト。入っている譜面は
- *                     「今作で歴代自己ベスト」として行を強調する（トグルの ON/OFF に依らない）。
- *                     過去作スコアが未取得・他ユーザー閲覧中は null（強調なし）。
+ * @prop currentAllTimeBest 今作のスコアが歴代自己ベストの譜面。キーがある譜面は行を強調する
+ *                     （トグルの ON/OFF に依らない）。値は並んだ／超えた過去作ベストで、
+ *                     過去作にスコアが無い譜面（新曲の初スコアなど）は null。
+ *                     過去作スコアが未取得・他ユーザー閲覧中は prop 自体が null（強調なし）。
  * @emits folder-open  フォルダが開かれた。親はこれを合図に過去作スコアを遅延取得する
  *                     （強調が見えるのは開いた中だけなので、開かれるまで取りに行かない）。
  */
@@ -36,7 +37,7 @@ import RankGrowthChartModal from './RankGrowthChartModal.vue';
 const props = defineProps<{
   scores: ScoreRecord[];
   historyScores?: ScoreRecord[];
-  beatenPastBest?: Map<string, PastBest> | null;
+  currentAllTimeBest?: Map<string, PastBest | null> | null;
 }>();
 
 const emit = defineEmits<{ (e: 'folder-open'): void }>();
@@ -107,8 +108,8 @@ interface SongRow {
   songRank: RankInfo | null;
   isLeggendaria: boolean;
   /**
-   * 今作のスコアが歴代自己ベスト（過去作のベストに並んだ／超えた）の行か。強調表示の対象。
-   * 比べる過去作スコアが無い譜面（新曲など）は「超えた」わけではないので false。
+   * 今作のスコアが歴代自己ベストの行か。強調表示の対象。
+   * 過去作のベストに並んだ／超えた譜面に加えて、過去作にスコアが無い譜面（新曲の初スコアなど）も含む。
    */
   isAllTimeBest: boolean;
   /**
@@ -382,19 +383,21 @@ const tableData = computed(() => {
       const grade = played(s) ? getScoreGradeInfo(s.score, s.maxScore) : null;
       const allTimeVersion = played(s) ? (s.allTimeVersion ?? null) : null;
       // 過去作のスコアに置き換わった行（allTimeVersion あり）は今作が負けているので、両方が立つことはない。
-      const beaten = played(s) && allTimeVersion === null
-        ? (props.beatenPastBest?.get(chartKey(s.title, s.difficultyName)) ?? null)
-        : null;
+      const allTimeKey = chartKey(s.title, s.difficultyName);
+      const isAllTimeBest = played(s) && allTimeVersion === null && (props.currentAllTimeBest?.has(allTimeKey) ?? false);
+      // 並んだ／超えた過去作ベスト。過去作にスコアが無い譜面（新曲の初スコアなど）は null。
+      const beaten = isAllTimeBest ? (props.currentAllTimeBest?.get(allTimeKey) ?? null) : null;
       return {
         key: `${s.title}_${s.difficultyName}`,
         song: s,
         songRank: played(s) ? getFolderRankInfoByRate(s.scoreRate, rank) : null,
         isLeggendaria: s.difficultyName === 'LEGGENDARIA',
-        isAllTimeBest: beaten !== null,
+        isAllTimeBest,
         allTimeVersion,
         tooltip: `${s.title} [${s.difficultyName}]`
           + (grade?.grade ? `\nEX ${s.score} / ${s.maxScore}  (${grade.fromMax} ・ ${grade.grade})` : '')
-          + (beaten ? `\n★ ${t('table.allTimeBestRow', { version: `${beaten.version} ${versionName(beaten.version)}`, score: beaten.score })}` : '')
+          + (beaten ? `\n★ ${t('table.allTimeBestRow', { version: `${beaten.version} ${versionName(beaten.version)}`, score: beaten.score })}`
+            : isAllTimeBest ? `\n★ ${t('table.allTimeBestRowFirst')}` : '')
           + (allTimeVersion ? `\n${t('filter.bestVersionTag', { name: `${allTimeVersion} ${versionName(allTimeVersion)}` })}` : ''),
         avgBefore: songSort.value !== 'title' && !!prev && played(prev) && played(s)
           && (prev.scoreRate >= averageRate) !== (s.scoreRate >= averageRate),
@@ -740,7 +743,7 @@ const openGrowth = (data: FolderRow) => {
             </div>
           </div>
 
-          <!-- 凡例。色付きの行 = 今作のスコアが歴代自己ベスト（過去作のベストに並んだ／超えた）の曲 -->
+          <!-- 凡例。色付きの行 = 今作のスコアが歴代自己ベスト（過去作のベストに並んだ／超えた、または過去作にスコアが無い）の曲 -->
           <p v-if="data.allTimeCount > 0" class="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold leading-4 text-amber-700 dark:text-amber-400">
             <span class="all-time-swatch shrink-0"></span>
             <span>{{ t('table.allTimeLegend', { n: data.allTimeCount }) }}</span>

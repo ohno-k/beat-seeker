@@ -381,6 +381,7 @@ export const ja = {
   'table.folderAverage': 'フォルダ平均 {rate}%',
   'table.allTimeLegend': '★ 今作のスコアが歴代自己ベスト {n}曲',
   'table.allTimeBestRow': '歴代自己ベスト（過去作のベスト: {version} {score}）',
+  'table.allTimeBestRowFirst': '歴代自己ベスト（過去作のスコアなし）',
   'table.sortRateDesc': 'レート高い順',
   'table.sortRateAsc': 'レート低い順',
   'table.sortTitle': '曲名順',

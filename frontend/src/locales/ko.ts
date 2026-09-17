@@ -403,6 +403,7 @@ export const ko = {
   'table.folderAverage': '폴더 평균 {rate}%',
   'table.allTimeLegend': '★ 이번 작 스코어가 역대 자기 베스트 {n}곡',
   'table.allTimeBestRow': '역대 자기 베스트(과거작 베스트: {version} {score})',
+  'table.allTimeBestRowFirst': '역대 자기 베스트(과거작 스코어 없음)',
   'table.sortRateDesc': '레이트 높은 순',
   'table.sortRateAsc': '레이트 낮은 순',
   'table.sortTitle': '곡명 순',

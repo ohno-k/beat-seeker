@@ -209,7 +209,7 @@
       v-if="!isPrivateView"
       :scores="displayScores"
       :history-scores="allFlattenedScores"
-      :beaten-past-best="beatenPastBest"
+      :current-all-time-best="currentAllTimeBest"
       @folder-open="tableFolderOpened = true"
     />
 
@@ -459,20 +459,25 @@ watch([tableFolderOpened, hasPastImports, canUseAllTime], ([opened, hasPast, can
 });
 
 /**
- * 【computed の役割】 譜面キー → 今作のスコアが並んだ／超えた過去作ベスト（非公式難易度表の行強調用）。
+ * 【computed の役割】 今作のスコアが歴代自己ベストの譜面（非公式難易度表の行強調用）。
+ * 譜面キー → 並んだ／超えた過去作ベスト。過去作にスコアが無い譜面（新曲の初スコアなど）は値が null。
  *
- * 同点を今作扱いにするのは {@link applyAllTimeBest} と同じ規則。比べる過去作スコアが無い譜面は
- * 「超えた」わけではないので入れない。現行作のレコードから作るので歴代反映トグルには依存しない。
+ * 「過去作が上回るときだけ過去作、同点・過去作なしは今作」は {@link applyAllTimeBest} や
+ * スコア一覧の歴代ベスト作品フィルタと同じ規則。現行作のレコードから作るので歴代反映トグルには依存しない。
  * 過去作は本人のデータなので、他ユーザー閲覧中・未取得の間は null（強調なし）。
+ * 過去作スコアが 1 件も無いときも null にする（比べる相手が無いのに全行が光ってしまうため）。
  */
-const beatenPastBest = computed<Map<string, PastBest> | null>(() => {
+const currentAllTimeBest = computed<Map<string, PastBest | null> | null>(() => {
   if (!canUseAllTime.value || !isPastLoaded.value) return null;
   const bestByChart = pastBestByChart();
-  const map = new Map<string, PastBest>();
+  if (bestByChart.size === 0) return null;
+  const map = new Map<string, PastBest | null>();
   allFlattenedScores.value.forEach(rec => {
+    if (rec.score <= 0) return;
     const key = chartKey(rec.title, rec.difficultyName);
     const past = bestByChart.get(key);
-    if (past && past.score > 0 && rec.score >= past.score) map.set(key, past);
+    if (!past || past.score <= 0) map.set(key, null);
+    else if (rec.score >= past.score) map.set(key, past);
   });
   return map;
 });
