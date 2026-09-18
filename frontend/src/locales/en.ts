@@ -511,6 +511,8 @@ export const en = {
   'report.updatedSongs': 'Updated Songs',
   'report.noUpdates': 'No personal bests were updated.',
   'report.shareX': 'Post to X with Image',
+  /** Appended to the button above so it is clear you can just save the image (wraps here on narrow screens). */
+  'report.shareXOrSave': ' / Save Image',
   'report.generatingImage': 'Generating image...',
   'report.backToDashboard': 'Back to Dashboard',
   'report.shareText': 'I updated my scores on beat-seeker!',
@@ -533,6 +535,8 @@ export const en = {
   'report.sortByRatePtDesc': 'Top 10 by RATE-PT',
   'report.sortBySongTier': 'By song tier',
   'report.sortBySongTierDesc': 'Top 10 by per-song tier',
+  'report.onlyAllTimeBest': 'All-time bests only',
+  'report.onlyAllTimeBestDesc': 'Top {max} all-time best updates by BEAT-PT',
   'report.pickCustom': 'Custom pick',
   'report.pickCustomDesc': 'Pick up to {max} updated charts',
   'report.songTier': 'Song tier',

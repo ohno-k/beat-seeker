@@ -516,6 +516,8 @@ export const ja = {
   'report.updatedSongs': '更新された楽曲',
   'report.noUpdates': '自己ベストの更新はありませんでした。',
   'report.shareX': '画像付きでXにポスト',
+  /** 上のボタンに続けて出す「画像保存だけでもよい」という案内（狭い画面ではここで改行される）。 */
+  'report.shareXOrSave': '／画像保存',
   'report.generatingImage': '画像生成中...',
   'report.backToDashboard': 'ダッシュボードへ戻る',
   'report.shareText': 'beat-seekerでスコアを更新しました！',
@@ -538,6 +540,8 @@ export const ja = {
   'report.sortByRatePtDesc': 'RATE-PT が高い順に上位10曲',
   'report.sortBySongTier': '単曲ティア順',
   'report.sortBySongTierDesc': '単曲ティアが高い順に上位10曲',
+  'report.onlyAllTimeBest': '歴代ベストのみ',
+  'report.onlyAllTimeBestDesc': '歴代自己ベスト更新曲をBEAT-PT順に上位{max}曲',
   'report.pickCustom': '自由選択',
   'report.pickCustomDesc': '更新した曲から最大{max}曲を選ぶ',
   'report.songTier': '単曲ティア',

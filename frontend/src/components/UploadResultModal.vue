@@ -411,7 +411,8 @@
               <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
               </svg>
-              {{ t('report.shareX') }}
+              <!-- 狭い画面では「／画像保存」の手前で折り返す（「画像」「保存」で割れないよう後半は nowrap）。 -->
+              <span class="min-w-0">{{ t('report.shareX') }}<span class="whitespace-nowrap">{{ t('report.shareXOrSave') }}</span></span>
             </template>
             <template v-else>
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -1107,9 +1108,10 @@ const isSharing = ref(false);
 const isShareOptionsOpen = ref(false);
 /**
  * 共有画像に載せる曲の選び方。'beat' / 'rate' / 'tier' はその順の上位 10 曲、
+ * 'allTime' は歴代自己ベストを更新した曲だけを BEAT-PT 順に上位 10 曲、
  * 'custom' は更新曲の中からユーザーが選んだ曲（最大 10 曲、選んだ順）。
  */
-type ShareMode = 'beat' | 'rate' | 'tier' | 'custom';
+type ShareMode = 'beat' | 'rate' | 'tier' | 'allTime' | 'custom';
 const shareMode = ref<ShareMode>('beat');
 /** 自由選択で選んだ曲のキー（{@link songKey}）。配列の順がそのまま画像の並び順になる。 */
 const customKeys = ref<string[]>([]);
@@ -1141,16 +1143,27 @@ const versionLabel = computed(() => {
   return `IIDX ${v} ${versionName(v)}`;
 });
 
+/**
+ * 歴代自己ベストを更新した曲（★ 過去作のベストを塗り替えた / ☆ 今作のベストをさらに更新）だけを
+ * BEAT-PT 順に並べたもの。「歴代ベストのみ」の選択肢はこれが 1 曲以上あるときだけ出す
+ * （過去作 CSV 未取り込みのユーザーには常に 0 件になるため）。
+ */
+const allTimeBestSongs = computed<UpdatedSong[]>(() => {
+  const songs = (props.diffData?.updatedSongs ?? []).filter(s => s.allTimeBestUpdated || s.allTimeBestExtended);
+  return sortUpdatedSongs(songs, 'beat');
+});
+
 /** 選び方の選択肢。RATE-PT 順は Rate-Tier を表示しているユーザーにだけ出す。 */
 const shareModeOptions = computed(() => {
   const opts: { value: ShareMode; label: string; desc: string; tone: 'blue' | 'emerald' | 'amber' | 'slate' }[] = [
     { value: 'beat', label: t('report.sortByBeatPt'), desc: t('report.sortByBeatPtDesc'), tone: 'blue' },
   ];
   if (showRateTier.value) opts.push({ value: 'rate', label: t('report.sortByRatePt'), desc: t('report.sortByRatePtDesc'), tone: 'emerald' });
-  opts.push(
-    { value: 'tier', label: t('report.sortBySongTier'), desc: t('report.sortBySongTierDesc'), tone: 'amber' },
-    { value: 'custom', label: t('report.pickCustom'), desc: t('report.pickCustomDesc', { max: SHARE_MAX_SONGS }), tone: 'slate' },
-  );
+  opts.push({ value: 'tier', label: t('report.sortBySongTier'), desc: t('report.sortBySongTierDesc'), tone: 'amber' });
+  if (allTimeBestSongs.value.length > 0) {
+    opts.push({ value: 'allTime', label: `★ ${t('report.onlyAllTimeBest')}`, desc: t('report.onlyAllTimeBestDesc', { max: SHARE_MAX_SONGS }), tone: 'amber' });
+  }
+  opts.push({ value: 'custom', label: t('report.pickCustom'), desc: t('report.pickCustomDesc', { max: SHARE_MAX_SONGS }), tone: 'slate' });
   return opts;
 });
 
@@ -1172,6 +1185,7 @@ const customSongs = computed(() => customKeys.value.map(k => songByKey.value.get
 const shareSongs = computed<UpdatedSong[]>(() => {
   if (!props.diffData) return [];
   if (shareMode.value === 'custom') return customSongs.value;
+  if (shareMode.value === 'allTime') return allTimeBestSongs.value.slice(0, SHARE_MAX_SONGS);
   return sortUpdatedSongs(props.diffData.updatedSongs, shareMode.value).slice(0, SHARE_MAX_SONGS);
 });
 
@@ -1183,8 +1197,9 @@ const customColumnOptions = computed(() => {
   return opts;
 });
 
-/** 画像の右端の列。並び順モードはその指標、自由選択はユーザーの選択（RATE-PT は表示 ON のときだけ）。 */
+/** 画像の右端の列。並び順モードはその指標（歴代ベストのみは BEAT-PT）、自由選択はユーザーの選択（RATE-PT は表示 ON のときだけ）。 */
 const shareColumn = computed<ShareColumn>(() => {
+  if (shareMode.value === 'allTime') return 'beat';
   if (shareMode.value !== 'custom') return shareMode.value;
   return customColumn.value === 'rate' && !showRateTier.value ? 'beat' : customColumn.value;
 });
@@ -1193,11 +1208,12 @@ const SHARE_MODE_LABEL_KEY: Record<ShareMode, string> = {
   beat: 'report.sort.beat',
   rate: 'report.sort.rate',
   tier: 'report.sort.tier',
+  allTime: 'report.onlyAllTimeBest',
   custom: 'report.pickCustom',
 };
 
-/** 自由選択で 1 曲も選んでいない間は画像を作らない（空のリストを共有させない）。 */
-const hasShareSongs = computed(() => shareMode.value !== 'custom' || customSongs.value.length > 0);
+/** 載せる曲が 1 曲も無い間は画像を作らない（空のリストを共有させない）。 */
+const hasShareSongs = computed(() => (shareMode.value !== 'custom' && shareMode.value !== 'allTime') || shareSongs.value.length > 0);
 
 // ── 自由選択の候補リスト（並び順の選択肢は一覧と同じ sortOptions を使う） ──
 
@@ -1238,7 +1254,8 @@ const pickMetric = (song: UpdatedSong) => {
 const selectShareMode = (mode: ShareMode) => {
   if (mode === 'custom' && customKeys.value.length === 0) {
     customKeys.value = shareSongs.value.map(songKey);
-    if (shareMode.value !== 'custom') customColumn.value = shareMode.value;
+    // 歴代ベストのみは BEAT-PT を出しているので、そこから移ったときも BEAT-PT 列のままにする。
+    if (shareMode.value !== 'custom') customColumn.value = shareMode.value === 'allTime' ? 'beat' : shareMode.value;
   }
   shareMode.value = mode;
 };
@@ -1352,12 +1369,16 @@ watch(shareImageProps, () => { if (isShareOptionsOpen.value) scheduleShareImage(
 watch(isShareOptionsOpen, (open) => { if (open && !shareBlob.value) scheduleShareImage(); });
 
 /**
- * 【関数の役割】 シェアオプションを開く。一覧を RATE-PT 順・単曲ティア順で見ていたら画像もそれに合わせる。
+ * 【関数の役割】 シェアオプションを開く。一覧を RATE-PT 順・単曲ティア順で見ていたら画像もそれに合わせ、
+ * 「★ 歴代ベスト更新」で絞り込んで見ていたら画像も歴代ベストのみにする。
  * 自由選択で曲を選んである間は、開き直してもその選択を保つ。
  */
 const openShareOptions = () => {
   if (!(shareMode.value === 'custom' && customKeys.value.length > 0)) {
-    shareMode.value = listSort.value === 'rate' && showRateTier.value ? 'rate' : listSort.value === 'tier' ? 'tier' : 'beat';
+    shareMode.value = listFilter.value === 'allTimeBest' && allTimeBestSongs.value.length > 0 ? 'allTime'
+      : listSort.value === 'rate' && showRateTier.value ? 'rate'
+      : listSort.value === 'tier' ? 'tier'
+      : 'beat';
   }
   isShareOptionsOpen.value = true;
 };
