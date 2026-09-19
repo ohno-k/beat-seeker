@@ -142,6 +142,26 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String pushSubscription; // Web Push の購読情報 JSON
 
+    /**
+     * リーグ関連の通知（開始・結果・同グループの更新・終盤リマインド）を受け取るか。
+     *
+     * false にするとブラウザ通知もアプリ内通知（ベル）も作られない。リーグは週次で複数の
+     * 通知が出る唯一の機能なので、「うるさいから通知そのものを切る」（＝ライバル申請等も
+     * 届かなくなる）に走らせないための逃げ道として用意している。
+     *
+     * <p>NOT NULL を付けていないのは、既存行のあるテーブルへ後付けする列だから
+     * （NOT NULL の ALTER は失敗し得る）。読み取り側は {@link #isLeagueNotificationsEnabled()}
+     * を使い、null は「有効」として扱う（既存ユーザーは今までどおり受け取る）。
+     */
+    @Column(name = "league_notifications_enabled")
+    @org.hibernate.annotations.ColumnDefault("true")
+    private Boolean leagueNotificationsEnabled = true;
+
+    /** リーグ通知を受け取るか（null は有効扱い）。 */
+    public boolean isLeagueNotificationsEnabled() {
+        return !Boolean.FALSE.equals(leagueNotificationsEnabled);
+    }
+
     /** メールアドレス。パスワードリセット通知等に使う。ユニーク制約あり。 */
     @Column(unique = true)
     private String email;

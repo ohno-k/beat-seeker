@@ -34,9 +34,13 @@ public class AppNotification {
 
     /**
      * 通知の種別。
-     *  - "SCORE_BEAT"      : フレンドにスコアを抜かれた
-     *  - "FRIEND_RANK_UP"  : フレンドが Beat-Tier ランクアップした
-     *  - "LEAGUE_START"    : 参加中のリーグの週が始まった（卓・グループ・課題曲の公開）
+     *  - "SCORE_BEAT"          : フレンドにスコアを抜かれた
+     *  - "FRIEND_RANK_UP"      : フレンドが Beat-Tier ランクアップした
+     *  - "LEAGUE_START"        : 参加中のリーグの週が始まった（卓・グループ・課題曲の公開）
+     *  - "LEAGUE_RESULT"       : リーグの週が終わった（順位・昇降格・PT・自動休止の警告）
+     *  - "LEAGUE_DEADLINE"     : 締切前リマインド（課題曲が揃っていない人だけ）
+     *  - "LEAGUE_GROUP_UPDATE" : 同グループの誰かが課題曲を更新した（ブラウザ通知は送らない）
+     *  - "LEAGUE_OVERTAKEN"    : 同グループで抜かれてグループ順位が下がった
      *
      * フロントの {@code NotificationBox.vue} がこの値でアイコンと色を出し分けるので、
      * 種別を増やしたら同ファイルにも追加すること。

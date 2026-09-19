@@ -204,6 +204,8 @@ export const ko = {
   'dashboard.enableNotifications': '알림 활성화',
   'dashboard.notificationsEnabled': '알림이 활성화되었습니다',
   'dashboard.notificationsReregister': '알림 다시 등록',
+  'dashboard.leagueNotifications': '리그 알림 받기',
+  'dashboard.leagueNotificationsHint': '리그 시작·결과, 같은 그룹의 과제곡 갱신, 마감 전 리마인드를 알려드립니다. OFF로 하면 벨 알림도 오지 않습니다.',
   'dashboard.pushServerDisabled': '서버 측 알림 전송이 현재 중단되어 있습니다. 복구될 때까지 브라우저 알림은 도착하지 않습니다.',
   'dashboard.pushNotSubscribed': '알림은 허용되어 있지만 이 기기의 등록이 서버에 남아 있지 않습니다. "알림 다시 등록"을 눌러 주세요.',
   'dashboard.testNotification': '테스트 전송',

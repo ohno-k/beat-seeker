@@ -208,6 +208,8 @@ export const ja = {
   'dashboard.enableNotifications': '通知を有効にする',
   'dashboard.notificationsEnabled': '通知は有効です',
   'dashboard.notificationsReregister': '通知を登録し直す',
+  'dashboard.leagueNotifications': 'リーグの通知を受け取る',
+  'dashboard.leagueNotificationsHint': 'リーグの開始・結果、同じグループの課題曲更新、締切前のリマインドを通知します。OFF にするとベルの通知も届きません。',
   'dashboard.pushServerDisabled': 'サーバー側の通知送信が現在停止しています。復旧までブラウザ通知は届きません。',
   'dashboard.pushNotSubscribed': '通知は許可されていますが、この端末の登録がサーバーに残っていません。「通知を登録し直す」を押してください。',
   'dashboard.testNotification': 'テスト送信',

@@ -85,6 +85,10 @@ const notificationIcon = (type: string) => {
   if (type === 'SCORE_BEAT') return '⚡';
   if (type === 'FRIEND_RANK_UP') return '🏆';
   if (type === 'LEAGUE_START') return '🏁';
+  if (type === 'LEAGUE_RESULT') return '🎖️';
+  if (type === 'LEAGUE_DEADLINE') return '⏰';
+  if (type === 'LEAGUE_OVERTAKEN') return '📉';
+  if (type === 'LEAGUE_GROUP_UPDATE') return '👥';
   return '🔔';
 };
 
@@ -93,8 +97,10 @@ const notificationIcon = (type: string) => {
  * @param type 通知タイプ
  */
 const notificationIconClass = (type: string) => {
-  if (type === 'SCORE_BEAT') return 'bg-red-100 dark:bg-red-900/30';
-  if (type === 'LEAGUE_START') return 'bg-indigo-100 dark:bg-indigo-900/30';
+  if (type === 'SCORE_BEAT' || type === 'LEAGUE_OVERTAKEN') return 'bg-red-100 dark:bg-red-900/30';
+  if (type === 'LEAGUE_DEADLINE') return 'bg-orange-100 dark:bg-orange-900/30';
+  if (type === 'LEAGUE_GROUP_UPDATE') return 'bg-slate-100 dark:bg-slate-700/50';
+  if (type.startsWith('LEAGUE_')) return 'bg-indigo-100 dark:bg-indigo-900/30';
   return 'bg-amber-100 dark:bg-amber-900/30';
 };
 </script>

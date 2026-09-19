@@ -26,6 +26,7 @@ public class LeagueScheduler {
 
     private final LeagueWeekLifecycleService lifecycleService;
     private final LeagueService leagueService;
+    private final LeagueNotificationService notificationService;
 
     /**
      * シーズン開始日（JST）。この日以降の月曜 12:00 のみ自動編成・開始する。
@@ -39,9 +40,11 @@ public class LeagueScheduler {
      */
     public LeagueScheduler(LeagueWeekLifecycleService lifecycleService,
                            LeagueService leagueService,
+                           LeagueNotificationService notificationService,
                            @Value("${app.league.season-start:2026-08-03}") String seasonStart) {
         this.lifecycleService = lifecycleService;
         this.leagueService = leagueService;
+        this.notificationService = notificationService;
         this.seasonStart = LocalDate.parse(seasonStart);
     }
 
@@ -57,6 +60,23 @@ public class LeagueScheduler {
                 lifecycleService.createDraftWeek(ladder);
             } catch (Exception e) {
                 log.error("リーグ draft 週の作成に失敗: ladder={}", ladder, e);
+            }
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 日曜 12:00 JST に、課題曲が揃っていない参加者へ締切リマインドを送る。
+     *
+     * 締め（日曜 21:00）の 9 時間前。有効曲が 3 曲に満たない人だけが対象で、揃っている人には
+     * 送らない。「参加しているのに気付かないまま不戦敗」「知らないうちに自動休止」を防ぐのが目的。
+     */
+    @Scheduled(cron = "0 0 12 * * SUN", zone = "Asia/Tokyo")
+    public void remindDeadline() {
+        for (String ladder : LeagueService.LADDERS) {
+            try {
+                notificationService.notifyDeadlineReminder(ladder);
+            } catch (Exception e) {
+                log.error("リーグ終盤リマインドの起動に失敗: ladder={}", ladder, e);
             }
         }
     }

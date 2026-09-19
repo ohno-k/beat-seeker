@@ -69,6 +69,20 @@ public class LeagueMember {
     @Column(name = "final_rank")
     private Integer finalRank;
 
+    /**
+     * 「同グループで抜かれた」通知を最後に評価したときのグループ内順位。
+     *
+     * 週の途中でグループの誰かが課題曲を更新するたびに順位表を計算し直し、この値より
+     * 順位が下がったメンバーにだけ通知する（下がっていない人には送らない）ための記録。
+     * 通知の送信有無に関わらず、評価のたびに最新順位で上書きする。
+     *
+     * <p>順位そのものは進行中は都度計算する方針（{@link #finalRank} は締め後のみ）なので、
+     * この列は順位の永続化ではなく「前回通知判定時のスナップショット」であり、
+     * 表示には一切使わない。null は「まだ一度も評価していない」。
+     */
+    @Column(name = "last_notified_rank")
+    private Integer lastNotifiedRank;
+
     /** 昇降格結果。{@code "promote" / "stay" / "relegate"}。週次締めで凍結。 */
     @Column(length = 12)
     private String movement;

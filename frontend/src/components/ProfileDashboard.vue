@@ -499,6 +499,33 @@
           {{ t('dashboard.currentStatus') }}: {{ notificationStatus === 'granted' ? t('dashboard.statusGranted') : notificationStatus === 'denied' ? t('dashboard.statusDenied') : t('dashboard.statusDefault') }}
         </span>
       </div>
+
+      <!-- 通知の種類ごとの設定。リーグは週次で複数の通知が出るので個別に切れるようにしている。 -->
+      <div v-if="pushStatus" class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <button
+            type="button"
+            role="switch"
+            :aria-checked="pushStatus.leagueNotifications"
+            @click="handleToggleLeagueNotifications"
+            class="mt-0.5 relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors"
+            :class="pushStatus.leagueNotifications ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'"
+          >
+            <span
+              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform mt-0.5"
+              :class="pushStatus.leagueNotifications ? 'translate-x-4' : 'translate-x-0.5'"
+            ></span>
+          </button>
+          <span class="min-w-0">
+            <span class="block text-sm font-bold text-slate-700 dark:text-slate-200">
+              {{ t('dashboard.leagueNotifications') }}
+            </span>
+            <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {{ t('dashboard.leagueNotificationsHint') }}
+            </span>
+          </span>
+        </label>
+      </div>
     </div>
 
     <!-- 過去作スコアの取り込み状況（本人のみ）。取り込み自体は通常の CSV 取り込み UI が行う。
@@ -562,7 +589,7 @@ const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
 const { t } = useI18n();
 // プッシュ通知は「自分を閲覧中」のみ有効（viewingUserId が無いケース）。
-const { requestNotificationPermission, sendTestNotification, pushStatus, fetchPushStatus } = useFriends();
+const { requestNotificationPermission, sendTestNotification, pushStatus, fetchPushStatus, setLeagueNotifications } = useFriends();
 
 /** URL 共有モーダルの開閉状態。 */
 const isShareModalOpen = ref(false);
@@ -616,6 +643,22 @@ const handleEnableNotifications = async () => {
     // 購読が保存されたか・サーバー側が生きているかを取り直して表示に反映する。
     await fetchPushStatus();
   }
+};
+
+/**
+ * 【関数の役割】 リーグ関連通知の受け取り ON/OFF を切り替える。
+ *
+ * リーグは週次で複数の通知が出る唯一の機能なので、「うるさいからブラウザごと通知を切る」
+ * （＝ライバル申請やスコア追い抜きまで届かなくなる）に走らせないための逃げ道。
+ * OFF にするとブラウザ通知だけでなくベルのアプリ内通知も作られなくなる。
+ */
+const handleToggleLeagueNotifications = async () => {
+  if (!pushStatus.value) return;
+  const next = !pushStatus.value.leagueNotifications;
+  // 楽観的に反映し、失敗したら元に戻す（トグルの反応を待たせない）。
+  pushStatus.value.leagueNotifications = next;
+  const ok = await setLeagueNotifications(next);
+  if (!ok && pushStatus.value) pushStatus.value.leagueNotifications = !next;
 };
 
 /** 【関数の役割】 テスト用プッシュ通知を自分宛てに送信する（ちゃんと届くか確認用）。 */

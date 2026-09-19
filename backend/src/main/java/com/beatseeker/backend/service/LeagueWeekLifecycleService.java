@@ -94,8 +94,8 @@ public class LeagueWeekLifecycleService {
     private final SongDefinitionRepository songDefinitionRepository;
     /** 過去作スコア。{@link #baselineIncludesPast} が有効なときだけベースラインの合算に使う。 */
     private final PastScoreRepository pastScoreRepository;
-    /** 週の開始をコミット後に参加者へ通知する（アプリ内通知 + ブラウザ通知）。 */
-    private final LeagueStartNotificationService startNotificationService;
+    /** 週の開始・締めをコミット後に参加者へ通知する（アプリ内通知 + ブラウザ通知）。 */
+    private final LeagueNotificationService leagueNotificationService;
 
     /**
      * 開催回 #1 の開始日（JST）。この日以降に始まる週へ通し番号（#1, #2, ...）を採番する。
@@ -129,7 +129,7 @@ public class LeagueWeekLifecycleService {
                                       LeagueSongDrawService songDrawService,
                                       SongDefinitionRepository songDefinitionRepository,
                                       PastScoreRepository pastScoreRepository,
-                                      LeagueStartNotificationService startNotificationService,
+                                      LeagueNotificationService leagueNotificationService,
                                       @Value("${app.league.week-one-start:2026-08-10}") String weekOneStart,
                                       @Value("${app.league.baseline-includes-past:false}") boolean baselineIncludesPast) {
         this.weekOneStart = LocalDate.parse(weekOneStart);
@@ -143,7 +143,7 @@ public class LeagueWeekLifecycleService {
         this.songDrawService = songDrawService;
         this.songDefinitionRepository = songDefinitionRepository;
         this.pastScoreRepository = pastScoreRepository;
-        this.startNotificationService = startNotificationService;
+        this.leagueNotificationService = leagueNotificationService;
         this.baselineIncludesPast = baselineIncludesPast;
     }
 
@@ -329,6 +329,9 @@ public class LeagueWeekLifecycleService {
         active.setStatus("closed");
         leagueWeekRepository.save(active);
         log.info("リーグ週を締め: ladder={} weekId={} members={}", ladder, active.getId(), members.size());
+        // 結果（順位・昇降格・PT・自動休止）はこの時点で LeagueMember / LeagueEntry に確定済み。
+        // 開始通知と同じくコミット後に流す。
+        afterCommit(() -> leagueNotificationService.notifyWeekClosed(active.getId()));
         return active;
     }
 
@@ -505,30 +508,30 @@ public class LeagueWeekLifecycleService {
         log.info("リーグ週を開始: ladder={} weekId={} members={}", ladder, week.getId(), members.size());
         // 参加者への開始通知はコミット後に非同期で流す。cron でも管理者の run-weekly でも
         // 同じ経路を通るよう、呼び出し元ではなくここで仕込む（開始 = 通知、を 1 箇所に閉じる）。
-        notifyStartAfterCommit(week.getId());
+        afterCommit(() -> leagueNotificationService.notifyWeekStarted(week.getId()));
         return week;
     }
 
     /**
-     * 【メソッドの役割】 リーグ開始通知を「このトランザクションがコミットされた後」に流す。
+     * 【メソッドの役割】 参加者への通知を「このトランザクションがコミットされた後」に流す。
      *
-     * 開始処理と同じトランザクション内で Push を送ると、参加者の数だけ外部 HTTPS 通信を
-     * 待つ間 DB トランザクションを握り続けることになる。また、万一開始がロールバックされた
-     * 場合に「始まっていない週の開始通知」だけが飛んでしまう。そのため after-commit に回す。
+     * 週の進行と同じトランザクション内で Push を送ると、参加者の数だけ外部 HTTPS 通信を
+     * 待つ間 DB トランザクションを握り続けることになる。また、万一ロールバックされた場合に
+     * 「始まっていない週の開始通知」「確定していない結果通知」だけが飛んでしまう。
      *
      * トランザクション外から呼ばれた場合（テスト等）はその場で実行する。
      *
-     * @param weekId 開始した週の ID
+     * @param task コミット後に走らせる処理（通知サービスの {@code @Async} メソッド呼び出し）
      */
-    private void notifyStartAfterCommit(Long weekId) {
+    private void afterCommit(Runnable task) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            startNotificationService.notifyWeekStarted(weekId);
+            task.run();
             return;
         }
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                startNotificationService.notifyWeekStarted(weekId);
+                task.run();
             }
         });
     }

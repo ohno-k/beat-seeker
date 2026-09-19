@@ -137,6 +137,9 @@ public class ScoreController {
     /** リーグの課題曲が更新されたときに管理者へメール通知するサービス。 */
     private final com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService;
 
+    /** リーグの課題曲が更新されたときに同グループへ通知するサービス（アプリ内通知 + ブラウザ通知）。 */
+    private final com.beatseeker.backend.service.LeagueNotificationService leagueNotificationService;
+
     /** 前作の最終 PT（ランキング行のティアアイコンの外枠用）。 */
     private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
@@ -164,6 +167,7 @@ public class ScoreController {
             VirtualRivalRepository virtualRivalRepository,
             com.beatseeker.backend.service.AdminAuthService adminAuthService,
             com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService,
+            com.beatseeker.backend.service.LeagueNotificationService leagueNotificationService,
             com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
         this.previousVersionPtService = previousVersionPtService;
         this.scoreRepository = scoreRepository;
@@ -188,6 +192,7 @@ public class ScoreController {
         this.virtualRivalRepository = virtualRivalRepository;
         this.adminAuthService = adminAuthService;
         this.leagueUpdateNotificationService = leagueUpdateNotificationService;
+        this.leagueNotificationService = leagueNotificationService;
     }
 
     /**
@@ -412,6 +417,9 @@ public class ScoreController {
             } catch (Exception e) {
                 System.err.println("Failed to notify league song update: " + e.getMessage());
             }
+
+            // 同グループへの「課題曲が更新された / 順位が下がった」通知。
+            notifyLeagueGroupAfterCommit(user.getId(), updatedSongs);
 
             // INFINITAS 由来の更新があれば、その日 1 レコードの成長記録（tag=INFINITAS）へ集約する。
             // 画面取り込みは 1 曲ずつ届くため、同日内は既存ログに曲を追記・各 PT を再計算する upsert。
@@ -1246,6 +1254,47 @@ public class ScoreController {
      * @param uploader     スコアをアップロードしたユーザー
      * @param updatedSongs uploadScores() が生成した差分情報リスト
      */
+    /**
+     * 【メソッドの役割】 リーグ同グループへの更新通知を「スコア保存がコミットされた後」に依頼する。
+     *
+     * コミット前に投げてはいけない: 通知側はグループ全員の順位を {@code scores} から計算し直すため、
+     * 未コミットの状態で走ると「更新前の順位」で判定してしまい、抜かれた通知が飛ばない。
+     * 通知サービス側は {@code @Async} なので、別スレッドでこのトランザクションの外から走る。
+     *
+     * リーグはアーケード記録のみを対象にするので、INFINITAS 由来の更新は渡さない。
+     *
+     * @param uploaderId   アップロードしたユーザーの ID
+     * @param updatedSongs 今回の更新差分
+     */
+    private void notifyLeagueGroupAfterCommit(Long uploaderId, List<Map<String, Object>> updatedSongs) {
+        List<String> charts = updatedSongs.stream()
+                .filter(d -> d.get("source") == null || "arcade".equals(d.get("source")))
+                .map(d -> d.get("title") + "|" + d.get("difficulty"))
+                .distinct()
+                .toList();
+        if (charts.isEmpty()) return;
+
+        Runnable task = () -> {
+            try {
+                leagueNotificationService.notifyGroupUpdate(
+                        uploaderId, com.beatseeker.backend.service.LeagueService.LADDER_SCORE, charts);
+            } catch (Exception e) {
+                System.err.println("Failed to notify league group update: " + e.getMessage());
+            }
+        };
+        if (!org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            task.run();
+            return;
+        }
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        task.run();
+                    }
+                });
+    }
+
     private void notifyFriendsOfScoreBeat(User uploader, List<Map<String, Object>> updatedSongs) {
         // 手順1a: 非公開ユーザーは通知を飛ばさない（スコアが漏れないように）。
         if (uploader.getPrivacyLevel() != null && uploader.getPrivacyLevel() == 2) return;

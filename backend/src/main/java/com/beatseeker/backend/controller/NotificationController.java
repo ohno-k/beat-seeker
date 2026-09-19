@@ -73,8 +73,36 @@ public class NotificationController {
                 // クライアントが subscribe に使うべき公開鍵
                 "publicKey", pushNotificationService.getPublicKey(),
                 // このユーザーの購読が保存されているか
-                "subscribed", subscription != null && !subscription.isBlank()
+                "subscribed", subscription != null && !subscription.isBlank(),
+                // リーグ関連の通知を受け取る設定か
+                "leagueNotifications", user.isLeagueNotificationsEnabled()
         ));
+    }
+
+    /**
+     * 【メソッドの役割】 通知の受け取り設定を更新する。
+     *
+     * 現状の項目はリーグ関連通知の ON/OFF だけ。リーグは週次で複数の通知が出る唯一の機能で、
+     * うるさいと感じた人がブラウザごと通知を切ると、ライバル申請やスコア追い抜きまで
+     * 届かなくなるため、その逃げ道として用意している。
+     *
+     * 指定されなかった項目は変更しない（将来項目が増えても部分更新で済むように）。
+     *
+     * @param auth    認証情報
+     * @param payload {@code {leagueNotifications: boolean}}
+     * @return 更新後の設定
+     */
+    @PostMapping("/preferences")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> updatePreferences(Authentication auth,
+                                                                 @RequestBody Map<String, Object> payload) {
+        User user = getUser(auth);
+        Object league = payload != null ? payload.get("leagueNotifications") : null;
+        if (league instanceof Boolean enabled) {
+            user.setLeagueNotificationsEnabled(enabled);
+            userRepository.save(user);
+        }
+        return ResponseEntity.ok(Map.of("leagueNotifications", user.isLeagueNotificationsEnabled()));
     }
 
     /**

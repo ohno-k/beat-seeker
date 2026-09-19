@@ -204,6 +204,8 @@ export const en = {
   'dashboard.enableNotifications': 'Enable Notifications',
   'dashboard.notificationsEnabled': 'Notifications Enabled',
   'dashboard.notificationsReregister': 'Re-register Notifications',
+  'dashboard.leagueNotifications': 'Receive league notifications',
+  'dashboard.leagueNotificationsHint': 'Notifies you when a league week starts and ends, when someone in your group updates a challenge song, and before the deadline. Turning this off also stops in-app bell notifications.',
   'dashboard.pushServerDisabled': 'Push delivery is currently down on the server. Browser notifications will not arrive until it is restored.',
   'dashboard.pushNotSubscribed': 'Notifications are allowed, but this device is not registered on the server. Press "Re-register Notifications".',
   'dashboard.testNotification': 'Test Send',

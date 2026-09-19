@@ -74,6 +74,8 @@ export interface PushStatus {
     publicKey: string;
     /** このユーザーの購読がサーバーに保存されているか。 */
     subscribed: boolean;
+    /** リーグ関連の通知（開始・結果・同グループの更新・終盤リマインド）を受け取る設定か。 */
+    leagueNotifications: boolean;
 }
 
 /**
@@ -397,11 +399,36 @@ export function useFriends() {
             pushStatus.value = {
                 serverEnabled: !!data.serverEnabled,
                 publicKey: data.publicKey ?? '',
-                subscribed: !!data.subscribed
+                subscribed: !!data.subscribed,
+                // 旧サーバー（項目が無い）では「受け取る」を既定にする。
+                leagueNotifications: data.leagueNotifications !== false
             };
             return pushStatus.value;
         } catch {
             return null;
+        }
+    };
+
+    /**
+     * 通知の受け取り設定を更新する（現状はリーグ通知の ON/OFF のみ）。
+     *
+     * @param leagueNotifications リーグ関連の通知を受け取るか
+     * @returns 成功したら `true`
+     */
+    const setLeagueNotifications = async (leagueNotifications: boolean) => {
+        try {
+            const res = await fetch(`${API_BASE}/api/notifications/preferences`, {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ leagueNotifications })
+            });
+            if (!res.ok) return false;
+            const data = await res.json();
+            if (pushStatus.value) pushStatus.value.leagueNotifications = data.leagueNotifications !== false;
+            return true;
+        } catch (e) {
+            console.error('通知設定の更新に失敗しました', e);
+            return false;
         }
     };
 
@@ -613,10 +640,12 @@ export function useFriends() {
         requestNotificationPermission,
         /** 許可済み端末の購読だけを黙って貼り直す（起動時用・ダイアログを出さない）。 */
         syncPushSubscription,
-        /** ブラウザ通知の稼働状態（サーバー側の有効/無効・購読の有無）。 */
+        /** ブラウザ通知の稼働状態（サーバー側の有効/無効・購読の有無・リーグ通知設定）。 */
         pushStatus,
         /** 上記をサーバーから取得する。 */
         fetchPushStatus,
+        /** リーグ関連通知の ON/OFF を更新する。 */
+        setLeagueNotifications,
         /** アプリ内通知一覧・未読件数取得。 */
         fetchAppNotifications,
         /** 全通知を既読化。 */
