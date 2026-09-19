@@ -96,7 +96,8 @@ public class NotificationController {
                 "type", n.getType(),
                 "message", n.getMessage(),
                 "read", n.isRead(),
-                "createdAt", n.getCreatedAt().toString()
+                // JST オフセット付きで返す（素の toString() だと端末 TZ で解釈され本番で 9 時間ずれる）
+                "createdAt", com.beatseeker.backend.util.JstTime.toIsoString(n.getCreatedAt())
         )).collect(Collectors.toList());
 
         return ResponseEntity.ok(Map.of("notifications", items, "unreadCount", unreadCount));

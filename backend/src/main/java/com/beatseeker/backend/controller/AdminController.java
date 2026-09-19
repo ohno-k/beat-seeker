@@ -15,6 +15,7 @@ import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.ScoreRecalculationService;
 import com.beatseeker.backend.service.TopRankersBeatPtService;
+import com.beatseeker.backend.util.JstTime;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.http.ResponseEntity;
@@ -321,7 +322,7 @@ public class AdminController {
         for (ScoreHistoryLog log : logs) {
             Map<String, Object> snapshotData = new HashMap<>();
             snapshotData.put("snapshotId", log.getId().toString()); // ID を擬似的なスナップショット ID として利用する
-            snapshotData.put("date", log.getUploadedAt().toString());
+            snapshotData.put("date", JstTime.toIsoString(log.getUploadedAt()));
             snapshotData.put("totalScore", log.getTotalScore());
             snapshotData.put("fcCount", log.getFcCount());
             snapshotData.put("exhCount", log.getExhCount());
@@ -948,7 +949,7 @@ public class AdminController {
         body.put("displayName", targetUser.getDisplayName() != null ? targetUser.getDisplayName() : "");
         body.put("iidxId", targetUser.getIidxId() != null ? targetUser.getIidxId() : "");
         body.put("totalBeatPt", targetUser.getTotalBeatPt() != null ? targetUser.getTotalBeatPt() : 0.0);
-        body.put("computedAt", computedAt != null ? computedAt.toString() : null);
+        body.put("computedAt", JstTime.toIsoString(computedAt));
         body.put("opponents", new ArrayList<>(byOpponent.values()));
         return ResponseEntity.ok(body);
     }

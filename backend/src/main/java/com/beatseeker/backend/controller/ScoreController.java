@@ -760,7 +760,7 @@ public class ScoreController {
         for (ScoreHistoryLog log : logs) {
             Map<String, Object> snapshotData = new HashMap<>();
             snapshotData.put("snapshotId", log.getId().toString()); // ID をスナップショット ID として流用
-            snapshotData.put("date", log.getUploadedAt().toString());
+            snapshotData.put("date", com.beatseeker.backend.util.JstTime.toIsoString(log.getUploadedAt()));
             snapshotData.put("totalScore", log.getTotalScore());
             snapshotData.put("fcCount", log.getFcCount());
             snapshotData.put("exhCount", log.getExhCount());
@@ -1214,7 +1214,7 @@ public class ScoreController {
                     // (title, difficulty) が一致する差分のみを拾う。
                     if (title.equals(t) && difficultyName.equals(d)) {
                         Map<String, Object> entry = new HashMap<>();
-                        entry.put("uploadedAt", log.getUploadedAt().toString());
+                        entry.put("uploadedAt", com.beatseeker.backend.util.JstTime.toIsoString(log.getUploadedAt()));
                         entry.put("score", diff.get("newScore"));
                         entry.put("beatPt", diff.get("newBeatPt"));
                         result.add(entry);

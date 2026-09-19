@@ -27,11 +27,29 @@ public final class JstTime {
     /**
      * サーバー TZ の {@link LocalDateTime} を JST オフセット付き ISO 文字列に変換する。
      *
+     * <p>{@code LocalDateTime.now()} (ゾーン指定なし) で記録した値、つまり「その JVM の壁時計」を
+     * 持つ値に使う。DB の {@code createdAt} / {@code uploadedAt} 系はほぼこれ。
+     *
      * @param serverLocal DB から読んだ日時 (JVM のデフォルト TZ の壁時計)。null 可
      * @return 例: {@code 2026-09-12T15:30:00.123456+09:00}。入力が null なら null
      */
     public static String toIsoString(LocalDateTime serverLocal) {
         if (serverLocal == null) return null;
         return serverLocal.atZone(ZoneId.systemDefault()).withZoneSameInstant(JST).format(ISO_OFFSET);
+    }
+
+    /**
+     * すでに「JST の壁時計」として保存されている {@link LocalDateTime} に、そのまま {@code +09:00} を付ける。
+     *
+     * <p>{@code Competition#deadlineAt} / {@code LeagueWeek#startsAt} のように、管理者が JST で入力した
+     * 値をそのまま持ち、{@code LocalDateTime.now(JST)} と比較している項目に使う。こちらに
+     * {@link #toIsoString(LocalDateTime)} を掛けると本番 (UTC JVM) で 9 時間ずれる。
+     *
+     * @param jstLocal JST 壁時計の日時。null 可
+     * @return 例: {@code 2026-09-21T00:00:00+09:00}。入力が null なら null
+     */
+    public static String fromJst(LocalDateTime jstLocal) {
+        if (jstLocal == null) return null;
+        return jstLocal.atZone(JST).format(ISO_OFFSET);
     }
 }

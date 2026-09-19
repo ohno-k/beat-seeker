@@ -457,7 +457,7 @@ public class FillRecommendationService {
             if (isUnreachedAttempt(attempt, currentScore, goalScore)) {
                 item.put("attemptOldScore", attempt.oldScore);
                 item.put("attemptNewScore", attempt.newScore);
-                item.put("lastAttemptAt", attempt.lastAt.toString());
+                item.put("lastAttemptAt", com.beatseeker.backend.util.JstTime.toIsoString(attempt.lastAt));
                 attemptedItems.add(item);
                 continue;
             }

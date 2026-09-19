@@ -529,7 +529,7 @@ public class FriendController {
         List<Map<String, Object>> history = logs.stream().map(log -> {
             Map<String, Object> m = new HashMap<>();
             m.put("snapshotId", log.getId().toString());
-            m.put("date", log.getUploadedAt().toString());
+            m.put("date", com.beatseeker.backend.util.JstTime.toIsoString(log.getUploadedAt()));
             m.put("totalScore", log.getTotalScore());
             m.put("fcCount", log.getFcCount());
             m.put("exhCount", log.getExhCount());

@@ -185,8 +185,7 @@ public class ResultImageController {
         m.put("url", storage.presignGet(img.getObjectKey()));
         m.put("width", img.getWidth());
         m.put("height", img.getHeight());
-        m.put("uploadedAt", img.getUploadedAt() != null
-                ? img.getUploadedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null);
+        m.put("uploadedAt", com.beatseeker.backend.util.JstTime.toIsoString(img.getUploadedAt()));
         return m;
     }
 
