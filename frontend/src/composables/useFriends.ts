@@ -464,11 +464,17 @@ export function useFriends() {
             }
 
             // VAPID 公開鍵はサーバーが配る値を正とする（鍵ローテーション時のズレを防ぐ）。
-            // 取得できないときだけ env / ハードコードにフォールバックする。
+            // 取得できないときだけビルド時の env にフォールバックする。
+            // 鍵をここにハードコードしてはいけない: サーバーで鍵を差し替えたときに古い鍵で
+            // 購読を作ってしまい、「購読済みなのに一通も届かない」状態が固定化する。
             const status = await fetchPushStatus();
-            const vapidPublicKey = status?.publicKey
-                || import.meta.env.VITE_VAPID_PUBLIC_KEY
-                || 'BK8nOI89kHqMXjG1Pz5MiOLMc7lX8zjgd-gd3KhfRfr3mD_pt_VgRBFPzPRvmPoDhz06o82fBbBmVLATrotGB0k';
+            const vapidPublicKey = status?.publicKey || import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+            if (!vapidPublicKey) {
+                // 鍵が分からない状態で購読しても無駄なので、あえて何もしない。
+                // サーバー側が未設定（serverEnabled=false）なら UI がその旨を表示する。
+                console.error('VAPID 公開鍵を取得できないため購読をスキップしました');
+                return false;
+            }
 
             // 既存購読が今の公開鍵と別の鍵で作られていたら、作り直さないと送信できない。
             const existing = await registration.pushManager.getSubscription();
