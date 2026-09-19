@@ -41,6 +41,7 @@ import {
   pointsPerSong,
   type MatchKind,
 } from '../composables/competitionMatchKinds';
+import { formatJstDateTime, formatJstShortDateTime } from '../utils/jstTime';
 import SongPickerModal from '../components/SongPickerModal.vue';
 import SongSelect from '../components/SongSelect.vue';
 
@@ -507,7 +508,10 @@ const handlePublishPick = async (matchId: number, side: 'a' | 'b' | 'both', publ
  */
 const deadlineInput = ref<string>('');
 
-/** サーバの ISO 日時文字列 (例 "2026-06-20T21:00:00") を datetime-local 値 "2026-06-20T21:00" に整形。 */
+/**
+ * サーバの ISO 日時文字列 (例 "2026-06-20T21:00:00+09:00") を datetime-local 値 "2026-06-20T21:00" に整形。
+ * 締切系の日時は JST の壁時計をそのまま +09:00 付きで返しているので、先頭 16 文字がそのまま JST の入力値になる。
+ */
 const toDatetimeLocal = (iso: string | null): string => (iso ? iso.slice(0, 16) : '');
 
 watch(
@@ -697,11 +701,11 @@ const onChatReplyKeydown = (e: KeyboardEvent) => {
   }
 };
 
-const formatChatTime = (iso: string): string => {
-  try {
-    return new Date(iso).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  } catch { return ''; }
-};
+/** チャットの送信日時を「9/20 15:30」形式（JST 固定）で表示する。 */
+const formatChatTime = (iso: string): string => formatJstShortDateTime(iso);
+
+/** 管理画面の各種日時を「2026/09/20 15:30」形式（JST 固定）で表示する。 */
+const formatAdminDateTime = (iso: string | null | undefined): string => formatJstDateTime(iso);
 
 onMounted(() => {
   chatPollTimer = setInterval(loadChatThreads, 20000);
@@ -2002,7 +2006,7 @@ const statusColor = (s: string) => ({
             <li v-for="c in competitions" :key="c.id" class="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer" @click="handleOpenCompetition(c.id)">
               <div class="flex-1 min-w-0">
                 <p class="font-bold truncate">{{ c.name }}</p>
-                <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · 作成 {{ new Date(c.createdAt).toLocaleString() }}</p>
+                <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · 作成 {{ formatAdminDateTime(c.createdAt) }}</p>
               </div>
               <span
                 class="text-[10px] font-bold px-2 py-0.5 rounded"
@@ -2580,7 +2584,7 @@ const statusColor = (s: string) => ({
             >締切解除</button>
           </div>
           <p v-if="currentCompetition.deadlineAt" class="text-[10px] font-mono text-slate-400">
-            現在の設定: {{ new Date(currentCompetition.deadlineAt).toLocaleString('ja-JP') }}
+            現在の設定: {{ formatAdminDateTime(currentCompetition.deadlineAt) }}
           </p>
           <p v-else class="text-[10px] font-mono text-slate-400">
             未設定 (締め切らない)。日時を入れて「保存」すると有効になります。
@@ -2631,7 +2635,7 @@ const statusColor = (s: string) => ({
             >公開日時解除</button>
           </div>
           <p v-if="currentCompetition.lineupPublishAt" class="text-[10px] font-mono text-slate-400">
-            現在の設定: {{ new Date(currentCompetition.lineupPublishAt).toLocaleString('ja-JP') }}
+            現在の設定: {{ formatAdminDateTime(currentCompetition.lineupPublishAt) }}
           </p>
           <p v-else class="text-[10px] font-mono text-slate-400">
             未設定 (自動公開しない)。日時を入れて「保存」すると有効になります。
@@ -2697,7 +2701,7 @@ const statusColor = (s: string) => ({
             </div>
             <p class="text-[10px] font-mono text-slate-400">
               {{ currentCompetition.finalsDeadlineAt
-                ? '現在の設定: ' + new Date(currentCompetition.finalsDeadlineAt).toLocaleString('ja-JP')
+                ? '現在の設定: ' + formatAdminDateTime(currentCompetition.finalsDeadlineAt)
                 : '未設定 (決勝の起用を締め切らない)' }}
             </p>
           </div>
@@ -2727,7 +2731,7 @@ const statusColor = (s: string) => ({
             </div>
             <p class="text-[10px] font-mono text-slate-400">
               {{ currentCompetition.finalsLineupPublishAt
-                ? '現在の設定: ' + new Date(currentCompetition.finalsLineupPublishAt).toLocaleString('ja-JP')
+                ? '現在の設定: ' + formatAdminDateTime(currentCompetition.finalsLineupPublishAt)
                 : '未設定 (決勝の起用は非公開のまま)' }}
             </p>
           </div>
@@ -3614,7 +3618,7 @@ const statusColor = (s: string) => ({
               <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between flex-wrap gap-2">
                 <p class="font-bold text-sm">予選 第 {{ m.matchOrder }} 試合</p>
                 <p class="text-[10px] font-mono text-slate-400">
-                  <span v-if="m.resultRecordedAt" class="text-emerald-600 dark:text-emerald-300">記録済 {{ new Date(m.resultRecordedAt).toLocaleString() }}</span>
+                  <span v-if="m.resultRecordedAt" class="text-emerald-600 dark:text-emerald-300">記録済 {{ formatAdminDateTime(m.resultRecordedAt) }}</span>
                   <span v-else class="italic">未記録</span>
                 </p>
               </div>
@@ -3800,7 +3804,7 @@ const statusColor = (s: string) => ({
                   バケット {{ m.finalsBucket }}: 全体 {{ (m.finalsBucket! - 1) * 4 + 1 }} 〜 {{ (m.finalsBucket! - 1) * 4 + 4 }} 位
                 </p>
                 <p class="text-[10px] font-mono text-slate-400">
-                  <span v-if="m.resultRecordedAt" class="text-emerald-600 dark:text-emerald-300">記録済 {{ new Date(m.resultRecordedAt).toLocaleString() }}</span>
+                  <span v-if="m.resultRecordedAt" class="text-emerald-600 dark:text-emerald-300">記録済 {{ formatAdminDateTime(m.resultRecordedAt) }}</span>
                   <span v-else class="italic">未記録</span>
                 </p>
               </div>

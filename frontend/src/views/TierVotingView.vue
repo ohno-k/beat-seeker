@@ -19,6 +19,7 @@ import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { API_BASE } from '../composables/useAuth';
+import { toJstDate } from '../utils/jstTime';
 import TierCommentModal from '../components/TierCommentModal.vue';
 
 const { t } = useI18n();
@@ -290,8 +291,8 @@ const filteredRanks = computed(() => {
         const aStats = commentStats.value.get(`${aParsed.title}|${aParsed.difficultyName}`);
         const bStats = commentStats.value.get(`${bParsed.title}|${bParsed.difficultyName}`);
 
-        const aTime = aStats ? new Date(aStats.latest).getTime() : 0;
-        const bTime = bStats ? new Date(bStats.latest).getTime() : 0;
+        const aTime = aStats ? (toJstDate(aStats.latest)?.getTime() ?? 0) : 0;
+        const bTime = bStats ? (toJstDate(bStats.latest)?.getTime() ?? 0) : 0;
 
         if (aTime !== bTime) {
           return bTime - aTime;

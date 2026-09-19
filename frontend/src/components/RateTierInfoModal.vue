@@ -185,7 +185,7 @@
       <!-- フッター（更新日表示） -->
       <div class="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 text-center transition-colors duration-200">
         <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-          {{ t('rateTierInfo.footerDesc') }} • {{ new Date().toLocaleDateString() }}
+          {{ t('rateTierInfo.footerDesc') }} • {{ todayLabel }}
         </p>
       </div>
     </div>
@@ -206,10 +206,14 @@
 import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { RATE_TIER_RANKS, SCORE_RATE_THRESHOLDS, getGroupedRateTierRanks } from '../utils/beatTier';
+import { formatJstDate } from '../utils/jstTime';
 import RankIcon from './RankIcon.vue';
 
 const { t } = useI18n();
 defineEmits(['close']);
+
+/** フッターに出す「本日」の日付。端末 TZ に依らず JST で表示する。 */
+const todayLabel = computed(() => formatJstDate(new Date()));
 
 /** 現在のタブ（解説 / 閾値テーブル）。 */
 const activeTab = ref<'about' | 'table'>('about');

@@ -19,6 +19,7 @@ import FriendSearchModal from './FriendSearchModal.vue';
 import FriendComparisonModal from './FriendComparisonModal.vue';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo, previousTierFrame } from '../utils/beatTier';
+import { formatJstDateTime } from '../utils/jstTime';
 
 const emit = defineEmits<{
   'view-user': [user: { id: number; displayName: string; iidxId: string }],
@@ -113,14 +114,10 @@ onMounted(async () => {
   }
 });
 
-/** 【関数の役割】 ISO 日時を「YYYY/MM/DD HH:mm」形式で日本語整形。未指定時は「未アップロード」。 */
+/** 【関数の役割】 ISO 日時を「YYYY/MM/DD HH:mm」形式（JST 固定）で整形。未指定時は「未アップロード」。 */
 const formatDate = (dateStr: string | null) => {
   if (!dateStr) return '未アップロード';
-  const date = new Date(dateStr);
-  return date.toLocaleString('ja-JP', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit'
-  });
+  return formatJstDateTime(dateStr);
 };
 
 /** 相手のプライバシーレベルが 2（完全非公開）でない限り、ダッシュボードを覗ける。 */

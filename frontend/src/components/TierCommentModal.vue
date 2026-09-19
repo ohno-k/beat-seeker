@@ -18,6 +18,7 @@ import { ref, watch, nextTick } from 'vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
+import { formatJstDateTime } from '../utils/jstTime';
 
 const props = defineProps<{
   show: boolean;
@@ -118,14 +119,9 @@ const submitComment = async () => {
 };
 
 /**
- * 【関数の役割】 バックエンドが返す ISO 風日時を、ブラウザのロケールで整形する。
- * バックエンドが Z 抜きで返すことがあるため、末尾に 'Z' を補って UTC として解釈。
+ * 【関数の役割】 バックエンドが返す ISO 日時を「YYYY/MM/DD HH:mm」形式（JST 固定）で整形する。
  */
-const formatDate = (dateString: string) => {
-  const ds = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-  const d = new Date(ds);
-  return d.toLocaleString();
-};
+const formatDate = (dateString: string) => formatJstDateTime(dateString);
 
 </script>
 

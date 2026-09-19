@@ -539,6 +539,7 @@ import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficu
 import { usePastScores, chartKey } from '../composables/usePastScores';
 import { CLEAR_TYPE_RANK } from '../composables/constants';
 import { versionBadgeClass, versionName, versionShort } from '../utils/iidxVersions';
+import { jstParts, toJstDate, toJstDateKey } from '../utils/jstTime';
 import ShareTokenModal from './ShareTokenModal.vue';
 import IntegrationTokenModal from './IntegrationTokenModal.vue';
 import PastScoreManager from './PastScoreManager.vue';
@@ -714,7 +715,7 @@ onMounted(async () => {
 
     if (histRes.status === 'fulfilled' && histRes.value.ok) {
       historyData.value = await histRes.value.json();
-      historyData.value.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      historyData.value.sort((a, b) => (toJstDate(a.date)?.getTime() ?? 0) - (toJstDate(b.date)?.getTime() ?? 0));
     }
     if (scoresRes.status === 'fulfilled' && scoresRes.value.ok) {
       myScores.value = await scoresRes.value.json();
@@ -743,7 +744,7 @@ const dailyHistory = computed<HistoryRecord[]>(() => {
   if (!historyData.value.length) return [];
   const byDate = new Map<string, HistoryRecord[]>();
   for (const r of historyData.value) {
-    const day = r.date.slice(0, 10); // YYYY-MM-DD
+    const day = toJstDateKey(r.date); // JST の YYYY-MM-DD
     if (!byDate.has(day)) byDate.set(day, []);
     byDate.get(day)!.push(r);
   }
@@ -772,12 +773,13 @@ const maxBeatPtIncrease = computed(() =>
   Math.round(Math.max(0, ...historyWithoutFirst.value.map(r => r.beatPtIncrease ?? 0)) * 10) / 10
 );
 
-const labels = computed(() =>
-  dailyHistory.value.map(r => {
-    const d = new Date(r.date);
-    return `${d.getMonth() + 1}/${d.getDate()}`;
-  })
-);
+/** グラフ横軸の「M/D」ラベル。端末 TZ に依らず JST の日付で刻む。 */
+const shortJstLabel = (date: string) => {
+  const p = jstParts(date);
+  return p ? `${p.month}/${p.day}` : '';
+};
+
+const labels = computed(() => dailyHistory.value.map(r => shortJstLabel(r.date)));
 
 const beatPtChartData = computed(() => {
   if (!dailyHistory.value.length) return null;
@@ -794,10 +796,7 @@ const beatPtChartData = computed(() => {
 });
 
 const uploadIncreaseLabels = computed(() =>
-  historyWithoutFirst.value.map(r => {
-    const d = new Date(r.date);
-    return `${d.getMonth() + 1}/${d.getDate()}`;
-  })
+  historyWithoutFirst.value.map(r => shortJstLabel(r.date))
 );
 
 const uploadIncreaseChartData = computed(() => {

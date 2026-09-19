@@ -158,6 +158,7 @@
 import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
 import { useSupportChat, type SupportThreadDto, type SupportMessageDto } from '../composables/useSupportChat';
 import { useToast } from '../composables/useToast';
+import { formatJstShortDateTime } from '../utils/jstTime';
 
 const props = defineProps<{ isOpen: boolean }>();
 const emit = defineEmits<{
@@ -257,11 +258,8 @@ const onReplyKeydown = (e: KeyboardEvent) => {
   }
 };
 
-const formatTime = (iso: string): string => {
-  try {
-    return new Date(iso).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  } catch { return ''; }
-};
+/** 送信日時を「9/20 15:30」形式（JST 固定）で表示する。 */
+const formatTime = (iso: string): string => formatJstShortDateTime(iso);
 
 // モーダル開閉に応じて初回ロード + ポーリング開始/停止。
 watch(() => props.isOpen, (open) => {

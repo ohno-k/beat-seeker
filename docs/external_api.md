@@ -8,6 +8,16 @@
 - ベース URL（開発）: `http://localhost:8080`
 - すべて JSON 応答（`Content-Type: application/json`）
 - 認証: **個人 API トークン**（Bearer 方式）
+- 日時はすべて **JST オフセット付き ISO 8601**（例 `2026-05-12T22:31:14+09:00`）
+
+### 日時の表記について
+
+レスポンス中の日時（`uploadedAt` / `updatedAt` / `calculatedAt` / `generatedAt` など）は、
+2026-09-20 からすべて `+09:00` オフセット付きの ISO 8601 文字列で返します。
+それ以前はタイムゾーン無し（`2026-05-12T22:31:14`）で返しており、サーバーの稼働タイムゾーン（UTC）
+に依存して 9 時間ずれて解釈される余地がありました。標準的な ISO 8601 パーサ
+（JavaScript の `new Date()`、Python の `datetime.fromisoformat()` 等）はどちらの形式も読めますが、
+自前で末尾に `Z` を付け足すような処理をしている場合は取り除いてください。
 
 ### ベース URL についての補足
 
@@ -163,12 +173,12 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
     "pgreat": 1545,
     "great": 312,
     "playCount": 42,
-    "uploadedAt": "2026-05-12T22:31:14"
+    "uploadedAt": "2026-05-12T22:31:14+09:00"
   },
   "rank": {
     "rank": 124,
     "total": 5821,
-    "calculatedAt": "2026-05-13T03:00:00"
+    "calculatedAt": "2026-05-13T03:00:00+09:00"
   },
   "options": ["乱"],
   "optionVotes": {
@@ -177,8 +187,8 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
     "myVotes": ["RANDOM"]
   },
   "history": [
-    { "uploadedAt": "2026-05-12T22:31:14", "score": 3402, "beatPt": 162.8, "ratePt": 95.2 },
-    { "uploadedAt": "2026-04-30T19:02:01", "score": 3380, "beatPt": 161.4, "ratePt": 94.8 }
+    { "uploadedAt": "2026-05-12T22:31:14+09:00", "score": 3402, "beatPt": 162.8, "ratePt": 95.2 },
+    { "uploadedAt": "2026-04-30T19:02:01+09:00", "score": 3380, "beatPt": 161.4, "ratePt": 94.8 }
   ],
   "chartTendency": {
     "bpmMain": 153,
@@ -277,7 +287,7 @@ curl -s "https://beat-seeker.com/api/external/v1/song-detail?title=灼熱Beach%2
   "user": { "iidxId": "1234-5678", "djName": "DJ-OONO" },
   "difficulties": ["ANOTHER", "LEGGENDARIA"],
   "source": "arcade",
-  "generatedAt": "2026-08-02T23:45:36.213142",
+  "generatedAt": "2026-08-02T23:45:36.213142+09:00",
   "count": 2082,
   "playedCount": 812,
   "summaries": [
@@ -293,7 +303,7 @@ curl -s "https://beat-seeker.com/api/external/v1/song-detail?title=灼熱Beach%2
       "missCount": 30,
       "beatPt": 154.02,
       "ratePt": 2.95,
-      "updatedAt": "2026-08-02T23:45:36.213142"
+      "updatedAt": "2026-08-02T23:45:36.213142+09:00"
     },
     {
       "textage": "26/_and_int.html?1AB00",

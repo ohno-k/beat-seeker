@@ -142,7 +142,8 @@ public class CompetitionSpectatorController {
         m.put("id", c.getId());
         m.put("name", c.getName());
         m.put("status", c.getStatus());
-        m.put("deadlineAt", c.getDeadlineAt());
+        // deadlineAt は「JST の壁時計」で保存しているので +09:00 をそのまま付けて返す。
+        m.put("deadlineAt", com.beatseeker.backend.util.JstTime.fromJst(c.getDeadlineAt()));
         m.put("lockedAt", c.getLockedAt());
         return m;
     }

@@ -23,6 +23,7 @@ import LeaguePointGauge from '../components/LeaguePointGauge.vue';
 import LeagueStandingsTable from '../components/LeagueStandingsTable.vue';
 import RankIcon from '../components/RankIcon.vue';
 import { getRankInfo, previousTierFrame } from '../utils/beatTier';
+import { jstParts, toJstDate } from '../utils/jstTime';
 import {
   useLeague,
   type LadderType,
@@ -148,7 +149,7 @@ const myRow = computed(() =>
 const countdown = computed(() => {
   const endsAt = current.value?.week?.endsAt;
   if (!endsAt) return '';
-  const diff = new Date(endsAt).getTime() - now.value;
+  const diff = (toJstDate(endsAt)?.getTime() ?? 0) - now.value;
   if (diff <= 0) return '';
   const minutes = Math.floor(diff / 60000);
   const days = Math.floor(minutes / 1440);
@@ -159,17 +160,16 @@ const countdown = computed(() => {
   return t('league.countdownM', { m: mins });
 });
 
-/** 日付を「7/21」のような短い形式で表示する。 */
+/** 日付を「7/21」のような短い形式で表示する（週の区切りは JST 固定）。 */
 const shortDate = (iso: string) => {
-  const d = new Date(iso);
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+  const p = jstParts(iso);
+  return p ? `${p.month}/${p.day}` : '';
 };
 
-/** 日時を「7/21 12:00」のような形式で表示する（週の開始/終了は時刻が重要）。 */
+/** 日時を「7/21 12:00」のような形式で表示する（週の開始/終了は時刻が重要。JST 固定）。 */
 const shortDateTime = (iso: string) => {
-  const d = new Date(iso);
-  const hm = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-  return `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
+  const p = jstParts(iso);
+  return p ? `${p.month}/${p.day} ${p.hour}:${String(p.minute).padStart(2, '0')}` : '';
 };
 
 /**

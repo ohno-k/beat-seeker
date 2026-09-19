@@ -21,6 +21,7 @@ import {
 import { useToast } from '../composables/useToast';
 import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
 import { KIND_LABEL_JA, kindLevelLabel, pointsPerSong } from '../composables/competitionMatchKinds';
+import { formatJst } from '../utils/jstTime';
 
 const props = defineProps<{ token: string }>();
 
@@ -54,7 +55,7 @@ const handleRefresh = async () => {
 /** 最終更新の表示 (JST の時刻のみ)。未取得なら null。 */
 const lastUpdatedLabel = computed<string | null>(() => {
   if (!lastUpdatedAt.value) return null;
-  return lastUpdatedAt.value.toLocaleTimeString('ja-JP', { hour12: false });
+  return formatJst(lastUpdatedAt.value, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 });
 
 // 戦種別のラベル / Lv 帯 (予選 3 戦 / 決勝 7 戦) は competitionMatchKinds に集約。

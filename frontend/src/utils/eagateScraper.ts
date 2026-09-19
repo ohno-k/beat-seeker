@@ -447,7 +447,9 @@ export async function scrapeEagate(
     // 実行ページの作品番号。前作ページで取った結果をサーバーが見分けるための材料。
     pageVersion: detectPageVersion(),
     myDjName,
-    year: String(new Date().getFullYear()),
+    // アリーナ結果の日時は eagate (JST) 表記なので、年も端末 TZ ではなく JST で採る。
+    // このファイルはブックマークレットに丸ごと埋め込むため、共通ユーティリティは使わず自前で求める。
+    year: new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tokyo', year: 'numeric' }).format(new Date()),
     battles,
   };
 

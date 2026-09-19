@@ -19,6 +19,7 @@ import { getRankInfo, getRateTierRankInfo, previousTierFrame } from '../utils/be
 import { diffTable as diffTableRef } from '../composables/useGameData';
 import { getSongMaxScore } from '../utils/scoreData';
 import { CURRENT_VERSION, HISTORY_VERSIONS, versionName } from '../utils/iidxVersions';
+import { formatJstDate, formatJstDateTime, toJstDate } from '../utils/jstTime';
 
 const { t, currentLang } = useI18n();
 import UploadResultModal from './UploadResultModal.vue';
@@ -60,14 +61,11 @@ const selectedDate = ref<string | null>(null);
 const isModalOpen = ref(false);
 
 /**
- * 【関数の役割】 ISO 日時文字列を「YYYY/MM/DD」形式（JST）に整形して返す。グルーピングのキーに使用。
- * バックエンドが Z 抜きで返す場合に備えて末尾補完を行う。
+ * 【関数の役割】 ISO 日時文字列を「YYYY/MM/DD」形式（JST 固定）に整形して返す。グルーピングのキーに使用。
  */
 const getDateKey = (dateStr: string) => {
-  const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
-  const d = new Date(zDateStr);
   const locale = currentLang.value === 'ko' ? 'ko-KR' : (currentLang.value === 'en' ? 'en-US' : 'ja-JP');
-  return d.toLocaleDateString(locale, { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' });
+  return formatJstDate(dateStr, locale);
 };
 
 /**
@@ -235,7 +233,7 @@ const fetchHistory = async () => {
     const data = await res.json();
 
     // 日時降順（新しい順）に並び替え。
-    const sortedData = data.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const sortedData = data.sort((a: any, b: any) => (toJstDate(b.date)?.getTime() ?? 0) - (toJstDate(a.date)?.getTime() ?? 0));
 
     historyList.value = sortedData.map((item: any, idx: number) => {
       const beatPt = item.totalBeatPt || 0;
@@ -287,18 +285,11 @@ const fetchHistory = async () => {
 };
 
 /**
- * 【関数の役割】 表示用に日時を JST 5 桁フォーマット（YYYY/MM/DD HH:mm）で返す。
- * バックエンドが Z を付けない場合に備えて末尾補完を行う。
+ * 【関数の役割】 表示用に日時を JST 固定のフォーマット（YYYY/MM/DD HH:mm）で返す。
  */
 const formatDate = (dateStr: string) => {
-  const zDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
-  const d = new Date(zDateStr);
   const locale = currentLang.value === 'ko' ? 'ko-KR' : (currentLang.value === 'en' ? 'en-US' : 'ja-JP');
-  return d.toLocaleString(locale, {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit'
-  });
+  return formatJstDateTime(dateStr, locale);
 };
 
 // マウント時に初回取得。作品を切り替えたら取り直す。

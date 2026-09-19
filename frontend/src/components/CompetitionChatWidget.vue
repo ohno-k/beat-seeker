@@ -12,6 +12,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import { useCompetitionTl, type ChatMessageDto } from '../composables/useCompetitionTl';
 import { useToast } from '../composables/useToast';
+import { formatJstTime } from '../utils/jstTime';
 
 const props = defineProps<{ token: string }>();
 
@@ -88,13 +89,8 @@ const onKeydown = (e: KeyboardEvent) => {
   }
 };
 
-const formatTime = (iso: string): string => {
-  try {
-    return new Date(iso).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-  } catch {
-    return '';
-  }
-};
+/** 送信時刻を「15:30」形式（JST 固定）で表示する。 */
+const formatTime = (iso: string): string => formatJstTime(iso);
 
 onMounted(() => {
   loadChat();

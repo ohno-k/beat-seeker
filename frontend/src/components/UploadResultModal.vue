@@ -710,6 +710,7 @@ import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
 import { ignoreOutside, withHtml2canvasTextFix } from '../utils/html2canvasHelpers';
+import { jstParts, nowJstParts } from '../utils/jstTime';
 import { canShareImageNatively, copyImageToClipboard, downloadBlob, isIosDevice, xIntentUrl } from '../utils/shareToX';
 import html2canvas from 'html2canvas';
 
@@ -1128,14 +1129,11 @@ watch(showDjName, (v) => localStorage.setItem(SHOW_NAME_KEY, v ? '1' : '0'));
 /** 自分のレポートで、かつ表示名があるときだけ DJ NAME の選択肢を出す。 */
 const canShowOwner = computed(() => !props.hideOwner && !!user.value?.displayName);
 
-/** 取り込み日（JST）を "2026.09.17" 形式で。バックエンドがタイムゾーン無しで返す日時は UTC として読む。 */
+/** 取り込み日（JST）を "2026.09.17" 形式で。 */
 const dateLabel = computed(() => {
-  const raw = props.reportDate;
-  const d = raw ? new Date(/(Z|[+-]\d{2}:?\d{2})$/.test(raw) ? raw : `${raw}Z`) : new Date();
-  const parts = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' })
-    .formatToParts(Number.isNaN(d.getTime()) ? new Date() : d);
-  const pick = (type: string) => parts.find(p => p.type === type)?.value ?? '';
-  return `${pick('year')}.${pick('month')}.${pick('day')}`;
+  const p = jstParts(props.reportDate || new Date()) ?? nowJstParts();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${p.year}.${pad(p.month)}.${pad(p.day)}`;
 });
 
 const versionLabel = computed(() => {

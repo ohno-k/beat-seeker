@@ -40,6 +40,7 @@ import {
   versionName,
   versionShort,
 } from '../utils/iidxVersions';
+import { toJstDateKey } from '../utils/jstTime';
 
 const props = defineProps<{
   /** 表示対象の作品バージョン番号（30〜33）。 */
@@ -243,7 +244,7 @@ const paged = computed(() => {
 /** この作品の取り込み日（過去作のみ。現行作は通常スコアなので持たない）。 */
 const importedAt = computed(() => {
   const entry = summary.value.find(s => s.version === props.version);
-  return entry?.importedAt ? entry.importedAt.slice(0, 10) : '';
+  return toJstDateKey(entry?.importedAt ?? null);
 });
 
 /**

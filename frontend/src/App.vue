@@ -52,7 +52,7 @@ import Friends from './components/Friends.vue';
 import FriendTimeline from './components/FriendTimeline.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
-import WhatsNewModal from './components/WhatsNewModal.vue';
+import LeaguePushPromptModal from './components/LeaguePushPromptModal.vue';
 import ShareImportModal from './components/ShareImportModal.vue';
 // サポーター限定タブ（譜面分析 / スコアペア散布図）を非サポーターが開いたときのロック画面。
 import SupporterLock from './components/SupporterLock.vue';
@@ -517,7 +517,7 @@ const goCompetitionAdmin = () => {
   activeTab.value = 'competition-admin';
   window.history.replaceState({}, '', '/competition-admin');
 };
-const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, requestNotificationPermission, sendFriendRequest, fetchVirtualRivalStatus, addVirtualRival, removeVirtualRival } = useFriends();
+const { pendingRequests, appUnreadCount, fetchPendingRequests, fetchAppNotifications, syncPushSubscription, sendFriendRequest, fetchVirtualRivalStatus, addVirtualRival, removeVirtualRival } = useFriends();
 
 /** 閲覧中ユーザーとのフレンド関係。null はログイン前 or 取得前。 */
 const friendStatus = ref<'none' | 'friend' | 'requested' | 'incoming' | 'self' | null>(null);
@@ -756,9 +756,12 @@ onMounted(() => {
     showInstallBanner.value = true;
   });
 
-  // ログイン済みのセッション復元時は通知権限をリクエストする。
+  // ログイン済みのセッション復元時は、許可済み端末の push 購読だけ黙って貼り直す。
+  // ここで許可ダイアログは出さない（未回答の人への案内は LeaguePushPromptModal の責務。
+  // 起動時にいきなり requestPermission() を呼ぶと Safari では例外になり、
+  // Chrome でもサイレント通知モードに回されやすい）。
   if (isLoggedIn.value) {
-    requestNotificationPermission();
+    syncPushSubscription();
   }
 
   // URLパスに応じてタブを設定（直接アクセス・クローラー対応）。
@@ -1053,7 +1056,8 @@ watch(isLoggedIn, (newVal) => {
     loadSavedScores();
     fetchPendingRequests();
     fetchAppNotifications();
-    requestNotificationPermission();
+    // 許可済み端末の購読を貼り直すだけ（ダイアログは出さない）。onMounted 側と同じ理由。
+    syncPushSubscription();
 
     // 公開ランディング（未ログインの /）からログインモーダル経由でログインした場合は
     // ダッシュボードへ切り替える。PC はサイドバーが常時見えているので気付きにくいが、
@@ -2029,7 +2033,7 @@ const handleUnifiedClose = async () => {
     </div>
 
     <!-- アップデート告知モーダル（ログイン後・未読の告知があれば1回だけ表示） -->
-    <WhatsNewModal />
+    <LeaguePushPromptModal />
 
     <!-- 共有/選択した画像を曲名検索して保存するモーダル（PWA Share Target の受け皿） -->
     <ShareImportModal

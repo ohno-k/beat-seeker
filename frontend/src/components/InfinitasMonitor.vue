@@ -21,6 +21,7 @@ import { useAuth } from '../composables/useAuth';
 import InfinitasResultModal from './InfinitasResultModal.vue';
 import type { ScoreData } from '../types/ScoreData';
 import { useI18n } from '../composables/useI18n';
+import { formatJstTime } from '../utils/jstTime';
 
 const { t } = useI18n();
 const { user } = useAuth();
@@ -233,7 +234,7 @@ onBeforeUnmount(() => {
             </p>
           </div>
           <span class="text-[10px] text-slate-400 tabular-nums shrink-0">
-            {{ r.capturedAt.toLocaleTimeString() }}
+            {{ formatJstTime(r.capturedAt) }}
           </span>
         </div>
       </div>

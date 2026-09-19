@@ -1547,6 +1547,7 @@ import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../
 import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getFolderRankInfoByRate, getFolderLegendRate, getFolderRankOffsetMax, SCORE_RATE_TIER_C_MIN, FOLDER_RANK_DEFS, type RankInfo } from '../utils/beatTier';
 import { calcBpi } from '../utils/bpi';
 import { gradeLabel } from '../utils/scoreGrade';
+import { formatJstDateTime } from '../utils/jstTime';
 import { useScores } from '../composables/useScores';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
@@ -2994,14 +2995,10 @@ const handleMilestoneTabClick = () => {
 };
 
 /**
- * 【関数の役割】 バックエンドの LocalDateTime 文字列（タイムゾーンなし）を JST 扱いで整形する。
- * 既にタイムゾーンが付いていればそのまま使用、無ければ `+09:00` を付与して Date 化する。
+ * 【関数の役割】 更新履歴の日時を「YYYY/MM/DD HH:mm」形式（JST 固定）で整形する。
+ * バックエンドは JST オフセット付きで返すので、端末 TZ に関わらず日本時間が出る。
  */
-const formatHistoryDate = (dateStr: string) => {
-  // バックエンドはタイムゾーン情報を持たない LocalDateTime を返す。JST として解釈する。
-  const jstStr = /[Z+\-]\d{2}:?\d{2}$/.test(dateStr) ? dateStr : dateStr + '+09:00';
-  return new Date(jstStr).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-};
+const formatHistoryDate = (dateStr: string) => formatJstDateTime(dateStr);
 
 /**
  * 【watch の役割】 選択中譜面が変わるたびに、モーダル内タブごとのキャッシュをリセットし、

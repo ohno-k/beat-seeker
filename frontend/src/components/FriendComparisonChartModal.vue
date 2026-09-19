@@ -33,6 +33,7 @@ import { useDarkMode } from '../composables/useDarkMode';
 import { useI18n } from '../composables/useI18n';
 import type { Friend } from '../composables/useFriends';
 import type { ScoreRecord } from '../utils/scoreData';
+import { formatJst, toJstDate } from '../utils/jstTime';
 
 ChartJS.register(LinearScale, CategoryScale, TimeScale, PointElement, LineElement, Filler, Tooltip, Legend, zoomPlugin);
 
@@ -141,7 +142,7 @@ function flattenHistoryEvents(rawHistory: any[], side: Side, keySet: Set<string>
     if (!entry || !entry.diffJson || entry.diffJson === '[]') continue;
     const dateStr = String(entry.date ?? '');
     if (!dateStr) continue;
-    const ts = new Date(dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`).getTime();
+    const ts = toJstDate(dateStr)?.getTime() ?? NaN;
     if (!Number.isFinite(ts)) continue;
     let songs: any[];
     try {
@@ -348,9 +349,8 @@ async function loadHistory() {
 }
 
 const formatDateLabel = (ts: number) => {
-  const d = new Date(ts);
   const locale = currentLang.value === 'ko' ? 'ko-KR' : (currentLang.value === 'en' ? 'en-US' : 'ja-JP');
-  return d.toLocaleDateString(locale, { timeZone: 'Asia/Tokyo', year: '2-digit', month: '2-digit', day: '2-digit' });
+  return formatJst(ts, { year: '2-digit', month: '2-digit', day: '2-digit' }, locale);
 };
 
 /**

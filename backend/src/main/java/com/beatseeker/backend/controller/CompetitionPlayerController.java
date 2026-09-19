@@ -342,7 +342,8 @@ public class CompetitionPlayerController {
         compMap.put("name", comp.getName());
         compMap.put("format", comp.getFormat());
         compMap.put("status", comp.getStatus());
-        compMap.put("deadlineAt", comp.getDeadlineAt());
+        // deadlineAt は「JST の壁時計」で保存しているので +09:00 をそのまま付けて返す。
+        compMap.put("deadlineAt", com.beatseeker.backend.util.JstTime.fromJst(comp.getDeadlineAt()));
         compMap.put("lockedAt", comp.getLockedAt());
         root.put("competition", compMap);
 
@@ -426,7 +427,8 @@ public class CompetitionPlayerController {
         m.put("name", c.getName());
         m.put("format", c.getFormat());
         m.put("status", c.getStatus());
-        m.put("deadlineAt", c.getDeadlineAt());
+        // deadlineAt は「JST の壁時計」で保存しているので +09:00 をそのまま付けて返す。
+        m.put("deadlineAt", com.beatseeker.backend.util.JstTime.fromJst(c.getDeadlineAt()));
         m.put("lockedAt", c.getLockedAt());
         return m;
     }

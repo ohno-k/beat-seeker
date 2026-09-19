@@ -20,6 +20,7 @@ import RankIcon from './RankIcon.vue';
 import RankingScatterChart, { type ScatterPoint } from './RankingScatterChart.vue';
 import { getRankInfo, getRateTierRankInfo, previousTierFrame } from '../utils/beatTier';
 import { CURRENT_VERSION, HISTORY_VERSIONS, versionName } from '../utils/iidxVersions';
+import { toJstDate } from '../utils/jstTime';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { useFriends } from '../composables/useFriends';
@@ -159,7 +160,8 @@ interface SimulationEntry {
 function formatLastUpdated(dateStr: string | null): string {
   if (!dateStr) return '-';
   const now = new Date();
-  const date = new Date(dateStr);
+  const date = toJstDate(dateStr);
+  if (!date) return '-';
   const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
   if (diffDays === 0) return t('common.today');
   if (diffDays === 1) return t('common.yesterday');

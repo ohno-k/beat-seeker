@@ -13,6 +13,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useLeague, type LeagueCurrent } from '../composables/useLeague';
+import { toJstDate } from '../utils/jstTime';
 import DivisionIcon from './DivisionIcon.vue';
 
 const emit = defineEmits<{ (e: 'open-league'): void }>();
@@ -56,7 +57,7 @@ const visible = computed(() => myTier.value != null);
 const isLive = computed(() => {
   const w = current.value?.week;
   if (!w || current.value?.member == null) return false;
-  return new Date(w.endsAt).getTime() > now.value;
+  return (toJstDate(w.endsAt)?.getTime() ?? 0) > now.value;
 });
 
 /** DIVISION の表示名（0=DIVISION LEGEND、1..10=DIVISION n）。 */
@@ -74,7 +75,7 @@ const groupLabel = computed(() => {
 const countdown = computed(() => {
   const endsAt = current.value?.week?.endsAt;
   if (!endsAt) return '';
-  const diff = new Date(endsAt).getTime() - now.value;
+  const diff = (toJstDate(endsAt)?.getTime() ?? 0) - now.value;
   if (diff <= 0) return '';
   const minutes = Math.floor(diff / 60000);
   const days = Math.floor(minutes / 1440);

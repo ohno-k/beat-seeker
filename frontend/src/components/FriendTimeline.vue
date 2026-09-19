@@ -14,6 +14,7 @@ import { useTimeline } from '../composables/useTimeline';
 import { useAdmin } from '../composables/useAdmin';
 import { useAuth } from '../composables/useAuth';
 import FriendTimelineEventBody from './FriendTimelineEventBody.vue';
+import { formatJstDate, formatJstShortDateTime, toJstDate } from '../utils/jstTime';
 import type {
   TimelineEntry,
   OvertakeSongPayload,
@@ -141,12 +142,11 @@ const toggleSongs = (id: number) => {
   expandedSongIds.value = next;
 };
 
-/** ISO 日時を「◯分前 / ◯時間前 / M/D HH:mm」表記に整形する。 */
+/** ISO 日時を「◯分前 / ◯時間前 / M/D HH:mm」表記（日時は JST 固定）に整形する。 */
 const formatRelative = (iso: string): string => {
-  const jst = /[Z+\-]\d{2}:?\d{2}$/.test(iso) ? iso : iso + '+09:00';
-  const d = new Date(jst);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
+  const d = toJstDate(iso);
+  if (!d) return '';
+  const diffMs = Date.now() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 1) return 'たった今';
   if (diffMin < 60) return `${diffMin}分前`;
@@ -154,7 +154,7 @@ const formatRelative = (iso: string): string => {
   if (diffH < 24) return `${diffH}時間前`;
   const diffD = Math.floor(diffH / 24);
   if (diffD < 7) return `${diffD}日前`;
-  return d.toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return formatJstShortDateTime(d);
 };
 
 /** スレッド: 同日・同ユーザのイベント群（親 1 + 子 N の集合）。 */
@@ -192,9 +192,8 @@ const threadedEntries = computed<{ date: string; threads: Thread[] }[]>(() => {
   let threadSeen = new Map<string, Set<string>>();
 
   for (const e of entries.value) {
-    const jst = /[Z+\-]\d{2}:?\d{2}$/.test(e.createdAt) ? e.createdAt : e.createdAt + '+09:00';
-    const d = new Date(jst);
-    const dateKey = d.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    // 日付の切れ目も JST 基準（端末 TZ が違っても同じ日付でまとまる）。
+    const dateKey = formatJstDate(e.createdAt);
     if (dateKey !== currentDateKey) {
       dateGroups.push({ date: dateKey, threads: [] });
       currentDateKey = dateKey;

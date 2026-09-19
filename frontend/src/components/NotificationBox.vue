@@ -14,6 +14,7 @@
  */
 import { onMounted, onUnmounted, ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
+import { formatJstShortDateTime } from '../utils/jstTime';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -205,7 +206,7 @@ const notificationIconClass = (type: string) => {
               <div class="flex-1 min-w-0">
                 <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{{ notif.message }}</p>
                 <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
-                  {{ new Date(notif.createdAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+                  {{ formatJstShortDateTime(notif.createdAt) }}
                 </p>
               </div>
               <div v-if="!notif.read" class="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-1"></div>

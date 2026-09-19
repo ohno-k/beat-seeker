@@ -241,6 +241,7 @@ import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { getNextRankInfo } from '../utils/beatTier';
 import { scoreGrade, gradeLabel, gradeColorClass } from '../utils/scoreGrade';
+import { formatJstDate } from '../utils/jstTime';
 import InformalRankBadge from './InformalRankBadge.vue';
 import RankUpAdviceReasonModal from './RankUpAdviceReasonModal.vue';
 import type { AttemptedItem, FillAccuracy, FillRecommendationItem } from '../types/fillRecommendation';
@@ -466,12 +467,11 @@ function currentTooltip(sug: FillRecommendationItem): string {
 }
 
 /**
- * 【関数の役割】 挑戦済みの更新日時を端末ロケールの日付にする。
- * サーバーの LocalDateTime はタイムゾーン無しの UTC 文字列なので、他の履歴表示と同じく 'Z' を補って解釈する。
+ * 【関数の役割】 挑戦済みの更新日時を JST の日付にする。
+ * サーバーは JST オフセット付きで返すので、端末 TZ に依らず同じ日付が出る。
  */
 function formatAttemptDate(iso: string): string {
-  const d = new Date(iso.endsWith('Z') ? iso : `${iso}Z`);
-  return Number.isFinite(d.getTime()) ? d.toLocaleDateString() : '';
+  return formatJstDate(iso);
 }
 
 /** 最高ランクに到達済み（残り pt が無い）ならパネル自体を出さないので、取得もしない。 */

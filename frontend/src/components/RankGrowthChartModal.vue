@@ -25,6 +25,7 @@ import { diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useI18n } from '../composables/useI18n';
+import { formatJst, toJstDate } from '../utils/jstTime';
 
 ChartJS.register(LinearScale, CategoryScale, TimeScale, PointElement, LineElement, Filler, Tooltip, Legend, zoomPlugin);
 
@@ -116,9 +117,8 @@ const subTierBoundaries = computed(() => {
 });
 
 const formatDateLabel = (ts: number) => {
-  const d = new Date(ts);
   const locale = currentLang.value === 'ko' ? 'ko-KR' : (currentLang.value === 'en' ? 'en-US' : 'ja-JP');
-  return d.toLocaleDateString(locale, { timeZone: 'Asia/Tokyo', year: '2-digit', month: '2-digit', day: '2-digit' });
+  return formatJst(ts, { year: '2-digit', month: '2-digit', day: '2-digit' }, locale);
 };
 
 const chartData = computed(() => {
@@ -308,7 +308,7 @@ async function loadHistory() {
     const res = await fetch(`${API_BASE}/api/scores/history`, { headers: authHeaders() });
     if (!res.ok) throw new Error(t('history.error'));
     const data = await res.json();
-    const asc = [...data].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const asc = [...data].sort((a: any, b: any) => (toJstDate(a.date)?.getTime() ?? 0) - (toJstDate(b.date)?.getTime() ?? 0));
 
     const lookup = songToRank.value;
 
@@ -329,7 +329,7 @@ async function loadHistory() {
     const firstAppear = new Map<string, { ts: number; oldScore: number }>();
     for (const entry of asc) {
       if (!entry.diffJson || entry.diffJson === '[]') continue;
-      const ts = new Date(entry.date.endsWith('Z') ? entry.date : `${entry.date}Z`).getTime();
+      const ts = (toJstDate(entry.date)?.getTime() ?? NaN);
       try {
         const songs = JSON.parse(entry.diffJson) as any[];
         for (const s of songs) {
@@ -353,14 +353,14 @@ async function loadHistory() {
     let fullFilledTs = -Infinity;
     // preHistory のみで既に全曲揃っているなら、最初の history エントリから「埋まり済み」とみなす。
     if (playedSet.size >= requiredCount && asc.length > 0) {
-      fullFilledTs = new Date(asc[0].date.endsWith('Z') ? asc[0].date : `${asc[0].date}Z`).getTime();
+      fullFilledTs = (toJstDate(asc[0].date)?.getTime() ?? NaN);
     }
 
     let cum = 0;
     type Snapshot = { ts: number; cum: number };
     const snapshots: Snapshot[] = [];
     for (const entry of asc) {
-      const ts = new Date(entry.date.endsWith('Z') ? entry.date : `${entry.date}Z`).getTime();
+      const ts = (toJstDate(entry.date)?.getTime() ?? NaN);
       let diff = 0;
       try {
         if (entry.diffJson && entry.diffJson !== '[]') {

@@ -101,7 +101,8 @@ public class DifficultyRevisionService {
             m.put("label", "v" + rev.getEdition());
             m.put("appVersion", rev.getAppVersion());
             m.put("date", rev.getAppliedAt().format(YEAR_MONTH));
-            m.put("appliedAt", rev.getAppliedAt().toString());
+            // appliedAt は LocalDateTime.now(JST) で記録した「JST の壁時計」。+09:00 を付けて返す。
+            m.put("appliedAt", com.beatseeker.backend.util.JstTime.fromJst(rev.getAppliedAt()));
             m.put("added", readArray(rev.getAddedJson()));
             m.put("changed", readArray(rev.getChangedJson()));
             m.put("removed", readArray(rev.getRemovedJson()));

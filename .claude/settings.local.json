@@ -58,7 +58,13 @@
       "Bash(sort -k4 -rn)",
       "Bash(awk '{size=$4; $1=$2=$3=$4=\"\"; printf \"%6.1f MB %s\\\\n\", size/1048576, $0}')",
       "Bash(awk '{s+=$4} END {printf \"%.0f MB in %d files\\\\n\", s/1048576, NR}')",
-      "Bash(curl -s -L -o zinrai_index.html -w \"HTTP:%{http_code} SIZE:%{size_download} URL:%{url_effective}\\\\n\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/129.0.0.0 Safari/537.36\" -H \"Accept-Language: ja,en;q=0.9\" \"https://p.eagate.573.jp/game/2dx/34/index.html\")"
+      "Bash(curl -s -L -o zinrai_index.html -w \"HTTP:%{http_code} SIZE:%{size_download} URL:%{url_effective}\\\\n\" -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/129.0.0.0 Safari/537.36\" -H \"Accept-Language: ja,en;q=0.9\" \"https://p.eagate.573.jp/game/2dx/34/index.html\")",
+      "Bash(python -)",
+      "Bash(sed -i '7a import com.beatseeker.backend.util.JstTime;' LeagueController.java)",
+      "Bash(sed -i '5a import com.beatseeker.backend.util.JstTime;' LeagueAdminController.java)",
+      "Bash(sed -i \"14a import { formatJstTime } from '../utils/jstTime';\" components/CompetitionChatWidget.vue)",
+      "Bash(sed -i \"16a import { formatJstTime } from '../utils/jstTime';\" components/SupportChatWidget.vue)",
+      "Bash(grep -n \"from '\\\\.\\\\./\\\\|from '\\\\./\" components/FriendComparisonChartModal.vue)"
     ]
   }
 }

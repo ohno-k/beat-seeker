@@ -16,6 +16,7 @@
  */
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { nowJstParts } from '../utils/jstTime';
 
 interface WrappedTarget {
   year: number;
@@ -24,16 +25,18 @@ interface WrappedTarget {
 }
 
 /**
- * 現在日時から振り返り対象月を導出する。
+ * 現在日時（JST）から振り返り対象月を導出する。
  *  - 月末 6 日（最終日 - 5 〜 最終日）: 当月
  *  - 月初 6 日（1 〜 6）: 先月
  *  - それ以外: null（バナー非表示）
+ *
+ * 集計はサーバー側で JST の月境界を使うので、表示判定も端末 TZ ではなく JST で行う。
  */
 function getWrappedTarget(): WrappedTarget | null {
-  const now = new Date();
-  const day = now.getDate();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const now = nowJstParts();
+  const day = now.day;
+  const year = now.year;
+  const month = now.month;
   // 月の最終日: Date(year, month, 0) = "翌月の 0 日" = 当月最終日
   const lastDay = new Date(year, month, 0).getDate();
 

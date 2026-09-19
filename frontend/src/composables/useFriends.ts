@@ -428,29 +428,21 @@ export function useFriends() {
     };
 
     /**
-     * ブラウザに Web Push の許可を求め、許可されればサービスワーカーに購読登録する。
+     * 許可済み（`Notification.permission === 'granted'`）を前提に、購読を作って（または作り直して）
+     * サーバーへ保存する。ダイアログは一切出さない。
      *
      * 手順:
-     *  1. Notification API が存在するか確認
-     *  2. ユーザーに許可を求める（ネイティブダイアログ。許可済みなら即座に 'granted'）
-     *  3. Service Worker の有効化を待つ
-     *  4. サーバーが配る VAPID 公開鍵を取得する（フロントのハードコードは fallback のみ）
-     *  5. 既存購読が別の公開鍵で作られていれば unsubscribe してから購読し直す
-     *  6. 購読情報をサーバに保存（`updatePushSubscription`）
+     *  1. Service Worker の有効化を待つ
+     *  2. サーバーが配る VAPID 公開鍵を取得する（フロントに鍵は持たない）
+     *  3. 既存購読が別の公開鍵で作られていれば unsubscribe してから購読し直す
+     *  4. 購読情報をサーバに保存（`updatePushSubscription`）
      *
-     * 手順 5 が無いと、鍵をローテーションしたときに `subscribe()` が InvalidStateError で
+     * 手順 3 が無いと、鍵をローテーションしたときに `subscribe()` が InvalidStateError で
      * 失敗し続け、以後そのブラウザには通知が一切届かなくなる（古い購読が残ったまま）。
      *
      * @returns 購読までできたら `true`
      */
-    const requestNotificationPermission = async () => {
-        if (!('Notification' in window)) {
-            console.error('Notifications not supported');
-            return false;
-        }
-
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') return false;
+    const subscribeAndSave = async () => {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             console.error('This browser does not support Web Push');
             return false;
@@ -502,6 +494,53 @@ export function useFriends() {
             console.error('Failed to subscribe to push notifications', e);
             return false;
         }
+    };
+
+    /**
+     * 既に許可済みの端末だけ、購読を最新の状態に貼り直す。**ダイアログは絶対に出さない。**
+     *
+     * アプリ起動時・ログイン時に呼ぶ想定。鍵をローテーションした後や、ブラウザ側で購読が
+     * 作り直された後の復旧はこの経路で自動的に行われる。
+     *
+     * 未回答（'default'）のユーザーに起動時いきなり許可を求めない（求めるのは
+     * {@link requestNotificationPermission} を呼ぶ画面側の責務）。
+     *
+     * @returns 購読を保存できたら `true`
+     */
+    const syncPushSubscription = async () => {
+        if (!('Notification' in window)) return false;
+        if (Notification.permission !== 'granted') return false;
+        return await subscribeAndSave();
+    };
+
+    /**
+     * ブラウザに Web Push の許可を求め、許可されれば購読登録する。
+     *
+     * **ユーザー操作（ボタン押下）から呼ぶこと。** Safari（iOS のホーム画面アプリを含む）は
+     * ユーザー操作起点でない `requestPermission()` を拒否する。
+     *
+     * 許可済みの場合はダイアログを出さずに購読の貼り直しだけ行う。
+     * 拒否済みの場合はブラウザが再要求を禁止しているので、何もせず false を返す。
+     *
+     * @returns 購読までできたら `true`
+     */
+    const requestNotificationPermission = async () => {
+        if (!('Notification' in window)) {
+            console.error('Notifications not supported');
+            return false;
+        }
+
+        let permission = Notification.permission;
+        if (permission === 'default') {
+            try {
+                permission = await Notification.requestPermission();
+            } catch (e) {
+                console.warn('通知の許可要求はユーザー操作から行う必要があります', e);
+                return false;
+            }
+        }
+        if (permission !== 'granted') return false;
+        return await subscribeAndSave();
     };
 
     /**
@@ -570,8 +609,10 @@ export function useFriends() {
         sendTestNotification,
         /** フレンドスコア取得。 */
         fetchFriendScores,
-        /** ブラウザに通知許可を求めて購読する高レベル関数。 */
+        /** ブラウザに通知許可を求めて購読する高レベル関数（ユーザー操作から呼ぶこと）。 */
         requestNotificationPermission,
+        /** 許可済み端末の購読だけを黙って貼り直す（起動時用・ダイアログを出さない）。 */
+        syncPushSubscription,
         /** ブラウザ通知の稼働状態（サーバー側の有効/無効・購読の有無）。 */
         pushStatus,
         /** 上記をサーバーから取得する。 */

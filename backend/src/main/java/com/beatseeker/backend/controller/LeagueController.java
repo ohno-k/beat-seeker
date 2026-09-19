@@ -5,6 +5,7 @@ import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.LeagueDivision;
 import com.beatseeker.backend.service.LeagueService;
 import com.beatseeker.backend.service.LeagueStandingsService;
+import com.beatseeker.backend.util.JstTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -308,8 +309,8 @@ public class LeagueController {
                     Map<String, Object> row = new LinkedHashMap<>();
                     row.put("weekId", m.getWeek().getId());
                     row.put("weekNo", m.getWeek().getWeekNo());
-                    row.put("startsAt", m.getWeek().getStartsAt());
-                    row.put("endsAt", m.getWeek().getEndsAt());
+                    row.put("startsAt", JstTime.fromJst(m.getWeek().getStartsAt()));
+                    row.put("endsAt", JstTime.fromJst(m.getWeek().getEndsAt()));
                     row.put("tier", m.getTier());
                     row.put("groupIndex", m.getGroupIndex());
                     row.put("finalRank", m.getFinalRank());
@@ -393,8 +394,8 @@ public class LeagueController {
                 Map<String, Object> row = new LinkedHashMap<>();
                 row.put("weekId", week.getId());
                 row.put("weekNo", week.getWeekNo());
-                row.put("startsAt", week.getStartsAt());
-                row.put("endsAt", week.getEndsAt());
+                row.put("startsAt", JstTime.fromJst(week.getStartsAt()));
+                row.put("endsAt", JstTime.fromJst(week.getEndsAt()));
                 row.put("items", items);
                 weekList.add(row);
             }
@@ -553,8 +554,8 @@ public class LeagueController {
         m.put("ladderType", week.getLadderType());
         // 開催回の通し番号（#1, #2, ...）。プレシーズンは null（画面では「プレシーズン」表示）。
         m.put("weekNo", week.getWeekNo());
-        m.put("startsAt", week.getStartsAt());
-        m.put("endsAt", week.getEndsAt());
+        m.put("startsAt", JstTime.fromJst(week.getStartsAt()));
+        m.put("endsAt", JstTime.fromJst(week.getEndsAt()));
         m.put("status", week.getStatus());
         return m;
     }

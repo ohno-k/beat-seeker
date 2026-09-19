@@ -33,6 +33,7 @@ import strategySongs from '../data/strategy_card_songs.json';
 import { useToast } from '../composables/useToast';
 import { useSe } from '../composables/useSe';
 import { KIND_LABEL_JA, LEVELS_FOR_KIND } from '../composables/competitionMatchKinds';
+import { formatJstDateTime } from '../utils/jstTime';
 import { buildChartIndex, resolveChartByTitle } from '../utils/songTitleMatch';
 
 const { songDataBody, fetchGameData } = useGameData();
@@ -1087,7 +1088,7 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
               @click="handleSelectImportCompetition(c.id)"
             >
               <p class="font-bold">{{ c.name }}</p>
-              <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · status: {{ c.status }} · 作成 {{ new Date(c.createdAt).toLocaleString() }}</p>
+              <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · status: {{ c.status }} · 作成 {{ formatJstDateTime(c.createdAt) }}</p>
             </li>
           </ul>
           <p v-else class="px-5 py-8 text-center text-slate-500 text-sm">取り込める大会がありません (主催権限でログインしていることを確認してください)</p>

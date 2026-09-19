@@ -3,6 +3,7 @@ package com.beatseeker.backend.controller;
 import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.*;
+import com.beatseeker.backend.util.JstTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -180,8 +181,8 @@ public class LeagueAdminController {
             wm.put("id", week.getId());
             wm.put("ladderType", week.getLadderType());
             wm.put("weekNo", week.getWeekNo());
-            wm.put("startsAt", week.getStartsAt());
-            wm.put("endsAt", week.getEndsAt());
+            wm.put("startsAt", JstTime.fromJst(week.getStartsAt()));
+            wm.put("endsAt", JstTime.fromJst(week.getEndsAt()));
             wm.put("status", week.getStatus());
             wm.put("memberCount", memberCountByWeek.getOrDefault(week.getId(), 0L));
             ActivityCounts counts = activityCounts(week, countsByWeek.get(week.getId()),
@@ -244,8 +245,8 @@ public class LeagueAdminController {
         wm.put("id", week.getId());
         wm.put("ladderType", week.getLadderType());
         wm.put("weekNo", week.getWeekNo());
-        wm.put("startsAt", week.getStartsAt());
-        wm.put("endsAt", week.getEndsAt());
+        wm.put("startsAt", JstTime.fromJst(week.getStartsAt()));
+        wm.put("endsAt", JstTime.fromJst(week.getEndsAt()));
         wm.put("status", week.getStatus());
         result.put("week", wm);
         result.put("songs", songMapsWithLines(week, tier, groupIndex));
@@ -806,8 +807,8 @@ public class LeagueAdminController {
         m.put("id", week.getId());
         m.put("ladderType", week.getLadderType());
         m.put("weekNo", week.getWeekNo());
-        m.put("startsAt", week.getStartsAt());
-        m.put("endsAt", week.getEndsAt());
+        m.put("startsAt", JstTime.fromJst(week.getStartsAt()));
+        m.put("endsAt", JstTime.fromJst(week.getEndsAt()));
         m.put("status", week.getStatus());
         List<LeagueSong> songs = leagueSongRepository.findByWeekOrderByTierAscSlotAsc(week);
         // 卓(tier) → グループ → メンバー。誰がどのグループに入ったかを管理者が確認できるようにする。

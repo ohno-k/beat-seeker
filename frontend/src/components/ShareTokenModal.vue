@@ -15,6 +15,7 @@ import { ref, watch } from 'vue';
 import { useShareTokens, type ShareTokenInfo, type ShareExpiresIn } from '../composables/useShareTokens';
 import { useToast } from '../composables/useToast';
 import { useModalEscape } from '../composables/useModalEscape';
+import { jstParts } from '../utils/jstTime';
 
 const props = defineProps<{ isOpen: boolean }>();
 const emit = defineEmits<{ (e: 'close'): void }>();
@@ -121,16 +122,13 @@ const handleDelete = async (t: ShareTokenInfo) => {
     }
 };
 
+/** 日時を「YYYY/MM/DD HH:mm」形式（JST 固定）で表示する。 */
 const formatDateTime = (iso: string | null) => {
     if (!iso) return '無期限';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `${y}/${m}/${day} ${hh}:${mm}`;
+    const p = jstParts(iso);
+    if (!p) return iso;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${p.year}/${pad(p.month)}/${pad(p.day)} ${pad(p.hour)}:${pad(p.minute)}`;
 };
 
 const scopeLabel = (t: ShareTokenInfo) => {

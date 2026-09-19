@@ -22,6 +22,7 @@ import {
   versionChartColor,
   versionName,
 } from '../utils/iidxVersions';
+import { toJstDateKey } from '../utils/jstTime';
 
 const { t } = useI18n();
 const {
@@ -90,11 +91,8 @@ const openVersion = (version: number) => {
   emit('open-version', version);
 };
 
-/** ISO 日時文字列を "YYYY-MM-DD" に丸める（時刻までは管理画面に不要）。 */
-const formatDate = (iso: string | null): string => {
-  if (!iso) return '';
-  return iso.slice(0, 10);
-};
+/** ISO 日時文字列を JST の "YYYY-MM-DD" に丸める（時刻までは管理画面に不要）。 */
+const formatDate = (iso: string | null): string => toJstDateKey(iso);
 
 // ── 歴代ベストの作品内訳（円グラフ）──────────────────────────────
 /** 円グラフ用に `/past/best` を取得中かどうか。 */

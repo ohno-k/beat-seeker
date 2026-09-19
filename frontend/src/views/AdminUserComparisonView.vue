@@ -27,6 +27,7 @@ import { useScores } from '../composables/useScores';
 import AdminComparisonModal, { type AdminUserSummary } from '../components/AdminComparisonModal.vue';
 import RankIcon from '../components/RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
+import { jstParts } from '../utils/jstTime';
 
 const { isAdmin } = useAdmin();
 const { fetchAllUsers, fetchUserComparison, recalculateUserComparison } = useScores();
@@ -155,13 +156,13 @@ const beatTier = (pt: number | null | undefined) => getRankInfo(pt ?? 0);
 /** 勝率を「64.3%」形式に整形する。母数 0 は "-"。 */
 const formatRate = (rate: number | null) => rate == null ? '-' : `${rate.toFixed(1)}%`;
 
-/** 集計日時を「2026/08/27 04:00」形式に整形する。 */
+/** 集計日時を「2026/08/27 04:00」形式（JST 固定）に整形する。 */
 const formatComputedAt = (value: string | null) => {
   if (!value) return '未集計';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
+  const p = jstParts(value);
+  if (!p) return value;
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${p.year}/${pad(p.month)}/${pad(p.day)} ${pad(p.hour)}:${pad(p.minute)}`;
 };
 
 /**

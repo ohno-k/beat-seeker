@@ -546,6 +546,7 @@ import { useAuth } from '../composables/useAuth';
 import { useGameData } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
+import { jstParts } from '../utils/jstTime';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -1223,12 +1224,12 @@ const handleWikiSync = async (dryRun: boolean) => {
   }
 };
 
-/** 【関数の役割】 実行履歴の日時（JST オフセット付き ISO）を "9/16 06:20" 形式にする。 */
+/** 【関数の役割】 実行履歴の日時（JST オフセット付き ISO）を JST の "9/16 06:20" 形式にする。 */
 const formatWikiRunTime = (iso: string | null) => {
   if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const p = jstParts(iso);
+  if (!p) return iso;
+  return `${p.month}/${p.day} ${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
 };
 
 /** 【関数の役割】 実行結果ステータスの表示ラベル。 */

@@ -12,6 +12,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { API_BASE } from '../composables/useAuth';
+import { formatJst, toJstDate } from '../utils/jstTime';
 
 /** アクティビティ 1 件分の型（API レスポンス）。 */
 interface ActivityItem {
@@ -50,15 +51,13 @@ const fetchFeed = async () => {
 
 /**
  * 【関数の役割】 ISO 風の日時文字列を「◯分前」「◯時間前」等に整形する。
- * バックエンドは LocalDateTime をタイムゾーン無しで返すため、JST (+09:00) を補って解釈する。
- * @param isoStr 例: "2026-04-23T12:34:56"（TZ 未指定）または "...Z"
+ * 日付表記になる場合は端末 TZ に依らず JST で表示する。
+ * @param isoStr 例: "2026-04-23T12:34:56+09:00"（TZ 未指定なら JST とみなす）
  */
 const formatDate = (isoStr: string) => {
-  // タイムゾーン情報が含まれていなければ JST (+09:00) を付与する。
-  const jstStr = /[Z+\-]\d{2}:?\d{2}$/.test(isoStr) ? isoStr : isoStr + '+09:00';
-  const d = new Date(jstStr);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
+  const d = toJstDate(isoStr);
+  if (!d) return '';
+  const diffMs = Date.now() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 1) return t('activity.justNow');
   if (diffMin < 60) return t('activity.minutesAgo', { n: diffMin });
@@ -66,8 +65,9 @@ const formatDate = (isoStr: string) => {
   if (diffH < 24) return t('activity.hoursAgo', { n: diffH });
   const diffD = Math.floor(diffH / 24);
   if (diffD < 7) return t('activity.daysAgo', { n: diffD });
-  // 1 週間以上前は日付表記（言語毎に locale を切替）。
-  return d.toLocaleDateString(currentLang.value === 'ko' ? 'ko-KR' : currentLang.value === 'en' ? 'en-US' : 'ja-JP', { month: 'short', day: 'numeric' });
+  // 1 週間以上前は日付表記（言語毎に locale を切替。時刻は常に JST 基準）。
+  const locale = currentLang.value === 'ko' ? 'ko-KR' : currentLang.value === 'en' ? 'en-US' : 'ja-JP';
+  return formatJst(d, { month: 'short', day: 'numeric' }, locale);
 };
 
 // マウント時に一度だけフィードを取得。

@@ -7,6 +7,7 @@ import com.beatseeker.backend.service.CompetitionTeamStandingsService;
 import com.beatseeker.backend.service.CompetitionTeamSummaryService;
 import com.beatseeker.backend.service.OrganizerAuthService;
 import com.beatseeker.backend.service.StrategyPoolService;
+import com.beatseeker.backend.util.JstTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -1479,7 +1480,9 @@ public class CompetitionAdminController {
         m.put("name", c.getName());
         m.put("format", c.getFormat());
         m.put("status", c.getStatus());
-        m.put("deadlineAt", c.getDeadlineAt());
+        // 締切/公開日時は「JST の壁時計」で保存しているので、そのまま +09:00 を付けて返す
+        // (サーバー時計として扱うと本番の UTC JVM で 9 時間ずれる)。
+        m.put("deadlineAt", JstTime.fromJst(c.getDeadlineAt()));
         m.put("createdAt", c.getCreatedAt());
         m.put("lockedAt", c.getLockedAt());
         m.put("createdById", c.getCreatedBy() != null ? c.getCreatedBy().getId() : null);
@@ -1488,12 +1491,12 @@ public class CompetitionAdminController {
         // 起用クローズ: deadlineAt を「クローズ日時」として運用。lineupClosed は現在 (JST) 時点の派生状態。
         m.put("lineupClosed", c.isLineupClosed());
         // 起用公開: lineupPublishAt を「公開日時」として運用。lineupPublished は現在 (JST) 時点の派生状態 (クローズとは独立)。
-        m.put("lineupPublishAt", c.getLineupPublishAt());
+        m.put("lineupPublishAt", JstTime.fromJst(c.getLineupPublishAt()));
         m.put("lineupPublished", c.isLineupPublished());
         // 決勝は予選と別スケジュール。未設定 (null) の間は「起用編集可 & 起用非公開」。
-        m.put("finalsDeadlineAt", c.getFinalsDeadlineAt());
+        m.put("finalsDeadlineAt", JstTime.fromJst(c.getFinalsDeadlineAt()));
         m.put("finalsLineupClosed", c.isFinalsLineupClosed());
-        m.put("finalsLineupPublishAt", c.getFinalsLineupPublishAt());
+        m.put("finalsLineupPublishAt", JstTime.fromJst(c.getFinalsLineupPublishAt()));
         m.put("finalsLineupPublished", c.isFinalsLineupPublished());
         return m;
     }

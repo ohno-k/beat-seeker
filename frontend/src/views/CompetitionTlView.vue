@@ -19,6 +19,7 @@ import { useI18n } from '../composables/useI18n';
 import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
 import { kindLevelLabel, isAdjacentKind } from '../composables/competitionMatchKinds';
 import CompetitionChatWidget from '../components/CompetitionChatWidget.vue';
+import { formatJstDateTime } from '../utils/jstTime';
 
 const props = defineProps<{ token: string }>();
 
@@ -179,7 +180,7 @@ const undecidedStrategyCount = computed<number>(() =>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
-          <span v-if="view.competition.deadlineAt"> · {{ t('competition.common.deadline') }} {{ new Date(view.competition.deadlineAt).toLocaleString() }}</span>
+          <span v-if="view.competition.deadlineAt"> · {{ t('competition.common.deadline') }} {{ formatJstDateTime(view.competition.deadlineAt) }}</span>
         </p>
       </div>
 
