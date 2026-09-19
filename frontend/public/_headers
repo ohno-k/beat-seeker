@@ -7,3 +7,8 @@
 
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate
+
+# Service Worker はキャッシュさせない。古い sw.js が残ると push ハンドラの修正が
+# 端末に届かず、「一部の人だけ通知が来ない」状態が長引く。
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate

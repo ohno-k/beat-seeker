@@ -66,6 +66,22 @@ const appNotifications = ref<AppNotificationItem[]>([]);
 /** 未読通知件数。ヘッダアイコンの赤バッジ等で使う。 */
 const appUnreadCount = ref(0);
 
+/** ブラウザ通知（Web Push）のサーバー側 / クライアント側の状態。 */
+export interface PushStatus {
+    /** サーバーに VAPID 鍵が投入され、送信できる状態か。false なら誰にも通知は届かない。 */
+    serverEnabled: boolean;
+    /** クライアントが subscribe に使うべき VAPID 公開鍵（base64url）。 */
+    publicKey: string;
+    /** このユーザーの購読がサーバーに保存されているか。 */
+    subscribed: boolean;
+}
+
+/**
+ * 直近に取得した Push の稼働状態。プロフィール画面が「サーバー側で無効」を
+ * 出し分けるために参照する（全 UI で同じ値を見るようモジュールレベルに置く）。
+ */
+const pushStatus = ref<PushStatus | null>(null);
+
 /**
  * 【Composable の役割】 フレンド機能と通知機能を包括的に提供する。
  *
@@ -299,13 +315,21 @@ export function useFriends() {
      */
     const updatePushSubscription = async (subscription: string) => {
         try {
-            await fetch(`${API_BASE}/api/friends/push-subscription`, {
+            const res = await fetch(`${API_BASE}/api/friends/push-subscription`, {
                 method: 'POST',
                 headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ subscription })
             });
+            // 保存に失敗したままだとサーバーに購読が残らず、以後まったく通知が届かない。
+            // 呼び出し元では握り潰すが、原因追跡できるようログには必ず出す。
+            if (!res.ok) {
+                console.error('Push subscription save failed', res.status);
+                return false;
+            }
+            return true;
         } catch (e: any) {
             console.error('Push subscription failed', e);
+            return false;
         }
     };
 
@@ -349,47 +373,129 @@ export function useFriends() {
         return outputArray;
     };
 
+    /** `ArrayBuffer`（既存購読の applicationServerKey）を base64url 文字列に戻す。 */
+    const arrayBufferToUrlBase64 = (buffer: ArrayBuffer) => {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    };
+
+    /**
+     * ブラウザ通知の稼働状態をサーバーから取得する。
+     *
+     * 「通知が来ない」の原因がサーバー側（VAPID 鍵未設定）かクライアント側（未許可・未購読）かを
+     * 切り分けるために使う。取得結果は `pushStatus` にも保持してプロフィール画面が参照する。
+     *
+     * @returns 状態。取得に失敗した場合は null
+     */
+    const fetchPushStatus = async (): Promise<PushStatus | null> => {
+        try {
+            const res = await fetch(`${API_BASE}/api/notifications/push-status`, { headers: authHeaders() });
+            if (!res.ok) return null;
+            const data = await res.json();
+            pushStatus.value = {
+                serverEnabled: !!data.serverEnabled,
+                publicKey: data.publicKey ?? '',
+                subscribed: !!data.subscribed
+            };
+            return pushStatus.value;
+        } catch {
+            return null;
+        }
+    };
+
+    /**
+     * Service Worker の有効化を待つ。
+     *
+     * `navigator.serviceWorker.ready` は「登録が 1 つも無い」場合に永久に解決しない。
+     * index.html の登録が何らかの理由で失敗していると購読処理がここで無言のまま止まり、
+     * 「通知を有効にする」を押しても何も起きない状態になるため、自前で登録を試み、
+     * タイムアウトも付けて必ず結果を返す。
+     *
+     * @returns 有効化済みの登録。取得できなければ null
+     */
+    const ensureServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
+        if (!('serviceWorker' in navigator)) return null;
+        try {
+            // index.html でも登録しているが、register は同一スクリプトなら冪等なので二重呼び出しで問題ない。
+            await navigator.serviceWorker.register('/sw.js');
+        } catch (e) {
+            console.error('Service Worker の登録に失敗しました', e);
+        }
+        const timeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 10000));
+        return await Promise.race([navigator.serviceWorker.ready, timeout]);
+    };
+
     /**
      * ブラウザに Web Push の許可を求め、許可されればサービスワーカーに購読登録する。
      *
      * 手順:
      *  1. Notification API が存在するか確認
-     *  2. ユーザーに許可を求める（ネイティブダイアログ）
-     *  3. 許可が下りたら SW 登録を待ち、VAPID 公開鍵で pushManager.subscribe
-     *  4. 購読情報をサーバに保存（`updatePushSubscription`）
+     *  2. ユーザーに許可を求める（ネイティブダイアログ。許可済みなら即座に 'granted'）
+     *  3. Service Worker の有効化を待つ
+     *  4. サーバーが配る VAPID 公開鍵を取得する（フロントのハードコードは fallback のみ）
+     *  5. 既存購読が別の公開鍵で作られていれば unsubscribe してから購読し直す
+     *  6. 購読情報をサーバに保存（`updatePushSubscription`）
      *
-     * @returns 許可が下りたなら `true`
+     * 手順 5 が無いと、鍵をローテーションしたときに `subscribe()` が InvalidStateError で
+     * 失敗し続け、以後そのブラウザには通知が一切届かなくなる（古い購読が残ったまま）。
+     *
+     * @returns 購読までできたら `true`
      */
     const requestNotificationPermission = async () => {
         if (!('Notification' in window)) {
             console.error('Notifications not supported');
-            return;
+            return false;
         }
 
         const permission = await Notification.requestPermission();
-        if (permission === 'granted' && 'serviceWorker' in navigator) {
-            try {
-                const registration = await navigator.serviceWorker.ready;
-                // VAPID 公開鍵。秘密鍵はサーバ側で保管。
-                // 環境変数 VITE_VAPID_PUBLIC_KEY で上書き可能。未設定時は従来のハードコード値を使う
-                //（.env を用意しなくても従来どおり動作する）。
-                const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
-                    ?? 'BK8nOI89kHqMXjG1Pz5MiOLMc7lX8zjgd-gd3KhfRfr3mD_pt_VgRBFPzPRvmPoDhz06o82fBbBmVLATrotGB0k';
-                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+        if (permission !== 'granted') return false;
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            console.error('This browser does not support Web Push');
+            return false;
+        }
 
-                const subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: convertedVapidKey
-                });
-                console.log('Push Subscription successful');
-                await updatePushSubscription(JSON.stringify(subscription));
-                return true;
-            } catch (e) {
-                console.error('Failed to subscribe to push notifications', e);
+        try {
+            const registration = await ensureServiceWorker();
+            if (!registration) {
+                console.error('Service Worker が有効になりませんでした');
                 return false;
             }
+
+            // VAPID 公開鍵はサーバーが配る値を正とする（鍵ローテーション時のズレを防ぐ）。
+            // 取得できないときだけ env / ハードコードにフォールバックする。
+            const status = await fetchPushStatus();
+            const vapidPublicKey = status?.publicKey
+                || import.meta.env.VITE_VAPID_PUBLIC_KEY
+                || 'BK8nOI89kHqMXjG1Pz5MiOLMc7lX8zjgd-gd3KhfRfr3mD_pt_VgRBFPzPRvmPoDhz06o82fBbBmVLATrotGB0k';
+
+            // 既存購読が今の公開鍵と別の鍵で作られていたら、作り直さないと送信できない。
+            const existing = await registration.pushManager.getSubscription();
+            if (existing) {
+                const existingKey = existing.options?.applicationServerKey;
+                const sameKey = existingKey
+                    ? arrayBufferToUrlBase64(existingKey) === vapidPublicKey
+                    : false;
+                if (!sameKey) {
+                    console.warn('VAPID 公開鍵が変わっているため購読を作り直します');
+                    await existing.unsubscribe().catch(() => undefined);
+                }
+            }
+
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+            });
+            // 毎回保存し直す。ブラウザ側で購読が作り直された場合や、
+            // 管理者の「Push通知リセット」でサーバー側が空になった場合もこれで復旧する。
+            await updatePushSubscription(JSON.stringify(subscription));
+            if (pushStatus.value) pushStatus.value.subscribed = true;
+            return true;
+        } catch (e) {
+            console.error('Failed to subscribe to push notifications', e);
+            return false;
         }
-        return permission === 'granted';
     };
 
     /**
@@ -460,6 +566,10 @@ export function useFriends() {
         fetchFriendScores,
         /** ブラウザに通知許可を求めて購読する高レベル関数。 */
         requestNotificationPermission,
+        /** ブラウザ通知の稼働状態（サーバー側の有効/無効・購読の有無）。 */
+        pushStatus,
+        /** 上記をサーバーから取得する。 */
+        fetchPushStatus,
         /** アプリ内通知一覧・未読件数取得。 */
         fetchAppNotifications,
         /** 全通知を既読化。 */

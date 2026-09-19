@@ -456,22 +456,36 @@
         {{ t('dashboard.notificationsHint') }}
         <br/>{{ t('dashboard.iosPwaHint') }}
       </p>
-      <div class="flex items-center gap-4">
+      <!-- サーバー側で Push が無効（VAPID 鍵未設定など）なら、誰が何をしても通知は届かない。
+           「許可済みなのに来ない」を利用者側の問題と誤解させないよう明示する。 -->
+      <p v-if="pushStatus && !pushStatus.serverEnabled"
+         class="text-sm text-red-600 dark:text-red-400 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md px-3 py-2">
+        {{ t('dashboard.pushServerDisabled') }}
+      </p>
+      <!-- 許可はしているが購読がサーバーに無い状態（購読失効・管理者リセット後など）。
+           このときボタンを押せば復旧できる。 -->
+      <p v-else-if="notificationStatus === 'granted' && pushStatus && !pushStatus.subscribed"
+         class="text-sm text-amber-600 dark:text-amber-400 mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
+        {{ t('dashboard.pushNotSubscribed') }}
+      </p>
+      <div class="flex items-center gap-4 flex-wrap">
         <button
           @click="handleEnableNotifications"
-          :disabled="isSubscribing || notificationStatus === 'granted'"
+          :disabled="isSubscribing || isPushReady"
           class="px-6 py-2.5 rounded-md font-bold text-sm transition-all duration-200 flex items-center gap-2"
-          :class="notificationStatus === 'granted'
+          :class="isPushReady
             ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default'
             : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95 disabled:opacity-50'"
         >
           <span v-if="isSubscribing" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-          <span v-else-if="notificationStatus === 'granted'">
+          <span v-else-if="isPushReady">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
           </span>
-          {{ notificationStatus === 'granted' ? t('dashboard.notificationsEnabled') : t('dashboard.enableNotifications') }}
+          {{ isPushReady
+              ? t('dashboard.notificationsEnabled')
+              : notificationStatus === 'granted' ? t('dashboard.notificationsReregister') : t('dashboard.enableNotifications') }}
         </button>
         <button v-if="notificationStatus === 'granted'"
           @click="handleTestNotification"
@@ -547,7 +561,7 @@ const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
 const { t } = useI18n();
 // プッシュ通知は「自分を閲覧中」のみ有効（viewingUserId が無いケース）。
-const { requestNotificationPermission, sendTestNotification } = useFriends();
+const { requestNotificationPermission, sendTestNotification, pushStatus, fetchPushStatus } = useFriends();
 
 /** URL 共有モーダルの開閉状態。 */
 const isShareModalOpen = ref(false);
@@ -561,6 +575,23 @@ const notificationStatus = ref(typeof Notification !== 'undefined' ? (Notificati
 const isSubscribing = ref(false);
 /** テスト送信 API 呼び出し中フラグ。 */
 const isTesting = ref(false);
+
+/**
+ * 通知が実際に機能している状態か。
+ *
+ * ブラウザの許可だけでは足りない。購読がサーバーに保存されていて、かつサーバー側の
+ * 送信（VAPID 鍵）が生きていて初めて届く。ここを permission だけで判定していたため、
+ * 「許可済み＝有効」と表示したまま実際には一通も届かない状態になり得た。
+ */
+const isPushReady = computed(() =>
+  notificationStatus.value === 'granted'
+  && !!pushStatus.value?.subscribed
+  && !!pushStatus.value?.serverEnabled);
+
+// 本人が自分のダッシュボードを見ているときだけ、Push の稼働状態を取りに行く。
+if (!props.viewingUserId && !props.shareToken) {
+  fetchPushStatus();
+}
 
 /**
  * 【関数の役割】 プッシュ通知の許可要求 → サービスワーカー購読を試みる。
@@ -581,6 +612,8 @@ const handleEnableNotifications = async () => {
   } finally {
     isSubscribing.value = false;
     notificationStatus.value = typeof Notification !== 'undefined' ? (Notification.permission || 'default') : 'default';
+    // 購読が保存されたか・サーバー側が生きているかを取り直して表示に反映する。
+    await fetchPushStatus();
   }
 };
 

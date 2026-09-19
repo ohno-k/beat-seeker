@@ -274,14 +274,12 @@ public class FriendController {
         request.setStatus("PENDING");
         friendRequestRepository.save(request);
 
-        // 手順3b: 受信者が push 購読済みであれば、即座に通知する。
-        if (receiver.getPushSubscription() != null) {
-            pushNotificationService.sendNotification(
-                    receiver.getPushSubscription(),
-                    "ライバル申請が届きました",
-                    sender.getDisplayName() + "さんからライバル申請が届きました。",
-                    "/friends");
-        }
+        // 手順3b: 受信者が push 購読済みであれば、即座に通知する（失効購読はここで掃除される）。
+        pushNotificationService.sendToUser(
+                receiver,
+                "ライバル申請が届きました",
+                sender.getDisplayName() + "さんからライバル申請が届きました。",
+                "/friends");
 
         return ResponseEntity.ok(Map.of("message", "フレンド申請を送信しました。"));
     }

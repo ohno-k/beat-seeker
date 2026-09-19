@@ -4,6 +4,7 @@ import com.beatseeker.backend.entity.AppNotification;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.AppNotificationRepository;
 import com.beatseeker.backend.repository.UserRepository;
+import com.beatseeker.backend.service.PushNotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,9 @@ import java.util.stream.Collectors;
  * 既読化することができる。
  *
  * 主要エンドポイント:
- *  - {@code GET  /api/notifications}            … 通知一覧と未読件数を取得
- *  - {@code POST /api/notifications/read-all}   … 全通知を既読化
+ *  - {@code GET  /api/notifications}             … 通知一覧と未読件数を取得
+ *  - {@code POST /api/notifications/read-all}    … 全通知を既読化
+ *  - {@code GET  /api/notifications/push-status} … ブラウザ通知（Web Push）の稼働状態を返す
  *
  * 認証: 全エンドポイントが JWT 認証必須。
  */
@@ -35,13 +37,44 @@ public class NotificationController {
     private final AppNotificationRepository notificationRepository;
     /** 認証プリンシパル（iidxId）から User エンティティを引くための Repository。 */
     private final UserRepository userRepository;
+    /** Web Push の稼働状態と VAPID 公開鍵の配布元。 */
+    private final PushNotificationService pushNotificationService;
 
     /**
-     * 【コンストラクタ】 Spring が DI で各 Repository を注入する。
+     * 【コンストラクタ】 Spring が DI で各 Repository / Service を注入する。
      */
-    public NotificationController(AppNotificationRepository notificationRepository, UserRepository userRepository) {
+    public NotificationController(AppNotificationRepository notificationRepository,
+                                  UserRepository userRepository,
+                                  PushNotificationService pushNotificationService) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
+        this.pushNotificationService = pushNotificationService;
+    }
+
+    /**
+     * 【メソッドの役割】 ブラウザ通知（Web Push）の稼働状態を返す。
+     *
+     * 「通知が全く来ない」ときに、原因がサーバー側（VAPID 鍵未設定）なのか
+     * クライアント側（未購読・許可拒否）なのかを切り分けるための診断 API。
+     * 併せて、クライアントが {@code pushManager.subscribe} に使うべき VAPID 公開鍵を配る。
+     * フロントに鍵をハードコードしていると、鍵をローテーションしたときに
+     * サーバーとずれて全ユーザーの購読が黙って無効になるため、サーバー配布を正とする。
+     *
+     * @param auth 認証情報
+     * @return {@code {serverEnabled, publicKey, subscribed}}
+     */
+    @GetMapping("/push-status")
+    public ResponseEntity<Map<String, Object>> pushStatus(Authentication auth) {
+        User user = getUser(auth);
+        String subscription = user.getPushSubscription();
+        return ResponseEntity.ok(Map.of(
+                // サーバーに VAPID 鍵が投入されていて送信できる状態か
+                "serverEnabled", pushNotificationService.isEnabled(),
+                // クライアントが subscribe に使うべき公開鍵
+                "publicKey", pushNotificationService.getPublicKey(),
+                // このユーザーの購読が保存されているか
+                "subscribed", subscription != null && !subscription.isBlank()
+        ));
     }
 
     /**

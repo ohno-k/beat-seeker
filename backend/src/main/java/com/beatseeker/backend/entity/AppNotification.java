@@ -36,6 +36,10 @@ public class AppNotification {
      * 通知の種別。
      *  - "SCORE_BEAT"      : フレンドにスコアを抜かれた
      *  - "FRIEND_RANK_UP"  : フレンドが Beat-Tier ランクアップした
+     *  - "LEAGUE_START"    : 参加中のリーグの週が始まった（卓・グループ・課題曲の公開）
+     *
+     * フロントの {@code NotificationBox.vue} がこの値でアイコンと色を出し分けるので、
+     * 種別を増やしたら同ファイルにも追加すること。
      */
     @Column(nullable = false, length = 30)
     private String type;

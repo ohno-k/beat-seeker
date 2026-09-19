@@ -1289,14 +1289,12 @@ public class ScoreController {
                             newScore + " を記録し、あなたのスコア " + friendScoreVal + " を上回りました！");
                     appNotificationRepository.save(notification);
 
-                    // push 購読が登録済みなら Web Push も送る。
-                    if (friend.getPushSubscription() != null) {
-                        pushNotificationService.sendNotification(
-                                friend.getPushSubscription(),
-                                "スコアを抜かれました！",
-                                uploader.getDisplayName() + "さんに「" + title + "」で抜かれました",
-                                "/");
-                    }
+                    // push 購読が登録済みなら Web Push も送る（失効購読はここで掃除される）。
+                    pushNotificationService.sendToUser(
+                            friend,
+                            "スコアを抜かれました！",
+                            uploader.getDisplayName() + "さんに「" + title + "」で抜かれました",
+                            "/");
                 }
             }
         }
@@ -1532,14 +1530,12 @@ public class ScoreController {
                     user.getDisplayName() + "さんが Beat-Tier「" + oldTier + "」から「" + newTier + "」にランクアップしました！");
             appNotificationRepository.save(notification);
 
-            // push は購読者だけに送る。
-            if (friend.getPushSubscription() != null) {
-                pushNotificationService.sendNotification(
-                        friend.getPushSubscription(),
-                        "フレンドがランクアップ！",
-                        user.getDisplayName() + "さんが " + newTier + " にランクアップしました！",
-                        "/");
-            }
+            // push は購読者だけに送る（未購読なら sendToUser が何もしない）。
+            pushNotificationService.sendToUser(
+                    friend,
+                    "フレンドがランクアップ！",
+                    user.getDisplayName() + "さんが " + newTier + " にランクアップしました！",
+                    "/");
         }
     }
 

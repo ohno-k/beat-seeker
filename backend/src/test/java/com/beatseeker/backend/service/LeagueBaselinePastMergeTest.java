@@ -59,7 +59,7 @@ class LeagueBaselinePastMergeTest {
 
     private LeagueWeekLifecycleService service(boolean includesPast) {
         return new LeagueWeekLifecycleService(null, null, null, songRepository, baselineRepository,
-                scoreRepository, null, null, null, pastScoreRepository, "2026-08-10", includesPast);
+                scoreRepository, null, null, null, pastScoreRepository, null, "2026-08-10", includesPast);
     }
 
     private LeagueSong song(String title, String diff) {

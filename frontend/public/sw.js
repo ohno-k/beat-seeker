@@ -7,11 +7,20 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-    const data = event.data ? event.data.json() : { title: 'Notification', body: 'You have a new update!' };
+    // サーバーは {title, body, url} の JSON を送るが、JSON でないペイロードが来ても
+    // 通知を落とさない（userVisibleOnly なので「何も出さない」は許可の剥奪に繋がる）。
+    let data = { title: 'beat-seeker', body: '新しい通知があります', url: '/' };
+    if (event.data) {
+        try {
+            data = Object.assign(data, event.data.json());
+        } catch (e) {
+            data.body = event.data.text() || data.body;
+        }
+    }
 
     const options = {
         body: data.body,
-        icon: '/favicon.svg',
+        icon: '/icon-192.png',
         badge: '/favicon.svg',
         data: data.url || '/'
     };
@@ -23,9 +32,22 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    event.waitUntil(
-        clients.openWindow(event.notification.data)
-    );
+    // 既に開いているタブがあればそれを前面に出して遷移させる。
+    // 無条件に openWindow すると、アプリを開いたまま通知を押すたびにタブが増える。
+    const target = new URL(event.notification.data || '/', self.location.origin);
+    event.waitUntil((async () => {
+        const windowClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+        for (const client of windowClients) {
+            if (new URL(client.url).origin !== target.origin) continue;
+            await client.focus();
+            // navigate() は一部ブラウザで未対応 / 失敗しうるのでフォーカスだけは確保する。
+            if ('navigate' in client) {
+                await client.navigate(target.href).catch(() => undefined);
+            }
+            return;
+        }
+        await clients.openWindow(target.href);
+    })());
 });
 
 // ============================================================

@@ -78,12 +78,23 @@ const handleMarkAllRead = async () => {
 
 /**
  * 【関数の役割】 通知種別から絵文字アイコンを決定する。
- * @param type 通知タイプ（SCORE_BEAT / FRIEND_RANK_UP / その他）
+ * @param type 通知タイプ（SCORE_BEAT / FRIEND_RANK_UP / LEAGUE_START / その他）
  */
 const notificationIcon = (type: string) => {
   if (type === 'SCORE_BEAT') return '⚡';
   if (type === 'FRIEND_RANK_UP') return '🏆';
+  if (type === 'LEAGUE_START') return '🏁';
   return '🔔';
+};
+
+/**
+ * 【関数の役割】 通知種別からアイコン背景色のクラスを決定する。
+ * @param type 通知タイプ
+ */
+const notificationIconClass = (type: string) => {
+  if (type === 'SCORE_BEAT') return 'bg-red-100 dark:bg-red-900/30';
+  if (type === 'LEAGUE_START') return 'bg-indigo-100 dark:bg-indigo-900/30';
+  return 'bg-amber-100 dark:bg-amber-900/30';
 };
 </script>
 
@@ -188,7 +199,7 @@ const notificationIcon = (type: string) => {
             :class="notif.read ? 'hover:bg-slate-50 dark:hover:bg-slate-700/20' : 'bg-blue-50/30 dark:bg-blue-900/10 hover:bg-blue-50/60 dark:hover:bg-blue-900/20'">
             <div class="flex items-start gap-3">
               <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0"
-                   :class="notif.type === 'SCORE_BEAT' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-amber-100 dark:bg-amber-900/30'">
+                   :class="notificationIconClass(notif.type)">
                 {{ notificationIcon(notif.type) }}
               </div>
               <div class="flex-1 min-w-0">

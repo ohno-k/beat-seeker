@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -92,6 +94,8 @@ public class LeagueWeekLifecycleService {
     private final SongDefinitionRepository songDefinitionRepository;
     /** 過去作スコア。{@link #baselineIncludesPast} が有効なときだけベースラインの合算に使う。 */
     private final PastScoreRepository pastScoreRepository;
+    /** 週の開始をコミット後に参加者へ通知する（アプリ内通知 + ブラウザ通知）。 */
+    private final LeagueStartNotificationService startNotificationService;
 
     /**
      * 開催回 #1 の開始日（JST）。この日以降に始まる週へ通し番号（#1, #2, ...）を採番する。
@@ -125,6 +129,7 @@ public class LeagueWeekLifecycleService {
                                       LeagueSongDrawService songDrawService,
                                       SongDefinitionRepository songDefinitionRepository,
                                       PastScoreRepository pastScoreRepository,
+                                      LeagueStartNotificationService startNotificationService,
                                       @Value("${app.league.week-one-start:2026-08-10}") String weekOneStart,
                                       @Value("${app.league.baseline-includes-past:false}") boolean baselineIncludesPast) {
         this.weekOneStart = LocalDate.parse(weekOneStart);
@@ -138,6 +143,7 @@ public class LeagueWeekLifecycleService {
         this.songDrawService = songDrawService;
         this.songDefinitionRepository = songDefinitionRepository;
         this.pastScoreRepository = pastScoreRepository;
+        this.startNotificationService = startNotificationService;
         this.baselineIncludesPast = baselineIncludesPast;
     }
 
@@ -497,7 +503,34 @@ public class LeagueWeekLifecycleService {
         snapshotBaselines(week, members);
 
         log.info("リーグ週を開始: ladder={} weekId={} members={}", ladder, week.getId(), members.size());
+        // 参加者への開始通知はコミット後に非同期で流す。cron でも管理者の run-weekly でも
+        // 同じ経路を通るよう、呼び出し元ではなくここで仕込む（開始 = 通知、を 1 箇所に閉じる）。
+        notifyStartAfterCommit(week.getId());
         return week;
+    }
+
+    /**
+     * 【メソッドの役割】 リーグ開始通知を「このトランザクションがコミットされた後」に流す。
+     *
+     * 開始処理と同じトランザクション内で Push を送ると、参加者の数だけ外部 HTTPS 通信を
+     * 待つ間 DB トランザクションを握り続けることになる。また、万一開始がロールバックされた
+     * 場合に「始まっていない週の開始通知」だけが飛んでしまう。そのため after-commit に回す。
+     *
+     * トランザクション外から呼ばれた場合（テスト等）はその場で実行する。
+     *
+     * @param weekId 開始した週の ID
+     */
+    private void notifyStartAfterCommit(Long weekId) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            startNotificationService.notifyWeekStarted(weekId);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                startNotificationService.notifyWeekStarted(weekId);
+            }
+        });
     }
 
     /**
@@ -507,6 +540,9 @@ public class LeagueWeekLifecycleService {
      * ベースライン）を削除して空の draft にする。開始(activation)では PT/DIVISION は一切変化しない
      * ため、エントリーには触れない（＝この取り消しは順位・昇降格に影響しない）。空 draft に戻るので、
      * 通常のスケジュール（自動編成→開始）がそのまま正しく走る。
+     *
+     * <p><b>注意:</b> 開始時点で参加者へ「リーグが始まった」通知（アプリ内 + ブラウザ）が
+     * 飛んでいる。取り消してもその通知は消えないので、誤開始を取り消した場合は別途周知すること。
      *
      * <p><b>注意:</b> 週を締めて（{@link #closeWeek}）昇降格を確定した後には使えない
      * （締めで既に PT/DIVISION が変わっているため、この取り消しでは戻せない）。締め済みの週は
