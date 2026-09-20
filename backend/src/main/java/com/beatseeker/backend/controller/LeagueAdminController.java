@@ -366,16 +366,14 @@ public class LeagueAdminController {
     /**
      * 【メソッドの役割】 課題曲差し替えの選択肢（その枠に出題され得る譜面）を返す。
      *
-     * {@code weekId} と {@code groupIndex} を渡すと、抽選と同じ絞り込み（②グループ全員が未プレー
-     * ∪ ③2 人以上がプレー済みで拮抗、かつ直近 8 週の出題を除外）を通した候補だけを返す
-     * （{@code filtered=true}）。差し替えでも抽選と同じ基準の曲が選ばれるようにするため。
-     * 週やグループを指定しない場合・そのグループにメンバーが居ない場合は、絞り込み前の
-     * 階級プール（難易度帯のみ）を返す（{@code filtered=false}）。
+     * {@code weekId} を渡すと、抽選と同じ母集団（難易度帯のプールから直近 8 週の出題を除いたもの）
+     * だけを返す（{@code filtered=true}）。差し替えでも抽選と同じ基準の曲が選ばれるようにするため。
+     * 週を指定しない場合は、直近出題を除く前の階級プール（難易度帯のみ）を返す（{@code filtered=false}）。
      *
      * @param auth       認証情報（管理者限定）
      * @param tier       階級（0=LEGEND .. 10）
-     * @param weekId     対象週 ID（省略可。グループの拮抗判定・直近出題除外に使う）
-     * @param groupIndex グループ番号（省略可）
+     * @param weekId     対象週 ID（省略可。直近出題の除外の基準日時に使う）
+     * @param groupIndex グループ番号（省略可。応答にそのまま載せるだけで絞り込みには使わない）
      * @return {@code {tier, groupIndex, filtered, songs:[{title, difficultyName, level, notes}]}}
      */
     @GetMapping("/song-pool")
@@ -390,21 +388,14 @@ public class LeagueAdminController {
             return ResponseEntity.badRequest().body(Map.of("error", "tier は 0 (DIVISION LEGEND) 〜 10 で指定してください"));
         }
 
-        // 週・グループが分かるなら、抽選と同じ選曲基準を通した候補を返す。
+        // 週が分かるなら、抽選と同じ母集団（難易度帯のプール − 直近 8 週の出題）を返す。
         List<SongDefinition> pool = null;
-        if (weekId != null && groupIndex != null) {
+        if (weekId != null) {
             LeagueWeek week = leagueWeekRepository.findById(weekId).orElse(null);
             if (week == null) {
                 return ResponseEntity.status(404).body(Map.of("error", "指定した週が見つかりません"));
             }
-            List<User> members = leagueMemberRepository.findByWeek(week).stream()
-                    .filter(m -> tier.equals(m.getTier()) && groupIndex.equals(m.getGroupIndex()))
-                    .map(LeagueMember::getUser)
-                    .toList();
-            // 未編成（メンバーが居ない）なら拮抗判定のしようがないので、絞り込み前のプールに落とす。
-            if (!members.isEmpty()) {
-                pool = songDrawService.candidatesForGroup(tier, members, week.getStartsAt());
-            }
+            pool = songDrawService.candidatesForTier(tier, week.getStartsAt());
         }
         boolean filtered = pool != null;
         if (pool == null) {
@@ -432,15 +423,16 @@ public class LeagueAdminController {
     }
 
     /**
-     * 【メソッドの役割】 draft 週の指定階級の課題曲 3 曲を再抽選する。
+     * 【メソッドの役割】 draft 週の指定階級の課題曲を再抽選する。
      *
-     * レベル帯の算出には現行 active 週の同階級メンバーを使う（draft 週にはまだ
-     * メンバーが居ないため）。active 週が無い場合は空メンバー（最下位帯）で抽選する。
+     * 事前編成済みならグループごとに 3 曲ずつ引き直す（課題曲はグループ単位なので
+     * tier 一括では壊れる）。未編成なら階級一括で 3 曲引く。
+     * 難易度帯はどちらも階級だけで決まる（参加者のスコアは参照しない）。
      *
      * @param auth   認証情報（管理者限定）
      * @param weekId 対象週 ID（draft のみ）
      * @param tier   階級
-     * @return 再抽選後の課題曲 3 曲
+     * @return 再抽選後の課題曲
      */
     @PostMapping("/weeks/{weekId}/redraw")
     @Transactional
@@ -458,31 +450,21 @@ public class LeagueAdminController {
             return ResponseEntity.badRequest().body(Map.of("error", "再抽選できるのは draft 週のみです"));
         }
 
-        // 事前編成済み（formDraft 済み）なら、この週のメンバーをグループ単位で使って
-        // グループごとに再抽選する（課題曲はグループ単位なので tier 一括では壊れる）。
-        Map<Integer, List<User>> membersByGroup = leagueMemberRepository.findByWeek(week).stream()
+        // 事前編成済み（formDraft 済み）なら、この週の実グループごとに引き直す。
+        List<Integer> groupIndexes = leagueMemberRepository.findByWeek(week).stream()
                 .filter(m -> m.getTier().equals(tier))
-                .collect(Collectors.groupingBy(LeagueMember::getGroupIndex,
-                        Collectors.mapping(LeagueMember::getUser, Collectors.toList())));
+                .map(LeagueMember::getGroupIndex)
+                .distinct().sorted().toList();
 
         List<LeagueSong> songs;
-        if (!membersByGroup.isEmpty()) {
+        if (!groupIndexes.isEmpty()) {
             songs = new ArrayList<>();
-            for (Map.Entry<Integer, List<User>> g : membersByGroup.entrySet()) {
-                songs.addAll(songDrawService.drawSongsForGroup(week, tier, g.getKey(), g.getValue()));
+            for (Integer gi : groupIndexes) {
+                songs.addAll(songDrawService.drawSongsForGroup(week, tier, gi));
             }
         } else {
-            // 未編成の draft: 現行 active 週の同階級メンバーで tier 一括抽選（従来動作）。
-            List<User> tierMembers = List.of();
-            LeagueWeek active = leagueWeekRepository
-                    .findFirstByLadderTypeAndStatusOrderByStartsAtDesc(week.getLadderType(), "active").orElse(null);
-            if (active != null) {
-                tierMembers = leagueMemberRepository.findByWeek(active).stream()
-                        .filter(m -> m.getTier().equals(tier))
-                        .map(LeagueMember::getUser)
-                        .collect(Collectors.toList());
-            }
-            songs = songDrawService.drawSongsForTier(week, tier, tierMembers);
+            // 未編成の draft: グループ分けが無いので階級一括で引く。
+            songs = songDrawService.drawSongsForTier(week, tier);
         }
         return ResponseEntity.ok(Map.of("message", "課題曲を再抽選しました",
                 "songs", songs.stream().map(this::toSongMap).toList()));

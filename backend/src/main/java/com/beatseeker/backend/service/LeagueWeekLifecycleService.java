@@ -111,8 +111,9 @@ public class LeagueWeekLifecycleService {
      * 新作稼働直後は現行作（{@code scores}）の記録がほぼ空で、全曲が「ライン無し」になり
      * 週内に出した記録が何でも有効になってしまう。その間は歴代ベストを基準にして
      * 「歴代ベスト超え」を有効条件にする。落ち着いたら false に戻す（現行作のみに戻る）。
-     * 課題曲選定側の {@code app.league.self-best-includes-past} と同じ値にすること
-     * （プレビューのライン表示と実際のラインを一致させるため）。
+     *
+     * <p>なお課題曲の抽選はスコアを一切参照しない（{@link LeagueSongDrawService}）ので、
+     * この設定が影響するのはラインの算出だけ。
      */
     private final boolean baselineIncludesPast;
 
@@ -203,8 +204,8 @@ public class LeagueWeekLifecycleService {
         assignWeekNo(week);
         week = leagueWeekRepository.save(week);
 
-        // 課題曲はグループごと（各グループの参加者の実力に合わせて）抽選するため、
-        // グループ確定前の draft 段階では抽選しない。編成（activateWeek）時にグループ単位で抽選する。
+        // 課題曲はグループ単位で引くため、グループ確定前の draft 段階では抽選しない。
+        // 編成（formWeek / activateWeek）時にグループごとに抽選する。
         log.info("リーグ draft 週を作成: ladder={} startsAt={} weekNo={}", ladder, startsAt, week.getWeekNo());
         return week;
     }
@@ -736,18 +737,15 @@ public class LeagueWeekLifecycleService {
         leagueMemberRepository.saveAll(newMembers);
 
         // --- 課題曲の抽選（グループごと） ---
-        // 各グループの参加者の実力に合わせて 3 曲ずつ抽選する（drawSongsForGroup）。
-        // グループ確定後にしか選べないため、draft 段階では抽選せずここで一括抽選する。
-        Map<String, List<User>> usersByGroup = new LinkedHashMap<>();
+        // 課題曲はグループ単位なので、グループが確定したここで 3 曲ずつ引く
+        // （同じ階級でも他グループとは別の 3 曲になる）。
         Map<String, int[]> groupTierIndex = new LinkedHashMap<>(); // key -> {tier, groupIndex}
         for (LeagueMember m : newMembers) {
-            String key = m.getTier() + "-" + m.getGroupIndex();
-            usersByGroup.computeIfAbsent(key, k -> new ArrayList<>()).add(m.getUser());
-            groupTierIndex.putIfAbsent(key, new int[]{ m.getTier(), m.getGroupIndex() });
+            groupTierIndex.putIfAbsent(m.getTier() + "-" + m.getGroupIndex(),
+                    new int[]{ m.getTier(), m.getGroupIndex() });
         }
-        for (Map.Entry<String, List<User>> e : usersByGroup.entrySet()) {
-            int[] tg = groupTierIndex.get(e.getKey());
-            songDrawService.drawSongsForGroup(week, tg[0], tg[1], e.getValue());
+        for (int[] tg : groupTierIndex.values()) {
+            songDrawService.drawSongsForGroup(week, tg[0], tg[1]);
         }
 
         log.info("リーグ週を編成: ladder={} weekId={} 卓={} members={}",
@@ -1111,9 +1109,8 @@ public class LeagueWeekLifecycleService {
             List<Map<String, Object>> groupList = new ArrayList<>();
             for (int gi = 0; gi < groups.size(); gi++) {
                 List<Seat> g = groups.get(gi);
-                List<User> users = g.stream().map(s -> s.entry().getUser()).toList();
                 List<LeagueSongDrawService.DrawnSong> songs =
-                        songDrawService.selectSongsForGroup(host, users, refStart, usedInTier);
+                        songDrawService.selectSongs(host, refStart, usedInTier);
                 for (LeagueSongDrawService.DrawnSong ds : songs) usedInTier.add(ds.song().getTitle());
                 groupList.add(buildPreviewGroup(gi, g, songs));
             }

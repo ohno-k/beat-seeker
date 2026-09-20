@@ -52,8 +52,8 @@ export interface LeagueSongInfo {
   disabled?: boolean;
   /**
    * 抽選のフォールバックで埋まった枠か（管理者 overview のみ）。true = 通常の選曲基準
-   * （全員未プレー / 2 人以上で拮抗）を満たす候補が足りず、プール全体から補填した曲。
-   * 集計上は通常曲と同じ扱いで、差し替え候補として色分け表示するための印。
+   * （その DIVISION の難易度帯・直近8週の出題を除く）を満たす候補が足りず、再登板や
+   * プール拡大で補填した曲。集計上は通常曲と同じ扱いで、差し替え候補として色分け表示するための印。
    */
   fallback?: boolean;
   /** このグループの「ライン」= 週開始時点の最高 EX（匿名のグループ共通閾値）。誰も未プレーなら null。 */
@@ -303,8 +303,8 @@ export interface LeagueNewsWeek {
 /** 課題曲差し替えの選択肢（と、それが抽選基準で絞り込まれたものかどうか）。 */
 export interface LeagueSongPool {
   /**
-   * true = 抽選と同じ選曲基準（②全員未プレー ∪ ③2 人以上で拮抗、直近出題除外）を通した候補。
-   * false = 絞り込み前の階級プール（週・グループ未指定、または未編成でメンバーが居ない場合）。
+   * true = 抽選と同じ母集団（その DIVISION の難易度帯 − 直近8週の出題）。
+   * false = 直近出題を除く前の階級プール（週を指定しなかった場合）。
    */
   filtered: boolean;
   songs: LeaguePoolSong[];
@@ -657,9 +657,10 @@ export function useLeague() {
   /**
    * 課題曲差し替えの選択肢を取得する（管理者のみ）。
    *
-   * weekId / groupIndex を渡すと、抽選と同じ選曲基準（②全員未プレー ∪ ③2 人以上で拮抗、
-   * 直近 8 週の出題は除外）を通した候補が返る（filtered=true）。未編成などで判定できない
-   * 場合は絞り込み前の階級プールが返る（filtered=false）。
+   * weekId を渡すと、抽選と同じ母集団（その DIVISION の難易度帯から直近 8 週の出題を除いたもの）
+   * が返る（filtered=true）。省略した場合は直近出題を除く前の階級プールが返る（filtered=false）。
+   * groupIndex は応答にそのまま載るだけで、候補の中身には影響しない
+   * （抽選は参加者のスコアを見ないので、同じ階級ならグループが違っても候補は同じ）。
    */
   const fetchSongPool = async (
     tier: number,

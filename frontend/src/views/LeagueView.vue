@@ -321,7 +321,7 @@ const loadAdmin = async () => {
     if (!draft) continue;
     for (const tierInfo of draft.tiers) {
       if (!tierInfo.groups.length || isSongEditOpen(draft.id, tierInfo.tier)) {
-        // 候補はグループごとに異なる（拮抗判定がそのグループの参加者に依存する）。
+        // 候補は階級ごとに同じだが、差し替え先のセルがグループ単位なのでグループごとに保持する。
         for (const gi of songGroupIndexes(tierInfo)) ensureSongPool(draft.id, tierInfo.tier, gi);
       }
     }
@@ -482,12 +482,13 @@ const weekStatusClass = (status: string) => {
 // -------------------------------------------------------------------
 
 /**
- * 差し替えドロップダウンの選択肢（グループ単位）。抽選と同じ選曲基準（拮抗判定・直近出題除外）を
- * 通した候補なので、週 × 階級 × グループごとに内容が変わる。キーは `${weekId}-${tier}-${groupIndex}`。
+ * 差し替えドロップダウンの選択肢。抽選と同じ母集団（その階級の難易度帯 − 直近8週の出題）で、
+ * 同じ週・同じ階級ならグループが違っても中身は同じ。差し替え先のセルがグループ単位なので
+ * キーも `${weekId}-${tier}-${groupIndex}` で持つ。
  */
 const songPools = ref<Record<string, LeagueSongPool>>({});
 
-/** 選曲プールのキャッシュキー（候補はグループごとに異なる）。 */
+/** 選曲プールのキャッシュキー（差し替え先のセル＝グループ単位で持つ）。 */
 const poolKey = (weekId: number, tier: number, groupIndex: number) => `${weekId}-${tier}-${groupIndex}`;
 
 /** 選曲候補を取得する（取得済み・取得中なら何もしない）。 */
@@ -1467,7 +1468,7 @@ onUnmounted(() => {
                    選曲プールから選ぶと即時に差し替わり、ライン・保持者・自己ベスト表が更新される。 -->
               <div v-if="isSongEditOpen(al.draftWeek.id, tierInfo.tier) || !tierInfo.groups.length"
                    class="mt-2 rounded-lg bg-slate-50 dark:bg-slate-900/40 p-2 space-y-1.5">
-                <!-- 候補数はグループごとに出す（拮抗判定がそのグループの参加者に依存するため）。 -->
+                <!-- 差し替え先はグループ単位なので、候補数もグループごとに並べる。 -->
                 <div v-for="gi in songGroupIndexes(tierInfo)" :key="`pool-${gi}`" class="text-[11px] text-slate-400">
                   <template v-if="songPools[poolKey(al.draftWeek.id, tierInfo.tier, gi)]">
                     <span class="text-slate-500 dark:text-slate-400">{{ t('league.groupN', { n: gi + 1 }) }}:</span>
