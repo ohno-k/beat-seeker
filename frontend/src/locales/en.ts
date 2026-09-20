@@ -1652,7 +1652,7 @@ export const en = {
   'league.noWeek': 'No week is currently running.',
   'league.noWeekHint': 'It will start at the next formation once players have joined.',
   'league.nextWeekNotice': 'The next round {label} is scheduled to start on {start} (JST).',
-  'league.joinBlocked.noPastScores': 'You cannot join the league right now because you have no scores from previous versions (past scores) registered.',
+  'league.joinBlocked.noPastScores': 'You cannot join the league right now because you have no scores from previous versions (past scores) registered. Import a previous version\'s CSV from "Upload Scores" to join.',
   'league.joinBlocked.generic': 'You cannot join the league right now.',
   'league.weekOf': 'Week of {start} – {end}',
   'league.week': 'Week',
@@ -1815,6 +1815,7 @@ export const en = {
   // Divisions & song difficulty (range chart)
   'league.infoModal.divisionTitle': 'Divisions & song difficulty',
   'league.infoModal.division1': 'There are 11 fixed divisions: DIVISION LEGEND and DIVISION 1–10. Your first placement is based on your BEAT-TIER.',
+  'league.infoModal.divisionPrevVersion': '* For a while after the ZINRAI launch, your first placement uses your final BEAT-TIER from the previous version (Sparkle Shower).',
   'league.infoModal.division2': 'Within a division, groups of up to 8 are re-drawn at random every week regardless of skill.',
   'league.infoModal.division3': 'Songs are drawn at random from each division\'s difficulty band shown below (unofficial difficulty table, ☆11+ ANOTHER / LEGGENDARIA), avoiding the last 8 weeks\' songs.',
   'league.infoModal.chart.title': 'Song difficulty band per division',

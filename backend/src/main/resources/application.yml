@@ -84,10 +84,20 @@ app:
     # 記録が無く全曲ライン無しになるため、歴代ベスト超えを有効条件にする（LeagueWeekLifecycleService）。
     # プレビューと実ラインを一致させるため self-best-includes-past と同じ値にすること。
     baseline-includes-past: ${LEAGUE_BASELINE_INCLUDES_PAST:true}
-    # 過去作スコアが 1 件も無いユーザーの新規参加を受け付けない（ラインの基準を持てないため）。
+    # 過去作スコアが 1 件も無いユーザー（＝ ZINRAI のスコアしか無い人）の新規参加・復帰を受け付けない。
+    # ラインの基準（過去作の自己ベスト）を持てず、同じ卓の他の人と条件が揃わないため。
+    # 止めるのは参加・復帰だけで、すでに参加中のエントリーはそのまま（LeagueService.joinBlockedReason）。
     # 過去作アーカイブ（version_pt_snapshots）が空の間＝世代切り替え前は判定せず、誰でも参加できる。
-    # 2026-09-14 に解除（false）: 新規参加は誰でも受け付ける。再び止める場合は true にする。
-    require-past-scores-to-join: ${LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN:false}
+    # 2026-09-14 に一旦解除 → 2026-09-20 に transition-measures-until 付きで再開。
+    require-past-scores-to-join: ${LEAGUE_REQUIRE_PAST_SCORES_TO_JOIN:true}
+    # 初回参加の DIVISION を前作（Sparkle Shower）の最終 BEAT-PT から決める（LeagueService.initialBeatPt）。
+    # 稼働直後の現行作 PT は「どれだけ遊んだか」でしかなく実力を表さないため。
+    # 前作のアーカイブが無い人は従来どおり歴代最高（現行作と過去作の高いほう）で配属する。
+    initial-tier-from-previous-version: ${LEAGUE_INITIAL_TIER_FROM_PREVIOUS_VERSION:true}
+    # 上 2 つ（参加ゲート・前作基準の初回配属）の期限（JST、書式 2026-11-16T07:00）。
+    # この日時を過ぎると設定値に関わらず両方とも無効になる（解除のデプロイが要らない）。
+    # 既定は ZINRAI 稼働（2026-09-16 07:00）から 2 か月。空にすると無期限。
+    transition-measures-until: ${LEAGUE_TRANSITION_MEASURES_UNTIL:2026-11-16T07:00}
   # ── 世代切り替え（IIDX 33 Sparkle Shower → 34 ZINRAI）──
   # launch-at を過ぎると (1) IidxVersions.current() が 34 を返し始め、(2) VersionTransitionScheduler が
   # スナップショット → past_scores 複製 → スコア初期化 を 1 度だけ自動実行する（1 分ポーリング）。

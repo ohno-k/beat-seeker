@@ -394,14 +394,23 @@ export function useLeague() {
     throw new Error(body?.error || `${fallback} (${res.status})`);
   };
 
-  /** 自分のエントリー状態と参加可否（参加できない理由コード）をまとめて取得する。 */
-  const fetchMeStatus = async (): Promise<{ entries: LeagueEntry[]; joinBlockedReason: LeagueJoinBlockedReason | null }> => {
+  /**
+   * 自分のエントリー状態と参加可否（参加できない理由コード）をまとめて取得する。
+   * {@code initialTierFromPreviousVersion} は世代切り替えの一時措置（初回配属が前作の
+   * 最終 BEAT-TIER 基準か）で、ルール説明モーダルの注記の出し分けに使う。
+   */
+  const fetchMeStatus = async (): Promise<{
+    entries: LeagueEntry[];
+    joinBlockedReason: LeagueJoinBlockedReason | null;
+    initialTierFromPreviousVersion: boolean;
+  }> => {
     const res = await fetch(`${API_BASE}/api/league/me`, { headers: authHeaders() });
     if (!res.ok) await raise(res, '参加状態の取得に失敗しました');
     const body = await res.json();
     return {
       entries: (body.entries ?? []) as LeagueEntry[],
       joinBlockedReason: (body.joinBlockedReason ?? null) as LeagueJoinBlockedReason | null,
+      initialTierFromPreviousVersion: body.initialTierFromPreviousVersion === true,
     };
   };
 

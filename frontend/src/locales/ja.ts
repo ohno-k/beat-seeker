@@ -1686,7 +1686,7 @@ export const ja = {
   'league.noWeek': '開催中の週はありません。',
   'league.noWeekHint': '参加者が集まると次回の編成から開始されます。',
   'league.nextWeekNotice': '次回の開催回 {label} は {start} に開始予定です。',
-  'league.joinBlocked.noPastScores': '前作までのスコア（歴代スコア）が登録されていないため、現在はリーグに参加できません。',
+  'league.joinBlocked.noPastScores': '前作までのスコア（歴代スコア）が登録されていないため、現在はリーグに参加できません。「スコアをアップロード」から前作のCSVを取り込むと参加できます。',
   'league.joinBlocked.generic': '現在はリーグに参加できません。',
   'league.weekOf': '{start} 〜 {end} の週',
   'league.week': '週',
@@ -1849,6 +1849,8 @@ export const ja = {
   // DIVISION と課題曲の難易度帯（レンジ図）
   'league.infoModal.divisionTitle': 'DIVISIONと課題曲の難易度',
   'league.infoModal.division1': 'DIVISION LEGEND と DIVISION 1〜10 の固定11階級です。初回はBEAT-TIERに応じて配属されます。',
+  // 一時措置（世代切り替え直後のみ表示。API の initialTierFromPreviousVersion が true のとき）
+  'league.infoModal.divisionPrevVersion': '※ ZINRAI稼働からしばらくの間は、前作（Sparkle Shower）の最終BEAT-TIERで初回配属します。',
   'league.infoModal.division2': '同じDIVISION内のグループ（最大8人）は、実力に関係なく毎週ランダムに組み直します。',
   'league.infoModal.division3': '課題曲は下図の難易度帯（非公式難易度表・☆11以上のANOTHER / LEGGENDARIA）からランダムに選ばれ、直近8週の曲は避けます。',
   'league.infoModal.chart.title': '各DIVISIONの課題曲の難易度帯',

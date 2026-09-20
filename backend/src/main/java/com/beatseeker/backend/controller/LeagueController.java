@@ -93,6 +93,8 @@ public class LeagueController {
         result.put("entries", entries);
         // 参加できない理由（無ければ null）。フロントは参加ボタンを無効化して理由を表示する。
         result.put("joinBlockedReason", leagueService.joinBlockedReason(user));
+        // 一時措置: 初回配属が前作の最終 BEAT-TIER 基準か。ルール説明モーダルの注記に使う。
+        result.put("initialTierFromPreviousVersion", leagueService.usesPreviousVersionTier());
         return ResponseEntity.ok(result);
     }
 
@@ -219,7 +221,10 @@ public class LeagueController {
         } else {
             // 未参加者には「自分の BEAT-TIER 相当 DIVISION」の課題曲をプレビュー表示する。
             // その DIVISION が今週開催されていない場合は、開催中で最も近い DIVISION の曲を出す。
-            int myDivision = com.beatseeker.backend.service.LeagueDivision.forBeatPt(user.getTotalBeatPt());
+            // 参照する PT は実際の初回配属と同じ基準（世代切り替え直後は前作の最終 BEAT-PT）にして、
+            // 「プレビューで見た卓と参加後の卓が違う」を避ける。
+            int myDivision = com.beatseeker.backend.service.LeagueDivision.forBeatPt(
+                    leagueService.initialBeatPt(user));
             Integer previewTier = leagueSongRepository.findByWeekOrderByTierAscSlotAsc(week).stream()
                     .map(LeagueSong::getTier)
                     .distinct()

@@ -1652,7 +1652,7 @@ export const ko = {
   'league.noWeek': '진행 중인 주가 없습니다.',
   'league.noWeekHint': '참가자가 모이면 다음 편성부터 시작됩니다.',
   'league.nextWeekNotice': '다음 회차 {label}은(는) {start}(JST)에 시작 예정입니다.',
-  'league.joinBlocked.noPastScores': '이전 작품까지의 점수(역대 점수)가 등록되어 있지 않아 현재는 리그에 참가할 수 없습니다.',
+  'league.joinBlocked.noPastScores': '이전 작품까지의 점수(역대 점수)가 등록되어 있지 않아 현재는 리그에 참가할 수 없습니다. 「점수 업로드」에서 이전 작품 CSV를 가져오면 참가할 수 있습니다.',
   'league.joinBlocked.generic': '현재는 리그에 참가할 수 없습니다.',
   'league.weekOf': '{start} ~ {end} 주',
   'league.week': '주',
@@ -1815,6 +1815,7 @@ export const ko = {
   // DIVISION과 과제곡 난이도 (범위 그림)
   'league.infoModal.divisionTitle': 'DIVISION과 과제곡 난이도',
   'league.infoModal.division1': 'DIVISION LEGEND와 DIVISION 1~10의 고정 11등급제입니다. 첫 참가 시 BEAT-TIER에 따라 배정됩니다.',
+  'league.infoModal.divisionPrevVersion': '※ ZINRAI 가동 후 당분간은 이전 작품(Sparkle Shower)의 최종 BEAT-TIER로 최초 배정합니다.',
   'league.infoModal.division2': '같은 DIVISION 안의 그룹(최대 8명)은 실력과 무관하게 매주 무작위로 다시 편성합니다.',
   'league.infoModal.division3': '과제곡은 아래 그림의 난이도대(비공식 난이도표·☆11 이상 ANOTHER / LEGGENDARIA)에서 무작위로 선정되며, 최근 8주의 곡은 피합니다.',
   'league.infoModal.chart.title': 'DIVISION별 과제곡 난이도대',

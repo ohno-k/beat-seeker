@@ -30,6 +30,11 @@ const joining = ref(false);
 const joinError = ref('');
 /** 参加できない理由コード（API の joinBlockedReason）。参加できるときは null。 */
 const joinBlockedReason = ref<string | null>(null);
+/**
+ * 【一時措置】初回配属が前作（Sparkle Shower）の最終 BEAT-TIER 基準か（API の同名フィールド）。
+ * サーバー側の期限（app.league.transition-measures-until）を過ぎると false になり、注記も消える。
+ */
+const initialTierFromPrevious = ref(false);
 /** 参加できない理由の表示文。参加できるときは空文字。 */
 const joinBlockedText = computed(() => {
   if (!joinBlockedReason.value) return '';
@@ -45,6 +50,7 @@ onMounted(async () => {
     const status = await league.fetchMeStatus();
     joined.value = status.entries.some((e) => e.ladderType === 'score' && e.active);
     joinBlockedReason.value = status.joinBlockedReason;
+    initialTierFromPrevious.value = status.initialTierFromPreviousVersion;
   } catch {
     /* 参加状態が取れなくても無視（ボタンは押せる状態のまま） */
   }
@@ -314,6 +320,12 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
               {{ t('league.infoModal.divisionTitle') }}
             </h4>
             <p :class="leadClass">{{ t('league.infoModal.division1') }}</p>
+            <!-- 一時措置（世代切り替え直後）: 初回配属を前作の最終 BEAT-TIER で決めている間だけ出す。
+                 色は noteClass（text-slate-500）と衝突しないよう直書きする（src/output.css が後勝ちで
+                 text-slate-* を再定義しているため、重ねると amber が負ける）。 -->
+            <p v-if="initialTierFromPrevious" class="mt-1 text-xs leading-relaxed text-amber-700 dark:text-amber-400">
+              {{ t('league.infoModal.divisionPrevVersion') }}
+            </p>
             <p :class="[leadClass, 'mt-1']">{{ t('league.infoModal.division2') }}</p>
             <p :class="[leadClass, 'mt-1']">{{ t('league.infoModal.division3') }}</p>
 

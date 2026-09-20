@@ -2,16 +2,20 @@ package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.LeagueEntry;
 import com.beatseeker.backend.entity.User;
+import com.beatseeker.backend.entity.VersionPtSnapshot;
 import com.beatseeker.backend.repository.LeagueEntryRepository;
 import com.beatseeker.backend.repository.PastScoreRepository;
 import com.beatseeker.backend.repository.VersionPtSnapshotRepository;
+import com.beatseeker.backend.util.JstTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -24,6 +28,8 @@ import java.util.List;
  */
 @Service
 public class LeagueService {
+
+    private static final Logger log = LoggerFactory.getLogger(LeagueService.class);
 
     /**
      * 有効なラダー種別。現在はスコアリーグ（3曲平均スコアレート）のみ運用する。
@@ -46,14 +52,34 @@ public class LeagueService {
      * 【一時措置】過去作スコア（{@code past_scores}）が 1 件も無いユーザーの参加を受け付けないか。
      *
      * 新作稼働直後はリーグの有効ライン（週開始時点の自己ベスト）を過去作の記録から取る
-     * （{@code app.league.baseline-includes-past}）。過去作の記録が無い人はラインの基準を持てず、
-     * 同じグループの他の人と条件が揃わないため、その間は新規参加を止める。
-     * {@code app.league.require-past-scores-to-join}（既定 false。2026-09-13 に true で導入し、
-     * 2026-09-14 に解除して false に戻した。仕組みは残してあるので必要なら再び true にできる）。
+     * （{@code app.league.baseline-includes-past}）。現行作（ZINRAI）のスコアしか無い人は
+     * ラインの基準を持てず、同じグループの他の人と条件が揃わないため、その間は新規参加を止める。
+     * {@code app.league.require-past-scores-to-join}（2026-09-13 に導入 → 09-14 に一旦解除 →
+     * 09-20 に {@link #transitionMeasuresUntil} 付きで再開）。
+     * 止めるのは<b>新規参加と休止からの復帰</b>だけで、すでに参加中のエントリーには触れない。
      * 過去作アーカイブ（{@code version_pt_snapshots}）が空の間＝世代切り替え前は
      * 「前作の記録が無い」を判定できないので、この設定に関わらずゲートしない。
      */
     private final boolean requirePastScoresToJoin;
+
+    /**
+     * 【一時措置】初回参加の DIVISION を前作（Sparkle Shower）の最終 BEAT-PT で決めるか。
+     *
+     * 新作稼働直後の現行作 BEAT-PT は「どれだけ遊んだか」でしかなく実力を表さないため、
+     * 前作の到達点で配属するほうが初週の対戦が噛み合う。
+     * {@code app.league.initial-tier-from-previous-version}（{@link #initialBeatPt}）。
+     */
+    private final boolean initialTierFromPreviousVersion;
+
+    /**
+     * 【一時措置の期限（JST 壁時計）】{@link #requirePastScoresToJoin} と
+     * {@link #initialTierFromPreviousVersion} が効く期限。この日時を過ぎると設定値に関わらず
+     * 両方とも無効になる（解除のためのデプロイを要らなくするため）。
+     *
+     * 既定は ZINRAI 稼働（2026-09-16 07:00 JST）から 2 か月。
+     * 未設定（空文字）なら期限なしで、設定値のまま効き続ける。
+     */
+    private final LocalDateTime transitionMeasuresUntil;
 
     /** {@link #joinBlockedReason} が返す理由コード: 過去作スコアが無い。フロントの i18n キーと対応させる。 */
     public static final String JOIN_BLOCKED_NO_PAST_SCORES = "noPastScores";
@@ -61,26 +87,71 @@ public class LeagueService {
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
      *
-     * @param leagueEntryRepository       エントリーの永続化リポジトリ
-     * @param versionPtSnapshotRepository 過去作の最終 PT アーカイブ
-     * @param pastScoreRepository         過去作スコア
-     * @param requirePastScoresToJoin     過去作スコアが無いユーザーの参加を止めるか（一時措置）
+     * @param leagueEntryRepository          エントリーの永続化リポジトリ
+     * @param versionPtSnapshotRepository    過去作の最終 PT アーカイブ
+     * @param pastScoreRepository            過去作スコア
+     * @param requirePastScoresToJoin        過去作スコアが無いユーザーの参加を止めるか（一時措置）
+     * @param initialTierFromPreviousVersion 初回配属を前作の最終 BEAT-PT で決めるか（一時措置）
+     * @param transitionMeasuresUntil        上記 2 つの一時措置の期限（JST、{@code 2026-11-16T07:00} 形式。空なら無期限）
      */
     public LeagueService(LeagueEntryRepository leagueEntryRepository,
                          VersionPtSnapshotRepository versionPtSnapshotRepository,
                          PastScoreRepository pastScoreRepository,
-                         @Value("${app.league.require-past-scores-to-join:false}") boolean requirePastScoresToJoin) {
+                         @Value("${app.league.require-past-scores-to-join:false}") boolean requirePastScoresToJoin,
+                         @Value("${app.league.initial-tier-from-previous-version:false}") boolean initialTierFromPreviousVersion,
+                         @Value("${app.league.transition-measures-until:}") String transitionMeasuresUntil) {
         this.leagueEntryRepository = leagueEntryRepository;
         this.versionPtSnapshotRepository = versionPtSnapshotRepository;
         this.pastScoreRepository = pastScoreRepository;
         this.requirePastScoresToJoin = requirePastScoresToJoin;
+        this.initialTierFromPreviousVersion = initialTierFromPreviousVersion;
+        this.transitionMeasuresUntil = parseJstDateTime(transitionMeasuresUntil);
+    }
+
+    /**
+     * 設定値（JST 壁時計の ISO 形式）を {@link LocalDateTime} にする。空なら null＝期限なし。
+     * 書式が不正な場合も null（＝期限なし）にして措置を効かせたままにする。
+     * 「読めなかったから解除」にすると、設定ミスで一時措置が黙って外れてしまうため。
+     */
+    private static LocalDateTime parseJstDateTime(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDateTime.parse(raw.trim());
+        } catch (DateTimeParseException e) {
+            log.warn("app.league.transition-measures-until を解釈できません（期限なしとして扱います）: {}", raw);
+            return null;
+        }
+    }
+
+    /**
+     * 【メソッドの役割】 世代切り替えの一時措置（参加ゲート・前作基準の初回配属）が今も効く期間か。
+     *
+     * @return 期限前なら true。期限が未設定なら常に true
+     */
+    public boolean withinTransitionMeasures() {
+        return transitionMeasuresUntil == null
+                || LocalDateTime.now(JstTime.JST).isBefore(transitionMeasuresUntil);
+    }
+
+    /**
+     * 【メソッドの役割】 いまの初回配属が「前作の最終 BEAT-TIER 基準」かを返す（説明表示用）。
+     *
+     * ルール説明モーダルに一時措置の注記を出すかの判定に使う。期限を過ぎれば false に戻るので、
+     * フロント側に終了日を持たせなくてよい。
+     *
+     * @return 前作基準なら true
+     */
+    public boolean usesPreviousVersionTier() {
+        return initialTierFromPreviousVersion && withinTransitionMeasures();
     }
 
     /**
      * 【メソッドの役割】 このユーザーがいま参加（復帰を含む）できない理由コードを返す。
      *
      * 参加できるなら null。理由は現状 {@link #JOIN_BLOCKED_NO_PAST_SCORES} のみ
-     * （{@link #requirePastScoresToJoin} が有効で、過去作アーカイブが存在し、本人に過去作スコアが無い）。
+     * （{@link #requirePastScoresToJoin} が有効で期限内、過去作アーカイブが存在し、本人に過去作スコアが無い）。
      * 参加受付のロック（{@link #isRegistrationLocked}）は時間帯の都合であって本人の状態ではないので、
      * ここには含めない。
      *
@@ -88,7 +159,7 @@ public class LeagueService {
      * @return 理由コード。参加できるなら null
      */
     public String joinBlockedReason(User user) {
-        if (!requirePastScoresToJoin || user == null || user.getId() == null) {
+        if (!requirePastScoresToJoin || !withinTransitionMeasures() || user == null || user.getId() == null) {
             return null;
         }
         if (versionPtSnapshotRepository.count() == 0) {
@@ -105,7 +176,8 @@ public class LeagueService {
      */
     public String joinBlockedMessage(String reason) {
         if (JOIN_BLOCKED_NO_PAST_SCORES.equals(reason)) {
-            return "前作までのスコア（歴代スコア）が登録されていないため、現在はリーグに参加できません。";
+            return "前作までのスコア（歴代スコア）が登録されていないため、現在はリーグに参加できません。"
+                    + "スコア取り込みから前作の CSV を取り込むと参加できます。";
         }
         return "現在はリーグに参加できません。";
     }
@@ -121,7 +193,7 @@ public class LeagueService {
      * @return ロック中なら true
      */
     public boolean isRegistrationLocked() {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Tokyo"));
+        LocalDateTime now = LocalDateTime.now(JstTime.JST);
         return now.getDayOfWeek() == DayOfWeek.MONDAY
                 && now.getHour() < LeagueWeekLifecycleService.START_HOUR;
     }
@@ -149,15 +221,10 @@ public class LeagueService {
     /**
      * 【メソッドの役割】 指定ラダーへ参加（または休止から復帰）する。
      *
-     * 初回参加時は BEAT-TIER（総合 BEAT-PT）を参照して DIVISION を即時配属する
-     * （{@link LeagueDivision#forBeatPt}）。復帰の場合は以前の DIVISION を維持する。
+     * 初回参加時は BEAT-TIER を参照して DIVISION を即時配属する
+     * （{@link LeagueDivision#forBeatPt}・参照する PT は {@link #initialBeatPt}）。
+     * 復帰の場合は以前の DIVISION を維持する。
      * 反映は次回の週開始（月曜 12:00 JST）から。途中参加は不可で、進行中の週には追加されない。
-     *
-     * 参照する BEAT-PT は<b>現行作と過去作アーカイブの高いほう（＝歴代最高）</b>。
-     * 新作稼働直後は現行作の BEAT-PT が 0 に戻るため、現行作だけを見ると経験者まで
-     * 最下位階級から始まってしまう。それを避けるための措置。
-     * アーカイブが 1 件も無い間（＝初回の世代切り替え前）は現行作の値がそのまま使われるので、
-     * 挙動はこれまでと変わらない。
      *
      * @param user       参加ユーザー
      * @param ladderType ラダー種別（呼び出し前に {@link #isValidLadder} で検証済みであること）
@@ -171,7 +238,7 @@ public class LeagueService {
             entry.setUser(user);
             entry.setLadderType(ladderType);
             // 初回参加: BEAT-TIER に応じた DIVISION へ配属（参加した瞬間に確定・表示できる）
-            entry.setCurrentTier(LeagueDivision.forBeatPt(allTimeBeatPt(user)));
+            entry.setCurrentTier(LeagueDivision.forBeatPt(initialBeatPt(user)));
         }
         entry.setActive(true);
         entry.setInactiveWeeks(0);
@@ -179,7 +246,41 @@ public class LeagueService {
     }
 
     /**
-     * 【メソッドの役割】 初回参加の階級判定に使う「歴代最高 BEAT-PT」を返す。
+     * 【メソッドの役割】 初回配属（と未参加者へのプレビュー表示）に使う BEAT-PT を返す。
+     *
+     * <ul>
+     *   <li><b>一時措置の期間中</b>（{@link #initialTierFromPreviousVersion} が有効かつ
+     *       {@link #withinTransitionMeasures}）: 前作（Sparkle Shower）の最終 BEAT-PT をそのまま使う。
+     *       新作稼働直後の現行作 PT は「どれだけ遊んだか」でしかなく実力を表さないため、
+     *       前作の到達点で配属したほうが初週の対戦が噛み合う。</li>
+     *   <li><b>それ以外</b>: 現行作と過去作アーカイブの高いほう（＝歴代最高、{@link #allTimeBeatPt}）。</li>
+     * </ul>
+     *
+     * 前作のアーカイブが無い人（前作を遊んでいない・スナップショット後に登録して前作 CSV も
+     * 未取り込み）は歴代最高へフォールバックする。
+     *
+     * @param user 対象ユーザー
+     * @return DIVISION 判定に使う BEAT-PT
+     */
+    public double initialBeatPt(User user) {
+        if (user == null) {
+            return 0.0;
+        }
+        if (initialTierFromPreviousVersion && withinTransitionMeasures() && user.getId() != null) {
+            // 前作 = 現行作の 1 つ前（ZINRAI 稼働中なら 33 = Sparkle Shower）。
+            Double previous = versionPtSnapshotRepository
+                    .findByVersionAndUserId(IidxVersions.current() - 1, user.getId())
+                    .map(VersionPtSnapshot::getTotalBeatPt)
+                    .orElse(null);
+            if (previous != null && previous > 0) {
+                return previous;
+            }
+        }
+        return allTimeBeatPt(user);
+    }
+
+    /**
+     * 【メソッドの役割】 階級判定の基準になる「歴代最高 BEAT-PT」を返す（{@link #initialBeatPt} の既定）。
      *
      * 現行作の {@code users.total_beat_pt} と、過去作アーカイブ
      * （{@code version_pt_snapshots}）の最大値のうち高いほうを採る。
