@@ -89,16 +89,16 @@ const flowSteps = [
  */
 const divisions: { tier: number; beatTier: string | null; lo: number; hi: number; open?: boolean }[] = [
   { tier: 0, beatTier: 'Legend 〜 Mythic 4', lo: 125, hi: 130, open: true },
-  { tier: 1, beatTier: 'Mythic 3 〜 Mythic 1', lo: 123, hi: 127 },
-  { tier: 2, beatTier: 'Ancient 5 〜 Ancient 2', lo: 121, hi: 125 },
-  { tier: 3, beatTier: 'Ancient 1 〜 Master 4', lo: 119, hi: 123 },
-  { tier: 4, beatTier: 'Master 3 〜 Elite 5', lo: 118, hi: 122 },
-  { tier: 5, beatTier: 'Elite 4 〜 Elite 1', lo: 117, hi: 120 },
-  { tier: 6, beatTier: 'Commander 5 〜 Commander 1', lo: 116, hi: 119 },
-  { tier: 7, beatTier: 'Veteran 5 〜 Veteran 1', lo: 115, hi: 118 },
-  { tier: 8, beatTier: 'Expert 5 〜 Expert 3', lo: 113, hi: 116 },
-  { tier: 9, beatTier: 'Expert 2 〜 Advanced 3', lo: 111, hi: 114 },
-  { tier: 10, beatTier: null, lo: 110, hi: 112 }, // beatTier は mappingLowest キーで表示
+  { tier: 1, beatTier: 'Mythic 3 〜 Mythic 1', lo: 123, hi: 128 },
+  { tier: 2, beatTier: 'Ancient 5 〜 Ancient 2', lo: 121, hi: 126 },
+  { tier: 3, beatTier: 'Ancient 1 〜 Master 4', lo: 119, hi: 124 },
+  { tier: 4, beatTier: 'Master 3 〜 Elite 5', lo: 118, hi: 123 },
+  { tier: 5, beatTier: 'Elite 4 〜 Elite 1', lo: 117, hi: 121 },
+  { tier: 6, beatTier: 'Commander 5 〜 Commander 1', lo: 116, hi: 120 },
+  { tier: 7, beatTier: 'Veteran 5 〜 Veteran 1', lo: 115, hi: 119 },
+  { tier: 8, beatTier: 'Expert 5 〜 Expert 3', lo: 113, hi: 117 },
+  { tier: 9, beatTier: 'Expert 2 〜 Advanced 3', lo: 111, hi: 115 },
+  { tier: 10, beatTier: null, lo: 110, hi: 113 }, // beatTier は mappingLowest キーで表示
 ];
 
 /** レンジ図の横軸: ☆11.0 〜 ☆13.0 を 0.1 刻みのセル（両端含む 21 セル）で表す。 */
@@ -113,7 +113,7 @@ const bandWidth = (lo: number, hi: number) => ((hi - lo + 1) / AXIS_CELLS) * 100
 const axisTicks = [110, 115, 120, 125, 130];
 /** 0.1 単位の整数 → "☆12.5" 表記。 */
 const fmtRank = (tenths: number) => `☆${(tenths / 10).toFixed(1)}`;
-/** 帯のラベル（"☆12.3〜12.7" / LEGEND は "☆12.5 以上"）。 */
+/** 帯のラベル（"☆12.3〜12.8" / LEGEND は "☆12.5 以上"）。 */
 const rangeLabel = (d: { lo: number; hi: number; open?: boolean }) =>
   d.open
     ? t('league.infoModal.chart.andAbove', { rank: fmtRank(d.lo) })
@@ -186,6 +186,20 @@ const weeklyDelta = Array.from({ length: 8 }, (_, i) => {
   return { rank, delta: rank <= 4 ? 4 - rank + 1 : -(rank - 4) };
 });
 const fmtDelta = (d: number) => (d > 0 ? `+${d}` : `${d}`);
+
+/**
+ * 「PTのやり取りは課題曲を全曲プレーした人だけ」の例（8 人卓で 3 人だけが 3 曲すべてをプレー）。
+ * 残った人の増減はバックエンド LeagueStandingsService.weeklyDeltas（3 人なら +1/0/-1）、
+ * 固定マイナスは incompletePenalty(8) = -4 と揃えること。
+ */
+const exchangeExample = {
+  /** 全曲プレーした人の増減（1 位から順）。 */
+  deltas: [1, 0, -1],
+  /** 1 曲でも遊ばなかった人数。 */
+  excluded: 5,
+  /** その人数の固定マイナス。 */
+  penalty: -4,
+};
 
 /** 共通スタイル。 */
 const sectionTitleClass = 'text-sm font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2';
@@ -484,6 +498,10 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
                 <span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                 {{ t('league.infoModal.noPlay3') }}
               </li>
+              <li :class="[noteClass, 'pl-4 relative']">
+                <span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-rose-400 dark:bg-rose-500"></span>
+                {{ t('league.infoModal.noPlay4') }}
+              </li>
             </ul>
           </section>
 
@@ -509,6 +527,41 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
                   >
                     <div class="text-[9px] opacity-70 whitespace-nowrap">{{ t('league.songRank', { n: c.rank }) }}</div>
                     <div class="text-xs font-extrabold tabular-nums">{{ fmtDelta(c.delta) }}</div>
+                  </div>
+                </div>
+              </div>
+              <!-- PT のやり取りは「課題曲を全曲プレーした人」だけ -->
+              <div>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-1">{{ t('league.infoModal.ptDiagram.exchange') }}</p>
+                <div class="flex max-sm:flex-col gap-2">
+                  <!-- 全曲プレーした人: 残った人数ぶんの増減をやり取り -->
+                  <div class="flex-1 rounded-lg border border-emerald-200 dark:border-emerald-800/70 bg-emerald-50/70 dark:bg-emerald-900/20 p-2">
+                    <p class="text-[10px] font-bold leading-tight text-emerald-700 dark:text-emerald-300 mb-1">
+                      {{ t('league.infoModal.ptDiagram.playedAll', { n: exchangeExample.deltas.length }) }}
+                    </p>
+                    <div class="grid grid-cols-3 gap-1">
+                      <div
+                        v-for="(d, i) in exchangeExample.deltas"
+                        :key="i"
+                        class="rounded-md text-center py-1 bg-white/80 dark:bg-slate-800/80"
+                      >
+                        <div class="text-[9px] leading-tight text-slate-400 dark:text-slate-500 whitespace-nowrap">{{ t('league.songRank', { n: i + 1 }) }}</div>
+                        <div
+                          class="text-xs font-extrabold tabular-nums"
+                          :class="d > 0 ? 'text-emerald-600 dark:text-emerald-400' : d < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'"
+                        >{{ fmtDelta(d) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 1 曲でも未プレー: 順位に関係なく固定マイナス -->
+                  <div class="flex-1 rounded-lg border border-rose-200 dark:border-rose-800/70 bg-rose-50/70 dark:bg-rose-900/20 p-2">
+                    <p class="text-[10px] font-bold leading-tight text-rose-700 dark:text-rose-300 mb-1">
+                      {{ t('league.infoModal.ptDiagram.notAll', { n: exchangeExample.excluded }) }}
+                    </p>
+                    <div class="rounded-md text-center py-1 bg-white/80 dark:bg-slate-800/80">
+                      <div class="text-[9px] leading-tight text-slate-400 dark:text-slate-500 whitespace-nowrap">{{ t('league.infoModal.ptDiagram.fixed') }}</div>
+                      <div class="text-xs font-extrabold tabular-nums text-rose-600 dark:text-rose-400">{{ fmtDelta(exchangeExample.penalty) }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -541,6 +594,10 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
               </div>
             </div>
             <ul class="mt-2 space-y-1">
+              <li :class="[noteClass, 'pl-4 relative']">
+                <span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-rose-400 dark:bg-rose-500"></span>
+                {{ t('league.infoModal.pt5') }}
+              </li>
               <li :class="[noteClass, 'pl-4 relative']">
                 <span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                 {{ t('league.infoModal.pt2') }}

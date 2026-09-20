@@ -25,7 +25,7 @@ import java.util.*;
  *
  * 抽選の考え方:
  *  - 抽選プールは非公式難易度表（difficulty_ranks / difficulty_rank_songs の active）を基準にし、
- *    DIVISION ごとに割り当てた難易度表ランク帯（例: LEGEND = 12.8 以上、DIVISION 10 = 11.0〜11.1）で絞る。
+ *    DIVISION ごとに割り当てた難易度表ランク帯（例: LEGEND = 12.5 以上、DIVISION 10 = 11.0〜11.3）で絞る。
  *    固定の DIVISION → 帯マッピングなので、参加人数に依らず安定した難易度になる。
  *  - 対象は公式 Lv{@link #OFFICIAL_MIN_LEVEL} 以上の譜面のみ（難易度表は ANOTHER / LEGGENDARIA が中心で、
  *    タイトル末尾 "[L]" が LEGGENDARIA）。スコアレート計算のため notes 判明済みも必須。
@@ -466,24 +466,28 @@ public class LeagueSongDrawService {
      * またがって出題され得る）。中心値が上位ほど高難度になるよう単調に下げ、LEGEND は 12.5 以上。
      * 本番の難易度表分布ではどの帯も 100 曲以上のプールになる。
      * <pre>
-     *   LEGEND : 12.5+        1 : 12.3-12.7   2 : 12.1-12.5   3 : 11.9-12.3
-     *   4 : 11.8-12.2   5 : 11.7-12.0   6 : 11.6-11.9   7 : 11.5-11.8
-     *   8 : 11.3-11.6   9 : 11.1-11.4   10 : 11.0-11.2
+     *   LEGEND : 12.5+        1 : 12.3-12.8   2 : 12.1-12.6   3 : 11.9-12.4
+     *   4 : 11.8-12.3   5 : 11.7-12.1   6 : 11.6-12.0   7 : 11.5-11.9
+     *   8 : 11.3-11.7   9 : 11.1-11.5   10 : 11.0-11.3
      * </pre>
+     *
+     * <p>2026-09-20 に全帯の難易度を引き上げた（ユーザー要望）。下限はそのままに、上限だけを
+     * 1 ランク（0.1）上へ広げてある。LEGEND は元から上限なしのため変更なし。
+     * フロントの説明モーダル（LeagueInfoModal.vue の divisions）も同時に更新すること。
      */
     private int[] rankBandTenths(int tier) {
         return switch (tier) {
             case 0  -> new int[]{125, 9999}; // LEGEND: 12.5 以上
-            case 1  -> new int[]{123, 127};
-            case 2  -> new int[]{121, 125};
-            case 3  -> new int[]{119, 123};
-            case 4  -> new int[]{118, 122};
-            case 5  -> new int[]{117, 120};
-            case 6  -> new int[]{116, 119};
-            case 7  -> new int[]{115, 118};
-            case 8  -> new int[]{113, 116};
-            case 9  -> new int[]{111, 114};
-            default -> new int[]{110, 112}; // DIVISION 10
+            case 1  -> new int[]{123, 128};
+            case 2  -> new int[]{121, 126};
+            case 3  -> new int[]{119, 124};
+            case 4  -> new int[]{118, 123};
+            case 5  -> new int[]{117, 121};
+            case 6  -> new int[]{116, 120};
+            case 7  -> new int[]{115, 119};
+            case 8  -> new int[]{113, 117};
+            case 9  -> new int[]{111, 115};
+            default -> new int[]{110, 113}; // DIVISION 10
         };
     }
 

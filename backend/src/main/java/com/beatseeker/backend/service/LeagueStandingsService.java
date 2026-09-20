@@ -42,6 +42,10 @@ import java.util.stream.Collectors;
  *  - 週の順位に応じてポイントが増減する（{@link #deltaForRank}: 8 人なら 1 位 +4 〜 8 位 -4。
  *    人数が少ないほど幅が縮小し、奇数人数では中央順位が ±0）。1 週の増減幅は
  *    ±{@link #WEEKLY_DELTA_CAP} が上限。
+ *  - <b>PT のやり取りは「課題曲を全曲プレーした人」だけで行う</b>（{@link #weeklyDeltas}）。
+ *    1 曲でも遊ばなかった人はやり取りから外れ、グループ人数に応じた固定マイナス
+ *    （{@link #incompletePenalty}: 8 人卓なら -4）を受ける。残った人は<b>その人数</b>で
+ *    順位を数え直して増減幅が決まるので、放置が多い週に「遊んだ人が全員プラス」にはならない。
  *  - 累積ポイントが +{@link #POINT_CAP} に到達すると昇格、-{@link #POINT_CAP} で降格
  *    （1 週の増減は最大 ±{@link #WEEKLY_DELTA_CAP} なので、昇降格には最短でも 2 週かかる）。
  *  - 昇降格した直後は 0 ではなく「移動先での立ち位置」を反映した PT から始める:
@@ -451,11 +455,10 @@ public class LeagueStandingsService {
         int size = stats.size();
 
         // 同着の確定: 得点と有効曲数がともに等しい人をひとまとめにし、順位番号と PT を共有させる。
-        //  - 順位は競争順位（1, 1, 3, ...）。同着集団は先頭の順位番号を全員が名乗る。
-        //  - PT はその順位帯のデルタ合計の平均を切り上げ（多いほう）で等分する。実力と無関係な
-        //    表示用タイブレーク順（ベスト単曲レート等）で ±4 の差が付くのを防ぐ。
-        //  - 有効 0 曲の集団はプラスを獲得できない（放置昇格の防止）。
-        int[] deltas = new int[size];
+        //  - 順位は競争順位（1, 1, 3, ...）。同着集団は先頭の順位番号を全員が名乗る。順位表の
+        //    表示順位は課題曲を全曲遊んだかに関わらずグループ全員を通しで付ける。
+        //  - PT は同着集団で共有する（weeklyDeltas）。実力と無関係な表示用タイブレーク順
+        //    （ベスト単曲レート等）で ±4 の差が付くのを防ぐ。
         int[] ranks = new int[size];
         int cursor = 0;
         while (cursor < size) {
@@ -463,23 +466,28 @@ public class LeagueStandingsService {
             while (groupEnd < size && samePerformance(stats.get(cursor), stats.get(groupEnd))) {
                 groupEnd++;
             }
-            int shared = sharedDelta(size, cursor + 1, groupEnd - cursor);
-            if (stats.get(cursor).validCount == 0 && shared > 0) {
-                shared = 0;
-            }
             for (int k = cursor; k < groupEnd; k++) {
-                deltas[k] = shared;
                 ranks[k] = cursor + 1;
             }
             cursor = groupEnd;
         }
+
+        // PT のやり取りは「課題曲を全曲プレーした人」だけで行い、それ以外は固定マイナスにする。
+        boolean[] playedAll = new boolean[size];
+        boolean[] anyValid = new boolean[size];
+        for (int i = 0; i < size; i++) {
+            playedAll[i] = playedAllSongs(stats.get(i));
+            anyValid[i] = stats.get(i).validCount > 0;
+        }
+        int[] deltas = weeklyDeltas(playedAll, anyValid, ranks);
 
         for (int i = 0; i < size; i++) {
             MemberStats st = stats.get(i);
             int rank = ranks[i]; // 同着は同じ順位番号（1, 1, 3, ...）
             String role = st.member.getRole() != null ? st.member.getRole() : "normal";
             // チャレンジ/ディフェンスの補正（±ROLE_BONUS）を基本デルタに適用する。
-            int delta = applyRole(deltas[i], role);
+            // 全曲プレーしなかった人の固定マイナスは立場に関わらず動かさない。
+            int delta = playedAll[i] ? applyRole(deltas[i], role) : deltas[i];
             // 有効 0 曲はプラスを獲得できない（放置昇格の防止）。基本デルタ側でも同じ判定をしているが、
             // チャレンジ補正はその後に効くため、ここでも押さえる（1 曲もライン超えせず +2 されるのを防ぐ）。
             if (st.validCount == 0 && delta > 0) {
@@ -921,6 +929,86 @@ public class LeagueStandingsService {
     private boolean samePerformance(MemberStats a, MemberStats b) {
         return Math.abs(a.totalSongPoints - b.totalSongPoints) < 1e-6
                 && a.validCount == b.validCount;
+    }
+
+    /**
+     * 【メソッドの役割】 課題曲を全曲プレーしなかった人が受け取る固定マイナス PT を返す（純粋計算）。
+     *
+     * その人数での最大のマイナス（＝最下位のデルタ）と同じ値。8 人卓なら -4、7 人卓なら -3。
+     * 順位・立場（チャレンジ/ディフェンス）に関わらずこの値で固定する。
+     *
+     * @param size グループ人数
+     * @return 固定のマイナス PT（0 以下）
+     */
+    public static int incompletePenalty(int size) {
+        return deltaForRank(size, size);
+    }
+
+    /**
+     * 【メソッドの役割】 1 グループ分の昇降格 PT の増減を計算する（純粋計算・立場補正の前）。
+     *
+     * 引数の配列はすべて順位表の並び（上位から）で、同じ添字が同じメンバーを指す。
+     *
+     * <ul>
+     *   <li>課題曲を全曲プレーしなかった人（{@code playedAll = false}）は<b>やり取りから外し</b>、
+     *       グループ人数に応じた固定マイナス（{@link #incompletePenalty}）を与える。</li>
+     *   <li>残った人だけで順位を数え直し、<b>その人数</b>の増減幅を配る。8 人卓で全曲プレーが
+     *       3 人なら +1 / 0 / -1 になる（放置が多い週に「遊んだ人が全員プラス」になるのを防ぐ）。</li>
+     *   <li>同着（{@code displayRank} が同じ）の集団は、その順位帯のデルタ合計の平均を
+     *       切り上げ（多いほう）で等分する（{@link #sharedDelta}）。</li>
+     *   <li>有効曲 0 曲の人はプラスを獲得できない（過疎グループでの放置昇格を防ぐ）。</li>
+     * </ul>
+     *
+     * @param playedAll   課題曲（無効化された曲を除く）を全曲プレーしたか
+     * @param anyValid    有効化した曲が 1 曲以上あるか
+     * @param displayRank 順位表の順位番号（同着は同じ番号。同着集団の判定に使う）
+     * @return メンバーごとの増減 PT
+     */
+    static int[] weeklyDeltas(boolean[] playedAll, boolean[] anyValid, int[] displayRank) {
+        int size = playedAll.length;
+        int[] deltas = new int[size];
+        // やり取りに参加するのは全曲プレーした人だけ。それ以外はここで固定マイナスを確定させる。
+        List<Integer> exchange = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            if (playedAll[i]) {
+                exchange.add(i);
+            } else {
+                deltas[i] = incompletePenalty(size);
+            }
+        }
+        int n = exchange.size();
+        int p = 0;
+        while (p < n) {
+            int q = p;
+            // 同着集団（表示順位が同じ）はまとめて 1 つの順位帯として扱う。
+            while (q < n && displayRank[exchange.get(q)] == displayRank[exchange.get(p)]) {
+                q++;
+            }
+            int shared = sharedDelta(n, p + 1, q - p);
+            // 同着集団は有効曲数も等しい（samePerformance）ので、先頭の判定を集団全体に適用してよい。
+            if (!anyValid[exchange.get(p)] && shared > 0) {
+                shared = 0;
+            }
+            for (int k = p; k < q; k++) {
+                deltas[exchange.get(k)] = shared;
+            }
+            p = q;
+        }
+        return deltas;
+    }
+
+    /**
+     * 【メソッドの役割】 その週の課題曲を<b>全曲</b>プレーしたか（＝ PT のやり取りに参加できるか）を返す。
+     *
+     * 判定は曲ごとの「参加」（週内に遊んだ形跡。ライン超え＝有効化までは求めない）。
+     * 管理者が無効化した課題曲は勝負の対象外なので数に入れない。課題曲が 1 曲も無い週は true。
+     */
+    private static boolean playedAllSongs(MemberStats st) {
+        for (Map<String, Object> ps : st.perSong) {
+            if (Boolean.TRUE.equals(ps.get("disabled"))) continue;
+            if (!Boolean.TRUE.equals(ps.get("participated"))) return false;
+        }
+        return true;
     }
 
     /**
