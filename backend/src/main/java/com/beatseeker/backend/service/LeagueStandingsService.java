@@ -30,7 +30,10 @@ import java.util.stream.Collectors;
  *
  * 「週内プレー」の判定（メンバー × 課題曲、arcade 行）:
  *  - ベースライン行あり: プレー回数増加 or EX スコア更新 or ミスカウント改善 or ランプ改善
- *  - ベースライン行なし: Score.uploadedAt >= week.snapshotAt（週内に初記録が現れた）
+ *  - ベースライン行なし: Score.uploadedAt >= week.snapshotAt（週内に初記録が現れた）。
+ *    ただし EX=0 かつプレー回数 0 の「空記録」（所持のみ・未プレー）は記録として数えない。
+ *  - 上記のどちらでも、公式 CSV の最終プレー日時が分かっていて開催期間の外なら「週内プレー」ではない
+ *    （週の前に出した記録を週内にアップロードしただけのケースを弾く）。
  *
  * 曲別の着順ポイントは「有効化した人 &gt; 有効ラインに届かなかった人」の 2 段で配る。
  * 未到達者は遊んだかどうかに関わらず<b>まず全員で山分け</b>し、そのあと週内に遊んだ形跡が無い人
@@ -598,12 +601,25 @@ public class LeagueStandingsService {
                 if (playedThisWeek) continue;
                 LeagueBaseline base = baselineIndex.get(baselineKey(user.getId(), song.getTitle(), song.getDifficultyName(), source));
                 if (base == null) {
-                    // 週開始時点で記録が無かった source に行が現れた = 週内の新規記録
-                    playedThisWeek = cur.uploadedAt != null && week.getSnapshotAt() != null
+                    // 週開始時点で記録が無かった source に行が現れた = 週内の新規記録。
+                    // ただし EX=0 かつプレー回数 0 の「空記録」（譜面を所持しているだけで未プレー。
+                    // IIDX の CSV にはこの行が混ざる）は記録ではないので、行が現れただけでは遊んだ証拠にしない。
+                    boolean hasRecord = (cur.score != null && cur.score > 0)
+                            || (cur.playCount != null && cur.playCount > 0);
+                    playedThisWeek = hasRecord && cur.uploadedAt != null && week.getSnapshotAt() != null
                             && !cur.uploadedAt.isBefore(week.getSnapshotAt());
                 } else {
                     playedThisWeek = improvedFromBaseline(cur, base);
                 }
+            }
+
+            // 公式 CSV の最終プレー日時が分かるなら、それが開催期間の外なら「週内には遊んでいない」。
+            // アップロード日時だけでは「週の前に出した記録を週内にアップロードしただけ」を区別できず、
+            // ライン無しの曲（新作稼働直後はほとんどの曲がそう）で週外の記録が有効になってしまう。
+            // 最終プレー日時を持たない取り込み経路（ブックマークレット CSV）では従来どおり判定しない。
+            if (lastPlayedAt != null && week.getStartsAt() != null && week.getEndsAt() != null
+                    && !LeagueWeekLifecycleService.withinWeek(lastPlayedAt, week)) {
+                playedThisWeek = false;
             }
 
             // ライン判定: グループ内の「週開始時点の最高記録」（スコア=最大EX / BP=最小ミス）を
@@ -612,8 +628,11 @@ public class LeagueStandingsService {
             // 誰もプレーしていない曲はライン無し（週内に記録を出せばそのまま有効）。
             Integer lineEx = lineExBySong.get(key);
             Integer lineMiss = lineMissBySong.get(key);
+            // EX=0 は「所持のみ・未プレー」の空記録なので、ラインの有無に関わらず記録として扱わない
+            // （ラインの算出側でも同じ理由で 0 を除外している）。ライン無しの曲でこれを許すと、
+            // 遊んでいない人が 0 点の「有効な記録」を持つことになってしまう。
             boolean beatLine = isScoreLadder
-                    ? (bestEx != null && (lineEx == null || bestEx > lineEx))
+                    ? (bestEx != null && bestEx > 0 && (lineEx == null || bestEx > lineEx))
                     : (bestMiss != null && (lineMiss == null || bestMiss < lineMiss));
             // 管理者が無効化した曲（解禁不可能な選曲など）は誰も有効化できない扱いにする。
             // 着順ポイントも配らない（assignSongPoints 側でスキップする）。
