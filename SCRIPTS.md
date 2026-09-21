@@ -56,6 +56,14 @@
 | [verify_notes.py](tools/verify_notes.py) | `chart_cache/profiles/` と `song_data.json` を突き合わせ、ノーツ数の検証結果を出力。 |
 | [generate_invalid_check_sql.py](tools/generate_invalid_check_sql.py) | `sp11.json`/`sp12.json` からスコア率100%超過の検出 SQL (`sql/find_invalid_scores.sql`) を自動生成。※`BASE_DIR`(L5) が旧環境の絶対パスでハードコードされているため、実行前に修正が必要。 |
 
+### 1.4.1 データ補修
+
+| スクリプト | 用途 |
+|------------|------|
+| [backfill-missing-upload-logs.js](scripts/backfill-missing-upload-logs.js) | 「スコアは保存されたのに成長記録（`score_history_logs`）が無い」アップロードを検出して補填。`scores.uploaded_at` をアップロード単位にクラスタリング（120 秒以上空いたら別回）し、前後 [-2 分, +5 分] にログが無いものを欠落とみなす。現在のスコアから、欠落回より後のログの `diffJson`（`oldScore` / `oldClearType`）を逆適用して当時の状態を復元し、BEAT / RATE / KENBAN / SARA-PT を backend と同じ式で再計算して INSERT する（作品切替 `tag='version-transition'` より前へは遡らない）。実行前に「同じ作品の直近ログ」を同手順で復元して値が一致するか必ず検証し、外れたユーザーは挿入をスキップする。欠落回がそのユーザーの最新イベントだった場合は `users` の PT キャッシュも追従させる。デフォルト dry-run、`--apply` で INSERT。`--since=` `--user=` で絞り込み可。2026-09-21 に 5 件（なつみ / まいけ / 早池峰 / も / ARSTA）を補填済み。 |
+
+**前提**: Node + `pg`（`scripts/node_modules`、接続情報ハードコード・本番 DB 直接更新）。
+
 ### 1.5 初期セットアップ（通常は一度きり）
 
 | スクリプト | 用途 |

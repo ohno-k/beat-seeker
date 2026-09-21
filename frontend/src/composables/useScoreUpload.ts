@@ -8,7 +8,16 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
  * `upload()` が投げるエラー。`rejected` が true のときはサーバーが内容を理由に拒否しており
  * （前作データの判定など）、何も保存されていないことが確定している。`message` は利用者向けの文言。
  */
-export type UploadError = Error & { status?: number; code?: string; rejected?: boolean };
+export type UploadError = Error & { status?: number; code?: string; rejected?: boolean; aborted?: boolean };
+
+/**
+ * `upload()` の打ち切り時間（ミリ秒）。
+ *
+ * 全譜面（2000〜3000 件）を 1 リクエストで送るため、初回取り込みや全曲再取り込みでは
+ * サーバー側の集計・通知処理を含めて 1 分を超えることがある。ここで打ち切ると
+ * 「サーバーは保存したのにブラウザだけ失敗扱い」になり、レポートも成長記録も出ない。
+ */
+const UPLOAD_TIMEOUT_MS = 180000;
 
 /**
  * 【内部関数】 UI 側では「曲単位（1 行に beginner〜leggendaria が同居）」でスコアを保持しているが、
@@ -70,7 +79,7 @@ function flattenToUploadRecords(scores: ScoreData[], source: 'arcade' | 'infinit
  * 【Composable の役割】 スコアデータをバックエンドへアップロードする。
  *
  * 機能:
- *  - `upload()`: CSV から読んだ `ScoreData[]` を一括送信（60 秒タイムアウト付き）
+ *  - `upload()`: CSV から読んだ `ScoreData[]` を一括送信（{@link UPLOAD_TIMEOUT_MS} でタイムアウト）
  *  - `saveHistoryLog()`: アップロード後の履歴ログを保存
  *
  * 使い方:
@@ -87,7 +96,8 @@ export function useScoreUpload() {
      * スコアをまとめてアップロードする。
      *
      * 注意:
-     *  - 60 秒で AbortController により強制中断（大量データで DB 処理が長引くため）
+     *  - {@link UPLOAD_TIMEOUT_MS} で AbortController により強制中断（大量データで DB 処理が長引くため）。
+     *    中断・通信断は `aborted = true` を付けて投げる（保存済みの可能性があるため確認が必要）
      *  - 非 2xx 応答は例外として投げる（呼び出し側で UI エラーハンドリング）。
      *    サーバーが内容を理由に拒否した場合（前作データの判定など: 400 + code）は、その文言を
      *    message に、`rejected = true` を付けて投げる。呼び出し側は「保存されていない」と確定して扱える。
@@ -104,14 +114,23 @@ export function useScoreUpload() {
     ): Promise<{ updatedCount: number; updatedSongs: any[]; message: string; skippedInfinitasOnly?: number }> => {
         const records = flattenToUploadRecords(scores, source, sourceVersion);
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        const timeoutId = setTimeout(() => controller.abort(), UPLOAD_TIMEOUT_MS);
         try {
-            const res = await fetch(`${API_BASE}/api/scores/upload`, {
-                method: 'POST',
-                headers: authHeaders({ 'Content-Type': 'application/json' }),
-                body: JSON.stringify(records),
-                signal: controller.signal,
-            });
+            let res: Response;
+            try {
+                res = await fetch(`${API_BASE}/api/scores/upload`, {
+                    method: 'POST',
+                    headers: authHeaders({ 'Content-Type': 'application/json' }),
+                    body: JSON.stringify(records),
+                    signal: controller.signal,
+                });
+            } catch (e: any) {
+                // 打ち切り・通信断は「サーバー側で保存が完了している可能性がある」ケース。
+                // 呼び出し側がこれを見て、保存済みかどうかを確かめてから結果を出し分ける。
+                const err = new Error(e?.message || 'Upload aborted') as UploadError;
+                err.aborted = true;
+                throw err;
+            }
 
             if (!res.ok) {
                 let message = `Upload failed: ${res.status}`;

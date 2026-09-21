@@ -32,6 +32,7 @@ import com.beatseeker.backend.service.TopRankersBeatPtService;
 import com.beatseeker.backend.service.VirtualArenaRankerService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -142,6 +143,13 @@ public class ScoreController {
 
     /** 前作の最終 PT（ランキング行のティアアイコンの外枠用）。 */
     private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
+
+    /**
+     * upload がサーバー側で作った成長記録を、フロントの /save-history-log が
+     * 「同じアップロードのもの」とみなして仕上げられる猶予（分）。
+     * フロントは upload 成功の数秒後に呼ぶので短くてよいが、集計や順位取得を挟むぶんの余裕を見る。
+     */
+    private static final int CLIENT_CONFIRM_WINDOW_MINUTES = 10;
 
     /**
      * 【コンストラクタ】 Spring DI で全依存を受け取る。
@@ -434,6 +442,30 @@ public class ScoreController {
                     System.err.println("Failed to upsert daily INFINITAS history log: " + e.getMessage());
                 }
             }
+
+            // CSV / ブックマークレット由来の更新があれば、この upload 自身で成長記録を作っておく。
+            // 以前は成長記録がフロントの /save-history-log だけで作られていたため、upload の
+            // レスポンスがブラウザに届かないと（60 秒タイムアウト・通信断・途中リロード）
+            // 「スコアは保存されたのに成長記録が無い」状態になり、最新ログを読む RATE-Tier
+            // ランキングも古い値で据え置かれていた。ここで先に残し、フロントからの
+            // /save-history-log はこの行を仕上げる（clientConfirmed = true）役に変えている。
+            // 対象はフロントがレポートに出すのと同じ条件（スコアかランプが伸びた譜面）に揃える。
+            // BP だけ縮んだ更新まで拾うと、これまで成長記録が作られなかったケースで行が増えてしまう。
+            List<Map<String, Object>> arcadeUpdated = updatedSongs.stream()
+                    .filter(d -> !"infinitas".equals(d.get("source")))
+                    .filter(d -> ((Number) d.getOrDefault("scoreIncrease", 0)).intValue() > 0
+                            || Boolean.TRUE.equals(d.get("clearTypeImproved")))
+                    .collect(java.util.stream.Collectors.toList());
+            if (!arcadeUpdated.isEmpty()) {
+                try {
+                    // scoreMap には既存行と今回の新規行が全て入っている（= 更新後の全スコア）。
+                    scoreRecalculationService.upsertUploadLog(
+                            user, arcadeUpdated, new java.util.ArrayList<>(scoreMap.values()));
+                } catch (Exception e) {
+                    // 成長記録の作成失敗でスコア保存を巻き戻さない（フロント側の保存で救済される）。
+                    System.err.println("Failed to create upload history log: " + e.getMessage());
+                }
+            }
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -500,38 +532,58 @@ public class ScoreController {
             return ResponseEntity.badRequest().body(Map.of("message", "No scores found to snapshot"));
         }
 
-        // 手順2: フロントで集計済みの値を ScoreHistoryLog に詰める。
-        ScoreHistoryLog log = new ScoreHistoryLog();
-        log.setUser(user);
-        log.setUploadedAt(java.time.LocalDateTime.now());
-        // 作品バージョン（成長記録の作品切り替え用）。切替日時を過ぎると自動的に次作の番号になる。
-        log.setVersion(IidxVersions.current());
+        // 手順2: 直前の upload がサーバー側で作った未確定ログがあれば、新しい行を足さずにそれを仕上げる。
+        // upload が先に成長記録を残しているので、ここで毎回 INSERT すると 1 回のアップロードで
+        // 2 行できてしまう。CLIENT_CONFIRM_WINDOW 内の未確定行だけを対象にする。
+        Optional<ScoreHistoryLog> pendingLog = scoreHistoryLogRepository
+                .findFirstByUserAndTagIsNullAndClientConfirmedFalseAndUploadedAtGreaterThanEqualOrderByUploadedAtDesc(
+                        user, java.time.LocalDateTime.now().minusMinutes(CLIENT_CONFIRM_WINDOW_MINUTES));
+        boolean claimed = pendingLog.isPresent();
+
+        // 手順3: フロントで集計済みの値を ScoreHistoryLog に詰める。
+        ScoreHistoryLog log = pendingLog.orElseGet(ScoreHistoryLog::new);
+        if (!claimed) {
+            log.setUser(user);
+            log.setUploadedAt(java.time.LocalDateTime.now());
+            // 作品バージョン（成長記録の作品切り替え用）。切替日時を過ぎると自動的に次作の番号になる。
+            log.setVersion(IidxVersions.current());
+        }
+        log.setClientConfirmed(true);
+        double serverRatePt = log.getTotalRatePt() != null ? log.getTotalRatePt() : 0.0;
         log.setTotalBeatPt(req.totalBeatPt());
         log.setBeatPtIncrease(req.beatPtIncrease());
         log.setUpdatedCount(req.updatedCount());
         log.setDiffJson(req.diffJson());
         log.setTotalPrecisionPt(req.totalPrecisionPt() != null ? req.totalPrecisionPt() : 0.0);
         double totalRatePt = req.totalRatePt() != null ? req.totalRatePt() : 0.0;
-        // フロント未計算・未送信（0 以下）の場合はバックエンド側で active 曲データから再計算。
+        // フロント未計算・未送信（0 以下）の場合は upload が算出済みの値を使い、それも無ければ再計算。
         if (totalRatePt <= 0) {
-            totalRatePt = scoreRecalculationService.calculateRatePtFromActiveData(allScores);
+            totalRatePt = (claimed && serverRatePt > 0)
+                    ? serverRatePt
+                    : scoreRecalculationService.calculateRatePtFromActiveData(allScores);
         }
         log.setTotalRatePt(totalRatePt);
 
-        // KENBAN-PT / SARA-PT もバックエンドで一括算出してログに保存（フロントは送ってこない）。
-        try {
-            var songMaxScores = scoreRecalculationService.loadSongMaxScores();
-            var informalRanks = scoreRecalculationService.loadInformalRanks();
-            var scratchMap    = scoreRecalculationService.loadScratchMap();
-            double[] kenbanSara = scoreRecalculationService.calculateKenbanSaraPtFromActiveData(
-                allScores, songMaxScores, informalRanks, scratchMap);
-            log.setTotalKenbanPt(kenbanSara[0]);
-            log.setTotalSaraPt(kenbanSara[1]);
-            user.setTotalKenbanPt(kenbanSara[0]);
-            user.setTotalSaraPt(kenbanSara[1]);
-        } catch (Exception e) {
-            // 失敗してもメイン保存処理は続行（KENBAN/SARA は事後再計算で救済可能）。
-            System.err.println("Failed to compute KENBAN/SARA-PT in saveHistoryLog: " + e.getMessage());
+        // KENBAN-PT / SARA-PT はフロントが送ってこないのでバックエンドで算出する。
+        // claimed の場合は upload 時に同じ式で計算済みなので、重い再計算を省いてそのまま使う。
+        if (claimed) {
+            if (log.getTotalKenbanPt() != null) user.setTotalKenbanPt(log.getTotalKenbanPt());
+            if (log.getTotalSaraPt() != null) user.setTotalSaraPt(log.getTotalSaraPt());
+        } else {
+            try {
+                var songMaxScores = scoreRecalculationService.loadSongMaxScores();
+                var informalRanks = scoreRecalculationService.loadInformalRanks();
+                var scratchMap    = scoreRecalculationService.loadScratchMap();
+                double[] kenbanSara = scoreRecalculationService.calculateKenbanSaraPtFromActiveData(
+                    allScores, songMaxScores, informalRanks, scratchMap);
+                log.setTotalKenbanPt(kenbanSara[0]);
+                log.setTotalSaraPt(kenbanSara[1]);
+                user.setTotalKenbanPt(kenbanSara[0]);
+                user.setTotalSaraPt(kenbanSara[1]);
+            } catch (Exception e) {
+                // 失敗してもメイン保存処理は続行（KENBAN/SARA は事後再計算で救済可能）。
+                System.err.println("Failed to compute KENBAN/SARA-PT in saveHistoryLog: " + e.getMessage());
+            }
         }
 
         // 手順3: スコア全件を 1 周して totalScore と各クリア種別・DJ ランクのカウントを集計する。

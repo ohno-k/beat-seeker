@@ -307,6 +307,90 @@ public class ScoreRecalculationService {
         };
     }
 
+    /**
+     * 【メソッドの役割】 スコアアップロードの成長記録（通常ログ）をサーバー側で作る。
+     *
+     * 成長記録はもともとフロントが upload のレスポンスを受け取ってから
+     * {@code /save-history-log} を呼ぶことで作られていた。そのためレスポンスが
+     * ブラウザに届かなかった場合（タイムアウト・通信断・再読込）、スコアだけ保存されて
+     * 成長記録が残らず、最新ログを読む RATE-Tier ランキングも古い値で据え置かれていた。
+     * そこで upload と同じトランザクションでこの行を先に作り、フロントの
+     * {@code /save-history-log} は「この行を仕上げる」役に変えている。
+     *
+     * 集計規則は {@code ScoreController.saveHistoryLog} と揃える:
+     *  - totalScore / クリア種別・DJ ランクのカウント … scores 全行をそのまま数える
+     *  - BEAT / RATE / KENBAN / SARA-PT … {@link #calculatePtTotals}（譜面ごと最高スコアの上位 100）
+     *
+     * @param user         対象ユーザー
+     * @param updatedSongs 今回の upload で更新された譜面の差分（サーバー側で組み立てたもの）
+     * @return 作成したログ。スコアが 1 件も無いときは null
+     */
+    // 注意: REQUIRES_NEW にしない。upload と同一トランザクションに参加させることで、
+    // 直前に保存した（まだコミット前の）スコアも含めて再計算できる。
+    @Transactional
+    public ScoreHistoryLog upsertUploadLog(User user, List<Map<String, Object>> updatedSongs, List<Score> loadedScores) {
+        // upload から呼ばれるときは、その場で更新した Score をそのまま渡してもらう（再クエリを省く）。
+        List<Score> allScores = (loadedScores != null && !loadedScores.isEmpty())
+                ? loadedScores
+                : scoreRepository.findByUserOrderByUploadedAtAsc(user);
+        if (allScores.isEmpty()) return null;
+
+        long totalScore = 0;
+        int fcCount = 0, exhCount = 0, hCount = 0, clearCount = 0, easyCount = 0;
+        int aaaCount = 0, aaCount = 0, aCount = 0;
+        for (Score s : allScores) {
+            if (s.getScore() != null) totalScore += s.getScore();
+            if ("FULLCOMBO CLEAR".equals(s.getClearType())) fcCount++;
+            if ("EX HARD CLEAR".equals(s.getClearType())) exhCount++;
+            if ("HARD CLEAR".equals(s.getClearType())) hCount++;
+            if ("CLEAR".equals(s.getClearType())) clearCount++;
+            if ("EASY CLEAR".equals(s.getClearType())) easyCount++;
+            if ("AAA".equals(s.getDjLevel())) aaaCount++;
+            if ("AA".equals(s.getDjLevel())) aaCount++;
+            if ("A".equals(s.getDjLevel())) aCount++;
+        }
+
+        double[] totals = calculatePtTotals(allScores, loadSongMaxScores(), loadInformalRanks(), loadScratchMap());
+        double base = scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(user)
+                .map(l -> l.getTotalBeatPt() != null ? l.getTotalBeatPt() : 0.0).orElse(0.0);
+
+        ScoreHistoryLog log = new ScoreHistoryLog();
+        log.setUser(user);
+        log.setUploadedAt(LocalDateTime.now());
+        log.setVersion(IidxVersions.current());
+        log.setClientConfirmed(false); // フロントが上書きしたら true になる
+        log.setTotalScore(totalScore);
+        log.setFcCount(fcCount);
+        log.setExhCount(exhCount);
+        log.setHCount(hCount);
+        log.setClearCount(clearCount);
+        log.setEasyCount(easyCount);
+        log.setAaaCount(aaaCount);
+        log.setAaCount(aaCount);
+        log.setACount(aCount);
+        log.setTotalBeatPt(totals[0]);
+        log.setBeatPtIncrease(Math.max(0.0, Math.round((totals[0] - base) * 10.0) / 10.0));
+        log.setTotalRatePt(totals[1]);
+        log.setTotalKenbanPt(totals[2]);
+        log.setTotalSaraPt(totals[3]);
+        log.setTotalPrecisionPt(0.0);
+        log.setUpdatedCount(updatedSongs != null ? updatedSongs.size() : 0);
+        try {
+            log.setDiffJson(objectMapper.writeValueAsString(updatedSongs != null ? updatedSongs : List.of()));
+        } catch (Exception e) {
+            log.setDiffJson("[]");
+        }
+        scoreHistoryLogRepository.save(log);
+
+        // ランキング用キャッシュもここで更新しておく（フロントの save-history-log が来なくても正しい値になる）。
+        user.setTotalBeatPt(totals[0]);
+        user.setTotalKenbanPt(totals[2]);
+        user.setTotalSaraPt(totals[3]);
+        userRepository.save(user);
+
+        return log;
+    }
+
     public double calculateBeatPtFromActiveData(List<Score> scores) {
         List<SongDefinition> activeSongs = songDefinitionRepository.findByRevision("active");
         Map<String, Integer> songMaxScores = new HashMap<>();

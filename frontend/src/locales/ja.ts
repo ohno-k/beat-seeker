@@ -1272,8 +1272,9 @@ export const ja = {
   // App / Global
   'app.error.noUpdate': 'スコアの更新はありませんでした（すでに最新のスコアが保存されています）',
   'app.error.historySaveFailed': '成長記録の保存に失敗しました。ページを再読み込みして再度お試しください。',
-  'app.error.uploadFailed': 'スコアの保存に失敗しました。表示は取り込み前との比較です。',
+  'app.error.uploadFailed': '通信が途切れましたが、スコアはサーバーに保存されています。表示は取り込み前との比較です。',
   'app.error.uploadNotSaved': 'スコアの保存に失敗しました。今回の記録はサーバーに保存されていません（成長記録も残していません）。時間をおいて、もう一度アップロードしてください。',
+  'app.error.uploadUnverified': '通信が途切れたため、保存できたかどうか確認できませんでした。ページを再読み込みしてスコアを確認してください（保存されていれば、そのまま反映されています）。',
   'app.error.parseFailed': 'CSVの解析に失敗しました。',
   'app.banner.adminMode': '管理者モード',
   'app.banner.friendMode': 'フレンドのデータを閲覧中',

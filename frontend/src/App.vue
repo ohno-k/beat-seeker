@@ -1740,31 +1740,54 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
         console.error("Auto upload failed", err);
 
         // 送信に失敗したときは、DB を読み直して「本当に保存されなかったのか」を確かめる。
-        // 稀に「サーバーには保存されたがレスポンス取得だけ失敗」という状況があり得るので、
-        // 実際に保存されていた場合だけ従来どおりレポートと成長記録を残す。
+        // 結果は 3 通りあり、区別しないと利用者に嘘を伝えることになる:
+        //   'saved'    … サーバーは受理済み（レスポンスだけ届かなかった）。レポートと成長記録を残す
+        //   'notSaved' … 本当に何も入っていない。再アップロードを促す
+        //   'unknown'  … 読み直し自体が失敗。どちらとも言えないので断定しない
         //
         // 保存されていないのに成長記録を書いてしまうと、scores には存在しない更新が
         // score_history_logs と users.totalBeatPt にだけ残り、スコア一覧・ランキング・
         // リーグが「更新履歴には出ているのに反映されない」状態になる（2026-08-15 の実障害）。
-        let persisted = false;
-        try {
-            await loadSavedScores();
-            const savedScoreByChart = new Map<string, number>(
-                flattenScores(scoreData.value)
-                    .map(s => [`${s.title}_${s.difficultyName}`, s.score] as [string, number])
-            );
-            // 今回の更新分がすべて DB 側に載っていれば「保存は通っていた」と判断する。
-            persisted = updatedSongs.length > 0 && updatedSongs.every(
-                u => (savedScoreByChart.get(`${u.title}_${u.difficulty}`) ?? -1) >= u.newScore
-            );
-        } catch (reloadErr) {
-            console.error("Failed to re-read saved scores after upload failure", reloadErr);
-        }
+        //
+        // 逆に、サーバーがまだ処理中（打ち切り後もコミットまで走り続ける）のうちに 1 回読んで
+        // 「未保存」と断定すると、保存されているのに失敗と表示してしまう（2026-09-21 の実障害）。
+        // そのため数秒あけて数回確かめる。なお成長記録自体は upload 側でも作られるので、
+        // ここで保存できなくても記録が消えることはない。
+        // 打ち切り・通信断（aborted）のときはサーバーがまだコミット中のことがあるので長めに粘る。
+        // 非 2xx（500 など）はトランザクションごと巻き戻っているので、短く確かめれば足りる。
+        const attempts = (err as any)?.aborted ? 5 : 3;
+        const verifyPersisted = async (): Promise<'saved' | 'notSaved' | 'unknown'> => {
+            if (updatedSongs.length === 0) return 'notSaved';
+            let readFailed = false;
+            for (let attempt = 0; attempt < attempts; attempt++) {
+                if (attempt > 0) await new Promise(r => setTimeout(r, 6000));
+                try {
+                    const data = await fetchMyScores();
+                    const savedScoreByChart = new Map<string, number>(
+                        flattenScores(data ?? [])
+                            .map(s => [`${s.title}_${s.difficultyName}`, s.score] as [string, number])
+                    );
+                    // 今回の更新分がすべて DB 側に載っていれば「保存は通っていた」と判断する。
+                    if (updatedSongs.every(u => (savedScoreByChart.get(`${u.title}_${u.difficulty}`) ?? -1) >= u.newScore)) {
+                        return 'saved';
+                    }
+                } catch (reloadErr) {
+                    console.error("Failed to re-read saved scores after upload failure", reloadErr);
+                    readFailed = true;
+                }
+            }
+            return readFailed ? 'unknown' : 'notSaved';
+        };
+        const verdict = await verifyPersisted();
 
-        if (!persisted) {
+        if (verdict === 'unknown') {
+            // 保存されたかどうか確かめられなかった: 二重登録を避けるため何も書かず、再読込を促す。
+            errorMsg.value = t('app.error.uploadUnverified');
+        } else if (verdict === 'notSaved') {
             // 本当に保存されていない: 成長記録も残さず、再アップロードを促すだけにする。
             errorMsg.value = t('app.error.uploadNotSaved');
         } else {
+            await loadSavedScores();
             errorMsg.value = t('app.error.uploadFailed');
             const guestNewTotalRatePt = calcFlatRatePt(newFlat);
             diffResult.value = {

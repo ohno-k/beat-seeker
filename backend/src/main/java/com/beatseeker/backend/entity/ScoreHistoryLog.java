@@ -93,4 +93,16 @@ public class ScoreHistoryLog {
     /** 更新された個別譜面の詳細 JSON（差分表示用）。 */
     @Column(columnDefinition = "TEXT")
     private String diffJson;
+
+    /**
+     * フロントの {@code /save-history-log} がこの行を上書き済みかどうか。
+     *
+     * この行はまず {@code /api/scores/upload} がサーバー側で作る（false）。続けてフロントが
+     * BEAT-PT 差分・ティア名・リッチな diffJson を載せて上書きすると true になる。
+     * upload のレスポンスがブラウザに届かなかった場合は false のまま残り、
+     * 「スコアだけ保存されて成長記録が無い」状態にはならない。
+     *
+     * null は本フラグ導入前に保存された行（= フロント由来）。
+     */
+    private Boolean clientConfirmed;
 }

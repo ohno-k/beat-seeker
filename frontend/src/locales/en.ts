@@ -1240,8 +1240,9 @@ export const en = {
   // App / Global
   'app.error.noUpdate': 'No score updates found (latest scores already saved).',
   'app.error.historySaveFailed': 'Failed to save growth record. Please reload and try again.',
-  'app.error.uploadFailed': 'Failed to save scores. Showing comparison before import.',
+  'app.error.uploadFailed': 'The connection dropped, but your scores were saved on the server. Showing comparison before import.',
   'app.error.uploadNotSaved': 'Failed to save scores. Nothing from this import was saved on the server (no growth record was created either). Please wait a moment and upload again.',
+  'app.error.uploadUnverified': 'The connection dropped, so we could not confirm whether the import was saved. Please reload the page and check your scores (if it was saved, it is already reflected).',
   'app.error.parseFailed': 'Failed to parse CSV.',
   'app.banner.adminMode': 'Admin Mode',
   'app.banner.friendMode': 'Viewing Friend\'s Data',

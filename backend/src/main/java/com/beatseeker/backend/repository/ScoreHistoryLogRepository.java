@@ -66,6 +66,20 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
     Optional<ScoreHistoryLog> findFirstByUserOrderByUploadedAtDesc(User user);
 
     /**
+     * 【メソッドの役割】 直前の upload がサーバー側で作った、まだフロントが上書きしていない
+     * 通常ログ（tag = null / clientConfirmed = false）を 1 件取得する。
+     *
+     * {@code /save-history-log} が「新しい行を足す」のではなく「upload が作った行を仕上げる」ために使う。
+     * 取り違えを避けるため、呼び出し側は直近数分だけを対象にする（{@code since}）。
+     *
+     * @param user  対象ユーザー
+     * @param since この時刻以降に作られた行だけを対象にする
+     * @return 未確定の直近ログ（なければ空）
+     */
+    Optional<ScoreHistoryLog> findFirstByUserAndTagIsNullAndClientConfirmedFalseAndUploadedAtGreaterThanEqualOrderByUploadedAtDesc(
+            User user, LocalDateTime since);
+
+    /**
      * 【メソッドの役割】 グローバルランキング（beat_pt）を取得する。順位変動付き。
      *
      * ネイティブ SQL（PostgreSQL）。概要:
