@@ -1544,7 +1544,7 @@ import type { ScoreData } from '../types/ScoreData';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import { computeMilestoneLines } from '../utils/milestones';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef } from '../composables/useGameData';
-import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getFolderRankInfoByRate, getFolderLegendRate, getFolderRankOffsetMax, SCORE_RATE_TIER_C_MIN, FOLDER_RANK_DEFS, type RankInfo } from '../utils/beatTier';
+import { calculatePoints, getMaxPoints, getRankInfo, calculateScoreRateTierPoints, SCORE_RATE_THRESHOLDS, getFolderRankInfoByRate, getFolderLegendRate, getFolderRankThresholdRateAt, FOLDER_RANK_DEFS, type RankInfo } from '../utils/beatTier';
 import { calcBpi } from '../utils/bpi';
 import { gradeLabel } from '../utils/scoreGrade';
 import { formatJstDateTime } from '../utils/jstTime';
@@ -3452,8 +3452,8 @@ interface TierCardColumn {
   tier?: number;
   /** 表示ラベル（例: 'Master 3' / 'Legend'）。ツールチップに使う。 */
   label: string;
-  /** 正規化 offset [0, 1]（{@link FOLDER_RANK_DEFS} 由来。0 = Legend）。 */
-  offset: number;
+  /** {@link FOLDER_RANK_DEFS} での添字（0 = Legend）。必要レートの算出に使う。 */
+  defIndex: number;
   /** 文字色クラス（FOLDER_RANK_DEFS の color）。 */
   color: string;
   /** ブロック先頭列なら true（左罫線を引いてブロックの切れ目を見せる）。 */
@@ -3465,15 +3465,18 @@ interface TierCardColumn {
  * {@link FOLDER_RANK_DEFS}（Legend → Novice 1 の降順）を反転し、
  * Novice 1 → Novice 5 → Intermediate 1 → … → Mythic 5 → Legend の昇順に並べる。
  */
-const TIER_CARD_COLUMNS: TierCardColumn[] = [...FOLDER_RANK_DEFS].reverse().map((def, idx, arr) => ({
-  key: def.tier ? `${def.name}-${def.tier}` : def.name,
-  name: def.name,
-  tier: def.tier,
-  label: def.tier ? `${def.name} ${def.tier}` : def.name,
-  offset: def.offset,
-  color: def.color,
-  isBlockStart: idx > 0 && arr[idx - 1].name !== def.name,
-}));
+const TIER_CARD_COLUMNS: TierCardColumn[] = FOLDER_RANK_DEFS
+  .map((def, defIndex) => ({ def, defIndex }))
+  .reverse()
+  .map(({ def, defIndex }, idx, arr) => ({
+    key: def.tier ? `${def.name}-${def.tier}` : def.name,
+    name: def.name,
+    tier: def.tier,
+    label: def.tier ? `${def.name} ${def.tier}` : def.name,
+    defIndex,
+    color: def.color,
+    isBlockStart: idx > 0 && arr[idx - 1].def.name !== def.name,
+  }));
 
 /** TIER CARD の上段ヘッダ（ブロック名 + colspan）。列定義から連続する同名ブロックをまとめる。 */
 const TIER_CARD_BLOCKS = TIER_CARD_COLUMNS.reduce<{ name: string; span: number; color: string }[]>((acc, col) => {
@@ -3566,16 +3569,15 @@ const buildTierCardRow = (record: ScoreRecord, display: TierCardDisplay): TierCa
     return { key, record, current: null, cells: null };
   }
 
-  const offsetScale = getFolderRankOffsetMax(record.informalRank);
   const cells: TierCardCell[] = [];
   let nextMarked = false;
   let topAchieved: TierCardColumn | null = null;
 
   for (const col of TIER_CARD_COLUMNS) {
     const border = col.isBlockStart ? ` ${TIER_CARD_CELL_CLS.blockStart}` : '';
-    const rate = legendRate - col.offset * offsetScale;
-    // C 帯（66.666%）以下に落ちるティアはその難易度帯には存在しない
-    if (rate <= SCORE_RATE_TIER_C_MIN) {
+    const rate = getFolderRankThresholdRateAt(col.defIndex, record.informalRank);
+    // 難易度表の対象外など、閾値が引けない譜面はその列を空にする
+    if (rate <= 0) {
       cells.push({ text: '-', cls: TIER_CARD_CELL_CLS.none + border, title: t('tierCard.cellUnreachable', { tier: col.label }) });
       continue;
     }

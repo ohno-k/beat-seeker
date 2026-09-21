@@ -24,7 +24,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { ScoreRecord } from '../utils/scoreData';
 import type { RankInfo } from '../utils/beatTier';
-import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderLegendRate, getFolderRankOffsetMax, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
+import { getFolderRankInfoByRate, getNextFolderRankInfoByRate, getLegendPtPerSong, getFolderRankThresholdRateAt, FOLDER_RANK_DEFS, getMaxPoints } from '../utils/beatTier';
 import { getScoreGradeInfo, tierLabel } from '../utils/uploadReport';
 import { versionBadgeClass, versionName, versionShort } from '../utils/iidxVersions';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
@@ -143,11 +143,11 @@ for (let i = 0; i <= 21; i++) allFolders.push((11.0 + i * 0.1).toFixed(1));
  * 66.67% 以下は "-"、AAA/MAX-/MAX 帯域は色分けする。
  */
 const rateTableRows = computed(() => {
-  return FOLDER_RANK_DEFS.map(def => {
+  return FOLDER_RANK_DEFS.map((def, defIndex) => {
     const label = def.tier ? `${def.name} ${def.tier}` : def.name;
     const rates = allFolders.map(f => {
-      const rate = getFolderLegendRate(f) - def.offset * getFolderRankOffsetMax(f);
-      if (rate <= 66.666) return { text: '-', color: 'text-slate-400 dark:text-slate-500' };
+      const rate = getFolderRankThresholdRateAt(defIndex, f);
+      if (rate <= 0) return { text: '-', color: 'text-slate-400 dark:text-slate-500' };
 
       let rateColor = 'text-slate-600 dark:text-slate-300';
       if (rate >= 94.45) rateColor = 'text-purple-600 dark:text-purple-400 font-bold';

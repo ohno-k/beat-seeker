@@ -19,7 +19,7 @@ import {
 import { Line } from 'vue-chartjs';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {
-  FOLDER_RANK_DEFS, getFolderLegendRate, getFolderRankOffsetMax, calculatePoints,
+  FOLDER_RANK_DEFS, getFolderLegendRate, getFolderRankThresholdRateAt, calculatePoints,
 } from '../utils/beatTier';
 import { diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { useAuth, API_BASE } from '../composables/useAuth';
@@ -99,11 +99,12 @@ type SubTierBoundary = { name: string; label: string; pt: number; tier: number |
 const subTierBoundaries = computed(() => {
   const legendRate = getFolderLegendRate(props.rank);
   if (legendRate <= 0) return [] as SubTierBoundary[];
-  const offsetScale = getFolderRankOffsetMax(props.rank);
 
   const out: SubTierBoundary[] = [];
-  for (const def of FOLDER_RANK_DEFS) {
-    const thresholdRate = legendRate - def.offset * offsetScale;
+  for (let i = 0; i < FOLDER_RANK_DEFS.length; i++) {
+    const def = FOLDER_RANK_DEFS[i];
+    const thresholdRate = getFolderRankThresholdRateAt(i, props.rank);
+    // BEAT-PT 換算なので C 帯以下は calculatePoints が 0 になり境界として使えない
     if (thresholdRate <= 66.666) continue;
     out.push({
       name: def.name,

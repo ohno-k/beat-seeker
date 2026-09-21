@@ -115,7 +115,7 @@
                             </div>
                             <div class="mt-3 xl:mt-3 ml-0 xl:ml-0 flex flex-col items-center gap-1 min-w-[3rem]">
                               <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ 6 - tier }}</p>
-                              <p class="text-[10px] font-bold text-slate-500 tracking-tight">{{ (getRankForTier(name, 6 - tier)?.minPoints || 0) / 1000 }}k</p>
+                              <p class="text-[10px] font-bold text-slate-500 tracking-tight">{{ formatTierPt(getRankForTier(name, 6 - tier)?.minPoints) }}</p>
                             </div>
                           </div>
                         </div>
@@ -227,6 +227,18 @@ const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Commander', 'Veteran
 const getRankForTier = (name: string, tier: number) => {
   return groupedRanks.value[name]?.find(r => r.tier === tier);
 };
+
+/**
+ * 【関数の役割】 サブティア閾値をアイコン下の小ラベル用に短く整形する。
+ *
+ * Rate-Tier の閾値は 25 pt 台から 22,000 pt 台まで 3 桁ぶん開きがあり、
+ * 等比分割なので小数（例 3675.8）も出る。1,000 pt 以上は "3.7k" と丸め、
+ * 未満はそのまま（小数第 1 位まで）出して桁幅を揃える。
+ */
+function formatTierPt(points: number | undefined): string {
+  const v = points ?? 0;
+  return v >= 1000 ? `${Math.round(v / 100) / 10}k` : String(Math.round(v * 10) / 10);
+}
 
 /** 【関数の役割】 閾値表の左端カラーマーカーを points 規模で決定する。 */
 function thresholdColor(points: number): string {

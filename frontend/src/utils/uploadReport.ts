@@ -2,7 +2,7 @@
  * プレイ成果レポート（UploadResultModal）と、その X 共有画像（UploadReportShareImage）で共用する
  * 表示用ロジック。どちらも同じ {@link UpdatedSong} を別レイアウトで描くため、判定はここに寄せる。
  */
-import { getFolderLegendRate, getFolderRankInfoByRate, getFolderRankOffsetMax } from './beatTier';
+import { getFolderRankIndexByRate, getFolderRankInfoByRate } from './beatTier';
 import type { RankInfo } from './beatTier';
 import type { UpdatedSong, UploadDiffResult } from '../types/UploadDiff';
 
@@ -203,16 +203,15 @@ export type SongSort = 'beat' | 'rate' | 'tier' | 'gain' | 'level';
 /**
  * 【関数の役割】 単曲ティアの並び替え用の値（小さいほど上位）。
  *
- * 単曲ティアは「Legend 基準レートからどれだけ離れているか」を譜面の非公式難易度ごとの幅で正規化した値に
- * しきい値を当てて決まる（{@link getFolderRankInfoByRate}）。その正規化した値そのものを返すので、
- * 並べるとティア順になり、同じティアの中では次のティアに近い曲が先に来る。
+ * ティア階段上の連続位置（0 = Legend、50 = Novice 1）をそのまま返す
+ * （{@link getFolderRankIndexByRate}）。並べるとティア順になり、同じティアの中では
+ * 次のティアに近い曲が先に来る。
  * 単曲ティアが付かない譜面（難易度表の対象外・Beginner 帯）は末尾に回す。
  */
 export function songTierSortValue(song: { scoreRate?: number; informalRank?: string }): number {
   if (!getSongTierInfo(song)) return Number.POSITIVE_INFINITY;
   const rank = getNumericRank(song.informalRank) ?? undefined;
-  const scale = getFolderRankOffsetMax(rank);
-  return scale > 0 ? (getFolderLegendRate(rank) - (song.scoreRate ?? 0)) / scale : Number.POSITIVE_INFINITY;
+  return getFolderRankIndexByRate(song.scoreRate ?? 0, rank);
 }
 
 /** 【関数の役割】 更新曲を指定の順に並べた新しい配列を返す（入力は変更しない）。同順位は BEAT-PT の高い順。 */

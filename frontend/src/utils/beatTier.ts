@@ -81,27 +81,67 @@ const SCORE_RATE_TIER_AAA = 88.88;
 const SCORE_RATE_TIER_MAX_MINUS = 94.44;
 
 /**
- * 【Folder Legend】 ☆値 → Legend 到達 score rate（%）の制御点表（区間線形補間）。
+ * 【FOLDER 用】 単曲ティアの**ブロック境界**の必要 score rate（☆ × 11 ブロック）。
  *
- * 2026-06 データ再調整: リポジトリ同梱の歴代トップランカーデータ
- * （top-rankers-data/0/ = 歴代・全国＋47都道府県）から各フォルダの
- * 「歴代全国レコードの score rate 分布」を集計し、その下位25%点
- * （= 歴代レコードの約75%が到達できる水準）に Legend を揃えた。
- * 旧 t^4 カーブは ☆11.2〜12.1 帯で歴代レコードの中央値すら下回って
- * おり（例: ☆11.8 要求 99.88% vs 歴代中央値 99.71%）、「人類未到達の
- * Legend」が多数発生していたための是正。☆12.5・☆12.9 は旧カーブと
- * 同値で再合流させ、☆13.0 のみ歴代中央値 95.54% が旧閾値 95.80% に
- * 届かなかったため 95.30%（歴代p25）へ引き下げ。
+ * 列の並びは {@link FOLDER_BLOCK_ORDER} と同じ:
+ *   [Legend, Mythic 1, Ancient 1, Master 1, Elite 1, Commander 1,
+ *    Veteran 1, Expert 1, Advanced 1, Intermediate 1, Novice 1]
+ * 各ブロック内の 5 サブティア（V〜I）は、上の境界から下の境界までを
+ * レート空間で 5 等分して作る（{@link getFolderRankThresholdRateAt}）。
+ *
+ * 2026-09-22 実測較正。較正元は Sparkle Shower(33) 終了時点の past_scores
+ * （1,081 人 / 1,315 譜面 / 760,514 レコード）、☆の所属は active（第6版）:
+ *  - **Legend** = その☆に属する譜面の「歴代全国レコード rate」の p10。
+ *    （backend/src/main/resources/top-rankers-data/0/00_全国.csv.gz）
+ *    人類が誰も到達していない Legend を作らないための外部基準で、ここだけ
+ *    beat-seeker の分布から独立している。歴代全国レコードの 89.5% がこの線を超える。
+ *  - **Mythic 1 以下** = 譜面ごとに「その譜面で上位 Q%」に当たる rate を求め、
+ *    ☆内の中央値を採ったもの。Q = 1.2 / 3.8 / 8.0 / 13.5 / 20.5 / 28.5 /
+ *    37.5 / 47.5 / 60.0 / 80.0 (%)。
+ *  - ☆方向の単調性は重み付き PAVA で担保した。実際に値が動いたのは
+ *    Novice 1 の ☆13.0 / 13.1（64.37 / 65.77 → 64.99）だけで、
+ *    残りは実測がそのまま単調に並んだ。
+ *
+ * 旧実装（Legend ラインの制御点 7 本 + offsetScale の制御点 6 本 + 累乗カーブ）は、
+ * 同じ行が☆によって上位 0.06%〜0.52%（Legend）や上位 47%〜81%（Novice 1）と
+ * バラバラの順位を指していた。この表はその歪みを取り、全☆で同じ行が同じ順位を指す。
+ *
+ * 母集団に注意: パーセンタイルは「beat-seeker 登録者のうちその譜面にスコアがある人」
+ * （1 譜面あたり中央 452 人、申告段位は皆伝 65.5%）で、IIDX 全国の分布ではない。
+ *
+ * 再較正の手順は docs/単曲ティア較正.md を参照。
  */
-const LEGEND_RATE_CONTROL: readonly { v: number; rate: number }[] = [
-    { v: 11.0, rate: 99.95 },
-    { v: 11.5, rate: 99.79 },
-    { v: 12.0, rate: 99.46 },
-    { v: 12.5, rate: 98.66 }, // 旧 t^4 カーブと同値（ここで旧式と再合流）
-    { v: 12.9, rate: 96.58 }, // 旧 t^4 カーブと同値（維持）
-    { v: 13.0, rate: 95.30 }, // 歴代p25。旧 95.80 では歴代中央値が未到達だった
-    { v: 13.1, rate: 94.44 }, // 新設帯。難易度上昇に伴う低下トレンドを継続し MAX- ライン(94.44%)に着地
-];
+const BLOCK_BOUND_RATES: Record<string, readonly number[]> = {
+    //        Legend  Mythic1 Ancient1 Master1  Elite1  Comm1   Vete1   Expe1   Adva1   Inte1   Novi1
+    '11.0': [ 99.93,  99.66,  99.43,  99.06,  98.76,  98.23,  97.59,  96.81,  95.70,  94.15,  89.52], // 23 譜面
+    '11.1': [ 99.86,  99.57,  99.22,  98.87,  98.42,  97.81,  97.10,  96.21,  94.98,  93.07,  87.55], // 33 譜面
+    '11.2': [ 99.80,  99.42,  98.99,  98.57,  98.07,  97.47,  96.62,  95.60,  94.25,  92.11,  85.94], // 45 譜面
+    '11.3': [ 99.80,  99.38,  98.93,  98.39,  97.80,  97.11,  96.20,  95.12,  93.60,  91.31,  84.28], // 48 譜面
+    '11.4': [ 99.72,  99.25,  98.77,  98.21,  97.60,  96.81,  95.83,  94.72,  93.19,  90.71,  83.47], // 78 譜面
+    '11.5': [ 99.68,  99.17,  98.58,  98.03,  97.37,  96.52,  95.53,  94.33,  92.58,  90.05,  82.48], // 75 譜面
+    '11.6': [ 99.68,  99.11,  98.53,  97.91,  97.17,  96.26,  95.17,  93.88,  92.05,  89.65,  81.96], // 85 譜面
+    '11.7': [ 99.65,  99.06,  98.37,  97.69,  96.91,  95.95,  94.82,  93.47,  91.61,  89.15,  81.20], // 84 譜面
+    '11.8': [ 99.51,  98.86,  98.15,  97.45,  96.62,  95.56,  94.43,  93.00,  91.11,  88.68,  80.63], // 97 譜面
+    '11.9': [ 99.45,  98.75,  98.00,  97.15,  96.34,  95.22,  94.03,  92.47,  90.54,  87.87,  79.50], // 92 譜面
+    '12.0': [ 99.31,  98.52,  97.69,  96.92,  95.97,  94.80,  93.49,  91.95,  90.15,  87.21,  79.35], // 78 譜面
+    '12.1': [ 99.31,  98.40,  97.43,  96.59,  95.65,  94.39,  92.94,  91.32,  89.43,  86.13,  78.13], // 84 譜面
+    '12.2': [ 99.25,  98.16,  97.22,  96.25,  95.23,  93.92,  92.42,  90.79,  88.92,  85.50,  77.31], // 88 譜面
+    '12.3': [ 99.06,  97.96,  96.92,  95.83,  94.74,  93.34,  91.88,  90.24,  88.09,  84.23,  75.93], // 84 譜面
+    '12.4': [ 98.94,  97.54,  96.33,  95.17,  93.99,  92.52,  90.95,  89.47,  87.23,  83.60,  75.54], // 77 譜面
+    '12.5': [ 98.57,  97.27,  95.98,  94.77,  93.55,  92.06,  90.42,  88.89,  86.20,  82.24,  74.33], // 70 譜面
+    '12.6': [ 98.49,  96.81,  95.37,  94.09,  92.69,  91.16,  89.77,  87.80,  84.84,  80.95,  73.18], // 57 譜面
+    '12.7': [ 98.12,  96.14,  94.64,  93.15,  91.72,  89.92,  88.68,  86.27,  83.67,  79.97,  72.65], // 51 譜面
+    '12.8': [ 97.55,  95.16,  93.37,  91.81,  90.32,  88.70,  86.25,  84.16,  81.14,  77.60,  69.75], // 45 譜面
+    '12.9': [ 96.70,  93.66,  91.23,  89.84,  87.55,  84.61,  82.48,  79.93,  76.81,  72.68,  66.26], // 12 譜面
+    '13.0': [ 95.68,  92.55,  90.51,  88.54,  85.81,  83.61,  81.05,  78.43,  75.56,  72.66,  64.99], //  5 譜面
+    '13.1': [ 94.95,  91.32,  89.44,  87.32,  84.52,  82.17,  79.98,  77.87,  74.98,  71.67,  64.99], //  4 譜面
+};
+
+/** 【FOLDER 用】 {@link BLOCK_BOUND_RATES} の列の並び（高い順）。 */
+export const FOLDER_BLOCK_ORDER = [
+    'Legend', 'Mythic', 'Ancient', 'Master', 'Elite', 'Commander',
+    'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice',
+] as const;
 
 /**
  * 【Folder Legend】 Legend 判定 score rate の対応範囲下限（非公式ランク）。
@@ -112,6 +152,40 @@ const LEGEND_RANK_MIN = 11.0;
  * 【Folder Legend】 Legend 判定 score rate の対応範囲上限（非公式ランク）。
  */
 const LEGEND_RANK_MAX = 13.1;
+
+/**
+ * 【内部ヘルパー】 非公式ランク文字列から数値部分を取り出す。
+ * `"12.0 (IIDX 32)"` のような注記付きも受け付ける。取れなければ null。
+ */
+function parseInformalRankValue(informalRank: string | undefined): number | null {
+    if (!informalRank) return null;
+    const m = informalRank.match(/(\d+\.\d+)/);
+    if (!m) return null;
+    const v = parseFloat(m[1]);
+    return Number.isFinite(v) ? v : null;
+}
+
+/**
+ * 【内部ヘルパー】 非公式ランク → その☆のブロック境界レート 11 本。
+ *
+ * 表に無い☆（0.1 刻みから外れた中間値が将来出た場合）は隣接 2 本を線形補間する。
+ * 対応範囲（☆11.0〜13.1）の外と、数値が取れないもの（Uncategorized 等）は null。
+ */
+function folderBlockBounds(informalRank: string | undefined): readonly number[] | null {
+    const v = parseInformalRankValue(informalRank);
+    if (v === null || v < LEGEND_RANK_MIN || v > LEGEND_RANK_MAX) return null;
+
+    const exact = BLOCK_BOUND_RATES[v.toFixed(1)];
+    if (exact) return exact;
+
+    const lo = Math.floor(v * 10) / 10;
+    const a = BLOCK_BOUND_RATES[lo.toFixed(1)];
+    if (!a) return null;
+    const b = BLOCK_BOUND_RATES[(lo + 0.1).toFixed(1)];
+    if (!b) return a;
+    const t = (v - lo) / 0.1;
+    return a.map((x, i) => x + (b[i] - x) * t);
+}
 
 /**
  * 【総合 BEAT-PT】 合計対象となる上位譜面数。譜面数が多いユーザー同士を公平に比較するため
@@ -213,33 +287,15 @@ export function getMaxPoints(informalRank: string | undefined): number {
 /**
  * 【関数の役割】 各フォルダの Legend（最高ランク）到達に必要な score rate を返す。
  *
- * {@link LEGEND_RATE_CONTROL}（歴代トップランカーデータの下位25%点に
- * フィットさせた制御点表）を区間線形補間して返す。
- *  - 制御点間は線形なので隣接難易度間の落差がなめらか
- *  - 歴代レコードが原則 Legend に到達できる水準を全フォルダで保証
+ * {@link BLOCK_BOUND_RATES} の先頭列（= その☆に属する譜面の歴代全国レコードの p10）。
+ * 人類が誰も到達していない Legend を作らないための外部基準。
  *
  * @param informalRank 非公式ランク文字列
  * @returns            Legend 判定用の score rate（%）。範囲外は 0。
  */
 export function getFolderLegendRate(informalRank: string | undefined): number {
-    if (!informalRank) return 0;
-    const match = informalRank.match(/(\d+\.\d+)/);
-    const rankValue = match ? parseFloat(match[1]) : 0;
-    // 対応範囲は ☆11.0〜☆13.1 のみ
-    if (rankValue < LEGEND_RANK_MIN || rankValue > LEGEND_RANK_MAX) return 0;
-
-    const ctrl = LEGEND_RATE_CONTROL;
-    if (rankValue <= ctrl[0].v) return ctrl[0].rate;
-    if (rankValue >= ctrl[ctrl.length - 1].v) return ctrl[ctrl.length - 1].rate;
-    for (let i = 0; i < ctrl.length - 1; i++) {
-        const lo = ctrl[i];
-        const hi = ctrl[i + 1];
-        if (rankValue >= lo.v && rankValue <= hi.v) {
-            const t = (rankValue - lo.v) / (hi.v - lo.v);
-            return lo.rate + t * (hi.rate - lo.rate);
-        }
-    }
-    return ctrl[ctrl.length - 1].rate;
+    const bounds = folderBlockBounds(informalRank);
+    return bounds ? bounds[0] : 0;
 }
 
 /**
@@ -657,25 +713,68 @@ export function getGroupedRanks() {
 }
 
 /**
+ * 【内部ヘルパー】 Rate-Tier 用に、1 つのランク名を 5 段階のサブティアへ「等比」分割する。
+ *
+ * Rate-Tier の大ティア境界は 25 → 50 → 100 → … と 2 倍ずつ伸びる等比数列なので、
+ * ブロック内を {@link generateTieredRanks}（等差）で刻むと、1 段上がるのに必要な
+ * 伸び率が段ごとにばらつく。例えば Master 3200〜6400 を等差で刻むと
+ * I→II は +20% 必要なのに IV→V は +12.5% で済み、下の段ほど昇格が重かった。
+ *
+ * そこで公比 `(end / start) ^ (1/5)`（= ブロック幅が 2 倍なら約 +14.87%）の等比で刻み、
+ * どのサブティアでも「次の段まで同じ伸び率」＝対数グラフ上で等間隔になるようにする。
+ * 等比分割の閾値は等差分割より必ず低くなる（相加相乗平均の関係）ため、
+ * この方式へ切り替えてもサブティアが下がる人は出ない。
+ *
+ * 例: `generateGeometricTieredRanks('Master', 3200, 6400, ...)` →
+ *   `[Master V(5571.5), Master IV(4850.3), Master III(4222.4), Master II(3675.8), Master I(3200)]`
+ *
+ * 返す配列は tier の大きい順（＝高いランクが先頭）で並ぶ。
+ *
+ * @param name  ランク名（例: 'Master'）
+ * @param start このランクブロックの下限ポイント（= サブティア I の閾値）
+ * @param end   このランクブロックの上限ポイント（次ランクの下限）
+ * @param color Tailwind カラークラス
+ */
+function generateGeometricTieredRanks(name: string, start: number, end: number, color: string): RankInfo[] {
+    // 公比 = ブロック幅の 5 乗根。start × ratio^5 = end（次ランクの下限）になる。
+    const ratio = Math.pow(end / start, 1 / TIERS_PER_RANK_BLOCK);
+    const tiers: RankInfo[] = [];
+    for (let i = TIERS_PER_RANK_BLOCK; i >= 1; i--) {
+        tiers.push({
+            name,
+            tier: i,
+            // pt の表示が小数第 1 位までなので、閾値も 0.1 pt 単位に丸めて表示と揃える。
+            minPoints: Math.round(start * Math.pow(ratio, i - 1) * 10) / 10,
+            color
+        });
+    }
+    return tiers;
+}
+
+/**
  * Rate-Tier の全ランク定義。
  *
  * 閾値は 25 から始まり 2 倍ずつ伸びる等比数列: 25 → 50 → 100 → ... → 25600（理論最大）。
  * BEAT-Tier が「上位 100 譜面の累積」なのに対し、こちらは 1 譜面の score rate から
  * 指数的に伸びるポイントを与える体系。
+ *
+ * 大ティアの中のサブティア I〜V も {@link generateGeometricTieredRanks} で等比に刻む。
+ * 大ティアもサブティアも対数グラフ上で等間隔になり、「次のサブティアまでに必要な伸び率」が
+ * どの段でも同じ（約 +14.87%）になる。
  */
 export const RATE_TIER_RANKS: RankInfo[] = [
     { name: 'Legend', minPoints: 25600, color: 'text-amber-500 font-bold' },
 
-    ...generateTieredRanks('Mythic', 12800, 25600, 'text-purple-600'),
-    ...generateTieredRanks('Ancient', 6400, 12800, 'text-indigo-600'),
-    ...generateTieredRanks('Master', 3200, 6400, 'text-red-600'),
-    ...generateTieredRanks('Elite', 1600, 3200, 'text-orange-600'),
-    ...generateTieredRanks('Commander', 800, 1600, 'text-yellow-700'),
-    ...generateTieredRanks('Veteran', 400, 800, 'text-emerald-600'),
-    ...generateTieredRanks('Expert', 200, 400, 'text-teal-600'),
-    ...generateTieredRanks('Advanced', 100, 200, 'text-cyan-600'),
-    ...generateTieredRanks('Intermediate', 50, 100, 'text-blue-600'),
-    ...generateTieredRanks('Novice', 25, 50, 'text-slate-600'),
+    ...generateGeometricTieredRanks('Mythic', 12800, 25600, 'text-purple-600'),
+    ...generateGeometricTieredRanks('Ancient', 6400, 12800, 'text-indigo-600'),
+    ...generateGeometricTieredRanks('Master', 3200, 6400, 'text-red-600'),
+    ...generateGeometricTieredRanks('Elite', 1600, 3200, 'text-orange-600'),
+    ...generateGeometricTieredRanks('Commander', 800, 1600, 'text-yellow-700'),
+    ...generateGeometricTieredRanks('Veteran', 400, 800, 'text-emerald-600'),
+    ...generateGeometricTieredRanks('Expert', 200, 400, 'text-teal-600'),
+    ...generateGeometricTieredRanks('Advanced', 100, 200, 'text-cyan-600'),
+    ...generateGeometricTieredRanks('Intermediate', 50, 100, 'text-blue-600'),
+    ...generateGeometricTieredRanks('Novice', 25, 50, 'text-slate-600'),
 
     { name: 'Beginner', minPoints: 0, color: 'text-slate-400' },
 ];
@@ -808,130 +907,89 @@ const FOLDER_RANK_BLOCKS: { name: string; color: string }[] = [
     { name: 'Novice',       color: 'text-slate-600' },
 ];
 
-/** 【FOLDER 用】 サブランク総数 = 10 ブロック × 5 ティア = 50。 */
-const FOLDER_SUB_RANK_COUNT = FOLDER_RANK_BLOCKS.length * TIERS_PER_RANK_BLOCK;
-
 /**
- * 【FOLDER 用】 オフセット生成カーブの指数。
- * offset_norm(i) = 1 − (1 − i/N)^p 形式の累乗カーブを使う（[0, 1] 正規化）。
- *  - p > 1 にすると Legend 側ほど隣接ランク間の差が大きく、Novice 側ほど詰まる。
- *  - p < 1 にすると逆に Novice 側ほど段差が大きく、上位ランクは詰まる。
- *  - p = 0.5 で「高スコア帯ほど 1 点の重みが大きい」感覚に合わせ、Legend 周辺は僅差、
- *    Novice 末端で大きく開く bottom-heavy 配置。
- */
-const FOLDER_RANK_OFFSET_POWER = 0.5;
-
-/**
- * 【FOLDER 用】 ☆値 → offsetScale（Legend → Novice 1 の総スパン%）の制御点表。
+ * 【関数の役割】 その☆のティア階段の総スパン（Legend − Novice 1、%ポイント）を返す。
  *
- * 2026-06 データ再調整: 歴代県別トップデータ（top-rankers-data/0/01〜47）から
- * 各譜面の「47都道府県トップスコアの中央値」を集計し、その中央値が
- * Ancient 1（i=10, offset_norm≈0.1056）に一致するよう各☆のスパンを逆算した。
- * これにより「Legend=歴代級 / Mythic=全国トップ・強豪県1位級 /
- * Ancient=県1位級」という序列が全フォルダで一貫する
- * （旧テーブルでは県トップ中央値の到達ティアが Ancient 1〜Master 2 まで
- * ☆帯によってばらついていた）。
- * ☆12.9・☆13.0 は前回調整（☆12.9 引き締め・☆13.0 緩和）の意図を尊重して旧値を維持。
+ * 旧実装では制御点表からの幾何補間で求めていたが、現在は {@link BLOCK_BOUND_RATES} の
+ * 両端の差そのもの。☆11.0 で約 10.4pt、☆13.1 で約 30.0pt と、難しい譜面ほど広くなる。
  *
- * バランス調整時はこのテーブルを編集する。
- */
-const FOLDER_OFFSET_CONTROL: readonly { v: number; scale: number }[] = [
-    { v: 11.0, scale: 4.10 },  // 県トップ中央値 99.58% → Ancient 1 アンカー
-    { v: 11.5, scale: 9.20 },  // 同 98.77%
-    { v: 12.0, scale: 14.85 }, // 同 97.82%
-    { v: 12.5, scale: 22.50 }, // 同 96.16%
-    { v: 12.9, scale: 28.00 }, // 旧値維持（前回の引き締め意図を尊重）
-    { v: 13.0, scale: 35.00 }, // 旧値維持（高難度の厳しさ緩和）
-];
-
-/**
- * 【FOLDER 用】 全難易度のティア閾値を一律に「~1 サブティア上」へシフトする全体ブースト係数。
- *
- * 効果:
- *  - scale × BOOST により、同じスコアに対する T_norm（=gap/scale）が縮み、結果としてより高いティアに割り振られる。
- *  - 1.00 = シフト無し。1.05 で中央〜下位帯（Master〜Novice）が約 1 サブティア上、上位帯（Mythic）は約 0.2 サブティア上にシフト。
- *  - offset_norm が bottom-heavy（power=0.5）のため、ブースト効果は上位ほど小さく下位ほど大きくなる非対称特性を持つ。
- *
- * チューニング目安:
- *  - 0.5 サブティア上げ: 1.025
- *  - 1.0 サブティア上げ: 1.05  ← 採用値
- *  - 1.5 サブティア上げ: 1.07
- *  - 2.0 サブティア上げ: 1.10
- */
-const FOLDER_OFFSET_GLOBAL_BOOST = 1.05;
-
-/**
- * 【関数の役割】 難易度に応じた最大 offset スパン(%)を制御点表からの**区間幾何補間**で返し、
- * 全体ブースト係数 {@link FOLDER_OFFSET_GLOBAL_BOOST} を乗じて返す。
- * 区間ごとに `lo.scale × (hi.scale / lo.scale)^t` で結ぶ。[☆11.0, ☆12.2] は旧式
- * （LOW=6, HIGH=28 の幾何補間）と完全一致、[☆12.2, ☆12.9] は ☆12.7 を中心に bell 状に
- * 圧縮、☆13.0 端は独立調整値。BOOST はその上に一律に作用する。
+ * @param informalRank 非公式ランク文字列
+ * @returns            スパン（%ポイント）。対応範囲外は 0。
  */
 export function getFolderRankOffsetMax(informalRank: string | undefined): number {
-    const last = FOLDER_OFFSET_CONTROL[FOLDER_OFFSET_CONTROL.length - 1];
-    let scale: number;
-    if (!informalRank) {
-        scale = last.scale;
-    } else {
-        const m = informalRank.match(/(\d+\.\d+)/);
-        const v = m ? parseFloat(m[1]) : LEGEND_RANK_MAX;
-        if (v <= FOLDER_OFFSET_CONTROL[0].v) {
-            scale = FOLDER_OFFSET_CONTROL[0].scale;
-        } else if (v >= last.v) {
-            scale = last.scale;
-        } else {
-            scale = last.scale;
-            for (let i = 0; i < FOLDER_OFFSET_CONTROL.length - 1; i++) {
-                const lo = FOLDER_OFFSET_CONTROL[i];
-                const hi = FOLDER_OFFSET_CONTROL[i + 1];
-                if (v >= lo.v && v <= hi.v) {
-                    const t = (v - lo.v) / (hi.v - lo.v);
-                    scale = lo.scale * Math.pow(hi.scale / lo.scale, t);
-                    break;
-                }
-            }
-        }
-    }
-    return scale * FOLDER_OFFSET_GLOBAL_BOOST;
+    const bounds = folderBlockBounds(informalRank);
+    return bounds ? bounds[0] - bounds[bounds.length - 1] : 0;
 }
 
 /**
- * 【関数の役割】 サブランク順位 i (1〜50) に対応する正規化 offset [0, 1] を返す。
- * 実際の % offset は consumer 側で `getFolderRankOffsetMax(informalRank)` を掛けて算出する。
- * i=0 は Legend で常に 0。
- */
-function computeFolderRankNormalizedOffset(i: number): number {
-    if (i <= 0) return 0;
-    const t = i / FOLDER_SUB_RANK_COUNT;
-    return 1 - Math.pow(1 - t, FOLDER_RANK_OFFSET_POWER);
-}
-
-/**
- * フォルダランクのオフセット定義表（自動生成）。
+ * フォルダランクの定義表。
  *
- * `offset` は **正規化値 [0, 1]** を保持する（0=Legend、1=Novice 1）。
- * 実際の score rate 閾値は `legendRate − offset × getFolderRankOffsetMax(informalRank)`。
- * このスケール係数を ☆11.0 では小、☆13.0 では大に取ることで、低難度では上位ランクが密集し、
- * 高難度では Legend と Mythic 1 が大きく開く設計が成立する。
+ * 並び順: Legend → Mythic V → … → Mythic I → Ancient V → … → Novice I（計 51 件）。
+ * **この配列の添字がそのまま {@link getFolderRankThresholdRateAt} の index になる**
+ * （0 = Legend、5 = Mythic 1、10 = Ancient 1、…、50 = Novice 1）。
  *
- * 並び順: Legend → Mythic V → Mythic I → Ancient V → ... → Novice I の順。
- * Legend のベース rate は {@link getFolderLegendRate} で決まる。
+ * 閾値そのものは☆ごとに {@link BLOCK_BOUND_RATES} から引くため、ここには持たない。
  */
-export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; color: string }[] = [
-    { offset: 0, name: 'Legend', color: 'text-amber-500 font-bold' },
-    ...FOLDER_RANK_BLOCKS.flatMap((block, blockIdx) =>
-        Array.from({ length: TIERS_PER_RANK_BLOCK }, (_, tierWithinBlockIdx) => {
-            const i = blockIdx * TIERS_PER_RANK_BLOCK + tierWithinBlockIdx + 1;
-            const tier = TIERS_PER_RANK_BLOCK - tierWithinBlockIdx; // 5,4,3,2,1
-            return {
-                offset: computeFolderRankNormalizedOffset(i),
-                name: block.name,
-                tier,
-                color: block.color,
-            };
-        })
+export const FOLDER_RANK_DEFS: { name: string; tier?: number; color: string }[] = [
+    { name: 'Legend', color: 'text-amber-500 font-bold' },
+    ...FOLDER_RANK_BLOCKS.flatMap(block =>
+        Array.from({ length: TIERS_PER_RANK_BLOCK }, (_, tierWithinBlockIdx) => ({
+            name: block.name,
+            tier: TIERS_PER_RANK_BLOCK - tierWithinBlockIdx, // 5,4,3,2,1
+            color: block.color,
+        }))
     ),
 ];
+
+/**
+ * 【関数の役割】 {@link FOLDER_RANK_DEFS} の添字 index（0 = Legend 〜 50 = Novice 1）に対応する
+ * 必要 score rate を返す。
+ *
+ * ブロック境界（index が 5 の倍数）は {@link BLOCK_BOUND_RATES} の実測値そのもの。
+ * ブロック内のサブティアは、上の境界から下の境界までをレート空間で 5 等分した位置。
+ *
+ * @param index        FOLDER_RANK_DEFS の添字
+ * @param informalRank 非公式ランク文字列
+ * @returns            必要 score rate（%）。対応範囲外・添字不正は 0。
+ */
+export function getFolderRankThresholdRateAt(index: number, informalRank: string | undefined): number {
+    const bounds = folderBlockBounds(informalRank);
+    if (!bounds || index < 0 || index >= FOLDER_RANK_DEFS.length) return 0;
+    if (index === 0) return bounds[0];
+
+    const blockIdx = Math.floor((index - 1) / TIERS_PER_RANK_BLOCK);
+    const withinBlock = (index - 1) % TIERS_PER_RANK_BLOCK; // 0 = tier V … 4 = tier I
+    const upper = bounds[blockIdx];
+    const lower = bounds[blockIdx + 1];
+    return upper - (upper - lower) * (withinBlock + 1) / TIERS_PER_RANK_BLOCK;
+}
+
+/**
+ * 【関数の役割】 score rate を「ティア階段上の連続位置」に変換する（0 = Legend、50 = Novice 1）。
+ *
+ * ティアの整数添字を線形補間で埋めた値なので、☆をまたいで並べてもティア順になり、
+ * 同じティアの中では次のティアに近いものが小さい値になる。並び替え専用。
+ * Novice 1 に届かない（= Beginner）場合と対応範囲外は {@link Number.POSITIVE_INFINITY}。
+ *
+ * @param scoreRate    その譜面の score rate（%）
+ * @param informalRank 非公式ランク文字列
+ */
+export function getFolderRankIndexByRate(scoreRate: number, informalRank: string | undefined): number {
+    const bounds = folderBlockBounds(informalRank);
+    if (!bounds || !(scoreRate > 0)) return Number.POSITIVE_INFINITY;
+    if (scoreRate >= bounds[0]) return 0;
+
+    for (let k = 0; k < bounds.length - 1; k++) {
+        const upper = bounds[k];
+        const lower = bounds[k + 1];
+        if (scoreRate >= lower) {
+            const span = upper - lower;
+            const t = span > 0 ? (upper - scoreRate) / span : 1;
+            return (k + t) * TIERS_PER_RANK_BLOCK;
+        }
+    }
+    return Number.POSITIVE_INFINITY;
+}
 
 /**
  * 【関数の役割】 フォルダ（= 同じ非公式ランクの曲群）ごとのランクを
@@ -950,16 +1008,16 @@ export const FOLDER_RANK_DEFS: { offset: number; name: string; tier?: number; co
 export function getFolderRankInfo(totalPoints: number, informalRank: string | undefined, songCount: number): RankInfo {
     if (!informalRank || songCount <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 
-    const legendRate = getFolderLegendRate(informalRank);
-    if (legendRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+    if (getFolderLegendRate(informalRank) <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 
-    const offsetScale = getFolderRankOffsetMax(informalRank);
-    for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset * offsetScale;
-        // score rate が C 帯（66.666%）以下まで落ちた時点で以降は Beginner 扱い
+    for (let i = 0; i < FOLDER_RANK_DEFS.length; i++) {
+        const thresholdRate = getFolderRankThresholdRateAt(i, informalRank);
+        // BEAT-PT 換算では C 帯（66.666%）以下は calculatePoints が 0 を返して順序が壊れるため、
+        // そこから下のティアはこのフォルダには存在しないものとして扱う。
         if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
         const thresholdPoints = calculatePoints(thresholdRate, informalRank) * songCount;
         if (totalPoints >= thresholdPoints) {
+            const def = FOLDER_RANK_DEFS[i];
             return {
                 name: def.name,
                 tier: def.tier,
@@ -986,16 +1044,14 @@ export function getFolderRankInfo(totalPoints: number, informalRank: string | un
 export function getNextFolderRankInfo(totalPoints: number, informalRank: string | undefined, songCount: number): { nextRank?: RankInfo; progress: number } {
     if (!informalRank || songCount <= 0) return { progress: 0 };
 
-    const legendRate = getFolderLegendRate(informalRank);
-    if (legendRate <= 0) return { progress: 0 };
+    if (getFolderLegendRate(informalRank) <= 0) return { progress: 0 };
 
     // 手順1: ランクごとの閾値ポイント配列を先に組み立てる。
-    const offsetScale = getFolderRankOffsetMax(informalRank);
     const thresholds: { def: typeof FOLDER_RANK_DEFS[0]; points: number }[] = [];
-    for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset * offsetScale;
+    for (let i = 0; i < FOLDER_RANK_DEFS.length; i++) {
+        const thresholdRate = getFolderRankThresholdRateAt(i, informalRank);
         if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
-        thresholds.push({ def, points: calculatePoints(thresholdRate, informalRank) * songCount });
+        thresholds.push({ def: FOLDER_RANK_DEFS[i], points: calculatePoints(thresholdRate, informalRank) * songCount });
     }
 
     if (thresholds.length === 0) return { progress: 0 };
@@ -1045,15 +1101,14 @@ export function getNextFolderRankInfo(totalPoints: number, informalRank: string 
  */
 export function getFolderRankInfoByRate(averageRate: number, informalRank: string | undefined): RankInfo {
     if (!informalRank || averageRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
+    if (getFolderLegendRate(informalRank) <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
 
-    const legendRate = getFolderLegendRate(informalRank);
-    if (legendRate <= 0) return { name: 'Beginner', minPoints: 0, color: 'text-slate-400' };
-
-    const offsetScale = getFolderRankOffsetMax(informalRank);
-    for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset * offsetScale;
-        if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
+    // レート判定では C 帯での打ち切りを行わない。☆12.9 以上は Novice 1 の実測値が
+    // 66.666% を下回るが、そこは実際に人が居る領域なのでティアを与える。
+    for (let i = 0; i < FOLDER_RANK_DEFS.length; i++) {
+        const thresholdRate = getFolderRankThresholdRateAt(i, informalRank);
         if (averageRate >= thresholdRate) {
+            const def = FOLDER_RANK_DEFS[i];
             return { name: def.name, tier: def.tier, minPoints: thresholdRate, color: def.color };
         }
     }
@@ -1075,11 +1130,9 @@ export function getFolderRankInfoByRate(averageRate: number, informalRank: strin
  * @returns            到達に必要な score rate（%）。判定不能時は 0。
  */
 export function getFolderRankThresholdRate(name: string, tier: number | undefined, informalRank: string | undefined): number {
-    const legendRate = getFolderLegendRate(informalRank);
-    if (legendRate <= 0) return 0;
-    const def = FOLDER_RANK_DEFS.find(d => d.name === name && d.tier === tier);
-    if (!def) return 0;
-    return legendRate - def.offset * getFolderRankOffsetMax(informalRank);
+    const index = FOLDER_RANK_DEFS.findIndex(d => d.name === name && d.tier === tier);
+    if (index < 0) return 0;
+    return getFolderRankThresholdRateAt(index, informalRank);
 }
 
 /**
@@ -1093,15 +1146,12 @@ export function getFolderRankThresholdRate(name: string, tier: number | undefine
 export function getNextFolderRankInfoByRate(averageRate: number, informalRank: string | undefined): { nextRank?: RankInfo & { minRate: number }; progress: number } {
     if (!informalRank || averageRate <= 0) return { progress: 0 };
 
-    const legendRate = getFolderLegendRate(informalRank);
-    if (legendRate <= 0) return { progress: 0 };
+    if (getFolderLegendRate(informalRank) <= 0) return { progress: 0 };
 
-    const offsetScale = getFolderRankOffsetMax(informalRank);
+    // レート判定なので C 帯での打ち切りはしない（getFolderRankInfoByRate と揃える）。
     const thresholds: { def: typeof FOLDER_RANK_DEFS[0]; rate: number }[] = [];
-    for (const def of FOLDER_RANK_DEFS) {
-        const thresholdRate = legendRate - def.offset * offsetScale;
-        if (thresholdRate <= SCORE_RATE_TIER_C_MIN) break;
-        thresholds.push({ def, rate: thresholdRate });
+    for (let i = 0; i < FOLDER_RANK_DEFS.length; i++) {
+        thresholds.push({ def: FOLDER_RANK_DEFS[i], rate: getFolderRankThresholdRateAt(i, informalRank) });
     }
 
     if (thresholds.length === 0) return { progress: 0 };
@@ -1117,7 +1167,11 @@ export function getNextFolderRankInfoByRate(averageRate: number, informalRank: s
     if (currentIdx === 0) return { progress: PROGRESS_PCT_MAX };
 
     const nextIdx = currentIdx === -1 ? thresholds.length - 1 : currentIdx - 1;
-    const currentRate = currentIdx === -1 ? SCORE_RATE_TIER_C_MIN : thresholds[currentIdx].rate;
+    // まだ Novice 1 にも届いていない場合の進捗の起点。ティア階段の下にもう 1 ブロック分
+    // （Intermediate 1 − Novice 1 と同じ幅）の助走区間があるものとして測る。
+    const bottomRate = thresholds[thresholds.length - 1].rate;
+    const floorRate = Math.max(0, bottomRate - (thresholds[thresholds.length - 1 - TIERS_PER_RANK_BLOCK].rate - bottomRate));
+    const currentRate = currentIdx === -1 ? floorRate : thresholds[currentIdx].rate;
     const nextRate = thresholds[nextIdx].rate;
     const nextDef = thresholds[nextIdx].def;
 
