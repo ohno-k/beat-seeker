@@ -586,6 +586,9 @@ public class LeagueStandingsService {
             Integer bestEx = null;
             Integer bestMiss = null;
             java.time.LocalDateTime lastPlayedAt = null;
+            // この譜面に「記録」と呼べるものがあるか。EX=0 かつプレー回数 0 は譜面を所持しているだけの
+            // 空記録（IIDX の CSV に混ざる）で、一度も遊んでいないことを表す。
+            boolean hasRecord = false;
 
             for (String source : List.of("arcade")) {
                 List<Score> rows = rowsBySongSource.get(key + "|" + source);
@@ -597,15 +600,15 @@ public class LeagueStandingsService {
                 }
                 if (cur.score != null && (bestEx == null || cur.score > bestEx)) bestEx = cur.score;
                 if (cur.miss != null && (bestMiss == null || cur.miss < bestMiss)) bestMiss = cur.miss;
+                if ((cur.score != null && cur.score > 0) || (cur.playCount != null && cur.playCount > 0)) {
+                    hasRecord = true;
+                }
 
                 if (playedThisWeek) continue;
                 LeagueBaseline base = baselineIndex.get(baselineKey(user.getId(), song.getTitle(), song.getDifficultyName(), source));
                 if (base == null) {
                     // 週開始時点で記録が無かった source に行が現れた = 週内の新規記録。
-                    // ただし EX=0 かつプレー回数 0 の「空記録」（譜面を所持しているだけで未プレー。
-                    // IIDX の CSV にはこの行が混ざる）は記録ではないので、行が現れただけでは遊んだ証拠にしない。
-                    boolean hasRecord = (cur.score != null && cur.score > 0)
-                            || (cur.playCount != null && cur.playCount > 0);
+                    // ただし空記録は記録ではないので、行が現れただけでは遊んだ証拠にしない。
                     playedThisWeek = hasRecord && cur.uploadedAt != null && week.getSnapshotAt() != null
                             && !cur.uploadedAt.isBefore(week.getSnapshotAt());
                 } else {
@@ -639,13 +642,19 @@ public class LeagueStandingsService {
             boolean valid = !song.isDisabled() && playedThisWeek && beatLine;
 
             // 「参加」= 週内にこの課題曲を遊んだ形跡があるか（ライン到達は問わない）。
-            // 着順ポイントの配分で「遊んだが未到達」と「そもそも遊んでいない」を分けるために使う。
+            // 着順ポイントの配分で「遊んだが未到達」と「そもそも遊んでいない」を分け、
+            // 「課題曲を全曲プレーしたか」（PT のやり取りの対象）の判定にも使う。
             //  - 公式 CSV: 最終プレー日時が開催期間内（記録が伸びなくても進む唯一の値）
             //  - それ以外: 記録・プレー回数の前進（playedThisWeek）を保険にする
             // 最終プレー日時を持たない取り込み経路（ブックマークレット CSV は当該列が空欄）では
             // 「記録が伸びなかったプレー」を観測できないため不参加へ倒れる。判定不能を参加扱いにすると
             // 遊ばずに山分けを受け取れてしまうため、活動判定（自動休止）とは違って保険は張らない。
-            boolean participated = playedThisWeek || LeagueWeekLifecycleService.withinWeek(lastPlayedAt, week);
+            //
+            // 最終プレー日時は公式 CSV では<b>曲単位</b>（1 曲 1 行に全難易度が並び、日時は 1 つだけ）
+            // なので、同じ曲の別難易度を週内に遊ぶと未プレーの譜面にも期間内の日時が付く。
+            // 空記録（記録が無い譜面）はこの日時だけで参加扱いにしない。
+            boolean participated = playedThisWeek
+                    || (hasRecord && LeagueWeekLifecycleService.withinWeek(lastPlayedAt, week));
 
             Integer notes = notesBySong.get(key);
             Double rate = null;

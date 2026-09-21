@@ -175,6 +175,18 @@ class LeagueEmptyRecordTest {
     }
 
     @Test
+    void 同じ曲の別難易度を週内に遊んでも空記録は参加にならない() {
+        // 公式 CSV の最終プレー日時は曲単位（1 曲 1 行に全難易度）なので、ANOTHER を週内に遊ぶと
+        // 未プレーの LEGGENDARIA にも期間内の日時が付く。それだけで「この譜面を遊んだ」にはしない。
+        givenScore(0, 0, LocalDateTime.of(2026, 9, 23, 20, 0)); // 週内だが記録は空
+
+        List<Map<String, Object>> standings = service().computeGroupStandings(week, 6, 2);
+
+        assertThat(firstSong(standings).get("valid")).isEqualTo(false);
+        assertThat(firstSong(standings).get("participated")).isEqualTo(false);
+    }
+
+    @Test
     void 最終プレー日時が無くても空記録は有効にならない() {
         givenScore(0, 0, null);
 

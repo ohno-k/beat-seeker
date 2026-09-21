@@ -68,7 +68,8 @@
       "PowerShell($env:JAVA_HOME = \"C:\\\\Users\\\\oonok\\\\dev-tools\\\\jdk-17.0.19+10\"; Set-Location C:\\\\Users\\\\oonok\\\\beat-seeker\\\\backend; $env:SPRING_PROFILES_ACTIVE=\"local\"; & C:\\\\Users\\\\oonok\\\\dev-tools\\\\apache-maven-3.9.9\\\\bin\\\\mvn.cmd -o -q spring-boot:run \"-Dspring-boot.run.profiles=local\" \"-Dspring-boot.run.arguments=--server.port=18080\" 2>&1 | Out-File -FilePath C:\\\\Users\\\\oonok\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-oonok-beat-seeker\\\\8d9b4793-59ae-4909-ae27-1f8437e7ce4a\\\\scratchpad\\\\boot.log -Encoding utf8)",
       "Bash(awk '/infoModal: \\\\{/,/^    \\\\},/' frontend/src/locales/ja.ts)",
       "Bash(NODE_PATH=\"C:/Users/oonok/beat-seeker/scripts/node_modules\" node --max-old-space-size=4096 b1_songrank.js)",
-      "Bash(NODE_PATH=\"C:/Users/oonok/beat-seeker/scripts/node_modules\" node --max-old-space-size=6144 g5_build_active.js)"
+      "Bash(NODE_PATH=\"C:/Users/oonok/beat-seeker/scripts/node_modules\" node --max-old-space-size=6144 g5_build_active.js)",
+      "Bash(JAVA_HOME=/c/Users/oonok/dev-tools/jdk-17.0.19+10 SERVER_PORT=8098 /c/Users/oonok/dev-tools/apache-maven-3.9.9/bin/mvn -o spring-boot:run -Dspring-boot.run.profiles=prod-db)"
     ]
   }
 }
