@@ -69,7 +69,11 @@
       "Bash(awk '/infoModal: \\\\{/,/^    \\\\},/' frontend/src/locales/ja.ts)",
       "Bash(NODE_PATH=\"C:/Users/oonok/beat-seeker/scripts/node_modules\" node --max-old-space-size=4096 b1_songrank.js)",
       "Bash(NODE_PATH=\"C:/Users/oonok/beat-seeker/scripts/node_modules\" node --max-old-space-size=6144 g5_build_active.js)",
-      "Bash(JAVA_HOME=/c/Users/oonok/dev-tools/jdk-17.0.19+10 SERVER_PORT=8098 /c/Users/oonok/dev-tools/apache-maven-3.9.9/bin/mvn -o spring-boot:run -Dspring-boot.run.profiles=prod-db)"
+      "Bash(JAVA_HOME=/c/Users/oonok/dev-tools/jdk-17.0.19+10 SERVER_PORT=8098 /c/Users/oonok/dev-tools/apache-maven-3.9.9/bin/mvn -o spring-boot:run -Dspring-boot.run.profiles=prod-db)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/BPIManager/BPIManager2/master/src/pages/api/v2/songs/index.ts\" -o bpim/songs-index.ts)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/BPIManager/BPIManager2/master/src/pages/api/v1/songs/index.ts\")",
+      "Bash(curl -s \"https://bpi2.poyashi.me/api/v1/songs\" -o bpim/songs-all.json -w \"HTTP %{http_code} %{size_download}B %{time_total}s\\\\n\")",
+      "Bash(node inject.js)"
     ]
   }
 }

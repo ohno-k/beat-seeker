@@ -14,10 +14,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -200,7 +203,8 @@ public final class BemaniwikiSongListParser {
      * 処理の流れ:
      *  - 手順1: ページ本文（div#body）内の全 table について見出しを平坦化し、「楽曲リスト表」と「総ノーツ数表」を特定
      *  - 手順2: 総ノーツ数表を TITLE → {難易度コード → ノーツ数} に読む
-     *  - 手順3: 楽曲リスト表を上から読み、セクション行と通常行を処理。通常行は TITLE でノーツを結合
+     *  - 手順3: 楽曲リスト表を上から読み、セクション行と通常行を処理。TITLE でノーツを結合する
+     *           （完全一致しない曲だけ正規化で救済するが、他の曲の行は流用しない。{@link #parse(String, NotesPage)} 参照）
      *  - 手順4: 結果全体のハッシュを計算
      *
      * @param html ページの HTML（UTF-8 で読み込み済みの文字列）
@@ -233,6 +237,14 @@ public final class BemaniwikiSongListParser {
 
     /**
      * 【メソッドの役割】 楽曲リスト表を解析し、ノーツ数を結合して曲一覧を返す。
+     *
+     * ノーツ数の結合は TITLE の完全一致が原則。完全一致しない曲だけ {@link #normalizeTitle} で救済するが、
+     * 次のどれかに当たる場合は「ノーツ数未記載」として据え置き、警告だけ残す（同名異曲の取り違え防止）:
+     *  - 正規化一致したノーツ表の行が、楽曲リスト側の別の曲と完全一致している（その曲のための行なので流用できない）
+     *  - 正規化すると複数の曲が同じキーになる（ノーツ表側・楽曲リスト側のどちらでも）
+     *
+     * これを入れる前は、2026-09-17 の旧曲同期で「Shooting Star」(ReGLOSS) がノーツ表に未掲載だったため、
+     * 大文字だけ違う別曲「SHOOTING STAR」(小坂りゆ) のノーツ数が書き込まれ、スコア理論値が狂った。
      *
      * @param html          楽曲リスト表が載ったページの HTML
      * @param externalNotes 別ページから読んだ総ノーツ数表（{@link #parseNotesPage}）。null なら同じページ内の表を探す
@@ -273,10 +285,17 @@ public final class BemaniwikiSongListParser {
         } else {
             notesByTitle = parseNotesTable(notesTable, notesIdx, warnings);
         }
+        // 正規化して引くための索引。同じキーに別表記が 2 つ以上落ちたら「曖昧」として記録し、後段で使わない。
         Map<String, String> notesTitleByNorm = new LinkedHashMap<>();
-        for (String t : notesByTitle.keySet()) notesTitleByNorm.putIfAbsent(normalizeTitle(t), t);
+        Set<String> ambiguousNotesNorm = new HashSet<>();
+        for (String t : notesByTitle.keySet()) {
+            String key = normalizeTitle(t);
+            String prev = notesTitleByNorm.putIfAbsent(key, t);
+            if (prev != null && !prev.equals(t)) ambiguousNotesNorm.add(key);
+        }
 
-        List<Song> songs = new ArrayList<>();
+        // 手順3a: 楽曲リスト表の行を読む。ノーツ表との結合は全曲の TITLE が出揃ってから（手順3b）行う。
+        List<PendingRow> pending = new ArrayList<>();
         Map<String, Integer> seenTitles = new LinkedHashMap<>();
         Section current = null;
         int columnCount = levelIdx.size();
@@ -306,15 +325,41 @@ public final class BemaniwikiSongListParser {
             String genre = blankToNull(mainLineText(cells.get(levelIdx.get("GENRE"))));
             String artist = levelIdx.containsKey("ARTIST") ? blankToNull(mainLineText(cells.get(levelIdx.get("ARTIST")))) : null;
             String bpm = levelIdx.containsKey("BPM") ? blankToNull(cellText(cells.get(levelIdx.get("BPM")))) : null;
+            pending.add(new PendingRow(title, genre, artist, bpm, current, cells));
+        }
 
+        // 楽曲リスト側でも、正規化すると同じキーになる別表記（"SHOOTING STAR" と "Shooting Star" など）を拾っておく。
+        Set<String> listTitles = new HashSet<>();
+        Set<String> ambiguousListNorm = new HashSet<>();
+        Map<String, String> listTitleByNorm = new HashMap<>();
+        for (PendingRow p : pending) {
+            listTitles.add(p.title());
+            String key = normalizeTitle(p.title());
+            String prev = listTitleByNorm.putIfAbsent(key, p.title());
+            if (prev != null && !prev.equals(p.title())) ambiguousListNorm.add(key);
+        }
+
+        // 手順3b: TITLE でノーツ数を結合する。完全一致しない曲だけ正規化で救済する。
+        List<Song> songs = new ArrayList<>();
+        for (PendingRow p : pending) {
+            String title = p.title();
             Map<String, Integer> notes = notesByTitle.get(title);
             if (notes == null) {
-                String alt = notesTitleByNorm.get(normalizeTitle(title));
-                if (alt != null) {
+                String key = normalizeTitle(title);
+                String alt = notesTitleByNorm.get(key);
+                if (alt == null) {
+                    if (hasNotesSource) warnings.add("ノーツ表に見当たらない曲: " + title);
+                } else if (listTitles.contains(alt)) {
+                    // ノーツ表の『alt』は、楽曲リストにある別の曲の行（大文字小文字だけ違う同名異曲など）。
+                    // 流用すると他人のノーツ数を書き込んでしまうので、未記載のまま据え置く。
+                    warnings.add("ノーツ表の『" + alt + "』は楽曲リストの別の曲の行なので結合しません"
+                            + "（同名異曲の取り違え防止）。ノーツ数未記載として扱います: " + title);
+                } else if (ambiguousNotesNorm.contains(key) || ambiguousListNorm.contains(key)) {
+                    warnings.add("表記をそろえると複数の曲が一致するため結合しません"
+                            + "（同名異曲の取り違え防止）。ノーツ数未記載として扱います: " + title);
+                } else {
                     notes = notesByTitle.get(alt);
                     warnings.add("ノーツ表とは TITLE の表記が異なります: 楽曲リスト『" + title + "』 / ノーツ表『" + alt + "』");
-                } else if (hasNotesSource) {
-                    warnings.add("ノーツ表に見当たらない曲: " + title);
                 }
             }
 
@@ -323,16 +368,20 @@ public final class BemaniwikiSongListParser {
                 Integer ci = levelIdx.get("SP:" + col.getKey());
                 if (ci == null) continue;
                 String code = col.getValue();
-                Chart ch = parseLevelCell(cells.get(ci), code);
+                Chart ch = parseLevelCell(p.cells().get(ci), code);
                 if (ch == null) continue; // "-" = 譜面なし
                 Integer n = notes != null ? notes.get(code) : null;
                 charts.put(code, new Chart(code, ch.level(), n, ch.hidden(), ch.uncertain()));
             }
-            songs.add(new Song(title, genre, artist, bpm, current, Collections.unmodifiableMap(charts)));
+            songs.add(new Song(title, p.genre(), p.artist(), p.bpm(), p.section(), Collections.unmodifiableMap(charts)));
         }
 
         return new Result(Collections.unmodifiableList(songs), contentHash(songs), Collections.unmodifiableList(warnings));
     }
+
+    /** 楽曲リスト表 1 行ぶんの読み取り結果。ノーツ数の結合前の状態。 */
+    private record PendingRow(String title, String genre, String artist, String bpm,
+                              Section section, List<Element> cells) {}
 
     // ── 表の見出し ─────────────────────────────────────
 

@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * （譜面別の注記が並ぶ複数行の TITLE/GENRE/ARTIST、作品名の区切り行、金太字の解禁曲、BPM「※」）を
  * 意図どおり読むことを検証する。
  *
- * 固定 HTML は実ページ（各 2MB 前後）から楽曲リスト表の行を 31 曲分だけ残したもの。行の HTML は原文のまま。
+ * 固定 HTML は実ページ（各 2MB 前後）から楽曲リスト表の行を 33 曲分だけ残したもの。行の HTML は原文のまま。
  * 期待値は同じ HTML を別実装（Node の正規表現ベース）で読んだ結果と突き合わせて確定したもの。
  */
 class BemaniwikiOldSongListParserTest {
@@ -71,7 +71,7 @@ class BemaniwikiOldSongListParserTest {
     @Test
     void 別ページのノーツ表をTITLEで結合して読む() {
         // バージョン一覧表・「譜面によりBPMが異なる楽曲」表は楽曲リストとして読まない
-        assertThat(result.songs()).hasSize(31);
+        assertThat(result.songs()).hasSize(33);
 
         Song s = song("Dr.LOVE");
         assertThat(s.genre()).isEqualTo("DANCE POP");
@@ -136,6 +136,27 @@ class BemaniwikiOldSongListParserTest {
         assertThat(s.charts().get("2").notes()).isEqualTo(414);
         assertThat(s.charts().get("4").notes()).isEqualTo(915);
         assertThat(result.warnings()).anyMatch(w -> w.contains("ノーツ表とは TITLE の表記が異なります") && w.contains("never"));
+    }
+
+    @Test
+    void 大文字小文字だけ違う同名異曲のノーツ数は流用しない() {
+        // 2026-09-17 のノーツ表には "SHOOTING STAR"(小坂りゆ) の行しか無く、"Shooting Star"(ReGLOSS) はまだ載っていない。
+        // 正規化すると同じキーになるので、以前はここで別曲のノーツ数（651/855/1146）を結合してしまい、
+        // 本番で ReGLOSS 側のスコア理論値が狂った。結合せず未記載のまま据え置くのが正しい。
+        Song reGloss = song("Shooting Star");
+        assertThat(reGloss.artist()).isEqualTo("ReGLOSS");
+        assertThat(reGloss.charts().get("4").level()).isEqualTo(10);
+        assertThat(reGloss.charts().get("4").notes()).isNull();
+        assertThat(reGloss.charts().get("4").holdReason()).isEqualTo("ノーツ数未記載");
+        assertThat(result.warnings())
+                .anyMatch(w -> w.contains("同名異曲の取り違え防止") && w.contains("Shooting Star"));
+
+        // 完全一致する大文字のほうは、これまでどおり自分のノーツ数を読む
+        Song kosaka = song("SHOOTING STAR");
+        assertThat(kosaka.artist()).isEqualTo("小坂りゆ");
+        assertThat(kosaka.charts().get("2").notes()).isEqualTo(651);
+        assertThat(kosaka.charts().get("3").notes()).isEqualTo(855);
+        assertThat(kosaka.charts().get("4").notes()).isEqualTo(1146);
     }
 
     @Test

@@ -22,7 +22,10 @@ import java.util.Set;
  *
  * 判定の順序:
  *  - 手順1: 完全一致
- *  - 手順2: 正規化一致（{@link BemaniwikiSongListParser#normalizeTitle}: 全角半角・大文字小文字・空白・波ダッシュ）
+ *  - 手順2: 正規化一致（{@link BemaniwikiSongListParser#normalizeTitle}: 全角半角・大文字小文字・空白・波ダッシュ）。
+ *           ただし "SHOOTING STAR"(小坂りゆ) と "Shooting Star"(ReGLOSS) のような同名異曲があるので、
+ *           同じ正規化キーの曲が既存側・ページ側に複数ある場合と、寄せ先の既存曲がページの別の曲と
+ *           完全一致している場合は断定しない（別曲にレベル・ノーツ数を上書きしないため）
  *  - 手順3: 指紋一致。ARTIST と GENRE が（正規化して）一致し、かつ同じ難易度のノーツ数が 2 譜面以上一致する
  *           既存曲がちょうど 1 曲だけある場合に、その曲とみなす
  *
@@ -63,6 +66,15 @@ final class WikiTitleResolver {
 
     private final Map<String, ActiveSong> byTitle = new LinkedHashMap<>();
     private final Map<String, String> titleByNorm = new HashMap<>();
+    /**
+     * 正規化すると同じキーになる既存曲が 2 曲以上ある正規化キー（"SHOOTING STAR" と "Shooting Star" など）。
+     * どちらの曲か断定できないので 手順2 では使わない（別曲にレベル・ノーツ数を上書きしないため）。
+     */
+    private final Set<String> ambiguousNorm = new HashSet<>();
+    /** 正規化すると同じキーになる曲が、このページに 2 曲以上ある正規化キー。 */
+    private final Set<String> ambiguousPageNorm = new HashSet<>();
+    /** このページの曲と完全一致している既存曲名（その曲のものなので、別の曲の正規化一致には使わせない）。 */
+    private final Set<String> exactClaimed = new HashSet<>();
     /** このページの曲と 手順1・2 で対応済みの既存曲名（指紋一致の候補から外す）。 */
     private final Set<String> claimed = new HashSet<>();
     /** 指紋一致で既に使った既存曲名。 */
@@ -78,7 +90,17 @@ final class WikiTitleResolver {
             if (a.genre == null) a.genre = sd.getGenre();
             if (a.artist == null) a.artist = sd.getArtist();
             if (sd.getNotes() != null && sd.getNotes() > 0) a.notesByDifficulty.putIfAbsent(sd.getDifficulty(), sd.getNotes());
-            titleByNorm.putIfAbsent(BemaniwikiSongListParser.normalizeTitle(sd.getTitle()), sd.getTitle());
+            String norm = BemaniwikiSongListParser.normalizeTitle(sd.getTitle());
+            String prev = titleByNorm.putIfAbsent(norm, sd.getTitle());
+            if (prev != null && !prev.equals(sd.getTitle())) ambiguousNorm.add(norm);
+        }
+        // 正規化一致を許すかの判断材料を先に作る（完全一致でページの別の曲に取られている既存曲・ページ側の同名衝突）
+        Map<String, String> pageTitleByNorm = new HashMap<>();
+        for (Song s : pageSongs) {
+            if (byTitle.containsKey(s.title())) exactClaimed.add(s.title());
+            String norm = BemaniwikiSongListParser.normalizeTitle(s.title());
+            String prev = pageTitleByNorm.putIfAbsent(norm, s.title());
+            if (prev != null && !prev.equals(s.title())) ambiguousPageNorm.add(norm);
         }
         for (Song s : pageSongs) {
             Match m = resolveByTitle(s.title());
@@ -97,8 +119,12 @@ final class WikiTitleResolver {
 
     private Match resolveByTitle(String wikiTitle) {
         if (byTitle.containsKey(wikiTitle)) return new Match(wikiTitle, Kind.EXACT);
-        String viaNorm = titleByNorm.get(BemaniwikiSongListParser.normalizeTitle(wikiTitle));
-        return viaNorm != null ? new Match(viaNorm, Kind.NORMALIZED) : null;
+        String norm = BemaniwikiSongListParser.normalizeTitle(wikiTitle);
+        // 同じキーの曲が既存側・ページ側に複数ある / その既存曲はページの別の曲と完全一致している → 断定しない
+        if (ambiguousNorm.contains(norm) || ambiguousPageNorm.contains(norm)) return null;
+        String viaNorm = titleByNorm.get(norm);
+        if (viaNorm == null || exactClaimed.contains(viaNorm)) return null;
+        return new Match(viaNorm, Kind.NORMALIZED);
     }
 
     private String resolveByFingerprint(Song song) {

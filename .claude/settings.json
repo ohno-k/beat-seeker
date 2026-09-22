@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(python -c ' *)",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Bash(NODE_PATH=\"C:/Users/oonok/beat-seeker/scripts/node_modules\" node \"C:/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/e0a38b31-ce57-4cd4-a2af-763686ced44e/scratchpad/q.js\" \"select count\\(*\\) filter \\(where p.notes is distinct from sd.notes\\) as mismatched, count\\(*\\) as total from chart_tendency_profiles p join song_definitions sd on sd.title=p.title and sd.difficulty=p.difficulty and sd.revision='active'\")"
     ]
   }
 }

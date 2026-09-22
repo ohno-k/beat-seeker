@@ -153,6 +153,20 @@ class WikiSongSyncPlanTest {
     }
 
     @Test
+    void 大文字小文字だけ違う同名異曲には寄せない() {
+        // wiki の "Shooting Star"(ReGLOSS) がマスタ未登録でも、別曲の "SHOOTING STAR"(小坂りゆ) に寄せてはいけない。
+        // 寄せてしまうと小坂りゆ側のレベル（★7/8/9）とノーツ数が ReGLOSS の値に書き換わる。
+        List<SongDefinition> masters = mastersSameAsWiki();
+        masters.removeIf(sd -> sd.getTitle().equals("Shooting Star"));
+
+        Plan plan = planOld(masters);
+        assertThat(plan.titleMatches()).noneMatch(m -> m.contains("Shooting Star"));
+        assertThat(plan.changes()).noneMatch(c -> c.title().equals("SHOOTING STAR"));
+        assertThat(plan.held()).as("未登録かつノーツ数未記載なので取り込まず保留")
+                .hasSize(4).allMatch(h -> h.startsWith("Shooting Star ["));
+    }
+
+    @Test
     void レベル変更と譜面追加とノーツ数訂正を拾う() {
         List<SongDefinition> masters = mastersSameAsWiki();
         // 本番と同じ食い違い: 曲名の大文字小文字、LEGGENDARIA ★11→12、LEGGENDARIA 追加、ノーツ数の誤り
